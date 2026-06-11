@@ -1,38 +1,52 @@
 "use client";
+
 import DashboardHeader from "@/components/dashboard/DashboardHeader";
-import { CheckCircle2, ArrowRight, Star, Crown, Zap } from "lucide-react";
+import { useStore } from "@/context/StoreContext";
+import { CheckCircle2, Star, Crown, Zap } from "lucide-react";
 
 const plans = [
-  { name: "Free", price: "₦0", period: "forever", current: false, features: ["1 store", "5 products", "Free subdomain"] },
-  { name: "Starter", price: "₦5,000", period: "/month", current: true, features: ["Custom domain", "50 products", "All payments", "WhatsApp ordering"] },
-  { name: "Business", price: "₦15,000", period: "/month", current: false, features: ["3 stores", "Unlimited products", "Abandoned cart", "AI descriptions"] },
-  { name: "Growth", price: "₦35,000", period: "/month", current: false, features: ["10 stores", "AI full suite", "A/B testing", "API access"] },
+  { name: "Free", price: "₦0", period: "/month", features: ["Subdomain", "5 products", "Basic analytics", "Platform branding"], icon: Zap },
+  { name: "Starter", price: "₦5,000", period: "/month", features: ["Custom domain", "50 products", "Payment gateways", "No branding"], icon: Star, popular: true },
+  { name: "Business", price: "₦15,000", period: "/month", features: ["Unlimited products", "Advanced analytics", "Coupons", "Abandoned cart"], icon: Crown },
+  { name: "Growth", price: "₦35,000", period: "/month", features: ["Everything in Business", "AI tools", "A/B testing", "Priority support"], icon: Crown },
 ];
 
 export default function BillingPage() {
+  const { currentStore } = useStore();
+  const currentPlan = currentStore?.plan || "FREE";
+
   return (
     <>
-      <DashboardHeader title="Billing" subtitle="Manage your subscription and invoices" />
-      <div className="p-6 space-y-6 max-w-4xl">
-        <div className="rounded-2xl border-2 border-brand-200 bg-brand-50/30 p-6 flex items-center justify-between">
-          <div>
-            <div className="flex items-center gap-2"><Zap className="h-5 w-5 text-brand-600" /><h3 className="text-lg font-bold text-surface-900">Starter Plan</h3></div>
-            <p className="text-sm text-surface-500 mt-1">₦5,000/month — Next billing: Feb 15, 2025</p>
-          </div>
-          <button className="btn-primary text-sm"><Crown className="h-4 w-4" />Upgrade</button>
-        </div>
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-          {plans.map((p) => (
-            <div key={p.name} className={`rounded-2xl border p-5 ${p.current ? "border-brand-500 bg-white ring-1 ring-brand-500" : "border-surface-200 bg-white"}`}>
-              {p.current && <span className="text-[10px] font-bold text-brand-600 uppercase mb-2 block">Current Plan</span>}
-              <h4 className="text-lg font-bold text-surface-900">{p.name}</h4>
-              <div className="mt-2 mb-4"><span className="text-2xl font-extrabold font-display text-surface-900">{p.price}</span><span className="text-xs text-surface-500">{p.period}</span></div>
-              <div className="space-y-2">
-                {p.features.map((f) => (<div key={f} className="flex items-center gap-2 text-xs"><CheckCircle2 className="h-3.5 w-3.5 text-brand-500" /><span className="text-surface-600">{f}</span></div>))}
+      <DashboardHeader title="Billing" subtitle="Manage your subscription" />
+      <div className="p-6">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+          {plans.map((plan) => {
+            const isActive = currentPlan === plan.name.toUpperCase();
+            const Icon = plan.icon;
+            return (
+              <div key={plan.name} className={`rounded-2xl border bg-white p-6 relative ${isActive ? "border-brand-600 shadow-lg" : "border-surface-200"} ${plan.popular ? "ring-2 ring-brand-600" : ""}`}>
+                {plan.popular && (
+                  <div className="absolute -top-3 left-1/2 -translate-x-1/2 bg-brand-600 text-white text-[10px] font-bold px-3 py-0.5 rounded-full">Most Popular</div>
+                )}
+                <Icon className="h-8 w-8 text-brand-600 mb-3" />
+                <h3 className="text-lg font-bold text-surface-900">{plan.name}</h3>
+                <div className="flex items-baseline gap-1 mt-1 mb-4">
+                  <span className="text-2xl font-extrabold text-surface-900">{plan.price}</span>
+                  <span className="text-xs text-surface-500">{plan.period}</span>
+                </div>
+                <ul className="space-y-2 mb-6">
+                  {plan.features.map((f) => (
+                    <li key={f} className="flex items-center gap-2 text-xs text-surface-600">
+                      <CheckCircle2 className="h-3.5 w-3.5 text-brand-600 flex-shrink-0" />{f}
+                    </li>
+                  ))}
+                </ul>
+                <button className={`w-full text-sm py-2.5 rounded-xl font-semibold ${isActive ? "bg-brand-50 text-brand-700 cursor-default" : "btn-primary"}`} disabled={isActive}>
+                  {isActive ? "Current Plan" : "Upgrade"}
+                </button>
               </div>
-              {!p.current && <button className="btn-secondary w-full mt-4 text-xs">{p.name === "Free" ? "Downgrade" : "Upgrade"}<ArrowRight className="h-3.5 w-3.5" /></button>}
-            </div>
-          ))}
+            );
+          })}
         </div>
       </div>
     </>

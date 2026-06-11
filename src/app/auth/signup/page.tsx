@@ -2,6 +2,8 @@
 
 import { useState } from "react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
+import { useAuth } from "@/context/AuthContext";
 import {
   ShoppingBag,
   Eye,
@@ -13,11 +15,41 @@ import {
   Phone,
   CheckCircle2,
   Sparkles,
+  Loader2,
 } from "lucide-react";
 
 export default function SignupPage() {
   const [showPassword, setShowPassword] = useState(false);
-  const [step, setStep] = useState(1);
+  const [firstName, setFirstName] = useState("");
+  const [lastName, setLastName] = useState("");
+  const [email, setEmail] = useState("");
+  const [phone, setPhone] = useState("");
+  const [password, setPassword] = useState("");
+  const [error, setError] = useState("");
+  const [submitting, setSubmitting] = useState(false);
+  const { signup } = useAuth();
+  const router = useRouter();
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setError("");
+    setSubmitting(true);
+
+    const result = await signup({
+      email,
+      password,
+      firstName,
+      lastName,
+      phone: phone || undefined,
+    });
+
+    if (result.success) {
+      router.push("/dashboard");
+    } else {
+      setError(result.error || "Signup failed");
+    }
+    setSubmitting(false);
+  };
 
   return (
     <div className="min-h-screen flex">
@@ -68,7 +100,6 @@ export default function SignupPage() {
       {/* Right Panel - Form */}
       <div className="flex-1 flex items-center justify-center px-4 sm:px-8 py-12">
         <div className="w-full max-w-md">
-          {/* Mobile logo */}
           <div className="lg:hidden mb-8">
             <Link href="/" className="flex items-center gap-2.5">
               <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-brand-600">
@@ -89,7 +120,13 @@ export default function SignupPage() {
             </p>
           </div>
 
-          <form className="space-y-4" onSubmit={(e) => e.preventDefault()}>
+          <form className="space-y-4" onSubmit={handleSubmit}>
+            {error && (
+              <div className="rounded-xl bg-red-50 border border-red-200 px-4 py-3 text-sm text-red-700">
+                {error}
+              </div>
+            )}
+
             <div className="grid grid-cols-2 gap-4">
               <div>
                 <label className="block text-sm font-medium text-surface-700 mb-1.5">
@@ -99,8 +136,11 @@ export default function SignupPage() {
                   <User className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-surface-400" />
                   <input
                     type="text"
+                    value={firstName}
+                    onChange={(e) => setFirstName(e.target.value)}
                     className="input-field pl-10"
                     placeholder="Amara"
+                    required
                   />
                 </div>
               </div>
@@ -110,8 +150,11 @@ export default function SignupPage() {
                 </label>
                 <input
                   type="text"
+                  value={lastName}
+                  onChange={(e) => setLastName(e.target.value)}
                   className="input-field"
                   placeholder="Okafor"
+                  required
                 />
               </div>
             </div>
@@ -124,8 +167,11 @@ export default function SignupPage() {
                 <Mail className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-surface-400" />
                 <input
                   type="email"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
                   className="input-field pl-10"
                   placeholder="amara@example.com"
+                  required
                 />
               </div>
             </div>
@@ -138,6 +184,8 @@ export default function SignupPage() {
                 <Phone className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-surface-400" />
                 <input
                   type="tel"
+                  value={phone}
+                  onChange={(e) => setPhone(e.target.value)}
                   className="input-field pl-10"
                   placeholder="+234 812 345 6789"
                 />
@@ -152,51 +200,38 @@ export default function SignupPage() {
                 <Lock className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-surface-400" />
                 <input
                   type={showPassword ? "text" : "password"}
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
                   className="input-field pl-10 pr-10"
                   placeholder="Min. 8 characters"
+                  required
+                  minLength={8}
                 />
                 <button
                   type="button"
                   onClick={() => setShowPassword(!showPassword)}
                   className="absolute right-3 top-1/2 -translate-y-1/2 text-surface-400 hover:text-surface-600"
                 >
-                  {showPassword ? (
-                    <EyeOff className="h-4 w-4" />
-                  ) : (
-                    <Eye className="h-4 w-4" />
-                  )}
+                  {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
                 </button>
               </div>
             </div>
 
-            <Link
-              href="/dashboard"
+            <button
+              type="submit"
+              disabled={submitting}
               className="btn-primary w-full mt-6"
             >
-              <Sparkles className="h-4 w-4" />
-              Create Account
-              <ArrowRight className="h-4 w-4" />
-            </Link>
-
-            <div className="relative my-6">
-              <div className="absolute inset-0 flex items-center">
-                <div className="w-full border-t border-surface-200" />
-              </div>
-              <div className="relative flex justify-center text-xs uppercase">
-                <span className="bg-white px-3 text-surface-400">
-                  Or continue with
-                </span>
-              </div>
-            </div>
-
-            <div className="grid grid-cols-2 gap-3">
-              <button className="btn-secondary text-sm py-2.5">
-                Google
-              </button>
-              <button className="btn-secondary text-sm py-2.5">
-                Apple
-              </button>
-            </div>
+              {submitting ? (
+                <Loader2 className="h-4 w-4 animate-spin" />
+              ) : (
+                <>
+                  <Sparkles className="h-4 w-4" />
+                  Create Account
+                  <ArrowRight className="h-4 w-4" />
+                </>
+              )}
+            </button>
           </form>
 
           <p className="mt-8 text-center text-sm text-surface-500">

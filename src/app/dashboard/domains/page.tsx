@@ -1,46 +1,73 @@
 "use client";
 
+import { useState } from "react";
 import DashboardHeader from "@/components/dashboard/DashboardHeader";
-import { Globe, CheckCircle2, AlertCircle, Plus, ExternalLink, Copy, RefreshCw } from "lucide-react";
+import { useStore } from "@/context/StoreContext";
+import { api } from "@/lib/api-client";
+import { Globe, CheckCircle2, AlertCircle, Plus, ExternalLink, Copy, Loader2 } from "lucide-react";
 
 export default function DomainsPage() {
+  const { currentStore, refreshStores } = useStore();
+  const [customDomain, setCustomDomain] = useState("");
+  const [saving, setSaving] = useState(false);
+  const [saved, setSaved] = useState(false);
+  const [error, setError] = useState("");
+
+  const subdomain = currentStore ? `${currentStore.subdomain}.afrostore.com` : "";
+
+  const handleConnect = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!currentStore) return;
+    setSaving(true); setError("");
+    const res = await api.patch(`/api/stores/${currentStore.id}`, { customDomain });
+    if (res.success) { setSaved(true); setTimeout(() => setSaved(false), 2000); refreshStores(); }
+    else setError(res.error || "Failed");
+    setSaving(false);
+  };
+
+  const copyToClipboard = (text: string) => { navigator.clipboard.writeText(text); };
+
   return (
     <>
-      <DashboardHeader title="Domains" subtitle="Manage your store domains" action={{ label: "Add Domain" }} />
-      <div className="p-6 max-w-3xl space-y-6">
-        {/* Free Subdomain */}
-        <div className="rounded-2xl border border-brand-200 bg-brand-50/50 p-6">
-          <div className="flex items-center gap-2 mb-3"><CheckCircle2 className="h-5 w-5 text-brand-500" /><h3 className="text-base font-bold text-surface-900">Free Subdomain</h3></div>
-          <div className="flex items-center gap-3">
-            <div className="flex-1 input-field bg-white flex items-center gap-2"><Globe className="h-4 w-4 text-surface-400" /><span className="text-surface-700">myfashionstore.afrostore.com</span></div>
-            <button className="btn-ghost text-sm py-2.5"><Copy className="h-4 w-4" /></button>
-            <a href="#" className="btn-ghost text-sm py-2.5"><ExternalLink className="h-4 w-4" /></a>
-          </div>
-          <p className="text-xs text-surface-500 mt-2">Your store is always available at this address.</p>
-        </div>
-
-        {/* Custom Domain */}
+      <DashboardHeader title="Domains" subtitle="Manage your store URLs" />
+      <div className="p-6 space-y-6 max-w-3xl">
+        {/* Free subdomain */}
         <div className="rounded-2xl border border-surface-200 bg-white p-6">
-          <h3 className="text-base font-bold text-surface-900 mb-4">Custom Domain</h3>
-          <div className="space-y-4">
-            <div className="flex gap-3"><input type="text" className="input-field flex-1" placeholder="yourbrand.com" /><button className="btn-primary text-sm">Connect</button></div>
-            <div className="rounded-xl bg-surface-50 border border-surface-200 p-4">
-              <h4 className="text-sm font-semibold text-surface-900 mb-3">DNS Setup Instructions</h4>
-              <div className="space-y-2">
-                <div className="flex items-center justify-between rounded-lg bg-white border border-surface-200 px-4 py-2.5">
-                  <div><span className="text-[10px] font-semibold text-surface-400 uppercase">Type</span><p className="text-sm font-mono text-surface-900">CNAME</p></div>
-                  <div><span className="text-[10px] font-semibold text-surface-400 uppercase">Name</span><p className="text-sm font-mono text-surface-900">www</p></div>
-                  <div><span className="text-[10px] font-semibold text-surface-400 uppercase">Value</span><p className="text-sm font-mono text-surface-900">shops.afrostore.com</p></div>
-                </div>
-                <div className="flex items-center justify-between rounded-lg bg-white border border-surface-200 px-4 py-2.5">
-                  <div><span className="text-[10px] font-semibold text-surface-400 uppercase">Type</span><p className="text-sm font-mono text-surface-900">A</p></div>
-                  <div><span className="text-[10px] font-semibold text-surface-400 uppercase">Name</span><p className="text-sm font-mono text-surface-900">@</p></div>
-                  <div><span className="text-[10px] font-semibold text-surface-400 uppercase">Value</span><p className="text-sm font-mono text-surface-900">76.76.21.21</p></div>
-                </div>
-              </div>
-              <button className="mt-3 btn-ghost text-xs"><RefreshCw className="h-3.5 w-3.5" />Verify DNS</button>
+          <div className="flex items-center gap-3 mb-4">
+            <div className="h-10 w-10 rounded-xl bg-green-50 flex items-center justify-center"><CheckCircle2 className="h-5 w-5 text-green-600" /></div>
+            <div>
+              <h3 className="text-base font-bold text-surface-900">Free Subdomain</h3>
+              <p className="text-xs text-surface-500">Always active and free</p>
             </div>
           </div>
+          <div className="flex items-center gap-2 bg-surface-50 rounded-xl p-3">
+            <Globe className="h-4 w-4 text-surface-400" />
+            <span className="text-sm font-medium text-surface-900 flex-1">{subdomain}</span>
+            <button onClick={() => copyToClipboard(`https://${subdomain}`)} className="p-1.5 rounded-lg hover:bg-surface-200 transition-colors"><Copy className="h-4 w-4 text-surface-500" /></button>
+            <a href={`https://${subdomain}`} target="_blank" rel="noopener" className="p-1.5 rounded-lg hover:bg-surface-200 transition-colors"><ExternalLink className="h-4 w-4 text-surface-500" /></a>
+          </div>
+        </div>
+
+        {/* Custom domain */}
+        <div className="rounded-2xl border border-surface-200 bg-white p-6">
+          <h3 className="text-base font-bold text-surface-900 mb-1">Custom Domain</h3>
+          <p className="text-xs text-surface-500 mb-4">Connect your own domain (e.g. mystore.com)</p>
+
+          {currentStore?.customDomain ? (
+            <div className="flex items-center gap-2 bg-green-50 rounded-xl p-3 mb-4">
+              <CheckCircle2 className="h-4 w-4 text-green-600" />
+              <span className="text-sm font-medium text-green-800 flex-1">{currentStore.customDomain}</span>
+            </div>
+          ) : null}
+
+          <form onSubmit={handleConnect} className="space-y-3">
+            {error && <div className="rounded-xl bg-red-50 border border-red-200 px-4 py-3 text-sm text-red-700">{error}</div>}
+            <input value={customDomain} onChange={(e) => setCustomDomain(e.target.value)} className="input-field" placeholder="mystore.com" />
+            <p className="text-[10px] text-surface-500">Point your domain&apos;s CNAME record to <strong>cname.afrostore.com</strong></p>
+            <button type="submit" disabled={saving || !customDomain} className="btn-primary text-sm py-2 px-4">
+              {saving ? <Loader2 className="h-4 w-4 animate-spin" /> : saved ? "Saved!" : <><Plus className="h-4 w-4" />Connect Domain</>}
+            </button>
+          </form>
         </div>
       </div>
     </>

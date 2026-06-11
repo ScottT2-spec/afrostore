@@ -1,80 +1,127 @@
 "use client";
 
+import { useState, useEffect, useCallback } from "react";
 import DashboardHeader from "@/components/dashboard/DashboardHeader";
-import { Search, MoreHorizontal, Mail, Phone, MapPin, ShoppingCart, TrendingUp, ChevronLeft, ChevronRight } from "lucide-react";
+import { useStore } from "@/context/StoreContext";
+import { api } from "@/lib/api-client";
+import { formatCurrency } from "@/lib/utils";
+import { Search, Users, Loader2, Mail, Phone, ShoppingCart } from "lucide-react";
 
-const customers = [
-  { id: "1", name: "Chioma Eze", email: "chioma@gmail.com", phone: "+234 812 345 6789", location: "Lagos, Nigeria", orders: 12, spent: 285000, lastOrder: "5 min ago", initials: "CE", gradient: "from-pink-400 to-rose-500" },
-  { id: "2", name: "Kwame Asante", email: "kwame@gmail.com", phone: "+233 24 567 8901", location: "Accra, Ghana", orders: 8, spent: 195000, lastOrder: "23 min ago", initials: "KA", gradient: "from-blue-400 to-indigo-500" },
-  { id: "3", name: "Fatima Bello", email: "fatima@yahoo.com", phone: "+234 803 456 7890", location: "Abuja, Nigeria", orders: 15, spent: 412000, lastOrder: "1 hour ago", initials: "FB", gradient: "from-amber-400 to-orange-500" },
-  { id: "4", name: "Emeka Obi", email: "emeka@outlook.com", phone: "+234 706 789 0123", location: "Port Harcourt, Nigeria", orders: 6, spent: 168000, lastOrder: "3 hours ago", initials: "EO", gradient: "from-green-400 to-emerald-500" },
-  { id: "5", name: "Aisha Mohammed", email: "aisha@gmail.com", phone: "+234 809 012 3456", location: "Kano, Nigeria", orders: 22, spent: 680000, lastOrder: "5 hours ago", initials: "AM", gradient: "from-purple-400 to-violet-500" },
-  { id: "6", name: "Ngozi Adaeze", email: "ngozi@gmail.com", phone: "+234 815 678 9012", location: "Onitsha, Nigeria", orders: 3, spent: 72000, lastOrder: "1 day ago", initials: "NA", gradient: "from-teal-400 to-cyan-500" },
-  { id: "7", name: "Tunde Bakare", email: "tunde@hotmail.com", phone: "+234 708 234 5678", location: "Ibadan, Nigeria", orders: 9, spent: 245000, lastOrder: "2 days ago", initials: "TB", gradient: "from-red-400 to-pink-500" },
-  { id: "8", name: "Nana Ama Serwaa", email: "nana@gmail.com", phone: "+233 50 123 4567", location: "Kumasi, Ghana", orders: 5, spent: 135000, lastOrder: "3 days ago", initials: "NS", gradient: "from-yellow-400 to-amber-500" },
-];
+interface Customer {
+  id: string;
+  email: string;
+  firstName: string;
+  lastName: string;
+  phone?: string;
+  totalOrders: number;
+  totalSpent: number;
+  createdAt: string;
+}
+
+interface CustomersResponse {
+  customers: Customer[];
+  pagination: { page: number; limit: number; total: number; pages: number };
+}
 
 export default function CustomersPage() {
+  const { currentStore } = useStore();
+  const [customers, setCustomers] = useState<Customer[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [total, setTotal] = useState(0);
+  const [page, setPage] = useState(1);
+  const [search, setSearch] = useState("");
+
+  const fetchCustomers = useCallback(async () => {
+    if (!currentStore) return;
+    setLoading(true);
+    const params = new URLSearchParams({ page: page.toString(), limit: "20" });
+    if (search) params.set("search", search);
+    const res = await api.get<CustomersResponse>(`/api/stores/${currentStore.id}/customers?${params}`);
+    if (res.success && res.data) {
+      setCustomers(res.data.customers);
+      setTotal(res.data.pagination.total);
+    }
+    setLoading(false);
+  }, [currentStore, page, search]);
+
+  useEffect(() => { fetchCustomers(); }, [fetchCustomers]);
+
+  const currency = currentStore?.currency || "NGN";
+
   return (
     <>
-      <DashboardHeader title="Customers" subtitle={`${customers.length} registered customers`} />
+      <DashboardHeader title="Customers" subtitle={`${total} customers`} />
       <div className="p-6 space-y-4">
-        {/* Stats */}
-        <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
-          {[
-            { label: "Total Customers", value: "1,249", icon: "👥" },
-            { label: "Repeat Buyers", value: "68%", icon: "🔄" },
-            { label: "Avg. Order Value", value: "₦24,500", icon: "💰" },
-            { label: "New This Month", value: "+89", icon: "📈" },
-          ].map((s) => (
-            <div key={s.label} className="rounded-2xl border border-surface-200 bg-white p-4">
-              <p className="text-xs text-surface-500 font-medium">{s.label}</p>
-              <p className="text-2xl font-bold font-display text-surface-900 mt-1">{s.value}</p>
-            </div>
-          ))}
-        </div>
-
-        {/* Search */}
         <div className="flex items-center gap-2 rounded-xl border border-surface-200 bg-white px-3 py-2 max-w-md">
           <Search className="h-4 w-4 text-surface-400" />
-          <input type="text" placeholder="Search customers..." className="flex-1 bg-transparent text-sm placeholder:text-surface-400 focus:outline-none" />
+          <input
+            type="text"
+            placeholder="Search customers..."
+            value={search}
+            onChange={(e) => { setSearch(e.target.value); setPage(1); }}
+            className="flex-1 bg-transparent text-sm placeholder:text-surface-400 focus:outline-none"
+          />
         </div>
 
-        {/* Table */}
-        <div className="rounded-2xl border border-surface-200 bg-white overflow-hidden">
-          <table className="w-full">
-            <thead>
-              <tr className="border-b border-surface-100 bg-surface-50">
-                <th className="px-6 py-3 text-left text-[10px] font-semibold uppercase tracking-wider text-surface-400">Customer</th>
-                <th className="px-6 py-3 text-left text-[10px] font-semibold uppercase tracking-wider text-surface-400 hidden md:table-cell">Location</th>
-                <th className="px-6 py-3 text-left text-[10px] font-semibold uppercase tracking-wider text-surface-400">Orders</th>
-                <th className="px-6 py-3 text-left text-[10px] font-semibold uppercase tracking-wider text-surface-400">Total Spent</th>
-                <th className="px-6 py-3 text-left text-[10px] font-semibold uppercase tracking-wider text-surface-400 hidden lg:table-cell">Last Order</th>
-                <th className="px-6 py-3"></th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-surface-100">
-              {customers.map((c) => (
-                <tr key={c.id} className="hover:bg-surface-50 transition-colors cursor-pointer">
-                  <td className="px-6 py-3.5">
-                    <div className="flex items-center gap-3">
-                      <div className={`h-9 w-9 rounded-full bg-gradient-to-br ${c.gradient} flex items-center justify-center text-white text-[10px] font-bold`}>{c.initials}</div>
-                      <div>
-                        <div className="text-sm font-semibold text-surface-900">{c.name}</div>
-                        <div className="text-[10px] text-surface-400">{c.email}</div>
-                      </div>
-                    </div>
-                  </td>
-                  <td className="px-6 py-3.5 hidden md:table-cell"><span className="text-xs text-surface-500">{c.location}</span></td>
-                  <td className="px-6 py-3.5"><span className="text-sm font-medium text-surface-700">{c.orders}</span></td>
-                  <td className="px-6 py-3.5"><span className="text-sm font-bold text-surface-900">₦{c.spent.toLocaleString()}</span></td>
-                  <td className="px-6 py-3.5 hidden lg:table-cell"><span className="text-xs text-surface-500">{c.lastOrder}</span></td>
-                  <td className="px-6 py-3.5"><button className="p-1.5 rounded-lg text-surface-400 hover:bg-surface-100"><MoreHorizontal className="h-4 w-4" /></button></td>
+        {loading ? (
+          <div className="flex items-center justify-center py-20"><Loader2 className="h-8 w-8 animate-spin text-brand-600" /></div>
+        ) : customers.length === 0 ? (
+          <div className="rounded-2xl border border-surface-200 bg-white p-12 text-center">
+            <Users className="h-12 w-12 text-surface-300 mx-auto mb-4" />
+            <h3 className="text-lg font-bold text-surface-900 mb-2">No customers yet</h3>
+            <p className="text-sm text-surface-500">Customers are created when they place orders.</p>
+          </div>
+        ) : (
+          <div className="rounded-2xl border border-surface-200 bg-white overflow-hidden">
+            <table className="w-full">
+              <thead>
+                <tr className="bg-surface-50 border-b border-surface-200">
+                  <th className="px-6 py-3 text-left text-[10px] font-semibold uppercase tracking-wider text-surface-400">Customer</th>
+                  <th className="px-6 py-3 text-left text-[10px] font-semibold uppercase tracking-wider text-surface-400 hidden md:table-cell">Contact</th>
+                  <th className="px-6 py-3 text-center text-[10px] font-semibold uppercase tracking-wider text-surface-400">Orders</th>
+                  <th className="px-6 py-3 text-right text-[10px] font-semibold uppercase tracking-wider text-surface-400">Total Spent</th>
                 </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
+              </thead>
+              <tbody className="divide-y divide-surface-100">
+                {customers.map((c) => (
+                  <tr key={c.id} className="hover:bg-surface-50 transition-colors">
+                    <td className="px-6 py-3.5">
+                      <div className="flex items-center gap-3">
+                        <div className="h-9 w-9 rounded-full bg-gradient-to-br from-brand-600 to-accent-400 flex items-center justify-center text-white text-xs font-bold">
+                          {c.firstName[0]}{c.lastName[0]}
+                        </div>
+                        <div>
+                          <div className="text-sm font-semibold text-surface-900">{c.firstName} {c.lastName}</div>
+                          <div className="text-[10px] text-surface-500">Since {new Date(c.createdAt).toLocaleDateString()}</div>
+                        </div>
+                      </div>
+                    </td>
+                    <td className="px-6 py-3.5 hidden md:table-cell">
+                      <div className="flex items-center gap-1.5 text-xs text-surface-500"><Mail className="h-3 w-3" />{c.email}</div>
+                      {c.phone && <div className="flex items-center gap-1.5 text-xs text-surface-500 mt-0.5"><Phone className="h-3 w-3" />{c.phone}</div>}
+                    </td>
+                    <td className="px-6 py-3.5 text-center">
+                      <span className="inline-flex items-center gap-1 text-sm text-surface-700"><ShoppingCart className="h-3.5 w-3.5" />{c.totalOrders}</span>
+                    </td>
+                    <td className="px-6 py-3.5 text-right text-sm font-semibold text-surface-900">
+                      {formatCurrency(Number(c.totalSpent), currency)}
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        )}
+
+        {total > 20 && (
+          <div className="flex items-center justify-between">
+            <p className="text-xs text-surface-500">Page {page} of {Math.ceil(total / 20)}</p>
+            <div className="flex gap-2">
+              <button onClick={() => setPage(page - 1)} disabled={page <= 1} className="btn-secondary text-xs py-1.5 px-3 disabled:opacity-50">Prev</button>
+              <button onClick={() => setPage(page + 1)} disabled={page * 20 >= total} className="btn-secondary text-xs py-1.5 px-3 disabled:opacity-50">Next</button>
+            </div>
+          </div>
+        )}
       </div>
     </>
   );

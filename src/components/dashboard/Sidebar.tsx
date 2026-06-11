@@ -3,6 +3,8 @@
 import { useState } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import { useAuth } from "@/context/AuthContext";
+import { useStore } from "@/context/StoreContext";
 import { cn } from "@/lib/utils";
 import {
   ShoppingBag,
@@ -48,6 +50,12 @@ const bottomNav = [
 export default function Sidebar() {
   const pathname = usePathname();
   const [collapsed, setCollapsed] = useState(false);
+  const { user, logout } = useAuth();
+  const { currentStore, stores } = useStore();
+
+  const initials = user
+    ? `${user.firstName?.[0] || ""}${user.lastName?.[0] || ""}`.toUpperCase()
+    : "??";
 
   return (
     <aside
@@ -72,11 +80,7 @@ export default function Sidebar() {
           onClick={() => setCollapsed(!collapsed)}
           className="hidden lg:flex h-7 w-7 items-center justify-center rounded-lg text-surface-400 hover:bg-surface-100 hover:text-surface-600 transition-colors"
         >
-          {collapsed ? (
-            <ChevronRight className="h-4 w-4" />
-          ) : (
-            <ChevronLeft className="h-4 w-4" />
-          )}
+          {collapsed ? <ChevronRight className="h-4 w-4" /> : <ChevronLeft className="h-4 w-4" />}
         </button>
       </div>
 
@@ -95,10 +99,10 @@ export default function Sidebar() {
             <>
               <div className="flex-1 text-left min-w-0">
                 <div className="text-xs font-semibold text-surface-900 truncate">
-                  My Fashion Store
+                  {currentStore?.name || "No store yet"}
                 </div>
                 <div className="text-[10px] text-surface-500 truncate">
-                  mystore.afrostore.com
+                  {currentStore ? `${currentStore.subdomain}.afrostore.com` : "Create your first store"}
                 </div>
               </div>
               <ChevronRight className="h-3.5 w-3.5 text-surface-400 rotate-90" />
@@ -124,12 +128,7 @@ export default function Sidebar() {
                 collapsed && "justify-center px-2"
               )}
             >
-              <Icon
-                className={cn(
-                  "h-[18px] w-[18px] flex-shrink-0",
-                  isActive ? "text-brand-600" : ""
-                )}
-              />
+              <Icon className={cn("h-[18px] w-[18px] flex-shrink-0", isActive ? "text-brand-600" : "")} />
               {!collapsed && <span>{item.name}</span>}
             </Link>
           );
@@ -154,15 +153,33 @@ export default function Sidebar() {
             </Link>
           );
         })}
-        <button
-          className={cn(
-            "w-full flex items-center gap-3 rounded-xl px-3 py-2 text-sm font-medium text-red-500 transition-colors hover:bg-red-50",
-            collapsed && "justify-center px-2"
+
+        {/* User info + logout */}
+        <div className={cn("rounded-xl bg-surface-50 p-2.5 mt-2", collapsed && "text-center")}>
+          {!collapsed && (
+            <div className="flex items-center gap-2 mb-2">
+              <div className="h-8 w-8 rounded-full bg-gradient-to-br from-brand-600 to-accent-400 flex items-center justify-center text-white text-xs font-bold">
+                {initials}
+              </div>
+              <div className="flex-1 min-w-0">
+                <p className="text-xs font-semibold text-surface-900 truncate">
+                  {user?.firstName} {user?.lastName}
+                </p>
+                <p className="text-[10px] text-surface-500 truncate">{user?.email}</p>
+              </div>
+            </div>
           )}
-        >
-          <LogOut className="h-[18px] w-[18px] flex-shrink-0" />
-          {!collapsed && <span>Log out</span>}
-        </button>
+          <button
+            onClick={logout}
+            className={cn(
+              "flex items-center gap-2 text-sm text-surface-500 hover:text-red-500 transition-colors",
+              collapsed ? "mx-auto" : "w-full"
+            )}
+          >
+            <LogOut className="h-[16px] w-[16px]" />
+            {!collapsed && <span>Log out</span>}
+          </button>
+        </div>
       </div>
     </aside>
   );

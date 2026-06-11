@@ -1,13 +1,14 @@
 "use client";
 
+import { useAuth } from "@/context/AuthContext";
 import {
   Bell,
   Search,
   Plus,
   Bot,
   ChevronDown,
-  Menu,
 } from "lucide-react";
+import Link from "next/link";
 
 interface DashboardHeaderProps {
   title: string;
@@ -24,6 +25,11 @@ export default function DashboardHeader({
   subtitle,
   action,
 }: DashboardHeaderProps) {
+  const { user } = useAuth();
+  const initials = user
+    ? `${user.firstName?.[0] || ""}${user.lastName?.[0] || ""}`.toUpperCase()
+    : "??";
+
   return (
     <header className="sticky top-0 z-30 bg-white/80 backdrop-blur-xl border-b border-surface-100">
       <div className="flex h-16 items-center justify-between px-6">
@@ -51,14 +57,16 @@ export default function DashboardHeader({
           </div>
 
           {/* AI Assistant */}
-          <button className="flex h-9 w-9 items-center justify-center rounded-xl bg-brand-50 text-brand-600 hover:bg-brand-100 transition-colors">
+          <Link
+            href="/dashboard/ai"
+            className="flex h-9 w-9 items-center justify-center rounded-xl bg-brand-50 text-brand-600 hover:bg-brand-100 transition-colors"
+          >
             <Bot className="h-[18px] w-[18px]" />
-          </button>
+          </Link>
 
           {/* Notifications */}
           <button className="relative flex h-9 w-9 items-center justify-center rounded-xl text-surface-500 hover:bg-surface-100 transition-colors">
             <Bell className="h-[18px] w-[18px]" />
-            <span className="absolute top-1.5 right-1.5 h-2 w-2 rounded-full bg-red-500 ring-2 ring-white" />
           </button>
 
           {/* Action button */}
@@ -75,7 +83,7 @@ export default function DashboardHeader({
           {/* User */}
           <button className="flex items-center gap-2 rounded-xl px-2 py-1.5 hover:bg-surface-50 transition-colors">
             <div className="h-8 w-8 rounded-full bg-gradient-to-br from-brand-600 to-accent-400 flex items-center justify-center text-white text-xs font-bold">
-              AO
+              {initials}
             </div>
             <ChevronDown className="h-3.5 w-3.5 text-surface-400 hidden sm:block" />
           </button>
