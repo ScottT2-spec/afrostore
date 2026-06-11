@@ -323,7 +323,7 @@ export function monnifyHealthCheck(apiKey: string, secretKey: string, baseUrl: s
   return async (): Promise<HealthCheckResult> => {
     const start = performance.now();
     try {
-      const credentials = Buffer.from(`${apiKey}:${secretKey}`).toString('base64');
+      const credentials = btoa(`${apiKey}:${secretKey}`);
       const res = await fetch(`${baseUrl}/api/v1/auth/login`, {
         method: 'POST',
         headers: { Authorization: `Basic ${credentials}` },
