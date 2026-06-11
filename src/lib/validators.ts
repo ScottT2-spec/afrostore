@@ -214,11 +214,20 @@ export const createReviewSchema = z.object({
   images: z.array(z.string().url()).default([]),
 });
 
+export const moderateReviewSchema = z.object({
+  isApproved: z.boolean().optional(),
+  isVerified: z.boolean().optional(),
+});
+
 // ─── MEMBERS ────────────────────────────────────────────────
 
 export const addMemberSchema = z.object({
   email: z.string().email("Invalid email address"),
   role: z.enum(["ADMIN", "STAFF", "VIEWER"]).default("STAFF"),
+});
+
+export const updateMemberRoleSchema = z.object({
+  role: z.enum(["ADMIN", "STAFF", "VIEWER"]),
 });
 
 // ─── ANALYTICS ──────────────────────────────────────────────
