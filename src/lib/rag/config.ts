@@ -49,7 +49,7 @@ const ORDER_CHUNKING: ChunkingStrategy = {
 export function createDefaultConfig(
   overrides: Partial<DeepPartial<RAGConfig>> = {}
 ): RAGConfig {
-  const env = typeof process !== 'undefined' ? process.env : {};
+  const env: Record<string, string | undefined> = typeof process !== 'undefined' ? process.env : {};
 
   const defaults: RAGConfig = {
     embedding: {
@@ -137,7 +137,7 @@ export function createDefaultConfig(
     },
   };
 
-  return deepMerge(defaults, overrides as Partial<RAGConfig>) as RAGConfig;
+  return deepMerge(defaults as any, overrides as any) as RAGConfig;
 }
 
 // ─── VALIDATION ─────────────────────────────────────────────
