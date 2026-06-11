@@ -232,7 +232,7 @@ export default function DashboardPage() {
                   (h, i) => (
                     <div
                       key={i}
-                      className="flex-1 rounded-t-sm bg-gradient-to-t from-brand-500 to-brand-400 transition-all hover:from-brand-600 hover:to-brand-500 cursor-pointer"
+                      className="flex-1 rounded-t-sm bg-gradient-to-t from-brand-600 to-brand-500 transition-all hover:from-brand-700 hover:to-brand-600 cursor-pointer"
                       style={{ height: `${h}%` }}
                     />
                   )
@@ -362,7 +362,7 @@ export default function DashboardPage() {
                         </td>
                         <td className="px-6 py-3.5">
                           <div className="flex items-center gap-2.5">
-                            <div className="h-8 w-8 rounded-full bg-gradient-to-br from-brand-400 to-accent-400 flex items-center justify-center text-white text-[10px] font-bold">
+                            <div className="h-8 w-8 rounded-full bg-gradient-to-br from-brand-600 to-accent-400 flex items-center justify-center text-white text-[10px] font-bold">
                               {order.initials}
                             </div>
                             <span className="text-sm text-surface-700">

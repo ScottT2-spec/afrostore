@@ -207,7 +207,7 @@ export default function AIPage() {
                     )}
                   </div>
                   {message.role === "user" && (
-                    <div className="h-8 w-8 rounded-full bg-gradient-to-br from-brand-400 to-accent-400 flex items-center justify-center text-white text-[10px] font-bold flex-shrink-0">
+                    <div className="h-8 w-8 rounded-full bg-gradient-to-br from-brand-600 to-accent-400 flex items-center justify-center text-white text-[10px] font-bold flex-shrink-0">
                       AO
                     </div>
                   )}

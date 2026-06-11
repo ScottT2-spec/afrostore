@@ -49,7 +49,7 @@ export default function Hero() {
           <h1 className="animate-fade-up text-center font-display text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-extrabold tracking-tight text-white max-w-5xl text-balance leading-[1.1]">
             From Idea to{" "}
             <span className="relative">
-              <span className="bg-gradient-to-r from-brand-400 via-brand-300 to-accent-400 bg-clip-text text-transparent">
+              <span className="bg-gradient-to-r from-accent-300 via-accent-400 to-accent-500 bg-clip-text text-transparent">
                 Selling
               </span>
               <svg
@@ -71,8 +71,8 @@ export default function Hero() {
                     x2="200"
                     y2="0"
                   >
-                    <stop stopColor="#4ade80" />
-                    <stop offset="1" stopColor="#fb923c" />
+                    <stop stopColor="#F5B731" />
+                    <stop offset="1" stopColor="#ca8a04" />
                   </linearGradient>
                 </defs>
               </svg>
@@ -221,7 +221,7 @@ export default function Hero() {
                             (h, i) => (
                               <div
                                 key={i}
-                                className="flex-1 rounded-t-sm bg-gradient-to-t from-brand-500 to-brand-400 opacity-80"
+                                className="flex-1 rounded-t-sm bg-gradient-to-t from-brand-600 to-brand-500 opacity-80"
                                 style={{ height: `${h}%` }}
                               />
                             )
@@ -257,7 +257,7 @@ export default function Hero() {
                       {[1, 2, 3].map((i) => (
                         <div
                           key={i}
-                          className="h-6 w-6 rounded-full bg-gradient-to-br from-accent-400 to-brand-400 border-2 border-white"
+                          className="h-6 w-6 rounded-full bg-gradient-to-br from-accent-400 to-brand-600 border-2 border-white"
                         />
                       ))}
                     </div>

@@ -74,7 +74,7 @@ export default function DashboardHeader({
 
           {/* User */}
           <button className="flex items-center gap-2 rounded-xl px-2 py-1.5 hover:bg-surface-50 transition-colors">
-            <div className="h-8 w-8 rounded-full bg-gradient-to-br from-brand-400 to-accent-400 flex items-center justify-center text-white text-xs font-bold">
+            <div className="h-8 w-8 rounded-full bg-gradient-to-br from-brand-600 to-accent-400 flex items-center justify-center text-white text-xs font-bold">
               AO
             </div>
             <ChevronDown className="h-3.5 w-3.5 text-surface-400 hidden sm:block" />

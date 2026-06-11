@@ -133,7 +133,7 @@ export default function OrdersPage() {
                       </td>
                       <td className="px-6 py-3.5">
                         <div className="flex items-center gap-2.5">
-                          <div className="h-8 w-8 rounded-full bg-gradient-to-br from-brand-400 to-accent-400 flex items-center justify-center text-white text-[10px] font-bold">{order.initials}</div>
+                          <div className="h-8 w-8 rounded-full bg-gradient-to-br from-brand-600 to-accent-400 flex items-center justify-center text-white text-[10px] font-bold">{order.initials}</div>
                           <div>
                             <div className="text-sm font-medium text-surface-900">{order.customer}</div>
                             <div className="text-[10px] text-surface-400">{order.items.length} item{order.items.length > 1 ? "s" : ""}</div>
@@ -198,7 +198,7 @@ export default function OrdersPage() {
               <div className="rounded-xl border border-surface-200 p-4 space-y-3">
                 <h3 className="text-sm font-semibold text-surface-900">Customer</h3>
                 <div className="flex items-center gap-3">
-                  <div className="h-10 w-10 rounded-full bg-gradient-to-br from-brand-400 to-accent-400 flex items-center justify-center text-white text-xs font-bold">{selectedOrder.initials}</div>
+                  <div className="h-10 w-10 rounded-full bg-gradient-to-br from-brand-600 to-accent-400 flex items-center justify-center text-white text-xs font-bold">{selectedOrder.initials}</div>
                   <div>
                     <div className="text-sm font-semibold text-surface-900">{selectedOrder.customer}</div>
                     <div className="text-xs text-surface-500">{selectedOrder.email}</div>
