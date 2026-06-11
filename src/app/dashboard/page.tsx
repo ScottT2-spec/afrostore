@@ -266,7 +266,7 @@ export default function DashboardPage() {
                   <CartesianGrid strokeDasharray="3 3" />
                   <XAxis dataKey="date" tick={{ fontSize: 11 }} />
                   <YAxis tickFormatter={(v) => `₦${(v / 1000).toFixed(0)}k`} tick={{ fontSize: 11 }} />
-                  <Tooltip formatter={(value: number) => [`₦${value.toLocaleString()}`, "Revenue"]} />
+                  <Tooltip formatter={(value) => [`₦${Number(value).toLocaleString()}`, "Revenue"]} />
                   <Area
                     type="monotone"
                     dataKey="revenue"
