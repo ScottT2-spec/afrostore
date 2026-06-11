@@ -76,7 +76,7 @@ export async function POST(req: NextRequest, { params }: Params) {
           create: images.map((img, i) => ({ url: img.url, alt: img.alt, position: i })),
         },
         variants: {
-          create: variants.map((v, i) => ({ ...v, position: i })),
+          create: variants.map((v, i) => ({ ...v, options: v.options as any, position: i })),
         },
       },
       include: {

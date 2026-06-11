@@ -106,8 +106,13 @@ export async function POST(req: NextRequest, { params }: Params) {
     const parsed = analyticsEventSchema.safeParse(body);
     if (!parsed.success) return validationError(parsed.error.flatten().fieldErrors);
 
+    const { metadata, ...rest } = parsed.data;
     const analyticsEvent = await prisma.analyticsEvent.create({
-      data: { storeId, ...parsed.data },
+      data: {
+        storeId,
+        ...rest,
+        metadata: metadata ? (metadata as any) : undefined,
+      },
     });
 
     return success(analyticsEvent, 201);

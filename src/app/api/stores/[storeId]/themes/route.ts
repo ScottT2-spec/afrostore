@@ -83,11 +83,11 @@ export async function POST(req: NextRequest, { params }: Params) {
         storeId,
         themeId,
         isActive: activate !== false,
-        customConfig: customConfig || null,
+        customConfig: customConfig ? (customConfig as any) : undefined,
       },
       update: {
         isActive: activate !== false,
-        customConfig: customConfig !== undefined ? customConfig : undefined,
+        customConfig: customConfig !== undefined ? (customConfig as any) : undefined,
       },
       include: { theme: true },
     });

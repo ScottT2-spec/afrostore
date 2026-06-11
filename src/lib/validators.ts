@@ -63,7 +63,7 @@ export const createProductSchema = z.object({
     sku: z.string().optional(),
     price: z.number().positive().optional(),
     stock: z.number().int().min(0).default(0),
-    options: z.record(z.string()),
+    options: z.record(z.string(), z.string()),
   })).default([]),
 });
 
@@ -159,7 +159,7 @@ export const setupPaymentGatewaySchema = z.object({
   publicKey: z.string().min(1),
   secretKey: z.string().min(1),
   webhookSecret: z.string().optional(),
-  config: z.record(z.unknown()).optional(),
+  config: z.record(z.string(), z.unknown()).optional(),
 });
 
 // ─── SETTINGS ───────────────────────────────────────────────
@@ -233,5 +233,5 @@ export const analyticsEventSchema = z.object({
   device: z.string().optional(),
   country: z.string().optional(),
   city: z.string().optional(),
-  metadata: z.record(z.unknown()).optional(),
+  metadata: z.record(z.string(), z.unknown()).optional(),
 });

@@ -3,7 +3,6 @@ import { prisma } from "@/lib/db";
 import { getStoreContext, success, error, validationError, generateOrderNumber, logAudit } from "@/lib/api-helpers";
 import { createOrderSchema } from "@/lib/validators";
 import { unauthorized } from "@/lib/auth";
-import { Decimal } from "@prisma/client/runtime/library";
 
 type Params = { params: Promise<{ storeId: string }> };
 
@@ -71,19 +70,19 @@ export async function POST(req: NextRequest, { params }: Params) {
     });
 
     const productMap = new Map(products.map((p) => [p.id, p]));
-    let subtotal = new Decimal(0);
+    let subtotal = 0;
 
     const orderItems = items.map((item) => {
       const product = productMap.get(item.productId);
       if (!product) throw new Error(`Product ${item.productId} not found`);
 
-      let price = product.price;
+      let price = Number(product.price);
       let variantName: string | undefined;
 
       if (item.variantId) {
         const variant = product.variants.find((v) => v.id === item.variantId);
         if (!variant) throw new Error(`Variant ${item.variantId} not found`);
-        if (variant.price) price = variant.price;
+        if (variant.price) price = Number(variant.price);
         variantName = variant.name;
       }
 
@@ -92,8 +91,8 @@ export async function POST(req: NextRequest, { params }: Params) {
         throw new Error(`Insufficient stock for ${product.name}`);
       }
 
-      const lineTotal = price.mul(item.quantity);
-      subtotal = subtotal.add(lineTotal);
+      const lineTotal = price * item.quantity;
+      subtotal += lineTotal;
 
       return {
         productId: product.id,
@@ -108,18 +107,17 @@ export async function POST(req: NextRequest, { params }: Params) {
     });
 
     // Delivery fee
-    let deliveryFee = new Decimal(0);
+    let deliveryFee = 0;
     if (deliveryZoneId) {
       const zone = store.deliveryZones.find((z) => z.id === deliveryZoneId);
       if (zone) {
-        deliveryFee = zone.freeAbove && subtotal.gte(zone.freeAbove)
-          ? new Decimal(0)
-          : zone.fee;
+        const zoneFreeAbove = zone.freeAbove ? Number(zone.freeAbove) : null;
+        deliveryFee = zoneFreeAbove && subtotal >= zoneFreeAbove ? 0 : Number(zone.fee);
       }
     }
 
     // Coupon
-    let discount = new Decimal(0);
+    let discount = 0;
     let couponId: string | undefined;
     if (couponCode) {
       const coupon = await prisma.coupon.findUnique({
@@ -132,22 +130,24 @@ export async function POST(req: NextRequest, { params }: Params) {
         if (coupon.expiresAt && new Date() > coupon.expiresAt) {
           return error("Coupon has expired", 400);
         }
-        if (coupon.minOrderAmount && subtotal.lt(coupon.minOrderAmount)) {
-          return error(`Minimum order amount is ₦${coupon.minOrderAmount}`, 400);
+        const minAmount = coupon.minOrderAmount ? Number(coupon.minOrderAmount) : null;
+        if (minAmount && subtotal < minAmount) {
+          return error(`Minimum order amount is ₦${minAmount}`, 400);
         }
 
+        const couponValue = Number(coupon.value);
         if (coupon.type === "PERCENTAGE") {
-          discount = subtotal.mul(coupon.value).div(100);
+          discount = subtotal * couponValue / 100;
         } else if (coupon.type === "FIXED") {
-          discount = Decimal.min(coupon.value, subtotal);
+          discount = Math.min(couponValue, subtotal);
         } else if (coupon.type === "FREE_SHIPPING") {
-          deliveryFee = new Decimal(0);
+          deliveryFee = 0;
         }
         couponId = coupon.id;
       }
     }
 
-    const total = subtotal.add(deliveryFee).sub(discount);
+    const total = subtotal + deliveryFee - discount;
 
     // Find or create customer
     let customer = await prisma.customer.findUnique({
@@ -204,7 +204,7 @@ export async function POST(req: NextRequest, { params }: Params) {
         where: { id: customer!.id },
         data: {
           totalOrders: { increment: 1 },
-          totalSpent: { increment: total.toNumber() },
+          totalSpent: { increment: total },
         },
       });
 
