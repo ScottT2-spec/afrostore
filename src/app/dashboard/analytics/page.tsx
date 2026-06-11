@@ -2,12 +2,46 @@
 
 import DashboardHeader from "@/components/dashboard/DashboardHeader";
 import { TrendingUp, TrendingDown, Eye, ShoppingCart, MousePointerClick, Users, Globe, Smartphone, Monitor, ArrowUpRight, Target, ShoppingBag } from "lucide-react";
+import { AreaChart, Area, CartesianGrid, Tooltip, ResponsiveContainer, XAxis, YAxis } from "recharts";
 
 const metrics = [
   { label: "Total Visitors", value: "12,849", change: "+18.2%", trend: "up", icon: Eye },
   { label: "Conversion Rate", value: "4.2%", change: "+2.1%", trend: "up", icon: Target },
   { label: "Add to Cart", value: "8.7%", change: "+1.3%", trend: "up", icon: ShoppingCart },
   { label: "Avg. Order Value", value: "₦24,500", change: "-3.2%", trend: "down", icon: ShoppingBag },
+];
+
+const visitorsData = [
+  { date: "Jun 1", visitors: 350, orders: 15 },
+  { date: "Jun 2", visitors: 480, orders: 22 },
+  { date: "Jun 3", visitors: 290, orders: 12 },
+  { date: "Jun 4", visitors: 580, orders: 28 },
+  { date: "Jun 5", visitors: 400, orders: 18 },
+  { date: "Jun 6", visitors: 680, orders: 32 },
+  { date: "Jun 7", visitors: 500, orders: 24 },
+  { date: "Jun 8", visitors: 710, orders: 35 },
+  { date: "Jun 9", visitors: 600, orders: 30 },
+  { date: "Jun 10", visitors: 420, orders: 19 },
+  { date: "Jun 11", visitors: 540, orders: 25 },
+  { date: "Jun 12", visitors: 660, orders: 31 },
+  { date: "Jun 13", visitors: 460, orders: 21 },
+  { date: "Jun 14", visitors: 730, orders: 36 },
+  { date: "Jun 15", visitors: 620, orders: 29 },
+  { date: "Jun 16", visitors: 370, orders: 16 },
+  { date: "Jun 17", visitors: 560, orders: 26 },
+  { date: "Jun 18", visitors: 690, orders: 33 },
+  { date: "Jun 19", visitors: 520, orders: 24 },
+  { date: "Jun 20", visitors: 640, orders: 30 },
+  { date: "Jun 21", visitors: 450, orders: 20 },
+  { date: "Jun 22", visitors: 590, orders: 27 },
+  { date: "Jun 23", visitors: 680, orders: 32 },
+  { date: "Jun 24", visitors: 550, orders: 25 },
+  { date: "Jun 25", visitors: 500, orders: 23 },
+  { date: "Jun 26", visitors: 710, orders: 34 },
+  { date: "Jun 27", visitors: 650, orders: 31 },
+  { date: "Jun 28", visitors: 600, orders: 28 },
+  { date: "Jun 29", visitors: 730, orders: 36 },
+  { date: "Jun 30", visitors: 630, orders: 30 },
 ];
 
 const topPages = [
@@ -78,20 +112,35 @@ export default function AnalyticsPage() {
                 ))}
               </div>
             </div>
-            <div className="relative h-56">
-              {/* Visitor bars */}
-              <div className="absolute inset-0 flex items-end gap-1">
-                {[45, 62, 38, 75, 52, 88, 65, 92, 78, 55, 70, 85, 60, 95, 80, 48, 72, 90, 68, 82, 58, 76, 88, 72, 65, 92, 85, 78, 95, 82].map((h, i) => (
-                  <div key={i} className="flex-1 flex flex-col gap-0.5 justify-end" style={{ height: '100%' }}>
-                    <div className="rounded-t-sm bg-brand-200" style={{ height: `${h * 0.3}%` }} />
-                    <div className="rounded-t-sm bg-brand-500" style={{ height: `${h * 0.7}%` }} />
-                  </div>
-                ))}
-              </div>
+            <div className="h-64">
+              <ResponsiveContainer width="100%" height="100%">
+                <AreaChart data={visitorsData}>
+                  <CartesianGrid strokeDasharray="3 3" />
+                  <XAxis dataKey="date" tick={{ fontSize: 11 }} />
+                  <YAxis tick={{ fontSize: 11 }} />
+                  <Tooltip />
+                  <Area
+                    type="monotone"
+                    dataKey="visitors"
+                    stroke="#1E293B"
+                    fill="#1E293B"
+                    fillOpacity={0.1}
+                    name="Visitors"
+                  />
+                  <Area
+                    type="monotone"
+                    dataKey="orders"
+                    stroke="#93C5FD"
+                    fill="#93C5FD"
+                    fillOpacity={0.15}
+                    name="Orders"
+                  />
+                </AreaChart>
+              </ResponsiveContainer>
             </div>
             <div className="flex items-center gap-6 mt-4">
-              <div className="flex items-center gap-2 text-xs text-surface-500"><div className="h-2.5 w-2.5 rounded-sm bg-brand-500" />Visitors</div>
-              <div className="flex items-center gap-2 text-xs text-surface-500"><div className="h-2.5 w-2.5 rounded-sm bg-brand-200" />Orders</div>
+              <div className="flex items-center gap-2 text-xs text-surface-500"><div className="h-2.5 w-2.5 rounded-sm" style={{ backgroundColor: "#1E293B" }} />Visitors</div>
+              <div className="flex items-center gap-2 text-xs text-surface-500"><div className="h-2.5 w-2.5 rounded-sm" style={{ backgroundColor: "#93C5FD" }} />Orders</div>
             </div>
           </div>
 
