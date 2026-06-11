@@ -20,6 +20,7 @@ import {
   Truck,
   MessageCircle,
 } from "lucide-react";
+import { AreaChart, Area, CartesianGrid, Tooltip, ResponsiveContainer, XAxis, YAxis } from "recharts";
 import Link from "next/link";
 
 const stats = [
@@ -119,6 +120,39 @@ const topProducts = [
   { name: "Leather Crossbody Bag", sold: 29, revenue: "₦435,000", image: "from-amber-600 to-yellow-600" },
   { name: "Shea Butter Skincare Set", sold: 24, revenue: "₦192,000", image: "from-green-400 to-emerald-500" },
   { name: "African Print Sneakers", sold: 21, revenue: "₦378,000", image: "from-blue-400 to-indigo-500" },
+];
+
+const revenueTrendData = [
+  { date: "Jun 1", revenue: 35000 },
+  { date: "Jun 2", revenue: 52000 },
+  { date: "Jun 3", revenue: 48000 },
+  { date: "Jun 4", revenue: 65000 },
+  { date: "Jun 5", revenue: 42000 },
+  { date: "Jun 6", revenue: 78000 },
+  { date: "Jun 7", revenue: 55000 },
+  { date: "Jun 8", revenue: 82000 },
+  { date: "Jun 9", revenue: 90000 },
+  { date: "Jun 10", revenue: 68000 },
+  { date: "Jun 11", revenue: 75000 },
+  { date: "Jun 12", revenue: 88000 },
+  { date: "Jun 13", revenue: 72000 },
+  { date: "Jun 14", revenue: 95000 },
+  { date: "Jun 15", revenue: 85000 },
+  { date: "Jun 16", revenue: 60000 },
+  { date: "Jun 17", revenue: 92000 },
+  { date: "Jun 18", revenue: 78000 },
+  { date: "Jun 19", revenue: 88000 },
+  { date: "Jun 20", revenue: 96000 },
+  { date: "Jun 21", revenue: 82000 },
+  { date: "Jun 22", revenue: 70000 },
+  { date: "Jun 23", revenue: 85000 },
+  { date: "Jun 24", revenue: 92000 },
+  { date: "Jun 25", revenue: 88000 },
+  { date: "Jun 26", revenue: 95000 },
+  { date: "Jun 27", revenue: 80000 },
+  { date: "Jun 28", revenue: 90000 },
+  { date: "Jun 29", revenue: 98000 },
+  { date: "Jun 30", revenue: 86000 },
 ];
 
 const aiSuggestions = [
@@ -225,27 +259,23 @@ export default function DashboardPage() {
                 ))}
               </div>
             </div>
-            {/* Chart visualization */}
-            <div className="relative h-52">
-              <div className="absolute inset-0 flex items-end gap-1.5">
-                {[35, 52, 48, 65, 42, 78, 55, 82, 90, 68, 75, 88, 72, 95, 85, 60, 92, 78, 88, 96, 82, 70, 85, 92, 88, 95, 80, 90, 98, 86].map(
-                  (h, i) => (
-                    <div
-                      key={i}
-                      className="flex-1 rounded-t-sm bg-gradient-to-t from-brand-600 to-brand-500 transition-all hover:from-brand-700 hover:to-brand-600 cursor-pointer"
-                      style={{ height: `${h}%` }}
-                    />
-                  )
-                )}
-              </div>
-              {/* Y-axis labels */}
-              <div className="absolute left-0 top-0 bottom-0 flex flex-col justify-between text-[10px] text-surface-400 -ml-1">
-                <span>₦100k</span>
-                <span>₦75k</span>
-                <span>₦50k</span>
-                <span>₦25k</span>
-                <span>₦0</span>
-              </div>
+            {/* Area Chart */}
+            <div className="h-64">
+              <ResponsiveContainer width="100%" height="100%">
+                <AreaChart data={revenueTrendData}>
+                  <CartesianGrid strokeDasharray="3 3" />
+                  <XAxis dataKey="date" tick={{ fontSize: 11 }} />
+                  <YAxis tickFormatter={(v) => `₦${(v / 1000).toFixed(0)}k`} tick={{ fontSize: 11 }} />
+                  <Tooltip formatter={(value: number) => [`₦${value.toLocaleString()}`, "Revenue"]} />
+                  <Area
+                    type="monotone"
+                    dataKey="revenue"
+                    stroke="#1E293B"
+                    fill="#1E293B"
+                    fillOpacity={0.1}
+                  />
+                </AreaChart>
+              </ResponsiveContainer>
             </div>
           </div>
 
