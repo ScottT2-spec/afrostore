@@ -25,14 +25,12 @@ WORKDIR /app
 
 ENV NODE_ENV=production
 ENV PORT=7860
+ENV HOSTNAME=0.0.0.0
 
+# Copy standalone build
 COPY --from=base /app/.next/standalone ./
 COPY --from=base /app/.next/static ./.next/static
 COPY --from=base /app/public ./public
-COPY --from=base /app/prisma ./prisma
-COPY --from=base /app/prisma.config.ts ./prisma.config.ts
-COPY --from=base /app/node_modules/.prisma ./node_modules/.prisma
-COPY --from=base /app/src/generated ./src/generated
 
 EXPOSE 7860
 
