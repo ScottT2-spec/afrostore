@@ -12,7 +12,7 @@
  * - Cheaper (your existing Postgres, not $70+/month SaaS)
  */
 
-import type { PrismaClient } from '@prisma/client';
+import type { PrismaClient } from '@/generated/prisma';
 import type {
   SearchQuery,
   SearchResult,
@@ -117,7 +117,7 @@ export class VectorSearch {
         ...params
       );
 
-      const results = rows.map((row) => this.rowToResult(row));
+      const results = rows.map((row: VectorRawRow) => this.rowToResult(row));
 
       const durationMs = performance.now() - startTime;
       metrics.observe(METRIC.SEARCH_VECTOR_LATENCY, durationMs);

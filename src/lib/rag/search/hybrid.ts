@@ -281,7 +281,7 @@ export class HybridSearch {
       score: (result.score - minScoreVal) / scoreRange,
       scoreBreakdown: {
         ...breakdown,
-        finalScore: (breakdown.rrfScore - minScoreVal) / scoreRange,
+        finalScore: ((breakdown.rrfScore ?? 0) - minScoreVal) / scoreRange,
       },
     }));
   }

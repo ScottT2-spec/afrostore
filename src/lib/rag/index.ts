@@ -47,7 +47,7 @@
  *   const stats = await rag.getStats(storeId);
  */
 
-import type { PrismaClient } from '@prisma/client';
+import type { PrismaClient } from '@/generated/prisma';
 import type {
   RAGConfig,
   SearchQuery,

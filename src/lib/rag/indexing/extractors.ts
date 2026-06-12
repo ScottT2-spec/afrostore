@@ -74,7 +74,7 @@ function extractProduct(data: EntityData, storeId: string): ExtractedDocument {
   const name = str(data.name);
   const description = stripHtml(str(data.description));
   const category = str(data.category) || str(data.categoryName);
-  const tags = arr(data.tags);
+  const tags = strArr(data.tags);
   const variants = arr(data.variants);
   const price = num(data.price);
   const compareAtPrice = num(data.compareAtPrice);
@@ -191,7 +191,7 @@ function extractCustomer(data: EntityData, storeId: string): ExtractedDocument {
   const totalOrders = num(data.totalOrders);
   const totalSpent = num(data.totalSpent);
   const currency = str(data.currency) || 'NGN';
-  const tags = arr(data.tags);
+  const tags = strArr(data.tags);
   const address = data.address as EntityData | null;
 
   const contentParts = [
@@ -587,6 +587,10 @@ function bool(v: unknown): boolean {
 
 function arr(v: unknown): EntityData[] {
   return Array.isArray(v) ? v : [];
+}
+
+function strArr(v: unknown): string[] {
+  return Array.isArray(v) ? v.map((item) => String(item)) : [];
 }
 
 function formatPrice(amount: number, currency: string): string {

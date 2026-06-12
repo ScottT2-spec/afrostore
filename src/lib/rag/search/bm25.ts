@@ -18,7 +18,7 @@
  * - Is battle-tested in production by thousands of companies
  */
 
-import type { PrismaClient } from '@prisma/client';
+import type { PrismaClient } from '@/generated/prisma';
 import type {
   SearchQuery,
   SearchResult,
@@ -112,7 +112,7 @@ export class BM25Search {
 
       const rows = await this.prisma.$queryRawUnsafe<BM25RawRow[]>(sql, ...params);
 
-      const results = rows.map((row, index) => this.rowToResult(row, index, rows.length));
+      const results = rows.map((row: BM25RawRow, index: number) => this.rowToResult(row, index, rows.length));
 
       const durationMs = performance.now() - startTime;
       metrics.observe(METRIC.SEARCH_BM25_LATENCY, durationMs);

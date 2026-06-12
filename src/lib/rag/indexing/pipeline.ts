@@ -15,7 +15,7 @@
  * - Automatic cleanup of stale chunks when document shrinks
  */
 
-import type { PrismaClient } from '@prisma/client';
+import type { PrismaClient } from '@/generated/prisma';
 import type {
   RagDocument,
   DocumentType,
