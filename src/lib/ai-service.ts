@@ -69,7 +69,7 @@ function getAIProviders(): AIProviderConfig[] {
     providers.push({
       provider: "groq",
       apiKey: process.env.GROQ_API_KEY,
-      model: "llama-3.1-70b-versatile",
+      model: "llama-3.3-70b-versatile",
       capabilities: [AICapability.CHAT, AICapability.FUNCTION_CALLING],
     });
   }
