@@ -295,7 +295,7 @@ export default function StorePage() {
           <nav className="hidden sm:flex items-center gap-6">
             <a href="#shop" className="text-sm font-medium text-surface-600 hover:text-surface-900 transition-colors">Shop</a>
             {data.pages.filter((p) => p.type !== "HOME").slice(0, 3).map((page) => (
-              <a key={page.id} href={`#${page.slug}`} className="text-sm font-medium text-surface-600 hover:text-surface-900 transition-colors">{page.title}</a>
+              <Link key={page.id} href={`/store/${slug}/${page.slug}`} className="text-sm font-medium text-surface-600 hover:text-surface-900 transition-colors">{page.title}</Link>
             ))}
           </nav>
 
@@ -337,7 +337,7 @@ export default function StorePage() {
         <div className="sm:hidden bg-white border-b border-surface-200 px-4 py-4 space-y-2">
           <a href="#shop" onClick={() => setMobileMenu(false)} className="block text-sm font-medium text-surface-600 py-2">Shop</a>
           {data.pages.filter((p) => p.type !== "HOME").map((page) => (
-            <a key={page.id} href={`#${page.slug}`} onClick={() => setMobileMenu(false)} className="block text-sm font-medium text-surface-600 py-2">{page.title}</a>
+            <Link key={page.id} href={`/store/${slug}/${page.slug}`} onClick={() => setMobileMenu(false)} className="block text-sm font-medium text-surface-600 py-2">{page.title}</Link>
           ))}
           {whatsappNumber && (
             <a href={getWhatsAppLink(whatsappNumber, [], currency, store.name)} className="block text-sm font-medium text-green-600 py-2">WhatsApp us</a>
@@ -554,7 +554,7 @@ export default function StorePage() {
               <h4 className="text-sm font-semibold text-white mb-3">Pages</h4>
               <ul className="space-y-2 text-xs">
                 {data.pages.slice(0, 5).map((page) => (
-                  <li key={page.id}><a href={`#${page.slug}`} className="hover:text-white transition-colors">{page.title}</a></li>
+                  <li key={page.id}><Link href={`/store/${slug}/${page.slug}`} className="hover:text-white transition-colors">{page.title}</Link></li>
                 ))}
               </ul>
             </div>

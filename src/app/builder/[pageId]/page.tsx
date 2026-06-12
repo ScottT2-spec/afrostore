@@ -1,10 +1,12 @@
 "use client";
 
-import { useState, useEffect, useCallback, use } from "react";
+import { useState, useEffect, useCallback, useRef, use } from "react";
 import { useRouter } from "next/navigation";
 import { useStore } from "@/context/StoreContext";
 import { api } from "@/lib/api-client";
-import { BuilderBlock, BlockType, blockDefaults, blockPalette, PaletteItem } from "@/lib/builder/types";
+import { BuilderBlock, BlockType, blockDefaults, blockPalette } from "@/lib/builder/types";
+import { BuilderHistory } from "@/lib/builder/history";
+import { blockTemplates } from "@/lib/builder/templates";
 import BlockRenderer from "@/components/builder/BlockRenderer";
 import PropertyPanel from "@/components/builder/PropertyPanel";
 import {
@@ -27,7 +29,6 @@ import { CSS } from "@dnd-kit/utilities";
 import {
   ArrowLeft,
   Save,
-  Eye,
   Smartphone,
   Monitor,
   Plus,
@@ -50,6 +51,15 @@ import {
   MoveVertical,
   Minus,
   Sparkles,
+  Undo2,
+  Redo2,
+  Copy,
+  ChevronUp,
+  ChevronDown,
+  Layers,
+  User,
+  Eye,
+  EyeOff,
 } from "lucide-react";
 import Link from "next/link";
 
@@ -60,6 +70,7 @@ const paletteIcons: Record<string, React.ElementType> = {
   "move-vertical": MoveVertical, minus: Minus, layout: Layout, columns: Columns,
   grid: Grid3X3, "shopping-bag": ShoppingBag, "message-circle": MessageCircle,
   "help-circle": HelpCircle, mail: Mail, play: Play, clock: Clock, shield: Shield,
+  user: User,
 };
 
 // ─── SORTABLE BLOCK WRAPPER ─────────────────────────────────
@@ -68,10 +79,22 @@ function SortableBlock({
   block,
   isSelected,
   onClick,
+  onDuplicate,
+  onMoveUp,
+  onMoveDown,
+  onInlineEdit,
+  isFirst,
+  isLast,
 }: {
   block: BuilderBlock;
   isSelected: boolean;
   onClick: () => void;
+  onDuplicate: () => void;
+  onMoveUp: () => void;
+  onMoveDown: () => void;
+  onInlineEdit: (key: string, value: string) => void;
+  isFirst: boolean;
+  isLast: boolean;
 }) {
   const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({ id: block.id });
 
@@ -94,21 +117,33 @@ function SortableBlock({
       <div
         {...attributes}
         {...listeners}
-        className="absolute -left-8 top-1/2 -translate-y-1/2 opacity-0 group-hover:opacity-100 cursor-grab active:cursor-grabbing transition-opacity z-10"
+        className="absolute -left-10 top-1/2 -translate-y-1/2 opacity-0 group-hover:opacity-100 cursor-grab active:cursor-grabbing transition-opacity z-10"
       >
         <GripVertical className="h-5 w-5 text-surface-400" />
       </div>
 
-      {/* Block type label */}
-      <div className="absolute -top-2.5 left-3 opacity-0 group-hover:opacity-100 transition-opacity z-10">
-        <span className="bg-brand-600 text-white text-[9px] font-bold px-2 py-0.5 rounded-full uppercase">
+      {/* Block toolbar */}
+      <div className="absolute -top-3 left-3 opacity-0 group-hover:opacity-100 transition-opacity z-10 flex items-center gap-0.5">
+        <span className="bg-brand-600 text-white text-[9px] font-bold px-2 py-0.5 rounded-full uppercase mr-1">
           {block.type}
         </span>
+        <button onClick={(e) => { e.stopPropagation(); onMoveUp(); }} disabled={isFirst}
+          className="h-5 w-5 rounded bg-white shadow border border-surface-200 flex items-center justify-center text-surface-400 hover:text-surface-700 disabled:opacity-30">
+          <ChevronUp className="h-3 w-3" />
+        </button>
+        <button onClick={(e) => { e.stopPropagation(); onMoveDown(); }} disabled={isLast}
+          className="h-5 w-5 rounded bg-white shadow border border-surface-200 flex items-center justify-center text-surface-400 hover:text-surface-700 disabled:opacity-30">
+          <ChevronDown className="h-3 w-3" />
+        </button>
+        <button onClick={(e) => { e.stopPropagation(); onDuplicate(); }}
+          className="h-5 w-5 rounded bg-white shadow border border-surface-200 flex items-center justify-center text-surface-400 hover:text-surface-700">
+          <Copy className="h-3 w-3" />
+        </button>
       </div>
 
       {/* Block content */}
       <div className="p-4">
-        <BlockRenderer block={block} />
+        <BlockRenderer block={block} isSelected={isSelected} onInlineEdit={onInlineEdit} />
       </div>
     </div>
   );
@@ -123,14 +158,46 @@ export default function BuilderPage({ params }: { params: Promise<{ pageId: stri
 
   const [blocks, setBlocks] = useState<BuilderBlock[]>([]);
   const [pageTitle, setPageTitle] = useState("");
-  const [pageData, setPageData] = useState<any>(null);
+  const [isPublished, setIsPublished] = useState(false);
   const [selectedBlockId, setSelectedBlockId] = useState<string | null>(null);
   const [activeId, setActiveId] = useState<string | null>(null);
-  const [showPalette, setShowPalette] = useState(true);
+  const [sidebarTab, setSidebarTab] = useState<"blocks" | "templates">("blocks");
+  const [showSidebar, setShowSidebar] = useState(true);
   const [previewMode, setPreviewMode] = useState<"desktop" | "mobile">("desktop");
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [saved, setSaved] = useState(false);
+  const [canUndo, setCanUndo] = useState(false);
+  const [canRedo, setCanRedo] = useState(false);
+
+  const historyRef = useRef(new BuilderHistory());
+
+  // Push state to history
+  const pushHistory = useCallback(() => {
+    historyRef.current.push(blocks);
+    setCanUndo(historyRef.current.canUndo);
+    setCanRedo(historyRef.current.canRedo);
+  }, [blocks]);
+
+  // Undo
+  const undo = useCallback(() => {
+    const prev = historyRef.current.undo(blocks);
+    if (prev) {
+      setBlocks(prev);
+      setCanUndo(historyRef.current.canUndo);
+      setCanRedo(historyRef.current.canRedo);
+    }
+  }, [blocks]);
+
+  // Redo
+  const redo = useCallback(() => {
+    const next = historyRef.current.redo(blocks);
+    if (next) {
+      setBlocks(next);
+      setCanUndo(historyRef.current.canUndo);
+      setCanRedo(historyRef.current.canRedo);
+    }
+  }, [blocks]);
 
   // Load page
   useEffect(() => {
@@ -138,27 +205,49 @@ export default function BuilderPage({ params }: { params: Promise<{ pageId: stri
     (async () => {
       const res = await api.get<any>(`/api/stores/${currentStore.id}/pages/${pageId}`);
       if (res.success && res.data) {
-        setPageData(res.data);
         setPageTitle(res.data.title || "");
-        setBlocks(Array.isArray(res.data.content) ? res.data.content : []);
+        setIsPublished(res.data.isPublished || false);
+        const content = Array.isArray(res.data.content) ? res.data.content : [];
+        setBlocks(content);
+        historyRef.current.push(content);
       }
       setLoading(false);
     })();
   }, [currentStore, pageId]);
+
+  // Keyboard shortcuts
+  useEffect(() => {
+    const handler = (e: KeyboardEvent) => {
+      const mod = e.metaKey || e.ctrlKey;
+      if (mod && e.key === "z" && !e.shiftKey) { e.preventDefault(); undo(); }
+      if (mod && e.key === "z" && e.shiftKey) { e.preventDefault(); redo(); }
+      if (mod && e.key === "y") { e.preventDefault(); redo(); }
+      if (mod && e.key === "s") { e.preventDefault(); handleSave(); }
+      if (e.key === "Delete" || e.key === "Backspace") {
+        if (selectedBlockId && document.activeElement?.tagName !== "INPUT" && document.activeElement?.tagName !== "TEXTAREA" && document.activeElement?.tagName !== "SELECT") {
+          e.preventDefault();
+          deleteBlock(selectedBlockId);
+        }
+      }
+      if (mod && e.key === "d" && selectedBlockId) { e.preventDefault(); duplicateBlock(selectedBlockId); }
+      if (e.key === "Escape") setSelectedBlockId(null);
+    };
+    window.addEventListener("keydown", handler);
+    return () => window.removeEventListener("keydown", handler);
+  });
 
   // DnD sensors
   const sensors = useSensors(
     useSensor(PointerSensor, { activationConstraint: { distance: 5 } })
   );
 
-  const handleDragStart = (event: DragStartEvent) => {
-    setActiveId(event.active.id as string);
-  };
+  const handleDragStart = (event: DragStartEvent) => { setActiveId(event.active.id as string); };
 
   const handleDragEnd = (event: DragEndEvent) => {
     setActiveId(null);
     const { active, over } = event;
     if (!over || active.id === over.id) return;
+    pushHistory();
     setBlocks((items) => {
       const oldIndex = items.findIndex((b) => b.id === active.id);
       const newIndex = items.findIndex((b) => b.id === over.id);
@@ -166,28 +255,72 @@ export default function BuilderPage({ params }: { params: Promise<{ pageId: stri
     });
   };
 
-  // Add block
-  const addBlock = (type: BlockType) => {
-    const newBlock: BuilderBlock = {
-      id: crypto.randomUUID(),
-      type,
-      props: blockDefaults[type](),
-    };
-    setBlocks((prev) => [...prev, newBlock]);
+  // Block operations
+  const addBlock = (type: BlockType, index?: number) => {
+    pushHistory();
+    const newBlock: BuilderBlock = { id: crypto.randomUUID(), type, props: blockDefaults[type]() };
+    setBlocks((prev) => {
+      if (index !== undefined) { const arr = [...prev]; arr.splice(index, 0, newBlock); return arr; }
+      return [...prev, newBlock];
+    });
     setSelectedBlockId(newBlock.id);
-    setShowPalette(false);
+    setSidebarTab("blocks");
   };
 
-  // Update block
   const updateBlock = useCallback((updated: BuilderBlock) => {
     setBlocks((prev) => prev.map((b) => (b.id === updated.id ? updated : b)));
   }, []);
 
-  // Delete block
+  const commitBlockUpdate = useCallback(() => { pushHistory(); }, [pushHistory]);
+
   const deleteBlock = useCallback((id: string) => {
+    pushHistory();
     setBlocks((prev) => prev.filter((b) => b.id !== id));
     setSelectedBlockId(null);
-  }, []);
+  }, [pushHistory]);
+
+  const duplicateBlock = useCallback((id: string) => {
+    pushHistory();
+    setBlocks((prev) => {
+      const idx = prev.findIndex((b) => b.id === id);
+      if (idx === -1) return prev;
+      const original = prev[idx];
+      const clone: BuilderBlock = {
+        id: crypto.randomUUID(),
+        type: original.type,
+        props: JSON.parse(JSON.stringify(original.props)),
+      };
+      const arr = [...prev];
+      arr.splice(idx + 1, 0, clone);
+      setSelectedBlockId(clone.id);
+      return arr;
+    });
+  }, [pushHistory]);
+
+  const moveBlock = useCallback((id: string, direction: "up" | "down") => {
+    pushHistory();
+    setBlocks((prev) => {
+      const idx = prev.findIndex((b) => b.id === id);
+      if (idx === -1) return prev;
+      const newIdx = direction === "up" ? idx - 1 : idx + 1;
+      if (newIdx < 0 || newIdx >= prev.length) return prev;
+      return arrayMove(prev, idx, newIdx);
+    });
+  }, [pushHistory]);
+
+  const applyTemplate = (templateIdx: number) => {
+    const template = blockTemplates[templateIdx];
+    if (!template) return;
+    pushHistory();
+    // Give each block a fresh ID
+    const newBlocks = template.blocks.map((b) => ({
+      ...b,
+      id: crypto.randomUUID(),
+      props: JSON.parse(JSON.stringify(b.props)),
+    }));
+    setBlocks(newBlocks);
+    setSelectedBlockId(null);
+  };
 
   // Save
   const handleSave = async () => {
@@ -196,12 +329,10 @@ export default function BuilderPage({ params }: { params: Promise<{ pageId: stri
     const res = await api.patch(`/api/stores/${currentStore.id}/pages/${pageId}`, {
       title: pageTitle,
       content: blocks,
+      isPublished,
     });
     setSaving(false);
-    if (res.success) {
-      setSaved(true);
-      setTimeout(() => setSaved(false), 2000);
-    }
+    if (res.success) { setSaved(true); setTimeout(() => setSaved(false), 2000); }
   };
 
   const selectedBlock = blocks.find((b) => b.id === selectedBlockId) || null;
@@ -214,7 +345,6 @@ export default function BuilderPage({ params }: { params: Promise<{ pageId: stri
     );
   }
 
-  // Group palette by category
   const categories = ["basic", "layout", "commerce", "social", "marketing"] as const;
   const categoryLabels: Record<string, string> = { basic: "Basic", layout: "Layout", commerce: "Commerce", social: "Social", marketing: "Marketing" };
 
@@ -222,71 +352,135 @@ export default function BuilderPage({ params }: { params: Promise<{ pageId: stri
     <div className="h-screen flex flex-col bg-surface-50">
       {/* Toolbar */}
       <header className="h-14 bg-white border-b border-surface-200 flex items-center justify-between px-4 flex-shrink-0 z-20">
-        <div className="flex items-center gap-3">
+        <div className="flex items-center gap-2">
           <Link href="/dashboard" className="p-2 rounded-lg hover:bg-surface-100 transition-colors">
             <ArrowLeft className="h-4 w-4 text-surface-500" />
           </Link>
+          <div className="h-5 w-px bg-surface-200" />
           <input
             value={pageTitle}
             onChange={(e) => setPageTitle(e.target.value)}
-            className="text-sm font-bold text-surface-900 bg-transparent border-none focus:outline-none focus:ring-0 min-w-0"
+            className="text-sm font-bold text-surface-900 bg-transparent border-none focus:outline-none focus:ring-0 min-w-0 w-48"
             placeholder="Page title..."
           />
         </div>
 
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-1.5">
+          {/* Undo/Redo */}
+          <button onClick={undo} disabled={!canUndo} className="p-2 rounded-lg hover:bg-surface-100 disabled:opacity-30 transition-colors" title="Undo (⌘Z)">
+            <Undo2 className="h-4 w-4 text-surface-500" />
+          </button>
+          <button onClick={redo} disabled={!canRedo} className="p-2 rounded-lg hover:bg-surface-100 disabled:opacity-30 transition-colors" title="Redo (⌘⇧Z)">
+            <Redo2 className="h-4 w-4 text-surface-500" />
+          </button>
+
+          <div className="h-5 w-px bg-surface-200 mx-1" />
+
           {/* Preview toggle */}
           <div className="flex items-center rounded-lg border border-surface-200 p-0.5">
-            <button onClick={() => setPreviewMode("desktop")} className={`p-1.5 rounded-md ${previewMode === "desktop" ? "bg-surface-100" : ""}`}>
+            <button onClick={() => setPreviewMode("desktop")} className={`p-1.5 rounded-md transition-colors ${previewMode === "desktop" ? "bg-surface-100" : ""}`} title="Desktop">
               <Monitor className="h-4 w-4 text-surface-500" />
             </button>
-            <button onClick={() => setPreviewMode("mobile")} className={`p-1.5 rounded-md ${previewMode === "mobile" ? "bg-surface-100" : ""}`}>
+            <button onClick={() => setPreviewMode("mobile")} className={`p-1.5 rounded-md transition-colors ${previewMode === "mobile" ? "bg-surface-100" : ""}`} title="Mobile">
               <Smartphone className="h-4 w-4 text-surface-500" />
             </button>
           </div>
 
-          {/* Toggle palette */}
-          <button onClick={() => setShowPalette(!showPalette)} className={`p-2 rounded-lg transition-colors ${showPalette ? "bg-brand-50 text-brand-600" : "hover:bg-surface-100 text-surface-500"}`}>
+          {/* Sidebar toggle */}
+          <button onClick={() => setShowSidebar(!showSidebar)} className={`p-2 rounded-lg transition-colors ${showSidebar ? "bg-brand-50 text-brand-600" : "hover:bg-surface-100 text-surface-500"}`} title="Toggle blocks panel">
             <LayoutGrid className="h-4 w-4" />
+          </button>
+
+          <div className="h-5 w-px bg-surface-200 mx-1" />
+
+          {/* Publish toggle */}
+          <button
+            onClick={() => setIsPublished(!isPublished)}
+            className={`flex items-center gap-1.5 text-xs font-semibold px-3 py-1.5 rounded-lg border transition-colors ${isPublished ? "bg-green-50 text-green-700 border-green-200" : "bg-surface-50 text-surface-500 border-surface-200"}`}
+          >
+            {isPublished ? <Eye className="h-3.5 w-3.5" /> : <EyeOff className="h-3.5 w-3.5" />}
+            {isPublished ? "Published" : "Draft"}
           </button>
 
           {/* Save */}
           <button onClick={handleSave} disabled={saving} className="btn-primary text-xs py-2 px-4">
-            {saving ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : saved ? "Saved!" : <><Save className="h-3.5 w-3.5" /> Save</>}
+            {saving ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : saved ? "Saved ✓" : <><Save className="h-3.5 w-3.5" /> Save</>}
           </button>
         </div>
       </header>
 
       <div className="flex-1 flex overflow-hidden">
-        {/* Block Palette */}
-        {showPalette && (
-          <div className="w-56 border-r border-surface-200 bg-white overflow-y-auto flex-shrink-0">
-            <div className="p-3">
-              <p className="text-[10px] font-semibold text-surface-400 uppercase tracking-wider mb-3">Add Blocks</p>
-              {categories.map((cat) => {
-                const items = blockPalette.filter((p) => p.category === cat);
-                if (!items.length) return null;
-                return (
-                  <div key={cat} className="mb-4">
-                    <p className="text-[9px] font-semibold text-surface-400 uppercase tracking-wider mb-1.5 px-1">{categoryLabels[cat]}</p>
-                    <div className="grid grid-cols-2 gap-1">
-                      {items.map((item) => {
-                        const Icon = paletteIcons[item.icon] || Sparkles;
-                        return (
-                          <button
-                            key={item.type}
-                            onClick={() => addBlock(item.type)}
-                            className="flex flex-col items-center gap-1 rounded-lg border border-surface-100 bg-surface-50 p-2.5 text-[10px] font-medium text-surface-600 hover:bg-brand-50 hover:text-brand-700 hover:border-brand-200 transition-colors"
-                          >
-                            <Icon className="h-4 w-4" />
-                            {item.label}
-                          </button>
-                        );
-                      })}
-                    </div>
-                  </div>
-                );
-              })}
+        {/* Sidebar — Blocks + Templates */}
+        {showSidebar && (
+          <div className="w-56 border-r border-surface-200 bg-white overflow-y-auto flex-shrink-0 flex flex-col">
+            {/* Tabs */}
+            <div className="flex border-b border-surface-100">
+              <button onClick={() => setSidebarTab("blocks")} className={`flex-1 text-xs font-semibold py-2.5 text-center transition-colors ${sidebarTab === "blocks" ? "text-brand-600 border-b-2 border-brand-600" : "text-surface-400"}`}>
+                <LayoutGrid className="h-3.5 w-3.5 inline mr-1" />Blocks
+              </button>
+              <button onClick={() => setSidebarTab("templates")} className={`flex-1 text-xs font-semibold py-2.5 text-center transition-colors ${sidebarTab === "templates" ? "text-brand-600 border-b-2 border-brand-600" : "text-surface-400"}`}>
+                <Layers className="h-3.5 w-3.5 inline mr-1" />Templates
+              </button>
+            </div>
+
+            <div className="flex-1 overflow-y-auto p-3">
+              {sidebarTab === "blocks" ? (
+                <>
+                  {categories.map((cat) => {
+                    const items = blockPalette.filter((p) => p.category === cat);
+                    if (!items.length) return null;
+                    return (
+                      <div key={cat} className="mb-4">
+                        <p className="text-[9px] font-semibold text-surface-400 uppercase tracking-wider mb-1.5 px-1">{categoryLabels[cat]}</p>
+                        <div className="grid grid-cols-2 gap-1">
+                          {items.map((item) => {
+                            const Icon = paletteIcons[item.icon] || Sparkles;
+                            return (
+                              <button
+                                key={item.type}
+                                onClick={() => addBlock(item.type)}
+                                className="flex flex-col items-center gap-1 rounded-lg border border-surface-100 bg-surface-50 p-2.5 text-[10px] font-medium text-surface-600 hover:bg-brand-50 hover:text-brand-700 hover:border-brand-200 transition-colors"
+                              >
+                                <Icon className="h-4 w-4" />
+                                {item.label}
+                              </button>
+                            );
+                          })}
+                        </div>
+                      </div>
+                    );
+                  })}
+                </>
+              ) : (
+                <div className="space-y-2">
+                  {blockTemplates.map((template, i) => {
+                    const Icon = paletteIcons[template.icon] || Sparkles;
+                    return (
+                      <button
+                        key={i}
+                        onClick={() => {
+                          if (blocks.length > 0 && !confirm("This will replace your current blocks. Continue?")) return;
+                          applyTemplate(i);
+                        }}
+                        className="w-full text-left rounded-xl border border-surface-100 bg-surface-50 p-3 hover:bg-brand-50 hover:border-brand-200 transition-colors"
+                      >
+                        <div className="flex items-center gap-2 mb-1">
+                          <Icon className="h-4 w-4 text-brand-600" />
+                          <span className="text-xs font-bold text-surface-900">{template.name}</span>
+                        </div>
+                        <p className="text-[10px] text-surface-500">{template.description}</p>
+                      </button>
+                    );
+                  })}
+                </div>
+              )}
+            </div>
+
+            {/* Keyboard shortcuts hint */}
+            <div className="p-3 border-t border-surface-100 text-[9px] text-surface-400 space-y-0.5">
+              <p><kbd className="font-mono bg-surface-100 px-1 rounded">⌘Z</kbd> Undo · <kbd className="font-mono bg-surface-100 px-1 rounded">⌘⇧Z</kbd> Redo</p>
+              <p><kbd className="font-mono bg-surface-100 px-1 rounded">⌘D</kbd> Duplicate · <kbd className="font-mono bg-surface-100 px-1 rounded">⌘S</kbd> Save</p>
+              <p><kbd className="font-mono bg-surface-100 px-1 rounded">Del</kbd> Delete · <kbd className="font-mono bg-surface-100 px-1 rounded">Esc</kbd> Deselect</p>
             </div>
           </div>
         )}
@@ -302,51 +496,63 @@ export default function BuilderPage({ params }: { params: Promise<{ pageId: stri
                   <Plus className="h-8 w-8 text-surface-300" />
                 </div>
                 <h3 className="text-base font-bold text-surface-900 mb-1">Start building your page</h3>
-                <p className="text-xs text-surface-500 mb-4">Click blocks from the left panel to add them here.</p>
-                <button onClick={() => { setShowPalette(true); addBlock("hero"); }} className="btn-primary text-xs py-2 px-4">
-                  <Sparkles className="h-3.5 w-3.5" /> Add Hero Section
-                </button>
+                <p className="text-xs text-surface-500 mb-6 max-w-sm">Add blocks from the left panel or start with a template.</p>
+                <div className="flex gap-2">
+                  <button onClick={() => addBlock("hero")} className="btn-primary text-xs py-2 px-4">
+                    <Sparkles className="h-3.5 w-3.5" /> Add Hero
+                  </button>
+                  <button onClick={() => setSidebarTab("templates")} className="btn-secondary text-xs py-2 px-4">
+                    <Layers className="h-3.5 w-3.5" /> Use Template
+                  </button>
+                </div>
               </div>
             ) : (
-              <DndContext
-                sensors={sensors}
-                collisionDetection={closestCenter}
-                onDragStart={handleDragStart}
-                onDragEnd={handleDragEnd}
-              >
+              <DndContext sensors={sensors} collisionDetection={closestCenter} onDragStart={handleDragStart} onDragEnd={handleDragEnd}>
                 <SortableContext items={blocks.map((b) => b.id)} strategy={verticalListSortingStrategy}>
                   <div className="p-6 space-y-3">
-                    {blocks.map((block) => (
-                      <SortableBlock
-                        key={block.id}
-                        block={block}
-                        isSelected={selectedBlockId === block.id}
-                        onClick={() => setSelectedBlockId(block.id)}
-                      />
+                    {blocks.map((block, idx) => (
+                      <div key={block.id}>
+                        {/* Insert-between button */}
+                        {idx === 0 && (
+                          <div className="flex justify-center -mb-1 opacity-0 hover:opacity-100 transition-opacity">
+                            <button onClick={() => { setShowSidebar(true); }} className="text-[9px] text-surface-400 hover:text-brand-600 flex items-center gap-1 py-1">
+                              <Plus className="h-3 w-3" /> Add block above
+                            </button>
+                          </div>
+                        )}
+                        <SortableBlock
+                          block={block}
+                          isSelected={selectedBlockId === block.id}
+                          onClick={() => setSelectedBlockId(block.id)}
+                          onDuplicate={() => duplicateBlock(block.id)}
+                          onMoveUp={() => moveBlock(block.id, "up")}
+                          onMoveDown={() => moveBlock(block.id, "down")}
+                          onInlineEdit={(key, value) => {
+                            pushHistory();
+                            updateBlock({ ...block, props: { ...block.props, [key]: value } });
+                          }}
+                          isFirst={idx === 0}
+                          isLast={idx === blocks.length - 1}
+                        />
+                        {/* Insert-between button */}
+                        <div className="flex justify-center -mt-1 opacity-0 hover:opacity-100 transition-opacity">
+                          <button onClick={() => { setShowSidebar(true); }} className="text-[9px] text-surface-400 hover:text-brand-600 flex items-center gap-1 py-1">
+                            <Plus className="h-3 w-3" /> Add block
+                          </button>
+                        </div>
+                      </div>
                     ))}
                   </div>
                 </SortableContext>
 
                 <DragOverlay>
                   {activeId ? (
-                    <div className="rounded-xl bg-white shadow-2xl border border-brand-200 p-4 opacity-90">
+                    <div className="rounded-xl bg-white shadow-2xl border border-brand-200 p-4 opacity-90 max-w-lg">
                       <BlockRenderer block={blocks.find((b) => b.id === activeId)!} />
                     </div>
                   ) : null}
                 </DragOverlay>
               </DndContext>
-            )}
-
-            {/* Add block button at bottom */}
-            {blocks.length > 0 && (
-              <div className="p-4 text-center">
-                <button
-                  onClick={() => setShowPalette(true)}
-                  className="inline-flex items-center gap-1.5 text-xs font-semibold text-surface-400 hover:text-brand-600 transition-colors"
-                >
-                  <Plus className="h-4 w-4" /> Add Block
-                </button>
-              </div>
             )}
           </div>
         </div>
@@ -356,8 +562,10 @@ export default function BuilderPage({ params }: { params: Promise<{ pageId: stri
           <PropertyPanel
             block={selectedBlock}
             onUpdate={updateBlock}
+            onCommit={commitBlockUpdate}
             onClose={() => setSelectedBlockId(null)}
             onDelete={() => deleteBlock(selectedBlock.id)}
+            onDuplicate={() => duplicateBlock(selectedBlock.id)}
           />
         )}
       </div>

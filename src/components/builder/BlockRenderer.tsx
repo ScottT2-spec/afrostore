@@ -266,8 +266,61 @@ const renderers: Record<string, React.FC<{ props: Record<string, unknown> }>> = 
   trustBadges: TrustBadgesBlock,
 };
 
-export default function BlockRenderer({ block }: { block: BuilderBlock }) {
+interface BlockRendererProps {
+  block: BuilderBlock;
+  isSelected?: boolean;
+  onInlineEdit?: (key: string, value: string) => void;
+}
+
+export default function BlockRenderer({ block, isSelected, onInlineEdit }: BlockRendererProps) {
+  // Inline editing for heading/text blocks when selected
+  if (isSelected && onInlineEdit && (block.type === "heading" || block.type === "text")) {
+    return <InlineEditableBlock block={block} onInlineEdit={onInlineEdit} />;
+  }
+
   const Renderer = renderers[block.type];
   if (!Renderer) return <div className="p-4 bg-red-50 rounded-xl text-sm text-red-600">Unknown block: {block.type}</div>;
   return <Renderer props={block.props} />;
+}
+
+/* ─── INLINE EDITABLE BLOCK ────────────────────────────────── */
+
+function InlineEditableBlock({ block, onInlineEdit }: { block: BuilderBlock; onInlineEdit: (key: string, value: string) => void }) {
+  const isHeading = block.type === "heading";
+  const text = (block.props.text as string) || "";
+  const align = (block.props.align as string) || "left";
+  const color = (block.props.color as string) || (isHeading ? "#171717" : "#525252");
+
+  if (isHeading) {
+    const sizeMap: Record<string, string> = { xl: "text-xl", "2xl": "text-2xl", "3xl": "text-3xl", "4xl": "text-4xl" };
+    const sizeClass = sizeMap[(block.props.fontSize as string) || "2xl"] || "text-2xl";
+    return (
+      <div
+        contentEditable
+        suppressContentEditableWarning
+        onBlur={(e) => onInlineEdit("text", e.currentTarget.textContent || "")}
+        className={`font-display font-bold ${sizeClass} outline-none focus:ring-2 focus:ring-brand-400 focus:ring-offset-2 rounded-lg px-1 -mx-1 cursor-text`}
+        style={{ color, textAlign: align as React.CSSProperties["textAlign"] }}
+      >
+        {text}
+      </div>
+    );
+  }
+
+  // Text block
+  return (
+    <div
+      contentEditable
+      suppressContentEditableWarning
+      onBlur={(e) => onInlineEdit("text", e.currentTarget.textContent || "")}
+      className="leading-relaxed outline-none focus:ring-2 focus:ring-brand-400 focus:ring-offset-2 rounded-lg px-1 -mx-1 cursor-text"
+      style={{
+        color,
+        textAlign: align as React.CSSProperties["textAlign"],
+        fontSize: { sm: "0.875rem", base: "1rem", lg: "1.125rem" }[(block.props.fontSize as string) || "base"] || "1rem",
+      }}
+    >
+      {text}
+    </div>
+  );
 }
