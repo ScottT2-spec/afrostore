@@ -113,6 +113,7 @@ model Store {
   socialLinks    StoreSocialLinks?
   analytics      AnalyticsEvent[]
   auditLogs      AuditLog[]
+  referralProgram ReferralProgram?
 
   @@index([ownerId])
   @@index([subdomain])
@@ -332,6 +333,7 @@ model Order {
   coupon   Coupon?    @relation(fields: [couponId], references: [id], onDelete: SetNull)
   items    OrderItem[]
   timeline OrderTimeline[]
+  referral Referral?
 
   @@index([storeId])
   @@index([storeId, status])
@@ -411,9 +413,10 @@ model Customer {
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
 
-  store  Store   @relation(fields: [storeId], references: [id], onDelete: Cascade)
-  orders Order[]
-  reviews Review[]
+  store      Store       @relation(fields: [storeId], references: [id], onDelete: Cascade)
+  orders     Order[]
+  reviews    Review[]
+  affiliates Affiliate[]
 
   @@unique([storeId, email])
   @@index([storeId])
@@ -700,6 +703,116 @@ model AnalyticsEvent {
   @@index([storeId, createdAt])
   @@index([sessionId])
   @@map("analytics_events")
+}
+
+// ─── REFERRAL / AFFILIATE ───────────────────────────────────
+
+model ReferralProgram {
+  id              String   @id @default(cuid())
+  storeId         String   @unique
+  enabled         Boolean  @default(true)
+  commissionType  CommissionType @default(PERCENTAGE)
+  commissionValue Float    @default(10) // 10% or flat amount
+  cookieDays      Int      @default(30) // how long referral cookie lasts
+  minPayoutAmount Float    @default(5000) // minimum before payout
+  autoApprove     Boolean  @default(false) // auto-approve referrals on purchase
+  welcomeMessage  String?  @db.Text
+  termsText       String?  @db.Text
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  store      Store       @relation(fields: [storeId], references: [id], onDelete: Cascade)
+  affiliates Affiliate[]
+
+  @@map("referral_programs")
+}
+
+model Affiliate {
+  id              String          @id @default(cuid())
+  programId       String
+  customerId      String
+  code            String          @unique // unique referral code
+  status          AffiliateStatus @default(PENDING)
+  totalClicks     Int             @default(0)
+  totalOrders     Int             @default(0)
+  totalEarnings   Float           @default(0)
+  pendingEarnings Float           @default(0)
+  paidEarnings    Float           @default(0)
+  payoutMethod    String?         // bank_transfer, mobile_money, etc.
+  payoutDetails   Json?           // bank name, account number, etc.
+  createdAt       DateTime        @default(now())
+  updatedAt       DateTime        @updatedAt
+
+  program    ReferralProgram @relation(fields: [programId], references: [id], onDelete: Cascade)
+  customer   Customer        @relation(fields: [customerId], references: [id], onDelete: Cascade)
+  referrals  Referral[]
+  payouts    Payout[]
+
+  @@unique([programId, customerId])
+  @@index([code])
+  @@map("affiliates")
+}
+
+model Referral {
+  id            String         @id @default(cuid())
+  affiliateId   String
+  orderId       String?        @unique
+  status        ReferralStatus @default(PENDING)
+  commissionAmount Float       @default(0)
+  clickedAt     DateTime       @default(now())
+  convertedAt   DateTime?
+  approvedAt    DateTime?
+  ip            String?
+  userAgent     String?
+
+  affiliate Affiliate @relation(fields: [affiliateId], references: [id], onDelete: Cascade)
+  order     Order?    @relation(fields: [orderId], references: [id], onDelete: SetNull)
+
+  @@index([affiliateId])
+  @@map("referrals")
+}
+
+model Payout {
+  id          String       @id @default(cuid())
+  affiliateId String
+  amount      Float
+  status      PayoutStatus @default(PENDING)
+  reference   String?      // payment reference
+  paidAt      DateTime?
+  note        String?
+  createdAt   DateTime     @default(now())
+
+  affiliate Affiliate @relation(fields: [affiliateId], references: [id], onDelete: Cascade)
+
+  @@index([affiliateId])
+  @@map("payouts")
+}
+
+enum CommissionType {
+  PERCENTAGE
+  FLAT
+}
+
+enum AffiliateStatus {
+  PENDING
+  APPROVED
+  SUSPENDED
+  REJECTED
+}
+
+enum ReferralStatus {
+  PENDING
+  CONVERTED
+  APPROVED
+  REJECTED
+  EXPIRED
+}
+
+enum PayoutStatus {
+  PENDING
+  PROCESSING
+  COMPLETED
+  FAILED
 }
 
 // ─── AUDIT LOG ──────────────────────────────────────────────

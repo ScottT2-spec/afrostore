@@ -26,6 +26,7 @@ import {
   LogOut,
   Plus,
   Store,
+  Link2,
 } from "lucide-react";
 
 const navigation = [
@@ -37,6 +38,7 @@ const navigation = [
   { name: "Payments", href: "/dashboard/payments", icon: CreditCard },
   { name: "Themes", href: "/dashboard/themes", icon: Palette },
   { name: "Plugins", href: "/dashboard/plugins", icon: Puzzle },
+  { name: "Referrals", href: "/dashboard/referrals", icon: Link2 },
   { name: "AI Assistant", href: "/dashboard/ai", icon: Bot },
   { name: "Domains", href: "/dashboard/domains", icon: Globe },
 ];
