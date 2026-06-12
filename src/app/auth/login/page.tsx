@@ -30,6 +30,21 @@ export default function LoginPage() {
 
     const result = await login(email, password);
     if (result.success) {
+      // Check user role from the auth context after login
+      const token = localStorage.getItem("token");
+      if (token) {
+        try {
+          const payload = JSON.parse(atob(token.split(".")[1]));
+          // Fetch user to check role
+          const res = await fetch("/api/auth/me", { headers: { Authorization: `Bearer ${token}` } });
+          const data = await res.json();
+          if (data.success && (data.data?.role === "ADMIN" || data.data?.role === "SUPER_ADMIN")) {
+            router.push("/admin");
+            setSubmitting(false);
+            return;
+          }
+        } catch {}
+      }
       router.push("/dashboard");
     } else {
       setError(result.error || "Login failed");
