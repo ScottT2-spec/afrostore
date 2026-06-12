@@ -47,7 +47,7 @@ const bottomNav = [
   { name: "Help", href: "/dashboard/support", icon: HelpCircle },
 ];
 
-export default function Sidebar() {
+export default function Sidebar({ onNavigate }: { onNavigate?: () => void } = {}) {
   const pathname = usePathname();
   const [collapsed, setCollapsed] = useState(false);
   const { user, logout } = useAuth();
@@ -120,6 +120,7 @@ export default function Sidebar() {
             <Link
               key={item.name}
               href={item.href}
+              onClick={onNavigate}
               className={cn(
                 "flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium transition-all duration-200",
                 isActive
