@@ -78,12 +78,12 @@ export async function GET(req: NextRequest, { params }: Params) {
     const revenueByDay = await prisma.$queryRawUnsafe<
       { date: string; revenue: number; orders: number }[]
     >(
-      `SELECT DATE(created_at) as date, 
+      `SELECT DATE("createdAt") as date, 
               COALESCE(SUM(total), 0)::float as revenue, 
               COUNT(*)::int as orders
        FROM orders 
-       WHERE store_id = $1 AND created_at >= $2
-       GROUP BY DATE(created_at) 
+       WHERE "storeId" = $1 AND "createdAt" >= $2
+       GROUP BY DATE("createdAt") 
        ORDER BY date ASC`,
       storeId,
       thirtyDaysAgo

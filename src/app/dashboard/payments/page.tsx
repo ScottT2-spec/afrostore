@@ -32,8 +32,8 @@ export default function PaymentsPage() {
   useEffect(() => {
     if (!currentStore) return;
     (async () => {
-      const res = await api.get<{ gateways: Gateway[] }>(`/api/stores/${currentStore.id}/payment-gateways`);
-      if (res.success && res.data) setGateways(res.data.gateways);
+      const res = await api.get<Gateway[]>(`/api/stores/${currentStore.id}/payment-gateways`);
+      if (res.success && res.data) setGateways(Array.isArray(res.data) ? res.data : []);
       setLoading(false);
     })();
   }, [currentStore]);
@@ -53,8 +53,8 @@ export default function PaymentsPage() {
       setPublicKey("");
       setSecretKey("");
       // Refresh
-      const r = await api.get<{ gateways: Gateway[] }>(`/api/stores/${currentStore.id}/payment-gateways`);
-      if (r.success && r.data) setGateways(r.data.gateways);
+      const r = await api.get<Gateway[]>(`/api/stores/${currentStore.id}/payment-gateways`);
+      if (r.success && r.data) setGateways(Array.isArray(r.data) ? r.data : []);
     } else {
       setSetupError(res.error || "Setup failed");
     }

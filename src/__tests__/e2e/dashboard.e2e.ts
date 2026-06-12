@@ -31,8 +31,9 @@ export function dashboardTests() {
       const res = await GET(`/api/stores/${store.id}/dashboard`, user.token);
       expectSuccess(res);
       const data = res.body.data as any;
-      // Should have some stats fields
-      if (data.totalOrders === undefined && data.orders === undefined) {
+      // Stats are nested under data.stats
+      const stats = data.stats || data;
+      if (stats.totalOrders === undefined && stats.totalRevenue === undefined) {
         throw new Error('Dashboard should return order stats');
       }
     });

@@ -6,9 +6,8 @@ import { useStore } from "@/context/StoreContext";
 import { api } from "@/lib/api-client";
 import { Eye, CheckCircle2, Star, Loader2, Palette } from "lucide-react";
 
-interface Theme { id: string; name: string; slug: string; description?: string; thumbnail?: string; category: string; industry?: string; isPremium: boolean; isFeatured: boolean; }
-interface StoreTheme { id: string; themeId: string; isActive: boolean; theme: Theme; }
-interface ThemesData { themes: Theme[]; storeThemes: StoreTheme[]; }
+interface Theme { id: string; name: string; slug: string; description?: string; thumbnail?: string; category: string; industry?: string; isPremium: boolean; isFeatured: boolean; isInstalled?: boolean; isActive?: boolean; }
+interface ThemesData { themes: Theme[]; activeThemeId: string | null; }
 
 export default function ThemesPage() {
   const { currentStore } = useStore();
@@ -33,7 +32,7 @@ export default function ThemesPage() {
     setInstalling(null);
   };
 
-  const activeThemeId = data?.storeThemes.find((st) => st.isActive)?.themeId;
+  const activeThemeId = data?.activeThemeId;
 
   return (
     <>

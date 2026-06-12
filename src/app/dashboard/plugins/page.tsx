@@ -6,13 +6,12 @@ import { useStore } from "@/context/StoreContext";
 import { api } from "@/lib/api-client";
 import { Search, Star, CheckCircle2, Loader2, Puzzle } from "lucide-react";
 
-interface Plugin { id: string; name: string; slug: string; description?: string; icon?: string; category: string; author: string; isPremium: boolean; installs: number; }
-interface StorePlugin { id: string; pluginId: string; isEnabled: boolean; }
-interface PluginsData { plugins: Plugin[]; storePlugins: StorePlugin[]; }
+interface Plugin { id: string; name: string; slug: string; description?: string; icon?: string; category: string; author: string; isPremium: boolean; installs: number; isInstalled?: boolean; isEnabled?: boolean; }
+
 
 export default function PluginsPage() {
   const { currentStore } = useStore();
-  const [data, setData] = useState<PluginsData | null>(null);
+  const [data, setData] = useState<Plugin[] | null>(null);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState("");
   const [installing, setInstalling] = useState<string | null>(null);
@@ -20,8 +19,8 @@ export default function PluginsPage() {
   const fetchData = async () => {
     if (!currentStore) return;
     const params = new URLSearchParams(); if (search) params.set("search", search);
-    const res = await api.get<PluginsData>(`/api/stores/${currentStore.id}/plugins?${params}`);
-    if (res.success && res.data) setData(res.data);
+    const res = await api.get<Plugin[]>(`/api/stores/${currentStore.id}/plugins?${params}`);
+    if (res.success && res.data) setData(Array.isArray(res.data) ? res.data : []);
     setLoading(false);
   };
 
@@ -30,11 +29,11 @@ export default function PluginsPage() {
   const togglePlugin = async (pluginId: string) => {
     if (!currentStore) return;
     setInstalling(pluginId);
-    const installed = data?.storePlugins.find((sp) => sp.pluginId === pluginId);
-    if (installed) {
-      await api.patch(`/api/stores/${currentStore.id}/plugins`, { pluginId, isEnabled: !installed.isEnabled });
+    const plugin = data?.find((p) => p.id === pluginId);
+    if (plugin?.isInstalled) {
+      await api.post(`/api/stores/${currentStore.id}/plugins`, { pluginId, action: "toggle" });
     } else {
-      await api.post(`/api/stores/${currentStore.id}/plugins`, { pluginId });
+      await api.post(`/api/stores/${currentStore.id}/plugins`, { pluginId, action: "install" });
     }
     await fetchData();
     setInstalling(null);
@@ -51,7 +50,7 @@ export default function PluginsPage() {
 
         {loading ? (
           <div className="flex items-center justify-center py-20"><Loader2 className="h-8 w-8 animate-spin text-brand-600" /></div>
-        ) : !data?.plugins.length ? (
+        ) : !data?.length ? (
           <div className="rounded-2xl border border-surface-200 bg-white p-12 text-center">
             <Puzzle className="h-12 w-12 text-surface-300 mx-auto mb-4" />
             <h3 className="text-lg font-bold text-surface-900 mb-2">No plugins available yet</h3>
@@ -59,9 +58,8 @@ export default function PluginsPage() {
           </div>
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-            {data.plugins.map((plugin) => {
-              const sp = data.storePlugins.find((s) => s.pluginId === plugin.id);
-              const isInstalled = !!sp?.isEnabled;
+            {data.map((plugin) => {
+              const isInstalled = !!plugin.isEnabled;
               return (
                 <div key={plugin.id} className="rounded-2xl border border-surface-200 bg-white p-5 hover:shadow-md transition-shadow">
                   <div className="flex items-start gap-3 mb-3">

@@ -70,10 +70,10 @@ export async function GET(req: NextRequest, { params }: Params) {
     const timeline = await prisma.$queryRawUnsafe<
       { date: string; event: string; count: number }[]
     >(
-      `SELECT DATE_TRUNC($1, created_at)::date as date, event, COUNT(*)::int as count
+      `SELECT DATE_TRUNC($1, "createdAt")::date as date, event, COUNT(*)::int as count
        FROM analytics_events
-       WHERE store_id = $2 AND created_at >= $3 ${endDate ? "AND created_at <= $4" : ""}
-       GROUP BY DATE_TRUNC($1, created_at)::date, event
+       WHERE "storeId" = $2 AND "createdAt" >= $3 ${endDate ? 'AND "createdAt" <= $4' : ""}
+       GROUP BY DATE_TRUNC($1, "createdAt")::date, event
        ORDER BY date ASC`,
       dateTrunc,
       storeId,
