@@ -23,7 +23,7 @@ export default function AdminAnalyticsPage() {
     });
   }, []);
 
-  if (loading) return <div className="p-6 flex items-center justify-center min-h-[50vh]"><Loader2 className="h-8 w-8 animate-spin text-red-600" /></div>;
+  if (loading) return <div className="p-6 flex items-center justify-center min-h-[50vh]"><Loader2 className="h-8 w-8 animate-spin text-accent-600" /></div>;
   if (!data) return <div className="p-6 text-surface-500">Failed to load analytics.</div>;
 
   const charts: { title: string; subtitle: string; data: Record<string, string | number>[]; dataKey: string; label: string; format?: (v: number) => string }[] = [

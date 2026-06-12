@@ -66,14 +66,14 @@ export default function AdminUsersPage() {
               placeholder="Search users by name or email..."
               value={search}
               onChange={(e) => { setSearch(e.target.value); setPage(1); }}
-              className="w-full rounded-xl border border-surface-200 bg-surface-50 pl-10 pr-4 py-2.5 text-sm focus:outline-none focus:border-red-500"
+              className="w-full rounded-xl border border-surface-200 bg-surface-50 pl-10 pr-4 py-2.5 text-sm focus:outline-none focus:border-brand-500"
             />
           </div>
         </div>
 
         {loading ? (
           <div className="flex items-center justify-center py-12">
-            <Loader2 className="h-6 w-6 animate-spin text-red-600" />
+            <Loader2 className="h-6 w-6 animate-spin text-accent-600" />
           </div>
         ) : (
           <>
@@ -102,7 +102,7 @@ export default function AdminUsersPage() {
                       </td>
                       <td className="px-6 py-3.5 text-sm text-surface-500">{u.email}</td>
                       <td className="px-6 py-3.5">
-                        <span className={`text-[10px] font-semibold px-2.5 py-1 rounded-full ${u.role === "ADMIN" || u.role === "SUPER_ADMIN" ? "bg-red-100 text-red-700" : "bg-blue-100 text-blue-700"}`}>
+                        <span className={`text-[10px] font-semibold px-2.5 py-1 rounded-full ${u.role === "ADMIN" || u.role === "SUPER_ADMIN" ? "bg-accent-100 text-accent-700" : "bg-blue-100 text-blue-700"}`}>
                           {u.role}
                         </span>
                       </td>
@@ -110,12 +110,12 @@ export default function AdminUsersPage() {
                       <td className="px-6 py-3.5 text-sm text-surface-500">{new Date(u.createdAt).toLocaleDateString()}</td>
                       <td className="px-6 py-3.5 text-center">
                         {updatingId === u.id ? (
-                          <Loader2 className="h-4 w-4 animate-spin text-red-600 mx-auto" />
+                          <Loader2 className="h-4 w-4 animate-spin text-accent-600 mx-auto" />
                         ) : (
                           <select
                             value={u.role}
                             onChange={(e) => updateRole(u.id, e.target.value)}
-                            className="text-xs rounded-lg border border-surface-200 px-2 py-1 focus:outline-none focus:border-red-500"
+                            className="text-xs rounded-lg border border-surface-200 px-2 py-1 focus:outline-none focus:border-brand-500"
                           >
                             <option value="MERCHANT">MERCHANT</option>
                             <option value="ADMIN">ADMIN</option>

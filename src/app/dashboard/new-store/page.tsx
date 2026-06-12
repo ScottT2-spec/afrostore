@@ -34,7 +34,7 @@ import {
 const businessTypes = [
   { id: "fashion", label: "Fashion & Apparel", icon: Shirt, color: "from-pink-500 to-rose-500" },
   { id: "beauty", label: "Beauty & Skincare", icon: Flower2, color: "from-purple-500 to-fuchsia-500" },
-  { id: "food", label: "Food & Restaurant", icon: UtensilsCrossed, color: "from-orange-500 to-red-500" },
+  { id: "food", label: "Food & Restaurant", icon: UtensilsCrossed, color: "from-accent-400 to-accent-600" },
   { id: "jewelry", label: "Jewelry & Accessories", icon: Gem, color: "from-amber-400 to-yellow-500" },
   { id: "electronics", label: "Electronics & Gadgets", icon: Smartphone, color: "from-blue-500 to-cyan-500" },
   { id: "general", label: "General Store", icon: Package, color: "from-green-500 to-emerald-500" },
@@ -44,7 +44,7 @@ const businessTypes = [
 
 const templates = [
   { id: "1", name: "Lagos Fashion", gradient: "from-purple-500 via-pink-500 to-orange-400", popular: true },
-  { id: "2", name: "Nairobi Fresh", gradient: "from-orange-500 via-red-500 to-pink-500" },
+  { id: "2", name: "Nairobi Fresh", gradient: "from-accent-400 via-accent-500 to-brand-600" },
   { id: "3", name: "Accra Beauty", gradient: "from-rose-400 via-fuchsia-500 to-indigo-500" },
   { id: "4", name: "Kigali Minimal", gradient: "from-emerald-500 via-green-500 to-teal-400" },
   { id: "5", name: "Abuja Tech", gradient: "from-blue-500 via-cyan-500 to-teal-400" },
@@ -483,7 +483,7 @@ export default function NewStorePage() {
             </div>
 
             {launchError && (
-              <div className="rounded-xl bg-red-50 border border-red-200 px-4 py-3 text-sm text-red-700 max-w-lg mx-auto">{launchError}</div>
+              <div className="rounded-xl bg-accent-50 border border-accent-200 px-4 py-3 text-sm text-accent-700 max-w-lg mx-auto">{launchError}</div>
             )}
             <button onClick={handleLaunch} disabled={launching} className="btn-primary text-lg py-4 px-12">
               {launching ? <Loader2 className="h-5 w-5 animate-spin" /> : <Rocket className="h-5 w-5" />}

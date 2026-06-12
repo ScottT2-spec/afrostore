@@ -348,7 +348,7 @@ export default function CheckoutPage() {
 
       <div className="max-w-5xl mx-auto px-4 sm:px-6 py-8">
         {orderError && !orderSuccess && (
-          <div className="rounded-xl bg-red-50 border border-red-200 px-4 py-3 text-sm text-red-700 mb-6 flex items-start gap-2">
+          <div className="rounded-xl bg-accent-50 border border-accent-200 px-4 py-3 text-sm text-accent-700 mb-6 flex items-start gap-2">
             <AlertCircle className="h-4 w-4 mt-0.5 flex-shrink-0" />
             <span>{orderError}</span>
           </div>
@@ -489,7 +489,7 @@ export default function CheckoutPage() {
                           <button onClick={() => updateQty(item.productId, -1)} className="h-6 w-6 rounded border border-surface-200 flex items-center justify-center text-surface-500 hover:bg-surface-50"><Minus className="h-3 w-3" /></button>
                           <span className="text-xs font-bold text-surface-900 w-4 text-center">{item.quantity}</span>
                           <button onClick={() => updateQty(item.productId, 1)} className="h-6 w-6 rounded border border-surface-200 flex items-center justify-center text-surface-500 hover:bg-surface-50"><Plus className="h-3 w-3" /></button>
-                          <button onClick={() => removeItem(item.productId)} className="ml-auto p-1 text-surface-400 hover:text-red-500"><Trash2 className="h-3.5 w-3.5" /></button>
+                          <button onClick={() => removeItem(item.productId)} className="ml-auto p-1 text-surface-400 hover:text-accent-500"><Trash2 className="h-3.5 w-3.5" /></button>
                         </div>
                       </div>
                       <p className="text-sm font-bold text-surface-900 flex-shrink-0">

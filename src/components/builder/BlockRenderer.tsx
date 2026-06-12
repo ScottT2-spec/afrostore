@@ -279,7 +279,7 @@ export default function BlockRenderer({ block, isSelected, onInlineEdit }: Block
   }
 
   const Renderer = renderers[block.type];
-  if (!Renderer) return <div className="p-4 bg-red-50 rounded-xl text-sm text-red-600">Unknown block: {block.type}</div>;
+  if (!Renderer) return <div className="p-4 bg-accent-50 rounded-xl text-sm text-accent-700">Unknown block: {block.type}</div>;
   return <Renderer props={block.props} />;
 }
 

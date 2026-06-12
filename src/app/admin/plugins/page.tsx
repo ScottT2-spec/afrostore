@@ -44,7 +44,7 @@ export default function AdminPluginsPage() {
     fetchPlugins();
   };
 
-  const reviewColors: Record<string, string> = { APPROVED: "bg-green-100 text-green-700", PENDING: "bg-yellow-100 text-yellow-700", REJECTED: "bg-red-100 text-red-700" };
+  const reviewColors: Record<string, string> = { APPROVED: "bg-green-100 text-green-700", PENDING: "bg-yellow-100 text-yellow-700", REJECTED: "bg-accent-100 text-accent-700" };
 
   return (
     <div className="p-6 space-y-6">
@@ -53,7 +53,7 @@ export default function AdminPluginsPage() {
           <h1 className="text-2xl font-bold text-surface-900 font-display">Plugin Management</h1>
           <p className="text-sm text-surface-500 mt-1">Manage and review platform plugins</p>
         </div>
-        <button onClick={() => setShowForm(true)} className="flex items-center gap-2 rounded-xl bg-red-600 text-white px-4 py-2.5 text-sm font-medium hover:bg-red-700 transition-colors">
+        <button onClick={() => setShowForm(true)} className="flex items-center gap-2 rounded-xl bg-brand-600 text-white px-4 py-2.5 text-sm font-medium hover:bg-brand-700 transition-colors">
           <Plus className="h-4 w-4" /> Add Plugin
         </button>
       </div>
@@ -65,18 +65,18 @@ export default function AdminPluginsPage() {
             <button onClick={() => setShowForm(false)} className="text-surface-400 hover:text-surface-600"><X className="h-5 w-5" /></button>
           </div>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <input placeholder="Plugin Name" value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })} className="rounded-xl border border-surface-200 px-4 py-2.5 text-sm focus:outline-none focus:border-red-500" />
-            <select value={form.category} onChange={(e) => setForm({ ...form, category: e.target.value })} className="rounded-xl border border-surface-200 px-4 py-2.5 text-sm focus:outline-none focus:border-red-500">
+            <input placeholder="Plugin Name" value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })} className="rounded-xl border border-surface-200 px-4 py-2.5 text-sm focus:outline-none focus:border-brand-500" />
+            <select value={form.category} onChange={(e) => setForm({ ...form, category: e.target.value })} className="rounded-xl border border-surface-200 px-4 py-2.5 text-sm focus:outline-none focus:border-brand-500">
               <option value="payments">Payments</option><option value="delivery">Delivery</option><option value="marketing">Marketing</option><option value="analytics">Analytics</option><option value="communication">Communication</option><option value="inventory">Inventory</option><option value="ai">AI</option>
             </select>
-            <input placeholder="Author" value={form.author} onChange={(e) => setForm({ ...form, author: e.target.value })} className="rounded-xl border border-surface-200 px-4 py-2.5 text-sm focus:outline-none focus:border-red-500" />
-            <input placeholder="Version" value={form.version} onChange={(e) => setForm({ ...form, version: e.target.value })} className="rounded-xl border border-surface-200 px-4 py-2.5 text-sm focus:outline-none focus:border-red-500" />
-            <textarea placeholder="Description" value={form.description} onChange={(e) => setForm({ ...form, description: e.target.value })} className="rounded-xl border border-surface-200 px-4 py-2.5 text-sm focus:outline-none focus:border-red-500 md:col-span-2" rows={2} />
+            <input placeholder="Author" value={form.author} onChange={(e) => setForm({ ...form, author: e.target.value })} className="rounded-xl border border-surface-200 px-4 py-2.5 text-sm focus:outline-none focus:border-brand-500" />
+            <input placeholder="Version" value={form.version} onChange={(e) => setForm({ ...form, version: e.target.value })} className="rounded-xl border border-surface-200 px-4 py-2.5 text-sm focus:outline-none focus:border-brand-500" />
+            <textarea placeholder="Description" value={form.description} onChange={(e) => setForm({ ...form, description: e.target.value })} className="rounded-xl border border-surface-200 px-4 py-2.5 text-sm focus:outline-none focus:border-brand-500 md:col-span-2" rows={2} />
             <label className="flex items-center gap-2 text-sm"><input type="checkbox" checked={form.isPremium} onChange={(e) => setForm({ ...form, isPremium: e.target.checked })} className="rounded" /> Premium Plugin</label>
           </div>
           <div className="flex justify-end gap-3 mt-4">
             <button onClick={() => setShowForm(false)} className="px-4 py-2 text-sm rounded-xl border border-surface-200 hover:bg-surface-50">Cancel</button>
-            <button onClick={handleSave} disabled={saving || !form.name} className="px-4 py-2 text-sm rounded-xl bg-red-600 text-white hover:bg-red-700 disabled:opacity-50 flex items-center gap-2">
+            <button onClick={handleSave} disabled={saving || !form.name} className="px-4 py-2 text-sm rounded-xl bg-brand-600 text-white hover:bg-brand-700 disabled:opacity-50 flex items-center gap-2">
               {saving && <Loader2 className="h-4 w-4 animate-spin" />} Create
             </button>
           </div>
@@ -84,7 +84,7 @@ export default function AdminPluginsPage() {
       )}
 
       {loading ? (
-        <div className="flex items-center justify-center py-12"><Loader2 className="h-6 w-6 animate-spin text-red-600" /></div>
+        <div className="flex items-center justify-center py-12"><Loader2 className="h-6 w-6 animate-spin text-accent-600" /></div>
       ) : plugins.length === 0 ? (
         <div className="rounded-2xl border border-surface-200 bg-white p-12 text-center">
           <Puzzle className="h-12 w-12 text-surface-300 mx-auto mb-3" />
@@ -117,10 +117,10 @@ export default function AdminPluginsPage() {
                   {p.reviewStatus === "PENDING" && (
                     <>
                       <button onClick={() => updatePlugin(p.id, { reviewStatus: "APPROVED" })} className="p-1.5 rounded-lg hover:bg-green-50 text-surface-400 hover:text-green-600"><CheckCircle2 className="h-4 w-4" /></button>
-                      <button onClick={() => updatePlugin(p.id, { reviewStatus: "REJECTED" })} className="p-1.5 rounded-lg hover:bg-red-50 text-surface-400 hover:text-red-600"><XCircle className="h-4 w-4" /></button>
+                      <button onClick={() => updatePlugin(p.id, { reviewStatus: "REJECTED" })} className="p-1.5 rounded-lg hover:bg-accent-50 text-surface-400 hover:text-accent-600"><XCircle className="h-4 w-4" /></button>
                     </>
                   )}
-                  <button onClick={() => handleDelete(p.id)} className="p-1.5 rounded-lg hover:bg-red-50 text-surface-400 hover:text-red-600"><Trash2 className="h-4 w-4" /></button>
+                  <button onClick={() => handleDelete(p.id)} className="p-1.5 rounded-lg hover:bg-accent-50 text-surface-400 hover:text-accent-600"><Trash2 className="h-4 w-4" /></button>
                 </div>
               </div>
             </div>

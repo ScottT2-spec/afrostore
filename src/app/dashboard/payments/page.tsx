@@ -112,7 +112,7 @@ export default function PaymentsPage() {
               <h2 className="text-lg font-bold text-surface-900 mb-1">Connect {providerInfo[setupProvider].name}</h2>
               <p className="text-xs text-surface-500 mb-6">Enter your API keys from {providerInfo[setupProvider].name} dashboard.</p>
               <form onSubmit={handleSetup} className="space-y-4">
-                {setupError && <div className="rounded-xl bg-red-50 border border-red-200 px-4 py-3 text-sm text-red-700">{setupError}</div>}
+                {setupError && <div className="rounded-xl bg-accent-50 border border-accent-200 px-4 py-3 text-sm text-accent-700">{setupError}</div>}
                 <div>
                   <label className="block text-sm font-medium text-surface-700 mb-1">Public Key</label>
                   <input value={publicKey} onChange={(e) => setPublicKey(e.target.value)} className="input-field" required />

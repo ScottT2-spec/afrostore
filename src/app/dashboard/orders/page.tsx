@@ -47,7 +47,7 @@ const statusConfig: Record<string, { label: string; color: string; icon: React.E
   PROCESSING: { label: "Processing", color: "bg-purple-50 text-purple-700 border-purple-200", icon: Package },
   SHIPPED: { label: "Shipped", color: "bg-orange-50 text-orange-700 border-orange-200", icon: Truck },
   DELIVERED: { label: "Delivered", color: "bg-green-50 text-green-700 border-green-200", icon: CheckCircle2 },
-  CANCELLED: { label: "Cancelled", color: "bg-red-50 text-red-700 border-red-200", icon: X },
+  CANCELLED: { label: "Cancelled", color: "bg-accent-50 text-accent-700 border-accent-200", icon: X },
 };
 
 export default function OrdersPage() {

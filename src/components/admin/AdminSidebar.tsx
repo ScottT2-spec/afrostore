@@ -48,12 +48,12 @@ export default function AdminSidebar() {
       {/* Logo */}
       <div className="flex h-16 items-center justify-between px-4 border-b border-surface-100">
         <Link href="/admin" className="flex items-center gap-2.5 min-w-0">
-          <div className="flex h-9 w-9 flex-shrink-0 items-center justify-center rounded-xl bg-red-600 shadow-md shadow-red-600/20">
+          <div className="flex h-9 w-9 flex-shrink-0 items-center justify-center rounded-xl bg-brand-600 shadow-md shadow-brand-600/20">
             <ShoppingBag className="h-5 w-5 text-white" />
           </div>
           {!collapsed && (
             <span className="font-display text-lg font-bold text-surface-900 truncate">
-              Admin <span className="text-red-600">Panel</span>
+              Admin <span className="text-accent-600">Panel</span>
             </span>
           )}
         </Link>
@@ -69,19 +69,19 @@ export default function AdminSidebar() {
       <div className="px-3 py-3">
         <div
           className={cn(
-            "w-full flex items-center gap-2.5 rounded-xl border border-red-200 bg-red-50 p-2.5",
+            "w-full flex items-center gap-2.5 rounded-xl border border-accent-200 bg-accent-50 p-2.5",
             collapsed && "justify-center p-2"
           )}
         >
-          <div className="flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-lg bg-gradient-to-br from-red-400 to-red-600 text-white">
+          <div className="flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-lg bg-gradient-to-br from-accent-400 to-accent-600 text-white">
             <Settings className="h-4 w-4" />
           </div>
           {!collapsed && (
             <div className="flex-1 text-left min-w-0">
-              <div className="text-xs font-semibold text-red-900 truncate">
+              <div className="text-xs font-semibold text-accent-900 truncate">
                 Admin Panel
               </div>
-              <div className="text-[10px] text-red-600 truncate">
+              <div className="text-[10px] text-accent-600 truncate">
                 Platform Management
               </div>
             </div>
@@ -101,12 +101,12 @@ export default function AdminSidebar() {
               className={cn(
                 "flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium transition-all duration-200",
                 isActive
-                  ? "bg-red-50 text-red-700 shadow-sm"
+                  ? "bg-accent-50 text-accent-700 shadow-sm"
                   : "text-surface-500 hover:bg-surface-50 hover:text-surface-900",
                 collapsed && "justify-center px-2"
               )}
             >
-              <Icon className={cn("h-[18px] w-[18px] flex-shrink-0", isActive ? "text-red-600" : "")} />
+              <Icon className={cn("h-[18px] w-[18px] flex-shrink-0", isActive ? "text-accent-600" : "")} />
               {!collapsed && <span>{item.name}</span>}
             </Link>
           );
@@ -118,7 +118,7 @@ export default function AdminSidebar() {
         <div className={cn("rounded-xl bg-surface-50 p-2.5", collapsed && "text-center")}>
           {!collapsed && (
             <div className="flex items-center gap-2 mb-2">
-              <div className="h-8 w-8 rounded-full bg-gradient-to-br from-red-600 to-red-400 flex items-center justify-center text-white text-xs font-bold">
+              <div className="h-8 w-8 rounded-full bg-gradient-to-br from-brand-600 to-accent-400 flex items-center justify-center text-white text-xs font-bold">
                 {initials}
               </div>
               <div className="flex-1 min-w-0">
@@ -126,14 +126,14 @@ export default function AdminSidebar() {
                   {user?.firstName} {user?.lastName}
                 </p>
                 <p className="text-[10px] text-surface-500 truncate">{user?.email}</p>
-                <p className="text-[10px] text-red-600 font-medium truncate">Admin</p>
+                <p className="text-[10px] text-accent-500 font-medium truncate">Admin</p>
               </div>
             </div>
           )}
           <button
             onClick={logout}
             className={cn(
-              "flex items-center gap-2 text-sm text-surface-500 hover:text-red-500 transition-colors",
+              "flex items-center gap-2 text-sm text-surface-500 hover:text-accent-500 transition-colors",
               collapsed ? "mx-auto" : "w-full"
             )}
           >

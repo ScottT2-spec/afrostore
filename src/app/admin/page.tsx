@@ -28,7 +28,7 @@ export default function AdminDashboard() {
   if (loading) {
     return (
       <div className="p-6 flex items-center justify-center min-h-[50vh]">
-        <Loader2 className="h-8 w-8 animate-spin text-red-600" />
+        <Loader2 className="h-8 w-8 animate-spin text-accent-600" />
       </div>
     );
   }
@@ -40,7 +40,7 @@ export default function AdminDashboard() {
     { label: "Total Stores", value: stats.totalStores, icon: Store, color: "bg-purple-50 text-purple-600" },
     { label: "Total Orders", value: stats.totalOrders, icon: ShoppingCart, color: "bg-green-50 text-green-600" },
     { label: "Revenue (GMV)", value: `₵${Number(stats.totalRevenue).toLocaleString()}`, icon: DollarSign, color: "bg-amber-50 text-amber-600" },
-    { label: "Active Stores", value: stats.activeStores, icon: Activity, color: "bg-red-50 text-red-600" },
+    { label: "Active Stores", value: stats.activeStores, icon: Activity, color: "bg-accent-50 text-accent-600" },
   ];
 
   return (
@@ -83,7 +83,7 @@ export default function AdminDashboard() {
                   </div>
                 </div>
                 <div className="text-right">
-                  <span className={`text-[10px] font-semibold px-2 py-0.5 rounded-full ${u.role === "ADMIN" ? "bg-red-100 text-red-700" : "bg-blue-100 text-blue-700"}`}>
+                  <span className={`text-[10px] font-semibold px-2 py-0.5 rounded-full ${u.role === "ADMIN" ? "bg-accent-100 text-accent-700" : "bg-blue-100 text-blue-700"}`}>
                     {u.role}
                   </span>
                   <p className="text-[10px] text-surface-400 mt-1">{new Date(u.createdAt).toLocaleDateString()}</p>

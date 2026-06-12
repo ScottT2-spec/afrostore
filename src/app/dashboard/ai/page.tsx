@@ -155,7 +155,7 @@ export default function AIPage() {
       <div className="flex flex-col h-[calc(100vh-64px)]">
         {/* Error banner */}
         {error && !error.includes("not configured") && (
-          <div className="mx-6 mt-4 rounded-xl bg-red-50 border border-red-200 px-4 py-3 text-sm text-red-700 flex items-start gap-2">
+          <div className="mx-6 mt-4 rounded-xl bg-accent-50 border border-accent-200 px-4 py-3 text-sm text-accent-700 flex items-start gap-2">
             <AlertCircle className="h-4 w-4 mt-0.5 flex-shrink-0" />
             <span>{error}</span>
           </div>

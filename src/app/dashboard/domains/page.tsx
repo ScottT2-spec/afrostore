@@ -61,7 +61,7 @@ export default function DomainsPage() {
           ) : null}
 
           <form onSubmit={handleConnect} className="space-y-3">
-            {error && <div className="rounded-xl bg-red-50 border border-red-200 px-4 py-3 text-sm text-red-700">{error}</div>}
+            {error && <div className="rounded-xl bg-accent-50 border border-accent-200 px-4 py-3 text-sm text-accent-700">{error}</div>}
             <input value={customDomain} onChange={(e) => setCustomDomain(e.target.value)} className="input-field" placeholder="mystore.com" />
             <p className="text-[10px] text-surface-500">Point your domain&apos;s CNAME record to <strong>cname.afrostore.com</strong></p>
             <button type="submit" disabled={saving || !customDomain} className="btn-primary text-sm py-2 px-4">

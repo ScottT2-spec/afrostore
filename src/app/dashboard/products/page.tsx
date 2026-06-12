@@ -219,7 +219,7 @@ export default function ProductsPage() {
                         </span>
                       </td>
                       <td className="px-6 py-3.5 hidden sm:table-cell">
-                        <span className={`text-sm ${product.stock <= 5 ? "text-red-500 font-semibold" : "text-surface-700"}`}>
+                        <span className={`text-sm ${product.stock <= 5 ? "text-accent-600 font-semibold" : "text-surface-700"}`}>
                           {product.stock}
                         </span>
                       </td>
@@ -234,7 +234,7 @@ export default function ProductsPage() {
                         )}
                       </td>
                       <td className="px-6 py-3.5 text-right">
-                        <button onClick={() => handleDelete(product.id)} className="p-1.5 rounded-lg text-surface-400 hover:text-red-500 hover:bg-red-50 transition-colors">
+                        <button onClick={() => handleDelete(product.id)} className="p-1.5 rounded-lg text-surface-400 hover:text-accent-600 hover:bg-accent-50 transition-colors">
                           <Trash2 className="h-4 w-4" />
                         </button>
                       </td>
@@ -270,7 +270,7 @@ export default function ProductsPage() {
             </div>
             <form onSubmit={handleCreate} className="space-y-4">
               {createError && (
-                <div className="rounded-xl bg-red-50 border border-red-200 px-4 py-3 text-sm text-red-700">{createError}</div>
+                <div className="rounded-xl bg-accent-50 border border-accent-200 px-4 py-3 text-sm text-accent-700">{createError}</div>
               )}
               <div>
                 <label className="block text-sm font-medium text-surface-700 mb-1">Product name</label>

@@ -120,7 +120,7 @@ export default function Hero() {
                 {/* Browser chrome */}
                 <div className="flex items-center gap-2 border-b border-white/10 px-4 py-3">
                   <div className="flex gap-1.5">
-                    <div className="h-3 w-3 rounded-full bg-red-500/60" />
+                    <div className="h-3 w-3 rounded-full bg-accent-500/60" />
                     <div className="h-3 w-3 rounded-full bg-yellow-500/60" />
                     <div className="h-3 w-3 rounded-full bg-green-500/60" />
                   </div>

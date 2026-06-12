@@ -232,7 +232,7 @@ export default function PropertyPanel({ block, onUpdate, onCommit, onClose, onDe
             <Copy className="h-3.5 w-3.5" /> Duplicate Block
           </button>
         )}
-        <button onClick={onDelete} className="w-full flex items-center justify-center gap-2 rounded-xl border border-red-200 bg-red-50 px-4 py-2 text-xs font-semibold text-red-600 hover:bg-red-100 transition-colors">
+        <button onClick={onDelete} className="w-full flex items-center justify-center gap-2 rounded-xl border border-brand-200 bg-brand-50 px-4 py-2 text-xs font-semibold text-brand-700 hover:bg-brand-100 transition-colors">
           <Trash2 className="h-3.5 w-3.5" /> Delete Block
         </button>
       </div>

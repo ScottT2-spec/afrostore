@@ -172,7 +172,7 @@ export default function Sidebar() {
           <button
             onClick={logout}
             className={cn(
-              "flex items-center gap-2 text-sm text-surface-500 hover:text-red-500 transition-colors",
+              "flex items-center gap-2 text-sm text-surface-500 hover:text-accent-500 transition-colors",
               collapsed ? "mx-auto" : "w-full"
             )}
           >

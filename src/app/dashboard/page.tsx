@@ -57,7 +57,7 @@ const statusConfig: Record<string, { label: string; color: string; icon: React.E
   PROCESSING: { label: "Processing", color: "bg-purple-50 text-purple-700 border-purple-200", icon: Package },
   SHIPPED: { label: "Shipped", color: "bg-orange-50 text-orange-700 border-orange-200", icon: Truck },
   DELIVERED: { label: "Delivered", color: "bg-green-50 text-green-700 border-green-200", icon: CheckCircle2 },
-  CANCELLED: { label: "Cancelled", color: "bg-red-50 text-red-700 border-red-200", icon: Clock },
+  CANCELLED: { label: "Cancelled", color: "bg-accent-50 text-accent-700 border-accent-200", icon: Clock },
 };
 
 function EmptyDashboard() {
@@ -176,7 +176,7 @@ export default function DashboardPage() {
                     <Icon className="h-5 w-5" />
                   </div>
                   {stat.change && (
-                    <div className={`flex items-center gap-1 text-xs font-semibold ${isUp ? "text-green-600" : "text-red-500"}`}>
+                    <div className={`flex items-center gap-1 text-xs font-semibold ${isUp ? "text-green-600" : "text-accent-600"}`}>
                       {isUp ? <TrendingUp className="h-3.5 w-3.5" /> : <TrendingDown className="h-3.5 w-3.5" />}
                       {stat.change}
                     </div>

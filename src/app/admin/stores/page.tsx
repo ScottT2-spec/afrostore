@@ -52,7 +52,7 @@ export default function AdminStoresPage() {
   const statusColors: Record<string, string> = {
     ACTIVE: "bg-green-100 text-green-700",
     PAUSED: "bg-yellow-100 text-yellow-700",
-    SUSPENDED: "bg-red-100 text-red-700",
+    SUSPENDED: "bg-accent-100 text-accent-700",
   };
 
   return (
@@ -67,17 +67,17 @@ export default function AdminStoresPage() {
           <div className="relative flex-1 min-w-[200px]">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-surface-400" />
             <input type="text" placeholder="Search stores..." value={search} onChange={(e) => { setSearch(e.target.value); setPage(1); }}
-              className="w-full rounded-xl border border-surface-200 bg-surface-50 pl-10 pr-4 py-2.5 text-sm focus:outline-none focus:border-red-500" />
+              className="w-full rounded-xl border border-surface-200 bg-surface-50 pl-10 pr-4 py-2.5 text-sm focus:outline-none focus:border-brand-500" />
           </div>
           <select value={statusFilter} onChange={(e) => { setStatusFilter(e.target.value); setPage(1); }}
-            className="rounded-xl border border-surface-200 px-3 py-2.5 text-sm focus:outline-none focus:border-red-500">
+            className="rounded-xl border border-surface-200 px-3 py-2.5 text-sm focus:outline-none focus:border-brand-500">
             <option value="">All Status</option>
             <option value="ACTIVE">Active</option>
             <option value="PAUSED">Paused</option>
             <option value="SUSPENDED">Suspended</option>
           </select>
           <select value={planFilter} onChange={(e) => { setPlanFilter(e.target.value); setPage(1); }}
-            className="rounded-xl border border-surface-200 px-3 py-2.5 text-sm focus:outline-none focus:border-red-500">
+            className="rounded-xl border border-surface-200 px-3 py-2.5 text-sm focus:outline-none focus:border-brand-500">
             <option value="">All Plans</option>
             <option value="FREE">Free</option>
             <option value="STARTER">Starter</option>
@@ -88,7 +88,7 @@ export default function AdminStoresPage() {
         </div>
 
         {loading ? (
-          <div className="flex items-center justify-center py-12"><Loader2 className="h-6 w-6 animate-spin text-red-600" /></div>
+          <div className="flex items-center justify-center py-12"><Loader2 className="h-6 w-6 animate-spin text-accent-600" /></div>
         ) : (
           <>
             <div className="overflow-x-auto">
@@ -124,9 +124,9 @@ export default function AdminStoresPage() {
                       <td className="px-6 py-3.5"><span className={`text-[10px] font-semibold px-2.5 py-1 rounded-full ${statusColors[s.status] || ""}`}>{s.status}</span></td>
                       <td className="px-6 py-3.5 text-sm text-surface-500">{new Date(s.createdAt).toLocaleDateString()}</td>
                       <td className="px-6 py-3.5 text-center">
-                        {updatingId === s.id ? <Loader2 className="h-4 w-4 animate-spin text-red-600 mx-auto" /> : (
+                        {updatingId === s.id ? <Loader2 className="h-4 w-4 animate-spin text-accent-600 mx-auto" /> : (
                           <select value={s.status} onChange={(e) => updateStatus(s.id, e.target.value)}
-                            className="text-xs rounded-lg border border-surface-200 px-2 py-1 focus:outline-none focus:border-red-500">
+                            className="text-xs rounded-lg border border-surface-200 px-2 py-1 focus:outline-none focus:border-brand-500">
                             <option value="ACTIVE">Active</option>
                             <option value="PAUSED">Paused</option>
                             <option value="SUSPENDED">Suspended</option>

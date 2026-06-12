@@ -18,7 +18,7 @@ const templates = [
     name: "Nairobi Fresh",
     category: "Food & Restaurant",
     description: "Clean, appetizing layout for restaurants and food delivery",
-    gradient: "from-orange-500 via-red-500 to-pink-500",
+    gradient: "from-accent-400 via-accent-500 to-brand-600",
     tags: ["Food", "Delivery"],
     rating: 4.8,
     uses: "1.8k",
