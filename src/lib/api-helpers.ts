@@ -3,8 +3,27 @@ import { getAuthUser } from "./auth";
 import { prisma } from "./db";
 import { slugify, generateId } from "./utils";
 
+/**
+ * Recursively convert Prisma Decimal objects to plain numbers in API responses.
+ */
+function serializeDecimals(obj: unknown): unknown {
+  if (obj === null || obj === undefined) return obj;
+  if (typeof obj === 'object' && obj !== null && 'toNumber' in obj && typeof (obj as any).toNumber === 'function') {
+    return (obj as any).toNumber();
+  }
+  if (Array.isArray(obj)) return obj.map(serializeDecimals);
+  if (typeof obj === 'object' && obj !== null) {
+    const result: Record<string, unknown> = {};
+    for (const [key, value] of Object.entries(obj)) {
+      result[key] = serializeDecimals(value);
+    }
+    return result;
+  }
+  return obj;
+}
+
 export function success(data: unknown, status = 200) {
-  return NextResponse.json({ success: true, data }, { status });
+  return NextResponse.json({ success: true, data: serializeDecimals(data) }, { status });
 }
 
 export function error(message: string, status = 400) {
