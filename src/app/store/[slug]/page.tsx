@@ -1,17 +1,16 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect, useCallback } from "react";
+import { useParams } from "next/navigation";
 import Link from "next/link";
 import {
   ShoppingBag,
   Search,
   ShoppingCart,
-  User,
   Menu,
   X,
   Star,
   Heart,
-  Eye,
   ChevronRight,
   MessageCircle,
   Truck,
@@ -23,33 +22,244 @@ import {
   MapPin,
   Plus,
   Minus,
-  Filter,
-  Clock,
-  CheckCircle2,
   Zap,
+  Loader2,
+  CheckCircle2,
+  ImageIcon,
 } from "lucide-react";
 
-const products = [
-  { id: "1", name: "Ankara Maxi Dress", price: 15000, compareAt: 22000, image: "from-pink-400 to-rose-500", badge: "Best Seller", rating: 4.9, reviews: 48, category: "Fashion" },
-  { id: "2", name: "Gold Hoop Earrings", price: 9000, image: "from-amber-400 to-orange-500", rating: 4.8, reviews: 36, category: "Jewelry" },
-  { id: "3", name: "Leather Crossbody Bag", price: 15000, image: "from-amber-600 to-yellow-600", badge: "Low Stock", rating: 4.7, reviews: 29, category: "Accessories" },
-  { id: "4", name: "Shea Butter Skincare Set", price: 8000, image: "from-green-400 to-emerald-500", rating: 4.9, reviews: 24, category: "Beauty" },
-  { id: "5", name: "African Print Sneakers", price: 18000, compareAt: 25000, image: "from-blue-400 to-indigo-500", badge: "New", rating: 4.8, reviews: 21, category: "Shoes" },
-  { id: "6", name: "Beaded Statement Necklace", price: 6500, image: "from-red-400 to-pink-500", rating: 4.6, reviews: 15, category: "Jewelry" },
-  { id: "7", name: "Coconut Oil Hair Treatment", price: 4500, image: "from-teal-400 to-cyan-500", badge: "Popular", rating: 4.8, reviews: 42, category: "Beauty" },
-  { id: "8", name: "Dashiki Summer Shirt", price: 12000, image: "from-purple-400 to-violet-500", rating: 4.5, reviews: 18, category: "Fashion" },
+/* ───────── Types ───────── */
+
+interface ProductImage {
+  id: string;
+  url: string;
+  alt?: string;
+}
+
+interface ProductCategory {
+  id: string;
+  name: string;
+  slug: string;
+}
+
+interface Product {
+  id: string;
+  name: string;
+  slug: string;
+  description?: string;
+  price: number;
+  compareAtPrice?: number;
+  currency: string;
+  stock?: number;
+  inStock: boolean;
+  isFeatured: boolean;
+  tags: string[];
+  images: ProductImage[];
+  category?: ProductCategory;
+  reviewCount: number;
+}
+
+interface StoreCategory {
+  id: string;
+  name: string;
+  slug: string;
+  _count: { products: number };
+}
+
+interface DeliveryZone {
+  id: string;
+  name: string;
+  areas: string[];
+  fee: number;
+  freeAbove?: number;
+  estimatedDays?: string;
+}
+
+interface StoreData {
+  store: {
+    id: string;
+    name: string;
+    slug: string;
+    description?: string;
+    logo?: string;
+    coverImage?: string;
+    subdomain: string;
+    customDomain?: string;
+    currency: string;
+    country: string;
+    businessType: string;
+  };
+  settings: {
+    allowGuestCheckout?: boolean;
+    payOnDelivery?: boolean;
+    bankTransfer?: boolean;
+    whatsappOrdering?: boolean;
+    showStockCount?: boolean;
+    lowDataMode?: boolean;
+    whatsappNumber?: string;
+    metaTitle?: string;
+    metaDescription?: string;
+  };
+  socialLinks: {
+    whatsapp?: string;
+    instagram?: string;
+    facebook?: string;
+    twitter?: string;
+    tiktok?: string;
+  };
+  products: Product[];
+  pagination: { page: number; limit: number; total: number; pages: number };
+  categories: StoreCategory[];
+  deliveryZones: DeliveryZone[];
+  pages: Array<{ id: string; title: string; slug: string; type: string }>;
+}
+
+interface CartItem {
+  productId: string;
+  variantId?: string;
+  quantity: number;
+  product: Product;
+}
+
+/* ───────── Helpers ───────── */
+
+function formatCurrency(amount: number, currency: string = "NGN"): string {
+  const symbols: Record<string, string> = { NGN: "₦", KES: "KSh", GHS: "GH₵", ZAR: "R", USD: "$", GBP: "£", EUR: "€" };
+  const symbol = symbols[currency] || currency;
+  return `${symbol}${amount.toLocaleString("en-NG", { minimumFractionDigits: 0, maximumFractionDigits: 2 })}`;
+}
+
+const GRADIENTS = [
+  "from-pink-400 to-rose-500",
+  "from-amber-400 to-orange-500",
+  "from-amber-600 to-yellow-600",
+  "from-green-400 to-emerald-500",
+  "from-blue-400 to-indigo-500",
+  "from-red-400 to-pink-500",
+  "from-teal-400 to-cyan-500",
+  "from-purple-400 to-violet-500",
 ];
 
-const categories = ["All", "Fashion", "Jewelry", "Beauty", "Accessories", "Shoes"];
+function getGradient(id: string): string {
+  let hash = 0;
+  for (let i = 0; i < id.length; i++) hash = id.charCodeAt(i) + ((hash << 5) - hash);
+  return GRADIENTS[Math.abs(hash) % GRADIENTS.length];
+}
+
+function getWhatsAppLink(phone: string | undefined, cart: CartItem[], currency: string, storeName: string): string {
+  const num = phone?.replace(/[^0-9+]/g, "") || "";
+  if (!num) return "#";
+  let msg = `Hi ${storeName}! I'd like to order:\n\n`;
+  cart.forEach((item) => {
+    msg += `• ${item.product.name} x${item.quantity} — ${formatCurrency(Number(item.product.price) * item.quantity, currency)}\n`;
+  });
+  const total = cart.reduce((s, i) => s + Number(i.product.price) * i.quantity, 0);
+  msg += `\nTotal: ${formatCurrency(total, currency)}`;
+  return `https://wa.me/${num.replace("+", "")}?text=${encodeURIComponent(msg)}`;
+}
+
+/* ───────── Component ───────── */
 
 export default function StorePage() {
-  const [cartCount, setCartCount] = useState(0);
+  const params = useParams();
+  const slug = params.slug as string;
+
+  const [data, setData] = useState<StoreData | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
+  const [cart, setCart] = useState<CartItem[]>([]);
   const [mobileMenu, setMobileMenu] = useState(false);
   const [selectedCategory, setSelectedCategory] = useState("All");
-  const [selectedProduct, setSelectedProduct] = useState<typeof products[0] | null>(null);
+  const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
   const [qty, setQty] = useState(1);
+  const [searchQuery, setSearchQuery] = useState("");
+  const [showSearch, setShowSearch] = useState(false);
+  const [addedToCart, setAddedToCart] = useState<string | null>(null);
 
-  const filteredProducts = selectedCategory === "All" ? products : products.filter((p) => p.category === selectedCategory);
+  const fetchStore = useCallback(async () => {
+    setLoading(true);
+    try {
+      const res = await fetch(`/api/storefront/${slug}`);
+      const json = await res.json();
+      if (json.success && json.data) {
+        setData(json.data);
+      } else {
+        setError(json.error || "Store not found");
+      }
+    } catch {
+      setError("Failed to load store");
+    }
+    setLoading(false);
+  }, [slug]);
+
+  useEffect(() => { fetchStore(); }, [fetchStore]);
+
+  // Persist cart to localStorage for checkout
+  useEffect(() => {
+    if (data) {
+      localStorage.setItem("afrostore_cart", JSON.stringify(cart));
+      localStorage.setItem("afrostore_storeId", data.store.id);
+      localStorage.setItem("afrostore_storeSlug", data.store.slug);
+      localStorage.setItem("afrostore_storeName", data.store.name);
+      localStorage.setItem("afrostore_currency", data.store.currency);
+      localStorage.setItem("afrostore_deliveryZones", JSON.stringify(data.deliveryZones));
+    }
+  }, [cart, data]);
+
+  const addToCart = (product: Product, quantity: number = 1) => {
+    setCart((prev) => {
+      const existing = prev.find((i) => i.productId === product.id);
+      if (existing) {
+        return prev.map((i) => i.productId === product.id ? { ...i, quantity: i.quantity + quantity } : i);
+      }
+      return [...prev, { productId: product.id, quantity, product }];
+    });
+    setAddedToCart(product.id);
+    setTimeout(() => setAddedToCart(null), 1500);
+  };
+
+  const cartCount = cart.reduce((s, i) => s + i.quantity, 0);
+  const cartTotal = cart.reduce((s, i) => s + Number(i.product.price) * i.quantity, 0);
+
+  /* ── Loading ── */
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-white flex items-center justify-center">
+        <div className="text-center">
+          <Loader2 className="h-10 w-10 animate-spin text-brand-600 mx-auto mb-4" />
+          <p className="text-surface-500 text-sm">Loading store...</p>
+        </div>
+      </div>
+    );
+  }
+
+  /* ── Error ── */
+  if (error || !data) {
+    return (
+      <div className="min-h-screen bg-white flex items-center justify-center">
+        <div className="text-center max-w-md px-4">
+          <ShoppingBag className="h-12 w-12 text-surface-300 mx-auto mb-4" />
+          <h1 className="text-2xl font-bold text-surface-900 mb-2">Store not found</h1>
+          <p className="text-surface-500">{error || "This store doesn't exist or isn't active yet."}</p>
+          <Link href="/" className="mt-6 inline-flex items-center gap-2 text-brand-600 font-semibold text-sm hover:text-brand-700">
+            <ArrowRight className="h-4 w-4 rotate-180" /> Go to AfroStore
+          </Link>
+        </div>
+      </div>
+    );
+  }
+
+  const { store, settings, socialLinks, products, categories } = data;
+  const currency = store.currency || "NGN";
+  const whatsappNumber = settings.whatsappNumber || socialLinks.whatsapp;
+
+  const filteredProducts = products.filter((p) => {
+    const matchCat = selectedCategory === "All" || p.category?.name === selectedCategory;
+    const matchSearch = !searchQuery || p.name.toLowerCase().includes(searchQuery.toLowerCase()) || p.tags.some((t) => t.toLowerCase().includes(searchQuery.toLowerCase()));
+    return matchCat && matchSearch;
+  });
+
+  const categoryNames = ["All", ...categories.filter((c) => c._count.products > 0).map((c) => c.name)];
 
   return (
     <div className="min-h-screen bg-white">
@@ -57,7 +267,9 @@ export default function StorePage() {
       <div className="bg-brand-600 text-white text-center py-2 text-xs font-medium">
         <div className="flex items-center justify-center gap-2">
           <Truck className="h-3.5 w-3.5" />
-          Free delivery on orders above ₦50,000 — Shop now!
+          {data.deliveryZones.some((z) => z.freeAbove)
+            ? `Free delivery on orders above ${formatCurrency(Number(data.deliveryZones.find((z) => z.freeAbove)?.freeAbove || 0), currency)} — Shop now!`
+            : `Welcome to ${store.name} — Shop now!`}
         </div>
       </div>
 
@@ -68,35 +280,70 @@ export default function StorePage() {
             <button onClick={() => setMobileMenu(!mobileMenu)} className="sm:hidden p-2 -ml-2 text-surface-600">
               {mobileMenu ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
             </button>
-            <Link href="#" className="flex items-center gap-2">
-              <div className="h-9 w-9 rounded-xl bg-gradient-to-br from-purple-500 to-pink-500 flex items-center justify-center">
-                <ShoppingBag className="h-5 w-5 text-white" />
-              </div>
-              <span className="font-display text-lg font-bold text-surface-900">Amara&apos;s Fashion</span>
+            <Link href={`/store/${slug}`} className="flex items-center gap-2">
+              {store.logo ? (
+                <img src={store.logo} alt={store.name} className="h-9 w-9 rounded-xl object-cover" />
+              ) : (
+                <div className="h-9 w-9 rounded-xl bg-gradient-to-br from-purple-500 to-pink-500 flex items-center justify-center">
+                  <ShoppingBag className="h-5 w-5 text-white" />
+                </div>
+              )}
+              <span className="font-display text-lg font-bold text-surface-900">{store.name}</span>
             </Link>
           </div>
 
           <nav className="hidden sm:flex items-center gap-6">
-            {["Shop", "New Arrivals", "About", "Contact"].map((item) => (
-              <a key={item} href="#" className="text-sm font-medium text-surface-600 hover:text-surface-900 transition-colors">{item}</a>
+            <a href="#shop" className="text-sm font-medium text-surface-600 hover:text-surface-900 transition-colors">Shop</a>
+            {data.pages.filter((p) => p.type !== "HOME").slice(0, 3).map((page) => (
+              <a key={page.id} href={`#${page.slug}`} className="text-sm font-medium text-surface-600 hover:text-surface-900 transition-colors">{page.title}</a>
             ))}
           </nav>
 
           <div className="flex items-center gap-3">
-            <button className="p-2 text-surface-600 hover:bg-surface-50 rounded-lg"><Search className="h-5 w-5" /></button>
+            <button onClick={() => setShowSearch(!showSearch)} className="p-2 text-surface-600 hover:bg-surface-50 rounded-lg"><Search className="h-5 w-5" /></button>
             <button className="p-2 text-surface-600 hover:bg-surface-50 rounded-lg hidden sm:flex"><Heart className="h-5 w-5" /></button>
-            <button
-              onClick={() => setCartCount(c => c + 1)}
+            <Link
+              href="/checkout"
               className="relative p-2 text-surface-600 hover:bg-surface-50 rounded-lg"
             >
               <ShoppingCart className="h-5 w-5" />
               {cartCount > 0 && (
                 <span className="absolute -top-0.5 -right-0.5 h-5 w-5 rounded-full bg-brand-600 text-white text-[10px] font-bold flex items-center justify-center">{cartCount}</span>
               )}
-            </button>
+            </Link>
           </div>
         </div>
+        {/* Search bar */}
+        {showSearch && (
+          <div className="border-t border-surface-100 px-4 sm:px-6 py-3 max-w-6xl mx-auto">
+            <div className="flex items-center gap-2 rounded-xl border border-surface-200 bg-surface-50 px-3 py-2">
+              <Search className="h-4 w-4 text-surface-400" />
+              <input
+                autoFocus
+                type="text"
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                placeholder="Search products..."
+                className="flex-1 bg-transparent text-sm placeholder:text-surface-400 focus:outline-none"
+              />
+              {searchQuery && <button onClick={() => setSearchQuery("")}><X className="h-4 w-4 text-surface-400" /></button>}
+            </div>
+          </div>
+        )}
       </header>
+
+      {/* Mobile menu */}
+      {mobileMenu && (
+        <div className="sm:hidden bg-white border-b border-surface-200 px-4 py-4 space-y-2">
+          <a href="#shop" onClick={() => setMobileMenu(false)} className="block text-sm font-medium text-surface-600 py-2">Shop</a>
+          {data.pages.filter((p) => p.type !== "HOME").map((page) => (
+            <a key={page.id} href={`#${page.slug}`} onClick={() => setMobileMenu(false)} className="block text-sm font-medium text-surface-600 py-2">{page.title}</a>
+          ))}
+          {whatsappNumber && (
+            <a href={getWhatsAppLink(whatsappNumber, [], currency, store.name)} className="block text-sm font-medium text-green-600 py-2">WhatsApp us</a>
+          )}
+        </div>
+      )}
 
       {/* Hero */}
       <section className="relative bg-gradient-to-br from-surface-900 via-surface-800 to-surface-900 overflow-hidden">
@@ -107,27 +354,28 @@ export default function StorePage() {
         <div className="relative max-w-6xl mx-auto px-4 sm:px-6 py-16 sm:py-24 flex flex-col sm:flex-row items-center gap-8">
           <div className="flex-1 text-center sm:text-left">
             <span className="inline-flex items-center gap-1.5 rounded-full bg-white/10 border border-white/20 px-3 py-1 text-xs text-white/80 mb-4">
-              <Zap className="h-3 w-3" />New Collection 2025
+              <Zap className="h-3 w-3" />{store.businessType ? `${store.businessType.charAt(0).toUpperCase()}${store.businessType.slice(1)}` : "Shop"}
             </span>
             <h1 className="font-display text-3xl sm:text-4xl lg:text-5xl font-extrabold text-white leading-tight">
-              African Fashion,<br />
-              <span className="bg-gradient-to-r from-purple-400 to-pink-400 bg-clip-text text-transparent">Reimagined.</span>
+              {store.name}
             </h1>
-            <p className="mt-4 text-white/60 max-w-md text-base leading-relaxed">
-              Handcrafted pieces that celebrate our heritage. Bold prints, premium quality, and styles that tell your story.
-            </p>
+            {store.description && (
+              <p className="mt-4 text-white/60 max-w-md text-base leading-relaxed">{store.description}</p>
+            )}
             <div className="mt-6 flex items-center gap-3 justify-center sm:justify-start">
-              <a href="#shop" className="btn-primary text-sm">
-                Shop Now
-                <ArrowRight className="h-4 w-4" />
-              </a>
-              <a href="#" className="inline-flex items-center gap-2 text-white/70 text-sm font-medium hover:text-white transition-colors">
-                <MessageCircle className="h-4 w-4" />
-                Order via WhatsApp
-              </a>
+              <a href="#shop" className="btn-primary text-sm">Shop Now <ArrowRight className="h-4 w-4" /></a>
+              {settings.whatsappOrdering && whatsappNumber && (
+                <a href={getWhatsAppLink(whatsappNumber, cart, currency, store.name)} className="inline-flex items-center gap-2 text-white/70 text-sm font-medium hover:text-white transition-colors">
+                  <MessageCircle className="h-4 w-4" /> Order via WhatsApp
+                </a>
+              )}
             </div>
           </div>
-          <div className="w-64 h-80 sm:w-72 sm:h-96 rounded-2xl bg-gradient-to-br from-purple-500 via-pink-500 to-orange-400 shadow-2xl shadow-purple-500/20 flex-shrink-0" />
+          {store.coverImage ? (
+            <img src={store.coverImage} alt={store.name} className="w-64 h-80 sm:w-72 sm:h-96 rounded-2xl object-cover shadow-2xl flex-shrink-0" />
+          ) : (
+            <div className="w-64 h-80 sm:w-72 sm:h-96 rounded-2xl bg-gradient-to-br from-purple-500 via-pink-500 to-orange-400 shadow-2xl shadow-purple-500/20 flex-shrink-0" />
+          )}
         </div>
       </section>
 
@@ -138,7 +386,7 @@ export default function StorePage() {
             { icon: Truck, text: "Fast Delivery" },
             { icon: Shield, text: "Secure Payment" },
             { icon: CreditCard, text: "Pay Your Way" },
-            { icon: MessageCircle, text: "WhatsApp Support" },
+            ...(settings.whatsappOrdering ? [{ icon: MessageCircle, text: "WhatsApp Support" }] : [{ icon: CheckCircle2, text: "Verified Store" }]),
           ].map((t) => {
             const Icon = t.icon;
             return (
@@ -154,13 +402,15 @@ export default function StorePage() {
       {/* Products */}
       <section id="shop" className="max-w-6xl mx-auto px-4 sm:px-6 py-12">
         <div className="flex items-center justify-between mb-8">
-          <h2 className="font-display text-2xl font-bold text-surface-900">Our Collection</h2>
-          <div className="flex items-center gap-2">
-            {categories.map((cat) => (
+          <h2 className="font-display text-2xl font-bold text-surface-900">
+            {selectedCategory !== "All" ? selectedCategory : "Our Collection"}
+          </h2>
+          <div className="flex items-center gap-2 overflow-x-auto">
+            {categoryNames.map((cat) => (
               <button
                 key={cat}
                 onClick={() => setSelectedCategory(cat)}
-                className={`hidden sm:block rounded-full px-3 py-1.5 text-xs font-medium transition-colors ${selectedCategory === cat ? "bg-surface-900 text-white" : "bg-surface-100 text-surface-600 hover:bg-surface-200"}`}
+                className={`hidden sm:block rounded-full px-3 py-1.5 text-xs font-medium transition-colors whitespace-nowrap ${selectedCategory === cat ? "bg-surface-900 text-white" : "bg-surface-100 text-surface-600 hover:bg-surface-200"}`}
               >
                 {cat}
               </button>
@@ -168,61 +418,114 @@ export default function StorePage() {
           </div>
         </div>
 
-        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4 sm:gap-6">
-          {filteredProducts.map((product) => (
-            <div key={product.id} className="group cursor-pointer" onClick={() => { setSelectedProduct(product); setQty(1); }}>
-              <div className="relative aspect-[3/4] rounded-2xl overflow-hidden mb-3">
-                <div className={`absolute inset-0 bg-gradient-to-br ${product.image} transition-transform duration-500 group-hover:scale-110`} />
-                {product.badge && (
-                  <div className={`absolute top-3 left-3 rounded-full px-2.5 py-0.5 text-[10px] font-bold text-white ${product.badge === "Best Seller" ? "bg-brand-600" : product.badge === "Low Stock" ? "bg-red-500" : product.badge === "New" ? "bg-blue-600" : "bg-purple-600"}`}>
-                    {product.badge}
+        {/* Mobile category tabs */}
+        {categoryNames.length > 1 && (
+          <div className="sm:hidden flex gap-2 overflow-x-auto pb-4 -mx-4 px-4 scrollbar-hide">
+            {categoryNames.map((cat) => (
+              <button
+                key={cat}
+                onClick={() => setSelectedCategory(cat)}
+                className={`rounded-full px-3 py-1.5 text-xs font-medium transition-colors whitespace-nowrap ${selectedCategory === cat ? "bg-surface-900 text-white" : "bg-surface-100 text-surface-600"}`}
+              >
+                {cat}
+              </button>
+            ))}
+          </div>
+        )}
+
+        {filteredProducts.length === 0 ? (
+          <div className="text-center py-20">
+            <ShoppingBag className="h-12 w-12 text-surface-300 mx-auto mb-4" />
+            <h3 className="text-lg font-bold text-surface-900 mb-2">
+              {searchQuery ? "No products found" : "No products yet"}
+            </h3>
+            <p className="text-sm text-surface-500">
+              {searchQuery ? `No results for "${searchQuery}"` : "This store is setting up. Check back soon!"}
+            </p>
+          </div>
+        ) : (
+          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4 sm:gap-6">
+            {filteredProducts.map((product) => {
+              const hasImage = product.images.length > 0 && product.images[0].url;
+              const discount = product.compareAtPrice
+                ? Math.round(((Number(product.compareAtPrice) - Number(product.price)) / Number(product.compareAtPrice)) * 100)
+                : 0;
+              const justAdded = addedToCart === product.id;
+
+              return (
+                <div key={product.id} className="group cursor-pointer" onClick={() => { setSelectedProduct(product); setQty(1); }}>
+                  <div className="relative aspect-[3/4] rounded-2xl overflow-hidden mb-3">
+                    {hasImage ? (
+                      <img src={product.images[0].url} alt={product.images[0].alt || product.name} className="absolute inset-0 w-full h-full object-cover transition-transform duration-500 group-hover:scale-110" />
+                    ) : (
+                      <div className={`absolute inset-0 bg-gradient-to-br ${getGradient(product.id)} transition-transform duration-500 group-hover:scale-110 flex items-center justify-center`}>
+                        <ImageIcon className="h-10 w-10 text-white/40" />
+                      </div>
+                    )}
+                    {product.isFeatured && (
+                      <div className="absolute top-3 left-3 rounded-full px-2.5 py-0.5 text-[10px] font-bold text-white bg-brand-600">Featured</div>
+                    )}
+                    {!product.inStock && (
+                      <div className="absolute top-3 left-3 rounded-full px-2.5 py-0.5 text-[10px] font-bold text-white bg-red-500">Sold Out</div>
+                    )}
+                    {discount > 0 && (
+                      <div className="absolute top-3 right-3 rounded-full bg-red-500 px-2 py-0.5 text-[10px] font-bold text-white">-{discount}%</div>
+                    )}
+                    <div className="absolute inset-0 bg-black/0 group-hover:bg-black/20 transition-colors" />
+                    <button
+                      onClick={(e) => { e.stopPropagation(); if (product.inStock) addToCart(product); }}
+                      disabled={!product.inStock}
+                      className={`absolute bottom-3 left-3 right-3 rounded-xl py-2.5 text-xs font-semibold opacity-0 group-hover:opacity-100 transition-all translate-y-2 group-hover:translate-y-0 shadow-lg flex items-center justify-center gap-2 ${
+                        justAdded ? "bg-green-500 text-white" : "bg-white text-surface-900 hover:bg-surface-50"
+                      } disabled:opacity-50`}
+                    >
+                      {justAdded ? <><CheckCircle2 className="h-3.5 w-3.5" /> Added!</> : <><ShoppingCart className="h-3.5 w-3.5" /> Add to Cart</>}
+                    </button>
                   </div>
-                )}
-                {product.compareAt && (
-                  <div className="absolute top-3 right-3 rounded-full bg-red-500 px-2 py-0.5 text-[10px] font-bold text-white">
-                    -{Math.round(((product.compareAt - product.price) / product.compareAt) * 100)}%
+                  <h3 className="text-sm font-semibold text-surface-900 group-hover:text-brand-600 transition-colors line-clamp-1">{product.name}</h3>
+                  {product.reviewCount > 0 && (
+                    <div className="flex items-center gap-1 mt-1">
+                      <Star className="h-3 w-3 fill-yellow-400 text-yellow-400" />
+                      <span className="text-[10px] text-surface-400">({product.reviewCount})</span>
+                    </div>
+                  )}
+                  <div className="flex items-center gap-2 mt-1.5">
+                    <span className="text-base font-bold text-surface-900">{formatCurrency(Number(product.price), currency)}</span>
+                    {product.compareAtPrice && (
+                      <span className="text-xs text-surface-400 line-through">{formatCurrency(Number(product.compareAtPrice), currency)}</span>
+                    )}
                   </div>
-                )}
-                <div className="absolute inset-0 bg-black/0 group-hover:bg-black/20 transition-colors" />
-                <button
-                  onClick={(e) => { e.stopPropagation(); setCartCount(c => c + 1); }}
-                  className="absolute bottom-3 left-3 right-3 rounded-xl bg-white py-2.5 text-xs font-semibold text-surface-900 opacity-0 group-hover:opacity-100 transition-all translate-y-2 group-hover:translate-y-0 shadow-lg flex items-center justify-center gap-2 hover:bg-surface-50"
-                >
-                  <ShoppingCart className="h-3.5 w-3.5" />
-                  Add to Cart
-                </button>
-              </div>
-              <h3 className="text-sm font-semibold text-surface-900 group-hover:text-brand-600 transition-colors">{product.name}</h3>
-              <div className="flex items-center gap-1 mt-1">
-                <div className="flex">
-                  {Array.from({ length: 5 }).map((_, i) => (
-                    <Star key={i} className={`h-3 w-3 ${i < Math.floor(product.rating) ? "fill-yellow-400 text-yellow-400" : "fill-surface-200 text-surface-200"}`} />
-                  ))}
                 </div>
-                <span className="text-[10px] text-surface-400">({product.reviews})</span>
-              </div>
-              <div className="flex items-center gap-2 mt-1.5">
-                <span className="text-base font-bold text-surface-900">₦{product.price.toLocaleString()}</span>
-                {product.compareAt && <span className="text-xs text-surface-400 line-through">₦{product.compareAt.toLocaleString()}</span>}
-              </div>
-            </div>
-          ))}
-        </div>
+              );
+            })}
+          </div>
+        )}
       </section>
 
       {/* WhatsApp CTA */}
-      <section className="bg-green-600 py-10">
-        <div className="max-w-6xl mx-auto px-4 sm:px-6 flex flex-col sm:flex-row items-center justify-between gap-4">
-          <div className="text-center sm:text-left">
-            <h3 className="text-xl font-bold text-white">Prefer to order on WhatsApp?</h3>
-            <p className="text-green-100 text-sm mt-1">Send us a message and we&apos;ll help you place your order.</p>
+      {settings.whatsappOrdering && whatsappNumber && (
+        <section className="bg-green-600 py-10">
+          <div className="max-w-6xl mx-auto px-4 sm:px-6 flex flex-col sm:flex-row items-center justify-between gap-4">
+            <div className="text-center sm:text-left">
+              <h3 className="text-xl font-bold text-white">Prefer to order on WhatsApp?</h3>
+              <p className="text-green-100 text-sm mt-1">Send us a message and we&apos;ll help you place your order.</p>
+            </div>
+            <a href={getWhatsAppLink(whatsappNumber, cart, currency, store.name)} className="inline-flex items-center gap-2 rounded-xl bg-white px-6 py-3 text-sm font-bold text-green-700 hover:bg-green-50 transition-colors shadow-lg">
+              <MessageCircle className="h-5 w-5" /> Chat on WhatsApp
+            </a>
           </div>
-          <a href="https://wa.me/2348123456789" className="inline-flex items-center gap-2 rounded-xl bg-white px-6 py-3 text-sm font-bold text-green-700 hover:bg-green-50 transition-colors shadow-lg">
-            <MessageCircle className="h-5 w-5" />
-            Chat on WhatsApp
-          </a>
+        </section>
+      )}
+
+      {/* Cart preview bar */}
+      {cartCount > 0 && !selectedProduct && (
+        <div className="fixed bottom-0 left-0 right-0 z-40 bg-white border-t border-surface-200 shadow-2xl px-4 sm:px-6 py-3 sm:hidden">
+          <Link href="/checkout" className="btn-primary w-full py-3.5 text-sm">
+            <ShoppingCart className="h-4 w-4" />
+            View Cart ({cartCount}) — {formatCurrency(cartTotal, currency)}
+          </Link>
         </div>
-      </section>
+      )}
 
       {/* Footer */}
       <footer className="bg-surface-900 text-surface-400 py-12">
@@ -230,43 +533,52 @@ export default function StorePage() {
           <div className="grid grid-cols-2 sm:grid-cols-4 gap-8">
             <div className="col-span-2 sm:col-span-1">
               <div className="flex items-center gap-2 mb-3">
-                <div className="h-8 w-8 rounded-lg bg-gradient-to-br from-purple-500 to-pink-500 flex items-center justify-center"><ShoppingBag className="h-4 w-4 text-white" /></div>
-                <span className="font-display font-bold text-white">Amara&apos;s Fashion</span>
+                {store.logo ? (
+                  <img src={store.logo} alt={store.name} className="h-8 w-8 rounded-lg object-cover" />
+                ) : (
+                  <div className="h-8 w-8 rounded-lg bg-gradient-to-br from-purple-500 to-pink-500 flex items-center justify-center"><ShoppingBag className="h-4 w-4 text-white" /></div>
+                )}
+                <span className="font-display font-bold text-white">{store.name}</span>
               </div>
-              <p className="text-xs leading-relaxed">Handcrafted African fashion and accessories. Bold. Beautiful. Yours.</p>
+              {store.description && <p className="text-xs leading-relaxed">{store.description}</p>}
             </div>
             <div>
               <h4 className="text-sm font-semibold text-white mb-3">Shop</h4>
               <ul className="space-y-2 text-xs">
-                {["New Arrivals", "Best Sellers", "Fashion", "Jewelry", "Beauty"].map((l) => (<li key={l}><a href="#" className="hover:text-white transition-colors">{l}</a></li>))}
+                {categoryNames.filter((c) => c !== "All").slice(0, 5).map((c) => (
+                  <li key={c}><button onClick={() => { setSelectedCategory(c); window.scrollTo({ top: 0, behavior: "smooth" }); }} className="hover:text-white transition-colors">{c}</button></li>
+                ))}
               </ul>
             </div>
             <div>
-              <h4 className="text-sm font-semibold text-white mb-3">Help</h4>
+              <h4 className="text-sm font-semibold text-white mb-3">Pages</h4>
               <ul className="space-y-2 text-xs">
-                {["Shipping", "Returns", "FAQ", "Contact Us"].map((l) => (<li key={l}><a href="#" className="hover:text-white transition-colors">{l}</a></li>))}
+                {data.pages.slice(0, 5).map((page) => (
+                  <li key={page.id}><a href={`#${page.slug}`} className="hover:text-white transition-colors">{page.title}</a></li>
+                ))}
               </ul>
             </div>
             <div>
               <h4 className="text-sm font-semibold text-white mb-3">Contact</h4>
               <div className="space-y-2 text-xs">
-                <div className="flex items-center gap-2"><Phone className="h-3.5 w-3.5" />+234 812 345 6789</div>
-                <div className="flex items-center gap-2"><Mail className="h-3.5 w-3.5" />hello@amarasfashion.com</div>
-                <div className="flex items-center gap-2"><MapPin className="h-3.5 w-3.5" />Lagos, Nigeria</div>
+                {whatsappNumber && <div className="flex items-center gap-2"><Phone className="h-3.5 w-3.5" />{whatsappNumber}</div>}
+                {socialLinks.instagram && <div className="flex items-center gap-2"><span>📸</span>{socialLinks.instagram}</div>}
               </div>
             </div>
           </div>
           <div className="mt-8 pt-6 border-t border-surface-800 flex items-center justify-between text-xs text-surface-600">
-            <span>&copy; 2025 Amara&apos;s Fashion. All rights reserved.</span>
+            <span>&copy; {new Date().getFullYear()} {store.name}. All rights reserved.</span>
             <span className="flex items-center gap-1">Powered by <span className="font-semibold text-brand-400">AfroStore</span></span>
           </div>
         </div>
       </footer>
 
       {/* Floating WhatsApp */}
-      <a href="https://wa.me/2348123456789" className="fixed bottom-6 right-6 z-50 flex h-14 w-14 items-center justify-center rounded-full bg-green-500 text-white shadow-xl shadow-green-500/30 hover:bg-green-600 hover:scale-110 transition-all">
-        <MessageCircle className="h-6 w-6" />
-      </a>
+      {settings.whatsappOrdering && whatsappNumber && (
+        <a href={getWhatsAppLink(whatsappNumber, cart, currency, store.name)} className="fixed bottom-6 right-6 z-50 flex h-14 w-14 items-center justify-center rounded-full bg-green-500 text-white shadow-xl shadow-green-500/30 hover:bg-green-600 hover:scale-110 transition-all sm:bottom-6" style={{ bottom: cartCount > 0 ? "5rem" : undefined }}>
+          <MessageCircle className="h-6 w-6" />
+        </a>
+      )}
 
       {/* Product Quick View Modal */}
       {selectedProduct && (
@@ -274,11 +586,14 @@ export default function StorePage() {
           <div className="w-full max-w-3xl bg-white rounded-2xl shadow-2xl overflow-hidden max-h-[90vh] overflow-y-auto" onClick={(e) => e.stopPropagation()}>
             <div className="grid grid-cols-1 sm:grid-cols-2">
               {/* Image */}
-              <div className={`aspect-square bg-gradient-to-br ${selectedProduct.image} relative`}>
-                {selectedProduct.badge && (
-                  <span className={`absolute top-4 left-4 rounded-full px-3 py-1 text-xs font-bold text-white ${selectedProduct.badge === "Best Seller" ? "bg-brand-600" : selectedProduct.badge === "Low Stock" ? "bg-red-500" : "bg-blue-600"}`}>
-                    {selectedProduct.badge}
-                  </span>
+              <div className="aspect-square relative overflow-hidden">
+                {selectedProduct.images.length > 0 && selectedProduct.images[0].url ? (
+                  <img src={selectedProduct.images[0].url} alt={selectedProduct.name} className="absolute inset-0 w-full h-full object-cover" />
+                ) : (
+                  <div className={`absolute inset-0 bg-gradient-to-br ${getGradient(selectedProduct.id)}`} />
+                )}
+                {selectedProduct.isFeatured && (
+                  <span className="absolute top-4 left-4 rounded-full px-3 py-1 text-xs font-bold text-white bg-brand-600">Featured</span>
                 )}
                 <button onClick={() => setSelectedProduct(null)} className="absolute top-4 right-4 h-8 w-8 rounded-full bg-white/80 flex items-center justify-center text-surface-700 hover:bg-white">
                   <X className="h-4 w-4" />
@@ -287,46 +602,59 @@ export default function StorePage() {
               {/* Details */}
               <div className="p-6 sm:p-8 flex flex-col">
                 <h2 className="font-display text-2xl font-bold text-surface-900">{selectedProduct.name}</h2>
-                <div className="flex items-center gap-2 mt-2">
-                  <div className="flex">{Array.from({ length: 5 }).map((_, i) => (<Star key={i} className={`h-4 w-4 ${i < Math.floor(selectedProduct.rating) ? "fill-yellow-400 text-yellow-400" : "fill-surface-200 text-surface-200"}`} />))}</div>
-                  <span className="text-sm text-surface-500">({selectedProduct.reviews} reviews)</span>
-                </div>
+                {selectedProduct.reviewCount > 0 && (
+                  <div className="flex items-center gap-2 mt-2">
+                    <Star className="h-4 w-4 fill-yellow-400 text-yellow-400" />
+                    <span className="text-sm text-surface-500">({selectedProduct.reviewCount} reviews)</span>
+                  </div>
+                )}
                 <div className="flex items-center gap-3 mt-4">
-                  <span className="text-3xl font-extrabold text-surface-900 font-display">₦{selectedProduct.price.toLocaleString()}</span>
-                  {selectedProduct.compareAt && <span className="text-lg text-surface-400 line-through">₦{selectedProduct.compareAt.toLocaleString()}</span>}
-                  {selectedProduct.compareAt && <span className="rounded-full bg-red-50 text-red-600 px-2.5 py-0.5 text-xs font-bold">Save ₦{(selectedProduct.compareAt - selectedProduct.price).toLocaleString()}</span>}
+                  <span className="text-3xl font-extrabold text-surface-900 font-display">{formatCurrency(Number(selectedProduct.price), currency)}</span>
+                  {selectedProduct.compareAtPrice && (
+                    <>
+                      <span className="text-lg text-surface-400 line-through">{formatCurrency(Number(selectedProduct.compareAtPrice), currency)}</span>
+                      <span className="rounded-full bg-red-50 text-red-600 px-2.5 py-0.5 text-xs font-bold">
+                        Save {formatCurrency(Number(selectedProduct.compareAtPrice) - Number(selectedProduct.price), currency)}
+                      </span>
+                    </>
+                  )}
                 </div>
-                <p className="mt-4 text-sm text-surface-500 leading-relaxed">Beautiful handcrafted {selectedProduct.name.toLowerCase()} made with premium materials. Celebrate African heritage with style.</p>
+                {selectedProduct.description && (
+                  <p className="mt-4 text-sm text-surface-500 leading-relaxed">{selectedProduct.description}</p>
+                )}
 
-                {/* Size selector example */}
-                {selectedProduct.category === "Fashion" && (
+                {!selectedProduct.inStock && (
+                  <div className="mt-4 rounded-xl bg-red-50 border border-red-200 px-4 py-3 text-sm text-red-700 font-medium">Out of stock</div>
+                )}
+
+                {/* Quantity */}
+                {selectedProduct.inStock && (
                   <div className="mt-5">
-                    <span className="text-sm font-semibold text-surface-900">Size</span>
-                    <div className="flex gap-2 mt-2">
-                      {["S", "M", "L", "XL"].map((s) => (<button key={s} className={`h-10 w-10 rounded-lg border text-sm font-medium transition-colors ${s === "M" ? "border-surface-900 bg-surface-900 text-white" : "border-surface-200 text-surface-600 hover:border-surface-400"}`}>{s}</button>))}
+                    <span className="text-sm font-semibold text-surface-900">Quantity</span>
+                    <div className="flex items-center gap-3 mt-2">
+                      <button onClick={() => setQty(Math.max(1, qty - 1))} className="h-10 w-10 rounded-lg border border-surface-200 flex items-center justify-center text-surface-600 hover:bg-surface-50"><Minus className="h-4 w-4" /></button>
+                      <span className="text-lg font-bold text-surface-900 w-8 text-center">{qty}</span>
+                      <button onClick={() => setQty(qty + 1)} className="h-10 w-10 rounded-lg border border-surface-200 flex items-center justify-center text-surface-600 hover:bg-surface-50"><Plus className="h-4 w-4" /></button>
                     </div>
                   </div>
                 )}
 
-                {/* Quantity */}
-                <div className="mt-5">
-                  <span className="text-sm font-semibold text-surface-900">Quantity</span>
-                  <div className="flex items-center gap-3 mt-2">
-                    <button onClick={() => setQty(Math.max(1, qty - 1))} className="h-10 w-10 rounded-lg border border-surface-200 flex items-center justify-center text-surface-600 hover:bg-surface-50"><Minus className="h-4 w-4" /></button>
-                    <span className="text-lg font-bold text-surface-900 w-8 text-center">{qty}</span>
-                    <button onClick={() => setQty(qty + 1)} className="h-10 w-10 rounded-lg border border-surface-200 flex items-center justify-center text-surface-600 hover:bg-surface-50"><Plus className="h-4 w-4" /></button>
-                  </div>
-                </div>
-
                 <div className="mt-6 space-y-3 flex-1 flex flex-col justify-end">
-                  <button onClick={() => { setCartCount(c => c + qty); setSelectedProduct(null); }} className="btn-primary w-full py-3.5">
-                    <ShoppingCart className="h-5 w-5" />
-                    Add to Cart — ₦{(selectedProduct.price * qty).toLocaleString()}
-                  </button>
-                  <a href="https://wa.me/2348123456789" className="btn-secondary w-full py-3 text-green-700 border-green-200 hover:bg-green-50">
-                    <MessageCircle className="h-5 w-5 text-green-600" />
-                    Order via WhatsApp
-                  </a>
+                  {selectedProduct.inStock && (
+                    <button onClick={() => { addToCart(selectedProduct, qty); setSelectedProduct(null); }} className="btn-primary w-full py-3.5">
+                      <ShoppingCart className="h-5 w-5" />
+                      Add to Cart — {formatCurrency(Number(selectedProduct.price) * qty, currency)}
+                    </button>
+                  )}
+                  {settings.whatsappOrdering && whatsappNumber && (
+                    <a
+                      href={getWhatsAppLink(whatsappNumber, [{ productId: selectedProduct.id, quantity: qty, product: selectedProduct }], currency, store.name)}
+                      className="btn-secondary w-full py-3 text-green-700 border-green-200 hover:bg-green-50 text-center"
+                    >
+                      <MessageCircle className="h-5 w-5 text-green-600" />
+                      Order via WhatsApp
+                    </a>
+                  )}
                 </div>
 
                 <div className="mt-4 grid grid-cols-3 gap-2 pt-4 border-t border-surface-100">

@@ -2,6 +2,8 @@
 
 import { useState } from "react";
 import Link from "next/link";
+import { useStore } from "@/context/StoreContext";
+import { api } from "@/lib/api-client";
 import {
   ShoppingBag,
   ArrowRight,
@@ -64,14 +66,19 @@ const steps = [
 ];
 
 export default function NewStorePage() {
+  const { refreshStores } = useStore();
   const [currentStep, setCurrentStep] = useState(1);
   const [selectedType, setSelectedType] = useState("");
   const [selectedTemplate, setSelectedTemplate] = useState("");
   const [selectedGateways, setSelectedGateways] = useState<string[]>([]);
   const [storeName, setStoreName] = useState("");
+  const [storeDescription, setStoreDescription] = useState("");
   const [useAI, setUseAI] = useState(false);
   const [aiGenerating, setAiGenerating] = useState(false);
   const [launched, setLaunched] = useState(false);
+  const [launching, setLaunching] = useState(false);
+  const [launchError, setLaunchError] = useState("");
+  const [createdStore, setCreatedStore] = useState<{ subdomain: string; id: string } | null>(null);
 
   const toggleGateway = (id: string) => {
     setSelectedGateways((prev) =>
@@ -88,8 +95,28 @@ export default function NewStorePage() {
     }, 3000);
   };
 
-  const handleLaunch = () => {
-    setLaunched(true);
+  const handleLaunch = async () => {
+    setLaunching(true);
+    setLaunchError("");
+    try {
+      const res = await api.post<{ id: string; subdomain: string; name: string }>("/api/stores", {
+        name: storeName || "My Store",
+        description: storeDescription || undefined,
+        businessType: selectedType || "general",
+        country: "NG",
+        currency: "NGN",
+      });
+      if (res.success && res.data) {
+        setCreatedStore({ subdomain: res.data.subdomain, id: res.data.id });
+        setLaunched(true);
+        await refreshStores();
+      } else {
+        setLaunchError(res.error || "Failed to create store. Please try again.");
+      }
+    } catch {
+      setLaunchError("Something went wrong. Please try again.");
+    }
+    setLaunching(false);
   };
 
   return (
@@ -233,6 +260,8 @@ export default function NewStorePage() {
                   className="input-field"
                   rows={3}
                   placeholder="What do you sell? Who are your customers?"
+                  value={storeDescription}
+                  onChange={(e) => setStoreDescription(e.target.value)}
                 />
               </div>
 
@@ -453,9 +482,12 @@ export default function NewStorePage() {
               </div>
             </div>
 
-            <button onClick={handleLaunch} className="btn-primary text-lg py-4 px-12">
-              <Rocket className="h-5 w-5" />
-              Launch My Store
+            {launchError && (
+              <div className="rounded-xl bg-red-50 border border-red-200 px-4 py-3 text-sm text-red-700 max-w-lg mx-auto">{launchError}</div>
+            )}
+            <button onClick={handleLaunch} disabled={launching} className="btn-primary text-lg py-4 px-12">
+              {launching ? <Loader2 className="h-5 w-5 animate-spin" /> : <Rocket className="h-5 w-5" />}
+              {launching ? "Creating..." : "Launch My Store"}
             </button>
           </div>
         )}
@@ -480,7 +512,7 @@ export default function NewStorePage() {
             <div className="rounded-2xl border border-brand-200 bg-brand-50 p-6 animate-fade-up">
               <p className="text-sm text-surface-600 mb-2">Your store URL:</p>
               <p className="text-lg font-bold text-brand-700">
-                {(storeName || "mystore").toLowerCase().replace(/[^a-z0-9]/g, "")}.afrostore.com
+                {createdStore?.subdomain || (storeName || "mystore").toLowerCase().replace(/[^a-z0-9]/g, "")}.afrostore.com
               </p>
             </div>
 
