@@ -638,6 +638,7 @@ model StorePlugin {
   pluginId    String
   isEnabled   Boolean  @default(true)
   config      Json?
+  settings    Json?    // Per-store plugin settings (populated from settingsSchema)
   installedAt DateTime @default(now())
 
   store  Store  @relation(fields: [storeId], references: [id], onDelete: Cascade)
