@@ -21,6 +21,8 @@ import {
   MessageCircle,
   Loader2,
   Store,
+  ExternalLink,
+  Globe,
 } from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
@@ -155,6 +157,27 @@ export default function DashboardPage() {
       />
 
       <div className="p-6 space-y-6">
+        {/* View Store Banner */}
+        <div className="rounded-2xl border border-brand-200 bg-gradient-to-r from-brand-50 to-accent-50 p-4 flex flex-col sm:flex-row items-center justify-between gap-3">
+          <div className="flex items-center gap-3">
+            <div className="h-10 w-10 rounded-xl bg-brand-600 flex items-center justify-center flex-shrink-0">
+              <Globe className="h-5 w-5 text-white" />
+            </div>
+            <div>
+              <p className="text-sm font-semibold text-surface-900">Your store is live!</p>
+              <p className="text-xs text-surface-500">{currentStore.subdomain}.afrostore.com</p>
+            </div>
+          </div>
+          <Link
+            href={`/store/${currentStore.slug}`}
+            target="_blank"
+            className="inline-flex items-center gap-2 rounded-xl bg-brand-600 text-white px-5 py-2.5 text-sm font-semibold hover:bg-brand-700 transition-colors shadow-md shadow-brand-600/20"
+          >
+            <ExternalLink className="h-4 w-4" />
+            View My Store
+          </Link>
+        </div>
+
         {/* Stats */}
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
           {statCards.map((stat) => {

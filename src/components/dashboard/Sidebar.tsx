@@ -36,6 +36,7 @@ import {
   Zap,
   RotateCcw,
   Crown,
+  ExternalLink,
 } from "lucide-react";
 
 const navigation = [
@@ -105,7 +106,7 @@ export default function Sidebar({ onNavigate }: { onNavigate?: () => void } = {}
       </div>
 
       {/* Store selector */}
-      <div className="px-3 py-3">
+      <div className="px-3 py-3 space-y-2">
         <button
           className={cn(
             "w-full flex items-center gap-2.5 rounded-xl border border-surface-200 bg-surface-50 p-2.5 transition-colors hover:bg-surface-100",
@@ -129,6 +130,23 @@ export default function Sidebar({ onNavigate }: { onNavigate?: () => void } = {}
             </>
           )}
         </button>
+
+        {/* View Store button */}
+        {currentStore && (
+          <Link
+            href={`/store/${currentStore.slug}`}
+            target="_blank"
+            className={cn(
+              "w-full flex items-center gap-2 rounded-xl border border-brand-200 bg-brand-50 text-brand-700 transition-colors hover:bg-brand-100",
+              collapsed ? "justify-center p-2" : "px-3 py-2"
+            )}
+          >
+            <ExternalLink className="h-3.5 w-3.5 flex-shrink-0" />
+            {!collapsed && (
+              <span className="text-xs font-semibold">View My Store</span>
+            )}
+          </Link>
+        )}
       </div>
 
       {/* Navigation */}
