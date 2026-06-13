@@ -237,7 +237,7 @@ export class PluginEngine {
               data: {
                 storeId: this.storeId,
                 code: p.code as string,
-                type: (p.type as string) || "PERCENTAGE",
+                type: ((p.type as string) || "PERCENTAGE") as import("@/generated/prisma").CouponType,
                 value: p.value as number,
                 maxUses: (p.maxUses as number) || null,
                 expiresAt: p.expiresAt ? new Date(p.expiresAt as string) : null,
