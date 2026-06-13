@@ -53,7 +53,7 @@ export async function PATCH(req: NextRequest, { params }: Params) {
     if (variants) {
       await tx.productVariant.deleteMany({ where: { productId } });
       await tx.productVariant.createMany({
-        data: variants.map((v, i) => ({ productId, ...v, options: v.options as any, position: i })),
+        data: variants.map((v, i) => ({ productId, ...v, options: v.options as any, image: v.image || null, position: i })),
       });
     }
 

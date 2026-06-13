@@ -1,10 +1,12 @@
 "use client";
 
 import { useState, useEffect, useCallback } from "react";
+import { useRouter } from "next/navigation";
 import DashboardHeader from "@/components/dashboard/DashboardHeader";
 import { useStore } from "@/context/StoreContext";
 import { api } from "@/lib/api-client";
 import { formatCurrency } from "@/lib/utils";
+import Link from "next/link";
 import {
   Search,
   Plus,
@@ -63,15 +65,7 @@ export default function ProductsPage() {
   const [search, setSearch] = useState("");
   const [statusFilter, setStatusFilter] = useState("");
   const [view, setView] = useState<"grid" | "list">("list");
-  const [showCreate, setShowCreate] = useState(false);
-
-  // Create form
-  const [newName, setNewName] = useState("");
-  const [newPrice, setNewPrice] = useState("");
-  const [newDesc, setNewDesc] = useState("");
-  const [newStock, setNewStock] = useState("0");
-  const [creating, setCreating] = useState(false);
-  const [createError, setCreateError] = useState("");
+  const router = useRouter();
 
   const fetchProducts = useCallback(async () => {
     if (!currentStore) return;
@@ -89,28 +83,6 @@ export default function ProductsPage() {
 
   useEffect(() => { fetchProducts(); }, [fetchProducts]);
 
-  const handleCreate = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!currentStore) return;
-    setCreating(true);
-    setCreateError("");
-    const res = await api.post(`/api/stores/${currentStore.id}/products`, {
-      name: newName,
-      price: parseFloat(newPrice),
-      description: newDesc || undefined,
-      stock: parseInt(newStock) || 0,
-      status: "DRAFT",
-    });
-    if (res.success) {
-      setShowCreate(false);
-      setNewName(""); setNewPrice(""); setNewDesc(""); setNewStock("0");
-      fetchProducts();
-    } else {
-      setCreateError(res.error || "Failed to create product");
-    }
-    setCreating(false);
-  };
-
   const handleDelete = async (id: string) => {
     if (!currentStore || !confirm("Delete this product?")) return;
     await api.delete(`/api/stores/${currentStore.id}/products/${id}`);
@@ -124,7 +96,7 @@ export default function ProductsPage() {
       <DashboardHeader
         title="Products"
         subtitle={`${total} products in your store`}
-        action={{ label: "Add Product", onClick: () => setShowCreate(true) }}
+        action={{ label: "Add Product", onClick: () => router.push("/dashboard/products/new") }}
       />
 
       <div className="p-6 space-y-4">
@@ -173,9 +145,9 @@ export default function ProductsPage() {
             <Package className="h-12 w-12 text-surface-300 mx-auto mb-4" />
             <h3 className="text-lg font-bold text-surface-900 mb-2">No products yet</h3>
             <p className="text-sm text-surface-500 mb-6">Add your first product to start selling.</p>
-            <button onClick={() => setShowCreate(true)} className="btn-primary">
+            <Link href="/dashboard/products/new" className="btn-primary inline-flex items-center gap-2">
               <Plus className="h-4 w-4" /> Add Product
-            </button>
+            </Link>
           </div>
         ) : (
           /* Product List */
@@ -234,9 +206,18 @@ export default function ProductsPage() {
                         )}
                       </td>
                       <td className="px-6 py-3.5 text-right">
-                        <button onClick={() => handleDelete(product.id)} className="p-1.5 rounded-lg text-surface-400 hover:text-accent-600 hover:bg-accent-50 transition-colors">
-                          <Trash2 className="h-4 w-4" />
-                        </button>
+                        <div className="flex items-center justify-end gap-1">
+                          <Link
+                            href={`/dashboard/products/${product.id}/edit`}
+                            className="p-1.5 rounded-lg text-surface-400 hover:text-brand-600 hover:bg-brand-50 transition-colors"
+                            title="Edit product"
+                          >
+                            <Edit className="h-4 w-4" />
+                          </Link>
+                          <button onClick={() => handleDelete(product.id)} className="p-1.5 rounded-lg text-surface-400 hover:text-accent-600 hover:bg-accent-50 transition-colors" title="Delete product">
+                            <Trash2 className="h-4 w-4" />
+                          </button>
+                        </div>
                       </td>
                     </tr>
                   );
@@ -258,48 +239,6 @@ export default function ProductsPage() {
         )}
       </div>
 
-      {/* Create Product Modal */}
-      {showCreate && (
-        <div className="fixed inset-0 bg-black/40 z-50 flex items-center justify-center p-4" onClick={() => setShowCreate(false)}>
-          <div className="bg-white rounded-2xl w-full max-w-lg p-6 shadow-2xl" onClick={(e) => e.stopPropagation()}>
-            <div className="flex items-center justify-between mb-6">
-              <h2 className="text-lg font-bold text-surface-900">Add Product</h2>
-              <button onClick={() => setShowCreate(false)} className="p-1 rounded-lg hover:bg-surface-100">
-                <X className="h-5 w-5 text-surface-400" />
-              </button>
-            </div>
-            <form onSubmit={handleCreate} className="space-y-4">
-              {createError && (
-                <div className="rounded-xl bg-accent-50 border border-accent-200 px-4 py-3 text-sm text-accent-700">{createError}</div>
-              )}
-              <div>
-                <label className="block text-sm font-medium text-surface-700 mb-1">Product name</label>
-                <input value={newName} onChange={(e) => setNewName(e.target.value)} className="input-field" placeholder="e.g. Ankara Maxi Dress" required />
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-surface-700 mb-1">Description</label>
-                <textarea value={newDesc} onChange={(e) => setNewDesc(e.target.value)} className="input-field" rows={3} placeholder="Describe your product..." />
-              </div>
-              <div className="grid grid-cols-2 gap-4">
-                <div>
-                  <label className="block text-sm font-medium text-surface-700 mb-1">Price ({currency})</label>
-                  <input type="number" value={newPrice} onChange={(e) => setNewPrice(e.target.value)} className="input-field" placeholder="15000" required min="0" step="0.01" />
-                </div>
-                <div>
-                  <label className="block text-sm font-medium text-surface-700 mb-1">Stock</label>
-                  <input type="number" value={newStock} onChange={(e) => setNewStock(e.target.value)} className="input-field" placeholder="0" min="0" />
-                </div>
-              </div>
-              <div className="flex justify-end gap-3 pt-2">
-                <button type="button" onClick={() => setShowCreate(false)} className="btn-secondary text-sm py-2 px-4">Cancel</button>
-                <button type="submit" disabled={creating} className="btn-primary text-sm py-2 px-4">
-                  {creating ? <Loader2 className="h-4 w-4 animate-spin" /> : <><Plus className="h-4 w-4" /> Add Product</>}
-                </button>
-              </div>
-            </form>
-          </div>
-        </div>
-      )}
     </>
   );
 }

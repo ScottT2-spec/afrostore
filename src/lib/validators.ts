@@ -63,6 +63,7 @@ export const createProductSchema = z.object({
     sku: z.string().optional(),
     price: z.number().positive().optional(),
     stock: z.number().int().min(0).default(0),
+    image: z.string().url().optional().nullable(),
     options: z.record(z.string(), z.string()),
   })).default([]),
 });
