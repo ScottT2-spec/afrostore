@@ -29,6 +29,8 @@ import {
   Loader2,
   X,
   Check,
+  AlertCircle,
+  RefreshCw,
 } from "lucide-react";
 
 const businessTypes = [
@@ -75,10 +77,13 @@ export default function NewStorePage() {
   const [storeDescription, setStoreDescription] = useState("");
   const [useAI, setUseAI] = useState(false);
   const [aiGenerating, setAiGenerating] = useState(false);
+  const [aiProgress, setAiProgress] = useState<string[]>([]);
+  const [aiError, setAiError] = useState("");
   const [launched, setLaunched] = useState(false);
   const [launching, setLaunching] = useState(false);
   const [launchError, setLaunchError] = useState("");
   const [createdStore, setCreatedStore] = useState<{ subdomain: string; id: string } | null>(null);
+  const [generatedPages, setGeneratedPages] = useState<Array<{ id: string; title: string; slug: string; type: string }>>([]);
 
   const toggleGateway = (id: string) => {
     setSelectedGateways((prev) =>
@@ -86,19 +91,106 @@ export default function NewStorePage() {
     );
   };
 
-  const handleAIGenerate = () => {
+  const handleAIGenerate = async () => {
     setAiGenerating(true);
-    setTimeout(() => {
+    setAiError("");
+    setAiProgress(["Analyzing your business type"]);
+
+    try {
+      // Step 1: Create the store first
+      setAiProgress(["Analyzing your business type", "Creating your store"]);
+      const storeRes = await api.post<{ id: string; subdomain: string; name: string }>("/api/stores", {
+        name: storeName || "My Store",
+        description: storeDescription || undefined,
+        businessType: selectedType || "general",
+        country: "NG",
+        currency: "NGN",
+      });
+
+      if (!storeRes.success || !storeRes.data) {
+        throw new Error(storeRes.error || "Failed to create store");
+      }
+
+      const newStore = storeRes.data;
+      setCreatedStore({ subdomain: newStore.subdomain, id: newStore.id });
+      await refreshStores();
+
+      // Step 2: Generate pages with AI
+      setAiProgress(["Analyzing your business type", "Creating your store", "Generating homepage & content"]);
+
+      await new Promise((r) => setTimeout(r, 500)); // small pause so user sees progress
+
+      setAiProgress([
+        "Analyzing your business type",
+        "Creating your store",
+        "Generating homepage & content",
+        "Writing About page & brand story",
+      ]);
+
+      const genRes = await api.post<{
+        pages: Array<{ id: string; title: string; slug: string; type: string }>;
+        provider: string;
+        model: string;
+      }>(`/api/stores/${newStore.id}/ai/generate-store`, {
+        storeName: storeName || "My Store",
+        businessType: selectedType || "general",
+        description: storeDescription || undefined,
+      });
+
+      if (!genRes.success || !genRes.data) {
+        // Store was created but AI generation failed — still continue
+        console.error("AI generation failed:", genRes.error);
+        setAiProgress([
+          "Analyzing your business type",
+          "Creating your store",
+          "Generating homepage & content",
+          "Writing About page & brand story",
+          "Building FAQ & policies",
+          "⚠️ AI content generation had issues — you can use the AI assistant later to generate pages",
+        ]);
+        await new Promise((r) => setTimeout(r, 2000));
+        setAiGenerating(false);
+        setSelectedTemplate("1");
+        setCurrentStep(4);
+        return;
+      }
+
+      setGeneratedPages(genRes.data.pages);
+
+      setAiProgress([
+        "Analyzing your business type",
+        "Creating your store",
+        "Generating homepage & content",
+        "Writing About page & brand story",
+        "Building FAQ & policies",
+        "Optimizing for mobile & SEO",
+      ]);
+
+      await new Promise((r) => setTimeout(r, 1000));
+
       setAiGenerating(false);
       setSelectedTemplate("1");
+      // Skip template selection — AI already built the pages. Go to payments.
       setCurrentStep(4);
-    }, 3000);
+    } catch (err) {
+      console.error("AI store generation error:", err);
+      setAiError((err as Error).message || "Something went wrong. Please try again.");
+      setAiGenerating(false);
+    }
   };
 
   const handleLaunch = async () => {
     setLaunching(true);
     setLaunchError("");
     try {
+      // If AI flow already created the store, just mark as launched
+      if (useAI && createdStore) {
+        setLaunched(true);
+        setLaunching(false);
+        return;
+      }
+
+      // Manual flow — create the store now
       const res = await api.post<{ id: string; subdomain: string; name: string }>("/api/stores", {
         name: storeName || "My Store",
         description: storeDescription || undefined,
@@ -299,6 +391,23 @@ export default function NewStorePage() {
               </div>
             </div>
 
+            {/* AI Error */}
+            {aiError && (
+              <div className="rounded-xl bg-red-50 border border-red-200 px-4 py-3 text-sm text-red-700 flex items-start gap-2">
+                <AlertCircle className="h-4 w-4 mt-0.5 flex-shrink-0" />
+                <div>
+                  <p className="font-medium">AI generation failed</p>
+                  <p className="mt-1">{aiError}</p>
+                  <button
+                    onClick={() => { setAiError(""); handleAIGenerate(); }}
+                    className="mt-2 text-red-800 underline font-medium flex items-center gap-1"
+                  >
+                    <RefreshCw className="h-3 w-3" /> Try again
+                  </button>
+                </div>
+              </div>
+            )}
+
             {/* AI Generating State */}
             {aiGenerating && (
               <div className="fixed inset-0 z-50 flex items-center justify-center bg-white/95 backdrop-blur-sm">
@@ -308,28 +417,41 @@ export default function NewStorePage() {
                   </div>
                   <h2 className="font-display text-2xl font-bold text-surface-900 mb-2">AI is building your store...</h2>
                   <p className="text-surface-500 mb-8">
-                    Generating homepage, product pages, about page, checkout, policies, SEO titles, and more.
+                    Creating your homepage, about page, FAQ, policies, and SEO — all tailored to your business.
                   </p>
                   <div className="space-y-3 text-left max-w-sm mx-auto">
                     {[
-                      { label: "Analyzing your business type", done: true },
-                      { label: "Generating brand identity", done: true },
-                      { label: "Creating homepage layout", done: true },
-                      { label: "Building product pages", done: false },
-                      { label: "Setting up checkout flow", done: false },
-                      { label: "Optimizing for mobile", done: false },
-                    ].map((item, i) => (
-                      <div key={item.label} className="flex items-center gap-3">
-                        {item.done ? (
-                          <CheckCircle2 className="h-5 w-5 text-brand-500" />
-                        ) : (
-                          <Loader2 className="h-5 w-5 text-surface-300 animate-spin" />
-                        )}
-                        <span className={`text-sm ${item.done ? "text-surface-900 font-medium" : "text-surface-400"}`}>
-                          {item.label}
-                        </span>
-                      </div>
-                    ))}
+                      "Analyzing your business type",
+                      "Creating your store",
+                      "Generating homepage & content",
+                      "Writing About page & brand story",
+                      "Building FAQ & policies",
+                      "Optimizing for mobile & SEO",
+                    ].map((label, i) => {
+                      const isDone = i < aiProgress.length;
+                      const isCurrent = i === aiProgress.length - 1;
+                      const isWarning = aiProgress[i]?.startsWith("⚠️");
+                      return (
+                        <div key={label} className="flex items-center gap-3">
+                          {isWarning ? (
+                            <AlertCircle className="h-5 w-5 text-amber-500" />
+                          ) : isDone ? (
+                            <CheckCircle2 className="h-5 w-5 text-brand-500" />
+                          ) : isCurrent ? (
+                            <Loader2 className="h-5 w-5 text-brand-400 animate-spin" />
+                          ) : (
+                            <div className="h-5 w-5 rounded-full border-2 border-surface-200" />
+                          )}
+                          <span className={`text-sm ${
+                            isWarning ? "text-amber-700 font-medium" :
+                            isDone ? "text-surface-900 font-medium" :
+                            "text-surface-400"
+                          }`}>
+                            {isWarning ? aiProgress[i] : label}
+                          </span>
+                        </div>
+                      );
+                    })}
                   </div>
                 </div>
               </div>
@@ -472,12 +594,21 @@ export default function NewStorePage() {
             <div className="rounded-2xl border border-surface-200 bg-white p-6 text-left space-y-3">
               <div className="flex items-center gap-3"><CheckCircle2 className="h-5 w-5 text-brand-500" /><span className="text-sm text-surface-700">Business type: <b className="capitalize">{selectedType}</b></span></div>
               <div className="flex items-center gap-3"><CheckCircle2 className="h-5 w-5 text-brand-500" /><span className="text-sm text-surface-700">Store name: <b>{storeName || "My Store"}</b></span></div>
-              <div className="flex items-center gap-3"><CheckCircle2 className="h-5 w-5 text-brand-500" /><span className="text-sm text-surface-700">Template selected</span></div>
+              {useAI && generatedPages.length > 0 ? (
+                <div className="flex items-center gap-3">
+                  <Sparkles className="h-5 w-5 text-brand-500" />
+                  <span className="text-sm text-surface-700">
+                    AI generated <b>{generatedPages.length} pages</b>: {generatedPages.map(p => p.title).join(", ")}
+                  </span>
+                </div>
+              ) : (
+                <div className="flex items-center gap-3"><CheckCircle2 className="h-5 w-5 text-brand-500" /><span className="text-sm text-surface-700">Template selected</span></div>
+              )}
               <div className="flex items-center gap-3"><CheckCircle2 className="h-5 w-5 text-brand-500" /><span className="text-sm text-surface-700">{selectedGateways.length > 0 ? `${selectedGateways.length} payment gateway(s)` : "Payments: setup later"}</span></div>
               <div className="flex items-center gap-3">
                 <Globe className="h-5 w-5 text-brand-500" />
                 <span className="text-sm text-surface-700">
-                  URL: <b>{(storeName || "mystore").toLowerCase().replace(/[^a-z0-9]/g, "")}.afrostore.com</b>
+                  URL: <b>{createdStore?.subdomain || (storeName || "mystore").toLowerCase().replace(/[^a-z0-9]/g, "")}.afrostore.com</b>
                 </span>
               </div>
             </div>
