@@ -33,6 +33,9 @@ import {
   FolderTree,
   Star,
   UserPlus,
+  Zap,
+  RotateCcw,
+  Crown,
 } from "lucide-react";
 
 const navigation = [
@@ -51,6 +54,9 @@ const navigation = [
   { name: "Themes", href: "/dashboard/themes", icon: Palette },
   { name: "Plugins", href: "/dashboard/plugins", icon: Puzzle },
   { name: "Referrals", href: "/dashboard/referrals", icon: Link2 },
+  { name: "Flash Sales", href: "/dashboard/flash-sales", icon: Zap },
+  { name: "Abandoned Carts", href: "/dashboard/abandoned-carts", icon: RotateCcw },
+  { name: "Loyalty", href: "/dashboard/loyalty", icon: Crown },
   { name: "AI Assistant", href: "/dashboard/ai", icon: Bot },
   { name: "Domains", href: "/dashboard/domains", icon: Globe },
 ];

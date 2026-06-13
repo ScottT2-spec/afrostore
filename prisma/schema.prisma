@@ -114,6 +114,9 @@ model Store {
   analytics      AnalyticsEvent[]
   auditLogs      AuditLog[]
   referralProgram ReferralProgram?
+  flashSales     FlashSale[]
+  abandonedCarts AbandonedCart[]
+  loyaltyProgram LoyaltyProgram?
 
   @@index([ownerId])
   @@index([subdomain])
@@ -249,6 +252,7 @@ model Product {
   variants  ProductVariant[]
   orderItems OrderItem[]
   reviews   Review[]
+  flashSales FlashSaleProduct[]
 
   @@unique([storeId, slug])
   @@index([storeId])
@@ -334,6 +338,7 @@ model Order {
   items    OrderItem[]
   timeline OrderTimeline[]
   referral Referral?
+  recoveredCart AbandonedCart? @relation("RecoveredCart")
 
   @@index([storeId])
   @@index([storeId, status])
@@ -413,10 +418,12 @@ model Customer {
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
 
-  store      Store       @relation(fields: [storeId], references: [id], onDelete: Cascade)
-  orders     Order[]
-  reviews    Review[]
-  affiliates Affiliate[]
+  store          Store           @relation(fields: [storeId], references: [id], onDelete: Cascade)
+  orders         Order[]
+  reviews        Review[]
+  affiliates     Affiliate[]
+  abandonedCarts AbandonedCart[]
+  loyaltyMemberships LoyaltyMember[]
 
   @@unique([storeId, email])
   @@index([storeId])
@@ -703,6 +710,142 @@ model AnalyticsEvent {
   @@index([storeId, createdAt])
   @@index([sessionId])
   @@map("analytics_events")
+}
+
+// ─── FLASH SALES ────────────────────────────────────────────
+
+model FlashSale {
+  id          String          @id @default(cuid())
+  storeId     String
+  name        String
+  description String?         @db.Text
+  discountType DiscountType   @default(PERCENTAGE)
+  discountValue Float
+  startsAt    DateTime
+  endsAt      DateTime
+  isActive    Boolean         @default(true)
+  maxUses     Int?            // null = unlimited
+  usedCount   Int             @default(0)
+  createdAt   DateTime        @default(now())
+  updatedAt   DateTime        @updatedAt
+
+  store    Store             @relation(fields: [storeId], references: [id], onDelete: Cascade)
+  products FlashSaleProduct[]
+
+  @@index([storeId])
+  @@index([storeId, startsAt, endsAt])
+  @@map("flash_sales")
+}
+
+model FlashSaleProduct {
+  id          String    @id @default(cuid())
+  flashSaleId String
+  productId   String
+  overrideDiscount Float? // per-product override
+
+  flashSale FlashSale @relation(fields: [flashSaleId], references: [id], onDelete: Cascade)
+  product   Product   @relation(fields: [productId], references: [id], onDelete: Cascade)
+
+  @@unique([flashSaleId, productId])
+  @@map("flash_sale_products")
+}
+
+enum DiscountType {
+  PERCENTAGE
+  FIXED
+}
+
+// ─── ABANDONED CARTS ────────────────────────────────────────
+
+model AbandonedCart {
+  id          String            @id @default(cuid())
+  storeId     String
+  customerId  String?
+  email       String?
+  phone       String?
+  sessionId   String?
+  items       Json              // cart items snapshot
+  totalAmount Float             @default(0)
+  currency    String            @default("NGN")
+  status      AbandonedCartStatus @default(ACTIVE)
+  recoveredOrderId String?      @unique
+  remindersSent Int             @default(0)
+  lastReminderAt DateTime?
+  recoveredAt DateTime?
+  createdAt   DateTime          @default(now())
+  updatedAt   DateTime          @updatedAt
+
+  store     Store   @relation(fields: [storeId], references: [id], onDelete: Cascade)
+  customer  Customer? @relation(fields: [customerId], references: [id], onDelete: SetNull)
+  recoveredOrder Order? @relation("RecoveredCart", fields: [recoveredOrderId], references: [id], onDelete: SetNull)
+
+  @@index([storeId, status])
+  @@index([storeId, createdAt])
+  @@index([email])
+  @@map("abandoned_carts")
+}
+
+enum AbandonedCartStatus {
+  ACTIVE
+  REMINDED
+  RECOVERED
+  EXPIRED
+}
+
+// ─── LOYALTY POINTS ─────────────────────────────────────────
+
+model LoyaltyProgram {
+  id                  String   @id @default(cuid())
+  storeId             String   @unique
+  enabled             Boolean  @default(true)
+  pointsPerCurrency   Float    @default(1)     // e.g. 1 point per ₦100 spent
+  currencyPerPoint    Float    @default(100)    // ₦ threshold per point
+  redemptionRate      Float    @default(0.01)   // value per point in store currency
+  minRedeemPoints     Int      @default(100)
+  welcomePoints       Int      @default(0)
+  referralPoints      Int      @default(50)
+  reviewPoints        Int      @default(10)
+  createdAt           DateTime @default(now())
+  updatedAt           DateTime @updatedAt
+
+  store   Store          @relation(fields: [storeId], references: [id], onDelete: Cascade)
+  members LoyaltyMember[]
+
+  @@map("loyalty_programs")
+}
+
+model LoyaltyMember {
+  id              String   @id @default(cuid())
+  programId       String
+  customerId      String
+  totalPoints     Int      @default(0)
+  availablePoints Int      @default(0)
+  redeemedPoints  Int      @default(0)
+  tier            String   @default("bronze") // bronze, silver, gold, platinum
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  program       LoyaltyProgram    @relation(fields: [programId], references: [id], onDelete: Cascade)
+  customer      Customer          @relation(fields: [customerId], references: [id], onDelete: Cascade)
+  transactions  LoyaltyTransaction[]
+
+  @@unique([programId, customerId])
+  @@map("loyalty_members")
+}
+
+model LoyaltyTransaction {
+  id          String   @id @default(cuid())
+  memberId    String
+  type        String   // earn, redeem, bonus, expire
+  points      Int
+  description String?
+  orderId     String?
+  createdAt   DateTime @default(now())
+
+  member LoyaltyMember @relation(fields: [memberId], references: [id], onDelete: Cascade)
+
+  @@index([memberId])
+  @@map("loyalty_transactions")
 }
 
 // ─── REFERRAL / AFFILIATE ───────────────────────────────────
