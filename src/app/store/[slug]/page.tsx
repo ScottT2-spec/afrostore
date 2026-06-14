@@ -310,6 +310,7 @@ export default function StorePage() {
           <nav className="hidden sm:flex items-center gap-6">
             <Link href={`/store/${slug}`} className="text-sm font-medium text-brand-700 transition-colors">Home</Link>
             <a href="#shop" className="text-sm font-medium text-surface-600 hover:text-surface-900 transition-colors">Shop</a>
+            <Link href={`/store/${slug}/reviews`} className="text-sm font-medium text-surface-600 hover:text-surface-900 transition-colors">Reviews</Link>
             {navPages.slice(0, 4).map((page) => (
               <Link key={page.id} href={`/store/${slug}/${page.slug}`} className="text-sm font-medium text-surface-600 hover:text-surface-900 transition-colors">{page.title}</Link>
             ))}
@@ -353,6 +354,7 @@ export default function StorePage() {
         <div className="sm:hidden bg-white border-b border-surface-200 px-4 py-4 space-y-2">
           <Link href={`/store/${slug}`} onClick={() => setMobileMenu(false)} className="block text-sm font-bold text-brand-700 py-2">Home</Link>
           <a href="#shop" onClick={() => setMobileMenu(false)} className="block text-sm font-medium text-surface-600 py-2">Shop</a>
+          <Link href={`/store/${slug}/reviews`} onClick={() => setMobileMenu(false)} className="block text-sm font-medium text-surface-600 py-2">Reviews</Link>
           {navPages.map((page) => (
             <Link key={page.id} href={`/store/${slug}/${page.slug}`} onClick={() => setMobileMenu(false)} className="block text-sm font-medium text-surface-600 py-2">{page.title}</Link>
           ))}

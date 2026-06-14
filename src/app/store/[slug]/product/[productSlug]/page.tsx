@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { useParams } from "next/navigation";
 import Link from "next/link";
 import {
@@ -19,6 +19,10 @@ import {
   Share2,
   Check,
   ImageIcon,
+  ChevronDown,
+  BadgeCheck,
+  Pencil,
+  X,
 } from "lucide-react";
 
 interface ProductImage { id: string; url: string; alt?: string }
@@ -345,58 +349,8 @@ export default function ProductDetailPage() {
           </div>
         </div>
 
-        {/* Reviews */}
-        {reviews.stats.totalCount > 0 && (
-          <section className="mt-16 pt-10 border-t border-surface-100">
-            <h2 className="text-xl font-bold text-surface-900 font-display mb-6">Customer Reviews</h2>
-
-            <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-              {/* Stats */}
-              <div className="lg:col-span-1">
-                <div className="rounded-2xl bg-surface-50 p-6 text-center">
-                  <div className="text-4xl font-bold text-surface-900">{reviews.stats.averageRating.toFixed(1)}</div>
-                  <Stars rating={reviews.stats.averageRating} size={20} />
-                  <p className="text-xs text-surface-500 mt-1">{reviews.stats.totalCount} review{reviews.stats.totalCount !== 1 ? "s" : ""}</p>
-                  <div className="mt-4 space-y-1.5">
-                    {[...reviews.stats.ratingDistribution].reverse().map((d) => (
-                      <div key={d.rating} className="flex items-center gap-2">
-                        <span className="text-[10px] text-surface-500 w-3">{d.rating}</span>
-                        <Star className="h-3 w-3 text-amber-400 fill-amber-400" />
-                        <div className="flex-1 h-2 rounded-full bg-surface-200 overflow-hidden">
-                          <div className="h-full rounded-full bg-amber-400" style={{ width: `${reviews.stats.totalCount > 0 ? (d.count / reviews.stats.totalCount) * 100 : 0}%` }} />
-                        </div>
-                        <span className="text-[10px] text-surface-400 w-4 text-right">{d.count}</span>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              </div>
-
-              {/* Review List */}
-              <div className="lg:col-span-2 space-y-4">
-                {reviews.items.map((review) => (
-                  <div key={review.id} className="rounded-2xl border border-surface-100 p-5">
-                    <div className="flex items-center justify-between mb-2">
-                      <div className="flex items-center gap-2">
-                        <div className="h-8 w-8 rounded-full bg-gradient-to-br from-brand-600 to-accent-400 flex items-center justify-center text-white text-[10px] font-bold">
-                          {review.name.split(" ").map((n) => n[0]).join("").slice(0, 2).toUpperCase()}
-                        </div>
-                        <div>
-                          <span className="text-sm font-semibold text-surface-900">{review.name}</span>
-                          {review.isVerified && <span className="ml-1.5 text-[9px] font-semibold text-green-600 bg-green-50 px-1.5 py-0.5 rounded">Verified</span>}
-                        </div>
-                      </div>
-                      <span className="text-[10px] text-surface-400">{new Date(review.createdAt).toLocaleDateString()}</span>
-                    </div>
-                    <Stars rating={review.rating} size={14} />
-                    {review.title && <p className="text-sm font-semibold text-surface-900 mt-2">{review.title}</p>}
-                    {review.body && <p className="text-sm text-surface-600 mt-1 leading-relaxed">{review.body}</p>}
-                  </div>
-                ))}
-              </div>
-            </div>
-          </section>
-        )}
+        {/* Reviews Section */}
+        <ReviewsSection slug={slug} productSlug={productSlug} initialReviews={reviews} />
 
         {/* Related Products */}
         {relatedProducts.length > 0 && (
@@ -430,5 +384,345 @@ export default function ProductDetailPage() {
         </div>
       </footer>
     </div>
+  );
+}
+
+/* ═══════════════════════════════════════════════════════════
+   ReviewsSection — full-featured reviews UI
+   ═══════════════════════════════════════════════════════════ */
+
+function InteractiveStars({ rating, onRate, onHover, size = 24 }: { rating: number; onRate: (r: number) => void; onHover?: (r: number | null) => void; size?: number }) {
+  return (
+    <div className="flex items-center gap-1">
+      {[1, 2, 3, 4, 5].map((i) => (
+        <button
+          key={i}
+          type="button"
+          onClick={() => onRate(i)}
+          onMouseEnter={() => onHover?.(i)}
+          onMouseLeave={() => onHover?.(null)}
+          className="transition-transform hover:scale-110"
+        >
+          <Star
+            className={i <= rating ? "text-amber-400 fill-amber-400" : "text-surface-200 hover:text-amber-200"}
+            style={{ width: size, height: size }}
+          />
+        </button>
+      ))}
+    </div>
+  );
+}
+
+interface ReviewsData {
+  items: Review[];
+  stats: { averageRating: number; totalCount: number; ratingDistribution: { rating: number; count: number }[] };
+}
+
+function ReviewsSection({ slug, productSlug, initialReviews }: { slug: string; productSlug: string; initialReviews: ReviewsData }) {
+  const [reviews, setReviews] = useState<Review[]>(initialReviews.items);
+  const [stats, setStats] = useState(initialReviews.stats);
+  const [page, setPage] = useState(1);
+  const [hasMore, setHasMore] = useState(initialReviews.items.length >= 5);
+  const [loadingMore, setLoadingMore] = useState(false);
+  const [sort, setSort] = useState("newest");
+  const [showForm, setShowForm] = useState(false);
+
+  // Form state
+  const [formRating, setFormRating] = useState(0);
+  const [hoverRating, setHoverRating] = useState<number | null>(null);
+  const [formName, setFormName] = useState("");
+  const [formEmail, setFormEmail] = useState("");
+  const [formTitle, setFormTitle] = useState("");
+  const [formBody, setFormBody] = useState("");
+  const [submitting, setSubmitting] = useState(false);
+  const [submitResult, setSubmitResult] = useState<{ type: "success" | "error"; message: string } | null>(null);
+
+  const fetchReviews = useCallback(async (p: number, s: string, append: boolean) => {
+    setLoadingMore(true);
+    try {
+      const res = await fetch(`/api/storefront/${slug}/products/${productSlug}/reviews?page=${p}&limit=5&sort=${s}`);
+      const data = await res.json();
+      if (data.success) {
+        if (append) {
+          setReviews((prev) => [...prev, ...data.data.items]);
+        } else {
+          setReviews(data.data.items);
+        }
+        setStats(data.data.stats);
+        setHasMore(data.data.pagination.hasMore);
+      }
+    } catch {
+      // silently fail
+    } finally {
+      setLoadingMore(false);
+    }
+  }, [slug, productSlug]);
+
+  const handleSortChange = (newSort: string) => {
+    setSort(newSort);
+    setPage(1);
+    fetchReviews(1, newSort, false);
+  };
+
+  const handleLoadMore = () => {
+    const nextPage = page + 1;
+    setPage(nextPage);
+    fetchReviews(nextPage, sort, true);
+  };
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (formRating === 0) {
+      setSubmitResult({ type: "error", message: "Please select a rating" });
+      return;
+    }
+    setSubmitting(true);
+    setSubmitResult(null);
+
+    try {
+      const res = await fetch(`/api/storefront/${slug}/products/${productSlug}/reviews`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          name: formName,
+          email: formEmail,
+          rating: formRating,
+          title: formTitle || undefined,
+          body: formBody || undefined,
+        }),
+      });
+      const data = await res.json();
+      if (data.success) {
+        setSubmitResult({ type: "success", message: "Thank you! Your review will appear after approval." });
+        setFormRating(0);
+        setFormName("");
+        setFormEmail("");
+        setFormTitle("");
+        setFormBody("");
+        setTimeout(() => setShowForm(false), 3000);
+      } else {
+        setSubmitResult({ type: "error", message: data.error || "Failed to submit review" });
+      }
+    } catch {
+      setSubmitResult({ type: "error", message: "Something went wrong. Please try again." });
+    } finally {
+      setSubmitting(false);
+    }
+  };
+
+  const displayRating = hoverRating ?? formRating;
+  const isEmpty = stats.totalCount === 0 && reviews.length === 0;
+
+  return (
+    <section id="reviews" className="mt-16 pt-10 border-t border-surface-100">
+      <div className="flex items-center justify-between mb-8">
+        <h2 className="text-xl font-bold text-surface-900 font-display">Customer Reviews</h2>
+        <button
+          onClick={() => { setShowForm(!showForm); setSubmitResult(null); }}
+          className="flex items-center gap-2 rounded-xl bg-brand-600 text-white px-5 py-2.5 text-sm font-bold hover:bg-brand-700 transition-all"
+        >
+          <Pencil className="h-4 w-4" /> Write a Review
+        </button>
+      </div>
+
+      {/* Write Review Form */}
+      {showForm && (
+        <div className="mb-8 rounded-2xl border border-surface-200 bg-surface-50 p-6">
+          <div className="flex items-center justify-between mb-4">
+            <h3 className="text-lg font-bold text-surface-900 font-display">Write a Review</h3>
+            <button onClick={() => setShowForm(false)} className="p-1 text-surface-400 hover:text-surface-600">
+              <X className="h-5 w-5" />
+            </button>
+          </div>
+
+          {submitResult?.type === "success" ? (
+            <div className="flex items-center gap-3 rounded-xl bg-green-50 border border-green-200 p-4">
+              <Check className="h-5 w-5 text-green-600 flex-shrink-0" />
+              <p className="text-sm text-green-700 font-medium">{submitResult.message}</p>
+            </div>
+          ) : (
+            <form onSubmit={handleSubmit} className="space-y-4">
+              {/* Star Rating */}
+              <div>
+                <label className="block text-sm font-semibold text-surface-700 mb-2">Your Rating *</label>
+                <InteractiveStars rating={displayRating} onRate={setFormRating} onHover={setHoverRating} size={28} />
+                {submitResult?.type === "error" && submitResult.message === "Please select a rating" && (
+                  <p className="text-xs text-red-500 mt-1">Please select a rating</p>
+                )}
+              </div>
+
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-sm font-semibold text-surface-700 mb-1.5">Name *</label>
+                  <input
+                    type="text"
+                    required
+                    value={formName}
+                    onChange={(e) => setFormName(e.target.value)}
+                    placeholder="Your name"
+                    className="w-full rounded-xl border border-surface-200 bg-white px-4 py-2.5 text-sm text-surface-900 placeholder:text-surface-400 focus:outline-none focus:ring-2 focus:ring-brand-500 focus:border-transparent"
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-semibold text-surface-700 mb-1.5">Email *</label>
+                  <input
+                    type="email"
+                    required
+                    value={formEmail}
+                    onChange={(e) => setFormEmail(e.target.value)}
+                    placeholder="your@email.com"
+                    className="w-full rounded-xl border border-surface-200 bg-white px-4 py-2.5 text-sm text-surface-900 placeholder:text-surface-400 focus:outline-none focus:ring-2 focus:ring-brand-500 focus:border-transparent"
+                  />
+                  <p className="text-[10px] text-surface-400 mt-1">Your email won&apos;t be displayed publicly</p>
+                </div>
+              </div>
+
+              <div>
+                <label className="block text-sm font-semibold text-surface-700 mb-1.5">Title <span className="text-surface-400 font-normal">(optional)</span></label>
+                <input
+                  type="text"
+                  value={formTitle}
+                  onChange={(e) => setFormTitle(e.target.value)}
+                  placeholder="Summarize your experience"
+                  className="w-full rounded-xl border border-surface-200 bg-white px-4 py-2.5 text-sm text-surface-900 placeholder:text-surface-400 focus:outline-none focus:ring-2 focus:ring-brand-500 focus:border-transparent"
+                />
+              </div>
+
+              <div>
+                <label className="block text-sm font-semibold text-surface-700 mb-1.5">Review <span className="text-surface-400 font-normal">(optional but encouraged)</span></label>
+                <textarea
+                  value={formBody}
+                  onChange={(e) => setFormBody(e.target.value)}
+                  placeholder="Tell others about your experience with this product..."
+                  rows={4}
+                  className="w-full rounded-xl border border-surface-200 bg-white px-4 py-2.5 text-sm text-surface-900 placeholder:text-surface-400 focus:outline-none focus:ring-2 focus:ring-brand-500 focus:border-transparent resize-none"
+                />
+              </div>
+
+              {submitResult?.type === "error" && submitResult.message !== "Please select a rating" && (
+                <div className="rounded-xl bg-red-50 border border-red-200 p-3">
+                  <p className="text-sm text-red-600">{submitResult.message}</p>
+                </div>
+              )}
+
+              <button
+                type="submit"
+                disabled={submitting}
+                className="flex items-center justify-center gap-2 rounded-xl bg-surface-900 text-white px-6 py-3 text-sm font-bold hover:bg-surface-800 disabled:opacity-50 disabled:cursor-not-allowed transition-all"
+              >
+                {submitting ? <><Loader2 className="h-4 w-4 animate-spin" /> Submitting...</> : "Submit Review"}
+              </button>
+            </form>
+          )}
+        </div>
+      )}
+
+      {isEmpty ? (
+        /* Empty state */
+        <div className="rounded-2xl border border-dashed border-surface-200 p-10 text-center">
+          <Star className="h-10 w-10 text-surface-200 mx-auto mb-3" />
+          <h3 className="text-lg font-bold text-surface-900 font-display">No reviews yet</h3>
+          <p className="text-sm text-surface-500 mt-1 mb-4">Be the first to share your experience!</p>
+          {!showForm && (
+            <button
+              onClick={() => setShowForm(true)}
+              className="inline-flex items-center gap-2 rounded-xl bg-brand-600 text-white px-5 py-2.5 text-sm font-bold hover:bg-brand-700 transition-all"
+            >
+              <Pencil className="h-4 w-4" /> Write a Review
+            </button>
+          )}
+        </div>
+      ) : (
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+          {/* Stats Sidebar */}
+          <div className="lg:col-span-1">
+            <div className="rounded-2xl bg-surface-50 p-6 text-center sticky top-24">
+              <div className="text-5xl font-bold text-surface-900 font-display">{stats.averageRating.toFixed(1)}</div>
+              <div className="flex justify-center mt-2">
+                <Stars rating={stats.averageRating} size={22} />
+              </div>
+              <p className="text-sm text-surface-500 mt-2">{stats.totalCount} review{stats.totalCount !== 1 ? "s" : ""}</p>
+
+              <div className="mt-6 space-y-2">
+                {[...stats.ratingDistribution].reverse().map((d) => {
+                  const pct = stats.totalCount > 0 ? (d.count / stats.totalCount) * 100 : 0;
+                  return (
+                    <div key={d.rating} className="flex items-center gap-2">
+                      <span className="text-xs text-surface-500 w-3 text-right">{d.rating}</span>
+                      <Star className="h-3.5 w-3.5 text-amber-400 fill-amber-400" />
+                      <div className="flex-1 h-2.5 rounded-full bg-surface-200 overflow-hidden">
+                        <div className="h-full rounded-full bg-amber-400 transition-all duration-300" style={{ width: `${pct}%` }} />
+                      </div>
+                      <span className="text-xs text-surface-400 w-6 text-right">{d.count}</span>
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
+          </div>
+
+          {/* Review List */}
+          <div className="lg:col-span-2">
+            {/* Sort */}
+            <div className="flex items-center justify-between mb-4">
+              <p className="text-sm text-surface-500">{stats.totalCount} review{stats.totalCount !== 1 ? "s" : ""}</p>
+              <div className="relative">
+                <select
+                  value={sort}
+                  onChange={(e) => handleSortChange(e.target.value)}
+                  className="appearance-none rounded-xl border border-surface-200 bg-white px-4 py-2 pr-9 text-sm text-surface-700 font-medium focus:outline-none focus:ring-2 focus:ring-brand-500 cursor-pointer"
+                >
+                  <option value="newest">Newest</option>
+                  <option value="highest">Highest Rated</option>
+                  <option value="lowest">Lowest Rated</option>
+                </select>
+                <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 h-4 w-4 text-surface-400 pointer-events-none" />
+              </div>
+            </div>
+
+            <div className="space-y-4">
+              {reviews.map((review) => (
+                <div key={review.id} className="rounded-2xl border border-surface-100 p-5 hover:border-surface-200 transition-colors">
+                  <div className="flex items-start justify-between mb-3">
+                    <div className="flex items-center gap-3">
+                      <div className="h-10 w-10 rounded-full bg-gradient-to-br from-brand-600 to-accent-400 flex items-center justify-center text-white text-xs font-bold flex-shrink-0">
+                        {review.name.split(" ").map((n) => n[0]).join("").slice(0, 2).toUpperCase()}
+                      </div>
+                      <div>
+                        <div className="flex items-center gap-2">
+                          <span className="text-sm font-semibold text-surface-900">{review.name}</span>
+                          {review.isVerified && (
+                            <span className="inline-flex items-center gap-0.5 text-[10px] font-semibold text-green-600 bg-green-50 px-1.5 py-0.5 rounded-full">
+                              <BadgeCheck className="h-3 w-3" /> Verified
+                            </span>
+                          )}
+                        </div>
+                        <span className="text-xs text-surface-400">{new Date(review.createdAt).toLocaleDateString("en-US", { year: "numeric", month: "short", day: "numeric" })}</span>
+                      </div>
+                    </div>
+                  </div>
+                  <Stars rating={review.rating} size={14} />
+                  {review.title && <p className="text-sm font-bold text-surface-900 mt-2">{review.title}</p>}
+                  {review.body && <p className="text-sm text-surface-600 mt-1.5 leading-relaxed">{review.body}</p>}
+                </div>
+              ))}
+            </div>
+
+            {/* Load More */}
+            {hasMore && (
+              <div className="mt-6 text-center">
+                <button
+                  onClick={handleLoadMore}
+                  disabled={loadingMore}
+                  className="inline-flex items-center gap-2 rounded-xl border border-surface-200 bg-white px-6 py-2.5 text-sm font-semibold text-surface-700 hover:bg-surface-50 disabled:opacity-50 transition-all"
+                >
+                  {loadingMore ? <><Loader2 className="h-4 w-4 animate-spin" /> Loading...</> : "Load More Reviews"}
+                </button>
+              </div>
+            )}
+          </div>
+        </div>
+      )}
+    </section>
   );
 }
