@@ -4,6 +4,7 @@ import { useState } from "react";
 import Link from "next/link";
 import { useStore } from "@/context/StoreContext";
 import { api } from "@/lib/api-client";
+import { SingleImageUpload } from "@/components/dashboard/ImageUpload";
 import {
   ShoppingBag,
   ArrowRight,
@@ -82,6 +83,7 @@ export default function NewStorePage() {
   const [launched, setLaunched] = useState(false);
   const [launching, setLaunching] = useState(false);
   const [launchError, setLaunchError] = useState("");
+  const [storeLogo, setStoreLogo] = useState<string | null>(null);
   const [createdStore, setCreatedStore] = useState<{ subdomain: string; id: string } | null>(null);
   const [generatedPages, setGeneratedPages] = useState<Array<{ id: string; title: string; slug: string; type: string }>>([]);
 
@@ -197,6 +199,7 @@ export default function NewStorePage() {
         businessType: selectedType || "general",
         country: "NG",
         currency: "NGN",
+        logo: storeLogo || undefined,
       });
       if (res.success && res.data) {
         setCreatedStore({ subdomain: res.data.subdomain, id: res.data.id });
@@ -357,14 +360,11 @@ export default function NewStorePage() {
                 />
               </div>
 
-              <div>
-                <label className="block text-sm font-medium text-surface-700 mb-1.5">Logo (optional)</label>
-                <div className="border-2 border-dashed border-surface-300 rounded-xl p-6 text-center hover:border-brand-400 hover:bg-brand-50/30 transition-all cursor-pointer">
-                  <Upload className="h-6 w-6 text-surface-400 mx-auto mb-2" />
-                  <p className="text-sm text-surface-500">Upload logo or drop here</p>
-                  <p className="text-[10px] text-surface-400 mt-1">PNG, JPG • 512x512 recommended</p>
-                </div>
-              </div>
+              <SingleImageUpload
+                image={storeLogo}
+                onChange={setStoreLogo}
+                label="Logo (optional)"
+              />
 
               {/* AI or Manual */}
               <div className="rounded-2xl bg-gradient-to-r from-brand-50 to-accent-50 border border-brand-100 p-5">

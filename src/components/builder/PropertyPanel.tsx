@@ -2,6 +2,7 @@
 
 import { BuilderBlock, BlockType } from "@/lib/builder/types";
 import { X, Trash2, Plus, Copy } from "lucide-react";
+import { SingleImageUpload } from "@/components/dashboard/ImageUpload";
 
 interface PropertyPanelProps {
   block: BuilderBlock;
@@ -115,7 +116,12 @@ function TextProps({ block, update }: { block: BuilderBlock; update: (key: strin
 function ImageProps({ block, update }: { block: BuilderBlock; update: (key: string, val: unknown) => void }) {
   return (
     <>
-      <PropInput label="Image URL" value={block.props.src} onChange={(v) => update("src", v)} />
+      <SingleImageUpload
+        image={(block.props.src as string) || null}
+        onChange={(url) => update("src", url || "")}
+        label="Image"
+        compact
+      />
       <PropInput label="Alt Text" value={block.props.alt} onChange={(v) => update("alt", v)} />
       <PropInput label="Corners" value={block.props.rounded} onChange={(v) => update("rounded", v)} type="select"
         options={[{ value: "none", label: "Square" }, { value: "lg", label: "Rounded" }, { value: "xl", label: "More Rounded" }, { value: "2xl", label: "Very Round" }]} />

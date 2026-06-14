@@ -29,8 +29,8 @@ export const createStoreSchema = z.object({
 export const updateStoreSchema = z.object({
   name: z.string().min(1).max(100).optional(),
   description: z.string().max(500).optional(),
-  logo: z.string().url().optional().nullable(),
-  coverImage: z.string().url().optional().nullable(),
+  logo: z.string().optional().nullable(),
+  coverImage: z.string().optional().nullable(),
   customDomain: z.string().optional().nullable(),
   currency: z.string().optional(),
   country: z.string().optional(),
@@ -55,7 +55,7 @@ export const createProductSchema = z.object({
   metaTitle: z.string().optional(),
   metaDescription: z.string().optional(),
   images: z.array(z.object({
-    url: z.string().url(),
+    url: z.string().min(1),
     alt: z.string().optional(),
   })).default([]),
   variants: z.array(z.object({
@@ -63,7 +63,7 @@ export const createProductSchema = z.object({
     sku: z.string().optional(),
     price: z.number().positive().optional(),
     stock: z.number().int().min(0).default(0),
-    image: z.string().url().optional().nullable(),
+    image: z.string().optional().nullable(),
     options: z.record(z.string(), z.string()),
   })).default([]),
 });

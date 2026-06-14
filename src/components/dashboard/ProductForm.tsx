@@ -24,6 +24,7 @@ import {
   Copy,
   AlertCircle,
 } from "lucide-react";
+import ImageUpload, { SingleImageUpload } from "@/components/dashboard/ImageUpload";
 
 // ─── Types ──────────────────────────────────────────────────
 
@@ -171,7 +172,6 @@ export default function ProductForm({ productId }: ProductFormProps) {
 
   // Images
   const [images, setImages] = useState<ProductImage[]>([]);
-  const [imageUrl, setImageUrl] = useState("");
 
   // Inventory
   const [stock, setStock] = useState("0");
@@ -310,21 +310,7 @@ export default function ProductForm({ productId }: ProductFormProps) {
     setVariants(merged);
   };
 
-  // ─── Images ────────────────────────────────────────────────
-
-  const addImage = () => {
-    if (!imageUrl.trim()) return;
-    setImages([...images, { url: imageUrl.trim(), alt: "" }]);
-    setImageUrl("");
-  };
-
-  const removeImage = (index: number) => {
-    setImages(images.filter((_, i) => i !== index));
-  };
-
-  const updateImageAlt = (index: number, alt: string) => {
-    setImages(images.map((img, i) => (i === index ? { ...img, alt } : img)));
-  };
+  // Images are now managed by the ImageUpload component
 
   // ─── Tags ──────────────────────────────────────────────────
 
@@ -708,70 +694,15 @@ export default function ProductForm({ productId }: ProductFormProps) {
               <div className="rounded-2xl border border-surface-200 bg-white p-5 space-y-4">
                 <h3 className="text-sm font-semibold text-surface-900">Product Images</h3>
                 <p className="text-xs text-surface-500">
-                  Add images by URL. The first image is used as the main product image.
+                  Upload images from your device. The first image is used as the main product image.
                 </p>
-
-                {/* Add image */}
-                <div className="flex gap-2">
-                  <input
-                    value={imageUrl}
-                    onChange={(e) => setImageUrl(e.target.value)}
-                    onKeyDown={(e) => {
-                      if (e.key === "Enter") { e.preventDefault(); addImage(); }
-                    }}
-                    className="input-field flex-1"
-                    placeholder="https://example.com/image.jpg"
-                  />
-                  <button onClick={addImage} className="btn-primary text-sm py-2 px-4">
-                    <Plus className="h-4 w-4" /> Add
-                  </button>
-                </div>
-
-                {/* Image grid */}
-                {images.length === 0 ? (
-                  <div className="rounded-xl border-2 border-dashed border-surface-200 p-8 text-center">
-                    <ImageIcon className="h-10 w-10 text-surface-300 mx-auto mb-3" />
-                    <p className="text-sm text-surface-500">No images added yet</p>
-                    <p className="text-xs text-surface-400">Paste an image URL above to get started</p>
-                  </div>
-                ) : (
-                  <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4">
-                    {images.map((img, i) => (
-                      <div key={i} className="group relative rounded-xl border border-surface-200 overflow-hidden bg-surface-50">
-                        <div className="aspect-square relative">
-                          <img
-                            src={img.url}
-                            alt={img.alt || `Product image ${i + 1}`}
-                            className="h-full w-full object-cover"
-                            onError={(e) => {
-                              (e.target as HTMLImageElement).src = "";
-                              (e.target as HTMLImageElement).style.display = "none";
-                            }}
-                          />
-                          {i === 0 && (
-                            <span className="absolute top-2 left-2 rounded-full bg-brand-600 px-2 py-0.5 text-[10px] font-bold text-white">
-                              MAIN
-                            </span>
-                          )}
-                          <button
-                            onClick={() => removeImage(i)}
-                            className="absolute top-2 right-2 rounded-full bg-red-500 p-1 text-white opacity-0 group-hover:opacity-100 transition-opacity"
-                          >
-                            <X className="h-3 w-3" />
-                          </button>
-                        </div>
-                        <div className="p-2">
-                          <input
-                            value={img.alt || ""}
-                            onChange={(e) => updateImageAlt(i, e.target.value)}
-                            className="w-full text-[10px] bg-transparent border-0 border-b border-surface-200 focus:outline-none focus:border-brand-500 text-surface-600"
-                            placeholder="Alt text (optional)"
-                          />
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                )}
+                <ImageUpload
+                  images={images}
+                  onChange={setImages}
+                  multiple
+                  max={20}
+                  showMainBadge
+                />
               </div>
             )}
 
@@ -1175,29 +1106,15 @@ function VariantRow({
           </div>
 
           {/* Variant image */}
-          <div>
-            <label className="block text-xs font-medium text-surface-700 mb-1">
-              Variation Image
-            </label>
-            <div className="flex gap-2 items-start">
-              <input
-                value={variant.image}
-                onChange={(e) => onUpdate("image", e.target.value)}
-                className="input-field text-sm flex-1"
-                placeholder="https://example.com/variant-image.jpg"
-              />
-              {variant.image && (
-                <img
-                  src={variant.image}
-                  alt={variant.name}
-                  className="h-12 w-12 rounded-lg object-cover border border-surface-200 flex-shrink-0"
-                />
-              )}
-            </div>
-            <p className="text-[10px] text-surface-400 mt-0.5">
-              Image specific to this variation (e.g. different color)
-            </p>
-          </div>
+          <SingleImageUpload
+            image={variant.image || null}
+            onChange={(url) => onUpdate("image", url || "")}
+            label="Variation Image"
+            compact
+          />
+          <p className="text-[10px] text-surface-400 -mt-2">
+            Image specific to this variation (e.g. different color)
+          </p>
         </div>
       )}
     </div>

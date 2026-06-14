@@ -32,6 +32,9 @@ COPY --from=base /app/.next/standalone ./
 COPY --from=base /app/.next/static ./.next/static
 COPY --from=base /app/public ./public
 
+# Ensure uploads directory exists and is writable
+RUN mkdir -p /app/public/uploads
+
 EXPOSE 7860
 
 CMD ["node", "server.js"]

@@ -7,6 +7,7 @@ import {
   FolderTree, Plus, Loader2, Pencil, Trash2, X, Check, Package,
   ChevronRight, GripVertical, Image as ImageIcon,
 } from "lucide-react";
+import { SingleImageUpload } from "@/components/dashboard/ImageUpload";
 
 interface Category {
   id: string;
@@ -117,11 +118,11 @@ export default function CategoriesPage() {
               placeholder="slug (auto-generated)"
               className="input-field py-2.5"
             />
-            <input
-              value={form.image}
-              onChange={(e) => setForm({ ...form, image: e.target.value })}
-              placeholder="Image URL (optional)"
-              className="input-field py-2.5"
+            <SingleImageUpload
+              image={form.image || null}
+              onChange={(url) => setForm({ ...form, image: url || "" })}
+              label="Category Image"
+              compact
             />
             <select
               value={form.parentId}
