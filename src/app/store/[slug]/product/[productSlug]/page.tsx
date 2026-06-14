@@ -72,6 +72,7 @@ export default function ProductDetailPage() {
   const [quantity, setQuantity] = useState(1);
   const [addedToCart, setAddedToCart] = useState(false);
   const [wishlistToast, setWishlistToast] = useState<string | null>(null);
+  const { isWishlisted, toggleWishlist } = useWishlist(data?.store?.id || "");
 
   useEffect(() => {
     fetch(`/api/storefront/${slug}/products/${productSlug}`)
@@ -101,7 +102,6 @@ export default function ProductDetailPage() {
   );
 
   const { store, product, reviews, relatedProducts } = data;
-  const { isWishlisted, toggleWishlist } = useWishlist(store.id);
   const currency = product.currency || store.currency;
   const images = product.images.length > 0 ? product.images : [{ id: "placeholder", url: "", alt: "No image" }];
   const activeVariant = product.variants.find((v) => v.id === selectedVariant);

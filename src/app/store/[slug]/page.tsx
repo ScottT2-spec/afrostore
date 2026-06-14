@@ -177,6 +177,7 @@ export default function StorePage() {
   const [searchQuery, setSearchQuery] = useState("");
   const [showSearch, setShowSearch] = useState(false);
   const [addedToCart, setAddedToCart] = useState<string | null>(null);
+  const { isWishlisted, toggleWishlist, wishlistCount } = useWishlist(data?.store?.id || "");
 
   const fetchStore = useCallback(async () => {
     setLoading(true);
@@ -252,7 +253,6 @@ export default function StorePage() {
   }
 
   const { store, settings, socialLinks, products, categories } = data;
-  const { isWishlisted, toggleWishlist, wishlistCount } = useWishlist(store.id);
   const currency = store.currency || "NGN";
   const whatsappNumber = settings.whatsappNumber || socialLinks.whatsapp;
 
