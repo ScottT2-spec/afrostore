@@ -153,7 +153,7 @@ export default function DashboardPage() {
       <DashboardHeader
         title="Dashboard"
         subtitle={`Welcome back, ${user?.firstName}! Here's what's happening with ${currentStore.name}.`}
-        action={{ label: "Add Product", href: "/dashboard/products" }}
+
       />
 
       <div className="p-6 space-y-6">
