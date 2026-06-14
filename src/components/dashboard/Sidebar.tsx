@@ -71,8 +71,9 @@ const bottomNav = [
 export default function Sidebar({ onNavigate }: { onNavigate?: () => void } = {}) {
   const pathname = usePathname();
   const [collapsed, setCollapsed] = useState(false);
+  const [storeDropdownOpen, setStoreDropdownOpen] = useState(false);
   const { user, logout } = useAuth();
-  const { currentStore, stores } = useStore();
+  const { currentStore, stores, setCurrentStore } = useStore();
 
   const initials = user
     ? `${user.firstName?.[0] || ""}${user.lastName?.[0] || ""}`.toUpperCase()
@@ -106,10 +107,12 @@ export default function Sidebar({ onNavigate }: { onNavigate?: () => void } = {}
       </div>
 
       {/* Store selector */}
-      <div className="px-3 py-3 space-y-2">
+      <div className="px-3 py-3 space-y-2 relative">
         <button
+          onClick={() => !collapsed && setStoreDropdownOpen(!storeDropdownOpen)}
           className={cn(
             "w-full flex items-center gap-2.5 rounded-xl border border-surface-200 bg-surface-50 p-2.5 transition-colors hover:bg-surface-100",
+            storeDropdownOpen && "border-brand-300 bg-brand-50",
             collapsed && "justify-center p-2"
           )}
         >
@@ -126,10 +129,75 @@ export default function Sidebar({ onNavigate }: { onNavigate?: () => void } = {}
                   {currentStore ? `${currentStore.subdomain}.afrostore.com` : "Create your first store"}
                 </div>
               </div>
-              <ChevronRight className="h-3.5 w-3.5 text-surface-400 rotate-90" />
+              <ChevronRight className={cn("h-3.5 w-3.5 text-surface-400 transition-transform", storeDropdownOpen ? "rotate-180" : "rotate-90")} />
             </>
           )}
         </button>
+
+        {/* Store dropdown */}
+        {storeDropdownOpen && !collapsed && (
+          <>
+            {/* Backdrop to close */}
+            <div className="fixed inset-0 z-40" onClick={() => setStoreDropdownOpen(false)} />
+
+            <div className="absolute left-3 right-3 top-[60px] z-50 rounded-xl border border-surface-200 bg-white shadow-xl overflow-hidden">
+              {/* Store list */}
+              {stores.length > 0 && (
+                <div className="max-h-[200px] overflow-y-auto">
+                  {stores.map((s) => {
+                    const isActive = currentStore?.id === s.id;
+                    return (
+                      <button
+                        key={s.id}
+                        onClick={() => {
+                          setCurrentStore(s);
+                          setStoreDropdownOpen(false);
+                        }}
+                        className={cn(
+                          "w-full flex items-center gap-3 px-3 py-2.5 text-left transition-colors hover:bg-surface-50",
+                          isActive && "bg-brand-50"
+                        )}
+                      >
+                        <div className={cn(
+                          "flex h-7 w-7 flex-shrink-0 items-center justify-center rounded-lg text-white text-[10px] font-bold",
+                          isActive ? "bg-brand-600" : "bg-gradient-to-br from-accent-400 to-accent-600"
+                        )}>
+                          {s.name[0]?.toUpperCase()}
+                        </div>
+                        <div className="flex-1 min-w-0">
+                          <div className={cn("text-xs font-semibold truncate", isActive ? "text-brand-700" : "text-surface-900")}>
+                            {s.name}
+                          </div>
+                          <div className="text-[10px] text-surface-400 truncate">
+                            {s.subdomain}.afrostore.com
+                          </div>
+                        </div>
+                        {isActive && (
+                          <div className="h-2 w-2 rounded-full bg-brand-500 flex-shrink-0" />
+                        )}
+                      </button>
+                    );
+                  })}
+                </div>
+              )}
+
+              {/* Divider */}
+              {stores.length > 0 && <div className="border-t border-surface-100" />}
+
+              {/* Create new store */}
+              <Link
+                href="/dashboard/new-store"
+                onClick={() => setStoreDropdownOpen(false)}
+                className="flex items-center gap-3 px-3 py-2.5 text-left transition-colors hover:bg-surface-50"
+              >
+                <div className="flex h-7 w-7 flex-shrink-0 items-center justify-center rounded-lg border-2 border-dashed border-surface-300 text-surface-400">
+                  <Plus className="h-3.5 w-3.5" />
+                </div>
+                <span className="text-xs font-semibold text-surface-600">Create New Store</span>
+              </Link>
+            </div>
+          </>
+        )}
 
         {/* View Store button */}
         {currentStore && (
