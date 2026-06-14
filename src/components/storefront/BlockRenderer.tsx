@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useMemo } from "react";
+import { useState, useEffect, useMemo, useRef } from "react";
 import {
   Star,
   Truck,
@@ -10,6 +10,30 @@ import {
   ChevronDown,
   ChevronUp,
   MessageCircle,
+  Phone,
+  Mail,
+  MapPin,
+  Clock,
+  Zap,
+  Heart,
+  Award,
+  Users,
+  Globe,
+  TrendingUp,
+  Package,
+  CreditCard,
+  CheckCircle2,
+  ArrowRight,
+  Play,
+  Send,
+  Sparkles,
+  ShoppingBag,
+  Eye,
+  ThumbsUp,
+  Target,
+  Palette,
+  Rocket,
+  Lock,
 } from "lucide-react";
 
 /* ─── TYPES ─────────────────────────────────────────────────── */
@@ -20,232 +44,398 @@ export interface BuilderBlock {
   props: Record<string, unknown>;
 }
 
+/* ─── ANIMATION HOOK ────────────────────────────────────────── */
+
+function useInView(threshold = 0.1) {
+  const ref = useRef<HTMLDivElement>(null);
+  const [inView, setInView] = useState(false);
+  useEffect(() => {
+    const el = ref.current;
+    if (!el) return;
+    const obs = new IntersectionObserver(([e]) => { if (e.isIntersecting) { setInView(true); obs.disconnect(); } }, { threshold });
+    obs.observe(el);
+    return () => obs.disconnect();
+  }, [threshold]);
+  return { ref, inView };
+}
+
+function AnimateIn({ children, className = "", delay = 0 }: { children: React.ReactNode; className?: string; delay?: number }) {
+  const { ref, inView } = useInView();
+  return (
+    <div
+      ref={ref}
+      className={className}
+      style={{
+        opacity: inView ? 1 : 0,
+        transform: inView ? "translateY(0)" : "translateY(24px)",
+        transition: `opacity 0.6s ease ${delay}s, transform 0.6s ease ${delay}s`,
+      }}
+    >
+      {children}
+    </div>
+  );
+}
+
 /* ─── ICON MAP ──────────────────────────────────────────────── */
 
 const iconMap: Record<string, React.ElementType> = {
-  truck: Truck,
-  shield: Shield,
-  headphones: Headphones,
-  refresh: RefreshCw,
-  phone: Headphones,
-  mail: MessageCircle,
+  truck: Truck, shield: Shield, headphones: Headphones, refresh: RefreshCw,
+  phone: Phone, mail: Mail, "map-pin": MapPin, clock: Clock, zap: Zap,
+  heart: Heart, award: Award, users: Users, globe: Globe,
+  "trending-up": TrendingUp, package: Package, "credit-card": CreditCard,
+  check: CheckCircle2, sparkles: Sparkles, "shopping-bag": ShoppingBag,
+  eye: Eye, "thumbs-up": ThumbsUp, target: Target, palette: Palette,
+  rocket: Rocket, lock: Lock, star: Star, send: Send, play: Play,
+  message: MessageCircle,
 };
 
-/* ─── BLOCK RENDERERS ───────────────────────────────────────── */
+/* ═══════════════════════════════════════════════════════════════
+   BLOCK RENDERERS
+   ═══════════════════════════════════════════════════════════════ */
 
+/* ── Heading ─────────────────────────────────────────────────── */
 function HeadingBlock({ props }: { props: Record<string, unknown> }) {
   const level = (props.level as string) || "h2";
-  const sizeMap: Record<string, string> = {
-    xl: "text-xl",
-    "2xl": "text-2xl",
-    "3xl": "text-3xl",
-    "4xl": "text-4xl",
-  };
-  const cls = `font-bold ${sizeMap[(props.fontSize as string) || "2xl"] || "text-2xl"}`;
-  const style = {
-    color: (props.color as string) || "#171717",
-    textAlign: (props.align as string) || "left",
-  } as React.CSSProperties;
+  const sizeMap: Record<string, string> = { xl: "text-xl", "2xl": "text-2xl sm:text-3xl", "3xl": "text-3xl sm:text-4xl", "4xl": "text-4xl sm:text-5xl" };
+  const cls = `font-display font-extrabold tracking-tight ${sizeMap[(props.fontSize as string) || "2xl"] || "text-2xl sm:text-3xl"}`;
+  const style = { color: (props.color as string) || "#171717", textAlign: (props.align as string) || "left" } as React.CSSProperties;
   const text = (props.text as string) || "Heading";
-
-  if (level === "h1") return <h1 className={cls} style={style}>{text}</h1>;
-  if (level === "h3") return <h3 className={cls} style={style}>{text}</h3>;
-  if (level === "h4") return <h4 className={cls} style={style}>{text}</h4>;
-  return <h2 className={cls} style={style}>{text}</h2>;
+  if (level === "h1") return <AnimateIn><h1 className={cls} style={style}>{text}</h1></AnimateIn>;
+  if (level === "h3") return <AnimateIn><h3 className={cls} style={style}>{text}</h3></AnimateIn>;
+  if (level === "h4") return <AnimateIn><h4 className={cls} style={style}>{text}</h4></AnimateIn>;
+  return <AnimateIn><h2 className={cls} style={style}>{text}</h2></AnimateIn>;
 }
 
+/* ── Text ────────────────────────────────────────────────────── */
 function TextBlock({ props }: { props: Record<string, unknown> }) {
   const text = (props.text as string) || "";
-  // Support \n\n for paragraph breaks
   const paragraphs = text.split(/\n\n+/);
+  const dropCap = props.dropCap as boolean;
   return (
-    <div
-      className="leading-relaxed space-y-3"
-      style={{
-        color: (props.color as string) || "#525252",
-        textAlign: (props.align as React.CSSProperties["textAlign"]) || "left",
-        fontSize: { sm: "0.875rem", base: "1rem", lg: "1.125rem" }[(props.fontSize as string) || "base"] || "1rem",
-      }}
-    >
-      {paragraphs.map((p, i) => (
-        <p key={i}>{p}</p>
-      ))}
-    </div>
+    <AnimateIn>
+      <div
+        className="leading-relaxed space-y-4 max-w-3xl mx-auto"
+        style={{
+          color: (props.color as string) || "#525252",
+          textAlign: (props.align as React.CSSProperties["textAlign"]) || "left",
+          fontSize: { sm: "0.875rem", base: "1rem", lg: "1.125rem", xl: "1.25rem" }[(props.fontSize as string) || "base"] || "1rem",
+        }}
+      >
+        {paragraphs.map((p, i) => (
+          <p key={i} className={i === 0 && dropCap ? "first-letter:text-5xl first-letter:font-bold first-letter:float-left first-letter:mr-2 first-letter:mt-1 first-letter:leading-none" : ""}>
+            {p}
+          </p>
+        ))}
+      </div>
+    </AnimateIn>
   );
 }
 
+/* ── Image ───────────────────────────────────────────────────── */
 function ImageBlock({ props }: { props: Record<string, unknown> }) {
   const src = props.src as string;
   if (!src) return null;
-  const radiusMap: Record<string, string> = { none: "0", lg: "0.5rem", xl: "0.75rem", "2xl": "1rem" };
+  const radiusMap: Record<string, string> = { none: "0", lg: "0.5rem", xl: "0.75rem", "2xl": "1rem", "3xl": "1.5rem" };
   return (
-    <img
-      src={src}
-      alt={(props.alt as string) || ""}
-      className="w-full object-cover"
-      style={{ borderRadius: radiusMap[(props.rounded as string) || "xl"] || "0.75rem" }}
-    />
+    <AnimateIn>
+      <img
+        src={src}
+        alt={(props.alt as string) || ""}
+        className="w-full object-cover shadow-lg"
+        style={{ borderRadius: radiusMap[(props.rounded as string) || "2xl"] || "1rem" }}
+      />
+    </AnimateIn>
   );
 }
 
+/* ── Button ──────────────────────────────────────────────────── */
 function ButtonBlock({ props }: { props: Record<string, unknown> }) {
   const variant = (props.variant as string) || "primary";
   const size = (props.size as string) || "md";
-
   const variantStyles: Record<string, string> = {
-    primary: "bg-indigo-600 text-white hover:bg-indigo-700",
-    secondary: "bg-gray-100 text-gray-900 hover:bg-gray-200 border border-gray-200",
-    accent: "bg-orange-500 text-white hover:bg-orange-600",
+    primary: "bg-brand-600 text-white hover:bg-brand-700 shadow-lg shadow-brand-600/25 hover:shadow-xl hover:shadow-brand-600/30 hover:-translate-y-0.5",
+    secondary: "bg-surface-100 text-surface-900 hover:bg-surface-200 border border-surface-200",
+    accent: "bg-accent-500 text-white hover:bg-accent-600 shadow-lg shadow-accent-500/25",
+    outline: "border-2 border-surface-900 text-surface-900 hover:bg-surface-900 hover:text-white",
   };
-  const sizeStyles: Record<string, string> = {
-    sm: "text-sm py-2 px-4",
-    md: "text-sm py-3 px-6",
-    lg: "text-base py-4 px-8",
-  };
-
+  const sizeStyles: Record<string, string> = { sm: "text-sm py-2.5 px-5", md: "text-sm py-3 px-7", lg: "text-base py-4 px-9" };
   return (
-    <div style={{ textAlign: (props.align as React.CSSProperties["textAlign"]) || "left" }}>
-      <a
-        href={(props.href as string) || "#"}
-        className={`inline-flex items-center justify-center rounded-xl font-semibold transition-colors ${variantStyles[variant] || variantStyles.primary} ${sizeStyles[size] || sizeStyles.md}`}
-      >
-        {(props.text as string) || "Button"}
-      </a>
-    </div>
+    <AnimateIn>
+      <div style={{ textAlign: (props.align as React.CSSProperties["textAlign"]) || "left" }}>
+        <a
+          href={(props.href as string) || "#"}
+          className={`inline-flex items-center justify-center gap-2 rounded-2xl font-bold transition-all duration-300 ${variantStyles[variant] || variantStyles.primary} ${sizeStyles[size] || sizeStyles.md}`}
+        >
+          {(props.text as string) || "Button"}
+          {variant === "primary" && <ArrowRight className="h-4 w-4" />}
+        </a>
+      </div>
+    </AnimateIn>
   );
 }
 
+/* ── Hero ────────────────────────────────────────────────────── */
 function HeroBlock({ props }: { props: Record<string, unknown> }) {
+  const bgStyle = (props.bgStyle as string) || "gradient";
+  const bgColor = (props.bgColor as string) || "#1B2B4B";
+  const textColor = (props.textColor as string) || "#fff";
+
+  const bgClasses: Record<string, string> = {
+    gradient: "bg-gradient-to-br from-brand-950 via-brand-900 to-brand-800",
+    dark: "bg-gradient-to-br from-surface-950 via-surface-900 to-surface-800",
+    accent: "bg-gradient-to-br from-accent-600 via-accent-500 to-accent-400",
+    light: "bg-gradient-to-br from-surface-50 to-white",
+  };
+
+  const isLight = bgStyle === "light";
+
   return (
     <div
-      className="rounded-2xl px-8 py-16 sm:py-20"
-      style={{
-        backgroundColor: (props.bgColor as string) || "#1B2B4B",
-        color: (props.textColor as string) || "#fff",
-        textAlign: (props.align as React.CSSProperties["textAlign"]) || "center",
-      }}
+      className={`relative overflow-hidden rounded-3xl px-8 sm:px-12 py-16 sm:py-24 ${bgClasses[bgStyle] || ""}`}
+      style={!bgClasses[bgStyle] ? { backgroundColor: bgColor, color: textColor } : {}}
     >
-      <h1 className="text-3xl sm:text-4xl font-extrabold mb-4">
-        {(props.heading as string) || "Hero Heading"}
-      </h1>
-      <p className="text-lg opacity-80 mb-8 max-w-2xl mx-auto">
-        {(props.subheading as string) || "Subheading text"}
-      </p>
-      {(props.buttonText as string) && (
-        <a
-          href={(props.buttonHref as string) || "#"}
-          className="inline-flex items-center justify-center rounded-xl bg-orange-500 text-white font-semibold py-3 px-6 hover:bg-orange-600 transition-colors"
-        >
-          {props.buttonText as string}
-        </a>
-      )}
+      {/* Decorative elements */}
+      <div className="absolute inset-0 overflow-hidden pointer-events-none">
+        <div className={`absolute -top-24 -right-24 w-96 h-96 rounded-full ${isLight ? "bg-brand-100/40" : "bg-white/5"} blur-3xl`} />
+        <div className={`absolute -bottom-24 -left-24 w-80 h-80 rounded-full ${isLight ? "bg-accent-100/40" : "bg-accent-500/10"} blur-3xl`} />
+        <div className="absolute inset-0 opacity-[0.03]" style={{ backgroundImage: "radial-gradient(circle at 1px 1px, currentColor 1px, transparent 0)", backgroundSize: "32px 32px" }} />
+      </div>
+
+      <div className="relative max-w-3xl mx-auto" style={{ textAlign: (props.align as React.CSSProperties["textAlign"]) || "center" }}>
+        {(props.badge as string) && (
+          <AnimateIn>
+            <span className={`inline-flex items-center gap-2 rounded-full px-4 py-1.5 text-xs font-semibold mb-6 ${isLight ? "bg-brand-100 text-brand-700" : "bg-white/10 text-white/80 border border-white/20"}`}>
+              <Sparkles className="h-3 w-3" />
+              {props.badge as string}
+            </span>
+          </AnimateIn>
+        )}
+        <AnimateIn delay={0.1}>
+          <h1 className={`text-3xl sm:text-4xl lg:text-5xl font-display font-extrabold tracking-tight mb-4 sm:mb-6 ${isLight ? "text-surface-900" : "text-white"}`}>
+            {(props.heading as string) || "Hero Heading"}
+          </h1>
+        </AnimateIn>
+        <AnimateIn delay={0.2}>
+          <p className={`text-base sm:text-lg lg:text-xl mb-8 max-w-2xl mx-auto leading-relaxed ${isLight ? "text-surface-600" : "text-white/75"}`}>
+            {(props.subheading as string) || "Subheading text"}
+          </p>
+        </AnimateIn>
+        {(props.buttonText as string) && (
+          <AnimateIn delay={0.3}>
+            <div className="flex flex-col sm:flex-row items-center justify-center gap-3">
+              <a
+                href={(props.buttonHref as string) || "#"}
+                className={`inline-flex items-center justify-center gap-2 rounded-2xl font-bold py-3.5 px-8 transition-all duration-300 hover:-translate-y-0.5 ${
+                  isLight
+                    ? "bg-brand-600 text-white shadow-xl shadow-brand-600/25 hover:bg-brand-700"
+                    : "bg-white text-surface-900 shadow-xl shadow-black/20 hover:bg-surface-50"
+                }`}
+              >
+                {props.buttonText as string}
+                <ArrowRight className="h-4 w-4" />
+              </a>
+              {(props.secondaryButtonText as string) && (
+                <a
+                  href={(props.secondaryButtonHref as string) || "#"}
+                  className={`inline-flex items-center gap-2 rounded-2xl font-semibold py-3.5 px-8 transition-all ${
+                    isLight
+                      ? "border border-surface-200 text-surface-700 hover:bg-surface-50"
+                      : "border border-white/20 text-white hover:bg-white/10"
+                  }`}
+                >
+                  {props.secondaryButtonText as string}
+                </a>
+              )}
+            </div>
+          </AnimateIn>
+        )}
+      </div>
     </div>
   );
 }
 
+/* ── Spacer ──────────────────────────────────────────────────── */
 function SpacerBlock({ props }: { props: Record<string, unknown> }) {
   return <div style={{ height: `${(props.height as number) || 40}px` }} />;
 }
 
+/* ── Divider ─────────────────────────────────────────────────── */
 function DividerBlock({ props }: { props: Record<string, unknown> }) {
-  return (
-    <hr
-      style={{
-        borderColor: (props.color as string) || "#e5e5e5",
-        borderWidth: `${(props.thickness as number) || 1}px`,
-        borderStyle: (props.style as string) || "solid",
-      }}
-    />
-  );
+  const style = (props.style as string) || "solid";
+  if (style === "wave") {
+    return (
+      <div className="py-4">
+        <svg viewBox="0 0 1200 40" className="w-full h-6 text-surface-200" preserveAspectRatio="none">
+          <path d="M0 20 Q150 0 300 20 Q450 40 600 20 Q750 0 900 20 Q1050 40 1200 20" fill="none" stroke="currentColor" strokeWidth="2" />
+        </svg>
+      </div>
+    );
+  }
+  if (style === "dots") {
+    return (
+      <div className="flex items-center justify-center gap-2 py-6">
+        {[0, 1, 2].map(i => <div key={i} className="h-1.5 w-1.5 rounded-full bg-surface-300" />)}
+      </div>
+    );
+  }
+  return <hr style={{ borderColor: (props.color as string) || "#e5e5e5", borderWidth: `${(props.thickness as number) || 1}px`, borderStyle: style }} />;
 }
 
+/* ── Columns ─────────────────────────────────────────────────── */
 function ColumnsBlock({ props }: { props: Record<string, unknown> }) {
   const children = (props.children as BuilderBlock[]) || [];
   const cols = (props.columns as number) || 2;
   return (
-    <div
-      className="grid grid-cols-1 gap-6"
-      style={{ gridTemplateColumns: `repeat(${cols}, minmax(0, 1fr))` }}
-    >
-      {children.map((child) => (
-        <div key={child.id}>
-          <PublicBlockRenderer block={child} />
-        </div>
-      ))}
+    <div className={`grid grid-cols-1 md:grid-cols-${Math.min(cols, 4)} gap-6`}>
+      {children.map((child) => <div key={child.id}><PublicBlockRenderer block={child} /></div>)}
     </div>
   );
 }
 
+/* ── Product Grid ────────────────────────────────────────────── */
 function ProductGridBlock({ props }: { props: Record<string, unknown> }) {
   const limit = (props.limit as number) || 6;
   const cols = (props.columns as number) || 3;
   return (
-    <div>
-      {(props.title as string) && (
-        <h3 className="text-xl font-bold text-gray-900 mb-4">{props.title as string}</h3>
-      )}
-      <div
-        className="grid grid-cols-2 gap-4"
-        style={{ gridTemplateColumns: `repeat(${Math.min(cols, 4)}, minmax(0, 1fr))` }}
-      >
-        {Array.from({ length: limit }).map((_, i) => (
-          <div key={i} className="rounded-xl border border-gray-200 bg-white overflow-hidden">
-            <div className="h-40 bg-gradient-to-br from-gray-100 to-gray-50" />
-            <div className="p-4">
-              <div className="h-3 bg-gray-100 rounded w-3/4 mb-2" />
-              <div className="h-3 bg-gray-100 rounded w-1/2" />
-            </div>
+    <AnimateIn>
+      <div>
+        {(props.title as string) && (
+          <div className="text-center mb-8">
+            <h3 className="text-2xl sm:text-3xl font-display font-extrabold text-surface-900">{props.title as string}</h3>
+            {(props.subtitle as string) && <p className="text-surface-500 mt-2">{props.subtitle as string}</p>}
           </div>
-        ))}
+        )}
+        <div className={`grid grid-cols-2 sm:grid-cols-${Math.min(cols, 4)} gap-4`}>
+          {Array.from({ length: limit }).map((_, i) => (
+            <div key={i} className="group rounded-2xl border border-surface-100 bg-white overflow-hidden hover:shadow-xl hover:-translate-y-1 transition-all duration-300">
+              <div className="aspect-square bg-gradient-to-br from-surface-100 via-surface-50 to-brand-50/30 relative overflow-hidden">
+                <div className="absolute inset-0 bg-gradient-to-t from-black/5 to-transparent" />
+                <div className="absolute inset-0 flex items-center justify-center">
+                  <ShoppingBag className="h-8 w-8 text-surface-300" />
+                </div>
+              </div>
+              <div className="p-4">
+                <div className="h-3 bg-surface-100 rounded-full w-3/4 mb-2" />
+                <div className="h-3 bg-surface-100 rounded-full w-1/2" />
+              </div>
+            </div>
+          ))}
+        </div>
       </div>
-    </div>
+    </AnimateIn>
   );
 }
 
+/* ── Testimonial (single) ────────────────────────────────────── */
 function TestimonialBlock({ props }: { props: Record<string, unknown> }) {
   const rating = (props.rating as number) || 5;
   return (
-    <div className="rounded-2xl border border-gray-200 bg-white p-6">
-      <div className="flex gap-0.5 mb-3">
-        {Array.from({ length: 5 }).map((_, i) => (
-          <Star
-            key={i}
-            className={`h-4 w-4 ${i < rating ? "text-yellow-400 fill-yellow-400" : "text-gray-200"}`}
-          />
-        ))}
+    <AnimateIn>
+      <div className="rounded-2xl border border-surface-100 bg-white p-6 sm:p-8 hover:shadow-lg transition-shadow duration-300">
+        <div className="flex gap-0.5 mb-4">
+          {Array.from({ length: 5 }).map((_, i) => (
+            <Star key={i} className={`h-4 w-4 ${i < rating ? "text-amber-400 fill-amber-400" : "text-surface-200"}`} />
+          ))}
+        </div>
+        <p className="text-surface-700 mb-5 leading-relaxed italic">
+          &ldquo;{(props.text as string) || "Great product!"}&rdquo;
+        </p>
+        <div className="flex items-center gap-3">
+          <div className="h-11 w-11 rounded-full bg-gradient-to-br from-brand-600 to-accent-400 flex items-center justify-center text-white font-bold text-sm">
+            {((props.name as string) || "C").split(" ").map(n => n[0]).join("").slice(0, 2).toUpperCase()}
+          </div>
+          <div>
+            <p className="text-sm font-bold text-surface-900">{(props.name as string) || "Customer"}</p>
+            <p className="text-xs text-surface-500">{(props.role as string) || "Buyer"}</p>
+          </div>
+        </div>
       </div>
-      <p className="text-sm text-gray-700 mb-4 italic">
-        &ldquo;{(props.text as string) || "Great product!"}&rdquo;
-      </p>
-      <div className="flex items-center gap-3">
-        <div className="h-10 w-10 rounded-full bg-indigo-100 flex items-center justify-center text-indigo-600 font-bold text-sm">
-          {((props.name as string) || "C")[0]}
-        </div>
-        <div>
-          <p className="text-sm font-semibold text-gray-900">{(props.name as string) || "Customer"}</p>
-          <p className="text-xs text-gray-500">{(props.role as string) || "Buyer"}</p>
-        </div>
+    </AnimateIn>
+  );
+}
+
+/* ── Testimonials Grid (multiple) ────────────────────────────── */
+function TestimonialsBlock({ props }: { props: Record<string, unknown> }) {
+  const items = (props.items as Array<{ name: string; text: string; role?: string; rating?: number }>) || [];
+  const bg = (props.bgColor as string) || "transparent";
+  return (
+    <div className="rounded-3xl py-12 px-6 sm:px-10" style={{ backgroundColor: bg === "surface" ? "#FAFAFA" : bg === "dark" ? "#0F172A" : "transparent" }}>
+      <AnimateIn>
+        {(props.title as string) && (
+          <div className="text-center mb-10">
+            <h3 className={`text-2xl sm:text-3xl font-display font-extrabold ${bg === "dark" ? "text-white" : "text-surface-900"}`}>
+              {props.title as string}
+            </h3>
+            {(props.subtitle as string) && (
+              <p className={`mt-2 ${bg === "dark" ? "text-white/60" : "text-surface-500"}`}>{props.subtitle as string}</p>
+            )}
+          </div>
+        )}
+      </AnimateIn>
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
+        {items.map((item, i) => (
+          <AnimateIn key={i} delay={i * 0.1}>
+            <div className={`rounded-2xl p-6 h-full ${bg === "dark" ? "bg-white/5 border border-white/10" : "bg-white border border-surface-100 shadow-sm hover:shadow-lg"} transition-shadow duration-300`}>
+              <div className="flex gap-0.5 mb-3">
+                {Array.from({ length: 5 }).map((_, j) => (
+                  <Star key={j} className={`h-4 w-4 ${j < (item.rating || 5) ? "text-amber-400 fill-amber-400" : "text-surface-200"}`} />
+                ))}
+              </div>
+              <p className={`text-sm leading-relaxed mb-4 ${bg === "dark" ? "text-white/70" : "text-surface-600"}`}>
+                &ldquo;{item.text}&rdquo;
+              </p>
+              <div className="flex items-center gap-3 mt-auto">
+                <div className="h-9 w-9 rounded-full bg-gradient-to-br from-brand-600 to-accent-400 flex items-center justify-center text-white text-xs font-bold">
+                  {item.name.split(" ").map(n => n[0]).join("").slice(0, 2).toUpperCase()}
+                </div>
+                <div>
+                  <p className={`text-sm font-semibold ${bg === "dark" ? "text-white" : "text-surface-900"}`}>{item.name}</p>
+                  <p className={`text-xs ${bg === "dark" ? "text-white/50" : "text-surface-400"}`}>{item.role || "Customer"}</p>
+                </div>
+              </div>
+            </div>
+          </AnimateIn>
+        ))}
       </div>
     </div>
   );
 }
 
+/* ── Features Grid ───────────────────────────────────────────── */
 function FeaturesBlock({ props }: { props: Record<string, unknown> }) {
   const items = (props.items as Array<{ icon: string; title: string; desc: string }>) || [];
+  const cols = items.length <= 3 ? 3 : 4;
+  const bg = (props.bgColor as string) || "transparent";
+  const isDark = bg === "dark";
   return (
-    <div>
+    <div className="rounded-3xl py-10 px-6 sm:px-10" style={{ backgroundColor: bg === "surface" ? "#FAFAFA" : isDark ? "#0F172A" : "transparent" }}>
       {(props.title as string) && (
-        <h3 className="text-xl font-bold text-gray-900 mb-6 text-center">{props.title as string}</h3>
+        <AnimateIn>
+          <div className="text-center mb-10">
+            <h3 className={`text-2xl sm:text-3xl font-display font-extrabold ${isDark ? "text-white" : "text-surface-900"}`}>
+              {props.title as string}
+            </h3>
+            {(props.subtitle as string) && (
+              <p className={`mt-2 text-base ${isDark ? "text-white/60" : "text-surface-500"}`}>{props.subtitle as string}</p>
+            )}
+          </div>
+        </AnimateIn>
       )}
-      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+      <div className={`grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-${cols} gap-5`}>
         {items.map((item, i) => {
           const Icon = iconMap[item.icon] || Shield;
           return (
-            <div key={i} className="text-center p-4 rounded-xl border border-gray-100">
-              <Icon className="h-8 w-8 text-indigo-600 mx-auto mb-3" />
-              <h4 className="text-sm font-bold text-gray-900 mb-1">{item.title}</h4>
-              <p className="text-xs text-gray-500">{item.desc}</p>
-            </div>
+            <AnimateIn key={i} delay={i * 0.08}>
+              <div className={`text-center p-6 rounded-2xl transition-all duration-300 hover:-translate-y-1 ${
+                isDark ? "bg-white/5 border border-white/10 hover:bg-white/10" : "bg-white border border-surface-100 shadow-sm hover:shadow-lg"
+              }`}>
+                <div className={`h-12 w-12 rounded-2xl mx-auto mb-4 flex items-center justify-center ${isDark ? "bg-brand-500/20" : "bg-brand-50"}`}>
+                  <Icon className={`h-6 w-6 ${isDark ? "text-brand-400" : "text-brand-600"}`} />
+                </div>
+                <h4 className={`text-sm font-bold mb-1.5 ${isDark ? "text-white" : "text-surface-900"}`}>{item.title}</h4>
+                <p className={`text-xs leading-relaxed ${isDark ? "text-white/60" : "text-surface-500"}`}>{item.desc}</p>
+              </div>
+            </AnimateIn>
           );
         })}
       </div>
@@ -253,105 +443,251 @@ function FeaturesBlock({ props }: { props: Record<string, unknown> }) {
   );
 }
 
+/* ── FAQ Accordion ───────────────────────────────────────────── */
 function FAQBlock({ props }: { props: Record<string, unknown> }) {
   const items = (props.items as Array<{ question: string; answer: string }>) || [];
-  const [open, setOpen] = useState<number | null>(null);
+  const [open, setOpen] = useState<number | null>(0);
   return (
-    <div>
-      {(props.title as string) && (
-        <h3 className="text-xl font-bold text-gray-900 mb-4">{props.title as string}</h3>
-      )}
-      <div className="space-y-2">
-        {items.map((item, i) => (
-          <div key={i} className="rounded-xl border border-gray-200 overflow-hidden">
-            <button
-              onClick={() => setOpen(open === i ? null : i)}
-              className="w-full flex items-center justify-between p-4 text-sm font-semibold text-gray-900 hover:bg-gray-50"
-            >
-              {item.question}
-              {open === i ? <ChevronUp className="h-4 w-4" /> : <ChevronDown className="h-4 w-4" />}
-            </button>
-            {open === i && (
-              <div className="px-4 pb-4 text-sm text-gray-600">{item.answer}</div>
-            )}
+    <AnimateIn>
+      <div className="max-w-3xl mx-auto">
+        {(props.title as string) && (
+          <div className="text-center mb-8">
+            <h3 className="text-2xl sm:text-3xl font-display font-extrabold text-surface-900">{props.title as string}</h3>
+            {(props.subtitle as string) && <p className="text-surface-500 mt-2">{props.subtitle as string}</p>}
           </div>
-        ))}
+        )}
+        <div className="space-y-3">
+          {items.map((item, i) => {
+            const isOpen = open === i;
+            return (
+              <div key={i} className={`rounded-2xl border overflow-hidden transition-colors ${isOpen ? "border-brand-200 bg-brand-50/30" : "border-surface-200 bg-white hover:border-surface-300"}`}>
+                <button
+                  onClick={() => setOpen(isOpen ? null : i)}
+                  className="w-full flex items-center justify-between p-5 text-left"
+                >
+                  <span className="text-sm font-bold text-surface-900 pr-4">{item.question}</span>
+                  <div className={`h-7 w-7 rounded-full flex-shrink-0 flex items-center justify-center transition-colors ${isOpen ? "bg-brand-600 text-white" : "bg-surface-100 text-surface-500"}`}>
+                    {isOpen ? <ChevronUp className="h-4 w-4" /> : <ChevronDown className="h-4 w-4" />}
+                  </div>
+                </button>
+                <div
+                  className="overflow-hidden transition-all duration-300"
+                  style={{ maxHeight: isOpen ? "500px" : "0", opacity: isOpen ? 1 : 0 }}
+                >
+                  <div className="px-5 pb-5 text-sm text-surface-600 leading-relaxed">{item.answer}</div>
+                </div>
+              </div>
+            );
+          })}
+        </div>
+      </div>
+    </AnimateIn>
+  );
+}
+
+/* ── Contact Form ────────────────────────────────────────────── */
+function ContactFormBlock({ props }: { props: Record<string, unknown> }) {
+  const [submitted, setSubmitted] = useState(false);
+  return (
+    <AnimateIn>
+      <div className="max-w-xl mx-auto rounded-2xl border border-surface-200 bg-white p-6 sm:p-8 shadow-sm">
+        {(props.title as string) && <h3 className="text-xl font-display font-bold text-surface-900 mb-1">{props.title as string}</h3>}
+        {(props.subtitle as string) && <p className="text-sm text-surface-500 mb-6">{props.subtitle as string}</p>}
+        {submitted ? (
+          <div className="text-center py-10">
+            <div className="h-14 w-14 rounded-full bg-green-100 flex items-center justify-center mx-auto mb-4">
+              <CheckCircle2 className="h-7 w-7 text-green-600" />
+            </div>
+            <h4 className="text-lg font-bold text-surface-900 mb-1">Message sent!</h4>
+            <p className="text-sm text-surface-500">We&apos;ll get back to you soon.</p>
+          </div>
+        ) : (
+          <form onSubmit={(e) => { e.preventDefault(); setSubmitted(true); }} className="space-y-4">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <input className="w-full rounded-xl border border-surface-200 bg-surface-50 px-4 py-3 text-sm placeholder:text-surface-400 focus:outline-none focus:ring-2 focus:ring-brand-500 focus:border-transparent transition-shadow" placeholder="Your name" required />
+              <input className="w-full rounded-xl border border-surface-200 bg-surface-50 px-4 py-3 text-sm placeholder:text-surface-400 focus:outline-none focus:ring-2 focus:ring-brand-500 focus:border-transparent transition-shadow" placeholder="Your email" type="email" required />
+            </div>
+            <input className="w-full rounded-xl border border-surface-200 bg-surface-50 px-4 py-3 text-sm placeholder:text-surface-400 focus:outline-none focus:ring-2 focus:ring-brand-500 focus:border-transparent transition-shadow" placeholder="Subject" />
+            <textarea className="w-full rounded-xl border border-surface-200 bg-surface-50 px-4 py-3 text-sm placeholder:text-surface-400 focus:outline-none focus:ring-2 focus:ring-brand-500 focus:border-transparent transition-shadow resize-none" placeholder="Your message" rows={4} required />
+            <button type="submit" className="w-full rounded-xl bg-brand-600 text-white font-bold py-3.5 hover:bg-brand-700 transition-all duration-300 shadow-lg shadow-brand-600/25 hover:shadow-xl flex items-center justify-center gap-2">
+              <Send className="h-4 w-4" />
+              {(props.buttonText as string) || "Send Message"}
+            </button>
+          </form>
+        )}
+      </div>
+    </AnimateIn>
+  );
+}
+
+/* ── Contact Info ────────────────────────────────────────────── */
+function ContactInfoBlock({ props }: { props: Record<string, unknown> }) {
+  const items = (props.items as Array<{ icon: string; title: string; value: string }>) || [];
+  const hours = props.hours as string;
+  return (
+    <AnimateIn>
+      <div className="max-w-2xl mx-auto">
+        {(props.title as string) && (
+          <div className="text-center mb-8">
+            <h3 className="text-2xl font-display font-extrabold text-surface-900">{props.title as string}</h3>
+          </div>
+        )}
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          {items.map((item, i) => {
+            const Icon = iconMap[item.icon] || Mail;
+            return (
+              <div key={i} className="flex items-start gap-4 rounded-2xl border border-surface-100 bg-white p-5 hover:shadow-md transition-shadow">
+                <div className="h-10 w-10 rounded-xl bg-brand-50 flex items-center justify-center flex-shrink-0">
+                  <Icon className="h-5 w-5 text-brand-600" />
+                </div>
+                <div>
+                  <p className="text-xs font-semibold text-surface-500 uppercase tracking-wider">{item.title}</p>
+                  <p className="text-sm font-semibold text-surface-900 mt-0.5">{item.value}</p>
+                </div>
+              </div>
+            );
+          })}
+        </div>
+        {hours && (
+          <div className="mt-4 rounded-2xl bg-surface-50 border border-surface-100 p-5 text-center">
+            <div className="flex items-center justify-center gap-2 mb-1">
+              <Clock className="h-4 w-4 text-surface-500" />
+              <p className="text-xs font-semibold text-surface-500 uppercase tracking-wider">Business Hours</p>
+            </div>
+            <p className="text-sm text-surface-700">{hours}</p>
+          </div>
+        )}
+      </div>
+    </AnimateIn>
+  );
+}
+
+/* ── Stats / Counters ────────────────────────────────────────── */
+function StatsBlock({ props }: { props: Record<string, unknown> }) {
+  const items = (props.items as Array<{ value: string; label: string; icon?: string }>) || [];
+  const bg = (props.bgColor as string) || "brand";
+  const isDark = bg === "brand" || bg === "dark";
+  return (
+    <div className={`rounded-3xl py-12 px-6 sm:px-10 ${
+      bg === "brand" ? "bg-gradient-to-br from-brand-700 to-brand-900" :
+      bg === "dark" ? "bg-gradient-to-br from-surface-900 to-surface-950" :
+      "bg-surface-50"
+    }`}>
+      {(props.title as string) && (
+        <AnimateIn>
+          <h3 className={`text-2xl sm:text-3xl font-display font-extrabold text-center mb-10 ${isDark ? "text-white" : "text-surface-900"}`}>
+            {props.title as string}
+          </h3>
+        </AnimateIn>
+      )}
+      <div className={`grid grid-cols-2 sm:grid-cols-${Math.min(items.length, 4)} gap-6`}>
+        {items.map((item, i) => {
+          const Icon = item.icon ? iconMap[item.icon] : null;
+          return (
+            <AnimateIn key={i} delay={i * 0.1}>
+              <div className="text-center">
+                {Icon && <Icon className={`h-6 w-6 mx-auto mb-2 ${isDark ? "text-accent-400" : "text-brand-600"}`} />}
+                <div className={`text-3xl sm:text-4xl font-display font-extrabold ${isDark ? "text-white" : "text-surface-900"}`}>
+                  {item.value}
+                </div>
+                <div className={`text-xs sm:text-sm mt-1 ${isDark ? "text-white/60" : "text-surface-500"}`}>{item.label}</div>
+              </div>
+            </AnimateIn>
+          );
+        })}
       </div>
     </div>
   );
 }
 
-function ContactFormBlock({ props }: { props: Record<string, unknown> }) {
+/* ── Newsletter ──────────────────────────────────────────────── */
+function NewsletterBlock({ props }: { props: Record<string, unknown> }) {
   const [submitted, setSubmitted] = useState(false);
+  const bg = (props.bgColor as string) || "surface";
+  const isDark = bg === "dark" || bg === "brand";
   return (
-    <div className="rounded-2xl border border-gray-200 bg-white p-6">
-      {(props.title as string) && (
-        <h3 className="text-lg font-bold text-gray-900 mb-1">{props.title as string}</h3>
-      )}
-      {(props.subtitle as string) && (
-        <p className="text-xs text-gray-500 mb-4">{props.subtitle as string}</p>
-      )}
-      {submitted ? (
-        <div className="text-center py-8">
-          <div className="h-12 w-12 rounded-full bg-green-100 flex items-center justify-center mx-auto mb-3">
-            <MessageCircle className="h-6 w-6 text-green-600" />
+    <AnimateIn>
+      <div className={`rounded-3xl py-12 px-6 sm:px-10 text-center ${
+        bg === "brand" ? "bg-gradient-to-br from-brand-600 to-brand-800" :
+        bg === "dark" ? "bg-gradient-to-br from-surface-900 to-surface-950" :
+        "bg-surface-50 border border-surface-100"
+      }`}>
+        <h3 className={`text-xl sm:text-2xl font-display font-extrabold mb-2 ${isDark ? "text-white" : "text-surface-900"}`}>
+          {(props.title as string) || "Stay Updated"}
+        </h3>
+        <p className={`text-sm mb-6 max-w-md mx-auto ${isDark ? "text-white/60" : "text-surface-500"}`}>
+          {(props.subtitle as string) || "Get the latest updates and offers."}
+        </p>
+        {submitted ? (
+          <div className={`flex items-center justify-center gap-2 text-sm font-semibold ${isDark ? "text-accent-400" : "text-brand-600"}`}>
+            <CheckCircle2 className="h-5 w-5" /> You&apos;re subscribed!
           </div>
-          <h4 className="text-base font-bold text-gray-900 mb-1">Message sent!</h4>
-          <p className="text-sm text-gray-500">We&apos;ll get back to you soon.</p>
-        </div>
-      ) : (
-        <form onSubmit={(e) => { e.preventDefault(); setSubmitted(true); }} className="space-y-3">
-          <input className="w-full rounded-xl border border-gray-200 bg-gray-50 px-4 py-3 text-sm placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent" placeholder="Your name" required />
-          <input className="w-full rounded-xl border border-gray-200 bg-gray-50 px-4 py-3 text-sm placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent" placeholder="Your email" type="email" required />
-          <textarea className="w-full rounded-xl border border-gray-200 bg-gray-50 px-4 py-3 text-sm placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent" placeholder="Your message" rows={3} required />
-          <button type="submit" className="w-full rounded-xl bg-indigo-600 text-white font-semibold py-3 hover:bg-indigo-700 transition-colors">
-            {(props.buttonText as string) || "Send Message"}
-          </button>
-        </form>
-      )}
-    </div>
+        ) : (
+          <form onSubmit={(e) => { e.preventDefault(); setSubmitted(true); }} className="flex flex-col sm:flex-row gap-3 max-w-md mx-auto">
+            <input
+              type="email"
+              required
+              placeholder="Enter your email"
+              className="flex-1 rounded-xl border border-surface-200 bg-white px-4 py-3 text-sm placeholder:text-surface-400 focus:outline-none focus:ring-2 focus:ring-brand-500"
+            />
+            <button type="submit" className={`rounded-xl font-bold py-3 px-6 text-sm transition-all hover:-translate-y-0.5 ${
+              isDark ? "bg-white text-surface-900 shadow-lg" : "bg-brand-600 text-white shadow-lg shadow-brand-600/25"
+            }`}>
+              Subscribe
+            </button>
+          </form>
+        )}
+      </div>
+    </AnimateIn>
   );
 }
 
+/* ── Video ───────────────────────────────────────────────────── */
 function VideoBlock({ props }: { props: Record<string, unknown> }) {
   const url = props.url as string;
+  const [playing, setPlaying] = useState(false);
   const embedUrl = useMemo(() => {
     if (!url) return "";
     const ytMatch = url.match(/(?:youtube\.com\/watch\?v=|youtu\.be\/|youtube\.com\/embed\/)([a-zA-Z0-9_-]+)/);
-    if (ytMatch) return `https://www.youtube.com/embed/${ytMatch[1]}`;
+    if (ytMatch) return `https://www.youtube.com/embed/${ytMatch[1]}?autoplay=1`;
     const vmMatch = url.match(/vimeo\.com\/(\d+)/);
-    if (vmMatch) return `https://player.vimeo.com/video/${vmMatch[1]}`;
+    if (vmMatch) return `https://player.vimeo.com/video/${vmMatch[1]}?autoplay=1`;
     return url;
   }, [url]);
 
   if (!embedUrl) return null;
 
   return (
-    <div>
-      {(props.title as string) && (
-        <h3 className="text-lg font-bold text-gray-900 mb-3">{props.title as string}</h3>
-      )}
-      <div className="aspect-video rounded-xl overflow-hidden bg-black">
-        <iframe src={embedUrl} className="w-full h-full" allowFullScreen />
+    <AnimateIn>
+      <div className="max-w-4xl mx-auto">
+        {(props.title as string) && (
+          <h3 className="text-xl font-display font-bold text-surface-900 mb-4 text-center">{props.title as string}</h3>
+        )}
+        <div className="aspect-video rounded-2xl overflow-hidden bg-surface-900 relative shadow-2xl">
+          {playing ? (
+            <iframe src={embedUrl} className="w-full h-full" allowFullScreen allow="autoplay" />
+          ) : (
+            <button onClick={() => setPlaying(true)} className="w-full h-full flex items-center justify-center bg-gradient-to-br from-surface-800 to-surface-900 group">
+              <div className="h-16 w-16 rounded-full bg-white/20 backdrop-blur-sm flex items-center justify-center group-hover:bg-white/30 group-hover:scale-110 transition-all">
+                <Play className="h-7 w-7 text-white ml-1" />
+              </div>
+            </button>
+          )}
+        </div>
       </div>
-    </div>
+    </AnimateIn>
   );
 }
 
+/* ── Countdown ───────────────────────────────────────────────── */
 function CountdownBlock({ props }: { props: Record<string, unknown> }) {
   const endDate = (props.endDate as string) || "";
   const [timeLeft, setTimeLeft] = useState({ days: 0, hours: 0, min: 0, sec: 0 });
-
   useEffect(() => {
     if (!endDate) return;
     const tick = () => {
       const diff = Math.max(0, new Date(endDate).getTime() - Date.now());
-      setTimeLeft({
-        days: Math.floor(diff / 86400000),
-        hours: Math.floor((diff % 86400000) / 3600000),
-        min: Math.floor((diff % 3600000) / 60000),
-        sec: Math.floor((diff % 60000) / 1000),
-      });
+      setTimeLeft({ days: Math.floor(diff / 86400000), hours: Math.floor((diff % 86400000) / 3600000), min: Math.floor((diff % 3600000) / 60000), sec: Math.floor((diff % 60000) / 1000) });
     };
     tick();
     const id = setInterval(tick, 1000);
@@ -359,53 +695,223 @@ function CountdownBlock({ props }: { props: Record<string, unknown> }) {
   }, [endDate]);
 
   return (
-    <div
-      className="rounded-2xl px-6 py-8 text-center"
-      style={{
-        backgroundColor: (props.bgColor as string) || "#1B2B4B",
-        color: (props.textColor as string) || "#fff",
-      }}
-    >
-      <h3 className="text-lg font-bold mb-4">
-        {(props.title as string) || "Sale Ends In"}
-      </h3>
-      <div className="flex items-center justify-center gap-4">
-        {[
-          { label: "Days", val: timeLeft.days },
-          { label: "Hours", val: timeLeft.hours },
-          { label: "Min", val: timeLeft.min },
-          { label: "Sec", val: timeLeft.sec },
-        ].map(({ label, val }) => (
-          <div key={label} className="text-center">
-            <div className="text-3xl font-extrabold tabular-nums">
-              {String(val).padStart(2, "0")}
-            </div>
-            <div className="text-[10px] opacity-60 uppercase">{label}</div>
+    <AnimateIn>
+      <div className="rounded-3xl px-8 py-12 text-center bg-gradient-to-br from-brand-950 via-brand-900 to-brand-800 relative overflow-hidden"
+        style={{ backgroundColor: (props.bgColor as string) || undefined, color: (props.textColor as string) || "#fff" }}>
+        <div className="absolute inset-0 overflow-hidden pointer-events-none">
+          <div className="absolute -top-20 -right-20 w-64 h-64 rounded-full bg-accent-500/10 blur-3xl" />
+        </div>
+        <div className="relative">
+          <h3 className="text-xl sm:text-2xl font-display font-extrabold mb-6">{(props.title as string) || "Sale Ends In"}</h3>
+          <div className="flex items-center justify-center gap-3 sm:gap-5">
+            {[
+              { label: "Days", val: timeLeft.days },
+              { label: "Hours", val: timeLeft.hours },
+              { label: "Min", val: timeLeft.min },
+              { label: "Sec", val: timeLeft.sec },
+            ].map(({ label, val }, i) => (
+              <div key={label} className="text-center">
+                <div className="bg-white/10 backdrop-blur-sm rounded-2xl px-4 py-3 sm:px-6 sm:py-4 border border-white/10">
+                  <div className="text-2xl sm:text-4xl font-display font-extrabold tabular-nums">
+                    {String(val).padStart(2, "0")}
+                  </div>
+                </div>
+                <div className="text-[10px] sm:text-xs mt-2 opacity-60 uppercase tracking-wider font-semibold">{label}</div>
+              </div>
+            ))}
           </div>
-        ))}
+          {(props.buttonText as string) && (
+            <a href={(props.buttonHref as string) || "#"} className="inline-flex items-center gap-2 mt-8 rounded-2xl bg-white text-surface-900 font-bold py-3 px-8 hover:-translate-y-0.5 transition-all shadow-xl">
+              {props.buttonText as string}
+              <ArrowRight className="h-4 w-4" />
+            </a>
+          )}
+        </div>
       </div>
-    </div>
+    </AnimateIn>
   );
 }
 
+/* ── Trust Badges ────────────────────────────────────────────── */
 function TrustBadgesBlock({ props }: { props: Record<string, unknown> }) {
   const items = (props.items as Array<{ icon: string; label: string }>) || [];
   return (
-    <div className="flex flex-wrap items-center justify-center gap-6 py-4">
-      {items.map((item, i) => {
-        const Icon = iconMap[item.icon] || Shield;
-        return (
-          <div key={i} className="flex items-center gap-2 text-gray-600">
-            <Icon className="h-5 w-5 text-indigo-600" />
-            <span className="text-xs font-semibold">{item.label}</span>
-          </div>
-        );
-      })}
-    </div>
+    <AnimateIn>
+      <div className="flex flex-wrap items-center justify-center gap-6 sm:gap-10 py-6 rounded-2xl bg-surface-50 border border-surface-100 px-4">
+        {items.map((item, i) => {
+          const Icon = iconMap[item.icon] || Shield;
+          return (
+            <div key={i} className="flex items-center gap-2.5 text-surface-600">
+              <div className="h-9 w-9 rounded-xl bg-white border border-surface-200 flex items-center justify-center shadow-sm">
+                <Icon className="h-4 w-4 text-brand-600" />
+              </div>
+              <span className="text-xs font-bold">{item.label}</span>
+            </div>
+          );
+        })}
+      </div>
+    </AnimateIn>
   );
 }
 
-/* ─── RENDERER MAP ──────────────────────────────────────────── */
+/* ── Banner ──────────────────────────────────────────────────── */
+function BannerBlock({ props }: { props: Record<string, unknown> }) {
+  const bg = (props.bgColor as string) || "brand";
+  return (
+    <AnimateIn>
+      <div className={`rounded-3xl px-8 sm:px-12 py-10 sm:py-14 relative overflow-hidden ${
+        bg === "brand" ? "bg-gradient-to-r from-brand-700 to-brand-900" :
+        bg === "accent" ? "bg-gradient-to-r from-accent-500 to-accent-700" :
+        bg === "dark" ? "bg-gradient-to-r from-surface-900 to-surface-950" :
+        "bg-surface-50 border border-surface-200"
+      }`}>
+        <div className="absolute inset-0 overflow-hidden pointer-events-none">
+          <div className="absolute -right-10 -top-10 w-40 h-40 rounded-full bg-white/5 blur-2xl" />
+        </div>
+        <div className="relative flex flex-col sm:flex-row items-center justify-between gap-6">
+          <div>
+            <h3 className={`text-xl sm:text-2xl font-display font-extrabold ${bg === "light" ? "text-surface-900" : "text-white"}`}>
+              {(props.title as string) || "Special Offer"}
+            </h3>
+            {(props.subtitle as string) && (
+              <p className={`text-sm mt-1 ${bg === "light" ? "text-surface-600" : "text-white/70"}`}>{props.subtitle as string}</p>
+            )}
+          </div>
+          {(props.buttonText as string) && (
+            <a href={(props.buttonHref as string) || "#"}
+              className={`inline-flex items-center gap-2 rounded-2xl font-bold py-3 px-7 text-sm transition-all hover:-translate-y-0.5 flex-shrink-0 ${
+                bg === "light" ? "bg-brand-600 text-white shadow-lg" : "bg-white text-surface-900 shadow-xl"
+              }`}>
+              {props.buttonText as string}
+              <ArrowRight className="h-4 w-4" />
+            </a>
+          )}
+        </div>
+      </div>
+    </AnimateIn>
+  );
+}
+
+/* ── Image + Text ────────────────────────────────────────────── */
+function ImageTextBlock({ props }: { props: Record<string, unknown> }) {
+  const reverse = (props.reverse as boolean) || false;
+  return (
+    <AnimateIn>
+      <div className={`grid grid-cols-1 md:grid-cols-2 gap-8 sm:gap-12 items-center`}>
+        <div className={reverse ? "md:order-2" : ""}>
+          {(props.image as string) ? (
+            <img src={props.image as string} alt={(props.imageAlt as string) || ""} className="w-full rounded-2xl shadow-lg object-cover" />
+          ) : (
+            <div className="aspect-[4/3] rounded-2xl bg-gradient-to-br from-brand-100 via-surface-100 to-accent-50 flex items-center justify-center">
+              <ShoppingBag className="h-12 w-12 text-surface-300" />
+            </div>
+          )}
+        </div>
+        <div className={reverse ? "md:order-1" : ""}>
+          {(props.badge as string) && (
+            <span className="inline-flex items-center gap-1.5 rounded-full bg-brand-50 text-brand-700 px-3 py-1 text-xs font-semibold mb-4">
+              <Sparkles className="h-3 w-3" /> {props.badge as string}
+            </span>
+          )}
+          <h3 className="text-2xl sm:text-3xl font-display font-extrabold text-surface-900 mb-4">
+            {(props.title as string) || "Title"}
+          </h3>
+          <p className="text-surface-600 leading-relaxed mb-6">
+            {(props.text as string) || "Description text"}
+          </p>
+          {(props.buttonText as string) && (
+            <a href={(props.buttonHref as string) || "#"} className="inline-flex items-center gap-2 rounded-2xl bg-brand-600 text-white font-bold py-3 px-7 text-sm hover:bg-brand-700 transition-all shadow-lg shadow-brand-600/25 hover:-translate-y-0.5">
+              {props.buttonText as string}
+              <ArrowRight className="h-4 w-4" />
+            </a>
+          )}
+        </div>
+      </div>
+    </AnimateIn>
+  );
+}
+
+/* ── Gallery ─────────────────────────────────────────────────── */
+function GalleryBlock({ props }: { props: Record<string, unknown> }) {
+  const images = (props.images as Array<{ src: string; alt?: string }>) || [];
+  if (images.length === 0) return null;
+  return (
+    <AnimateIn>
+      <div>
+        {(props.title as string) && (
+          <h3 className="text-2xl font-display font-extrabold text-surface-900 mb-6 text-center">{props.title as string}</h3>
+        )}
+        <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
+          {images.map((img, i) => (
+            <div key={i} className={`rounded-2xl overflow-hidden ${i === 0 ? "col-span-2 row-span-2" : ""}`}>
+              <img src={img.src} alt={img.alt || ""} className="w-full h-full object-cover hover:scale-105 transition-transform duration-500" />
+            </div>
+          ))}
+        </div>
+      </div>
+    </AnimateIn>
+  );
+}
+
+/* ── Team ────────────────────────────────────────────────────── */
+function TeamBlock({ props }: { props: Record<string, unknown> }) {
+  const members = (props.members as Array<{ name: string; role: string; image?: string; bio?: string }>) || [];
+  return (
+    <AnimateIn>
+      <div>
+        {(props.title as string) && (
+          <div className="text-center mb-10">
+            <h3 className="text-2xl sm:text-3xl font-display font-extrabold text-surface-900">{props.title as string}</h3>
+            {(props.subtitle as string) && <p className="text-surface-500 mt-2">{props.subtitle as string}</p>}
+          </div>
+        )}
+        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-6">
+          {members.map((m, i) => (
+            <AnimateIn key={i} delay={i * 0.08}>
+              <div className="text-center group">
+                <div className="w-24 h-24 mx-auto mb-4 rounded-full overflow-hidden bg-gradient-to-br from-brand-200 to-accent-100 border-4 border-white shadow-lg group-hover:shadow-xl transition-shadow">
+                  {m.image ? (
+                    <img src={m.image} alt={m.name} className="w-full h-full object-cover" />
+                  ) : (
+                    <div className="w-full h-full flex items-center justify-center text-2xl font-bold text-brand-600">
+                      {m.name.split(" ").map(n => n[0]).join("").slice(0, 2).toUpperCase()}
+                    </div>
+                  )}
+                </div>
+                <h4 className="text-sm font-bold text-surface-900">{m.name}</h4>
+                <p className="text-xs text-surface-500">{m.role}</p>
+                {m.bio && <p className="text-xs text-surface-400 mt-1">{m.bio}</p>}
+              </div>
+            </AnimateIn>
+          ))}
+        </div>
+      </div>
+    </AnimateIn>
+  );
+}
+
+/* ── Brands / Logos ──────────────────────────────────────────── */
+function BrandsBlock({ props }: { props: Record<string, unknown> }) {
+  const names = (props.names as string[]) || [];
+  return (
+    <AnimateIn>
+      <div className="py-8">
+        {(props.title as string) && (
+          <p className="text-xs font-semibold text-surface-400 uppercase tracking-widest text-center mb-6">{props.title as string}</p>
+        )}
+        <div className="flex flex-wrap items-center justify-center gap-8 sm:gap-12">
+          {names.map((name, i) => (
+            <span key={i} className="text-lg sm:text-xl font-display font-bold text-surface-300 hover:text-surface-500 transition-colors">{name}</span>
+          ))}
+        </div>
+      </div>
+    </AnimateIn>
+  );
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   RENDERER MAP
+   ═══════════════════════════════════════════════════════════════ */
 
 const renderers: Record<string, React.FC<{ props: Record<string, unknown> }>> = {
   heading: HeadingBlock,
@@ -418,12 +924,22 @@ const renderers: Record<string, React.FC<{ props: Record<string, unknown> }>> = 
   columns: ColumnsBlock,
   productGrid: ProductGridBlock,
   testimonial: TestimonialBlock,
+  testimonials: TestimonialsBlock,
   features: FeaturesBlock,
   faq: FAQBlock,
   contactForm: ContactFormBlock,
+  contactInfo: ContactInfoBlock,
+  stats: StatsBlock,
+  newsletter: NewsletterBlock,
   video: VideoBlock,
   countdown: CountdownBlock,
   trustBadges: TrustBadgesBlock,
+  banner: BannerBlock,
+  imageText: ImageTextBlock,
+  "image-text": ImageTextBlock,
+  gallery: GalleryBlock,
+  team: TeamBlock,
+  brands: BrandsBlock,
 };
 
 /* ─── PUBLIC API ────────────────────────────────────────────── */
@@ -437,7 +953,7 @@ export function PublicBlockRenderer({ block }: { block: BuilderBlock }) {
 export function RenderBlocks({ blocks }: { blocks: BuilderBlock[] }) {
   if (!blocks || blocks.length === 0) return null;
   return (
-    <div className="space-y-6">
+    <div className="space-y-8">
       {blocks.map((block) => (
         <PublicBlockRenderer key={block.id} block={block} />
       ))}

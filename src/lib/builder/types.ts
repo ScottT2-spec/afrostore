@@ -11,12 +11,21 @@ export type BlockType =
   | "columns"
   | "productGrid"
   | "testimonial"
+  | "testimonials"
   | "features"
   | "faq"
   | "contactForm"
+  | "contactInfo"
   | "video"
   | "countdown"
-  | "trustBadges";
+  | "trustBadges"
+  | "stats"
+  | "newsletter"
+  | "banner"
+  | "imageText"
+  | "gallery"
+  | "team"
+  | "brands";
 
 export interface BuilderBlock {
   id: string;
@@ -133,6 +142,75 @@ export const blockDefaults: Record<BlockType, () => Record<string, unknown>> = {
       { icon: "headphones", label: "24/7 Support" },
     ],
   }),
+  testimonials: () => ({
+    title: "What Our Customers Say",
+    subtitle: "Real reviews from real customers",
+    bgColor: "transparent",
+    items: [
+      { name: "Amara Okafor", text: "Absolutely love the quality! Fast delivery too.", role: "Verified Buyer", rating: 5 },
+      { name: "Kwesi Mensah", text: "Great products and excellent customer service.", role: "Repeat Customer", rating: 5 },
+      { name: "Fatima Ibrahim", text: "Best shopping experience I've had online.", role: "First-time Buyer", rating: 5 },
+    ],
+  }),
+  stats: () => ({
+    title: "Our Impact",
+    bgColor: "brand",
+    items: [
+      { value: "5,000+", label: "Happy Customers", icon: "users" },
+      { value: "10,000+", label: "Orders Delivered", icon: "package" },
+      { value: "4.9", label: "Average Rating", icon: "star" },
+      { value: "24/7", label: "Customer Support", icon: "headphones" },
+    ],
+  }),
+  newsletter: () => ({
+    title: "Stay Updated",
+    subtitle: "Subscribe to get the latest offers and updates.",
+    bgColor: "surface",
+  }),
+  banner: () => ({
+    title: "Special Offer",
+    subtitle: "Get 20% off your first order",
+    buttonText: "Shop Now",
+    buttonHref: "#",
+    bgColor: "brand",
+  }),
+  imageText: () => ({
+    title: "Our Story",
+    text: "We started with a simple mission: to bring the best products to our customers.",
+    image: "",
+    imageAlt: "",
+    reverse: false,
+    badge: "About Us",
+    buttonText: "Learn More",
+    buttonHref: "#",
+  }),
+  contactInfo: () => ({
+    title: "Contact Information",
+    items: [
+      { icon: "mail", title: "Email", value: "hello@store.com" },
+      { icon: "phone", title: "Phone", value: "+234 800 000 0000" },
+      { icon: "map-pin", title: "Address", value: "Lagos, Nigeria" },
+      { icon: "message", title: "WhatsApp", value: "+234 800 000 0000" },
+    ],
+    hours: "Monday - Saturday, 9:00 AM - 6:00 PM",
+  }),
+  gallery: () => ({
+    title: "Gallery",
+    images: [],
+  }),
+  team: () => ({
+    title: "Meet Our Team",
+    subtitle: "The people behind the brand",
+    members: [
+      { name: "John Doe", role: "Founder & CEO" },
+      { name: "Jane Smith", role: "Head of Design" },
+      { name: "Mike Johnson", role: "Operations Manager" },
+    ],
+  }),
+  brands: () => ({
+    title: "Trusted By",
+    names: ["Brand A", "Brand B", "Brand C", "Brand D", "Brand E"],
+  }),
 };
 
 // ─── BLOCK PALETTE ───────────────────────────────────────────
@@ -151,14 +229,23 @@ export const blockPalette: PaletteItem[] = [
   { type: "button", label: "Button", icon: "mouse-pointer", category: "basic" },
   { type: "spacer", label: "Spacer", icon: "move-vertical", category: "basic" },
   { type: "divider", label: "Divider", icon: "minus", category: "basic" },
+  { type: "video", label: "Video", icon: "play", category: "basic" },
   { type: "hero", label: "Hero Section", icon: "layout", category: "layout" },
   { type: "columns", label: "Columns", icon: "columns", category: "layout" },
-  { type: "features", label: "Features", icon: "grid", category: "layout" },
+  { type: "features", label: "Features Grid", icon: "grid", category: "layout" },
+  { type: "imageText", label: "Image + Text", icon: "image", category: "layout" },
+  { type: "gallery", label: "Gallery", icon: "image", category: "layout" },
   { type: "productGrid", label: "Product Grid", icon: "shopping-bag", category: "commerce" },
+  { type: "countdown", label: "Countdown", icon: "clock", category: "commerce" },
+  { type: "banner", label: "Promo Banner", icon: "zap", category: "commerce" },
   { type: "testimonial", label: "Testimonial", icon: "message-circle", category: "social" },
+  { type: "testimonials", label: "Testimonials Grid", icon: "message-circle", category: "social" },
   { type: "faq", label: "FAQ", icon: "help-circle", category: "social" },
   { type: "contactForm", label: "Contact Form", icon: "mail", category: "social" },
-  { type: "video", label: "Video", icon: "play", category: "basic" },
-  { type: "countdown", label: "Countdown", icon: "clock", category: "marketing" },
+  { type: "contactInfo", label: "Contact Info", icon: "map-pin", category: "social" },
+  { type: "team", label: "Team", icon: "users", category: "social" },
+  { type: "stats", label: "Stats Counter", icon: "trending-up", category: "marketing" },
+  { type: "newsletter", label: "Newsletter", icon: "send", category: "marketing" },
   { type: "trustBadges", label: "Trust Badges", icon: "shield", category: "marketing" },
+  { type: "brands", label: "Brand Logos", icon: "globe", category: "marketing" },
 ];

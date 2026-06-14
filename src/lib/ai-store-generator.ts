@@ -224,35 +224,54 @@ function buildHomePage(data: Record<string, any>, storeName: string): GeneratedP
   const features = data.features || [];
   const testimonials = data.testimonials || [];
 
+  const featureIcons = ["truck", "shield", "headphones", "zap", "heart", "award", "globe", "rocket"];
+
   const blocks: BuilderBlock[] = [
-    // Hero
+    // Premium Hero
     block("hero", {
       heading: brand.heroHeading || `Welcome to ${storeName}`,
       subheading: brand.heroSubheading || brand.tagline || "Discover amazing products",
       buttonText: brand.ctaText || "Shop Now",
       buttonHref: "#products",
-      bgColor: "#1B2B4B",
-      textColor: "#ffffff",
+      secondaryButtonText: "Learn More",
+      secondaryButtonHref: "#about",
+      badge: brand.tagline || `✨ Welcome to ${storeName}`,
+      bgStyle: "gradient",
       align: "center",
     }),
-    block("spacer", { height: 40 }),
+    block("spacer", { height: 56 }),
+
+    // Stats
+    block("stats", {
+      bgColor: "brand",
+      items: [
+        { value: "1,000+", label: "Happy Customers", icon: "users" },
+        { value: "500+", label: "Products", icon: "package" },
+        { value: "4.9", label: "Customer Rating", icon: "star" },
+        { value: "24/7", label: "Support", icon: "headphones" },
+      ],
+    }),
+    block("spacer", { height: 56 }),
 
     // Featured products
     block("productGrid", {
       title: "Our Products",
+      subtitle: "Handpicked just for you",
       columns: 3,
       limit: 6,
       showPrice: true,
       category: "",
     }),
-    block("spacer", { height: 40 }),
+    block("spacer", { height: 56 }),
 
     // Features / Why choose us
     block("features", {
       title: "Why Choose Us",
+      subtitle: "Here's what makes us different",
+      bgColor: "surface",
       items: features.length >= 3
-        ? features.slice(0, 3).map((f: any) => ({
-            icon: "shield",
+        ? features.slice(0, 4).map((f: any, i: number) => ({
+            icon: featureIcons[i % featureIcons.length],
             title: f.title,
             desc: f.desc,
           }))
@@ -260,11 +279,42 @@ function buildHomePage(data: Record<string, any>, storeName: string): GeneratedP
             { icon: "truck", title: "Fast Delivery", desc: "Swift delivery across Nigeria" },
             { icon: "shield", title: "Secure Payments", desc: "Pay with card, bank transfer, or on delivery" },
             { icon: "headphones", title: "24/7 Support", desc: "Reach us anytime on WhatsApp" },
+            { icon: "refresh", title: "Easy Returns", desc: "Hassle-free returns within 7 days" },
           ],
     }),
-    block("spacer", { height: 40 }),
+    block("spacer", { height: 56 }),
+  ];
 
-    // Trust badges
+  // Testimonials grid (not individual cards)
+  if (testimonials.length > 0) {
+    blocks.push(
+      block("testimonials", {
+        title: "What Our Customers Say",
+        subtitle: "Real reviews from real customers",
+        bgColor: "transparent",
+        items: testimonials.slice(0, 3).map((t: any) => ({
+          name: t.name,
+          role: t.role || "Verified Buyer",
+          text: t.text,
+          rating: 5,
+        })),
+      })
+    );
+    blocks.push(block("spacer", { height: 56 }));
+  }
+
+  // Newsletter
+  blocks.push(
+    block("newsletter", {
+      title: "Stay Updated",
+      subtitle: "Get the latest offers and new arrivals straight to your inbox.",
+      bgColor: "brand",
+    })
+  );
+  blocks.push(block("spacer", { height: 40 }));
+
+  // Trust badges
+  blocks.push(
     block("trustBadges", {
       items: [
         { icon: "shield", label: "Secure Checkout" },
@@ -272,55 +322,6 @@ function buildHomePage(data: Record<string, any>, storeName: string): GeneratedP
         { icon: "refresh", label: "Easy Returns" },
         { icon: "headphones", label: "WhatsApp Support" },
       ],
-    }),
-    block("spacer", { height: 40 }),
-  ];
-
-  // Add testimonials
-  if (testimonials.length > 0) {
-    blocks.push(
-      block("heading", {
-        text: "What Our Customers Say",
-        level: "h2",
-        align: "center",
-        color: "#171717",
-        fontSize: "2xl",
-      })
-    );
-    blocks.push(block("spacer", { height: 16 }));
-
-    for (const t of testimonials.slice(0, 3)) {
-      blocks.push(
-        block("testimonial", {
-          name: t.name,
-          role: t.role || "Verified Buyer",
-          text: t.text,
-          rating: 5,
-          avatar: "",
-        })
-      );
-      blocks.push(block("spacer", { height: 12 }));
-    }
-  }
-
-  // Final CTA
-  blocks.push(block("spacer", { height: 24 }));
-  blocks.push(
-    block("heading", {
-      text: brand.tagline || "Ready to shop?",
-      level: "h2",
-      align: "center",
-      color: "#171717",
-      fontSize: "2xl",
-    })
-  );
-  blocks.push(
-    block("button", {
-      text: brand.ctaText || "Start Shopping",
-      href: "#products",
-      variant: "primary",
-      align: "center",
-      size: "lg",
     })
   );
 
@@ -336,57 +337,106 @@ function buildHomePage(data: Record<string, any>, storeName: string): GeneratedP
 
 function buildAboutPage(data: Record<string, any>, storeName: string): GeneratedPage {
   const about = data.about || {};
+  const testimonials = data.testimonials || [];
+  const valueIcons = ["heart", "award", "globe", "shield", "target", "rocket"];
+
+  // Split story into two halves for image-text sections
+  const storyText = about.story || `${storeName} is dedicated to providing the best products and services.`;
+  const storyParts = storyText.split(/\n\n+/);
+  const firstHalf = storyParts.slice(0, Math.ceil(storyParts.length / 2)).join("\n\n");
+  const secondHalf = storyParts.slice(Math.ceil(storyParts.length / 2)).join("\n\n");
 
   const blocks: BuilderBlock[] = [
-    block("heading", {
-      text: about.headline || `About ${storeName}`,
-      level: "h1",
-      align: "center",
-      color: "#171717",
-      fontSize: "3xl",
+    block("hero", {
+      heading: about.headline || `About ${storeName}`,
+      subheading: "Our story, our mission, our people",
+      bgStyle: "gradient",
+      buttonText: "",
     }),
-    block("spacer", { height: 20 }),
-    block("text", {
-      text: about.story || `${storeName} is dedicated to providing the best products and services.`,
-      align: "center",
-      color: "#525252",
-      fontSize: "base",
+    block("spacer", { height: 56 }),
+
+    // Story section 1
+    block("imageText", {
+      badge: "Our Story",
+      title: `Why ${storeName}?`,
+      text: firstHalf,
+      reverse: false,
+      buttonText: "",
     }),
-    block("spacer", { height: 40 }),
+    block("spacer", { height: 48 }),
   ];
+
+  // Story section 2
+  if (secondHalf) {
+    blocks.push(
+      block("imageText", {
+        badge: "Our Mission",
+        title: "What Drives Us",
+        text: secondHalf,
+        reverse: true,
+        buttonText: "",
+      })
+    );
+    blocks.push(block("spacer", { height: 48 }));
+  }
 
   // Values
   if (about.values && about.values.length > 0) {
     blocks.push(
       block("features", {
         title: "Our Values",
-        items: about.values.map((v: any) => ({
-          icon: "shield",
+        subtitle: "The principles that guide everything we do",
+        bgColor: "surface",
+        items: about.values.map((v: any, i: number) => ({
+          icon: valueIcons[i % valueIcons.length],
           title: v.title,
           desc: v.desc,
         })),
       })
     );
-    blocks.push(block("spacer", { height: 40 }));
+    blocks.push(block("spacer", { height: 48 }));
   }
 
-  // CTA
+  // Stats
   blocks.push(
-    block("heading", {
-      text: "Ready to experience the difference?",
-      level: "h3",
-      align: "center",
-      color: "#171717",
-      fontSize: "2xl",
+    block("stats", {
+      title: "Our Impact",
+      bgColor: "brand",
+      items: [
+        { value: "1,000+", label: "Happy Customers", icon: "users" },
+        { value: "500+", label: "Products Sold", icon: "package" },
+        { value: "4.9", label: "Customer Rating", icon: "star" },
+        { value: "24/7", label: "Support", icon: "headphones" },
+      ],
     })
   );
+  blocks.push(block("spacer", { height: 48 }));
+
+  // Testimonials
+  if (testimonials.length > 0) {
+    blocks.push(
+      block("testimonials", {
+        title: "Loved by Our Customers",
+        bgColor: "transparent",
+        items: testimonials.slice(0, 3).map((t: any) => ({
+          name: t.name,
+          role: t.role || "Customer",
+          text: t.text,
+          rating: 5,
+        })),
+      })
+    );
+    blocks.push(block("spacer", { height: 48 }));
+  }
+
+  // CTA Banner
   blocks.push(
-    block("button", {
-      text: "Browse Products",
-      href: "/",
-      variant: "primary",
-      align: "center",
-      size: "lg",
+    block("banner", {
+      title: "Ready to Experience the Difference?",
+      subtitle: "Join thousands of happy customers today",
+      buttonText: "Browse Products",
+      buttonHref: "/",
+      bgColor: "dark",
     })
   );
 
@@ -404,21 +454,13 @@ function buildFAQPage(data: Record<string, any>, storeName: string): GeneratedPa
   const faq = data.faq || {};
 
   const blocks: BuilderBlock[] = [
-    block("heading", {
-      text: "Frequently Asked Questions",
-      level: "h1",
-      align: "center",
-      color: "#171717",
-      fontSize: "3xl",
+    block("hero", {
+      heading: "Frequently Asked Questions",
+      subheading: "Got questions? We've got answers.",
+      bgStyle: "light",
+      buttonText: "",
     }),
-    block("spacer", { height: 8 }),
-    block("text", {
-      text: "Got questions? We've got answers. If you don't find what you're looking for, reach out to us directly.",
-      align: "center",
-      color: "#525252",
-      fontSize: "base",
-    }),
-    block("spacer", { height: 24 }),
+    block("spacer", { height: 48 }),
     block("faq", {
       title: "",
       items: (faq.items || []).slice(0, 8).map((item: any) => ({
@@ -426,21 +468,25 @@ function buildFAQPage(data: Record<string, any>, storeName: string): GeneratedPa
         answer: item.answer,
       })),
     }),
-    block("spacer", { height: 32 }),
-    block("divider", { color: "#e5e5e5", thickness: 1, style: "solid" }),
-    block("spacer", { height: 24 }),
-    block("heading", {
-      text: "Still have questions?",
-      level: "h3",
-      align: "center",
-      color: "#171717",
-      fontSize: "2xl",
+    block("spacer", { height: 48 }),
+    block("divider", { style: "dots" }),
+    block("spacer", { height: 48 }),
+    block("contactInfo", {
+      title: "Other Ways to Reach Us",
+      items: [
+        { icon: "message", title: "WhatsApp", value: "Message us for quick help" },
+        { icon: "mail", title: "Email", value: "Send us a detailed message" },
+        { icon: "phone", title: "Phone", value: "Call during business hours" },
+      ],
+      hours: "Monday - Saturday, 9:00 AM - 6:00 PM",
     }),
-    block("contactForm", {
-      title: "Send Us a Message",
-      subtitle: "We'll respond within 24 hours",
-      fields: ["name", "email", "message"],
-      buttonText: "Send Message",
+    block("spacer", { height: 48 }),
+    block("banner", {
+      title: "Still Have Questions?",
+      subtitle: "Our friendly team is here to help",
+      buttonText: "Contact Us",
+      buttonHref: "/contact",
+      bgColor: "dark",
     }),
   ];
 
@@ -458,35 +504,35 @@ function buildContactPage(data: Record<string, any>, storeName: string): Generat
   const contact = data.contact || {};
 
   const blocks: BuilderBlock[] = [
-    block("heading", {
-      text: contact.headline || "Get in Touch",
-      level: "h1",
-      align: "center",
-      color: "#171717",
-      fontSize: "3xl",
+    block("hero", {
+      heading: contact.headline || "Get in Touch",
+      subheading: contact.subtitle || "We'd love to hear from you. Send us a message and we'll respond as soon as possible.",
+      bgStyle: "light",
+      buttonText: "",
     }),
-    block("spacer", { height: 8 }),
-    block("text", {
-      text: contact.subtitle || "We'd love to hear from you. Send us a message and we'll respond as soon as possible.",
-      align: "center",
-      color: "#525252",
-      fontSize: "base",
+    block("spacer", { height: 48 }),
+    block("contactInfo", {
+      title: "Contact Information",
+      items: [
+        { icon: "mail", title: "Email", value: "hello@example.com" },
+        { icon: "phone", title: "Phone", value: "+234 800 000 0000" },
+        { icon: "message", title: "WhatsApp", value: "Quick chat support" },
+        { icon: "map-pin", title: "Address", value: "Lagos, Nigeria" },
+      ],
+      hours: "Monday - Saturday, 9:00 AM - 6:00 PM",
     }),
-    block("spacer", { height: 32 }),
+    block("spacer", { height: 48 }),
     block("contactForm", {
-      title: "",
-      subtitle: "",
+      title: "Send Us a Message",
+      subtitle: "We'll respond within 24 hours",
       fields: ["name", "email", "phone", "message"],
       buttonText: "Send Message",
     }),
-    block("spacer", { height: 40 }),
-    block("features", {
-      title: "Other Ways to Reach Us",
-      items: [
-        { icon: "headphones", title: "WhatsApp", desc: "Message us anytime for quick responses" },
-        { icon: "mail", title: "Email", desc: "Send us a detailed message" },
-        { icon: "phone", title: "Phone", desc: "Call us during business hours" },
-      ],
+    block("spacer", { height: 48 }),
+    block("newsletter", {
+      title: "Stay in the Loop",
+      subtitle: "Get updates on new products and exclusive offers.",
+      bgColor: "surface",
     }),
   ];
 
