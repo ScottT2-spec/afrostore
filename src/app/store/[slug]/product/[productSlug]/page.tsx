@@ -24,6 +24,7 @@ import {
   Pencil,
   X,
 } from "lucide-react";
+import { useWishlist } from "@/hooks/useWishlist";
 
 interface ProductImage { id: string; url: string; alt?: string }
 interface Variant { id: string; name: string; price: number; stock: number; inStock: boolean; options: Record<string, string> | null }
@@ -70,7 +71,7 @@ export default function ProductDetailPage() {
   const [selectedVariant, setSelectedVariant] = useState<string | null>(null);
   const [quantity, setQuantity] = useState(1);
   const [addedToCart, setAddedToCart] = useState(false);
-  const [wishlisted, setWishlisted] = useState(false);
+  const [wishlistToast, setWishlistToast] = useState<string | null>(null);
 
   useEffect(() => {
     fetch(`/api/storefront/${slug}/products/${productSlug}`)
@@ -100,6 +101,7 @@ export default function ProductDetailPage() {
   );
 
   const { store, product, reviews, relatedProducts } = data;
+  const { isWishlisted, toggleWishlist } = useWishlist(store.id);
   const currency = product.currency || store.currency;
   const images = product.images.length > 0 ? product.images : [{ id: "placeholder", url: "", alt: "No image" }];
   const activeVariant = product.variants.find((v) => v.id === selectedVariant);
@@ -308,10 +310,14 @@ export default function ProductDetailPage() {
                 </button>
               )}
               <button
-                onClick={() => setWishlisted(!wishlisted)}
-                className={`p-3.5 rounded-xl border transition-all ${wishlisted ? "border-red-200 bg-red-50 text-red-500" : "border-surface-200 text-surface-400 hover:text-red-500"}`}
+                onClick={() => {
+                  const added = toggleWishlist(product.id);
+                  setWishlistToast(added ? "Added to wishlist" : "Removed from wishlist");
+                  setTimeout(() => setWishlistToast(null), 1500);
+                }}
+                className={`p-3.5 rounded-xl border transition-all ${isWishlisted(product.id) ? "border-red-200 bg-red-50 text-red-500" : "border-surface-200 text-surface-400 hover:text-red-500"}`}
               >
-                <Heart className={`h-5 w-5 ${wishlisted ? "fill-red-500" : ""}`} />
+                <Heart className={`h-5 w-5 ${isWishlisted(product.id) ? "fill-red-500" : ""}`} />
               </button>
             </div>
 
@@ -376,6 +382,16 @@ export default function ProductDetailPage() {
           </section>
         )}
       </main>
+
+      {/* Wishlist Toast */}
+      {wishlistToast && (
+        <div className="fixed bottom-6 left-1/2 -translate-x-1/2 z-50 animate-in slide-in-from-bottom-4 fade-in duration-300">
+          <div className="flex items-center gap-2 rounded-full bg-surface-900 text-white px-5 py-2.5 text-sm font-medium shadow-xl">
+            <Heart className="h-4 w-4 fill-red-500 text-red-500" />
+            {wishlistToast}
+          </div>
+        </div>
+      )}
 
       {/* Footer */}
       <footer className="border-t border-surface-100 mt-16">

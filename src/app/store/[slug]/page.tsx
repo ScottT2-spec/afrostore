@@ -28,6 +28,7 @@ import {
   ImageIcon,
 } from "lucide-react";
 import { RenderBlocks, type BuilderBlock } from "@/components/storefront/BlockRenderer";
+import { useWishlist } from "@/hooks/useWishlist";
 
 /* ───────── Types ───────── */
 
@@ -251,6 +252,7 @@ export default function StorePage() {
   }
 
   const { store, settings, socialLinks, products, categories } = data;
+  const { isWishlisted, toggleWishlist, wishlistCount } = useWishlist(store.id);
   const currency = store.currency || "NGN";
   const whatsappNumber = settings.whatsappNumber || socialLinks.whatsapp;
 
@@ -318,7 +320,12 @@ export default function StorePage() {
 
           <div className="flex items-center gap-3">
             <button onClick={() => setShowSearch(!showSearch)} className="p-2 text-surface-600 hover:bg-surface-50 rounded-lg"><Search className="h-5 w-5" /></button>
-            <button className="p-2 text-surface-600 hover:bg-surface-50 rounded-lg hidden sm:flex"><Heart className="h-5 w-5" /></button>
+            <Link href={`/store/${slug}/wishlist`} className="relative p-2 text-surface-600 hover:bg-surface-50 rounded-lg hidden sm:flex">
+              <Heart className="h-5 w-5" />
+              {wishlistCount > 0 && (
+                <span className="absolute -top-0.5 -right-0.5 h-5 w-5 rounded-full bg-red-500 text-white text-[10px] font-bold flex items-center justify-center">{wishlistCount}</span>
+              )}
+            </Link>
             <Link
               href="/checkout"
               className="relative p-2 text-surface-600 hover:bg-surface-50 rounded-lg"
@@ -499,6 +506,12 @@ export default function StorePage() {
                     {discount > 0 && (
                       <div className="absolute top-3 right-3 rounded-full bg-red-500 px-2 py-0.5 text-[10px] font-bold text-white">-{discount}%</div>
                     )}
+                    <button
+                      onClick={(e) => { e.stopPropagation(); toggleWishlist(product.id); }}
+                      className={`absolute ${discount > 0 ? "top-10" : "top-3"} right-3 h-8 w-8 rounded-full bg-white/80 backdrop-blur-sm flex items-center justify-center transition-all hover:bg-white hover:scale-110 z-10 shadow-sm`}
+                    >
+                      <Heart className={`h-4 w-4 ${isWishlisted(product.id) ? "fill-red-500 text-red-500" : "text-surface-500"}`} />
+                    </button>
                     <div className="absolute inset-0 bg-black/0 group-hover:bg-black/20 transition-colors" />
                     <button
                       onClick={(e) => { e.stopPropagation(); if (product.inStock) addToCart(product); }}
@@ -669,10 +682,18 @@ export default function StorePage() {
 
                 <div className="mt-6 space-y-3 flex-1 flex flex-col justify-end">
                   {selectedProduct.inStock && (
-                    <button onClick={() => { addToCart(selectedProduct, qty); setSelectedProduct(null); }} className="btn-primary w-full py-3.5">
-                      <ShoppingCart className="h-5 w-5" />
-                      Add to Cart — {formatCurrency(Number(selectedProduct.price) * qty, currency)}
-                    </button>
+                    <div className="flex gap-2">
+                      <button onClick={() => { addToCart(selectedProduct, qty); setSelectedProduct(null); }} className="btn-primary flex-1 py-3.5">
+                        <ShoppingCart className="h-5 w-5" />
+                        Add to Cart — {formatCurrency(Number(selectedProduct.price) * qty, currency)}
+                      </button>
+                      <button
+                        onClick={() => toggleWishlist(selectedProduct.id)}
+                        className={`p-3.5 rounded-xl border transition-all ${isWishlisted(selectedProduct.id) ? "border-red-200 bg-red-50 text-red-500" : "border-surface-200 text-surface-400 hover:text-red-500"}`}
+                      >
+                        <Heart className={`h-5 w-5 ${isWishlisted(selectedProduct.id) ? "fill-red-500" : ""}`} />
+                      </button>
+                    </div>
                   )}
                   {settings.whatsappOrdering && whatsappNumber && (
                     <a
