@@ -155,6 +155,7 @@ export async function GET(req: NextRequest, { params }: Params) {
           title: true,
           slug: true,
           type: true,
+          content: true,
         },
         orderBy: { position: "asc" },
       }),

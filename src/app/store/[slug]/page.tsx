@@ -27,6 +27,7 @@ import {
   CheckCircle2,
   ImageIcon,
 } from "lucide-react";
+import { RenderBlocks, type BuilderBlock } from "@/components/storefront/BlockRenderer";
 
 /* ───────── Types ───────── */
 
@@ -111,7 +112,7 @@ interface StoreData {
   pagination: { page: number; limit: number; total: number; pages: number };
   categories: StoreCategory[];
   deliveryZones: DeliveryZone[];
-  pages: Array<{ id: string; title: string; slug: string; type: string }>;
+  pages: Array<{ id: string; title: string; slug: string; type: string; content?: unknown }>;
 }
 
 interface CartItem {
@@ -261,6 +262,20 @@ export default function StorePage() {
 
   const categoryNames = ["All", ...categories.filter((c) => c._count.products > 0).map((c) => c.name)];
 
+  // ─── Page helpers ─────────────────────────────────────────
+  // Find the HOME page (AI-generated) with its blocks
+  const homePage = data.pages.find((p) => p.type === "HOME");
+  const homeBlocks: BuilderBlock[] = homePage && Array.isArray(homePage.content)
+    ? (homePage.content as BuilderBlock[])
+    : [];
+  const hasHomeContent = homeBlocks.length > 0;
+
+  // Navigation pages: exclude HOME (we're on it), sort sensibly
+  const navPageOrder: Record<string, number> = { ABOUT: 0, FAQ: 1, CONTACT: 2, POLICY: 3, CUSTOM: 4, LANDING: 5 };
+  const navPages = data.pages
+    .filter((p) => p.type !== "HOME")
+    .sort((a, b) => (navPageOrder[a.type] ?? 99) - (navPageOrder[b.type] ?? 99));
+
   return (
     <div className="min-h-screen bg-white">
       {/* Announcement Bar */}
@@ -293,8 +308,9 @@ export default function StorePage() {
           </div>
 
           <nav className="hidden sm:flex items-center gap-6">
+            <Link href={`/store/${slug}`} className="text-sm font-medium text-brand-700 transition-colors">Home</Link>
             <a href="#shop" className="text-sm font-medium text-surface-600 hover:text-surface-900 transition-colors">Shop</a>
-            {data.pages.filter((p) => p.type !== "HOME").slice(0, 3).map((page) => (
+            {navPages.slice(0, 4).map((page) => (
               <Link key={page.id} href={`/store/${slug}/${page.slug}`} className="text-sm font-medium text-surface-600 hover:text-surface-900 transition-colors">{page.title}</Link>
             ))}
           </nav>
@@ -335,8 +351,9 @@ export default function StorePage() {
       {/* Mobile menu */}
       {mobileMenu && (
         <div className="sm:hidden bg-white border-b border-surface-200 px-4 py-4 space-y-2">
+          <Link href={`/store/${slug}`} onClick={() => setMobileMenu(false)} className="block text-sm font-bold text-brand-700 py-2">Home</Link>
           <a href="#shop" onClick={() => setMobileMenu(false)} className="block text-sm font-medium text-surface-600 py-2">Shop</a>
-          {data.pages.filter((p) => p.type !== "HOME").map((page) => (
+          {navPages.map((page) => (
             <Link key={page.id} href={`/store/${slug}/${page.slug}`} onClick={() => setMobileMenu(false)} className="block text-sm font-medium text-surface-600 py-2">{page.title}</Link>
           ))}
           {whatsappNumber && (
@@ -345,59 +362,68 @@ export default function StorePage() {
         </div>
       )}
 
-      {/* Hero */}
-      <section className="relative bg-gradient-to-br from-surface-900 via-surface-800 to-surface-900 overflow-hidden">
-        <div className="absolute inset-0">
-          <div className="absolute top-0 right-0 h-[500px] w-[500px] rounded-full bg-purple-500/10 blur-[100px]" />
-          <div className="absolute bottom-0 left-0 h-[400px] w-[400px] rounded-full bg-pink-500/10 blur-[100px]" />
-        </div>
-        <div className="relative max-w-6xl mx-auto px-4 sm:px-6 py-16 sm:py-24 flex flex-col sm:flex-row items-center gap-8">
-          <div className="flex-1 text-center sm:text-left">
-            <span className="inline-flex items-center gap-1.5 rounded-full bg-white/10 border border-white/20 px-3 py-1 text-xs text-white/80 mb-4">
-              <Zap className="h-3 w-3" />{store.businessType ? `${store.businessType.charAt(0).toUpperCase()}${store.businessType.slice(1)}` : "Shop"}
-            </span>
-            <h1 className="font-display text-3xl sm:text-4xl lg:text-5xl font-extrabold text-white leading-tight">
-              {store.name}
-            </h1>
-            {store.description && (
-              <p className="mt-4 text-white/60 max-w-md text-base leading-relaxed">{store.description}</p>
-            )}
-            <div className="mt-6 flex items-center gap-3 justify-center sm:justify-start">
-              <a href="#shop" className="btn-primary text-sm">Shop Now <ArrowRight className="h-4 w-4" /></a>
-              {settings.whatsappOrdering && whatsappNumber && (
-                <a href={getWhatsAppLink(whatsappNumber, cart, currency, store.name)} className="inline-flex items-center gap-2 text-white/70 text-sm font-medium hover:text-white transition-colors">
-                  <MessageCircle className="h-4 w-4" /> Order via WhatsApp
-                </a>
+      {/* ─── HOME PAGE CONTENT ─────────────────────────────────── */}
+      {hasHomeContent ? (
+        /* AI-generated Home page — render the builder blocks */
+        <section className="max-w-6xl mx-auto px-4 sm:px-6 py-8">
+          <RenderBlocks blocks={homeBlocks} />
+        </section>
+      ) : (
+        /* Fallback: default hero + trust bar (no AI content) */
+        <>
+          <section className="relative bg-gradient-to-br from-surface-900 via-surface-800 to-surface-900 overflow-hidden">
+            <div className="absolute inset-0">
+              <div className="absolute top-0 right-0 h-[500px] w-[500px] rounded-full bg-purple-500/10 blur-[100px]" />
+              <div className="absolute bottom-0 left-0 h-[400px] w-[400px] rounded-full bg-pink-500/10 blur-[100px]" />
+            </div>
+            <div className="relative max-w-6xl mx-auto px-4 sm:px-6 py-16 sm:py-24 flex flex-col sm:flex-row items-center gap-8">
+              <div className="flex-1 text-center sm:text-left">
+                <span className="inline-flex items-center gap-1.5 rounded-full bg-white/10 border border-white/20 px-3 py-1 text-xs text-white/80 mb-4">
+                  <Zap className="h-3 w-3" />{store.businessType ? `${store.businessType.charAt(0).toUpperCase()}${store.businessType.slice(1)}` : "Shop"}
+                </span>
+                <h1 className="font-display text-3xl sm:text-4xl lg:text-5xl font-extrabold text-white leading-tight">
+                  {store.name}
+                </h1>
+                {store.description && (
+                  <p className="mt-4 text-white/60 max-w-md text-base leading-relaxed">{store.description}</p>
+                )}
+                <div className="mt-6 flex items-center gap-3 justify-center sm:justify-start">
+                  <a href="#shop" className="btn-primary text-sm">Shop Now <ArrowRight className="h-4 w-4" /></a>
+                  {settings.whatsappOrdering && whatsappNumber && (
+                    <a href={getWhatsAppLink(whatsappNumber, cart, currency, store.name)} className="inline-flex items-center gap-2 text-white/70 text-sm font-medium hover:text-white transition-colors">
+                      <MessageCircle className="h-4 w-4" /> Order via WhatsApp
+                    </a>
+                  )}
+                </div>
+              </div>
+              {store.coverImage ? (
+                <img src={store.coverImage} alt={store.name} className="w-64 h-80 sm:w-72 sm:h-96 rounded-2xl object-cover shadow-2xl flex-shrink-0" />
+              ) : (
+                <div className="w-64 h-80 sm:w-72 sm:h-96 rounded-2xl bg-gradient-to-br from-purple-500 via-pink-500 to-orange-400 shadow-2xl shadow-purple-500/20 flex-shrink-0" />
               )}
             </div>
-          </div>
-          {store.coverImage ? (
-            <img src={store.coverImage} alt={store.name} className="w-64 h-80 sm:w-72 sm:h-96 rounded-2xl object-cover shadow-2xl flex-shrink-0" />
-          ) : (
-            <div className="w-64 h-80 sm:w-72 sm:h-96 rounded-2xl bg-gradient-to-br from-purple-500 via-pink-500 to-orange-400 shadow-2xl shadow-purple-500/20 flex-shrink-0" />
-          )}
-        </div>
-      </section>
+          </section>
 
-      {/* Trust Bar */}
-      <div className="border-b border-surface-100 bg-surface-50">
-        <div className="max-w-6xl mx-auto px-4 sm:px-6 py-4 grid grid-cols-2 sm:grid-cols-4 gap-4">
-          {[
-            { icon: Truck, text: "Fast Delivery" },
-            { icon: Shield, text: "Secure Payment" },
-            { icon: CreditCard, text: "Pay Your Way" },
-            ...(settings.whatsappOrdering ? [{ icon: MessageCircle, text: "WhatsApp Support" }] : [{ icon: CheckCircle2, text: "Verified Store" }]),
-          ].map((t) => {
-            const Icon = t.icon;
-            return (
-              <div key={t.text} className="flex items-center gap-2 justify-center">
-                <Icon className="h-4 w-4 text-brand-600" />
-                <span className="text-xs font-medium text-surface-600">{t.text}</span>
-              </div>
-            );
-          })}
-        </div>
-      </div>
+          <div className="border-b border-surface-100 bg-surface-50">
+            <div className="max-w-6xl mx-auto px-4 sm:px-6 py-4 grid grid-cols-2 sm:grid-cols-4 gap-4">
+              {[
+                { icon: Truck, text: "Fast Delivery" },
+                { icon: Shield, text: "Secure Payment" },
+                { icon: CreditCard, text: "Pay Your Way" },
+                ...(settings.whatsappOrdering ? [{ icon: MessageCircle, text: "WhatsApp Support" }] : [{ icon: CheckCircle2, text: "Verified Store" }]),
+              ].map((t) => {
+                const Icon = t.icon;
+                return (
+                  <div key={t.text} className="flex items-center gap-2 justify-center">
+                    <Icon className="h-4 w-4 text-brand-600" />
+                    <span className="text-xs font-medium text-surface-600">{t.text}</span>
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+        </>
+      )}
 
       {/* Products */}
       <section id="shop" className="max-w-6xl mx-auto px-4 sm:px-6 py-12">
@@ -551,9 +577,9 @@ export default function StorePage() {
               </ul>
             </div>
             <div>
-              <h4 className="text-sm font-semibold text-white mb-3">Pages</h4>
+              <h4 className="text-sm font-semibold text-white mb-3">Info</h4>
               <ul className="space-y-2 text-xs">
-                {data.pages.slice(0, 5).map((page) => (
+                {navPages.slice(0, 5).map((page) => (
                   <li key={page.id}><Link href={`/store/${slug}/${page.slug}`} className="hover:text-white transition-colors">{page.title}</Link></li>
                 ))}
               </ul>
