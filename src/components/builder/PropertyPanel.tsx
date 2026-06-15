@@ -204,6 +204,234 @@ function CountdownProps({ block, update }: { block: BuilderBlock; update: (key: 
   );
 }
 
+function ContactInfoProps({ block, update }: { block: BuilderBlock; update: (key: string, val: unknown) => void }) {
+  const items = (block.props.items as Array<{ icon: string; title: string; value: string }>) || [];
+  const iconOptions = [
+    { value: "mail", label: "Email" }, { value: "phone", label: "Phone" },
+    { value: "message", label: "WhatsApp" }, { value: "map-pin", label: "Address" },
+    { value: "clock", label: "Hours" }, { value: "globe", label: "Website" },
+  ];
+  const updateItem = (index: number, key: string, val: string) => {
+    const next = items.map((item, i) => i === index ? { ...item, [key]: val } : item);
+    update("items", next);
+  };
+  const addItem = () => update("items", [...items, { icon: "mail", title: "Email", value: "" }]);
+  const removeItem = (index: number) => update("items", items.filter((_, i) => i !== index));
+  return (
+    <>
+      <PropInput label="Section Title" value={block.props.title} onChange={(v) => update("title", v)} />
+      <PropInput label="Business Hours" value={block.props.hours} onChange={(v) => update("hours", v)} />
+      <div>
+        <label className="block text-xs font-medium text-surface-700 mb-2">Contact Items</label>
+        <div className="space-y-3">
+          {items.map((item, i) => (
+            <div key={i} className="rounded-xl border border-surface-200 bg-surface-50 p-3 space-y-2">
+              <div className="flex items-center justify-between">
+                <span className="text-[10px] font-bold text-surface-400 uppercase">Item {i + 1}</span>
+                <button onClick={() => removeItem(i)} className="text-[10px] text-red-500 hover:text-red-700 font-medium">Remove</button>
+              </div>
+              <PropInput label="Type" value={item.icon} onChange={(v) => updateItem(i, "icon", v as string)} type="select" options={iconOptions} />
+              <PropInput label="Label" value={item.title} onChange={(v) => updateItem(i, "title", v as string)} />
+              <PropInput label="Value" value={item.value} onChange={(v) => updateItem(i, "value", v as string)} />
+            </div>
+          ))}
+        </div>
+        <button onClick={addItem} className="mt-2 w-full rounded-lg border border-dashed border-surface-300 py-2 text-xs font-medium text-surface-500 hover:bg-surface-50 hover:text-surface-700 transition-colors">
+          <Plus className="h-3 w-3 inline mr-1" /> Add Contact Item
+        </button>
+      </div>
+    </>
+  );
+}
+
+function ContactFormProps({ block, update }: { block: BuilderBlock; update: (key: string, val: unknown) => void }) {
+  return (
+    <>
+      <PropInput label="Title" value={block.props.title} onChange={(v) => update("title", v)} />
+      <PropInput label="Subtitle" value={block.props.subtitle} onChange={(v) => update("subtitle", v)} type="textarea" rows={2} />
+      <PropInput label="Button Text" value={block.props.buttonText} onChange={(v) => update("buttonText", v)} />
+    </>
+  );
+}
+
+function FeaturesProps({ block, update }: { block: BuilderBlock; update: (key: string, val: unknown) => void }) {
+  const items = (block.props.items as Array<{ icon: string; title: string; desc: string }>) || [];
+  const iconOptions = [
+    { value: "truck", label: "Truck" }, { value: "shield", label: "Shield" },
+    { value: "headphones", label: "Support" }, { value: "zap", label: "Zap" },
+    { value: "heart", label: "Heart" }, { value: "award", label: "Award" },
+    { value: "globe", label: "Globe" }, { value: "rocket", label: "Rocket" },
+    { value: "lock", label: "Lock" }, { value: "star", label: "Star" },
+    { value: "target", label: "Target" }, { value: "check", label: "Check" },
+  ];
+  const updateItem = (index: number, key: string, val: string) => {
+    const next = items.map((item, i) => i === index ? { ...item, [key]: val } : item);
+    update("items", next);
+  };
+  const addItem = () => update("items", [...items, { icon: "star", title: "Feature", desc: "Description" }]);
+  const removeItem = (index: number) => update("items", items.filter((_, i) => i !== index));
+  return (
+    <>
+      <PropInput label="Section Title" value={block.props.title} onChange={(v) => update("title", v)} />
+      <PropInput label="Subtitle" value={block.props.subtitle} onChange={(v) => update("subtitle", v)} />
+      <PropInput label="Background" value={block.props.bgColor} onChange={(v) => update("bgColor", v)} type="select"
+        options={[{ value: "transparent", label: "None" }, { value: "surface", label: "Light" }, { value: "dark", label: "Dark" }]} />
+      <div>
+        <label className="block text-xs font-medium text-surface-700 mb-2">Features</label>
+        <div className="space-y-3">
+          {items.map((item, i) => (
+            <div key={i} className="rounded-xl border border-surface-200 bg-surface-50 p-3 space-y-2">
+              <div className="flex items-center justify-between">
+                <span className="text-[10px] font-bold text-surface-400 uppercase">Feature {i + 1}</span>
+                <button onClick={() => removeItem(i)} className="text-[10px] text-red-500 hover:text-red-700 font-medium">Remove</button>
+              </div>
+              <PropInput label="Icon" value={item.icon} onChange={(v) => updateItem(i, "icon", v as string)} type="select" options={iconOptions} />
+              <PropInput label="Title" value={item.title} onChange={(v) => updateItem(i, "title", v as string)} />
+              <PropInput label="Description" value={item.desc} onChange={(v) => updateItem(i, "desc", v as string)} type="textarea" rows={2} />
+            </div>
+          ))}
+        </div>
+        <button onClick={addItem} className="mt-2 w-full rounded-lg border border-dashed border-surface-300 py-2 text-xs font-medium text-surface-500 hover:bg-surface-50 hover:text-surface-700 transition-colors">
+          <Plus className="h-3 w-3 inline mr-1" /> Add Feature
+        </button>
+      </div>
+    </>
+  );
+}
+
+function TestimonialsProps({ block, update }: { block: BuilderBlock; update: (key: string, val: unknown) => void }) {
+  const items = (block.props.items as Array<{ name: string; text: string; role?: string; rating?: number }>) || [];
+  const updateItem = (index: number, key: string, val: unknown) => {
+    const next = items.map((item, i) => i === index ? { ...item, [key]: val } : item);
+    update("items", next);
+  };
+  const addItem = () => update("items", [...items, { name: "Customer", text: "Great experience!", role: "Buyer", rating: 5 }]);
+  const removeItem = (index: number) => update("items", items.filter((_, i) => i !== index));
+  return (
+    <>
+      <PropInput label="Section Title" value={block.props.title} onChange={(v) => update("title", v)} />
+      <PropInput label="Subtitle" value={block.props.subtitle} onChange={(v) => update("subtitle", v)} />
+      <div>
+        <label className="block text-xs font-medium text-surface-700 mb-2">Testimonials</label>
+        <div className="space-y-3">
+          {items.map((item, i) => (
+            <div key={i} className="rounded-xl border border-surface-200 bg-surface-50 p-3 space-y-2">
+              <div className="flex items-center justify-between">
+                <span className="text-[10px] font-bold text-surface-400 uppercase">Testimonial {i + 1}</span>
+                <button onClick={() => removeItem(i)} className="text-[10px] text-red-500 hover:text-red-700 font-medium">Remove</button>
+              </div>
+              <PropInput label="Name" value={item.name} onChange={(v) => updateItem(i, "name", v)} />
+              <PropInput label="Role" value={item.role} onChange={(v) => updateItem(i, "role", v)} />
+              <PropInput label="Quote" value={item.text} onChange={(v) => updateItem(i, "text", v)} type="textarea" rows={2} />
+              <PropInput label="Rating (1-5)" value={item.rating} onChange={(v) => updateItem(i, "rating", v)} type="number" />
+            </div>
+          ))}
+        </div>
+        <button onClick={addItem} className="mt-2 w-full rounded-lg border border-dashed border-surface-300 py-2 text-xs font-medium text-surface-500 hover:bg-surface-50 hover:text-surface-700 transition-colors">
+          <Plus className="h-3 w-3 inline mr-1" /> Add Testimonial
+        </button>
+      </div>
+    </>
+  );
+}
+
+function BannerProps({ block, update }: { block: BuilderBlock; update: (key: string, val: unknown) => void }) {
+  return (
+    <>
+      <PropInput label="Title" value={block.props.title} onChange={(v) => update("title", v)} />
+      <PropInput label="Subtitle" value={block.props.subtitle} onChange={(v) => update("subtitle", v)} />
+      <PropInput label="Button Text" value={block.props.buttonText} onChange={(v) => update("buttonText", v)} />
+      <PropInput label="Button Link" value={block.props.buttonHref} onChange={(v) => update("buttonHref", v)} />
+      <PropInput label="Background" value={block.props.bgColor} onChange={(v) => update("bgColor", v)} type="select"
+        options={[{ value: "brand", label: "Brand" }, { value: "accent", label: "Accent" }, { value: "dark", label: "Dark" }, { value: "light", label: "Light" }]} />
+    </>
+  );
+}
+
+function StatsProps({ block, update }: { block: BuilderBlock; update: (key: string, val: unknown) => void }) {
+  const items = (block.props.items as Array<{ value: string; label: string; icon?: string }>) || [];
+  const updateItem = (index: number, key: string, val: string) => {
+    const next = items.map((item, i) => i === index ? { ...item, [key]: val } : item);
+    update("items", next);
+  };
+  return (
+    <>
+      <PropInput label="Title" value={block.props.title} onChange={(v) => update("title", v)} />
+      <PropInput label="Background" value={block.props.bgColor} onChange={(v) => update("bgColor", v)} type="select"
+        options={[{ value: "brand", label: "Brand" }, { value: "dark", label: "Dark" }, { value: "light", label: "Light" }]} />
+      <div>
+        <label className="block text-xs font-medium text-surface-700 mb-2">Stats</label>
+        <div className="space-y-3">
+          {items.map((item, i) => (
+            <div key={i} className="rounded-xl border border-surface-200 bg-surface-50 p-3 space-y-2">
+              <PropInput label="Value" value={item.value} onChange={(v) => updateItem(i, "value", v as string)} />
+              <PropInput label="Label" value={item.label} onChange={(v) => updateItem(i, "label", v as string)} />
+            </div>
+          ))}
+        </div>
+      </div>
+    </>
+  );
+}
+
+function FAQProps({ block, update }: { block: BuilderBlock; update: (key: string, val: unknown) => void }) {
+  const items = (block.props.items as Array<{ question: string; answer: string }>) || [];
+  const updateItem = (index: number, key: string, val: string) => {
+    const next = items.map((item, i) => i === index ? { ...item, [key]: val } : item);
+    update("items", next);
+  };
+  const addItem = () => update("items", [...items, { question: "Question?", answer: "Answer." }]);
+  const removeItem = (index: number) => update("items", items.filter((_, i) => i !== index));
+  return (
+    <>
+      <PropInput label="Section Title" value={block.props.title} onChange={(v) => update("title", v)} />
+      <div>
+        <label className="block text-xs font-medium text-surface-700 mb-2">FAQ Items</label>
+        <div className="space-y-3">
+          {items.map((item, i) => (
+            <div key={i} className="rounded-xl border border-surface-200 bg-surface-50 p-3 space-y-2">
+              <div className="flex items-center justify-between">
+                <span className="text-[10px] font-bold text-surface-400 uppercase">Q{i + 1}</span>
+                <button onClick={() => removeItem(i)} className="text-[10px] text-red-500 hover:text-red-700 font-medium">Remove</button>
+              </div>
+              <PropInput label="Question" value={item.question} onChange={(v) => updateItem(i, "question", v as string)} />
+              <PropInput label="Answer" value={item.answer} onChange={(v) => updateItem(i, "answer", v as string)} type="textarea" rows={2} />
+            </div>
+          ))}
+        </div>
+        <button onClick={addItem} className="mt-2 w-full rounded-lg border border-dashed border-surface-300 py-2 text-xs font-medium text-surface-500 hover:bg-surface-50 hover:text-surface-700 transition-colors">
+          <Plus className="h-3 w-3 inline mr-1" /> Add FAQ
+        </button>
+      </div>
+    </>
+  );
+}
+
+function NewsletterProps({ block, update }: { block: BuilderBlock; update: (key: string, val: unknown) => void }) {
+  return (
+    <>
+      <PropInput label="Title" value={block.props.title} onChange={(v) => update("title", v)} />
+      <PropInput label="Subtitle" value={block.props.subtitle} onChange={(v) => update("subtitle", v)} type="textarea" rows={2} />
+      <PropInput label="Background" value={block.props.bgColor} onChange={(v) => update("bgColor", v)} type="select"
+        options={[{ value: "brand", label: "Brand" }, { value: "dark", label: "Dark" }, { value: "surface", label: "Light" }]} />
+    </>
+  );
+}
+
+function ImageTextProps({ block, update }: { block: BuilderBlock; update: (key: string, val: unknown) => void }) {
+  return (
+    <>
+      <PropInput label="Badge" value={block.props.badge} onChange={(v) => update("badge", v)} />
+      <PropInput label="Title" value={block.props.title} onChange={(v) => update("title", v)} />
+      <PropInput label="Text" value={block.props.text} onChange={(v) => update("text", v)} type="textarea" rows={4} />
+      <PropInput label="Button Text" value={block.props.buttonText} onChange={(v) => update("buttonText", v)} />
+      <PropInput label="Button Link" value={block.props.buttonHref} onChange={(v) => update("buttonHref", v)} />
+      <PropInput label="Reverse Layout" value={block.props.reverse} onChange={(v) => update("reverse", v)} type="toggle" />
+      <SingleImageUpload image={(block.props.image as string) || null} onChange={(url) => update("image", url || "")} label="Image" compact />
+    </>
+  );
+}
+
 function GenericProps({ block }: { block: BuilderBlock }) {
   return <p className="text-xs text-surface-500">Properties for this block type coming soon.</p>;
 }
@@ -212,6 +440,10 @@ const propEditors: Record<string, React.FC<{ block: BuilderBlock; update: (key: 
   heading: HeadingProps, text: TextProps, image: ImageProps, button: ButtonProps,
   hero: HeroProps, spacer: SpacerProps, divider: DividerProps,
   productGrid: ProductGridProps, testimonial: TestimonialProps, countdown: CountdownProps,
+  contactInfo: ContactInfoProps, contactForm: ContactFormProps,
+  features: FeaturesProps, testimonials: TestimonialsProps,
+  banner: BannerProps, stats: StatsProps, faq: FAQProps,
+  newsletter: NewsletterProps, imageText: ImageTextProps, "image-text": ImageTextProps,
 };
 
 // ─── PANEL ───────────────────────────────────────────────────
