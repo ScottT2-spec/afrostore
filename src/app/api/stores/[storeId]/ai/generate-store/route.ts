@@ -23,6 +23,7 @@ export async function POST(req: NextRequest, { params }: Params) {
 
     const result = await generateStore({
       storeId,
+      storeSlug: store.slug,
       storeName: (body.storeName as string) || store.name,
       businessType: (body.businessType as string) || store.businessType || "general",
       description: (body.description as string) || store.description || undefined,

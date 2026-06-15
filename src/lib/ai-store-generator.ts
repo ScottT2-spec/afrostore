@@ -19,6 +19,7 @@ import type { BuilderBlock, BlockType } from "@/lib/builder/types";
 
 export interface StoreGeneratorInput {
   storeId: string;
+  storeSlug: string;
   storeName: string;
   businessType: string;
   description?: string;
@@ -219,7 +220,7 @@ function parseAIResponse(content: string): Record<string, any> {
 
 // ─── Build pages from AI content ────────────────────────────
 
-function buildHomePage(data: Record<string, any>, storeName: string): GeneratedPage {
+function buildHomePage(data: Record<string, any>, storeName: string, storeSlug: string): GeneratedPage {
   const brand = data.brand || {};
   const features = data.features || [];
   const testimonials = data.testimonials || [];
@@ -232,9 +233,9 @@ function buildHomePage(data: Record<string, any>, storeName: string): GeneratedP
       heading: brand.heroHeading || `Welcome to ${storeName}`,
       subheading: brand.heroSubheading || brand.tagline || "Discover amazing products",
       buttonText: brand.ctaText || "Shop Now",
-      buttonHref: "#products",
+      buttonHref: `/store/${storeSlug}#shop`,
       secondaryButtonText: "Learn More",
-      secondaryButtonHref: "#about",
+      secondaryButtonHref: `/store/${storeSlug}/about`,
       badge: brand.tagline || `✨ Welcome to ${storeName}`,
       bgStyle: "gradient",
       align: "center",
@@ -335,7 +336,7 @@ function buildHomePage(data: Record<string, any>, storeName: string): GeneratedP
   };
 }
 
-function buildAboutPage(data: Record<string, any>, storeName: string): GeneratedPage {
+function buildAboutPage(data: Record<string, any>, storeName: string, storeSlug: string): GeneratedPage {
   const about = data.about || {};
   const testimonials = data.testimonials || [];
   const valueIcons = ["heart", "award", "globe", "shield", "target", "rocket"];
@@ -435,7 +436,7 @@ function buildAboutPage(data: Record<string, any>, storeName: string): Generated
       title: "Ready to Experience the Difference?",
       subtitle: "Join thousands of happy customers today",
       buttonText: "Browse Products",
-      buttonHref: "/",
+      buttonHref: `/store/${storeSlug}#shop`,
       bgColor: "dark",
     })
   );
@@ -450,7 +451,7 @@ function buildAboutPage(data: Record<string, any>, storeName: string): Generated
   };
 }
 
-function buildFAQPage(data: Record<string, any>, storeName: string): GeneratedPage {
+function buildFAQPage(data: Record<string, any>, storeName: string, storeSlug: string): GeneratedPage {
   const faq = data.faq || {};
 
   const blocks: BuilderBlock[] = [
@@ -485,7 +486,7 @@ function buildFAQPage(data: Record<string, any>, storeName: string): GeneratedPa
       title: "Still Have Questions?",
       subtitle: "Our friendly team is here to help",
       buttonText: "Contact Us",
-      buttonHref: "/contact",
+      buttonHref: `/store/${storeSlug}/contact`,
       bgColor: "dark",
     }),
   ];
@@ -658,9 +659,9 @@ export async function generateStore(input: StoreGeneratorInput): Promise<StoreGe
 
   // 3. Build pages from the generated content
   const pages: GeneratedPage[] = [
-    buildHomePage(data, input.storeName),
-    buildAboutPage(data, input.storeName),
-    buildFAQPage(data, input.storeName),
+    buildHomePage(data, input.storeName, input.storeSlug),
+    buildAboutPage(data, input.storeName, input.storeSlug),
+    buildFAQPage(data, input.storeName, input.storeSlug),
     buildContactPage(data, input.storeName),
     buildPoliciesPage(data, input.storeName),
   ];
