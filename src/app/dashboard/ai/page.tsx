@@ -5,7 +5,7 @@ import DashboardHeader from "@/components/dashboard/DashboardHeader";
 import { useAuth } from "@/context/AuthContext";
 import { useStore } from "@/context/StoreContext";
 import { api } from "@/lib/api-client";
-import { Bot, Send, Sparkles, Loader2, User, AlertCircle, RefreshCw, Zap } from "lucide-react";
+import { Bot, Send, Sparkles, Loader2, User, AlertCircle, RefreshCw, Zap, ImagePlus, X, Link2 } from "lucide-react";
 
 interface Message {
   id: string;
@@ -15,6 +15,7 @@ interface Message {
   provider?: string;
   model?: string;
   ragSources?: number;
+  images?: string[]; // base64 preview URLs for user messages
 }
 
 interface AIChatResponse {
@@ -50,6 +51,8 @@ export default function AIPage() {
   const [input, setInput] = useState("");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
+  const [attachedImages, setAttachedImages] = useState<string[]>([]);
+  const fileInputRef = useRef<HTMLInputElement>(null);
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
   const initials = user
@@ -61,17 +64,40 @@ export default function AIPage() {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages, loading]);
 
-  const sendMessage = async (text: string) => {
-    if (!text.trim() || !currentStore || loading) return;
+  const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const files = e.target.files;
+    if (!files) return;
+    const maxImages = 4 - attachedImages.length;
+    Array.from(files).slice(0, maxImages).forEach((file) => {
+      if (!file.type.startsWith("image/")) return;
+      if (file.size > 5 * 1024 * 1024) return; // 5MB max
+      const reader = new FileReader();
+      reader.onload = () => {
+        setAttachedImages((prev) => [...prev, reader.result as string].slice(0, 4));
+      };
+      reader.readAsDataURL(file);
+    });
+    if (fileInputRef.current) fileInputRef.current.value = "";
+  };
 
+  const removeImage = (index: number) => {
+    setAttachedImages((prev) => prev.filter((_, i) => i !== index));
+  };
+
+  const sendMessage = async (text: string) => {
+    if ((!text.trim() && attachedImages.length === 0) || !currentStore || loading) return;
+
+    const currentImages = [...attachedImages];
     const userMsg: Message = {
       id: Date.now().toString(),
       role: "user",
-      content: text.trim(),
+      content: text.trim() || (currentImages.length > 0 ? "What do you think of this?" : ""),
       timestamp: new Date(),
+      images: currentImages.length > 0 ? currentImages : undefined,
     };
     setMessages((prev) => [...prev, userMsg]);
     setInput("");
+    setAttachedImages([]);
     setLoading(true);
     setError("");
 
@@ -85,8 +111,9 @@ export default function AIPage() {
       const res = await api.post<AIChatResponse>(
         `/api/stores/${currentStore.id}/ai`,
         {
-          message: text.trim(),
+          message: text.trim() || "What do you think of this?",
           conversationHistory,
+          ...(currentImages.length > 0 ? { images: currentImages } : {}),
         }
       );
 
@@ -208,6 +235,13 @@ export default function AIPage() {
                         : "bg-surface-100 text-surface-800"
                     }`}
                   >
+                    {msg.images && msg.images.length > 0 && (
+                      <div className={`flex gap-2 mb-2 flex-wrap ${msg.images.length === 1 ? "" : "grid grid-cols-2"}`}>
+                        {msg.images.map((img, i) => (
+                          <img key={i} src={img} alt={`Attached ${i + 1}`} className="rounded-lg max-h-48 object-cover border border-white/20" />
+                        ))}
+                      </div>
+                    )}
                     <p className="whitespace-pre-wrap">{msg.content}</p>
                     {msg.role === "assistant" && (msg.provider || msg.ragSources) && (
                       <div className="mt-2 pt-2 border-t border-surface-200/50 flex items-center gap-3 text-[10px] text-surface-400">
@@ -250,33 +284,71 @@ export default function AIPage() {
 
         {/* Input */}
         <div className="border-t border-surface-100 p-4 bg-white">
-          <form
-            onSubmit={(e) => {
-              e.preventDefault();
-              sendMessage(input);
-            }}
-            className="flex items-center gap-3 max-w-3xl mx-auto"
-          >
-            <input
-              value={input}
-              onChange={(e) => setInput(e.target.value)}
-              placeholder="Ask anything about your store..."
-              className="flex-1 rounded-xl border border-surface-200 bg-surface-50 px-4 py-3 text-sm focus:outline-none focus:border-brand-500 focus:ring-2 focus:ring-brand-500/10"
-              disabled={loading}
-              maxLength={5000}
-            />
-            <button
-              type="submit"
-              disabled={loading || !input.trim()}
-              className="flex h-11 w-11 items-center justify-center rounded-xl bg-brand-600 text-white shadow-lg shadow-brand-600/25 transition-all hover:bg-brand-700 disabled:opacity-50 flex-shrink-0"
+          <div className="max-w-3xl mx-auto">
+            {/* Image previews */}
+            {attachedImages.length > 0 && (
+              <div className="flex gap-2 mb-3 flex-wrap">
+                {attachedImages.map((img, i) => (
+                  <div key={i} className="relative group">
+                    <img src={img} alt={`Upload ${i + 1}`} className="h-16 w-16 rounded-lg object-cover border border-surface-200" />
+                    <button
+                      onClick={() => removeImage(i)}
+                      className="absolute -top-1.5 -right-1.5 h-5 w-5 rounded-full bg-surface-800 text-white flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity"
+                    >
+                      <X className="h-3 w-3" />
+                    </button>
+                  </div>
+                ))}
+              </div>
+            )}
+            <form
+              onSubmit={(e) => {
+                e.preventDefault();
+                sendMessage(input);
+              }}
+              className="flex items-center gap-2"
             >
-              {loading ? (
-                <Loader2 className="h-4 w-4 animate-spin" />
-              ) : (
-                <Send className="h-4 w-4" />
-              )}
-            </button>
-          </form>
+              <input
+                type="file"
+                ref={fileInputRef}
+                onChange={handleImageUpload}
+                accept="image/*"
+                multiple
+                className="hidden"
+              />
+              <button
+                type="button"
+                onClick={() => fileInputRef.current?.click()}
+                disabled={loading || attachedImages.length >= 4}
+                className="flex h-11 w-11 items-center justify-center rounded-xl border border-surface-200 bg-white text-surface-500 hover:bg-surface-50 hover:text-surface-700 transition-colors disabled:opacity-50 flex-shrink-0"
+                title="Attach image (screenshot, site sample, product photo)"
+              >
+                <ImagePlus className="h-4 w-4" />
+              </button>
+              <input
+                value={input}
+                onChange={(e) => setInput(e.target.value)}
+                placeholder={attachedImages.length > 0 ? "Describe what you want..." : "Ask anything about your store..."}
+                className="flex-1 rounded-xl border border-surface-200 bg-surface-50 px-4 py-3 text-sm focus:outline-none focus:border-brand-500 focus:ring-2 focus:ring-brand-500/10"
+                disabled={loading}
+                maxLength={5000}
+              />
+              <button
+                type="submit"
+                disabled={loading || (!input.trim() && attachedImages.length === 0)}
+                className="flex h-11 w-11 items-center justify-center rounded-xl bg-brand-600 text-white shadow-lg shadow-brand-600/25 transition-all hover:bg-brand-700 disabled:opacity-50 flex-shrink-0"
+              >
+                {loading ? (
+                  <Loader2 className="h-4 w-4 animate-spin" />
+                ) : (
+                  <Send className="h-4 w-4" />
+                )}
+              </button>
+            </form>
+            <p className="text-[10px] text-surface-400 mt-2 text-center">
+              Share screenshots, site samples, or product photos • Paste links for the AI to analyze
+            </p>
+          </div>
         </div>
       </div>
     </>

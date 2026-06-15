@@ -404,7 +404,25 @@ export class AIFailover {
     const body: Record<string, unknown> = {
       model: request.model || config.model,
       max_tokens: request.maxTokens || config.maxTokens || 4096,
-      messages: nonSystemMessages.map((m) => ({ role: m.role, content: m.content })),
+      messages: nonSystemMessages.map((m) => ({
+        role: m.role,
+        content: Array.isArray(m.content)
+          ? m.content.map((part) => {
+              if (part.type === 'image_url') {
+                // Anthropic uses a different format for images
+                const url = part.image_url.url;
+                if (url.startsWith('data:')) {
+                  const match = url.match(/^data:(image\/[^;]+);base64,(.+)$/);
+                  if (match) {
+                    return { type: 'image' as const, source: { type: 'base64' as const, media_type: match[1], data: match[2] } };
+                  }
+                }
+                return { type: 'image' as const, source: { type: 'url' as const, url } };
+              }
+              return part;
+            })
+          : m.content,
+      })),
     };
 
     if (systemMsg) body.system = systemMsg.content;

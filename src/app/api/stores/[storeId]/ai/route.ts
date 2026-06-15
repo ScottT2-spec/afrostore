@@ -15,7 +15,7 @@ export async function POST(req: NextRequest, { params }: Params) {
 
   try {
     const body = await req.json();
-    const { message, conversationHistory } = body;
+    const { message, conversationHistory, images } = body;
 
     if (!message || typeof message !== "string" || message.trim().length === 0) {
       return error("Message is required", 400);
@@ -23,6 +23,15 @@ export async function POST(req: NextRequest, { params }: Params) {
 
     if (message.length > 5000) {
       return error("Message too long (max 5000 characters)", 400);
+    }
+
+    // Validate images if provided
+    let validImages: string[] | undefined;
+    if (images && Array.isArray(images)) {
+      validImages = images
+        .filter((img: unknown): img is string => typeof img === "string")
+        .filter((img) => img.startsWith("data:image/") || img.startsWith("https://"))
+        .slice(0, 4); // Max 4 images
     }
 
     // Validate conversation history format
@@ -46,6 +55,7 @@ export async function POST(req: NextRequest, { params }: Params) {
     const response = await chatWithAI({
       storeId,
       message: message.trim(),
+      images: validImages,
       conversationHistory: history,
     });
 

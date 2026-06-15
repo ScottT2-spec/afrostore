@@ -150,6 +150,7 @@ You have access to the store's data (products, orders, customers, analytics). Us
 export interface AIChatRequest {
   storeId: string;
   message: string;
+  images?: string[]; // base64 data URLs or public URLs
   conversationHistory?: Array<{ role: "user" | "assistant"; content: string }>;
 }
 
@@ -231,7 +232,7 @@ Customers: ${store._count.customers}`;
   }
 
   // 3. Build messages
-  const messages: Array<{ role: "system" | "user" | "assistant"; content: string }> = [
+  const messages: Array<{ role: "system" | "user" | "assistant"; content: string | Array<{ type: "text"; text: string } | { type: "image_url"; image_url: { url: string; detail?: "auto" | "low" | "high" } }> }> = [
     { role: "system", content: buildSystemPrompt(store.name, storeContext) },
   ];
 
@@ -243,12 +244,25 @@ Customers: ${store._count.customers}`;
     }
   }
 
-  // Add current message
-  messages.push({ role: "user", content: req.message });
+  // Add current message (with images if provided)
+  if (req.images && req.images.length > 0) {
+    const contentParts: Array<{ type: "text"; text: string } | { type: "image_url"; image_url: { url: string; detail?: "auto" | "low" | "high" } }> = [
+      { type: "text", text: req.message },
+    ];
+    for (const img of req.images.slice(0, 4)) { // max 4 images
+      contentParts.push({
+        type: "image_url",
+        image_url: { url: img, detail: "auto" },
+      });
+    }
+    messages.push({ role: "user", content: contentParts });
+  } else {
+    messages.push({ role: "user", content: req.message });
+  }
 
   // 4. Call AI with failover
   const result = await ai.chat({
-    capability: AICapability.CHAT,
+    capability: req.images?.length ? AICapability.VISION : AICapability.CHAT,
     messages,
     maxTokens: 2000,
     temperature: 0.7,
