@@ -60,7 +60,7 @@ export async function POST(req: NextRequest) {
       await writeFile(filePath, buffer);
 
       uploaded.push({
-        url: `/uploads/${fileName}`,
+        url: `/api/uploads/${fileName}`,
         name: file.name,
         size: file.size,
       });
