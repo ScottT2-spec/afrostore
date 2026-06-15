@@ -1,9 +1,8 @@
 import { NextRequest, NextResponse } from "next/server";
-import { writeFile, mkdir } from "fs/promises";
-import path from "path";
 import crypto from "crypto";
+import path from "path";
+import { supabaseAdmin, STORAGE_BUCKET, getPublicUrl } from "@/lib/supabase";
 
-const UPLOAD_DIR = path.join(process.cwd(), "public", "uploads");
 const MAX_FILE_SIZE = 10 * 1024 * 1024; // 10MB
 const ALLOWED_TYPES = [
   "image/jpeg",
@@ -34,33 +33,46 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    // Ensure upload directory exists
-    await mkdir(UPLOAD_DIR, { recursive: true });
-
     const uploaded: Array<{ url: string; name: string; size: number }> = [];
     const errors: string[] = [];
 
     for (const file of files) {
       // Validate type
       if (!ALLOWED_TYPES.includes(file.type)) {
-        errors.push(`${file.name}: Invalid file type (${file.type}). Allowed: JPEG, PNG, WebP, GIF, SVG`);
+        errors.push(
+          `${file.name}: Invalid file type (${file.type}). Allowed: JPEG, PNG, WebP, GIF, SVG`
+        );
         continue;
       }
 
       // Validate size
       if (file.size > MAX_FILE_SIZE) {
-        errors.push(`${file.name}: File too large (${(file.size / 1024 / 1024).toFixed(1)}MB). Max: 10MB`);
+        errors.push(
+          `${file.name}: File too large (${(file.size / 1024 / 1024).toFixed(1)}MB). Max: 10MB`
+        );
         continue;
       }
 
       const fileName = generateFileName(file.name);
-      const filePath = path.join(UPLOAD_DIR, fileName);
-
       const buffer = Buffer.from(await file.arrayBuffer());
-      await writeFile(filePath, buffer);
+
+      // Upload to Supabase Storage
+      const { error: uploadError } = await supabaseAdmin.storage
+        .from(STORAGE_BUCKET)
+        .upload(fileName, buffer, {
+          contentType: file.type,
+          cacheControl: "31536000",
+          upsert: false,
+        });
+
+      if (uploadError) {
+        console.error("Supabase upload error:", uploadError);
+        errors.push(`${file.name}: ${uploadError.message}`);
+        continue;
+      }
 
       uploaded.push({
-        url: `/api/uploads/${fileName}`,
+        url: getPublicUrl(fileName),
         name: file.name,
         size: file.size,
       });
