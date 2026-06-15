@@ -3,6 +3,9 @@ import { getStoreContext, success, error } from "@/lib/api-helpers";
 import { unauthorized } from "@/lib/auth";
 import { generateStore } from "@/lib/ai-store-generator";
 
+// Allow up to 60 seconds for AI generation
+export const maxDuration = 60;
+
 type Params = { params: Promise<{ storeId: string }> };
 
 // POST /api/stores/:storeId/ai/generate-store

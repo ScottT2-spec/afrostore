@@ -3,6 +3,8 @@ import { getStoreContext, success, error } from "@/lib/api-helpers";
 import { unauthorized } from "@/lib/auth";
 import { chatWithAI, getAIStatus } from "@/lib/ai-service";
 
+export const maxDuration = 60;
+
 type Params = { params: Promise<{ storeId: string }> };
 
 // POST /api/stores/:storeId/ai — Chat with AI assistant

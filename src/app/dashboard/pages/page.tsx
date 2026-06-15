@@ -6,7 +6,7 @@ import { api } from "@/lib/api-client";
 import Link from "next/link";
 import {
   FileText, Plus, Loader2, Search, ExternalLink, Eye, EyeOff,
-  Pencil, Trash2, MoreHorizontal, GripVertical, Layout,
+  Pencil, Trash2, MoreHorizontal, GripVertical, Layout, Sparkles,
 } from "lucide-react";
 
 interface PageItem {
@@ -33,6 +33,7 @@ export default function PagesPage() {
   const [newTitle, setNewTitle] = useState("");
   const [newType, setNewType] = useState("CUSTOM");
   const [deleteId, setDeleteId] = useState<string | null>(null);
+  const [regenerating, setRegenerating] = useState(false);
 
   const fetchPages = useCallback(async () => {
     if (!currentStore) return;
@@ -69,6 +70,26 @@ export default function PagesPage() {
     setDeleteId(null);
   };
 
+  const regeneratePages = async () => {
+    if (!currentStore || regenerating) return;
+    if (!confirm("This will regenerate all AI pages (Home, About, FAQ, Contact, Policies) with the latest premium design. Continue?")) return;
+    setRegenerating(true);
+    try {
+      const res = await api.post<{ pages: Array<{ id: string; title: string; slug: string; type: string }> }>(
+        `/api/stores/${currentStore.id}/ai/generate-store`,
+        { storeName: currentStore.name, businessType: currentStore.businessType || "general", description: currentStore.description || "" }
+      );
+      if (res.success) {
+        await fetchPages();
+      } else {
+        alert(res.error || "AI generation failed. Please try again.");
+      }
+    } catch {
+      alert("AI generation failed. Please try again.");
+    }
+    setRegenerating(false);
+  };
+
   const togglePublish = async (page: PageItem) => {
     if (!currentStore) return;
     const res = await api.patch<PageItem>(`/api/stores/${currentStore.id}/pages/${page.id}`, {
@@ -86,9 +107,19 @@ export default function PagesPage() {
           <h1 className="text-2xl font-bold text-surface-900 font-display">Pages</h1>
           <p className="text-sm text-surface-500 mt-1">Create and manage store pages with the drag-and-drop builder</p>
         </div>
-        <button onClick={() => setShowCreate(true)} className="btn-primary text-sm py-2.5 px-4">
-          <Plus className="h-4 w-4" /> New Page
-        </button>
+        <div className="flex items-center gap-2">
+          <button
+            onClick={regeneratePages}
+            disabled={regenerating}
+            className="inline-flex items-center gap-2 rounded-xl border border-brand-200 bg-brand-50 px-4 py-2.5 text-sm font-semibold text-brand-700 hover:bg-brand-100 transition-colors disabled:opacity-50"
+          >
+            {regenerating ? <Loader2 className="h-4 w-4 animate-spin" /> : <Sparkles className="h-4 w-4" />}
+            {regenerating ? "Generating..." : "Regenerate with AI"}
+          </button>
+          <button onClick={() => setShowCreate(true)} className="btn-primary text-sm py-2.5 px-4">
+            <Plus className="h-4 w-4" /> New Page
+          </button>
+        </div>
       </div>
 
       {/* Create form */}
