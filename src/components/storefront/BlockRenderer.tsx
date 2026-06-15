@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useMemo, useRef } from "react";
+import { useState, useEffect, useMemo, useRef, createContext, useContext } from "react";
 import {
   Star,
   Truck,
@@ -34,6 +34,7 @@ import {
   Palette,
   Rocket,
   Lock,
+  Loader2,
 } from "lucide-react";
 
 /* ─── TYPES ─────────────────────────────────────────────────── */
@@ -487,7 +488,37 @@ function FAQBlock({ props }: { props: Record<string, unknown> }) {
 
 /* ── Contact Form ────────────────────────────────────────────── */
 function ContactFormBlock({ props }: { props: Record<string, unknown> }) {
+  const storeSlug = useContext(StoreSlugContext);
   const [submitted, setSubmitted] = useState(false);
+  const [sending, setSending] = useState(false);
+  const [error, setError] = useState("");
+  const [form, setForm] = useState({ name: "", email: "", subject: "", message: "" });
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!storeSlug) { setSubmitted(true); return; } // fallback for preview
+    setSending(true);
+    setError("");
+    try {
+      const res = await fetch(`/api/storefront/${storeSlug}/contact`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(form),
+      });
+      const json = await res.json();
+      if (json.success) {
+        setSubmitted(true);
+      } else {
+        setError(json.error || "Failed to send. Please try again.");
+      }
+    } catch {
+      setError("Network error. Please try again.");
+    }
+    setSending(false);
+  };
+
+  const inputCls = "w-full rounded-xl border border-surface-200 bg-surface-50 px-4 py-3 text-sm placeholder:text-surface-400 focus:outline-none focus:ring-2 focus:ring-brand-500 focus:border-transparent transition-shadow";
+
   return (
     <AnimateIn>
       <div className="max-w-xl mx-auto rounded-2xl border border-surface-200 bg-white p-6 sm:p-8 shadow-sm">
@@ -502,16 +533,17 @@ function ContactFormBlock({ props }: { props: Record<string, unknown> }) {
             <p className="text-sm text-surface-500">We&apos;ll get back to you soon.</p>
           </div>
         ) : (
-          <form onSubmit={(e) => { e.preventDefault(); setSubmitted(true); }} className="space-y-4">
+          <form onSubmit={handleSubmit} className="space-y-4">
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-              <input className="w-full rounded-xl border border-surface-200 bg-surface-50 px-4 py-3 text-sm placeholder:text-surface-400 focus:outline-none focus:ring-2 focus:ring-brand-500 focus:border-transparent transition-shadow" placeholder="Your name" required />
-              <input className="w-full rounded-xl border border-surface-200 bg-surface-50 px-4 py-3 text-sm placeholder:text-surface-400 focus:outline-none focus:ring-2 focus:ring-brand-500 focus:border-transparent transition-shadow" placeholder="Your email" type="email" required />
+              <input className={inputCls} placeholder="Your name" required value={form.name} onChange={(e) => setForm((f) => ({ ...f, name: e.target.value }))} />
+              <input className={inputCls} placeholder="Your email" type="email" required value={form.email} onChange={(e) => setForm((f) => ({ ...f, email: e.target.value }))} />
             </div>
-            <input className="w-full rounded-xl border border-surface-200 bg-surface-50 px-4 py-3 text-sm placeholder:text-surface-400 focus:outline-none focus:ring-2 focus:ring-brand-500 focus:border-transparent transition-shadow" placeholder="Subject" />
-            <textarea className="w-full rounded-xl border border-surface-200 bg-surface-50 px-4 py-3 text-sm placeholder:text-surface-400 focus:outline-none focus:ring-2 focus:ring-brand-500 focus:border-transparent transition-shadow resize-none" placeholder="Your message" rows={4} required />
-            <button type="submit" className="w-full rounded-xl bg-brand-600 text-white font-bold py-3.5 hover:bg-brand-700 transition-all duration-300 shadow-lg shadow-brand-600/25 hover:shadow-xl flex items-center justify-center gap-2">
-              <Send className="h-4 w-4" />
-              {(props.buttonText as string) || "Send Message"}
+            <input className={inputCls} placeholder="Subject" value={form.subject} onChange={(e) => setForm((f) => ({ ...f, subject: e.target.value }))} />
+            <textarea className={`${inputCls} resize-none`} placeholder="Your message" rows={4} required value={form.message} onChange={(e) => setForm((f) => ({ ...f, message: e.target.value }))} />
+            {error && <p className="text-sm text-red-600 font-medium">{error}</p>}
+            <button type="submit" disabled={sending} className="w-full rounded-xl bg-brand-600 text-white font-bold py-3.5 hover:bg-brand-700 transition-all duration-300 shadow-lg shadow-brand-600/25 hover:shadow-xl flex items-center justify-center gap-2 disabled:opacity-50">
+              {sending ? <Loader2 className="h-4 w-4 animate-spin" /> : <Send className="h-4 w-4" />}
+              {sending ? "Sending..." : (props.buttonText as string) || "Send Message"}
             </button>
           </form>
         )}
@@ -521,8 +553,23 @@ function ContactFormBlock({ props }: { props: Record<string, unknown> }) {
 }
 
 /* ── Contact Info ────────────────────────────────────────────── */
+function getContactHref(icon: string, value: string): string | null {
+  const v = value.trim();
+  if (icon === "mail" || v.includes("@")) return `mailto:${v}`;
+  if (icon === "phone" || icon === "tel") {
+    const num = v.replace(/[^0-9+]/g, "");
+    return num ? `tel:${num}` : null;
+  }
+  if (icon === "message" || icon === "whatsapp") {
+    const num = v.replace(/[^0-9+]/g, "");
+    return num ? `https://wa.me/${num.replace("+", "")}` : null;
+  }
+  if (v.startsWith("http://") || v.startsWith("https://")) return v;
+  return null;
+}
+
 function ContactInfoBlock({ props }: { props: Record<string, unknown> }) {
-  const items = (props.items as Array<{ icon: string; title: string; value: string }>) || [];
+  const items = (props.items as Array<{ icon: string; title: string; value: string; href?: string }>) || [];
   const hours = props.hours as string;
   return (
     <AnimateIn>
@@ -535,15 +582,26 @@ function ContactInfoBlock({ props }: { props: Record<string, unknown> }) {
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
           {items.map((item, i) => {
             const Icon = iconMap[item.icon] || Mail;
-            return (
-              <div key={i} className="flex items-start gap-4 rounded-2xl border border-surface-100 bg-white p-5 hover:shadow-md transition-shadow">
+            const href = item.href || getContactHref(item.icon, item.value);
+            const content = (
+              <>
                 <div className="h-10 w-10 rounded-xl bg-brand-50 flex items-center justify-center flex-shrink-0">
                   <Icon className="h-5 w-5 text-brand-600" />
                 </div>
                 <div>
                   <p className="text-xs font-semibold text-surface-500 uppercase tracking-wider">{item.title}</p>
-                  <p className="text-sm font-semibold text-surface-900 mt-0.5">{item.value}</p>
+                  <p className={`text-sm font-semibold mt-0.5 ${href ? "text-brand-700 underline decoration-brand-200" : "text-surface-900"}`}>{item.value}</p>
                 </div>
+              </>
+            );
+            return href ? (
+              <a key={i} href={href} target={href.startsWith("http") ? "_blank" : undefined} rel={href.startsWith("http") ? "noopener noreferrer" : undefined}
+                className="flex items-start gap-4 rounded-2xl border border-surface-100 bg-white p-5 hover:shadow-md hover:border-brand-200 transition-all cursor-pointer">
+                {content}
+              </a>
+            ) : (
+              <div key={i} className="flex items-start gap-4 rounded-2xl border border-surface-100 bg-white p-5 hover:shadow-md transition-shadow">
+                {content}
               </div>
             );
           })}
@@ -942,6 +1000,10 @@ const renderers: Record<string, React.FC<{ props: Record<string, unknown> }>> = 
   brands: BrandsBlock,
 };
 
+/* ─── STORE CONTEXT (for blocks that need store info) ─────── */
+
+const StoreSlugContext = createContext<string>("");
+
 /* ─── PUBLIC API ────────────────────────────────────────────── */
 
 export function PublicBlockRenderer({ block }: { block: BuilderBlock }) {
@@ -950,13 +1012,16 @@ export function PublicBlockRenderer({ block }: { block: BuilderBlock }) {
   return <Renderer props={block.props} />;
 }
 
-export function RenderBlocks({ blocks }: { blocks: BuilderBlock[] }) {
+export function RenderBlocks({ blocks, storeSlug }: { blocks: BuilderBlock[]; storeSlug?: string }) {
   if (!blocks || blocks.length === 0) return null;
-  return (
+  const content = (
     <div className="space-y-8">
       {blocks.map((block) => (
         <PublicBlockRenderer key={block.id} block={block} />
       ))}
     </div>
   );
+  return storeSlug ? (
+    <StoreSlugContext.Provider value={storeSlug}>{content}</StoreSlugContext.Provider>
+  ) : content;
 }

@@ -375,7 +375,7 @@ export default function StorePage() {
       {hasHomeContent ? (
         /* AI-generated Home page — render the builder blocks */
         <section className="max-w-6xl mx-auto px-4 sm:px-6 py-8">
-          <RenderBlocks blocks={homeBlocks} />
+          <RenderBlocks blocks={homeBlocks} storeSlug={slug} />
         </section>
       ) : (
         /* Fallback: default hero + trust bar (no AI content) */

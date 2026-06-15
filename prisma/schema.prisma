@@ -113,6 +113,7 @@ model Store {
   socialLinks    StoreSocialLinks?
   analytics      AnalyticsEvent[]
   auditLogs      AuditLog[]
+  contactMessages ContactMessage[]
   referralProgram ReferralProgram?
   flashSales     FlashSale[]
   abandonedCarts AbandonedCart[]
@@ -958,6 +959,25 @@ enum PayoutStatus {
   PROCESSING
   COMPLETED
   FAILED
+}
+
+// ─── CONTACT MESSAGES ───────────────────────────────────────
+
+model ContactMessage {
+  id        String   @id @default(cuid())
+  storeId   String
+  name      String
+  email     String
+  subject   String?
+  message   String   @db.Text
+  isRead    Boolean  @default(false)
+  createdAt DateTime @default(now())
+
+  store Store @relation(fields: [storeId], references: [id], onDelete: Cascade)
+
+  @@index([storeId, createdAt])
+  @@index([storeId, isRead])
+  @@map("contact_messages")
 }
 
 // ─── AUDIT LOG ──────────────────────────────────────────────

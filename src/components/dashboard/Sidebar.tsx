@@ -45,6 +45,7 @@ import {
   HelpCircle as FAQIcon,
   ScrollText,
   File,
+  Mail,
 } from "lucide-react";
 
 // ─── Page type icons ───────────────────────────────────────
@@ -85,6 +86,7 @@ const navGroups: NavGroup[] = [
       { name: "Orders", href: "/dashboard/orders", icon: ShoppingCart },
       { name: "Customers", href: "/dashboard/customers", icon: Users },
       { name: "Reviews", href: "/dashboard/reviews", icon: Star },
+      { name: "Messages", href: "/dashboard/messages", icon: Mail },
     ],
   },
   {

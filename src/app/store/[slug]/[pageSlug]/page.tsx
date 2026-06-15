@@ -114,7 +114,7 @@ export default function StorefrontPage() {
             <p className="text-gray-400">This page has no content yet.</p>
           </div>
         ) : (
-          <RenderBlocks blocks={blocks} />
+          <RenderBlocks blocks={blocks} storeSlug={slug} />
         )}
       </main>
 
