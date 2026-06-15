@@ -14,6 +14,7 @@ export default function DashboardLayout({
 }) {
   const { user, loading } = useAuth();
   const router = useRouter();
+  const [sidebarOpen, setSidebarOpen] = useState(false);
 
   useEffect(() => {
     if (!loading && !user) {
@@ -28,8 +29,6 @@ export default function DashboardLayout({
       </div>
     );
   }
-
-  const [sidebarOpen, setSidebarOpen] = useState(false);
 
   if (!user) return null;
 
