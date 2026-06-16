@@ -147,7 +147,7 @@ export interface PaymentInitResponse {
 // ─── AI PROVIDER FAILOVER TYPES ─────────────────────────────
 
 export interface AIProviderConfig {
-  provider: 'openai' | 'anthropic' | 'google' | 'groq' | 'deepseek' | 'cohere';
+  provider: 'openai' | 'anthropic' | 'google' | 'groq' | 'deepseek' | 'cohere' | string;
   apiKey: string;
   baseUrl?: string;
   /** Default model for this provider */
