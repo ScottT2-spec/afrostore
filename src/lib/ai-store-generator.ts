@@ -633,27 +633,41 @@ export async function generateStore(input: StoreGeneratorInput): Promise<StoreGe
   // 1. Call AI to generate content
   const prompt = buildGenerationPrompt(input);
 
-  const result = await ai.chat({
-    capability: AICapability.CHAT,
-    messages: [
-      { role: "system" as const, content: "You are a professional ecommerce content generator. Return ONLY valid JSON. No markdown, no explanation." },
-      { role: "user" as const, content: prompt },
-    ],
-    maxTokens: 4000,
-    temperature: 0.7,
-  });
+  // Try up to 2 times in case of JSON parse failures
+  let data: Record<string, any> | null = null;
+  let lastResult: any = null;
 
-  if (!result.success || !result.data) {
-    const errors = result.failedProviders?.map((f) => `${f.provider}: ${f.error}`).join("; ") || "Unknown error";
-    throw new Error(`AI generation failed: ${errors}`);
+  for (let attempt = 0; attempt < 2; attempt++) {
+    const result = await ai.chat({
+      capability: AICapability.CHAT,
+      messages: [
+        { role: "system" as const, content: "You are a professional ecommerce content generator. Return ONLY valid JSON. No markdown fences, no explanation, no text before or after the JSON." },
+        { role: "user" as const, content: prompt },
+      ],
+      maxTokens: 8000,
+      temperature: 0.7,
+    });
+
+    lastResult = result;
+
+    if (!result.success || !result.data) {
+      const errors = result.failedProviders?.map((f) => `${f.provider}: ${f.error}`).join("; ") || "Unknown error";
+      throw new Error(`AI generation failed: ${errors}`);
+    }
+
+    try {
+      data = parseAIResponse(result.data.content);
+      break; // Success
+    } catch (parseErr) {
+      console.error(`AI response parse error (attempt ${attempt + 1}):`, result.data.content.slice(0, 500));
+      if (attempt === 1) {
+        throw new Error("AI returned invalid content. Please try again.");
+      }
+      // Retry on first failure
+    }
   }
 
-  // 2. Parse the AI response
-  let data: Record<string, any>;
-  try {
-    data = parseAIResponse(result.data.content);
-  } catch (parseErr) {
-    console.error("AI response parse error:", result.data.content.slice(0, 500));
+  if (!data || !lastResult?.data) {
     throw new Error("AI returned invalid content. Please try again.");
   }
 
@@ -700,7 +714,7 @@ export async function generateStore(input: StoreGeneratorInput): Promise<StoreGe
       slug: p.slug,
       type: p.type,
     })),
-    provider: result.data.provider,
-    model: result.data.model,
+    provider: lastResult.data.provider,
+    model: lastResult.data.model,
   };
 }
