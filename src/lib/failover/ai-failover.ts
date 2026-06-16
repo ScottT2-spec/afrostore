@@ -341,6 +341,8 @@ export class AIFailover {
       case 'deepseek':
         return this.callDeepSeek(config, request);
       default:
+        // Support numbered variants (e.g. groq_2, groq_3) that use the same API
+        if (config.provider.startsWith('groq')) return this.callGroq(config, request);
         throw new Error(`Unknown AI provider: ${config.provider}`);
     }
   }
@@ -638,7 +640,9 @@ export class AIFailover {
       case 'google': return googleHealthCheck(config.apiKey);
       case 'groq': return groqHealthCheck(config.apiKey);
       case 'deepseek': return deepseekHealthCheck(config.apiKey);
-      default: return null;
+      default:
+        if (config.provider.startsWith('groq')) return groqHealthCheck(config.apiKey);
+        return null;
     }
   }
 

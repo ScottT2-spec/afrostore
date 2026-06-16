@@ -76,14 +76,22 @@ function getAIProviders(): AIProviderConfig[] {
       capabilities: [AICapability.CHAT, AICapability.FUNCTION_CALLING],
     });
   }
-  if (process.env.GROQ_API_KEY) {
+  // Register all available Groq keys as separate providers for rate-limit failover
+  const groqKeys = [
+    process.env.GROQ_API_KEY,
+    process.env.GROQ_KEY_2,
+    process.env.GROQ_KEY_3,
+    process.env.GROQ_KEY_4,
+  ].filter(Boolean) as string[];
+
+  groqKeys.forEach((key, i) => {
     providers.push({
-      provider: "groq",
-      apiKey: process.env.GROQ_API_KEY,
+      provider: i === 0 ? "groq" : `groq_${i + 1}`,
+      apiKey: key,
       model: "llama-3.3-70b-versatile",
       capabilities: [AICapability.CHAT],
     });
-  }
+  });
   if (process.env.DEEPSEEK_API_KEY) {
     providers.push({
       provider: "deepseek",
@@ -103,7 +111,7 @@ function getAI(): AIFailover {
     }
     aiFailover = new AIFailover({
       providers,
-      priorityOrder: ["openai", "anthropic", "google", "groq", "deepseek"],
+      priorityOrder: ["openai", "anthropic", "google", "groq", "groq_2", "groq_3", "groq_4", "deepseek"],
       circuitBreaker: { failureThreshold: 3, recoveryTimeoutMs: 30_000 },
       healthCheckIntervalMs: 0,
       requestTimeoutMs: 90_000, // longer timeout for generation
