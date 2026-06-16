@@ -109,8 +109,10 @@ export default function ReferralsPage() {
 
   const loadCustomers = async () => {
     if (!currentStore) return;
-    const res = await api.get<Customer[]>(`/api/stores/${currentStore.id}/customers`);
-    if (res.success && res.data) setCustomers(res.data);
+    const res = await api.get<any>(`/api/stores/${currentStore.id}/customers?limit=100`);
+    if (res.success && res.data) {
+      setCustomers(Array.isArray(res.data) ? res.data : res.data.customers || []);
+    }
   };
 
   const saveSettings = async () => {

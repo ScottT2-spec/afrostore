@@ -196,7 +196,10 @@ export default function ProductForm({ productId }: ProductFormProps) {
   useEffect(() => {
     if (!currentStore) return;
     api.get<{ categories: Category[] }>(`/api/stores/${currentStore.id}/categories`).then((res) => {
-      if (res.success && res.data) setCategories(res.data.categories || []);
+      if (res.success && res.data) {
+        const cats = Array.isArray(res.data) ? res.data : (res.data as any).categories || [];
+        setCategories(cats);
+      }
     });
   }, [currentStore]);
 

@@ -49,8 +49,10 @@ export default function FlashSalesPage() {
 
   const loadProducts = async () => {
     if (!currentStore) return;
-    const res = await api.get<Product[]>(`/api/stores/${currentStore.id}/products`);
-    if (res.success && res.data) setProducts(res.data);
+    const res = await api.get<any>(`/api/stores/${currentStore.id}/products?limit=100`);
+    if (res.success && res.data) {
+      setProducts(Array.isArray(res.data) ? res.data : res.data.products || []);
+    }
   };
 
   const create = async () => {

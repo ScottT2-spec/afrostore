@@ -30,8 +30,9 @@ export default function SettingsPage() {
     if (!currentStore) return;
     (async () => {
       const res = await api.get<any>(`/api/stores/${currentStore.id}/settings`);
-      if (res.success && res.data?.settings) {
-        setSettings((prev) => ({ ...prev, ...res.data.settings }));
+      if (res.success && res.data) {
+        const s = (res.data as any).settings || res.data;
+        setSettings((prev) => ({ ...prev, ...s }));
       }
       setLoading(false);
     })();

@@ -16,6 +16,7 @@ export async function GET(req: NextRequest, { params }: Params) {
   const url = new URL(req.url);
   const status = url.searchParams.get("status");
   const paymentStatus = url.searchParams.get("paymentStatus");
+  const search = url.searchParams.get("search");
   const page = parseInt(url.searchParams.get("page") || "1");
   const limit = Math.min(parseInt(url.searchParams.get("limit") || "20"), 100);
   const skip = (page - 1) * limit;
@@ -23,6 +24,14 @@ export async function GET(req: NextRequest, { params }: Params) {
   const where: Record<string, unknown> = { storeId };
   if (status) where.status = status;
   if (paymentStatus) where.paymentStatus = paymentStatus;
+  if (search) {
+    where.OR = [
+      { orderNumber: { contains: search, mode: "insensitive" } },
+      { customer: { firstName: { contains: search, mode: "insensitive" } } },
+      { customer: { lastName: { contains: search, mode: "insensitive" } } },
+      { customer: { email: { contains: search, mode: "insensitive" } } },
+    ];
+  }
 
   const [orders, total] = await Promise.all([
     prisma.order.findMany({

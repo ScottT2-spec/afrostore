@@ -40,3 +40,39 @@ export async function POST(req: NextRequest, { params }: Params) {
 
   return success(coupon, 201);
 }
+
+export async function PATCH(req: NextRequest, { params }: Params) {
+  const { storeId } = await params;
+  const ctx = await getStoreContext(req, storeId);
+  if (ctx.error) return ctx.user ? error(ctx.error, 403) : unauthorized();
+
+  const body = await req.json();
+  const { id, ...data } = body;
+  if (!id) return error("Coupon id is required", 400);
+
+  const coupon = await prisma.coupon.findFirst({ where: { id, storeId } });
+  if (!coupon) return error("Coupon not found", 404);
+
+  const updated = await prisma.coupon.update({
+    where: { id },
+    data,
+  });
+
+  return success(updated);
+}
+
+export async function DELETE(req: NextRequest, { params }: Params) {
+  const { storeId } = await params;
+  const ctx = await getStoreContext(req, storeId);
+  if (ctx.error) return ctx.user ? error(ctx.error, 403) : unauthorized();
+
+  const url = new URL(req.url);
+  const id = url.searchParams.get("id");
+  if (!id) return error("Coupon id is required", 400);
+
+  const coupon = await prisma.coupon.findFirst({ where: { id, storeId } });
+  if (!coupon) return error("Coupon not found", 404);
+
+  await prisma.coupon.delete({ where: { id } });
+  return success({ deleted: true });
+}
