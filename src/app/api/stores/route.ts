@@ -48,8 +48,14 @@ export async function POST(req: NextRequest) {
       return error("Store limit reached for your plan", 403);
     }
 
-    const slug = slugify(name);
+    const baseSlug = slugify(name);
     const subdomain = generateSubdomain(name);
+
+    // Ensure unique slug
+    const existingSlug = await prisma.store.findFirst({ where: { slug: baseSlug } });
+    const slug = existingSlug
+      ? `${baseSlug}-${Math.random().toString(36).slice(2, 6)}`
+      : baseSlug;
 
     // Ensure unique subdomain
     const existingSubdomain = await prisma.store.findUnique({ where: { subdomain } });
