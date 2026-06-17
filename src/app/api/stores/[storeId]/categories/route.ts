@@ -85,39 +85,3 @@ export async function DELETE(req: NextRequest, { params }: Params) {
 
   return success({ deleted: true });
 }
-
-export async function PATCH(req: NextRequest, { params }: Params) {
-  const { storeId } = await params;
-  const ctx = await getStoreContext(req, storeId);
-  if (ctx.error) return ctx.user ? error(ctx.error, 403) : unauthorized();
-
-  const body = await req.json();
-  const { id, ...data } = body;
-  if (!id) return error("Category id is required", 400);
-
-  const category = await prisma.category.findFirst({ where: { id, storeId } });
-  if (!category) return error("Category not found", 404);
-
-  const updated = await prisma.category.update({
-    where: { id },
-    data,
-  });
-
-  return success(updated);
-}
-
-export async function DELETE(req: NextRequest, { params }: Params) {
-  const { storeId } = await params;
-  const ctx = await getStoreContext(req, storeId);
-  if (ctx.error) return ctx.user ? error(ctx.error, 403) : unauthorized();
-
-  const url = new URL(req.url);
-  const id = url.searchParams.get("id");
-  if (!id) return error("Category id is required", 400);
-
-  const category = await prisma.category.findFirst({ where: { id, storeId } });
-  if (!category) return error("Category not found", 404);
-
-  await prisma.category.delete({ where: { id } });
-  return success({ deleted: true });
-}

@@ -5,7 +5,7 @@ import DashboardHeader from "@/components/dashboard/DashboardHeader";
 import { useStore } from "@/context/StoreContext";
 import { api } from "@/lib/api-client";
 import { formatCurrency } from "@/lib/utils";
-import { Search, Users, Loader2, Mail, Phone, ShoppingCart } from "lucide-react";
+import { Search, Users, Loader2, Mail, Phone, ShoppingCart, Plus, X, UserPlus } from "lucide-react";
 
 interface Customer {
   id: string;
