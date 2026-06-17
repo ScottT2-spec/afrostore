@@ -58,8 +58,19 @@ export default function SettingsPage() {
     }
     const res = await api.patch(`/api/stores/${currentStore.id}/settings`, cleaned);
     setSaving(false);
-    if (res.success) { setSaved(true); setTimeout(() => setSaved(false), 2000); }
-    else { setSaveError(res.error || "Failed to save settings"); }
+    if (res.success) {
+      setSaved(true);
+      // Re-fetch settings to confirm they persisted
+      const fresh = await api.get<any>(`/api/stores/${currentStore.id}/settings`);
+      if (fresh.success && fresh.data) {
+        const { id: _id, storeId: _sid, createdAt: _ca, updatedAt: _ua, ...s } = fresh.data;
+        setSettings((prev) => ({ ...prev, ...s }));
+      }
+      window.scrollTo({ top: 0, behavior: "smooth" });
+      setTimeout(() => setSaved(false), 3000);
+    } else {
+      setSaveError(res.error || "Failed to save settings");
+    }
   };
 
   const toggle = (key: string) => setSettings((prev) => ({ ...prev, [key]: !(prev as any)[key] }));
@@ -76,6 +87,11 @@ export default function SettingsPage() {
     <>
       <DashboardHeader title="Settings" subtitle="Configure your store" />
       <div className="p-6 space-y-6 max-w-3xl">
+        {saved && (
+          <div className="rounded-xl bg-green-50 border border-green-200 px-4 py-3 text-sm text-green-700 flex items-center gap-2 animate-pulse">
+            ✅ Settings saved successfully!
+          </div>
+        )}
         {/* Store Info */}
         <div className="rounded-2xl border border-surface-200 bg-white p-6">
           <h3 className="text-base font-bold text-surface-900 mb-4 flex items-center gap-2"><Store className="h-5 w-5" />Store Info</h3>
