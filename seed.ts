@@ -133,6 +133,25 @@ async function main() {
   }
   console.log("✅ Customers created:", customers.length);
 
+  // 7. Seed Themes
+  const defaultThemes = [
+    { name: "Lagos Modern", slug: "lagos-modern", category: "ecommerce", industry: "general", description: "A clean, modern theme perfect for any store", config: { colors: { primary: "#1E293B", accent: "#F59E0B" }, fonts: { heading: "Plus Jakarta Sans", body: "Inter" }, layout: "standard" }, isFeatured: true },
+    { name: "Ankara Boutique", slug: "ankara-boutique", category: "fashion", industry: "fashion", description: "Vibrant theme designed for African fashion brands", config: { colors: { primary: "#7C3AED", accent: "#EC4899" }, fonts: { heading: "Plus Jakarta Sans", body: "Inter" }, layout: "boutique" }, isFeatured: true },
+    { name: "Market Fresh", slug: "market-fresh", category: "food", industry: "food", description: "Warm and inviting theme for food & grocery stores", config: { colors: { primary: "#059669", accent: "#F97316" }, fonts: { heading: "Plus Jakarta Sans", body: "Inter" }, layout: "grid" } },
+    { name: "Tech Hub", slug: "tech-hub", category: "tech", industry: "electronics", description: "Sleek dark theme for gadgets and tech products", config: { colors: { primary: "#0F172A", accent: "#3B82F6" }, fonts: { heading: "Plus Jakarta Sans", body: "Inter" }, layout: "minimal" } },
+    { name: "Beauty Glow", slug: "beauty-glow", category: "beauty", industry: "beauty", description: "Elegant theme for beauty and skincare brands", config: { colors: { primary: "#BE185D", accent: "#F472B6" }, fonts: { heading: "Plus Jakarta Sans", body: "Inter" }, layout: "elegant" }, isPremium: true },
+    { name: "Naija Express", slug: "naija-express", category: "ecommerce", industry: "general", description: "Fast-loading minimal theme optimized for low data", config: { colors: { primary: "#16A34A", accent: "#EAB308" }, fonts: { heading: "Plus Jakarta Sans", body: "Inter" }, layout: "compact" } },
+  ];
+
+  for (const theme of defaultThemes) {
+    await prisma.theme.upsert({
+      where: { slug: theme.slug },
+      update: {},
+      create: theme,
+    });
+  }
+  console.log("✅ Themes seeded:", defaultThemes.length);
+
   console.log("\n🎉 Seed complete!\n");
   console.log("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━");
   console.log("  Admin Login:");

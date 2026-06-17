@@ -12,6 +12,14 @@ export async function GET(req: NextRequest) {
     const thirtyDaysAgo = new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000);
 
     // Get raw data for last 30 days
+    // Overall totals
+    const [totalUsers, totalStores, totalOrders, totalRevenueAgg] = await Promise.all([
+      prisma.user.count(),
+      prisma.store.count(),
+      prisma.order.count(),
+      prisma.order.aggregate({ _sum: { total: true }, where: { paymentStatus: "PAID" } }),
+    ]);
+
     const [users, stores, orders] = await Promise.all([
       prisma.user.findMany({
         where: { createdAt: { gte: thirtyDaysAgo } },
@@ -72,6 +80,12 @@ export async function GET(req: NextRequest) {
       stores: groupByDate(stores),
       orders: groupByDate(orders),
       revenue: revenueByDate(),
+      totals: {
+        users: totalUsers,
+        stores: totalStores,
+        orders: totalOrders,
+        revenue: Number(totalRevenueAgg._sum.total || 0),
+      },
     });
   } catch (err) {
     console.error("Admin analytics error:", err);

@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useCallback } from "react";
 import { api } from "@/lib/api-client";
-import { Search, Users, Shield, Loader2, ChevronLeft, ChevronRight } from "lucide-react";
+import { Search, Users, Shield, Loader2, ChevronLeft, ChevronRight, UserPlus, X } from "lucide-react";
 
 interface User {
   id: string;
@@ -21,6 +21,25 @@ export default function AdminUsersPage() {
   const [page, setPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
   const [updatingId, setUpdatingId] = useState<string | null>(null);
+  const [showCreate, setShowCreate] = useState(false);
+  const [creating, setCreating] = useState(false);
+  const [createForm, setCreateForm] = useState({ email: "", firstName: "", lastName: "", password: "", role: "MERCHANT" });
+  const [createError, setCreateError] = useState("");
+
+  const createUser = async () => {
+    if (!createForm.email || !createForm.firstName || !createForm.lastName || !createForm.password) return;
+    setCreating(true);
+    setCreateError("");
+    const res = await api.post<any>("/api/admin/users", createForm);
+    if (res.success) {
+      setShowCreate(false);
+      setCreateForm({ email: "", firstName: "", lastName: "", password: "", role: "MERCHANT" });
+      fetchUsers();
+    } else {
+      setCreateError(res.error || "Failed to create user");
+    }
+    setCreating(false);
+  };
 
   const fetchUsers = useCallback(async () => {
     setLoading(true);
@@ -40,6 +59,9 @@ export default function AdminUsersPage() {
     const res = await api.patch(`/api/admin/users/${userId}`, { role: newRole });
     if (res.success) {
       setUsers((prev) => prev.map((u) => u.id === userId ? { ...u, role: newRole } : u));
+    } else {
+      alert(res.error || "Failed to update role");
+      fetchUsers(); // refetch to restore correct state
     }
     setUpdatingId(null);
   };
@@ -51,11 +73,36 @@ export default function AdminUsersPage() {
           <h1 className="text-2xl font-bold text-surface-900 font-display">User Management</h1>
           <p className="text-sm text-surface-500 mt-1">Manage all platform users</p>
         </div>
-        <div className="flex items-center gap-2">
-          <Users className="h-5 w-5 text-surface-400" />
-          <span className="text-sm font-semibold text-surface-700">{users.length} users</span>
-        </div>
+        <button onClick={() => setShowCreate(true)} className="flex items-center gap-2 rounded-xl bg-brand-600 text-white px-4 py-2.5 text-sm font-medium hover:bg-brand-700 transition-colors">
+          <UserPlus className="h-4 w-4" /> Add User
+        </button>
       </div>
+
+      {showCreate && (
+        <div className="rounded-2xl border border-surface-200 bg-white p-6">
+          <div className="flex items-center justify-between mb-4">
+            <h3 className="text-base font-bold text-surface-900">Create User</h3>
+            <button onClick={() => { setShowCreate(false); setCreateError(""); }} className="text-surface-400 hover:text-surface-600"><X className="h-5 w-5" /></button>
+          </div>
+          {createError && <div className="rounded-xl bg-red-50 border border-red-200 px-4 py-3 text-sm text-red-700 mb-3">{createError}</div>}
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+            <input placeholder="First Name" value={createForm.firstName} onChange={(e) => setCreateForm({ ...createForm, firstName: e.target.value })} className="rounded-xl border border-surface-200 px-4 py-2.5 text-sm focus:outline-none focus:border-brand-500" />
+            <input placeholder="Last Name" value={createForm.lastName} onChange={(e) => setCreateForm({ ...createForm, lastName: e.target.value })} className="rounded-xl border border-surface-200 px-4 py-2.5 text-sm focus:outline-none focus:border-brand-500" />
+            <input placeholder="Email" type="email" value={createForm.email} onChange={(e) => setCreateForm({ ...createForm, email: e.target.value })} className="rounded-xl border border-surface-200 px-4 py-2.5 text-sm focus:outline-none focus:border-brand-500" />
+            <input placeholder="Password" type="password" value={createForm.password} onChange={(e) => setCreateForm({ ...createForm, password: e.target.value })} className="rounded-xl border border-surface-200 px-4 py-2.5 text-sm focus:outline-none focus:border-brand-500" />
+            <select value={createForm.role} onChange={(e) => setCreateForm({ ...createForm, role: e.target.value })} className="rounded-xl border border-surface-200 px-4 py-2.5 text-sm focus:outline-none focus:border-brand-500">
+              <option value="MERCHANT">Merchant</option>
+              <option value="ADMIN">Admin</option>
+            </select>
+          </div>
+          <div className="flex gap-2 mt-4">
+            <button onClick={createUser} disabled={creating || !createForm.email || !createForm.firstName || !createForm.password} className="px-4 py-2 text-sm rounded-xl bg-brand-600 text-white hover:bg-brand-700 disabled:opacity-50 flex items-center gap-2">
+              {creating && <Loader2 className="h-4 w-4 animate-spin" />} Create
+            </button>
+            <button onClick={() => { setShowCreate(false); setCreateError(""); }} className="px-4 py-2 text-sm rounded-xl border border-surface-200 hover:bg-surface-50">Cancel</button>
+          </div>
+        </div>
+      )}
 
       <div className="rounded-2xl border border-surface-200 bg-white">
         <div className="p-4 border-b border-surface-100">

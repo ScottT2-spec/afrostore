@@ -2,7 +2,8 @@
 
 import { useState, useEffect, useCallback } from "react";
 import { api } from "@/lib/api-client";
-import { Palette, Plus, Loader2, Star, Eye, Trash2, X } from "lucide-react";
+import { Palette, Plus, Loader2, Star, Eye, Trash2, X, Upload } from "lucide-react";
+import { SingleImageUpload } from "@/components/dashboard/ImageUpload";
 
 interface Theme {
   id: string; name: string; slug: string; description: string | null; category: string; industry: string | null;
@@ -15,7 +16,7 @@ export default function AdminThemesPage() {
   const [showForm, setShowForm] = useState(false);
   const [editingId, setEditingId] = useState<string | null>(null);
   const [saving, setSaving] = useState(false);
-  const [form, setForm] = useState({ name: "", slug: "", description: "", category: "ecommerce", industry: "", isPremium: false, isFeatured: false });
+  const [form, setForm] = useState({ name: "", slug: "", description: "", category: "ecommerce", industry: "", isPremium: false, isFeatured: false, thumbnail: "" });
 
   const fetchThemes = useCallback(async () => {
     setLoading(true);
@@ -26,12 +27,13 @@ export default function AdminThemesPage() {
 
   useEffect(() => { fetchThemes(); }, [fetchThemes]);
 
-  const resetForm = () => { setForm({ name: "", slug: "", description: "", category: "ecommerce", industry: "", isPremium: false, isFeatured: false }); setEditingId(null); setShowForm(false); };
+  const resetForm = () => { setForm({ name: "", slug: "", description: "", category: "ecommerce", industry: "", isPremium: false, isFeatured: false, thumbnail: "" }); setEditingId(null); setShowForm(false); };
 
   const handleSave = async () => {
     setSaving(true);
     const slug = form.slug || form.name.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/(^-|-$)/g, "");
-    const body = { ...form, slug, config: { colors: { primary: "#1E293B", accent: "#F59E0B" }, fonts: { heading: "Plus Jakarta Sans", body: "Inter" } } };
+    const { thumbnail, ...rest } = form;
+    const body = { ...rest, slug, ...(thumbnail ? { thumbnail } : {}), config: { colors: { primary: "#1E293B", accent: "#F59E0B" }, fonts: { heading: "Plus Jakarta Sans", body: "Inter" } } };
     const res = editingId ? await api.patch(`/api/admin/themes/${editingId}`, body) : await api.post("/api/admin/themes", body);
     if (res.success) { fetchThemes(); resetForm(); }
     setSaving(false);
@@ -44,7 +46,7 @@ export default function AdminThemesPage() {
   };
 
   const startEdit = (t: Theme) => {
-    setForm({ name: t.name, slug: t.slug, description: t.description || "", category: t.category, industry: t.industry || "", isPremium: t.isPremium, isFeatured: t.isFeatured });
+    setForm({ name: t.name, slug: t.slug, description: t.description || "", category: t.category, industry: t.industry || "", isPremium: t.isPremium, isFeatured: t.isFeatured, thumbnail: "" });
     setEditingId(t.id); setShowForm(true);
   };
 
@@ -77,8 +79,23 @@ export default function AdminThemesPage() {
             <select value={form.category} onChange={(e) => setForm({ ...form, category: e.target.value })} className="rounded-xl border border-surface-200 px-4 py-2.5 text-sm focus:outline-none focus:border-brand-500">
               <option value="ecommerce">Ecommerce</option><option value="fashion">Fashion</option><option value="food">Food & Beverage</option><option value="beauty">Beauty</option><option value="tech">Tech</option><option value="general">General</option>
             </select>
-            <input placeholder="Industry (optional)" value={form.industry} onChange={(e) => setForm({ ...form, industry: e.target.value })} className="rounded-xl border border-surface-200 px-4 py-2.5 text-sm focus:outline-none focus:border-brand-500" />
+            <select value={form.industry} onChange={(e) => setForm({ ...form, industry: e.target.value })} className="rounded-xl border border-surface-200 px-4 py-2.5 text-sm focus:outline-none focus:border-brand-500">
+              <option value="">Industry (optional)</option>
+              <option value="general">General</option>
+              <option value="fashion">Fashion</option>
+              <option value="food">Food & Beverage</option>
+              <option value="beauty">Beauty & Skincare</option>
+              <option value="electronics">Electronics & Tech</option>
+              <option value="home">Home & Living</option>
+              <option value="health">Health & Wellness</option>
+              <option value="sports">Sports & Fitness</option>
+              <option value="books">Books & Media</option>
+              <option value="art">Art & Crafts</option>
+            </select>
             <textarea placeholder="Description" value={form.description} onChange={(e) => setForm({ ...form, description: e.target.value })} className="rounded-xl border border-surface-200 px-4 py-2.5 text-sm focus:outline-none focus:border-brand-500 md:col-span-2" rows={2} />
+            <div className="md:col-span-2">
+              <SingleImageUpload image={form.thumbnail || null} onChange={(url) => setForm({ ...form, thumbnail: url || "" })} label="Thumbnail Preview" compact />
+            </div>
             <div className="flex items-center gap-6 md:col-span-2">
               <label className="flex items-center gap-2 text-sm"><input type="checkbox" checked={form.isPremium} onChange={(e) => setForm({ ...form, isPremium: e.target.checked })} className="rounded" /> Premium</label>
               <label className="flex items-center gap-2 text-sm"><input type="checkbox" checked={form.isFeatured} onChange={(e) => setForm({ ...form, isFeatured: e.target.checked })} className="rounded" /> Featured</label>
