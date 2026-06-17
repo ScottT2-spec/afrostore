@@ -92,9 +92,9 @@ export default function TeamPage() {
               <input
                 value={inviteEmail}
                 onChange={(e) => setInviteEmail(e.target.value)}
-                placeholder="team@example.com"
+                placeholder="Enter member's email address"
                 type="email"
-                className="input-field py-2.5 pl-10"
+                className="w-full rounded-xl border border-surface-200 bg-white pl-10 pr-4 py-2.5 text-sm text-surface-900 placeholder:text-surface-400 transition-all duration-200 focus:border-brand-500 focus:outline-none focus:ring-4 focus:ring-brand-500/10"
                 autoFocus
                 onKeyDown={(e) => e.key === "Enter" && inviteMember()}
               />
