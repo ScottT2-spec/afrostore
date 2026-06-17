@@ -172,13 +172,13 @@ export const updateSettingsSchema = z.object({
   whatsappOrdering: z.boolean().optional(),
   showStockCount: z.boolean().optional(),
   lowDataMode: z.boolean().optional(),
-  language: z.string().optional(),
-  whatsappNumber: z.string().optional(),
-  metaTitle: z.string().optional(),
-  metaDescription: z.string().optional(),
-  googleAnalyticsId: z.string().optional(),
-  facebookPixelId: z.string().optional(),
-  tiktokPixelId: z.string().optional(),
+  language: z.string().optional().nullable(),
+  whatsappNumber: z.string().optional().nullable(),
+  metaTitle: z.string().optional().nullable(),
+  metaDescription: z.string().optional().nullable(),
+  googleAnalyticsId: z.string().optional().nullable(),
+  facebookPixelId: z.string().optional().nullable(),
+  tiktokPixelId: z.string().optional().nullable(),
 });
 
 // ─── PAGES ──────────────────────────────────────────────────

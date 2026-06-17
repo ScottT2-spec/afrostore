@@ -31,19 +31,35 @@ export default function SettingsPage() {
     (async () => {
       const res = await api.get<any>(`/api/stores/${currentStore.id}/settings`);
       if (res.success && res.data) {
-        const s = (res.data as any).settings || res.data;
+        // Strip non-settings fields from DB response
+        const { id, storeId, createdAt, updatedAt, ...s } = res.data;
         setSettings((prev) => ({ ...prev, ...s }));
       }
       setLoading(false);
     })();
   }, [currentStore]);
 
+  const [saveError, setSaveError] = useState("");
+
   const handleSave = async () => {
     if (!currentStore) return;
     setSaving(true);
-    const res = await api.patch(`/api/stores/${currentStore.id}/settings`, settings);
+    setSaveError("");
+    // Only send fields that have actual values (don't send empty strings for optional fields)
+    const cleaned: Record<string, unknown> = {};
+    for (const [key, value] of Object.entries(settings)) {
+      if (typeof value === "boolean") {
+        cleaned[key] = value;
+      } else if (typeof value === "string" && value.trim()) {
+        cleaned[key] = value;
+      } else if (typeof value === "string") {
+        cleaned[key] = null; // send null instead of empty string
+      }
+    }
+    const res = await api.patch(`/api/stores/${currentStore.id}/settings`, cleaned);
     setSaving(false);
     if (res.success) { setSaved(true); setTimeout(() => setSaved(false), 2000); }
+    else { setSaveError(res.error || "Failed to save settings"); }
   };
 
   const toggle = (key: string) => setSettings((prev) => ({ ...prev, [key]: !(prev as any)[key] }));
@@ -126,6 +142,9 @@ export default function SettingsPage() {
         </div>
 
         {/* Save */}
+        {saveError && (
+          <div className="rounded-xl bg-accent-50 border border-accent-200 px-4 py-3 text-sm text-accent-700">{saveError}</div>
+        )}
         <div className="flex justify-end">
           <button onClick={handleSave} disabled={saving} className="btn-primary">
             {saving ? <Loader2 className="h-4 w-4 animate-spin" /> : <><Save className="h-4 w-4" />{saved ? "Saved!" : "Save Settings"}</>}

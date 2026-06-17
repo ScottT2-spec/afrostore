@@ -165,7 +165,7 @@ export default function ProductForm({ productId }: ProductFormProps) {
   const [costPrice, setCostPrice] = useState("");
   const [sku, setSku] = useState("");
   const [categoryId, setCategoryId] = useState("");
-  const [status, setStatus] = useState("DRAFT");
+  const [status, setStatus] = useState("ACTIVE");
   const [isFeatured, setIsFeatured] = useState(false);
   const [tags, setTags] = useState<string[]>([]);
   const [tagInput, setTagInput] = useState("");
@@ -331,7 +331,7 @@ export default function ProductForm({ productId }: ProductFormProps) {
     if (!currentStore) return;
     if (!name.trim()) { setError("Product name is required"); setActiveTab("general"); return; }
     if (!price || parseFloat(price) <= 0) { setError("Price must be greater than 0"); setActiveTab("general"); return; }
-    if (costPrice && parseFloat(costPrice) >= parseFloat(price)) { setError("Cost price must be lower than the regular price"); setActiveTab("general"); return; }
+
 
     setSaving(true);
     setError("");
@@ -342,7 +342,7 @@ export default function ProductForm({ productId }: ProductFormProps) {
       description: description.trim() || undefined,
       price: parseFloat(price),
       compareAtPrice: compareAtPrice ? parseFloat(compareAtPrice) : null,
-      costPrice: costPrice ? parseFloat(costPrice) : null,
+      costPrice: null,
       sku: sku || undefined,
       stock: parseInt(stock) || 0,
       trackInventory,
@@ -373,9 +373,7 @@ export default function ProductForm({ productId }: ProductFormProps) {
 
     if (res.success) {
       setSuccessMsg(isEditing ? "Product updated!" : "Product created!");
-      if (!isEditing) {
-        setTimeout(() => router.push("/dashboard/products"), 800);
-      }
+      setTimeout(() => router.push("/dashboard/products"), 800);
     } else {
       setError(res.error || "Failed to save product");
     }
@@ -572,21 +570,7 @@ export default function ProductForm({ productId }: ProductFormProps) {
                         Original/compare-at price (shows as crossed out)
                       </p>
                     </div>
-                    <div>
-                      <label className="block text-sm font-medium text-surface-700 mb-1">
-                        Cost Price ({currency})
-                      </label>
-                      <input
-                        type="number"
-                        value={costPrice}
-                        onChange={(e) => setCostPrice(e.target.value)}
-                        className="input-field"
-                        placeholder="0.00"
-                        min="0"
-                        step="0.01"
-                      />
-                      <p className="text-[10px] text-surface-400 mt-1">For profit calculations only</p>
-                    </div>
+                    {/* Cost price removed */}
                   </div>
                 </div>
 
