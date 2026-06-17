@@ -42,6 +42,12 @@ export async function PATCH(req: NextRequest, { params }: Params) {
 
   const { images, variants, ...data } = parsed.data;
 
+  // Cost price must be lower than regular price
+  const effectivePrice = data.price ?? Number(existing.price);
+  if (data.costPrice && data.costPrice >= effectivePrice) {
+    return error("Cost price must be lower than the regular price", 400);
+  }
+
   const product = await prisma.$transaction(async (tx) => {
     if (images) {
       await tx.productImage.deleteMany({ where: { productId } });

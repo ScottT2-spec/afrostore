@@ -65,6 +65,12 @@ export async function POST(req: NextRequest, { params }: Params) {
     if (!parsed.success) return validationError(parsed.error.flatten().fieldErrors);
 
     const { images, variants, ...productData } = parsed.data;
+
+    // Cost price must be lower than regular price
+    if (productData.costPrice && productData.costPrice >= productData.price) {
+      return error("Cost price must be lower than the regular price", 400);
+    }
+
     const slug = await ensureUniqueSlug(productData.name, storeId, "product");
 
     const product = await prisma.product.create({

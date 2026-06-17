@@ -138,7 +138,7 @@ export default function SignupPage() {
                     type="text"
                     value={firstName}
                     onChange={(e) => setFirstName(e.target.value)}
-                    className="input-field pl-10"
+                    className="w-full rounded-xl border border-surface-200 bg-white pl-10 pr-4 py-3 text-sm text-surface-900 placeholder:text-surface-400 transition-all duration-200 focus:border-brand-500 focus:outline-none focus:ring-4 focus:ring-brand-500/10"
                     placeholder="Amara"
                     required
                   />
@@ -169,7 +169,7 @@ export default function SignupPage() {
                   type="email"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
-                  className="input-field pl-10"
+                  className="w-full rounded-xl border border-surface-200 bg-white pl-10 pr-4 py-3 text-sm text-surface-900 placeholder:text-surface-400 transition-all duration-200 focus:border-brand-500 focus:outline-none focus:ring-4 focus:ring-brand-500/10"
                   placeholder="amara@example.com"
                   required
                 />
@@ -186,7 +186,7 @@ export default function SignupPage() {
                   type="tel"
                   value={phone}
                   onChange={(e) => setPhone(e.target.value)}
-                  className="input-field pl-10"
+                  className="w-full rounded-xl border border-surface-200 bg-white pl-10 pr-4 py-3 text-sm text-surface-900 placeholder:text-surface-400 transition-all duration-200 focus:border-brand-500 focus:outline-none focus:ring-4 focus:ring-brand-500/10"
                   placeholder="+234 812 345 6789"
                 />
               </div>
@@ -202,7 +202,7 @@ export default function SignupPage() {
                   type={showPassword ? "text" : "password"}
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
-                  className="input-field pl-10 pr-10"
+                  className="w-full rounded-xl border border-surface-200 bg-white pl-10 pr-10 py-3 text-sm text-surface-900 placeholder:text-surface-400 transition-all duration-200 focus:border-brand-500 focus:outline-none focus:ring-4 focus:ring-brand-500/10"
                   placeholder="Min. 8 characters"
                   required
                   minLength={8}

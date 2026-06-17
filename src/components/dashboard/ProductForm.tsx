@@ -331,6 +331,7 @@ export default function ProductForm({ productId }: ProductFormProps) {
     if (!currentStore) return;
     if (!name.trim()) { setError("Product name is required"); setActiveTab("general"); return; }
     if (!price || parseFloat(price) <= 0) { setError("Price must be greater than 0"); setActiveTab("general"); return; }
+    if (costPrice && parseFloat(costPrice) >= parseFloat(price)) { setError("Cost price must be lower than the regular price"); setActiveTab("general"); return; }
 
     setSaving(true);
     setError("");
