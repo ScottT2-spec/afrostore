@@ -294,9 +294,53 @@ function ColumnsBlock({ props }: { props: Record<string, unknown> }) {
 }
 
 /* ── Product Grid ────────────────────────────────────────────── */
+
+function formatBlockCurrency(amount: number, currency: string = "NGN"): string {
+  const symbols: Record<string, string> = { NGN: "₦", KES: "KSh", GHS: "GH₵", ZAR: "R", USD: "$", GBP: "£", EUR: "€" };
+  const symbol = symbols[currency] || currency;
+  return `${symbol}${amount.toLocaleString("en-NG", { minimumFractionDigits: 0, maximumFractionDigits: 2 })}`;
+}
+
+const PRODUCT_GRADIENTS = [
+  "from-pink-400 to-rose-500",
+  "from-amber-400 to-orange-500",
+  "from-amber-600 to-yellow-600",
+  "from-green-400 to-emerald-500",
+  "from-blue-400 to-indigo-500",
+  "from-red-400 to-pink-500",
+  "from-teal-400 to-cyan-500",
+  "from-purple-400 to-violet-500",
+];
+
+function getProductGradient(id: string): string {
+  let hash = 0;
+  for (let i = 0; i < id.length; i++) hash = id.charCodeAt(i) + ((hash << 5) - hash);
+  return PRODUCT_GRADIENTS[Math.abs(hash) % PRODUCT_GRADIENTS.length];
+}
+
 function ProductGridBlock({ props }: { props: Record<string, unknown> }) {
   const limit = (props.limit as number) || 6;
   const cols = (props.columns as number) || 3;
+  const categoryFilter = (props.category as string) || "";
+  const { products, currency, slug } = useContext(StoreContext);
+
+  // Filter products by category if specified, then limit
+  let displayProducts = products;
+  if (categoryFilter) {
+    displayProducts = products.filter(
+      (p) => p.category?.name?.toLowerCase() === categoryFilter.toLowerCase() || p.category?.slug === categoryFilter
+    );
+  }
+  // If "featured" filter or showFeatured prop, prioritise featured
+  if (props.filter === "featured" || props.showFeatured) {
+    const featured = displayProducts.filter((p) => p.isFeatured);
+    if (featured.length > 0) displayProducts = featured;
+  }
+  displayProducts = displayProducts.slice(0, limit);
+
+  // Fallback: if no real products, show skeletons
+  const hasRealProducts = displayProducts.length > 0;
+
   return (
     <AnimateIn>
       <div>
@@ -306,21 +350,69 @@ function ProductGridBlock({ props }: { props: Record<string, unknown> }) {
             {(props.subtitle as string) && <p className="text-surface-500 mt-2">{props.subtitle as string}</p>}
           </div>
         )}
-        <div className={`grid grid-cols-2 sm:grid-cols-${Math.min(cols, 4)} gap-4`}>
-          {Array.from({ length: limit }).map((_, i) => (
-            <div key={i} className="group rounded-2xl border border-surface-100 bg-white overflow-hidden hover:shadow-xl hover:-translate-y-1 transition-all duration-300">
-              <div className="aspect-square bg-gradient-to-br from-surface-100 via-surface-50 to-brand-50/30 relative overflow-hidden">
-                <div className="absolute inset-0 bg-gradient-to-t from-black/5 to-transparent" />
-                <div className="absolute inset-0 flex items-center justify-center">
-                  <ShoppingBag className="h-8 w-8 text-surface-300" />
+        <div className={`grid grid-cols-2 sm:grid-cols-${Math.min(cols, 4)} gap-4 sm:gap-6`}>
+          {hasRealProducts
+            ? displayProducts.map((product) => {
+                const hasImage = product.images.length > 0 && product.images[0].url;
+                const discount = product.compareAtPrice
+                  ? Math.round(((Number(product.compareAtPrice) - Number(product.price)) / Number(product.compareAtPrice)) * 100)
+                  : 0;
+                const productUrl = slug ? `/store/${slug}/product/${product.slug}` : "#";
+                return (
+                  <a key={product.id} href={productUrl} className="group block">
+                    <div className="relative aspect-[3/4] rounded-2xl overflow-hidden mb-3">
+                      {hasImage ? (
+                        <img
+                          src={product.images[0].url}
+                          alt={product.images[0].alt || product.name}
+                          className="absolute inset-0 w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
+                        />
+                      ) : (
+                        <div className={`absolute inset-0 bg-gradient-to-br ${getProductGradient(product.id)} transition-transform duration-500 group-hover:scale-110 flex items-center justify-center`}>
+                          <ShoppingBag className="h-10 w-10 text-white/40" />
+                        </div>
+                      )}
+                      {product.isFeatured && (
+                        <div className="absolute top-3 left-3 rounded-full px-2.5 py-0.5 text-[10px] font-bold text-white bg-brand-600">Featured</div>
+                      )}
+                      {!product.inStock && (
+                        <div className="absolute top-3 left-3 rounded-full px-2.5 py-0.5 text-[10px] font-bold text-white bg-red-500">Sold Out</div>
+                      )}
+                      {discount > 0 && (
+                        <div className="absolute top-3 right-3 rounded-full bg-red-500 px-2 py-0.5 text-[10px] font-bold text-white">-{discount}%</div>
+                      )}
+                      <div className="absolute inset-0 bg-black/0 group-hover:bg-black/20 transition-colors" />
+                    </div>
+                    <h3 className="text-sm font-semibold text-surface-900 group-hover:text-brand-600 transition-colors line-clamp-1">{product.name}</h3>
+                    {product.reviewCount > 0 && (
+                      <div className="flex items-center gap-1 mt-1">
+                        <Star className="h-3 w-3 fill-yellow-400 text-yellow-400" />
+                        <span className="text-[10px] text-surface-400">({product.reviewCount})</span>
+                      </div>
+                    )}
+                    <div className="flex items-center gap-2 mt-1.5">
+                      <span className="text-base font-bold text-surface-900">{formatBlockCurrency(Number(product.price), currency)}</span>
+                      {product.compareAtPrice && (
+                        <span className="text-xs text-surface-400 line-through">{formatBlockCurrency(Number(product.compareAtPrice), currency)}</span>
+                      )}
+                    </div>
+                  </a>
+                );
+              })
+            : Array.from({ length: limit }).map((_, i) => (
+                <div key={i} className="group rounded-2xl border border-surface-100 bg-white overflow-hidden hover:shadow-xl hover:-translate-y-1 transition-all duration-300">
+                  <div className="aspect-square bg-gradient-to-br from-surface-100 via-surface-50 to-brand-50/30 relative overflow-hidden">
+                    <div className="absolute inset-0 bg-gradient-to-t from-black/5 to-transparent" />
+                    <div className="absolute inset-0 flex items-center justify-center">
+                      <ShoppingBag className="h-8 w-8 text-surface-300" />
+                    </div>
+                  </div>
+                  <div className="p-4">
+                    <div className="h-3 bg-surface-100 rounded-full w-3/4 mb-2" />
+                    <div className="h-3 bg-surface-100 rounded-full w-1/2" />
+                  </div>
                 </div>
-              </div>
-              <div className="p-4">
-                <div className="h-3 bg-surface-100 rounded-full w-3/4 mb-2" />
-                <div className="h-3 bg-surface-100 rounded-full w-1/2" />
-              </div>
-            </div>
-          ))}
+              ))}
         </div>
       </div>
     </AnimateIn>
@@ -1002,6 +1094,29 @@ const renderers: Record<string, React.FC<{ props: Record<string, unknown> }>> = 
 
 /* ─── STORE CONTEXT (for blocks that need store info) ─────── */
 
+export interface StoreProduct {
+  id: string;
+  name: string;
+  slug: string;
+  description?: string;
+  price: number;
+  compareAtPrice?: number;
+  currency: string;
+  inStock: boolean;
+  isFeatured: boolean;
+  tags: string[];
+  images: Array<{ id: string; url: string; alt?: string }>;
+  category?: { id: string; name: string; slug: string };
+  reviewCount: number;
+}
+
+interface StoreContextData {
+  slug: string;
+  products: StoreProduct[];
+  currency: string;
+}
+
+const StoreContext = createContext<StoreContextData>({ slug: "", products: [], currency: "NGN" });
 const StoreSlugContext = createContext<string>("");
 
 /* ─── PUBLIC API ────────────────────────────────────────────── */
@@ -1012,7 +1127,7 @@ export function PublicBlockRenderer({ block }: { block: BuilderBlock }) {
   return <Renderer props={block.props} />;
 }
 
-export function RenderBlocks({ blocks, storeSlug }: { blocks: BuilderBlock[]; storeSlug?: string }) {
+export function RenderBlocks({ blocks, storeSlug, products, currency }: { blocks: BuilderBlock[]; storeSlug?: string; products?: StoreProduct[]; currency?: string }) {
   if (!blocks || blocks.length === 0) return null;
   const content = (
     <div className="space-y-8">
@@ -1021,7 +1136,12 @@ export function RenderBlocks({ blocks, storeSlug }: { blocks: BuilderBlock[]; st
       ))}
     </div>
   );
-  return storeSlug ? (
-    <StoreSlugContext.Provider value={storeSlug}>{content}</StoreSlugContext.Provider>
+  const wrappedContent = storeSlug ? (
+    <StoreSlugContext.Provider value={storeSlug}>
+      <StoreContext.Provider value={{ slug: storeSlug || "", products: products || [], currency: currency || "NGN" }}>
+        {content}
+      </StoreContext.Provider>
+    </StoreSlugContext.Provider>
   ) : content;
+  return wrappedContent;
 }
