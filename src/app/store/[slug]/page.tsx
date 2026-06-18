@@ -271,6 +271,7 @@ export default function StorePage() {
     ? (homePage.content as BuilderBlock[])
     : [];
   const hasHomeContent = homeBlocks.length > 0;
+  const homeHasProductGrid = homeBlocks.some((b) => b.type === "productGrid");
 
   // Navigation pages: exclude HOME (we're on it), sort sensibly
   const navPageOrder: Record<string, number> = { ABOUT: 0, FAQ: 1, CONTACT: 2, POLICY: 3, CUSTOM: 4, LANDING: 5 };
@@ -434,7 +435,8 @@ export default function StorePage() {
         </>
       )}
 
-      {/* Products */}
+      {/* Products — skip when AI home page already includes a product grid */}
+      {!homeHasProductGrid && (
       <section id="shop" className="max-w-6xl mx-auto px-4 sm:px-6 py-12">
         <div className="flex items-center justify-between mb-8">
           <h2 className="font-display text-2xl font-bold text-surface-900">
@@ -542,6 +544,7 @@ export default function StorePage() {
           </div>
         )}
       </section>
+      )}
 
       {/* WhatsApp CTA */}
       {settings.whatsappOrdering && whatsappNumber && (
