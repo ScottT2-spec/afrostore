@@ -383,7 +383,7 @@ export default function StorePage() {
       {hasHomeContent ? (
         /* AI-generated Home page — render the builder blocks */
         <section className="max-w-6xl mx-auto px-4 sm:px-6 py-8">
-          <RenderBlocks blocks={homeBlocks} storeSlug={slug} products={products} currency={currency} />
+          <RenderBlocks blocks={homeBlocks} storeSlug={slug} products={products} currency={currency} addToCart={(p) => addToCart(p as unknown as Product)} isWishlisted={isWishlisted} toggleWishlist={toggleWishlist} addedToCart={addedToCart} />
           {products.length > 0 && (
             <div className="text-center mt-10">
               <Link

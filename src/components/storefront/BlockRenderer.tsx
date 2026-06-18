@@ -3,6 +3,7 @@
 import { useState, useEffect, useMemo, useRef, createContext, useContext } from "react";
 import {
   Star,
+  ShoppingCart,
   Truck,
   Shield,
   Headphones,
@@ -322,7 +323,7 @@ function ProductGridBlock({ props }: { props: Record<string, unknown> }) {
   const limit = (props.limit as number) || 6;
   const cols = (props.columns as number) || 3;
   const categoryFilter = (props.category as string) || "";
-  const { products, currency, slug } = useContext(StoreContext);
+  const { products, currency, slug, addToCart, isWishlisted, toggleWishlist, addedToCart } = useContext(StoreContext);
 
   // Filter products by category if specified, then limit
   let displayProducts = products;
@@ -358,32 +359,60 @@ function ProductGridBlock({ props }: { props: Record<string, unknown> }) {
                   ? Math.round(((Number(product.compareAtPrice) - Number(product.price)) / Number(product.compareAtPrice)) * 100)
                   : 0;
                 const productUrl = slug ? `/store/${slug}/product/${product.slug}` : "#";
+                const wishlisted = isWishlisted ? isWishlisted(product.id) : false;
+                const justAdded = addedToCart === product.id;
                 return (
-                  <a key={product.id} href={productUrl} className="group block">
-                    <div className="relative aspect-[3/4] rounded-2xl overflow-hidden mb-3">
-                      {hasImage ? (
-                        <img
-                          src={product.images[0].url}
-                          alt={product.images[0].alt || product.name}
-                          className="absolute inset-0 w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
-                        />
-                      ) : (
-                        <div className={`absolute inset-0 bg-gradient-to-br ${getProductGradient(product.id)} transition-transform duration-500 group-hover:scale-110 flex items-center justify-center`}>
-                          <ShoppingBag className="h-10 w-10 text-white/40" />
+                  <div key={product.id} className="group">
+                    <a href={productUrl} className="block">
+                      <div className="relative aspect-[3/4] rounded-2xl overflow-hidden mb-3">
+                        {hasImage ? (
+                          <img
+                            src={product.images[0].url}
+                            alt={product.images[0].alt || product.name}
+                            className="absolute inset-0 w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
+                          />
+                        ) : (
+                          <div className={`absolute inset-0 bg-gradient-to-br ${getProductGradient(product.id)} transition-transform duration-500 group-hover:scale-110 flex items-center justify-center`}>
+                            <ShoppingBag className="h-10 w-10 text-white/40" />
+                          </div>
+                        )}
+                        {product.isFeatured && (
+                          <div className="absolute top-3 left-3 rounded-full px-2.5 py-0.5 text-[10px] font-bold text-white bg-brand-600">Featured</div>
+                        )}
+                        {!product.inStock && (
+                          <div className="absolute top-3 left-3 rounded-full px-2.5 py-0.5 text-[10px] font-bold text-white bg-red-500">Sold Out</div>
+                        )}
+                        {discount > 0 && (
+                          <div className="absolute top-3 left-3 rounded-full bg-red-500 px-2 py-0.5 text-[10px] font-bold text-white z-10">-{discount}%</div>
+                        )}
+                        {/* Always-visible wishlist + cart icons */}
+                        <div className="absolute top-3 right-3 flex items-center gap-1.5 z-10">
+                          {toggleWishlist && (
+                            <button
+                              onClick={(e) => { e.preventDefault(); e.stopPropagation(); toggleWishlist(product.id); }}
+                              className={`h-8 w-8 rounded-full bg-white/90 backdrop-blur-sm flex items-center justify-center transition-all hover:bg-white hover:scale-110 shadow-sm ${wishlisted ? "ring-1 ring-red-200" : ""}`}
+                            >
+                              <Heart className={`h-4 w-4 ${wishlisted ? "fill-red-500 text-red-500" : "text-surface-500"}`} />
+                            </button>
+                          )}
+                          {addToCart && (
+                            <button
+                              onClick={(e) => { e.preventDefault(); e.stopPropagation(); if (product.inStock) addToCart(product); }}
+                              disabled={!product.inStock}
+                              className={`h-8 w-8 rounded-full backdrop-blur-sm flex items-center justify-center transition-all hover:scale-110 shadow-sm disabled:opacity-40 ${
+                                justAdded ? "bg-green-500 text-white" : "bg-white/90 text-surface-500 hover:bg-white"
+                              }`}
+                            >
+                              {justAdded ? <CheckCircle2 className="h-4 w-4" /> : <ShoppingCart className="h-4 w-4" />}
+                            </button>
+                          )}
                         </div>
-                      )}
-                      {product.isFeatured && (
-                        <div className="absolute top-3 left-3 rounded-full px-2.5 py-0.5 text-[10px] font-bold text-white bg-brand-600">Featured</div>
-                      )}
-                      {!product.inStock && (
-                        <div className="absolute top-3 left-3 rounded-full px-2.5 py-0.5 text-[10px] font-bold text-white bg-red-500">Sold Out</div>
-                      )}
-                      {discount > 0 && (
-                        <div className="absolute top-3 right-3 rounded-full bg-red-500 px-2 py-0.5 text-[10px] font-bold text-white">-{discount}%</div>
-                      )}
-                      <div className="absolute inset-0 bg-black/0 group-hover:bg-black/20 transition-colors" />
-                    </div>
-                    <h3 className="text-sm font-semibold text-surface-900 group-hover:text-brand-600 transition-colors line-clamp-1">{product.name}</h3>
+                        <div className="absolute inset-0 bg-black/0 group-hover:bg-black/10 transition-colors" />
+                      </div>
+                    </a>
+                    <a href={productUrl}>
+                      <h3 className="text-sm font-semibold text-surface-900 group-hover:text-brand-600 transition-colors line-clamp-1">{product.name}</h3>
+                    </a>
                     {product.reviewCount > 0 && (
                       <div className="flex items-center gap-1 mt-1">
                         <Star className="h-3 w-3 fill-yellow-400 text-yellow-400" />
@@ -396,7 +425,7 @@ function ProductGridBlock({ props }: { props: Record<string, unknown> }) {
                         <span className="text-xs text-surface-400 line-through">{formatBlockCurrency(Number(product.compareAtPrice), currency)}</span>
                       )}
                     </div>
-                  </a>
+                  </div>
                 );
               })
             : Array.from({ length: limit }).map((_, i) => (
@@ -1114,6 +1143,10 @@ interface StoreContextData {
   slug: string;
   products: StoreProduct[];
   currency: string;
+  addToCart?: (product: StoreProduct) => void;
+  isWishlisted?: (productId: string) => boolean;
+  toggleWishlist?: (productId: string) => void;
+  addedToCart?: string | null;
 }
 
 const StoreContext = createContext<StoreContextData>({ slug: "", products: [], currency: "NGN" });
@@ -1127,7 +1160,16 @@ export function PublicBlockRenderer({ block }: { block: BuilderBlock }) {
   return <Renderer props={block.props} />;
 }
 
-export function RenderBlocks({ blocks, storeSlug, products, currency }: { blocks: BuilderBlock[]; storeSlug?: string; products?: StoreProduct[]; currency?: string }) {
+export function RenderBlocks({ blocks, storeSlug, products, currency, addToCart, isWishlisted, toggleWishlist, addedToCart }: {
+  blocks: BuilderBlock[];
+  storeSlug?: string;
+  products?: StoreProduct[];
+  currency?: string;
+  addToCart?: (product: StoreProduct) => void;
+  isWishlisted?: (productId: string) => boolean;
+  toggleWishlist?: (productId: string) => void;
+  addedToCart?: string | null;
+}) {
   if (!blocks || blocks.length === 0) return null;
   const content = (
     <div className="space-y-8">
@@ -1138,7 +1180,7 @@ export function RenderBlocks({ blocks, storeSlug, products, currency }: { blocks
   );
   const wrappedContent = storeSlug ? (
     <StoreSlugContext.Provider value={storeSlug}>
-      <StoreContext.Provider value={{ slug: storeSlug || "", products: products || [], currency: currency || "NGN" }}>
+      <StoreContext.Provider value={{ slug: storeSlug || "", products: products || [], currency: currency || "NGN", addToCart, isWishlisted, toggleWishlist, addedToCart }}>
         {content}
       </StoreContext.Provider>
     </StoreSlugContext.Provider>
