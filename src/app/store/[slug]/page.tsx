@@ -312,7 +312,7 @@ export default function StorePage() {
 
           <nav className="hidden sm:flex items-center gap-6">
             <Link href={`/store/${slug}`} className="text-sm font-medium text-brand-700 transition-colors">Home</Link>
-            <a href="#shop" className="text-sm font-medium text-surface-600 hover:text-surface-900 transition-colors">Shop</a>
+            <Link href={`/store/${slug}/shop`} className="text-sm font-medium text-surface-600 hover:text-surface-900 transition-colors">Shop</Link>
             <Link href={`/store/${slug}/reviews`} className="text-sm font-medium text-surface-600 hover:text-surface-900 transition-colors">Reviews</Link>
             {navPages.slice(0, 4).map((page) => (
               <Link key={page.id} href={`/store/${slug}/${page.slug}`} className="text-sm font-medium text-surface-600 hover:text-surface-900 transition-colors">{page.title}</Link>
@@ -361,7 +361,7 @@ export default function StorePage() {
       {mobileMenu && (
         <div className="sm:hidden bg-white border-b border-surface-200 px-4 py-4 space-y-2">
           <Link href={`/store/${slug}`} onClick={() => setMobileMenu(false)} className="block text-sm font-bold text-brand-700 py-2">Home</Link>
-          <a href="#shop" onClick={() => setMobileMenu(false)} className="block text-sm font-medium text-surface-600 py-2">Shop</a>
+          <Link href={`/store/${slug}/shop`} onClick={() => setMobileMenu(false)} className="block text-sm font-medium text-surface-600 py-2">Shop</Link>
           <Link href={`/store/${slug}/reviews`} onClick={() => setMobileMenu(false)} className="block text-sm font-medium text-surface-600 py-2">Reviews</Link>
           {navPages.map((page) => (
             <Link key={page.id} href={`/store/${slug}/${page.slug}`} onClick={() => setMobileMenu(false)} className="block text-sm font-medium text-surface-600 py-2">{page.title}</Link>
@@ -377,6 +377,16 @@ export default function StorePage() {
         /* AI-generated Home page — render the builder blocks */
         <section className="max-w-6xl mx-auto px-4 sm:px-6 py-8">
           <RenderBlocks blocks={homeBlocks} storeSlug={slug} products={products} currency={currency} />
+          {products.length > 0 && (
+            <div className="text-center mt-10">
+              <Link
+                href={`/store/${slug}/shop`}
+                className="inline-flex items-center gap-2 rounded-2xl bg-surface-900 text-white px-8 py-3.5 text-sm font-bold hover:bg-surface-800 transition-all shadow-lg hover:-translate-y-0.5"
+              >
+                View All Products <ArrowRight className="h-4 w-4" />
+              </Link>
+            </div>
+          )}
         </section>
       ) : (
         /* Fallback: default hero + trust bar (no AI content) */
@@ -481,8 +491,9 @@ export default function StorePage() {
             </p>
           </div>
         ) : (
+          <>
           <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4 sm:gap-6">
-            {filteredProducts.map((product) => {
+            {filteredProducts.slice(0, 8).map((product) => {
               const hasImage = product.images.length > 0 && product.images[0].url;
               const discount = product.compareAtPrice
                 ? Math.round(((Number(product.compareAtPrice) - Number(product.price)) / Number(product.compareAtPrice)) * 100)
@@ -542,6 +553,18 @@ export default function StorePage() {
               );
             })}
           </div>
+          {filteredProducts.length > 8 && (
+            <div className="text-center mt-10">
+              <Link
+                href={`/store/${slug}/shop`}
+                className="inline-flex items-center gap-2 rounded-2xl bg-surface-900 text-white px-8 py-3.5 text-sm font-bold hover:bg-surface-800 transition-all shadow-lg hover:-translate-y-0.5"
+              >
+                View All Products <ArrowRight className="h-4 w-4" />
+              </Link>
+              <p className="text-xs text-surface-400 mt-2">Showing 8 of {filteredProducts.length} products</p>
+            </div>
+          )}
+          </>
         )}
       </section>
       )}
