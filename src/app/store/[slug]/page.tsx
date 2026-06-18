@@ -169,7 +169,14 @@ export default function StorePage() {
   const [data, setData] = useState<StoreData | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
-  const [cart, setCart] = useState<CartItem[]>([]);
+  const [cart, setCart] = useState<CartItem[]>(() => {
+    if (typeof window === "undefined") return [];
+    try {
+      const saved = localStorage.getItem("afrostore_cart");
+      if (saved) { const parsed = JSON.parse(saved); if (Array.isArray(parsed)) return parsed; }
+    } catch { /* ignore */ }
+    return [];
+  });
   const [mobileMenu, setMobileMenu] = useState(false);
   const [selectedCategory, setSelectedCategory] = useState("All");
   const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
@@ -196,17 +203,6 @@ export default function StorePage() {
   }, [slug]);
 
   useEffect(() => { fetchStore(); }, [fetchStore]);
-
-  // Load existing cart from localStorage on mount
-  useEffect(() => {
-    try {
-      const saved = localStorage.getItem("afrostore_cart");
-      if (saved) {
-        const parsed = JSON.parse(saved);
-        if (Array.isArray(parsed) && parsed.length > 0) setCart(parsed);
-      }
-    } catch { /* ignore */ }
-  }, []);
 
   // Persist cart to localStorage for checkout
   useEffect(() => {
@@ -528,24 +524,27 @@ export default function StorePage() {
                       <div className="absolute top-3 left-3 rounded-full px-2.5 py-0.5 text-[10px] font-bold text-white bg-red-500">Sold Out</div>
                     )}
                     {discount > 0 && (
-                      <div className="absolute top-3 right-3 rounded-full bg-red-500 px-2 py-0.5 text-[10px] font-bold text-white">-{discount}%</div>
+                      <div className="absolute top-3 left-3 rounded-full bg-red-500 px-2 py-0.5 text-[10px] font-bold text-white z-10">-{discount}%</div>
                     )}
-                    <button
-                      onClick={(e) => { e.stopPropagation(); toggleWishlist(product.id); }}
-                      className={`absolute ${discount > 0 ? "top-10" : "top-3"} right-3 h-8 w-8 rounded-full bg-white/80 backdrop-blur-sm flex items-center justify-center transition-all hover:bg-white hover:scale-110 z-10 shadow-sm`}
-                    >
-                      <Heart className={`h-4 w-4 ${isWishlisted(product.id) ? "fill-red-500 text-red-500" : "text-surface-500"}`} />
-                    </button>
-                    <div className="absolute inset-0 bg-black/0 group-hover:bg-black/20 transition-colors" />
-                    <button
-                      onClick={(e) => { e.stopPropagation(); if (product.inStock) addToCart(product); }}
-                      disabled={!product.inStock}
-                      className={`absolute bottom-3 left-3 right-3 rounded-xl py-2.5 text-xs font-semibold opacity-0 group-hover:opacity-100 transition-all translate-y-2 group-hover:translate-y-0 shadow-lg flex items-center justify-center gap-2 ${
-                        justAdded ? "bg-green-500 text-white" : "bg-white text-surface-900 hover:bg-surface-50"
-                      } disabled:opacity-50`}
-                    >
-                      {justAdded ? <><CheckCircle2 className="h-3.5 w-3.5" /> Added!</> : <><ShoppingCart className="h-3.5 w-3.5" /> Add to Cart</>}
-                    </button>
+                    {/* Always-visible wishlist + cart icons */}
+                    <div className="absolute top-3 right-3 flex items-center gap-1.5 z-10">
+                      <button
+                        onClick={(e) => { e.stopPropagation(); toggleWishlist(product.id); }}
+                        className={`h-8 w-8 rounded-full bg-white/90 backdrop-blur-sm flex items-center justify-center transition-all hover:bg-white hover:scale-110 shadow-sm ${isWishlisted(product.id) ? "ring-1 ring-red-200" : ""}`}
+                      >
+                        <Heart className={`h-4 w-4 ${isWishlisted(product.id) ? "fill-red-500 text-red-500" : "text-surface-500"}`} />
+                      </button>
+                      <button
+                        onClick={(e) => { e.stopPropagation(); if (product.inStock) addToCart(product); }}
+                        disabled={!product.inStock}
+                        className={`h-8 w-8 rounded-full backdrop-blur-sm flex items-center justify-center transition-all hover:scale-110 shadow-sm disabled:opacity-40 ${
+                          justAdded ? "bg-green-500 text-white" : "bg-white/90 text-surface-500 hover:bg-white"
+                        }`}
+                      >
+                        {justAdded ? <CheckCircle2 className="h-4 w-4" /> : <ShoppingCart className="h-4 w-4" />}
+                      </button>
+                    </div>
+                    <div className="absolute inset-0 bg-black/0 group-hover:bg-black/10 transition-colors" />
                   </div>
                   <h3 className="text-sm font-semibold text-surface-900 group-hover:text-brand-600 transition-colors line-clamp-1">{product.name}</h3>
                   {product.reviewCount > 0 && (
