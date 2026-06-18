@@ -197,6 +197,17 @@ export default function StorePage() {
 
   useEffect(() => { fetchStore(); }, [fetchStore]);
 
+  // Load existing cart from localStorage on mount
+  useEffect(() => {
+    try {
+      const saved = localStorage.getItem("afrostore_cart");
+      if (saved) {
+        const parsed = JSON.parse(saved);
+        if (Array.isArray(parsed) && parsed.length > 0) setCart(parsed);
+      }
+    } catch { /* ignore */ }
+  }, []);
+
   // Persist cart to localStorage for checkout
   useEffect(() => {
     if (data) {

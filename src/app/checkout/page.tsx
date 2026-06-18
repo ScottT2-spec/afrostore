@@ -93,6 +93,7 @@ export default function CheckoutPage() {
   const router = useRouter();
 
   // Load cart + store info from localStorage (set by storefront)
+  const [cartLoaded, setCartLoaded] = useState(false);
   const [cart, setCart] = useState<CartItem[]>([]);
   const [storeId, setStoreId] = useState("");
   const [storeSlug, setStoreSlug] = useState("");
@@ -123,7 +124,10 @@ export default function CheckoutPage() {
     if (typeof window === "undefined") return;
     try {
       const c = localStorage.getItem("afrostore_cart");
-      if (c) setCart(JSON.parse(c));
+      if (c) {
+        const parsed = JSON.parse(c);
+        if (Array.isArray(parsed)) setCart(parsed);
+      }
       setStoreId(localStorage.getItem("afrostore_storeId") || "");
       setStoreSlug(localStorage.getItem("afrostore_storeSlug") || "");
       setStoreName(localStorage.getItem("afrostore_storeName") || "");
@@ -137,6 +141,7 @@ export default function CheckoutPage() {
     } catch {
       // ignore parse errors
     }
+    setCartLoaded(true);
   }, []);
 
   // Cart helpers
@@ -290,6 +295,18 @@ export default function CheckoutPage() {
               </Link>
             )}
           </div>
+        </div>
+      </div>
+    );
+  }
+
+  /* ── Loading cart from localStorage ── */
+  if (!cartLoaded) {
+    return (
+      <div className="min-h-screen bg-surface-50 flex items-center justify-center">
+        <div className="text-center">
+          <Loader2 className="h-10 w-10 animate-spin text-brand-600 mx-auto mb-4" />
+          <p className="text-surface-500 text-sm">Loading cart...</p>
         </div>
       </div>
     );
