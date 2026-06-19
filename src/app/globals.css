@@ -86,6 +86,22 @@
   --animate-marquee-right: marqueeRight 50s linear infinite;
 }
 
+/* Marquee — keep outside @theme so it outputs as real CSS */
+.marquee-track {
+  display: flex;
+  width: max-content;
+  gap: 1.5rem;
+}
+.marquee-track[data-direction="left"] {
+  animation: marqueeLeft var(--marquee-duration, 45s) linear infinite;
+}
+.marquee-track[data-direction="right"] {
+  animation: marqueeRight var(--marquee-duration, 50s) linear infinite;
+}
+.marquee-track[data-paused="true"] {
+  animation-play-state: paused;
+}
+
 @layer base {
   :root {
     --theme-primary: #1B2B4B;

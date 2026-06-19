@@ -1,7 +1,7 @@
 "use client";
 
 import { Star, Quote } from "lucide-react";
-import { useEffect, useState, useRef } from "react";
+import { useEffect, useState } from "react";
 
 // ─── Types ──────────────────────────────────────────────────
 
@@ -43,7 +43,7 @@ const gradients = [
   "from-fuchsia-500 to-rose-500",
 ];
 
-// ─── Fallback testimonials ──────────────────────────────────
+// ─── Fallback testimonials (shown when no real reviews exist) ─
 
 const fallbackTestimonials: TestimonialCard[] = [
   {
@@ -183,57 +183,11 @@ function ReviewCard({ t }: { t: TestimonialCard }) {
   );
 }
 
-// ─── Marquee Row ────────────────────────────────────────────
-
-function MarqueeRow({
-  cards,
-  direction = "left",
-  duration = 40,
-  paused,
-}: {
-  cards: TestimonialCard[];
-  direction?: "left" | "right";
-  duration?: number;
-  paused: boolean;
-}) {
-  if (cards.length === 0) return null;
-
-  // We duplicate the cards so the loop is seamless
-  const animClass =
-    direction === "left" ? "animate-marquee-left" : "animate-marquee-right";
-
-  return (
-    <div className="overflow-hidden relative">
-      {/* Fade edges */}
-      <div className="pointer-events-none absolute inset-y-0 left-0 w-16 sm:w-24 z-10 bg-gradient-to-r from-white to-transparent" />
-      <div className="pointer-events-none absolute inset-y-0 right-0 w-16 sm:w-24 z-10 bg-gradient-to-l from-white to-transparent" />
-
-      <div
-        className={`flex gap-6 ${animClass}`}
-        style={{
-          animationDuration: `${duration}s`,
-          animationPlayState: paused ? "paused" : "running",
-        }}
-      >
-        {/* First set */}
-        {cards.map((t) => (
-          <ReviewCard key={t.id} t={t} />
-        ))}
-        {/* Duplicate for seamless loop */}
-        {cards.map((t) => (
-          <ReviewCard key={`dup-${t.id}`} t={t} />
-        ))}
-      </div>
-    </div>
-  );
-}
-
 // ─── Main Component ─────────────────────────────────────────
 
 export default function Testimonials() {
   const [cards, setCards] = useState<TestimonialCard[]>(fallbackTestimonials);
   const [paused, setPaused] = useState(false);
-  const sectionRef = useRef<HTMLElement>(null);
 
   // Fetch real approved reviews
   useEffect(() => {
@@ -248,21 +202,20 @@ export default function Testimonials() {
 
         if (json.success && json.data && json.data.length > 0) {
           const realCards = json.data
-            .filter((r: ReviewData) => r.body || r.title) // skip empty reviews
+            .filter((r: ReviewData) => r.body || r.title)
             .map(mapReviewToCard);
 
           if (realCards.length > 0) {
-            // Merge: real reviews first, then fill with fallbacks to have at least 6
+            // Real reviews first, pad with fallbacks if under 6
             const merged = [...realCards];
             if (merged.length < 6) {
-              const needed = 6 - merged.length;
-              merged.push(...fallbackTestimonials.slice(0, needed));
+              merged.push(...fallbackTestimonials.slice(0, 6 - merged.length));
             }
             setCards(merged);
           }
         }
       } catch {
-        // Keep fallback testimonials on error
+        // Keep fallback testimonials
       }
     }
 
@@ -270,14 +223,8 @@ export default function Testimonials() {
     return () => { cancelled = true; };
   }, []);
 
-  // Split cards into two rows for a nicer effect
-  const midpoint = Math.ceil(cards.length / 2);
-  const row1 = cards.slice(0, midpoint);
-  const row2 = cards.slice(midpoint);
-
   return (
     <section
-      ref={sectionRef}
       className="section-padding bg-white overflow-hidden"
       onMouseEnter={() => setPaused(true)}
       onMouseLeave={() => setPaused(false)}
@@ -299,12 +246,26 @@ export default function Testimonials() {
         </div>
       </div>
 
-      {/* Marquee rows — full bleed for seamless scroll */}
-      <div className="space-y-6">
-        <MarqueeRow cards={row1} direction="left" duration={45} paused={paused} />
-        {row2.length > 0 && (
-          <MarqueeRow cards={row2} direction="right" duration={50} paused={paused} />
-        )}
+      {/* Scrolling marquee */}
+      <div className="relative">
+        {/* Fade edges */}
+        <div className="pointer-events-none absolute inset-y-0 left-0 w-16 sm:w-24 z-10 bg-gradient-to-r from-white to-transparent" />
+        <div className="pointer-events-none absolute inset-y-0 right-0 w-16 sm:w-24 z-10 bg-gradient-to-l from-white to-transparent" />
+
+        <div
+          className="marquee-track"
+          data-direction="left"
+          data-paused={paused ? "true" : "false"}
+          style={{ "--marquee-duration": "45s" } as React.CSSProperties}
+        >
+          {cards.map((t) => (
+            <ReviewCard key={t.id} t={t} />
+          ))}
+          {/* Duplicate for seamless loop */}
+          {cards.map((t) => (
+            <ReviewCard key={`dup-${t.id}`} t={t} />
+          ))}
+        </div>
       </div>
     </section>
   );
