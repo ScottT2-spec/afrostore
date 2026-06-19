@@ -146,10 +146,11 @@ export default function ShopPage() {
   const [showSortMenu, setShowSortMenu] = useState(false);
   const [mobileFilters, setMobileFilters] = useState(false);
   const [addedToCart, setAddedToCart] = useState<string | null>(null);
+  const cartKey = `afrostore_cart_${slug}`;
   const [cart, setCart] = useState<Array<{ productId: string; quantity: number; product: Product }>>(() => {
     if (typeof window === "undefined") return [];
     try {
-      const saved = localStorage.getItem("afrostore_cart");
+      const saved = localStorage.getItem(cartKey);
       if (saved) { const parsed = JSON.parse(saved); if (Array.isArray(parsed)) return parsed; }
     } catch { /* ignore */ }
     return [];
@@ -219,7 +220,8 @@ export default function ShopPage() {
   // Save cart to localStorage
   useEffect(() => {
     if (storeData) {
-      localStorage.setItem("afrostore_cart", JSON.stringify(cart));
+      localStorage.setItem(cartKey, JSON.stringify(cart));
+      localStorage.setItem("afrostore_cart_active_slug", slug);
       localStorage.setItem("afrostore_storeId", storeData.store.id);
       localStorage.setItem("afrostore_storeSlug", storeData.store.slug);
       localStorage.setItem("afrostore_storeName", storeData.store.name);

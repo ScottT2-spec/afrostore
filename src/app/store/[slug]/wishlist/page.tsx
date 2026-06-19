@@ -112,15 +112,17 @@ export default function WishlistPage() {
       });
     }
     localStorage.setItem(cartKey, JSON.stringify(cart));
-    // Also update the afrostore_cart format used by the store page
-    const afroCart = JSON.parse(localStorage.getItem("afrostore_cart") || "[]");
+    // Also update the store-scoped cart used by the store page
+    const storeCartKey = `afrostore_cart_${slug}`;
+    const afroCart = JSON.parse(localStorage.getItem(storeCartKey) || "[]");
     const existingAfro = afroCart.find((item: any) => item.productId === product.id);
     if (existingAfro) {
       existingAfro.quantity += 1;
     } else {
       afroCart.push({ productId: product.id, quantity: 1, product });
     }
-    localStorage.setItem("afrostore_cart", JSON.stringify(afroCart));
+    localStorage.setItem(storeCartKey, JSON.stringify(afroCart));
+    localStorage.setItem("afrostore_cart_active_slug", slug as string);
 
     setAddedToCart(product.id);
     setTimeout(() => setAddedToCart(null), 1500);

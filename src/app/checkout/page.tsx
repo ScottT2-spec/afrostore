@@ -93,16 +93,21 @@ export default function CheckoutPage() {
   const router = useRouter();
 
   // Load cart + store info from localStorage (set by storefront)
+  const [activeSlug] = useState(() => {
+    if (typeof window === "undefined") return "";
+    return localStorage.getItem("afrostore_cart_active_slug") || "";
+  });
+  const cartKey = activeSlug ? `afrostore_cart_${activeSlug}` : "afrostore_cart";
   const [cart, setCart] = useState<CartItem[]>(() => {
     if (typeof window === "undefined") return [];
     try {
-      const saved = localStorage.getItem("afrostore_cart");
+      const saved = localStorage.getItem(cartKey);
       if (saved) { const parsed = JSON.parse(saved); if (Array.isArray(parsed)) return parsed; }
     } catch { /* ignore */ }
     return [];
   });
   const [storeId, setStoreId] = useState("");
-  const [storeSlug, setStoreSlug] = useState("");
+  const [storeSlug, setStoreSlug] = useState(activeSlug);
   const [storeName, setStoreName] = useState("");
   const [currency, setCurrency] = useState("NGN");
   const [deliveryZones, setDeliveryZones] = useState<DeliveryZone[]>([]);
@@ -154,7 +159,7 @@ export default function CheckoutPage() {
         }
         return item;
       }).filter((item) => item.quantity > 0);
-      localStorage.setItem("afrostore_cart", JSON.stringify(updated));
+      localStorage.setItem(cartKey, JSON.stringify(updated));
       return updated;
     });
   };
@@ -162,7 +167,7 @@ export default function CheckoutPage() {
   const removeItem = (productId: string) => {
     setCart((prev) => {
       const updated = prev.filter((i) => i.productId !== productId);
-      localStorage.setItem("afrostore_cart", JSON.stringify(updated));
+      localStorage.setItem(cartKey, JSON.stringify(updated));
       return updated;
     });
   };
@@ -218,7 +223,7 @@ export default function CheckoutPage() {
       // 2. If pay on delivery, we're done
       if (paymentMethod === "COD") {
         // Clear cart
-        localStorage.removeItem("afrostore_cart");
+        localStorage.removeItem(cartKey);
         setCart([]);
         setOrderSuccess({ orderNumber: order.orderNumber, orderId: order.id });
         setPlacing(false);
@@ -240,7 +245,7 @@ export default function CheckoutPage() {
 
       if (payJson.success && payJson.data?.paymentUrl) {
         // Clear cart
-        localStorage.removeItem("afrostore_cart");
+        localStorage.removeItem(cartKey);
         setCart([]);
         // Redirect to payment page
         window.location.href = payJson.data.paymentUrl;
@@ -248,7 +253,7 @@ export default function CheckoutPage() {
       }
 
       // Payment init failed but order was created — show partial success
-      localStorage.removeItem("afrostore_cart");
+      localStorage.removeItem(cartKey);
       setCart([]);
       setOrderSuccess({ orderNumber: order.orderNumber, orderId: order.id });
       setOrderError("Order placed but payment initialization failed. Please contact the store to complete payment.");
@@ -267,7 +272,7 @@ export default function CheckoutPage() {
     const orderNum = params.get("order");
     if (status === "success" && orderNum) {
       setOrderSuccess({ orderNumber: orderNum, orderId: "" });
-      localStorage.removeItem("afrostore_cart");
+      localStorage.removeItem(cartKey);
       setCart([]);
     }
   }, []);
