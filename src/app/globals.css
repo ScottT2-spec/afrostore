@@ -72,6 +72,18 @@
     0% { box-shadow: 0 0 20px rgba(27, 43, 75, 0.1); }
     100% { box-shadow: 0 0 40px rgba(245, 183, 49, 0.3); }
   }
+
+  @keyframes marqueeLeft {
+    0% { transform: translateX(0); }
+    100% { transform: translateX(-50%); }
+  }
+  @keyframes marqueeRight {
+    0% { transform: translateX(-50%); }
+    100% { transform: translateX(0); }
+  }
+
+  --animate-marquee-left: marqueeLeft 45s linear infinite;
+  --animate-marquee-right: marqueeRight 50s linear infinite;
 }
 
 @layer base {
