@@ -86,29 +86,36 @@ export default function TeamPage() {
           <h3 className="text-sm font-bold text-surface-900 mb-3">Add Team Member</h3>
           <p className="text-xs text-surface-500 mb-3">The person must already have an AfroStore account.</p>
           {error && <div className="rounded-xl bg-accent-50 border border-accent-200 px-4 py-3 text-sm text-accent-700 mb-3">{error}</div>}
-          <div className="flex flex-col sm:flex-row gap-3">
-            <div className="flex-1 relative">
-              <Mail className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-surface-400" />
+          <div className="space-y-3">
+            {/* Email input — full width */}
+            <div>
+              <label className="block text-xs font-medium text-surface-600 mb-1.5">Email address</label>
               <input
                 value={inviteEmail}
                 onChange={(e) => setInviteEmail(e.target.value)}
-                placeholder="Enter member's email address"
+                placeholder="e.g. teammate@example.com"
                 type="email"
-                className="w-full rounded-xl border border-surface-200 bg-white pl-10 pr-4 py-2.5 text-sm text-surface-900 placeholder:text-surface-400 transition-all duration-200 focus:border-brand-500 focus:outline-none focus:ring-4 focus:ring-brand-500/10"
+                className="w-full rounded-xl border border-surface-200 bg-white px-4 py-3 text-sm text-surface-900 placeholder:text-surface-400 transition-all duration-200 focus:border-brand-500 focus:outline-none focus:ring-4 focus:ring-brand-500/10"
                 autoFocus
                 onKeyDown={(e) => e.key === "Enter" && inviteMember()}
               />
             </div>
-            <select value={inviteRole} onChange={(e) => setInviteRole(e.target.value as typeof inviteRole)} className="input-field py-2.5 w-36">
-              <option value="ADMIN">Admin</option>
-              <option value="STAFF">Staff</option>
-              <option value="VIEWER">Viewer</option>
-            </select>
-            <div className="flex gap-2">
-              <button onClick={inviteMember} disabled={saving || !inviteEmail.trim()} className="btn-primary text-sm py-2.5 px-5">
-                {saving ? <Loader2 className="h-4 w-4 animate-spin" /> : "Add"}
-              </button>
-              <button onClick={() => { setShowInvite(false); setError(""); }} className="btn-secondary text-sm py-2.5 px-4">Cancel</button>
+            {/* Role + actions */}
+            <div className="flex items-center gap-3">
+              <div>
+                <label className="block text-xs font-medium text-surface-600 mb-1.5">Role</label>
+                <select value={inviteRole} onChange={(e) => setInviteRole(e.target.value as typeof inviteRole)} className="input-field py-3 w-40">
+                  <option value="ADMIN">Admin</option>
+                  <option value="STAFF">Staff</option>
+                  <option value="VIEWER">Viewer</option>
+                </select>
+              </div>
+              <div className="flex gap-2 ml-auto self-end">
+                <button onClick={inviteMember} disabled={saving || !inviteEmail.trim()} className="btn-primary text-sm py-3 px-6">
+                  {saving ? <Loader2 className="h-4 w-4 animate-spin" /> : "Add Member"}
+                </button>
+                <button onClick={() => { setShowInvite(false); setError(""); }} className="btn-secondary text-sm py-3 px-4">Cancel</button>
+              </div>
             </div>
           </div>
         </div>
