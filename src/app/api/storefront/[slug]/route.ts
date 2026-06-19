@@ -78,6 +78,7 @@ export async function GET(req: NextRequest, { params }: Params) {
       categories,
       deliveryZones,
       pages,
+      activeTheme,
     ] = await Promise.all([
       prisma.storeSettings.findUnique({
         where: { storeId: store.id },
@@ -159,6 +160,15 @@ export async function GET(req: NextRequest, { params }: Params) {
         },
         orderBy: { position: "asc" },
       }),
+
+      prisma.storeTheme.findFirst({
+        where: { storeId: store.id, isActive: true },
+        include: {
+          theme: {
+            select: { id: true, name: true, slug: true, config: true },
+          },
+        },
+      }),
     ]);
 
     // Clean product output — strip cost price and other merchant-only fields
@@ -201,6 +211,17 @@ export async function GET(req: NextRequest, { params }: Params) {
       categories,
       deliveryZones,
       pages,
+      theme: activeTheme
+        ? {
+            id: activeTheme.theme.id,
+            name: activeTheme.theme.name,
+            slug: activeTheme.theme.slug,
+            config: {
+              ...(activeTheme.theme.config as Record<string, unknown>),
+              ...(activeTheme.customConfig as Record<string, unknown> | null),
+            },
+          }
+        : null,
     });
   } catch (err) {
     console.error("Storefront fetch error:", err);

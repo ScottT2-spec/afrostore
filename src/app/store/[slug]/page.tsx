@@ -28,6 +28,7 @@ import {
   ImageIcon,
 } from "lucide-react";
 import { RenderBlocks, type BuilderBlock } from "@/components/storefront/BlockRenderer";
+import { ThemeProvider, type ThemeData } from "@/components/storefront/ThemeProvider";
 import { useWishlist } from "@/hooks/useWishlist";
 
 /* ───────── Types ───────── */
@@ -114,6 +115,7 @@ interface StoreData {
   categories: StoreCategory[];
   deliveryZones: DeliveryZone[];
   pages: Array<{ id: string; title: string; slug: string; type: string; content?: unknown }>;
+  theme: ThemeData | null;
 }
 
 interface CartItem {
@@ -289,6 +291,7 @@ export default function StorePage() {
     .sort((a, b) => (navPageOrder[a.type] ?? 99) - (navPageOrder[b.type] ?? 99));
 
   return (
+    <ThemeProvider theme={data.theme}>
     <div className="min-h-screen bg-white">
       {/* Announcement Bar */}
       <div className="bg-brand-600 text-white text-center py-2 text-xs font-medium">
@@ -301,7 +304,7 @@ export default function StorePage() {
       </div>
 
       {/* Store Nav */}
-      <header className="sticky top-0 z-40 bg-white border-b border-surface-200 shadow-sm">
+      <header className="sticky top-0 z-40 bg-white border-b border-surface-200 shadow-sm themed-header">
         <div className="max-w-6xl mx-auto flex h-16 items-center justify-between px-4 sm:px-6">
           <div className="flex items-center gap-4">
             <button onClick={() => setMobileMenu(!mobileMenu)} className="sm:hidden p-2 -ml-2 text-surface-600">
@@ -607,7 +610,7 @@ export default function StorePage() {
       )}
 
       {/* Footer */}
-      <footer className="bg-surface-900 text-surface-400 py-12">
+      <footer className="bg-surface-900 text-surface-400 py-12 themed-footer">
         <div className="max-w-6xl mx-auto px-4 sm:px-6">
           <div className="grid grid-cols-2 sm:grid-cols-4 gap-8">
             <div className="col-span-2 sm:col-span-1">
@@ -765,5 +768,6 @@ export default function StorePage() {
         </div>
       )}
     </div>
+    </ThemeProvider>
   );
 }

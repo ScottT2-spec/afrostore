@@ -75,6 +75,26 @@
 }
 
 @layer base {
+  :root {
+    --theme-primary: #1B2B4B;
+    --theme-primary-light: #3d6499;
+    --theme-primary-dark: #0F1C32;
+    --theme-primary-shadow: rgba(27, 43, 75, 0.25);
+    --theme-primary-shadow-hover: rgba(27, 43, 75, 0.3);
+    --theme-accent: #F5B731;
+    --theme-header-bg: #ffffff;
+    --theme-header-text: #171717;
+    --theme-footer-bg: #171717;
+    --theme-footer-text: #a3a3a3;
+    --theme-button-bg: #1B2B4B;
+    --theme-button-text: #ffffff;
+    --theme-sale-badge: #ef4444;
+    --theme-font-heading: 'Plus Jakarta Sans', system-ui, sans-serif;
+    --theme-font-body: 'Inter', system-ui, sans-serif;
+    --theme-max-width: 72rem;
+    --theme-product-columns: 4;
+  }
+
   html {
     scroll-behavior: smooth;
     -webkit-font-smoothing: antialiased;
@@ -83,6 +103,45 @@
 
   body {
     font-family: var(--font-sans);
+  }
+
+  /* Theme root: remap brand palette to theme variables so all existing
+     Tailwind brand-* utilities (bg-brand-600, text-brand-700, etc.)
+     automatically pick up the active theme's colors */
+  .theme-root {
+    font-family: var(--theme-font-body);
+
+    --color-brand-600: var(--theme-primary);
+    --color-brand-700: var(--theme-primary-dark);
+    --color-brand-500: var(--theme-primary-light);
+    --color-brand-400: var(--theme-primary-light);
+    --color-brand-100: color-mix(in srgb, var(--theme-primary) 10%, white);
+    --color-brand-50: color-mix(in srgb, var(--theme-primary) 5%, white);
+
+    --color-accent-500: var(--theme-accent);
+    --color-accent-400: var(--theme-accent);
+  }
+
+  .theme-root h1,
+  .theme-root h2,
+  .theme-root h3,
+  .theme-root h4,
+  .theme-root h5,
+  .theme-root h6,
+  .theme-root .font-display {
+    font-family: var(--theme-font-heading);
+  }
+
+  /* Theme-aware footer */
+  .theme-root footer.themed-footer {
+    background-color: var(--theme-footer-bg);
+    color: var(--theme-footer-text);
+  }
+
+  /* Theme-aware header */
+  .theme-root header.themed-header {
+    background-color: var(--theme-header-bg);
+    color: var(--theme-header-text);
   }
 
   ::selection {
@@ -111,7 +170,14 @@
   }
 
   .btn-primary {
-    @apply inline-flex items-center justify-center gap-2 rounded-xl bg-brand-600 px-6 py-3 text-sm font-semibold text-white shadow-lg shadow-brand-600/25 transition-all duration-200 hover:bg-brand-700 hover:shadow-xl hover:shadow-brand-600/30 hover:-translate-y-0.5 active:translate-y-0 disabled:opacity-50 disabled:cursor-not-allowed;
+    @apply inline-flex items-center justify-center gap-2 rounded-xl px-6 py-3 text-sm font-semibold shadow-lg transition-all duration-200 hover:shadow-xl hover:-translate-y-0.5 active:translate-y-0 disabled:opacity-50 disabled:cursor-not-allowed;
+    background-color: var(--theme-button-bg);
+    color: var(--theme-button-text);
+    --tw-shadow-color: var(--theme-primary-shadow);
+  }
+  .btn-primary:hover {
+    background-color: var(--theme-primary-dark);
+    --tw-shadow-color: var(--theme-primary-shadow-hover);
   }
 
   .btn-secondary {

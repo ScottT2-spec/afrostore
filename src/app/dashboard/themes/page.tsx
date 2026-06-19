@@ -6,7 +6,8 @@ import { useStore } from "@/context/StoreContext";
 import { api } from "@/lib/api-client";
 import { Eye, CheckCircle2, Star, Loader2, Palette } from "lucide-react";
 
-interface Theme { id: string; name: string; slug: string; description?: string; thumbnail?: string; category: string; industry?: string; isPremium: boolean; isFeatured: boolean; isInstalled?: boolean; isActive?: boolean; }
+interface ThemeConfig { colors?: { primary?: string; accent?: string; headerBg?: string; footerBg?: string }; fonts?: { heading?: string; body?: string } }
+interface Theme { id: string; name: string; slug: string; description?: string; thumbnail?: string; category: string; industry?: string; isPremium: boolean; isFeatured: boolean; isInstalled?: boolean; isActive?: boolean; config?: ThemeConfig; customConfig?: ThemeConfig | null; }
 interface ThemesData { themes: Theme[]; activeThemeId: string | null; }
 
 export default function ThemesPage() {
@@ -60,7 +61,18 @@ export default function ThemesPage() {
                       <h3 className="text-sm font-bold text-surface-900">{theme.name}</h3>
                       {theme.isPremium && <span className="text-[10px] font-semibold text-accent-600 bg-accent-50 px-2 py-0.5 rounded-full">Premium</span>}
                     </div>
-                    <p className="text-xs text-surface-500 mb-3">{theme.category}{theme.industry ? ` · ${theme.industry}` : ""}</p>
+                    <p className="text-xs text-surface-500 mb-2">{theme.category}{theme.industry ? ` · ${theme.industry}` : ""}</p>
+                    {/* Color swatches */}
+                    {theme.config?.colors && (
+                      <div className="flex items-center gap-1 mb-3">
+                        {[theme.config.colors.primary, theme.config.colors.accent, theme.config.colors.headerBg, theme.config.colors.footerBg].filter(Boolean).map((color, i) => (
+                          <div key={i} className="h-5 w-5 rounded-full border border-surface-200 shadow-sm" style={{ backgroundColor: color }} title={color} />
+                        ))}
+                        {theme.config.fonts?.heading && (
+                          <span className="text-[10px] text-surface-400 ml-1">{theme.config.fonts.heading}</span>
+                        )}
+                      </div>
+                    )}
                     {isActive ? (
                       <span className="inline-flex items-center gap-1.5 text-xs font-semibold text-green-700"><CheckCircle2 className="h-3.5 w-3.5" />Active</span>
                     ) : (

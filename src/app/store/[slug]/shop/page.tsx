@@ -19,6 +19,7 @@ import {
   ArrowUpDown,
   ChevronLeft,
 } from "lucide-react";
+import { ThemeProvider, type ThemeData } from "@/components/storefront/ThemeProvider";
 import { useWishlist } from "@/hooks/useWishlist";
 
 /* ───────── Types ───────── */
@@ -72,6 +73,7 @@ interface StoreData {
   pagination: { page: number; limit: number; total: number; pages: number };
   categories: StoreCategory[];
   pages: Array<{ id: string; title: string; slug: string; type: string }>;
+  theme: ThemeData | null;
 }
 
 /* ───────── Helpers ───────── */
@@ -299,9 +301,10 @@ export default function ShopPage() {
   const activeCategoryName = categories.find((c) => c.slug === selectedCategory)?.name;
 
   return (
+    <ThemeProvider theme={storeData.theme}>
     <div className="min-h-screen bg-surface-50">
       {/* ── Nav ── */}
-      <header className="sticky top-0 z-40 bg-white border-b border-surface-200 shadow-sm">
+      <header className="sticky top-0 z-40 bg-white border-b border-surface-200 shadow-sm themed-header">
         <div className="max-w-6xl mx-auto flex h-16 items-center justify-between px-4 sm:px-6">
           <div className="flex items-center gap-4">
             <button onClick={() => setMobileMenu(!mobileMenu)} className="sm:hidden p-2 -ml-2 text-surface-600">
@@ -681,7 +684,7 @@ export default function ShopPage() {
       </div>
 
       {/* ── Footer ── */}
-      <footer className="bg-surface-900 text-surface-400 py-10">
+      <footer className="bg-surface-900 text-surface-400 py-10 themed-footer">
         <div className="max-w-6xl mx-auto px-4 sm:px-6 flex flex-col sm:flex-row items-center justify-between gap-4 text-xs">
           <div className="flex items-center gap-2">
             {store.logo ? (
@@ -709,5 +712,6 @@ export default function ShopPage() {
         </div>
       )}
     </div>
+    </ThemeProvider>
   );
 }
