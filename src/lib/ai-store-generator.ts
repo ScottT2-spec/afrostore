@@ -241,7 +241,7 @@ function buildHomePage(data: Record<string, any>, storeName: string, storeSlug: 
       heading: brand.heroHeading || `Welcome to ${storeName}`,
       subheading: brand.heroSubheading || brand.tagline || "Discover amazing products",
       buttonText: brand.ctaText || "Shop Now",
-      buttonHref: `/store/${storeSlug}#shop`,
+      buttonHref: `/store/${storeSlug}/shop`,
       secondaryButtonText: "Learn More",
       secondaryButtonHref: `/store/${storeSlug}/about`,
       badge: brand.tagline || `✨ Welcome to ${storeName}`,
@@ -444,7 +444,7 @@ function buildAboutPage(data: Record<string, any>, storeName: string, storeSlug:
       title: "Ready to Experience the Difference?",
       subtitle: "Join thousands of happy customers today",
       buttonText: "Browse Products",
-      buttonHref: `/store/${storeSlug}#shop`,
+      buttonHref: `/store/${storeSlug}/shop`,
       bgColor: "dark",
     })
   );

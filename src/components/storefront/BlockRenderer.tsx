@@ -181,6 +181,14 @@ function HeroBlock({ props }: { props: Record<string, unknown> }) {
   const bgStyle = (props.bgStyle as string) || "gradient";
   const bgColor = (props.bgColor as string) || "#1B2B4B";
   const textColor = (props.textColor as string) || "#fff";
+  const storeSlug = useContext(StoreSlugContext);
+
+  // Resolve broken/placeholder hrefs — "#", "#shop", "/store/slug#shop" → actual shop page
+  function resolveHref(raw: string | undefined): string {
+    if (!raw || raw === "#") return storeSlug ? `/store/${storeSlug}/shop` : "#";
+    if (raw === "#shop" || raw.endsWith("#shop")) return storeSlug ? `/store/${storeSlug}/shop` : raw;
+    return raw;
+  }
 
   const bgClasses: Record<string, string> = {
     gradient: "bg-gradient-to-br from-brand-950 via-brand-900 to-brand-800",
@@ -226,7 +234,7 @@ function HeroBlock({ props }: { props: Record<string, unknown> }) {
           <AnimateIn delay={0.3}>
             <div className="flex flex-col sm:flex-row items-center justify-center gap-3">
               <a
-                href={(props.buttonHref as string) || "#"}
+                href={resolveHref(props.buttonHref as string)}
                 className={`inline-flex items-center justify-center gap-2 rounded-2xl font-bold py-3.5 px-8 transition-all duration-300 hover:-translate-y-0.5 ${
                   isLight
                     ? "bg-brand-600 text-white shadow-xl shadow-brand-600/25 hover:bg-brand-700"
@@ -507,8 +515,6 @@ function TestimonialsBlock({ props }: { props: Record<string, unknown> }) {
   const isDark = bg === "dark";
   const storeSlug = useContext(StoreSlugContext);
   const [allItems, setAllItems] = useState(hardcodedItems);
-  const [paused, setPaused] = useState(false);
-
   // Fetch approved reviews and merge with hardcoded items
   useEffect(() => {
     if (!storeSlug) return;
@@ -551,8 +557,7 @@ function TestimonialsBlock({ props }: { props: Record<string, unknown> }) {
     <div
       className="rounded-3xl py-12 overflow-hidden"
       style={{ backgroundColor: bgStyle }}
-      onMouseEnter={() => setPaused(true)}
-      onMouseLeave={() => setPaused(false)}
+      
     >
       <AnimateIn>
         {(props.title as string) && (
@@ -576,7 +581,7 @@ function TestimonialsBlock({ props }: { props: Record<string, unknown> }) {
         <div
           className="marquee-track"
           data-direction="left"
-          data-paused={paused ? "true" : "false"}
+          
           style={{ "--marquee-duration": "40s" } as React.CSSProperties}
         >
           {allItems.map((item, i) => (
