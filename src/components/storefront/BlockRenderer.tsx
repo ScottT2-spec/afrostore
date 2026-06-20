@@ -476,48 +476,117 @@ function TestimonialBlock({ props }: { props: Record<string, unknown> }) {
   );
 }
 
-/* ── Testimonials Grid (multiple) ────────────────────────────── */
-function TestimonialsBlock({ props }: { props: Record<string, unknown> }) {
-  const items = (props.items as Array<{ name: string; text: string; role?: string; rating?: number }>) || [];
-  const bg = (props.bgColor as string) || "transparent";
+/* ── Testimonials Grid (multiple) — with live approved reviews + marquee ── */
+function TestimonialCard({ item, isDark }: { item: { name: string; text: string; role?: string; rating?: number }; isDark: boolean }) {
   return (
-    <div className="rounded-3xl py-12 px-6 sm:px-10" style={{ backgroundColor: bg === "surface" ? "#FAFAFA" : bg === "dark" ? "#0F172A" : "transparent" }}>
+    <div className={`flex-shrink-0 w-[320px] sm:w-[360px] rounded-2xl p-6 ${isDark ? "bg-white/5 border border-white/10" : "bg-white border border-surface-100 shadow-sm hover:shadow-lg"} transition-shadow duration-300`}>
+      <div className="flex gap-0.5 mb-3">
+        {Array.from({ length: 5 }).map((_, j) => (
+          <Star key={j} className={`h-4 w-4 ${j < (item.rating || 5) ? "text-amber-400 fill-amber-400" : "text-surface-200"}`} />
+        ))}
+      </div>
+      <p className={`text-sm leading-relaxed mb-4 line-clamp-4 ${isDark ? "text-white/70" : "text-surface-600"}`}>
+        &ldquo;{item.text}&rdquo;
+      </p>
+      <div className="flex items-center gap-3 mt-auto">
+        <div className="h-9 w-9 rounded-full bg-gradient-to-br from-brand-600 to-accent-400 flex items-center justify-center text-white text-xs font-bold flex-shrink-0">
+          {item.name.split(" ").map(n => n[0]).join("").slice(0, 2).toUpperCase()}
+        </div>
+        <div className="min-w-0">
+          <p className={`text-sm font-semibold truncate ${isDark ? "text-white" : "text-surface-900"}`}>{item.name}</p>
+          <p className={`text-xs truncate ${isDark ? "text-white/50" : "text-surface-400"}`}>{item.role || "Customer"}</p>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function TestimonialsBlock({ props }: { props: Record<string, unknown> }) {
+  const hardcodedItems = (props.items as Array<{ name: string; text: string; role?: string; rating?: number }>) || [];
+  const bg = (props.bgColor as string) || "transparent";
+  const isDark = bg === "dark";
+  const storeSlug = useContext(StoreSlugContext);
+  const [allItems, setAllItems] = useState(hardcodedItems);
+  const [paused, setPaused] = useState(false);
+
+  // Fetch approved reviews and merge with hardcoded items
+  useEffect(() => {
+    if (!storeSlug) return;
+    let cancelled = false;
+
+    async function fetchReviews() {
+      try {
+        const res = await fetch(`/api/storefront/${storeSlug}/reviews?limit=30`);
+        if (!res.ok) return;
+        const json = await res.json();
+        if (cancelled) return;
+
+        if (json.success && json.data?.items && json.data.items.length > 0) {
+          const reviewCards = json.data.items
+            .filter((r: { body?: string; title?: string }) => r.body || r.title)
+            .map((r: { name: string; body?: string; title?: string; rating: number; isVerified: boolean }) => ({
+              name: r.name,
+              text: r.body || r.title || "Great product!",
+              role: r.isVerified ? "Verified Buyer" : "Customer",
+              rating: r.rating,
+            }));
+
+          if (reviewCards.length > 0) {
+            // Approved reviews first, then hardcoded ones
+            setAllItems([...reviewCards, ...hardcodedItems]);
+          }
+        }
+      } catch {
+        // Keep hardcoded items on error
+      }
+    }
+
+    fetchReviews();
+    return () => { cancelled = true; };
+  }, [storeSlug]);
+
+  const bgStyle = bg === "surface" ? "#FAFAFA" : isDark ? "#0F172A" : "transparent";
+
+  return (
+    <div
+      className="rounded-3xl py-12 overflow-hidden"
+      style={{ backgroundColor: bgStyle }}
+      onMouseEnter={() => setPaused(true)}
+      onMouseLeave={() => setPaused(false)}
+    >
       <AnimateIn>
         {(props.title as string) && (
-          <div className="text-center mb-10">
-            <h3 className={`text-2xl sm:text-3xl font-display font-extrabold ${bg === "dark" ? "text-white" : "text-surface-900"}`}>
+          <div className="text-center mb-10 px-6 sm:px-10">
+            <h3 className={`text-2xl sm:text-3xl font-display font-extrabold ${isDark ? "text-white" : "text-surface-900"}`}>
               {props.title as string}
             </h3>
             {(props.subtitle as string) && (
-              <p className={`mt-2 ${bg === "dark" ? "text-white/60" : "text-surface-500"}`}>{props.subtitle as string}</p>
+              <p className={`mt-2 ${isDark ? "text-white/60" : "text-surface-500"}`}>{props.subtitle as string}</p>
             )}
           </div>
         )}
       </AnimateIn>
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
-        {items.map((item, i) => (
-          <AnimateIn key={i} delay={i * 0.1}>
-            <div className={`rounded-2xl p-6 h-full ${bg === "dark" ? "bg-white/5 border border-white/10" : "bg-white border border-surface-100 shadow-sm hover:shadow-lg"} transition-shadow duration-300`}>
-              <div className="flex gap-0.5 mb-3">
-                {Array.from({ length: 5 }).map((_, j) => (
-                  <Star key={j} className={`h-4 w-4 ${j < (item.rating || 5) ? "text-amber-400 fill-amber-400" : "text-surface-200"}`} />
-                ))}
-              </div>
-              <p className={`text-sm leading-relaxed mb-4 ${bg === "dark" ? "text-white/70" : "text-surface-600"}`}>
-                &ldquo;{item.text}&rdquo;
-              </p>
-              <div className="flex items-center gap-3 mt-auto">
-                <div className="h-9 w-9 rounded-full bg-gradient-to-br from-brand-600 to-accent-400 flex items-center justify-center text-white text-xs font-bold">
-                  {item.name.split(" ").map(n => n[0]).join("").slice(0, 2).toUpperCase()}
-                </div>
-                <div>
-                  <p className={`text-sm font-semibold ${bg === "dark" ? "text-white" : "text-surface-900"}`}>{item.name}</p>
-                  <p className={`text-xs ${bg === "dark" ? "text-white/50" : "text-surface-400"}`}>{item.role || "Customer"}</p>
-                </div>
-              </div>
-            </div>
-          </AnimateIn>
-        ))}
+
+      {/* Scrolling marquee */}
+      <div className="relative">
+        {/* Fade edges */}
+        <div className={`pointer-events-none absolute inset-y-0 left-0 w-12 sm:w-20 z-10 bg-gradient-to-r ${isDark ? "from-[#0F172A]" : bg === "surface" ? "from-[#FAFAFA]" : "from-white"} to-transparent`} />
+        <div className={`pointer-events-none absolute inset-y-0 right-0 w-12 sm:w-20 z-10 bg-gradient-to-l ${isDark ? "from-[#0F172A]" : bg === "surface" ? "from-[#FAFAFA]" : "from-white"} to-transparent`} />
+
+        <div
+          className="marquee-track"
+          data-direction="left"
+          data-paused={paused ? "true" : "false"}
+          style={{ "--marquee-duration": "40s" } as React.CSSProperties}
+        >
+          {allItems.map((item, i) => (
+            <TestimonialCard key={`a-${i}`} item={item} isDark={isDark} />
+          ))}
+          {/* Duplicate for seamless loop */}
+          {allItems.map((item, i) => (
+            <TestimonialCard key={`b-${i}`} item={item} isDark={isDark} />
+          ))}
+        </div>
       </div>
     </div>
   );
