@@ -115,7 +115,7 @@ export default function Hero() {
 
           {/* Hero Image/Preview */}
           <div className="animate-fade-up mt-12 sm:mt-16 w-full max-w-5xl">
-            <div className="relative rounded-2xl border border-white/10 bg-white/5 p-2 backdrop-blur-sm shadow-2xl">
+            <div className="relative rounded-2xl border border-white/10 bg-white/5 p-2 backdrop-blur-sm shadow-2xl animate-float" style={{ animationDuration: "5s" }}>
               <div className="rounded-xl bg-gradient-to-br from-surface-900 to-surface-800 overflow-hidden">
                 {/* Browser chrome */}
                 <div className="flex items-center gap-2 border-b border-white/10 px-4 py-3">
