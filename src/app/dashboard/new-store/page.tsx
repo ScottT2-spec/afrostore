@@ -107,6 +107,7 @@ export default function NewStorePage() {
         businessType: selectedType || "general",
         country: "NG",
         currency: "NGN",
+        logo: storeLogo || undefined,
       });
 
       if (!storeRes.success || !storeRes.data) {
