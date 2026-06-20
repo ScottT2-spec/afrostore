@@ -582,7 +582,7 @@ function TestimonialsBlock({ props }: { props: Record<string, unknown> }) {
           className="marquee-track"
           data-direction="left"
           
-          style={{ "--marquee-duration": "40s" } as React.CSSProperties}
+          style={{ "--marquee-duration": "25s" } as React.CSSProperties}
         >
           {allItems.map((item, i) => (
             <TestimonialCard key={`a-${i}`} item={item} isDark={isDark} />
