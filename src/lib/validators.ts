@@ -24,6 +24,7 @@ export const createStoreSchema = z.object({
   country: z.string().default("NG"),
   currency: z.string().default("NGN"),
   themeId: z.string().optional(),
+  logo: z.string().url().optional(),
 });
 
 export const updateStoreSchema = z.object({

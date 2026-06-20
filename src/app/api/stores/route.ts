@@ -40,7 +40,7 @@ export async function POST(req: NextRequest) {
       return validationError(parsed.error.flatten().fieldErrors);
     }
 
-    const { name, description, businessType, country, currency } = parsed.data;
+    const { name, description, businessType, country, currency, logo } = parsed.data;
 
     // Check store limit based on plan (simplified)
     const storeCount = await prisma.store.count({ where: { ownerId: user.id } });
@@ -73,6 +73,7 @@ export async function POST(req: NextRequest) {
         businessType,
         country,
         currency,
+        logo: logo || undefined,
         settings: {
           create: {
             allowGuestCheckout: true,
