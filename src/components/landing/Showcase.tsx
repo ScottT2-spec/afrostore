@@ -1,17 +1,92 @@
 "use client";
 
-import { ArrowRight, ShoppingBag, Star, Package, Heart, Search, ChevronRight, Plus, Check, Minus, Eye, Globe } from "lucide-react";
+import Image from "next/image";
 import Link from "next/link";
+import {
+  ArrowRight, ShoppingBag, Star, Heart, Search, ChevronRight,
+  Plus, Minus, Eye, Globe, Package,
+} from "lucide-react";
 
 /**
  * Showcase Section
- * 
- * Woman on the left with phone overlapping her on the right (like the Prokip reference).
- * Desktop mockup on the far left. Both devices show storefronts.
- * Phone shows a grocery store with add-to-cart interaction.
+ *
+ * Layout: Desktop storefront on the left. Woman (real photo) with phone
+ * overlapping her on the right — like the Prokip reference.
+ * Both devices show storefronts. Phone shows grocery store with real
+ * product images and add-to-cart UI.
  */
 
-// ─── Desktop Storefront Mockup ──────────────────────────────
+// ─── Real product images (Unsplash, free to use) ────────────
+
+const PRODUCTS = [
+  {
+    name: "Fresh Avocados",
+    unit: "Per piece",
+    price: "₦800",
+    oldPrice: "₦950",
+    badge: "-15%",
+    badgeColor: "bg-red-500",
+    qty: 2,
+    image: "https://images.unsplash.com/photo-1523049673857-eb18f1d7b578?w=200&h=200&fit=crop&crop=center",
+  },
+  {
+    name: "Ripe Tomatoes",
+    unit: "1kg basket",
+    price: "₦1,200",
+    oldPrice: null,
+    badge: null,
+    badgeColor: "",
+    qty: 1,
+    image: "https://images.unsplash.com/photo-1546470427-0d4db154ceb8?w=200&h=200&fit=crop&crop=center",
+  },
+  {
+    name: "Bell Peppers",
+    unit: "Per piece",
+    price: "₦500",
+    oldPrice: null,
+    badge: null,
+    badgeColor: "",
+    qty: 0,
+    image: "https://images.unsplash.com/photo-1563565375-f3fdfdbefa83?w=200&h=200&fit=crop&crop=center",
+  },
+  {
+    name: "Fresh Carrots",
+    unit: "500g pack",
+    price: "₦650",
+    oldPrice: null,
+    badge: "New",
+    badgeColor: "bg-green-600",
+    qty: 0,
+    image: "https://images.unsplash.com/photo-1598170845058-32b9d6a5da37?w=200&h=200&fit=crop&crop=center",
+  },
+];
+
+// Woman photo — professional African woman, natural hair, confident pose
+const WOMAN_PHOTO = "https://images.unsplash.com/photo-1589156280159-27698a70f29e?w=600&h=800&fit=crop&crop=face";
+
+// Desktop storefront product images
+const STOREFRONT_PRODUCTS = [
+  {
+    name: "Ankara Wrap Dress",
+    price: "₦18,500",
+    badge: "Best Seller",
+    image: "https://images.unsplash.com/photo-1590735213920-68192a487bc2?w=200&h=200&fit=crop&crop=center",
+  },
+  {
+    name: "Beaded Necklace Set",
+    price: "₦12,000",
+    badge: null,
+    image: "https://images.unsplash.com/photo-1611085583191-a3b181a88401?w=200&h=200&fit=crop&crop=center",
+  },
+  {
+    name: "Silk Head Wrap",
+    price: "₦8,500",
+    badge: "New",
+    image: "https://images.unsplash.com/photo-1594938298603-c8148c4dae35?w=200&h=200&fit=crop&crop=center",
+  },
+];
+
+// ─── Desktop Storefront ─────────────────────────────────────
 
 function DesktopMockup() {
   return (
@@ -32,9 +107,8 @@ function DesktopMockup() {
           </div>
         </div>
 
-        {/* Storefront Content */}
         <div className="rounded-b-xl bg-white overflow-hidden">
-          {/* Store Navbar */}
+          {/* Navbar */}
           <div className="flex items-center justify-between px-5 py-3 border-b border-surface-100">
             <div className="flex items-center gap-2">
               <div className="h-7 w-7 rounded-lg bg-gradient-to-br from-purple-600 to-pink-500 flex items-center justify-center">
@@ -47,65 +121,64 @@ function DesktopMockup() {
               <span>New In</span>
               <span>About</span>
               <span className="flex items-center gap-1">
-                <Heart className="h-3 w-3" />
-              </span>
-              <span className="flex items-center gap-1">
                 <ShoppingBag className="h-3 w-3" />
                 <span className="bg-purple-600 text-white text-[8px] rounded-full h-3.5 w-3.5 flex items-center justify-center">3</span>
               </span>
             </div>
           </div>
 
-          {/* Hero Banner */}
+          {/* Hero */}
           <div className="relative bg-gradient-to-r from-purple-900 via-purple-800 to-pink-800 px-6 py-8">
-            <div className="relative z-10">
-              <span className="inline-block text-[9px] font-semibold text-pink-300 bg-pink-500/20 rounded-full px-2.5 py-0.5 mb-2">✨ New Collection</span>
-              <h2 className="text-lg font-bold text-white leading-tight">Summer Elegance<br />Collection 2026</h2>
-              <p className="text-[10px] text-purple-200 mt-1.5 max-w-[200px]">Handcrafted African fashion meets modern style. Free delivery in Lagos.</p>
-              <button className="mt-3 bg-white text-purple-900 text-[10px] font-bold rounded-lg px-4 py-1.5 flex items-center gap-1">
-                Shop Now <ArrowRight className="h-3 w-3" />
-              </button>
-            </div>
-            <div className="absolute right-4 top-1/2 -translate-y-1/2 opacity-20">
-              <div className="h-28 w-28 rounded-full border-2 border-white/30" />
-              <div className="h-20 w-20 rounded-full border-2 border-white/20 absolute top-4 left-4" />
-            </div>
+            <span className="inline-block text-[9px] font-semibold text-pink-300 bg-pink-500/20 rounded-full px-2.5 py-0.5 mb-2">✨ New Collection</span>
+            <h2 className="text-lg font-bold text-white leading-tight">Summer Elegance<br />Collection 2026</h2>
+            <p className="text-[10px] text-purple-200 mt-1.5 max-w-[200px]">Handcrafted African fashion meets modern style. Free delivery in Lagos.</p>
+            <button className="mt-3 bg-white text-purple-900 text-[10px] font-bold rounded-lg px-4 py-1.5 flex items-center gap-1">
+              Shop Now <ArrowRight className="h-3 w-3" />
+            </button>
           </div>
 
-          {/* Product Grid */}
+          {/* Products with real images */}
           <div className="p-4">
             <div className="flex items-center justify-between mb-3">
               <h3 className="text-xs font-bold text-surface-900">Trending Now 🔥</h3>
               <span className="text-[9px] text-purple-600 font-semibold flex items-center gap-0.5">View All <ChevronRight className="h-2.5 w-2.5" /></span>
             </div>
             <div className="grid grid-cols-3 gap-2.5">
-              {[
-                { name: "Ankara Wrap Dress", price: "₦18,500", color: "from-amber-200 to-orange-300", badge: "Best Seller" },
-                { name: "Beaded Necklace Set", price: "₦12,000", color: "from-emerald-200 to-teal-300", badge: null },
-                { name: "Silk Head Wrap", price: "₦8,500", color: "from-rose-200 to-pink-300", badge: "New" },
-              ].map((product, i) => (
+              {STOREFRONT_PRODUCTS.map((product, i) => (
                 <div key={i} className="group">
-                  <div className={`aspect-square rounded-lg bg-gradient-to-br ${product.color} relative overflow-hidden`}>
-                    <div className="absolute inset-0 flex items-center justify-center">
-                      <Package className="h-6 w-6 text-white/40" />
-                    </div>
+                  <div className="aspect-square rounded-lg overflow-hidden relative bg-surface-100">
+                    <Image
+                      src={product.image}
+                      alt={product.name}
+                      width={200}
+                      height={200}
+                      className="w-full h-full object-cover"
+                    />
                     {product.badge && (
                       <span className={`absolute top-1 left-1 text-[7px] font-bold px-1.5 py-0.5 rounded-md ${
                         product.badge === "Best Seller" ? "bg-amber-500 text-white" : "bg-purple-600 text-white"
                       }`}>{product.badge}</span>
                     )}
+                    <button className="absolute top-1 right-1 h-5 w-5 rounded-full bg-white/80 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
+                      <Heart className="h-2.5 w-2.5 text-surface-600" />
+                    </button>
                   </div>
                   <p className="text-[9px] font-semibold text-surface-800 mt-1.5 truncate">{product.name}</p>
-                  <span className="text-[9px] font-bold text-surface-900">{product.price}</span>
+                  <div className="flex items-center gap-1">
+                    <span className="text-[9px] font-bold text-surface-900">{product.price}</span>
+                    <div className="flex items-center gap-0.5">
+                      {[1,2,3,4,5].map(s => <Star key={s} className="h-2 w-2 fill-amber-400 text-amber-400" />)}
+                    </div>
+                  </div>
                 </div>
               ))}
             </div>
           </div>
 
-          {/* Trust Bar */}
+          {/* Trust */}
           <div className="flex items-center justify-center gap-6 py-2.5 bg-surface-50 border-t border-surface-100">
-            {["🔒 Secure Pay", "🚚 Fast Delivery", "💬 WhatsApp Support"].map((badge, i) => (
-              <span key={i} className="text-[8px] text-surface-500 font-medium">{badge}</span>
+            {["🔒 Secure Pay", "🚚 Fast Delivery", "💬 WhatsApp Support"].map((b, i) => (
+              <span key={i} className="text-[8px] text-surface-500 font-medium">{b}</span>
             ))}
           </div>
         </div>
@@ -114,17 +187,14 @@ function DesktopMockup() {
   );
 }
 
-// ─── Phone Storefront Mockup (Grocery Store with Add to Cart) ─
+// ─── Phone Storefront (Grocery — real product photos) ───────
 
 function PhoneMockup() {
   return (
     <div className="relative w-[210px] sm:w-[230px]">
-      {/* Phone Frame */}
       <div className="rounded-[28px] border-[3px] border-surface-700 bg-surface-900 p-1 shadow-2xl">
-        {/* Notch */}
         <div className="absolute top-0 left-1/2 -translate-x-1/2 w-20 h-5 bg-surface-900 rounded-b-2xl z-10" />
-        
-        {/* Screen */}
+
         <div className="rounded-[24px] bg-white overflow-hidden">
           {/* Status Bar */}
           <div className="flex items-center justify-between px-4 pt-6 pb-1.5 bg-green-700">
@@ -139,7 +209,7 @@ function PhoneMockup() {
           <div className="bg-green-700 px-4 pb-3 pt-0.5">
             <div className="flex items-center justify-between mb-2">
               <div className="flex items-center gap-2">
-                <div className="h-7 w-7 rounded-full bg-white/20 flex items-center justify-center text-[10px]">🥑</div>
+                <div className="h-7 w-7 rounded-full bg-white/20 flex items-center justify-center text-[10px] font-bold text-white">FM</div>
                 <div>
                   <p className="text-[10px] font-bold text-white">FreshMart Lagos</p>
                   <p className="text-[7px] text-green-200">🟢 Open · Delivers in 30min</p>
@@ -150,7 +220,6 @@ function PhoneMockup() {
                 <div className="absolute -top-1 -right-1.5 h-3.5 w-3.5 rounded-full bg-red-500 flex items-center justify-center text-[7px] font-bold text-white border border-green-700">4</div>
               </div>
             </div>
-            {/* Search */}
             <div className="flex items-center gap-2 bg-white/15 rounded-lg px-3 py-1.5">
               <Search className="h-3 w-3 text-white/60" />
               <span className="text-[9px] text-white/50">Search for groceries...</span>
@@ -161,9 +230,9 @@ function PhoneMockup() {
           <div className="flex gap-1.5 px-3 py-2.5 overflow-hidden">
             {[
               { label: "All", active: false },
-              { label: "🥬 Vegetables", active: true },
-              { label: "🍎 Fruits", active: false },
-              { label: "🥩 Meat", active: false },
+              { label: "Vegetables", active: true },
+              { label: "Fruits", active: false },
+              { label: "Meat", active: false },
             ].map((cat, i) => (
               <span key={i} className={`text-[8px] font-semibold px-2.5 py-1 rounded-full whitespace-nowrap ${
                 cat.active ? "bg-green-600 text-white" : "bg-surface-100 text-surface-600"
@@ -171,90 +240,56 @@ function PhoneMockup() {
             ))}
           </div>
 
-          {/* Products - Grid with Add to Cart */}
+          {/* Product Grid with REAL images */}
           <div className="px-3 pb-2">
             <div className="grid grid-cols-2 gap-2">
-              {/* Product 1 - Added to cart state */}
-              <div className="rounded-xl border border-surface-100 bg-white p-2 shadow-sm">
-                <div className="aspect-square rounded-lg bg-gradient-to-br from-green-100 to-emerald-200 flex items-center justify-center mb-1.5 relative">
-                  <span className="text-2xl">🥑</span>
-                  <span className="absolute top-1 right-1 text-[7px] font-bold bg-red-500 text-white px-1 py-0.5 rounded">-15%</span>
-                </div>
-                <p className="text-[9px] font-semibold text-surface-800">Avocado</p>
-                <p className="text-[7px] text-surface-400">Per piece</p>
-                <div className="flex items-center justify-between mt-1">
-                  <div>
-                    <span className="text-[9px] font-bold text-surface-900">₦800</span>
-                    <span className="text-[7px] text-surface-400 line-through ml-1">₦950</span>
+              {PRODUCTS.map((product, i) => (
+                <div key={i} className="rounded-xl border border-surface-100 bg-white p-2 shadow-sm">
+                  <div className="aspect-square rounded-lg overflow-hidden relative bg-surface-50 mb-1.5">
+                    <Image
+                      src={product.image}
+                      alt={product.name}
+                      width={200}
+                      height={200}
+                      className="w-full h-full object-cover"
+                    />
+                    {product.badge && (
+                      <span className={`absolute top-1 ${product.badgeColor === "bg-green-600" ? "left-1" : "right-1"} text-[7px] font-bold ${product.badgeColor} text-white px-1 py-0.5 rounded`}>
+                        {product.badge}
+                      </span>
+                    )}
                   </div>
-                  {/* Quantity control - already in cart */}
-                  <div className="flex items-center gap-0.5">
-                    <button className="h-5 w-5 rounded-md bg-green-600 flex items-center justify-center">
-                      <Minus className="h-2.5 w-2.5 text-white" />
-                    </button>
-                    <span className="text-[9px] font-bold text-surface-900 w-4 text-center">2</span>
-                    <button className="h-5 w-5 rounded-md bg-green-600 flex items-center justify-center">
-                      <Plus className="h-2.5 w-2.5 text-white" />
-                    </button>
-                  </div>
-                </div>
-              </div>
-
-              {/* Product 2 - Added to cart */}
-              <div className="rounded-xl border border-surface-100 bg-white p-2 shadow-sm">
-                <div className="aspect-square rounded-lg bg-gradient-to-br from-red-100 to-orange-200 flex items-center justify-center mb-1.5">
-                  <span className="text-2xl">🍅</span>
-                </div>
-                <p className="text-[9px] font-semibold text-surface-800">Tomatoes</p>
-                <p className="text-[7px] text-surface-400">1kg basket</p>
-                <div className="flex items-center justify-between mt-1">
-                  <span className="text-[9px] font-bold text-surface-900">₦1,200</span>
-                  <div className="flex items-center gap-0.5">
-                    <button className="h-5 w-5 rounded-md bg-green-600 flex items-center justify-center">
-                      <Minus className="h-2.5 w-2.5 text-white" />
-                    </button>
-                    <span className="text-[9px] font-bold text-surface-900 w-4 text-center">1</span>
-                    <button className="h-5 w-5 rounded-md bg-green-600 flex items-center justify-center">
-                      <Plus className="h-2.5 w-2.5 text-white" />
-                    </button>
+                  <p className="text-[9px] font-semibold text-surface-800">{product.name}</p>
+                  <p className="text-[7px] text-surface-400">{product.unit}</p>
+                  <div className="flex items-center justify-between mt-1">
+                    <div>
+                      <span className="text-[9px] font-bold text-surface-900">{product.price}</span>
+                      {product.oldPrice && (
+                        <span className="text-[7px] text-surface-400 line-through ml-1">{product.oldPrice}</span>
+                      )}
+                    </div>
+                    {product.qty > 0 ? (
+                      <div className="flex items-center gap-0.5">
+                        <button className="h-5 w-5 rounded-md bg-green-600 flex items-center justify-center">
+                          <Minus className="h-2.5 w-2.5 text-white" />
+                        </button>
+                        <span className="text-[9px] font-bold text-surface-900 w-4 text-center">{product.qty}</span>
+                        <button className="h-5 w-5 rounded-md bg-green-600 flex items-center justify-center">
+                          <Plus className="h-2.5 w-2.5 text-white" />
+                        </button>
+                      </div>
+                    ) : (
+                      <button className="h-5 w-5 rounded-md bg-green-100 flex items-center justify-center">
+                        <Plus className="h-2.5 w-2.5 text-green-700" />
+                      </button>
+                    )}
                   </div>
                 </div>
-              </div>
-
-              {/* Product 3 - Not in cart yet */}
-              <div className="rounded-xl border border-surface-100 bg-white p-2 shadow-sm">
-                <div className="aspect-square rounded-lg bg-gradient-to-br from-yellow-100 to-amber-200 flex items-center justify-center mb-1.5">
-                  <span className="text-2xl">🫑</span>
-                </div>
-                <p className="text-[9px] font-semibold text-surface-800">Bell Pepper</p>
-                <p className="text-[7px] text-surface-400">Per piece</p>
-                <div className="flex items-center justify-between mt-1">
-                  <span className="text-[9px] font-bold text-surface-900">₦500</span>
-                  <button className="h-5 w-5 rounded-md bg-green-100 flex items-center justify-center">
-                    <Plus className="h-2.5 w-2.5 text-green-700" />
-                  </button>
-                </div>
-              </div>
-
-              {/* Product 4 - Not in cart */}
-              <div className="rounded-xl border border-surface-100 bg-white p-2 shadow-sm">
-                <div className="aspect-square rounded-lg bg-gradient-to-br from-orange-100 to-yellow-200 flex items-center justify-center mb-1.5 relative">
-                  <span className="text-2xl">🥕</span>
-                  <span className="absolute top-1 left-1 text-[7px] font-bold bg-green-600 text-white px-1 py-0.5 rounded">New</span>
-                </div>
-                <p className="text-[9px] font-semibold text-surface-800">Carrots</p>
-                <p className="text-[7px] text-surface-400">500g pack</p>
-                <div className="flex items-center justify-between mt-1">
-                  <span className="text-[9px] font-bold text-surface-900">₦650</span>
-                  <button className="h-5 w-5 rounded-md bg-green-100 flex items-center justify-center">
-                    <Plus className="h-2.5 w-2.5 text-green-700" />
-                  </button>
-                </div>
-              </div>
+              ))}
             </div>
           </div>
 
-          {/* Floating Cart Summary */}
+          {/* Cart Summary */}
           <div className="mx-3 mb-2 rounded-xl bg-green-700 p-2.5 flex items-center justify-between">
             <div className="flex items-center gap-2">
               <div className="h-7 w-7 rounded-lg bg-white/20 flex items-center justify-center">
@@ -276,118 +311,12 @@ function PhoneMockup() {
   );
 }
 
-// ─── Woman SVG Illustration ─────────────────────────────────
-
-function WomanIllustration() {
-  return (
-    <svg viewBox="0 0 320 500" className="w-[260px] sm:w-[300px] lg:w-[340px] drop-shadow-2xl" fill="none" xmlns="http://www.w3.org/2000/svg">
-      {/* Hair - Voluminous Afro */}
-      <ellipse cx="160" cy="105" rx="85" ry="95" fill="#1a1a2e" />
-      <ellipse cx="160" cy="95" rx="90" ry="78" fill="#1a1a2e" />
-      <circle cx="85" cy="78" r="28" fill="#1a1a2e" />
-      <circle cx="235" cy="78" r="28" fill="#1a1a2e" />
-      <circle cx="75" cy="108" r="22" fill="#1a1a2e" />
-      <circle cx="245" cy="108" r="22" fill="#1a1a2e" />
-      <circle cx="105" cy="48" r="24" fill="#1a1a2e" />
-      <circle cx="215" cy="48" r="24" fill="#1a1a2e" />
-      <circle cx="160" cy="35" r="22" fill="#1a1a2e" />
-      <circle cx="130" cy="38" r="20" fill="#1a1a2e" />
-      <circle cx="190" cy="38" r="20" fill="#1a1a2e" />
-      <circle cx="95" cy="55" r="18" fill="#1a1a2e" />
-      <circle cx="225" cy="55" r="18" fill="#1a1a2e" />
-
-      {/* Face */}
-      <ellipse cx="160" cy="130" rx="56" ry="65" fill="#8B5E3C" />
-      
-      {/* Forehead highlight */}
-      <ellipse cx="160" cy="100" rx="35" ry="20" fill="#9B6E4C" opacity="0.3" />
-      
-      {/* Eyes */}
-      <ellipse cx="138" cy="120" rx="9" ry="5.5" fill="white" />
-      <ellipse cx="182" cy="120" rx="9" ry="5.5" fill="white" />
-      <circle cx="140" cy="120" r="4" fill="#1a1a2e" />
-      <circle cx="184" cy="120" r="4" fill="#1a1a2e" />
-      <circle cx="141.5" cy="119" r="1.5" fill="white" />
-      <circle cx="185.5" cy="119" r="1.5" fill="white" />
-      
-      {/* Eyelashes */}
-      <path d="M128 116 Q138 112 148 116" stroke="#1a1a2e" strokeWidth="1.5" strokeLinecap="round" fill="none" />
-      <path d="M172 116 Q182 112 192 116" stroke="#1a1a2e" strokeWidth="1.5" strokeLinecap="round" fill="none" />
-      
-      {/* Eyebrows */}
-      <path d="M125 108 Q138 102 150 108" stroke="#1a1a2e" strokeWidth="2.8" strokeLinecap="round" fill="none" />
-      <path d="M170 108 Q182 102 195 108" stroke="#1a1a2e" strokeWidth="2.8" strokeLinecap="round" fill="none" />
-      
-      {/* Nose */}
-      <path d="M153 132 Q160 140 167 132" stroke="#7A5231" strokeWidth="1.8" strokeLinecap="round" fill="none" />
-      
-      {/* Smile - Wide and warm */}
-      <path d="M135 150 Q160 168 185 150" stroke="#6B4226" strokeWidth="2.5" strokeLinecap="round" fill="none" />
-      <path d="M139 150 Q160 164 181 150" fill="#C0392B" opacity="0.5" />
-      {/* Teeth hint */}
-      <path d="M145 151 L175 151" stroke="white" strokeWidth="2" opacity="0.7" />
-      
-      {/* Dimples */}
-      <circle cx="130" cy="148" r="2" fill="#7A5231" opacity="0.3" />
-      <circle cx="190" cy="148" r="2" fill="#7A5231" opacity="0.3" />
-      
-      {/* Earrings - Gold hoops */}
-      <ellipse cx="103" cy="140" rx="5" ry="8" stroke="#F5B731" strokeWidth="2.5" fill="none" />
-      <ellipse cx="217" cy="140" rx="5" ry="8" stroke="#F5B731" strokeWidth="2.5" fill="none" />
-      
-      {/* Neck */}
-      <path d="M140 185 Q160 195 180 185 L178 210 L142 210 Z" fill="#8B5E3C" />
-      
-      {/* Necklace */}
-      <path d="M130 200 Q160 215 190 200" stroke="#F5B731" strokeWidth="2" fill="none" />
-      <circle cx="160" cy="213" r="5" fill="#F5B731" />
-      <circle cx="160" cy="213" r="2.5" fill="#D4941F" />
-      
-      {/* Body - Cream/Beige Blazer */}
-      <path d="M85 210 Q90 200 140 205 L160 205 L180 205 Q230 200 235 210 L255 380 Q255 395 240 395 L80 395 Q65 395 65 380 Z" fill="#E8D5B7" />
-      
-      {/* Blazer shadow/lapels */}
-      <path d="M140 205 L152 260 L160 205" fill="#D4C4A5" />
-      <path d="M180 205 L168 260 L160 205" fill="#D4C4A5" />
-      
-      {/* Inner top - White */}
-      <path d="M148 205 L152 260 L168 260 L172 205" fill="white" />
-      
-      {/* Blazer pocket detail */}
-      <rect x="100" y="280" width="30" height="2" rx="1" fill="#D4C4A5" />
-      <rect x="190" y="280" width="30" height="2" rx="1" fill="#D4C4A5" />
-      
-      {/* Blazer buttons */}
-      <circle cx="160" cy="270" r="3" fill="#C4B498" />
-      <circle cx="160" cy="290" r="3" fill="#C4B498" />
-      
-      {/* Right arm - Thumbs up */}
-      <path d="M235 215 Q260 250 255 300" stroke="#E8D5B7" strokeWidth="28" strokeLinecap="round" fill="none" />
-      {/* Hand / Fist */}
-      <rect x="240" y="285" width="22" height="25" rx="10" fill="#8B5E3C" />
-      {/* Thumb pointing up */}
-      <rect x="246" y="260" width="13" height="30" rx="6.5" fill="#8B5E3C" />
-      {/* Thumb highlight */}
-      <rect x="249" y="264" width="6" height="15" rx="3" fill="#9B6E4C" opacity="0.3" />
-      
-      {/* Left arm - relaxed */}
-      <path d="M85 215 Q60 260 72 340" stroke="#E8D5B7" strokeWidth="28" strokeLinecap="round" fill="none" />
-      <ellipse cx="72" cy="345" r="12" ry="10" fill="#8B5E3C" />
-
-      {/* Glasses - stylish rectangular */}
-      <rect x="124" y="112" rx="4" width="30" height="18" stroke="#1a1a2e" strokeWidth="2" fill="none" opacity="0.15" />
-      <rect x="166" y="112" rx="4" width="30" height="18" stroke="#1a1a2e" strokeWidth="2" fill="none" opacity="0.15" />
-      <line x1="154" y1="120" x2="166" y2="120" stroke="#1a1a2e" strokeWidth="1.5" opacity="0.15" />
-    </svg>
-  );
-}
-
-// ─── Main Showcase Section ──────────────────────────────────
+// ─── Main Section ───────────────────────────────────────────
 
 export default function Showcase() {
   return (
     <section className="relative overflow-hidden bg-gradient-to-br from-brand-950 via-[#0a1628] to-brand-900 py-20 sm:py-28">
-      {/* Background Effects */}
+      {/* Background */}
       <div className="absolute inset-0">
         <div className="absolute top-0 left-1/4 h-[500px] w-[500px] rounded-full bg-brand-600/8 blur-[120px]" />
         <div className="absolute bottom-0 right-1/4 h-[400px] w-[400px] rounded-full bg-accent-500/8 blur-[100px]" />
@@ -399,7 +328,7 @@ export default function Showcase() {
       </div>
 
       <div className="container-max relative px-4 sm:px-6 lg:px-8">
-        {/* Section Header */}
+        {/* Header */}
         <div className="text-center mb-16">
           <div className="inline-flex items-center gap-2 rounded-full border border-accent-500/20 bg-accent-500/10 px-4 py-1.5 text-sm text-accent-300 mb-6">
             <Eye className="h-3.5 w-3.5" />
@@ -412,11 +341,11 @@ export default function Showcase() {
             </span>
           </h2>
           <p className="mt-4 text-lg text-brand-200/70 max-w-2xl mx-auto">
-            Your customers get a stunning shopping experience whether they&apos;re on desktop or phone. Every store looks amazing out of the box.
+            Your customers get a stunning shopping experience whether they&apos;re on desktop or mobile. Every store looks amazing out of the box.
           </p>
         </div>
 
-        {/* Main Layout: Desktop on left, Woman + Phone on right */}
+        {/* Layout: Desktop left | Woman + Phone right */}
         <div className="flex flex-col lg:flex-row items-center justify-center gap-10 lg:gap-16">
           
           {/* Desktop Mockup */}
@@ -430,20 +359,41 @@ export default function Showcase() {
             </div>
           </div>
 
-          {/* Woman + Phone Composite (Prokip style) */}
-          <div className="relative animate-fade-up flex-shrink-0" style={{ animationDelay: "0.25s" }}>
-            {/* Woman - base layer */}
-            <div className="relative">
-              <WomanIllustration />
-            </div>
-            
-            {/* Phone - overlapping the woman on the right */}
-            <div className="absolute top-8 -right-16 sm:-right-12 z-10">
-              <PhoneMockup />
+          {/* Woman + Phone — Prokip-style composition */}
+          <div className="relative animate-fade-up flex-shrink-0 mt-8 lg:mt-0" style={{ animationDelay: "0.25s" }}>
+            {/* 
+              Woman is the base layer, phone overlaps her on the right.
+              The woman photo is cropped from chest up, positioned left.
+              The phone sits on her right side, partially overlapping.
+            */}
+            <div className="relative w-[320px] sm:w-[380px] h-[420px] sm:h-[480px]">
+              
+              {/* Woman Photo — left side, foreground */}
+              <div className="absolute bottom-0 left-0 w-[220px] sm:w-[260px] h-[380px] sm:h-[440px] z-10">
+                <div className="relative w-full h-full rounded-2xl overflow-hidden">
+                  <Image
+                    src={WOMAN_PHOTO}
+                    alt="African woman entrepreneur"
+                    fill
+                    className="object-cover object-top"
+                    sizes="260px"
+                    priority
+                  />
+                  {/* Gradient fade at bottom so she blends into the dark bg */}
+                  <div className="absolute inset-x-0 bottom-0 h-24 bg-gradient-to-t from-[#0a1628] to-transparent" />
+                  {/* Subtle gradient on the right edge so phone overlaps cleanly */}
+                  <div className="absolute inset-y-0 right-0 w-16 bg-gradient-to-l from-[#0a1628]/60 to-transparent" />
+                </div>
+              </div>
+
+              {/* Phone — right side, overlapping the woman */}
+              <div className="absolute top-4 right-0 z-20">
+                <PhoneMockup />
+              </div>
             </div>
 
-            {/* Label under the composite */}
-            <div className="absolute -bottom-8 left-1/2 -translate-x-1/2">
+            {/* Label */}
+            <div className="absolute -bottom-4 left-1/2 -translate-x-1/2">
               <span className="inline-flex items-center gap-1.5 bg-white/10 backdrop-blur-sm border border-white/10 rounded-full px-4 py-1.5 text-[11px] font-semibold text-white/80 whitespace-nowrap">
                 <ShoppingBag className="h-3 w-3 text-green-400" />
                 Mobile Experience
