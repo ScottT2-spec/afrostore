@@ -1,5 +1,6 @@
 "use client";
 
+import { useState } from "react";
 import Link from "next/link";
 import {
   ArrowRight,
@@ -10,6 +11,7 @@ import {
   Zap,
   Star,
   CheckCircle2,
+  X,
 } from "lucide-react";
 
 const trustedBy = [
@@ -18,7 +20,20 @@ const trustedBy = [
   "15 countries",
 ];
 
+// Replace with your actual demo video URL (YouTube or Vimeo)
+const DEMO_VIDEO_URL = "https://www.youtube.com/embed/dQw4w9WgXcQ";
+
+function getEmbedUrl(url: string): string {
+  const ytMatch = url.match(/(?:youtube\.com\/watch\?v=|youtu\.be\/|youtube\.com\/embed\/)([a-zA-Z0-9_-]+)/);
+  if (ytMatch) return `https://www.youtube.com/embed/${ytMatch[1]}?autoplay=1&rel=0`;
+  const vmMatch = url.match(/vimeo\.com\/(\d+)/);
+  if (vmMatch) return `https://player.vimeo.com/video/${vmMatch[1]}?autoplay=1`;
+  return url;
+}
+
 export default function Hero() {
+  const [showDemo, setShowDemo] = useState(false);
+
   return (
     <section className="relative overflow-hidden bg-gradient-to-b from-brand-950 via-brand-900 to-brand-800 pt-16">
       {/* Background elements */}
@@ -95,8 +110,11 @@ export default function Hero() {
               Create Your Store Free
               <ArrowRight className="h-5 w-5 transition-transform group-hover:translate-x-1" />
             </Link>
-            <button className="group inline-flex items-center gap-2.5 rounded-2xl border border-white/20 px-8 py-4 text-base font-semibold text-white transition-all duration-300 hover:bg-white/10">
-              <div className="flex h-8 w-8 items-center justify-center rounded-full bg-white/20">
+            <button
+              onClick={() => setShowDemo(true)}
+              className="group inline-flex items-center gap-2.5 rounded-2xl border border-white/20 px-8 py-4 text-base font-semibold text-white transition-all duration-300 hover:bg-white/10"
+            >
+              <div className="flex h-8 w-8 items-center justify-center rounded-full bg-white/20 transition-colors group-hover:bg-white/30">
                 <Play className="h-4 w-4 text-white ml-0.5" />
               </div>
               Watch Demo
@@ -281,6 +299,35 @@ export default function Hero() {
           </div>
         </div>
       </div>
+      {/* Demo Video Modal */}
+      {showDemo && (
+        <div
+          className="fixed inset-0 z-50 flex items-center justify-center p-4 sm:p-6"
+          onClick={() => setShowDemo(false)}
+        >
+          <div className="absolute inset-0 bg-black/80 backdrop-blur-sm" />
+          <div
+            className="relative w-full max-w-4xl animate-fade-up"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <button
+              onClick={() => setShowDemo(false)}
+              className="absolute -top-12 right-0 flex items-center gap-2 text-sm text-white/70 hover:text-white transition-colors"
+            >
+              Close <X className="h-5 w-5" />
+            </button>
+            <div className="rounded-2xl overflow-hidden shadow-2xl bg-black aspect-video">
+              <iframe
+                src={getEmbedUrl(DEMO_VIDEO_URL)}
+                className="w-full h-full"
+                allow="autoplay; fullscreen; picture-in-picture"
+                allowFullScreen
+                title="AfroStore Demo"
+              />
+            </div>
+          </div>
+        </div>
+      )}
     </section>
   );
 }

@@ -60,11 +60,23 @@ export async function getStoreContext(req: NextRequest, storeId: string) {
   return { user, store, error: null };
 }
 
+/**
+ * Generate a collision-resistant order number.
+ * Format: AF-{timestamp36}-{random4}  →  e.g. "AF-LZ4K8W-9F3A"
+ * 
+ * The timestamp component (base-36 encoded ms since epoch) ensures
+ * uniqueness across time, while the random suffix handles concurrent
+ * orders within the same millisecond. This gives effectively unlimited
+ * unique order numbers without DB sequence dependency.
+ * 
+ * The caller should still handle the (astronomically unlikely) unique
+ * constraint violation with a single retry.
+ */
 export function generateOrderNumber(): string {
   const prefix = "AF";
-  const num = Math.floor(1000 + Math.random() * 9000);
-  const suffix = generateId().slice(0, 4).toUpperCase();
-  return `${prefix}-${num}${suffix}`;
+  const timestamp = Date.now().toString(36).toUpperCase();
+  const random = Math.random().toString(36).substring(2, 6).toUpperCase();
+  return `${prefix}-${timestamp}-${random}`;
 }
 
 export function generateSubdomain(name: string): string {

@@ -169,8 +169,12 @@ export async function POST(req: NextRequest, { params }: Params) {
       });
     }
 
-    // Create order
-    const order = await prisma.$transaction(async (tx) => {
+    // Create order (with retry on unlikely order number collision)
+    let attempts = 0;
+    const createOrder = async (): Promise<any> => {
+      attempts++;
+      try {
+        return await prisma.$transaction(async (tx) => {
       const ord = await tx.order.create({
         data: {
           storeId,
@@ -227,7 +231,17 @@ export async function POST(req: NextRequest, { params }: Params) {
       }
 
       return ord;
-    });
+        });
+      } catch (err: any) {
+        // Retry on unique constraint violation (order number collision)
+        if (attempts < 3 && err.code === "P2002" && err.meta?.target?.includes("orderNumber")) {
+          return createOrder();
+        }
+        throw err;
+      }
+    };
+
+    const order = await createOrder();
 
     await logAudit({
       storeId, action: "CREATE", entity: "order",
