@@ -1,14 +1,19 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import { useRouter } from "next/navigation";
 import DashboardHeader from "@/components/dashboard/DashboardHeader";
 import { useStore } from "@/context/StoreContext";
 import { api } from "@/lib/api-client";
-import { Store, Globe, Bell, Shield, Truck, MessageCircle, Save, Loader2 } from "lucide-react";
+import { Store, Globe, Bell, Shield, Truck, MessageCircle, Save, Loader2, AlertTriangle, Trash2 } from "lucide-react";
 
 export default function SettingsPage() {
-  const { currentStore } = useStore();
+  const router = useRouter();
+  const { currentStore, stores, setCurrentStore } = useStore();
   const [loading, setLoading] = useState(true);
+  const [deleteConfirm, setDeleteConfirm] = useState("");
+  const [deleting, setDeleting] = useState(false);
+  const [deleteError, setDeleteError] = useState("");
   const [saving, setSaving] = useState(false);
   const [saved, setSaved] = useState(false);
   const [settings, setSettings] = useState({
@@ -165,6 +170,66 @@ export default function SettingsPage() {
           <button onClick={handleSave} disabled={saving} className="btn-primary">
             {saving ? <Loader2 className="h-4 w-4 animate-spin" /> : <><Save className="h-4 w-4" />{saved ? "Saved!" : "Save Settings"}</>}
           </button>
+        </div>
+
+        {/* Danger Zone */}
+        <div className="rounded-2xl border-2 border-red-200 bg-red-50/50 p-6 mt-8">
+          <h3 className="text-base font-bold text-red-700 mb-1 flex items-center gap-2">
+            <AlertTriangle className="h-5 w-5" />
+            Danger Zone
+          </h3>
+          <p className="text-sm text-red-600/70 mb-4">
+            Permanently delete this store and all its data — products, orders, customers, pages, everything. This action cannot be undone.
+          </p>
+
+          <div className="space-y-3">
+            <div>
+              <label className="block text-sm font-medium text-red-700 mb-1">
+                Type <span className="font-bold">{currentStore?.name}</span> to confirm
+              </label>
+              <input
+                value={deleteConfirm}
+                onChange={(e) => setDeleteConfirm(e.target.value)}
+                className="w-full rounded-xl border border-red-300 bg-white px-4 py-2.5 text-sm text-surface-900 placeholder-surface-400 focus:border-red-500 focus:outline-none focus:ring-2 focus:ring-red-500/20"
+                placeholder={currentStore?.name || "Store name"}
+              />
+            </div>
+
+            {deleteError && (
+              <div className="rounded-xl bg-red-100 border border-red-300 px-4 py-2.5 text-sm text-red-700">{deleteError}</div>
+            )}
+
+            <button
+              onClick={async () => {
+                if (!currentStore) return;
+                if (deleteConfirm !== currentStore.name) {
+                  setDeleteError("Store name doesn't match. Please type it exactly.");
+                  return;
+                }
+                setDeleting(true);
+                setDeleteError("");
+                const res = await api.delete(`/api/stores/${currentStore.id}`);
+                if (res.success) {
+                  // Switch to another store or go to new-store page
+                  const remaining = stores.filter((s) => s.id !== currentStore.id);
+                  if (remaining.length > 0) {
+                    setCurrentStore(remaining[0]);
+                    router.push("/dashboard");
+                  } else {
+                    router.push("/dashboard/new-store");
+                  }
+                } else {
+                  setDeleteError(res.error || "Failed to delete store");
+                  setDeleting(false);
+                }
+              }}
+              disabled={deleting || deleteConfirm !== currentStore?.name}
+              className="flex items-center gap-2 rounded-xl bg-red-600 px-4 py-2.5 text-sm font-semibold text-white transition-colors hover:bg-red-700 disabled:opacity-40 disabled:cursor-not-allowed"
+            >
+              {deleting ? <Loader2 className="h-4 w-4 animate-spin" /> : <Trash2 className="h-4 w-4" />}
+              {deleting ? "Deleting..." : "Delete This Store"}
+            </button>
+          </div>
         </div>
       </div>
     </>
