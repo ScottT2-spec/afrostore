@@ -280,28 +280,10 @@ export default function Showcase() {
           </p>
         </div>
 
-        {/* Desktop + Phone side by side */}
-        <div className="flex flex-col lg:flex-row items-center justify-center gap-8 lg:gap-12">
-          {/* Desktop */}
-          <div className="relative animate-fade-up" style={{ animationDelay: "0.1s" }}>
+        {/* Desktop only */}
+        <div className="flex items-center justify-center">
+          <div className="relative animate-fade-up">
             <DesktopMockup />
-            <div className="absolute -bottom-8 left-1/2 -translate-x-1/2">
-              <span className="inline-flex items-center gap-1.5 bg-white/10 backdrop-blur-sm border border-white/10 rounded-full px-4 py-1.5 text-[11px] font-semibold text-white/80">
-                <ShoppingBag className="h-3 w-3 text-accent-400" />
-                Customer Storefront
-              </span>
-            </div>
-          </div>
-
-          {/* Phone */}
-          <div className="relative animate-fade-up" style={{ animationDelay: "0.25s" }}>
-            <PhoneMockup />
-            <div className="absolute -bottom-8 left-1/2 -translate-x-1/2">
-              <span className="inline-flex items-center gap-1.5 bg-white/10 backdrop-blur-sm border border-white/10 rounded-full px-4 py-1.5 text-[11px] font-semibold text-white/80 whitespace-nowrap">
-                <BarChart3 className="h-3 w-3 text-brand-400" />
-                Merchant Dashboard
-              </span>
-            </div>
           </div>
         </div>
 
