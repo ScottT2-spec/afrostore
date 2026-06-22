@@ -3,86 +3,82 @@
 import Image from "next/image";
 import Link from "next/link";
 import {
-  ArrowRight, ShoppingBag, Star, Heart, Search, ChevronRight,
-  Plus, Minus, Eye, Globe, Package,
+  ArrowRight, ShoppingBag, Star, Heart, Search,
+  Eye, Globe, Plus, ChevronRight,
 } from "lucide-react";
 
 /**
- * Showcase Section
+ * Showcase Section — Prokip-style layout
  *
- * Layout: Desktop storefront on the left. Woman (real photo) with phone
- * overlapping her on the right — like the Prokip reference.
- * Both devices show storefronts. Phone shows grocery store with real
- * product images and add-to-cart UI.
+ * The woman is a real photo that BLENDS into the dark background (no box).
+ * The phone sits beside/behind her right shoulder showing a product shop.
+ * Desktop storefront mockup on the left side.
+ * No cart UI — just a clean product browsing experience.
  */
 
-// ─── Real product images (Unsplash, free to use) ────────────
+// Woman — professional African woman. Use a portrait-style photo.
+// This should ideally be replaced with a proper cutout PNG in /public/images/
+const WOMAN_PHOTO = "https://images.unsplash.com/photo-1589156280159-27698a70f29e?w=600&h=900&fit=crop&crop=face&q=80";
 
-const PRODUCTS = [
-  {
-    name: "Fresh Avocados",
-    unit: "Per piece",
-    price: "₦800",
-    oldPrice: "₦950",
-    badge: "-15%",
-    badgeColor: "bg-red-500",
-    qty: 2,
-    image: "https://images.unsplash.com/photo-1523049673857-eb18f1d7b578?w=200&h=200&fit=crop&crop=center",
-  },
-  {
-    name: "Ripe Tomatoes",
-    unit: "1kg basket",
-    price: "₦1,200",
-    oldPrice: null,
-    badge: null,
-    badgeColor: "",
-    qty: 1,
-    image: "https://images.unsplash.com/photo-1546470427-0d4db154ceb8?w=200&h=200&fit=crop&crop=center",
-  },
-  {
-    name: "Bell Peppers",
-    unit: "Per piece",
-    price: "₦500",
-    oldPrice: null,
-    badge: null,
-    badgeColor: "",
-    qty: 0,
-    image: "https://images.unsplash.com/photo-1563565375-f3fdfdbefa83?w=200&h=200&fit=crop&crop=center",
-  },
-  {
-    name: "Fresh Carrots",
-    unit: "500g pack",
-    price: "₦650",
-    oldPrice: null,
-    badge: "New",
-    badgeColor: "bg-green-600",
-    qty: 0,
-    image: "https://images.unsplash.com/photo-1598170845058-32b9d6a5da37?w=200&h=200&fit=crop&crop=center",
-  },
-];
-
-// Woman photo — professional African woman, natural hair, confident pose
-const WOMAN_PHOTO = "https://images.unsplash.com/photo-1589156280159-27698a70f29e?w=600&h=800&fit=crop&crop=face";
-
-// Desktop storefront product images
-const STOREFRONT_PRODUCTS = [
+// Desktop storefront products
+const DESKTOP_PRODUCTS = [
   {
     name: "Ankara Wrap Dress",
     price: "₦18,500",
     badge: "Best Seller",
-    image: "https://images.unsplash.com/photo-1590735213920-68192a487bc2?w=200&h=200&fit=crop&crop=center",
+    image: "https://images.unsplash.com/photo-1590735213920-68192a487bc2?w=200&h=200&fit=crop",
   },
   {
     name: "Beaded Necklace Set",
     price: "₦12,000",
     badge: null,
-    image: "https://images.unsplash.com/photo-1611085583191-a3b181a88401?w=200&h=200&fit=crop&crop=center",
+    image: "https://images.unsplash.com/photo-1611085583191-a3b181a88401?w=200&h=200&fit=crop",
   },
   {
     name: "Silk Head Wrap",
     price: "₦8,500",
     badge: "New",
-    image: "https://images.unsplash.com/photo-1594938298603-c8148c4dae35?w=200&h=200&fit=crop&crop=center",
+    image: "https://images.unsplash.com/photo-1594938298603-c8148c4dae35?w=200&h=200&fit=crop",
+  },
+];
+
+// Phone storefront products — grocery shop (browsing, not cart)
+const PHONE_PRODUCTS = [
+  {
+    name: "Fresh Avocados",
+    price: "₦800",
+    rating: 4.8,
+    image: "https://images.unsplash.com/photo-1523049673857-eb18f1d7b578?w=200&h=200&fit=crop",
+  },
+  {
+    name: "Ripe Tomatoes",
+    price: "₦1,200",
+    rating: 4.9,
+    image: "https://images.unsplash.com/photo-1546470427-0d4db154ceb8?w=200&h=200&fit=crop",
+  },
+  {
+    name: "Bell Peppers",
+    price: "₦500",
+    rating: 4.7,
+    image: "https://images.unsplash.com/photo-1563565375-f3fdfdbefa83?w=200&h=200&fit=crop",
+  },
+  {
+    name: "Fresh Carrots",
+    price: "₦650",
+    rating: 4.6,
+    image: "https://images.unsplash.com/photo-1598170845058-32b9d6a5da37?w=200&h=200&fit=crop",
+  },
+  {
+    name: "Red Onions",
+    price: "₦400",
+    rating: 4.5,
+    image: "https://images.unsplash.com/photo-1618512496248-a07fe83aa8cb?w=200&h=200&fit=crop",
+  },
+  {
+    name: "Fresh Spinach",
+    price: "₦350",
+    rating: 4.8,
+    image: "https://images.unsplash.com/photo-1576045057995-568f588f82fb?w=200&h=200&fit=crop",
   },
 ];
 
@@ -137,27 +133,19 @@ function DesktopMockup() {
             </button>
           </div>
 
-          {/* Products with real images */}
+          {/* Products */}
           <div className="p-4">
             <div className="flex items-center justify-between mb-3">
               <h3 className="text-xs font-bold text-surface-900">Trending Now 🔥</h3>
               <span className="text-[9px] text-purple-600 font-semibold flex items-center gap-0.5">View All <ChevronRight className="h-2.5 w-2.5" /></span>
             </div>
             <div className="grid grid-cols-3 gap-2.5">
-              {STOREFRONT_PRODUCTS.map((product, i) => (
+              {DESKTOP_PRODUCTS.map((product, i) => (
                 <div key={i} className="group">
                   <div className="aspect-square rounded-lg overflow-hidden relative bg-surface-100">
-                    <Image
-                      src={product.image}
-                      alt={product.name}
-                      width={200}
-                      height={200}
-                      className="w-full h-full object-cover"
-                    />
+                    <Image src={product.image} alt={product.name} width={200} height={200} className="w-full h-full object-cover" />
                     {product.badge && (
-                      <span className={`absolute top-1 left-1 text-[7px] font-bold px-1.5 py-0.5 rounded-md ${
-                        product.badge === "Best Seller" ? "bg-amber-500 text-white" : "bg-purple-600 text-white"
-                      }`}>{product.badge}</span>
+                      <span className={`absolute top-1 left-1 text-[7px] font-bold px-1.5 py-0.5 rounded-md ${product.badge === "Best Seller" ? "bg-amber-500 text-white" : "bg-purple-600 text-white"}`}>{product.badge}</span>
                     )}
                     <button className="absolute top-1 right-1 h-5 w-5 rounded-full bg-white/80 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
                       <Heart className="h-2.5 w-2.5 text-surface-600" />
@@ -187,17 +175,17 @@ function DesktopMockup() {
   );
 }
 
-// ─── Phone Storefront (Grocery — real product photos) ───────
+// ─── Phone Storefront (Product Shop — browsing, NOT cart) ───
 
 function PhoneMockup() {
   return (
-    <div className="relative w-[210px] sm:w-[230px]">
+    <div className="relative w-[200px] sm:w-[220px]">
       <div className="rounded-[28px] border-[3px] border-surface-700 bg-surface-900 p-1 shadow-2xl">
         <div className="absolute top-0 left-1/2 -translate-x-1/2 w-20 h-5 bg-surface-900 rounded-b-2xl z-10" />
 
         <div className="rounded-[24px] bg-white overflow-hidden">
           {/* Status Bar */}
-          <div className="flex items-center justify-between px-4 pt-6 pb-1.5 bg-green-700">
+          <div className="flex items-center justify-between px-4 pt-6 pb-1 bg-green-700">
             <span className="text-[8px] text-white/80 font-medium">9:41</span>
             <div className="flex items-center gap-1">
               <div className="h-1.5 w-3 rounded-sm bg-white/60" />
@@ -206,103 +194,48 @@ function PhoneMockup() {
           </div>
 
           {/* Store Header */}
-          <div className="bg-green-700 px-4 pb-3 pt-0.5">
+          <div className="bg-green-700 px-3 pb-3 pt-0.5">
             <div className="flex items-center justify-between mb-2">
-              <div className="flex items-center gap-2">
-                <div className="h-7 w-7 rounded-full bg-white/20 flex items-center justify-center text-[10px] font-bold text-white">FM</div>
-                <div>
-                  <p className="text-[10px] font-bold text-white">FreshMart Lagos</p>
-                  <p className="text-[7px] text-green-200">🟢 Open · Delivers in 30min</p>
-                </div>
+              <div className="flex items-center gap-1.5">
+                <div className="h-6 w-6 rounded-full bg-white/20 flex items-center justify-center text-[9px] font-bold text-white">FM</div>
+                <span className="text-[10px] font-bold text-white">FreshMart Lagos</span>
               </div>
-              <div className="relative">
-                <ShoppingBag className="h-4 w-4 text-white" />
-                <div className="absolute -top-1 -right-1.5 h-3.5 w-3.5 rounded-full bg-red-500 flex items-center justify-center text-[7px] font-bold text-white border border-green-700">4</div>
-              </div>
+              <ShoppingBag className="h-3.5 w-3.5 text-white" />
             </div>
-            <div className="flex items-center gap-2 bg-white/15 rounded-lg px-3 py-1.5">
-              <Search className="h-3 w-3 text-white/60" />
-              <span className="text-[9px] text-white/50">Search for groceries...</span>
+            <div className="flex items-center gap-2 bg-white/15 rounded-lg px-2.5 py-1.5">
+              <Search className="h-2.5 w-2.5 text-white/60" />
+              <span className="text-[8px] text-white/50">Search groceries...</span>
             </div>
           </div>
 
-          {/* Category Pills */}
-          <div className="flex gap-1.5 px-3 py-2.5 overflow-hidden">
-            {[
-              { label: "All", active: false },
-              { label: "Vegetables", active: true },
-              { label: "Fruits", active: false },
-              { label: "Meat", active: false },
-            ].map((cat, i) => (
-              <span key={i} className={`text-[8px] font-semibold px-2.5 py-1 rounded-full whitespace-nowrap ${
-                cat.active ? "bg-green-600 text-white" : "bg-surface-100 text-surface-600"
-              }`}>{cat.label}</span>
+          {/* Categories */}
+          <div className="flex gap-1 px-3 py-2 overflow-hidden">
+            {["All", "Vegetables", "Fruits", "Meat"].map((cat, i) => (
+              <span key={i} className={`text-[7px] font-semibold px-2 py-0.5 rounded-full whitespace-nowrap ${i === 1 ? "bg-green-600 text-white" : "bg-surface-100 text-surface-500"}`}>{cat}</span>
             ))}
           </div>
 
-          {/* Product Grid with REAL images */}
-          <div className="px-3 pb-2">
-            <div className="grid grid-cols-2 gap-2">
-              {PRODUCTS.map((product, i) => (
-                <div key={i} className="rounded-xl border border-surface-100 bg-white p-2 shadow-sm">
-                  <div className="aspect-square rounded-lg overflow-hidden relative bg-surface-50 mb-1.5">
-                    <Image
-                      src={product.image}
-                      alt={product.name}
-                      width={200}
-                      height={200}
-                      className="w-full h-full object-cover"
-                    />
-                    {product.badge && (
-                      <span className={`absolute top-1 ${product.badgeColor === "bg-green-600" ? "left-1" : "right-1"} text-[7px] font-bold ${product.badgeColor} text-white px-1 py-0.5 rounded`}>
-                        {product.badge}
-                      </span>
-                    )}
+          {/* Product Grid — Shop browsing */}
+          <div className="px-2.5 pb-3">
+            <div className="grid grid-cols-2 gap-1.5">
+              {PHONE_PRODUCTS.map((product, i) => (
+                <div key={i} className="rounded-lg border border-surface-100 bg-white p-1.5">
+                  <div className="aspect-square rounded-md overflow-hidden bg-surface-50 mb-1">
+                    <Image src={product.image} alt={product.name} width={200} height={200} className="w-full h-full object-cover" />
                   </div>
-                  <p className="text-[9px] font-semibold text-surface-800">{product.name}</p>
-                  <p className="text-[7px] text-surface-400">{product.unit}</p>
+                  <p className="text-[8px] font-semibold text-surface-800 truncate">{product.name}</p>
+                  <div className="flex items-center gap-0.5 mt-0.5">
+                    <Star className="h-2 w-2 fill-amber-400 text-amber-400" />
+                    <span className="text-[7px] text-surface-400">{product.rating}</span>
+                  </div>
                   <div className="flex items-center justify-between mt-1">
-                    <div>
-                      <span className="text-[9px] font-bold text-surface-900">{product.price}</span>
-                      {product.oldPrice && (
-                        <span className="text-[7px] text-surface-400 line-through ml-1">{product.oldPrice}</span>
-                      )}
-                    </div>
-                    {product.qty > 0 ? (
-                      <div className="flex items-center gap-0.5">
-                        <button className="h-5 w-5 rounded-md bg-green-600 flex items-center justify-center">
-                          <Minus className="h-2.5 w-2.5 text-white" />
-                        </button>
-                        <span className="text-[9px] font-bold text-surface-900 w-4 text-center">{product.qty}</span>
-                        <button className="h-5 w-5 rounded-md bg-green-600 flex items-center justify-center">
-                          <Plus className="h-2.5 w-2.5 text-white" />
-                        </button>
-                      </div>
-                    ) : (
-                      <button className="h-5 w-5 rounded-md bg-green-100 flex items-center justify-center">
-                        <Plus className="h-2.5 w-2.5 text-green-700" />
-                      </button>
-                    )}
+                    <span className="text-[8px] font-bold text-surface-900">{product.price}</span>
+                    <button className="h-4.5 w-4.5 rounded-md bg-green-600 flex items-center justify-center">
+                      <Plus className="h-2.5 w-2.5 text-white" />
+                    </button>
                   </div>
                 </div>
               ))}
-            </div>
-          </div>
-
-          {/* Cart Summary */}
-          <div className="mx-3 mb-2 rounded-xl bg-green-700 p-2.5 flex items-center justify-between">
-            <div className="flex items-center gap-2">
-              <div className="h-7 w-7 rounded-lg bg-white/20 flex items-center justify-center">
-                <ShoppingBag className="h-3.5 w-3.5 text-white" />
-              </div>
-              <div>
-                <p className="text-[9px] font-bold text-white">4 items · ₦4,250</p>
-                <p className="text-[7px] text-green-200">Free delivery above ₦5,000</p>
-              </div>
-            </div>
-            <div className="bg-white rounded-lg px-2.5 py-1 flex items-center gap-1">
-              <span className="text-[9px] font-bold text-green-700">Checkout</span>
-              <ArrowRight className="h-2.5 w-2.5 text-green-700" />
             </div>
           </div>
         </div>
@@ -320,7 +253,6 @@ export default function Showcase() {
       <div className="absolute inset-0">
         <div className="absolute top-0 left-1/4 h-[500px] w-[500px] rounded-full bg-brand-600/8 blur-[120px]" />
         <div className="absolute bottom-0 right-1/4 h-[400px] w-[400px] rounded-full bg-accent-500/8 blur-[100px]" />
-        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 h-[600px] w-[600px] rounded-full bg-purple-500/5 blur-[150px]" />
         <div className="absolute inset-0 opacity-[0.02]" style={{
           backgroundImage: "linear-gradient(rgba(255,255,255,.1) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,.1) 1px, transparent 1px)",
           backgroundSize: "80px 80px",
@@ -345,65 +277,54 @@ export default function Showcase() {
           </p>
         </div>
 
-        {/* Layout: Desktop left | Woman + Phone right */}
-        <div className="flex flex-col lg:flex-row items-center justify-center gap-10 lg:gap-16">
+        {/* Layout: Desktop left | Woman+Phone right */}
+        <div className="flex flex-col lg:flex-row items-center justify-center gap-10 lg:gap-20">
           
-          {/* Desktop Mockup */}
+          {/* Desktop */}
           <div className="relative animate-fade-up" style={{ animationDelay: "0.1s" }}>
             <DesktopMockup />
-            <div className="absolute -bottom-8 left-1/2 -translate-x-1/2">
-              <span className="inline-flex items-center gap-1.5 bg-white/10 backdrop-blur-sm border border-white/10 rounded-full px-4 py-1.5 text-[11px] font-semibold text-white/80">
-                <Globe className="h-3 w-3 text-accent-400" />
-                Desktop Experience
-              </span>
-            </div>
           </div>
 
-          {/* Woman + Phone — Prokip-style composition */}
-          <div className="relative animate-fade-up flex-shrink-0 mt-8 lg:mt-0" style={{ animationDelay: "0.25s" }}>
-            {/* 
-              Woman is the base layer, phone overlaps her on the right.
-              The woman photo is cropped from chest up, positioned left.
-              The phone sits on her right side, partially overlapping.
+          {/* Woman + Phone — Prokip composition */}
+          <div className="relative animate-fade-up" style={{ animationDelay: "0.25s" }}>
+            {/*
+              Prokip style: Woman in foreground (left), phone beside her (right).
+              Woman photo fades into the dark background — no box, no border.
+              Phone overlaps slightly at her shoulder area.
             */}
-            <div className="relative w-[320px] sm:w-[380px] h-[420px] sm:h-[480px]">
+            <div className="relative w-[340px] sm:w-[400px] h-[440px] sm:h-[520px]">
               
-              {/* Woman Photo — left side, foreground */}
-              <div className="absolute bottom-0 left-0 w-[220px] sm:w-[260px] h-[380px] sm:h-[440px] z-10">
-                <div className="relative w-full h-full rounded-2xl overflow-hidden">
+              {/* Woman — blends into background, no visible edges */}
+              <div className="absolute bottom-0 left-0 w-[230px] sm:w-[270px] h-full">
+                <div className="relative w-full h-full">
                   <Image
                     src={WOMAN_PHOTO}
-                    alt="African woman entrepreneur"
+                    alt="African woman entrepreneur showcasing mobile store"
                     fill
                     className="object-cover object-top"
-                    sizes="260px"
+                    sizes="270px"
                     priority
+                    style={{
+                      // Mask: fade all edges into the dark background
+                      maskImage: "linear-gradient(to bottom, transparent 0%, black 8%, black 70%, transparent 100%), linear-gradient(to right, transparent 0%, black 10%, black 60%, transparent 100%)",
+                      maskComposite: "intersect",
+                      WebkitMaskImage: "linear-gradient(to bottom, transparent 0%, black 8%, black 70%, transparent 100%)",
+                      WebkitMaskComposite: "source-in",
+                    }}
                   />
-                  {/* Gradient fade at bottom so she blends into the dark bg */}
-                  <div className="absolute inset-x-0 bottom-0 h-24 bg-gradient-to-t from-[#0a1628] to-transparent" />
-                  {/* Subtle gradient on the right edge so phone overlaps cleanly */}
-                  <div className="absolute inset-y-0 right-0 w-16 bg-gradient-to-l from-[#0a1628]/60 to-transparent" />
                 </div>
               </div>
 
-              {/* Phone — right side, overlapping the woman */}
-              <div className="absolute top-4 right-0 z-20">
+              {/* Phone — positioned at her right shoulder area */}
+              <div className="absolute top-6 sm:top-10 right-0 z-20">
                 <PhoneMockup />
               </div>
-            </div>
-
-            {/* Label */}
-            <div className="absolute -bottom-4 left-1/2 -translate-x-1/2">
-              <span className="inline-flex items-center gap-1.5 bg-white/10 backdrop-blur-sm border border-white/10 rounded-full px-4 py-1.5 text-[11px] font-semibold text-white/80 whitespace-nowrap">
-                <ShoppingBag className="h-3 w-3 text-green-400" />
-                Mobile Experience
-              </span>
             </div>
           </div>
         </div>
 
         {/* CTA */}
-        <div className="mt-20 text-center">
+        <div className="mt-16 text-center">
           <Link
             href="/auth/signup"
             className="inline-flex items-center gap-2.5 rounded-2xl bg-gradient-to-r from-accent-500 to-accent-600 px-8 py-4 text-base font-bold text-white shadow-2xl shadow-accent-500/20 transition-all duration-300 hover:shadow-accent-500/40 hover:-translate-y-1"
