@@ -61,10 +61,7 @@ function DesktopMockup() {
               <span>Shop</span>
               <span>New In</span>
               <span>About</span>
-              <span className="flex items-center gap-1">
-                <ShoppingBag className="h-3 w-3" />
-                <span className="bg-purple-600 text-white text-[8px] rounded-full h-3.5 w-3.5 flex items-center justify-center">3</span>
-              </span>
+              <span>Contact</span>
             </div>
           </div>
 
