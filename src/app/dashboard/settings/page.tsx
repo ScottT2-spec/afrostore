@@ -9,7 +9,7 @@ import { Store, Globe, Bell, Shield, Truck, MessageCircle, Save, Loader2, AlertT
 
 export default function SettingsPage() {
   const router = useRouter();
-  const { currentStore, stores, setCurrentStore } = useStore();
+  const { currentStore, stores, setCurrentStore, refreshStores } = useStore();
   const [loading, setLoading] = useState(true);
   const [deleteConfirm, setDeleteConfirm] = useState("");
   const [deleting, setDeleting] = useState(false);
@@ -210,7 +210,7 @@ export default function SettingsPage() {
                 setDeleteError("");
                 const res = await api.delete(`/api/stores/${currentStore.id}`);
                 if (res.success) {
-                  // Switch to another store or go to new-store page
+                  await refreshStores();
                   const remaining = stores.filter((s) => s.id !== currentStore.id);
                   if (remaining.length > 0) {
                     setCurrentStore(remaining[0]);
