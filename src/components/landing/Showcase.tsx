@@ -57,7 +57,7 @@ function DesktopMockup() {
               </div>
               <span className="text-xs font-bold text-surface-900">Elegance Boutique</span>
             </div>
-            <div className="flex items-center gap-4 text-[10px] text-surface-500 font-medium">
+            <div className="flex items-center gap-2 text-[10px] text-surface-500 font-medium">
               <span>Shop</span>
               <span>New In</span>
               <span>About</span>
