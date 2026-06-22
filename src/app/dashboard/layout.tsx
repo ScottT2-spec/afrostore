@@ -5,7 +5,7 @@ import { StoreProvider } from "@/context/StoreContext";
 import { useAuth } from "@/context/AuthContext";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
-import { Menu, X } from "lucide-react";
+import { ChevronRight, X, ShoppingBag } from "lucide-react";
 
 export default function DashboardLayout({
   children,
@@ -22,6 +22,11 @@ export default function DashboardLayout({
     }
   }, [user, loading, router]);
 
+  // Close sidebar on route change (mobile)
+  useEffect(() => {
+    setSidebarOpen(false);
+  }, []);
+
   if (loading) {
     return (
       <div className="min-h-screen bg-surface-50 flex items-center justify-center">
@@ -35,15 +40,28 @@ export default function DashboardLayout({
   return (
     <StoreProvider>
       <div className="min-h-screen bg-surface-50">
-        {/* Mobile top bar */}
-        <div className="sticky top-0 z-50 flex h-14 items-center gap-3 border-b border-surface-200 bg-white px-4 lg:hidden">
+        {/* 
+          Mobile: small arrow tab on the left edge to open sidebar.
+          No top bar taking up space — just a floating toggle.
+        */}
+
+        {/* Mobile sidebar toggle — small arrow on left edge */}
+        {!sidebarOpen && (
           <button
-            onClick={() => setSidebarOpen(!sidebarOpen)}
-            className="flex h-9 w-9 items-center justify-center rounded-lg text-surface-600 hover:bg-surface-100"
+            onClick={() => setSidebarOpen(true)}
+            className="fixed left-0 top-1/2 -translate-y-1/2 z-50 lg:hidden flex items-center justify-center h-12 w-6 bg-brand-600 text-white rounded-r-lg shadow-lg active:bg-brand-700 transition-colors"
+            aria-label="Open sidebar"
           >
-            {sidebarOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
+            <ChevronRight className="h-4 w-4" />
           </button>
-          <span className="font-display text-base font-bold text-surface-900">
+        )}
+
+        {/* Mobile top bar — minimal, just logo */}
+        <div className="sticky top-0 z-30 flex h-12 items-center gap-2 border-b border-surface-200 bg-white px-4 lg:hidden">
+          <div className="flex h-7 w-7 items-center justify-center rounded-lg bg-brand-600">
+            <ShoppingBag className="h-4 w-4 text-white" />
+          </div>
+          <span className="font-display text-sm font-bold text-surface-900">
             Afro<span className="text-brand-600">Store</span>
           </span>
         </div>
@@ -51,13 +69,29 @@ export default function DashboardLayout({
         {/* Mobile overlay */}
         {sidebarOpen && (
           <div
-            className="fixed inset-0 z-40 bg-black/40 lg:hidden"
+            className="fixed inset-0 z-40 bg-black/50 backdrop-blur-sm lg:hidden"
             onClick={() => setSidebarOpen(false)}
           />
         )}
 
-        {/* Sidebar — hidden on mobile, visible on lg+ */}
-        <div className={`${sidebarOpen ? "translate-x-0" : "-translate-x-full"} fixed inset-y-0 left-0 z-50 transition-transform duration-300 lg:translate-x-0`}>
+        {/* Sidebar */}
+        <div
+          className={`
+            fixed inset-y-0 left-0 z-50 transition-transform duration-300 ease-in-out
+            ${sidebarOpen ? "translate-x-0" : "-translate-x-full"}
+            lg:translate-x-0
+          `}
+        >
+          {/* Mobile close button */}
+          {sidebarOpen && (
+            <button
+              onClick={() => setSidebarOpen(false)}
+              className="absolute top-3 -right-10 z-50 lg:hidden flex items-center justify-center h-8 w-8 bg-white rounded-full shadow-lg text-surface-600"
+              aria-label="Close sidebar"
+            >
+              <X className="h-4 w-4" />
+            </button>
+          )}
           <Sidebar onNavigate={() => setSidebarOpen(false)} />
         </div>
 
