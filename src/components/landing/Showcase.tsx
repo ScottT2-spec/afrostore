@@ -61,6 +61,8 @@ function DesktopMockup() {
               <span>Shop</span>
               <span>New In</span>
               <span>About</span>
+              <span>FAQ</span>
+              <span>Contact</span>
               <Heart className="h-3.5 w-3.5 cursor-pointer" />
               <div className="relative cursor-pointer">
                 <ShoppingCart className="h-3.5 w-3.5" />
