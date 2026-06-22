@@ -8,6 +8,8 @@ import {
   ChevronRight, GripVertical, Image as ImageIcon,
 } from "lucide-react";
 import { SingleImageUpload } from "@/components/dashboard/ImageUpload";
+import AIFormBridge from "@/components/dashboard/AIFormBridge";
+import { useAIPrefill } from "@/hooks/useAIPrefill";
 
 interface Category {
   id: string;
@@ -23,6 +25,7 @@ interface Category {
 
 export default function CategoriesPage() {
   const { currentStore } = useStore();
+  const { prefill: aiPrefill, isAIPrefilled, onSaveComplete } = useAIPrefill("categories");
   const [categories, setCategories] = useState<Category[]>([]);
   const [loading, setLoading] = useState(true);
   const [showForm, setShowForm] = useState(false);
@@ -42,6 +45,22 @@ export default function CategoriesPage() {
   }, [currentStore]);
 
   useEffect(() => { fetchCategories(); }, [fetchCategories]);
+
+  // AI prefill
+  useEffect(() => {
+    if (!aiPrefill) return;
+    if (aiPrefill._action === "create") {
+      setForm({
+        name: (aiPrefill.name as string) || "",
+        slug: "",
+        description: (aiPrefill.description as string) || "",
+        image: (aiPrefill.image as string) || "",
+        parentId: (aiPrefill.parentId as string) || "",
+      });
+      setEditingId(null);
+      setShowForm(true);
+    }
+  }, [aiPrefill]);
 
   const resetForm = () => {
     setForm({ name: "", slug: "", description: "", image: "", parentId: "" });
@@ -75,6 +94,10 @@ export default function CategoriesPage() {
       if (res.success) fetchCategories();
     }
     setSaving(false);
+    if (isAIPrefilled) {
+      onSaveComplete(editingId ? "Category updated!" : "Category created!");
+      return;
+    }
     resetForm();
   };
 
@@ -90,6 +113,7 @@ export default function CategoriesPage() {
 
   return (
     <div className="p-6 space-y-6">
+      <AIFormBridge page="categories" />
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-2xl font-bold text-surface-900 font-display">Categories</h1>

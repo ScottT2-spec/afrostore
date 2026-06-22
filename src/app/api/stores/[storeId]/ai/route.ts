@@ -1,13 +1,13 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getStoreContext, success, error } from "@/lib/api-helpers";
 import { unauthorized } from "@/lib/auth";
-import { chatWithAI, getAIStatus } from "@/lib/ai-service";
+import { mcpChat, getMCPStatus } from "@/lib/mcp-ai-service";
 
-export const maxDuration = 60;
+export const maxDuration = 120; // Longer timeout for tool calling loops
 
 type Params = { params: Promise<{ storeId: string }> };
 
-// POST /api/stores/:storeId/ai — Chat with AI assistant
+// POST /api/stores/:storeId/ai — MCP-powered AI chat
 export async function POST(req: NextRequest, { params }: Params) {
   const { storeId } = await params;
   const ctx = await getStoreContext(req, storeId);
@@ -25,16 +25,16 @@ export async function POST(req: NextRequest, { params }: Params) {
       return error("Message too long (max 5000 characters)", 400);
     }
 
-    // Validate images if provided
+    // Validate images
     let validImages: string[] | undefined;
     if (images && Array.isArray(images)) {
       validImages = images
         .filter((img: unknown): img is string => typeof img === "string")
         .filter((img) => img.startsWith("data:image/") || img.startsWith("https://"))
-        .slice(0, 4); // Max 4 images
+        .slice(0, 4);
     }
 
-    // Validate conversation history format
+    // Validate conversation history
     let history: Array<{ role: "user" | "assistant"; content: string }> | undefined;
     if (conversationHistory && Array.isArray(conversationHistory)) {
       history = conversationHistory
@@ -48,12 +48,13 @@ export async function POST(req: NextRequest, { params }: Params) {
             typeof (m as any).content === "string" &&
             ((m as any).role === "user" || (m as any).role === "assistant")
         )
-        .slice(-10) // Last 10 messages max
+        .slice(-10)
         .map((m) => ({ role: m.role as "user" | "assistant", content: m.content }));
     }
 
-    const response = await chatWithAI({
+    const response = await mcpChat({
       storeId,
+      userId: ctx.user!.id,
       message: message.trim(),
       images: validImages,
       conversationHistory: history,
@@ -61,23 +62,20 @@ export async function POST(req: NextRequest, { params }: Params) {
 
     return success(response);
   } catch (err) {
-    console.error("AI chat error:", err);
-
+    console.error("MCP AI chat error:", err);
     const message = (err as Error).message || "AI service unavailable";
 
-    // Check if it's a configuration error
     if (message.includes("No AI providers configured")) {
       return NextResponse.json(
         {
           success: false,
           error: "AI is not configured. Please set up an AI provider API key.",
-          details: "Set OPENAI_API_KEY, ANTHROPIC_API_KEY, GOOGLE_AI_KEY, GROQ_API_KEY, or DEEPSEEK_API_KEY in environment variables.",
+          details: "Set OPENAI_API_KEY, ANTHROPIC_API_KEY, GOOGLE_AI_KEY, GROQ_API_KEY, or DEEPSEEK_API_KEY.",
         },
         { status: 503 }
       );
     }
 
-    // Check if all providers failed
     if (message.includes("AI request failed")) {
       return NextResponse.json(
         { success: false, error: "AI service temporarily unavailable. Please try again." },
@@ -85,19 +83,16 @@ export async function POST(req: NextRequest, { params }: Params) {
       );
     }
 
-    return NextResponse.json(
-      { success: false, error: message },
-      { status: 500 }
-    );
+    return NextResponse.json({ success: false, error: message }, { status: 500 });
   }
 }
 
-// GET /api/stores/:storeId/ai — Get AI status
+// GET /api/stores/:storeId/ai — Get MCP + AI status
 export async function GET(req: NextRequest, { params }: Params) {
   const { storeId } = await params;
   const ctx = await getStoreContext(req, storeId);
   if (ctx.error) return ctx.user ? error(ctx.error, 403) : unauthorized();
 
-  const status = getAIStatus();
+  const status = getMCPStatus();
   return success(status);
 }

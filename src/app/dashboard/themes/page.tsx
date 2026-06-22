@@ -5,6 +5,8 @@ import DashboardHeader from "@/components/dashboard/DashboardHeader";
 import { useStore } from "@/context/StoreContext";
 import { api } from "@/lib/api-client";
 import { Eye, CheckCircle2, Star, Loader2, Palette } from "lucide-react";
+import { useAIPrefill } from "@/hooks/useAIPrefill";
+import AIPrefillBanner from "@/components/dashboard/AIPrefillBanner";
 
 interface ThemeConfig { colors?: { primary?: string; accent?: string; headerBg?: string; footerBg?: string }; fonts?: { heading?: string; body?: string } }
 interface Theme { id: string; name: string; slug: string; description?: string; thumbnail?: string; category: string; industry?: string; isPremium: boolean; isFeatured: boolean; isInstalled?: boolean; isActive?: boolean; config?: ThemeConfig; customConfig?: ThemeConfig | null; }
@@ -12,6 +14,7 @@ interface ThemesData { themes: Theme[]; activeThemeId: string | null; }
 
 export default function ThemesPage() {
   const { currentStore } = useStore();
+  const { prefillData, clearPrefill, isFromAI } = useAIPrefill("theme");
   const [data, setData] = useState<ThemesData | null>(null);
   const [loading, setLoading] = useState(true);
   const [installing, setInstalling] = useState<string | null>(null);
@@ -39,6 +42,7 @@ export default function ThemesPage() {
     <>
       <DashboardHeader title="Themes" subtitle="Customize your store's look" />
       <div className="p-6">
+        {isFromAI && <AIPrefillBanner entityType="theme" onDiscard={() => clearPrefill()} />}
         {loading ? (
           <div className="flex items-center justify-center py-20"><Loader2 className="h-8 w-8 animate-spin text-brand-600" /></div>
         ) : !data?.themes.length ? (

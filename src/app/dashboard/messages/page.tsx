@@ -6,6 +6,8 @@ import { api } from "@/lib/api-client";
 import {
   Mail, MailOpen, Loader2, Trash2, CheckCheck, Clock, User, ChevronDown, ChevronUp,
 } from "lucide-react";
+import { useAIPrefill } from "@/hooks/useAIPrefill";
+import AIPrefillBanner from "@/components/dashboard/AIPrefillBanner";
 
 interface ContactMessage {
   id: string;
@@ -19,6 +21,7 @@ interface ContactMessage {
 
 export default function MessagesPage() {
   const { currentStore } = useStore();
+  const { isFromAI, clearPrefill } = useAIPrefill("message");
   const [messages, setMessages] = useState<ContactMessage[]>([]);
   const [loading, setLoading] = useState(true);
   const [expanded, setExpanded] = useState<string | null>(null);

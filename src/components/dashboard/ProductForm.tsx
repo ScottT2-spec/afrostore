@@ -4,6 +4,8 @@ import { useState, useEffect, useCallback } from "react";
 import { useStore } from "@/context/StoreContext";
 import { useRouter } from "next/navigation";
 import { api } from "@/lib/api-client";
+import { useAIPrefill } from "@/hooks/useAIPrefill";
+import AIPrefillBanner from "@/components/dashboard/AIPrefillBanner";
 import {
   ArrowLeft,
   Save,
@@ -148,6 +150,8 @@ export default function ProductForm({ productId }: ProductFormProps) {
   const { currentStore } = useStore();
   const router = useRouter();
   const isEditing = !!productId;
+  const prefillPage = isEditing ? `products/${productId}/edit` : "products/new";
+  const { prefill: aiPrefill, isAIPrefilled, onSaveComplete } = useAIPrefill(prefillPage);
 
   // Form state
   const [activeTab, setActiveTab] = useState<TabId>("general");
@@ -265,6 +269,74 @@ export default function ProductForm({ productId }: ProductFormProps) {
     });
   }, [isEditing, currentStore, productId]);
 
+  // ─── AI Prefill ────────────────────────────────────────────
+
+  useEffect(() => {
+    if (!aiPrefill || isEditing) return;
+
+    // Populate form from AI-generated data
+    if (aiPrefill.name) setName(aiPrefill.name as string);
+    if (aiPrefill.description) setDescription(aiPrefill.description as string);
+    if (aiPrefill.price) setPrice(String(aiPrefill.price));
+    if (aiPrefill.compareAtPrice) setCompareAtPrice(String(aiPrefill.compareAtPrice));
+    if (aiPrefill.costPrice) setCostPrice(String(aiPrefill.costPrice));
+    if (aiPrefill.sku) setSku(aiPrefill.sku as string);
+    if (aiPrefill.stock !== undefined) setStock(String(aiPrefill.stock));
+    if (aiPrefill.trackInventory !== undefined) setTrackInventory(aiPrefill.trackInventory as boolean);
+    if (aiPrefill.categoryId) setCategoryId(aiPrefill.categoryId as string);
+    if (aiPrefill.status) setStatus(aiPrefill.status as string);
+    if (aiPrefill.isFeatured !== undefined) setIsFeatured(aiPrefill.isFeatured as boolean);
+    if (aiPrefill.tags) setTags(aiPrefill.tags as string[]);
+    if (aiPrefill.metaTitle) setMetaTitle(aiPrefill.metaTitle as string);
+    if (aiPrefill.metaDescription) setMetaDescription(aiPrefill.metaDescription as string);
+
+    // Images (AI might not have images, merchant adds them)
+    if (aiPrefill.images && Array.isArray(aiPrefill.images) && (aiPrefill.images as any[]).length > 0) {
+      setImages(aiPrefill.images as ProductImage[]);
+    }
+
+    // Variants
+    if (aiPrefill.variants && Array.isArray(aiPrefill.variants) && (aiPrefill.variants as any[]).length > 0) {
+      setProductType("variable");
+      const prefillVariants = aiPrefill.variants as any[];
+
+      // Reconstruct attributes from variant options
+      const attrMap = new Map<string, Set<string>>();
+      for (const v of prefillVariants) {
+        if (v.options && typeof v.options === "object") {
+          for (const [key, val] of Object.entries(v.options as Record<string, string>)) {
+            if (!attrMap.has(key)) attrMap.set(key, new Set());
+            attrMap.get(key)!.add(val);
+          }
+        }
+      }
+      setAttributes(
+        Array.from(attrMap.entries()).map(([attrName, vals]) => ({
+          id: generateId(),
+          name: attrName,
+          values: Array.from(vals),
+        }))
+      );
+      setVariants(
+        prefillVariants.map((v: any) => ({
+          id: v.id || generateId(),
+          name: v.name,
+          sku: v.sku || "",
+          price: v.price ? String(v.price) : "",
+          stock: String(v.stock || 0),
+          image: v.image || "",
+          options: v.options || {},
+          expanded: false,
+        }))
+      );
+    }
+
+    // Auto-switch to images tab if no images (hint to add them)
+    if (!aiPrefill.images || (aiPrefill.images as any[]).length === 0) {
+      // Stay on general tab first so they can review, but we could hint
+    }
+  }, [aiPrefill, isEditing]);
+
   // ─── Attributes ────────────────────────────────────────────
 
   const addAttribute = () => {
@@ -373,7 +445,12 @@ export default function ProductForm({ productId }: ProductFormProps) {
 
     if (res.success) {
       setSuccessMsg(isEditing ? "Product updated!" : "Product created!");
-      setTimeout(() => router.push("/dashboard/products"), 800);
+      if (isAIPrefilled) {
+        // Return to AI chat after saving
+        setTimeout(() => onSaveComplete(isEditing ? "Product updated successfully!" : "Product created successfully!"), 600);
+      } else {
+        setTimeout(() => router.push("/dashboard/products"), 800);
+      }
     } else {
       setError(res.error || "Failed to save product");
     }
@@ -435,6 +512,9 @@ export default function ProductForm({ productId }: ProductFormProps) {
       </header>
 
       <div className="p-6">
+        {/* AI Prefill Banner */}
+        <AIPrefillBanner page={prefillPage} />
+
         {/* Messages */}
         {error && (
           <div className="mb-4 rounded-xl bg-red-50 border border-red-200 px-4 py-3 text-sm text-red-700 flex items-center gap-2">

@@ -8,6 +8,8 @@ import {
   Search, Loader2, Puzzle, CheckCircle2, Settings, X, ToggleLeft, ToggleRight,
   Zap, Shield, ChevronRight, Tag, Download, Trash2, ExternalLink, Clock,
 } from "lucide-react";
+import { useAIPrefill } from "@/hooks/useAIPrefill";
+import AIPrefillBanner from "@/components/dashboard/AIPrefillBanner";
 
 interface Plugin {
   id: string; name: string; slug: string; description?: string; icon?: string;
@@ -54,6 +56,7 @@ const categoryLabels: Record<string, string> = {
 
 export default function PluginsPage() {
   const { currentStore } = useStore();
+  const { prefillData, clearPrefill, isFromAI } = useAIPrefill("plugin");
   const [plugins, setPlugins] = useState<Plugin[]>([]);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState("");
@@ -154,6 +157,7 @@ export default function PluginsPage() {
     <>
       <DashboardHeader title="Plugins" subtitle="Extend your store with powerful add-ons" />
 
+      {isFromAI && <div className="px-6 pt-4"><AIPrefillBanner entityType="plugin" onDiscard={() => clearPrefill()} /></div>}
       <div className="flex min-h-[calc(100vh-4rem)]">
         {/* Sidebar filters */}
         <div className="hidden lg:block w-56 border-r border-surface-100 bg-white p-4 space-y-1">

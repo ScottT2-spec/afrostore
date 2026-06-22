@@ -4,6 +4,9 @@ import { useState, useEffect, useCallback } from "react";
 import { useStore } from "@/context/StoreContext";
 import { api } from "@/lib/api-client";
 import DashboardHeader from "@/components/dashboard/DashboardHeader";
+import { useAIPrefill } from "@/hooks/useAIPrefill";
+import AIPrefillBanner from "@/components/dashboard/AIPrefillBanner";
+import { useRouter } from "next/navigation";
 import {
   Loader2,
   Link2,
@@ -64,6 +67,8 @@ interface Customer {
 
 export default function ReferralsPage() {
   const { currentStore } = useStore();
+  const router = useRouter();
+  const { prefillData, clearPrefill, isFromAI } = useAIPrefill("referral_program");
   const [program, setProgram] = useState<ProgramResponse | null>(null);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
@@ -107,6 +112,14 @@ export default function ReferralsPage() {
 
   useEffect(() => { loadProgram(); }, [loadProgram]);
 
+  // AI prefill
+  useEffect(() => {
+    if (prefillData && isFromAI) {
+      setSettings((prev) => ({ ...prev, ...(prefillData as any) }));
+      setShowSettings(true);
+    }
+  }, [prefillData, isFromAI]);
+
   const loadCustomers = async () => {
     if (!currentStore) return;
     const res = await api.get<any>(`/api/stores/${currentStore.id}/customers?limit=100`);
@@ -122,6 +135,7 @@ export default function ReferralsPage() {
     await loadProgram();
     setSaving(false);
     setShowSettings(false);
+    if (isFromAI) { clearPrefill(); router.push("/dashboard/ai"); }
   };
 
   const addAffiliate = async () => {
@@ -202,6 +216,7 @@ export default function ReferralsPage() {
       />
 
       <div className="p-6 space-y-6">
+        {isFromAI && <AIPrefillBanner entityType="referral program" onDiscard={() => { clearPrefill(); setShowSettings(false); }} />}
         {/* No program yet */}
         {!program && (
           <div className="rounded-2xl border border-surface-200 bg-white p-12 text-center">

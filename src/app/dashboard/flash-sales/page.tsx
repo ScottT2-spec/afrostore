@@ -4,6 +4,9 @@ import { useState, useEffect, useCallback } from "react";
 import { useStore } from "@/context/StoreContext";
 import { api } from "@/lib/api-client";
 import DashboardHeader from "@/components/dashboard/DashboardHeader";
+import { useAIPrefill } from "@/hooks/useAIPrefill";
+import AIPrefillBanner from "@/components/dashboard/AIPrefillBanner";
+import { useRouter } from "next/navigation";
 import { Loader2, Zap, Clock, Package, Percent, Trash2, Plus, X, ToggleLeft, ToggleRight, Calendar } from "lucide-react";
 
 interface FlashSale {
@@ -25,6 +28,8 @@ interface Product { id: string; name: string; price: number }
 
 export default function FlashSalesPage() {
   const { currentStore } = useStore();
+  const router = useRouter();
+  const { prefillData, clearPrefill, isFromAI } = useAIPrefill("flash_sale");
   const [sales, setSales] = useState<FlashSale[]>([]);
   const [loading, setLoading] = useState(true);
   const [showCreate, setShowCreate] = useState(false);
@@ -47,6 +52,26 @@ export default function FlashSalesPage() {
 
   useEffect(() => { load(); }, [load]);
 
+  // AI prefill
+  useEffect(() => {
+    if (prefillData && isFromAI) {
+      const d = prefillData as any;
+      setForm((prev) => ({
+        ...prev,
+        name: d.name || prev.name,
+        description: d.description || prev.description,
+        discountType: d.discountType || prev.discountType,
+        discountValue: d.discountValue ?? prev.discountValue,
+        startsAt: d.startsAt ? String(d.startsAt).slice(0, 16) : prev.startsAt,
+        endsAt: d.endsAt ? String(d.endsAt).slice(0, 16) : prev.endsAt,
+        maxUses: d.maxUses ? String(d.maxUses) : prev.maxUses,
+        productIds: d.productIds || prev.productIds,
+      }));
+      setShowCreate(true);
+      loadProducts();
+    }
+  }, [prefillData, isFromAI]);
+
   const loadProducts = async () => {
     if (!currentStore) return;
     const res = await api.get<any>(`/api/stores/${currentStore.id}/products?limit=100`);
@@ -67,6 +92,7 @@ export default function FlashSalesPage() {
     setSaving(false);
     setShowCreate(false);
     setForm({ name: "", description: "", discountType: "PERCENTAGE", discountValue: 20, startsAt: "", endsAt: "", maxUses: "", productIds: [] });
+    if (isFromAI) { clearPrefill(); router.push("/dashboard/ai"); }
   };
 
   const toggleActive = async (id: string, isActive: boolean) => {
@@ -100,6 +126,7 @@ export default function FlashSalesPage() {
     <>
       <DashboardHeader title="Flash Sales" subtitle="Create urgency with time-limited deals" action={{ label: "New Flash Sale", onClick: () => { setShowCreate(true); loadProducts(); } }} />
       <div className="p-6 space-y-6">
+        {isFromAI && <AIPrefillBanner entityType="flash sale" onDiscard={() => { clearPrefill(); setShowCreate(false); setForm({ name: "", description: "", discountType: "PERCENTAGE", discountValue: 20, startsAt: "", endsAt: "", maxUses: "", productIds: [] }); }} />}
         {sales.length === 0 ? (
           <div className="rounded-2xl border border-surface-200 bg-white p-12 text-center">
             <div className="mx-auto w-16 h-16 rounded-2xl bg-amber-50 flex items-center justify-center mb-4">

@@ -5,6 +5,8 @@ import { useStore } from "@/context/StoreContext";
 import { api } from "@/lib/api-client";
 import { formatCurrency } from "@/lib/utils";
 import { Tag, Plus, Loader2, Trash2, Pencil, Copy, Check, ToggleLeft, ToggleRight } from "lucide-react";
+import AIFormBridge from "@/components/dashboard/AIFormBridge";
+import { useAIPrefill } from "@/hooks/useAIPrefill";
 
 interface Coupon {
   id: string;
@@ -22,6 +24,7 @@ interface Coupon {
 
 export default function CouponsPage() {
   const { currentStore } = useStore();
+  const { prefill: aiPrefill, isAIPrefilled, onSaveComplete } = useAIPrefill("coupons");
   const [coupons, setCoupons] = useState<Coupon[]>([]);
   const [loading, setLoading] = useState(true);
   const [showForm, setShowForm] = useState(false);
@@ -46,6 +49,22 @@ export default function CouponsPage() {
   }, [currentStore]);
 
   useEffect(() => { fetchCoupons(); }, [fetchCoupons]);
+
+  // AI prefill
+  useEffect(() => {
+    if (!aiPrefill || aiPrefill._action !== "create") return;
+    setForm({
+      code: (aiPrefill.code as string) || "",
+      type: (aiPrefill.type as Coupon["type"]) || "PERCENTAGE",
+      value: (aiPrefill.value as number) || 10,
+      minOrderAmount: aiPrefill.minOrderAmount ? String(aiPrefill.minOrderAmount) : "",
+      maxUses: aiPrefill.maxUses ? String(aiPrefill.maxUses) : "",
+      expiresAt: aiPrefill.expiresAt ? (aiPrefill.expiresAt as string).slice(0, 10) : "",
+      isActive: true,
+    });
+    setEditingId(null);
+    setShowForm(true);
+  }, [aiPrefill]);
 
   const resetForm = () => {
     setForm({ code: "", type: "PERCENTAGE", value: 10, minOrderAmount: "", maxUses: "", expiresAt: "", isActive: true });
@@ -90,6 +109,10 @@ export default function CouponsPage() {
       await api.post(`/api/stores/${currentStore.id}/coupons`, body);
     }
     setSaving(false);
+    if (isAIPrefilled) {
+      onSaveComplete(editingId ? "Coupon updated!" : "Coupon created!");
+      return;
+    }
     resetForm();
     fetchCoupons();
   };
@@ -120,6 +143,7 @@ export default function CouponsPage() {
 
   return (
     <div className="p-6 space-y-6">
+      <AIFormBridge page="coupons" />
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-2xl font-bold text-surface-900 font-display">Coupons</h1>

@@ -2,6 +2,7 @@
 
 import Sidebar from "@/components/dashboard/Sidebar";
 import { StoreProvider } from "@/context/StoreContext";
+import { AIActionProvider } from "@/context/AIActionContext";
 import { useAuth } from "@/context/AuthContext";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
@@ -39,6 +40,7 @@ export default function DashboardLayout({
 
   return (
     <StoreProvider>
+      <AIActionProvider>
       <div className="min-h-screen bg-surface-50">
         {/* 
           Mobile: small arrow tab on the left edge to open sidebar.
@@ -99,6 +101,7 @@ export default function DashboardLayout({
           <div className="mx-auto max-w-[1400px]">{children}</div>
         </main>
       </div>
+      </AIActionProvider>
     </StoreProvider>
   );
 }

@@ -4,6 +4,9 @@ import { useState, useEffect, useCallback } from "react";
 import { useStore } from "@/context/StoreContext";
 import { api } from "@/lib/api-client";
 import Link from "next/link";
+import { useAIPrefill } from "@/hooks/useAIPrefill";
+import AIPrefillBanner from "@/components/dashboard/AIPrefillBanner";
+import { useRouter } from "next/navigation";
 import {
   FileText, Plus, Loader2, Search, ExternalLink, Eye, EyeOff,
   Pencil, Trash2, MoreHorizontal, GripVertical, Layout, Sparkles,
@@ -26,6 +29,8 @@ const pageTypeLabels: Record<string, string> = {
 
 export default function PagesPage() {
   const { currentStore } = useStore();
+  const router = useRouter();
+  const { prefillData, clearPrefill, isFromAI } = useAIPrefill("page");
   const [pages, setPages] = useState<PageItem[]>([]);
   const [loading, setLoading] = useState(true);
   const [creating, setCreating] = useState(false);
@@ -47,6 +52,16 @@ export default function PagesPage() {
 
   useEffect(() => { fetchPages(); }, [fetchPages]);
 
+  // AI prefill
+  useEffect(() => {
+    if (prefillData && isFromAI) {
+      const d = prefillData as any;
+      setNewTitle(d.title || "");
+      setNewType(d.type || "CUSTOM");
+      setShowCreate(true);
+    }
+  }, [prefillData, isFromAI]);
+
   const createPage = async () => {
     if (!currentStore || !newTitle.trim()) return;
     setCreating(true);
@@ -60,6 +75,7 @@ export default function PagesPage() {
       setShowCreate(false);
     }
     setCreating(false);
+    if (isFromAI) { clearPrefill(); router.push("/dashboard/ai"); }
   };
 
   const deletePage = async (id: string) => {
@@ -102,6 +118,7 @@ export default function PagesPage() {
 
   return (
     <div className="p-6 space-y-6">
+      {isFromAI && <AIPrefillBanner entityType="page" onDiscard={() => { clearPrefill(); setShowCreate(false); setNewTitle(""); }} />}
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-2xl font-bold text-surface-900 font-display">Pages</h1>

@@ -5,6 +5,9 @@ import { useStore } from "@/context/StoreContext";
 import { api } from "@/lib/api-client";
 import DashboardHeader from "@/components/dashboard/DashboardHeader";
 import { Loader2, Star, Crown, Users, Gift, Settings, X, ToggleLeft, ToggleRight, Award, TrendingUp } from "lucide-react";
+import { useAIPrefill } from "@/hooks/useAIPrefill";
+import AIPrefillBanner from "@/components/dashboard/AIPrefillBanner";
+import { useRouter } from "next/navigation";
 
 interface LoyaltyProgram {
   id: string; enabled: boolean; pointsPerCurrency: number; currencyPerPoint: number;
@@ -26,6 +29,8 @@ const tierColors: Record<string, string> = {
 
 export default function LoyaltyPage() {
   const { currentStore } = useStore();
+  const router = useRouter();
+  const { prefillData, clearPrefill, isFromAI } = useAIPrefill("loyalty");
   const [program, setProgram] = useState<LoyaltyProgram | null>(null);
   const [stats, setStats] = useState<Stats | null>(null);
   const [loading, setLoading] = useState(true);
@@ -64,6 +69,14 @@ export default function LoyaltyPage() {
 
   useEffect(() => { load(); }, [load]);
 
+  // AI prefill
+  useEffect(() => {
+    if (prefillData && isFromAI) {
+      setForm((prev) => ({ ...prev, ...(prefillData as any) }));
+      setShowSettings(true);
+    }
+  }, [prefillData, isFromAI]);
+
   const saveSettings = async () => {
     if (!currentStore) return;
     setSaving(true);
@@ -71,6 +84,7 @@ export default function LoyaltyPage() {
     await load();
     setSaving(false);
     setShowSettings(false);
+    if (isFromAI) { clearPrefill(); router.push("/dashboard/ai"); }
   };
 
   if (loading) return (
@@ -97,6 +111,7 @@ export default function LoyaltyPage() {
         action={program ? { label: "Settings", onClick: () => setShowSettings(true) } : undefined}
       />
       <div className="p-6 space-y-6">
+        {isFromAI && <AIPrefillBanner entityType="loyalty program" onDiscard={() => { clearPrefill(); setShowSettings(false); }} />}
         {!program ? (
           <div className="rounded-2xl border border-surface-200 bg-white p-12 text-center">
             <div className="mx-auto w-16 h-16 rounded-2xl bg-amber-50 flex items-center justify-center mb-4">

@@ -5,6 +5,9 @@ import { useStore } from "@/context/StoreContext";
 import { api } from "@/lib/api-client";
 import { formatCurrency } from "@/lib/utils";
 import { Truck, Plus, Loader2, Trash2, Pencil, MapPin, ToggleLeft, ToggleRight } from "lucide-react";
+import { useAIPrefill } from "@/hooks/useAIPrefill";
+import AIPrefillBanner from "@/components/dashboard/AIPrefillBanner";
+import { useRouter } from "next/navigation";
 
 interface DeliveryZone {
   id: string;
@@ -19,6 +22,8 @@ interface DeliveryZone {
 
 export default function DeliveryPage() {
   const { currentStore } = useStore();
+  const router = useRouter();
+  const { prefillData, clearPrefill, isFromAI } = useAIPrefill("delivery_zone");
   const [zones, setZones] = useState<DeliveryZone[]>([]);
   const [loading, setLoading] = useState(true);
   const [showForm, setShowForm] = useState(false);
@@ -39,6 +44,23 @@ export default function DeliveryPage() {
   }, [currentStore]);
 
   useEffect(() => { fetchZones(); }, [fetchZones]);
+
+  // AI prefill
+  useEffect(() => {
+    if (prefillData && isFromAI) {
+      const d = prefillData as any;
+      setForm((prev) => ({
+        ...prev,
+        name: d.name || prev.name,
+        areas: Array.isArray(d.areas) ? d.areas.join(", ") : d.areas || prev.areas,
+        fee: d.fee != null ? String(d.fee) : prev.fee,
+        freeAbove: d.freeAbove != null ? String(d.freeAbove) : prev.freeAbove,
+        estimatedDays: d.estimatedDays || prev.estimatedDays,
+        isActive: d.isActive ?? prev.isActive,
+      }));
+      setShowForm(true);
+    }
+  }, [prefillData, isFromAI]);
 
   const resetForm = () => {
     setForm({ name: "", areas: "", fee: "", freeAbove: "", estimatedDays: "", isActive: true });
@@ -78,6 +100,7 @@ export default function DeliveryPage() {
     setSaving(false);
     resetForm();
     fetchZones();
+    if (isFromAI) { clearPrefill(); router.push("/dashboard/ai"); }
   };
 
   const handleDelete = async (id: string) => {
@@ -94,6 +117,7 @@ export default function DeliveryPage() {
 
   return (
     <div className="p-6 space-y-6">
+      {isFromAI && <AIPrefillBanner entityType="delivery zone" onDiscard={() => { clearPrefill(); resetForm(); }} />}
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-2xl font-bold text-surface-900 font-display">Delivery Zones</h1>

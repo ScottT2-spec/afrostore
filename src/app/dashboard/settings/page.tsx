@@ -6,10 +6,13 @@ import DashboardHeader from "@/components/dashboard/DashboardHeader";
 import { useStore } from "@/context/StoreContext";
 import { api } from "@/lib/api-client";
 import { Store, Globe, Bell, Shield, Truck, MessageCircle, Save, Loader2, AlertTriangle, Trash2 } from "lucide-react";
+import { useAIPrefill } from "@/hooks/useAIPrefill";
+import AIPrefillBanner from "@/components/dashboard/AIPrefillBanner";
 
 export default function SettingsPage() {
   const router = useRouter();
   const { currentStore, stores, setCurrentStore, refreshStores } = useStore();
+  const { prefillData, clearPrefill, isFromAI } = useAIPrefill("settings");
   const [loading, setLoading] = useState(true);
   const [deleteConfirm, setDeleteConfirm] = useState("");
   const [deleting, setDeleting] = useState(false);
@@ -44,6 +47,13 @@ export default function SettingsPage() {
     })();
   }, [currentStore]);
 
+  // AI prefill for settings
+  useEffect(() => {
+    if (prefillData && isFromAI) {
+      setSettings((prev) => ({ ...prev, ...(prefillData as any) }));
+    }
+  }, [prefillData, isFromAI]);
+
   const [saveError, setSaveError] = useState("");
 
   const handleSave = async () => {
@@ -73,6 +83,7 @@ export default function SettingsPage() {
       }
       window.scrollTo({ top: 0, behavior: "smooth" });
       setTimeout(() => setSaved(false), 3000);
+      if (isFromAI) { clearPrefill(); router.push("/dashboard/ai"); }
     } else {
       setSaveError(res.error || "Failed to save settings");
     }
@@ -92,6 +103,7 @@ export default function SettingsPage() {
     <>
       <DashboardHeader title="Settings" subtitle="Configure your store" />
       <div className="p-6 space-y-6 max-w-3xl">
+        {isFromAI && <AIPrefillBanner entityType="settings" onDiscard={() => { clearPrefill(); }} />}
         {saved && (
           <div className="rounded-xl bg-green-50 border border-green-200 px-4 py-3 text-sm text-green-700 flex items-center gap-2 animate-pulse">
             ✅ Settings saved successfully!

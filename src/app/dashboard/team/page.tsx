@@ -4,6 +4,9 @@ import { useState, useEffect, useCallback } from "react";
 import { useStore } from "@/context/StoreContext";
 import { api } from "@/lib/api-client";
 import { UserPlus, Loader2, Trash2, Shield, Eye, Settings, Crown, Mail } from "lucide-react";
+import { useAIPrefill } from "@/hooks/useAIPrefill";
+import AIPrefillBanner from "@/components/dashboard/AIPrefillBanner";
+import { useRouter } from "next/navigation";
 
 interface Member {
   id: string;
@@ -21,6 +24,8 @@ const roleConfig: Record<string, { label: string; color: string; icon: React.Ele
 
 export default function TeamPage() {
   const { currentStore } = useStore();
+  const router = useRouter();
+  const { prefillData, clearPrefill, isFromAI } = useAIPrefill("member");
   const [members, setMembers] = useState<Member[]>([]);
   const [loading, setLoading] = useState(true);
   const [showInvite, setShowInvite] = useState(false);
@@ -41,6 +46,16 @@ export default function TeamPage() {
 
   useEffect(() => { fetchMembers(); }, [fetchMembers]);
 
+  // AI prefill — auto-open invite form
+  useEffect(() => {
+    if (prefillData && isFromAI) {
+      const d = prefillData as any;
+      setInviteEmail(d.email || "");
+      setInviteRole(d.role || "STAFF");
+      setShowInvite(true);
+    }
+  }, [prefillData, isFromAI]);
+
   const inviteMember = async () => {
     if (!currentStore || !inviteEmail.trim()) return;
     setSaving(true);
@@ -50,6 +65,7 @@ export default function TeamPage() {
       setInviteEmail("");
       setShowInvite(false);
       fetchMembers();
+      if (isFromAI) { clearPrefill(); router.push("/dashboard/ai"); }
     } else {
       setError(res.error || "Failed to add member. Make sure they have an account.");
     }
@@ -70,6 +86,7 @@ export default function TeamPage() {
 
   return (
     <div className="p-6 space-y-6">
+      {isFromAI && <AIPrefillBanner entityType="team member" onDiscard={() => { clearPrefill(); setShowInvite(false); setInviteEmail(""); }} />}
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-2xl font-bold text-surface-900 font-display">Team</h1>

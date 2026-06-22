@@ -5,6 +5,9 @@ import DashboardHeader from "@/components/dashboard/DashboardHeader";
 import { useStore } from "@/context/StoreContext";
 import { api } from "@/lib/api-client";
 import { CheckCircle2, AlertCircle, CreditCard, ArrowRight, Shield, Loader2 } from "lucide-react";
+import { useAIPrefill } from "@/hooks/useAIPrefill";
+import AIPrefillBanner from "@/components/dashboard/AIPrefillBanner";
+import { useRouter } from "next/navigation";
 
 interface Gateway {
   id: string;
@@ -21,6 +24,8 @@ const providerInfo: Record<string, { name: string; desc: string; color: string }
 
 export default function PaymentsPage() {
   const { currentStore } = useStore();
+  const router = useRouter();
+  const { prefillData, clearPrefill, isFromAI } = useAIPrefill("payment_gateway");
   const [gateways, setGateways] = useState<Gateway[]>([]);
   const [loading, setLoading] = useState(true);
   const [setupProvider, setSetupProvider] = useState<string | null>(null);
@@ -59,7 +64,18 @@ export default function PaymentsPage() {
       setSetupError(res.error || "Setup failed");
     }
     setSaving(false);
+    if (isFromAI) { clearPrefill(); router.push("/dashboard/ai"); }
   };
+
+  // AI prefill — auto-open setup for a specific provider
+  useEffect(() => {
+    if (prefillData && isFromAI && (prefillData as any).provider) {
+      const d = prefillData as any;
+      setSetupProvider(d.provider);
+      if (d.publicKey) setPublicKey(d.publicKey);
+      if (d.secretKey) setSecretKey(d.secretKey);
+    }
+  }, [prefillData, isFromAI]);
 
   if (loading) return (
     <>
@@ -72,6 +88,7 @@ export default function PaymentsPage() {
     <>
       <DashboardHeader title="Payments" subtitle="Connect your payment gateways" />
       <div className="p-6 space-y-4 max-w-3xl">
+        {isFromAI && <AIPrefillBanner entityType="payment gateway" onDiscard={() => { clearPrefill(); setSetupProvider(null); }} />}
         {["MONNIFY", "PAYSTACK", "FLUTTERWAVE"].map((provider) => {
           const info = providerInfo[provider];
           const gw = gateways.find((g) => g.provider === provider);
