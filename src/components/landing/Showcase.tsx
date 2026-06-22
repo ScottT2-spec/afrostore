@@ -3,7 +3,7 @@
 import Image from "next/image";
 import Link from "next/link";
 import {
-  ArrowRight, ShoppingBag, Star, Heart, Search,
+  ArrowRight, ShoppingBag, ShoppingCart, Star, Heart, Search,
   Eye, Globe, ChevronRight, Package, Users,
   BarChart3, Bell, TrendingUp,
 } from "lucide-react";
@@ -61,13 +61,11 @@ function DesktopMockup() {
               <span>Shop</span>
               <span>New In</span>
               <span>About</span>
-              <span className="flex items-center gap-1">
-                <Heart className="h-3 w-3" />
-              </span>
-              <span className="flex items-center gap-1">
-                <ShoppingBag className="h-3 w-3" />
-                <span className="bg-purple-600 text-white text-[8px] rounded-full h-3.5 w-3.5 flex items-center justify-center">3</span>
-              </span>
+              <Heart className="h-3.5 w-3.5 cursor-pointer" />
+              <div className="relative cursor-pointer">
+                <ShoppingCart className="h-3.5 w-3.5" />
+                <span className="absolute -top-1.5 -right-2 bg-purple-600 text-white text-[7px] font-bold rounded-full h-3 w-3 flex items-center justify-center">3</span>
+              </div>
             </div>
           </div>
 
