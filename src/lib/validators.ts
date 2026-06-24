@@ -253,6 +253,15 @@ export const moderateReviewSchema = z.object({
   isVerified: z.boolean().optional(),
 });
 
+// ─── NOTIFICATIONS ──────────────────────────────────────────
+
+export const createSiteNotificationSchema = z.object({
+  type: z.string().min(1).max(50),
+  title: z.string().min(1).max(300),
+  message: z.string().min(1).max(5000),
+  data: z.record(z.string(), z.unknown()).optional(),
+});
+
 // ─── FUNNELS ────────────────────────────────────────────────
 
 export const funnelStepSchema = z.object({

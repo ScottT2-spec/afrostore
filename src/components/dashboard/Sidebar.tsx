@@ -69,7 +69,10 @@ const ecommerceNav: NavGroup[] = [
       { name: "Team", href: "/dashboard/team", icon: UserPlus },
     ],
   },
-  { label: "", items: [{ name: "AI Commerce Assistant", href: "/dashboard/ai", icon: Bot }] },
+  { label: "", items: [
+    { name: "Notifications", href: "/dashboard/notifications", icon: Bell },
+    { name: "AI Commerce Assistant", href: "/dashboard/ai", icon: Bot },
+  ] },
 ];
 
 const websiteNav: NavGroup[] = [
@@ -100,7 +103,10 @@ const websiteNav: NavGroup[] = [
       { name: "Team", href: "/dashboard/team", icon: UserPlus },
     ],
   },
-  { label: "", items: [{ name: "AI Website Assistant", href: "/dashboard/ai", icon: Bot }] },
+  { label: "", items: [
+    { name: "Notifications", href: "/dashboard/notifications", icon: Bell },
+    { name: "AI Website Assistant", href: "/dashboard/ai", icon: Bot },
+  ] },
 ];
 
 const landingPageNav: NavGroup[] = [
@@ -140,7 +146,10 @@ const landingPageNav: NavGroup[] = [
       { name: "Team", href: "/dashboard/team", icon: UserPlus },
     ],
   },
-  { label: "", items: [{ name: "AI Growth Assistant", href: "/dashboard/ai", icon: Bot }] },
+  { label: "", items: [
+    { name: "Notifications", href: "/dashboard/notifications", icon: Bell },
+    { name: "AI Growth Assistant", href: "/dashboard/ai", icon: Bot },
+  ] },
 ];
 
 function getNavForSiteType(siteType: string | null): NavGroup[] {
