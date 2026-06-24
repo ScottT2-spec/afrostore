@@ -253,6 +253,54 @@ export const moderateReviewSchema = z.object({
   isVerified: z.boolean().optional(),
 });
 
+// ─── FORMS ──────────────────────────────────────────────────
+
+export const formFieldSchema = z.object({
+  id: z.string(),
+  type: z.enum(["text", "email", "phone", "textarea", "number", "select", "radio", "checkbox", "date", "url", "file"]),
+  label: z.string().min(1).max(200),
+  placeholder: z.string().max(200).optional(),
+  required: z.boolean().default(false),
+  options: z.array(z.string()).optional(), // for select, radio, checkbox
+  validation: z.object({
+    min: z.number().optional(),
+    max: z.number().optional(),
+    pattern: z.string().optional(),
+  }).optional(),
+});
+
+export const createFormSchema = z.object({
+  name: z.string().min(1, "Form name is required").max(200),
+  description: z.string().max(2000).optional(),
+  fields: z.array(formFieldSchema).min(1, "At least one field is required"),
+  settings: z.object({
+    redirectUrl: z.string().url().optional(),
+    emailNotify: z.boolean().optional(),
+    notifyEmail: z.string().email().optional(),
+    successMessage: z.string().max(500).optional(),
+    submitButtonText: z.string().max(100).optional(),
+  }).optional(),
+  submitButtonText: z.string().max(100).default("Submit"),
+  successMessage: z.string().max(500).optional(),
+  isActive: z.boolean().default(true),
+});
+
+export const updateFormSchema = z.object({
+  name: z.string().min(1).max(200).optional(),
+  description: z.string().max(2000).optional().nullable(),
+  fields: z.array(formFieldSchema).min(1).optional(),
+  settings: z.object({
+    redirectUrl: z.string().url().optional(),
+    emailNotify: z.boolean().optional(),
+    notifyEmail: z.string().email().optional(),
+    successMessage: z.string().max(500).optional(),
+    submitButtonText: z.string().max(100).optional(),
+  }).optional().nullable(),
+  submitButtonText: z.string().max(100).optional(),
+  successMessage: z.string().max(500).optional().nullable(),
+  isActive: z.boolean().optional(),
+});
+
 // ─── MEMBERS ────────────────────────────────────────────────
 
 export const addMemberSchema = z.object({
