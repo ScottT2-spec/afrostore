@@ -253,6 +253,100 @@ export const moderateReviewSchema = z.object({
   isVerified: z.boolean().optional(),
 });
 
+// ─── AUTOMATIONS ────────────────────────────────────────────
+
+export const createAutomationSchema = z.object({
+  name: z.string().min(1, "Name is required").max(200),
+  description: z.string().max(2000).optional(),
+  trigger: z.object({
+    type: z.enum(["new_order", "new_lead", "abandoned_cart", "payment_success", "form_submission", "product_purchase", "visitor_activity", "schedule"]),
+    conditions: z.record(z.string(), z.unknown()).optional(),
+  }),
+  actions: z.array(z.object({
+    type: z.enum(["send_email", "send_sms", "send_whatsapp", "create_task", "assign_user", "add_crm_tag", "ai_response", "webhook", "delay"]),
+    config: z.record(z.string(), z.unknown()).optional(),
+  })).min(1, "At least one action is required"),
+  isActive: z.boolean().default(false),
+});
+
+export const updateAutomationSchema = z.object({
+  name: z.string().min(1).max(200).optional(),
+  description: z.string().max(2000).optional().nullable(),
+  trigger: z.object({
+    type: z.enum(["new_order", "new_lead", "abandoned_cart", "payment_success", "form_submission", "product_purchase", "visitor_activity", "schedule"]),
+    conditions: z.record(z.string(), z.unknown()).optional(),
+  }).optional(),
+  actions: z.array(z.object({
+    type: z.enum(["send_email", "send_sms", "send_whatsapp", "create_task", "assign_user", "add_crm_tag", "ai_response", "webhook", "delay"]),
+    config: z.record(z.string(), z.unknown()).optional(),
+  })).min(1).optional(),
+  isActive: z.boolean().optional(),
+});
+
+// ─── POPUPS ─────────────────────────────────────────────────
+
+export const createPopupSchema = z.object({
+  name: z.string().min(1, "Name is required").max(200),
+  type: z.enum(["MODAL", "BANNER", "SLIDE_IN", "FULL_SCREEN", "COUNTDOWN", "NOTIFICATION_BAR"]).default("MODAL"),
+  content: z.any().optional(),
+  trigger: z.object({
+    type: z.enum(["exit_intent", "scroll", "time_delay", "click", "page_load"]),
+    config: z.record(z.string(), z.unknown()).optional(),
+  }).optional(),
+  displayRules: z.object({
+    pages: z.array(z.string()).optional(),
+    frequency: z.enum(["once", "session", "always"]).optional(),
+    devices: z.array(z.enum(["desktop", "mobile", "tablet"])).optional(),
+  }).optional(),
+  isActive: z.boolean().default(false),
+});
+
+export const updatePopupSchema = z.object({
+  name: z.string().min(1).max(200).optional(),
+  type: z.enum(["MODAL", "BANNER", "SLIDE_IN", "FULL_SCREEN", "COUNTDOWN", "NOTIFICATION_BAR"]).optional(),
+  content: z.any().optional(),
+  trigger: z.object({
+    type: z.enum(["exit_intent", "scroll", "time_delay", "click", "page_load"]),
+    config: z.record(z.string(), z.unknown()).optional(),
+  }).optional().nullable(),
+  displayRules: z.object({
+    pages: z.array(z.string()).optional(),
+    frequency: z.enum(["once", "session", "always"]).optional(),
+    devices: z.array(z.enum(["desktop", "mobile", "tablet"])).optional(),
+  }).optional().nullable(),
+  isActive: z.boolean().optional(),
+});
+
+// ─── A/B TESTS ──────────────────────────────────────────────
+
+export const createABTestSchema = z.object({
+  name: z.string().min(1, "Name is required").max(200),
+  pageId: z.string().optional(),
+  variants: z.array(z.object({
+    id: z.string(),
+    name: z.string().min(1).max(100),
+    content: z.any().optional(),
+    weight: z.number().min(0).max(100).default(50),
+  })).min(2, "At least 2 variants required"),
+  startsAt: z.string().datetime().optional().nullable(),
+  endsAt: z.string().datetime().optional().nullable(),
+});
+
+export const updateABTestSchema = z.object({
+  name: z.string().min(1).max(200).optional(),
+  pageId: z.string().optional().nullable(),
+  status: z.enum(["DRAFT", "RUNNING", "PAUSED", "COMPLETED"]).optional(),
+  variants: z.array(z.object({
+    id: z.string(),
+    name: z.string().min(1).max(100),
+    content: z.any().optional(),
+    weight: z.number().min(0).max(100).default(50),
+  })).min(2).optional(),
+  winnerVariantId: z.string().optional().nullable(),
+  startsAt: z.string().datetime().optional().nullable(),
+  endsAt: z.string().datetime().optional().nullable(),
+});
+
 // ─── EMAIL CAMPAIGNS ────────────────────────────────────────
 
 export const createEmailCampaignSchema = z.object({
