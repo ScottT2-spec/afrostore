@@ -131,10 +131,14 @@ export default function TemplateGallery({
                       <ExternalLink className="h-4 w-4" />
                     </a>
                   )}
-                  {selectable && (
+                  {selectable ? (
                     <button onClick={() => onUseTemplate?.(template)} className="rounded-lg bg-brand-600 px-3 py-2 text-sm font-semibold text-white hover:bg-brand-700">
                       Use
                     </button>
+                  ) : (
+                    <Link href={`/dashboard/new-site?template=${template.slug}`} className="rounded-lg bg-brand-600 px-3 py-2 text-sm font-semibold text-white hover:bg-brand-700">
+                      Use
+                    </Link>
                   )}
                 </div>
               </div>
