@@ -253,6 +253,24 @@ export const moderateReviewSchema = z.object({
   isVerified: z.boolean().optional(),
 });
 
+// ─── BRANDS ─────────────────────────────────────────────────
+
+export const createBrandSchema = z.object({
+  name: z.string().min(1, "Brand name is required").max(200),
+  logo: z.string().url().optional().nullable(),
+  description: z.string().max(2000).optional(),
+  website: z.string().url().optional().nullable(),
+  position: z.number().int().min(0).default(0),
+});
+
+export const updateBrandSchema = z.object({
+  name: z.string().min(1).max(200).optional(),
+  logo: z.string().url().optional().nullable(),
+  description: z.string().max(2000).optional().nullable(),
+  website: z.string().url().optional().nullable(),
+  position: z.number().int().min(0).optional(),
+});
+
 // ─── FORMS ──────────────────────────────────────────────────
 
 export const formFieldSchema = z.object({
