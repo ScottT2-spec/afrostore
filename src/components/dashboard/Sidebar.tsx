@@ -42,6 +42,7 @@ const ecommerceNav: NavGroup[] = [
       { name: "Customers", href: "/dashboard/customers", icon: Users },
       { name: "Reviews", href: "/dashboard/reviews", icon: Star },
       { name: "Returns", href: "/dashboard/returns", icon: Undo2 },
+      { name: "Inventory", href: "/dashboard/inventory", icon: BarChart3 },
       { name: "Messages", href: "/dashboard/messages", icon: Mail },
     ],
   },
@@ -53,6 +54,7 @@ const ecommerceNav: NavGroup[] = [
       { name: "Referrals", href: "/dashboard/referrals", icon: Link2 },
       { name: "Loyalty", href: "/dashboard/loyalty", icon: Crown },
       { name: "Abandoned Carts", href: "/dashboard/abandoned-carts", icon: RotateCcw },
+      { name: "Campaigns", href: "/dashboard/marketing", icon: Megaphone },
     ],
   },
   {
@@ -69,7 +71,10 @@ const ecommerceNav: NavGroup[] = [
       { name: "Team", href: "/dashboard/team", icon: UserPlus },
     ],
   },
-  { label: "", items: [{ name: "AI Commerce Assistant", href: "/dashboard/ai", icon: Bot }] },
+  { label: "", items: [
+    { name: "Notifications", href: "/dashboard/notifications", icon: Bell },
+    { name: "AI Commerce Assistant", href: "/dashboard/ai", icon: Bot },
+  ] },
 ];
 
 const websiteNav: NavGroup[] = [
@@ -100,7 +105,10 @@ const websiteNav: NavGroup[] = [
       { name: "Team", href: "/dashboard/team", icon: UserPlus },
     ],
   },
-  { label: "", items: [{ name: "AI Website Assistant", href: "/dashboard/ai", icon: Bot }] },
+  { label: "", items: [
+    { name: "Notifications", href: "/dashboard/notifications", icon: Bell },
+    { name: "AI Website Assistant", href: "/dashboard/ai", icon: Bot },
+  ] },
 ];
 
 const landingPageNav: NavGroup[] = [
@@ -124,9 +132,7 @@ const landingPageNav: NavGroup[] = [
   {
     label: "Marketing",
     items: [
-      { name: "Email Campaigns", href: "/dashboard/email-campaigns", icon: Mail },
-      { name: "SMS Campaigns", href: "/dashboard/sms-campaigns", icon: Smartphone },
-      { name: "WhatsApp", href: "/dashboard/whatsapp-campaigns", icon: MessageSquare },
+      { name: "Marketing", href: "/dashboard/marketing", icon: Megaphone },
       { name: "Automations", href: "/dashboard/automations", icon: Zap },
     ],
   },
@@ -140,7 +146,10 @@ const landingPageNav: NavGroup[] = [
       { name: "Team", href: "/dashboard/team", icon: UserPlus },
     ],
   },
-  { label: "", items: [{ name: "AI Growth Assistant", href: "/dashboard/ai", icon: Bot }] },
+  { label: "", items: [
+    { name: "Notifications", href: "/dashboard/notifications", icon: Bell },
+    { name: "AI Growth Assistant", href: "/dashboard/ai", icon: Bot },
+  ] },
 ];
 
 function getNavForSiteType(siteType: string | null): NavGroup[] {

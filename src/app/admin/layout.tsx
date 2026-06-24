@@ -3,7 +3,8 @@
 import AdminSidebar from "@/components/admin/AdminSidebar";
 import { useAuth } from "@/context/AuthContext";
 import { useRouter } from "next/navigation";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
+import { ChevronRight, X, ShoppingBag } from "lucide-react";
 
 export default function AdminLayout({
   children,
@@ -12,18 +13,25 @@ export default function AdminLayout({
 }) {
   const { user, loading } = useAuth();
   const router = useRouter();
+  const [sidebarOpen, setSidebarOpen] = useState(false);
+  const [collapsed, setCollapsed] = useState(false);
 
   useEffect(() => {
     if (!loading && !user) {
       router.push("/auth/login");
       return;
     }
-    
+
     if (user && user.role !== "ADMIN" && user.role !== "SUPER_ADMIN") {
       router.push("/dashboard");
       return;
     }
   }, [user, loading, router]);
+
+  // Close sidebar on route change (mobile)
+  useEffect(() => {
+    setSidebarOpen(false);
+  }, []);
 
   if (loading) {
     return (
@@ -39,8 +47,63 @@ export default function AdminLayout({
 
   return (
     <div className="min-h-screen bg-surface-50">
-      <AdminSidebar />
-      <main className="lg:pl-64 min-h-screen">{children}</main>
+      {/* Mobile sidebar toggle — small arrow on left edge */}
+      {!sidebarOpen && (
+        <button
+          onClick={() => setSidebarOpen(true)}
+          className="fixed left-0 top-1/2 -translate-y-1/2 z-50 lg:hidden flex items-center justify-center h-12 w-6 bg-accent-600 text-white rounded-r-lg shadow-lg active:bg-accent-700 transition-colors"
+          aria-label="Open sidebar"
+        >
+          <ChevronRight className="h-4 w-4" />
+        </button>
+      )}
+
+      {/* Mobile top bar — minimal, just logo */}
+      <div className="sticky top-0 z-30 flex h-12 items-center gap-2 border-b border-surface-200 bg-white px-4 lg:hidden">
+        <div className="flex h-7 w-7 items-center justify-center rounded-lg bg-brand-600">
+          <ShoppingBag className="h-4 w-4 text-white" />
+        </div>
+        <span className="font-display text-sm font-bold text-surface-900">
+          Admin <span className="text-accent-600">Panel</span>
+        </span>
+      </div>
+
+      {/* Mobile overlay */}
+      {sidebarOpen && (
+        <div
+          className="fixed inset-0 z-40 bg-black/50 backdrop-blur-sm lg:hidden"
+          onClick={() => setSidebarOpen(false)}
+        />
+      )}
+
+      {/* Sidebar */}
+      <div
+        className={`
+          fixed inset-y-0 left-0 z-50 transition-transform duration-300 ease-in-out
+          ${sidebarOpen ? "translate-x-0" : "-translate-x-full"}
+          lg:translate-x-0
+        `}
+      >
+        {/* Mobile close button */}
+        {sidebarOpen && (
+          <button
+            onClick={() => setSidebarOpen(false)}
+            className="absolute top-3 -right-10 z-50 lg:hidden flex items-center justify-center h-8 w-8 bg-white rounded-full shadow-lg text-surface-600"
+            aria-label="Close sidebar"
+          >
+            <X className="h-4 w-4" />
+          </button>
+        )}
+        <AdminSidebar
+          collapsed={collapsed}
+          setCollapsed={setCollapsed}
+          onNavigate={() => setSidebarOpen(false)}
+        />
+      </div>
+
+      <main className={`${collapsed ? "lg:pl-[72px]" : "lg:pl-64"} min-h-screen transition-all duration-300`}>
+        {children}
+      </main>
     </div>
   );
 }
