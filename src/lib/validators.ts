@@ -253,6 +253,34 @@ export const moderateReviewSchema = z.object({
   isVerified: z.boolean().optional(),
 });
 
+// ─── CRM CONTACTS ───────────────────────────────────────────
+
+export const createCrmContactSchema = z.object({
+  email: z.string().email("Valid email is required"),
+  firstName: z.string().max(100).optional(),
+  lastName: z.string().max(100).optional(),
+  phone: z.string().max(30).optional(),
+  company: z.string().max(200).optional(),
+  source: z.string().max(100).optional(),
+  status: z.enum(["NEW", "CONTACTED", "QUALIFIED", "PROPOSAL", "NEGOTIATION", "WON", "LOST", "UNSUBSCRIBED"]).default("NEW"),
+  score: z.number().int().min(0).max(1000).default(0),
+  tags: z.array(z.string().max(50)).max(20).default([]),
+  customFields: z.record(z.string(), z.unknown()).optional(),
+});
+
+export const updateCrmContactSchema = z.object({
+  email: z.string().email().optional(),
+  firstName: z.string().max(100).optional().nullable(),
+  lastName: z.string().max(100).optional().nullable(),
+  phone: z.string().max(30).optional().nullable(),
+  company: z.string().max(200).optional().nullable(),
+  source: z.string().max(100).optional().nullable(),
+  status: z.enum(["NEW", "CONTACTED", "QUALIFIED", "PROPOSAL", "NEGOTIATION", "WON", "LOST", "UNSUBSCRIBED"]).optional(),
+  score: z.number().int().min(0).max(1000).optional(),
+  tags: z.array(z.string().max(50)).max(20).optional(),
+  customFields: z.record(z.string(), z.unknown()).optional().nullable(),
+});
+
 // ─── BRANDS ─────────────────────────────────────────────────
 
 export const createBrandSchema = z.object({
