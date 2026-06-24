@@ -3,142 +3,550 @@
 import { useState, useEffect, useCallback } from "react";
 import { useSite } from "@/context/StoreContext";
 import { api } from "@/lib/api-client";
-import { Link2, Loader2, Save, Users, DollarSign, MousePointerClick, ShoppingCart, Settings } from "lucide-react";
+import DashboardHeader from "@/components/dashboard/DashboardHeader";
+import { useAIPrefill } from "@/hooks/useAIPrefill";
+import AIPrefillBanner from "@/components/dashboard/AIPrefillBanner";
+import { useRouter } from "next/navigation";
+import {
+  Loader2,
+  Link2,
+  Users,
+  DollarSign,
+  MousePointerClick,
+  ShoppingCart,
+  Copy,
+  Check,
+  Settings,
+  UserPlus,
+  Eye,
+  MoreHorizontal,
+  TrendingUp,
+  Gift,
+  ToggleLeft,
+  ToggleRight,
+  X,
+} from "lucide-react";
 
 interface ReferralProgram {
-  id: string; enabled: boolean; commissionType: string; commissionValue: number;
-  cookieDays: number; minPayoutAmount: number; autoApprove: boolean;
-  welcomeMessage: string | null; termsText: string | null;
+  id: string;
+  siteId: string;
+  enabled: boolean;
+  commissionType: "PERCENTAGE" | "FLAT";
+  commissionValue: number;
+  cookieDays: number;
+  minPayoutAmount: number;
+  autoApprove: boolean;
+  welcomeMessage?: string;
+  termsText?: string;
 }
 
-interface AffiliateItem {
-  id: string; code: string; status: string;
-  totalClicks: number; totalOrders: number; totalEarnings: number; pendingEarnings: number;
+interface AffiliateData {
+  id: string;
+  code: string;
+  status: "PENDING" | "APPROVED" | "SUSPENDED" | "REJECTED";
+  totalClicks: number;
+  totalOrders: number;
+  totalEarnings: number;
+  pendingEarnings: number;
+  paidEarnings: number;
+  createdAt: string;
   customer: { id: string; firstName: string; lastName: string; email: string };
-  _count: { referrals: number };
+  _count: { referrals: number; payouts: number };
 }
 
-interface Stats { totalAffiliates: number; totalClicks: number; totalOrders: number; totalEarnings: number; pendingEarnings: number; }
+interface ProgramResponse extends ReferralProgram {
+  affiliates: AffiliateData[];
+}
 
-const statusStyles: Record<string, string> = {
-  PENDING: "bg-amber-50 text-amber-700", APPROVED: "bg-green-50 text-green-700",
-  SUSPENDED: "bg-red-50 text-red-700", REJECTED: "bg-surface-100 text-surface-500",
-};
+interface Customer {
+  id: string;
+  firstName: string;
+  lastName: string;
+  email: string;
+}
 
 export default function ReferralsPage() {
   const { currentStore } = useSite();
-  const [program, setProgram] = useState<ReferralProgram | null>(null);
-  const [affiliates, setAffiliates] = useState<AffiliateItem[]>([]);
-  const [stats, setStats] = useState<Stats>({ totalAffiliates: 0, totalClicks: 0, totalOrders: 0, totalEarnings: 0, pendingEarnings: 0 });
+  const router = useRouter();
+  const { prefillData, clearPrefill, isFromAI } = useAIPrefill("referral_program");
+  const [program, setProgram] = useState<ProgramResponse | null>(null);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
-  const [edited, setEdited] = useState(false);
+  const [showSettings, setShowSettings] = useState(false);
+  const [showAddAffiliate, setShowAddAffiliate] = useState(false);
+  const [copiedCode, setCopiedCode] = useState<string | null>(null);
+  const [customers, setCustomers] = useState<Customer[]>([]);
+  const [selectedCustomer, setSelectedCustomer] = useState("");
+  const [addingAffiliate, setAddingAffiliate] = useState(false);
 
-  const fetchData = useCallback(async () => {
+  // Settings form
+  const [settings, setSettings] = useState({
+    enabled: true,
+    commissionType: "PERCENTAGE" as "PERCENTAGE" | "FLAT",
+    commissionValue: 10,
+    cookieDays: 30,
+    minPayoutAmount: 5000,
+    autoApprove: false,
+    welcomeMessage: "",
+    termsText: "",
+  });
+
+  const loadProgram = useCallback(async () => {
     if (!currentStore) return;
-    setLoading(true);
-    const res = await api.get<{ program: ReferralProgram; affiliates: AffiliateItem[]; stats: Stats }>(`/api/sites/${currentStore.id}/referrals`);
-    if (res.success && res.data) { setProgram(res.data.program); setAffiliates(res.data.affiliates || []); setStats(res.data.stats); }
+    const res = await api.get<ProgramResponse>(`/api/sites/${currentStore.id}/referrals`);
+    if (res.success && res.data) {
+      setProgram(res.data);
+      setSettings({
+        enabled: res.data.enabled,
+        commissionType: res.data.commissionType,
+        commissionValue: res.data.commissionValue,
+        cookieDays: res.data.cookieDays,
+        minPayoutAmount: res.data.minPayoutAmount,
+        autoApprove: res.data.autoApprove,
+        welcomeMessage: res.data.welcomeMessage || "",
+        termsText: res.data.termsText || "",
+      });
+    }
     setLoading(false);
   }, [currentStore]);
 
-  useEffect(() => { fetchData(); }, [fetchData]);
+  useEffect(() => { loadProgram(); }, [loadProgram]);
 
-  const update = (field: keyof ReferralProgram, value: number | boolean | string | null) => {
-    if (!program) return;
-    setProgram({ ...program, [field]: value }); setEdited(true);
+  // AI prefill
+  useEffect(() => {
+    if (prefillData && isFromAI) {
+      setSettings((prev) => ({ ...prev, ...(prefillData as any) }));
+      setShowSettings(true);
+    }
+  }, [prefillData, isFromAI]);
+
+  const loadCustomers = async () => {
+    if (!currentStore) return;
+    const res = await api.get<any>(`/api/sites/${currentStore.id}/customers?limit=100`);
+    if (res.success && res.data) {
+      setCustomers(Array.isArray(res.data) ? res.data : res.data.customers || []);
+    }
   };
 
-  const save = async () => {
-    if (!currentStore || !program) return;
+  const saveSettings = async () => {
+    if (!currentStore) return;
     setSaving(true);
-    const { id, ...data } = program;
-    await api.patch(`/api/sites/${currentStore.id}/referrals`, data);
-    setSaving(false); setEdited(false);
+    await api.post(`/api/sites/${currentStore.id}/referrals`, settings);
+    await loadProgram();
+    setSaving(false);
+    setShowSettings(false);
+    if (isFromAI) { clearPrefill(); router.push("/dashboard/ai"); }
   };
 
-  if (!currentStore || loading) return <div className="p-6 flex items-center justify-center min-h-[50vh]"><Loader2 className="h-8 w-8 animate-spin text-brand-600" /></div>;
-  if (!program) return null;
+  const addAffiliate = async () => {
+    if (!currentStore || !selectedCustomer) return;
+    setAddingAffiliate(true);
+    await api.post(`/api/sites/${currentStore.id}/referrals/affiliates`, {
+      customerId: selectedCustomer,
+    });
+    await loadProgram();
+    setAddingAffiliate(false);
+    setShowAddAffiliate(false);
+    setSelectedCustomer("");
+  };
 
-  const statCards = [
-    { label: "Affiliates", value: stats.totalAffiliates, icon: Users, color: "bg-blue-50 text-blue-600" },
-    { label: "Total Clicks", value: stats.totalClicks.toLocaleString(), icon: MousePointerClick, color: "bg-purple-50 text-purple-600" },
-    { label: "Referred Orders", value: stats.totalOrders, icon: ShoppingCart, color: "bg-green-50 text-green-600" },
-    { label: "Total Earnings", value: `$${stats.totalEarnings.toLocaleString()}`, icon: DollarSign, color: "bg-amber-50 text-amber-600" },
+  const updateAffiliateStatus = async (affiliateId: string, status: string) => {
+    if (!currentStore) return;
+    await api.patch(`/api/sites/${currentStore.id}/referrals/affiliates/${affiliateId}`, { status });
+    await loadProgram();
+  };
+
+  const copyLink = (code: string) => {
+    const domain = currentStore?.customDomain || `${currentStore?.subdomain}.afrostore.com`;
+    navigator.clipboard.writeText(`https://${domain}?ref=${code}`);
+    setCopiedCode(code);
+    setTimeout(() => setCopiedCode(null), 2000);
+  };
+
+  const currency = currentStore?.currency || "NGN";
+  const symbol = currency === "NGN" ? "₦" : currency === "GHS" ? "₵" : currency;
+
+  if (loading) {
+    return (
+      <>
+        <DashboardHeader title="Referrals" subtitle="Manage your affiliate referral program" />
+        <div className="p-6 flex items-center justify-center min-h-[50vh]">
+          <Loader2 className="h-8 w-8 animate-spin text-brand-600" />
+        </div>
+      </>
+    );
+  }
+
+  // Stats
+  const affiliates = program?.affiliates || [];
+  const totalAffiliates = affiliates.length;
+  const activeAffiliates = affiliates.filter((a) => a.status === "APPROVED").length;
+  const totalClicks = affiliates.reduce((s, a) => s + a.totalClicks, 0);
+  const totalOrders = affiliates.reduce((s, a) => s + a.totalOrders, 0);
+  const totalEarnings = affiliates.reduce((s, a) => s + a.totalEarnings, 0);
+  const totalPending = affiliates.reduce((s, a) => s + a.pendingEarnings, 0);
+
+  const stats = [
+    { label: "Affiliates", value: activeAffiliates, icon: Users, color: "brand" },
+    { label: "Total Clicks", value: totalClicks.toLocaleString(), icon: MousePointerClick, color: "blue" },
+    { label: "Referred Orders", value: totalOrders, icon: ShoppingCart, color: "purple" },
+    { label: "Total Commissions", value: `${symbol}${totalEarnings.toLocaleString()}`, icon: DollarSign, color: "accent" },
   ];
 
+  const colorMap: Record<string, string> = {
+    brand: "bg-brand-50 text-brand-600",
+    blue: "bg-blue-50 text-blue-600",
+    purple: "bg-purple-50 text-purple-600",
+    accent: "bg-accent-50 text-accent-600",
+  };
+
+  const statusColors: Record<string, string> = {
+    APPROVED: "bg-green-50 text-green-700 border-green-200",
+    PENDING: "bg-yellow-50 text-yellow-700 border-yellow-200",
+    SUSPENDED: "bg-red-50 text-red-700 border-red-200",
+    REJECTED: "bg-surface-100 text-surface-500 border-surface-200",
+  };
+
   return (
-    <div className="p-6 space-y-6">
-      <div className="flex items-center justify-between">
-        <div><h1 className="text-2xl font-bold text-surface-900 font-display">Referral Program</h1><p className="text-sm text-surface-500 mt-1">Grow through affiliate partnerships and referral commissions</p></div>
-        {edited && <button onClick={save} disabled={saving} className="btn-primary text-sm py-2.5 px-4">{saving ? <Loader2 className="h-4 w-4 animate-spin" /> : <><Save className="h-4 w-4" /> Save</>}</button>}
-      </div>
+    <>
+      <DashboardHeader
+        title="Referrals"
+        subtitle="Grow your sales through affiliate referral links"
+        action={program ? { label: "Settings", href: "#", onClick: () => setShowSettings(true) } : undefined}
+      />
 
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
-        {statCards.map((s) => (
-          <div key={s.label} className="rounded-xl border border-surface-200 bg-white p-4">
-            <div className={`h-8 w-8 rounded-lg flex items-center justify-center ${s.color}`}><s.icon className="h-4 w-4" /></div>
-            <p className="text-lg font-bold text-surface-900 mt-2">{s.value}</p>
-            <p className="text-xs text-surface-500">{s.label}</p>
-          </div>
-        ))}
-      </div>
-
-      {/* Program Settings */}
-      <div className="rounded-2xl border border-surface-200 bg-white p-6 space-y-4">
-        <div className="flex items-center justify-between">
-          <div className="flex items-center gap-2"><Settings className="h-5 w-5 text-surface-500" /><h3 className="text-lg font-bold text-surface-900">Settings</h3></div>
-          <label className="flex items-center gap-2 cursor-pointer">
-            <input type="checkbox" checked={program.enabled} onChange={(e) => update("enabled", e.target.checked)} className="w-4 h-4 rounded border-surface-300 text-brand-600" />
-            <span className="text-sm font-medium text-surface-700">{program.enabled ? "Enabled" : "Disabled"}</span>
-          </label>
-        </div>
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-          <div><label className="block text-sm font-medium text-surface-700 mb-1">Commission Type</label>
-            <select value={program.commissionType} onChange={(e) => update("commissionType", e.target.value)} className="input-field py-2.5 w-full">
-              <option value="PERCENTAGE">Percentage</option><option value="FLAT">Flat Amount</option>
-            </select></div>
-          <div><label className="block text-sm font-medium text-surface-700 mb-1">Commission Value</label>
-            <input type="number" value={program.commissionValue} min={0} onChange={(e) => update("commissionValue", parseFloat(e.target.value) || 0)} className="input-field py-2.5 w-full" /></div>
-          <div><label className="block text-sm font-medium text-surface-700 mb-1">Cookie Days</label>
-            <input type="number" value={program.cookieDays} min={1} onChange={(e) => update("cookieDays", parseInt(e.target.value) || 30)} className="input-field py-2.5 w-full" /></div>
-          <div><label className="block text-sm font-medium text-surface-700 mb-1">Min Payout</label>
-            <input type="number" value={program.minPayoutAmount} min={0} onChange={(e) => update("minPayoutAmount", parseFloat(e.target.value) || 0)} className="input-field py-2.5 w-full" /></div>
-        </div>
-        <label className="flex items-center gap-2 cursor-pointer">
-          <input type="checkbox" checked={program.autoApprove} onChange={(e) => update("autoApprove", e.target.checked)} className="w-4 h-4 rounded border-surface-300 text-brand-600" />
-          <span className="text-sm text-surface-700">Auto-approve new affiliates</span>
-        </label>
-      </div>
-
-      {/* Affiliates */}
-      <div>
-        <h3 className="text-lg font-bold text-surface-900 mb-3">Top Affiliates</h3>
-        {affiliates.length === 0 ? (
-          <div className="rounded-2xl border border-surface-200 bg-white text-center py-12 px-6">
-            <Link2 className="h-8 w-8 text-surface-300 mx-auto mb-2" />
-            <p className="text-sm text-surface-500">No affiliates yet. They'll appear once customers sign up.</p>
-          </div>
-        ) : (
-          <div className="rounded-2xl border border-surface-200 bg-white overflow-hidden divide-y divide-surface-100">
-            {affiliates.map((a) => (
-              <div key={a.id} className="flex items-center gap-4 px-5 py-3">
-                <div className="h-9 w-9 rounded-lg bg-brand-50 flex items-center justify-center text-xs font-bold text-brand-600">{a.customer.firstName[0]}{a.customer.lastName[0]}</div>
-                <div className="flex-1 min-w-0">
-                  <div className="flex items-center gap-2">
-                    <span className="text-sm font-semibold text-surface-900">{a.customer.firstName} {a.customer.lastName}</span>
-                    <code className="text-xs bg-surface-100 px-1.5 py-0.5 rounded font-mono">{a.code}</code>
-                    <span className={`text-[10px] font-semibold px-2 py-0.5 rounded-full ${statusStyles[a.status]}`}>{a.status}</span>
-                  </div>
-                  <div className="flex items-center gap-3 text-xs text-surface-400">
-                    <span>{a.totalClicks} clicks</span><span>{a.totalOrders} orders</span><span>${a.totalEarnings.toFixed(2)} earned</span><span>${a.pendingEarnings.toFixed(2)} pending</span>
-                  </div>
-                </div>
-              </div>
-            ))}
+      <div className="p-6 space-y-6">
+        {isFromAI && <AIPrefillBanner entityType="referral program" onDiscard={() => { clearPrefill(); setShowSettings(false); }} />}
+        {/* No program yet */}
+        {!program && (
+          <div className="rounded-2xl border border-surface-200 bg-white p-12 text-center">
+            <div className="mx-auto w-16 h-16 rounded-2xl bg-brand-50 flex items-center justify-center mb-4">
+              <Gift className="h-8 w-8 text-brand-600" />
+            </div>
+            <h2 className="text-xl font-bold text-surface-900 font-display mb-2">
+              Launch Your Referral Program
+            </h2>
+            <p className="text-sm text-surface-500 max-w-md mx-auto mb-6">
+              Let your customers earn commissions by referring new buyers. Set a commission rate, share unique links, and watch your sales grow.
+            </p>
+            <button onClick={() => setShowSettings(true)} className="btn-primary">
+              <Link2 className="h-4 w-4" />
+              Set Up Referral Program
+            </button>
           </div>
         )}
+
+        {/* Program exists */}
+        {program && (
+          <>
+            {/* Program status bar */}
+            <div className="rounded-2xl border border-surface-200 bg-white p-4 flex items-center justify-between">
+              <div className="flex items-center gap-3">
+                <div className={`h-3 w-3 rounded-full ${program.enabled ? "bg-green-500" : "bg-surface-300"}`} />
+                <span className="text-sm font-medium text-surface-900">
+                  {program.enabled ? "Program Active" : "Program Paused"}
+                </span>
+                <span className="text-xs text-surface-400">
+                  {program.commissionValue}{program.commissionType === "PERCENTAGE" ? "%" : ` ${currency}`} per referral
+                </span>
+              </div>
+              <button
+                onClick={() => setShowSettings(true)}
+                className="text-xs text-brand-600 font-semibold hover:text-brand-700 flex items-center gap-1"
+              >
+                <Settings className="h-3.5 w-3.5" />
+                Settings
+              </button>
+            </div>
+
+            {/* Stats */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+              {stats.map((stat) => {
+                const Icon = stat.icon;
+                return (
+                  <div key={stat.label} className="rounded-2xl border border-surface-200 bg-white p-5 transition-all hover:shadow-md">
+                    <div className="flex items-center justify-between mb-3">
+                      <div className={`flex h-10 w-10 items-center justify-center rounded-xl ${colorMap[stat.color]}`}>
+                        <Icon className="h-5 w-5" />
+                      </div>
+                    </div>
+                    <div className="text-2xl font-bold text-surface-900 font-display">{stat.value}</div>
+                    <div className="text-xs text-surface-500 mt-0.5">{stat.label}</div>
+                  </div>
+                );
+              })}
+            </div>
+
+            {/* Pending earnings banner */}
+            {totalPending > 0 && (
+              <div className="rounded-2xl border border-amber-200 bg-amber-50 p-4 flex items-center justify-between">
+                <div className="flex items-center gap-3">
+                  <TrendingUp className="h-5 w-5 text-amber-600" />
+                  <span className="text-sm font-medium text-amber-800">
+                    {symbol}{totalPending.toLocaleString()} in pending commissions awaiting approval
+                  </span>
+                </div>
+              </div>
+            )}
+
+            {/* Affiliates table */}
+            <div className="rounded-2xl border border-surface-200 bg-white">
+              <div className="flex items-center justify-between p-6 pb-4">
+                <div>
+                  <h3 className="text-base font-bold text-surface-900">Affiliates</h3>
+                  <p className="text-xs text-surface-500 mt-0.5">{totalAffiliates} total affiliate{totalAffiliates !== 1 ? "s" : ""}</p>
+                </div>
+                <button
+                  onClick={() => { setShowAddAffiliate(true); loadCustomers(); }}
+                  className="btn-primary text-xs py-2"
+                >
+                  <UserPlus className="h-3.5 w-3.5" />
+                  Add Affiliate
+                </button>
+              </div>
+
+              {affiliates.length === 0 ? (
+                <div className="px-6 pb-8 text-center text-sm text-surface-400">
+                  No affiliates yet. Add your first affiliate to get started.
+                </div>
+              ) : (
+                <div className="overflow-x-auto">
+                  <table className="w-full">
+                    <thead>
+                      <tr className="border-t border-surface-100">
+                        <th className="px-6 py-3 text-left text-[10px] font-semibold uppercase tracking-wider text-surface-400">Affiliate</th>
+                        <th className="px-6 py-3 text-left text-[10px] font-semibold uppercase tracking-wider text-surface-400">Code</th>
+                        <th className="px-6 py-3 text-left text-[10px] font-semibold uppercase tracking-wider text-surface-400">Status</th>
+                        <th className="px-6 py-3 text-right text-[10px] font-semibold uppercase tracking-wider text-surface-400">Clicks</th>
+                        <th className="px-6 py-3 text-right text-[10px] font-semibold uppercase tracking-wider text-surface-400">Orders</th>
+                        <th className="px-6 py-3 text-right text-[10px] font-semibold uppercase tracking-wider text-surface-400">Earned</th>
+                        <th className="px-6 py-3 text-center text-[10px] font-semibold uppercase tracking-wider text-surface-400">Actions</th>
+                      </tr>
+                    </thead>
+                    <tbody className="divide-y divide-surface-100">
+                      {affiliates.map((aff) => (
+                        <tr key={aff.id} className="hover:bg-surface-50 transition-colors">
+                          <td className="px-6 py-3.5">
+                            <div className="flex items-center gap-2.5">
+                              <div className="h-8 w-8 rounded-full bg-gradient-to-br from-brand-600 to-accent-400 flex items-center justify-center text-white text-[10px] font-bold">
+                                {aff.customer.firstName[0]}{aff.customer.lastName[0]}
+                              </div>
+                              <div>
+                                <div className="text-sm font-medium text-surface-900">{aff.customer.firstName} {aff.customer.lastName}</div>
+                                <div className="text-[10px] text-surface-400">{aff.customer.email}</div>
+                              </div>
+                            </div>
+                          </td>
+                          <td className="px-6 py-3.5">
+                            <div className="flex items-center gap-2">
+                              <code className="text-xs font-mono bg-surface-100 px-2 py-0.5 rounded">{aff.code}</code>
+                              <button onClick={() => copyLink(aff.code)} className="text-surface-400 hover:text-brand-600">
+                                {copiedCode === aff.code ? <Check className="h-3.5 w-3.5 text-green-500" /> : <Copy className="h-3.5 w-3.5" />}
+                              </button>
+                            </div>
+                          </td>
+                          <td className="px-6 py-3.5">
+                            <span className={`inline-flex items-center rounded-full border px-2.5 py-0.5 text-[10px] font-semibold ${statusColors[aff.status]}`}>
+                              {aff.status}
+                            </span>
+                          </td>
+                          <td className="px-6 py-3.5 text-right text-sm text-surface-700">{aff.totalClicks}</td>
+                          <td className="px-6 py-3.5 text-right text-sm text-surface-700">{aff.totalOrders}</td>
+                          <td className="px-6 py-3.5 text-right text-sm font-semibold text-surface-900">{symbol}{aff.totalEarnings.toLocaleString()}</td>
+                          <td className="px-6 py-3.5 text-center">
+                            <div className="flex items-center justify-center gap-1">
+                              {aff.status === "PENDING" && (
+                                <button
+                                  onClick={() => updateAffiliateStatus(aff.id, "APPROVED")}
+                                  className="text-[10px] font-semibold text-green-600 hover:text-green-700 px-2 py-1 rounded hover:bg-green-50"
+                                >
+                                  Approve
+                                </button>
+                              )}
+                              {aff.status === "APPROVED" && (
+                                <button
+                                  onClick={() => updateAffiliateStatus(aff.id, "SUSPENDED")}
+                                  className="text-[10px] font-semibold text-red-600 hover:text-red-700 px-2 py-1 rounded hover:bg-red-50"
+                                >
+                                  Suspend
+                                </button>
+                              )}
+                              {aff.status === "SUSPENDED" && (
+                                <button
+                                  onClick={() => updateAffiliateStatus(aff.id, "APPROVED")}
+                                  className="text-[10px] font-semibold text-brand-600 hover:text-brand-700 px-2 py-1 rounded hover:bg-brand-50"
+                                >
+                                  Reactivate
+                                </button>
+                              )}
+                            </div>
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              )}
+            </div>
+          </>
+        )}
       </div>
-    </div>
+
+      {/* Settings Modal */}
+      {showSettings && (
+        <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4" onClick={() => setShowSettings(false)}>
+          <div className="bg-white rounded-2xl max-w-lg w-full max-h-[90vh] overflow-y-auto p-6" onClick={(e) => e.stopPropagation()}>
+            <div className="flex items-center justify-between mb-6">
+              <h2 className="text-lg font-bold text-surface-900 font-display">Referral Program Settings</h2>
+              <button onClick={() => setShowSettings(false)} className="text-surface-400 hover:text-surface-600">
+                <X className="h-5 w-5" />
+              </button>
+            </div>
+
+            <div className="space-y-5">
+              {/* Enable toggle */}
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-sm font-medium text-surface-900">Enable Program</p>
+                  <p className="text-xs text-surface-500">Allow affiliates to earn commissions</p>
+                </div>
+                <button onClick={() => setSettings((s) => ({ ...s, enabled: !s.enabled }))}>
+                  {settings.enabled
+                    ? <ToggleRight className="h-8 w-8 text-brand-600" />
+                    : <ToggleLeft className="h-8 w-8 text-surface-300" />
+                  }
+                </button>
+              </div>
+
+              {/* Commission */}
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-xs font-semibold text-surface-600 mb-1.5">Commission Type</label>
+                  <select
+                    value={settings.commissionType}
+                    onChange={(e) => setSettings((s) => ({ ...s, commissionType: e.target.value as "PERCENTAGE" | "FLAT" }))}
+                    className="w-full rounded-xl border border-surface-200 px-3 py-2 text-sm focus:border-brand-500 focus:ring-brand-500"
+                  >
+                    <option value="PERCENTAGE">Percentage (%)</option>
+                    <option value="FLAT">Flat Amount ({symbol})</option>
+                  </select>
+                </div>
+                <div>
+                  <label className="block text-xs font-semibold text-surface-600 mb-1.5">
+                    Commission {settings.commissionType === "PERCENTAGE" ? "(%)" : `(${symbol})`}
+                  </label>
+                  <input
+                    type="number"
+                    value={settings.commissionValue}
+                    onChange={(e) => setSettings((s) => ({ ...s, commissionValue: Number(e.target.value) }))}
+                    className="w-full rounded-xl border border-surface-200 px-3 py-2 text-sm focus:border-brand-500 focus:ring-brand-500"
+                    min={0}
+                    max={settings.commissionType === "PERCENTAGE" ? 100 : undefined}
+                  />
+                </div>
+              </div>
+
+              {/* Cookie & min payout */}
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-xs font-semibold text-surface-600 mb-1.5">Cookie Duration (days)</label>
+                  <input
+                    type="number"
+                    value={settings.cookieDays}
+                    onChange={(e) => setSettings((s) => ({ ...s, cookieDays: Number(e.target.value) }))}
+                    className="w-full rounded-xl border border-surface-200 px-3 py-2 text-sm focus:border-brand-500 focus:ring-brand-500"
+                    min={1}
+                  />
+                </div>
+                <div>
+                  <label className="block text-xs font-semibold text-surface-600 mb-1.5">Min Payout ({symbol})</label>
+                  <input
+                    type="number"
+                    value={settings.minPayoutAmount}
+                    onChange={(e) => setSettings((s) => ({ ...s, minPayoutAmount: Number(e.target.value) }))}
+                    className="w-full rounded-xl border border-surface-200 px-3 py-2 text-sm focus:border-brand-500 focus:ring-brand-500"
+                    min={0}
+                  />
+                </div>
+              </div>
+
+              {/* Auto approve */}
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-sm font-medium text-surface-900">Auto-Approve Referrals</p>
+                  <p className="text-xs text-surface-500">Automatically approve commissions on purchase</p>
+                </div>
+                <button onClick={() => setSettings((s) => ({ ...s, autoApprove: !s.autoApprove }))}>
+                  {settings.autoApprove
+                    ? <ToggleRight className="h-8 w-8 text-brand-600" />
+                    : <ToggleLeft className="h-8 w-8 text-surface-300" />
+                  }
+                </button>
+              </div>
+
+              {/* Welcome message */}
+              <div>
+                <label className="block text-xs font-semibold text-surface-600 mb-1.5">Welcome Message (optional)</label>
+                <textarea
+                  value={settings.welcomeMessage}
+                  onChange={(e) => setSettings((s) => ({ ...s, welcomeMessage: e.target.value }))}
+                  className="w-full rounded-xl border border-surface-200 px-3 py-2 text-sm focus:border-brand-500 focus:ring-brand-500"
+                  rows={3}
+                  placeholder="Message shown to new affiliates..."
+                />
+              </div>
+
+              <button
+                onClick={saveSettings}
+                disabled={saving}
+                className="w-full btn-primary py-2.5 disabled:opacity-50"
+              >
+                {saving ? <Loader2 className="h-4 w-4 animate-spin" /> : "Save Settings"}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Add Affiliate Modal */}
+      {showAddAffiliate && (
+        <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4" onClick={() => setShowAddAffiliate(false)}>
+          <div className="bg-white rounded-2xl max-w-md w-full p-6" onClick={(e) => e.stopPropagation()}>
+            <div className="flex items-center justify-between mb-6">
+              <h2 className="text-lg font-bold text-surface-900 font-display">Add Affiliate</h2>
+              <button onClick={() => setShowAddAffiliate(false)} className="text-surface-400 hover:text-surface-600">
+                <X className="h-5 w-5" />
+              </button>
+            </div>
+
+            <div className="space-y-4">
+              <div>
+                <label className="block text-xs font-semibold text-surface-600 mb-1.5">Select Customer</label>
+                <select
+                  value={selectedCustomer}
+                  onChange={(e) => setSelectedCustomer(e.target.value)}
+                  className="w-full rounded-xl border border-surface-200 px-3 py-2 text-sm focus:border-brand-500 focus:ring-brand-500"
+                >
+                  <option value="">Choose a customer...</option>
+                  {customers.map((c) => (
+                    <option key={c.id} value={c.id}>
+                      {c.firstName} {c.lastName} — {c.email}
+                    </option>
+                  ))}
+                </select>
+              </div>
+
+              <button
+                onClick={addAffiliate}
+                disabled={!selectedCustomer || addingAffiliate}
+                className="w-full btn-primary py-2.5 disabled:opacity-50"
+              >
+                {addingAffiliate ? <Loader2 className="h-4 w-4 animate-spin" /> : "Add as Affiliate"}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+    </>
   );
 }
