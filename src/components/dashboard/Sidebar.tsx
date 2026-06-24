@@ -14,7 +14,7 @@ import {
   Crown, ExternalLink, Home, Info, Phone, ScrollText, File, Mail,
   PenTool, BookOpen, Image as ImageIcon, Search, Target, MessageSquare,
   Smartphone, Filter, BarChart, MousePointer, Clock, Activity, Layers,
-  Building2, Bell, Undo2, Megaphone, Send,
+  Building2, Bell, Undo2, Megaphone, Send, Heart, Shield,
 } from "lucide-react";
 
 // ─── Nav types ─────────────────────────────────────────────
@@ -41,6 +41,7 @@ const ecommerceNav: NavGroup[] = [
       { name: "Orders", href: "/dashboard/orders", icon: ShoppingCart },
       { name: "Customers", href: "/dashboard/customers", icon: Users },
       { name: "Reviews", href: "/dashboard/reviews", icon: Star },
+      { name: "Wishlists", href: "/dashboard/wishlists", icon: Heart },
       { name: "Returns", href: "/dashboard/returns", icon: Undo2 },
       { name: "Inventory", href: "/dashboard/inventory", icon: BarChart3 },
       { name: "Messages", href: "/dashboard/messages", icon: Mail },
@@ -66,8 +67,10 @@ const ecommerceNav: NavGroup[] = [
       { name: "Pages", href: "/dashboard/pages", icon: FileText },
       { name: "Themes", href: "/dashboard/themes", icon: Palette },
       { name: "Plugins", href: "/dashboard/plugins", icon: Puzzle },
+      { name: "Marketplace", href: "/dashboard/marketplace", icon: Store },
       { name: "Domains", href: "/dashboard/domains", icon: Globe },
       { name: "Analytics", href: "/dashboard/analytics", icon: BarChart3 },
+      { name: "Audit Log", href: "/dashboard/audit-log", icon: Shield },
       { name: "Team", href: "/dashboard/team", icon: UserPlus },
     ],
   },

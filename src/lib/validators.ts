@@ -668,6 +668,66 @@ export const updateMemberRoleSchema = z.object({
   role: z.enum(["ADMIN", "STAFF", "VIEWER"]),
 });
 
+// ─── PRODUCT VARIANTS ───────────────────────────────────────
+
+export const createProductVariantSchema = z.object({
+  name: z.string().min(1, "Name is required").max(200),
+  sku: z.string().max(100).optional().nullable(),
+  price: z.number().min(0).optional().nullable(),
+  stock: z.number().int().min(0).default(0),
+  image: z.string().url().optional().nullable(),
+  options: z.record(z.string(), z.unknown()),
+  position: z.number().int().min(0).default(0),
+});
+
+export const updateProductVariantSchema = z.object({
+  name: z.string().min(1).max(200).optional(),
+  sku: z.string().max(100).optional().nullable(),
+  price: z.number().min(0).optional().nullable(),
+  stock: z.number().int().min(0).optional(),
+  image: z.string().url().optional().nullable(),
+  options: z.record(z.string(), z.unknown()).optional(),
+  position: z.number().int().min(0).optional(),
+});
+
+// ─── PRODUCT IMAGES ─────────────────────────────────────────
+
+export const createProductImageSchema = z.object({
+  url: z.string().url("Valid URL required"),
+  alt: z.string().max(255).optional().nullable(),
+  position: z.number().int().min(0).default(0),
+});
+
+export const updateProductImageSchema = z.object({
+  alt: z.string().max(255).optional().nullable(),
+  position: z.number().int().min(0).optional(),
+});
+
+// ─── MARKETPLACE ────────────────────────────────────────────
+
+export const createMarketplaceItemSchema = z.object({
+  type: z.enum(["THEME", "PLUGIN", "TEMPLATE", "FUNNEL", "AUTOMATION"]),
+  themeId: z.string().optional().nullable(),
+  pluginId: z.string().optional().nullable(),
+  name: z.string().min(1, "Name is required").max(200),
+  description: z.string().max(5000).optional(),
+  price: z.number().min(0).default(0),
+  currency: z.string().max(3).default("NGN"),
+  thumbnail: z.string().url().optional().nullable(),
+  category: z.string().max(100).optional().nullable(),
+  tags: z.array(z.string()).default([]),
+});
+
+export const updateMarketplaceItemSchema = z.object({
+  name: z.string().min(1).max(200).optional(),
+  description: z.string().max(5000).optional().nullable(),
+  price: z.number().min(0).optional(),
+  thumbnail: z.string().url().optional().nullable(),
+  status: z.enum(["PENDING", "APPROVED", "REJECTED", "SUSPENDED"]).optional(),
+  category: z.string().max(100).optional().nullable(),
+  tags: z.array(z.string()).optional(),
+});
+
 // ─── ANALYTICS ──────────────────────────────────────────────
 
 export const analyticsEventSchema = z.object({
