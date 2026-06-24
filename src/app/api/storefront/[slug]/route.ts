@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/db";
+import type { Prisma } from "@/generated/prisma";
 
 type Params = { params: Promise<{ slug: string }> };
 
@@ -79,6 +80,7 @@ export async function GET(req: NextRequest, { params }: Params) {
       deliveryZones,
       pages,
       activeTheme,
+      activeTemplate,
     ] = await Promise.all([
       prisma.siteSettings.findUnique({
         where: { siteId: site.id },
@@ -108,7 +110,7 @@ export async function GET(req: NextRequest, { params }: Params) {
       }),
 
       prisma.product.findMany({
-        where: productWhere as any,
+        where: productWhere as Prisma.ProductWhereInput,
         include: {
           images: { orderBy: { position: "asc" }, take: 3 },
           category: { select: { id: true, name: true, slug: true } },
@@ -119,7 +121,7 @@ export async function GET(req: NextRequest, { params }: Params) {
         take: limit,
       }),
 
-      prisma.product.count({ where: productWhere as any }),
+      prisma.product.count({ where: productWhere as Prisma.ProductWhereInput }),
 
       prisma.category.findMany({
         where: { siteId: site.id },
@@ -169,6 +171,15 @@ export async function GET(req: NextRequest, { params }: Params) {
           },
         },
       }),
+
+      prisma.siteTemplate.findFirst({
+        where: { siteId: site.id, isActive: true },
+        include: {
+          template: {
+            select: { id: true, name: true, slug: true },
+          },
+        },
+      }),
     ]);
 
     // Clean product output — strip cost price and other merchant-only fields
@@ -188,6 +199,17 @@ export async function GET(req: NextRequest, { params }: Params) {
       category: p.category,
       reviewCount: p._count.reviews,
     }));
+
+    const templateThemeConfig = activeTemplate?.themeConfig as unknown as
+      | {
+          homepage_layout?: string;
+          header_style?: string;
+          footer_style?: string;
+          product_card_style?: string;
+          colors?: Record<string, string>;
+          fonts?: Record<string, string>;
+        }
+      | undefined;
 
     return success({
       store: {
@@ -218,6 +240,32 @@ export async function GET(req: NextRequest, { params }: Params) {
             config: {
               ...(activeTheme.theme.config as Record<string, unknown>),
               ...(activeTheme.customConfig as Record<string, unknown> | null),
+            },
+          }
+        : activeTemplate
+        ? {
+            id: activeTemplate.template.id,
+            name: activeTemplate.template.name,
+            slug: activeTemplate.template.slug,
+            config: {
+              colors: {
+                primary: templateThemeConfig?.colors?.primary,
+                accent: templateThemeConfig?.colors?.accent,
+                headerBg: templateThemeConfig?.colors?.headerBg || templateThemeConfig?.colors?.background,
+                headerText: templateThemeConfig?.colors?.headerText || templateThemeConfig?.colors?.text,
+                footerBg: templateThemeConfig?.colors?.footerBg || templateThemeConfig?.colors?.secondary,
+                footerText: templateThemeConfig?.colors?.footerText || "#ffffff",
+                buttonBg: templateThemeConfig?.colors?.primary,
+                buttonText: "#ffffff",
+              },
+              fonts: templateThemeConfig?.fonts,
+              layout: {
+                template: templateThemeConfig?.homepage_layout,
+                headerStyle: templateThemeConfig?.header_style,
+                cardStyle: templateThemeConfig?.product_card_style,
+                maxWidth: "72rem",
+                productColumns: 4,
+              },
             },
           }
         : null,

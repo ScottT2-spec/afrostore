@@ -1,12 +1,22 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import {
   ShoppingBag, Globe, FileText, Sparkles, ArrowRight, ArrowLeft,
-  Check, Loader2, Zap, Layout, PenTool, Square, CreditCard,
-  Building2, Upload, Link as LinkIcon
+  Check, Loader2, Zap, Layout, Square, Palette, Link as LinkIcon
 } from 'lucide-react';
+import TemplateSelector from '@/templates/TemplateSelector';
+import type { TemplateDefinition } from '@/lib/templates/types';
+import { clearOnboardingDraft, saveOnboardingDraft } from '@/lib/onboarding-draft';
+import { useOnboardingDraft } from '@/hooks/useOnboardingDraft';
+import { useAuth } from '@/context/AuthContext';
+
+async function parseResponse<T>(response: Response): Promise<T | null> {
+  const text = await response.text();
+  if (!text) return null;
+  return JSON.parse(text) as T;
+}
 
 const INDUSTRIES = [
   { id: 'fashion', emoji: '👗', name: 'Fashion & Clothing' },
@@ -42,33 +52,69 @@ const PAYMENT_GATEWAYS = [
 ];
 
 type SiteType = 'ECOMMERCE' | 'WEBSITE' | 'LANDING_PAGE';
+type ScoredTemplate = TemplateDefinition & { matchPercent?: number; score?: number };
 
 export default function NewSitePage() {
   const router = useRouter();
   const searchParams = useSearchParams();
+  const { user } = useAuth();
   const workspaceId = searchParams.get('workspace');
+  const templateParam = searchParams.get('template');
+  const draft = useOnboardingDraft();
 
-  const [step, setStep] = useState(1);
+  const [step, setStep] = useState(draft?.currentStep || 1);
   const [creating, setCreating] = useState(false);
   const [created, setCreated] = useState(false);
   const [createdSiteId, setCreatedSiteId] = useState<string | null>(null);
+  const [createError, setCreateError] = useState('');
 
   // Form state
-  const [siteType, setSiteType] = useState<SiteType | null>(null);
-  const [industry, setIndustry] = useState<string | null>(null);
-  const [launchMethod, setLaunchMethod] = useState<string | null>(null);
+  const [siteType, setSiteType] = useState<SiteType | null>((draft?.siteType as SiteType | null) || null);
+  const [industry, setIndustry] = useState<string | null>(draft?.industry || null);
+  const [launchMethod, setLaunchMethod] = useState<string | null>(templateParam ? 'template' : draft?.launchMethod || null);
+  const [selectedTemplate, setSelectedTemplate] = useState<ScoredTemplate | null>(draft?.selectedTemplate || null);
+  const [selectedTemplateId, setSelectedTemplateId] = useState<string | null>(templateParam || draft?.selectedTemplateId || null);
   const [businessInfo, setBusinessInfo] = useState({
-    name: '', description: '', logo: '',
-    phone: '', email: '', location: '',
-    whatsapp: '', instagram: '', facebook: '', twitter: '', tiktok: '',
+    name: draft?.businessDetails.name || '',
+    description: draft?.businessDetails.description || '',
+    logo: draft?.businessDetails.logo || '',
+    phone: draft?.businessDetails.phone || '',
+    email: draft?.businessDetails.email || '',
+    location: draft?.businessDetails.location || '',
+    whatsapp: draft?.businessDetails.whatsapp || '',
+    instagram: draft?.businessDetails.instagram || '',
+    facebook: draft?.businessDetails.facebook || '',
+    twitter: draft?.businessDetails.twitter || '',
+    tiktok: draft?.businessDetails.tiktok || '',
+    products: draft?.businessDetails.products || '',
+    services: draft?.businessDetails.services || '',
+    targetAudience: draft?.businessDetails.targetAudience || '',
+  });
+  const [branding, setBranding] = useState({
+    primary: '#1B2B4B',
+    secondary: '#111827',
+    accent: '#F5B731',
+    background: '#ffffff',
+    text: '#111827',
+    headingFont: 'Plus Jakarta Sans',
+    bodyFont: 'Inter',
   });
   const [selectedGateways, setSelectedGateways] = useState<string[]>([]);
   const [domainType, setDomainType] = useState<'subdomain' | 'custom'>('subdomain');
   const [customDomain, setCustomDomain] = useState('');
+  const [recommendedTemplates, setRecommendedTemplates] = useState<ScoredTemplate[]>(draft?.recommendations || []);
 
   // Load workspaces if none specified
-  const [workspaces, setWorkspaces] = useState<Array<{ id: string; name: string }>>([]);
   const [selectedWorkspace, setSelectedWorkspace] = useState(workspaceId || '');
+  const businessContext = useMemo(() => ({
+    businessName: businessInfo.name,
+    businessCategory: industry,
+    industry,
+    description: businessInfo.description,
+    products: businessInfo.products.split(',').map((item) => item.trim()).filter(Boolean),
+    services: businessInfo.services.split(',').map((item) => item.trim()).filter(Boolean),
+    targetAudience: businessInfo.targetAudience,
+  }), [businessInfo, industry]);
 
   useEffect(() => {
     if (!workspaceId) {
@@ -77,12 +123,35 @@ export default function NewSitePage() {
         .then(r => r.json())
         .then(json => {
           if (json.success && json.data.length > 0) {
-            setWorkspaces(json.data);
             setSelectedWorkspace(json.data[0].id);
           }
         });
     }
   }, [workspaceId]);
+
+  useEffect(() => {
+    if (!user) return;
+    saveOnboardingDraft({
+      currentStep: step,
+      siteType,
+      industry,
+      launchMethod,
+      businessDetails: { ...businessInfo },
+      selectedTemplate,
+      selectedTemplateId,
+      recommendations: recommendedTemplates,
+    }, user.id);
+  }, [
+    user,
+    step,
+    siteType,
+    industry,
+    launchMethod,
+    businessInfo,
+    selectedTemplate,
+    selectedTemplateId,
+    recommendedTemplates,
+  ]);
 
   const totalSteps = 7;
   const canProceed = () => {
@@ -91,7 +160,7 @@ export default function NewSitePage() {
       case 2: return !!industry;
       case 3: return !!launchMethod;
       case 4: return businessInfo.name.trim().length >= 2;
-      case 5: return true; // generate step
+      case 5: return launchMethod !== 'template' || !!selectedTemplateId;
       case 6: return true; // payment optional
       case 7: return true; // domain optional
       default: return false;
@@ -101,6 +170,7 @@ export default function NewSitePage() {
   const createSite = async () => {
     if (creating) return;
     setCreating(true);
+    setCreateError('');
 
     try {
       const token = localStorage.getItem('token');
@@ -125,11 +195,30 @@ export default function NewSitePage() {
         body: JSON.stringify({
           siteType,
           industry,
+          launchMethod,
+          templateId: selectedTemplateId,
           name: businessInfo.name.trim(),
           description: businessInfo.description,
           logo: businessInfo.logo || null,
           phone: businessInfo.phone,
           businessType: industry || 'general',
+          products: businessInfo.products.split(',').map(item => item.trim()).filter(Boolean),
+          services: businessInfo.services.split(',').map(item => item.trim()).filter(Boolean),
+          targetAudience: businessInfo.targetAudience,
+          branding: {
+            logo: businessInfo.logo || undefined,
+            colors: {
+              primary: branding.primary,
+              secondary: branding.secondary,
+              accent: branding.accent,
+              background: branding.background,
+              text: branding.text,
+            },
+            fonts: {
+              heading: branding.headingFont,
+              body: branding.bodyFont,
+            },
+          },
           socialLinks: {
             whatsapp: businessInfo.whatsapp,
             instagram: businessInfo.instagram,
@@ -141,13 +230,20 @@ export default function NewSitePage() {
         }),
       });
 
-      const json = await res.json();
+      const json = await parseResponse<{ success?: boolean; data?: { id: string }; error?: string }>(res);
+      if (!json) {
+        throw new Error("The site creation service returned no data. Please try again.");
+      }
       if (json.success) {
         setCreatedSiteId(json.data.id);
         setCreated(true);
+        clearOnboardingDraft(user?.id);
+      } else {
+        setCreateError(json.error || 'Failed to create site');
       }
     } catch (e) {
       console.error(e);
+      setCreateError(e instanceof Error ? e.message : 'Failed to create site');
     } finally {
       setCreating(false);
     }
@@ -163,8 +259,9 @@ export default function NewSitePage() {
 
   const handleFinish = () => {
     if (createdSiteId) {
-      localStorage.setItem('activeSiteId', createdSiteId);
-      router.push('/dashboard');
+      localStorage.setItem(`activeSiteId:${user?.id || "guest"}`, createdSiteId);
+      localStorage.removeItem('activeSiteId');
+      router.push(`/dashboard/sites/${createdSiteId}/customize`);
     }
   };
 
@@ -320,6 +417,38 @@ export default function NewSitePage() {
                   placeholder="What does your business do?"
                 />
               </div>
+              <div className="grid sm:grid-cols-3 gap-4">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1.5">Products</label>
+                  <input
+                    type="text"
+                    value={businessInfo.products}
+                    onChange={e => setBusinessInfo(prev => ({ ...prev, products: e.target.value }))}
+                    className="w-full px-4 py-3 border border-gray-200 rounded-lg focus:ring-2 focus:ring-gray-900 outline-none"
+                    placeholder="dresses, shoes"
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1.5">Services</label>
+                  <input
+                    type="text"
+                    value={businessInfo.services}
+                    onChange={e => setBusinessInfo(prev => ({ ...prev, services: e.target.value }))}
+                    className="w-full px-4 py-3 border border-gray-200 rounded-lg focus:ring-2 focus:ring-gray-900 outline-none"
+                    placeholder="delivery, styling"
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1.5">Target Audience</label>
+                  <input
+                    type="text"
+                    value={businessInfo.targetAudience}
+                    onChange={e => setBusinessInfo(prev => ({ ...prev, targetAudience: e.target.value }))}
+                    className="w-full px-4 py-3 border border-gray-200 rounded-lg focus:ring-2 focus:ring-gray-900 outline-none"
+                    placeholder="families, founders"
+                  />
+                </div>
+              </div>
               <div className="grid sm:grid-cols-2 gap-4">
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1.5">Phone Number</label>
@@ -375,27 +504,86 @@ export default function NewSitePage() {
           </div>
         )}
 
-        {/* Step 5: Generate */}
+        {/* Step 5: AI Template Recommendation + Theme Customization */}
         {step === 5 && !created && (
-          <div className="fade-in text-center py-10">
+          <div className="fade-in py-10">
             {creating ? (
-              <>
+              <div className="text-center">
                 <div className="w-20 h-20 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-6">
                   <Loader2 className="w-10 h-10 text-gray-600 animate-spin" />
                 </div>
                 <h1 className="text-2xl font-bold text-gray-900 mb-2">Creating your site...</h1>
-                <p className="text-gray-500">Setting up pages, settings, and defaults</p>
-              </>
+                <p className="text-gray-500">Selecting a template, generating pages, and cloning your theme config</p>
+              </div>
             ) : (
               <>
-                <div className="w-20 h-20 bg-gradient-to-br from-emerald-100 to-blue-100 rounded-full flex items-center justify-center mx-auto mb-6">
-                  <Sparkles className="w-10 h-10 text-emerald-600" />
+                <div className="text-center">
+                  <div className="w-20 h-20 bg-gradient-to-br from-emerald-100 to-blue-100 rounded-full flex items-center justify-center mx-auto mb-6">
+                    <Sparkles className="w-10 h-10 text-emerald-600" />
+                  </div>
+                  <h1 className="text-2xl font-bold text-gray-900 mb-2">
+                    {launchMethod === 'blank' ? 'Ready to generate your site' : launchMethod === 'template' ? 'Choose a template' : 'AI will build your website'}
+                  </h1>
+                  <p className="text-gray-500 mb-6 max-w-md mx-auto">
+                    We&apos;ll create a {siteType === 'ECOMMERCE' ? 'store' : siteType === 'WEBSITE' ? 'website' : 'landing page'} for
+                    <strong> {businessInfo.name}</strong> in the <strong>{INDUSTRIES.find(i => i.id === industry)?.name}</strong> industry.
+                  </p>
                 </div>
-                <h1 className="text-2xl font-bold text-gray-900 mb-2">Ready to generate your site</h1>
-                <p className="text-gray-500 mb-6 max-w-md mx-auto">
-                  We&apos;ll create a {siteType === 'ECOMMERCE' ? 'store' : siteType === 'WEBSITE' ? 'website' : 'landing page'} for
-                  <strong> {businessInfo.name}</strong> in the <strong>{INDUSTRIES.find(i => i.id === industry)?.name}</strong> industry.
-                </p>
+                {launchMethod === 'template' && (
+                  <div className="mt-8">
+                    <TemplateSelector
+                      businessContext={businessContext}
+                      initialRecommendations={recommendedTemplates}
+                      onRecommendationsLoaded={setRecommendedTemplates}
+                      onSelect={(template) => {
+                        setSelectedTemplate(template);
+                        setSelectedTemplateId(template.id || template.slug);
+                      }}
+                    />
+                    {selectedTemplate && (
+                      <div className="mt-4 rounded-xl border border-emerald-200 bg-emerald-50 p-4 text-sm text-emerald-800">
+                        Selected <strong>{selectedTemplate.name}</strong>
+                        {selectedTemplate.matchPercent !== undefined ? ` (${selectedTemplate.matchPercent}% match)` : ''}
+                      </div>
+                    )}
+                  </div>
+                )}
+                {launchMethod !== 'blank' && (
+                  <div className="mt-8 rounded-xl border border-gray-200 bg-white p-5">
+                    <div className="flex items-center gap-2 mb-4">
+                      <Palette className="w-5 h-5 text-gray-500" />
+                      <h2 className="font-semibold text-gray-900">Theme customization</h2>
+                    </div>
+                    <div className="grid sm:grid-cols-5 gap-3">
+                      {(['primary', 'secondary', 'accent', 'background', 'text'] as const).map(key => (
+                        <label key={key} className="text-xs font-medium text-gray-600 capitalize">
+                          {key}
+                          <input
+                            type="color"
+                            value={branding[key]}
+                            onChange={e => setBranding(prev => ({ ...prev, [key]: e.target.value }))}
+                            className="mt-1 h-10 w-full rounded border border-gray-200 p-1"
+                          />
+                        </label>
+                      ))}
+                    </div>
+                    <div className="grid sm:grid-cols-2 gap-3 mt-4">
+                      <input
+                        value={branding.headingFont}
+                        onChange={e => setBranding(prev => ({ ...prev, headingFont: e.target.value }))}
+                        className="rounded-lg border border-gray-200 px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-gray-900"
+                        placeholder="Heading font"
+                      />
+                      <input
+                        value={branding.bodyFont}
+                        onChange={e => setBranding(prev => ({ ...prev, bodyFont: e.target.value }))}
+                        className="rounded-lg border border-gray-200 px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-gray-900"
+                        placeholder="Body font"
+                      />
+                    </div>
+                  </div>
+                )}
+                {createError && <p className="mt-4 text-center text-sm font-medium text-red-600">{createError}</p>}
               </>
             )}
           </div>
@@ -411,6 +599,26 @@ export default function NewSitePage() {
               <strong>{businessInfo.name}</strong> has been created successfully.
             </p>
             <p className="text-sm text-gray-400 mb-8">You can connect payments and set a custom domain in the next steps, or skip to your dashboard.</p>
+            <div className="flex flex-wrap items-center justify-center gap-3">
+              <button
+                onClick={handleFinish}
+                className="inline-flex items-center gap-2 rounded-lg bg-gray-900 px-6 py-3 font-medium text-white hover:bg-gray-800"
+              >
+                Customize Site <ArrowRight className="h-4 w-4" />
+              </button>
+              <button
+                onClick={() => {
+                  if (createdSiteId) {
+                    localStorage.setItem(`activeSiteId:${user?.id || "guest"}`, createdSiteId);
+                    localStorage.removeItem('activeSiteId');
+                  }
+                  router.push('/dashboard');
+                }}
+                className="inline-flex items-center gap-2 rounded-lg border border-gray-200 bg-white px-6 py-3 font-medium text-gray-700 hover:bg-gray-50"
+              >
+                Go to Dashboard
+              </button>
+            </div>
           </div>
         )}
 

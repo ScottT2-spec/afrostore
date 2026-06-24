@@ -44,7 +44,8 @@ class ApiClient {
         headers,
       });
 
-      const json = await res.json();
+      const text = await res.text();
+      const json = text ? JSON.parse(text) : null;
 
       if (!res.ok) {
         return {
@@ -54,7 +55,7 @@ class ApiClient {
         };
       }
 
-      return json;
+      return json || { success: true, data: undefined };
     } catch (err) {
       return {
         success: false,
@@ -77,6 +78,13 @@ class ApiClient {
   patch<T>(path: string, body: unknown) {
     return this.request<T>(path, {
       method: "PATCH",
+      body: JSON.stringify(body),
+    });
+  }
+
+  put<T>(path: string, body: unknown) {
+    return this.request<T>(path, {
+      method: "PUT",
       body: JSON.stringify(body),
     });
   }

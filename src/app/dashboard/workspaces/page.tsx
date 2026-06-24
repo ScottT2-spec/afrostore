@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { Plus, Building2, Globe, ShoppingBag, FileText, Megaphone, Settings, Users, MoreVertical, Loader2 } from 'lucide-react';
+import { useAuth } from '@/context/AuthContext';
 
 interface Workspace {
   id: string;
@@ -32,6 +33,7 @@ const siteTypeConfig = {
 };
 
 export default function WorkspacesPage() {
+  const { user } = useAuth();
   const [workspaces, setWorkspaces] = useState<Workspace[]>([]);
   const [loading, setLoading] = useState(true);
   const [showCreate, setShowCreate] = useState(false);
@@ -201,7 +203,8 @@ export default function WorkspacesPage() {
                       <button
                         key={site.id}
                         onClick={() => {
-                          localStorage.setItem('activeSiteId', site.id);
+                          localStorage.setItem(`activeSiteId:${user?.id || "guest"}`, site.id);
+                          localStorage.removeItem('activeSiteId');
                           router.push('/dashboard');
                         }}
                         className="w-full px-6 py-3.5 flex items-center justify-between hover:bg-gray-50 transition text-left"

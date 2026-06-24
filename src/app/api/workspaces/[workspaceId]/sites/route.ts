@@ -3,6 +3,7 @@ import { getAuthUser, unauthorized } from "@/lib/auth";
 import { prisma } from "@/lib/db";
 import { success, error, generateSubdomain } from "@/lib/api-helpers";
 import { slugify } from "@/lib/utils";
+import { applyTemplateToSite, recommendTemplates } from "@/lib/templates/recommendation";
 
 // GET /api/workspaces/[workspaceId]/sites — list sites in workspace
 export async function GET(req: NextRequest, { params }: { params: Promise<{ workspaceId: string }> }) {
@@ -32,27 +33,36 @@ export async function GET(req: NextRequest, { params }: { params: Promise<{ work
 
 // POST /api/workspaces/[workspaceId]/sites — create a new site (7-step wizard)
 export async function POST(req: NextRequest, { params }: { params: Promise<{ workspaceId: string }> }) {
-  const user = await getAuthUser(req);
-  if (!user) return unauthorized();
-  const { workspaceId } = await params;
+  try {
+    const user = await getAuthUser(req);
+    if (!user) return unauthorized();
+    const { workspaceId } = await params;
 
-  const workspace = await prisma.workspace.findUnique({ where: { id: workspaceId } });
-  if (!workspace) return error("Workspace not found", 404);
+    const workspace = await prisma.workspace.findUnique({ where: { id: workspaceId } });
+    if (!workspace) return error("Workspace not found", 404);
 
-  const isOwner = workspace.ownerId === user.id;
-  const member = await prisma.workspaceMember.findUnique({
-    where: { workspaceId_userId: { workspaceId, userId: user.id } },
-  });
-  const canCreate = isOwner || (member && ["OWNER", "ADMIN", "MANAGER"].includes(member.role));
-  if (!canCreate) return error("Not authorized to create sites", 403);
+    const isOwner = workspace.ownerId === user.id;
+    const member = await prisma.workspaceMember.findUnique({
+      where: { workspaceId_userId: { workspaceId, userId: user.id } },
+    });
+    const canCreate = isOwner || (member && ["OWNER", "ADMIN", "MANAGER"].includes(member.role));
+    if (!canCreate) return error("Not authorized to create sites", 403);
 
-  const body = await req.json();
-  const {
+    const body = await req.json();
+    const {
     // Step 1: Site type
     siteType = "ECOMMERCE",
     // Step 2: Industry
     industry,
     // Step 3: Launch method (handled client-side)
+    launchMethod,
+    templateId,
+    templateSlug,
+    variant,
+    products,
+    services,
+    targetAudience,
+    branding,
     // Step 4: Business info
     name,
     description,
@@ -68,36 +78,36 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ wor
     customDomain,
   } = body;
 
-  if (!name || typeof name !== "string" || name.trim().length < 2) {
-    return error("Site name is required (min 2 characters)", 422);
-  }
+    if (!name || typeof name !== "string" || name.trim().length < 2) {
+      return error("Site name is required (min 2 characters)", 422);
+    }
 
-  if (!["ECOMMERCE", "WEBSITE", "LANDING_PAGE"].includes(siteType)) {
-    return error("Invalid site type. Must be ECOMMERCE, WEBSITE, or LANDING_PAGE", 422);
-  }
+    if (!["ECOMMERCE", "WEBSITE", "LANDING_PAGE"].includes(siteType)) {
+      return error("Invalid site type. Must be ECOMMERCE, WEBSITE, or LANDING_PAGE", 422);
+    }
 
   // Generate unique slug & subdomain
-  let slug = slugify(name.trim());
-  let counter = 0;
-  while (true) {
-    const candidate = counter === 0 ? slug : `${slug}-${counter}`;
-    const existing = await prisma.site.findUnique({ where: { slug: candidate } });
-    if (!existing) { slug = candidate; break; }
-    counter++;
-  }
+    let slug = slugify(name.trim());
+    let counter = 0;
+    while (true) {
+      const candidate = counter === 0 ? slug : `${slug}-${counter}`;
+      const existing = await prisma.site.findUnique({ where: { slug: candidate } });
+      if (!existing) { slug = candidate; break; }
+      counter++;
+    }
 
-  let subdomain = generateSubdomain(name.trim());
-  counter = 0;
-  while (true) {
-    const candidate = counter === 0 ? subdomain : `${subdomain}-${counter}`;
-    const existing = await prisma.site.findUnique({ where: { subdomain: candidate } });
-    if (!existing) { subdomain = candidate; break; }
-    counter++;
-  }
+    let subdomain = generateSubdomain(name.trim());
+    counter = 0;
+    while (true) {
+      const candidate = counter === 0 ? subdomain : `${subdomain}-${counter}`;
+      const existing = await prisma.site.findUnique({ where: { subdomain: candidate } });
+      if (!existing) { subdomain = candidate; break; }
+      counter++;
+    }
 
   // Create site with settings and social links
-  const site = await prisma.site.create({
-    data: {
+    const site = await prisma.site.create({
+      data: {
       workspaceId,
       name: name.trim(),
       slug,
@@ -127,29 +137,60 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ wor
         },
       } : undefined,
     },
-    include: {
-      settings: true,
-      socialLinks: true,
-    },
-  });
+      include: {
+        settings: true,
+        socialLinks: true,
+      },
+    });
 
   // Create default pages based on site type
-  const defaultPages = getDefaultPages(siteType, name.trim());
-  if (defaultPages.length > 0) {
-    await prisma.page.createMany({
-      data: defaultPages.map((p, i) => ({
-        siteId: site.id,
-        title: p.title,
-        slug: p.slug,
-        type: p.type,
-        content: p.content,
-        isPublished: true,
-        position: i,
-      })),
-    });
-  }
+    const defaultPages = getDefaultPages(siteType, name.trim());
+    if (defaultPages.length > 0) {
+      await prisma.page.createMany({
+        data: defaultPages.map((p, i) => ({
+          siteId: site.id,
+          title: p.title,
+          slug: p.slug,
+          type: p.type,
+          content: p.content,
+          isPublished: true,
+          position: i,
+        })),
+      });
+    }
 
-  return success(site, 201);
+    let templateResult: unknown = null;
+    if (launchMethod === "template" || launchMethod === "ai" || launchMethod === "quick" || templateId || templateSlug) {
+      const businessInput = {
+        businessName: name.trim(),
+        businessCategory: businessType || industry || "general",
+        industry,
+        description,
+        products,
+        services,
+        targetAudience,
+        branding,
+      };
+      const selectedTemplateId = templateId || templateSlug
+        ? templateId
+        : (await recommendTemplates(businessInput)).recommendations[0]?.template.id;
+
+      if (selectedTemplateId || templateSlug) {
+        templateResult = await applyTemplateToSite(site.id, {
+          ...businessInput,
+          templateId: selectedTemplateId,
+          templateSlug,
+          variant,
+          aiBuild: launchMethod === "ai" || launchMethod === "quick",
+        });
+      }
+    }
+
+    return success({ ...site, templateResult }, 201);
+  } catch (err) {
+    console.error("Create site error:", err);
+    return error(err instanceof Error ? err.message : "Internal server error", 500);
+  }
 }
 
 function getDefaultPages(siteType: string, siteName: string) {

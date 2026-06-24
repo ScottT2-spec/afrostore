@@ -87,6 +87,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   const logout = () => {
     api.setToken(null);
+    if (typeof window !== "undefined") {
+      localStorage.removeItem("activeSiteId");
+    }
     setUser(null);
     router.push("/auth/login");
   };
