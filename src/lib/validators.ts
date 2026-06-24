@@ -347,6 +347,58 @@ export const updateABTestSchema = z.object({
   endsAt: z.string().datetime().optional().nullable(),
 });
 
+// ─── FLASH SALES ────────────────────────────────────────────
+
+export const createFlashSaleSchema = z.object({
+  name: z.string().min(1, "Name is required").max(200),
+  description: z.string().max(2000).optional(),
+  discountType: z.enum(["PERCENTAGE", "FIXED"]).default("PERCENTAGE"),
+  discountValue: z.number().min(0),
+  startsAt: z.string().datetime(),
+  endsAt: z.string().datetime(),
+  isActive: z.boolean().default(true),
+  maxUses: z.number().int().min(0).optional().nullable(),
+  productIds: z.array(z.string()).optional(),
+});
+
+export const updateFlashSaleSchema = z.object({
+  name: z.string().min(1).max(200).optional(),
+  description: z.string().max(2000).optional().nullable(),
+  discountType: z.enum(["PERCENTAGE", "FIXED"]).optional(),
+  discountValue: z.number().min(0).optional(),
+  startsAt: z.string().datetime().optional(),
+  endsAt: z.string().datetime().optional(),
+  isActive: z.boolean().optional(),
+  maxUses: z.number().int().min(0).optional().nullable(),
+  productIds: z.array(z.string()).optional(),
+});
+
+// ─── LOYALTY ────────────────────────────────────────────────
+
+export const updateLoyaltyProgramSchema = z.object({
+  enabled: z.boolean().optional(),
+  pointsPerCurrency: z.number().min(0).optional(),
+  currencyPerPoint: z.number().min(0).optional(),
+  redemptionRate: z.number().min(0).optional(),
+  minRedeemPoints: z.number().int().min(0).optional(),
+  welcomePoints: z.number().int().min(0).optional(),
+  referralPoints: z.number().int().min(0).optional(),
+  reviewPoints: z.number().int().min(0).optional(),
+});
+
+// ─── REFERRAL PROGRAM ───────────────────────────────────────
+
+export const updateReferralProgramSchema = z.object({
+  enabled: z.boolean().optional(),
+  commissionType: z.enum(["PERCENTAGE", "FLAT"]).optional(),
+  commissionValue: z.number().min(0).optional(),
+  cookieDays: z.number().int().min(1).optional(),
+  minPayoutAmount: z.number().min(0).optional(),
+  autoApprove: z.boolean().optional(),
+  welcomeMessage: z.string().max(2000).optional().nullable(),
+  termsText: z.string().max(5000).optional().nullable(),
+});
+
 // ─── MEDIA ──────────────────────────────────────────────────
 
 export const createMediaItemSchema = z.object({

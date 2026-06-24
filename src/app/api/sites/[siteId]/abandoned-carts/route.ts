@@ -5,87 +5,34 @@ import { unauthorized } from "@/lib/auth";
 
 type Params = { params: Promise<{ siteId: string }> };
 
-// GET — list abandoned carts
 export async function GET(req: NextRequest, { params }: Params) {
   const { siteId } = await params;
   const ctx = await getStoreContext(req, siteId);
   if (ctx.error) return ctx.user ? error(ctx.error, 403) : unauthorized();
 
-  const status = req.nextUrl.searchParams.get("status") || undefined;
+  const url = new URL(req.url);
+  const status = url.searchParams.get("status");
+  const page = parseInt(url.searchParams.get("page") || "1");
+  const limit = Math.min(parseInt(url.searchParams.get("limit") || "20"), 100);
 
-  const carts = await prisma.abandonedCart.findMany({
-    where: {
-      siteId,
-      ...(status ? { status: status as any } : {}),
-    },
-    include: {
-      customer: { select: { id: true, firstName: true, lastName: true, email: true, phone: true } },
-    },
-    orderBy: { createdAt: "desc" },
-    take: 100,
-  });
+  const where: Record<string, unknown> = { siteId };
+  if (status) where.status = status;
 
-  // Summary stats
-  const [total, active, recovered, totalValue, recoveredValue] = await Promise.all([
-    prisma.abandonedCart.count({ where: { siteId } }),
-    prisma.abandonedCart.count({ where: { siteId, status: "ACTIVE" } }),
-    prisma.abandonedCart.count({ where: { siteId, status: "RECOVERED" } }),
-    prisma.abandonedCart.aggregate({ where: { siteId }, _sum: { totalAmount: true } }),
-    prisma.abandonedCart.aggregate({ where: { siteId, status: "RECOVERED" }, _sum: { totalAmount: true } }),
+  const [carts, total] = await Promise.all([
+    prisma.abandonedCart.findMany({
+      where: where as any, orderBy: { createdAt: "desc" }, skip: (page - 1) * limit, take: limit,
+      include: { customer: { select: { id: true, firstName: true, lastName: true, email: true } } },
+    }),
+    prisma.abandonedCart.count({ where: where as any }),
   ]);
 
-  return success({
-    carts,
-    stats: {
-      total,
-      active,
-      recovered,
-      recoveryRate: total > 0 ? ((recovered / total) * 100).toFixed(1) : "0",
-      totalValue: totalValue._sum.totalAmount || 0,
-      recoveredValue: recoveredValue._sum.totalAmount || 0,
-    },
-  });
-}
+  // Summary
+  const stats = await prisma.abandonedCart.groupBy({ by: ["status"], where: { siteId }, _count: true, _sum: { totalAmount: true } });
+  const summary = {
+    total: stats.reduce((a, s) => a + s._count, 0),
+    totalValue: stats.reduce((a, s) => a + (s._sum.totalAmount || 0), 0),
+    byStatus: Object.fromEntries(stats.map((s) => [s.status, { count: s._count, value: s._sum.totalAmount || 0 }])),
+  };
 
-// POST — record an abandoned cart (called from storefront)
-export async function POST(req: NextRequest, { params }: Params) {
-  const { siteId } = await params;
-  const body = await req.json();
-  const { email, phone, sessionId, items, totalAmount, currency, customerId } = body;
-
-  if (!items || !Array.isArray(items) || items.length === 0) return error("Cart items required");
-  if (!email && !phone && !sessionId) return error("At least email, phone, or sessionId required");
-
-  // Check for existing active cart with same identifier
-  const existing = await prisma.abandonedCart.findFirst({
-    where: {
-      siteId,
-      status: "ACTIVE",
-      ...(email ? { email } : sessionId ? { sessionId } : { phone }),
-    },
-  });
-
-  if (existing) {
-    // Update existing cart
-    const updated = await prisma.abandonedCart.update({
-      where: { id: existing.id },
-      data: { items, totalAmount: totalAmount || 0, currency: currency || "NGN" },
-    });
-    return success(updated);
-  }
-
-  const cart = await prisma.abandonedCart.create({
-    data: {
-      siteId,
-      customerId,
-      email,
-      phone,
-      sessionId,
-      items,
-      totalAmount: totalAmount || 0,
-      currency: currency || "NGN",
-    },
-  });
-
-  return success(cart, 201);
+  return success({ carts, summary, pagination: { page, limit, total, pages: Math.ceil(total / limit) } });
 }
