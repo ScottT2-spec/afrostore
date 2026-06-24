@@ -253,6 +253,48 @@ export const moderateReviewSchema = z.object({
   isVerified: z.boolean().optional(),
 });
 
+// ─── FUNNELS ────────────────────────────────────────────────
+
+export const funnelStepSchema = z.object({
+  name: z.string().min(1).max(200),
+  type: z.enum(["LANDING", "LEAD_FORM", "THANK_YOU", "CHECKOUT", "UPSELL", "DOWNSELL", "CONFIRMATION", "WEBINAR", "VIDEO"]).default("LANDING"),
+  pageContent: z.any().optional(),
+  position: z.number().int().min(0).default(0),
+  settings: z.object({
+    redirectUrl: z.string().url().optional(),
+    delaySeconds: z.number().int().min(0).optional(),
+    buttonText: z.string().max(100).optional(),
+  }).optional(),
+});
+
+export const createFunnelSchema = z.object({
+  name: z.string().min(1, "Funnel name is required").max(200),
+  description: z.string().max(2000).optional(),
+  status: z.enum(["DRAFT", "ACTIVE", "PAUSED", "ARCHIVED"]).default("DRAFT"),
+  steps: z.array(funnelStepSchema).optional(),
+});
+
+export const updateFunnelSchema = z.object({
+  name: z.string().min(1).max(200).optional(),
+  description: z.string().max(2000).optional().nullable(),
+  status: z.enum(["DRAFT", "ACTIVE", "PAUSED", "ARCHIVED"]).optional(),
+  isActive: z.boolean().optional(),
+});
+
+export const createFunnelStepSchema = funnelStepSchema;
+
+export const updateFunnelStepSchema = z.object({
+  name: z.string().min(1).max(200).optional(),
+  type: z.enum(["LANDING", "LEAD_FORM", "THANK_YOU", "CHECKOUT", "UPSELL", "DOWNSELL", "CONFIRMATION", "WEBINAR", "VIDEO"]).optional(),
+  pageContent: z.any().optional(),
+  position: z.number().int().min(0).optional(),
+  settings: z.object({
+    redirectUrl: z.string().url().optional(),
+    delaySeconds: z.number().int().min(0).optional(),
+    buttonText: z.string().max(100).optional(),
+  }).optional().nullable(),
+});
+
 // ─── CRM CONTACTS ───────────────────────────────────────────
 
 export const createCrmContactSchema = z.object({
