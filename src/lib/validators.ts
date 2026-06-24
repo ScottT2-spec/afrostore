@@ -204,6 +204,38 @@ export const updatePageSchema = z.object({
   position: z.number().int().min(0).optional(),
 });
 
+// ─── BLOGS ──────────────────────────────────────────────────
+
+export const createBlogSchema = z.object({
+  title: z.string().min(1, "Blog title is required").max(300),
+  excerpt: z.string().max(1000).optional(),
+  content: z.any().optional(),
+  contentHtml: z.string().optional(),
+  coverImage: z.string().url().optional().nullable(),
+  author: z.string().max(200).optional(),
+  category: z.string().max(100).optional(),
+  tags: z.array(z.string().max(50)).max(20).default([]),
+  status: z.enum(["DRAFT", "PUBLISHED", "ARCHIVED"]).default("DRAFT"),
+  metaTitle: z.string().max(200).optional(),
+  metaDescription: z.string().max(500).optional(),
+  publishedAt: z.string().datetime().optional().nullable(),
+});
+
+export const updateBlogSchema = z.object({
+  title: z.string().min(1).max(300).optional(),
+  excerpt: z.string().max(1000).optional().nullable(),
+  content: z.any().optional(),
+  contentHtml: z.string().optional().nullable(),
+  coverImage: z.string().url().optional().nullable(),
+  author: z.string().max(200).optional().nullable(),
+  category: z.string().max(100).optional().nullable(),
+  tags: z.array(z.string().max(50)).max(20).optional(),
+  status: z.enum(["DRAFT", "PUBLISHED", "ARCHIVED"]).optional(),
+  metaTitle: z.string().max(200).optional().nullable(),
+  metaDescription: z.string().max(500).optional().nullable(),
+  publishedAt: z.string().datetime().optional().nullable(),
+});
+
 // ─── REVIEWS ────────────────────────────────────────────────
 
 export const createReviewSchema = z.object({
