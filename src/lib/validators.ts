@@ -347,6 +347,26 @@ export const updateABTestSchema = z.object({
   endsAt: z.string().datetime().optional().nullable(),
 });
 
+// ─── MEDIA ──────────────────────────────────────────────────
+
+export const createMediaItemSchema = z.object({
+  name: z.string().min(1, "Name is required").max(255),
+  url: z.string().url("Valid URL required"),
+  type: z.enum(["IMAGE", "VIDEO", "DOCUMENT", "AUDIO"]).default("IMAGE"),
+  mimeType: z.string().max(100).optional(),
+  size: z.number().int().min(0).optional(),
+  width: z.number().int().min(0).optional(),
+  height: z.number().int().min(0).optional(),
+  alt: z.string().max(255).optional(),
+  folder: z.string().max(255).default("/"),
+});
+
+export const updateMediaItemSchema = z.object({
+  name: z.string().min(1).max(255).optional(),
+  alt: z.string().max(255).optional().nullable(),
+  folder: z.string().max(255).optional(),
+});
+
 // ─── RETURNS ────────────────────────────────────────────────
 
 export const createReturnSchema = z.object({

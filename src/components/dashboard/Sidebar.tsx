@@ -42,6 +42,7 @@ const ecommerceNav: NavGroup[] = [
       { name: "Customers", href: "/dashboard/customers", icon: Users },
       { name: "Reviews", href: "/dashboard/reviews", icon: Star },
       { name: "Returns", href: "/dashboard/returns", icon: Undo2 },
+      { name: "Inventory", href: "/dashboard/inventory", icon: BarChart3 },
       { name: "Messages", href: "/dashboard/messages", icon: Mail },
     ],
   },
