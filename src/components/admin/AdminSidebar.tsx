@@ -1,6 +1,5 @@
 "use client";
 
-import { useState } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useAuth } from "@/context/AuthContext";
@@ -29,9 +28,16 @@ const navigation = [
   { name: "Settings", href: "/admin/settings", icon: Settings },
 ];
 
-export default function AdminSidebar() {
+export default function AdminSidebar({
+  collapsed,
+  setCollapsed,
+  onNavigate,
+}: {
+  collapsed: boolean;
+  setCollapsed: (v: boolean) => void;
+  onNavigate?: () => void;
+}) {
   const pathname = usePathname();
-  const [collapsed, setCollapsed] = useState(false);
   const { user, logout } = useAuth();
 
   const initials = user
@@ -41,7 +47,8 @@ export default function AdminSidebar() {
   return (
     <aside
       className={cn(
-        "fixed left-0 top-0 z-40 h-screen border-r border-surface-200 bg-white transition-all duration-300 flex flex-col",
+        "left-0 top-0 z-40 h-screen border-r border-surface-200 bg-white transition-all duration-300 flex flex-col",
+        "lg:fixed lg:block",
         collapsed ? "w-[72px]" : "w-64"
       )}
     >
@@ -98,6 +105,7 @@ export default function AdminSidebar() {
             <Link
               key={item.name}
               href={item.href}
+              onClick={onNavigate}
               className={cn(
                 "flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium transition-all duration-200",
                 isActive
