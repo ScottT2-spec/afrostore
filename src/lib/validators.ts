@@ -347,6 +347,42 @@ export const updateABTestSchema = z.object({
   endsAt: z.string().datetime().optional().nullable(),
 });
 
+// ─── RETURNS ────────────────────────────────────────────────
+
+export const createReturnSchema = z.object({
+  orderId: z.string().min(1, "Order ID is required"),
+  reason: z.string().min(1, "Reason is required").max(2000),
+  items: z.any().optional(),
+  notes: z.string().max(2000).optional(),
+});
+
+export const updateReturnSchema = z.object({
+  status: z.enum(["REQUESTED", "APPROVED", "REJECTED", "RECEIVED", "REFUNDED", "CLOSED"]).optional(),
+  refundAmount: z.number().min(0).optional(),
+  refundMethod: z.string().max(50).optional().nullable(),
+  notes: z.string().max(2000).optional().nullable(),
+});
+
+// ─── TAX RULES ──────────────────────────────────────────────
+
+export const createTaxRuleSchema = z.object({
+  name: z.string().min(1, "Name is required").max(200),
+  rate: z.number().min(0).max(100),
+  country: z.string().max(2).optional().nullable(),
+  state: z.string().max(100).optional().nullable(),
+  isDefault: z.boolean().default(false),
+  isActive: z.boolean().default(true),
+});
+
+export const updateTaxRuleSchema = z.object({
+  name: z.string().min(1).max(200).optional(),
+  rate: z.number().min(0).max(100).optional(),
+  country: z.string().max(2).optional().nullable(),
+  state: z.string().max(100).optional().nullable(),
+  isDefault: z.boolean().optional(),
+  isActive: z.boolean().optional(),
+});
+
 // ─── EMAIL CAMPAIGNS ────────────────────────────────────────
 
 export const createEmailCampaignSchema = z.object({
