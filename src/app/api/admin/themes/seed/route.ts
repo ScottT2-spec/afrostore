@@ -232,8 +232,8 @@ export async function GET(req: NextRequest) {
     }
 
     return success({ seeded: results.length, results });
-  } catch (err) {
+  } catch (err: any) {
     console.error("Theme seed error:", err);
-    return error("Failed to seed themes", 500);
+    return error(`Failed to seed themes: ${err?.message || String(err)}`, 500);
   }
 }
