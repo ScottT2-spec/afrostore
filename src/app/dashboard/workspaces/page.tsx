@@ -39,6 +39,11 @@ export default function WorkspacesPage() {
   const [showCreate, setShowCreate] = useState(false);
   const [newName, setNewName] = useState('');
   const [creating, setCreating] = useState(false);
+  const [settingsWorkspace, setSettingsWorkspace] = useState<Workspace | null>(null);
+  const [editName, setEditName] = useState('');
+  const [savingSettings, setSavingSettings] = useState(false);
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
+  const [deleting, setDeleting] = useState(false);
   const router = useRouter();
 
   const fetchWorkspaces = async () => {
@@ -57,6 +62,56 @@ export default function WorkspacesPage() {
   };
 
   useEffect(() => { fetchWorkspaces(); }, []);
+
+  const openSettings = (workspace: Workspace) => {
+    setSettingsWorkspace(workspace);
+    setEditName(workspace.name);
+    setShowDeleteConfirm(false);
+  };
+
+  const saveWorkspaceSettings = async () => {
+    if (!settingsWorkspace || !editName.trim() || savingSettings) return;
+    setSavingSettings(true);
+    try {
+      const token = localStorage.getItem('token');
+      const res = await fetch(`/api/workspaces/${settingsWorkspace.id}`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
+        body: JSON.stringify({ name: editName.trim() }),
+      });
+      const json = await res.json();
+      if (json.success) {
+        setSettingsWorkspace(null);
+        fetchWorkspaces();
+      }
+    } catch (e) {
+      console.error(e);
+    } finally {
+      setSavingSettings(false);
+    }
+  };
+
+  const deleteWorkspace = async () => {
+    if (!settingsWorkspace || deleting) return;
+    setDeleting(true);
+    try {
+      const token = localStorage.getItem('token');
+      const res = await fetch(`/api/workspaces/${settingsWorkspace.id}`, {
+        method: 'DELETE',
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      const json = await res.json();
+      if (json.success) {
+        setSettingsWorkspace(null);
+        setShowDeleteConfirm(false);
+        fetchWorkspaces();
+      }
+    } catch (e) {
+      console.error(e);
+    } finally {
+      setDeleting(false);
+    }
+  };
 
   const createWorkspace = async () => {
     if (!newName.trim() || creating) return;
@@ -137,6 +192,92 @@ export default function WorkspacesPage() {
         </div>
       )}
 
+      {/* Workspace Settings Modal */}
+      {settingsWorkspace && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-2xl p-6 w-full max-w-md shadow-xl">
+            <h2 className="text-lg font-semibold mb-1">Workspace Settings</h2>
+            <p className="text-sm text-gray-400 mb-5">Manage {settingsWorkspace.name}</p>
+
+            {/* Rename */}
+            <label className="block text-sm font-medium text-gray-700 mb-1.5">Workspace Name</label>
+            <input
+              type="text"
+              value={editName}
+              onChange={e => setEditName(e.target.value)}
+              onKeyDown={e => e.key === 'Enter' && saveWorkspaceSettings()}
+              className="w-full px-4 py-3 border border-gray-200 rounded-lg focus:ring-2 focus:ring-gray-900 outline-none mb-5"
+            />
+
+            {/* Info */}
+            <div className="bg-gray-50 rounded-lg p-3 mb-5 space-y-1">
+              <div className="flex justify-between text-sm">
+                <span className="text-gray-500">Sites</span>
+                <span className="font-medium text-gray-900">{settingsWorkspace._count.sites}</span>
+              </div>
+              <div className="flex justify-between text-sm">
+                <span className="text-gray-500">Members</span>
+                <span className="font-medium text-gray-900">{settingsWorkspace._count.members}</span>
+              </div>
+              <div className="flex justify-between text-sm">
+                <span className="text-gray-500">Plan</span>
+                <span className="font-medium text-gray-900 capitalize">{settingsWorkspace.plan.toLowerCase()}</span>
+              </div>
+            </div>
+
+            {/* Danger Zone */}
+            {!showDeleteConfirm ? (
+              <button
+                onClick={() => setShowDeleteConfirm(true)}
+                className="w-full text-sm text-red-500 hover:text-red-700 hover:bg-red-50 rounded-lg py-2 transition mb-4"
+              >
+                Delete Workspace
+              </button>
+            ) : (
+              <div className="border border-red-200 bg-red-50 rounded-lg p-3 mb-4">
+                <p className="text-sm text-red-700 font-medium mb-2">
+                  Delete &ldquo;{settingsWorkspace.name}&rdquo;? This will remove all sites and data. This cannot be undone.
+                </p>
+                <div className="flex gap-2">
+                  <button
+                    onClick={() => setShowDeleteConfirm(false)}
+                    className="flex-1 px-3 py-1.5 text-sm text-gray-600 hover:bg-white rounded-lg transition"
+                  >
+                    Cancel
+                  </button>
+                  <button
+                    onClick={deleteWorkspace}
+                    disabled={deleting}
+                    className="flex-1 px-3 py-1.5 text-sm bg-red-600 text-white rounded-lg hover:bg-red-700 disabled:opacity-50 flex items-center justify-center gap-1.5"
+                  >
+                    {deleting && <Loader2 className="w-3.5 h-3.5 animate-spin" />}
+                    Delete
+                  </button>
+                </div>
+              </div>
+            )}
+
+            {/* Actions */}
+            <div className="flex gap-3 justify-end">
+              <button
+                onClick={() => setSettingsWorkspace(null)}
+                className="px-4 py-2 text-gray-600 hover:text-gray-800"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={saveWorkspaceSettings}
+                disabled={!editName.trim() || editName.trim() === settingsWorkspace.name || savingSettings}
+                className="px-6 py-2 bg-gray-900 text-white rounded-lg hover:bg-gray-800 disabled:opacity-50 flex items-center gap-2"
+              >
+                {savingSettings && <Loader2 className="w-4 h-4 animate-spin" />}
+                Save
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* Workspaces Grid */}
       {workspaces.length === 0 ? (
         <div className="text-center py-20">
@@ -183,7 +324,10 @@ export default function WorkspacesPage() {
                     <Plus className="w-3.5 h-3.5" />
                     Add Site
                   </button>
-                  <button className="p-2 hover:bg-gray-100 rounded-lg transition">
+                  <button
+                    onClick={() => openSettings(workspace)}
+                    className="p-2 hover:bg-gray-100 rounded-lg transition"
+                  >
                     <Settings className="w-4 h-4 text-gray-400" />
                   </button>
                 </div>
