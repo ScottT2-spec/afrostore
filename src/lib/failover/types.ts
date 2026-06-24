@@ -122,7 +122,7 @@ export enum PaymentMethod {
 }
 
 export interface PaymentInitRequest {
-  storeId: string;
+  siteId: string;
   orderId: string;
   amount: number;
   currency: string;

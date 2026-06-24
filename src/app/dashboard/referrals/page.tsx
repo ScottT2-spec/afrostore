@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect, useCallback } from "react";
-import { useStore } from "@/context/StoreContext";
+import { useSite } from "@/context/StoreContext";
 import { api } from "@/lib/api-client";
 import DashboardHeader from "@/components/dashboard/DashboardHeader";
 import { useAIPrefill } from "@/hooks/useAIPrefill";
@@ -29,7 +29,7 @@ import {
 
 interface ReferralProgram {
   id: string;
-  storeId: string;
+  siteId: string;
   enabled: boolean;
   commissionType: "PERCENTAGE" | "FLAT";
   commissionValue: number;
@@ -66,7 +66,7 @@ interface Customer {
 }
 
 export default function ReferralsPage() {
-  const { currentStore } = useStore();
+  const { currentStore } = useSite();
   const router = useRouter();
   const { prefillData, clearPrefill, isFromAI } = useAIPrefill("referral_program");
   const [program, setProgram] = useState<ProgramResponse | null>(null);
@@ -93,7 +93,7 @@ export default function ReferralsPage() {
 
   const loadProgram = useCallback(async () => {
     if (!currentStore) return;
-    const res = await api.get<ProgramResponse>(`/api/stores/${currentStore.id}/referrals`);
+    const res = await api.get<ProgramResponse>(`/api/sites/${currentStore.id}/referrals`);
     if (res.success && res.data) {
       setProgram(res.data);
       setSettings({
@@ -122,7 +122,7 @@ export default function ReferralsPage() {
 
   const loadCustomers = async () => {
     if (!currentStore) return;
-    const res = await api.get<any>(`/api/stores/${currentStore.id}/customers?limit=100`);
+    const res = await api.get<any>(`/api/sites/${currentStore.id}/customers?limit=100`);
     if (res.success && res.data) {
       setCustomers(Array.isArray(res.data) ? res.data : res.data.customers || []);
     }
@@ -131,7 +131,7 @@ export default function ReferralsPage() {
   const saveSettings = async () => {
     if (!currentStore) return;
     setSaving(true);
-    await api.post(`/api/stores/${currentStore.id}/referrals`, settings);
+    await api.post(`/api/sites/${currentStore.id}/referrals`, settings);
     await loadProgram();
     setSaving(false);
     setShowSettings(false);
@@ -141,7 +141,7 @@ export default function ReferralsPage() {
   const addAffiliate = async () => {
     if (!currentStore || !selectedCustomer) return;
     setAddingAffiliate(true);
-    await api.post(`/api/stores/${currentStore.id}/referrals/affiliates`, {
+    await api.post(`/api/sites/${currentStore.id}/referrals/affiliates`, {
       customerId: selectedCustomer,
     });
     await loadProgram();
@@ -152,7 +152,7 @@ export default function ReferralsPage() {
 
   const updateAffiliateStatus = async (affiliateId: string, status: string) => {
     if (!currentStore) return;
-    await api.patch(`/api/stores/${currentStore.id}/referrals/affiliates/${affiliateId}`, { status });
+    await api.patch(`/api/sites/${currentStore.id}/referrals/affiliates/${affiliateId}`, { status });
     await loadProgram();
   };
 

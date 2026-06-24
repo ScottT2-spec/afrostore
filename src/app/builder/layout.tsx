@@ -1,7 +1,7 @@
 "use client";
 
 import { useAuth } from "@/context/AuthContext";
-import { StoreProvider } from "@/context/StoreContext";
+import { SiteProvider } from "@/context/StoreContext";
 import { useRouter } from "next/navigation";
 import { useEffect } from "react";
 
@@ -16,8 +16,8 @@ export default function BuilderLayout({ children }: { children: React.ReactNode 
   if (loading || !user) return null;
 
   return (
-    <StoreProvider>
+    <SiteProvider>
       {children}
-    </StoreProvider>
+    </SiteProvider>
   );
 }

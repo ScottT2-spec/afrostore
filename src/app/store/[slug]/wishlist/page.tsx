@@ -56,8 +56,8 @@ export default function WishlistPage() {
   const [error, setError] = useState("");
   const [addedToCart, setAddedToCart] = useState<string | null>(null);
 
-  const storeId = store?.id || "";
-  const { wishlist, removeFromWishlist, clearWishlist, wishlistCount } = useWishlist(storeId);
+  const siteId = store?.id || "";
+  const { wishlist, removeFromWishlist, clearWishlist, wishlistCount } = useWishlist(siteId);
 
   // Fetch store data
   useEffect(() => {
@@ -84,14 +84,14 @@ export default function WishlistPage() {
 
   // Clean up stale product IDs (products that no longer exist)
   useEffect(() => {
-    if (!storeId || allProducts.length === 0) return;
+    if (!siteId || allProducts.length === 0) return;
     const validIds = new Set(allProducts.map((p) => p.id));
     wishlist.forEach((id) => {
       if (!validIds.has(id)) {
         removeFromWishlist(id);
       }
     });
-  }, [allProducts, wishlist, storeId, removeFromWishlist]);
+  }, [allProducts, wishlist, siteId, removeFromWishlist]);
 
   const addToCart = (product: Product) => {
     if (!store) return;

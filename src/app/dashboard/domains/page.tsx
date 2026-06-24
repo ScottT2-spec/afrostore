@@ -2,12 +2,12 @@
 
 import { useState } from "react";
 import DashboardHeader from "@/components/dashboard/DashboardHeader";
-import { useStore } from "@/context/StoreContext";
+import { useSite } from "@/context/StoreContext";
 import { api } from "@/lib/api-client";
 import { Globe, CheckCircle2, AlertCircle, Plus, ExternalLink, Copy, Loader2 } from "lucide-react";
 
 export default function DomainsPage() {
-  const { currentStore, refreshStores } = useStore();
+  const { currentStore, refreshStores } = useSite();
   const [customDomain, setCustomDomain] = useState("");
   const [saving, setSaving] = useState(false);
   const [saved, setSaved] = useState(false);
@@ -19,7 +19,7 @@ export default function DomainsPage() {
     e.preventDefault();
     if (!currentStore) return;
     setSaving(true); setError("");
-    const res = await api.patch(`/api/stores/${currentStore.id}`, { customDomain });
+    const res = await api.patch(`/api/sites/${currentStore.id}`, { customDomain });
     if (res.success) { setSaved(true); setTimeout(() => setSaved(false), 2000); refreshStores(); }
     else setError(res.error || "Failed");
     setSaving(false);
@@ -56,7 +56,7 @@ export default function DomainsPage() {
           {currentStore?.customDomain ? (
             <div className="flex items-center gap-2 bg-green-50 rounded-xl p-3 mb-4">
               <CheckCircle2 className="h-4 w-4 text-green-600" />
-              <span className="text-sm font-medium text-green-800 flex-1">{currentStore.customDomain}</span>
+              <span className="text-sm font-medium text-green-800 flex-1">{String(currentStore.customDomain)}</span>
             </div>
           ) : null}
 

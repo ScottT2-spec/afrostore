@@ -9,11 +9,23 @@ async function main() {
   const admin = await prisma.user.findUnique({ where: { email: "admin@afrostore.com" } });
   if (!admin) throw new Error("Admin not found");
 
-  const adminStore = await prisma.store.upsert({
+  // Create or find a workspace for admin
+  const adminWorkspace = await prisma.workspace.upsert({
     where: { slug: "afrostore-hq" },
     update: {},
     create: {
       ownerId: admin.id,
+      name: "AfroStore HQ",
+      slug: "afrostore-hq",
+      plan: "ENTERPRISE",
+    },
+  });
+
+  const adminStore = await prisma.site.upsert({
+    where: { slug: "afrostore-hq" },
+    update: {},
+    create: {
+      workspaceId: adminWorkspace.id,
       name: "AfroStore HQ",
       slug: "afrostore-hq",
       description: "The official AfroStore headquarters — platform admin store.",
@@ -22,7 +34,6 @@ async function main() {
       country: "GH",
       currency: "GHS",
       status: "ACTIVE",
-      plan: "ENTERPRISE",
       settings: {
         create: {
           allowGuestCheckout: true,
@@ -38,11 +49,11 @@ async function main() {
   console.log("✅ Admin store created:", adminStore.name);
 
   // 2. Add sample orders to Merchant's store
-  const merchantStore = await prisma.store.findUnique({ where: { slug: "kwame-fashion-hub" } });
+  const merchantStore = await prisma.site.findUnique({ where: { slug: "kwame-fashion-hub" } });
   if (!merchantStore) throw new Error("Merchant store not found");
 
-  const products = await prisma.product.findMany({ where: { storeId: merchantStore.id }, take: 4 });
-  const customers = await prisma.customer.findMany({ where: { storeId: merchantStore.id }, take: 3 });
+  const products = await prisma.product.findMany({ where: { siteId: merchantStore.id }, take: 4 });
+  const customers = await prisma.customer.findMany({ where: { siteId: merchantStore.id }, take: 3 });
 
   const orderData = [
     { customer: customers[0], items: [products[0], products[3]], status: "CONFIRMED" as const, payStatus: "PAID" as const },
@@ -61,7 +72,7 @@ async function main() {
 
     await prisma.order.create({
       data: {
-        storeId: merchantStore.id,
+        siteId: merchantStore.id,
         customerId: od.customer.id,
         orderNumber: `AF-${orderNum}`,
         email: od.customer.email,

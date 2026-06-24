@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect, useCallback } from "react";
-import { useStore } from "@/context/StoreContext";
+import { useSite } from "@/context/StoreContext";
 import { useRouter } from "next/navigation";
 import { api } from "@/lib/api-client";
 import { useAIPrefill } from "@/hooks/useAIPrefill";
@@ -147,7 +147,7 @@ function generateVariantCombinations(attributes: Attribute[]): Variant[] {
 // ─── Component ──────────────────────────────────────────────
 
 export default function ProductForm({ productId }: ProductFormProps) {
-  const { currentStore } = useStore();
+  const { currentStore } = useSite();
   const router = useRouter();
   const isEditing = !!productId;
   const prefillPage = isEditing ? `products/${productId}/edit` : "products/new";
@@ -199,7 +199,7 @@ export default function ProductForm({ productId }: ProductFormProps) {
 
   useEffect(() => {
     if (!currentStore) return;
-    api.get<{ categories: Category[] }>(`/api/stores/${currentStore.id}/categories`).then((res) => {
+    api.get<{ categories: Category[] }>(`/api/sites/${currentStore.id}/categories`).then((res) => {
       if (res.success && res.data) {
         const cats = Array.isArray(res.data) ? res.data : (res.data as any).categories || [];
         setCategories(cats);
@@ -212,7 +212,7 @@ export default function ProductForm({ productId }: ProductFormProps) {
   useEffect(() => {
     if (!isEditing || !currentStore || !productId) return;
     setLoadingProduct(true);
-    api.get<ProductData>(`/api/stores/${currentStore.id}/products/${productId}`).then((res) => {
+    api.get<ProductData>(`/api/sites/${currentStore.id}/products/${productId}`).then((res) => {
       if (res.success && res.data) {
         const p = res.data;
         setName(p.name);
@@ -440,8 +440,8 @@ export default function ProductForm({ productId }: ProductFormProps) {
     };
 
     const res = isEditing
-      ? await api.patch(`/api/stores/${currentStore.id}/products/${productId}`, payload)
-      : await api.post(`/api/stores/${currentStore.id}/products`, payload);
+      ? await api.patch(`/api/sites/${currentStore.id}/products/${productId}`, payload)
+      : await api.post(`/api/sites/${currentStore.id}/products`, payload);
 
     if (res.success) {
       setSuccessMsg(isEditing ? "Product updated!" : "Product created!");

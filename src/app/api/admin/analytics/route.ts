@@ -15,7 +15,7 @@ export async function GET(req: NextRequest) {
     // Overall totals
     const [totalUsers, totalStores, totalOrders, totalRevenueAgg] = await Promise.all([
       prisma.user.count(),
-      prisma.store.count(),
+      prisma.site.count(),
       prisma.order.count(),
       prisma.order.aggregate({ _sum: { total: true }, where: { paymentStatus: "PAID" } }),
     ]);
@@ -26,7 +26,7 @@ export async function GET(req: NextRequest) {
         select: { createdAt: true },
         orderBy: { createdAt: "asc" },
       }),
-      prisma.store.findMany({
+      prisma.site.findMany({
         where: { createdAt: { gte: thirtyDaysAgo } },
         select: { createdAt: true },
         orderBy: { createdAt: "asc" },

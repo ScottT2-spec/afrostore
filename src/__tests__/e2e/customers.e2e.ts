@@ -23,7 +23,7 @@ export function customerAndCatalogTests() {
     });
 
     it('should create a customer', async () => {
-      const res = await POST(`/api/stores/${store.id}/customers`, {
+      const res = await POST(`/api/sites/${store.id}/customers`, {
         email: 'amara@example.com',
         firstName: 'Amara',
         lastName: 'Okafor',
@@ -38,17 +38,17 @@ export function customerAndCatalogTests() {
 
     it('should list customers', async () => {
       await createTestCustomer(user.token, store.id);
-      const res = await GET(`/api/stores/${store.id}/customers`, user.token);
+      const res = await GET(`/api/sites/${store.id}/customers`, user.token);
       expectSuccess(res);
     });
 
     it('should reject duplicate customer email per store', async () => {
       const email = `dup_${Date.now()}@test.com`;
-      await POST(`/api/stores/${store.id}/customers`, {
+      await POST(`/api/sites/${store.id}/customers`, {
         email, firstName: 'A', lastName: 'B',
       }, user.token);
 
-      const res = await POST(`/api/stores/${store.id}/customers`, {
+      const res = await POST(`/api/sites/${store.id}/customers`, {
         email, firstName: 'C', lastName: 'D',
       }, user.token);
 
@@ -69,7 +69,7 @@ export function customerAndCatalogTests() {
     });
 
     it('should create a category', async () => {
-      const res = await POST(`/api/stores/${store.id}/categories`, {
+      const res = await POST(`/api/sites/${store.id}/categories`, {
         name: 'Electronics',
         description: 'Phones, laptops, accessories',
       }, user.token);
@@ -81,12 +81,12 @@ export function customerAndCatalogTests() {
     });
 
     it('should create nested category', async () => {
-      const parent = await POST(`/api/stores/${store.id}/categories`, {
+      const parent = await POST(`/api/sites/${store.id}/categories`, {
         name: 'Fashion',
       }, user.token);
       const parentId = (parent.body.data as any).id;
 
-      const res = await POST(`/api/stores/${store.id}/categories`, {
+      const res = await POST(`/api/sites/${store.id}/categories`, {
         name: 'Shoes',
         parentId,
       }, user.token);
@@ -95,7 +95,7 @@ export function customerAndCatalogTests() {
     });
 
     it('should list categories', async () => {
-      const res = await GET(`/api/stores/${store.id}/categories`, user.token);
+      const res = await GET(`/api/sites/${store.id}/categories`, user.token);
       expectSuccess(res);
     });
   });
@@ -112,7 +112,7 @@ export function customerAndCatalogTests() {
     });
 
     it('should create a percentage coupon', async () => {
-      const res = await POST(`/api/stores/${store.id}/coupons`, {
+      const res = await POST(`/api/sites/${store.id}/coupons`, {
         code: 'SAVE20',
         type: 'PERCENTAGE',
         value: 20,
@@ -125,7 +125,7 @@ export function customerAndCatalogTests() {
     });
 
     it('should create a fixed amount coupon', async () => {
-      const res = await POST(`/api/stores/${store.id}/coupons`, {
+      const res = await POST(`/api/sites/${store.id}/coupons`, {
         code: 'FLAT5000',
         type: 'FIXED',
         value: 5000,
@@ -135,7 +135,7 @@ export function customerAndCatalogTests() {
     });
 
     it('should create a free shipping coupon', async () => {
-      const res = await POST(`/api/stores/${store.id}/coupons`, {
+      const res = await POST(`/api/sites/${store.id}/coupons`, {
         code: 'FREESHIP',
         type: 'FREE_SHIPPING',
         value: 0.01, // Required by validator but irrelevant for free shipping
@@ -145,12 +145,12 @@ export function customerAndCatalogTests() {
     });
 
     it('should list coupons', async () => {
-      const res = await GET(`/api/stores/${store.id}/coupons`, user.token);
+      const res = await GET(`/api/sites/${store.id}/coupons`, user.token);
       expectSuccess(res);
     });
 
     it('should uppercase coupon code', async () => {
-      const res = await POST(`/api/stores/${store.id}/coupons`, {
+      const res = await POST(`/api/sites/${store.id}/coupons`, {
         code: 'lowercase',
         type: 'PERCENTAGE',
         value: 10,
@@ -174,7 +174,7 @@ export function customerAndCatalogTests() {
     });
 
     it('should create delivery zone for Lagos Mainland', async () => {
-      const res = await POST(`/api/stores/${store.id}/delivery-zones`, {
+      const res = await POST(`/api/sites/${store.id}/delivery-zones`, {
         name: 'Lagos Mainland',
         areas: ['Yaba', 'Surulere', 'Ikeja', 'Mushin', 'Oshodi'],
         fee: 2000,
@@ -186,7 +186,7 @@ export function customerAndCatalogTests() {
     });
 
     it('should create delivery zone for Lagos Island', async () => {
-      const res = await POST(`/api/stores/${store.id}/delivery-zones`, {
+      const res = await POST(`/api/sites/${store.id}/delivery-zones`, {
         name: 'Lagos Island',
         areas: ['Victoria Island', 'Lekki', 'Ikoyi', 'Ajah'],
         fee: 3500,
@@ -198,7 +198,7 @@ export function customerAndCatalogTests() {
     });
 
     it('should list delivery zones', async () => {
-      const res = await GET(`/api/stores/${store.id}/delivery-zones`, user.token);
+      const res = await GET(`/api/sites/${store.id}/delivery-zones`, user.token);
       expectSuccess(res);
     });
   });
@@ -218,7 +218,7 @@ export function customerAndCatalogTests() {
     });
 
     it('should create a review', async () => {
-      const res = await POST(`/api/stores/${store.id}/reviews`, {
+      const res = await POST(`/api/sites/${store.id}/reviews`, {
         productId,
         name: 'Happy Customer',
         email: 'happy@test.com',
@@ -231,7 +231,7 @@ export function customerAndCatalogTests() {
     });
 
     it('should reject review with invalid rating', async () => {
-      const res = await POST(`/api/stores/${store.id}/reviews`, {
+      const res = await POST(`/api/sites/${store.id}/reviews`, {
         productId,
         name: 'Bad Rating',
         email: 'bad@test.com',
@@ -242,7 +242,7 @@ export function customerAndCatalogTests() {
     });
 
     it('should list reviews', async () => {
-      const res = await GET(`/api/stores/${store.id}/reviews`, user.token);
+      const res = await GET(`/api/sites/${store.id}/reviews`, user.token);
       expectSuccess(res);
     });
   });
@@ -259,7 +259,7 @@ export function customerAndCatalogTests() {
     });
 
     it('should create an about page', async () => {
-      const res = await POST(`/api/stores/${store.id}/pages`, {
+      const res = await POST(`/api/sites/${store.id}/pages`, {
         title: 'About Us',
         type: 'ABOUT',
         content: { blocks: [{ type: 'text', text: 'We are a Lagos-based fashion brand.' }] },
@@ -270,7 +270,7 @@ export function customerAndCatalogTests() {
     });
 
     it('should create a custom landing page', async () => {
-      const res = await POST(`/api/stores/${store.id}/pages`, {
+      const res = await POST(`/api/sites/${store.id}/pages`, {
         title: 'Valentine Sale 2026',
         type: 'LANDING',
         isPublished: false,
@@ -280,7 +280,7 @@ export function customerAndCatalogTests() {
     });
 
     it('should list pages', async () => {
-      const res = await GET(`/api/stores/${store.id}/pages`, user.token);
+      const res = await GET(`/api/sites/${store.id}/pages`, user.token);
       expectSuccess(res);
     });
   });
@@ -297,7 +297,7 @@ export function customerAndCatalogTests() {
     });
 
     it('should setup Paystack gateway', async () => {
-      const res = await POST(`/api/stores/${store.id}/payment-gateways`, {
+      const res = await POST(`/api/sites/${store.id}/payment-gateways`, {
         provider: 'PAYSTACK',
         publicKey: 'pk_test_xxx',
         secretKey: 'sk_test_xxx',
@@ -307,7 +307,7 @@ export function customerAndCatalogTests() {
     });
 
     it('should list payment gateways', async () => {
-      const res = await GET(`/api/stores/${store.id}/payment-gateways`, user.token);
+      const res = await GET(`/api/sites/${store.id}/payment-gateways`, user.token);
       expectSuccess(res);
     });
   });

@@ -14,7 +14,7 @@ const listDeliveryZones: MCPToolDef = {
   requiresVerification: false,
   execute: async (_params, ctx) => {
     const zones = await prisma.deliveryZone.findMany({
-      where: { storeId: ctx.storeId },
+      where: { siteId: ctx.siteId },
       orderBy: { position: "asc" },
     });
 
@@ -141,7 +141,7 @@ const deleteDeliveryZone: MCPToolDef = {
   requiresVerification: false,
   execute: async (params, ctx) => {
     const zone = await prisma.deliveryZone.findFirst({
-      where: { id: params.zone_id as string, storeId: ctx.storeId },
+      where: { id: params.zone_id as string, siteId: ctx.siteId },
     });
     if (!zone) return { action: "error", message: "Delivery zone not found.", errorCode: "NOT_FOUND" };
 

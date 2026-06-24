@@ -64,7 +64,7 @@ export class BM25Search {
    * Returns ranked results with relevance scores.
    */
   async search(query: SearchQuery): Promise<SearchResult[]> {
-    if (!query.storeId) throw new TenantIsolationError();
+    if (!query.siteId) throw new TenantIsolationError();
 
     const startTime = performance.now();
 
@@ -209,7 +209,7 @@ export class BM25Search {
 
     // MANDATORY: Store isolation
     conditions.push(`store_id = $${paramIdx}`);
-    params.push(query.storeId);
+    params.push(query.siteId);
     paramIdx++;
 
     // Active documents only
@@ -285,7 +285,7 @@ export class BM25Search {
       id: row.id,
       documentId: row.document_id,
       documentType: row.document_type as DocumentType,
-      storeId: row.store_id,
+      siteId: row.store_id,
       score: row.rank, // Raw ts_rank_cd score — normalized later in RRF
       content: row.content,
       metadata: row.metadata as DocumentMetadata,

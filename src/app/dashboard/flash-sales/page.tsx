@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect, useCallback } from "react";
-import { useStore } from "@/context/StoreContext";
+import { useSite } from "@/context/StoreContext";
 import { api } from "@/lib/api-client";
 import DashboardHeader from "@/components/dashboard/DashboardHeader";
 import { useAIPrefill } from "@/hooks/useAIPrefill";
@@ -27,7 +27,7 @@ interface FlashSale {
 interface Product { id: string; name: string; price: number }
 
 export default function FlashSalesPage() {
-  const { currentStore } = useStore();
+  const { currentStore } = useSite();
   const router = useRouter();
   const { prefillData, clearPrefill, isFromAI } = useAIPrefill("flash_sale");
   const [sales, setSales] = useState<FlashSale[]>([]);
@@ -45,7 +45,7 @@ export default function FlashSalesPage() {
 
   const load = useCallback(async () => {
     if (!currentStore) return;
-    const res = await api.get<FlashSale[]>(`/api/stores/${currentStore.id}/flash-sales`);
+    const res = await api.get<FlashSale[]>(`/api/sites/${currentStore.id}/flash-sales`);
     if (res.success && res.data) setSales(res.data);
     setLoading(false);
   }, [currentStore]);
@@ -74,7 +74,7 @@ export default function FlashSalesPage() {
 
   const loadProducts = async () => {
     if (!currentStore) return;
-    const res = await api.get<any>(`/api/stores/${currentStore.id}/products?limit=100`);
+    const res = await api.get<any>(`/api/sites/${currentStore.id}/products?limit=100`);
     if (res.success && res.data) {
       setProducts(Array.isArray(res.data) ? res.data : res.data.products || []);
     }
@@ -83,7 +83,7 @@ export default function FlashSalesPage() {
   const create = async () => {
     if (!currentStore) return;
     setSaving(true);
-    await api.post(`/api/stores/${currentStore.id}/flash-sales`, {
+    await api.post(`/api/sites/${currentStore.id}/flash-sales`, {
       ...form,
       discountValue: Number(form.discountValue),
       maxUses: form.maxUses ? Number(form.maxUses) : null,
@@ -97,13 +97,13 @@ export default function FlashSalesPage() {
 
   const toggleActive = async (id: string, isActive: boolean) => {
     if (!currentStore) return;
-    await api.patch(`/api/stores/${currentStore.id}/flash-sales/${id}`, { isActive: !isActive });
+    await api.patch(`/api/sites/${currentStore.id}/flash-sales/${id}`, { isActive: !isActive });
     await load();
   };
 
   const deleteSale = async (id: string) => {
     if (!currentStore) return;
-    await api.delete(`/api/stores/${currentStore.id}/flash-sales/${id}`);
+    await api.delete(`/api/sites/${currentStore.id}/flash-sales/${id}`);
     await load();
   };
 

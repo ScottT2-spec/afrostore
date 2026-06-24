@@ -106,7 +106,7 @@ export default function CheckoutPage() {
     } catch { /* ignore */ }
     return [];
   });
-  const [storeId, setStoreId] = useState("");
+  const [siteId, setStoreId] = useState("");
   const [storeSlug, setStoreSlug] = useState(activeSlug);
   const [storeName, setStoreName] = useState("");
   const [currency, setCurrency] = useState("NGN");
@@ -134,7 +134,7 @@ export default function CheckoutPage() {
   useEffect(() => {
     if (typeof window === "undefined") return;
     try {
-      setStoreId(localStorage.getItem("afrostore_storeId") || "");
+      setStoreId(localStorage.getItem("afrostore_siteId") || "");
       setStoreSlug(localStorage.getItem("afrostore_storeSlug") || "");
       setStoreName(localStorage.getItem("afrostore_storeName") || "");
       setCurrency(localStorage.getItem("afrostore_currency") || "NGN");
@@ -179,7 +179,7 @@ export default function CheckoutPage() {
   const total = subtotal + deliveryFee;
 
   const handlePlaceOrder = async () => {
-    if (!storeId) { setOrderError("Store information missing. Go back to the store and try again."); return; }
+    if (!siteId) { setOrderError("Store information missing. Go back to the store and try again."); return; }
     if (!firstName || !lastName || !email || !phone) { setOrderError("Please fill in all contact information."); return; }
     if (!address || !city || !state) { setOrderError("Please fill in your delivery address."); return; }
     if (cart.length === 0) { setOrderError("Your cart is empty."); return; }
@@ -189,7 +189,7 @@ export default function CheckoutPage() {
 
     try {
       // 1. Create the order
-      const orderRes = await fetch(`/api/stores/${storeId}/orders`, {
+      const orderRes = await fetch(`/api/sites/${siteId}/orders`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
@@ -231,7 +231,7 @@ export default function CheckoutPage() {
       }
 
       // 3. Initialize payment
-      const payRes = await fetch(`/api/stores/${storeId}/checkout`, {
+      const payRes = await fetch(`/api/sites/${siteId}/checkout`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({

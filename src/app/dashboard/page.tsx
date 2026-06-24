@@ -1,8 +1,8 @@
 "use client";
 
 import DashboardHeader from "@/components/dashboard/DashboardHeader";
-import { useStore } from "@/context/StoreContext";
-import { useStoreApi } from "@/hooks/useApiData";
+import { useSite } from "@/context/StoreContext";
+import { useSiteApi } from "@/hooks/useApiData";
 import { useAuth } from "@/context/AuthContext";
 import { formatCurrency } from "@/lib/utils";
 import {
@@ -74,7 +74,7 @@ function EmptyDashboard() {
         <p className="text-surface-500 mb-6 max-w-sm mx-auto">
           Get started by creating a store. You&apos;ll be selling in minutes.
         </p>
-        <button onClick={() => router.push("/dashboard/new-store")} className="btn-primary">
+        <button onClick={() => router.push("/dashboard/new-site")} className="btn-primary">
           <Sparkles className="h-4 w-4" />
           Create Store
         </button>
@@ -85,8 +85,8 @@ function EmptyDashboard() {
 
 export default function DashboardPage() {
   const { user } = useAuth();
-  const { currentStore, loading: storeLoading } = useStore();
-  const { data, loading, error } = useStoreApi<DashboardData>("/dashboard");
+  const { currentStore, loading: storeLoading } = useSite();
+  const { data, loading, error } = useSiteApi<DashboardData>("/dashboard");
 
   if (storeLoading) {
     return (

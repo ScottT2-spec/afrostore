@@ -3,7 +3,7 @@
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import DashboardHeader from "@/components/dashboard/DashboardHeader";
-import { useStore } from "@/context/StoreContext";
+import { useSite } from "@/context/StoreContext";
 import { api } from "@/lib/api-client";
 import { Store, Globe, Bell, Shield, Truck, MessageCircle, Save, Loader2, AlertTriangle, Trash2 } from "lucide-react";
 import { useAIPrefill } from "@/hooks/useAIPrefill";
@@ -11,7 +11,7 @@ import AIPrefillBanner from "@/components/dashboard/AIPrefillBanner";
 
 export default function SettingsPage() {
   const router = useRouter();
-  const { currentStore, stores, setCurrentStore, refreshStores } = useStore();
+  const { currentStore, stores, setCurrentStore, refreshStores } = useSite();
   const { prefillData, clearPrefill, isFromAI } = useAIPrefill("settings");
   const [loading, setLoading] = useState(true);
   const [deleteConfirm, setDeleteConfirm] = useState("");
@@ -37,10 +37,10 @@ export default function SettingsPage() {
   useEffect(() => {
     if (!currentStore) return;
     (async () => {
-      const res = await api.get<any>(`/api/stores/${currentStore.id}/settings`);
+      const res = await api.get<any>(`/api/sites/${currentStore.id}/settings`);
       if (res.success && res.data) {
         // Strip non-settings fields from DB response
-        const { id, storeId, createdAt, updatedAt, ...s } = res.data;
+        const { id, siteId, createdAt, updatedAt, ...s } = res.data;
         setSettings((prev) => ({ ...prev, ...s }));
       }
       setLoading(false);
@@ -71,14 +71,14 @@ export default function SettingsPage() {
         cleaned[key] = null; // send null instead of empty string
       }
     }
-    const res = await api.patch(`/api/stores/${currentStore.id}/settings`, cleaned);
+    const res = await api.patch(`/api/sites/${currentStore.id}/settings`, cleaned);
     setSaving(false);
     if (res.success) {
       setSaved(true);
       // Re-fetch settings to confirm they persisted
-      const fresh = await api.get<any>(`/api/stores/${currentStore.id}/settings`);
+      const fresh = await api.get<any>(`/api/sites/${currentStore.id}/settings`);
       if (fresh.success && fresh.data) {
-        const { id: _id, storeId: _sid, createdAt: _ca, updatedAt: _ua, ...s } = fresh.data;
+        const { id: _id, siteId: _sid, createdAt: _ca, updatedAt: _ua, ...s } = fresh.data;
         setSettings((prev) => ({ ...prev, ...s }));
       }
       window.scrollTo({ top: 0, behavior: "smooth" });
@@ -220,15 +220,15 @@ export default function SettingsPage() {
                 }
                 setDeleting(true);
                 setDeleteError("");
-                const res = await api.delete(`/api/stores/${currentStore.id}`);
+                const res = await api.delete(`/api/sites/${currentStore.id}`);
                 if (res.success) {
                   await refreshStores();
-                  const remaining = stores.filter((s) => s.id !== currentStore.id);
+                  const remaining = stores.filter((s: { id: string }) => s.id !== currentStore.id);
                   if (remaining.length > 0) {
                     setCurrentStore(remaining[0]);
                     router.push("/dashboard");
                   } else {
-                    router.push("/dashboard/new-store");
+                    router.push("/dashboard/new-site");
                   }
                 } else {
                   setDeleteError(res.error || "Failed to delete store");

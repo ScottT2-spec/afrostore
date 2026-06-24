@@ -4,7 +4,7 @@
  * The core execution engine. Like WordPress's do_action() and apply_filters().
  *
  * Usage:
- *   const engine = new PluginEngine(storeId);
+ *   const engine = new PluginEngine(siteId);
  *   await engine.load();                          // Load active plugins
  *   const results = await engine.run("order:created", orderData);
  *   const fees = engine.collectFees(results);     // Aggregate fees from all plugins
@@ -35,12 +35,12 @@ interface LoadedPlugin {
 }
 
 export class PluginEngine {
-  private storeId: string;
+  private siteId: string;
   private plugins: LoadedPlugin[] = [];
   private loaded = false;
 
-  constructor(storeId: string) {
-    this.storeId = storeId;
+  constructor(siteId: string) {
+    this.siteId = siteId;
   }
 
   /**
@@ -50,8 +50,8 @@ export class PluginEngine {
   async load(): Promise<void> {
     if (this.loaded) return;
 
-    const storePlugins = await prisma.storePlugin.findMany({
-      where: { storeId: this.storeId, isEnabled: true },
+    const storePlugins = await prisma.sitePlugin.findMany({
+      where: { siteId: this.siteId, isEnabled: true },
       include: { plugin: true },
     });
 
@@ -94,8 +94,8 @@ export class PluginEngine {
     subscribers.sort((a, b) => a.hookDef.priority - b.hookDef.priority);
 
     // Get store context
-    const store = await prisma.store.findUnique({
-      where: { id: this.storeId },
+    const store = await prisma.site.findUnique({
+      where: { id: this.siteId },
       select: { name: true, currency: true, country: true },
     });
 
@@ -123,7 +123,7 @@ export class PluginEngine {
         }
 
         const ctx: HookContext = {
-          storeId: this.storeId,
+          siteId: this.siteId,
           hook,
           data: currentData,
           pluginSettings: plugin.settings,
@@ -235,7 +235,7 @@ export class PluginEngine {
             const p = action.params;
             await prisma.coupon.create({
               data: {
-                storeId: this.storeId,
+                siteId: this.siteId,
                 code: p.code as string,
                 type: ((p.type as string) || "PERCENTAGE") as import("@/generated/prisma").CouponType,
                 value: p.value as number,
@@ -248,7 +248,7 @@ export class PluginEngine {
           case "log":
             await prisma.auditLog.create({
               data: {
-                storeId: this.storeId,
+                siteId: this.siteId,
                 action: `plugin:${plugin.slug}`,
                 entity: "plugin_action",
                 after: action.params as any,
@@ -286,8 +286,8 @@ export class PluginEngine {
 /**
  * Convenience: create engine, load, run hook, return results.
  */
-export async function runHook(storeId: string, hook: HookName, data: Record<string, unknown> = {}): Promise<PluginExecResult[]> {
-  const engine = new PluginEngine(storeId);
+export async function runHook(siteId: string, hook: HookName, data: Record<string, unknown> = {}): Promise<PluginExecResult[]> {
+  const engine = new PluginEngine(siteId);
   await engine.load();
   return engine.run(hook, data);
 }

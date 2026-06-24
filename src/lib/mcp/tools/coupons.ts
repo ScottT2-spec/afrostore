@@ -19,7 +19,7 @@ const listCoupons: MCPToolDef = {
   mutates: false,
   requiresVerification: false,
   execute: async (params, ctx) => {
-    const where: Record<string, unknown> = { storeId: ctx.storeId };
+    const where: Record<string, unknown> = { siteId: ctx.siteId };
     if (params.active_only) where.isActive = true;
 
     const coupons = await prisma.coupon.findMany({
@@ -87,7 +87,7 @@ Suggest strategic coupon ideas based on the store's context (e.g., "WELCOME10" f
 
     // Check for duplicate
     const existing = await prisma.coupon.findFirst({
-      where: { storeId: ctx.storeId, code },
+      where: { siteId: ctx.siteId, code },
     });
     if (existing) {
       return { action: "error", message: `Coupon code "${code}" already exists. Try a different code.`, errorCode: "DUPLICATE" };
@@ -137,7 +137,7 @@ const updateCoupon: MCPToolDef = {
   requiresVerification: true,
   execute: async (params, ctx) => {
     const coupon = await prisma.coupon.findFirst({
-      where: { id: params.coupon_id as string, storeId: ctx.storeId },
+      where: { id: params.coupon_id as string, siteId: ctx.siteId },
     });
     if (!coupon) return { action: "error", message: "Coupon not found.", errorCode: "NOT_FOUND" };
 
@@ -176,7 +176,7 @@ const deleteCoupon: MCPToolDef = {
   requiresVerification: false,
   execute: async (params, ctx) => {
     const coupon = await prisma.coupon.findFirst({
-      where: { id: params.coupon_id as string, storeId: ctx.storeId },
+      where: { id: params.coupon_id as string, siteId: ctx.siteId },
     });
     if (!coupon) return { action: "error", message: "Coupon not found.", errorCode: "NOT_FOUND" };
 

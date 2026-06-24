@@ -27,7 +27,7 @@ export async function DELETE(req: NextRequest, { params }: { params: Promise<{ i
     const { id } = await params;
 
     // Check if any stores are using this theme
-    const inUse = await prisma.storeTheme.count({ where: { themeId: id } });
+    const inUse = await prisma.siteTheme.count({ where: { themeId: id } });
     if (inUse > 0) return error(`Cannot delete: ${inUse} store(s) are using this theme`, 400);
 
     await prisma.theme.delete({ where: { id } });

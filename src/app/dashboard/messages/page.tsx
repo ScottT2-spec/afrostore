@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect, useCallback } from "react";
-import { useStore } from "@/context/StoreContext";
+import { useSite } from "@/context/StoreContext";
 import { api } from "@/lib/api-client";
 import {
   Mail, MailOpen, Loader2, Trash2, CheckCheck, Clock, User, ChevronDown, ChevronUp,
@@ -20,7 +20,7 @@ interface ContactMessage {
 }
 
 export default function MessagesPage() {
-  const { currentStore } = useStore();
+  const { currentStore } = useSite();
   const { isFromAI, clearPrefill } = useAIPrefill("message");
   const [messages, setMessages] = useState<ContactMessage[]>([]);
   const [loading, setLoading] = useState(true);
@@ -30,7 +30,7 @@ export default function MessagesPage() {
     if (!currentStore) return;
     setLoading(true);
     const res = await api.get<{ data: ContactMessage[]; pagination: unknown }>(
-      `/api/stores/${currentStore.id}/messages`
+      `/api/sites/${currentStore.id}/messages`
     );
     if (res.success && res.data) {
       const msgs = Array.isArray(res.data) ? res.data : (res.data.data || []);
@@ -43,13 +43,13 @@ export default function MessagesPage() {
 
   const markRead = async (ids: string[]) => {
     if (!currentStore) return;
-    await api.patch(`/api/stores/${currentStore.id}/messages`, { ids, isRead: true });
+    await api.patch(`/api/sites/${currentStore.id}/messages`, { ids, isRead: true });
     setMessages((prev) => prev.map((m) => ids.includes(m.id) ? { ...m, isRead: true } : m));
   };
 
   const deleteMessage = async (id: string) => {
     if (!currentStore || !confirm("Delete this message?")) return;
-    await api.delete(`/api/stores/${currentStore.id}/messages?id=${id}`);
+    await api.delete(`/api/sites/${currentStore.id}/messages?id=${id}`);
     setMessages((prev) => prev.filter((m) => m.id !== id));
   };
 

@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from "react";
 import DashboardHeader from "@/components/dashboard/DashboardHeader";
-import { useStore } from "@/context/StoreContext";
+import { useSite } from "@/context/StoreContext";
 import { api } from "@/lib/api-client";
 import { Eye, CheckCircle2, Star, Loader2, Palette } from "lucide-react";
 import { useAIPrefill } from "@/hooks/useAIPrefill";
@@ -13,7 +13,7 @@ interface Theme { id: string; name: string; slug: string; description?: string; 
 interface ThemesData { themes: Theme[]; activeThemeId: string | null; }
 
 export default function ThemesPage() {
-  const { currentStore } = useStore();
+  const { currentStore } = useSite();
   const { prefillData, clearPrefill, isFromAI } = useAIPrefill("theme");
   const [data, setData] = useState<ThemesData | null>(null);
   const [loading, setLoading] = useState(true);
@@ -21,7 +21,7 @@ export default function ThemesPage() {
 
   const fetch = async () => {
     if (!currentStore) return;
-    const res = await api.get<ThemesData>(`/api/stores/${currentStore.id}/themes`);
+    const res = await api.get<ThemesData>(`/api/sites/${currentStore.id}/themes`);
     if (res.success && res.data) setData(res.data);
     setLoading(false);
   };
@@ -31,7 +31,7 @@ export default function ThemesPage() {
   const installTheme = async (themeId: string) => {
     if (!currentStore) return;
     setInstalling(themeId);
-    await api.post(`/api/stores/${currentStore.id}/themes`, { themeId, activate: true });
+    await api.post(`/api/sites/${currentStore.id}/themes`, { themeId, activate: true });
     await fetch();
     setInstalling(null);
   };

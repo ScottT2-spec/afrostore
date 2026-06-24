@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useCallback } from "react";
 import DashboardHeader from "@/components/dashboard/DashboardHeader";
-import { useStore } from "@/context/StoreContext";
+import { useSite } from "@/context/StoreContext";
 import { api } from "@/lib/api-client";
 import { formatCurrency } from "@/lib/utils";
 import { Search, Users, Loader2, Mail, Phone, ShoppingCart, Plus, X, UserPlus } from "lucide-react";
@@ -24,7 +24,7 @@ interface CustomersResponse {
 }
 
 export default function CustomersPage() {
-  const { currentStore } = useStore();
+  const { currentStore } = useSite();
   const [customers, setCustomers] = useState<Customer[]>([]);
   const [loading, setLoading] = useState(true);
   const [total, setTotal] = useState(0);
@@ -36,7 +36,7 @@ export default function CustomersPage() {
     setLoading(true);
     const params = new URLSearchParams({ page: page.toString(), limit: "20" });
     if (search) params.set("search", search);
-    const res = await api.get<CustomersResponse>(`/api/stores/${currentStore.id}/customers?${params}`);
+    const res = await api.get<CustomersResponse>(`/api/sites/${currentStore.id}/customers?${params}`);
     if (res.success && res.data) {
       setCustomers(res.data.customers);
       setTotal(res.data.pagination.total);

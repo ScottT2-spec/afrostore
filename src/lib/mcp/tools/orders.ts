@@ -29,7 +29,7 @@ const listOrders: MCPToolDef = {
     const limit = Math.min((params.limit as number) || 20, 100);
     const skip = (page - 1) * limit;
 
-    const where: Record<string, unknown> = { storeId: ctx.storeId };
+    const where: Record<string, unknown> = { siteId: ctx.siteId };
     if (params.status) where.status = params.status;
     if (params.payment_status) where.paymentStatus = params.payment_status;
     if (params.days) {
@@ -98,9 +98,9 @@ const getOrder: MCPToolDef = {
   requiresVerification: false,
   execute: async (params, ctx) => {
     const where = params.order_id
-      ? { id: params.order_id as string, storeId: ctx.storeId }
+      ? { id: params.order_id as string, siteId: ctx.siteId }
       : params.order_number
-        ? { orderNumber: params.order_number as string, storeId: ctx.storeId }
+        ? { orderNumber: params.order_number as string, siteId: ctx.siteId }
         : null;
 
     if (!where) return { action: "error", message: "Provide order_id or order_number.", errorCode: "MISSING_PARAM" };
@@ -188,7 +188,7 @@ Optionally add a tracking number when marking as SHIPPED, or a note for any stat
   requiresVerification: false,
   execute: async (params, ctx) => {
     const order = await prisma.order.findFirst({
-      where: { id: params.order_id as string, storeId: ctx.storeId },
+      where: { id: params.order_id as string, siteId: ctx.siteId },
     });
     if (!order) return { action: "error", message: "Order not found.", errorCode: "NOT_FOUND" };
 
@@ -220,7 +220,7 @@ Optionally add a tracking number when marking as SHIPPED, or a note for any stat
     });
 
     await logAudit({
-      storeId: ctx.storeId, userId: ctx.userId,
+      siteId: ctx.siteId, userId: ctx.userId,
       action: "UPDATE_STATUS", entity: "order", entityId: order.id,
       before: { status: order.status },
       after: { status },
@@ -252,20 +252,20 @@ const getOrderStats: MCPToolDef = {
     const since = new Date(Date.now() - days * 86400000);
 
     const [totalOrders, paidOrders, statusCounts, recentRevenue] = await Promise.all([
-      prisma.order.count({ where: { storeId: ctx.storeId, createdAt: { gte: since } } }),
+      prisma.order.count({ where: { siteId: ctx.siteId, createdAt: { gte: since } } }),
       prisma.order.aggregate({
-        where: { storeId: ctx.storeId, paymentStatus: "PAID", createdAt: { gte: since } },
+        where: { siteId: ctx.siteId, paymentStatus: "PAID", createdAt: { gte: since } },
         _count: { id: true },
         _sum: { total: true },
         _avg: { total: true },
       }),
       prisma.order.groupBy({
         by: ["status"],
-        where: { storeId: ctx.storeId, createdAt: { gte: since } },
+        where: { siteId: ctx.siteId, createdAt: { gte: since } },
         _count: { id: true },
       }),
       prisma.order.aggregate({
-        where: { storeId: ctx.storeId, paymentStatus: "PAID", createdAt: { gte: since } },
+        where: { siteId: ctx.siteId, paymentStatus: "PAID", createdAt: { gte: since } },
         _sum: { total: true, deliveryFee: true, discount: true },
       }),
     ]);

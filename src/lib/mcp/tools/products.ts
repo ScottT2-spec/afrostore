@@ -59,7 +59,7 @@ const listProducts: MCPToolDef = {
     const limit = Math.min((params.limit as number) || 20, 100);
     const skip = (page - 1) * limit;
 
-    const where: Record<string, unknown> = { storeId: ctx.storeId };
+    const where: Record<string, unknown> = { siteId: ctx.siteId };
     if (params.status) where.status = params.status;
     if (params.category) where.categoryId = params.category;
     if (params.featured_only) where.isFeatured = true;
@@ -150,9 +150,9 @@ const getProduct: MCPToolDef = {
   requiresVerification: false,
   execute: async (params, ctx) => {
     const where = params.product_id
-      ? { id: params.product_id as string, storeId: ctx.storeId }
+      ? { id: params.product_id as string, siteId: ctx.siteId }
       : params.slug
-        ? { storeId_slug: { storeId: ctx.storeId, slug: params.slug as string } }
+        ? { siteId_slug: { siteId: ctx.siteId, slug: params.slug as string } }
         : null;
 
     if (!where) {
@@ -293,7 +293,7 @@ Generate a compelling, conversion-focused product description if the merchant do
     // Validate category exists if provided
     if (params.category_id) {
       const cat = await prisma.category.findFirst({
-        where: { id: params.category_id as string, storeId: ctx.storeId },
+        where: { id: params.category_id as string, siteId: ctx.siteId },
       });
       if (!cat) {
         return {
@@ -383,7 +383,7 @@ Use get_product first to see current values, then only change what's needed.`,
   requiresVerification: true,
   execute: async (params, ctx) => {
     const product = await prisma.product.findFirst({
-      where: { id: params.product_id as string, storeId: ctx.storeId },
+      where: { id: params.product_id as string, siteId: ctx.siteId },
       include: {
         images: { orderBy: { position: "asc" } },
         variants: { orderBy: { position: "asc" } },
@@ -456,7 +456,7 @@ const deleteProduct: MCPToolDef = {
   requiresVerification: false,
   execute: async (params, ctx) => {
     const product = await prisma.product.findFirst({
-      where: { id: params.product_id as string, storeId: ctx.storeId },
+      where: { id: params.product_id as string, siteId: ctx.siteId },
       include: { _count: { select: { orderItems: true } } },
     });
 
@@ -475,7 +475,7 @@ const deleteProduct: MCPToolDef = {
     await prisma.product.delete({ where: { id: product.id } });
 
     await logAudit({
-      storeId: ctx.storeId,
+      siteId: ctx.siteId,
       userId: ctx.userId,
       action: "DELETE",
       entity: "product",
@@ -520,12 +520,12 @@ const bulkUpdateProductStatus: MCPToolDef = {
     const status = params.status as string;
 
     const result = await prisma.product.updateMany({
-      where: { id: { in: ids }, storeId: ctx.storeId },
+      where: { id: { in: ids }, siteId: ctx.siteId },
       data: { status: status as any },
     });
 
     await logAudit({
-      storeId: ctx.storeId,
+      siteId: ctx.siteId,
       userId: ctx.userId,
       action: "BULK_UPDATE",
       entity: "product",
@@ -559,7 +559,7 @@ const duplicateProduct: MCPToolDef = {
   requiresVerification: true,
   execute: async (params, ctx) => {
     const product = await prisma.product.findFirst({
-      where: { id: params.product_id as string, storeId: ctx.storeId },
+      where: { id: params.product_id as string, siteId: ctx.siteId },
       include: {
         images: { orderBy: { position: "asc" } },
         variants: { orderBy: { position: "asc" } },
@@ -630,7 +630,7 @@ const getProductAnalytics: MCPToolDef = {
     const since = new Date(Date.now() - days * 24 * 60 * 60 * 1000);
 
     const product = await prisma.product.findFirst({
-      where: { id: productId, storeId: ctx.storeId },
+      where: { id: productId, siteId: ctx.siteId },
       select: { name: true, price: true },
     });
 
@@ -640,18 +640,18 @@ const getProductAnalytics: MCPToolDef = {
 
     const [views, addToCarts, purchases, orderItems] = await Promise.all([
       prisma.analyticsEvent.count({
-        where: { storeId: ctx.storeId, productId, event: "page_view", createdAt: { gte: since } },
+        where: { siteId: ctx.siteId, productId, event: "page_view", createdAt: { gte: since } },
       }),
       prisma.analyticsEvent.count({
-        where: { storeId: ctx.storeId, productId, event: "add_to_cart", createdAt: { gte: since } },
+        where: { siteId: ctx.siteId, productId, event: "add_to_cart", createdAt: { gte: since } },
       }),
       prisma.analyticsEvent.count({
-        where: { storeId: ctx.storeId, productId, event: "purchase", createdAt: { gte: since } },
+        where: { siteId: ctx.siteId, productId, event: "purchase", createdAt: { gte: since } },
       }),
       prisma.orderItem.findMany({
         where: {
           productId,
-          order: { storeId: ctx.storeId, createdAt: { gte: since }, paymentStatus: "PAID" },
+          order: { siteId: ctx.siteId, createdAt: { gte: since }, paymentStatus: "PAID" },
         },
         select: { quantity: true, total: true },
       }),

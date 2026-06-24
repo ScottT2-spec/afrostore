@@ -71,7 +71,7 @@ export class Retriever {
    * 6. Cache results
    */
   async retrieve(query: SearchQuery): Promise<SearchResponse> {
-    if (!query.storeId) throw new TenantIsolationError();
+    if (!query.siteId) throw new TenantIsolationError();
 
     // Normalize query
     const normalizedQuery = this.preprocessQuery(query);
@@ -269,7 +269,7 @@ export class Retriever {
   // ─── CACHE ────────────────────────────────────────────
 
   private getCacheKey(query: SearchQuery): string {
-    const keyData = `${query.storeId}:${query.query}:${query.strategy}:${JSON.stringify(query.documentTypes || [])}:${JSON.stringify(query.filters || [])}:${query.limit}`;
+    const keyData = `${query.siteId}:${query.query}:${query.strategy}:${JSON.stringify(query.documentTypes || [])}:${JSON.stringify(query.filters || [])}:${query.limit}`;
     return fnv1aHash(keyData);
   }
 

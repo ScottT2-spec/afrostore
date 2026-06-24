@@ -36,21 +36,33 @@ async function main() {
   });
   console.log("✅ Merchant created:", merchant.email);
 
-  // 3. Create Store for merchant
-  const store = await prisma.store.upsert({
-    where: { slug: "kwame-fashion-hub" },
+  // 3. Create Workspace for merchant
+  const workspace = await prisma.workspace.upsert({
+    where: { slug: "kwame-fashion" },
     update: {},
     create: {
       ownerId: merchant.id,
+      name: "Kwame Fashion",
+      slug: "kwame-fashion",
+    },
+  });
+  console.log("✅ Workspace created:", workspace.name);
+
+  // 4. Create Site for merchant
+  const store = await prisma.site.upsert({
+    where: { slug: "kwame-fashion-hub" },
+    update: {},
+    create: {
+      workspaceId: workspace.id,
       name: "Kwame Fashion Hub",
       slug: "kwame-fashion-hub",
       description: "Premium African fashion, accessories, and lifestyle products.",
       subdomain: "kwame-fashion-hub",
+      siteType: "ECOMMERCE",
       businessType: "fashion",
       country: "GH",
       currency: "GHS",
       status: "ACTIVE",
-      plan: "STARTER",
       settings: {
         create: {
           allowGuestCheckout: true,
@@ -69,19 +81,19 @@ async function main() {
   // 4. Create Categories
   const categories = await Promise.all([
     prisma.category.upsert({
-      where: { storeId_slug: { storeId: store.id, slug: "clothing" } },
+      where: { siteId_slug: { siteId: store.id, slug: "clothing" } },
       update: {},
-      create: { storeId: store.id, name: "Clothing", slug: "clothing", description: "Traditional and modern African clothing" },
+      create: { siteId: store.id, name: "Clothing", slug: "clothing", description: "Traditional and modern African clothing" },
     }),
     prisma.category.upsert({
-      where: { storeId_slug: { storeId: store.id, slug: "accessories" } },
+      where: { siteId_slug: { siteId: store.id, slug: "accessories" } },
       update: {},
-      create: { storeId: store.id, name: "Accessories", slug: "accessories", description: "Handcrafted jewelry and accessories" },
+      create: { siteId: store.id, name: "Accessories", slug: "accessories", description: "Handcrafted jewelry and accessories" },
     }),
     prisma.category.upsert({
-      where: { storeId_slug: { storeId: store.id, slug: "footwear" } },
+      where: { siteId_slug: { siteId: store.id, slug: "footwear" } },
       update: {},
-      create: { storeId: store.id, name: "Footwear", slug: "footwear", description: "African-inspired sneakers and sandals" },
+      create: { siteId: store.id, name: "Footwear", slug: "footwear", description: "African-inspired sneakers and sandals" },
     }),
   ]);
   console.log("✅ Categories created:", categories.length);
@@ -98,10 +110,10 @@ async function main() {
 
   for (const p of products) {
     await prisma.product.upsert({
-      where: { storeId_slug: { storeId: store.id, slug: p.slug } },
+      where: { siteId_slug: { siteId: store.id, slug: p.slug } },
       update: {},
       create: {
-        storeId: store.id,
+        siteId: store.id,
         categoryId: p.categoryId,
         name: p.name,
         slug: p.slug,
@@ -126,9 +138,9 @@ async function main() {
 
   for (const c of customers) {
     await prisma.customer.upsert({
-      where: { storeId_email: { storeId: store.id, email: c.email } },
+      where: { siteId_email: { siteId: store.id, email: c.email } },
       update: {},
-      create: { storeId: store.id, ...c },
+      create: { siteId: store.id, ...c },
     });
   }
   console.log("✅ Customers created:", customers.length);

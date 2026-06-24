@@ -1,84 +1,127 @@
-"use client";
+'use client';
 
-import { createContext, useContext, useState, useEffect, useCallback, ReactNode } from "react";
-import { api } from "@/lib/api-client";
-import { useAuth } from "./AuthContext";
+import { createContext, useContext, useState, useEffect, ReactNode } from 'react';
 
-interface Store {
+export interface StoreLike {
   id: string;
   name: string;
+  siteType: 'ECOMMERCE' | 'WEBSITE' | 'LANDING_PAGE';
   slug: string;
-  description?: string;
-  logo?: string;
-  coverImage?: string;
   subdomain: string;
-  customDomain?: string;
   currency: string;
-  country: string;
-  businessType: string;
-  status: string;
-  plan: string;
-  createdAt: string;
+  [key: string]: unknown;
 }
 
-interface StoreContextType {
-  stores: Store[];
-  currentStore: Store | null;
+export interface SiteContextType {
+  siteId: string | null;
+  siteName: string | null;
+  siteType: 'ECOMMERCE' | 'WEBSITE' | 'LANDING_PAGE' | null;
+  slug: string | null;
+  currency: string;
+  setSiteId: (id: string) => void;
   loading: boolean;
-  setCurrentStore: (store: Store) => void;
+  /** @deprecated Use siteId/siteName/slug directly */
+  currentStore: StoreLike | null;
+  /** @deprecated */
+  stores: StoreLike[];
+  /** @deprecated Use setSiteId */
+  setCurrentStore: (store: StoreLike) => void;
+  /** @deprecated */
   refreshStores: () => Promise<void>;
 }
 
-const StoreContext = createContext<StoreContextType | null>(null);
+const SiteContext = createContext<SiteContextType>({
+  siteId: null,
+  siteName: null,
+  siteType: null,
+  slug: null,
+  currency: 'NGN',
+  setSiteId: () => {},
+  loading: true,
+  currentStore: null,
+  stores: [],
+  setCurrentStore: () => {},
+  refreshStores: async () => {},
+});
 
-export function StoreProvider({ children }: { children: ReactNode }) {
-  const { user } = useAuth();
-  const [stores, setStores] = useState<Store[]>([]);
-  const [currentStore, setCurrentStoreState] = useState<Store | null>(null);
+export function SiteProvider({ children }: { children: ReactNode }) {
+  const [siteId, setSiteIdState] = useState<string | null>(null);
+  const [siteName, setSiteName] = useState<string | null>(null);
+  const [siteType, setSiteType] = useState<SiteContextType['siteType']>(null);
+  const [slug, setSlug] = useState<string | null>(null);
+  const [subdomain, setSubdomain] = useState<string | null>(null);
+  const [currency, setCurrency] = useState('NGN');
   const [loading, setLoading] = useState(true);
+  const [siteData, setSiteData] = useState<Record<string, unknown> | null>(null);
+  const [storesList, setStoresList] = useState<StoreLike[]>([]);
 
-  const refreshStores = useCallback(async () => {
-    if (!user) {
-      setStores([]);
-      setCurrentStoreState(null);
-      setLoading(false);
-      return;
-    }
-    setLoading(true);
-    const res = await api.get<Store[]>("/api/stores");
-    if (res.success && res.data) {
-      const storeList = Array.isArray(res.data) ? res.data : [];
-      setStores(storeList);
-      // Restore last selected or pick first
-      const savedId = typeof window !== "undefined" ? localStorage.getItem("currentStoreId") : null;
-      const saved = storeList.find((s) => s.id === savedId);
-      if (saved) {
-        setCurrentStoreState(saved);
-      } else if (storeList.length > 0) {
-        setCurrentStoreState(storeList[0]);
+  const setSiteId = (id: string) => {
+    setSiteIdState(id);
+    localStorage.setItem('activeSiteId', id);
+  };
+
+  const fetchSiteData = async (id: string) => {
+    try {
+      const r = await fetch(`/api/sites/${id}`);
+      const data = await r.json();
+      const site = data.data || data.site;
+      if (site) {
+        setSiteName(site.name);
+        setSiteType(site.siteType);
+        setSlug(site.slug);
+        setSubdomain(site.subdomain || site.slug);
+        setCurrency(site.currency || 'NGN');
+        setSiteData(site);
       }
-    }
-    setLoading(false);
-  }, [user]);
+    } catch {}
+  };
+
+  const refreshStores = async () => {
+    try {
+      const r = await fetch('/api/sites');
+      const data = await r.json();
+      const sites = data.data || data.sites || [];
+      setStoresList(sites);
+    } catch {}
+  };
 
   useEffect(() => {
+    const stored = localStorage.getItem('activeSiteId');
+    if (stored) {
+      setSiteIdState(stored);
+    }
+    setLoading(false);
     refreshStores();
-  }, [refreshStores]);
+  }, []);
 
-  const setCurrentStore = (store: Store) => {
-    setCurrentStoreState(store);
-    if (typeof window !== "undefined") localStorage.setItem("currentStoreId", store.id);
+  useEffect(() => {
+    if (!siteId) return;
+    fetchSiteData(siteId);
+  }, [siteId]);
+
+  const currentStore: StoreLike | null = siteId && siteName ? {
+    id: siteId,
+    name: siteName,
+    siteType: siteType || 'ECOMMERCE',
+    slug: slug || '',
+    subdomain: subdomain || slug || '',
+    currency,
+    ...(siteData || {}),
+  } : null;
+
+  const setCurrentStore = (store: StoreLike) => {
+    setSiteId(store.id);
   };
 
   return (
-    <StoreContext.Provider value={{ stores, currentStore, loading, setCurrentStore, refreshStores }}>
+    <SiteContext.Provider value={{
+      siteId, siteName, siteType, slug, currency, setSiteId, loading,
+      currentStore, stores: storesList, setCurrentStore, refreshStores,
+    }}>
       {children}
-    </StoreContext.Provider>
+    </SiteContext.Provider>
   );
 }
 
-export function useStore() {
-  const ctx = useContext(StoreContext);
-  if (!ctx) throw new Error("useStore must be used within StoreProvider");
-  return ctx;
-}
+export const useSite = () => useContext(SiteContext);
+export default SiteContext;

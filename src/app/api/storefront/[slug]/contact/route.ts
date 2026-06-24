@@ -28,12 +28,12 @@ export async function POST(req: NextRequest, { params }: Params) {
     }
 
     // Find store by slug
-    const store = await prisma.store.findUnique({
+    const site = await prisma.site.findUnique({
       where: { slug },
       select: { id: true, status: true },
     });
 
-    if (!store || store.status !== "ACTIVE") {
+    if (!site || site.status !== "ACTIVE") {
       return NextResponse.json(
         { success: false, error: "Store not found" },
         { status: 404 }
@@ -44,7 +44,7 @@ export async function POST(req: NextRequest, { params }: Params) {
     const oneHourAgo = new Date(Date.now() - 60 * 60 * 1000);
     const recentCount = await prisma.contactMessage.count({
       where: {
-        storeId: store.id,
+        siteId: site.id,
         email,
         createdAt: { gte: oneHourAgo },
       },
@@ -60,7 +60,7 @@ export async function POST(req: NextRequest, { params }: Params) {
     // Save the message
     await prisma.contactMessage.create({
       data: {
-        storeId: store.id,
+        siteId: site.id,
         name: name.slice(0, 200),
         email: email.slice(0, 320),
         subject: subject ? subject.slice(0, 500) : null,

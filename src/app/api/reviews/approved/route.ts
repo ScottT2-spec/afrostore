@@ -14,7 +14,7 @@ export async function GET(req: NextRequest) {
     const reviews = await prisma.review.findMany({
       where: {
         isApproved: true,
-        product: { status: "ACTIVE", store: { status: "ACTIVE" } },
+        product: { status: "ACTIVE", site: { status: "ACTIVE" } },
       },
       select: {
         id: true,
@@ -27,7 +27,7 @@ export async function GET(req: NextRequest) {
         product: {
           select: {
             name: true,
-            store: {
+            site: {
               select: {
                 name: true,
                 slug: true,
@@ -51,10 +51,10 @@ export async function GET(req: NextRequest) {
       isVerified: r.isVerified,
       createdAt: r.createdAt,
       productName: r.product.name,
-      storeName: r.product.store.name,
-      storeSlug: r.product.store.slug,
-      businessType: r.product.store.businessType,
-      country: r.product.store.country,
+      storeName: r.product.site.name,
+      storeSlug: r.product.site.slug,
+      businessType: r.product.site.businessType,
+      country: r.product.site.country,
     }));
 
     return json({ success: true, data: formatted });

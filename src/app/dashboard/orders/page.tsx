@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useCallback } from "react";
 import DashboardHeader from "@/components/dashboard/DashboardHeader";
-import { useStore } from "@/context/StoreContext";
+import { useSite } from "@/context/StoreContext";
 import { api } from "@/lib/api-client";
 import { formatCurrency } from "@/lib/utils";
 import {
@@ -51,7 +51,7 @@ const statusConfig: Record<string, { label: string; color: string; icon: React.E
 };
 
 export default function OrdersPage() {
-  const { currentStore } = useStore();
+  const { currentStore } = useSite();
   const [orders, setOrders] = useState<Order[]>([]);
   const [loading, setLoading] = useState(true);
   const [total, setTotal] = useState(0);
@@ -67,7 +67,7 @@ export default function OrdersPage() {
     const params = new URLSearchParams({ page: page.toString(), limit: "20" });
     if (statusFilter) params.set("status", statusFilter);
     if (search) params.set("search", search);
-    const res = await api.get<OrdersResponse>(`/api/stores/${currentStore.id}/orders?${params}`);
+    const res = await api.get<OrdersResponse>(`/api/sites/${currentStore.id}/orders?${params}`);
     if (res.success && res.data) {
       setOrders(res.data.orders);
       setTotal(res.data.pagination.total);
@@ -80,7 +80,7 @@ export default function OrdersPage() {
   const updateStatus = async (orderId: string, status: string) => {
     if (!currentStore) return;
     setUpdatingStatus(true);
-    await api.patch(`/api/stores/${currentStore.id}/orders/${orderId}`, { status });
+    await api.patch(`/api/sites/${currentStore.id}/orders/${orderId}`, { status });
     setUpdatingStatus(false);
     fetchOrders();
     if (selectedOrder?.id === orderId) {

@@ -42,39 +42,39 @@ const getDashboard: MCPToolDef = {
       unreadMessages,
     ] = await Promise.all([
       prisma.order.aggregate({
-        where: { storeId: ctx.storeId, paymentStatus: "PAID", createdAt: { gte: since } },
+        where: { siteId: ctx.siteId, paymentStatus: "PAID", createdAt: { gte: since } },
         _sum: { total: true }, _count: { id: true },
       }),
       prisma.order.aggregate({
-        where: { storeId: ctx.storeId, paymentStatus: "PAID", createdAt: { gte: prevSince, lt: since } },
+        where: { siteId: ctx.siteId, paymentStatus: "PAID", createdAt: { gte: prevSince, lt: since } },
         _sum: { total: true }, _count: { id: true },
       }),
-      prisma.order.count({ where: { storeId: ctx.storeId, createdAt: { gte: since } } }),
-      prisma.order.count({ where: { storeId: ctx.storeId, createdAt: { gte: prevSince, lt: since } } }),
-      prisma.customer.count({ where: { storeId: ctx.storeId, createdAt: { gte: since } } }),
-      prisma.customer.count({ where: { storeId: ctx.storeId, createdAt: { gte: prevSince, lt: since } } }),
+      prisma.order.count({ where: { siteId: ctx.siteId, createdAt: { gte: since } } }),
+      prisma.order.count({ where: { siteId: ctx.siteId, createdAt: { gte: prevSince, lt: since } } }),
+      prisma.customer.count({ where: { siteId: ctx.siteId, createdAt: { gte: since } } }),
+      prisma.customer.count({ where: { siteId: ctx.siteId, createdAt: { gte: prevSince, lt: since } } }),
       prisma.orderItem.groupBy({
         by: ["productId"],
-        where: { order: { storeId: ctx.storeId, createdAt: { gte: since } } },
+        where: { order: { siteId: ctx.siteId, createdAt: { gte: since } } },
         _sum: { quantity: true, total: true },
         orderBy: { _sum: { total: "desc" } },
         take: 5,
       }),
       prisma.order.findMany({
-        where: { storeId: ctx.storeId },
+        where: { siteId: ctx.siteId },
         orderBy: { createdAt: "desc" },
         take: 5,
         select: { orderNumber: true, status: true, total: true, email: true, createdAt: true },
       }),
-      prisma.order.count({ where: { storeId: ctx.storeId, status: "PENDING" } }),
+      prisma.order.count({ where: { siteId: ctx.siteId, status: "PENDING" } }),
       prisma.product.findMany({
-        where: { storeId: ctx.storeId, trackInventory: true, status: "ACTIVE" },
+        where: { siteId: ctx.siteId, trackInventory: true, status: "ACTIVE" },
         orderBy: { stock: "asc" },
         take: 5,
         select: { name: true, stock: true, lowStockAlert: true },
       }),
-      prisma.review.count({ where: { product: { storeId: ctx.storeId }, isApproved: false } }),
-      prisma.contactMessage.count({ where: { storeId: ctx.storeId, isRead: false } }),
+      prisma.review.count({ where: { product: { siteId: ctx.siteId }, isApproved: false } }),
+      prisma.contactMessage.count({ where: { siteId: ctx.siteId, isRead: false } }),
     ]);
 
     // Get product names for top products
@@ -152,7 +152,7 @@ const getAnalytics: MCPToolDef = {
     const days = (params.days as number) || 30;
     const since = new Date(Date.now() - days * 86400000);
 
-    const where: Record<string, unknown> = { storeId: ctx.storeId, createdAt: { gte: since } };
+    const where: Record<string, unknown> = { siteId: ctx.siteId, createdAt: { gte: since } };
     if (params.event) where.event = params.event;
 
     const [eventCounts, topPages, sources, devices] = await Promise.all([
@@ -233,7 +233,7 @@ const getAbandonedCarts: MCPToolDef = {
   mutates: false,
   requiresVerification: false,
   execute: async (params, ctx) => {
-    const where: Record<string, unknown> = { storeId: ctx.storeId };
+    const where: Record<string, unknown> = { siteId: ctx.siteId };
     if (params.status) where.status = params.status;
 
     const [carts, stats] = await Promise.all([
@@ -244,12 +244,12 @@ const getAbandonedCarts: MCPToolDef = {
         take: (params.limit as number) || 20,
       }),
       Promise.all([
-        prisma.abandonedCart.count({ where: { storeId: ctx.storeId } }),
-        prisma.abandonedCart.count({ where: { storeId: ctx.storeId, status: "ACTIVE" } }),
-        prisma.abandonedCart.count({ where: { storeId: ctx.storeId, status: "RECOVERED" } }),
-        prisma.abandonedCart.aggregate({ where: { storeId: ctx.storeId }, _sum: { totalAmount: true } }),
+        prisma.abandonedCart.count({ where: { siteId: ctx.siteId } }),
+        prisma.abandonedCart.count({ where: { siteId: ctx.siteId, status: "ACTIVE" } }),
+        prisma.abandonedCart.count({ where: { siteId: ctx.siteId, status: "RECOVERED" } }),
+        prisma.abandonedCart.aggregate({ where: { siteId: ctx.siteId }, _sum: { totalAmount: true } }),
         prisma.abandonedCart.aggregate({
-          where: { storeId: ctx.storeId, status: "RECOVERED" },
+          where: { siteId: ctx.siteId, status: "RECOVERED" },
           _sum: { totalAmount: true },
         }),
       ]),

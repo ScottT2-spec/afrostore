@@ -2,15 +2,15 @@
 
 import { useState, useEffect, useCallback } from "react";
 import { api } from "@/lib/api-client";
-import { useStore } from "@/context/StoreContext";
+import { useSite } from "@/context/StoreContext";
 
-export function useStoreApi<T>(path: string, deps: unknown[] = []) {
-  const { currentStore } = useStore();
+export function useSiteApi<T>(path: string, deps: unknown[] = []) {
+  const { currentStore } = useSite();
   const [data, setData] = useState<T | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
-  const fullPath = currentStore ? `/api/stores/${currentStore.id}${path}` : null;
+  const fullPath = currentStore ? `/api/sites/${currentStore.id}${path}` : null;
 
   const refetch = useCallback(async () => {
     if (!fullPath) return;

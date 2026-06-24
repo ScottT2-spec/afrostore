@@ -1,8 +1,8 @@
 "use client";
 
 import DashboardHeader from "@/components/dashboard/DashboardHeader";
-import { useStoreApi } from "@/hooks/useApiData";
-import { useStore } from "@/context/StoreContext";
+import { useSiteApi } from "@/hooks/useApiData";
+import { useSite } from "@/context/StoreContext";
 import { formatCurrency } from "@/lib/utils";
 import { TrendingUp, Eye, ShoppingCart, MousePointerClick, Users, Loader2, BarChart3 } from "lucide-react";
 
@@ -22,8 +22,8 @@ interface AnalyticsData {
 }
 
 export default function AnalyticsPage() {
-  const { currentStore } = useStore();
-  const { data, loading } = useStoreApi<AnalyticsData>("/analytics?period=30d");
+  const { currentStore } = useSite();
+  const { data, loading } = useSiteApi<AnalyticsData>("/analytics?period=30d");
   const currency = currentStore?.currency || "NGN";
 
   const summary = data?.summary;

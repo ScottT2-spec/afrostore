@@ -28,7 +28,7 @@ export function dashboardTests() {
     });
 
     it('should return dashboard stats', async () => {
-      const res = await GET(`/api/stores/${store.id}/dashboard`, user.token);
+      const res = await GET(`/api/sites/${store.id}/dashboard`, user.token);
       expectSuccess(res);
       const data = res.body.data as any;
       // Stats are nested under data.stats
@@ -49,7 +49,7 @@ export function dashboardTests() {
     });
 
     it('should record analytics event', async () => {
-      const res = await POST(`/api/stores/${store.id}/analytics`, {
+      const res = await POST(`/api/sites/${store.id}/analytics`, {
         event: 'page_view',
         page: '/products/ankara-fabric',
         sessionId: 'sess_123',
@@ -62,7 +62,7 @@ export function dashboardTests() {
     });
 
     it('should get analytics data', async () => {
-      const res = await GET(`/api/stores/${store.id}/analytics`, user.token);
+      const res = await GET(`/api/sites/${store.id}/analytics`, user.token);
       expectSuccess(res);
     });
   });
@@ -79,7 +79,7 @@ export function dashboardTests() {
     });
 
     it('should add a team member', async () => {
-      const res = await POST(`/api/stores/${store.id}/members`, {
+      const res = await POST(`/api/sites/${store.id}/members`, {
         email: staff.email,
         role: 'STAFF',
       }, owner.token);
@@ -88,7 +88,7 @@ export function dashboardTests() {
     });
 
     it('should list team members', async () => {
-      const res = await GET(`/api/stores/${store.id}/members`, owner.token);
+      const res = await GET(`/api/sites/${store.id}/members`, owner.token);
       expectSuccess(res);
       const data = res.body.data as any;
       const members = Array.isArray(data) ? data : data.members || [];
@@ -96,13 +96,13 @@ export function dashboardTests() {
     });
 
     it('staff should access store after being added', async () => {
-      const res = await GET(`/api/stores/${store.id}/products`, staff.token);
+      const res = await GET(`/api/sites/${store.id}/products`, staff.token);
       expectSuccess(res);
     });
 
     it('should reject non-owner adding members', async () => {
       const newUser = await createTestUser();
-      const res = await POST(`/api/stores/${store.id}/members`, {
+      const res = await POST(`/api/sites/${store.id}/members`, {
         email: 'hacker@test.com',
         role: 'ADMIN',
       }, newUser.token);
@@ -121,7 +121,7 @@ export function dashboardTests() {
     });
 
     it('should list available themes', async () => {
-      const res = await GET(`/api/stores/${store.id}/themes`, user.token);
+      const res = await GET(`/api/sites/${store.id}/themes`, user.token);
       expectSuccess(res);
     });
   });
@@ -136,7 +136,7 @@ export function dashboardTests() {
     });
 
     it('should list available plugins', async () => {
-      const res = await GET(`/api/stores/${store.id}/plugins`, user.token);
+      const res = await GET(`/api/sites/${store.id}/plugins`, user.token);
       expectSuccess(res);
     });
   });

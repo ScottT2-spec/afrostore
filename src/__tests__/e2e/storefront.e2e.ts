@@ -42,7 +42,7 @@ export function storefrontTests() {
       });
 
       // Create a page
-      await POST(`/api/stores/${store.id}/pages`, {
+      await POST(`/api/sites/${store.id}/pages`, {
         title: 'About Us',
         type: 'ABOUT',
         content: { blocks: [{ type: 'text', text: 'Welcome to our store!' }] },
@@ -116,14 +116,14 @@ export function storefrontTests() {
       store = await createTestStore(user.token, { name: `Page Test ${Date.now()}` });
       slug = (store as any).slug;
 
-      await POST(`/api/stores/${store.id}/pages`, {
+      await POST(`/api/sites/${store.id}/pages`, {
         title: 'FAQ',
         type: 'FAQ',
         content: { blocks: [{ type: 'text', text: 'Common questions.' }] },
         isPublished: true,
       }, user.token);
 
-      await POST(`/api/stores/${store.id}/pages`, {
+      await POST(`/api/sites/${store.id}/pages`, {
         title: 'Unpublished Page',
         type: 'CUSTOM',
         isPublished: false,
@@ -159,7 +159,7 @@ export function storefrontTests() {
     });
 
     it('should create checkout/order from storefront', async () => {
-      const res = await POST(`/api/stores/${(store as any).id}/checkout`, {
+      const res = await POST(`/api/sites/${(store as any).id}/checkout`, {
         email: 'shopper@example.com',
         firstName: 'Kemi',
         lastName: 'Adekunle',

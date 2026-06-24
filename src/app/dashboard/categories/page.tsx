@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect, useCallback } from "react";
-import { useStore } from "@/context/StoreContext";
+import { useSite } from "@/context/StoreContext";
 import { api } from "@/lib/api-client";
 import {
   FolderTree, Plus, Loader2, Pencil, Trash2, X, Check, Package,
@@ -24,7 +24,7 @@ interface Category {
 }
 
 export default function CategoriesPage() {
-  const { currentStore } = useStore();
+  const { currentStore } = useSite();
   const { prefill: aiPrefill, isAIPrefilled, onSaveComplete } = useAIPrefill("categories");
   const [categories, setCategories] = useState<Category[]>([]);
   const [loading, setLoading] = useState(true);
@@ -36,7 +36,7 @@ export default function CategoriesPage() {
   const fetchCategories = useCallback(async () => {
     if (!currentStore) return;
     setLoading(true);
-    const res = await api.get<Category[]>(`/api/stores/${currentStore.id}/categories`);
+    const res = await api.get<Category[]>(`/api/sites/${currentStore.id}/categories`);
     if (res.success && res.data) {
       const data = Array.isArray(res.data) ? res.data : (res.data as any).categories || [];
       setCategories(data);
@@ -87,10 +87,10 @@ export default function CategoriesPage() {
     const body = { ...form, slug, parentId: form.parentId || null };
 
     if (editingId) {
-      const res = await api.patch(`/api/stores/${currentStore.id}/categories`, { id: editingId, ...body });
+      const res = await api.patch(`/api/sites/${currentStore.id}/categories`, { id: editingId, ...body });
       if (res.success) fetchCategories();
     } else {
-      const res = await api.post(`/api/stores/${currentStore.id}/categories`, body);
+      const res = await api.post(`/api/sites/${currentStore.id}/categories`, body);
       if (res.success) fetchCategories();
     }
     setSaving(false);
@@ -103,7 +103,7 @@ export default function CategoriesPage() {
 
   const handleDelete = async (id: string) => {
     if (!currentStore || !confirm("Delete this category? Products in it will become uncategorized.")) return;
-    await api.delete(`/api/stores/${currentStore.id}/categories?id=${id}`);
+    await api.delete(`/api/sites/${currentStore.id}/categories?id=${id}`);
     setCategories((prev) => prev.filter((c) => c.id !== id));
   };
 

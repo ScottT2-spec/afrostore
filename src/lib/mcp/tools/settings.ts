@@ -17,11 +17,11 @@ const getSettings: MCPToolDef = {
   requiresVerification: false,
   execute: async (_params, ctx) => {
     const [settings, social, store] = await Promise.all([
-      prisma.storeSettings.findUnique({ where: { storeId: ctx.storeId } }),
-      prisma.storeSocialLinks.findUnique({ where: { storeId: ctx.storeId } }),
-      prisma.store.findUnique({
-        where: { id: ctx.storeId },
-        select: { name: true, slug: true, description: true, logo: true, coverImage: true, currency: true, country: true, businessType: true, plan: true, subdomain: true, customDomain: true },
+      prisma.siteSettings.findUnique({ where: { siteId: ctx.siteId } }),
+      prisma.siteSocialLinks.findUnique({ where: { siteId: ctx.siteId } }),
+      prisma.site.findUnique({
+        where: { id: ctx.siteId },
+        select: { name: true, slug: true, description: true, logo: true, coverImage: true, currency: true, country: true, businessType: true, subdomain: true, customDomain: true },
       }),
     ]);
 
@@ -180,7 +180,7 @@ const listThemes: MCPToolDef = {
 
     const [themes, installed] = await Promise.all([
       prisma.theme.findMany({ where: where as any, orderBy: [{ isFeatured: "desc" }, { installs: "desc" }] }),
-      prisma.storeTheme.findMany({ where: { storeId: ctx.storeId }, include: { theme: true } }),
+      prisma.siteTheme.findMany({ where: { siteId: ctx.siteId }, include: { theme: true } }),
     ]);
 
     const installedIds = new Set(installed.map((t) => t.themeId));
@@ -258,7 +258,7 @@ const listPlugins: MCPToolDef = {
 
     const [plugins, installed] = await Promise.all([
       prisma.plugin.findMany({ where: where as any, orderBy: { installs: "desc" } }),
-      prisma.storePlugin.findMany({ where: { storeId: ctx.storeId } }),
+      prisma.sitePlugin.findMany({ where: { siteId: ctx.siteId } }),
     ]);
 
     const installedMap = new Map(installed.map((p) => [p.pluginId, p]));
@@ -328,7 +328,7 @@ const listPaymentGateways: MCPToolDef = {
   requiresVerification: false,
   execute: async (_params, ctx) => {
     const gateways = await prisma.paymentGateway.findMany({
-      where: { storeId: ctx.storeId },
+      where: { siteId: ctx.siteId },
       select: { id: true, provider: true, isEnabled: true, publicKey: true, createdAt: true },
     });
 
@@ -385,12 +385,12 @@ const listMembers: MCPToolDef = {
   requiresVerification: false,
   execute: async (_params, ctx) => {
     const [store, members] = await Promise.all([
-      prisma.store.findUnique({
-        where: { id: ctx.storeId },
-        include: { owner: { select: { id: true, email: true, firstName: true, lastName: true } } },
+      prisma.site.findUnique({
+        where: { id: ctx.siteId },
+        include: { workspace: { include: { owner: { select: { id: true, email: true, firstName: true, lastName: true } } } } },
       }),
-      prisma.storeMember.findMany({
-        where: { storeId: ctx.storeId },
+      prisma.siteMember.findMany({
+        where: { siteId: ctx.siteId },
         include: { user: { select: { id: true, email: true, firstName: true, lastName: true } } },
         orderBy: { createdAt: "asc" },
       }),
@@ -400,9 +400,9 @@ const listMembers: MCPToolDef = {
       action: "data",
       message: `Team: 1 owner + ${members.length} member${members.length !== 1 ? "s" : ""}.`,
       data: {
-        owner: store?.owner ? {
-          name: `${store.owner.firstName} ${store.owner.lastName}`,
-          email: store.owner.email,
+        owner: store?.workspace?.owner ? {
+          name: `${store.workspace.owner.firstName} ${store.workspace.owner.lastName}`,
+          email: store.workspace.owner.email,
           role: "OWNER",
         } : null,
         members: members.map((m) => ({
@@ -437,8 +437,8 @@ const addMember: MCPToolDef = {
       return { action: "error", message: `No user found with email ${params.email}. They need to sign up first.`, errorCode: "NOT_FOUND" };
     }
 
-    const existing = await prisma.storeMember.findFirst({
-      where: { storeId: ctx.storeId, userId: user.id },
+    const existing = await prisma.siteMember.findFirst({
+      where: { siteId: ctx.siteId, userId: user.id },
     });
     if (existing) {
       return { action: "error", message: `${params.email} is already a team member.`, errorCode: "DUPLICATE" };
@@ -472,15 +472,15 @@ const removeMember: MCPToolDef = {
   mutates: true,
   requiresVerification: false,
   execute: async (params, ctx) => {
-    const member = await prisma.storeMember.findFirst({
-      where: { id: params.member_id as string, storeId: ctx.storeId },
+    const member = await prisma.siteMember.findFirst({
+      where: { id: params.member_id as string, siteId: ctx.siteId },
       include: { user: { select: { firstName: true, lastName: true, email: true } } },
     });
     if (!member) return { action: "error", message: "Team member not found.", errorCode: "NOT_FOUND" };
 
-    await prisma.storeMember.delete({ where: { id: member.id } });
+    await prisma.siteMember.delete({ where: { id: member.id } });
     await logAudit({
-      storeId: ctx.storeId, userId: ctx.userId,
+      siteId: ctx.siteId, userId: ctx.userId,
       action: "REMOVE", entity: "member", entityId: member.id,
       before: { email: member.user.email, role: member.role },
     });

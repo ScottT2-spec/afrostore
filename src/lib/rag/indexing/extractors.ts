@@ -38,39 +38,39 @@ type EntityData = Record<string, unknown>;
 export function extractDocument(
   type: DocumentType,
   data: EntityData,
-  storeId: string
+  siteId: string
 ): ExtractedDocument {
   switch (type) {
     case DocumentType.PRODUCT:
-      return extractProduct(data, storeId);
+      return extractProduct(data, siteId);
     case DocumentType.ORDER:
-      return extractOrder(data, storeId);
+      return extractOrder(data, siteId);
     case DocumentType.CUSTOMER:
-      return extractCustomer(data, storeId);
+      return extractCustomer(data, siteId);
     case DocumentType.PAGE:
-      return extractPage(data, storeId);
+      return extractPage(data, siteId);
     case DocumentType.PLUGIN:
-      return extractPlugin(data, storeId);
+      return extractPlugin(data, siteId);
     case DocumentType.CATEGORY:
-      return extractCategory(data, storeId);
+      return extractCategory(data, siteId);
     case DocumentType.COUPON:
-      return extractCoupon(data, storeId);
+      return extractCoupon(data, siteId);
     case DocumentType.REVIEW:
-      return extractReview(data, storeId);
+      return extractReview(data, siteId);
     case DocumentType.DELIVERY_ZONE:
-      return extractDeliveryZone(data, storeId);
+      return extractDeliveryZone(data, siteId);
     case DocumentType.STORE_SETTINGS:
-      return extractStoreSettings(data, storeId);
+      return extractSiteSettings(data, siteId);
     case DocumentType.ANALYTICS_SUMMARY:
-      return extractAnalyticsSummary(data, storeId);
+      return extractAnalyticsSummary(data, siteId);
     default:
-      return extractGeneric(type, data, storeId);
+      return extractGeneric(type, data, siteId);
   }
 }
 
 // ─── PRODUCT ────────────────────────────────────────────
 
-function extractProduct(data: EntityData, storeId: string): ExtractedDocument {
+function extractProduct(data: EntityData, siteId: string): ExtractedDocument {
   const name = str(data.name);
   const description = stripHtml(str(data.description));
   const category = str(data.category) || str(data.categoryName);
@@ -103,7 +103,7 @@ function extractProduct(data: EntityData, storeId: string): ExtractedDocument {
     title: name,
     sourceType: DocumentType.PRODUCT,
     sourceId: str(data.id),
-    storeId,
+    siteId,
     price,
     compareAtPrice: compareAtPrice || undefined,
     currency,
@@ -127,7 +127,7 @@ function extractProduct(data: EntityData, storeId: string): ExtractedDocument {
 
 // ─── ORDER ──────────────────────────────────────────────
 
-function extractOrder(data: EntityData, storeId: string): ExtractedDocument {
+function extractOrder(data: EntityData, siteId: string): ExtractedDocument {
   const orderNumber = str(data.orderNumber);
   const items = arr(data.items);
   const status = str(data.status);
@@ -160,7 +160,7 @@ function extractOrder(data: EntityData, storeId: string): ExtractedDocument {
     title: `Order #${orderNumber}`,
     sourceType: DocumentType.ORDER,
     sourceId: str(data.id),
-    storeId,
+    siteId,
     orderNumber,
     status,
     paymentStatus,
@@ -182,7 +182,7 @@ function extractOrder(data: EntityData, storeId: string): ExtractedDocument {
 
 // ─── CUSTOMER ───────────────────────────────────────────
 
-function extractCustomer(data: EntityData, storeId: string): ExtractedDocument {
+function extractCustomer(data: EntityData, siteId: string): ExtractedDocument {
   const firstName = str(data.firstName);
   const lastName = str(data.lastName);
   const name = `${firstName} ${lastName}`.trim() || str(data.name);
@@ -209,7 +209,7 @@ function extractCustomer(data: EntityData, storeId: string): ExtractedDocument {
     title: name,
     sourceType: DocumentType.CUSTOMER,
     sourceId: str(data.id),
-    storeId,
+    siteId,
     email,
     phone: phone || undefined,
     totalOrders,
@@ -230,7 +230,7 @@ function extractCustomer(data: EntityData, storeId: string): ExtractedDocument {
 
 // ─── PAGE ───────────────────────────────────────────────
 
-function extractPage(data: EntityData, storeId: string): ExtractedDocument {
+function extractPage(data: EntityData, siteId: string): ExtractedDocument {
   const title = str(data.title);
   const content = data.content;
   const pageType = str(data.type) || str(data.pageType);
@@ -256,7 +256,7 @@ function extractPage(data: EntityData, storeId: string): ExtractedDocument {
     title,
     sourceType: DocumentType.PAGE,
     sourceId: str(data.id),
-    storeId,
+    siteId,
     pageType,
     slug,
     isPublished: bool(data.isPublished),
@@ -271,7 +271,7 @@ function extractPage(data: EntityData, storeId: string): ExtractedDocument {
 
 // ─── PLUGIN ─────────────────────────────────────────────
 
-function extractPlugin(data: EntityData, storeId: string): ExtractedDocument {
+function extractPlugin(data: EntityData, siteId: string): ExtractedDocument {
   const name = str(data.name);
   const description = str(data.description);
   const category = str(data.category);
@@ -293,7 +293,7 @@ function extractPlugin(data: EntityData, storeId: string): ExtractedDocument {
     title: name,
     sourceType: DocumentType.PLUGIN,
     sourceId: str(data.id),
-    storeId,
+    siteId,
     category,
     author,
     version: str(data.version) || '1.0.0',
@@ -312,7 +312,7 @@ function extractPlugin(data: EntityData, storeId: string): ExtractedDocument {
 
 // ─── REVIEW ─────────────────────────────────────────────
 
-function extractReview(data: EntityData, storeId: string): ExtractedDocument {
+function extractReview(data: EntityData, siteId: string): ExtractedDocument {
   const productName = str(data.productName) || str(data.name);
   const rating = num(data.rating);
   const title = str(data.title);
@@ -330,7 +330,7 @@ function extractReview(data: EntityData, storeId: string): ExtractedDocument {
     title: title || `Review for ${productName}`,
     sourceType: DocumentType.REVIEW,
     sourceId: str(data.id),
-    storeId,
+    siteId,
     productId: str(data.productId),
     productName,
     rating,
@@ -347,7 +347,7 @@ function extractReview(data: EntityData, storeId: string): ExtractedDocument {
 
 // ─── CATEGORY ───────────────────────────────────────────
 
-function extractCategory(data: EntityData, storeId: string): ExtractedDocument {
+function extractCategory(data: EntityData, siteId: string): ExtractedDocument {
   const name = str(data.name);
   const description = str(data.description);
 
@@ -362,7 +362,7 @@ function extractCategory(data: EntityData, storeId: string): ExtractedDocument {
       title: name,
       sourceType: DocumentType.CATEGORY,
       sourceId: str(data.id),
-      storeId,
+      siteId,
       slug: str(data.slug),
       parentId: str(data.parentId) || null,
     },
@@ -371,7 +371,7 @@ function extractCategory(data: EntityData, storeId: string): ExtractedDocument {
 
 // ─── COUPON ─────────────────────────────────────────────
 
-function extractCoupon(data: EntityData, storeId: string): ExtractedDocument {
+function extractCoupon(data: EntityData, siteId: string): ExtractedDocument {
   const code = str(data.code);
   const type = str(data.type);
   const value = num(data.value);
@@ -401,7 +401,7 @@ function extractCoupon(data: EntityData, storeId: string): ExtractedDocument {
       title: `Coupon: ${code}`,
       sourceType: DocumentType.COUPON,
       sourceId: str(data.id),
-      storeId,
+      siteId,
       code,
       type,
       value,
@@ -412,7 +412,7 @@ function extractCoupon(data: EntityData, storeId: string): ExtractedDocument {
 
 // ─── DELIVERY ZONE ──────────────────────────────────────
 
-function extractDeliveryZone(data: EntityData, storeId: string): ExtractedDocument {
+function extractDeliveryZone(data: EntityData, siteId: string): ExtractedDocument {
   const name = str(data.name);
   const areas = arr(data.areas);
   const fee = num(data.fee);
@@ -435,7 +435,7 @@ function extractDeliveryZone(data: EntityData, storeId: string): ExtractedDocume
       title: `Delivery: ${name}`,
       sourceType: DocumentType.DELIVERY_ZONE,
       sourceId: str(data.id),
-      storeId,
+      siteId,
       areas,
       fee,
       freeAbove: freeAbove || null,
@@ -445,7 +445,7 @@ function extractDeliveryZone(data: EntityData, storeId: string): ExtractedDocume
 
 // ─── STORE SETTINGS ─────────────────────────────────────
 
-function extractStoreSettings(data: EntityData, storeId: string): ExtractedDocument {
+function extractSiteSettings(data: EntityData, siteId: string): ExtractedDocument {
   const features: string[] = [];
   if (bool(data.allowGuestCheckout)) features.push('Guest checkout enabled');
   if (bool(data.payOnDelivery)) features.push('Pay on delivery available');
@@ -468,15 +468,15 @@ function extractStoreSettings(data: EntityData, storeId: string): ExtractedDocum
     metadata: {
       title: 'Store Settings',
       sourceType: DocumentType.STORE_SETTINGS,
-      sourceId: storeId,
-      storeId,
+      sourceId: siteId,
+      siteId,
     },
   };
 }
 
 // ─── ANALYTICS SUMMARY ──────────────────────────────────
 
-function extractAnalyticsSummary(data: EntityData, storeId: string): ExtractedDocument {
+function extractAnalyticsSummary(data: EntityData, siteId: string): ExtractedDocument {
   const period = str(data.period) || 'unknown';
 
   return {
@@ -499,7 +499,7 @@ function extractAnalyticsSummary(data: EntityData, storeId: string): ExtractedDo
       title: `Analytics: ${period}`,
       sourceType: DocumentType.ANALYTICS_SUMMARY,
       sourceId: str(data.id) || `analytics-${period}`,
-      storeId,
+      siteId,
       period,
     },
   };
@@ -510,7 +510,7 @@ function extractAnalyticsSummary(data: EntityData, storeId: string): ExtractedDo
 function extractGeneric(
   type: DocumentType,
   data: EntityData,
-  storeId: string
+  siteId: string
 ): ExtractedDocument {
   const title = str(data.name) || str(data.title) || `${type} document`;
   const content = Object.entries(data)
@@ -525,7 +525,7 @@ function extractGeneric(
       title,
       sourceType: type,
       sourceId: str(data.id),
-      storeId,
+      siteId,
     },
   };
 }

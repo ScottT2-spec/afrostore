@@ -20,22 +20,22 @@ const CreateReviewSchema = z.object({
 
 // ── Resolve store + product ──
 async function resolveStoreAndProduct(slug: string, productSlug: string) {
-  const store = await prisma.store.findFirst({
+  const site = await prisma.site.findFirst({
     where: {
       status: "ACTIVE",
       OR: [{ slug }, { subdomain: slug }, { customDomain: slug }],
     },
     select: { id: true },
   });
-  if (!store) return null;
+  if (!site) return null;
 
   const product = await prisma.product.findFirst({
-    where: { storeId: store.id, slug: productSlug, status: "ACTIVE" },
+    where: { siteId: site.id, slug: productSlug, status: "ACTIVE" },
     select: { id: true },
   });
   if (!product) return null;
 
-  return { storeId: store.id, productId: product.id };
+  return { siteId: site.id, productId: product.id };
 }
 
 // ── GET: paginated approved reviews + stats ──
@@ -164,7 +164,7 @@ export async function POST(req: NextRequest, { params }: Params) {
     let customerId: string | null = null;
 
     const customer = await prisma.customer.findUnique({
-      where: { storeId_email: { storeId: resolved.storeId, email } },
+      where: { siteId_email: { siteId: resolved.siteId, email } },
       select: { id: true },
     });
 
@@ -172,7 +172,7 @@ export async function POST(req: NextRequest, { params }: Params) {
       customerId = customer.id;
       const purchaseOrder = await prisma.order.findFirst({
         where: {
-          storeId: resolved.storeId,
+          siteId: resolved.siteId,
           customerId: customer.id,
           status: "DELIVERED",
           items: { some: { productId: resolved.productId } },

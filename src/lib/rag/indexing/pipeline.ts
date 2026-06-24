@@ -61,10 +61,10 @@ export class IndexingPipeline {
   async indexOne(
     type: DocumentType,
     data: Record<string, unknown>,
-    storeId: string,
+    siteId: string,
     options: IndexingOptions = {}
   ): Promise<IndexingResult> {
-    return this.indexMany(type, [data], storeId, options);
+    return this.indexMany(type, [data], siteId, options);
   }
 
   /**
@@ -73,10 +73,10 @@ export class IndexingPipeline {
   async indexMany(
     type: DocumentType,
     dataArray: Record<string, unknown>[],
-    storeId: string,
+    siteId: string,
     options: IndexingOptions = {}
   ): Promise<IndexingResult> {
-    if (!storeId) throw new TenantIsolationError();
+    if (!siteId) throw new TenantIsolationError();
     if (dataArray.length === 0) {
       return this.emptyResult();
     }
@@ -108,7 +108,7 @@ export class IndexingPipeline {
         const batchResult = await this.processBatch(
           type,
           batch,
-          storeId,
+          siteId,
           { upsert, force }
         );
 
@@ -166,7 +166,7 @@ export class IndexingPipeline {
 
     logger.info('Indexing complete', {
       type,
-      storeId,
+      siteId,
       total: result.totalDocuments,
       indexed: result.indexed,
       updated: result.updated,
@@ -183,17 +183,17 @@ export class IndexingPipeline {
    */
   async removeDocument(
     documentId: string,
-    storeId: string
+    siteId: string
   ): Promise<void> {
-    if (!storeId) throw new TenantIsolationError();
+    if (!siteId) throw new TenantIsolationError();
 
     await this.prisma.$executeRawUnsafe(
       `DELETE FROM ${this.tableName} WHERE document_id = $1 AND store_id = $2`,
       documentId,
-      storeId
+      siteId
     );
 
-    logger.info('Document removed from index', { documentId, storeId });
+    logger.info('Document removed from index', { documentId, siteId });
   }
 
   /**
@@ -201,40 +201,40 @@ export class IndexingPipeline {
    */
   async removeByType(
     type: DocumentType,
-    storeId: string
+    siteId: string
   ): Promise<number> {
-    if (!storeId) throw new TenantIsolationError();
+    if (!siteId) throw new TenantIsolationError();
 
     const result = await this.prisma.$executeRawUnsafe(
       `DELETE FROM ${this.tableName} WHERE document_type = $1 AND store_id = $2`,
       type,
-      storeId
+      siteId
     );
 
-    logger.info('Documents removed by type', { type, storeId, count: result });
+    logger.info('Documents removed by type', { type, siteId, count: result });
     return result;
   }
 
   /**
    * Remove all documents for a store (full reindex prep).
    */
-  async removeAllForStore(storeId: string): Promise<number> {
-    if (!storeId) throw new TenantIsolationError();
+  async removeAllForStore(siteId: string): Promise<number> {
+    if (!siteId) throw new TenantIsolationError();
 
     const result = await this.prisma.$executeRawUnsafe(
       `DELETE FROM ${this.tableName} WHERE store_id = $1`,
-      storeId
+      siteId
     );
 
-    logger.info('All documents removed for store', { storeId, count: result });
+    logger.info('All documents removed for store', { siteId, count: result });
     return result;
   }
 
   /**
    * Get indexing stats for a store.
    */
-  async getStats(storeId: string): Promise<Record<string, number>> {
-    if (!storeId) throw new TenantIsolationError();
+  async getStats(siteId: string): Promise<Record<string, number>> {
+    if (!siteId) throw new TenantIsolationError();
 
     const rows = await this.prisma.$queryRawUnsafe<
       Array<{ document_type: string; count: bigint }>
@@ -242,7 +242,7 @@ export class IndexingPipeline {
       `SELECT document_type, COUNT(*) as count FROM ${this.tableName}
        WHERE store_id = $1 AND status = 'active'
        GROUP BY document_type`,
-      storeId
+      siteId
     );
 
     const stats: Record<string, number> = {};
@@ -257,7 +257,7 @@ export class IndexingPipeline {
   private async processBatch(
     type: DocumentType,
     batch: Record<string, unknown>[],
-    storeId: string,
+    siteId: string,
     opts: { upsert: boolean; force: boolean }
   ): Promise<{
     indexed: number;
@@ -284,7 +284,7 @@ export class IndexingPipeline {
           throw new ValidationError('Document must have an id field');
         }
 
-        const extracted = extractDocument(type, data, storeId);
+        const extracted = extractDocument(type, data, siteId);
         const chunks = this.chunker.chunk(extracted.content, type);
         const contentHash = createContentHash(extracted.content);
 
@@ -314,7 +314,7 @@ export class IndexingPipeline {
     // Step 2: Check for existing documents (skip if unchanged)
     if (opts.upsert && !opts.force) {
       const docIds = prepared.map((p) => p.documentId);
-      const existing = await this.getExistingHashes(docIds, storeId);
+      const existing = await this.getExistingHashes(docIds, siteId);
 
       const toProcess: typeof prepared = [];
       for (const doc of prepared) {
@@ -371,7 +371,7 @@ export class IndexingPipeline {
           await this.prisma.$executeRawUnsafe(
             `DELETE FROM ${this.tableName} WHERE document_id = $1 AND store_id = $2`,
             doc.documentId,
-            storeId
+            siteId
           );
         }
 
@@ -394,7 +394,7 @@ export class IndexingPipeline {
               $11::vector, to_tsvector($12, $13),
               NOW(), NOW()
             )`,
-            storeId,
+            siteId,
             doc.documentId,
             type,
             doc.title,
@@ -439,7 +439,7 @@ export class IndexingPipeline {
 
   private async getExistingHashes(
     documentIds: string[],
-    storeId: string
+    siteId: string
   ): Promise<Map<string, string>> {
     if (documentIds.length === 0) return new Map();
 
@@ -450,7 +450,7 @@ export class IndexingPipeline {
       `SELECT DISTINCT document_id, content_hash FROM ${this.tableName}
        WHERE store_id = $1 AND document_id IN (${placeholders})
        AND chunk_index = 0`,
-      storeId,
+      siteId,
       ...documentIds
     );
 

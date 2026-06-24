@@ -16,7 +16,7 @@ function notFound(message: string) {
  * Only returns ACTIVE stores.
  */
 async function resolveStore(slug: string) {
-  return prisma.store.findFirst({
+  return prisma.site.findFirst({
     where: {
       status: "ACTIVE",
       OR: [
@@ -33,8 +33,8 @@ export async function GET(req: NextRequest, { params }: Params) {
   const { slug } = await params;
 
   try {
-    const store = await resolveStore(slug);
-    if (!store) return notFound("Store not found");
+    const site = await resolveStore(slug);
+    if (!site) return notFound("Store not found");
 
     const url = new URL(req.url);
     const page = parseInt(url.searchParams.get("page") || "1");
@@ -46,13 +46,13 @@ export async function GET(req: NextRequest, { params }: Params) {
 
     // Build product filter
     const productWhere: Record<string, unknown> = {
-      storeId: store.id,
+      siteId: site.id,
       status: "ACTIVE",
     };
 
     if (categorySlug) {
       const category = await prisma.category.findFirst({
-        where: { storeId: store.id, slug: categorySlug },
+        where: { siteId: site.id, slug: categorySlug },
         select: { id: true },
       });
       if (category) productWhere.categoryId = category.id;
@@ -80,8 +80,8 @@ export async function GET(req: NextRequest, { params }: Params) {
       pages,
       activeTheme,
     ] = await Promise.all([
-      prisma.storeSettings.findUnique({
-        where: { storeId: store.id },
+      prisma.siteSettings.findUnique({
+        where: { siteId: site.id },
         select: {
           allowGuestCheckout: true,
           payOnDelivery: true,
@@ -96,8 +96,8 @@ export async function GET(req: NextRequest, { params }: Params) {
         },
       }),
 
-      prisma.storeSocialLinks.findUnique({
-        where: { storeId: store.id },
+      prisma.siteSocialLinks.findUnique({
+        where: { siteId: site.id },
         select: {
           whatsapp: true,
           instagram: true,
@@ -122,7 +122,7 @@ export async function GET(req: NextRequest, { params }: Params) {
       prisma.product.count({ where: productWhere as any }),
 
       prisma.category.findMany({
-        where: { storeId: store.id },
+        where: { siteId: site.id },
         select: {
           id: true,
           name: true,
@@ -137,7 +137,7 @@ export async function GET(req: NextRequest, { params }: Params) {
       }),
 
       prisma.deliveryZone.findMany({
-        where: { storeId: store.id, isActive: true },
+        where: { siteId: site.id, isActive: true },
         select: {
           id: true,
           name: true,
@@ -150,7 +150,7 @@ export async function GET(req: NextRequest, { params }: Params) {
       }),
 
       prisma.page.findMany({
-        where: { storeId: store.id, isPublished: true },
+        where: { siteId: site.id, isPublished: true },
         select: {
           id: true,
           title: true,
@@ -161,8 +161,8 @@ export async function GET(req: NextRequest, { params }: Params) {
         orderBy: { position: "asc" },
       }),
 
-      prisma.storeTheme.findFirst({
-        where: { storeId: store.id, isActive: true },
+      prisma.siteTheme.findFirst({
+        where: { siteId: site.id, isActive: true },
         include: {
           theme: {
             select: { id: true, name: true, slug: true, config: true },
@@ -191,18 +191,17 @@ export async function GET(req: NextRequest, { params }: Params) {
 
     return success({
       store: {
-        id: store.id,
-        name: store.name,
-        slug: store.slug,
-        description: store.description,
-        logo: store.logo,
-        coverImage: store.coverImage,
-        subdomain: store.subdomain,
-        customDomain: store.customDomain,
-        currency: store.currency,
-        country: store.country,
-        businessType: store.businessType,
-        plan: store.plan,
+        id: site.id,
+        name: site.name,
+        slug: site.slug,
+        description: site.description,
+        logo: site.logo,
+        coverImage: site.coverImage,
+        subdomain: site.subdomain,
+        customDomain: site.customDomain,
+        currency: site.currency,
+        country: site.country,
+        businessType: site.businessType,
       },
       settings: settings || {},
       socialLinks: socialLinks || {},

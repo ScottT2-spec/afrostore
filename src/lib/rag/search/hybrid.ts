@@ -51,7 +51,7 @@ export class HybridSearch {
    * Falls back to single-mode if one search fails.
    */
   async search(query: SearchQuery): Promise<SearchResponse> {
-    if (!query.storeId) throw new TenantIsolationError();
+    if (!query.siteId) throw new TenantIsolationError();
 
     const strategy = query.strategy || this.config.defaultStrategy;
     const startTime = performance.now();
@@ -185,7 +185,7 @@ export class HybridSearch {
     logger.info('Search completed', {
       strategy,
       query: query.query,
-      storeId: query.storeId,
+      siteId: query.siteId,
       results: results.length,
       latencyMs: totalMs,
       fallback: fallbackUsed,

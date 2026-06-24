@@ -25,8 +25,10 @@ model User {
 
   accounts       Account[]
   sessions       Session[]
-  stores         Store[]
-  storeMembers   StoreMember[]
+  workspaces     Workspace[]
+  workspaceMembers WorkspaceMember[]
+  siteMembers    SiteMember[]
+  notifications  Notification[]
 
   @@map("users")
 }
@@ -77,111 +79,42 @@ enum UserRole {
   SUPER_ADMIN
 }
 
-// ─── STORES (MULTI-TENANT) ──────────────────────────────────
+// ─── WORKSPACE ──────────────────────────────────────────────
 
-model Store {
-  id             String      @id @default(cuid())
-  ownerId        String
-  name           String
-  slug           String      @unique
-  description    String?     @db.Text
-  logo           String?
-  coverImage     String?
-  subdomain      String      @unique
-  customDomain   String?     @unique
-  currency       String      @default("NGN")
-  country        String      @default("NG")
-  businessType   String      @default("general")
-  status         StoreStatus @default(ACTIVE)
-  plan           StorePlan   @default(FREE)
-  createdAt      DateTime    @default(now())
-  updatedAt      DateTime    @updatedAt
+model Workspace {
+  id          String   @id @default(cuid())
+  ownerId     String
+  name        String
+  slug        String   @unique
+  logo        String?
+  plan        WorkspacePlan @default(FREE)
+  status      WorkspaceStatus @default(ACTIVE)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
 
-  owner          User        @relation(fields: [ownerId], references: [id], onDelete: Cascade)
-  members        StoreMember[]
-  products       Product[]
-  categories     Category[]
-  orders         Order[]
-  customers      Customer[]
-  coupons        Coupon[]
-  pages          Page[]
-  themes         StoreTheme[]
-  plugins        StorePlugin[]
-  paymentGateways PaymentGateway[]
-  deliveryZones  DeliveryZone[]
-  settings       StoreSettings?
-  socialLinks    StoreSocialLinks?
-  analytics      AnalyticsEvent[]
-  auditLogs      AuditLog[]
-  contactMessages ContactMessage[]
-  referralProgram ReferralProgram?
-  flashSales     FlashSale[]
-  abandonedCarts AbandonedCart[]
-  loyaltyProgram LoyaltyProgram?
+  owner       User     @relation(fields: [ownerId], references: [id], onDelete: Cascade)
+  members     WorkspaceMember[]
+  sites       Site[]
 
   @@index([ownerId])
-  @@index([subdomain])
-  @@index([customDomain])
-  @@map("stores")
+  @@map("workspaces")
 }
 
-model StoreMember {
-  id        String          @id @default(cuid())
-  storeId   String
-  userId    String
-  role      StoreMemberRole @default(STAFF)
-  createdAt DateTime        @default(now())
+model WorkspaceMember {
+  id          String          @id @default(cuid())
+  workspaceId String
+  userId      String
+  role        WorkspaceRole   @default(EDITOR)
+  createdAt   DateTime        @default(now())
 
-  store Store @relation(fields: [storeId], references: [id], onDelete: Cascade)
-  user  User  @relation(fields: [userId], references: [id], onDelete: Cascade)
+  workspace Workspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  user      User      @relation(fields: [userId], references: [id], onDelete: Cascade)
 
-  @@unique([storeId, userId])
-  @@map("store_members")
+  @@unique([workspaceId, userId])
+  @@map("workspace_members")
 }
 
-model StoreSettings {
-  id                  String  @id @default(cuid())
-  storeId             String  @unique
-  allowGuestCheckout  Boolean @default(true)
-  payOnDelivery       Boolean @default(true)
-  bankTransfer        Boolean @default(true)
-  whatsappOrdering    Boolean @default(true)
-  showStockCount      Boolean @default(false)
-  lowDataMode         Boolean @default(false)
-  language            String  @default("en")
-  whatsappNumber      String?
-  metaTitle           String?
-  metaDescription     String? @db.Text
-  googleAnalyticsId   String?
-  facebookPixelId     String?
-  tiktokPixelId       String?
-
-  store Store @relation(fields: [storeId], references: [id], onDelete: Cascade)
-
-  @@map("store_settings")
-}
-
-model StoreSocialLinks {
-  id        String  @id @default(cuid())
-  storeId   String  @unique
-  whatsapp  String?
-  instagram String?
-  facebook  String?
-  twitter   String?
-  tiktok    String?
-
-  store Store @relation(fields: [storeId], references: [id], onDelete: Cascade)
-
-  @@map("store_social_links")
-}
-
-enum StoreStatus {
-  ACTIVE
-  PAUSED
-  SUSPENDED
-}
-
-enum StorePlan {
+enum WorkspacePlan {
   FREE
   STARTER
   BUSINESS
@@ -190,18 +123,236 @@ enum StorePlan {
   ENTERPRISE
 }
 
-enum StoreMemberRole {
+enum WorkspaceStatus {
+  ACTIVE
+  PAUSED
+  SUSPENDED
+}
+
+enum WorkspaceRole {
   OWNER
   ADMIN
+  MANAGER
+  EDITOR
+  MARKETER
+  SUPPORT
+  DEVELOPER
+  VIEWER
+}
+
+// ─── SITES (MULTI-TYPE) ─────────────────────────────────────
+
+model Site {
+  id             String      @id @default(cuid())
+  workspaceId    String
+  name           String
+  slug           String      @unique
+  description    String?     @db.Text
+  logo           String?
+  coverImage     String?
+  siteType       SiteType    @default(ECOMMERCE)
+  subdomain      String      @unique
+  customDomain   String?     @unique
+  currency       String      @default("NGN")
+  country        String      @default("NG")
+  businessType   String      @default("general")
+  industry       String?
+  status         SiteStatus  @default(ACTIVE)
+  createdAt      DateTime    @default(now())
+  updatedAt      DateTime    @updatedAt
+
+  workspace      Workspace   @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  members        SiteMember[]
+  products       Product[]
+  categories     Category[]
+  brands         Brand[]
+  orders         Order[]
+  customers      Customer[]
+  coupons        Coupon[]
+  pages          Page[]
+  blogs          Blog[]
+  forms          Form[]
+  media          MediaItem[]
+  themes         SiteTheme[]
+  plugins        SitePlugin[]
+  paymentGateways PaymentGateway[]
+  deliveryZones  DeliveryZone[]
+  taxRules       TaxRule[]
+  domains        Domain[]
+  settings       SiteSettings?
+  socialLinks    SiteSocialLinks?
+  analytics      AnalyticsEvent[]
+  auditLogs      AuditLog[]
+  contactMessages ContactMessage[]
+  referralProgram ReferralProgram?
+  flashSales     FlashSale[]
+  abandonedCarts AbandonedCart[]
+  loyaltyProgram LoyaltyProgram?
+  wishlists      Wishlist[]
+  funnels        Funnel[]
+  crmContacts    CrmContact[]
+  emailCampaigns EmailCampaign[]
+  smsCampaigns   SmsCampaign[]
+  whatsappCampaigns WhatsAppCampaign[]
+  automations    Automation[]
+  abTests        ABTest[]
+  popups         Popup[]
+  notifications  SiteNotification[]
+  returns        Return[]
+
+  @@index([workspaceId])
+  @@index([subdomain])
+  @@index([customDomain])
+  @@index([siteType])
+  @@map("sites")
+}
+
+model SiteMember {
+  id        String          @id @default(cuid())
+  siteId    String
+  userId    String
+  role      SiteMemberRole  @default(STAFF)
+  createdAt DateTime        @default(now())
+
+  site  Site @relation(fields: [siteId], references: [id], onDelete: Cascade)
+  user  User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([siteId, userId])
+  @@map("site_members")
+}
+
+model SiteSettings {
+  id                  String  @id @default(cuid())
+  siteId              String  @unique
+  allowGuestCheckout  Boolean @default(true)
+  payOnDelivery       Boolean @default(true)
+  bankTransfer        Boolean @default(true)
+  whatsappOrdering    Boolean @default(true)
+  showStockCount      Boolean @default(false)
+  lowDataMode         Boolean @default(false)
+  offlineMode         Boolean @default(false)
+  language            String  @default("en")
+  whatsappNumber      String?
+  metaTitle           String?
+  metaDescription     String? @db.Text
+  googleAnalyticsId   String?
+  facebookPixelId     String?
+  tiktokPixelId       String?
+  customHeadCode      String? @db.Text
+  customBodyCode      String? @db.Text
+
+  site Site @relation(fields: [siteId], references: [id], onDelete: Cascade)
+
+  @@map("site_settings")
+}
+
+model SiteSocialLinks {
+  id        String  @id @default(cuid())
+  siteId    String  @unique
+  whatsapp  String?
+  instagram String?
+  facebook  String?
+  twitter   String?
+  tiktok    String?
+  linkedin  String?
+  youtube   String?
+
+  site Site @relation(fields: [siteId], references: [id], onDelete: Cascade)
+
+  @@map("site_social_links")
+}
+
+enum SiteType {
+  ECOMMERCE
+  WEBSITE
+  LANDING_PAGE
+}
+
+enum SiteStatus {
+  ACTIVE
+  PAUSED
+  SUSPENDED
+}
+
+enum SiteMemberRole {
+  OWNER
+  ADMIN
+  MANAGER
+  EDITOR
+  MARKETER
+  SUPPORT
+  DEVELOPER
   STAFF
   VIEWER
 }
 
+// ─── DOMAINS ────────────────────────────────────────────────
+
+model Domain {
+  id            String       @id @default(cuid())
+  siteId        String
+  domain        String       @unique
+  type          DomainType   @default(CUSTOM)
+  status        DomainStatus @default(PENDING)
+  sslStatus     SSLStatus    @default(PENDING)
+  sslExpiresAt  DateTime?
+  dnsVerified   Boolean      @default(false)
+  verificationToken String?
+  isPrimary     Boolean      @default(false)
+  createdAt     DateTime     @default(now())
+  updatedAt     DateTime     @updatedAt
+
+  site Site @relation(fields: [siteId], references: [id], onDelete: Cascade)
+
+  @@index([siteId])
+  @@map("domains")
+}
+
+enum DomainType {
+  SUBDOMAIN
+  CUSTOM
+  FOLDER
+}
+
+enum DomainStatus {
+  PENDING
+  ACTIVE
+  FAILED
+  EXPIRED
+}
+
+enum SSLStatus {
+  PENDING
+  ACTIVE
+  EXPIRED
+  FAILED
+}
+
 // ─── PRODUCTS ───────────────────────────────────────────────
+
+model Brand {
+  id          String    @id @default(cuid())
+  siteId      String
+  name        String
+  slug        String
+  logo        String?
+  description String?   @db.Text
+  website     String?
+  position    Int       @default(0)
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+
+  site     Site      @relation(fields: [siteId], references: [id], onDelete: Cascade)
+  products Product[]
+
+  @@unique([siteId, slug])
+  @@index([siteId])
+  @@map("brands")
+}
 
 model Category {
   id          String    @id @default(cuid())
-  storeId     String
+  siteId      String
   name        String
   slug        String
   description String?   @db.Text
@@ -211,54 +362,66 @@ model Category {
   createdAt   DateTime  @default(now())
   updatedAt   DateTime  @updatedAt
 
-  store    Store      @relation(fields: [storeId], references: [id], onDelete: Cascade)
+  site     Site       @relation(fields: [siteId], references: [id], onDelete: Cascade)
   parent   Category?  @relation("CategoryTree", fields: [parentId], references: [id])
   children Category[] @relation("CategoryTree")
   products Product[]
 
-  @@unique([storeId, slug])
-  @@index([storeId])
+  @@unique([siteId, slug])
+  @@index([siteId])
   @@map("categories")
 }
 
 model Product {
-  id             String        @id @default(cuid())
-  storeId        String
-  categoryId     String?
-  name           String
-  slug           String
-  description    String?       @db.Text
-  price          Decimal       @db.Decimal(12, 2)
-  compareAtPrice Decimal?      @db.Decimal(12, 2)
-  costPrice      Decimal?      @db.Decimal(12, 2)
-  currency       String        @default("NGN")
-  sku            String?
-  barcode        String?
-  stock          Int           @default(0)
-  lowStockAlert  Int           @default(5)
-  trackInventory Boolean       @default(true)
-  weight         Decimal?      @db.Decimal(8, 2)
-  status         ProductStatus @default(DRAFT)
-  isFeatured     Boolean       @default(false)
-  tags           String[]
-  metaTitle      String?
-  metaDescription String?      @db.Text
-  position       Int           @default(0)
-  createdAt      DateTime      @default(now())
-  updatedAt      DateTime      @updatedAt
+  id              String        @id @default(cuid())
+  siteId          String
+  categoryId      String?
+  brandId         String?
+  name            String
+  slug            String
+  description     String?       @db.Text
+  price           Decimal       @db.Decimal(12, 2)
+  compareAtPrice  Decimal?      @db.Decimal(12, 2)
+  costPrice       Decimal?      @db.Decimal(12, 2)
+  currency        String        @default("NGN")
+  sku             String?
+  barcode         String?
+  stock           Int           @default(0)
+  lowStockAlert   Int           @default(5)
+  trackInventory  Boolean       @default(true)
+  weight          Decimal?      @db.Decimal(8, 2)
+  productType     ProductType   @default(PHYSICAL)
+  status          ProductStatus @default(DRAFT)
+  isFeatured      Boolean       @default(false)
+  tags            String[]
+  metaTitle       String?
+  metaDescription String?       @db.Text
+  position        Int           @default(0)
+  // Digital product fields
+  downloadUrl     String?
+  downloadLimit   Int?
+  // Subscription fields
+  recurringInterval String?     // daily, weekly, monthly, yearly
+  recurringPrice    Decimal?    @db.Decimal(12, 2)
+  trialDays         Int?
+  createdAt       DateTime      @default(now())
+  updatedAt       DateTime      @updatedAt
 
-  store     Store          @relation(fields: [storeId], references: [id], onDelete: Cascade)
-  category  Category?      @relation(fields: [categoryId], references: [id], onDelete: SetNull)
-  images    ProductImage[]
-  variants  ProductVariant[]
+  site       Site             @relation(fields: [siteId], references: [id], onDelete: Cascade)
+  category   Category?        @relation(fields: [categoryId], references: [id], onDelete: SetNull)
+  brand      Brand?           @relation(fields: [brandId], references: [id], onDelete: SetNull)
+  images     ProductImage[]
+  variants   ProductVariant[]
   orderItems OrderItem[]
-  reviews   Review[]
+  reviews    Review[]
   flashSales FlashSaleProduct[]
+  wishlists  WishlistItem[]
 
-  @@unique([storeId, slug])
-  @@index([storeId])
-  @@index([storeId, status])
-  @@index([storeId, categoryId])
+  @@unique([siteId, slug])
+  @@index([siteId])
+  @@index([siteId, status])
+  @@index([siteId, categoryId])
+  @@index([siteId, brandId])
   @@map("products")
 }
 
@@ -283,7 +446,7 @@ model ProductVariant {
   price     Decimal? @db.Decimal(12, 2)
   stock     Int      @default(0)
   image     String?
-  options   Json     // e.g. { "size": "M", "color": "Red" }
+  options   Json
   position  Int      @default(0)
   createdAt DateTime @default(now())
 
@@ -292,6 +455,13 @@ model ProductVariant {
 
   @@index([productId])
   @@map("product_variants")
+}
+
+enum ProductType {
+  PHYSICAL
+  DIGITAL
+  SUBSCRIPTION
+  SERVICE
 }
 
 enum ProductStatus {
@@ -304,7 +474,7 @@ enum ProductStatus {
 
 model Order {
   id               String        @id @default(cuid())
-  storeId          String
+  siteId           String
   customerId       String?
   orderNumber      String        @unique
   email            String
@@ -334,17 +504,18 @@ model Order {
   createdAt        DateTime      @default(now())
   updatedAt        DateTime      @updatedAt
 
-  store    Store      @relation(fields: [storeId], references: [id], onDelete: Cascade)
+  site     Site       @relation(fields: [siteId], references: [id], onDelete: Cascade)
   customer Customer?  @relation(fields: [customerId], references: [id], onDelete: SetNull)
   coupon   Coupon?    @relation(fields: [couponId], references: [id], onDelete: SetNull)
   items    OrderItem[]
   timeline OrderTimeline[]
   referral Referral?
   recoveredCart AbandonedCart? @relation("RecoveredCart")
+  returns  Return[]
 
-  @@index([storeId])
-  @@index([storeId, status])
-  @@index([storeId, createdAt])
+  @@index([siteId])
+  @@index([siteId, status])
+  @@index([siteId, createdAt])
   @@index([customerId])
   @@index([orderNumber])
   @@map("orders")
@@ -403,11 +574,44 @@ enum PaymentStatus {
   PARTIALLY_REFUNDED
 }
 
+// ─── RETURNS ────────────────────────────────────────────────
+
+model Return {
+  id            String       @id @default(cuid())
+  siteId        String
+  orderId       String
+  reason        String       @db.Text
+  status        ReturnStatus @default(REQUESTED)
+  refundAmount  Decimal?     @db.Decimal(12, 2)
+  refundMethod  String?
+  items         Json?        // which items are being returned
+  notes         String?      @db.Text
+  resolvedAt    DateTime?
+  createdAt     DateTime     @default(now())
+  updatedAt     DateTime     @updatedAt
+
+  site  Site  @relation(fields: [siteId], references: [id], onDelete: Cascade)
+  order Order @relation(fields: [orderId], references: [id], onDelete: Cascade)
+
+  @@index([siteId])
+  @@index([orderId])
+  @@map("returns")
+}
+
+enum ReturnStatus {
+  REQUESTED
+  APPROVED
+  REJECTED
+  RECEIVED
+  REFUNDED
+  CLOSED
+}
+
 // ─── CUSTOMERS ──────────────────────────────────────────────
 
 model Customer {
   id          String   @id @default(cuid())
-  storeId     String
+  siteId      String
   email       String
   firstName   String
   lastName    String
@@ -420,16 +624,48 @@ model Customer {
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
 
-  store          Store           @relation(fields: [storeId], references: [id], onDelete: Cascade)
+  site           Site            @relation(fields: [siteId], references: [id], onDelete: Cascade)
   orders         Order[]
   reviews        Review[]
   affiliates     Affiliate[]
   abandonedCarts AbandonedCart[]
   loyaltyMemberships LoyaltyMember[]
+  wishlists      Wishlist[]
 
-  @@unique([storeId, email])
-  @@index([storeId])
+  @@unique([siteId, email])
+  @@index([siteId])
   @@map("customers")
+}
+
+// ─── WISHLISTS ──────────────────────────────────────────────
+
+model Wishlist {
+  id         String   @id @default(cuid())
+  siteId     String
+  customerId String
+  sessionId  String?
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+
+  site     Site           @relation(fields: [siteId], references: [id], onDelete: Cascade)
+  customer Customer       @relation(fields: [customerId], references: [id], onDelete: Cascade)
+  items    WishlistItem[]
+
+  @@unique([siteId, customerId])
+  @@map("wishlists")
+}
+
+model WishlistItem {
+  id         String   @id @default(cuid())
+  wishlistId String
+  productId  String
+  addedAt    DateTime @default(now())
+
+  wishlist Wishlist @relation(fields: [wishlistId], references: [id], onDelete: Cascade)
+  product  Product  @relation(fields: [productId], references: [id], onDelete: Cascade)
+
+  @@unique([wishlistId, productId])
+  @@map("wishlist_items")
 }
 
 // ─── REVIEWS ────────────────────────────────────────────────
@@ -459,7 +695,7 @@ model Review {
 
 model Coupon {
   id             String     @id @default(cuid())
-  storeId        String
+  siteId         String
   code           String
   type           CouponType
   value          Decimal    @db.Decimal(12, 2)
@@ -471,11 +707,11 @@ model Coupon {
   isActive       Boolean    @default(true)
   createdAt      DateTime   @default(now())
 
-  store  Store   @relation(fields: [storeId], references: [id], onDelete: Cascade)
+  site   Site    @relation(fields: [siteId], references: [id], onDelete: Cascade)
   orders Order[]
 
-  @@unique([storeId, code])
-  @@index([storeId])
+  @@unique([siteId, code])
+  @@index([siteId])
   @@map("coupons")
 }
 
@@ -485,11 +721,31 @@ enum CouponType {
   FREE_SHIPPING
 }
 
+// ─── TAXES ──────────────────────────────────────────────────
+
+model TaxRule {
+  id          String   @id @default(cuid())
+  siteId      String
+  name        String
+  rate        Decimal  @db.Decimal(5, 2) // percentage
+  country     String?
+  state       String?
+  isDefault   Boolean  @default(false)
+  isActive    Boolean  @default(true)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  site Site @relation(fields: [siteId], references: [id], onDelete: Cascade)
+
+  @@index([siteId])
+  @@map("tax_rules")
+}
+
 // ─── PAYMENTS ───────────────────────────────────────────────
 
 model PaymentGateway {
   id            String                @id @default(cuid())
-  storeId       String
+  siteId        String
   provider      PaymentProvider
   isEnabled     Boolean               @default(false)
   publicKey     String?
@@ -499,11 +755,11 @@ model PaymentGateway {
   createdAt     DateTime              @default(now())
   updatedAt     DateTime              @updatedAt
 
-  store        Store                  @relation(fields: [storeId], references: [id], onDelete: Cascade)
+  site         Site                   @relation(fields: [siteId], references: [id], onDelete: Cascade)
   transactions PaymentTransaction[]
 
-  @@unique([storeId, provider])
-  @@index([storeId])
+  @@unique([siteId, provider])
+  @@index([siteId])
   @@map("payment_gateways")
 }
 
@@ -534,6 +790,8 @@ enum PaymentProvider {
   MONNIFY
   PAYSTACK
   FLUTTERWAVE
+  STRIPE
+  PAYPAL
 }
 
 enum TransactionStatus {
@@ -547,7 +805,7 @@ enum TransactionStatus {
 
 model DeliveryZone {
   id            String   @id @default(cuid())
-  storeId       String
+  siteId        String
   name          String
   areas         String[]
   fee           Decimal  @db.Decimal(12, 2)
@@ -557,53 +815,57 @@ model DeliveryZone {
   position      Int      @default(0)
   createdAt     DateTime @default(now())
 
-  store Store @relation(fields: [storeId], references: [id], onDelete: Cascade)
+  site Site @relation(fields: [siteId], references: [id], onDelete: Cascade)
 
-  @@index([storeId])
+  @@index([siteId])
   @@map("delivery_zones")
 }
 
 // ─── THEMES ─────────────────────────────────────────────────
 
 model Theme {
-  id          String  @id @default(cuid())
+  id          String    @id @default(cuid())
   name        String
-  slug        String  @unique
-  description String? @db.Text
+  slug        String    @unique
+  description String?   @db.Text
   thumbnail   String?
   preview     String?
-  category    String
+  category    String    // ecommerce, website, landing_page
   industry    String?
-  isPremium   Boolean @default(false)
-  isFeatured  Boolean @default(false)
-  isActive    Boolean @default(true)
-  config      Json    // colors, fonts, layout
-  version     String  @default("1.0.0")
+  isPremium   Boolean   @default(false)
+  isFeatured  Boolean   @default(false)
+  isActive    Boolean   @default(true)
+  config      Json      // colors, fonts, layout
+  version     String    @default("1.0.0")
   tags        String[]
-  installs    Int     @default(0)
-  rating      Decimal @default(0) @db.Decimal(3, 2)
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
+  installs    Int       @default(0)
+  rating      Decimal   @default(0) @db.Decimal(3, 2)
+  price       Decimal?  @db.Decimal(12, 2)
+  authorId    String?
+  isAIGenerated Boolean @default(false)
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
 
-  storeThemes StoreTheme[]
+  siteThemes  SiteTheme[]
+  marketplace MarketplaceItem[]
 
   @@map("themes")
 }
 
-model StoreTheme {
+model SiteTheme {
   id           String   @id @default(cuid())
-  storeId      String
+  siteId       String
   themeId      String
   isActive     Boolean  @default(false)
-  customConfig Json?    // overrides
+  customConfig Json?
   installedAt  DateTime @default(now())
 
-  store Store @relation(fields: [storeId], references: [id], onDelete: Cascade)
+  site  Site  @relation(fields: [siteId], references: [id], onDelete: Cascade)
   theme Theme @relation(fields: [themeId], references: [id], onDelete: Cascade)
 
-  @@unique([storeId, themeId])
-  @@index([storeId])
-  @@map("store_themes")
+  @@unique([siteId, themeId])
+  @@index([siteId])
+  @@map("site_themes")
 }
 
 // ─── PLUGINS ────────────────────────────────────────────────
@@ -624,31 +886,33 @@ model Plugin {
   permissions String[]
   installs    Int     @default(0)
   rating      Decimal @default(0) @db.Decimal(3, 2)
+  price       Decimal? @db.Decimal(12, 2)
   isAIGenerated Boolean @default(false)
   reviewStatus PluginReviewStatus @default(APPROVED)
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
 
-  storePlugins StorePlugin[]
+  sitePlugins SitePlugin[]
+  marketplace MarketplaceItem[]
 
   @@map("plugins")
 }
 
-model StorePlugin {
+model SitePlugin {
   id          String   @id @default(cuid())
-  storeId     String
+  siteId      String
   pluginId    String
   isEnabled   Boolean  @default(true)
   config      Json?
-  settings    Json?    // Per-store plugin settings (populated from settingsSchema)
+  settings    Json?
   installedAt DateTime @default(now())
 
-  store  Store  @relation(fields: [storeId], references: [id], onDelete: Cascade)
+  site   Site   @relation(fields: [siteId], references: [id], onDelete: Cascade)
   plugin Plugin @relation(fields: [pluginId], references: [id], onDelete: Cascade)
 
-  @@unique([storeId, pluginId])
-  @@index([storeId])
-  @@map("store_plugins")
+  @@unique([siteId, pluginId])
+  @@index([siteId])
+  @@map("site_plugins")
 }
 
 enum PluginReviewStatus {
@@ -660,23 +924,25 @@ enum PluginReviewStatus {
 // ─── PAGES (BUILDER) ────────────────────────────────────────
 
 model Page {
-  id          String     @id @default(cuid())
-  storeId     String
-  title       String
-  slug        String
-  type        PageType   @default(CUSTOM)
-  content     Json?      // builder blocks
-  metaTitle   String?
-  metaDescription String? @db.Text
-  isPublished Boolean    @default(false)
-  position    Int        @default(0)
-  createdAt   DateTime   @default(now())
-  updatedAt   DateTime   @updatedAt
+  id              String     @id @default(cuid())
+  siteId          String
+  title           String
+  slug            String
+  type            PageType   @default(CUSTOM)
+  content         Json?      // builder blocks
+  metaTitle       String?
+  metaDescription String?    @db.Text
+  isPublished     Boolean    @default(false)
+  position        Int        @default(0)
+  template        String?    // template slug if from template
+  createdAt       DateTime   @default(now())
+  updatedAt       DateTime   @updatedAt
 
-  store Store @relation(fields: [storeId], references: [id], onDelete: Cascade)
+  site    Site     @relation(fields: [siteId], references: [id], onDelete: Cascade)
+  abTests ABTest[]
 
-  @@unique([storeId, slug])
-  @@index([storeId])
+  @@unique([siteId, slug])
+  @@index([siteId])
   @@map("pages")
 }
 
@@ -688,63 +954,597 @@ enum PageType {
   POLICY
   CUSTOM
   LANDING
+  SERVICES
+  TEAM
+  KNOWLEDGE_BASE
+  THANK_YOU
+}
+
+// ─── BLOGS ──────────────────────────────────────────────────
+
+model Blog {
+  id          String     @id @default(cuid())
+  siteId      String
+  title       String
+  slug        String
+  excerpt     String?    @db.Text
+  content     Json?      // rich content blocks
+  contentHtml String?    @db.Text
+  coverImage  String?
+  author      String?
+  category    String?
+  tags        String[]
+  status      BlogStatus @default(DRAFT)
+  metaTitle   String?
+  metaDescription String? @db.Text
+  publishedAt DateTime?
+  createdAt   DateTime   @default(now())
+  updatedAt   DateTime   @updatedAt
+
+  site Site @relation(fields: [siteId], references: [id], onDelete: Cascade)
+
+  @@unique([siteId, slug])
+  @@index([siteId])
+  @@index([siteId, status])
+  @@map("blogs")
+}
+
+enum BlogStatus {
+  DRAFT
+  PUBLISHED
+  ARCHIVED
+}
+
+// ─── FORMS ──────────────────────────────────────────────────
+
+model Form {
+  id             String   @id @default(cuid())
+  siteId         String
+  name           String
+  slug           String
+  description    String?  @db.Text
+  fields         Json     // form field definitions
+  settings       Json?    // redirect url, email notifications, etc.
+  submitButtonText String @default("Submit")
+  successMessage String?  @db.Text
+  isActive       Boolean  @default(true)
+  submissionCount Int     @default(0)
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+
+  site        Site             @relation(fields: [siteId], references: [id], onDelete: Cascade)
+  submissions FormSubmission[]
+
+  @@unique([siteId, slug])
+  @@index([siteId])
+  @@map("forms")
+}
+
+model FormSubmission {
+  id        String   @id @default(cuid())
+  formId    String
+  data      Json     // submitted field values
+  ip        String?
+  userAgent String?
+  source    String?  // page URL where submitted
+  isRead    Boolean  @default(false)
+  createdAt DateTime @default(now())
+
+  form Form @relation(fields: [formId], references: [id], onDelete: Cascade)
+
+  @@index([formId])
+  @@index([formId, createdAt])
+  @@map("form_submissions")
+}
+
+// ─── MEDIA LIBRARY ──────────────────────────────────────────
+
+model MediaItem {
+  id        String    @id @default(cuid())
+  siteId    String
+  name      String
+  url       String
+  type      MediaType @default(IMAGE)
+  mimeType  String?
+  size      Int?      // bytes
+  width     Int?
+  height    Int?
+  alt       String?
+  folder    String?   @default("/")
+  createdAt DateTime  @default(now())
+
+  site Site @relation(fields: [siteId], references: [id], onDelete: Cascade)
+
+  @@index([siteId])
+  @@index([siteId, folder])
+  @@map("media_items")
+}
+
+enum MediaType {
+  IMAGE
+  VIDEO
+  DOCUMENT
+  AUDIO
+}
+
+// ─── FUNNELS ────────────────────────────────────────────────
+
+model Funnel {
+  id          String       @id @default(cuid())
+  siteId      String
+  name        String
+  description String?      @db.Text
+  status      FunnelStatus @default(DRAFT)
+  isActive    Boolean      @default(true)
+  createdAt   DateTime     @default(now())
+  updatedAt   DateTime     @updatedAt
+
+  site  Site         @relation(fields: [siteId], references: [id], onDelete: Cascade)
+  steps FunnelStep[]
+
+  @@index([siteId])
+  @@map("funnels")
+}
+
+model FunnelStep {
+  id          String   @id @default(cuid())
+  funnelId    String
+  name        String
+  type        FunnelStepType @default(LANDING)
+  pageContent Json?    // builder blocks
+  position    Int      @default(0)
+  settings    Json?    // redirect, delay, conditions
+  conversionCount Int  @default(0)
+  viewCount   Int      @default(0)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  funnel Funnel @relation(fields: [funnelId], references: [id], onDelete: Cascade)
+
+  @@index([funnelId])
+  @@map("funnel_steps")
+}
+
+enum FunnelStatus {
+  DRAFT
+  ACTIVE
+  PAUSED
+  ARCHIVED
+}
+
+enum FunnelStepType {
+  LANDING
+  LEAD_FORM
+  THANK_YOU
+  CHECKOUT
+  UPSELL
+  DOWNSELL
+  CONFIRMATION
+  WEBINAR
+  VIDEO
+}
+
+// ─── CRM ────────────────────────────────────────────────────
+
+model CrmContact {
+  id          String    @id @default(cuid())
+  siteId      String
+  email       String
+  firstName   String?
+  lastName    String?
+  phone       String?
+  company     String?
+  source      String?   // organic, ad, referral, form, etc.
+  status      LeadStatus @default(NEW)
+  score       Int       @default(0)
+  tags        String[]
+  customFields Json?
+  lastActivityAt DateTime?
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+
+  site      Site          @relation(fields: [siteId], references: [id], onDelete: Cascade)
+  activities CrmActivity[]
+  emailRecipients EmailRecipient[]
+
+  @@unique([siteId, email])
+  @@index([siteId])
+  @@index([siteId, status])
+  @@index([siteId, score])
+  @@map("crm_contacts")
+}
+
+model CrmActivity {
+  id        String   @id @default(cuid())
+  contactId String
+  type      String   // email_opened, link_clicked, form_submitted, page_viewed, purchase
+  details   Json?
+  createdAt DateTime @default(now())
+
+  contact CrmContact @relation(fields: [contactId], references: [id], onDelete: Cascade)
+
+  @@index([contactId])
+  @@index([contactId, createdAt])
+  @@map("crm_activities")
+}
+
+enum LeadStatus {
+  NEW
+  CONTACTED
+  QUALIFIED
+  PROPOSAL
+  NEGOTIATION
+  WON
+  LOST
+  UNSUBSCRIBED
+}
+
+// ─── EMAIL MARKETING ────────────────────────────────────────
+
+model EmailCampaign {
+  id           String              @id @default(cuid())
+  siteId       String
+  name         String
+  subject      String
+  fromName     String?
+  fromEmail    String?
+  content      Json?               // email builder blocks
+  contentHtml  String?             @db.Text
+  status       CampaignStatus      @default(DRAFT)
+  type         EmailCampaignType   @default(BROADCAST)
+  scheduledAt  DateTime?
+  sentAt       DateTime?
+  totalSent    Int                 @default(0)
+  totalOpened  Int                 @default(0)
+  totalClicked Int                 @default(0)
+  totalBounced Int                 @default(0)
+  createdAt    DateTime            @default(now())
+  updatedAt    DateTime            @updatedAt
+
+  site       Site              @relation(fields: [siteId], references: [id], onDelete: Cascade)
+  recipients EmailRecipient[]
+
+  @@index([siteId])
+  @@index([siteId, status])
+  @@map("email_campaigns")
+}
+
+model EmailRecipient {
+  id         String   @id @default(cuid())
+  campaignId String
+  contactId  String?
+  email      String
+  status     String   @default("pending") // pending, sent, opened, clicked, bounced, unsubscribed
+  sentAt     DateTime?
+  openedAt   DateTime?
+  clickedAt  DateTime?
+  createdAt  DateTime @default(now())
+
+  campaign EmailCampaign @relation(fields: [campaignId], references: [id], onDelete: Cascade)
+  contact  CrmContact?   @relation(fields: [contactId], references: [id], onDelete: SetNull)
+
+  @@index([campaignId])
+  @@index([email])
+  @@map("email_recipients")
+}
+
+enum EmailCampaignType {
+  BROADCAST
+  AUTOMATED
+  TRANSACTIONAL
+}
+
+// ─── SMS MARKETING ──────────────────────────────────────────
+
+model SmsCampaign {
+  id           String         @id @default(cuid())
+  siteId       String
+  name         String
+  message      String         @db.Text
+  status       CampaignStatus @default(DRAFT)
+  scheduledAt  DateTime?
+  sentAt       DateTime?
+  totalSent    Int            @default(0)
+  totalDelivered Int          @default(0)
+  createdAt    DateTime       @default(now())
+  updatedAt    DateTime       @updatedAt
+
+  site Site @relation(fields: [siteId], references: [id], onDelete: Cascade)
+
+  @@index([siteId])
+  @@map("sms_campaigns")
+}
+
+// ─── WHATSAPP MARKETING ─────────────────────────────────────
+
+model WhatsAppCampaign {
+  id           String         @id @default(cuid())
+  siteId       String
+  name         String
+  message      String         @db.Text
+  mediaUrl     String?
+  status       CampaignStatus @default(DRAFT)
+  scheduledAt  DateTime?
+  sentAt       DateTime?
+  totalSent    Int            @default(0)
+  totalDelivered Int          @default(0)
+  totalRead    Int            @default(0)
+  createdAt    DateTime       @default(now())
+  updatedAt    DateTime       @updatedAt
+
+  site Site @relation(fields: [siteId], references: [id], onDelete: Cascade)
+
+  @@index([siteId])
+  @@map("whatsapp_campaigns")
+}
+
+enum CampaignStatus {
+  DRAFT
+  SCHEDULED
+  SENDING
+  SENT
+  PAUSED
+  CANCELLED
+}
+
+// ─── A/B TESTING ────────────────────────────────────────────
+
+model ABTest {
+  id          String       @id @default(cuid())
+  siteId      String
+  pageId      String?
+  name        String
+  status      ABTestStatus @default(DRAFT)
+  variants    Json         // array of { id, name, content, weight }
+  winnerVariantId String?
+  totalViews  Int          @default(0)
+  startsAt    DateTime?
+  endsAt      DateTime?
+  createdAt   DateTime     @default(now())
+  updatedAt   DateTime     @updatedAt
+
+  site Site  @relation(fields: [siteId], references: [id], onDelete: Cascade)
+  page Page? @relation(fields: [pageId], references: [id], onDelete: SetNull)
+
+  @@index([siteId])
+  @@map("ab_tests")
+}
+
+enum ABTestStatus {
+  DRAFT
+  RUNNING
+  PAUSED
+  COMPLETED
+}
+
+// ─── AUTOMATION ENGINE ──────────────────────────────────────
+
+model Automation {
+  id          String           @id @default(cuid())
+  siteId      String
+  name        String
+  description String?          @db.Text
+  trigger     Json             // { type, conditions }
+  actions     Json             // [{ type, config }]
+  isActive    Boolean          @default(false)
+  triggerCount Int             @default(0)
+  lastTriggeredAt DateTime?
+  createdAt   DateTime         @default(now())
+  updatedAt   DateTime         @updatedAt
+
+  site Site              @relation(fields: [siteId], references: [id], onDelete: Cascade)
+  logs AutomationLog[]
+
+  @@index([siteId])
+  @@map("automations")
+}
+
+model AutomationLog {
+  id           String   @id @default(cuid())
+  automationId String
+  status       String   // success, failed, skipped
+  triggerData  Json?
+  result       Json?
+  error        String?
+  executedAt   DateTime @default(now())
+
+  automation Automation @relation(fields: [automationId], references: [id], onDelete: Cascade)
+
+  @@index([automationId])
+  @@index([automationId, executedAt])
+  @@map("automation_logs")
+}
+
+// ─── POPUPS ─────────────────────────────────────────────────
+
+model Popup {
+  id          String      @id @default(cuid())
+  siteId      String
+  name        String
+  type        PopupType   @default(MODAL)
+  content     Json?       // builder blocks
+  trigger     Json?       // { type: 'exit_intent' | 'scroll' | 'time_delay' | 'click', config }
+  displayRules Json?      // { pages, frequency, devices }
+  isActive    Boolean     @default(false)
+  views       Int         @default(0)
+  conversions Int         @default(0)
+  createdAt   DateTime    @default(now())
+  updatedAt   DateTime    @updatedAt
+
+  site Site @relation(fields: [siteId], references: [id], onDelete: Cascade)
+
+  @@index([siteId])
+  @@map("popups")
+}
+
+enum PopupType {
+  MODAL
+  BANNER
+  SLIDE_IN
+  FULL_SCREEN
+  COUNTDOWN
+  NOTIFICATION_BAR
+}
+
+// ─── NOTIFICATIONS ──────────────────────────────────────────
+
+model Notification {
+  id        String           @id @default(cuid())
+  userId    String
+  type      NotificationType
+  title     String
+  message   String           @db.Text
+  data      Json?
+  isRead    Boolean          @default(false)
+  channel   String           @default("in_app") // in_app, email, sms, whatsapp, push
+  createdAt DateTime         @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@index([userId, isRead])
+  @@map("notifications")
+}
+
+model SiteNotification {
+  id        String   @id @default(cuid())
+  siteId    String
+  type      String   // order, low_stock, review, payment, etc.
+  title     String
+  message   String   @db.Text
+  data      Json?
+  isRead    Boolean  @default(false)
+  createdAt DateTime @default(now())
+
+  site Site @relation(fields: [siteId], references: [id], onDelete: Cascade)
+
+  @@index([siteId])
+  @@index([siteId, isRead])
+  @@map("site_notifications")
+}
+
+enum NotificationType {
+  ORDER
+  PAYMENT
+  LOW_STOCK
+  REVIEW
+  LEAD
+  CAMPAIGN
+  SYSTEM
+  SECURITY
+}
+
+// ─── MARKETPLACE ────────────────────────────────────────────
+
+model MarketplaceItem {
+  id          String              @id @default(cuid())
+  type        MarketplaceItemType
+  themeId     String?
+  pluginId    String?
+  name        String
+  description String?             @db.Text
+  price       Decimal             @default(0) @db.Decimal(12, 2)
+  currency    String              @default("NGN")
+  authorId    String
+  authorName  String
+  thumbnail   String?
+  downloads   Int                 @default(0)
+  rating      Decimal             @default(0) @db.Decimal(3, 2)
+  reviewCount Int                 @default(0)
+  status      MarketplaceStatus   @default(PENDING)
+  revenueShare Decimal            @default(70) @db.Decimal(5, 2) // author gets 70%
+  category    String?
+  tags        String[]
+  createdAt   DateTime            @default(now())
+  updatedAt   DateTime            @updatedAt
+
+  theme  Theme?  @relation(fields: [themeId], references: [id], onDelete: SetNull)
+  plugin Plugin? @relation(fields: [pluginId], references: [id], onDelete: SetNull)
+
+  @@index([type])
+  @@index([authorId])
+  @@index([status])
+  @@map("marketplace_items")
+}
+
+enum MarketplaceItemType {
+  THEME
+  PLUGIN
+  TEMPLATE
+  FUNNEL
+  AUTOMATION
+}
+
+enum MarketplaceStatus {
+  PENDING
+  APPROVED
+  REJECTED
+  SUSPENDED
 }
 
 // ─── ANALYTICS ──────────────────────────────────────────────
 
 model AnalyticsEvent {
-  id        String   @id @default(cuid())
-  storeId   String
-  event     String   // page_view, add_to_cart, checkout, purchase
-  page      String?
-  productId String?
-  orderId   String?
-  sessionId String?
-  source    String?
-  device    String?
-  country   String?
-  city      String?
-  metadata  Json?
-  createdAt DateTime @default(now())
+  id         String   @id @default(cuid())
+  siteId     String
+  event      String
+  page       String?
+  productId  String?
+  orderId    String?
+  funnelId   String?
+  campaignId String?
+  sessionId  String?
+  source     String?
+  medium     String?
+  campaign   String?
+  device     String?
+  browser    String?
+  os         String?
+  country    String?
+  city       String?
+  metadata   Json?
+  createdAt  DateTime @default(now())
 
-  store Store @relation(fields: [storeId], references: [id], onDelete: Cascade)
+  site Site @relation(fields: [siteId], references: [id], onDelete: Cascade)
 
-  @@index([storeId, event])
-  @@index([storeId, createdAt])
+  @@index([siteId, event])
+  @@index([siteId, createdAt])
   @@index([sessionId])
+  @@index([siteId, funnelId])
+  @@index([siteId, campaignId])
   @@map("analytics_events")
 }
 
 // ─── FLASH SALES ────────────────────────────────────────────
 
 model FlashSale {
-  id          String          @id @default(cuid())
-  storeId     String
-  name        String
-  description String?         @db.Text
-  discountType DiscountType   @default(PERCENTAGE)
+  id           String       @id @default(cuid())
+  siteId       String
+  name         String
+  description  String?      @db.Text
+  discountType DiscountType @default(PERCENTAGE)
   discountValue Float
-  startsAt    DateTime
-  endsAt      DateTime
-  isActive    Boolean         @default(true)
-  maxUses     Int?            // null = unlimited
-  usedCount   Int             @default(0)
-  createdAt   DateTime        @default(now())
-  updatedAt   DateTime        @updatedAt
+  startsAt     DateTime
+  endsAt       DateTime
+  isActive     Boolean      @default(true)
+  maxUses      Int?
+  usedCount    Int          @default(0)
+  createdAt    DateTime     @default(now())
+  updatedAt    DateTime     @updatedAt
 
-  store    Store             @relation(fields: [storeId], references: [id], onDelete: Cascade)
+  site     Site              @relation(fields: [siteId], references: [id], onDelete: Cascade)
   products FlashSaleProduct[]
 
-  @@index([storeId])
-  @@index([storeId, startsAt, endsAt])
+  @@index([siteId])
+  @@index([siteId, startsAt, endsAt])
   @@map("flash_sales")
 }
 
 model FlashSaleProduct {
-  id          String    @id @default(cuid())
-  flashSaleId String
-  productId   String
-  overrideDiscount Float? // per-product override
+  id               String @id @default(cuid())
+  flashSaleId      String
+  productId        String
+  overrideDiscount Float?
 
   flashSale FlashSale @relation(fields: [flashSaleId], references: [id], onDelete: Cascade)
   product   Product   @relation(fields: [productId], references: [id], onDelete: Cascade)
@@ -761,29 +1561,29 @@ enum DiscountType {
 // ─── ABANDONED CARTS ────────────────────────────────────────
 
 model AbandonedCart {
-  id          String            @id @default(cuid())
-  storeId     String
-  customerId  String?
-  email       String?
-  phone       String?
-  sessionId   String?
-  items       Json              // cart items snapshot
-  totalAmount Float             @default(0)
-  currency    String            @default("NGN")
-  status      AbandonedCartStatus @default(ACTIVE)
-  recoveredOrderId String?      @unique
-  remindersSent Int             @default(0)
-  lastReminderAt DateTime?
-  recoveredAt DateTime?
-  createdAt   DateTime          @default(now())
-  updatedAt   DateTime          @updatedAt
+  id               String              @id @default(cuid())
+  siteId           String
+  customerId       String?
+  email            String?
+  phone            String?
+  sessionId        String?
+  items            Json
+  totalAmount      Float               @default(0)
+  currency         String              @default("NGN")
+  status           AbandonedCartStatus  @default(ACTIVE)
+  recoveredOrderId String?             @unique
+  remindersSent    Int                 @default(0)
+  lastReminderAt   DateTime?
+  recoveredAt      DateTime?
+  createdAt        DateTime            @default(now())
+  updatedAt        DateTime            @updatedAt
 
-  store     Store   @relation(fields: [storeId], references: [id], onDelete: Cascade)
-  customer  Customer? @relation(fields: [customerId], references: [id], onDelete: SetNull)
-  recoveredOrder Order? @relation("RecoveredCart", fields: [recoveredOrderId], references: [id], onDelete: SetNull)
+  site           Site      @relation(fields: [siteId], references: [id], onDelete: Cascade)
+  customer       Customer? @relation(fields: [customerId], references: [id], onDelete: SetNull)
+  recoveredOrder Order?    @relation("RecoveredCart", fields: [recoveredOrderId], references: [id], onDelete: SetNull)
 
-  @@index([storeId, status])
-  @@index([storeId, createdAt])
+  @@index([siteId, status])
+  @@index([siteId, createdAt])
   @@index([email])
   @@map("abandoned_carts")
 }
@@ -798,20 +1598,20 @@ enum AbandonedCartStatus {
 // ─── LOYALTY POINTS ─────────────────────────────────────────
 
 model LoyaltyProgram {
-  id                  String   @id @default(cuid())
-  storeId             String   @unique
-  enabled             Boolean  @default(true)
-  pointsPerCurrency   Float    @default(1)     // e.g. 1 point per ₦100 spent
-  currencyPerPoint    Float    @default(100)    // ₦ threshold per point
-  redemptionRate      Float    @default(0.01)   // value per point in store currency
-  minRedeemPoints     Int      @default(100)
-  welcomePoints       Int      @default(0)
-  referralPoints      Int      @default(50)
-  reviewPoints        Int      @default(10)
-  createdAt           DateTime @default(now())
-  updatedAt           DateTime @updatedAt
+  id                String   @id @default(cuid())
+  siteId            String   @unique
+  enabled           Boolean  @default(true)
+  pointsPerCurrency Float    @default(1)
+  currencyPerPoint  Float    @default(100)
+  redemptionRate    Float    @default(0.01)
+  minRedeemPoints   Int      @default(100)
+  welcomePoints     Int      @default(0)
+  referralPoints    Int      @default(50)
+  reviewPoints      Int      @default(10)
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
 
-  store   Store          @relation(fields: [storeId], references: [id], onDelete: Cascade)
+  site    Site           @relation(fields: [siteId], references: [id], onDelete: Cascade)
   members LoyaltyMember[]
 
   @@map("loyalty_programs")
@@ -824,13 +1624,13 @@ model LoyaltyMember {
   totalPoints     Int      @default(0)
   availablePoints Int      @default(0)
   redeemedPoints  Int      @default(0)
-  tier            String   @default("bronze") // bronze, silver, gold, platinum
+  tier            String   @default("bronze")
   createdAt       DateTime @default(now())
   updatedAt       DateTime @updatedAt
 
-  program       LoyaltyProgram    @relation(fields: [programId], references: [id], onDelete: Cascade)
-  customer      Customer          @relation(fields: [customerId], references: [id], onDelete: Cascade)
-  transactions  LoyaltyTransaction[]
+  program      LoyaltyProgram     @relation(fields: [programId], references: [id], onDelete: Cascade)
+  customer     Customer           @relation(fields: [customerId], references: [id], onDelete: Cascade)
+  transactions LoyaltyTransaction[]
 
   @@unique([programId, customerId])
   @@map("loyalty_members")
@@ -854,20 +1654,20 @@ model LoyaltyTransaction {
 // ─── REFERRAL / AFFILIATE ───────────────────────────────────
 
 model ReferralProgram {
-  id              String   @id @default(cuid())
-  storeId         String   @unique
-  enabled         Boolean  @default(true)
+  id              String         @id @default(cuid())
+  siteId          String         @unique
+  enabled         Boolean        @default(true)
   commissionType  CommissionType @default(PERCENTAGE)
-  commissionValue Float    @default(10) // 10% or flat amount
-  cookieDays      Int      @default(30) // how long referral cookie lasts
-  minPayoutAmount Float    @default(5000) // minimum before payout
-  autoApprove     Boolean  @default(false) // auto-approve referrals on purchase
-  welcomeMessage  String?  @db.Text
-  termsText       String?  @db.Text
-  createdAt       DateTime @default(now())
-  updatedAt       DateTime @updatedAt
+  commissionValue Float          @default(10)
+  cookieDays      Int            @default(30)
+  minPayoutAmount Float          @default(5000)
+  autoApprove     Boolean        @default(false)
+  welcomeMessage  String?        @db.Text
+  termsText       String?        @db.Text
+  createdAt       DateTime       @default(now())
+  updatedAt       DateTime       @updatedAt
 
-  store      Store       @relation(fields: [storeId], references: [id], onDelete: Cascade)
+  site       Site        @relation(fields: [siteId], references: [id], onDelete: Cascade)
   affiliates Affiliate[]
 
   @@map("referral_programs")
@@ -877,22 +1677,22 @@ model Affiliate {
   id              String          @id @default(cuid())
   programId       String
   customerId      String
-  code            String          @unique // unique referral code
+  code            String          @unique
   status          AffiliateStatus @default(PENDING)
   totalClicks     Int             @default(0)
   totalOrders     Int             @default(0)
   totalEarnings   Float           @default(0)
   pendingEarnings Float           @default(0)
   paidEarnings    Float           @default(0)
-  payoutMethod    String?         // bank_transfer, mobile_money, etc.
-  payoutDetails   Json?           // bank name, account number, etc.
+  payoutMethod    String?
+  payoutDetails   Json?
   createdAt       DateTime        @default(now())
   updatedAt       DateTime        @updatedAt
 
-  program    ReferralProgram @relation(fields: [programId], references: [id], onDelete: Cascade)
-  customer   Customer        @relation(fields: [customerId], references: [id], onDelete: Cascade)
-  referrals  Referral[]
-  payouts    Payout[]
+  program   ReferralProgram @relation(fields: [programId], references: [id], onDelete: Cascade)
+  customer  Customer        @relation(fields: [customerId], references: [id], onDelete: Cascade)
+  referrals Referral[]
+  payouts   Payout[]
 
   @@unique([programId, customerId])
   @@index([code])
@@ -900,16 +1700,16 @@ model Affiliate {
 }
 
 model Referral {
-  id            String         @id @default(cuid())
-  affiliateId   String
-  orderId       String?        @unique
-  status        ReferralStatus @default(PENDING)
-  commissionAmount Float       @default(0)
-  clickedAt     DateTime       @default(now())
-  convertedAt   DateTime?
-  approvedAt    DateTime?
-  ip            String?
-  userAgent     String?
+  id               String         @id @default(cuid())
+  affiliateId      String
+  orderId          String?        @unique
+  status           ReferralStatus @default(PENDING)
+  commissionAmount Float          @default(0)
+  clickedAt        DateTime       @default(now())
+  convertedAt      DateTime?
+  approvedAt       DateTime?
+  ip               String?
+  userAgent        String?
 
   affiliate Affiliate @relation(fields: [affiliateId], references: [id], onDelete: Cascade)
   order     Order?    @relation(fields: [orderId], references: [id], onDelete: SetNull)
@@ -923,7 +1723,7 @@ model Payout {
   affiliateId String
   amount      Float
   status      PayoutStatus @default(PENDING)
-  reference   String?      // payment reference
+  reference   String?
   paidAt      DateTime?
   note        String?
   createdAt   DateTime     @default(now())
@@ -965,7 +1765,7 @@ enum PayoutStatus {
 
 model ContactMessage {
   id        String   @id @default(cuid())
-  storeId   String
+  siteId    String
   name      String
   email     String
   subject   String?
@@ -973,10 +1773,10 @@ model ContactMessage {
   isRead    Boolean  @default(false)
   createdAt DateTime @default(now())
 
-  store Store @relation(fields: [storeId], references: [id], onDelete: Cascade)
+  site Site @relation(fields: [siteId], references: [id], onDelete: Cascade)
 
-  @@index([storeId, createdAt])
-  @@index([storeId, isRead])
+  @@index([siteId, createdAt])
+  @@index([siteId, isRead])
   @@map("contact_messages")
 }
 
@@ -984,7 +1784,7 @@ model ContactMessage {
 
 model AuditLog {
   id        String   @id @default(cuid())
-  storeId   String
+  siteId    String
   userId    String?
   action    String
   entity    String
@@ -994,9 +1794,9 @@ model AuditLog {
   ip        String?
   createdAt DateTime @default(now())
 
-  store Store @relation(fields: [storeId], references: [id], onDelete: Cascade)
+  site Site @relation(fields: [siteId], references: [id], onDelete: Cascade)
 
-  @@index([storeId, createdAt])
-  @@index([storeId, entity])
+  @@index([siteId, createdAt])
+  @@index([siteId, entity])
   @@map("audit_logs")
 }

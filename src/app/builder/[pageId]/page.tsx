@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useCallback, useRef, use } from "react";
 import { useRouter } from "next/navigation";
-import { useStore } from "@/context/StoreContext";
+import { useSite } from "@/context/StoreContext";
 import { api } from "@/lib/api-client";
 import { BuilderBlock, BlockType, blockDefaults, blockPalette } from "@/lib/builder/types";
 import { BuilderHistory } from "@/lib/builder/history";
@@ -153,7 +153,7 @@ function SortableBlock({
 
 export default function BuilderPage({ params }: { params: Promise<{ pageId: string }> }) {
   const { pageId } = use(params);
-  const { currentStore } = useStore();
+  const { currentStore } = useSite();
   const router = useRouter();
 
   const [blocks, setBlocks] = useState<BuilderBlock[]>([]);
@@ -203,7 +203,7 @@ export default function BuilderPage({ params }: { params: Promise<{ pageId: stri
   useEffect(() => {
     if (!currentStore) return;
     (async () => {
-      const res = await api.get<any>(`/api/stores/${currentStore.id}/pages/${pageId}`);
+      const res = await api.get<any>(`/api/sites/${currentStore.id}/pages/${pageId}`);
       if (res.success && res.data) {
         setPageTitle(res.data.title || "");
         setIsPublished(res.data.isPublished || false);
@@ -326,7 +326,7 @@ export default function BuilderPage({ params }: { params: Promise<{ pageId: stri
   const handleSave = async () => {
     if (!currentStore) return;
     setSaving(true);
-    const res = await api.patch(`/api/stores/${currentStore.id}/pages/${pageId}`, {
+    const res = await api.patch(`/api/sites/${currentStore.id}/pages/${pageId}`, {
       title: pageTitle,
       content: blocks,
       isPublished,

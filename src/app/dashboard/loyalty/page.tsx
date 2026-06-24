@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect, useCallback } from "react";
-import { useStore } from "@/context/StoreContext";
+import { useSite } from "@/context/StoreContext";
 import { api } from "@/lib/api-client";
 import DashboardHeader from "@/components/dashboard/DashboardHeader";
 import { Loader2, Star, Crown, Users, Gift, Settings, X, ToggleLeft, ToggleRight, Award, TrendingUp } from "lucide-react";
@@ -28,7 +28,7 @@ const tierColors: Record<string, string> = {
 };
 
 export default function LoyaltyPage() {
-  const { currentStore } = useStore();
+  const { currentStore } = useSite();
   const router = useRouter();
   const { prefillData, clearPrefill, isFromAI } = useAIPrefill("loyalty");
   const [program, setProgram] = useState<LoyaltyProgram | null>(null);
@@ -47,7 +47,7 @@ export default function LoyaltyPage() {
 
   const load = useCallback(async () => {
     if (!currentStore) return;
-    const res = await api.get<{ program: LoyaltyProgram | null; stats: Stats }>(`/api/stores/${currentStore.id}/loyalty`);
+    const res = await api.get<{ program: LoyaltyProgram | null; stats: Stats }>(`/api/sites/${currentStore.id}/loyalty`);
     if (res.success && res.data) {
       setProgram(res.data.program);
       setStats(res.data.stats);
@@ -80,7 +80,7 @@ export default function LoyaltyPage() {
   const saveSettings = async () => {
     if (!currentStore) return;
     setSaving(true);
-    await api.post(`/api/stores/${currentStore.id}/loyalty`, form);
+    await api.post(`/api/sites/${currentStore.id}/loyalty`, form);
     await load();
     setSaving(false);
     setShowSettings(false);

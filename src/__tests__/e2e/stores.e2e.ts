@@ -21,7 +21,7 @@ export function storeTests() {
     });
 
     it('should create a store with valid data', async () => {
-      const res = await POST('/api/stores', {
+      const res = await POST('/api/sites', {
         name: 'Lagos Fashion Hub',
         description: 'Premium ankara and fashion',
         businessType: 'fashion',
@@ -38,7 +38,7 @@ export function storeTests() {
     });
 
     it('should auto-generate subdomain from name', async () => {
-      const res = await POST('/api/stores', {
+      const res = await POST('/api/sites', {
         name: 'My Amazing Store 2026',
       }, user.token);
 
@@ -48,17 +48,17 @@ export function storeTests() {
     });
 
     it('should reject store creation without auth', async () => {
-      const res = await POST('/api/stores', { name: 'No Auth Store' });
+      const res = await POST('/api/sites', { name: 'No Auth Store' });
       expectError(res, 401);
     });
 
     it('should reject store without name', async () => {
-      const res = await POST('/api/stores', {}, user.token);
+      const res = await POST('/api/sites', {}, user.token);
       expectError(res, 422);
     });
 
     it('should create default settings on store creation', async () => {
-      const res = await POST('/api/stores', {
+      const res = await POST('/api/sites', {
         name: 'Settings Test Store',
       }, user.token);
 
@@ -80,7 +80,7 @@ export function storeTests() {
     });
 
     it('should list user stores', async () => {
-      const res = await GET('/api/stores', user.token);
+      const res = await GET('/api/sites', user.token);
       expectSuccess(res);
       const stores = res.body.data as any[];
       if (!Array.isArray(stores)) throw new Error('Expected array');
@@ -90,7 +90,7 @@ export function storeTests() {
     });
 
     it('should get a specific store', async () => {
-      const res = await GET(`/api/stores/${store.id}`, user.token);
+      const res = await GET(`/api/sites/${store.id}`, user.token);
       expectSuccess(res);
       const data = res.body.data as any;
       if (data.id !== store.id) throw new Error('Store id mismatch');
@@ -98,7 +98,7 @@ export function storeTests() {
 
     it('should not list stores from another user', async () => {
       const otherUser = await createTestUser();
-      const res = await GET('/api/stores', otherUser.token);
+      const res = await GET('/api/sites', otherUser.token);
       expectSuccess(res);
       const stores = res.body.data as any[];
       const found = stores.find((s: any) => s.id === store.id);
@@ -116,7 +116,7 @@ export function storeTests() {
     });
 
     it('should update store name', async () => {
-      const res = await PATCH(`/api/stores/${store.id}`, {
+      const res = await PATCH(`/api/sites/${store.id}`, {
         name: 'Updated Store Name',
       }, user.token);
 
@@ -127,7 +127,7 @@ export function storeTests() {
 
     it('should reject update from non-owner', async () => {
       const otherUser = await createTestUser();
-      const res = await PATCH(`/api/stores/${store.id}`, {
+      const res = await PATCH(`/api/sites/${store.id}`, {
         name: 'Hacked Name',
       }, otherUser.token);
 
@@ -145,12 +145,12 @@ export function storeTests() {
     });
 
     it('should get store settings', async () => {
-      const res = await GET(`/api/stores/${store.id}/settings`, user.token);
+      const res = await GET(`/api/sites/${store.id}/settings`, user.token);
       expectSuccess(res);
     });
 
     it('should update store settings', async () => {
-      const res = await PATCH(`/api/stores/${store.id}/settings`, {
+      const res = await PATCH(`/api/sites/${store.id}/settings`, {
         whatsappNumber: '+2348012345678',
         payOnDelivery: false,
         language: 'pcm', // Pidgin
@@ -174,17 +174,17 @@ export function storeTests() {
     });
 
     it('user1 cannot access user2 store products', async () => {
-      const res = await GET(`/api/stores/${store2.id}/products`, user1.token);
+      const res = await GET(`/api/sites/${store2.id}/products`, user1.token);
       expectError(res, 403);
     });
 
     it('user2 cannot access user1 store orders', async () => {
-      const res = await GET(`/api/stores/${store1.id}/orders`, user2.token);
+      const res = await GET(`/api/sites/${store1.id}/orders`, user2.token);
       expectError(res, 403);
     });
 
     it('user1 cannot create product in user2 store', async () => {
-      const res = await POST(`/api/stores/${store2.id}/products`, {
+      const res = await POST(`/api/sites/${store2.id}/products`, {
         name: 'Injected Product',
         price: 1000,
       }, user1.token);

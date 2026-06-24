@@ -1,7 +1,7 @@
 "use client";
 
 import Sidebar from "@/components/dashboard/Sidebar";
-import { StoreProvider } from "@/context/StoreContext";
+import { SiteProvider } from "@/context/StoreContext";
 import { AIActionProvider } from "@/context/AIActionContext";
 import { useAuth } from "@/context/AuthContext";
 import { useRouter } from "next/navigation";
@@ -39,7 +39,7 @@ export default function DashboardLayout({
   if (!user) return null;
 
   return (
-    <StoreProvider>
+    <SiteProvider>
       <AIActionProvider>
       <div className="min-h-screen bg-surface-50">
         {/* 
@@ -102,6 +102,6 @@ export default function DashboardLayout({
         </main>
       </div>
       </AIActionProvider>
-    </StoreProvider>
+    </SiteProvider>
   );
 }

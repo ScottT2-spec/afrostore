@@ -1,7 +1,7 @@
 "use client";
 
 import DashboardHeader from "@/components/dashboard/DashboardHeader";
-import { useStore } from "@/context/StoreContext";
+import { useSite } from "@/context/StoreContext";
 import { CheckCircle2, Star, Crown, Zap } from "lucide-react";
 
 const plans = [
@@ -12,7 +12,7 @@ const plans = [
 ];
 
 export default function BillingPage() {
-  const { currentStore } = useStore();
+  const { currentStore } = useSite();
   const currentPlan = currentStore?.plan || "FREE";
 
   return (

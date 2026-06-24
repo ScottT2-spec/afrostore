@@ -48,7 +48,7 @@
  *   payments.startHealthChecks();
  *
  *   const result = await payments.initializePayment({
- *     storeId: 'store_123',
+ *     siteId: 'store_123',
  *     orderId: 'order_456',
  *     amount: 25000,
  *     currency: 'NGN',

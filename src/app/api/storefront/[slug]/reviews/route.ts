@@ -12,7 +12,7 @@ export async function GET(req: NextRequest, { params }: Params) {
   const { slug } = await params;
 
   try {
-    const store = await prisma.store.findFirst({
+    const site = await prisma.site.findFirst({
       where: {
         status: "ACTIVE",
         OR: [{ slug }, { subdomain: slug }, { customDomain: slug }],
@@ -20,7 +20,7 @@ export async function GET(req: NextRequest, { params }: Params) {
       select: { id: true, name: true },
     });
 
-    if (!store) {
+    if (!site) {
       return json({ success: false, error: "Store not found" }, 404);
     }
 
@@ -33,7 +33,7 @@ export async function GET(req: NextRequest, { params }: Params) {
     // Base where clause: approved reviews for products in this store
     const where: Record<string, unknown> = {
       isApproved: true,
-      product: { storeId: store.id, status: "ACTIVE" },
+      product: { siteId: site.id, status: "ACTIVE" },
     };
     if (ratingVal && ratingVal >= 1 && ratingVal <= 5) {
       where.rating = ratingVal;
@@ -67,7 +67,7 @@ export async function GET(req: NextRequest, { params }: Params) {
       prisma.review.aggregate({
         where: {
           isApproved: true,
-          product: { storeId: store.id, status: "ACTIVE" },
+          product: { siteId: site.id, status: "ACTIVE" },
         },
         _avg: { rating: true },
         _count: { rating: true },
@@ -76,7 +76,7 @@ export async function GET(req: NextRequest, { params }: Params) {
         by: ["rating"],
         where: {
           isApproved: true,
-          product: { storeId: store.id, status: "ACTIVE" },
+          product: { siteId: site.id, status: "ACTIVE" },
         },
         _count: { rating: true },
         orderBy: { rating: "asc" },

@@ -24,7 +24,7 @@ const listCustomers: MCPToolDef = {
   execute: async (params, ctx) => {
     const page = (params.page as number) || 1;
     const limit = Math.min((params.limit as number) || 20, 100);
-    const where: Record<string, unknown> = { storeId: ctx.storeId };
+    const where: Record<string, unknown> = { siteId: ctx.siteId };
 
     if (params.search) {
       where.OR = [
@@ -87,9 +87,9 @@ const getCustomer: MCPToolDef = {
   requiresVerification: false,
   execute: async (params, ctx) => {
     const where = params.customer_id
-      ? { id: params.customer_id as string, storeId: ctx.storeId }
+      ? { id: params.customer_id as string, siteId: ctx.siteId }
       : params.email
-        ? { storeId_email: { storeId: ctx.storeId, email: params.email as string } }
+        ? { siteId_email: { siteId: ctx.siteId, email: params.email as string } }
         : null;
 
     if (!where) return { action: "error", message: "Provide customer_id or email.", errorCode: "MISSING_PARAM" };
@@ -168,7 +168,7 @@ const createCustomer: MCPToolDef = {
   requiresVerification: true,
   execute: async (params, ctx) => {
     const existing = await prisma.customer.findFirst({
-      where: { storeId: ctx.storeId, email: params.email as string },
+      where: { siteId: ctx.siteId, email: params.email as string },
     });
     if (existing) {
       return { action: "error", message: `A customer with email ${params.email} already exists.`, errorCode: "DUPLICATE" };
@@ -210,15 +210,15 @@ const getCustomerStats: MCPToolDef = {
     const since = new Date(Date.now() - days * 86400000);
 
     const [total, newCustomers, topSpenders, repeatCustomers] = await Promise.all([
-      prisma.customer.count({ where: { storeId: ctx.storeId } }),
-      prisma.customer.count({ where: { storeId: ctx.storeId, createdAt: { gte: since } } }),
+      prisma.customer.count({ where: { siteId: ctx.siteId } }),
+      prisma.customer.count({ where: { siteId: ctx.siteId, createdAt: { gte: since } } }),
       prisma.customer.findMany({
-        where: { storeId: ctx.storeId },
+        where: { siteId: ctx.siteId },
         orderBy: { totalSpent: "desc" },
         take: 5,
         select: { firstName: true, lastName: true, email: true, totalOrders: true, totalSpent: true },
       }),
-      prisma.customer.count({ where: { storeId: ctx.storeId, totalOrders: { gte: 2 } } }),
+      prisma.customer.count({ where: { siteId: ctx.siteId, totalOrders: { gte: 2 } } }),
     ]);
 
     return {

@@ -41,7 +41,7 @@ export type HookName =
   | "cron:hourly";           // Runs hourly
 
 export interface HookContext {
-  storeId: string;
+  siteId: string;
   hook: HookName;
   data: Record<string, unknown>;
   pluginSettings: Record<string, unknown>;

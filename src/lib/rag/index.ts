@@ -13,21 +13,21 @@
  *   const rag = RAGService.create(prisma);
  *
  *   // Index a product
- *   await rag.index('product', productData, storeId);
+ *   await rag.index('product', productData, siteId);
  *
  *   // Index many products
- *   await rag.indexBatch('product', productsArray, storeId);
+ *   await rag.indexBatch('product', productsArray, siteId);
  *
  *   // Search
  *   const results = await rag.search({
  *     query: 'red leather bag under 50000',
- *     storeId: 'store_abc123',
+ *     siteId: 'store_abc123',
  *   });
  *
  *   // Search with filters
  *   const results = await rag.search({
  *     query: 'best selling items',
- *     storeId: 'store_abc123',
+ *     siteId: 'store_abc123',
  *     documentTypes: ['product'],
  *     filters: [{ field: 'status', operator: 'eq', value: 'active' }],
  *   });
@@ -35,16 +35,16 @@
  *   // Get LLM-ready context
  *   const context = await rag.retrieveContext(
  *     'Why are my customers not buying?',
- *     storeId,
+ *     siteId,
  *     { documentTypes: ['analytics_summary', 'order', 'product'] }
  *   );
  *   // Pass context.context to your LLM prompt
  *
  *   // Remove a document
- *   await rag.remove(productId, storeId);
+ *   await rag.remove(productId, siteId);
  *
  *   // Get index stats
- *   const stats = await rag.getStats(storeId);
+ *   const stats = await rag.getStats(siteId);
  */
 
 import type { PrismaClient } from '@/generated/prisma';
@@ -153,20 +153,20 @@ export class RAGService {
    *
    * @param type - Document type ('product', 'order', etc.)
    * @param data - Entity data (must include 'id' field)
-   * @param storeId - Store ID for multi-tenant isolation
+   * @param siteId - Store ID for multi-tenant isolation
    * @param options - Optional indexing configuration
    */
   async index(
     type: DocumentType | string,
     data: Record<string, unknown>,
-    storeId: string,
+    siteId: string,
     options?: IndexingOptions
   ): Promise<IndexingResult> {
     const docType = this.resolveDocType(type);
-    const result = await this.indexer.indexOne(docType, data, storeId, options);
+    const result = await this.indexer.indexOne(docType, data, siteId, options);
 
     this.emit(RAGEvent.DOCUMENT_INDEXED, {
-      storeId,
+      siteId,
       documentId: String(data.id),
       documentType: type,
       success: result.success,
@@ -181,29 +181,29 @@ export class RAGService {
    *
    * @param type - Document type
    * @param dataArray - Array of entity data objects
-   * @param storeId - Store ID
+   * @param siteId - Store ID
    * @param options - Indexing options (batch size, concurrency, progress callback)
    */
   async indexBatch(
     type: DocumentType | string,
     dataArray: Record<string, unknown>[],
-    storeId: string,
+    siteId: string,
     options?: IndexingOptions
   ): Promise<IndexingResult> {
     const docType = this.resolveDocType(type);
 
     this.emit(RAGEvent.INDEX_BATCH_STARTED, {
-      storeId,
+      siteId,
       documentType: type,
       count: dataArray.length,
     });
 
-    const result = await this.indexer.indexMany(docType, dataArray, storeId, options);
+    const result = await this.indexer.indexMany(docType, dataArray, siteId, options);
 
     this.emit(
       result.success ? RAGEvent.INDEX_BATCH_COMPLETED : RAGEvent.INDEX_BATCH_FAILED,
       {
-        storeId,
+        siteId,
         documentType: type,
         ...result,
       }
@@ -218,20 +218,20 @@ export class RAGService {
    *
    * @param type - Document type to reindex
    * @param dataArray - Fresh entity data
-   * @param storeId - Store ID
+   * @param siteId - Store ID
    */
   async reindex(
     type: DocumentType | string,
     dataArray: Record<string, unknown>[],
-    storeId: string,
+    siteId: string,
     options?: IndexingOptions
   ): Promise<IndexingResult> {
     const docType = this.resolveDocType(type);
 
-    logger.info('Starting reindex', { type, storeId, count: dataArray.length });
+    logger.info('Starting reindex', { type, siteId, count: dataArray.length });
 
-    await this.indexer.removeByType(docType, storeId);
-    return this.indexer.indexMany(docType, dataArray, storeId, {
+    await this.indexer.removeByType(docType, siteId);
+    return this.indexer.indexMany(docType, dataArray, siteId, {
       ...options,
       upsert: false,
       force: true,
@@ -241,16 +241,16 @@ export class RAGService {
   /**
    * Remove a document from the index.
    */
-  async remove(documentId: string, storeId: string): Promise<void> {
-    await this.indexer.removeDocument(documentId, storeId);
-    this.emit(RAGEvent.DOCUMENT_DELETED, { storeId, documentId });
+  async remove(documentId: string, siteId: string): Promise<void> {
+    await this.indexer.removeDocument(documentId, siteId);
+    this.emit(RAGEvent.DOCUMENT_DELETED, { siteId, documentId });
   }
 
   /**
    * Remove all indexed documents for a store.
    */
-  async removeAll(storeId: string): Promise<number> {
-    return this.indexer.removeAllForStore(storeId);
+  async removeAll(siteId: string): Promise<number> {
+    return this.indexer.removeAllForStore(siteId);
   }
 
   // ═══════════════════════════════════════════════════════
@@ -267,7 +267,7 @@ export class RAGService {
     const response = await this.retriever.retrieve(query);
 
     this.emit(RAGEvent.SEARCH_COMPLETED, {
-      storeId: query.storeId,
+      siteId: query.siteId,
       query: query.query,
       strategy: query.strategy,
       resultCount: response.results.length,
@@ -298,7 +298,7 @@ export class RAGService {
    */
   async find(
     query: string,
-    storeId: string,
+    siteId: string,
     options: {
       types?: (DocumentType | string)[];
       limit?: number;
@@ -307,7 +307,7 @@ export class RAGService {
   ): Promise<SearchResponse['results']> {
     const response = await this.search({
       query,
-      storeId,
+      siteId,
       documentTypes: options.types?.map((t) => this.resolveDocType(t)),
       limit: options.limit,
       strategy: options.strategy,
@@ -324,13 +324,13 @@ export class RAGService {
    * This is the main method for the AI assistant integration.
    *
    * @param query - Natural language question
-   * @param storeId - Store ID
+   * @param siteId - Store ID
    * @param options - Search and context options
    * @returns Formatted context string, token count, and sources
    */
   async retrieveContext(
     query: string,
-    storeId: string,
+    siteId: string,
     options: {
       documentTypes?: (DocumentType | string)[];
       limit?: number;
@@ -341,7 +341,7 @@ export class RAGService {
   ): Promise<RetrievalContext> {
     const searchResponse = await this.search({
       query,
-      storeId,
+      siteId,
       documentTypes: options.documentTypes?.map((t) => this.resolveDocType(t)),
       limit: options.limit || 15,
       strategy: options.strategy,
@@ -367,8 +367,8 @@ export class RAGService {
   /**
    * Get indexing statistics for a store.
    */
-  async getStats(storeId: string): Promise<Record<string, number>> {
-    return this.indexer.getStats(storeId);
+  async getStats(siteId: string): Promise<Record<string, number>> {
+    return this.indexer.getStats(siteId);
   }
 
   /**
@@ -492,7 +492,7 @@ export class RAGService {
     const payload: RAGEventPayload = {
       event,
       timestamp: Date.now(),
-      storeId: data.storeId as string,
+      siteId: data.siteId as string,
       data,
     };
 

@@ -64,7 +64,7 @@ export class VectorSearch {
    * Generates query embedding, then finds nearest neighbors.
    */
   async search(query: SearchQuery): Promise<SearchResult[]> {
-    if (!query.storeId) throw new TenantIsolationError();
+    if (!query.siteId) throw new TenantIsolationError();
 
     const startTime = performance.now();
 
@@ -180,7 +180,7 @@ export class VectorSearch {
 
     // MANDATORY: Store isolation
     conditions.push(`store_id = $${paramIdx}`);
-    params.push(query.storeId);
+    params.push(query.siteId);
     paramIdx++;
 
     // Active documents only
@@ -258,7 +258,7 @@ export class VectorSearch {
       id: row.id,
       documentId: row.document_id,
       documentType: row.document_type as DocumentType,
-      storeId: row.store_id,
+      siteId: row.store_id,
       score: this.distanceToScore(row.distance),
       content: row.content,
       metadata: row.metadata as DocumentMetadata,

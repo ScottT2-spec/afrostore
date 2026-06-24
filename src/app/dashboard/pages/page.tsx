@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect, useCallback } from "react";
-import { useStore } from "@/context/StoreContext";
+import { useSite } from "@/context/StoreContext";
 import { api } from "@/lib/api-client";
 import Link from "next/link";
 import { useAIPrefill } from "@/hooks/useAIPrefill";
@@ -28,7 +28,7 @@ const pageTypeLabels: Record<string, string> = {
 };
 
 export default function PagesPage() {
-  const { currentStore } = useStore();
+  const { currentStore } = useSite();
   const router = useRouter();
   const { prefillData, clearPrefill, isFromAI } = useAIPrefill("page");
   const [pages, setPages] = useState<PageItem[]>([]);
@@ -43,7 +43,7 @@ export default function PagesPage() {
   const fetchPages = useCallback(async () => {
     if (!currentStore) return;
     setLoading(true);
-    const res = await api.get<{ pages: PageItem[] }>(`/api/stores/${currentStore.id}/pages`);
+    const res = await api.get<{ pages: PageItem[] }>(`/api/sites/${currentStore.id}/pages`);
     if (res.success && res.data) {
       setPages(res.data.pages || (Array.isArray(res.data) ? res.data as unknown as PageItem[] : []));
     }
@@ -66,7 +66,7 @@ export default function PagesPage() {
     if (!currentStore || !newTitle.trim()) return;
     setCreating(true);
     const slug = newTitle.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "");
-    const res = await api.post<PageItem>(`/api/stores/${currentStore.id}/pages`, {
+    const res = await api.post<PageItem>(`/api/sites/${currentStore.id}/pages`, {
       title: newTitle, slug, type: newType, content: [], isPublished: false,
     });
     if (res.success && res.data) {
@@ -81,7 +81,7 @@ export default function PagesPage() {
   const deletePage = async (id: string) => {
     if (!currentStore) return;
     setDeleteId(id);
-    await api.delete(`/api/stores/${currentStore.id}/pages/${id}`);
+    await api.delete(`/api/sites/${currentStore.id}/pages/${id}`);
     setPages((prev) => prev.filter((p) => p.id !== id));
     setDeleteId(null);
   };
@@ -92,7 +92,7 @@ export default function PagesPage() {
     setRegenerating(true);
     try {
       const res = await api.post<{ pages: Array<{ id: string; title: string; slug: string; type: string }> }>(
-        `/api/stores/${currentStore.id}/ai/generate-store`,
+        `/api/sites/${currentStore.id}/ai/generate-store`,
         { storeName: currentStore.name, businessType: currentStore.businessType || "general", description: currentStore.description || "" }
       );
       if (res.success) {
@@ -108,7 +108,7 @@ export default function PagesPage() {
 
   const togglePublish = async (page: PageItem) => {
     if (!currentStore) return;
-    const res = await api.patch<PageItem>(`/api/stores/${currentStore.id}/pages/${page.id}`, {
+    const res = await api.patch<PageItem>(`/api/sites/${currentStore.id}/pages/${page.id}`, {
       isPublished: !page.isPublished,
     });
     if (res.success) {

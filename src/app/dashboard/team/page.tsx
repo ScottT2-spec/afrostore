@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect, useCallback } from "react";
-import { useStore } from "@/context/StoreContext";
+import { useSite } from "@/context/StoreContext";
 import { api } from "@/lib/api-client";
 import { UserPlus, Loader2, Trash2, Shield, Eye, Settings, Crown, Mail } from "lucide-react";
 import { useAIPrefill } from "@/hooks/useAIPrefill";
@@ -23,7 +23,7 @@ const roleConfig: Record<string, { label: string; color: string; icon: React.Ele
 };
 
 export default function TeamPage() {
-  const { currentStore } = useStore();
+  const { currentStore } = useSite();
   const router = useRouter();
   const { prefillData, clearPrefill, isFromAI } = useAIPrefill("member");
   const [members, setMembers] = useState<Member[]>([]);
@@ -37,7 +37,7 @@ export default function TeamPage() {
   const fetchMembers = useCallback(async () => {
     if (!currentStore) return;
     setLoading(true);
-    const res = await api.get<any>(`/api/stores/${currentStore.id}/members`);
+    const res = await api.get<any>(`/api/sites/${currentStore.id}/members`);
     if (res.success && res.data) {
       setMembers(Array.isArray(res.data) ? res.data : res.data.members || []);
     }
@@ -60,7 +60,7 @@ export default function TeamPage() {
     if (!currentStore || !inviteEmail.trim()) return;
     setSaving(true);
     setError("");
-    const res = await api.post<any>(`/api/stores/${currentStore.id}/members`, { email: inviteEmail, role: inviteRole });
+    const res = await api.post<any>(`/api/sites/${currentStore.id}/members`, { email: inviteEmail, role: inviteRole });
     if (res.success) {
       setInviteEmail("");
       setShowInvite(false);
@@ -74,13 +74,13 @@ export default function TeamPage() {
 
   const updateRole = async (memberId: string, role: string) => {
     if (!currentStore) return;
-    await api.patch(`/api/stores/${currentStore.id}/members/${memberId}`, { role });
+    await api.patch(`/api/sites/${currentStore.id}/members/${memberId}`, { role });
     setMembers((prev) => prev.map((m) => m.id === memberId ? { ...m, role: role as Member["role"] } : m));
   };
 
   const removeMember = async (memberId: string, name: string) => {
     if (!currentStore || !confirm(`Remove ${name} from the team?`)) return;
-    await api.delete(`/api/stores/${currentStore.id}/members/${memberId}`);
+    await api.delete(`/api/sites/${currentStore.id}/members/${memberId}`);
     setMembers((prev) => prev.filter((m) => m.id !== memberId));
   };
 

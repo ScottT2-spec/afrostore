@@ -3,7 +3,7 @@
 import { useState, useEffect, useCallback } from "react";
 import { useRouter } from "next/navigation";
 import DashboardHeader from "@/components/dashboard/DashboardHeader";
-import { useStore } from "@/context/StoreContext";
+import { useSite } from "@/context/StoreContext";
 import { api } from "@/lib/api-client";
 import { formatCurrency } from "@/lib/utils";
 import Link from "next/link";
@@ -57,7 +57,7 @@ const statusBadge: Record<string, { label: string; color: string; icon: React.El
 };
 
 export default function ProductsPage() {
-  const { currentStore } = useStore();
+  const { currentStore } = useSite();
   const [products, setProducts] = useState<Product[]>([]);
   const [loading, setLoading] = useState(true);
   const [total, setTotal] = useState(0);
@@ -73,7 +73,7 @@ export default function ProductsPage() {
     const params = new URLSearchParams({ page: page.toString(), limit: "20" });
     if (search) params.set("search", search);
     if (statusFilter) params.set("status", statusFilter);
-    const res = await api.get<ProductsResponse>(`/api/stores/${currentStore.id}/products?${params}`);
+    const res = await api.get<ProductsResponse>(`/api/sites/${currentStore.id}/products?${params}`);
     if (res.success && res.data) {
       setProducts(res.data.products);
       setTotal(res.data.pagination.total);
@@ -85,7 +85,7 @@ export default function ProductsPage() {
 
   const handleDelete = async (id: string) => {
     if (!currentStore || !confirm("Delete this product?")) return;
-    await api.delete(`/api/stores/${currentStore.id}/products/${id}`);
+    await api.delete(`/api/sites/${currentStore.id}/products/${id}`);
     fetchProducts();
   };
 

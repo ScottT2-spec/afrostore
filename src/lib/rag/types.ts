@@ -36,7 +36,7 @@ export interface RagDocument {
   /** Unique ID for this chunk (auto-generated) */
   id?: string;
   /** Store this document belongs to — MANDATORY for multi-tenant isolation */
-  storeId: string;
+  siteId: string;
   /** External entity ID (e.g., product ID, order ID) */
   documentId: string;
   /** Type of document */
@@ -70,7 +70,7 @@ export interface DocumentMetadata {
   /** Source entity ID */
   sourceId: string;
   /** Store ID (redundant for safety) */
-  storeId: string;
+  siteId: string;
   /** Additional fields vary by document type */
   [key: string]: unknown;
 }
@@ -154,7 +154,7 @@ export interface SearchQuery {
   /** Natural language query */
   query: string;
   /** Store scope — REQUIRED */
-  storeId: string;
+  siteId: string;
   /** Filter by document types */
   documentTypes?: DocumentType[];
   /** Maximum results to return */
@@ -214,7 +214,7 @@ export interface SearchResult {
   /** Document type */
   documentType: DocumentType;
   /** Store ID */
-  storeId: string;
+  siteId: string;
   /** Relevance score (0-1, normalized) */
   score: number;
   /** Content snippet or full content */
@@ -526,7 +526,7 @@ export enum RAGEvent {
 export interface RAGEventPayload {
   event: RAGEvent;
   timestamp: number;
-  storeId?: string;
+  siteId?: string;
   data: Record<string, unknown>;
   durationMs?: number;
 }

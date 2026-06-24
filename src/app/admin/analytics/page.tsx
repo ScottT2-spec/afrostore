@@ -8,9 +8,10 @@ import { AreaChart, Area, CartesianGrid, Tooltip, ResponsiveContainer, XAxis, YA
 interface AnalyticsData {
   signups: { date: string; count: number }[];
   stores: { date: string; count: number }[];
+  sites: { date: string; count: number }[];
   orders: { date: string; count: number }[];
   revenue: { date: string; amount: number }[];
-  totals?: { users: number; stores: number; orders: number; revenue: number };
+  totals?: { users: number; stores: number; sites: number; orders: number; revenue: number };
 }
 
 export default function AdminAnalyticsPage() {
@@ -29,7 +30,7 @@ export default function AdminAnalyticsPage() {
 
   // Compute totals from chart data
   const totalSignups = data.totals?.users ?? data.signups.reduce((s, d) => s + d.count, 0);
-  const totalStores = data.totals?.stores ?? data.stores.reduce((s, d) => s + d.count, 0);
+  const totalStores = data.totals?.sites ?? (data.sites || data.stores).reduce((s: number, d: { count: number }) => s + d.count, 0);
   const totalOrders = data.totals?.orders ?? data.orders.reduce((s, d) => s + d.count, 0);
   const totalRevenue = data.totals?.revenue ?? data.revenue.reduce((s, d) => s + d.amount, 0);
 
@@ -42,7 +43,7 @@ export default function AdminAnalyticsPage() {
 
   const charts: { title: string; subtitle: string; data: Record<string, string | number>[]; dataKey: string; label: string; format?: (v: number) => string }[] = [
     { title: "User Signups", subtitle: "Last 30 days", data: data.signups, dataKey: "count", label: "Signups" },
-    { title: "Stores Created", subtitle: "Last 30 days", data: data.stores, dataKey: "count", label: "Stores" },
+    { title: "Stores Created", subtitle: "Last 30 days", data: data.sites || data.stores, dataKey: "count", label: "Stores" },
     { title: "Orders", subtitle: "Last 30 days", data: data.orders, dataKey: "count", label: "Orders" },
     { title: "Revenue", subtitle: "Last 30 days", data: data.revenue, dataKey: "amount", label: "Revenue", format: (v: number) => `₵${v.toLocaleString()}` },
   ];

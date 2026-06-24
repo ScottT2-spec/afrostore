@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from "react";
 import DashboardHeader from "@/components/dashboard/DashboardHeader";
-import { useStore } from "@/context/StoreContext";
+import { useSite } from "@/context/StoreContext";
 import { api } from "@/lib/api-client";
 import { CheckCircle2, AlertCircle, CreditCard, ArrowRight, Shield, Loader2 } from "lucide-react";
 import { useAIPrefill } from "@/hooks/useAIPrefill";
@@ -23,7 +23,7 @@ const providerInfo: Record<string, { name: string; desc: string; color: string }
 };
 
 export default function PaymentsPage() {
-  const { currentStore } = useStore();
+  const { currentStore } = useSite();
   const router = useRouter();
   const { prefillData, clearPrefill, isFromAI } = useAIPrefill("payment_gateway");
   const [gateways, setGateways] = useState<Gateway[]>([]);
@@ -37,7 +37,7 @@ export default function PaymentsPage() {
   useEffect(() => {
     if (!currentStore) return;
     (async () => {
-      const res = await api.get<Gateway[]>(`/api/stores/${currentStore.id}/payment-gateways`);
+      const res = await api.get<Gateway[]>(`/api/sites/${currentStore.id}/payment-gateways`);
       if (res.success && res.data) setGateways(Array.isArray(res.data) ? res.data : []);
       setLoading(false);
     })();
@@ -48,7 +48,7 @@ export default function PaymentsPage() {
     if (!currentStore || !setupProvider) return;
     setSaving(true);
     setSetupError("");
-    const res = await api.post(`/api/stores/${currentStore.id}/payment-gateways`, {
+    const res = await api.post(`/api/sites/${currentStore.id}/payment-gateways`, {
       provider: setupProvider,
       publicKey,
       secretKey,
@@ -58,7 +58,7 @@ export default function PaymentsPage() {
       setPublicKey("");
       setSecretKey("");
       // Refresh
-      const r = await api.get<Gateway[]>(`/api/stores/${currentStore.id}/payment-gateways`);
+      const r = await api.get<Gateway[]>(`/api/sites/${currentStore.id}/payment-gateways`);
       if (r.success && r.data) setGateways(Array.isArray(r.data) ? r.data : []);
     } else {
       setSetupError(res.error || "Setup failed");

@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect, useCallback } from "react";
-import { useStore } from "@/context/StoreContext";
+import { useSite } from "@/context/StoreContext";
 import { api } from "@/lib/api-client";
 import DashboardHeader from "@/components/dashboard/DashboardHeader";
 import { Loader2, ShoppingCart, TrendingUp, DollarSign, RotateCcw, MessageCircle, Trash2, Eye, Clock, Mail } from "lucide-react";
@@ -17,7 +17,7 @@ interface AbandonedCart {
 interface Stats { total: number; active: number; recovered: number; recoveryRate: string; totalValue: number; recoveredValue: number }
 
 export default function AbandonedCartsPage() {
-  const { currentStore } = useStore();
+  const { currentStore } = useSite();
   const [carts, setCarts] = useState<AbandonedCart[]>([]);
   const [stats, setStats] = useState<Stats | null>(null);
   const [loading, setLoading] = useState(true);
@@ -28,7 +28,7 @@ export default function AbandonedCartsPage() {
 
   const load = useCallback(async () => {
     if (!currentStore) return;
-    const res = await api.get<{ carts: AbandonedCart[]; stats: Stats }>(`/api/stores/${currentStore.id}/abandoned-carts`);
+    const res = await api.get<{ carts: AbandonedCart[]; stats: Stats }>(`/api/sites/${currentStore.id}/abandoned-carts`);
     if (res.success && res.data) {
       setCarts(res.data.carts);
       setStats(res.data.stats);
@@ -41,7 +41,7 @@ export default function AbandonedCartsPage() {
   const sendReminder = async (cart: AbandonedCart) => {
     if (!currentStore) return;
     // Mark as reminded
-    await api.patch(`/api/stores/${currentStore.id}/abandoned-carts/${cart.id}`, { status: "REMINDED" });
+    await api.patch(`/api/sites/${currentStore.id}/abandoned-carts/${cart.id}`, { status: "REMINDED" });
     // Open WhatsApp with recovery message if phone available
     const contact = cart.phone || cart.customer?.phone;
     if (contact) {
@@ -54,7 +54,7 @@ export default function AbandonedCartsPage() {
 
   const deleteCart = async (id: string) => {
     if (!currentStore) return;
-    await api.delete(`/api/stores/${currentStore.id}/abandoned-carts/${id}`);
+    await api.delete(`/api/sites/${currentStore.id}/abandoned-carts/${id}`);
     await load();
   };
 

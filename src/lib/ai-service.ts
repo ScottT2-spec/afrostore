@@ -156,7 +156,7 @@ You have access to the store's data (products, orders, customers, analytics). Us
 // ─── Public API ─────────────────────────────────────────
 
 export interface AIChatRequest {
-  storeId: string;
+  siteId: string;
   message: string;
   images?: string[]; // base64 data URLs or public URLs
   conversationHistory?: Array<{ role: "user" | "assistant"; content: string }>;
@@ -187,8 +187,8 @@ export async function chatWithAI(req: AIChatRequest): Promise<AIChatResponse> {
   const ai = getAIFailover();
 
   // 1. Get basic store context from DB
-  const store = await prisma.store.findUnique({
-    where: { id: req.storeId },
+  const store = await prisma.site.findUnique({
+    where: { id: req.siteId },
     select: {
       name: true,
       currency: true,
@@ -221,7 +221,7 @@ Customers: ${store._count.customers}`;
   let ragInfo: AIChatResponse["ragContext"] | undefined;
   try {
     const rag = getRAGService();
-    const context = await rag.retrieveContext(req.message, req.storeId, {
+    const context = await rag.retrieveContext(req.message, req.siteId, {
       documentTypes: ["product", "order", "customer", "analytics_summary", "page", "category"],
       limit: 10,
       maxTokens: 2000,
@@ -312,12 +312,12 @@ export function getAIStatus() {
 /**
  * Index store data into RAG for better AI context.
  */
-export async function indexStoreData(storeId: string) {
+export async function indexStoreData(siteId: string) {
   const rag = getRAGService();
 
   // Index products
   const products = await prisma.product.findMany({
-    where: { storeId, status: "ACTIVE" },
+    where: { siteId, status: "ACTIVE" },
     include: { category: true, images: { take: 1 } },
   });
 
@@ -335,13 +335,13 @@ export async function indexStoreData(storeId: string) {
         tags: p.tags,
         status: p.status,
       })),
-      storeId
+      siteId
     );
   }
 
   // Index categories
   const categories = await prisma.category.findMany({
-    where: { storeId },
+    where: { siteId },
     include: { _count: { select: { products: true } } },
   });
 
@@ -354,7 +354,7 @@ export async function indexStoreData(storeId: string) {
         description: c.description || "",
         productCount: c._count.products,
       })),
-      storeId
+      siteId
     );
   }
 

@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect, useCallback } from "react";
-import { useStore } from "@/context/StoreContext";
+import { useSite } from "@/context/StoreContext";
 import { api } from "@/lib/api-client";
 import { formatCurrency } from "@/lib/utils";
 import { Truck, Plus, Loader2, Trash2, Pencil, MapPin, ToggleLeft, ToggleRight } from "lucide-react";
@@ -21,7 +21,7 @@ interface DeliveryZone {
 }
 
 export default function DeliveryPage() {
-  const { currentStore } = useStore();
+  const { currentStore } = useSite();
   const router = useRouter();
   const { prefillData, clearPrefill, isFromAI } = useAIPrefill("delivery_zone");
   const [zones, setZones] = useState<DeliveryZone[]>([]);
@@ -36,7 +36,7 @@ export default function DeliveryPage() {
   const fetchZones = useCallback(async () => {
     if (!currentStore) return;
     setLoading(true);
-    const res = await api.get<any>(`/api/stores/${currentStore.id}/delivery-zones`);
+    const res = await api.get<any>(`/api/sites/${currentStore.id}/delivery-zones`);
     if (res.success && res.data) {
       setZones(Array.isArray(res.data) ? res.data : res.data.deliveryZones || []);
     }
@@ -93,9 +93,9 @@ export default function DeliveryPage() {
       isActive: form.isActive,
     };
     if (editingId) {
-      await api.patch(`/api/stores/${currentStore.id}/delivery-zones`, { id: editingId, ...body });
+      await api.patch(`/api/sites/${currentStore.id}/delivery-zones`, { id: editingId, ...body });
     } else {
-      await api.post(`/api/stores/${currentStore.id}/delivery-zones`, body);
+      await api.post(`/api/sites/${currentStore.id}/delivery-zones`, body);
     }
     setSaving(false);
     resetForm();
@@ -105,13 +105,13 @@ export default function DeliveryPage() {
 
   const handleDelete = async (id: string) => {
     if (!currentStore || !confirm("Delete this delivery zone?")) return;
-    await api.delete(`/api/stores/${currentStore.id}/delivery-zones?id=${id}`);
+    await api.delete(`/api/sites/${currentStore.id}/delivery-zones?id=${id}`);
     setZones((prev) => prev.filter((z) => z.id !== id));
   };
 
   const toggleActive = async (z: DeliveryZone) => {
     if (!currentStore) return;
-    await api.patch(`/api/stores/${currentStore.id}/delivery-zones`, { id: z.id, isActive: !z.isActive });
+    await api.patch(`/api/sites/${currentStore.id}/delivery-zones`, { id: z.id, isActive: !z.isActive });
     setZones((prev) => prev.map((x) => x.id === z.id ? { ...x, isActive: !x.isActive } : x));
   };
 

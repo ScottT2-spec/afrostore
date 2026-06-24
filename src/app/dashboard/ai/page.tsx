@@ -3,7 +3,7 @@
 import { useState, useRef, useEffect } from "react";
 import DashboardHeader from "@/components/dashboard/DashboardHeader";
 import { useAuth } from "@/context/AuthContext";
-import { useStore } from "@/context/StoreContext";
+import { useSite } from "@/context/StoreContext";
 import { useAIAction } from "@/context/AIActionContext";
 import { api } from "@/lib/api-client";
 import {
@@ -205,7 +205,7 @@ function ReturnBanner({
 
 export default function AIPage() {
   const { user } = useAuth();
-  const { currentStore } = useStore();
+  const { currentStore } = useSite();
   const {
     setVerification,
     navigateToVerification,
@@ -283,7 +283,7 @@ export default function AIPage() {
       }));
 
       const res = await api.post<MCPResponse>(
-        `/api/stores/${currentStore.id}/ai`,
+        `/api/sites/${currentStore.id}/ai`,
         {
           message:
             text.trim() ||

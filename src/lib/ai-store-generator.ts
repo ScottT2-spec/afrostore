@@ -18,7 +18,7 @@ import type { BuilderBlock, BlockType } from "@/lib/builder/types";
 // ─── Types ──────────────────────────────────────────────────
 
 export interface StoreGeneratorInput {
-  storeId: string;
+  siteId: string;
   storeSlug: string;
   storeName: string;
   businessType: string;
@@ -691,7 +691,7 @@ export async function generateStore(input: StoreGeneratorInput): Promise<StoreGe
   // 4. Delete any existing auto-generated pages for this store (fresh start)
   await prisma.page.deleteMany({
     where: {
-      storeId: input.storeId,
+      siteId: input.siteId,
       type: { in: ["HOME", "ABOUT", "FAQ", "CONTACT", "POLICY"] },
     },
   });
@@ -701,7 +701,7 @@ export async function generateStore(input: StoreGeneratorInput): Promise<StoreGe
     pages.map((page, i) =>
       prisma.page.create({
         data: {
-          storeId: input.storeId,
+          siteId: input.siteId,
           title: page.title,
           slug: page.slug,
           type: page.type as any,

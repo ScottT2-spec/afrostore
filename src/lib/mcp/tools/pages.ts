@@ -21,7 +21,7 @@ const listPages: MCPToolDef = {
   mutates: false,
   requiresVerification: false,
   execute: async (params, ctx) => {
-    const where: Record<string, unknown> = { storeId: ctx.storeId };
+    const where: Record<string, unknown> = { siteId: ctx.siteId };
     if (params.type) where.type = params.type;
     if (params.published_only) where.isPublished = true;
 
@@ -99,13 +99,13 @@ const deletePage: MCPToolDef = {
   requiresVerification: false,
   execute: async (params, ctx) => {
     const page = await prisma.page.findFirst({
-      where: { id: params.page_id as string, storeId: ctx.storeId },
+      where: { id: params.page_id as string, siteId: ctx.siteId },
     });
     if (!page) return { action: "error", message: "Page not found.", errorCode: "NOT_FOUND" };
 
     await prisma.page.delete({ where: { id: page.id } });
     await logAudit({
-      storeId: ctx.storeId, userId: ctx.userId,
+      siteId: ctx.siteId, userId: ctx.userId,
       action: "DELETE", entity: "page", entityId: page.id,
       before: { title: page.title, type: page.type },
     });

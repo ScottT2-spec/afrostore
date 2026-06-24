@@ -224,7 +224,7 @@ export default function ShopPage() {
     if (storeData) {
       localStorage.setItem(cartKey, JSON.stringify(cart));
       localStorage.setItem("afrostore_cart_active_slug", slug);
-      localStorage.setItem("afrostore_storeId", storeData.store.id);
+      localStorage.setItem("afrostore_siteId", storeData.store.id);
       localStorage.setItem("afrostore_storeSlug", storeData.store.slug);
       localStorage.setItem("afrostore_storeName", storeData.store.name);
       localStorage.setItem("afrostore_currency", storeData.store.currency);

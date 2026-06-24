@@ -15,7 +15,7 @@ const listCategories: MCPToolDef = {
   requiresVerification: false,
   execute: async (_params, ctx) => {
     const categories = await prisma.category.findMany({
-      where: { storeId: ctx.storeId },
+      where: { siteId: ctx.siteId },
       include: {
         parent: { select: { id: true, name: true } },
         children: { select: { id: true, name: true } },
@@ -69,7 +69,7 @@ Suggest good category structures based on the store's business type.`,
   execute: async (params, ctx) => {
     if (params.parent_id) {
       const parent = await prisma.category.findFirst({
-        where: { id: params.parent_id as string, storeId: ctx.storeId },
+        where: { id: params.parent_id as string, siteId: ctx.siteId },
       });
       if (!parent) {
         return { action: "error", message: "Parent category not found.", errorCode: "NOT_FOUND" };
@@ -78,7 +78,7 @@ Suggest good category structures based on the store's business type.`,
 
     // Check for duplicate name
     const existing = await prisma.category.findFirst({
-      where: { storeId: ctx.storeId, name: { equals: params.name as string, mode: "insensitive" } },
+      where: { siteId: ctx.siteId, name: { equals: params.name as string, mode: "insensitive" } },
     });
     if (existing) {
       return { action: "error", message: `A category named "${params.name}" already exists.`, errorCode: "DUPLICATE" };
@@ -118,7 +118,7 @@ const updateCategory: MCPToolDef = {
   requiresVerification: true,
   execute: async (params, ctx) => {
     const cat = await prisma.category.findFirst({
-      where: { id: params.category_id as string, storeId: ctx.storeId },
+      where: { id: params.category_id as string, siteId: ctx.siteId },
     });
     if (!cat) {
       return { action: "error", message: "Category not found.", errorCode: "NOT_FOUND" };
@@ -155,7 +155,7 @@ const deleteCategory: MCPToolDef = {
   requiresVerification: false,
   execute: async (params, ctx) => {
     const cat = await prisma.category.findFirst({
-      where: { id: params.category_id as string, storeId: ctx.storeId },
+      where: { id: params.category_id as string, siteId: ctx.siteId },
       include: { _count: { select: { products: true, children: true } } },
     });
     if (!cat) {
@@ -167,7 +167,7 @@ const deleteCategory: MCPToolDef = {
     await prisma.category.delete({ where: { id: cat.id } });
 
     await logAudit({
-      storeId: ctx.storeId, userId: ctx.userId,
+      siteId: ctx.siteId, userId: ctx.userId,
       action: "DELETE", entity: "category", entityId: cat.id,
       before: { name: cat.name, products: cat._count.products },
     });

@@ -27,7 +27,7 @@ const listReviews: MCPToolDef = {
     const limit = Math.min((params.limit as number) || 20, 100);
 
     const where: Record<string, unknown> = {
-      product: { storeId: ctx.storeId },
+      product: { siteId: ctx.siteId },
     };
     if (params.product_id) where.productId = params.product_id;
     if (params.pending_only) where.isApproved = false;
@@ -43,14 +43,14 @@ const listReviews: MCPToolDef = {
       }),
       prisma.review.count({ where: where as any }),
       prisma.review.aggregate({
-        where: { product: { storeId: ctx.storeId }, isApproved: true },
+        where: { product: { siteId: ctx.siteId }, isApproved: true },
         _avg: { rating: true },
         _count: { id: true },
       }),
     ]);
 
     const pendingCount = await prisma.review.count({
-      where: { product: { storeId: ctx.storeId }, isApproved: false },
+      where: { product: { siteId: ctx.siteId }, isApproved: false },
     });
 
     return {
@@ -97,7 +97,7 @@ const moderateReview: MCPToolDef = {
   requiresVerification: false,
   execute: async (params, ctx) => {
     const review = await prisma.review.findFirst({
-      where: { id: params.review_id as string, product: { storeId: ctx.storeId } },
+      where: { id: params.review_id as string, product: { siteId: ctx.siteId } },
       include: { product: { select: { name: true } } },
     });
     if (!review) return { action: "error", message: "Review not found.", errorCode: "NOT_FOUND" };
@@ -139,7 +139,7 @@ const bulkModerateReviews: MCPToolDef = {
 
     // Verify all reviews belong to this store
     const reviews = await prisma.review.findMany({
-      where: { id: { in: ids }, product: { storeId: ctx.storeId } },
+      where: { id: { in: ids }, product: { siteId: ctx.siteId } },
     });
 
     if (reviews.length === 0) return { action: "error", message: "No matching reviews found.", errorCode: "NOT_FOUND" };
@@ -178,7 +178,7 @@ const listMessages: MCPToolDef = {
   execute: async (params, ctx) => {
     const page = (params.page as number) || 1;
     const limit = Math.min((params.limit as number) || 20, 50);
-    const where: Record<string, unknown> = { storeId: ctx.storeId };
+    const where: Record<string, unknown> = { siteId: ctx.siteId };
     if (params.unread_only) where.isRead = false;
 
     const [messages, total, unreadCount] = await Promise.all([
@@ -189,7 +189,7 @@ const listMessages: MCPToolDef = {
         take: limit,
       }),
       prisma.contactMessage.count({ where: where as any }),
-      prisma.contactMessage.count({ where: { storeId: ctx.storeId, isRead: false } }),
+      prisma.contactMessage.count({ where: { siteId: ctx.siteId, isRead: false } }),
     ]);
 
     return {
@@ -229,7 +229,7 @@ const markMessagesRead: MCPToolDef = {
   execute: async (params, ctx) => {
     if (params.mark_all) {
       const result = await prisma.contactMessage.updateMany({
-        where: { storeId: ctx.storeId, isRead: false },
+        where: { siteId: ctx.siteId, isRead: false },
         data: { isRead: true },
       });
       return { action: "done", message: `Marked ${result.count} message(s) as read.` };
@@ -237,7 +237,7 @@ const markMessagesRead: MCPToolDef = {
 
     if (params.message_ids && (params.message_ids as string[]).length > 0) {
       await prisma.contactMessage.updateMany({
-        where: { storeId: ctx.storeId, id: { in: params.message_ids as string[] } },
+        where: { siteId: ctx.siteId, id: { in: params.message_ids as string[] } },
         data: { isRead: true },
       });
       return { action: "done", message: `Marked ${(params.message_ids as string[]).length} message(s) as read.` };

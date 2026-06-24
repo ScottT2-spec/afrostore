@@ -1,0 +1,553 @@
+'use client';
+
+import { useState, useEffect } from 'react';
+import { useRouter, useSearchParams } from 'next/navigation';
+import {
+  ShoppingBag, Globe, FileText, Sparkles, ArrowRight, ArrowLeft,
+  Check, Loader2, Zap, Layout, PenTool, Square, CreditCard,
+  Building2, Upload, Link as LinkIcon
+} from 'lucide-react';
+
+const INDUSTRIES = [
+  { id: 'fashion', emoji: '👗', name: 'Fashion & Clothing' },
+  { id: 'electronics', emoji: '📱', name: 'Electronics & Gadgets' },
+  { id: 'food', emoji: '🍽️', name: 'Food & Restaurant' },
+  { id: 'beauty', emoji: '💄', name: 'Beauty & Skincare' },
+  { id: 'health', emoji: '💪', name: 'Health & Wellness' },
+  { id: 'real-estate', emoji: '🏠', name: 'Real Estate' },
+  { id: 'education', emoji: '📚', name: 'Education' },
+  { id: 'healthcare', emoji: '🏥', name: 'Healthcare' },
+  { id: 'agency', emoji: '🏢', name: 'Agency' },
+  { id: 'church', emoji: '⛪', name: 'Church & Ministry' },
+  { id: 'ngo', emoji: '🤝', name: 'NGO & Non-Profit' },
+  { id: 'construction', emoji: '🏗️', name: 'Construction' },
+  { id: 'auto', emoji: '🚗', name: 'Automotive' },
+  { id: 'art', emoji: '🎨', name: 'Art & Crafts' },
+  { id: 'sports', emoji: '⚽', name: 'Sports & Fitness' },
+  { id: 'services', emoji: '🛠️', name: 'Professional Services' },
+  { id: 'other', emoji: '🏪', name: 'Other' },
+];
+
+const LAUNCH_METHODS = [
+  { id: 'quick', icon: Zap, title: 'Launch in 3 Minutes', desc: 'AI builds everything for you', color: 'border-emerald-500 bg-emerald-50' },
+  { id: 'template', icon: Layout, title: 'Use a Template', desc: 'Start from a professional template', color: 'border-blue-500 bg-blue-50' },
+  { id: 'ai', icon: Sparkles, title: 'Build with AI', desc: 'Guide AI to build your vision', color: 'border-purple-500 bg-purple-50' },
+  { id: 'blank', icon: Square, title: 'Blank Canvas', desc: 'Start from scratch', color: 'border-gray-500 bg-gray-50' },
+];
+
+const PAYMENT_GATEWAYS = [
+  { id: 'paystack', name: 'Paystack', logo: '💳', desc: 'Cards, bank transfer, USSD' },
+  { id: 'flutterwave', name: 'Flutterwave', logo: '🦋', desc: 'Cards, mobile money, bank' },
+  { id: 'monnify', name: 'Monnify', logo: '🏦', desc: 'Bank transfer, cards, USSD' },
+];
+
+type SiteType = 'ECOMMERCE' | 'WEBSITE' | 'LANDING_PAGE';
+
+export default function NewSitePage() {
+  const router = useRouter();
+  const searchParams = useSearchParams();
+  const workspaceId = searchParams.get('workspace');
+
+  const [step, setStep] = useState(1);
+  const [creating, setCreating] = useState(false);
+  const [created, setCreated] = useState(false);
+  const [createdSiteId, setCreatedSiteId] = useState<string | null>(null);
+
+  // Form state
+  const [siteType, setSiteType] = useState<SiteType | null>(null);
+  const [industry, setIndustry] = useState<string | null>(null);
+  const [launchMethod, setLaunchMethod] = useState<string | null>(null);
+  const [businessInfo, setBusinessInfo] = useState({
+    name: '', description: '', logo: '',
+    phone: '', email: '', location: '',
+    whatsapp: '', instagram: '', facebook: '', twitter: '', tiktok: '',
+  });
+  const [selectedGateways, setSelectedGateways] = useState<string[]>([]);
+  const [domainType, setDomainType] = useState<'subdomain' | 'custom'>('subdomain');
+  const [customDomain, setCustomDomain] = useState('');
+
+  // Load workspaces if none specified
+  const [workspaces, setWorkspaces] = useState<Array<{ id: string; name: string }>>([]);
+  const [selectedWorkspace, setSelectedWorkspace] = useState(workspaceId || '');
+
+  useEffect(() => {
+    if (!workspaceId) {
+      const token = localStorage.getItem('token');
+      fetch('/api/workspaces', { headers: { Authorization: `Bearer ${token}` } })
+        .then(r => r.json())
+        .then(json => {
+          if (json.success && json.data.length > 0) {
+            setWorkspaces(json.data);
+            setSelectedWorkspace(json.data[0].id);
+          }
+        });
+    }
+  }, [workspaceId]);
+
+  const totalSteps = 7;
+  const canProceed = () => {
+    switch (step) {
+      case 1: return !!siteType;
+      case 2: return !!industry;
+      case 3: return !!launchMethod;
+      case 4: return businessInfo.name.trim().length >= 2;
+      case 5: return true; // generate step
+      case 6: return true; // payment optional
+      case 7: return true; // domain optional
+      default: return false;
+    }
+  };
+
+  const createSite = async () => {
+    if (creating) return;
+    setCreating(true);
+
+    try {
+      const token = localStorage.getItem('token');
+      const wsId = selectedWorkspace || workspaceId;
+
+      // Create workspace if none exist
+      let finalWsId = wsId;
+      if (!finalWsId) {
+        const wsRes = await fetch('/api/workspaces', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
+          body: JSON.stringify({ name: businessInfo.name.trim() }),
+        });
+        const wsJson = await wsRes.json();
+        if (wsJson.success) finalWsId = wsJson.data.id;
+        else throw new Error('Failed to create workspace');
+      }
+
+      const res = await fetch(`/api/workspaces/${finalWsId}/sites`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
+        body: JSON.stringify({
+          siteType,
+          industry,
+          name: businessInfo.name.trim(),
+          description: businessInfo.description,
+          logo: businessInfo.logo || null,
+          phone: businessInfo.phone,
+          businessType: industry || 'general',
+          socialLinks: {
+            whatsapp: businessInfo.whatsapp,
+            instagram: businessInfo.instagram,
+            facebook: businessInfo.facebook,
+            twitter: businessInfo.twitter,
+            tiktok: businessInfo.tiktok,
+          },
+          customDomain: domainType === 'custom' && customDomain ? customDomain : null,
+        }),
+      });
+
+      const json = await res.json();
+      if (json.success) {
+        setCreatedSiteId(json.data.id);
+        setCreated(true);
+      }
+    } catch (e) {
+      console.error(e);
+    } finally {
+      setCreating(false);
+    }
+  };
+
+  const handleNext = () => {
+    if (step === 5) {
+      createSite();
+      return;
+    }
+    if (step < totalSteps) setStep(step + 1);
+  };
+
+  const handleFinish = () => {
+    if (createdSiteId) {
+      localStorage.setItem('activeSiteId', createdSiteId);
+      router.push('/dashboard');
+    }
+  };
+
+  return (
+    <div className="min-h-screen bg-gray-50">
+      {/* Progress Bar */}
+      <div className="bg-white border-b border-gray-100 sticky top-0 z-10">
+        <div className="max-w-3xl mx-auto px-4 py-4">
+          <div className="flex items-center justify-between mb-3">
+            <button onClick={() => router.back()} className="text-sm text-gray-500 hover:text-gray-700 flex items-center gap-1">
+              <ArrowLeft className="w-4 h-4" /> Back
+            </button>
+            <span className="text-sm text-gray-400">Step {step} of {totalSteps}</span>
+          </div>
+          <div className="w-full bg-gray-100 rounded-full h-1.5">
+            <div
+              className="bg-gray-900 h-1.5 rounded-full transition-all duration-500"
+              style={{ width: `${(step / totalSteps) * 100}%` }}
+            />
+          </div>
+        </div>
+      </div>
+
+      <div className="max-w-3xl mx-auto px-4 py-10">
+        {/* Step 1: Choose Site Type */}
+        {step === 1 && (
+          <div className="fade-in">
+            <h1 className="text-2xl font-bold text-gray-900 mb-2">What do you want to build?</h1>
+            <p className="text-gray-500 mb-8">Choose the type of site that fits your needs</p>
+            <div className="grid gap-4">
+              {([
+                { type: 'ECOMMERCE' as SiteType, icon: ShoppingBag, title: 'Ecommerce Store', desc: 'Sell products and services online. Products, orders, inventory, payments.', color: 'emerald' },
+                { type: 'WEBSITE' as SiteType, icon: Globe, title: 'Business Website', desc: 'Build an informational website. Pages, blogs, forms, SEO.', color: 'blue' },
+                { type: 'LANDING_PAGE' as SiteType, icon: FileText, title: 'Landing Page', desc: 'Lead generation and conversion. Funnels, CRM, email & WhatsApp marketing.', color: 'purple' },
+              ]).map(item => {
+                const Icon = item.icon;
+                const selected = siteType === item.type;
+                return (
+                  <button
+                    key={item.type}
+                    onClick={() => setSiteType(item.type)}
+                    className={`flex items-start gap-4 p-5 rounded-xl border-2 text-left transition ${
+                      selected
+                        ? `border-${item.color}-500 bg-${item.color}-50`
+                        : 'border-gray-100 bg-white hover:border-gray-200'
+                    }`}
+                  >
+                    <div className={`w-12 h-12 rounded-xl flex items-center justify-center ${
+                      selected ? `bg-${item.color}-100` : 'bg-gray-100'
+                    }`}>
+                      <Icon className={`w-6 h-6 ${selected ? `text-${item.color}-600` : 'text-gray-400'}`} />
+                    </div>
+                    <div className="flex-1">
+                      <p className="font-semibold text-gray-900">{item.title}</p>
+                      <p className="text-sm text-gray-500 mt-0.5">{item.desc}</p>
+                    </div>
+                    {selected && <Check className={`w-5 h-5 text-${item.color}-600 mt-1`} />}
+                  </button>
+                );
+              })}
+
+              {/* AI Decide option */}
+              <button
+                onClick={() => setSiteType('ECOMMERCE')} // Default to ecommerce for AI
+                className="flex items-start gap-4 p-5 rounded-xl border-2 border-dashed border-gray-200 bg-white hover:border-gray-300 text-left transition"
+              >
+                <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-purple-100 to-blue-100 flex items-center justify-center">
+                  <Sparkles className="w-6 h-6 text-purple-500" />
+                </div>
+                <div>
+                  <p className="font-semibold text-gray-900">Let AI Decide</p>
+                  <p className="text-sm text-gray-500 mt-0.5">Tell us about your business and AI will pick the best type</p>
+                </div>
+              </button>
+            </div>
+          </div>
+        )}
+
+        {/* Step 2: Choose Industry */}
+        {step === 2 && (
+          <div className="fade-in">
+            <h1 className="text-2xl font-bold text-gray-900 mb-2">What&apos;s your industry?</h1>
+            <p className="text-gray-500 mb-8">This helps us customize templates and features for you</p>
+            <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
+              {INDUSTRIES.map(ind => (
+                <button
+                  key={ind.id}
+                  onClick={() => setIndustry(ind.id)}
+                  className={`p-4 rounded-xl border-2 text-left transition ${
+                    industry === ind.id
+                      ? 'border-gray-900 bg-gray-50'
+                      : 'border-gray-100 bg-white hover:border-gray-200'
+                  }`}
+                >
+                  <span className="text-2xl">{ind.emoji}</span>
+                  <p className="text-sm font-medium text-gray-900 mt-2">{ind.name}</p>
+                </button>
+              ))}
+            </div>
+          </div>
+        )}
+
+        {/* Step 3: Launch Method */}
+        {step === 3 && (
+          <div className="fade-in">
+            <h1 className="text-2xl font-bold text-gray-900 mb-2">How do you want to start?</h1>
+            <p className="text-gray-500 mb-8">Choose your preferred launch method</p>
+            <div className="grid sm:grid-cols-2 gap-4">
+              {LAUNCH_METHODS.map(method => {
+                const Icon = method.icon;
+                const selected = launchMethod === method.id;
+                return (
+                  <button
+                    key={method.id}
+                    onClick={() => setLaunchMethod(method.id)}
+                    className={`p-6 rounded-xl border-2 text-left transition ${
+                      selected ? method.color : 'border-gray-100 bg-white hover:border-gray-200'
+                    }`}
+                  >
+                    <Icon className={`w-8 h-8 mb-3 ${selected ? 'text-gray-900' : 'text-gray-400'}`} />
+                    <p className="font-semibold text-gray-900">{method.title}</p>
+                    <p className="text-sm text-gray-500 mt-1">{method.desc}</p>
+                  </button>
+                );
+              })}
+            </div>
+          </div>
+        )}
+
+        {/* Step 4: Business Information */}
+        {step === 4 && (
+          <div className="fade-in">
+            <h1 className="text-2xl font-bold text-gray-900 mb-2">Tell us about your business</h1>
+            <p className="text-gray-500 mb-8">This information will appear on your site</p>
+            <div className="space-y-5">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1.5">Business Name *</label>
+                <input
+                  type="text"
+                  value={businessInfo.name}
+                  onChange={e => setBusinessInfo(prev => ({ ...prev, name: e.target.value }))}
+                  className="w-full px-4 py-3 border border-gray-200 rounded-lg focus:ring-2 focus:ring-gray-900 outline-none"
+                  placeholder="e.g. Prokip Technologies"
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1.5">Description</label>
+                <textarea
+                  value={businessInfo.description}
+                  onChange={e => setBusinessInfo(prev => ({ ...prev, description: e.target.value }))}
+                  className="w-full px-4 py-3 border border-gray-200 rounded-lg focus:ring-2 focus:ring-gray-900 outline-none"
+                  rows={3}
+                  placeholder="What does your business do?"
+                />
+              </div>
+              <div className="grid sm:grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1.5">Phone Number</label>
+                  <input
+                    type="tel"
+                    value={businessInfo.phone}
+                    onChange={e => setBusinessInfo(prev => ({ ...prev, phone: e.target.value }))}
+                    className="w-full px-4 py-3 border border-gray-200 rounded-lg focus:ring-2 focus:ring-gray-900 outline-none"
+                    placeholder="+234 800 000 0000"
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1.5">Email</label>
+                  <input
+                    type="email"
+                    value={businessInfo.email}
+                    onChange={e => setBusinessInfo(prev => ({ ...prev, email: e.target.value }))}
+                    className="w-full px-4 py-3 border border-gray-200 rounded-lg focus:ring-2 focus:ring-gray-900 outline-none"
+                    placeholder="hello@business.com"
+                  />
+                </div>
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1.5">Location</label>
+                <input
+                  type="text"
+                  value={businessInfo.location}
+                  onChange={e => setBusinessInfo(prev => ({ ...prev, location: e.target.value }))}
+                  className="w-full px-4 py-3 border border-gray-200 rounded-lg focus:ring-2 focus:ring-gray-900 outline-none"
+                  placeholder="Lagos, Nigeria"
+                />
+              </div>
+
+              {/* Social Links (collapsible) */}
+              <details className="border border-gray-100 rounded-lg">
+                <summary className="px-4 py-3 text-sm font-medium text-gray-700 cursor-pointer hover:bg-gray-50">
+                  Social Links (optional)
+                </summary>
+                <div className="px-4 pb-4 space-y-3">
+                  {(['whatsapp', 'instagram', 'facebook', 'twitter', 'tiktok'] as const).map(platform => (
+                    <input
+                      key={platform}
+                      type="text"
+                      value={businessInfo[platform]}
+                      onChange={e => setBusinessInfo(prev => ({ ...prev, [platform]: e.target.value }))}
+                      className="w-full px-4 py-2.5 border border-gray-200 rounded-lg focus:ring-2 focus:ring-gray-900 outline-none text-sm"
+                      placeholder={platform.charAt(0).toUpperCase() + platform.slice(1)}
+                    />
+                  ))}
+                </div>
+              </details>
+            </div>
+          </div>
+        )}
+
+        {/* Step 5: Generate */}
+        {step === 5 && !created && (
+          <div className="fade-in text-center py-10">
+            {creating ? (
+              <>
+                <div className="w-20 h-20 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-6">
+                  <Loader2 className="w-10 h-10 text-gray-600 animate-spin" />
+                </div>
+                <h1 className="text-2xl font-bold text-gray-900 mb-2">Creating your site...</h1>
+                <p className="text-gray-500">Setting up pages, settings, and defaults</p>
+              </>
+            ) : (
+              <>
+                <div className="w-20 h-20 bg-gradient-to-br from-emerald-100 to-blue-100 rounded-full flex items-center justify-center mx-auto mb-6">
+                  <Sparkles className="w-10 h-10 text-emerald-600" />
+                </div>
+                <h1 className="text-2xl font-bold text-gray-900 mb-2">Ready to generate your site</h1>
+                <p className="text-gray-500 mb-6 max-w-md mx-auto">
+                  We&apos;ll create a {siteType === 'ECOMMERCE' ? 'store' : siteType === 'WEBSITE' ? 'website' : 'landing page'} for
+                  <strong> {businessInfo.name}</strong> in the <strong>{INDUSTRIES.find(i => i.id === industry)?.name}</strong> industry.
+                </p>
+              </>
+            )}
+          </div>
+        )}
+
+        {step === 5 && created && (
+          <div className="fade-in text-center py-10">
+            <div className="w-20 h-20 bg-emerald-100 rounded-full flex items-center justify-center mx-auto mb-6">
+              <Check className="w-10 h-10 text-emerald-600" />
+            </div>
+            <h1 className="text-2xl font-bold text-gray-900 mb-2">Your site is ready! 🎉</h1>
+            <p className="text-gray-500 mb-2">
+              <strong>{businessInfo.name}</strong> has been created successfully.
+            </p>
+            <p className="text-sm text-gray-400 mb-8">You can connect payments and set a custom domain in the next steps, or skip to your dashboard.</p>
+          </div>
+        )}
+
+        {/* Step 6: Connect Payment */}
+        {step === 6 && (
+          <div className="fade-in">
+            <h1 className="text-2xl font-bold text-gray-900 mb-2">Connect Payment Gateway</h1>
+            <p className="text-gray-500 mb-8">Choose how you want to receive payments (you can set this up later)</p>
+            <div className="space-y-3">
+              {PAYMENT_GATEWAYS.map(gw => {
+                const selected = selectedGateways.includes(gw.id);
+                return (
+                  <button
+                    key={gw.id}
+                    onClick={() => setSelectedGateways(prev =>
+                      selected ? prev.filter(g => g !== gw.id) : [...prev, gw.id]
+                    )}
+                    className={`w-full flex items-center gap-4 p-4 rounded-xl border-2 text-left transition ${
+                      selected ? 'border-gray-900 bg-gray-50' : 'border-gray-100 bg-white hover:border-gray-200'
+                    }`}
+                  >
+                    <span className="text-3xl">{gw.logo}</span>
+                    <div className="flex-1">
+                      <p className="font-semibold text-gray-900">{gw.name}</p>
+                      <p className="text-sm text-gray-500">{gw.desc}</p>
+                    </div>
+                    {selected && <Check className="w-5 h-5 text-gray-900" />}
+                  </button>
+                );
+              })}
+            </div>
+          </div>
+        )}
+
+        {/* Step 7: Domain */}
+        {step === 7 && (
+          <div className="fade-in">
+            <h1 className="text-2xl font-bold text-gray-900 mb-2">Set Up Your Domain</h1>
+            <p className="text-gray-500 mb-8">Choose how people will access your site</p>
+            <div className="space-y-4">
+              <button
+                onClick={() => setDomainType('subdomain')}
+                className={`w-full flex items-center gap-4 p-5 rounded-xl border-2 text-left transition ${
+                  domainType === 'subdomain' ? 'border-gray-900 bg-gray-50' : 'border-gray-100 bg-white hover:border-gray-200'
+                }`}
+              >
+                <Globe className="w-8 h-8 text-gray-400" />
+                <div>
+                  <p className="font-semibold text-gray-900">Free Subdomain</p>
+                  <p className="text-sm text-gray-500">your-site.prokip.site</p>
+                </div>
+              </button>
+
+              <button
+                onClick={() => setDomainType('custom')}
+                className={`w-full flex items-center gap-4 p-5 rounded-xl border-2 text-left transition ${
+                  domainType === 'custom' ? 'border-gray-900 bg-gray-50' : 'border-gray-100 bg-white hover:border-gray-200'
+                }`}
+              >
+                <LinkIcon className="w-8 h-8 text-gray-400" />
+                <div>
+                  <p className="font-semibold text-gray-900">Custom Domain</p>
+                  <p className="text-sm text-gray-500">yoursite.com</p>
+                </div>
+              </button>
+
+              {domainType === 'custom' && (
+                <input
+                  type="text"
+                  value={customDomain}
+                  onChange={e => setCustomDomain(e.target.value)}
+                  className="w-full px-4 py-3 border border-gray-200 rounded-lg focus:ring-2 focus:ring-gray-900 outline-none"
+                  placeholder="yourdomain.com"
+                />
+              )}
+            </div>
+          </div>
+        )}
+
+        {/* Navigation Buttons */}
+        <div className="flex items-center justify-between mt-10 pt-6 border-t border-gray-100">
+          <button
+            onClick={() => step > 1 ? setStep(step - 1) : router.back()}
+            className="flex items-center gap-2 px-4 py-2.5 text-gray-600 hover:text-gray-800 transition"
+          >
+            <ArrowLeft className="w-4 h-4" />
+            {step === 1 ? 'Cancel' : 'Back'}
+          </button>
+
+          <div className="flex gap-3">
+            {step >= 6 && (
+              <button
+                onClick={handleFinish}
+                className="px-6 py-2.5 text-gray-600 hover:text-gray-800 transition"
+              >
+                Skip & Go to Dashboard
+              </button>
+            )}
+            {step === 7 ? (
+              <button
+                onClick={handleFinish}
+                className="flex items-center gap-2 px-6 py-2.5 bg-gray-900 text-white rounded-lg hover:bg-gray-800 transition font-medium"
+              >
+                Publish <Check className="w-4 h-4" />
+              </button>
+            ) : step === 5 && created ? (
+              <button
+                onClick={() => setStep(6)}
+                className="flex items-center gap-2 px-6 py-2.5 bg-gray-900 text-white rounded-lg hover:bg-gray-800 transition font-medium"
+              >
+                Continue <ArrowRight className="w-4 h-4" />
+              </button>
+            ) : (
+              <button
+                onClick={handleNext}
+                disabled={!canProceed() || creating}
+                className="flex items-center gap-2 px-6 py-2.5 bg-gray-900 text-white rounded-lg hover:bg-gray-800 disabled:opacity-40 transition font-medium"
+              >
+                {step === 5 && !created ? (
+                  creating ? (
+                    <><Loader2 className="w-4 h-4 animate-spin" /> Creating...</>
+                  ) : (
+                    <><Sparkles className="w-4 h-4" /> Generate Site</>
+                  )
+                ) : (
+                  <>Next <ArrowRight className="w-4 h-4" /></>
+                )}
+              </button>
+            )}
+          </div>
+        </div>
+      </div>
+
+      <style jsx>{`
+        .fade-in { animation: fadeIn 0.3s ease-out; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
+      `}</style>
+    </div>
+  );
+}

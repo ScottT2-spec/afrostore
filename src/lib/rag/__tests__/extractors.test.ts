@@ -36,7 +36,7 @@ describe('Document Extractors', () => {
       expect(result.content).toContain('ankara, fabric, fashion');
       expect(result.content).toContain('SKU: ANK-001');
       expect(result.metadata.sourceType).toBe(DocumentType.PRODUCT);
-      expect(result.metadata.storeId).toBe(STORE_ID);
+      expect(result.metadata.siteId).toBe(STORE_ID);
     });
 
     it('handles out-of-stock products', () => {

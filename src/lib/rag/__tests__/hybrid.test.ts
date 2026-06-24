@@ -51,10 +51,10 @@ function makeResult(docId: string, score: number): SearchResult {
     id: `chunk_${docId}`,
     documentId: docId,
     documentType: DocumentType.PRODUCT,
-    storeId: 'store_1',
+    siteId: 'store_1',
     score,
     content: `Content for ${docId}`,
-    metadata: { title: docId, sourceType: DocumentType.PRODUCT, sourceId: docId, storeId: 'store_1' },
+    metadata: { title: docId, sourceType: DocumentType.PRODUCT, sourceId: docId, siteId: 'store_1' },
     chunkIndex: 0,
     chunkTotal: 1,
   };

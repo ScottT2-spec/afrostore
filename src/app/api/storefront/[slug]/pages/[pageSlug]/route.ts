@@ -16,7 +16,7 @@ export async function GET(_req: NextRequest, { params }: Params) {
   const { slug, pageSlug } = await params;
 
   try {
-    const store = await prisma.store.findFirst({
+    const site = await prisma.site.findFirst({
       where: {
         status: "ACTIVE",
         OR: [
@@ -33,11 +33,11 @@ export async function GET(_req: NextRequest, { params }: Params) {
       },
     });
 
-    if (!store) return notFound("Store not found");
+    if (!site) return notFound("Store not found");
 
     const page = await prisma.page.findFirst({
       where: {
-        storeId: store.id,
+        siteId: site.id,
         slug: pageSlug,
         isPublished: true,
       },
@@ -56,10 +56,10 @@ export async function GET(_req: NextRequest, { params }: Params) {
 
     return success({
       store: {
-        id: store.id,
-        name: store.name,
-        slug: store.slug,
-        logo: store.logo,
+        id: site.id,
+        name: site.name,
+        slug: site.slug,
+        logo: site.logo,
       },
       page,
     });

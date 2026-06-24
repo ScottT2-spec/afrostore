@@ -16,7 +16,7 @@ const getLoyaltyProgram: MCPToolDef = {
   requiresVerification: false,
   execute: async (_params, ctx) => {
     const program = await prisma.loyaltyProgram.findUnique({
-      where: { storeId: ctx.storeId },
+      where: { siteId: ctx.siteId },
       include: {
         members: {
           include: { customer: { select: { firstName: true, lastName: true, email: true } } },
@@ -131,7 +131,7 @@ const getReferralProgram: MCPToolDef = {
   requiresVerification: false,
   execute: async (_params, ctx) => {
     const program = await prisma.referralProgram.findUnique({
-      where: { storeId: ctx.storeId },
+      where: { siteId: ctx.siteId },
       include: {
         affiliates: {
           include: {
@@ -247,7 +247,7 @@ const manageAffiliate: MCPToolDef = {
   requiresVerification: false,
   execute: async (params, ctx) => {
     const affiliate = await prisma.affiliate.findFirst({
-      where: { id: params.affiliate_id as string, program: { storeId: ctx.storeId } },
+      where: { id: params.affiliate_id as string, program: { siteId: ctx.siteId } },
       include: { customer: { select: { firstName: true, lastName: true } } },
     });
     if (!affiliate) return { action: "error", message: "Affiliate not found.", errorCode: "NOT_FOUND" };

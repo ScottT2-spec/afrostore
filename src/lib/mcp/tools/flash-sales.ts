@@ -21,7 +21,7 @@ const listFlashSales: MCPToolDef = {
   execute: async (params, ctx) => {
     const now = new Date();
     const sales = await prisma.flashSale.findMany({
-      where: { storeId: ctx.storeId },
+      where: { siteId: ctx.siteId },
       include: {
         products: {
           include: { product: { select: { id: true, name: true, price: true } } },
@@ -103,7 +103,7 @@ Suggest compelling flash sale strategies (e.g., "Weekend Madness: 30% off all sh
     let productNames: string[] = [];
     if (params.product_ids && (params.product_ids as string[]).length > 0) {
       const products = await prisma.product.findMany({
-        where: { id: { in: params.product_ids as string[] }, storeId: ctx.storeId },
+        where: { id: { in: params.product_ids as string[] }, siteId: ctx.siteId },
         select: { id: true, name: true },
       });
       productNames = products.map((p) => p.name);
@@ -150,7 +150,7 @@ const deleteFlashSale: MCPToolDef = {
   requiresVerification: false,
   execute: async (params, ctx) => {
     const sale = await prisma.flashSale.findFirst({
-      where: { id: params.flash_sale_id as string, storeId: ctx.storeId },
+      where: { id: params.flash_sale_id as string, siteId: ctx.siteId },
     });
     if (!sale) return { action: "error", message: "Flash sale not found.", errorCode: "NOT_FOUND" };
 

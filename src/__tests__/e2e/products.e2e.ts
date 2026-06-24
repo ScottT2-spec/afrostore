@@ -23,7 +23,7 @@ export function productTests() {
     });
 
     it('should create a simple product', async () => {
-      const res = await POST(`/api/stores/${store.id}/products`, {
+      const res = await POST(`/api/sites/${store.id}/products`, {
         name: 'Premium Ankara Fabric',
         description: 'Beautiful 6-yard ankara fabric',
         price: 15000,
@@ -40,7 +40,7 @@ export function productTests() {
     });
 
     it('should create product with variants', async () => {
-      const res = await POST(`/api/stores/${store.id}/products`, {
+      const res = await POST(`/api/sites/${store.id}/products`, {
         name: 'T-Shirt',
         price: 5000,
         stock: 100,
@@ -57,7 +57,7 @@ export function productTests() {
     });
 
     it('should create product with images', async () => {
-      const res = await POST(`/api/stores/${store.id}/products`, {
+      const res = await POST(`/api/sites/${store.id}/products`, {
         name: 'Bag with Images',
         price: 25000,
         images: [
@@ -74,7 +74,7 @@ export function productTests() {
     it('should create product with category', async () => {
       const category = await createTestCategory(user.token, store.id, 'Shoes');
 
-      const res = await POST(`/api/stores/${store.id}/products`, {
+      const res = await POST(`/api/sites/${store.id}/products`, {
         name: 'Running Shoes',
         price: 35000,
         categoryId: category.id,
@@ -87,7 +87,7 @@ export function productTests() {
     });
 
     it('should reject product without name', async () => {
-      const res = await POST(`/api/stores/${store.id}/products`, {
+      const res = await POST(`/api/sites/${store.id}/products`, {
         price: 5000,
       }, user.token);
 
@@ -95,7 +95,7 @@ export function productTests() {
     });
 
     it('should reject product with negative price', async () => {
-      const res = await POST(`/api/stores/${store.id}/products`, {
+      const res = await POST(`/api/sites/${store.id}/products`, {
         name: 'Bad Price Product',
         price: -100,
       }, user.token);
@@ -104,12 +104,12 @@ export function productTests() {
     });
 
     it('should auto-generate unique slugs for duplicate names', async () => {
-      await POST(`/api/stores/${store.id}/products`, {
+      await POST(`/api/sites/${store.id}/products`, {
         name: 'Duplicate Name',
         price: 1000,
       }, user.token);
 
-      const res = await POST(`/api/stores/${store.id}/products`, {
+      const res = await POST(`/api/sites/${store.id}/products`, {
         name: 'Duplicate Name',
         price: 2000,
       }, user.token);
@@ -139,7 +139,7 @@ export function productTests() {
     });
 
     it('should list all products', async () => {
-      const res = await GET(`/api/stores/${store.id}/products`, user.token);
+      const res = await GET(`/api/sites/${store.id}/products`, user.token);
       expectSuccess(res);
       const data = res.body.data as any;
       if (!data.products || data.products.length < 5) throw new Error('Expected at least 5 products');
@@ -147,7 +147,7 @@ export function productTests() {
     });
 
     it('should filter products by status', async () => {
-      const res = await GET(`/api/stores/${store.id}/products?status=ACTIVE`, user.token);
+      const res = await GET(`/api/sites/${store.id}/products?status=ACTIVE`, user.token);
       expectSuccess(res);
       const data = res.body.data as any;
       for (const p of data.products) {
@@ -158,14 +158,14 @@ export function productTests() {
     it('should search products by name', async () => {
       await createTestProduct(user.token, store.id, { name: 'Ankara Special Edition' });
 
-      const res = await GET(`/api/stores/${store.id}/products?search=ankara`, user.token);
+      const res = await GET(`/api/sites/${store.id}/products?search=ankara`, user.token);
       expectSuccess(res);
       const data = res.body.data as any;
       if (data.products.length < 1) throw new Error('Search should find ankara product');
     });
 
     it('should paginate products', async () => {
-      const res = await GET(`/api/stores/${store.id}/products?page=1&limit=2`, user.token);
+      const res = await GET(`/api/sites/${store.id}/products?page=1&limit=2`, user.token);
       expectSuccess(res);
       const data = res.body.data as any;
       if (data.products.length > 2) throw new Error('Pagination limit not respected');
@@ -185,7 +185,7 @@ export function productTests() {
     });
 
     it('should update product price', async () => {
-      const res = await PATCH(`/api/stores/${store.id}/products/${product.id}`, {
+      const res = await PATCH(`/api/sites/${store.id}/products/${product.id}`, {
         price: 7500,
       }, user.token);
 
@@ -195,7 +195,7 @@ export function productTests() {
     });
 
     it('should update product status to archived', async () => {
-      const res = await PATCH(`/api/stores/${store.id}/products/${product.id}`, {
+      const res = await PATCH(`/api/sites/${store.id}/products/${product.id}`, {
         status: 'ARCHIVED',
       }, user.token);
 
@@ -205,11 +205,11 @@ export function productTests() {
     it('should delete a product', async () => {
       const tempProduct = await createTestProduct(user.token, store.id, { name: 'To Delete' });
 
-      const res = await DELETE(`/api/stores/${store.id}/products/${tempProduct.id}`, user.token);
+      const res = await DELETE(`/api/sites/${store.id}/products/${tempProduct.id}`, user.token);
       expectSuccess(res);
 
       // Verify it's gone
-      const getRes = await GET(`/api/stores/${store.id}/products/${tempProduct.id}`, user.token);
+      const getRes = await GET(`/api/sites/${store.id}/products/${tempProduct.id}`, user.token);
       expectError(getRes, 404);
     });
   });

@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect, useCallback } from "react";
-import { useStore } from "@/context/StoreContext";
+import { useSite } from "@/context/StoreContext";
 import { api } from "@/lib/api-client";
 import { Star, Loader2, CheckCircle2, XCircle, MessageCircle, Filter } from "lucide-react";
 
@@ -19,7 +19,7 @@ interface Review {
 }
 
 export default function ReviewsPage() {
-  const { currentStore } = useStore();
+  const { currentStore } = useSite();
   const [reviews, setReviews] = useState<Review[]>([]);
   const [loading, setLoading] = useState(true);
   const [filter, setFilter] = useState<"all" | "pending" | "approved">("all");
@@ -27,7 +27,7 @@ export default function ReviewsPage() {
   const fetchReviews = useCallback(async () => {
     if (!currentStore) return;
     setLoading(true);
-    const res = await api.get<any>(`/api/stores/${currentStore.id}/reviews`);
+    const res = await api.get<any>(`/api/sites/${currentStore.id}/reviews`);
     if (res.success && res.data) {
       setReviews(Array.isArray(res.data) ? res.data : res.data.reviews || []);
     }
@@ -38,13 +38,13 @@ export default function ReviewsPage() {
 
   const updateReview = async (id: string, data: Partial<Review>) => {
     if (!currentStore) return;
-    await api.patch(`/api/stores/${currentStore.id}/reviews/${id}`, data);
+    await api.patch(`/api/sites/${currentStore.id}/reviews/${id}`, data);
     setReviews((prev) => prev.map((r) => r.id === id ? { ...r, ...data } : r));
   };
 
   const deleteReview = async (id: string) => {
     if (!currentStore || !confirm("Delete this review?")) return;
-    await api.delete(`/api/stores/${currentStore.id}/reviews/${id}`);
+    await api.delete(`/api/sites/${currentStore.id}/reviews/${id}`);
     setReviews((prev) => prev.filter((r) => r.id !== id));
   };
 

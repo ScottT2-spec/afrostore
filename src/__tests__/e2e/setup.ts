@@ -178,7 +178,7 @@ export async function createTestStore(
 ): Promise<TestStore> {
   const name = overrides.name || `Test Store ${Date.now()}`;
 
-  const res = await POST('/api/stores', {
+  const res = await POST('/api/sites', {
     name,
     description: overrides.description || 'E2E test store',
     businessType: overrides.businessType || 'general',
@@ -204,7 +204,7 @@ export interface TestProduct {
 
 export async function createTestProduct(
   token: string,
-  storeId: string,
+  siteId: string,
   overrides: Partial<{
     name: string;
     description: string;
@@ -215,7 +215,7 @@ export async function createTestProduct(
     categoryId: string;
   }> = {}
 ): Promise<TestProduct> {
-  const res = await POST(`/api/stores/${storeId}/products`, {
+  const res = await POST(`/api/sites/${siteId}/products`, {
     name: overrides.name || `Test Product ${Date.now()}`,
     description: overrides.description || 'A test product',
     price: overrides.price || 5000,
@@ -234,10 +234,10 @@ export async function createTestProduct(
 
 export async function createTestCategory(
   token: string,
-  storeId: string,
+  siteId: string,
   name?: string
 ): Promise<{ id: string; name: string; slug: string }> {
-  const res = await POST(`/api/stores/${storeId}/categories`, {
+  const res = await POST(`/api/sites/${siteId}/categories`, {
     name: name || `Category ${Date.now()}`,
   }, token);
 
@@ -250,7 +250,7 @@ export async function createTestCategory(
 
 export async function createTestCustomer(
   token: string,
-  storeId: string,
+  siteId: string,
   overrides: Partial<{
     email: string;
     firstName: string;
@@ -258,7 +258,7 @@ export async function createTestCustomer(
     phone: string;
   }> = {}
 ): Promise<{ id: string; email: string }> {
-  const res = await POST(`/api/stores/${storeId}/customers`, {
+  const res = await POST(`/api/sites/${siteId}/customers`, {
     email: overrides.email || `customer_${Date.now()}@test.com`,
     firstName: overrides.firstName || 'Test',
     lastName: overrides.lastName || 'Customer',
@@ -274,7 +274,7 @@ export async function createTestCustomer(
 
 export async function createTestOrder(
   token: string,
-  storeId: string,
+  siteId: string,
   productId: string,
   overrides: Partial<{
     email: string;
@@ -282,7 +282,7 @@ export async function createTestOrder(
     paymentMethod: string;
   }> = {}
 ): Promise<{ id: string; orderNumber: string; total: number }> {
-  const res = await POST(`/api/stores/${storeId}/orders`, {
+  const res = await POST(`/api/sites/${siteId}/orders`, {
     email: overrides.email || `buyer_${Date.now()}@test.com`,
     firstName: 'Test',
     lastName: 'Buyer',

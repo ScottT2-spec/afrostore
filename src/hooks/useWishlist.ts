@@ -2,14 +2,14 @@
 
 import { useState, useEffect, useCallback, useMemo } from "react";
 
-function getStorageKey(storeId: string) {
-  return `wishlist_${storeId}`;
+function getStorageKey(siteId: string) {
+  return `wishlist_${siteId}`;
 }
 
-function readWishlist(storeId: string): string[] {
+function readWishlist(siteId: string): string[] {
   if (typeof window === "undefined") return [];
   try {
-    const raw = localStorage.getItem(getStorageKey(storeId));
+    const raw = localStorage.getItem(getStorageKey(siteId));
     if (!raw) return [];
     const parsed = JSON.parse(raw);
     return Array.isArray(parsed) ? parsed : [];
@@ -18,34 +18,34 @@ function readWishlist(storeId: string): string[] {
   }
 }
 
-function writeWishlist(storeId: string, ids: string[]) {
+function writeWishlist(siteId: string, ids: string[]) {
   if (typeof window === "undefined") return;
   try {
-    localStorage.setItem(getStorageKey(storeId), JSON.stringify(ids));
+    localStorage.setItem(getStorageKey(siteId), JSON.stringify(ids));
   } catch {
     // localStorage full or unavailable
   }
 }
 
-export function useWishlist(storeId: string) {
+export function useWishlist(siteId: string) {
   const [wishlist, setWishlist] = useState<string[]>([]);
 
   // Initialize from localStorage after mount
   useEffect(() => {
-    setWishlist(readWishlist(storeId));
-  }, [storeId]);
+    setWishlist(readWishlist(siteId));
+  }, [siteId]);
 
   // Sync across tabs
   useEffect(() => {
-    const key = getStorageKey(storeId);
+    const key = getStorageKey(siteId);
     const handler = (e: StorageEvent) => {
       if (e.key === key) {
-        setWishlist(readWishlist(storeId));
+        setWishlist(readWishlist(siteId));
       }
     };
     window.addEventListener("storage", handler);
     return () => window.removeEventListener("storage", handler);
-  }, [storeId]);
+  }, [siteId]);
 
   const isWishlisted = useCallback(
     (productId: string) => wishlist.includes(productId),
@@ -54,7 +54,7 @@ export function useWishlist(storeId: string) {
 
   const toggleWishlist = useCallback(
     (productId: string): boolean => {
-      const current = readWishlist(storeId);
+      const current = readWishlist(siteId);
       let next: string[];
       let added: boolean;
       if (current.includes(productId)) {
@@ -64,27 +64,27 @@ export function useWishlist(storeId: string) {
         next = [...current, productId];
         added = true;
       }
-      writeWishlist(storeId, next);
+      writeWishlist(siteId, next);
       setWishlist(next);
       return added;
     },
-    [storeId]
+    [siteId]
   );
 
   const removeFromWishlist = useCallback(
     (productId: string) => {
-      const current = readWishlist(storeId);
+      const current = readWishlist(siteId);
       const next = current.filter((id) => id !== productId);
-      writeWishlist(storeId, next);
+      writeWishlist(siteId, next);
       setWishlist(next);
     },
-    [storeId]
+    [siteId]
   );
 
   const clearWishlist = useCallback(() => {
-    writeWishlist(storeId, []);
+    writeWishlist(siteId, []);
     setWishlist([]);
-  }, [storeId]);
+  }, [siteId]);
 
   const wishlistCount = wishlist.length;
 

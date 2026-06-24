@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect, useCallback } from "react";
-import { useStore } from "@/context/StoreContext";
+import { useSite } from "@/context/StoreContext";
 import { api } from "@/lib/api-client";
 import { formatCurrency } from "@/lib/utils";
 import { Tag, Plus, Loader2, Trash2, Pencil, Copy, Check, ToggleLeft, ToggleRight } from "lucide-react";
@@ -23,7 +23,7 @@ interface Coupon {
 }
 
 export default function CouponsPage() {
-  const { currentStore } = useStore();
+  const { currentStore } = useSite();
   const { prefill: aiPrefill, isAIPrefilled, onSaveComplete } = useAIPrefill("coupons");
   const [coupons, setCoupons] = useState<Coupon[]>([]);
   const [loading, setLoading] = useState(true);
@@ -41,7 +41,7 @@ export default function CouponsPage() {
   const fetchCoupons = useCallback(async () => {
     if (!currentStore) return;
     setLoading(true);
-    const res = await api.get<any>(`/api/stores/${currentStore.id}/coupons`);
+    const res = await api.get<any>(`/api/sites/${currentStore.id}/coupons`);
     if (res.success && res.data) {
       setCoupons(Array.isArray(res.data) ? res.data : res.data.coupons || []);
     }
@@ -104,9 +104,9 @@ export default function CouponsPage() {
       isActive: form.isActive,
     };
     if (editingId) {
-      await api.patch(`/api/stores/${currentStore.id}/coupons`, { id: editingId, ...body });
+      await api.patch(`/api/sites/${currentStore.id}/coupons`, { id: editingId, ...body });
     } else {
-      await api.post(`/api/stores/${currentStore.id}/coupons`, body);
+      await api.post(`/api/sites/${currentStore.id}/coupons`, body);
     }
     setSaving(false);
     if (isAIPrefilled) {
@@ -119,13 +119,13 @@ export default function CouponsPage() {
 
   const handleDelete = async (id: string) => {
     if (!currentStore || !confirm("Delete this coupon?")) return;
-    await api.delete(`/api/stores/${currentStore.id}/coupons?id=${id}`);
+    await api.delete(`/api/sites/${currentStore.id}/coupons?id=${id}`);
     setCoupons((prev) => prev.filter((c) => c.id !== id));
   };
 
   const toggleActive = async (c: Coupon) => {
     if (!currentStore) return;
-    await api.patch(`/api/stores/${currentStore.id}/coupons`, { id: c.id, isActive: !c.isActive });
+    await api.patch(`/api/sites/${currentStore.id}/coupons`, { id: c.id, isActive: !c.isActive });
     setCoupons((prev) => prev.map((x) => x.id === c.id ? { ...x, isActive: !x.isActive } : x));
   };
 

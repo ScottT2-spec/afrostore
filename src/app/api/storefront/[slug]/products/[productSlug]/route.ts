@@ -17,7 +17,7 @@ export async function GET(req: NextRequest, { params }: Params) {
 
   try {
     // Resolve store
-    const store = await prisma.store.findFirst({
+    const site = await prisma.site.findFirst({
       where: {
         status: "ACTIVE",
         OR: [
@@ -42,12 +42,12 @@ export async function GET(req: NextRequest, { params }: Params) {
       },
     });
 
-    if (!store) return notFound("Store not found");
+    if (!site) return notFound("Store not found");
 
     // Fetch product
     const product = await prisma.product.findFirst({
       where: {
-        storeId: store.id,
+        siteId: site.id,
         slug: productSlug,
         status: "ACTIVE",
       },
@@ -122,7 +122,7 @@ export async function GET(req: NextRequest, { params }: Params) {
     if (product.categoryId) {
       relatedProducts = await prisma.product.findMany({
         where: {
-          storeId: store.id,
+          siteId: site.id,
           categoryId: product.categoryId,
           status: "ACTIVE",
           id: { not: product.id },
@@ -147,7 +147,7 @@ export async function GET(req: NextRequest, { params }: Params) {
     }
 
     // Clean output — hide cost price, sensitive fields
-    const showStock = store.settings?.showStockCount ?? false;
+    const showStock = site.settings?.showStockCount ?? false;
     const publicProduct = {
       id: product.id,
       name: product.name,
@@ -174,13 +174,13 @@ export async function GET(req: NextRequest, { params }: Params) {
 
     return success({
       store: {
-        id: store.id,
-        name: store.name,
-        slug: store.slug,
-        currency: store.currency,
-        logo: store.logo,
-        whatsapp: store.settings?.whatsappOrdering
-          ? (store.settings?.whatsappNumber || store.socialLinks?.whatsapp)
+        id: site.id,
+        name: site.name,
+        slug: site.slug,
+        currency: site.currency,
+        logo: site.logo,
+        whatsapp: site.settings?.whatsappOrdering
+          ? (site.settings?.whatsappNumber || site.socialLinks?.whatsapp)
           : undefined,
       },
       product: publicProduct,

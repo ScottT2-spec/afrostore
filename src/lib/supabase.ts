@@ -20,7 +20,7 @@ export function getSupabaseAdmin(): SupabaseClient {
 /** @deprecated Use getSupabaseAdmin() instead — kept for backward compat */
 export const supabaseAdmin = new Proxy({} as SupabaseClient, {
   get(_target, prop) {
-    return (getSupabaseAdmin() as Record<string | symbol, unknown>)[prop];
+    return (getSupabaseAdmin() as unknown as Record<string | symbol, unknown>)[prop];
   },
 });
 

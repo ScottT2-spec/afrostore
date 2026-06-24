@@ -37,28 +37,32 @@ export function validationError(errors: unknown) {
   );
 }
 
-// Get authenticated user + verify store ownership/membership
-export async function getStoreContext(req: NextRequest, storeId: string) {
+// Get authenticated user + verify site ownership/membership
+export async function getSiteContext(req: NextRequest, siteId: string) {
   const user = await getAuthUser(req);
-  if (!user) return { user: null, store: null, error: "Unauthorized" };
+  if (!user) return { user: null, site: null, error: "Unauthorized" };
 
-  const store = await prisma.store.findUnique({
-    where: { id: storeId },
-    include: { members: true },
+  const site = await prisma.site.findUnique({
+    where: { id: siteId },
+    include: { members: true, workspace: true },
   });
 
-  if (!store) return { user, store: null, error: "Store not found" };
+  if (!site) return { user, site: null, error: "Site not found" };
 
-  const isOwner = store.ownerId === user.id;
-  const isMember = store.members.some((m) => m.userId === user.id);
+  // Check access: site owner (workspace owner), site member, workspace member, or platform admin
+  const isWorkspaceOwner = site.workspace.ownerId === user.id;
+  const isSiteMember = site.members.some((m) => m.userId === user.id);
   const isAdmin = user.role === "ADMIN" || user.role === "SUPER_ADMIN";
 
-  if (!isOwner && !isMember && !isAdmin) {
-    return { user, store: null, error: "Forbidden" };
+  if (!isWorkspaceOwner && !isSiteMember && !isAdmin) {
+    return { user, site: null, error: "Forbidden" };
   }
 
-  return { user, store, error: null };
+  return { user, site, error: null };
 }
+
+// Backward compat alias
+export const getStoreContext = getSiteContext;
 
 /**
  * Generate a collision-resistant order number.
@@ -85,7 +89,7 @@ export function generateSubdomain(name: string): string {
 
 export async function ensureUniqueSlug(
   name: string,
-  storeId: string,
+  siteId: string,
   model: "product" | "category" | "page"
 ): Promise<string> {
   let slug = slugify(name);
@@ -97,15 +101,15 @@ export async function ensureUniqueSlug(
 
     if (model === "product") {
       exists = await prisma.product.findUnique({
-        where: { storeId_slug: { storeId, slug: candidate } },
+        where: { siteId_slug: { siteId, slug: candidate } },
       });
     } else if (model === "category") {
       exists = await prisma.category.findUnique({
-        where: { storeId_slug: { storeId, slug: candidate } },
+        where: { siteId_slug: { siteId, slug: candidate } },
       });
     } else {
       exists = await prisma.page.findUnique({
-        where: { storeId_slug: { storeId, slug: candidate } },
+        where: { siteId_slug: { siteId, slug: candidate } },
       });
     }
 
@@ -116,7 +120,7 @@ export async function ensureUniqueSlug(
 
 // Audit logging
 export async function logAudit(params: {
-  storeId: string;
+  siteId: string;
   userId?: string;
   action: string;
   entity: string;
@@ -127,7 +131,7 @@ export async function logAudit(params: {
 }) {
   await prisma.auditLog.create({
     data: {
-      storeId: params.storeId,
+      siteId: params.siteId,
       userId: params.userId,
       action: params.action,
       entity: params.entity,

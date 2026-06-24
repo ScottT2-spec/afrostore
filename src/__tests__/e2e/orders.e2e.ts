@@ -30,7 +30,7 @@ export function orderTests() {
     });
 
     it('should create an order with valid data', async () => {
-      const res = await POST(`/api/stores/${store.id}/orders`, {
+      const res = await POST(`/api/sites/${store.id}/orders`, {
         email: 'buyer@test.com',
         firstName: 'Amara',
         lastName: 'Okafor',
@@ -52,7 +52,7 @@ export function orderTests() {
     });
 
     it('should reject order with no items', async () => {
-      const res = await POST(`/api/stores/${store.id}/orders`, {
+      const res = await POST(`/api/sites/${store.id}/orders`, {
         email: 'buyer@test.com',
         firstName: 'Test',
         lastName: 'Buyer',
@@ -70,7 +70,7 @@ export function orderTests() {
     });
 
     it('should reject order with invalid product ID', async () => {
-      const res = await POST(`/api/stores/${store.id}/orders`, {
+      const res = await POST(`/api/sites/${store.id}/orders`, {
         email: 'buyer@test.com',
         firstName: 'Test',
         lastName: 'Buyer',
@@ -92,7 +92,7 @@ export function orderTests() {
     });
 
     it('should create order with delivery instructions', async () => {
-      const res = await POST(`/api/stores/${store.id}/orders`, {
+      const res = await POST(`/api/sites/${store.id}/orders`, {
         email: 'buyer2@test.com',
         firstName: 'Kofi',
         lastName: 'Mensah',
@@ -129,7 +129,7 @@ export function orderTests() {
     });
 
     it('should list orders', async () => {
-      const res = await GET(`/api/stores/${store.id}/orders`, user.token);
+      const res = await GET(`/api/sites/${store.id}/orders`, user.token);
       expectSuccess(res);
       const data = res.body.data as any;
       const orders = Array.isArray(data) ? data : data.orders;
@@ -139,7 +139,7 @@ export function orderTests() {
     it('should get a single order by ID', async () => {
       const order = await createTestOrder(user.token, store.id, product.id);
 
-      const res = await GET(`/api/stores/${store.id}/orders/${order.id}`, user.token);
+      const res = await GET(`/api/sites/${store.id}/orders/${order.id}`, user.token);
       expectSuccess(res);
       const data = res.body.data as any;
       if (data.id !== order.id) throw new Error('Order ID mismatch');
@@ -160,7 +160,7 @@ export function orderTests() {
     it('should update order status: PENDING → CONFIRMED', async () => {
       const order = await createTestOrder(user.token, store.id, product.id);
 
-      const res = await PATCH(`/api/stores/${store.id}/orders/${order.id}`, {
+      const res = await PATCH(`/api/sites/${store.id}/orders/${order.id}`, {
         status: 'CONFIRMED',
         note: 'Payment verified via bank transfer',
       }, user.token);
@@ -172,12 +172,12 @@ export function orderTests() {
       const order = await createTestOrder(user.token, store.id, product.id);
 
       // Confirm first
-      await PATCH(`/api/stores/${store.id}/orders/${order.id}`, {
+      await PATCH(`/api/sites/${store.id}/orders/${order.id}`, {
         status: 'CONFIRMED',
       }, user.token);
 
       // Then ship
-      const res = await PATCH(`/api/stores/${store.id}/orders/${order.id}`, {
+      const res = await PATCH(`/api/sites/${store.id}/orders/${order.id}`, {
         status: 'SHIPPED',
         trackingNumber: 'GIG-12345678',
       }, user.token);
@@ -188,7 +188,7 @@ export function orderTests() {
     it('should cancel an order', async () => {
       const order = await createTestOrder(user.token, store.id, product.id);
 
-      const res = await PATCH(`/api/stores/${store.id}/orders/${order.id}`, {
+      const res = await PATCH(`/api/sites/${store.id}/orders/${order.id}`, {
         status: 'CANCELLED',
         note: 'Customer requested cancellation',
       }, user.token);

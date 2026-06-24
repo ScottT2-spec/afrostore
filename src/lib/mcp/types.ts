@@ -134,7 +134,7 @@ export type MCPCategory =
  */
 export interface MCPContext {
   /** The store this request is for */
-  storeId: string;
+  siteId: string;
 
   /** The authenticated user making the request */
   userId: string;

@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useCallback } from "react";
 import DashboardHeader from "@/components/dashboard/DashboardHeader";
-import { useStore } from "@/context/StoreContext";
+import { useSite } from "@/context/StoreContext";
 import { api } from "@/lib/api-client";
 import {
   Search, Loader2, Puzzle, CheckCircle2, Settings, X, ToggleLeft, ToggleRight,
@@ -55,7 +55,7 @@ const categoryLabels: Record<string, string> = {
 };
 
 export default function PluginsPage() {
-  const { currentStore } = useStore();
+  const { currentStore } = useSite();
   const { prefillData, clearPrefill, isFromAI } = useAIPrefill("plugin");
   const [plugins, setPlugins] = useState<Plugin[]>([]);
   const [loading, setLoading] = useState(true);
@@ -73,7 +73,7 @@ export default function PluginsPage() {
     if (!currentStore) return;
     const params = new URLSearchParams();
     if (search) params.set("search", search);
-    const res = await api.get<Plugin[]>(`/api/stores/${currentStore.id}/plugins?${params}`);
+    const res = await api.get<Plugin[]>(`/api/sites/${currentStore.id}/plugins?${params}`);
     if (res.success && res.data) setPlugins(Array.isArray(res.data) ? res.data : []);
     setLoading(false);
   }, [currentStore, search]);
@@ -83,7 +83,7 @@ export default function PluginsPage() {
   const installPlugin = async (pluginId: string) => {
     if (!currentStore) return;
     setInstalling(pluginId);
-    await api.post(`/api/stores/${currentStore.id}/plugins`, { pluginId, action: "install" });
+    await api.post(`/api/sites/${currentStore.id}/plugins`, { pluginId, action: "install" });
     await fetchPlugins();
     setInstalling(null);
   };
@@ -91,7 +91,7 @@ export default function PluginsPage() {
   const togglePlugin = async (pluginId: string) => {
     if (!currentStore) return;
     setInstalling(pluginId);
-    await api.post(`/api/stores/${currentStore.id}/plugins`, { pluginId, action: "toggle" });
+    await api.post(`/api/sites/${currentStore.id}/plugins`, { pluginId, action: "toggle" });
     await fetchPlugins();
     setInstalling(null);
   };
@@ -99,7 +99,7 @@ export default function PluginsPage() {
   const uninstallPlugin = async (pluginId: string) => {
     if (!currentStore) return;
     setInstalling(pluginId);
-    await api.post(`/api/stores/${currentStore.id}/plugins`, { pluginId, action: "uninstall" });
+    await api.post(`/api/sites/${currentStore.id}/plugins`, { pluginId, action: "uninstall" });
     await fetchPlugins();
     setInstalling(null);
   };
@@ -108,7 +108,7 @@ export default function PluginsPage() {
     if (!currentStore) return;
     setSettingsLoading(true);
     setSettingsPlugin(null);
-    const res = await api.get<PluginSettings>(`/api/stores/${currentStore.id}/plugins/${plugin.id}/settings`);
+    const res = await api.get<PluginSettings>(`/api/sites/${currentStore.id}/plugins/${plugin.id}/settings`);
     if (res.success && res.data) {
       setSettingsPlugin(res.data);
       setSettingsValues(res.data.settings || {});
@@ -119,12 +119,12 @@ export default function PluginsPage() {
   const saveSettings = async () => {
     if (!currentStore || !settingsPlugin) return;
     setSaving(true);
-    await api.patch(`/api/stores/${currentStore.id}/plugins/${settingsPlugin.pluginId}/settings`, {
+    await api.patch(`/api/sites/${currentStore.id}/plugins/${settingsPlugin.pluginId}/settings`, {
       settings: settingsValues,
     });
     setSaving(false);
     // Refresh
-    const res = await api.get<PluginSettings>(`/api/stores/${currentStore.id}/plugins/${settingsPlugin.pluginId}/settings`);
+    const res = await api.get<PluginSettings>(`/api/sites/${currentStore.id}/plugins/${settingsPlugin.pluginId}/settings`);
     if (res.success && res.data) {
       setSettingsPlugin(res.data);
       setSettingsValues(res.data.settings || {});
@@ -134,7 +134,7 @@ export default function PluginsPage() {
   const toggleEnabled = async () => {
     if (!currentStore || !settingsPlugin) return;
     setSaving(true);
-    await api.patch(`/api/stores/${currentStore.id}/plugins/${settingsPlugin.pluginId}/settings`, {
+    await api.patch(`/api/sites/${currentStore.id}/plugins/${settingsPlugin.pluginId}/settings`, {
       isEnabled: !settingsPlugin.isEnabled,
     });
     setSaving(false);

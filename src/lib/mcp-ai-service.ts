@@ -162,7 +162,7 @@ ${storeContext}`;
 // ─── Main Chat Function ─────────────────────────────────────
 
 export interface MCPChatRequest {
-  storeId: string;
+  siteId: string;
   userId: string;
   message: string;
   images?: string[];
@@ -183,15 +183,10 @@ export async function mcpChat(req: MCPChatRequest): Promise<MCPAIResponse> {
   const ai = getAI();
 
   // 1. Fetch store context
-  const store = await prisma.store.findUnique({
-    where: { id: req.storeId },
-    select: {
-      name: true,
-      slug: true,
-      currency: true,
-      country: true,
-      businessType: true,
-      plan: true,
+  const store = await prisma.site.findUnique({
+    where: { id: req.siteId },
+    include: {
+      workspace: { select: { plan: true } },
       _count: { select: { products: true, orders: true, customers: true } },
     },
   });
@@ -203,7 +198,7 @@ Slug: ${store.slug}
 Business type: ${store.businessType || "general"}
 Country: ${store.country || "NG"}
 Currency: ${store.currency || "NGN"}
-Plan: ${store.plan}
+Plan: ${store.workspace.plan}
 Products: ${store._count.products}
 Orders: ${store._count.orders}
 Customers: ${store._count.customers}`;
@@ -212,7 +207,7 @@ Customers: ${store._count.customers}`;
   let ragInfo: MCPAIResponse["ragContext"];
   try {
     const rag = getRAG();
-    const context = await rag.retrieveContext(req.message, req.storeId, {
+    const context = await rag.retrieveContext(req.message, req.siteId, {
       documentTypes: ["product", "order", "customer", "analytics_summary", "page", "category"],
       limit: 10,
       maxTokens: 2000,
@@ -230,7 +225,7 @@ Customers: ${store._count.customers}`;
 
   // 3. Build MCP context for tool execution
   const mcpContext: MCPContext = {
-    storeId: req.storeId,
+    siteId: req.siteId,
     userId: req.userId,
     currency: store.currency || "NGN",
     country: store.country || "NG",

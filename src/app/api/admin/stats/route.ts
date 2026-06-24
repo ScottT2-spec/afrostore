@@ -10,17 +10,17 @@ export async function GET(req: NextRequest) {
 
     const [
       totalUsers,
-      totalStores,
+      totalSites,
       totalOrders,
-      activeStores,
+      activeSites,
       totalRevenue,
       recentSignups,
-      recentStores,
+      recentSites,
     ] = await Promise.all([
       prisma.user.count(),
-      prisma.store.count(),
+      prisma.site.count(),
       prisma.order.count(),
-      prisma.store.count({ where: { status: "ACTIVE" } }),
+      prisma.site.count({ where: { status: "ACTIVE" } }),
       prisma.order.aggregate({
         _sum: { total: true },
         where: { paymentStatus: "PAID" },
@@ -37,14 +37,15 @@ export async function GET(req: NextRequest) {
           createdAt: true,
         },
       }),
-      prisma.store.findMany({
+      prisma.site.findMany({
         orderBy: { createdAt: "desc" },
         take: 5,
         include: {
-          owner: {
-            select: {
-              firstName: true,
-              lastName: true,
+          workspace: {
+            include: {
+              owner: {
+                select: { firstName: true, lastName: true },
+              },
             },
           },
         },
@@ -53,12 +54,12 @@ export async function GET(req: NextRequest) {
 
     const stats = {
       totalUsers,
-      totalStores,
+      totalSites,
       totalOrders,
-      activeStores,
+      activeSites,
       totalRevenue: totalRevenue._sum.total || 0,
       recentSignups,
-      recentStores,
+      recentSites,
     };
 
     return success(stats);

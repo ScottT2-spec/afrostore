@@ -32,7 +32,7 @@ export async function GET(req: NextRequest) {
         take: limit,
         orderBy: { createdAt: "desc" },
         include: {
-          stores: {
+          siteMembers: {
             select: { id: true },
           },
         },
@@ -42,8 +42,8 @@ export async function GET(req: NextRequest) {
 
     const usersWithStoreCount = users.map((user) => ({
       ...user,
-      storesCount: user.stores.length,
-      stores: undefined, // Remove the stores array, keep only count
+      storesCount: user.siteMembers.length,
+      siteMembers: undefined,
     }));
 
     return success({

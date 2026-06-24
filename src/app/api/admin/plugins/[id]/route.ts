@@ -26,7 +26,7 @@ export async function DELETE(req: NextRequest, { params }: { params: Promise<{ i
 
     const { id } = await params;
 
-    const inUse = await prisma.storePlugin.count({ where: { pluginId: id } });
+    const inUse = await prisma.sitePlugin.count({ where: { pluginId: id } });
     if (inUse > 0) return error(`Cannot delete: ${inUse} store(s) are using this plugin`, 400);
 
     await prisma.plugin.delete({ where: { id } });

@@ -322,7 +322,7 @@ export class PaymentFailover {
       reference: request.reference,
       callbackUrl: request.callbackUrl,
       metadata: {
-        storeId: request.storeId,
+        siteId: request.siteId,
         orderId: request.orderId,
         ...request.metadata,
       },
@@ -349,7 +349,7 @@ export class PaymentFailover {
       redirectUrl: request.redirectUrl,
       customerName: request.customerName,
       meta: {
-        storeId: request.storeId,
+        siteId: request.siteId,
         orderId: request.orderId,
         ...request.metadata,
       },
