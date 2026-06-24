@@ -53,6 +53,7 @@ const ecommerceNav: NavGroup[] = [
       { name: "Referrals", href: "/dashboard/referrals", icon: Link2 },
       { name: "Loyalty", href: "/dashboard/loyalty", icon: Crown },
       { name: "Abandoned Carts", href: "/dashboard/abandoned-carts", icon: RotateCcw },
+      { name: "Campaigns", href: "/dashboard/marketing", icon: Megaphone },
     ],
   },
   {
@@ -130,9 +131,7 @@ const landingPageNav: NavGroup[] = [
   {
     label: "Marketing",
     items: [
-      { name: "Email Campaigns", href: "/dashboard/email-campaigns", icon: Mail },
-      { name: "SMS Campaigns", href: "/dashboard/sms-campaigns", icon: Smartphone },
-      { name: "WhatsApp", href: "/dashboard/whatsapp-campaigns", icon: MessageSquare },
+      { name: "Marketing", href: "/dashboard/marketing", icon: Megaphone },
       { name: "Automations", href: "/dashboard/automations", icon: Zap },
     ],
   },

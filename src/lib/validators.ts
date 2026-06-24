@@ -253,6 +253,63 @@ export const moderateReviewSchema = z.object({
   isVerified: z.boolean().optional(),
 });
 
+// ─── EMAIL CAMPAIGNS ────────────────────────────────────────
+
+export const createEmailCampaignSchema = z.object({
+  name: z.string().min(1, "Campaign name is required").max(200),
+  subject: z.string().min(1, "Subject is required").max(500),
+  fromName: z.string().max(200).optional(),
+  fromEmail: z.string().email().optional(),
+  content: z.any().optional(),
+  contentHtml: z.string().optional(),
+  type: z.enum(["BROADCAST", "AUTOMATED", "TRANSACTIONAL"]).default("BROADCAST"),
+  scheduledAt: z.string().datetime().optional().nullable(),
+});
+
+export const updateEmailCampaignSchema = z.object({
+  name: z.string().min(1).max(200).optional(),
+  subject: z.string().min(1).max(500).optional(),
+  fromName: z.string().max(200).optional().nullable(),
+  fromEmail: z.string().email().optional().nullable(),
+  content: z.any().optional(),
+  contentHtml: z.string().optional().nullable(),
+  status: z.enum(["DRAFT", "SCHEDULED", "SENDING", "SENT", "PAUSED", "CANCELLED"]).optional(),
+  type: z.enum(["BROADCAST", "AUTOMATED", "TRANSACTIONAL"]).optional(),
+  scheduledAt: z.string().datetime().optional().nullable(),
+});
+
+// ─── SMS CAMPAIGNS ──────────────────────────────────────────
+
+export const createSmsCampaignSchema = z.object({
+  name: z.string().min(1, "Campaign name is required").max(200),
+  message: z.string().min(1, "Message is required").max(1600),
+  scheduledAt: z.string().datetime().optional().nullable(),
+});
+
+export const updateSmsCampaignSchema = z.object({
+  name: z.string().min(1).max(200).optional(),
+  message: z.string().min(1).max(1600).optional(),
+  status: z.enum(["DRAFT", "SCHEDULED", "SENDING", "SENT", "PAUSED", "CANCELLED"]).optional(),
+  scheduledAt: z.string().datetime().optional().nullable(),
+});
+
+// ─── WHATSAPP CAMPAIGNS ─────────────────────────────────────
+
+export const createWhatsAppCampaignSchema = z.object({
+  name: z.string().min(1, "Campaign name is required").max(200),
+  message: z.string().min(1, "Message is required").max(4096),
+  mediaUrl: z.string().url().optional().nullable(),
+  scheduledAt: z.string().datetime().optional().nullable(),
+});
+
+export const updateWhatsAppCampaignSchema = z.object({
+  name: z.string().min(1).max(200).optional(),
+  message: z.string().min(1).max(4096).optional(),
+  mediaUrl: z.string().url().optional().nullable(),
+  status: z.enum(["DRAFT", "SCHEDULED", "SENDING", "SENT", "PAUSED", "CANCELLED"]).optional(),
+  scheduledAt: z.string().datetime().optional().nullable(),
+});
+
 // ─── NOTIFICATIONS ──────────────────────────────────────────
 
 export const createSiteNotificationSchema = z.object({
