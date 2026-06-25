@@ -336,9 +336,9 @@ export default function DashboardHeader({
                 <div className="border-t border-surface-100 py-1.5">
                   <button
                     onClick={handleLogout}
-                    className="flex items-center gap-3 px-4 py-2.5 text-sm text-red-600 hover:bg-red-50 transition-colors w-full"
+                    className="flex items-center gap-3 px-4 py-2.5 text-sm text-surface-600 hover:bg-surface-50 hover:text-surface-900 transition-colors w-full"
                   >
-                    <LogOut className="h-4 w-4" />
+                    <LogOut className="h-4 w-4 text-surface-400" />
                     Log Out
                   </button>
                 </div>

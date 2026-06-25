@@ -346,7 +346,7 @@ export default function Sidebar({ onNavigate }: { onNavigate?: () => void } = {}
           <button
             onClick={logout}
             className={cn(
-              "flex items-center gap-2 text-sm text-gray-500 hover:text-red-500 transition-colors",
+              "flex items-center gap-2 text-sm text-gray-500 hover:text-gray-900 transition-colors",
               collapsed ? "mx-auto" : "w-full"
             )}
           >
