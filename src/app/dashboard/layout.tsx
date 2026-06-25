@@ -60,10 +60,7 @@ export default function DashboardLayout({
 
         {/* Mobile top bar — minimal, just logo */}
         <div className="sticky top-0 z-30 flex h-12 items-center gap-2 border-b border-surface-200 bg-white px-4 lg:hidden">
-          <img src="/prokip-logo.png" alt="Prokip" className="h-7 w-7 object-contain" />
-          <span className="font-display text-sm font-bold text-surface-900">
-            Afro<span className="text-brand-600">Store</span>
-          </span>
+          <img src="/prokip-logo.png" alt="Prokip" className="h-10 w-10 object-contain" />
         </div>
 
         {/* Mobile overlay */}

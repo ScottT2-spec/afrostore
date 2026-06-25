@@ -56,13 +56,8 @@ export default function AdminSidebar({
     >
       {/* Logo */}
       <div className="flex h-16 items-center justify-between px-4 border-b border-surface-100">
-        <Link href="/admin" className="flex items-center gap-2.5 min-w-0">
-          <img src="/prokip-logo.png" alt="Prokip" className="h-9 w-9 flex-shrink-0 object-contain" />
-          {!collapsed && (
-            <span className="font-display text-lg font-bold text-surface-900 truncate">
-              Admin <span className="text-accent-600">Panel</span>
-            </span>
-          )}
+        <Link href="/admin" className="flex items-center min-w-0">
+          <img src="/prokip-logo.png" alt="Prokip" className={`${collapsed ? "h-10 w-10" : "h-12 w-12"} flex-shrink-0 object-contain`} />
         </Link>
         <button
           onClick={() => setCollapsed(!collapsed)}

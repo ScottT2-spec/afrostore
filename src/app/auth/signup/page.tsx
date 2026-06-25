@@ -60,11 +60,8 @@ export default function SignupPage() {
           <div className="absolute bottom-1/4 right-1/4 h-[300px] w-[300px] rounded-full bg-accent-500/15 blur-[100px]" />
         </div>
         <div className="relative flex flex-col justify-center px-16">
-          <Link href="/" className="flex items-center gap-2.5 mb-12">
-            <img src="/prokip-logo.png" alt="Prokip" className="h-10 w-10 object-contain brightness-0 invert" />
-            <span className="font-display text-2xl font-bold text-white">
-              Afro<span className="text-brand-300">Store</span>
-            </span>
+          <Link href="/" className="flex items-center mb-12">
+            <img src="/prokip-logo.png" alt="Prokip" className="h-16 w-16 object-contain brightness-0 invert" />
           </Link>
 
           <h1 className="font-display text-4xl font-extrabold text-white leading-tight mb-4">
@@ -99,13 +96,8 @@ export default function SignupPage() {
       <div className="flex-1 flex items-center justify-center px-4 sm:px-8 py-12">
         <div className="w-full max-w-md">
           <div className="lg:hidden mb-8">
-            <Link href="/" className="flex items-center gap-2.5">
-              <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-brand-600">
-                <img src="/prokip-logo.png" alt="Prokip" className="h-5 w-5 object-contain" />
-              </div>
-              <span className="font-display text-xl font-bold text-surface-900">
-                Afro<span className="text-brand-600">Store</span>
-              </span>
+            <Link href="/" className="flex items-center">
+              <img src="/prokip-logo.png" alt="Prokip" className="h-14 w-14 object-contain" />
             </Link>
           </div>
 

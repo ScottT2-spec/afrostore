@@ -243,13 +243,8 @@ export default function Sidebar({ onNavigate }: { onNavigate?: () => void } = {}
     >
       {/* Logo */}
       <div className="flex h-16 items-center justify-between px-4 border-b border-gray-100">
-        <Link href="/dashboard/workspaces" className="flex items-center gap-2.5 min-w-0">
-          <img src="/prokip-logo.png" alt="Prokip" className="h-9 w-9 flex-shrink-0 object-contain" />
-          {!collapsed && (
-            <span className="font-bold text-lg text-gray-900 truncate">
-              Prokip<span className="text-emerald-600">Sites</span>
-            </span>
-          )}
+        <Link href="/dashboard/workspaces" className="flex items-center min-w-0">
+          <img src="/prokip-logo.png" alt="Prokip" className={`${collapsed ? "h-10 w-10" : "h-12 w-12"} flex-shrink-0 object-contain`} />
         </Link>
         <button
           onClick={() => setCollapsed(!collapsed)}

@@ -56,11 +56,8 @@ export default function LoginPage() {
     <div className="min-h-screen flex items-center justify-center bg-surface-50 px-4 py-12">
       <div className="w-full max-w-md">
         <div className="text-center mb-8">
-          <Link href="/" className="inline-flex items-center gap-2.5 mb-6">
-            <img src="/prokip-logo.png" alt="Prokip" className="h-10 w-10 object-contain" />
-            <span className="font-display text-2xl font-bold text-surface-900">
-              Afro<span className="text-brand-600">Store</span>
-            </span>
+          <Link href="/" className="inline-flex items-center mb-6">
+            <img src="/prokip-logo.png" alt="Prokip" className="h-14 w-14 object-contain" />
           </Link>
           <h1 className="font-display text-2xl font-bold text-surface-900">
             Welcome back
