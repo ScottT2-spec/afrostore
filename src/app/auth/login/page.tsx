@@ -57,7 +57,7 @@ export default function LoginPage() {
       <div className="w-full max-w-md">
         <div className="text-center mb-8">
           <Link href="/" className="inline-flex items-center mb-6">
-            <img src="/prokip-logo.png" alt="Prokip" className="h-20 w-20 object-contain" />
+            <img src="/prokip-logo.png" alt="Prokip" className="h-28 w-28 object-contain" />
           </Link>
           <h1 className="font-display text-2xl font-bold text-surface-900">
             Welcome back

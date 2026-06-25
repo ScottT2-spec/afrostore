@@ -61,7 +61,7 @@ export default function SignupPage() {
         </div>
         <div className="relative flex flex-col justify-center px-16">
           <Link href="/" className="flex items-center mb-12">
-            <img src="/prokip-logo.png" alt="Prokip" className="h-24 w-24 object-contain brightness-0 invert" />
+            <img src="/prokip-logo.png" alt="Prokip" className="h-36 w-36 object-contain brightness-0 invert" />
           </Link>
 
           <h1 className="font-display text-4xl font-extrabold text-white leading-tight mb-4">
@@ -97,7 +97,7 @@ export default function SignupPage() {
         <div className="w-full max-w-md">
           <div className="lg:hidden mb-8">
             <Link href="/" className="flex items-center">
-              <img src="/prokip-logo.png" alt="Prokip" className="h-20 w-20 object-contain" />
+              <img src="/prokip-logo.png" alt="Prokip" className="h-28 w-28 object-contain" />
             </Link>
           </div>
 
