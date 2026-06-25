@@ -80,7 +80,7 @@ export default function LoginPage() {
 
             <div>
               <label className="block text-sm font-medium text-surface-700 mb-1.5">
-                Email address
+                EMAIL ADDRESS
               </label>
               <div className="relative">
                 <Mail className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-surface-400" />
@@ -98,7 +98,7 @@ export default function LoginPage() {
             <div>
               <div className="flex items-center justify-between mb-1.5">
                 <label className="block text-sm font-medium text-surface-700">
-                  Password
+                  PASSWORD
                 </label>
                 <Link
                   href="#"
