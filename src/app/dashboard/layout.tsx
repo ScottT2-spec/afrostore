@@ -62,7 +62,7 @@ export default function DashboardLayout({
         <div className="sticky top-0 z-30 flex h-12 items-center gap-2 border-b border-surface-200 bg-white px-4 lg:hidden">
           <img src="/prokip-logo.png" alt="Prokip" className="h-7 w-7 object-contain" />
           <span className="font-display text-sm font-bold text-surface-900">
-            Prokip<span className="text-emerald-600">Sites</span>
+            Afro<span className="text-brand-600">Store</span>
           </span>
         </div>
 

@@ -101,7 +101,7 @@ export default function TeamPage() {
       {showInvite && (
         <div className="rounded-2xl border border-surface-200 bg-white p-5">
           <h3 className="text-sm font-bold text-surface-900 mb-3">Add Team Member</h3>
-          <p className="text-xs text-surface-500 mb-3">The person must already have a ProkipSites account.</p>
+          <p className="text-xs text-surface-500 mb-3">The person must already have an AfroStore account.</p>
           {error && <div className="rounded-xl bg-accent-50 border border-accent-200 px-4 py-3 text-sm text-accent-700 mb-3">{error}</div>}
           <div className="space-y-3">
             {/* Email input — full width */}

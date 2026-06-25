@@ -23,9 +23,9 @@ interface PlatformSettings {
 }
 
 const defaults: PlatformSettings = {
-  siteName: "ProkipSites",
-  siteUrl: "https://prokip.site",
-  supportEmail: "support@prokip.site",
+  siteName: "AfroStore",
+  siteUrl: "https://afrostore.app",
+  supportEmail: "support@afrostore.app",
   defaultCurrency: "NGN",
   defaultCountry: "NG",
   maintenanceMode: false,
@@ -38,7 +38,7 @@ const defaults: PlatformSettings = {
   smtpUser: "",
   smtpPass: "",
   sendFromEmail: "",
-  sendFromName: "ProkipSites",
+  sendFromName: "AfroStore",
 };
 
 function Toggle({ value, onChange, label }: { value: boolean; onChange: (v: boolean) => void; label: string }) {
@@ -192,7 +192,7 @@ export default function AdminSettingsPage() {
               </div>
               <div>
                 <label className="block text-sm font-medium text-surface-700 mb-1.5">Send From Email</label>
-                <input value={settings.sendFromEmail} onChange={(e) => update("sendFromEmail", e.target.value)} placeholder="noreply@prokip.site" className="w-full rounded-xl border border-surface-200 px-4 py-2.5 text-sm focus:outline-none focus:border-brand-500" />
+                <input value={settings.sendFromEmail} onChange={(e) => update("sendFromEmail", e.target.value)} placeholder="noreply@afrostore.app" className="w-full rounded-xl border border-surface-200 px-4 py-2.5 text-sm focus:outline-none focus:border-brand-500" />
               </div>
               <div>
                 <label className="block text-sm font-medium text-surface-700 mb-1.5">Send From Name</label>

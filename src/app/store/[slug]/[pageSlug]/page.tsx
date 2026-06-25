@@ -120,7 +120,7 @@ export default function StorefrontPage() {
 
       {/* Footer */}
       <footer className="border-t border-gray-100 py-8 text-center text-xs text-gray-400">
-        <p>&copy; {new Date().getFullYear()} {store.name}. Powered by <span className="font-semibold text-indigo-500">ProkipSites</span></p>
+        <p>&copy; {new Date().getFullYear()} {store.name}. Powered by <span className="font-semibold text-indigo-500">AfroStore</span></p>
       </footer>
     </div>
   );

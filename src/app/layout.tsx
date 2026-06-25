@@ -3,7 +3,7 @@ import "./globals.css";
 import { AuthProvider } from "@/context/AuthContext";
 
 export const metadata: Metadata = {
-  title: "ProkipSites — AI-Powered Website AfroStore — AI-Powered Ecommerce Builder for Africa Store Builder for Africa",
+  title: "AfroStore — AI-Powered Ecommerce Builder for Africa",
   description:
     "Launch your online store in 5 minutes. AI-powered ecommerce, landing pages, and website builder designed for African businesses. Accept Monnify, Paystack, and Flutterwave payments.",
   keywords: [
@@ -18,7 +18,7 @@ export const metadata: Metadata = {
     "Monnify",
   ],
   openGraph: {
-    title: "ProkipSites — From Idea to Selling in 5 Minutes",
+    title: "AfroStore — From Idea to Selling in 5 Minutes",
     description:
       "The simplest, fastest, most conversion-focused ecommerce platform for African businesses.",
     type: "website",

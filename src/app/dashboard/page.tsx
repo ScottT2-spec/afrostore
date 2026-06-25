@@ -102,7 +102,7 @@ export default function DashboardPage() {
   if (!currentStore) {
     return (
       <>
-        <DashboardHeader title="Dashboard" subtitle="Welcome to ProkipSites!" />
+        <DashboardHeader title="Dashboard" subtitle="Welcome to AfroStore!" />
         <EmptyDashboard />
       </>
     );
@@ -165,7 +165,7 @@ export default function DashboardPage() {
             </div>
             <div>
               <p className="text-sm font-semibold text-surface-900">Your store is live!</p>
-              <p className="text-xs text-surface-500">{currentStore.subdomain}.prokip.site</p>
+              <p className="text-xs text-surface-500">{currentStore.subdomain}.afrostore.com</p>
             </div>
           </div>
           <Link
@@ -315,7 +315,7 @@ export default function DashboardPage() {
                         You have products but no orders yet. Share your store link!
                       </p>
                       <p className="mt-1 text-[10px] text-surface-400">
-                        {currentStore.subdomain}.prokip.site
+                        {currentStore.subdomain}.afrostore.com
                       </p>
                     </div>
                   </div>

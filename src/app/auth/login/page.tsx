@@ -59,7 +59,7 @@ export default function LoginPage() {
           <Link href="/" className="inline-flex items-center gap-2.5 mb-6">
             <img src="/prokip-logo.png" alt="Prokip" className="h-10 w-10 object-contain" />
             <span className="font-display text-2xl font-bold text-surface-900">
-              Prokip<span className="text-emerald-600">Sites</span>
+              Afro<span className="text-brand-600">Store</span>
             </span>
           </Link>
           <h1 className="font-display text-2xl font-bold text-surface-900">

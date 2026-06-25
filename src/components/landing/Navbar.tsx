@@ -38,7 +38,7 @@ export default function Navbar() {
           <Link href="/" className="flex items-center gap-2.5">
             <img src="/prokip-logo.png" alt="Prokip" className="h-9 w-9 object-contain" />
             <span className="font-display text-xl font-bold text-surface-900">
-              Prokip<span className="text-emerald-600">Sites</span>
+              Afro<span className="text-brand-600">Store</span>
             </span>
           </Link>
 

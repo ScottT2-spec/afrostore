@@ -73,7 +73,7 @@ export async function initializeFlutterwavePayment(params: {
       },
       meta: params.meta,
       customizations: {
-        title: "ProkipSites Payment",
+        title: "AfroStore Payment",
       },
     }),
   });

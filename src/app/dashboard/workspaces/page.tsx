@@ -27,7 +27,7 @@ interface Site {
 }
 
 const siteTypeConfig = {
-  ECOMMERCE: { icon: Store, label: 'Store', color: 'text-emerald-600', bg: 'bg-emerald-50' },
+  ECOMMERCE: { icon: ShoppingBag, label: 'Store', color: 'text-emerald-600', bg: 'bg-emerald-50' },
   WEBSITE: { icon: Globe, label: 'Website', color: 'text-blue-600', bg: 'bg-blue-50' },
   LANDING_PAGE: { icon: FileText, label: 'Landing Page', color: 'text-purple-600', bg: 'bg-purple-50' },
 };

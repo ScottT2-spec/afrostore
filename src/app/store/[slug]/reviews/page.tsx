@@ -309,7 +309,7 @@ export default function StoreReviewsPage() {
       {/* Footer */}
       <footer className="border-t border-surface-100 mt-16">
         <div className="max-w-6xl mx-auto px-4 sm:px-6 py-8 text-center">
-          <p className="text-xs text-surface-400">© {new Date().getFullYear()} {store?.name}. Powered by ProkipSites.</p>
+          <p className="text-xs text-surface-400">© {new Date().getFullYear()} {store?.name}. Powered by AfroStore.</p>
         </div>
       </footer>
     </div>

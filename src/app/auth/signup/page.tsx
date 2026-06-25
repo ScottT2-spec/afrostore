@@ -63,7 +63,7 @@ export default function SignupPage() {
           <Link href="/" className="flex items-center gap-2.5 mb-12">
             <img src="/prokip-logo.png" alt="Prokip" className="h-10 w-10 object-contain brightness-0 invert" />
             <span className="font-display text-2xl font-bold text-white">
-              Prokip<span className="text-emerald-300">Sites</span>
+              Afro<span className="text-brand-300">Store</span>
             </span>
           </Link>
 
@@ -76,7 +76,7 @@ export default function SignupPage() {
           </h1>
 
           <p className="text-brand-200/70 text-lg leading-relaxed mb-10 max-w-md">
-            Join 5,000+ businesses already using ProkipSites to launch, sell, and grow online.
+            Join 5,000+ businesses already using AfroStore to launch, sell, and grow online.
           </p>
 
           <div className="space-y-4">

@@ -13,7 +13,7 @@ export default function DomainsPage() {
   const [saved, setSaved] = useState(false);
   const [error, setError] = useState("");
 
-  const subdomain = currentStore ? `${currentStore.subdomain}.prokip.site` : "";
+  const subdomain = currentStore ? `${currentStore.subdomain}.afrostore.com` : "";
 
   const handleConnect = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -63,7 +63,7 @@ export default function DomainsPage() {
           <form onSubmit={handleConnect} className="space-y-3">
             {error && <div className="rounded-xl bg-accent-50 border border-accent-200 px-4 py-3 text-sm text-accent-700">{error}</div>}
             <input value={customDomain} onChange={(e) => setCustomDomain(e.target.value)} className="input-field" placeholder="mystore.com" />
-            <p className="text-[10px] text-surface-500">Point your domain&apos;s CNAME record to <strong>cname.prokip.site</strong></p>
+            <p className="text-[10px] text-surface-500">Point your domain&apos;s CNAME record to <strong>cname.afrostore.com</strong></p>
             <button type="submit" disabled={saving || !customDomain} className="btn-primary text-sm py-2 px-4">
               {saving ? <Loader2 className="h-4 w-4 animate-spin" /> : saved ? "Saved!" : <><Plus className="h-4 w-4" />Connect Domain</>}
             </button>

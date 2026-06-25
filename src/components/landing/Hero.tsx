@@ -145,7 +145,7 @@ export default function Hero() {
                   <div className="flex-1 flex justify-center">
                     <div className="flex items-center gap-2 rounded-lg bg-white/10 px-4 py-1 text-xs text-white/50">
                       <Globe className="h-3 w-3" />
-                      yourstore.prokip.site
+                      yourstore.afrostore.com
                     </div>
                   </div>
                 </div>

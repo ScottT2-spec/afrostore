@@ -256,7 +256,7 @@ export default function StorePage() {
           <h1 className="text-2xl font-bold text-surface-900 mb-2">Store not found</h1>
           <p className="text-surface-500">{error || "This store doesn't exist or isn't active yet."}</p>
           <Link href="/" className="mt-6 inline-flex items-center gap-2 text-brand-600 font-semibold text-sm hover:text-brand-700">
-            <ArrowRight className="h-4 w-4 rotate-180" /> Go to ProkipSites
+            <ArrowRight className="h-4 w-4 rotate-180" /> Go to AfroStore
           </Link>
         </div>
       </div>
@@ -650,7 +650,7 @@ export default function StorePage() {
           </div>
           <div className="mt-8 pt-6 border-t border-surface-800 flex items-center justify-between text-xs text-surface-600">
             <span>&copy; {new Date().getFullYear()} {store.name}. All rights reserved.</span>
-            <span className="flex items-center gap-1">Powered by <span className="font-semibold text-brand-400">ProkipSites</span></span>
+            <span className="flex items-center gap-1">Powered by <span className="font-semibold text-brand-400">AfroStore</span></span>
           </div>
         </div>
       </footer>
