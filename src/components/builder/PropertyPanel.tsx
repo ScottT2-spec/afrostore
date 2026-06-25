@@ -433,18 +433,174 @@ function ImageTextProps({ block, update }: { block: BuilderBlock; update: (key: 
   );
 }
 
+function GalleryProps({ block, update }: { block: BuilderBlock; update: (key: string, val: unknown) => void }) {
+  return (
+    <>
+      <PropInput label="Title" value={block.props.title} onChange={(v) => update("title", v)} />
+      <PropInput label="Subtitle" value={block.props.subtitle} onChange={(v) => update("subtitle", v)} type="textarea" rows={2} />
+    </>
+  );
+}
+
+function TeamProps({ block, update }: { block: BuilderBlock; update: (key: string, val: unknown) => void }) {
+  const members = (block.props.members as Array<{ name: string; role: string; image?: string }>) || [];
+  const updateMember = (index: number, key: string, val: string) => {
+    const next = members.map((m, i) => i === index ? { ...m, [key]: val } : m);
+    update("members", next);
+  };
+  const addMember = () => update("members", [...members, { name: "New Member", role: "Role" }]);
+  const removeMember = (index: number) => update("members", members.filter((_, i) => i !== index));
+  return (
+    <>
+      <PropInput label="Section Title" value={block.props.title} onChange={(v) => update("title", v)} />
+      <PropInput label="Subtitle" value={block.props.subtitle} onChange={(v) => update("subtitle", v)} type="textarea" rows={2} />
+      <div>
+        <label className="block text-xs font-medium text-surface-700 mb-2">Team Members</label>
+        <div className="space-y-3">
+          {members.map((m, i) => (
+            <div key={i} className="rounded-xl border border-surface-200 bg-surface-50 p-3 space-y-2">
+              <div className="flex items-center justify-between">
+                <span className="text-[10px] font-bold text-surface-400 uppercase">Member {i + 1}</span>
+                <button onClick={() => removeMember(i)} className="text-[10px] text-red-500 hover:text-red-700 font-medium">Remove</button>
+              </div>
+              <PropInput label="Name" value={m.name} onChange={(v) => updateMember(i, "name", v as string)} />
+              <PropInput label="Role" value={m.role} onChange={(v) => updateMember(i, "role", v as string)} />
+              <SingleImageUpload image={m.image || null} onChange={(url) => updateMember(i, "image", url || "")} label="Photo" compact />
+            </div>
+          ))}
+        </div>
+        <button onClick={addMember} className="mt-2 w-full rounded-lg border border-dashed border-surface-300 py-2 text-xs font-medium text-surface-500 hover:bg-surface-50 hover:text-surface-700 transition-colors">
+          <Plus className="h-3 w-3 inline mr-1" /> Add Member
+        </button>
+      </div>
+    </>
+  );
+}
+
+function BrandsProps({ block, update }: { block: BuilderBlock; update: (key: string, val: unknown) => void }) {
+  const names = (block.props.names as string[]) || [];
+  const updateName = (index: number, val: string) => {
+    const next = names.map((n, i) => i === index ? val : n);
+    update("names", next);
+  };
+  const addName = () => update("names", [...names, "Brand Name"]);
+  const removeName = (index: number) => update("names", names.filter((_, i) => i !== index));
+  return (
+    <>
+      <PropInput label="Section Title" value={block.props.title} onChange={(v) => update("title", v)} />
+      <div>
+        <label className="block text-xs font-medium text-surface-700 mb-2">Brand Names</label>
+        <div className="space-y-2">
+          {names.map((name, i) => (
+            <div key={i} className="flex items-center gap-2">
+              <input value={name} onChange={(e) => updateName(i, e.target.value)} className="input-field text-sm py-1.5 flex-1" />
+              <button onClick={() => removeName(i)} className="text-red-500 hover:text-red-700"><X className="h-3.5 w-3.5" /></button>
+            </div>
+          ))}
+        </div>
+        <button onClick={addName} className="mt-2 w-full rounded-lg border border-dashed border-surface-300 py-2 text-xs font-medium text-surface-500 hover:bg-surface-50 hover:text-surface-700 transition-colors">
+          <Plus className="h-3 w-3 inline mr-1" /> Add Brand
+        </button>
+      </div>
+    </>
+  );
+}
+
+function TrustBadgesProps({ block, update }: { block: BuilderBlock; update: (key: string, val: unknown) => void }) {
+  const items = (block.props.items as Array<{ icon: string; label: string }>) || [];
+  const iconOptions = [
+    { value: "shield", label: "Shield" }, { value: "truck", label: "Truck" },
+    { value: "refresh", label: "Returns" }, { value: "headphones", label: "Support" },
+    { value: "lock", label: "Lock" }, { value: "check", label: "Check" },
+    { value: "star", label: "Star" }, { value: "heart", label: "Heart" },
+    { value: "award", label: "Award" }, { value: "zap", label: "Zap" },
+  ];
+  const updateItem = (index: number, key: string, val: string) => {
+    const next = items.map((item, i) => i === index ? { ...item, [key]: val } : item);
+    update("items", next);
+  };
+  const addItem = () => update("items", [...items, { icon: "shield", label: "Badge" }]);
+  const removeItem = (index: number) => update("items", items.filter((_, i) => i !== index));
+  return (
+    <>
+      <PropInput label="Section Title" value={block.props.title} onChange={(v) => update("title", v)} />
+      <PropInput label="Subtitle" value={block.props.subtitle} onChange={(v) => update("subtitle", v)} />
+      <div>
+        <label className="block text-xs font-medium text-surface-700 mb-2">Badges</label>
+        <div className="space-y-3">
+          {items.map((item, i) => (
+            <div key={i} className="rounded-xl border border-surface-200 bg-surface-50 p-3 space-y-2">
+              <div className="flex items-center justify-between">
+                <span className="text-[10px] font-bold text-surface-400 uppercase">Badge {i + 1}</span>
+                <button onClick={() => removeItem(i)} className="text-[10px] text-red-500 hover:text-red-700 font-medium">Remove</button>
+              </div>
+              <PropInput label="Icon" value={item.icon} onChange={(v) => updateItem(i, "icon", v as string)} type="select" options={iconOptions} />
+              <PropInput label="Label" value={item.label} onChange={(v) => updateItem(i, "label", v as string)} />
+            </div>
+          ))}
+        </div>
+        <button onClick={addItem} className="mt-2 w-full rounded-lg border border-dashed border-surface-300 py-2 text-xs font-medium text-surface-500 hover:bg-surface-50 hover:text-surface-700 transition-colors">
+          <Plus className="h-3 w-3 inline mr-1" /> Add Badge
+        </button>
+      </div>
+    </>
+  );
+}
+
+function VideoProps({ block, update }: { block: BuilderBlock; update: (key: string, val: unknown) => void }) {
+  return (
+    <>
+      <PropInput label="Title" value={block.props.title} onChange={(v) => update("title", v)} />
+      <PropInput label="Video URL" value={block.props.url} onChange={(v) => update("url", v)} />
+    </>
+  );
+}
+
+function ColumnsProps({ block, update }: { block: BuilderBlock; update: (key: string, val: unknown) => void }) {
+  return (
+    <>
+      <PropInput label="Columns" value={block.props.columns} onChange={(v) => update("columns", v)} type="number" />
+      <PropInput label="Gap" value={block.props.gap} onChange={(v) => update("gap", v)} type="number" />
+    </>
+  );
+}
+
 function GenericProps({ block }: { block: BuilderBlock }) {
   return <p className="text-xs text-surface-500">Properties for this block type coming soon.</p>;
 }
 
 const propEditors: Record<string, React.FC<{ block: BuilderBlock; update: (key: string, val: unknown) => void }>> = {
+  // Core block types
   heading: HeadingProps, text: TextProps, image: ImageProps, button: ButtonProps,
-  hero: HeroProps, spacer: SpacerProps, divider: DividerProps,
+  hero: HeroProps, spacer: SpacerProps, divider: DividerProps, columns: ColumnsProps,
   productGrid: ProductGridProps, testimonial: TestimonialProps, countdown: CountdownProps,
   contactInfo: ContactInfoProps, contactForm: ContactFormProps,
   features: FeaturesProps, testimonials: TestimonialsProps,
   banner: BannerProps, stats: StatsProps, faq: FAQProps,
   newsletter: NewsletterProps, imageText: ImageTextProps, "image-text": ImageTextProps,
+  gallery: GalleryProps, team: TeamProps, brands: BrandsProps,
+  trustBadges: TrustBadgesProps, video: VideoProps,
+
+  // Template aliases → map to their base editor
+  featured_products: ProductGridProps,
+  featured_dishes: ProductGridProps,
+  featured_toys: ProductGridProps,
+  new_arrivals: ProductGridProps,
+  best_sellers: ProductGridProps,
+  categories: FeaturesProps,
+  collections: FeaturesProps,
+  menu: FeaturesProps,
+  service_cards: FeaturesProps,
+  services: FeaturesProps,
+  case_studies: FeaturesProps,
+  age_categories: FeaturesProps,
+  reservations: ContactFormProps,
+  chef: TeamProps,
+  opening_hours: ContactInfoProps,
+  lookbook: GalleryProps,
+  promotions: BannerProps,
+  projects: GalleryProps,
+  portfolio: GalleryProps,
 };
 
 // ─── PANEL ───────────────────────────────────────────────────
