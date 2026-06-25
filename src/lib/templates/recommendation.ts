@@ -35,9 +35,25 @@ const RECOMMENDATION_MAP: Record<string, string[]> = {
   consulting: ["Business Services Pro"],
   agency: ["Business Services Pro"],
   business: ["Business Services Pro", "Commerce Pro"],
-  portfolio: ["Interior Studio", "Business Services Pro"],
+  portfolio: ["Interior Studio", "Business Services Pro", "Landing Artsy"],
   commerce: ["Commerce Pro"],
   ecommerce: ["Commerce Pro"],
+  landing: ["Landing Artsy", "Landing Scenic", "Landing Agency", "Landing Service", "Landing Education", "Landing Product"],
+  creative: ["Landing Artsy", "Interior Studio"],
+  art: ["Landing Artsy"],
+  travel: ["Landing Scenic"],
+  tour: ["Landing Scenic"],
+  hospitality: ["Landing Scenic"],
+  advertising: ["Landing Agency"],
+  marketing: ["Landing Agency", "Business Services Pro"],
+  saas: ["Landing Service", "Landing Product"],
+  app: ["Landing Service", "Landing Product"],
+  software: ["Landing Service"],
+  education: ["Landing Education"],
+  course: ["Landing Education"],
+  training: ["Landing Education"],
+  product: ["Landing Product", "Commerce Pro"],
+  launch: ["Landing Product"],
 };
 
 function block(id: string, type: string, props: Record<string, unknown>): BuilderBlock {
@@ -57,6 +73,7 @@ const INDUSTRY_ALIASES: Record<string, string[]> = {
   Children: ["children", "kids", "baby", "toys", "education"],
   Services: ["services", "consulting", "agency", "business", "legal", "accounting"],
   "Interior Design": ["interior", "architecture", "construction", "projects", "portfolio"],
+  "Landing Page": ["landing", "creative", "art", "travel", "tour", "advertising", "marketing", "saas", "app", "software", "education", "course", "training", "launch"],
 };
 
 let templateCache: { expiresAt: number; templates: TemplateDefinition[] } | null = null;
@@ -308,14 +325,19 @@ function sectionForPage(pageTitle: string, businessName: string, industry: strin
   const title = pageTitle.toLowerCase();
   if (title === "home") return null;
   if (title.includes("contact")) return { id: `${slugify(pageTitle)}-contact`, type: "contactForm", props: { title: `Contact ${businessName}`, subtitle: "Tell us what you need and we will respond shortly." } };
-  if (title.includes("testimonial")) return { id: `${slugify(pageTitle)}-testimonials`, type: "testimonials", props: { title: "Customer stories", bgColor: "surface", items: [] } };
-  if (title.includes("team")) return { id: `${slugify(pageTitle)}-team`, type: "team", props: { title: "Meet the team", members: [] } };
-  if (title.includes("gallery") || title.includes("lookbook") || title.includes("portfolio") || title.includes("projects")) return { id: `${slugify(pageTitle)}-portfolio`, type: "portfolio", props: { title: pageTitle, subtitle: `Selected work from ${businessName}.` } };
+  if (title.includes("testimonial") || title.includes("review")) return { id: `${slugify(pageTitle)}-testimonials`, type: "testimonials", props: { title: "Customer stories", bgColor: "surface", items: [] } };
+  if (title.includes("team") || title.includes("instructor")) return { id: `${slugify(pageTitle)}-team`, type: "team", props: { title: pageTitle, subtitle: `Meet the people behind ${businessName}.`, members: [] } };
+  if (title.includes("gallery") || title.includes("lookbook") || title.includes("portfolio") || title.includes("projects") || title.includes("destination") || title.includes("experience")) return { id: `${slugify(pageTitle)}-portfolio`, type: "portfolio", props: { title: pageTitle, subtitle: `Selected work from ${businessName}.` } };
   if (title.includes("menu")) return { id: `${slugify(pageTitle)}-menu`, type: "menu", props: { title: `${businessName} Menu`, subtitle: "Add your signature items, specials, and pricing." } };
   if (title.includes("reservation")) return { id: `${slugify(pageTitle)}-reservations`, type: "reservations", props: { title: "Reservations", subtitle: "Make it easy for customers to book a table or request catering." } };
-  if (title.includes("service")) return { id: `${slugify(pageTitle)}-services`, type: "service_cards", props: { title: "Services", subtitle: `Core ${industry} services from ${businessName}.` } };
-  if (title.includes("case")) return { id: `${slugify(pageTitle)}-case-studies`, type: "case_studies", props: { title: "Case Studies", subtitle: "Show outcomes and proof from completed work." } };
-  if (title.includes("collection") || title.includes("shop") || title.includes("featured") || title.includes("categor")) return { id: `${slugify(pageTitle)}-products`, type: "featured_products", props: { title: pageTitle, limit: 8, columns: 4, showFeatured: true } };
+  if (title.includes("service")) return { id: `${slugify(pageTitle)}-services`, type: "service_cards", props: { title: "Services", subtitle: `Core services from ${businessName}.` } };
+  if (title.includes("case") || title.includes("process")) return { id: `${slugify(pageTitle)}-case-studies`, type: "case_studies", props: { title: pageTitle, subtitle: "Show outcomes and proof from completed work." } };
+  if (title.includes("pricing")) return { id: `${slugify(pageTitle)}-pricing`, type: "stats", props: { title: "Pricing", subtitle: "Transparent plans and starting prices.", bgColor: "brand" } };
+  if (title.includes("faq")) return { id: `${slugify(pageTitle)}-faq`, type: "faq", props: { title: "Frequently Asked Questions", items: [{ question: "How do I get started?", answer: "Contact us or sign up to get started." }] } };
+  if (title.includes("feature")) return { id: `${slugify(pageTitle)}-features`, type: "features", props: { title: "Features", subtitle: `What makes ${businessName} special.`, items: [{ icon: "star", title: "Quality", desc: "We deliver the best." }, { icon: "zap", title: "Fast", desc: "Quick turnaround." }, { icon: "shield", title: "Reliable", desc: "Trusted by thousands." }] } };
+  if (title.includes("course") || title.includes("categor")) return { id: `${slugify(pageTitle)}-grid`, type: "featured_products", props: { title: pageTitle, subtitle: `Browse ${pageTitle.toLowerCase()} from ${businessName}.`, limit: 8, columns: 4, showFeatured: true } };
+  if (title.includes("about")) return { id: `${slugify(pageTitle)}-about`, type: "imageText", props: { title: `About ${businessName}`, text: "Tell your story here. What drives you, what makes you different, and why customers choose you.", badge: "Our Story", buttonText: "Get in Touch", buttonHref: "#contact" } };
+  if (title.includes("collection") || title.includes("shop") || title.includes("featured")) return { id: `${slugify(pageTitle)}-products`, type: "featured_products", props: { title: pageTitle, limit: 8, columns: 4, showFeatured: true } };
   return { id: `${slugify(pageTitle)}-content`, type: "features", props: { title: pageTitle, subtitle: `A starter ${pageTitle.toLowerCase()} page for ${businessName}.`, items: [] } };
 }
 
@@ -339,10 +361,29 @@ export function generatePages(input: BusinessAnalysisInput, template: TemplateDe
   });
 }
 
+function isLandingPageTemplate(industry: string) {
+  return industry.startsWith("landing-");
+}
+
 function generateHomepageSections(input: BusinessAnalysisInput, template: TemplateDefinition, industry: string) {
   const businessName = input.businessName || input.business_name || "Your Business";
-  const description = input.description || `Professional ${industry.replace("-", " ")} services and products built for your customers.`;
+  const description = input.description || `Professional ${industry.replace(/-/g, " ")} services and products built for your customers.`;
   const starter = structuredClone(template.themeConfig.sections);
+
+  // Landing page templates define their own complete section list —
+  // only personalise the hero heading/subheading, keep everything else intact.
+  if (isLandingPageTemplate(industry)) {
+    const hero = starter.find((section) => section.type === "hero");
+    if (hero) {
+      hero.props = {
+        ...hero.props,
+        heading: businessName !== "Your Business" ? businessName : hero.props.heading,
+        subheading: description !== hero.props.subheading && input.description ? description : hero.props.subheading,
+      };
+    }
+    return starter;
+  }
+
   const hero = starter.find((section) => section.type === "hero");
   if (hero) {
     const isDiningFamily = industry === "restaurant-pro" || industry === "bakery-delight";

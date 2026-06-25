@@ -148,11 +148,24 @@ function ButtonProps({ block, update }: { block: BuilderBlock; update: (key: str
 function HeroProps({ block, update }: { block: BuilderBlock; update: (key: string, val: unknown) => void }) {
   return (
     <>
+      <PropInput label="Badge" value={block.props.badge} onChange={(v) => update("badge", v)} />
       <PropInput label="Heading" value={block.props.heading} onChange={(v) => update("heading", v)} />
       <PropInput label="Subheading" value={block.props.subheading} onChange={(v) => update("subheading", v)} type="textarea" rows={2} />
       <PropInput label="Button Text" value={block.props.buttonText} onChange={(v) => update("buttonText", v)} />
       <PropInput label="Button Link" value={block.props.buttonHref} onChange={(v) => update("buttonHref", v)} />
-      <PropInput label="Background" value={block.props.bgColor} onChange={(v) => update("bgColor", v)} type="color" />
+      <PropInput label="Secondary Button" value={block.props.secondaryButtonText} onChange={(v) => update("secondaryButtonText", v)} />
+      <PropInput label="Secondary Link" value={block.props.secondaryButtonHref} onChange={(v) => update("secondaryButtonHref", v)} />
+      <SingleImageUpload image={(block.props.bgImage as string) || null} onChange={(url) => update("bgImage", url || "")} label="Background Image" compact />
+      <PropInput label="Overlay Opacity" value={block.props.overlayOpacity ?? 50} onChange={(v) => update("overlayOpacity", v)} type="number" />
+      <PropInput label="Background Style" value={block.props.bgStyle} onChange={(v) => update("bgStyle", v)} type="select"
+        options={[
+          { value: "", label: "Custom Color" },
+          { value: "dark", label: "Dark" },
+          { value: "light", label: "Light" },
+          { value: "accent", label: "Accent" },
+          { value: "gradient", label: "Gradient" },
+        ]} />
+      <PropInput label="Background Color" value={block.props.bgColor} onChange={(v) => update("bgColor", v)} type="color" />
       <PropInput label="Text Color" value={block.props.textColor} onChange={(v) => update("textColor", v)} type="color" />
       <PropInput label="Align" value={block.props.align} onChange={(v) => update("align", v)} type="select"
         options={[{ value: "left", label: "Left" }, { value: "center", label: "Center" }, { value: "right", label: "Right" }]} />
@@ -343,6 +356,7 @@ function BannerProps({ block, update }: { block: BuilderBlock; update: (key: str
       <PropInput label="Subtitle" value={block.props.subtitle} onChange={(v) => update("subtitle", v)} />
       <PropInput label="Button Text" value={block.props.buttonText} onChange={(v) => update("buttonText", v)} />
       <PropInput label="Button Link" value={block.props.buttonHref} onChange={(v) => update("buttonHref", v)} />
+      <SingleImageUpload image={(block.props.bgImage as string) || null} onChange={(url) => update("bgImage", url || "")} label="Background Image" compact />
       <PropInput label="Background" value={block.props.bgColor} onChange={(v) => update("bgColor", v)} type="select"
         options={[{ value: "brand", label: "Brand" }, { value: "accent", label: "Accent" }, { value: "dark", label: "Dark" }, { value: "light", label: "Light" }]} />
     </>
