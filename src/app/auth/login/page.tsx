@@ -82,7 +82,7 @@ export default function LoginPage() {
               Welcome Back
             </h1>
             <p className="text-gray-500 mt-2 text-base">
-              Sign in to your admin dashboard
+              Sign in to your dashboard
             </p>
           </div>
 
@@ -105,7 +105,7 @@ export default function LoginPage() {
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
                   className="w-full rounded-xl border-0 bg-gray-100 pl-12 pr-4 py-4 text-base text-gray-700 placeholder:text-gray-400 transition-all duration-200 focus:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-slate-400/40"
-                  placeholder="admin@example.com"
+                  placeholder="you@example.com"
                   required
                 />
               </div>
