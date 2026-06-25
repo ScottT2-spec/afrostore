@@ -278,8 +278,12 @@ export default function StorePage() {
   // ─── Page helpers ─────────────────────────────────────────
   // Find the HOME page (AI-generated) with its blocks
   const homePage = data.pages.find((p) => p.type === "HOME");
-  const homeBlocks: BuilderBlock[] = homePage && Array.isArray(homePage.content)
-    ? (homePage.content as BuilderBlock[])
+  const homeBlocks: BuilderBlock[] = homePage
+    ? Array.isArray(homePage.content)
+      ? (homePage.content as BuilderBlock[])
+      : Array.isArray((homePage.content as Record<string, unknown>)?.blocks)
+        ? ((homePage.content as Record<string, unknown>).blocks as BuilderBlock[])
+        : []
     : [];
   const hasHomeContent = homeBlocks.length > 0;
   const homeHasProductGrid = homeBlocks.some((b) => b.type === "productGrid");

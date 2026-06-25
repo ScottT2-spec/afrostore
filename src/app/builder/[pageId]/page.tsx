@@ -207,7 +207,12 @@ export default function BuilderPage({ params }: { params: Promise<{ pageId: stri
       if (res.success && res.data) {
         setPageTitle(res.data.title || "");
         setIsPublished(res.data.isPublished || false);
-        const content = Array.isArray(res.data.content) ? res.data.content : [];
+        const rawContent = res.data.content;
+        const content = Array.isArray(rawContent)
+          ? rawContent
+          : Array.isArray((rawContent as Record<string, unknown>)?.blocks)
+            ? (rawContent as Record<string, unknown>).blocks as unknown[]
+            : [];
         setBlocks(content);
         historyRef.current.push(content);
       }

@@ -81,7 +81,11 @@ export default function StorefrontPage() {
   }
 
   const { store, page } = data;
-  const blocks: BuilderBlock[] = Array.isArray(page.content) ? (page.content as BuilderBlock[]) : [];
+  const blocks: BuilderBlock[] = Array.isArray(page.content)
+    ? (page.content as BuilderBlock[])
+    : Array.isArray((page.content as Record<string, unknown>)?.blocks)
+      ? ((page.content as Record<string, unknown>).blocks as BuilderBlock[])
+      : [];
 
   return (
     <div className="min-h-screen bg-white">
