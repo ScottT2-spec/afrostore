@@ -349,7 +349,7 @@ export default function Sidebar({ onNavigate }: { onNavigate?: () => void } = {}
           <Link
             href={`/store/${slug}`}
             target="_blank"
-            className="mt-2 w-full flex items-center gap-2 rounded-xl border border-emerald-200 bg-emerald-50 text-emerald-700 px-3 py-2 transition-colors hover:bg-emerald-100"
+            className="mt-2 w-full flex items-center gap-2 rounded-xl border border-amber-300 bg-amber-50 text-amber-700 px-3 py-2 transition-colors hover:bg-amber-100"
           >
             <ExternalLink className="h-3.5 w-3.5 flex-shrink-0" />
             <span className="text-xs font-semibold">View Live Site</span>
