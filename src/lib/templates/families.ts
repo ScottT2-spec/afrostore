@@ -34,8 +34,8 @@ function themeConfig(params: {
   };
 }
 
-function makeTemplate(template: FamilyDef): FamilyDef {
-  return { ...template, active: true };
+function makeTemplate(template: Omit<FamilyDef, "active"> & { active?: boolean }): FamilyDef {
+  return { ...template, active: template.active ?? true };
 }
 
 const restaurantHero = block("restaurant-hero", "hero", {
