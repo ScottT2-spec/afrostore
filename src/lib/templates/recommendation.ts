@@ -35,25 +35,42 @@ const RECOMMENDATION_MAP: Record<string, string[]> = {
   consulting: ["Business Services Pro"],
   agency: ["Business Services Pro"],
   business: ["Business Services Pro", "Commerce Pro"],
-  portfolio: ["Interior Studio", "Business Services Pro", "Landing Artsy"],
+  portfolio: ["Interior Studio", "Business Services Pro", "Artsy Studio"],
   commerce: ["Commerce Pro"],
   ecommerce: ["Commerce Pro"],
-  landing: ["Landing Artsy", "Landing Scenic", "Landing Agency", "Landing Service", "Landing Education", "Landing Product"],
-  creative: ["Landing Artsy", "Interior Studio"],
-  art: ["Landing Artsy"],
-  travel: ["Landing Scenic"],
-  tour: ["Landing Scenic"],
-  hospitality: ["Landing Scenic"],
-  advertising: ["Landing Agency"],
-  marketing: ["Landing Agency", "Business Services Pro"],
-  saas: ["Landing Service", "Landing Product"],
-  app: ["Landing Service", "Landing Product"],
-  software: ["Landing Service"],
-  education: ["Landing Education"],
-  course: ["Landing Education"],
-  training: ["Landing Education"],
-  product: ["Landing Product", "Commerce Pro"],
-  launch: ["Landing Product"],
+  // Landing page recommendations
+  creative: ["Artsy Studio", "Agency Growth"],
+  art: ["Artsy Studio"],
+  artist: ["Artsy Studio"],
+  "design studio": ["Artsy Studio", "Agency Growth"],
+  travel: ["Scenic Experiences"],
+  tourism: ["Scenic Experiences"],
+  hospitality: ["Scenic Experiences"],
+  events: ["Scenic Experiences"],
+  marketing: ["Agency Growth", "Business Impact"],
+  advertising: ["Agency Growth"],
+  "digital agency": ["Agency Growth"],
+  branding: ["Agency Growth", "Artsy Studio"],
+  campaign: ["Agency Growth"],
+  saas: ["SaaS Launch"],
+  software: ["SaaS Launch"],
+  startup: ["SaaS Launch", "Business Impact"],
+  technology: ["SaaS Launch"],
+  "online service": ["SaaS Launch"],
+  platform: ["SaaS Launch"],
+  app: ["SaaS Launch"],
+  education: ["Education Pro", "Kids World"],
+  school: ["Education Pro"],
+  training: ["Education Pro"],
+  university: ["Education Pro"],
+  courses: ["Education Pro"],
+  "e-learning": ["Education Pro"],
+  academy: ["Education Pro"],
+  "product launch": ["Business Impact"],
+  "pre-order": ["Business Impact"],
+  dtc: ["Business Impact"],
+  crowdfunding: ["Business Impact"],
+  corporate: ["Agency Growth", "Business Impact"],
 };
 
 function block(id: string, type: string, props: Record<string, unknown>): BuilderBlock {
@@ -73,7 +90,12 @@ const INDUSTRY_ALIASES: Record<string, string[]> = {
   Children: ["children", "kids", "baby", "toys", "education"],
   Services: ["services", "consulting", "agency", "business", "legal", "accounting"],
   "Interior Design": ["interior", "architecture", "construction", "projects", "portfolio"],
-  "Landing Page": ["landing", "creative", "art", "travel", "tour", "advertising", "marketing", "saas", "app", "software", "education", "course", "training", "launch"],
+  "Creative": ["creative", "art", "artist", "design studio", "portfolio", "branding"],
+  "Travel": ["travel", "tourism", "hospitality", "events", "lifestyle", "experiences"],
+  "Marketing": ["marketing", "advertising", "agency", "digital agency", "campaign", "branding"],
+  "Technology": ["saas", "software", "startup", "technology", "app", "platform", "online service"],
+  "Education": ["education", "school", "training", "university", "courses", "e-learning", "academy"],
+  "Corporate": ["corporate", "business", "consulting", "professional services"],
 };
 
 let templateCache: { expiresAt: number; templates: TemplateDefinition[] } | null = null;
@@ -238,13 +260,14 @@ export function classifyBusiness(input: BusinessAnalysisInput): ClassificationRe
   };
 }
 
-export function scoreTemplates(templates: TemplateDefinition[], input: BusinessAnalysisInput): TemplateRecommendation[] {
+export function scoreTemplates(templates: TemplateDefinition[], input: BusinessAnalysisInput & { siteType?: string }): TemplateRecommendation[] {
   const tokens = tokenize(input);
   const tokenSet = new Set(tokens);
   const categoryTerm = normalize(input.businessCategory || input.category);
   const industryTerm = normalize(input.industry);
   const productTerms = new Set(tokenize({ products: input.products, services: input.services }));
   const mappedNames = RECOMMENDATION_MAP[primaryBusinessTerm(input)] || [];
+  const isLandingPage = input.siteType === "LANDING_PAGE";
 
   return templates
     .map((template) => {
@@ -252,6 +275,21 @@ export function scoreTemplates(templates: TemplateDefinition[], input: BusinessA
       const reasons: string[] = [];
       const category = template.category.toLowerCase();
       const keywords = template.recommendationKeywords.map((keyword) => keyword.toLowerCase());
+      const isLandingTemplate = category === "landing page" || keywords.includes("landing");
+
+      // Site type filtering: boost matching templates, penalize mismatches
+      if (isLandingPage) {
+        if (isLandingTemplate) {
+          score += 30;
+          reasons.push("Landing page template");
+        } else {
+          // Non-landing templates get heavily deprioritized for landing page sites
+          return { template, score: 0, matchPercent: 0, reasons: [] };
+        }
+      } else if (isLandingTemplate && input.siteType) {
+        // Don't show landing templates for ecommerce/website site types
+        return { template, score: 0, matchPercent: 0, reasons: [] };
+      }
 
       if (mappedNames.includes(template.name) || categoryTerm.includes(category) || keywords.some((keyword) => categoryTerm.includes(keyword))) {
         score += 50;
@@ -290,12 +328,13 @@ export function scoreTemplates(templates: TemplateDefinition[], input: BusinessA
     .sort((a, b) => b.score - a.score || a.template.name.localeCompare(b.template.name));
 }
 
-export async function recommendTemplates(input: BusinessAnalysisInput) {
+export async function recommendTemplates(input: BusinessAnalysisInput & { siteType?: string }) {
   const templates = await listTemplates();
   const classification = classifyBusiness(input);
   const recommendations = scoreTemplates(templates, {
     ...input,
     industry: input.industry || classification.industry,
+    siteType: input.siteType,
   });
   return { classification, recommendations };
 }
@@ -318,6 +357,12 @@ function canonicalIndustry(input: BusinessAnalysisInput, template?: TemplateDefi
   if (category.includes("children")) return "kids-world";
   if (category.includes("consulting") || category.includes("services")) return "business-services-pro";
   if (category.includes("interior") || category.includes("architecture")) return "interior-studio";
+  if (category.includes("landing") || category.includes("creative") || category.includes("portfolio")) return "landing-artsy";
+  if (category.includes("travel") || category.includes("tourism")) return "landing-scenic";
+  if (category.includes("marketing") || category.includes("advertising") || category.includes("agency")) return "landing-agency";
+  if (category.includes("saas") || category.includes("software") || category.includes("technology")) return "landing-service";
+  if (category.includes("education") || category.includes("training") || category.includes("university")) return "landing-education";
+  if (category.includes("corporate")) return "landing-product";
   return "commerce-pro";
 }
 

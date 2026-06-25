@@ -129,7 +129,7 @@ const interiorHero = block("interior-hero", "hero", {
 /* ─── Landing Page Heroes ─────────────────────────────────── */
 
 const landingArtsyHero = block("landing-artsy-hero", "hero", {
-  badge: "Landing Artsy",
+  badge: "Artsy Studio",
   heading: "Where creativity meets digital craft",
   subheading: "A bold, visual-first landing page for artists, designers, and creative studios. Full-screen hero slider, portfolio grid, and immersive storytelling.",
   buttonText: "View Portfolio",
@@ -140,7 +140,7 @@ const landingArtsyHero = block("landing-artsy-hero", "hero", {
 });
 
 const landingScenicHero = block("landing-scenic-hero", "hero", {
-  badge: "Landing Scenic",
+  badge: "Scenic Experiences",
   heading: "Discover breathtaking experiences",
   subheading: "A cinematic, full-screen landing page for travel, hospitality, and lifestyle brands. Stunning imagery, smooth scrolling, and immersive galleries.",
   buttonText: "Explore Now",
@@ -151,7 +151,7 @@ const landingScenicHero = block("landing-scenic-hero", "hero", {
 });
 
 const landingAgencyHero = block("landing-agency-hero", "hero", {
-  badge: "Landing Agency",
+  badge: "Agency Growth",
   heading: "We build brands that convert",
   subheading: "A high-impact landing page for advertising agencies, design studios, and digital marketing firms. Results-driven layout with case studies and clear CTAs.",
   buttonText: "Our Services",
@@ -162,7 +162,7 @@ const landingAgencyHero = block("landing-agency-hero", "hero", {
 });
 
 const landingServiceHero = block("landing-service-hero", "hero", {
-  badge: "Landing Service",
+  badge: "SaaS Launch",
   heading: "The smarter way to manage your business",
   subheading: "A clean, conversion-optimized landing page for SaaS products, online services, and digital tools. Feature highlights, pricing tables, and trust signals.",
   buttonText: "Get Started",
@@ -173,7 +173,7 @@ const landingServiceHero = block("landing-service-hero", "hero", {
 });
 
 const landingEducationHero = block("landing-education-hero", "hero", {
-  badge: "Landing Education",
+  badge: "Education Pro",
   heading: "Start learning from leading experts today",
   subheading: "A structured landing page for online courses, training programs, and educational institutions. Course categories, instructor profiles, and enrollment CTAs.",
   buttonText: "Browse Courses",
@@ -184,7 +184,7 @@ const landingEducationHero = block("landing-education-hero", "hero", {
 });
 
 const landingProductHero = block("landing-product-hero", "hero", {
-  badge: "Landing Product",
+  badge: "Business Impact",
   heading: "One product. Infinite possibilities.",
   subheading: "A focused, single-product landing page for launches, pre-orders, and direct-to-consumer brands. Video showcase, features breakdown, and strong conversion flow.",
   buttonText: "Buy Now",
@@ -467,7 +467,7 @@ export const TEMPLATE_FAMILIES: FamilyDef[] = [
   /* ─── Landing Page Templates ─────────────────────────────── */
 
   makeTemplate({
-    name: "Landing Artsy",
+    name: "Artsy Studio",
     slug: "landing-artsy",
     category: "Landing Page",
     description: "A bold, visual-first landing page for artists, designers, and creative studios with portfolio grids and immersive storytelling.",
@@ -511,7 +511,7 @@ export const TEMPLATE_FAMILIES: FamilyDef[] = [
   }),
 
   makeTemplate({
-    name: "Landing Scenic",
+    name: "Scenic Experiences",
     slug: "landing-scenic",
     category: "Landing Page",
     description: "A cinematic, full-screen landing page for travel, hospitality, events, and lifestyle brands with immersive galleries.",
@@ -556,7 +556,7 @@ export const TEMPLATE_FAMILIES: FamilyDef[] = [
   }),
 
   makeTemplate({
-    name: "Landing Agency",
+    name: "Agency Growth",
     slug: "landing-agency",
     category: "Landing Page",
     description: "A high-impact landing page for advertising agencies, design studios, and digital marketing firms with case studies and conversion CTAs.",
@@ -612,7 +612,7 @@ export const TEMPLATE_FAMILIES: FamilyDef[] = [
   }),
 
   makeTemplate({
-    name: "Landing Service",
+    name: "SaaS Launch",
     slug: "landing-service",
     category: "Landing Page",
     description: "A clean, conversion-optimized landing page for SaaS products, online services, and digital tools with feature highlights and pricing.",
@@ -669,7 +669,7 @@ export const TEMPLATE_FAMILIES: FamilyDef[] = [
   }),
 
   makeTemplate({
-    name: "Landing Education",
+    name: "Education Pro",
     slug: "landing-education",
     category: "Landing Page",
     description: "A structured landing page for online courses, training programs, and educational institutions with course categories and instructor profiles.",
@@ -731,7 +731,7 @@ export const TEMPLATE_FAMILIES: FamilyDef[] = [
   }),
 
   makeTemplate({
-    name: "Landing Product",
+    name: "Business Impact",
     slug: "landing-product",
     category: "Landing Page",
     description: "A focused single-product landing page for launches, pre-orders, and DTC brands with video showcase and strong conversion flow.",

@@ -114,7 +114,8 @@ export default function NewSitePage() {
     products: businessInfo.products.split(',').map((item) => item.trim()).filter(Boolean),
     services: businessInfo.services.split(',').map((item) => item.trim()).filter(Boolean),
     targetAudience: businessInfo.targetAudience,
-  }), [businessInfo, industry]);
+    siteType,
+  }), [businessInfo, industry, siteType]);
 
   useEffect(() => {
     if (!workspaceId) {
