@@ -30,6 +30,7 @@ interface NavGroup {
 }
 
 // ─── Site-type-specific navigation ─────────────────────────
+// ─── ECOMMERCE: Full store management ──────────────────────
 const ecommerceNav: NavGroup[] = [
   { label: "", items: [{ name: "Dashboard", href: "/dashboard", icon: LayoutDashboard }] },
   {
@@ -44,7 +45,6 @@ const ecommerceNav: NavGroup[] = [
       { name: "Wishlists", href: "/dashboard/wishlists", icon: Heart },
       { name: "Returns", href: "/dashboard/returns", icon: Undo2 },
       { name: "Inventory", href: "/dashboard/inventory", icon: BarChart3 },
-      { name: "Messages", href: "/dashboard/messages", icon: Mail },
     ],
   },
   {
@@ -52,10 +52,19 @@ const ecommerceNav: NavGroup[] = [
     items: [
       { name: "Coupons", href: "/dashboard/coupons", icon: Tag },
       { name: "Flash Sales", href: "/dashboard/flash-sales", icon: Zap },
-      { name: "Referrals", href: "/dashboard/referrals", icon: Link2 },
-      { name: "Loyalty", href: "/dashboard/loyalty", icon: Crown },
-      { name: "Abandoned Carts", href: "/dashboard/abandoned-carts", icon: RotateCcw },
       { name: "Campaigns", href: "/dashboard/marketing", icon: Megaphone },
+      { name: "Abandoned Carts", href: "/dashboard/abandoned-carts", icon: RotateCcw },
+      { name: "Loyalty", href: "/dashboard/loyalty", icon: Crown },
+      { name: "Referrals", href: "/dashboard/referrals", icon: Link2 },
+    ],
+  },
+  {
+    label: "Content",
+    items: [
+      { name: "Pages", href: "/dashboard/pages", icon: FileText },
+      { name: "Blogs", href: "/dashboard/blogs", icon: BookOpen },
+      { name: "Media Library", href: "/dashboard/media", icon: ImageIcon },
+      { name: "SEO", href: "/dashboard/seo", icon: Search },
     ],
   },
   {
@@ -64,22 +73,24 @@ const ecommerceNav: NavGroup[] = [
       { name: "Delivery", href: "/dashboard/delivery", icon: Truck },
       { name: "Payments", href: "/dashboard/payments", icon: CreditCard },
       { name: "Taxes", href: "/dashboard/taxes", icon: Receipt },
-      { name: "Pages", href: "/dashboard/pages", icon: FileText },
       { name: "Themes", href: "/dashboard/themes", icon: Palette },
       { name: "Plugins", href: "/dashboard/plugins", icon: Puzzle },
-      { name: "Marketplace", href: "/dashboard/marketplace", icon: Store },
       { name: "Domains", href: "/dashboard/domains", icon: Globe },
       { name: "Analytics", href: "/dashboard/analytics", icon: BarChart3 },
+      { name: "Marketplace", href: "/dashboard/marketplace", icon: Store },
       { name: "Audit Log", href: "/dashboard/audit-log", icon: Shield },
       { name: "Team", href: "/dashboard/team", icon: UserPlus },
     ],
   },
   { label: "", items: [
     { name: "Notifications", href: "/dashboard/notifications", icon: Bell },
-    { name: "AI Commerce Assistant", href: "/dashboard/ai", icon: Bot },
+    { name: "Messages", href: "/dashboard/messages", icon: Mail },
+    { name: "AI Business", href: "/dashboard/ai-business", icon: Bot },
+    { name: "AI Assistant", href: "/dashboard/ai", icon: Bot },
   ] },
 ];
 
+// ─── WEBSITE: Content & blogging focused ───────────────────
 const websiteNav: NavGroup[] = [
   { label: "", items: [{ name: "Dashboard", href: "/dashboard", icon: LayoutDashboard }] },
   {
@@ -89,14 +100,14 @@ const websiteNav: NavGroup[] = [
       { name: "Blogs", href: "/dashboard/blogs", icon: BookOpen },
       { name: "Media Library", href: "/dashboard/media", icon: ImageIcon },
       { name: "Forms", href: "/dashboard/forms", icon: PenTool },
-      { name: "Messages", href: "/dashboard/messages", icon: Mail },
     ],
   },
   {
-    label: "Growth",
+    label: "Marketing",
     items: [
+      { name: "Campaigns", href: "/dashboard/marketing", icon: Megaphone },
+      { name: "Popups", href: "/dashboard/popups", icon: Layers },
       { name: "SEO", href: "/dashboard/seo", icon: Search },
-      { name: "Analytics", href: "/dashboard/analytics", icon: BarChart3 },
     ],
   },
   {
@@ -105,15 +116,20 @@ const websiteNav: NavGroup[] = [
       { name: "Themes", href: "/dashboard/themes", icon: Palette },
       { name: "Plugins", href: "/dashboard/plugins", icon: Puzzle },
       { name: "Domains", href: "/dashboard/domains", icon: Globe },
+      { name: "Analytics", href: "/dashboard/analytics", icon: BarChart3 },
+      { name: "Audit Log", href: "/dashboard/audit-log", icon: Shield },
       { name: "Team", href: "/dashboard/team", icon: UserPlus },
     ],
   },
   { label: "", items: [
     { name: "Notifications", href: "/dashboard/notifications", icon: Bell },
-    { name: "AI Website Assistant", href: "/dashboard/ai", icon: Bot },
+    { name: "Messages", href: "/dashboard/messages", icon: Mail },
+    { name: "AI Business", href: "/dashboard/ai-business", icon: Bot },
+    { name: "AI Assistant", href: "/dashboard/ai", icon: Bot },
   ] },
 ];
 
+// ─── LANDING PAGE: Conversion & lead gen focused ───────────
 const landingPageNav: NavGroup[] = [
   { label: "", items: [{ name: "Dashboard", href: "/dashboard", icon: LayoutDashboard }] },
   {
@@ -135,8 +151,9 @@ const landingPageNav: NavGroup[] = [
   {
     label: "Marketing",
     items: [
-      { name: "Marketing", href: "/dashboard/marketing", icon: Megaphone },
+      { name: "Campaigns", href: "/dashboard/marketing", icon: Megaphone },
       { name: "Automations", href: "/dashboard/automations", icon: Zap },
+      { name: "SEO", href: "/dashboard/seo", icon: Search },
     ],
   },
   {
@@ -146,12 +163,16 @@ const landingPageNav: NavGroup[] = [
       { name: "Plugins", href: "/dashboard/plugins", icon: Puzzle },
       { name: "Domains", href: "/dashboard/domains", icon: Globe },
       { name: "Analytics", href: "/dashboard/analytics", icon: BarChart3 },
+      { name: "Media Library", href: "/dashboard/media", icon: ImageIcon },
+      { name: "Audit Log", href: "/dashboard/audit-log", icon: Shield },
       { name: "Team", href: "/dashboard/team", icon: UserPlus },
     ],
   },
   { label: "", items: [
     { name: "Notifications", href: "/dashboard/notifications", icon: Bell },
-    { name: "AI Growth Assistant", href: "/dashboard/ai", icon: Bot },
+    { name: "Messages", href: "/dashboard/messages", icon: Mail },
+    { name: "AI Business", href: "/dashboard/ai-business", icon: Bot },
+    { name: "AI Assistant", href: "/dashboard/ai", icon: Bot },
   ] },
 ];
 
