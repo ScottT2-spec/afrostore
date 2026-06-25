@@ -19,4 +19,18 @@ export const templateConfigRegistry = {
   businessServicesPro: "business-services-pro",
   interiorStudio: "interior-studio",
   commercePro: "commerce-pro",
+  // Landing Page Templates
+  artsy: "landing-artsy",
+  landingArtsy: "landing-artsy",
+  scenic: "landing-scenic",
+  frolic: "landing-scenic",
+  landingScenic: "landing-scenic",
+  designpro: "landing-agency",
+  dilabs: "landing-agency",
+  landingAgency: "landing-agency",
+  corba: "landing-service",
+  landingService: "landing-service",
+  educavo: "landing-education",
+  landingEducation: "landing-education",
+  landingProduct: "landing-product",
 };
