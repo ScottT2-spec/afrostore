@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/db";
-import { authenticateRequest } from "@/lib/auth";
+import { getAuthUser } from "@/lib/auth";
 import dns from "dns";
 import { promisify } from "util";
 import { CNAME_TARGET, SERVER_IP } from "@/lib/domain/domain-manager";
@@ -14,7 +14,7 @@ function error(message: string, status = 400) {
 }
 
 export async function POST(req: NextRequest, { params }: { params: Promise<{ siteId: string }> }) {
-  const user = await authenticateRequest(req);
+  const user = await getAuthUser(req);
   if (!user) return error("Unauthorized", 401);
   const { siteId } = await params;
 

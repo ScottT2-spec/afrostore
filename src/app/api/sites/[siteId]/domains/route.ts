@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/db";
-import { authenticateRequest } from "@/lib/auth";
+import { getAuthUser } from "@/lib/auth";
 import { CNAME_TARGET, SERVER_IP } from "@/lib/domain/domain-manager";
 
 function domainError(message: string, status = 400) {
@@ -16,7 +16,7 @@ function validateDomain(domain: string): string | null {
 
 // GET — list domains for a site
 export async function GET(req: NextRequest, { params }: { params: Promise<{ siteId: string }> }) {
-  const user = await authenticateRequest(req);
+  const user = await getAuthUser(req);
   if (!user) return domainError("Unauthorized", 401);
   const { siteId } = await params;
 
@@ -41,7 +41,7 @@ export async function GET(req: NextRequest, { params }: { params: Promise<{ site
 
 // POST — connect a custom domain
 export async function POST(req: NextRequest, { params }: { params: Promise<{ siteId: string }> }) {
-  const user = await authenticateRequest(req);
+  const user = await getAuthUser(req);
   if (!user) return domainError("Unauthorized", 401);
   const { siteId } = await params;
 
@@ -100,7 +100,7 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ sit
 
 // DELETE — disconnect a domain
 export async function DELETE(req: NextRequest, { params }: { params: Promise<{ siteId: string }> }) {
-  const user = await authenticateRequest(req);
+  const user = await getAuthUser(req);
   if (!user) return domainError("Unauthorized", 401);
   const { siteId } = await params;
 
