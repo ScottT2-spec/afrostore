@@ -1,12 +1,13 @@
 "use client";
 
 import Sidebar from "@/components/dashboard/Sidebar";
-import { SiteProvider } from "@/context/StoreContext";
+import { SiteProvider, useSite } from "@/context/StoreContext";
 import { AIActionProvider } from "@/context/AIActionContext";
 import { useAuth } from "@/context/AuthContext";
-import { useRouter } from "next/navigation";
+import { useRouter, usePathname } from "next/navigation";
 import { useEffect, useState } from "react";
-import { ChevronRight, X } from "lucide-react";
+import { ChevronRight, X, Plus, Globe } from "lucide-react";
+import Link from "next/link";
 
 export default function DashboardLayout({
   children,
@@ -93,10 +94,59 @@ export default function DashboardLayout({
         </div>
 
         <main className="lg:pl-64 min-h-screen">
-          <div className="mx-auto max-w-[1400px]">{children}</div>
+          <div className="mx-auto max-w-[1400px]">
+            <SiteGate>{children}</SiteGate>
+          </div>
         </main>
       </div>
       </AIActionProvider>
     </SiteProvider>
   );
+}
+
+/** Pages that work without a site selected */
+const NO_SITE_PAGES = ["/dashboard/workspaces", "/dashboard/new-site", "/dashboard/agency", "/dashboard/billing", "/dashboard/settings", "/dashboard/support"];
+
+function SiteGate({ children }: { children: React.ReactNode }) {
+  const { currentStore, loading } = useSite();
+  const pathname = usePathname();
+
+  // Skip gate for pages that don't need a site
+  if (NO_SITE_PAGES.some((p) => pathname.startsWith(p))) return <>{children}</>;
+
+  // Still loading site data
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center min-h-[60vh]">
+        <div className="animate-spin h-8 w-8 border-4 border-brand-600 border-t-transparent rounded-full" />
+      </div>
+    );
+  }
+
+  // No site selected — show helpful prompt
+  if (!currentStore) {
+    return (
+      <div className="flex items-center justify-center min-h-[60vh]">
+        <div className="text-center max-w-md mx-auto p-8">
+          <div className="h-16 w-16 rounded-2xl bg-surface-100 flex items-center justify-center mx-auto mb-4">
+            <Globe className="h-8 w-8 text-surface-400" />
+          </div>
+          <h2 className="text-xl font-bold text-surface-900 mb-2">No site selected</h2>
+          <p className="text-surface-500 text-sm mb-6">
+            Select an existing site from your workspaces or create a new one to get started.
+          </p>
+          <div className="flex items-center justify-center gap-3">
+            <Link href="/dashboard/workspaces" className="btn-secondary py-2.5 px-4 text-sm">
+              My Workspaces
+            </Link>
+            <Link href="/dashboard/new-site" className="btn-primary py-2.5 px-4 text-sm flex items-center gap-1.5">
+              <Plus className="h-4 w-4" /> Create Site
+            </Link>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  return <>{children}</>;
 }
