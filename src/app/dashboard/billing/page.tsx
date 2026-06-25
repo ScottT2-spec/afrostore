@@ -45,7 +45,7 @@ export default function BillingPage() {
                   className={`w-full text-sm py-2.5 rounded-xl font-semibold ${isActive ? "bg-brand-50 text-brand-700 cursor-default" : "btn-primary"}`}
                   disabled={isActive}
                   onClick={() => {
-                    if (!isActive) alert(`Upgrade to ${plan.name} coming soon! Contact support@afrostore.com to upgrade.`);
+                    if (!isActive) alert(`Upgrade to ${plan.name} coming soon! Contact support@prokip.site to upgrade.`);
                   }}
                 >
                   {isActive ? "Current Plan" : "Upgrade"}

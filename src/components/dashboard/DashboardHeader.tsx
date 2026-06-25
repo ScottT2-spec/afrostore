@@ -49,7 +49,7 @@ const defaultNotifications: Notification[] = [
   {
     id: "welcome",
     type: "info",
-    title: "Welcome to AfroStore! 🎉",
+    title: "Welcome to ProkipSites! 🎉",
     message: "Your dashboard is ready. Start by adding products to your store.",
     time: "Just now",
     read: false,

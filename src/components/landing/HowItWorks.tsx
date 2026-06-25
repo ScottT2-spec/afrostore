@@ -57,7 +57,7 @@ const steps = [
     description:
       "Publish on your free subdomain. Share on WhatsApp, Instagram, and social media. Connect your custom domain anytime.",
     details: [
-      "Free yourname.afrostore.com",
+      "Free yourname.prokip.site",
       "Custom domain support",
       "Social media sharing tools",
       "WhatsApp catalog sync",

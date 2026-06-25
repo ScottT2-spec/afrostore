@@ -4,7 +4,7 @@ import AdminSidebar from "@/components/admin/AdminSidebar";
 import { useAuth } from "@/context/AuthContext";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
-import { ChevronRight, X, ShoppingBag } from "lucide-react";
+import { ChevronRight, X } from "lucide-react";
 
 export default function AdminLayout({
   children,
@@ -60,9 +60,7 @@ export default function AdminLayout({
 
       {/* Mobile top bar — minimal, just logo */}
       <div className="sticky top-0 z-30 flex h-12 items-center gap-2 border-b border-surface-200 bg-white px-4 lg:hidden">
-        <div className="flex h-7 w-7 items-center justify-center rounded-lg bg-brand-600">
-          <ShoppingBag className="h-4 w-4 text-white" />
-        </div>
+        <img src="/prokip-logo.png" alt="Prokip" className="h-7 w-7 object-contain" />
         <span className="font-display text-sm font-bold text-surface-900">
           Admin <span className="text-accent-600">Panel</span>
         </span>

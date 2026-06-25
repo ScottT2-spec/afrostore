@@ -157,7 +157,7 @@ export default function ReferralsPage() {
   };
 
   const copyLink = (code: string) => {
-    const domain = currentStore?.customDomain || `${currentStore?.subdomain}.afrostore.com`;
+    const domain = currentStore?.customDomain || `${currentStore?.subdomain}.prokip.site`;
     navigator.clipboard.writeText(`https://${domain}?ref=${code}`);
     setCopiedCode(code);
     setTimeout(() => setCopiedCode(null), 2000);

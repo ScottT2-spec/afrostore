@@ -14,7 +14,7 @@ const plans = [
       "5 products",
       "Free subdomain",
       "Basic templates",
-      "AfroStore branding",
+      "ProkipSites branding",
       "Community support",
     ],
     cta: "Start Free",

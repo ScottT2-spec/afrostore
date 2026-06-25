@@ -697,7 +697,7 @@ export default function ShopPage() {
             <span className="font-display font-bold text-white">{store.name}</span>
           </div>
           <span className="flex items-center gap-1">
-            &copy; {new Date().getFullYear()} {store.name}. Powered by <span className="font-semibold text-brand-400">AfroStore</span>
+            &copy; {new Date().getFullYear()} {store.name}. Powered by <span className="font-semibold text-brand-400">ProkipSites</span>
           </span>
         </div>
       </footer>

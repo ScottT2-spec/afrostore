@@ -81,7 +81,7 @@ export default function Footer() {
         {/* Bottom */}
         <div className="mt-12 pt-8 border-t border-surface-800 flex flex-col sm:flex-row items-center justify-between gap-4">
           <p className="text-xs text-surface-600">
-            &copy; {new Date().getFullYear()} AfroStore. All rights reserved.
+            &copy; {new Date().getFullYear()} ProkipSites. All rights reserved.
           </p>
           <div className="flex items-center gap-6">
             <Link

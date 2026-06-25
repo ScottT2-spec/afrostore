@@ -44,7 +44,7 @@ function DesktopMockup() {
           <div className="flex-1 flex justify-center">
             <div className="flex items-center gap-2 rounded-lg bg-white/10 px-4 py-1 text-[10px] text-white/50">
               <Globe className="h-2.5 w-2.5" />
-              elegance-boutique.afrostore.com
+              elegance-boutique.prokip.site
             </div>
           </div>
         </div>

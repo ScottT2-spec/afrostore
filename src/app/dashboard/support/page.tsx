@@ -7,7 +7,7 @@ const resources = [
   { icon: Book, title: "Documentation", desc: "Guides for setting up your store", href: "#" },
   { icon: Video, title: "Video Tutorials", desc: "Step-by-step walkthroughs", href: "#" },
   { icon: MessageCircle, title: "Live Chat", desc: "Chat with our support team", href: "#" },
-  { icon: Mail, title: "Email Support", desc: "support@afrostore.com", href: "mailto:support@afrostore.com" },
+  { icon: Mail, title: "Email Support", desc: "support@prokip.site", href: "mailto:support@prokip.site" },
 ];
 
 export default function SupportPage() {

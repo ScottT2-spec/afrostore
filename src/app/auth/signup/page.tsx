@@ -61,11 +61,9 @@ export default function SignupPage() {
         </div>
         <div className="relative flex flex-col justify-center px-16">
           <Link href="/" className="flex items-center gap-2.5 mb-12">
-            <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-white/20 backdrop-blur-sm">
-              <ShoppingBag className="h-5 w-5 text-white" />
-            </div>
+            <img src="/prokip-logo.png" alt="Prokip" className="h-10 w-10 object-contain brightness-0 invert" />
             <span className="font-display text-2xl font-bold text-white">
-              Afro<span className="text-brand-300">Store</span>
+              Prokip<span className="text-emerald-300">Sites</span>
             </span>
           </Link>
 
@@ -78,7 +76,7 @@ export default function SignupPage() {
           </h1>
 
           <p className="text-brand-200/70 text-lg leading-relaxed mb-10 max-w-md">
-            Join 5,000+ businesses already using AfroStore to launch, sell, and grow online.
+            Join 5,000+ businesses already using ProkipSites to launch, sell, and grow online.
           </p>
 
           <div className="space-y-4">
@@ -103,7 +101,7 @@ export default function SignupPage() {
           <div className="lg:hidden mb-8">
             <Link href="/" className="flex items-center gap-2.5">
               <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-brand-600">
-                <ShoppingBag className="h-5 w-5 text-white" />
+                <img src="/prokip-logo.png" alt="Prokip" className="h-5 w-5 object-contain" />
               </div>
               <span className="font-display text-xl font-bold text-surface-900">
                 Afro<span className="text-brand-600">Store</span>

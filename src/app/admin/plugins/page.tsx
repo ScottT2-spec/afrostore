@@ -14,7 +14,7 @@ export default function AdminPluginsPage() {
   const [loading, setLoading] = useState(true);
   const [showForm, setShowForm] = useState(false);
   const [saving, setSaving] = useState(false);
-  const [form, setForm] = useState({ name: "", slug: "", description: "", category: "payments", author: "AfroStore", version: "1.0.0", isPremium: false });
+  const [form, setForm] = useState({ name: "", slug: "", description: "", category: "payments", author: "ProkipSites", version: "1.0.0", isPremium: false });
 
   const fetchPlugins = useCallback(async () => {
     setLoading(true);
@@ -29,7 +29,7 @@ export default function AdminPluginsPage() {
     setSaving(true);
     const slug = form.slug || form.name.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/(^-|-$)/g, "");
     const res = await api.post("/api/admin/plugins", { ...form, slug, permissions: [] });
-    if (res.success) { fetchPlugins(); setShowForm(false); setForm({ name: "", slug: "", description: "", category: "payments", author: "AfroStore", version: "1.0.0", isPremium: false }); }
+    if (res.success) { fetchPlugins(); setShowForm(false); setForm({ name: "", slug: "", description: "", category: "payments", author: "ProkipSites", version: "1.0.0", isPremium: false }); }
     setSaving(false);
   };
 

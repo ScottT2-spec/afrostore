@@ -36,11 +36,9 @@ export default function Navbar() {
         <div className="flex h-16 items-center justify-between px-4 sm:px-6 lg:px-8">
           {/* Logo */}
           <Link href="/" className="flex items-center gap-2.5">
-            <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-brand-600 shadow-lg shadow-brand-600/25">
-              <ShoppingBag className="h-5 w-5 text-white" />
-            </div>
+            <img src="/prokip-logo.png" alt="Prokip" className="h-9 w-9 object-contain" />
             <span className="font-display text-xl font-bold text-surface-900">
-              Afro<span className="text-brand-600">Store</span>
+              Prokip<span className="text-emerald-600">Sites</span>
             </span>
           </Link>
 

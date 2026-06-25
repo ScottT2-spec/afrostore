@@ -538,12 +538,26 @@ export default function NewSitePage() {
                       onSelect={(template) => {
                         setSelectedTemplate(template);
                         setSelectedTemplateId(template.id || template.slug);
+                        // Scroll to bottom so user sees the selection + Create button
+                        setTimeout(() => {
+                          window.scrollTo({ top: document.body.scrollHeight, behavior: 'smooth' });
+                        }, 100);
                       }}
                     />
                     {selectedTemplate && (
-                      <div className="mt-4 rounded-xl border border-emerald-200 bg-emerald-50 p-4 text-sm text-emerald-800">
-                        Selected <strong>{selectedTemplate.name}</strong>
-                        {selectedTemplate.matchPercent !== undefined ? ` (${selectedTemplate.matchPercent}% match)` : ''}
+                      <div className="mt-4 rounded-xl border border-emerald-200 bg-emerald-50 p-4 flex items-center justify-between gap-4">
+                        <div className="text-sm text-emerald-800">
+                          ✅ Selected <strong>{selectedTemplate.name}</strong>
+                          {selectedTemplate.matchPercent !== undefined ? ` (${selectedTemplate.matchPercent}% match)` : ''}
+                        </div>
+                        <button
+                          onClick={createSite}
+                          disabled={creating}
+                          className="flex items-center gap-2 px-5 py-2 bg-gray-900 text-white rounded-lg hover:bg-gray-800 disabled:opacity-50 text-sm font-semibold whitespace-nowrap"
+                        >
+                          {creating ? <Loader2 className="w-4 h-4 animate-spin" /> : <Sparkles className="w-4 h-4" />}
+                          {creating ? 'Creating...' : 'Create Site'}
+                        </button>
                       </div>
                     )}
                   </div>
