@@ -201,8 +201,22 @@ const siteTypeLabels: Record<string, { label: string; color: string }> = {
 export default function Sidebar({ onNavigate }: { onNavigate?: () => void } = {}) {
   const pathname = usePathname();
   const [collapsed, setCollapsed] = useState(false);
+  const [siteSwitcherOpen, setSiteSwitcherOpen] = useState(false);
+  const [allSites, setAllSites] = useState<Array<{ id: string; name: string; siteType: string; slug: string }>>([]);
   const { user, logout } = useAuth();
-  const { siteId, siteName, siteType, slug } = useSite();
+  const { siteId, siteName, siteType, slug, setSiteId } = useSite();
+
+  // Fetch all sites for the switcher dropdown
+  useEffect(() => {
+    if (!siteSwitcherOpen) return;
+    const token = typeof window !== "undefined" ? localStorage.getItem("token") : null;
+    fetch("/api/sites", { headers: token ? { Authorization: `Bearer ${token}` } : {} })
+      .then((r) => r.json())
+      .then((json) => {
+        if (json.success && Array.isArray(json.data)) setAllSites(json.data);
+      })
+      .catch(() => {});
+  }, [siteSwitcherOpen]);
 
   const navGroups = getNavForSiteType(siteType);
   const typeInfo = siteTypeLabels[siteType || "ECOMMERCE"];
@@ -254,10 +268,10 @@ export default function Sidebar({ onNavigate }: { onNavigate?: () => void } = {}
         </button>
       </div>
 
-      {/* Active Site Indicator */}
-      <div className="px-3 py-3 border-b border-gray-100">
-        <Link
-          href="/dashboard/workspaces"
+      {/* Site Switcher */}
+      <div className="px-3 py-3 border-b border-gray-100 relative">
+        <button
+          onClick={() => setSiteSwitcherOpen(!siteSwitcherOpen)}
           className={cn(
             "w-full flex items-center gap-2.5 rounded-xl border border-gray-200 bg-gray-50 p-2.5 transition-colors hover:bg-gray-100",
             collapsed && "justify-center p-2"
@@ -267,16 +281,77 @@ export default function Sidebar({ onNavigate }: { onNavigate?: () => void } = {}
             {siteName ? siteName.charAt(0).toUpperCase() : "?"}
           </div>
           {!collapsed && (
-            <div className="flex-1 text-left min-w-0">
-              <div className="text-xs font-semibold text-gray-900 truncate">
-                {siteName || "No site selected"}
+            <>
+              <div className="flex-1 text-left min-w-0">
+                <div className="text-xs font-semibold text-gray-900 truncate">
+                  {siteName || "No site selected"}
+                </div>
+                <div className={`text-[10px] font-medium ${typeInfo.color}`}>
+                  {typeInfo.label}
+                </div>
               </div>
-              <div className={`text-[10px] font-medium ${typeInfo.color}`}>
-                {typeInfo.label}
-              </div>
-            </div>
+              <ChevronDown className={cn("h-4 w-4 text-gray-400 transition-transform flex-shrink-0", siteSwitcherOpen && "rotate-180")} />
+            </>
           )}
-        </Link>
+        </button>
+
+        {/* Dropdown */}
+        {siteSwitcherOpen && !collapsed && (
+          <div className="absolute left-3 right-3 top-full mt-1 z-50 rounded-xl border border-gray-200 bg-white shadow-lg overflow-hidden">
+            <div className="max-h-64 overflow-y-auto py-1">
+              {allSites.length === 0 ? (
+                <div className="px-3 py-4 text-center text-xs text-gray-400">No sites found</div>
+              ) : (
+                allSites.map((site) => {
+                  const cfg = siteTypeLabels[site.siteType] || siteTypeLabels.ECOMMERCE;
+                  const isActive = site.id === siteId;
+                  return (
+                    <button
+                      key={site.id}
+                      onClick={() => {
+                        setSiteId(site.id);
+                        setSiteSwitcherOpen(false);
+                        if (typeof window !== "undefined") {
+                          localStorage.setItem(`activeSiteId:${user?.id || "guest"}`, site.id);
+                          localStorage.removeItem("activeSiteId");
+                        }
+                      }}
+                      className={cn(
+                        "w-full flex items-center gap-2.5 px-3 py-2.5 text-left transition-colors",
+                        isActive ? "bg-gray-50" : "hover:bg-gray-50"
+                      )}
+                    >
+                      <div className="flex h-7 w-7 flex-shrink-0 items-center justify-center rounded-lg bg-gray-900 text-white font-bold text-[10px]">
+                        {site.name.charAt(0).toUpperCase()}
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <div className="text-xs font-semibold text-gray-900 truncate">{site.name}</div>
+                        <div className={`text-[10px] font-medium ${cfg.color}`}>{cfg.label}</div>
+                      </div>
+                      {isActive && <div className="w-2 h-2 rounded-full bg-emerald-500 flex-shrink-0" />}
+                    </button>
+                  );
+                })
+              )}
+            </div>
+            <div className="border-t border-gray-100">
+              <Link
+                href="/dashboard/new-site"
+                onClick={() => setSiteSwitcherOpen(false)}
+                className="flex items-center gap-2 px-3 py-2.5 text-xs font-semibold text-gray-600 hover:bg-gray-50 transition-colors"
+              >
+                <Plus className="h-3.5 w-3.5" /> Create new site
+              </Link>
+              <Link
+                href="/dashboard/workspaces"
+                onClick={() => setSiteSwitcherOpen(false)}
+                className="flex items-center gap-2 px-3 py-2.5 text-xs font-semibold text-gray-600 hover:bg-gray-50 transition-colors"
+              >
+                <Store className="h-3.5 w-3.5" /> Manage workspaces
+              </Link>
+            </div>
+          </div>
+        )}
 
         {slug && !collapsed && (
           <Link
