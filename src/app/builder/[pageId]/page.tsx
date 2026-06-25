@@ -473,7 +473,7 @@ export default function BuilderPage({ params }: { params: Promise<{ pageId: stri
                   <button onClick={() => addBlock("hero")} className="btn-primary text-xs py-2 px-4">
                     <Sparkles className="h-3.5 w-3.5" /> Add Hero
                   </button>
-                  <button onClick={() => setSidebarTab("templates")} className="btn-secondary text-xs py-2 px-4">
+                  <button onClick={() => { setShowSidebar(true); setSidebarTab("templates"); }} className="btn-secondary text-xs py-2 px-4">
                     <Layers className="h-3.5 w-3.5" /> Use Template
                   </button>
                 </div>
