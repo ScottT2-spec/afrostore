@@ -9,12 +9,14 @@ import Link from "next/link";
 import { useAIPrefill } from "@/hooks/useAIPrefill";
 import AIPrefillBanner from "@/components/dashboard/AIPrefillBanner";
 import { useRouter } from "next/navigation";
+import { getLinkedPageBadge, getLinkedPageTemplate } from "@/lib/page-content";
 
 interface PageItem {
   id: string;
   title: string;
   slug: string;
   type: string;
+  template?: string | null;
   isPublished: boolean;
   createdAt: string;
   updatedAt: string;
@@ -64,8 +66,9 @@ export default function PagesPage() {
     if (!currentStore || !newTitle.trim()) return;
     setCreating(true);
     const slug = newTitle.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "");
+    const template = getLinkedPageTemplate({ slug, title: newTitle });
     const res = await api.post<PageItem>(`/api/sites/${currentStore.id}/pages`, {
-      title: newTitle, slug, type: newType, content: [], isPublished: false,
+      title: newTitle, slug, type: newType, content: [], template, isPublished: false,
     });
     if (res.success && res.data) {
       setPages((prev) => [res.data!, ...prev]);
@@ -204,6 +207,11 @@ export default function PagesPage() {
                     <span className="text-[10px] font-semibold px-2 py-0.5 rounded-full bg-surface-100 text-surface-500">
                       {pageTypeLabels[page.type] || page.type}
                     </span>
+                    {getLinkedPageBadge(page) && (
+                      <span className="text-[10px] font-semibold px-2 py-0.5 rounded-full bg-blue-50 text-blue-700">
+                        {getLinkedPageBadge(page)}
+                      </span>
+                    )}
                     <span className={`text-[10px] font-semibold px-2 py-0.5 rounded-full ${
                       page.isPublished ? "bg-green-50 text-green-700" : "bg-surface-100 text-surface-500"
                     }`}>
@@ -243,6 +251,15 @@ export default function PagesPage() {
                   >
                     {deleteId === page.id ? <Loader2 className="h-4 w-4 animate-spin" /> : <Trash2 className="h-4 w-4" />}
                   </button>
+                  {getLinkedPageBadge(page) && (
+                    <Link
+                      href="/dashboard/blogs"
+                      className="p-2 rounded-lg hover:bg-surface-100 text-surface-400 hover:text-surface-700 transition-colors"
+                      title="Open CRM Blogs"
+                    >
+                      <ExternalLink className="h-4 w-4" />
+                    </Link>
+                  )}
                 </div>
               </div>
             ))}

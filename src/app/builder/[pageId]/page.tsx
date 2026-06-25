@@ -11,6 +11,8 @@ import { BuilderHistory } from "@/lib/builder/history";
 import { blockTemplates } from "@/lib/builder/templates";
 import BlockRenderer from "@/components/builder/BlockRenderer";
 import PropertyPanel from "@/components/builder/PropertyPanel";
+import { SingleImageUpload } from "@/components/dashboard/ImageUpload";
+import { parsePageContent, serializePageContent, type PageSettings } from "@/lib/page-content";
 import {
   DndContext,
   closestCenter,
@@ -116,6 +118,87 @@ function SortableBlock({
   );
 }
 
+function PageSettingsPanel({
+  settings,
+  onChange,
+}: {
+  settings: PageSettings;
+  onChange: (settings: PageSettings) => void;
+}) {
+  return (
+    <div className="w-72 border-l border-surface-200 bg-white h-full overflow-y-auto flex flex-col">
+      <div className="p-4 border-b border-surface-100">
+        <h3 className="text-sm font-bold text-surface-900">Page Settings</h3>
+        <p className="mt-1 text-xs text-surface-500">Add a background image or adjust the page shell.</p>
+      </div>
+      <div className="flex-1 p-4 space-y-4">
+        <SingleImageUpload
+          image={settings.backgroundImage || null}
+          onChange={(backgroundImage) => onChange({ ...settings, backgroundImage })}
+          label="Background Image"
+          compact
+        />
+        <div>
+          <label className="block text-xs font-medium text-surface-700 mb-1">Background Color</label>
+          <input
+            type="color"
+            value={settings.backgroundColor || "#ffffff"}
+            onChange={(e) => onChange({ ...settings, backgroundColor: e.target.value })}
+            className="h-10 w-full rounded-xl border border-surface-200 bg-white p-1"
+          />
+        </div>
+        <div>
+          <label className="block text-xs font-medium text-surface-700 mb-1">Background Size</label>
+          <select
+            value={settings.backgroundSize || "cover"}
+            onChange={(e) => onChange({ ...settings, backgroundSize: e.target.value as PageSettings["backgroundSize"] })}
+            className="input-field text-sm py-2 w-full"
+          >
+            <option value="cover">Cover</option>
+            <option value="contain">Contain</option>
+            <option value="auto">Auto</option>
+          </select>
+        </div>
+        <div>
+          <label className="block text-xs font-medium text-surface-700 mb-1">Background Position</label>
+          <select
+            value={settings.backgroundPosition || "center center"}
+            onChange={(e) => onChange({ ...settings, backgroundPosition: e.target.value })}
+            className="input-field text-sm py-2 w-full"
+          >
+            <option value="center center">Center</option>
+            <option value="center top">Top</option>
+            <option value="center bottom">Bottom</option>
+            <option value="left center">Left</option>
+            <option value="right center">Right</option>
+          </select>
+        </div>
+        <div>
+          <label className="block text-xs font-medium text-surface-700 mb-1">Overlay Color</label>
+          <input
+            type="color"
+            value={settings.overlayColor || "#000000"}
+            onChange={(e) => onChange({ ...settings, overlayColor: e.target.value })}
+            className="h-10 w-full rounded-xl border border-surface-200 bg-white p-1"
+          />
+        </div>
+        <div>
+          <label className="block text-xs font-medium text-surface-700 mb-1">Overlay Opacity</label>
+          <input
+            type="range"
+            min="0"
+            max="1"
+            step="0.05"
+            value={settings.overlayOpacity ?? 0.25}
+            onChange={(e) => onChange({ ...settings, overlayOpacity: Number(e.target.value) })}
+            className="w-full"
+          />
+        </div>
+      </div>
+    </div>
+  );
+}
+
 // ─── MAIN BUILDER PAGE ───────────────────────────────────────
 
 export default function BuilderPage({ params }: { params: Promise<{ pageId: string }> }) {
@@ -126,6 +209,7 @@ export default function BuilderPage({ params }: { params: Promise<{ pageId: stri
   const [blocks, setBlocks] = useState<BuilderBlock[]>([]);
   const [pageTitle, setPageTitle] = useState("");
   const [isPublished, setIsPublished] = useState(false);
+  const [pageSettings, setPageSettings] = useState<PageSettings>({});
   const [selectedBlockId, setSelectedBlockId] = useState<string | null>(null);
   const [activeId, setActiveId] = useState<string | null>(null);
   const [sidebarTab, setSidebarTab] = useState<"blocks" | "templates">("blocks");
@@ -174,14 +258,10 @@ export default function BuilderPage({ params }: { params: Promise<{ pageId: stri
       if (res.success && res.data) {
         setPageTitle(res.data.title || "");
         setIsPublished(res.data.isPublished || false);
-        const rawContent = res.data.content;
-        const content = Array.isArray(rawContent)
-          ? rawContent
-          : Array.isArray((rawContent as Record<string, unknown>)?.blocks)
-            ? (rawContent as Record<string, unknown>).blocks as unknown[]
-            : [];
-        setBlocks(content);
-        historyRef.current.push(content);
+        const content = parsePageContent(res.data.content);
+        setBlocks(content.blocks as unknown as BuilderBlock[]);
+        setPageSettings(content.settings);
+        historyRef.current.push(content.blocks as unknown as BuilderBlock[]);
       }
       setLoading(false);
     })();
@@ -300,7 +380,7 @@ export default function BuilderPage({ params }: { params: Promise<{ pageId: stri
     setSaving(true);
     const res = await api.patch(`/api/sites/${currentStore.id}/pages/${pageId}`, {
       title: pageTitle,
-      content: blocks,
+      content: serializePageContent({ blocks, settings: pageSettings }),
       isPublished,
     });
     setSaving(false);
@@ -459,11 +539,30 @@ export default function BuilderPage({ params }: { params: Promise<{ pageId: stri
 
         {/* Canvas */}
         <div className="flex-1 overflow-y-auto p-6" onClick={() => setSelectedBlockId(null)}>
-          <div className={`mx-auto bg-white rounded-2xl border border-surface-200 shadow-sm min-h-[600px] transition-all ${
+          <div
+            className={`mx-auto rounded-2xl border border-surface-200 shadow-sm min-h-[600px] transition-all overflow-hidden relative ${
             previewMode === "mobile" ? "max-w-[375px]" : "max-w-4xl"
-          }`}>
+          }`}
+            style={{
+              backgroundColor: pageSettings.backgroundColor || "#ffffff",
+              backgroundImage: pageSettings.backgroundImage ? `url(${pageSettings.backgroundImage})` : undefined,
+              backgroundSize: pageSettings.backgroundImage ? pageSettings.backgroundSize || "cover" : undefined,
+              backgroundPosition: pageSettings.backgroundImage ? pageSettings.backgroundPosition || "center center" : undefined,
+              backgroundRepeat: pageSettings.backgroundImage ? pageSettings.backgroundRepeat || "no-repeat" : undefined,
+              backgroundAttachment: pageSettings.backgroundImage ? pageSettings.backgroundAttachment || "scroll" : undefined,
+            }}
+          >
+            {pageSettings.backgroundImage && (
+              <div
+                className="absolute inset-0 pointer-events-none"
+                style={{
+                  backgroundColor: pageSettings.overlayColor || "#000000",
+                  opacity: pageSettings.overlayOpacity ?? 0.25,
+                }}
+              />
+            )}
             {blocks.length === 0 ? (
-              <div className="flex flex-col items-center justify-center h-[600px] text-center p-8">
+              <div className="flex flex-col items-center justify-center h-[600px] text-center p-8 relative z-10">
                 <div className="h-16 w-16 rounded-2xl bg-surface-50 flex items-center justify-center mb-4">
                   <Plus className="h-8 w-8 text-surface-300" />
                 </div>
@@ -481,7 +580,7 @@ export default function BuilderPage({ params }: { params: Promise<{ pageId: stri
             ) : (
               <DndContext sensors={sensors} collisionDetection={closestCenter} onDragStart={handleDragStart} onDragEnd={handleDragEnd}>
                 <SortableContext items={blocks.map((b) => b.id)} strategy={verticalListSortingStrategy}>
-                  <div className="p-6 space-y-3">
+                  <div className="p-6 space-y-3 relative z-10">
                     {blocks.map((block, idx) => (
                       <div key={block.id}>
                         {/* Insert-between button */}
@@ -530,7 +629,7 @@ export default function BuilderPage({ params }: { params: Promise<{ pageId: stri
         </div>
 
         {/* Property Panel */}
-        {selectedBlock && (
+        {selectedBlock ? (
           <PropertyPanel
             block={selectedBlock}
             onUpdate={updateBlock}
@@ -539,6 +638,8 @@ export default function BuilderPage({ params }: { params: Promise<{ pageId: stri
             onDelete={() => deleteBlock(selectedBlock.id)}
             onDuplicate={() => duplicateBlock(selectedBlock.id)}
           />
+        ) : (
+          <PageSettingsPanel settings={pageSettings} onChange={setPageSettings} />
         )}
       </div>
     </div>

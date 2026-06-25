@@ -40,7 +40,9 @@ function Stars({ rating, size = 16 }: { rating: number; size?: number }) {
   return (
     <div className="flex items-center gap-0.5">
       {[1, 2, 3, 4, 5].map((i) => (
-        <Star key={i} className={i <= Math.round(rating) ? "text-amber-400 fill-amber-400" : "text-surface-200"} style={{ width: size, height: size }} />
+        <span key={i} className="inline-flex shrink-0" style={{ width: size, height: size }}>
+          <Star className={`${i <= Math.round(rating) ? "text-amber-400 fill-amber-400" : "text-surface-200"} h-full w-full`} />
+        </span>
       ))}
     </div>
   );

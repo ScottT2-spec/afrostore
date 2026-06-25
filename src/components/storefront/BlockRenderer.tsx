@@ -44,6 +44,24 @@ function AnimateIn({ children, className = "", delay = 0 }: { children: React.Re
   );
 }
 
+const textSizeClasses: Record<string, string> = {
+  sm: "text-sm",
+  base: "text-base",
+  lg: "text-lg",
+  xl: "text-xl",
+  "2xl": "text-2xl",
+  "3xl": "text-3xl",
+  "4xl": "text-4xl",
+};
+
+const roundedClasses: Record<string, string> = {
+  none: "rounded-none",
+  lg: "rounded-lg",
+  xl: "rounded-xl",
+  "2xl": "rounded-2xl",
+  "3xl": "rounded-3xl",
+};
+
 /* ─── ICON MAP ──────────────────────────────────────────────── */
 
 const iconMap: Record<string, React.ElementType> = {
@@ -103,15 +121,19 @@ function TextBlock({ props }: { props: Record<string, unknown> }) {
 function ImageBlock({ props }: { props: Record<string, unknown> }) {
   const src = props.src as string;
   if (!src) return null;
-  const radiusMap: Record<string, string> = { none: "0", lg: "0.5rem", xl: "0.75rem", "2xl": "1rem", "3xl": "1.5rem" };
+  const widthValue = (props.width as string) || "full";
   return (
     <AnimateIn>
-      <img
-        src={src}
-        alt={(props.alt as string) || ""}
-        className="w-full object-cover shadow-lg"
-        style={{ borderRadius: radiusMap[(props.rounded as string) || "2xl"] || "1rem" }}
-      />
+      <div className="w-full max-w-full overflow-hidden flex justify-center">
+        <img
+          src={src}
+          alt={(props.alt as string) || ""}
+          className={`block w-full max-w-full h-auto object-cover shadow-lg ${roundedClasses[(props.rounded as string) || "2xl"] || roundedClasses["2xl"]}`}
+          style={{
+            maxWidth: widthValue === "half" ? "50%" : widthValue === "third" ? "33.333%" : widthValue === "quarter" ? "25%" : "100%",
+          }}
+        />
+      </div>
     </AnimateIn>
   );
 }
@@ -230,6 +252,12 @@ function HeroBlock({ props }: { props: Record<string, unknown> }) {
   );
 }
 
+function gridColumnsStyle(columns: number, mobileColumns = 1) {
+  return {
+    gridTemplateColumns: `repeat(${Math.max(mobileColumns, Math.min(columns, 4))}, minmax(0, 1fr))`,
+  } as React.CSSProperties;
+}
+
 /* ── Spacer ──────────────────────────────────────────────────── */
 function SpacerBlock({ props }: { props: Record<string, unknown> }) {
   return <div style={{ height: `${(props.height as number) || 40}px` }} />;
@@ -261,8 +289,14 @@ function DividerBlock({ props }: { props: Record<string, unknown> }) {
 function ColumnsBlock({ props }: { props: Record<string, unknown> }) {
   const children = (props.children as BuilderBlock[]) || [];
   const cols = (props.columns as number) || 2;
+  const gridClass = {
+    1: "grid-cols-1",
+    2: "grid-cols-1 md:grid-cols-2",
+    3: "grid-cols-1 md:grid-cols-3",
+    4: "grid-cols-1 md:grid-cols-4",
+  }[Math.max(1, Math.min(cols, 4)) as 1 | 2 | 3 | 4];
   return (
-    <div className={`grid grid-cols-1 md:grid-cols-${Math.min(cols, 4)} gap-6`}>
+    <div className={`grid gap-6 ${gridClass}`}>
       {children.map((child) => <div key={child.id}><PublicBlockRenderer block={child} /></div>)}
     </div>
   );
@@ -296,6 +330,12 @@ function getProductGradient(id: string): string {
 function ProductGridBlock({ props }: { props: Record<string, unknown> }) {
   const limit = (props.limit as number) || 6;
   const cols = (props.columns as number) || 3;
+  const gridClass = {
+    1: "grid-cols-2",
+    2: "grid-cols-2 sm:grid-cols-2",
+    3: "grid-cols-2 sm:grid-cols-3",
+    4: "grid-cols-2 sm:grid-cols-2 lg:grid-cols-4",
+  }[Math.max(1, Math.min(cols, 4)) as 1 | 2 | 3 | 4];
   const categoryFilter = (props.category as string) || "";
   const { products, currency, slug, addToCart, isWishlisted, toggleWishlist, addedToCart } = useContext(StoreContext);
 
@@ -325,7 +365,7 @@ function ProductGridBlock({ props }: { props: Record<string, unknown> }) {
             {(props.subtitle as string) && <p className="text-surface-500 mt-2">{props.subtitle as string}</p>}
           </div>
         )}
-        <div className={`grid grid-cols-2 sm:grid-cols-${Math.min(cols, 4)} gap-4 sm:gap-6`}>
+        <div className={`grid gap-4 sm:gap-6 ${gridClass}`}>
           {hasRealProducts
             ? displayProducts.map((product) => {
                 const hasImage = product.images.length > 0 && product.images[0].url;
@@ -569,6 +609,7 @@ function FeaturesBlock({ props }: { props: Record<string, unknown> }) {
   const cols = items.length <= 3 ? 3 : 4;
   const bg = (props.bgColor as string) || "transparent";
   const isDark = bg === "dark";
+  const gridClass = cols === 4 ? "grid-cols-1 sm:grid-cols-2 lg:grid-cols-4" : "grid-cols-1 sm:grid-cols-2 lg:grid-cols-3";
   return (
     <div className="rounded-3xl py-10 px-6 sm:px-10" style={{ backgroundColor: bg === "surface" ? "#FAFAFA" : isDark ? "#0F172A" : "transparent" }}>
       {(props.title as string) && (
@@ -583,7 +624,7 @@ function FeaturesBlock({ props }: { props: Record<string, unknown> }) {
           </div>
         </AnimateIn>
       )}
-      <div className={`grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-${cols} gap-5`}>
+      <div className={`grid gap-5 ${gridClass}`}>
         {items.map((item, i) => {
           const Icon = iconMap[item.icon] || Shield;
           return (
@@ -786,6 +827,7 @@ function StatsBlock({ props }: { props: Record<string, unknown> }) {
   const items = (props.items as Array<{ value: string; label: string; icon?: string }>) || [];
   const bg = (props.bgColor as string) || "brand";
   const isDark = bg === "brand" || bg === "dark";
+  const columnsClass = items.length >= 4 ? "grid-cols-2 sm:grid-cols-4" : items.length === 3 ? "grid-cols-2 sm:grid-cols-3" : "grid-cols-2";
   return (
     <div className={`rounded-3xl py-12 px-6 sm:px-10 ${
       bg === "brand" ? "bg-gradient-to-br from-brand-700 to-brand-900" :
@@ -799,7 +841,7 @@ function StatsBlock({ props }: { props: Record<string, unknown> }) {
           </h3>
         </AnimateIn>
       )}
-      <div className={`grid grid-cols-2 sm:grid-cols-${Math.min(items.length, 4)} gap-6`}>
+      <div className={`grid gap-6 ${columnsClass}`}>
         {items.map((item, i) => {
           const Icon = item.icon ? iconMap[item.icon] : null;
           return (

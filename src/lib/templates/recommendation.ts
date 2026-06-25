@@ -1,6 +1,7 @@
 import { prisma } from "@/lib/db";
 import { slugify } from "@/lib/utils";
 import type { PageType, Prisma, Template as PrismaTemplate } from "@/generated/prisma";
+import type { BuilderBlock } from "@/lib/builder/types";
 import { INTERNAL_TEMPLATES } from "./catalog";
 import { TEMPLATE_FAMILY_ALIASES, TEMPLATE_FAMILY_PAGE_SETS } from "./families";
 import type {
@@ -38,6 +39,14 @@ const RECOMMENDATION_MAP: Record<string, string[]> = {
   commerce: ["Commerce Pro"],
   ecommerce: ["Commerce Pro"],
 };
+
+function block(id: string, type: string, props: Record<string, unknown>): BuilderBlock {
+  return {
+    id,
+    type: type as BuilderBlock["type"],
+    props,
+  };
+}
 
 const INDUSTRY_ALIASES: Record<string, string[]> = {
   Restaurant: ["restaurant", "cafe", "food", "dining", "menu", "catering"],

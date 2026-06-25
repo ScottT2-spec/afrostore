@@ -43,6 +43,66 @@ export default function MediaPage() {
   const [uploadUrl, setUploadUrl] = useState("");
   const [uploadType, setUploadType] = useState("IMAGE");
   const [uploadFolder, setUploadFolder] = useState("/");
+  const [uploadFiles, setUploadFiles] = useState<File[]>([]);
+
+  const determineMediaType = (file: File): MediaItem["type"] => {
+    if (file.type.startsWith("image/")) return "IMAGE";
+    if (file.type.startsWith("video/")) return "VIDEO";
+    if (file.type.startsWith("audio/")) return "AUDIO";
+    return "DOCUMENT";
+  };
+
+  const uploadSelectedFiles = async () => {
+    if (!currentStore || uploadFiles.length === 0) return;
+
+    setSaving(true);
+    try {
+      const formData = new FormData();
+      uploadFiles.forEach((file) => formData.append("file", file));
+
+      const token = typeof window !== "undefined" ? localStorage.getItem("token") : null;
+      const headers: Record<string, string> = {};
+      if (token) headers["Authorization"] = `Bearer ${token}`;
+
+      const uploadRes = await fetch("/api/upload", {
+        method: "POST",
+        headers,
+        body: formData,
+      });
+
+      const uploadJson = await uploadRes.json();
+      if (!uploadRes.ok || !uploadJson.success) {
+        throw new Error(uploadJson.error || "Upload failed");
+      }
+
+      const uploadedFiles = (uploadJson.data?.files || []) as Array<{ url: string; name: string; size: number }>;
+      for (let index = 0; index < uploadedFiles.length; index += 1) {
+        const file = uploadFiles[index];
+        const uploaded = uploadedFiles[index];
+        if (!file || !uploaded) continue;
+
+        const mediaName = uploadName.trim() || file.name;
+        await api.post(`/api/sites/${currentStore.id}/media`, {
+          name: mediaName,
+          url: uploaded.url,
+          type: determineMediaType(file),
+          mimeType: file.type || undefined,
+          size: file.size,
+          folder: uploadFolder || "/",
+        });
+      }
+
+      setShowUpload(false);
+      setUploadName("");
+      setUploadUrl("");
+      setUploadType("IMAGE");
+      setUploadFolder("/");
+      setUploadFiles([]);
+      fetchMedia();
+    } finally {
+      setSaving(false);
+    }
+  };
 
   const fetchMedia = useCallback(async () => {
     if (!currentStore) return;
@@ -59,10 +119,14 @@ export default function MediaPage() {
   useEffect(() => { fetchMedia(); }, [fetchMedia]);
 
   const uploadItem = async () => {
+    if (uploadFiles.length > 0) {
+      await uploadSelectedFiles();
+      return;
+    }
     if (!currentStore || !uploadName.trim() || !uploadUrl.trim()) return;
     setSaving(true);
     await api.post(`/api/sites/${currentStore.id}/media`, { name: uploadName.trim(), url: uploadUrl.trim(), type: uploadType, folder: uploadFolder || "/" });
-    setShowUpload(false); setUploadName(""); setUploadUrl(""); setUploadType("IMAGE"); setUploadFolder("/"); setSaving(false); fetchMedia();
+    setShowUpload(false); setUploadName(""); setUploadUrl(""); setUploadType("IMAGE"); setUploadFolder("/"); setUploadFiles([]); setSaving(false); fetchMedia();
   };
 
   const deleteItem = async (id: string) => {
@@ -124,8 +188,28 @@ export default function MediaPage() {
               </select></div>
             <div><label className="block text-sm font-medium text-surface-700 mb-1">Folder</label><input value={uploadFolder} onChange={(e) => setUploadFolder(e.target.value)} className="input-field py-2.5 w-full" placeholder="/" /></div>
           </div>
+          <div>
+            <label className="block text-sm font-medium text-surface-700 mb-1">Upload Files</label>
+            <input
+              type="file"
+              multiple
+              accept="image/*,video/*,audio/*,.pdf,.doc,.docx,.ppt,.pptx,.xls,.xlsx,.csv,.txt,.rtf"
+              onChange={(e) => setUploadFiles(Array.from(e.target.files || []))}
+              className="block w-full rounded-xl border border-dashed border-surface-300 bg-surface-50 px-4 py-3 text-sm text-surface-600 file:mr-4 file:rounded-lg file:border-0 file:bg-brand-600 file:px-4 file:py-2 file:text-sm file:font-semibold file:text-white hover:border-brand-300"
+            />
+            {uploadFiles.length > 0 && (
+              <p className="mt-2 text-xs text-surface-500">{uploadFiles.length} file(s) selected</p>
+            )}
+            <p className="mt-1 text-[10px] text-surface-400">Upload images, videos, audio, and documents directly to the media library.</p>
+          </div>
           <div className="flex gap-3">
-            <button onClick={uploadItem} disabled={saving || !uploadName.trim() || !uploadUrl.trim()} className="btn-primary text-sm py-2.5 px-6">{saving ? <Loader2 className="h-4 w-4 animate-spin" /> : "Add"}</button>
+            <button
+              onClick={uploadItem}
+              disabled={saving || (!uploadFiles.length && (!uploadName.trim() || !uploadUrl.trim()))}
+              className="btn-primary text-sm py-2.5 px-6"
+            >
+              {saving ? <Loader2 className="h-4 w-4 animate-spin" /> : uploadFiles.length > 0 ? "Upload Files" : "Add"}
+            </button>
             <button onClick={() => setShowUpload(false)} className="btn-secondary text-sm py-2.5 px-4">Cancel</button>
           </div>
         </div>

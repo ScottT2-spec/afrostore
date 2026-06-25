@@ -46,6 +46,7 @@ export async function GET(_req: NextRequest, { params }: Params) {
         title: true,
         slug: true,
         type: true,
+        template: true,
         content: true,
         metaTitle: true,
         metaDescription: true,

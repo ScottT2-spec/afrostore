@@ -6,6 +6,7 @@ import { useState, useEffect } from "react";
 import { useParams } from "next/navigation";
 import Link from "next/link";
 import { RenderBlocks, type BuilderBlock } from "@/components/storefront/BlockRenderer";
+import { parsePageContent, type PageContentDocument } from "@/lib/page-content";
 
 /* ─── TYPES ─────────────────────────────────────────────────── */
 
@@ -16,6 +17,7 @@ interface PageData {
     title: string;
     slug: string;
     type: string;
+    template?: string | null;
     content: unknown;
     metaTitle?: string;
     metaDescription?: string;
@@ -82,14 +84,11 @@ export default function StorefrontPage() {
   }
 
   const { store, page } = data;
-  const blocks: BuilderBlock[] = Array.isArray(page.content)
-    ? (page.content as BuilderBlock[])
-    : Array.isArray((page.content as Record<string, unknown>)?.blocks)
-      ? ((page.content as Record<string, unknown>).blocks as BuilderBlock[])
-      : [];
+  const parsedContent: PageContentDocument = parsePageContent(page.content);
+  const blocks: BuilderBlock[] = parsedContent.blocks;
 
   return (
-    <div className="min-h-screen bg-white">
+    <div className="min-h-screen bg-white" style={parsedContent.settings.backgroundColor ? { backgroundColor: parsedContent.settings.backgroundColor } : undefined}>
       {/* Minimal navbar */}
       <header className="sticky top-0 z-40 bg-white border-b border-gray-200">
         <div className="max-w-4xl mx-auto flex h-14 items-center justify-between px-4 sm:px-6">
@@ -113,13 +112,33 @@ export default function StorefrontPage() {
       </header>
 
       {/* Page content */}
-      <main className="max-w-4xl mx-auto px-4 sm:px-6 py-8 sm:py-12">
+      <main
+        className="max-w-4xl mx-auto px-4 sm:px-6 py-8 sm:py-12 relative overflow-hidden rounded-2xl"
+        style={parsedContent.settings.backgroundImage ? {
+          backgroundImage: `url(${parsedContent.settings.backgroundImage})`,
+          backgroundSize: parsedContent.settings.backgroundSize || "cover",
+          backgroundPosition: parsedContent.settings.backgroundPosition || "center center",
+          backgroundRepeat: parsedContent.settings.backgroundRepeat || "no-repeat",
+          backgroundAttachment: parsedContent.settings.backgroundAttachment || "scroll",
+        } : undefined}
+      >
+        {parsedContent.settings.backgroundImage && (
+          <div
+            className="absolute inset-0 pointer-events-none"
+            style={{
+              backgroundColor: parsedContent.settings.overlayColor || "#000000",
+              opacity: parsedContent.settings.overlayOpacity ?? 0.25,
+            }}
+          />
+        )}
         {blocks.length === 0 ? (
-          <div className="text-center py-20">
+          <div className="text-center py-20 relative z-10">
             <p className="text-gray-400">This page has no content yet.</p>
           </div>
         ) : (
-          <RenderBlocks blocks={blocks} storeSlug={slug} />
+          <div className="relative z-10">
+            <RenderBlocks blocks={blocks} storeSlug={slug} />
+          </div>
         )}
       </main>
 

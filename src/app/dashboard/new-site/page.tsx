@@ -51,6 +51,8 @@ const PAYMENT_GATEWAYS = [
 
 type SiteType = 'ECOMMERCE' | 'WEBSITE' | 'LANDING_PAGE';
 type ScoredTemplate = TemplateDefinition & { matchPercent?: number; score?: number };
+const asScoredTemplates = (value: unknown): ScoredTemplate[] => value as ScoredTemplate[];
+const asScoredTemplate = (value: unknown): ScoredTemplate | null => value as ScoredTemplate | null;
 
 export default function NewSitePage() {
   const router = useRouter();
@@ -70,7 +72,7 @@ export default function NewSitePage() {
   const [siteType, setSiteType] = useState<SiteType | null>((draft?.siteType as SiteType | null) || null);
   const [industry, setIndustry] = useState<string | null>(draft?.industry || null);
   const [launchMethod, setLaunchMethod] = useState<string | null>(templateParam ? 'template' : draft?.launchMethod || null);
-  const [selectedTemplate, setSelectedTemplate] = useState<ScoredTemplate | null>(draft?.selectedTemplate || null);
+  const [selectedTemplate, setSelectedTemplate] = useState<ScoredTemplate | null>(asScoredTemplate(draft?.selectedTemplate));
   const [selectedTemplateId, setSelectedTemplateId] = useState<string | null>(templateParam || draft?.selectedTemplateId || null);
   const [businessInfo, setBusinessInfo] = useState({
     name: draft?.businessDetails.name || '',
@@ -100,7 +102,7 @@ export default function NewSitePage() {
   const [selectedGateways, setSelectedGateways] = useState<string[]>([]);
   const [domainType, setDomainType] = useState<'subdomain' | 'custom'>('subdomain');
   const [customDomain, setCustomDomain] = useState('');
-  const [recommendedTemplates, setRecommendedTemplates] = useState<ScoredTemplate[]>(draft?.recommendations || []);
+  const [recommendedTemplates, setRecommendedTemplates] = useState<ScoredTemplate[]>(asScoredTemplates(draft?.recommendations || []));
 
   // Load workspaces if none specified
   const [selectedWorkspace, setSelectedWorkspace] = useState(workspaceId || '');
@@ -232,7 +234,7 @@ export default function NewSitePage() {
       if (!json) {
         throw new Error("The site creation service returned no data. Please try again.");
       }
-      if (json.success) {
+      if (json.success && json.data?.id) {
         setCreatedSiteId(json.data.id);
         setCreated(true);
         clearOnboardingDraft(user?.id);

@@ -3,6 +3,7 @@ import { prisma } from "@/lib/db";
 import { getStoreContext, success, error, validationError, ensureUniqueSlug, logAudit } from "@/lib/api-helpers";
 import { createPageSchema } from "@/lib/validators";
 import { unauthorized } from "@/lib/auth";
+import { getLinkedPageTemplate } from "@/lib/page-content";
 
 type Params = { params: Promise<{ siteId: string }> };
 
@@ -57,12 +58,14 @@ export async function POST(req: NextRequest, { params }: Params) {
     if (!parsed.success) return validationError(parsed.error.flatten().fieldErrors);
 
     const slug = await ensureUniqueSlug(parsed.data.title, siteId, "page");
+    const linkedTemplate = getLinkedPageTemplate({ slug, title: parsed.data.title });
 
     const page = await prisma.page.create({
       data: {
         siteId,
         slug,
         ...parsed.data,
+        template: parsed.data.template ?? linkedTemplate,
       },
     });
 

@@ -9,6 +9,24 @@ const iconMap: Record<string, React.ElementType> = {
   truck: Truck, shield: Shield, headphones: Headphones, refresh: RefreshCw,
 };
 
+const textSizeClasses: Record<string, string> = {
+  sm: "text-sm",
+  base: "text-base",
+  lg: "text-lg",
+  xl: "text-xl",
+  "2xl": "text-2xl",
+  "3xl": "text-3xl",
+  "4xl": "text-4xl",
+};
+
+const roundedClasses: Record<string, string> = {
+  none: "rounded-none",
+  lg: "rounded-lg",
+  xl: "rounded-xl",
+  "2xl": "rounded-2xl",
+  "3xl": "rounded-3xl",
+};
+
 function HeadingBlock({ props }: { props: Record<string, unknown> }) {
   const level = (props.level as string) || "h2";
   const sizeMap: Record<string, string> = { xl: "text-xl", "2xl": "text-2xl", "3xl": "text-3xl", "4xl": "text-4xl" };
@@ -25,7 +43,7 @@ function HeadingBlock({ props }: { props: Record<string, unknown> }) {
 function TextBlock({ props }: { props: Record<string, unknown> }) {
   return (
     <p
-      className={`text-${(props.fontSize as string) || "base"} leading-relaxed`}
+      className={`${textSizeClasses[(props.fontSize as string) || "base"] || textSizeClasses.base} leading-relaxed`}
       style={{ color: (props.color as string) || "#525252", textAlign: (props.align as any) || "left" }}
     >
       {(props.text as string) || ""}
@@ -36,7 +54,18 @@ function TextBlock({ props }: { props: Record<string, unknown> }) {
 function ImageBlock({ props }: { props: Record<string, unknown> }) {
   const src = props.src as string;
   if (!src) return <div className="h-48 bg-surface-100 rounded-xl flex items-center justify-center text-surface-400 text-sm">Click to add image URL</div>;
-  return <img src={src} alt={(props.alt as string) || ""} className={`w-${(props.width as string) || "full"} rounded-${(props.rounded as string) || "xl"} object-cover`} />;
+  return (
+    <div className="w-full max-w-full overflow-hidden flex justify-center">
+      <img
+        src={src}
+        alt={(props.alt as string) || ""}
+        className={`block w-full max-w-full h-auto object-cover ${roundedClasses[(props.rounded as string) || "xl"] || roundedClasses.xl}`}
+        style={{
+          maxWidth: props.width === "half" ? "50%" : props.width === "third" ? "33.333%" : props.width === "quarter" ? "25%" : "100%",
+        }}
+      />
+    </div>
+  );
 }
 
 function ButtonBlock({ props }: { props: Record<string, unknown> }) {
@@ -83,8 +112,17 @@ function DividerBlock({ props }: { props: Record<string, unknown> }) {
 function ColumnsBlock({ props }: { props: Record<string, unknown> }) {
   const children = (props.children as BuilderBlock[]) || [];
   const cols = (props.columns as number) || 2;
+  const gridClass = {
+    1: "grid-cols-1",
+    2: "grid-cols-1 md:grid-cols-2",
+    3: "grid-cols-1 md:grid-cols-3",
+    4: "grid-cols-1 md:grid-cols-4",
+  }[Math.max(1, Math.min(cols, 4)) as 1 | 2 | 3 | 4];
   return (
-    <div className={`grid grid-cols-1 md:grid-cols-${cols} gap-${(props.gap as number) || 4}`}>
+    <div
+      className={`grid gap-4 ${gridClass}`}
+      style={{ gap: `${((props.gap as number) || 4) * 0.25}rem` }}
+    >
       {children.map((child) => (
         <div key={child.id} className="p-4 border border-dashed border-surface-200 rounded-xl min-h-[80px]">
           <BlockRenderer block={child} />
@@ -97,10 +135,16 @@ function ColumnsBlock({ props }: { props: Record<string, unknown> }) {
 function ProductGridBlock({ props }: { props: Record<string, unknown> }) {
   const limit = (props.limit as number) || 6;
   const cols = (props.columns as number) || 3;
+  const gridClass = {
+    1: "grid-cols-2",
+    2: "grid-cols-2 sm:grid-cols-2",
+    3: "grid-cols-2 sm:grid-cols-3",
+    4: "grid-cols-2 sm:grid-cols-2 lg:grid-cols-4",
+  }[Math.max(1, Math.min(cols, 4)) as 1 | 2 | 3 | 4];
   return (
     <div>
       {(props.title as string) ? <h3 className="text-xl font-bold text-surface-900 mb-4">{props.title as string}</h3> : null}
-      <div className={`grid grid-cols-2 md:grid-cols-${cols} gap-4`}>
+      <div className={`grid gap-4 ${gridClass}`}>
         {Array.from({ length: limit }).map((_, i) => (
           <div key={i} className="rounded-xl border border-surface-200 bg-white overflow-hidden">
             <div className="h-32 bg-surface-100" />
