@@ -238,6 +238,8 @@ export default function NewSitePage() {
         setCreatedSiteId(json.data.id);
         setCreated(true);
         clearOnboardingDraft(user?.id);
+        // Scroll to top so the user sees the success message
+        window.scrollTo({ top: 0, behavior: 'smooth' });
       } else {
         setCreateError(json.error || 'Failed to create site');
       }
