@@ -1,12 +1,10 @@
 "use client";
+import { Loader2 } from "lucide-react";
+import { AlertTriangle, BarChart3, CheckCircle2, Package, Pencil, Save, Search, XCircle } from "@/components/icons/FilledIcons";
 
 import { useState, useEffect, useCallback } from "react";
 import { useSite } from "@/context/StoreContext";
 import { api } from "@/lib/api-client";
-import {
-  Package, Loader2, Search, AlertTriangle, XCircle, CheckCircle2,
-  BarChart3, Save, Pencil,
-} from "lucide-react";
 
 interface InventoryProduct {
   id: string; name: string; slug: string; sku: string | null;

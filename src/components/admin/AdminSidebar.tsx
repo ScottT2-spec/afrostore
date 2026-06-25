@@ -1,23 +1,11 @@
 "use client";
+import { ChevronLeft, ChevronRight } from "lucide-react";
+import { BarChart3, LayoutDashboard, LayoutTemplate, LogOut, Palette, Puzzle, Settings, ShoppingBag, Store, Users } from "@/components/icons/FilledIcons";
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useAuth } from "@/context/AuthContext";
 import { cn } from "@/lib/utils";
-import {
-  ShoppingBag,
-  LayoutDashboard,
-  Users,
-  Store,
-  Palette,
-  LayoutTemplate,
-  Puzzle,
-  BarChart3,
-  Settings,
-  ChevronLeft,
-  ChevronRight,
-  LogOut,
-} from "lucide-react";
 
 const navigation = [
   { name: "Dashboard", href: "/admin", icon: LayoutDashboard },

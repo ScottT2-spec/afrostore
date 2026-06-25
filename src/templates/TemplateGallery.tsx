@@ -1,11 +1,12 @@
 "use client";
+import { ArrowRight, Loader2 } from "lucide-react";
+import { ExternalLink, Search, Sparkles } from "@/components/icons/FilledIcons";
 
 import { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
 import { api } from "@/lib/api-client";
 import { TEMPLATE_CATEGORIES } from "@/lib/templates/catalog";
 import type { TemplateDefinition } from "@/lib/templates/types";
-import { ArrowRight, ExternalLink, Loader2, Search, Sparkles } from "lucide-react";
 
 interface ScoredTemplate extends TemplateDefinition {
   score?: number;

@@ -1,7 +1,8 @@
 "use client";
+import { Plus, X } from "lucide-react";
+import { Copy, Trash2 } from "@/components/icons/FilledIcons";
 
 import { BuilderBlock, BlockType } from "@/lib/builder/types";
-import { X, Trash2, Plus, Copy } from "lucide-react";
 import { SingleImageUpload } from "@/components/dashboard/ImageUpload";
 
 interface PropertyPanelProps {

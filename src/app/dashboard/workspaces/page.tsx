@@ -1,8 +1,9 @@
 'use client';
+import { Loader2, Plus } from "lucide-react";
+import { Building2, FileText, Globe, Megaphone, MoreVertical, Settings, ShoppingBag, Users } from "@/components/icons/FilledIcons";
 
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
-import { Plus, Building2, Globe, ShoppingBag, FileText, Megaphone, Settings, Users, MoreVertical, Loader2 } from 'lucide-react';
 import { useAuth } from '@/context/AuthContext';
 
 interface Workspace {

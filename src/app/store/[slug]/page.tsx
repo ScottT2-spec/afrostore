@@ -1,32 +1,10 @@
 "use client";
+import { ArrowRight, ChevronRight, Loader2, Plus, X } from "lucide-react";
+import { CheckCircle2, CreditCard, Heart, ImageIcon, Mail, MapPin, Menu, MessageCircle, Minus, Phone, Search, Shield, ShoppingBag, ShoppingCart, Star, Truck, Zap } from "@/components/icons/FilledIcons";
 
 import { useState, useEffect, useCallback } from "react";
 import { useParams } from "next/navigation";
 import Link from "next/link";
-import {
-  ShoppingBag,
-  Search,
-  ShoppingCart,
-  Menu,
-  X,
-  Star,
-  Heart,
-  ChevronRight,
-  MessageCircle,
-  Truck,
-  Shield,
-  CreditCard,
-  ArrowRight,
-  Phone,
-  Mail,
-  MapPin,
-  Plus,
-  Minus,
-  Zap,
-  Loader2,
-  CheckCircle2,
-  ImageIcon,
-} from "lucide-react";
 import { RenderBlocks, type BuilderBlock } from "@/components/storefront/BlockRenderer";
 import { ThemeProvider, type ThemeData } from "@/components/storefront/ThemeProvider";
 import { useWishlist } from "@/hooks/useWishlist";

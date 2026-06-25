@@ -1,12 +1,9 @@
 "use client";
+import { ArrowRight, ChevronRight } from "lucide-react";
+import { BarChart3, Bell, Eye, Globe, Heart, Package, Search, ShoppingBag, ShoppingCart, Star, TrendingUp, Users } from "@/components/icons/FilledIcons";
 
 import Image from "next/image";
 import Link from "next/link";
-import {
-  ArrowRight, ShoppingBag, ShoppingCart, Star, Heart, Search,
-  Eye, Globe, ChevronRight, Package, Users,
-  BarChart3, Bell, TrendingUp,
-} from "lucide-react";
 
 const DESKTOP_PRODUCTS = [
   {

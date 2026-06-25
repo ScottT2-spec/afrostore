@@ -1,6 +1,7 @@
 "use client";
+import { ArrowRight } from "lucide-react";
+import { Eye, Sparkles, Star } from "@/components/icons/FilledIcons";
 
-import { ArrowRight, Eye, Star, Sparkles } from "lucide-react";
 import Link from "next/link";
 
 const templates = [

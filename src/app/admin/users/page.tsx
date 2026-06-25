@@ -1,8 +1,9 @@
 "use client";
+import { ChevronLeft, ChevronRight, Loader2, X } from "lucide-react";
+import { Search, Shield, UserPlus, Users } from "@/components/icons/FilledIcons";
 
 import { useState, useEffect, useCallback } from "react";
 import { api } from "@/lib/api-client";
-import { Search, Users, Shield, Loader2, ChevronLeft, ChevronRight, UserPlus, X } from "lucide-react";
 
 interface User {
   id: string;

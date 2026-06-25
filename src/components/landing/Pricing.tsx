@@ -1,6 +1,7 @@
 "use client";
+import { ArrowRight } from "lucide-react";
+import { CheckCircle2, Sparkles, Star } from "@/components/icons/FilledIcons";
 
-import { CheckCircle2, ArrowRight, Sparkles, Star } from "lucide-react";
 import Link from "next/link";
 
 const plans = [

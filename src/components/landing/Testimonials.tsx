@@ -1,6 +1,6 @@
 "use client";
+import { Quote, Star } from "@/components/icons/FilledIcons";
 
-import { Star, Quote } from "lucide-react";
 import { useEffect, useState } from "react";
 
 // ─── Types ──────────────────────────────────────────────────

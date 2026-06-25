@@ -1,7 +1,7 @@
 "use client";
+import { ShoppingBag } from "@/components/icons/FilledIcons";
 
 import Link from "next/link";
-import { ShoppingBag } from "lucide-react";
 
 const footerLinks = {
   Product: [

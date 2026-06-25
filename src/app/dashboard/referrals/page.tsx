@@ -1,4 +1,6 @@
 "use client";
+import { Check, Loader2, X } from "lucide-react";
+import { Copy, DollarSign, Eye, Gift, Link2, MoreHorizontal, MousePointerClick, Settings, ShoppingCart, ToggleLeft, ToggleRight, TrendingUp, UserPlus, Users } from "@/components/icons/FilledIcons";
 
 import { useState, useEffect, useCallback } from "react";
 import { useSite } from "@/context/StoreContext";
@@ -7,25 +9,6 @@ import DashboardHeader from "@/components/dashboard/DashboardHeader";
 import { useAIPrefill } from "@/hooks/useAIPrefill";
 import AIPrefillBanner from "@/components/dashboard/AIPrefillBanner";
 import { useRouter } from "next/navigation";
-import {
-  Loader2,
-  Link2,
-  Users,
-  DollarSign,
-  MousePointerClick,
-  ShoppingCart,
-  Copy,
-  Check,
-  Settings,
-  UserPlus,
-  Eye,
-  MoreHorizontal,
-  TrendingUp,
-  Gift,
-  ToggleLeft,
-  ToggleRight,
-  X,
-} from "lucide-react";
 
 interface ReferralProgram {
   id: string;

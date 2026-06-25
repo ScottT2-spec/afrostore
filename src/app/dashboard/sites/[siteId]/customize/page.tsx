@@ -1,9 +1,10 @@
 "use client";
+import { ArrowLeft, Loader2, Plus } from "lucide-react";
+import { ExternalLink, LayoutTemplate, Pencil, Save, Sparkles } from "@/components/icons/FilledIcons";
 
 import { use, useEffect, useMemo, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { ArrowLeft, ExternalLink, LayoutTemplate, Loader2, Pencil, Plus, Save, Sparkles } from "lucide-react";
 import { api } from "@/lib/api-client";
 import { SingleImageUpload } from "@/components/dashboard/ImageUpload";
 

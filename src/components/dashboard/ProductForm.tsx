@@ -1,4 +1,6 @@
 "use client";
+import { ArrowLeft, ChevronDown, ChevronUp, Loader2, Plus, X } from "lucide-react";
+import { AlertCircle, BarChart3, Copy, GripVertical, ImageIcon, Layers, Package, Save, Settings2, Sparkles, Tag, Trash2 } from "@/components/icons/FilledIcons";
 
 import { useState, useEffect, useCallback } from "react";
 import { useSite } from "@/context/StoreContext";
@@ -6,26 +8,6 @@ import { useRouter } from "next/navigation";
 import { api } from "@/lib/api-client";
 import { useAIPrefill } from "@/hooks/useAIPrefill";
 import AIPrefillBanner from "@/components/dashboard/AIPrefillBanner";
-import {
-  ArrowLeft,
-  Save,
-  Loader2,
-  Plus,
-  X,
-  Trash2,
-  ImageIcon,
-  GripVertical,
-  ChevronDown,
-  ChevronUp,
-  Package,
-  Layers,
-  Tag,
-  BarChart3,
-  Settings2,
-  Sparkles,
-  Copy,
-  AlertCircle,
-} from "lucide-react";
 import ImageUpload, { SingleImageUpload } from "@/components/dashboard/ImageUpload";
 
 // ─── Types ──────────────────────────────────────────────────
@@ -403,7 +385,6 @@ export default function ProductForm({ productId }: ProductFormProps) {
     if (!currentStore) return;
     if (!name.trim()) { setError("Product name is required"); setActiveTab("general"); return; }
     if (!price || parseFloat(price) <= 0) { setError("Price must be greater than 0"); setActiveTab("general"); return; }
-
 
     setSaving(true);
     setError("");

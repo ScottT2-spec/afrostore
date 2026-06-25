@@ -1,16 +1,10 @@
 "use client";
+import { ArrowLeft, Loader2 } from "lucide-react";
+import { BadgeCheck, ImageIcon, ShoppingBag, Star } from "@/components/icons/FilledIcons";
 
 import { useState, useEffect, useCallback } from "react";
 import { useParams } from "next/navigation";
 import Link from "next/link";
-import {
-  ShoppingBag,
-  Star,
-  ArrowLeft,
-  Loader2,
-  BadgeCheck,
-  ImageIcon,
-} from "lucide-react";
 
 interface ReviewProduct {
   name: string;

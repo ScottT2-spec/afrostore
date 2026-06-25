@@ -1,4 +1,6 @@
 "use client";
+import { ArrowRight, ChevronDown, ChevronUp, Loader2, X } from "lucide-react";
+import { AlertCircle, Bot, CheckCircle2, ExternalLink, ImagePlus, Send, Sparkles, Wrench, Zap } from "@/components/icons/FilledIcons";
 
 import { useState, useRef, useEffect } from "react";
 import DashboardHeader from "@/components/dashboard/DashboardHeader";
@@ -6,22 +8,6 @@ import { useAuth } from "@/context/AuthContext";
 import { useSite } from "@/context/StoreContext";
 import { useAIAction } from "@/context/AIActionContext";
 import { api } from "@/lib/api-client";
-import {
-  Bot,
-  Send,
-  Sparkles,
-  Loader2,
-  AlertCircle,
-  Zap,
-  ImagePlus,
-  X,
-  ArrowRight,
-  CheckCircle2,
-  Wrench,
-  ExternalLink,
-  ChevronDown,
-  ChevronUp,
-} from "lucide-react";
 
 // ─── Types ──────────────────────────────────────────────────
 

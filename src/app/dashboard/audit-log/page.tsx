@@ -1,9 +1,10 @@
 "use client";
+import { ChevronDown, ChevronRight, Loader2 } from "lucide-react";
+import { Search, Shield } from "@/components/icons/FilledIcons";
 
 import { useState, useEffect, useCallback } from "react";
 import { useSite } from "@/context/StoreContext";
 import { api } from "@/lib/api-client";
-import { Shield, Loader2, Search, ChevronDown, ChevronRight } from "lucide-react";
 
 interface AuditLogEntry {
   id: string; action: string; entity: string; entityId: string | null;

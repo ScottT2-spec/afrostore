@@ -1,11 +1,12 @@
 "use client";
+import { Loader2, Plus, X } from "lucide-react";
+import { CheckCircle2, Edit3, Eye, Power, Save, Search } from "@/components/icons/FilledIcons";
 
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { api } from "@/lib/api-client";
 import { TEMPLATE_CATEGORIES } from "@/lib/templates/catalog";
 import type { TemplateDefinition } from "@/lib/templates/types";
 import { SingleImageUpload } from "@/components/dashboard/ImageUpload";
-import { CheckCircle2, Edit3, Eye, Loader2, Plus, Power, Save, Search, X } from "lucide-react";
 
 const EMPTY_CONFIG = {
   homepage_layout: "custom",

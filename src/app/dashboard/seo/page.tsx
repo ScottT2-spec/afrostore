@@ -1,9 +1,10 @@
 "use client";
+import { Loader2 } from "lucide-react";
+import { AlertTriangle, CheckCircle2, FileText, Globe, Package, Save, Search as SearchIcon } from "@/components/icons/FilledIcons";
 
 import { useState, useEffect, useCallback } from "react";
 import { useSite } from "@/context/StoreContext";
 import { api } from "@/lib/api-client";
-import { Search as SearchIcon, Loader2, Save, FileText, Package, Globe, AlertTriangle, CheckCircle2 } from "lucide-react";
 
 interface SeoItem {
   id: string; type: "page" | "product" | "blog"; name: string; slug: string;

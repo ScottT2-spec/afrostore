@@ -1,7 +1,7 @@
 "use client";
+import { Sparkles } from "@/components/icons/FilledIcons";
 
 import type { TemplateDefinition } from "@/lib/templates/types";
-import { Sparkles } from "lucide-react";
 
 export interface RecommendedTemplate extends TemplateDefinition {
   matchPercent?: number;

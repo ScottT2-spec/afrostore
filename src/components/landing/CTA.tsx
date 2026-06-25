@@ -1,7 +1,8 @@
 "use client";
+import { ArrowRight } from "lucide-react";
+import { ShoppingBag, Sparkles, Zap } from "@/components/icons/FilledIcons";
 
 import Link from "next/link";
-import { ArrowRight, ShoppingBag, Sparkles, Zap } from "lucide-react";
 
 export default function CTA() {
   return (

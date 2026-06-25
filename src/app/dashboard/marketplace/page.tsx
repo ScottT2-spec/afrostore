@@ -1,12 +1,10 @@
 "use client";
+import { Loader2, Plus } from "lucide-react";
+import { Download, FileText, Filter, Palette, Pencil, Puzzle, Search, Star, Store, Trash2, Zap } from "@/components/icons/FilledIcons";
 
 import { useState, useEffect, useCallback } from "react";
 import { useSite } from "@/context/StoreContext";
 import { api } from "@/lib/api-client";
-import {
-  Store, Loader2, Search, Download, Star, Plus, Pencil, Trash2,
-  Palette, Puzzle, FileText, Zap, Filter,
-} from "lucide-react";
 
 interface MarketplaceItem {
   id: string; type: string; name: string; description: string | null;

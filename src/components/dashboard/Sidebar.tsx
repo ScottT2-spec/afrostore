@@ -1,4 +1,6 @@
 "use client";
+import { ChevronDown, ChevronLeft, ChevronRight, Plus } from "lucide-react";
+import { Activity, BarChart, BarChart3, Bell, BookOpen, Bot, Building2, Clock, CreditCard, Crown, ExternalLink, File, FileText, Filter, FolderTree, Globe, Heart, HelpCircle, Home, Image as ImageIcon, Info, Layers, LayoutDashboard, Link2, LogOut, Mail, Megaphone, MessageSquare, MousePointer, Package, Palette, PenTool, Phone, Puzzle, Receipt, RotateCcw, ScrollText, Search, Send, Settings, Shield, ShoppingBag, ShoppingCart, Smartphone, Star, Store, Tag, Target, Truck, Undo2, UserPlus, Users, Zap } from "@/components/icons/FilledIcons";
 
 import { useState, useEffect, useCallback } from "react";
 import Link from "next/link";
@@ -6,16 +8,6 @@ import { usePathname } from "next/navigation";
 import { useAuth } from "@/context/AuthContext";
 import { useSite } from "@/context/StoreContext";
 import { cn } from "@/lib/utils";
-import {
-  ShoppingBag, LayoutDashboard, Package, ShoppingCart, Users, BarChart3,
-  Palette, Puzzle, Bot, Globe, CreditCard, Settings, HelpCircle, Receipt,
-  ChevronLeft, ChevronRight, ChevronDown, LogOut, Plus, Store, Link2,
-  FileText, Tag, Truck, FolderTree, Star, UserPlus, Zap, RotateCcw,
-  Crown, ExternalLink, Home, Info, Phone, ScrollText, File, Mail,
-  PenTool, BookOpen, Image as ImageIcon, Search, Target, MessageSquare,
-  Smartphone, Filter, BarChart, MousePointer, Clock, Activity, Layers,
-  Building2, Bell, Undo2, Megaphone, Send, Heart, Shield,
-} from "lucide-react";
 
 // ─── Nav types ─────────────────────────────────────────────
 interface NavItem {

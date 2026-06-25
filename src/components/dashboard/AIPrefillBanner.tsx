@@ -1,4 +1,6 @@
 "use client";
+import { ArrowLeft, X } from "lucide-react";
+import { Bot, Sparkles } from "@/components/icons/FilledIcons";
 
 /**
  * AI Prefill Banner
@@ -8,7 +10,6 @@
  */
 
 import { useAIAction } from "@/context/AIActionContext";
-import { Bot, ArrowLeft, Sparkles, X } from "lucide-react";
 
 export interface AIPrefillBannerProps {
   /** What kind of entity (e.g. "product", "coupon", "flash sale") — shown in text */

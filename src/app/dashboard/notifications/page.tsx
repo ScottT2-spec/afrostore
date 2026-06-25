@@ -1,13 +1,10 @@
 "use client";
+import { Loader2 } from "lucide-react";
+import { AlertTriangle, Bell, CheckCircle2, CreditCard, Filter, Mail, Megaphone, MessageSquare, Package, Shield, ShoppingCart, Smartphone, Star, Trash2, Users } from "@/components/icons/FilledIcons";
 
 import { useState, useEffect, useCallback } from "react";
 import { useSite } from "@/context/StoreContext";
 import { api } from "@/lib/api-client";
-import {
-  Bell, Loader2, CheckCircle2, Trash2, ShoppingCart, CreditCard,
-  Package, Star, Users, Megaphone, Shield, AlertTriangle, Filter,
-  Mail, MessageSquare, Smartphone,
-} from "lucide-react";
 
 interface SiteNotif {
   id: string;

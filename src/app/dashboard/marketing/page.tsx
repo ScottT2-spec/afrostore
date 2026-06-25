@@ -1,13 +1,10 @@
 "use client";
+import { Loader2, Plus } from "lucide-react";
+import { AlertTriangle, BarChart3, CheckCircle2, Clock, Eye, Image as ImageIcon, Mail, MessageSquare, MousePointerClick, Pause, Pencil, Search, Send, Smartphone, Trash2, XCircle } from "@/components/icons/FilledIcons";
 
 import { useState, useEffect, useCallback } from "react";
 import { useSite } from "@/context/StoreContext";
 import { api } from "@/lib/api-client";
-import {
-  Mail, MessageSquare, Smartphone, Plus, Loader2, Search, Trash2,
-  Pencil, Send, Clock, Pause, CheckCircle2, XCircle, BarChart3,
-  Eye, MousePointerClick, AlertTriangle, Image as ImageIcon,
-} from "lucide-react";
 
 // ─── Types ──────────────────────────────────────────────────
 

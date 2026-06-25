@@ -1,9 +1,10 @@
 "use client";
+import { Loader2 } from "lucide-react";
+import { Heart, Package, TrendingUp, Users } from "@/components/icons/FilledIcons";
 
 import { useState, useEffect, useCallback } from "react";
 import { useSite } from "@/context/StoreContext";
 import { api } from "@/lib/api-client";
-import { Heart, Loader2, Users, Package, TrendingUp } from "lucide-react";
 
 interface WishlistProduct { id: string; name: string; slug: string; price: string; images: string[]; }
 interface WishlistItemData { id: string; productId: string; addedAt: string; product: WishlistProduct; }

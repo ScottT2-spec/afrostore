@@ -1,4 +1,6 @@
 "use client";
+import { Loader2, Plus } from "lucide-react";
+import { ExternalLink, Eye, EyeOff, FileText, GripVertical, Layout, MoreHorizontal, Pencil, Search, Sparkles, Trash2 } from "@/components/icons/FilledIcons";
 
 import { useState, useEffect, useCallback } from "react";
 import { useSite } from "@/context/StoreContext";
@@ -7,10 +9,6 @@ import Link from "next/link";
 import { useAIPrefill } from "@/hooks/useAIPrefill";
 import AIPrefillBanner from "@/components/dashboard/AIPrefillBanner";
 import { useRouter } from "next/navigation";
-import {
-  FileText, Plus, Loader2, Search, ExternalLink, Eye, EyeOff,
-  Pencil, Trash2, MoreHorizontal, GripVertical, Layout, Sparkles,
-} from "lucide-react";
 
 interface PageItem {
   id: string;

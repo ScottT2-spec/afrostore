@@ -1,12 +1,10 @@
 "use client";
+import { Loader2, Plus } from "lucide-react";
+import { BarChart3, Eye, EyeOff, Layers, Monitor, MousePointerClick, Pencil, Smartphone, Tablet, Trash2 } from "@/components/icons/FilledIcons";
 
 import { useState, useEffect, useCallback } from "react";
 import { useSite } from "@/context/StoreContext";
 import { api } from "@/lib/api-client";
-import {
-  Layers, Plus, Loader2, Trash2, Pencil, Eye, EyeOff,
-  MousePointerClick, BarChart3, Monitor, Smartphone, Tablet,
-} from "lucide-react";
 
 interface PopupItem {
   id: string; name: string; type: string;

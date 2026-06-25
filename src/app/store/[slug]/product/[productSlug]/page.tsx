@@ -1,29 +1,10 @@
 "use client";
+import { Check, ChevronDown, ChevronRight, Loader2, Plus, X } from "lucide-react";
+import { BadgeCheck, CreditCard, Heart, ImageIcon, MessageCircle, Minus, Pencil, Share2, Shield, ShoppingBag, ShoppingCart, Star, Truck } from "@/components/icons/FilledIcons";
 
 import { useState, useEffect, useCallback } from "react";
 import { useParams } from "next/navigation";
 import Link from "next/link";
-import {
-  ShoppingBag,
-  Star,
-  Heart,
-  ShoppingCart,
-  MessageCircle,
-  Truck,
-  Shield,
-  CreditCard,
-  Minus,
-  Plus,
-  ChevronRight,
-  Loader2,
-  Share2,
-  Check,
-  ImageIcon,
-  ChevronDown,
-  BadgeCheck,
-  Pencil,
-  X,
-} from "lucide-react";
 import { useWishlist } from "@/hooks/useWishlist";
 
 interface ProductImage { id: string; url: string; alt?: string }

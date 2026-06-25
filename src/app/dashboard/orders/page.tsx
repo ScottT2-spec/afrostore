@@ -1,21 +1,12 @@
 "use client";
+import { ArrowRight, Loader2, X } from "lucide-react";
+import { CheckCircle2, Clock, Package, Search, ShoppingCart, Truck } from "@/components/icons/FilledIcons";
 
 import { useState, useEffect, useCallback } from "react";
 import DashboardHeader from "@/components/dashboard/DashboardHeader";
 import { useSite } from "@/context/StoreContext";
 import { api } from "@/lib/api-client";
 import { formatCurrency } from "@/lib/utils";
-import {
-  Search,
-  Clock,
-  CheckCircle2,
-  Package,
-  Truck,
-  Loader2,
-  ShoppingCart,
-  X,
-  ArrowRight,
-} from "lucide-react";
 
 interface Order {
   id: string;

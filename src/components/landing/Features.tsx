@@ -1,23 +1,5 @@
 "use client";
-
-import {
-  Sparkles,
-  ShoppingBag,
-  Palette,
-  Globe,
-  CreditCard,
-  MessageCircle,
-  BarChart3,
-  Puzzle,
-  Smartphone,
-  Truck,
-  Shield,
-  Zap,
-  Clock,
-  MousePointerClick,
-  Bot,
-  Languages,
-} from "lucide-react";
+import { BarChart3, Bot, Clock, CreditCard, Globe, Languages, MessageCircle, MousePointerClick, Palette, Puzzle, Shield, ShoppingBag, Smartphone, Sparkles, Truck, Zap } from "@/components/icons/FilledIcons";
 
 const features = [
   {

@@ -1,12 +1,10 @@
 "use client";
+import { Loader2, Plus } from "lucide-react";
+import { Archive, Calendar, ExternalLink, Eye, EyeOff, FileText, Image as ImageIcon, Pencil, Search, Tag, Trash2 } from "@/components/icons/FilledIcons";
 
 import { useState, useEffect, useCallback } from "react";
 import { useSite } from "@/context/StoreContext";
 import { api } from "@/lib/api-client";
-import {
-  FileText, Plus, Loader2, Search, ExternalLink, Eye, EyeOff,
-  Pencil, Trash2, Calendar, Tag, Image as ImageIcon, Archive,
-} from "lucide-react";
 
 interface BlogItem {
   id: string;

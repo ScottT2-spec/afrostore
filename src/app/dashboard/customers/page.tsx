@@ -1,11 +1,12 @@
 "use client";
+import { Loader2, Plus, X } from "lucide-react";
+import { Mail, Phone, Search, ShoppingCart, UserPlus, Users } from "@/components/icons/FilledIcons";
 
 import { useState, useEffect, useCallback } from "react";
 import DashboardHeader from "@/components/dashboard/DashboardHeader";
 import { useSite } from "@/context/StoreContext";
 import { api } from "@/lib/api-client";
 import { formatCurrency } from "@/lib/utils";
-import { Search, Users, Loader2, Mail, Phone, ShoppingCart, Plus, X, UserPlus } from "lucide-react";
 
 interface Customer {
   id: string;

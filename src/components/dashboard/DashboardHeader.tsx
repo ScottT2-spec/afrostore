@@ -1,27 +1,10 @@
 "use client";
+import { ChevronDown, Plus, X } from "lucide-react";
+import { AlertTriangle, Bell, Bot, CheckCircle2, CreditCard, HelpCircle, Info, LogOut, Package, Search, Settings, ShoppingCart, Store, User } from "@/components/icons/FilledIcons";
 
 import { useState, useRef, useEffect } from "react";
 import { useAuth } from "@/context/AuthContext";
 import { useRouter } from "next/navigation";
-import {
-  Bell,
-  Search,
-  Plus,
-  Bot,
-  ChevronDown,
-  User,
-  Settings,
-  LogOut,
-  HelpCircle,
-  CreditCard,
-  Store,
-  Package,
-  ShoppingCart,
-  CheckCircle2,
-  Info,
-  AlertTriangle,
-  X,
-} from "lucide-react";
 import Link from "next/link";
 
 interface DashboardHeaderProps {

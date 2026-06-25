@@ -1,10 +1,11 @@
 "use client";
+import { Check, Loader2, Plus } from "lucide-react";
+import { Copy, Pencil, Tag, ToggleLeft, ToggleRight, Trash2 } from "@/components/icons/FilledIcons";
 
 import { useState, useEffect, useCallback } from "react";
 import { useSite } from "@/context/StoreContext";
 import { api } from "@/lib/api-client";
 import { formatCurrency } from "@/lib/utils";
-import { Tag, Plus, Loader2, Trash2, Pencil, Copy, Check, ToggleLeft, ToggleRight } from "lucide-react";
 import AIFormBridge from "@/components/dashboard/AIFormBridge";
 import { useAIPrefill } from "@/hooks/useAIPrefill";
 

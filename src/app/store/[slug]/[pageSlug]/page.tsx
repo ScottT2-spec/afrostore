@@ -1,9 +1,10 @@
 "use client";
+import { ArrowLeft, Loader2 } from "lucide-react";
+import { ShoppingBag } from "@/components/icons/FilledIcons";
 
 import { useState, useEffect } from "react";
 import { useParams } from "next/navigation";
 import Link from "next/link";
-import { ShoppingBag, ArrowLeft, Loader2 } from "lucide-react";
 import { RenderBlocks, type BuilderBlock } from "@/components/storefront/BlockRenderer";
 
 /* ─── TYPES ─────────────────────────────────────────────────── */

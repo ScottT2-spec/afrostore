@@ -1,8 +1,9 @@
 "use client";
+import { Loader2 } from "lucide-react";
+import { DollarSign, ShoppingCart, Store, Users } from "@/components/icons/FilledIcons";
 
 import { useState, useEffect } from "react";
 import { api } from "@/lib/api-client";
-import { Loader2, Users, Store, ShoppingCart, DollarSign } from "lucide-react";
 import { AreaChart, Area, CartesianGrid, Tooltip, ResponsiveContainer, XAxis, YAxis } from "recharts";
 
 interface AnalyticsData {

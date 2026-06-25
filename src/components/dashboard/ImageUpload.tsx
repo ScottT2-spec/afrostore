@@ -1,7 +1,8 @@
 "use client";
+import { Loader2, Plus, X } from "lucide-react";
+import { Camera, ImageIcon, Upload } from "@/components/icons/FilledIcons";
 
 import { useState, useRef, useCallback } from "react";
-import { Upload, X, Loader2, ImageIcon, Camera, Plus } from "lucide-react";
 
 interface UploadedImage {
   url: string;

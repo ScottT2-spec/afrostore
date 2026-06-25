@@ -1,10 +1,11 @@
 "use client";
+import { Loader2, X } from "lucide-react";
+import { Award, Crown, Gift, Settings, Star, ToggleLeft, ToggleRight, TrendingUp, Users } from "@/components/icons/FilledIcons";
 
 import { useState, useEffect, useCallback } from "react";
 import { useSite } from "@/context/StoreContext";
 import { api } from "@/lib/api-client";
 import DashboardHeader from "@/components/dashboard/DashboardHeader";
-import { Loader2, Star, Crown, Users, Gift, Settings, X, ToggleLeft, ToggleRight, Award, TrendingUp } from "lucide-react";
 import { useAIPrefill } from "@/hooks/useAIPrefill";
 import AIPrefillBanner from "@/components/dashboard/AIPrefillBanner";
 import { useRouter } from "next/navigation";

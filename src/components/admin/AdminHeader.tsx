@@ -1,6 +1,5 @@
 "use client";
-
-import { Shield } from "lucide-react";
+import { Shield } from "@/components/icons/FilledIcons";
 
 export default function AdminHeader({ title, subtitle }: { title: string; subtitle?: string }) {
   return (

@@ -1,42 +1,8 @@
 "use client";
+import { ArrowRight, ChevronDown, ChevronUp, Loader2 } from "lucide-react";
+import { Award, CheckCircle2, Clock, CreditCard, Eye, Globe, Headphones, Heart, Lock, Mail, MapPin, MessageCircle, Package, Palette, Phone, Play, RefreshCw, Rocket, Send, Shield, ShoppingBag, ShoppingCart, Sparkles, Star, Target, ThumbsUp, TrendingUp, Truck, Users, Zap } from "@/components/icons/FilledIcons";
 
 import { useState, useEffect, useMemo, useRef, createContext, useContext } from "react";
-import {
-  Star,
-  ShoppingCart,
-  Truck,
-  Shield,
-  Headphones,
-  RefreshCw,
-  ChevronDown,
-  ChevronUp,
-  MessageCircle,
-  Phone,
-  Mail,
-  MapPin,
-  Clock,
-  Zap,
-  Heart,
-  Award,
-  Users,
-  Globe,
-  TrendingUp,
-  Package,
-  CreditCard,
-  CheckCircle2,
-  ArrowRight,
-  Play,
-  Send,
-  Sparkles,
-  ShoppingBag,
-  Eye,
-  ThumbsUp,
-  Target,
-  Palette,
-  Rocket,
-  Lock,
-  Loader2,
-} from "lucide-react";
 
 /* ─── TYPES ─────────────────────────────────────────────────── */
 

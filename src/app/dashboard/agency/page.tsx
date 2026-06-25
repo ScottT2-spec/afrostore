@@ -1,11 +1,9 @@
 "use client";
+import { ChevronRight, Loader2, Plus } from "lucide-react";
+import { BarChart3, Building2, Globe, Search, Settings, ShieldCheck, Trash2, Users } from "@/components/icons/FilledIcons";
 
 import { useState, useEffect, useCallback } from "react";
 import { api } from "@/lib/api-client";
-import {
-  Building2, Plus, Users, Globe, Loader2, Trash2, Settings, ChevronRight,
-  Search, BarChart3, ShieldCheck,
-} from "lucide-react";
 
 interface WorkspaceData {
   id: string;

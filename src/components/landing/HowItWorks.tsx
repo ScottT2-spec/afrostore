@@ -1,14 +1,6 @@
 "use client";
-
-import {
-  MessageSquare,
-  Palette,
-  CreditCard,
-  Rocket,
-  ArrowRight,
-  CheckCircle2,
-  Sparkles,
-} from "lucide-react";
+import { ArrowRight } from "lucide-react";
+import { CheckCircle2, CreditCard, MessageSquare, Palette, Rocket, Sparkles } from "@/components/icons/FilledIcons";
 
 const steps = [
   {

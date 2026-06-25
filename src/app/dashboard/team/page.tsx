@@ -1,9 +1,10 @@
 "use client";
+import { Loader2 } from "lucide-react";
+import { Crown, Eye, Mail, Settings, Shield, Trash2, UserPlus } from "@/components/icons/FilledIcons";
 
 import { useState, useEffect, useCallback } from "react";
 import { useSite } from "@/context/StoreContext";
 import { api } from "@/lib/api-client";
-import { UserPlus, Loader2, Trash2, Shield, Eye, Settings, Crown, Mail } from "lucide-react";
 import { useAIPrefill } from "@/hooks/useAIPrefill";
 import AIPrefillBanner from "@/components/dashboard/AIPrefillBanner";
 import { useRouter } from "next/navigation";

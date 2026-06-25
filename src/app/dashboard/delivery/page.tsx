@@ -1,10 +1,11 @@
 "use client";
+import { Loader2, Plus } from "lucide-react";
+import { MapPin, Pencil, ToggleLeft, ToggleRight, Trash2, Truck } from "@/components/icons/FilledIcons";
 
 import { useState, useEffect, useCallback } from "react";
 import { useSite } from "@/context/StoreContext";
 import { api } from "@/lib/api-client";
 import { formatCurrency } from "@/lib/utils";
-import { Truck, Plus, Loader2, Trash2, Pencil, MapPin, ToggleLeft, ToggleRight } from "lucide-react";
 import { useAIPrefill } from "@/hooks/useAIPrefill";
 import AIPrefillBanner from "@/components/dashboard/AIPrefillBanner";
 import { useRouter } from "next/navigation";

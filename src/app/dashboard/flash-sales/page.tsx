@@ -1,4 +1,6 @@
 "use client";
+import { Loader2, Plus, X } from "lucide-react";
+import { Calendar, Clock, Package, Percent, ToggleLeft, ToggleRight, Trash2, Zap } from "@/components/icons/FilledIcons";
 
 import { useState, useEffect, useCallback } from "react";
 import { useSite } from "@/context/StoreContext";
@@ -7,7 +9,6 @@ import DashboardHeader from "@/components/dashboard/DashboardHeader";
 import { useAIPrefill } from "@/hooks/useAIPrefill";
 import AIPrefillBanner from "@/components/dashboard/AIPrefillBanner";
 import { useRouter } from "next/navigation";
-import { Loader2, Zap, Clock, Package, Percent, Trash2, Plus, X, ToggleLeft, ToggleRight, Calendar } from "lucide-react";
 
 interface FlashSale {
   id: string;

@@ -1,8 +1,9 @@
 "use client";
+import { ArrowLeft } from "lucide-react";
+import { ExternalLink, Sparkles } from "@/components/icons/FilledIcons";
 
 import Link from "next/link";
 import type { TemplateDefinition } from "@/lib/templates/types";
-import { ArrowLeft, ExternalLink, Sparkles } from "lucide-react";
 import TemplateRenderer from "./TemplateRenderer";
 
 interface Props {

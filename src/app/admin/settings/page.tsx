@@ -1,7 +1,8 @@
 "use client";
+import { Loader2 } from "lucide-react";
+import { Bell, CheckCircle2, Globe, Mail, Save, Settings, Shield } from "@/components/icons/FilledIcons";
 
 import { useState } from "react";
-import { Settings, Save, Globe, Mail, Shield, Bell, Loader2, CheckCircle2 } from "lucide-react";
 
 interface PlatformSettings {
   siteName: string;

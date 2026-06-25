@@ -1,13 +1,10 @@
 "use client";
+import { ChevronDown, ChevronRight, Loader2, Plus } from "lucide-react";
+import { AlignLeft, Calendar, CheckCircle2, Copy, ExternalLink, Eye, EyeOff, FileUp, Hash, Inbox, Link2, List, Mail, PenTool, Pencil, Phone, Search, ToggleLeft, Trash2, Type } from "@/components/icons/FilledIcons";
 
 import { useState, useEffect, useCallback } from "react";
 import { useSite } from "@/context/StoreContext";
 import { api } from "@/lib/api-client";
-import {
-  PenTool, Plus, Loader2, Search, Trash2, Pencil, Eye, EyeOff,
-  Inbox, CheckCircle2, Copy, ExternalLink, ChevronDown, ChevronRight,
-  Mail, Phone, Type, AlignLeft, Hash, List, Calendar, Link2, FileUp, ToggleLeft,
-} from "lucide-react";
 
 interface FormField {
   id: string;

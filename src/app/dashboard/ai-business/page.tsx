@@ -1,12 +1,10 @@
 "use client";
+import { ArrowRight, Loader2 } from "lucide-react";
+import { CheckCircle2, FileText, Mail, MessageSquare, Palette, Rocket, Search as SearchIcon, Sparkles, Store } from "@/components/icons/FilledIcons";
 
 import { useState } from "react";
 import { useSite } from "@/context/StoreContext";
 import { api } from "@/lib/api-client";
-import {
-  Sparkles, Loader2, CheckCircle2, Palette, FileText, Mail,
-  Search as SearchIcon, MessageSquare, Rocket, Store, ArrowRight,
-} from "lucide-react";
 
 interface GenerationResult {
   pages?: Array<{ id: string; title: string; slug: string }>;

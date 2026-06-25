@@ -1,13 +1,10 @@
 "use client";
+import { ChevronDown, ChevronRight, Loader2, Plus } from "lucide-react";
+import { Activity, ArrowUpDown, Building2, Filter, Mail, Pencil, Phone, Search, Tag, Trash2, Users } from "@/components/icons/FilledIcons";
 
 import { useState, useEffect, useCallback } from "react";
 import { useSite } from "@/context/StoreContext";
 import { api } from "@/lib/api-client";
-import {
-  Users, Plus, Loader2, Search, Trash2, Pencil, Mail, Phone,
-  Building2, Tag, Activity, ChevronDown, ChevronRight, ArrowUpDown,
-  Filter,
-} from "lucide-react";
 
 interface CrmContact {
   id: string;

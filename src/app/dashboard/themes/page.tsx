@@ -1,10 +1,11 @@
 "use client";
+import { Loader2 } from "lucide-react";
+import { CheckCircle2, ExternalLink, Eye, Palette } from "@/components/icons/FilledIcons";
 
 import { useState, useEffect } from "react";
 import DashboardHeader from "@/components/dashboard/DashboardHeader";
 import { useSite } from "@/context/StoreContext";
 import { api } from "@/lib/api-client";
-import { Eye, CheckCircle2, Loader2, Palette, ExternalLink } from "lucide-react";
 import { useAIPrefill } from "@/hooks/useAIPrefill";
 import AIPrefillBanner from "@/components/dashboard/AIPrefillBanner";
 

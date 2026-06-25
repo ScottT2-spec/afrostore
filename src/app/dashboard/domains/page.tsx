@@ -1,10 +1,11 @@
 "use client";
+import { Loader2, Plus } from "lucide-react";
+import { AlertCircle, CheckCircle2, Copy, ExternalLink, Globe } from "@/components/icons/FilledIcons";
 
 import { useState } from "react";
 import DashboardHeader from "@/components/dashboard/DashboardHeader";
 import { useSite } from "@/context/StoreContext";
 import { api } from "@/lib/api-client";
-import { Globe, CheckCircle2, AlertCircle, Plus, ExternalLink, Copy, Loader2 } from "lucide-react";
 
 export default function DomainsPage() {
   const { currentStore, refreshStores } = useSite();

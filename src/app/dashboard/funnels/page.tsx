@@ -1,13 +1,10 @@
 "use client";
+import { ChevronDown, ChevronRight, Loader2, Plus } from "lucide-react";
+import { Archive, ArrowDown, BarChart3, Eye, EyeOff, Filter, Layers, MousePointerClick, Pause, Pencil, Play, Search, Trash2 } from "@/components/icons/FilledIcons";
 
 import { useState, useEffect, useCallback } from "react";
 import { useSite } from "@/context/StoreContext";
 import { api } from "@/lib/api-client";
-import {
-  Filter, Plus, Loader2, Search, Trash2, Pencil, Eye, EyeOff,
-  Play, Pause, Archive, ChevronDown, ChevronRight, ArrowDown,
-  BarChart3, MousePointerClick, Layers,
-} from "lucide-react";
 
 interface FunnelStep {
   id: string;

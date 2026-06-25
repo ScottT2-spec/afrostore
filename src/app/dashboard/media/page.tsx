@@ -1,12 +1,10 @@
 "use client";
+import { Check, Loader2, Plus, X } from "lucide-react";
+import { FileText, Film, FolderOpen, Grid, Image as ImageIcon, List, Music, Pencil, Search, Trash2 } from "@/components/icons/FilledIcons";
 
 import { useState, useEffect, useCallback } from "react";
 import { useSite } from "@/context/StoreContext";
 import { api } from "@/lib/api-client";
-import {
-  Image as ImageIcon, Plus, Loader2, Trash2, Pencil, Search,
-  FolderOpen, Film, FileText, Music, Grid, List, X, Check,
-} from "lucide-react";
 
 interface MediaItem {
   id: string; name: string; url: string; type: string; mimeType: string | null;

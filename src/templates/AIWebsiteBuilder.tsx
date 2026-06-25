@@ -1,8 +1,9 @@
 "use client";
+import { Loader2 } from "lucide-react";
+import { Sparkles } from "@/components/icons/FilledIcons";
 
 import { useState } from "react";
 import { api } from "@/lib/api-client";
-import { Loader2, Sparkles } from "lucide-react";
 
 export default function AIWebsiteBuilder({
   siteId,

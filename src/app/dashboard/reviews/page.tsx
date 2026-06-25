@@ -1,9 +1,10 @@
 "use client";
+import { Loader2 } from "lucide-react";
+import { CheckCircle2, Filter, MessageCircle, Star, XCircle } from "@/components/icons/FilledIcons";
 
 import { useState, useEffect, useCallback } from "react";
 import { useSite } from "@/context/StoreContext";
 import { api } from "@/lib/api-client";
-import { Star, Loader2, CheckCircle2, XCircle, MessageCircle, Filter } from "lucide-react";
 
 interface Review {
   id: string;

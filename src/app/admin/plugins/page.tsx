@@ -1,8 +1,9 @@
 "use client";
+import { Loader2, Plus, X } from "lucide-react";
+import { Bot, CheckCircle2, Puzzle, Trash2, XCircle } from "@/components/icons/FilledIcons";
 
 import { useState, useEffect, useCallback } from "react";
 import { api } from "@/lib/api-client";
-import { Puzzle, Plus, Loader2, Trash2, X, CheckCircle2, XCircle, Bot } from "lucide-react";
 
 interface Plugin {
   id: string; name: string; slug: string; description: string | null; category: string; author: string;

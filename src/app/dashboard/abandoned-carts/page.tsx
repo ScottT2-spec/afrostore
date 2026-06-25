@@ -1,10 +1,11 @@
 "use client";
+import { Loader2 } from "lucide-react";
+import { Clock, DollarSign, Eye, Mail, MessageCircle, RotateCcw, ShoppingCart, Trash2, TrendingUp } from "@/components/icons/FilledIcons";
 
 import { useState, useEffect, useCallback } from "react";
 import { useSite } from "@/context/StoreContext";
 import { api } from "@/lib/api-client";
 import DashboardHeader from "@/components/dashboard/DashboardHeader";
-import { Loader2, ShoppingCart, TrendingUp, DollarSign, RotateCcw, MessageCircle, Trash2, Eye, Clock, Mail } from "lucide-react";
 
 interface CartItem { productId: string; name: string; price: number; quantity: number; image?: string }
 interface AbandonedCart {

@@ -1,8 +1,9 @@
 "use client";
+import { ChevronLeft, ChevronRight, Loader2 } from "lucide-react";
+import { Search, Store } from "@/components/icons/FilledIcons";
 
 import { useState, useEffect, useCallback } from "react";
 import { api } from "@/lib/api-client";
-import { Search, Store, Loader2, ChevronLeft, ChevronRight } from "lucide-react";
 
 interface StoreItem {
   id: string;

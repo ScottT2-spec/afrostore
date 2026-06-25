@@ -1,4 +1,6 @@
 "use client";
+import { ChevronRight, Plus, X } from "lucide-react";
+import { Globe } from "@/components/icons/FilledIcons";
 
 import Sidebar from "@/components/dashboard/Sidebar";
 import { SiteProvider, useSite } from "@/context/StoreContext";
@@ -6,7 +8,6 @@ import { AIActionProvider } from "@/context/AIActionContext";
 import { useAuth } from "@/context/AuthContext";
 import { useRouter, usePathname } from "next/navigation";
 import { useEffect, useState } from "react";
-import { ChevronRight, X, Plus, Globe } from "lucide-react";
 import Link from "next/link";
 
 export default function DashboardLayout({

@@ -1,11 +1,12 @@
 "use client";
+import { Loader2 } from "lucide-react";
+import { AlertTriangle, Bell, Globe, MessageCircle, Save, Shield, Store, Trash2, Truck } from "@/components/icons/FilledIcons";
 
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import DashboardHeader from "@/components/dashboard/DashboardHeader";
 import { useSite } from "@/context/StoreContext";
 import { api } from "@/lib/api-client";
-import { Store, Globe, Bell, Shield, Truck, MessageCircle, Save, Loader2, AlertTriangle, Trash2 } from "lucide-react";
 import { useAIPrefill } from "@/hooks/useAIPrefill";
 import AIPrefillBanner from "@/components/dashboard/AIPrefillBanner";
 

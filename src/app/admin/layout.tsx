@@ -1,10 +1,10 @@
 "use client";
+import { ChevronRight, X } from "lucide-react";
 
 import AdminSidebar from "@/components/admin/AdminSidebar";
 import { useAuth } from "@/context/AuthContext";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
-import { ChevronRight, X } from "lucide-react";
 
 export default function AdminLayout({
   children,

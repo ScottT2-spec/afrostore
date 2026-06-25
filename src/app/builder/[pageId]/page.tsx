@@ -1,4 +1,6 @@
 "use client";
+import { ArrowLeft, ChevronDown, ChevronUp, Loader2, Plus } from "lucide-react";
+import { Clock, Columns, Copy, Eye, EyeOff, Grid3X3, GripVertical, HelpCircle, Image as ImageIcon, Layers, Layout, LayoutGrid, Mail, MessageCircle, Minus, Monitor, MousePointer, MoveVertical, Play, Redo2, Save, Shield, ShoppingBag, Smartphone, Sparkles, Type, Undo2, User } from "@/components/icons/FilledIcons";
 
 import { useState, useEffect, useCallback, useRef, use } from "react";
 import { useRouter } from "next/navigation";
@@ -26,41 +28,6 @@ import {
   arrayMove,
 } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
-import {
-  ArrowLeft,
-  Save,
-  Smartphone,
-  Monitor,
-  Plus,
-  GripVertical,
-  Loader2,
-  LayoutGrid,
-  Type,
-  Image as ImageIcon,
-  MousePointer,
-  Layout,
-  Columns,
-  Grid3X3,
-  ShoppingBag,
-  MessageCircle,
-  HelpCircle,
-  Mail,
-  Play,
-  Clock,
-  Shield,
-  MoveVertical,
-  Minus,
-  Sparkles,
-  Undo2,
-  Redo2,
-  Copy,
-  ChevronUp,
-  ChevronDown,
-  Layers,
-  User,
-  Eye,
-  EyeOff,
-} from "lucide-react";
 import Link from "next/link";
 
 // ─── ICON MAP ────────────────────────────────────────────────

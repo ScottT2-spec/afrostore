@@ -1,29 +1,12 @@
 "use client";
+import { ArrowRight, Loader2 } from "lucide-react";
+import { Bot, CheckCircle2, Clock, DollarSign, ExternalLink, Globe, MessageCircle, Package, ShoppingCart, Sparkles, Store, TrendingDown, TrendingUp, Truck, Users } from "@/components/icons/FilledIcons";
 
 import DashboardHeader from "@/components/dashboard/DashboardHeader";
 import { useSite } from "@/context/StoreContext";
 import { useSiteApi } from "@/hooks/useApiData";
 import { useAuth } from "@/context/AuthContext";
 import { formatCurrency } from "@/lib/utils";
-import {
-  TrendingUp,
-  TrendingDown,
-  ShoppingCart,
-  Users,
-  DollarSign,
-  Package,
-  ArrowRight,
-  Bot,
-  Sparkles,
-  Clock,
-  CheckCircle2,
-  Truck,
-  MessageCircle,
-  Loader2,
-  Store,
-  ExternalLink,
-  Globe,
-} from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 

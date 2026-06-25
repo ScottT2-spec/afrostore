@@ -1,15 +1,9 @@
 "use client";
+import { ArrowRight, ChevronDown, X } from "lucide-react";
+import { Menu, ShoppingBag, Sparkles } from "@/components/icons/FilledIcons";
 
 import { useState } from "react";
 import Link from "next/link";
-import {
-  Menu,
-  X,
-  ShoppingBag,
-  ChevronDown,
-  Sparkles,
-  ArrowRight,
-} from "lucide-react";
 
 const navigation = [
   {

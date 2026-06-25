@@ -1,14 +1,10 @@
 "use client";
+import { ChevronDown, ChevronRight, Loader2, Plus } from "lucide-react";
+import { Bot, Clock, CreditCard, FileText, Globe, Mail, MessageSquare, MousePointer, Pause, Pencil, Play, ShoppingBag, ShoppingCart, Smartphone, Tag, Timer, Trash2, Users, Zap } from "@/components/icons/FilledIcons";
 
 import { useState, useEffect, useCallback } from "react";
 import { useSite } from "@/context/StoreContext";
 import { api } from "@/lib/api-client";
-import {
-  Zap, Plus, Loader2, Trash2, Pencil, Play, Pause, ChevronDown,
-  ChevronRight, ShoppingCart, Users, ShoppingBag, CreditCard,
-  FileText, MousePointer, Clock, Mail, MessageSquare, Smartphone,
-  Tag, Bot, Globe, Timer,
-} from "lucide-react";
 
 interface AutomationItem {
   id: string; name: string; description: string | null;

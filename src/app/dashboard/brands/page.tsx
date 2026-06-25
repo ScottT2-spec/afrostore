@@ -1,12 +1,10 @@
 "use client";
+import { Loader2, Plus } from "lucide-react";
+import { ExternalLink, Globe, GripVertical, Image as ImageIcon, Package, Pencil, Search, Tag, Trash2 } from "@/components/icons/FilledIcons";
 
 import { useState, useEffect, useCallback } from "react";
 import { useSite } from "@/context/StoreContext";
 import { api } from "@/lib/api-client";
-import {
-  Tag, Plus, Loader2, Search, Trash2, Pencil, Globe, Package,
-  Image as ImageIcon, GripVertical, ExternalLink,
-} from "lucide-react";
 
 interface BrandItem {
   id: string;

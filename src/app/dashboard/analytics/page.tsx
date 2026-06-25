@@ -1,10 +1,11 @@
 "use client";
+import { Loader2 } from "lucide-react";
+import { BarChart3, Eye, MousePointerClick, ShoppingCart, TrendingUp, Users } from "@/components/icons/FilledIcons";
 
 import DashboardHeader from "@/components/dashboard/DashboardHeader";
 import { useSiteApi } from "@/hooks/useApiData";
 import { useSite } from "@/context/StoreContext";
 import { formatCurrency } from "@/lib/utils";
-import { TrendingUp, Eye, ShoppingCart, MousePointerClick, Users, Loader2, BarChart3 } from "lucide-react";
 
 interface AnalyticsData {
   summary: {

@@ -1,7 +1,8 @@
 "use client";
+import { ArrowRight } from "lucide-react";
+import { Book, Mail, MessageCircle, Search, Video } from "@/components/icons/FilledIcons";
 
 import DashboardHeader from "@/components/dashboard/DashboardHeader";
-import { MessageCircle, Book, Video, Mail, ArrowRight, Search } from "lucide-react";
 
 const resources = [
   { icon: Book, title: "Documentation", desc: "Guides for setting up your store", href: "#" },

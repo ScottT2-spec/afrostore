@@ -1,13 +1,11 @@
 "use client";
+import { ChevronRight, Loader2, X } from "lucide-react";
+import { CheckCircle2, Clock, Download, ExternalLink, Puzzle, Search, Settings, Shield, Tag, ToggleLeft, ToggleRight, Trash2, Zap } from "@/components/icons/FilledIcons";
 
 import { useState, useEffect, useCallback } from "react";
 import DashboardHeader from "@/components/dashboard/DashboardHeader";
 import { useSite } from "@/context/StoreContext";
 import { api } from "@/lib/api-client";
-import {
-  Search, Loader2, Puzzle, CheckCircle2, Settings, X, ToggleLeft, ToggleRight,
-  Zap, Shield, ChevronRight, Tag, Download, Trash2, ExternalLink, Clock,
-} from "lucide-react";
 import { useAIPrefill } from "@/hooks/useAIPrefill";
 import AIPrefillBanner from "@/components/dashboard/AIPrefillBanner";
 

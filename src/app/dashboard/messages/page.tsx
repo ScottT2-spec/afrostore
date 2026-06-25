@@ -1,11 +1,10 @@
 "use client";
+import { ChevronDown, ChevronUp, Loader2 } from "lucide-react";
+import { CheckCheck, Clock, Mail, MailOpen, Trash2, User } from "@/components/icons/FilledIcons";
 
 import { useState, useEffect, useCallback } from "react";
 import { useSite } from "@/context/StoreContext";
 import { api } from "@/lib/api-client";
-import {
-  Mail, MailOpen, Loader2, Trash2, CheckCheck, Clock, User, ChevronDown, ChevronUp,
-} from "lucide-react";
 import { useAIPrefill } from "@/hooks/useAIPrefill";
 import AIPrefillBanner from "@/components/dashboard/AIPrefillBanner";
 

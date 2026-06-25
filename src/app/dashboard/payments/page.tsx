@@ -1,10 +1,11 @@
 "use client";
+import { ArrowRight, Loader2 } from "lucide-react";
+import { AlertCircle, CheckCircle2, CreditCard, Shield } from "@/components/icons/FilledIcons";
 
 import { useState, useEffect } from "react";
 import DashboardHeader from "@/components/dashboard/DashboardHeader";
 import { useSite } from "@/context/StoreContext";
 import { api } from "@/lib/api-client";
-import { CheckCircle2, AlertCircle, CreditCard, ArrowRight, Shield, Loader2 } from "lucide-react";
 import { useAIPrefill } from "@/hooks/useAIPrefill";
 import AIPrefillBanner from "@/components/dashboard/AIPrefillBanner";
 import { useRouter } from "next/navigation";

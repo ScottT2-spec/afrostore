@@ -1,11 +1,9 @@
 'use client';
+import { ArrowLeft, ArrowRight, Check, Loader2 } from "lucide-react";
+import { FileText, Globe, Layout, Link as LinkIcon, Palette, ShoppingBag, Sparkles, Square, Zap } from "@/components/icons/FilledIcons";
 
 import { useState, useEffect, useMemo } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
-import {
-  ShoppingBag, Globe, FileText, Sparkles, ArrowRight, ArrowLeft,
-  Check, Loader2, Zap, Layout, Square, Palette, Link as LinkIcon
-} from 'lucide-react';
 import TemplateSelector from '@/templates/TemplateSelector';
 import type { TemplateDefinition } from '@/lib/templates/types';
 import { clearOnboardingDraft, saveOnboardingDraft } from '@/lib/onboarding-draft';

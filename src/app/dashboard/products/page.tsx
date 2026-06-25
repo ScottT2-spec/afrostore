@@ -1,4 +1,6 @@
 "use client";
+import { Loader2, Plus, X } from "lucide-react";
+import { AlertCircle, CheckCircle2, Clock, Edit, Eye, Grid3X3, ImageIcon, List, MoreHorizontal, Package, Search, Sparkles, Trash2 } from "@/components/icons/FilledIcons";
 
 import { useState, useEffect, useCallback } from "react";
 import { useRouter } from "next/navigation";
@@ -7,24 +9,6 @@ import { useSite } from "@/context/StoreContext";
 import { api } from "@/lib/api-client";
 import { formatCurrency } from "@/lib/utils";
 import Link from "next/link";
-import {
-  Search,
-  Plus,
-  MoreHorizontal,
-  Edit,
-  Trash2,
-  Eye,
-  Package,
-  ImageIcon,
-  CheckCircle2,
-  AlertCircle,
-  Clock,
-  Grid3X3,
-  List,
-  Sparkles,
-  Loader2,
-  X,
-} from "lucide-react";
 
 interface Product {
   id: string;

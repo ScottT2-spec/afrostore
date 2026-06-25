@@ -1,9 +1,10 @@
 "use client";
+import { Loader2, Plus } from "lucide-react";
+import { Pencil, Receipt, Star, ToggleLeft, ToggleRight, Trash2 } from "@/components/icons/FilledIcons";
 
 import { useState, useEffect, useCallback } from "react";
 import { useSite } from "@/context/StoreContext";
 import { api } from "@/lib/api-client";
-import { Receipt, Plus, Loader2, Trash2, Pencil, Star, ToggleLeft, ToggleRight } from "lucide-react";
 
 interface TaxRule {
   id: string; name: string; rate: string; country: string | null;

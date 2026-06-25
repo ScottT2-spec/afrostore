@@ -1,8 +1,9 @@
 "use client";
+import { Loader2, Plus, X } from "lucide-react";
+import { Eye, Palette, Star, Trash2 } from "@/components/icons/FilledIcons";
 
 import { useState, useEffect, useCallback } from "react";
 import { api } from "@/lib/api-client";
-import { Palette, Plus, Loader2, Star, Eye, Trash2, X } from "lucide-react";
 import { SingleImageUpload } from "@/components/dashboard/ImageUpload";
 
 interface Theme {

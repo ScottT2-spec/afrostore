@@ -1,30 +1,10 @@
 "use client";
+import { ArrowRight, ChevronLeft, Loader2, Plus, X } from "lucide-react";
+import { AlertCircle, Building2, CheckCircle2, CreditCard, Lock, MapPin, MessageCircle, Minus, Shield, ShoppingBag, ShoppingCart, Smartphone, Tag, Trash2, Truck } from "@/components/icons/FilledIcons";
 
 import { useState, useEffect } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import {
-  ShoppingBag,
-  ChevronLeft,
-  Lock,
-  CreditCard,
-  Building2,
-  Smartphone,
-  Truck,
-  CheckCircle2,
-  Shield,
-  Tag,
-  Minus,
-  Plus,
-  Trash2,
-  MessageCircle,
-  ArrowRight,
-  MapPin,
-  Loader2,
-  ShoppingCart,
-  AlertCircle,
-  X,
-} from "lucide-react";
 
 /* ───────── Types ───────── */
 

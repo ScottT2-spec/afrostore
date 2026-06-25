@@ -1,8 +1,8 @@
 "use client";
+import { CheckCircle2, Crown, Star, Zap } from "@/components/icons/FilledIcons";
 
 import DashboardHeader from "@/components/dashboard/DashboardHeader";
 import { useSite } from "@/context/StoreContext";
-import { CheckCircle2, Star, Crown, Zap } from "lucide-react";
 
 const plans = [
   { name: "Free", price: "₦0", period: "/month", features: ["Subdomain", "5 products", "Basic analytics", "Platform branding"], icon: Zap },

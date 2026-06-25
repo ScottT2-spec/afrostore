@@ -1,24 +1,10 @@
 "use client";
+import { ChevronLeft, ChevronRight, Loader2, X } from "lucide-react";
+import { ArrowUpDown, CheckCircle2, Heart, ImageIcon, Menu, Search, ShoppingBag, ShoppingCart, SlidersHorizontal, Star } from "@/components/icons/FilledIcons";
 
 import { useState, useEffect, useCallback } from "react";
 import { useParams, useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
-import {
-  ShoppingBag,
-  Search,
-  ShoppingCart,
-  Menu,
-  X,
-  Star,
-  Heart,
-  ChevronRight,
-  Loader2,
-  CheckCircle2,
-  ImageIcon,
-  SlidersHorizontal,
-  ArrowUpDown,
-  ChevronLeft,
-} from "lucide-react";
 import { ThemeProvider, type ThemeData } from "@/components/storefront/ThemeProvider";
 import { useWishlist } from "@/hooks/useWishlist";
 

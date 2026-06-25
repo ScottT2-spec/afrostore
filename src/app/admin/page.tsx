@@ -1,8 +1,9 @@
 "use client";
+import { Loader2 } from "lucide-react";
+import { Activity, DollarSign, ShoppingCart, Store, Users } from "@/components/icons/FilledIcons";
 
 import { useState, useEffect } from "react";
 import { api } from "@/lib/api-client";
-import { Users, Store, ShoppingCart, DollarSign, Activity, Loader2 } from "lucide-react";
 
 interface Stats {
   totalUsers: number;

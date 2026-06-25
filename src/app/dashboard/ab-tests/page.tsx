@@ -1,12 +1,10 @@
 "use client";
+import { Loader2, Plus } from "lucide-react";
+import { Activity, BarChart3, CheckCircle2, Eye, MousePointerClick, Pause, Pencil, Play, Trash2, Trophy } from "@/components/icons/FilledIcons";
 
 import { useState, useEffect, useCallback } from "react";
 import { useSite } from "@/context/StoreContext";
 import { api } from "@/lib/api-client";
-import {
-  Activity, Plus, Loader2, Trash2, Pencil, Play, Pause, Trophy,
-  BarChart3, Eye, MousePointerClick, CheckCircle2,
-} from "lucide-react";
 
 interface Variant { id: string; name: string; content?: unknown; weight: number; }
 interface ABTestItem {

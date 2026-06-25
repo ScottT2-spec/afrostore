@@ -1,18 +1,10 @@
 "use client";
+import { ArrowLeft, Loader2, X } from "lucide-react";
+import { Heart, ImageIcon, ShoppingBag, ShoppingCart, Trash2 } from "@/components/icons/FilledIcons";
 
 import { useState, useEffect } from "react";
 import { useParams } from "next/navigation";
 import Link from "next/link";
-import {
-  ShoppingBag,
-  Heart,
-  ArrowLeft,
-  Loader2,
-  ShoppingCart,
-  Trash2,
-  ImageIcon,
-  X,
-} from "lucide-react";
 import { useWishlist } from "@/hooks/useWishlist";
 
 interface ProductImage {

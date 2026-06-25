@@ -1,18 +1,9 @@
 "use client";
+import { ArrowRight, X } from "lucide-react";
+import { CheckCircle2, Globe, Play, ShoppingBag, Sparkles, Star, Zap } from "@/components/icons/FilledIcons";
 
 import { useState } from "react";
 import Link from "next/link";
-import {
-  ArrowRight,
-  Sparkles,
-  Play,
-  ShoppingBag,
-  Globe,
-  Zap,
-  Star,
-  CheckCircle2,
-  X,
-} from "lucide-react";
 
 const trustedBy = [
   "5,000+ African businesses",

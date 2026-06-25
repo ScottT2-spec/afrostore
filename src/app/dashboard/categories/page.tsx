@@ -1,12 +1,10 @@
 "use client";
+import { Check, ChevronRight, Loader2, Plus, X } from "lucide-react";
+import { FolderTree, GripVertical, Image as ImageIcon, Package, Pencil, Trash2 } from "@/components/icons/FilledIcons";
 
 import { useState, useEffect, useCallback } from "react";
 import { useSite } from "@/context/StoreContext";
 import { api } from "@/lib/api-client";
-import {
-  FolderTree, Plus, Loader2, Pencil, Trash2, X, Check, Package,
-  ChevronRight, GripVertical, Image as ImageIcon,
-} from "lucide-react";
 import { SingleImageUpload } from "@/components/dashboard/ImageUpload";
 import AIFormBridge from "@/components/dashboard/AIFormBridge";
 import { useAIPrefill } from "@/hooks/useAIPrefill";
