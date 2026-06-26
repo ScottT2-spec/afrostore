@@ -17,6 +17,15 @@ const STATIC_SITE_MAP: Record<string, string> = {
   strada: "strada",
   bistro: "bistro",
   nutrio: "nutrio",
+  "landing-gadget": "landing-gadget",
+  "landing-health": "landing-health",
+  "landing-saas-minimal": "landing-saas-minimal",
+  "landing-wellness": "landing-wellness",
+  "landing-artsy": "landing-artsy",
+  "landing-dev-portfolio": "landing-dev-portfolio",
+  "landing-kids": "landing-kids",
+  "landing-tech-saas": "landing-tech-saas",
+  "landing-travel": "landing-travel",
 };
 
 interface Props {
