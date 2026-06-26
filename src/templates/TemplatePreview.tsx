@@ -6,6 +6,19 @@ import Link from "next/link";
 import type { TemplateDefinition } from "@/lib/templates/types";
 import TemplateRenderer from "./TemplateRenderer";
 
+// Maps template slugs to their static site folders in /templates/sites/
+const STATIC_SITE_MAP: Record<string, string> = {
+  clarity: "clarity",
+  arsha: "arsha",
+  medicare: "medicare",
+  travely: "travely",
+  rival: "rival",
+  workfolio: "workfolio",
+  strada: "strada",
+  bistro: "bistro",
+  nutrio: "nutrio",
+};
+
 interface Props {
   template: TemplateDefinition;
   previewMode?: boolean;
@@ -13,6 +26,7 @@ interface Props {
 
 export default function TemplatePreview({ template, previewMode = false }: Props) {
   const sections = template.themeConfig.sections.map((section) => section.type.replace(/_/g, " "));
+  const staticSite = STATIC_SITE_MAP[template.slug];
 
   return (
     <div className="min-h-screen bg-surface-50">
@@ -21,8 +35,19 @@ export default function TemplatePreview({ template, previewMode = false }: Props
           <ArrowLeft className="h-4 w-4" /> Templates
         </Link>
         <div className="grid gap-8 lg:grid-cols-[1.2fr_0.8fr]">
-          <div className="overflow-hidden rounded-2xl border border-surface-200 bg-white p-4">
-            <TemplateRenderer template={template} previewMode={previewMode} />
+          <div className="overflow-hidden rounded-2xl border border-surface-200 bg-white">
+            {staticSite ? (
+              <iframe
+                src={`/templates/sites/${staticSite}/index.html`}
+                className="w-full border-0"
+                style={{ height: "80vh", minHeight: "600px" }}
+                title={`${template.name} Preview`}
+              />
+            ) : (
+              <div className="p-4">
+                <TemplateRenderer template={template} previewMode={previewMode} />
+              </div>
+            )}
           </div>
           <aside className="space-y-5">
             {previewMode && (
