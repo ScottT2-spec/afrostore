@@ -415,9 +415,14 @@ function generateHomepageSections(input: BusinessAnalysisInput, template: Templa
   const description = input.description || `Professional ${industry.replace(/-/g, " ")} services and products built for your customers.`;
   const starter = structuredClone(template.themeConfig.sections);
 
-  // Landing page templates define their own complete section list —
+  // Business website & landing page templates define their own complete section list —
   // only personalise the hero heading/subheading, keep everything else intact.
-  if (isLandingPageTemplate(industry)) {
+  const SELF_CONTAINED_TEMPLATES = [
+    "clarity", "arsha", "lawyer-corporate", "corporate-pro", "real-estate-pro",
+    "bistro", "nutrio", "medicare", "travely", "melody-education",
+    "rival", "workfolio", "strada",
+  ];
+  if (isLandingPageTemplate(industry) || SELF_CONTAINED_TEMPLATES.includes(template.slug)) {
     const hero = starter.find((section) => section.type === "hero");
     if (hero) {
       hero.props = {
