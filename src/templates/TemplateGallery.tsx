@@ -23,105 +23,16 @@ interface Props {
 }
 
 function TemplateMiniPreview({ template }: { template: ScoredTemplate }) {
-  const colors = template.themeConfig?.colors || { primary: "#6366f1", secondary: "#1f2937", accent: "#f59e0b", background: "#ffffff", text: "#111827", headerBg: "#ffffff", footerBg: "#1f2937", footerText: "#f9fafb" };
-
   return (
-    <div className="absolute inset-0 overflow-hidden">
-      {/* Scaled-down full website mockup */}
-      <div className="absolute top-0 left-0 origin-top-left" style={{ width: "400%", height: "400%", transform: "scale(0.25)" }}>
-        {/* Browser Chrome */}
-        <div className="flex items-center gap-2 px-4 py-2" style={{ background: "#f1f3f4" }}>
-          <div className="flex gap-1.5">
-            <div className="h-3 w-3 rounded-full bg-red-400" />
-            <div className="h-3 w-3 rounded-full bg-yellow-400" />
-            <div className="h-3 w-3 rounded-full bg-green-400" />
-          </div>
-          <div className="flex-1 mx-4 h-6 rounded-md bg-white flex items-center px-3">
-            <div className="h-2 w-32 rounded bg-gray-300" />
-          </div>
-        </div>
-
-        {/* Site Header */}
-        <div className="flex items-center justify-between px-12 py-5" style={{ background: colors.headerBg, borderBottom: "2px solid rgba(0,0,0,0.05)" }}>
-          <div className="flex items-center gap-3">
-            <div className="h-10 w-10 rounded-lg" style={{ background: colors.primary }} />
-            <div className="h-4 w-28 rounded" style={{ background: colors.text, opacity: 0.8 }} />
-          </div>
-          <div className="flex items-center gap-6">
-            <div className="h-3 w-16 rounded" style={{ background: colors.text, opacity: 0.4 }} />
-            <div className="h-3 w-16 rounded" style={{ background: colors.text, opacity: 0.4 }} />
-            <div className="h-3 w-16 rounded" style={{ background: colors.text, opacity: 0.4 }} />
-            <div className="h-3 w-16 rounded" style={{ background: colors.text, opacity: 0.4 }} />
-            <div className="h-8 w-24 rounded-lg" style={{ background: colors.primary }} />
-          </div>
-        </div>
-
-        {/* Hero Section */}
-        <div className="relative px-12 py-24" style={{ background: `linear-gradient(135deg, ${colors.primary}, ${colors.secondary})`, minHeight: "320px" }}>
-          <div className="max-w-xl">
-            <div className="h-3 w-32 rounded-full mb-6" style={{ background: colors.accent, opacity: 0.9 }} />
-            <div className="h-8 w-full rounded mb-3" style={{ background: "#ffffff", opacity: 0.95 }} />
-            <div className="h-8 w-3/4 rounded mb-6" style={{ background: "#ffffff", opacity: 0.95 }} />
-            <div className="h-4 w-full rounded mb-2" style={{ background: "#ffffff", opacity: 0.4 }} />
-            <div className="h-4 w-2/3 rounded mb-8" style={{ background: "#ffffff", opacity: 0.4 }} />
-            <div className="flex gap-4">
-              <div className="h-12 w-40 rounded-lg" style={{ background: colors.accent }} />
-              <div className="h-12 w-40 rounded-lg border-2" style={{ borderColor: "rgba(255,255,255,0.5)" }} />
-            </div>
-          </div>
-        </div>
-
-        {/* Featured Products Section */}
-        <div className="px-12 py-16" style={{ background: colors.background }}>
-          <div className="text-center mb-10">
-            <div className="mx-auto h-3 w-24 rounded-full mb-4" style={{ background: colors.primary, opacity: 0.6 }} />
-            <div className="mx-auto h-6 w-64 rounded mb-3" style={{ background: colors.text, opacity: 0.85 }} />
-            <div className="mx-auto h-3 w-80 rounded" style={{ background: colors.text, opacity: 0.3 }} />
-          </div>
-          <div className="grid grid-cols-4 gap-6">
-            {[0,1,2,3].map((i) => (
-              <div key={i} className="rounded-xl overflow-hidden" style={{ border: "2px solid rgba(0,0,0,0.06)", background: colors.background }}>
-                <div className="h-40" style={{ background: `linear-gradient(${135 + i * 25}deg, ${colors.primary}15, ${colors.accent}20, ${colors.secondary}10)` }} />
-                <div className="p-4">
-                  <div className="h-3 w-full rounded mb-2" style={{ background: colors.text, opacity: 0.6 }} />
-                  <div className="h-3 w-2/3 rounded mb-3" style={{ background: colors.text, opacity: 0.3 }} />
-                  <div className="flex justify-between items-center">
-                    <div className="h-4 w-16 rounded" style={{ background: colors.primary, opacity: 0.8 }} />
-                    <div className="h-8 w-8 rounded-lg" style={{ background: colors.accent, opacity: 0.7 }} />
-                  </div>
-                </div>
-              </div>
-            ))}
-          </div>
-        </div>
-
-        {/* CTA Banner */}
-        <div className="px-12 py-12 flex items-center justify-between" style={{ background: colors.primary }}>
-          <div>
-            <div className="h-5 w-56 rounded mb-2" style={{ background: "#ffffff", opacity: 0.9 }} />
-            <div className="h-3 w-72 rounded" style={{ background: "#ffffff", opacity: 0.4 }} />
-          </div>
-          <div className="h-12 w-36 rounded-lg" style={{ background: colors.accent }} />
-        </div>
-
-        {/* Footer */}
-        <div className="px-12 py-10" style={{ background: colors.footerBg }}>
-          <div className="grid grid-cols-4 gap-8 mb-8">
-            {[0,1,2,3].map((i) => (
-              <div key={i}>
-                <div className="h-3 w-20 rounded mb-4" style={{ background: colors.footerText, opacity: 0.7 }} />
-                <div className="space-y-2">
-                  <div className="h-2 w-24 rounded" style={{ background: colors.footerText, opacity: 0.3 }} />
-                  <div className="h-2 w-20 rounded" style={{ background: colors.footerText, opacity: 0.3 }} />
-                  <div className="h-2 w-28 rounded" style={{ background: colors.footerText, opacity: 0.3 }} />
-                </div>
-              </div>
-            ))}
-          </div>
-          <div className="h-px w-full mb-4" style={{ background: colors.footerText, opacity: 0.1 }} />
-          <div className="h-2 w-48 rounded mx-auto" style={{ background: colors.footerText, opacity: 0.3 }} />
-        </div>
-      </div>
+    <div className="absolute inset-0 overflow-hidden pointer-events-none">
+      <iframe
+        src={`/template-preview/${template.slug}`}
+        title={template.name}
+        className="absolute top-0 left-0 border-0 pointer-events-none"
+        style={{ width: "1280px", height: "900px", transform: "scale(0.28)", transformOrigin: "top left" }}
+        loading="lazy"
+        tabIndex={-1}
+      />
     </div>
   );
 }
