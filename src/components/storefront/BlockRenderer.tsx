@@ -1170,6 +1170,215 @@ function BrandsBlock({ props }: { props: Record<string, unknown> }) {
   );
 }
 
+/* ── Image Hero Banner (dual side-by-side image banners) ───── */
+function ImageHeroBannerBlock({ props }: { props: Record<string, unknown> }) {
+  const items = (props.items as Array<{ image: string; title: string; subtitle: string; buttonText: string; buttonHref: string }>) || [];
+  return (
+    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+      {items.map((item, i) => (
+        <AnimateIn key={i} delay={i * 0.15}>
+          <a href={item.buttonHref || "#"} className="group relative block aspect-[3/4] sm:aspect-[4/5] rounded-2xl overflow-hidden">
+            <img src={item.image} alt={item.title} className="absolute inset-0 w-full h-full object-cover transition-transform duration-700 group-hover:scale-105" />
+            <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-black/20 to-transparent" />
+            <div className="absolute bottom-0 left-0 p-6 sm:p-8">
+              <h2 className="text-xl sm:text-2xl font-display font-bold text-white mb-1">{item.title}</h2>
+              <p className="text-lg sm:text-xl font-display font-semibold text-white/90 mb-4">{item.subtitle}</p>
+              <span className="inline-block border-b-2 border-white text-sm font-semibold text-white uppercase tracking-wider pb-1 group-hover:border-white/60 transition-colors">
+                {item.buttonText}
+              </span>
+            </div>
+          </a>
+        </AnimateIn>
+      ))}
+    </div>
+  );
+}
+
+/* ── Image Category Cards ────────────────────────────────────── */
+function ImageCategoryCardsBlock({ props }: { props: Record<string, unknown> }) {
+  const items = (props.items as Array<{ image: string; title: string; href: string }>) || [];
+  const cols = (props.columns as number) || 4;
+  const gridClass = { 2: "grid-cols-2", 3: "grid-cols-2 sm:grid-cols-3", 4: "grid-cols-2 sm:grid-cols-4" }[Math.min(cols, 4) as 2 | 3 | 4] || "grid-cols-2 sm:grid-cols-4";
+  return (
+    <AnimateIn>
+      <div className={`grid gap-4 sm:gap-6 ${gridClass}`}>
+        {items.map((item, i) => (
+          <a key={i} href={item.href || "#"} className="group text-center">
+            <div className="aspect-square rounded-full overflow-hidden mx-auto mb-3 w-32 h-32 sm:w-40 sm:h-40 border-2 border-surface-100 shadow-sm group-hover:shadow-lg transition-shadow">
+              <img src={item.image} alt={item.title} className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110" />
+            </div>
+            <h3 className="text-sm sm:text-base font-display font-bold text-surface-900 group-hover:text-brand-600 transition-colors">{item.title}</h3>
+          </a>
+        ))}
+      </div>
+    </AnimateIn>
+  );
+}
+
+/* ── Static Product Grid (hardcoded products, not from store) ── */
+function StaticProductGridBlock({ props }: { props: Record<string, unknown> }) {
+  type StaticProduct = { name: string; price: number; compareAtPrice?: number; image: string; hoverImage?: string; currency?: string };
+  const products = (props.products as StaticProduct[]) || [];
+  const cols = (props.columns as number) || 3;
+  const gridClass = { 2: "grid-cols-2", 3: "grid-cols-2 sm:grid-cols-3", 4: "grid-cols-2 sm:grid-cols-2 lg:grid-cols-4" }[Math.min(cols, 4) as 2 | 3 | 4] || "grid-cols-2 sm:grid-cols-3";
+  const fmt = (amount: number, cur?: string) => {
+    const symbols: Record<string, string> = { USD: "$", GBP: "£", EUR: "€", NGN: "₦", KES: "KSh", ZAR: "R" };
+    return `${symbols[cur || "USD"] || "$"}${amount.toFixed(2)}`;
+  };
+  return (
+    <AnimateIn>
+      <div>
+        {(props.title as string) && (
+          <div className="text-center mb-8">
+            <h3 className="text-2xl sm:text-3xl font-display font-extrabold text-surface-900">{props.title as string}</h3>
+          </div>
+        )}
+        <div className={`grid gap-4 sm:gap-6 ${gridClass}`}>
+          {products.map((product, i) => {
+            const discount = product.compareAtPrice ? Math.round(((product.compareAtPrice - product.price) / product.compareAtPrice) * 100) : 0;
+            return (
+              <div key={i} className="group">
+                <div className="relative aspect-[3/4] rounded-2xl overflow-hidden mb-3">
+                  <img
+                    src={product.image}
+                    alt={product.name}
+                    className={`absolute inset-0 w-full h-full object-cover transition-opacity duration-500 ${product.hoverImage ? "group-hover:opacity-0" : ""}`}
+                  />
+                  {product.hoverImage && (
+                    <img
+                      src={product.hoverImage}
+                      alt={product.name}
+                      className="absolute inset-0 w-full h-full object-cover opacity-0 group-hover:opacity-100 transition-opacity duration-500"
+                    />
+                  )}
+                  {discount > 0 && (
+                    <div className="absolute top-3 left-3 rounded-full bg-red-500 px-2 py-0.5 text-[10px] font-bold text-white z-10">-{discount}%</div>
+                  )}
+                  <div className="absolute top-3 right-3 z-10">
+                    <button className="h-8 w-8 rounded-full bg-white/90 backdrop-blur-sm flex items-center justify-center hover:bg-white hover:scale-110 transition-all shadow-sm">
+                      <Heart className="h-4 w-4 text-surface-500" />
+                    </button>
+                  </div>
+                </div>
+                <h4 className="text-sm font-semibold text-surface-900 mb-1 line-clamp-1">{product.name}</h4>
+                <div className="flex items-center gap-2">
+                  {product.compareAtPrice && (
+                    <span className="text-xs text-surface-400 line-through">{fmt(product.compareAtPrice, product.currency)}</span>
+                  )}
+                  <span className="text-sm font-bold text-surface-900">{fmt(product.price, product.currency)}</span>
+                </div>
+              </div>
+            );
+          })}
+        </div>
+      </div>
+    </AnimateIn>
+  );
+}
+
+/* ── Promo Split Section (images | products | images) ──────── */
+function PromoSplitBlock({ props }: { props: Record<string, unknown> }) {
+  type PromoImage = { src: string; title?: string };
+  type PromoProduct = { name: string; price: number; image: string; hoverImage?: string };
+  const leftImages = (props.leftImages as PromoImage[]) || [];
+  const rightImages = (props.rightImages as PromoImage[]) || [];
+  const centerProducts = (props.centerProducts as PromoProduct[]) || [];
+  return (
+    <AnimateIn>
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+        {/* Left stacked images */}
+        <div className="flex flex-col gap-4">
+          {leftImages.map((img, i) => (
+            <div key={i} className="relative rounded-2xl overflow-hidden aspect-[4/5]">
+              <img src={img.src} alt={img.title || ""} className="w-full h-full object-cover" />
+              {img.title && (
+                <>
+                  <div className="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent" />
+                  <div className="absolute bottom-4 left-4">
+                    <h3 className="text-lg font-display font-bold text-white">{img.title}</h3>
+                  </div>
+                </>
+              )}
+            </div>
+          ))}
+        </div>
+        {/* Center products */}
+        <div className="flex flex-col gap-4 justify-center">
+          {centerProducts.map((product, i) => (
+            <div key={i} className="group">
+              <div className="relative aspect-[3/4] rounded-2xl overflow-hidden mb-2">
+                <img src={product.image} alt={product.name} className={`absolute inset-0 w-full h-full object-cover transition-opacity duration-500 ${product.hoverImage ? "group-hover:opacity-0" : ""}`} />
+                {product.hoverImage && <img src={product.hoverImage} alt={product.name} className="absolute inset-0 w-full h-full object-cover opacity-0 group-hover:opacity-100 transition-opacity duration-500" />}
+                <div className="absolute top-3 right-3"><button className="h-8 w-8 rounded-full bg-white/90 backdrop-blur-sm flex items-center justify-center shadow-sm"><Heart className="h-4 w-4 text-surface-500" /></button></div>
+              </div>
+              <h4 className="text-sm font-semibold text-surface-900 line-clamp-1">{product.name}</h4>
+              <span className="text-sm font-bold text-surface-900">${product.price.toFixed(2)}</span>
+            </div>
+          ))}
+        </div>
+        {/* Right stacked images */}
+        <div className="flex flex-col gap-4">
+          {rightImages.map((img, i) => (
+            <div key={i} className="relative rounded-2xl overflow-hidden aspect-[4/5]">
+              <img src={img.src} alt={img.title || ""} className="w-full h-full object-cover" />
+              {img.title && (
+                <>
+                  <div className="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent" />
+                  <div className="absolute bottom-4 left-4"><h3 className="text-lg font-display font-bold text-white">{img.title}</h3></div>
+                </>
+              )}
+            </div>
+          ))}
+        </div>
+      </div>
+    </AnimateIn>
+  );
+}
+
+/* ── Image Brands (logo images, not text) ────────────────────── */
+function ImageBrandsBlock({ props }: { props: Record<string, unknown> }) {
+  const items = (props.items as Array<{ name: string; logo: string }>) || [];
+  return (
+    <AnimateIn>
+      <div className="py-8">
+        {(props.title as string) && (
+          <p className="text-xs font-semibold text-surface-400 uppercase tracking-widest text-center mb-6">{props.title as string}</p>
+        )}
+        <div className="flex flex-wrap items-center justify-center gap-8 sm:gap-12">
+          {items.map((item, i) => (
+            <img key={i} src={item.logo} alt={item.name} className="h-8 sm:h-10 object-contain opacity-50 hover:opacity-100 transition-opacity" />
+          ))}
+        </div>
+      </div>
+    </AnimateIn>
+  );
+}
+
+/* ── Link Cards (pre-footer image cards with overlay) ────────── */
+function LinkCardsBlock({ props }: { props: Record<string, unknown> }) {
+  const items = (props.items as Array<{ image: string; title: string; buttonText: string; href: string }>) || [];
+  const cols = (props.columns as number) || 4;
+  const gridClass = { 2: "grid-cols-1 sm:grid-cols-2", 3: "grid-cols-1 sm:grid-cols-3", 4: "grid-cols-2 sm:grid-cols-4" }[Math.min(cols, 4) as 2 | 3 | 4] || "grid-cols-2 sm:grid-cols-4";
+  return (
+    <AnimateIn>
+      <div className={`grid gap-4 ${gridClass}`}>
+        {items.map((item, i) => (
+          <a key={i} href={item.href || "#"} className="group relative block aspect-[3/4] rounded-2xl overflow-hidden">
+            <img src={item.image} alt={item.title} className="absolute inset-0 w-full h-full object-cover transition-transform duration-700 group-hover:scale-105" />
+            <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-black/10 to-transparent" />
+            <div className="absolute bottom-0 left-0 p-5">
+              <h3 className="text-lg font-display font-bold text-white mb-2">{item.title}</h3>
+              <span className="inline-block border-b border-white text-xs font-semibold text-white uppercase tracking-wider pb-0.5 group-hover:border-white/60 transition-colors">
+                {item.buttonText}
+              </span>
+            </div>
+          </a>
+        ))}
+      </div>
+    </AnimateIn>
+  );
+}
+
 /* ═══════════════════════════════════════════════════════════════
    RENDERER MAP
    ═══════════════════════════════════════════════════════════════ */
@@ -1220,6 +1429,12 @@ const renderers: Record<string, React.FC<{ props: Record<string, unknown> }>> = 
   gallery: GalleryBlock,
   team: TeamBlock,
   brands: BrandsBlock,
+  imageHeroBanner: ImageHeroBannerBlock,
+  imageCategoryCards: ImageCategoryCardsBlock,
+  staticProductGrid: StaticProductGridBlock,
+  promoSplit: PromoSplitBlock,
+  imageBrands: ImageBrandsBlock,
+  linkCards: LinkCardsBlock,
 };
 
 /* ─── STORE CONTEXT (for blocks that need store info) ─────── */
