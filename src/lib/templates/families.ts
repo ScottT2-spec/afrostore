@@ -115,6 +115,7 @@ const clarityHero = block("clarity-hero", "hero", {
   secondaryButtonText: "Our Work",
   secondaryButtonHref: "#portfolio",
   bgStyle: "light",
+  image: "/templates/clarity/hero.webp",
 });
 
 const arshaHero = block("arsha-hero", "hero", {
@@ -126,6 +127,7 @@ const arshaHero = block("arsha-hero", "hero", {
   secondaryButtonText: "Watch Video",
   secondaryButtonHref: "#video",
   bgStyle: "dark",
+  image: "/templates/arsha/hero.png",
 });
 
 const medicareHero = block("medicare-hero", "hero", {
@@ -137,6 +139,7 @@ const medicareHero = block("medicare-hero", "hero", {
   secondaryButtonText: "Watch Our Story",
   secondaryButtonHref: "#video",
   bgStyle: "accent",
+  image: "/templates/medicare/hero.webp",
 });
 
 const travelyHero = block("travely-hero", "hero", {
@@ -148,6 +151,7 @@ const travelyHero = block("travely-hero", "hero", {
   secondaryButtonText: "Plan Your Trip",
   secondaryButtonHref: "#contact",
   bgStyle: "dark",
+  image: "/templates/travely/hero.webp",
 });
 
 const lawyerHero = block("lawyer-hero", "hero", {
@@ -159,6 +163,7 @@ const lawyerHero = block("lawyer-hero", "hero", {
   secondaryButtonText: "Our Practice Areas",
   secondaryButtonHref: "#services",
   bgStyle: "dark",
+  image: "/templates/lawyer-corporate/hero.jpg",
 });
 
 const corporateHero = block("corporate-hero", "hero", {
@@ -170,6 +175,7 @@ const corporateHero = block("corporate-hero", "hero", {
   secondaryButtonText: "Learn More",
   secondaryButtonHref: "#about",
   bgStyle: "dark",
+  image: "/templates/corporate-pro/hero.jpg",
 });
 
 const realEstateHero = block("realestate-hero", "hero", {
@@ -181,6 +187,7 @@ const realEstateHero = block("realestate-hero", "hero", {
   secondaryButtonText: "Contact an Agent",
   secondaryButtonHref: "#contact",
   bgStyle: "accent",
+  image: "/templates/real-estate-pro/hero.jpg",
 });
 
 const bistroHero = block("bistro-hero", "hero", {
@@ -192,6 +199,7 @@ const bistroHero = block("bistro-hero", "hero", {
   secondaryButtonText: "View on Map",
   secondaryButtonHref: "#contact",
   bgStyle: "dark",
+  image: "/templates/bistro/restaurant.jpg",
 });
 
 const nutrioHero = block("nutrio-hero", "hero", {
@@ -203,6 +211,7 @@ const nutrioHero = block("nutrio-hero", "hero", {
   secondaryButtonText: "View on Map",
   secondaryButtonHref: "#contact",
   bgStyle: "accent",
+  image: "/templates/nutrio/hero.png",
 });
 
 const educationHero = block("melody-edu-hero", "hero", {
@@ -214,6 +223,7 @@ const educationHero = block("melody-edu-hero", "hero", {
   secondaryButtonText: "Learn More",
   secondaryButtonHref: "#about",
   bgStyle: "accent",
+  image: "/templates/melody-education/hero.jpg",
 });
 
 const servicesHero = block("services-hero", "hero", {
@@ -516,7 +526,7 @@ export const TEMPLATE_FAMILIES: FamilyDef[] = [
           { value: "24", label: "Team Members" },
           { value: "20+", label: "Years of Expertise" },
         ] }),
-        block("clarity-about", "imageText", { title: "Innovative Solutions for a Digital-First World", text: "We deliver innovative digital solutions that drive growth and elevate your brand. Our team of experts specializes in web development, UI/UX design, digital marketing, and brand strategy. With over 20 years of experience and 500+ happy clients, we're your trusted partners in digital transformation.", imagePosition: "right", buttonText: "Discover More", buttonHref: "#services" }),
+        block("clarity-about", "imageText", { title: "Innovative Solutions for a Digital-First World", text: "We deliver innovative digital solutions that drive growth and elevate your brand. Our team of experts specializes in web development, UI/UX design, digital marketing, and brand strategy. With over 20 years of experience and 500+ happy clients, we're your trusted partners in digital transformation.", imagePosition: "right", buttonText: "Discover More", buttonHref: "#services", image: "/templates/clarity/about-1.webp" }),
         block("clarity-services", "features", { title: "Services", subtitle: "Comprehensive digital solutions tailored to your business needs", items: [
           { icon: "palette", title: "Brand Identity Design", description: "Complete visual identity systems including logos, brand guidelines, and marketing collateral." },
           { icon: "eye", title: "UI/UX Design", description: "User-centered interface design that creates intuitive and delightful digital experiences." },
@@ -526,16 +536,23 @@ export const TEMPLATE_FAMILIES: FamilyDef[] = [
           { icon: "trending-up", title: "SEO Optimization", description: "Technical and content SEO strategies to improve search rankings and drive organic traffic." },
         ] }),
         block("clarity-cta", "banner", { title: "Ready to Transform Your Digital Presence?", subtitle: "Let's discuss your project and create something amazing together", buttonText: "Get Started Today", buttonHref: "#contact" }),
-        block("clarity-portfolio", "gallery", { title: "Portfolio", subtitle: "Our latest work across web design, mobile apps, branding, and UI/UX", columns: 3 }),
+        block("clarity-portfolio", "gallery", { title: "Portfolio", subtitle: "Our latest work across web design, mobile apps, branding, and UI/UX", columns: 3, images: [
+          { src: "/templates/clarity/portfolio-1.webp", alt: "Digital Innovation Platform" },
+          { src: "/templates/clarity/portfolio-2.webp", alt: "Smart Productivity App" },
+          { src: "/templates/clarity/portfolio-3.webp", alt: "Modern Brand Identity" },
+          { src: "/templates/clarity/portfolio-4.webp", alt: "SaaS Dashboard Design" },
+          { src: "/templates/clarity/portfolio-5.webp", alt: "E-commerce Platform" },
+          { src: "/templates/clarity/portfolio-6.webp", alt: "Fintech Mobile App" },
+        ] }),
         block("clarity-team", "team", { title: "Our Team", subtitle: "Meet the talented people behind our success", members: [
-          { name: "Walter White", role: "Chief Executive Officer", bio: "Strategic leader with 15+ years in digital transformation." },
-          { name: "Sarah Jhonson", role: "Product Manager", bio: "Expert in agile methodologies and product lifecycle management." },
-          { name: "William Anderson", role: "CTO", bio: "Full-stack architect specializing in scalable cloud solutions." },
+          { name: "Walter White", role: "Chief Executive Officer", bio: "Strategic leader with 15+ years in digital transformation.", image: "/templates/clarity/team-1.webp" },
+          { name: "Sarah Jhonson", role: "Product Manager", bio: "Expert in agile methodologies and product lifecycle management.", image: "/templates/clarity/team-2.webp" },
+          { name: "William Anderson", role: "CTO", bio: "Full-stack architect specializing in scalable cloud solutions.", image: "/templates/clarity/team-3.webp" },
         ] }),
         block("clarity-testimonials", "testimonials", { title: "What Our Clients Say", subtitle: "Hear from the businesses we've helped transform", bgColor: "surface", items: [
-          { name: "Saul Goodman", role: "CEO, Goodman Corp", text: "The team delivered exceptional results. Our digital presence has completely transformed and we've seen a 200% increase in online engagement." },
-          { name: "Sara Wilsson", role: "Designer, Roma Inc", text: "Professional, creative, and always on time. They understood our vision perfectly and brought it to life beautifully." },
-          { name: "Jena Karlis", role: "Owner, Flavor Studio", text: "Outstanding work on our brand identity. The attention to detail and creative direction exceeded our expectations." },
+          { name: "Saul Goodman", role: "CEO, Goodman Corp", text: "The team delivered exceptional results. Our digital presence has completely transformed and we've seen a 200% increase in online engagement.", image: "/templates/clarity/testimonial-1.webp" },
+          { name: "Sara Wilsson", role: "Designer, Roma Inc", text: "Professional, creative, and always on time. They understood our vision perfectly and brought it to life beautifully.", image: "/templates/clarity/testimonial-2.webp" },
+          { name: "Jena Karlis", role: "Owner, Flavor Studio", text: "Outstanding work on our brand identity. The attention to detail and creative direction exceeded our expectations.", image: "/templates/clarity/testimonial-3.webp" },
         ] }),
         block("clarity-contact", "contactForm", { title: "Contact Us", subtitle: "Ready to start your project? Get in touch and let's make it happen." }),
         block("clarity-contactinfo", "contactInfo", { title: "Get In Touch", subtitle: "Visit us or reach out through any of these channels", items: [
@@ -569,7 +586,7 @@ export const TEMPLATE_FAMILIES: FamilyDef[] = [
       sections: [
         arshaHero,
         block("arsha-brands", "brands", { title: "Trusted By", items: [] }),
-        block("arsha-about", "imageText", { title: "About Us", text: "We provide innovative business solutions tailored to your needs. Our team of experts specializes in creating cutting-edge digital products and services that drive growth and efficiency. With a focus on quality and customer satisfaction, we've helped hundreds of businesses achieve their goals.", imagePosition: "right", buttonText: "Read More", buttonHref: "#services" }),
+        block("arsha-about", "imageText", { title: "About Us", text: "We provide innovative business solutions tailored to your needs. Our team of experts specializes in creating cutting-edge digital products and services that drive growth and efficiency. With a focus on quality and customer satisfaction, we've helped hundreds of businesses achieve their goals.", imagePosition: "right", buttonText: "Read More", buttonHref: "#services", image: "/templates/arsha/about.webp" }),
         block("arsha-faq", "faq", { title: "Frequently Asked Questions", items: [
           { question: "Non consectetur a erat nam at lectus urna duis?", answer: "Feugiat pretium nibh ipsum consequat. Tempus iaculis urna id volutpat lacus laoreet non curabitur gravida. Venenatis lectus magna fringilla urna porttitor rhoncus dolor purus non." },
           { question: "Feugiat scelerisque varius morbi enim nunc faucibus?", answer: "Dolor sit amet consectetur adipiscing elit pellentesque habitant morbi. Id interdum velit laoreet id donec ultrices. Fringilla phasellus faucibus scelerisque eleifend donec pretium." },
@@ -584,12 +601,19 @@ export const TEMPLATE_FAMILIES: FamilyDef[] = [
           { icon: "phone", title: "Mobile Development", description: "Native and cross-platform mobile apps that deliver exceptional user experiences." },
         ] }),
         block("arsha-cta", "banner", { title: "Ready to Get Started?", subtitle: "Let's discuss how our solutions can help your business grow", buttonText: "Call to Action", buttonHref: "#contact" }),
-        block("arsha-portfolio", "gallery", { title: "Portfolio", subtitle: "Check out our latest projects", columns: 3 }),
+        block("arsha-portfolio", "gallery", { title: "Portfolio", subtitle: "Check out our latest projects", columns: 3, images: [
+          { src: "/templates/arsha/portfolio-1.webp", alt: "Web Design Project" },
+          { src: "/templates/arsha/portfolio-2.webp", alt: "Mobile App Project" },
+          { src: "/templates/arsha/portfolio-3.webp", alt: "Branding Project" },
+          { src: "/templates/arsha/portfolio-4.webp", alt: "E-commerce Platform" },
+          { src: "/templates/arsha/portfolio-5.webp", alt: "Dashboard Design" },
+          { src: "/templates/arsha/portfolio-6.webp", alt: "Marketing Campaign" },
+        ] }),
         block("arsha-team", "team", { title: "Our Team", subtitle: "Meet the experts behind our success", members: [
-          { name: "Walter White", role: "Chief Executive Officer", bio: "Visionary leader driving business innovation and growth." },
-          { name: "Sarah Jhonson", role: "Product Manager", bio: "Expert strategist with a passion for delivering results." },
-          { name: "William Anderson", role: "CTO", bio: "Technology architect building scalable solutions." },
-          { name: "Amanda Jepson", role: "Accountant", bio: "Financial expert ensuring business sustainability." },
+          { name: "Walter White", role: "Chief Executive Officer", bio: "Visionary leader driving business innovation and growth.", image: "/templates/arsha/team-1.webp" },
+          { name: "Sarah Jhonson", role: "Product Manager", bio: "Expert strategist with a passion for delivering results.", image: "/templates/arsha/team-2.webp" },
+          { name: "William Anderson", role: "CTO", bio: "Technology architect building scalable solutions.", image: "/templates/arsha/team-3.webp" },
+          { name: "Amanda Jepson", role: "Accountant", bio: "Financial expert ensuring business sustainability.", image: "/templates/arsha/team-4.webp" },
         ] }),
         block("arsha-stats", "stats", { title: "Our Achievements", items: [
           { value: "232", label: "Happy Clients" },
@@ -638,7 +662,7 @@ export const TEMPLATE_FAMILIES: FamilyDef[] = [
           { value: "98%", label: "Success Rate" },
           { value: "150+", label: "Expert Attorneys" },
         ] }),
-        block("lawyer-about", "imageText", { title: "A Legacy of Legal Excellence", text: "For over 25 years, our firm has been at the forefront of legal advocacy. We combine deep legal expertise with a client-first approach, ensuring every case receives the dedication and strategic thinking it deserves. Our attorneys are recognized leaders in their fields, committed to achieving the best possible outcomes.", imagePosition: "left", buttonText: "About Our Firm", buttonHref: "#team" }),
+        block("lawyer-about", "imageText", { title: "A Legacy of Legal Excellence", text: "For over 25 years, our firm has been at the forefront of legal advocacy. We combine deep legal expertise with a client-first approach, ensuring every case receives the dedication and strategic thinking it deserves. Our attorneys are recognized leaders in their fields, committed to achieving the best possible outcomes.", imagePosition: "left", buttonText: "About Our Firm", buttonHref: "#team", image: "/templates/lawyer-corporate/office.jpg" }),
         block("lawyer-services", "features", { title: "Practice Areas", subtitle: "Comprehensive legal services across all major disciplines", items: [
           { icon: "shield", title: "Corporate Law", description: "Business formation, mergers & acquisitions, corporate governance, and regulatory compliance." },
           { icon: "users", title: "Family Law", description: "Divorce, custody, adoption, and prenuptial agreements handled with sensitivity and expertise." },
@@ -654,10 +678,10 @@ export const TEMPLATE_FAMILIES: FamilyDef[] = [
           { value: "100%", label: "Criminal Defense Acquittals (2024)" },
         ] }),
         block("lawyer-team", "team", { title: "Our Attorneys", subtitle: "Meet the experienced legal professionals dedicated to your case", members: [
-          { name: "Robert Mitchell", role: "Managing Partner — Corporate Law", bio: "Harvard Law graduate with 30+ years in corporate mergers and acquisitions." },
-          { name: "Diana Lawson", role: "Senior Partner — Family Law", bio: "Compassionate advocate recognized as a Super Lawyer for 10 consecutive years." },
-          { name: "James Hartfield", role: "Partner — Litigation", bio: "Former federal prosecutor with an exceptional trial record." },
-          { name: "Elena Rodriguez", role: "Associate — Real Estate", bio: "Specialist in commercial property transactions and development law." },
+          { name: "Robert Mitchell", role: "Managing Partner — Corporate Law", bio: "Harvard Law graduate with 30+ years in corporate mergers and acquisitions.", image: "/templates/lawyer-corporate/team-1.jpg" },
+          { name: "Diana Lawson", role: "Senior Partner — Family Law", bio: "Compassionate advocate recognized as a Super Lawyer for 10 consecutive years.", image: "/templates/lawyer-corporate/team-2.jpg" },
+          { name: "James Hartfield", role: "Partner — Litigation", bio: "Former federal prosecutor with an exceptional trial record.", image: "/templates/lawyer-corporate/team-3.jpg" },
+          { name: "Elena Rodriguez", role: "Associate — Real Estate", bio: "Specialist in commercial property transactions and development law.", image: "/templates/lawyer-corporate/team-4.jpg" },
         ] }),
         block("lawyer-testimonials", "testimonials", { title: "Client Testimonials", subtitle: "What our clients say about our legal representation", bgColor: "surface", items: [
           { name: "Michael Torres", role: "CEO, Torres Holdings", text: "Their corporate legal team guided us through a complex acquisition seamlessly. Professional, thorough, and always available." },
@@ -697,7 +721,7 @@ export const TEMPLATE_FAMILIES: FamilyDef[] = [
       sections: [
         corporateHero,
         block("corporate-brands", "brands", { title: "Trusted by Industry Leaders", items: [] }),
-        block("corporate-about", "imageText", { title: "We Drive Business Transformation", text: "With a proven track record of delivering results across industries, our team of seasoned consultants combines strategic thinking with operational expertise. We partner with organizations to unlock growth, optimize processes, and build sustainable competitive advantages.", imagePosition: "right", buttonText: "About Our Firm", buttonHref: "#team" }),
+        block("corporate-about", "imageText", { title: "We Drive Business Transformation", text: "With a proven track record of delivering results across industries, our team of seasoned consultants combines strategic thinking with operational expertise. We partner with organizations to unlock growth, optimize processes, and build sustainable competitive advantages.", imagePosition: "right", buttonText: "About Our Firm", buttonHref: "#team", image: "/templates/corporate-pro/office.jpg" }),
         block("corporate-services", "features", { title: "Our Services", subtitle: "Strategic solutions designed to accelerate your business growth", items: [
           { icon: "trending-up", title: "Growth Strategy", description: "Market analysis, competitive positioning, and growth roadmaps for sustainable scaling." },
           { icon: "users", title: "Organizational Design", description: "Workforce optimization, culture transformation, and leadership development programs." },
@@ -718,10 +742,10 @@ export const TEMPLATE_FAMILIES: FamilyDef[] = [
           { icon: "award", title: "Manufacturing — Industry 4.0", description: "Complete digital transformation of production lines, increasing efficiency by 60% and reducing waste by 35%." },
         ] }),
         block("corporate-team", "team", { title: "Leadership Team", subtitle: "Experienced professionals driving results across industries", members: [
-          { name: "Victoria Hayes", role: "Managing Director", bio: "Former McKinsey partner with 25 years in strategic consulting." },
-          { name: "Marcus Webb", role: "Head of Digital", bio: "Technology leader who has overseen 100+ digital transformations." },
-          { name: "Katherine Blake", role: "Chief Strategy Officer", bio: "Specialist in market entry strategy and competitive positioning." },
-          { name: "Richard Park", role: "Head of Operations", bio: "Expert in lean management and operational excellence." },
+          { name: "Victoria Hayes", role: "Managing Director", bio: "Former McKinsey partner with 25 years in strategic consulting.", image: "/templates/corporate-pro/team-1.jpg" },
+          { name: "Marcus Webb", role: "Head of Digital", bio: "Technology leader who has overseen 100+ digital transformations.", image: "/templates/corporate-pro/team-2.jpg" },
+          { name: "Katherine Blake", role: "Chief Strategy Officer", bio: "Specialist in market entry strategy and competitive positioning.", image: "/templates/corporate-pro/team-3.jpg" },
+          { name: "Richard Park", role: "Head of Operations", bio: "Expert in lean management and operational excellence.", image: "/templates/corporate-pro/team-4.jpg" },
         ] }),
         block("corporate-testimonials", "testimonials", { title: "Client Testimonials", bgColor: "surface", items: [
           { name: "CEO, Fortune 500 Company", role: "Manufacturing", text: "They transformed our operations and delivered measurable results within the first quarter. A truly strategic partner." },
@@ -759,18 +783,25 @@ export const TEMPLATE_FAMILIES: FamilyDef[] = [
           { value: "15+", label: "Years in Market" },
           { value: "98%", label: "Client Satisfaction" },
         ] }),
-        block("realestate-featured", "gallery", { title: "Featured Properties", subtitle: "Explore our curated selection of premium listings", columns: 3 }),
+        block("realestate-featured", "gallery", { title: "Featured Properties", subtitle: "Explore our curated selection of premium listings", columns: 3, images: [
+          { src: "/templates/real-estate-pro/property-1.jpg", alt: "Modern Villa with Pool" },
+          { src: "/templates/real-estate-pro/property-2.jpg", alt: "Luxury Penthouse" },
+          { src: "/templates/real-estate-pro/property-3.jpg", alt: "Contemporary Family Home" },
+          { src: "/templates/real-estate-pro/property-4.jpg", alt: "Waterfront Estate" },
+          { src: "/templates/real-estate-pro/property-5.jpg", alt: "Downtown Apartment" },
+          { src: "/templates/real-estate-pro/property-6.jpg", alt: "Suburban Townhouse" },
+        ] }),
         block("realestate-services", "features", { title: "Our Services", subtitle: "Full-service real estate solutions for buyers, sellers, and investors", items: [
           { icon: "globe", title: "Property Sales", description: "Expert guidance through every step of buying or selling your property." },
           { icon: "trending-up", title: "Investment Advisory", description: "Market analysis and investment strategy for maximum returns." },
           { icon: "eye", title: "Property Management", description: "Hassle-free property management for landlords and investors." },
           { icon: "target", title: "Market Valuations", description: "Accurate property valuations based on comprehensive market data." },
         ] }),
-        block("realestate-about", "imageText", { title: "Your Trusted Real Estate Partner", text: "With deep knowledge of local markets and a commitment to exceptional service, our team of licensed agents helps you navigate the real estate journey with confidence. Whether you're a first-time buyer, seasoned investor, or looking to sell, we deliver results.", imagePosition: "left", buttonText: "Meet Our Agents", buttonHref: "#team" }),
+        block("realestate-about", "imageText", { title: "Your Trusted Real Estate Partner", text: "With deep knowledge of local markets and a commitment to exceptional service, our team of licensed agents helps you navigate the real estate journey with confidence. Whether you're a first-time buyer, seasoned investor, or looking to sell, we deliver results.", imagePosition: "left", buttonText: "Meet Our Agents", buttonHref: "#team", image: "/templates/real-estate-pro/about.jpg" }),
         block("realestate-team", "team", { title: "Our Agents", subtitle: "Experienced professionals dedicated to finding your perfect property", members: [
-          { name: "Jennifer Moore", role: "Principal Broker", bio: "Top-producing agent with $200M+ in career sales." },
-          { name: "Daniel Foster", role: "Luxury Specialist", bio: "Expert in high-end residential and waterfront properties." },
-          { name: "Maria Santos", role: "Commercial Agent", bio: "Specialist in commercial leasing and investment properties." },
+          { name: "Jennifer Moore", role: "Principal Broker", bio: "Top-producing agent with $200M+ in career sales.", image: "/templates/real-estate-pro/team-1.jpg" },
+          { name: "Daniel Foster", role: "Luxury Specialist", bio: "Expert in high-end residential and waterfront properties.", image: "/templates/real-estate-pro/team-2.jpg" },
+          { name: "Maria Santos", role: "Commercial Agent", bio: "Specialist in commercial leasing and investment properties.", image: "/templates/real-estate-pro/team-3.jpg" },
         ] }),
         block("realestate-testimonials", "testimonials", { title: "Client Success Stories", bgColor: "surface", items: [
           { name: "The Martinez Family", role: "First-time Buyers", text: "They made our first home purchase stress-free. Found us the perfect home within our budget in just 3 weeks!" },
@@ -809,7 +840,7 @@ export const TEMPLATE_FAMILIES: FamilyDef[] = [
       fonts: { heading: "Cormorant Garamond", body: "Inter" },
       sections: [
         bistroHero,
-        block("bistro-about", "imageText", { title: "Welcomes You", text: "Discover the charm of Bistro, an authentic restaurant offering exceptional cuisine in every bite. Indulge in traditional dishes crafted with care, complemented by warm hospitality and a cozy ambiance. From hearty stews to savory specialties, experience unforgettable flavors.", imagePosition: "right", buttonText: "View on Map", buttonHref: "#contact" }),
+        block("bistro-about", "imageText", { title: "Welcomes You", text: "Discover the charm of Bistro, an authentic restaurant offering exceptional cuisine in every bite. Indulge in traditional dishes crafted with care, complemented by warm hospitality and a cozy ambiance. From hearty stews to savory specialties, experience unforgettable flavors.", imagePosition: "right", buttonText: "View on Map", buttonHref: "#contact", image: "/templates/bistro/dinner.jpg" }),
         block("bistro-specials", "features", { title: "Discover Authentic Flavours", subtitle: "Diners' favorites crafted with the finest ingredients", items: [
           { icon: "star", title: "Special Coffee", description: "Our signature blend, carefully roasted and brewed to perfection." },
           { icon: "heart", title: "Bacon and Eggs", description: "Classic breakfast elevated with farm-fresh ingredients and house seasonings." },
@@ -827,7 +858,15 @@ export const TEMPLATE_FAMILIES: FamilyDef[] = [
           { name: "Bára Müllerová", role: "Food Critic", text: "Bistro delivers authentic flavors with a modern twist. A must-visit for anyone who appreciates quality cuisine." },
           { name: "Matt Freeman", role: "Local Regular", text: "Our go-to restaurant for special occasions. The staff are warm, attentive, and truly passionate about food." },
         ] }),
-        block("bistro-gallery", "gallery", { title: "Gallery", subtitle: "A glimpse into our kitchen, dining room, and culinary creations", columns: 3 }),
+        block("bistro-gallery", "gallery", { title: "Gallery", subtitle: "A glimpse into our kitchen, dining room, and culinary creations", columns: 3, images: [
+          { src: "/templates/bistro/restaurant.jpg", alt: "Restaurant Interior" },
+          { src: "/templates/bistro/breakfast.jpg", alt: "Breakfast Spread" },
+          { src: "/templates/bistro/lunch.jpg", alt: "Lunch Service" },
+          { src: "/templates/bistro/dinner.jpg", alt: "Dinner Ambiance" },
+          { src: "/templates/bistro/dessert.jpg", alt: "Signature Desserts" },
+          { src: "/templates/bistro/coffee.jpg", alt: "Artisan Coffee" },
+          { src: "/templates/bistro/wine.jpeg", alt: "Wine Selection" },
+        ] }),
         block("bistro-contact", "contactInfo", { title: "On the Map", subtitle: "Find us and come experience Bistro in person", items: [
           { icon: "map-pin", title: "Location", value: "123 Gourmet Street, London, UK" },
           { icon: "phone", title: "Reservations", value: "+123 232 123" },
@@ -909,7 +948,7 @@ export const TEMPLATE_FAMILIES: FamilyDef[] = [
           { value: "32K+", label: "Treated Patients" },
           { value: "98%", label: "Satisfaction Rate" },
         ] }),
-        block("medicare-about", "imageText", { title: "Redefining Modern Healthcare Standards", text: "Our patient-centered approach combines cutting-edge medical technology with compassionate care. Each treatment protocol is calibrated against individual medical history, lifestyle factors, and recovery goals. With advanced diagnostics, certified specialists, integrated recovery programs, and round-the-clock critical care, we deliver excellence at every touchpoint.", imagePosition: "left", buttonText: "Discover Our Services", buttonHref: "#services" }),
+        block("medicare-about", "imageText", { title: "Redefining Modern Healthcare Standards", text: "Our patient-centered approach combines cutting-edge medical technology with compassionate care. Each treatment protocol is calibrated against individual medical history, lifestyle factors, and recovery goals. With advanced diagnostics, certified specialists, integrated recovery programs, and round-the-clock critical care, we deliver excellence at every touchpoint.", imagePosition: "left", buttonText: "Discover Our Services", buttonHref: "#services", image: "/templates/medicare/facilities.webp" }),
         block("medicare-services", "features", { title: "Medical Departments", subtitle: "Comprehensive healthcare services across all major specialties", items: [
           { icon: "heart", title: "Cardiology", description: "Advanced cardiac care including interventional procedures, diagnostics, and rehabilitation." },
           { icon: "eye", title: "Ophthalmology", description: "Complete eye care from routine exams to laser surgery and retinal treatments." },
@@ -919,13 +958,13 @@ export const TEMPLATE_FAMILIES: FamilyDef[] = [
           { icon: "award", title: "Oncology", description: "Comprehensive cancer care with the latest treatments and supportive services." },
         ] }),
         block("medicare-team", "team", { title: "Our Doctors", subtitle: "Meet our team of board-certified medical professionals", members: [
-          { name: "Dr. Sarah Mitchell", role: "Chief of Cardiology", bio: "20+ years in interventional cardiology with 5,000+ procedures performed." },
-          { name: "Dr. James Chen", role: "Head of Neurology", bio: "Published researcher and expert in neurodegenerative disease treatment." },
-          { name: "Dr. Maria Santos", role: "Pediatrics Director", bio: "Compassionate pediatrician with a focus on developmental health." },
-          { name: "Dr. Robert Kim", role: "Orthopedic Surgeon", bio: "Fellowship-trained in sports medicine and minimally invasive surgery." },
+          { name: "Dr. Sarah Mitchell", role: "Chief of Cardiology", bio: "20+ years in interventional cardiology with 5,000+ procedures performed.", image: "/templates/medicare/doctor-1.webp" },
+          { name: "Dr. James Chen", role: "Head of Neurology", bio: "Published researcher and expert in neurodegenerative disease treatment.", image: "/templates/medicare/doctor-2.webp" },
+          { name: "Dr. Maria Santos", role: "Pediatrics Director", bio: "Compassionate pediatrician with a focus on developmental health.", image: "/templates/medicare/doctor-3.webp" },
+          { name: "Dr. Robert Kim", role: "Orthopedic Surgeon", bio: "Fellowship-trained in sports medicine and minimally invasive surgery.", image: "/templates/medicare/doctor-4.webp" },
         ] }),
         block("medicare-testimonials", "testimonials", { title: "Patient Stories", subtitle: "Real experiences from our patients and their families", bgColor: "surface", items: [
-          { name: "Marisol Avery", role: "Verified Patient", text: "The team went above and beyond. Compassionate, attentive, and genuinely caring throughout every step of my recovery." },
+          { name: "Marisol Avery", role: "Verified Patient", text: "The team went above and beyond. Compassionate, attentive, and genuinely caring throughout every step of my recovery.", image: "/templates/medicare/patient.webp" },
           { name: "Thomas Wright", role: "Cardiac Patient", text: "From diagnosis to recovery, the cardiology team provided exceptional care. I'm stronger than ever." },
           { name: "Linda Park", role: "Parent", text: "The pediatrics department made my daughter feel safe and comfortable. The doctors are truly wonderful with children." },
         ] }),
@@ -973,8 +1012,15 @@ export const TEMPLATE_FAMILIES: FamilyDef[] = [
           { value: "4.9★", label: "Average Rating" },
           { value: "15+", label: "Years Experience" },
         ] }),
-        block("travely-about", "imageText", { title: "Your Adventure Awaits", text: "Whether it's a mountain retreat, coastal escape, or urban exploration — we create moments that last a lifetime. Our expert travel consultants craft personalized itineraries tailored to your interests, budget, and travel style. From luxury resorts to off-the-beaten-path adventures, every trip is designed to be unforgettable.", imagePosition: "left", buttonText: "Plan Your Trip", buttonHref: "#contact" }),
-        block("travely-destinations", "gallery", { title: "Popular Destinations", subtitle: "Explore breathtaking views from our most sought-after locations around the world", columns: 3 }),
+        block("travely-about", "imageText", { title: "Your Adventure Awaits", text: "Whether it's a mountain retreat, coastal escape, or urban exploration — we create moments that last a lifetime. Our expert travel consultants craft personalized itineraries tailored to your interests, budget, and travel style. From luxury resorts to off-the-beaten-path adventures, every trip is designed to be unforgettable.", imagePosition: "left", buttonText: "Plan Your Trip", buttonHref: "#contact", image: "/templates/travely/about.webp" }),
+        block("travely-destinations", "gallery", { title: "Popular Destinations", subtitle: "Explore breathtaking views from our most sought-after locations around the world", columns: 3, images: [
+          { src: "/templates/travely/dest-1.webp", alt: "Tropical Beach Paradise" },
+          { src: "/templates/travely/dest-2.webp", alt: "Mountain Retreat" },
+          { src: "/templates/travely/dest-3.webp", alt: "Historic City Tour" },
+          { src: "/templates/travely/dest-4.webp", alt: "Coastal Escape" },
+          { src: "/templates/travely/dest-5.webp", alt: "Desert Adventure" },
+          { src: "/templates/travely/dest-6.webp", alt: "Island Getaway" },
+        ] }),
         block("travely-services", "features", { title: "What We Offer", subtitle: "Curated experiences crafted with attention to every detail", items: [
           { icon: "star", title: "Curated Experiences", description: "Hand-picked destinations and activities for every type of traveler." },
           { icon: "shield", title: "Trusted & Safe", description: "Licensed guides, insured trips, and 24/7 on-ground support." },
@@ -1045,12 +1091,12 @@ export const TEMPLATE_FAMILIES: FamilyDef[] = [
           { icon: "palette", title: "UI/UX Design Masterclass", description: "Design thinking, wireframing, prototyping, and portfolio building." },
           { icon: "trending-up", title: "Digital Marketing Pro", description: "SEO, Google Ads, social media, email marketing, and analytics." },
         ] }),
-        block("melody-about", "imageText", { title: "Learn From Industry Experts", text: "Our instructors are working professionals from top companies. Get real-world knowledge, not just theory. Every course includes hands-on projects, mentorship, and lifetime access to materials. Join a community of 50,000+ learners advancing their careers.", imagePosition: "left", buttonText: "Meet Instructors", buttonHref: "#instructors" }),
+        block("melody-about", "imageText", { title: "Learn From Industry Experts", text: "Our instructors are working professionals from top companies. Get real-world knowledge, not just theory. Every course includes hands-on projects, mentorship, and lifetime access to materials. Join a community of 50,000+ learners advancing their careers.", imagePosition: "left", buttonText: "Meet Instructors", buttonHref: "#instructors", image: "/templates/melody-education/about.jpg" }),
         block("melody-instructors", "team", { title: "Top Instructors", subtitle: "Learn from the best minds in the industry", members: [
-          { name: "Dr. Amara Obi", role: "AI & Machine Learning", bio: "Former Google AI researcher with 15+ years of industry experience." },
-          { name: "Carlos Mendez", role: "Web Development", bio: "Full-stack engineer and author of 3 bestselling coding courses." },
-          { name: "Lisa Thompson", role: "UX Design", bio: "Lead designer at Meta, specializing in accessible design systems." },
-          { name: "Raj Patel", role: "Cybersecurity", bio: "Certified ethical hacker and cybersecurity consultant for Fortune 500 companies." },
+          { name: "Dr. Amara Obi", role: "AI & Machine Learning", bio: "Former Google AI researcher with 15+ years of industry experience.", image: "/templates/melody-education/team-1.jpg" },
+          { name: "Carlos Mendez", role: "Web Development", bio: "Full-stack engineer and author of 3 bestselling coding courses.", image: "/templates/melody-education/team-2.jpg" },
+          { name: "Lisa Thompson", role: "UX Design", bio: "Lead designer at Meta, specializing in accessible design systems.", image: "/templates/melody-education/team-3.jpg" },
+          { name: "Raj Patel", role: "Cybersecurity", bio: "Certified ethical hacker and cybersecurity consultant for Fortune 500 companies.", image: "/templates/melody-education/team-4.jpg" },
         ] }),
         block("melody-offer", "banner", { title: "🎓 20% Off All Courses — Limited Time!", subtitle: "Enroll today and get instant access to premium learning materials.", buttonText: "Claim Offer", buttonHref: "#contact" }),
         block("melody-testimonials", "testimonials", { title: "What Students Say", subtitle: "Real reviews from our learning community", bgColor: "surface", items: [
