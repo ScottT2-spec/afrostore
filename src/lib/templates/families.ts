@@ -731,6 +731,125 @@ export const TEMPLATE_FAMILIES: FamilyDef[] = [
   }),
 
   makeTemplate({
+    name: "Jewellery Elegance",
+    slug: "jewellery-elegance",
+    category: "Accessories",
+    description: "A premium jewellery e-commerce template with elegant hero banners, category browsing, product grids, and editorial promotional sections.",
+    previewImage: "https://woodmart.xtemos.com/jewellery-2/wp-content/uploads/sites/35/2026/04/j2-hero-banner-1.jpg.webp",
+    previewUrl: "/template-preview/jewellery-elegance",
+    recommendationKeywords: ["jewellery", "jewelry", "accessories", "rings", "necklaces", "earrings", "bracelets", "luxury", "gold", "elegance", "gift"],
+    variants: [{ name: "Jewellery", keywords: ["jewellery", "jewelry", "gold"] }, { name: "Luxury Accessories", keywords: ["luxury", "accessories", "gift"] }],
+    themeConfig: themeConfig({
+      layout: "jewellery_elegance",
+      header: "minimal",
+      footer: "rich",
+      card: "gallery",
+      colors: { primary: "#1C1C1C", secondary: "#6B6B6B", accent: "#C9A96E", background: "#FFFFFF", text: "#1C1C1C", headerBg: "#FFFFFF", headerText: "#1C1C1C", footerBg: "#1C1C1C", footerText: "#E5E5E5" },
+      fonts: { heading: "Playfair Display", body: "Inter" },
+      sections: [
+        // 1. DUAL HERO BANNERS
+        block("jewellery-hero", "columns", {
+          columns: 2,
+          gap: "md",
+          items: [
+            {
+              image: "https://woodmart.xtemos.com/jewellery-2/wp-content/uploads/sites/35/2026/04/j2-hero-banner-1.jpg.webp",
+              title: "Earrings Sale",
+              subtitle: "Up to 20% off",
+              buttonText: "Shop now",
+              buttonHref: "/shop",
+            },
+            {
+              image: "https://woodmart.xtemos.com/jewellery-2/wp-content/uploads/sites/35/2026/04/j2-hero-banner-2.jpg.webp",
+              title: "Elevate Your Look",
+              subtitle: "15% off Sitewide",
+              buttonText: "Shop now",
+              buttonHref: "/shop",
+            },
+          ],
+        }),
+        // 2. CATEGORY CARDS (4 in a row)
+        block("jewellery-categories", "categories", {
+          title: "",
+          columns: 4,
+          items: [
+            { icon: "", title: "Bracelets", description: "", image: "https://woodmart.xtemos.com/jewellery-2/wp-content/uploads/sites/35/2026/04/j2-category-bracelets.jpg.webp", href: "/shop?category=bracelets" },
+            { icon: "", title: "Earrings", description: "", image: "https://woodmart.xtemos.com/jewellery-2/wp-content/uploads/sites/35/2026/04/j2-category-earrings.jpg.webp", href: "/shop?category=earrings" },
+            { icon: "", title: "Necklaces", description: "", image: "https://woodmart.xtemos.com/jewellery-2/wp-content/uploads/sites/35/2026/04/j2-category-necklaces.jpg.webp", href: "/shop?category=necklaces" },
+            { icon: "", title: "Rings", description: "", image: "https://woodmart.xtemos.com/jewellery-2/wp-content/uploads/sites/35/2026/04/j2-category-rings.jpg.webp", href: "/shop?category=rings" },
+          ],
+        }),
+        // 3. NEW IN - product grid
+        block("jewellery-new-in", "new_arrivals", {
+          title: "New In",
+          limit: 6,
+          columns: 3,
+        }),
+        // 4. PROMOTIONAL SPLIT SECTION
+        block("jewellery-promo", "columns", {
+          columns: 3,
+          gap: "md",
+          items: [
+            {
+              type: "stacked-images",
+              images: [
+                { src: "https://woodmart.xtemos.com/jewellery-2/wp-content/uploads/sites/35/2026/04/j2-p-left-img-1.jpg.webp", title: "Classic Paperclip Chain" },
+                { src: "https://woodmart.xtemos.com/jewellery-2/wp-content/uploads/sites/35/2026/04/j2-p-left-img-2.jpg", title: "Oversized Stud Earrings" },
+              ],
+            },
+            {
+              type: "products",
+              title: "Featured Picks",
+              limit: 2,
+            },
+            {
+              type: "stacked-images",
+              images: [
+                { src: "https://woodmart.xtemos.com/jewellery-2/wp-content/uploads/sites/35/2026/04/j2-p-right-img-1.jpg.webp" },
+                { src: "https://woodmart.xtemos.com/jewellery-2/wp-content/uploads/sites/35/2026/04/j2-p-right-img-2.jpg.webp" },
+              ],
+            },
+          ],
+        }),
+        // 5. BESTSELLERS
+        block("jewellery-bestsellers", "best_sellers", {
+          title: "Bestsellers",
+          limit: 6,
+          columns: 3,
+        }),
+        // 6. TESTIMONIAL QUOTE
+        block("jewellery-quote", "testimonial", {
+          text: "WoodMart Jewelry combines elegance and craftsmanship, offering timeless pieces that belong in every jewelry collection.",
+          bgColor: "surface",
+        }),
+        // 7. BRAND LOGOS
+        block("jewellery-brands", "brands", {
+          title: "",
+          items: [
+            { name: "Vitra", logo: "https://woodmart.xtemos.com/jewellery-2/wp-content/uploads/sites/35/2026/04/j2-brand-vitra.svg" },
+            { name: "Poliform", logo: "https://woodmart.xtemos.com/jewellery-2/wp-content/uploads/sites/35/2026/04/j2-brand-poliform.svg" },
+            { name: "Minotti", logo: "https://woodmart.xtemos.com/jewellery-2/wp-content/uploads/sites/35/2026/04/j2-brand-minotti.svg" },
+            { name: "Lladro", logo: "https://woodmart.xtemos.com/jewellery-2/wp-content/uploads/sites/35/2026/04/j2-brand-lladro.svg" },
+          ],
+        }),
+        // 8. PRE-FOOTER BANNERS (4 cards)
+        block("jewellery-prefooter", "gallery", {
+          title: "",
+          columns: 4,
+          items: [
+            { image: "https://woodmart.xtemos.com/jewellery-2/wp-content/uploads/sites/35/2026/04/j2-prefooter-banner-about-us.jpg.webp", title: "About Us", buttonText: "Discover More", href: "/about" },
+            { image: "https://woodmart.xtemos.com/jewellery-2/wp-content/uploads/sites/35/2026/04/j2-prefooter-banner-packages.jpg.webp", title: "Our Packaging", buttonText: "Discover More", href: "/shop" },
+            { image: "https://woodmart.xtemos.com/jewellery-2/wp-content/uploads/sites/35/2026/04/j2-prefooter-banner-collections.jpg.webp", title: "Collections", buttonText: "Discover More", href: "/collections" },
+            { image: "https://woodmart.xtemos.com/jewellery-2/wp-content/uploads/sites/35/2026/04/j2-prefooter-banner-showrooms.jpg.webp", title: "Showrooms", buttonText: "Discover More", href: "/showrooms" },
+          ],
+        }),
+      ],
+    }),
+    pageTitles: ["Home", "Shop", "Collections", "About Us", "Contact", "Wishlist"],
+    legacySlugs: ["jewellery-2"],
+  }),
+
+  makeTemplate({
     name: "Business Impact",
     slug: "landing-product",
     category: "Landing Page",

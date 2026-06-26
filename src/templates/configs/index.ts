@@ -19,6 +19,9 @@ export const templateConfigRegistry = {
   businessServicesPro: "business-services-pro",
   interiorStudio: "interior-studio",
   commercePro: "commerce-pro",
+  // Jewellery Templates
+  jewelleryElegance: "jewellery-elegance",
+  jewellery: "jewellery-elegance",
   // Landing Page Templates
   artsy: "landing-artsy",
   landingArtsy: "landing-artsy",
