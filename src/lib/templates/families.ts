@@ -1399,7 +1399,7 @@ export const TEMPLATE_FAMILIES: FamilyDef[] = [
     slug: "jewellery-elegance",
     category: "Accessories",
     description: "A premium jewellery e-commerce template with elegant hero banners, category browsing, product grids, and editorial promotional sections.",
-    previewImage: "https://woodmart.xtemos.com/jewellery-2/wp-content/uploads/sites/35/2026/04/j2-hero-banner-1.jpg.webp",
+    previewImage: "/templates/jewellery/hero/banner-1.webp",
     previewUrl: "/template-preview/jewellery-elegance",
     recommendationKeywords: ["jewellery", "jewelry", "accessories", "rings", "necklaces", "earrings", "bracelets", "luxury", "gold", "elegance", "gift"],
     variants: [{ name: "Jewellery", keywords: ["jewellery", "jewelry", "gold"] }, { name: "Luxury Accessories", keywords: ["luxury", "accessories", "gift"] }],
@@ -1414,18 +1414,18 @@ export const TEMPLATE_FAMILIES: FamilyDef[] = [
         // 1. DUAL HERO BANNERS
         block("jewellery-hero", "imageHeroBanner", {
           items: [
-            { image: "https://woodmart.xtemos.com/jewellery-2/wp-content/uploads/sites/35/2026/04/j2-hero-banner-1.jpg.webp", title: "Earrings Sale", subtitle: "Up to 20% off", buttonText: "Shop now", buttonHref: "/shop" },
-            { image: "https://woodmart.xtemos.com/jewellery-2/wp-content/uploads/sites/35/2026/04/j2-hero-banner-2.jpg.webp", title: "Elevate Your Look", subtitle: "15% off Sitewide", buttonText: "Shop now", buttonHref: "/shop" },
+            { image: "/templates/jewellery/hero/banner-1.webp", title: "Earrings Sale", subtitle: "Up to 20% off", buttonText: "Shop now", buttonHref: "/shop" },
+            { image: "/templates/jewellery/hero/banner-2.webp", title: "Elevate Your Look", subtitle: "15% off Sitewide", buttonText: "Shop now", buttonHref: "/shop" },
           ],
         }),
         // 2. CATEGORY CARDS
         block("jewellery-categories", "imageCategoryCards", {
           columns: 4,
           items: [
-            { image: "https://woodmart.xtemos.com/jewellery-2/wp-content/uploads/sites/35/2026/04/j2-category-bracelets.jpg.webp", title: "Bracelets", href: "/shop?category=bracelets" },
-            { image: "https://woodmart.xtemos.com/jewellery-2/wp-content/uploads/sites/35/2026/04/j2-category-earrings.jpg.webp", title: "Earrings", href: "/shop?category=earrings" },
-            { image: "https://woodmart.xtemos.com/jewellery-2/wp-content/uploads/sites/35/2026/04/j2-category-necklaces.jpg.webp", title: "Necklaces", href: "/shop?category=necklaces" },
-            { image: "https://woodmart.xtemos.com/jewellery-2/wp-content/uploads/sites/35/2026/04/j2-category-rings.jpg.webp", title: "Rings", href: "/shop?category=rings" },
+            { image: "/templates/jewellery/categories/bracelets.webp", title: "Bracelets", href: "/shop?category=bracelets" },
+            { image: "/templates/jewellery/categories/earrings.webp", title: "Earrings", href: "/shop?category=earrings" },
+            { image: "/templates/jewellery/categories/necklaces.webp", title: "Necklaces", href: "/shop?category=necklaces" },
+            { image: "/templates/jewellery/categories/rings.webp", title: "Rings", href: "/shop?category=rings" },
           ],
         }),
         // 3. NEW IN (hardcoded products with real images)
@@ -1433,27 +1433,27 @@ export const TEMPLATE_FAMILIES: FamilyDef[] = [
           title: "New In",
           columns: 3,
           products: [
-            { name: "August Birthstone Pendant Necklace", price: 95, image: "https://woodmart.xtemos.com/jewellery-2/wp-content/uploads/sites/35/2026/04/august-birthstone-pendant-necklace-600x686.jpeg.webp", hoverImage: "https://woodmart.xtemos.com/jewellery-2/wp-content/uploads/sites/35/2026/04/august-birthstone-pendant-necklace-1-600x686.jpeg.webp", currency: "USD" },
-            { name: "Aurora Studs", price: 92, image: "https://woodmart.xtemos.com/jewellery-2/wp-content/uploads/sites/35/2026/04/aurora-studs-600x686.jpeg.webp", hoverImage: "https://woodmart.xtemos.com/jewellery-2/wp-content/uploads/sites/35/2026/04/aurora-studs-1-600x686.jpeg.webp", currency: "USD" },
-            { name: "Baya Hoop Earrings", price: 72, image: "https://woodmart.xtemos.com/jewellery-2/wp-content/uploads/sites/35/2026/04/baya-hoop-earrings-600x686.jpeg.webp", hoverImage: "https://woodmart.xtemos.com/jewellery-2/wp-content/uploads/sites/35/2026/04/baya-hoop-earrings-1-600x686.jpeg.webp", currency: "USD" },
-            { name: "Bold Bonds Interlock Ring – Mixed Metal", price: 220, image: "https://woodmart.xtemos.com/jewellery-2/wp-content/uploads/sites/35/2026/04/bold-bonds-interlock-ring--mixed-metal-600x686.jpeg.webp", hoverImage: "https://woodmart.xtemos.com/jewellery-2/wp-content/uploads/sites/35/2026/04/bold-bonds-interlock-ring--mixed-metal-1-600x686.jpeg.webp", currency: "USD" },
-            { name: "Bond Stacking Ring", price: 89, image: "https://woodmart.xtemos.com/jewellery-2/wp-content/uploads/sites/35/2026/04/bond-stacking-ring-600x686.jpeg.webp", hoverImage: "https://woodmart.xtemos.com/jewellery-2/wp-content/uploads/sites/35/2026/04/bond-stacking-ring-1-600x686.jpeg.webp", currency: "USD" },
-            { name: "Button Pearl Square Chunky Ring", price: 125, image: "https://woodmart.xtemos.com/jewellery-2/wp-content/uploads/sites/35/2026/04/button-pearl-square-chunky-ring-600x686.jpeg.webp", hoverImage: "https://woodmart.xtemos.com/jewellery-2/wp-content/uploads/sites/35/2026/04/button-pearl-square-chunky-ring-1-600x686.jpeg.webp", currency: "USD" },
+            { name: "August Birthstone Pendant Necklace", price: 95, image: "/templates/jewellery/products/august-birthstone.webp", hoverImage: "/templates/jewellery/products/august-birthstone-hover.webp", currency: "USD" },
+            { name: "Aurora Studs", price: 92, image: "/templates/jewellery/products/aurora-studs.webp", hoverImage: "/templates/jewellery/products/aurora-studs-hover.webp", currency: "USD" },
+            { name: "Baya Hoop Earrings", price: 72, image: "/templates/jewellery/products/baya-hoop.webp", hoverImage: "/templates/jewellery/products/baya-hoop-hover.webp", currency: "USD" },
+            { name: "Bold Bonds Interlock Ring – Mixed Metal", price: 220, image: "/templates/jewellery/products/bold-bonds.webp", hoverImage: "/templates/jewellery/products/bold-bonds-hover.webp", currency: "USD" },
+            { name: "Bond Stacking Ring", price: 89, image: "/templates/jewellery/products/bond-stacking.webp", hoverImage: "/templates/jewellery/products/bond-stacking-hover.webp", currency: "USD" },
+            { name: "Button Pearl Square Chunky Ring", price: 125, image: "/templates/jewellery/products/button-pearl.webp", hoverImage: "/templates/jewellery/products/button-pearl-hover.webp", currency: "USD" },
           ],
         }),
         // 4. PROMOTIONAL SPLIT
         block("jewellery-promo", "promoSplit", {
           leftImages: [
-            { src: "https://woodmart.xtemos.com/jewellery-2/wp-content/uploads/sites/35/2026/04/j2-p-left-img-1.jpg.webp", title: "Classic Paperclip Chain" },
-            { src: "https://woodmart.xtemos.com/jewellery-2/wp-content/uploads/sites/35/2026/04/j2-p-left-img-2.jpg", title: "Oversized Stud Earrings" },
+            { src: "/templates/jewellery/promo/left-1.webp", title: "Classic Paperclip Chain" },
+            { src: "/templates/jewellery/promo/left-2.jpg", title: "Oversized Stud Earrings" },
           ],
           rightImages: [
-            { src: "https://woodmart.xtemos.com/jewellery-2/wp-content/uploads/sites/35/2026/04/j2-p-right-img-1.jpg.webp" },
-            { src: "https://woodmart.xtemos.com/jewellery-2/wp-content/uploads/sites/35/2026/04/j2-p-right-img-2.jpg.webp" },
+            { src: "/templates/jewellery/promo/right-1.webp" },
+            { src: "/templates/jewellery/promo/right-2.webp" },
           ],
           centerProducts: [
-            { name: "August Birthstone Pendant Necklace", price: 95, image: "https://woodmart.xtemos.com/jewellery-2/wp-content/uploads/sites/35/2026/04/august-birthstone-pendant-necklace-600x686.jpeg.webp", hoverImage: "https://woodmart.xtemos.com/jewellery-2/wp-content/uploads/sites/35/2026/04/august-birthstone-pendant-necklace-1-600x686.jpeg.webp" },
-            { name: "Aurora Studs", price: 92, image: "https://woodmart.xtemos.com/jewellery-2/wp-content/uploads/sites/35/2026/04/aurora-studs-600x686.jpeg.webp", hoverImage: "https://woodmart.xtemos.com/jewellery-2/wp-content/uploads/sites/35/2026/04/aurora-studs-1-600x686.jpeg.webp" },
+            { name: "August Birthstone Pendant Necklace", price: 95, image: "/templates/jewellery/products/august-birthstone.webp", hoverImage: "/templates/jewellery/products/august-birthstone-hover.webp" },
+            { name: "Aurora Studs", price: 92, image: "/templates/jewellery/products/aurora-studs.webp", hoverImage: "/templates/jewellery/products/aurora-studs-hover.webp" },
           ],
         }),
         // 5. BESTSELLERS (hardcoded)
@@ -1461,12 +1461,12 @@ export const TEMPLATE_FAMILIES: FamilyDef[] = [
           title: "Bestsellers",
           columns: 3,
           products: [
-            { name: "Scarlett Double Hoop Earrings", price: 72, image: "https://woodmart.xtemos.com/jewellery-2/wp-content/uploads/sites/35/2026/04/scarlett-double-hoop-earrings-600x686.jpeg.webp", hoverImage: "https://woodmart.xtemos.com/jewellery-2/wp-content/uploads/sites/35/2026/04/scarlett-double-hoop-earrings-1-600x686.jpeg.webp", currency: "USD" },
-            { name: "Maeve Bangle", price: 168, image: "https://woodmart.xtemos.com/jewellery-2/wp-content/uploads/sites/35/2026/04/maeve-bangle-600x686.jpeg.webp", hoverImage: "https://woodmart.xtemos.com/jewellery-2/wp-content/uploads/sites/35/2026/04/maeve-bangle-1-600x686.jpeg.webp", currency: "USD" },
-            { name: "August Birthstone Pendant Necklace", price: 95, image: "https://woodmart.xtemos.com/jewellery-2/wp-content/uploads/sites/35/2026/04/august-birthstone-pendant-necklace-600x686.jpeg.webp", hoverImage: "https://woodmart.xtemos.com/jewellery-2/wp-content/uploads/sites/35/2026/04/august-birthstone-pendant-necklace-1-600x686.jpeg.webp", currency: "USD" },
-            { name: "Paige Gold Chain Bracelet", price: 69, compareAtPrice: 75, image: "https://woodmart.xtemos.com/jewellery-2/wp-content/uploads/sites/35/2026/04/paige-gold-chain-bracelet-600x686.jpeg.webp", hoverImage: "https://woodmart.xtemos.com/jewellery-2/wp-content/uploads/sites/35/2026/04/paige-gold-chain-bracelet-1-600x686.jpeg.webp", currency: "USD" },
-            { name: "Iconic Lucy Williams Malachite Necklace Set", price: 239, image: "https://woodmart.xtemos.com/jewellery-2/wp-content/uploads/sites/35/2026/04/iconic-lucy-williams-malachite-necklace-set-600x686.jpeg.webp", hoverImage: "https://woodmart.xtemos.com/jewellery-2/wp-content/uploads/sites/35/2026/04/iconic-lucy-williams-malachite-necklace-set-1-600x686.jpeg.webp", currency: "USD" },
-            { name: "Bond Stacking Ring", price: 89, image: "https://woodmart.xtemos.com/jewellery-2/wp-content/uploads/sites/35/2026/04/bond-stacking-ring-600x686.jpeg.webp", hoverImage: "https://woodmart.xtemos.com/jewellery-2/wp-content/uploads/sites/35/2026/04/bond-stacking-ring-1-600x686.jpeg.webp", currency: "USD" },
+            { name: "Scarlett Double Hoop Earrings", price: 72, image: "/templates/jewellery/products/scarlett-hoop.webp", hoverImage: "/templates/jewellery/products/scarlett-hoop-hover.webp", currency: "USD" },
+            { name: "Maeve Bangle", price: 168, image: "/templates/jewellery/products/maeve-bangle.webp", hoverImage: "/templates/jewellery/products/maeve-bangle-hover.webp", currency: "USD" },
+            { name: "August Birthstone Pendant Necklace", price: 95, image: "/templates/jewellery/products/august-birthstone.webp", hoverImage: "/templates/jewellery/products/august-birthstone-hover.webp", currency: "USD" },
+            { name: "Paige Gold Chain Bracelet", price: 69, compareAtPrice: 75, image: "/templates/jewellery/products/paige-bracelet.webp", hoverImage: "/templates/jewellery/products/paige-bracelet-hover.webp", currency: "USD" },
+            { name: "Iconic Lucy Williams Malachite Necklace Set", price: 239, image: "/templates/jewellery/products/lucy-malachite.webp", hoverImage: "/templates/jewellery/products/lucy-malachite-hover.webp", currency: "USD" },
+            { name: "Bond Stacking Ring", price: 89, image: "/templates/jewellery/products/bond-stacking.webp", hoverImage: "/templates/jewellery/products/bond-stacking-hover.webp", currency: "USD" },
           ],
         }),
         // 6. TESTIMONIAL QUOTE
@@ -1477,20 +1477,20 @@ export const TEMPLATE_FAMILIES: FamilyDef[] = [
         // 7. BRAND LOGOS (actual images)
         block("jewellery-brands", "imageBrands", {
           items: [
-            { name: "Vitra", logo: "https://woodmart.xtemos.com/jewellery-2/wp-content/uploads/sites/35/2026/04/j2-brand-vitra.svg" },
-            { name: "Poliform", logo: "https://woodmart.xtemos.com/jewellery-2/wp-content/uploads/sites/35/2026/04/j2-brand-poliform.svg" },
-            { name: "Minotti", logo: "https://woodmart.xtemos.com/jewellery-2/wp-content/uploads/sites/35/2026/04/j2-brand-minotti.svg" },
-            { name: "Lladro", logo: "https://woodmart.xtemos.com/jewellery-2/wp-content/uploads/sites/35/2026/04/j2-brand-lladro.svg" },
+            { name: "Vitra", logo: "/templates/jewellery/brands/vitra.svg" },
+            { name: "Poliform", logo: "/templates/jewellery/brands/poliform.svg" },
+            { name: "Minotti", logo: "/templates/jewellery/brands/minotti.svg" },
+            { name: "Lladro", logo: "/templates/jewellery/brands/lladro.svg" },
           ],
         }),
         // 8. PRE-FOOTER LINK CARDS
         block("jewellery-prefooter", "linkCards", {
           columns: 4,
           items: [
-            { image: "https://woodmart.xtemos.com/jewellery-2/wp-content/uploads/sites/35/2026/04/j2-prefooter-banner-about-us.jpg.webp", title: "About Us", buttonText: "Discover More", href: "/about" },
-            { image: "https://woodmart.xtemos.com/jewellery-2/wp-content/uploads/sites/35/2026/04/j2-prefooter-banner-packages.jpg.webp", title: "Our Packaging", buttonText: "Discover More", href: "/shop" },
-            { image: "https://woodmart.xtemos.com/jewellery-2/wp-content/uploads/sites/35/2026/04/j2-prefooter-banner-collections.jpg.webp", title: "Collections", buttonText: "Discover More", href: "/collections" },
-            { image: "https://woodmart.xtemos.com/jewellery-2/wp-content/uploads/sites/35/2026/04/j2-prefooter-banner-showrooms.jpg.webp", title: "Showrooms", buttonText: "Discover More", href: "/showrooms" },
+            { image: "/templates/jewellery/prefooter/about-us.webp", title: "About Us", buttonText: "Discover More", href: "/about" },
+            { image: "/templates/jewellery/prefooter/packages.webp", title: "Our Packaging", buttonText: "Discover More", href: "/shop" },
+            { image: "/templates/jewellery/prefooter/collections.webp", title: "Collections", buttonText: "Discover More", href: "/collections" },
+            { image: "/templates/jewellery/prefooter/showrooms.webp", title: "Showrooms", buttonText: "Discover More", href: "/showrooms" },
           ],
         }),
       ],
