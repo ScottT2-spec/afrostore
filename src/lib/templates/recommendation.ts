@@ -386,20 +386,86 @@ function sectionForPage(pageTitle: string, businessName: string, industry: strin
   return { id: `${slugify(pageTitle)}-content`, type: "features", props: { title: pageTitle, subtitle: `A starter ${pageTitle.toLowerCase()} page for ${businessName}.`, items: [] } };
 }
 
+// For self-contained templates, map page titles to relevant section types
+// so each page gets the correct sections from the template definition.
+const PAGE_SECTION_MAP: Record<string, string[]> = {
+  home: ["hero", "stats", "brands", "banner"],
+  about: ["imageText", "stats", "brands"],
+  services: ["features", "service_cards", "faq"],
+  departments: ["features", "service_cards"],
+  portfolio: ["gallery", "portfolio", "projects"],
+  properties: ["gallery", "portfolio"],
+  destinations: ["gallery"],
+  packages: ["features"],
+  courses: ["features", "featured_products"],
+  categories: ["features"],
+  team: ["team"],
+  doctors: ["team"],
+  agents: ["team"],
+  attorneys: ["team"],
+  instructors: ["team"],
+  testimonials: ["testimonials"],
+  reviews: ["testimonials"],
+  contact: ["contactForm", "contactInfo"],
+  appointment: ["contactForm", "contactInfo"],
+  reservations: ["contactForm", "reservations"],
+  menu: ["menu", "features"],
+  gallery: ["gallery"],
+  faq: ["faq"],
+  pricing: ["stats"],
+  "case studies": ["case_studies", "features"],
+  "case results": ["stats"],
+  "practice areas": ["features", "service_cards"],
+};
+
+function getSectionsForPage(pageTitle: string, allSections: BuilderBlock[]): BuilderBlock[] {
+  const key = pageTitle.toLowerCase();
+  const sectionTypes = PAGE_SECTION_MAP[key];
+  if (!sectionTypes) return [];
+
+  return allSections.filter((section) => sectionTypes.includes(section.type));
+}
+
 export function generatePages(input: BusinessAnalysisInput, template: TemplateDefinition): GeneratedTemplatePage[] {
   const businessName = input.businessName || input.business_name || "Your Business";
   const industry = canonicalIndustry(input, template);
   const pageNames = TEMPLATE_FAMILY_PAGE_SETS[industry] || TEMPLATE_FAMILY_PAGE_SETS["commerce-pro"];
   const homeSections = generateHomepageSections(input, template, industry);
 
+  const SELF_CONTAINED_SLUGS = [
+    "clarity", "arsha", "lawyer-corporate", "corporate-pro", "real-estate-pro",
+    "bistro", "nutrio", "medicare", "travely", "melody-education",
+    "rival", "workfolio", "strada",
+  ];
+  const isSelfContained = SELF_CONTAINED_SLUGS.includes(template.slug) || isLandingPageTemplate(industry);
+  const templateSections = structuredClone(template.themeConfig.sections);
+
   return pageNames.map((title, position) => {
     const pageSlug = title === "Home" ? "home" : slugify(title);
-    const pageBlock = sectionForPage(title, businessName, industry);
+
+    let content: BuilderBlock[];
+    if (title === "Home") {
+      content = homeSections;
+    } else if (isSelfContained) {
+      // Pull matching sections from the template for this page
+      const pageSections = getSectionsForPage(title, templateSections);
+      if (pageSections.length > 0) {
+        content = pageSections;
+      } else {
+        // Fallback: use sectionForPage but this shouldn't happen for well-defined templates
+        const pageBlock = sectionForPage(title, businessName, industry);
+        content = pageBlock ? [pageBlock] : [];
+      }
+    } else {
+      const pageBlock = sectionForPage(title, businessName, industry);
+      content = pageBlock ? [pageBlock] : [];
+    }
+
     return {
       title,
       slug: pageSlug,
       type: title === "Home" ? "HOME" : title === "Contact" ? "CONTACT" : title === "About" ? "ABOUT" : title === "Services" ? "SERVICES" : title === "Team" ? "TEAM" : "CUSTOM",
-      content: title === "Home" ? homeSections : pageBlock ? [pageBlock] : [],
+      content,
       metaTitle: `${title} | ${businessName}`,
       metaDescription: position === 0 ? normalize(input.description) || `${businessName} ${industry} website.` : `${title} page for ${businessName}.`,
     };
