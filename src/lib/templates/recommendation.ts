@@ -637,12 +637,24 @@ export async function applyTemplateToSite(siteId: string, input: TemplateSelecti
     },
   });
 
-  await prisma.page.deleteMany({
-    where: {
-      siteId,
-      OR: pages.map((page) => ({ slug: page.slug })),
-    },
-  });
+  // For self-contained templates, remove ALL existing pages to start fresh
+  // (prevents leftover default pages from cluttering the sidebar).
+  // For other templates, only replace pages with matching slugs.
+  const SELF_CONTAINED_SLUGS = [
+    "clarity", "arsha", "lawyer-corporate", "corporate-pro", "real-estate-pro",
+    "bistro", "nutrio", "medicare", "travely", "melody-education",
+    "rival", "workfolio", "strada",
+  ];
+  if (SELF_CONTAINED_SLUGS.includes(template.slug) || template.slug.startsWith("landing-")) {
+    await prisma.page.deleteMany({ where: { siteId } });
+  } else {
+    await prisma.page.deleteMany({
+      where: {
+        siteId,
+        OR: pages.map((page) => ({ slug: page.slug })),
+      },
+    });
+  }
 
   await prisma.page.createMany({
     data: pages.map((page, position) => ({
