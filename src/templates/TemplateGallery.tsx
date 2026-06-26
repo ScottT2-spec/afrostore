@@ -22,6 +22,59 @@ interface Props {
   onRecommendationsLoaded?: (templates: ScoredTemplate[]) => void;
 }
 
+function TemplateMiniPreview({ template }: { template: ScoredTemplate }) {
+  const colors = template.themeConfig?.colors || { primary: "#6366f1", secondary: "#1f2937", accent: "#f59e0b", background: "#ffffff", text: "#111827", headerBg: "#ffffff", footerBg: "#1f2937", footerText: "#f9fafb" };
+  const fonts = template.themeConfig?.fonts || { heading: "Inter", body: "Inter" };
+  const name = template.name;
+
+  return (
+    <div className="h-full w-full" style={{ background: colors.background, transform: "scale(0.5)", transformOrigin: "top left", width: "200%", height: "200%" }}>
+      {/* Mini Header */}
+      <div className="flex items-center justify-between px-6 py-3" style={{ background: colors.headerBg, borderBottom: "1px solid rgba(0,0,0,0.06)" }}>
+        <div className="flex items-center gap-2">
+          <div className="h-5 w-5 rounded-md" style={{ background: colors.primary }} />
+          <div className="h-2 w-16 rounded" style={{ background: colors.text, opacity: 0.7 }} />
+        </div>
+        <div className="flex gap-3">
+          <div className="h-2 w-10 rounded" style={{ background: colors.text, opacity: 0.3 }} />
+          <div className="h-2 w-10 rounded" style={{ background: colors.text, opacity: 0.3 }} />
+          <div className="h-2 w-10 rounded" style={{ background: colors.text, opacity: 0.3 }} />
+        </div>
+      </div>
+      {/* Mini Hero */}
+      <div className="px-6 py-10 text-center" style={{ background: `linear-gradient(135deg, ${colors.primary}, ${colors.secondary})` }}>
+        <div className="mx-auto mb-2 h-2 w-20 rounded" style={{ background: colors.accent, opacity: 0.8 }} />
+        <div className="mx-auto mb-2 h-4 w-48 rounded" style={{ background: "#ffffff", opacity: 0.95 }} />
+        <div className="mx-auto mb-4 h-2 w-36 rounded" style={{ background: "#ffffff", opacity: 0.5 }} />
+        <div className="mx-auto h-6 w-24 rounded-md" style={{ background: colors.accent }} />
+      </div>
+      {/* Mini Products Grid */}
+      <div className="px-6 py-5" style={{ background: colors.background }}>
+        <div className="mx-auto mb-3 h-3 w-28 rounded" style={{ background: colors.text, opacity: 0.8 }} />
+        <div className="grid grid-cols-4 gap-2">
+          {[0,1,2,3].map((i) => (
+            <div key={i} className="rounded-lg overflow-hidden" style={{ border: "1px solid rgba(0,0,0,0.06)" }}>
+              <div className="h-12" style={{ background: `linear-gradient(${120 + i * 30}deg, ${colors.primary}22, ${colors.accent}33)` }} />
+              <div className="p-1.5" style={{ background: colors.background }}>
+                <div className="h-1.5 w-full rounded mb-1" style={{ background: colors.text, opacity: 0.5 }} />
+                <div className="h-1.5 w-8 rounded" style={{ background: colors.primary, opacity: 0.7 }} />
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
+      {/* Mini Footer */}
+      <div className="px-6 py-3" style={{ background: colors.footerBg }}>
+        <div className="flex gap-3 justify-center">
+          <div className="h-1.5 w-10 rounded" style={{ background: colors.footerText, opacity: 0.4 }} />
+          <div className="h-1.5 w-10 rounded" style={{ background: colors.footerText, opacity: 0.4 }} />
+          <div className="h-1.5 w-10 rounded" style={{ background: colors.footerText, opacity: 0.4 }} />
+        </div>
+      </div>
+    </div>
+  );
+}
+
 export default function TemplateGallery({
   selectable,
   onUseTemplate,
@@ -104,8 +157,12 @@ export default function TemplateGallery({
         <div className="grid grid-cols-1 gap-5 md:grid-cols-2 xl:grid-cols-3">
           {filtered.map((template) => (
             <article key={template.id || template.slug} className="overflow-hidden rounded-xl border border-surface-200 bg-white shadow-sm">
-              <div className="relative h-44 bg-gradient-to-br from-surface-900 via-brand-700 to-accent-500">
-                {template.previewImage ? <img src={template.previewImage} alt={template.name} className="h-full w-full object-cover" /> : null}
+              <div className="relative h-52 overflow-hidden bg-gray-100">
+                {template.previewImage ? (
+                  <img src={template.previewImage} alt={template.name} className="h-full w-full object-cover" />
+                ) : (
+                  <TemplateMiniPreview template={template} />
+                )}
                 {template.matchPercent !== undefined && (
                   <span className="absolute left-3 top-3 rounded-full bg-white px-2.5 py-1 text-xs font-bold text-brand-700 shadow-sm">
                     {template.matchPercent}% Match
