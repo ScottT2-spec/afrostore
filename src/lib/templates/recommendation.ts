@@ -358,11 +358,15 @@ function canonicalIndustry(input: BusinessAnalysisInput, template?: TemplateDefi
   if (category.includes("consulting") || category.includes("services")) return "business-services-pro";
   if (category.includes("interior") || category.includes("architecture")) return "interior-studio";
   if (category.includes("landing") || category.includes("creative") || category.includes("portfolio")) return "landing-artsy";
-  if (category.includes("travel") || category.includes("tourism")) return "landing-scenic";
-  if (category.includes("marketing") || category.includes("advertising") || category.includes("agency")) return "landing-agency";
-  if (category.includes("saas") || category.includes("software") || category.includes("technology")) return "landing-service";
-  if (category.includes("education") || category.includes("training") || category.includes("university")) return "landing-education";
-  if (category.includes("corporate")) return "landing-product";
+  if (category.includes("travel") || category.includes("tourism")) return "landing-travel";
+  if (category.includes("marketing") || category.includes("advertising") || category.includes("agency")) return "landing-tech-saas";
+  if (category.includes("saas") || category.includes("software") || category.includes("technology")) return "landing-saas-minimal";
+  if (category.includes("education") || category.includes("training") || category.includes("university")) return "landing-kids";
+  if (category.includes("health") || category.includes("nonprofit") || category.includes("advocacy")) return "landing-health";
+  if (category.includes("wellness") || category.includes("sleep") || category.includes("meditation")) return "landing-wellness";
+  if (category.includes("gadget") || category.includes("electronics") || category.includes("device")) return "landing-gadget";
+  if (category.includes("developer") || category.includes("portfolio") || category.includes("freelance")) return "landing-dev-portfolio";
+  if (category.includes("corporate")) return "landing-tech-saas";
   return "commerce-pro";
 }
 

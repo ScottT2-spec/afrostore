@@ -250,69 +250,102 @@ const interiorHero = block("interior-hero", "hero", {
 
 /* ─── Landing Page Heroes ─────────────────────────────────── */
 
+const landingGadgetHero = block("landing-gadget-hero", "hero", {
+  badge: "Next-Gen Gadgets",
+  heading: "Smart technology for everyday life",
+  subheading: "Discover premium smart gadgets designed for performance, style, and seamless integration into your daily routine. Waterproof. Wireless. Unstoppable.",
+  buttonText: "Shop Now",
+  buttonHref: "#products",
+  secondaryButtonText: "Learn More",
+  secondaryButtonHref: "#features",
+  bgStyle: "dark",
+});
+
+const landingHealthHero = block("landing-health-hero", "hero", {
+  badge: "Living Beyond, Living Well",
+  heading: "Innovative care, personalized journeys",
+  subheading: "We empower lives through innovative healthcare, advocacy, and community support. Together, we build a future defined by health, not diagnosis.",
+  buttonText: "Get Started Today",
+  buttonHref: "#services",
+  secondaryButtonText: "View Programs",
+  secondaryButtonHref: "#programs",
+  bgStyle: "dark",
+});
+
+const landingSaasMinimalHero = block("landing-saas-minimal-hero", "hero", {
+  badge: "AI-Powered Platform",
+  heading: "Ship products faster with AI",
+  subheading: "An AI-powered platform that streamlines every step of product creation — from design and development to final distribution. Fast, efficient, and end-to-end.",
+  buttonText: "Start Free",
+  buttonHref: "#pricing",
+  secondaryButtonText: "Watch Demo",
+  secondaryButtonHref: "#demo",
+  bgStyle: "dark",
+});
+
+const landingWellnessHero = block("landing-wellness-hero", "hero", {
+  badge: "Wellness Tech",
+  heading: "Calm your space, elevate your mind",
+  subheading: "Premium wellness technology designed to help you sleep better, breathe deeper, and live more mindfully. Ambient sound, smart sensors, and elegant design.",
+  buttonText: "Order Now",
+  buttonHref: "#product",
+  secondaryButtonText: "How It Works",
+  secondaryButtonHref: "#features",
+  bgStyle: "gradient",
+});
+
 const landingArtsyHero = block("landing-artsy-hero", "hero", {
-  badge: "Artsy Studio",
-  heading: "Where creativity meets digital craft",
-  subheading: "A bold, visual-first landing page for artists, designers, and creative studios. Full-screen hero slider, portfolio grid, and immersive storytelling.",
+  badge: "Illustrator & Animator",
+  heading: "Visual storytelling through illustration and animation",
+  subheading: "Illustration, character design and frame-by-frame animation. Explore visual storytelling, commercial work and experimental projects — where creativity meets craft.",
   buttonText: "View Portfolio",
   buttonHref: "#portfolio",
   secondaryButtonText: "Get in Touch",
   secondaryButtonHref: "#contact",
-  bgStyle: "dark",
-});
-
-const landingScenicHero = block("landing-scenic-hero", "hero", {
-  badge: "Scenic Experiences",
-  heading: "Discover breathtaking experiences",
-  subheading: "A cinematic, full-screen landing page for travel, hospitality, and lifestyle brands. Stunning imagery, smooth scrolling, and immersive galleries.",
-  buttonText: "Explore Now",
-  buttonHref: "#features",
-  secondaryButtonText: "View Gallery",
-  secondaryButtonHref: "#gallery",
-  bgStyle: "accent",
-});
-
-const landingAgencyHero = block("landing-agency-hero", "hero", {
-  badge: "Agency Growth",
-  heading: "We build brands that convert",
-  subheading: "A high-impact landing page for advertising agencies, design studios, and digital marketing firms. Results-driven layout with case studies and clear CTAs.",
-  buttonText: "Our Services",
-  buttonHref: "#services",
-  secondaryButtonText: "See Results",
-  secondaryButtonHref: "#case-studies",
-  bgStyle: "dark",
-});
-
-const landingServiceHero = block("landing-service-hero", "hero", {
-  badge: "SaaS Launch",
-  heading: "The smarter way to manage your business",
-  subheading: "A clean, conversion-optimized landing page for SaaS products, online services, and digital tools. Feature highlights, pricing tables, and trust signals.",
-  buttonText: "Get Started",
-  buttonHref: "#features",
-  secondaryButtonText: "See Pricing",
-  secondaryButtonHref: "#pricing",
   bgStyle: "light",
 });
 
-const landingEducationHero = block("landing-education-hero", "hero", {
-  badge: "Education Pro",
-  heading: "Start learning from leading experts today",
-  subheading: "A structured landing page for online courses, training programs, and educational institutions. Course categories, instructor profiles, and enrollment CTAs.",
-  buttonText: "Browse Courses",
-  buttonHref: "#courses",
-  secondaryButtonText: "Learn More",
-  secondaryButtonHref: "#about",
+const landingDevPortfolioHero = block("landing-dev-portfolio-hero", "hero", {
+  badge: "Creative Developer",
+  heading: "I build things for the web",
+  subheading: "Full-stack developer specializing in crafting beautiful, performant, and accessible digital experiences. Clean code, modern stack, pixel-perfect execution.",
+  buttonText: "View Projects",
+  buttonHref: "#projects",
+  secondaryButtonText: "Contact Me",
+  secondaryButtonHref: "#contact",
+  bgStyle: "dark",
+});
+
+const landingKidsHero = block("landing-kids-hero", "hero", {
+  badge: "New Monthly Adventures",
+  heading: "Spark their imagination, one box at a time",
+  subheading: "Expertly curated toy boxes delivered monthly to your doorstep. Tailored for every stage of development, from curious toddlers to aspiring scientists.",
+  buttonText: "Subscribe Now",
+  buttonHref: "#pricing",
+  secondaryButtonText: "How It Works",
+  secondaryButtonHref: "#how-it-works",
   bgStyle: "accent",
 });
 
-const landingProductHero = block("landing-product-hero", "hero", {
-  badge: "Business Impact",
-  heading: "One product. Infinite possibilities.",
-  subheading: "A focused, single-product landing page for launches, pre-orders, and direct-to-consumer brands. Video showcase, features breakdown, and strong conversion flow.",
-  buttonText: "Buy Now",
-  buttonHref: "#product",
-  secondaryButtonText: "Watch Demo",
-  secondaryButtonHref: "#video",
+const landingTechSaasHero = block("landing-tech-saas-hero", "hero", {
+  badge: "Launch Your Product",
+  heading: "Beautiful landing pages in minutes, not months",
+  subheading: "The fastest way to create stunning, conversion-optimized landing pages for your SaaS product. No design skills needed. Just pick, customize, and ship.",
+  buttonText: "Get Started Free",
+  buttonHref: "#pricing",
+  secondaryButtonText: "See Examples",
+  secondaryButtonHref: "#showcase",
+  bgStyle: "light",
+});
+
+const landingTravelHero = block("landing-travel-hero", "hero", {
+  badge: "Explore the World",
+  heading: "Your next adventure starts here",
+  subheading: "Discover breathtaking destinations with curated travel experiences. From mountain retreats to coastal escapes, plan your perfect journey with confidence.",
+  buttonText: "Explore Destinations",
+  buttonHref: "#destinations",
+  secondaryButtonText: "Plan Your Trip",
+  secondaryButtonHref: "#contact",
   bgStyle: "dark",
 });
 
@@ -1297,61 +1330,275 @@ export const TEMPLATE_FAMILIES: FamilyDef[] = [
     pageTitles: ["Home", "Collections", "Featured Products", "Flash Sales", "Reviews", "Contact"],
   }),
 
+
   /* ─── Landing Page Templates ─────────────────────────────── */
 
+  /* 1. Gadget Landing — inspired by WoodMart Gadget (smart tech product showcase) */
   makeTemplate({
-    name: "Artsy Studio",
+    name: "Gadget Showcase",
+    slug: "landing-gadget",
+    category: "Landing Page",
+    description: "A sleek, product-focused landing page for smart gadgets, electronics, and tech accessories. Feature highlights, waterproof/wireless badges, and strong conversion layout.",
+    previewImage: "",
+    previewUrl: "/template-preview/landing-gadget",
+    recommendationKeywords: ["landing", "gadget", "electronics", "tech", "smart", "device", "product", "wireless", "wearable"],
+    variants: [{ name: "Smart Device", keywords: ["smart", "device", "gadget"] }, { name: "Electronics", keywords: ["electronics", "tech", "wireless"] }],
+    themeConfig: themeConfig({
+      layout: "landing_gadget",
+      header: "minimal",
+      footer: "simple",
+      card: "product-focus",
+      colors: { primary: "#e84e48", secondary: "#242424", accent: "#fbbc34", background: "#f1f2f6", text: "#242424", headerBg: "#FFFFFF", footerBg: "#242424", footerText: "#767676" },
+      fonts: { heading: "Inter", body: "Inter" },
+      sections: [
+        landingGadgetHero,
+        block("gadget-brands", "brands", { title: "Trusted By Leading Brands", items: [] }),
+        block("gadget-features", "features", { title: "Built for Performance", subtitle: "Engineered with precision for everyday greatness.", items: [
+          { icon: "shield", title: "Waterproof Design", description: "IP68 rated. Take it anywhere — rain, pool, or shower." },
+          { icon: "zap", title: "Fast Wireless Charging", description: "0 to 100% in under an hour with Qi2 wireless charging." },
+          { icon: "sparkles", title: "AI-Powered Sensors", description: "Smart sensors that learn your habits and adapt in real-time." },
+          { icon: "heart", title: "All-Day Battery", description: "48-hour battery life that keeps up with your busiest days." },
+        ] }),
+        block("gadget-imagetext-1", "imageText", { title: "Precision Engineered Camera", text: "Ultra-wide 48MP lens with AI-enhanced night mode. Capture stunning photos in any lighting condition. Professional-grade imaging in a compact, everyday device.", imagePosition: "right", buttonText: "See Specs", buttonHref: "#specs" }),
+        block("gadget-stats", "stats", { title: "By the Numbers", items: [
+          { value: "48MP", label: "Camera Resolution" },
+          { value: "48hr", label: "Battery Life" },
+          { value: "IP68", label: "Water Resistance" },
+          { value: "5G", label: "Connectivity" },
+        ] }),
+        block("gadget-imagetext-2", "imageText", { title: "Seamless Connectivity", text: "Bluetooth 5.3, Wi-Fi 6E, and 5G ready. Connect to everything in your ecosystem instantly. Works flawlessly with iOS, Android, and all major smart home platforms.", imagePosition: "left", buttonText: "Learn More", buttonHref: "#connectivity" }),
+        block("gadget-testimonials", "testimonials", { title: "What Users Say", bgColor: "surface", items: [
+          { name: "Alex Chen", role: "Tech Enthusiast", text: "The build quality is insane. Best gadget purchase I've made this year, hands down." },
+          { name: "Maria Santos", role: "Content Creator", text: "The camera quality rivals devices twice the price. Absolutely love it." },
+          { name: "James Wright", role: "Verified Buyer", text: "Battery life is a game-changer. I charge it once every two days." },
+        ] }),
+        block("gadget-cta", "banner", { title: "Ready to Upgrade?", subtitle: "Free shipping on all orders. 30-day money-back guarantee.", buttonText: "Shop Now", buttonHref: "#shop" }),
+        block("gadget-newsletter", "newsletter", { title: "Stay in the Loop", subtitle: "Get exclusive deals, early access, and tech tips delivered to your inbox." }),
+      ],
+    }),
+    pageTitles: ["Home", "Features", "Specs", "Reviews", "Shop"],
+    legacySlugs: ["woodmart-gadget"],
+  }),
+
+  /* 2. Health/Nonprofit Landing — inspired by Aegis (advocacy, care, community) */
+  makeTemplate({
+    name: "Health & Advocacy",
+    slug: "landing-health",
+    category: "Landing Page",
+    description: "A warm, trust-forward landing page for healthcare organizations, nonprofits, and advocacy groups. Service highlights, impact stats, and community-driven storytelling.",
+    previewImage: "",
+    previewUrl: "/template-preview/landing-health",
+    recommendationKeywords: ["landing", "health", "nonprofit", "advocacy", "care", "community", "charity", "medical", "wellness", "ngo"],
+    variants: [{ name: "Healthcare", keywords: ["health", "medical", "care"] }, { name: "Nonprofit", keywords: ["nonprofit", "charity", "advocacy"] }],
+    themeConfig: themeConfig({
+      layout: "landing_health",
+      header: "professional",
+      footer: "rich",
+      card: "clean",
+      colors: { primary: "#2563EB", secondary: "#1E40AF", accent: "#10B981", background: "#FFFFFF", text: "#111827", headerBg: "#FFFFFF", footerBg: "#111827", footerText: "#9CA3AF" },
+      fonts: { heading: "Inter", body: "Inter" },
+      sections: [
+        landingHealthHero,
+        block("health-stats", "stats", { title: "Our Impact", items: [
+          { value: "50K+", label: "Lives Impacted" },
+          { value: "200+", label: "Care Programs" },
+          { value: "98%", label: "Patient Satisfaction" },
+          { value: "15yr", label: "Serving Communities" },
+        ] }),
+        block("health-services", "features", { title: "Our Services", subtitle: "Comprehensive care programs designed around your needs.", items: [
+          { icon: "heart", title: "Primary Care", description: "Compassionate, accessible primary healthcare for individuals and families." },
+          { icon: "shield", title: "Mental Health Support", description: "Confidential counseling, therapy, and wellness programs." },
+          { icon: "users", title: "Community Outreach", description: "Mobile clinics, health education, and community wellness events." },
+          { icon: "sparkles", title: "Preventive Programs", description: "Screenings, vaccinations, and proactive health management." },
+          { icon: "globe", title: "Advocacy & Policy", description: "Fighting for equitable healthcare access at local and national levels." },
+          { icon: "award", title: "Research & Innovation", description: "Advancing medical knowledge through community-based research." },
+        ] }),
+        block("health-imagetext", "imageText", { title: "Every Person Deserves Quality Care", text: "We believe healthcare is a right, not a privilege. Our team of dedicated professionals works tirelessly to ensure no one is left behind. From rural communities to urban centers, we bring care to where it's needed most.", imagePosition: "left", buttonText: "Our Story", buttonHref: "#about" }),
+        block("health-testimonials", "testimonials", { title: "Stories of Hope", subtitle: "Real people, real impact.", bgColor: "surface", items: [
+          { name: "Grace Mensah", role: "Community Member", text: "They didn't just treat my illness — they gave me hope. The care team genuinely cares about every patient." },
+          { name: "Dr. Kwame Asante", role: "Partner Physician", text: "Their community outreach model is transformational. I've seen firsthand the lives they've changed." },
+        ] }),
+        block("health-team", "team", { title: "Meet Our Team", subtitle: "Passionate professionals dedicated to your wellbeing.", members: [
+          { name: "Dr. Amara Obi", role: "Medical Director", bio: "20+ years in community health, specializing in preventive care and public health policy." },
+          { name: "Samuel Addo", role: "Program Coordinator", bio: "Leading outreach programs across 30+ communities with measurable impact." },
+          { name: "Fatima Diallo", role: "Mental Health Lead", bio: "Licensed therapist passionate about destigmatizing mental healthcare in Africa." },
+        ] }),
+        block("health-faq", "faq", { title: "Common Questions", items: [
+          { question: "Is care available to everyone?", answer: "Yes. We provide services regardless of ability to pay. Sliding-scale fees and free programs are available." },
+          { question: "How can I volunteer?", answer: "Visit our volunteer page or contact us directly. We welcome medical and non-medical volunteers." },
+          { question: "Do you accept insurance?", answer: "We work with most major insurance providers and also offer self-pay options." },
+        ] }),
+        block("health-cta", "banner", { title: "Join the Movement", subtitle: "Together, we can build healthier communities. Donate, volunteer, or spread the word.", buttonText: "Get Involved", buttonHref: "#contact" }),
+        block("health-contact", "contactForm", { title: "Reach Out", subtitle: "Have questions? Our team is here to help." }),
+      ],
+    }),
+    pageTitles: ["Home", "Services", "About", "Team", "FAQ", "Contact"],
+    legacySlugs: ["aegis", "nonprofit"],
+  }),
+
+  /* 3. Minimal SaaS Landing — inspired by Najaf Framer (AI platform, clean layout) */
+  makeTemplate({
+    name: "SaaS Minimal",
+    slug: "landing-saas-minimal",
+    category: "Landing Page",
+    description: "A clean, minimal landing page for AI-powered platforms and SaaS products. Monospace accents, dark gradients, feature grids, and transparent pricing.",
+    previewImage: "",
+    previewUrl: "/template-preview/landing-saas-minimal",
+    recommendationKeywords: ["landing", "saas", "ai", "platform", "minimal", "software", "startup", "tool", "app"],
+    variants: [{ name: "AI Platform", keywords: ["ai", "platform", "machine learning"] }, { name: "SaaS Startup", keywords: ["saas", "startup", "software"] }],
+    themeConfig: themeConfig({
+      layout: "landing_saas_minimal",
+      header: "minimal",
+      footer: "simple",
+      card: "modern",
+      colors: { primary: "#6366F1", secondary: "#1E1B4B", accent: "#22D3EE", background: "#0A0A0F", text: "#F8FAFC", headerBg: "#0A0A0F", footerBg: "#0A0A0F", footerText: "#64748B" },
+      fonts: { heading: "Figtree", body: "Inter" },
+      sections: [
+        landingSaasMinimalHero,
+        block("saas-min-brands", "brands", { title: "Trusted by 500+ Teams", items: [] }),
+        block("saas-min-features", "features", { title: "Everything You Need to Ship", subtitle: "From idea to production in record time.", items: [
+          { icon: "zap", title: "Lightning Builds", description: "Compile, test, and deploy in under 30 seconds with edge infrastructure." },
+          { icon: "sparkles", title: "AI Code Generation", description: "Generate production-ready code from natural language prompts." },
+          { icon: "shield", title: "Enterprise Security", description: "SOC2 compliant, end-to-end encryption, and SSO out of the box." },
+          { icon: "refresh", title: "Real-time Collaboration", description: "Multiple team members editing simultaneously with zero conflicts." },
+          { icon: "trending-up", title: "Smart Analytics", description: "Track usage, performance, and user behavior with built-in dashboards." },
+          { icon: "globe", title: "Global Edge Network", description: "Deploy to 200+ edge locations worldwide for sub-50ms latency." },
+        ] }),
+        block("saas-min-imagetext", "imageText", { title: "Design to Deployment in One Flow", text: "No more juggling between tools. Design your interface, write your logic, test your app, and push to production — all from a single platform. Our AI assistant helps at every step.", imagePosition: "right", buttonText: "Try It Free", buttonHref: "#pricing" }),
+        block("saas-min-video", "video", { title: "See It in Action", subtitle: "A 90-second walkthrough of the entire product workflow." }),
+        block("saas-min-stats", "stats", { title: "Built for Scale", items: [
+          { value: "99.99%", label: "Uptime SLA" },
+          { value: "30K+", label: "Developers" },
+          { value: "<50ms", label: "Global Latency" },
+          { value: "200+", label: "Integrations" },
+        ] }),
+        block("saas-min-pricing", "features", { title: "Simple, Transparent Pricing", subtitle: "No hidden fees. Start free, scale when ready.", items: [
+          { icon: "check", title: "Free — $0/mo", description: "Up to 3 projects, 1GB storage, community support. Perfect for side projects." },
+          { icon: "star", title: "Pro — $29/mo", description: "Unlimited projects, 100GB storage, priority support, advanced analytics." },
+          { icon: "rocket", title: "Enterprise — Custom", description: "Custom limits, SSO, SLA guarantees, dedicated account manager." },
+        ] }),
+        block("saas-min-testimonials", "testimonials", { title: "Loved by Developers", bgColor: "surface", items: [
+          { name: "Sarah Kim", role: "CTO, LaunchPad", text: "We replaced 4 different tools with this single platform. Our team ships 3x faster now." },
+          { name: "Omar Hassan", role: "Indie Developer", text: "The AI code generation is insanely good. It understands context better than any tool I've used." },
+        ] }),
+        block("saas-min-faq", "faq", { title: "Frequently Asked Questions", items: [
+          { question: "Is there a free tier?", answer: "Yes! Our Free plan includes 3 projects and 1GB storage. No credit card required." },
+          { question: "Can I export my code?", answer: "Absolutely. Full code export is available on all plans. No vendor lock-in." },
+          { question: "What languages are supported?", answer: "JavaScript, TypeScript, Python, Go, Rust, and more. We add new languages regularly." },
+          { question: "How does AI generation work?", answer: "Describe what you want in plain English. Our AI generates production-ready, tested code." },
+        ] }),
+        block("saas-min-cta", "banner", { title: "Start Shipping Today", subtitle: "Join 30,000+ developers building with AI. Free forever.", buttonText: "Get Started Free", buttonHref: "#signup" }),
+      ],
+    }),
+    pageTitles: ["Home", "Features", "Pricing", "FAQ", "Contact"],
+    legacySlugs: ["najaf", "saas-launch", "corba"],
+  }),
+
+  /* 4. Wellness Tech Landing — inspired by Aurapod (sleep tech, ambient, premium) */
+  makeTemplate({
+    name: "Wellness Tech",
+    slug: "landing-wellness",
+    category: "Landing Page",
+    description: "A premium, ambient landing page for wellness tech products — sleep devices, smart home wellness, health-focused SaaS. Soft gradients, calm typography, and mindful design.",
+    previewImage: "",
+    previewUrl: "/template-preview/landing-wellness",
+    recommendationKeywords: ["landing", "wellness", "health tech", "sleep", "meditation", "smart home", "ambient", "mindfulness", "wearable"],
+    variants: [{ name: "Sleep Tech", keywords: ["sleep", "ambient", "relaxation"] }, { name: "Health Device", keywords: ["health", "wellness", "wearable"] }],
+    themeConfig: themeConfig({
+      layout: "landing_wellness",
+      header: "minimal",
+      footer: "simple",
+      card: "gallery",
+      colors: { primary: "#7C3AED", secondary: "#2E1065", accent: "#A78BFA", background: "#0F0B1A", text: "#F5F3FF", headerBg: "#0F0B1A", footerBg: "#0F0B1A", footerText: "#7C7C8A" },
+      fonts: { heading: "Open Sans", body: "Open Sans" },
+      sections: [
+        landingWellnessHero,
+        block("wellness-imagetext-1", "imageText", { title: "Ambient Sound Technology", text: "Immerse yourself in scientifically designed soundscapes that promote deep relaxation and restorative sleep. Adaptive AI learns your preferences and adjusts throughout the night.", imagePosition: "right", buttonText: "Explore Sounds", buttonHref: "#sounds" }),
+        block("wellness-features", "features", { title: "Designed for Better Living", subtitle: "Every detail crafted for your wellbeing.", items: [
+          { icon: "sparkles", title: "Adaptive AI", description: "Learns your sleep patterns and adjusts sound, light, and temperature automatically." },
+          { icon: "heart", title: "Biometric Monitoring", description: "Track heart rate, breathing, and sleep quality without wearing anything." },
+          { icon: "shield", title: "Medical-Grade Sensors", description: "Clinical accuracy in a beautiful, consumer-friendly design." },
+          { icon: "zap", title: "Smart Wake", description: "Wake up at the optimal point in your sleep cycle, feeling refreshed every morning." },
+        ] }),
+        block("wellness-stats", "stats", { title: "The Science of Better Sleep", items: [
+          { value: "94%", label: "Report Better Sleep" },
+          { value: "27min", label: "Faster to Fall Asleep" },
+          { value: "3.2hr", label: "More Deep Sleep" },
+          { value: "4.9★", label: "Customer Rating" },
+        ] }),
+        block("wellness-imagetext-2", "imageText", { title: "Elegant Design, Invisible Technology", text: "Crafted from premium sustainable materials with a minimalist aesthetic that complements any bedroom. The technology disappears — all you experience is better rest.", imagePosition: "left", buttonText: "See Design", buttonHref: "#design" }),
+        block("wellness-testimonials", "testimonials", { title: "Sleep Stories", subtitle: "Real experiences from our community.", bgColor: "surface", items: [
+          { name: "Dr. Lena Fischer", role: "Sleep Researcher", text: "The biometric accuracy rivals clinical-grade equipment. A remarkable achievement in consumer wellness tech." },
+          { name: "Ama Boateng", role: "Verified User", text: "I've struggled with sleep for years. This device genuinely changed my life — I wake up feeling human again." },
+          { name: "Yuki Tanaka", role: "Wellness Coach", text: "I recommend this to all my clients. The adaptive soundscapes are unlike anything else on the market." },
+        ] }),
+        block("wellness-faq", "faq", { title: "Questions & Answers", items: [
+          { question: "How does it track sleep without wearables?", answer: "Our contactless radar sensors monitor breathing and movement from your nightstand — no wristband needed." },
+          { question: "Is there a subscription?", answer: "The device works fully without a subscription. Premium sound packs and advanced analytics are an optional $4.99/mo." },
+          { question: "What's the return policy?", answer: "Try it for 100 nights risk-free. Full refund if you don't love it." },
+        ] }),
+        block("wellness-cta", "banner", { title: "Transform Your Nights", subtitle: "Free shipping. 100-night trial. 2-year warranty.", buttonText: "Order Now", buttonHref: "#buy" }),
+      ],
+    }),
+    pageTitles: ["Home", "Features", "Science", "Reviews", "FAQ"],
+    legacySlugs: ["aurapod"],
+  }),
+
+  /* 5. Artsy Portfolio Landing — inspired by GLC Patti (illustrator, octagon masks, pink accents) */
+  makeTemplate({
+    name: "Artsy Portfolio",
     slug: "landing-artsy",
     category: "Landing Page",
-    description: "A bold, visual-first landing page for artists, designers, and creative studios with portfolio grids and immersive storytelling.",
+    description: "A bold, playful portfolio landing page for illustrators, animators, and creative artists. Visual-first storytelling with character, personality, and charm.",
     previewImage: "",
     previewUrl: "/template-preview/landing-artsy",
-    recommendationKeywords: ["landing", "creative", "art", "portfolio", "design", "studio", "gallery", "artist"],
-    variants: [{ name: "Creative Studio", keywords: ["creative", "studio", "design"] }, { name: "Artist Portfolio", keywords: ["art", "portfolio", "gallery"] }],
+    recommendationKeywords: ["landing", "creative", "art", "portfolio", "illustration", "animation", "design", "studio", "gallery", "artist"],
+    variants: [{ name: "Illustrator", keywords: ["illustration", "drawing", "art"] }, { name: "Animator", keywords: ["animation", "motion", "2d"] }],
     themeConfig: themeConfig({
       layout: "landing_artsy",
       header: "minimal",
       footer: "minimal",
       card: "editorial",
-      colors: { primary: "#1A1A2E", secondary: "#16213E", accent: "#E94560", background: "#0F0F0F", text: "#F5F5F5", headerBg: "#0F0F0F", footerBg: "#0F0F0F", footerText: "#A0A0A0" },
+      colors: { primary: "#3D2C1E", secondary: "#E8B4B8", accent: "#F4A7BB", background: "#F5EDE4", text: "#3D2C1E", headerBg: "#F5EDE4", footerBg: "#3D2C1E", footerText: "#D4C5B9" },
       fonts: { heading: "Playfair Display", body: "Inter" },
       sections: [
         landingArtsyHero,
-        block("artsy-about", "imageText", { title: "About the Studio", text: "We are a multidisciplinary creative studio specializing in branding, digital design, and visual storytelling. Every project is a canvas.", imagePosition: "right", buttonText: "Our Story", buttonHref: "#story" }),
-        block("artsy-portfolio", "gallery", { title: "Selected Works", subtitle: "A curated showcase of our finest projects and creative collaborations.", columns: 3 }),
-        block("artsy-services", "features", { title: "What We Do", subtitle: "From concept to execution — branding, web design, illustration, and beyond.", items: [
-          { icon: "palette", title: "Branding & Identity", description: "Logos, visual systems, and brand guidelines that stand out." },
-          { icon: "globe", title: "Web Design", description: "Responsive, immersive websites built for impact." },
-          { icon: "eye", title: "Illustration", description: "Custom artwork and visual storytelling for any medium." },
-          { icon: "sparkles", title: "Motion & Animation", description: "Dynamic visuals that bring your brand to life." },
+        block("artsy-portfolio", "gallery", { title: "Selected Works", subtitle: "A curated showcase of illustration, character design, and animation projects.", columns: 3 }),
+        block("artsy-about", "imageText", { title: "In a Nutshell", text: "I work in illustration and 2D animation. Whether it's a playful character design, a commercial campaign, or an experimental personal project — I bring ideas to life with color, motion, and storytelling. Got something big in mind? Let's talk.", imagePosition: "right", buttonText: "About Me", buttonHref: "#about" }),
+        block("artsy-services", "features", { title: "What I Do", subtitle: "From concept to final frame — creative services that tell your story.", items: [
+          { icon: "palette", title: "Illustration", description: "Custom artwork, editorial illustration, and visual storytelling for print and digital." },
+          { icon: "eye", title: "Character Design", description: "Unique, memorable characters for brands, games, and publications." },
+          { icon: "sparkles", title: "2D Animation", description: "Frame-by-frame animation, motion graphics, and animated short films." },
+          { icon: "globe", title: "Commercial Work", description: "Ad campaigns, brand collaborations, and product illustrations." },
         ] }),
-        block("artsy-stats", "stats", { title: "By the Numbers", items: [
-          { value: "150+", label: "Projects Completed" },
-          { value: "40+", label: "Happy Clients" },
-          { value: "12", label: "Awards Won" },
+        block("artsy-stats", "stats", { title: "Career Highlights", items: [
+          { value: "200+", label: "Projects Completed" },
+          { value: "50+", label: "Clients Worldwide" },
           { value: "8+", label: "Years Experience" },
+          { value: "15", label: "Awards & Features" },
         ] }),
-        block("artsy-testimonials", "testimonials", { title: "Client Words", subtitle: "What our collaborators say about working with us.", bgColor: "surface", items: [
-          { name: "Sarah Chen", role: "Creative Director, Bloom Agency", text: "Their artistry elevated our brand beyond what we imagined. Truly world-class work." },
-          { name: "Marcus Rivera", role: "Founder, Drift Co.", text: "The attention to detail and creative vision made the entire experience exceptional." },
+        block("artsy-testimonials", "testimonials", { title: "Kind Words", subtitle: "What clients and collaborators say.", bgColor: "surface", items: [
+          { name: "Creative Director, Bloom", role: "Ad Agency", text: "Gianluca's artistry elevated our campaign beyond what we imagined. Truly world-class illustration work." },
+          { name: "Marcus Rivera", role: "Founder, Drift Co.", text: "The attention to detail and creative vision made the entire collaboration exceptional. Highly recommended." },
         ] }),
-        block("artsy-cta", "banner", { title: "Ready to Create Something Beautiful?", subtitle: "Let's collaborate on your next project.", buttonText: "Start a Project", buttonHref: "#contact" }),
-        block("artsy-contact", "contactForm", { title: "Get in Touch", subtitle: "Tell us about your vision. We'd love to hear from you." }),
+        block("artsy-cta", "banner", { title: "Let's Create Something Beautiful", subtitle: "Available for freelance projects and studio collaborations.", buttonText: "Get in Touch", buttonHref: "#contact" }),
+        block("artsy-contact", "contactForm", { title: "Say Hello", subtitle: "Tell me about your project. I'd love to hear from you." }),
       ],
     }),
-    pageTitles: ["Home", "Portfolio", "Services", "About", "Contact"],
-    legacySlugs: ["artsy"],
+    pageTitles: ["Home", "Portfolio", "About", "Services", "Contact"],
+    legacySlugs: ["artsy", "glcpatti"],
   }),
 
+  /* 6. Dev Portfolio Landing — inspired by Jamie Dev Portfolio (clean, dark, minimal) */
   makeTemplate({
-    name: "Scenic Experiences",
-    slug: "landing-scenic",
+    name: "Developer Portfolio",
+    slug: "landing-dev-portfolio",
     category: "Landing Page",
-    description: "A cinematic, full-screen landing page for travel, hospitality, events, and lifestyle brands with immersive galleries.",
+    description: "A clean, modern developer portfolio landing page. Dark theme, project showcases, tech stack highlights, and a strong personal brand presence.",
     previewImage: "",
-    previewUrl: "/template-preview/landing-scenic",
-    recommendationKeywords: ["landing", "travel", "hospitality", "scenic", "tourism", "events", "lifestyle", "experience"],
-    variants: [{ name: "Travel", keywords: ["travel", "tourism", "destination"] }, { name: "Events", keywords: ["events", "hospitality", "venue"] }],
+    previewUrl: "/template-preview/landing-dev-portfolio",
+    recommendationKeywords: ["landing", "developer", "portfolio", "coding", "freelance", "web developer", "programmer", "personal site"],
+    variants: [{ name: "Full-stack Dev", keywords: ["fullstack", "developer", "engineer"] }, { name: "Freelancer", keywords: ["freelance", "independent", "consultant"] }],
     themeConfig: themeConfig({
       layout: "landing_scenic",
       header: "editorial",
@@ -1458,58 +1705,46 @@ export const TEMPLATE_FAMILIES: FamilyDef[] = [
       header: "minimal",
       footer: "simple",
       card: "modern",
-      colors: { primary: "#7C3AED", secondary: "#1E1B4B", accent: "#10B981", background: "#FAFAFE", text: "#111827", headerBg: "#FFFFFF", footerBg: "#111827", footerText: "#D1D5DB" },
+      colors: { primary: "#3B82F6", secondary: "#1E3A5F", accent: "#10B981", background: "#0F172A", text: "#E2E8F0", headerBg: "#0F172A", footerBg: "#020617", footerText: "#64748B" },
       fonts: { heading: "Inter", body: "Inter" },
       sections: [
-        landingServiceHero,
-        block("service-brands", "brands", { title: "Trusted By Teams At", items: [] }),
-        block("service-features", "features", { title: "Everything You Need", subtitle: "Powerful features to streamline your workflow and boost productivity.", items: [
-          { icon: "zap", title: "Lightning Fast", description: "Built for speed. Load times under 100ms with global edge deployment." },
-          { icon: "shield", title: "Enterprise Security", description: "SOC2 compliant, end-to-end encryption, and role-based access control." },
-          { icon: "refresh", title: "Real-time Sync", description: "Changes propagate instantly across all devices and team members." },
-          { icon: "sparkles", title: "AI-Powered", description: "Smart automation and suggestions that save hours of manual work." },
-          { icon: "users", title: "Team Collaboration", description: "Built-in chat, comments, and real-time co-editing for teams." },
-          { icon: "trending-up", title: "Advanced Analytics", description: "Deep insights and custom dashboards to track what matters." },
+        landingDevPortfolioHero,
+        block("devport-about", "imageText", { title: "About Me", text: "I'm a full-stack developer with a passion for building beautiful, performant web applications. I specialize in React, Next.js, TypeScript, and Node.js. When I'm not coding, you'll find me contributing to open source or writing about web development.", imagePosition: "right", buttonText: "Download CV", buttonHref: "#cv" }),
+        block("devport-skills", "features", { title: "Tech Stack", subtitle: "Technologies I work with daily.", items: [
+          { icon: "globe", title: "Frontend", description: "React, Next.js, TypeScript, Tailwind CSS, Framer Motion." },
+          { icon: "shield", title: "Backend", description: "Node.js, Python, PostgreSQL, Redis, GraphQL." },
+          { icon: "rocket", title: "DevOps", description: "Docker, AWS, Vercel, GitHub Actions, CI/CD pipelines." },
+          { icon: "sparkles", title: "AI/ML", description: "OpenAI, LangChain, vector databases, prompt engineering." },
         ] }),
-        block("service-imagetext", "imageText", { title: "How It Works", text: "Get started in minutes. Connect your existing tools, invite your team, and let our platform handle the rest. No complex setup. No learning curve. Just results.", imagePosition: "right", buttonText: "Try It Free", buttonHref: "#pricing" }),
-        block("service-video", "video", { title: "See It in Action", subtitle: "Watch a 2-minute overview of how our platform transforms your workflow." }),
-        block("service-stats", "stats", { title: "Built for Scale", items: [
-          { value: "99.9%", label: "Uptime SLA" },
-          { value: "50K+", label: "Active Users" },
-          { value: "2M+", label: "Tasks Completed" },
-          { value: "150+", label: "Integrations" },
+        block("devport-projects", "gallery", { title: "Featured Projects", subtitle: "Selected work from recent client and personal projects.", columns: 3 }),
+        block("devport-stats", "stats", { title: "Experience", items: [
+          { value: "80+", label: "Projects Shipped" },
+          { value: "5yr", label: "Professional Experience" },
+          { value: "30+", label: "Happy Clients" },
+          { value: "12K", label: "GitHub Stars" },
         ] }),
-        block("service-pricing", "features", { title: "Simple, Transparent Pricing", subtitle: "No hidden fees. No surprises. Start free and scale as you grow.", items: [
-          { icon: "check", title: "Starter — Free", description: "Up to 3 users, 1GB storage, core features. Perfect for individuals." },
-          { icon: "star", title: "Pro — $29/mo", description: "Unlimited users, 50GB storage, advanced analytics, priority support." },
-          { icon: "rocket", title: "Enterprise — Custom", description: "Custom limits, SSO, dedicated support, SLA guarantees." },
+        block("devport-testimonials", "testimonials", { title: "Client Reviews", bgColor: "surface", items: [
+          { name: "Lisa Chen", role: "CEO, StartupHQ", text: "Exceptional developer. Delivered our MVP ahead of schedule with clean, maintainable code." },
+          { name: "David Okafor", role: "CTO, FinEdge", text: "One of the best developers I've worked with. Great communication and technical skills." },
         ] }),
-        block("service-testimonials", "testimonials", { title: "Loved by Teams", subtitle: "Join thousands of teams already using our platform.", bgColor: "surface", items: [
-          { name: "Rachel Kim", role: "Product Lead, Stripe", text: "This tool has completely changed how our team collaborates. We shipped 3x faster." },
-          { name: "Tom Nguyen", role: "CTO, Buildify", text: "The best developer experience I've seen. Setup took 5 minutes, and it just works." },
-        ] }),
-        block("service-faq", "faq", { title: "Frequently Asked Questions", items: [
-          { question: "Is there a free trial?", answer: "Yes! Our Starter plan is free forever. No credit card required." },
-          { question: "Can I cancel anytime?", answer: "Absolutely. No contracts, no cancellation fees. You can downgrade or cancel at any time." },
-          { question: "Do you offer custom integrations?", answer: "Yes, our Enterprise plan includes custom API integrations and dedicated engineering support." },
-          { question: "How secure is my data?", answer: "We use end-to-end encryption, SOC2 compliance, and regular security audits to protect your data." },
-        ] }),
-        block("service-cta", "banner", { title: "Start Building Today", subtitle: "Join 50,000+ teams already using our platform. Free forever.", buttonText: "Get Started Free", buttonHref: "#signup" }),
+        block("devport-cta", "banner", { title: "Let's Work Together", subtitle: "Available for freelance projects and full-time opportunities.", buttonText: "Contact Me", buttonHref: "#contact" }),
+        block("devport-contact", "contactForm", { title: "Get in Touch", subtitle: "Have a project in mind? Let's talk." }),
       ],
     }),
-    pageTitles: ["Home", "Features", "Pricing", "FAQ", "Contact"],
-    legacySlugs: ["corba"],
+    pageTitles: ["Home", "About", "Projects", "Skills", "Contact"],
+    legacySlugs: ["jamie-portfolio", "dev-portfolio"],
   }),
 
+  /* 7. Kids/Children Landing — inspired by ToyBox (subscription toy boxes, playful, colorful) */
   makeTemplate({
-    name: "Education Pro",
-    slug: "landing-education",
+    name: "Kids World",
+    slug: "landing-kids",
     category: "Landing Page",
-    description: "A structured landing page for online courses, training programs, and educational institutions with course categories and instructor profiles.",
+    description: "A playful, colorful landing page for children's products, toy subscriptions, kids' brands, and family-focused businesses. Rounded shapes, bright palette, and parent-friendly CTAs.",
     previewImage: "",
-    previewUrl: "/template-preview/landing-education",
-    recommendationKeywords: ["landing", "education", "courses", "learning", "school", "training", "academy", "university", "instructor"],
-    variants: [{ name: "Online Courses", keywords: ["courses", "online learning", "e-learning"] }, { name: "Academy", keywords: ["academy", "school", "training"] }],
+    previewUrl: "/template-preview/landing-kids",
+    recommendationKeywords: ["landing", "kids", "children", "toys", "subscription box", "baby", "family", "playful", "education", "parenting"],
+    variants: [{ name: "Toy Subscription", keywords: ["toys", "subscription", "box"] }, { name: "Kids Brand", keywords: ["kids", "children", "baby"] }],
     themeConfig: themeConfig({
       layout: "landing_education",
       header: "professional",
@@ -1576,96 +1811,51 @@ export const TEMPLATE_FAMILIES: FamilyDef[] = [
       layout: "jewellery_elegance",
       header: "minimal",
       footer: "rich",
-      card: "gallery",
-      colors: { primary: "#1C1C1C", secondary: "#6B6B6B", accent: "#C9A96E", background: "#FFFFFF", text: "#1C1C1C", headerBg: "#FFFFFF", headerText: "#1C1C1C", footerBg: "#1C1C1C", footerText: "#E5E5E5" },
-      fonts: { heading: "Playfair Display", body: "Inter" },
+      card: "clean",
+      colors: { primary: "#0050D4", secondary: "#203044", accent: "#F8A010", background: "#F4F6FF", text: "#203044", headerBg: "#FFFFFF", footerBg: "#EBF0FF", footerText: "#68788F" },
+      fonts: { heading: "Epilogue", body: "Manrope" },
       sections: [
-        // 1. DUAL HERO BANNERS
-        block("jewellery-hero", "imageHeroBanner", {
-          items: [
-            { image: "/templates/jewellery/hero/banner-1.webp", title: "Earrings Sale", subtitle: "Up to 20% off", buttonText: "Shop now", buttonHref: "/shop" },
-            { image: "/templates/jewellery/hero/banner-2.webp", title: "Elevate Your Look", subtitle: "15% off Sitewide", buttonText: "Shop now", buttonHref: "/shop" },
-          ],
-        }),
-        // 2. CATEGORY CARDS
-        block("jewellery-categories", "imageCategoryCards", {
-          columns: 4,
-          items: [
-            { image: "/templates/jewellery/categories/bracelets.webp", title: "Bracelets", href: "/shop?category=bracelets" },
-            { image: "/templates/jewellery/categories/earrings.webp", title: "Earrings", href: "/shop?category=earrings" },
-            { image: "/templates/jewellery/categories/necklaces.webp", title: "Necklaces", href: "/shop?category=necklaces" },
-            { image: "/templates/jewellery/categories/rings.webp", title: "Rings", href: "/shop?category=rings" },
-          ],
-        }),
-        // 3. NEW IN (hardcoded products with real images)
-        block("jewellery-new-in", "staticProductGrid", {
-          title: "New In",
-          columns: 3,
-          products: [
-            { name: "August Birthstone Pendant Necklace", price: 95, image: "/templates/jewellery/products/august-birthstone.webp", hoverImage: "/templates/jewellery/products/august-birthstone-hover.webp", currency: "USD" },
-            { name: "Aurora Studs", price: 92, image: "/templates/jewellery/products/aurora-studs.webp", hoverImage: "/templates/jewellery/products/aurora-studs-hover.webp", currency: "USD" },
-            { name: "Baya Hoop Earrings", price: 72, image: "/templates/jewellery/products/baya-hoop.webp", hoverImage: "/templates/jewellery/products/baya-hoop-hover.webp", currency: "USD" },
-            { name: "Bold Bonds Interlock Ring – Mixed Metal", price: 220, image: "/templates/jewellery/products/bold-bonds.webp", hoverImage: "/templates/jewellery/products/bold-bonds-hover.webp", currency: "USD" },
-            { name: "Bond Stacking Ring", price: 89, image: "/templates/jewellery/products/bond-stacking.webp", hoverImage: "/templates/jewellery/products/bond-stacking-hover.webp", currency: "USD" },
-            { name: "Button Pearl Square Chunky Ring", price: 125, image: "/templates/jewellery/products/button-pearl.webp", hoverImage: "/templates/jewellery/products/button-pearl-hover.webp", currency: "USD" },
-          ],
-        }),
-        // 4. PROMOTIONAL SPLIT
-        block("jewellery-promo", "promoSplit", {
-          leftImages: [
-            { src: "/templates/jewellery/promo/left-1.webp", title: "Classic Paperclip Chain" },
-            { src: "/templates/jewellery/promo/left-2.jpg", title: "Oversized Stud Earrings" },
-          ],
-          rightImages: [
-            { src: "/templates/jewellery/promo/right-1.webp" },
-            { src: "/templates/jewellery/promo/right-2.webp" },
-          ],
-          centerProducts: [
-            { name: "August Birthstone Pendant Necklace", price: 95, image: "/templates/jewellery/products/august-birthstone.webp", hoverImage: "/templates/jewellery/products/august-birthstone-hover.webp" },
-            { name: "Aurora Studs", price: 92, image: "/templates/jewellery/products/aurora-studs.webp", hoverImage: "/templates/jewellery/products/aurora-studs-hover.webp" },
-          ],
-        }),
-        // 5. BESTSELLERS (hardcoded)
-        block("jewellery-bestsellers", "staticProductGrid", {
-          title: "Bestsellers",
-          columns: 3,
-          products: [
-            { name: "Scarlett Double Hoop Earrings", price: 72, image: "/templates/jewellery/products/scarlett-hoop.webp", hoverImage: "/templates/jewellery/products/scarlett-hoop-hover.webp", currency: "USD" },
-            { name: "Maeve Bangle", price: 168, image: "/templates/jewellery/products/maeve-bangle.webp", hoverImage: "/templates/jewellery/products/maeve-bangle-hover.webp", currency: "USD" },
-            { name: "August Birthstone Pendant Necklace", price: 95, image: "/templates/jewellery/products/august-birthstone.webp", hoverImage: "/templates/jewellery/products/august-birthstone-hover.webp", currency: "USD" },
-            { name: "Paige Gold Chain Bracelet", price: 69, compareAtPrice: 75, image: "/templates/jewellery/products/paige-bracelet.webp", hoverImage: "/templates/jewellery/products/paige-bracelet-hover.webp", currency: "USD" },
-            { name: "Iconic Lucy Williams Malachite Necklace Set", price: 239, image: "/templates/jewellery/products/lucy-malachite.webp", hoverImage: "/templates/jewellery/products/lucy-malachite-hover.webp", currency: "USD" },
-            { name: "Bond Stacking Ring", price: 89, image: "/templates/jewellery/products/bond-stacking.webp", hoverImage: "/templates/jewellery/products/bond-stacking-hover.webp", currency: "USD" },
-          ],
-        }),
-        // 6. TESTIMONIAL QUOTE
-        block("jewellery-quote", "testimonial", {
-          text: "WoodMart Jewelry combines elegance and craftsmanship, offering timeless pieces that belong in every jewelry collection.",
-          bgColor: "surface",
-        }),
-        // 7. BRAND LOGOS (actual images)
-        block("jewellery-brands", "imageBrands", {
-          items: [
-            { name: "Vitra", logo: "/templates/jewellery/brands/vitra.svg" },
-            { name: "Poliform", logo: "/templates/jewellery/brands/poliform.svg" },
-            { name: "Minotti", logo: "/templates/jewellery/brands/minotti.svg" },
-            { name: "Lladro", logo: "/templates/jewellery/brands/lladro.svg" },
-          ],
-        }),
-        // 8. PRE-FOOTER LINK CARDS
-        block("jewellery-prefooter", "linkCards", {
-          columns: 4,
-          items: [
-            { image: "/templates/jewellery/prefooter/about-us.webp", title: "About Us", buttonText: "Discover More", href: "/about" },
-            { image: "/templates/jewellery/prefooter/packages.webp", title: "Our Packaging", buttonText: "Discover More", href: "/shop" },
-            { image: "/templates/jewellery/prefooter/collections.webp", title: "Collections", buttonText: "Discover More", href: "/collections" },
-            { image: "/templates/jewellery/prefooter/showrooms.webp", title: "Showrooms", buttonText: "Discover More", href: "/showrooms" },
-          ],
-        }),
+        landingKidsHero,
+        block("kids-how-it-works", "features", { title: "Magic in 3 Simple Steps", subtitle: "Curating joy is as easy as 1, 2, 3.", items: [
+          { icon: "target", title: "1. Pick a Plan", description: "Tell us your child's age and interests. We'll find the perfect box sequence for their growth." },
+          { icon: "package", title: "2. Box Arrives", description: "A themed box filled with 5-7 high-quality toys and activities ships right to your door every month." },
+          { icon: "sparkles", title: "3. Play & Learn", description: "Unbox a world of adventure! Watch as they develop new skills through creative and guided play." },
+        ] }),
+        block("kids-gallery", "gallery", { title: "Inside Our Favorite Boxes", subtitle: "Click to explore the contents of our most popular monthly themes.", columns: 3 }),
+        block("kids-categories", "features", { title: "Box Types for Every Age", subtitle: "Curated collections tailored to developmental stages.", items: [
+          { icon: "heart", title: "Ages 0-2: Sensory Discovery", description: "Soft plush toys, wooden teething rings, and sensory fabric books for curious little ones." },
+          { icon: "rocket", title: "Ages 3-5: Creative Play", description: "Building blocks, art supplies, and imaginative play sets that spark creativity." },
+          { icon: "sparkles", title: "STEM Kits: Ages 6+", description: "Science experiments, coding games, and engineering challenges for young scientists." },
+          { icon: "palette", title: "Creative Play: All Ages", description: "Chunky crayons, watercolor paints, and construction paper for budding artists." },
+        ] }),
+        block("kids-stats", "stats", { title: "Trusted by Families", items: [
+          { value: "15,000+", label: "Happy Explorers" },
+          { value: "4.9★", label: "Parent Rating" },
+          { value: "50+", label: "Monthly Themes" },
+          { value: "100%", label: "Safe & Tested" },
+        ] }),
+        block("kids-testimonials", "testimonials", { title: "What Parents Say", subtitle: "Real reviews from our community.", bgColor: "surface", items: [
+          { name: "Sarah J.", role: "Mother of 2 (Ages 3 & 5)", text: "The quality of the toys is outstanding. My son looks forward to his 'magic blue box' every single month. It's saved me so much time shopping!" },
+          { name: "David M.", role: "Father of a 7-year-old", text: "Finally, toys that actually challenge their minds! The STEM kits are educational but feel like pure play. Highly recommend for curious kids." },
+          { name: "Emily R.", role: "Verified Subscriber", text: "The subscription is so flexible. We skipped a month when we were traveling with zero hassle. Customer service is actually human and helpful." },
+        ] }),
+        block("kids-pricing", "features", { title: "Choose Your Adventure", subtitle: "Flexible plans for every family.", items: [
+          { icon: "check", title: "Monthly — $29.99/mo", description: "1 themed box per month. Cancel anytime. Free shipping." },
+          { icon: "star", title: "Quarterly — $24.99/mo", description: "Billed every 3 months. Save 17%. Priority shipping included." },
+          { icon: "award", title: "Annual — $19.99/mo", description: "Best value! Billed yearly. Save 33%. Exclusive bonus toys included." },
+        ] }),
+        block("kids-faq", "faq", { title: "Parent Questions", items: [
+          { question: "Are the toys safe for toddlers?", answer: "Absolutely. Every toy is rigorously tested and certified for safety. No small parts in our 0-2 boxes." },
+          { question: "Can I choose the box theme?", answer: "We curate each box based on your child's age, but you can set preferences and interests in your profile." },
+          { question: "What if my child doesn't like a toy?", answer: "We offer a satisfaction guarantee. Contact us and we'll make it right." },
+          { question: "Can I gift a subscription?", answer: "Yes! Gift subscriptions are available for 3, 6, or 12 months with a beautiful gift card." },
+        ] }),
+        block("kids-cta", "banner", { title: "Start Their Adventure Today", subtitle: "First box ships within 3 days. Cancel anytime.", buttonText: "Subscribe Now", buttonHref: "#subscribe" }),
+        block("kids-newsletter", "newsletter", { title: "Get Play Ideas & Special Offers", subtitle: "Join 15,000+ parents who get weekly activity ideas and exclusive deals." }),
       ],
     }),
-    pageTitles: ["Home", "Shop", "Collections", "About Us", "Contact", "Wishlist"],
-    legacySlugs: ["jewellery-2"],
+    pageTitles: ["Home", "Box Types", "How It Works", "Pricing", "FAQ", "Contact"],
+    legacySlugs: ["toybox", "kids-world"],
   }),
 
   // ─── E-commerce Store Templates (WoodMart References) ─────────
@@ -2395,54 +2585,118 @@ export const TEMPLATE_FAMILIES: FamilyDef[] = [
   }),
 
   makeTemplate({
-    name: "Business Impact",
-    slug: "landing-product",
+    name: "Tech SaaS Pro",
+    slug: "landing-tech-saas",
     category: "Landing Page",
-    description: "A focused single-product landing page for launches, pre-orders, and DTC brands with video showcase and strong conversion flow.",
+    description: "A feature-rich SaaS landing page with detailed pricing tables, feature comparisons, multiple CTAs, and a professional conversion-optimized layout.",
     previewImage: "",
-    previewUrl: "/template-preview/landing-product",
-    recommendationKeywords: ["landing", "product", "launch", "pre-order", "dtc", "direct to consumer", "single product", "crowdfunding"],
-    variants: [{ name: "Product Launch", keywords: ["launch", "product", "pre-order"] }, { name: "DTC Brand", keywords: ["dtc", "brand", "direct"] }],
+    previewUrl: "/template-preview/landing-tech-saas",
+    recommendationKeywords: ["landing", "saas", "tech", "software", "platform", "b2b", "startup", "product", "tool", "subscription"],
+    variants: [{ name: "B2B SaaS", keywords: ["b2b", "enterprise", "software"] }, { name: "Startup", keywords: ["startup", "product", "launch"] }],
     themeConfig: themeConfig({
-      layout: "landing_product",
-      header: "centered",
-      footer: "minimal",
-      card: "product-focus",
-      colors: { primary: "#0F172A", secondary: "#334155", accent: "#F97316", background: "#FFFFFF", text: "#0F172A", headerBg: "#FFFFFF", footerBg: "#0F172A", footerText: "#94A3B8" },
+      layout: "landing_tech_saas",
+      header: "professional",
+      footer: "rich",
+      card: "modern",
+      colors: { primary: "#6366F1", secondary: "#312E81", accent: "#F59E0B", background: "#FFFFFF", text: "#111827", headerBg: "#FFFFFF", footerBg: "#111827", footerText: "#9CA3AF" },
       fonts: { heading: "Inter", body: "Inter" },
       sections: [
-        landingProductHero,
-        block("product-brands", "brands", { title: "As Seen In", items: [] }),
-        block("product-imagetext", "imageText", { title: "Designed for Real Life", text: "Every detail has been obsessively refined. Premium materials, precision engineering, and thoughtful design that fits seamlessly into your daily routine. This isn't just a product — it's a statement.", imagePosition: "right", buttonText: "Learn More", buttonHref: "#features" }),
-        block("product-video", "video", { title: "Watch It in Action", subtitle: "See how it works in a quick 60-second demo." }),
-        block("product-features", "features", { title: "Why It's Different", subtitle: "Built from the ground up to solve real problems.", items: [
-          { icon: "zap", title: "10x Faster", description: "Revolutionary engineering delivers performance that blows the competition away." },
-          { icon: "shield", title: "Built to Last", description: "Premium materials and rigorous testing ensure years of reliable use." },
-          { icon: "heart", title: "Thoughtfully Designed", description: "Every curve, texture, and interaction has been refined for delight." },
-          { icon: "package", title: "All-in-One", description: "Everything you need in the box. No extras required." },
+        landingTechSaasHero,
+        block("techsaas-brands", "brands", { title: "Powering Teams at", items: [] }),
+        block("techsaas-features", "features", { title: "Everything You Need to Convert", subtitle: "Built from the ground up for maximum conversion rates.", items: [
+          { icon: "zap", title: "Drag & Drop Builder", description: "Build stunning pages visually. No coding required. Real-time preview as you design." },
+          { icon: "sparkles", title: "AI Copywriter", description: "Generate compelling headlines, descriptions, and CTAs with one click." },
+          { icon: "trending-up", title: "A/B Testing Built-in", description: "Test variations automatically and let data pick the winner." },
+          { icon: "globe", title: "Custom Domains", description: "Connect your own domain in seconds. Free SSL included on all plans." },
+          { icon: "shield", title: "GDPR Compliant", description: "Cookie consent, data processing agreements, and privacy controls built-in." },
+          { icon: "rocket", title: "One-Click Deploy", description: "Go live instantly. Global CDN ensures fast loads everywhere." },
         ] }),
-        block("product-stats", "stats", { title: "The Numbers Speak", items: [
-          { value: "50K+", label: "Units Sold" },
-          { value: "4.9★", label: "Customer Rating" },
-          { value: "2 min", label: "Setup Time" },
-          { value: "3 yr", label: "Warranty" },
+        block("techsaas-imagetext", "imageText", { title: "Designed for Marketers, Built by Engineers", text: "Stop waiting on developers. Create, test, and launch landing pages independently. Our visual builder is powerful enough for designers and simple enough for founders. Integrates with your existing stack.", imagePosition: "right", buttonText: "Start Building", buttonHref: "#pricing" }),
+        block("techsaas-stats", "stats", { title: "Platform Stats", items: [
+          { value: "10K+", label: "Pages Created" },
+          { value: "99.9%", label: "Uptime" },
+          { value: "2.3s", label: "Avg Load Time" },
+          { value: "34%", label: "Avg Conversion Lift" },
         ] }),
-        block("product-testimonials", "testimonials", { title: "What People Are Saying", bgColor: "surface", items: [
-          { name: "Alex Rivera", role: "Verified Buyer", text: "Honestly blown away. This is the quality I've been looking for. Already bought two more as gifts." },
-          { name: "Jordan Lee", role: "Tech Reviewer", text: "Best in class. Period. Nothing else comes close at this price point." },
+        block("techsaas-showcase", "gallery", { title: "Customer Showcase", subtitle: "See what others have built with our platform.", columns: 3 }),
+        block("techsaas-pricing", "features", { title: "Pricing That Scales With You", subtitle: "Start free. Upgrade when you're ready.", items: [
+          { icon: "check", title: "Starter — Free", description: "1 page, basic templates, community support. Perfect for testing." },
+          { icon: "star", title: "Growth — $19/mo", description: "10 pages, custom domains, A/B testing, analytics, priority support." },
+          { icon: "rocket", title: "Scale — $49/mo", description: "Unlimited pages, team accounts, API access, white-label, SLA." },
+          { icon: "award", title: "Enterprise — Custom", description: "Custom integrations, dedicated success manager, volume pricing." },
         ] }),
-        block("product-countdown", "countdown", { title: "Pre-order Ends Soon", subtitle: "Lock in the early bird price before it's gone.", targetDate: "" }),
-        block("product-faq", "faq", { title: "Questions? We've Got Answers.", items: [
-          { question: "When will it ship?", answer: "Orders placed now ship within 5-7 business days." },
-          { question: "Is there a warranty?", answer: "Yes — every unit comes with a 3-year manufacturer warranty." },
-          { question: "Can I return it?", answer: "Absolutely. 30-day no-questions-asked return policy." },
-          { question: "Do you ship internationally?", answer: "Yes! We ship to 50+ countries with tracked delivery." },
+        block("techsaas-testimonials", "testimonials", { title: "What Our Users Say", bgColor: "surface", items: [
+          { name: "Aisha Mohammed", role: "Growth Lead, FlowHQ", text: "We replaced our entire landing page stack with this. Conversion rates jumped 40% in the first month." },
+          { name: "Kevin Park", role: "Founder, ShipFast", text: "The AI copywriter alone is worth the subscription. It generates better headlines than our agency did." },
+          { name: "Rosa Diaz", role: "Marketing Director", text: "Finally a tool that lets our marketing team move independently. No more developer bottlenecks." },
         ] }),
-        block("product-cta", "banner", { title: "Don't Miss Out", subtitle: "Limited first-run batch. Order now and be among the first.", buttonText: "Order Now", buttonHref: "#buy" }),
+        block("techsaas-faq", "faq", { title: "Common Questions", items: [
+          { question: "Can I use my own domain?", answer: "Yes! Connect any custom domain with free SSL on all paid plans." },
+          { question: "Do I need coding skills?", answer: "Not at all. Everything is drag-and-drop. For advanced users, custom code injection is available." },
+          { question: "Can I cancel anytime?", answer: "Yes. Monthly billing, cancel whenever. Your pages stay live for 30 days after cancellation." },
+          { question: "Is there a page limit?", answer: "Free plan: 1 page. Growth: 10. Scale & Enterprise: unlimited." },
+        ] }),
+        block("techsaas-cta", "banner", { title: "Ready to Launch?", subtitle: "Join 10,000+ marketers building high-converting pages. No credit card required.", buttonText: "Start for Free", buttonHref: "#signup" }),
       ],
     }),
-    pageTitles: ["Home", "Features", "Reviews", "FAQ"],
-    legacySlugs: ["product-launch"],
+    pageTitles: ["Home", "Features", "Pricing", "Showcase", "FAQ", "Contact"],
+    legacySlugs: ["pixapage", "landing-service"],
+  }),
+
+  /* 9. Travel Landing — inspired by Traveler (destination discovery, swiper galleries, booking CTAs) */
+  makeTemplate({
+    name: "Travel Explorer",
+    slug: "landing-travel",
+    category: "Landing Page",
+    description: "A cinematic travel landing page with destination showcases, experience galleries, booking CTAs, and traveler testimonials. Built for travel agencies, tour operators, and hospitality brands.",
+    previewImage: "",
+    previewUrl: "/template-preview/landing-travel",
+    recommendationKeywords: ["landing", "travel", "tourism", "destination", "hospitality", "adventure", "booking", "tour", "vacation", "hotel"],
+    variants: [{ name: "Travel Agency", keywords: ["travel", "agency", "tours"] }, { name: "Hospitality", keywords: ["hotel", "resort", "hospitality"] }],
+    themeConfig: themeConfig({
+      layout: "landing_travel",
+      header: "editorial",
+      footer: "rich",
+      card: "gallery",
+      colors: { primary: "#0E7C61", secondary: "#064E3B", accent: "#F59E0B", background: "#FEFCE8", text: "#1C1917", headerBg: "#FFFFFF", footerBg: "#064E3B", footerText: "#D1FAE5" },
+      fonts: { heading: "Cormorant Garamond", body: "Nunito" },
+      sections: [
+        landingTravelHero,
+        block("travel-stats", "stats", { title: "Why Travelers Choose Us", items: [
+          { value: "500+", label: "Curated Trips" },
+          { value: "80+", label: "Destinations" },
+          { value: "25K+", label: "Happy Travelers" },
+          { value: "4.9★", label: "Average Rating" },
+        ] }),
+        block("travel-destinations", "gallery", { title: "Popular Destinations", subtitle: "Hand-picked locations for unforgettable experiences.", columns: 3 }),
+        block("travel-features", "features", { title: "The Explorer Difference", subtitle: "What makes our travel experiences unique.", items: [
+          { icon: "star", title: "Curated Experiences", description: "Hand-selected by local experts who know every hidden gem and secret spot." },
+          { icon: "shield", title: "Travel Insurance Included", description: "Comprehensive coverage included with every booking. Travel with peace of mind." },
+          { icon: "heart", title: "Small Group Adventures", description: "Intimate groups of 12 or fewer for authentic, personal experiences." },
+          { icon: "globe", title: "Local Guides", description: "Native guides who share genuine cultural insights and off-the-beaten-path discoveries." },
+          { icon: "award", title: "Sustainable Tourism", description: "Carbon-neutral trips with community-first partnerships and eco-conscious accommodations." },
+          { icon: "users", title: "24/7 Support", description: "Round-the-clock assistance wherever you are in the world." },
+        ] }),
+        block("travel-imagetext", "imageText", { title: "Your Adventure, Your Way", text: "Every trip is fully customizable. Choose your destinations, pace, and activities. Whether you want a mountain trek, a beach retreat, or a cultural immersion — we craft the perfect itinerary around your preferences.", imagePosition: "left", buttonText: "Plan Your Trip", buttonHref: "#contact" }),
+        block("travel-testimonials", "testimonials", { title: "Traveler Stories", subtitle: "Real experiences from our adventurers.", bgColor: "surface", items: [
+          { name: "Elena & Marco", role: "Honeymoon Trip, Bali", text: "The most magical trip we've ever taken. Every single detail was thoughtfully planned. We'll be back." },
+          { name: "Kwame Appiah", role: "Solo Traveler, Morocco", text: "As a solo traveler, safety was my concern. The team made me feel supported every step of the way." },
+          { name: "Yuki Tanaka", role: "Family Trip, Kenya", text: "Our kids still talk about the safari months later. A truly life-changing family experience." },
+        ] }),
+        block("travel-brands", "brands", { title: "Featured In", items: [] }),
+        block("travel-faq", "faq", { title: "Travel Questions", items: [
+          { question: "How far in advance should I book?", answer: "We recommend 2-3 months for popular destinations, but we can also accommodate last-minute bookings." },
+          { question: "Are trips suitable for families?", answer: "Absolutely! We offer family-friendly itineraries with age-appropriate activities for children of all ages." },
+          { question: "What's included in the price?", answer: "Accommodation, guided tours, ground transport, and travel insurance. Flights are typically separate." },
+          { question: "Can I customize my itinerary?", answer: "Yes! Every trip is fully customizable. Tell us your interests and we'll build the perfect plan." },
+        ] }),
+        block("travel-newsletter", "newsletter", { title: "Get Inspired", subtitle: "Subscribe for destination guides, travel tips, and exclusive early-bird deals." }),
+        block("travel-cta", "banner", { title: "Ready for Your Next Adventure?", subtitle: "Book now and save 15% on your first trip. Limited availability.", buttonText: "Start Planning", buttonHref: "#contact" }),
+        block("travel-contact", "contactForm", { title: "Book Your Experience", subtitle: "Tell us your dream trip and we'll make it happen." }),
+      ],
+    }),
+    pageTitles: ["Home", "Destinations", "Experiences", "About", "FAQ", "Contact"],
+    legacySlugs: ["scenic", "frolic", "traveler", "landing-scenic"],
   }),
 ];
 

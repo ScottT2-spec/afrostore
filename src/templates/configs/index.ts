@@ -38,6 +38,7 @@ export const templateConfigRegistry = {
   jewellery: "jewellery-elegance",
   // Landing Page Templates
   artsy: "landing-artsy",
+  glcpatti: "landing-artsy",
   landingArtsy: "landing-artsy",
   scenic: "landing-scenic",
   frolic: "landing-scenic",
