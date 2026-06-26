@@ -1,4 +1,4 @@
 import { getTemplateDemoData } from "../shared";
 
 export const templateSlug = "clarity";
-export const demoData = getTemplateDemoData(templateSlug);
+export const templateDemoData = getTemplateDemoData(templateSlug);

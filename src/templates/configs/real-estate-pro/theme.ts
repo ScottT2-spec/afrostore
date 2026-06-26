@@ -1,4 +1,4 @@
 import { getTemplateTheme } from "../shared";
 
-export const templateSlug = "clarity";
+export const templateSlug = "real-estate-pro";
 export const templateTheme = getTemplateTheme(templateSlug);

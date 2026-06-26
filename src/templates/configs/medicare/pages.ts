@@ -1,4 +1,4 @@
 import { getTemplatePages } from "../shared";
 
-export const templateSlug = "clarity";
+export const templateSlug = "medicare";
 export const templatePages = getTemplatePages(templateSlug);

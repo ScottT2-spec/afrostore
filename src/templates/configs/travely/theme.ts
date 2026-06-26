@@ -1,4 +1,4 @@
 import { getTemplateTheme } from "../shared";
 
-export const templateSlug = "clarity";
+export const templateSlug = "travely";
 export const templateTheme = getTemplateTheme(templateSlug);

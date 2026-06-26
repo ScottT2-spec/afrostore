@@ -1,4 +1,4 @@
 import { getTemplateSections } from "../shared";
 
-export const templateSlug = "clarity";
+export const templateSlug = "bistro";
 export const templateSections = getTemplateSections(templateSlug);
