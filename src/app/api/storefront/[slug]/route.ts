@@ -232,6 +232,7 @@ export async function GET(req: NextRequest, { params }: Params) {
       categories,
       deliveryZones,
       pages,
+      templateSlug: activeTemplate?.template?.slug || null,
       theme: activeTheme
         ? {
             id: activeTheme.theme.id,

@@ -9,6 +9,7 @@ import { RenderBlocks, type BuilderBlock } from "@/components/storefront/BlockRe
 import { getLinkedPageHref, parsePageContent } from "@/lib/page-content";
 import { ThemeProvider, type ThemeData } from "@/components/storefront/ThemeProvider";
 import { useWishlist } from "@/hooks/useWishlist";
+import { hasTemplateHtml } from "@/lib/templates/template-html-map";
 
 /* ───────── Types ───────── */
 
@@ -94,6 +95,7 @@ interface StoreData {
   categories: StoreCategory[];
   deliveryZones: DeliveryZone[];
   pages: Array<{ id: string; title: string; slug: string; type: string; content?: unknown }>;
+  templateSlug: string | null;
   theme: ThemeData | null;
 }
 
@@ -239,6 +241,23 @@ export default function StorePage() {
           </Link>
         </div>
       </div>
+    );
+  }
+
+  // ─── Template HTML Mode ─────────────────────────────────
+  // If the store uses a template with raw HTML, render the exact template via iframe
+  const useTemplateHtml = hasTemplateHtml(data.templateSlug);
+
+  if (useTemplateHtml) {
+    return (
+      <TemplateHtmlStorefront
+        slug={slug}
+        storeName={data.store.name}
+        currency={data.store.currency || "NGN"}
+        cart={cart}
+        setCart={setCart}
+        data={data}
+      />
     );
   }
 
@@ -746,5 +765,218 @@ export default function StorePage() {
       )}
     </div>
     </ThemeProvider>
+  );
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   TEMPLATE HTML STOREFRONT
+   Renders the exact template HTML via iframe with cart overlay
+   ═══════════════════════════════════════════════════════════════ */
+
+function TemplateHtmlStorefront({
+  slug,
+  storeName,
+  currency,
+  cart,
+  setCart,
+  data,
+}: {
+  slug: string;
+  storeName: string;
+  currency: string;
+  cart: CartItem[];
+  setCart: React.Dispatch<React.SetStateAction<CartItem[]>>;
+  data: StoreData;
+}) {
+  const [iframeLoaded, setIframeLoaded] = useState(false);
+  const [showCart, setShowCart] = useState(false);
+
+  const cartCount = cart.reduce((s, i) => s + i.quantity, 0);
+  const cartTotal = cart.reduce((s, i) => s + Number(i.product.price) * i.quantity, 0);
+
+  const symbols: Record<string, string> = { NGN: "₦", KES: "KSh", GHS: "GH₵", ZAR: "R", USD: "$", GBP: "£", EUR: "€" };
+  const sym = symbols[currency] || currency;
+
+  // Listen for postMessage from template iframe
+  useEffect(() => {
+    function handleMessage(e: MessageEvent) {
+      if (!e.data || typeof e.data !== "object") return;
+
+      if (e.data.type === "afrostore-add-to-cart") {
+        const { name, price } = e.data.product;
+        // Try to match to a real product
+        const matchedProduct = data.products.find(
+          (p) => p.name === name || Math.abs(Number(p.price) - price) < 0.01
+        );
+
+        if (matchedProduct) {
+          setCart((prev) => {
+            const existing = prev.find((i) => i.productId === matchedProduct.id);
+            if (existing) {
+              return prev.map((i) =>
+                i.productId === matchedProduct.id
+                  ? { ...i, quantity: i.quantity + 1 }
+                  : i
+              );
+            }
+            return [
+              ...prev,
+              { productId: matchedProduct.id, quantity: 1, product: matchedProduct },
+            ];
+          });
+          setShowCart(true);
+        }
+      }
+
+      if (e.data.type === "afrostore-template-loaded") {
+        setIframeLoaded(true);
+      }
+    }
+
+    window.addEventListener("message", handleMessage);
+    return () => window.removeEventListener("message", handleMessage);
+  }, [data.products, setCart]);
+
+  return (
+    <div className="relative min-h-screen">
+      {/* Loading overlay */}
+      {!iframeLoaded && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-white">
+          <div className="text-center">
+            <Loader2 className="h-10 w-10 animate-spin text-brand-600 mx-auto mb-4" />
+            <p className="text-surface-500 text-sm">Loading {storeName}...</p>
+          </div>
+        </div>
+      )}
+
+      {/* Template HTML iframe — full screen */}
+      <iframe
+        src={`/api/storefront/${slug}/template-html`}
+        className="w-full border-0"
+        style={{
+          height: "100vh",
+          minHeight: "100vh",
+          display: "block",
+        }}
+        title={`${storeName} Store`}
+        onLoad={() => setIframeLoaded(true)}
+      />
+
+      {/* Floating cart button */}
+      {cartCount > 0 && (
+        <button
+          onClick={() => setShowCart(!showCart)}
+          className="fixed bottom-6 right-6 z-50 flex items-center gap-2 rounded-full bg-surface-900 text-white px-5 py-3.5 shadow-2xl hover:bg-surface-800 transition-all hover:scale-105"
+        >
+          <ShoppingCart className="h-5 w-5" />
+          <span className="font-bold text-sm">{cartCount}</span>
+          <span className="text-surface-300">|</span>
+          <span className="text-sm font-semibold">{sym}{cartTotal.toLocaleString()}</span>
+        </button>
+      )}
+
+      {/* Cart slide-over */}
+      {showCart && (
+        <div className="fixed inset-0 z-50" onClick={() => setShowCart(false)}>
+          <div className="absolute inset-0 bg-black/40 backdrop-blur-sm" />
+          <div
+            className="absolute right-0 top-0 bottom-0 w-full max-w-md bg-white shadow-2xl flex flex-col"
+            onClick={(e) => e.stopPropagation()}
+          >
+            {/* Cart header */}
+            <div className="flex items-center justify-between px-6 py-4 border-b border-surface-200">
+              <h2 className="font-display text-lg font-bold text-surface-900">
+                Your Cart ({cartCount})
+              </h2>
+              <button
+                onClick={() => setShowCart(false)}
+                className="p-2 text-surface-400 hover:text-surface-600 rounded-lg"
+              >
+                <X className="h-5 w-5" />
+              </button>
+            </div>
+
+            {/* Cart items */}
+            <div className="flex-1 overflow-y-auto px-6 py-4 space-y-4">
+              {cart.map((item) => (
+                <div key={item.productId} className="flex items-center gap-4">
+                  <div className="h-16 w-16 rounded-xl bg-surface-100 flex-shrink-0 overflow-hidden">
+                    {item.product.images?.[0]?.url ? (
+                      <img
+                        src={item.product.images[0].url}
+                        alt={item.product.name}
+                        className="h-full w-full object-cover"
+                      />
+                    ) : (
+                      <div className="h-full w-full flex items-center justify-center">
+                        <ShoppingBag className="h-6 w-6 text-surface-300" />
+                      </div>
+                    )}
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <p className="text-sm font-semibold text-surface-900 truncate">
+                      {item.product.name}
+                    </p>
+                    <p className="text-sm text-surface-500">
+                      {sym}{Number(item.product.price).toLocaleString()} × {item.quantity}
+                    </p>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <button
+                      onClick={() =>
+                        setCart((prev) =>
+                          item.quantity <= 1
+                            ? prev.filter((i) => i.productId !== item.productId)
+                            : prev.map((i) =>
+                                i.productId === item.productId
+                                  ? { ...i, quantity: i.quantity - 1 }
+                                  : i
+                              )
+                        )
+                      }
+                      className="h-7 w-7 rounded-md border border-surface-200 flex items-center justify-center text-surface-500 hover:bg-surface-50"
+                    >
+                      <Minus className="h-3 w-3" />
+                    </button>
+                    <span className="text-sm font-bold w-5 text-center">{item.quantity}</span>
+                    <button
+                      onClick={() =>
+                        setCart((prev) =>
+                          prev.map((i) =>
+                            i.productId === item.productId
+                              ? { ...i, quantity: i.quantity + 1 }
+                              : i
+                          )
+                        )
+                      }
+                      className="h-7 w-7 rounded-md border border-surface-200 flex items-center justify-center text-surface-500 hover:bg-surface-50"
+                    >
+                      <Plus className="h-3 w-3" />
+                    </button>
+                  </div>
+                </div>
+              ))}
+            </div>
+
+            {/* Cart footer */}
+            <div className="border-t border-surface-200 px-6 py-4 space-y-3">
+              <div className="flex items-center justify-between">
+                <span className="text-sm font-medium text-surface-600">Total</span>
+                <span className="text-xl font-bold text-surface-900">
+                  {sym}{cartTotal.toLocaleString()}
+                </span>
+              </div>
+              <Link
+                href="/checkout"
+                className="btn-primary w-full py-3.5 text-sm text-center block"
+                onClick={() => setShowCart(false)}
+              >
+                Checkout
+              </Link>
+            </div>
+          </div>
+        </div>
+      )}
+    </div>
   );
 }

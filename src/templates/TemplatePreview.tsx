@@ -5,74 +5,11 @@ import { ExternalLink, Sparkles } from "@/components/icons/FilledIcons";
 import Link from "next/link";
 import type { TemplateDefinition } from "@/lib/templates/types";
 import TemplateRenderer from "./TemplateRenderer";
-
-// Maps template slugs to their static site folders in /templates/sites/
-const STATIC_SITE_MAP: Record<string, string> = {
-  clarity: "clarity",
-  arsha: "arsha",
-  medicare: "medicare",
-  travely: "travely",
-  rival: "rival",
-  workfolio: "workfolio",
-  strada: "strada",
-  bistro: "bistro",
-  nutrio: "nutrio",
-  "landing-gadget": "landing-gadget",
-  "landing-health": "landing-health",
-  "landing-saas-minimal": "landing-saas-minimal",
-  "landing-wellness": "landing-wellness",
-  "landing-artsy": "landing-artsy",
-  "landing-dev-portfolio": "landing-dev-portfolio",
-  "landing-kids": "landing-kids",
-  "landing-tech-saas": "landing-tech-saas",
-  "landing-travel": "landing-travel",
-};
-
-// Templates with raw HTML previews extracted from reference sites (preview.html in /templates/<slug>/)
-const RAW_PREVIEW_SLUGS = new Set([
-  "jewellery-elegance",
-  "vegetables-market", "grocery-market",
-  "makeup-beauty", "perfume-store", "cosmetics-boutique",
-  "pottery-artisan", "handmade-crafts", "handmade-bags",
-  "tshirts-prints", "fashion-colored", "fashion-classic",
-  "pills-health",
-  "tech-accessories", "tools-hardware", "electronics-hub", "hardware-pro",
-  "kids-fashion", "toy-world",
-  "home-decor", "retail-general",
-  "wine-cellar", "drinks-store",
-  "sweets-bakery",
-  "food-delivery", "event-agency",
-]);
-
-// Map template slugs to the folder name where preview.html lives
-const RAW_PREVIEW_FOLDER: Record<string, string> = {
-  "jewellery-elegance": "jewellery",
-  "vegetables-market": "vegetables",
-  "grocery-market": "grocery",
-  "makeup-beauty": "makeup",
-  "perfume-store": "perfumes",
-  "cosmetics-boutique": "cosmetics",
-  "pottery-artisan": "pottery",
-  "handmade-crafts": "handmade",
-  "handmade-bags": "handmade-bags",
-  "tshirts-prints": "tshirts",
-  "fashion-colored": "fashion-colored",
-  "fashion-classic": "fashion",
-  "pills-health": "pills",
-  "tech-accessories": "electronics-acc",
-  "tools-hardware": "tools",
-  "electronics-hub": "electronics",
-  "hardware-pro": "hardware",
-  "kids-fashion": "kids",
-  "toy-world": "toys",
-  "home-decor": "decor",
-  "retail-general": "retail",
-  "wine-cellar": "wine",
-  "drinks-store": "drinks",
-  "sweets-bakery": "sweets-bakery",
-  "food-delivery": "food-delivery",
-  "event-agency": "event-agency",
-};
+import {
+  STATIC_SITE_MAP,
+  RAW_PREVIEW_SLUGS,
+  RAW_PREVIEW_FOLDER,
+} from "@/lib/templates/template-html-map";
 
 interface Props {
   template: TemplateDefinition;
