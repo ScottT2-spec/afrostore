@@ -378,27 +378,7 @@ function canonicalIndustry(input: BusinessAnalysisInput, template?: TemplateDefi
   return "commerce-pro";
 }
 
-function sectionForPage(pageTitle: string, businessName: string, industry: string) {
-  const title = pageTitle.toLowerCase();
-  if (title === "home") return null;
-  if (title.includes("contact")) return { id: `${slugify(pageTitle)}-contact`, type: "contactForm", props: { title: `Contact ${businessName}`, subtitle: "Tell us what you need and we will respond shortly." } };
-  if (title.includes("testimonial") || title.includes("review")) return { id: `${slugify(pageTitle)}-testimonials`, type: "testimonials", props: { title: "Customer stories", bgColor: "surface", items: [] } };
-  if (title.includes("team") || title.includes("instructor")) return { id: `${slugify(pageTitle)}-team`, type: "team", props: { title: pageTitle, subtitle: `Meet the people behind ${businessName}.`, members: [] } };
-  if (title.includes("gallery") || title.includes("lookbook") || title.includes("portfolio") || title.includes("projects") || title.includes("destination") || title.includes("experience")) return { id: `${slugify(pageTitle)}-portfolio`, type: "portfolio", props: { title: pageTitle, subtitle: `Selected work from ${businessName}.` } };
-  if (title.includes("menu")) return { id: `${slugify(pageTitle)}-menu`, type: "menu", props: { title: `${businessName} Menu`, subtitle: "Add your signature items, specials, and pricing." } };
-  if (title.includes("reservation")) return { id: `${slugify(pageTitle)}-reservations`, type: "reservations", props: { title: "Reservations", subtitle: "Make it easy for customers to book a table or request catering." } };
-  if (title.includes("service")) return { id: `${slugify(pageTitle)}-services`, type: "service_cards", props: { title: "Services", subtitle: `Core services from ${businessName}.` } };
-  if (title.includes("case") || title.includes("process")) return { id: `${slugify(pageTitle)}-case-studies`, type: "case_studies", props: { title: pageTitle, subtitle: "Show outcomes and proof from completed work." } };
-  if (title.includes("pricing")) return { id: `${slugify(pageTitle)}-pricing`, type: "stats", props: { title: "Pricing", subtitle: "Transparent plans and starting prices.", bgColor: "brand" } };
-  if (title.includes("faq")) return { id: `${slugify(pageTitle)}-faq`, type: "faq", props: { title: "Frequently Asked Questions", items: [{ question: "How do I get started?", answer: "Contact us or sign up to get started." }] } };
-  if (title.includes("feature")) return { id: `${slugify(pageTitle)}-features`, type: "features", props: { title: "Features", subtitle: `What makes ${businessName} special.`, items: [{ icon: "star", title: "Quality", desc: "We deliver the best." }, { icon: "zap", title: "Fast", desc: "Quick turnaround." }, { icon: "shield", title: "Reliable", desc: "Trusted by thousands." }] } };
-  if (title.includes("course") || title.includes("categor")) return { id: `${slugify(pageTitle)}-grid`, type: "featured_products", props: { title: pageTitle, subtitle: `Browse ${pageTitle.toLowerCase()} from ${businessName}.`, limit: 8, columns: 4, showFeatured: true } };
-  if (title.includes("about")) return { id: `${slugify(pageTitle)}-about`, type: "imageText", props: { title: `About ${businessName}`, text: "Tell your story here. What drives you, what makes you different, and why customers choose you.", badge: "Our Story", buttonText: "Get in Touch", buttonHref: "#contact" } };
-  if (title.includes("collection") || title.includes("shop") || title.includes("featured")) return { id: `${slugify(pageTitle)}-products`, type: "featured_products", props: { title: pageTitle, limit: 8, columns: 4, showFeatured: true } };
-  return { id: `${slugify(pageTitle)}-content`, type: "features", props: { title: pageTitle, subtitle: `A starter ${pageTitle.toLowerCase()} page for ${businessName}.`, items: [] } };
-}
-
-// For self-contained templates, map page titles to relevant section types
+// Map page titles to relevant section types from the template definition.
 // so each page gets the correct sections from the template definition.
 const PAGE_SECTION_MAP: Record<string, string[]> = {
   home: ["hero", "stats", "brands", "banner"],
@@ -444,12 +424,6 @@ export function generatePages(input: BusinessAnalysisInput, template: TemplateDe
   const pageNames = TEMPLATE_FAMILY_PAGE_SETS[industry] || TEMPLATE_FAMILY_PAGE_SETS["commerce-pro"];
   const homeSections = generateHomepageSections(input, template, industry);
 
-  const SELF_CONTAINED_SLUGS = [
-    "clarity", "arsha", "lawyer-corporate", "corporate-pro", "real-estate-pro",
-    "bistro", "nutrio", "medicare", "travely", "melody-education",
-    "rival", "workfolio", "strada",
-  ];
-  const isSelfContained = SELF_CONTAINED_SLUGS.includes(template.slug) || isLandingPageTemplate(industry);
   const templateSections = structuredClone(template.themeConfig.sections);
 
   return pageNames.map((title, position) => {
@@ -458,19 +432,10 @@ export function generatePages(input: BusinessAnalysisInput, template: TemplateDe
     let content: BuilderBlock[];
     if (title === "Home") {
       content = homeSections;
-    } else if (isSelfContained) {
+    } else {
       // Pull matching sections from the template for this page
       const pageSections = getSectionsForPage(title, templateSections);
-      if (pageSections.length > 0) {
-        content = pageSections;
-      } else {
-        // Fallback: use sectionForPage but this shouldn't happen for well-defined templates
-        const pageBlock = sectionForPage(title, businessName, industry);
-        content = pageBlock ? [pageBlock] : [];
-      }
-    } else {
-      const pageBlock = sectionForPage(title, businessName, industry);
-      content = pageBlock ? [pageBlock] : [];
+      content = pageSections.length > 0 ? pageSections : [];
     }
 
     return {
@@ -484,89 +449,24 @@ export function generatePages(input: BusinessAnalysisInput, template: TemplateDe
   });
 }
 
-function isLandingPageTemplate(industry: string) {
-  return industry.startsWith("landing-");
-}
 
 function generateHomepageSections(input: BusinessAnalysisInput, template: TemplateDefinition, industry: string) {
   const businessName = input.businessName || input.business_name || "Your Business";
   const description = input.description || `Professional ${industry.replace(/-/g, " ")} services and products built for your customers.`;
   const starter = structuredClone(template.themeConfig.sections);
 
-  // Business website & landing page templates define their own complete section list —
-  // only personalise the hero heading/subheading, keep everything else intact.
-  const SELF_CONTAINED_TEMPLATES = [
-    "clarity", "arsha", "lawyer-corporate", "corporate-pro", "real-estate-pro",
-    "bistro", "nutrio", "medicare", "travely", "melody-education",
-    "rival", "workfolio", "strada",
-  ];
-  if (isLandingPageTemplate(industry) || SELF_CONTAINED_TEMPLATES.includes(template.slug)) {
-    const hero = starter.find((section) => section.type === "hero");
-    if (hero) {
-      hero.props = {
-        ...hero.props,
-        heading: businessName !== "Your Business" ? businessName : hero.props.heading,
-        subheading: description !== hero.props.subheading && input.description ? description : hero.props.subheading,
-      };
-    }
-    return starter;
-  }
-
+  // ALL templates now define their own complete section list.
+  // Only personalise the hero heading/subheading with the business name,
+  // keep everything else intact from the template definition.
   const hero = starter.find((section) => section.type === "hero");
   if (hero) {
-    const isDiningFamily = industry === "restaurant-pro" || industry === "bakery-delight";
-    const isServiceFamily = industry === "business-services-pro" || industry === "interior-studio";
     hero.props = {
       ...hero.props,
-      badge: template.category,
-      heading: businessName,
-      subheading: description,
-      buttonText: isDiningFamily ? "View Menu" : isServiceFamily ? "View Services" : "Shop Now",
-      buttonHref: isDiningFamily ? `/store/${slugify(businessName)}/menu` : "#shop",
+      heading: businessName !== "Your Business" ? businessName : hero.props.heading,
+      subheading: description !== hero.props.subheading && input.description ? description : hero.props.subheading,
     };
   }
-
-  const familySections: Record<string, BuilderBlock[]> = {
-    "restaurant-pro": [
-      block("restaurant-inline-menu", "menu", { title: `${businessName} Menu`, subtitle: "Scan the menu before you visit." }),
-      block("restaurant-inline-reservation", "reservations", { title: "Reservations", subtitle: "Reserve a table in a couple of taps." }),
-    ],
-    "bakery-delight": [
-      block("bakery-inline-specials", "banner", { title: "Daily Specials", subtitle: "Fresh bakes and morning offers." }),
-      block("bakery-inline-pickup", "features", { title: "Pickup", subtitle: "Quick ordering and same-day pickup.", items: [] }),
-    ],
-    "fashion-luxe": [
-      block("fashion-inline-lookbook", "lookbook", { title: "Lookbook", subtitle: "Styled collections and editorial moments." }),
-      block("fashion-inline-arrivals", "new_arrivals", { title: "New Arrivals", limit: 4, columns: 4 }),
-    ],
-    "footwear-elite": [
-      block("footwear-inline-size", "features", { title: "Size Guide", subtitle: "Help shoppers buy with confidence.", items: [] }),
-      block("footwear-inline-collections", "collections", { title: "Seasonal Collections" }),
-    ],
-    "accessory-hub": [
-      block("accessory-inline-gifts", "featured_products", { title: "Gift Collections", limit: 4, columns: 4, showFeatured: true }),
-      block("accessory-inline-bundles", "banner", { title: "Product Bundles", subtitle: "Build a gift set or bundled offer." }),
-    ],
-    "kids-world": [
-      block("kids-inline-age", "age_categories", { title: "Age Categories" }),
-      block("kids-inline-safety", "trustBadges", { title: "Safety Highlights" }),
-    ],
-    "business-services-pro": [
-      block("services-inline-cases", "case_studies", { title: "Case Studies", subtitle: "Show outcomes and proof." }),
-      block("services-inline-pricing", "stats", { title: "Pricing", subtitle: "Transparent plans and starting points." }),
-    ],
-    "interior-studio": [
-      block("interior-inline-projects", "projects", { title: "Projects", subtitle: "Selected work and design direction." }),
-      block("interior-inline-awards", "stats", { title: "Awards", subtitle: "Recognition and milestones." }),
-    ],
-    "commerce-pro": [
-      block("commerce-inline-collections", "collections", { title: "Collections" }),
-      block("commerce-inline-flash", "banner", { title: "Flash Sales", subtitle: "Limited-time promotions." }),
-    ],
-  };
-
-  const inserts = familySections[industry] || familySections["commerce-pro"];
-  return [starter[0], ...inserts, ...starter.slice(1)];
+  return starter;
 }
 
 export function mergeBranding(themeConfig: ThemeConfig, input: TemplateSelectionInput): ThemeConfig {
@@ -645,24 +545,9 @@ export async function applyTemplateToSite(siteId: string, input: TemplateSelecti
     },
   });
 
-  // For self-contained templates, remove ALL existing pages to start fresh
-  // (prevents leftover default pages from cluttering the sidebar).
-  // For other templates, only replace pages with matching slugs.
-  const SELF_CONTAINED_SLUGS = [
-    "clarity", "arsha", "lawyer-corporate", "corporate-pro", "real-estate-pro",
-    "bistro", "nutrio", "medicare", "travely", "melody-education",
-    "rival", "workfolio", "strada",
-  ];
-  if (SELF_CONTAINED_SLUGS.includes(template.slug) || template.slug.startsWith("landing-")) {
-    await prisma.page.deleteMany({ where: { siteId } });
-  } else {
-    await prisma.page.deleteMany({
-      where: {
-        siteId,
-        OR: pages.map((page) => ({ slug: page.slug })),
-      },
-    });
-  }
+  // Remove ALL existing pages to start fresh with template pages only.
+  // All templates now define their own complete page set.
+  await prisma.page.deleteMany({ where: { siteId } });
 
   await prisma.page.createMany({
     data: pages.map((page, position) => ({

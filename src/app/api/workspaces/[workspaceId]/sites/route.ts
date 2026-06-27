@@ -143,20 +143,25 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ wor
       },
     });
 
-  // Create default pages based on site type
-    const defaultPages = getDefaultPages(siteType, name.trim());
-    if (defaultPages.length > 0) {
-      await prisma.page.createMany({
-        data: defaultPages.map((p, i) => ({
-          siteId: site.id,
-          title: p.title,
-          slug: p.slug,
-          type: p.type,
-          content: p.content,
-          isPublished: true,
-          position: i,
-        })),
-      });
+  // Create default pages ONLY if no template will be applied.
+    // When a template is selected, applyTemplateToSite handles all page creation
+    // with the template's own sections — so default pages would just be overwritten.
+    const willApplyTemplate = !!(launchMethod === "template" || launchMethod === "ai" || launchMethod === "quick" || templateId || templateSlug);
+    if (!willApplyTemplate) {
+      const defaultPages = getDefaultPages(siteType, name.trim());
+      if (defaultPages.length > 0) {
+        await prisma.page.createMany({
+          data: defaultPages.map((p, i) => ({
+            siteId: site.id,
+            title: p.title,
+            slug: p.slug,
+            type: p.type,
+            content: p.content,
+            isPublished: true,
+            position: i,
+          })),
+        });
+      }
     }
 
     let templateResult: unknown = null;
