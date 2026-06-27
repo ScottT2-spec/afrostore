@@ -1,0 +1,686 @@
+<!DOCTYPE html><html><head><meta charset=UTF-8><meta name=viewport content='width=device-width,initial-scale=1'><style>.wd-page-wrapper:has(.whb-boxed){--wd-header-boxed-sp: 30px}.wd-page-wrapper:has(.whb-boxed):has(.whb-top-bar.whb-without-bg:not(.whb-hidden-desktop)){--wd-header-boxed-sp: 0.001px}.whb-boxed:not(.whb-sticked) .whb-main-header{margin-inline:auto;width:95%}.whb-boxed:not(.whb-sticked) .whb-main-header .whb-row>.container{padding-inline:30px;max-width:100%;width:100%}.whb-boxed:not(.whb-sticked) .whb-main-header:before{content:"";display:block;height:var(--wd-header-boxed-sp)}.whb-boxed:not(.whb-sticked) .whb-top-bar.whb-without-bg>.container{padding-inline:0}.wrapper-boxed .whb-boxed:not(.whb-sticked) .whb-main-header{max-width:var(--wd-container-w)}.whb-boxed:not(.whb-sticked):not(.whb-full-width) .whb-main-header{max-width:calc(var(--wd-container-w) - 30px)}
+
+.wd-header-overlap:where(:not(.single-product)) .wd-content-layout:first-child{padding-top:0}.whb-overcontent{min-height:.2px}.whb-overcontent .whb-main-header{position:absolute}body:not(.single-product) .whb-overcontent,.whb-overcontent.whb-custom-header{margin-bottom:0;padding-top:0 !important}@media(min-width: 1025px){.wd-header-overlap .wd-page-title{padding-top:calc(var(--wd-header-h) + var(--wd-header-boxed-sp, 0.001px) + var(--wd-title-sp))}.single-product .whb-overcontent:not(.whb-custom-header){padding-top:calc(var(--wd-header-h) + var(--wd-header-boxed-sp, 0.001px))}}@media(max-width: 1024px){.wd-header-overlap .wd-page-title{padding-top:calc(var(--wd-header-sm-h) + var(--wd-title-sp))}.single-product .whb-overcontent:not(.whb-custom-header){padding-top:var(--wd-header-sm-h)}}
+
+.btn.btn-style-3d{--btn-box-shadow: inset 0 -2px 0 rgba(0, 0, 0, 0.15);--btn-box-shadow-hover: inset 0 -2px 0 rgba(0, 0, 0, 0.15)}.btn.btn-style-3d:active{box-shadow:none;top:1px}.btn.btn-style-bordered{--btn-bgcolor: transparent;--btn-bgcolor-hover: transparent;--btn-brd-width: 2px;--btn-box-shadow-hover: none}.btn.btn-style-link{--btn-bgcolor: transparent;--btn-bgcolor-hover: transparent;--btn-brd-width: 2px;--btn-box-shadow-hover: none;--btn-height: none;--btn-padding: 0;border-top:0;border-inline:0}.btn-color-primary{--btn-color: #FFF;--btn-color-hover: #FFF;--btn-bgcolor: var(--wd-primary-color);--btn-bgcolor-hover: var(--wd-primary-color);--btn-brd-color: var(--wd-primary-color);--btn-brd-color-hover: var(--wd-primary-color);--btn-box-shadow-hover: inset 0 0 0 1000px rgba(0, 0, 0, 0.1)}.btn-color-primary.btn-style-bordered{--btn-color: var(--wd-primary-color);--btn-bgcolor-hover: var(--wd-primary-color)}.btn-color-primary.btn-style-link{--btn-color: var(--color-gray-800);--btn-color-hover: var(--color-gray-500)}.btn-color-alt{--btn-color: #FFF;--btn-color-hover: #FFF;--btn-bgcolor: var(--wd-alternative-color);--btn-bgcolor-hover: var(--wd-alternative-color);--btn-brd-color: var(--wd-alternative-color);--btn-brd-color-hover: var(--wd-alternative-color);--btn-box-shadow-hover: inset 0 0 0 1000px rgba(0, 0, 0, 0.1)}.btn-color-alt.btn-style-bordered{--btn-color: var(--wd-alternative-color);--btn-bgcolor-hover: var(--wd-alternative-color)}.btn-color-alt.btn-style-link{--btn-color: var(--color-gray-800);--btn-color-hover: var(--color-gray-500)}.btn-color-black{--btn-color: #FFF;--btn-color-hover: #FFF;--btn-bgcolor: #212121;--btn-bgcolor-hover: #212121;--btn-brd-color: #212121;--btn-brd-color-hover: #212121;--btn-box-shadow-hover: inset 0 0 0 1000px rgba(0, 0, 0, 0.1)}.btn-color-black.btn-style-bordered{--btn-color: #333;--btn-bgcolor-hover: #212121}.btn-color-black.btn-style-link{--btn-color: var(--color-gray-800);--btn-color-hover: var(--color-gray-500)}.btn-color-white{--btn-color: #333;--btn-color-hover: #333;--btn-bgcolor: #FFF;--btn-bgcolor-hover: #FFF;--btn-brd-color: rgba(255, 255, 255, 0.5);--btn-brd-color-hover: #FFF;--btn-box-shadow-hover: inset 0 0 0 1000px rgba(0, 0, 0, 0.1)}.btn-color-white.btn-style-bordered{--btn-color: #FFF;--btn-bgcolor-hover: #FFF}.btn-color-white.btn-style-link{--btn-color: #FFF;--btn-color-hover: #FFF}.btn-size-extra-small{--btn-padding: 5px 10px;--btn-height: 28px;--btn-font-size: 11px}.btn-size-small{--btn-padding: 5px 14px;--btn-height: 36px;--btn-font-size: 12px}.btn-shape-round,.btn-style-round{--btn-brd-radius: 35px}.btn-shape-semi-round,.btn-style-semi-round{--btn-brd-radius: 5px}.btn-icon-pos-left{flex-direction:row-reverse}.btn-icon-pos-right{flex-direction:row}@media(min-width: 1025px){.btn-size-large{--btn-padding: 5px 28px;--btn-height: 48px;--btn-font-size: 14px}.btn-size-extra-large{--btn-padding: 5px 40px;--btn-height: 56px;--btn-font-size: 16px}}
+
+.wp-block-wd-button{--wd-width: fit-content;--wd-trans-main: all .25s ease;max-width:var(--wd-width);height:fit-content}.wp-block-wd-button>span{flex-shrink:0}.btn :where(.wp-block-wd-icon):not(.wd-with-text){--wd-icon-w: 18px}.btn svg{fill:currentColor;transition:fill .25s ease}
+
+.wd-transform{--wd-transform-perspective: 0;--wd-transform-rotateX: 0;--wd-transform-rotateY: 0;--wd-transform-rotateZ: 0;--wd-transform-translateX: 0;--wd-transform-translateY: 0;--wd-transform-scaleX: 1;--wd-transform-scaleY: 1;--wd-transform-skewX: 0;--wd-transform-skewY: 0;--wd-transform-origin-y: center;--wd-transform-origin-x: center;transform:perspective(var(--wd-transform-perspective)) translateX(var(--wd-transform-translateX)) translateY(var(--wd-transform-translateY)) scaleX(var(--wd-transform-scaleX)) scaleY(var(--wd-transform-scaleY)) rotateX(var(--wd-transform-rotateX)) rotateY(var(--wd-transform-rotateY)) rotateZ(var(--wd-transform-rotateZ)) skewX(var(--wd-transform-skewX)) skewY(var(--wd-transform-skewY));transform-origin:var(--wd-transform-origin-y) var(--wd-transform-origin-x)}
+
+.wp-block-wd-container{--wd-width: 100%;--wd-row-gap: 20px;--wd-col-gap: 20px;display:flex;width:var(--wd-width);align-items:flex-start;row-gap:var(--wd-row-gap);column-gap:var(--wd-col-gap)}:root .wp-block-wd-container>*{margin-bottom:0;min-width:1px}.wp-block-wd-container.wd-dir-col>*{flex-shrink:0}:is(.entry-content,.wd-entry-content)>.wp-block-wd-container{margin-inline:auto}.wp-block-wd-container:is(.wd-dir-row,.wd-dir-row-rev){justify-content:var(--wd-align);align-content:flex-start}.wp-block-wd-container.wd-dir-row{flex-direction:row}.wp-block-wd-container.wd-dir-row-rev{flex-direction:row-reverse}.wp-block-wd-container:is(.wd-dir-col,.wd-dir-col-rev){align-items:var(--wd-align)}.wp-block-wd-container:is(.wd-dir-col,.wd-dir-col-rev):not([class*=wd-align-is-])>*:not(:is(.wd-custom-width,[class*=wd-align-s-])){width:100%}.wp-block-wd-container.wd-dir-col{flex-direction:column}.wp-block-wd-container.wd-dir-col-rev{flex-direction:column-reverse}@media(max-width: 1024px){.wp-block-wd-container:is(.wd-dir-row-md,.wd-dir-row-rev-md){justify-content:var(--wd-align);align-content:flex-start}.wp-block-wd-container:is(.wd-dir-row-md,.wd-dir-row-rev-md)[class*=wd-dir-col]:not([class*=wd-align-is-])>*:not(:is(.wd-custom-width,[class*=wd-align-s-])){width:unset;flex-shrink:unset}.wp-block-wd-container.wd-dir-row-md{flex-direction:row}.wp-block-wd-container.wd-dir-row-rev-md{flex-direction:row-reverse}.wp-block-wd-container:is(.wd-dir-col-md,.wd-dir-col-rev-md){align-items:var(--wd-align)}.wp-block-wd-container:is(.wd-dir-col-md,.wd-dir-col-rev-md):not([class*=wd-align-is-])>*:not(:is(.wd-custom-width,[class*=wd-align-s-])){width:100%}.wp-block-wd-container.wd-dir-col-md{flex-direction:column}.wp-block-wd-container.wd-dir-col-rev-md{flex-direction:column-reverse}}@media(max-width: 768.98px){.wp-block-wd-container:is(.wd-dir-row-sm,.wd-dir-row-rev-sm){justify-content:var(--wd-align);align-content:flex-start}.wp-block-wd-container:is(.wd-dir-row-sm,.wd-dir-row-rev-sm)[class*=wd-dir-col]:not([class*=wd-align-is-])>*:not(:is(.wd-custom-width,[class*=wd-align-s-])){width:unset;flex-shrink:unset}.wp-block-wd-container.wd-dir-row-sm{flex-direction:row}.wp-block-wd-container.wd-dir-row-rev-sm{flex-direction:row-reverse}.wp-block-wd-container:is(.wd-dir-col-sm,.wd-dir-col-rev-sm){align-items:var(--wd-align)}.wp-block-wd-container:is(.wd-dir-col-sm,.wd-dir-col-rev-sm):not([class*=wd-align-is-])>*:not(:is(.wd-custom-width,[class*=wd-align-s-])){width:100%}.wp-block-wd-container.wd-dir-col-sm{flex-direction:column}.wp-block-wd-container.wd-dir-col-rev-sm{flex-direction:column-reverse}}
+
+.wd-info-box{position:relative;display:flex;flex-direction:column;border-radius:var(--wd-brd-radius);gap:var(--ib-icon-sp);--ib-icon-sp: 20px}.wd-info-box .box-icon-wrapper{flex:0 0 auto;line-height:0}.wd-info-box :is(.info-box-icon,.info-svg-wrapper){display:inline-block;max-width:100%}.wd-info-box .info-box-icon{transition:all .25s ease}.wd-info-box .info-svg-wrapper img{height:inherit}.wd-info-box .info-svg-wrapper :is(img,svg){width:inherit !important;height:inherit !important}.wd-info-box :is(.info-box-subtitle,.info-box-title){transition:all .25s ease;margin-bottom:0}.wd-info-box :is(.info-box-subtitle,.info-box-title,.info-box-inner):not(:first-child){margin-top:10px}.wd-info-box :is(.info-box-subtitle:not(.subtitle-style-background),.info-box-title){line-height:1.3}.wd-info-box .info-box-content{--wd-tags-mb: 10px;position:relative;flex:1 1 auto;border-radius:var(--wd-brd-radius)}.wd-info-box .info-box-inner p:first-child:empty,.wd-info-box .info-box-inner p:first-child:empty~p:last-child,.wd-info-box .info-box-inner:empty{display:none}.wd-info-box .info-btn-wrapper{margin-top:15px}.wd-info-box-link{z-index:2}.box-icon-align-top .box-icon-wrapper{margin-bottom:-5px}:is(.box-icon-align-left,.box-icon-align-right) .box-icon-wrapper{max-width:50%}.box-icon-align-left{flex-direction:row}.box-icon-align-right{flex-direction:row-reverse}.box-title-style-underlined{padding-bottom:10px;border-bottom:1px solid var(--brdcolor-gray-300)}.box-with-icon .info-box-icon{overflow:hidden}.box-icon-wrapper.box-with-text{color:var(--wd-primary-color);font-weight:600;line-height:1}.box-with-text.text-size-small{font-size:38px}.box-with-text:is(.text-size-default,.text-size-large){font-size:52px}[class*=box-icon-with-].box-with-text{--text-bg-size: 85px}[class*=box-icon-with-].box-with-text .info-box-icon{padding:0 10px;min-width:var(--text-bg-size);height:var(--text-bg-size);border-radius:100px;line-height:var(--text-bg-size)}[class*=box-icon-with-]:is(.text-size-default,.text-size-large){--text-bg-size: 100px}[class*=box-icon-with-] .info-box-icon{border-radius:50%;text-align:center}.box-icon-with-bg .info-box-icon{padding:20px;background-color:#f1f1f1}.box-icon-with-border .info-box-icon{padding:18px;border:2px solid #f1f1f1}.wpb-js-composer .info-box-wrapper.inline-element{max-width:100%}.wpb-js-composer .info-box-carousel .inline-element{display:block;margin-inline:0 !important}.wpb-js-composer .info-box-carousel .inline-element .wd-info-box{display:inline-flex}.with-animation .info-svg-wrapper path{stroke:var(--wd-primary-color)}.info-box-carousel-wrapper .wd-wpb{margin-bottom:0}[class*=color-scheme-hover]{transition:all .25s ease}[class*=color-scheme-hover] .title{transition:all .25s ease}.color-scheme-hover-dark:hover{--color-gray-400: #a5a5a5;--color-gray-500: #a5a5a5;--color-gray-800: #333;--bgcolor-gray-200: #f7f7f7;--brdcolor-gray-500: rgba(0, 0, 0, 0.2);--wd-text-color: #767676;--wd-title-color: #242424;--wd-link-color: #333;--wd-link-color-hover: #242424;color:var(--wd-text-color)}.color-scheme-hover-light:hover{--color-gray-400: rgba(255, 255, 255, 0.8);--color-gray-500: rgba(255, 255, 255, 0.8);--color-gray-800: #FFF;--brdcolor-gray-300: rgba(255, 255, 255, 0.15);--brdcolor-gray-500: rgba(255, 255, 255, 0.3);--wd-text-color: rgba(255, 255, 255, 0.8);--wd-title-color: #FFF;--wd-link-color: rgba(255, 255, 255, 0.9);--wd-link-color-hover: #FFF;color:var(--wd-text-color)}.color-scheme-hover-light:hover .info-svg-wrapper svg{fill:#fff !important}.color-scheme-hover-light:hover .info-svg-wrapper img{filter:brightness(0) invert(1)}.color-scheme-hover-light:hover :is(.info-box-icon,.title){color:#fff !important}@media(min-width: 1025px){.box-with-text.text-size-large{font-size:74px}[class*=box-icon-with-].text-size-large{--text-bg-size: 130px}}
+
+.title-wrapper{--wd-mb: 10px}.title-wrapper [class*=title]{display:inline-block}.title-wrapper .title{margin-bottom:0}.title-wrapper .img-wrapper{display:block;margin-top:10px}.subtitle-color-black.subtitle-style-default{color:#000}.subtitle-color-black.subtitle-style-background{background-color:#333;color:#fff}.subtitle-color-white.subtitle-style-default{color:hsla(0,0%,100%,.8)}.subtitle-color-white.subtitle-style-background{background-color:hsla(0,0%,100%,.8);color:#242424}.subtitle-color-gradient.subtitle-style-default{color:var(--color-gray-400)}.subtitle-color-gradient.subtitle-style-background{background-color:#f1f1f1;color:#333}.wd-title-color-default{--el-title-color: rgba(0, 0, 0, 0.105)}.wd-title-color-primary{--el-title-color: var(--wd-primary-color)}.wd-title-color-alt{--el-title-color: var(--wd-alternative-color)}.wd-title-color-black{--el-title-color: #000}.wd-title-color-white{color:var(--wd-text-color);--wd-text-color: rgba(255, 255, 255, 0.8);--wd-title-color: #FFF;--el-title-color: #FFF}.wd-title-color-gradient .title{-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:rgba(0,0,0,0)}.wd-title-style-shadow{padding:25px;border-radius:var(--wd-brd-radius);box-shadow:0 0 8px rgba(0,0,0,.12)}.wpb-js-composer .title-wrapper{--content-width: var(--wd-max-width)}.wpb-js-composer .title-wrapper [class*=title]{max-width:var(--content-width)}.wpb-js-composer .title-wrapper.wd-title-empty .liner-continer{margin-bottom:0}.wpb-js-composer .title-wrapper.wd-title-empty .liner-continer .title{display:none}@media(max-width: 1024px){.title-subtitle.wd-fontsize-m,.title-after_title.wd-fontsize-s{font-size:14px}}@media(max-width: 576px){.title-wrapper .title-subtitle{font-size:12px}.title-wrapper .title{font-size:20px}}
+
+[class*=wd-underline] u{text-decoration:none}[class*=wd-underline-colored] u{color:var(--wd-primary-color)}.wd-underline-colored-alt u{font-family:var(--wd-alternative-font);font-style:var(--wd-alternative-font-style)}.wd-underline-bordered u{text-decoration:underline 3px solid var(--wd-primary-color);text-underline-offset:.25em}.wd-underline-gradient u{-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:rgba(0,0,0,0);background-color:currentColor}
+
+.wd-text-block:not(.inline-element){max-width:var(--content-width);--content-width: var(--wd-max-width)}.wd-text-block:not(.inline-element).text-left{margin-right:auto}.wd-text-block:not(.inline-element).text-center{margin-inline:auto}.wd-text-block:not(.inline-element).text-right{margin-left:auto}
+
+div.wpcf7 input[type=submit]{padding:var(--btn-accented-padding, var(--btn-padding, 5px 20px));min-height:var(--btn-accented-height, var(--btn-height, 42px));font-size:var(--btn-accented-font-size, var(--btn-font-size, 13px));border-radius:var(--btn-accented-brd-radius);color:var(--btn-accented-color);box-shadow:var(--btn-accented-box-shadow);background-color:var(--btn-accented-bgcolor);text-transform:var(--btn-accented-transform, var(--btn-transform, uppercase));font-weight:var(--btn-accented-font-weight, var(--btn-font-weight, 600));font-family:var(--btn-accented-font-family, var(--btn-font-family, inherit));font-style:var(--btn-accented-font-style, var(--btn-font-style, unset))}div.wpcf7 input[type=submit]:hover{color:var(--btn-accented-color-hover);box-shadow:var(--btn-accented-box-shadow-hover);background-color:var(--btn-accented-bgcolor-hover)}div.wpcf7 input[type=submit]:active{box-shadow:var(--btn-accented-box-shadow-active);bottom:var(--btn-accented-bottom-active, 0)}div.wpcf7 .wpcf7-spinner{position:relative;visibility:hidden}div.wpcf7 .wpcf7-spinner:before{position:absolute;top:0;left:20px;margin-top:2px;content:"";display:inline-block;width:16px;height:16px;border:1px solid rgba(0,0,0,0);border-left-color:var(--color-gray-900);border-radius:50%;vertical-align:middle;animation:wd-rotate 450ms infinite linear var(--wd-anim-state, paused)}div.wpcf7 .ajax-error{display:none}div.wpcf7 form.submitting .wpcf7-spinner{visibility:visible}div.wpcf7 form.submitting .wpcf7-spinner:before{--wd-anim-state: running}div.wpcf7 .hidden-fields-container{display:none}.wpcf7-form :is(.wd-grid-g,.wd-grid-f-stretch){--wd-tags-mb: 0}.wpcf7-form .row{--wd-gap: 20px;--wd-f-basis: 150px;display:flex;flex-wrap:wrap;margin-inline:calc(var(--wd-gap)/-2)}.wpcf7-form .row>[class*=col]{flex:1 1 var(--wd-f-basis);padding-inline:calc(var(--wd-gap)/2)}.wpcf7-form .row>[class*=auto]{flex:0 0 auto}.wpcf7-form .row>:is(.col-md-12,.col-lg-12){--wd-f-basis: 100%}.wpcf7-form .btn-color-white{--btn-accented-color: #333;--btn-accented-bgcolor: #FFF;--btn-accented-color-hover: #333;--btn-accented-bgcolor-hover: #FFF}.wpcf7-list-item{display:inline-block;margin-inline-end:10px}.wpcf7-radio input{margin-inline-start:5px}.wpcf7-not-valid-tip{display:block;color:red}form div.wpcf7-response-output{display:none;margin:20px 0 0}form:is(.sent,.invalid,.unaccepted,.spam,.failed,.aborted) div.wpcf7-response-output{display:block}.wpcf7-form.wd-style-with-bg{--wd-form-bg: #FFF;--wd-form-color: #767676;--wd-form-brd-color: rgba(0, 0, 0, 0.1);--wd-form-brd-color-focus: rgba(0, 0, 0, 0.15);--wd-form-placeholder-color: #767676}.wd-cf7{--wd-width: 100%;width:var(--wd-width)}@media(max-width: 768.98px){.wpcf7-form .row{--wd-f-basis: 100%}}
+
+.wd-carousel-container{--wd-width: 100%;position:relative;width:var(--wd-width)}.wd-carousel-inner{position:relative;margin:-15px 0}.wd-carousel{position:relative;overflow-x:var(--wd-carousel-overflow, clip);overflow-y:var(--wd-carousel-overflow, unset);padding:15px 0;margin-inline:calc(var(--wd-gap)/-2);touch-action:pan-y}@supports not (overflow: clip){.wd-carousel{overflow:var(--wd-carousel-overflow, hidden)}}.wd-carousel-wrap{position:relative;width:100%;height:100%;z-index:1;display:flex;transition-property:transform;transition-timing-function:initial;box-sizing:content-box;transform:translate3d(0px, 0, 0)}.wd-carousel-item{position:relative;height:100%;flex:0 0 calc(100%/var(--wd-col));max-width:calc(100%/var(--wd-col));padding:0 calc(var(--wd-gap)/2);transition-property:transform;transform:translate3d(0px, 0, 0)}.wd-backface-hidden .wd-carousel-item{transform:translateZ(0);backface-visibility:hidden}.wd-carousel[data-center_mode=yes] .wd-carousel-wrap:not([style]){transform:translate3d(calc(50% - 100% / var(--wd-col) / 2), 0, 0)}.wd-autoheight,.wd-autoheight .wd-carousel-item{height:auto}.wd-autoheight .wd-carousel-wrap{align-items:flex-start;transition-property:transform,height}@media(min-width: 1025px){.wd-carousel-container:not(.wd-off-lg) [style*="col-lg:1;"]:not(.wd-initialized)>.wd-carousel-wrap>.wd-carousel-item:nth-child(n+2){display:none}}@media(max-width: 768.98px){.wd-carousel-container:not(.wd-off-sm) [style*="col-sm:1;"]:not(.wd-initialized)>.wd-carousel-wrap>.wd-carousel-item:nth-child(n+2){display:none}}@media(min-width: 769px)and (max-width: 1024px){.wd-carousel-container:not(.wd-off-md) [style*="col-md:1;"]:not(.wd-initialized)>.wd-carousel-wrap>.wd-carousel-item:nth-child(n+2){display:none}}
+
+.wd-btn-arrow.wd-lock,.wd-carousel:not(.wd-initialized)~.wd-nav-arrows .wd-btn-arrow{opacity:0 !important;pointer-events:none !important}@media(min-width: 1025px){.wd-nav-arrows[class*=wd-hover].wd-pos-sep .wd-btn-arrow{opacity:0;pointer-events:none}}
+
+.woodmart-counter{font-size:36px}.woodmart-counter .counter-value{color:var(--color-gray-800);line-height:1;font-size:1em}.woodmart-counter .counter-label{margin-top:10px;color:var(--color-gray-500);font-size:.47em;line-height:1.4}.woodmart-counter.counter-small{font-size:28px}.woodmart-counter.counter-large{font-size:44px}.woodmart-counter.counter-extra-large{font-size:54px}.woodmart-counter.color-scheme-custom :is(.counter-value,.counter-label){color:inherit}
+
+.footer-sidebar{padding-block:40px}.footer-column>*:not(.widget){margin-block:0 var(--wd-block-spacing)}.footer-column>*:not(.widget):last-child{margin-bottom:0}.wd-prefooter{padding-bottom:40px;background-color:var(--wd-main-bgcolor)}.wd-copyrights{--wd-tags-mb: 10px;padding-block:20px;border-top:1px solid var(--brdcolor-gray-300)}.wd-copyrights.wd-layout-two-columns>.wd-grid-g{--wd-col-lg: 2;--wd-col-md: 1}.wd-copyrights.wd-layout-centered{text-align:center}@media(min-width: 1025px){.sticky-footer-on :is(.wd-page-content,.wd-prefooter){position:relative;z-index:2}.sticky-footer-on .wd-footer{position:sticky;bottom:0}}@media(min-width: 1025px){.wd-copyrights.wd-layout-two-columns .wd-col-end{text-align:end}}@media(max-width: 1024px){.wd-copyrights.wd-layout-two-columns{text-align:center}}
+
+.mc4wp-form{--wd-width: 100%;width:var(--wd-width)}.mc4wp-form .wd-grid-f-stretch{--wd-f-basis: 150px}.mc4wp-form .row{--wd-gap: 10px;display:flex;flex-wrap:wrap;margin:0 calc(var(--wd-gap)/-2) calc(var(--wd-gap)*-1)}.mc4wp-form .row [class*=col]{padding-inline:calc(var(--wd-gap)/2);margin-bottom:var(--wd-gap)}.mc4wp-form .row .col{flex:1 1 200px}.mc4wp-form .row .col-auto{flex:0 0 auto}.mc4wp-form input[type=submit]{padding:var(--btn-accented-padding, var(--btn-padding, 5px 20px));min-height:var(--btn-accented-height, var(--btn-height, 42px));font-size:var(--btn-accented-font-size, var(--btn-font-size, 13px));border-radius:var(--btn-accented-brd-radius);color:var(--btn-accented-color);box-shadow:var(--btn-accented-box-shadow);background-color:var(--btn-accented-bgcolor);text-transform:var(--btn-accented-transform, var(--btn-transform, uppercase));font-weight:var(--btn-accented-font-weight, var(--btn-font-weight, 600));font-family:var(--btn-accented-font-family, var(--btn-font-family, inherit));font-style:var(--btn-accented-font-style, var(--btn-font-style, unset))}.mc4wp-form input[type=submit]:hover{color:var(--btn-accented-color-hover);box-shadow:var(--btn-accented-box-shadow-hover);background-color:var(--btn-accented-bgcolor-hover)}.mc4wp-form input[type=submit]:active{box-shadow:var(--btn-accented-box-shadow-active);bottom:var(--btn-accented-bottom-active, 0)}.mc4wp-form-fields{display:inline-block;width:100%;max-width:var(--wd-max-width)}body:not(.notifications-sticky) .mc4wp-alert{margin-block:20px 0}.mc4wp-alert>p{margin-bottom:0}@media(min-width: 1025px){.mc4wp-form input[type=submit]{padding-inline:35px}}
+
+@media(max-width: 1024px){.wd-nav-mega .wd-dropdown-menu{display:none}}
+
+.wd-menu>.widget-title{margin-bottom:0;padding:20px;background-color:var(--bgcolor-gray-300);text-transform:uppercase;border-top-left-radius:var(--wd-brd-radius);border-top-right-radius:var(--wd-brd-radius)}.wd-menu>.widget-title+.wd-nav-vertical{border-top:none}.wd-menu>.widget-title+.wd-nav-vertical,.wd-menu>.widget-title+.wd-nav-vertical>li:first-child>a{border-top-left-radius:0;border-top-right-radius:0}.rtl .wd-menu .wd-nav.wd-icon-left>li>a .wd-nav-img{order:1;margin:0;margin-inline-start:7px}.rtl .wd-menu .wd-nav.wd-icon-right>li>a .wd-nav-img{order:0;margin:0;margin-inline-end:7px}
+
+.scrollToTop{position:fixed;inset-inline-end:20px;bottom:20px;z-index:350;display:flex;align-items:center;justify-content:center;width:50px;height:50px;border-radius:50%;background-color:rgba(var(--bgcolor-white-rgb), 0.9);box-shadow:0 0 5px rgba(0,0,0,.17);color:var(--color-gray-800);font-size:16px;opacity:0;pointer-events:none;text-decoration:none !important;backface-visibility:hidden;-webkit-backface-visibility:hidden;transform:translateX(100%)}.scrollToTop.button-show{opacity:1;transform:none;pointer-events:auto}.scrollToTop:after{content:"\f115";font-family:"woodmart-font"}.scrollToTop:hover{color:var(--color-gray-500)}.wd-search-opened .scrollToTop{display:none}@media(max-width: 1024px){.scrollToTop{inset-inline-end:12px;bottom:12px;width:40px;height:40px;font-size:14px}}
+
+.wd-animation{--wd-anim-duration: 1s;--wd-anim-timing-f: cubic-bezier(0, 0.87, 0.58, 1);--wd-anim-delay: 0s;--wd-anim-opa-timing-f: ease;--wd-trans-main: all .25s ease;--wd-trans-last: transform var(--wd-anim-duration) var(--wd-anim-timing-f) var(--wd-anim-delay), opacity .25s var(--wd-anim-opa-timing-f) var(--wd-anim-delay);opacity:0}.wd-animation:not(.wd-animated){transition:none !important}.wd-animation.wd-animated{transition:var(--wd-trans-main),var(--wd-trans-last)}.wd-animation.wd-in{opacity:1}
+
+.searchform{position:relative;--wd-search-btn-w: var(--wd-form-height);--wd-form-height: 46px;--wd-search-clear-sp: .001px}.searchform input[type=text]{padding-inline-end:calc(var(--wd-search-btn-w) + 30px)}.searchform .searchsubmit{--btn-color: var(--wd-form-color, currentColor);--btn-bgcolor: transparent;--btn-bgcolor-hover: transparent;position:absolute;gap:0;inset-block:0;inset-inline-end:0;padding:0;width:var(--wd-search-btn-w);min-height:unset;border:none;box-shadow:none;font-weight:400;font-size:0;font-style:unset}.searchform .searchsubmit:hover:after,.searchform .searchsubmit:hover img{opacity:.7}.searchform .searchsubmit:after{font-size:calc(var(--wd-form-height)/2.3);transition:opacity .2s ease;content:"\f130";font-family:"woodmart-font"}.searchform .searchsubmit img{max-width:var(--wd-tools-icon-width, 24px);transition:opacity .2s ease}.searchform .searchsubmit:before{position:absolute;top:50%;left:50%;margin-top:calc(var(--wd-form-height)/2.5/-2);margin-left:calc(var(--wd-form-height)/2.5/-2);opacity:0;transition:opacity .1s ease;content:"";display:inline-block;width:calc(var(--wd-form-height)/2.5);height:calc(var(--wd-form-height)/2.5);border:1px solid rgba(0,0,0,0);border-left-color:currentColor;border-radius:50%;vertical-align:middle;animation:wd-rotate 450ms infinite linear var(--wd-anim-state, paused)}.searchform .searchsubmit.wd-with-img:after{content:none}.searchform.wd-search-loading .searchsubmit{transform:translateZ(0)}.searchform.wd-search-loading .searchsubmit:before{opacity:1;transition-duration:.2s;--wd-anim-state: running}.searchform.wd-search-loading .searchsubmit:after,.searchform.wd-search-loading .searchsubmit img{opacity:0;transition-duration:.1s}.searchform .wd-clear-search{position:absolute;top:calc(50% - 12px);display:flex;align-items:center;justify-content:center;width:30px;height:24px;inset-inline-end:calc(var(--wd-search-cat-w, 0.001px) + var(--wd-search-btn-w) + var(--wd-search-clear-sp));color:var(--wd-form-color, currentColor);cursor:pointer}.searchform .wd-clear-search:before{font-size:calc(var(--wd-form-height)/3);line-height:1;transition:opacity .2s ease;content:"\f112";font-family:"woodmart-font"}.searchform .wd-clear-search:hover:before{opacity:.7}
+
+.wd-search-results-wrapper{position:relative}.wd-search-title.title{margin-bottom:0;text-transform:uppercase;font-size:var(--wd-search-font-size);line-height:1}.wd-suggestions-group{display:grid;grid-template-columns:repeat(auto-fit, minmax(240px, 1fr))}.wd-suggestion{position:relative;display:flex;line-height:1;transition:all .25s ease}.wd-suggestion .wd-entities-title{font-size:.92em}.wd-suggestion .wd-entities-title strong{text-decoration:underline;font-weight:bolder}.wd-suggestion-thumb img{border-radius:calc(var(--wd-brd-radius)/1.5)}.wd-suggestion-content{--wd-mb: 10px}.wd-suggestion-sku{font-size:.8em}.wd-suggestions-group.wd-type-categories .wd-suggestion-thumb{margin-inline-end:7px}.wd-suggestions-group.wd-type-categories .wd-suggestion-thumb img{max-height:18px;max-width:18px;object-fit:contain;object-position:50% 50%}.wd-suggestions-group.wd-type-categories .wd-suggestion-content{display:flex;justify-content:space-between;align-items:center;gap:10px;width:100%}.wd-suggestions-group.wd-type-categories .wd-suggestion-content .wd-entities-title{flex-grow:1}.wd-not-found{grid-column:1/-1}.wd-all-results{--wd-link-color: var(--color-gray-800);--wd-link-color-hover: var(--color-gray-800);display:block;border-block:1px solid var(--brdcolor-gray-300);padding-inline:var(--wd-search-sp);text-align:center;text-transform:uppercase;font-weight:600;font-size:var(--wd-search-font-size);line-height:50px;transition:all .25s ease;text-decoration:none !important}.wd-all-results:hover{background-color:var(--bgcolor-gray-100) !important}.wd-search-area{position:relative;transition:all .25s ease}.wd-ajax-search-content:not(.wd-content-loaded) .wd-search-area{min-height:70px}.wd-ajax-search-content:not(.wd-content-loaded) .wd-search-loader{opacity:1;pointer-events:auto}.wd-ajax-search-content:not(.wd-content-loaded) .wd-search-loader:after{--wd-anim-state: running}.wd-search-loader{z-index:410;opacity:0;pointer-events:none;background-color:rgba(var(--bgcolor-white-rgb), 0.8);transition:all .25s cubic-bezier(0.19, 1, 0.22, 1);overflow:hidden}.wd-search-loader:after{position:absolute;top:calc(50% - 16px);left:calc(50% - 16px);content:"";display:inline-block;width:32px;height:32px;border:1px solid rgba(0,0,0,0);border-left-color:var(--color-gray-900);border-radius:50%;vertical-align:middle;animation:wd-rotate 450ms infinite linear var(--wd-anim-state, paused)}@media(max-width: 1024px){.wd-suggestions-group{grid-template-columns:repeat(auto-fit, minmax(180px, 1fr))}.wd-suggestion :is(.wd-entities-title,.price){font-size:.9em}}
+
+@media(min-width: 769px){.searchform.wd-style-default:not(.wd-with-cat) .wd-clear-search{padding-inline-end:10px;border-inline-end:1px solid var(--wd-form-brd-color)}.searchform.wd-style-default.wd-cat-style-default{--wd-search-clear-sp: 7px}}@media(max-width: 768.98px){.searchform.wd-style-default .wd-clear-search{padding-inline-end:10px;border-inline-end:1px solid var(--wd-form-brd-color)}}
+
+.wd-dropdown-results{--wd-search-font-size: .92em;--wd-search-sp: 15px;overflow:hidden;right:calc(var(--wd-form-brd-radius)/1.5);left:calc(var(--wd-form-brd-radius)/1.5);margin-top:0 !important}.wd-dropdown-results:after{width:auto !important;height:auto !important}.wd-dropdown-results .wd-scroll-content{overscroll-behavior:none}.wd-dropdown-results .wd-search-suggestions{margin-top:-1px;margin-inline-end:-1px}.wd-dropdown-results .wd-search-suggestions .wd-search-title{margin-block:-1px;border-block:1px solid var(--brdcolor-gray-300);background-color:var(--bgcolor-white);padding:var(--wd-search-sp)}.wd-dropdown-results .wd-suggestion{margin-bottom:-1px;border-top:1px solid;border-bottom:1px solid;border-inline-end:1px solid;border-color:var(--brdcolor-gray-300);background-color:var(--bgcolor-white);padding:var(--wd-search-sp)}.wd-dropdown-results .wd-suggestion:hover,.wd-dropdown-results .wd-suggestion.wd-active{background-color:var(--bgcolor-gray-100)}.wd-dropdown-results .wd-suggestion-thumb{flex:0 0 auto;margin-inline-end:15px;max-width:65px}.wd-dropdown-results .wd-suggestion-thumb img{border-radius:calc(var(--wd-brd-radius)/1.5)}.wd-dropdown-results .wd-all-results{background-color:var(--bgcolor-white)}.wd-dropdown-results .wd-suggestions-group.wd-type-categories{display:block}.wd-dropdown-results .wd-suggestions-group.wd-type-categories .wd-suggestion{border:none;padding-block:10px}.wd-dropdown-results .wd-suggestions-group.wd-type-categories .wd-suggestion:first-child{border-top:1px solid var(--brdcolor-gray-300)}.wd-dropdown-results .wd-suggestions-group.wd-type-categories .wd-suggestion:last-child{border-bottom:1px solid var(--brdcolor-gray-300)}.wd-dropdown-results .wd-suggestions-group.wd-type-categories .wd-suggestion-content:after{content:"\f120";font-family:"woodmart-font";color:var(--color-gray-400)}.wd-dropdown-results .wd-not-found{background-color:var(--bgcolor-white) !important}.wd-dropdown-results .wd-suggestions-group.wd-type-product:only-child .wd-not-found{margin-bottom:0}.wd-dropdown-results :is(.wd-search-requests,.wd-search-history,.wd-search-area){padding:var(--wd-search-sp)}.wd-dropdown-results :is(.wd-search-requests,.wd-search-history,.wd-search-area):not(:first-child){margin-top:-1px;border-top:1px solid var(--brdcolor-gray-300)}.wd-searched .wd-dropdown-results :is(.wd-search-history,.wd-search-requests,.wd-search-area){display:none}.wd-dropdown-results .wd-search-requests{--wd-requests-pd: 8px 12px;--wd-requests-fs: 10px}@media(max-width: 1024px){.wd-dropdown-results{--wd-search-sp: 10px}.wd-dropdown-results .wd-suggestion-thumb{max-width:45px}}
+
+:is(.widget,.wd-widget,div[class^=vc_wp]){line-height:1.4;--wd-link-color: var(--color-gray-500);--wd-link-color-hover: var(--color-gray-800);--wd-link-decor: none;--wd-link-decor-hover: none}:is(.widget,.wd-widget,div[class^=vc_wp])>:is(ul,ol){margin-top:0}:is(.widget,.wd-widget,div[class^=vc_wp]) :is(ul,ol){list-style:none;--list-mb: 0;--li-mb: 15px;--li-pl: 0}.widgettitle,.widget-title{margin-bottom:20px;color:var(--wd-widget-title-color);text-transform:var(--wd-widget-title-transform);font-weight:var(--wd-widget-title-font-weight);font-style:var(--wd-widget-title-font-style);font-size:var(--wd-widget-title-font-size);font-family:var(--wd-widget-title-font)}.widget .wp-block-heading{font-size:var(--wd-widget-title-font-size)}.widget{margin-bottom:30px;padding-bottom:30px;border-bottom:1px solid var(--brdcolor-gray-300)}.widget:last-child{margin-bottom:0;padding-bottom:0;border-bottom:none}
+
+
+
+img:is([sizes=auto i],[sizes^="auto," i]){contain-intrinsic-size:3000px 1500px}
+/*# sourceURL=wp-img-auto-sizes-contain-inline-css */
+
+
+.woocommerce form .form-row .required { visibility: visible; }
+/*# sourceURL=woocommerce-inline-inline-css */
+
+
+@font-face {
+	font-weight: normal;
+	font-style: normal;
+	font-family: "woodmart-font";
+	src: url("//woodmart.xtemos.com/wp-content/themes/woodmart/fonts/woodmart-font-1-400.woff2?v=8.5.0") format("woff2");
+	font-display:fallback;
+}
+
+
+/*# sourceURL=wd-style-base-inline-css */
+
+
+.whb-flex-row{display:flex;flex-direction:row;flex-wrap:nowrap;justify-content:space-between}.whb-column{display:flex;align-items:center;flex-direction:row;max-height:inherit}.whb-col-left,.whb-mobile-left{justify-content:flex-start;margin-left:-10px}.whb-col-right,.whb-mobile-right{justify-content:flex-end;margin-right:-10px}.whb-col-mobile{flex:1 1 auto;justify-content:center;margin-inline:-10px}.whb-flex-flex-middle .whb-col-center{flex:1 1 0%}.whb-flex-equal-sides :is(.whb-col-left,.whb-col-right){flex:1 1 0%}.whb-col-1 :is(.whb-flex-row,.whb-column){max-width:calc(100% + 20px);justify-content:center}.whb-col-1 :is(.whb-col-left,.whb-mobile-left){flex:1 1 auto;margin-inline:-10px}.whb-col-1 .wd-header-html{max-width:100%}.whb-general-header :is(.whb-mobile-left,.whb-mobile-right){flex:1 1 0%}.whb-empty-column+.whb-mobile-right{flex:1 1 auto}.whb-with-shadow{box-shadow:0 1px 8px rgba(0,0,0,.1)}.whb-main-header{position:relative;top:0;right:0;left:0;z-index:390;backface-visibility:hidden;-webkit-backface-visibility:hidden}.whb-sticky-prepared{padding-top:var(--wd-header-h)}.whb-sticky-prepared .whb-main-header{position:absolute}:root:has(.whb-sticky-prepared):not(:has(.whb-top-bar)){--wd-top-bar-h: .00001px;--wd-top-bar-sm-h: .00001px}:root:has(.whb-sticky-prepared):not(:has(.whb-general-header)){--wd-header-general-h: .00001px;--wd-header-general-sm-h: .00001px}:root:has(.whb-sticky-prepared):not(:has(.whb-header-bottom)){--wd-header-bottom-h: .00001px;--wd-header-bottom-sm-h: .00001px;--wd-header-bottom-brd-w: .00001px}.whb-sticked .whb-row{transition:background-color .3s ease}.whb-sticked .whb-not-sticky-row{display:none}.whb-header.whb-sticked .whb-main-header{position:fixed}.whb-row{transition:background-color .2s ease}.whb-color-dark:not(.whb-with-bg){background-color:#fff}.whb-color-light:not(.whb-with-bg){background-color:#212121}body:not(.single-product) .whb-overcontent:not(.whb-sticked) .whb-row:not(.whb-with-bg){background-color:rgba(0,0,0,0)}.whb-row.whb-with-bdf,.whb-row.whb-with-bdf>.container{position:relative}.whb-row.whb-with-bdf:before{content:"";position:absolute;inset:0}@keyframes wd-fadeInDownBig{from{transform:translate3d(0, -100%, 0)}to{transform:none}}@media(min-width: 1025px){.whb-top-bar-inner{height:var(--wd-top-bar-h);max-height:var(--wd-top-bar-h)}.whb-sticked .whb-top-bar-inner{height:var(--wd-top-bar-sticky-h);max-height:var(--wd-top-bar-sticky-h)}.whb-general-header-inner{height:var(--wd-header-general-h);max-height:var(--wd-header-general-h)}.whb-sticked:not(.whb-clone) .whb-general-header-inner{height:var(--wd-header-general-sticky-h);max-height:var(--wd-header-general-sticky-h)}.whb-header-bottom-inner{height:var(--wd-header-bottom-h);max-height:var(--wd-header-bottom-h)}.whb-sticked .whb-header-bottom-inner{height:var(--wd-header-bottom-sticky-h);max-height:var(--wd-header-bottom-sticky-h)}.whb-hidden-lg,.whb-hidden-desktop{display:none}.whb-clone,.whb-sticked .whb-main-header{top:var(--wd-admin-bar-h)}.whb-full-width .whb-row>.container,.whb-full-width+.whb-clone .whb-row>.container{max-width:100%;width:clamp(var(--wd-container-w),95%,100%)}}@media(max-width: 1024px){.whb-top-bar-inner{height:var(--wd-top-bar-sm-h);max-height:var(--wd-top-bar-sm-h)}.whb-general-header-inner{height:var(--wd-header-general-sm-h);max-height:var(--wd-header-general-sm-h)}.whb-header-bottom-inner{height:var(--wd-header-bottom-sm-h);max-height:var(--wd-header-bottom-sm-h)}.whb-visible-lg,.whb-hidden-mobile{display:none}.whb-sticky-prepared{padding-top:var(--wd-header-sm-h)}}.wd-tools-element{position:relative;--wd-header-el-color: #333;--wd-header-el-color-hover: rgba(51,51,51,.6);--wd-tools-icon-base-width: 20px}.wd-tools-element>a{display:flex;align-items:center;justify-content:center;gap:7px;height:40px;color:var(--wd-header-el-color);line-height:1;text-decoration:none !important;padding-inline:10px}.wd-tools-element [class*=wd-tools-text]{text-transform:var(--wd-header-el-transform);white-space:nowrap;font-weight:var(--wd-header-el-font-weight);font-style:var(--wd-header-el-font-style);font-size:var(--wd-header-el-font-size);font-family:var(--wd-header-el-font)}.wd-tools-element .wd-tools-count{z-index:1;width:var(--wd-count-size, 15px);height:var(--wd-count-size, 15px);border-radius:50%;text-align:center;letter-spacing:0;font-weight:400;line-height:var(--wd-count-size, 15px)}.wd-tools-element:hover>a{color:var(--wd-header-el-color-hover)}.whb-top-bar .wd-tools-element{--wd-count-size: 13px;--wd-tools-icon-base-width: 14px}.whb-top-bar .wd-tools-element .wd-tools-text{font-weight:400;font-size:12px}.whb-color-light .wd-tools-element{--wd-header-el-color: #FFF;--wd-header-el-color-hover: rgba(255, 255, 255, 0.8)}.wd-tools-icon{position:relative;display:flex;align-items:center;justify-content:center;gap:7px;font-size:0}.wd-tools-icon:before{content:var(--wd-tools-icon, unset);font-size:var(--wd-tools-icon-base-width);font-family:"woodmart-font"}.wd-tools-inner{position:relative;display:flex;align-items:center;gap:7px}.wd-custom-icon,picture.wd-custom-icon img{max-width:var(--wd-tools-icon-width, 38px);width:var(--wd-tools-icon-width, revert-layer);transition:all .25s ease}.wd-tools-custom-icon .wd-tools-icon:before,.wd-tools-custom-icon .wd-tools-icon:after{display:none}.wd-tools-custom-icon:hover .wd-custom-icon{opacity:.6}.wd-tools-element:is(.wd-design-2,.wd-design-5).wd-with-count .wd-tools-icon{margin-inline-end:6px}.wd-tools-element:is(.wd-design-2,.wd-design-5) .wd-tools-count{position:absolute;top:-5px;inset-inline-end:-9px;background-color:var(--wd-primary-color);color:#fff;font-size:9px}.wd-tools-element[class*=wd-design-1] .wd-tools-count{width:auto;height:auto;text-transform:var(--wd-header-el-transform);font-weight:var(--wd-header-el-font-weight);font-style:var(--wd-header-el-font-style);font-size:var(--wd-header-el-font-size);font-family:var(--wd-header-el-font);line-height:inherit}.wd-tools-element[class*=wd-design-1] .subtotal-divider{display:inline}.wd-tools-element[class*=wd-design-4]{--wd-count-size: 19px}.wd-tools-element[class*=wd-design-4] .wd-tools-count{display:inline-block;padding:0 2px;background-color:var(--wd-primary-color);color:#fff;font-weight:600;font-size:10px}.whb-top-bar .wd-tools-element[class*=wd-design-4]{--wd-count-size: 16px}.wd-tools-element:is([class*=wd-design-6],[class*=wd-design-7],.wd-design-8){--wd-count-size: 18px}.wd-tools-element:is([class*=wd-design-6],[class*=wd-design-7],.wd-design-8) .wd-tools-inner .wd-tools-icon{position:static}.wd-tools-element:is([class*=wd-design-6],[class*=wd-design-7],.wd-design-8) .wd-custom-icon{max-width:var(--wd-tools-icon-width, var(--wd-tools-icon-base-width))}.wd-tools-element:is([class*=wd-design-6],[class*=wd-design-7],.wd-design-8) .wd-tools-count{position:absolute;top:-3px;inset-inline-end:-7px;background-color:#fff;box-shadow:0 0 4px rgba(0,0,0,.17);color:var(--wd-primary-color);font-size:11px}.whb-top-bar .wd-tools-element:is([class*=wd-design-6],[class*=wd-design-7],.wd-design-8){--wd-count-size: 13px}.wd-tools-element:is([class*=wd-design-6],[class*=wd-design-7]){--wd-tools-sp: 13px}.wd-tools-element:is([class*=wd-design-6],[class*=wd-design-7]) :is(.wd-tools-inner,.wd-tools-icon){height:42px;border-radius:42px}.wd-tools-element:is([class*=wd-design-6],[class*=wd-design-7]) .wd-tools-inner{padding-inline:var(--wd-tools-sp)}.wd-tools-element:is([class*=wd-design-6],[class*=wd-design-7]):not(.wd-with-wrap) .wd-tools-icon{width:42px}.whb-top-bar .wd-tools-element:is([class*=wd-design-6],[class*=wd-design-7]){--wd-tools-sp: 9px}.whb-top-bar .wd-tools-element:is([class*=wd-design-6],[class*=wd-design-7]) :is(.wd-tools-inner,.wd-tools-icon){height:28px}.whb-top-bar .wd-tools-element:is([class*=wd-design-6],[class*=wd-design-7]):not(.wd-with-wrap) .wd-tools-icon{width:28px}.whb-top-bar .wd-tools-element:is([class*=wd-design-6],[class*=wd-design-7]) .wd-tools-count{font-size:9px}.wd-tools-element[class*=wd-design-6]>a>:is(.wd-tools-inner,.wd-tools-icon){border:1px solid rgba(0, 0, 0, 0.105)}.whb-color-light .wd-tools-element[class*=wd-design-6]>a>:is(.wd-tools-inner,.wd-tools-icon){border-color:rgba(255, 255, 255, 0.25)}.wd-tools-element[class*=wd-design-7]>a>:is(.wd-tools-inner,.wd-tools-icon){background-color:var(--wd-primary-color);color:#fff;transition:inherit}.wd-tools-element[class*=wd-design-7]:hover>a>:is(.wd-tools-inner,.wd-tools-icon){color:hsla(0,0%,100%,.8)}.wd-header-nav{flex:1 1 auto;padding-inline:10px}.wd-header-nav.wd-inline{flex:0 0 auto;max-width:100%}.whb-color-light .wd-header-nav>span{color:hsla(0,0%,100%,.8)}.wd-nav-header>li>a{font-size:var(--wd-header-el-font-size);font-weight:var(--wd-header-el-font-weight);font-style:var(--wd-header-el-font-style);font-family:var(--wd-header-el-font);text-transform:var(--wd-header-el-transform)}.wd-nav-header>li.color-primary{--nav-color: var(--wd-primary-color);--nav-color-hover: var(--wd-primary-color)}.wd-nav-header:not(.wd-offsets-calculated)>li>.wd-dropdown:not(.wd-design-default){opacity:0;pointer-events:none}@supports(-webkit-touch-callout: none){.wd-nav-header:not(.wd-offsets-calculated)>li>.wd-dropdown:not(.wd-design-default){transform:translateY(15px) translateZ(0)}}.whb-color-light .wd-nav-header{--wd-navigation-color: 255, 255, 255}.whb-color-light .wd-nav-header.wd-style-default{--nav-color-hover: rgba(255, 255, 255, 0.7)}.whb-color-dark .wd-nav-header{--wd-navigation-color: 51, 51, 51}:is(.whb-top-bar,.whb-clone) .wd-nav-header>li>a .menu-label{position:static;margin-top:0;margin-inline-start:5px;opacity:1;align-self:center}:is(.whb-top-bar,.whb-clone) .wd-nav-header>li>a .menu-label:before{content:none}.whb-top-bar .wd-nav-secondary>li>a{font-weight:400;font-size:12px}.wd-header-nav.wd-full-height,.wd-header-nav.wd-full-height :is(.wd-nav,.wd-nav>li,.wd-nav>li>a){height:100%}.wd-header-nav.wd-full-height .wd-nav>li>.wd-dropdown-menu{margin-top:0 !important}.wd-header-nav.wd-full-height .wd-nav>li>.wd-dropdown-menu:after{width:auto !important;height:auto !important}.rtl .wd-header-nav .wd-nav.wd-icon-left>li>a .wd-nav-img{order:1;margin:0;margin-inline-start:7px}.rtl .wd-header-nav .wd-nav.wd-icon-right>li>a .wd-nav-img{order:0;margin:0;margin-inline-end:7px}.wd-header-sticky-nav{--wd-tools-icon: "\f15a"}.site-logo{max-height:inherit;padding-inline:10px}.wd-logo{max-height:inherit;transition:none}.wd-logo picture{max-height:inherit}.wd-logo picture img{max-width:inherit}.wd-logo img{padding-top:5px;padding-bottom:5px;max-height:inherit;transform:translateZ(0);backface-visibility:hidden;-webkit-backface-visibility:hidden;perspective:800px}.wd-logo img[src$=".svg"]{height:100%}.wd-logo img[width]:not([src$=".svg"]){width:auto;object-fit:contain}.whb-column>.info-box-wrapper{padding-inline:10px}.whb-column>.info-box-wrapper .wd-info-box{--ib-icon-sp: 10px}.wd-header-text{--wd-tags-mb: 10px;flex:1 1 auto;padding-inline:10px}.wd-header-text p:first-child:empty{display:none}.wd-header-text.wd-inline{flex:0 0 auto}.whb-top-bar .wd-header-text{font-size:12px;line-height:1.2}.whb-color-light .wd-header-text{--wd-text-color: rgba(255, 255, 255, 0.8);--wd-title-color: #FFF;--wd-link-color: rgba(255, 255, 255, 0.9);--wd-link-color-hover: #FFF;color:var(--wd-text-color)}.whb-column>.wd-button-wrapper{padding-inline:10px}.whb-column>.wd-social-icons{padding-inline:10px}.wd-header-html{padding-inline:10px}.wd-header-mobile-nav{--wd-tools-icon: "\f15a"}.wd-header-wishlist{--wd-tools-icon: "\f106"}.wd-header-compare{--wd-tools-icon: "\f128"}.wd-dropdown-compare a{justify-content:space-between}.wd-dropdown-compare .count{margin-inline-start:10px;color:var(--color-gray-300)}.wd-header-my-account{--wd-tools-icon: "\f124"}@media(max-width: 1024px){.wd-header-my-account .wd-dropdown{display:none}}
+
+/*# sourceURL=https://woodmart.xtemos.com/wp-content/themes/woodmart/css/parts/header-base.css */
+
+
+.wd-z-index{position:relative;z-index:35}.wd-fontsize-xs{font-size:14px}.wd-fontsize-s{font-size:16px}.wd-fontsize-m{font-size:18px}.wd-fontsize-l{font-size:22px}.wd-fontsize-xl{font-size:26px}.wd-fontsize-xxl{font-size:36px}.wd-fontsize-xxxl{font-size:46px}.text-larger{font-size:110%}.font-text{font-family:var(--wd-text-font)}.font-primary{font-family:var(--wd-title-font)}.font-alt{font-style:var(--wd-alternative-font-style);font-family:var(--wd-alternative-font)}.wd-items-top{align-items:flex-start}.wd-items-middle{align-items:center}.wd-items-bottom{align-items:flex-end}.wd-justify-left{justify-content:left}.wd-justify-center{justify-content:center}.wd-justify-right{justify-content:right}.color-primary{color:var(--wd-primary-color)}.color-alt{color:var(--wd-alternative-color)}.color-title{color:var(--wd-title-color)}@media(max-width: 1024px){.wd-fontsize-xl,.wd-fontsize-xxl,.wd-fontsize-xxxl{font-size:22px}.text-larger{font-size:inherit}}
+
+/*# sourceURL=https://woodmart.xtemos.com/wp-content/themes/woodmart/css/parts/helpers-wpb-elem.css */
+
+
+.yoast-breadcrumb>span{color:var(--wd-bcrumb-delim-color)}.yoast-breadcrumb .breadcrumb_last{--wd-link-color: var(--wd-bcrumb-color-active);--wd-link-color-hover: color-mix(in srgb, var(--wd-bcrumb-color-active), transparent 25%);color:var(--wd-bcrumb-color-active)}
+
+/*# sourceURL=https://woodmart.xtemos.com/wp-content/themes/woodmart/css/parts/int-yoast.css */
+
+
+.wpb-js-composer .menu-item:has(>.wd-design-sized){--wd-dropdown-padding: 30px 35px 0 35px}.wpb-js-composer .menu-item:has(>.wd-design-full-width){--wd-dropdown-padding: 30px 0px}.wpb-js-composer .wd-nav-vertical .menu-item:has(>.wd-design-full-width){--wd-dropdown-padding: 30px 35px 0 35px}.wpb-js-composer .wd-sub-menu-wrapp>.wd-sub-menu>li{--wd-dropdown-padding: 30px 35px 0 35px}.wd-button-wrapper .btn-style-link,.wd-button-wrapper .btn-style-bordered:not(:hover){background-color:rgba(0,0,0,0) !important}.btn-full-width{width:100%}.rtl .btn-icon-pos-left{flex-direction:row}.rtl .btn-icon-pos-right{flex-direction:row-reverse}.wd-wpb.wd-tabs:not(.wd-products-tabs) .wd-nav-tabs>li>a{font-weight:inherit;font-size:inherit;font-family:inherit}.wd-tabs.wd-fontsize-custom .wd-nav-tabs>li>a{line-height:inherit}:is(.wd-entry-content,.entry-content)>.wpb-content-wrapper{margin-bottom:0}.wd-row-gradient-enable{position:relative}.woodmart-row-gradient{border-radius:inherit}.wd-parallax{background-attachment:fixed !important;background-size:cover !important}@supports(-webkit-touch-callout: none){.wd-parallax{--wd-parallax-pos: center;background-attachment:scroll !important}}.attachment_fixed-yes{background-attachment:fixed}:is(.vc_row,.vc_section).wd-disable-overflow{overflow:visible !important}.vc_row,.vc_section,.wpb_column{scroll-margin-top:150px}.inline-element{display:inline-block;width:auto;vertical-align:middle}.inline-element:not(:last-child){margin-right:15px}.text-left .inline-element{margin-left:0}.text-left .inline-element:not(:last-child){margin-right:15px}.text-right .inline-element{margin-right:0}.text-right .inline-element:not(:first-child){margin-left:15px}.text-center .inline-element{margin-right:7px;margin-left:7px}.wpb-js-composer .wd-button-wrapper.inline-element{margin-bottom:10px}.wd-enabled-width{display:inline-block;max-width:100%;width:100%}.wd-enabled-flex>.vc_column-inner>.wpb_wrapper{display:flex;flex-wrap:wrap}.wd-enabled-flex>.vc_column-inner>.wpb_wrapper>*:not(.wd-enabled-width):not(.inline-element){width:100%}.vc_row-full-width{float:left;width:100%}.compose-mode .vc_column-inner .vc_controls>.vc_controls-out-tl{right:-1px;left:auto;z-index:2000}:is([data-vc-full-width],[class*=wd-section-stretch]).vc_row{transition:none !important}.vc_row.vc_row-flex>.vc_column_container>.vc_column-inner{z-index:auto}[data-vc-full-width]:has(.woodmart-sticky-column),[class*=wd-section-stretch]:has(.woodmart-sticky-column){overflow:unset !important}.vc_row-o-equal-height .wpb_wrapper{height:auto}[class*=wd-section-stretch]{transition:opacity .5s ease;overflow:hidden}[class*=wd-section-stretch].vc_hidden{opacity:0}.vc_row[class*=wd-section-stretch] .vc_grid.vc_row{overflow:hidden}.vc_row.wd-section-stretch-content-no-pd .vc_column-inner{padding-left:0;padding-right:0}.vc_row.wd-section-stretch-content-no-pd .vc_inner{margin-left:0;margin-right:0}.vc_section[class*=wd-section-stretch]{padding-left:0;padding-right:0}.vc_section[class*=wd-section-stretch]>.vc_row{margin-left:0;margin-right:0}.wpb_widgetised_column>.wpb_wrapper>*:last-child{margin-bottom:0}.widgetarea-head .wpb_widgetised_column{margin-bottom:0}.vc_video-bg{border-radius:inherit}body .wd-bg-left-top{background-position:left top !important}body .wd-bg-left-center{background-position:left center !important}body .wd-bg-left-bottom{background-position:left bottom !important}body .wd-bg-right-top{background-position:right top !important}body .wd-bg-right-center{background-position:right center !important}body .wd-bg-right-bottom{background-position:right bottom !important}body .wd-bg-center-top{background-position:center top !important}body .wd-bg-center-center{background-position:center center !important}body .wd-bg-center-bottom{background-position:center bottom !important}body [class*=wd-bg-]>.vc_column-inner{background-position:inherit !important}.parallax-bg{background-attachment:fixed !important}.visible-xs,.visible-sm,.visible-md,.visible-lg{display:none !important}.wd-font-weight-100{font-weight:100 !important}.wd-font-weight-200{font-weight:200 !important}.wd-font-weight-300{font-weight:300 !important}.wd-font-weight-400{font-weight:400 !important}.wd-font-weight-500{font-weight:500 !important}.wd-font-weight-600{font-weight:600 !important}.wd-font-weight-700{font-weight:700 !important}.wd-font-weight-800{font-weight:800 !important}.wd-font-weight-900{font-weight:900 !important}.wd-wpb{margin-bottom:30px}.wd-wpb:empty{display:none}.wpb-content-wrapper>p:has(:is(link:first-child:last-child)),.wpb-content-wrapper>p:empty{display:none}.wd .vc_row.vc_row-flex>.vc_column_container>.vc_column-inner>*{min-height:auto}@media(min-width: 1025px){[class*=wd-section-stretch],[data-vc-full-width]{--wd-stretch-width: calc(100vw - var(--wd-scroll-w) - var(--wd-sticky-nav-w));--wd-row-spacing: calc(var(--wd-column-gap, .001px) / 2 + 15px);--wd-stretch-left: calc((50% - 50vw + var(--wd-sticky-nav-w) / 2 + var(--wd-scroll-w) / 2) + var(--wd-row-spacing));position:relative;box-sizing:border-box;width:var(--wd-stretch-width);left:var(--wd-stretch-left)}[class*=wd-section-stretch].vc_column-gap-5,[data-vc-full-width].vc_column-gap-5{--wd-column-gap: 5px}:is(.vc_section[class*=wd-section-stretch],.vc_section[data-vc-full-width])>:is(.vc_row[data-vc-full-width],.vc_row[class*=wd-section-stretch]){--wd-row-spacing: .001px}:is(.vc_section,.vc_row)[data-vc-full-width-temp]{width:var(--wd-stretch-width);left:var(--wd-stretch-left);right:auto;margin-left:-15px}}@media(min-width: 1200px){.hidden-lg{display:none !important}.visible-lg{display:block !important}}@media(max-width: 1024px){body .tablet-bg-img-hidden,.wpb_column.tablet-bg-img-hidden>div{background-image:none !important}.wd-parallax{background-attachment:scroll !important}body.wpb-js-composer .wd-width-enabled{--content-width: calc(var(--wd-max-width) + 20%)}}@media(max-width: 767.98px){.hidden-xs{display:none !important}.visible-xs{display:block !important}body .mobile-bg-img-hidden,.wpb_column.mobile-bg-img-hidden>div{background-image:none !important}.row-reverse-mobile:not(.vc_row-flex){display:flex;flex-wrap:wrap;box-sizing:border-box}.row-reverse-mobile>.wpb_column:nth-child(1){order:12}.row-reverse-mobile>.wpb_column:nth-child(2){order:11}.row-reverse-mobile>.wpb_column:nth-child(3){order:10}.row-reverse-mobile>.wpb_column:nth-child(4){order:9}.row-reverse-mobile>.wpb_column:nth-child(5){order:8}.row-reverse-mobile>.wpb_column:nth-child(6){order:7}.row-reverse-mobile>.wpb_column:nth-child(7){order:6}.row-reverse-mobile>.wpb_column:nth-child(8){order:5}.row-reverse-mobile>.wpb_column:nth-child(9){order:4}.row-reverse-mobile>.wpb_column:nth-child(10){order:3}.row-reverse-mobile>.wpb_column:nth-child(11){order:2}.row-reverse-mobile>.wpb_column:nth-child(12){order:1}}@media(max-width: 576px){body.wpb-js-composer .wd-width-enabled{--content-width: 100%}}@media(min-width: 992px)and (max-width: 1199.98px){.hidden-md{display:none !important}.visible-md{display:block !important}}@media(min-width: 768px)and (max-width: 991px){.hidden-sm{display:none !important}.visible-sm{display:block !important}.row-reverse-tablet:not(.vc_row-flex){display:flex;flex-wrap:wrap;box-sizing:border-box}.row-reverse-tablet>.wpb_column:nth-child(1){order:12}.row-reverse-tablet>.wpb_column:nth-child(2){order:11}.row-reverse-tablet>.wpb_column:nth-child(3){order:10}.row-reverse-tablet>.wpb_column:nth-child(4){order:9}.row-reverse-tablet>.wpb_column:nth-child(5){order:8}.row-reverse-tablet>.wpb_column:nth-child(6){order:7}.row-reverse-tablet>.wpb_column:nth-child(7){order:6}.row-reverse-tablet>.wpb_column:nth-child(8){order:5}.row-reverse-tablet>.wpb_column:nth-child(9){order:4}.row-reverse-tablet>.wpb_column:nth-child(10){order:3}.row-reverse-tablet>.wpb_column:nth-child(11){order:2}.row-reverse-tablet>.wpb_column:nth-child(12){order:1}}.vc_progress_bar .vc_single_bar{border-radius:0;box-shadow:none}.vc_progress_bar .vc_single_bar .vc_label{padding:.6em 1.2em;text-transform:uppercase;text-shadow:none !important;font-weight:600;font-size:12px}.vc_progress_bar .vc_single_bar .vc_bar{border-radius:0;transition:width .8s ease}.products:not(.wd-img-width) .cat-design-alt img{width:revert-layer}.wd-btn-align-center{--wd-btn-align: center}.wd-btn-align-right{--wd-btn-align: end}.wd-btn-align-full-width{--wd-btn-align: stretch}
+
+/*# sourceURL=https://woodmart.xtemos.com/wp-content/themes/woodmart/css/parts/int-wpb-base.css */
+
+
+.wfls-login-message{scroll-margin-top:150px;max-width:calc(var(--wd-container-w) - 30px);margin-inline:auto;padding-block:15px}.wfls-login-message ul{margin-bottom:0}#wfls-prompt-overlay{margin-top:20px;border:none !important}#wfls-prompt-overlay .submit{margin-bottom:0}
+
+/*# sourceURL=https://woodmart.xtemos.com/wp-content/themes/woodmart/css/parts/int-wordfence.css */
+
+
+.amount{color:var(--wd-primary-color);font-weight:600}.price{color:var(--wd-primary-color);font-weight:600}.price .amount{color:inherit;font-size:inherit;font-weight:inherit}.price del{color:var(--color-gray-300);font-size:90%;font-weight:400}.price ins{padding:0;background-color:rgba(0,0,0,0);text-decoration:none;opacity:1}.woocommerce-price-suffix{color:var(--color-gray-500);font-weight:400}.woocommerce-notices-wrapper:empty{display:none}ul:is(.woocommerce-error,.woocommerce-message,.woocommerce-info){list-style:none;--li-pl: 0;--li-mb: 5px;align-items:stretch;flex-direction:column;justify-content:center}ul.variation{font-size:90%;--li-mb: 5px;--list-mb: 0;--wd-tags-mb: 0;--li-pl: 0;list-style:none}ul.variation p{display:inline}ul.variation .item-variation-name{color:var(--color-gray-800);font-weight:600}.wc-item-meta{--li-pl: 0;--list-mb: 0;--li-mb: 0;margin-top:10px;font-size:90%;list-style:none}.wc-item-meta li>*{display:inline-block;margin-top:0 !important;margin-bottom:5px;vertical-align:middle}.wc-item-meta strong{color:var(--color-gray-800)}.single_add_to_cart_button{padding:var(--btn-accented-padding, var(--btn-padding, 5px 20px));min-height:var(--btn-accented-height, var(--btn-height, 42px));font-size:var(--btn-accented-font-size, var(--btn-font-size, 13px));border-radius:var(--btn-accented-brd-radius);color:var(--btn-accented-color);box-shadow:var(--btn-accented-box-shadow);background-color:var(--btn-accented-bgcolor);text-transform:var(--btn-accented-transform, var(--btn-transform, uppercase));font-weight:var(--btn-accented-font-weight, var(--btn-font-weight, 600));font-family:var(--btn-accented-font-family, var(--btn-font-family, inherit));font-style:var(--btn-accented-font-style, var(--btn-font-style, unset))}.single_add_to_cart_button:hover{color:var(--btn-accented-color-hover);box-shadow:var(--btn-accented-box-shadow-hover);background-color:var(--btn-accented-bgcolor-hover)}.single_add_to_cart_button:active{box-shadow:var(--btn-accented-box-shadow-active);bottom:var(--btn-accented-bottom-active, 0)}.single_add_to_cart_button:before{content:"";position:absolute;inset:0;opacity:0;z-index:1;border-radius:inherit;background-color:inherit;box-shadow:inherit;transition:opacity 0s ease}.single_add_to_cart_button:after{position:absolute;top:calc(50% - 9px);inset-inline-start:calc(50% - 9px);opacity:0;z-index:2;transition:opacity 0s ease;content:"";display:inline-block;width:18px;height:18px;border:1px solid rgba(0,0,0,0);border-left-color:currentColor;border-radius:50%;vertical-align:middle;animation:wd-rotate 450ms infinite linear var(--wd-anim-state, paused)}.single_add_to_cart_button.loading:before{opacity:1;transition:opacity .25s ease}.single_add_to_cart_button.loading:after{opacity:1;transition:opacity .25s ease;--wd-anim-state: running}.single_add_to_cart_button+.added_to_cart{display:none}form.cart{display:flex;flex-wrap:wrap;gap:10px;justify-content:var(--content-align)}form.cart>*{flex:1 1 100%}form.cart :where(.single_add_to_cart_button,.wd-buy-now-btn,.quantity){flex:0 0 auto}.woocommerce-product-details__short-description{margin-bottom:20px}.woocommerce-product-details__short-description>*:last-child{margin-bottom:0}
+
+/*# sourceURL=https://woodmart.xtemos.com/wp-content/themes/woodmart/css/parts/woocommerce-base.css */
+
+
+.star-rating{position:relative;display:inline-block;vertical-align:middle;white-space:nowrap;letter-spacing:2px;font-weight:400;color:var(--wd-star-color, #EABE12);width:fit-content;font-family:"woodmart-font"}.star-rating:before{content:"\f149" "\f149" "\f149" "\f149" "\f149";color:var(--wd-empty-star-color, var(--color-gray-300))}.star-rating span{position:absolute;inset-block:0;inset-inline-start:0;overflow:hidden;width:100%;text-indent:99999px}.star-rating span:before{content:"\f148" "\f148" "\f148" "\f148" "\f148";position:absolute;top:0;inset-inline-start:0;text-indent:0}
+
+/*# sourceURL=https://woodmart.xtemos.com/wp-content/themes/woodmart/css/parts/mod-star-rating.css */
+
+
+.wd-free-progress-bar{--wd-progress-height: 10px}.wd-free-progress-bar .progress-bar{margin-top:10px;background-image:linear-gradient(135deg, rgba(255, 255, 255, 0.2) 25%, transparent 25%, transparent 50%, rgba(255, 255, 255, 0.2) 50%, rgba(255, 255, 255, 0.2) 75%, transparent 75%, transparent);background-size:15px 15px}.wd-free-progress-bar.wd-progress-hide .progress-area{display:none}.wd-shipping-progress-bar.wd-style-bordered .wd-free-progress-bar{padding:20px;border:2px dashed var(--brdcolor-gray-300);border-radius:var(--wd-brd-radius)}.widget_shopping_cart .wd-free-progress-bar{margin-bottom:0;padding-block:15px;border-top:1px solid var(--brdcolor-gray-300)}.wd-builder-off .wd-shipping-progress-bar{margin-bottom:20px}
+
+/*# sourceURL=https://woodmart.xtemos.com/wp-content/themes/woodmart/css/parts/woo-opt-free-progress-bar.css */
+
+
+.wd-progress-bar p:last-child{--wd-tags-mb: 0}.wd-progress-bar .stock-info{display:flex;flex-wrap:wrap;justify-content:space-between;gap:8px;margin-bottom:8px;color:var(--color-gray-500);line-height:1}.wd-progress-bar .stock-info span{margin-inline-start:3px;color:var(--color-gray-800);font-weight:600}.wd-progress-bar :is(.progress-area,.progress-bar){height:var(--wd-progress-height, 7px);border-radius:var(--wd-brd-radius)}.wd-progress-bar .progress-area{width:100%;background-color:rgba(var(--bgcolor-black-rgb), 0.06);transition:background-color .25s ease}.wd-progress-bar .progress-bar{background-color:var(--wd-primary-color)}@media(max-width: 576px){.wd-product .wd-progress-bar .stock-info{justify-content:center}.wd-product .wd-progress-bar .total-sold{display:none}}
+
+/*# sourceURL=https://woodmart.xtemos.com/wp-content/themes/woodmart/css/parts/woo-mod-progress-bar.css */
+
+
+/*
+ Theme Name:   Woodmart Child
+ Description:  Woodmart Child Theme
+ Author:       XTemos
+ Author URI:   http://xtemos.com
+ Template:     woodmart
+ Version:      1.0.0
+ Text Domain:  woodmart
+*/
+
+/**** WORDFANCE Fix login plugin notice ****/
+
+.woocommerce-account .wfls-login-message {  /*VALID*/
+	margin-block: 20px -40px;
+}
+
+/**** WORDFANCE Fix login notice (remove on 8.6) ****/
+
+.wd-header-overlap .wfls-login-message { /*VALID*/
+	position: absolute;
+	top: calc(var(--wd-header-h) + var(--wd-header-boxed-sp, .0001px));
+	z-index: 388;
+	inset-inline: 0;
+}
+
+.wd-header-overlap:not(.single-product) .wfls-login-message + .wd-content-layout {
+	padding-top: 0;
+}
+/*# sourceURL=https://woodmart.xtemos.com/wp-content/themes/woodmart-child/style.css */
+
+.woocommerce-product-gallery{ opacity: 1 !important; }
+.recentcomments a{display:inline !important;padding:0 !important;margin:0 !important;}
+
+		
+		
+.wd-rs-6400b0d650c2c > .vc_column-inner > .wpb_wrapper{align-items: center;justify-content: center}.wd-rs-6400b0e003f93 > .vc_column-inner > .wpb_wrapper{align-items: center;justify-content: center}.wd-rs-63ff79f79e6d1 > .vc_column-inner > .wpb_wrapper{align-items: center;justify-content: center}.wd-rs-63ff7b40deda6 > .vc_column-inner > .wpb_wrapper{justify-content: center}#wd-63ff81c7d8a5a{--wd-max-width:600px;}#wd-63ff81c7d8a5a .woodmart-title-container{line-height:82px;font-size:72px;}#wd-641467ae38084{--wd-max-width:530px;}#wd-64146e53ac90c .title-after_title{line-height:28px;font-size:18px;}#wd-64146e5f3f5cc .title-after_title{line-height:28px;font-size:18px;}#wd-64146e672ef70 .title-after_title{line-height:28px;font-size:18px;}#wd-64146e79b4689{--wd-max-width:370px;}#wd-64146e79b4689 .title-after_title{line-height:28px;font-size:18px;}#wd-6407364edb6a8{--wd-max-width:320px;}#wd-6407364edb6a8 .title-after_title{line-height:28px;font-size:18px;}#wd-64146e7f84d63.wd-text-block{line-height:32px;font-size:22px;}#wd-64146e88f3c28.wd-text-block{line-height:32px;font-size:22px;}#wd-64146e917ad08.wd-text-block{line-height:32px;font-size:22px;}#wd-64146ea0efffa .woodmart-title-container{line-height:68px;font-size:58px;}#wd-64146ea0efffa .title-after_title{line-height:28px;font-size:18px;color:#2f1c64;}@media (max-width: 1199px) {html .wd-rs-640733b03d9f7{padding-top:80px !important;}html .wd-rs-64060d0bd7fc9{padding-top:80px !important;padding-bottom:20px !important;}html .wd-rs-6400b064138f8{padding-bottom:0px !important;}html .wd-rs-6418854a0f2db{padding-top:60px !important;padding-bottom:60px !important;}html .wd-rs-641885535b9d3{padding-top:220px !important;padding-bottom:220px !important;}html .wd-rs-67d44986db5e1 > .vc_column-inner{margin-bottom:20px !important;}#wd-63ff81c7d8a5a{--wd-max-width:460px;}#wd-63ff81c7d8a5a .woodmart-title-container{line-height:56px;font-size:46px;}html .wd-rs-63ff81c7d8a5a{margin-bottom:15px !important;}html .wd-rs-640733c0862e4{margin-right:-275px !important;}#wd-64146e53ac90c .woodmart-title-container{line-height:42px;font-size:32px;}#wd-64146e53ac90c .title-after_title{line-height:26px;font-size:16px;}html .wd-rs-64146e53ac90c{margin-bottom:40px !important;}html .wd-rs-64073aaa569b0{margin-bottom:40px !important;}html .wd-rs-6414764a1d779{margin-bottom:40px !important;}#wd-64073aa24f882 .woodmart-title-container{line-height:42px;font-size:32px;}#wd-64146e5f3f5cc .title-after_title{line-height:26px;font-size:16px;}#wd-64146e672ef70 .title-after_title{line-height:26px;font-size:16px;}html .wd-rs-6400b09079633{margin-bottom:20px !important;}#wd-64146e79b4689 .woodmart-title-container{line-height:42px;font-size:32px;}#wd-64146e79b4689 .title-after_title{line-height:26px;font-size:16px;}#wd-6407364edb6a8 .woodmart-title-container{line-height:42px;font-size:32px;}#wd-6407364edb6a8 .title-after_title{line-height:26px;font-size:16px;}#wd-64146ea0efffa .woodmart-title-container{line-height:52px;font-size:42px;}#wd-64146ea0efffa .title-after_title{line-height:26px;font-size:16px;}html .wd-rs-64146ea0efffa{margin-bottom:40px !important;}}@media (max-width: 767px) {html .wd-rs-640733b03d9f7{padding-top:120px !important;}html .wd-rs-64060d0bd7fc9{padding-top:60px !important;padding-bottom:0px !important;}html .wd-rs-6400b064138f8{padding-top:30px !important;}html .wd-rs-641885535b9d3{padding-top:160px !important;padding-bottom:160px !important;}#wd-63ff81c7d8a5a .woodmart-title-container{line-height:42px;font-size:32px;}html .wd-rs-640733c0862e4{margin-right:0px !important;}#wd-64146e53ac90c .woodmart-title-container{line-height:38px;font-size:28px;}html .wd-rs-64073aaa569b0{margin-bottom:20px !important;}html .wd-rs-6414764a1d779{margin-bottom:20px !important;}#wd-64073aa24f882 .woodmart-title-container{line-height:38px;font-size:28px;}html .wd-rs-6400b09079633{margin-bottom:40px !important;}#wd-64146e79b4689 .woodmart-title-container{line-height:38px;font-size:28px;}#wd-6407364edb6a8 .woodmart-title-container{line-height:38px;font-size:28px;}html .wd-rs-6400b0d650c2c > .vc_column-inner{margin-bottom:30px !important;}html .wd-rs-6400b0e003f93 > .vc_column-inner{margin-bottom:30px !important;}#wd-64146ea0efffa .woodmart-title-container{line-height:38px;font-size:28px;}}
+.vc_custom_1678193598886{padding-top: 140px !important;background-image: url(https://woodmart.xtemos.com/wp-content/uploads/2023/03/w-delivery-top-bg-1.jpg?id=55173) !important;background-position: center !important;background-repeat: no-repeat !important;background-size: cover !important;}.vc_custom_1678118160693{padding-top: 120px !important;padding-bottom: 80px !important;}.vc_custom_1677766766428{padding-top: 60px !important;padding-bottom: 40px !important;background-color: #faefed !important;}.vc_custom_1679328575180{padding-top: 80px !important;padding-bottom: 80px !important;background: #faefed url(https://woodmart.xtemos.com/wp-content/uploads/2021/06/w-delivery-10-min-way-1.svg?id=38258) !important;background-position: 0 0 !important;background-repeat: no-repeat !important;}.vc_custom_1679328592597{padding-top: 80px !important;padding-bottom: 80px !important;background-color: #eb7a61 !important;}.vc_custom_1679328601245{margin-bottom: -40px !important;padding-top: 240px !important;padding-bottom: 290px !important;background-image: url(https://woodmart.xtemos.com/wp-content/uploads/2023/03/w-delivery-people-bg-1-scaled.jpg?id=55179) !important;background-position: center !important;background-repeat: no-repeat !important;background-size: cover !important;}.vc_custom_1677689799674{background-position: center !important;background-repeat: no-repeat !important;background-size: contain !important;}.vc_custom_1741965707836{margin-bottom: 40px !important;padding-top: 0px !important;}.vc_custom_1741965700901{padding-top: 0px !important;}.vc_custom_1679058866770{margin-bottom: 40px !important;}.vc_custom_1741965660698{margin-right: 0px !important;margin-left: 0px !important;padding-top: 20px !important;padding-right: 5px !important;padding-bottom: 20px !important;padding-left: 5px !important;background-color: #ffffff !important;border-radius: 10px !important;}.vc_custom_1622724188749{padding-top: 0px !important;}.vc_custom_1741965666477{margin-bottom: 0px !important;}.vc_custom_1678193612970{margin-right: -300px !important;margin-bottom: 0px !important;}.vc_custom_1677686779582{padding-top: 0px !important;}.vc_custom_1679060571477{margin-bottom: 60px !important;}.vc_custom_1678191625391{margin-right: 10% !important;margin-left: 10% !important;}.vc_custom_1678191632113{margin-right: 10% !important;margin-left: 10% !important;}.vc_custom_1678191638149{margin-right: 10% !important;margin-left: 10% !important;}.vc_custom_1678195386316{margin-bottom: 60px !important;}.vc_custom_1679062606645{margin-bottom: 60px !important;padding-right: 5px !important;padding-left: 5px !important;}.vc_custom_1622725262705{padding-top: 0px !important;}.vc_custom_1678195368173{margin-bottom: 0px !important;}.vc_custom_1678191707810{padding-top: 40px !important;padding-right: 40px !important;padding-bottom: 40px !important;padding-left: 40px !important;background-color: #fadbb7 !important;border-radius: 20px !important;}.vc_custom_1678191713682{padding-top: 40px !important;padding-right: 40px !important;padding-bottom: 40px !important;padding-left: 40px !important;background-color: #dae8cd !important;border-radius: 20px !important;}.vc_custom_1678193632496{margin-bottom: 0px !important;}.vc_custom_1678193644032{margin-bottom: 0px !important;}.vc_custom_1622727085967{padding-top: 0px !important;}.vc_custom_1677688068739{margin-bottom: 10px !important;}.vc_custom_1677766805631{margin-bottom: 160px !important;}.vc_custom_1678191832240{margin-bottom: 20px !important;padding-top: 0px !important;}.vc_custom_1678194172755{margin-bottom: 20px !important;padding-top: 0px !important;}.vc_custom_1678194019009{margin-bottom: 0px !important;}.vc_custom_1679060604190{margin-bottom: 0px !important;}.vc_custom_1678194191036{margin-bottom: 20px !important;padding-top: 0px !important;}.vc_custom_1678191893050{margin-bottom: 20px !important;padding-top: 0px !important;}.vc_custom_1678194028558{margin-bottom: 0px !important;}.vc_custom_1677766878534{padding-top: 0px !important;}.vc_custom_1677766885990{padding-top: 0px !important;}.vc_custom_1677687292825{padding-top: 0px !important;}.vc_custom_1677687179363{margin-bottom: 0px !important;}.vc_custom_1622729254477{margin-bottom: 0px !important;}.vc_custom_1679060615215{margin-top: 10px !important;margin-bottom: 0px !important;}.vc_custom_1677687205052{margin-bottom: 0px !important;}.vc_custom_1622729325798{margin-bottom: 0px !important;}.vc_custom_1679060623674{margin-top: 10px !important;margin-bottom: 0px !important;}.vc_custom_1677687229989{margin-bottom: 0px !important;}.vc_custom_1622729348294{margin-bottom: 0px !important;}.vc_custom_1679060635463{margin-top: 10px !important;margin-bottom: 0px !important;}.vc_custom_1677687626167{padding-top: 0px !important;}.vc_custom_1679060651777{margin-bottom: 30px !important;}.vc_custom_1678119279914{margin-bottom: 20px !important;}.vc_custom_1678119228591{margin-bottom: 20px !important;}
+ .wpb_animate_when_almost_visible { opacity: 1; }
+
+				:root{
+	--wd-top-bar-h: .00001px;
+	--wd-top-bar-sm-h: .00001px;
+	--wd-top-bar-sticky-h: .00001px;
+	--wd-top-bar-brd-w: .00001px;
+
+	--wd-header-general-h: 90px;
+	--wd-header-general-sm-h: 60px;
+	--wd-header-general-sticky-h: 60px;
+	--wd-header-general-brd-w: .00001px;
+
+	--wd-header-bottom-h: .00001px;
+	--wd-header-bottom-sm-h: .00001px;
+	--wd-header-bottom-sticky-h: .00001px;
+	--wd-header-bottom-brd-w: .00001px;
+
+	--wd-header-clone-h: .00001px;
+
+	--wd-header-brd-w: calc(var(--wd-top-bar-brd-w) + var(--wd-header-general-brd-w) + var(--wd-header-bottom-brd-w));
+	--wd-header-h: calc(var(--wd-top-bar-h) + var(--wd-header-general-h) + var(--wd-header-bottom-h) + var(--wd-header-brd-w));
+	--wd-header-sticky-h: calc(var(--wd-top-bar-sticky-h) + var(--wd-header-general-sticky-h) + var(--wd-header-bottom-sticky-h) + var(--wd-header-clone-h) + var(--wd-header-brd-w));
+	--wd-header-sm-h: calc(var(--wd-top-bar-sm-h) + var(--wd-header-general-sm-h) + var(--wd-header-bottom-sm-h) + var(--wd-header-brd-w));
+}
+
+.whb-sticked .whb-general-header .wd-dropdown:not(.sub-sub-menu) {
+	margin-top: 9px;
+}
+
+.whb-sticked .whb-general-header .wd-dropdown:not(.sub-sub-menu):after {
+	height: 20px;
+}
+
+:root:has(.whb-top-bar.whb-border-boxed) {
+	--wd-top-bar-brd-w: .00001px;
+}
+
+@media (max-width: 1024px) {
+:root:has(.whb-top-bar.whb-hidden-mobile) {
+	--wd-top-bar-brd-w: .00001px;
+}
+}
+
+
+:root:has(.whb-header-bottom.whb-border-boxed) {
+	--wd-header-bottom-brd-w: .00001px;
+}
+
+@media (max-width: 1024px) {
+:root:has(.whb-header-bottom.whb-hidden-mobile) {
+	--wd-header-bottom-brd-w: .00001px;
+}
+}
+
+
+		.whb-top-bar-inner { border-color: rgba(255, 255, 255, 0.25);border-bottom-width: 1px;border-bottom-style: solid; }
+.whb-87322ze45yotodtae1vs.info-box-wrapper div.wd-info-box {
+	--ib-icon-sp: 10px;
+}
+.whb-general-header {
+		background-color: rgba(255, 255, 255, 1);
+border-bottom-width: 0px;border-bottom-style: solid;
+}
+
+.whb-header-bottom {
+	border-color: rgba(230, 230, 230, 1);border-bottom-width: 1px;border-bottom-style: solid;
+}
+			
+
+				:root {
+	--wd-text-font: "Nunito", Arial, Helvetica, sans-serif;
+	--wd-text-font-weight: 600;
+	--wd-text-color: #767676;
+	--wd-text-font-size: 16px;
+	--wd-title-font: "Nunito", Arial, Helvetica, sans-serif;
+	--wd-title-font-weight: 800;
+	--wd-title-color: #2f1c64;
+	--wd-entities-title-font: "Nunito", Arial, Helvetica, sans-serif;
+	--wd-entities-title-font-weight: 800;
+	--wd-entities-title-color: #333333;
+	--wd-entities-title-color-hover: rgb(51 51 51 / 65%);
+	--wd-alternative-font: "Lato", Arial, Helvetica, sans-serif;
+	--wd-widget-title-font: "Nunito", Arial, Helvetica, sans-serif;
+	--wd-widget-title-font-weight: 800;
+	--wd-widget-title-transform: uppercase;
+	--wd-widget-title-color: #333;
+	--wd-widget-title-font-size: 16px;
+	--wd-header-el-font: "Nunito", Arial, Helvetica, sans-serif;
+	--wd-header-el-font-weight: 600;
+	--wd-header-el-transform: capitalize;
+	--wd-header-el-font-size: 15px;
+	--wd-brd-radius: 10px;
+	--wd-otl-style: dotted;
+	--wd-otl-width: 2px;
+	--wd-primary-color: #eb7a61;
+	--wd-alternative-color: #fbbc34;
+	--btn-default-bgcolor: #f7f7f7;
+	--btn-default-bgcolor-hover: #efefef;
+	--btn-accented-bgcolor: #eb7a61;
+	--btn-accented-bgcolor-hover: #d66f58;
+	--btn-transform: capitalize;
+	--wd-form-brd-width: 2px;
+	--notices-success-bg: #459647;
+	--notices-success-color: #fff;
+	--notices-warning-bg: #E0B252;
+	--notices-warning-color: #fff;
+	--wd-link-color: #333333;
+	--wd-link-color-hover: #242424;
+}
+.wd-age-verify-wrap {
+	--wd-popup-width: 500px;
+}
+.wd-popup.wd-promo-popup {
+	background-image: url(https://woodmart.xtemos.com/wp-content/uploads/2023/03/w-delivery-popup.jpg);
+	background-size: cover;
+	background-position: center bottom;
+}
+.wd-promo-popup-wrap {
+	--wd-popup-width: 800px;
+	--wd-popup-padding: 15px;
+}
+:is(.woodmart-woocommerce-layered-nav, .wd-product-category-filter) .wd-scroll-content {
+	max-height: 235px;
+}
+.wd-page-title .wd-page-title-bg img {
+	object-fit: cover;
+	object-position: center center;
+}
+.wd-footer {
+	background-color: #ffffff;
+	background-image: none;
+}
+html .wd-nav-mobile > li > a {
+	text-transform: capitalize;
+}
+.woodmart-archive-shop:not(.single-product) :is(.wd-page-content, .whb-header) {
+	background-color: #ffffff;
+	background-image: none;
+}
+body, [class*=color-scheme-light], [class*=color-scheme-dark], .wd-search-form[class*="wd-header-search-form"] form.searchform, .wd-el-search .searchform {
+	--wd-form-placeholder-color: #777777;
+	--wd-form-bg: #ffffff;
+}
+.mfp-wrap.wd-popup-quick-view-wrap {
+	--wd-popup-width: 920px;
+}
+.wd-builder-off .wd-fbt.wd-design-side {
+	--wd-form-width: 335px;
+}
+:root{
+--wd-container-w: 1222px;
+--wd-form-brd-radius: 5px;
+--btn-default-color: #333;
+--btn-default-color-hover: #333;
+--btn-accented-color: #fff;
+--btn-accented-color-hover: #fff;
+--btn-default-brd-radius: 35px;
+--btn-default-box-shadow: none;
+--btn-default-box-shadow-hover: none;
+--btn-accented-brd-radius: 5px;
+--btn-accented-box-shadow: none;
+--btn-accented-box-shadow-hover: none;
+}
+
+@media (min-width: 1222px) {
+[data-vc-full-width]:not([data-vc-stretch-content]),
+:is(.vc_section, .vc_row).wd-section-stretch {
+padding-left: calc((100vw - 1222px - var(--wd-sticky-nav-w) - var(--wd-scroll-w)) / 2);
+padding-right: calc((100vw - 1222px - var(--wd-sticky-nav-w) - var(--wd-scroll-w)) / 2);
+}
+}
+
+
+.wd-page-title {
+background-color: #0a0a0a;
+}
+
+/* Hide widgets in fullscreen navigation */
+
+.wd-fs-widget-area {
+	display: none;
+}
+
+/* Custom product label (Remove after demo refactor) */
+
+.label-term-custom-label {
+display: none !important;
+}
+
+/* Hide quick shop 2 select dropdown on hovers */
+
+.product-grid-item .wd-quick-shop-2 .variations td.value:not(.with-swatches),
+.product-grid-item[data-id="831"] .wd-quick-shop-2 {
+	display: none;
+}
+
+/* Need to hide categories widget on shop page widgetarea */
+
+.widget_product_categories {
+	display: none;
+}
+
+/* PORTFOLIO hide digitals */
+
+[data-filter=".proj-cat-digitals"] {
+	display: none;
+}
+
+/* PORTFOLIO related project height fix */
+
+.portfolio-template-default .wd-carousel-container.wd-portfolio-element figure img {
+	height: 293px;
+	object-fit: cover;
+}
+
+/* Aside shop menu */
+
+.wd-design-aside.wd-dropdown .wd-aside-banner-col {
+    border-start-end-radius: var(--wd-brd-radius);
+    border-end-end-radius: var(--wd-brd-radius);
+}
+
+/**** Rewrite primary color in header menu "Header link" ****/
+
+.whb-color-light .wd-nav-header > li.color-primary {
+    --nav-color: rgba(var(--wd-navigation-color), 1);
+		--nav-color-hover: rgba(var(--wd-navigation-color), 1);
+}
+
+/* Disable demo Font Awesome icon (Mr. Mackay) */
+
+.whb-top-bar.whb-color-dark .menu-item-2191 a img {
+	filter: brightness(0);
+}
+
+/**** Breadcrumbs remove "Shop" ****/
+
+.woocommerce-breadcrumb > a:first-child:not(.wd-last-link) + .wd-delimiter,
+.woocommerce-breadcrumb > a:first-child:not(.wd-last-link) + .wd-delimiter + a {
+	display: none;
+}
+
+/**** Footer color scheme light ****/
+
+.footer-container.color-scheme-light .wd-list li img,
+.footer-container.color-scheme-light .wd-bc65b95a img {
+  filter: brightness(0) invert(1);
+}
+
+/**** Dropdown color-scheme light ****/
+
+.wd-dropdown-menu.wd-design-aside.color-scheme-light .wd-aside-banner-col { 
+	background-color: rgba(0,0,0,.4) !important;
+}.wd-prefooter .vc_custom_1677765542071{
+	border-radius: 200px !important;
+}			
+
+				@font-face{font-family:'Lato';font-style:normal;font-weight:400;font-display:swap;src:url(/wp-content/uploads/woodmart/google-fonts/fonts/lato-ab8d749e.woff2) format('woff2');unicode-range:U+0100-02BA,U+02BD-02C5,U+02C7-02CC,U+02CE-02D7,U+02DD-02FF,U+0304,U+0308,U+0329,U+1D00-1DBF,U+1E00-1E9F,U+1EF2-1EFF,U+2020,U+20A0-20AB,U+20AD-20C0,U+2113,U+2C60-2C7F,U+A720-A7FF;}@font-face{font-family:'Lato';font-style:normal;font-weight:400;font-display:swap;src:url(/wp-content/uploads/woodmart/google-fonts/fonts/lato-702e3b8c.woff2) format('woff2');unicode-range:U+0000-00FF,U+0131,U+0152-0153,U+02BB-02BC,U+02C6,U+02DA,U+02DC,U+0304,U+0308,U+0329,U+2000-206F,U+20AC,U+2122,U+2191,U+2193,U+2212,U+2215,U+FEFF,U+FFFD;}@font-face{font-family:'Lato';font-style:normal;font-weight:700;font-display:swap;src:url(/wp-content/uploads/woodmart/google-fonts/fonts/lato-91ee0a23.woff2) format('woff2');unicode-range:U+0100-02BA,U+02BD-02C5,U+02C7-02CC,U+02CE-02D7,U+02DD-02FF,U+0304,U+0308,U+0329,U+1D00-1DBF,U+1E00-1E9F,U+1EF2-1EFF,U+2020,U+20A0-20AB,U+20AD-20C0,U+2113,U+2C60-2C7F,U+A720-A7FF;}@font-face{font-family:'Lato';font-style:normal;font-weight:700;font-display:swap;src:url(/wp-content/uploads/woodmart/google-fonts/fonts/lato-b0cd9a1e.woff2) format('woff2');unicode-range:U+0000-00FF,U+0131,U+0152-0153,U+02BB-02BC,U+02C6,U+02DA,U+02DC,U+0304,U+0308,U+0329,U+2000-206F,U+20AC,U+2122,U+2191,U+2193,U+2212,U+2215,U+FEFF,U+FFFD;}@font-face{font-family:'Poppins';font-style:normal;font-weight:500;font-display:swap;src:url(/wp-content/uploads/woodmart/google-fonts/fonts/poppins-42acf878.woff2) format('woff2');unicode-range:U+0900-097F,U+1CD0-1CF9,U+200C-200D,U+20A8,U+20B9,U+20F0,U+25CC,U+A830-A839,U+A8E0-A8FF,U+11B00-11B09;}@font-face{font-family:'Poppins';font-style:normal;font-weight:500;font-display:swap;src:url(/wp-content/uploads/woodmart/google-fonts/fonts/poppins-86b12e74.woff2) format('woff2');unicode-range:U+0100-02BA,U+02BD-02C5,U+02C7-02CC,U+02CE-02D7,U+02DD-02FF,U+0304,U+0308,U+0329,U+1D00-1DBF,U+1E00-1E9F,U+1EF2-1EFF,U+2020,U+20A0-20AB,U+20AD-20C0,U+2113,U+2C60-2C7F,U+A720-A7FF;}@font-face{font-family:'Poppins';font-style:normal;font-weight:500;font-display:swap;src:url(/wp-content/uploads/woodmart/google-fonts/fonts/poppins-57e843b6.woff2) format('woff2');unicode-range:U+0000-00FF,U+0131,U+0152-0153,U+02BB-02BC,U+02C6,U+02DA,U+02DC,U+0304,U+0308,U+0329,U+2000-206F,U+20AC,U+2122,U+2191,U+2193,U+2212,U+2215,U+FEFF,U+FFFD;}@font-face{font-family:'Poppins';font-style:normal;font-weight:600;font-display:swap;src:url(/wp-content/uploads/woodmart/google-fonts/fonts/poppins-ad3722d3.woff2) format('woff2');unicode-range:U+0900-097F,U+1CD0-1CF9,U+200C-200D,U+20A8,U+20B9,U+20F0,U+25CC,U+A830-A839,U+A8E0-A8FF,U+11B00-11B09;}@font-face{font-family:'Poppins';font-style:normal;font-weight:600;font-display:swap;src:url(/wp-content/uploads/woodmart/google-fonts/fonts/poppins-b1eb82d1.woff2) format('woff2');unicode-range:U+0100-02BA,U+02BD-02C5,U+02C7-02CC,U+02CE-02D7,U+02DD-02FF,U+0304,U+0308,U+0329,U+1D00-1DBF,U+1E00-1E9F,U+1EF2-1EFF,U+2020,U+20A0-20AB,U+20AD-20C0,U+2113,U+2C60-2C7F,U+A720-A7FF;}@font-face{font-family:'Poppins';font-style:normal;font-weight:600;font-display:swap;src:url(/wp-content/uploads/woodmart/google-fonts/fonts/poppins-93818c37.woff2) format('woff2');unicode-range:U+0000-00FF,U+0131,U+0152-0153,U+02BB-02BC,U+02C6,U+02DA,U+02DC,U+0304,U+0308,U+0329,U+2000-206F,U+20AC,U+2122,U+2191,U+2193,U+2212,U+2215,U+FEFF,U+FFFD;}			
+
+				.wd.wd .wd-b749f5ff{--wd-align: var(--wd-center);margin-bottom: 30px;}			
+.vc_custom_1677765542071{margin-right: 9% !important;margin-bottom: -130px !important;margin-left: 9% !important;background-color: #739853 !important;border-radius: 35px !important;}.vc_custom_1716541803003{margin-bottom: -40px !important;padding-top: 205px !important;padding-bottom: 20px !important;background-color: #101010 !important;}.vc_custom_1677764846824{padding-top: 0px !important;}.vc_custom_1679061495761{padding-top: 30px !important;padding-bottom: 20px !important;}.vc_custom_1678195039491{margin-top: -40px !important;margin-bottom: 0px !important;}.vc_custom_1679061471781{margin-bottom: 10px !important;}.vc_custom_1739880682662{margin-bottom: 20px !important;}.vc_custom_1677765362803{margin-bottom: 20px !important;padding-top: 0px !important;}.vc_custom_1679061574168{margin-bottom: 20px !important;padding-top: 0px !important;}.vc_custom_1622731625167{margin-top: 20px !important;padding-top: 0px !important;}.vc_custom_1677765351178{margin-bottom: 0px !important;}.vc_custom_1678195667310{margin-bottom: 20px !important;}.vc_custom_1677762837887{margin-bottom: 0px !important;}.wd-rs-6400aba12ca0b{z-index: 10}.wd-rs-641471f219648 > .vc_column-inner > .wpb_wrapper{align-items: center;}.wd-rs-67b478e811a9f{--wd-max-width: 420px;}.wd-rs-6414723e017c7 > .vc_column-inner > .wpb_wrapper{justify-content: flex-end}.wd-rs-643964d89763f .wd-nav > .menu-item > a{font-size: 15px;text-transform: capitalize;}@media (max-width: 767px) { .wd-rs-6400aae8923b4 > .vc_column-inner > .wpb_wrapper{justify-content: center}.wd-rs-6414723e017c7 > .vc_column-inner > .wpb_wrapper{justify-content: center} }#wd-641471d18267c .woodmart-title-container{line-height:68px;font-size:58px;}#wd-641471b9acd22.wd-text-block{line-height:28px;font-size:18px;}@media (max-width: 1199px) {html .wd-rs-6400aba12ca0b{margin-right:0px !important;margin-left:0px !important;}html .wd-rs-66505966ec78e{padding-top:170px !important;}html .wd-rs-641471f219648 > .vc_column-inner{padding-bottom:20px !important;}html .wd-rs-6407395864f52{margin-top:-30px !important;margin-left:10px !important;}#wd-641471d18267c .woodmart-title-container{line-height:46px;font-size:36px;}html .wd-rs-641471d18267c{margin-bottom:20px !important;}#wd-641471b9acd22.wd-text-block{line-height:26px;font-size:16px;}}@media (max-width: 767px) {html .wd-rs-641471f219648 > .vc_column-inner{padding-top:20px !important;padding-right:30px !important;padding-bottom:30px !important;padding-left:30px !important;}html .wd-rs-6407395864f52{margin-top:-30px !important;margin-left:0px !important;}html .wd-rs-6414723e017c7 > .vc_column-inner{margin-bottom:10px !important;}}
+.vc_custom_1522144037503{padding: 15px !important;}.vc_custom_1550592116443{margin-bottom: 5px !important;}.vc_custom_1550592119005{margin-bottom: 30px !important;}.vc_custom_1739883730538{margin-bottom: 20px !important;}.vc_custom_1550592124952{margin-bottom: 0px !important;}.wd-rs-67b484c8945d5{--wd-max-width: 420px;}#wd-5c6c28722ee60 .woodmart-text-block{line-height:24px;font-size:14px;color:#9a9a9a;}#wd-5c6c28750babf .woodmart-title-container{line-height:40px;font-size:30px;}@media (max-width: 1199px) {#wd-5c6c28722ee60 .woodmart-text-block{line-height:22px;font-size:12px;}#wd-5c6c28750babf .woodmart-title-container{line-height:36px;font-size:26px;}}@media (max-width: 767px) {#wd-5c6c28722ee60 .woodmart-text-block{line-height:22px;font-size:12px;}#wd-5c6c28750babf .woodmart-title-container{line-height:30px;font-size:20px;}}
+.vc_custom_1510050196408{margin-top: -5px !important;margin-right: -20px !important;margin-left: -20px !important;}.vc_custom_1503328526381{margin-right: -15px !important;margin-bottom: 15px !important;margin-left: -15px !important;border-bottom-width: 1px !important;padding-right: 20px !important;padding-bottom: 15px !important;padding-left: 20px !important;border-bottom-color: rgba(129,129,129,0.2) !important;border-bottom-style: solid !important;}.vc_custom_1503328531932{margin-right: -15px !important;margin-bottom: 15px !important;margin-left: -15px !important;border-bottom-width: 1px !important;padding-right: 20px !important;padding-bottom: 15px !important;padding-left: 20px !important;border-bottom-color: rgba(129,129,129,0.2) !important;border-bottom-style: solid !important;}</style></head><body class=woodmart-light><main id="main-content" class="wd-content-layout content-layout-wrapper container" role="main">
+				
+
+<div class="wd-content-area site-content">
+									<article id="post-38164" class="entry-content post-38164 page type-page status-publish hentry">
+					<div class="wpb-content-wrapper"><section class="vc_section vc_custom_1678193598886 vc_section-has-fill wd-rs-640733b03d9f7 wd-section-stretch"><div class="vc_row wpb_row vc_row-fluid vc_custom_1677689799674 vc_row-has-fill vc_row-o-content-middle vc_row-flex wd-bg-right-bottom mobile-bg-img-hidden tablet-bg-img-hidden wd-rs-63ff83c10adcb wd-section-stretch"><div class="wpb_column vc_column_container vc_col-sm-6 vc_col-lg-7 wd-rs-67d44986db5e1"><div class="vc_column-inner vc_custom_1741965707836"><div class="wpb_wrapper">			<link rel="stylesheet" id="wd-section-title-css" href="https://woodmart.xtemos.com/wp-content/themes/woodmart/css/parts/el-section-title.css?ver=8.5.0" type="text/css" media="all" /> 						<link rel="stylesheet" id="wd-mod-highlighted-text-css" href="https://woodmart.xtemos.com/wp-content/themes/woodmart/css/parts/mod-highlighted-text.css?ver=8.5.0" type="text/css" media="all" /> 			
+		<div id="wd-63ff81c7d8a5a" class="title-wrapper wd-wpb wd-set-mb reset-last-child  wd-rs-63ff81c7d8a5a wd-title-color-default wd-title-style-default text-left  wd-width-custom wd-underline-colored">
+			
+			<div class="liner-continer">
+				<h4 class="woodmart-title-container title  wd-font-weight- wd-fontsize-xl" >Take your online order within minutes</h4>
+							</div>
+			
+			
+			
+		</div>
+		
+					<link rel="stylesheet" id="wd-text-block-css" href="https://woodmart.xtemos.com/wp-content/themes/woodmart/css/parts/el-text-block.css?ver=8.5.0" type="text/css" media="all" /> 					<div id="wd-641467ae38084" class="wd-text-block wd-wpb reset-last-child wd-rs-641467ae38084 text-left wd-width-custom wd-fontsize-m vc_custom_1679058866770">
+			<p>From local fare to restaurant favorites, our wide selection of food will definitely satisfy all your cravings.</p>
+		</div>
+		<div class="vc_row wpb_row vc_inner vc_row-fluid vc_custom_1741965660698 vc_row-has-fill wd-rs-67d44957ca2cf">			<link rel="stylesheet" id="wd-wpcf7-css" href="https://woodmart.xtemos.com/wp-content/themes/woodmart/css/parts/int-wpcf7.css?ver=8.5.0" type="text/css" media="all" /> 			<div class="wpb_column vc_column_container vc_col-sm-12"><div class="vc_column-inner vc_custom_1622724188749"><div class="wpb_wrapper">					<div class="wd-cf7 wd-wpb wd-rs-67d4495e5998e vc_custom_1741965666477">
+				
+<div class="wpcf7 no-js" id="wpcf7-f38200-p38164-o1" lang="en-US" dir="ltr" data-wpcf7-id="38200">
+<div class="screen-reader-response"><p role="status" aria-live="polite" aria-atomic="true"></p> <ul></ul></div>
+<form action="/demo-food-delivery/demo/food-delivery/#wpcf7-f38200-p38164-o1" method="post" class="wpcf7-form init" aria-label="Contact form" novalidate="novalidate" data-status="init">
+<fieldset class="hidden-fields-container"><input type="hidden" name="_wpcf7" value="38200" /><input type="hidden" name="_wpcf7_version" value="6.1.5" /><input type="hidden" name="_wpcf7_locale" value="en_US" /><input type="hidden" name="_wpcf7_unit_tag" value="wpcf7-f38200-p38164-o1" /><input type="hidden" name="_wpcf7_container_post" value="38164" /><input type="hidden" name="_wpcf7_posted_data_hash" value="" />
+</fieldset>
+<div class="wd-grid-f-stretch">
+	<div class="wd-col">
+		<p><span class="wpcf7-form-control-wrap" data-name="Your"><input size="40" maxlength="400" class="wpcf7-form-control wpcf7-text wpcf7-validates-as-required" aria-required="true" aria-invalid="false" placeholder="Your order" value="" type="text" name="Your" /></span>
+		</p>
+	</div>
+	<div class="wd-col">
+		<p><span class="wpcf7-form-control-wrap" data-name="Your"><input size="40" maxlength="400" class="wpcf7-form-control wpcf7-text wpcf7-validates-as-required" aria-required="true" aria-invalid="false" placeholder="Your address" value="" type="text" name="Your" /></span>
+		</p>
+	</div>
+	<div class="wd-col-auto">
+		<p><input class="wpcf7-form-control wpcf7-submit has-spinner btn" type="submit" value="Make order" />
+		</p>
+	</div>
+</div><div class="wpcf7-response-output" aria-hidden="true"></div>
+</form>
+</div>
+			</div>
+				</div></div></div></div></div></div></div><div class="wpb_column vc_column_container vc_col-sm-6 vc_col-lg-5 wd-rs-67d4497dc0d2c"><div class="vc_column-inner vc_custom_1741965700901"><div class="wpb_wrapper">		<div id="wd-640733c0862e4" class="wd-image wd-wpb wd-rs-640733c0862e4 text-left vc_custom_1678193612970">
+			
+			<img fetchpriority="high" decoding="async" width="1864" height="1760" src="/templates/food-delivery/assets/w-delivery-girl-1.png" class="attachment-full size-full" alt="" srcset="/templates/food-delivery/assets/w-delivery-girl-1.png 1864w, /templates/food-delivery/assets/w-delivery-girl-1-318x300.png 318w, /templates/food-delivery/assets/w-delivery-girl-1-847x800.png 847w, /templates/food-delivery/assets/w-delivery-girl-1-150x142.png 150w, /templates/food-delivery/assets/w-delivery-girl-1-768x725.png 768w, /templates/food-delivery/assets/w-delivery-girl-1-290x274.png 290w, /templates/food-delivery/assets/w-delivery-girl-1-1536x1450.png 1536w, /templates/food-delivery/assets/w-delivery-girl-1-100x94.png 100w, /templates/food-delivery/assets/w-delivery-girl-1-860x812.png 860w, /templates/food-delivery/assets/w-delivery-girl-1-430x406.png 430w, /templates/food-delivery/assets/w-delivery-girl-1-700x661.png 700w, /templates/food-delivery/assets/w-delivery-girl-1-130x123.png 130w" sizes="(max-width: 1864px) 100vw, 1864px" />
+					</div>
+		</div></div></div></div></section><div class="vc_row wpb_row vc_row-fluid vc_custom_1678118160693 wd-row-gradient-enable wd-rs-64060d0bd7fc9 wd-section-stretch"><div class="woodmart-row-gradient wd-fill" style="background-image:linear-gradient(to bottom, rgba(250, 239, 237, 0) 0%, rgb(250, 239, 237) 100%);"></div><div class="wpb_column vc_column_container vc_col-sm-12 wd-rs-63ff77f46f05b"><div class="vc_column-inner vc_custom_1677686779582"><div class="wpb_wrapper">
+		<div id="wd-64146e53ac90c" class="title-wrapper wd-wpb wd-set-mb reset-last-child  wd-rs-64146e53ac90c wd-title-color-default wd-title-style-default text-center vc_custom_1679060571477 wd-width-enabled wd-underline-colored" style="--wd-max-width: 40%;">
+			
+			<div class="liner-continer">
+				<h4 class="woodmart-title-container title  wd-font-weight- wd-fontsize-xxxl" >How we work?</h4>
+							</div>
+			
+							<div class="title-after_title reset-last-child  wd-fontsize-s">We try to make our service fast and convenient for you!</div>
+			
+			
+		</div>
+		
+					<link rel="stylesheet" id="wd-swiper-css" href="https://woodmart.xtemos.com/wp-content/themes/woodmart/css/parts/lib-swiper.css?ver=8.5.0" type="text/css" media="all" /> 						<div id="carousel-515" class="wd-carousel-container info-box-carousel-wrapper wd-wpb   wd-rs-6a3e9d2e621ff ">
+				<div class="wd-carousel-inner">
+					<div class="wd-carousel wd-grid info-box-carousel" data-scroll_per_page="yes" style="--wd-col-lg:3;--wd-col-md:3;--wd-col-sm:1;--wd-gap-lg:30px;--wd-gap-sm:10px;">
+						<div class="wd-carousel-wrap">
+										<div class="info-box-wrapper wd-carousel-item">
+								<div id="wd-64072ba368972" class=" wd-rs-64072ba368972 wd-info-box wd-wpb text-center box-icon-align-top box-style- color-scheme- wd-bg-none vc_custom_1678191625391">
+											<div class="box-icon-wrapper  box-with-icon box-icon-simple">
+							<div class="info-box-icon">
+								<div class="info-svg-wrapper" style="width: 50px;height: 50px;"><img decoding="async"  src="/templates/food-delivery/assets/w-delivery-order.svg" title="w-delivery-order" loading="lazy" width="50" height="50"></div>							</div>
+						</div>
+										<div class="info-box-content">
+						<h4 class="info-box-title title box-title-style-default wd-fontsize-xl">Order</h4>						<div class="info-box-inner reset-last-child"><p>Our manager will contact you to discuss all the details of your order.</p>
+</div>
+
+											</div>
+
+					
+									</div>
+			</div>
+					<div class="info-box-wrapper wd-carousel-item">
+								<div id="wd-64072c0b7606e" class=" wd-rs-64072c0b7606e wd-info-box wd-wpb text-center box-icon-align-top box-style- color-scheme- wd-bg-none vc_custom_1678191632113">
+											<div class="box-icon-wrapper  box-with-icon box-icon-simple">
+							<div class="info-box-icon">
+								<div class="info-svg-wrapper" style="width: 50px;height: 50px;"><img decoding="async"  src="/templates/food-delivery/assets/w-delivery-delivery-man-2.svg" title="w-delivery-delivery-man" loading="lazy" width="50" height="50"></div>							</div>
+						</div>
+										<div class="info-box-content">
+						<h4 class="info-box-title title box-title-style-default wd-fontsize-xl">Delivery</h4>						<div class="info-box-inner reset-last-child"><p>Delivery of your order by our service, at any time convenient for you.</p>
+</div>
+
+											</div>
+
+					
+									</div>
+			</div>
+					<div class="info-box-wrapper wd-carousel-item">
+								<div id="wd-64072c11d1674" class=" wd-rs-64072c11d1674 wd-info-box wd-wpb text-center box-icon-align-top box-style- color-scheme- wd-bg-none vc_custom_1678191638149">
+											<div class="box-icon-wrapper  box-with-icon box-icon-simple">
+							<div class="info-box-icon">
+								<div class="info-svg-wrapper" style="width: 50px;height: 50px;"><img decoding="async"  src="/templates/food-delivery/assets/w-delivery-done.svg" title="w-delivery-done" loading="lazy" width="50" height="50"></div>							</div>
+						</div>
+										<div class="info-box-content">
+						<h4 class="info-box-title title box-title-style-default wd-fontsize-xl">Done!</h4>						<div class="info-box-inner reset-last-child"><p>Your order is in your hands! Enjoy the food you ordered.</p>
+</div>
+
+											</div>
+
+					
+									</div>
+			</div>
+								</div>
+					</div>
+
+														<link rel="stylesheet" id="wd-swiper-arrows-critical-css" href="https://woodmart.xtemos.com/wp-content/themes/woodmart/css/parts/lib-swiper-arrows-critical.css?ver=8.5.0" type="text/css" media="all" /> 					<div class="wd-nav-arrows wd-pos-sep wd-hover-1 wd-icon-1">
+			<div class="wd-btn-arrow wd-prev wd-disabled">
+				<div class="wd-arrow-inner"></div>
+			</div>
+			<div class="wd-btn-arrow wd-next">
+				<div class="wd-arrow-inner"></div>
+			</div>
+		</div>
+											</div>
+
+											</div>
+		</div></div></div></div><section class="vc_section vc_custom_1677766766428 vc_section-has-fill wd-rs-6400b064138f8 wd-section-stretch"><div class="vc_row wpb_row vc_row-fluid vc_custom_1678195386316 wd-rs-64073aaa569b0"><div class="wpb_column vc_column_container vc_col-sm-12"><div class="vc_column-inner vc_custom_1622725262705"><div class="wpb_wrapper">
+		<div id="wd-64073aa24f882" class="title-wrapper wd-wpb wd-set-mb reset-last-child  wd-rs-64073aa24f882 wd-title-color-default wd-title-style-default text-center vc_custom_1678195368173 wd-width-enabled wd-underline-colored" style="--wd-max-width: 50%;">
+			
+			<div class="liner-continer">
+				<h4 class="woodmart-title-container title  wd-font-weight- wd-fontsize-xxxl" >We will take into account your preferences</h4>
+							</div>
+			
+			
+			
+		</div>
+		
+		</div></div></div></div><div class="vc_row wpb_row vc_row-fluid vc_custom_1679062606645 vc_column-gap-20 wd-rs-6414764a1d779"><div class="wpb_column vc_column_container vc_col-sm-6 vc_col-has-fill wd-rs-64072c5365410"><div class="vc_column-inner vc_custom_1678191707810"><div class="wpb_wrapper">
+		<div id="wd-64146e5f3f5cc" class="title-wrapper wd-wpb wd-set-mb reset-last-child  wd-rs-64146e5f3f5cc wd-title-color-default wd-title-style-default text-center  wd-width-enabled wd-underline-colored" style="--wd-max-width: 60%;">
+			
+			<div class="liner-continer">
+				<h4 class="woodmart-title-container title  wd-font-weight- wd-fontsize-xl" >Fast-food Menu</h4>
+							</div>
+			
+							<div class="title-after_title reset-last-child  wd-fontsize-s">In this menu you find a favorite nuggets and burgers!</div>
+			
+			
+		</div>
+		
+				<div id="wd-640733d285a12" class="wd-image wd-wpb wd-rs-640733d285a12 text-center vc_custom_1678193632496">
+			
+			<img decoding="async" width="944" height="124" src="/templates/food-delivery/assets/w-delivery-food-icons-1.png" class="attachment-full size-full" alt="" srcset="/templates/food-delivery/assets/w-delivery-food-icons-1.png 944w, /templates/food-delivery/assets/w-delivery-food-icons-1-400x53.png 400w, /templates/food-delivery/assets/w-delivery-food-icons-1-150x20.png 150w, /templates/food-delivery/assets/w-delivery-food-icons-1-768x101.png 768w, /templates/food-delivery/assets/w-delivery-food-icons-1-290x38.png 290w, /templates/food-delivery/assets/w-delivery-food-icons-1-100x13.png 100w, /templates/food-delivery/assets/w-delivery-food-icons-1-860x113.png 860w, /templates/food-delivery/assets/w-delivery-food-icons-1-430x56.png 430w, /templates/food-delivery/assets/w-delivery-food-icons-1-700x92.png 700w, /templates/food-delivery/assets/w-delivery-food-icons-1-130x17.png 130w" sizes="(max-width: 944px) 100vw, 944px" />
+					</div>
+		</div></div></div><div class="wpb_column vc_column_container vc_col-sm-6 vc_col-has-fill wd-rs-64072c5d91241"><div class="vc_column-inner vc_custom_1678191713682"><div class="wpb_wrapper">
+		<div id="wd-64146e672ef70" class="title-wrapper wd-wpb wd-set-mb reset-last-child  wd-rs-64146e672ef70 wd-title-color-default wd-title-style-default text-center  wd-width-enabled wd-underline-colored" style="--wd-max-width: 60%;">
+			
+			<div class="liner-continer">
+				<h4 class="woodmart-title-container title  wd-font-weight- wd-fontsize-xl" >Vegan Menu</h4>
+							</div>
+			
+							<div class="title-after_title reset-last-child  wd-fontsize-s">In this menu you find a favorite noodles and carrots!</div>
+			
+			
+		</div>
+		
+				<div id="wd-640733e21f46f" class="wd-image wd-wpb wd-rs-640733e21f46f text-center vc_custom_1678193644032">
+			
+			<img decoding="async" width="944" height="124" src="/templates/food-delivery/assets/w-delivery-vegan-icons-1.png" class="attachment-full size-full" alt="" srcset="/templates/food-delivery/assets/w-delivery-vegan-icons-1.png 944w, /templates/food-delivery/assets/w-delivery-vegan-icons-1-400x53.png 400w, /templates/food-delivery/assets/w-delivery-vegan-icons-1-150x20.png 150w, /templates/food-delivery/assets/w-delivery-vegan-icons-1-768x101.png 768w, /templates/food-delivery/assets/w-delivery-vegan-icons-1-290x38.png 290w, /templates/food-delivery/assets/w-delivery-vegan-icons-1-100x13.png 100w, /templates/food-delivery/assets/w-delivery-vegan-icons-1-860x113.png 860w, /templates/food-delivery/assets/w-delivery-vegan-icons-1-430x56.png 430w, /templates/food-delivery/assets/w-delivery-vegan-icons-1-700x92.png 700w, /templates/food-delivery/assets/w-delivery-vegan-icons-1-130x17.png 130w" sizes="(max-width: 944px) 100vw, 944px" />
+					</div>
+		</div></div></div></div><div class="vc_row wpb_row vc_row-fluid vc_row-o-content-middle vc_row-flex wd-rs-63ff7bb4998cd"><div class="wpb_column vc_column_container vc_col-sm-12 text-center"><div class="vc_column-inner vc_custom_1622727085967"><div class="wpb_wrapper">		<div id="wd-63ff7d01af30d" class="wd-text-block wd-wpb reset-last-child inline-element wd-rs-63ff7d01af30d text-center wd-fontsize-m font-primary vc_custom_1677688068739">
+			<p>We are working 24/7, you can call us at any time (406) 555-0120</p>
+		</div>
+		<div id="wd-64072fce93e13" class=" wd-rs-64072fce93e13  wd-button-wrapper text-center inline-element"><a  class="btn btn-color-primary btn-style-default btn-shape-semi-round btn-size-default">Make order</a></div></div></div></div></div></section><section class="vc_section vc_custom_1679328575180 vc_section-has-fill wd-bg-center-center mobile-bg-img-hidden wd-rs-6418853944f21 wd-section-stretch"><div class="vc_row wpb_row vc_row-fluid vc_custom_1677766805631 vc_row-o-content-middle vc_row-flex wd-rs-6400b09079633"><div class="wpb_column vc_column_container vc_col-sm-6 vc_col-lg-4 wd-rs-64072cd1706e2"><div class="vc_column-inner vc_custom_1678191832240"><div class="wpb_wrapper">		<div id="wd-6407355c6af5d" class="wd-image wd-wpb wd-rs-6407355c6af5d text-left vc_custom_1678194019009">
+			
+			<img loading="lazy" decoding="async" width="760" height="960" src="/templates/food-delivery/assets/w-delivery-img-1-1.jpg" class="attachment-full size-full" alt="" srcset="/templates/food-delivery/assets/w-delivery-img-1-1.jpg 760w, /templates/food-delivery/assets/w-delivery-img-1-1-238x300.jpg 238w, /templates/food-delivery/assets/w-delivery-img-1-1-633x800.jpg 633w, /templates/food-delivery/assets/w-delivery-img-1-1-119x150.jpg 119w, /templates/food-delivery/assets/w-delivery-img-1-1-261x330.jpg 261w, /templates/food-delivery/assets/w-delivery-img-1-1-79x100.jpg 79w, /templates/food-delivery/assets/w-delivery-img-1-1-430x543.jpg 430w, /templates/food-delivery/assets/w-delivery-img-1-1-700x884.jpg 700w, /templates/food-delivery/assets/w-delivery-img-1-1-130x164.jpg 130w" sizes="auto, (max-width: 760px) 100vw, 760px" />
+					</div>
+		</div></div></div><div class="wpb_column vc_column_container vc_col-sm-6 vc_col-lg-8 wd-rs-640735f5c962b"><div class="vc_column-inner vc_custom_1678194172755"><div class="wpb_wrapper">
+		<div id="wd-64146e79b4689" class="title-wrapper wd-wpb wd-set-mb reset-last-child  wd-rs-64146e79b4689 wd-title-color-default wd-title-style-default text-left vc_custom_1679060604190 wd-width-custom wd-underline-colored">
+			
+			<div class="liner-continer">
+				<h4 class="woodmart-title-container title  wd-font-weight- wd-fontsize-xxxl" >Oh, new order!</h4>
+							</div>
+			
+							<div class="title-after_title reset-last-child  wd-fontsize-s">We will bring your order or let the restaurant know you're coming! Simple as that!</div>
+			
+			
+		</div>
+		
+		</div></div></div></div><div class="vc_row wpb_row vc_row-fluid vc_row-o-content-middle vc_row-flex row-reverse-mobile wd-rs-6400b0b368208"><div class="wpb_column vc_column_container vc_col-sm-6 vc_col-lg-8 wd-rs-640735fe927d9"><div class="vc_column-inner vc_custom_1678194191036"><div class="wpb_wrapper">
+		<div id="wd-6407364edb6a8" class="title-wrapper wd-wpb wd-set-mb reset-last-child  wd-rs-6407364edb6a8 wd-title-color-default wd-title-style-default text-right  wd-width-custom wd-underline-colored">
+			
+			<div class="liner-continer">
+				<h4 class="woodmart-title-container title  wd-font-weight- wd-fontsize-xxxl" >WOW!<br />
+It's really fast</h4>
+							</div>
+			
+							<div class="title-after_title reset-last-child  wd-fontsize-s">This is the fastest delivery in my city efficiently and quickly</div>
+			
+			
+		</div>
+		
+		<div id="wd-64073ef16089d" class=" wd-rs-64073ef16089d  wd-button-wrapper text-right"><a  class="btn btn-color-primary btn-style-default btn-shape-semi-round btn-size-default">View more</a></div></div></div></div><div class="wpb_column vc_column_container vc_col-sm-6 vc_col-lg-4 wd-rs-64072d1181659"><div class="vc_column-inner vc_custom_1678191893050"><div class="wpb_wrapper">		<div id="wd-640735669b4d7" class="wd-image wd-wpb wd-rs-640735669b4d7 text-left vc_custom_1678194028558">
+			
+			<img loading="lazy" decoding="async" width="760" height="960" src="/templates/food-delivery/assets/w-delivery-img-2-1.jpg" class="attachment-full size-full" alt="" srcset="/templates/food-delivery/assets/w-delivery-img-2-1.jpg 760w, /templates/food-delivery/assets/w-delivery-img-2-1-238x300.jpg 238w, /templates/food-delivery/assets/w-delivery-img-2-1-633x800.jpg 633w, /templates/food-delivery/assets/w-delivery-img-2-1-119x150.jpg 119w, /templates/food-delivery/assets/w-delivery-img-2-1-261x330.jpg 261w, /templates/food-delivery/assets/w-delivery-img-2-1-79x100.jpg 79w, /templates/food-delivery/assets/w-delivery-img-2-1-430x543.jpg 430w, /templates/food-delivery/assets/w-delivery-img-2-1-700x884.jpg 700w, /templates/food-delivery/assets/w-delivery-img-2-1-130x164.jpg 130w" sizes="auto, (max-width: 760px) 100vw, 760px" />
+					</div>
+		</div></div></div></div></section><div class="vc_row wpb_row vc_row-fluid vc_custom_1679328592597 vc_row-has-fill wd-rs-6418854a0f2db wd-section-stretch"><div class="wpb_column vc_column_container vc_col-sm-4 wd-enabled-flex text-center wd-rs-6400b0d650c2c"><div class="vc_column-inner vc_custom_1677766878534"><div class="wpb_wrapper">		<div id="wd-63ff7986efa70" class="wd-image wd-wpb wd-rs-63ff7986efa70 text-center vc_custom_1677687179363 inline-element">
+			
+			<img decoding="async"  src="/templates/food-delivery/assets/w-delivery-happy.svg" title="w-delivery-happy" loading="lazy" width="64" height="64">
+					</div>
+					<link rel="stylesheet" id="wd-counter-css" href="https://woodmart.xtemos.com/wp-content/themes/woodmart/css/parts/el-counter.css?ver=8.5.0" type="text/css" media="all" /> 						<div class="woodmart-counter wd-wpb  wd-rs-60b8e22002287 inline-element counter-extra-large text-center color-scheme-light vc_custom_1622729254477" id="wd-60b8e22002287">
+				<div class="counter-value wd-font-weight-600" data-state="new" data-final="1000">
+					0				</div>
+											</div>
+
+				<div id="wd-64146e7f84d63" class="wd-text-block wd-wpb reset-last-child wd-rs-64146e7f84d63 text-center color-scheme-light color-title wd-fontsize-custom font-primary vc_custom_1679060615215">
+			<p>Satisfied customers</p>
+		</div>
+		</div></div></div><div class="wpb_column vc_column_container vc_col-sm-4 wd-enabled-flex text-center wd-rs-6400b0e003f93"><div class="vc_column-inner vc_custom_1677766885990"><div class="wpb_wrapper">		<div id="wd-63ff798e58164" class="wd-image wd-wpb wd-rs-63ff798e58164 text-center vc_custom_1677687205052 inline-element">
+			
+			<img decoding="async"  src="/templates/food-delivery/assets/w-delivery-delivery-man-white.svg" title="w-delivery-delivery-man-white" loading="lazy" width="64" height="64">
+					</div>
+					<div class="woodmart-counter wd-wpb  wd-rs-60b8e26979d6d inline-element counter-extra-large text-center color-scheme-light vc_custom_1622729325798" id="wd-60b8e26979d6d">
+				<div class="counter-value wd-font-weight-600" data-state="new" data-final="800">
+					0				</div>
+											</div>
+
+				<div id="wd-64146e88f3c28" class="wd-text-block wd-wpb reset-last-child wd-rs-64146e88f3c28 text-center color-scheme-light color-title wd-fontsize-custom font-primary vc_custom_1679060623674">
+			<p>Deliveries per day</p>
+		</div>
+		</div></div></div><div class="wpb_column vc_column_container vc_col-sm-4 wd-enabled-flex text-center wd-rs-63ff79f79e6d1"><div class="vc_column-inner vc_custom_1677687292825"><div class="wpb_wrapper">		<div id="wd-63ff79b57a084" class="wd-image wd-wpb wd-rs-63ff79b57a084 text-center vc_custom_1677687229989 inline-element">
+			
+			<img decoding="async"  src="/templates/food-delivery/assets/w-delivery-way.svg" title="w-delivery-way" loading="lazy" width="64" height="64">
+					</div>
+					<div class="woodmart-counter wd-wpb  wd-rs-60b8e27fc5350 inline-element counter-extra-large text-center color-scheme-light vc_custom_1622729348294" id="wd-60b8e27fc5350">
+				<div class="counter-value wd-font-weight-600" data-state="new" data-final="10">
+					0				</div>
+											</div>
+
+				<div id="wd-64146e917ad08" class="wd-text-block wd-wpb reset-last-child wd-rs-64146e917ad08 text-center color-scheme-light color-title wd-fontsize-custom font-primary vc_custom_1679060635463">
+			<p>Minute delivery</p>
+		</div>
+		</div></div></div></div><div class="vc_row wpb_row vc_row-fluid vc_custom_1679328601245 vc_row-has-fill wd-rs-641885535b9d3 wd-section-stretch"><div class="wpb_column vc_column_container vc_col-sm-12 wd-enabled-flex text-center wd-rs-63ff7b40deda6"><div class="vc_column-inner vc_custom_1677687626167"><div class="wpb_wrapper">
+		<div id="wd-64146ea0efffa" class="title-wrapper wd-wpb wd-set-mb reset-last-child  wd-rs-64146ea0efffa wd-title-color-default wd-title-style-default text-center vc_custom_1679060651777 wd-width-enabled wd-underline-colored" style="--wd-max-width: 60%;">
+			
+			<div class="liner-continer">
+				<h4 class="woodmart-title-container title  wd-font-weight- wd-fontsize-xxxl" >Quick commerce, the next generation of delivery</h4>
+							</div>
+			
+							<div class="title-after_title reset-last-child  wd-fontsize-s">Download the app and get a 10% discount on your first order.</div>
+			
+			
+		</div>
+		
+				<div id="wd-6406116b22eaf" class="wd-image wd-wpb wd-rs-6406116b22eaf text-center vc_custom_1678119279914 inline-element">
+			
+			<img decoding="async"  src="/templates/food-delivery/assets/download-google-store-2.svg" title="download-google-store-2" loading="lazy" width="160" height="49">
+					</div>
+				<div id="wd-640611358925f" class="wd-image wd-wpb wd-rs-640611358925f text-center vc_custom_1678119228591 inline-element">
+			
+			<img decoding="async"  src="/templates/food-delivery/assets/download-apple-store.svg" title="download-apple-store" loading="lazy" width="146" height="40">
+					</div>
+		</div></div></div></div>
+</div>
+					
+									</article>
+
+				
+		
+</div>
+
+
+
+			</main></body></html>
