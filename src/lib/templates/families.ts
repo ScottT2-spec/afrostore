@@ -1607,7 +1607,7 @@ export const TEMPLATE_FAMILIES: FamilyDef[] = [
       colors: { primary: "#2D5016", secondary: "#1B3A0A", accent: "#D4A853", background: "#FDFCF8", text: "#1C1917", headerBg: "#FFFFFF", footerBg: "#1B3A0A", footerText: "#E7E5E4" },
       fonts: { heading: "Cormorant Garamond", body: "Nunito" },
       sections: [
-        landingScenicHero,
+        block("scenic-hero", "hero", { badge: "Scenic Experiences", heading: "Discover breathtaking experiences", subheading: "Stunning imagery, smooth scrolling, and immersive galleries for travel and lifestyle brands.", buttonText: "Explore Now", buttonHref: "#features", secondaryButtonText: "View Gallery", secondaryButtonHref: "#gallery", bgStyle: "accent" }),
         block("scenic-features", "features", { title: "Why Choose Us", subtitle: "Unforgettable experiences crafted with attention to every detail.", items: [
           { icon: "star", title: "Curated Experiences", description: "Hand-picked destinations and activities for every traveler." },
           { icon: "shield", title: "Trusted & Safe", description: "Licensed guides, insured trips, and 24/7 support." },
@@ -1652,7 +1652,7 @@ export const TEMPLATE_FAMILIES: FamilyDef[] = [
       colors: { primary: "#4F46E5", secondary: "#1E1B4B", accent: "#06B6D4", background: "#FFFFFF", text: "#0F172A", headerBg: "#FFFFFF", footerBg: "#0F172A", footerText: "#CBD5E1" },
       fonts: { heading: "Inter", body: "Inter" },
       sections: [
-        landingAgencyHero,
+        block("agency-hero", "hero", { badge: "Agency Growth", heading: "We build brands that convert", subheading: "High-impact landing for agencies, design studios, and marketing firms.", buttonText: "Our Services", buttonHref: "#services", secondaryButtonText: "See Results", secondaryButtonHref: "#case-studies", bgStyle: "dark" }),
         block("agency-brands", "brands", { title: "Trusted By", items: [] }),
         block("agency-services", "features", { title: "Our Services", subtitle: "Full-stack digital solutions that drive measurable growth.", items: [
           { icon: "target", title: "Digital Marketing", description: "SEO, PPC, social media, and content strategies that convert." },
@@ -1753,7 +1753,7 @@ export const TEMPLATE_FAMILIES: FamilyDef[] = [
       colors: { primary: "#1D4ED8", secondary: "#1E3A5F", accent: "#F59E0B", background: "#FFFFFF", text: "#111827", headerBg: "#FFFFFF", footerBg: "#1E3A5F", footerText: "#E2E8F0" },
       fonts: { heading: "Nunito", body: "Inter" },
       sections: [
-        landingEducationHero,
+        block("education-hero", "hero", { badge: "Education Pro", heading: "Start learning from leading experts today", subheading: "Structured landing for courses, training programs, and educational institutions.", buttonText: "Browse Courses", buttonHref: "#courses", secondaryButtonText: "Learn More", secondaryButtonHref: "#about", bgStyle: "accent" }),
         block("education-stats", "stats", { title: "Platform at a Glance", items: [
           { value: "5,000+", label: "Online Courses" },
           { value: "200+", label: "Expert Instructors" },
