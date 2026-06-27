@@ -28,6 +28,52 @@ const STATIC_SITE_MAP: Record<string, string> = {
   "landing-travel": "landing-travel",
 };
 
+// Templates with raw HTML previews extracted from reference sites (preview.html in /templates/<slug>/)
+const RAW_PREVIEW_SLUGS = new Set([
+  "jewellery-elegance",
+  "vegetables-market", "grocery-market",
+  "makeup-beauty", "perfume-store", "cosmetics-boutique",
+  "pottery-artisan", "handmade-crafts", "handmade-bags",
+  "tshirts-prints", "fashion-colored", "fashion-classic",
+  "pills-health",
+  "tech-accessories", "tools-hardware", "electronics-hub", "hardware-pro",
+  "kids-fashion", "toy-world",
+  "home-decor", "retail-general",
+  "wine-cellar", "drinks-store",
+  "sweets-bakery",
+  "food-delivery", "event-agency",
+]);
+
+// Map template slugs to the folder name where preview.html lives
+const RAW_PREVIEW_FOLDER: Record<string, string> = {
+  "jewellery-elegance": "jewellery",
+  "vegetables-market": "vegetables",
+  "grocery-market": "grocery",
+  "makeup-beauty": "makeup",
+  "perfume-store": "perfumes",
+  "cosmetics-boutique": "cosmetics",
+  "pottery-artisan": "pottery",
+  "handmade-crafts": "handmade",
+  "handmade-bags": "handmade-bags",
+  "tshirts-prints": "tshirts",
+  "fashion-colored": "fashion-colored",
+  "fashion-classic": "fashion",
+  "pills-health": "pills",
+  "tech-accessories": "electronics-acc",
+  "tools-hardware": "tools",
+  "electronics-hub": "electronics",
+  "hardware-pro": "hardware",
+  "kids-fashion": "kids",
+  "toy-world": "toys",
+  "home-decor": "decor",
+  "retail-general": "retail",
+  "wine-cellar": "wine",
+  "drinks-store": "drinks",
+  "sweets-bakery": "sweets-bakery",
+  "food-delivery": "food-delivery",
+  "event-agency": "event-agency",
+};
+
 interface Props {
   template: TemplateDefinition;
   previewMode?: boolean;
@@ -36,6 +82,8 @@ interface Props {
 export default function TemplatePreview({ template, previewMode = false }: Props) {
   const sections = template.themeConfig.sections.map((section) => section.type.replace(/_/g, " "));
   const staticSite = STATIC_SITE_MAP[template.slug];
+  const rawPreviewFolder = RAW_PREVIEW_FOLDER[template.slug];
+  const hasRawPreview = RAW_PREVIEW_SLUGS.has(template.slug);
 
   return (
     <div className="min-h-screen bg-surface-50">
@@ -48,6 +96,13 @@ export default function TemplatePreview({ template, previewMode = false }: Props
             {staticSite ? (
               <iframe
                 src={`/templates/sites/${staticSite}/index.html`}
+                className="w-full border-0"
+                style={{ height: "80vh", minHeight: "600px" }}
+                title={`${template.name} Preview`}
+              />
+            ) : hasRawPreview && rawPreviewFolder ? (
+              <iframe
+                src={`/templates/${rawPreviewFolder}/preview.html`}
                 className="w-full border-0"
                 style={{ height: "80vh", minHeight: "600px" }}
                 title={`${template.name} Preview`}
