@@ -256,8 +256,8 @@ export default function StorePage() {
   const categoryNames = ["All", ...categories.filter((c) => c._count.products > 0).map((c) => c.name)];
 
   // ─── Page helpers ─────────────────────────────────────────
-  // Find the HOME page (AI-generated) with its blocks
-  const homePage = data.pages.find((p) => p.type === "HOME");
+  // Find the primary page — HOME or LANDING (whichever has content)
+  const homePage = data.pages.find((p) => p.type === "HOME") || data.pages.find((p) => p.type === "LANDING");
   const homeBlocks: BuilderBlock[] = homePage ? parsePageContent(homePage.content).blocks : [];
   const hasHomeContent = homeBlocks.length > 0;
   const homeHasProductGrid = homeBlocks.some((b) => b.type === "productGrid");
