@@ -421,32 +421,20 @@ function getSectionsForPage(pageTitle: string, allSections: BuilderBlock[]): Bui
 export function generatePages(input: BusinessAnalysisInput, template: TemplateDefinition): GeneratedTemplatePage[] {
   const businessName = input.businessName || input.business_name || "Your Business";
   const industry = canonicalIndustry(input, template);
-  const pageNames = TEMPLATE_FAMILY_PAGE_SETS[industry] || TEMPLATE_FAMILY_PAGE_SETS["commerce-pro"];
   const homeSections = generateHomepageSections(input, template, industry);
 
-  const templateSections = structuredClone(template.themeConfig.sections);
+  // Only create the Home page with the template's sections.
+  // The template defines the ENTIRE layout — no extra default pages.
+  const isLanding = input.siteType === "LANDING_PAGE" || template.category?.toLowerCase().includes("landing");
 
-  return pageNames.map((title, position) => {
-    const pageSlug = title === "Home" ? "home" : slugify(title);
-
-    let content: BuilderBlock[];
-    if (title === "Home") {
-      content = homeSections;
-    } else {
-      // Pull matching sections from the template for this page
-      const pageSections = getSectionsForPage(title, templateSections);
-      content = pageSections.length > 0 ? pageSections : [];
-    }
-
-    return {
-      title,
-      slug: pageSlug,
-      type: title === "Home" ? "HOME" : title === "Contact" ? "CONTACT" : title === "About" ? "ABOUT" : title === "Services" ? "SERVICES" : title === "Team" ? "TEAM" : "CUSTOM",
-      content,
-      metaTitle: `${title} | ${businessName}`,
-      metaDescription: position === 0 ? normalize(input.description) || `${businessName} ${industry} website.` : `${title} page for ${businessName}.`,
-    };
-  });
+  return [{
+    title: "Home",
+    slug: "home",
+    type: isLanding ? "LANDING" : "HOME",
+    content: homeSections,
+    metaTitle: `${businessName}`,
+    metaDescription: normalize(input.description) || `${businessName} — ${industry.replace(/-/g, " ")}.`,
+  }];
 }
 
 

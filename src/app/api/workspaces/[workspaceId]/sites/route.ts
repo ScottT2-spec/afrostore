@@ -198,81 +198,8 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ wor
   }
 }
 
-function getDefaultPages(siteType: string, siteName: string) {
-  const common = [
-    {
-      title: "Home",
-      slug: "home",
-      type: "HOME" as const,
-      content: {
-        blocks: [
-          {
-            id: "hero-1",
-            type: "hero",
-            props: {
-              title: `Welcome to ${siteName}`,
-              subtitle: siteType === "ECOMMERCE"
-                ? "Discover amazing products at great prices"
-                : siteType === "WEBSITE"
-                ? "We help businesses grow and succeed"
-                : "Take your business to the next level",
-              ctaText: siteType === "ECOMMERCE" ? "Shop Now" : "Get Started",
-              ctaLink: siteType === "ECOMMERCE" ? "/shop" : "#contact",
-            },
-          },
-        ],
-      },
-    },
-  ];
-
-  if (siteType === "ECOMMERCE") {
-    return [
-      ...common,
-      { title: "About Us", slug: "about", type: "ABOUT" as const, content: { blocks: [] } },
-      { title: "Contact", slug: "contact", type: "CONTACT" as const, content: { blocks: [] } },
-      { title: "FAQ", slug: "faq", type: "FAQ" as const, content: { blocks: [] } },
-      { title: "Privacy Policy", slug: "privacy-policy", type: "POLICY" as const, content: { blocks: [] } },
-      { title: "Return Policy", slug: "return-policy", type: "POLICY" as const, content: { blocks: [] } },
-    ];
-  }
-
-  if (siteType === "WEBSITE") {
-    return [
-      ...common,
-      { title: "About Us", slug: "about", type: "ABOUT" as const, content: { blocks: [] } },
-      { title: "Services", slug: "services", type: "SERVICES" as const, content: { blocks: [] } },
-      { title: "Team", slug: "team", type: "TEAM" as const, content: { blocks: [] } },
-      { title: "Contact", slug: "contact", type: "CONTACT" as const, content: { blocks: [] } },
-      { title: "FAQ", slug: "faq", type: "FAQ" as const, content: { blocks: [] } },
-    ];
-  }
-
-  // LANDING_PAGE
-  return [
-    {
-      title: "Landing Page",
-      slug: "landing",
-      type: "LANDING" as const,
-      content: {
-        blocks: [
-          {
-            id: "hero-1",
-            type: "hero",
-            props: {
-              title: siteName,
-              subtitle: "Convert visitors into customers",
-              ctaText: "Get Started",
-              ctaLink: "#form",
-            },
-          },
-          {
-            id: "form-1",
-            type: "lead-form",
-            props: { title: "Get in Touch", fields: ["name", "email", "phone"] },
-          },
-        ],
-      },
-    },
-    { title: "Thank You", slug: "thank-you", type: "THANK_YOU" as const, content: { blocks: [] } },
-  ];
+function getDefaultPages(_siteType: string, _siteName: string) {
+  // No default pages — templates provide all pages.
+  // Blank stores get an empty site that the owner populates.
+  return [] as { title: string; slug: string; type: "HOME" | "LANDING" | "ABOUT" | "CONTACT" | "FAQ" | "POLICY" | "SERVICES" | "TEAM" | "THANK_YOU" | "CUSTOM"; content: { blocks: unknown[] } }[];
 }
