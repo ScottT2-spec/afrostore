@@ -20,7 +20,7 @@ export async function GET(req: NextRequest, { params }: { params: Promise<{ site
   if (!user) return domainError("Unauthorized", 401);
   const { siteId } = await params;
 
-  const site = await prisma.site.findFirst({ where: { id: siteId, userId: user.id } });
+  const site = await prisma.site.findFirst({ where: { id: siteId, workspace: { members: { some: { userId: user.id } } } } });
   if (!site) return domainError("Site not found", 404);
 
   const domains = await prisma.domain.findMany({ where: { siteId }, orderBy: { createdAt: "desc" } });
@@ -45,7 +45,7 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ sit
   if (!user) return domainError("Unauthorized", 401);
   const { siteId } = await params;
 
-  const site = await prisma.site.findFirst({ where: { id: siteId, userId: user.id } });
+  const site = await prisma.site.findFirst({ where: { id: siteId, workspace: { members: { some: { userId: user.id } } } } });
   if (!site) return domainError("Site not found", 404);
 
   const body = await req.json();
@@ -104,7 +104,7 @@ export async function DELETE(req: NextRequest, { params }: { params: Promise<{ s
   if (!user) return domainError("Unauthorized", 401);
   const { siteId } = await params;
 
-  const site = await prisma.site.findFirst({ where: { id: siteId, userId: user.id } });
+  const site = await prisma.site.findFirst({ where: { id: siteId, workspace: { members: { some: { userId: user.id } } } } });
   if (!site) return domainError("Site not found", 404);
 
   const { searchParams } = new URL(req.url);

@@ -59,6 +59,7 @@ export interface BusinessAnalysisInput {
   services?: string[] | string;
   targetAudience?: string;
   target_audience?: string;
+  siteType?: string;
 }
 
 export interface TemplateRecommendation {

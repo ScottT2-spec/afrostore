@@ -57,8 +57,8 @@ export async function GET(req: NextRequest, { params }: Params) {
 
     // 4. Fetch store data for substitution
     const [settings, socialLinks, products, categories] = await Promise.all([
-      prisma.storeSettings.findUnique({ where: { siteId: site.id } }),
-      prisma.socialLinks.findUnique({ where: { siteId: site.id } }),
+      prisma.siteSettings.findUnique({ where: { siteId: site.id } }),
+      prisma.siteSocialLinks.findUnique({ where: { siteId: site.id } }),
       prisma.product.findMany({
         where: { siteId: site.id, status: "ACTIVE" },
         include: {

@@ -2,7 +2,7 @@
 import { ArrowRight, ChevronRight, Loader2, Plus, X } from "lucide-react";
 import { CheckCircle2, CreditCard, Heart, ImageIcon, Mail, MapPin, Menu, MessageCircle, Minus, Phone, Search, Shield, ShoppingBag, ShoppingCart, Star, Truck, Zap } from "@/components/icons/FilledIcons";
 
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useRef } from "react";
 import { useParams } from "next/navigation";
 import Link from "next/link";
 import { RenderBlocks, type BuilderBlock } from "@/components/storefront/BlockRenderer";
@@ -167,6 +167,8 @@ export default function StorePage() {
   const [searchQuery, setSearchQuery] = useState("");
   const [showSearch, setShowSearch] = useState(false);
   const [addedToCart, setAddedToCart] = useState<string | null>(null);
+  const [hasRawHtml, setHasRawHtml] = useState<boolean | null>(null); // null = checking, true/false = result
+  const rawHtmlIframeRef = useRef<HTMLIFrameElement>(null);
   const { isWishlisted, toggleWishlist, wishlistCount } = useWishlist(data?.store?.id || "");
 
   const fetchStore = useCallback(async () => {
@@ -186,6 +188,21 @@ export default function StorePage() {
   }, [slug]);
 
   useEffect(() => { fetchStore(); }, [fetchStore]);
+
+  // Check if this store has a raw HTML template available
+  useEffect(() => {
+    if (!data?.templateSlug) { setHasRawHtml(false); return; }
+    let cancelled = false;
+    (async () => {
+      try {
+        const res = await fetch(`/api/storefront/${slug}/template-html`, { method: "HEAD" });
+        if (!cancelled) setHasRawHtml(res.ok);
+      } catch {
+        if (!cancelled) setHasRawHtml(false);
+      }
+    })();
+    return () => { cancelled = true; };
+  }, [data?.templateSlug, slug]);
 
   // Persist cart to localStorage for checkout
   useEffect(() => {
@@ -363,8 +380,28 @@ export default function StorePage() {
       )}
 
       {/* ─── HOME PAGE CONTENT ─────────────────────────────────── */}
-      {hasHomeContent ? (
-        /* Template / AI-generated Home page — render ONLY the template blocks, nothing else */
+      {hasRawHtml ? (
+        /* Raw HTML template — render the EXACT template layout via iframe */
+        <iframe
+          ref={rawHtmlIframeRef}
+          src={`/api/storefront/${slug}/template-html`}
+          className="w-full border-0"
+          style={{ minHeight: "100vh" }}
+          title={`${store.name} Store`}
+          onLoad={() => {
+            // Auto-resize iframe to content height
+            const iframe = rawHtmlIframeRef.current;
+            if (iframe?.contentDocument?.body) {
+              const resizeObserver = new ResizeObserver(() => {
+                const h = iframe.contentDocument?.body?.scrollHeight;
+                if (h) iframe.style.height = `${h}px`;
+              });
+              resizeObserver.observe(iframe.contentDocument.body);
+            }
+          }}
+        />
+      ) : hasHomeContent ? (
+        /* Builder blocks Home page — render template blocks */
         <div>
           <RenderBlocks blocks={homeBlocks} storeSlug={slug} products={products} currency={currency} addToCart={(p) => addToCart(p as unknown as Product)} isWishlisted={isWishlisted} toggleWishlist={toggleWishlist} addedToCart={addedToCart} />
           {products.length > 0 && !homeHasProductGrid && (

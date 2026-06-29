@@ -98,6 +98,7 @@ export function getDnsInstructions(domain: string): DnsInstructions {
 
 /**
  * Connect a custom domain to a site.
+ * Creates a Domain record and updates Site.customDomain.
  */
 export async function connectDomain(siteId: string, domain: string): Promise<DomainConnectionResult> {
   const normalized = domain.trim().toLowerCase();
@@ -109,22 +110,47 @@ export async function connectDomain(siteId: string, domain: string): Promise<Dom
   }
 
   // Check if domain is already taken by another site
-  const existing = await prisma.site.findFirst({
-    where: { customDomain: normalized, NOT: { id: siteId } },
+  const existing = await prisma.domain.findUnique({
+    where: { domain: normalized },
   });
 
-  if (existing) {
+  if (existing && existing.siteId !== siteId) {
     return { success: false, error: "This domain is already connected to another site" };
   }
 
-  // Save to DB
-  await prisma.site.update({
-    where: { id: siteId },
+  // If domain record already exists for this site, return it
+  if (existing && existing.siteId === siteId) {
+    return {
+      success: true,
+      domain: normalized,
+      status: existing.status,
+      dnsInstructions: getDnsInstructions(normalized),
+    };
+  }
+
+  // Create Domain record
+  const verificationToken = `afrostore-verify-${siteId.slice(0, 8)}-${Date.now().toString(36)}`;
+  const domainCount = await prisma.domain.count({ where: { siteId } });
+
+  await prisma.domain.create({
     data: {
-      customDomain: normalized,
-      domainStatus: "PENDING",
+      siteId,
+      domain: normalized,
+      type: "CUSTOM",
+      status: "PENDING",
+      sslStatus: "PENDING",
+      verificationToken,
+      isPrimary: domainCount === 0,
     },
   });
+
+  // Update Site.customDomain if it's the first domain
+  if (domainCount === 0) {
+    await prisma.site.update({
+      where: { id: siteId },
+      data: { customDomain: normalized },
+    });
+  }
 
   const dnsInstructions = getDnsInstructions(normalized);
 
@@ -206,29 +232,39 @@ export async function checkDnsResolution(domain: string): Promise<DnsVerificatio
 
 /**
  * Verify DNS configuration and update domain status in DB.
+ * Works with the Domain model (not Site fields).
  */
 export async function verifyDomain(siteId: string): Promise<DnsVerificationResult & { domainStatus: string }> {
-  const site = await prisma.site.findUnique({
-    where: { id: siteId },
-    select: { customDomain: true, domainStatus: true },
+  // Find the primary domain for this site
+  const domainRecord = await prisma.domain.findFirst({
+    where: { siteId, isPrimary: true },
   });
 
-  if (!site?.customDomain) {
-    return {
-      verified: false,
-      message: "No custom domain connected",
-      domainStatus: "NONE",
-    };
+  if (!domainRecord) {
+    // Fall back to any domain
+    const anyDomain = await prisma.domain.findFirst({ where: { siteId } });
+    if (!anyDomain) {
+      return {
+        verified: false,
+        message: "No custom domain connected",
+        domainStatus: "NONE",
+      };
+    }
+    return verifyDomainRecord(anyDomain.id, anyDomain.domain);
   }
 
-  const result = await checkDnsResolution(site.customDomain);
+  return verifyDomainRecord(domainRecord.id, domainRecord.domain);
+}
 
-  const newStatus = result.verified ? "VERIFIED" : "PENDING";
-  await prisma.site.update({
-    where: { id: siteId },
+async function verifyDomainRecord(domainId: string, domain: string): Promise<DnsVerificationResult & { domainStatus: string }> {
+  const result = await checkDnsResolution(domain);
+
+  const newStatus = result.verified ? "ACTIVE" : "PENDING";
+  await prisma.domain.update({
+    where: { id: domainId },
     data: {
-      domainStatus: newStatus,
-      ...(result.verified ? { domainVerifiedAt: new Date() } : {}),
+      status: newStatus,
+      dnsVerified: result.verified,
     },
   });
 
@@ -237,16 +273,16 @@ export async function verifyDomain(siteId: string): Promise<DnsVerificationResul
 
 /**
  * Remove a custom domain from a site.
+ * Deletes Domain record and clears Site.customDomain.
  */
 export async function removeDomain(siteId: string): Promise<void> {
+  // Delete all domain records for this site
+  await prisma.domain.deleteMany({ where: { siteId } });
+
+  // Clear customDomain on Site
   await prisma.site.update({
     where: { id: siteId },
-    data: {
-      customDomain: null,
-      domainStatus: "NONE",
-      domainVerifiedAt: null,
-      sslStatus: "NONE",
-    },
+    data: { customDomain: null },
   });
 }
 
@@ -269,6 +305,7 @@ export function getDomainConfigFilename(domain: string): string {
 
 /**
  * Get domain info for a site.
+ * Reads from Domain model instead of Site fields.
  */
 export async function getDomainInfo(siteId: string) {
   const site = await prisma.site.findUnique({
@@ -276,13 +313,15 @@ export async function getDomainInfo(siteId: string) {
     select: {
       subdomain: true,
       customDomain: true,
-      domainStatus: true,
-      domainVerifiedAt: true,
-      sslStatus: true,
     },
   });
 
   if (!site) return null;
+
+  // Get the primary domain record
+  const domainRecord = await prisma.domain.findFirst({
+    where: { siteId, isPrimary: true },
+  });
 
   const dnsInstructions = site.customDomain
     ? getDnsInstructions(site.customDomain)
@@ -292,9 +331,9 @@ export async function getDomainInfo(siteId: string) {
     subdomain: site.subdomain,
     freeSubdomain: `${site.subdomain}.${APP_DOMAIN}`,
     customDomain: site.customDomain,
-    domainStatus: site.domainStatus || "NONE",
-    domainVerifiedAt: site.domainVerifiedAt,
-    sslStatus: site.sslStatus || "NONE",
+    domainStatus: domainRecord?.status || "NONE",
+    domainVerifiedAt: domainRecord?.dnsVerified ? domainRecord.updatedAt : null,
+    sslStatus: domainRecord?.sslStatus || "NONE",
     dnsInstructions: site.customDomain ? dnsInstructions : null,
   };
 }

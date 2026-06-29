@@ -156,7 +156,7 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ wor
             title: p.title,
             slug: p.slug,
             type: p.type,
-            content: p.content,
+            content: p.content as unknown as Record<string, string>,
             isPublished: true,
             position: i,
           })),
@@ -201,5 +201,5 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ wor
 function getDefaultPages(_siteType: string, _siteName: string) {
   // No default pages — templates provide all pages.
   // Blank stores get an empty site that the owner populates.
-  return [] as { title: string; slug: string; type: "HOME" | "LANDING" | "ABOUT" | "CONTACT" | "FAQ" | "POLICY" | "SERVICES" | "TEAM" | "THANK_YOU" | "CUSTOM"; content: { blocks: unknown[] } }[];
+  return [] as { title: string; slug: string; type: "HOME" | "LANDING" | "ABOUT" | "CONTACT" | "FAQ" | "POLICY" | "SERVICES" | "TEAM" | "THANK_YOU" | "CUSTOM"; content: Record<string, unknown> }[];
 }
