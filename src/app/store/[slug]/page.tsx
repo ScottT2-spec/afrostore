@@ -285,6 +285,35 @@ export default function StorePage() {
     .filter((p) => p.type !== "HOME")
     .sort((a, b) => (navPageOrder[a.type] ?? 99) - (navPageOrder[b.type] ?? 99));
 
+  // ─── RAW HTML TEMPLATE MODE ──────────────────────────────
+  // When a raw HTML template exists, render ONLY the iframe — no store shell at all.
+  // The raw HTML template has its own header, footer, nav, everything.
+  if (hasRawHtml) {
+    return (
+      <div className="min-h-screen">
+        <iframe
+          ref={rawHtmlIframeRef}
+          src={`/api/storefront/${slug}/template-html`}
+          className="w-full border-0"
+          style={{ minHeight: "100vh", display: "block" }}
+          title={`${store.name}`}
+          onLoad={() => {
+            const iframe = rawHtmlIframeRef.current;
+            if (iframe?.contentDocument?.body) {
+              const h = iframe.contentDocument.body.scrollHeight;
+              if (h) iframe.style.height = `${h}px`;
+              const resizeObserver = new ResizeObserver(() => {
+                const height = iframe.contentDocument?.body?.scrollHeight;
+                if (height) iframe.style.height = `${height}px`;
+              });
+              resizeObserver.observe(iframe.contentDocument.body);
+            }
+          }}
+        />
+      </div>
+    );
+  }
+
   return (
     <ThemeProvider theme={data.theme}>
     <div className="min-h-screen bg-white">
@@ -380,27 +409,7 @@ export default function StorePage() {
       )}
 
       {/* ─── HOME PAGE CONTENT ─────────────────────────────────── */}
-      {hasRawHtml ? (
-        /* Raw HTML template — render the EXACT template layout via iframe */
-        <iframe
-          ref={rawHtmlIframeRef}
-          src={`/api/storefront/${slug}/template-html`}
-          className="w-full border-0"
-          style={{ minHeight: "100vh" }}
-          title={`${store.name} Store`}
-          onLoad={() => {
-            // Auto-resize iframe to content height
-            const iframe = rawHtmlIframeRef.current;
-            if (iframe?.contentDocument?.body) {
-              const resizeObserver = new ResizeObserver(() => {
-                const h = iframe.contentDocument?.body?.scrollHeight;
-                if (h) iframe.style.height = `${h}px`;
-              });
-              resizeObserver.observe(iframe.contentDocument.body);
-            }
-          }}
-        />
-      ) : hasHomeContent ? (
+      {hasHomeContent ? (
         /* Builder blocks Home page — render template blocks */
         <div>
           <RenderBlocks blocks={homeBlocks} storeSlug={slug} products={products} currency={currency} addToCart={(p) => addToCart(p as unknown as Product)} isWishlisted={isWishlisted} toggleWishlist={toggleWishlist} addedToCart={addedToCart} />

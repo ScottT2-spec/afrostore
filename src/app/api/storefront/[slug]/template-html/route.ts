@@ -81,7 +81,12 @@ export async function GET(req: NextRequest, { params }: Params) {
     const currencySymbol = currencySymbols[currency] || currency;
     const whatsappNumber = settings?.whatsappNumber || socialLinks?.whatsapp || "";
 
+    // 4b. Fix relative asset paths — make them absolute so they resolve from the API route
+    const templateDir = htmlRelPath.substring(0, htmlRelPath.lastIndexOf("/"));
+    html = fixAssetPaths(html, templateDir);
+
     // 5. Perform data substitution
+    const templateName = activeTemplate?.template?.name || "";
     html = substituteStoreData(html, {
       storeName: site.name,
       storeDescription: site.description || "",
@@ -90,6 +95,7 @@ export async function GET(req: NextRequest, { params }: Params) {
       currencySymbol,
       whatsappNumber,
       storeSlug: slug,
+      templateName,
       products: products.map((p) => ({
         name: p.name,
         price: Number(p.price),
@@ -140,18 +146,41 @@ interface SubstitutionData {
   currencySymbol: string;
   whatsappNumber: string;
   storeSlug: string;
+  templateName: string;
   products: StoreProduct[];
   categories: string[];
+}
+
+/* ─── Asset Path Fixer ─── */
+
+function fixAssetPaths(html: string, templateDir: string): string {
+  // Convert relative paths like href="assets/css/main.css" to absolute "/templates/sites/rival/assets/css/main.css"
+  // Also handles src="vendors/...", src="assets/img/..."
+  // Don't touch absolute URLs (http/https), data URIs, or anchors (#)
+  const relativePattern = /((?:href|src|srcset)\s*=\s*")((?!https?:\/\/|data:|\/\/|#|mailto:)[^"]+)(")/gi;
+  html = html.replace(relativePattern, (_match, prefix, relativePath, suffix) => {
+    // Skip if already absolute
+    if (relativePath.startsWith("/")) return `${prefix}${relativePath}${suffix}`;
+    return `${prefix}${templateDir}/${relativePath}${suffix}`;
+  });
+
+  // Also fix url() in inline styles
+  const urlPattern = /(url\(\s*['"]?)((?!https?:\/\/|data:|\/\/)[^'")]+)(['"]?\s*\))/gi;
+  html = html.replace(urlPattern, (_match, prefix, relativePath, suffix) => {
+    if (relativePath.startsWith("/")) return `${prefix}${relativePath}${suffix}`;
+    return `${prefix}${templateDir}/${relativePath}${suffix}`;
+  });
+
+  return html;
 }
 
 /* ─── Substitution Engine ─── */
 
 function substituteStoreData(html: string, data: SubstitutionData): string {
-  // Replace store/brand name in common patterns
-  // WoodMart templates often have the brand name in titles, headers, footer
-  html = replaceStoreName(html, data.storeName);
+  // Replace store/brand name
+  html = replaceStoreName(html, data.storeName, data.templateName);
 
-  // Replace currency symbols (WoodMart uses &#36; for $)
+  // Replace currency symbols
   html = replaceCurrency(html, data.currencySymbol);
 
   // Replace product data (names, prices, images)
@@ -168,29 +197,68 @@ function substituteStoreData(html: string, data: SubstitutionData): string {
   return html;
 }
 
-function replaceStoreName(html: string, storeName: string): string {
-  // Common brand name patterns in WoodMart templates
-  const brandPatterns = [
-    /WoodMart/gi,
-    /Flavor\s*Store/gi,
-    /Fashion\s*Store/gi,
-    /FLAVOR/g,
-  ];
-
-  // Replace the page <title>
+function replaceStoreName(html: string, storeName: string, templateName: string): string {
+  // 1. Replace the page <title>
   html = html.replace(/<title>[^<]*<\/title>/i, `<title>${storeName}</title>`);
 
-  // Replace common header brand text patterns
-  // Look for text inside logo/brand areas
+  // 2. Replace the template name wherever it appears as visible text
+  //    Build patterns from the template name (e.g. "Rival" -> matches "Rival")
+  //    Also handle common template brand patterns
+  const namePatterns: RegExp[] = [];
+
+  if (templateName) {
+    // Exact template name (case-insensitive, word boundary)
+    const escaped = templateName.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+    namePatterns.push(new RegExp(`\\b${escaped}\\b`, "gi"));
+  }
+
+  // Common template brand names from various template providers
+  const knownBrands = [
+    "WoodMart", "Flavor Store", "Fashion Store", "FLAVOR",
+    "Rival", "Clarity", "Arsha", "Medicare", "Travely", "Workfolio",
+    "Strada", "Bistro", "Nutrio", "BootstrapMade",
+  ];
+
+  for (const brand of knownBrands) {
+    const escaped = brand.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+    namePatterns.push(new RegExp(`\\b${escaped}\\b`, "g"));
+  }
+
+  // 3. Replace in sitename/brand/logo text elements
   html = html.replace(
-    /(<(?:span|a|div|h\d)[^>]*class="[^"]*(?:site-title|brand-name|logo-text|wd-logo-text)[^"]*"[^>]*>)([^<]+)(<\/)/gi,
+    /(<(?:span|a|div|h1|h2|h3|h4)[^>]*class="[^"]*(?:sitename|site-title|brand-name|logo-text|wd-logo-text|navbar-brand)[^"]*"[^>]*>)([^<]+)(<\/)/gi,
     `$1${storeName}$3`
   );
 
-  // Replace copyright text
+  // Also handle <h1 class="sitename">Text</h1> pattern (Bootstrap templates)
+  html = html.replace(
+    /(<h1[^>]*class="sitename"[^>]*>)([^<]+)(<\/h1>)/gi,
+    `$1${storeName}$3`
+  );
+
+  // 4. Replace template name in visible text (not in comments, scripts, or HTML attributes)
+  for (const pattern of namePatterns) {
+    // Replace in text content between tags (not inside <script>, <style>, or HTML tag attributes)
+    html = html.replace(
+      /(>)([^<]*?)(<)/g,
+      (match, open, text, close) => {
+        if (!pattern.test(text)) return match;
+        pattern.lastIndex = 0;
+        return `${open}${text.replace(pattern, storeName)}${close}`;
+      }
+    );
+  }
+
+  // 5. Replace copyright text
   html = html.replace(
     /(©\s*\d{4}\s*)([^<.]+)/gi,
     `$1${storeName}`
+  );
+
+  // 6. Replace meta description
+  html = html.replace(
+    /(<meta\s+name="description"\s+content=")[^"]*(")/i,
+    `$1${storeName}$2`
   );
 
   return html;
