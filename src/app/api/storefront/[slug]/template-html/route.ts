@@ -154,22 +154,21 @@ interface SubstitutionData {
 /* ─── Asset Path Fixer ─── */
 
 function fixAssetPaths(html: string, templateDir: string): string {
-  // Convert relative paths like href="assets/css/main.css" to absolute "/templates/sites/rival/assets/css/main.css"
-  // Also handles src="vendors/...", src="assets/img/..."
-  // Don't touch absolute URLs (http/https), data URIs, or anchors (#)
-  const relativePattern = /((?:href|src|srcset)\s*=\s*")((?!https?:\/\/|data:|\/\/|#|mailto:)[^"]+)(")/gi;
-  html = html.replace(relativePattern, (_match, prefix, relativePath, suffix) => {
-    // Skip if already absolute
-    if (relativePath.startsWith("/")) return `${prefix}${relativePath}${suffix}`;
-    return `${prefix}${templateDir}/${relativePath}${suffix}`;
-  });
+  // Inject a <base> tag so all relative paths (CSS, JS, images) resolve correctly.
+  // This is the most reliable approach — no need to regex-replace every href/src.
+  const baseHref = `${templateDir}/`;
+  const baseTag = `<base href="${baseHref}">`;
 
-  // Also fix url() in inline styles
-  const urlPattern = /(url\(\s*['"]?)((?!https?:\/\/|data:|\/\/)[^'")]+)(['"]?\s*\))/gi;
-  html = html.replace(urlPattern, (_match, prefix, relativePath, suffix) => {
-    if (relativePath.startsWith("/")) return `${prefix}${relativePath}${suffix}`;
-    return `${prefix}${templateDir}/${relativePath}${suffix}`;
-  });
+  if (html.includes("<head>")) {
+    // Insert right after <head>
+    html = html.replace(/<head>/i, `<head>\n${baseTag}`);
+  } else if (html.includes("<html")) {
+    // No <head> tag — inject after <html...>
+    html = html.replace(/(<html[^>]*>)/i, `$1\n<head>${baseTag}</head>`);
+  } else {
+    // Last resort — prepend
+    html = `${baseTag}\n${html}`;
+  }
 
   return html;
 }
