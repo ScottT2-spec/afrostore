@@ -225,6 +225,8 @@ export default function BuilderPage({ params }: { params: Promise<{ pageId: stri
   const [canvasMode, setCanvasMode] = useState<"builder" | "preview">("builder");
   const [templateSlug, setTemplateSlug] = useState<string | null>(null);
   const [storeSlug, setStoreSlug] = useState<string>("");
+  const [templateEditMode, setTemplateEditMode] = useState(false);
+  const templateIframeRef = useRef<HTMLIFrameElement>(null);
 
   const historyRef = useRef(new BuilderHistory());
 
@@ -302,6 +304,14 @@ export default function BuilderPage({ params }: { params: Promise<{ pageId: stri
     window.addEventListener("keydown", handler);
     return () => window.removeEventListener("keydown", handler);
   });
+
+  const startTemplateEdit = () => {
+    if (!storeSlug) return;
+    if (templateIframeRef.current) {
+      templateIframeRef.current.src = `/api/storefront/${storeSlug}/template-html?afro_edit=1`;
+      setTemplateEditMode(true);
+    }
+  };
 
   // DnD sensors
   const sensors = useSensors(
@@ -454,6 +464,20 @@ export default function BuilderPage({ params }: { params: Promise<{ pageId: stri
                   <Eye className="h-3.5 w-3.5 inline mr-0.5" />Preview
                 </button>
               </div>
+              {canvasMode === "preview" && !templateEditMode && (
+                <button
+                  onClick={startTemplateEdit}
+                  className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-[10px] font-semibold bg-purple-100 text-purple-700 border border-purple-200 hover:bg-purple-200 transition-colors mr-1"
+                  title="Customize the template — change text, images, colors"
+                >
+                  <Sparkles className="h-3.5 w-3.5" /> Customize Template
+                </button>
+              )}
+              {templateEditMode && (
+                <span className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-[10px] font-semibold bg-purple-600 text-white mr-1">
+                  <Sparkles className="h-3.5 w-3.5" /> Customizing...
+                </span>
+              )}
             </>
           )}
 
@@ -588,6 +612,7 @@ export default function BuilderPage({ params }: { params: Promise<{ pageId: stri
                   </span>
                 </div>
                 <iframe
+                  ref={templateIframeRef}
                   src={`/api/storefront/${storeSlug}/template-html`}
                   className="w-full border-0"
                   style={{ minHeight: "80vh", display: "block" }}
@@ -618,7 +643,7 @@ export default function BuilderPage({ params }: { params: Promise<{ pageId: stri
                       <span className="text-xs text-surface-600 truncate flex-1">
                         {(block.props.title as string) || (block.props.heading as string) || (block.props.text as string) || ""}
                       </span>
-                      <span className="text-[9px] text-surface-400">Edit →</span>
+                      <span className="text-[9px] text-surface-400">Customize →</span>
                     </button>
                   ))}
                 </div>
