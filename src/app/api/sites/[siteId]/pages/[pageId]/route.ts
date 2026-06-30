@@ -12,12 +12,16 @@ export async function GET(req: NextRequest, { params }: Params) {
   const ctx = await getStoreContext(req, siteId);
   if (ctx.error) return ctx.user ? error(ctx.error, 403) : unauthorized();
 
-  const page = await prisma.page.findFirst({
-    where: { id: pageId, siteId },
-  });
+  const [page, activeTemplate] = await Promise.all([
+    prisma.page.findFirst({ where: { id: pageId, siteId } }),
+    prisma.siteTemplate.findFirst({
+      where: { siteId, isActive: true },
+      include: { template: { select: { slug: true } } },
+    }),
+  ]);
 
   if (!page) return error("Page not found", 404);
-  return success(page);
+  return success({ ...page, templateSlug: activeTemplate?.template?.slug || null });
 }
 
 // PATCH /api/sites/:siteId/pages/:pageId

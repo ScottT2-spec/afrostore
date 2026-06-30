@@ -13,6 +13,7 @@ import BlockRenderer from "@/components/builder/BlockRenderer";
 import PropertyPanel from "@/components/builder/PropertyPanel";
 import { SingleImageUpload } from "@/components/dashboard/ImageUpload";
 import { parsePageContent, serializePageContent, type PageSettings } from "@/lib/page-content";
+import { hasTemplateHtml as checkTemplateHtml } from "@/lib/templates/template-html-map";
 import {
   DndContext,
   closestCenter,
@@ -221,7 +222,7 @@ export default function BuilderPage({ params }: { params: Promise<{ pageId: stri
   const [canUndo, setCanUndo] = useState(false);
   const [canRedo, setCanRedo] = useState(false);
   const [canvasMode, setCanvasMode] = useState<"builder" | "preview">("builder");
-  const [hasTemplateHtml, setHasTemplateHtml] = useState(false);
+  const [templateSlug, setTemplateSlug] = useState<string | null>(null);
   const [storeSlug, setStoreSlug] = useState<string>("");
   const [templateEditMode, setTemplateEditMode] = useState(false);
   const [templateSaving, setTemplateSaving] = useState(false);
@@ -269,18 +270,16 @@ export default function BuilderPage({ params }: { params: Promise<{ pageId: stri
         setBlocks(content.blocks as unknown as BuilderBlock[]);
         setPageSettings(content.settings);
         historyRef.current.push(content.blocks as unknown as BuilderBlock[]);
-      }
 
-      // Check if store has a raw HTML template for live preview
-      setStoreSlug(currentStore.slug);
-      try {
-        const htmlRes = await fetch(`/api/storefront/${currentStore.slug}/template-html`, { method: "HEAD" });
-        if (htmlRes.ok) {
-          setHasTemplateHtml(true);
+        // Synchronous template check — no async HEAD request needed
+        const slug = res.data.templateSlug || null;
+        setTemplateSlug(slug);
+        if (slug && checkTemplateHtml(slug)) {
           setCanvasMode("preview"); // default to preview if template exists
         }
-      } catch { /* no template html available */ }
+      }
 
+      setStoreSlug(currentStore.slug);
       setLoading(false);
     })();
   }, [currentStore, pageId]);
@@ -565,7 +564,7 @@ export default function BuilderPage({ params }: { params: Promise<{ pageId: stri
           <div className="h-5 w-px bg-surface-200 mx-1" />
 
           {/* Canvas mode toggle — Builder vs Live Preview */}
-          {hasTemplateHtml && (
+          {checkTemplateHtml(templateSlug) && (
             <>
               <div className="flex items-center rounded-lg border border-surface-200 p-0.5 mr-1">
                 <button onClick={() => setCanvasMode("builder")} className={`px-2 py-1 rounded-md text-[10px] font-semibold transition-colors ${canvasMode === "builder" ? "bg-brand-100 text-brand-700" : "text-surface-500"}`} title="Block Editor">
@@ -703,7 +702,7 @@ export default function BuilderPage({ params }: { params: Promise<{ pageId: stri
 
         {/* Canvas */}
         <div className="flex-1 overflow-y-auto p-6" onClick={() => setSelectedBlockId(null)}>
-          {canvasMode === "preview" && hasTemplateHtml ? (
+          {canvasMode === "preview" && checkTemplateHtml(templateSlug) ? (
             /* ─── LIVE TEMPLATE PREVIEW ──────────────────────────── */
             <div className={`mx-auto transition-all ${previewMode === "mobile" ? "max-w-[375px]" : "max-w-5xl"}`}>
               <div className="rounded-2xl border border-surface-200 shadow-sm overflow-hidden bg-white">
