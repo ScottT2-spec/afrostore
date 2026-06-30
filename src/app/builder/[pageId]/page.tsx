@@ -261,6 +261,8 @@ export default function BuilderPage({ params }: { params: Promise<{ pageId: stri
   // Load page + check for template HTML
   useEffect(() => {
     if (!currentStore) return;
+    // Set store slug immediately — needed for iframe src before async completes
+    setStoreSlug(currentStore.slug);
     (async () => {
       const res = await api.get<any>(`/api/sites/${currentStore.id}/pages/${pageId}`);
       if (res.success && res.data) {
@@ -272,14 +274,13 @@ export default function BuilderPage({ params }: { params: Promise<{ pageId: stri
         historyRef.current.push(content.blocks as unknown as BuilderBlock[]);
 
         // Synchronous template check — no async HEAD request needed
-        const slug = res.data.templateSlug || null;
-        setTemplateSlug(slug);
-        if (slug && checkTemplateHtml(slug)) {
-          setCanvasMode("preview"); // default to preview if template exists
+        const tplSlug = res.data.templateSlug || null;
+        setTemplateSlug(tplSlug);
+        if (tplSlug && checkTemplateHtml(tplSlug)) {
+          setCanvasMode("preview");
         }
       }
 
-      setStoreSlug(currentStore.slug);
       setLoading(false);
     })();
   }, [currentStore, pageId]);
@@ -702,7 +703,7 @@ export default function BuilderPage({ params }: { params: Promise<{ pageId: stri
 
         {/* Canvas */}
         <div className="flex-1 overflow-y-auto p-6" onClick={() => setSelectedBlockId(null)}>
-          {canvasMode === "preview" && checkTemplateHtml(templateSlug) ? (
+          {canvasMode === "preview" && checkTemplateHtml(templateSlug) && storeSlug ? (
             /* ─── LIVE TEMPLATE PREVIEW ──────────────────────────── */
             <div className={`mx-auto transition-all ${previewMode === "mobile" ? "max-w-[375px]" : "max-w-5xl"}`}>
               <div className="rounded-2xl border border-surface-200 shadow-sm overflow-hidden bg-white">
