@@ -288,6 +288,17 @@ export default function StorePage() {
   // ─── RAW HTML TEMPLATE MODE ──────────────────────────────
   // When a raw HTML template exists, render ONLY the iframe — no store shell at all.
   // The raw HTML template has its own header, footer, nav, everything.
+  // Show loading while still checking (hasRawHtml === null) to avoid flash of default layout.
+  if (hasRawHtml === null) {
+    return (
+      <div className="min-h-screen bg-white flex items-center justify-center">
+        <div className="text-center">
+          <Loader2 className="h-10 w-10 animate-spin text-brand-600 mx-auto mb-4" />
+          <p className="text-surface-500 text-sm">Loading store...</p>
+        </div>
+      </div>
+    );
+  }
   if (hasRawHtml) {
     return (
       <div className="min-h-screen">
