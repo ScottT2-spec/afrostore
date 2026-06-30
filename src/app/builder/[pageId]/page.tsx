@@ -223,6 +223,9 @@ export default function BuilderPage({ params }: { params: Promise<{ pageId: stri
   const [canvasMode, setCanvasMode] = useState<"builder" | "preview">("builder");
   const [hasTemplateHtml, setHasTemplateHtml] = useState(false);
   const [storeSlug, setStoreSlug] = useState<string>("");
+  const [templateEditMode, setTemplateEditMode] = useState(false);
+  const [templateSaving, setTemplateSaving] = useState(false);
+  const [templateEditorReady, setTemplateEditorReady] = useState(false);
   const templateIframeRef = useRef<HTMLIFrameElement>(null);
 
   const historyRef = useRef(new BuilderHistory());
@@ -302,6 +305,124 @@ export default function BuilderPage({ params }: { params: Promise<{ pageId: stri
     window.addEventListener("keydown", handler);
     return () => window.removeEventListener("keydown", handler);
   });
+
+  // ─── TEMPLATE EDITOR: postMessage handler ──────────────────
+  useEffect(() => {
+    const handler = (e: MessageEvent) => {
+      if (!e.data?.type) return;
+
+      switch (e.data.type) {
+        case "afro-editor-ready":
+          setTemplateEditorReady(true);
+          // Tell the iframe to start editing
+          templateIframeRef.current?.contentWindow?.postMessage({ type: "afro-editor-start" }, "*");
+          break;
+
+        case "afro-editor-started":
+          setTemplateEditMode(true);
+          break;
+
+        case "afro-editor-save":
+          handleTemplateSave(e.data.html);
+          break;
+
+        case "afro-editor-cancel":
+          setTemplateEditMode(false);
+          setTemplateEditorReady(false);
+          // Reload iframe without edit mode
+          if (templateIframeRef.current) {
+            templateIframeRef.current.src = `/api/storefront/${storeSlug}/template-html`;
+          }
+          break;
+
+        case "afro-editor-reset":
+          handleTemplateReset();
+          break;
+
+        case "afro-editor-upload-image":
+          handleEditorImageUpload(e.data);
+          break;
+
+        case "afro-editor-change":
+          // Editor notified us of a change — could show unsaved indicator
+          break;
+      }
+    };
+
+    window.addEventListener("message", handler);
+    return () => window.removeEventListener("message", handler);
+  }, [storeSlug, currentStore]);
+
+  const handleTemplateSave = async (html: string) => {
+    if (!currentStore || !html) return;
+    setTemplateSaving(true);
+    try {
+      const res = await api.put(`/api/sites/${currentStore.id}/template-html-editor`, { customHtml: html });
+      if (res.success) {
+        setSaved(true);
+        setTimeout(() => setSaved(false), 2000);
+        // Exit edit mode and reload preview
+        setTemplateEditMode(false);
+        setTemplateEditorReady(false);
+        if (templateIframeRef.current) {
+          templateIframeRef.current.src = `/api/storefront/${storeSlug}/template-html`;
+        }
+      }
+    } catch (err) {
+      console.error("Template save error:", err);
+    } finally {
+      setTemplateSaving(false);
+    }
+  };
+
+  const handleTemplateReset = async () => {
+    if (!currentStore) return;
+    try {
+      await api.delete(`/api/sites/${currentStore.id}/template-html-editor`);
+      setTemplateEditMode(false);
+      setTemplateEditorReady(false);
+      // Reload with base template
+      if (templateIframeRef.current) {
+        templateIframeRef.current.src = `/api/storefront/${storeSlug}/template-html`;
+      }
+    } catch (err) {
+      console.error("Template reset error:", err);
+    }
+  };
+
+  const startTemplateEdit = () => {
+    if (!storeSlug) return;
+    // Reload iframe with edit param to inject editor script
+    if (templateIframeRef.current) {
+      templateIframeRef.current.src = `/api/storefront/${storeSlug}/template-html?afro_edit=1`;
+    }
+  };
+
+  const handleEditorImageUpload = async (data: { dataUrl: string; fileName: string; mimeType: string }) => {
+    if (!currentStore) return;
+    try {
+      // Convert data URL to blob and upload via existing image upload API
+      const blob = await fetch(data.dataUrl).then((r) => r.blob());
+      const formData = new FormData();
+      formData.append("file", blob, data.fileName);
+
+      const res = await fetch(`/api/sites/${currentStore.id}/upload`, {
+        method: "POST",
+        body: formData,
+      });
+      const result = await res.json();
+
+      if (result.url) {
+        // Send uploaded URL back to editor iframe
+        templateIframeRef.current?.contentWindow?.postMessage({
+          type: "afro-editor-image-uploaded",
+          url: result.url,
+        }, "*");
+      }
+    } catch (err) {
+      console.error("Image upload error:", err);
+    }
+  };
 
   // DnD sensors
   const sensors = useSensors(
@@ -445,14 +566,30 @@ export default function BuilderPage({ params }: { params: Promise<{ pageId: stri
 
           {/* Canvas mode toggle — Builder vs Live Preview */}
           {hasTemplateHtml && (
-            <div className="flex items-center rounded-lg border border-surface-200 p-0.5 mr-1">
-              <button onClick={() => setCanvasMode("builder")} className={`px-2 py-1 rounded-md text-[10px] font-semibold transition-colors ${canvasMode === "builder" ? "bg-brand-100 text-brand-700" : "text-surface-500"}`} title="Block Editor">
-                <LayoutGrid className="h-3.5 w-3.5 inline mr-0.5" />Edit
-              </button>
-              <button onClick={() => setCanvasMode("preview")} className={`px-2 py-1 rounded-md text-[10px] font-semibold transition-colors ${canvasMode === "preview" ? "bg-brand-100 text-brand-700" : "text-surface-500"}`} title="Live Template Preview">
-                <Eye className="h-3.5 w-3.5 inline mr-0.5" />Preview
-              </button>
-            </div>
+            <>
+              <div className="flex items-center rounded-lg border border-surface-200 p-0.5 mr-1">
+                <button onClick={() => setCanvasMode("builder")} className={`px-2 py-1 rounded-md text-[10px] font-semibold transition-colors ${canvasMode === "builder" ? "bg-brand-100 text-brand-700" : "text-surface-500"}`} title="Block Editor">
+                  <LayoutGrid className="h-3.5 w-3.5 inline mr-0.5" />Blocks
+                </button>
+                <button onClick={() => setCanvasMode("preview")} className={`px-2 py-1 rounded-md text-[10px] font-semibold transition-colors ${canvasMode === "preview" ? "bg-brand-100 text-brand-700" : "text-surface-500"}`} title="Live Template Preview">
+                  <Eye className="h-3.5 w-3.5 inline mr-0.5" />Preview
+                </button>
+              </div>
+              {canvasMode === "preview" && !templateEditMode && (
+                <button
+                  onClick={startTemplateEdit}
+                  className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-[10px] font-semibold bg-purple-100 text-purple-700 border border-purple-200 hover:bg-purple-200 transition-colors mr-1"
+                  title="Customize the template — change text, images, colors"
+                >
+                  <Sparkles className="h-3.5 w-3.5" /> Customize Template
+                </button>
+              )}
+              {templateEditMode && (
+                <span className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-[10px] font-semibold bg-purple-600 text-white mr-1">
+                  <Sparkles className="h-3.5 w-3.5" /> Customizing...
+                </span>
+              )}
+            </>
           )}
 
           {/* Preview toggle */}
@@ -581,8 +718,8 @@ export default function BuilderPage({ params }: { params: Promise<{ pageId: stri
                       {storeSlug}.afrostore.com
                     </span>
                   </div>
-                  <span className="text-[9px] font-semibold text-brand-600 bg-brand-50 px-2 py-0.5 rounded-full">
-                    Live Template Preview
+                  <span className={`text-[9px] font-semibold px-2 py-0.5 rounded-full ${templateEditMode ? "text-purple-700 bg-purple-100" : "text-brand-600 bg-brand-50"}`}>
+                    {templateEditMode ? "✏️ Customizing Template" : "Live Template Preview"}
                   </span>
                 </div>
                 <iframe
@@ -629,7 +766,7 @@ export default function BuilderPage({ params }: { params: Promise<{ pageId: stri
                       <span className="text-xs text-surface-600 truncate flex-1">
                         {(block.props.title as string) || (block.props.heading as string) || (block.props.text as string) || ""}
                       </span>
-                      <span className="text-[9px] text-surface-400">Edit →</span>
+                      <span className="text-[9px] text-surface-400">Customize →</span>
                     </button>
                   ))}
                 </div>

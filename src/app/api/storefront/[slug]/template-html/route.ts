@@ -41,18 +41,27 @@ export async function GET(req: NextRequest, { params }: Params) {
       return NextResponse.json({ error: "No HTML template available" }, { status: 404 });
     }
 
-    // 3. Read the template HTML
+    // Check for edit mode
+    const isEditMode = req.nextUrl.searchParams.get("afro_edit") === "1";
+
+    // 3. Read the template HTML — use customHtml if merchant has edited it
     const htmlRelPath = getTemplateHtmlPath(templateSlug);
     if (!htmlRelPath) {
       return NextResponse.json({ error: "Template HTML path not found" }, { status: 404 });
     }
 
-    const htmlAbsPath = path.join(process.cwd(), "public", htmlRelPath);
     let html: string;
-    try {
-      html = await readFile(htmlAbsPath, "utf-8");
-    } catch {
-      return NextResponse.json({ error: "Template HTML file not found" }, { status: 404 });
+    if (activeTemplate?.customHtml) {
+      // Merchant has a saved custom version — use that
+      html = activeTemplate.customHtml;
+    } else {
+      // Use the base template file
+      const htmlAbsPath = path.join(process.cwd(), "public", htmlRelPath);
+      try {
+        html = await readFile(htmlAbsPath, "utf-8");
+      } catch {
+        return NextResponse.json({ error: "Template HTML file not found" }, { status: 404 });
+      }
     }
 
     // 4. Fetch store data for substitution
@@ -83,7 +92,10 @@ export async function GET(req: NextRequest, { params }: Params) {
 
     // 4b. Fix relative asset paths — make them absolute so they resolve from the API route
     const templateDir = htmlRelPath.substring(0, htmlRelPath.lastIndexOf("/"));
-    html = fixAssetPaths(html, templateDir);
+    // Only fix asset paths if using base template (customHtml already has them fixed)
+    if (!activeTemplate?.customHtml) {
+      html = fixAssetPaths(html, templateDir);
+    }
 
     // 5. Perform data substitution
     const templateName = activeTemplate?.template?.name || "";
@@ -111,6 +123,11 @@ export async function GET(req: NextRequest, { params }: Params) {
 
     // 6. Inject navigation overlay + cart bridge script
     html = injectStorefrontBridge(html, slug, site.name, currency, currencySymbol);
+
+    // 7. If edit mode, inject the template editor script
+    if (isEditMode) {
+      html = injectEditorScript(html);
+    }
 
     return new NextResponse(html, {
       status: 200,
@@ -489,6 +506,28 @@ function injectStorefrontBridge(
     html = html.replace("</body>", bridgeScript + "\n</body>");
   } else {
     html += bridgeScript;
+  }
+
+  return html;
+}
+
+/* ─── Editor Script Injection ─── */
+
+function injectEditorScript(html: string): string {
+  const editorScript = `<script src="/js/template-editor.js"></script>
+<script>
+  // Auto-start editor when loaded in edit mode
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', function() {
+      window.parent.postMessage({ type: 'afro-editor-ready' }, '*');
+    });
+  }
+</script>`;
+
+  if (html.includes("</body>")) {
+    html = html.replace("</body>", editorScript + "\n</body>");
+  } else {
+    html += editorScript;
   }
 
   return html;

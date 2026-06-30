@@ -245,13 +245,13 @@ export default function SiteCustomizePage({ params }: { params: Promise<{ siteId
           <div className="rounded-2xl border border-surface-200 bg-white p-5 shadow-sm">
             <div className="mb-3 flex items-center gap-2">
               <Sparkles className="h-5 w-5 text-brand-600" />
-              <h2 className="text-lg font-bold text-surface-900">Quick edits</h2>
+              <h2 className="text-lg font-bold text-surface-900">Quick customizations</h2>
             </div>
-            <p className="text-sm text-surface-500">Use the page builder to update wording, add sections, and swap images inside each page.</p>
+            <p className="text-sm text-surface-500">Use the page builder to customize wording, add sections, and swap images inside each page.</p>
             <div className="mt-4 space-y-2">
               {homePage && (
                 <Link href={`/builder/${homePage.id}`} className="flex items-center justify-between rounded-xl border border-surface-200 px-4 py-3 text-sm font-medium text-surface-700 hover:bg-surface-50">
-                  <span className="inline-flex items-center gap-2"><Pencil className="h-4 w-4 text-brand-600" /> Edit homepage</span>
+                  <span className="inline-flex items-center gap-2"><Pencil className="h-4 w-4 text-brand-600" /> Customize homepage</span>
                   <span className="text-xs text-surface-400">{homePage.slug}</span>
                 </Link>
               )}
@@ -276,8 +276,8 @@ export default function SiteCustomizePage({ params }: { params: Promise<{ siteId
       <section className="rounded-2xl border border-surface-200 bg-white p-5 shadow-sm">
         <div className="flex flex-wrap items-center justify-between gap-3">
           <div>
-            <h2 className="text-lg font-bold text-surface-900">Pages you can edit</h2>
-            <p className="text-sm text-surface-500">Open any page to update text, sections, images, and layout blocks.</p>
+            <h2 className="text-lg font-bold text-surface-900">Pages you can customize</h2>
+            <p className="text-sm text-surface-500">Open any page to customize text, sections, images, and layout blocks.</p>
           </div>
           <Link href="/dashboard/pages" className="inline-flex items-center gap-2 rounded-xl border border-surface-200 bg-white px-4 py-2.5 text-sm font-semibold text-surface-700 hover:bg-surface-50">
             Open page manager <ExternalLink className="h-4 w-4" />
@@ -296,10 +296,10 @@ export default function SiteCustomizePage({ params }: { params: Promise<{ siteId
                   {page.isPublished ? "Published" : "Draft"}
                 </span>
               </div>
-              <p className="mt-3 text-xs text-surface-500">Click edit to change wording, swap images, or add sections in the visual builder.</p>
+              <p className="mt-3 text-xs text-surface-500">Click customize to change wording, swap images, or add sections in the visual builder.</p>
               <div className="mt-4 flex items-center gap-2">
                 <Link href={`/builder/${page.id}`} className="inline-flex flex-1 items-center justify-center gap-2 rounded-lg bg-brand-600 px-3 py-2 text-xs font-semibold text-white hover:bg-brand-700">
-                  Edit page <Pencil className="h-3.5 w-3.5" />
+                  Customize page <Pencil className="h-3.5 w-3.5" />
                 </Link>
                 <Link href={`/store/${site.slug}/${page.slug}`} target="_blank" className="inline-flex items-center justify-center rounded-lg border border-surface-200 px-3 py-2 text-xs font-semibold text-surface-600 hover:bg-surface-50">
                   View
