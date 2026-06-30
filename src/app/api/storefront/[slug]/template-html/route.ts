@@ -98,17 +98,12 @@ export async function GET(req: NextRequest, { params }: Params) {
     }
 
     // 5. Perform data substitution
+    //    Skip substitution if merchant has custom HTML — their edits ARE the content.
+    //    Only apply product/price substitution (dynamic data) on custom HTML.
     const templateName = activeTemplate?.template?.name || "";
-    html = substituteStoreData(html, {
-      storeName: site.name,
-      storeDescription: site.description || "",
-      storeLogo: site.logo || "",
-      currency,
-      currencySymbol,
-      whatsappNumber,
-      storeSlug: slug,
-      templateName,
-      products: products.map((p) => ({
+    if (activeTemplate?.customHtml) {
+      // Custom HTML: only inject dynamic product data, don't touch text/names
+      html = replaceProducts(html, products.map((p) => ({
         name: p.name,
         price: Number(p.price),
         compareAtPrice: p.compareAtPrice ? Number(p.compareAtPrice) : null,
@@ -117,9 +112,31 @@ export async function GET(req: NextRequest, { params }: Params) {
         category: p.category?.name || "",
         inStock: p.stock > 0,
         slug: p.slug,
-      })),
-      categories: categories.map((c) => c.name),
-    });
+      })), currencySymbols[currency] || currency);
+    } else {
+      // Base template: full substitution
+      html = substituteStoreData(html, {
+        storeName: site.name,
+        storeDescription: site.description || "",
+        storeLogo: site.logo || "",
+        currency,
+        currencySymbol,
+        whatsappNumber,
+        storeSlug: slug,
+        templateName,
+        products: products.map((p) => ({
+          name: p.name,
+          price: Number(p.price),
+          compareAtPrice: p.compareAtPrice ? Number(p.compareAtPrice) : null,
+          imageUrl: p.images[0]?.url || null,
+          imageAlt: p.images[0]?.alt || p.name,
+          category: p.category?.name || "",
+          inStock: p.stock > 0,
+          slug: p.slug,
+        })),
+        categories: categories.map((c) => c.name),
+      });
+    }
 
     // 6. Inject navigation overlay + cart bridge script
     html = injectStorefrontBridge(html, slug, site.name, currency, currencySymbol);
