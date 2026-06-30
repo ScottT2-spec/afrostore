@@ -235,17 +235,20 @@ function replaceStoreName(html: string, storeName: string, templateName: string)
     `$1${storeName}$3`
   );
 
-  // 4. Replace template name in visible text (not in comments, scripts, or HTML attributes)
+  // 4. Replace template name in visible text — SKIP <script>, <style>, and <!-- --> blocks.
   for (const pattern of namePatterns) {
-    // Replace in text content between tags (not inside <script>, <style>, or HTML tag attributes)
-    html = html.replace(
-      /(>)([^<]*?)(<)/g,
-      (match, open, text, close) => {
-        if (!pattern.test(text)) return match;
+    const safeReplace = (segment: string) =>
+      segment.replace(/(>)([^<]*?)(<)/g, (m, open, text, close) => {
+        if (!pattern.test(text)) return m;
         pattern.lastIndex = 0;
         return `${open}${text.replace(pattern, storeName)}${close}`;
-      }
-    );
+      });
+
+    // Split out script/style/comment blocks so we never touch them
+    const parts = html.split(/(<script[\s\S]*?<\/script>|<style[\s\S]*?<\/style>|<!--[\s\S]*?-->)/gi);
+    html = parts
+      .map((part, i) => (i % 2 === 0 ? safeReplace(part) : part))
+      .join("");
   }
 
   // 5. Replace copyright text
@@ -339,33 +342,36 @@ function replaceProducts(
 }
 
 function replaceContactInfo(html: string, phone: string): string {
-  // Replace phone numbers in common patterns
+  // Only replace phone numbers inside safe contexts — NOT inside <script>, <style>, or attributes.
+  // Target: visible text that looks like a phone number (tel: links, aria-labels, visible spans).
+  
+  // 1. Replace tel: href values
   html = html.replace(
-    /(\+?\d[\d\s\-().]{7,})/g,
-    (match) => {
-      // Only replace if it looks like a phone number (not a product ID or price)
-      if (match.replace(/\D/g, "").length >= 8) {
-        return phone;
-      }
-      return match;
-    }
+    /(href="tel:)[^"]*(")/gi,
+    `$1${phone.replace(/[^0-9+]/g, "")}$2`
+  );
+
+  // 2. Replace phone numbers inside known contact containers only
+  // Match text nodes inside elements with contact-related classes
+  html = html.replace(
+    /(<(?:a|span|p|div|li)[^>]*class="[^"]*(?:phone|tel|contact|whatsapp)[^"]*"[^>]*>)([^<]+)(<\/)/gi,
+    (_match, open, _text, close) => `${open}${phone}${close}`
   );
 
   return html;
 }
 
 function rewriteLinks(html: string, storeSlug: string): string {
-  // Rewrite WoodMart demo links to point to our store
-  html = html.replace(
-    /href="https?:\/\/woodmart\.xtemos\.com[^"]*"/g,
-    `href="/store/${storeSlug}/shop"`
+  // Only rewrite known demo-site links — never touch CDN, font, or asset URLs.
+  const demoDomains = [
+    "woodmart.xtemos.com",
+    "preview.themeforest.net",
+  ];
+  const demoPattern = new RegExp(
+    `href="https?://(?:${demoDomains.map(d => d.replace(/\./g, "\\.")).join("|")})[^"]*"`,
+    "g"
   );
-
-  // Rewrite any remaining external shop links
-  html = html.replace(
-    /href="https?:\/\/[^"]*\/shop[^"]*"/g,
-    `href="/store/${storeSlug}/shop"`
-  );
+  html = html.replace(demoPattern, `href="/store/${storeSlug}/shop"`);
 
   return html;
 }
@@ -398,25 +404,27 @@ function injectStorefrontBridge(
   var currency = ${JSON.stringify(currency)};
   var currencySymbol = ${JSON.stringify(currencySymbol)};
 
-  // Intercept all link clicks — navigate parent frame instead
+  // Intercept link clicks — but let anchor/hash links work normally for template nav
   document.addEventListener('click', function(e) {
     var link = e.target.closest('a[href]');
     if (!link) return;
     var href = link.getAttribute('href');
-    if (!href || href === '#' || href.startsWith('javascript:')) return;
+    if (!href || href.startsWith('javascript:')) return;
     
-    e.preventDefault();
+    // Let anchor links work normally (smooth scroll, tabs, etc.)
+    if (href === '#' || href.startsWith('#')) return;
     
-    // If it's a store link, navigate parent
+    // Store links — navigate parent frame
     if (href.startsWith('/store/')) {
-      window.parent.location.href = href;
-    } else if (href.startsWith('/')) {
+      e.preventDefault();
       window.parent.location.href = href;
     }
     // External links — open in new tab
     else if (href.startsWith('http')) {
+      e.preventDefault();
       window.open(href, '_blank');
     }
+    // Other relative links — let them be (template internal pages)
   });
 
   // Intercept add-to-cart buttons
