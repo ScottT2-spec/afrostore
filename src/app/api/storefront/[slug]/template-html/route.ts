@@ -409,10 +409,16 @@ function injectStorefrontBridge(
     var link = e.target.closest('a[href]');
     if (!link) return;
     var href = link.getAttribute('href');
-    if (!href || href.startsWith('javascript:')) return;
+    
+    // Block empty hrefs and bare "#" — many templates leave these as placeholders
+    if (!href || href === '' || href === '#' || href === 'http://' || href === 'https://') {
+      e.preventDefault();
+      return;
+    }
+    if (href.startsWith('javascript:')) return;
     
     // Let anchor links work normally (smooth scroll, tabs, etc.)
-    if (href === '#' || href.startsWith('#')) return;
+    if (href.startsWith('#')) return;
     
     // Store links — navigate parent frame
     if (href.startsWith('/store/')) {
@@ -424,7 +430,10 @@ function injectStorefrontBridge(
       e.preventDefault();
       window.open(href, '_blank');
     }
-    // Other relative links — let them be (template internal pages)
+    // Other relative links — prevent navigation (would break iframe)
+    else {
+      e.preventDefault();
+    }
   });
 
   // Intercept add-to-cart buttons
