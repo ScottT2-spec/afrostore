@@ -26,10 +26,24 @@ const lazySections: Record<string, ComponentType<Record<string, unknown>>> = {
 export default function TemplateRenderer({
   template,
   blocks,
+  storeSlug,
+  products,
+  currency,
+  addToCart,
+  isWishlisted,
+  toggleWishlist,
+  addedToCart,
   previewMode = false,
 }: {
   template: TemplateDefinition;
   blocks?: BuilderBlock[];
+  storeSlug?: string;
+  products?: unknown[];
+  currency?: string;
+  addToCart?: (product: unknown) => void;
+  isWishlisted?: (productId: string) => boolean;
+  toggleWishlist?: (productId: string) => void;
+  addedToCart?: string | null;
   previewMode?: boolean;
 }) {
   const renderBlocks = useMemo(() => blocks || template.themeConfig.sections, [blocks, template.themeConfig.sections]);
@@ -41,7 +55,16 @@ export default function TemplateRenderer({
         if (!Section) return <RenderBlocks key={block.id} blocks={[block]} />;
         return (
           <Suspense key={block.id} fallback={<div className="h-24 animate-pulse rounded-xl bg-surface-100" />}>
-            <Section {...block.props} />
+            <Section
+              {...block.props}
+              storeSlug={storeSlug}
+              products={products}
+              currency={currency}
+              addToCart={addToCart}
+              isWishlisted={isWishlisted}
+              toggleWishlist={toggleWishlist}
+              addedToCart={addedToCart}
+            />
           </Suspense>
         );
       })}

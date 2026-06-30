@@ -78,7 +78,7 @@ export interface ClassificationResult {
 export interface GeneratedTemplatePage {
   title: string;
   slug: string;
-  type: "HOME" | "ABOUT" | "CONTACT" | "CUSTOM" | "SERVICES" | "TEAM" | "FAQ" | "LANDING";
+  type: "HOME" | "ABOUT" | "CONTACT" | "CUSTOM" | "SERVICES" | "TEAM" | "FAQ" | "LANDING" | "POLICY" | "THANK_YOU";
   content: BuilderBlock[];
   metaTitle?: string;
   metaDescription?: string;

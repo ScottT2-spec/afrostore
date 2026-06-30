@@ -1,7 +1,7 @@
 import { prisma } from "@/lib/db";
 import { slugify } from "@/lib/utils";
 import type { PageType, Prisma, Template as PrismaTemplate } from "@/generated/prisma";
-import type { BuilderBlock } from "@/lib/builder/types";
+import type { BuilderBlock } from "@/components/storefront/BlockRenderer";
 import { INTERNAL_TEMPLATES } from "./catalog";
 import { TEMPLATE_FAMILY_ALIASES, TEMPLATE_FAMILY_PAGE_SETS } from "./families";
 import type {
@@ -418,43 +418,42 @@ function getSectionsForPage(pageTitle: string, allSections: BuilderBlock[]): Bui
   return allSections.filter((section) => sectionTypes.includes(section.type));
 }
 
-export function generatePages(input: BusinessAnalysisInput, template: TemplateDefinition): GeneratedTemplatePage[] {
-  const businessName = input.businessName || input.business_name || "Your Business";
-  const industry = canonicalIndustry(input, template);
-  const homeSections = generateHomepageSections(input, template, industry);
+function pageTypeForTitle(pageTitle: string, isLanding: boolean): GeneratedTemplatePage["type"] {
+  const key = pageTitle.toLowerCase();
 
-  // Only create the Home page with the template's sections.
-  // The template defines the ENTIRE layout — no extra default pages.
-  const isLanding = input.siteType === "LANDING_PAGE" || template.category?.toLowerCase().includes("landing");
+  if (key === "home") return isLanding ? "LANDING" : "HOME";
+  if (key === "about") return "ABOUT";
+  if (key === "contact") return "CONTACT";
+  if (key === "faq") return "FAQ";
+  if (key === "services") return "SERVICES";
+  if (key === "team" || key === "doctors" || key === "instructors" || key === "attorneys" || key === "agents") return "TEAM";
+  if (key === "policy") return "POLICY";
+  if (key === "landing") return "LANDING";
+  if (key === "thank you" || key === "thank-you") return "THANK_YOU";
 
-  return [{
-    title: "Home",
-    slug: "home",
-    type: isLanding ? "LANDING" : "HOME",
-    content: homeSections,
-    metaTitle: `${businessName}`,
-    metaDescription: normalize(input.description) || `${businessName} — ${industry.replace(/-/g, " ")}.`,
-  }];
+  return "CUSTOM";
 }
 
+export function generatePages(input: BusinessAnalysisInput, template: TemplateDefinition): GeneratedTemplatePage[] {
+  const canonicalSlug = TEMPLATE_FAMILY_ALIASES[template.slug] || template.slug;
+  const pageTitles = TEMPLATE_FAMILY_PAGE_SETS[canonicalSlug] || ["Home"];
+  const sections = structuredClone(template.themeConfig.sections);
+  const isLanding = input.siteType === "LANDING_PAGE" || template.category?.toLowerCase().includes("landing");
 
-function generateHomepageSections(input: BusinessAnalysisInput, template: TemplateDefinition, industry: string) {
-  const businessName = input.businessName || input.business_name || "Your Business";
-  const description = input.description || `Professional ${industry.replace(/-/g, " ")} services and products built for your customers.`;
-  const starter = structuredClone(template.themeConfig.sections);
+  return pageTitles.map((title, index) => {
+    const content = index === 0 || title.toLowerCase() === "home"
+      ? structuredClone(sections)
+      : structuredClone(getSectionsForPage(title, sections));
 
-  // ALL templates now define their own complete section list.
-  // Only personalise the hero heading/subheading with the business name,
-  // keep everything else intact from the template definition.
-  const hero = starter.find((section) => section.type === "hero");
-  if (hero) {
-    hero.props = {
-      ...hero.props,
-      heading: businessName !== "Your Business" ? businessName : hero.props.heading,
-      subheading: description !== hero.props.subheading && input.description ? description : hero.props.subheading,
+    return {
+      title,
+      slug: slugify(title),
+      type: pageTypeForTitle(title, isLanding),
+      content,
+      metaTitle: `${title} — ${template.name}`,
+      metaDescription: template.description || undefined,
     };
-  }
-  return starter;
+  });
 }
 
 export function mergeBranding(themeConfig: ThemeConfig, input: TemplateSelectionInput): ThemeConfig {

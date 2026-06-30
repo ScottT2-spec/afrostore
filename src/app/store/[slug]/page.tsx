@@ -2,13 +2,16 @@
 import { ArrowRight, ChevronRight, Loader2, Plus, X } from "lucide-react";
 import { CheckCircle2, CreditCard, Heart, ImageIcon, Mail, MapPin, Menu, MessageCircle, Minus, Phone, Search, Shield, ShoppingBag, ShoppingCart, Star, Truck, Zap } from "@/components/icons/FilledIcons";
 
-import { useState, useEffect, useCallback, useRef } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { useParams } from "next/navigation";
 import Link from "next/link";
 import { RenderBlocks, type BuilderBlock } from "@/components/storefront/BlockRenderer";
 import { getLinkedPageHref, parsePageContent } from "@/lib/page-content";
 import { ThemeProvider, type ThemeData } from "@/components/storefront/ThemeProvider";
 import { useWishlist } from "@/hooks/useWishlist";
+import TemplateRenderer from "@/templates/TemplateRenderer";
+import type { TemplateDefinition } from "@/lib/templates/types";
+import { hasTemplateHtml } from "@/lib/templates/template-html-map";
 
 /* ───────── Types ───────── */
 
@@ -167,8 +170,6 @@ export default function StorePage() {
   const [searchQuery, setSearchQuery] = useState("");
   const [showSearch, setShowSearch] = useState(false);
   const [addedToCart, setAddedToCart] = useState<string | null>(null);
-  const [hasRawHtml, setHasRawHtml] = useState<boolean | null>(null); // null = checking, true/false = result
-  const rawHtmlIframeRef = useRef<HTMLIFrameElement>(null);
   const { isWishlisted, toggleWishlist, wishlistCount } = useWishlist(data?.store?.id || "");
 
   const fetchStore = useCallback(async () => {
@@ -188,21 +189,6 @@ export default function StorePage() {
   }, [slug]);
 
   useEffect(() => { fetchStore(); }, [fetchStore]);
-
-  // Check if this store has a raw HTML template available
-  useEffect(() => {
-    if (!data?.templateSlug) { setHasRawHtml(false); return; }
-    let cancelled = false;
-    (async () => {
-      try {
-        const res = await fetch(`/api/storefront/${slug}/template-html`, { method: "HEAD" });
-        if (!cancelled) setHasRawHtml(res.ok);
-      } catch {
-        if (!cancelled) setHasRawHtml(false);
-      }
-    })();
-    return () => { cancelled = true; };
-  }, [data?.templateSlug, slug]);
 
   // Persist cart to localStorage for checkout
   useEffect(() => {
@@ -278,6 +264,41 @@ export default function StorePage() {
   const homeBlocks: BuilderBlock[] = homePage ? parsePageContent(homePage.content).blocks : [];
   const hasHomeContent = homeBlocks.length > 0;
   const homeHasProductGrid = homeBlocks.some((b) => b.type === "productGrid");
+  const isTemplateSite = !!data.templateSlug;
+  const useRawTemplateHtml = !!data.templateSlug && hasTemplateHtml(data.templateSlug);
+  const templateLike: TemplateDefinition | null = data.templateSlug ? {
+    id: data.templateSlug,
+    name: store.name,
+    slug: data.templateSlug,
+    category: store.businessType || "Store",
+    description: store.description || "",
+    previewImage: "",
+    previewUrl: `/template-preview/${data.templateSlug}`,
+    recommendationKeywords: [],
+    themeConfig: {
+      homepage_layout: "storefront",
+      header_style: "storefront",
+      footer_style: "storefront",
+      product_card_style: "storefront",
+      colors: {
+        primary: "#111827",
+        secondary: "#374151",
+        accent: "#2563eb",
+        background: "#ffffff",
+        text: "#111827",
+        headerBg: "#ffffff",
+        headerText: "#111827",
+        footerBg: "#111827",
+        footerText: "#ffffff",
+      },
+      fonts: {
+        heading: "Inter",
+        body: "Inter",
+      },
+      sections: homeBlocks,
+    },
+    active: true,
+  } : null;
 
   // Navigation pages: exclude HOME (we're on it), sort sensibly
   const navPageOrder: Record<string, number> = { ABOUT: 0, FAQ: 1, CONTACT: 2, POLICY: 3, CUSTOM: 4, LANDING: 5 };
@@ -285,43 +306,36 @@ export default function StorePage() {
     .filter((p) => p.type !== "HOME")
     .sort((a, b) => (navPageOrder[a.type] ?? 99) - (navPageOrder[b.type] ?? 99));
 
-  // ─── RAW HTML TEMPLATE MODE ──────────────────────────────
-  // When a raw HTML template exists, render ONLY the iframe — no store shell at all.
-  // The raw HTML template has its own header, footer, nav, everything.
-  // Show loading while still checking (hasRawHtml === null) to avoid flash of default layout.
-  if (hasRawHtml === null) {
-    return (
-      <div className="min-h-screen bg-white flex items-center justify-center">
-        <div className="text-center">
-          <Loader2 className="h-10 w-10 animate-spin text-brand-600 mx-auto mb-4" />
-          <p className="text-surface-500 text-sm">Loading store...</p>
-        </div>
-      </div>
-    );
-  }
-  if (hasRawHtml) {
+  if (isTemplateSite && useRawTemplateHtml) {
     return (
       <div className="min-h-screen">
         <iframe
-          ref={rawHtmlIframeRef}
           src={`/api/storefront/${slug}/template-html`}
           className="w-full border-0"
           style={{ minHeight: "100vh", display: "block" }}
-          title={`${store.name}`}
-          onLoad={() => {
-            const iframe = rawHtmlIframeRef.current;
-            if (iframe?.contentDocument?.body) {
-              const h = iframe.contentDocument.body.scrollHeight;
-              if (h) iframe.style.height = `${h}px`;
-              const resizeObserver = new ResizeObserver(() => {
-                const height = iframe.contentDocument?.body?.scrollHeight;
-                if (height) iframe.style.height = `${height}px`;
-              });
-              resizeObserver.observe(iframe.contentDocument.body);
-            }
-          }}
+          title={store.name}
         />
       </div>
+    );
+  }
+
+  if (isTemplateSite && templateLike) {
+    return (
+      <ThemeProvider theme={data.theme}>
+        <div className="min-h-screen bg-white">
+          <TemplateRenderer
+            template={templateLike}
+            blocks={homeBlocks}
+            storeSlug={slug}
+            products={products as any}
+            currency={currency}
+            addToCart={(p) => addToCart(p as unknown as Product)}
+            isWishlisted={isWishlisted}
+            toggleWishlist={toggleWishlist}
+            addedToCart={addedToCart}
+          />
+        </div>
+      </ThemeProvider>
     );
   }
 
