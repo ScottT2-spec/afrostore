@@ -14,8 +14,7 @@ import PropertyPanel from "@/components/builder/PropertyPanel";
 import { SingleImageUpload } from "@/components/dashboard/ImageUpload";
 import { parsePageContent, serializePageContent, type PageSettings } from "@/lib/page-content";
 import { hasTemplateHtml as checkTemplateHtml } from "@/lib/templates/template-html-map";
-import TemplateRenderer from "@/templates/TemplateRenderer";
-import type { TemplateDefinition } from "@/lib/templates/types";
+
 import {
   DndContext,
   closestCenter,
@@ -570,7 +569,7 @@ export default function BuilderPage({ params }: { params: Promise<{ pageId: stri
         {/* Canvas */}
         <div className="flex-1 overflow-y-auto p-6" onClick={() => setSelectedBlockId(null)}>
           {canvasMode === "preview" && checkTemplateHtml(templateSlug) && storeSlug ? (
-            /* ─── LIVE TEMPLATE PREVIEW via TemplateRenderer ───── */
+            /* ─── LIVE TEMPLATE PREVIEW ──────────────────────────── */
             <div className={`mx-auto transition-all ${previewMode === "mobile" ? "max-w-[375px]" : "max-w-5xl"}`}>
               <div className="rounded-2xl border border-surface-200 shadow-sm overflow-hidden bg-white">
                 <div className="bg-surface-50 border-b border-surface-200 px-4 py-2 flex items-center justify-between">
@@ -588,32 +587,12 @@ export default function BuilderPage({ params }: { params: Promise<{ pageId: stri
                     Live Template Preview
                   </span>
                 </div>
-                <div className="p-0">
-                  <TemplateRenderer
-                    template={{
-                      id: templateSlug!,
-                      name: pageTitle || "Store",
-                      slug: templateSlug!,
-                      category: "Store",
-                      description: "",
-                      previewImage: "",
-                      previewUrl: "",
-                      recommendationKeywords: [],
-                      themeConfig: {
-                        homepage_layout: "storefront",
-                        header_style: "storefront",
-                        footer_style: "storefront",
-                        product_card_style: "storefront",
-                        colors: { primary: "#111827", secondary: "#374151", accent: "#2563eb", background: "#ffffff", text: "#111827", headerBg: "#ffffff", headerText: "#111827", footerBg: "#111827", footerText: "#ffffff" },
-                        fonts: { heading: "Inter", body: "Inter" },
-                        sections: blocks,
-                      },
-                      active: true,
-                    } as TemplateDefinition}
-                    blocks={blocks}
-                    storeSlug={storeSlug}
-                  />
-                </div>
+                <iframe
+                  src={`/api/storefront/${storeSlug}/template-html`}
+                  className="w-full border-0"
+                  style={{ minHeight: "80vh", display: "block" }}
+                  title="Template Preview"
+                />
               </div>
               {/* Section list below preview */}
               <div className="mt-4 rounded-xl border border-surface-200 bg-white p-4">
