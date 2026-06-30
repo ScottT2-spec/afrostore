@@ -220,6 +220,10 @@ export default function BuilderPage({ params }: { params: Promise<{ pageId: stri
   const [saved, setSaved] = useState(false);
   const [canUndo, setCanUndo] = useState(false);
   const [canRedo, setCanRedo] = useState(false);
+  const [canvasMode, setCanvasMode] = useState<"builder" | "preview">("builder");
+  const [hasTemplateHtml, setHasTemplateHtml] = useState(false);
+  const [storeSlug, setStoreSlug] = useState<string>("");
+  const templateIframeRef = useRef<HTMLIFrameElement>(null);
 
   const historyRef = useRef(new BuilderHistory());
 
@@ -250,7 +254,7 @@ export default function BuilderPage({ params }: { params: Promise<{ pageId: stri
     }
   }, [blocks]);
 
-  // Load page
+  // Load page + check for template HTML
   useEffect(() => {
     if (!currentStore) return;
     (async () => {
@@ -263,6 +267,17 @@ export default function BuilderPage({ params }: { params: Promise<{ pageId: stri
         setPageSettings(content.settings);
         historyRef.current.push(content.blocks as unknown as BuilderBlock[]);
       }
+
+      // Check if store has a raw HTML template for live preview
+      setStoreSlug(currentStore.slug);
+      try {
+        const htmlRes = await fetch(`/api/storefront/${currentStore.slug}/template-html`, { method: "HEAD" });
+        if (htmlRes.ok) {
+          setHasTemplateHtml(true);
+          setCanvasMode("preview"); // default to preview if template exists
+        }
+      } catch { /* no template html available */ }
+
       setLoading(false);
     })();
   }, [currentStore, pageId]);
@@ -428,6 +443,18 @@ export default function BuilderPage({ params }: { params: Promise<{ pageId: stri
 
           <div className="h-5 w-px bg-surface-200 mx-1" />
 
+          {/* Canvas mode toggle — Builder vs Live Preview */}
+          {hasTemplateHtml && (
+            <div className="flex items-center rounded-lg border border-surface-200 p-0.5 mr-1">
+              <button onClick={() => setCanvasMode("builder")} className={`px-2 py-1 rounded-md text-[10px] font-semibold transition-colors ${canvasMode === "builder" ? "bg-brand-100 text-brand-700" : "text-surface-500"}`} title="Block Editor">
+                <LayoutGrid className="h-3.5 w-3.5 inline mr-0.5" />Edit
+              </button>
+              <button onClick={() => setCanvasMode("preview")} className={`px-2 py-1 rounded-md text-[10px] font-semibold transition-colors ${canvasMode === "preview" ? "bg-brand-100 text-brand-700" : "text-surface-500"}`} title="Live Template Preview">
+                <Eye className="h-3.5 w-3.5 inline mr-0.5" />Preview
+              </button>
+            </div>
+          )}
+
           {/* Preview toggle */}
           <div className="flex items-center rounded-lg border border-surface-200 p-0.5">
             <button onClick={() => setPreviewMode("desktop")} className={`p-1.5 rounded-md transition-colors ${previewMode === "desktop" ? "bg-surface-100" : ""}`} title="Desktop">
@@ -539,93 +566,165 @@ export default function BuilderPage({ params }: { params: Promise<{ pageId: stri
 
         {/* Canvas */}
         <div className="flex-1 overflow-y-auto p-6" onClick={() => setSelectedBlockId(null)}>
-          <div
-            className={`mx-auto rounded-2xl border border-surface-200 shadow-sm min-h-[600px] transition-all overflow-hidden relative ${
-            previewMode === "mobile" ? "max-w-[375px]" : "max-w-4xl"
-          }`}
-            style={{
-              backgroundColor: pageSettings.backgroundColor || "#ffffff",
-              backgroundImage: pageSettings.backgroundImage ? `url(${pageSettings.backgroundImage})` : undefined,
-              backgroundSize: pageSettings.backgroundImage ? pageSettings.backgroundSize || "cover" : undefined,
-              backgroundPosition: pageSettings.backgroundImage ? pageSettings.backgroundPosition || "center center" : undefined,
-              backgroundRepeat: pageSettings.backgroundImage ? pageSettings.backgroundRepeat || "no-repeat" : undefined,
-              backgroundAttachment: pageSettings.backgroundImage ? pageSettings.backgroundAttachment || "scroll" : undefined,
-            }}
-          >
-            {pageSettings.backgroundImage && (
-              <div
-                className="absolute inset-0 pointer-events-none"
-                style={{
-                  backgroundColor: pageSettings.overlayColor || "#000000",
-                  opacity: pageSettings.overlayOpacity ?? 0.25,
-                }}
-              />
-            )}
-            {blocks.length === 0 ? (
-              <div className="flex flex-col items-center justify-center h-[600px] text-center p-8 relative z-10">
-                <div className="h-16 w-16 rounded-2xl bg-surface-50 flex items-center justify-center mb-4">
-                  <Plus className="h-8 w-8 text-surface-300" />
+          {canvasMode === "preview" && hasTemplateHtml ? (
+            /* ─── LIVE TEMPLATE PREVIEW ──────────────────────────── */
+            <div className={`mx-auto transition-all ${previewMode === "mobile" ? "max-w-[375px]" : "max-w-5xl"}`}>
+              <div className="rounded-2xl border border-surface-200 shadow-sm overflow-hidden bg-white">
+                <div className="bg-surface-50 border-b border-surface-200 px-4 py-2 flex items-center justify-between">
+                  <div className="flex items-center gap-2">
+                    <div className="flex gap-1">
+                      <div className="h-2.5 w-2.5 rounded-full bg-red-400" />
+                      <div className="h-2.5 w-2.5 rounded-full bg-yellow-400" />
+                      <div className="h-2.5 w-2.5 rounded-full bg-green-400" />
+                    </div>
+                    <span className="text-[10px] text-surface-400 font-mono">
+                      {storeSlug}.afrostore.com
+                    </span>
+                  </div>
+                  <span className="text-[9px] font-semibold text-brand-600 bg-brand-50 px-2 py-0.5 rounded-full">
+                    Live Template Preview
+                  </span>
                 </div>
-                <h3 className="text-base font-bold text-surface-900 mb-1">Start building your page</h3>
-                <p className="text-xs text-surface-500 mb-6 max-w-sm">Add blocks from the left panel or start with a template.</p>
-                <div className="flex gap-2">
-                  <button onClick={() => addBlock("hero")} className="btn-primary text-xs py-2 px-4">
-                    <Sparkles className="h-3.5 w-3.5" /> Add Hero
-                  </button>
-                  <button onClick={() => { setShowSidebar(true); setSidebarTab("templates"); }} className="btn-secondary text-xs py-2 px-4">
-                    <Layers className="h-3.5 w-3.5" /> Use Template
-                  </button>
+                <iframe
+                  ref={templateIframeRef}
+                  src={`/api/storefront/${storeSlug}/template-html`}
+                  className="w-full border-0"
+                  style={{ minHeight: "80vh" }}
+                  title="Template Preview"
+                  onLoad={() => {
+                    const iframe = templateIframeRef.current;
+                    if (iframe?.contentDocument?.body) {
+                      const h = iframe.contentDocument.body.scrollHeight;
+                      if (h) iframe.style.height = `${h}px`;
+                      const ro = new ResizeObserver(() => {
+                        const height = iframe.contentDocument?.body?.scrollHeight;
+                        if (height) iframe.style.height = `${height}px`;
+                      });
+                      ro.observe(iframe.contentDocument.body);
+                    }
+                  }}
+                />
+              </div>
+              {/* Section list below preview — shows which blocks are editing which sections */}
+              <div className="mt-4 rounded-xl border border-surface-200 bg-white p-4">
+                <h3 className="text-xs font-bold text-surface-900 mb-3 flex items-center gap-1.5">
+                  <Layers className="h-3.5 w-3.5 text-brand-600" />
+                  Page Sections ({blocks.length})
+                </h3>
+                <div className="space-y-1.5">
+                  {blocks.map((block, idx) => (
+                    <button
+                      key={block.id}
+                      onClick={(e) => { e.stopPropagation(); setSelectedBlockId(block.id); setCanvasMode("builder"); }}
+                      className={`w-full text-left flex items-center gap-3 px-3 py-2 rounded-lg transition-colors ${
+                        selectedBlockId === block.id
+                          ? "bg-brand-50 border border-brand-200"
+                          : "hover:bg-surface-50 border border-transparent"
+                      }`}
+                    >
+                      <span className="text-[10px] font-mono text-surface-400 w-5">{idx + 1}</span>
+                      <span className="text-[10px] font-bold uppercase text-brand-600 bg-brand-50 px-1.5 py-0.5 rounded">
+                        {block.type}
+                      </span>
+                      <span className="text-xs text-surface-600 truncate flex-1">
+                        {(block.props.title as string) || (block.props.heading as string) || (block.props.text as string) || ""}
+                      </span>
+                      <span className="text-[9px] text-surface-400">Edit →</span>
+                    </button>
+                  ))}
                 </div>
               </div>
-            ) : (
-              <DndContext sensors={sensors} collisionDetection={closestCenter} onDragStart={handleDragStart} onDragEnd={handleDragEnd}>
-                <SortableContext items={blocks.map((b) => b.id)} strategy={verticalListSortingStrategy}>
-                  <div className="p-6 space-y-3 relative z-10">
-                    {blocks.map((block, idx) => (
-                      <div key={block.id}>
-                        {/* Insert-between button */}
-                        {idx === 0 && (
-                          <div className="flex justify-center -mb-1 opacity-0 hover:opacity-100 transition-opacity">
+            </div>
+          ) : (
+            /* ─── BLOCK EDITOR CANVAS ────────────────────────────── */
+            <div
+              className={`mx-auto rounded-2xl border border-surface-200 shadow-sm min-h-[600px] transition-all overflow-hidden relative ${
+              previewMode === "mobile" ? "max-w-[375px]" : "max-w-4xl"
+            }`}
+              style={{
+                backgroundColor: pageSettings.backgroundColor || "#ffffff",
+                backgroundImage: pageSettings.backgroundImage ? `url(${pageSettings.backgroundImage})` : undefined,
+                backgroundSize: pageSettings.backgroundImage ? pageSettings.backgroundSize || "cover" : undefined,
+                backgroundPosition: pageSettings.backgroundImage ? pageSettings.backgroundPosition || "center center" : undefined,
+                backgroundRepeat: pageSettings.backgroundImage ? pageSettings.backgroundRepeat || "no-repeat" : undefined,
+                backgroundAttachment: pageSettings.backgroundImage ? pageSettings.backgroundAttachment || "scroll" : undefined,
+              }}
+            >
+              {pageSettings.backgroundImage && (
+                <div
+                  className="absolute inset-0 pointer-events-none"
+                  style={{
+                    backgroundColor: pageSettings.overlayColor || "#000000",
+                    opacity: pageSettings.overlayOpacity ?? 0.25,
+                  }}
+                />
+              )}
+              {blocks.length === 0 ? (
+                <div className="flex flex-col items-center justify-center h-[600px] text-center p-8 relative z-10">
+                  <div className="h-16 w-16 rounded-2xl bg-surface-50 flex items-center justify-center mb-4">
+                    <Plus className="h-8 w-8 text-surface-300" />
+                  </div>
+                  <h3 className="text-base font-bold text-surface-900 mb-1">Start building your page</h3>
+                  <p className="text-xs text-surface-500 mb-6 max-w-sm">Add blocks from the left panel or start with a template.</p>
+                  <div className="flex gap-2">
+                    <button onClick={() => addBlock("hero")} className="btn-primary text-xs py-2 px-4">
+                      <Sparkles className="h-3.5 w-3.5" /> Add Hero
+                    </button>
+                    <button onClick={() => { setShowSidebar(true); setSidebarTab("templates"); }} className="btn-secondary text-xs py-2 px-4">
+                      <Layers className="h-3.5 w-3.5" /> Use Template
+                    </button>
+                  </div>
+                </div>
+              ) : (
+                <DndContext sensors={sensors} collisionDetection={closestCenter} onDragStart={handleDragStart} onDragEnd={handleDragEnd}>
+                  <SortableContext items={blocks.map((b) => b.id)} strategy={verticalListSortingStrategy}>
+                    <div className="p-6 space-y-3 relative z-10">
+                      {blocks.map((block, idx) => (
+                        <div key={block.id}>
+                          {/* Insert-between button */}
+                          {idx === 0 && (
+                            <div className="flex justify-center -mb-1 opacity-0 hover:opacity-100 transition-opacity">
+                              <button onClick={() => { setShowSidebar(true); }} className="text-[9px] text-surface-400 hover:text-brand-600 flex items-center gap-1 py-1">
+                                <Plus className="h-3 w-3" /> Add block above
+                              </button>
+                            </div>
+                          )}
+                          <SortableBlock
+                            block={block}
+                            isSelected={selectedBlockId === block.id}
+                            onClick={() => setSelectedBlockId(block.id)}
+                            onDuplicate={() => duplicateBlock(block.id)}
+                            onMoveUp={() => moveBlock(block.id, "up")}
+                            onMoveDown={() => moveBlock(block.id, "down")}
+                            onInlineEdit={(key, value) => {
+                              pushHistory();
+                              updateBlock({ ...block, props: { ...block.props, [key]: value } });
+                            }}
+                            isFirst={idx === 0}
+                            isLast={idx === blocks.length - 1}
+                          />
+                          {/* Insert-between button */}
+                          <div className="flex justify-center -mt-1 opacity-0 hover:opacity-100 transition-opacity">
                             <button onClick={() => { setShowSidebar(true); }} className="text-[9px] text-surface-400 hover:text-brand-600 flex items-center gap-1 py-1">
-                              <Plus className="h-3 w-3" /> Add block above
+                              <Plus className="h-3 w-3" /> Add block
                             </button>
                           </div>
-                        )}
-                        <SortableBlock
-                          block={block}
-                          isSelected={selectedBlockId === block.id}
-                          onClick={() => setSelectedBlockId(block.id)}
-                          onDuplicate={() => duplicateBlock(block.id)}
-                          onMoveUp={() => moveBlock(block.id, "up")}
-                          onMoveDown={() => moveBlock(block.id, "down")}
-                          onInlineEdit={(key, value) => {
-                            pushHistory();
-                            updateBlock({ ...block, props: { ...block.props, [key]: value } });
-                          }}
-                          isFirst={idx === 0}
-                          isLast={idx === blocks.length - 1}
-                        />
-                        {/* Insert-between button */}
-                        <div className="flex justify-center -mt-1 opacity-0 hover:opacity-100 transition-opacity">
-                          <button onClick={() => { setShowSidebar(true); }} className="text-[9px] text-surface-400 hover:text-brand-600 flex items-center gap-1 py-1">
-                            <Plus className="h-3 w-3" /> Add block
-                          </button>
                         </div>
-                      </div>
-                    ))}
-                  </div>
-                </SortableContext>
-
-                <DragOverlay>
-                  {activeId ? (
-                    <div className="rounded-xl bg-white shadow-2xl border border-brand-200 p-4 opacity-90 max-w-lg">
-                      <BlockRenderer block={blocks.find((b) => b.id === activeId)!} />
+                      ))}
                     </div>
-                  ) : null}
-                </DragOverlay>
-              </DndContext>
-            )}
-          </div>
+                  </SortableContext>
+
+                  <DragOverlay>
+                    {activeId ? (
+                      <div className="rounded-xl bg-white shadow-2xl border border-brand-200 p-4 opacity-90 max-w-lg">
+                        <BlockRenderer block={blocks.find((b) => b.id === activeId)!} />
+                      </div>
+                    ) : null}
+                  </DragOverlay>
+                </DndContext>
+              )}
+            </div>
+          )}
         </div>
 
         {/* Property Panel */}
