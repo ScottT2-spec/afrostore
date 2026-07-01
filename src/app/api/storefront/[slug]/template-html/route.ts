@@ -155,6 +155,9 @@ export async function GET(req: NextRequest, { params }: Params) {
       });
     }
 
+    // 5b. Fix empty/placeholder nav links by mapping link text to page sections
+    html = fixEmptyNavLinks(html, slug);
+
     // 6. Inject navigation overlay + cart bridge script
     html = injectStorefrontBridge(html, slug, site.name, currency, currencySymbol, isEditMode);
 
@@ -417,6 +420,130 @@ function replaceContactInfo(html: string, phone: string): string {
     /(<(?:a|span|p|div|li)[^>]*class="[^"]*(?:phone|tel|contact|whatsapp)[^"]*"[^>]*>)([^<]+)(<\/)/gi,
     (_match, open, _text, close) => `${open}${phone}${close}`
   );
+
+  return html;
+}
+
+/**
+ * Fix empty href="" and href="#" links by mapping their visible text to
+ * in-page section anchors or store pages. Works across all templates.
+ */
+function fixEmptyNavLinks(html: string, storeSlug: string): string {
+  // Map of common link text -> target (anchor or path)
+  const textToTarget: Record<string, string> = {
+    // Common sections (scroll to anchor)
+    "about": "#about",
+    "about us": "#about",
+    "about me": "#about",
+    "who we are": "#about",
+    "our story": "#about",
+    "contact": "#contact",
+    "contact us": "#contact",
+    "get in touch": "#contact",
+    "menus": "#menu",
+    "menu": "#menu",
+    "our menu": "#menu",
+    "breakfast menu": "#menu",
+    "lunch menu": "#menu",
+    "dinner menu": "#menu",
+    "dessert menu": "#menu",
+    "drinks menu": "#menu",
+    "services": "#services",
+    "our services": "#services",
+    "what we do": "#services",
+    "portfolio": "#portfolio",
+    "our work": "#portfolio",
+    "work": "#portfolio",
+    "projects": "#portfolio",
+    "gallery": "#gallery",
+    "pricing": "#pricing",
+    "plans": "#pricing",
+    "team": "#team",
+    "our team": "#team",
+    "staff": "#team",
+    "testimonials": "#testimonials",
+    "reviews": "#testimonials",
+    "faq": "#faq",
+    "faqs": "#faq",
+    "blog": "#blog",
+    "news": "#blog",
+    "features": "#features",
+    "how it works": "#how-it-works",
+    "reservation": "#reservation",
+    "reservations": "#reservation",
+    "book a table": "#reservation",
+    "booking": "#reservation",
+    "book now": "#reservation",
+    "locations": "#contact",
+    "skills": "#skills",
+    "experience": "#experience",
+    // Pages (navigate to store subpages)
+    "shop": `/store/${storeSlug}/shop`,
+    "shop now": `/store/${storeSlug}/shop`,
+    "order online": `/store/${storeSlug}/shop`,
+    "buy now": `/store/${storeSlug}/shop`,
+    "all products": `/store/${storeSlug}/shop`,
+    "collections": `/store/${storeSlug}/shop`,
+    "privacy policy": `/store/${storeSlug}/privacy-policy`,
+    "privacy": `/store/${storeSlug}/privacy-policy`,
+    "terms": `/store/${storeSlug}/terms`,
+    "terms of service": `/store/${storeSlug}/terms`,
+  };
+
+  // Fix href="" and href="#" links by matching their text content
+  html = html.replace(
+    /<a([^>]*)\s+href=["'](?:|#)["']([^>]*)>([^<]+)<\/a>/gi,
+    (match, before, after, text) => {
+      const trimmed = text.trim().toLowerCase();
+      const target = textToTarget[trimmed];
+      if (target) {
+        return `<a${before} href="${target}"${after}>${text}</a>`;
+      }
+      // No match — keep as-is but add a data attribute so bridge script can handle
+      return `<a${before} href="#" data-afro-nav="${trimmed}"${after}>${text}</a>`;
+    }
+  );
+
+  // Also ensure sections have IDs matching common anchor targets
+  // Add IDs to sections that don't have them, based on heading text
+  const sectionAnchors: Record<string, string> = {
+    "about": "about",
+    "about us": "about",
+    "contact": "contact",
+    "contact us": "contact",
+    "menu": "menu",
+    "our menu": "menu",
+    "services": "services",
+    "portfolio": "portfolio",
+    "pricing": "pricing",
+    "team": "team",
+    "faq": "faq",
+    "blog": "blog",
+    "reservation": "reservation",
+    "testimonials": "testimonials",
+    "features": "features",
+    "gallery": "gallery",
+    "skills": "skills",
+    "experience": "experience",
+    "how it works": "how-it-works",
+  };
+
+  // Find <section> or major <div> elements without IDs that contain heading text
+  // matching our known anchors, and add the ID
+  for (const [headingText, anchorId] of Object.entries(sectionAnchors)) {
+    // Skip if this ID already exists in the HTML
+    if (html.includes(`id="${anchorId}"`)) continue;
+
+    // Look for sections containing a heading with this text
+    const headingPattern = new RegExp(
+      `(<section[^>]*?)>(\\s*(?:<[^>]*>\\s*)*<(?:h[1-6]|div)[^>]*>\\s*(?:<[^>]*>\\s*)*${headingText.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")})`,
+      "i"
+    );
+    html = html.replace(headingPattern, (m, sectionTag, rest) => {
+      if (sectionTag.includes("id=")) return m; // already has an ID
+      return `${sectionTag} id="${anchorId}">${rest}`;
+    });
+  }
 
   return html;
 }
@@ -693,6 +820,40 @@ function injectStorefrontBridge(
         storeName: storeName,
         storeSlug: storeSlug,
       }, '*');
+    }
+  });
+
+  // Smooth scroll for anchor links
+  document.addEventListener('click', function(e) {
+    var link = e.target.closest('a[href^="#"]');
+    if (!link) return;
+    var hash = link.getAttribute('href');
+    if (!hash || hash === '#') return;
+    var target = document.querySelector(hash);
+    if (target) {
+      e.preventDefault();
+      target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      // Close any open mobile menu
+      var collapsed = document.getElementById('collapsed-items');
+      if (collapsed) collapsed.style.display = 'none';
+    }
+  });
+
+  // Fallback: data-afro-nav links — try to find a matching section by scanning headings
+  document.addEventListener('click', function(e) {
+    var link = e.target.closest('a[data-afro-nav]');
+    if (!link) return;
+    e.preventDefault();
+    var navText = link.getAttribute('data-afro-nav');
+    // Search all headings and section titles for a match
+    var headings = document.querySelectorAll('h1, h2, h3, h4, section[class], div[class*="section"]');
+    for (var i = 0; i < headings.length; i++) {
+      var el = headings[i];
+      var text = (el.textContent || '').trim().toLowerCase();
+      if (text.indexOf(navText) !== -1 || navText.indexOf(text) !== -1) {
+        el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        return;
+      }
     }
   });
 
