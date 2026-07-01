@@ -2,13 +2,14 @@
 import { ArrowRight, ChevronRight, Loader2, X } from "lucide-react";
 import { Heart, Menu, MessageCircle, Phone, Search, ShoppingBag, ShoppingCart } from "@/components/icons/FilledIcons";
 
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useMemo } from "react";
 import { useParams } from "next/navigation";
 import Link from "next/link";
 import { RenderBlocks, type BuilderBlock, type StoreProduct } from "@/components/storefront/BlockRenderer";
 import { parsePageContent, getLinkedPageHref } from "@/lib/page-content";
 import { ThemeProvider, type ThemeData } from "@/components/storefront/ThemeProvider";
 import { useWishlist } from "@/hooks/useWishlist";
+import { applyPageCustomization, buildPageBackgroundStyle, buildThemeDataWithCustomization, filterVisiblePages, getResolvedPageSettings, normalizeSiteCustomization, type SiteCustomizationDocument } from "@/lib/site-customization";
 
 /* ─── TYPES ─────────────────────────────────────────────────── */
 
@@ -51,6 +52,7 @@ interface PageData {
   pages: Array<{ id: string; title: string; slug: string; type: string }>;
   templateSlug: string | null;
   theme: ThemeData | null;
+  customization?: SiteCustomizationDocument | null;
 }
 
 /* ─── HELPERS ───────────────────────────────────────────────── */
@@ -71,6 +73,7 @@ export default function StorefrontPage() {
   const [data, setData] = useState<PageData | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
+  const [draftCustomization, setDraftCustomization] = useState<SiteCustomizationDocument | null>(null);
   const [mobileMenu, setMobileMenu] = useState(false);
   const [showSearch, setShowSearch] = useState(false);
   const [addedToCart, setAddedToCart] = useState<string | null>(null);
@@ -91,13 +94,14 @@ export default function StorefrontPage() {
   useEffect(() => {
     (async () => {
       try {
-        const res = await fetch(`/api/storefront/${slug}/pages/${pageSlug}`);
-        const json = await res.json();
-        if (json.success && json.data) {
-          setData(json.data);
-          const title = json.data.page.metaTitle || `${json.data.page.title} — ${json.data.store.name}`;
-          document.title = title;
-        } else {
+      const res = await fetch(`/api/storefront/${slug}/pages/${pageSlug}`);
+      const json = await res.json();
+      if (json.success && json.data) {
+        setData(json.data);
+        setDraftCustomization(normalizeSiteCustomization(json.data.customization || null));
+        const title = json.data.page.metaTitle || `${json.data.page.title} — ${json.data.store.name}`;
+        document.title = title;
+      } else {
           setError(json.error || "Page not found");
         }
       } catch {
@@ -106,6 +110,16 @@ export default function StorefrontPage() {
       setLoading(false);
     })();
   }, [slug, pageSlug]);
+
+  useEffect(() => {
+    const handler = (event: MessageEvent) => {
+      if (!event.data || event.data.type !== "afro-site-customization-preview") return;
+      setDraftCustomization(normalizeSiteCustomization(event.data.customization || null));
+    };
+
+    window.addEventListener("message", handler);
+    return () => window.removeEventListener("message", handler);
+  }, []);
 
   // Persist cart
   useEffect(() => {
@@ -162,17 +176,22 @@ export default function StorefrontPage() {
   const { store, page, settings, socialLinks, products, categories } = data;
   const currency = store.currency || "NGN";
   const whatsappNumber = settings?.whatsappNumber || socialLinks?.whatsapp;
-  const parsedContent = parsePageContent(page.content);
+  const resolvedPage = applyPageCustomization(page, draftCustomization);
+  const parsedContent = parsePageContent(resolvedPage.content);
+  const resolvedPageSettings = getResolvedPageSettings(resolvedPage, parsedContent.settings, draftCustomization);
   const blocks: BuilderBlock[] = parsedContent.blocks;
+  const resolvedTheme = useMemo(() => buildThemeDataWithCustomization(data.theme, draftCustomization), [data.theme, draftCustomization]);
+  const visiblePages = filterVisiblePages(data.pages, draftCustomization);
+  const customizedPages = visiblePages.map((item) => applyPageCustomization(item, draftCustomization));
 
   // Navigation pages — exclude current page type HOME (we link to store root for that)
   const navPageOrder: Record<string, number> = { ABOUT: 0, FAQ: 1, CONTACT: 2, POLICY: 3, CUSTOM: 4, LANDING: 5 };
-  const navPages = data.pages
+  const navPages = customizedPages
     .filter((p) => p.type !== "HOME")
     .sort((a, b) => (navPageOrder[a.type] ?? 99) - (navPageOrder[b.type] ?? 99));
 
   return (
-    <ThemeProvider theme={data.theme}>
+    <ThemeProvider theme={resolvedTheme}>
     <div className="min-h-screen bg-white">
       {/* Announcement Bar — same as store homepage */}
       <div className="bg-brand-600 text-white text-center py-2 text-xs font-medium">
@@ -256,32 +275,26 @@ export default function StorefrontPage() {
         <nav className="flex items-center gap-1.5 text-xs text-surface-400">
           <Link href={`/store/${slug}`} className="hover:text-surface-600 transition-colors">{store.name}</Link>
           <ChevronRight className="h-3 w-3" />
-          <span className="text-surface-700 font-medium">{page.title}</span>
+          <span className="text-surface-700 font-medium">{resolvedPage.title}</span>
         </nav>
       </div>
 
       {/* Page content — full width like homepage, blocks define their own max-width */}
       <main
         className="relative overflow-hidden"
-        style={parsedContent.settings.backgroundImage ? {
-          backgroundImage: `url(${parsedContent.settings.backgroundImage})`,
-          backgroundSize: parsedContent.settings.backgroundSize || "cover",
-          backgroundPosition: parsedContent.settings.backgroundPosition || "center center",
-          backgroundRepeat: parsedContent.settings.backgroundRepeat || "no-repeat",
-          backgroundAttachment: parsedContent.settings.backgroundAttachment || "scroll",
-        } : undefined}
+        style={buildPageBackgroundStyle(resolvedPageSettings)}
       >
-        {parsedContent.settings.backgroundImage && (
+        {resolvedPageSettings.backgroundImage && (
           <div
             className="absolute inset-0 pointer-events-none"
             style={{
-              backgroundColor: parsedContent.settings.overlayColor || "#000000",
-              opacity: parsedContent.settings.overlayOpacity ?? 0.25,
+              backgroundColor: String(resolvedPageSettings.overlayColor || "#000000"),
+              opacity: Number(resolvedPageSettings.overlayOpacity ?? 0.25),
             }}
           />
         )}
-        {parsedContent.settings.backgroundColor && (
-          <div className="absolute inset-0 pointer-events-none" style={{ backgroundColor: parsedContent.settings.backgroundColor }} />
+        {resolvedPageSettings.backgroundColor && (
+          <div className="absolute inset-0 pointer-events-none" style={{ backgroundColor: String(resolvedPageSettings.backgroundColor) }} />
         )}
         {blocks.length === 0 ? (
           <div className="text-center py-20 relative z-10 max-w-6xl mx-auto px-4 sm:px-6">

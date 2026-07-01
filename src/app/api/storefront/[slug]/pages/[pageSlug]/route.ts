@@ -1,5 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/db";
+import { asRecord } from "@/lib/json";
+import { buildThemeDataWithCustomization, loadSiteCustomizationSafely } from "@/lib/site-customization";
 
 type Params = { params: Promise<{ slug: string; pageSlug: string }> };
 
@@ -39,6 +41,7 @@ export async function GET(_req: NextRequest, { params }: Params) {
       activeTheme,
       activeTemplate,
       products,
+      customization,
     ] = await Promise.all([
       prisma.page.findFirst({
         where: {
@@ -129,7 +132,14 @@ export async function GET(_req: NextRequest, { params }: Params) {
         orderBy: [{ isFeatured: "desc" }, { position: "asc" }, { createdAt: "desc" }],
         take: 20,
       }),
+
+      loadSiteCustomizationSafely(
+        prisma.siteCustomization.findUnique({
+          where: { siteId: site.id },
+        })
+      ),
     ]);
+    const resolvedCustomization = customization;
 
     if (!page) return notFound("Page not found");
 
@@ -183,43 +193,47 @@ export async function GET(_req: NextRequest, { params }: Params) {
       deliveryZones,
       pages: allPages,
       templateSlug: activeTemplate?.template?.slug || null,
-      theme: activeTheme
-        ? {
-            id: activeTheme.theme.id,
-            name: activeTheme.theme.name,
-            slug: activeTheme.theme.slug,
-            config: {
-              ...(activeTheme.theme.config as Record<string, unknown>),
-              ...(activeTheme.customConfig as Record<string, unknown> | null),
-            },
-          }
-        : activeTemplate
-        ? {
-            id: activeTemplate.template.id,
-            name: activeTemplate.template.name,
-            slug: activeTemplate.template.slug,
-            config: {
-              colors: {
-                primary: templateThemeConfig?.colors?.primary,
-                accent: templateThemeConfig?.colors?.accent,
-                headerBg: templateThemeConfig?.colors?.headerBg || templateThemeConfig?.colors?.background,
-                headerText: templateThemeConfig?.colors?.headerText || templateThemeConfig?.colors?.text,
-                footerBg: templateThemeConfig?.colors?.footerBg || templateThemeConfig?.colors?.secondary,
-                footerText: templateThemeConfig?.colors?.footerText || "#ffffff",
-                buttonBg: templateThemeConfig?.colors?.primary,
-                buttonText: "#ffffff",
+      customization: resolvedCustomization,
+      theme: buildThemeDataWithCustomization(
+        activeTheme
+          ? {
+              id: activeTheme.theme.id,
+              name: activeTheme.theme.name,
+              slug: activeTheme.theme.slug,
+              config: {
+                ...asRecord(activeTheme.theme.config),
+                ...asRecord(activeTheme.customConfig),
               },
-              fonts: templateThemeConfig?.fonts,
-              layout: {
-                template: templateThemeConfig?.homepage_layout,
-                headerStyle: templateThemeConfig?.header_style,
-                cardStyle: templateThemeConfig?.product_card_style,
-                maxWidth: "72rem",
-                productColumns: 4,
+            }
+          : activeTemplate
+          ? {
+              id: activeTemplate.template.id,
+              name: activeTemplate.template.name,
+              slug: activeTemplate.template.slug,
+              config: {
+                colors: {
+                  primary: templateThemeConfig?.colors?.primary,
+                  accent: templateThemeConfig?.colors?.accent,
+                  headerBg: templateThemeConfig?.colors?.headerBg || templateThemeConfig?.colors?.background,
+                  headerText: templateThemeConfig?.colors?.headerText || templateThemeConfig?.colors?.text,
+                  footerBg: templateThemeConfig?.colors?.footerBg || templateThemeConfig?.colors?.secondary,
+                  footerText: templateThemeConfig?.colors?.footerText || "#ffffff",
+                  buttonBg: templateThemeConfig?.colors?.primary,
+                  buttonText: "#ffffff",
+                },
+                fonts: templateThemeConfig?.fonts,
+                layout: {
+                  template: templateThemeConfig?.homepage_layout,
+                  headerStyle: templateThemeConfig?.header_style,
+                  cardStyle: templateThemeConfig?.product_card_style,
+                  maxWidth: "72rem",
+                  productColumns: 4,
+                },
               },
-            },
-          }
-        : null,
+            }
+          : null,
+        resolvedCustomization
+      ),
     });
   } catch (err) {
     console.error("Storefront page fetch error:", err);

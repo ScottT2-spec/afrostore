@@ -9,6 +9,14 @@ export interface ThemeColors {
   primaryLight?: string;
   primaryDark?: string;
   accent?: string;
+  secondary?: string;
+  background?: string;
+  surface?: string;
+  border?: string;
+  text?: string;
+  success?: string;
+  warning?: string;
+  error?: string;
   headerBg?: string;
   headerText?: string;
   footerBg?: string;
@@ -30,6 +38,10 @@ export interface ThemeLayout {
   headerStyle?: string;   // future: "standard" | "centered" | "minimal"
   cardStyle?: string;     // future: "modern" | "classic" | "minimal"
   template?: string;      // future: template slug
+  radius?: string;
+  spacingScale?: number;
+  buttonStyle?: string;
+  linkStyle?: string;
 }
 
 export interface ThemeConfig {

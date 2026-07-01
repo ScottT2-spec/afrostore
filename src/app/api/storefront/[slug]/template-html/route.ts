@@ -3,6 +3,7 @@ import { prisma } from "@/lib/db";
 import { readFile } from "fs/promises";
 import path from "path";
 import { getTemplateHtmlPath, hasTemplateHtml } from "@/lib/templates/template-html-map";
+import { buildCustomizationBridgeScript, buildCustomizationCss, getResolvedPageSettings, loadSiteCustomizationSafely, type SiteCustomizationDocument } from "@/lib/site-customization";
 
 type Params = { params: Promise<{ slug: string }> };
 
@@ -34,6 +35,19 @@ export async function GET(req: NextRequest, { params }: Params) {
       include: {
         template: { select: { id: true, name: true, slug: true } },
       },
+    });
+    const customization = await loadSiteCustomizationSafely(
+      prisma.siteCustomization.findUnique({
+        where: { siteId: site.id },
+      })
+    );
+    const homePage = await prisma.page.findFirst({
+      where: {
+        siteId: site.id,
+        isPublished: true,
+        OR: [{ type: "HOME" }, { type: "LANDING" }],
+      },
+      select: { id: true, slug: true, title: true },
     });
 
     const templateSlug = activeTemplate?.template?.slug;
@@ -139,9 +153,12 @@ export async function GET(req: NextRequest, { params }: Params) {
     }
 
     // 6. Inject navigation overlay + cart bridge script
-    html = injectStorefrontBridge(html, slug, site.name, currency, currencySymbol);
+    html = injectStorefrontBridge(html, slug, site.name, currency, currencySymbol, isEditMode);
 
-    // 7. If edit mode, inject the template editor script
+    // 7. Inject site customization bridge/styles so saved and live drafts render visually
+    html = injectCustomizationLayers(html, customization, homePage ? getResolvedPageSettings(homePage, {}, customization) : null);
+
+    // 8. If edit mode, inject the template editor script
     if (isEditMode) {
       html = injectEditorScript(html);
     }
@@ -150,7 +167,7 @@ export async function GET(req: NextRequest, { params }: Params) {
       status: 200,
       headers: {
         "Content-Type": "text/html; charset=utf-8",
-        "Cache-Control": "public, max-age=60, stale-while-revalidate=300",
+        "Cache-Control": "no-store, max-age=0",
       },
     });
   } catch (err) {
@@ -424,7 +441,8 @@ function injectStorefrontBridge(
   storeSlug: string,
   storeName: string,
   currency: string,
-  currencySymbol: string
+  currencySymbol: string,
+  isEditMode = false
 ): string {
   // Inject a small script before </body> that:
   // 1. Communicates with parent frame for cart functionality
@@ -437,6 +455,7 @@ function injectStorefrontBridge(
   var storeName = ${JSON.stringify(storeName)};
   var currency = ${JSON.stringify(currency)};
   var currencySymbol = ${JSON.stringify(currencySymbol)};
+  var isEditMode = ${JSON.stringify(isEditMode)};
 
   // Intercept link clicks — but let anchor/hash links work normally for template nav
   document.addEventListener('click', function(e) {
@@ -457,7 +476,11 @@ function injectStorefrontBridge(
     // Store links — navigate parent frame
     if (href.startsWith('/store/')) {
       e.preventDefault();
-      window.parent.location.href = href;
+      var nextHref = href;
+      if (isEditMode && nextHref.indexOf('afro_editor=1') === -1) {
+        nextHref += (nextHref.indexOf('?') === -1 ? '?' : '&') + 'afro_editor=1';
+      }
+      window.parent.location.href = nextHref;
     }
     // External links — open in new tab
     else if (href.startsWith('http')) {
@@ -526,6 +549,76 @@ function injectStorefrontBridge(
   }
 
   return html;
+}
+
+/* ─── Customization Injection ─── */
+
+function injectCustomizationLayers(
+  html: string,
+  customization: SiteCustomizationDocument | null,
+  pageSettings: unknown
+): string {
+  const customCss = buildCustomizationCss(customization);
+  const customizationBridge = buildCustomizationBridgeScript(customization);
+  const pageCss = buildPageCustomizationCss(pageSettings);
+
+  if (customCss) {
+    const styleTag = `<style id="afro-site-customization-css">${customCss}</style>`;
+    if (html.includes("</head>")) {
+      html = html.replace("</head>", `${styleTag}\n</head>`);
+    } else if (html.includes("<body>")) {
+      html = html.replace("<body>", `<body>\n${styleTag}`);
+    } else {
+      html = `${styleTag}\n${html}`;
+    }
+  }
+
+  if (pageCss) {
+    const styleTag = `<style id="afro-page-customization-css">${pageCss}</style>`;
+    if (html.includes("</head>")) {
+      html = html.replace("</head>", `${styleTag}\n</head>`);
+    } else if (html.includes("<body>")) {
+      html = html.replace("<body>", `<body>\n${styleTag}`);
+    } else {
+      html = `${styleTag}\n${html}`;
+    }
+  }
+
+  if (html.includes("</body>")) {
+    html = html.replace("</body>", customizationBridge + "\n</body>");
+  } else {
+    html += customizationBridge;
+  }
+
+  return html;
+}
+
+function buildPageCustomizationCss(settings: unknown): string {
+  if (!settings) return "";
+
+  const record = settings as Record<string, unknown>;
+  const backgroundImage = typeof record.backgroundImage === "string" ? record.backgroundImage : "";
+  const backgroundColor = typeof record.backgroundColor === "string" ? record.backgroundColor : "";
+  const backgroundSize = typeof record.backgroundSize === "string" ? record.backgroundSize : "cover";
+  const backgroundPosition = typeof record.backgroundPosition === "string" ? record.backgroundPosition : "center center";
+  const backgroundRepeat = typeof record.backgroundRepeat === "string" ? record.backgroundRepeat : "no-repeat";
+  const backgroundAttachment = typeof record.backgroundAttachment === "string" ? record.backgroundAttachment : "scroll";
+  const overlayColor = typeof record.overlayColor === "string" ? record.overlayColor : "#000000";
+  const overlayOpacity = typeof record.overlayOpacity === "number" ? record.overlayOpacity : 0.25;
+
+  const rules: string[] = [];
+  if (backgroundColor) {
+    rules.push(`body{background-color:${backgroundColor};}`);
+  }
+  if (backgroundImage) {
+    const escapedUrl = backgroundImage.replace(/\\/g, "\\\\").replace(/"/g, '\\"');
+    rules.push(`body{background-image:url("${escapedUrl}");background-size:${backgroundSize};background-position:${backgroundPosition};background-repeat:${backgroundRepeat};background-attachment:${backgroundAttachment};}`);
+    rules.push(`body{position:relative;}`);
+    rules.push(`body::before{content:'';position:fixed;inset:0;pointer-events:none;background:${overlayColor};opacity:${overlayOpacity};z-index:0;}`);
+    rules.push(`body > *{position:relative;z-index:1;}`);
+  }
+
+  return rules.join("\n");
 }
 
 /* ─── Editor Script Injection ─── */

@@ -2,16 +2,15 @@
 import { ArrowRight, ChevronRight, Loader2, Plus, X } from "lucide-react";
 import { CheckCircle2, CreditCard, Heart, ImageIcon, Mail, MapPin, Menu, MessageCircle, Minus, Phone, Search, Shield, ShoppingBag, ShoppingCart, Star, Truck, Zap } from "@/components/icons/FilledIcons";
 
-import { useState, useEffect, useCallback } from "react";
-import { useParams } from "next/navigation";
+import { useState, useEffect, useCallback, useMemo, useRef } from "react";
+import { useParams, useSearchParams } from "next/navigation";
 import Link from "next/link";
 import { RenderBlocks, type BuilderBlock } from "@/components/storefront/BlockRenderer";
-import { getLinkedPageHref, parsePageContent } from "@/lib/page-content";
+import { getLinkedPageHref, parsePageContent, type PageSettings } from "@/lib/page-content";
 import { ThemeProvider, type ThemeData } from "@/components/storefront/ThemeProvider";
 import { useWishlist } from "@/hooks/useWishlist";
-import TemplateRenderer from "@/templates/TemplateRenderer";
-import type { TemplateDefinition } from "@/lib/templates/types";
 import { hasTemplateHtml } from "@/lib/templates/template-html-map";
+import { applyPageCustomization, buildPageBackgroundStyle, buildThemeDataWithCustomization, filterVisiblePages, getResolvedPageSettings, normalizeSiteCustomization, type SiteCustomizationDocument } from "@/lib/site-customization";
 
 /* ───────── Types ───────── */
 
@@ -99,6 +98,7 @@ interface StoreData {
   pages: Array<{ id: string; title: string; slug: string; type: string; content?: unknown }>;
   templateSlug: string | null;
   theme: ThemeData | null;
+  customization?: SiteCustomizationDocument | null;
 }
 
 interface CartItem {
@@ -149,11 +149,14 @@ function getWhatsAppLink(phone: string | undefined, cart: CartItem[], currency: 
 
 export default function StorePage() {
   const params = useParams();
+  const searchParams = useSearchParams();
   const slug = params.slug as string;
 
   const [data, setData] = useState<StoreData | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
+  const [draftCustomization, setDraftCustomization] = useState<SiteCustomizationDocument | null>(null);
+  const templateIframeRef = useRef<HTMLIFrameElement>(null);
   const cartKey = `afrostore_cart_${slug}`;
   const [cart, setCart] = useState<CartItem[]>(() => {
     if (typeof window === "undefined") return [];
@@ -179,6 +182,7 @@ export default function StorePage() {
       const json = await res.json();
       if (json.success && json.data) {
         setData(json.data);
+        setDraftCustomization(normalizeSiteCustomization(json.data.customization || null));
       } else {
         setError(json.error || "Store not found");
       }
@@ -189,6 +193,21 @@ export default function StorePage() {
   }, [slug]);
 
   useEffect(() => { fetchStore(); }, [fetchStore]);
+
+  useEffect(() => {
+    const handler = (event: MessageEvent) => {
+      if (!event.data || event.data.type !== "afro-site-customization-preview") return;
+      const nextCustomization = normalizeSiteCustomization(event.data.customization || null);
+      setDraftCustomization(nextCustomization);
+      templateIframeRef.current?.contentWindow?.postMessage({
+        type: "afro-site-customization-preview",
+        customization: nextCustomization,
+      }, "*");
+    };
+
+    window.addEventListener("message", handler);
+    return () => window.removeEventListener("message", handler);
+  }, []);
 
   // Persist cart to localStorage for checkout
   useEffect(() => {
@@ -217,6 +236,8 @@ export default function StorePage() {
 
   const cartCount = cart.reduce((s, i) => s + i.quantity, 0);
   const cartTotal = cart.reduce((s, i) => s + Number(i.product.price) * i.quantity, 0);
+  const resolvedTheme = useMemo(() => buildThemeDataWithCustomization(data?.theme || null, draftCustomization), [data?.theme, draftCustomization]);
+  const editorPreview = searchParams.get("afro_editor") === "1";
 
   /* ── Loading ── */
   if (loading) {
@@ -260,87 +281,48 @@ export default function StorePage() {
 
   // ─── Page helpers ─────────────────────────────────────────
   // Find the primary page — HOME or LANDING (whichever has content)
-  const homePage = data.pages.find((p) => p.type === "HOME") || data.pages.find((p) => p.type === "LANDING");
-  const homeBlocks: BuilderBlock[] = homePage ? parsePageContent(homePage.content).blocks : [];
+  const visiblePages = filterVisiblePages(data.pages, draftCustomization);
+  const customizedPages = visiblePages.map((page) => applyPageCustomization(page, draftCustomization));
+  const homePage = customizedPages.find((p) => p.type === "HOME") || customizedPages.find((p) => p.type === "LANDING");
+  const homeContent: { blocks: BuilderBlock[]; settings: PageSettings } = homePage
+    ? parsePageContent(homePage.content)
+    : { blocks: [], settings: {} };
+  const homePageSettings = homePage ? getResolvedPageSettings(homePage, homeContent.settings, draftCustomization) : {};
+  const homeBlocks: BuilderBlock[] = homeContent.blocks;
   const hasHomeContent = homeBlocks.length > 0;
   const homeHasProductGrid = homeBlocks.some((b) => b.type === "productGrid");
   const isTemplateSite = !!data.templateSlug;
-  const useRawTemplateHtml = !!data.templateSlug && hasTemplateHtml(data.templateSlug);
-  const templateLike: TemplateDefinition | null = data.templateSlug ? {
-    id: data.templateSlug,
-    name: store.name,
-    slug: data.templateSlug,
-    category: store.businessType || "Store",
-    description: store.description || "",
-    previewImage: "",
-    previewUrl: `/template-preview/${data.templateSlug}`,
-    recommendationKeywords: [],
-    themeConfig: {
-      homepage_layout: "storefront",
-      header_style: "storefront",
-      footer_style: "storefront",
-      product_card_style: "storefront",
-      colors: {
-        primary: "#111827",
-        secondary: "#374151",
-        accent: "#2563eb",
-        background: "#ffffff",
-        text: "#111827",
-        headerBg: "#ffffff",
-        headerText: "#111827",
-        footerBg: "#111827",
-        footerText: "#ffffff",
-      },
-      fonts: {
-        heading: "Inter",
-        body: "Inter",
-      },
-      sections: homeBlocks,
-    },
-    active: true,
-  } : null;
+  const hasRawTemplateHtml = !!data.templateSlug && hasTemplateHtml(data.templateSlug);
+  const iframeSrc = `${"/api/storefront/" + slug + "/template-html"}${editorPreview ? "?afro_edit=1" : ""}`;
 
   // Navigation pages: exclude HOME (we're on it), sort sensibly
   const navPageOrder: Record<string, number> = { ABOUT: 0, FAQ: 1, CONTACT: 2, POLICY: 3, CUSTOM: 4, LANDING: 5 };
-  const navPages = data.pages
+  const navPages = customizedPages
     .filter((p) => p.type !== "HOME")
     .sort((a, b) => (navPageOrder[a.type] ?? 99) - (navPageOrder[b.type] ?? 99));
 
-  if (isTemplateSite && useRawTemplateHtml) {
+  if (isTemplateSite && hasRawTemplateHtml) {
     return (
       <div className="min-h-screen">
         <iframe
-          src={`/api/storefront/${slug}/template-html`}
+          ref={templateIframeRef}
+          src={iframeSrc}
           className="w-full border-0"
           style={{ minHeight: "100vh", display: "block" }}
           title={store.name}
+          onLoad={() => {
+            templateIframeRef.current?.contentWindow?.postMessage({
+              type: "afro-site-customization-preview",
+              customization: draftCustomization,
+            }, "*");
+          }}
         />
       </div>
     );
   }
 
-  if (isTemplateSite && templateLike) {
-    return (
-      <ThemeProvider theme={data.theme}>
-        <div className="min-h-screen bg-white">
-          <TemplateRenderer
-            template={templateLike}
-            blocks={homeBlocks}
-            storeSlug={slug}
-            products={products as any}
-            currency={currency}
-            addToCart={(p) => addToCart(p as unknown as Product)}
-            isWishlisted={isWishlisted}
-            toggleWishlist={toggleWishlist}
-            addedToCart={addedToCart}
-          />
-        </div>
-      </ThemeProvider>
-    );
-  }
-
   return (
-    <ThemeProvider theme={data.theme}>
+    <ThemeProvider theme={resolvedTheme}>
     <div className="min-h-screen bg-white">
       {/* Announcement Bar */}
       <div className="bg-brand-600 text-white text-center py-2 text-xs font-medium">
@@ -436,7 +418,7 @@ export default function StorePage() {
       {/* ─── HOME PAGE CONTENT ─────────────────────────────────── */}
       {hasHomeContent ? (
         /* Builder blocks Home page — render template blocks */
-        <div>
+        <div style={buildPageBackgroundStyle(homePageSettings)}>
           <RenderBlocks blocks={homeBlocks} storeSlug={slug} products={products} currency={currency} addToCart={(p) => addToCart(p as unknown as Product)} isWishlisted={isWishlisted} toggleWishlist={toggleWishlist} addedToCart={addedToCart} />
           {products.length > 0 && !homeHasProductGrid && (
             <div className="text-center py-10">
@@ -451,7 +433,7 @@ export default function StorePage() {
         </div>
       ) : (
         /* Fallback: no template — default hero + product grid for blank stores */
-        <>
+        <div style={buildPageBackgroundStyle(homePageSettings)}>
           <section className="relative bg-gradient-to-br from-surface-900 via-surface-800 to-surface-900 overflow-hidden">
             <div className="absolute inset-0">
               <div className="absolute top-0 right-0 h-[500px] w-[500px] rounded-full bg-purple-500/10 blur-[100px]" />
@@ -548,101 +530,85 @@ export default function StorePage() {
               </div>
             ) : (
               <>
-              <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4 sm:gap-6">
-                {filteredProducts.slice(0, 8).map((product) => {
-                  const hasImage = product.images.length > 0 && product.images[0].url;
-                  const discount = product.compareAtPrice
-                    ? Math.round(((Number(product.compareAtPrice) - Number(product.price)) / Number(product.compareAtPrice)) * 100)
-                    : 0;
-                  const justAdded = addedToCart === product.id;
+                <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4 sm:gap-6">
+                  {filteredProducts.slice(0, 8).map((product) => {
+                    const hasImage = product.images.length > 0 && product.images[0].url;
+                    const discount = product.compareAtPrice
+                      ? Math.round(((Number(product.compareAtPrice) - Number(product.price)) / Number(product.compareAtPrice)) * 100)
+                      : 0;
+                    const justAdded = addedToCart === product.id;
 
-                  return (
-                    <div key={product.id} className="group cursor-pointer" onClick={() => { setSelectedProduct(product); setQty(1); }}>
-                      <div className="relative aspect-[3/4] rounded-2xl overflow-hidden mb-3">
-                        {hasImage ? (
-                          <img src={product.images[0].url} alt={product.images[0].alt || product.name} className="absolute inset-0 w-full h-full object-cover transition-transform duration-500 group-hover:scale-110" />
-                        ) : (
-                          <div className={`absolute inset-0 bg-gradient-to-br ${getGradient(product.id)} transition-transform duration-500 group-hover:scale-110 flex items-center justify-center`}>
-                            <ImageIcon className="h-10 w-10 text-white/40" />
+                    return (
+                      <div key={product.id} className="group cursor-pointer" onClick={() => { setSelectedProduct(product); setQty(1); }}>
+                        <div className="relative aspect-[3/4] rounded-2xl overflow-hidden mb-3">
+                          {hasImage ? (
+                            <img src={product.images[0].url} alt={product.images[0].alt || product.name} className="absolute inset-0 w-full h-full object-cover transition-transform duration-500 group-hover:scale-110" />
+                          ) : (
+                            <div className={`absolute inset-0 bg-gradient-to-br ${getGradient(product.id)} transition-transform duration-500 group-hover:scale-110 flex items-center justify-center`}>
+                              <ImageIcon className="h-10 w-10 text-white/40" />
+                            </div>
+                          )}
+                          {product.isFeatured && (
+                            <div className="absolute top-3 left-3 rounded-full px-2.5 py-0.5 text-[10px] font-bold text-white bg-brand-600">Featured</div>
+                          )}
+                          {!product.inStock && (
+                            <div className="absolute top-3 left-3 rounded-full px-2.5 py-0.5 text-[10px] font-bold text-white bg-red-500">Sold Out</div>
+                          )}
+                          {discount > 0 && (
+                            <div className="absolute top-3 left-3 rounded-full bg-red-500 px-2 py-0.5 text-[10px] font-bold text-white z-10">-{discount}%</div>
+                          )}
+                          <div className="absolute top-3 right-3 flex items-center gap-1.5 z-10">
+                            <button
+                              onClick={(e) => { e.stopPropagation(); toggleWishlist(product.id); }}
+                              className={`h-8 w-8 rounded-full bg-white/90 backdrop-blur-sm flex items-center justify-center transition-all hover:bg-white hover:scale-110 shadow-sm ${isWishlisted(product.id) ? "ring-1 ring-red-200" : ""}`}
+                            >
+                              <Heart className={`h-4 w-4 ${isWishlisted(product.id) ? "fill-red-500 text-red-500" : "text-surface-500"}`} />
+                            </button>
+                            <button
+                              onClick={(e) => { e.stopPropagation(); if (product.inStock) addToCart(product); }}
+                              disabled={!product.inStock}
+                              className={`h-8 w-8 rounded-full backdrop-blur-sm flex items-center justify-center transition-all hover:scale-110 shadow-sm disabled:opacity-40 ${
+                                justAdded ? "bg-green-500 text-white" : "bg-white/90 text-surface-500 hover:bg-white"
+                              }`}
+                            >
+                              {justAdded ? <CheckCircle2 className="h-4 w-4" /> : <ShoppingCart className="h-4 w-4" />}
+                            </button>
+                          </div>
+                          <div className="absolute inset-0 bg-black/0 group-hover:bg-black/10 transition-colors" />
+                        </div>
+                        <h3 className="text-sm font-semibold text-surface-900 group-hover:text-brand-600 transition-colors line-clamp-1">{product.name}</h3>
+                        {product.reviewCount > 0 && (
+                          <div className="flex items-center gap-1 mt-1">
+                            <Star className="h-3 w-3 fill-yellow-400 text-yellow-400" />
+                            <span className="text-[10px] text-surface-400">({product.reviewCount})</span>
                           </div>
                         )}
-                        {product.isFeatured && (
-                          <div className="absolute top-3 left-3 rounded-full px-2.5 py-0.5 text-[10px] font-bold text-white bg-brand-600">Featured</div>
-                        )}
-                        {!product.inStock && (
-                          <div className="absolute top-3 left-3 rounded-full px-2.5 py-0.5 text-[10px] font-bold text-white bg-red-500">Sold Out</div>
-                        )}
-                        {discount > 0 && (
-                          <div className="absolute top-3 left-3 rounded-full bg-red-500 px-2 py-0.5 text-[10px] font-bold text-white z-10">-{discount}%</div>
-                        )}
-                        <div className="absolute top-3 right-3 flex items-center gap-1.5 z-10">
-                          <button
-                            onClick={(e) => { e.stopPropagation(); toggleWishlist(product.id); }}
-                            className={`h-8 w-8 rounded-full bg-white/90 backdrop-blur-sm flex items-center justify-center transition-all hover:bg-white hover:scale-110 shadow-sm ${isWishlisted(product.id) ? "ring-1 ring-red-200" : ""}`}
-                          >
-                            <Heart className={`h-4 w-4 ${isWishlisted(product.id) ? "fill-red-500 text-red-500" : "text-surface-500"}`} />
-                          </button>
-                          <button
-                            onClick={(e) => { e.stopPropagation(); if (product.inStock) addToCart(product); }}
-                            disabled={!product.inStock}
-                            className={`h-8 w-8 rounded-full backdrop-blur-sm flex items-center justify-center transition-all hover:scale-110 shadow-sm disabled:opacity-40 ${
-                              justAdded ? "bg-green-500 text-white" : "bg-white/90 text-surface-500 hover:bg-white"
-                            }`}
-                          >
-                            {justAdded ? <CheckCircle2 className="h-4 w-4" /> : <ShoppingCart className="h-4 w-4" />}
-                          </button>
+                        <div className="flex items-center gap-2 mt-1.5">
+                          <span className="text-base font-bold text-surface-900">{formatCurrency(Number(product.price), currency)}</span>
+                          {product.compareAtPrice && (
+                            <span className="text-xs text-surface-400 line-through">{formatCurrency(Number(product.compareAtPrice), currency)}</span>
+                          )}
                         </div>
-                        <div className="absolute inset-0 bg-black/0 group-hover:bg-black/10 transition-colors" />
                       </div>
-                      <h3 className="text-sm font-semibold text-surface-900 group-hover:text-brand-600 transition-colors line-clamp-1">{product.name}</h3>
-                      {product.reviewCount > 0 && (
-                        <div className="flex items-center gap-1 mt-1">
-                          <Star className="h-3 w-3 fill-yellow-400 text-yellow-400" />
-                          <span className="text-[10px] text-surface-400">({product.reviewCount})</span>
-                        </div>
-                      )}
-                      <div className="flex items-center gap-2 mt-1.5">
-                        <span className="text-base font-bold text-surface-900">{formatCurrency(Number(product.price), currency)}</span>
-                        {product.compareAtPrice && (
-                          <span className="text-xs text-surface-400 line-through">{formatCurrency(Number(product.compareAtPrice), currency)}</span>
-                        )}
-                      </div>
-                    </div>
-                  );
-                })}
-              </div>
-              {filteredProducts.length > 8 && (
-                <div className="text-center mt-10">
-                  <Link
-                    href={`/store/${slug}/shop`}
-                    className="inline-flex items-center gap-2 rounded-2xl bg-surface-900 text-white px-8 py-3.5 text-sm font-bold hover:bg-surface-800 transition-all shadow-lg hover:-translate-y-0.5"
-                  >
-                    View All Products <ArrowRight className="h-4 w-4" />
-                  </Link>
-                  <p className="text-xs text-surface-400 mt-2">Showing 8 of {filteredProducts.length} products</p>
+                    );
+                  })}
                 </div>
-              )}
+                {filteredProducts.length > 8 && (
+                  <div className="text-center mt-10">
+                    <Link
+                      href={`/store/${slug}/shop`}
+                      className="inline-flex items-center gap-2 rounded-2xl bg-surface-900 text-white px-8 py-3.5 text-sm font-bold hover:bg-surface-800 transition-all shadow-lg hover:-translate-y-0.5"
+                    >
+                      View All Products <ArrowRight className="h-4 w-4" />
+                    </Link>
+                    <p className="text-xs text-surface-400 mt-2">Showing 8 of {filteredProducts.length} products</p>
+                  </div>
+                )}
               </>
             )}
           </section>
-
-          {/* WhatsApp CTA — only for blank stores without template */}
-          {settings.whatsappOrdering && whatsappNumber && (
-            <section className="bg-green-600 py-10">
-              <div className="max-w-6xl mx-auto px-4 sm:px-6 flex flex-col sm:flex-row items-center justify-between gap-4">
-                <div className="text-center sm:text-left">
-                  <h3 className="text-xl font-bold text-white">Prefer to order on WhatsApp?</h3>
-                  <p className="text-green-100 text-sm mt-1">Send us a message and we&apos;ll help you place your order.</p>
-                </div>
-                <a href={getWhatsAppLink(whatsappNumber, cart, currency, store.name)} className="inline-flex items-center gap-2 rounded-xl bg-white px-6 py-3 text-sm font-bold text-green-700 hover:bg-green-50 transition-colors shadow-lg">
-                  <MessageCircle className="h-5 w-5" /> Chat on WhatsApp
-                </a>
-              </div>
-            </section>
-          )}
-        </>
+        </div>
       )}
-
       {/* Cart preview bar */}
       {cartCount > 0 && !selectedProduct && (
         <div className="fixed bottom-0 left-0 right-0 z-40 bg-white border-t border-surface-200 shadow-2xl px-4 sm:px-6 py-3 sm:hidden">

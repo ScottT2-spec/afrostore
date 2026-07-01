@@ -177,6 +177,9 @@ export default function SiteCustomizePage({ params }: { params: Promise<{ siteId
           <Link href={`/store/${site.slug}`} target="_blank" className="inline-flex items-center gap-2 rounded-xl border border-surface-200 bg-white px-4 py-2.5 text-sm font-semibold text-surface-700 hover:bg-surface-50">
             Live site <ExternalLink className="h-4 w-4" />
           </Link>
+          <Link href={`/dashboard/sites/${siteId}/editor`} className="inline-flex items-center gap-2 rounded-xl border border-brand-200 bg-brand-50 px-4 py-2.5 text-sm font-semibold text-brand-700 hover:bg-brand-100">
+            <LayoutTemplate className="h-4 w-4" /> Open visual editor
+          </Link>
           <button onClick={saveChanges} disabled={saving} className="inline-flex items-center gap-2 rounded-xl bg-brand-600 px-4 py-2.5 text-sm font-semibold text-white hover:bg-brand-700 disabled:opacity-50">
             {saving ? <Loader2 className="h-4 w-4 animate-spin" /> : <Save className="h-4 w-4" />} Save changes
           </button>

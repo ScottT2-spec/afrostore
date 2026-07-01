@@ -175,6 +175,7 @@ model Site {
   media          MediaItem[]
   themes         SiteTheme[]
   templates      SiteTemplate[]
+  customization  SiteCustomization?
   plugins        SitePlugin[]
   paymentGateways PaymentGateway[]
   deliveryZones  DeliveryZone[]
@@ -910,6 +911,33 @@ model SiteTemplate {
   @@index([siteId])
   @@index([templateId])
   @@map("site_templates")
+}
+
+model SiteCustomization {
+  id                  String   @id @default(cuid())
+  siteId              String   @unique
+  themeSettings       Json?
+  pageSettings        Json?
+  sectionSettings     Json?
+  blockSettings       Json?
+  navigationSettings  Json?
+  footerSettings      Json?
+  headerSettings      Json?
+  mediaAssets         Json?
+  seoSettings         Json?
+  revisionHistory     Json?
+  customCss           String?  @db.Text
+  customJs            String?  @db.Text
+  currentVersion      Int      @default(1)
+  publishedVersion    Int      @default(1)
+  lastPublishedAt     DateTime?
+  createdAt           DateTime @default(now())
+  updatedAt           DateTime @updatedAt
+
+  site Site @relation(fields: [siteId], references: [id], onDelete: Cascade)
+
+  @@index([siteId])
+  @@map("site_customizations")
 }
 
 // ─── PLUGINS ────────────────────────────────────────────────

@@ -1,9 +1,10 @@
-'use client';
+"use client";
 import { Loader2, Plus } from "lucide-react";
 import { Building2, FileText, Globe, Megaphone, MoreVertical, Settings, ShoppingBag, Users } from "@/components/icons/FilledIcons";
 
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
+import Link from "next/link";
 import { useAuth } from '@/context/AuthContext';
 
 interface Workspace {
@@ -136,6 +137,8 @@ export default function WorkspacesPage() {
       setCreating(false);
     }
   };
+
+  const getCustomizeSiteId = (workspace: Workspace) => workspace.sites[0]?.id || null;
 
   if (loading) {
     return (
@@ -325,6 +328,14 @@ export default function WorkspacesPage() {
                     <Plus className="w-3.5 h-3.5" />
                     Add Site
                   </button>
+                  {getCustomizeSiteId(workspace) && (
+                    <Link
+                      href={`/dashboard/sites/${getCustomizeSiteId(workspace)}/customize`}
+                      className="flex items-center gap-1.5 px-3 py-1.5 text-sm bg-brand-50 text-brand-700 rounded-lg hover:bg-brand-100 transition font-medium"
+                    >
+                      Customize
+                    </Link>
+                  )}
                   <button
                     onClick={() => openSettings(workspace)}
                     className="p-2 hover:bg-gray-100 rounded-lg transition"
@@ -345,35 +356,44 @@ export default function WorkspacesPage() {
                     const config = siteTypeConfig[site.siteType];
                     const Icon = config.icon;
                     return (
-                      <button
+                      <div
                         key={site.id}
-                        onClick={() => {
-                          localStorage.setItem(`activeSiteId:${user?.id || "guest"}`, site.id);
-                          localStorage.removeItem('activeSiteId');
-                          router.push('/dashboard');
-                        }}
-                        className="w-full px-6 py-3.5 flex items-center justify-between hover:bg-gray-50 transition text-left"
+                        className="w-full px-6 py-3.5 flex items-center justify-between gap-4 hover:bg-gray-50 transition text-left"
                       >
-                        <div className="flex items-center gap-3">
-                          <div className={`w-9 h-9 ${config.bg} rounded-lg flex items-center justify-center`}>
+                        <button
+                          onClick={() => {
+                            localStorage.setItem(`activeSiteId:${user?.id || "guest"}`, site.id);
+                            localStorage.removeItem('activeSiteId');
+                            router.push('/dashboard');
+                          }}
+                          className="flex min-w-0 flex-1 items-center gap-3 text-left"
+                        >
+                          <div className={`w-9 h-9 ${config.bg} rounded-lg flex items-center justify-center flex-shrink-0`}>
                             {site.logo ? (
                               <img src={site.logo} alt="" className="w-full h-full rounded-lg object-cover" />
                             ) : (
                               <Icon className={`w-4 h-4 ${config.color}`} />
                             )}
                           </div>
-                          <div>
-                            <p className="font-medium text-gray-900 text-sm">{site.name}</p>
-                            <p className="text-xs text-gray-400">{site.subdomain}.prokip.site</p>
+                          <div className="min-w-0">
+                            <p className="font-medium text-gray-900 text-sm truncate">{site.name}</p>
+                            <p className="text-xs text-gray-400 truncate">{site.subdomain}.prokip.site</p>
                           </div>
-                        </div>
-                        <div className="flex items-center gap-3">
+                        </button>
+
+                        <div className="flex items-center gap-3 flex-shrink-0">
                           <span className={`text-xs font-medium px-2 py-0.5 rounded-full ${config.bg} ${config.color}`}>
                             {config.label}
                           </span>
                           <span className={`w-2 h-2 rounded-full ${site.status === 'ACTIVE' ? 'bg-emerald-400' : 'bg-gray-300'}`} />
+                          <Link
+                            href={`/dashboard/sites/${site.id}/customize`}
+                            className="rounded-lg border border-gray-200 bg-white px-3 py-1.5 text-xs font-medium text-gray-700 hover:bg-gray-50 transition"
+                          >
+                            Customize
+                          </Link>
                         </div>
-                      </button>
+                      </div>
                     );
                   })}
                 </div>
