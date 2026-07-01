@@ -24,7 +24,7 @@ RUN apt-get update && apt-get install -y openssl ca-certificates && rm -rf /var/
 WORKDIR /app
 
 ENV NODE_ENV=production
-ENV PORT=7860
+ENV PORT=3000
 ENV HOSTNAME=0.0.0.0
 
 # Copy standalone build
@@ -35,6 +35,6 @@ COPY --from=base /app/public ./public
 # Ensure uploads directory exists and is writable
 RUN mkdir -p /app/public/uploads
 
-EXPOSE 7860
+EXPOSE 3000
 
 CMD ["node", "server.js"]
