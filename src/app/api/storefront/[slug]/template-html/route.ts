@@ -244,6 +244,12 @@ function substituteStoreData(html: string, data: SubstitutionData): string {
     html = replaceContactInfo(html, data.whatsappNumber);
   }
 
+  // Replace category names in sidebar/nav widgets
+  html = replaceCategories(html, data.categories, data.storeSlug);
+
+  // Replace footer menu/widget links with store pages
+  html = replaceFooterLinks(html, data.storeSlug);
+
   // Fix internal links to point to our store
   html = rewriteLinks(html, data.storeSlug);
 
@@ -415,19 +421,141 @@ function replaceContactInfo(html: string, phone: string): string {
   return html;
 }
 
+function replaceFooterLinks(html: string, storeSlug: string): string {
+  const shopHref = `/store/${storeSlug}/shop`;
+
+  // Replace footer widget links that point to demo pages
+  // Footer toggle/widget links with text like "About Us", "Contact", "FAQ", etc.
+  html = html.replace(
+    /(<a[^>]*class="[^"]*(?:wp-block-wd-menu-list|footer|widget)[^"]*"[^>]*)href="[^"]*"/g,
+    `$1href="${shopHref}"`
+  );
+
+  // Replace links inside footer sections (wd-toggle-content, footer-sidebar)
+  html = html.replace(
+    /(class="[^"]*(?:wd-toggle-content|footer-column|footer-sidebar)[^"]*"[\s\S]*?<a[^>]*)href="(?:https?:\/\/[^"]*|\/[^"]*(?!\.(?:css|js|png|jpg|svg|woff2?))[^"]*)"/g,
+    `$1href="${shopHref}"`
+  );
+
+  return html;
+}
+
+function replaceCategories(html: string, categories: string[], storeSlug: string): string {
+  if (categories.length === 0) return html;
+
+  let catIndex = 0;
+
+  // Replace WoodMart category titles in product-category blocks
+  html = html.replace(
+    /(<div[^>]*class="[^"]*product-category[^"]*"[^>]*>[\s\S]*?<[^>]*class="wd-entities-title"[^>]*>\s*<a[^>]*>)([^<]+)(<\/a>)/g,
+    (_match, prefix, _oldName, suffix) => {
+      if (catIndex >= categories.length) catIndex = 0;
+      const cat = categories[catIndex++];
+      return `${prefix}${cat}${suffix}`;
+    }
+  );
+
+  // Replace category links in sidebar widget lists (WoodMart pattern)
+  html = html.replace(
+    /(<li[^>]*class="[^"]*cat-item[^"]*"[^>]*>\s*<a[^>]*)href="[^"]*"(>)([^<]+)(<\/a>)/g,
+    (_match, before, gt, _oldName, after) => {
+      if (catIndex >= categories.length) catIndex = 0;
+      const cat = categories[catIndex++];
+      return `${before}href="/store/${storeSlug}/shop"${gt}${cat}${after}`;
+    }
+  );
+
+  // Replace nav menu items that link to product-category pages
+  html = html.replace(
+    /(<a[^>]*href="[^"]*product-category[^"]*"[^>]*>)([^<]+)(<\/a>)/g,
+    (_match, open, _oldName, close) => {
+      if (catIndex >= categories.length) catIndex = 0;
+      const cat = categories[catIndex++];
+      const newOpen = open.replace(/href="[^"]*"/, `href="/store/${storeSlug}/shop"`);
+      return `${newOpen}${cat}${close}`;
+    }
+  );
+
+  return html;
+}
+
 function rewriteLinks(html: string, storeSlug: string): string {
-  // Only rewrite known demo-site links — never touch CDN, font, or asset URLs.
+  const shopHref = `/store/${storeSlug}/shop`;
+  const homeHref = `/store/${storeSlug}`;
+
+  // 1. Rewrite known demo-site full URLs (woodmart, themeforest, etc.)
   const demoDomains = [
     "woodmart.xtemos.com",
     "preview.themeforest.net",
   ];
   const demoPattern = new RegExp(
-    `href="https?://(?:${demoDomains.map(d => d.replace(/\./g, "\\.")).join("|")})[^"]*"`,
+    `href="https?://(?:${demoDomains.map(d => d.replace(/\./g, "\\.")).join("|")})(/[^"]*)"`,
     "g"
   );
-  html = html.replace(demoPattern, `href="/store/${storeSlug}/shop"`);
+  html = html.replace(demoPattern, (_match, path: string) => {
+    return `href="${classifyDemoPath(path, storeSlug)}"`;
+  });
+
+  // 2. Rewrite relative demo paths: /demo-<name>/... or /<demo-slug>/...
+  //    These appear in cosmetics, electronics, retail, grocery templates
+  html = html.replace(
+    /href="\/(?:demo-[a-z-]+|[a-z-]+)\/demo\/[a-z-]+\/(\?add-to-cart=\d+)"/g,
+    `href="${shopHref}"`
+  );
+  html = html.replace(
+    /href="\/(?:demo-[a-z-]+|[a-z-]+)\/demo\/[a-z-]+\/[^"]*"/g,
+    `href="${shopHref}"`
+  );
+
+  // 3. Rewrite empty hrefs and placeholder links
+  html = html.replace(/href="(?:http:\/\/|https:\/\/)?"/g, `href="${homeHref}"`);
 
   return html;
+}
+
+/** Classify a demo-site URL path and map it to the appropriate store page */
+function classifyDemoPath(path: string, storeSlug: string): string {
+  const shopHref = `/store/${storeSlug}/shop`;
+  const homeHref = `/store/${storeSlug}`;
+
+  // Product pages: /*/product/product-slug/
+  if (/\/product\/[^/]+/.test(path)) {
+    return shopHref;
+  }
+  // Category pages: /*/product-category/cat-slug/
+  if (/\/product-category\//.test(path)) {
+    return shopHref;
+  }
+  // Shop pages
+  if (/\/shop\/?/.test(path)) {
+    return shopHref;
+  }
+  // Collections / catalog
+  if (/\/collections?\/?/.test(path)) {
+    return shopHref;
+  }
+  // Wishlist
+  if (/\/wishlist\/?/.test(path)) {
+    return `/store/${storeSlug}/wishlist`;
+  }
+  // Cart / checkout
+  if (/\/(?:cart|checkout)\/?/.test(path)) {
+    return `/checkout`;
+  }
+  // About page
+  if (/\/about/.test(path)) {
+    return `/store/${storeSlug}/about`;
+  }
+  // Contact page
+  if (/\/contact/.test(path)) {
+    return `/store/${storeSlug}/contact`;
+  }
+  // Blog
+  if (/\/blog/.test(path)) {
+    return homeHref;
+  }
+  // Default — send to shop
+  return shopHref;
 }
 
 function formatPrice(price: number): string {
@@ -459,56 +587,68 @@ function injectStorefrontBridge(
   var currency = ${JSON.stringify(currency)};
   var currencySymbol = ${JSON.stringify(currencySymbol)};
   var isEditMode = ${JSON.stringify(isEditMode)};
+  var shopHref = '/store/' + storeSlug + '/shop';
+  var homeHref = '/store/' + storeSlug;
 
-  // Intercept link clicks — but let anchor/hash links work normally for template nav
+  // Helper: navigate parent frame
+  function navigateParent(href) {
+    if (isEditMode && href.indexOf('afro_editor=1') === -1) {
+      href += (href.indexOf('?') === -1 ? '?' : '&') + 'afro_editor=1';
+    }
+    window.parent.location.href = href;
+  }
+
+  // Helper: classify and redirect a link
+  function resolveHref(href) {
+    if (!href || href === '' || href === '#' || href === 'http://' || href === 'https://') return null;
+    if (href.startsWith('javascript:')) return null;
+    if (href.startsWith('#')) return 'anchor'; // let anchor links work normally
+    if (href.startsWith('/store/') || href.startsWith('/checkout')) return href;
+    if (href.startsWith('tel:') || href.startsWith('mailto:') || href.startsWith('whatsapp:') || href.startsWith('https://wa.me')) return 'passthrough';
+    if (href.startsWith('https://maps.') || href.startsWith('https://www.google.com/maps')) return 'external';
+    // Social media links — open externally
+    if (/https?:\/\/(www\.)?(facebook|instagram|twitter|x|tiktok|youtube|linkedin|pinterest|telegram)\./.test(href)) return 'external';
+    // Demo site links that were missed by server-side rewrite
+    if (/woodmart\.xtemos\.com|preview\.themeforest\.net/.test(href)) return shopHref;
+    // Relative demo paths
+    if (/\/demo[-\/]/.test(href) || /\?add-to-cart=/.test(href)) return shopHref;
+    // External links
+    if (href.startsWith('http')) return 'external';
+    // Relative links (non-asset) — redirect to shop
+    if (!href.match(/\.(css|js|png|jpg|jpeg|gif|svg|webp|woff|woff2|ttf|eot|ico)$/i)) return shopHref;
+    return null;
+  }
+
+  // Intercept all link clicks
   document.addEventListener('click', function(e) {
     var link = e.target.closest('a[href]');
     if (!link) return;
     var href = link.getAttribute('href');
-    
-    // Block empty hrefs and bare "#" — many templates leave these as placeholders
-    if (!href || href === '' || href === '#' || href === 'http://' || href === 'https://') {
-      e.preventDefault();
-      return;
-    }
-    if (href.startsWith('javascript:')) return;
-    
-    // Let anchor links work normally (smooth scroll, tabs, etc.)
-    if (href.startsWith('#')) return;
-    
-    // Store links — navigate parent frame
-    if (href.startsWith('/store/')) {
-      e.preventDefault();
-      var nextHref = href;
-      if (isEditMode && nextHref.indexOf('afro_editor=1') === -1) {
-        nextHref += (nextHref.indexOf('?') === -1 ? '?' : '&') + 'afro_editor=1';
-      }
-      window.parent.location.href = nextHref;
-    }
-    // External links — open in new tab
-    else if (href.startsWith('http')) {
-      e.preventDefault();
-      window.open(href, '_blank');
-    }
-    // Other relative links — prevent navigation (would break iframe)
-    else {
-      e.preventDefault();
-    }
+    var resolved = resolveHref(href);
+
+    if (resolved === null) { e.preventDefault(); return; }
+    if (resolved === 'anchor') return; // let browser handle
+    if (resolved === 'passthrough') return; // tel:, mailto:, whatsapp:
+    if (resolved === 'external') { e.preventDefault(); window.open(href, '_blank'); return; }
+
+    // Internal store navigation
+    e.preventDefault();
+    navigateParent(resolved);
   });
 
-  // Intercept add-to-cart buttons
+  // Intercept add-to-cart buttons (WoodMart + generic patterns)
   document.addEventListener('click', function(e) {
-    var btn = e.target.closest('.wd-add-btn, .add_to_cart_button, [class*="add-to-cart"]');
+    var btn = e.target.closest('.wd-add-btn, .add_to_cart_button, [class*="add-to-cart"], .wd-action-btn');
     if (!btn) return;
     e.preventDefault();
     e.stopPropagation();
     
     // Find the product card this button belongs to
-    var productCard = btn.closest('.wd-product, .product');
+    var productCard = btn.closest('.wd-product, .product, .wd-carousel-item');
     if (!productCard) return;
     
-    var titleEl = productCard.querySelector('.wd-entities-title a, .woocommerce-loop-product__title');
-    var priceEl = productCard.querySelector('.woocommerce-Price-amount bdi');
+    var titleEl = productCard.querySelector('.wd-entities-title a, .woocommerce-loop-product__title, h3 a, h2 a');
+    var priceEl = productCard.querySelector('.woocommerce-Price-amount bdi, .price .amount, .price');
     
     var productName = titleEl ? titleEl.textContent.trim() : 'Product';
     var productPrice = priceEl ? priceEl.textContent.replace(/[^\\d.,]/g, '') : '0';
@@ -524,8 +664,25 @@ function injectStorefrontBridge(
     }, '*');
     
     // Visual feedback
-    btn.style.opacity = '0.5';
-    setTimeout(function() { btn.style.opacity = '1'; }, 500);
+    var originalText = btn.textContent;
+    btn.style.opacity = '0.6';
+    btn.style.pointerEvents = 'none';
+    setTimeout(function() { btn.style.opacity = '1'; btn.style.pointerEvents = ''; }, 800);
+  });
+
+  // Make product cards clickable — clicking anywhere on a product card navigates to shop
+  document.addEventListener('click', function(e) {
+    if (e.target.closest('a[href], button, .wd-add-btn, .wd-action-btn')) return;
+    var card = e.target.closest('.wd-product, .product');
+    if (!card) return;
+    var titleLink = card.querySelector('.wd-entities-title a[href]');
+    if (titleLink) {
+      var href = titleLink.getAttribute('href');
+      var resolved = resolveHref(href);
+      if (resolved && resolved !== 'anchor' && resolved !== 'passthrough' && resolved !== 'external') {
+        navigateParent(resolved);
+      }
+    }
   });
 
   // Listen for messages from parent
