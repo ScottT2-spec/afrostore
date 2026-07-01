@@ -160,9 +160,6 @@ export async function GET(req: NextRequest, { params }: Params) {
       });
     }
 
-    // 5b. Fix empty/placeholder nav links by mapping link text to page sections
-    html = fixEmptyNavLinks(html, slug);
-
     // 6. Inject navigation overlay + cart bridge script
     html = injectStorefrontBridge(html, slug, site.name, currency, currencySymbol, isEditMode);
 
@@ -255,6 +252,9 @@ function substituteStoreData(html: string, data: SubstitutionData): string {
 
   // Replace category names in sidebar/nav widgets
   html = replaceCategories(html, data.categories, data.storeSlug);
+
+  // Fix empty/placeholder nav links BEFORE rewriteLinks converts them
+  html = fixEmptyNavLinks(html, data.storeSlug);
 
   // Replace footer menu/widget links with store pages
   html = replaceFooterLinks(html, data.storeSlug);
@@ -496,10 +496,12 @@ function fixEmptyNavLinks(html: string, storeSlug: string): string {
   };
 
   // Fix href="" and href="#" links by matching their text content
+  // Use [\s\S]*? for text to handle multiline content inside <a> tags
   html = html.replace(
-    /<a([^>]*)\s+href=["'](?:|#)["']([^>]*)>([^<]+)<\/a>/gi,
+    /<a([^>]*?)\s+href=["'](?:|#)["']([^>]*)>([\s\S]*?)<\/a>/gi,
     (match, before, after, text) => {
-      const trimmed = text.trim().toLowerCase();
+      const trimmed = text.replace(/<[^>]*>/g, '').trim().toLowerCase();
+      if (!trimmed) return match; // empty link text, skip
       const target = textToTarget[trimmed];
       if (target) {
         return `<a${before} href="${target}"${after}>${text}</a>`;
@@ -509,46 +511,48 @@ function fixEmptyNavLinks(html: string, storeSlug: string): string {
     }
   );
 
-  // Also ensure sections have IDs matching common anchor targets
-  // Add IDs to sections that don't have them, based on heading text
-  const sectionAnchors: Record<string, string> = {
-    "about": "about",
-    "about us": "about",
-    "contact": "contact",
-    "contact us": "contact",
-    "menu": "menu",
-    "our menu": "menu",
-    "services": "services",
-    "portfolio": "portfolio",
-    "pricing": "pricing",
-    "team": "team",
-    "faq": "faq",
-    "blog": "blog",
-    "reservation": "reservation",
-    "testimonials": "testimonials",
-    "features": "features",
-    "gallery": "gallery",
-    "skills": "skills",
-    "experience": "experience",
-    "how it works": "how-it-works",
-  };
+  // Ensure sections have IDs matching anchor targets.
+  // Strategy: scan all <section> elements, look at their text content for keywords,
+  // and assign the corresponding ID if not already present.
+  const keywordToId: [RegExp, string][] = [
+    [/\b(?:about|who we are|our story|welcomes?\s+you|founded)\b/i, "about"],
+    [/\b(?:contact|get in touch|reach\s+us|find\s+us|location)\b/i, "contact"],
+    [/\b(?:menu|breakfast|lunch|dinner|dessert|drinks|dishes|cuisine)\b/i, "menu"],
+    [/\b(?:services?|what we (?:do|offer))\b/i, "services"],
+    [/\b(?:portfolio|our work|projects?|gallery|showcase)\b/i, "portfolio"],
+    [/\b(?:pricing|plans?|packages?)\b/i, "pricing"],
+    [/\b(?:team|staff|people|meet\s+(?:our|the))\b/i, "team"],
+    [/\b(?:faq|frequently|questions)\b/i, "faq"],
+    [/\b(?:testimonial|review|what\s+(?:our|people)\s+(?:clients?|say))\b/i, "testimonials"],
+    [/\b(?:blog|news|articles?|latest\s+posts?)\b/i, "blog"],
+    [/\b(?:features?|why\s+(?:choose|us))\b/i, "features"],
+    [/\b(?:skills?|expertise|proficien)\b/i, "skills"],
+    [/\b(?:experience|career|timeline|history)\b/i, "experience"],
+    [/\b(?:how\s+it\s+works|process|steps?)\b/i, "how-it-works"],
+  ];
 
-  // Find <section> or major <div> elements without IDs that contain heading text
-  // matching our known anchors, and add the ID
-  for (const [headingText, anchorId] of Object.entries(sectionAnchors)) {
-    // Skip if this ID already exists in the HTML
-    if (html.includes(`id="${anchorId}"`)) continue;
+  const assignedIds = new Set<string>();
+  // Collect existing IDs
+  const existingIds = html.match(/id="([^"]+)"/g);
+  if (existingIds) existingIds.forEach(m => assignedIds.add(m.slice(4, -1)));
 
-    // Look for sections containing a heading with this text
-    const headingPattern = new RegExp(
-      `(<section[^>]*?)>(\\s*(?:<[^>]*>\\s*)*<(?:h[1-6]|div)[^>]*>\\s*(?:<[^>]*>\\s*)*${headingText.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")})`,
-      "i"
-    );
-    html = html.replace(headingPattern, (m, sectionTag, rest) => {
-      if (sectionTag.includes("id=")) return m; // already has an ID
-      return `${sectionTag} id="${anchorId}">${rest}`;
-    });
-  }
+  // Match each <section> block and check its content
+  html = html.replace(
+    /(<section\b)([^>]*>)([\s\S]*?)(<\/section>)/gi,
+    (match, tag, attrs, content, close) => {
+      if (attrs.includes('id=')) return match; // already has ID
+      // Strip HTML tags to get text content for matching
+      const text = content.replace(/<[^>]*>/g, ' ').substring(0, 500);
+      for (const [pattern, id] of keywordToId) {
+        if (assignedIds.has(id)) continue;
+        if (pattern.test(text)) {
+          assignedIds.add(id);
+          return `${tag} id="${id}"${attrs}${content}${close}`;
+          }
+      }
+      return match;
+    }
+  );
 
   return html;
 }
