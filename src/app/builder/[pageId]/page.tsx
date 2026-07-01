@@ -11,9 +11,11 @@ import { BuilderHistory } from "@/lib/builder/history";
 import { blockTemplates } from "@/lib/builder/templates";
 import BlockRenderer from "@/components/builder/BlockRenderer";
 import PropertyPanel from "@/components/builder/PropertyPanel";
+import TemplateElementPanel from "@/components/builder/TemplateElementPanel";
 import { SingleImageUpload } from "@/components/dashboard/ImageUpload";
 import { parsePageContent, serializePageContent, type PageSettings } from "@/lib/page-content";
 import { hasTemplateHtml as checkTemplateHtml } from "@/lib/templates/template-html-map";
+import type { TemplateElement, TemplateSection } from "@/lib/builder/template-editor-types";
 
 import {
   DndContext,
@@ -226,6 +228,8 @@ export default function BuilderPage({ params }: { params: Promise<{ pageId: stri
   const [templateSlug, setTemplateSlug] = useState<string | null>(null);
   const [storeSlug, setStoreSlug] = useState<string>("");
   const [templateEditMode, setTemplateEditMode] = useState(false);
+  const [templateSelectedElement, setTemplateSelectedElement] = useState<TemplateElement | null>(null);
+  const [templateSections, setTemplateSections] = useState<TemplateSection[]>([]);
   const templateIframeRef = useRef<HTMLIFrameElement>(null);
 
   const historyRef = useRef(new BuilderHistory());
@@ -312,6 +316,105 @@ export default function BuilderPage({ params }: { params: Promise<{ pageId: stri
       setTemplateEditMode(true);
     }
   };
+
+  // Send message to the template iframe
+  const sendToIframe = useCallback((data: Record<string, unknown>) => {
+    templateIframeRef.current?.contentWindow?.postMessage(data, "*");
+  }, []);
+
+  // Listen for postMessage events from the template editor iframe
+  useEffect(() => {
+    const handler = (e: MessageEvent) => {
+      if (!e.data || !e.data.type) return;
+      const { type } = e.data;
+
+      switch (type) {
+        case "afro-editor-element-selected":
+          setTemplateSelectedElement(e.data.element as TemplateElement);
+          break;
+
+        case "afro-editor-element-deselected":
+          setTemplateSelectedElement(null);
+          break;
+
+        case "afro-editor-sections-list":
+          setTemplateSections(e.data.sections as TemplateSection[]);
+          break;
+
+        case "afro-editor-started":
+          setTemplateEditMode(true);
+          break;
+
+        case "afro-editor-save":
+          // Save customized HTML to the API
+          if (currentStore && e.data.html) {
+            (async () => {
+              setSaving(true);
+              await api.patch(`/api/sites/${currentStore.id}/pages/${pageId}`, {
+                customHtml: e.data.html,
+              });
+              setSaving(false);
+              setSaved(true);
+              setTimeout(() => setSaved(false), 2000);
+            })();
+          }
+          break;
+
+        case "afro-editor-cancel":
+          setTemplateEditMode(false);
+          setTemplateSelectedElement(null);
+          setTemplateSections([]);
+          // Reload iframe without edit mode
+          if (templateIframeRef.current && storeSlug) {
+            templateIframeRef.current.src = `/api/storefront/${storeSlug}/template-html`;
+          }
+          break;
+
+        case "afro-editor-reset":
+          // Reset custom HTML and reload
+          if (currentStore) {
+            (async () => {
+              await api.patch(`/api/sites/${currentStore.id}/pages/${pageId}`, {
+                customHtml: null,
+              });
+              setTemplateEditMode(false);
+              setTemplateSelectedElement(null);
+              setTemplateSections([]);
+              if (templateIframeRef.current && storeSlug) {
+                templateIframeRef.current.src = `/api/storefront/${storeSlug}/template-html`;
+              }
+            })();
+          }
+          break;
+
+        case "afro-editor-upload-image":
+          // Handle image upload from iframe, then send URL back
+          if (e.data.dataUrl && currentStore) {
+            (async () => {
+              try {
+                const res = await api.post<{ url: string }>(`/api/sites/${currentStore.id}/upload`, {
+                  file: e.data.dataUrl,
+                  fileName: e.data.fileName || "image.jpg",
+                  mimeType: e.data.mimeType || "image/jpeg",
+                });
+                if (res.success && res.data?.url) {
+                  sendToIframe({
+                    type: "afro-editor-image-uploaded",
+                    url: res.data.url,
+                  });
+                }
+              } catch {
+                // Upload failed silently
+              }
+            })();
+          }
+          break;
+      }
+    };
+
+    window.addEventListener("message", handler);
+    return () => window.removeEventListener("message", handler);
+  }, [currentStore, pageId, storeSlug, sendToIframe]);
 
   // DnD sensors
   const sensors = useSensors(
@@ -742,7 +845,41 @@ export default function BuilderPage({ params }: { params: Promise<{ pageId: stri
         </div>
 
         {/* Property Panel */}
-        {selectedBlock ? (
+        {canvasMode === "preview" && templateEditMode ? (
+          <TemplateElementPanel
+            element={templateSelectedElement}
+            sections={templateSections}
+            onUpdateText={(id, text) => sendToIframe({ type: "afro-editor-update-text", id, text })}
+            onUpdateLink={(id, href, target) => sendToIframe({ type: "afro-editor-update-link", id, href, target })}
+            onUpdateImage={(id, src, alt) => sendToIframe({ type: "afro-editor-update-image", id, src, alt })}
+            onUpdateStyles={(id, styles) => sendToIframe({ type: "afro-editor-update-styles", id, styles })}
+            onRemoveElement={(id) => sendToIframe({ type: "afro-editor-remove-element", id })}
+            onSelectSection={(id) => sendToIframe({ type: "afro-editor-select-element", id })}
+            onDeselect={() => { setTemplateSelectedElement(null); sendToIframe({ type: "afro-editor-deselect" }); }}
+            onUploadImage={(file, elementId) => {
+              const reader = new FileReader();
+              reader.onload = (evt) => {
+                if (currentStore && evt.target?.result) {
+                  (async () => {
+                    try {
+                      const res = await api.post<{ url: string }>(`/api/sites/${currentStore.id}/upload`, {
+                        file: evt.target!.result as string,
+                        fileName: file.name,
+                        mimeType: file.type,
+                      });
+                      if (res.success && res.data?.url) {
+                        sendToIframe({ type: "afro-editor-update-image", id: elementId, src: res.data.url, alt: "" });
+                        // Update local state too
+                        setTemplateSelectedElement((prev) => prev ? { ...prev, src: res.data!.url } : null);
+                      }
+                    } catch { /* upload failed */ }
+                  })();
+                }
+              };
+              reader.readAsDataURL(file);
+            }}
+          />
+        ) : selectedBlock ? (
           <PropertyPanel
             block={selectedBlock}
             onUpdate={updateBlock}
