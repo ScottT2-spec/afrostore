@@ -3,6 +3,8 @@ import { prisma } from "@/lib/db";
 import { getStoreContext, success, error, validationError, ensureUniqueSlug, logAudit } from "@/lib/api-helpers";
 import { updatePageSchema } from "@/lib/validators";
 import { unauthorized } from "@/lib/auth";
+import { findStoredTemplatePage } from "@/lib/templates/site-instance";
+import type { Prisma } from "@/generated/prisma";
 
 type Params = { params: Promise<{ siteId: string; pageId: string }> };
 
@@ -16,12 +18,16 @@ export async function GET(req: NextRequest, { params }: Params) {
     prisma.page.findFirst({ where: { id: pageId, siteId } }),
     prisma.siteTemplate.findFirst({
       where: { siteId, isActive: true },
-      include: { template: { select: { slug: true } } },
+      select: { pages: true, template: { select: { slug: true } } },
     }),
   ]);
 
   if (!page) return error("Page not found", 404);
-  return success({ ...page, templateSlug: activeTemplate?.template?.slug || null });
+  const fallbackTemplatePage = findStoredTemplatePage(activeTemplate?.pages, page.slug) || findStoredTemplatePage(activeTemplate?.pages, page.type);
+  const mergedPage = fallbackTemplatePage && (!page.content || (Array.isArray(page.content) && page.content.length === 0))
+    ? { ...page, ...fallbackTemplatePage, template: page.template ?? fallbackTemplatePage.template ?? null }
+    : { ...page, template: page.template ?? fallbackTemplatePage?.template ?? null };
+  return success({ ...mergedPage, templateSlug: activeTemplate?.template?.slug || null });
 }
 
 // PATCH /api/sites/:siteId/pages/:pageId
@@ -51,7 +57,7 @@ export async function PATCH(req: NextRequest, { params }: Params) {
 
     const page = await prisma.page.update({
       where: { id: pageId },
-      data: updateData as any,
+      data: updateData as Prisma.PageUpdateInput,
     });
 
     await logAudit({

@@ -164,7 +164,7 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ wor
 
     let templateResult: unknown = null;
     const shouldUseTemplate = launchMethod === "template" || !!templateId || !!templateSlug;
-    const shouldUseAi = launchMethod === "ai" || launchMethod === "quick";
+    const shouldUseAi = !shouldUseTemplate && (launchMethod === "ai" || launchMethod === "quick");
 
     if (launchMethod === "template" && !templateId && !templateSlug) {
       return error("Template selection is required for template-based site creation", 422);

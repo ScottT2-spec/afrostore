@@ -36,7 +36,58 @@ export function findStoredTemplatePage(pages: unknown, slug: string) {
   return normalizedPages.find((page) => page.slug.toLowerCase() === lowerSlug || page.type.toLowerCase() === lowerSlug) || null;
 }
 
-export function mergeStoredTemplatePages<T extends { slug: string }>(databasePages: T[], storedPages: unknown): T[] {
-  if (databasePages.length > 0) return databasePages;
-  return normalizeStoredTemplatePages(storedPages) as unknown as T[];
+function hasRenderableContent(page: { content?: unknown }): boolean {
+  const content = page.content;
+  if (Array.isArray(content)) return content.length > 0;
+  if (!content || typeof content !== "object") return false;
+
+  const raw = content as Record<string, unknown>;
+  if (Array.isArray(raw.blocks)) return raw.blocks.length > 0;
+  return Object.keys(raw).length > 0;
+}
+
+export function mergeStoredTemplatePages<
+  T extends { id?: string; slug: string; title?: string; content?: unknown; type?: string; template?: string | null }
+>(databasePages: T[], storedPages: unknown): T[] {
+  const normalizedStored = normalizeStoredTemplatePages(storedPages);
+  if (normalizedStored.length === 0) return databasePages;
+
+  const storedBySlug = new Map(normalizedStored.map((page) => [page.slug.toLowerCase(), page] as const));
+  const mergedPages: T[] = [];
+  const consumed = new Set<string>();
+
+  for (const databasePage of databasePages) {
+    const storedPage = storedBySlug.get(databasePage.slug.toLowerCase()) || storedBySlug.get((databasePage.title || "").toLowerCase());
+    if (!storedPage) {
+      mergedPages.push(databasePage);
+      continue;
+    }
+
+    consumed.add(storedPage.slug.toLowerCase());
+
+    if (hasRenderableContent(databasePage) || databasePage.template) {
+      mergedPages.push({
+        ...databasePage,
+        template: databasePage.template ?? storedPage.template ?? null,
+      });
+      continue;
+    }
+
+    mergedPages.push({
+      ...databasePage,
+      id: databasePage.id || storedPage.id,
+      title: storedPage.title,
+      slug: storedPage.slug,
+      type: storedPage.type,
+      content: storedPage.content,
+      template: storedPage.template ?? databasePage.template ?? null,
+    });
+  }
+
+  for (const storedPage of normalizedStored) {
+    if (consumed.has(storedPage.slug.toLowerCase())) continue;
+    mergedPages.push(storedPage as unknown as T);
+  }
+
+  return mergedPages;
 }

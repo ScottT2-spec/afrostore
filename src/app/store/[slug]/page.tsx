@@ -1,15 +1,16 @@
 "use client";
-import { ArrowRight, ChevronRight, Loader2, Plus, X } from "lucide-react";
-import { CheckCircle2, CreditCard, Heart, ImageIcon, Mail, MapPin, Menu, MessageCircle, Minus, Phone, Search, Shield, ShoppingBag, ShoppingCart, Star, Truck, Zap } from "@/components/icons/FilledIcons";
+import { ArrowRight, Loader2, Plus, X } from "lucide-react";
+import { CheckCircle2, CreditCard, Heart, ImageIcon, Menu, MessageCircle, Minus, Phone, Search, Shield, ShoppingBag, ShoppingCart, Star, Truck, Zap } from "@/components/icons/FilledIcons";
 
 import { useState, useEffect, useMemo, useRef } from "react";
-import { useParams, useSearchParams } from "next/navigation";
+import { useParams } from "next/navigation";
 import Link from "next/link";
 import { RenderBlocks, type BuilderBlock } from "@/components/storefront/BlockRenderer";
 import { getLinkedPageHref, parsePageContent, type PageSettings } from "@/lib/page-content";
 import { ThemeProvider, type ThemeData } from "@/components/storefront/ThemeProvider";
 import { useWishlist } from "@/hooks/useWishlist";
 import { applyPageCustomization, buildPageBackgroundStyle, buildThemeDataWithCustomization, filterVisiblePages, getResolvedPageSettings, normalizeSiteCustomization, type SiteCustomizationDocument } from "@/lib/site-customization";
+import { hasTemplateHtml } from "@/lib/templates/template-html-map";
 
 /* ───────── Types ───────── */
 
@@ -148,7 +149,6 @@ function getWhatsAppLink(phone: string | undefined, cart: CartItem[], currency: 
 
 export default function StorePage() {
   const params = useParams();
-  const searchParams = useSearchParams();
   const slug = params.slug as string;
 
   const [data, setData] = useState<StoreData | null>(null);
@@ -243,8 +243,11 @@ export default function StorePage() {
   const cartCount = cart.reduce((s, i) => s + i.quantity, 0);
   const cartTotal = cart.reduce((s, i) => s + Number(i.product.price) * i.quantity, 0);
   const resolvedTheme = useMemo(() => buildThemeDataWithCustomization(data?.theme || null, draftCustomization), [data?.theme, draftCustomization]);
-  const editorPreview = searchParams.get("afro_editor") === "1";
-
+  const renderTemplateHtml = !!data?.templateSlug && hasTemplateHtml(data.templateSlug);
+  const templateHtmlSrc = useMemo(
+    () => (renderTemplateHtml ? `/api/storefront/${slug}/template-html` : ""),
+    [renderTemplateHtml, slug],
+  );
   /* ── Loading ── */
   if (loading) {
     return (
@@ -297,12 +300,6 @@ export default function StorePage() {
   const homeBlocks: BuilderBlock[] = homeContent.blocks;
   const hasHomeContent = homeBlocks.length > 0;
   const homeHasProductGrid = homeBlocks.some((b) => b.type === "productGrid");
-  const isTemplateSite = !!data.templateSlug;
-<<<<<<< HEAD
-  const hasRawTemplateHtml = !!data.templateSlug && hasTemplateHtml(data.templateSlug);
-  const iframeSrc = `/api/storefront/${slug}/template-html${editorPreview ? "?afro_edit=1&" : "?"}_t=${Date.now()}`;
-=======
->>>>>>> cf562f4 (Customization of templates implemented fully)
 
   // Navigation pages: exclude HOME (we're on it), sort sensibly
   const navPageOrder: Record<string, number> = { ABOUT: 0, FAQ: 1, CONTACT: 2, POLICY: 3, CUSTOM: 4, LANDING: 5 };
@@ -312,6 +309,13 @@ export default function StorePage() {
 
   return (
     <ThemeProvider theme={resolvedTheme}>
+    {renderTemplateHtml ? (
+      <iframe
+        src={templateHtmlSrc}
+        title={`${store.name} template preview`}
+        className="w-full min-h-screen border-0 bg-white"
+      />
+    ) : (
     <div className="min-h-screen bg-white">
       {/* Announcement Bar */}
       <div className="bg-brand-600 text-white text-center py-2 text-xs font-medium">
@@ -767,6 +771,7 @@ export default function StorePage() {
         </div>
       )}
     </div>
+    )}
     </ThemeProvider>
   );
 }

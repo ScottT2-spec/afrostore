@@ -48,22 +48,40 @@ export default function WorkspacesPage() {
   const [deleting, setDeleting] = useState(false);
   const router = useRouter();
 
-  const fetchWorkspaces = async () => {
+  const getAuthHeaders = (): Record<string, string> => {
+    const token = localStorage.getItem('token');
+    return token ? { Authorization: `Bearer ${token}` } : {};
+  };
+
+  useEffect(() => {
+    let cancelled = false;
+
+    (async () => {
+      try {
+        const res = await fetch('/api/workspaces', { headers: { ...getAuthHeaders() } });
+        const json = await res.json();
+        if (!cancelled && json.success) setWorkspaces(json.data);
+      } catch (e) {
+        console.error(e);
+      } finally {
+        if (!cancelled) setLoading(false);
+      }
+    })();
+
+    return () => {
+      cancelled = true;
+    };
+  }, []);
+
+  const refreshWorkspaces = async () => {
     try {
-      const token = localStorage.getItem('token');
-      const res = await fetch('/api/workspaces', {
-        headers: { Authorization: `Bearer ${token}` },
-      });
+      const res = await fetch('/api/workspaces', { headers: { ...getAuthHeaders() } });
       const json = await res.json();
       if (json.success) setWorkspaces(json.data);
     } catch (e) {
       console.error(e);
-    } finally {
-      setLoading(false);
     }
   };
-
-  useEffect(() => { fetchWorkspaces(); }, []);
 
   const openSettings = (workspace: Workspace) => {
     setSettingsWorkspace(workspace);
@@ -75,16 +93,15 @@ export default function WorkspacesPage() {
     if (!settingsWorkspace || !editName.trim() || savingSettings) return;
     setSavingSettings(true);
     try {
-      const token = localStorage.getItem('token');
       const res = await fetch(`/api/workspaces/${settingsWorkspace.id}`, {
         method: 'PATCH',
-        headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
+        headers: { 'Content-Type': 'application/json', ...getAuthHeaders() },
         body: JSON.stringify({ name: editName.trim() }),
       });
       const json = await res.json();
       if (json.success) {
         setSettingsWorkspace(null);
-        fetchWorkspaces();
+        await refreshWorkspaces();
       }
     } catch (e) {
       console.error(e);
@@ -97,16 +114,15 @@ export default function WorkspacesPage() {
     if (!settingsWorkspace || deleting) return;
     setDeleting(true);
     try {
-      const token = localStorage.getItem('token');
       const res = await fetch(`/api/workspaces/${settingsWorkspace.id}`, {
         method: 'DELETE',
-        headers: { Authorization: `Bearer ${token}` },
+        headers: { ...getAuthHeaders() },
       });
       const json = await res.json();
       if (json.success) {
         setSettingsWorkspace(null);
         setShowDeleteConfirm(false);
-        fetchWorkspaces();
+        await refreshWorkspaces();
       }
     } catch (e) {
       console.error(e);
@@ -119,17 +135,16 @@ export default function WorkspacesPage() {
     if (!newName.trim() || creating) return;
     setCreating(true);
     try {
-      const token = localStorage.getItem('token');
       const res = await fetch('/api/workspaces', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
+        headers: { 'Content-Type': 'application/json', ...getAuthHeaders() },
         body: JSON.stringify({ name: newName.trim() }),
       });
       const json = await res.json();
       if (json.success) {
         setShowCreate(false);
         setNewName('');
-        fetchWorkspaces();
+        await refreshWorkspaces();
       }
     } catch (e) {
       console.error(e);

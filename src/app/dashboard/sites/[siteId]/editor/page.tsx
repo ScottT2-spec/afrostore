@@ -182,7 +182,6 @@ export default function SiteEditorPage({ params }: { params: Promise<{ siteId: s
   const [activeRightTab, setActiveRightTab] = useState<"brand" | "theme" | "page" | "seo" | "code" | "media">("brand");
   const [site, setSite] = useState<SiteRecord | null>(null);
   const [pages, setPages] = useState<PageRecord[]>([]);
-  const [templateSlug, setTemplateSlug] = useState<string | null>(null);
   const [siteDraft, setSiteDraft] = useState<EditorState>(() => ({
     name: persistedEditorState?.siteDraft?.name || "",
     description: persistedEditorState?.siteDraft?.description || "",
@@ -227,11 +226,8 @@ export default function SiteEditorPage({ params }: { params: Promise<{ siteId: s
       if (!customizationRes.success || !customizationRes.data) throw new Error(customizationRes.error || "Failed to load customization");
 
       const siteRecord = siteRes.data as SiteRecord;
-      const storefrontRes = await api.get<{ templateSlug: string | null; theme?: { slug?: string | null } | null }>(`/api/storefront/${siteRecord.slug}`);
-      if (!storefrontRes.success || !storefrontRes.data) throw new Error(storefrontRes.error || "Failed to load storefront");
       setSite(siteRecord);
       setPages(pagesRes.data.pages || []);
-      setTemplateSlug(storefrontRes.data.templateSlug || null);
       if (!persistedEditorState?.customization) {
         const customizationData = customizationRes.data as { customization: SiteCustomizationDocument } | undefined;
         if (customizationData?.customization) {
@@ -266,7 +262,16 @@ export default function SiteEditorPage({ params }: { params: Promise<{ siteId: s
   };
 
   useEffect(() => {
-    void loadData();
+    let cancelled = false;
+
+    (async () => {
+      await loadData();
+      if (cancelled) return;
+    })();
+
+    return () => {
+      cancelled = true;
+    };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [siteId]);
 

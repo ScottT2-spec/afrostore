@@ -12,8 +12,6 @@ import BlockRenderer from "@/components/builder/BlockRenderer";
 import PropertyPanel from "@/components/builder/PropertyPanel";
 import { SingleImageUpload } from "@/components/dashboard/ImageUpload";
 import { parsePageContent, serializePageContent, type PageSettings } from "@/lib/page-content";
-import { buildPageBackgroundStyle } from "@/lib/site-customization";
-import { RenderBlocks } from "@/components/storefront/BlockRenderer";
 import {
   addBuilderEditorBlock,
   deleteBuilderEditorBlock,
@@ -235,6 +233,7 @@ export default function BuilderPage({ params }: { params: Promise<{ pageId: stri
   const [saving, setSaving] = useState(false);
   const [saved, setSaved] = useState(false);
   const [canvasMode, setCanvasMode] = useState<"builder" | "preview">("builder");
+  const [previewTick, setPreviewTick] = useState(0);
 
   // Load page
   useEffect(() => {
@@ -300,6 +299,7 @@ export default function BuilderPage({ params }: { params: Promise<{ pageId: stri
       }
       markBuilderEditorSaved();
       setSaved(true);
+      setPreviewTick((prev) => prev + 1);
       setTimeout(() => setSaved(false), 2000);
     }
   }, [currentStore, editor.blocks, editor.isPublished, editor.pageSettings, editor.pageSlug, editor.pageTitle, pageId]);
@@ -323,173 +323,7 @@ export default function BuilderPage({ params }: { params: Promise<{ pageId: stri
     };
     window.addEventListener("keydown", handler);
     return () => window.removeEventListener("keydown", handler);
-<<<<<<< HEAD
-  });
-
-  const startTemplateEdit = () => {
-    if (!storeSlug) return;
-    if (templateIframeRef.current) {
-      templateIframeRef.current.src = `/api/storefront/${storeSlug}/template-html?afro_edit=1&_t=${Date.now()}`;
-      setTemplateEditMode(true);
-    }
-  };
-
-  // Send message to the template iframe
-  const sendToIframe = useCallback((data: Record<string, unknown>) => {
-    templateIframeRef.current?.contentWindow?.postMessage(data, "*");
-  }, []);
-
-  // Listen for postMessage events from the template editor iframe
-  useEffect(() => {
-    const handler = (e: MessageEvent) => {
-      if (!e.data || !e.data.type) return;
-      const { type } = e.data;
-
-      switch (type) {
-        case "afro-editor-element-selected":
-          setTemplateSelectedElement(e.data.element as TemplateElement);
-          break;
-
-        case "afro-editor-element-deselected":
-          setTemplateSelectedElement(null);
-          break;
-
-        case "afro-editor-sections-list":
-          setTemplateSections(e.data.sections as TemplateSection[]);
-          break;
-
-        case "afro-editor-started":
-          setTemplateEditMode(true);
-          break;
-
-        case "afro-editor-save":
-          // Save customized HTML to the template-html-editor endpoint
-          if (currentStore && e.data.html) {
-            (async () => {
-              setSaving(true);
-              try {
-                const saveRes = await api.put(`/api/sites/${currentStore.id}/template-html-editor`, {
-                  customHtml: e.data.html,
-                });
-                if (saveRes.success) {
-                  setSaved(true);
-                  setTimeout(() => setSaved(false), 2000);
-                  // Exit edit mode and reload preview with cache-busting
-                  setTemplateEditMode(false);
-                  setTemplateSelectedElement(null);
-                  setTemplateSections([]);
-                  if (templateIframeRef.current && storeSlug) {
-                    templateIframeRef.current.src = `/api/storefront/${storeSlug}/template-html?_t=${Date.now()}`;
-                  }
-                } else {
-                  console.error("Template save failed:", saveRes.error);
-                  alert("Failed to save: " + (saveRes.error || "Unknown error"));
-                }
-              } catch (saveErr) {
-                console.error("Template save error:", saveErr);
-                alert("Failed to save template. Please try again.");
-              } finally {
-                setSaving(false);
-              }
-            })();
-          }
-          break;
-
-        case "afro-editor-cancel":
-          setTemplateEditMode(false);
-          setTemplateSelectedElement(null);
-          setTemplateSections([]);
-          // Reload iframe without edit mode + cache bust
-          if (templateIframeRef.current && storeSlug) {
-            templateIframeRef.current.src = `/api/storefront/${storeSlug}/template-html?_t=${Date.now()}`;
-          }
-          break;
-
-        case "afro-editor-reset":
-          handleTemplateReset();
-          break;
-
-        case "afro-editor-upload-image":
-          handleEditorImageUpload(e.data);
-          break;
-
-        case "afro-editor-change":
-          // Editor notified us of a change — could show unsaved indicator
-          break;
-      }
-    };
-
-    window.addEventListener("message", handler);
-    return () => window.removeEventListener("message", handler);
-  }, [storeSlug, currentStore]);
-
-  const handleTemplateSave = async (html: string) => {
-    if (!currentStore || !html) return;
-    setTemplateSaving(true);
-    try {
-      const res = await api.put(`/api/sites/${currentStore.id}/template-html-editor`, { customHtml: html });
-      if (res.success) {
-        setSaved(true);
-        setTimeout(() => setSaved(false), 2000);
-        // Exit edit mode and reload preview
-        setTemplateEditMode(false);
-        setTemplateEditorReady(false);
-        if (templateIframeRef.current) {
-          templateIframeRef.current.src = `/api/storefront/${storeSlug}/template-html?_t=${Date.now()}`;
-        }
-      }
-    } catch (err) {
-      console.error("Template save error:", err);
-    } finally {
-      setTemplateSaving(false);
-    }
-  };
-
-  const handleTemplateReset = async () => {
-    if (!currentStore) return;
-    try {
-      await api.delete(`/api/sites/${currentStore.id}/template-html-editor`);
-      setTemplateEditMode(false);
-      setTemplateEditorReady(false);
-      // Reload with base template + cache bust
-      if (templateIframeRef.current) {
-        templateIframeRef.current.src = `/api/storefront/${storeSlug}/template-html?_t=${Date.now()}`;
-      }
-    } catch (err) {
-      console.error("Template reset error:", err);
-    }
-  };
-
-  // startTemplateEdit defined above — sets iframe src with afro_edit=1
-
-  const handleEditorImageUpload = async (data: { dataUrl: string; fileName: string; mimeType: string }) => {
-    if (!currentStore) return;
-    try {
-      // Convert data URL to blob and upload via existing image upload API
-      const blob = await fetch(data.dataUrl).then((r) => r.blob());
-      const formData = new FormData();
-      formData.append("file", blob, data.fileName);
-
-      const res = await fetch(`/api/sites/${currentStore.id}/upload`, {
-        method: "POST",
-        body: formData,
-      });
-      const result = await res.json();
-
-      if (result.url) {
-        // Send uploaded URL back to editor iframe
-        templateIframeRef.current?.contentWindow?.postMessage({
-          type: "afro-editor-image-uploaded",
-          url: result.url,
-        }, "*");
-      }
-    } catch (err) {
-      console.error("Image upload error:", err);
-    }
-  };
-=======
   }, [editor.selectedBlockId, handleSave]);
->>>>>>> cf562f4 (Customization of templates implemented fully)
 
   // DnD sensors
   const sensors = useSensors(
@@ -534,6 +368,10 @@ export default function BuilderPage({ params }: { params: Promise<{ pageId: stri
   };
 
   const selectedBlock = editor.blocks.find((b) => b.id === editor.selectedBlockId) || null;
+  const previewHref = currentStore
+    ? `/store/${currentStore.slug}${editor.pageSlug ? `/${editor.pageSlug}` : ""}?afro_editor=1`
+    : "";
+
   if (loading || !currentStore || !user) {
     return (
       <div className="h-screen flex items-center justify-center bg-surface-50">
@@ -713,27 +551,12 @@ export default function BuilderPage({ params }: { params: Promise<{ pageId: stri
                   </span>
                 </div>
 
-<<<<<<< HEAD
-                {checkTemplateHtml(templateSlug) ? (
-                  <iframe
-                    ref={templateIframeRef}
-                    src={`/api/storefront/${storeSlug}/template-html${templateEditMode ? "?afro_edit=1&" : "?"}_t=${Date.now()}`}
-                    className="w-full border-0"
-                    style={{ minHeight: "80vh" }}
-                    title="Template Preview"
-                  />
-                ) : (
-                  <div className="relative overflow-hidden" style={buildPageBackgroundStyle(pageSettings)}>
-                    <RenderBlocks
-                      blocks={blocks}
-                    />
-                  </div>
-                )}
-=======
-                <div className="relative overflow-hidden" style={buildPageBackgroundStyle(editor.pageSettings)}>
-                  <RenderBlocks blocks={editor.blocks} storeSlug={currentStore?.slug || ""} />
-                </div>
->>>>>>> cf562f4 (Customization of templates implemented fully)
+                <iframe
+                  key={`${previewHref}-${previewTick}`}
+                  src={previewHref}
+                  className={`w-full border-0 bg-white ${previewMode === "mobile" ? "h-[78vh]" : "h-[82vh]"}`}
+                  title="Live page preview"
+                />
               </div>
 
               <div className="mt-4 rounded-xl border border-surface-200 bg-white p-4">

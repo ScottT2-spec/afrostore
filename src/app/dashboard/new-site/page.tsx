@@ -117,6 +117,11 @@ export default function NewSitePage() {
     siteType,
   }), [businessInfo, industry, siteType]);
 
+  const getAuthHeaders = (): Record<string, string> => {
+    const token = localStorage.getItem("token");
+    return token ? { Authorization: `Bearer ${token}` } : {};
+  };
+
   useEffect(() => {
     if (!workspaceId) {
       const token = localStorage.getItem('token');
@@ -174,7 +179,6 @@ export default function NewSitePage() {
     setCreateError('');
 
     try {
-      const token = localStorage.getItem('token');
       const wsId = selectedWorkspace || workspaceId;
 
       // Create workspace if none exist
@@ -182,22 +186,23 @@ export default function NewSitePage() {
       if (!finalWsId) {
         const wsRes = await fetch('/api/workspaces', {
           method: 'POST',
-          headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
+          headers: { 'Content-Type': 'application/json', ...getAuthHeaders() },
           body: JSON.stringify({ name: businessInfo.name.trim() }),
         });
         const wsJson = await wsRes.json();
         if (wsJson.success) finalWsId = wsJson.data.id;
-        else throw new Error('Failed to create workspace');
+        else throw new Error(wsJson.error || 'Failed to create workspace');
       }
 
       const res = await fetch(`/api/workspaces/${finalWsId}/sites`, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
+        headers: { 'Content-Type': 'application/json', ...getAuthHeaders() },
         body: JSON.stringify({
           siteType,
           industry,
           launchMethod,
           templateId: selectedTemplateId,
+          templateSlug: selectedTemplate?.slug || selectedTemplateId || null,
           name: businessInfo.name.trim(),
           description: businessInfo.description,
           logo: businessInfo.logo || null,

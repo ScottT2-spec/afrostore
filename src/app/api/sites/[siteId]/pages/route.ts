@@ -4,6 +4,8 @@ import { getStoreContext, success, error, validationError, ensureUniqueSlug, log
 import { createPageSchema } from "@/lib/validators";
 import { unauthorized } from "@/lib/auth";
 import { getLinkedPageTemplate } from "@/lib/page-content";
+import { mergeStoredTemplatePages } from "@/lib/templates/site-instance";
+import type { Prisma } from "@/generated/prisma";
 
 type Params = { params: Promise<{ siteId: string }> };
 
@@ -30,18 +32,22 @@ export async function GET(req: NextRequest, { params }: Params) {
     where.title = { contains: search, mode: "insensitive" };
   }
 
-  const [pages, total] = await Promise.all([
+  const [pages, total, activeTemplate] = await Promise.all([
     prisma.page.findMany({
-      where: where as any,
+      where: where as Prisma.PageWhereInput,
       orderBy: [{ position: "asc" }, { createdAt: "desc" }],
       skip,
       take: limit,
     }),
-    prisma.page.count({ where: where as any }),
+    prisma.page.count({ where: where as Prisma.PageWhereInput }),
+    prisma.siteTemplate.findFirst({
+      where: { siteId, isActive: true },
+      select: { pages: true },
+    }),
   ]);
 
   return success({
-    pages,
+    pages: mergeStoredTemplatePages(pages, activeTemplate?.pages),
     pagination: { page, limit, total, pages: Math.ceil(total / limit) },
   });
 }
