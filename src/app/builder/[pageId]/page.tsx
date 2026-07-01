@@ -346,11 +346,11 @@ export default function BuilderPage({ params }: { params: Promise<{ pageId: stri
           break;
 
         case "afro-editor-save":
-          // Save customized HTML to the API
+          // Save customized HTML to the template-html-editor endpoint
           if (currentStore && e.data.html) {
             (async () => {
               setSaving(true);
-              await api.patch(`/api/sites/${currentStore.id}/pages/${pageId}`, {
+              await api.put(`/api/sites/${currentStore.id}/template-html-editor`, {
                 customHtml: e.data.html,
               });
               setSaving(false);
@@ -371,12 +371,10 @@ export default function BuilderPage({ params }: { params: Promise<{ pageId: stri
           break;
 
         case "afro-editor-reset":
-          // Reset custom HTML and reload
+          // Reset custom HTML via DELETE and reload
           if (currentStore) {
             (async () => {
-              await api.patch(`/api/sites/${currentStore.id}/pages/${pageId}`, {
-                customHtml: null,
-              });
+              await api.delete(`/api/sites/${currentStore.id}/template-html-editor`);
               setTemplateEditMode(false);
               setTemplateSelectedElement(null);
               setTemplateSections([]);
