@@ -323,8 +323,7 @@ export default function BuilderPage({ params }: { params: Promise<{ pageId: stri
     };
     window.addEventListener("keydown", handler);
     return () => window.removeEventListener("keydown", handler);
-<<<<<<< HEAD
-  });
+  }, [editor.selectedBlockId, handleSave]);
 
   const startTemplateEdit = () => {
     if (!storeSlug) return;
@@ -334,47 +333,35 @@ export default function BuilderPage({ params }: { params: Promise<{ pageId: stri
     }
   };
 
-  // Send message to the template iframe
   const sendToIframe = useCallback((data: Record<string, unknown>) => {
     templateIframeRef.current?.contentWindow?.postMessage(data, "*");
   }, []);
 
-  // Listen for postMessage events from the template editor iframe
   useEffect(() => {
     const handler = (e: MessageEvent) => {
       if (!e.data || !e.data.type) return;
-      const { type } = e.data;
-
-      switch (type) {
+      switch (e.data.type) {
         case "afro-editor-element-selected":
           setTemplateSelectedElement(e.data.element as TemplateElement);
           break;
-
         case "afro-editor-element-deselected":
           setTemplateSelectedElement(null);
           break;
-
         case "afro-editor-sections-list":
           setTemplateSections(e.data.sections as TemplateSection[]);
           break;
-
         case "afro-editor-started":
           setTemplateEditMode(true);
           break;
-
         case "afro-editor-save":
-          // Save customized HTML to the template-html-editor endpoint
           if (currentStore && e.data.html) {
             (async () => {
               setSaving(true);
               try {
-                const saveRes = await api.put(`/api/sites/${currentStore.id}/template-html-editor`, {
-                  customHtml: e.data.html,
-                });
+                const saveRes = await api.put(`/api/sites/${currentStore.id}/template-html-editor`, { customHtml: e.data.html });
                 if (saveRes.success) {
                   setSaved(true);
                   setTimeout(() => setSaved(false), 2000);
-                  // Exit edit mode and reload preview with cache-busting
                   setTemplateEditMode(false);
                   setTemplateSelectedElement(null);
                   setTemplateSections([]);
@@ -382,7 +369,6 @@ export default function BuilderPage({ params }: { params: Promise<{ pageId: stri
                     templateIframeRef.current.src = `/api/storefront/${storeSlug}/template-html?_t=${Date.now()}`;
                   }
                 } else {
-                  console.error("Template save failed:", saveRes.error);
                   alert("Failed to save: " + (saveRes.error || "Unknown error"));
                 }
               } catch (saveErr) {
@@ -394,102 +380,48 @@ export default function BuilderPage({ params }: { params: Promise<{ pageId: stri
             })();
           }
           break;
-
         case "afro-editor-cancel":
           setTemplateEditMode(false);
           setTemplateSelectedElement(null);
           setTemplateSections([]);
-          // Reload iframe without edit mode + cache bust
           if (templateIframeRef.current && storeSlug) {
             templateIframeRef.current.src = `/api/storefront/${storeSlug}/template-html?_t=${Date.now()}`;
           }
           break;
-
         case "afro-editor-reset":
-          handleTemplateReset();
+          if (!currentStore) break;
+          (async () => {
+            try {
+              await api.delete(`/api/sites/${currentStore.id}/template-html-editor`);
+              setTemplateEditMode(false);
+              if (templateIframeRef.current) {
+                templateIframeRef.current.src = `/api/storefront/${storeSlug}/template-html?_t=${Date.now()}`;
+              }
+            } catch (err) { console.error("Template reset error:", err); }
+          })();
           break;
-
         case "afro-editor-upload-image":
-          handleEditorImageUpload(e.data);
+          if (!currentStore) break;
+          (async () => {
+            try {
+              const blob = await fetch(e.data.dataUrl).then((r) => r.blob());
+              const formData = new FormData();
+              formData.append("file", blob, e.data.fileName);
+              const res = await fetch(`/api/sites/${currentStore.id}/upload`, { method: "POST", body: formData });
+              const result = await res.json();
+              if (result.url) {
+                templateIframeRef.current?.contentWindow?.postMessage({ type: "afro-editor-image-uploaded", url: result.url }, "*");
+              }
+            } catch (err) { console.error("Image upload error:", err); }
+          })();
           break;
-
         case "afro-editor-change":
-          // Editor notified us of a change — could show unsaved indicator
           break;
       }
     };
-
     window.addEventListener("message", handler);
     return () => window.removeEventListener("message", handler);
   }, [storeSlug, currentStore]);
-
-  const handleTemplateSave = async (html: string) => {
-    if (!currentStore || !html) return;
-    setTemplateSaving(true);
-    try {
-      const res = await api.put(`/api/sites/${currentStore.id}/template-html-editor`, { customHtml: html });
-      if (res.success) {
-        setSaved(true);
-        setTimeout(() => setSaved(false), 2000);
-        // Exit edit mode and reload preview
-        setTemplateEditMode(false);
-        setTemplateEditorReady(false);
-        if (templateIframeRef.current) {
-          templateIframeRef.current.src = `/api/storefront/${storeSlug}/template-html?_t=${Date.now()}`;
-        }
-      }
-    } catch (err) {
-      console.error("Template save error:", err);
-    } finally {
-      setTemplateSaving(false);
-    }
-  };
-
-  const handleTemplateReset = async () => {
-    if (!currentStore) return;
-    try {
-      await api.delete(`/api/sites/${currentStore.id}/template-html-editor`);
-      setTemplateEditMode(false);
-      setTemplateEditorReady(false);
-      // Reload with base template + cache bust
-      if (templateIframeRef.current) {
-        templateIframeRef.current.src = `/api/storefront/${storeSlug}/template-html?_t=${Date.now()}`;
-      }
-    } catch (err) {
-      console.error("Template reset error:", err);
-    }
-  };
-
-  // startTemplateEdit defined above — sets iframe src with afro_edit=1
-
-  const handleEditorImageUpload = async (data: { dataUrl: string; fileName: string; mimeType: string }) => {
-    if (!currentStore) return;
-    try {
-      // Convert data URL to blob and upload via existing image upload API
-      const blob = await fetch(data.dataUrl).then((r) => r.blob());
-      const formData = new FormData();
-      formData.append("file", blob, data.fileName);
-
-      const res = await fetch(`/api/sites/${currentStore.id}/upload`, {
-        method: "POST",
-        body: formData,
-      });
-      const result = await res.json();
-
-      if (result.url) {
-        // Send uploaded URL back to editor iframe
-        templateIframeRef.current?.contentWindow?.postMessage({
-          type: "afro-editor-image-uploaded",
-          url: result.url,
-        }, "*");
-      }
-    } catch (err) {
-      console.error("Image upload error:", err);
-    }
-  };
-=======
-  }, [editor.selectedBlockId, handleSave]);
->>>>>>> cf562f4 (Customization of templates implemented fully)
 
   // DnD sensors
   const sensors = useSensors(
@@ -713,7 +645,6 @@ export default function BuilderPage({ params }: { params: Promise<{ pageId: stri
                   </span>
                 </div>
 
-<<<<<<< HEAD
                 {checkTemplateHtml(templateSlug) ? (
                   <iframe
                     ref={templateIframeRef}
@@ -723,17 +654,10 @@ export default function BuilderPage({ params }: { params: Promise<{ pageId: stri
                     title="Template Preview"
                   />
                 ) : (
-                  <div className="relative overflow-hidden" style={buildPageBackgroundStyle(pageSettings)}>
-                    <RenderBlocks
-                      blocks={blocks}
-                    />
+                  <div className="relative overflow-hidden" style={buildPageBackgroundStyle(editor.pageSettings)}>
+                    <RenderBlocks blocks={editor.blocks} storeSlug={currentStore?.slug || ""} />
                   </div>
                 )}
-=======
-                <div className="relative overflow-hidden" style={buildPageBackgroundStyle(editor.pageSettings)}>
-                  <RenderBlocks blocks={editor.blocks} storeSlug={currentStore?.slug || ""} />
-                </div>
->>>>>>> cf562f4 (Customization of templates implemented fully)
               </div>
 
               <div className="mt-4 rounded-xl border border-surface-200 bg-white p-4">

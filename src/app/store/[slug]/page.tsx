@@ -298,17 +298,46 @@ export default function StorePage() {
   const hasHomeContent = homeBlocks.length > 0;
   const homeHasProductGrid = homeBlocks.some((b) => b.type === "productGrid");
   const isTemplateSite = !!data.templateSlug;
-<<<<<<< HEAD
   const hasRawTemplateHtml = !!data.templateSlug && hasTemplateHtml(data.templateSlug);
   const iframeSrc = `/api/storefront/${slug}/template-html${editorPreview ? "?afro_edit=1&" : "?"}_t=${Date.now()}`;
-=======
->>>>>>> cf562f4 (Customization of templates implemented fully)
 
   // Navigation pages: exclude HOME (we're on it), sort sensibly
   const navPageOrder: Record<string, number> = { ABOUT: 0, FAQ: 1, CONTACT: 2, POLICY: 3, CUSTOM: 4, LANDING: 5 };
   const navPages = customizedPages
     .filter((p) => p.type !== "HOME")
     .sort((a, b) => (navPageOrder[a.type] ?? 99) - (navPageOrder[b.type] ?? 99));
+
+  // ─── RAW HTML TEMPLATE MODE ──────────────────────────────
+  if (isTemplateSite && hasRawTemplateHtml) {
+    return (
+      <div className="min-h-screen">
+        <iframe
+          ref={templateIframeRef}
+          src={iframeSrc}
+          className="w-full border-0"
+          style={{ minHeight: "100vh", display: "block" }}
+          title={store.name}
+          onLoad={() => {
+            const iframe = templateIframeRef.current;
+            if (iframe?.contentDocument?.body) {
+              const h = iframe.contentDocument.body.scrollHeight;
+              if (h) iframe.style.height = `${h}px`;
+              const resizeObserver = new ResizeObserver(() => {
+                const height = iframe.contentDocument?.body?.scrollHeight;
+                if (height) iframe.style.height = `${height}px`;
+              });
+              resizeObserver.observe(iframe.contentDocument.body);
+            }
+            // Send customization data to iframe
+            templateIframeRef.current?.contentWindow?.postMessage({
+              type: "afro-site-customization-preview",
+              customization: draftCustomization,
+            }, "*");
+          }}
+        />
+      </div>
+    );
+  }
 
   return (
     <ThemeProvider theme={resolvedTheme}>
