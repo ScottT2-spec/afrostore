@@ -314,7 +314,7 @@ export default function BuilderPage({ params }: { params: Promise<{ pageId: stri
   const startTemplateEdit = () => {
     if (!storeSlug) return;
     if (templateIframeRef.current) {
-      templateIframeRef.current.src = `/api/storefront/${storeSlug}/template-html?afro_edit=1`;
+      templateIframeRef.current.src = `/api/storefront/${storeSlug}/template-html?afro_edit=1&_t=${Date.now()}`;
       setTemplateEditMode(true);
     }
   };
@@ -352,12 +352,30 @@ export default function BuilderPage({ params }: { params: Promise<{ pageId: stri
           if (currentStore && e.data.html) {
             (async () => {
               setSaving(true);
-              await api.put(`/api/sites/${currentStore.id}/template-html-editor`, {
-                customHtml: e.data.html,
-              });
-              setSaving(false);
-              setSaved(true);
-              setTimeout(() => setSaved(false), 2000);
+              try {
+                const saveRes = await api.put(`/api/sites/${currentStore.id}/template-html-editor`, {
+                  customHtml: e.data.html,
+                });
+                if (saveRes.success) {
+                  setSaved(true);
+                  setTimeout(() => setSaved(false), 2000);
+                  // Exit edit mode and reload preview with cache-busting
+                  setTemplateEditMode(false);
+                  setTemplateSelectedElement(null);
+                  setTemplateSections([]);
+                  if (templateIframeRef.current && storeSlug) {
+                    templateIframeRef.current.src = `/api/storefront/${storeSlug}/template-html?_t=${Date.now()}`;
+                  }
+                } else {
+                  console.error("Template save failed:", saveRes.error);
+                  alert("Failed to save: " + (saveRes.error || "Unknown error"));
+                }
+              } catch (saveErr) {
+                console.error("Template save error:", saveErr);
+                alert("Failed to save template. Please try again.");
+              } finally {
+                setSaving(false);
+              }
             })();
           }
           break;
@@ -366,9 +384,9 @@ export default function BuilderPage({ params }: { params: Promise<{ pageId: stri
           setTemplateEditMode(false);
           setTemplateSelectedElement(null);
           setTemplateSections([]);
-          // Reload iframe without edit mode
+          // Reload iframe without edit mode + cache bust
           if (templateIframeRef.current && storeSlug) {
-            templateIframeRef.current.src = `/api/storefront/${storeSlug}/template-html`;
+            templateIframeRef.current.src = `/api/storefront/${storeSlug}/template-html?_t=${Date.now()}`;
           }
           break;
 
@@ -402,7 +420,7 @@ export default function BuilderPage({ params }: { params: Promise<{ pageId: stri
         setTemplateEditMode(false);
         setTemplateEditorReady(false);
         if (templateIframeRef.current) {
-          templateIframeRef.current.src = `/api/storefront/${storeSlug}/template-html`;
+          templateIframeRef.current.src = `/api/storefront/${storeSlug}/template-html?_t=${Date.now()}`;
         }
       }
     } catch (err) {
@@ -418,20 +436,16 @@ export default function BuilderPage({ params }: { params: Promise<{ pageId: stri
       await api.delete(`/api/sites/${currentStore.id}/template-html-editor`);
       setTemplateEditMode(false);
       setTemplateEditorReady(false);
-      // Reload with base template
+      // Reload with base template + cache bust
       if (templateIframeRef.current) {
-        templateIframeRef.current.src = `/api/storefront/${storeSlug}/template-html`;
+        templateIframeRef.current.src = `/api/storefront/${storeSlug}/template-html?_t=${Date.now()}`;
       }
     } catch (err) {
       console.error("Template reset error:", err);
     }
   };
 
-  const startTemplateEdit = () => {
-    if (!storeSlug) return;
-    setTemplateEditMode(true);
-    setTemplateEditorReady(false);
-  };
+  // startTemplateEdit defined above — sets iframe src with afro_edit=1
 
   const handleEditorImageUpload = async (data: { dataUrl: string; fileName: string; mimeType: string }) => {
     if (!currentStore) return;
@@ -759,7 +773,7 @@ export default function BuilderPage({ params }: { params: Promise<{ pageId: stri
                 {checkTemplateHtml(templateSlug) ? (
                   <iframe
                     ref={templateIframeRef}
-                    src={`/api/storefront/${storeSlug}/template-html${templateEditMode ? "?afro_edit=1" : ""}`}
+                    src={`/api/storefront/${storeSlug}/template-html${templateEditMode ? "?afro_edit=1&" : "?"}_t=${Date.now()}`}
                     className="w-full border-0"
                     style={{ minHeight: "80vh" }}
                     title="Template Preview"

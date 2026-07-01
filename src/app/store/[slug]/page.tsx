@@ -293,7 +293,7 @@ export default function StorePage() {
   const homeHasProductGrid = homeBlocks.some((b) => b.type === "productGrid");
   const isTemplateSite = !!data.templateSlug;
   const hasRawTemplateHtml = !!data.templateSlug && hasTemplateHtml(data.templateSlug);
-  const iframeSrc = `${"/api/storefront/" + slug + "/template-html"}${editorPreview ? "?afro_edit=1" : ""}`;
+  const iframeSrc = `/api/storefront/${slug}/template-html${editorPreview ? "?afro_edit=1&" : "?"}_t=${Date.now()}`;
 
   // Navigation pages: exclude HOME (we're on it), sort sensibly
   const navPageOrder: Record<string, number> = { ABOUT: 0, FAQ: 1, CONTACT: 2, POLICY: 3, CUSTOM: 4, LANDING: 5 };

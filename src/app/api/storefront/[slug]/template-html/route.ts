@@ -5,6 +5,9 @@ import path from "path";
 import { getTemplateHtmlPath, hasTemplateHtml } from "@/lib/templates/template-html-map";
 import { buildCustomizationBridgeScript, buildCustomizationCss, getResolvedPageSettings, loadSiteCustomizationSafely, type SiteCustomizationDocument } from "@/lib/site-customization";
 
+// Force dynamic — never statically cache this route
+export const dynamic = "force-dynamic";
+
 type Params = { params: Promise<{ slug: string }> };
 
 /**

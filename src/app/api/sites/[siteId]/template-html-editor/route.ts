@@ -3,6 +3,8 @@ import { prisma } from "@/lib/db";
 import { getSiteContext, error, success } from "@/lib/api-helpers";
 import { unauthorized } from "@/lib/auth";
 
+export const dynamic = "force-dynamic";
+
 type Params = { params: Promise<{ siteId: string }> };
 
 /**
