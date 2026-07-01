@@ -50,8 +50,8 @@ class ApiClient {
       if (!res.ok) {
         return {
           success: false,
-          error: json.error || `Request failed (${res.status})`,
-          details: json.details,
+          error: json?.error || `Request failed (${res.status})`,
+          details: json?.details,
         };
       }
 

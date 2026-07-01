@@ -3,6 +3,7 @@ import { prisma } from "@/lib/db";
 import { readFile } from "fs/promises";
 import path from "path";
 import { getTemplateHtmlPath, hasTemplateHtml } from "@/lib/templates/template-html-map";
+import { findStoredTemplatePage } from "@/lib/templates/site-instance";
 import { buildCustomizationBridgeScript, buildCustomizationCss, getResolvedPageSettings, loadSiteCustomizationSafely, type SiteCustomizationDocument } from "@/lib/site-customization";
 
 // Force dynamic — never statically cache this route
@@ -35,7 +36,11 @@ export async function GET(req: NextRequest, { params }: Params) {
     // 2. Get the active template
     const activeTemplate = await prisma.siteTemplate.findFirst({
       where: { siteId: site.id, isActive: true },
-      include: {
+      select: {
+        variant: true,
+        themeConfig: true,
+        pages: true,
+        customHtml: true,
         template: { select: { id: true, name: true, slug: true } },
       },
     });
@@ -129,7 +134,7 @@ export async function GET(req: NextRequest, { params }: Params) {
         category: p.category?.name || "",
         inStock: p.stock > 0,
         slug: p.slug,
-      })), currencySymbols[currency] || currency);
+      })));
     } else {
       // Base template: full substitution
       html = substituteStoreData(html, {
@@ -162,7 +167,8 @@ export async function GET(req: NextRequest, { params }: Params) {
     html = injectStorefrontBridge(html, slug, site.name, currency, currencySymbol, isEditMode);
 
     // 7. Inject site customization bridge/styles so saved and live drafts render visually
-    html = injectCustomizationLayers(html, customization, homePage ? getResolvedPageSettings(homePage, {}, customization) : null);
+    const fallbackHomePage = homePage || findStoredTemplatePage(activeTemplate?.pages, "home");
+    html = injectCustomizationLayers(html, customization, fallbackHomePage ? getResolvedPageSettings(fallbackHomePage, {}, customization) : null);
 
     // 8. If edit mode, inject the template editor script
     if (isEditMode) {
@@ -240,7 +246,7 @@ function substituteStoreData(html: string, data: SubstitutionData): string {
   html = replaceCurrency(html, data.currencySymbol);
 
   // Replace product data (names, prices, images)
-  html = replaceProducts(html, data.products, data.currencySymbol);
+  html = replaceProducts(html, data.products);
 
   // Replace contact info
   if (data.whatsappNumber) {
@@ -342,8 +348,7 @@ function replaceCurrency(html: string, currencySymbol: string): string {
 
 function replaceProducts(
   html: string,
-  products: StoreProduct[],
-  currencySymbol: string
+  products: StoreProduct[]
 ): string {
   if (products.length === 0) return html;
 
@@ -352,7 +357,7 @@ function replaceProducts(
   // Replace product titles in wd-entities-title blocks
   html = html.replace(
     /(<[^>]*class="wd-entities-title"[^>]*>)\s*<a[^>]*>([^<]+)<\/a>/g,
-    (match, prefix, _oldName) => {
+    (_match, prefix) => {
       if (productIndex >= products.length) {
         // Cycle through products if template has more slots
         productIndex = 0;
@@ -370,7 +375,7 @@ function replaceProducts(
   // Replace prices - WoodMart pattern: <bdi><span class="woocommerce-Price-currencySymbol">$</span>199.00</bdi>
   html = html.replace(
     /(<bdi>\s*<span class="woocommerce-Price-currencySymbol">[^<]*<\/span>)[\d,.]+(<\/bdi>)/g,
-    (match, prefix, suffix) => {
+    (_match, prefix, suffix) => {
       if (productIndex >= products.length) productIndex = 0;
       const product = products[productIndex];
       const price = formatPrice(product.price);
@@ -386,7 +391,7 @@ function replaceProducts(
     // Replace product images (identified by default-product pattern in src)
     html = html.replace(
       /(<img[^>]*)(src="[^"]*default-product[^"]*")([^>]*)(alt="[^"]*")?/g,
-      (match, before, _oldSrc, after, _oldAlt) => {
+      (_match, before, _oldSrc, after) => {
         if (imgIndex >= productsWithImages.length) imgIndex = 0;
         const product = productsWithImages[imgIndex];
         imgIndex++;

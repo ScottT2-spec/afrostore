@@ -2,7 +2,7 @@
 import { Plus, X } from "lucide-react";
 import { Copy, Trash2 } from "@/components/icons/FilledIcons";
 
-import { BuilderBlock, BlockType } from "@/lib/builder/types";
+import { BuilderBlock } from "@/lib/builder/types";
 import { SingleImageUpload } from "@/components/dashboard/ImageUpload";
 
 interface PropertyPanelProps {
@@ -155,8 +155,11 @@ function HeroProps({ block, update }: { block: BuilderBlock; update: (key: strin
       <PropInput label="Button Link" value={block.props.buttonHref} onChange={(v) => update("buttonHref", v)} />
       <PropInput label="Secondary Button" value={block.props.secondaryButtonText} onChange={(v) => update("secondaryButtonText", v)} />
       <PropInput label="Secondary Link" value={block.props.secondaryButtonHref} onChange={(v) => update("secondaryButtonHref", v)} />
+      <PropInput label="Button Color" value={block.props.buttonColor} onChange={(v) => update("buttonColor", v)} type="color" />
+      <PropInput label="Button Text Color" value={block.props.buttonTextColor} onChange={(v) => update("buttonTextColor", v)} type="color" />
       <SingleImageUpload image={(block.props.bgImage as string) || null} onChange={(url) => update("bgImage", url || "")} label="Background Image" compact />
       <PropInput label="Overlay Opacity" value={block.props.overlayOpacity ?? 50} onChange={(v) => update("overlayOpacity", v)} type="number" />
+      <PropInput label="Overlay Color" value={block.props.overlayColor} onChange={(v) => update("overlayColor", v)} type="color" />
       <PropInput label="Background Style" value={block.props.bgStyle} onChange={(v) => update("bgStyle", v)} type="select"
         options={[
           { value: "", label: "Custom Color" },
@@ -357,6 +360,11 @@ function BannerProps({ block, update }: { block: BuilderBlock; update: (key: str
       <PropInput label="Button Text" value={block.props.buttonText} onChange={(v) => update("buttonText", v)} />
       <PropInput label="Button Link" value={block.props.buttonHref} onChange={(v) => update("buttonHref", v)} />
       <SingleImageUpload image={(block.props.bgImage as string) || null} onChange={(url) => update("bgImage", url || "")} label="Background Image" compact />
+      <PropInput label="Overlay Color" value={block.props.overlayColor} onChange={(v) => update("overlayColor", v)} type="color" />
+      <PropInput label="Overlay Opacity" value={block.props.overlayOpacity ?? 35} onChange={(v) => update("overlayOpacity", v)} type="number" />
+      <PropInput label="Text Color" value={block.props.textColor} onChange={(v) => update("textColor", v)} type="color" />
+      <PropInput label="Button Color" value={block.props.buttonColor} onChange={(v) => update("buttonColor", v)} type="color" />
+      <PropInput label="Button Text Color" value={block.props.buttonTextColor} onChange={(v) => update("buttonTextColor", v)} type="color" />
       <PropInput label="Background" value={block.props.bgColor} onChange={(v) => update("bgColor", v)} type="select"
         options={[{ value: "brand", label: "Brand" }, { value: "accent", label: "Accent" }, { value: "dark", label: "Dark" }, { value: "light", label: "Light" }]} />
     </>
@@ -443,15 +451,47 @@ function ImageTextProps({ block, update }: { block: BuilderBlock; update: (key: 
       <PropInput label="Button Link" value={block.props.buttonHref} onChange={(v) => update("buttonHref", v)} />
       <PropInput label="Reverse Layout" value={block.props.reverse} onChange={(v) => update("reverse", v)} type="toggle" />
       <SingleImageUpload image={(block.props.image as string) || null} onChange={(url) => update("image", url || "")} label="Image" compact />
+      <PropInput label="Image Alt Text" value={block.props.imageAlt} onChange={(v) => update("imageAlt", v)} />
+      <PropInput label="Background Color" value={block.props.bgColor} onChange={(v) => update("bgColor", v)} type="color" />
+      <PropInput label="Heading Color" value={block.props.headingColor} onChange={(v) => update("headingColor", v)} type="color" />
+      <PropInput label="Body Color" value={block.props.bodyColor} onChange={(v) => update("bodyColor", v)} type="color" />
+      <PropInput label="Text Color" value={block.props.textColor} onChange={(v) => update("textColor", v)} type="color" />
+      <PropInput label="Button Color" value={block.props.buttonColor} onChange={(v) => update("buttonColor", v)} type="color" />
+      <PropInput label="Button Text Color" value={block.props.buttonTextColor} onChange={(v) => update("buttonTextColor", v)} type="color" />
     </>
   );
 }
 
 function GalleryProps({ block, update }: { block: BuilderBlock; update: (key: string, val: unknown) => void }) {
+  const images = (block.props.images as Array<{ src: string; alt?: string }>) || [];
+  const updateImage = (index: number, key: string, val: string) => {
+    const next = images.map((image, i) => (i === index ? { ...image, [key]: val } : image));
+    update("images", next);
+  };
+  const addImage = () => update("images", [...images, { src: "", alt: "" }]);
+  const removeImage = (index: number) => update("images", images.filter((_, i) => i !== index));
   return (
     <>
       <PropInput label="Title" value={block.props.title} onChange={(v) => update("title", v)} />
       <PropInput label="Subtitle" value={block.props.subtitle} onChange={(v) => update("subtitle", v)} type="textarea" rows={2} />
+      <div>
+        <label className="block text-xs font-medium text-surface-700 mb-2">Gallery Images</label>
+        <div className="space-y-3">
+          {images.map((image, i) => (
+            <div key={i} className="rounded-xl border border-surface-200 bg-surface-50 p-3 space-y-2">
+              <div className="flex items-center justify-between">
+                <span className="text-[10px] font-bold text-surface-400 uppercase">Image {i + 1}</span>
+                <button onClick={() => removeImage(i)} className="text-[10px] text-red-500 hover:text-red-700 font-medium">Remove</button>
+              </div>
+              <SingleImageUpload image={image.src || null} onChange={(url) => updateImage(i, "src", url || "")} label="Image" compact />
+              <PropInput label="Alt Text" value={image.alt} onChange={(v) => updateImage(i, "alt", v as string)} />
+            </div>
+          ))}
+        </div>
+        <button onClick={addImage} className="mt-2 w-full rounded-lg border border-dashed border-surface-300 py-2 text-xs font-medium text-surface-500 hover:bg-surface-50 hover:text-surface-700 transition-colors">
+          <Plus className="h-3 w-3 inline mr-1" /> Add Image
+        </button>
+      </div>
     </>
   );
 }
@@ -579,7 +619,7 @@ function ColumnsProps({ block, update }: { block: BuilderBlock; update: (key: st
   );
 }
 
-function GenericProps({ block }: { block: BuilderBlock }) {
+function GenericProps() {
   return <p className="text-xs text-surface-500">Properties for this block type coming soon.</p>;
 }
 
@@ -619,7 +659,7 @@ const propEditors: Record<string, React.FC<{ block: BuilderBlock; update: (key: 
 
 // ─── PANEL ───────────────────────────────────────────────────
 
-export default function PropertyPanel({ block, onUpdate, onCommit, onClose, onDelete, onDuplicate }: PropertyPanelProps) {
+export default function PropertyPanel({ block, onUpdate, onClose, onDelete, onDuplicate }: PropertyPanelProps) {
   const update = (key: string, val: unknown) => {
     onUpdate({ ...block, props: { ...block.props, [key]: val } });
   };

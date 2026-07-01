@@ -1,5 +1,6 @@
 import type { BuilderBlock } from "@/components/storefront/BlockRenderer";
 import type { TemplateDefinition, ThemeConfig } from "./types";
+import { getTemplateSiteType } from "./site-type";
 
 type FamilyDef = TemplateDefinition & {
   pageTitles: string[];
@@ -35,7 +36,15 @@ function themeConfig(params: {
 }
 
 function makeTemplate(template: Omit<FamilyDef, "active"> & { active?: boolean }): FamilyDef {
-  return { ...template, active: template.active ?? true };
+  return {
+    ...template,
+    manifest: {
+      category: template.category,
+      siteType: getTemplateSiteType({ category: template.category, slug: template.slug }),
+      industry: template.category,
+    },
+    active: template.active ?? true,
+  };
 }
 
 const restaurantHero = block("restaurant-hero", "hero", {
@@ -226,17 +235,6 @@ const educationHero = block("melody-edu-hero", "hero", {
   image: "/templates/melody-education/hero.jpg",
 });
 
-const servicesHero = block("services-hero", "hero", {
-  badge: "Business Services Pro",
-  heading: "Lead-driven services, proof, and pricing",
-  subheading: "Structured for consulting, agency, and professional businesses with clear conversion pathways.",
-  buttonText: "See Services",
-  buttonHref: "#services",
-  secondaryButtonText: "Get a Quote",
-  secondaryButtonHref: "#contact",
-  bgStyle: "dark",
-});
-
 const interiorHero = block("interior-hero", "hero", {
   badge: "Interior Studio",
   heading: "Portfolio-led presentation for studios and designers",
@@ -314,17 +312,6 @@ const landingDevPortfolioHero = block("landing-dev-portfolio-hero", "hero", {
   secondaryButtonText: "Contact Me",
   secondaryButtonHref: "#contact",
   bgStyle: "dark",
-});
-
-const landingKidsHero = block("landing-kids-hero", "hero", {
-  badge: "New Monthly Adventures",
-  heading: "Spark their imagination, one box at a time",
-  subheading: "Expertly curated toy boxes delivered monthly to your doorstep. Tailored for every stage of development, from curious toddlers to aspiring scientists.",
-  buttonText: "Subscribe Now",
-  buttonHref: "#pricing",
-  secondaryButtonText: "How It Works",
-  secondaryButtonHref: "#how-it-works",
-  bgStyle: "accent",
 });
 
 const landingTechSaasHero = block("landing-tech-saas-hero", "hero", {
@@ -2690,4 +2677,3 @@ export function getFamilyTemplateBySlug(slug: string) {
   const canonical = TEMPLATE_FAMILY_ALIASES[slug] || slug;
   return TEMPLATE_FAMILIES.find((family) => family.slug === canonical);
 }
-

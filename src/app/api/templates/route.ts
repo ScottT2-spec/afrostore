@@ -29,6 +29,7 @@ export async function GET(req: NextRequest) {
   try {
     const url = new URL(req.url);
     const includeInactive = url.searchParams.get("includeInactive") === "true";
+    const siteType = url.searchParams.get("siteType") || undefined;
     if (includeInactive) {
       const admin = await getAdminUser(req);
       if (!admin) return error("Admin access required", 403);
@@ -36,6 +37,7 @@ export async function GET(req: NextRequest) {
     const templates = await listTemplates({
       search: url.searchParams.get("search") || undefined,
       category: url.searchParams.get("category") || undefined,
+      siteType,
       includeInactive,
     });
     return success(templates);

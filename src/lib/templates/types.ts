@@ -33,6 +33,12 @@ export interface TemplateDefinition {
   name: string;
   slug: string;
   category: string;
+  manifest?: {
+    category: string;
+    siteType: "ECOMMERCE" | "WEBSITE" | "LANDING_PAGE";
+    industry?: string;
+    version?: string;
+  };
   description: string;
   previewImage: string;
   previewUrl: string;

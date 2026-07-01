@@ -4,6 +4,7 @@ import type { PageType, Prisma, Template as PrismaTemplate } from "@/generated/p
 import type { BuilderBlock } from "@/components/storefront/BlockRenderer";
 import { INTERNAL_TEMPLATES } from "./catalog";
 import { TEMPLATE_FAMILY_ALIASES, TEMPLATE_FAMILY_PAGE_SETS } from "./families";
+import { getTemplateSiteType } from "./site-type";
 import type {
   BusinessAnalysisInput,
   ClassificationResult,
@@ -81,14 +82,6 @@ const RECOMMENDATION_MAP: Record<string, string[]> = {
   freelance: ["Developer Portfolio"],
 };
 
-function block(id: string, type: string, props: Record<string, unknown>): BuilderBlock {
-  return {
-    id,
-    type: type as BuilderBlock["type"],
-    props,
-  };
-}
-
 const INDUSTRY_ALIASES: Record<string, string[]> = {
   Restaurant: ["restaurant", "cafe", "food", "dining", "menu", "catering"],
   Bakery: ["bakery", "cake", "pastry", "bread", "dessert"],
@@ -158,11 +151,17 @@ function primaryBusinessTerm(input: BusinessAnalysisInput): string {
 }
 
 function toTemplateDefinition(template: PrismaTemplate): TemplateDefinition {
+  const siteType = getTemplateSiteType({ category: template.category, slug: template.slug });
   return {
     id: template.id,
     name: template.name,
     slug: template.slug,
     category: template.category,
+    manifest: {
+      category: template.category,
+      siteType,
+      industry: template.category,
+    },
     description: template.description || "",
     previewImage: template.previewImage || "",
     previewUrl: sanitizePreviewUrl(template.slug, template.previewUrl),
@@ -209,7 +208,7 @@ export async function syncInternalTemplates() {
   invalidateTemplateCache();
 }
 
-export async function listTemplates(options: { includeInactive?: boolean; search?: string; category?: string } = {}) {
+export async function listTemplates(options: { includeInactive?: boolean; search?: string; category?: string; siteType?: string } = {}) {
   await syncInternalTemplates();
   if (!templateCache || templateCache.expiresAt < Date.now()) {
     const templates = await prisma.template.findMany({
@@ -227,6 +226,7 @@ export async function listTemplates(options: { includeInactive?: boolean; search
   return templateCache.templates.filter((template) => {
     if (Object.prototype.hasOwnProperty.call(TEMPLATE_FAMILY_ALIASES, template.slug)) return false;
     if (!options.includeInactive && !template.active) return false;
+    if (options.siteType && template.manifest?.siteType !== options.siteType) return false;
     if (category && template.category.toLowerCase() !== category && !template.recommendationKeywords.includes(category)) return false;
     if (search) {
       const text = `${template.name} ${template.category} ${template.description} ${template.recommendationKeywords.join(" ")}`.toLowerCase();
@@ -337,7 +337,7 @@ export function scoreTemplates(templates: TemplateDefinition[], input: BusinessA
 }
 
 export async function recommendTemplates(input: BusinessAnalysisInput & { siteType?: string }) {
-  const templates = await listTemplates();
+  const templates = await listTemplates({ siteType: input.siteType });
   const classification = classifyBusiness(input);
   const recommendations = scoreTemplates(templates, {
     ...input,
@@ -345,37 +345,6 @@ export async function recommendTemplates(input: BusinessAnalysisInput & { siteTy
     siteType: input.siteType,
   });
   return { classification, recommendations };
-}
-
-function canonicalIndustry(input: BusinessAnalysisInput, template?: TemplateDefinition) {
-  const templateSlug = template?.slug || "";
-  const canonicalSlug = TEMPLATE_FAMILY_ALIASES[templateSlug] || templateSlug;
-  if (TEMPLATE_FAMILY_PAGE_SETS[canonicalSlug]) return canonicalSlug;
-
-  const term = primaryBusinessTerm(input);
-  const canonicalTerm = TEMPLATE_FAMILY_ALIASES[term] || term;
-  if (TEMPLATE_FAMILY_PAGE_SETS[canonicalTerm]) return canonicalTerm;
-
-  const category = template?.category.toLowerCase() || "";
-  if (category.includes("restaurant")) return "restaurant-pro";
-  if (category.includes("bakery")) return "bakery-delight";
-  if (category.includes("fashion")) return "fashion-luxe";
-  if (category.includes("shoe")) return "footwear-elite";
-  if (category.includes("accessories")) return "accessory-hub";
-  if (category.includes("children")) return "kids-world";
-  if (category.includes("consulting") || category.includes("services")) return "business-services-pro";
-  if (category.includes("interior") || category.includes("architecture")) return "interior-studio";
-  if (category.includes("landing") || category.includes("creative") || category.includes("portfolio")) return "landing-artsy";
-  if (category.includes("travel") || category.includes("tourism")) return "landing-travel";
-  if (category.includes("marketing") || category.includes("advertising") || category.includes("agency")) return "landing-tech-saas";
-  if (category.includes("saas") || category.includes("software") || category.includes("technology")) return "landing-saas-minimal";
-  if (category.includes("education") || category.includes("training") || category.includes("university")) return "landing-kids";
-  if (category.includes("health") || category.includes("nonprofit") || category.includes("advocacy")) return "landing-health";
-  if (category.includes("wellness") || category.includes("sleep") || category.includes("meditation")) return "landing-wellness";
-  if (category.includes("gadget") || category.includes("electronics") || category.includes("device")) return "landing-gadget";
-  if (category.includes("developer") || category.includes("portfolio") || category.includes("freelance")) return "landing-dev-portfolio";
-  if (category.includes("corporate")) return "landing-tech-saas";
-  return "commerce-pro";
 }
 
 // Map page titles to relevant section types from the template definition.
@@ -502,7 +471,9 @@ export function themeConfigForProvider(config: ThemeConfig) {
 export async function applyTemplateToSite(siteId: string, input: TemplateSelectionInput) {
   const template = input.templateId || input.templateSlug
     ? await getTemplateByIdOrSlug(input.templateId || input.templateSlug || "")
-    : (await recommendTemplates(input)).recommendations[0]?.template;
+    : input.aiBuild
+    ? (await recommendTemplates(input)).recommendations[0]?.template
+    : null;
 
   if (!template) throw new Error("Template not found");
 

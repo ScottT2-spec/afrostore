@@ -2,21 +2,38 @@
 import { ArrowLeft, ChevronDown, ChevronUp, Loader2, Plus } from "lucide-react";
 import { Clock, Columns, Copy, Eye, EyeOff, Grid3X3, GripVertical, HelpCircle, Image as ImageIcon, Layers, Layout, LayoutGrid, Mail, MessageCircle, Minus, Monitor, MousePointer, MoveVertical, Play, Redo2, Save, Shield, ShoppingBag, Smartphone, Sparkles, Type, Undo2, User } from "@/components/icons/FilledIcons";
 
-import { useState, useEffect, useCallback, useRef, use } from "react";
-import { useRouter } from "next/navigation";
+import { useState, useEffect, useCallback, use } from "react";
+import { useAuth } from "@/context/AuthContext";
 import { useSite } from "@/context/StoreContext";
 import { api } from "@/lib/api-client";
-import { BuilderBlock, BlockType, blockDefaults, blockPalette } from "@/lib/builder/types";
-import { BuilderHistory } from "@/lib/builder/history";
+import { BuilderBlock, BlockType, blockPalette } from "@/lib/builder/types";
 import { blockTemplates } from "@/lib/builder/templates";
 import BlockRenderer from "@/components/builder/BlockRenderer";
 import PropertyPanel from "@/components/builder/PropertyPanel";
-import TemplateElementPanel from "@/components/builder/TemplateElementPanel";
 import { SingleImageUpload } from "@/components/dashboard/ImageUpload";
 import { parsePageContent, serializePageContent, type PageSettings } from "@/lib/page-content";
 import { buildPageBackgroundStyle } from "@/lib/site-customization";
-import { hasTemplateHtml as checkTemplateHtml } from "@/lib/templates/template-html-map";
 import { RenderBlocks } from "@/components/storefront/BlockRenderer";
+import {
+  addBuilderEditorBlock,
+  deleteBuilderEditorBlock,
+  duplicateBuilderEditorBlock,
+  getBuilderEditorStorageKey,
+  initializeBuilderEditorSession,
+  markBuilderEditorSaved,
+  moveBuilderEditorBlock,
+  redoBuilderEditor,
+  replaceBuilderEditorBlock,
+  setBuilderEditorBlocks,
+  setBuilderEditorPageSettings,
+  setBuilderEditorPageTitle,
+  setBuilderEditorPageSlug,
+  setBuilderEditorPublished,
+  setBuilderEditorSelectedBlockId,
+  undoBuilderEditor,
+  useBuilderEditor,
+  updateBuilderEditorBlockProp,
+} from "@/lib/builder/editor-store";
 import {
   DndContext,
   closestCenter,
@@ -207,14 +224,9 @@ function PageSettingsPanel({
 
 export default function BuilderPage({ params }: { params: Promise<{ pageId: string }> }) {
   const { pageId } = use(params);
+  const { user } = useAuth();
   const { currentStore } = useSite();
-  const router = useRouter();
-
-  const [blocks, setBlocks] = useState<BuilderBlock[]>([]);
-  const [pageTitle, setPageTitle] = useState("");
-  const [isPublished, setIsPublished] = useState(false);
-  const [pageSettings, setPageSettings] = useState<PageSettings>({});
-  const [selectedBlockId, setSelectedBlockId] = useState<string | null>(null);
+  const editor = useBuilderEditor();
   const [activeId, setActiveId] = useState<string | null>(null);
   const [sidebarTab, setSidebarTab] = useState<"blocks" | "templates">("blocks");
   const [showSidebar, setShowSidebar] = useState(true);
@@ -222,93 +234,96 @@ export default function BuilderPage({ params }: { params: Promise<{ pageId: stri
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [saved, setSaved] = useState(false);
-  const [canUndo, setCanUndo] = useState(false);
-  const [canRedo, setCanRedo] = useState(false);
   const [canvasMode, setCanvasMode] = useState<"builder" | "preview">("builder");
-  const [templateSlug, setTemplateSlug] = useState<string | null>(null);
-  const [pageSlug, setPageSlug] = useState<string>("");
-  const [storeSlug, setStoreSlug] = useState<string>("");
-  const [templateEditMode, setTemplateEditMode] = useState(false);
-  const [templateSelectedElement, setTemplateSelectedElement] = useState<TemplateElement | null>(null);
-  const [templateSections, setTemplateSections] = useState<TemplateSection[]>([]);
-  const templateIframeRef = useRef<HTMLIFrameElement>(null);
 
-  const historyRef = useRef(new BuilderHistory());
-
-  // Push state to history
-  const pushHistory = useCallback(() => {
-    historyRef.current.push(blocks);
-    setCanUndo(historyRef.current.canUndo);
-    setCanRedo(historyRef.current.canRedo);
-  }, [blocks]);
-
-  // Undo
-  const undo = useCallback(() => {
-    const prev = historyRef.current.undo(blocks);
-    if (prev) {
-      setBlocks(prev);
-      setCanUndo(historyRef.current.canUndo);
-      setCanRedo(historyRef.current.canRedo);
-    }
-  }, [blocks]);
-
-  // Redo
-  const redo = useCallback(() => {
-    const next = historyRef.current.redo(blocks);
-    if (next) {
-      setBlocks(next);
-      setCanUndo(historyRef.current.canUndo);
-      setCanRedo(historyRef.current.canRedo);
-    }
-  }, [blocks]);
-
-  // Load page + check for template HTML
+  // Load page
   useEffect(() => {
-    if (!currentStore) return;
-    // Set store slug immediately — needed for iframe src before async completes
-    setStoreSlug(currentStore.slug);
+    if (!currentStore || !user) return;
     (async () => {
-      const res = await api.get<any>(`/api/sites/${currentStore.id}/pages/${pageId}`);
+      const res = await api.get<{
+        title?: string;
+        isPublished?: boolean;
+        slug?: string;
+        content?: unknown;
+      }>(`/api/sites/${currentStore.id}/pages/${pageId}`);
       if (res.success && res.data) {
-        setPageTitle(res.data.title || "");
-        setIsPublished(res.data.isPublished || false);
-        setPageSlug(res.data.slug || "");
         const content = parsePageContent(res.data.content);
-        setBlocks(content.blocks as unknown as BuilderBlock[]);
-        setPageSettings(content.settings);
-        historyRef.current.push(content.blocks as unknown as BuilderBlock[]);
-
-        // Synchronous template check — no async HEAD request needed
-        const tplSlug = res.data.templateSlug || null;
-        setTemplateSlug(tplSlug);
-        if (tplSlug && checkTemplateHtml(tplSlug)) {
-          setCanvasMode("preview");
-        }
+        initializeBuilderEditorSession({
+          storageKey: getBuilderEditorStorageKey(user.id, currentStore.id, pageId),
+          siteId: currentStore.id,
+          siteSlug: currentStore.slug,
+          pageId,
+          pageSlug: res.data.slug || "",
+          pageTitle: res.data.title || "",
+          isPublished: res.data.isPublished || false,
+          blocks: content.blocks as unknown as BuilderBlock[],
+          pageSettings: content.settings,
+          selectedBlockId: null,
+        });
+      } else {
+        initializeBuilderEditorSession({
+          storageKey: getBuilderEditorStorageKey(user.id, currentStore.id, pageId),
+          siteId: currentStore.id,
+          siteSlug: currentStore.slug,
+          pageId,
+          pageSlug: "",
+          pageTitle: "Untitled Page",
+          isPublished: false,
+          blocks: [],
+          pageSettings: {},
+          selectedBlockId: null,
+        });
       }
 
       setLoading(false);
     })();
-  }, [currentStore, pageId]);
+  }, [currentStore, pageId, user]);
+
+  const handleSave = useCallback(async () => {
+    if (!currentStore) return;
+    setSaving(true);
+    const res = await api.patch<{
+      title?: string;
+      slug?: string;
+      isPublished?: boolean;
+    }>(`/api/sites/${currentStore.id}/pages/${pageId}`, {
+      title: editor.pageTitle,
+      content: serializePageContent({ blocks: editor.blocks, settings: editor.pageSettings }),
+      isPublished: editor.isPublished,
+    });
+    setSaving(false);
+    if (res.success) {
+      if (res.data) {
+        setBuilderEditorPageTitle((res.data.title as string) || editor.pageTitle);
+        setBuilderEditorPageSlug((res.data.slug as string) || editor.pageSlug);
+        setBuilderEditorPublished(Boolean(res.data.isPublished));
+      }
+      markBuilderEditorSaved();
+      setSaved(true);
+      setTimeout(() => setSaved(false), 2000);
+    }
+  }, [currentStore, editor.blocks, editor.isPublished, editor.pageSettings, editor.pageSlug, editor.pageTitle, pageId]);
 
   // Keyboard shortcuts
   useEffect(() => {
     const handler = (e: KeyboardEvent) => {
       const mod = e.metaKey || e.ctrlKey;
-      if (mod && e.key === "z" && !e.shiftKey) { e.preventDefault(); undo(); }
-      if (mod && e.key === "z" && e.shiftKey) { e.preventDefault(); redo(); }
-      if (mod && e.key === "y") { e.preventDefault(); redo(); }
+      if (mod && e.key === "z" && !e.shiftKey) { e.preventDefault(); undoBuilderEditor(); }
+      if (mod && e.key === "z" && e.shiftKey) { e.preventDefault(); redoBuilderEditor(); }
+      if (mod && e.key === "y") { e.preventDefault(); redoBuilderEditor(); }
       if (mod && e.key === "s") { e.preventDefault(); handleSave(); }
       if (e.key === "Delete" || e.key === "Backspace") {
-        if (selectedBlockId && document.activeElement?.tagName !== "INPUT" && document.activeElement?.tagName !== "TEXTAREA" && document.activeElement?.tagName !== "SELECT") {
+        if (editor.selectedBlockId && document.activeElement?.tagName !== "INPUT" && document.activeElement?.tagName !== "TEXTAREA" && document.activeElement?.tagName !== "SELECT") {
           e.preventDefault();
-          deleteBlock(selectedBlockId);
+          deleteBuilderEditorBlock(editor.selectedBlockId);
         }
       }
-      if (mod && e.key === "d" && selectedBlockId) { e.preventDefault(); duplicateBlock(selectedBlockId); }
-      if (e.key === "Escape") setSelectedBlockId(null);
+      if (mod && e.key === "d" && editor.selectedBlockId) { e.preventDefault(); duplicateBuilderEditorBlock(editor.selectedBlockId); }
+      if (e.key === "Escape") setBuilderEditorSelectedBlockId(null);
     };
     window.addEventListener("keydown", handler);
     return () => window.removeEventListener("keydown", handler);
+<<<<<<< HEAD
   });
 
   const startTemplateEdit = () => {
@@ -472,6 +487,9 @@ export default function BuilderPage({ params }: { params: Promise<{ pageId: stri
       console.error("Image upload error:", err);
     }
   };
+=======
+  }, [editor.selectedBlockId, handleSave]);
+>>>>>>> cf562f4 (Customization of templates implemented fully)
 
   // DnD sensors
   const sensors = useSensors(
@@ -484,96 +502,39 @@ export default function BuilderPage({ params }: { params: Promise<{ pageId: stri
     setActiveId(null);
     const { active, over } = event;
     if (!over || active.id === over.id) return;
-    pushHistory();
-    setBlocks((items) => {
-      const oldIndex = items.findIndex((b) => b.id === active.id);
-      const newIndex = items.findIndex((b) => b.id === over.id);
-      return arrayMove(items, oldIndex, newIndex);
-    });
+    const oldIndex = editor.blocks.findIndex((b) => b.id === active.id);
+    const newIndex = editor.blocks.findIndex((b) => b.id === over.id);
+    if (oldIndex === -1 || newIndex === -1) return;
+    setBuilderEditorBlocks(arrayMove(editor.blocks, oldIndex, newIndex));
   };
 
   // Block operations
   const addBlock = (type: BlockType, index?: number) => {
-    pushHistory();
-    const newBlock: BuilderBlock = { id: crypto.randomUUID(), type, props: blockDefaults[type]() };
-    setBlocks((prev) => {
-      if (index !== undefined) { const arr = [...prev]; arr.splice(index, 0, newBlock); return arr; }
-      return [...prev, newBlock];
-    });
-    setSelectedBlockId(newBlock.id);
+    addBuilderEditorBlock(type, index);
     setSidebarTab("blocks");
   };
 
   const updateBlock = useCallback((updated: BuilderBlock) => {
-    setBlocks((prev) => prev.map((b) => (b.id === updated.id ? updated : b)));
+    replaceBuilderEditorBlock(updated);
   }, []);
 
-  const commitBlockUpdate = useCallback(() => { pushHistory(); }, [pushHistory]);
-
-  const deleteBlock = useCallback((id: string) => {
-    pushHistory();
-    setBlocks((prev) => prev.filter((b) => b.id !== id));
-    setSelectedBlockId(null);
-  }, [pushHistory]);
-
-  const duplicateBlock = useCallback((id: string) => {
-    pushHistory();
-    setBlocks((prev) => {
-      const idx = prev.findIndex((b) => b.id === id);
-      if (idx === -1) return prev;
-      const original = prev[idx];
-      const clone: BuilderBlock = {
-        id: crypto.randomUUID(),
-        type: original.type,
-        props: JSON.parse(JSON.stringify(original.props)),
-      };
-      const arr = [...prev];
-      arr.splice(idx + 1, 0, clone);
-      setSelectedBlockId(clone.id);
-      return arr;
-    });
-  }, [pushHistory]);
-
-  const moveBlock = useCallback((id: string, direction: "up" | "down") => {
-    pushHistory();
-    setBlocks((prev) => {
-      const idx = prev.findIndex((b) => b.id === id);
-      if (idx === -1) return prev;
-      const newIdx = direction === "up" ? idx - 1 : idx + 1;
-      if (newIdx < 0 || newIdx >= prev.length) return prev;
-      return arrayMove(prev, idx, newIdx);
-    });
-  }, [pushHistory]);
+  const commitBlockUpdate = useCallback(() => {}, []);
 
   const applyTemplate = (templateIdx: number) => {
     const template = blockTemplates[templateIdx];
     if (!template) return;
-    pushHistory();
     // Give each block a fresh ID
     const newBlocks = template.blocks.map((b) => ({
       ...b,
       id: crypto.randomUUID(),
       props: JSON.parse(JSON.stringify(b.props)),
     }));
-    setBlocks(newBlocks);
-    setSelectedBlockId(null);
+    setBuilderEditorBlocks(newBlocks as BuilderBlock[]);
+    setBuilderEditorSelectedBlockId(null);
   };
 
-  // Save
-  const handleSave = async () => {
-    if (!currentStore) return;
-    setSaving(true);
-    const res = await api.patch(`/api/sites/${currentStore.id}/pages/${pageId}`, {
-      title: pageTitle,
-      content: serializePageContent({ blocks, settings: pageSettings }),
-      isPublished,
-    });
-    setSaving(false);
-    if (res.success) { setSaved(true); setTimeout(() => setSaved(false), 2000); }
-  };
-
-  const selectedBlock = blocks.find((b) => b.id === selectedBlockId) || null;
-  if (loading) {
+  const selectedBlock = editor.blocks.find((b) => b.id === editor.selectedBlockId) || null;
+  if (loading || !currentStore || !user) {
     return (
       <div className="h-screen flex items-center justify-center bg-surface-50">
         <Loader2 className="h-8 w-8 animate-spin text-brand-600" />
@@ -594,8 +555,8 @@ export default function BuilderPage({ params }: { params: Promise<{ pageId: stri
           </Link>
           <div className="h-5 w-px bg-surface-200" />
           <input
-            value={pageTitle}
-            onChange={(e) => setPageTitle(e.target.value)}
+            value={editor.pageTitle}
+            onChange={(e) => setBuilderEditorPageTitle(e.target.value)}
             className="text-sm font-bold text-surface-900 bg-transparent border-none focus:outline-none focus:ring-0 min-w-0 w-48"
             placeholder="Page title..."
           />
@@ -603,42 +564,24 @@ export default function BuilderPage({ params }: { params: Promise<{ pageId: stri
 
         <div className="flex items-center gap-1.5">
           {/* Undo/Redo */}
-          <button onClick={undo} disabled={!canUndo} className="p-2 rounded-lg hover:bg-surface-100 disabled:opacity-30 transition-colors" title="Undo (⌘Z)">
+          <button onClick={undoBuilderEditor} disabled={!editor.canUndo} className="p-2 rounded-lg hover:bg-surface-100 disabled:opacity-30 transition-colors" title="Undo (⌘Z)">
             <Undo2 className="h-4 w-4 text-surface-500" />
           </button>
-          <button onClick={redo} disabled={!canRedo} className="p-2 rounded-lg hover:bg-surface-100 disabled:opacity-30 transition-colors" title="Redo (⌘⇧Z)">
+          <button onClick={redoBuilderEditor} disabled={!editor.canRedo} className="p-2 rounded-lg hover:bg-surface-100 disabled:opacity-30 transition-colors" title="Redo (⌘⇧Z)">
             <Redo2 className="h-4 w-4 text-surface-500" />
           </button>
 
           <div className="h-5 w-px bg-surface-200 mx-1" />
 
           {/* Canvas mode toggle — Builder vs Live Preview */}
-          {checkTemplateHtml(templateSlug) && (
-            <>
-              <div className="flex items-center rounded-lg border border-surface-200 p-0.5 mr-1">
-                <button onClick={() => setCanvasMode("builder")} className={`px-2 py-1 rounded-md text-[10px] font-semibold transition-colors ${canvasMode === "builder" ? "bg-brand-100 text-brand-700" : "text-surface-500"}`} title="Block Editor">
-                  <LayoutGrid className="h-3.5 w-3.5 inline mr-0.5" />Blocks
-                </button>
-                <button onClick={() => setCanvasMode("preview")} className={`px-2 py-1 rounded-md text-[10px] font-semibold transition-colors ${canvasMode === "preview" ? "bg-brand-100 text-brand-700" : "text-surface-500"}`} title="Live Template Preview">
-                  <Eye className="h-3.5 w-3.5 inline mr-0.5" />Preview
-                </button>
-              </div>
-              {canvasMode === "preview" && !templateEditMode && (
-                <button
-                  onClick={startTemplateEdit}
-                  className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-[10px] font-semibold bg-purple-100 text-purple-700 border border-purple-200 hover:bg-purple-200 transition-colors mr-1"
-                  title="Customize the template — change text, images, colors"
-                >
-                  <Sparkles className="h-3.5 w-3.5" /> Customize Template
-                </button>
-              )}
-              {templateEditMode && (
-                <span className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-[10px] font-semibold bg-purple-600 text-white mr-1">
-                  <Sparkles className="h-3.5 w-3.5" /> Customizing...
-                </span>
-              )}
-            </>
-          )}
+          <div className="flex items-center rounded-lg border border-surface-200 p-0.5 mr-1">
+            <button onClick={() => setCanvasMode("builder")} className={`px-2 py-1 rounded-md text-[10px] font-semibold transition-colors ${canvasMode === "builder" ? "bg-brand-100 text-brand-700" : "text-surface-500"}`} title="Block Editor">
+              <LayoutGrid className="h-3.5 w-3.5 inline mr-0.5" />Blocks
+            </button>
+            <button onClick={() => setCanvasMode("preview")} className={`px-2 py-1 rounded-md text-[10px] font-semibold transition-colors ${canvasMode === "preview" ? "bg-brand-100 text-brand-700" : "text-surface-500"}`} title="Live Preview">
+              <Eye className="h-3.5 w-3.5 inline mr-0.5" />Preview
+            </button>
+          </div>
 
           {/* Preview toggle */}
           <div className="flex items-center rounded-lg border border-surface-200 p-0.5">
@@ -659,11 +602,11 @@ export default function BuilderPage({ params }: { params: Promise<{ pageId: stri
 
           {/* Publish toggle */}
           <button
-            onClick={() => setIsPublished(!isPublished)}
-            className={`flex items-center gap-1.5 text-xs font-semibold px-3 py-1.5 rounded-lg border transition-colors ${isPublished ? "bg-green-50 text-green-700 border-green-200" : "bg-surface-50 text-surface-500 border-surface-200"}`}
+            onClick={() => setBuilderEditorPublished(!editor.isPublished)}
+            className={`flex items-center gap-1.5 text-xs font-semibold px-3 py-1.5 rounded-lg border transition-colors ${editor.isPublished ? "bg-green-50 text-green-700 border-green-200" : "bg-surface-50 text-surface-500 border-surface-200"}`}
           >
-            {isPublished ? <Eye className="h-3.5 w-3.5" /> : <EyeOff className="h-3.5 w-3.5" />}
-            {isPublished ? "Published" : "Draft"}
+            {editor.isPublished ? <Eye className="h-3.5 w-3.5" /> : <EyeOff className="h-3.5 w-3.5" />}
+            {editor.isPublished ? "Published" : "Draft"}
           </button>
 
           {/* Save */}
@@ -723,7 +666,7 @@ export default function BuilderPage({ params }: { params: Promise<{ pageId: stri
                       <button
                         key={i}
                         onClick={() => {
-                          if (blocks.length > 0 && !confirm("This will replace your current blocks. Continue?")) return;
+                          if (editor.blocks.length > 0 && !confirm("This will replace your current blocks. Continue?")) return;
                           applyTemplate(i);
                         }}
                         className="w-full text-left rounded-xl border border-surface-100 bg-surface-50 p-3 hover:bg-brand-50 hover:border-brand-200 transition-colors"
@@ -750,7 +693,7 @@ export default function BuilderPage({ params }: { params: Promise<{ pageId: stri
         )}
 
         {/* Canvas */}
-        <div className="flex-1 overflow-y-auto p-6" onClick={() => setSelectedBlockId(null)}>
+        <div className="flex-1 overflow-y-auto p-6" onClick={() => setBuilderEditorSelectedBlockId(null)}>
           {canvasMode === "preview" ? (
             <div className={`mx-auto transition-all ${previewMode === "mobile" ? "max-w-[375px]" : "max-w-5xl"}`}>
               <div className="rounded-2xl border border-surface-200 shadow-sm overflow-hidden bg-white">
@@ -762,14 +705,15 @@ export default function BuilderPage({ params }: { params: Promise<{ pageId: stri
                       <div className="h-2.5 w-2.5 rounded-full bg-green-400" />
                     </div>
                     <span className="text-[10px] text-surface-400 font-mono">
-                      {storeSlug}.afrostore.com{pageSlug ? `/${pageSlug}` : ""}
+                      {currentStore?.slug || "store"}.afrostore.com{editor.pageSlug ? `/${editor.pageSlug}` : ""}
                     </span>
                   </div>
-                <span className={`text-[9px] font-semibold px-2 py-0.5 rounded-full ${templateEditMode ? "text-purple-700 bg-purple-100" : "text-brand-600 bg-brand-50"}`}>
-                  {templateEditMode ? "✏️ Template HTML" : "Live Page Preview"}
-                </span>
-              </div>
+                  <span className="text-[9px] font-semibold px-2 py-0.5 rounded-full text-brand-600 bg-brand-50">
+                    Live Page Preview
+                  </span>
+                </div>
 
+<<<<<<< HEAD
                 {checkTemplateHtml(templateSlug) ? (
                   <iframe
                     ref={templateIframeRef}
@@ -785,20 +729,25 @@ export default function BuilderPage({ params }: { params: Promise<{ pageId: stri
                     />
                   </div>
                 )}
+=======
+                <div className="relative overflow-hidden" style={buildPageBackgroundStyle(editor.pageSettings)}>
+                  <RenderBlocks blocks={editor.blocks} storeSlug={currentStore?.slug || ""} />
+                </div>
+>>>>>>> cf562f4 (Customization of templates implemented fully)
               </div>
 
               <div className="mt-4 rounded-xl border border-surface-200 bg-white p-4">
                 <h3 className="text-xs font-bold text-surface-900 mb-3 flex items-center gap-1.5">
                   <Layers className="h-3.5 w-3.5 text-brand-600" />
-                  Page Sections ({blocks.length})
+                  Page Sections ({editor.blocks.length})
                 </h3>
                 <div className="space-y-1.5">
-                  {blocks.map((block, idx) => (
+                  {editor.blocks.map((block, idx) => (
                     <button
                       key={block.id}
-                      onClick={(e) => { e.stopPropagation(); setSelectedBlockId(block.id); setCanvasMode("builder"); }}
+                      onClick={(e) => { e.stopPropagation(); setBuilderEditorSelectedBlockId(block.id); setCanvasMode("builder"); }}
                       className={`w-full text-left flex items-center gap-3 px-3 py-2 rounded-lg transition-colors ${
-                        selectedBlockId === block.id
+                        editor.selectedBlockId === block.id
                           ? "bg-brand-50 border border-brand-200"
                           : "hover:bg-surface-50 border border-transparent"
                       }`}
@@ -823,24 +772,24 @@ export default function BuilderPage({ params }: { params: Promise<{ pageId: stri
               previewMode === "mobile" ? "max-w-[375px]" : "max-w-4xl"
             }`}
               style={{
-                backgroundColor: pageSettings.backgroundColor || "#ffffff",
-                backgroundImage: pageSettings.backgroundImage ? `url(${pageSettings.backgroundImage})` : undefined,
-                backgroundSize: pageSettings.backgroundImage ? pageSettings.backgroundSize || "cover" : undefined,
-                backgroundPosition: pageSettings.backgroundImage ? pageSettings.backgroundPosition || "center center" : undefined,
-                backgroundRepeat: pageSettings.backgroundImage ? pageSettings.backgroundRepeat || "no-repeat" : undefined,
-                backgroundAttachment: pageSettings.backgroundImage ? pageSettings.backgroundAttachment || "scroll" : undefined,
+                backgroundColor: editor.pageSettings.backgroundColor || "#ffffff",
+                backgroundImage: editor.pageSettings.backgroundImage ? `url(${editor.pageSettings.backgroundImage})` : undefined,
+                backgroundSize: editor.pageSettings.backgroundImage ? editor.pageSettings.backgroundSize || "cover" : undefined,
+                backgroundPosition: editor.pageSettings.backgroundImage ? editor.pageSettings.backgroundPosition || "center center" : undefined,
+                backgroundRepeat: editor.pageSettings.backgroundImage ? editor.pageSettings.backgroundRepeat || "no-repeat" : undefined,
+                backgroundAttachment: editor.pageSettings.backgroundImage ? editor.pageSettings.backgroundAttachment || "scroll" : undefined,
               }}
             >
-              {pageSettings.backgroundImage && (
+              {editor.pageSettings.backgroundImage && (
                 <div
                   className="absolute inset-0 pointer-events-none"
                   style={{
-                    backgroundColor: pageSettings.overlayColor || "#000000",
-                    opacity: pageSettings.overlayOpacity ?? 0.25,
+                    backgroundColor: editor.pageSettings.overlayColor || "#000000",
+                    opacity: editor.pageSettings.overlayOpacity ?? 0.25,
                   }}
                 />
               )}
-              {blocks.length === 0 ? (
+              {editor.blocks.length === 0 ? (
                 <div className="flex flex-col items-center justify-center h-[600px] text-center p-8 relative z-10">
                   <div className="h-16 w-16 rounded-2xl bg-surface-50 flex items-center justify-center mb-4">
                     <Plus className="h-8 w-8 text-surface-300" />
@@ -858,9 +807,9 @@ export default function BuilderPage({ params }: { params: Promise<{ pageId: stri
                 </div>
               ) : (
                 <DndContext sensors={sensors} collisionDetection={closestCenter} onDragStart={handleDragStart} onDragEnd={handleDragEnd}>
-                  <SortableContext items={blocks.map((b) => b.id)} strategy={verticalListSortingStrategy}>
+                  <SortableContext items={editor.blocks.map((b) => b.id)} strategy={verticalListSortingStrategy}>
                     <div className="p-6 space-y-3 relative z-10">
-                      {blocks.map((block, idx) => (
+                      {editor.blocks.map((block, idx) => (
                         <div key={block.id}>
                           {/* Insert-between button */}
                           {idx === 0 && (
@@ -872,17 +821,16 @@ export default function BuilderPage({ params }: { params: Promise<{ pageId: stri
                           )}
                           <SortableBlock
                             block={block}
-                            isSelected={selectedBlockId === block.id}
-                            onClick={() => setSelectedBlockId(block.id)}
-                            onDuplicate={() => duplicateBlock(block.id)}
-                            onMoveUp={() => moveBlock(block.id, "up")}
-                            onMoveDown={() => moveBlock(block.id, "down")}
+                            isSelected={editor.selectedBlockId === block.id}
+                            onClick={() => setBuilderEditorSelectedBlockId(block.id)}
+                            onDuplicate={() => duplicateBuilderEditorBlock(block.id)}
+                            onMoveUp={() => moveBuilderEditorBlock(block.id, "up")}
+                            onMoveDown={() => moveBuilderEditorBlock(block.id, "down")}
                             onInlineEdit={(key, value) => {
-                              pushHistory();
-                              updateBlock({ ...block, props: { ...block.props, [key]: value } });
+                              updateBuilderEditorBlockProp(block.id, key, value);
                             }}
                             isFirst={idx === 0}
-                            isLast={idx === blocks.length - 1}
+                            isLast={idx === editor.blocks.length - 1}
                           />
                           {/* Insert-between button */}
                           <div className="flex justify-center -mt-1 opacity-0 hover:opacity-100 transition-opacity">
@@ -898,7 +846,7 @@ export default function BuilderPage({ params }: { params: Promise<{ pageId: stri
                   <DragOverlay>
                     {activeId ? (
                       <div className="rounded-xl bg-white shadow-2xl border border-brand-200 p-4 opacity-90 max-w-lg">
-                        <BlockRenderer block={blocks.find((b) => b.id === activeId)!} />
+                        <BlockRenderer block={editor.blocks.find((b) => b.id === activeId)!} />
                       </div>
                     ) : null}
                   </DragOverlay>
@@ -909,51 +857,17 @@ export default function BuilderPage({ params }: { params: Promise<{ pageId: stri
         </div>
 
         {/* Property Panel */}
-        {canvasMode === "preview" && templateEditMode ? (
-          <TemplateElementPanel
-            element={templateSelectedElement}
-            sections={templateSections}
-            onUpdateText={(id, text) => sendToIframe({ type: "afro-editor-update-text", id, text })}
-            onUpdateLink={(id, href, target) => sendToIframe({ type: "afro-editor-update-link", id, href, target })}
-            onUpdateImage={(id, src, alt) => sendToIframe({ type: "afro-editor-update-image", id, src, alt })}
-            onUpdateStyles={(id, styles) => sendToIframe({ type: "afro-editor-update-styles", id, styles })}
-            onRemoveElement={(id) => sendToIframe({ type: "afro-editor-remove-element", id })}
-            onSelectSection={(id) => sendToIframe({ type: "afro-editor-select-element", id })}
-            onDeselect={() => { setTemplateSelectedElement(null); sendToIframe({ type: "afro-editor-deselect" }); }}
-            onUploadImage={(file, elementId) => {
-              const reader = new FileReader();
-              reader.onload = (evt) => {
-                if (currentStore && evt.target?.result) {
-                  (async () => {
-                    try {
-                      const res = await api.post<{ url: string }>(`/api/sites/${currentStore.id}/upload`, {
-                        file: evt.target!.result as string,
-                        fileName: file.name,
-                        mimeType: file.type,
-                      });
-                      if (res.success && res.data?.url) {
-                        sendToIframe({ type: "afro-editor-update-image", id: elementId, src: res.data.url, alt: "" });
-                        // Update local state too
-                        setTemplateSelectedElement((prev) => prev ? { ...prev, src: res.data!.url } : null);
-                      }
-                    } catch { /* upload failed */ }
-                  })();
-                }
-              };
-              reader.readAsDataURL(file);
-            }}
-          />
-        ) : selectedBlock ? (
+        {selectedBlock ? (
           <PropertyPanel
             block={selectedBlock}
             onUpdate={updateBlock}
             onCommit={commitBlockUpdate}
-            onClose={() => setSelectedBlockId(null)}
-            onDelete={() => deleteBlock(selectedBlock.id)}
-            onDuplicate={() => duplicateBlock(selectedBlock.id)}
+            onClose={() => setBuilderEditorSelectedBlockId(null)}
+            onDelete={() => deleteBuilderEditorBlock(selectedBlock.id)}
+            onDuplicate={() => duplicateBuilderEditorBlock(selectedBlock.id)}
           />
         ) : (
-          <PageSettingsPanel settings={pageSettings} onChange={setPageSettings} />
+          <PageSettingsPanel settings={editor.pageSettings} onChange={setBuilderEditorPageSettings} />
         )}
       </div>
     </div>

@@ -29,7 +29,6 @@ import {
   type SiteCustomizationPageSettings,
 } from "@/lib/site-customization";
 import { parsePageContent } from "@/lib/page-content";
-import { hasTemplateHtml } from "@/lib/templates/template-html-map";
 
 interface SiteRecord {
   id: string;
@@ -285,15 +284,12 @@ export default function SiteEditorPage({ params }: { params: Promise<{ siteId: s
   const selectedPageCustomization = useMemo(() => selectedPage ? customization.pageSettings[selectedPage.id] || {} : {}, [customization.pageSettings, selectedPage]);
   const previewHref = useMemo(() => {
     if (!site) return "";
-    if (templateSlug && hasTemplateHtml(templateSlug)) {
-      return `/api/storefront/${site.slug}/template-html?afro_edit=1`;
-    }
     const pagePath = selectedPage && selectedPage.type !== "HOME" ? `/${selectedPage.slug}` : "";
     return `/store/${site.slug}${pagePath}?afro_editor=1`;
-  }, [selectedPage, site, templateSlug]);
+  }, [selectedPage, site]);
   const sectionBlocks = useMemo(() => selectedPage ? parsePageContent(selectedPage.content).blocks : [], [selectedPage]);
   const visiblePages = useMemo(() => filterVisiblePages(pages, customization), [pages, customization]);
-  const canUseTemplatePreview = !!templateSlug && hasTemplateHtml(templateSlug);
+  const canUseTemplatePreview = false;
 
   useEffect(() => {
     if (!iframeRef.current?.contentWindow) return;

@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/db";
 import { asRecord } from "@/lib/json";
 import { buildThemeDataWithCustomization, loadSiteCustomizationSafely } from "@/lib/site-customization";
+import { mergeStoredTemplatePages } from "@/lib/templates/site-instance";
 import type { Prisma } from "@/generated/prisma";
 
 type Params = { params: Promise<{ slug: string }> };
@@ -177,7 +178,11 @@ export async function GET(req: NextRequest, { params }: Params) {
 
       prisma.siteTemplate.findFirst({
         where: { siteId: site.id, isActive: true },
-        include: {
+        select: {
+          variant: true,
+          themeConfig: true,
+          pages: true,
+          customHtml: true,
           template: {
             select: { id: true, name: true, slug: true },
           },
@@ -221,30 +226,9 @@ export async function GET(req: NextRequest, { params }: Params) {
         }
       | undefined;
 
-    return success({
-      store: {
-        id: site.id,
-        name: site.name,
-        slug: site.slug,
-        description: site.description,
-        logo: site.logo,
-        coverImage: site.coverImage,
-        subdomain: site.subdomain,
-        customDomain: site.customDomain,
-        currency: site.currency,
-        country: site.country,
-        businessType: site.businessType,
-      },
-      settings: settings || {},
-      socialLinks: socialLinks || {},
-      products: publicProducts,
-      pagination: { page, limit, total: productTotal, pages: Math.ceil(productTotal / limit) },
-      categories,
-      deliveryZones,
-      pages,
-      templateSlug: activeTemplate?.template?.slug || null,
-      customization: resolvedCustomization,
-      theme: buildThemeDataWithCustomization(
+    let resolvedTheme: ReturnType<typeof buildThemeDataWithCustomization> = null;
+    try {
+      resolvedTheme = buildThemeDataWithCustomization(
         activeTheme
           ? {
               id: activeTheme.theme.id,
@@ -283,7 +267,43 @@ export async function GET(req: NextRequest, { params }: Params) {
             }
           : null,
         resolvedCustomization
-      ),
+      );
+    } catch (themeError) {
+      console.error("Storefront theme build error:", themeError);
+    }
+
+    const publicPages = mergeStoredTemplatePages(
+      pages.map((page) => ({
+        ...page,
+        content: page.content,
+      })),
+      activeTemplate?.pages
+    );
+
+    return success({
+      store: {
+        id: site.id,
+        name: site.name,
+        slug: site.slug,
+        description: site.description,
+        logo: site.logo,
+        coverImage: site.coverImage,
+        subdomain: site.subdomain,
+        customDomain: site.customDomain,
+        currency: site.currency,
+        country: site.country,
+        businessType: site.businessType,
+      },
+      settings: settings || {},
+      socialLinks: socialLinks || {},
+      products: publicProducts,
+      pagination: { page, limit, total: productTotal, pages: Math.ceil(productTotal / limit) },
+      categories,
+      deliveryZones,
+      pages: publicPages,
+      templateSlug: activeTemplate?.template?.slug || null,
+      customization: resolvedCustomization,
+      theme: resolvedTheme,
     });
   } catch (err) {
     console.error("Storefront fetch error:", err);

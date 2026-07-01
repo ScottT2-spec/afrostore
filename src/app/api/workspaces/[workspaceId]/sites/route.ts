@@ -69,8 +69,6 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ wor
     logo,
     socialLinks,
     phone,
-    email: businessEmail,
-    location,
     businessType = "general",
     // Step 5: Auto-generate (handled after creation)
     // Step 6: Payment (handled after creation)
@@ -148,7 +146,7 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ wor
     // with the template's own sections — so default pages would just be overwritten.
     const willApplyTemplate = !!(launchMethod === "template" || launchMethod === "ai" || launchMethod === "quick" || templateId || templateSlug);
     if (!willApplyTemplate) {
-      const defaultPages = getDefaultPages(siteType, name.trim());
+      const defaultPages = getDefaultPages();
       if (defaultPages.length > 0) {
         await prisma.page.createMany({
           data: defaultPages.map((p, i) => ({
@@ -165,7 +163,14 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ wor
     }
 
     let templateResult: unknown = null;
-    if (launchMethod === "template" || launchMethod === "ai" || launchMethod === "quick" || templateId || templateSlug) {
+    const shouldUseTemplate = launchMethod === "template" || !!templateId || !!templateSlug;
+    const shouldUseAi = launchMethod === "ai" || launchMethod === "quick";
+
+    if (launchMethod === "template" && !templateId && !templateSlug) {
+      return error("Template selection is required for template-based site creation", 422);
+    }
+
+    if (shouldUseTemplate || shouldUseAi) {
       const businessInput = {
         businessName: name.trim(),
         businessCategory: businessType || industry || "general",
@@ -176,17 +181,26 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ wor
         targetAudience,
         branding,
       };
-      const selectedTemplateId = templateId || templateSlug
-        ? templateId
-        : (await recommendTemplates(businessInput)).recommendations[0]?.template.id;
+      const selectedTemplateId = templateId || null;
+      const selectedTemplateSlug = templateSlug || null;
 
-      if (selectedTemplateId || templateSlug) {
+      if (shouldUseAi && !selectedTemplateId && !selectedTemplateSlug) {
+        const recommendation = await recommendTemplates(businessInput);
+        const best = recommendation.recommendations[0];
+        if (best) {
+          templateResult = await applyTemplateToSite(site.id, {
+            ...businessInput,
+            templateId: best.template.id,
+            aiBuild: true,
+          });
+        }
+      } else if (selectedTemplateId || selectedTemplateSlug) {
         templateResult = await applyTemplateToSite(site.id, {
           ...businessInput,
           templateId: selectedTemplateId,
-          templateSlug,
+          templateSlug: selectedTemplateSlug,
           variant,
-          aiBuild: launchMethod === "ai" || launchMethod === "quick",
+          aiBuild: false,
         });
       }
     }
@@ -198,7 +212,7 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ wor
   }
 }
 
-function getDefaultPages(_siteType: string, _siteName: string) {
+function getDefaultPages() {
   // No default pages — templates provide all pages.
   // Blank stores get an empty site that the owner populates.
   return [] as { title: string; slug: string; type: "HOME" | "LANDING" | "ABOUT" | "CONTACT" | "FAQ" | "POLICY" | "SERVICES" | "TEAM" | "THANK_YOU" | "CUSTOM"; content: Record<string, unknown> }[];

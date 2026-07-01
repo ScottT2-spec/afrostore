@@ -49,12 +49,13 @@ export default function TemplateGallery({
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState("");
   const [category, setCategory] = useState("");
+  const siteType = typeof businessContext?.siteType === "string" ? businessContext.siteType : "";
 
   useEffect(() => {
     let cancelled = false;
     async function load() {
       setLoading(true);
-      const res = await api.get<TemplateDefinition[]>("/api/templates");
+      const res = await api.get<TemplateDefinition[]>(`/api/templates${siteType ? `?siteType=${encodeURIComponent(siteType)}` : ""}`);
       if (!cancelled && res.success && res.data) setTemplates(res.data);
 
       if (businessContext && Object.keys(businessContext).length > 0) {
@@ -69,7 +70,7 @@ export default function TemplateGallery({
     }
     load();
     return () => { cancelled = true; };
-  }, [businessContext, onRecommendationsLoaded]);
+  }, [businessContext, onRecommendationsLoaded, siteType]);
 
   const filtered = useMemo(() => {
     const recommendedIds = new Set(recommended.map((template) => template.id || template.slug));
@@ -102,7 +103,7 @@ export default function TemplateGallery({
           className="rounded-xl border border-surface-200 bg-white px-3 py-2.5 text-sm outline-none focus:border-brand-500"
         >
           <option value="">All categories</option>
-          {TEMPLATE_CATEGORIES.map((item) => <option key={item} value={item}>{item}</option>)}
+          {TEMPLATE_CATEGORIES.filter((item) => !siteType || templates.some((template) => template.category === item)).map((item) => <option key={item} value={item}>{item}</option>)}
         </select>
       </div>
 

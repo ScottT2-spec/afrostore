@@ -128,7 +128,9 @@ export default function StorefrontPage() {
       localStorage.setItem("afrostore_cart_active_slug", slug);
       localStorage.setItem("afrostore_siteId", data.store.id);
     }
-  }, [cart, data]);
+  }, [cart, data, cartKey, slug]);
+
+  const resolvedTheme = useMemo(() => buildThemeDataWithCustomization(data?.theme || null, draftCustomization), [data?.theme, draftCustomization]);
 
   const addToCart = useCallback((product: StoreProduct) => {
     setCart((prev) => {
@@ -180,7 +182,6 @@ export default function StorefrontPage() {
   const parsedContent = parsePageContent(resolvedPage.content);
   const resolvedPageSettings = getResolvedPageSettings(resolvedPage, parsedContent.settings, draftCustomization);
   const blocks: BuilderBlock[] = parsedContent.blocks;
-  const resolvedTheme = useMemo(() => buildThemeDataWithCustomization(data.theme, draftCustomization), [data.theme, draftCustomization]);
   const visiblePages = filterVisiblePages(data.pages, draftCustomization);
   const customizedPages = visiblePages.map((item) => applyPageCustomization(item, draftCustomization));
 

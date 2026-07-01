@@ -3,6 +3,7 @@ import { ArrowRight, ChevronDown, ChevronUp, Loader2 } from "lucide-react";
 import { Award, CheckCircle2, Clock, CreditCard, Eye, Globe, Headphones, Heart, Lock, Mail, MapPin, MessageCircle, Package, Palette, Phone, Play, RefreshCw, Rocket, Send, Shield, ShoppingBag, ShoppingCart, Sparkles, Star, Target, ThumbsUp, TrendingUp, Truck, Users, Zap } from "@/components/icons/FilledIcons";
 
 import { useState, useEffect, useMemo, useRef, createContext, useContext } from "react";
+import { getSectionStyle, resolveOpacity } from "@/components/storefront/block-style";
 
 /* ─── TYPES ─────────────────────────────────────────────────── */
 
@@ -43,16 +44,6 @@ function AnimateIn({ children, className = "", delay = 0 }: { children: React.Re
     </div>
   );
 }
-
-const textSizeClasses: Record<string, string> = {
-  sm: "text-sm",
-  base: "text-base",
-  lg: "text-lg",
-  xl: "text-xl",
-  "2xl": "text-2xl",
-  "3xl": "text-3xl",
-  "4xl": "text-4xl",
-};
 
 const roundedClasses: Record<string, string> = {
   none: "rounded-none",
@@ -186,20 +177,35 @@ function HeroBlock({ props }: { props: Record<string, unknown> }) {
   };
 
   const isLight = bgStyle === "light";
+  const sectionStyle = getSectionStyle(props);
+  const hasImageBackground = Boolean(props.bgImage);
+  const overlayColor = (props.overlayColor as string) || "#000000";
+  const overlayOpacity = resolveOpacity(props.overlayOpacity, 0.35);
+  const textStyle = { color: textColor } as React.CSSProperties;
 
   return (
     <div
       className={`relative overflow-hidden rounded-3xl px-8 sm:px-12 py-16 sm:py-24 ${bgClasses[bgStyle] || ""}`}
-      style={!bgClasses[bgStyle] ? { backgroundColor: bgColor, color: textColor } : {}}
+      style={{
+        ...(bgClasses[bgStyle] ? {} : { backgroundColor: bgColor, color: textColor }),
+        ...sectionStyle,
+      }}
     >
       {/* Decorative elements */}
       <div className="absolute inset-0 overflow-hidden pointer-events-none">
-        <div className={`absolute -top-24 -right-24 w-96 h-96 rounded-full ${isLight ? "bg-brand-100/40" : "bg-white/5"} blur-3xl`} />
-        <div className={`absolute -bottom-24 -left-24 w-80 h-80 rounded-full ${isLight ? "bg-accent-100/40" : "bg-accent-500/10"} blur-3xl`} />
+        {!hasImageBackground && (
+          <>
+            <div className={`absolute -top-24 -right-24 w-96 h-96 rounded-full ${isLight ? "bg-brand-100/40" : "bg-white/5"} blur-3xl`} />
+            <div className={`absolute -bottom-24 -left-24 w-80 h-80 rounded-full ${isLight ? "bg-accent-100/40" : "bg-accent-500/10"} blur-3xl`} />
+          </>
+        )}
         <div className="absolute inset-0 opacity-[0.03]" style={{ backgroundImage: "radial-gradient(circle at 1px 1px, currentColor 1px, transparent 0)", backgroundSize: "32px 32px" }} />
+        {hasImageBackground && (
+          <div className="absolute inset-0" style={{ backgroundColor: overlayColor, opacity: overlayOpacity }} />
+        )}
       </div>
 
-      <div className="relative max-w-3xl mx-auto" style={{ textAlign: (props.align as React.CSSProperties["textAlign"]) || "center" }}>
+      <div className="relative max-w-3xl mx-auto" style={{ textAlign: (props.align as React.CSSProperties["textAlign"]) || "center", ...textStyle }}>
         {(props.badge as string) && (
           <AnimateIn>
             <span className={`inline-flex items-center gap-2 rounded-full px-4 py-1.5 text-xs font-semibold mb-6 ${isLight ? "bg-brand-100 text-brand-700" : "bg-white/10 text-white/80 border border-white/20"}`}>
@@ -208,13 +214,13 @@ function HeroBlock({ props }: { props: Record<string, unknown> }) {
             </span>
           </AnimateIn>
         )}
-        <AnimateIn delay={0.1}>
-          <h1 className={`text-3xl sm:text-4xl lg:text-5xl font-display font-extrabold tracking-tight mb-4 sm:mb-6 ${isLight ? "text-surface-900" : "text-white"}`}>
+          <AnimateIn delay={0.1}>
+          <h1 className={`text-3xl sm:text-4xl lg:text-5xl font-display font-extrabold tracking-tight mb-4 sm:mb-6`} style={textStyle}>
             {(props.heading as string) || "Hero Heading"}
           </h1>
         </AnimateIn>
         <AnimateIn delay={0.2}>
-          <p className={`text-base sm:text-lg lg:text-xl mb-8 max-w-2xl mx-auto leading-relaxed ${isLight ? "text-surface-600" : "text-white/75"}`}>
+          <p className="text-base sm:text-lg lg:text-xl mb-8 max-w-2xl mx-auto leading-relaxed" style={textStyle}>
             {(props.subheading as string) || "Subheading text"}
           </p>
         </AnimateIn>
@@ -228,6 +234,10 @@ function HeroBlock({ props }: { props: Record<string, unknown> }) {
                     ? "bg-brand-600 text-white shadow-xl shadow-brand-600/25 hover:bg-brand-700"
                     : "bg-white text-surface-900 shadow-xl shadow-black/20 hover:bg-surface-50"
                 }`}
+                style={{
+                  backgroundColor: (props.buttonColor as string) || undefined,
+                  color: (props.buttonTextColor as string) || undefined,
+                }}
               >
                 {props.buttonText as string}
                 <ArrowRight className="h-4 w-4" />
@@ -250,12 +260,6 @@ function HeroBlock({ props }: { props: Record<string, unknown> }) {
       </div>
     </div>
   );
-}
-
-function gridColumnsStyle(columns: number, mobileColumns = 1) {
-  return {
-    gridTemplateColumns: `repeat(${Math.max(mobileColumns, Math.min(columns, 4))}, minmax(0, 1fr))`,
-  } as React.CSSProperties;
 }
 
 /* ── Spacer ──────────────────────────────────────────────────── */
@@ -516,11 +520,18 @@ function TestimonialCard({ item, isDark }: { item: { name: string; text: string;
 }
 
 function TestimonialsBlock({ props }: { props: Record<string, unknown> }) {
-  const hardcodedItems = (props.items as Array<{ name: string; text: string; role?: string; rating?: number }>) || [];
+  const hardcodedItems = useMemo(
+    () => (props.items as Array<{ name: string; text: string; role?: string; rating?: number }>) || [],
+    [props.items],
+  );
   const bg = (props.bgColor as string) || "transparent";
   const isDark = bg === "dark";
   const storeSlug = useContext(StoreSlugContext);
-  const [allItems, setAllItems] = useState(hardcodedItems);
+  const [approvedItems, setApprovedItems] = useState<Array<{ name: string; text: string; role?: string; rating?: number }>>([]);
+  const allItems = useMemo(() => [...approvedItems, ...hardcodedItems], [approvedItems, hardcodedItems]);
+  useEffect(() => {
+    setApprovedItems([]);
+  }, [storeSlug]);
   // Fetch approved reviews and merge with hardcoded items
   useEffect(() => {
     if (!storeSlug) return;
@@ -545,7 +556,7 @@ function TestimonialsBlock({ props }: { props: Record<string, unknown> }) {
 
           if (reviewCards.length > 0) {
             // Approved reviews first, then hardcoded ones
-            setAllItems([...reviewCards, ...hardcodedItems]);
+            setApprovedItems(reviewCards);
           }
         }
       } catch {
@@ -587,15 +598,14 @@ function TestimonialsBlock({ props }: { props: Record<string, unknown> }) {
         <div
           className="marquee-track"
           data-direction="left"
-          
           style={{ "--marquee-duration": "25s" } as React.CSSProperties}
         >
-          {allItems.map((item, i) => (
-            <TestimonialCard key={`a-${i}`} item={item} isDark={isDark} />
+          {allItems.map((item, index) => (
+            <TestimonialCard key={`a-${index}`} item={item} isDark={isDark} />
           ))}
           {/* Duplicate for seamless loop */}
-          {allItems.map((item, i) => (
-            <TestimonialCard key={`b-${i}`} item={item} isDark={isDark} />
+          {allItems.map((item, index) => (
+            <TestimonialCard key={`b-${index}`} item={item} isDark={isDark} />
           ))}
         </div>
       </div>
@@ -970,7 +980,7 @@ function CountdownBlock({ props }: { props: Record<string, unknown> }) {
               { label: "Hours", val: timeLeft.hours },
               { label: "Min", val: timeLeft.min },
               { label: "Sec", val: timeLeft.sec },
-            ].map(({ label, val }, i) => (
+            ].map(({ label, val }) => (
               <div key={label} className="text-center">
                 <div className="bg-white/10 backdrop-blur-sm rounded-2xl px-4 py-3 sm:px-6 sm:py-4 border border-white/10">
                   <div className="text-2xl sm:text-4xl font-display font-extrabold tabular-nums">
@@ -1018,6 +1028,11 @@ function TrustBadgesBlock({ props }: { props: Record<string, unknown> }) {
 /* ── Banner ──────────────────────────────────────────────────── */
 function BannerBlock({ props }: { props: Record<string, unknown> }) {
   const bg = (props.bgColor as string) || "brand";
+  const sectionStyle = getSectionStyle(props);
+  const hasImageBackground = Boolean(props.bgImage);
+  const overlayColor = (props.overlayColor as string) || "#000000";
+  const overlayOpacity = resolveOpacity(props.overlayOpacity, 0.35);
+  const textStyle = { color: (props.textColor as string) || undefined } as React.CSSProperties;
   return (
     <AnimateIn>
       <div className={`rounded-3xl px-8 sm:px-12 py-10 sm:py-14 relative overflow-hidden ${
@@ -1025,24 +1040,31 @@ function BannerBlock({ props }: { props: Record<string, unknown> }) {
         bg === "accent" ? "bg-gradient-to-r from-accent-500 to-accent-700" :
         bg === "dark" ? "bg-gradient-to-r from-surface-900 to-surface-950" :
         "bg-surface-50 border border-surface-200"
-      }`}>
+      }`} style={sectionStyle}>
         <div className="absolute inset-0 overflow-hidden pointer-events-none">
-          <div className="absolute -right-10 -top-10 w-40 h-40 rounded-full bg-white/5 blur-2xl" />
+          {!hasImageBackground && <div className="absolute -right-10 -top-10 w-40 h-40 rounded-full bg-white/5 blur-2xl" />}
+          {hasImageBackground && (
+            <div className="absolute inset-0" style={{ backgroundColor: overlayColor, opacity: overlayOpacity }} />
+          )}
         </div>
         <div className="relative flex flex-col sm:flex-row items-center justify-between gap-6">
           <div>
-            <h3 className={`text-xl sm:text-2xl font-display font-extrabold ${bg === "light" ? "text-surface-900" : "text-white"}`}>
+            <h3 className="text-xl sm:text-2xl font-display font-extrabold" style={textStyle}>
               {(props.title as string) || "Special Offer"}
             </h3>
             {(props.subtitle as string) && (
-              <p className={`text-sm mt-1 ${bg === "light" ? "text-surface-600" : "text-white/70"}`}>{props.subtitle as string}</p>
+              <p className="text-sm mt-1" style={textStyle}>{props.subtitle as string}</p>
             )}
           </div>
           {(props.buttonText as string) && (
             <a href={(props.buttonHref as string) || "#"}
               className={`inline-flex items-center gap-2 rounded-2xl font-bold py-3 px-7 text-sm transition-all hover:-translate-y-0.5 flex-shrink-0 ${
                 bg === "light" ? "bg-brand-600 text-white shadow-lg" : "bg-white text-surface-900 shadow-xl"
-              }`}>
+              }`}
+              style={{
+                backgroundColor: (props.buttonColor as string) || undefined,
+                color: (props.buttonTextColor as string) || undefined,
+              }}>
               {props.buttonText as string}
               <ArrowRight className="h-4 w-4" />
             </a>
@@ -1056,12 +1078,14 @@ function BannerBlock({ props }: { props: Record<string, unknown> }) {
 /* ── Image + Text ────────────────────────────────────────────── */
 function ImageTextBlock({ props }: { props: Record<string, unknown> }) {
   const reverse = (props.reverse as boolean) || false;
+  const sectionStyle = getSectionStyle(props);
+  const textStyle = { color: (props.textColor as string) || undefined } as React.CSSProperties;
   return (
     <AnimateIn>
-      <div className={`grid grid-cols-1 md:grid-cols-2 gap-8 sm:gap-12 items-center`}>
+      <div className={`grid grid-cols-1 md:grid-cols-2 gap-8 sm:gap-12 items-center rounded-3xl p-6 sm:p-8`} style={sectionStyle}>
         <div className={reverse ? "md:order-2" : ""}>
           {(props.image as string) ? (
-            <img src={props.image as string} alt={(props.imageAlt as string) || ""} className="w-full rounded-2xl shadow-lg object-cover" />
+            <img src={props.image as string} alt={(props.imageAlt as string) || ""} className="w-full rounded-2xl shadow-lg object-cover aspect-[4/3]" />
           ) : (
             <div className="aspect-[4/3] rounded-2xl bg-gradient-to-br from-brand-100 via-surface-100 to-accent-50 flex items-center justify-center">
               <ShoppingBag className="h-12 w-12 text-surface-300" />
@@ -1074,14 +1098,21 @@ function ImageTextBlock({ props }: { props: Record<string, unknown> }) {
               <Sparkles className="h-3 w-3" /> {props.badge as string}
             </span>
           )}
-          <h3 className="text-2xl sm:text-3xl font-display font-extrabold text-surface-900 mb-4">
+          <h3 className="text-2xl sm:text-3xl font-display font-extrabold mb-4" style={{ color: (props.headingColor as string) || undefined }}>
             {(props.title as string) || "Title"}
           </h3>
-          <p className="text-surface-600 leading-relaxed mb-6">
+          <p className="leading-relaxed mb-6" style={{ ...textStyle, color: (props.bodyColor as string) || (props.textColor as string) || undefined }}>
             {(props.text as string) || "Description text"}
           </p>
           {(props.buttonText as string) && (
-            <a href={(props.buttonHref as string) || "#"} className="inline-flex items-center gap-2 rounded-2xl bg-brand-600 text-white font-bold py-3 px-7 text-sm hover:bg-brand-700 transition-all shadow-lg shadow-brand-600/25 hover:-translate-y-0.5">
+            <a
+              href={(props.buttonHref as string) || "#"}
+              className="inline-flex items-center gap-2 rounded-2xl font-bold py-3 px-7 text-sm transition-all shadow-lg hover:-translate-y-0.5"
+              style={{
+                backgroundColor: (props.buttonColor as string) || "#0f62fe",
+                color: (props.buttonTextColor as string) || "#ffffff",
+              }}
+            >
               {props.buttonText as string}
               <ArrowRight className="h-4 w-4" />
             </a>

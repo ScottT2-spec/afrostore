@@ -2,14 +2,13 @@
 import { ArrowRight, ChevronRight, Loader2, Plus, X } from "lucide-react";
 import { CheckCircle2, CreditCard, Heart, ImageIcon, Mail, MapPin, Menu, MessageCircle, Minus, Phone, Search, Shield, ShoppingBag, ShoppingCart, Star, Truck, Zap } from "@/components/icons/FilledIcons";
 
-import { useState, useEffect, useCallback, useMemo, useRef } from "react";
+import { useState, useEffect, useMemo, useRef } from "react";
 import { useParams, useSearchParams } from "next/navigation";
 import Link from "next/link";
 import { RenderBlocks, type BuilderBlock } from "@/components/storefront/BlockRenderer";
 import { getLinkedPageHref, parsePageContent, type PageSettings } from "@/lib/page-content";
 import { ThemeProvider, type ThemeData } from "@/components/storefront/ThemeProvider";
 import { useWishlist } from "@/hooks/useWishlist";
-import { hasTemplateHtml } from "@/lib/templates/template-html-map";
 import { applyPageCustomization, buildPageBackgroundStyle, buildThemeDataWithCustomization, filterVisiblePages, getResolvedPageSettings, normalizeSiteCustomization, type SiteCustomizationDocument } from "@/lib/site-customization";
 
 /* ───────── Types ───────── */
@@ -175,24 +174,31 @@ export default function StorePage() {
   const [addedToCart, setAddedToCart] = useState<string | null>(null);
   const { isWishlisted, toggleWishlist, wishlistCount } = useWishlist(data?.store?.id || "");
 
-  const fetchStore = useCallback(async () => {
-    setLoading(true);
-    try {
-      const res = await fetch(`/api/storefront/${slug}`);
-      const json = await res.json();
-      if (json.success && json.data) {
-        setData(json.data);
-        setDraftCustomization(normalizeSiteCustomization(json.data.customization || null));
-      } else {
-        setError(json.error || "Store not found");
-      }
-    } catch {
-      setError("Failed to load store");
-    }
-    setLoading(false);
-  }, [slug]);
+  useEffect(() => {
+    let cancelled = false;
 
-  useEffect(() => { fetchStore(); }, [fetchStore]);
+    async function fetchStore() {
+      setLoading(true);
+      try {
+        const res = await fetch(`/api/storefront/${slug}`);
+        const json = await res.json();
+        if (cancelled) return;
+        if (json.success && json.data) {
+          setData(json.data);
+          setDraftCustomization(normalizeSiteCustomization(json.data.customization || null));
+        } else {
+          setError(json.error || "Store not found");
+        }
+      } catch {
+        if (!cancelled) setError("Failed to load store");
+      } finally {
+        if (!cancelled) setLoading(false);
+      }
+    }
+
+    fetchStore();
+    return () => { cancelled = true; };
+  }, [slug]);
 
   useEffect(() => {
     const handler = (event: MessageEvent) => {
@@ -220,7 +226,7 @@ export default function StorePage() {
       localStorage.setItem("afrostore_currency", data.store.currency);
       localStorage.setItem("afrostore_deliveryZones", JSON.stringify(data.deliveryZones));
     }
-  }, [cart, data]);
+  }, [cart, data, cartKey, slug]);
 
   const addToCart = (product: Product, quantity: number = 1) => {
     setCart((prev) => {
@@ -292,34 +298,17 @@ export default function StorePage() {
   const hasHomeContent = homeBlocks.length > 0;
   const homeHasProductGrid = homeBlocks.some((b) => b.type === "productGrid");
   const isTemplateSite = !!data.templateSlug;
+<<<<<<< HEAD
   const hasRawTemplateHtml = !!data.templateSlug && hasTemplateHtml(data.templateSlug);
   const iframeSrc = `/api/storefront/${slug}/template-html${editorPreview ? "?afro_edit=1&" : "?"}_t=${Date.now()}`;
+=======
+>>>>>>> cf562f4 (Customization of templates implemented fully)
 
   // Navigation pages: exclude HOME (we're on it), sort sensibly
   const navPageOrder: Record<string, number> = { ABOUT: 0, FAQ: 1, CONTACT: 2, POLICY: 3, CUSTOM: 4, LANDING: 5 };
   const navPages = customizedPages
     .filter((p) => p.type !== "HOME")
     .sort((a, b) => (navPageOrder[a.type] ?? 99) - (navPageOrder[b.type] ?? 99));
-
-  if (isTemplateSite && hasRawTemplateHtml) {
-    return (
-      <div className="min-h-screen">
-        <iframe
-          ref={templateIframeRef}
-          src={iframeSrc}
-          className="w-full border-0"
-          style={{ minHeight: "100vh", display: "block" }}
-          title={store.name}
-          onLoad={() => {
-            templateIframeRef.current?.contentWindow?.postMessage({
-              type: "afro-site-customization-preview",
-              customization: draftCustomization,
-            }, "*");
-          }}
-        />
-      </div>
-    );
-  }
 
   return (
     <ThemeProvider theme={resolvedTheme}>
