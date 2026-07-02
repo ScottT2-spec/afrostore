@@ -1,0 +1,14 @@
+{
+  "slug": "najaf-ai",
+  "name": "Najaf AI",
+  "category": "Landing Page",
+  "siteType": "LANDING_PAGE",
+  "version": "1.0.0",
+  "previewImage": "/templates/jewellery/prefooter/showrooms.webp",
+  "description": "Imported Najaf AI landing page package based on the live Framer reference.",
+  "tags": ["ai", "saas", "automation", "product"],
+  "assets": [
+    "/templates/jewellery/prefooter/about-us.webp",
+    "/templates/jewellery/prefooter/showrooms.webp"
+  ]
+}

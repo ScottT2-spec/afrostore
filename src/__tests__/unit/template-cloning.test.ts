@@ -4,6 +4,7 @@ import { buildImportedTemplatePages } from "@/lib/templates/importer";
 import { getInternalTemplateBySlug, TEMPLATE_CATEGORIES } from "@/lib/templates/catalog";
 import { getLandingGadgetPackageDefinition } from "@/templates/packages/landing-gadget";
 import { getAegisPackageDefinition } from "@/templates/packages/aegis";
+import { getNajafAiPackageDefinition } from "@/templates/packages/najaf-ai";
 
 describe("theme package importer", () => {
   it("exposes top-level category filtering", () => {
@@ -64,6 +65,17 @@ describe("theme package importer", () => {
     const packageDefinition = getAegisPackageDefinition();
 
     expect(packageDefinition.slug).toBe("aegis");
+    expect(packageDefinition.manifest.siteType).toBe("LANDING_PAGE");
+    expect(packageDefinition.homeSections?.length).toBeGreaterThan(0);
+    expect(packageDefinition.media.length).toBeGreaterThan(0);
+    expect(packageDefinition.pages[0].blocks.length).toBeGreaterThan(0);
+    expect(packageDefinition.products?.length).toBe(0);
+  });
+
+  it("exposes a structured najaf-ai package with editable sections and media", () => {
+    const packageDefinition = getNajafAiPackageDefinition();
+
+    expect(packageDefinition.slug).toBe("najaf-ai");
     expect(packageDefinition.manifest.siteType).toBe("LANDING_PAGE");
     expect(packageDefinition.homeSections?.length).toBeGreaterThan(0);
     expect(packageDefinition.media.length).toBeGreaterThan(0);
