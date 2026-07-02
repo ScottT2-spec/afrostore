@@ -63,7 +63,12 @@ export function middleware(req: NextRequest) {
     host === "localhost" ||
     host === "127.0.0.1" ||
     host === "0.0.0.0" ||
-    host === "";  // Missing host header
+    host === "" ||  // Missing host header
+    host.endsWith(".vercel.app") ||  // Vercel preview/production domains
+    host.endsWith(".vercel.sh") ||   // Vercel system domains
+    host.endsWith(".railway.app") || // Railway deployments
+    host.endsWith(".onrender.com") || // Render deployments
+    host.endsWith(".herokuapp.com");  // Heroku deployments
 
   if (isMainDomain) {
     return NextResponse.next();
