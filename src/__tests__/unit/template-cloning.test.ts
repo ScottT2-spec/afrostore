@@ -3,6 +3,7 @@ import { describe, it, expect } from "vitest";
 import { buildImportedTemplatePages } from "@/lib/templates/importer";
 import { getInternalTemplateBySlug, TEMPLATE_CATEGORIES } from "@/lib/templates/catalog";
 import { getLandingGadgetPackageDefinition } from "@/templates/packages/landing-gadget";
+import { getAegisPackageDefinition } from "@/templates/packages/aegis";
 
 describe("theme package importer", () => {
   it("exposes top-level category filtering", () => {
@@ -57,6 +58,17 @@ describe("theme package importer", () => {
     expect(packageDefinition.media.length).toBeGreaterThan(0);
     expect(packageDefinition.pages[0].blocks.length).toBeGreaterThan(0);
     expect(packageDefinition.products?.length).toBe(2);
+  });
+
+  it("exposes a structured aegis package with editable sections and media", () => {
+    const packageDefinition = getAegisPackageDefinition();
+
+    expect(packageDefinition.slug).toBe("aegis");
+    expect(packageDefinition.manifest.siteType).toBe("LANDING_PAGE");
+    expect(packageDefinition.homeSections?.length).toBeGreaterThan(0);
+    expect(packageDefinition.media.length).toBeGreaterThan(0);
+    expect(packageDefinition.pages[0].blocks.length).toBeGreaterThan(0);
+    expect(packageDefinition.products?.length).toBe(0);
   });
 });
 

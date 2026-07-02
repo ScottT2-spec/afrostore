@@ -1,0 +1,14 @@
+{
+  "slug": "aegis",
+  "name": "Aegis",
+  "category": "Landing Page",
+  "siteType": "LANDING_PAGE",
+  "version": "1.0.0",
+  "previewImage": "/templates/jewellery/prefooter/showrooms.webp",
+  "description": "Imported Aegis landing template package built from the live reference structure.",
+  "tags": ["saas", "security", "platform"],
+  "assets": [
+    "/templates/jewellery/prefooter/about-us.webp",
+    "/templates/jewellery/prefooter/showrooms.webp"
+  ]
+}
