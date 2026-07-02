@@ -8,9 +8,25 @@
   "description": "Imported landing gadget template package built from the live reference source.",
   "tags": ["landing", "gadget", "pixel", "launch"],
   "assets": [
+    "landing-pixel-popup-bg-opt.jpg",
     "landing-pixel-slider-phone-opt.png",
+    "landing-pixel-slider-bg-opt.jpg",
+    "landing-pixel-sound-img-opt.png",
     "landing-pixel-specification-opt.jpg",
     "landing-pixel-display-opt.jpg",
-    "landing-pixel-woterproof-opt.png"
+    "landing-pixel-woterproof-opt.png",
+    "landing-pixel-photo-1-opt.jpg",
+    "landing-pixel-photo-3-opt.jpg",
+    "landing-pixel-photo-4-opt.jpg",
+    "landing-pixel-camera-opt.png",
+    "landing-pixel-camera-bg-opt.jpg",
+    "landing-pixel-sequrity-opt-1.jpg",
+    "landing-pixel-product-3-black-opt.jpg",
+    "landing-pixel-product-3-gold-pink-opt.jpg",
+    "landing-pixel-product-3-white-opt.jpg",
+    "landing-pixel-product-3-xl-black-opt.jpg",
+    "landing-pixel-product-3-xl-gold-pink-opt.jpg",
+    "landing-pixel-product-3-xl-white-opt.jpg",
+    "xtemos-logo-black-3.svg"
   ]
 }

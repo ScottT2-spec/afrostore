@@ -160,6 +160,8 @@ function HeroBlock({ props }: { props: Record<string, unknown> }) {
   const bgStyle = (props.bgStyle as string) || "gradient";
   const bgColor = (props.bgColor as string) || "#1B2B4B";
   const textColor = (props.textColor as string) || "#fff";
+  const layout = (props.layout as string) || "center";
+  const imageSrc = (props.image as string) || (props.bgImage as string) || "";
   const storeSlug = useContext(StoreSlugContext);
 
   // Resolve broken/placeholder hrefs — "#", "#shop", "/store/slug#shop" → actual shop page
@@ -182,6 +184,83 @@ function HeroBlock({ props }: { props: Record<string, unknown> }) {
   const overlayColor = (props.overlayColor as string) || "#000000";
   const overlayOpacity = resolveOpacity(props.overlayOpacity, 0.35);
   const textStyle = { color: textColor } as React.CSSProperties;
+
+  if (layout === "split") {
+    return (
+      <div
+        className={`relative overflow-hidden rounded-3xl px-6 py-10 sm:px-10 sm:py-14 lg:px-14 lg:py-16 ${bgClasses[bgStyle] || ""}`}
+        style={{
+          ...(bgClasses[bgStyle] ? {} : { backgroundColor: bgColor, color: textColor }),
+          ...sectionStyle,
+        }}
+      >
+        <div className="absolute inset-0 overflow-hidden pointer-events-none">
+          <div className={`absolute -top-24 -right-24 h-80 w-80 rounded-full ${isLight ? "bg-brand-100/30" : "bg-white/5"} blur-3xl`} />
+          <div className={`absolute -bottom-24 -left-24 h-80 w-80 rounded-full ${isLight ? "bg-accent-100/25" : "bg-accent-500/10"} blur-3xl`} />
+          <div className="absolute inset-0 opacity-[0.03]" style={{ backgroundImage: "radial-gradient(circle at 1px 1px, currentColor 1px, transparent 0)", backgroundSize: "32px 32px" }} />
+          {hasImageBackground && <div className="absolute inset-0" style={{ backgroundColor: overlayColor, opacity: overlayOpacity }} />}
+        </div>
+
+        <div className="relative grid items-center gap-10 lg:grid-cols-[1fr_1.05fr]">
+          <div className="max-w-xl text-left" style={textStyle}>
+            {(props.badge as string) && (
+              <AnimateIn>
+                <span className="mb-6 inline-flex items-center gap-2 rounded-full border border-brand-200 bg-white/80 px-4 py-1.5 text-xs font-semibold uppercase tracking-[0.22em] text-brand-700 backdrop-blur">
+                  <Sparkles className="h-3 w-3" />
+                  {props.badge as string}
+                </span>
+              </AnimateIn>
+            )}
+            <AnimateIn delay={0.1}>
+              <h1 className="mb-4 text-4xl font-display font-extrabold tracking-tight text-[#242424] sm:text-5xl lg:text-[4.5rem] lg:leading-[1.02] whitespace-pre-line">
+                {(props.heading as string) || "Hero Heading"}
+              </h1>
+            </AnimateIn>
+            <AnimateIn delay={0.2}>
+              <p className="mb-8 max-w-xl text-base leading-7 text-[#767676] sm:text-lg">
+                {(props.subheading as string) || "Subheading text"}
+              </p>
+            </AnimateIn>
+            <AnimateIn delay={0.3}>
+              <div className="flex flex-col gap-3 sm:flex-row sm:items-center">
+                <a
+                  href={resolveHref(props.buttonHref as string)}
+                  className="inline-flex items-center justify-center gap-2 rounded-full bg-brand-600 px-8 py-3.5 text-sm font-bold text-white shadow-lg shadow-brand-600/25 transition-all duration-300 hover:-translate-y-0.5 hover:bg-brand-700"
+                  style={{
+                    backgroundColor: (props.buttonColor as string) || undefined,
+                    color: (props.buttonTextColor as string) || undefined,
+                  }}
+                >
+                  {props.buttonText as string}
+                </a>
+                {(props.secondaryButtonText as string) && (
+                  <a
+                    href={(props.secondaryButtonHref as string) || "#"}
+                    className="inline-flex items-center justify-center gap-2 rounded-full border border-surface-300 bg-white/80 px-8 py-3.5 text-sm font-semibold text-[#242424] backdrop-blur transition-all hover:border-surface-400 hover:bg-white"
+                  >
+                    {props.secondaryButtonText as string}
+                  </a>
+                )}
+              </div>
+            </AnimateIn>
+          </div>
+
+          <AnimateIn delay={0.15}>
+            <div className="relative mx-auto w-full max-w-[620px]">
+              <div className="absolute inset-0 rounded-[2rem] bg-gradient-to-br from-black/5 via-transparent to-black/10 blur-3xl" />
+              {imageSrc ? (
+                <img
+                  src={imageSrc}
+                  alt={(props.imageAlt as string) || ""}
+                  className="relative z-10 mx-auto w-full max-w-[620px] object-contain drop-shadow-[0_26px_55px_rgba(0,0,0,0.18)]"
+                />
+              ) : null}
+            </div>
+          </AnimateIn>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div
