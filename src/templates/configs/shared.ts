@@ -1,5 +1,4 @@
 import { getInternalTemplateBySlug } from "@/lib/templates/catalog";
-import { generatePages } from "@/lib/templates/recommendation";
 import type { TemplateDefinition } from "@/lib/templates/types";
 
 export function getTemplateBundle(slug: string): TemplateDefinition {
@@ -24,15 +23,7 @@ export function getTemplateTheme(slug: string) {
 
 export function getTemplatePages(slug: string) {
   const template = getTemplateBundle(slug);
-  return generatePages(
-    {
-      businessName: template.name,
-      businessCategory: template.category,
-      industry: template.category,
-      description: template.description,
-    },
-    template,
-  );
+  return template.package?.pages || [{ title: "Home", slug: "home", type: "HOME", blocks: template.themeConfig.sections }];
 }
 
 export function getTemplateDemoData(slug: string) {
