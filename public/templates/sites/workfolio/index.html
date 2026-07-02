@@ -4,8 +4,8 @@
 <head>
   <meta charset="utf-8">
   <meta content="width=device-width, initial-scale=1.0" name="viewport">
-  <title>Index - Workfolio Bootstrap Template</title>
-  <meta name="description" content="">
+  <title>{{meta_title|{{store_name}}}}</title>
+  <meta name="description" content="{{meta_description}}">
   <meta name="keywords" content="">
 
   <meta name="robots" content="noindex, nofollow">
@@ -44,7 +44,7 @@
 
       <a href="index.html" class="logo d-flex align-items-center">
         <span class="mark">W</span>
-        <h1 class="sitename">Workfolio</h1>
+        <h1 class="sitename">{{store_name|Workfolio}}</h1>
       </a>
 
       <nav id="navmenu" class="navmenu">
@@ -565,7 +565,7 @@
 
             <div class="quick">
               <a href="/cdn-cgi/l/email-protection#b2dad7dededdf2d7cad3dfc2ded79cd1dddf"><i class="bi bi-envelope"></i> <span class="__cf_email__" data-cfemail="e088858c8c8fa08598818d908c85ce838f8d">[email&#160;protected]</span></a>
-              <a href="tel:+15552480192"><i class="bi bi-telephone"></i> +1 (555) 248-0192</a>
+              <a href="tel:{{contact_phone}}"><i class="bi bi-telephone"></i> +1 (555) 248-0192</a>
               <span><i class="bi bi-geo-alt"></i> Austin, TX</span>
             </div>
 
@@ -600,7 +600,7 @@
 
         <div class="col-lg-4 col-md-12 footer-about">
           <a href="index.html" class="logo d-flex align-items-center">
-            <span class="sitename">Workfolio</span>
+            <span class="sitename">{{store_name|Workfolio}}</span>
           </a>
           <p>Product designer and front-end developer crafting accessible, human-centered digital experiences. Always happy to talk about a new idea.</p>
           <div class="social-links d-flex mt-4">
@@ -645,7 +645,7 @@
     </div>
 
     <div class="container copyright text-center mt-4">
-      <p>© <span>Copyright</span> <strong class="px-1 sitename">Workfolio</strong> <span>All Rights Reserved</span></p>
+      <p>© <span>Copyright</span> <strong class="px-1 sitename">{{store_name}}</strong> <span>All Rights Reserved</span></p>
       <div class="credits">
         <!-- All the links in the footer should remain intact. -->
         <!-- You can delete the links only if you've purchased the pro version. -->

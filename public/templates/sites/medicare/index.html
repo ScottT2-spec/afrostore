@@ -4,8 +4,8 @@
 <head>
   <meta charset="utf-8">
   <meta content="width=device-width, initial-scale=1.0" name="viewport">
-  <title>Index - MediCare Bootstrap Template</title>
-  <meta name="description" content="">
+  <title>{{meta_title|{{store_name}}}}</title>
+  <meta name="description" content="{{meta_description}}">
   <meta name="keywords" content="">
 
   <meta name="robots" content="noindex, nofollow">
@@ -48,7 +48,7 @@
         <!-- Uncomment the line below if you also wish to use an image logo -->
         <!-- <img src="assets/img/logo.webp" alt=""> -->
         <i class="bi bi-heart-pulse"></i>
-        <h1 class="sitename">MediCare</h1>
+        <h1 class="sitename">{{store_name|MediCare}}</h1>
       </a>
 
       <nav id="navmenu" class="navmenu">
@@ -136,7 +136,7 @@
                 Accredited Medical Network
               </span>
 
-              <h1 class="hero-headline">Quality Healthcare, Centered Around Every Patient</h1>
+              <h1 class="hero-headline">{{hero_title|Quality Healthcare, Centered Around Every Patient}}</h1>
               <p class="hero-subtext">Vestibulum ante ipsum primis in faucibus orci luctus et ultrices posuere cubilia. Donec rutrum congue leo eget malesuada. Vivamus magna justo, lacinia eget consectetur sed.</p>
 
               <div class="action-row">
@@ -181,7 +181,7 @@
                   <span class="card-label">24/7 Emergency Hotline</span>
                   <span class="card-value">+1 (555) 482-7390</span>
                 </div>
-                <a href="tel:+15554827390" class="card-action" aria-label="Call now">
+                <a href="tel:{{contact_phone}}" class="card-action" aria-label="Call now">
                   <i class="bi bi-arrow-up-right"></i>
                 </a>
               </div><!-- End Emergency Card -->
@@ -1268,7 +1268,7 @@
               </div>
             </div>
             <div class="alert-actions">
-              <a href="tel:+15557890123" class="btn-primary-shad">
+              <a href="tel:{{contact_phone}}" class="btn-primary-shad">
                 <i class="bi bi-telephone"></i>
                 <span>+1 (555) 789-0123</span>
               </a>
@@ -1290,7 +1290,7 @@
         <div class="row gy-4">
           <div class="col-lg-4 col-md-6 footer-about">
             <a href="index.html" class="logo d-flex align-items-center">
-              <span class="sitename">MediCare</span>
+              <span class="sitename">{{store_name|MediCare}}</span>
             </a>
             <div class="footer-contact pt-3">
               <p>A108 Adam Street</p>

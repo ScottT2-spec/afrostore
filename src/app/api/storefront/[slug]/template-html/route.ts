@@ -5,6 +5,7 @@ import path from "path";
 import { getTemplateHtmlPath, hasTemplateHtml } from "@/lib/templates/template-html-map";
 import { findStoredTemplatePage } from "@/lib/templates/site-instance";
 import { buildCustomizationBridgeScript, buildCustomizationCss, getResolvedPageSettings, loadSiteCustomizationSafely, type SiteCustomizationDocument } from "@/lib/site-customization";
+import { substituteTemplateVariables, buildTemplateVariables } from "@/lib/templates/template-variables";
 
 // Force dynamic — never statically cache this route
 export const dynamic = "force-dynamic";
@@ -120,44 +121,54 @@ export async function GET(req: NextRequest, { params }: Params) {
     }
 
     // 5. Perform data substitution
-    //    Skip substitution if merchant has custom HTML — their edits ARE the content.
-    //    Only apply product/price substitution (dynamic data) on custom HTML.
-    const templateName = activeTemplate?.template?.name || "";
+    //    Step A: Replace {{variable}} placeholders with real store data (all templates)
+    //    Step B: Replace dynamic product/category data (e-commerce templates)
+    //    Skip text substitution on custom HTML — merchant edits ARE the content.
+    const storeProducts = products.map((p) => ({
+      name: p.name,
+      price: Number(p.price),
+      compareAtPrice: p.compareAtPrice ? Number(p.compareAtPrice) : null,
+      imageUrl: p.images[0]?.url || null,
+      imageAlt: p.images[0]?.alt || p.name,
+      category: p.category?.name || "",
+      inStock: p.stock > 0,
+      slug: p.slug,
+    }));
+
     if (activeTemplate?.customHtml) {
       // Custom HTML: only inject dynamic product data, don't touch text/names
-      html = replaceProducts(html, products.map((p) => ({
-        name: p.name,
-        price: Number(p.price),
-        compareAtPrice: p.compareAtPrice ? Number(p.compareAtPrice) : null,
-        imageUrl: p.images[0]?.url || null,
-        imageAlt: p.images[0]?.alt || p.name,
-        category: p.category?.name || "",
-        inStock: p.stock > 0,
-        slug: p.slug,
-      })));
+      html = replaceProducts(html, storeProducts);
     } else {
-      // Base template: full substitution
-      html = substituteStoreData(html, {
+      // Step A: Template variable substitution ({{store_name}}, {{hero_title}}, etc.)
+      const templateVars = buildTemplateVariables({
         storeName: site.name,
-        storeDescription: site.description || "",
-        storeLogo: site.logo || "",
-        currency,
-        currencySymbol,
-        whatsappNumber,
+        storeDescription: site.description || undefined,
+        storeLogo: site.logo || undefined,
         storeSlug: slug,
-        templateName,
-        products: products.map((p) => ({
-          name: p.name,
-          price: Number(p.price),
-          compareAtPrice: p.compareAtPrice ? Number(p.compareAtPrice) : null,
-          imageUrl: p.images[0]?.url || null,
-          imageAlt: p.images[0]?.alt || p.name,
-          category: p.category?.name || "",
-          inStock: p.stock > 0,
-          slug: p.slug,
-        })),
-        categories: categories.map((c) => c.name),
+        whatsappNumber: whatsappNumber || undefined,
+        contactPhone: whatsappNumber || undefined,
+        socialLinks: {
+          instagram: socialLinks?.instagram || undefined,
+          facebook: socialLinks?.facebook || undefined,
+          twitter: socialLinks?.twitter || undefined,
+          tiktok: socialLinks?.tiktok || undefined,
+        },
+        metaTitle: settings?.metaTitle || undefined,
+        metaDescription: settings?.metaDescription || undefined,
       });
+      html = substituteTemplateVariables(html, templateVars);
+
+      // Step B: Dynamic data — currency, products, categories, links (keeps the existing logic)
+      html = replaceCurrency(html, currencySymbol);
+      html = replaceProducts(html, storeProducts);
+      html = replaceCategories(html, categories.map((c) => c.name), slug);
+      html = fixEmptyNavLinks(html, slug);
+      html = replaceFooterLinks(html, slug);
+      html = rewriteLinks(html, slug);
+
+      if (whatsappNumber) {
+        html = replaceContactInfo(html, whatsappNumber);
+      }
     }
 
     // 6. Inject navigation overlay + cart bridge script
@@ -198,19 +209,6 @@ interface StoreProduct {
   slug: string;
 }
 
-interface SubstitutionData {
-  storeName: string;
-  storeDescription: string;
-  storeLogo: string;
-  currency: string;
-  currencySymbol: string;
-  whatsappNumber: string;
-  storeSlug: string;
-  templateName: string;
-  products: StoreProduct[];
-  categories: string[];
-}
-
 /* ─── Asset Path Fixer ─── */
 
 function fixAssetPaths(html: string, templateDir: string): string {
@@ -233,107 +231,7 @@ function fixAssetPaths(html: string, templateDir: string): string {
   return html;
 }
 
-/* ─── Substitution Engine ─── */
-
-function substituteStoreData(html: string, data: SubstitutionData): string {
-  // Replace store/brand name
-  html = replaceStoreName(html, data.storeName, data.templateName);
-
-  // Replace currency symbols
-  html = replaceCurrency(html, data.currencySymbol);
-
-  // Replace product data (names, prices, images)
-  html = replaceProducts(html, data.products);
-
-  // Replace contact info
-  if (data.whatsappNumber) {
-    html = replaceContactInfo(html, data.whatsappNumber);
-  }
-
-  // Replace category names in sidebar/nav widgets
-  html = replaceCategories(html, data.categories, data.storeSlug);
-
-  // Fix empty/placeholder nav links BEFORE rewriteLinks converts them
-  html = fixEmptyNavLinks(html, data.storeSlug);
-
-  // Replace footer menu/widget links with store pages
-  html = replaceFooterLinks(html, data.storeSlug);
-
-  // Fix internal links to point to our store
-  html = rewriteLinks(html, data.storeSlug);
-
-  return html;
-}
-
-function replaceStoreName(html: string, storeName: string, templateName: string): string {
-  // 1. Replace the page <title>
-  html = html.replace(/<title>[^<]*<\/title>/i, `<title>${storeName}</title>`);
-
-  // 2. Replace the template name wherever it appears as visible text
-  //    Build patterns from the template name (e.g. "Rival" -> matches "Rival")
-  //    Also handle common template brand patterns
-  const namePatterns: RegExp[] = [];
-
-  if (templateName) {
-    // Exact template name (case-insensitive, word boundary)
-    const escaped = templateName.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
-    namePatterns.push(new RegExp(`\\b${escaped}\\b`, "gi"));
-  }
-
-  // Common template brand names from various template providers
-  const knownBrands = [
-    "WoodMart", "Flavor Store", "Fashion Store", "FLAVOR",
-    "Rival", "Clarity", "Arsha", "Medicare", "Travely", "Workfolio",
-    "Strada", "Bistro", "Nutrio", "BootstrapMade",
-  ];
-
-  for (const brand of knownBrands) {
-    const escaped = brand.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
-    namePatterns.push(new RegExp(`\\b${escaped}\\b`, "g"));
-  }
-
-  // 3. Replace in sitename/brand/logo text elements
-  html = html.replace(
-    /(<(?:span|a|div|h1|h2|h3|h4)[^>]*class="[^"]*(?:sitename|site-title|brand-name|logo-text|wd-logo-text|navbar-brand)[^"]*"[^>]*>)([^<]+)(<\/)/gi,
-    `$1${storeName}$3`
-  );
-
-  // Also handle <h1 class="sitename">Text</h1> pattern (Bootstrap templates)
-  html = html.replace(
-    /(<h1[^>]*class="sitename"[^>]*>)([^<]+)(<\/h1>)/gi,
-    `$1${storeName}$3`
-  );
-
-  // 4. Replace template name in visible text — SKIP <script>, <style>, and <!-- --> blocks.
-  for (const pattern of namePatterns) {
-    const safeReplace = (segment: string) =>
-      segment.replace(/(>)([^<]*?)(<)/g, (m, open, text, close) => {
-        if (!pattern.test(text)) return m;
-        pattern.lastIndex = 0;
-        return `${open}${text.replace(pattern, storeName)}${close}`;
-      });
-
-    // Split out script/style/comment blocks so we never touch them
-    const parts = html.split(/(<script[\s\S]*?<\/script>|<style[\s\S]*?<\/style>|<!--[\s\S]*?-->)/gi);
-    html = parts
-      .map((part, i) => (i % 2 === 0 ? safeReplace(part) : part))
-      .join("");
-  }
-
-  // 5. Replace copyright text
-  html = html.replace(
-    /(©\s*\d{4}\s*)([^<.]+)/gi,
-    `$1${storeName}`
-  );
-
-  // 6. Replace meta description
-  html = html.replace(
-    /(<meta\s+name="description"\s+content=")[^"]*(")/i,
-    `$1${storeName}$2`
-  );
-
-  return html;
-}
+/* ─── Dynamic Data Substitution (currency, products, categories, links) ─── */
 
 function replaceCurrency(html: string, currencySymbol: string): string {
   // WoodMart uses &#36; for $ — replace with store currency
