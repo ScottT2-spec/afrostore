@@ -10,6 +10,7 @@ import { getLinkedPageHref, parsePageContent, type PageSettings } from "@/lib/pa
 import { ThemeProvider, type ThemeData } from "@/components/storefront/ThemeProvider";
 import { useWishlist } from "@/hooks/useWishlist";
 import { applyPageCustomization, buildPageBackgroundStyle, buildThemeDataWithCustomization, filterVisiblePages, getResolvedPageSettings, normalizeSiteCustomization, type SiteCustomizationDocument } from "@/lib/site-customization";
+import { hasTemplateHtml } from "@/lib/templates/template-html-map";
 
 /* ───────── Types ───────── */
 
