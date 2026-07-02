@@ -45,12 +45,12 @@ function pageSet(source: ImportedSource, heroTitle: string, body: string, heroIm
   return {
     about: [
       block(`${source.slug}-about-hero`, "hero", {
-        badge: source.name,
+        badge: "Our Mission",
         heading: heroTitle,
         subheading: body,
-        buttonText: "Learn More",
-        buttonHref: "/about",
-        secondaryButtonText: "Contact",
+        buttonText: "Get Tested",
+        buttonHref: "/contact",
+        secondaryButtonText: "Join Us",
         secondaryButtonHref: "/contact",
         bgStyle: "light",
         bgImage: heroImage,
@@ -59,23 +59,23 @@ function pageSet(source: ImportedSource, heroTitle: string, body: string, heroIm
         title: "Our Mission",
         text: body,
         imagePosition: "right",
-        buttonText: "Contact us",
+        buttonText: "Get Tested",
         buttonHref: "/contact",
         image: heroImage,
       }),
       block(`${source.slug}-about-stats`, "stats", {
         title: "Our Impact",
         items: [
-          { value: "10K+", label: "Lives Impacted" },
-          { value: "50+", label: "Partner Clinics" },
-          { value: "24/7", label: "Support Available" },
-          { value: "100%", label: "Confidential Care" },
+          { value: "15k+", label: "Tests Provided" },
+          { value: "200+", label: "Clinics Supported" },
+          { value: "98%", label: "Retention in Care" },
+          { value: "Global", label: "Advocacy Impact" },
         ],
       }),
     ],
     services: [
       block(`${source.slug}-services-hero`, "hero", {
-        badge: "Services",
+        badge: "Programs",
         heading: "Our Programs",
         subheading: "Comprehensive healthcare and support services tailored to your needs.",
         buttonText: "Get Started",
@@ -84,13 +84,13 @@ function pageSet(source: ImportedSource, heroTitle: string, body: string, heroIm
         bgImage: heroImage,
       }),
       block(`${source.slug}-services-grid`, "features", {
-        title: "What We Offer",
-        subtitle: "Comprehensive care and support services",
+        title: "Our Approach",
+        subtitle: "Innovative Care, Personalized Journeys",
         items: [
-          { icon: "heart", title: "Advanced Screening", description: "Rapid, confidential testing using the latest generation diagnostic technology." },
-          { icon: "users", title: "Peer Support", description: "Connecting you with a community that understands the journey." },
-          { icon: "shield", title: "Advocacy", description: "Fighting for policy changes and removing stigma at all levels." },
-          { icon: "pill", title: "ART Access", description: "Ensuring uninterrupted access to life-saving Antiretroviral Therapy." },
+          { icon: "biotech", title: "Advanced Screening", description: "Rapid, confidential testing using the latest generation diagnostic technology for immediate peace of mind." },
+          { icon: "diversity_3", title: "Peer Support", description: "Connecting you with a community that understands the journey, fostering resilience through shared experience." },
+          { icon: "policy", title: "Advocacy", description: "Fighting for policy changes and removing the stigma surrounding HIV/AIDS at local and national levels." },
+          { icon: "medication", title: "ART Access", description: "Ensuring uninterrupted access to life-saving Antiretroviral Therapy for all community members." },
         ],
       }),
     ],
@@ -99,15 +99,17 @@ function pageSet(source: ImportedSource, heroTitle: string, body: string, heroIm
         badge: "Contact",
         heading: "Get in Touch",
         subheading: "We're here to help. Reach out with any questions or to schedule an appointment.",
-        buttonText: "Send Message",
-        buttonHref: "#contact",
+        buttonText: "Find a Clinic Near You",
+        buttonHref: "/contact",
+        secondaryButtonText: "Speak with a Specialist",
+        secondaryButtonHref: "/contact",
         bgStyle: "dark",
         bgImage: heroImage,
       }),
       block(`${source.slug}-contact-info`, "contactInfo", {
         title: "Contact Information",
         items: [
-          { icon: "map-pin", title: "Location", value: "123 Health Street, Medical District" },
+          { icon: "map-pin", title: "Testing Centers", value: "Find a clinic near you" },
           { icon: "phone", title: "Phone", value: "+1 (555) 123-4567" },
           { icon: "mail", title: "Email", value: "hello@aegishealth.org" },
         ],
@@ -140,54 +142,61 @@ export function buildImportedAegisDesign(source: ImportedSource): PackageDesign 
     previewImage: hero,
     homeSections: [
       block(`${source.slug}-hero`, "hero", {
-        badge: source.name,
+        badge: "Aegis Health",
         heading: "Living Beyond,\nLiving Well.",
         subheading: "We empower lives through innovative HIV/AIDS care, advocacy, and community support. Together, we build a future defined by health, not diagnosis.",
-        buttonText: "Get Tested",
+        buttonText: "Get Tested Today",
         buttonHref: "/contact",
-        secondaryButtonText: "Learn More",
-        secondaryButtonHref: "/about",
+        secondaryButtonText: "View Care Programs",
+        secondaryButtonHref: "/services",
         bgStyle: "light",
         bgImage: hero,
         layout: "center",
         textColor: "#1a1a1a",
       }),
+      block(`${source.slug}-stats`, "stats", {
+        title: "Our Impact",
+        items: [
+          { value: "15k+", label: "Tests Provided" },
+          { value: "200+", label: "Clinics Supported" },
+          { value: "98%", label: "Retention in Care" },
+          { value: "Global", label: "Advocacy Impact" },
+        ],
+      }),
       block(`${source.slug}-mission`, "imageText", {
         title: "Innovative Care, Personalized Journeys",
         text: "Healthcare is never one-size-fits-all. We combine cutting-edge biomedical research with a deeply human touch to ensure every individual thrives.",
         imagePosition: "right",
-        buttonText: "Explore Protocols",
+        buttonText: "Explore our medical protocols",
         buttonHref: "/services",
-        secondaryButtonText: "Contact Us",
-        secondaryButtonHref: "/contact",
         image: feature1,
       }),
       block(`${source.slug}-features`, "features", {
-        title: "Our Core Services",
-        subtitle: "Comprehensive care designed for your unique journey",
+        title: "Our Approach",
+        subtitle: "Innovative Care, Personalized Journeys",
         bgColor: "surface",
         items: [
-          { icon: "microscope", title: "Advanced Screening", description: "Rapid, confidential testing using the latest generation diagnostic technology for immediate peace of mind." },
-          { icon: "users", title: "Peer Support", description: "Connecting you with a community that understands the journey, fostering resilience through shared experience." },
-          { icon: "megaphone", title: "Advocacy", description: "Fighting for policy changes and removing the stigma surrounding HIV/AIDS at local and national levels." },
-          { icon: "pill", title: "ART Access", description: "Ensuring uninterrupted access to life-saving Antiretroviral Therapy for all community members." },
+          { icon: "biotech", title: "Advanced Screening", description: "Rapid, confidential testing using the latest generation diagnostic technology for immediate peace of mind." },
+          { icon: "diversity_3", title: "Peer Support", description: "Connecting you with a community that understands the journey, fostering resilience through shared experience." },
+          { icon: "policy", title: "Advocacy", description: "Fighting for policy changes and removing the stigma surrounding HIV/AIDS at local and national levels." },
+          { icon: "medication", title: "ART Access", description: "Ensuring uninterrupted access to life-saving Antiretroviral Therapy for all community members." },
         ],
       }),
       block(`${source.slug}-testimonials`, "testimonials", {
         title: "Stories of Resilience",
-        subtitle: "Real stories from our community members",
+        subtitle: "Community Member • Advocate Story",
         bgColor: "light",
         items: [
           {
             name: "Marcus",
-            role: "Community Member since 2012",
-            quote: "My diagnosis was a beginning, not an end. The team at Aegis didn't just give me medicine; they gave me my dignity back. They saw the person, not the patient.",
+            role: "12 years thriving with Aegis support",
+            quote: "My diagnosis was a beginning, not an end.",
             image: testimonial,
           },
           {
             name: "Elena Rodriguez",
             role: "Community Member since 2018",
-            quote: "The support I received changed my life. From testing to treatment, every step was handled with compassion and professionalism.",
+            quote: "The team at Aegis didn't just give me medicine; they gave me my dignity back. They saw the person, not the patient.",
             image: testimonial,
           },
         ],
@@ -195,14 +204,17 @@ export function buildImportedAegisDesign(source: ImportedSource): PackageDesign 
       block(`${source.slug}-cta`, "banner", {
         title: "Take the first step towards clarity.",
         subtitle: "Confidential, free, and compassionate testing is available at all our partner clinics. No appointment necessary for initial screening.",
-        buttonText: "Find a Testing Center",
+        buttonText: "Find a Clinic Near You",
         buttonHref: "/contact",
+        secondaryButtonText: "Speak with a Specialist",
+        secondaryButtonHref: "/contact",
         bgImage: cta,
         bgColor: "primary",
       }),
-      block(`${source.slug}-newsletter`, "newsletter", {
-        title: "Stay Connected",
-        subtitle: "Join our community and receive updates on our programs, events, and impact stories.",
+      block(`${source.slug}-footer-cta`, "banner", {
+        title: "Aegis Health",
+        subtitle: "Dedicated to a world where health is a right, and every life is celebrated.",
+        bgColor: "dark",
       }),
     ],
     pages: {
@@ -228,11 +240,14 @@ export function buildImportedAegisDesign(source: ImportedSource): PackageDesign 
       { title: "Community Stories", slug: "community-stories", excerpt: "Inspiring journeys of resilience and hope from our members." },
     ],
     navigation: [
-      { label: "Home", href: "/" },
-      { label: "About", href: "/about" },
-      { label: "Services", href: "/services" },
+      { label: "Our Mission", href: "/about" },
+      { label: "Get Tested", href: "/contact" },
+      { label: "Programs", href: "/services" },
       { label: "Impact", href: "/about" },
-      { label: "Contact", href: "/contact" },
+      { label: "Join Us", href: "/contact" },
+      { label: "Patient Portal", href: "/contact" },
+      { label: "Donate", href: "/contact" },
+      { label: "Healthcare Professional", href: "/contact" },
     ],
     footer: {
       columns: [
@@ -249,27 +264,26 @@ export function buildImportedAegisDesign(source: ImportedSource): PackageDesign 
           links: [
             { label: "Privacy Policy", href: "/about" }, 
             { label: "Terms of Service", href: "/about" }, 
+            { label: "Newsletter Signup", href: "/contact" },
             { label: "Contact Us", href: "/contact" }
           ] 
         },
         { 
           heading: "Connect", 
           links: [
-            { label: "Newsletter Signup", href: "/contact" }, 
-            { label: "Volunteer", href: "/contact" }, 
-            { label: "Donate", href: "/contact" }
+            { label: "Share", href: "/contact" }, 
+            { label: "Mail", href: "/contact" }
           ] 
         },
       ],
       copyright: "© 2024 Aegis Health. Free HTML Template by TemplatesJungle.com",
     },
     menus: [
-      { name: "Main Menu", slug: "main-menu", items: [{ label: "Home", href: "/" }, { label: "About", href: "/about" }, { label: "Services", href: "/services" }, { label: "Impact", href: "/about" }, { label: "Contact", href: "/contact" }] },
-      { name: "Footer Menu", slug: "footer-menu", items: [{ label: "Privacy Policy", href: "/about" }, { label: "Terms of Service", href: "/about" }, { label: "Contact Us", href: "/contact" }] },
+      { name: "Main Menu", slug: "main-menu", items: [{ label: "Our Mission", href: "/about" }, { label: "Get Tested", href: "/contact" }, { label: "Programs", href: "/services" }, { label: "Impact", href: "/about" }, { label: "Join Us", href: "/contact" }, { label: "Patient Portal", href: "/contact" }, { label: "Donate", href: "/contact" }, { label: "Healthcare Professional", href: "/contact" }] },
+      { name: "Footer Menu", slug: "footer-menu", items: [{ label: "Privacy Policy", href: "/about" }, { label: "Terms of Service", href: "/about" }, { label: "Newsletter Signup", href: "/contact" }, { label: "Contact Us", href: "/contact" }] },
     ],
     forms: [
       { name: "Contact Form", slug: "contact", fields: [{ name: "name", label: "Name", type: "text", required: true }, { name: "email", label: "Email", type: "email", required: true }, { name: "message", label: "Message", type: "textarea", required: true }] },
-      { name: "Newsletter", slug: "newsletter", fields: [{ name: "email", label: "Email", type: "email", required: true }] },
     ],
   };
 
@@ -299,15 +313,15 @@ export const aegisImportedPackage: ThemePackageDefinition = {
     footer_style: "editorial",
     product_card_style: "premium",
     colors: {
-      primary: "#2563eb",
-      secondary: "#1e40af",
-      accent: "#3b82f6",
+      primary: "#0D9488",
+      secondary: "#0F766E",
+      accent: "#14B8A6",
       background: "#FFFFFF",
-      text: "#374151",
-      headerBg: "rgba(255,255,255,0.98)",
-      headerText: "#1a1a1a",
-      footerBg: "#f8fafc",
-      footerText: "#334155",
+      text: "#1F2937",
+      headerBg: "#FFFFFF",
+      headerText: "#1F2937",
+      footerBg: "#0F172A",
+      footerText: "#E5E7EB",
     },
     fonts: {
       heading: "Inter",
@@ -321,11 +335,14 @@ export const aegisImportedPackage: ThemePackageDefinition = {
     defaultDescription: "Aegis Health - Innovative HIV/AIDS care, advocacy, and community support services.",
   },
   navigation: [
-    { label: "Home", href: "/" },
-    { label: "About", href: "/about" },
-    { label: "Services", href: "/services" },
+    { label: "Our Mission", href: "/about" },
+    { label: "Get Tested", href: "/contact" },
+    { label: "Programs", href: "/services" },
     { label: "Impact", href: "/about" },
-    { label: "Contact", href: "/contact" },
+    { label: "Join Us", href: "/contact" },
+    { label: "Patient Portal", href: "/contact" },
+    { label: "Donate", href: "/contact" },
+    { label: "Healthcare Professional", href: "/contact" },
   ],
   footer: {
     columns: [
@@ -342,27 +359,26 @@ export const aegisImportedPackage: ThemePackageDefinition = {
         links: [
           { label: "Privacy Policy", href: "/about" }, 
           { label: "Terms of Service", href: "/about" }, 
+          { label: "Newsletter Signup", href: "/contact" },
           { label: "Contact Us", href: "/contact" }
         ] 
       },
       { 
         heading: "Connect", 
         links: [
-          { label: "Newsletter Signup", href: "/contact" }, 
-          { label: "Volunteer", href: "/contact" }, 
-          { label: "Donate", href: "/contact" }
+          { label: "Share", href: "/contact" }, 
+          { label: "Mail", href: "/contact" }
         ] 
       },
     ],
     copyright: "© 2024 Aegis Health. Free HTML Template by TemplatesJungle.com",
   },
   menus: [
-    { name: "Main Menu", slug: "main-menu", items: [{ label: "Home", href: "/" }, { label: "About", href: "/about" }, { label: "Services", href: "/services" }, { label: "Impact", href: "/about" }, { label: "Contact", href: "/contact" }] },
-    { name: "Footer Menu", slug: "footer-menu", items: [{ label: "Privacy Policy", href: "/about" }, { label: "Terms of Service", href: "/about" }, { label: "Contact Us", href: "/contact" }] },
+    { name: "Main Menu", slug: "main-menu", items: [{ label: "Our Mission", href: "/about" }, { label: "Get Tested", href: "/contact" }, { label: "Programs", href: "/services" }, { label: "Impact", href: "/about" }, { label: "Join Us", href: "/contact" }, { label: "Patient Portal", href: "/contact" }, { label: "Donate", href: "/contact" }, { label: "Healthcare Professional", href: "/contact" }] },
+    { name: "Footer Menu", slug: "footer-menu", items: [{ label: "Privacy Policy", href: "/about" }, { label: "Terms of Service", href: "/about" }, { label: "Newsletter Signup", href: "/contact" }, { label: "Contact Us", href: "/contact" }] },
   ],
   forms: [
     { name: "Contact Form", slug: "contact", fields: [{ name: "name", label: "Name", type: "text", required: true }, { name: "email", label: "Email", type: "email", required: true }, { name: "message", label: "Message", type: "textarea", required: true }] },
-    { name: "Newsletter", slug: "newsletter", fields: [{ name: "email", label: "Email", type: "email", required: true }] },
   ],
   media: [
     media("hero", sourcePath("aegis-hero-opt.jpg"), "Aegis Health hero section"),
