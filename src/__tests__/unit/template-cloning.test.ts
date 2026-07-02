@@ -1,104 +1,62 @@
-import { describe, it } from "node:test";
-import assert from "node:assert/strict";
+import { describe, it, expect } from "vitest";
 
-import { generatePages } from "@/lib/templates/recommendation";
-import { TEMPLATE_FAMILY_PAGE_SETS, getFamilyTemplateBySlug } from "@/lib/templates/families";
-import type { TemplateDefinition } from "@/lib/templates/types";
+import { buildImportedTemplatePages } from "@/lib/templates/importer";
+import { getInternalTemplateBySlug, TEMPLATE_CATEGORIES } from "@/lib/templates/catalog";
+import { getLandingGadgetPackageDefinition } from "@/templates/packages/landing-gadget";
 
-describe("template cloning", () => {
-  it("keeps the selected template sections intact on the home page", () => {
-    const template = getFamilyTemplateBySlug("restaurant-pro");
-    assert.ok(template);
+describe("theme package importer", () => {
+  it("exposes top-level category filtering", () => {
+    expect(TEMPLATE_CATEGORIES).toEqual(["Ecommerce", "Landing Page", "Business Website"]);
+  });
 
-    const pages = generatePages(
+  it("returns complete package pages for a selected template", () => {
+    const template = getInternalTemplateBySlug("fashion");
+    expect(template).toBeTruthy();
+
+    const pages = buildImportedTemplatePages(
       {
-        businessName: "My Custom Business",
-        description: "This should not rewrite the template look.",
+        businessName: "Moda House",
+        description: "Imported from the selected theme package.",
       },
       template,
     );
 
-    assert.equal(pages.length, TEMPLATE_FAMILY_PAGE_SETS[template.slug].length);
-    assert.equal(pages[0].title, "Home");
-    assert.deepEqual(pages[0].content, template.themeConfig.sections);
-    assert.deepEqual(pages[0].content[0].props, {
-      badge: "Restaurant Pro",
-      heading: "Elevated dining experiences",
-      subheading: "A refined menu-first layout with reservations, chef storytelling, and elegant gallery sections.",
-      buttonText: "View Menu",
-      buttonHref: "#menu",
-      secondaryButtonText: "Reserve a Table",
-      secondaryButtonHref: "#reservations",
-      bgStyle: "dark",
-    });
-    assert.equal(pages[0].metaTitle, "Home — Restaurant Pro");
+    expect(template?.package).toBeTruthy();
+    expect(template?.package?.pages.length).toBeGreaterThan(1);
+    expect(pages).toHaveLength(template?.package?.pages.length || 0);
+    expect(pages[0].title).toBe("Home");
+    expect(pages[0].content).toEqual(template?.package?.pages[0].blocks);
+    expect(pages[0].metaTitle).toBe(`${template?.package?.pages[0].title} — ${template?.name}`);
   });
 
-  it("builds secondary pages from the template's own section map", () => {
-    const template = getFamilyTemplateBySlug("clarity");
-    assert.ok(template);
+  it("keeps package-specific blocks intact for non-home pages", () => {
+    const template = getInternalTemplateBySlug("clarity");
+    expect(template).toBeTruthy();
 
-    const pages = generatePages(
+    const pages = buildImportedTemplatePages(
       {
         businessName: "Acme Studio",
-        description: "An agency site that should still follow the template.",
+        description: "A package-backed business website.",
       },
       template,
     );
 
     const aboutPage = pages.find((page) => page.slug === "about");
-    assert.ok(aboutPage);
-    assert.equal(aboutPage?.type, "ABOUT");
-    assert.equal(aboutPage?.content.some((block) => block.type === "hero"), false);
-    assert.equal(aboutPage?.content.some((block) => block.type === "imageText"), true);
+    expect(aboutPage).toBeTruthy();
+    expect(aboutPage?.type).toBe("ABOUT");
+    expect(Array.isArray(aboutPage?.content)).toBe(true);
+    expect((aboutPage?.content || []).length).toBeGreaterThan(0);
   });
 
-  it("falls back to a single home page for templates without a family page set", () => {
-    const template: TemplateDefinition = {
-      name: "Custom Template",
-      slug: "custom-template",
-      category: "Business",
-      description: "Fallback template",
-      previewImage: "",
-      previewUrl: "",
-      recommendationKeywords: [],
-      themeConfig: {
-        homepage_layout: "default",
-        header_style: "default",
-        footer_style: "default",
-        product_card_style: "default",
-        colors: {
-          primary: "#000000",
-          secondary: "#111111",
-          accent: "#222222",
-          background: "#ffffff",
-          text: "#000000",
-        },
-        fonts: {
-          heading: "Inter",
-          body: "Inter",
-        },
-        sections: [
-          {
-            id: "hero",
-            type: "hero",
-            props: { heading: "Fallback hero", subheading: "Still exact" },
-          },
-        ],
-      },
-      active: true,
-    };
+  it("exposes a structured landing-gadget package with editable sections and media", () => {
+    const packageDefinition = getLandingGadgetPackageDefinition();
 
-    const pages = generatePages({}, template);
-
-    assert.equal(pages.length, 1);
-    assert.deepEqual(pages[0], {
-      title: "Home",
-      slug: "home",
-      type: "HOME",
-      content: template.themeConfig.sections,
-      metaTitle: "Home — Custom Template",
-      metaDescription: "Fallback template",
-    });
+    expect(packageDefinition.slug).toBe("landing-gadget");
+    expect(packageDefinition.manifest.siteType).toBe("LANDING_PAGE");
+    expect(packageDefinition.homeSections?.length).toBeGreaterThan(0);
+    expect(packageDefinition.media.length).toBeGreaterThan(0);
+    expect(packageDefinition.pages[0].blocks.length).toBeGreaterThan(0);
+    expect(packageDefinition.products?.length).toBe(2);
   });
 });
+

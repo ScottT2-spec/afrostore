@@ -1,0 +1,16 @@
+{
+  "slug": "landing-gadget",
+  "name": "Landing Gadget",
+  "category": "Landing Page",
+  "siteType": "LANDING_PAGE",
+  "version": "1.0.0",
+  "previewImage": "/templates/imports/landing-gadget/landing-pixel-slider-phone-opt.png",
+  "description": "Imported landing gadget template package built from the live reference source.",
+  "tags": ["landing", "gadget", "pixel", "launch"],
+  "assets": [
+    "landing-pixel-slider-phone-opt.png",
+    "landing-pixel-specification-opt.jpg",
+    "landing-pixel-display-opt.jpg",
+    "landing-pixel-woterproof-opt.png"
+  ]
+}
