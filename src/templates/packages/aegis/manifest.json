@@ -1,14 +1,19 @@
 {
   "slug": "aegis",
-  "name": "Aegis",
+  "name": "Aegis Health",
   "category": "Landing Page",
   "siteType": "LANDING_PAGE",
   "version": "1.0.0",
-  "previewImage": "/templates/jewellery/prefooter/showrooms.webp",
-  "description": "Imported Aegis landing template package built from the live reference structure.",
-  "tags": ["saas", "security", "platform"],
+  "previewImage": "/templates/imports/aegis/aegis-hero-opt.jpg",
+  "description": "Imported Aegis Health landing template package built from the live reference source.",
+  "tags": ["health", "non-profit", "medical", "community", "hiv", "aids"],
   "assets": [
-    "/templates/jewellery/prefooter/about-us.webp",
-    "/templates/jewellery/prefooter/showrooms.webp"
+    "aegis-hero-opt.jpg",
+    "aegis-screening-opt.jpg",
+    "aegis-support-opt.jpg",
+    "aegis-advocacy-opt.jpg",
+    "aegis-art-opt.jpg",
+    "aegis-testimonial-opt.jpg",
+    "aegis-cta-opt.jpg"
   ]
 }

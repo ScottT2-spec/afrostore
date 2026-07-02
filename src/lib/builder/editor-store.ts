@@ -70,6 +70,10 @@ function clone<T>(value: T): T {
   return JSON.parse(JSON.stringify(value));
 }
 
+function hasMeaningfulBlocks(blocks: BuilderBlock[] | undefined | null) {
+  return Array.isArray(blocks) && blocks.length > 0;
+}
+
 function emit() {
   for (const listener of listeners) listener();
 }
@@ -143,7 +147,7 @@ function ensureSession(storageKey: string) {
   if (hydratedStorageKey === storageKey) return;
 
   const restored = loadPersistedState(storageKey);
-  if (restored) {
+  if (restored && (hasMeaningfulBlocks(restored.blocks) || !hasMeaningfulBlocks(state.blocks))) {
     state = restored;
   }
 
@@ -160,7 +164,7 @@ export function initializeBuilderEditorSession(init: BuilderEditorSessionInit) {
   const baseBlocks = clone(init.blocks);
   const basePageSettings = clone(init.pageSettings);
 
-  if (restored) {
+  if (restored && (hasMeaningfulBlocks(restored.blocks) || !hasMeaningfulBlocks(baseBlocks))) {
     applyState(
       {
         ...defaultSnapshot,

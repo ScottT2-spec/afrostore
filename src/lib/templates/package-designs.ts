@@ -1,6 +1,7 @@
 import type { BuilderBlock } from "@/components/storefront/BlockRenderer";
 import type { ThemePackageCollection, ThemePackageMediaAsset, ThemePackageProduct } from "./types";
 import { buildImportedLandingGadgetDesign } from "./imported/landing-gadget";
+import { buildImportedAegisDesign } from "./imported/aegis";
 
 export interface PackageDesign {
   previewImage?: string;
@@ -1243,7 +1244,7 @@ export function getPackageDesign(source: PackageSource): PackageDesign {
     case "landing-gadget":
       return buildImportedLandingGadgetDesign(source);
     case "aegis":
-      return buildLandingAegisDesign(source);
+      return buildImportedAegisDesign(source);
     case "najaf-ai":
       return buildLandingNajafDesign(source);
     case "aurapod":

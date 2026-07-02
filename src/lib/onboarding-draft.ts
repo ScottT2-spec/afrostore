@@ -35,7 +35,7 @@ export interface StoredOnboardingDraft {
   };
   selectedTemplate: StoredOnboardingTemplate | null;
   selectedTemplateId: string | null;
-  recommendations: StoredOnboardingTemplate[];
+  recommendations?: StoredOnboardingTemplate[];
 }
 
 const STORAGE_KEY_PREFIX = "afrostore:onboarding:draft";

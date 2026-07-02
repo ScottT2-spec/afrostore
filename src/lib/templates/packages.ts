@@ -23,7 +23,7 @@ const PACKAGE_SOURCES: PackageSource[] = [
   { slug: "bakery", name: "Bakery", category: "Ecommerce", tags: ["bakery", "dessert", "pastry", "cake"] },
   { slug: "digital-services", name: "Digital Services", category: "Ecommerce", tags: ["delivery", "services", "mobile-first"] },
   { slug: "landing-gadget", name: "Landing Gadget", category: "Landing Page", tags: ["gadget", "product launch", "hardware"] },
-  { slug: "aegis", name: "Aegis", category: "Landing Page", tags: ["saas", "security", "platform"] },
+  { slug: "aegis", name: "Aegis Health", category: "Landing Page", tags: ["health", "non-profit", "medical", "community", "hiv", "aids"] },
   { slug: "najaf-ai", name: "Najaf AI", category: "Landing Page", tags: ["ai", "automation", "software"] },
   { slug: "aurapod", name: "AuraPod", category: "Landing Page", tags: ["audio", "wellness", "subscription"] },
   { slug: "arts-portfolio", name: "Arts Portfolio", category: "Landing Page", tags: ["portfolio", "art", "creative"] },

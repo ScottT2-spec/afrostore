@@ -1,6 +1,6 @@
 export type TemplateSiteType = "ECOMMERCE" | "WEBSITE" | "LANDING_PAGE";
 
-const ECOMMERCE_CATEGORIES = new Set(["restaurant", "bakery", "fashion", "shoes", "accessories", "children"]);
+const ECOMMERCE_CATEGORIES = new Set(["ecommerce"]);
 const LANDING_CATEGORIES = new Set(["landing page"]);
 
 export function getTemplateSiteType(template: { category: string; slug: string }): TemplateSiteType {

@@ -1,7 +1,7 @@
 import { NextRequest } from "next/server";
 import { getSiteContext, error, success } from "@/lib/api-helpers";
 import { unauthorized } from "@/lib/auth";
-import { applyTemplateToSite } from "@/lib/templates/recommendation";
+import { importTemplateToSite } from "@/lib/templates/importer";
 
 type Params = { params: Promise<{ id: string }> };
 
@@ -12,12 +12,13 @@ export async function POST(req: NextRequest, { params }: Params) {
 
   try {
     const body = await req.json();
-    const result = await applyTemplateToSite(id, {
+    const result = await importTemplateToSite(id, {
       ...body,
       businessName: body.businessName || body.business_name || ctx.site?.name,
       description: body.description || ctx.site?.description || undefined,
       businessCategory: body.businessCategory || body.category || ctx.site?.businessType,
       industry: body.industry || ctx.site?.industry || undefined,
+      aiBuild: false,
     });
 
     return success({

@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/db";
 import { asRecord } from "@/lib/json";
 import { buildThemeDataWithCustomization, loadSiteCustomizationSafely } from "@/lib/site-customization";
-import { findStoredTemplatePage, mergeStoredTemplatePages } from "@/lib/templates/site-instance";
+import { mergeStoredTemplatePages } from "@/lib/templates/site-instance";
 
 type Params = { params: Promise<{ slug: string; pageSlug: string }> };
 
@@ -146,7 +146,11 @@ export async function GET(_req: NextRequest, { params }: Params) {
     ]);
     const resolvedCustomization = customization;
 
-    const fallbackPage = page || findStoredTemplatePage(activeTemplate?.pages, pageSlug);
+    const mergedPages = mergeStoredTemplatePages(
+      page ? [page] : [],
+      activeTemplate?.pages,
+    );
+    const fallbackPage = mergedPages.find((item) => item.slug === pageSlug) || mergedPages[0];
     if (!fallbackPage) return notFound("Page not found");
 
     const publicProducts = products.map((p) => ({
@@ -223,13 +227,7 @@ export async function GET(_req: NextRequest, { params }: Params) {
       console.error("Storefront page theme build error:", themeError);
     }
 
-    const publicPages = mergeStoredTemplatePages(
-      allPages.map((item) => ({
-        ...item,
-        content: undefined,
-      })),
-      activeTemplate?.pages
-    );
+    const publicPages = mergeStoredTemplatePages(allPages, activeTemplate?.pages);
 
     return success({
       store: {

@@ -46,7 +46,7 @@ export default function TemplateRenderer({
   addedToCart?: string | null;
   previewMode?: boolean;
 }) {
-  const renderBlocks = useMemo(() => blocks || template.themeConfig.sections, [blocks, template.themeConfig.sections]);
+  const renderBlocks = useMemo(() => blocks || template.package?.pages?.[0]?.blocks || template.themeConfig.sections, [blocks, template.package?.pages, template.themeConfig.sections]);
 
   return (
     <div className={previewMode ? "space-y-8 rounded-3xl border border-surface-200 bg-white p-4 shadow-sm" : "space-y-8"}>

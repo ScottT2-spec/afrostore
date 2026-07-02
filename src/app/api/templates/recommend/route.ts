@@ -1,20 +1,20 @@
 import { NextRequest } from "next/server";
 import { error, success } from "@/lib/api-helpers";
-import { recommendTemplates } from "@/lib/templates/recommendation";
+import { listTemplates } from "@/lib/templates/recommendation";
 
 export async function POST(req: NextRequest) {
   try {
     const body = await req.json();
-    const result = await recommendTemplates(body || {});
+    const templates = await listTemplates({ siteType: body?.siteType });
     return success({
-      industry: result.classification.industry,
-      confidence: result.classification.confidence,
-      recommended_templates: result.classification.recommended_templates,
-      recommendations: result.recommendations.map((item) => ({
-        ...item.template,
-        score: item.score,
-        matchPercent: item.matchPercent,
-        reasons: item.reasons,
+      industry: body?.businessCategory || body?.industry || "Business",
+      confidence: 0.5,
+      recommended_templates: templates.slice(0, 5).map((template) => template.slug),
+      recommendations: templates.slice(0, 5).map((template) => ({
+        ...template,
+        score: 100,
+        matchPercent: 100,
+        reasons: ["Category filtered package"],
       })),
     });
   } catch (err) {

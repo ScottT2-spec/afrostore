@@ -3,7 +3,7 @@ import { getAuthUser, unauthorized } from "@/lib/auth";
 import { prisma } from "@/lib/db";
 import { success, error, generateSubdomain } from "@/lib/api-helpers";
 import { slugify } from "@/lib/utils";
-import { applyTemplateToSite, recommendTemplates } from "@/lib/templates/recommendation";
+import { importTemplateToSite } from "@/lib/templates/importer";
 
 // GET /api/workspaces/[workspaceId]/sites — list sites in workspace
 export async function GET(req: NextRequest, { params }: { params: Promise<{ workspaceId: string }> }) {
@@ -141,36 +141,17 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ wor
       },
     });
 
-  // Create default pages ONLY if no template will be applied.
-    // When a template is selected, applyTemplateToSite handles all page creation
-    // with the template's own sections — so default pages would just be overwritten.
-    const willApplyTemplate = !!(launchMethod === "template" || launchMethod === "ai" || launchMethod === "quick" || templateId || templateSlug);
-    if (!willApplyTemplate) {
-      const defaultPages = getDefaultPages();
-      if (defaultPages.length > 0) {
-        await prisma.page.createMany({
-          data: defaultPages.map((p, i) => ({
-            siteId: site.id,
-            title: p.title,
-            slug: p.slug,
-            type: p.type,
-            content: p.content as unknown as Record<string, string>,
-            isPublished: true,
-            position: i,
-          })),
-        });
-      }
-    }
+    // Theme packages always provide their own pages and site data.
+    // No default page synthesis is allowed in the import flow.
 
     let templateResult: unknown = null;
     const shouldUseTemplate = launchMethod === "template" || !!templateId || !!templateSlug;
-    const shouldUseAi = !shouldUseTemplate && (launchMethod === "ai" || launchMethod === "quick");
 
     if (launchMethod === "template" && !templateId && !templateSlug) {
       return error("Template selection is required for template-based site creation", 422);
     }
 
-    if (shouldUseTemplate || shouldUseAi) {
+    if (shouldUseTemplate) {
       const businessInput = {
         businessName: name.trim(),
         businessCategory: businessType || industry || "general",
@@ -183,19 +164,8 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ wor
       };
       const selectedTemplateId = templateId || null;
       const selectedTemplateSlug = templateSlug || null;
-
-      if (shouldUseAi && !selectedTemplateId && !selectedTemplateSlug) {
-        const recommendation = await recommendTemplates(businessInput);
-        const best = recommendation.recommendations[0];
-        if (best) {
-          templateResult = await applyTemplateToSite(site.id, {
-            ...businessInput,
-            templateId: best.template.id,
-            aiBuild: true,
-          });
-        }
-      } else if (selectedTemplateId || selectedTemplateSlug) {
-        templateResult = await applyTemplateToSite(site.id, {
+      if (selectedTemplateId || selectedTemplateSlug) {
+        templateResult = await importTemplateToSite(site.id, {
           ...businessInput,
           templateId: selectedTemplateId,
           templateSlug: selectedTemplateSlug,
@@ -210,10 +180,4 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ wor
     console.error("Create site error:", err);
     return error(err instanceof Error ? err.message : "Internal server error", 500);
   }
-}
-
-function getDefaultPages() {
-  // No default pages — templates provide all pages.
-  // Blank stores get an empty site that the owner populates.
-  return [] as { title: string; slug: string; type: "HOME" | "LANDING" | "ABOUT" | "CONTACT" | "FAQ" | "POLICY" | "SERVICES" | "TEAM" | "THANK_YOU" | "CUSTOM"; content: Record<string, unknown> }[];
 }

@@ -37,9 +37,9 @@ const INDUSTRIES = [
 ];
 
 const LAUNCH_METHODS = [
-  { id: 'quick', icon: Zap, title: 'Launch in 3 Minutes', desc: 'AI builds everything for you', color: 'border-emerald-500 bg-emerald-50' },
+  { id: 'quick', icon: Zap, title: 'Fast Import', desc: 'Choose a package and import it immediately', color: 'border-emerald-500 bg-emerald-50' },
   { id: 'template', icon: Layout, title: 'Use a Template', desc: 'Start from a professional template', color: 'border-blue-500 bg-blue-50' },
-  { id: 'ai', icon: Sparkles, title: 'Build with AI', desc: 'Guide AI to build your vision', color: 'border-purple-500 bg-purple-50' },
+  { id: 'ai', icon: Sparkles, title: 'Template Import', desc: 'Open the package chooser and import a design', color: 'border-purple-500 bg-purple-50' },
   { id: 'blank', icon: Square, title: 'Blank Canvas', desc: 'Start from scratch', color: 'border-gray-500 bg-gray-50' },
 ];
 
@@ -51,7 +51,6 @@ const PAYMENT_GATEWAYS = [
 
 type SiteType = 'ECOMMERCE' | 'WEBSITE' | 'LANDING_PAGE';
 type ScoredTemplate = TemplateDefinition & { matchPercent?: number; score?: number };
-const asScoredTemplates = (value: unknown): ScoredTemplate[] => value as ScoredTemplate[];
 const asScoredTemplate = (value: unknown): ScoredTemplate | null => value as ScoredTemplate | null;
 
 export default function NewSitePage() {
@@ -102,7 +101,6 @@ export default function NewSitePage() {
   const [selectedGateways, setSelectedGateways] = useState<string[]>([]);
   const [domainType, setDomainType] = useState<'subdomain' | 'custom'>('subdomain');
   const [customDomain, setCustomDomain] = useState('');
-  const [recommendedTemplates, setRecommendedTemplates] = useState<ScoredTemplate[]>(asScoredTemplates(draft?.recommendations || []));
 
   // Load workspaces if none specified
   const [selectedWorkspace, setSelectedWorkspace] = useState(workspaceId || '');
@@ -145,7 +143,6 @@ export default function NewSitePage() {
       businessDetails: { ...businessInfo },
       selectedTemplate,
       selectedTemplateId,
-      recommendations: recommendedTemplates,
     }, user.id);
   }, [
     user,
@@ -156,7 +153,6 @@ export default function NewSitePage() {
     businessInfo,
     selectedTemplate,
     selectedTemplateId,
-    recommendedTemplates,
   ]);
 
   const totalSteps = 7;
@@ -166,7 +162,7 @@ export default function NewSitePage() {
       case 2: return !!industry;
       case 3: return !!launchMethod;
       case 4: return businessInfo.name.trim().length >= 2;
-      case 5: return launchMethod !== 'template' || !!selectedTemplateId;
+      case 5: return launchMethod === 'blank' || !!selectedTemplateId;
       case 6: return true; // payment optional
       case 7: return true; // domain optional
       default: return false;
@@ -331,17 +327,17 @@ export default function NewSitePage() {
                 );
               })}
 
-              {/* AI Decide option */}
-              <button
-                onClick={() => setSiteType('ECOMMERCE')} // Default to ecommerce for AI
+              {/* Guided selection option */}
+                <button
+                  onClick={() => setSiteType('ECOMMERCE')} // Default to ecommerce for guided selection
                 className="flex items-start gap-4 p-5 rounded-xl border-2 border-dashed border-gray-200 bg-white hover:border-gray-300 text-left transition"
               >
                 <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-purple-100 to-blue-100 flex items-center justify-center">
                   <Sparkles className="w-6 h-6 text-purple-500" />
                 </div>
                 <div>
-                  <p className="font-semibold text-gray-900">Let AI Decide</p>
-                  <p className="text-sm text-gray-500 mt-0.5">Tell us about your business and AI will pick the best type</p>
+                  <p className="font-semibold text-gray-900">Use guided selection</p>
+                  <p className="text-sm text-gray-500 mt-0.5">Tell us about your business and we’ll guide the category choice</p>
                 </div>
               </button>
             </div>
@@ -512,7 +508,7 @@ export default function NewSitePage() {
           </div>
         )}
 
-        {/* Step 5: AI Template Recommendation + Theme Customization */}
+        {/* Step 5: Theme Package Selection + Theme Customization */}
         {step === 5 && !created && (
           <div className="fade-in py-10">
             {creating ? (
@@ -530,19 +526,17 @@ export default function NewSitePage() {
                     <Sparkles className="w-10 h-10 text-emerald-600" />
                   </div>
                   <h1 className="text-2xl font-bold text-gray-900 mb-2">
-                    {launchMethod === 'blank' ? 'Ready to generate your site' : launchMethod === 'template' ? 'Choose a template' : 'AI will build your website'}
+                    {launchMethod === 'blank' ? 'Ready to create your site' : launchMethod === 'template' ? 'Choose a template' : 'Choose a theme package'}
                   </h1>
                   <p className="text-gray-500 mb-6 max-w-md mx-auto">
                     We&apos;ll create a {siteType === 'ECOMMERCE' ? 'store' : siteType === 'WEBSITE' ? 'website' : 'landing page'} for
                     <strong> {businessInfo.name}</strong> in the <strong>{INDUSTRIES.find(i => i.id === industry)?.name}</strong> industry.
                   </p>
                 </div>
-                {launchMethod === 'template' && (
+                {launchMethod !== 'blank' && (
                   <div className="mt-8">
                     <TemplateSelector
                       businessContext={businessContext}
-                      initialRecommendations={recommendedTemplates}
-                      onRecommendationsLoaded={setRecommendedTemplates}
                       onSelect={(template) => {
                         setSelectedTemplate(template);
                         setSelectedTemplateId(template.id || template.slug);
@@ -763,7 +757,7 @@ export default function NewSitePage() {
                   creating ? (
                     <><Loader2 className="w-4 h-4 animate-spin" /> Creating...</>
                   ) : (
-                    <><Sparkles className="w-4 h-4" /> Generate Site</>
+                    <><Sparkles className="w-4 h-4" /> Import Package</>
                   )
                 ) : (
                   <>Next <ArrowRight className="w-4 h-4" /></>

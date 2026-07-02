@@ -12,6 +12,8 @@ import BlockRenderer from "@/components/builder/BlockRenderer";
 import PropertyPanel from "@/components/builder/PropertyPanel";
 import { SingleImageUpload } from "@/components/dashboard/ImageUpload";
 import { parsePageContent, serializePageContent, type PageSettings } from "@/lib/page-content";
+import { buildPageBackgroundStyle } from "@/lib/site-customization";
+import { RenderBlocks } from "@/components/storefront/BlockRenderer";
 import {
   addBuilderEditorBlock,
   deleteBuilderEditorBlock,
@@ -233,7 +235,6 @@ export default function BuilderPage({ params }: { params: Promise<{ pageId: stri
   const [saving, setSaving] = useState(false);
   const [saved, setSaved] = useState(false);
   const [canvasMode, setCanvasMode] = useState<"builder" | "preview">("builder");
-  const [previewTick, setPreviewTick] = useState(0);
 
   // Load page
   useEffect(() => {
@@ -299,7 +300,6 @@ export default function BuilderPage({ params }: { params: Promise<{ pageId: stri
       }
       markBuilderEditorSaved();
       setSaved(true);
-      setPreviewTick((prev) => prev + 1);
       setTimeout(() => setSaved(false), 2000);
     }
   }, [currentStore, editor.blocks, editor.isPublished, editor.pageSettings, editor.pageSlug, editor.pageTitle, pageId]);
@@ -368,9 +368,6 @@ export default function BuilderPage({ params }: { params: Promise<{ pageId: stri
   };
 
   const selectedBlock = editor.blocks.find((b) => b.id === editor.selectedBlockId) || null;
-  const previewHref = currentStore
-    ? `/store/${currentStore.slug}${editor.pageSlug ? `/${editor.pageSlug}` : ""}?afro_editor=1`
-    : "";
 
   if (loading || !currentStore || !user) {
     return (
@@ -551,12 +548,9 @@ export default function BuilderPage({ params }: { params: Promise<{ pageId: stri
                   </span>
                 </div>
 
-                <iframe
-                  key={`${previewHref}-${previewTick}`}
-                  src={previewHref}
-                  className={`w-full border-0 bg-white ${previewMode === "mobile" ? "h-[78vh]" : "h-[82vh]"}`}
-                  title="Live page preview"
-                />
+                <div className={`relative overflow-hidden ${previewMode === "mobile" ? "max-w-[375px] mx-auto" : ""}`} style={buildPageBackgroundStyle(editor.pageSettings)}>
+                  <RenderBlocks blocks={editor.blocks} storeSlug={currentStore?.slug || ""} />
+                </div>
               </div>
 
               <div className="mt-4 rounded-xl border border-surface-200 bg-white p-4">
