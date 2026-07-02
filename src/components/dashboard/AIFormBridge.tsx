@@ -38,7 +38,7 @@ import { useAIPrefill } from "@/hooks/useAIPrefill";
 import AIPrefillBanner from "@/components/dashboard/AIPrefillBanner";
 
 interface AIFormBridgeProps {
-  /** Page identifier matching the MCP tool's navigateTo */
+  /** Page identifier matching the AI tool's navigateTo */
   page: string;
 
   /** Called when AI prefill data is available */

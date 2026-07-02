@@ -42,7 +42,7 @@ interface Message {
   };
 }
 
-interface MCPResponse {
+interface AIResponse {
   content: string;
   provider: string;
   model: string;
@@ -268,7 +268,7 @@ export default function AIPage() {
         content: m.content,
       }));
 
-      const res = await api.post<MCPResponse>(
+      const res = await api.post<AIResponse>(
         `/api/sites/${currentStore.id}/ai`,
         {
           message:
