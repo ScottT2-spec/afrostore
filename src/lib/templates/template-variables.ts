@@ -69,20 +69,30 @@ export function substituteTemplateVariables(
   html: string,
   variables: Partial<TemplateVariables>
 ): string {
-  return html.replace(
-    /\{\{(\w+)(?:\|([^}]*))?\}\}/g,
-    (_match, varName: string, defaultValue?: string) => {
-      const value = variables[varName];
-      if (value !== undefined && value !== "") {
-        return escapeHtml(value);
+  // Split out <script>, <style>, and <!-- --> blocks so we never modify JS/CSS
+  // This prevents breaking framework-internal {{variables}} (e.g. WoodMart Swiper, Framer)
+  const parts = html.split(/(<script[\s\S]*?<\/script>|<style[\s\S]*?<\/style>|<!--[\s\S]*?-->)/gi);
+  
+  return parts.map((part, i) => {
+    // Odd-indexed parts are script/style/comment blocks — leave them alone
+    if (i % 2 !== 0) return part;
+    
+    // Only substitute in HTML content (even-indexed parts)
+    return part.replace(
+      /\{\{(\w+)(?:\|([^}]*))?\}\}/g,
+      (_match, varName: string, defaultValue?: string) => {
+        const value = variables[varName];
+        if (value !== undefined && value !== "") {
+          return escapeHtml(value);
+        }
+        // Use default value if provided, otherwise leave the placeholder
+        if (defaultValue !== undefined) {
+          return defaultValue;
+        }
+        return _match; // leave unresolved
       }
-      // Use default value if provided, otherwise leave the placeholder
-      if (defaultValue !== undefined) {
-        return defaultValue;
-      }
-      return _match; // leave unresolved
-    }
-  );
+    );
+  }).join("");
 }
 
 /**
