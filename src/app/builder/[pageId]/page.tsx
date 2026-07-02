@@ -2,7 +2,7 @@
 import { ArrowLeft, ChevronDown, ChevronUp, Loader2, Plus } from "lucide-react";
 import { Clock, Columns, Copy, Eye, EyeOff, Grid3X3, GripVertical, HelpCircle, Image as ImageIcon, Layers, Layout, LayoutGrid, Mail, MessageCircle, Minus, Monitor, MousePointer, MoveVertical, Play, Redo2, Save, Shield, ShoppingBag, Smartphone, Sparkles, Type, Undo2, User } from "@/components/icons/FilledIcons";
 
-import { useState, useEffect, useCallback, use } from "react";
+import { useState, useEffect, useCallback, useRef, use } from "react";
 import { useAuth } from "@/context/AuthContext";
 import { useSite } from "@/context/StoreContext";
 import { api } from "@/lib/api-client";
@@ -52,6 +52,7 @@ import {
 } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
 import Link from "next/link";
+import type { TemplateElement, TemplateSection } from "@/lib/builder/template-editor-types";
 
 // ─── ICON MAP ────────────────────────────────────────────────
 
@@ -235,6 +236,11 @@ export default function BuilderPage({ params }: { params: Promise<{ pageId: stri
   const [saving, setSaving] = useState(false);
   const [saved, setSaved] = useState(false);
   const [canvasMode, setCanvasMode] = useState<"builder" | "preview">("builder");
+  const [templateEditMode, setTemplateEditMode] = useState(false);
+  const [templateSelectedElement, setTemplateSelectedElement] = useState<TemplateElement | null>(null);
+  const [templateSections, setTemplateSections] = useState<TemplateSection[]>([]);
+  const templateIframeRef = useRef<HTMLIFrameElement>(null);
+  const storeSlug = currentStore?.slug || "";
 
   // Load page
   useEffect(() => {
