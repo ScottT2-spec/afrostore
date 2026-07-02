@@ -5,7 +5,6 @@ import { ArrowUpDown, CheckCircle2, Heart, ImageIcon, Menu, Search, ShoppingBag,
 import { useState, useEffect, useCallback } from "react";
 import { useParams, useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
-import { getLinkedPageHref } from "@/lib/page-content";
 import { ThemeProvider, type ThemeData } from "@/components/storefront/ThemeProvider";
 import { useWishlist } from "@/hooks/useWishlist";
 
@@ -314,7 +313,7 @@ export default function ShopPage() {
             <Link href={`/store/${slug}/shop`} className="text-sm font-medium text-brand-700 transition-colors">Shop</Link>
             <Link href={`/store/${slug}/reviews`} className="text-sm font-medium text-surface-600 hover:text-surface-900 transition-colors">Reviews</Link>
             {navPages.slice(0, 4).map((page) => (
-              <Link key={page.id} href={getLinkedPageHref(page as { slug: string; template?: string | null }, slug)} className="text-sm font-medium text-surface-600 hover:text-surface-900 transition-colors">{page.title}</Link>
+              <Link key={page.id} href={`/store/${slug}/${page.slug}`} className="text-sm font-medium text-surface-600 hover:text-surface-900 transition-colors">{page.title}</Link>
             ))}
           </nav>
 
@@ -341,7 +340,7 @@ export default function ShopPage() {
             <Link href={`/store/${slug}/shop`} onClick={() => setMobileMenu(false)} className="block text-sm font-bold text-brand-700 py-2">Shop</Link>
             <Link href={`/store/${slug}/reviews`} onClick={() => setMobileMenu(false)} className="block text-sm font-medium text-surface-600 py-2">Reviews</Link>
             {navPages.map((page) => (
-              <Link key={page.id} href={getLinkedPageHref(page as { slug: string; template?: string | null }, slug)} onClick={() => setMobileMenu(false)} className="block text-sm font-medium text-surface-600 py-2">{page.title}</Link>
+              <Link key={page.id} href={`/store/${slug}/${page.slug}`} onClick={() => setMobileMenu(false)} className="block text-sm font-medium text-surface-600 py-2">{page.title}</Link>
             ))}
           </div>
         )}

@@ -89,4 +89,37 @@ describe("site instance registry", () => {
     assert.equal(merged.length, 1);
     assert.deepEqual(merged[0].content, [{ id: "hero-1", type: "hero", props: { heading: "Live Content" } }]);
   });
+
+  it("prefers stored template content when database pages contain legacy scaffold blocks", () => {
+    const merged = mergeStoredTemplatePages(
+      [
+        {
+          id: "db-home",
+          title: "Home",
+          slug: "home",
+          type: "HOME",
+          content: {
+            blocks: [
+              { id: "1", type: "columns", props: {} },
+              { id: "2", type: "collections", props: {} },
+              { id: "3", type: "categories", props: {} },
+              { id: "4", type: "new_arrivals", props: {} },
+            ],
+          },
+        },
+      ],
+      [
+        {
+          id: "template-home",
+          title: "Home",
+          slug: "home",
+          type: "HOME",
+          content: [{ id: "hero-1", type: "imageHeroBanner", props: { items: [] } }],
+        },
+      ],
+    );
+
+    assert.equal(merged.length, 1);
+    assert.deepEqual(merged[0].content, [{ id: "hero-1", type: "imageHeroBanner", props: { items: [] } }]);
+  });
 });

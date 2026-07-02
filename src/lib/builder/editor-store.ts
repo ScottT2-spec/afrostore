@@ -160,28 +160,15 @@ export function initializeBuilderEditorSession(init: BuilderEditorSessionInit) {
   hydratedStorageKey = init.storageKey;
   history = new BuilderHistory();
 
-  const restored = loadPersistedState(init.storageKey);
   const baseBlocks = clone(init.blocks);
   const basePageSettings = clone(init.pageSettings);
 
-  if (restored && (hasMeaningfulBlocks(restored.blocks) || !hasMeaningfulBlocks(baseBlocks))) {
-    applyState(
-      {
-        ...defaultSnapshot,
-        ...restored,
-        storageKey: init.storageKey,
-        siteId: init.siteId,
-        siteSlug: init.siteSlug,
-        pageId: init.pageId,
-        pageSlug: init.pageSlug,
-        pageTitle: restored.pageTitle || init.pageTitle,
-        isPublished: restored.isPublished,
-        selectedBlockId: restored.selectedBlockId ?? init.selectedBlockId ?? null,
-        hydrated: true,
-      },
-      { persist: false },
-    );
-    return;
+  if (typeof window !== "undefined") {
+    try {
+      localStorage.removeItem(init.storageKey);
+    } catch {
+      // Ignore storage failures.
+    }
   }
 
   applyState(

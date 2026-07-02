@@ -30,7 +30,6 @@ interface PageData {
     title: string;
     slug: string;
     type: string;
-    template?: string | null;
     content: unknown;
     metaTitle?: string;
     metaDescription?: string;

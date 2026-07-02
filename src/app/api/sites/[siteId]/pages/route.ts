@@ -35,6 +35,17 @@ export async function GET(req: NextRequest, { params }: Params) {
   const [pages, total, activeTemplate] = await Promise.all([
     prisma.page.findMany({
       where: where as Prisma.PageWhereInput,
+      select: {
+        id: true,
+        title: true,
+        slug: true,
+        type: true,
+        content: true,
+        template: true,
+        isPublished: true,
+        position: true,
+        createdAt: true,
+      },
       orderBy: [{ position: "asc" }, { createdAt: "desc" }],
       skip,
       take: limit,
@@ -64,14 +75,12 @@ export async function POST(req: NextRequest, { params }: Params) {
     if (!parsed.success) return validationError(parsed.error.flatten().fieldErrors);
 
     const slug = await ensureUniqueSlug(parsed.data.title, siteId, "page");
-    const linkedTemplate = getLinkedPageTemplate({ slug, title: parsed.data.title });
 
     const page = await prisma.page.create({
       data: {
         siteId,
         slug,
         ...parsed.data,
-        template: parsed.data.template ?? linkedTemplate,
       },
     });
 

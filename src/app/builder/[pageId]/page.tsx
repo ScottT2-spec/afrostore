@@ -1,19 +1,19 @@
 "use client";
-import { ArrowLeft, ChevronDown, ChevronUp, Loader2, Plus } from "lucide-react";
+import { ArrowLeft, ChevronDown, ChevronUp, Loader2 } from "lucide-react";
 import { Clock, Columns, Copy, Eye, EyeOff, Grid3X3, GripVertical, HelpCircle, Image as ImageIcon, Layers, Layout, LayoutGrid, Mail, MessageCircle, Minus, Monitor, MousePointer, MoveVertical, Play, Redo2, Save, Shield, ShoppingBag, Smartphone, Sparkles, Type, Undo2, User } from "@/components/icons/FilledIcons";
 
-import { useState, useEffect, useCallback, use } from "react";
+import { useState, useEffect, useCallback, use, useMemo } from "react";
 import { useAuth } from "@/context/AuthContext";
-import { useSite } from "@/context/StoreContext";
 import { api } from "@/lib/api-client";
 import { BuilderBlock, BlockType, blockPalette } from "@/lib/builder/types";
 import { blockTemplates } from "@/lib/builder/templates";
 import BlockRenderer from "@/components/builder/BlockRenderer";
 import PropertyPanel from "@/components/builder/PropertyPanel";
 import { SingleImageUpload } from "@/components/dashboard/ImageUpload";
-import { parsePageContent, serializePageContent, type PageSettings } from "@/lib/page-content";
-import { buildPageBackgroundStyle } from "@/lib/site-customization";
-import { RenderBlocks } from "@/components/storefront/BlockRenderer";
+import { parsePageContent, pickRicherPageDocumentWithMeta, serializePageContent, type PageSettings } from "@/lib/page-content";
+import { applyPageCustomization, buildPageBackgroundStyle, buildThemeDataWithCustomization, getResolvedPageSettings, normalizeSiteCustomization, type SiteCustomizationDocument } from "@/lib/site-customization";
+import { RenderBlocks, type BuilderBlock as StorefrontBlock, type StoreProduct } from "@/components/storefront/BlockRenderer";
+import { ThemeProvider, type ThemeData } from "@/components/storefront/ThemeProvider";
 import {
   addBuilderEditorBlock,
   deleteBuilderEditorBlock,
@@ -53,8 +53,6 @@ import {
 import { CSS } from "@dnd-kit/utilities";
 import Link from "next/link";
 
-// ─── ICON MAP ────────────────────────────────────────────────
-
 const paletteIcons: Record<string, React.ElementType> = {
   type: Type, "align-left": Type, image: ImageIcon, "mouse-pointer": MousePointer,
   "move-vertical": MoveVertical, minus: Minus, layout: Layout, columns: Columns,
@@ -63,11 +61,10 @@ const paletteIcons: Record<string, React.ElementType> = {
   user: User,
 };
 
-// ─── SORTABLE BLOCK WRAPPER ─────────────────────────────────
-
-function SortableBlock({
+function SortableEditorBlock({
   block,
   isSelected,
+  isEditing,
   onClick,
   onDuplicate,
   onMoveUp,
@@ -75,9 +72,11 @@ function SortableBlock({
   onInlineEdit,
   isFirst,
   isLast,
+  children,
 }: {
   block: BuilderBlock;
   isSelected: boolean;
+  isEditing: boolean;
   onClick: () => void;
   onDuplicate: () => void;
   onMoveUp: () => void;
@@ -85,6 +84,7 @@ function SortableBlock({
   onInlineEdit: (key: string, value: string) => void;
   isFirst: boolean;
   isLast: boolean;
+  children: React.ReactNode;
 }) {
   const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({ id: block.id });
 
@@ -98,43 +98,44 @@ function SortableBlock({
     <div
       ref={setNodeRef}
       style={style}
-      className={`group relative rounded-xl transition-all ${
-        isSelected ? "ring-2 ring-brand-600 ring-offset-2" : "hover:ring-2 hover:ring-brand-300 hover:ring-offset-1"
+      className={`group relative transition-all ${
+        isSelected ? "ring-2 ring-brand-600 ring-offset-2" : isEditing ? "hover:ring-2 hover:ring-brand-300 hover:ring-offset-1" : ""
       }`}
-      onClick={(e) => { e.stopPropagation(); onClick(); }}
+      onClick={(e) => { if (isEditing) { e.stopPropagation(); onClick(); } }}
     >
-      {/* Drag handle */}
-      <div
-        {...attributes}
-        {...listeners}
-        className="absolute -left-10 top-1/2 -translate-y-1/2 opacity-0 group-hover:opacity-100 cursor-grab active:cursor-grabbing transition-opacity z-10"
-      >
-        <GripVertical className="h-5 w-5 text-surface-400" />
-      </div>
-
-      {/* Block toolbar */}
-      <div className="absolute -top-3 left-3 opacity-0 group-hover:opacity-100 transition-opacity z-10 flex items-center gap-0.5">
-        <span className="bg-brand-600 text-white text-[9px] font-bold px-2 py-0.5 rounded-full uppercase mr-1">
-          {block.type}
-        </span>
-        <button onClick={(e) => { e.stopPropagation(); onMoveUp(); }} disabled={isFirst}
-          className="h-5 w-5 rounded bg-white shadow border border-surface-200 flex items-center justify-center text-surface-400 hover:text-surface-700 disabled:opacity-30">
-          <ChevronUp className="h-3 w-3" />
-        </button>
-        <button onClick={(e) => { e.stopPropagation(); onMoveDown(); }} disabled={isLast}
-          className="h-5 w-5 rounded bg-white shadow border border-surface-200 flex items-center justify-center text-surface-400 hover:text-surface-700 disabled:opacity-30">
-          <ChevronDown className="h-3 w-3" />
-        </button>
-        <button onClick={(e) => { e.stopPropagation(); onDuplicate(); }}
-          className="h-5 w-5 rounded bg-white shadow border border-surface-200 flex items-center justify-center text-surface-400 hover:text-surface-700">
-          <Copy className="h-3 w-3" />
-        </button>
-      </div>
-
-      {/* Block content */}
-      <div className="p-4">
+      {isEditing && (
+        <>
+          <div
+            {...attributes}
+            {...listeners}
+            className="absolute -left-10 top-1/2 -translate-y-1/2 opacity-0 group-hover:opacity-100 cursor-grab active:cursor-grabbing transition-opacity z-10"
+          >
+            <GripVertical className="h-5 w-5 text-surface-400" />
+          </div>
+          <div className="absolute -top-3 left-3 opacity-0 group-hover:opacity-100 transition-opacity z-10 flex items-center gap-0.5">
+            <span className="bg-brand-600 text-white text-[9px] font-bold px-2 py-0.5 rounded-full uppercase mr-1">
+              {block.type}
+            </span>
+            <button type="button" onClick={(e) => { e.stopPropagation(); onMoveUp(); }} disabled={isFirst}
+              className="h-5 w-5 rounded bg-white shadow border border-surface-200 flex items-center justify-center text-surface-400 hover:text-surface-700 disabled:opacity-30">
+              <ChevronUp className="h-3 w-3" />
+            </button>
+            <button type="button" onClick={(e) => { e.stopPropagation(); onMoveDown(); }} disabled={isLast}
+              className="h-5 w-5 rounded bg-white shadow border border-surface-200 flex items-center justify-center text-surface-400 hover:text-surface-700 disabled:opacity-30">
+              <ChevronDown className="h-3 w-3" />
+            </button>
+            <button type="button" onClick={(e) => { e.stopPropagation(); onDuplicate(); }}
+              className="h-5 w-5 rounded bg-white shadow border border-surface-200 flex items-center justify-center text-surface-400 hover:text-surface-700">
+              <Copy className="h-3 w-3" />
+            </button>
+          </div>
+        </>
+      )}
+      {isEditing && isSelected && (block.type === "heading" || block.type === "text") ? (
         <BlockRenderer block={block} isSelected={isSelected} onInlineEdit={onInlineEdit} />
-      </div>
+      ) : (
+        children
+      )}
     </div>
   );
 }
@@ -220,12 +221,25 @@ function PageSettingsPanel({
   );
 }
 
-// ─── MAIN BUILDER PAGE ───────────────────────────────────────
+interface BuilderPagePayload {
+  store: { id: string; name: string; slug: string; currency?: string };
+  page: {
+    id: string;
+    siteId: string;
+    slug: string;
+    title: string;
+    type: string;
+    content?: unknown;
+    isPublished: boolean;
+  };
+  products: StoreProduct[];
+  theme: ThemeData | null;
+  customization?: SiteCustomizationDocument | null;
+}
 
 export default function BuilderPage({ params }: { params: Promise<{ pageId: string }> }) {
   const { pageId } = use(params);
   const { user } = useAuth();
-  const { currentStore } = useSite();
   const editor = useBuilderEditor();
   const [activeId, setActiveId] = useState<string | null>(null);
   const [sidebarTab, setSidebarTab] = useState<"blocks" | "templates">("blocks");
@@ -235,60 +249,114 @@ export default function BuilderPage({ params }: { params: Promise<{ pageId: stri
   const [saving, setSaving] = useState(false);
   const [saved, setSaved] = useState(false);
   const [canvasMode, setCanvasMode] = useState<"builder" | "preview">("builder");
+  const [storeProducts, setStoreProducts] = useState<StoreProduct[]>([]);
+  const [currency, setCurrency] = useState<string>("NGN");
+  const [loadError, setLoadError] = useState<string | null>(null);
+  const [storeData, setStoreData] = useState<{ id: string; slug: string; currency?: string } | null>(null);
+  const [resolvedTheme, setResolvedTheme] = useState<ThemeData | null>(null);
+  const [pageType, setPageType] = useState<string>("HOME");
+  const [contentSource, setContentSource] = useState<string>("builder-api");
 
-  // Load page
   useEffect(() => {
-    if (!currentStore || !user) return;
-    (async () => {
-      const res = await api.get<{
-        title?: string;
-        isPublished?: boolean;
-        slug?: string;
-        content?: unknown;
-      }>(`/api/sites/${currentStore.id}/pages/${pageId}`);
-      if (res.success && res.data) {
-        const content = parsePageContent(res.data.content);
-        initializeBuilderEditorSession({
-          storageKey: getBuilderEditorStorageKey(user.id, currentStore.id, pageId),
-          siteId: currentStore.id,
-          siteSlug: currentStore.slug,
-          pageId,
-          pageSlug: res.data.slug || "",
-          pageTitle: res.data.title || "",
-          isPublished: res.data.isPublished || false,
-          blocks: content.blocks as unknown as BuilderBlock[],
-          pageSettings: content.settings,
-          selectedBlockId: null,
-        });
-      } else {
-        initializeBuilderEditorSession({
-          storageKey: getBuilderEditorStorageKey(user.id, currentStore.id, pageId),
-          siteId: currentStore.id,
-          siteSlug: currentStore.slug,
-          pageId,
-          pageSlug: "",
-          pageTitle: "Untitled Page",
-          isPublished: false,
-          blocks: [],
-          pageSettings: {},
-          selectedBlockId: null,
-        });
-      }
+    if (!user) return;
+    let cancelled = false;
 
-      setLoading(false);
+    (async () => {
+      try {
+        setLoadError(null);
+        setLoading(true);
+
+        const pageRes = await api.get<BuilderPagePayload>(`/api/builder/pages/${pageId}`);
+        if (cancelled) return;
+
+        if (!pageRes.success || !pageRes.data) {
+          setLoadError(pageRes.error || `Unable to load page ${pageId}.`);
+          return;
+        }
+
+        const { store, page, products, theme, customization } = pageRes.data;
+        if (!page || !store) {
+          setLoadError(`Unable to resolve page or store for ${pageId}.`);
+          return;
+        }
+
+        const normalizedCustomization = normalizeSiteCustomization(customization || null);
+        const builderPage = applyPageCustomization(page, normalizedCustomization);
+        const builderDocument = parsePageContent(builderPage.content);
+
+        let resolvedPage = builderPage;
+        let resolvedDocument = builderDocument;
+        let nextContentSource = "builder-api";
+
+        const storefrontRes = await api.get<{
+          pages: Array<{ id: string; slug: string; type: string; title: string; content?: unknown }>;
+          products: StoreProduct[];
+        }>(`/api/storefront/${store.slug}`);
+
+        if (!cancelled && storefrontRes.success && storefrontRes.data?.pages?.length) {
+          const livePageRecord =
+            storefrontRes.data.pages.find((item) => item.id === pageId) ||
+            storefrontRes.data.pages.find((item) => item.slug === page.slug) ||
+            storefrontRes.data.pages.find((item) => item.type === page.type) ||
+            null;
+
+          if (livePageRecord) {
+            const livePage = applyPageCustomization(
+              { ...builderPage, ...livePageRecord, id: builderPage.id },
+              normalizedCustomization,
+            );
+            const liveDocument = parsePageContent(livePage.content);
+            const picked = pickRicherPageDocumentWithMeta(builderDocument, liveDocument);
+            resolvedDocument = picked.document;
+            resolvedPage = picked.usedSecondary ? livePage : builderPage;
+            nextContentSource = picked.usedSecondary ? "storefront-api" : "builder-api";
+          }
+        }
+
+        const pageSettings = getResolvedPageSettings(resolvedPage, resolvedDocument.settings, normalizedCustomization);
+        const nextBlocks = resolvedDocument.blocks as unknown as BuilderBlock[];
+
+        setStoreData(store);
+        setStoreProducts(products || []);
+        setCurrency(store.currency || "NGN");
+        setResolvedTheme(buildThemeDataWithCustomization(theme, normalizedCustomization));
+        setPageType(page.type || "HOME");
+        setContentSource(nextContentSource);
+
+        initializeBuilderEditorSession({
+          storageKey: getBuilderEditorStorageKey(user.id, store.id, pageId),
+          siteId: store.id,
+          siteSlug: store.slug,
+          pageId,
+          pageSlug: resolvedPage.slug || "",
+          pageTitle: resolvedPage.title || "Untitled Page",
+          isPublished: Boolean(page.isPublished),
+          blocks: nextBlocks,
+          pageSettings,
+          selectedBlockId: null,
+        });
+      } catch {
+        if (!cancelled) setLoadError("Failed to load builder page content.");
+      } finally {
+        if (!cancelled) setLoading(false);
+      }
     })();
-  }, [currentStore, pageId, user]);
+
+    return () => {
+      cancelled = true;
+    };
+  }, [pageId, user]);
 
   const handleSave = useCallback(async () => {
-    if (!currentStore) return;
+    if (!storeData) return;
     setSaving(true);
     const res = await api.patch<{
       title?: string;
       slug?: string;
       isPublished?: boolean;
-    }>(`/api/sites/${currentStore.id}/pages/${pageId}`, {
+    }>(`/api/sites/${storeData.id}/pages/${pageId}`, {
       title: editor.pageTitle,
-      content: serializePageContent({ blocks: editor.blocks, settings: editor.pageSettings }),
+      content: serializePageContent({ blocks: editor.blocks as unknown as StorefrontBlock[], settings: editor.pageSettings }),
       isPublished: editor.isPublished,
     });
     setSaving(false);
@@ -302,9 +370,8 @@ export default function BuilderPage({ params }: { params: Promise<{ pageId: stri
       setSaved(true);
       setTimeout(() => setSaved(false), 2000);
     }
-  }, [currentStore, editor.blocks, editor.isPublished, editor.pageSettings, editor.pageSlug, editor.pageTitle, pageId]);
+  }, [storeData, editor.blocks, editor.isPublished, editor.pageSettings, editor.pageSlug, editor.pageTitle, pageId]);
 
-  // Keyboard shortcuts
   useEffect(() => {
     const handler = (e: KeyboardEvent) => {
       const mod = e.metaKey || e.ctrlKey;
@@ -325,7 +392,6 @@ export default function BuilderPage({ params }: { params: Promise<{ pageId: stri
     return () => window.removeEventListener("keydown", handler);
   }, [editor.selectedBlockId, handleSave]);
 
-  // DnD sensors
   const sensors = useSensors(
     useSensor(PointerSensor, { activationConstraint: { distance: 5 } })
   );
@@ -342,9 +408,8 @@ export default function BuilderPage({ params }: { params: Promise<{ pageId: stri
     setBuilderEditorBlocks(arrayMove(editor.blocks, oldIndex, newIndex));
   };
 
-  // Block operations
-  const addBlock = (type: BlockType, index?: number) => {
-    addBuilderEditorBlock(type, index);
+  const addBlock = (type: BlockType) => {
+    addBuilderEditorBlock(type);
     setSidebarTab("blocks");
   };
 
@@ -352,12 +417,9 @@ export default function BuilderPage({ params }: { params: Promise<{ pageId: stri
     replaceBuilderEditorBlock(updated);
   }, []);
 
-  const commitBlockUpdate = useCallback(() => {}, []);
-
   const applyTemplate = (templateIdx: number) => {
     const template = blockTemplates[templateIdx];
     if (!template) return;
-    // Give each block a fresh ID
     const newBlocks = template.blocks.map((b) => ({
       ...b,
       id: crypto.randomUUID(),
@@ -368,8 +430,38 @@ export default function BuilderPage({ params }: { params: Promise<{ pageId: stri
   };
 
   const selectedBlock = editor.blocks.find((b) => b.id === editor.selectedBlockId) || null;
+  const isEditing = canvasMode === "builder";
+  const storefrontBlocks = editor.blocks as unknown as StorefrontBlock[];
 
-  if (loading || !currentStore || !user) {
+  const wrapBlock = useCallback((block: StorefrontBlock, content: React.ReactNode, index: number) => {
+    if (!isEditing) return content;
+    return (
+      <SortableEditorBlock
+        block={block as unknown as BuilderBlock}
+        isSelected={editor.selectedBlockId === block.id}
+        isEditing={isEditing}
+        onClick={() => setBuilderEditorSelectedBlockId(block.id)}
+        onDuplicate={() => duplicateBuilderEditorBlock(block.id)}
+        onMoveUp={() => moveBuilderEditorBlock(block.id, "up")}
+        onMoveDown={() => moveBuilderEditorBlock(block.id, "down")}
+        onInlineEdit={(key, value) => updateBuilderEditorBlockProp(block.id, key, value)}
+        isFirst={index === 0}
+        isLast={index === editor.blocks.length - 1}
+      >
+        {content}
+      </SortableEditorBlock>
+    );
+  }, [editor.blocks.length, editor.selectedBlockId, isEditing]);
+
+  const pageBackgroundStyle = useMemo(() => buildPageBackgroundStyle(editor.pageSettings), [editor.pageSettings]);
+
+  const previewHref = useMemo(() => {
+    if (!storeData) return "";
+    const isHome = pageType === "HOME" || editor.pageSlug === "home";
+    return isHome ? `/store/${storeData.slug}` : `/store/${storeData.slug}/${editor.pageSlug}`;
+  }, [editor.pageSlug, pageType, storeData]);
+
+  if (loading || !storeData || !user) {
     return (
       <div className="h-screen flex items-center justify-center bg-surface-50">
         <Loader2 className="h-8 w-8 animate-spin text-brand-600" />
@@ -377,12 +469,61 @@ export default function BuilderPage({ params }: { params: Promise<{ pageId: stri
     );
   }
 
+  if (loadError) {
+    return (
+      <div className="h-screen flex items-center justify-center bg-surface-50 px-4">
+        <div className="max-w-md rounded-2xl border border-surface-200 bg-white p-6 text-center shadow-sm">
+          <h2 className="text-lg font-bold text-surface-900">Couldn&apos;t load page content</h2>
+          <p className="mt-2 text-sm text-surface-500">{loadError}</p>
+        </div>
+      </div>
+    );
+  }
+
   const categories = ["basic", "layout", "commerce", "social", "marketing"] as const;
   const categoryLabels: Record<string, string> = { basic: "Basic", layout: "Layout", commerce: "Commerce", social: "Social", marketing: "Marketing" };
 
+  const canvas = (
+    <div
+      className={`mx-auto rounded-2xl border border-surface-200 shadow-sm min-h-[600px] transition-all overflow-hidden bg-white ${
+        previewMode === "mobile" ? "max-w-[375px]" : "max-w-5xl"
+      }`}
+    >
+      <div className="relative" style={pageBackgroundStyle}>
+        {editor.pageSettings.backgroundImage && (
+          <div
+            className="absolute inset-0 pointer-events-none"
+            style={{
+              backgroundColor: editor.pageSettings.overlayColor || "#000000",
+              opacity: editor.pageSettings.overlayOpacity ?? 0.25,
+            }}
+          />
+        )}
+        <div className="relative z-10">
+          <ThemeProvider theme={resolvedTheme}>
+            <RenderBlocks
+              blocks={storefrontBlocks}
+              storeSlug={storeData.slug}
+              products={storeProducts}
+              currency={currency}
+              addToCart={() => {}}
+              isWishlisted={() => false}
+              toggleWishlist={() => {}}
+              addedToCart={null}
+              isEditorMode={isEditing}
+              pageId={pageId}
+              blockCount={editor.blocks.length}
+              dataSource={contentSource}
+              wrapBlock={isEditing ? wrapBlock : undefined}
+            />
+          </ThemeProvider>
+        </div>
+      </div>
+    </div>
+  );
+
   return (
     <div className="h-screen flex flex-col bg-surface-50">
-      {/* Toolbar */}
       <header className="h-14 bg-white border-b border-surface-200 flex items-center justify-between px-4 flex-shrink-0 z-20">
         <div className="flex items-center gap-2">
           <Link href="/dashboard" className="p-2 rounded-lg hover:bg-surface-100 transition-colors">
@@ -398,45 +539,41 @@ export default function BuilderPage({ params }: { params: Promise<{ pageId: stri
         </div>
 
         <div className="flex items-center gap-1.5">
-          {/* Undo/Redo */}
-          <button onClick={undoBuilderEditor} disabled={!editor.canUndo} className="p-2 rounded-lg hover:bg-surface-100 disabled:opacity-30 transition-colors" title="Undo (⌘Z)">
+          <button type="button" onClick={undoBuilderEditor} disabled={!editor.canUndo} className="p-2 rounded-lg hover:bg-surface-100 disabled:opacity-30 transition-colors" title="Undo (⌘Z)">
             <Undo2 className="h-4 w-4 text-surface-500" />
           </button>
-          <button onClick={redoBuilderEditor} disabled={!editor.canRedo} className="p-2 rounded-lg hover:bg-surface-100 disabled:opacity-30 transition-colors" title="Redo (⌘⇧Z)">
+          <button type="button" onClick={redoBuilderEditor} disabled={!editor.canRedo} className="p-2 rounded-lg hover:bg-surface-100 disabled:opacity-30 transition-colors" title="Redo (⌘⇧Z)">
             <Redo2 className="h-4 w-4 text-surface-500" />
           </button>
 
           <div className="h-5 w-px bg-surface-200 mx-1" />
 
-          {/* Canvas mode toggle — Builder vs Live Preview */}
           <div className="flex items-center rounded-lg border border-surface-200 p-0.5 mr-1">
-            <button onClick={() => setCanvasMode("builder")} className={`px-2 py-1 rounded-md text-[10px] font-semibold transition-colors ${canvasMode === "builder" ? "bg-brand-100 text-brand-700" : "text-surface-500"}`} title="Block Editor">
+            <button type="button" onClick={() => setCanvasMode("builder")} className={`px-2 py-1 rounded-md text-[10px] font-semibold transition-colors ${canvasMode === "builder" ? "bg-brand-100 text-brand-700" : "text-surface-500"}`}>
               <LayoutGrid className="h-3.5 w-3.5 inline mr-0.5" />Blocks
             </button>
-            <button onClick={() => setCanvasMode("preview")} className={`px-2 py-1 rounded-md text-[10px] font-semibold transition-colors ${canvasMode === "preview" ? "bg-brand-100 text-brand-700" : "text-surface-500"}`} title="Live Preview">
+            <button type="button" onClick={() => setCanvasMode("preview")} className={`px-2 py-1 rounded-md text-[10px] font-semibold transition-colors ${canvasMode === "preview" ? "bg-brand-100 text-brand-700" : "text-surface-500"}`}>
               <Eye className="h-3.5 w-3.5 inline mr-0.5" />Preview
             </button>
           </div>
 
-          {/* Preview toggle */}
           <div className="flex items-center rounded-lg border border-surface-200 p-0.5">
-            <button onClick={() => setPreviewMode("desktop")} className={`p-1.5 rounded-md transition-colors ${previewMode === "desktop" ? "bg-surface-100" : ""}`} title="Desktop">
+            <button type="button" onClick={() => setPreviewMode("desktop")} className={`p-1.5 rounded-md transition-colors ${previewMode === "desktop" ? "bg-surface-100" : ""}`}>
               <Monitor className="h-4 w-4 text-surface-500" />
             </button>
-            <button onClick={() => setPreviewMode("mobile")} className={`p-1.5 rounded-md transition-colors ${previewMode === "mobile" ? "bg-surface-100" : ""}`} title="Mobile">
+            <button type="button" onClick={() => setPreviewMode("mobile")} className={`p-1.5 rounded-md transition-colors ${previewMode === "mobile" ? "bg-surface-100" : ""}`}>
               <Smartphone className="h-4 w-4 text-surface-500" />
             </button>
           </div>
 
-          {/* Sidebar toggle */}
-          <button onClick={() => setShowSidebar(!showSidebar)} className={`p-2 rounded-lg transition-colors ${showSidebar ? "bg-brand-50 text-brand-600" : "hover:bg-surface-100 text-surface-500"}`} title="Toggle blocks panel">
+          <button type="button" onClick={() => setShowSidebar(!showSidebar)} className={`p-2 rounded-lg transition-colors ${showSidebar ? "bg-brand-50 text-brand-600" : "hover:bg-surface-100 text-surface-500"}`}>
             <LayoutGrid className="h-4 w-4" />
           </button>
 
           <div className="h-5 w-px bg-surface-200 mx-1" />
 
-          {/* Publish toggle */}
           <button
+            type="button"
             onClick={() => setBuilderEditorPublished(!editor.isPublished)}
             className={`flex items-center gap-1.5 text-xs font-semibold px-3 py-1.5 rounded-lg border transition-colors ${editor.isPublished ? "bg-green-50 text-green-700 border-green-200" : "bg-surface-50 text-surface-500 border-surface-200"}`}
           >
@@ -444,23 +581,20 @@ export default function BuilderPage({ params }: { params: Promise<{ pageId: stri
             {editor.isPublished ? "Published" : "Draft"}
           </button>
 
-          {/* Save */}
-          <button onClick={handleSave} disabled={saving} className="btn-primary text-xs py-2 px-4">
+          <button type="button" onClick={handleSave} disabled={saving} className="btn-primary text-xs py-2 px-4">
             {saving ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : saved ? "Saved ✓" : <><Save className="h-3.5 w-3.5" /> Save</>}
           </button>
         </div>
       </header>
 
       <div className="flex-1 flex overflow-hidden">
-        {/* Sidebar — Blocks + Templates */}
         {showSidebar && (
           <div className="w-56 border-r border-surface-200 bg-white overflow-y-auto flex-shrink-0 flex flex-col">
-            {/* Tabs */}
             <div className="flex border-b border-surface-100">
-              <button onClick={() => setSidebarTab("blocks")} className={`flex-1 text-xs font-semibold py-2.5 text-center transition-colors ${sidebarTab === "blocks" ? "text-brand-600 border-b-2 border-brand-600" : "text-surface-400"}`}>
+              <button type="button" onClick={() => setSidebarTab("blocks")} className={`flex-1 text-xs font-semibold py-2.5 text-center transition-colors ${sidebarTab === "blocks" ? "text-brand-600 border-b-2 border-brand-600" : "text-surface-400"}`}>
                 <LayoutGrid className="h-3.5 w-3.5 inline mr-1" />Blocks
               </button>
-              <button onClick={() => setSidebarTab("templates")} className={`flex-1 text-xs font-semibold py-2.5 text-center transition-colors ${sidebarTab === "templates" ? "text-brand-600 border-b-2 border-brand-600" : "text-surface-400"}`}>
+              <button type="button" onClick={() => setSidebarTab("templates")} className={`flex-1 text-xs font-semibold py-2.5 text-center transition-colors ${sidebarTab === "templates" ? "text-brand-600 border-b-2 border-brand-600" : "text-surface-400"}`}>
                 <Layers className="h-3.5 w-3.5 inline mr-1" />Templates
               </button>
             </div>
@@ -480,6 +614,7 @@ export default function BuilderPage({ params }: { params: Promise<{ pageId: stri
                             return (
                               <button
                                 key={item.type}
+                                type="button"
                                 onClick={() => addBlock(item.type)}
                                 className="flex flex-col items-center gap-1 rounded-lg border border-surface-100 bg-surface-50 p-2.5 text-[10px] font-medium text-surface-600 hover:bg-brand-50 hover:text-brand-700 hover:border-brand-200 transition-colors"
                               >
@@ -500,6 +635,7 @@ export default function BuilderPage({ params }: { params: Promise<{ pageId: stri
                     return (
                       <button
                         key={i}
+                        type="button"
                         onClick={() => {
                           if (editor.blocks.length > 0 && !confirm("This will replace your current blocks. Continue?")) return;
                           applyTemplate(i);
@@ -518,7 +654,6 @@ export default function BuilderPage({ params }: { params: Promise<{ pageId: stri
               )}
             </div>
 
-            {/* Keyboard shortcuts hint */}
             <div className="p-3 border-t border-surface-100 text-[9px] text-surface-400 space-y-0.5">
               <p><kbd className="font-mono bg-surface-100 px-1 rounded">⌘Z</kbd> Undo · <kbd className="font-mono bg-surface-100 px-1 rounded">⌘⇧Z</kbd> Redo</p>
               <p><kbd className="font-mono bg-surface-100 px-1 rounded">⌘D</kbd> Duplicate · <kbd className="font-mono bg-surface-100 px-1 rounded">⌘S</kbd> Save</p>
@@ -527,158 +662,43 @@ export default function BuilderPage({ params }: { params: Promise<{ pageId: stri
           </div>
         )}
 
-        {/* Canvas */}
-        <div className="flex-1 overflow-y-auto p-6" onClick={() => setBuilderEditorSelectedBlockId(null)}>
+        <div className="flex-1 overflow-y-auto p-6" onClick={() => isEditing && setBuilderEditorSelectedBlockId(null)}>
           {canvasMode === "preview" ? (
-            <div className={`mx-auto transition-all ${previewMode === "mobile" ? "max-w-[375px]" : "max-w-5xl"}`}>
-              <div className="rounded-2xl border border-surface-200 shadow-sm overflow-hidden bg-white">
-                <div className="bg-surface-50 border-b border-surface-200 px-4 py-2 flex items-center justify-between">
-                  <div className="flex items-center gap-2">
-                    <div className="flex gap-1">
-                      <div className="h-2.5 w-2.5 rounded-full bg-red-400" />
-                      <div className="h-2.5 w-2.5 rounded-full bg-yellow-400" />
-                      <div className="h-2.5 w-2.5 rounded-full bg-green-400" />
-                    </div>
-                    <span className="text-[10px] text-surface-400 font-mono">
-                      {currentStore?.slug || "store"}.afrostore.com{editor.pageSlug ? `/${editor.pageSlug}` : ""}
-                    </span>
-                  </div>
-                  <span className="text-[9px] font-semibold px-2 py-0.5 rounded-full text-brand-600 bg-brand-50">
-                    Live Page Preview
-                  </span>
-                </div>
-
-                <div className={`relative overflow-hidden ${previewMode === "mobile" ? "max-w-[375px] mx-auto" : ""}`} style={buildPageBackgroundStyle(editor.pageSettings)}>
-                  <RenderBlocks blocks={editor.blocks} storeSlug={currentStore?.slug || ""} />
-                </div>
-              </div>
-
-              <div className="mt-4 rounded-xl border border-surface-200 bg-white p-4">
-                <h3 className="text-xs font-bold text-surface-900 mb-3 flex items-center gap-1.5">
-                  <Layers className="h-3.5 w-3.5 text-brand-600" />
-                  Page Sections ({editor.blocks.length})
-                </h3>
-                <div className="space-y-1.5">
-                  {editor.blocks.map((block, idx) => (
-                    <button
-                      key={block.id}
-                      onClick={(e) => { e.stopPropagation(); setBuilderEditorSelectedBlockId(block.id); setCanvasMode("builder"); }}
-                      className={`w-full text-left flex items-center gap-3 px-3 py-2 rounded-lg transition-colors ${
-                        editor.selectedBlockId === block.id
-                          ? "bg-brand-50 border border-brand-200"
-                          : "hover:bg-surface-50 border border-transparent"
-                      }`}
-                    >
-                      <span className="text-[10px] font-mono text-surface-400 w-5">{idx + 1}</span>
-                      <span className="text-[10px] font-bold uppercase text-brand-600 bg-brand-50 px-1.5 py-0.5 rounded">
-                        {block.type}
-                      </span>
-                      <span className="text-xs text-surface-600 truncate flex-1">
-                        {(block.props.title as string) || (block.props.heading as string) || (block.props.text as string) || ""}
-                      </span>
-                      <span className="text-[9px] text-surface-400">Customize →</span>
-                    </button>
-                  ))}
-                </div>
-              </div>
-            </div>
-          ) : (
-            /* ─── BLOCK EDITOR CANVAS ────────────────────────────── */
             <div
-              className={`mx-auto rounded-2xl border border-surface-200 shadow-sm min-h-[600px] transition-all overflow-hidden relative ${
-              previewMode === "mobile" ? "max-w-[375px]" : "max-w-4xl"
-            }`}
-              style={{
-                backgroundColor: editor.pageSettings.backgroundColor || "#ffffff",
-                backgroundImage: editor.pageSettings.backgroundImage ? `url(${editor.pageSettings.backgroundImage})` : undefined,
-                backgroundSize: editor.pageSettings.backgroundImage ? editor.pageSettings.backgroundSize || "cover" : undefined,
-                backgroundPosition: editor.pageSettings.backgroundImage ? editor.pageSettings.backgroundPosition || "center center" : undefined,
-                backgroundRepeat: editor.pageSettings.backgroundImage ? editor.pageSettings.backgroundRepeat || "no-repeat" : undefined,
-                backgroundAttachment: editor.pageSettings.backgroundImage ? editor.pageSettings.backgroundAttachment || "scroll" : undefined,
-              }}
+              className={`mx-auto overflow-hidden rounded-2xl border border-surface-200 bg-white shadow-sm transition-all ${
+                previewMode === "mobile" ? "max-w-[375px] min-h-[600px]" : "max-w-5xl min-h-[600px]"
+              }`}
             >
-              {editor.pageSettings.backgroundImage && (
-                <div
-                  className="absolute inset-0 pointer-events-none"
-                  style={{
-                    backgroundColor: editor.pageSettings.overlayColor || "#000000",
-                    opacity: editor.pageSettings.overlayOpacity ?? 0.25,
-                  }}
-                />
-              )}
-              {editor.blocks.length === 0 ? (
-                <div className="flex flex-col items-center justify-center h-[600px] text-center p-8 relative z-10">
-                  <div className="h-16 w-16 rounded-2xl bg-surface-50 flex items-center justify-center mb-4">
-                    <Plus className="h-8 w-8 text-surface-300" />
-                  </div>
-                  <h3 className="text-base font-bold text-surface-900 mb-1">Start building your page</h3>
-                  <p className="text-xs text-surface-500 mb-6 max-w-sm">Add blocks from the left panel or start with a template.</p>
-                  <div className="flex gap-2">
-                    <button onClick={() => addBlock("hero")} className="btn-primary text-xs py-2 px-4">
-                      <Sparkles className="h-3.5 w-3.5" /> Add Hero
-                    </button>
-                    <button onClick={() => { setShowSidebar(true); setSidebarTab("templates"); }} className="btn-secondary text-xs py-2 px-4">
-                      <Layers className="h-3.5 w-3.5" /> Use Template
-                    </button>
-                  </div>
-                </div>
-              ) : (
-                <DndContext sensors={sensors} collisionDetection={closestCenter} onDragStart={handleDragStart} onDragEnd={handleDragEnd}>
-                  <SortableContext items={editor.blocks.map((b) => b.id)} strategy={verticalListSortingStrategy}>
-                    <div className="p-6 space-y-3 relative z-10">
-                      {editor.blocks.map((block, idx) => (
-                        <div key={block.id}>
-                          {/* Insert-between button */}
-                          {idx === 0 && (
-                            <div className="flex justify-center -mb-1 opacity-0 hover:opacity-100 transition-opacity">
-                              <button onClick={() => { setShowSidebar(true); }} className="text-[9px] text-surface-400 hover:text-brand-600 flex items-center gap-1 py-1">
-                                <Plus className="h-3 w-3" /> Add block above
-                              </button>
-                            </div>
-                          )}
-                          <SortableBlock
-                            block={block}
-                            isSelected={editor.selectedBlockId === block.id}
-                            onClick={() => setBuilderEditorSelectedBlockId(block.id)}
-                            onDuplicate={() => duplicateBuilderEditorBlock(block.id)}
-                            onMoveUp={() => moveBuilderEditorBlock(block.id, "up")}
-                            onMoveDown={() => moveBuilderEditorBlock(block.id, "down")}
-                            onInlineEdit={(key, value) => {
-                              updateBuilderEditorBlockProp(block.id, key, value);
-                            }}
-                            isFirst={idx === 0}
-                            isLast={idx === editor.blocks.length - 1}
-                          />
-                          {/* Insert-between button */}
-                          <div className="flex justify-center -mt-1 opacity-0 hover:opacity-100 transition-opacity">
-                            <button onClick={() => { setShowSidebar(true); }} className="text-[9px] text-surface-400 hover:text-brand-600 flex items-center gap-1 py-1">
-                              <Plus className="h-3 w-3" /> Add block
-                            </button>
-                          </div>
-                        </div>
-                      ))}
-                    </div>
-                  </SortableContext>
-
-                  <DragOverlay>
-                    {activeId ? (
-                      <div className="rounded-xl bg-white shadow-2xl border border-brand-200 p-4 opacity-90 max-w-lg">
-                        <BlockRenderer block={editor.blocks.find((b) => b.id === activeId)!} />
-                      </div>
-                    ) : null}
-                  </DragOverlay>
-                </DndContext>
-              )}
+              <iframe
+                key={previewHref}
+                src={previewHref}
+                title="Live storefront preview"
+                className="h-[700px] w-full border-0"
+              />
             </div>
+          ) : isEditing ? (
+            <DndContext sensors={sensors} collisionDetection={closestCenter} onDragStart={handleDragStart} onDragEnd={handleDragEnd}>
+              <SortableContext items={editor.blocks.map((b) => b.id)} strategy={verticalListSortingStrategy}>
+                {canvas}
+              </SortableContext>
+              <DragOverlay>
+                {activeId ? (
+                  <div className="rounded-xl bg-white shadow-2xl border border-brand-200 opacity-90 max-w-lg">
+                    <BlockRenderer block={editor.blocks.find((b) => b.id === activeId)!} />
+                  </div>
+                ) : null}
+              </DragOverlay>
+            </DndContext>
+          ) : (
+            canvas
           )}
         </div>
 
-        {/* Property Panel */}
-        {selectedBlock ? (
+        {selectedBlock && isEditing ? (
           <PropertyPanel
             block={selectedBlock}
             onUpdate={updateBlock}
-            onCommit={commitBlockUpdate}
+            onCommit={() => {}}
             onClose={() => setBuilderEditorSelectedBlockId(null)}
             onDelete={() => deleteBuilderEditorBlock(selectedBlock.id)}
             onDuplicate={() => duplicateBuilderEditorBlock(selectedBlock.id)}

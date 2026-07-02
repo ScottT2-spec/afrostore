@@ -51,7 +51,7 @@ const PAYMENT_GATEWAYS = [
 
 type SiteType = 'ECOMMERCE' | 'WEBSITE' | 'LANDING_PAGE';
 type ScoredTemplate = TemplateDefinition & { matchPercent?: number; score?: number };
-const asScoredTemplate = (value: unknown): ScoredTemplate | null => value as ScoredTemplate | null;
+const asScoredTemplate = (value: unknown): ScoredTemplate | null => (value ? (value as ScoredTemplate) : null);
 
 export default function NewSitePage() {
   const router = useRouter();
@@ -101,6 +101,7 @@ export default function NewSitePage() {
   const [selectedGateways, setSelectedGateways] = useState<string[]>([]);
   const [domainType, setDomainType] = useState<'subdomain' | 'custom'>('subdomain');
   const [customDomain, setCustomDomain] = useState('');
+  const [recommendedTemplates, setRecommendedTemplates] = useState<ScoredTemplate[]>(Array.isArray(draft?.recommendations) ? (draft?.recommendations as ScoredTemplate[]) : []);
 
   // Load workspaces if none specified
   const [selectedWorkspace, setSelectedWorkspace] = useState(workspaceId || '');
@@ -236,7 +237,7 @@ export default function NewSitePage() {
       if (!json) {
         throw new Error("The site creation service returned no data. Please try again.");
       }
-      if (json.success && json.data?.id) {
+      if (json.success && json.data) {
         setCreatedSiteId(json.data.id);
         setCreated(true);
         clearOnboardingDraft(user?.id);

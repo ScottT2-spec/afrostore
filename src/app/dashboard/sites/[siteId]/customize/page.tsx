@@ -43,6 +43,10 @@ interface PageRecord {
   position?: number;
 }
 
+function imageValue(url?: string | null) {
+  return url ? [{ url, alt: "" }] : [];
+}
+
 export default function SiteCustomizePage({ params }: { params: Promise<{ siteId: string }> }) {
   const { siteId } = use(params);
   const router = useRouter();
@@ -230,13 +234,13 @@ export default function SiteCustomizePage({ params }: { params: Promise<{ siteId
             <div className="sm:col-span-2 grid gap-4 lg:grid-cols-2">
               <SingleImageUpload
                 image={form.logo || null}
-                onChange={(url) => setForm((prev) => ({ ...prev, logo: url || "" }))}
+                onChange={(image) => setForm((prev) => ({ ...prev, logo: image || "" }))}
                 label="Logo"
                 compact
               />
               <SingleImageUpload
                 image={form.coverImage || null}
-                onChange={(url) => setForm((prev) => ({ ...prev, coverImage: url || "" }))}
+                onChange={(image) => setForm((prev) => ({ ...prev, coverImage: image || "" }))}
                 label="Cover image"
                 compact
               />

@@ -331,7 +331,7 @@ export default function StorePage() {
             <Link href={`/store/${slug}/shop`} className="text-sm font-medium text-surface-600 hover:text-surface-900 transition-colors">Shop</Link>
             <Link href={`/store/${slug}/reviews`} className="text-sm font-medium text-surface-600 hover:text-surface-900 transition-colors">Reviews</Link>
             {navPages.slice(0, 4).map((page) => (
-              <Link key={page.id} href={getLinkedPageHref(page as { slug: string; template?: string | null }, slug)} className="text-sm font-medium text-surface-600 hover:text-surface-900 transition-colors">{page.title}</Link>
+              <Link key={page.id} href={`/store/${slug}/${page.slug}`} className="text-sm font-medium text-surface-600 hover:text-surface-900 transition-colors">{page.title}</Link>
             ))}
           </nav>
 
@@ -380,7 +380,7 @@ export default function StorePage() {
           <Link href={`/store/${slug}/shop`} onClick={() => setMobileMenu(false)} className="block text-sm font-medium text-surface-600 py-2">Shop</Link>
           <Link href={`/store/${slug}/reviews`} onClick={() => setMobileMenu(false)} className="block text-sm font-medium text-surface-600 py-2">Reviews</Link>
           {navPages.map((page) => (
-            <Link key={page.id} href={getLinkedPageHref(page as { slug: string; template?: string | null }, slug)} onClick={() => setMobileMenu(false)} className="block text-sm font-medium text-surface-600 py-2">{page.title}</Link>
+            <Link key={page.id} href={`/store/${slug}/${page.slug}`} onClick={() => setMobileMenu(false)} className="block text-sm font-medium text-surface-600 py-2">{page.title}</Link>
           ))}
           {whatsappNumber && (
             <a href={getWhatsAppLink(whatsappNumber, [], currency, store.name)} className="block text-sm font-medium text-green-600 py-2">WhatsApp us</a>
@@ -454,7 +454,7 @@ export default function StorePage() {
               <h4 className="text-sm font-semibold text-white mb-3">Info</h4>
               <ul className="space-y-2 text-xs">
                 {navPages.slice(0, 5).map((page) => (
-                  <li key={page.id}><Link href={getLinkedPageHref(page as { slug: string; template?: string | null }, slug)} className="hover:text-white transition-colors">{page.title}</Link></li>
+                  <li key={page.id}><Link href={`/store/${slug}/${page.slug}`} className="hover:text-white transition-colors">{page.title}</Link></li>
                 ))}
               </ul>
             </div>

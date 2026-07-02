@@ -1,9 +1,55 @@
 import { prisma } from "@/lib/db";
-import type { Prisma } from "@/generated/prisma";
-import { THEME_PACKAGES, getInternalTemplateBySlug } from "./packages";
-import { templateMatchesSiteType } from "./site-type";
-import type { BusinessAnalysisInput, TemplateDefinition, TemplateRecommendation, TemplateSelectionInput, ThemeConfig } from "./types";
+import { slugify } from "@/lib/utils";
+import type { PageType, Prisma, Template as PrismaTemplate } from "@/generated/prisma";
+import { INTERNAL_TEMPLATES as THEME_PACKAGES, getInternalTemplateBySlug } from "./catalog";
 import { importTemplateToSite } from "./importer";
+import { templateMatchesSiteType } from "./site-type";
+import type {
+  BusinessAnalysisInput,
+  ClassificationResult,
+  GeneratedTemplatePage,
+  TemplateDefinition,
+  TemplateRecommendation,
+  TemplateSelectionInput,
+  ThemeConfig,
+} from "./types";
+
+const RECOMMENDATION_MAP: Record<string, string[]> = {
+  restaurant: ["Restaurant Pro", "Bakery Delight"],
+  cafe: ["Bakery Delight", "Restaurant Pro"],
+  bakery: ["Bakery Delight"],
+  food: ["Restaurant Pro", "Bakery Delight"],
+  fashion: ["Fashion Luxe", "Footwear Elite", "Commerce Pro"],
+  shoes: ["Footwear Elite", "Fashion Luxe"],
+  clothing: ["Fashion Luxe", "Commerce Pro"],
+  accessories: ["Accessory Hub", "Commerce Pro"],
+  jewelry: ["Accessory Hub"],
+  children: ["Kids World"],
+  kids: ["Kids World"],
+  toys: ["Kids World"],
+  interior: ["Interior Studio"],
+  "interior design": ["Interior Studio"],
+  architecture: ["Interior Studio"],
+  construction: ["Interior Studio"],
+  services: ["Business Services Pro"],
+  consulting: ["Business Services Pro"],
+  agency: ["Business Services Pro"],
+  business: ["Business Services Pro", "Commerce Pro"],
+  portfolio: ["Interior Studio", "Business Services Pro"],
+  commerce: ["Commerce Pro"],
+  ecommerce: ["Commerce Pro"],
+};
+
+const INDUSTRY_ALIASES: Record<string, string[]> = {
+  Restaurant: ["restaurant", "cafe", "food", "dining", "menu", "catering"],
+  Bakery: ["bakery", "cake", "pastry", "bread", "dessert"],
+  Fashion: ["fashion", "clothing", "apparel", "boutique", "retail"],
+  Shoes: ["shoes", "footwear", "sneakers"],
+  Accessories: ["accessories", "jewelry", "lifestyle", "watches", "bags"],
+  Children: ["children", "kids", "baby", "toys", "education"],
+  Services: ["services", "consulting", "agency", "business", "legal", "accounting"],
+  "Interior Design": ["interior", "architecture", "construction", "projects", "portfolio"],
+};
 
 let templateCache: { expiresAt: number; templates: TemplateDefinition[] } | null = null;
 const TEMPLATE_CACHE_TTL_MS = 60_000;

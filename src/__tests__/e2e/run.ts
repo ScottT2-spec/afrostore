@@ -27,7 +27,6 @@ import { orderTests } from './orders.e2e';
 import { customerAndCatalogTests } from './customers.e2e';
 import { storefrontTests } from './storefront.e2e';
 import { dashboardTests } from './dashboard.e2e';
-import { mediaPagesTests } from './media-pages.e2e';
 
 const BASE_URL = process.env.TEST_BASE_URL || 'http://localhost:3000';
 const args = process.argv.slice(2);
@@ -64,7 +63,6 @@ async function main() {
     customers: customerAndCatalogTests,
     storefront: storefrontTests,
     dashboard: dashboardTests,
-    media: mediaPagesTests,
   };
 
   if (suiteFilter) {

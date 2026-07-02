@@ -1,3 +1,5 @@
+import { isLegacyScaffoldBlocks, parsePageContent } from "@/lib/page-content";
+
 export interface StoredTemplatePage {
   id: string;
   title: string;
@@ -43,7 +45,13 @@ function hasRenderableContent(page: { content?: unknown }): boolean {
 
   const raw = content as Record<string, unknown>;
   if (Array.isArray(raw.blocks)) return raw.blocks.length > 0;
-  return Object.keys(raw).length > 0;
+  return false;
+}
+
+function shouldUseDatabaseContent(page: { content?: unknown }): boolean {
+  if (!hasRenderableContent(page)) return false;
+  const { blocks } = parsePageContent(page.content);
+  return !isLegacyScaffoldBlocks(blocks);
 }
 
 export function mergeStoredTemplatePages<
@@ -65,7 +73,7 @@ export function mergeStoredTemplatePages<
 
     consumed.add(storedPage.slug.toLowerCase());
 
-    if (hasRenderableContent(databasePage) || databasePage.template) {
+    if (shouldUseDatabaseContent(databasePage)) {
       mergedPages.push({
         ...databasePage,
         template: databasePage.template ?? storedPage.template ?? null,
@@ -76,9 +84,9 @@ export function mergeStoredTemplatePages<
     mergedPages.push({
       ...databasePage,
       id: databasePage.id || storedPage.id,
-      title: storedPage.title,
-      slug: storedPage.slug,
-      type: storedPage.type,
+      title: storedPage.title || databasePage.title,
+      slug: storedPage.slug || databasePage.slug,
+      type: storedPage.type || databasePage.type,
       content: storedPage.content,
       template: storedPage.template ?? databasePage.template ?? null,
     });

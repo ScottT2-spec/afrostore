@@ -20,7 +20,7 @@ describe("theme package importer", () => {
         businessName: "Moda House",
         description: "Imported from the selected theme package.",
       },
-      template,
+      template!,
     );
 
     expect(template?.package).toBeTruthy();
@@ -40,7 +40,7 @@ describe("theme package importer", () => {
         businessName: "Acme Studio",
         description: "A package-backed business website.",
       },
-      template,
+      template!,
     );
 
     const aboutPage = pages.find((page) => page.slug === "about");
@@ -83,4 +83,3 @@ describe("theme package importer", () => {
     expect(packageDefinition.products?.length).toBe(0);
   });
 });
-

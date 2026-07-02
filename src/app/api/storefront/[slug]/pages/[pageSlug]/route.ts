@@ -22,11 +22,7 @@ export async function GET(_req: NextRequest, { params }: Params) {
     const site = await prisma.site.findFirst({
       where: {
         status: "ACTIVE",
-        OR: [
-          { slug },
-          { subdomain: slug },
-          { customDomain: slug },
-        ],
+        OR: [{ slug }, { subdomain: slug }, { customDomain: slug }],
       },
     });
 
@@ -61,7 +57,6 @@ export async function GET(_req: NextRequest, { params }: Params) {
           metaDescription: true,
         },
       }),
-
       prisma.siteSettings.findUnique({
         where: { siteId: site.id },
         select: {
@@ -76,7 +71,6 @@ export async function GET(_req: NextRequest, { params }: Params) {
           metaDescription: true,
         },
       }),
-
       prisma.siteSocialLinks.findUnique({
         where: { siteId: site.id },
         select: {
@@ -87,24 +81,20 @@ export async function GET(_req: NextRequest, { params }: Params) {
           tiktok: true,
         },
       }),
-
       prisma.category.findMany({
         where: { siteId: site.id },
         select: { id: true, name: true, slug: true, _count: { select: { products: true } } },
         orderBy: { position: "asc" },
       }),
-
       prisma.deliveryZone.findMany({
         where: { siteId: site.id },
         orderBy: { position: "asc" },
       }),
-
       prisma.page.findMany({
         where: { siteId: site.id, isPublished: true },
-        select: { id: true, title: true, slug: true, type: true },
+        select: { id: true, title: true, slug: true, type: true, template: true },
         orderBy: { position: "asc" },
       }),
-
       prisma.siteTheme.findFirst({
         where: { siteId: site.id, isActive: true },
         include: {
@@ -113,7 +103,6 @@ export async function GET(_req: NextRequest, { params }: Params) {
           },
         },
       }),
-
       prisma.siteTemplate.findFirst({
         where: { siteId: site.id, isActive: true },
         select: {
@@ -126,7 +115,6 @@ export async function GET(_req: NextRequest, { params }: Params) {
           },
         },
       }),
-
       prisma.product.findMany({
         where: { siteId: site.id, status: "ACTIVE" },
         include: {
@@ -137,19 +125,11 @@ export async function GET(_req: NextRequest, { params }: Params) {
         orderBy: [{ isFeatured: "desc" }, { position: "asc" }, { createdAt: "desc" }],
         take: 20,
       }),
-
-      loadSiteCustomizationSafely(
-        prisma.siteCustomization.findUnique({
-          where: { siteId: site.id },
-        })
-      ),
+      loadSiteCustomizationSafely(prisma.siteCustomization.findUnique({ where: { siteId: site.id } })),
     ]);
-    const resolvedCustomization = customization;
 
-    const mergedPages = mergeStoredTemplatePages(
-      page ? [page] : [],
-      activeTemplate?.pages,
-    );
+    const resolvedCustomization = customization;
+    const mergedPages = mergeStoredTemplatePages(page ? [page] : [], activeTemplate?.pages);
     const fallbackPage = mergedPages.find((item) => item.slug === pageSlug) || mergedPages[0];
     if (!fallbackPage) return notFound("Page not found");
 
@@ -170,7 +150,7 @@ export async function GET(_req: NextRequest, { params }: Params) {
       reviewCount: p._count.reviews,
     }));
 
-    const templateThemeConfig = activeTemplate?.themeConfig as unknown as
+    const templateThemeConfig = activeTemplate?.themeConfig as
       | {
           homepage_layout?: string;
           header_style?: string;
@@ -221,7 +201,7 @@ export async function GET(_req: NextRequest, { params }: Params) {
               },
             }
           : null,
-        resolvedCustomization
+        resolvedCustomization,
       );
     } catch (themeError) {
       console.error("Storefront page theme build error:", themeError);
@@ -256,9 +236,6 @@ export async function GET(_req: NextRequest, { params }: Params) {
     });
   } catch (err) {
     console.error("Storefront page fetch error:", err);
-    return NextResponse.json(
-      { success: false, error: "Internal server error" },
-      { status: 500 }
-    );
+    return NextResponse.json({ success: false, error: "Internal server error" }, { status: 500 });
   }
 }

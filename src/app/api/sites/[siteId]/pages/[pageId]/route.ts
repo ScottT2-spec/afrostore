@@ -51,10 +51,6 @@ export async function PATCH(req: NextRequest, { params }: Params) {
       updateData.slug = await ensureUniqueSlug(parsed.data.title, siteId, "page");
     }
 
-    if (parsed.data.template === null) {
-      updateData.template = null;
-    }
-
     const page = await prisma.page.update({
       where: { id: pageId },
       data: updateData as Prisma.PageUpdateInput,

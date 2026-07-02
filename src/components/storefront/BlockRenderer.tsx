@@ -52,7 +52,6 @@ const roundedClasses: Record<string, string> = {
   "2xl": "rounded-2xl",
   "3xl": "rounded-3xl",
 };
-
 /* ─── ICON MAP ──────────────────────────────────────────────── */
 
 const iconMap: Record<string, React.ElementType> = {
@@ -112,19 +111,13 @@ function TextBlock({ props }: { props: Record<string, unknown> }) {
 function ImageBlock({ props }: { props: Record<string, unknown> }) {
   const src = props.src as string;
   if (!src) return null;
-  const widthValue = (props.width as string) || "full";
   return (
     <AnimateIn>
-      <div className="w-full max-w-full overflow-hidden flex justify-center">
-        <img
-          src={src}
-          alt={(props.alt as string) || ""}
-          className={`block w-full max-w-full h-auto object-cover shadow-lg ${roundedClasses[(props.rounded as string) || "2xl"] || roundedClasses["2xl"]}`}
-          style={{
-            maxWidth: widthValue === "half" ? "50%" : widthValue === "third" ? "33.333%" : widthValue === "quarter" ? "25%" : "100%",
-          }}
-        />
-      </div>
+      <img
+        src={src}
+        alt={(props.alt as string) || ""}
+        className={`w-full object-cover shadow-lg ${roundedClasses[(props.rounded as string) || "2xl"] || roundedClasses["2xl"]}`}
+      />
     </AnimateIn>
   );
 }
@@ -372,14 +365,8 @@ function DividerBlock({ props }: { props: Record<string, unknown> }) {
 function ColumnsBlock({ props }: { props: Record<string, unknown> }) {
   const children = (props.children as BuilderBlock[]) || [];
   const cols = (props.columns as number) || 2;
-  const gridClass = {
-    1: "grid-cols-1",
-    2: "grid-cols-1 md:grid-cols-2",
-    3: "grid-cols-1 md:grid-cols-3",
-    4: "grid-cols-1 md:grid-cols-4",
-  }[Math.max(1, Math.min(cols, 4)) as 1 | 2 | 3 | 4];
   return (
-    <div className={`grid gap-6 ${gridClass}`}>
+    <div className={`grid grid-cols-1 md:grid-cols-${Math.min(cols, 4)} gap-6`}>
       {children.map((child) => <div key={child.id}><PublicBlockRenderer block={child} /></div>)}
     </div>
   );
@@ -413,12 +400,6 @@ function getProductGradient(id: string): string {
 function ProductGridBlock({ props }: { props: Record<string, unknown> }) {
   const limit = (props.limit as number) || 6;
   const cols = (props.columns as number) || 3;
-  const gridClass = {
-    1: "grid-cols-2",
-    2: "grid-cols-2 sm:grid-cols-2",
-    3: "grid-cols-2 sm:grid-cols-3",
-    4: "grid-cols-2 sm:grid-cols-2 lg:grid-cols-4",
-  }[Math.max(1, Math.min(cols, 4)) as 1 | 2 | 3 | 4];
   const categoryFilter = (props.category as string) || "";
   const { products, currency, slug, addToCart, isWishlisted, toggleWishlist, addedToCart } = useContext(StoreContext);
 
@@ -448,7 +429,7 @@ function ProductGridBlock({ props }: { props: Record<string, unknown> }) {
             {(props.subtitle as string) && <p className="text-surface-500 mt-2">{props.subtitle as string}</p>}
           </div>
         )}
-        <div className={`grid gap-4 sm:gap-6 ${gridClass}`}>
+        <div className={`grid grid-cols-2 sm:grid-cols-${Math.min(cols, 4)} gap-4 sm:gap-6`}>
           {hasRealProducts
             ? displayProducts.map((product) => {
                 const hasImage = product.images.length > 0 && product.images[0].url;
@@ -698,7 +679,6 @@ function FeaturesBlock({ props }: { props: Record<string, unknown> }) {
   const cols = items.length <= 3 ? 3 : 4;
   const bg = (props.bgColor as string) || "transparent";
   const isDark = bg === "dark";
-  const gridClass = cols === 4 ? "grid-cols-1 sm:grid-cols-2 lg:grid-cols-4" : "grid-cols-1 sm:grid-cols-2 lg:grid-cols-3";
   return (
     <div className="rounded-3xl py-10 px-6 sm:px-10" style={{ backgroundColor: bg === "surface" ? "#FAFAFA" : isDark ? "#0F172A" : "transparent" }}>
       {(props.title as string) && (
@@ -713,7 +693,7 @@ function FeaturesBlock({ props }: { props: Record<string, unknown> }) {
           </div>
         </AnimateIn>
       )}
-      <div className={`grid gap-5 ${gridClass}`}>
+      <div className={`grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-${cols} gap-5`}>
         {items.map((item, i) => {
           const Icon = iconMap[item.icon] || Shield;
           return (
@@ -916,7 +896,6 @@ function StatsBlock({ props }: { props: Record<string, unknown> }) {
   const items = (props.items as Array<{ value: string; label: string; icon?: string }>) || [];
   const bg = (props.bgColor as string) || "brand";
   const isDark = bg === "brand" || bg === "dark";
-  const columnsClass = items.length >= 4 ? "grid-cols-2 sm:grid-cols-4" : items.length === 3 ? "grid-cols-2 sm:grid-cols-3" : "grid-cols-2";
   return (
     <div className={`rounded-3xl py-12 px-6 sm:px-10 ${
       bg === "brand" ? "bg-gradient-to-br from-brand-700 to-brand-900" :
@@ -930,7 +909,7 @@ function StatsBlock({ props }: { props: Record<string, unknown> }) {
           </h3>
         </AnimateIn>
       )}
-      <div className={`grid gap-6 ${columnsClass}`}>
+      <div className={`grid grid-cols-2 sm:grid-cols-${Math.min(items.length, 4)} gap-6`}>
         {items.map((item, i) => {
           const Icon = item.icon ? iconMap[item.icon] : null;
           return (
@@ -1580,13 +1559,13 @@ const StoreSlugContext = createContext<string>("");
 
 /* ─── PUBLIC API ────────────────────────────────────────────── */
 
-export function PublicBlockRenderer({ block }: { block: BuilderBlock }) {
+export function PublicBlockRenderer({ block }: { block: BuilderBlock; isEditorMode?: boolean }) {
   const Renderer = renderers[block.type];
   if (!Renderer) return null;
   return <Renderer props={block.props} />;
 }
 
-export function RenderBlocks({ blocks, storeSlug, products, currency, addToCart, isWishlisted, toggleWishlist, addedToCart }: {
+export function RenderBlocks({ blocks, storeSlug, products, currency, addToCart, isWishlisted, toggleWishlist, addedToCart, isEditorMode = false, pageId, blockCount, dataSource, wrapBlock }: {
   blocks: BuilderBlock[];
   storeSlug?: string;
   products?: StoreProduct[];
@@ -1595,19 +1574,39 @@ export function RenderBlocks({ blocks, storeSlug, products, currency, addToCart,
   isWishlisted?: (productId: string) => boolean;
   toggleWishlist?: (productId: string) => void;
   addedToCart?: string | null;
+  isEditorMode?: boolean;
+  pageId?: string | null;
+  blockCount?: number;
+  dataSource?: string;
+  wrapBlock?: (block: BuilderBlock, content: React.ReactNode, index: number) => React.ReactNode;
 }) {
-  if (!blocks || blocks.length === 0) return null;
   const content = (
-    <div className="space-y-8">
-      {blocks.map((block) => (
-        <PublicBlockRenderer key={block.id} block={block} />
-      ))}
+    <div className={isEditorMode ? "" : "space-y-8"}>
+      {blocks.map((block, index) => {
+        const node = <PublicBlockRenderer key={block.id} block={block} isEditorMode={isEditorMode} />;
+        if (wrapBlock) {
+          return <div key={block.id}>{wrapBlock(block, node, index)}</div>;
+        }
+        return node;
+      })}
     </div>
   );
   const wrappedContent = storeSlug ? (
     <StoreSlugContext.Provider value={storeSlug}>
       <StoreContext.Provider value={{ slug: storeSlug || "", products: products || [], currency: currency || "NGN", addToCart, isWishlisted, toggleWishlist, addedToCart }}>
-        {content}
+        <div className="relative">
+          {isEditorMode && (
+            <div className="pointer-events-none sticky top-0 z-30 border-b border-brand-200 bg-brand-50/95 px-4 py-2 text-[10px] font-mono text-brand-800 backdrop-blur">
+              <span className="font-semibold uppercase tracking-wide">Editor</span>
+              {" · "}
+              {pageId || "unknown page"}
+              {" · "}
+              {blockCount ?? blocks.length} blocks
+              {dataSource ? ` · ${dataSource}` : ""}
+            </div>
+          )}
+          {content}
+        </div>
       </StoreContext.Provider>
     </StoreSlugContext.Provider>
   ) : content;
