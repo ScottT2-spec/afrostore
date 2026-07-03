@@ -158,11 +158,15 @@ export async function listTemplates(options: { includeInactive?: boolean; search
 }
 
 export async function getTemplateByIdOrSlug(idOrSlug: string) {
-  await syncInternalTemplates();
   const canonical = idOrSlug.trim().toLowerCase();
-  const template = await prisma.template.findFirst({ where: { OR: [{ id: idOrSlug }, { slug: idOrSlug }, { slug: canonical }] } });
-  if (!template) return getInternalTemplateBySlug(idOrSlug);
-  return toTemplateDefinition(template as unknown as TemplateDefinition);
+  try {
+    await syncInternalTemplates();
+    const template = await prisma.template.findFirst({ where: { OR: [{ id: idOrSlug }, { slug: idOrSlug }, { slug: canonical }] } });
+    if (template) return toTemplateDefinition(template as unknown as TemplateDefinition);
+  } catch (error) {
+    console.error("[getTemplateByIdOrSlug] DB lookup failed, falling back to internal templates:", error);
+  }
+  return getInternalTemplateBySlug(idOrSlug);
 }
 
 export function scoreTemplates(templates: TemplateDefinition[], input: BusinessAnalysisInput & { siteType?: string }): TemplateRecommendation[] {
