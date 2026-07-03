@@ -82,26 +82,26 @@ export default function TemplateGallery({
         <div className="grid grid-cols-1 gap-5 md:grid-cols-2 xl:grid-cols-3">
           {filtered.map((template) => (
             <article key={template.id || template.slug} className="overflow-hidden rounded-xl border border-surface-200 bg-white shadow-sm">
-              <div className="relative h-52 overflow-hidden bg-gradient-to-br from-surface-900 via-surface-700 to-brand-700 p-5 text-white">
-                <div className="absolute inset-0 opacity-20" style={{ backgroundImage: "radial-gradient(circle at top left, rgba(255,255,255,0.4), transparent 40%), radial-gradient(circle at bottom right, rgba(255,255,255,0.2), transparent 30%)" }} />
-                <div className="relative flex h-full flex-col justify-between">
-                  <div className="flex items-center justify-between">
-                    <span className="rounded-full bg-white/15 px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.18em]">{template.category}</span>
+              <div className="relative h-52 overflow-hidden bg-surface-100">
+                <iframe
+                  src={`/template-preview/${template.slug}`}
+                  title={`${template.name} preview`}
+                  className="pointer-events-none absolute left-0 top-0 origin-top-left border-0"
+                  style={{ width: "1280px", height: "800px", transform: "scale(0.28)", transformOrigin: "top left" }}
+                  loading="lazy"
+                  sandbox="allow-same-origin"
+                  tabIndex={-1}
+                />
+                <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/60 to-transparent p-4">
+                  <div className="flex items-center gap-2">
+                    <span className="rounded-full bg-white/20 px-2.5 py-0.5 text-[10px] font-semibold uppercase tracking-wider text-white">{template.category}</span>
                     {template.manifest?.siteType && (
-                      <span className="rounded-full bg-white/15 px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.18em]">
+                      <span className="rounded-full bg-white/20 px-2.5 py-0.5 text-[10px] font-semibold uppercase tracking-wider text-white">
                         {template.manifest.siteType.replace("_", " ")}
                       </span>
                     )}
                   </div>
-                  <div>
-                    <h3 className="text-2xl font-bold leading-tight">{template.name}</h3>
-                    <p className="mt-2 max-w-sm text-sm text-white/80">{template.description}</p>
-                  </div>
-                  <div className="flex gap-2">
-                    {(template.package?.manifest.tags || template.recommendationKeywords).slice(0, 3).map((tag) => (
-                      <span key={tag} className="rounded-full bg-white/15 px-2.5 py-1 text-[11px] font-medium capitalize">{tag}</span>
-                    ))}
-                  </div>
+                  <h3 className="mt-1.5 text-lg font-bold text-white leading-tight">{template.name}</h3>
                 </div>
               </div>
               <div className="space-y-3 p-4">
