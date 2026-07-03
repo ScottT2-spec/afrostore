@@ -228,6 +228,7 @@ export async function GET(req: NextRequest, { params }: Params) {
         customDomain: site.customDomain,
         currency: site.currency,
         country: site.country,
+        siteType: site.siteType,
         businessType: site.businessType,
       },
       page: normalizedPage,

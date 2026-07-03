@@ -4,6 +4,8 @@ export interface BlockTemplate {
   name: string;
   description: string;
   icon: string;
+  /** Which site type this template is for. Omit = shows for all types. */
+  siteType?: "ECOMMERCE" | "LANDING_PAGE" | "WEBSITE";
   blocks: BuilderBlock[];
 }
 
@@ -34,6 +36,7 @@ export const blockTemplates: BlockTemplate[] = [
     name: "Product Showcase",
     description: "Hero → product grid → banner → trust badges",
     icon: "shopping-bag",
+    siteType: "ECOMMERCE",
     blocks: [
       { id: uid(), type: "hero", props: { ...blockDefaults.hero(), bgStyle: "dark", heading: "Our Best Sellers", subheading: "Handpicked products at amazing prices", buttonText: "Browse All" } },
       { id: uid(), type: "spacer", props: { height: 40 } },
@@ -98,6 +101,7 @@ export const blockTemplates: BlockTemplate[] = [
     name: "Flash Sale",
     description: "Countdown → products → urgency CTA",
     icon: "clock",
+    siteType: "ECOMMERCE",
     blocks: [
       { id: uid(), type: "countdown", props: { ...blockDefaults.countdown(), title: "🔥 Flash Sale Ends In", buttonText: "Shop the Sale" } },
       { id: uid(), type: "spacer", props: { height: 40 } },
@@ -106,6 +110,100 @@ export const blockTemplates: BlockTemplate[] = [
       { id: uid(), type: "banner", props: { title: "Don't Miss Out!", subtitle: "Free delivery on all sale items", buttonText: "View All Deals", bgColor: "accent" } },
       { id: uid(), type: "spacer", props: { height: 24 } },
       { id: uid(), type: "trustBadges", props: blockDefaults.trustBadges() },
+    ],
+  },
+
+  // ─── Landing Page Templates ────────────────────────────────
+
+  {
+    name: "SaaS Landing",
+    description: "Hero → features → stats → testimonials → FAQ → CTA",
+    icon: "layout",
+    siteType: "LANDING_PAGE",
+    blocks: [
+      { id: uid(), type: "hero", props: { ...blockDefaults.hero(), badge: "🚀 Launch", bgStyle: "gradient", heading: "Build Something Amazing", subheading: "The fastest way to bring your ideas to life. Simple, powerful, and built for growth.", buttonText: "Get Started Free", secondaryButtonText: "See Demo", secondaryButtonHref: "#features" } },
+      { id: uid(), type: "spacer", props: { height: 48 } },
+      { id: uid(), type: "features", props: { ...blockDefaults.features(), title: "Everything You Need", subtitle: "Powerful features to help you succeed" } },
+      { id: uid(), type: "spacer", props: { height: 48 } },
+      { id: uid(), type: "stats", props: { ...blockDefaults.stats(), title: "Trusted by Thousands" } },
+      { id: uid(), type: "spacer", props: { height: 48 } },
+      { id: uid(), type: "testimonials", props: blockDefaults.testimonials() },
+      { id: uid(), type: "spacer", props: { height: 48 } },
+      { id: uid(), type: "faq", props: blockDefaults.faq() },
+      { id: uid(), type: "spacer", props: { height: 48 } },
+      { id: uid(), type: "newsletter", props: { ...blockDefaults.newsletter(), bgColor: "brand", title: "Ready to Get Started?", subtitle: "Join thousands of happy users today." } },
+    ],
+  },
+  {
+    name: "Portfolio Landing",
+    description: "Hero → gallery → about → skills → contact",
+    icon: "user",
+    siteType: "LANDING_PAGE",
+    blocks: [
+      { id: uid(), type: "hero", props: { ...blockDefaults.hero(), bgStyle: "dark", heading: "Creative Designer & Developer", subheading: "I craft beautiful digital experiences that make an impact.", buttonText: "View My Work", secondaryButtonText: "Contact Me", secondaryButtonHref: "#contact" } },
+      { id: uid(), type: "spacer", props: { height: 48 } },
+      { id: uid(), type: "gallery", props: { ...blockDefaults.gallery(), title: "Selected Work", subtitle: "Projects I'm proud of" } },
+      { id: uid(), type: "spacer", props: { height: 48 } },
+      { id: uid(), type: "imageText", props: { ...blockDefaults.imageText(), title: "About Me", text: "I'm a creative professional passionate about building beautiful, functional digital products. With years of experience across design and development, I bring ideas to life.", imagePosition: "right" } },
+      { id: uid(), type: "spacer", props: { height: 48 } },
+      { id: uid(), type: "stats", props: { ...blockDefaults.stats(), title: "By the Numbers" } },
+      { id: uid(), type: "spacer", props: { height: 48 } },
+      { id: uid(), type: "contactForm", props: { title: "Let's Work Together", subtitle: "Have a project in mind? Let's talk.", buttonText: "Send Message" } },
+    ],
+  },
+  {
+    name: "Agency Landing",
+    description: "Hero → brands → features → team → testimonials → CTA",
+    icon: "globe",
+    siteType: "LANDING_PAGE",
+    blocks: [
+      { id: uid(), type: "hero", props: { ...blockDefaults.hero(), badge: "🏆 Award-Winning Agency", bgStyle: "gradient", heading: "We Build Digital Experiences", subheading: "Strategy, design, and development that drives results for ambitious brands.", buttonText: "Start a Project", secondaryButtonText: "Our Work", secondaryButtonHref: "#work" } },
+      { id: uid(), type: "spacer", props: { height: 40 } },
+      { id: uid(), type: "brands", props: blockDefaults.brands() },
+      { id: uid(), type: "spacer", props: { height: 48 } },
+      { id: uid(), type: "features", props: { ...blockDefaults.features(), title: "What We Do", subtitle: "Full-service digital solutions" } },
+      { id: uid(), type: "spacer", props: { height: 48 } },
+      { id: uid(), type: "team", props: blockDefaults.team() },
+      { id: uid(), type: "spacer", props: { height: 48 } },
+      { id: uid(), type: "testimonials", props: blockDefaults.testimonials() },
+      { id: uid(), type: "spacer", props: { height: 48 } },
+      { id: uid(), type: "newsletter", props: { ...blockDefaults.newsletter(), bgColor: "brand", title: "Let's Build Something Great", subtitle: "Get in touch to discuss your next project." } },
+    ],
+  },
+  {
+    name: "Event Landing",
+    description: "Hero → countdown → features → team → FAQ → CTA",
+    icon: "clock",
+    siteType: "LANDING_PAGE",
+    blocks: [
+      { id: uid(), type: "hero", props: { ...blockDefaults.hero(), bgStyle: "dark", heading: "The Future of Tech Conference", subheading: "Join 2,000+ innovators for three days of inspiration, learning, and networking.", buttonText: "Get Your Ticket", secondaryButtonText: "View Schedule", secondaryButtonHref: "#schedule" } },
+      { id: uid(), type: "spacer", props: { height: 40 } },
+      { id: uid(), type: "countdown", props: { ...blockDefaults.countdown(), title: "Event Starts In" } },
+      { id: uid(), type: "spacer", props: { height: 48 } },
+      { id: uid(), type: "features", props: { ...blockDefaults.features(), title: "What to Expect", subtitle: "Three days of amazing content" } },
+      { id: uid(), type: "spacer", props: { height: 48 } },
+      { id: uid(), type: "team", props: { ...blockDefaults.team(), title: "Featured Speakers" } },
+      { id: uid(), type: "spacer", props: { height: 48 } },
+      { id: uid(), type: "faq", props: { ...blockDefaults.faq(), title: "Frequently Asked Questions" } },
+      { id: uid(), type: "spacer", props: { height: 48 } },
+      { id: uid(), type: "contactForm", props: { title: "Register Your Interest", subtitle: "Be the first to know about updates.", buttonText: "Register Now" } },
+    ],
+  },
+  {
+    name: "Waitlist Landing",
+    description: "Hero → features → stats → newsletter",
+    icon: "send",
+    siteType: "LANDING_PAGE",
+    blocks: [
+      { id: uid(), type: "hero", props: { ...blockDefaults.hero(), badge: "🔥 Coming Soon", bgStyle: "gradient", heading: "Something Big Is Coming", subheading: "Be the first to experience it. Join the waitlist and get early access.", buttonText: "Join Waitlist" } },
+      { id: uid(), type: "spacer", props: { height: 48 } },
+      { id: uid(), type: "features", props: { ...blockDefaults.features(), title: "Why You'll Love It", subtitle: "Here's a sneak peek at what's coming" } },
+      { id: uid(), type: "spacer", props: { height: 48 } },
+      { id: uid(), type: "stats", props: { ...blockDefaults.stats(), title: "" } },
+      { id: uid(), type: "spacer", props: { height: 48 } },
+      { id: uid(), type: "testimonials", props: { ...blockDefaults.testimonials(), title: "What Early Users Say" } },
+      { id: uid(), type: "spacer", props: { height: 48 } },
+      { id: uid(), type: "newsletter", props: { ...blockDefaults.newsletter(), bgColor: "brand", title: "Join the Waitlist", subtitle: "Get notified when we launch. No spam, ever." } },
     ],
   },
 ];

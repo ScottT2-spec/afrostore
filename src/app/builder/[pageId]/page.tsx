@@ -6,7 +6,7 @@ import { useState, useEffect, useCallback, use, useMemo } from "react";
 import { useAuth } from "@/context/AuthContext";
 import { api } from "@/lib/api-client";
 import { BuilderBlock, BlockType, blockPalette } from "@/lib/builder/types";
-import { blockTemplates } from "@/lib/builder/templates";
+import { blockTemplates, type BlockTemplate } from "@/lib/builder/templates";
 import BlockRenderer from "@/components/builder/BlockRenderer";
 import PropertyPanel from "@/components/builder/PropertyPanel";
 import { SingleImageUpload } from "@/components/dashboard/ImageUpload";
@@ -222,7 +222,7 @@ function PageSettingsPanel({
 }
 
 interface BuilderPagePayload {
-  store: { id: string; name: string; slug: string; currency?: string };
+  store: { id: string; name: string; slug: string; currency?: string; siteType?: string };
   page: {
     id: string;
     siteId: string;
@@ -252,7 +252,7 @@ export default function BuilderPage({ params }: { params: Promise<{ pageId: stri
   const [storeProducts, setStoreProducts] = useState<StoreProduct[]>([]);
   const [currency, setCurrency] = useState<string>("NGN");
   const [loadError, setLoadError] = useState<string | null>(null);
-  const [storeData, setStoreData] = useState<{ id: string; slug: string; currency?: string } | null>(null);
+  const [storeData, setStoreData] = useState<{ id: string; slug: string; currency?: string; siteType?: string } | null>(null);
   const [resolvedTheme, setResolvedTheme] = useState<ThemeData | null>(null);
   const [pageType, setPageType] = useState<string>("HOME");
   const [contentSource, setContentSource] = useState<string>("builder-api");
@@ -417,9 +417,7 @@ export default function BuilderPage({ params }: { params: Promise<{ pageId: stri
     replaceBuilderEditorBlock(updated);
   }, []);
 
-  const applyTemplate = (templateIdx: number) => {
-    const template = blockTemplates[templateIdx];
-    if (!template) return;
+  const applyTemplate = (template: BlockTemplate) => {
     const newBlocks = template.blocks.map((b) => ({
       ...b,
       id: crypto.randomUUID(),
@@ -480,7 +478,10 @@ export default function BuilderPage({ params }: { params: Promise<{ pageId: stri
     );
   }
 
-  const categories = ["basic", "layout", "commerce", "social", "marketing"] as const;
+  const allCategories = ["basic", "layout", "commerce", "social", "marketing"] as const;
+  const categories = storeData?.siteType === "LANDING_PAGE"
+    ? allCategories.filter((c) => c !== "commerce")
+    : allCategories;
   const categoryLabels: Record<string, string> = { basic: "Basic", layout: "Layout", commerce: "Commerce", social: "Social", marketing: "Marketing" };
 
   const canvas = (
@@ -630,7 +631,7 @@ export default function BuilderPage({ params }: { params: Promise<{ pageId: stri
                 </>
               ) : (
                 <div className="space-y-2">
-                  {blockTemplates.map((template, i) => {
+                  {blockTemplates.filter((t) => !t.siteType || t.siteType === storeData?.siteType).map((template, i) => {
                     const Icon = paletteIcons[template.icon] || Sparkles;
                     return (
                       <button
@@ -638,7 +639,7 @@ export default function BuilderPage({ params }: { params: Promise<{ pageId: stri
                         type="button"
                         onClick={() => {
                           if (editor.blocks.length > 0 && !confirm("This will replace your current blocks. Continue?")) return;
-                          applyTemplate(i);
+                          applyTemplate(template);
                         }}
                         className="w-full text-left rounded-xl border border-surface-100 bg-surface-50 p-3 hover:bg-brand-50 hover:border-brand-200 transition-colors"
                       >
