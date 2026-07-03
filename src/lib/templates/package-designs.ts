@@ -960,8 +960,8 @@ function buildLandingAegisDesign(source: PackageSource): PackageDesign {
 
 function buildLandingNajafDesign(source: PackageSource): PackageDesign {
   return simpleTemplate(source, {
-    previewImage: "/templates/jewellery/prefooter/packages.webp",
-    heroImage: "/templates/jewellery/prefooter/collections.webp",
+    previewImage: "/templates/sites/landing-saas-minimal/assets/images/hero.png",
+    heroImage: "/templates/sites/landing-saas-minimal/assets/images/hero.png",
     tagline: "Najaf AI",
     heading: "Minimal AI product launch page",
     subheading: "Dark, minimal, and conversion-focused with a technical edge and pricing section.",
@@ -972,79 +972,157 @@ function buildLandingNajafDesign(source: PackageSource): PackageDesign {
       block(`${source.slug}-faq`, "faq", { title: "Frequently Asked Questions", items: [] }),
     ],
     navigation: [{ label: "Features", href: "/services" }, { label: "Pricing", href: "/pricing" }, { label: "FAQ", href: "/faq" }, { label: "Contact", href: "/contact" }],
+    media: [
+      media("hero", "/templates/sites/landing-saas-minimal/assets/images/hero.png", "Najaf AI hero"),
+    ],
   });
 }
 
 function buildLandingAurapodDesign(source: PackageSource): PackageDesign {
   return simpleTemplate(source, {
-    previewImage: "/templates/jewellery/prefooter/showrooms.webp",
-    heroImage: "/templates/jewellery/prefooter/about-us.webp",
+    previewImage: "/templates/sites/landing-wellness/assets/images/hero.png",
+    heroImage: "/templates/sites/landing-wellness/assets/images/hero.png",
     tagline: "AuraPod",
     heading: "Ambient wellness tech with a premium glow",
     subheading: "Soft gradients, biometric trust, and a calm wellness narrative.",
     buttons: { primary: "Order Now", secondary: "How It Works" },
-    sections: [block(`${source.slug}-science`, "stats", { title: "The science", items: [] }), block(`${source.slug}-features`, "features", { title: "Features", items: [] }), block(`${source.slug}-reviews`, "testimonials", { title: "Reviews", bgColor: "surface", items: [] })],
+    sections: [
+      block(`${source.slug}-science`, "stats", { title: "The science", items: [] }),
+      block(`${source.slug}-features`, "imageText", { title: "Features", image: "/templates/sites/landing-wellness/assets/images/feature.png", imagePosition: "right" }),
+      block(`${source.slug}-reviews`, "testimonials", { title: "Reviews", bgColor: "surface", items: [] }),
+    ],
     navigation: [{ label: "Features", href: "/services" }, { label: "Science", href: "/science" }, { label: "Reviews", href: "/reviews" }],
+    media: [
+      media("hero", "/templates/sites/landing-wellness/assets/images/hero.png", "AuraPod hero"),
+      media("feature", "/templates/sites/landing-wellness/assets/images/feature.png", "AuraPod feature"),
+    ],
   });
 }
 
 function buildLandingArtsPortfolioDesign(source: PackageSource): PackageDesign {
   return simpleTemplate(source, {
-    previewImage: "/templates/jewellery/prefooter/collections.webp",
-    heroImage: "/templates/jewellery/prefooter/about-us.webp",
+    previewImage: "/templates/sites/landing-dev-portfolio/assets/images/design.jpg",
+    heroImage: "/templates/sites/landing-dev-portfolio/assets/images/hero.jpg",
     tagline: "Arts Portfolio",
     heading: "Illustration portfolio with editorial personality",
     subheading: "Creative, warm, and playful with gallery-led storytelling and bold typography.",
     buttons: { primary: "View Portfolio", secondary: "Get in Touch" },
-    sections: [block(`${source.slug}-portfolio`, "gallery", { title: "Selected Works", columns: 3 }), block(`${source.slug}-about`, "imageText", { title: "About the artist", text: "Portfolio copy.", imagePosition: "right" }), block(`${source.slug}-testimonials`, "testimonials", { title: "Kind Words", bgColor: "surface", items: [] })],
+    sections: [
+      block(`${source.slug}-portfolio`, "gallery", { title: "Selected Works", columns: 3, items: [
+        { image: "/templates/sites/landing-dev-portfolio/assets/images/design.jpg", title: "Design Work" },
+        { image: "/templates/sites/landing-dev-portfolio/assets/images/photography.jpg", title: "Photography" },
+        { image: "/templates/sites/landing-dev-portfolio/assets/images/forest.jpg", title: "Nature Series" },
+      ] }),
+      block(`${source.slug}-about`, "imageText", { title: "About the artist", text: "Creative storytelling through illustration, character design, and animation.", image: "/templates/sites/landing-dev-portfolio/assets/images/editing.jpg", imagePosition: "right" }),
+      block(`${source.slug}-testimonials`, "testimonials", { title: "Kind Words", bgColor: "surface", items: [] }),
+    ],
+    media: [
+      media("hero", "/templates/sites/landing-dev-portfolio/assets/images/hero.jpg", "Portfolio hero"),
+      media("design", "/templates/sites/landing-dev-portfolio/assets/images/design.jpg", "Design work"),
+      media("photography", "/templates/sites/landing-dev-portfolio/assets/images/photography.jpg", "Photography"),
+      media("forest", "/templates/sites/landing-dev-portfolio/assets/images/forest.jpg", "Nature series"),
+      media("editing", "/templates/sites/landing-dev-portfolio/assets/images/editing.jpg", "Editing"),
+    ],
   });
 }
 
 function buildLandingDevPortfolioDesign(source: PackageSource): PackageDesign {
   return simpleTemplate(source, {
-    previewImage: "/templates/jewellery/prefooter/packages.webp",
-    heroImage: "/templates/jewellery/prefooter/showrooms.webp",
+    previewImage: "/templates/sites/landing-dev-portfolio/assets/images/hero.jpg",
+    heroImage: "/templates/sites/landing-dev-portfolio/assets/images/hero.jpg",
     tagline: "Developer Portfolio",
     heading: "A clean developer portfolio with sharp focus",
     subheading: "Dark, minimal, and performance-minded with projects and skills sections.",
     buttons: { primary: "View Projects", secondary: "Contact Me" },
-    sections: [block(`${source.slug}-projects`, "gallery", { title: "Projects", columns: 3 }), block(`${source.slug}-skills`, "features", { title: "Tech Stack", items: [] }), block(`${source.slug}-contact`, "contactForm", { title: "Get in touch" })],
+    sections: [
+      block(`${source.slug}-projects`, "gallery", { title: "Projects", columns: 3, items: [
+        { image: "/templates/sites/landing-dev-portfolio/assets/images/design.jpg", title: "Web Design" },
+        { image: "/templates/sites/landing-dev-portfolio/assets/images/editing.jpg", title: "Video Editing" },
+        { image: "/templates/sites/landing-dev-portfolio/assets/images/photography.jpg", title: "Photography" },
+      ] }),
+      block(`${source.slug}-skills`, "features", { title: "Tech Stack", items: [{ icon: "code", title: "React" }, { icon: "server", title: "Node.js" }, { icon: "database", title: "PostgreSQL" }, { icon: "cloud", title: "AWS" }] }),
+      block(`${source.slug}-contact`, "contactForm", { title: "Get in touch" }),
+    ],
+    media: [
+      media("hero", "/templates/sites/landing-dev-portfolio/assets/images/hero.jpg", "Developer portrait"),
+      media("design", "/templates/sites/landing-dev-portfolio/assets/images/design.jpg", "Design project"),
+      media("editing", "/templates/sites/landing-dev-portfolio/assets/images/editing.jpg", "Editing project"),
+      media("photography", "/templates/sites/landing-dev-portfolio/assets/images/photography.jpg", "Photography project"),
+      media("forest", "/templates/sites/landing-dev-portfolio/assets/images/forest.jpg", "Nature project"),
+    ],
   });
 }
 
 function buildLandingToyboxDesign(source: PackageSource): PackageDesign {
   return simpleTemplate(source, {
-    previewImage: "/templates/kids/hero.jpg",
-    heroImage: "/templates/kids/assets/w-bcs-slide-1-1536x555.jpg",
+    previewImage: "/templates/sites/landing-kids/assets/images/banner.jpg",
+    heroImage: "/templates/sites/landing-kids/assets/images/banner.jpg",
     tagline: "Toybox",
     heading: "Playful kids subscription landing page",
     subheading: "Bright, friendly, and parent-first with toy boxes, featured picks, and FAQs.",
     buttons: { primary: "Subscribe Now", secondary: "See Boxes" },
-    sections: [block(`${source.slug}-boxes`, "imageCategoryCards", { title: "Boxes", columns: 4, items: [] }), block(`${source.slug}-faq`, "faq", { title: "Questions", items: [] }), block(`${source.slug}-newsletter`, "newsletter", { title: "Join the list" })],
+    sections: [
+      block(`${source.slug}-boxes`, "imageCategoryCards", { title: "Boxes", columns: 4, items: [
+        { image: "/templates/sites/landing-kids/assets/images/image-01.jpg", title: "Starter Box" },
+        { image: "/templates/sites/landing-kids/assets/images/image-02.jpg", title: "Explorer Box" },
+        { image: "/templates/sites/landing-kids/assets/images/image-03.jpg", title: "Creative Box" },
+        { image: "/templates/sites/landing-kids/assets/images/image-04.jpg", title: "Adventure Box" },
+      ] }),
+      block(`${source.slug}-faq`, "faq", { title: "Questions", items: [] }),
+      block(`${source.slug}-newsletter`, "newsletter", { title: "Join the list" }),
+    ],
+    media: [
+      media("banner", "/templates/sites/landing-kids/assets/images/banner.jpg", "Toybox banner"),
+      media("box-1", "/templates/sites/landing-kids/assets/images/image-01.jpg", "Starter box"),
+      media("box-2", "/templates/sites/landing-kids/assets/images/image-02.jpg", "Explorer box"),
+      media("box-3", "/templates/sites/landing-kids/assets/images/image-03.jpg", "Creative box"),
+      media("box-4", "/templates/sites/landing-kids/assets/images/image-04.jpg", "Adventure box"),
+    ],
   });
 }
 
 function buildLandingPixaPageDesign(source: PackageSource): PackageDesign {
   return simpleTemplate(source, {
-    previewImage: "/templates/jewellery/prefooter/packages.webp",
-    heroImage: "/templates/jewellery/prefooter/showrooms.webp",
+    previewImage: "/templates/sites/landing-tech-saas/assets/images/logo.png",
+    heroImage: "/templates/sites/landing-tech-saas/assets/images/person-1.jpg",
     tagline: "PixaPage SaaS",
     heading: "SaaS landing page with a conversion-first flow",
     subheading: "Pricing, features, testimonials, and a strong product narrative.",
     buttons: { primary: "Start Free", secondary: "See Pricing" },
-    sections: [block(`${source.slug}-features`, "features", { title: "Features", items: [] }), block(`${source.slug}-pricing`, "features", { title: "Pricing", items: [] }), block(`${source.slug}-testimonials`, "testimonials", { title: "Testimonials", bgColor: "surface", items: [] })],
+    sections: [
+      block(`${source.slug}-features`, "features", { title: "Features", items: [{ icon: "zap", title: "Lightning Fast" }, { icon: "shield", title: "Enterprise Security" }, { icon: "users", title: "Team Collaboration" }, { icon: "bar-chart", title: "Analytics" }] }),
+      block(`${source.slug}-pricing`, "features", { title: "Pricing", items: [{ icon: "check", title: "Free" }, { icon: "star", title: "Pro — $29/mo" }, { icon: "rocket", title: "Enterprise" }] }),
+      block(`${source.slug}-testimonials`, "testimonials", { title: "Testimonials", bgColor: "surface", items: [
+        { quote: "PixaPage transformed our workflow.", author: "Sarah Chen", image: "/templates/sites/landing-tech-saas/assets/images/person-2.jpg" },
+        { quote: "Best SaaS tool we've used.", author: "Marcus Johnson", image: "/templates/sites/landing-tech-saas/assets/images/person-3.jpg" },
+      ] }),
+    ],
+    media: [
+      media("logo", "/templates/sites/landing-tech-saas/assets/images/logo.png", "PixaPage logo"),
+      media("person-1", "/templates/sites/landing-tech-saas/assets/images/person-1.jpg", "Team member"),
+      media("person-2", "/templates/sites/landing-tech-saas/assets/images/person-2.jpg", "Testimonial author"),
+      media("person-3", "/templates/sites/landing-tech-saas/assets/images/person-3.jpg", "Testimonial author"),
+    ],
   });
 }
 
 function buildLandingTravelerDesign(source: PackageSource): PackageDesign {
   return simpleTemplate(source, {
-    previewImage: "/templates/jewellery/prefooter/showrooms.webp",
-    heroImage: "/templates/jewellery/prefooter/about-us.webp",
+    previewImage: "/templates/sites/landing-travel/assets/images/phone.png",
+    heroImage: "/templates/sites/landing-travel/assets/images/phone.png",
     tagline: "Traveler Startup",
     heading: "Travel startup landing page for discovery and booking",
     subheading: "Destinations, experiences, and a crisp signup flow.",
     buttons: { primary: "Explore Destinations", secondary: "Plan a Trip" },
-    sections: [block(`${source.slug}-destinations`, "gallery", { title: "Destinations", columns: 3 }), block(`${source.slug}-experiences`, "features", { title: "Experiences", items: [] }), block(`${source.slug}-contact`, "contactForm", { title: "Book now" })],
+    sections: [
+      block(`${source.slug}-destinations`, "gallery", { title: "Destinations", columns: 3 }),
+      block(`${source.slug}-experiences`, "features", { title: "Experiences", items: [{ icon: "map", title: "Curated Routes" }, { icon: "compass", title: "Local Guides" }, { icon: "camera", title: "Photo Spots" }, { icon: "star", title: "Reviews" }] }),
+      block(`${source.slug}-contact`, "contactForm", { title: "Book now" }),
+    ],
+    media: [
+      media("phone", "/templates/sites/landing-travel/assets/images/phone.png", "Travel app on phone"),
+      media("logo", "/templates/sites/landing-travel/assets/images/logo.png", "Traveler logo"),
+    ],
   });
 }
 
