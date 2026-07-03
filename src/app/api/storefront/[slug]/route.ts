@@ -301,6 +301,7 @@ export async function GET(req: NextRequest, { params }: Params) {
         currency: site.currency,
         country: site.country,
         businessType: site.businessType,
+        siteType: site.siteType,
       },
       settings: settings || {},
       socialLinks: socialLinks || {},

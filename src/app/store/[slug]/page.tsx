@@ -71,6 +71,7 @@ interface StoreData {
     currency: string;
     country: string;
     businessType: string;
+    siteType?: string;
   };
   settings: {
     allowGuestCheckout?: boolean;
@@ -272,6 +273,7 @@ export default function StorePage() {
   const { store, settings, socialLinks, products, categories } = data;
   const currency = store.currency || "NGN";
   const whatsappNumber = settings.whatsappNumber || socialLinks.whatsapp;
+  const isLanding = store.siteType === "LANDING_PAGE" || store.siteType === "WEBSITE";
 
   const categoryNames = ["All", ...categories.filter((c) => c._count.products > 0).map((c) => c.name)];
 
@@ -298,6 +300,7 @@ export default function StorePage() {
     <ThemeProvider theme={resolvedTheme}>
     <div className="min-h-screen bg-white">
       {/* Announcement Bar */}
+      {!isLanding && (
       <div className="bg-brand-600 text-white text-center py-2 text-xs font-medium">
         <div className="flex items-center justify-center gap-2">
           <Truck className="h-3.5 w-3.5" />
@@ -306,6 +309,7 @@ export default function StorePage() {
             : `Welcome to ${store.name} — Shop now!`}
         </div>
       </div>
+      )}
 
       {/* Store Nav */}
       <header className="sticky top-0 z-40 bg-white border-b border-surface-200 shadow-sm themed-header">
@@ -319,7 +323,7 @@ export default function StorePage() {
                 <img src={store.logo} alt={store.name} className="h-9 w-9 rounded-xl object-cover" />
               ) : (
                 <div className="h-9 w-9 rounded-xl bg-gradient-to-br from-purple-500 to-pink-500 flex items-center justify-center">
-                  <ShoppingBag className="h-5 w-5 text-white" />
+                  {isLanding ? <span className="text-white font-bold text-sm">{store.name.charAt(0)}</span> : <ShoppingBag className="h-5 w-5 text-white" />}
                 </div>
               )}
               <span className="font-display text-lg font-bold text-surface-900">{store.name}</span>
@@ -328,34 +332,38 @@ export default function StorePage() {
 
           <nav className="hidden sm:flex items-center gap-6">
             <Link href={`/store/${slug}`} className="text-sm font-medium text-brand-700 transition-colors">Home</Link>
-            <Link href={`/store/${slug}/shop`} className="text-sm font-medium text-surface-600 hover:text-surface-900 transition-colors">Shop</Link>
-            <Link href={`/store/${slug}/reviews`} className="text-sm font-medium text-surface-600 hover:text-surface-900 transition-colors">Reviews</Link>
-            {navPages.slice(0, 4).map((page) => (
+            {!isLanding && <Link href={`/store/${slug}/shop`} className="text-sm font-medium text-surface-600 hover:text-surface-900 transition-colors">Shop</Link>}
+            {!isLanding && <Link href={`/store/${slug}/reviews`} className="text-sm font-medium text-surface-600 hover:text-surface-900 transition-colors">Reviews</Link>}
+            {navPages.slice(0, isLanding ? 6 : 4).map((page) => (
               <Link key={page.id} href={`/store/${slug}/${page.slug}`} className="text-sm font-medium text-surface-600 hover:text-surface-900 transition-colors">{page.title}</Link>
             ))}
           </nav>
 
           <div className="flex items-center gap-3">
-            <button onClick={() => setShowSearch(!showSearch)} className="p-2 text-surface-600 hover:bg-surface-50 rounded-lg"><Search className="h-5 w-5" /></button>
-            <Link href={`/store/${slug}/wishlist`} className="relative p-2 text-surface-600 hover:bg-surface-50 rounded-lg hidden sm:flex">
-              <Heart className="h-5 w-5" />
-              {wishlistCount > 0 && (
-                <span className="absolute -top-0.5 -right-0.5 h-5 w-5 rounded-full bg-red-500 text-white text-[10px] font-bold flex items-center justify-center">{wishlistCount}</span>
-              )}
-            </Link>
-            <Link
-              href="/checkout"
-              className="relative p-2 text-surface-600 hover:bg-surface-50 rounded-lg"
-            >
-              <ShoppingCart className="h-5 w-5" />
-              {cartCount > 0 && (
-                <span className="absolute -top-0.5 -right-0.5 h-5 w-5 rounded-full bg-brand-600 text-white text-[10px] font-bold flex items-center justify-center">{cartCount}</span>
-              )}
-            </Link>
+            {!isLanding && (
+              <>
+                <button onClick={() => setShowSearch(!showSearch)} className="p-2 text-surface-600 hover:bg-surface-50 rounded-lg"><Search className="h-5 w-5" /></button>
+                <Link href={`/store/${slug}/wishlist`} className="relative p-2 text-surface-600 hover:bg-surface-50 rounded-lg hidden sm:flex">
+                  <Heart className="h-5 w-5" />
+                  {wishlistCount > 0 && (
+                    <span className="absolute -top-0.5 -right-0.5 h-5 w-5 rounded-full bg-red-500 text-white text-[10px] font-bold flex items-center justify-center">{wishlistCount}</span>
+                  )}
+                </Link>
+                <Link
+                  href="/checkout"
+                  className="relative p-2 text-surface-600 hover:bg-surface-50 rounded-lg"
+                >
+                  <ShoppingCart className="h-5 w-5" />
+                  {cartCount > 0 && (
+                    <span className="absolute -top-0.5 -right-0.5 h-5 w-5 rounded-full bg-brand-600 text-white text-[10px] font-bold flex items-center justify-center">{cartCount}</span>
+                  )}
+                </Link>
+              </>
+            )}
           </div>
         </div>
         {/* Search bar */}
-        {showSearch && (
+        {!isLanding && showSearch && (
           <div className="border-t border-surface-100 px-4 sm:px-6 py-3 max-w-6xl mx-auto">
             <div className="flex items-center gap-2 rounded-xl border border-surface-200 bg-surface-50 px-3 py-2">
               <Search className="h-4 w-4 text-surface-400" />
@@ -377,12 +385,12 @@ export default function StorePage() {
       {mobileMenu && (
         <div className="sm:hidden bg-white border-b border-surface-200 px-4 py-4 space-y-2">
           <Link href={`/store/${slug}`} onClick={() => setMobileMenu(false)} className="block text-sm font-bold text-brand-700 py-2">Home</Link>
-          <Link href={`/store/${slug}/shop`} onClick={() => setMobileMenu(false)} className="block text-sm font-medium text-surface-600 py-2">Shop</Link>
-          <Link href={`/store/${slug}/reviews`} onClick={() => setMobileMenu(false)} className="block text-sm font-medium text-surface-600 py-2">Reviews</Link>
+          {!isLanding && <Link href={`/store/${slug}/shop`} onClick={() => setMobileMenu(false)} className="block text-sm font-medium text-surface-600 py-2">Shop</Link>}
+          {!isLanding && <Link href={`/store/${slug}/reviews`} onClick={() => setMobileMenu(false)} className="block text-sm font-medium text-surface-600 py-2">Reviews</Link>}
           {navPages.map((page) => (
             <Link key={page.id} href={`/store/${slug}/${page.slug}`} onClick={() => setMobileMenu(false)} className="block text-sm font-medium text-surface-600 py-2">{page.title}</Link>
           ))}
-          {whatsappNumber && (
+          {!isLanding && whatsappNumber && (
             <a href={getWhatsAppLink(whatsappNumber, [], currency, store.name)} className="block text-sm font-medium text-green-600 py-2">WhatsApp us</a>
           )}
         </div>
@@ -393,7 +401,7 @@ export default function StorePage() {
         /* Builder blocks Home page — render template blocks */
         <div style={buildPageBackgroundStyle(homePageSettings)}>
           <RenderBlocks blocks={homeBlocks} storeSlug={slug} products={products} currency={currency} addToCart={(p) => addToCart(p as unknown as Product)} isWishlisted={isWishlisted} toggleWishlist={toggleWishlist} addedToCart={addedToCart} />
-          {products.length > 0 && !homeHasProductGrid && (
+          {!isLanding && products.length > 0 && !homeHasProductGrid && (
             <div className="text-center py-10">
               <Link
                 href={`/store/${slug}/shop`}
@@ -418,7 +426,7 @@ export default function StorePage() {
         </div>
       )}
       {/* Cart preview bar */}
-      {cartCount > 0 && !selectedProduct && (
+      {!isLanding && cartCount > 0 && !selectedProduct && (
         <div className="fixed bottom-0 left-0 right-0 z-40 bg-white border-t border-surface-200 shadow-2xl px-4 sm:px-6 py-3 sm:hidden">
           <Link href="/checkout" className="btn-primary w-full py-3.5 text-sm">
             <ShoppingCart className="h-4 w-4" />
@@ -430,18 +438,21 @@ export default function StorePage() {
       {/* Footer */}
       <footer className="bg-surface-900 text-surface-400 py-12 themed-footer">
         <div className="max-w-6xl mx-auto px-4 sm:px-6">
-          <div className="grid grid-cols-2 sm:grid-cols-4 gap-8">
-            <div className="col-span-2 sm:col-span-1">
+          <div className={`grid gap-8 ${isLanding ? "grid-cols-1 sm:grid-cols-3" : "grid-cols-2 sm:grid-cols-4"}`}>
+            <div className={isLanding ? "col-span-1" : "col-span-2 sm:col-span-1"}>
               <div className="flex items-center gap-2 mb-3">
                 {store.logo ? (
                   <img src={store.logo} alt={store.name} className="h-8 w-8 rounded-lg object-cover" />
                 ) : (
-                  <div className="h-8 w-8 rounded-lg bg-gradient-to-br from-purple-500 to-pink-500 flex items-center justify-center"><ShoppingBag className="h-4 w-4 text-white" /></div>
+                  <div className="h-8 w-8 rounded-lg bg-gradient-to-br from-purple-500 to-pink-500 flex items-center justify-center">
+                    {isLanding ? <span className="text-white font-bold text-xs">{store.name.charAt(0)}</span> : <ShoppingBag className="h-4 w-4 text-white" />}
+                  </div>
                 )}
                 <span className="font-display font-bold text-white">{store.name}</span>
               </div>
               {store.description && <p className="text-xs leading-relaxed">{store.description}</p>}
             </div>
+            {!isLanding && (
             <div>
               <h4 className="text-sm font-semibold text-white mb-3">Shop</h4>
               <ul className="space-y-2 text-xs">
@@ -450,8 +461,9 @@ export default function StorePage() {
                 ))}
               </ul>
             </div>
+            )}
             <div>
-              <h4 className="text-sm font-semibold text-white mb-3">Info</h4>
+              <h4 className="text-sm font-semibold text-white mb-3">{isLanding ? "Pages" : "Info"}</h4>
               <ul className="space-y-2 text-xs">
                 {navPages.slice(0, 5).map((page) => (
                   <li key={page.id}><Link href={`/store/${slug}/${page.slug}`} className="hover:text-white transition-colors">{page.title}</Link></li>
@@ -474,14 +486,14 @@ export default function StorePage() {
       </footer>
 
       {/* Floating WhatsApp */}
-      {settings.whatsappOrdering && whatsappNumber && (
+      {!isLanding && settings.whatsappOrdering && whatsappNumber && (
         <a href={getWhatsAppLink(whatsappNumber, cart, currency, store.name)} className="fixed bottom-6 right-6 z-50 flex h-14 w-14 items-center justify-center rounded-full bg-green-500 text-white shadow-xl shadow-green-500/30 hover:bg-green-600 hover:scale-110 transition-all sm:bottom-6" style={{ bottom: cartCount > 0 ? "5rem" : undefined }}>
           <MessageCircle className="h-6 w-6" />
         </a>
       )}
 
       {/* Product Quick View Modal */}
-      {selectedProduct && (
+      {!isLanding && selectedProduct && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4" onClick={() => setSelectedProduct(null)}>
           <div className="w-full max-w-3xl bg-white rounded-2xl shadow-2xl overflow-hidden max-h-[90vh] overflow-y-auto" onClick={(e) => e.stopPropagation()}>
             <div className="grid grid-cols-1 sm:grid-cols-2">
