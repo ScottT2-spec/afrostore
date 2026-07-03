@@ -36,6 +36,7 @@ const BYPASS_PREFIXES = [
   "/verify",
   "/reset-password",
   "/invite",
+  "/template-preview/",
   "/store/",  // Already has /store/ prefix — don't double-rewrite
 ];
 
@@ -63,7 +64,8 @@ export function middleware(req: NextRequest) {
     host === "localhost" ||
     host === "127.0.0.1" ||
     host === "0.0.0.0" ||
-    host === "";  // Missing host header
+    host === "" ||  // Missing host header
+    host.endsWith(".vercel.app");  // Vercel preview/production domains
 
   if (isMainDomain) {
     return NextResponse.next();
