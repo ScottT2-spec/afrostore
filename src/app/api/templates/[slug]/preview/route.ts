@@ -1,6 +1,4 @@
 import { NextRequest, NextResponse } from "next/server";
-import { readFile } from "fs/promises";
-import { join } from "path";
 import { getTemplateBySlug } from "@/lib/templates/catalog";
 
 export async function GET(
@@ -14,20 +12,9 @@ export async function GET(
     return NextResponse.json({ error: "Template not found" }, { status: 404 });
   }
 
-  const filePath = join(process.cwd(), "extracted-templates", template.file);
-
-  try {
-    const html = await readFile(filePath, "utf-8");
-    return new NextResponse(html, {
-      headers: {
-        "Content-Type": "text/html; charset=utf-8",
-        "Cache-Control": "public, max-age=3600",
-      },
-    });
-  } catch {
-    return NextResponse.json(
-      { error: "Template file not found" },
-      { status: 404 }
-    );
-  }
+  // Redirect to static file in public/templates/
+  return NextResponse.redirect(
+    new URL(`/templates/${template.file}`, _req.url),
+    302
+  );
 }

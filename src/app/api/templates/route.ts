@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { TEMPLATES, TEMPLATE_CATEGORIES, getTemplatesByCategory, getTemplatesByIndustry } from "@/lib/templates/catalog";
+import { TEMPLATES, TEMPLATE_CATEGORIES } from "@/lib/templates/catalog";
 
 export async function GET(req: NextRequest) {
   const { searchParams } = new URL(req.url);
@@ -9,10 +9,17 @@ export async function GET(req: NextRequest) {
 
   let templates = [...TEMPLATES];
 
+  // Sort industry matches first but always return all templates
+  if (industry) {
+    templates.sort((a, b) => {
+      const aMatch = a.industries.includes(industry) ? 0 : 1;
+      const bMatch = b.industries.includes(industry) ? 0 : 1;
+      return aMatch - bMatch;
+    });
+  }
+
   if (category) {
-    templates = getTemplatesByCategory(category);
-  } else if (industry) {
-    templates = getTemplatesByIndustry(industry);
+    templates = templates.filter((t) => t.category === category);
   }
 
   if (search) {
@@ -32,7 +39,7 @@ export async function GET(req: NextRequest) {
       categoryLabel: t.categoryLabel,
       description: t.description,
       previewImage: t.previewImage,
-      previewUrl: `/api/templates/${t.slug}/preview`,
+      previewUrl: `/templates/${t.file}`,
       industries: t.industries,
     })),
     categories: TEMPLATE_CATEGORIES,

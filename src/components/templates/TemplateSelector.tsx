@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect, useMemo } from 'react';
-import { Check, Eye, Loader2, Search, X } from 'lucide-react';
+import { Check, Eye, Loader2, Search, Sparkles, X } from 'lucide-react';
 
 interface TemplateItem {
   slug: string;
@@ -36,7 +36,8 @@ export default function TemplateSelector({ industry, selectedSlug, onSelect }: T
   useEffect(() => {
     const fetchTemplates = async () => {
       try {
-        const url = industry ? `/api/templates?industry=${industry}` : '/api/templates';
+        // Always fetch all templates; industry just sorts relevant ones first
+        const url = `/api/templates${industry ? `?industry=${industry}` : ''}`;
         const res = await fetch(url);
         const data = await res.json();
         setTemplates(data.templates || []);
@@ -133,12 +134,11 @@ export default function TemplateSelector({ industry, selectedSlug, onSelect }: T
           return (
             <div
               key={template.slug}
-              className={`group relative rounded-xl border-2 overflow-hidden transition cursor-pointer ${
+              className={`relative rounded-xl border-2 overflow-hidden transition ${
                 isSelected
                   ? 'border-gray-900 ring-2 ring-gray-900/20'
                   : 'border-gray-200 hover:border-gray-400'
               }`}
-              onClick={() => onSelect(template)}
             >
               {/* Preview iframe thumbnail */}
               <div className="relative w-full h-48 bg-gray-50 overflow-hidden">
@@ -150,18 +150,6 @@ export default function TemplateSelector({ industry, selectedSlug, onSelect }: T
                   loading="lazy"
                   sandbox="allow-same-origin"
                 />
-                {/* Overlay for click + preview button */}
-                <div className="absolute inset-0 bg-transparent group-hover:bg-black/10 transition flex items-end justify-center pb-3 opacity-0 group-hover:opacity-100">
-                  <button
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      setPreviewSlug(template.slug);
-                    }}
-                    className="flex items-center gap-1.5 px-3 py-1.5 bg-white/90 backdrop-blur rounded-lg text-xs font-medium text-gray-800 shadow hover:bg-white"
-                  >
-                    <Eye className="w-3.5 h-3.5" /> Preview
-                  </button>
-                </div>
               </div>
 
               {/* Info */}
@@ -178,6 +166,26 @@ export default function TemplateSelector({ industry, selectedSlug, onSelect }: T
                 <span className="inline-block mt-2 px-2 py-0.5 bg-gray-100 rounded text-[10px] font-medium text-gray-500 uppercase tracking-wide">
                   {template.categoryLabel}
                 </span>
+
+                {/* Action buttons — always visible */}
+                <div className="flex items-center gap-2 mt-3">
+                  <button
+                    onClick={() => setPreviewSlug(template.slug)}
+                    className="flex-1 flex items-center justify-center gap-1.5 px-3 py-2 border border-gray-200 rounded-lg text-xs font-medium text-gray-700 hover:bg-gray-50 transition"
+                  >
+                    <Eye className="w-3.5 h-3.5" /> Preview
+                  </button>
+                  <button
+                    onClick={() => onSelect(template)}
+                    className={`flex-1 flex items-center justify-center gap-1.5 px-3 py-2 rounded-lg text-xs font-medium transition ${
+                      isSelected
+                        ? 'bg-emerald-600 text-white hover:bg-emerald-700'
+                        : 'bg-gray-900 text-white hover:bg-gray-800'
+                    }`}
+                  >
+                    {isSelected ? <><Check className="w-3.5 h-3.5" /> Selected</> : <><Sparkles className="w-3.5 h-3.5" /> Use Template</>}
+                  </button>
+                </div>
               </div>
             </div>
           );
@@ -218,7 +226,7 @@ export default function TemplateSelector({ industry, selectedSlug, onSelect }: T
               </div>
             </div>
             <iframe
-              src={`/api/templates/${previewSlug}/preview`}
+              src={templates.find(t => t.slug === previewSlug)?.previewUrl || `/api/templates/${previewSlug}/preview`}
               className="w-full h-full border-0"
               title="Template Preview"
             />
