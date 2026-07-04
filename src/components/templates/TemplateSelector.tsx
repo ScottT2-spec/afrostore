@@ -1,7 +1,50 @@
 'use client';
 
-import { useState, useEffect, useMemo } from 'react';
+import { useState, useEffect, useMemo, useRef, useCallback } from 'react';
 import { Check, Eye, Loader2, Search, Sparkles, X } from 'lucide-react';
+
+const IFRAME_W = 1440;
+const IFRAME_H = 1080;
+
+function TemplateThumb({ src, title }: { src: string; title: string }) {
+  const containerRef = useRef<HTMLDivElement>(null);
+  const [scale, setScale] = useState(0.25);
+
+  const measure = useCallback(() => {
+    if (!containerRef.current) return;
+    const w = containerRef.current.offsetWidth;
+    setScale(w / IFRAME_W);
+  }, []);
+
+  useEffect(() => {
+    measure();
+    const ro = new ResizeObserver(measure);
+    if (containerRef.current) ro.observe(containerRef.current);
+    return () => ro.disconnect();
+  }, [measure]);
+
+  return (
+    <div
+      ref={containerRef}
+      className="relative w-full bg-gray-50 overflow-hidden"
+      style={{ height: IFRAME_H * scale }}
+    >
+      <iframe
+        src={src}
+        className="absolute top-0 left-0 pointer-events-none"
+        style={{
+          width: IFRAME_W,
+          height: IFRAME_H,
+          transform: `scale(${scale})`,
+          transformOrigin: 'top left',
+        }}
+        title={title}
+        loading="lazy"
+        sandbox="allow-same-origin"
+      />
+    </div>
+  );
+}
 
 interface TemplateItem {
   slug: string;
@@ -140,17 +183,8 @@ export default function TemplateSelector({ industry, selectedSlug, onSelect }: T
                   : 'border-gray-200 hover:border-gray-400'
               }`}
             >
-              {/* Preview iframe thumbnail */}
-              <div className="relative w-full h-48 bg-gray-50 overflow-hidden">
-                <iframe
-                  src={template.previewUrl}
-                  className="w-[1200px] h-[900px] origin-top-left pointer-events-none"
-                  style={{ transform: 'scale(0.25)', transformOrigin: 'top left' }}
-                  title={template.name}
-                  loading="lazy"
-                  sandbox="allow-same-origin"
-                />
-              </div>
+              {/* Preview iframe thumbnail — CSS container query scales iframe to fill card */}
+              <TemplateThumb src={template.previewUrl} title={template.name} />
 
               {/* Info */}
               <div className="p-3">
