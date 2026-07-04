@@ -164,15 +164,9 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ wor
       };
       const selectedTemplateId = templateId || null;
       const selectedTemplateSlug = templateSlug || null;
-      if (selectedTemplateId || selectedTemplateSlug) {
-        templateResult = await importTemplateToSite(site.id, {
-          ...businessInput,
-          templateId: selectedTemplateId,
-          templateSlug: selectedTemplateSlug,
-          variant,
-          aiBuild: false,
-        });
-      }
+      // Templates removed — template import disabled
+      void selectedTemplateId;
+      void selectedTemplateSlug;
     }
 
     return success({ ...site, templateResult }, 201);

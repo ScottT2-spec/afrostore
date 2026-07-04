@@ -4,8 +4,7 @@ import { FileText, Globe, Layout, Link as LinkIcon, Palette, ShoppingBag, Sparkl
 
 import { useState, useEffect, useMemo } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
-import TemplateSelector from '@/templates/TemplateSelector';
-import type { TemplateDefinition } from '@/lib/templates/types';
+// Templates removed — will be re-added later
 import { clearOnboardingDraft, saveOnboardingDraft } from '@/lib/onboarding-draft';
 import { useOnboardingDraft } from '@/hooks/useOnboardingDraft';
 import { useAuth } from '@/context/AuthContext';
@@ -38,8 +37,7 @@ const INDUSTRIES = [
 
 const LAUNCH_METHODS = [
   { id: 'quick', icon: Zap, title: 'Fast Import', desc: 'Choose a package and import it immediately', color: 'border-emerald-500 bg-emerald-50' },
-  { id: 'template', icon: Layout, title: 'Use a Template', desc: 'Start from a professional template', color: 'border-blue-500 bg-blue-50' },
-  { id: 'ai', icon: Sparkles, title: 'Template Import', desc: 'Open the package chooser and import a design', color: 'border-purple-500 bg-purple-50' },
+  { id: 'template', icon: Layout, title: 'Use a Template', desc: 'Coming soon', color: 'border-blue-500 bg-blue-50', disabled: true },
   { id: 'blank', icon: Square, title: 'Blank Canvas', desc: 'Start from scratch', color: 'border-gray-500 bg-gray-50' },
 ];
 
@@ -50,7 +48,7 @@ const PAYMENT_GATEWAYS = [
 ];
 
 type SiteType = 'ECOMMERCE' | 'WEBSITE' | 'LANDING_PAGE';
-type ScoredTemplate = TemplateDefinition & { matchPercent?: number; score?: number };
+type ScoredTemplate = { slug: string; id?: string; name: string; category: string; description: string; previewImage: string; previewUrl: string; recommendationKeywords: string[]; matchPercent?: number; score?: number; reasons?: string[] };
 const asScoredTemplate = (value: unknown): ScoredTemplate | null => (value ? (value as ScoredTemplate) : null);
 
 export default function NewSitePage() {
@@ -536,17 +534,7 @@ export default function NewSitePage() {
                 </div>
                 {launchMethod !== 'blank' && (
                   <div className="mt-8">
-                    <TemplateSelector
-                      businessContext={businessContext}
-                      onSelect={(template) => {
-                        setSelectedTemplate(template);
-                        setSelectedTemplateId(template.id || template.slug);
-                        // Scroll to bottom so user sees the selection + Create button
-                        setTimeout(() => {
-                          window.scrollTo({ top: document.body.scrollHeight, behavior: 'smooth' });
-                        }, 100);
-                      }}
-                    />
+                    <div className="text-center py-12 text-surface-500">Templates coming soon</div>
                     {selectedTemplate && (
                       <div className="mt-4 rounded-xl border border-emerald-200 bg-emerald-50 p-4 flex items-center justify-between gap-4">
                         <div className="text-sm text-emerald-800">

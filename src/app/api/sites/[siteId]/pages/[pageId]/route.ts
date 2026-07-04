@@ -23,10 +23,7 @@ export async function GET(req: NextRequest, { params }: Params) {
   ]);
 
   if (!page) return error("Page not found", 404);
-  const fallbackTemplatePage = findStoredTemplatePage(activeTemplate?.pages, page.slug) || findStoredTemplatePage(activeTemplate?.pages, page.type);
-  const mergedPage = fallbackTemplatePage && (!page.content || (Array.isArray(page.content) && page.content.length === 0))
-    ? { ...page, ...fallbackTemplatePage, template: page.template ?? fallbackTemplatePage.template ?? null }
-    : { ...page, template: page.template ?? fallbackTemplatePage?.template ?? null };
+  const mergedPage = { ...page, template: null };
   return success({ ...mergedPage, templateSlug: activeTemplate?.template?.slug || null });
 }
 

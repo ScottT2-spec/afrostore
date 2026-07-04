@@ -6,7 +6,9 @@ import { useState, useEffect, useCallback, use, useMemo } from "react";
 import { useAuth } from "@/context/AuthContext";
 import { api } from "@/lib/api-client";
 import { BuilderBlock, BlockType, blockPalette } from "@/lib/builder/types";
-import { blockTemplates, type BlockTemplate } from "@/lib/builder/templates";
+// Templates removed
+type BlockTemplate = { name: string; description: string; icon: string; siteType?: string; blocks: Array<{ id: string; type: string; props: Record<string, unknown> }> };
+const blockTemplates: BlockTemplate[] = [];
 import BlockRenderer from "@/components/builder/BlockRenderer";
 import PropertyPanel from "@/components/builder/PropertyPanel";
 import { SingleImageUpload } from "@/components/dashboard/ImageUpload";
@@ -419,8 +421,8 @@ export default function BuilderPage({ params }: { params: Promise<{ pageId: stri
 
   const applyTemplate = (template: BlockTemplate) => {
     const newBlocks = template.blocks.map((b) => ({
-      ...b,
       id: crypto.randomUUID(),
+      type: b.type,
       props: JSON.parse(JSON.stringify(b.props)),
     }));
     setBuilderEditorBlocks(newBlocks as BuilderBlock[]);

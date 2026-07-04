@@ -17,7 +17,6 @@ const BYPASS_PREFIXES = [
   "/_next/",
   "/static/",
   "/js/",
-  "/templates/",
   "/favicon",
   "/robots.txt",
   "/sitemap",
@@ -36,7 +35,6 @@ const BYPASS_PREFIXES = [
   "/verify",
   "/reset-password",
   "/invite",
-  "/template-preview/",
   "/store/",  // Already has /store/ prefix — don't double-rewrite
 ];
 
