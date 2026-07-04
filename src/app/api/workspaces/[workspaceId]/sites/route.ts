@@ -152,21 +152,16 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ wor
     }
 
     if (shouldUseTemplate) {
-      const businessInput = {
-        businessName: name.trim(),
-        businessCategory: businessType || industry || "general",
-        industry,
-        description,
-        products,
-        services,
-        targetAudience,
-        branding,
-      };
-      const selectedTemplateId = templateId || null;
-      const selectedTemplateSlug = templateSlug || null;
-      // Templates removed — template import disabled
-      void selectedTemplateId;
-      void selectedTemplateSlug;
+      try {
+        templateResult = await importTemplateToSite(site.id, {
+          templateId: templateId || null,
+          templateSlug: templateSlug || null,
+          variant: variant || null,
+        });
+      } catch (importErr) {
+        console.error("Template import error:", importErr);
+        // Non-fatal — site is still created, just without template content
+      }
     }
 
     return success({ ...site, templateResult }, 201);

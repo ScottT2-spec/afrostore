@@ -1468,6 +1468,26 @@ function LinkCardsBlock({ props }: { props: Record<string, unknown> }) {
   );
 }
 
+/* ── HTML Embed (template iframe) ────────────────────────────── */
+function HtmlEmbedBlock({ props }: { props: Record<string, unknown> }) {
+  const src = (props.src as string) || "";
+  const minHeight = (props.minHeight as string) || "100vh";
+  const title = (props.title as string) || "Template Preview";
+  if (!src) return null;
+  return (
+    <div className="w-full" style={{ minHeight }}>
+      <iframe
+        src={src}
+        title={title}
+        className="w-full border-0"
+        style={{ minHeight, display: "block" }}
+        sandbox="allow-same-origin allow-scripts allow-popups allow-forms"
+        loading="eager"
+      />
+    </div>
+  );
+}
+
 /* ═══════════════════════════════════════════════════════════════
    RENDERER MAP
    ═══════════════════════════════════════════════════════════════ */
@@ -1524,6 +1544,7 @@ const renderers: Record<string, React.FC<{ props: Record<string, unknown> }>> = 
   promoSplit: PromoSplitBlock,
   imageBrands: ImageBrandsBlock,
   linkCards: LinkCardsBlock,
+  htmlEmbed: HtmlEmbedBlock,
 };
 
 /* ─── STORE CONTEXT (for blocks that need store info) ─────── */
