@@ -4,7 +4,7 @@ import { FileText, Globe, Layout, Link as LinkIcon, Palette, ShoppingBag, Sparkl
 
 import { useState, useEffect, useMemo } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
-// Templates removed — will be re-added later
+import TemplateSelector from '@/components/templates/TemplateSelector';
 import { clearOnboardingDraft, saveOnboardingDraft } from '@/lib/onboarding-draft';
 import { useOnboardingDraft } from '@/hooks/useOnboardingDraft';
 import { useAuth } from '@/context/AuthContext';
@@ -37,7 +37,7 @@ const INDUSTRIES = [
 
 const LAUNCH_METHODS = [
   { id: 'quick', icon: Zap, title: 'Fast Import', desc: 'Choose a package and import it immediately', color: 'border-emerald-500 bg-emerald-50' },
-  { id: 'template', icon: Layout, title: 'Use a Template', desc: 'Coming soon', color: 'border-blue-500 bg-blue-50', disabled: true },
+  { id: 'template', icon: Layout, title: 'Use a Template', desc: 'Pick a professionally designed template', color: 'border-blue-500 bg-blue-50' },
   { id: 'blank', icon: Square, title: 'Blank Canvas', desc: 'Start from scratch', color: 'border-gray-500 bg-gray-50' },
 ];
 
@@ -534,12 +534,18 @@ export default function NewSitePage() {
                 </div>
                 {launchMethod !== 'blank' && (
                   <div className="mt-8">
-                    <div className="text-center py-12 text-surface-500">Templates coming soon</div>
+                    <TemplateSelector
+                      industry={industry}
+                      selectedSlug={selectedTemplate?.slug || null}
+                      onSelect={(t) => {
+                        setSelectedTemplate({ slug: t.slug, name: t.name, category: t.category, description: t.description, previewImage: t.previewImage, previewUrl: t.previewUrl, recommendationKeywords: t.industries });
+                        setSelectedTemplateId(t.slug);
+                      }}
+                    />
                     {selectedTemplate && (
                       <div className="mt-4 rounded-xl border border-emerald-200 bg-emerald-50 p-4 flex items-center justify-between gap-4">
                         <div className="text-sm text-emerald-800">
                           ✅ Selected <strong>{selectedTemplate.name}</strong>
-                          {selectedTemplate.matchPercent !== undefined ? ` (${selectedTemplate.matchPercent}% match)` : ''}
                         </div>
                         <button
                           onClick={createSite}
