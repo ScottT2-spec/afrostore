@@ -365,7 +365,7 @@ export interface FashionProduct {
 export interface FashionStoreContextData {
   products: Array<{
     id: string; name: string; slug: string; price: number; compareAtPrice?: number;
-    currency: string; inStock: boolean; isFeatured: boolean;
+    currency: string; inStock: boolean; isFeatured: boolean; tags?: string[];
     images: Array<{ id: string; url: string; alt?: string }>;
     category?: { id: string; name: string; slug: string };
   }>;
@@ -382,10 +382,11 @@ export interface FashionProductGridProps {
   sectionTitle?: { subtitle?: string; title: string; description?: string };
   marginBottom?: string;
   maxProducts?: number;
-  filter?: "featured" | "all";
+  filter?: "featured" | "bestseller" | "new-arrival" | "sale" | "all";
+  filterTag?: string;
 }
 
-export function FashionProductGrid({ products: propProducts, columns = 4, showCategory = true, showHoverImage = true, sectionTitle, marginBottom = "60px", maxProducts = 8, filter }: FashionProductGridProps) {
+export function FashionProductGrid({ products: propProducts, columns = 4, showCategory = true, showHoverImage = true, sectionTitle, marginBottom = "60px", maxProducts = 8, filter, filterTag }: FashionProductGridProps) {
   const storeCtx = useContext(FashionStoreContext);
 
   // Convert real store products to FashionProduct format
@@ -396,9 +397,25 @@ export function FashionProductGrid({ products: propProducts, columns = 4, showCa
     if (!storeCtx || storeCtx.products.length === 0) return propProducts || [];
     
     let storeProducts = storeCtx.products;
+    
+    // Filter by featured flag
     if (filter === "featured") {
       const featured = storeProducts.filter(p => p.isFeatured);
       if (featured.length > 0) storeProducts = featured;
+    }
+    // Filter by tag (bestseller, new-arrival, etc.)
+    else if (filter === "bestseller" || filter === "new-arrival" || filter === "sale") {
+      const tagged = storeProducts.filter(p => 
+        p.tags?.some((t: string) => t.toLowerCase() === filter!.toLowerCase() || t.toLowerCase().replace(/[-_ ]/g, "") === filter!.toLowerCase().replace(/[-_ ]/g, ""))
+      );
+      if (tagged.length > 0) storeProducts = tagged;
+    }
+    // Custom tag filter
+    if (filterTag) {
+      const tagged = storeProducts.filter(p => 
+        p.tags?.some((t: string) => t.toLowerCase() === filterTag.toLowerCase())
+      );
+      if (tagged.length > 0) storeProducts = tagged;
     }
 
     const currencySymbols: Record<string, string> = { NGN: "₦", KES: "KSh", GHS: "GH₵", ZAR: "R", USD: "$", GBP: "£", EUR: "€" };
@@ -414,7 +431,7 @@ export function FashionProductGrid({ products: propProducts, columns = 4, showCa
       image: p.images[0]?.url || "",
       hoverImage: p.images[1]?.url,
       link: `/store/${storeCtx.storeSlug}/product/${p.slug}`,
-      badge: p.compareAtPrice ? "SALE" : undefined,
+      badge: p.compareAtPrice ? "SALE" : p.isFeatured ? "FEATURED" : undefined,
     }));
   })();
   const scopedCss = `

@@ -724,9 +724,19 @@ function FashionProductGridProps({ block, update }: { block: BuilderBlock; updat
         <PropInput label="Description" value={sectionTitle.description} onChange={(v) => updateTitle("description", v)} type="textarea" rows={2} />
       </div>
       <PropInput label="Columns" value={block.props.columns} onChange={(v) => update("columns", v)} type="number" />
+      <PropInput label="Max Products" value={block.props.maxProducts} onChange={(v) => update("maxProducts", v)} type="number" />
+      <PropInput label="Filter" value={block.props.filter} onChange={(v) => update("filter", v)} type="select"
+        options={[
+          { value: "all", label: "All Products" },
+          { value: "featured", label: "Featured Only" },
+          { value: "bestseller", label: "Bestsellers (tag)" },
+          { value: "new-arrival", label: "New Arrivals (tag)" },
+          { value: "sale", label: "On Sale (tag)" },
+        ]} />
+      <PropInput label="Custom Tag Filter" value={block.props.filterTag} onChange={(v) => update("filterTag", v)} />
       <PropInput label="Show Category" value={block.props.showCategory} onChange={(v) => update("showCategory", v)} type="toggle" />
       <PropInput label="Show Hover Image" value={block.props.showHoverImage} onChange={(v) => update("showHoverImage", v)} type="toggle" />
-      <p className="text-xs text-surface-400">Products are pulled from your store automatically.</p>
+      <p className="text-xs text-surface-400">Products are pulled from your store automatically. Use the Featured toggle or Tags in your product settings to control which products appear here.</p>
     </>
   );
 }
