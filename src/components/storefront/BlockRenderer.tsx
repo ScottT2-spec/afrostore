@@ -4,6 +4,31 @@ import { Award, CheckCircle2, Clock, CreditCard, Eye, Globe, Headphones, Heart, 
 
 import { useState, useEffect, useMemo, useRef, createContext, useContext } from "react";
 import { getSectionStyle, resolveOpacity } from "@/components/storefront/block-style";
+import {
+  FashionFontLoader as FashionFontLoaderDirect,
+  FashionHeroSlider,
+  FashionPromoBanners,
+  FashionSectionTitle,
+  FashionProductGrid,
+  FashionCategoryCards,
+  FashionTestimonials,
+  FashionBlogPosts,
+  FashionNewsletter,
+  FashionStoreContext,
+  type FashionStoreContextData,
+} from "@/components/storefront/FashionTemplateBlocks";
+
+type FashionBlockComponent = React.ComponentType<Record<string, unknown>>;
+const FASHION_BLOCK_MAP: Record<string, FashionBlockComponent> = {
+  fashionHeroSlider: FashionHeroSlider as unknown as FashionBlockComponent,
+  fashionPromoBanners: FashionPromoBanners as unknown as FashionBlockComponent,
+  fashionSectionTitle: FashionSectionTitle as unknown as FashionBlockComponent,
+  fashionProductGrid: FashionProductGrid as unknown as FashionBlockComponent,
+  fashionCategoryCards: FashionCategoryCards as unknown as FashionBlockComponent,
+  fashionTestimonials: FashionTestimonials as unknown as FashionBlockComponent,
+  fashionBlogPosts: FashionBlogPosts as unknown as FashionBlockComponent,
+  fashionNewsletter: FashionNewsletter as unknown as FashionBlockComponent,
+};
 
 /* ─── TYPES ─────────────────────────────────────────────────── */
 
@@ -1583,44 +1608,19 @@ const StoreSlugContext = createContext<string>("");
 export function PublicBlockRenderer({ block }: { block: BuilderBlock; isEditorMode?: boolean }) {
   // Check if it's a fashion template block
   if (block.type.startsWith("fashion")) {
-    return <FashionBlockBridge block={block} />;
+    const FashionComponent = FASHION_BLOCK_MAP[block.type];
+    if (FashionComponent) {
+      return (
+        <>
+          <FashionFontLoaderDirect />
+          <FashionComponent {...(block.props as Record<string, unknown>)} />
+        </>
+      );
+    }
   }
   const Renderer = renderers[block.type];
   if (!Renderer) return null;
   return <Renderer props={block.props} />;
-}
-
-// Lazy-loaded fashion block bridge to avoid circular imports
-let _fashionLoaded = false;
-let _FASHION_BLOCKS: Record<string, React.ComponentType<Record<string, unknown>>> = {};
-let _FashionFontLoader: React.ComponentType | null = null;
-
-function FashionBlockBridge({ block }: { block: BuilderBlock }) {
-  const [, forceRender] = useState(0);
-  
-  useEffect(() => {
-    if (!_fashionLoaded) {
-      import("@/components/storefront/TemplateBlockRenderer").then((mod) => {
-        _FASHION_BLOCKS = mod.FASHION_BLOCKS;
-        return import("@/components/storefront/FashionTemplateBlocks");
-      }).then((mod) => {
-        _FashionFontLoader = mod.FashionFontLoader;
-        _fashionLoaded = true;
-        forceRender((n) => n + 1);
-      });
-    }
-  }, []);
-
-  if (!_fashionLoaded) return null;
-  const Component = _FASHION_BLOCKS[block.type];
-  if (!Component) return null;
-  const FontLoader = _FashionFontLoader;
-  return (
-    <>
-      {FontLoader && <FontLoader />}
-      <Component {...(block.props as Record<string, unknown>)} />
-    </>
-  );
 }
 
 export function RenderBlocks({ blocks, storeSlug, products, currency, addToCart, isWishlisted, toggleWishlist, addedToCart, isEditorMode = false, pageId, blockCount, dataSource, wrapBlock }: {
@@ -1649,9 +1649,11 @@ export function RenderBlocks({ blocks, storeSlug, products, currency, addToCart,
       })}
     </div>
   );
+  const hasFashionBlocks = blocks.some((b) => b.type.startsWith("fashion"));
   const wrappedContent = storeSlug ? (
     <StoreSlugContext.Provider value={storeSlug}>
       <StoreContext.Provider value={{ slug: storeSlug || "", products: products || [], currency: currency || "NGN", addToCart, isWishlisted, toggleWishlist, addedToCart }}>
+        <FashionStoreContext.Provider value={hasFashionBlocks ? { products: (products || []) as unknown as FashionStoreContextData["products"], currency: currency || "NGN", storeSlug: storeSlug || "" } : null as unknown as FashionStoreContextData}>
         <div className="relative">
           {isEditorMode && (
             <div className="pointer-events-none sticky top-0 z-30 border-b border-brand-200 bg-brand-50/95 px-4 py-2 text-[10px] font-mono text-brand-800 backdrop-blur">
@@ -1665,6 +1667,7 @@ export function RenderBlocks({ blocks, storeSlug, products, currency, addToCart,
           )}
           {content}
         </div>
+        </FashionStoreContext.Provider>
       </StoreContext.Provider>
     </StoreSlugContext.Provider>
   ) : content;
