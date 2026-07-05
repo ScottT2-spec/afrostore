@@ -1581,6 +1581,22 @@ const StoreSlugContext = createContext<string>("");
 /* ─── PUBLIC API ────────────────────────────────────────────── */
 
 export function PublicBlockRenderer({ block }: { block: BuilderBlock; isEditorMode?: boolean }) {
+  // Check if it's a fashion template block
+  if (block.type.startsWith("fashion")) {
+    try {
+      const { FASHION_BLOCKS } = require("@/components/storefront/TemplateBlockRenderer");
+      const { FashionFontLoader } = require("@/components/storefront/FashionTemplateBlocks");
+      const FashionComponent = FASHION_BLOCKS[block.type];
+      if (FashionComponent) {
+        return (
+          <>
+            <FashionFontLoader />
+            <FashionComponent {...block.props} />
+          </>
+        );
+      }
+    } catch { /* fallback below */ }
+  }
   const Renderer = renderers[block.type];
   if (!Renderer) return null;
   return <Renderer props={block.props} />;

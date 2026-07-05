@@ -25,7 +25,15 @@ export type BlockType =
   | "imageText"
   | "gallery"
   | "team"
-  | "brands";
+  | "brands"
+  | "fashionHeroSlider"
+  | "fashionPromoBanners"
+  | "fashionSectionTitle"
+  | "fashionProductGrid"
+  | "fashionCategoryCards"
+  | "fashionTestimonials"
+  | "fashionBlogPosts"
+  | "fashionNewsletter";
 
 export interface BuilderBlock {
   id: string;
@@ -211,6 +219,73 @@ export const blockDefaults: Record<BlockType, () => Record<string, unknown>> = {
     title: "Trusted By",
     names: ["Brand A", "Brand B", "Brand C", "Brand D", "Brand E"],
   }),
+  fashionHeroSlider: () => ({
+    autoplaySpeed: 5000,
+    minHeight: "560px",
+    slides: [
+      { subtitle: "YOUR FAVOURITE STORE", titleLine1: "Blondes with minimalistic", titleLine2: "tendencies to vintage", description: "Discover our latest collection of handpicked fashion essentials.", buttonText: "SHOP NOW", buttonLink: "/shop", backgroundImage: "", textPosition: "center", colorScheme: "dark" },
+      { subtitle: "NEW ARRIVALS", titleLine1: "Fashionable fit trend style", titleLine2: "best sport man wear", description: "Explore trending styles curated for every occasion.", buttonText: "SHOP NOW", buttonLink: "/shop", backgroundImage: "", textPosition: "center", colorScheme: "dark" },
+    ],
+  }),
+  fashionPromoBanners: () => ({
+    banners: [
+      { image: "", subtitle: "SUMMER NEW", title: "AMAZING\nFASHION", buttonText: "Shop Now", buttonLink: "/shop", textAlign: "right" },
+      { image: "", subtitle: "BEST NEW", title: "STYLISH\nFASHION", buttonText: "Shop Now", buttonLink: "/shop", textAlign: "center" },
+      { image: "", subtitle: "NEW 2024", title: "FASHION\nSTYLE", buttonText: "Shop Now", buttonLink: "/shop", textAlign: "left" },
+    ],
+  }),
+  fashionSectionTitle: () => ({
+    subtitle: "WELCOME TO OUR STORE",
+    title: "SECTION TITLE",
+    description: "Add a description for this section.",
+    align: "center",
+    maxWidth: "40%",
+  }),
+  fashionProductGrid: () => ({
+    columns: 4,
+    showCategory: true,
+    showHoverImage: true,
+    marginBottom: "60px",
+    sectionTitle: { subtitle: "WELCOME TO OUR STORE", title: "FEATURED PRODUCTS", description: "Handpicked items from our latest collections." },
+    products: [],
+  }),
+  fashionCategoryCards: () => ({
+    columns: 4,
+    marginBottom: "50px",
+    sectionTitle: { subtitle: "WELCOME TO OUR STORE", title: "OUR CATEGORIES", description: "Browse through our collections." },
+    categories: [
+      { name: "Category 1", image: "", productCount: 0, link: "/shop" },
+      { name: "Category 2", image: "", productCount: 0, link: "/shop" },
+      { name: "Category 3", image: "", productCount: 0, link: "/shop" },
+      { name: "Category 4", image: "", productCount: 0, link: "/shop" },
+    ],
+  }),
+  fashionTestimonials: () => ({
+    title: "CUSTOMERS REVIEWS",
+    backgroundImage: "",
+    testimonials: [
+      { avatar: "", text: "Great quality and fast shipping!", name: "Customer Name", role: "Verified Buyer", rating: 5 },
+      { avatar: "", text: "Love the products, will order again.", name: "Customer Name", role: "Loyal Customer", rating: 5 },
+    ],
+  }),
+  fashionBlogPosts: () => ({
+    columns: 2,
+    marginBottom: "30px",
+    sectionTitle: { subtitle: "WELCOME TO OUR STORE", title: "OUR LATEST NEWS", description: "Stay updated with the latest trends." },
+    posts: [
+      { image: "", title: "Blog Post Title", excerpt: "Post excerpt goes here...", date: { day: "01", month: "Jan" }, categories: ["Fashion"], author: { name: "Author" }, link: "/blog", commentCount: 0 },
+    ],
+  }),
+  fashionNewsletter: () => ({
+    subtitle: "STAY CONNECTED",
+    title: "REGISTER FOR OUR NEWSLETTER",
+    description: "Sign up for news about our latest arrivals.",
+    buttonText: "Sign up",
+    socialLinks: [
+      { platform: "facebook", url: "#" },
+      { platform: "instagram", url: "#" },
+    ],
+  }),
 };
 
 // ─── BLOCK PALETTE ───────────────────────────────────────────
@@ -248,4 +323,13 @@ export const blockPalette: PaletteItem[] = [
   { type: "newsletter", label: "Newsletter", icon: "send", category: "marketing" },
   { type: "trustBadges", label: "Trust Badges", icon: "shield", category: "marketing" },
   { type: "brands", label: "Brand Logos", icon: "globe", category: "marketing" },
+  // Fashion Template Blocks
+  { type: "fashionHeroSlider", label: "Fashion Hero Slider", icon: "layout", category: "layout" },
+  { type: "fashionPromoBanners", label: "Fashion Promo Banners", icon: "image", category: "commerce" },
+  { type: "fashionSectionTitle", label: "Fashion Section Title", icon: "type", category: "basic" },
+  { type: "fashionProductGrid", label: "Fashion Products", icon: "shopping-bag", category: "commerce" },
+  { type: "fashionCategoryCards", label: "Fashion Categories", icon: "grid", category: "commerce" },
+  { type: "fashionTestimonials", label: "Fashion Testimonials", icon: "message-circle", category: "social" },
+  { type: "fashionBlogPosts", label: "Fashion Blog Posts", icon: "layout", category: "social" },
+  { type: "fashionNewsletter", label: "Fashion Newsletter", icon: "send", category: "marketing" },
 ];

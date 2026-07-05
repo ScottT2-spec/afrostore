@@ -619,6 +619,271 @@ function ColumnsProps({ block, update }: { block: BuilderBlock; update: (key: st
   );
 }
 
+// ─── FASHION TEMPLATE BLOCK PROPERTY EDITORS ────────────────
+
+function FashionHeroSliderProps({ block, update }: { block: BuilderBlock; update: (key: string, val: unknown) => void }) {
+  const slides = (block.props.slides as Array<Record<string, unknown>>) || [];
+  const updateSlide = (idx: number, key: string, val: unknown) => {
+    const next = slides.map((s, i) => i === idx ? { ...s, [key]: val } : s);
+    update("slides", next);
+  };
+  const addSlide = () => {
+    update("slides", [...slides, { subtitle: "NEW SLIDE", titleLine1: "Heading Line 1", titleLine2: "Heading Line 2", description: "Description text", buttonText: "SHOP NOW", buttonLink: "/shop", backgroundImage: "", textPosition: "center", colorScheme: "dark" }]);
+  };
+  const removeSlide = (idx: number) => {
+    update("slides", slides.filter((_, i) => i !== idx));
+  };
+  return (
+    <>
+      <PropInput label="Min Height" value={block.props.minHeight} onChange={(v) => update("minHeight", v)} />
+      <PropInput label="Autoplay Speed (ms)" value={block.props.autoplaySpeed} onChange={(v) => update("autoplaySpeed", v)} type="number" />
+      {slides.map((slide, i) => (
+        <div key={i} className="border border-surface-200 rounded-lg p-3 space-y-3">
+          <div className="flex items-center justify-between">
+            <span className="text-xs font-bold text-surface-700">Slide {i + 1}</span>
+            {slides.length > 1 && <button onClick={() => removeSlide(i)} className="text-red-500 text-xs">Remove</button>}
+          </div>
+          <PropInput label="Subtitle" value={slide.subtitle} onChange={(v) => updateSlide(i, "subtitle", v)} />
+          <PropInput label="Title Line 1" value={slide.titleLine1} onChange={(v) => updateSlide(i, "titleLine1", v)} />
+          <PropInput label="Title Line 2" value={slide.titleLine2} onChange={(v) => updateSlide(i, "titleLine2", v)} />
+          <PropInput label="Description" value={slide.description} onChange={(v) => updateSlide(i, "description", v)} type="textarea" rows={2} />
+          <PropInput label="Button Text" value={slide.buttonText} onChange={(v) => updateSlide(i, "buttonText", v)} />
+          <PropInput label="Button Link" value={slide.buttonLink} onChange={(v) => updateSlide(i, "buttonLink", v)} />
+          <SingleImageUpload image={(slide.backgroundImage as string) || null} onChange={(url) => updateSlide(i, "backgroundImage", url || "")} label="Background Image" compact />
+          <PropInput label="Text Position" value={slide.textPosition} onChange={(v) => updateSlide(i, "textPosition", v)} type="select"
+            options={[{ value: "left", label: "Left" }, { value: "center", label: "Center" }, { value: "right", label: "Right" }]} />
+          <PropInput label="Color Scheme" value={slide.colorScheme} onChange={(v) => updateSlide(i, "colorScheme", v)} type="select"
+            options={[{ value: "dark", label: "Dark Text" }, { value: "light", label: "Light Text" }]} />
+        </div>
+      ))}
+      <button onClick={addSlide} className="w-full flex items-center justify-center gap-1 text-xs font-semibold text-brand-600 py-2 border border-dashed border-brand-300 rounded-lg hover:bg-brand-50">
+        <Plus className="h-3 w-3" /> Add Slide
+      </button>
+    </>
+  );
+}
+
+function FashionPromoBannersProps({ block, update }: { block: BuilderBlock; update: (key: string, val: unknown) => void }) {
+  const banners = (block.props.banners as Array<Record<string, unknown>>) || [];
+  const updateBanner = (idx: number, key: string, val: unknown) => {
+    const next = banners.map((b, i) => i === idx ? { ...b, [key]: val } : b);
+    update("banners", next);
+  };
+  const addBanner = () => {
+    update("banners", [...banners, { image: "", subtitle: "NEW", title: "BANNER\nTITLE", buttonText: "Shop Now", buttonLink: "/shop", textAlign: "center" }]);
+  };
+  const removeBanner = (idx: number) => {
+    update("banners", banners.filter((_, i) => i !== idx));
+  };
+  return (
+    <>
+      {banners.map((b, i) => (
+        <div key={i} className="border border-surface-200 rounded-lg p-3 space-y-3">
+          <div className="flex items-center justify-between">
+            <span className="text-xs font-bold text-surface-700">Banner {i + 1}</span>
+            {banners.length > 1 && <button onClick={() => removeBanner(i)} className="text-red-500 text-xs">Remove</button>}
+          </div>
+          <SingleImageUpload image={(b.image as string) || null} onChange={(url) => updateBanner(i, "image", url || "")} label="Image" compact />
+          <PropInput label="Subtitle" value={b.subtitle} onChange={(v) => updateBanner(i, "subtitle", v)} />
+          <PropInput label="Title" value={b.title} onChange={(v) => updateBanner(i, "title", v)} type="textarea" rows={2} />
+          <PropInput label="Button Text" value={b.buttonText} onChange={(v) => updateBanner(i, "buttonText", v)} />
+          <PropInput label="Button Link" value={b.buttonLink} onChange={(v) => updateBanner(i, "buttonLink", v)} />
+          <PropInput label="Text Align" value={b.textAlign} onChange={(v) => updateBanner(i, "textAlign", v)} type="select"
+            options={[{ value: "left", label: "Left" }, { value: "center", label: "Center" }, { value: "right", label: "Right" }]} />
+        </div>
+      ))}
+      <button onClick={addBanner} className="w-full flex items-center justify-center gap-1 text-xs font-semibold text-brand-600 py-2 border border-dashed border-brand-300 rounded-lg hover:bg-brand-50">
+        <Plus className="h-3 w-3" /> Add Banner
+      </button>
+    </>
+  );
+}
+
+function FashionSectionTitleProps({ block, update }: { block: BuilderBlock; update: (key: string, val: unknown) => void }) {
+  return (
+    <>
+      <PropInput label="Subtitle" value={block.props.subtitle} onChange={(v) => update("subtitle", v)} />
+      <PropInput label="Title" value={block.props.title} onChange={(v) => update("title", v)} />
+      <PropInput label="Description" value={block.props.description} onChange={(v) => update("description", v)} type="textarea" rows={2} />
+      <PropInput label="Align" value={block.props.align} onChange={(v) => update("align", v)} type="select"
+        options={[{ value: "left", label: "Left" }, { value: "center", label: "Center" }, { value: "right", label: "Right" }]} />
+      <PropInput label="Max Width" value={block.props.maxWidth} onChange={(v) => update("maxWidth", v)} />
+    </>
+  );
+}
+
+function FashionProductGridProps({ block, update }: { block: BuilderBlock; update: (key: string, val: unknown) => void }) {
+  const sectionTitle = (block.props.sectionTitle as Record<string, unknown>) || {};
+  const updateTitle = (key: string, val: unknown) => update("sectionTitle", { ...sectionTitle, [key]: val });
+  return (
+    <>
+      <div className="border border-surface-200 rounded-lg p-3 space-y-3">
+        <span className="text-xs font-bold text-surface-700">Section Header</span>
+        <PropInput label="Subtitle" value={sectionTitle.subtitle} onChange={(v) => updateTitle("subtitle", v)} />
+        <PropInput label="Title" value={sectionTitle.title} onChange={(v) => updateTitle("title", v)} />
+        <PropInput label="Description" value={sectionTitle.description} onChange={(v) => updateTitle("description", v)} type="textarea" rows={2} />
+      </div>
+      <PropInput label="Columns" value={block.props.columns} onChange={(v) => update("columns", v)} type="number" />
+      <PropInput label="Show Category" value={block.props.showCategory} onChange={(v) => update("showCategory", v)} type="toggle" />
+      <PropInput label="Show Hover Image" value={block.props.showHoverImage} onChange={(v) => update("showHoverImage", v)} type="toggle" />
+      <p className="text-xs text-surface-400">Products are pulled from your store automatically.</p>
+    </>
+  );
+}
+
+function FashionCategoryCardsProps({ block, update }: { block: BuilderBlock; update: (key: string, val: unknown) => void }) {
+  const sectionTitle = (block.props.sectionTitle as Record<string, unknown>) || {};
+  const categories = (block.props.categories as Array<Record<string, unknown>>) || [];
+  const updateTitle = (key: string, val: unknown) => update("sectionTitle", { ...sectionTitle, [key]: val });
+  const updateCat = (idx: number, key: string, val: unknown) => {
+    const next = categories.map((c, i) => i === idx ? { ...c, [key]: val } : c);
+    update("categories", next);
+  };
+  const addCat = () => {
+    update("categories", [...categories, { name: "New Category", image: "", productCount: 0, link: "/shop" }]);
+  };
+  const removeCat = (idx: number) => {
+    update("categories", categories.filter((_, i) => i !== idx));
+  };
+  return (
+    <>
+      <div className="border border-surface-200 rounded-lg p-3 space-y-3">
+        <span className="text-xs font-bold text-surface-700">Section Header</span>
+        <PropInput label="Subtitle" value={sectionTitle.subtitle} onChange={(v) => updateTitle("subtitle", v)} />
+        <PropInput label="Title" value={sectionTitle.title} onChange={(v) => updateTitle("title", v)} />
+        <PropInput label="Description" value={sectionTitle.description} onChange={(v) => updateTitle("description", v)} type="textarea" rows={2} />
+      </div>
+      <PropInput label="Columns" value={block.props.columns} onChange={(v) => update("columns", v)} type="number" />
+      {categories.map((c, i) => (
+        <div key={i} className="border border-surface-200 rounded-lg p-3 space-y-3">
+          <div className="flex items-center justify-between">
+            <span className="text-xs font-bold text-surface-700">Category {i + 1}</span>
+            {categories.length > 1 && <button onClick={() => removeCat(i)} className="text-red-500 text-xs">Remove</button>}
+          </div>
+          <PropInput label="Name" value={c.name} onChange={(v) => updateCat(i, "name", v)} />
+          <SingleImageUpload image={(c.image as string) || null} onChange={(url) => updateCat(i, "image", url || "")} label="Image" compact />
+          <PropInput label="Product Count" value={c.productCount} onChange={(v) => updateCat(i, "productCount", v)} type="number" />
+          <PropInput label="Link" value={c.link} onChange={(v) => updateCat(i, "link", v)} />
+        </div>
+      ))}
+      <button onClick={addCat} className="w-full flex items-center justify-center gap-1 text-xs font-semibold text-brand-600 py-2 border border-dashed border-brand-300 rounded-lg hover:bg-brand-50">
+        <Plus className="h-3 w-3" /> Add Category
+      </button>
+    </>
+  );
+}
+
+function FashionTestimonialsProps({ block, update }: { block: BuilderBlock; update: (key: string, val: unknown) => void }) {
+  const testimonials = (block.props.testimonials as Array<Record<string, unknown>>) || [];
+  const updateTest = (idx: number, key: string, val: unknown) => {
+    const next = testimonials.map((t, i) => i === idx ? { ...t, [key]: val } : t);
+    update("testimonials", next);
+  };
+  const addTest = () => {
+    update("testimonials", [...testimonials, { avatar: "", text: "Customer review text.", name: "Customer Name", role: "Verified Buyer", rating: 5 }]);
+  };
+  const removeTest = (idx: number) => {
+    update("testimonials", testimonials.filter((_, i) => i !== idx));
+  };
+  return (
+    <>
+      <PropInput label="Section Title" value={block.props.title} onChange={(v) => update("title", v)} />
+      <SingleImageUpload image={(block.props.backgroundImage as string) || null} onChange={(url) => update("backgroundImage", url || "")} label="Background Image" compact />
+      {testimonials.map((t, i) => (
+        <div key={i} className="border border-surface-200 rounded-lg p-3 space-y-3">
+          <div className="flex items-center justify-between">
+            <span className="text-xs font-bold text-surface-700">Review {i + 1}</span>
+            {testimonials.length > 1 && <button onClick={() => removeTest(i)} className="text-red-500 text-xs">Remove</button>}
+          </div>
+          <PropInput label="Name" value={t.name} onChange={(v) => updateTest(i, "name", v)} />
+          <PropInput label="Role" value={t.role} onChange={(v) => updateTest(i, "role", v)} />
+          <PropInput label="Review" value={t.text} onChange={(v) => updateTest(i, "text", v)} type="textarea" rows={3} />
+          <PropInput label="Rating (1-5)" value={t.rating} onChange={(v) => updateTest(i, "rating", v)} type="number" />
+          <SingleImageUpload image={(t.avatar as string) || null} onChange={(url) => updateTest(i, "avatar", url || "")} label="Avatar" compact />
+        </div>
+      ))}
+      <button onClick={addTest} className="w-full flex items-center justify-center gap-1 text-xs font-semibold text-brand-600 py-2 border border-dashed border-brand-300 rounded-lg hover:bg-brand-50">
+        <Plus className="h-3 w-3" /> Add Review
+      </button>
+    </>
+  );
+}
+
+function FashionBlogPostsProps({ block, update }: { block: BuilderBlock; update: (key: string, val: unknown) => void }) {
+  const sectionTitle = (block.props.sectionTitle as Record<string, unknown>) || {};
+  const posts = (block.props.posts as Array<Record<string, unknown>>) || [];
+  const updateTitle = (key: string, val: unknown) => update("sectionTitle", { ...sectionTitle, [key]: val });
+  const updatePost = (idx: number, key: string, val: unknown) => {
+    const next = posts.map((p, i) => i === idx ? { ...p, [key]: val } : p);
+    update("posts", next);
+  };
+  const addPost = () => {
+    update("posts", [...posts, { image: "", title: "New Blog Post", excerpt: "Post excerpt...", date: { day: "01", month: "Jan" }, categories: ["News"], author: { name: "Author" }, link: "/blog", commentCount: 0 }]);
+  };
+  const removePost = (idx: number) => {
+    update("posts", posts.filter((_, i) => i !== idx));
+  };
+  return (
+    <>
+      <div className="border border-surface-200 rounded-lg p-3 space-y-3">
+        <span className="text-xs font-bold text-surface-700">Section Header</span>
+        <PropInput label="Subtitle" value={sectionTitle.subtitle} onChange={(v) => updateTitle("subtitle", v)} />
+        <PropInput label="Title" value={sectionTitle.title} onChange={(v) => updateTitle("title", v)} />
+        <PropInput label="Description" value={sectionTitle.description} onChange={(v) => updateTitle("description", v)} type="textarea" rows={2} />
+      </div>
+      <PropInput label="Columns" value={block.props.columns} onChange={(v) => update("columns", v)} type="number" />
+      {posts.map((p, i) => (
+        <div key={i} className="border border-surface-200 rounded-lg p-3 space-y-3">
+          <div className="flex items-center justify-between">
+            <span className="text-xs font-bold text-surface-700">Post {i + 1}</span>
+            {posts.length > 1 && <button onClick={() => removePost(i)} className="text-red-500 text-xs">Remove</button>}
+          </div>
+          <SingleImageUpload image={(p.image as string) || null} onChange={(url) => updatePost(i, "image", url || "")} label="Image" compact />
+          <PropInput label="Title" value={p.title} onChange={(v) => updatePost(i, "title", v)} />
+          <PropInput label="Excerpt" value={p.excerpt} onChange={(v) => updatePost(i, "excerpt", v)} type="textarea" rows={2} />
+          <PropInput label="Link" value={p.link} onChange={(v) => updatePost(i, "link", v)} />
+        </div>
+      ))}
+      <button onClick={addPost} className="w-full flex items-center justify-center gap-1 text-xs font-semibold text-brand-600 py-2 border border-dashed border-brand-300 rounded-lg hover:bg-brand-50">
+        <Plus className="h-3 w-3" /> Add Post
+      </button>
+    </>
+  );
+}
+
+function FashionNewsletterEditProps({ block, update }: { block: BuilderBlock; update: (key: string, val: unknown) => void }) {
+  const socialLinks = (block.props.socialLinks as Array<Record<string, unknown>>) || [];
+  const updateSocial = (idx: number, key: string, val: unknown) => {
+    const next = socialLinks.map((s, i) => i === idx ? { ...s, [key]: val } : s);
+    update("socialLinks", next);
+  };
+  const addSocial = () => {
+    update("socialLinks", [...socialLinks, { platform: "facebook", url: "#" }]);
+  };
+  const removeSocial = (idx: number) => {
+    update("socialLinks", socialLinks.filter((_, i) => i !== idx));
+  };
+  return (
+    <>
+      <PropInput label="Subtitle" value={block.props.subtitle} onChange={(v) => update("subtitle", v)} />
+      <PropInput label="Title" value={block.props.title} onChange={(v) => update("title", v)} />
+      <PropInput label="Description" value={block.props.description} onChange={(v) => update("description", v)} type="textarea" rows={2} />
+      <PropInput label="Button Text" value={block.props.buttonText} onChange={(v) => update("buttonText", v)} />
+      {socialLinks.map((s, i) => (
+        <div key={i} className="flex items-center gap-2">
+          <PropInput label="" value={s.platform} onChange={(v) => updateSocial(i, "platform", v)} type="select"
+            options={[{ value: "facebook", label: "Facebook" }, { value: "twitter", label: "Twitter/X" }, { value: "instagram", label: "Instagram" }, { value: "youtube", label: "YouTube" }, { value: "tiktok", label: "TikTok" }]} />
+          <PropInput label="" value={s.url} onChange={(v) => updateSocial(i, "url", v)} />
+          <button onClick={() => removeSocial(i)} className="text-red-500 text-xs mt-1">✕</button>
+        </div>
+      ))}
+      <button onClick={addSocial} className="w-full flex items-center justify-center gap-1 text-xs font-semibold text-brand-600 py-2 border border-dashed border-brand-300 rounded-lg hover:bg-brand-50">
+        <Plus className="h-3 w-3" /> Add Social Link
+      </button>
+    </>
+  );
+}
+
 function GenericProps() {
   return <p className="text-xs text-surface-500">Properties for this block type coming soon.</p>;
 }
@@ -634,6 +899,16 @@ const propEditors: Record<string, React.FC<{ block: BuilderBlock; update: (key: 
   newsletter: NewsletterProps, imageText: ImageTextProps, "image-text": ImageTextProps,
   gallery: GalleryProps, team: TeamProps, brands: BrandsProps,
   trustBadges: TrustBadgesProps, video: VideoProps,
+
+  // Fashion template blocks
+  fashionHeroSlider: FashionHeroSliderProps,
+  fashionPromoBanners: FashionPromoBannersProps,
+  fashionSectionTitle: FashionSectionTitleProps,
+  fashionProductGrid: FashionProductGridProps,
+  fashionCategoryCards: FashionCategoryCardsProps,
+  fashionTestimonials: FashionTestimonialsProps,
+  fashionBlogPosts: FashionBlogPostsProps,
+  fashionNewsletter: FashionNewsletterEditProps,
 
   // Template aliases → map to their base editor
   featured_products: ProductGridProps,

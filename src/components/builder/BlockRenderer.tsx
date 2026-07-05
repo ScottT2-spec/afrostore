@@ -2,6 +2,8 @@
 
 import { useMemo } from "react";
 import { PublicBlockRenderer, type BuilderBlock } from "@/components/storefront/BlockRenderer";
+import { FASHION_BLOCKS } from "@/components/storefront/TemplateBlockRenderer";
+import { FashionFontLoader } from "@/components/storefront/FashionTemplateBlocks";
 
 interface BlockRendererProps {
   block: BuilderBlock;
@@ -18,6 +20,17 @@ export default function BlockRenderer({ block, isSelected, onInlineEdit }: Block
 
   if (editablePreview) {
     return <InlineEditableBlock block={editablePreview} onInlineEdit={onInlineEdit} />;
+  }
+
+  // Fashion template blocks
+  const FashionComponent = FASHION_BLOCKS[block.type];
+  if (FashionComponent) {
+    return (
+      <>
+        <FashionFontLoader />
+        <FashionComponent {...(block.props as Record<string, unknown>)} />
+      </>
+    );
   }
 
   return <PublicBlockRenderer block={block} />;
