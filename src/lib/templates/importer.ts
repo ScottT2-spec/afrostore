@@ -1,5 +1,6 @@
 import { prisma } from "@/lib/db";
 import { TEMPLATES } from "@/lib/templates/catalog";
+import { FASHION_TEMPLATE_PRESET } from "@/lib/templates/presets/fashion-preset";
 
 /**
  * Import a template into a site by:
@@ -77,21 +78,28 @@ export async function importTemplateToSite(
     });
   }
 
-  // Build the htmlEmbed block for the HOME page
-  const templateUrl = `/templates/${catalogEntry.file}`;
-  const homeBlocks = [
-    {
-      id: `htmlEmbed-${template.slug}`,
-      type: "htmlEmbed",
-      props: {
-        src: templateUrl,
-        minHeight: "100vh",
-        title: `${catalogEntry.name} Template`,
-      },
-    },
-  ];
+  // Build blocks for the HOME page
+  // For templates with editable block presets, use those instead of htmlEmbed
+  const TEMPLATE_PRESETS: Record<string, typeof FASHION_TEMPLATE_PRESET> = {
+    fashion: FASHION_TEMPLATE_PRESET,
+  };
 
-  const homeContent = { blocks: homeBlocks, settings: {} };
+  const preset = TEMPLATE_PRESETS[catalogEntry.slug];
+  const homeBlocks = preset
+    ? preset
+    : [
+        {
+          id: `htmlEmbed-${template.slug}`,
+          type: "htmlEmbed",
+          props: {
+            src: `/templates/${catalogEntry.file}`,
+            minHeight: "100vh",
+            title: `${catalogEntry.name} Template`,
+          },
+        },
+      ];
+
+  const homeContent = JSON.parse(JSON.stringify({ blocks: homeBlocks, settings: {} }));
 
   // Create or update the HOME page
   const existingHome = await prisma.page.findFirst({

@@ -1,5 +1,5 @@
 "use client";
-import { useState, useEffect, useRef, useCallback } from "react";
+import { useState, useEffect, useRef, useCallback, createContext, useContext } from "react";
 
 /* ═══════════════════════════════════════════════════════════════
    FASHION TEMPLATE BLOCKS
@@ -361,16 +361,62 @@ export interface FashionProduct {
   badge?: string;
 }
 
+/** Context bridge — lets fashion blocks access real store products */
+export interface FashionStoreContextData {
+  products: Array<{
+    id: string; name: string; slug: string; price: number; compareAtPrice?: number;
+    currency: string; inStock: boolean; isFeatured: boolean;
+    images: Array<{ id: string; url: string; alt?: string }>;
+    category?: { id: string; name: string; slug: string };
+  }>;
+  currency: string;
+  storeSlug: string;
+}
+export const FashionStoreContext = createContext<FashionStoreContextData | null>(null);
+
 export interface FashionProductGridProps {
-  products: FashionProduct[];
+  products?: FashionProduct[];
   columns?: number;
   showCategory?: boolean;
   showHoverImage?: boolean;
   sectionTitle?: { subtitle?: string; title: string; description?: string };
   marginBottom?: string;
+  maxProducts?: number;
+  filter?: "featured" | "all";
 }
 
-export function FashionProductGrid({ products, columns = 4, showCategory = true, showHoverImage = true, sectionTitle, marginBottom = "60px" }: FashionProductGridProps) {
+export function FashionProductGrid({ products: propProducts, columns = 4, showCategory = true, showHoverImage = true, sectionTitle, marginBottom = "60px", maxProducts = 8, filter }: FashionProductGridProps) {
+  const storeCtx = useContext(FashionStoreContext);
+
+  // Convert real store products to FashionProduct format
+  const products: FashionProduct[] = (() => {
+    // If prop products are provided and not empty, use them
+    if (propProducts && propProducts.length > 0) return propProducts;
+    // Otherwise pull from store context
+    if (!storeCtx || storeCtx.products.length === 0) return propProducts || [];
+    
+    let storeProducts = storeCtx.products;
+    if (filter === "featured") {
+      const featured = storeProducts.filter(p => p.isFeatured);
+      if (featured.length > 0) storeProducts = featured;
+    }
+
+    const currencySymbols: Record<string, string> = { NGN: "₦", KES: "KSh", GHS: "GH₵", ZAR: "R", USD: "$", GBP: "£", EUR: "€" };
+    const sym = currencySymbols[storeCtx.currency] || storeCtx.currency;
+
+    return storeProducts.slice(0, maxProducts).map(p => ({
+      id: p.id,
+      name: p.name,
+      category: p.category?.name,
+      categoryLink: p.category?.slug ? `/store/${storeCtx.storeSlug}/shop?category=${p.category.slug}` : undefined,
+      price: p.compareAtPrice ? `${sym}${p.compareAtPrice.toLocaleString()}` : `${sym}${p.price.toLocaleString()}`,
+      salePrice: p.compareAtPrice ? `${sym}${p.price.toLocaleString()}` : undefined,
+      image: p.images[0]?.url || "",
+      hoverImage: p.images[1]?.url,
+      link: `/store/${storeCtx.storeSlug}/product/${p.slug}`,
+      badge: p.compareAtPrice ? "SALE" : undefined,
+    }));
+  })();
   const scopedCss = `
     .fpg-section { margin-bottom: ${marginBottom}; }
     .fpg-grid { 

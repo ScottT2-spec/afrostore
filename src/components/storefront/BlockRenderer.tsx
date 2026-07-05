@@ -1583,23 +1583,44 @@ const StoreSlugContext = createContext<string>("");
 export function PublicBlockRenderer({ block }: { block: BuilderBlock; isEditorMode?: boolean }) {
   // Check if it's a fashion template block
   if (block.type.startsWith("fashion")) {
-    try {
-      const { FASHION_BLOCKS } = require("@/components/storefront/TemplateBlockRenderer");
-      const { FashionFontLoader } = require("@/components/storefront/FashionTemplateBlocks");
-      const FashionComponent = FASHION_BLOCKS[block.type];
-      if (FashionComponent) {
-        return (
-          <>
-            <FashionFontLoader />
-            <FashionComponent {...block.props} />
-          </>
-        );
-      }
-    } catch { /* fallback below */ }
+    return <FashionBlockBridge block={block} />;
   }
   const Renderer = renderers[block.type];
   if (!Renderer) return null;
   return <Renderer props={block.props} />;
+}
+
+// Lazy-loaded fashion block bridge to avoid circular imports
+let _fashionLoaded = false;
+let _FASHION_BLOCKS: Record<string, React.ComponentType<Record<string, unknown>>> = {};
+let _FashionFontLoader: React.ComponentType | null = null;
+
+function FashionBlockBridge({ block }: { block: BuilderBlock }) {
+  const [, forceRender] = useState(0);
+  
+  useEffect(() => {
+    if (!_fashionLoaded) {
+      import("@/components/storefront/TemplateBlockRenderer").then((mod) => {
+        _FASHION_BLOCKS = mod.FASHION_BLOCKS;
+        return import("@/components/storefront/FashionTemplateBlocks");
+      }).then((mod) => {
+        _FashionFontLoader = mod.FashionFontLoader;
+        _fashionLoaded = true;
+        forceRender((n) => n + 1);
+      });
+    }
+  }, []);
+
+  if (!_fashionLoaded) return null;
+  const Component = _FASHION_BLOCKS[block.type];
+  if (!Component) return null;
+  const FontLoader = _FashionFontLoader;
+  return (
+    <>
+      {FontLoader && <FontLoader />}
+      <Component {...(block.props as Record<string, unknown>)} />
+    </>
+  );
 }
 
 export function RenderBlocks({ blocks, storeSlug, products, currency, addToCart, isWishlisted, toggleWishlist, addedToCart, isEditorMode = false, pageId, blockCount, dataSource, wrapBlock }: {

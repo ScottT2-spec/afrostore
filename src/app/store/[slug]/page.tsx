@@ -8,6 +8,7 @@ import Link from "next/link";
 import { RenderBlocks, type BuilderBlock } from "@/components/storefront/BlockRenderer";
 import { RenderTemplateBlocks } from "@/components/storefront/TemplateBlockRenderer";
 import { FASHION_TEMPLATE_PRESET } from "@/lib/templates/presets/fashion-preset";
+import { FashionStoreContext } from "@/components/storefront/FashionTemplateBlocks";
 import { getLinkedPageHref, parsePageContent, type PageSettings } from "@/lib/page-content";
 import { ThemeProvider, type ThemeData } from "@/components/storefront/ThemeProvider";
 import { useWishlist } from "@/hooks/useWishlist";
@@ -417,7 +418,9 @@ export default function StorePage() {
       ) : data.templateSlug === "fashion" ? (
         /* Fashion template — render pixel-perfect fashion blocks */
         <div>
-          <RenderTemplateBlocks blocks={FASHION_TEMPLATE_PRESET} />
+          <FashionStoreContext.Provider value={{ products: products as any, currency, storeSlug: slug }}>
+            <RenderTemplateBlocks blocks={FASHION_TEMPLATE_PRESET} />
+          </FashionStoreContext.Provider>
           {!isLanding && products.length > 0 && (
             <div className="text-center py-10">
               <Link
