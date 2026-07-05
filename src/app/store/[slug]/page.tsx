@@ -6,6 +6,8 @@ import { useState, useEffect, useMemo, useRef } from "react";
 import { useParams } from "next/navigation";
 import Link from "next/link";
 import { RenderBlocks, type BuilderBlock } from "@/components/storefront/BlockRenderer";
+import { RenderTemplateBlocks } from "@/components/storefront/TemplateBlockRenderer";
+import { FASHION_TEMPLATE_PRESET } from "@/lib/templates/presets/fashion-preset";
 import { getLinkedPageHref, parsePageContent, type PageSettings } from "@/lib/page-content";
 import { ThemeProvider, type ThemeData } from "@/components/storefront/ThemeProvider";
 import { useWishlist } from "@/hooks/useWishlist";
@@ -402,6 +404,21 @@ export default function StorePage() {
         <div style={buildPageBackgroundStyle(homePageSettings)}>
           <RenderBlocks blocks={homeBlocks} storeSlug={slug} products={products} currency={currency} addToCart={(p) => addToCart(p as unknown as Product)} isWishlisted={isWishlisted} toggleWishlist={toggleWishlist} addedToCart={addedToCart} />
           {!isLanding && products.length > 0 && !homeHasProductGrid && (
+            <div className="text-center py-10">
+              <Link
+                href={`/store/${slug}/shop`}
+                className="inline-flex items-center gap-2 rounded-2xl bg-surface-900 text-white px-8 py-3.5 text-sm font-bold hover:bg-surface-800 transition-all shadow-lg hover:-translate-y-0.5"
+              >
+                View All Products <ArrowRight className="h-4 w-4" />
+              </Link>
+            </div>
+          )}
+        </div>
+      ) : data.templateSlug === "fashion" ? (
+        /* Fashion template — render pixel-perfect fashion blocks */
+        <div>
+          <RenderTemplateBlocks blocks={FASHION_TEMPLATE_PRESET} />
+          {!isLanding && products.length > 0 && (
             <div className="text-center py-10">
               <Link
                 href={`/store/${slug}/shop`}
