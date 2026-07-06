@@ -437,6 +437,11 @@ export default function StorePage() {
             </div>
           )}
         </div>
+      ) : homeBlocks.length > 0 ? (
+        /* Fallback: render blocks even if hasHomeContent is false but blocks exist */
+        <div style={buildPageBackgroundStyle(homePageSettings)}>
+          <RenderBlocks blocks={homeBlocks} storeSlug={slug} products={products} currency={currency} addToCart={(p) => addToCart(p as unknown as Product)} isWishlisted={isWishlisted} toggleWishlist={toggleWishlist} addedToCart={addedToCart} />
+        </div>
       ) : (
         <div style={buildPageBackgroundStyle(homePageSettings)} className="min-h-[60vh] flex items-center justify-center px-4 sm:px-6 py-16">
           <div className="max-w-xl w-full rounded-3xl border border-dashed border-surface-200 bg-white p-8 sm:p-10 text-center shadow-sm">

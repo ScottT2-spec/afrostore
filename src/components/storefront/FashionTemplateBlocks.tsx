@@ -409,7 +409,7 @@ export function FashionProductGrid({ products: propProducts, columns = 4, showCa
   // Convert real store products to FashionProduct format
   const products: FashionProduct[] = (() => {
     // If no store context, use placeholder products from props
-    if (!storeCtx || storeCtx.products.length === 0) return propProducts || [];
+    if (!storeCtx || !storeCtx.products || storeCtx.products.length === 0) return propProducts || [];
     
     let storeProducts = storeCtx.products;
     
@@ -839,7 +839,7 @@ export function FashionBlogPosts({ posts: propPosts, columns = 2, sectionTitle, 
 
   // Convert real store blogs to FashionBlogPost format (same pattern as product grid)
   const posts: FashionBlogPost[] = (() => {
-    if (!storeCtx || storeCtx.blogs.length === 0) return propPosts || [];
+    if (!storeCtx || !storeCtx.blogs || storeCtx.blogs.length === 0) return propPosts || [];
 
     return storeCtx.blogs.slice(0, columns * 2).map((b) => {
       const pubDate = b.publishedAt ? new Date(b.publishedAt) : new Date(b.createdAt);

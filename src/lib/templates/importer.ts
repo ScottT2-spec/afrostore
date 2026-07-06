@@ -61,7 +61,20 @@ export async function importTemplateToSite(
 
   let siteTemplate;
   if (existing) {
-    siteTemplate = existing;
+    // If template already exists but isn't active, activate it
+    if (!existing.isActive) {
+      // Deactivate any other active templates for this site
+      await prisma.siteTemplate.updateMany({
+        where: { siteId, isActive: true },
+        data: { isActive: false },
+      });
+      siteTemplate = await prisma.siteTemplate.update({
+        where: { id: existing.id },
+        data: { isActive: true },
+      });
+    } else {
+      siteTemplate = existing;
+    }
   } else {
     // Deactivate any other active templates for this site
     await prisma.siteTemplate.updateMany({
@@ -111,7 +124,7 @@ export async function importTemplateToSite(
 
   let homePage;
   if (existingHome) {
-    // Only update if the page has no content yet
+    // Always update the page content when using a template preset to ensure blocks are loaded
     const existingContent = existingHome.content as Record<string, unknown> | null;
     const existingBlocks = Array.isArray(existingContent)
       ? existingContent
@@ -119,7 +132,9 @@ export async function importTemplateToSite(
         ? (existingContent as Record<string, unknown>).blocks
         : [];
 
-    if (!Array.isArray(existingBlocks) || (existingBlocks as unknown[]).length === 0) {
+    // Update if page has no content OR if we're using a preset template (to ensure blocks are loaded)
+    if (!Array.isArray(existingBlocks) || (existingBlocks as unknown[]).length === 0 || preset) {
+      console.log(`[Template Import] Updating existing HOME page with ${homeBlocks.length} blocks for template "${catalogEntry.slug}"`);
       homePage = await prisma.page.update({
         where: { id: existingHome.id },
         data: {
@@ -128,9 +143,11 @@ export async function importTemplateToSite(
         },
       });
     } else {
+      console.log(`[Template Import] HOME page already has ${existingBlocks.length} blocks, skipping update`);
       homePage = existingHome;
     }
   } else {
+    console.log(`[Template Import] Creating new HOME page with ${homeBlocks.length} blocks for template "${catalogEntry.slug}"`);
     homePage = await prisma.page.create({
       data: {
         siteId,
