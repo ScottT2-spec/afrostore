@@ -408,7 +408,9 @@ export default function StorePage() {
       {hasHomeContent ? (
         /* Builder blocks Home page — render template blocks */
         <div style={buildPageBackgroundStyle(homePageSettings)}>
+          <FashionStoreContext.Provider value={{ products: products as any, blogs: data.blogs || [], currency, storeSlug: slug }}>
           <RenderBlocks blocks={homeBlocks} storeSlug={slug} products={products} currency={currency} addToCart={(p) => addToCart(p as unknown as Product)} isWishlisted={isWishlisted} toggleWishlist={toggleWishlist} addedToCart={addedToCart} />
+          </FashionStoreContext.Provider>
           {!isLanding && products.length > 0 && !homeHasProductGrid && (
             <div className="text-center py-10">
               <Link
