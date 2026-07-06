@@ -825,6 +825,12 @@ export interface FashionBlogPostsProps {
 }
 
 export function FashionBlogPosts({ posts, columns = 2, sectionTitle, marginBottom = "30px" }: FashionBlogPostsProps) {
+  const storeCtx = useContext(FashionStoreContext);
+  const fixLink = (link: string) => {
+    if (link && link.startsWith("/store/")) return link;
+    if (storeCtx?.storeSlug) return `/store/${storeCtx.storeSlug}`;
+    return link || "#";
+  };
   const scopedCss = `
     .fbp-section { margin-bottom: ${marginBottom}; }
     .fbp-grid { display: grid; grid-template-columns: repeat(${columns}, 1fr); gap: 20px; }
@@ -894,7 +900,7 @@ export function FashionBlogPosts({ posts, columns = 2, sectionTitle, marginBotto
                 <span className="fbp-date-day">{p.date.day}</span>
                 <span className="fbp-date-month">{p.date.month}</span>
               </div>
-              <a href={p.link} style={{ position: "absolute", inset: 0, zIndex: 3 }} aria-label={p.title} />
+              <a href={fixLink(p.link)} style={{ position: "absolute", inset: 0, zIndex: 3 }} aria-label={p.title} />
             </div>
             <div className="fbp-content">
               <div className="fbp-cats">
@@ -902,14 +908,14 @@ export function FashionBlogPosts({ posts, columns = 2, sectionTitle, marginBotto
                   <span key={ci} className="fbp-cat">{c}</span>
                 ))}
               </div>
-              <h3 className="fbp-title"><a href={p.link}>{p.title}</a></h3>
+              <h3 className="fbp-title"><a href={fixLink(p.link)}>{p.title}</a></h3>
               <div className="fbp-meta">
                 {p.author.avatar && <img src={p.author.avatar} alt={p.author.name} className="fbp-meta-avatar" />}
                 <span>Posted by <strong>{p.author.name}</strong></span>
                 {p.commentCount !== undefined && <span>💬 {p.commentCount}</span>}
               </div>
               <p className="fbp-excerpt">{p.excerpt}</p>
-              <a href={p.link} className="fbp-read-more">Continue reading</a>
+              <a href={fixLink(p.link)} className="fbp-read-more">Continue reading</a>
             </div>
           </article>
         ))}
