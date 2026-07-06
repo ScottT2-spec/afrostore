@@ -1,12 +1,14 @@
 import { prisma } from "@/lib/db";
 import { TEMPLATES } from "@/lib/templates/catalog";
 import { FASHION_TEMPLATE_PRESET } from "@/lib/templates/presets/fashion-preset";
+import { FASHION_SAMPLE_PRODUCTS } from "@/lib/templates/presets/fashion-sample-products";
 
 /**
  * Import a template into a site by:
  * 1. Upserting a Template record in the DB
  * 2. Creating a SiteTemplate linking the site to that template
- * 3. Creating a HOME page with an htmlEmbed block pointing to the static template HTML
+ * 3. Creating a HOME page with editable blocks (or htmlEmbed fallback)
+ * 4. Creating sample products so the store isn't empty
  */
 export async function importTemplateToSite(
   siteId: string,
@@ -141,10 +143,63 @@ export async function importTemplateToSite(
     });
   }
 
+  // ── Create sample products for templates that have them ──
+  let sampleProducts: unknown[] = [];
+  const SAMPLE_PRODUCTS: Record<string, typeof FASHION_SAMPLE_PRODUCTS> = {
+    fashion: FASHION_SAMPLE_PRODUCTS,
+  };
+
+  const samples = SAMPLE_PRODUCTS[catalogEntry.slug];
+  if (samples && samples.length > 0) {
+    // Check if site already has products (don't add samples twice)
+    const existingProductCount = await prisma.product.count({ where: { siteId } });
+    if (existingProductCount === 0) {
+      // Get the site's currency
+      const site = await prisma.site.findUnique({ where: { id: siteId }, select: { currency: true } });
+      const currency = site?.currency || "USD";
+
+      for (const sample of samples) {
+        const product = await prisma.product.create({
+          data: {
+            siteId,
+            name: sample.name,
+            slug: sample.slug,
+            description: sample.description || "",
+            price: sample.price,
+            compareAtPrice: sample.compareAtPrice || null,
+            currency,
+            stock: sample.stock ?? 10,
+            status: "ACTIVE",
+            isFeatured: sample.isFeatured ?? false,
+            tags: sample.tags || [],
+            position: sample.position ?? 0,
+          },
+        });
+
+        // Create product images
+        if (sample.images && sample.images.length > 0) {
+          for (let i = 0; i < sample.images.length; i++) {
+            await prisma.productImage.create({
+              data: {
+                productId: product.id,
+                url: sample.images[i],
+                alt: sample.name,
+                position: i,
+              },
+            });
+          }
+        }
+
+        sampleProducts.push(product);
+      }
+    }
+  }
+
   return {
     template,
     siteTemplate,
     pages: [homePage],
+    sampleProducts,
     themeConfig: {},
     reused: !!existing,
   };
