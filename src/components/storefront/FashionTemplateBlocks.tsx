@@ -373,13 +373,18 @@ export interface FashionProduct {
   badge?: string;
 }
 
-/** Context bridge — lets fashion blocks access real store products */
+/** Context bridge — lets fashion blocks access real store products and blogs */
 export interface FashionStoreContextData {
   products: Array<{
     id: string; name: string; slug: string; price: number; compareAtPrice?: number;
     currency: string; inStock: boolean; isFeatured: boolean; tags?: string[];
     images: Array<{ id: string; url: string; alt?: string }>;
     category?: { id: string; name: string; slug: string };
+  }>;
+  blogs: Array<{
+    id: string; title: string; slug: string; excerpt?: string | null;
+    coverImage?: string | null; author?: string | null; category?: string | null;
+    tags: string[]; publishedAt?: string | null; createdAt: string;
   }>;
   currency: string;
   storeSlug: string;
@@ -824,13 +829,35 @@ export interface FashionBlogPostsProps {
   marginBottom?: string;
 }
 
-export function FashionBlogPosts({ posts, columns = 2, sectionTitle, marginBottom = "30px" }: FashionBlogPostsProps) {
+export function FashionBlogPosts({ posts: propPosts, columns = 2, sectionTitle, marginBottom = "30px" }: FashionBlogPostsProps) {
   const storeCtx = useContext(FashionStoreContext);
   const fixLink = (link: string) => {
     if (link && link.startsWith("/store/")) return link;
     if (storeCtx?.storeSlug) return `/store/${storeCtx.storeSlug}`;
     return link || "#";
   };
+
+  // Convert real store blogs to FashionBlogPost format (same pattern as product grid)
+  const posts: FashionBlogPost[] = (() => {
+    if (!storeCtx || storeCtx.blogs.length === 0) return propPosts || [];
+
+    return storeCtx.blogs.slice(0, columns * 2).map((b) => {
+      const pubDate = b.publishedAt ? new Date(b.publishedAt) : new Date(b.createdAt);
+      const day = pubDate.getDate().toString().padStart(2, "0");
+      const month = pubDate.toLocaleString("en-US", { month: "short" });
+
+      return {
+        image: b.coverImage || "https://images.unsplash.com/photo-1558171813-4c088753af8f?w=400&h=400&fit=crop",
+        title: b.title,
+        excerpt: b.excerpt || "",
+        date: { day, month },
+        categories: b.category ? [b.category] : [],
+        author: { name: b.author || "Store Team" },
+        link: `/store/${storeCtx.storeSlug}/blog/${b.slug}`,
+        commentCount: 0,
+      };
+    });
+  })();
   const scopedCss = `
     .fbp-section { margin-bottom: ${marginBottom}; }
     .fbp-grid { display: grid; grid-template-columns: repeat(${columns}, 1fr); gap: 20px; }

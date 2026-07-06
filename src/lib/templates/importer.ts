@@ -2,6 +2,7 @@ import { prisma } from "@/lib/db";
 import { TEMPLATES } from "@/lib/templates/catalog";
 import { FASHION_TEMPLATE_PRESET } from "@/lib/templates/presets/fashion-preset";
 import { FASHION_SAMPLE_PRODUCTS } from "@/lib/templates/presets/fashion-sample-products";
+import { FASHION_SAMPLE_BLOGS } from "@/lib/templates/presets/fashion-sample-blogs";
 
 /**
  * Import a template into a site by:
@@ -195,11 +196,45 @@ export async function importTemplateToSite(
     }
   }
 
+  // ── Create sample blog posts for templates that have them ──
+  let sampleBlogs: unknown[] = [];
+  const SAMPLE_BLOGS: Record<string, typeof FASHION_SAMPLE_BLOGS> = {
+    fashion: FASHION_SAMPLE_BLOGS,
+  };
+
+  const blogSamples = SAMPLE_BLOGS[catalogEntry.slug];
+  if (blogSamples && blogSamples.length > 0) {
+    // Check if site already has blog posts (don't add samples twice)
+    const existingBlogCount = await prisma.blog.count({ where: { siteId } });
+    if (existingBlogCount === 0) {
+      for (const sample of blogSamples) {
+        const blog = await prisma.blog.create({
+          data: {
+            siteId,
+            title: sample.title,
+            slug: sample.slug,
+            excerpt: sample.excerpt,
+            content: { html: sample.contentHtml },
+            contentHtml: sample.contentHtml,
+            coverImage: sample.coverImage,
+            author: sample.author,
+            category: sample.category,
+            tags: sample.tags,
+            status: sample.status,
+            publishedAt: new Date(),
+          },
+        });
+        sampleBlogs.push(blog);
+      }
+    }
+  }
+
   return {
     template,
     siteTemplate,
     pages: [homePage],
     sampleProducts,
+    sampleBlogs,
     themeConfig: {},
     reused: !!existing,
   };

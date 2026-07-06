@@ -85,6 +85,7 @@ export async function GET(req: NextRequest, { params }: Params) {
       activeTheme,
       activeTemplate,
       customization,
+      blogs,
     ] = await Promise.all([
       prisma.siteSettings.findUnique({
         where: { siteId: site.id },
@@ -195,6 +196,24 @@ export async function GET(req: NextRequest, { params }: Params) {
           where: { siteId: site.id },
         })
       ),
+
+      prisma.blog.findMany({
+        where: { siteId: site.id, status: "PUBLISHED" },
+        select: {
+          id: true,
+          title: true,
+          slug: true,
+          excerpt: true,
+          coverImage: true,
+          author: true,
+          category: true,
+          tags: true,
+          publishedAt: true,
+          createdAt: true,
+        },
+        orderBy: [{ publishedAt: "desc" }, { createdAt: "desc" }],
+        take: 10,
+      }),
     ]);
     const resolvedCustomization = customization;
 
@@ -313,6 +332,7 @@ export async function GET(req: NextRequest, { params }: Params) {
       templateSlug: activeTemplate?.template?.slug || null,
       customization: resolvedCustomization,
       theme: resolvedTheme,
+      blogs: blogs || [],
     });
   } catch (err) {
     console.error("Storefront fetch error:", err);

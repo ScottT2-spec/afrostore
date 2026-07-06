@@ -102,6 +102,11 @@ interface StoreData {
   templateSlug: string | null;
   theme: ThemeData | null;
   customization?: SiteCustomizationDocument | null;
+  blogs?: Array<{
+    id: string; title: string; slug: string; excerpt?: string | null;
+    coverImage?: string | null; author?: string | null; category?: string | null;
+    tags: string[]; publishedAt?: string | null; createdAt: string;
+  }>;
 }
 
 interface CartItem {
@@ -418,7 +423,7 @@ export default function StorePage() {
       ) : data.templateSlug === "fashion" ? (
         /* Fashion template — render pixel-perfect fashion blocks */
         <div>
-          <FashionStoreContext.Provider value={{ products: products as any, currency, storeSlug: slug }}>
+          <FashionStoreContext.Provider value={{ products: products as any, blogs: data.blogs || [], currency, storeSlug: slug }}>
             <RenderTemplateBlocks blocks={FASHION_TEMPLATE_PRESET} />
           </FashionStoreContext.Provider>
           {!isLanding && products.length > 0 && (
