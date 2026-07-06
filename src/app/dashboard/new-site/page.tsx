@@ -36,7 +36,7 @@ const INDUSTRIES = [
 ];
 
 const LAUNCH_METHODS = [
-  { id: 'quick', icon: Zap, title: 'Fast Import', desc: 'Choose a package and import it immediately', color: 'border-emerald-500 bg-emerald-50' },
+  { id: 'quick', icon: Zap, title: 'Build with AI', desc: 'Let AI help you build your site quickly', color: 'border-emerald-500 bg-emerald-50' },
   { id: 'template', icon: Layout, title: 'Use a Template', desc: 'Pick a professionally designed template', color: 'border-blue-500 bg-blue-50' },
   { id: 'blank', icon: Square, title: 'Blank Canvas', desc: 'Start from scratch', color: 'border-gray-500 bg-gray-50' },
 ];
@@ -154,6 +154,13 @@ export default function NewSitePage() {
     selectedTemplateId,
   ]);
 
+  // Scroll to top when entering template selection step (step 5)
+  useEffect(() => {
+    if (step === 5 && !created) {
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+  }, [step, created]);
+
   const totalSteps = 7;
   const canProceed = () => {
     switch (step) {
@@ -264,6 +271,25 @@ export default function NewSitePage() {
     if (createdSiteId) {
       localStorage.setItem(`activeSiteId:${user?.id || "guest"}`, createdSiteId);
       localStorage.removeItem('activeSiteId');
+      router.push(`/dashboard/sites/${createdSiteId}/customize`);
+    }
+  };
+
+  // Navigate to dashboard (used by "Skip & Go to Dashboard" button)
+  const handleSkipToDashboard = () => {
+    if (createdSiteId) {
+      localStorage.setItem(`activeSiteId:${user?.id || "guest"}`, createdSiteId);
+      localStorage.removeItem('activeSiteId');
+    }
+    router.push('/dashboard');
+  };
+
+  // Publish the site (used by "Publish" button)
+  const handlePublish = async () => {
+    if (createdSiteId) {
+      localStorage.setItem(`activeSiteId:${user?.id || "guest"}`, createdSiteId);
+      localStorage.removeItem('activeSiteId');
+      // Navigate to customize page where publishing can be managed
       router.push(`/dashboard/sites/${createdSiteId}/customize`);
     }
   };
@@ -540,6 +566,10 @@ export default function NewSitePage() {
                       onSelect={(t) => {
                         setSelectedTemplate({ slug: t.slug, name: t.name, category: t.category, description: t.description, previewImage: t.previewImage, previewUrl: t.previewUrl, recommendationKeywords: t.industries });
                         setSelectedTemplateId(t.slug);
+                        // Smooth scroll to bottom after template selection so user sees theme customization
+                        setTimeout(() => {
+                          window.scrollTo({ top: document.body.scrollHeight, behavior: 'smooth' });
+                        }, 100);
                       }}
                     />
                     {selectedTemplate && (
@@ -565,32 +595,40 @@ export default function NewSitePage() {
                       <Palette className="w-5 h-5 text-gray-500" />
                       <h2 className="font-semibold text-gray-900">Theme customization</h2>
                     </div>
-                    <div className="grid sm:grid-cols-5 gap-3">
+                    {/* Color inputs - all visible by default with proper spacing */}
+                    <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-4">
                       {(['primary', 'secondary', 'accent', 'background', 'text'] as const).map(key => (
-                        <label key={key} className="text-xs font-medium text-gray-600 capitalize">
-                          {key}
+                        <div key={key} className="flex flex-col">
+                          <label className="text-xs font-medium text-gray-600 capitalize mb-2">{key}</label>
                           <input
                             type="color"
                             value={branding[key]}
                             onChange={e => setBranding(prev => ({ ...prev, [key]: e.target.value }))}
-                            className="mt-1 h-10 w-full rounded border border-gray-200 p-1"
+                            className="h-12 w-full rounded-lg border border-gray-200 p-1 cursor-pointer hover:border-gray-300 transition"
                           />
-                        </label>
+                        </div>
                       ))}
                     </div>
-                    <div className="grid sm:grid-cols-2 gap-3 mt-4">
-                      <input
-                        value={branding.headingFont}
-                        onChange={e => setBranding(prev => ({ ...prev, headingFont: e.target.value }))}
-                        className="rounded-lg border border-gray-200 px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-gray-900"
-                        placeholder="Heading font"
-                      />
-                      <input
-                        value={branding.bodyFont}
-                        onChange={e => setBranding(prev => ({ ...prev, bodyFont: e.target.value }))}
-                        className="rounded-lg border border-gray-200 px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-gray-900"
-                        placeholder="Body font"
-                      />
+                    {/* Font inputs */}
+                    <div className="grid sm:grid-cols-2 gap-4 mt-5">
+                      <div>
+                        <label className="text-xs font-medium text-gray-600 mb-2 block">Heading font</label>
+                        <input
+                          value={branding.headingFont}
+                          onChange={e => setBranding(prev => ({ ...prev, headingFont: e.target.value }))}
+                          className="w-full rounded-lg border border-gray-200 px-3 py-2.5 text-sm outline-none focus:ring-2 focus:ring-gray-900"
+                          placeholder="e.g. Plus Jakarta Sans"
+                        />
+                      </div>
+                      <div>
+                        <label className="text-xs font-medium text-gray-600 mb-2 block">Body font</label>
+                        <input
+                          value={branding.bodyFont}
+                          onChange={e => setBranding(prev => ({ ...prev, bodyFont: e.target.value }))}
+                          className="w-full rounded-lg border border-gray-200 px-3 py-2.5 text-sm outline-none focus:ring-2 focus:ring-gray-900"
+                          placeholder="e.g. Inter"
+                        />
+                      </div>
                     </div>
                   </div>
                 )}
@@ -618,13 +656,7 @@ export default function NewSitePage() {
                 Customize Site <ArrowRight className="h-4 w-4" />
               </button>
               <button
-                onClick={() => {
-                  if (createdSiteId) {
-                    localStorage.setItem(`activeSiteId:${user?.id || "guest"}`, createdSiteId);
-                    localStorage.removeItem('activeSiteId');
-                  }
-                  router.push('/dashboard');
-                }}
+                onClick={handleSkipToDashboard}
                 className="inline-flex items-center gap-2 rounded-lg border border-gray-200 bg-white px-6 py-3 font-medium text-gray-700 hover:bg-gray-50"
               >
                 Go to Dashboard
@@ -722,7 +754,7 @@ export default function NewSitePage() {
           <div className="flex gap-3">
             {step >= 6 && (
               <button
-                onClick={handleFinish}
+                onClick={handleSkipToDashboard}
                 className="px-6 py-2.5 text-gray-600 hover:text-gray-800 transition"
               >
                 Skip & Go to Dashboard
@@ -730,7 +762,7 @@ export default function NewSitePage() {
             )}
             {step === 7 ? (
               <button
-                onClick={handleFinish}
+                onClick={handlePublish}
                 className="flex items-center gap-2 px-6 py-2.5 bg-gray-900 text-white rounded-lg hover:bg-gray-800 transition font-medium"
               >
                 Publish <Check className="w-4 h-4" />
