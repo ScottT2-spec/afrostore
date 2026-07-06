@@ -86,6 +86,12 @@ export interface FashionHeroSliderProps {
 }
 
 export function FashionHeroSlider({ slides, autoplaySpeed = 5000, minHeight = "560px" }: FashionHeroSliderProps) {
+  const storeCtx = useContext(FashionStoreContext);
+  const fixLink = (link: string) => {
+    if (link && link.startsWith("/store/")) return link;
+    if (storeCtx?.storeSlug) return `/store/${storeCtx.storeSlug}/shop`;
+    return link || "#";
+  };
   const [current, setCurrent] = useState(0);
   const [isTransitioning, setIsTransitioning] = useState(false);
   const timerRef = useRef<ReturnType<typeof setInterval> | null>(null);
@@ -182,7 +188,7 @@ export function FashionHeroSlider({ slides, autoplaySpeed = 5000, minHeight = "5
                       <div className={`fh-title fh-title-${scheme} fh-anim-in`} style={{ animationDelay: "0.4s" }}>{slide.titleLine2}</div>
                       <div className={`fh-desc fh-desc-${scheme} fh-anim-in`} style={{ animationDelay: "0.5s", marginLeft: align === "center" ? "auto" : undefined, marginRight: align === "center" ? "auto" : undefined }}>{slide.description}</div>
                       <div className="fh-anim-in" style={{ animationDelay: "0.6s" }}>
-                        <a href={slide.buttonLink} className="fh-btn">{slide.buttonText}</a>
+                        <a href={fixLink(slide.buttonLink)} className="fh-btn">{slide.buttonText}</a>
                       </div>
                     </>
                   )}
@@ -221,6 +227,12 @@ export interface FashionPromoBannersProps {
 }
 
 export function FashionPromoBanners({ banners }: FashionPromoBannersProps) {
+  const storeCtx = useContext(FashionStoreContext);
+  const fixLink = (link: string) => {
+    if (link && link.startsWith("/store/")) return link;
+    if (storeCtx?.storeSlug) return `/store/${storeCtx.storeSlug}/shop`;
+    return link || "#";
+  };
   const scopedCss = `
     .fp-banners { display: grid; grid-template-columns: repeat(3, 1fr); gap: 30px; margin-bottom: 80px; }
     .fp-banner { position: relative; overflow: hidden; cursor: pointer; }
@@ -282,7 +294,7 @@ export function FashionPromoBanners({ banners }: FashionPromoBannersProps) {
                   <div className="fp-banner-btn">{b.buttonText}</div>
                 </div>
               </div>
-              <a href={b.buttonLink} className="fp-banner-link" aria-label={b.title} />
+              <a href={fixLink(b.buttonLink)} className="fp-banner-link" aria-label={b.title} />
             </div>
           );
         })}
@@ -589,6 +601,17 @@ export interface FashionCategoryCardsProps {
 }
 
 export function FashionCategoryCards({ categories, columns = 4, sectionTitle, marginBottom = "50px" }: FashionCategoryCardsProps) {
+  const storeCtx = useContext(FashionStoreContext);
+
+  // Resolve category links to proper store URLs
+  const resolveLink = (link: string, catName: string) => {
+    if (link && link.startsWith("/store/")) return link;
+    if (storeCtx?.storeSlug) {
+      const catSlug = catName.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/(^-|-$)/g, "");
+      return `/store/${storeCtx.storeSlug}/shop?category=${catSlug}`;
+    }
+    return link || "#";
+  };
   const scopedCss = `
     .fcc-section { margin-bottom: ${marginBottom}; }
     .fcc-grid { display: grid; grid-template-columns: repeat(${columns}, 1fr); gap: 20px; }
@@ -641,11 +664,11 @@ export function FashionCategoryCards({ categories, columns = 4, sectionTitle, ma
               <h3 className="fcc-name">{c.name}</h3>
               {c.productCount !== undefined && (
                 <div className="fcc-count">
-                  <a href={c.link}>{c.productCount} products</a>
+                  <a href={resolveLink(c.link, c.name)}>{c.productCount} products</a>
                 </div>
               )}
             </div>
-            <a href={c.link} className="fcc-link" aria-label={c.name} />
+            <a href={resolveLink(c.link, c.name)} className="fcc-link" aria-label={c.name} />
           </div>
         ))}
       </div>
