@@ -831,45 +831,6 @@ export interface FashionBlogPostsProps {
 
 export function FashionBlogPosts({ posts: propPosts, columns = 2, sectionTitle, marginBottom = "30px" }: FashionBlogPostsProps) {
   const storeCtx = useContext(FashionStoreContext);
-  const [livePosts, setLivePosts] = useState<FashionBlogPost[]>([]);
-  const [fetched, setFetched] = useState(false);
-
-  // Fetch real blog posts from store API
-  useEffect(() => {
-    if (!storeCtx?.storeSlug) return;
-    fetch(`/api/storefront/${storeCtx.storeSlug}/blogs?limit=4`)
-      .then(res => res.json())
-      .then(data => {
-        if (data.success && data.data?.blogs?.length > 0) {
-          const mapped: FashionBlogPost[] = data.data.blogs.map((b: Record<string, unknown>) => {
-            const published = b.publishedAt ? new Date(b.publishedAt as string) : new Date(b.createdAt as string);
-            const months = ["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"];
-            return {
-              image: (b.coverImage as string) || "",
-              title: b.title as string,
-              excerpt: (b.excerpt as string) || "",
-              date: { day: String(published.getDate()).padStart(2, "0"), month: months[published.getMonth()] },
-              categories: b.category ? [b.category as string] : [],
-              author: { name: (b.author as string) || "Author" },
-              link: `/store/${storeCtx.storeSlug}/blog/${b.slug as string}`,
-              commentCount: 0,
-            };
-          });
-          setLivePosts(mapped);
-        }
-        setFetched(true);
-      })
-      .catch(() => setFetched(true));
-  }, [storeCtx?.storeSlug]);
-
-  const posts = livePosts.length > 0 ? livePosts : propPosts;
-
-  const blogLink = (link: string, postSlug?: string) => {
-    if (link && link.startsWith("/store/")) return link;
-    if (storeCtx?.storeSlug && postSlug) return `/store/${storeCtx.storeSlug}/blog/${postSlug}`;
-    if (storeCtx?.storeSlug) return `/store/${storeCtx.storeSlug}`;
-    return link || "#";
-  };
 
   // Convert real store blogs to FashionBlogPost format (same pattern as product grid)
   const posts: FashionBlogPost[] = (() => {
@@ -961,7 +922,7 @@ export function FashionBlogPosts({ posts: propPosts, columns = 2, sectionTitle, 
                 <span className="fbp-date-day">{p.date.day}</span>
                 <span className="fbp-date-month">{p.date.month}</span>
               </div>
-              <a href={blogLink(p.link, p.link.split("/").pop())} style={{ position: "absolute", inset: 0, zIndex: 3 }} aria-label={p.title} />
+              <a href={p.link} style={{ position: "absolute", inset: 0, zIndex: 3 }} aria-label={p.title} />
             </div>
             <div className="fbp-content">
               <div className="fbp-cats">
@@ -969,14 +930,14 @@ export function FashionBlogPosts({ posts: propPosts, columns = 2, sectionTitle, 
                   <span key={ci} className="fbp-cat">{c}</span>
                 ))}
               </div>
-              <h3 className="fbp-title"><a href={blogLink(p.link, p.link.split("/").pop())}>{p.title}</a></h3>
+              <h3 className="fbp-title"><a href={p.link}>{p.title}</a></h3>
               <div className="fbp-meta">
                 {p.author.avatar && <img src={p.author.avatar} alt={p.author.name} className="fbp-meta-avatar" />}
                 <span>Posted by <strong>{p.author.name}</strong></span>
                 {p.commentCount !== undefined && <span>💬 {p.commentCount}</span>}
               </div>
               <p className="fbp-excerpt">{p.excerpt}</p>
-              <a href={blogLink(p.link, p.link.split("/").pop())} className="fbp-read-more">Continue reading</a>
+              <a href={p.link} className="fbp-read-more">Continue reading</a>
             </div>
           </article>
         ))}

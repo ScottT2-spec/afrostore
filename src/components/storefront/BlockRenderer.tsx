@@ -1653,7 +1653,7 @@ export function RenderBlocks({ blocks, storeSlug, products, currency, addToCart,
   const wrappedContent = storeSlug ? (
     <StoreSlugContext.Provider value={storeSlug}>
       <StoreContext.Provider value={{ slug: storeSlug || "", products: products || [], currency: currency || "NGN", addToCart, isWishlisted, toggleWishlist, addedToCart }}>
-        <FashionStoreContext.Provider value={hasFashionBlocks ? { products: (products || []) as unknown as FashionStoreContextData["products"], currency: currency || "NGN", storeSlug: storeSlug || "" } : null as unknown as FashionStoreContextData}>
+        <FashionStoreContext.Provider value={hasFashionBlocks ? { products: (products || []) as unknown as FashionStoreContextData["products"], blogs: [], currency: currency || "NGN", storeSlug: storeSlug || "" } : null as unknown as FashionStoreContextData}>
         <div className="relative">
           {isEditorMode && (
             <div className="pointer-events-none sticky top-0 z-30 border-b border-brand-200 bg-brand-50/95 px-4 py-2 text-[10px] font-mono text-brand-800 backdrop-blur">
