@@ -391,9 +391,7 @@ export function FashionProductGrid({ products: propProducts, columns = 4, showCa
 
   // Convert real store products to FashionProduct format
   const products: FashionProduct[] = (() => {
-    // If prop products are provided and not empty, use them
-    if (propProducts && propProducts.length > 0) return propProducts;
-    // Otherwise pull from store context
+    // If no store context, use placeholder products from props
     if (!storeCtx || storeCtx.products.length === 0) return propProducts || [];
     
     let storeProducts = storeCtx.products;
@@ -417,6 +415,9 @@ export function FashionProductGrid({ products: propProducts, columns = 4, showCa
       );
       if (tagged.length > 0) storeProducts = tagged;
     }
+
+    // If filtering returned no results, fall back to placeholder products
+    if (storeProducts.length === 0) return propProducts || [];
 
     const currencySymbols: Record<string, string> = { NGN: "₦", KES: "KSh", GHS: "GH₵", ZAR: "R", USD: "$", GBP: "£", EUR: "€" };
     const sym = currencySymbols[storeCtx.currency] || storeCtx.currency;
