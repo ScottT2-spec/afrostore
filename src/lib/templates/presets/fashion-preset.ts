@@ -101,16 +101,7 @@ export const FASHION_TEMPLATE_PRESET: TemplateBlock[] = [
         title: "FEATURED PRODUCTS",
         description: "Handpicked items from our latest collections, curated just for you.",
       },
-      products: [
-        { id: "1", name: "White Bow Back Shirt", category: "Fashion", price: "$199.00", image: "https://images.unsplash.com/photo-1562157873-818bc0726f68?w=290&h=330&fit=crop", link: "/shop" },
-        { id: "2", name: "Mint Floral Blouse", category: "Fashion", price: "$249.00", salePrice: "$199.00", image: "https://images.unsplash.com/photo-1594938298603-c8148c4dae35?w=290&h=330&fit=crop", link: "/shop", badge: "SALE" },
-        { id: "3", name: "Fuller Bust Shirt", category: "Fashion", price: "$149.00", image: "https://images.unsplash.com/photo-1564257631407-4deb1f99d992?w=290&h=330&fit=crop", link: "/shop" },
-        { id: "4", name: "Check Shirt with Ruffle", category: "Fashion", price: "$85.00", image: "https://images.unsplash.com/photo-1551488831-00ddcb6c6bd3?w=290&h=330&fit=crop", link: "/shop" },
-        { id: "5", name: "Lace Insert Shirt", category: "Fashion", price: "$99.00", image: "https://images.unsplash.com/photo-1485968579580-b6d095142e6e?w=290&h=330&fit=crop", link: "/shop" },
-        { id: "6", name: "Bardot Puff Sleeve", category: "Fashion", price: "$120.00", image: "https://images.unsplash.com/photo-1539109136881-3be0616acf4b?w=290&h=330&fit=crop", link: "/shop" },
-        { id: "7", name: "Fluted Crop Top", category: "Fashion", price: "$66.00", image: "https://images.unsplash.com/photo-1515886657613-9f3515b0c78f?w=290&h=330&fit=crop", link: "/shop" },
-        { id: "8", name: "Stripe Bow Back Top", category: "Fashion", price: "$75.00", image: "https://images.unsplash.com/photo-1496747611176-843222e1e57c?w=290&h=330&fit=crop", link: "/shop" },
-      ],
+      products: [],
     },
   },
 
@@ -151,12 +142,7 @@ export const FASHION_TEMPLATE_PRESET: TemplateBlock[] = [
         title: "OUR BESTSELLERS",
         description: "The most loved items by our customers — tried, tested, and trending.",
       },
-      products: [
-        { id: "b1", name: "Contrast Collar Blouse", category: "Fashion", price: "$85.00", image: "https://images.unsplash.com/photo-1509631179647-0177331693ae?w=290&h=330&fit=crop", link: "/shop" },
-        { id: "b2", name: "Wrap Front Top", category: "Fashion", price: "$45.00", image: "https://images.unsplash.com/photo-1581044777550-4cfa60707998?w=290&h=330&fit=crop", link: "/shop" },
-        { id: "b3", name: "Floral Midi Dress", category: "Fashion", price: "$159.00", image: "https://images.unsplash.com/photo-1572804013309-59a88b7e92f1?w=290&h=330&fit=crop", link: "/shop" },
-        { id: "b4", name: "Classic Denim Jacket", category: "Fashion", price: "$220.00", image: "https://images.unsplash.com/photo-1551028719-00167b16eac5?w=290&h=330&fit=crop", link: "/shop" },
-      ],
+      products: [],
     },
   },
 

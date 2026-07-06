@@ -497,6 +497,31 @@ export function FashionProductGrid({ products: propProducts, columns = 4, showCa
     @media (max-width: 767px) { .fpg-grid { grid-template-columns: repeat(2, 1fr); gap: 10px; } }
   `;
 
+  // Fix broken links — ensure they point to proper product pages
+  const resolveLink = (link: string, productName: string) => {
+    if (link && link.startsWith("/store/")) return link;
+    // Generate a proper link from context if available
+    if (storeCtx?.storeSlug) {
+      const slug = productName.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/(^-|-$)/g, "");
+      return `/store/${storeCtx.storeSlug}/product/${slug}`;
+    }
+    return link || "#";
+  };
+
+  if (products.length === 0) {
+    return (
+      <div className="fpg-section" style={containerStyle}>
+        <ScopedStyles id="product-grid" css={scopedCss} />
+        {sectionTitle && (
+          <FashionSectionTitle subtitle={sectionTitle.subtitle} title={sectionTitle.title} description={sectionTitle.description} />
+        )}
+        <div style={{ textAlign: "center", padding: "40px 20px", color: TOKENS.textColor, fontFamily: TOKENS.bodyFont }}>
+          <p>No products yet. Add products from your dashboard to see them here.</p>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="fpg-section" style={containerStyle}>
       <ScopedStyles id="product-grid" css={scopedCss} />
@@ -508,10 +533,12 @@ export function FashionProductGrid({ products: propProducts, columns = 4, showCa
         />
       )}
       <div className="fpg-grid">
-        {products.map((p) => (
+        {products.map((p) => {
+          const productLink = resolveLink(p.link, p.name);
+          return (
           <div key={p.id} className="fpg-card">
             <div className="fpg-thumb">
-              <a href={p.link}>
+              <a href={productLink}>
                 <img src={p.image} alt={p.name} className="fpg-img fpg-main-img" loading="lazy" />
                 {showHoverImage && p.hoverImage && (
                   <img src={p.hoverImage} alt={p.name} className="fpg-hover-img" loading="lazy" />
@@ -525,7 +552,7 @@ export function FashionProductGrid({ products: propProducts, columns = 4, showCa
               </div>
               <button className="fpg-add-btn">Add to cart</button>
             </div>
-            <h3 className="fpg-name"><a href={p.link}>{p.name}</a></h3>
+            <h3 className="fpg-name"><a href={productLink}>{p.name}</a></h3>
             {showCategory && p.category && (
               <div className="fpg-cat">
                 <a href={p.categoryLink || "#"}>{p.category}</a>
@@ -536,7 +563,8 @@ export function FashionProductGrid({ products: propProducts, columns = 4, showCa
               <span>{p.salePrice || p.price}</span>
             </div>
           </div>
-        ))}
+          );
+        })}
       </div>
     </div>
   );
