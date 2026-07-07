@@ -323,6 +323,7 @@ export default function StorePage() {
           logo={store.logo}
           navPages={navPages}
           customNavItems={customNavItems}
+          categories={categories.filter((c) => c._count.products > 0).map((c) => ({ id: c.id, name: c.name, slug: c.slug, productCount: c._count.products }))}
           cartCount={cartCount}
           wishlistCount={wishlistCount}
           topBarText={data.deliveryZones.some((z: any) => z.freeAbove)

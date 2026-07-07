@@ -27,6 +27,13 @@ export interface NavItem {
   openInNewTab?: boolean;
 }
 
+export interface StoreCategory {
+  id: string;
+  name: string;
+  slug: string;
+  productCount?: number;
+}
+
 interface FashionHeaderProps {
   storeName: string;
   storeSlug: string;
@@ -34,6 +41,8 @@ interface FashionHeaderProps {
   navPages?: Array<{ id: string; title: string; slug: string }>;
   /** Custom navigation items from navigationSettings — overrides default nav when present */
   customNavItems?: NavItem[];
+  /** Product categories for the vertical sidebar menu */
+  categories?: StoreCategory[];
   cartCount?: number;
   wishlistCount?: number;
   topBarText?: string;
@@ -72,12 +81,13 @@ function resolveNavHref(item: NavItem, storeSlug: string): string {
 }
 
 export function FashionHeader({
-  storeName, storeSlug, logo, navPages = [], customNavItems, cartCount = 0, wishlistCount = 0,
+  storeName, storeSlug, logo, navPages = [], customNavItems, categories = [], cartCount = 0, wishlistCount = 0,
   topBarText = "FREE SHIPPING FOR ALL ORDERS OF $150",
   socialLinks = [], onSearch, searchQuery = "", onSearchChange, isLanding = false,
 }: FashionHeaderProps) {
   const [mobileMenu, setMobileMenu] = useState(false);
   const [showSearch, setShowSearch] = useState(false);
+  const [showCategories, setShowCategories] = useState(false);
 
   const css = `
     .fsh-topbar { background: ${T.primary}; color: #fff; font-family: ${T.bodyFont}; font-size: 12px; padding: 0; }
@@ -108,6 +118,50 @@ export function FashionHeader({
     .fsh-mobile-menu { display: none; background: #fff; border-bottom: 1px solid #eee; padding: 15px; }
     .fsh-mobile-menu a { display: block; padding: 10px 0; font-family: ${T.bodyFont}; font-weight: 700; font-size: 14px; color: ${T.linkColor}; text-decoration: none; text-transform: uppercase; border-bottom: 1px solid #f5f5f5; }
     .fsh-mobile-menu a:last-child { border-bottom: none; }
+
+    /* Categories sidebar toggle */
+    .fsh-cat-wrap { position: relative; }
+    .fsh-cat-toggle {
+      display: flex; align-items: center; gap: 8px; height: 100%; padding: 0 18px;
+      font-family: ${T.bodyFont}; font-weight: 700; font-size: 13px; color: #fff;
+      background: ${T.primary}; border: none; cursor: pointer; text-transform: uppercase;
+      transition: background 0.2s; white-space: nowrap;
+    }
+    .fsh-cat-toggle:hover { background: ${T.primaryHover}; }
+    .fsh-cat-toggle svg { width: 16px; height: 16px; fill: currentColor; }
+    .fsh-cat-toggle .fsh-cat-chevron { width: 10px; height: 10px; transition: transform 0.3s; margin-left: 4px; }
+    .fsh-cat-toggle.fsh-open .fsh-cat-chevron { transform: rotate(180deg); }
+    .fsh-cat-dropdown {
+      position: absolute; top: 100%; left: 0; z-index: 100;
+      background: #fff; border: 1px solid #eee; border-top: none;
+      min-width: 270px; box-shadow: 0 8px 20px rgba(0,0,0,0.08);
+      display: none;
+    }
+    .fsh-cat-dropdown.fsh-open { display: block; }
+    .fsh-cat-list { list-style: none; margin: 0; padding: 8px 0; }
+    .fsh-cat-item {
+      display: flex; align-items: center; gap: 10px;
+      padding: 10px 20px; font-family: ${T.bodyFont}; font-size: 14px;
+      color: ${T.linkColor}; text-decoration: none; transition: all 0.15s;
+      border-bottom: 1px solid #f5f5f5;
+    }
+    .fsh-cat-item:last-child { border-bottom: none; }
+    .fsh-cat-item:hover { background: #f9f9f9; color: ${T.primary}; padding-left: 25px; }
+    .fsh-cat-item .fsh-cat-icon { width: 18px; height: 18px; flex-shrink: 0; opacity: 0.6; }
+    .fsh-cat-count { margin-left: auto; font-size: 12px; color: #aaa; }
+
+    /* Mobile categories section */
+    .fsh-mobile-cats { padding: 10px 0; border-top: 1px solid #f0f0f0; margin-top: 5px; }
+    .fsh-mobile-cats-title {
+      font-family: ${T.titleFont}; font-weight: 700; font-size: 11px;
+      color: #999; text-transform: uppercase; letter-spacing: 1px;
+      padding: 5px 0 8px; margin: 0;
+    }
+    .fsh-mobile-cats a {
+      font-weight: 400 !important; font-size: 14px !important;
+      text-transform: none !important; color: ${T.linkColor} !important;
+    }
+
     @media (max-width: 1024px) {
       .fsh-topbar-inner { padding: 8px 15px; }
       .fsh-main-inner { padding: 15px; }
@@ -190,6 +244,46 @@ export function FashionHeader({
       {/* Desktop Nav */}
       <nav className="fsh-nav">
         <div className="fsh-nav-inner">
+          {/* Categories dropdown toggle — WoodMart style */}
+          {!isLanding && categories.length > 0 && (
+            <div className="fsh-cat-wrap">
+              <button
+                className={`fsh-cat-toggle ${showCategories ? "fsh-open" : ""}`}
+                onClick={() => setShowCategories(!showCategories)}
+                aria-expanded={showCategories}
+              >
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                  <line x1="3" y1="6" x2="21" y2="6" /><line x1="3" y1="12" x2="21" y2="12" /><line x1="3" y1="18" x2="21" y2="18" />
+                </svg>
+                Categories
+                <svg className="fsh-cat-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
+                  <polyline points="6 9 12 15 18 9" />
+                </svg>
+              </button>
+              <div className={`fsh-cat-dropdown ${showCategories ? "fsh-open" : ""}`}>
+                <ul className="fsh-cat-list">
+                  {categories.map((cat) => (
+                    <Link
+                      key={cat.id}
+                      href={`/store/${storeSlug}/shop?category=${encodeURIComponent(cat.slug)}`}
+                      className="fsh-cat-item"
+                      onClick={() => setShowCategories(false)}
+                    >
+                      <svg className="fsh-cat-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
+                        <path d="M20.59 13.41l-7.17 7.17a2 2 0 01-2.83 0L2 12V2h10l8.59 8.59a2 2 0 010 2.82z" />
+                        <line x1="7" y1="7" x2="7.01" y2="7" />
+                      </svg>
+                      <span>{cat.name}</span>
+                      {cat.productCount !== undefined && cat.productCount > 0 && (
+                        <span className="fsh-cat-count">{cat.productCount}</span>
+                      )}
+                    </Link>
+                  ))}
+                </ul>
+              </div>
+            </div>
+          )}
+
           <div className="fsh-nav-links">
             {customNavItems && customNavItems.length > 0 ? (
               /* Custom navigation — store owner defined these */
@@ -238,6 +332,25 @@ export function FashionHeader({
               <Link key={p.id} href={`/store/${storeSlug}/${p.slug}`} onClick={() => setMobileMenu(false)}>{p.title}</Link>
             ))}
           </>
+        )}
+
+        {/* Mobile categories */}
+        {!isLanding && categories.length > 0 && (
+          <div className="fsh-mobile-cats">
+            <p className="fsh-mobile-cats-title">Categories</p>
+            {categories.map((cat) => (
+              <Link
+                key={cat.id}
+                href={`/store/${storeSlug}/shop?category=${encodeURIComponent(cat.slug)}`}
+                onClick={() => setMobileMenu(false)}
+              >
+                {cat.name}
+                {cat.productCount !== undefined && cat.productCount > 0 && (
+                  <span style={{ color: "#aaa", fontWeight: 400, fontSize: "12px", marginLeft: "6px" }}>({cat.productCount})</span>
+                )}
+              </Link>
+            ))}
+          </div>
         )}
       </div>
     </div>
