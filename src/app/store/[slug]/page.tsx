@@ -9,6 +9,7 @@ import { RenderBlocks, type BuilderBlock } from "@/components/storefront/BlockRe
 import { RenderTemplateBlocks } from "@/components/storefront/TemplateBlockRenderer";
 import { FASHION_TEMPLATE_PRESET } from "@/lib/templates/presets/fashion-preset";
 import { FashionStoreContext } from "@/components/storefront/FashionTemplateBlocks";
+import { FashionHeader, FashionFooter } from "@/components/storefront/FashionStoreChrome";
 import { getLinkedPageHref, parsePageContent, type PageSettings } from "@/lib/page-content";
 import { ThemeProvider, type ThemeData } from "@/components/storefront/ThemeProvider";
 import { useWishlist } from "@/hooks/useWishlist";
@@ -297,6 +298,7 @@ export default function StorePage() {
   const homeBlocks: BuilderBlock[] = homeContent.blocks;
   const hasHomeContent = homeBlocks.length > 0;
   const homeHasProductGrid = homeBlocks.some((b) => b.type === "productGrid");
+  const isFashionTemplate = data.templateSlug === "fashion" || homeBlocks.some((b) => b.type.startsWith("fashion"));
 
   // Navigation pages: exclude HOME (we're on it), sort sensibly
   const navPageOrder: Record<string, number> = { ABOUT: 0, FAQ: 1, CONTACT: 2, POLICY: 3, CUSTOM: 4, LANDING: 5 };
@@ -307,13 +309,36 @@ export default function StorePage() {
   return (
     <ThemeProvider theme={resolvedTheme}>
     <div className="min-h-screen bg-white">
+      {/* ─── FASHION TEMPLATE HEADER ─── */}
+      {isFashionTemplate ? (
+        <FashionHeader
+          storeName={store.name}
+          storeSlug={slug}
+          logo={store.logo}
+          navPages={navPages}
+          cartCount={cartCount}
+          wishlistCount={wishlistCount}
+          topBarText={data.deliveryZones.some((z: any) => z.freeAbove)
+            ? `FREE DELIVERY ON ORDERS ABOVE ${formatCurrency(Number(data.deliveryZones.find((z: any) => z.freeAbove)?.freeAbove || 0), currency)}`
+            : `FREE SHIPPING FOR ALL ORDERS — SHOP NOW!`}
+          socialLinks={[
+            ...(data.socialLinks?.facebook ? [{ platform: "facebook", url: data.socialLinks.facebook }] : []),
+            ...(data.socialLinks?.instagram ? [{ platform: "instagram", url: data.socialLinks.instagram }] : []),
+            ...(data.socialLinks?.twitter ? [{ platform: "twitter", url: data.socialLinks.twitter }] : []),
+          ]}
+          searchQuery={searchQuery}
+          onSearchChange={setSearchQuery}
+          isLanding={isLanding}
+        />
+      ) : (
+      <>
       {/* Announcement Bar */}
       {!isLanding && (
       <div className="bg-brand-600 text-white text-center py-2 text-xs font-medium">
         <div className="flex items-center justify-center gap-2">
           <Truck className="h-3.5 w-3.5" />
           {data.deliveryZones.some((z) => z.freeAbove)
-            ? `Free delivery on orders above ${formatCurrency(Number(data.deliveryZones.find((z) => z.freeAbove)?.freeAbove || 0), currency)} — Shop now!`
+            ? `Free delivery on orders above ${formatCurrency(Number(data.deliveryZones.find((z: any) => z.freeAbove)?.freeAbove || 0), currency)} — Shop now!`
             : `Welcome to ${store.name} — Shop now!`}
         </div>
       </div>
@@ -403,6 +428,8 @@ export default function StorePage() {
           )}
         </div>
       )}
+      </>
+      )}
 
       {/* ─── HOME PAGE CONTENT ─────────────────────────────────── */}
       {hasHomeContent ? (
@@ -468,6 +495,24 @@ export default function StorePage() {
       )}
 
       {/* Footer */}
+      {isFashionTemplate ? (
+        <FashionFooter
+          storeName={store.name}
+          storeSlug={slug}
+          logo={store.logo}
+          navPages={navPages}
+          description={store.description}
+          socialLinks={[
+            ...(data.socialLinks?.facebook ? [{ platform: "facebook", url: data.socialLinks.facebook }] : []),
+            ...(data.socialLinks?.instagram ? [{ platform: "instagram", url: data.socialLinks.instagram }] : []),
+            ...(data.socialLinks?.twitter ? [{ platform: "twitter", url: data.socialLinks.twitter }] : []),
+          ]}
+          contactInfo={{
+            phone: whatsappNumber || undefined,
+            email: (data.socialLinks as any)?.email || undefined,
+          }}
+        />
+      ) : (
       <footer className="bg-surface-900 text-surface-400 py-12 themed-footer">
         <div className="max-w-6xl mx-auto px-4 sm:px-6">
           <div className={`grid gap-8 ${isLanding ? "grid-cols-1 sm:grid-cols-3" : "grid-cols-2 sm:grid-cols-4"}`}>
@@ -516,6 +561,7 @@ export default function StorePage() {
           </div>
         </div>
       </footer>
+      )}
 
       {/* Floating WhatsApp */}
       {!isLanding && settings.whatsappOrdering && whatsappNumber && (
