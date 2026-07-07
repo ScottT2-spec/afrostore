@@ -251,6 +251,13 @@ export default function StorePage() {
   const cartCount = cart.reduce((s, i) => s + i.quantity, 0);
   const cartTotal = cart.reduce((s, i) => s + Number(i.product.price) * i.quantity, 0);
   const resolvedTheme = useMemo(() => buildThemeDataWithCustomization(data?.theme || null, draftCustomization), [data?.theme, draftCustomization]);
+
+  // Custom navigation items from site customization
+  const customNavItems = useMemo(() => {
+    const items = (draftCustomization?.navigationSettings?.items as NavItem[] | undefined) || [];
+    return items.length > 0 ? items : undefined;
+  }, [draftCustomization]);
+
   /* ── Loading ── */
   if (loading) {
     return (
@@ -299,12 +306,6 @@ export default function StorePage() {
   const hasHomeContent = homeBlocks.length > 0;
   const homeHasProductGrid = homeBlocks.some((b) => b.type === "productGrid");
   const isFashionTemplate = data.templateSlug === "fashion" || homeBlocks.some((b) => b.type.startsWith("fashion"));
-
-  // Custom navigation items from site customization
-  const customNavItems = useMemo(() => {
-    const items = (draftCustomization?.navigationSettings?.items as NavItem[] | undefined) || [];
-    return items.length > 0 ? items : undefined;
-  }, [draftCustomization]);
 
   // Navigation pages: exclude HOME (we're on it), sort sensibly
   const navPageOrder: Record<string, number> = { ABOUT: 0, FAQ: 1, CONTACT: 2, POLICY: 3, CUSTOM: 4, LANDING: 5 };
