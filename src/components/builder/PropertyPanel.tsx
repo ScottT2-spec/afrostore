@@ -898,6 +898,286 @@ function GenericProps() {
   return <p className="text-xs text-surface-500">Properties for this block type coming soon.</p>;
 }
 
+// ─── ELECTRONICS TEMPLATE PROPERTY EDITORS ─────────────────────
+
+function ElectronicsHeroSliderEditProps({ block, update }: { block: BuilderBlock; update: (key: string, val: unknown) => void }) {
+  const slides = (block.props.slides as Array<Record<string, unknown>>) || [];
+  const updateSlide = (idx: number, key: string, val: unknown) => {
+    const next = slides.map((s, i) => i === idx ? { ...s, [key]: val } : s);
+    update("slides", next);
+  };
+  const addSlide = () => {
+    update("slides", [...slides, { subtitle: "NEW CATEGORY", titleLine1: "HEADING LINE 1", titleLine2: "HEADING LINE 2", description: "Description text here.", buttonText: "Buy Now", buttonLink: "/shop", backgroundImage: "", textPosition: "left", colorScheme: "dark" }]);
+  };
+  const removeSlide = (idx: number) => update("slides", slides.filter((_, i) => i !== idx));
+  return (
+    <>
+      <PropInput label="Min Height" value={block.props.minHeight} onChange={(v) => update("minHeight", v)} />
+      <PropInput label="Autoplay Speed (ms)" value={block.props.autoplaySpeed} onChange={(v) => update("autoplaySpeed", v)} type="number" />
+      {slides.map((slide, i) => (
+        <div key={i} className="border border-surface-200 rounded-lg p-3 space-y-3">
+          <div className="flex items-center justify-between">
+            <span className="text-xs font-bold text-surface-700">Slide {i + 1}</span>
+            {slides.length > 1 && <button onClick={() => removeSlide(i)} className="text-red-500 text-xs">Remove</button>}
+          </div>
+          <PropInput label="Subtitle" value={slide.subtitle} onChange={(v) => updateSlide(i, "subtitle", v)} />
+          <PropInput label="Title Line 1" value={slide.titleLine1} onChange={(v) => updateSlide(i, "titleLine1", v)} />
+          <PropInput label="Title Line 2" value={slide.titleLine2} onChange={(v) => updateSlide(i, "titleLine2", v)} />
+          <PropInput label="Description" value={slide.description} onChange={(v) => updateSlide(i, "description", v)} type="textarea" rows={2} />
+          <PropInput label="Button Text" value={slide.buttonText} onChange={(v) => updateSlide(i, "buttonText", v)} />
+          <PropInput label="Button Link" value={slide.buttonLink} onChange={(v) => updateSlide(i, "buttonLink", v)} />
+          <SingleImageUpload image={(slide.backgroundImage as string) || null} onChange={(url) => updateSlide(i, "backgroundImage", url || "")} label="Background Image" compact />
+          <PropInput label="Text Position" value={slide.textPosition} onChange={(v) => updateSlide(i, "textPosition", v)} type="select"
+            options={[{ value: "left", label: "Left" }, { value: "center", label: "Center" }, { value: "right", label: "Right" }]} />
+          <PropInput label="Color Scheme" value={slide.colorScheme} onChange={(v) => updateSlide(i, "colorScheme", v)} type="select"
+            options={[{ value: "dark", label: "Dark Text" }, { value: "light", label: "Light Text" }]} />
+        </div>
+      ))}
+      <button onClick={addSlide} className="w-full flex items-center justify-center gap-1 text-xs font-semibold text-brand-600 py-2 border border-dashed border-brand-300 rounded-lg hover:bg-brand-50">
+        <Plus className="h-3 w-3" /> Add Slide
+      </button>
+    </>
+  );
+}
+
+function ElectronicsPromoBannersEditProps({ block, update }: { block: BuilderBlock; update: (key: string, val: unknown) => void }) {
+  const banners = (block.props.banners as Array<Record<string, unknown>>) || [];
+  const updateBanner = (idx: number, key: string, val: unknown) => {
+    const next = banners.map((b, i) => i === idx ? { ...b, [key]: val } : b);
+    update("banners", next);
+  };
+  const addBanner = () => update("banners", [...banners, { image: "", subtitle: "NEW", title: "BANNER TITLE", description: "Description", buttonText: "Shop More", buttonLink: "/shop", colorScheme: "dark" }]);
+  const removeBanner = (idx: number) => update("banners", banners.filter((_, i) => i !== idx));
+  return (
+    <>
+      {banners.map((b, i) => (
+        <div key={i} className="border border-surface-200 rounded-lg p-3 space-y-3">
+          <div className="flex items-center justify-between">
+            <span className="text-xs font-bold text-surface-700">Banner {i + 1}</span>
+            {banners.length > 1 && <button onClick={() => removeBanner(i)} className="text-red-500 text-xs">Remove</button>}
+          </div>
+          <SingleImageUpload image={(b.image as string) || null} onChange={(url) => updateBanner(i, "image", url || "")} label="Image" compact />
+          <PropInput label="Subtitle" value={b.subtitle} onChange={(v) => updateBanner(i, "subtitle", v)} />
+          <PropInput label="Title" value={b.title} onChange={(v) => updateBanner(i, "title", v)} />
+          <PropInput label="Description" value={b.description} onChange={(v) => updateBanner(i, "description", v)} type="textarea" rows={2} />
+          <PropInput label="Button Text" value={b.buttonText} onChange={(v) => updateBanner(i, "buttonText", v)} />
+          <PropInput label="Button Link" value={b.buttonLink} onChange={(v) => updateBanner(i, "buttonLink", v)} />
+          <PropInput label="Color Scheme" value={b.colorScheme} onChange={(v) => updateBanner(i, "colorScheme", v)} type="select"
+            options={[{ value: "dark", label: "Dark" }, { value: "light", label: "Light" }]} />
+        </div>
+      ))}
+      <button onClick={addBanner} className="w-full flex items-center justify-center gap-1 text-xs font-semibold text-brand-600 py-2 border border-dashed border-brand-300 rounded-lg hover:bg-brand-50">
+        <Plus className="h-3 w-3" /> Add Banner
+      </button>
+    </>
+  );
+}
+
+function ElectronicsProductTabsEditProps({ block, update }: { block: BuilderBlock; update: (key: string, val: unknown) => void }) {
+  const tabs = (block.props.tabs as Array<Record<string, unknown>>) || [];
+  const updateTab = (idx: number, key: string, val: unknown) => {
+    const next = tabs.map((t, i) => i === idx ? { ...t, [key]: val } : t);
+    update("tabs", next);
+  };
+  const addTab = () => update("tabs", [...tabs, { label: "New Tab", filter: "all" }]);
+  const removeTab = (idx: number) => update("tabs", tabs.filter((_, i) => i !== idx));
+  return (
+    <>
+      <PropInput label="Section Title" value={block.props.sectionTitle} onChange={(v) => update("sectionTitle", v)} />
+      <PropInput label="Columns" value={block.props.columns} onChange={(v) => update("columns", Number(v))} type="number" />
+      <PropInput label="Max Products" value={block.props.maxProducts} onChange={(v) => update("maxProducts", Number(v))} type="number" />
+      {tabs.map((tab, i) => (
+        <div key={i} className="border border-surface-200 rounded-lg p-3 space-y-3">
+          <div className="flex items-center justify-between">
+            <span className="text-xs font-bold text-surface-700">Tab {i + 1}</span>
+            {tabs.length > 1 && <button onClick={() => removeTab(i)} className="text-red-500 text-xs">Remove</button>}
+          </div>
+          <PropInput label="Label" value={tab.label} onChange={(v) => updateTab(i, "label", v)} />
+          <PropInput label="Filter" value={tab.filter} onChange={(v) => updateTab(i, "filter", v)} type="select"
+            options={[{ value: "all", label: "All" }, { value: "new", label: "New" }, { value: "featured", label: "Featured" }, { value: "top-sellers", label: "Top Sellers" }, { value: "sale", label: "On Sale" }]} />
+        </div>
+      ))}
+      <button onClick={addTab} className="w-full flex items-center justify-center gap-1 text-xs font-semibold text-brand-600 py-2 border border-dashed border-brand-300 rounded-lg hover:bg-brand-50">
+        <Plus className="h-3 w-3" /> Add Tab
+      </button>
+    </>
+  );
+}
+
+function ElectronicsBannerGridEditProps({ block, update }: { block: BuilderBlock; update: (key: string, val: unknown) => void }) {
+  const banners = (block.props.banners as Array<Record<string, unknown>>) || [];
+  const updateBanner = (idx: number, key: string, val: unknown) => {
+    const next = banners.map((b, i) => i === idx ? { ...b, [key]: val } : b);
+    update("banners", next);
+  };
+  return (
+    <>
+      {banners.slice(0, 4).map((b, i) => {
+        const labels = ["Left Tall", "Middle Top", "Middle Bottom", "Right Tall"];
+        return (
+          <div key={i} className="border border-surface-200 rounded-lg p-3 space-y-3">
+            <span className="text-xs font-bold text-surface-700">{labels[i] || `Banner ${i + 1}`}</span>
+            <SingleImageUpload image={(b.image as string) || null} onChange={(url) => updateBanner(i, "image", url || "")} label="Image" compact />
+            <PropInput label="Subtitle" value={b.subtitle} onChange={(v) => updateBanner(i, "subtitle", v)} />
+            <PropInput label="Title" value={b.title} onChange={(v) => updateBanner(i, "title", v)} type="textarea" rows={2} />
+            <PropInput label="Button Text" value={b.buttonText} onChange={(v) => updateBanner(i, "buttonText", v)} />
+            <PropInput label="Button Link" value={b.buttonLink} onChange={(v) => updateBanner(i, "buttonLink", v)} />
+            <PropInput label="Color Scheme" value={b.colorScheme} onChange={(v) => updateBanner(i, "colorScheme", v)} type="select"
+              options={[{ value: "dark", label: "Dark" }, { value: "light", label: "Light" }]} />
+          </div>
+        );
+      })}
+    </>
+  );
+}
+
+function ElectronicsHotDealsEditProps({ block, update }: { block: BuilderBlock; update: (key: string, val: unknown) => void }) {
+  return (
+    <>
+      <PropInput label="Section Title" value={block.props.sectionTitle} onChange={(v) => update("sectionTitle", v)} />
+      <PropInput label="Button Text" value={block.props.buttonText} onChange={(v) => update("buttonText", v)} />
+      <PropInput label="Button Link" value={block.props.buttonLink} onChange={(v) => update("buttonLink", v)} />
+      <PropInput label="Deal End Date" value={block.props.dealEndDate} onChange={(v) => update("dealEndDate", v)} placeholder="YYYY-MM-DD" />
+      <PropInput label="Max Products" value={block.props.maxProducts} onChange={(v) => update("maxProducts", Number(v))} type="number" />
+      <PropInput label="Columns" value={block.props.columns} onChange={(v) => update("columns", Number(v))} type="number" />
+      <PropInput label="Filter" value={block.props.filter} onChange={(v) => update("filter", v)} type="select"
+        options={[{ value: "sale", label: "On Sale" }, { value: "featured", label: "Featured" }, { value: "all", label: "All" }]} />
+    </>
+  );
+}
+
+function ElectronicsSideBannerEditProps({ block, update }: { block: BuilderBlock; update: (key: string, val: unknown) => void }) {
+  const rightTabs = (block.props.rightTabs as Array<Record<string, unknown>>) || [];
+  const updateTab = (idx: number, key: string, val: unknown) => {
+    const next = rightTabs.map((t, i) => i === idx ? { ...t, [key]: val } : t);
+    update("rightTabs", next);
+  };
+  return (
+    <>
+      <SingleImageUpload image={(block.props.bannerImage as string) || null} onChange={(url) => update("bannerImage", url || "")} label="Banner Image" compact />
+      <PropInput label="Banner Subtitle" value={block.props.bannerSubtitle} onChange={(v) => update("bannerSubtitle", v)} />
+      <PropInput label="Banner Title" value={block.props.bannerTitle} onChange={(v) => update("bannerTitle", v)} />
+      <PropInput label="Banner Button Text" value={block.props.bannerButtonText} onChange={(v) => update("bannerButtonText", v)} />
+      <PropInput label="Banner Button Link" value={block.props.bannerButtonLink} onChange={(v) => update("bannerButtonLink", v)} />
+      <PropInput label="Featured Title" value={block.props.featuredTitle} onChange={(v) => update("featuredTitle", v)} />
+      <PropInput label="Max Featured Products" value={block.props.maxFeaturedProducts} onChange={(v) => update("maxFeaturedProducts", Number(v))} type="number" />
+      <PropInput label="Right Section Title" value={block.props.rightSectionTitle} onChange={(v) => update("rightSectionTitle", v)} />
+      <PropInput label="Right Max Products" value={block.props.rightMaxProducts} onChange={(v) => update("rightMaxProducts", Number(v))} type="number" />
+      {rightTabs.map((tab, i) => (
+        <div key={i} className="border border-surface-200 rounded-lg p-3 space-y-3">
+          <span className="text-xs font-bold text-surface-700">Tab {i + 1}</span>
+          <PropInput label="Label" value={tab.label} onChange={(v) => updateTab(i, "label", v)} />
+          <PropInput label="Filter" value={tab.filter} onChange={(v) => updateTab(i, "filter", v)} type="select"
+            options={[{ value: "all", label: "All" }, { value: "new", label: "New" }, { value: "featured", label: "Featured" }, { value: "top-sellers", label: "Top Sellers" }]} />
+        </div>
+      ))}
+    </>
+  );
+}
+
+function ElectronicsGamingCTAEditProps({ block, update }: { block: BuilderBlock; update: (key: string, val: unknown) => void }) {
+  return (
+    <>
+      <SingleImageUpload image={(block.props.backgroundImage as string) || null} onChange={(url) => update("backgroundImage", url || "")} label="Background Image" compact />
+      <PropInput label="Subtitle" value={block.props.subtitle} onChange={(v) => update("subtitle", v)} />
+      <PropInput label="Title" value={block.props.title} onChange={(v) => update("title", v)} />
+      <PropInput label="Primary Button Text" value={block.props.primaryButtonText} onChange={(v) => update("primaryButtonText", v)} />
+      <PropInput label="Primary Button Link" value={block.props.primaryButtonLink} onChange={(v) => update("primaryButtonLink", v)} />
+      <PropInput label="Secondary Button Text" value={block.props.secondaryButtonText} onChange={(v) => update("secondaryButtonText", v)} />
+      <PropInput label="Secondary Button Link" value={block.props.secondaryButtonLink} onChange={(v) => update("secondaryButtonLink", v)} />
+      <SingleImageUpload image={(block.props.productImage as string) || null} onChange={(url) => update("productImage", url || "")} label="Product Image" compact />
+    </>
+  );
+}
+
+function ElectronicsBlogPostsEditProps({ block, update }: { block: BuilderBlock; update: (key: string, val: unknown) => void }) {
+  const posts = (block.props.posts as Array<Record<string, unknown>>) || [];
+  const updatePost = (idx: number, key: string, val: unknown) => {
+    const next = posts.map((p, i) => i === idx ? { ...p, [key]: val } : p);
+    update("posts", next);
+  };
+  const updatePostDate = (idx: number, dateKey: string, val: unknown) => {
+    const post = posts[idx];
+    const date = (post.date as Record<string, unknown>) || {};
+    const next = posts.map((p, i) => i === idx ? { ...p, date: { ...date, [dateKey]: val } } : p);
+    update("posts", next);
+  };
+  const addPost = () => update("posts", [...posts, { image: "", title: "New Blog Post", excerpt: "", date: { day: "01", month: "Jan", year: "2024" }, category: "Tech", author: "Store Team", link: "#" }]);
+  const removePost = (idx: number) => update("posts", posts.filter((_, i) => i !== idx));
+  return (
+    <>
+      <PropInput label="Section Title" value={block.props.sectionTitle} onChange={(v) => update("sectionTitle", v)} />
+      <PropInput label="Columns" value={block.props.columns} onChange={(v) => update("columns", Number(v))} type="number" />
+      {posts.map((p, i) => (
+        <div key={i} className="border border-surface-200 rounded-lg p-3 space-y-3">
+          <div className="flex items-center justify-between">
+            <span className="text-xs font-bold text-surface-700">Post {i + 1}</span>
+            {posts.length > 1 && <button onClick={() => removePost(i)} className="text-red-500 text-xs">Remove</button>}
+          </div>
+          <SingleImageUpload image={(p.image as string) || null} onChange={(url) => updatePost(i, "image", url || "")} label="Image" compact />
+          <PropInput label="Title" value={p.title} onChange={(v) => updatePost(i, "title", v)} />
+          <PropInput label="Category" value={p.category} onChange={(v) => updatePost(i, "category", v)} />
+          <PropInput label="Author" value={p.author} onChange={(v) => updatePost(i, "author", v)} />
+          <PropInput label="Link" value={p.link} onChange={(v) => updatePost(i, "link", v)} />
+          <div className="grid grid-cols-3 gap-2">
+            <PropInput label="Day" value={(p.date as Record<string, unknown>)?.day} onChange={(v) => updatePostDate(i, "day", v)} />
+            <PropInput label="Month" value={(p.date as Record<string, unknown>)?.month} onChange={(v) => updatePostDate(i, "month", v)} />
+            <PropInput label="Year" value={(p.date as Record<string, unknown>)?.year} onChange={(v) => updatePostDate(i, "year", v)} />
+          </div>
+        </div>
+      ))}
+      <button onClick={addPost} className="w-full flex items-center justify-center gap-1 text-xs font-semibold text-brand-600 py-2 border border-dashed border-brand-300 rounded-lg hover:bg-brand-50">
+        <Plus className="h-3 w-3" /> Add Post
+      </button>
+    </>
+  );
+}
+
+function ElectronicsPartnersEditProps({ block, update }: { block: BuilderBlock; update: (key: string, val: unknown) => void }) {
+  const logos = (block.props.logos as Array<Record<string, unknown>>) || [];
+  const updateLogo = (idx: number, key: string, val: unknown) => {
+    const next = logos.map((l, i) => i === idx ? { ...l, [key]: val } : l);
+    update("logos", next);
+  };
+  const addLogo = () => update("logos", [...logos, { name: "Brand", logoUrl: "", linkUrl: "#" }]);
+  const removeLogo = (idx: number) => update("logos", logos.filter((_, i) => i !== idx));
+  return (
+    <>
+      <PropInput label="Section Title" value={block.props.sectionTitle} onChange={(v) => update("sectionTitle", v)} />
+      <PropInput label="Video URL" value={block.props.videoUrl} onChange={(v) => update("videoUrl", v)} />
+      <SingleImageUpload image={(block.props.videoThumbnail as string) || null} onChange={(url) => update("videoThumbnail", url || "")} label="Video Thumbnail" compact />
+      {logos.map((l, i) => (
+        <div key={i} className="border border-surface-200 rounded-lg p-3 space-y-3">
+          <div className="flex items-center justify-between">
+            <span className="text-xs font-bold text-surface-700">Logo {i + 1}</span>
+            {logos.length > 1 && <button onClick={() => removeLogo(i)} className="text-red-500 text-xs">Remove</button>}
+          </div>
+          <PropInput label="Name" value={l.name} onChange={(v) => updateLogo(i, "name", v)} />
+          <SingleImageUpload image={(l.logoUrl as string) || null} onChange={(url) => updateLogo(i, "logoUrl", url || "")} label="Logo" compact />
+          <PropInput label="Link URL" value={l.linkUrl} onChange={(v) => updateLogo(i, "linkUrl", v)} />
+        </div>
+      ))}
+      <button onClick={addLogo} className="w-full flex items-center justify-center gap-1 text-xs font-semibold text-brand-600 py-2 border border-dashed border-brand-300 rounded-lg hover:bg-brand-50">
+        <Plus className="h-3 w-3" /> Add Logo
+      </button>
+    </>
+  );
+}
+
+function ElectronicsSectionTitleEditProps({ block, update }: { block: BuilderBlock; update: (key: string, val: unknown) => void }) {
+  return (
+    <>
+      <PropInput label="Title" value={block.props.title} onChange={(v) => update("title", v)} />
+      <PropInput label="Alignment" value={block.props.align} onChange={(v) => update("align", v)} type="select"
+        options={[{ value: "left", label: "Left" }, { value: "center", label: "Center" }, { value: "right", label: "Right" }]} />
+      <label className="flex items-center gap-2 text-xs text-surface-600">
+        <input type="checkbox" checked={block.props.showLine !== false} onChange={(e) => update("showLine", e.target.checked)} />
+        Show underline
+      </label>
+    </>
+  );
+}
+
 const propEditors: Record<string, React.FC<{ block: BuilderBlock; update: (key: string, val: unknown) => void }>> = {
   // Core block types
   heading: HeadingProps, text: TextProps, image: ImageProps, button: ButtonProps,
@@ -919,6 +1199,18 @@ const propEditors: Record<string, React.FC<{ block: BuilderBlock; update: (key: 
   fashionTestimonials: FashionTestimonialsProps,
   fashionBlogPosts: FashionBlogPostsProps,
   fashionNewsletter: FashionNewsletterEditProps,
+
+  // Electronics template blocks
+  electronicsHeroSlider: ElectronicsHeroSliderEditProps,
+  electronicsPromoBanners: ElectronicsPromoBannersEditProps,
+  electronicsProductTabs: ElectronicsProductTabsEditProps,
+  electronicsBannerGrid: ElectronicsBannerGridEditProps,
+  electronicsHotDeals: ElectronicsHotDealsEditProps,
+  electronicsSideBanner: ElectronicsSideBannerEditProps,
+  electronicsGamingCTA: ElectronicsGamingCTAEditProps,
+  electronicsBlogPosts: ElectronicsBlogPostsEditProps,
+  electronicsPartners: ElectronicsPartnersEditProps,
+  electronicsSectionTitle: ElectronicsSectionTitleEditProps,
 
   // Template aliases → map to their base editor
   featured_products: ProductGridProps,

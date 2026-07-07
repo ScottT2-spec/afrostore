@@ -8,6 +8,8 @@ import Link from "next/link";
 import { RenderBlocks, type BuilderBlock } from "@/components/storefront/BlockRenderer";
 import { RenderTemplateBlocks } from "@/components/storefront/TemplateBlockRenderer";
 import { FASHION_TEMPLATE_PRESET } from "@/lib/templates/presets/fashion-preset";
+import { ELECTRONICS_TEMPLATE_PRESET } from "@/lib/templates/presets/electronics-preset";
+import { ElectronicsStoreContext } from "@/components/storefront/ElectronicsTemplateBlocks";
 import { FashionStoreContext } from "@/components/storefront/FashionTemplateBlocks";
 import { FashionHeader, FashionFooter, type NavItem } from "@/components/storefront/FashionStoreChrome";
 import { getLinkedPageHref, parsePageContent, type PageSettings } from "@/lib/page-content";
@@ -464,6 +466,23 @@ export default function StorePage() {
           <FashionStoreContext.Provider value={{ products: products as any, blogs: data.blogs || [], currency, storeSlug: slug }}>
             <RenderTemplateBlocks blocks={FASHION_TEMPLATE_PRESET} />
           </FashionStoreContext.Provider>
+          {!isLanding && products.length > 0 && (
+            <div className="text-center py-10">
+              <Link
+                href={`/store/${slug}/shop`}
+                className="inline-flex items-center gap-2 rounded-2xl bg-surface-900 text-white px-8 py-3.5 text-sm font-bold hover:bg-surface-800 transition-all shadow-lg hover:-translate-y-0.5"
+              >
+                View All Products <ArrowRight className="h-4 w-4" />
+              </Link>
+            </div>
+          )}
+        </div>
+      ) : data.templateSlug === "electronics" ? (
+        /* Electronics template — render pixel-perfect electronics blocks */
+        <div>
+          <ElectronicsStoreContext.Provider value={{ products: products as any, blogs: data.blogs || [], currency, storeSlug: slug }}>
+            <RenderTemplateBlocks blocks={ELECTRONICS_TEMPLATE_PRESET} />
+          </ElectronicsStoreContext.Provider>
           {!isLanding && products.length > 0 && (
             <div className="text-center py-10">
               <Link

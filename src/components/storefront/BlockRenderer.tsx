@@ -17,6 +17,21 @@ import {
   FashionStoreContext,
   type FashionStoreContextData,
 } from "@/components/storefront/FashionTemplateBlocks";
+import {
+  ElectronicsFontLoader,
+  ElectronicsHeroSlider,
+  ElectronicsPromoBanners,
+  ElectronicsProductTabs,
+  ElectronicsBannerGrid,
+  ElectronicsHotDeals,
+  ElectronicsSideBanner,
+  ElectronicsGamingCTA,
+  ElectronicsBlogPosts,
+  ElectronicsPartners,
+  ElectronicsSectionTitle,
+  ElectronicsStoreContext,
+  type ElectronicsStoreContextData,
+} from "@/components/storefront/ElectronicsTemplateBlocks";
 
 type FashionBlockComponent = React.ComponentType<Record<string, unknown>>;
 const FASHION_BLOCK_MAP: Record<string, FashionBlockComponent> = {
@@ -28,6 +43,16 @@ const FASHION_BLOCK_MAP: Record<string, FashionBlockComponent> = {
   fashionTestimonials: FashionTestimonials as unknown as FashionBlockComponent,
   fashionBlogPosts: FashionBlogPosts as unknown as FashionBlockComponent,
   fashionNewsletter: FashionNewsletter as unknown as FashionBlockComponent,
+  electronicsHeroSlider: ElectronicsHeroSlider as unknown as FashionBlockComponent,
+  electronicsPromoBanners: ElectronicsPromoBanners as unknown as FashionBlockComponent,
+  electronicsProductTabs: ElectronicsProductTabs as unknown as FashionBlockComponent,
+  electronicsBannerGrid: ElectronicsBannerGrid as unknown as FashionBlockComponent,
+  electronicsHotDeals: ElectronicsHotDeals as unknown as FashionBlockComponent,
+  electronicsSideBanner: ElectronicsSideBanner as unknown as FashionBlockComponent,
+  electronicsGamingCTA: ElectronicsGamingCTA as unknown as FashionBlockComponent,
+  electronicsBlogPosts: ElectronicsBlogPosts as unknown as FashionBlockComponent,
+  electronicsPartners: ElectronicsPartners as unknown as FashionBlockComponent,
+  electronicsSectionTitle: ElectronicsSectionTitle as unknown as FashionBlockComponent,
 };
 
 /* ─── TYPES ─────────────────────────────────────────────────── */

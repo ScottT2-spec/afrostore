@@ -31,6 +31,19 @@ import type {
   FashionMarqueeProps,
   FashionCoverBannersProps,
 } from "@/components/storefront/FashionTemplateBlocks";
+import {
+  ElectronicsFontLoader,
+  ElectronicsHeroSlider,
+  ElectronicsPromoBanners,
+  ElectronicsProductTabs,
+  ElectronicsBannerGrid,
+  ElectronicsHotDeals,
+  ElectronicsSideBanner,
+  ElectronicsGamingCTA,
+  ElectronicsBlogPosts,
+  ElectronicsPartners,
+  ElectronicsSectionTitle,
+} from "@/components/storefront/ElectronicsTemplateBlocks";
 
 /* ─── TYPES ─────────────────────────────────────────────────── */
 
@@ -60,10 +73,28 @@ const FASHION_BLOCKS: Record<string, BlockComponent> = {
   fashionCoverBanners: FashionCoverBanners as unknown as BlockComponent,
 };
 
+const ELECTRONICS_BLOCKS: Record<string, BlockComponent> = {
+  electronicsHeroSlider: ElectronicsHeroSlider as unknown as BlockComponent,
+  electronicsPromoBanners: ElectronicsPromoBanners as unknown as BlockComponent,
+  electronicsProductTabs: ElectronicsProductTabs as unknown as BlockComponent,
+  electronicsBannerGrid: ElectronicsBannerGrid as unknown as BlockComponent,
+  electronicsHotDeals: ElectronicsHotDeals as unknown as BlockComponent,
+  electronicsSideBanner: ElectronicsSideBanner as unknown as BlockComponent,
+  electronicsGamingCTA: ElectronicsGamingCTA as unknown as BlockComponent,
+  electronicsBlogPosts: ElectronicsBlogPosts as unknown as BlockComponent,
+  electronicsPartners: ElectronicsPartners as unknown as BlockComponent,
+  electronicsSectionTitle: ElectronicsSectionTitle as unknown as BlockComponent,
+};
+
+const ALL_TEMPLATE_BLOCKS: Record<string, BlockComponent> = {
+  ...FASHION_BLOCKS,
+  ...ELECTRONICS_BLOCKS,
+};
+
 /* ─── SINGLE BLOCK RENDERER ────────────────────────────────── */
 
 function RenderTemplateBlock({ block }: { block: TemplateBlock }) {
-  const Component = FASHION_BLOCKS[block.type];
+  const Component = ALL_TEMPLATE_BLOCKS[block.type];
 
   if (!Component) {
     if (process.env.NODE_ENV === "development") {
@@ -88,9 +119,10 @@ export interface RenderTemplateBlocksProps {
 }
 
 export function RenderTemplateBlocks({ blocks }: RenderTemplateBlocksProps) {
+  const isElectronics = blocks.some((b) => b.type.startsWith("electronics"));
   return (
-    <div className="fashion-template">
-      <FashionFontLoader />
+    <div className={isElectronics ? "electronics-template" : "fashion-template"}>
+      {isElectronics ? <ElectronicsFontLoader /> : <FashionFontLoader />}
       {blocks.map((block) => (
         <RenderTemplateBlock key={block.id} block={block} />
       ))}
