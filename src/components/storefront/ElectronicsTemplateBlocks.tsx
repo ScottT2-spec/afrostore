@@ -1,330 +1,367 @@
 "use client";
-import { useState, useEffect, useRef, createContext, useContext } from "react";
+import { useState, useEffect, useRef, useCallback, createContext, useContext } from "react";
 
 /* ═══════════════════════════════════════════════════════════════
    ELECTRONICS TEMPLATE BLOCKS
    Pixel-perfect replicas of WoodMart Electronics template sections.
-   All styling inline — no external CSS dependencies.
+   All styling via scoped CSS — no external CSS dependencies.
    ═══════════════════════════════════════════════════════════════ */
 
+/* ─── DESIGN TOKENS ─────────────────────────────────────────── */
 const TOKENS = {
   primaryColor: "#007bc4",
-  primaryHover: "#006aaa",
-  altColor: "#fbbc34",
-  titleColor: "#242424",
-  textColor: "#767676",
+  primaryHover: "#005a9e",
+  titleColor: "#222222",
+  textColor: "#333333",
   entityTitleColor: "#333333",
+  linkColor: "#333333",
   starColor: "#EABE12",
-  footerBg: "#0a0a0a",
   containerWidth: "1222px",
-  titleFont: "'Poppins', Arial, Helvetica, sans-serif",
-  bodyFont: "'Lato', Arial, Helvetica, sans-serif",
+  borderRadius: "4px",
+  titleFont: "'Poppins', sans-serif",
+  bodyFont: "system-ui, -apple-system, sans-serif",
 };
-
-const IMG = "https://woodmart.xtemos.com/wp-content/uploads";
 
 /* ─── FONT LOADER ───────────────────────────────────────────── */
 export function ElectronicsFontLoader() {
   return (
     <style dangerouslySetInnerHTML={{ __html: `
-      @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&family=Lato:wght@400;700&display=swap');
+      @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap');
     `}} />
   );
 }
 
+/* ─── SHARED STYLES ─────────────────────────────────────────── */
 const containerStyle: React.CSSProperties = {
-  maxWidth: TOKENS.containerWidth, margin: "0 auto", padding: "0 15px",
-  boxSizing: "border-box" as const, width: "100%",
+  maxWidth: TOKENS.containerWidth,
+  margin: "0 auto",
+  padding: "0 15px",
+  boxSizing: "border-box" as const,
+  width: "100%",
 };
 
+/* ─── SCOPED STYLE INJECTOR ─────────────────────────────────── */
 function ScopedStyles({ id, css }: { id: string; css: string }) {
-  return <style data-elec-block={id} dangerouslySetInnerHTML={{ __html: css }} />;
+  return <style data-electronics-block={id} dangerouslySetInnerHTML={{ __html: css }} />;
 }
 
-/* ═══════════════════════════════════════════════════════════════
-   STORE CONTEXT
-   ═══════════════════════════════════════════════════════════════ */
-
-export interface ElectronicsProduct {
-  id: number; name: string; slug: string; price: string; comparePrice?: string;
-  image: string; hoverImage?: string; category: string; rating?: number;
-  badge?: string; tags?: string[];
+/* ─── useInView HOOK ────────────────────────────────────────── */
+function useInView(threshold = 0.1) {
+  const ref = useRef<HTMLDivElement>(null);
+  const [inView, setInView] = useState(false);
+  useEffect(() => {
+    const el = ref.current;
+    if (!el) return;
+    const obs = new IntersectionObserver(
+      ([e]) => { if (e.isIntersecting) { setInView(true); obs.disconnect(); } },
+      { threshold }
+    );
+    obs.observe(el);
+    return () => obs.disconnect();
+  }, [threshold]);
+  return { ref, inView };
 }
 
+/* ─── STORE CONTEXT ─────────────────────────────────────────── */
 export interface ElectronicsStoreContextData {
-  storeSlug?: string; products?: ElectronicsProduct[]; storeName?: string;
-  storeLogo?: string; contactEmail?: string; contactPhone?: string;
-  socialLinks?: { platform: string; url: string }[];
-  footerLinks?: { title: string; links: { label: string; href: string }[] }[];
+  products: Array<{
+    id: string; name: string; slug: string; price: number; compareAtPrice?: number;
+    currency: string; inStock: boolean; isFeatured: boolean; tags?: string[];
+    images: Array<{ id: string; url: string; alt?: string }>;
+    category?: { id: string; name: string; slug: string };
+  }>;
+  blogs: Array<{
+    id: string; title: string; slug: string; excerpt?: string | null;
+    coverImage?: string | null; author?: string | null; category?: string | null;
+    tags: string[]; publishedAt?: string | null; createdAt: string;
+  }>;
+  currency: string;
+  storeSlug: string;
 }
-
 export const ElectronicsStoreContext = createContext<ElectronicsStoreContextData | null>(null);
 
-/* ═══════════════════════════════════════════════════════════════
-   1. HERO SLIDER
-   ═══════════════════════════════════════════════════════════════ */
-
-export interface ElectronicsHeroSlide {
-  subtitle?: string;
-  titleLine1: string;
-  titleLine2?: string;
-  buttonText: string;
-  buttonLink: string;
-  backgroundColor: string;
-  image: string;
-  textColor?: string;
+/* ─── CURRENCY HELPER ───────────────────────────────────────── */
+function useCurrencySymbol() {
+  const ctx = useContext(ElectronicsStoreContext);
+  const currencySymbols: Record<string, string> = { NGN: "₦", KES: "KSh", GHS: "GH₵", ZAR: "R", USD: "$", GBP: "£", EUR: "€" };
+  const currency = ctx?.currency || "USD";
+  return currencySymbols[currency] || currency;
 }
 
-export interface ElectronicsHeroSliderProps {
-  slides?: ElectronicsHeroSlide[];
-  autoplaySpeed?: number;
-}
-
-export function ElectronicsHeroSlider({ slides, autoplaySpeed = 5000 }: ElectronicsHeroSliderProps) {
-  const storeCtx = useContext(ElectronicsStoreContext);
-  const fixLink = (link: string) => {
+function useFixLink() {
+  const ctx = useContext(ElectronicsStoreContext);
+  return (link: string) => {
     if (link && link.startsWith("/store/")) return link;
-    if (storeCtx?.storeSlug) return `/store/${storeCtx.storeSlug}/shop`;
+    if (ctx?.storeSlug) return `/store/${ctx.storeSlug}/shop`;
     return link || "#";
   };
+}
 
-  const defaultSlides: ElectronicsHeroSlide[] = [
-    {
-      subtitle: "WEBCAMS 2024",
-      titleLine1: "Pro Stream",
-      titleLine2: "Webcam HD",
-      buttonText: "Shop Now",
-      buttonLink: "#",
-      backgroundColor: "rgb(242,242,242)",
-      image: `${IMG}/2021/06/w-electronic-slide-1.jpg`,
-    },
-    {
-      subtitle: "LEATHER CASES",
-      titleLine1: "Premium Cases",
-      titleLine2: "For All Devices",
-      buttonText: "Shop Now",
-      buttonLink: "#",
-      backgroundColor: "rgb(242,242,242)",
-      image: `${IMG}/2022/06/electro-banner.jpg`,
-    },
-    {
-      subtitle: "NEW ARRIVAL",
-      titleLine1: "Next-Gen",
-      titleLine2: "Gaming Gear",
-      buttonText: "Shop Now",
-      buttonLink: "#",
-      backgroundColor: "rgb(0,0,0)",
-      image: `${IMG}/2022/06/electro-banner3.jpg`,
-      textColor: "#fff",
-    },
-  ];
+/* ═══════════════════════════════════════════════════════════════
+   ELECTRONICS SECTION TITLE
+   ═══════════════════════════════════════════════════════════════ */
 
-  const items = slides || defaultSlides;
-  const [current, setCurrent] = useState(0);
+export interface ElectronicsSectionTitleProps {
+  title: string;
+  align?: "left" | "center" | "right";
+  showLine?: boolean;
+}
 
-  useEffect(() => {
-    if (items.length <= 1) return;
-    const t = setInterval(() => setCurrent(p => (p + 1) % items.length), autoplaySpeed);
-    return () => clearInterval(t);
-  }, [items.length, autoplaySpeed]);
-
-  const css = `
-    .el-slider { position: relative; width: 100%; min-height: 500px; overflow: hidden; }
-    .el-slide { position: absolute; inset: 0; opacity: 0; transition: opacity 0.7s ease; display: flex; align-items: center; }
-    .el-slide.el-active { opacity: 1; position: relative; }
-    .el-slide-inner { width: 100%; display: flex; align-items: center; min-height: 500px; }
-    .el-slide-text { flex: 1; padding: 60px 0 60px 80px; z-index: 2; }
-    .el-slide-subtitle { font-family: ${TOKENS.bodyFont}; font-weight: 700; font-size: 13px; text-transform: uppercase; letter-spacing: 3px; margin-bottom: 10px; opacity: 0.7; }
-    .el-slide-title { font-family: ${TOKENS.titleFont}; font-weight: 700; font-size: 56px; line-height: 1.15; margin: 0 0 25px; }
-    .el-slide-btn { display: inline-block; padding: 14px 35px; background: ${TOKENS.primaryColor}; color: #fff; font-family: ${TOKENS.bodyFont}; font-weight: 700; font-size: 13px; text-decoration: none; text-transform: uppercase; letter-spacing: 1px; transition: background 0.3s; border: none; cursor: pointer; border-radius: 0; }
-    .el-slide-btn:hover { background: ${TOKENS.primaryHover}; }
-    .el-slide-img { flex: 1; height: 500px; overflow: hidden; }
-    .el-slide-img img { width: 100%; height: 100%; object-fit: cover; }
-    .el-dots { position: absolute; bottom: 25px; left: 50%; transform: translateX(-50%); display: flex; gap: 8px; z-index: 5; }
-    .el-dot { width: 10px; height: 10px; border-radius: 50%; border: 2px solid ${TOKENS.primaryColor}; background: transparent; cursor: pointer; padding: 0; transition: all 0.3s; }
-    .el-dot.el-active { background: ${TOKENS.primaryColor}; }
-    @media (max-width: 1024px) { .el-slide-title { font-size: 40px; } .el-slide-text { padding-left: 40px; } }
-    @media (max-width: 767px) { .el-slide-title { font-size: 32px; } .el-slide-img { display: none; } .el-slide-text { padding: 40px 20px; } .el-slider { min-height: 350px; } .el-slide-inner { min-height: 350px; } }
+export function ElectronicsSectionTitle({ title, align = "center", showLine = true }: ElectronicsSectionTitleProps) {
+  const scopedCss = `
+    .est-wrapper { margin-bottom: 25px; text-align: ${align}; }
+    .est-title {
+      font-family: ${TOKENS.titleFont}; font-weight: 700; font-size: 20px;
+      text-transform: uppercase; color: ${TOKENS.titleColor}; display: inline-block;
+      position: relative; padding-bottom: 12px; margin: 0; letter-spacing: 0.5px;
+    }
+    .est-title.est-lined::after {
+      content: ''; position: absolute; bottom: 0; left: 50%;
+      transform: translateX(-50%); width: 40px; height: 2px;
+      background: ${TOKENS.primaryColor};
+    }
+    .est-title.est-left::after { left: 0; transform: none; }
+    .est-title.est-right::after { left: auto; right: 0; transform: none; }
   `;
 
   return (
-    <div className="el-slider">
-      <ScopedStyles id="hero" css={css} />
-      {items.map((slide, i) => (
-        <div key={i} className={`el-slide ${i === current ? "el-active" : ""}`} style={{ backgroundColor: slide.backgroundColor }}>
-          <div className="el-slide-inner">
-            <div className="el-slide-text">
-              {slide.subtitle && <div className="el-slide-subtitle" style={{ color: slide.textColor || TOKENS.titleColor }}>{slide.subtitle}</div>}
-              <h2 className="el-slide-title" style={{ color: slide.textColor || TOKENS.titleColor }}>{slide.titleLine1}{slide.titleLine2 && <><br />{slide.titleLine2}</>}</h2>
-              <a href={fixLink(slide.buttonLink)} className="el-slide-btn">{slide.buttonText}</a>
-            </div>
-            <div className="el-slide-img">
-              <img src={slide.image} alt={slide.titleLine1} />
+    <div className="est-wrapper">
+      <ScopedStyles id="section-title" css={scopedCss} />
+      <h4 className={`est-title ${showLine ? "est-lined" : ""} ${align !== "center" ? `est-${align}` : ""}`}>
+        {title}
+      </h4>
+    </div>
+  );
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   1. ELECTRONICS HERO SLIDER
+   ═══════════════════════════════════════════════════════════════ */
+
+export interface ElectronicsHeroSlide {
+  subtitle: string;
+  titleLine1: string;
+  titleLine2: string;
+  description: string;
+  buttonText: string;
+  buttonLink: string;
+  backgroundImage: string;
+  textPosition?: "left" | "center" | "right";
+  colorScheme?: "dark" | "light";
+}
+
+export interface ElectronicsHeroSliderProps {
+  slides: ElectronicsHeroSlide[];
+  autoplaySpeed?: number;
+  minHeight?: string;
+}
+
+export function ElectronicsHeroSlider({ slides, autoplaySpeed = 5000, minHeight = "500px" }: ElectronicsHeroSliderProps) {
+  const fixLink = useFixLink();
+  const [current, setCurrent] = useState(0);
+  const [isTransitioning, setIsTransitioning] = useState(false);
+  const timerRef = useRef<ReturnType<typeof setInterval> | null>(null);
+
+  const goTo = useCallback((idx: number) => {
+    if (isTransitioning) return;
+    setIsTransitioning(true);
+    setCurrent(idx);
+    setTimeout(() => setIsTransitioning(false), 700);
+  }, [isTransitioning]);
+
+  useEffect(() => {
+    if (slides.length <= 1) return;
+    timerRef.current = setInterval(() => {
+      setCurrent(prev => (prev + 1) % slides.length);
+    }, autoplaySpeed);
+    return () => { if (timerRef.current) clearInterval(timerRef.current); };
+  }, [slides.length, autoplaySpeed]);
+
+  const scopedCss = `
+    .ehs-slider { position: relative; width: 100%; overflow: hidden; background: #1a1a2e; }
+    .ehs-slide { position: absolute; inset: 0; opacity: 0; transition: opacity 0.7s ease; display: flex; align-items: center; }
+    .ehs-slide.ehs-active { opacity: 1; position: relative; }
+    .ehs-slide-bg { position: absolute; inset: 0; background-size: cover; background-position: center center; z-index: 0; }
+    .ehs-slide-content { position: relative; z-index: 2; width: 100%; }
+    .ehs-subtitle {
+      color: ${TOKENS.primaryColor}; text-transform: uppercase; font-weight: 600;
+      font-size: 14px; font-family: ${TOKENS.bodyFont}; margin-bottom: 15px; letter-spacing: 2px;
+    }
+    .ehs-subtitle-light { color: rgba(255,255,255,0.7); }
+    .ehs-title {
+      font-family: ${TOKENS.titleFont}; font-weight: 700; font-size: 36px;
+      line-height: 44px; margin: 0 0 10px;
+    }
+    .ehs-title-dark { color: ${TOKENS.titleColor}; }
+    .ehs-title-light { color: #ffffff; }
+    .ehs-desc {
+      font-family: ${TOKENS.bodyFont}; font-size: 14px; line-height: 1.7;
+      max-width: 400px; margin: 0 0 25px;
+    }
+    .ehs-desc-dark { color: ${TOKENS.textColor}; }
+    .ehs-desc-light { color: rgba(255,255,255,0.75); }
+    .ehs-btn {
+      display: inline-block; padding: 12px 30px;
+      background: ${TOKENS.primaryColor}; color: #fff; text-transform: uppercase;
+      font-family: ${TOKENS.bodyFont}; font-weight: 600; font-size: 13px;
+      text-decoration: none; border: none; cursor: pointer; border-radius: ${TOKENS.borderRadius};
+      transition: background-color 0.3s ease; letter-spacing: 0.5px;
+    }
+    .ehs-btn:hover { background: ${TOKENS.primaryHover}; }
+    .ehs-dots {
+      position: absolute; bottom: 25px; left: 50%; transform: translateX(-50%);
+      display: flex; gap: 10px; z-index: 5;
+    }
+    .ehs-dot {
+      width: 12px; height: 12px; border-radius: 50%; border: 2px solid rgba(255,255,255,0.5);
+      cursor: pointer; background: transparent; transition: all 0.3s ease; padding: 0;
+    }
+    .ehs-dot.ehs-dot-active { background: #ffffff; border-color: #fff; }
+    .ehs-nav {
+      position: absolute; top: 50%; transform: translateY(-50%); z-index: 5;
+      width: 40px; height: 40px; background: rgba(0,0,0,0.3); color: #fff; border: none;
+      cursor: pointer; font-size: 18px; display: flex; align-items: center; justify-content: center;
+      transition: background 0.3s; border-radius: ${TOKENS.borderRadius};
+    }
+    .ehs-nav:hover { background: ${TOKENS.primaryColor}; }
+    .ehs-nav-prev { left: 15px; }
+    .ehs-nav-next { right: 15px; }
+    .ehs-anim-in { animation: ehsSlideUp 0.6s ease forwards; opacity: 0; }
+    @keyframes ehsSlideUp {
+      from { opacity: 0; transform: translateY(25px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+    @media (max-width: 1024px) {
+      .ehs-slider { min-height: 420px !important; }
+      .ehs-title { font-size: 28px; line-height: 34px; }
+    }
+    @media (max-width: 767px) {
+      .ehs-slider { min-height: 350px !important; }
+      .ehs-title { font-size: 22px; line-height: 30px; }
+      .ehs-subtitle { font-size: 12px; }
+      .ehs-nav { display: none; }
+    }
+  `;
+
+  return (
+    <div className="ehs-slider" style={{ minHeight }}>
+      <ScopedStyles id="ehs-hero" css={scopedCss} />
+      {slides.map((slide, i) => {
+        const scheme = slide.colorScheme || "dark";
+        const align = slide.textPosition || "left";
+        return (
+          <div key={i} className={`ehs-slide ${i === current ? "ehs-active" : ""}`}>
+            <div className="ehs-slide-bg" style={{ backgroundImage: `url(${slide.backgroundImage})` }} />
+            <div className="ehs-slide-content">
+              <div style={{ ...containerStyle, textAlign: align as React.CSSProperties["textAlign"] }}>
+                <div style={{ maxWidth: align === "center" ? "65%" : "50%", margin: align === "center" ? "0 auto" : align === "right" ? "0 0 0 auto" : "0", padding: "40px 0" }}>
+                  {i === current && (
+                    <>
+                      <div className={`ehs-subtitle ${scheme === "light" ? "ehs-subtitle-light" : ""} ehs-anim-in`} style={{ animationDelay: "0.2s" }}>{slide.subtitle}</div>
+                      <div className={`ehs-title ehs-title-${scheme} ehs-anim-in`} style={{ animationDelay: "0.3s" }}>{slide.titleLine1}</div>
+                      <div className={`ehs-title ehs-title-${scheme} ehs-anim-in`} style={{ animationDelay: "0.4s" }}>{slide.titleLine2}</div>
+                      <div className={`ehs-desc ehs-desc-${scheme} ehs-anim-in`} style={{ animationDelay: "0.5s" }}>{slide.description}</div>
+                      <div className="ehs-anim-in" style={{ animationDelay: "0.6s" }}>
+                        <a href={fixLink(slide.buttonLink)} className="ehs-btn">{slide.buttonText}</a>
+                      </div>
+                    </>
+                  )}
+                </div>
+              </div>
             </div>
           </div>
-        </div>
-      ))}
-      {items.length > 1 && (
-        <div className="el-dots">
-          {items.map((_, i) => (
-            <button key={i} className={`el-dot ${i === current ? "el-active" : ""}`} onClick={() => setCurrent(i)} aria-label={`Slide ${i + 1}`} />
-          ))}
-        </div>
+        );
+      })}
+      {slides.length > 1 && (
+        <>
+          <button className="ehs-nav ehs-nav-prev" onClick={() => goTo((current - 1 + slides.length) % slides.length)} aria-label="Previous">‹</button>
+          <button className="ehs-nav ehs-nav-next" onClick={() => goTo((current + 1) % slides.length)} aria-label="Next">›</button>
+          <div className="ehs-dots">
+            {slides.map((_, i) => (
+              <button key={i} className={`ehs-dot ${i === current ? "ehs-dot-active" : ""}`} onClick={() => goTo(i)} aria-label={`Slide ${i + 1}`} />
+            ))}
+          </div>
+        </>
       )}
     </div>
   );
 }
 
 /* ═══════════════════════════════════════════════════════════════
-   2. SECTION TITLE
+   2. ELECTRONICS PROMO BANNERS
    ═══════════════════════════════════════════════════════════════ */
 
-export function ElectronicsSectionTitle({ title, align = "center" }: { title: string; align?: "left" | "center" | "right" }) {
-  return (
-    <div style={{ ...containerStyle, textAlign: align, marginBottom: "25px" }}>
-      <h4 style={{ fontFamily: TOKENS.titleFont, fontWeight: 700, fontSize: "20px", color: TOKENS.titleColor, margin: 0, textTransform: "uppercase" as const, letterSpacing: "1px" }}>{title}</h4>
-    </div>
-  );
-}
-
-/* ═══════════════════════════════════════════════════════════════
-   3. PROMO BANNERS (4-grid: Monster Beats, iPhone, Music, iWatch)
-   ═══════════════════════════════════════════════════════════════ */
-
-export interface ElectronicsBanner {
+export interface ElectronicsPromoBanner {
+  image: string;
   subtitle: string;
   title: string;
-  image: string;
-  buttonText?: string;
-  buttonLink?: string;
-  textColor?: string;
+  description: string;
+  buttonText: string;
+  buttonLink: string;
+  colorScheme?: "dark" | "light";
 }
 
-export interface ElectronicsBannerGridProps {
-  banners?: ElectronicsBanner[];
+export interface ElectronicsPromoBannersProps {
+  banners: ElectronicsPromoBanner[];
 }
 
-export function ElectronicsBannerGrid({ banners }: ElectronicsBannerGridProps) {
-  const defaultBanners: ElectronicsBanner[] = [
-    { subtitle: "NEW TECHNOLOGIES", title: "Monster Beats\nHeadphones", image: `${IMG}/2022/06/electro-banner1-2.jpg`, buttonText: "Shop Now" },
-    { subtitle: "APPLE ACCESSORIES", title: "Apple iPhone 7\nColor Red", image: `${IMG}/2022/06/electro-banner1-32.jpg`, buttonText: "Shop Now" },
-    { subtitle: "Hich Tech News", title: "Music Makes\nFeel Better", image: `${IMG}/2022/06/electro-banner10.jpg`, buttonText: "Shop Now", textColor: "#fff" },
-    { subtitle: "Health & Fit", title: "Apple iWatch Nike Edition", image: `${IMG}/2022/06/electro-banner11.jpg`, buttonText: "Shop Now" },
-  ];
-
-  const items = banners || defaultBanners;
-
-  const css = `
-    .el-banner-grid { display: grid; grid-template-columns: 1fr 1fr; grid-template-rows: 1fr 1fr; gap: 20px; margin-bottom: 60px; }
-    .el-banner-grid .el-banner:first-child { grid-row: 1 / 3; }
-    .el-banner { position: relative; overflow: hidden; cursor: pointer; min-height: 240px; }
-    .el-banner-img { width: 100%; height: 100%; object-fit: cover; display: block; transition: transform 0.5s; position: absolute; inset: 0; }
-    .el-banner:hover .el-banner-img { transform: scale(1.05); }
-    .el-banner-content { position: relative; z-index: 2; padding: 30px; }
-    .el-banner-sub { font-family: ${TOKENS.bodyFont}; font-size: 12px; font-weight: 700; text-transform: uppercase; letter-spacing: 2px; margin-bottom: 8px; opacity: 0.7; }
-    .el-banner-title { font-family: ${TOKENS.titleFont}; font-weight: 700; font-size: 24px; line-height: 1.3; margin: 0 0 15px; white-space: pre-line; }
-    .el-banner-btn { display: inline-block; padding: 10px 22px; background: ${TOKENS.primaryColor}; color: #fff; font-family: ${TOKENS.bodyFont}; font-weight: 700; font-size: 12px; text-decoration: none; text-transform: uppercase; letter-spacing: 1px; transition: background 0.3s; }
-    .el-banner-btn:hover { background: ${TOKENS.primaryHover}; }
-    @media (max-width: 767px) { .el-banner-grid { grid-template-columns: 1fr; grid-template-rows: auto; } .el-banner-grid .el-banner:first-child { grid-row: auto; } }
+export function ElectronicsPromoBanners({ banners }: ElectronicsPromoBannersProps) {
+  const fixLink = useFixLink();
+  const scopedCss = `
+    .epb-section { padding: 30px 0; }
+    .epb-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 30px; }
+    .epb-card { position: relative; overflow: hidden; border-radius: ${TOKENS.borderRadius}; cursor: pointer; min-height: 220px; display: flex; align-items: center; }
+    .epb-card-dark { background: #1a1a2e; }
+    .epb-card-light { background: #f5f5f5; }
+    .epb-img { position: absolute; right: 0; bottom: 0; max-height: 100%; max-width: 50%; object-fit: contain; transition: transform 0.6s ease; }
+    .epb-card:hover .epb-img { transform: scale(1.05); }
+    .epb-content { position: relative; z-index: 2; padding: 30px; max-width: 55%; }
+    .epb-subtitle { font-size: 12px; text-transform: uppercase; letter-spacing: 2px; font-weight: 600; margin-bottom: 8px; font-family: ${TOKENS.bodyFont}; }
+    .epb-subtitle-dark { color: rgba(255,255,255,0.6); }
+    .epb-subtitle-light { color: ${TOKENS.textColor}; }
+    .epb-title { font-family: ${TOKENS.titleFont}; font-weight: 700; font-size: 24px; line-height: 1.2; margin: 0 0 10px; }
+    .epb-title-dark { color: #fff; }
+    .epb-title-light { color: ${TOKENS.titleColor}; }
+    .epb-desc { font-size: 13px; line-height: 1.6; margin-bottom: 15px; font-family: ${TOKENS.bodyFont}; }
+    .epb-desc-dark { color: rgba(255,255,255,0.6); }
+    .epb-desc-light { color: ${TOKENS.textColor}; }
+    .epb-btn {
+      display: inline-block; padding: 10px 25px; font-size: 12px; font-weight: 600;
+      text-transform: uppercase; text-decoration: none; border-radius: ${TOKENS.borderRadius};
+      transition: all 0.3s; font-family: ${TOKENS.bodyFont}; letter-spacing: 0.5px;
+    }
+    .epb-btn-dark { background: ${TOKENS.primaryColor}; color: #fff; }
+    .epb-btn-dark:hover { background: ${TOKENS.primaryHover}; }
+    .epb-btn-light { background: ${TOKENS.titleColor}; color: #fff; }
+    .epb-btn-light:hover { background: #444; }
+    .epb-link { position: absolute; inset: 0; z-index: 3; }
+    @media (max-width: 767px) {
+      .epb-grid { grid-template-columns: 1fr; }
+      .epb-card { min-height: 180px; }
+      .epb-title { font-size: 20px; }
+    }
   `;
 
   return (
     <div style={containerStyle}>
-      <ScopedStyles id="banners" css={css} />
-      <div className="el-banner-grid">
-        {items.map((b, i) => (
-          <div key={i} className="el-banner">
-            <img className="el-banner-img" src={b.image} alt={b.title} />
-            <div className="el-banner-content">
-              <div className="el-banner-sub" style={{ color: b.textColor || TOKENS.titleColor }}>{b.subtitle}</div>
-              <h4 className="el-banner-title" style={{ color: b.textColor || TOKENS.titleColor }}>{b.title}</h4>
-              {b.buttonText && <a href={b.buttonLink || "#"} className="el-banner-btn">{b.buttonText}</a>}
-            </div>
-          </div>
-        ))}
-      </div>
-    </div>
-  );
-}
-
-/* ═══════════════════════════════════════════════════════════════
-   4. PRODUCT GRID
-   ═══════════════════════════════════════════════════════════════ */
-
-export interface ElectronicsProductGridProps {
-  products?: ElectronicsProduct[];
-  columns?: number;
-  sectionTitle?: string;
-  marginBottom?: string;
-  maxProducts?: number;
-}
-
-export function ElectronicsProductGrid({
-  products: propProducts,
-  columns = 4,
-  sectionTitle = "FEATURED PRODUCTS",
-  marginBottom = "60px",
-  maxProducts = 8,
-}: ElectronicsProductGridProps) {
-  const storeCtx = useContext(ElectronicsStoreContext);
-  const fixLink = (slug: string) => storeCtx?.storeSlug ? `/store/${storeCtx.storeSlug}/product/${slug}` : "#";
-
-  const defaultProducts: ElectronicsProduct[] = [
-    { id: 1, name: "Google Pixel Blue", slug: "google-pixel-blue", price: "159.00", image: `${IMG}/2017/04/Product-3-1-430x491.jpg`, hoverImage: `${IMG}/2017/04/Product-3-2-430x491.jpg`, category: "Electronics", rating: 5 },
-    { id: 2, name: "iPhone Red 128GB", slug: "iphone-red", price: "159.00", image: `${IMG}/2017/04/Product-5-1-430x491.jpg`, hoverImage: `${IMG}/2017/04/Product-5-2-430x491.jpg`, category: "Electronics", rating: 5 },
-    { id: 3, name: "Microsoft Xbox One S", slug: "xbox-one-s", price: "159.00", image: `${IMG}/2017/04/Product-6-1-430x491.jpg`, hoverImage: `${IMG}/2017/04/Product-6-2-430x491.jpg`, category: "Electronics", rating: 5 },
-    { id: 4, name: "Samsung Galaxy S8", slug: "samsung-galaxy-s8", price: "159.00", image: `${IMG}/2017/04/Product-4-1-430x491.jpg`, hoverImage: `${IMG}/2017/04/Product-4-2-430x491.jpg`, category: "Electronics", rating: 5 },
-    { id: 5, name: "Samsung Gear 360", slug: "samsung-gear-360", price: "159.00", image: `${IMG}/2017/04/Product-7-1-430x491.jpg`, hoverImage: `${IMG}/2017/04/Product-7-2-430x491.jpg`, category: "Electronics", rating: 5 },
-    { id: 6, name: "Apple Watch Stainless Steel", slug: "apple-watch", price: "159.00", image: `${IMG}/2017/04/Product-9-1-430x491.jpg`, hoverImage: `${IMG}/2017/04/Product-9-2-430x491.jpg`, category: "Electronics", rating: 5 },
-    { id: 7, name: "Pro Stream Webcam", slug: "pro-stream-webcam", price: "159.00", image: `${IMG}/2017/04/Product-11-1-430x491.jpg`, hoverImage: `${IMG}/2017/04/Product-11-2-430x491.jpg`, category: "Electronics", rating: 5 },
-    { id: 8, name: "Artemis Spectrum G98", slug: "artemis-spectrum", price: "159.00", image: `${IMG}/2017/04/Product-12-1-430x491.jpg`, hoverImage: `${IMG}/2017/04/Product-12-2-430x491.jpg`, category: "Electronics", rating: 5 },
-  ];
-
-  const items = (propProducts || storeCtx?.products || defaultProducts).slice(0, maxProducts);
-  const [hoveredId, setHoveredId] = useState<number | null>(null);
-
-  const css = `
-    .el-products { margin-bottom: ${marginBottom}; }
-    .el-prod-grid { display: grid; gap: 20px; }
-    .el-prod { background: #fff; border: 1px solid #eee; overflow: hidden; transition: box-shadow 0.3s; position: relative; text-align: center; }
-    .el-prod:hover { box-shadow: 0 5px 25px rgba(0,0,0,0.1); }
-    .el-prod-img-wrap { position: relative; overflow: hidden; background: #f9f9f9; height: 280px; }
-    .el-prod-img { width: 100%; height: 100%; object-fit: contain; display: block; transition: opacity 0.4s; padding: 15px; }
-    .el-prod-info { padding: 12px 15px 20px; }
-    .el-prod-cat { font-family: ${TOKENS.bodyFont}; font-size: 11px; color: ${TOKENS.textColor}; margin-bottom: 4px; text-transform: uppercase; letter-spacing: 0.5px; }
-    .el-prod-name { font-family: ${TOKENS.titleFont}; font-weight: 600; font-size: 14px; color: ${TOKENS.entityTitleColor}; margin: 0 0 6px; }
-    .el-prod-name a { color: inherit; text-decoration: none; }
-    .el-prod-name a:hover { color: rgba(51,51,51,0.65); }
-    .el-prod-price { font-family: ${TOKENS.bodyFont}; font-weight: 700; font-size: 15px; color: ${TOKENS.titleColor}; }
-    .el-prod-stars { color: ${TOKENS.starColor}; font-size: 11px; letter-spacing: 1px; margin-bottom: 4px; }
-    .el-prod-btn { display: inline-block; margin-top: 8px; padding: 8px 20px; background: ${TOKENS.primaryColor}; color: #fff; font-family: ${TOKENS.bodyFont}; font-weight: 700; font-size: 11px; text-transform: uppercase; border: none; cursor: pointer; transition: background 0.3s; }
-    .el-prod-btn:hover { background: ${TOKENS.primaryHover}; }
-    .el-prod-badge { position: absolute; top: 10px; left: 10px; background: ${TOKENS.primaryColor}; color: #fff; font-family: ${TOKENS.bodyFont}; font-size: 11px; font-weight: 700; padding: 3px 10px; text-transform: uppercase; z-index: 2; }
-    @media (max-width: 1024px) { .el-prod-grid { grid-template-columns: repeat(3, 1fr) !important; } }
-    @media (max-width: 767px) { .el-prod-grid { grid-template-columns: repeat(2, 1fr) !important; } }
-  `;
-
-  return (
-    <div className="el-products">
-      <ScopedStyles id="products" css={css} />
-      <div style={containerStyle}>
-        {sectionTitle && <ElectronicsSectionTitle title={sectionTitle} />}
-        <div className="el-prod-grid" style={{ gridTemplateColumns: `repeat(${columns}, 1fr)` }}>
-          {items.map((p) => (
-            <div key={p.id} className="el-prod" onMouseEnter={() => setHoveredId(p.id)} onMouseLeave={() => setHoveredId(null)}>
-              {p.badge && <span className="el-prod-badge">{p.badge}</span>}
-              <div className="el-prod-img-wrap">
-                <img className="el-prod-img" src={hoveredId === p.id && p.hoverImage ? p.hoverImage : p.image} alt={p.name} />
+      <ScopedStyles id="epb-banners" css={scopedCss} />
+      <div className="epb-section">
+        <div className="epb-grid">
+          {banners.map((b, i) => {
+            const scheme = b.colorScheme || "dark";
+            return (
+              <div key={i} className={`epb-card epb-card-${scheme}`}>
+                {b.image && <img src={b.image} alt={b.title} className="epb-img" loading="lazy" />}
+                <div className="epb-content">
+                  <div className={`epb-subtitle epb-subtitle-${scheme}`}>{b.subtitle}</div>
+                  <h4 className={`epb-title epb-title-${scheme}`}>{b.title}</h4>
+                  <p className={`epb-desc epb-desc-${scheme}`}>{b.description}</p>
+                  <span className={`epb-btn epb-btn-${scheme}`}>{b.buttonText}</span>
+                </div>
+                <a href={fixLink(b.buttonLink)} className="epb-link" aria-label={b.title} />
               </div>
-              <div className="el-prod-info">
-                <div className="el-prod-cat">{p.category}</div>
-                <h3 className="el-prod-name"><a href={fixLink(p.slug)}>{p.name}</a></h3>
-                <div className="el-prod-stars">{"★".repeat(p.rating || 5)}{"☆".repeat(5 - (p.rating || 5))}</div>
-                <div className="el-prod-price">${p.price}</div>
-                <button className="el-prod-btn">Add to cart</button>
-              </div>
-            </div>
-          ))}
+            );
+          })}
         </div>
       </div>
     </div>
@@ -332,195 +369,518 @@ export function ElectronicsProductGrid({
 }
 
 /* ═══════════════════════════════════════════════════════════════
-   5. HOT DEALS (countdown timer)
+   3. ELECTRONICS PRODUCT TABS
+   ═══════════════════════════════════════════════════════════════ */
+
+export interface ElectronicsProductTabsProps {
+  sectionTitle?: string;
+  tabs: Array<{ label: string; filter: string }>;
+  columns?: number;
+  maxProducts?: number;
+}
+
+export function ElectronicsProductTabs({ sectionTitle = "ELECTRONICS", tabs, columns = 4, maxProducts = 8 }: ElectronicsProductTabsProps) {
+  const storeCtx = useContext(ElectronicsStoreContext);
+  const sym = useCurrencySymbol();
+  const [activeTab, setActiveTab] = useState(0);
+  const [page, setPage] = useState(0);
+
+  const getFilteredProducts = (filter: string) => {
+    if (!storeCtx?.products?.length) return [];
+    let prods = storeCtx.products;
+    if (filter === "featured") {
+      const f = prods.filter(p => p.isFeatured);
+      if (f.length > 0) prods = f;
+    } else if (filter === "new" || filter === "new-arrival") {
+      const t = prods.filter(p => p.tags?.some(tag => tag.toLowerCase().replace(/[-_ ]/g, "") === "newarrival"));
+      if (t.length > 0) prods = t;
+    } else if (filter === "bestseller" || filter === "top-sellers") {
+      const t = prods.filter(p => p.tags?.some(tag => tag.toLowerCase().replace(/[-_ ]/g, "") === "bestseller" || tag.toLowerCase().replace(/[-_ ]/g, "") === "topseller"));
+      if (t.length > 0) prods = t;
+    }
+    return prods;
+  };
+
+  const filteredProducts = getFilteredProducts(tabs[activeTab]?.filter || "all");
+  const totalPages = Math.ceil(filteredProducts.length / maxProducts);
+  const displayProducts = filteredProducts.slice(page * maxProducts, (page + 1) * maxProducts);
+
+  const scopedCss = `
+    .ept-section { padding: 40px 0 50px; }
+    .ept-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 25px; flex-wrap: wrap; gap: 10px; }
+    .ept-tabs { display: flex; gap: 5px; }
+    .ept-tab {
+      padding: 8px 20px; font-size: 13px; font-weight: 600; font-family: ${TOKENS.bodyFont};
+      text-transform: uppercase; border: none; cursor: pointer; background: transparent;
+      color: ${TOKENS.textColor}; transition: all 0.3s; border-radius: ${TOKENS.borderRadius};
+    }
+    .ept-tab:hover { color: ${TOKENS.primaryColor}; }
+    .ept-tab.ept-tab-active { background: ${TOKENS.primaryColor}; color: #fff; }
+    .ept-grid {
+      display: grid; grid-template-columns: repeat(${columns}, 1fr); gap: 20px;
+    }
+    .ept-card { position: relative; border: 1px solid #eee; border-radius: ${TOKENS.borderRadius}; overflow: hidden; transition: box-shadow 0.3s; }
+    .ept-card:hover { box-shadow: 0 4px 20px rgba(0,0,0,0.1); }
+    .ept-thumb { position: relative; overflow: hidden; background: #f9f9f9; aspect-ratio: 1; }
+    .ept-thumb img { width: 100%; height: 100%; object-fit: cover; transition: transform 0.5s; }
+    .ept-card:hover .ept-thumb img { transform: scale(1.05); }
+    .ept-badge {
+      position: absolute; top: 8px; left: 8px; background: ${TOKENS.primaryColor};
+      color: #fff; font-size: 11px; font-weight: 600; padding: 3px 8px;
+      border-radius: ${TOKENS.borderRadius}; z-index: 2; text-transform: uppercase;
+    }
+    .ept-actions {
+      position: absolute; top: 8px; right: 8px; display: flex; flex-direction: column;
+      gap: 4px; opacity: 0; transform: translateX(10px); transition: all 0.3s; z-index: 3;
+    }
+    .ept-card:hover .ept-actions { opacity: 1; transform: translateX(0); }
+    .ept-action-btn {
+      width: 32px; height: 32px; border-radius: 50%; background: #fff; border: 1px solid #eee;
+      cursor: pointer; display: flex; align-items: center; justify-content: center;
+      font-size: 13px; transition: all 0.2s; box-shadow: 0 1px 4px rgba(0,0,0,0.1);
+    }
+    .ept-action-btn:hover { background: ${TOKENS.primaryColor}; color: #fff; border-color: ${TOKENS.primaryColor}; }
+    .ept-info { padding: 12px 15px; }
+    .ept-cat { font-size: 12px; color: #999; margin-bottom: 4px; font-family: ${TOKENS.bodyFont}; }
+    .ept-name {
+      font-family: ${TOKENS.bodyFont}; font-weight: 600; font-size: 14px;
+      color: ${TOKENS.entityTitleColor}; margin: 0 0 6px; line-height: 1.3;
+    }
+    .ept-name a { color: inherit; text-decoration: none; }
+    .ept-name a:hover { color: ${TOKENS.primaryColor}; }
+    .ept-price { font-weight: 600; font-size: 14px; color: ${TOKENS.primaryColor}; font-family: ${TOKENS.bodyFont}; }
+    .ept-price-old { text-decoration: line-through; color: #999; font-weight: 400; margin-right: 8px; font-size: 13px; }
+    .ept-add-btn {
+      display: block; width: 100%; padding: 10px; background: ${TOKENS.primaryColor}; color: #fff;
+      border: none; text-transform: uppercase; font-weight: 600; font-size: 12px;
+      font-family: ${TOKENS.bodyFont}; cursor: pointer; opacity: 0;
+      transform: translateY(100%); transition: all 0.3s;
+    }
+    .ept-card:hover .ept-add-btn { opacity: 1; transform: translateY(0); }
+    .ept-pagination { display: flex; align-items: center; justify-content: center; gap: 10px; margin-top: 25px; }
+    .ept-page-btn {
+      width: 36px; height: 36px; border: 1px solid #ddd; background: #fff; cursor: pointer;
+      display: flex; align-items: center; justify-content: center; border-radius: ${TOKENS.borderRadius};
+      font-size: 14px; color: ${TOKENS.textColor}; transition: all 0.3s;
+    }
+    .ept-page-btn:hover { border-color: ${TOKENS.primaryColor}; color: ${TOKENS.primaryColor}; }
+    .ept-page-btn:disabled { opacity: 0.4; cursor: default; }
+    .ept-empty { text-align: center; padding: 40px; color: ${TOKENS.textColor}; font-family: ${TOKENS.bodyFont}; }
+    @media (max-width: 1024px) { .ept-grid { grid-template-columns: repeat(3, 1fr); } }
+    @media (max-width: 767px) { .ept-grid { grid-template-columns: repeat(2, 1fr); gap: 10px; } .ept-header { flex-direction: column; align-items: flex-start; } }
+  `;
+
+  return (
+    <div style={containerStyle}>
+      <ScopedStyles id="ept-tabs" css={scopedCss} />
+      <div className="ept-section">
+        <div className="ept-header">
+          <ElectronicsSectionTitle title={sectionTitle} showLine={true} />
+          <div className="ept-tabs">
+            {tabs.map((tab, i) => (
+              <button key={i} className={`ept-tab ${i === activeTab ? "ept-tab-active" : ""}`} onClick={() => { setActiveTab(i); setPage(0); }}>
+                {tab.label}
+              </button>
+            ))}
+          </div>
+        </div>
+        {displayProducts.length === 0 ? (
+          <div className="ept-empty">
+            <p>No products yet. Add products from your dashboard to see them here.</p>
+          </div>
+        ) : (
+          <>
+            <div className="ept-grid">
+              {displayProducts.map((p) => {
+                const productLink = storeCtx ? `/store/${storeCtx.storeSlug}/product/${p.slug}` : "#";
+                return (
+                  <div key={p.id} className="ept-card">
+                    <div className="ept-thumb">
+                      <a href={productLink}>
+                        <img src={p.images[0]?.url || ""} alt={p.name} loading="lazy" />
+                      </a>
+                      {p.compareAtPrice && <span className="ept-badge">SALE</span>}
+                      {!p.compareAtPrice && p.isFeatured && <span className="ept-badge">HOT</span>}
+                      <div className="ept-actions">
+                        <button className="ept-action-btn" title="Quick view" aria-label="Quick view">👁</button>
+                        <button className="ept-action-btn" title="Wishlist" aria-label="Wishlist">♡</button>
+                        <button className="ept-action-btn" title="Compare" aria-label="Compare">⇌</button>
+                      </div>
+                    </div>
+                    <div className="ept-info">
+                      {p.category && <div className="ept-cat">{p.category.name}</div>}
+                      <h3 className="ept-name"><a href={productLink}>{p.name}</a></h3>
+                      <div className="ept-price">
+                        {p.compareAtPrice && <span className="ept-price-old">{sym}{p.compareAtPrice.toLocaleString()}</span>}
+                        <span>{sym}{p.price.toLocaleString()}</span>
+                      </div>
+                    </div>
+                    <button className="ept-add-btn">Add to cart</button>
+                  </div>
+                );
+              })}
+            </div>
+            {totalPages > 1 && (
+              <div className="ept-pagination">
+                <button className="ept-page-btn" disabled={page === 0} onClick={() => setPage(p => p - 1)}>‹</button>
+                {Array.from({ length: totalPages }, (_, i) => (
+                  <button key={i} className="ept-page-btn" style={i === page ? { background: TOKENS.primaryColor, color: "#fff", borderColor: TOKENS.primaryColor } : {}} onClick={() => setPage(i)}>
+                    {i + 1}
+                  </button>
+                ))}
+                <button className="ept-page-btn" disabled={page >= totalPages - 1} onClick={() => setPage(p => p + 1)}>›</button>
+              </div>
+            )}
+          </>
+        )}
+      </div>
+    </div>
+  );
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   4. ELECTRONICS BANNER GRID
+   ═══════════════════════════════════════════════════════════════ */
+
+export interface ElectronicsBannerGridItem {
+  image: string;
+  subtitle: string;
+  title: string;
+  buttonText?: string;
+  buttonLink?: string;
+  colorScheme?: "dark" | "light";
+}
+
+export interface ElectronicsBannerGridProps {
+  banners: ElectronicsBannerGridItem[];
+}
+
+export function ElectronicsBannerGrid({ banners }: ElectronicsBannerGridProps) {
+  const fixLink = useFixLink();
+  // Expected: 4 banners in asymmetric grid: leftTall(4/12), middleTop(5/12), middleBottom(5/12), rightTall(3/12)
+  const scopedCss = `
+    .ebg-section { padding: 30px 0; }
+    .ebg-grid {
+      display: grid;
+      grid-template-columns: 4fr 5fr 3fr;
+      grid-template-rows: 1fr 1fr;
+      gap: 15px;
+      min-height: 420px;
+    }
+    .ebg-item { position: relative; overflow: hidden; border-radius: ${TOKENS.borderRadius}; cursor: pointer; }
+    .ebg-item-0 { grid-row: 1 / 3; } /* left tall */
+    .ebg-item-1 { } /* middle top */
+    .ebg-item-2 { } /* middle bottom */
+    .ebg-item-3 { grid-row: 1 / 3; } /* right tall */
+    .ebg-img { width: 100%; height: 100%; object-fit: cover; display: block; transition: transform 0.6s; }
+    .ebg-item:hover .ebg-img { transform: scale(1.05); }
+    .ebg-overlay { position: absolute; inset: 0; display: flex; flex-direction: column; justify-content: flex-end; padding: 20px; z-index: 2; }
+    .ebg-overlay-dark { background: linear-gradient(to top, rgba(0,0,0,0.5) 0%, transparent 60%); }
+    .ebg-overlay-light { background: linear-gradient(to top, rgba(255,255,255,0.7) 0%, transparent 60%); }
+    .ebg-sub { font-size: 11px; text-transform: uppercase; letter-spacing: 2px; font-weight: 600; margin-bottom: 5px; font-family: ${TOKENS.bodyFont}; }
+    .ebg-sub-dark { color: rgba(255,255,255,0.7); }
+    .ebg-sub-light { color: ${TOKENS.textColor}; }
+    .ebg-title-text { font-family: ${TOKENS.titleFont}; font-weight: 700; font-size: 18px; margin: 0 0 8px; line-height: 1.2; }
+    .ebg-title-dark { color: #fff; }
+    .ebg-title-light { color: ${TOKENS.titleColor}; }
+    .ebg-btn {
+      display: inline-block; font-size: 12px; font-weight: 600; text-transform: uppercase;
+      color: ${TOKENS.primaryColor}; text-decoration: none; font-family: ${TOKENS.bodyFont};
+      position: relative; letter-spacing: 0.5px;
+    }
+    .ebg-btn::after { content: '→'; margin-left: 5px; }
+    .ebg-link { position: absolute; inset: 0; z-index: 3; }
+    @media (max-width: 1024px) {
+      .ebg-grid { grid-template-columns: 1fr 1fr; grid-template-rows: auto; min-height: auto; }
+      .ebg-item-0, .ebg-item-3 { grid-row: auto; }
+      .ebg-item { min-height: 200px; }
+    }
+    @media (max-width: 767px) {
+      .ebg-grid { grid-template-columns: 1fr; }
+    }
+  `;
+
+  return (
+    <div style={containerStyle}>
+      <ScopedStyles id="ebg-grid" css={scopedCss} />
+      <div className="ebg-section">
+        <div className="ebg-grid">
+          {banners.slice(0, 4).map((b, i) => {
+            const scheme = b.colorScheme || "dark";
+            return (
+              <div key={i} className={`ebg-item ebg-item-${i}`}>
+                <img src={b.image} alt={b.title} className="ebg-img" loading="lazy" />
+                <div className={`ebg-overlay ebg-overlay-${scheme}`}>
+                  <div className={`ebg-sub ebg-sub-${scheme}`}>{b.subtitle}</div>
+                  <h4 className={`ebg-title-text ebg-title-${scheme}`}>{b.title}</h4>
+                  {b.buttonText && <span className="ebg-btn">{b.buttonText}</span>}
+                </div>
+                <a href={fixLink(b.buttonLink || "#")} className="ebg-link" aria-label={b.title} />
+              </div>
+            );
+          })}
+        </div>
+      </div>
+    </div>
+  );
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   5. ELECTRONICS HOT DEALS
    ═══════════════════════════════════════════════════════════════ */
 
 export interface ElectronicsHotDealsProps {
   sectionTitle?: string;
-  products?: ElectronicsProduct[];
-  endDate?: Date;
-  backgroundImage?: string;
+  buttonText?: string;
+  buttonLink?: string;
+  dealEndDate?: string;
+  maxProducts?: number;
+  columns?: number;
+  filter?: string;
 }
 
 export function ElectronicsHotDeals({
   sectionTitle = "TODAY HOT DEALS",
-  products,
-  endDate,
-  backgroundImage = `${IMG}/2022/06/bg-electro.jpg`,
+  buttonText = "View All Deals",
+  buttonLink = "/shop",
+  dealEndDate,
+  maxProducts = 6,
+  columns = 3,
+  filter = "sale",
 }: ElectronicsHotDealsProps) {
-  const target = endDate || new Date(Date.now() + 7 * 24 * 60 * 60 * 1000);
-  const [timeLeft, setTimeLeft] = useState({ days: 0, hours: 0, minutes: 0, seconds: 0 });
+  const storeCtx = useContext(ElectronicsStoreContext);
+  const sym = useCurrencySymbol();
+  const fixLink = useFixLink();
 
+  const products = (() => {
+    if (!storeCtx?.products?.length) return [];
+    let prods = storeCtx.products;
+    if (filter === "sale") {
+      const sale = prods.filter(p => p.compareAtPrice);
+      if (sale.length > 0) prods = sale;
+    } else if (filter === "featured") {
+      const feat = prods.filter(p => p.isFeatured);
+      if (feat.length > 0) prods = feat;
+    }
+    return prods.slice(0, maxProducts);
+  })();
+
+  // Countdown timer
+  const endDate = dealEndDate || new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString();
+  const [timeLeft, setTimeLeft] = useState({ days: 0, hours: 0, min: 0, sec: 0 });
   useEffect(() => {
     const tick = () => {
-      const diff = Math.max(0, target.getTime() - Date.now());
+      const diff = Math.max(0, new Date(endDate).getTime() - Date.now());
       setTimeLeft({
         days: Math.floor(diff / 86400000),
         hours: Math.floor((diff % 86400000) / 3600000),
-        minutes: Math.floor((diff % 3600000) / 60000),
-        seconds: Math.floor((diff % 60000) / 1000),
+        min: Math.floor((diff % 3600000) / 60000),
+        sec: Math.floor((diff % 60000) / 1000),
       });
     };
     tick();
-    const t = setInterval(tick, 1000);
-    return () => clearInterval(t);
-  }, []);
+    const id = setInterval(tick, 1000);
+    return () => clearInterval(id);
+  }, [endDate]);
 
-  const defaultProducts: ElectronicsProduct[] = [
-    { id: 51, name: "iPhone Red 128GB", slug: "iphone-red-deal", price: "159.00", comparePrice: "199.00", image: `${IMG}/2017/04/Product-5-1-430x491.jpg`, category: "Electronics", rating: 5, badge: "SALE" },
-    { id: 52, name: "Microsoft Xbox One S", slug: "xbox-deal", price: "159.00", comparePrice: "199.00", image: `${IMG}/2017/04/Product-6-1-430x491.jpg`, category: "Electronics", rating: 5, badge: "SALE" },
-    { id: 53, name: "Artemis Spectrum G98", slug: "artemis-deal", price: "99.00", comparePrice: "159.00", image: `${IMG}/2017/04/Product-12-1-430x491.jpg`, category: "Electronics", rating: 5, badge: "SALE" },
-  ];
-
-  const items = products || defaultProducts;
-
-  const css = `
-    .el-hotdeals { background-image: url(${backgroundImage}); background-size: cover; background-position: center; padding: 60px 0; margin-bottom: 60px; }
-    .el-countdown { display: flex; justify-content: center; gap: 15px; margin-bottom: 30px; }
-    .el-countdown-item { text-align: center; min-width: 70px; }
-    .el-countdown-num { font-family: ${TOKENS.titleFont}; font-weight: 700; font-size: 36px; color: #fff; display: block; }
-    .el-countdown-label { font-family: ${TOKENS.bodyFont}; font-size: 12px; color: rgba(255,255,255,0.7); text-transform: uppercase; letter-spacing: 1px; }
-    .el-hotdeals-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; }
-    .el-hotdeal-card { background: #fff; text-align: center; padding: 20px; position: relative; }
-    .el-hotdeal-img { width: 200px; height: 200px; object-fit: contain; margin: 0 auto 15px; display: block; }
-    .el-hotdeal-name { font-family: ${TOKENS.titleFont}; font-weight: 600; font-size: 15px; color: ${TOKENS.entityTitleColor}; margin: 0 0 6px; }
-    .el-hotdeal-price { font-family: ${TOKENS.bodyFont}; font-weight: 700; font-size: 16px; color: ${TOKENS.primaryColor}; }
-    .el-hotdeal-price del { color: ${TOKENS.textColor}; font-weight: 400; font-size: 14px; margin-right: 8px; }
-    .el-hotdeal-stars { color: ${TOKENS.starColor}; font-size: 11px; letter-spacing: 1px; margin-bottom: 5px; }
-    .el-hotdeal-badge { position: absolute; top: 10px; left: 10px; background: #e74c3c; color: #fff; font-family: ${TOKENS.bodyFont}; font-size: 11px; font-weight: 700; padding: 3px 10px; }
-    @media (max-width: 767px) { .el-hotdeals-grid { grid-template-columns: 1fr; } .el-countdown-num { font-size: 28px; } }
-  `;
-
-  return (
-    <div className="el-hotdeals">
-      <ScopedStyles id="hotdeals" css={css} />
-      <div style={containerStyle}>
-        <ElectronicsSectionTitle title={sectionTitle} />
-        <div className="el-countdown">
-          {[
-            { val: timeLeft.days, label: "Days" },
-            { val: timeLeft.hours, label: "Hours" },
-            { val: timeLeft.minutes, label: "Mins" },
-            { val: timeLeft.seconds, label: "Secs" },
-          ].map((t, i) => (
-            <div key={i} className="el-countdown-item">
-              <span className="el-countdown-num">{String(t.val).padStart(2, "0")}</span>
-              <span className="el-countdown-label">{t.label}</span>
-            </div>
-          ))}
-        </div>
-        <div className="el-hotdeals-grid">
-          {items.map((p) => (
-            <div key={p.id} className="el-hotdeal-card">
-              {p.badge && <span className="el-hotdeal-badge">{p.badge}</span>}
-              <img className="el-hotdeal-img" src={p.image} alt={p.name} />
-              <div className="el-hotdeal-stars">{"★".repeat(p.rating || 5)}</div>
-              <h3 className="el-hotdeal-name">{p.name}</h3>
-              <div className="el-hotdeal-price">
-                {p.comparePrice && <del>${p.comparePrice}</del>}
-                ${p.price}
-              </div>
-            </div>
-          ))}
-        </div>
-      </div>
-    </div>
-  );
-}
-
-/* ═══════════════════════════════════════════════════════════════
-   6. DUALSHOCK BANNER (full-width with product image)
-   ═══════════════════════════════════════════════════════════════ */
-
-export interface ElectronicsDualshockProps {
-  subtitle?: string;
-  title?: string;
-  buttonText?: string;
-  buttonLink?: string;
-  backgroundImage?: string;
-  productImage?: string;
-}
-
-export function ElectronicsDualshock({
-  subtitle = "Play The Dream",
-  title = "Sony Playstation 4 Dualshok Controller",
-  buttonText = "Shop Now",
-  buttonLink = "#",
-  backgroundImage = `${IMG}/2022/06/electro-dualshok.jpg`,
-  productImage = `${IMG}/2022/06/dualshok.png`,
-}: ElectronicsDualshockProps) {
-  const css = `
-    .el-dualshock { position: relative; min-height: 350px; background-size: cover; background-position: center; display: flex; align-items: center; margin-bottom: 60px; overflow: hidden; }
-    .el-dualshock-inner { display: flex; align-items: center; justify-content: space-between; width: 100%; }
-    .el-dualshock-text { flex: 1; }
-    .el-dualshock-sub { font-family: ${TOKENS.bodyFont}; font-size: 13px; font-weight: 700; color: rgba(255,255,255,0.7); text-transform: uppercase; letter-spacing: 2px; margin-bottom: 10px; }
-    .el-dualshock-title { font-family: ${TOKENS.titleFont}; font-weight: 700; font-size: 36px; line-height: 1.2; color: #fff; margin: 0 0 25px; max-width: 500px; }
-    .el-dualshock-btn { display: inline-block; padding: 14px 35px; background: ${TOKENS.primaryColor}; color: #fff; font-family: ${TOKENS.bodyFont}; font-weight: 700; font-size: 13px; text-decoration: none; text-transform: uppercase; transition: background 0.3s; }
-    .el-dualshock-btn:hover { background: ${TOKENS.primaryHover}; }
-    .el-dualshock-img { flex: 0 0 auto; max-width: 350px; }
-    .el-dualshock-img img { max-width: 100%; height: auto; }
-    @media (max-width: 767px) { .el-dualshock-title { font-size: 24px; } .el-dualshock-img { display: none; } }
-  `;
-
-  return (
-    <div className="el-dualshock" style={{ backgroundImage: `url(${backgroundImage})` }}>
-      <ScopedStyles id="dualshock" css={css} />
-      <div style={containerStyle}>
-        <div className="el-dualshock-inner">
-          <div className="el-dualshock-text">
-            <div className="el-dualshock-sub">{subtitle}</div>
-            <h4 className="el-dualshock-title">{title}</h4>
-            <a href={buttonLink} className="el-dualshock-btn">{buttonText}</a>
-          </div>
-          <div className="el-dualshock-img">
-            <img src={productImage} alt={title} />
-          </div>
-        </div>
-      </div>
-    </div>
-  );
-}
-
-/* ═══════════════════════════════════════════════════════════════
-   7. SMART HOME BANNER (Google)
-   ═══════════════════════════════════════════════════════════════ */
-
-export interface ElectronicsSmartHomeBannerProps {
-  subtitle?: string;
-  title?: string;
-  image?: string;
-  buttonText?: string;
-  buttonLink?: string;
-}
-
-export function ElectronicsSmartHomeBanner({
-  subtitle = "Hich Tech News",
-  title = "Google Smart Home 2024",
-  image = `${IMG}/2022/06/electro-banner3-1.jpg`,
-  buttonText = "Shop Now",
-  buttonLink = "#",
-}: ElectronicsSmartHomeBannerProps) {
-  const css = `
-    .el-smarthome { position: relative; overflow: hidden; margin-bottom: 60px; min-height: 300px; }
-    .el-smarthome-img { width: 100%; height: 300px; object-fit: cover; display: block; }
-    .el-smarthome-content { position: absolute; inset: 0; display: flex; align-items: center; padding: 0 60px; }
-    .el-smarthome-sub { font-family: ${TOKENS.bodyFont}; font-size: 12px; font-weight: 700; color: ${TOKENS.textColor}; text-transform: uppercase; letter-spacing: 2px; margin-bottom: 10px; }
-    .el-smarthome-title { font-family: ${TOKENS.titleFont}; font-weight: 700; font-size: 32px; color: ${TOKENS.titleColor}; margin: 0 0 20px; }
-    .el-smarthome-btn { display: inline-block; padding: 12px 28px; background: ${TOKENS.primaryColor}; color: #fff; font-family: ${TOKENS.bodyFont}; font-weight: 700; font-size: 13px; text-decoration: none; text-transform: uppercase; transition: background 0.3s; }
-    .el-smarthome-btn:hover { background: ${TOKENS.primaryHover}; }
-    @media (max-width: 767px) { .el-smarthome-title { font-size: 24px; } .el-smarthome-content { padding: 0 20px; } }
+  const scopedCss = `
+    .ehd-section { padding: 40px 0 50px; }
+    .ehd-grid { display: grid; grid-template-columns: repeat(${columns}, 1fr); gap: 20px; }
+    .ehd-card { border: 1px solid #eee; border-radius: ${TOKENS.borderRadius}; overflow: hidden; transition: box-shadow 0.3s; position: relative; }
+    .ehd-card:hover { box-shadow: 0 4px 20px rgba(0,0,0,0.1); }
+    .ehd-thumb { position: relative; overflow: hidden; background: #f9f9f9; aspect-ratio: 1; }
+    .ehd-thumb img { width: 100%; height: 100%; object-fit: cover; transition: transform 0.5s; }
+    .ehd-card:hover .ehd-thumb img { transform: scale(1.05); }
+    .ehd-badge { position: absolute; top: 8px; left: 8px; background: #e74c3c; color: #fff; font-size: 11px; font-weight: 700; padding: 3px 10px; border-radius: ${TOKENS.borderRadius}; z-index: 2; }
+    .ehd-timer {
+      position: absolute; bottom: 10px; left: 10px; right: 10px;
+      display: flex; gap: 4px; z-index: 2;
+    }
+    .ehd-timer-unit {
+      flex: 1; text-align: center; background: rgba(0,0,0,0.75); color: #fff;
+      border-radius: 3px; padding: 6px 2px;
+    }
+    .ehd-timer-val { font-size: 16px; font-weight: 700; display: block; line-height: 1; font-family: ${TOKENS.titleFont}; }
+    .ehd-timer-label { font-size: 9px; text-transform: uppercase; letter-spacing: 1px; opacity: 0.7; display: block; margin-top: 2px; }
+    .ehd-info { padding: 12px 15px; }
+    .ehd-name { font-family: ${TOKENS.bodyFont}; font-weight: 600; font-size: 14px; color: ${TOKENS.entityTitleColor}; margin: 0 0 6px; line-height: 1.3; }
+    .ehd-name a { color: inherit; text-decoration: none; }
+    .ehd-name a:hover { color: ${TOKENS.primaryColor}; }
+    .ehd-price { font-weight: 600; font-size: 14px; color: ${TOKENS.primaryColor}; }
+    .ehd-price-old { text-decoration: line-through; color: #999; font-weight: 400; margin-right: 8px; font-size: 13px; }
+    .ehd-footer { text-align: center; margin-top: 30px; }
+    .ehd-view-btn {
+      display: inline-block; padding: 12px 35px; background: transparent; color: ${TOKENS.primaryColor};
+      border: 2px solid ${TOKENS.primaryColor}; font-size: 13px; font-weight: 600; text-transform: uppercase;
+      text-decoration: none; border-radius: ${TOKENS.borderRadius}; transition: all 0.3s;
+      font-family: ${TOKENS.bodyFont}; letter-spacing: 0.5px;
+    }
+    .ehd-view-btn:hover { background: ${TOKENS.primaryColor}; color: #fff; }
+    .ehd-empty { text-align: center; padding: 40px; color: ${TOKENS.textColor}; font-family: ${TOKENS.bodyFont}; }
+    @media (max-width: 1024px) { .ehd-grid { grid-template-columns: repeat(2, 1fr); } }
+    @media (max-width: 767px) { .ehd-grid { grid-template-columns: repeat(2, 1fr); gap: 10px; } }
   `;
 
   return (
     <div style={containerStyle}>
-      <ScopedStyles id="smarthome" css={css} />
-      <div className="el-smarthome">
-        <img className="el-smarthome-img" src={image} alt={title} />
-        <div className="el-smarthome-content">
-          <div>
-            <div className="el-smarthome-sub">{subtitle}</div>
-            <h4 className="el-smarthome-title">{title}</h4>
-            <a href={buttonLink} className="el-smarthome-btn">{buttonText}</a>
+      <ScopedStyles id="ehd-deals" css={scopedCss} />
+      <div className="ehd-section">
+        <ElectronicsSectionTitle title={sectionTitle} />
+        {products.length === 0 ? (
+          <div className="ehd-empty"><p>No products yet. Add products from your dashboard.</p></div>
+        ) : (
+          <>
+            <div className="ehd-grid">
+              {products.map((p) => {
+                const productLink = storeCtx ? `/store/${storeCtx.storeSlug}/product/${p.slug}` : "#";
+                const discount = p.compareAtPrice ? Math.round(((p.compareAtPrice - p.price) / p.compareAtPrice) * 100) : 0;
+                return (
+                  <div key={p.id} className="ehd-card">
+                    <div className="ehd-thumb">
+                      <a href={productLink}>
+                        <img src={p.images[0]?.url || ""} alt={p.name} loading="lazy" />
+                      </a>
+                      {discount > 0 && <span className="ehd-badge">-{discount}%</span>}
+                      <div className="ehd-timer">
+                        <div className="ehd-timer-unit"><span className="ehd-timer-val">{String(timeLeft.days).padStart(2, "0")}</span><span className="ehd-timer-label">Days</span></div>
+                        <div className="ehd-timer-unit"><span className="ehd-timer-val">{String(timeLeft.hours).padStart(2, "0")}</span><span className="ehd-timer-label">Hrs</span></div>
+                        <div className="ehd-timer-unit"><span className="ehd-timer-val">{String(timeLeft.min).padStart(2, "0")}</span><span className="ehd-timer-label">Min</span></div>
+                        <div className="ehd-timer-unit"><span className="ehd-timer-val">{String(timeLeft.sec).padStart(2, "0")}</span><span className="ehd-timer-label">Sec</span></div>
+                      </div>
+                    </div>
+                    <div className="ehd-info">
+                      <h3 className="ehd-name"><a href={productLink}>{p.name}</a></h3>
+                      <div className="ehd-price">
+                        {p.compareAtPrice && <span className="ehd-price-old">{sym}{p.compareAtPrice.toLocaleString()}</span>}
+                        <span>{sym}{p.price.toLocaleString()}</span>
+                      </div>
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+            <div className="ehd-footer">
+              <a href={fixLink(buttonLink)} className="ehd-view-btn">{buttonText}</a>
+            </div>
+          </>
+        )}
+      </div>
+    </div>
+  );
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   6. ELECTRONICS SIDE BANNER + FEATURED PRODUCTS
+   ═══════════════════════════════════════════════════════════════ */
+
+export interface ElectronicsSideBannerProps {
+  bannerImage: string;
+  bannerSubtitle: string;
+  bannerTitle: string;
+  bannerButtonText: string;
+  bannerButtonLink: string;
+  featuredTitle?: string;
+  maxFeaturedProducts?: number;
+  rightSectionTitle?: string;
+  rightTabs?: Array<{ label: string; filter: string }>;
+  rightMaxProducts?: number;
+}
+
+export function ElectronicsSideBanner({
+  bannerImage,
+  bannerSubtitle,
+  bannerTitle,
+  bannerButtonText,
+  bannerButtonLink,
+  featuredTitle = "FEATURED PRODUCTS",
+  maxFeaturedProducts = 4,
+  rightSectionTitle = "ELECTRONICS",
+  rightTabs,
+  rightMaxProducts = 8,
+}: ElectronicsSideBannerProps) {
+  const storeCtx = useContext(ElectronicsStoreContext);
+  const sym = useCurrencySymbol();
+  const fixLink = useFixLink();
+
+  const featuredProducts = (() => {
+    if (!storeCtx?.products?.length) return [];
+    const feat = storeCtx.products.filter(p => p.isFeatured);
+    return (feat.length > 0 ? feat : storeCtx.products).slice(0, maxFeaturedProducts);
+  })();
+
+  const scopedCss = `
+    .esb-section { padding: 40px 0; }
+    .esb-layout { display: grid; grid-template-columns: 280px 1fr; gap: 30px; }
+    .esb-sidebar { }
+    .esb-banner { position: relative; overflow: hidden; border-radius: ${TOKENS.borderRadius}; margin-bottom: 30px; min-height: 320px; display: flex; align-items: flex-end; }
+    .esb-banner-img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; transition: transform 0.6s; }
+    .esb-banner:hover .esb-banner-img { transform: scale(1.05); }
+    .esb-banner-content { position: relative; z-index: 2; padding: 25px; background: linear-gradient(to top, rgba(0,0,0,0.6) 0%, transparent 100%); width: 100%; }
+    .esb-banner-sub { font-size: 11px; color: rgba(255,255,255,0.7); text-transform: uppercase; letter-spacing: 2px; margin-bottom: 5px; }
+    .esb-banner-title { font-family: ${TOKENS.titleFont}; font-weight: 700; font-size: 20px; color: #fff; margin: 0 0 12px; line-height: 1.2; }
+    .esb-banner-btn {
+      display: inline-block; padding: 8px 20px; background: ${TOKENS.primaryColor}; color: #fff;
+      font-size: 11px; font-weight: 600; text-transform: uppercase; text-decoration: none;
+      border-radius: ${TOKENS.borderRadius}; transition: background 0.3s;
+    }
+    .esb-banner-btn:hover { background: ${TOKENS.primaryHover}; }
+    .esb-feat-title {
+      font-family: ${TOKENS.titleFont}; font-weight: 700; font-size: 16px;
+      text-transform: uppercase; color: ${TOKENS.titleColor}; margin: 0 0 15px;
+      padding-bottom: 10px; border-bottom: 2px solid ${TOKENS.primaryColor};
+    }
+    .esb-feat-list { display: flex; flex-direction: column; gap: 12px; }
+    .esb-feat-item { display: flex; gap: 12px; align-items: center; }
+    .esb-feat-img { width: 70px; height: 70px; border-radius: ${TOKENS.borderRadius}; object-fit: cover; border: 1px solid #eee; flex-shrink: 0; }
+    .esb-feat-info { flex: 1; }
+    .esb-feat-name { font-size: 13px; font-weight: 600; color: ${TOKENS.entityTitleColor}; margin: 0 0 4px; line-height: 1.3; }
+    .esb-feat-name a { color: inherit; text-decoration: none; }
+    .esb-feat-name a:hover { color: ${TOKENS.primaryColor}; }
+    .esb-feat-price { font-size: 13px; font-weight: 600; color: ${TOKENS.primaryColor}; }
+    .esb-feat-price-old { text-decoration: line-through; color: #999; font-weight: 400; margin-right: 6px; font-size: 12px; }
+    @media (max-width: 1024px) { .esb-layout { grid-template-columns: 1fr; } }
+  `;
+
+  return (
+    <div style={containerStyle}>
+      <ScopedStyles id="esb-side" css={scopedCss} />
+      <div className="esb-section">
+        <div className="esb-layout">
+          <div className="esb-sidebar">
+            <div className="esb-banner">
+              <img src={bannerImage} alt={bannerTitle} className="esb-banner-img" loading="lazy" />
+              <div className="esb-banner-content">
+                <div className="esb-banner-sub">{bannerSubtitle}</div>
+                <h4 className="esb-banner-title">{bannerTitle}</h4>
+                <a href={fixLink(bannerButtonLink)} className="esb-banner-btn">{bannerButtonText}</a>
+              </div>
+            </div>
+            <h4 className="esb-feat-title">{featuredTitle}</h4>
+            <div className="esb-feat-list">
+              {featuredProducts.map((p) => {
+                const productLink = storeCtx ? `/store/${storeCtx.storeSlug}/product/${p.slug}` : "#";
+                return (
+                  <div key={p.id} className="esb-feat-item">
+                    <img src={p.images[0]?.url || ""} alt={p.name} className="esb-feat-img" loading="lazy" />
+                    <div className="esb-feat-info">
+                      <h5 className="esb-feat-name"><a href={productLink}>{p.name}</a></h5>
+                      <div className="esb-feat-price">
+                        {p.compareAtPrice && <span className="esb-feat-price-old">{sym}{p.compareAtPrice.toLocaleString()}</span>}
+                        {sym}{p.price.toLocaleString()}
+                      </div>
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+          <div className="esb-main">
+            <ElectronicsProductTabs
+              sectionTitle={rightSectionTitle}
+              tabs={rightTabs || [{ label: "New", filter: "new" }, { label: "Featured", filter: "featured" }, { label: "Top Sellers", filter: "top-sellers" }]}
+              columns={3}
+              maxProducts={rightMaxProducts || 6}
+            />
           </div>
         </div>
       </div>
@@ -529,246 +889,315 @@ export function ElectronicsSmartHomeBanner({
 }
 
 /* ═══════════════════════════════════════════════════════════════
-   8. BLOG POSTS
+   7. ELECTRONICS GAMING CTA
+   ═══════════════════════════════════════════════════════════════ */
+
+export interface ElectronicsGamingCTAProps {
+  backgroundImage: string;
+  subtitle: string;
+  title: string;
+  primaryButtonText: string;
+  primaryButtonLink: string;
+  secondaryButtonText?: string;
+  secondaryButtonLink?: string;
+  productImage?: string;
+}
+
+export function ElectronicsGamingCTA({
+  backgroundImage,
+  subtitle,
+  title,
+  primaryButtonText,
+  primaryButtonLink,
+  secondaryButtonText,
+  secondaryButtonLink,
+  productImage,
+}: ElectronicsGamingCTAProps) {
+  const fixLink = useFixLink();
+  const scopedCss = `
+    .egc-section {
+      position: relative; min-height: 350px; display: flex; align-items: center;
+      overflow: hidden; margin: 40px 0;
+    }
+    .egc-bg {
+      position: absolute; inset: 0; background-size: cover; background-position: center;
+      z-index: 0;
+    }
+    .egc-overlay { position: absolute; inset: 0; background: rgba(0,0,0,0.55); z-index: 1; }
+    .egc-content { position: relative; z-index: 2; display: flex; align-items: center; justify-content: space-between; width: 100%; }
+    .egc-text { max-width: 50%; }
+    .egc-subtitle {
+      font-size: 12px; text-transform: uppercase; letter-spacing: 3px; color: ${TOKENS.primaryColor};
+      font-weight: 600; margin-bottom: 10px; font-family: ${TOKENS.bodyFont};
+    }
+    .egc-title {
+      font-family: ${TOKENS.titleFont}; font-weight: 700; font-size: 32px; color: #fff;
+      line-height: 1.2; margin: 0 0 25px;
+    }
+    .egc-buttons { display: flex; gap: 12px; flex-wrap: wrap; }
+    .egc-btn-primary {
+      padding: 12px 30px; background: ${TOKENS.primaryColor}; color: #fff;
+      font-size: 13px; font-weight: 600; text-transform: uppercase; text-decoration: none;
+      border-radius: ${TOKENS.borderRadius}; transition: background 0.3s; font-family: ${TOKENS.bodyFont};
+    }
+    .egc-btn-primary:hover { background: ${TOKENS.primaryHover}; }
+    .egc-btn-secondary {
+      padding: 12px 30px; background: transparent; color: #fff;
+      font-size: 13px; font-weight: 600; text-transform: uppercase; text-decoration: none;
+      border-radius: ${TOKENS.borderRadius}; border: 2px solid rgba(255,255,255,0.5);
+      transition: all 0.3s; font-family: ${TOKENS.bodyFont};
+    }
+    .egc-btn-secondary:hover { border-color: #fff; background: rgba(255,255,255,0.1); }
+    .egc-product-img { max-width: 40%; max-height: 280px; object-fit: contain; filter: drop-shadow(0 10px 30px rgba(0,0,0,0.3)); }
+    @media (max-width: 1024px) {
+      .egc-title { font-size: 26px; }
+      .egc-text { max-width: 60%; }
+      .egc-product-img { max-width: 35%; }
+    }
+    @media (max-width: 767px) {
+      .egc-content { flex-direction: column; text-align: center; }
+      .egc-text { max-width: 100%; }
+      .egc-product-img { max-width: 60%; margin-top: 20px; }
+      .egc-buttons { justify-content: center; }
+    }
+  `;
+
+  return (
+    <div className="egc-section">
+      <ScopedStyles id="egc-cta" css={scopedCss} />
+      <div className="egc-bg" style={{ backgroundImage: `url(${backgroundImage})` }} />
+      <div className="egc-overlay" />
+      <div className="egc-content" style={containerStyle}>
+        <div className="egc-text">
+          <div className="egc-subtitle">{subtitle}</div>
+          <h3 className="egc-title">{title}</h3>
+          <div className="egc-buttons">
+            <a href={fixLink(primaryButtonLink)} className="egc-btn-primary">{primaryButtonText}</a>
+            {secondaryButtonText && (
+              <a href={fixLink(secondaryButtonLink || "#")} className="egc-btn-secondary">{secondaryButtonText}</a>
+            )}
+          </div>
+        </div>
+        {productImage && <img src={productImage} alt={title} className="egc-product-img" />}
+      </div>
+    </div>
+  );
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   8. ELECTRONICS BLOG POSTS
    ═══════════════════════════════════════════════════════════════ */
 
 export interface ElectronicsBlogPost {
-  title: string; image: string; date?: string; link?: string;
+  image: string;
+  title: string;
+  excerpt: string;
+  date: { day: string; month: string; year: string };
+  category: string;
+  author: string;
+  link: string;
 }
 
 export interface ElectronicsBlogPostsProps {
+  sectionTitle?: string;
   posts?: ElectronicsBlogPost[];
   columns?: number;
-  sectionTitle?: string;
 }
 
-export function ElectronicsBlogPosts({ posts, columns = 5, sectionTitle = "INNOVATIVE GADGETS" }: ElectronicsBlogPostsProps) {
-  const defaultPosts: ElectronicsBlogPost[] = [
-    { title: "Collar brings back coffee brewing ritual", image: `${IMG}/2022/06/electro-blog1.jpg`, date: "June 15, 2022" },
-    { title: "Exterior ideas: 10 colored garden seats", image: `${IMG}/2022/06/electro-blog2.jpg`, date: "June 15, 2022" },
-    { title: "Exploring Atlanta's modern homes", image: `${IMG}/2022/06/electro-blog3.jpg`, date: "June 15, 2022" },
-    { title: "New home decor from John Doerson", image: `${IMG}/2022/06/electro-blog4.jpg`, date: "June 15, 2022" },
-    { title: "The big design: Wall likes pictures", image: `${IMG}/2022/06/electro-blog5.jpg`, date: "June 15, 2022" },
-  ];
-
-  const items = posts || defaultPosts;
-
-  const css = `
-    .el-blog { margin-bottom: 60px; }
-    .el-blog-grid { display: grid; gap: 20px; }
-    .el-blog-card { overflow: hidden; }
-    .el-blog-img-wrap { overflow: hidden; }
-    .el-blog-img { width: 100%; height: 180px; object-fit: cover; display: block; transition: transform 0.5s; }
-    .el-blog-card:hover .el-blog-img { transform: scale(1.05); }
-    .el-blog-content { padding: 15px 0; }
-    .el-blog-date { font-family: ${TOKENS.bodyFont}; font-size: 12px; color: ${TOKENS.textColor}; margin-bottom: 6px; }
-    .el-blog-title { font-family: ${TOKENS.titleFont}; font-weight: 600; font-size: 14px; line-height: 1.4; color: ${TOKENS.entityTitleColor}; margin: 0; cursor: pointer; }
-    .el-blog-title:hover { color: rgba(51,51,51,0.65); }
-    @media (max-width: 1024px) { .el-blog-grid { grid-template-columns: repeat(3, 1fr) !important; } }
-    @media (max-width: 767px) { .el-blog-grid { grid-template-columns: 1fr !important; } }
-  `;
-
-  return (
-    <div className="el-blog">
-      <ScopedStyles id="blog" css={css} />
-      <div style={containerStyle}>
-        <ElectronicsSectionTitle title={sectionTitle} />
-        <div className="el-blog-grid" style={{ gridTemplateColumns: `repeat(${columns}, 1fr)` }}>
-          {items.map((post, i) => (
-            <div key={i} className="el-blog-card">
-              <div className="el-blog-img-wrap">
-                <img className="el-blog-img" src={post.image} alt={post.title} />
-              </div>
-              <div className="el-blog-content">
-                {post.date && <div className="el-blog-date">{post.date}</div>}
-                <h3 className="el-blog-title">{post.title}</h3>
-              </div>
-            </div>
-          ))}
-        </div>
-      </div>
-    </div>
-  );
-}
-
-/* ═══════════════════════════════════════════════════════════════
-   9. PARTNERS / BRANDS BAR
-   ═══════════════════════════════════════════════════════════════ */
-
-export interface ElectronicsBrandsBarProps {
-  brands?: { name: string; logo: string }[];
-}
-
-export function ElectronicsBrandsBar({ brands }: ElectronicsBrandsBarProps) {
-  const defaultBrands = [
-    { name: "Joseph Joseph", logo: `${IMG}/2016/09/brand-Joseph-Joseph.png` },
-    { name: "Louis Poulsen", logo: `${IMG}/2016/09/brand-Louis-Poulsen.png` },
-    { name: "Magisso", logo: `${IMG}/2016/09/brand-Magisso.png` },
-    { name: "PackIt", logo: `${IMG}/2016/09/brand-PackIt.png` },
-    { name: "Rosenthal", logo: `${IMG}/2016/09/brand-Rosenthal.png` },
-    { name: "Hay", logo: `${IMG}/2016/09/brand-hay.png` },
-    { name: "Witra", logo: `${IMG}/2016/09/brand-witra.png` },
-  ];
-
-  const items = brands || defaultBrands;
-
-  const css = `
-    .el-brands { padding: 40px 0; margin-bottom: 60px; border-top: 1px solid #eee; border-bottom: 1px solid #eee; }
-    .el-brands-grid { display: flex; align-items: center; justify-content: space-between; gap: 20px; flex-wrap: wrap; }
-    .el-brand { opacity: 0.4; transition: opacity 0.3s; cursor: pointer; }
-    .el-brand:hover { opacity: 1; }
-    .el-brand img { height: 30px; width: auto; }
-    @media (max-width: 767px) { .el-brands-grid { justify-content: center; } }
-  `;
-
-  return (
-    <div className="el-brands">
-      <ScopedStyles id="brands" css={css} />
-      <div style={containerStyle}>
-        <div className="el-brands-grid">
-          {items.map((brand, i) => (
-            <div key={i} className="el-brand">
-              <img src={brand.logo} alt={brand.name} />
-            </div>
-          ))}
-        </div>
-      </div>
-    </div>
-  );
-}
-
-/* ═══════════════════════════════════════════════════════════════
-   10. NEWSLETTER
-   ═══════════════════════════════════════════════════════════════ */
-
-export interface ElectronicsNewsletterProps {
-  title?: string;
-  buttonText?: string;
-  backgroundImage?: string;
-}
-
-export function ElectronicsNewsletter({
-  title = "HEY YOU, SIGN UP AND CONNECT TO WOODMART!",
-  buttonText = "Sign up",
-  backgroundImage = `${IMG}/2017/01/newsletter-wood-3.jpg`,
-}: ElectronicsNewsletterProps) {
-  const [email, setEmail] = useState("");
-  const [submitted, setSubmitted] = useState(false);
-
-  const css = `
-    .el-newsletter { position: relative; padding: 60px 0; margin-bottom: 0; background-size: cover; background-position: center; }
-    .el-newsletter-overlay { position: absolute; inset: 0; background: rgba(0,0,0,0.6); }
-    .el-newsletter-content { position: relative; z-index: 2; text-align: center; }
-    .el-newsletter-title { font-family: ${TOKENS.titleFont}; font-weight: 700; font-size: 28px; color: #fff; margin: 0 0 25px; text-transform: uppercase; }
-    .el-newsletter-form { display: flex; gap: 0; max-width: 500px; margin: 0 auto; }
-    .el-newsletter-input { flex: 1; padding: 14px 18px; border: none; background: rgba(255,255,255,0.15); color: #fff; font-family: ${TOKENS.bodyFont}; font-size: 14px; outline: none; }
-    .el-newsletter-input::placeholder { color: rgba(255,255,255,0.6); }
-    .el-newsletter-btn { padding: 14px 30px; background: ${TOKENS.primaryColor}; color: #fff; font-family: ${TOKENS.bodyFont}; font-weight: 700; font-size: 13px; border: none; cursor: pointer; text-transform: uppercase; transition: background 0.3s; }
-    .el-newsletter-btn:hover { background: ${TOKENS.primaryHover}; }
-    .el-newsletter-ok { font-family: ${TOKENS.bodyFont}; font-size: 16px; color: #fff; }
-    @media (max-width: 767px) { .el-newsletter-title { font-size: 22px; } .el-newsletter-form { flex-direction: column; } }
-  `;
-
-  return (
-    <div className="el-newsletter" style={{ backgroundImage: `url(${backgroundImage})` }}>
-      <div className="el-newsletter-overlay" />
-      <ScopedStyles id="newsletter" css={css} />
-      <div style={containerStyle}>
-        <div className="el-newsletter-content">
-          <h2 className="el-newsletter-title">{title}</h2>
-          {!submitted ? (
-            <form className="el-newsletter-form" onSubmit={(e) => { e.preventDefault(); setSubmitted(true); }}>
-              <input className="el-newsletter-input" type="email" placeholder="Your email address" value={email} onChange={e => setEmail(e.target.value)} required />
-              <button className="el-newsletter-btn" type="submit">{buttonText}</button>
-            </form>
-          ) : (
-            <div className="el-newsletter-ok">✓ Thank you for subscribing!</div>
-          )}
-        </div>
-      </div>
-    </div>
-  );
-}
-
-/* ═══════════════════════════════════════════════════════════════
-   11. FOOTER
-   ═══════════════════════════════════════════════════════════════ */
-
-export interface ElectronicsFooterProps {
-  logo?: string;
-  description?: string;
-  columns?: { title: string; links: { label: string; href: string }[] }[];
-  paymentImage?: string;
-  copyright?: string;
-}
-
-export function ElectronicsFooter({
-  logo = `${IMG}/2018/09/wood-logo-dark.svg`,
-  description = "The best electronics store with the latest gadgets and technology.",
-  columns,
-  paymentImage = `${IMG}/2018/08/payment.png`,
-  copyright = "WoodMart © 2026 created by Xtemos Studio.",
-}: ElectronicsFooterProps) {
+export function ElectronicsBlogPosts({ sectionTitle = "INNOVATIVE GADGETS", posts: propPosts, columns = 3 }: ElectronicsBlogPostsProps) {
   const storeCtx = useContext(ElectronicsStoreContext);
+  const [scroll, setScroll] = useState(0);
 
-  const defaultColumns = [
-    { title: "Shop", links: [
-      { label: "Shop Pages", href: "#" }, { label: "Product Loop", href: "#" },
-      { label: "Single Product", href: "#" }, { label: "Features", href: "#" },
-    ]},
-    { title: "Pages", links: [
-      { label: "Blog", href: "#" }, { label: "Pages", href: "#" },
-      { label: "Elements", href: "#" }, { label: "Contact", href: "#" },
-    ]},
-    { title: "Connect", links: [
-      { label: "Facebook", href: "#" }, { label: "Instagram", href: "#" },
-      { label: "Twitter", href: "#" }, { label: "YouTube", href: "#" },
-    ]},
-  ];
+  const posts: ElectronicsBlogPost[] = (() => {
+    if (!storeCtx?.blogs?.length) return propPosts || [];
+    return storeCtx.blogs.slice(0, columns * 2).map((b) => {
+      const pubDate = b.publishedAt ? new Date(b.publishedAt) : new Date(b.createdAt);
+      return {
+        image: b.coverImage || "https://images.unsplash.com/photo-1518770660439-4636190af475?w=400&h=300&fit=crop",
+        title: b.title,
+        excerpt: b.excerpt || "",
+        date: {
+          day: pubDate.getDate().toString().padStart(2, "0"),
+          month: pubDate.toLocaleString("en-US", { month: "short" }),
+          year: pubDate.getFullYear().toString(),
+        },
+        category: b.category || "Tech",
+        author: b.author || "Store Team",
+        link: `/store/${storeCtx.storeSlug}/blog/${b.slug}`,
+      };
+    });
+  })();
 
-  const cols = columns || storeCtx?.footerLinks || defaultColumns;
+  const scopedCss = `
+    .ebp-section { padding: 40px 0 50px; }
+    .ebp-grid { display: grid; grid-template-columns: repeat(${columns}, 1fr); gap: 25px; }
+    .ebp-card { border-radius: ${TOKENS.borderRadius}; overflow: hidden; border: 1px solid #eee; transition: box-shadow 0.3s; }
+    .ebp-card:hover { box-shadow: 0 4px 20px rgba(0,0,0,0.1); }
+    .ebp-img-wrap { position: relative; overflow: hidden; aspect-ratio: 16/10; }
+    .ebp-img { width: 100%; height: 100%; object-fit: cover; transition: transform 0.5s; }
+    .ebp-card:hover .ebp-img { transform: scale(1.05); }
+    .ebp-date-badge {
+      position: absolute; top: 15px; left: 15px; background: ${TOKENS.primaryColor};
+      color: #fff; text-align: center; padding: 8px 10px; border-radius: ${TOKENS.borderRadius}; z-index: 2;
+    }
+    .ebp-date-day { display: block; font-size: 18px; font-weight: 700; line-height: 1; font-family: ${TOKENS.titleFont}; }
+    .ebp-date-month { display: block; font-size: 10px; text-transform: uppercase; font-family: ${TOKENS.bodyFont}; }
+    .ebp-content { padding: 20px; }
+    .ebp-cat {
+      display: inline-block; font-size: 11px; color: ${TOKENS.primaryColor}; font-weight: 600;
+      text-transform: uppercase; margin-bottom: 8px; letter-spacing: 0.5px;
+      font-family: ${TOKENS.bodyFont};
+    }
+    .ebp-title {
+      font-family: ${TOKENS.titleFont}; font-weight: 700; font-size: 16px;
+      color: ${TOKENS.titleColor}; margin: 0 0 10px; line-height: 1.4;
+    }
+    .ebp-title a { color: inherit; text-decoration: none; }
+    .ebp-title a:hover { color: ${TOKENS.primaryColor}; }
+    .ebp-meta { font-size: 12px; color: #999; font-family: ${TOKENS.bodyFont}; }
+    .ebp-nav { display: flex; justify-content: center; gap: 10px; margin-top: 25px; }
+    .ebp-nav-btn {
+      width: 36px; height: 36px; border: 1px solid #ddd; background: #fff; cursor: pointer;
+      display: flex; align-items: center; justify-content: center; border-radius: ${TOKENS.borderRadius};
+      font-size: 14px; transition: all 0.3s;
+    }
+    .ebp-nav-btn:hover { border-color: ${TOKENS.primaryColor}; color: ${TOKENS.primaryColor}; }
+    @media (max-width: 1024px) { .ebp-grid { grid-template-columns: repeat(2, 1fr); } }
+    @media (max-width: 767px) { .ebp-grid { grid-template-columns: 1fr; } }
+  `;
 
-  const css = `
-    .el-footer { background: ${TOKENS.footerBg}; padding: 60px 0 30px; }
-    .el-footer-grid { display: grid; grid-template-columns: 1.5fr repeat(${cols.length}, 1fr); gap: 40px; margin-bottom: 40px; }
-    .el-footer-logo { height: 30px; margin-bottom: 15px; filter: brightness(0) invert(1); }
-    .el-footer-desc { font-family: ${TOKENS.bodyFont}; font-size: 14px; line-height: 24px; color: rgba(255,255,255,0.5); margin: 0 0 20px; }
-    .el-footer-col-title { font-family: ${TOKENS.titleFont}; font-weight: 700; font-size: 16px; color: #fff; margin: 0 0 15px; text-transform: uppercase; }
-    .el-footer-links { list-style: none; padding: 0; margin: 0; }
-    .el-footer-links li { margin-bottom: 8px; }
-    .el-footer-links a { font-family: ${TOKENS.bodyFont}; font-size: 14px; color: rgba(255,255,255,0.5); text-decoration: none; transition: color 0.3s; }
-    .el-footer-links a:hover { color: #fff; }
-    .el-footer-bottom { border-top: 1px solid rgba(255,255,255,0.1); padding-top: 20px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 15px; }
-    .el-footer-copyright { font-family: ${TOKENS.bodyFont}; font-size: 13px; color: rgba(255,255,255,0.4); }
-    .el-footer-payment img { height: 24px; filter: brightness(0) invert(1); }
-    @media (max-width: 767px) { .el-footer-grid { grid-template-columns: 1fr; } }
+  const displayPosts = posts.slice(scroll, scroll + columns);
+
+  return (
+    <div style={containerStyle}>
+      <ScopedStyles id="ebp-blog" css={scopedCss} />
+      <div className="ebp-section">
+        <ElectronicsSectionTitle title={sectionTitle} />
+        <div className="ebp-grid">
+          {displayPosts.map((p, i) => (
+            <article key={i} className="ebp-card">
+              <div className="ebp-img-wrap">
+                <img src={p.image} alt={p.title} className="ebp-img" loading="lazy" />
+                <div className="ebp-date-badge">
+                  <span className="ebp-date-day">{p.date.day}</span>
+                  <span className="ebp-date-month">{p.date.month}</span>
+                </div>
+                <a href={p.link} style={{ position: "absolute", inset: 0, zIndex: 3 }} aria-label={p.title} />
+              </div>
+              <div className="ebp-content">
+                <span className="ebp-cat">{p.category}</span>
+                <h3 className="ebp-title"><a href={p.link}>{p.title}</a></h3>
+                <div className="ebp-meta">By {p.author}</div>
+              </div>
+            </article>
+          ))}
+        </div>
+        {posts.length > columns && (
+          <div className="ebp-nav">
+            <button className="ebp-nav-btn" onClick={() => setScroll(Math.max(0, scroll - columns))} disabled={scroll === 0}>‹</button>
+            <button className="ebp-nav-btn" onClick={() => setScroll(Math.min(posts.length - columns, scroll + columns))} disabled={scroll >= posts.length - columns}>›</button>
+          </div>
+        )}
+      </div>
+    </div>
+  );
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   9. ELECTRONICS PARTNERS
+   ═══════════════════════════════════════════════════════════════ */
+
+export interface ElectronicsPartnerLogo {
+  name: string;
+  logoUrl: string;
+  linkUrl?: string;
+}
+
+export interface ElectronicsPartnersProps {
+  sectionTitle?: string;
+  videoUrl?: string;
+  videoThumbnail?: string;
+  logos: ElectronicsPartnerLogo[];
+}
+
+export function ElectronicsPartners({
+  sectionTitle = "OUR PARTNERS",
+  videoUrl = "https://www.youtube.com/watch?v=dQw4w9WgXcQ",
+  videoThumbnail,
+  logos,
+}: ElectronicsPartnersProps) {
+  const [playing, setPlaying] = useState(false);
+
+  const embedUrl = (() => {
+    if (!videoUrl) return "";
+    const ytMatch = videoUrl.match(/(?:youtube\.com\/watch\?v=|youtu\.be\/|youtube\.com\/embed\/)([a-zA-Z0-9_-]+)/);
+    if (ytMatch) return `https://www.youtube.com/embed/${ytMatch[1]}?autoplay=1`;
+    return videoUrl;
+  })();
+
+  const thumbnail = videoThumbnail || (() => {
+    const ytMatch = videoUrl?.match(/(?:youtube\.com\/watch\?v=|youtu\.be\/|youtube\.com\/embed\/)([a-zA-Z0-9_-]+)/);
+    if (ytMatch) return `https://img.youtube.com/vi/${ytMatch[1]}/maxresdefault.jpg`;
+    return "";
+  })();
+
+  const scopedCss = `
+    .epr-section { padding: 40px 0 50px; }
+    .epr-layout { display: grid; grid-template-columns: 1fr 1fr; gap: 30px; align-items: start; }
+    .epr-video { position: relative; border-radius: ${TOKENS.borderRadius}; overflow: hidden; aspect-ratio: 16/9; background: #000; }
+    .epr-video-thumb { width: 100%; height: 100%; object-fit: cover; }
+    .epr-play-btn {
+      position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);
+      width: 60px; height: 60px; border-radius: 50%; background: ${TOKENS.primaryColor};
+      border: none; cursor: pointer; display: flex; align-items: center; justify-content: center;
+      color: #fff; font-size: 22px; transition: all 0.3s; z-index: 2;
+      box-shadow: 0 4px 20px rgba(0,123,196,0.4);
+    }
+    .epr-play-btn:hover { transform: translate(-50%, -50%) scale(1.1); background: ${TOKENS.primaryHover}; }
+    .epr-video iframe { width: 100%; height: 100%; border: 0; }
+    .epr-logos { display: grid; grid-template-columns: repeat(3, 1fr); gap: 0; }
+    .epr-logo {
+      border: 1px solid #eee; display: flex; align-items: center; justify-content: center;
+      padding: 20px; aspect-ratio: 2/1; transition: all 0.3s;
+    }
+    .epr-logo:hover { background: #f9f9f9; }
+    .epr-logo img { max-width: 80%; max-height: 40px; object-fit: contain; opacity: 0.6; transition: opacity 0.3s; filter: grayscale(100%); }
+    .epr-logo:hover img { opacity: 1; filter: grayscale(0%); }
+    .epr-logo a { display: flex; align-items: center; justify-content: center; width: 100%; height: 100%; }
+    @media (max-width: 1024px) { .epr-layout { grid-template-columns: 1fr; } }
   `;
 
   return (
-    <footer className="el-footer">
-      <ScopedStyles id="footer" css={css} />
-      <div style={containerStyle}>
-        <div className="el-footer-grid">
-          <div>
-            <img className="el-footer-logo" src={storeCtx?.storeLogo || logo} alt="Logo" />
-            <p className="el-footer-desc">{description}</p>
+    <div style={containerStyle}>
+      <ScopedStyles id="epr-partners" css={scopedCss} />
+      <div className="epr-section">
+        <ElectronicsSectionTitle title={sectionTitle} />
+        <div className="epr-layout">
+          <div className="epr-video">
+            {playing ? (
+              <iframe src={embedUrl} allowFullScreen allow="autoplay" title="Partner video" />
+            ) : (
+              <>
+                {thumbnail && <img src={thumbnail} alt="Video thumbnail" className="epr-video-thumb" />}
+                <button className="epr-play-btn" onClick={() => setPlaying(true)} aria-label="Play video">▶</button>
+              </>
+            )}
           </div>
-          {cols.map((col, i) => (
-            <div key={i}>
-              <h5 className="el-footer-col-title">{col.title}</h5>
-              <ul className="el-footer-links">
-                {col.links.map((link, j) => (
-                  <li key={j}><a href={link.href}>{link.label}</a></li>
-                ))}
-              </ul>
-            </div>
-          ))}
-        </div>
-        <div className="el-footer-bottom">
-          <span className="el-footer-copyright">{copyright}</span>
-          <div className="el-footer-payment"><img src={paymentImage} alt="Payment methods" /></div>
+          <div className="epr-logos">
+            {logos.map((logo, i) => (
+              <div key={i} className="epr-logo">
+                {logo.linkUrl ? (
+                  <a href={logo.linkUrl} target="_blank" rel="noopener noreferrer" aria-label={logo.name}>
+                    <img src={logo.logoUrl} alt={logo.name} />
+                  </a>
+                ) : (
+                  <img src={logo.logoUrl} alt={logo.name} />
+                )}
+              </div>
+            ))}
+          </div>
         </div>
       </div>
-    </footer>
+    </div>
   );
 }
