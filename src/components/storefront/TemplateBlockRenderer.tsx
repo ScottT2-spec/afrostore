@@ -10,6 +10,7 @@ import {
   FashionTestimonials,
   FashionBlogPosts,
   FashionNewsletter,
+  FashionFooter,
 } from "@/components/storefront/FashionTemplateBlocks";
 import type {
   FashionHeroSliderProps,
@@ -20,6 +21,7 @@ import type {
   FashionTestimonialsProps,
   FashionBlogPostsProps,
   FashionNewsletterProps,
+  FashionFooterProps,
 } from "@/components/storefront/FashionTemplateBlocks";
 
 /* ─── TYPES ─────────────────────────────────────────────────── */
@@ -43,6 +45,7 @@ const FASHION_BLOCKS: Record<string, BlockComponent> = {
   fashionTestimonials: FashionTestimonials as unknown as BlockComponent,
   fashionBlogPosts: FashionBlogPosts as unknown as BlockComponent,
   fashionNewsletter: FashionNewsletter as unknown as BlockComponent,
+  fashionFooter: FashionFooter as unknown as BlockComponent,
 };
 
 /* ─── SINGLE BLOCK RENDERER ────────────────────────────────── */
@@ -95,4 +98,5 @@ export type {
   FashionTestimonialsProps,
   FashionBlogPostsProps,
   FashionNewsletterProps,
+  FashionFooterProps,
 };

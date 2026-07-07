@@ -1057,3 +1057,355 @@ export function FashionNewsletter({
     </div>
   );
 }
+
+/* ═══════════════════════════════════════════════════════════════
+   9. FASHION FOOTER
+   Matches WoodMart Fashion footer: 5-column main footer + copyright bar.
+   Light-on-dark color scheme with collapsible columns on mobile.
+   ═══════════════════════════════════════════════════════════════ */
+
+export interface FooterContactInfo {
+  address?: string;
+  phone?: string;
+  fax?: string;
+  email?: string;
+}
+
+export interface FooterLinkItem {
+  label: string;
+  url: string;
+  emphasized?: boolean;
+}
+
+export interface FooterLinkColumn {
+  title: string;
+  links: FooterLinkItem[];
+}
+
+export interface FooterRecentPost {
+  title: string;
+  url: string;
+  date: string;
+  thumbnail?: string;
+}
+
+export interface FashionFooterProps {
+  /** Store logo URL */
+  logoUrl?: string;
+  logoAlt?: string;
+  /** Short description below logo */
+  description?: string;
+  /** Contact details */
+  contact?: FooterContactInfo;
+  /** Recent blog posts column */
+  recentPosts?: FooterRecentPost[];
+  /** Link columns (Our Stores, Useful Links, Footer Menu, etc.) */
+  linkColumns?: FooterLinkColumn[];
+  /** Copyright text */
+  copyrightText?: string;
+  /** Payment icons image URL */
+  paymentIconsUrl?: string;
+  /** Background color override */
+  backgroundColor?: string;
+}
+
+export function FashionFooter({
+  logoUrl,
+  logoAlt = "Store Logo",
+  description = "Discover a curated collection of modern furniture designed to bring comfort and elegance into your home.",
+  contact = {
+    address: "451 Wall Street, UK, London",
+    phone: "(064) 332-1233",
+    fax: "(099) 453-1357",
+  },
+  recentPosts = [],
+  linkColumns = [],
+  copyrightText = `© ${new Date().getFullYear()}. ALL RIGHTS RESERVED.`,
+  paymentIconsUrl,
+  backgroundColor = TOKENS.footerBg,
+}: FashionFooterProps) {
+  const [openColumns, setOpenColumns] = useState<Set<number>>(new Set());
+
+  const toggleColumn = (index: number) => {
+    setOpenColumns((prev) => {
+      const next = new Set(prev);
+      if (next.has(index)) next.delete(index);
+      else next.add(index);
+      return next;
+    });
+  };
+
+  const footerStyle: React.CSSProperties = {
+    backgroundColor,
+    color: "rgba(255,255,255,0.66)",
+    fontFamily: TOKENS.bodyFont,
+    fontSize: "14px",
+    lineHeight: "1.7",
+  };
+
+  const mainFooterStyle: React.CSSProperties = {
+    maxWidth: TOKENS.containerWidth,
+    margin: "0 auto",
+    padding: "40px 15px",
+    display: "flex",
+    flexWrap: "wrap",
+    gap: "30px",
+  };
+
+  const scopedCss = `
+    /* Footer links */
+    .ff-footer a { color: rgba(255,255,255,0.66); text-decoration: none; transition: color 0.2s; }
+    .ff-footer a:hover { color: #fff; }
+
+    /* Column widths on desktop */
+    .ff-col-brand { flex: 0 1 25%; min-width: 220px; }
+    .ff-col-posts { flex: 0 1 25%; min-width: 220px; }
+    .ff-col-links { flex: 0 1 17%; min-width: 140px; }
+
+    /* Toggle headers */
+    .ff-col-toggle-head {
+      display: flex; justify-content: space-between; align-items: center;
+      cursor: pointer; user-select: none; padding: 0;
+    }
+    .ff-col-toggle-head svg {
+      width: 12px; height: 12px; fill: rgba(255,255,255,0.66);
+      transition: transform 0.3s;
+      display: none;
+    }
+    .ff-col-toggle-head.ff-open svg { transform: rotate(180deg); }
+
+    /* Column title */
+    .ff-col-title {
+      font-family: ${TOKENS.titleFont};
+      font-weight: 700; font-size: 16px; color: #fff;
+      letter-spacing: 0.3px; text-transform: uppercase;
+      margin: 0 0 20px 0;
+    }
+
+    /* Link lists */
+    .ff-link-list { list-style: none; margin: 0; padding: 0; }
+    .ff-link-list li { margin-bottom: 10px; }
+    .ff-link-list li a { font-size: 14px; }
+    .ff-link-list li a em { font-style: italic; }
+
+    /* Contact info */
+    .ff-contact-list { list-style: none; margin: 16px 0 0; padding: 0; }
+    .ff-contact-item { display: flex; align-items: flex-start; gap: 10px; margin-bottom: 10px; }
+    .ff-contact-icon { width: 14px; height: 14px; flex-shrink: 0; margin-top: 4px; fill: rgba(255,255,255,0.66); }
+
+    /* Recent posts */
+    .ff-post-item { display: flex; gap: 12px; margin-bottom: 15px; }
+    .ff-post-thumb { width: 75px; height: 65px; border-radius: 0; object-fit: cover; flex-shrink: 0; }
+    .ff-post-title { font-size: 14px; color: rgba(255,255,255,0.85); font-weight: 400; margin: 0 0 4px; line-height: 1.4; }
+    .ff-post-title a { color: rgba(255,255,255,0.85); }
+    .ff-post-title a:hover { color: #fff; }
+    .ff-post-date { font-size: 12px; color: rgba(255,255,255,0.45); }
+
+    /* Copyright bar */
+    .ff-copyrights {
+      border-top: 1px solid rgba(255,255,255,0.1);
+      max-width: ${TOKENS.containerWidth};
+      margin: 0 auto;
+      padding: 20px 15px;
+      display: flex; justify-content: space-between; align-items: center;
+      flex-wrap: wrap; gap: 10px;
+    }
+    .ff-copyrights small { font-size: 13px; color: rgba(255,255,255,0.5); }
+    .ff-copyrights small a { color: rgba(255,255,255,0.5); }
+    .ff-copyrights img { height: 21px; width: auto; }
+
+    /* Mobile responsive */
+    @media (max-width: 768px) {
+      .ff-main-footer { gap: 0 !important; padding: 0 15px !important; }
+      .ff-col-brand, .ff-col-posts, .ff-col-links {
+        flex: 0 1 100% !important; min-width: 100% !important;
+        border-bottom: 1px solid rgba(255,255,255,0.08);
+        padding: 20px 0;
+      }
+      .ff-col-brand { border-bottom: 1px solid rgba(255,255,255,0.08); padding-top: 30px; }
+      .ff-col-toggle-head svg { display: block; }
+      .ff-col-toggle-content { overflow: hidden; transition: max-height 0.3s ease; }
+      .ff-col-toggle-content.ff-closed { max-height: 0; }
+      .ff-col-toggle-content.ff-open { max-height: 500px; }
+      .ff-col-title { margin-bottom: 0; }
+      .ff-col-toggle-head.ff-open .ff-col-title { margin-bottom: 15px; }
+    }
+
+    @media (min-width: 769px) {
+      .ff-col-toggle-content { max-height: none !important; }
+    }
+
+    @media (min-width: 769px) and (max-width: 1024px) {
+      .ff-col-brand, .ff-col-posts { flex: 0 1 calc(50% - 15px) !important; }
+      .ff-col-links { flex: 0 1 calc(33% - 20px) !important; }
+    }
+  `;
+
+  // SVG icons for contact items
+  const contactIcons = {
+    address: (
+      <svg viewBox="0 0 477 477" className="ff-contact-icon">
+        <path d="M238.5 0C146.3 0 71.5 74.8 71.5 167c0 40.7 14.5 78 38.6 107.1L238.5 477l128.4-202.9C391 245 405.5 207.7 405.5 167 405.5 74.8 330.7 0 238.5 0zm0 240c-40.3 0-73-32.7-73-73s32.7-73 73-73 73 32.7 73 73-32.7 73-73 73z"/>
+      </svg>
+    ),
+    phone: (
+      <svg viewBox="0 0 27 27" className="ff-contact-icon">
+        <path d="M20.4 27c-1.8 0-4.4-.9-8-3.8C8.7 20.4 5 16.5 3 13.3.5 9.4-.2 6.4.1 4.3.4 2.5 1.4 1.3 2.4.5c.6-.5 1.2-.5 1.6-.1l4.2 5c.4.5.3 1-.1 1.4l-1.5 1.3c-.3.3-.3.6-.2.9 1 2 2.7 4.2 5 6.2s4.5 3.4 6.7 4c.3.1.7 0 .9-.2l1.5-1.6c.4-.4 1-.5 1.4-.1l4.7 4.4c.5.4.5 1.1 0 1.6-.8.9-2 1.8-3.8 2.2-.8.3-1.5.4-2.4.4z"/>
+      </svg>
+    ),
+    fax: (
+      <svg viewBox="0 0 479 479" className="ff-contact-icon">
+        <path d="M434.1 59.7H370V20c0-11-9-20-20-20H129c-11 0-20 9-20 20v39.7H44.9C20.1 59.7 0 79.8 0 104.6v214.6c0 24.8 20.1 44.9 44.9 44.9h64.1V459c0 11 9 20 20 20h221c11 0 20-9 20-20V364.1h64.1c24.8 0 44.9-20.1 44.9-44.9V104.6c0-24.8-20.1-44.9-44.9-44.9zM149 40h181v19.7H149V40zm181 399H149V284.1h181V439zm104.1-119.8c0 2.7-2.2 4.9-4.9 4.9H370V264.1c0-11-9-20-20-20H129c-11 0-20 9-20 20v60h-65.1c-2.7 0-4.9-2.2-4.9-4.9V104.6c0-2.7 2.2-4.9 4.9-4.9h390.2c2.7 0 4.9 2.2 4.9 4.9v214.6z"/>
+      </svg>
+    ),
+    email: (
+      <svg viewBox="0 0 479 479" className="ff-contact-icon">
+        <path d="M432 59H47C21 59 0 80 0 106v267c0 26 21 47 47 47h385c26 0 47-21 47-47V106c0-26-21-47-47-47zm-6 40L240 259 54 99h372zm6 280H47c-4 0-7-3-7-7V128l197 170c4 3 8 5 13 5s9-2 13-5l187-170v245c0 4-3 7-7 7z"/>
+      </svg>
+    ),
+  };
+
+  const chevronSvg = (
+    <svg viewBox="0 0 64 64" xmlns="http://www.w3.org/2000/svg">
+      <path d="M59.77 20.77c.49-.49.73-1.13.73-1.77s-.24-1.28-.73-1.77a2.5 2.5 0 00-3.54 0L32 41.46 7.77 17.23a2.5 2.5 0 00-3.54 0 2.5 2.5 0 000 3.54l26 26a2.5 2.5 0 003.54 0l26-26z"/>
+    </svg>
+  );
+
+  // Render togglable link columns
+  const renderLinkColumn = (col: FooterLinkColumn, idx: number) => {
+    const colIndex = idx + 2; // offset past brand + posts columns
+    const isOpen = openColumns.has(colIndex);
+
+    return (
+      <div key={idx} className="ff-col-links">
+        <div
+          className={`ff-col-toggle-head ${isOpen ? "ff-open" : ""}`}
+          onClick={() => toggleColumn(colIndex)}
+        >
+          <h4 className="ff-col-title">{col.title}</h4>
+          {chevronSvg}
+        </div>
+        <div className={`ff-col-toggle-content ${isOpen ? "ff-open" : "ff-closed"}`}>
+          <ul className="ff-link-list">
+            {col.links.map((link, li) => (
+              <li key={li}>
+                <a href={link.url}>
+                  {link.emphasized ? <em>{link.label}</em> : link.label}
+                </a>
+              </li>
+            ))}
+          </ul>
+        </div>
+      </div>
+    );
+  };
+
+  return (
+    <footer className="ff-footer" style={footerStyle}>
+      <ScopedStyles id="footer" css={scopedCss} />
+
+      {/* ── Main Footer ── */}
+      <div className="ff-main-footer" style={mainFooterStyle}>
+        {/* Column 1: Brand + Contact */}
+        <div className="ff-col-brand">
+          {logoUrl && (
+            <div style={{ marginBottom: "16px" }}>
+              <a href="/">
+                <img
+                  src={logoUrl}
+                  alt={logoAlt}
+                  style={{ maxWidth: "220px", height: "auto" }}
+                />
+              </a>
+            </div>
+          )}
+          <p style={{ margin: "0 0 10px", fontSize: "14px", lineHeight: "1.7" }}>
+            {description}
+          </p>
+          {contact && (
+            <ul className="ff-contact-list">
+              {contact.address && (
+                <li className="ff-contact-item">
+                  {contactIcons.address}
+                  <span>{contact.address}</span>
+                </li>
+              )}
+              {contact.phone && (
+                <li className="ff-contact-item">
+                  {contactIcons.phone}
+                  <span>Phone: {contact.phone}</span>
+                </li>
+              )}
+              {contact.fax && (
+                <li className="ff-contact-item">
+                  {contactIcons.fax}
+                  <span>Fax: {contact.fax}</span>
+                </li>
+              )}
+              {contact.email && (
+                <li className="ff-contact-item">
+                  {contactIcons.email}
+                  <span>Email: {contact.email}</span>
+                </li>
+              )}
+            </ul>
+          )}
+        </div>
+
+        {/* Column 2: Recent Posts */}
+        {recentPosts.length > 0 && (
+          <div className="ff-col-posts">
+            <div
+              className={`ff-col-toggle-head ${openColumns.has(1) ? "ff-open" : ""}`}
+              onClick={() => toggleColumn(1)}
+            >
+              <h4 className="ff-col-title">RECENT POSTS</h4>
+              {chevronSvg}
+            </div>
+            <div className={`ff-col-toggle-content ${openColumns.has(1) ? "ff-open" : "ff-closed"}`}>
+              {recentPosts.map((post, i) => (
+                <div key={i} className="ff-post-item">
+                  {post.thumbnail && (
+                    <img
+                      src={post.thumbnail}
+                      alt={post.title}
+                      className="ff-post-thumb"
+                      loading="lazy"
+                    />
+                  )}
+                  <div>
+                    <h5 className="ff-post-title">
+                      <a href={post.url}>{post.title}</a>
+                    </h5>
+                    <span className="ff-post-date">{post.date}</span>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
+
+        {/* Columns 3-5: Link columns */}
+        {linkColumns.map(renderLinkColumn)}
+      </div>
+
+      {/* ── Copyright Bar ── */}
+      <div className="ff-copyrights">
+        <div>
+          <small>
+            <a href="/">{copyrightText}</a>
+          </small>
+        </div>
+        {paymentIconsUrl && (
+          <div>
+            <img
+              src={paymentIconsUrl}
+              alt="Payment methods"
+              loading="lazy"
+            />
+          </div>
+        )}
+      </div>
+    </footer>
+  );
+}
