@@ -19,11 +19,21 @@ const T = {
   bodyFont: "'Lato', Arial, Helvetica, sans-serif",
 };
 
+export interface NavItem {
+  id: string;
+  label: string;
+  url: string;
+  type: string;
+  openInNewTab?: boolean;
+}
+
 interface FashionHeaderProps {
   storeName: string;
   storeSlug: string;
   logo?: string | null;
   navPages?: Array<{ id: string; title: string; slug: string }>;
+  /** Custom navigation items from navigationSettings — overrides default nav when present */
+  customNavItems?: NavItem[];
   cartCount?: number;
   wishlistCount?: number;
   topBarText?: string;
@@ -34,8 +44,35 @@ interface FashionHeaderProps {
   isLanding?: boolean;
 }
 
+/**
+ * Resolves a nav item's URL to a full href.
+ * - "home" / "shop" / "reviews" → /store/{slug}/...
+ * - "page" → /store/{slug}/{path}
+ * - "external" → used as-is
+ * - "custom" → prepends /store/{slug} if relative
+ */
+function resolveNavHref(item: NavItem, storeSlug: string): string {
+  const base = `/store/${storeSlug}`;
+  switch (item.type) {
+    case "home": return base;
+    case "shop": return `${base}/shop`;
+    case "reviews": return `${base}/reviews`;
+    case "page": {
+      const path = item.url.startsWith("/") ? item.url.slice(1) : item.url;
+      return `${base}/${path}`;
+    }
+    case "external": return item.url;
+    case "custom":
+    default: {
+      if (item.url.startsWith("http://") || item.url.startsWith("https://")) return item.url;
+      const path = item.url.startsWith("/") ? item.url.slice(1) : item.url;
+      return `${base}/${path}`;
+    }
+  }
+}
+
 export function FashionHeader({
-  storeName, storeSlug, logo, navPages = [], cartCount = 0, wishlistCount = 0,
+  storeName, storeSlug, logo, navPages = [], customNavItems, cartCount = 0, wishlistCount = 0,
   topBarText = "FREE SHIPPING FOR ALL ORDERS OF $150",
   socialLinks = [], onSearch, searchQuery = "", onSearchChange, isLanding = false,
 }: FashionHeaderProps) {
@@ -154,24 +191,54 @@ export function FashionHeader({
       <nav className="fsh-nav">
         <div className="fsh-nav-inner">
           <div className="fsh-nav-links">
-            <Link href={`/store/${storeSlug}`} className="fsh-nav-link fsh-active">Home</Link>
-            {!isLanding && <Link href={`/store/${storeSlug}/shop`} className="fsh-nav-link">Shop</Link>}
-            {!isLanding && <Link href={`/store/${storeSlug}/reviews`} className="fsh-nav-link">Reviews</Link>}
-            {navPages.map((p) => (
-              <Link key={p.id} href={`/store/${storeSlug}/${p.slug}`} className="fsh-nav-link">{p.title}</Link>
-            ))}
+            {customNavItems && customNavItems.length > 0 ? (
+              /* Custom navigation — store owner defined these */
+              customNavItems.map((item) => {
+                const href = resolveNavHref(item, storeSlug);
+                const isExternal = item.type === "external" || item.url.startsWith("http");
+                return isExternal ? (
+                  <a key={item.id} href={href} className="fsh-nav-link" target={item.openInNewTab ? "_blank" : undefined} rel={item.openInNewTab ? "noopener noreferrer" : undefined}>{item.label}</a>
+                ) : (
+                  <Link key={item.id} href={href} className="fsh-nav-link">{item.label}</Link>
+                );
+              })
+            ) : (
+              /* Default navigation — auto-generated from pages */
+              <>
+                <Link href={`/store/${storeSlug}`} className="fsh-nav-link fsh-active">Home</Link>
+                {!isLanding && <Link href={`/store/${storeSlug}/shop`} className="fsh-nav-link">Shop</Link>}
+                {!isLanding && <Link href={`/store/${storeSlug}/reviews`} className="fsh-nav-link">Reviews</Link>}
+                {navPages.map((p) => (
+                  <Link key={p.id} href={`/store/${storeSlug}/${p.slug}`} className="fsh-nav-link">{p.title}</Link>
+                ))}
+              </>
+            )}
           </div>
         </div>
       </nav>
 
       {/* Mobile Menu */}
       <div className={`fsh-mobile-menu ${mobileMenu ? "fsh-open" : ""}`}>
-        <Link href={`/store/${storeSlug}`} onClick={() => setMobileMenu(false)}>Home</Link>
-        {!isLanding && <Link href={`/store/${storeSlug}/shop`} onClick={() => setMobileMenu(false)}>Shop</Link>}
-        {!isLanding && <Link href={`/store/${storeSlug}/reviews`} onClick={() => setMobileMenu(false)}>Reviews</Link>}
-        {navPages.map((p) => (
-          <Link key={p.id} href={`/store/${storeSlug}/${p.slug}`} onClick={() => setMobileMenu(false)}>{p.title}</Link>
-        ))}
+        {customNavItems && customNavItems.length > 0 ? (
+          customNavItems.map((item) => {
+            const href = resolveNavHref(item, storeSlug);
+            const isExternal = item.type === "external" || item.url.startsWith("http");
+            return isExternal ? (
+              <a key={item.id} href={href} onClick={() => setMobileMenu(false)} target={item.openInNewTab ? "_blank" : undefined} rel={item.openInNewTab ? "noopener noreferrer" : undefined}>{item.label}</a>
+            ) : (
+              <Link key={item.id} href={href} onClick={() => setMobileMenu(false)}>{item.label}</Link>
+            );
+          })
+        ) : (
+          <>
+            <Link href={`/store/${storeSlug}`} onClick={() => setMobileMenu(false)}>Home</Link>
+            {!isLanding && <Link href={`/store/${storeSlug}/shop`} onClick={() => setMobileMenu(false)}>Shop</Link>}
+            {!isLanding && <Link href={`/store/${storeSlug}/reviews`} onClick={() => setMobileMenu(false)}>Reviews</Link>}
+            {navPages.map((p) => (
+              <Link key={p.id} href={`/store/${storeSlug}/${p.slug}`} onClick={() => setMobileMenu(false)}>{p.title}</Link>
+            ))}
+          </>
+        )}
       </div>
     </div>
   );

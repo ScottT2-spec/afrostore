@@ -9,7 +9,7 @@ import { RenderBlocks, type BuilderBlock } from "@/components/storefront/BlockRe
 import { RenderTemplateBlocks } from "@/components/storefront/TemplateBlockRenderer";
 import { FASHION_TEMPLATE_PRESET } from "@/lib/templates/presets/fashion-preset";
 import { FashionStoreContext } from "@/components/storefront/FashionTemplateBlocks";
-import { FashionHeader, FashionFooter } from "@/components/storefront/FashionStoreChrome";
+import { FashionHeader, FashionFooter, type NavItem } from "@/components/storefront/FashionStoreChrome";
 import { getLinkedPageHref, parsePageContent, type PageSettings } from "@/lib/page-content";
 import { ThemeProvider, type ThemeData } from "@/components/storefront/ThemeProvider";
 import { useWishlist } from "@/hooks/useWishlist";
@@ -300,6 +300,12 @@ export default function StorePage() {
   const homeHasProductGrid = homeBlocks.some((b) => b.type === "productGrid");
   const isFashionTemplate = data.templateSlug === "fashion" || homeBlocks.some((b) => b.type.startsWith("fashion"));
 
+  // Custom navigation items from site customization
+  const customNavItems = useMemo(() => {
+    const items = (draftCustomization?.navigationSettings?.items as NavItem[] | undefined) || [];
+    return items.length > 0 ? items : undefined;
+  }, [draftCustomization]);
+
   // Navigation pages: exclude HOME (we're on it), sort sensibly
   const navPageOrder: Record<string, number> = { ABOUT: 0, FAQ: 1, CONTACT: 2, POLICY: 3, CUSTOM: 4, LANDING: 5 };
   const navPages = customizedPages
@@ -316,6 +322,7 @@ export default function StorePage() {
           storeSlug={slug}
           logo={store.logo}
           navPages={navPages}
+          customNavItems={customNavItems}
           cartCount={cartCount}
           wishlistCount={wishlistCount}
           topBarText={data.deliveryZones.some((z: any) => z.freeAbove)

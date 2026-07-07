@@ -179,7 +179,7 @@ export default function SiteEditorPage({ params }: { params: Promise<{ siteId: s
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState("");
   const [activeLeftTab, setActiveLeftTab] = useState<"pages" | "sections" | "navigation">("pages");
-  const [activeRightTab, setActiveRightTab] = useState<"brand" | "theme" | "page" | "seo" | "code" | "media">("brand");
+  const [activeRightTab, setActiveRightTab] = useState<"brand" | "theme" | "page" | "nav" | "seo" | "code" | "media">("brand");
   const [site, setSite] = useState<SiteRecord | null>(null);
   const [pages, setPages] = useState<PageRecord[]>([]);
   const [siteDraft, setSiteDraft] = useState<EditorState>(() => ({
@@ -641,7 +641,7 @@ export default function SiteEditorPage({ params }: { params: Promise<{ siteId: s
         </div>
 
         <div className="flex border-b border-surface-200 text-xs font-semibold">
-          {(["brand", "theme", "page", "seo", "code", "media"] as const).map((tab) => (
+          {(["brand", "theme", "page", "nav", "seo", "code", "media"] as const).map((tab) => (
             <button
               key={tab}
               onClick={() => setActiveRightTab(tab)}
@@ -704,6 +704,174 @@ export default function SiteEditorPage({ params }: { params: Promise<{ siteId: s
               </div>
               <Field label="Background color" type="color" value={selectedPageCustomization.backgroundColor || "#ffffff"} onChange={(value) => updatePageSetting("backgroundColor", value)} />
               <SingleImageUpload image={selectedPageCustomization.backgroundImage || null} onChange={(value) => updatePageSetting("backgroundImage", value || null)} label="Background image" compact />
+            </section>
+          )}
+
+          {activeRightTab === "nav" && (
+            <section className="space-y-4">
+              <p className="text-xs text-surface-500">
+                Define your store's navigation menu. Items appear in the header and mobile menu. Drag to reorder.
+              </p>
+
+              {/* Existing nav items */}
+              {(() => {
+                const navItems = (customization.navigationSettings.items as Array<{ id: string; label: string; url: string; type: string; openInNewTab?: boolean }>) || [];
+
+                const updateNavItems = (items: typeof navItems) => {
+                  setCustomization((prev) => ({
+                    ...prev,
+                    navigationSettings: {
+                      ...prev.navigationSettings,
+                      items,
+                    },
+                  }));
+                };
+
+                const addNavItem = () => {
+                  updateNavItems([
+                    ...navItems,
+                    { id: crypto.randomUUID(), label: "New Link", url: "/", type: "custom", openInNewTab: false },
+                  ]);
+                };
+
+                const removeNavItem = (id: string) => {
+                  updateNavItems(navItems.filter((item) => item.id !== id));
+                };
+
+                const updateNavItem = (id: string, field: string, value: string | boolean) => {
+                  updateNavItems(navItems.map((item) => item.id === id ? { ...item, [field]: value } : item));
+                };
+
+                const moveNavItem = (index: number, direction: -1 | 1) => {
+                  const newItems = [...navItems];
+                  const targetIndex = index + direction;
+                  if (targetIndex < 0 || targetIndex >= newItems.length) return;
+                  [newItems[index], newItems[targetIndex]] = [newItems[targetIndex], newItems[index]];
+                  updateNavItems(newItems);
+                };
+
+                // Build page link options for the dropdown
+                const pageOptions = pages
+                  .filter((p) => p.isPublished || (customization.pageSettings[p.id] as any)?.isPublished)
+                  .map((p) => ({
+                    label: p.title,
+                    value: p.type === "HOME" ? "/" : `/${p.slug}`,
+                    type: "page",
+                  }));
+
+                return (
+                  <div className="space-y-3">
+                    {navItems.length === 0 && (
+                      <div className="rounded-xl border border-dashed border-surface-300 bg-surface-50 p-4 text-center text-xs text-surface-500">
+                        No navigation items yet. Add your first menu link below.
+                        <br />
+                        <span className="text-[11px] text-surface-400">Default links (Home, Shop, Reviews) will show until you add custom items.</span>
+                      </div>
+                    )}
+
+                    {navItems.map((item, index) => (
+                      <div key={item.id} className="rounded-xl border border-surface-200 bg-white p-3 space-y-2">
+                        <div className="flex items-center justify-between gap-2">
+                          <span className="text-xs font-semibold text-surface-700 truncate flex-1">{item.label || "Untitled"}</span>
+                          <div className="flex items-center gap-1">
+                            <button
+                              type="button"
+                              onClick={() => moveNavItem(index, -1)}
+                              disabled={index === 0}
+                              className="p-1 text-surface-400 hover:text-surface-700 disabled:opacity-30"
+                              title="Move up"
+                            >
+                              <ArrowUpDown className="h-3 w-3" />
+                            </button>
+                            <button
+                              type="button"
+                              onClick={() => removeNavItem(item.id)}
+                              className="p-1 text-red-400 hover:text-red-600"
+                              title="Remove"
+                            >
+                              <Trash2 className="h-3 w-3" />
+                            </button>
+                          </div>
+                        </div>
+
+                        <Field
+                          label="Label"
+                          value={item.label}
+                          onChange={(value) => updateNavItem(item.id, "label", value)}
+                          placeholder="e.g. Shop, About, Contact"
+                        />
+
+                        <label className="block text-xs font-medium text-surface-700">
+                          Link type
+                          <select
+                            value={item.type}
+                            onChange={(e) => {
+                              const newType = e.target.value;
+                              updateNavItem(item.id, "type", newType);
+                              if (newType === "home") updateNavItem(item.id, "url", "/");
+                              else if (newType === "shop") updateNavItem(item.id, "url", "/shop");
+                              else if (newType === "reviews") updateNavItem(item.id, "url", "/reviews");
+                            }}
+                            className="mt-1 w-full rounded-xl border border-surface-200 bg-white px-3 py-2 text-sm"
+                          >
+                            <option value="custom">Custom URL</option>
+                            <option value="home">Home</option>
+                            <option value="shop">Shop</option>
+                            <option value="reviews">Reviews</option>
+                            <option value="page">Page</option>
+                            <option value="external">External link</option>
+                          </select>
+                        </label>
+
+                        {item.type === "page" ? (
+                          <label className="block text-xs font-medium text-surface-700">
+                            Page
+                            <select
+                              value={item.url}
+                              onChange={(e) => updateNavItem(item.id, "url", e.target.value)}
+                              className="mt-1 w-full rounded-xl border border-surface-200 bg-white px-3 py-2 text-sm"
+                            >
+                              <option value="">Select a page...</option>
+                              {pageOptions.map((opt) => (
+                                <option key={opt.value} value={opt.value}>{opt.label}</option>
+                              ))}
+                            </select>
+                          </label>
+                        ) : item.type === "custom" || item.type === "external" ? (
+                          <Field
+                            label="URL"
+                            value={item.url}
+                            onChange={(value) => updateNavItem(item.id, "url", value)}
+                            placeholder={item.type === "external" ? "https://example.com" : "/your-page"}
+                          />
+                        ) : null}
+
+                        {item.type === "external" && (
+                          <Toggle
+                            label="Open in new tab"
+                            checked={item.openInNewTab ?? false}
+                            onChange={(value) => updateNavItem(item.id, "openInNewTab", value)}
+                          />
+                        )}
+                      </div>
+                    ))}
+
+                    <button
+                      type="button"
+                      onClick={addNavItem}
+                      className="inline-flex w-full items-center justify-center gap-2 rounded-xl border-2 border-dashed border-surface-300 px-4 py-3 text-sm font-semibold text-surface-600 hover:border-brand-400 hover:text-brand-700 transition-colors"
+                    >
+                      <Plus className="h-4 w-4" /> Add Menu Item
+                    </button>
+
+                    {navItems.length > 0 && (
+                      <div className="rounded-xl bg-brand-50 border border-brand-200 p-3 text-xs text-brand-700">
+                        <strong>💡 Tip:</strong> Links like <code>/shop</code> or <code>/about</code> are relative to your store. External links (starting with <code>https://</code>) open outside your store.
+                      </div>
+                    )}
+                  </div>
+                );
+              })()}
             </section>
           )}
 
