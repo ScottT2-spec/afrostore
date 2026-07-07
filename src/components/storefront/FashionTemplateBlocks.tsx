@@ -1262,7 +1262,192 @@ export function FashionInstagram({
 }
 
 /* ═══════════════════════════════════════════════════════════════
-   11. FASHION FOOTER
+   11. FASHION MARQUEE
+   Infinite scrolling text banner, matching WoodMart marquee element.
+   Used in handmade-bags template for announcements/info bars.
+   ═══════════════════════════════════════════════════════════════ */
+
+export interface FashionMarqueeItem {
+  text: string;
+  icon?: string; // emoji or text icon
+}
+
+export interface FashionMarqueeProps {
+  items?: FashionMarqueeItem[];
+  speed?: string;
+  gap?: string;
+  backgroundColor?: string;
+  textColor?: string;
+  fontSize?: string;
+  fontWeight?: string;
+  paddingY?: string;
+  borderTop?: string;
+  borderBottom?: string;
+  marginBottom?: string;
+}
+
+export function FashionMarquee({
+  items = [
+    { text: "Free shipping on orders over $200", icon: "✦" },
+    { text: "Production time is 5 days", icon: "✦" },
+  ],
+  speed = "45s",
+  gap = "60px",
+  backgroundColor = "transparent",
+  textColor = "#242424",
+  fontSize = "30px",
+  fontWeight = "600",
+  paddingY = "20px",
+  borderTop,
+  borderBottom,
+  marginBottom = "0px",
+}: FashionMarqueeProps) {
+  const scopedCss = `
+    @keyframes fm-scroll {
+      from { transform: translate3d(0, 0, 0); }
+      to { transform: translate3d(calc(-100% - ${gap}), 0, 0); }
+    }
+    .fm-marquee {
+      display: flex; overflow: hidden; gap: ${gap}; max-width: 100vw;
+      background: ${backgroundColor}; padding: ${paddingY} 0;
+      margin-bottom: ${marginBottom};
+      ${borderTop ? `border-top: ${borderTop};` : ""}
+      ${borderBottom ? `border-bottom: ${borderBottom};` : ""}
+    }
+    .fm-content {
+      display: flex; align-items: center; flex-shrink: 0; gap: ${gap};
+      min-width: 100%; white-space: nowrap;
+      animation: ${speed} linear infinite normal running fm-scroll;
+    }
+    .fm-marquee:hover .fm-content { animation-play-state: paused; }
+    .fm-item {
+      display: flex; gap: 10px; align-items: center;
+      font-family: ${TOKENS.titleFont}; font-weight: ${fontWeight};
+      font-size: ${fontSize}; line-height: 1; color: ${textColor};
+    }
+    .fm-item-icon { opacity: 0.5; font-size: 0.6em; }
+    @media (max-width: 768px) {
+      .fm-item { font-size: 24px; }
+      .fm-marquee { padding: 15px 0; }
+    }
+  `;
+
+  // Double the items for seamless loop
+  const allItems = [...items, ...items];
+
+  return (
+    <div className="fm-marquee">
+      <ScopedStyles id="marquee" css={scopedCss} />
+      <div className="fm-content">
+        {allItems.map((item, i) => (
+          <div key={i} className="fm-item">
+            {item.icon && <span className="fm-item-icon">{item.icon}</span>}
+            <span>{item.text}</span>
+          </div>
+        ))}
+      </div>
+      <div className="fm-content" aria-hidden="true">
+        {allItems.map((item, i) => (
+          <div key={`dup-${i}`} className="fm-item">
+            {item.icon && <span className="fm-item-icon">{item.icon}</span>}
+            <span>{item.text}</span>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   12. FASHION COVER BANNERS
+   Large cover image blocks with text overlay (craftmanship story).
+   Used in handmade-bags template for the 3-column story section.
+   ═══════════════════════════════════════════════════════════════ */
+
+export interface FashionCoverBanner {
+  image: string;
+  icon?: string; // emoji or SVG
+  title: string;
+  description: string;
+  overlayOpacity?: number;
+}
+
+export interface FashionCoverBannersProps {
+  banners?: FashionCoverBanner[];
+  columns?: number;
+  height?: string;
+  marginBottom?: string;
+}
+
+export function FashionCoverBanners({
+  banners = [],
+  columns = 3,
+  height = "580px",
+  marginBottom = "60px",
+}: FashionCoverBannersProps) {
+  const scopedCss = `
+    .fcb-wrap { margin-bottom: ${marginBottom}; }
+    .fcb-grid {
+      display: grid; grid-template-columns: repeat(${columns}, 1fr); gap: 0;
+    }
+    .fcb-banner {
+      position: relative; height: ${height}; overflow: hidden;
+      display: flex; flex-direction: column; justify-content: flex-end;
+      padding: 60px; color: #fff; text-decoration: none;
+    }
+    .fcb-bg {
+      position: absolute; inset: 0; background-size: cover; background-position: center;
+      transition: transform 0.6s ease;
+    }
+    .fcb-banner:hover .fcb-bg { transform: scale(1.05); }
+    .fcb-overlay {
+      position: absolute; inset: 0; background: #000;
+      opacity: 0.3; transition: opacity 0.3s;
+    }
+    .fcb-banner:hover .fcb-overlay { opacity: 0.45; }
+    .fcb-content { position: relative; z-index: 2; }
+    .fcb-icon { font-size: 48px; margin-bottom: 15px; opacity: 0.8; }
+    .fcb-title {
+      font-family: ${TOKENS.titleFont}; font-weight: 700; font-size: 38px;
+      margin: 0 0 15px; line-height: 1.2; color: #fff;
+    }
+    .fcb-desc {
+      font-family: ${TOKENS.bodyFont}; font-size: 15px; line-height: 1.7;
+      color: rgba(255,255,255,0.85); max-width: 400px; margin: 0;
+    }
+    @media (max-width: 1024px) {
+      .fcb-grid { grid-template-columns: 1fr; }
+      .fcb-banner { height: 480px; padding: 40px; }
+      .fcb-title { font-size: 28px; }
+    }
+    @media (max-width: 768px) {
+      .fcb-banner { height: 400px; padding: 30px; }
+      .fcb-title { font-size: 22px; }
+    }
+  `;
+
+  return (
+    <div className="fcb-wrap">
+      <ScopedStyles id="cover-banners" css={scopedCss} />
+      <div className="fcb-grid">
+        {banners.map((b, i) => (
+          <div key={i} className="fcb-banner">
+            <div className="fcb-bg" style={{ backgroundImage: `url(${b.image})` }} />
+            <div className="fcb-overlay" style={{ opacity: b.overlayOpacity ?? 0.3 }} />
+            <div className="fcb-content">
+              {b.icon && <div className="fcb-icon">{b.icon}</div>}
+              <h3 className="fcb-title">{b.title}</h3>
+              <p className="fcb-desc">{b.description}</p>
+            </div>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   13. FASHION FOOTER
    Matches WoodMart Fashion footer: 5-column main footer + copyright bar.
    Light-on-dark color scheme with collapsible columns on mobile.
    ═══════════════════════════════════════════════════════════════ */

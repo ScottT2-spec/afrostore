@@ -13,6 +13,8 @@ import {
   FashionFooter,
   FashionFeatures,
   FashionInstagram,
+  FashionMarquee,
+  FashionCoverBanners,
 } from "@/components/storefront/FashionTemplateBlocks";
 import type {
   FashionHeroSliderProps,
@@ -26,6 +28,8 @@ import type {
   FashionFooterProps,
   FashionFeaturesProps,
   FashionInstagramProps,
+  FashionMarqueeProps,
+  FashionCoverBannersProps,
 } from "@/components/storefront/FashionTemplateBlocks";
 
 /* ─── TYPES ─────────────────────────────────────────────────── */
@@ -52,6 +56,8 @@ const FASHION_BLOCKS: Record<string, BlockComponent> = {
   fashionFooter: FashionFooter as unknown as BlockComponent,
   fashionFeatures: FashionFeatures as unknown as BlockComponent,
   fashionInstagram: FashionInstagram as unknown as BlockComponent,
+  fashionMarquee: FashionMarquee as unknown as BlockComponent,
+  fashionCoverBanners: FashionCoverBanners as unknown as BlockComponent,
 };
 
 /* ─── SINGLE BLOCK RENDERER ────────────────────────────────── */
@@ -107,4 +113,6 @@ export type {
   FashionFooterProps,
   FashionFeaturesProps,
   FashionInstagramProps,
+  FashionMarqueeProps,
+  FashionCoverBannersProps,
 };
