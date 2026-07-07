@@ -1059,7 +1059,210 @@ export function FashionNewsletter({
 }
 
 /* ═══════════════════════════════════════════════════════════════
-   9. FASHION FOOTER
+   9. FASHION FEATURES (HOW WE WORK)
+   Numbered feature boxes (01, 02, 03) with title, description, and CTA.
+   Matches WoodMart "How We Work" section from fashion-colored template.
+   ═══════════════════════════════════════════════════════════════ */
+
+export interface FashionFeatureItem {
+  number: string;
+  title: string;
+  description: string;
+  buttonText?: string;
+  buttonLink?: string;
+}
+
+export interface FashionFeaturesProps {
+  features?: FashionFeatureItem[];
+  sectionTitle?: { subtitle?: string; title?: string; description?: string };
+  columns?: number;
+  marginBottom?: string;
+}
+
+export function FashionFeatures({
+  features = [
+    { number: "01", title: "SHOP FEATURE 1", description: "Massa a erat nam aliquam condi mentu tum in cum proin.", buttonText: "READ MORE", buttonLink: "#" },
+    { number: "02", title: "SHOP FEATURE 2", description: "Adipiscing proin lobortis nunc luctus conubia ac facilisi.", buttonText: "READ MORE", buttonLink: "#" },
+    { number: "03", title: "SHOP FEATURE 3", description: "Ulamcorper parturient adipiscing nisi rutrum eleifend class.", buttonText: "READ MORE", buttonLink: "#" },
+  ],
+  sectionTitle,
+  columns = 3,
+  marginBottom = "50px",
+}: FashionFeaturesProps) {
+  const scopedCss = `
+    .ff-features { margin-bottom: ${marginBottom}; }
+    .ff-features-grid {
+      display: grid; grid-template-columns: repeat(${columns}, 1fr); gap: 30px;
+      max-width: ${TOKENS.containerWidth}; margin: 0 auto; padding: 0 15px;
+    }
+    .ff-feature {
+      display: flex; align-items: flex-start; gap: 16px; padding: 30px;
+      background: #f9f9f9; transition: background 0.3s;
+    }
+    .ff-feature:hover { background: #f0f0f0; }
+    .ff-feature-num {
+      font-family: ${TOKENS.titleFont}; font-size: 36px; font-weight: 700;
+      color: ${TOKENS.primaryColor}; line-height: 1; flex-shrink: 0; opacity: 0.7;
+    }
+    .ff-feature-content { flex: 1; }
+    .ff-feature-title {
+      font-family: ${TOKENS.titleFont}; font-weight: 700; font-size: 16px;
+      color: ${TOKENS.entityTitleColor}; margin: 0 0 10px; text-transform: uppercase;
+    }
+    .ff-feature-desc {
+      font-family: ${TOKENS.bodyFont}; font-size: 14px; color: ${TOKENS.textColor};
+      line-height: 1.6; margin: 0 0 12px;
+    }
+    .ff-feature-btn {
+      font-family: ${TOKENS.bodyFont}; font-size: 13px; font-weight: 600;
+      color: ${TOKENS.primaryColor}; text-decoration: none; text-transform: uppercase;
+      display: inline-flex; align-items: center; gap: 4px; transition: opacity 0.2s;
+    }
+    .ff-feature-btn:hover { opacity: 0.7; }
+    @media (max-width: 768px) {
+      .ff-features-grid { grid-template-columns: 1fr; }
+      .ff-feature { padding: 20px; }
+    }
+  `;
+
+  return (
+    <div className="ff-features">
+      <ScopedStyles id="features" css={scopedCss} />
+      {sectionTitle?.title && (
+        <FashionSectionTitle subtitle={sectionTitle.subtitle} title={sectionTitle.title} description={sectionTitle.description} />
+      )}
+      <div className="ff-features-grid">
+        {features.map((f, i) => (
+          <div key={i} className="ff-feature">
+            <div className="ff-feature-num">{f.number}</div>
+            <div className="ff-feature-content">
+              <h4 className="ff-feature-title">{f.title}</h4>
+              <p className="ff-feature-desc">{f.description}</p>
+              {f.buttonText && (
+                <a href={f.buttonLink || "#"} className="ff-feature-btn">
+                  {f.buttonText} →
+                </a>
+              )}
+            </div>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   10. FASHION INSTAGRAM GALLERY
+   Grid of images with hover overlay showing likes/comments.
+   Matches WoodMart "PROKIP ON INSTAGRAM" from fashion-colored.
+   ═══════════════════════════════════════════════════════════════ */
+
+export interface FashionInstaImage {
+  src: string;
+  alt?: string;
+  likes?: number;
+  comments?: number;
+  link?: string;
+}
+
+export interface FashionInstagramProps {
+  images?: FashionInstaImage[];
+  columns?: number;
+  sectionTitle?: { subtitle?: string; title?: string; description?: string };
+  instagramUrl?: string;
+  buttonText?: string;
+  marginBottom?: string;
+}
+
+export function FashionInstagram({
+  images = [],
+  columns = 6,
+  sectionTitle,
+  instagramUrl = "https://www.instagram.com/",
+  buttonText = "FOLLOW US ON INSTAGRAM",
+  marginBottom = "0px",
+}: FashionInstagramProps) {
+  const scopedCss = `
+    .fi-insta { margin-bottom: ${marginBottom}; }
+    .fi-btn-wrap { text-align: center; margin-bottom: 25px; }
+    .fi-btn {
+      font-family: ${TOKENS.bodyFont}; font-size: 13px; font-weight: 600;
+      color: ${TOKENS.entityTitleColor}; text-decoration: none; text-transform: uppercase;
+      border-bottom: 1px solid ${TOKENS.entityTitleColor}; padding-bottom: 2px;
+      transition: color 0.2s, border-color 0.2s;
+    }
+    .fi-btn:hover { color: ${TOKENS.primaryColor}; border-color: ${TOKENS.primaryColor}; }
+    .fi-grid {
+      display: grid; grid-template-columns: repeat(${columns}, 1fr); gap: 0;
+      width: 100%;
+    }
+    .fi-item { position: relative; overflow: hidden; aspect-ratio: 1; cursor: pointer; }
+    .fi-item img { width: 100%; height: 100%; object-fit: cover; display: block; transition: transform 0.4s; }
+    .fi-item:hover img { transform: scale(1.05); }
+    .fi-overlay {
+      position: absolute; inset: 0; background: rgba(0,0,0,0.3);
+      display: flex; align-items: center; justify-content: center; gap: 15px;
+      opacity: 0; transition: opacity 0.3s;
+    }
+    .fi-item:hover .fi-overlay { opacity: 1; }
+    .fi-stat {
+      display: flex; align-items: center; gap: 5px; color: #fff;
+      font-family: ${TOKENS.bodyFont}; font-size: 13px; font-weight: 600;
+    }
+    .fi-stat svg { width: 16px; height: 16px; fill: #fff; }
+    @media (max-width: 1024px) { .fi-grid { grid-template-columns: repeat(4, 1fr); } }
+    @media (max-width: 768px) { .fi-grid { grid-template-columns: repeat(3, 1fr); } }
+    @media (max-width: 480px) { .fi-grid { grid-template-columns: repeat(2, 1fr); } }
+  `;
+
+  const heartSvg = (
+    <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+      <path d="M20.84 4.61a5.5 5.5 0 00-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 00-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 000-7.78z"/>
+    </svg>
+  );
+
+  const commentSvg = (
+    <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+      <path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/>
+    </svg>
+  );
+
+  const formatNum = (n: number) => n >= 1000 ? `${(n / 1000).toFixed(1)}k` : String(n);
+
+  return (
+    <div className="fi-insta">
+      <ScopedStyles id="instagram" css={scopedCss} />
+      {sectionTitle?.title && (
+        <FashionSectionTitle subtitle={sectionTitle.subtitle} title={sectionTitle.title} description={sectionTitle.description} />
+      )}
+      {buttonText && (
+        <div className="fi-btn-wrap">
+          <a href={instagramUrl} className="fi-btn" target="_blank" rel="noopener noreferrer">{buttonText}</a>
+        </div>
+      )}
+      <div className="fi-grid">
+        {images.map((img, i) => (
+          <a key={i} className="fi-item" href={img.link || instagramUrl} target="_blank" rel="noopener noreferrer">
+            <img src={img.src} alt={img.alt || `Instagram photo ${i + 1}`} loading="lazy" />
+            {(img.likes !== undefined || img.comments !== undefined) && (
+              <div className="fi-overlay">
+                {img.likes !== undefined && (
+                  <span className="fi-stat">{heartSvg} {formatNum(img.likes)}</span>
+                )}
+                {img.comments !== undefined && (
+                  <span className="fi-stat">{commentSvg} {formatNum(img.comments)}</span>
+                )}
+              </div>
+            )}
+          </a>
+        ))}
+      </div>
+    </div>
+  );
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   11. FASHION FOOTER
    Matches WoodMart Fashion footer: 5-column main footer + copyright bar.
    Light-on-dark color scheme with collapsible columns on mobile.
    ═══════════════════════════════════════════════════════════════ */
