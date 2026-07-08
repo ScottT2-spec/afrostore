@@ -4,56 +4,34 @@ import { Award, CheckCircle2, Clock, CreditCard, Eye, Globe, Headphones, Heart, 
 
 import { useState, useEffect, useMemo, useRef, createContext, useContext } from "react";
 import { getSectionStyle, resolveOpacity } from "@/components/storefront/block-style";
+import { ALL_TEMPLATE_BLOCKS } from "@/components/storefront/TemplateBlockRenderer";
 import {
   FashionFontLoader as FashionFontLoaderDirect,
-  FashionHeroSlider,
-  FashionPromoBanners,
-  FashionSectionTitle,
-  FashionProductGrid,
-  FashionCategoryCards,
-  FashionTestimonials,
-  FashionBlogPosts,
-  FashionNewsletter,
   FashionStoreContext,
   type FashionStoreContextData,
 } from "@/components/storefront/FashionTemplateBlocks";
-import {
-  ElectronicsFontLoader,
-  ElectronicsHeroSlider,
-  ElectronicsPromoBanners,
-  ElectronicsProductTabs,
-  ElectronicsBannerGrid,
-  ElectronicsHotDeals,
-  ElectronicsSideBanner,
-  ElectronicsGamingCTA,
-  ElectronicsBlogPosts,
-  ElectronicsPartners,
-  ElectronicsSectionTitle,
-  ElectronicsStoreContext,
-  type ElectronicsStoreContextData,
-} from "@/components/storefront/ElectronicsTemplateBlocks";
+import { ElectronicsFontLoader, ElectronicsStoreContext, type ElectronicsStoreContextData } from "@/components/storefront/ElectronicsTemplateBlocks";
+import { BakeryFontLoader } from "@/components/storefront/BakeryTemplateBlocks";
+import { CosmeticsFontLoader } from "@/components/storefront/CosmeticsTemplateBlocks";
+import { GroceryFontLoader } from "@/components/storefront/GroceryTemplateBlocks";
+import { HealthFontLoader } from "@/components/storefront/HealthTemplateBlocks";
+import { InteriorFontLoader } from "@/components/storefront/InteriorDesignTemplateBlocks";
+import { KidsFontLoader } from "@/components/storefront/KidsTemplateBlocks";
+import { MakeupFontLoader } from "@/components/storefront/MakeupTemplateBlocks";
+import { PerfumesFontLoader } from "@/components/storefront/PerfumesTemplateBlocks";
 
-type FashionBlockComponent = React.ComponentType<Record<string, unknown>>;
-const FASHION_BLOCK_MAP: Record<string, FashionBlockComponent> = {
-  fashionHeroSlider: FashionHeroSlider as unknown as FashionBlockComponent,
-  fashionPromoBanners: FashionPromoBanners as unknown as FashionBlockComponent,
-  fashionSectionTitle: FashionSectionTitle as unknown as FashionBlockComponent,
-  fashionProductGrid: FashionProductGrid as unknown as FashionBlockComponent,
-  fashionCategoryCards: FashionCategoryCards as unknown as FashionBlockComponent,
-  fashionTestimonials: FashionTestimonials as unknown as FashionBlockComponent,
-  fashionBlogPosts: FashionBlogPosts as unknown as FashionBlockComponent,
-  fashionNewsletter: FashionNewsletter as unknown as FashionBlockComponent,
-  electronicsHeroSlider: ElectronicsHeroSlider as unknown as FashionBlockComponent,
-  electronicsPromoBanners: ElectronicsPromoBanners as unknown as FashionBlockComponent,
-  electronicsProductTabs: ElectronicsProductTabs as unknown as FashionBlockComponent,
-  electronicsBannerGrid: ElectronicsBannerGrid as unknown as FashionBlockComponent,
-  electronicsHotDeals: ElectronicsHotDeals as unknown as FashionBlockComponent,
-  electronicsSideBanner: ElectronicsSideBanner as unknown as FashionBlockComponent,
-  electronicsGamingCTA: ElectronicsGamingCTA as unknown as FashionBlockComponent,
-  electronicsBlogPosts: ElectronicsBlogPosts as unknown as FashionBlockComponent,
-  electronicsPartners: ElectronicsPartners as unknown as FashionBlockComponent,
-  electronicsSectionTitle: ElectronicsSectionTitle as unknown as FashionBlockComponent,
-};
+function getTemplateFontLoader(type: string): React.ComponentType {
+  if (type.startsWith("electronics")) return ElectronicsFontLoader;
+  if (type.startsWith("bakery")) return BakeryFontLoader;
+  if (type.startsWith("cosmetics")) return CosmeticsFontLoader;
+  if (type.startsWith("grocery")) return GroceryFontLoader;
+  if (type.startsWith("health")) return HealthFontLoader;
+  if (type.startsWith("interior")) return InteriorFontLoader;
+  if (type.startsWith("kids")) return KidsFontLoader;
+  if (type.startsWith("makeup")) return MakeupFontLoader;
+  if (type.startsWith("perfumes")) return PerfumesFontLoader;
+  return FashionFontLoaderDirect;
+}
 
 /* ─── TYPES ─────────────────────────────────────────────────── */
 
@@ -1631,17 +1609,16 @@ const StoreSlugContext = createContext<string>("");
 /* ─── PUBLIC API ────────────────────────────────────────────── */
 
 export function PublicBlockRenderer({ block }: { block: BuilderBlock; isEditorMode?: boolean }) {
-  // Check if it's a fashion template block
-  if (block.type.startsWith("fashion")) {
-    const FashionComponent = FASHION_BLOCK_MAP[block.type];
-    if (FashionComponent) {
-      return (
-        <>
-          <FashionFontLoaderDirect />
-          <FashionComponent {...(block.props as Record<string, unknown>)} />
-        </>
-      );
-    }
+  // Check if it's a template block (fashion, electronics, bakery, cosmetics, etc.)
+  const TemplateComponent = ALL_TEMPLATE_BLOCKS[block.type];
+  if (TemplateComponent) {
+    const FontLoader = getTemplateFontLoader(block.type);
+    return (
+      <>
+        <FontLoader />
+        <TemplateComponent {...(block.props as Record<string, unknown>)} />
+      </>
+    );
   }
   const Renderer = renderers[block.type];
   if (!Renderer) return null;
