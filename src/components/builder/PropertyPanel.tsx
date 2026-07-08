@@ -898,6 +898,389 @@ function GenericProps() {
   return <p className="text-xs text-surface-500">Properties for this block type coming soon.</p>;
 }
 
+// ─── GENERIC TEMPLATE BLOCK PROPERTY EDITORS ────────────────
+// Reusable editors that work for any template's hero slider, product grid, etc.
+
+function GenericHeroSliderEditProps({ block, update }: { block: BuilderBlock; update: (key: string, val: unknown) => void }) {
+  const slides = (block.props.slides as Array<Record<string, unknown>>) || [];
+  const updateSlide = (idx: number, key: string, val: unknown) => {
+    const next = slides.map((s, i) => i === idx ? { ...s, [key]: val } : s);
+    update("slides", next);
+  };
+  const addSlide = () => update("slides", [...slides, { subtitle: "NEW", titleLine1: "Heading", titleLine2: "Line 2", description: "", buttonText: "Shop Now", buttonLink: "/shop", backgroundImage: "" }]);
+  const removeSlide = (idx: number) => update("slides", slides.filter((_, i) => i !== idx));
+  return (
+    <>
+      <PropInput label="Autoplay Speed (ms)" value={block.props.autoplaySpeed} onChange={(v) => update("autoplaySpeed", v)} type="number" />
+      <PropInput label="Min Height" value={block.props.minHeight} onChange={(v) => update("minHeight", v)} />
+      {slides.map((slide, i) => (
+        <div key={i} className="border border-surface-200 rounded-lg p-3 space-y-3">
+          <div className="flex items-center justify-between">
+            <span className="text-xs font-bold text-surface-700">Slide {i + 1}</span>
+            {slides.length > 1 && <button onClick={() => removeSlide(i)} className="text-red-500 text-xs">Remove</button>}
+          </div>
+          {slide.subtitle !== undefined && <PropInput label="Subtitle" value={slide.subtitle} onChange={(v) => updateSlide(i, "subtitle", v)} />}
+          {slide.title !== undefined && <PropInput label="Title" value={slide.title} onChange={(v) => updateSlide(i, "title", v)} />}
+          {slide.titleLine1 !== undefined && <PropInput label="Title Line 1" value={slide.titleLine1} onChange={(v) => updateSlide(i, "titleLine1", v)} />}
+          {slide.titleLine2 !== undefined && <PropInput label="Title Line 2" value={slide.titleLine2} onChange={(v) => updateSlide(i, "titleLine2", v)} />}
+          {slide.description !== undefined && <PropInput label="Description" value={slide.description} onChange={(v) => updateSlide(i, "description", v)} type="textarea" rows={2} />}
+          <PropInput label="Button Text" value={slide.buttonText} onChange={(v) => updateSlide(i, "buttonText", v)} />
+          <PropInput label="Button Link" value={slide.buttonLink} onChange={(v) => updateSlide(i, "buttonLink", v)} />
+          <SingleImageUpload image={(slide.backgroundImage as string) || (slide.image as string) || null} onChange={(url) => updateSlide(i, slide.backgroundImage !== undefined ? "backgroundImage" : "image", url || "")} label="Image" compact />
+          {slide.productImage !== undefined && <SingleImageUpload image={(slide.productImage as string) || null} onChange={(url) => updateSlide(i, "productImage", url || "")} label="Product Image" compact />}
+          {slide.colorScheme !== undefined && <PropInput label="Color Scheme" value={slide.colorScheme} onChange={(v) => updateSlide(i, "colorScheme", v)} type="select" options={[{ value: "dark", label: "Dark" }, { value: "light", label: "Light" }]} />}
+          {slide.backgroundColor !== undefined && <PropInput label="Background Color" value={slide.backgroundColor} onChange={(v) => updateSlide(i, "backgroundColor", v)} type="color" />}
+        </div>
+      ))}
+      <button onClick={addSlide} className="w-full flex items-center justify-center gap-1 text-xs font-semibold text-brand-600 py-2 border border-dashed border-brand-300 rounded-lg hover:bg-brand-50">
+        <Plus className="h-3 w-3" /> Add Slide
+      </button>
+    </>
+  );
+}
+
+function GenericSectionTitleEditProps({ block, update }: { block: BuilderBlock; update: (key: string, val: unknown) => void }) {
+  return (
+    <>
+      {block.props.subtitle !== undefined && <PropInput label="Subtitle" value={block.props.subtitle} onChange={(v) => update("subtitle", v)} />}
+      <PropInput label="Title" value={block.props.title} onChange={(v) => update("title", v)} />
+      {block.props.description !== undefined && <PropInput label="Description" value={block.props.description} onChange={(v) => update("description", v)} type="textarea" rows={2} />}
+      <PropInput label="Align" value={block.props.align} onChange={(v) => update("align", v)} type="select"
+        options={[{ value: "left", label: "Left" }, { value: "center", label: "Center" }, { value: "right", label: "Right" }]} />
+    </>
+  );
+}
+
+function GenericProductGridEditProps({ block, update }: { block: BuilderBlock; update: (key: string, val: unknown) => void }) {
+  // Handle sectionTitle as string or object
+  const st = block.props.sectionTitle;
+  const isObj = typeof st === "object" && st !== null;
+  return (
+    <>
+      {isObj ? (
+        <div className="border border-surface-200 rounded-lg p-3 space-y-3">
+          <span className="text-xs font-bold text-surface-700">Section Header</span>
+          <PropInput label="Subtitle" value={(st as Record<string, unknown>).subtitle} onChange={(v) => update("sectionTitle", { ...(st as Record<string, unknown>), subtitle: v })} />
+          <PropInput label="Title" value={(st as Record<string, unknown>).title} onChange={(v) => update("sectionTitle", { ...(st as Record<string, unknown>), title: v })} />
+        </div>
+      ) : (
+        <PropInput label="Section Title" value={block.props.sectionTitle} onChange={(v) => update("sectionTitle", v)} />
+      )}
+      {block.props.sectionSubtitle !== undefined && <PropInput label="Section Subtitle" value={block.props.sectionSubtitle} onChange={(v) => update("sectionSubtitle", v)} />}
+      <PropInput label="Columns" value={block.props.columns} onChange={(v) => update("columns", v)} type="number" />
+      <PropInput label="Max Products" value={block.props.maxProducts} onChange={(v) => update("maxProducts", v)} type="number" />
+      {block.props.filter !== undefined && <PropInput label="Filter" value={block.props.filter} onChange={(v) => update("filter", v)} type="select"
+        options={[{ value: "all", label: "All" }, { value: "featured", label: "Featured" }, { value: "bestseller", label: "Bestsellers" }, { value: "new-arrival", label: "New Arrivals" }, { value: "sale", label: "On Sale" }]} />}
+      {block.props.showCategory !== undefined && <PropInput label="Show Category" value={block.props.showCategory} onChange={(v) => update("showCategory", v)} type="toggle" />}
+      {block.props.showHoverImage !== undefined && <PropInput label="Show Hover Image" value={block.props.showHoverImage} onChange={(v) => update("showHoverImage", v)} type="toggle" />}
+      <p className="text-xs text-surface-400">Products are pulled from your store automatically.</p>
+    </>
+  );
+}
+
+function GenericPromoBannersEditProps({ block, update }: { block: BuilderBlock; update: (key: string, val: unknown) => void }) {
+  const banners = (block.props.banners as Array<Record<string, unknown>>) || [];
+  const updateBanner = (idx: number, key: string, val: unknown) => {
+    const next = banners.map((b, i) => i === idx ? { ...b, [key]: val } : b);
+    update("banners", next);
+  };
+  const addBanner = () => update("banners", [...banners, { image: "", title: "New Banner", description: "", buttonText: "Shop Now", buttonLink: "/shop" }]);
+  const removeBanner = (idx: number) => update("banners", banners.filter((_, i) => i !== idx));
+  return (
+    <>
+      {banners.map((b, i) => (
+        <div key={i} className="border border-surface-200 rounded-lg p-3 space-y-3">
+          <div className="flex items-center justify-between">
+            <span className="text-xs font-bold text-surface-700">Banner {i + 1}</span>
+            {banners.length > 1 && <button onClick={() => removeBanner(i)} className="text-red-500 text-xs">Remove</button>}
+          </div>
+          <SingleImageUpload image={(b.image as string) || (b.backgroundImage as string) || null} onChange={(url) => updateBanner(i, b.image !== undefined ? "image" : "backgroundImage", url || "")} label="Image" compact />
+          {b.subtitle !== undefined && <PropInput label="Subtitle" value={b.subtitle} onChange={(v) => updateBanner(i, "subtitle", v)} />}
+          <PropInput label="Title" value={b.title} onChange={(v) => updateBanner(i, "title", v)} />
+          {b.description !== undefined && <PropInput label="Description" value={b.description} onChange={(v) => updateBanner(i, "description", v)} type="textarea" rows={2} />}
+          {b.buttonText !== undefined && <PropInput label="Button Text" value={b.buttonText} onChange={(v) => updateBanner(i, "buttonText", v)} />}
+          {b.buttonLink !== undefined && <PropInput label="Button Link" value={b.buttonLink} onChange={(v) => updateBanner(i, "buttonLink", v)} />}
+          {b.colorScheme !== undefined && <PropInput label="Color Scheme" value={b.colorScheme} onChange={(v) => updateBanner(i, "colorScheme", v)} type="select" options={[{ value: "dark", label: "Dark" }, { value: "light", label: "Light" }]} />}
+        </div>
+      ))}
+      <button onClick={addBanner} className="w-full flex items-center justify-center gap-1 text-xs font-semibold text-brand-600 py-2 border border-dashed border-brand-300 rounded-lg hover:bg-brand-50">
+        <Plus className="h-3 w-3" /> Add Banner
+      </button>
+    </>
+  );
+}
+
+function GenericCategoryCardsEditProps({ block, update }: { block: BuilderBlock; update: (key: string, val: unknown) => void }) {
+  const st = block.props.sectionTitle;
+  const isObj = typeof st === "object" && st !== null;
+  const categories = (block.props.categories as Array<Record<string, unknown>>) || (block.props.items as Array<Record<string, unknown>>) || [];
+  const catKey = block.props.categories !== undefined ? "categories" : "items";
+  const updateCat = (idx: number, key: string, val: unknown) => {
+    const next = categories.map((c, i) => i === idx ? { ...c, [key]: val } : c);
+    update(catKey, next);
+  };
+  const addCat = () => update(catKey, [...categories, { name: "New Category", image: "", link: "/shop" }]);
+  const removeCat = (idx: number) => update(catKey, categories.filter((_, i) => i !== idx));
+  return (
+    <>
+      {isObj ? (
+        <div className="border border-surface-200 rounded-lg p-3 space-y-3">
+          <span className="text-xs font-bold text-surface-700">Section Header</span>
+          <PropInput label="Subtitle" value={(st as Record<string, unknown>).subtitle} onChange={(v) => update("sectionTitle", { ...(st as Record<string, unknown>), subtitle: v })} />
+          <PropInput label="Title" value={(st as Record<string, unknown>).title} onChange={(v) => update("sectionTitle", { ...(st as Record<string, unknown>), title: v })} />
+        </div>
+      ) : typeof st === "string" ? (
+        <PropInput label="Section Title" value={st} onChange={(v) => update("sectionTitle", v)} />
+      ) : null}
+      {block.props.columns !== undefined && <PropInput label="Columns" value={block.props.columns} onChange={(v) => update("columns", v)} type="number" />}
+      {categories.map((c, i) => (
+        <div key={i} className="border border-surface-200 rounded-lg p-3 space-y-3">
+          <div className="flex items-center justify-between">
+            <span className="text-xs font-bold text-surface-700">{(c.name as string) || (c.title as string) || `Item ${i + 1}`}</span>
+            {categories.length > 1 && <button onClick={() => removeCat(i)} className="text-red-500 text-xs">Remove</button>}
+          </div>
+          <PropInput label="Name" value={c.name || c.title} onChange={(v) => updateCat(i, c.name !== undefined ? "name" : "title", v)} />
+          {c.description !== undefined && <PropInput label="Description" value={c.description} onChange={(v) => updateCat(i, "description", v)} type="textarea" rows={2} />}
+          <SingleImageUpload image={(c.image as string) || (c.icon as string) || null} onChange={(url) => updateCat(i, c.image !== undefined ? "image" : "icon", url || "")} label="Image" compact />
+          {c.link !== undefined && <PropInput label="Link" value={c.link} onChange={(v) => updateCat(i, "link", v)} />}
+          {c.productCount !== undefined && <PropInput label="Product Count" value={c.productCount} onChange={(v) => updateCat(i, "productCount", v)} type="number" />}
+        </div>
+      ))}
+      <button onClick={addCat} className="w-full flex items-center justify-center gap-1 text-xs font-semibold text-brand-600 py-2 border border-dashed border-brand-300 rounded-lg hover:bg-brand-50">
+        <Plus className="h-3 w-3" /> Add Item
+      </button>
+    </>
+  );
+}
+
+function GenericBlogPostsEditProps({ block, update }: { block: BuilderBlock; update: (key: string, val: unknown) => void }) {
+  const st = block.props.sectionTitle;
+  const isObj = typeof st === "object" && st !== null;
+  return (
+    <>
+      {isObj ? (
+        <div className="border border-surface-200 rounded-lg p-3 space-y-3">
+          <span className="text-xs font-bold text-surface-700">Section Header</span>
+          <PropInput label="Subtitle" value={(st as Record<string, unknown>).subtitle} onChange={(v) => update("sectionTitle", { ...(st as Record<string, unknown>), subtitle: v })} />
+          <PropInput label="Title" value={(st as Record<string, unknown>).title} onChange={(v) => update("sectionTitle", { ...(st as Record<string, unknown>), title: v })} />
+        </div>
+      ) : (
+        <PropInput label="Section Title" value={st} onChange={(v) => update("sectionTitle", v)} />
+      )}
+      <PropInput label="Columns" value={block.props.columns} onChange={(v) => update("columns", v)} type="number" />
+      <p className="text-xs text-surface-400">Blog posts are pulled from your store&apos;s blog automatically.</p>
+    </>
+  );
+}
+
+function GenericNewsletterEditProps({ block, update }: { block: BuilderBlock; update: (key: string, val: unknown) => void }) {
+  return (
+    <>
+      {block.props.subtitle !== undefined && <PropInput label="Subtitle" value={block.props.subtitle} onChange={(v) => update("subtitle", v)} />}
+      <PropInput label="Title" value={block.props.title} onChange={(v) => update("title", v)} />
+      {block.props.description !== undefined && <PropInput label="Description" value={block.props.description} onChange={(v) => update("description", v)} type="textarea" rows={2} />}
+      {block.props.buttonText !== undefined && <PropInput label="Button Text" value={block.props.buttonText} onChange={(v) => update("buttonText", v)} />}
+      {block.props.backgroundColor !== undefined && <PropInput label="Background Color" value={block.props.backgroundColor} onChange={(v) => update("backgroundColor", v)} type="color" />}
+      {block.props.backgroundImage !== undefined && <SingleImageUpload image={(block.props.backgroundImage as string) || null} onChange={(url) => update("backgroundImage", url || "")} label="Background Image" compact />}
+    </>
+  );
+}
+
+function GenericFooterEditProps({ block, update }: { block: BuilderBlock; update: (key: string, val: unknown) => void }) {
+  return (
+    <>
+      {block.props.description !== undefined && <PropInput label="Description" value={block.props.description} onChange={(v) => update("description", v)} type="textarea" rows={3} />}
+      {block.props.contactPhone !== undefined && <PropInput label="Phone" value={block.props.contactPhone} onChange={(v) => update("contactPhone", v)} />}
+      {block.props.contactEmail !== undefined && <PropInput label="Email" value={block.props.contactEmail} onChange={(v) => update("contactEmail", v)} />}
+      {block.props.contactAddress !== undefined && <PropInput label="Address" value={block.props.contactAddress} onChange={(v) => update("contactAddress", v)} />}
+      {block.props.copyright !== undefined && <PropInput label="Copyright" value={block.props.copyright} onChange={(v) => update("copyright", v)} />}
+      {block.props.tagline !== undefined && <PropInput label="Tagline" value={block.props.tagline} onChange={(v) => update("tagline", v)} />}
+      {block.props.email !== undefined && <PropInput label="Email" value={block.props.email} onChange={(v) => update("email", v)} />}
+      {block.props.address !== undefined && <PropInput label="Address" value={block.props.address} onChange={(v) => update("address", v)} />}
+      {block.props.phone !== undefined && <PropInput label="Phone" value={block.props.phone} onChange={(v) => update("phone", v)} />}
+    </>
+  );
+}
+
+function GenericHandmadeEditProps({ block, update }: { block: BuilderBlock; update: (key: string, val: unknown) => void }) {
+  return (
+    <>
+      {block.props.subtitle !== undefined && <PropInput label="Subtitle" value={block.props.subtitle} onChange={(v) => update("subtitle", v)} />}
+      <PropInput label="Title" value={block.props.title} onChange={(v) => update("title", v)} />
+      {block.props.description !== undefined && <PropInput label="Description" value={block.props.description} onChange={(v) => update("description", v)} type="textarea" rows={3} />}
+      <SingleImageUpload image={(block.props.image as string) || null} onChange={(url) => update("image", url || "")} label="Image" compact />
+      {block.props.buttonText !== undefined && <PropInput label="Button Text" value={block.props.buttonText} onChange={(v) => update("buttonText", v)} />}
+      {block.props.buttonLink !== undefined && <PropInput label="Button Link" value={block.props.buttonLink} onChange={(v) => update("buttonLink", v)} />}
+    </>
+  );
+}
+
+function GenericProcessStepsEditProps({ block, update }: { block: BuilderBlock; update: (key: string, val: unknown) => void }) {
+  const steps = (block.props.steps as Array<Record<string, unknown>>) || [];
+  const updateStep = (idx: number, key: string, val: unknown) => {
+    const next = steps.map((s, i) => i === idx ? { ...s, [key]: val } : s);
+    update("steps", next);
+  };
+  const addStep = () => update("steps", [...steps, { icon: "", title: "New Step", description: "" }]);
+  const removeStep = (idx: number) => update("steps", steps.filter((_, i) => i !== idx));
+  return (
+    <>
+      {block.props.sectionTitle !== undefined && <PropInput label="Section Title" value={block.props.sectionTitle} onChange={(v) => update("sectionTitle", v)} />}
+      {block.props.sectionSubtitle !== undefined && <PropInput label="Section Subtitle" value={block.props.sectionSubtitle} onChange={(v) => update("sectionSubtitle", v)} />}
+      {block.props.image !== undefined && <SingleImageUpload image={(block.props.image as string) || null} onChange={(url) => update("image", url || "")} label="Image" compact />}
+      {steps.map((step, i) => (
+        <div key={i} className="border border-surface-200 rounded-lg p-3 space-y-3">
+          <div className="flex items-center justify-between">
+            <span className="text-xs font-bold text-surface-700">Step {i + 1}</span>
+            {steps.length > 1 && <button onClick={() => removeStep(i)} className="text-red-500 text-xs">Remove</button>}
+          </div>
+          <PropInput label="Title" value={step.title} onChange={(v) => updateStep(i, "title", v)} />
+          <PropInput label="Description" value={step.description} onChange={(v) => updateStep(i, "description", v)} type="textarea" rows={2} />
+          {step.icon !== undefined && <PropInput label="Icon URL" value={step.icon} onChange={(v) => updateStep(i, "icon", v)} />}
+        </div>
+      ))}
+      <button onClick={addStep} className="w-full flex items-center justify-center gap-1 text-xs font-semibold text-brand-600 py-2 border border-dashed border-brand-300 rounded-lg hover:bg-brand-50">
+        <Plus className="h-3 w-3" /> Add Step
+      </button>
+    </>
+  );
+}
+
+function GenericCtaEditProps({ block, update }: { block: BuilderBlock; update: (key: string, val: unknown) => void }) {
+  return (
+    <>
+      <PropInput label="Title" value={block.props.title} onChange={(v) => update("title", v)} />
+      {block.props.subtitle !== undefined && <PropInput label="Subtitle" value={block.props.subtitle} onChange={(v) => update("subtitle", v)} />}
+      {block.props.description !== undefined && <PropInput label="Description" value={block.props.description} onChange={(v) => update("description", v)} type="textarea" rows={2} />}
+      {block.props.buttonText !== undefined && <PropInput label="Button Text" value={block.props.buttonText} onChange={(v) => update("buttonText", v)} />}
+      {block.props.buttonLink !== undefined && <PropInput label="Button Link" value={block.props.buttonLink} onChange={(v) => update("buttonLink", v)} />}
+      {block.props.backgroundImage !== undefined && <SingleImageUpload image={(block.props.backgroundImage as string) || null} onChange={(url) => update("backgroundImage", url || "")} label="Background Image" compact />}
+      {block.props.backgroundColor !== undefined && <PropInput label="Background Color" value={block.props.backgroundColor} onChange={(v) => update("backgroundColor", v)} type="color" />}
+    </>
+  );
+}
+
+function GenericInfoBoxesEditProps({ block, update }: { block: BuilderBlock; update: (key: string, val: unknown) => void }) {
+  const items = (block.props.items as Array<Record<string, unknown>>) || (block.props.boxes as Array<Record<string, unknown>>) || (block.props.features as Array<Record<string, unknown>>) || [];
+  const itemsKey = block.props.items !== undefined ? "items" : block.props.boxes !== undefined ? "boxes" : "features";
+  const updateItem = (idx: number, key: string, val: unknown) => {
+    const next = items.map((item, i) => i === idx ? { ...item, [key]: val } : item);
+    update(itemsKey, next);
+  };
+  const addItem = () => update(itemsKey, [...items, { icon: "⭐", title: "New Item", description: "" }]);
+  const removeItem = (idx: number) => update(itemsKey, items.filter((_, i) => i !== idx));
+  return (
+    <>
+      {block.props.sectionTitle !== undefined && (typeof block.props.sectionTitle === "string"
+        ? <PropInput label="Section Title" value={block.props.sectionTitle} onChange={(v) => update("sectionTitle", v)} />
+        : <PropInput label="Title" value={(block.props.sectionTitle as Record<string, unknown>)?.title} onChange={(v) => update("sectionTitle", { ...(block.props.sectionTitle as Record<string, unknown>), title: v })} />
+      )}
+      {items.map((item, i) => (
+        <div key={i} className="border border-surface-200 rounded-lg p-3 space-y-3">
+          <div className="flex items-center justify-between">
+            <span className="text-xs font-bold text-surface-700">{(item.title as string) || `Item ${i + 1}`}</span>
+            {items.length > 1 && <button onClick={() => removeItem(i)} className="text-red-500 text-xs">Remove</button>}
+          </div>
+          {item.icon !== undefined && <PropInput label="Icon" value={item.icon} onChange={(v) => updateItem(i, "icon", v)} />}
+          {item.number !== undefined && <PropInput label="Number" value={item.number} onChange={(v) => updateItem(i, "number", v)} />}
+          <PropInput label="Title" value={item.title} onChange={(v) => updateItem(i, "title", v)} />
+          {item.description !== undefined && <PropInput label="Description" value={item.description} onChange={(v) => updateItem(i, "description", v)} type="textarea" rows={2} />}
+          {item.image !== undefined && <SingleImageUpload image={(item.image as string) || null} onChange={(url) => updateItem(i, "image", url || "")} label="Image" compact />}
+        </div>
+      ))}
+      <button onClick={addItem} className="w-full flex items-center justify-center gap-1 text-xs font-semibold text-brand-600 py-2 border border-dashed border-brand-300 rounded-lg hover:bg-brand-50">
+        <Plus className="h-3 w-3" /> Add Item
+      </button>
+    </>
+  );
+}
+
+function GenericMarqueeEditProps({ block, update }: { block: BuilderBlock; update: (key: string, val: unknown) => void }) {
+  const items = (block.props.items as string[]) || [];
+  const updateItem = (idx: number, val: string) => {
+    const next = items.map((item, i) => i === idx ? val : item);
+    update("items", next);
+  };
+  const addItem = () => update("items", [...items, "New Item"]);
+  const removeItem = (idx: number) => update("items", items.filter((_, i) => i !== idx));
+  return (
+    <>
+      {block.props.speed !== undefined && <PropInput label="Speed" value={block.props.speed} onChange={(v) => update("speed", v)} type="number" />}
+      {items.map((item, i) => (
+        <div key={i} className="flex items-center gap-2">
+          <input value={item} onChange={(e) => updateItem(i, e.target.value)} className="input-field text-sm py-1.5 flex-1" />
+          <button onClick={() => removeItem(i)} className="text-red-500 hover:text-red-700"><X className="h-3.5 w-3.5" /></button>
+        </div>
+      ))}
+      <button onClick={addItem} className="w-full flex items-center justify-center gap-1 text-xs font-semibold text-brand-600 py-2 border border-dashed border-brand-300 rounded-lg hover:bg-brand-50">
+        <Plus className="h-3 w-3" /> Add Item
+      </button>
+    </>
+  );
+}
+
+function GenericInstagramEditProps({ block, update }: { block: BuilderBlock; update: (key: string, val: unknown) => void }) {
+  return (
+    <>
+      {block.props.handle !== undefined && <PropInput label="Handle" value={block.props.handle} onChange={(v) => update("handle", v)} />}
+      {block.props.handleLink !== undefined && <PropInput label="Handle Link" value={block.props.handleLink} onChange={(v) => update("handleLink", v)} />}
+      <p className="text-xs text-surface-400">Instagram images will be pulled automatically when connected.</p>
+    </>
+  );
+}
+
+function GenericOlfactoryTagsEditProps({ block, update }: { block: BuilderBlock; update: (key: string, val: unknown) => void }) {
+  const tags = (block.props.tags as Array<Record<string, unknown>>) || [];
+  const updateTag = (idx: number, key: string, val: unknown) => {
+    const next = tags.map((t, i) => i === idx ? { ...t, [key]: val } : t);
+    update("tags", next);
+  };
+  const addTag = () => update("tags", [...tags, { name: "New Tag", link: "/shop" }]);
+  const removeTag = (idx: number) => update("tags", tags.filter((_, i) => i !== idx));
+  return (
+    <>
+      {block.props.title !== undefined && <PropInput label="Title" value={block.props.title} onChange={(v) => update("title", v)} />}
+      {tags.map((tag, i) => (
+        <div key={i} className="flex items-center gap-2">
+          <input value={(tag.name as string) || ""} onChange={(e) => updateTag(i, "name", e.target.value)} className="input-field text-sm py-1.5 flex-1" placeholder="Tag name" />
+          <input value={(tag.link as string) || ""} onChange={(e) => updateTag(i, "link", e.target.value)} className="input-field text-sm py-1.5 flex-1" placeholder="Link" />
+          <button onClick={() => removeTag(i)} className="text-red-500 hover:text-red-700"><X className="h-3.5 w-3.5" /></button>
+        </div>
+      ))}
+      <button onClick={addTag} className="w-full flex items-center justify-center gap-1 text-xs font-semibold text-brand-600 py-2 border border-dashed border-brand-300 rounded-lg hover:bg-brand-50">
+        <Plus className="h-3 w-3" /> Add Tag
+      </button>
+    </>
+  );
+}
+
+function GenericBundlePromoEditProps({ block, update }: { block: BuilderBlock; update: (key: string, val: unknown) => void }) {
+  return (
+    <>
+      {block.props.subtitle !== undefined && <PropInput label="Subtitle" value={block.props.subtitle} onChange={(v) => update("subtitle", v)} />}
+      <PropInput label="Title" value={block.props.title} onChange={(v) => update("title", v)} />
+      {block.props.description !== undefined && <PropInput label="Description" value={block.props.description} onChange={(v) => update("description", v)} type="textarea" rows={2} />}
+      {block.props.buttonText !== undefined && <PropInput label="Button Text" value={block.props.buttonText} onChange={(v) => update("buttonText", v)} />}
+      {block.props.buttonLink !== undefined && <PropInput label="Button Link" value={block.props.buttonLink} onChange={(v) => update("buttonLink", v)} />}
+      {block.props.backgroundColor !== undefined && <PropInput label="Background Color" value={block.props.backgroundColor} onChange={(v) => update("backgroundColor", v)} type="color" />}
+    </>
+  );
+}
+
+function GenericDiscoveryEditProps({ block, update }: { block: BuilderBlock; update: (key: string, val: unknown) => void }) {
+  return (
+    <>
+      <PropInput label="Title" value={block.props.title} onChange={(v) => update("title", v)} />
+      <PropInput label="Description" value={block.props.description} onChange={(v) => update("description", v)} type="textarea" rows={3} />
+      <SingleImageUpload image={(block.props.image as string) || null} onChange={(url) => update("image", url || "")} label="Image" compact />
+      {block.props.buttonText !== undefined && <PropInput label="Button Text" value={block.props.buttonText} onChange={(v) => update("buttonText", v)} />}
+      {block.props.buttonLink !== undefined && <PropInput label="Button Link" value={block.props.buttonLink} onChange={(v) => update("buttonLink", v)} />}
+      {block.props.secondButtonText !== undefined && <PropInput label="Secondary Button" value={block.props.secondButtonText} onChange={(v) => update("secondButtonText", v)} />}
+      {block.props.secondButtonLink !== undefined && <PropInput label="Secondary Link" value={block.props.secondButtonLink} onChange={(v) => update("secondButtonLink", v)} />}
+    </>
+  );
+}
+
 // ─── ELECTRONICS TEMPLATE PROPERTY EDITORS ─────────────────────
 
 function ElectronicsHeroSliderEditProps({ block, update }: { block: BuilderBlock; update: (key: string, val: unknown) => void }) {
@@ -1211,6 +1594,110 @@ const propEditors: Record<string, React.FC<{ block: BuilderBlock; update: (key: 
   electronicsBlogPosts: ElectronicsBlogPostsEditProps,
   electronicsPartners: ElectronicsPartnersEditProps,
   electronicsSectionTitle: ElectronicsSectionTitleEditProps,
+
+  // Bakery template blocks
+  bakeryHeroSlider: GenericHeroSliderEditProps,
+  bakerySectionTitle: GenericSectionTitleEditProps,
+  bakeryCategoryInfoBoxes: GenericCategoryCardsEditProps,
+  bakeryHandmade: GenericHandmadeEditProps,
+  bakeryProductGrid: GenericProductGridEditProps,
+  bakeryProcess: GenericProcessStepsEditProps,
+  bakeryBlogPosts: GenericBlogPostsEditProps,
+  bakeryCta: GenericCtaEditProps,
+  bakeryFooter: GenericFooterEditProps,
+
+  // Cosmetics template blocks
+  cosmeticsHeroSlider: GenericHeroSliderEditProps,
+  cosmeticsPromoBanners: GenericPromoBannersEditProps,
+  cosmeticsSectionTitle: GenericSectionTitleEditProps,
+  cosmeticsProductGrid: GenericProductGridEditProps,
+  cosmeticsCategoryCards: GenericCategoryCardsEditProps,
+  cosmeticsDiscovery: GenericDiscoveryEditProps,
+  cosmeticsCountdownBanner: GenericCtaEditProps,
+  cosmeticsInfoBoxes: GenericInfoBoxesEditProps,
+  cosmeticsBlogPosts: GenericBlogPostsEditProps,
+  cosmeticsInstagram: GenericInstagramEditProps,
+  cosmeticsNewsletter: GenericNewsletterEditProps,
+  cosmeticsFooter: GenericFooterEditProps,
+
+  // Grocery template blocks
+  groceryHeroSlider: GenericHeroSliderEditProps,
+  groceryFeaturesBar: GenericInfoBoxesEditProps,
+  grocerySectionTitle: GenericSectionTitleEditProps,
+  groceryProductGrid: GenericProductGridEditProps,
+  groceryPromoBanners: GenericPromoBannersEditProps,
+  groceryCategoryGrid: GenericCategoryCardsEditProps,
+  groceryNewsletter: GenericNewsletterEditProps,
+  groceryBestSellers: GenericProductGridEditProps,
+  groceryFooter: GenericFooterEditProps,
+
+  // Health template blocks
+  healthHero: GenericCtaEditProps,
+  healthMarquee: GenericMarqueeEditProps,
+  healthPromoBanners: GenericPromoBannersEditProps,
+  healthSectionTitle: GenericSectionTitleEditProps,
+  healthCategoryCards: GenericCategoryCardsEditProps,
+  healthProductGrid: GenericProductGridEditProps,
+  healthVideoSection: GenericCtaEditProps,
+  healthFeatureSection: GenericInfoBoxesEditProps,
+  healthTestimonials: GenericInfoBoxesEditProps,
+  healthBlogPosts: GenericBlogPostsEditProps,
+  healthNewsletter: GenericNewsletterEditProps,
+  healthBrandMarquee: GenericMarqueeEditProps,
+  healthFooter: GenericFooterEditProps,
+
+  // Interior Design template blocks
+  interiorHeroSlider: GenericHeroSliderEditProps,
+  interiorSectionTitle: GenericSectionTitleEditProps,
+  interiorCategoryGrid: GenericCategoryCardsEditProps,
+  interiorProductGrid: GenericProductGridEditProps,
+  interiorInfoBoxes: GenericInfoBoxesEditProps,
+  interiorGardenProducts: GenericProductGridEditProps,
+  interiorPromoBanners: GenericPromoBannersEditProps,
+  interiorFurnitureCategories: GenericCategoryCardsEditProps,
+  interiorFurnitureProducts: GenericProductGridEditProps,
+  interiorBlogPosts: GenericBlogPostsEditProps,
+  interiorBrandsBar: GenericInfoBoxesEditProps,
+  interiorCta: GenericCtaEditProps,
+  interiorFooter: GenericFooterEditProps,
+
+  // Kids template blocks
+  kidsAnnouncementBar: GenericCtaEditProps,
+  kidsHeroSlider: GenericHeroSliderEditProps,
+  kidsSectionTitle: GenericSectionTitleEditProps,
+  kidsCategoryCards: GenericCategoryCardsEditProps,
+  kidsProductGrid: GenericProductGridEditProps,
+  kidsBundlePromo: GenericBundlePromoEditProps,
+  kidsBlogPosts: GenericBlogPostsEditProps,
+  kidsInstagram: GenericInstagramEditProps,
+  kidsNewsletter: GenericNewsletterEditProps,
+  kidsFooter: GenericFooterEditProps,
+
+  // Makeup template blocks
+  makeupHeroSlider: GenericHeroSliderEditProps,
+  makeupCategorySidebar: GenericCategoryCardsEditProps,
+  makeupSectionTitle: GenericSectionTitleEditProps,
+  makeupProductGrid: GenericProductGridEditProps,
+  makeupProductTypeCards: GenericCategoryCardsEditProps,
+  makeupBeforeAfter: GenericDiscoveryEditProps,
+  makeupPromoBannerCards: GenericPromoBannersEditProps,
+  makeupVideoBlog: GenericBlogPostsEditProps,
+  makeupBlogPosts: GenericBlogPostsEditProps,
+  makeupBrandsCarousel: GenericInfoBoxesEditProps,
+  makeupFooter: GenericFooterEditProps,
+
+  // Perfumes template blocks
+  perfumesHeroSlider: GenericHeroSliderEditProps,
+  perfumesSectionTitle: GenericSectionTitleEditProps,
+  perfumesProductGrid: GenericProductGridEditProps,
+  perfumesOlfactoryTags: GenericOlfactoryTagsEditProps,
+  perfumesMarquee: GenericMarqueeEditProps,
+  perfumesFeaturedBanners: GenericPromoBannersEditProps,
+  perfumesTabbedProducts: GenericProductGridEditProps,
+  perfumesCollectionBanners: GenericPromoBannersEditProps,
+  perfumesBlogArticles: GenericBlogPostsEditProps,
+  perfumesInstagram: GenericInstagramEditProps,
+  perfumesFooter: GenericFooterEditProps,
 
   // Template aliases → map to their base editor
   featured_products: ProductGridProps,
