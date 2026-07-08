@@ -10,23 +10,26 @@ import { useState, useEffect, useRef, useCallback, createContext, useContext } f
 /* ─── DESIGN TOKENS ─────────────────────────────────────────── */
 const TOKENS = {
   primaryColor: "#007bc4",
-  primaryHover: "#005a9e",
-  titleColor: "#222222",
-  textColor: "#333333",
+  primaryHover: "#006aa9",
+  alternativeColor: "#fbbc34",
+  titleColor: "#242424",
+  textColor: "#767676",
   entityTitleColor: "#333333",
   linkColor: "#333333",
   starColor: "#EABE12",
   containerWidth: "1222px",
-  borderRadius: "4px",
-  titleFont: "'Poppins', sans-serif",
-  bodyFont: "system-ui, -apple-system, sans-serif",
+  borderRadius: "0px",
+  titleFont: "'Poppins', Arial, Helvetica, sans-serif",
+  bodyFont: "'Lato', Arial, Helvetica, sans-serif",
+  titleFontWeight: "600",
+  entityTitleFontWeight: "500",
 };
 
 /* ─── FONT LOADER ───────────────────────────────────────────── */
 export function ElectronicsFontLoader() {
   return (
     <style dangerouslySetInnerHTML={{ __html: `
-      @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap');
+      @import url('https://fonts.googleapis.com/css2?family=Lato:wght@300;400;700&family=Poppins:wght@400;500;600;700&display=swap');
     `}} />
   );
 }
@@ -111,7 +114,7 @@ export function ElectronicsSectionTitle({ title, align = "center", showLine = tr
   const scopedCss = `
     .est-wrapper { margin-bottom: 25px; text-align: ${align}; }
     .est-title {
-      font-family: ${TOKENS.titleFont}; font-weight: 700; font-size: 20px;
+      font-family: ${TOKENS.titleFont}; font-weight: ${TOKENS.titleFontWeight}; font-size: 20px;
       text-transform: uppercase; color: ${TOKENS.titleColor}; display: inline-block;
       position: relative; padding-bottom: 12px; margin: 0; letter-spacing: 0.5px;
     }
@@ -146,6 +149,8 @@ export interface ElectronicsHeroSlide {
   buttonText: string;
   buttonLink: string;
   backgroundImage: string;
+  backgroundColor?: string;
+  backgroundFit?: "cover" | "contain";
   textPosition?: "left" | "center" | "right";
   colorScheme?: "dark" | "light";
 }
@@ -178,33 +183,34 @@ export function ElectronicsHeroSlider({ slides, autoplaySpeed = 5000, minHeight 
   }, [slides.length, autoplaySpeed]);
 
   const scopedCss = `
-    .ehs-slider { position: relative; width: 100%; overflow: hidden; background: #1a1a2e; }
+    .ehs-slider { position: relative; width: 100%; overflow: hidden; background: #f2f2f2; }
     .ehs-slide { position: absolute; inset: 0; opacity: 0; transition: opacity 0.7s ease; display: flex; align-items: center; }
     .ehs-slide.ehs-active { opacity: 1; position: relative; }
     .ehs-slide-bg { position: absolute; inset: 0; background-size: cover; background-position: center center; z-index: 0; }
+    .ehs-slide-bg-contain { background-size: contain; background-repeat: no-repeat; background-position: right center; }
     .ehs-slide-content { position: relative; z-index: 2; width: 100%; }
     .ehs-subtitle {
-      color: ${TOKENS.primaryColor}; text-transform: uppercase; font-weight: 600;
-      font-size: 14px; font-family: ${TOKENS.bodyFont}; margin-bottom: 15px; letter-spacing: 2px;
+      color: ${TOKENS.primaryColor}; text-transform: uppercase; font-weight: 700;
+      font-size: 20px; line-height: 30px; font-family: ${TOKENS.bodyFont}; margin-bottom: 10px;
     }
-    .ehs-subtitle-light { color: rgba(255,255,255,0.7); }
+    .ehs-subtitle-light { color: ${TOKENS.primaryColor}; }
     .ehs-title {
-      font-family: ${TOKENS.titleFont}; font-weight: 700; font-size: 36px;
-      line-height: 44px; margin: 0 0 10px;
+      font-family: ${TOKENS.titleFont}; font-weight: 700; font-size: 52px;
+      line-height: 64px; margin: 0 0 15px;
     }
     .ehs-title-dark { color: ${TOKENS.titleColor}; }
     .ehs-title-light { color: #ffffff; }
     .ehs-desc {
-      font-family: ${TOKENS.bodyFont}; font-size: 14px; line-height: 1.7;
-      max-width: 400px; margin: 0 0 25px;
+      font-family: ${TOKENS.bodyFont}; font-size: 16px; line-height: 26px;
+      max-width: 90%; margin: 0 0 25px;
     }
     .ehs-desc-dark { color: ${TOKENS.textColor}; }
     .ehs-desc-light { color: rgba(255,255,255,0.75); }
     .ehs-btn {
       display: inline-block; padding: 12px 30px;
       background: ${TOKENS.primaryColor}; color: #fff; text-transform: uppercase;
-      font-family: ${TOKENS.bodyFont}; font-weight: 600; font-size: 13px;
-      text-decoration: none; border: none; cursor: pointer; border-radius: ${TOKENS.borderRadius};
+      font-family: ${TOKENS.bodyFont}; font-weight: 700; font-size: 13px;
+      text-decoration: none; border: none; cursor: pointer; border-radius: 35px;
       transition: background-color 0.3s ease; letter-spacing: 0.5px;
     }
     .ehs-btn:hover { background: ${TOKENS.primaryHover}; }
@@ -232,13 +238,13 @@ export function ElectronicsHeroSlider({ slides, autoplaySpeed = 5000, minHeight 
       to { opacity: 1; transform: translateY(0); }
     }
     @media (max-width: 1024px) {
-      .ehs-slider { min-height: 420px !important; }
-      .ehs-title { font-size: 28px; line-height: 34px; }
+      .ehs-slider { min-height: 660px !important; }
+      .ehs-title { font-size: 36px; line-height: 46px; }
     }
     @media (max-width: 767px) {
-      .ehs-slider { min-height: 350px !important; }
-      .ehs-title { font-size: 22px; line-height: 30px; }
-      .ehs-subtitle { font-size: 12px; }
+      .ehs-slider { min-height: 450px !important; }
+      .ehs-title { font-size: 36px; line-height: 46px; }
+      .ehs-subtitle { font-size: 16px; line-height: 26px; }
       .ehs-nav { display: none; }
     }
   `;
@@ -250,8 +256,8 @@ export function ElectronicsHeroSlider({ slides, autoplaySpeed = 5000, minHeight 
         const scheme = slide.colorScheme || "dark";
         const align = slide.textPosition || "left";
         return (
-          <div key={i} className={`ehs-slide ${i === current ? "ehs-active" : ""}`}>
-            <div className="ehs-slide-bg" style={{ backgroundImage: `url(${slide.backgroundImage})` }} />
+          <div key={i} className={`ehs-slide ${i === current ? "ehs-active" : ""}`} style={{ backgroundColor: slide.backgroundColor || "#f2f2f2" }}>
+            <div className={`ehs-slide-bg ${slide.backgroundFit === "contain" ? "ehs-slide-bg-contain" : ""}`} style={{ backgroundImage: `url(${slide.backgroundImage})` }} />
             <div className="ehs-slide-content">
               <div style={{ ...containerStyle, textAlign: align as React.CSSProperties["textAlign"] }}>
                 <div style={{ maxWidth: align === "center" ? "65%" : "50%", margin: align === "center" ? "0 auto" : align === "right" ? "0 0 0 auto" : "0", padding: "40px 0" }}>
@@ -310,12 +316,12 @@ export function ElectronicsPromoBanners({ banners }: ElectronicsPromoBannersProp
   const scopedCss = `
     .epb-section { padding: 30px 0; }
     .epb-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 30px; }
-    .epb-card { position: relative; overflow: hidden; border-radius: ${TOKENS.borderRadius}; cursor: pointer; min-height: 220px; display: flex; align-items: center; }
+    .epb-card { position: relative; overflow: hidden; border-radius: ${TOKENS.borderRadius}; cursor: pointer; min-height: 350px; display: flex; align-items: flex-start; }
     .epb-card-dark { background: #1a1a2e; }
     .epb-card-light { background: #f5f5f5; }
-    .epb-img { position: absolute; right: 0; bottom: 0; max-height: 100%; max-width: 50%; object-fit: contain; transition: transform 0.6s ease; }
+    .epb-img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; object-position: center; transition: transform 0.6s ease; }
     .epb-card:hover .epb-img { transform: scale(1.05); }
-    .epb-content { position: relative; z-index: 2; padding: 30px; max-width: 55%; }
+    .epb-content { position: relative; z-index: 2; padding: 30px; max-width: 60%; }
     .epb-subtitle { font-size: 12px; text-transform: uppercase; letter-spacing: 2px; font-weight: 600; margin-bottom: 8px; font-family: ${TOKENS.bodyFont}; }
     .epb-subtitle-dark { color: rgba(255,255,255,0.6); }
     .epb-subtitle-light { color: ${TOKENS.textColor}; }
@@ -330,10 +336,10 @@ export function ElectronicsPromoBanners({ banners }: ElectronicsPromoBannersProp
       text-transform: uppercase; text-decoration: none; border-radius: ${TOKENS.borderRadius};
       transition: all 0.3s; font-family: ${TOKENS.bodyFont}; letter-spacing: 0.5px;
     }
-    .epb-btn-dark { background: ${TOKENS.primaryColor}; color: #fff; }
+    .epb-btn-dark { background: ${TOKENS.primaryColor}; color: #fff; border-radius: 35px; }
     .epb-btn-dark:hover { background: ${TOKENS.primaryHover}; }
-    .epb-btn-light { background: ${TOKENS.titleColor}; color: #fff; }
-    .epb-btn-light:hover { background: #444; }
+    .epb-btn-light { background: #fff; color: ${TOKENS.titleColor}; border-radius: 35px; }
+    .epb-btn-light:hover { background: #f0f0f0; }
     .epb-link { position: absolute; inset: 0; z-index: 3; }
     @media (max-width: 767px) {
       .epb-grid { grid-template-columns: 1fr; }
@@ -443,7 +449,7 @@ export function ElectronicsProductTabs({ sectionTitle = "ELECTRONICS", tabs, col
     .ept-info { padding: 12px 15px; }
     .ept-cat { font-size: 12px; color: #999; margin-bottom: 4px; font-family: ${TOKENS.bodyFont}; }
     .ept-name {
-      font-family: ${TOKENS.bodyFont}; font-weight: 600; font-size: 14px;
+      font-family: ${TOKENS.titleFont}; font-weight: ${TOKENS.entityTitleFontWeight}; font-size: 14px;
       color: ${TOKENS.entityTitleColor}; margin: 0 0 6px; line-height: 1.3;
     }
     .ept-name a { color: inherit; text-decoration: none; }
@@ -574,21 +580,22 @@ export function ElectronicsBannerGrid({ banners }: ElectronicsBannerGridProps) {
     .ebg-item-3 { grid-row: 1 / 3; } /* right tall */
     .ebg-img { width: 100%; height: 100%; object-fit: cover; display: block; transition: transform 0.6s; }
     .ebg-item:hover .ebg-img { transform: scale(1.05); }
-    .ebg-overlay { position: absolute; inset: 0; display: flex; flex-direction: column; justify-content: flex-end; padding: 20px; z-index: 2; }
-    .ebg-overlay-dark { background: linear-gradient(to top, rgba(0,0,0,0.5) 0%, transparent 60%); }
-    .ebg-overlay-light { background: linear-gradient(to top, rgba(255,255,255,0.7) 0%, transparent 60%); }
+    .ebg-overlay { position: absolute; inset: 0; display: flex; flex-direction: column; justify-content: flex-start; padding: 25px; z-index: 2; }
+    .ebg-overlay-dark { }
+    .ebg-overlay-light { }
     .ebg-sub { font-size: 11px; text-transform: uppercase; letter-spacing: 2px; font-weight: 600; margin-bottom: 5px; font-family: ${TOKENS.bodyFont}; }
     .ebg-sub-dark { color: rgba(255,255,255,0.7); }
     .ebg-sub-light { color: ${TOKENS.textColor}; }
-    .ebg-title-text { font-family: ${TOKENS.titleFont}; font-weight: 700; font-size: 18px; margin: 0 0 8px; line-height: 1.2; }
+    .ebg-title-text { font-family: ${TOKENS.titleFont}; font-weight: ${TOKENS.titleFontWeight}; font-size: 20px; margin: 0 0 12px; line-height: 1.2; }
+    .ebg-item-0 .ebg-title-text, .ebg-item-3 .ebg-title-text { font-size: 26px; }
     .ebg-title-dark { color: #fff; }
     .ebg-title-light { color: ${TOKENS.titleColor}; }
     .ebg-btn {
-      display: inline-block; font-size: 12px; font-weight: 600; text-transform: uppercase;
-      color: ${TOKENS.primaryColor}; text-decoration: none; font-family: ${TOKENS.bodyFont};
-      position: relative; letter-spacing: 0.5px;
+      display: inline-block; padding: 8px 20px; font-size: 12px; font-weight: 700; text-transform: uppercase;
+      color: ${TOKENS.titleColor}; background: #fff; text-decoration: none; font-family: ${TOKENS.bodyFont};
+      border-radius: 35px; letter-spacing: 0.5px; transition: all 0.3s;
     }
-    .ebg-btn::after { content: '→'; margin-left: 5px; }
+    .ebg-btn:hover { background: #f0f0f0; }
     .ebg-link { position: absolute; inset: 0; z-index: 3; }
     @media (max-width: 1024px) {
       .ebg-grid { grid-template-columns: 1fr 1fr; grid-template-rows: auto; min-height: auto; }
@@ -637,6 +644,7 @@ export interface ElectronicsHotDealsProps {
   maxProducts?: number;
   columns?: number;
   filter?: string;
+  backgroundImage?: string;
 }
 
 export function ElectronicsHotDeals({
@@ -647,6 +655,7 @@ export function ElectronicsHotDeals({
   maxProducts = 6,
   columns = 3,
   filter = "sale",
+  backgroundImage,
 }: ElectronicsHotDealsProps) {
   const storeCtx = useContext(ElectronicsStoreContext);
   const sym = useCurrencySymbol();
@@ -684,7 +693,7 @@ export function ElectronicsHotDeals({
   }, [endDate]);
 
   const scopedCss = `
-    .ehd-section { padding: 40px 0 50px; }
+    .ehd-section { padding: 60px 0 60px; }
     .ehd-grid { display: grid; grid-template-columns: repeat(${columns}, 1fr); gap: 20px; }
     .ehd-card { border: 1px solid #eee; border-radius: ${TOKENS.borderRadius}; overflow: hidden; transition: box-shadow 0.3s; position: relative; }
     .ehd-card:hover { box-shadow: 0 4px 20px rgba(0,0,0,0.1); }
@@ -703,26 +712,31 @@ export function ElectronicsHotDeals({
     .ehd-timer-val { font-size: 16px; font-weight: 700; display: block; line-height: 1; font-family: ${TOKENS.titleFont}; }
     .ehd-timer-label { font-size: 9px; text-transform: uppercase; letter-spacing: 1px; opacity: 0.7; display: block; margin-top: 2px; }
     .ehd-info { padding: 12px 15px; }
-    .ehd-name { font-family: ${TOKENS.bodyFont}; font-weight: 600; font-size: 14px; color: ${TOKENS.entityTitleColor}; margin: 0 0 6px; line-height: 1.3; }
+    .ehd-name { font-family: ${TOKENS.titleFont}; font-weight: ${TOKENS.entityTitleFontWeight}; font-size: 14px; color: ${TOKENS.entityTitleColor}; margin: 0 0 6px; line-height: 1.3; }
     .ehd-name a { color: inherit; text-decoration: none; }
     .ehd-name a:hover { color: ${TOKENS.primaryColor}; }
     .ehd-price { font-weight: 600; font-size: 14px; color: ${TOKENS.primaryColor}; }
     .ehd-price-old { text-decoration: line-through; color: #999; font-weight: 400; margin-right: 8px; font-size: 13px; }
     .ehd-footer { text-align: center; margin-top: 30px; }
     .ehd-view-btn {
-      display: inline-block; padding: 12px 35px; background: transparent; color: ${TOKENS.primaryColor};
-      border: 2px solid ${TOKENS.primaryColor}; font-size: 13px; font-weight: 600; text-transform: uppercase;
-      text-decoration: none; border-radius: ${TOKENS.borderRadius}; transition: all 0.3s;
+      display: inline-block; padding: 15px 40px; background: ${TOKENS.primaryColor}; color: #fff;
+      border: none; font-size: 13px; font-weight: 700; text-transform: uppercase;
+      text-decoration: none; border-radius: 35px; transition: all 0.3s;
       font-family: ${TOKENS.bodyFont}; letter-spacing: 0.5px;
     }
-    .ehd-view-btn:hover { background: ${TOKENS.primaryColor}; color: #fff; }
+    .ehd-view-btn:hover { background: ${TOKENS.primaryHover}; }
     .ehd-empty { text-align: center; padding: 40px; color: ${TOKENS.textColor}; font-family: ${TOKENS.bodyFont}; }
     @media (max-width: 1024px) { .ehd-grid { grid-template-columns: repeat(2, 1fr); } }
     @media (max-width: 767px) { .ehd-grid { grid-template-columns: repeat(2, 1fr); gap: 10px; } }
   `;
 
+  const wrapperStyle: React.CSSProperties = backgroundImage
+    ? { backgroundImage: `url(${backgroundImage})`, backgroundSize: "cover", backgroundPosition: "center", backgroundRepeat: "no-repeat" }
+    : {};
+
   return (
-    <div style={containerStyle}>
+    <div style={wrapperStyle}>
+      <div style={containerStyle}>
       <ScopedStyles id="ehd-deals" css={scopedCss} />
       <div className="ehd-section">
         <ElectronicsSectionTitle title={sectionTitle} />
@@ -765,6 +779,7 @@ export function ElectronicsHotDeals({
           </>
         )}
       </div>
+    </div>
     </div>
   );
 }
@@ -819,21 +834,21 @@ export function ElectronicsSideBanner({
     .esb-banner-sub { font-size: 11px; color: rgba(255,255,255,0.7); text-transform: uppercase; letter-spacing: 2px; margin-bottom: 5px; }
     .esb-banner-title { font-family: ${TOKENS.titleFont}; font-weight: 700; font-size: 20px; color: #fff; margin: 0 0 12px; line-height: 1.2; }
     .esb-banner-btn {
-      display: inline-block; padding: 8px 20px; background: ${TOKENS.primaryColor}; color: #fff;
-      font-size: 11px; font-weight: 600; text-transform: uppercase; text-decoration: none;
-      border-radius: ${TOKENS.borderRadius}; transition: background 0.3s;
+      display: inline-block; padding: 8px 20px; background: #fff; color: ${TOKENS.titleColor};
+      font-size: 11px; font-weight: 700; text-transform: uppercase; text-decoration: none;
+      border-radius: 35px; transition: background 0.3s;
     }
     .esb-banner-btn:hover { background: ${TOKENS.primaryHover}; }
     .esb-feat-title {
-      font-family: ${TOKENS.titleFont}; font-weight: 700; font-size: 16px;
-      text-transform: uppercase; color: ${TOKENS.titleColor}; margin: 0 0 15px;
-      padding-bottom: 10px; border-bottom: 2px solid ${TOKENS.primaryColor};
+      font-family: ${TOKENS.titleFont}; font-weight: ${TOKENS.titleFontWeight}; font-size: 16px;
+      text-transform: uppercase; color: #fff; margin: 0 0 15px;
+      padding: 20px; background: ${TOKENS.primaryColor};
     }
-    .esb-feat-list { display: flex; flex-direction: column; gap: 12px; }
+    .esb-feat-list { display: flex; flex-direction: column; gap: 12px; border: 3px solid rgba(119,119,119,0.17); padding: 20px; }
     .esb-feat-item { display: flex; gap: 12px; align-items: center; }
     .esb-feat-img { width: 70px; height: 70px; border-radius: ${TOKENS.borderRadius}; object-fit: cover; border: 1px solid #eee; flex-shrink: 0; }
     .esb-feat-info { flex: 1; }
-    .esb-feat-name { font-size: 13px; font-weight: 600; color: ${TOKENS.entityTitleColor}; margin: 0 0 4px; line-height: 1.3; }
+    .esb-feat-name { font-family: ${TOKENS.titleFont}; font-size: 13px; font-weight: ${TOKENS.entityTitleFontWeight}; color: ${TOKENS.entityTitleColor}; margin: 0 0 4px; line-height: 1.3; }
     .esb-feat-name a { color: inherit; text-decoration: none; }
     .esb-feat-name a:hover { color: ${TOKENS.primaryColor}; }
     .esb-feat-price { font-size: 13px; font-weight: 600; color: ${TOKENS.primaryColor}; }
@@ -937,14 +952,14 @@ export function ElectronicsGamingCTA({
     .egc-buttons { display: flex; gap: 12px; flex-wrap: wrap; }
     .egc-btn-primary {
       padding: 12px 30px; background: ${TOKENS.primaryColor}; color: #fff;
-      font-size: 13px; font-weight: 600; text-transform: uppercase; text-decoration: none;
-      border-radius: ${TOKENS.borderRadius}; transition: background 0.3s; font-family: ${TOKENS.bodyFont};
+      font-size: 13px; font-weight: 700; text-transform: uppercase; text-decoration: none;
+      border-radius: 35px; transition: background 0.3s; font-family: ${TOKENS.bodyFont};
     }
     .egc-btn-primary:hover { background: ${TOKENS.primaryHover}; }
     .egc-btn-secondary {
       padding: 12px 30px; background: transparent; color: #fff;
-      font-size: 13px; font-weight: 600; text-transform: uppercase; text-decoration: none;
-      border-radius: ${TOKENS.borderRadius}; border: 2px solid rgba(255,255,255,0.5);
+      font-size: 13px; font-weight: 700; text-transform: uppercase; text-decoration: none;
+      border-radius: 35px; border: none;
       transition: all 0.3s; font-family: ${TOKENS.bodyFont};
     }
     .egc-btn-secondary:hover { border-color: #fff; background: rgba(255,255,255,0.1); }
@@ -1049,8 +1064,8 @@ export function ElectronicsBlogPosts({ sectionTitle = "INNOVATIVE GADGETS", post
       font-family: ${TOKENS.bodyFont};
     }
     .ebp-title {
-      font-family: ${TOKENS.titleFont}; font-weight: 700; font-size: 16px;
-      color: ${TOKENS.titleColor}; margin: 0 0 10px; line-height: 1.4;
+      font-family: ${TOKENS.titleFont}; font-weight: ${TOKENS.entityTitleFontWeight}; font-size: 16px;
+      color: ${TOKENS.entityTitleColor}; margin: 0 0 10px; line-height: 1.4;
     }
     .ebp-title a { color: inherit; text-decoration: none; }
     .ebp-title a:hover { color: ${TOKENS.primaryColor}; }
