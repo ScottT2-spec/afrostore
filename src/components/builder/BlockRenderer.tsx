@@ -2,37 +2,8 @@
 
 import { useMemo } from "react";
 import { PublicBlockRenderer, type BuilderBlock } from "@/components/storefront/BlockRenderer";
-import { ALL_TEMPLATE_BLOCKS } from "@/components/storefront/TemplateBlockRenderer";
+import { FASHION_BLOCKS } from "@/components/storefront/TemplateBlockRenderer";
 import { FashionFontLoader } from "@/components/storefront/FashionTemplateBlocks";
-import { ElectronicsFontLoader } from "@/components/storefront/ElectronicsTemplateBlocks";
-import { BakeryFontLoader } from "@/components/storefront/BakeryTemplateBlocks";
-import { CosmeticsFontLoader } from "@/components/storefront/CosmeticsTemplateBlocks";
-import { GroceryFontLoader } from "@/components/storefront/GroceryTemplateBlocks";
-import { HealthFontLoader } from "@/components/storefront/HealthTemplateBlocks";
-import { InteriorFontLoader } from "@/components/storefront/InteriorDesignTemplateBlocks";
-import { KidsFontLoader } from "@/components/storefront/KidsTemplateBlocks";
-import { MakeupFontLoader } from "@/components/storefront/MakeupTemplateBlocks";
-import { PerfumesFontLoader } from "@/components/storefront/PerfumesTemplateBlocks";
-
-const FONT_LOADER_MAP: Record<string, React.ComponentType> = {
-  fashion: FashionFontLoader,
-  electronics: ElectronicsFontLoader,
-  bakery: BakeryFontLoader,
-  cosmetics: CosmeticsFontLoader,
-  grocery: GroceryFontLoader,
-  health: HealthFontLoader,
-  interior: InteriorFontLoader,
-  kids: KidsFontLoader,
-  makeup: MakeupFontLoader,
-  perfumes: PerfumesFontLoader,
-};
-
-function getFontLoaderForType(type: string): React.ComponentType {
-  for (const [prefix, Loader] of Object.entries(FONT_LOADER_MAP)) {
-    if (type.startsWith(prefix)) return Loader;
-  }
-  return FashionFontLoader;
-}
 
 interface BlockRendererProps {
   block: BuilderBlock;
@@ -51,14 +22,13 @@ export default function BlockRenderer({ block, isSelected, onInlineEdit }: Block
     return <InlineEditableBlock block={editablePreview} onInlineEdit={onInlineEdit} />;
   }
 
-  // Template blocks (fashion, electronics, bakery, cosmetics, etc.)
-  const TemplateComponent = ALL_TEMPLATE_BLOCKS[block.type];
-  if (TemplateComponent) {
-    const FontLoader = getFontLoaderForType(block.type);
+  // Fashion template blocks
+  const FashionComponent = FASHION_BLOCKS[block.type];
+  if (FashionComponent) {
     return (
       <>
-        <FontLoader />
-        <TemplateComponent {...(block.props as Record<string, unknown>)} />
+        <FashionFontLoader />
+        <FashionComponent {...(block.props as Record<string, unknown>)} />
       </>
     );
   }
