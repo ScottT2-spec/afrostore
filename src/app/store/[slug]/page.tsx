@@ -6,12 +6,54 @@ import { useState, useEffect, useMemo, useRef } from "react";
 import { useParams } from "next/navigation";
 import Link from "next/link";
 import { RenderBlocks, type BuilderBlock } from "@/components/storefront/BlockRenderer";
-import { RenderTemplateBlocks } from "@/components/storefront/TemplateBlockRenderer";
+import { RenderTemplateBlocks, type TemplateBlock } from "@/components/storefront/TemplateBlockRenderer";
 import { FASHION_TEMPLATE_PRESET } from "@/lib/templates/presets/fashion-preset";
+import { FASHION_COLORED_PRESET } from "@/lib/templates/presets/fashion-colored-preset";
+import { HANDMADE_BAGS_PRESET } from "@/lib/templates/presets/handmade-bags-preset";
+import { T_SHIRTS_PRINTS_PRESET } from "@/lib/templates/presets/t-shirts-prints-preset";
 import { ELECTRONICS_TEMPLATE_PRESET } from "@/lib/templates/presets/electronics-preset";
-import { ElectronicsStoreContext } from "@/components/storefront/ElectronicsTemplateBlocks";
+import { BAKERY_TEMPLATE_PRESET } from "@/lib/templates/presets/bakery-preset";
+import { COSMETICS_TEMPLATE_PRESET } from "@/lib/templates/presets/cosmetics-preset";
+import { GROCERY_TEMPLATE_PRESET } from "@/lib/templates/presets/grocery-preset";
+import { HEALTH_TEMPLATE_PRESET } from "@/lib/templates/presets/health-preset";
+import { INTERIOR_DECOR_PRESET, INTERIOR_RETAIL_PRESET } from "@/lib/templates/presets/interior-preset";
+import { KIDS_TEMPLATE_PRESET } from "@/lib/templates/presets/kids-preset";
+import { MAKEUP_TEMPLATE_PRESET } from "@/lib/templates/presets/makeup-preset";
+import { PERFUMES_TEMPLATE_PRESET } from "@/lib/templates/presets/perfumes-preset";
 import { FashionStoreContext } from "@/components/storefront/FashionTemplateBlocks";
+import { ElectronicsStoreContext } from "@/components/storefront/ElectronicsTemplateBlocks";
+import { BakeryStoreContext } from "@/components/storefront/BakeryTemplateBlocks";
+import { CosmeticsStoreContext } from "@/components/storefront/CosmeticsTemplateBlocks";
+import { GroceryStoreContext } from "@/components/storefront/GroceryTemplateBlocks";
+import { HealthStoreContext } from "@/components/storefront/HealthTemplateBlocks";
+import { InteriorStoreContext } from "@/components/storefront/InteriorDesignTemplateBlocks";
+import { KidsStoreContext } from "@/components/storefront/KidsTemplateBlocks";
+import { MakeupStoreContext } from "@/components/storefront/MakeupTemplateBlocks";
+import { PerfumesStoreContext } from "@/components/storefront/PerfumesTemplateBlocks";
 import { FashionHeader, FashionFooter, type NavItem } from "@/components/storefront/FashionStoreChrome";
+
+/* ─── Template preset map ─── */
+const TEMPLATE_PRESET_MAP: Record<string, TemplateBlock[]> = {
+  fashion: FASHION_TEMPLATE_PRESET,
+  "fashion-colored": FASHION_COLORED_PRESET,
+  "handmade-bags": HANDMADE_BAGS_PRESET,
+  "t-shirts-prints": T_SHIRTS_PRINTS_PRESET,
+  electronics: ELECTRONICS_TEMPLATE_PRESET,
+  "electronics-accessories": ELECTRONICS_TEMPLATE_PRESET,
+  hardware: ELECTRONICS_TEMPLATE_PRESET,
+  tools: ELECTRONICS_TEMPLATE_PRESET,
+  "sweets-bakery": BAKERY_TEMPLATE_PRESET,
+  cosmetics: COSMETICS_TEMPLATE_PRESET,
+  grocery: GROCERY_TEMPLATE_PRESET,
+  vegetables: GROCERY_TEMPLATE_PRESET,
+  pills: HEALTH_TEMPLATE_PRESET,
+  decor: INTERIOR_DECOR_PRESET,
+  retail: INTERIOR_RETAIL_PRESET,
+  kids: KIDS_TEMPLATE_PRESET,
+  toys: KIDS_TEMPLATE_PRESET,
+  makeup: MAKEUP_TEMPLATE_PRESET,
+  perfumes: PERFUMES_TEMPLATE_PRESET,
+};
 import { getLinkedPageHref, parsePageContent, type PageSettings } from "@/lib/page-content";
 import { ThemeProvider, type ThemeData } from "@/components/storefront/ThemeProvider";
 import { useWishlist } from "@/hooks/useWishlist";
@@ -154,6 +196,52 @@ function getWhatsAppLink(phone: string | undefined, cart: CartItem[], currency: 
   const total = cart.reduce((s, i) => s + Number(i.product.price) * i.quantity, 0);
   msg += `\nTotal: ${formatCurrency(total, currency)}`;
   return `https://wa.me/${num.replace("+", "")}?text=${encodeURIComponent(msg)}`;
+}
+
+/* ───────── Template Store Context Provider ───────── */
+
+/** Maps any template slug to the correct StoreContext provider */
+function TemplateStoreContextProvider({ templateSlug, products, blogs, currency, storeSlug, children }: {
+  templateSlug: string | null;
+  products: any[];
+  blogs: any[];
+  currency: string;
+  storeSlug: string;
+  children: React.ReactNode;
+}) {
+  const value = { products, blogs, currency, storeSlug };
+
+  // Determine which context to use based on template slug or block prefix
+  const slug = templateSlug || "";
+  if (slug === "electronics" || slug === "electronics-accessories" || slug === "hardware" || slug === "tools") {
+    return <ElectronicsStoreContext.Provider value={value}>{children}</ElectronicsStoreContext.Provider>;
+  }
+  if (slug === "sweets-bakery") {
+    return <BakeryStoreContext.Provider value={value}>{children}</BakeryStoreContext.Provider>;
+  }
+  if (slug === "cosmetics") {
+    return <CosmeticsStoreContext.Provider value={value}>{children}</CosmeticsStoreContext.Provider>;
+  }
+  if (slug === "grocery" || slug === "vegetables") {
+    return <GroceryStoreContext.Provider value={value}>{children}</GroceryStoreContext.Provider>;
+  }
+  if (slug === "pills") {
+    return <HealthStoreContext.Provider value={value}>{children}</HealthStoreContext.Provider>;
+  }
+  if (slug === "decor" || slug === "retail") {
+    return <InteriorStoreContext.Provider value={value}>{children}</InteriorStoreContext.Provider>;
+  }
+  if (slug === "kids" || slug === "toys") {
+    return <KidsStoreContext.Provider value={value}>{children}</KidsStoreContext.Provider>;
+  }
+  if (slug === "makeup") {
+    return <MakeupStoreContext.Provider value={value}>{children}</MakeupStoreContext.Provider>;
+  }
+  if (slug === "perfumes") {
+    return <PerfumesStoreContext.Provider value={value}>{children}</PerfumesStoreContext.Provider>;
+  }
+  // Default: fashion family
+  return <FashionStoreContext.Provider value={value}>{children}</FashionStoreContext.Provider>;
 }
 
 /* ───────── Component ───────── */
@@ -307,7 +395,8 @@ export default function StorePage() {
   const homeBlocks: BuilderBlock[] = homeContent.blocks;
   const hasHomeContent = homeBlocks.length > 0;
   const homeHasProductGrid = homeBlocks.some((b) => b.type === "productGrid");
-  const isFashionTemplate = data.templateSlug === "fashion" || homeBlocks.some((b) => b.type.startsWith("fashion"));
+  const isFashionTemplate = data.templateSlug === "fashion" || data.templateSlug === "fashion-colored" || data.templateSlug === "handmade-bags" || data.templateSlug === "t-shirts-prints" || homeBlocks.some((b) => b.type.startsWith("fashion"));
+  const templatePreset = data.templateSlug ? TEMPLATE_PRESET_MAP[data.templateSlug] : undefined;
 
   // Navigation pages: exclude HOME (we're on it), sort sensibly
   const navPageOrder: Record<string, number> = { ABOUT: 0, FAQ: 1, CONTACT: 2, POLICY: 3, CUSTOM: 4, LANDING: 5 };
@@ -446,9 +535,9 @@ export default function StorePage() {
       {hasHomeContent ? (
         /* Builder blocks Home page — render template blocks */
         <div style={buildPageBackgroundStyle(homePageSettings)}>
-          <FashionStoreContext.Provider value={{ products: products as any, blogs: data.blogs || [], currency, storeSlug: slug }}>
+          <TemplateStoreContextProvider templateSlug={data.templateSlug} products={products} blogs={data.blogs || []} currency={currency} storeSlug={slug}>
           <RenderBlocks blocks={homeBlocks} storeSlug={slug} products={products} currency={currency} addToCart={(p) => addToCart(p as unknown as Product)} isWishlisted={isWishlisted} toggleWishlist={toggleWishlist} addedToCart={addedToCart} />
-          </FashionStoreContext.Provider>
+          </TemplateStoreContextProvider>
           {!isLanding && products.length > 0 && !homeHasProductGrid && (
             <div className="text-center py-10">
               <Link
@@ -460,29 +549,12 @@ export default function StorePage() {
             </div>
           )}
         </div>
-      ) : data.templateSlug === "fashion" ? (
-        /* Fashion template — render pixel-perfect fashion blocks */
+      ) : templatePreset ? (
+        /* Template with editable block preset */
         <div>
-          <FashionStoreContext.Provider value={{ products: products as any, blogs: data.blogs || [], currency, storeSlug: slug }}>
-            <RenderTemplateBlocks blocks={FASHION_TEMPLATE_PRESET} />
-          </FashionStoreContext.Provider>
-          {!isLanding && products.length > 0 && (
-            <div className="text-center py-10">
-              <Link
-                href={`/store/${slug}/shop`}
-                className="inline-flex items-center gap-2 rounded-2xl bg-surface-900 text-white px-8 py-3.5 text-sm font-bold hover:bg-surface-800 transition-all shadow-lg hover:-translate-y-0.5"
-              >
-                View All Products <ArrowRight className="h-4 w-4" />
-              </Link>
-            </div>
-          )}
-        </div>
-      ) : data.templateSlug === "electronics" ? (
-        /* Electronics template — render pixel-perfect electronics blocks */
-        <div>
-          <ElectronicsStoreContext.Provider value={{ products: products as any, blogs: data.blogs || [], currency, storeSlug: slug }}>
-            <RenderTemplateBlocks blocks={ELECTRONICS_TEMPLATE_PRESET} />
-          </ElectronicsStoreContext.Provider>
+          <TemplateStoreContextProvider templateSlug={data.templateSlug} products={products} blogs={data.blogs || []} currency={currency} storeSlug={slug}>
+            <RenderTemplateBlocks blocks={templatePreset} />
+          </TemplateStoreContextProvider>
           {!isLanding && products.length > 0 && (
             <div className="text-center py-10">
               <Link

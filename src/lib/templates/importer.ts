@@ -1,6 +1,18 @@
 import { prisma } from "@/lib/db";
 import { TEMPLATES } from "@/lib/templates/catalog";
 import { FASHION_TEMPLATE_PRESET } from "@/lib/templates/presets/fashion-preset";
+import { FASHION_COLORED_PRESET } from "@/lib/templates/presets/fashion-colored-preset";
+import { HANDMADE_BAGS_PRESET } from "@/lib/templates/presets/handmade-bags-preset";
+import { T_SHIRTS_PRINTS_PRESET } from "@/lib/templates/presets/t-shirts-prints-preset";
+import { ELECTRONICS_TEMPLATE_PRESET } from "@/lib/templates/presets/electronics-preset";
+import { BAKERY_TEMPLATE_PRESET } from "@/lib/templates/presets/bakery-preset";
+import { COSMETICS_TEMPLATE_PRESET } from "@/lib/templates/presets/cosmetics-preset";
+import { GROCERY_TEMPLATE_PRESET } from "@/lib/templates/presets/grocery-preset";
+import { HEALTH_TEMPLATE_PRESET } from "@/lib/templates/presets/health-preset";
+import { INTERIOR_DECOR_PRESET, INTERIOR_RETAIL_PRESET } from "@/lib/templates/presets/interior-preset";
+import { KIDS_TEMPLATE_PRESET } from "@/lib/templates/presets/kids-preset";
+import { MAKEUP_TEMPLATE_PRESET } from "@/lib/templates/presets/makeup-preset";
+import { PERFUMES_TEMPLATE_PRESET } from "@/lib/templates/presets/perfumes-preset";
 import { FASHION_SAMPLE_PRODUCTS } from "@/lib/templates/presets/fashion-sample-products";
 import { FASHION_SAMPLE_BLOGS } from "@/lib/templates/presets/fashion-sample-blogs";
 
@@ -85,6 +97,24 @@ export async function importTemplateToSite(
   // For templates with editable block presets, use those instead of htmlEmbed
   const TEMPLATE_PRESETS: Record<string, typeof FASHION_TEMPLATE_PRESET> = {
     fashion: FASHION_TEMPLATE_PRESET,
+    "fashion-colored": FASHION_COLORED_PRESET,
+    "handmade-bags": HANDMADE_BAGS_PRESET,
+    "t-shirts-prints": T_SHIRTS_PRINTS_PRESET,
+    electronics: ELECTRONICS_TEMPLATE_PRESET,
+    "electronics-accessories": ELECTRONICS_TEMPLATE_PRESET,
+    hardware: ELECTRONICS_TEMPLATE_PRESET,
+    tools: ELECTRONICS_TEMPLATE_PRESET,
+    "sweets-bakery": BAKERY_TEMPLATE_PRESET,
+    cosmetics: COSMETICS_TEMPLATE_PRESET,
+    grocery: GROCERY_TEMPLATE_PRESET,
+    vegetables: GROCERY_TEMPLATE_PRESET,
+    pills: HEALTH_TEMPLATE_PRESET,
+    decor: INTERIOR_DECOR_PRESET,
+    retail: INTERIOR_RETAIL_PRESET,
+    kids: KIDS_TEMPLATE_PRESET,
+    toys: KIDS_TEMPLATE_PRESET,
+    makeup: MAKEUP_TEMPLATE_PRESET,
+    perfumes: PERFUMES_TEMPLATE_PRESET,
   };
 
   const preset = TEMPLATE_PRESETS[catalogEntry.slug];
