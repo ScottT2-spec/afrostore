@@ -15,6 +15,7 @@ import { MAKEUP_TEMPLATE_PRESET } from "@/lib/templates/presets/makeup-preset";
 import { PERFUMES_TEMPLATE_PRESET } from "@/lib/templates/presets/perfumes-preset";
 import { FASHION_SAMPLE_PRODUCTS } from "@/lib/templates/presets/fashion-sample-products";
 import { FASHION_SAMPLE_BLOGS } from "@/lib/templates/presets/fashion-sample-blogs";
+import { TEMPLATE_SAMPLE_DATA } from "@/lib/templates/presets/template-sample-data";
 
 /**
  * Import a template into a site by:
@@ -174,22 +175,52 @@ export async function importTemplateToSite(
     });
   }
 
-  // ── Create sample products for templates that have them ──
+  // ── Seed sample data (categories, products, blogs) ──────────
   let sampleProducts: unknown[] = [];
-  const SAMPLE_PRODUCTS: Record<string, typeof FASHION_SAMPLE_PRODUCTS> = {
-    fashion: FASHION_SAMPLE_PRODUCTS,
-  };
+  let sampleBlogs: unknown[] = [];
+  let sampleCategories: unknown[] = [];
 
-  const samples = SAMPLE_PRODUCTS[catalogEntry.slug];
-  if (samples && samples.length > 0) {
-    // Check if site already has products (don't add samples twice)
+  // Get the site's currency
+  const site = await prisma.site.findUnique({ where: { id: siteId }, select: { currency: true } });
+  const currency = site?.currency || "USD";
+
+  // Fashion uses its own dedicated sample files; all others use the unified data
+  const isFashionFamily = catalogEntry.slug === "fashion" || catalogEntry.slug === "fashion-colored" || catalogEntry.slug === "handmade-bags" || catalogEntry.slug === "t-shirts-prints";
+  const templateData = TEMPLATE_SAMPLE_DATA[catalogEntry.slug];
+
+  // ── Categories ──────────────────────────────────────────────
+  const categoriesToSeed = templateData?.categories || [];
+  if (categoriesToSeed.length > 0) {
+    const existingCatCount = await prisma.category.count({ where: { siteId } });
+    if (existingCatCount === 0) {
+      for (const cat of categoriesToSeed) {
+        const created = await prisma.category.create({
+          data: {
+            siteId,
+            name: cat.name,
+            slug: cat.slug,
+            description: cat.description || "",
+            image: cat.image || null,
+            position: cat.position ?? 0,
+          },
+        });
+        sampleCategories.push(created);
+      }
+    }
+  }
+
+  // Build slug→id map for linking products to categories
+  const allCategories = await prisma.category.findMany({ where: { siteId }, select: { id: true, slug: true } });
+  const catSlugToId: Record<string, string> = {};
+  for (const c of allCategories) catSlugToId[c.slug] = c.id;
+
+  // ── Products ────────────────────────────────────────────────
+  const productsToSeed = isFashionFamily ? FASHION_SAMPLE_PRODUCTS : (templateData?.products || []);
+  if (productsToSeed.length > 0) {
     const existingProductCount = await prisma.product.count({ where: { siteId } });
     if (existingProductCount === 0) {
-      // Get the site's currency
-      const site = await prisma.site.findUnique({ where: { id: siteId }, select: { currency: true } });
-      const currency = site?.currency || "USD";
-
-      for (const sample of samples) {
+      for (const sample of productsToSeed) {
+        const categoryId = (sample as any).category ? catSlugToId[(sample as any).category] || null : null;
         const product = await prisma.product.create({
           data: {
             siteId,
@@ -204,6 +235,7 @@ export async function importTemplateToSite(
             isFeatured: sample.isFeatured ?? false,
             tags: sample.tags || [],
             position: sample.position ?? 0,
+            ...(categoryId ? { categoryId } : {}),
           },
         });
 
@@ -226,17 +258,12 @@ export async function importTemplateToSite(
     }
   }
 
-  // ── Create sample blog posts for templates that have them ──
-  let sampleBlogs: unknown[] = [];
-  const SAMPLE_BLOGS: Record<string, typeof FASHION_SAMPLE_BLOGS> = {
-    fashion: FASHION_SAMPLE_BLOGS,
-  };
-
-  const blogSamples = SAMPLE_BLOGS[catalogEntry.slug];
-  if (blogSamples && blogSamples.length > 0) {
+  // ── Blogs ───────────────────────────────────────────────────
+  const blogsToSeed = isFashionFamily ? FASHION_SAMPLE_BLOGS : (templateData?.blogs || []);
+  if (blogsToSeed.length > 0) {
     const existingBlogCount = await prisma.blog.count({ where: { siteId } });
     if (existingBlogCount === 0) {
-      for (const sample of blogSamples) {
+      for (const sample of blogsToSeed) {
         const blog = await prisma.blog.create({
           data: {
             siteId,
@@ -262,6 +289,7 @@ export async function importTemplateToSite(
     template,
     siteTemplate,
     pages: [homePage],
+    sampleCategories,
     sampleProducts,
     sampleBlogs,
     themeConfig: {},
