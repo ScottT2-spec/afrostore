@@ -3,7 +3,7 @@ import { ArrowRight, Loader2, Plus, X } from "lucide-react";
 import { CheckCircle2, Heart, Menu, MessageCircle, Minus, Phone, Search, Shield, ShoppingBag, ShoppingCart, Star, Truck } from "@/components/icons/FilledIcons";
 
 import { useState, useEffect, useMemo, useRef } from "react";
-import { useParams } from "next/navigation";
+import { useParams, useRouter } from "next/navigation";
 import Link from "next/link";
 import { RenderBlocks, type BuilderBlock } from "@/components/storefront/BlockRenderer";
 import { RenderTemplateBlocks, type TemplateBlock } from "@/components/storefront/TemplateBlockRenderer";
@@ -267,8 +267,17 @@ export default function StorePage() {
   const [mobileMenu, setMobileMenu] = useState(false);
   const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
   const [qty, setQty] = useState(1);
+  const router = useRouter();
   const [searchQuery, setSearchQuery] = useState("");
   const [showSearch, setShowSearch] = useState(false);
+
+  /** Navigate to shop page with search query */
+  const handleSearch = (q?: string) => {
+    const query = (q ?? searchQuery).trim();
+    if (query) {
+      router.push(`/store/${slug}/shop?search=${encodeURIComponent(query)}`);
+    }
+  };
   const [addedToCart, setAddedToCart] = useState<string | null>(null);
   const { isWishlisted, toggleWishlist, wishlistCount } = useWishlist(data?.store?.id || "");
 
@@ -428,6 +437,7 @@ export default function StorePage() {
           ]}
           searchQuery={searchQuery}
           onSearchChange={setSearchQuery}
+          onSearch={handleSearch}
           isLanding={isLanding}
         />
       ) : (
@@ -505,6 +515,7 @@ export default function StorePage() {
                 type="text"
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
+                onKeyDown={(e) => { if (e.key === "Enter") handleSearch(); }}
                 placeholder="Search products..."
                 className="flex-1 bg-transparent text-sm placeholder:text-surface-400 focus:outline-none"
               />
