@@ -3,7 +3,6 @@ import { useState, useEffect, useRef, useCallback, createContext, useContext } f
 import Link from "next/link";
 import { resolveStoreLink, resolveFooterLink } from "@/lib/template-link-utils";
 import { safeSrc, onImgError } from "./image-fallback";
-import { useNewsletterSubscribe } from "@/hooks/useNewsletterSubscribe";
 
 /* ═══════════════════════════════════════════════════════════════
    FASHION TEMPLATE BLOCKS
@@ -356,16 +355,6 @@ export function FashionSectionTitle({ subtitle, title, description, align = "cen
    4. FASHION PRODUCT GRID
    ═══════════════════════════════════════════════════════════════ */
 
-export interface FashionProductVariant {
-  id: string;
-  name: string;
-  price: number | null;
-  stock: number;
-  inStock: boolean;
-  options: Record<string, string> | null;
-  image: string | null;
-}
-
 export interface FashionProduct {
   id: string;
   name: string;
@@ -377,7 +366,6 @@ export interface FashionProduct {
   hoverImage?: string;
   link: string;
   badge?: string;
-  variants?: FashionProductVariant[];
 }
 
 /** Context bridge — lets fashion blocks access real store products and blogs */
@@ -387,7 +375,6 @@ export interface FashionStoreContextData {
     currency: string; inStock: boolean; isFeatured: boolean; tags?: string[];
     images: Array<{ id: string; url: string; alt?: string }>;
     category?: { id: string; name: string; slug: string };
-    variants?: FashionProductVariant[];
   }>;
   blogs: Array<{
     id: string; title: string; slug: string; excerpt?: string | null;
@@ -410,161 +397,6 @@ export interface FashionProductGridProps {
   maxProducts?: number;
   filter?: "featured" | "bestseller" | "new-arrival" | "sale" | "all";
   filterTag?: string;
-}
-
-/* ─── COLOR NAME → HEX MAP (for variant swatches) ───────────── */
-const COLOR_MAP: Record<string, string> = {
-  black: "#000000", white: "#ffffff", red: "#e53935", blue: "#1e88e5",
-  green: "#43a047", yellow: "#fdd835", orange: "#fb8c00", pink: "#ec407a",
-  purple: "#8e24aa", brown: "#6d4c41", grey: "#9e9e9e", gray: "#9e9e9e",
-  navy: "#1a237e", beige: "#f5f5dc", cream: "#fffdd0", gold: "#ffd700",
-  silver: "#c0c0c0", maroon: "#800000", olive: "#808000", teal: "#008080",
-  coral: "#ff7f50", burgundy: "#800020", khaki: "#c3b091", tan: "#d2b48c",
-  mint: "#98ff98", lavender: "#e6e6fa", ivory: "#fffff0", charcoal: "#36454f",
-  nude: "#f2d2bd", rose: "#ff007f", peach: "#ffcba4", aqua: "#00ffff",
-  cyan: "#00bcd4", magenta: "#ff00ff", indigo: "#3f51b5", lime: "#cddc39",
-  turquoise: "#40e0d0", salmon: "#fa8072", plum: "#9c27b0", sky: "#87ceeb",
-  "sky blue": "#87ceeb", "light blue": "#add8e6", "dark blue": "#00008b",
-  "light green": "#90ee90", "dark green": "#006400",
-};
-
-function resolveSwatchColor(value: string): string | null {
-  const lower = value.toLowerCase().trim();
-  if (COLOR_MAP[lower]) return COLOR_MAP[lower];
-  // Check if it's already a hex/rgb color
-  if (/^#[0-9a-f]{3,8}$/i.test(lower)) return lower;
-  if (/^rgb/i.test(lower)) return lower;
-  return null;
-}
-
-/** Extract variant display info: color swatches and sizes */
-function extractVariantSwatches(variants: FashionProductVariant[]) {
-  const colors: Array<{ id: string; color: string | null; image: string | null; name: string; inStock: boolean }> = [];
-  const sizes: Array<{ id: string; label: string; inStock: boolean }> = [];
-  const seenColors = new Set<string>();
-  const seenSizes = new Set<string>();
-
-  for (const v of variants) {
-    const opts = v.options as Record<string, string> | null;
-    if (!opts) {
-      // No structured options — treat name as a simple variant label
-      // Check if name looks like a color
-      const color = resolveSwatchColor(v.name);
-      if (color && !seenColors.has(v.name.toLowerCase())) {
-        seenColors.add(v.name.toLowerCase());
-        colors.push({ id: v.id, color, image: v.image, name: v.name, inStock: v.inStock });
-      } else if (!color && !seenSizes.has(v.name.toLowerCase())) {
-        seenSizes.add(v.name.toLowerCase());
-        sizes.push({ id: v.id, label: v.name, inStock: v.inStock });
-      }
-      continue;
-    }
-
-    // Structured options: look for color/size keys
-    for (const [key, val] of Object.entries(opts)) {
-      const k = key.toLowerCase();
-      if (k === "color" || k === "colour" || k === "color name") {
-        const color = resolveSwatchColor(val);
-        if (!seenColors.has(val.toLowerCase())) {
-          seenColors.add(val.toLowerCase());
-          colors.push({ id: v.id, color, image: v.image, name: val, inStock: v.inStock });
-        }
-      } else if (k === "size" || k === "taille" || k === "sizing") {
-        if (!seenSizes.has(val.toLowerCase())) {
-          seenSizes.add(val.toLowerCase());
-          sizes.push({ id: v.id, label: val, inStock: v.inStock });
-        }
-      }
-    }
-  }
-
-  return { colors, sizes };
-}
-
-/** Individual product card with variant swatch support */
-function FashionProductCard({ product: p, productLink, showCategory, showHoverImage, storeSlug }: {
-  product: FashionProduct;
-  productLink: string;
-  showCategory: boolean;
-  showHoverImage: boolean;
-  storeSlug?: string;
-}) {
-  const variants = p.variants || [];
-  const { colors, sizes } = extractVariantSwatches(variants);
-  const [activeColorId, setActiveColorId] = useState<string | null>(null);
-
-  // When a color swatch is hovered/clicked, swap the product image
-  const activeColor = colors.find(c => c.id === activeColorId);
-  const displayImage = (activeColor?.image) || p.image || safeSrc(null, p.name);
-
-  return (
-    <div className="fpg-card">
-      <div className="fpg-thumb">
-        <Link href={productLink}>
-          <img src={displayImage} alt={p.name} className="fpg-img fpg-main-img" loading="lazy" onError={(e) => onImgError(e, p.name)} />
-          {showHoverImage && p.hoverImage && !activeColorId && (
-            <img src={p.hoverImage} alt={p.name} className="fpg-hover-img" loading="lazy" />
-          )}
-        </Link>
-        {p.badge && <span className="fpg-badge">{p.badge}</span>}
-        <div className="fpg-actions">
-          <button className="fpg-action-btn" title="Compare" aria-label="Compare">⇌</button>
-          <button className="fpg-action-btn" title="Quick view" aria-label="Quick view">👁</button>
-          <button className="fpg-action-btn" title="Wishlist" aria-label="Wishlist">♡</button>
-        </div>
-        <button className="fpg-add-btn">Add to cart</button>
-      </div>
-      <h3 className="fpg-name"><Link href={productLink}>{p.name}</Link></h3>
-      {showCategory && p.category && (
-        <div className="fpg-cat">
-          <Link href={resolveStoreLink(p.categoryLink, storeSlug)}>{p.category}</Link>
-        </div>
-      )}
-      <div className="fpg-price">
-        {p.salePrice && <span className="fpg-price-old">{p.price}</span>}
-        <span>{p.salePrice || p.price}</span>
-      </div>
-      {/* Color swatches */}
-      {colors.length > 0 && (
-        <div className="fpg-swatches">
-          {colors.map((c) => (
-            <button
-              key={c.id}
-              className={`fpg-swatch ${activeColorId === c.id ? "fpg-swatch-active" : ""}`}
-              title={c.name}
-              aria-label={`Color: ${c.name}`}
-              onClick={(e) => { e.preventDefault(); setActiveColorId(activeColorId === c.id ? null : c.id); }}
-              onMouseEnter={() => { if (c.image) setActiveColorId(c.id); }}
-              onMouseLeave={() => { if (c.image && activeColorId === c.id) setActiveColorId(null); }}
-            >
-              {c.color ? (
-                <span className="fpg-swatch-inner" style={{ backgroundColor: c.color }} />
-              ) : c.image ? (
-                <img src={c.image} alt={c.name} className="fpg-swatch-img" />
-              ) : (
-                <span className="fpg-swatch-inner" style={{ background: "linear-gradient(135deg, #ddd 50%, #aaa 50%)" }} />
-              )}
-            </button>
-          ))}
-        </div>
-      )}
-      {/* Size chips */}
-      {sizes.length > 0 && (
-        <div className="fpg-sizes">
-          {sizes.map((s) => (
-            <Link
-              key={s.id}
-              href={productLink}
-              className={`fpg-size ${!s.inStock ? "fpg-size-oos" : ""}`}
-              title={!s.inStock ? `${s.label} — Out of stock` : s.label}
-            >
-              {s.label}
-            </Link>
-          ))}
-        </div>
-      )}
-    </div>
-  );
 }
 
 export function FashionProductGrid({ products: propProducts, columns = 4, showCategory = true, showHoverImage = true, sectionTitle, marginBottom = "60px", maxProducts = 8, filter, filterTag }: FashionProductGridProps) {
@@ -614,7 +446,6 @@ export function FashionProductGrid({ products: propProducts, columns = 4, showCa
       hoverImage: p.images[1]?.url,
       link: `/store/${storeCtx.storeSlug}/product/${p.slug}`,
       badge: p.compareAtPrice ? "SALE" : p.isFeatured ? "FEATURED" : undefined,
-      variants: p.variants || [],
     }));
   })();
   const scopedCss = `
@@ -675,36 +506,6 @@ export function FashionProductGrid({ products: propProducts, columns = 4, showCa
       transform: translateY(100%); transition: all 0.3s ease;
     }
     .fpg-card:hover .fpg-add-btn { opacity: 1; transform: translateY(0); }
-    .fpg-swatches {
-      display: flex; align-items: center; gap: 4px; margin-top: 6px; flex-wrap: wrap;
-    }
-    .fpg-swatch {
-      width: 18px; height: 18px; border-radius: 50%; border: 2px solid #e0e0e0;
-      cursor: pointer; transition: border-color 0.2s, transform 0.15s;
-      padding: 0; position: relative; overflow: hidden; flex-shrink: 0;
-    }
-    .fpg-swatch:hover, .fpg-swatch.fpg-swatch-active { border-color: ${TOKENS.entityTitleColor}; transform: scale(1.15); }
-    .fpg-swatch-inner {
-      position: absolute; inset: 2px; border-radius: 50%;
-    }
-    .fpg-swatch-img {
-      width: 100%; height: 100%; object-fit: cover; border-radius: 50%;
-    }
-    .fpg-sizes {
-      display: flex; align-items: center; gap: 3px; margin-top: 5px; flex-wrap: wrap;
-    }
-    .fpg-size {
-      font-family: ${TOKENS.bodyFont}; font-size: 10px; font-weight: 600;
-      color: ${TOKENS.textColor}; background: #f5f5f5; border: 1px solid #e0e0e0;
-      padding: 2px 6px; cursor: pointer; transition: all 0.2s;
-      text-transform: uppercase; line-height: 1.3; border-radius: 2px;
-    }
-    .fpg-size:hover, .fpg-size.fpg-size-active { border-color: ${TOKENS.entityTitleColor}; color: ${TOKENS.entityTitleColor}; background: #fff; }
-    .fpg-size-oos { opacity: 0.35; text-decoration: line-through; cursor: not-allowed; }
-    .fpg-variant-price {
-      color: ${TOKENS.primaryColor}; font-weight: 600; font-size: 12px;
-      font-family: ${TOKENS.bodyFont}; margin-top: 2px;
-    }
     @media (max-width: 1024px) { .fpg-grid { grid-template-columns: repeat(3, 1fr); } }
     @media (max-width: 767px) { .fpg-grid { grid-template-columns: repeat(2, 1fr); gap: 10px; } }
   `;
@@ -744,16 +545,38 @@ export function FashionProductGrid({ products: propProducts, columns = 4, showCa
         />
       )}
       <div className="fpg-grid">
-        {products.map((p) => (
-          <FashionProductCard
-            key={p.id}
-            product={p}
-            productLink={resolveProductLink(p.link, p.name)}
-            showCategory={showCategory}
-            showHoverImage={showHoverImage}
-            storeSlug={storeCtx?.storeSlug}
-          />
-        ))}
+        {products.map((p) => {
+          const productLink = resolveProductLink(p.link, p.name);
+          return (
+          <div key={p.id} className="fpg-card">
+            <div className="fpg-thumb">
+              <Link href={productLink}>
+                <img src={p.image || safeSrc(null, p.name)} alt={p.name} className="fpg-img fpg-main-img" loading="lazy" onError={(e) => onImgError(e, p.name)} />
+                {showHoverImage && p.hoverImage && (
+                  <img src={p.hoverImage} alt={p.name} className="fpg-hover-img" loading="lazy" />
+                )}
+              </Link>
+              {p.badge && <span className="fpg-badge">{p.badge}</span>}
+              <div className="fpg-actions">
+                <button className="fpg-action-btn" title="Compare" aria-label="Compare">⇌</button>
+                <button className="fpg-action-btn" title="Quick view" aria-label="Quick view">👁</button>
+                <button className="fpg-action-btn" title="Wishlist" aria-label="Wishlist">♡</button>
+              </div>
+              <button className="fpg-add-btn">Add to cart</button>
+            </div>
+            <h3 className="fpg-name"><Link href={productLink}>{p.name}</Link></h3>
+            {showCategory && p.category && (
+              <div className="fpg-cat">
+                <Link href={resolveStoreLink(p.categoryLink, storeCtx?.storeSlug)}>{p.category}</Link>
+              </div>
+            )}
+            <div className="fpg-price">
+              {p.salePrice && <span className="fpg-price-old">{p.price}</span>}
+              <span>{p.salePrice || p.price}</span>
+            </div>
+          </div>
+          );
+        })}
       </div>
     </div>
   );
@@ -1140,13 +963,11 @@ export function FashionNewsletter({
   onSubmit,
 }: FashionNewsletterProps) {
   const [email, setEmail] = useState("");
-  const storeCtx = useContext(FashionStoreContext);
-  const { subscribe, status: nlStatus } = useNewsletterSubscribe(storeCtx?.storeSlug || "");
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    if (onSubmit) { onSubmit(email); setEmail(""); return; }
-    subscribe(email).then(() => setEmail(""));
+    onSubmit?.(email);
+    setEmail("");
   };
 
   const socialIcons: Record<string, string> = {
@@ -1207,14 +1028,10 @@ export function FashionNewsletter({
       <ScopedStyles id="newsletter" css={scopedCss} />
       <div className="fn-section">
         <FashionSectionTitle subtitle={subtitle} title={title} description={description} maxWidth="70%" />
-        {nlStatus === "success" ? (
-          <p style={{ fontFamily: TOKENS.bodyFont, fontSize: "16px", color: TOKENS.primaryColor, marginTop: "20px" }}>Thanks for subscribing! 🎉</p>
-        ) : (
         <form className="fn-form" onSubmit={handleSubmit}>
           <input type="email" className="fn-input" placeholder="Your email address" value={email} onChange={(e) => setEmail(e.target.value)} required />
-          <button type="submit" className="fn-submit" disabled={nlStatus === "loading"}>{nlStatus === "loading" ? "Signing up..." : buttonText}</button>
+          <button type="submit" className="fn-submit">{buttonText}</button>
         </form>
-        )}
         {socialLinks.length > 0 && (
           <>
             <div className="fn-separator">

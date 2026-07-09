@@ -898,6 +898,48 @@ function GenericProps() {
   return <p className="text-xs text-surface-500">Properties for this block type coming soon.</p>;
 }
 
+function FashionInstagramEditProps({ block, update }: { block: BuilderBlock; update: (key: string, val: unknown) => void }) {
+  return (
+    <>
+      <PropInput label="Instagram URL" value={block.props.instagramUrl} onChange={(v) => update("instagramUrl", v)} />
+      <PropInput label="Button Text" value={block.props.buttonText} onChange={(v) => update("buttonText", v)} />
+      <PropInput label="Columns" value={block.props.columns} onChange={(v) => update("columns", v)} type="number" />
+      <PropInput label="Margin Bottom" value={block.props.marginBottom} onChange={(v) => update("marginBottom", v)} />
+    </>
+  );
+}
+
+function FashionMarqueeEditProps({ block, update }: { block: BuilderBlock; update: (key: string, val: unknown) => void }) {
+  const items = (block.props.items as Array<Record<string, unknown>>) || [];
+  const updateItem = (idx: number, key: string, val: unknown) => {
+    const next = items.map((item, i) => i === idx ? { ...item, [key]: val } : item);
+    update("items", next);
+  };
+  const addItem = () => update("items", [...items, { text: "New marquee text", icon: "✦" }]);
+  const removeItem = (idx: number) => update("items", items.filter((_, i) => i !== idx));
+  return (
+    <>
+      <PropInput label="Background Color" value={block.props.backgroundColor} onChange={(v) => update("backgroundColor", v)} type="color" />
+      <PropInput label="Text Color" value={block.props.textColor} onChange={(v) => update("textColor", v)} type="color" />
+      <PropInput label="Font Size" value={block.props.fontSize} onChange={(v) => update("fontSize", v)} />
+      <PropInput label="Speed" value={block.props.speed} onChange={(v) => update("speed", v)} />
+      {items.map((item, i) => (
+        <div key={i} className="border border-surface-200 rounded-lg p-3 space-y-2">
+          <div className="flex items-center justify-between">
+            <span className="text-xs font-bold text-surface-700">Item {i + 1}</span>
+            {items.length > 1 && <button onClick={() => removeItem(i)} className="text-red-500 text-xs">Remove</button>}
+          </div>
+          <PropInput label="Text" value={item.text} onChange={(v) => updateItem(i, "text", v)} />
+          <PropInput label="Icon" value={item.icon} onChange={(v) => updateItem(i, "icon", v)} />
+        </div>
+      ))}
+      <button onClick={addItem} className="w-full flex items-center justify-center gap-1 text-xs font-semibold text-brand-600 py-2 border border-dashed border-brand-300 rounded-lg hover:bg-brand-50">
+        + Add Item
+      </button>
+    </>
+  );
+}
+
 // ─── GENERIC TEMPLATE BLOCK PROPERTY EDITORS ────────────────
 // Reusable editors that work for any template's hero slider, product grid, etc.
 
@@ -1697,6 +1739,11 @@ const propEditors: Record<string, React.FC<{ block: BuilderBlock; update: (key: 
   fashionTestimonials: FashionTestimonialsProps,
   fashionBlogPosts: FashionBlogPostsProps,
   fashionNewsletter: FashionNewsletterEditProps,
+  fashionFooter: GenericFooterEditProps,
+  fashionFeatures: GenericInfoBoxesEditProps,
+  fashionInstagram: FashionInstagramEditProps,
+  fashionMarquee: FashionMarqueeEditProps,
+  fashionCoverBanners: GenericPromoBannersEditProps,
 
   // Electronics template blocks
   electronicsHeroSlider: ElectronicsHeroSliderEditProps,
