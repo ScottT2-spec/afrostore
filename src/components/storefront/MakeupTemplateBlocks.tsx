@@ -1066,125 +1066,192 @@ export function MakeupBrandsCarousel({ brands, marginBottom = "80px" }: MakeupBr
 }
 
 /* ═══════════════════════════════════════════════════════════════
-   11. MAKEUP FOOTER
-   Dark footer with logo, link columns, rating widget (4.5/5 stars),
-   social icons, copyright bar.
+   FOOTER
    ═══════════════════════════════════════════════════════════════ */
-
-export interface MakeupFooterLinkColumn {
-  title: string;
-  links: Array<{ label: string; url: string }>;
-}
 
 export interface MakeupFooterProps {
   logoUrl?: string;
   logoAlt?: string;
   description?: string;
-  linkColumns?: MakeupFooterLinkColumn[];
-  rating?: number;
-  ratingCount?: number;
-  socialLinks?: Array<{ platform: string; url: string }>;
+  contact?: FooterContactInfo;
+  recentPosts?: FooterRecentPost[];
+  linkColumns?: FooterLinkColumn[];
   copyrightText?: string;
   paymentIconsUrl?: string;
   backgroundColor?: string;
 }
 
+export interface FooterContactInfo {
+  address?: string;
+  phone?: string;
+  fax?: string;
+  email?: string;
+}
+
+export interface FooterLinkItem {
+  label: string;
+  url: string;
+  emphasized?: boolean;
+}
+
+export interface FooterLinkColumn {
+  title: string;
+  links: FooterLinkItem[];
+}
+
+export interface FooterRecentPost {
+  title: string;
+  url: string;
+  date: string;
+  thumbnail?: string;
+}
+
 export function MakeupFooter({
   logoUrl,
   logoAlt = "Store Logo",
-  description = "Premium beauty and skincare products curated for your self-care routine.",
+  description = "Discover a curated collection of modern furniture designed to bring comfort and elegance into your home.",
+  contact = {
+    address: "451 Wall Street, UK, London",
+    phone: "(064) 332-1233",
+    fax: "(099) 453-1357",
+  },
+  recentPosts = [],
   linkColumns = [],
-  rating = 4.5,
-  ratingCount = 374,
-  socialLinks = [],
-  copyrightText = `© ${new Date().getFullYear()}. All rights reserved.`,
+  copyrightText = `© ${new Date().getFullYear()}. ALL RIGHTS RESERVED.`,
   paymentIconsUrl,
   backgroundColor = TOKENS.footerBg,
 }: MakeupFooterProps) {
   const storeCtx = useContext(MakeupStoreContext);
   const [openColumns, setOpenColumns] = useState<Set<number>>(new Set());
-  const toggleColumn = (idx: number) => {
-    setOpenColumns(prev => {
+
+  const toggleColumn = (index: number) => {
+    setOpenColumns((prev) => {
       const next = new Set(prev);
-      if (next.has(idx)) next.delete(idx); else next.add(idx);
+      if (next.has(index)) next.delete(index);
+      else next.add(index);
       return next;
     });
   };
 
-  const socialIcons: Record<string, string> = {
-    facebook: "f", twitter: "𝕏", instagram: "📷", youtube: "▶", tiktok: "♪",
-    linkedin: "in", pinterest: "📌", telegram: "✈",
+  const footerStyle: React.CSSProperties = {
+    backgroundColor,
+    color: "rgba(255,255,255,0.66)",
+    fontFamily: TOKENS.bodyFont,
+    fontSize: "14px",
+    lineHeight: "1.7",
+  };
+
+  const mainFooterStyle: React.CSSProperties = {
+    maxWidth: TOKENS.containerWidth,
+    margin: "0 auto",
+    padding: "40px 15px",
+    display: "flex",
+    flexWrap: "wrap",
+    gap: "30px",
   };
 
   const scopedCss = `
-    .mf-footer { background: ${backgroundColor}; color: rgba(255,255,255,0.65); font-family: ${TOKENS.bodyFont}; font-size: 14px; line-height: 1.7; }
-    .mf-footer a { color: rgba(255,255,255,0.65); text-decoration: none; transition: color 0.2s; }
-    .mf-footer a:hover { color: #fff; }
-    .mf-main {
-      max-width: ${TOKENS.containerWidth}; margin: 0 auto; padding: 50px 15px;
-      display: flex; flex-wrap: wrap; gap: 30px;
+    .mk-footer a { color: rgba(255,255,255,0.66); text-decoration: none; transition: color 0.2s; }
+    .mk-footer a:hover { color: #fff; }
+
+    .mk-col-brand { flex: 0 1 25%; min-width: 220px; }
+    .mk-col-posts { flex: 0 1 25%; min-width: 220px; }
+    .mk-col-links { flex: 0 1 17%; min-width: 140px; }
+
+    .mk-col-toggle-head {
+      display: flex; justify-content: space-between; align-items: center;
+      cursor: pointer; user-select: none; padding: 0;
     }
-    .mf-col-brand { flex: 0 1 28%; min-width: 220px; }
-    .mf-col-links { flex: 0 1 18%; min-width: 140px; }
-    .mf-col-rating { flex: 0 1 22%; min-width: 180px; text-align: center; }
-    .mf-col-title {
-      font-family: ${TOKENS.titleFont}; font-weight: 700; font-size: 15px;
-      color: #fff; text-transform: uppercase; margin: 0 0 18px; letter-spacing: 0.3px;
+    .mk-col-toggle-head svg {
+      width: 12px; height: 12px; fill: rgba(255,255,255,0.66);
+      transition: transform 0.3s;
+      display: none;
     }
-    .mf-link-list { list-style: none; margin: 0; padding: 0; }
-    .mf-link-list li { margin-bottom: 8px; }
-    .mf-rating-num {
-      font-family: ${TOKENS.titleFont}; font-weight: 700; font-size: 24px; color: #fff;
+    .mk-col-toggle-head.mk-open svg { transform: rotate(180deg); }
+
+    .mk-col-title {
+      font-family: ${TOKENS.titleFont};
+      font-weight: 700; font-size: 16px; color: #fff;
+      letter-spacing: 0.3px; text-transform: uppercase;
+      margin: 0 0 20px 0;
     }
-    .mf-rating-highlight { color: ${TOKENS.primaryColor}; }
-    .mf-stars { color: ${TOKENS.starColor}; font-size: 18px; letter-spacing: 2px; margin: 8px 0; }
-    .mf-rating-text { font-size: 13px; color: rgba(255,255,255,0.5); margin-bottom: 15px; }
-    .mf-review-btn {
-      display: inline-block; padding: 8px 20px; border: 1px solid rgba(255,255,255,0.3);
-      border-radius: 25px; color: #fff; font-size: 13px; font-weight: 600;
-      text-decoration: none; transition: all 0.3s;
-    }
-    .mf-review-btn:hover { border-color: #fff; background: rgba(255,255,255,0.1); }
-    .mf-social { display: flex; gap: 8px; justify-content: center; margin-top: 15px; }
-    .mf-social-icon {
-      width: 35px; height: 35px; border-radius: 50%; border: 1px solid rgba(255,255,255,0.25);
-      display: flex; align-items: center; justify-content: center;
-      color: rgba(255,255,255,0.7); font-size: 13px; font-weight: 700;
-      transition: all 0.2s;
-    }
-    .mf-social-icon:hover { border-color: #fff; color: #fff; }
-    .mf-copyrights {
+
+    .mk-link-list { list-style: none; margin: 0; padding: 0; }
+    .mk-link-list li { margin-bottom: 10px; }
+    .mk-link-list li a { font-size: 14px; }
+    .mk-link-list li a em { font-style: italic; }
+
+    .mk-contact-list { list-style: none; margin: 16px 0 0; padding: 0; }
+    .mk-contact-item { display: flex; align-items: flex-start; gap: 10px; margin-bottom: 10px; }
+    .mk-contact-icon { width: 14px; height: 14px; flex-shrink: 0; margin-top: 4px; fill: rgba(255,255,255,0.66); }
+
+    .mk-post-item { display: flex; gap: 12px; margin-bottom: 15px; }
+    .mk-post-thumb { width: 75px; height: 65px; border-radius: 0; object-fit: cover; flex-shrink: 0; }
+    .mk-post-title { font-size: 14px; color: rgba(255,255,255,0.85); font-weight: 400; margin: 0 0 4px; line-height: 1.4; }
+    .mk-post-title a { color: rgba(255,255,255,0.85); }
+    .mk-post-title a:hover { color: #fff; }
+    .mk-post-date { font-size: 12px; color: rgba(255,255,255,0.45); }
+
+    .mk-copyrights {
       border-top: 1px solid rgba(255,255,255,0.1);
-      max-width: ${TOKENS.containerWidth}; margin: 0 auto; padding: 20px 15px;
+      max-width: ${TOKENS.containerWidth};
+      margin: 0 auto;
+      padding: 20px 15px;
       display: flex; justify-content: space-between; align-items: center;
       flex-wrap: wrap; gap: 10px;
     }
-    .mf-copyrights small { font-size: 13px; color: rgba(255,255,255,0.45); }
-    .mf-copyrights img { height: 21px; width: auto; }
-    .mf-col-toggle-head {
-      display: flex; justify-content: space-between; align-items: center;
-      cursor: pointer; user-select: none;
-    }
-    .mf-col-toggle-head svg {
-      width: 12px; height: 12px; fill: rgba(255,255,255,0.6);
-      transition: transform 0.3s; display: none;
-    }
-    .mf-col-toggle-head.mf-open svg { transform: rotate(180deg); }
+    .mk-copyrights small { font-size: 13px; color: rgba(255,255,255,0.5); }
+    .mk-copyrights small a { color: rgba(255,255,255,0.5); }
+    .mk-copyrights img { height: 21px; width: auto; }
+
     @media (max-width: 768px) {
-      .mf-main { gap: 0 !important; padding: 0 15px !important; }
-      .mf-col-brand, .mf-col-links, .mf-col-rating {
+      .mk-main-footer { gap: 0 !important; padding: 0 15px !important; }
+      .mk-col-brand, .mk-col-posts, .mk-col-links {
         flex: 0 1 100% !important; min-width: 100% !important;
-        border-bottom: 1px solid rgba(255,255,255,0.08); padding: 20px 0;
+        border-bottom: 1px solid rgba(255,255,255,0.08);
+        padding: 20px 0;
       }
-      .mf-col-toggle-head svg { display: block; }
-      .mf-col-toggle-content { overflow: hidden; transition: max-height 0.3s ease; }
-      .mf-col-toggle-content.mf-closed { max-height: 0; }
-      .mf-col-toggle-content.mf-open { max-height: 500px; }
-      .mf-col-title { margin-bottom: 0; }
-      .mf-col-toggle-head.mf-open .mf-col-title { margin-bottom: 15px; }
+      .mk-col-brand { border-bottom: 1px solid rgba(255,255,255,0.08); padding-top: 30px; }
+      .mk-col-toggle-head svg { display: block; }
+      .mk-col-toggle-content { overflow: hidden; transition: max-height 0.3s ease; }
+      .mk-col-toggle-content.mk-closed { max-height: 0; }
+      .mk-col-toggle-content.mk-open { max-height: 500px; }
+      .mk-col-title { margin-bottom: 0; }
+      .mk-col-toggle-head.mk-open .mk-col-title { margin-bottom: 15px; }
     }
-    @media (min-width: 769px) { .mf-col-toggle-content { max-height: none !important; } }
+
+    @media (min-width: 769px) {
+      .mk-col-toggle-content { max-height: none !important; }
+    }
+
+    @media (min-width: 769px) and (max-width: 1024px) {
+      .mk-col-brand, .mk-col-posts { flex: 0 1 calc(50% - 15px) !important; }
+      .mk-col-links { flex: 0 1 calc(33% - 20px) !important; }
+    }
   `;
+
+  const contactIcons = {
+    address: (
+      <svg viewBox="0 0 477 477" className="mk-contact-icon">
+        <path d="M238.5 0C146.3 0 71.5 74.8 71.5 167c0 40.7 14.5 78 38.6 107.1L238.5 477l128.4-202.9C391 245 405.5 207.7 405.5 167 405.5 74.8 330.7 0 238.5 0zm0 240c-40.3 0-73-32.7-73-73s32.7-73 73-73 73 32.7 73 73-32.7 73-73 73z"/>
+      </svg>
+    ),
+    phone: (
+      <svg viewBox="0 0 27 27" className="mk-contact-icon">
+        <path d="M20.4 27c-1.8 0-4.4-.9-8-3.8C8.7 20.4 5 16.5 3 13.3.5 9.4-.2 6.4.1 4.3.4 2.5 1.4 1.3 2.4.5c.6-.5 1.2-.5 1.6-.1l4.2 5c.4.5.3 1-.1 1.4l-1.5 1.3c-.3.3-.3.6-.2.9 1 2 2.7 4.2 5 6.2s4.5 3.4 6.7 4c.3.1.7 0 .9-.2l1.5-1.6c.4-.4 1-.5 1.4-.1l4.7 4.4c.5.4.5 1.1 0 1.6-.8.9-2 1.8-3.8 2.2-.8.3-1.5.4-2.4.4z"/>
+      </svg>
+    ),
+    fax: (
+      <svg viewBox="0 0 479 479" className="mk-contact-icon">
+        <path d="M434.1 59.7H370V20c0-11-9-20-20-20H129c-11 0-20 9-20 20v39.7H44.9C20.1 59.7 0 79.8 0 104.6v214.6c0 24.8 20.1 44.9 44.9 44.9h64.1V459c0 11 9 20 20 20h221c11 0 20-9 20-20V364.1h64.1c24.8 0 44.9-20.1 44.9-44.9V104.6c0-24.8-20.1-44.9-44.9-44.9zM149 40h181v19.7H149V40zm181 399H149V284.1h181V439zm104.1-119.8c0 2.7-2.2 4.9-4.9 4.9H370V264.1c0-11-9-20-20-20H129c-11 0-20 9-20 20v60h-65.1c-2.7 0-4.9-2.2-4.9-4.9V104.6c0-2.7 2.2-4.9 4.9-4.9h390.2c2.7 0 4.9 2.2 4.9 4.9v214.6z"/>
+      </svg>
+    ),
+    email: (
+      <svg viewBox="0 0 479 479" className="mk-contact-icon">
+        <path d="M432 59H47C21 59 0 80 0 106v267c0 26 21 47 47 47h385c26 0 47-21 47-47V106c0-26-21-47-47-47zm-6 40L240 259 54 99h372zm6 280H47c-4 0-7-3-7-7V128l197 170c4 3 8 5 13 5s9-2 13-5l187-170v245c0 4-3 7-7 7z"/>
+      </svg>
+    ),
+  };
 
   const chevronSvg = (
     <svg viewBox="0 0 64 64" xmlns="http://www.w3.org/2000/svg">
@@ -1192,79 +1259,136 @@ export function MakeupFooter({
     </svg>
   );
 
-  const starWidth = Math.round((rating / 5) * 100);
+  const renderLinkColumn = (col: FooterLinkColumn, idx: number) => {
+    const colIndex = idx + 2;
+    const isOpen = openColumns.has(colIndex);
 
-  return (
-    <footer className="mf-footer">
-      <ScopedStyles id="footer" css={scopedCss} />
-      <div className="mf-main">
-        {/* Brand column */}
-        <div className="mf-col-brand">
-          {logoUrl && (
-            <div style={{ marginBottom: "16px" }}>
-              <Link href={resolveStoreLink("/", storeCtx?.storeSlug)}><img src={logoUrl} alt={logoAlt} style={{ maxWidth: "150px", height: "auto" }} /></Link>
-            </div>
-          )}
-          <p style={{ margin: "0 0 10px" }}>{description}</p>
+    return (
+      <div key={idx} className="mk-col-links">
+        <div
+          className={`mk-col-toggle-head ${isOpen ? "mk-open" : ""}`}
+          onClick={() => toggleColumn(colIndex)}
+        >
+          <h4 className="mk-col-title">{col.title}</h4>
+          {chevronSvg}
         </div>
-
-        {/* Link columns */}
-        {linkColumns.map((col, idx) => {
-          const isOpen = openColumns.has(idx);
-          return (
-            <div key={idx} className="mf-col-links">
-              <div className={`mf-col-toggle-head ${isOpen ? "mf-open" : ""}`} onClick={() => toggleColumn(idx)}>
-                <h4 className="mf-col-title">{col.title}</h4>
-                {chevronSvg}
-              </div>
-              <div className={`mf-col-toggle-content ${isOpen ? "mf-open" : "mf-closed"}`}>
-                <ul className="mf-link-list">
-                  {col.links.map((link, li) => (
-                    <li key={li}><Link href={resolveFooterLink(link.url, link.label, storeCtx?.storeSlug)}>{link.label}</Link></li>
-                  ))}
-                </ul>
-              </div>
-            </div>
-          );
-        })}
-
-        {/* Rating column */}
-        <div className="mf-col-rating">
-          <div className="mf-rating-num">
-            <span className="mf-rating-highlight">{rating.toFixed(1).replace(".", ",")}</span>/5
-          </div>
-          <div className="mf-stars" style={{ position: "relative", display: "inline-block" }}>
-            <span style={{ color: "#555" }}>★★★★★</span>
-            <span style={{ position: "absolute", left: 0, top: 0, overflow: "hidden", width: `${starWidth}%`, color: TOKENS.starColor }}>★★★★★</span>
-          </div>
-          <div className="mf-rating-text">Based on {ratingCount} Google reviews</div>
-          <Link href={resolveStoreLink("#", storeCtx?.storeSlug)} className="mf-review-btn">Write a Review</Link>
-          {socialLinks.length > 0 && (
-            <div className="mf-social">
-              {socialLinks.map((s, i) => (
-                <a key={i} href={s.url} className="mf-social-icon" target="_blank" rel="noopener noreferrer" aria-label={s.platform}>
-                  {socialIcons[s.platform] || s.platform[0]?.toUpperCase()}
-                </a>
-              ))}
-            </div>
-          )}
+        <div className={`mk-col-toggle-content ${isOpen ? "mk-open" : "mk-closed"}`}>
+          <ul className="mk-link-list">
+            {col.links.map((link, li) => (
+              <li key={li}>
+                <Link href={resolveFooterLink(link.url, link.label, storeCtx?.storeSlug)}>
+                  {link.emphasized ? <em>{link.label}</em> : link.label}
+                </Link>
+              </li>
+            ))}
+          </ul>
         </div>
       </div>
+    );
+  };
 
-      {/* Copyright bar */}
-      <div className="mf-copyrights">
-        <div><small>{copyrightText}</small></div>
-        {paymentIconsUrl && <div><img src={paymentIconsUrl} alt="Payment methods" loading="lazy" /></div>}
-        {socialLinks.length > 0 && (
-          <div className="mf-social" style={{ marginTop: 0 }}>
-            {socialLinks.map((s, i) => (
-              <a key={i} href={s.url} className="mf-social-icon" target="_blank" rel="noopener noreferrer" aria-label={s.platform}>
-                {socialIcons[s.platform] || s.platform[0]?.toUpperCase()}
-              </a>
-            ))}
+  return (
+    <footer className="mk-footer" style={footerStyle}>
+      <ScopedStyles id="footer" css={scopedCss} />
+
+      <div className="mk-main-footer" style={mainFooterStyle}>
+        <div className="mk-col-brand">
+          {logoUrl && (
+            <div style={{ marginBottom: "16px" }}>
+              <Link href={storeCtx?.storeSlug ? `/store/${storeCtx.storeSlug}` : "/"}>
+                <img
+                  src={logoUrl}
+                  alt={logoAlt}
+                  style={{ maxWidth: "220px", height: "auto" }}
+                />
+              </Link>
+            </div>
+          )}
+          <p style={{ margin: "0 0 10px", fontSize: "14px", lineHeight: "1.7" }}>
+            {description}
+          </p>
+          {contact && (
+            <ul className="mk-contact-list">
+              {contact.address && (
+                <li className="mk-contact-item">
+                  {contactIcons.address}
+                  <span>{contact.address}</span>
+                </li>
+              )}
+              {contact.phone && (
+                <li className="mk-contact-item">
+                  {contactIcons.phone}
+                  <span>Phone: {contact.phone}</span>
+                </li>
+              )}
+              {contact.fax && (
+                <li className="mk-contact-item">
+                  {contactIcons.fax}
+                  <span>Fax: {contact.fax}</span>
+                </li>
+              )}
+              {contact.email && (
+                <li className="mk-contact-item">
+                  {contactIcons.email}
+                  <span>Email: {contact.email}</span>
+                </li>
+              )}
+            </ul>
+          )}
+        </div>
+
+        {recentPosts.length > 0 && (
+          <div className="mk-col-posts">
+            <div
+              className={`mk-col-toggle-head ${openColumns.has(1) ? "mk-open" : ""}`}
+              onClick={() => toggleColumn(1)}
+            >
+              <h4 className="mk-col-title">RECENT POSTS</h4>
+              {chevronSvg}
+            </div>
+            <div className={`mk-col-toggle-content ${openColumns.has(1) ? "mk-open" : "mk-closed"}`}>
+              {recentPosts.map((post, i) => (
+                <div key={i} className="mk-post-item">
+                  {post.thumbnail && (
+                    <img
+                      src={post.thumbnail}
+                      alt={post.title}
+                      className="mk-post-thumb"
+                      loading="lazy"
+                    />
+                  )}
+                  <div>
+                    <h5 className="mk-post-title">
+                      <Link href={resolveStoreLink(post.url, storeCtx?.storeSlug)}>{post.title}</Link>
+                    </h5>
+                    <span className="mk-post-date">{post.date}</span>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
+
+        {linkColumns.map(renderLinkColumn)}
+      </div>
+
+      <div className="mk-copyrights">
+        <div>
+          <small>
+            <Link href={storeCtx?.storeSlug ? `/store/${storeCtx.storeSlug}` : "/"}>{copyrightText}</Link>
+          </small>
+        </div>
+        {paymentIconsUrl && (
+          <div>
+            <img
+              src={paymentIconsUrl}
+              alt="Payment methods"
+              loading="lazy"
+            />
           </div>
         )}
       </div>
     </footer>
   );
 }
+
