@@ -179,39 +179,24 @@ export const COSMETICS_TEMPLATE_PRESET: TemplateBlock[] = [
     },
   },
   {
-    id: "cosmetics-footer",
-    type: "cosmeticsFooter",
+    id: "cosmetics-footer", type: "cosmeticsFooter",
     props: {
+      logoUrl: "",
+      logoAlt: "Store Logo",
       description: "Discover a curated collection of modern furniture designed to bring comfort and elegance into your home.",
       contact: {
         address: "451 Wall Street, UK, London",
         phone: "(064) 332-1233",
         fax: "(099) 453-1357",
       },
+      recentPosts: [],
       linkColumns: [
-        {
-          title: "OUR STORES",
-          links: [
-            { label: "New York", url: "#" },
-            { label: "London SF", url: "#" },
-            { label: "Edinburgh", url: "#" },
-            { label: "Los Angeles", url: "#" },
-            { label: "Chicago", url: "#" },
-            { label: "Las Vegas", url: "#" },
-          ],
-        },
-        {
-          title: "USEFUL LINKS",
-          links: [
-            { label: "Privacy Policy", url: "#" },
-            { label: "Returns", url: "#" },
-            { label: "Terms & Conditions", url: "#" },
-            { label: "Contact Us", url: "#" },
-            { label: "Latest News", url: "#" },
-            { label: "Our Sitemap", url: "#" },
-          ],
-        },
+        { title: "OUR STORES", links: [{ label: "New York", url: "#" }, { label: "London SF", url: "#" }, { label: "Edinburgh", url: "#" }, { label: "Los Angeles", url: "#" }, { label: "Chicago", url: "#" }, { label: "Las Vegas", url: "#" }] },
+        { title: "USEFUL LINKS", links: [{ label: "Privacy Policy", url: "#" }, { label: "Returns", url: "#" }, { label: "Terms & Conditions", url: "#" }, { label: "Contact Us", url: "#" }, { label: "Latest News", url: "#" }, { label: "Our Sitemap", url: "#" }] },
+        { title: "FOOTER MENU", links: [{ label: "Instagram profile", url: "#" }, { label: "New Collection", url: "#" }, { label: "Contact Us", url: "#" }, { label: "Latest News", url: "#" }, { label: "Our Sitemap", url: "#" }] },
       ],
+      copyrightText: "",
+      paymentIconsUrl: "https://woodmart.xtemos.com/wp-content/uploads/2018/08/payment.png",
     },
   },
 ];

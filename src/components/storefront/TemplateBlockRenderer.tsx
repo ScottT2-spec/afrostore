@@ -42,6 +42,7 @@ import {
   ElectronicsGamingCTA,
   ElectronicsBlogPosts,
   ElectronicsPartners,
+  ElectronicsFooter,
   ElectronicsSectionTitle,
 } from "@/components/storefront/ElectronicsTemplateBlocks";
 import {
@@ -195,6 +196,7 @@ const ELECTRONICS_BLOCKS: Record<string, BlockComponent> = {
   electronicsGamingCTA: ElectronicsGamingCTA as unknown as BlockComponent,
   electronicsBlogPosts: ElectronicsBlogPosts as unknown as BlockComponent,
   electronicsPartners: ElectronicsPartners as unknown as BlockComponent,
+  electronicsFooter: ElectronicsFooter as unknown as BlockComponent,
   electronicsSectionTitle: ElectronicsSectionTitle as unknown as BlockComponent,
 };
 
