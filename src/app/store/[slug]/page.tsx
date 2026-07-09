@@ -208,6 +208,10 @@ function TemplateStoreContextProvider({ templateSlug, products, blogs, currency,
   currency: string;
   storeSlug: string;
   socialLinks?: Array<{ platform: string; url: string }>;
+  addToCart?: (productId: string, quantity?: number) => void;
+  toggleWishlist?: (productId: string) => void;
+  isWishlisted?: (productId: string) => boolean;
+  onQuickView?: (productId: string) => void;
   children: React.ReactNode;
 }) {
   const value = { products, blogs, currency, storeSlug, socialLinks , addToCart, toggleWishlist, isWishlisted, onQuickView };
@@ -397,7 +401,7 @@ export default function StorePage() {
     ...(socialLinks?.instagram ? [{ platform: "instagram", url: socialLinks.instagram }] : []),
     ...(socialLinks?.twitter ? [{ platform: "twitter", url: socialLinks.twitter }] : []),
     ...(socialLinks?.tiktok ? [{ platform: "tiktok", url: socialLinks.tiktok }] : []),
-    ...(socialLinks?.youtube ? [{ platform: "youtube", url: socialLinks.youtube }] : []),
+    ...((socialLinks as any)?.youtube ? [{ platform: "youtube", url: (socialLinks as any).youtube }] : []),
     ...(socialLinks?.whatsapp ? [{ platform: "whatsapp", url: socialLinks.whatsapp }] : []),
   ];
 
@@ -617,7 +621,7 @@ export default function StorePage() {
       {hasHomeContent ? (
         /* Builder blocks Home page — render template blocks */
         <div style={buildPageBackgroundStyle(homePageSettings)}>
-          <TemplateStoreContextProvider templateSlug={data.templateSlug} products={products} blogs={data.blogs || []} currency={currency} storeSlug={slug} socialLinks={socialLinksArray}>
+          <TemplateStoreContextProvider templateSlug={data.templateSlug} products={products} blogs={data.blogs || []} currency={currency} storeSlug={slug} socialLinks={socialLinksArray} addToCart={(pid,qty)=>{const x=products.find(p=>p.id===pid);if(x)addToCart(x,qty);}} toggleWishlist={toggleWishlist} isWishlisted={isWishlisted} onQuickView={(pid)=>{const x=products.find(p=>p.id===pid);if(x)setSelectedProduct(x);}}>
           <RenderBlocks blocks={homeBlocks} storeSlug={slug} products={products} currency={currency} addToCart={(p) => addToCart(p as unknown as Product)} isWishlisted={isWishlisted} toggleWishlist={toggleWishlist} addedToCart={addedToCart} />
           </TemplateStoreContextProvider>
           {!isLanding && products.length > 0 && !homeHasProductGrid && (
@@ -634,7 +638,7 @@ export default function StorePage() {
       ) : templatePreset ? (
         /* Template with editable block preset */
         <div>
-          <TemplateStoreContextProvider templateSlug={data.templateSlug} products={products} blogs={data.blogs || []} currency={currency} storeSlug={slug} socialLinks={socialLinksArray}>
+          <TemplateStoreContextProvider templateSlug={data.templateSlug} products={products} blogs={data.blogs || []} currency={currency} storeSlug={slug} socialLinks={socialLinksArray} addToCart={(pid,qty)=>{const x=products.find(p=>p.id===pid);if(x)addToCart(x,qty);}} toggleWishlist={toggleWishlist} isWishlisted={isWishlisted} onQuickView={(pid)=>{const x=products.find(p=>p.id===pid);if(x)setSelectedProduct(x);}}>
             <RenderTemplateBlocks blocks={templatePreset} />
           </TemplateStoreContextProvider>
           {!isLanding && products.length > 0 && (
