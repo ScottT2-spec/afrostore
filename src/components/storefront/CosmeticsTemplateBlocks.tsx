@@ -4,6 +4,7 @@ import { resolveStoreLink, resolveFooterLink } from "@/lib/template-link-utils";
 import { useState, useEffect, useRef, useCallback, createContext, useContext } from "react";
 import { safeSrc, onImgError } from "./image-fallback";
 import { useNewsletterSubscribe } from "@/hooks/useNewsletterSubscribe";
+import { useStoreLink } from "@/hooks/useStoreLink";
 
 /* ═══════════════════════════════════════════════════════════════
    COSMETICS TEMPLATE BLOCKS
@@ -131,7 +132,8 @@ export interface CosmeticsHeroSliderProps {
 
 export function CosmeticsHeroSlider({ slides, autoplaySpeed = 5000, minHeight = "560px" }: CosmeticsHeroSliderProps) {
   const storeCtx = useContext(CosmeticsStoreContext);
-  const fixLink = (link: string) => resolveStoreLink(link, storeCtx?.storeSlug);
+  const { resolveLink } = useStoreLink();
+  const fixLink = (link: string) => resolveLink(link, storeCtx?.storeSlug || "");
   const [current, setCurrent] = useState(0);
   const [isTransitioning, setIsTransitioning] = useState(false);
   const timerRef = useRef<ReturnType<typeof setInterval> | null>(null);
@@ -283,7 +285,8 @@ export interface CosmeticsPromoBannersProps {
 
 export function CosmeticsPromoBanners({ banners }: CosmeticsPromoBannersProps) {
   const storeCtx = useContext(CosmeticsStoreContext);
-  const fixLink = (link: string) => resolveStoreLink(link, storeCtx?.storeSlug);
+  const { resolveLink } = useStoreLink();
+  const fixLink = (link: string) => resolveLink(link, storeCtx?.storeSlug || "");
 
   const scopedCss = `
     .cp-banners { display: grid; grid-template-columns: repeat(3, 1fr); gap: 30px; margin-bottom: 60px; }
@@ -367,7 +370,8 @@ export interface CosmeticsSectionTitleProps {
 
 export function CosmeticsSectionTitle({ subtitle, title, description, buttonText, buttonLink, align = "center", maxWidth = "50%", titleColor = "dark" }: CosmeticsSectionTitleProps) {
   const storeCtx = useContext(CosmeticsStoreContext);
-  const fixLink = (link: string) => resolveStoreLink(link, storeCtx?.storeSlug);
+  const { resolveLink } = useStoreLink();
+  const fixLink = (link: string) => resolveLink(link, storeCtx?.storeSlug || "");
 
   const scopedCss = `
     .cst-wrap { margin-bottom: 35px; }
@@ -433,6 +437,7 @@ export interface CosmeticsProductGridProps {
 
 export function CosmeticsProductGrid({ products: propProducts, columns = 4, showCategory = true, showHoverImage = true, sectionTitle, marginBottom = "60px", maxProducts = 8, filter, filterTag }: CosmeticsProductGridProps) {
   const storeCtx = useContext(CosmeticsStoreContext);
+  const { resolveLink } = useStoreLink();
 
   const products: CosmeticsProduct[] = (() => {
     if (!storeCtx || !storeCtx.products || storeCtx.products.length === 0) return propProducts || [];
@@ -464,12 +469,12 @@ export function CosmeticsProductGrid({ products: propProducts, columns = 4, show
       id: p.id,
       name: p.name,
       category: p.category?.name,
-      categoryLink: p.category?.slug ? `/store/${storeCtx.storeSlug}/shop?category=${p.category.slug}` : undefined,
+      categoryLink: p.category?.slug ? resolveLink(`shop?category=${p.category.slug}`, storeCtx?.storeSlug || "") : undefined,
       price: p.compareAtPrice ? `${sym}${p.compareAtPrice.toLocaleString()}` : `${sym}${p.price.toLocaleString()}`,
       salePrice: p.compareAtPrice ? `${sym}${p.price.toLocaleString()}` : undefined,
       image: p.images[0]?.url || safeSrc(null, p.name),
       hoverImage: p.images[1]?.url,
-      link: `/store/${storeCtx.storeSlug}/product/${p.slug}`,
+      link: resolveLink(`product/${p.slug}`, storeCtx?.storeSlug || ""),
       badge: p.compareAtPrice ? "SALE" : p.isFeatured ? "FEATURED" : undefined,
     }));
   })();
@@ -536,13 +541,14 @@ export function CosmeticsProductGrid({ products: propProducts, columns = 4, show
     @media (max-width: 767px) { .cpg-grid { grid-template-columns: repeat(2, 1fr); gap: 10px; } }
   `;
 
-  const resolveLink = (link: string, productName: string) => {
+  const resolveProductLink = (link: string, productName: string) => {
     if (link && link.startsWith("/store/")) return link;
-    if (storeCtx?.storeSlug) {
-      const slug = productName.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/(^-|-$)/g, "");
-      return `/store/${storeCtx.storeSlug}/product/${slug}`;
+    const slug = storeCtx?.storeSlug;
+    if (slug) {
+      const productSlug = productName.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/(^-|-$)/g, "");
+      return resolveLink(`product/${productSlug}`, slug);
     }
-    return resolveStoreLink(link, storeCtx?.storeSlug);
+    return resolveLink(link, slug || "");
   };
 
   if (products.length === 0) {
@@ -567,7 +573,7 @@ export function CosmeticsProductGrid({ products: propProducts, columns = 4, show
       )}
       <div className="cpg-grid">
         {products.map((p) => {
-          const productLink = resolveLink(p.link, p.name);
+          const productLink = resolveProductLink(p.link, p.name);
           return (
             <div key={p.id} className="cpg-card">
               <div className="cpg-thumb">
@@ -587,7 +593,7 @@ export function CosmeticsProductGrid({ products: propProducts, columns = 4, show
               </div>
               <h3 className="cpg-name"><Link href={productLink}>{p.name}</Link></h3>
               {showCategory && p.category && (
-                <div className="cpg-cat"><Link href={resolveStoreLink(p.categoryLink, storeCtx?.storeSlug)}>{p.category}</Link></div>
+                <div className="cpg-cat"><Link href={resolveLink(p.categoryLink || "", storeCtx?.storeSlug || "")}>{p.category}</Link></div>
               )}
               <div className="cpg-price">
                 {p.salePrice && <span className="cpg-price-old">{p.price}</span>}
@@ -620,13 +626,15 @@ export interface CosmeticsCategoryCardsProps {
 
 export function CosmeticsCategoryCards({ categories, sectionTitle, marginBottom = "60px" }: CosmeticsCategoryCardsProps) {
   const storeCtx = useContext(CosmeticsStoreContext);
-  const resolveLink = (link: string, catName: string) => {
+  const { resolveLink } = useStoreLink();
+  const resolveCategoryLink = (link: string, catName: string) => {
     if (link && link.startsWith("/store/")) return link;
-    if (storeCtx?.storeSlug) {
+    const slug = storeCtx?.storeSlug;
+    if (slug) {
       const catSlug = catName.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/(^-|-$)/g, "");
-      return `/store/${storeCtx.storeSlug}/shop?category=${catSlug}`;
+      return resolveLink(`shop?category=${catSlug}`, slug);
     }
-    return resolveStoreLink(link, storeCtx?.storeSlug);
+    return resolveLink(link, slug || "");
   };
 
   const scopedCss = `
@@ -721,7 +729,8 @@ export interface CosmeticsDiscoveryProps {
 
 export function CosmeticsDiscovery({ image, title, description, features, buttonText = "SHOP NOW", buttonLink, secondButtonText = "READ MORE", secondButtonLink, marginBottom = "60px" }: CosmeticsDiscoveryProps) {
   const storeCtx = useContext(CosmeticsStoreContext);
-  const fixLink = (link?: string) => resolveStoreLink(link || "#", storeCtx?.storeSlug);
+  const { resolveLink } = useStoreLink();
+  const fixLink = (link?: string) => resolveLink(link || "#", storeCtx?.storeSlug || "");
   const { ref, inView } = useInView();
 
   const scopedCss = `
@@ -826,7 +835,8 @@ export interface CosmeticsCountdownBannerProps {
 
 export function CosmeticsCountdownBanner({ title, description, image, targetDate, buttonText = "SHOP NOW", buttonLink, secondButtonText = "READ MORE", secondButtonLink, marginBottom = "60px" }: CosmeticsCountdownBannerProps) {
   const storeCtx = useContext(CosmeticsStoreContext);
-  const fixLink = (link?: string) => resolveStoreLink(link || "#", storeCtx?.storeSlug);
+  const { resolveLink } = useStoreLink();
+  const fixLink = (link?: string) => resolveLink(link || "#", storeCtx?.storeSlug || "");
 
   const [timeLeft, setTimeLeft] = useState({ days: 0, hours: 0, minutes: 0, seconds: 0 });
 
@@ -1032,6 +1042,7 @@ export interface CosmeticsBlogPostsProps {
 
 export function CosmeticsBlogPosts({ posts: propPosts, columns = 2, sectionTitle, marginBottom = "60px" }: CosmeticsBlogPostsProps) {
   const storeCtx = useContext(CosmeticsStoreContext);
+  const { resolveLink } = useStoreLink();
 
   const posts: CosmeticsBlogPost[] = (() => {
     if (!storeCtx || !storeCtx.blogs || storeCtx.blogs.length === 0) return propPosts || [];
@@ -1048,7 +1059,7 @@ export function CosmeticsBlogPosts({ posts: propPosts, columns = 2, sectionTitle
         date: { day, month },
         categories: b.category ? [b.category] : [],
         author: { name: b.author || "Store Team" },
-        link: `/store/${storeCtx.storeSlug}/blog/${b.slug}`,
+        link: resolveLink(`blog/${b.slug}`, storeCtx?.storeSlug || ""),
         commentCount: 0,
       };
     });
@@ -1117,7 +1128,7 @@ export function CosmeticsBlogPosts({ posts: propPosts, columns = 2, sectionTitle
                 <span className="cbp-date-day">{p.date.day}</span>
                 <span className="cbp-date-month">{p.date.month}</span>
               </div>
-              <Link href={resolveStoreLink(p.link, storeCtx?.storeSlug)} style={{ position: "absolute", inset: 0, zIndex: 3 }} aria-label={p.title} />
+              <Link href={resolveLink(p.link, storeCtx?.storeSlug || "")} style={{ position: "absolute", inset: 0, zIndex: 3 }} aria-label={p.title} />
             </div>
             <div className="cbp-content">
               <div className="cbp-cats">
@@ -1352,6 +1363,7 @@ export function CosmeticsFooter({
   backgroundColor = TOKENS.footerBg,
 }: CosmeticsFooterProps) {
   const storeCtx = useContext(CosmeticsStoreContext);
+  const { resolveLink } = useStoreLink();
   const [openColumns, setOpenColumns] = useState<Set<number>>(new Set());
 
   const toggleColumn = (index: number) => {
@@ -1525,13 +1537,7 @@ export function CosmeticsFooter({
         <div className="cf-col-brand">
           {logoUrl && (
             <div style={{ marginBottom: "16px" }}>
-              <Link href={storeCtx?.storeSlug ? `/store/${storeCtx.storeSlug}` : "/"}>
-                <img
-                  src={logoUrl}
-                  alt={logoAlt}
-                  style={{ maxWidth: "220px", height: "auto" }}
-                />
-              </Link>
+              <Link href={resolveLink("/", storeCtx?.storeSlug || "")}><img src={logoUrl} alt={logoAlt} style={{ maxWidth: "180px", height: "auto" }} /></Link>
             </div>
           )}
           <p style={{ margin: "0 0 10px", fontSize: "14px", lineHeight: "1.7" }}>
@@ -1567,39 +1573,25 @@ export function CosmeticsFooter({
           )}
         </div>
 
-        {recentPosts.length > 0 && (
-          <div className="cf-col-posts">
-            <div
-              className={`cf-col-toggle-head ${openColumns.has(1) ? "cf-open" : ""}`}
-              onClick={() => toggleColumn(1)}
-            >
-              <h4 className="cf-col-title">RECENT POSTS</h4>
-              {chevronSvg}
+        {/* Link columns */}
+        {linkColumns.map((col, idx) => {
+          const isOpen = openColumns.has(idx);
+          return (
+            <div key={idx} className="cf-col-links">
+              <div className={`cf-col-toggle-head ${isOpen ? "cf-open" : ""}`} onClick={() => toggleColumn(idx)}>
+                <h4 className="cf-col-title">{col.title}</h4>
+                {chevronSvg}
+              </div>
+              <div className={`cf-col-toggle-content ${isOpen ? "cf-open" : "cf-closed"}`}>
+                <ul className="cf-link-list">
+                  {col.links.map((link, li) => (
+                    <li key={li}><Link href={resolveFooterLink(link.url, link.label, storeCtx?.storeSlug || "")}>{link.label}</Link></li>
+                  ))}
+                </ul>
+              </div>
             </div>
-            <div className={`cf-col-toggle-content ${openColumns.has(1) ? "cf-open" : "cf-closed"}`}>
-              {recentPosts.map((post, i) => (
-                <div key={i} className="cf-post-item">
-                  {post.thumbnail && (
-                    <img
-                      src={post.thumbnail}
-                      alt={post.title}
-                      className="cf-post-thumb"
-                      loading="lazy"
-                    />
-                  )}
-                  <div>
-                    <h5 className="cf-post-title">
-                      <Link href={resolveStoreLink(post.url, storeCtx?.storeSlug)}>{post.title}</Link>
-                    </h5>
-                    <span className="cf-post-date">{post.date}</span>
-                  </div>
-                </div>
-              ))}
-            </div>
-          </div>
-        )}
-
-        {linkColumns.map(renderLinkColumn)}
+          );
+        })}
       </div>
 
       <div className="cf-copyrights">

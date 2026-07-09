@@ -164,12 +164,27 @@ function PageSettingsPanel({
         />
         <div>
           <label className="block text-xs font-medium text-surface-700 mb-1">Background Color</label>
-          <input
-            type="color"
-            value={settings.backgroundColor || "#ffffff"}
-            onChange={(e) => onChange({ ...settings, backgroundColor: e.target.value })}
-            className="h-10 w-full rounded-xl border border-surface-200 bg-white p-1"
-          />
+          <div className="flex items-center gap-2">
+            <input
+              type="color"
+              value={settings.backgroundColor || "#ffffff"}
+              onChange={(e) => onChange({ ...settings, backgroundColor: e.target.value })}
+              className="h-10 w-12 rounded-xl border border-surface-200 bg-white p-1 cursor-pointer"
+            />
+            <input
+              type="text"
+              value={settings.backgroundColor || "#ffffff"}
+              onChange={(e) => {
+                let newValue = e.target.value;
+                if (newValue && !newValue.startsWith('#')) {
+                  newValue = '#' + newValue;
+                }
+                onChange({ ...settings, backgroundColor: newValue });
+              }}
+              placeholder="#ffffff"
+              className="input-field text-sm py-2 flex-1 font-mono"
+            />
+          </div>
         </div>
         <div>
           <label className="block text-xs font-medium text-surface-700 mb-1">Background Size</label>
@@ -199,12 +214,27 @@ function PageSettingsPanel({
         </div>
         <div>
           <label className="block text-xs font-medium text-surface-700 mb-1">Overlay Color</label>
-          <input
-            type="color"
-            value={settings.overlayColor || "#000000"}
-            onChange={(e) => onChange({ ...settings, overlayColor: e.target.value })}
-            className="h-10 w-full rounded-xl border border-surface-200 bg-white p-1"
-          />
+          <div className="flex items-center gap-2">
+            <input
+              type="color"
+              value={settings.overlayColor || "#000000"}
+              onChange={(e) => onChange({ ...settings, overlayColor: e.target.value })}
+              className="h-10 w-12 rounded-xl border border-surface-200 bg-white p-1 cursor-pointer"
+            />
+            <input
+              type="text"
+              value={settings.overlayColor || "#000000"}
+              onChange={(e) => {
+                let newValue = e.target.value;
+                if (newValue && !newValue.startsWith('#')) {
+                  newValue = '#' + newValue;
+                }
+                onChange({ ...settings, overlayColor: newValue });
+              }}
+              placeholder="#000000"
+              className="input-field text-sm py-2 flex-1 font-mono"
+            />
+          </div>
         </div>
         <div>
           <label className="block text-xs font-medium text-surface-700 mb-1">Overlay Opacity</label>

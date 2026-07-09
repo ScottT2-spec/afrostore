@@ -88,14 +88,113 @@ export default function NewSitePage() {
     targetAudience: draft?.businessDetails.targetAudience || '',
   });
   const [branding, setBranding] = useState({
-    primary: '#1B2B4B',
-    secondary: '#111827',
-    accent: '#F5B731',
+    primary: '#3B82F6',
+    secondary: '#1E40AF',
+    accent: '#F59E0B',
     background: '#ffffff',
     text: '#111827',
     headingFont: 'Plus Jakarta Sans',
     bodyFont: 'Inter',
   });
+  const [colorFormats, setColorFormats] = useState<Record<string, 'hex' | 'rgb' | 'hsl'>>({
+    primary: 'hex',
+    secondary: 'hex',
+    accent: 'hex',
+    background: 'hex',
+    text: 'hex',
+  });
+
+  // Color format conversion functions
+  const hexToRgb = (hex: string): string => {
+    const result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
+    if (!result) return hex;
+    const r = parseInt(result[1], 16);
+    const g = parseInt(result[2], 16);
+    const b = parseInt(result[3], 16);
+    return `rgb(${r}, ${g}, ${b})`;
+  };
+
+  const hexToHsl = (hex: string): string => {
+    const result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
+    if (!result) return hex;
+    let r = parseInt(result[1], 16) / 255;
+    let g = parseInt(result[2], 16) / 255;
+    let b = parseInt(result[3], 16) / 255;
+    const max = Math.max(r, g, b);
+    const min = Math.min(r, g, b);
+    let h = 0, s = 0, l = (max + min) / 2;
+    if (max !== min) {
+      const d = max - min;
+      s = l > 0.5 ? d / (2 - max - min) : d / (max + min);
+      switch (max) {
+        case r: h = ((g - b) / d + (g < b ? 6 : 0)) / 6; break;
+        case g: h = ((b - r) / d + 2) / 6; break;
+        case b: h = ((r - g) / d + 4) / 6; break;
+      }
+    }
+    return `hsl(${Math.round(h * 360)}, ${Math.round(s * 100)}%, ${Math.round(l * 100)}%)`;
+  };
+
+  const rgbToHex = (rgb: string): string => {
+    const match = rgb.match(/rgba?\((\d+),\s*(\d+),\s*(\d+)/);
+    if (!match) return rgb;
+    const r = parseInt(match[1], 10).toString(16).padStart(2, '0');
+    const g = parseInt(match[2], 10).toString(16).padStart(2, '0');
+    const b = parseInt(match[3], 10).toString(16).padStart(2, '0');
+    return `#${r}${g}${b}`;
+  };
+
+  const hslToHex = (hsl: string): string => {
+    const match = hsl.match(/hsl\((\d+),\s*(\d+)%,\s*(\d+)%\)/);
+    if (!match) return hsl;
+    let h = parseInt(match[1], 10) / 360;
+    let s = parseInt(match[2], 10) / 100;
+    let l = parseInt(match[3], 10) / 100;
+    let r, g, b;
+    if (s === 0) {
+      r = g = b = l;
+    } else {
+      const hue2rgb = (p: number, q: number, t: number) => {
+        if (t < 0) t += 1;
+        if (t > 1) t -= 1;
+        if (t < 1/6) return p + (q - p) * 6 * t;
+        if (t < 1/2) return q;
+        if (t < 2/3) return p + (q - p) * (2/3 - t) * 6;
+        return p;
+      };
+      const q = l < 0.5 ? l * (1 + s) : l + s - l * s;
+      const p = 2 * l - q;
+      r = hue2rgb(p, q, h + 1/3);
+      g = hue2rgb(p, q, h);
+      b = hue2rgb(p, q, h - 1/3);
+    }
+    const toHex = (x: number) => Math.round(x * 255).toString(16).padStart(2, '0');
+    return `#${toHex(r)}${toHex(g)}${toHex(b)}`;
+  };
+
+  const formatColor = (color: string, format: 'hex' | 'rgb' | 'hsl'): string => {
+    const hexColor = color.startsWith('#') ? color : (color.startsWith('rgb') ? rgbToHex(color) : (color.startsWith('hsl') ? hslToHex(color) : color));
+    if (format === 'hex') return hexColor;
+    if (format === 'rgb') return hexToRgb(hexColor);
+    if (format === 'hsl') return hexToHsl(hexColor);
+    return hexColor;
+  };
+
+  const parseColorInput = (value: string, format: 'hex' | 'rgb' | 'hsl'): string => {
+    if (format === 'hex') {
+      if (!value.startsWith('#')) value = '#' + value;
+      return value;
+    }
+    if (format === 'rgb') {
+      if (value.startsWith('#')) return value;
+      return value;
+    }
+    if (format === 'hsl') {
+      if (value.startsWith('#')) return value;
+      return value;
+    }
+    return value;
+  };
   const [selectedGateways, setSelectedGateways] = useState<string[]>([]);
   const [domainType, setDomainType] = useState<'subdomain' | 'custom'>('subdomain');
   const [customDomain, setCustomDomain] = useState('');
@@ -600,12 +699,43 @@ export default function NewSitePage() {
                       {(['primary', 'secondary', 'accent', 'background', 'text'] as const).map(key => (
                         <div key={key} className="flex flex-col">
                           <label className="text-xs font-medium text-gray-600 capitalize mb-2">{key}</label>
-                          <input
-                            type="color"
-                            value={branding[key]}
-                            onChange={e => setBranding(prev => ({ ...prev, [key]: e.target.value }))}
-                            className="h-12 w-full rounded-lg border border-gray-200 p-1 cursor-pointer hover:border-gray-300 transition"
-                          />
+                          <div className="flex items-center gap-2">
+                            <div className="relative h-10 w-10 flex-shrink-0">
+                              <input
+                                type="color"
+                                value={branding[key]}
+                                onChange={e => setBranding(prev => ({ ...prev, [key]: e.target.value }))}
+                                className="absolute inset-0 w-full h-full rounded-lg border border-gray-200 cursor-pointer opacity-0"
+                              />
+                              <div 
+                                className="w-full h-full rounded-lg border border-gray-200 cursor-pointer hover:border-gray-300 transition"
+                                style={{ backgroundColor: branding[key] }}
+                              />
+                            </div>
+                            <div className="flex-1 min-w-0">
+                              <input
+                                type="text"
+                                value={formatColor(branding[key], colorFormats[key])}
+                                onChange={e => {
+                                  const newValue = parseColorInput(e.target.value, colorFormats[key]);
+                                  // Convert to HEX for storage
+                                  const hexValue = newValue.startsWith('#') ? newValue : (newValue.startsWith('rgb') ? rgbToHex(newValue) : (newValue.startsWith('hsl') ? hslToHex(newValue) : newValue));
+                                  setBranding(prev => ({ ...prev, [key]: hexValue }));
+                                }}
+                                placeholder={colorFormats[key] === 'hex' ? '#000000' : colorFormats[key] === 'rgb' ? 'rgb(0, 0, 0)' : 'hsl(0, 0%, 0%)'}
+                                className="w-full rounded-lg border border-gray-200 px-2 py-1.5 text-sm font-mono"
+                              />
+                              <select
+                                value={colorFormats[key]}
+                                onChange={e => setColorFormats(prev => ({ ...prev, [key]: e.target.value as 'hex' | 'rgb' | 'hsl' }))}
+                                className="mt-1 text-xs border border-gray-200 rounded px-1 py-0.5 bg-gray-50"
+                              >
+                                <option value="hex">HEX</option>
+                                <option value="rgb">RGB</option>
+                                <option value="hsl">HSL</option>
+                              </select>
+                            </div>
+                          </div>
                         </div>
                       ))}
                     </div>

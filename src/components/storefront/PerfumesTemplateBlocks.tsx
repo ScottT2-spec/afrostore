@@ -3,6 +3,8 @@ import Link from "next/link";
 import { resolveStoreLink, resolveFooterLink } from "@/lib/template-link-utils";
 import { useState, useEffect, useRef, useCallback, createContext, useContext } from "react";
 import { safeSrc, onImgError } from "./image-fallback";
+import { useNewsletterSubscribe } from "@/hooks/useNewsletterSubscribe";
+import { useStoreLink } from "@/hooks/useStoreLink";
 
 /* ═══════════════════════════════════════════════════════════════
    PERFUMES TEMPLATE BLOCKS
@@ -130,7 +132,8 @@ export interface PerfumesHeroSliderProps {
 
 export function PerfumesHeroSlider({ slides, autoplaySpeed = 6000, minHeight = "100vh" }: PerfumesHeroSliderProps) {
   const storeCtx = useContext(PerfumesStoreContext);
-  const fixLink = (link: string) => resolveStoreLink(link, storeCtx?.storeSlug);
+  const { resolveLink } = useStoreLink();
+  const fixLink = (link: string) => resolveLink(link, storeCtx?.storeSlug || "");
   const [current, setCurrent] = useState(0);
   const timerRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
@@ -298,6 +301,7 @@ export interface PerfumesProductGridProps {
 
 export function PerfumesProductGrid({ products: propProducts, columns = 3, sectionTitle, marginBottom = "120px", maxProducts = 6, filter, filterTag }: PerfumesProductGridProps) {
   const storeCtx = useContext(PerfumesStoreContext);
+  const { resolveLink } = useStoreLink();
 
   const products: PerfumesProduct[] = (() => {
     if (!storeCtx || !storeCtx.products || storeCtx.products.length === 0) return propProducts || [];
@@ -324,23 +328,24 @@ export function PerfumesProductGrid({ products: propProducts, columns = 3, secti
     return storeProducts.slice(0, maxProducts).map(p => ({
       id: p.id, name: p.name,
       category: p.category?.name,
-      categoryLink: p.category?.slug ? `/store/${storeCtx.storeSlug}/shop?category=${p.category.slug}` : undefined,
+      categoryLink: p.category?.slug ? resolveLink(`shop?category=${p.category.slug}`, storeCtx?.storeSlug || "") : undefined,
       price: p.compareAtPrice ? `${sym}${p.compareAtPrice.toLocaleString()}` : `${sym}${p.price.toLocaleString()}`,
       salePrice: p.compareAtPrice ? `${sym}${p.price.toLocaleString()}` : undefined,
       image: p.images[0]?.url || safeSrc(null, p.name),
       hoverImage: p.images[1]?.url,
-      link: `/store/${storeCtx.storeSlug}/product/${p.slug}`,
+      link: resolveLink(`product/${p.slug}`, storeCtx?.storeSlug || ""),
       badge: p.compareAtPrice ? "SALE" : undefined,
     }));
   })();
 
-  const resolveLink = (link: string, name: string) => {
+  const resolveProductLink = (link: string, name: string) => {
     if (link && link.startsWith("/store/")) return link;
-    if (storeCtx?.storeSlug) {
-      const slug = name.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/(^-|-$)/g, "");
-      return `/store/${storeCtx.storeSlug}/product/${slug}`;
+    const slug = storeCtx?.storeSlug;
+    if (slug) {
+      const productSlug = name.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/(^-|-$)/g, "");
+      return resolveLink(`product/${productSlug}`, slug);
     }
-    return resolveStoreLink(link, storeCtx?.storeSlug);
+    return resolveLink(link, slug || "");
   };
 
   const scopedCss = `
@@ -478,7 +483,8 @@ export interface PerfumesOlfactoryTagsProps {
 
 export function PerfumesOlfactoryTags({ title = "Shop by Olfactory Family", tags, marginBottom = "120px" }: PerfumesOlfactoryTagsProps) {
   const storeCtx = useContext(PerfumesStoreContext);
-  const fixLink = (link: string) => resolveStoreLink(link, storeCtx?.storeSlug);
+  const { resolveLink } = useStoreLink();
+  const fixLink = (link: string) => resolveLink(link, storeCtx?.storeSlug || "");
 
   const scopedCss = `
     .pot-section { margin-bottom: ${marginBottom}; }
@@ -587,7 +593,8 @@ export interface PerfumesFeaturedBannersProps {
 
 export function PerfumesFeaturedBanners({ banners, marginBottom = "120px" }: PerfumesFeaturedBannersProps) {
   const storeCtx = useContext(PerfumesStoreContext);
-  const fixLink = (link: string) => resolveStoreLink(link, storeCtx?.storeSlug);
+  const { resolveLink } = useStoreLink();
+  const fixLink = (link: string) => resolveLink(link, storeCtx?.storeSlug || "");
 
   const scopedCss = `
     .pfb-section { margin-bottom: ${marginBottom}; }
@@ -750,7 +757,8 @@ export interface PerfumesCollectionBannersProps {
 
 export function PerfumesCollectionBanners({ banners, sectionTitle, marginBottom = "120px" }: PerfumesCollectionBannersProps) {
   const storeCtx = useContext(PerfumesStoreContext);
-  const fixLink = (link: string) => resolveStoreLink(link, storeCtx?.storeSlug);
+  const { resolveLink } = useStoreLink();
+  const fixLink = (link: string) => resolveLink(link, storeCtx?.storeSlug || "");
   const { ref, inView } = useInView();
 
   const scopedCss = `
@@ -840,6 +848,7 @@ export interface PerfumesBlogArticlesProps {
 
 export function PerfumesBlogArticles({ posts: propPosts, sectionTitle = "Journal Articles", columns = 5, marginBottom = "100px" }: PerfumesBlogArticlesProps) {
   const storeCtx = useContext(PerfumesStoreContext);
+  const { resolveLink } = useStoreLink();
 
   const posts: PerfumesBlogPost[] = (() => {
     if (!storeCtx || !storeCtx.blogs || storeCtx.blogs.length === 0) return propPosts || [];
@@ -849,7 +858,7 @@ export function PerfumesBlogArticles({ posts: propPosts, sectionTitle = "Journal
         image: b.coverImage || "", title: b.title, excerpt: b.excerpt || "",
         date: d.toLocaleDateString("en-US", { day: "2-digit", month: "short", year: "numeric" }),
         categories: b.category ? [b.category] : [],
-        link: `/store/${storeCtx.storeSlug}/blog/${b.slug}`,
+        link: resolveLink(`blog/${b.slug}`, storeCtx?.storeSlug || ""),
       };
     });
   })();
@@ -897,7 +906,7 @@ export function PerfumesBlogArticles({ posts: propPosts, sectionTitle = "Journal
           <article key={i} className="pba-card">
             <div className="pba-img-wrap">
               <img src={p.image} alt={p.title} className="pba-img" loading="lazy" />
-              <Link href={resolveStoreLink(p.link, storeCtx?.storeSlug)} className="pba-link" aria-label={p.title} />
+              <Link href={resolveLink(p.link, storeCtx?.storeSlug || "")} className="pba-link" aria-label={p.title} />
             </div>
             <div className="pba-cats">
               {p.categories.map((c, ci) => (
@@ -1054,6 +1063,9 @@ export function PerfumesFooter({
   backgroundColor = TOKENS.footerBg,
 }: PerfumesFooterProps) {
   const storeCtx = useContext(PerfumesStoreContext);
+  const { resolveLink } = useStoreLink();
+  const [email, setEmail] = useState("");
+  const { subscribe, status: nlStatus } = useNewsletterSubscribe(storeCtx?.storeSlug || "");
   const [openColumns, setOpenColumns] = useState<Set<number>>(new Set());
 
   const toggleColumn = (index: number) => {
@@ -1191,117 +1203,64 @@ export function PerfumesFooter({
     </svg>
   );
 
-  const renderLinkColumn = (col: FooterLinkColumn, idx: number) => {
-    const colIndex = idx + 2;
-    const isOpen = openColumns.has(colIndex);
-
-    return (
-      <div key={idx} className="pf-col-links">
-        <div
-          className={`pf-col-toggle-head ${isOpen ? "pf-open" : ""}`}
-          onClick={() => toggleColumn(colIndex)}
-        >
-          <h4 className="pf-col-title">{col.title}</h4>
-          {chevronSvg}
-        </div>
-        <div className={`pf-col-toggle-content ${isOpen ? "pf-open" : "pf-closed"}`}>
-          <ul className="pf-link-list">
-            {col.links.map((link, li) => (
-              <li key={li}>
-                <Link href={resolveFooterLink(link.url, link.label, storeCtx?.storeSlug)}>
-                  {link.emphasized ? <em>{link.label}</em> : link.label}
-                </Link>
-              </li>
-            ))}
-          </ul>
-        </div>
-      </div>
-    );
-  };
-
   return (
-    <footer className="pf-footer" style={footerStyle}>
+    <footer className="pf-footer">
       <ScopedStyles id="footer" css={scopedCss} />
-
-      <div className="pf-main-footer" style={mainFooterStyle}>
+      <div className="pf-main">
+        {/* Brand */}
         <div className="pf-col-brand">
           {logoUrl && (
             <div style={{ marginBottom: "16px" }}>
-              <Link href={storeCtx?.storeSlug ? `/store/${storeCtx.storeSlug}` : "/"}>
-                <img
-                  src={logoUrl}
-                  alt={logoAlt}
-                  style={{ maxWidth: "220px", height: "auto" }}
-                />
-              </Link>
+              <Link href={resolveLink("/", storeCtx?.storeSlug || "")}><img src={logoUrl} alt={logoAlt} style={{ maxWidth: "150px", height: "auto" }} /></Link>
             </div>
           )}
-          <p style={{ margin: "0 0 10px", fontSize: "14px", lineHeight: "1.7" }}>
-            {description}
-          </p>
-          {contact && (
-            <ul className="pf-contact-list">
-              {contact.address && (
-                <li className="pf-contact-item">
-                  {contactIcons.address}
-                  <span>{contact.address}</span>
-                </li>
-              )}
-              {contact.phone && (
-                <li className="pf-contact-item">
-                  {contactIcons.phone}
-                  <span>Phone: {contact.phone}</span>
-                </li>
-              )}
-              {contact.fax && (
-                <li className="pf-contact-item">
-                  {contactIcons.fax}
-                  <span>Fax: {contact.fax}</span>
-                </li>
-              )}
-              {contact.email && (
-                <li className="pf-contact-item">
-                  {contactIcons.email}
-                  <span>Email: {contact.email}</span>
-                </li>
-              )}
-            </ul>
+          <p style={{ margin: "0 0 10px" }}>{description}</p>
+          {socialLinks.length > 0 && (
+            <div className="pf-social">
+              {socialLinks.map((s, i) => (
+                <a key={i} href={s.url} className="pf-social-icon" target="_blank" rel="noopener noreferrer" aria-label={s.platform}>
+                  {socialIcons[s.platform] || s.platform[0]?.toUpperCase()}
+                </a>
+              ))}
+            </div>
           )}
         </div>
 
-        {recentPosts.length > 0 && (
-          <div className="pf-col-posts">
-            <div
-              className={`pf-col-toggle-head ${openColumns.has(1) ? "pf-open" : ""}`}
-              onClick={() => toggleColumn(1)}
-            >
-              <h4 className="pf-col-title">RECENT POSTS</h4>
-              {chevronSvg}
+        {/* Link columns */}
+        {linkColumns.map((col, idx) => {
+          const isOpen = openColumns.has(idx);
+          return (
+            <div key={idx} className="pf-col-links">
+              <div className={`pf-col-toggle-head ${isOpen ? "pf-open" : ""}`} onClick={() => toggleColumn(idx)}>
+                <h4 className="pf-col-title">{col.title}</h4>
+                {chevronSvg}
+              </div>
+              <div className={`pf-col-toggle-content ${isOpen ? "pf-open" : "pf-closed"}`}>
+                <ul className="pf-link-list">
+                  {col.links.map((link, li) => (
+                    <li key={li}><Link href={resolveFooterLink(link.url, link.label, storeCtx?.storeSlug || "")}>{link.label}</Link></li>
+                  ))}
+                </ul>
+              </div>
             </div>
-            <div className={`pf-col-toggle-content ${openColumns.has(1) ? "pf-open" : "pf-closed"}`}>
-              {recentPosts.map((post, i) => (
-                <div key={i} className="pf-post-item">
-                  {post.thumbnail && (
-                    <img
-                      src={post.thumbnail}
-                      alt={post.title}
-                      className="pf-post-thumb"
-                      loading="lazy"
-                    />
-                  )}
-                  <div>
-                    <h5 className="pf-post-title">
-                      <Link href={resolveStoreLink(post.url, storeCtx?.storeSlug)}>{post.title}</Link>
-                    </h5>
-                    <span className="pf-post-date">{post.date}</span>
-                  </div>
-                </div>
-              ))}
-            </div>
+          );
+        })}
+
+        {/* Newsletter */}
+        {newsletterEnabled && (
+          <div className="pf-col-newsletter">
+            <h4 className="pf-col-title">Newsletter</h4>
+            <p style={{ margin: "0 0 10px" }}>Subscribe for exclusive fragrances and early access.</p>
+            {nlStatus === "success" ? (
+              <p style={{ fontFamily: TOKENS.bodyFont, fontSize: "14px", color: TOKENS.accentColor, marginTop: "10px" }}>Thanks for subscribing! 🎉</p>
+            ) : (
+            <form className="pf-newsletter-form" onSubmit={e => { e.preventDefault(); subscribe(email).then(() => setEmail("")); }}>
+              <input type="email" className="pf-newsletter-input" placeholder="Your email" value={email} onChange={e => setEmail(e.target.value)} required />
+              <button type="submit" className="pf-newsletter-btn" disabled={nlStatus === "loading"}>{nlStatus === "loading" ? "..." : "Subscribe"}</button>
+            </form>
+            )}
           </div>
         )}
-
-        {linkColumns.map(renderLinkColumn)}
       </div>
 
       <div className="pf-copyrights">

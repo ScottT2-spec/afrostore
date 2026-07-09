@@ -4,6 +4,7 @@ import { resolveStoreLink, resolveFooterLink } from "@/lib/template-link-utils";
 import { useState, useEffect, useRef, useCallback, createContext, useContext } from "react";
 import { safeSrc, onImgError } from "./image-fallback";
 import { useNewsletterSubscribe } from "@/hooks/useNewsletterSubscribe";
+import { useStoreLink } from "@/hooks/useStoreLink";
 
 /* ═══════════════════════════════════════════════════════════════
    HEALTH (PILLS & SUPPLEMENTS) TEMPLATE BLOCKS
@@ -13,8 +14,8 @@ import { useNewsletterSubscribe } from "@/hooks/useNewsletterSubscribe";
 
 /* ─── DESIGN TOKENS ─────────────────────────────────────────── */
 const TOKENS = {
-  primaryColor: "rgb(136,173,153)",
-  primaryHover: "rgb(110,150,130)",
+  primaryColor: "#88AD99",
+  primaryHover: "#6E9682",
   titleColor: "#333333",
   textColor: "#777777",
   entityTitleColor: "#333333",
@@ -129,7 +130,8 @@ export function HealthHero({
   backgroundImage = `${IMG}/2023/08/w-pas-first-screen.jpg`,
 }: HealthHeroProps) {
   const storeCtx = useContext(HealthStoreContext);
-  const fixLink = (link: string) => resolveStoreLink(link, storeCtx?.storeSlug);
+  const { resolveLink } = useStoreLink();
+  const fixLink = (link: string) => resolveLink(link, storeCtx?.storeSlug || "");
 
   const css = `
     .hh-hero { position: relative; width: 100%; min-height: 660px; display: flex; align-items: center; overflow: hidden; background: ${TOKENS.bgLight}; }
@@ -212,7 +214,8 @@ export interface HealthPromoBannersProps {
 
 export function HealthPromoBanners({ banners }: HealthPromoBannersProps) {
   const storeCtx = useContext(HealthStoreContext);
-  const fixLink = (link: string) => resolveStoreLink(link, storeCtx?.storeSlug);
+  const { resolveLink } = useStoreLink();
+  const fixLink = (link: string) => resolveLink(link, storeCtx?.storeSlug || "");
 
   const defaultBanners: HealthPromoBanner[] = [
     { image: `${IMG}/2024/03/w-pas-banner-1.jpg`, subtitle: "Save 15%", title: "Bundles", buttonText: "Shop by Need", buttonLink: "#", colorScheme: "light", height: "456px" },
@@ -304,7 +307,8 @@ export interface HealthCategoryCardsProps {
 
 export function HealthCategoryCards({ categories, columns = 4, sectionTitle = "Popular Categories", marginBottom = "80px" }: HealthCategoryCardsProps) {
   const storeCtx = useContext(HealthStoreContext);
-  const fixLink = (link?: string) => resolveStoreLink(link || "#", storeCtx?.storeSlug);
+  const { resolveLink } = useStoreLink();
+  const fixLink = (link?: string) => resolveLink(link || "#", storeCtx?.storeSlug || "");
 
   const defaultCats: HealthCategoryCard[] = [
     { name: "Allergy Relief", image: `${IMG}/2023/08/w-pas-category-allergy.jpg` },
@@ -374,8 +378,9 @@ export function HealthProductGrid({
   bgColor,
 }: HealthProductGridProps) {
   const storeCtx = useContext(HealthStoreContext);
+  const { resolveLink } = useStoreLink();
   const fixLink = (slug: string) => {
-    if (storeCtx?.storeSlug) return `/store/${storeCtx.storeSlug}/product/${slug}`;
+    if (storeCtx?.storeSlug) return resolveLink(`product/${slug}`, storeCtx?.storeSlug);
     return `#`;
   };
 
@@ -497,6 +502,7 @@ export function HealthFeatureSection({
   helpText = "Need help choosing?",
 }: HealthFeatureSectionProps) {
   const storeCtx = useContext(HealthStoreContext);
+  const { resolveLink } = useStoreLink();
   const defaultFeatures: HealthFeatureItem[] = [
     { icon: `${IMG}/2023/08/w-pas-m-icon-1.svg`, title: "Used In", description: "Chances are, you've probably heard of the nutrient iron before. As a kid, you may remember the not-so-pleasant finger pricks at the doctor's office to check your iron levels." },
     { icon: `${IMG}/2023/08/w-pas-m-icon-2.svg`, title: "Found In", description: "Chances are, you've probably heard of the nutrient iron before. As a kid, you may remember the not-so-pleasant finger pricks at the doctor's office to check your iron levels." },
@@ -534,7 +540,7 @@ export function HealthFeatureSection({
             <img className="hh-feat-avatars" src={helpAvatars} alt="Support team" />
             <div>
               <div className="hh-feat-help-text">{helpText}</div>
-              <Link href={resolveStoreLink("#", storeCtx?.storeSlug)} className="hh-feat-help-link">Contact Us →</Link>
+              <Link href={resolveLink("#", storeCtx?.storeSlug || "")} className="hh-feat-help-link">Contact Us →</Link>
             </div>
           </div>
         </div>
@@ -992,130 +998,34 @@ export function HealthFooter({
     const colIndex = idx + 2;
     const isOpen = openColumns.has(colIndex);
 
-    return (
-      <div key={idx} className="ht-col-links">
-        <div
-          className={`ht-col-toggle-head ${isOpen ? "ht-open" : ""}`}
-          onClick={() => toggleColumn(colIndex)}
-        >
-          <h4 className="ht-col-title">{col.title}</h4>
-          {chevronSvg}
-        </div>
-        <div className={`ht-col-toggle-content ${isOpen ? "ht-open" : "ht-closed"}`}>
-          <ul className="ht-link-list">
-            {col.links.map((link, li) => (
-              <li key={li}>
-                <Link href={resolveFooterLink(link.url, link.label, storeCtx?.storeSlug)}>
-                  {link.emphasized ? <em>{link.label}</em> : link.label}
-                </Link>
-              </li>
-            ))}
-          </ul>
-        </div>
-      </div>
-    );
-  };
-
   return (
-    <footer className="ht-footer" style={footerStyle}>
-      <ScopedStyles id="footer" css={scopedCss} />
-
-      <div className="ht-main-footer" style={mainFooterStyle}>
-        <div className="ht-col-brand">
-          {logoUrl && (
-            <div style={{ marginBottom: "16px" }}>
-              <Link href={storeCtx?.storeSlug ? `/store/${storeCtx.storeSlug}` : "/"}>
-                <img
-                  src={logoUrl}
-                  alt={logoAlt}
-                  style={{ maxWidth: "220px", height: "auto" }}
-                />
-              </Link>
-            </div>
-          )}
-          <p style={{ margin: "0 0 10px", fontSize: "14px", lineHeight: "1.7" }}>
-            {description}
-          </p>
-          {contact && (
-            <ul className="ht-contact-list">
-              {contact.address && (
-                <li className="ht-contact-item">
-                  {contactIcons.address}
-                  <span>{contact.address}</span>
-                </li>
-              )}
-              {contact.phone && (
-                <li className="ht-contact-item">
-                  {contactIcons.phone}
-                  <span>Phone: {contact.phone}</span>
-                </li>
-              )}
-              {contact.fax && (
-                <li className="ht-contact-item">
-                  {contactIcons.fax}
-                  <span>Fax: {contact.fax}</span>
-                </li>
-              )}
-              {contact.email && (
-                <li className="ht-contact-item">
-                  {contactIcons.email}
-                  <span>Email: {contact.email}</span>
-                </li>
-              )}
-            </ul>
-          )}
-        </div>
-
-        {recentPosts.length > 0 && (
-          <div className="ht-col-posts">
-            <div
-              className={`ht-col-toggle-head ${openColumns.has(1) ? "ht-open" : ""}`}
-              onClick={() => toggleColumn(1)}
-            >
-              <h4 className="ht-col-title">RECENT POSTS</h4>
-              {chevronSvg}
-            </div>
-            <div className={`ht-col-toggle-content ${openColumns.has(1) ? "ht-open" : "ht-closed"}`}>
-              {recentPosts.map((post, i) => (
-                <div key={i} className="ht-post-item">
-                  {post.thumbnail && (
-                    <img
-                      src={post.thumbnail}
-                      alt={post.title}
-                      className="ht-post-thumb"
-                      loading="lazy"
-                    />
-                  )}
-                  <div>
-                    <h5 className="ht-post-title">
-                      <Link href={resolveStoreLink(post.url, storeCtx?.storeSlug)}>{post.title}</Link>
-                    </h5>
-                    <span className="ht-post-date">{post.date}</span>
-                  </div>
-                </div>
-              ))}
-            </div>
-          </div>
-        )}
-
-        {linkColumns.map(renderLinkColumn)}
-      </div>
-
-      <div className="ht-copyrights">
-        <div>
-          <small>
-            <Link href={storeCtx?.storeSlug ? `/store/${storeCtx.storeSlug}` : "/"}>{copyrightText}</Link>
-          </small>
-        </div>
-        {paymentIconsUrl && (
+    <footer className="hh-footer">
+      <ScopedStyles id="footer" css={css} />
+      <div style={containerStyle}>
+        <div className="hh-footer-grid">
           <div>
-            <img
-              src={paymentIconsUrl}
-              alt="Payment methods"
-              loading="lazy"
-            />
+            <img className="hh-footer-logo" src={storeCtx?.storeLogo || logo} alt="Logo" />
+            <p className="hh-footer-desc">{description}</p>
+            <div className="hh-footer-contact">
+              {address && <div style={{ display: "flex", alignItems: "flex-start", gap: "8px", marginBottom: "8px" }}>
+                <img src={`${IMG}/2023/08/w-pas-map-pointer-1.svg`} alt="" style={{ width: "16px", marginTop: "3px" }} />
+                <span>{storeCtx?.contactAddress || address}</span>
+              </div>}
+              {(storeCtx?.contactEmail || email) && <div>✉ <a href={`mailto:${storeCtx?.contactEmail || email}`}>{storeCtx?.contactEmail || email}</a></div>}
+            </div>
           </div>
-        )}
+          {cols.map((col, i) => (
+            <div key={i}>
+              <h5 className="hh-footer-col-title">{col.title}</h5>
+              <ul className="hh-footer-links">
+                {col.links.map((link, j) => (
+                  <li key={j}><Link href={resolveFooterLink(link.href, link.label, storeCtx?.storeSlug || "")}>{link.label}</Link></li>
+                ))}
+              </ul>
+            </div>
+          ))}
+        </div>
+        <div className="hh-footer-bottom">{copyright}</div>
       </div>
     </footer>
   );

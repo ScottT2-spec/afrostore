@@ -4,6 +4,7 @@ import Link from "next/link";
 import { resolveStoreLink, resolveFooterLink } from "@/lib/template-link-utils";
 import { safeSrc, onImgError } from "./image-fallback";
 import { useNewsletterSubscribe } from "@/hooks/useNewsletterSubscribe";
+import { useStoreLink } from "@/hooks/useStoreLink";
 
 /* ═══════════════════════════════════════════════════════════════
    FASHION TEMPLATE BLOCKS
@@ -91,7 +92,8 @@ export interface FashionHeroSliderProps {
 
 export function FashionHeroSlider({ slides, autoplaySpeed = 5000, minHeight = "560px" }: FashionHeroSliderProps) {
   const storeCtx = useContext(FashionStoreContext);
-  const fixLink = (link: string) => resolveStoreLink(link, storeCtx?.storeSlug);
+  const { resolveLink } = useStoreLink();
+  const fixLink = (link: string) => resolveLink(link, storeCtx?.storeSlug || "");
   const [current, setCurrent] = useState(0);
   const [isTransitioning, setIsTransitioning] = useState(false);
   const timerRef = useRef<ReturnType<typeof setInterval> | null>(null);
@@ -228,7 +230,8 @@ export interface FashionPromoBannersProps {
 
 export function FashionPromoBanners({ banners }: FashionPromoBannersProps) {
   const storeCtx = useContext(FashionStoreContext);
-  const fixLink = (link: string) => resolveStoreLink(link, storeCtx?.storeSlug);
+  const { resolveLink } = useStoreLink();
+  const fixLink = (link: string) => resolveLink(link, storeCtx?.storeSlug || "");
   const scopedCss = `
     .fp-banners { display: grid; grid-template-columns: repeat(3, 1fr); gap: 30px; margin-bottom: 80px; }
     .fp-banner { position: relative; overflow: hidden; cursor: pointer; }
@@ -406,6 +409,7 @@ export interface FashionProductGridProps {
 
 export function FashionProductGrid({ products: propProducts, columns = 4, showCategory = true, showHoverImage = true, sectionTitle, marginBottom = "60px", maxProducts = 8, filter, filterTag }: FashionProductGridProps) {
   const storeCtx = useContext(FashionStoreContext);
+  const { resolveLink } = useStoreLink();
 
   // Convert real store products to FashionProduct format
   const products: FashionProduct[] = (() => {
@@ -444,12 +448,12 @@ export function FashionProductGrid({ products: propProducts, columns = 4, showCa
       id: p.id,
       name: p.name,
       category: p.category?.name,
-      categoryLink: p.category?.slug ? `/store/${storeCtx.storeSlug}/shop?category=${p.category.slug}` : undefined,
+      categoryLink: p.category?.slug ? resolveLink(`shop?category=${p.category.slug}`, storeCtx?.storeSlug || "") : undefined,
       price: p.compareAtPrice ? `${sym}${p.compareAtPrice.toLocaleString()}` : `${sym}${p.price.toLocaleString()}`,
       salePrice: p.compareAtPrice ? `${sym}${p.price.toLocaleString()}` : undefined,
       image: p.images[0]?.url || safeSrc(null, p.name),
       hoverImage: p.images[1]?.url,
-      link: `/store/${storeCtx.storeSlug}/product/${p.slug}`,
+      link: resolveLink(`product/${p.slug}`, storeCtx?.storeSlug || ""),
       badge: p.compareAtPrice ? "SALE" : p.isFeatured ? "FEATURED" : undefined,
     }));
   })();
@@ -520,9 +524,9 @@ export function FashionProductGrid({ products: propProducts, columns = 4, showCa
     if (link && link.startsWith("/store/")) return link;
     if (storeCtx?.storeSlug) {
       const slug = productName.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/(^-|-$)/g, "");
-      return `/store/${storeCtx.storeSlug}/product/${slug}`;
+      return resolveLink(`product/${slug}`, storeCtx?.storeSlug || "");
     }
-    return resolveStoreLink(link, storeCtx?.storeSlug);
+    return resolveLink(link, storeCtx?.storeSlug || "");
   };
 
   if (products.length === 0) {
@@ -572,7 +576,7 @@ export function FashionProductGrid({ products: propProducts, columns = 4, showCa
             <h3 className="fpg-name"><Link href={productLink}>{p.name}</Link></h3>
             {showCategory && p.category && (
               <div className="fpg-cat">
-                <Link href={resolveStoreLink(p.categoryLink, storeCtx?.storeSlug)}>{p.category}</Link>
+                <Link href={resolveLink(p.categoryLink || "", storeCtx?.storeSlug || "")}>{p.category}</Link>
               </div>
             )}
             <div className="fpg-price">
@@ -607,15 +611,17 @@ export interface FashionCategoryCardsProps {
 
 export function FashionCategoryCards({ categories, columns = 4, sectionTitle, marginBottom = "50px" }: FashionCategoryCardsProps) {
   const storeCtx = useContext(FashionStoreContext);
+  const { resolveLink } = useStoreLink();
 
   // Resolve category links to proper store URLs
   const resolveCatLink = (link: string, catName: string) => {
     if (link && link.startsWith("/store/")) return link;
-    if (storeCtx?.storeSlug) {
+    const slug = storeCtx?.storeSlug;
+    if (slug) {
       const catSlug = catName.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/(^-|-$)/g, "");
-      return `/store/${storeCtx.storeSlug}/shop?category=${catSlug}`;
+      return resolveLink(`shop?category=${catSlug}`, slug);
     }
-    return resolveStoreLink(link, storeCtx?.storeSlug);
+    return resolveLink(link, slug || "");
   };
   const scopedCss = `
     .fcc-section { margin-bottom: ${marginBottom}; }
@@ -831,6 +837,7 @@ export interface FashionBlogPostsProps {
 
 export function FashionBlogPosts({ posts: propPosts, columns = 2, sectionTitle, marginBottom = "30px" }: FashionBlogPostsProps) {
   const storeCtx = useContext(FashionStoreContext);
+  const { resolveLink } = useStoreLink();
 
   // Convert real store blogs to FashionBlogPost format (same pattern as product grid)
   const posts: FashionBlogPost[] = (() => {
@@ -848,7 +855,7 @@ export function FashionBlogPosts({ posts: propPosts, columns = 2, sectionTitle, 
         date: { day, month },
         categories: b.category ? [b.category] : [],
         author: { name: b.author || "Store Team" },
-        link: `/store/${storeCtx.storeSlug}/blog/${b.slug}`,
+        link: resolveLink(`blog/${b.slug}`, storeCtx?.storeSlug || ""),
         commentCount: 0,
       };
     });
@@ -1096,6 +1103,7 @@ export function FashionFeatures({
   marginBottom = "50px",
 }: FashionFeaturesProps) {
   const storeCtx = useContext(FashionStoreContext);
+  const { resolveLink } = useStoreLink();
   const scopedCss = `
     .ff-features { margin-bottom: ${marginBottom}; }
     .ff-features-grid {
@@ -1146,7 +1154,7 @@ export function FashionFeatures({
               <h4 className="ff-feature-title">{f.title}</h4>
               <p className="ff-feature-desc">{f.description}</p>
               {f.buttonText && (
-                <Link href={resolveStoreLink(f.buttonLink, storeCtx?.storeSlug)} className="ff-feature-btn">
+                <Link href={resolveLink(f.buttonLink || "", storeCtx?.storeSlug || "")} className="ff-feature-btn">
                   {f.buttonText} →
                 </Link>
               )}
@@ -1520,6 +1528,7 @@ export function FashionFooter({
   backgroundColor = TOKENS.footerBg,
 }: FashionFooterProps) {
   const storeCtx = useContext(FashionStoreContext);
+  const { resolveLink } = useStoreLink();
   const [openColumns, setOpenColumns] = useState<Set<number>>(new Set());
 
   const toggleColumn = (index: number) => {
@@ -1685,7 +1694,7 @@ export function FashionFooter({
           <ul className="ff-link-list">
             {col.links.map((link, li) => (
               <li key={li}>
-                <Link href={resolveFooterLink(link.url, link.label, storeCtx?.storeSlug)}>
+                <Link href={resolveFooterLink(link.url, link.label, storeCtx?.storeSlug || "")}>
                   {link.emphasized ? <em>{link.label}</em> : link.label}
                 </Link>
               </li>
@@ -1706,7 +1715,7 @@ export function FashionFooter({
         <div className="ff-col-brand">
           {logoUrl && (
             <div style={{ marginBottom: "16px" }}>
-              <Link href={storeCtx?.storeSlug ? `/store/${storeCtx.storeSlug}` : "/"}>
+              <Link href={resolveLink("/", storeCtx?.storeSlug || "")}>
                 <img
                   src={logoUrl}
                   alt={logoAlt}
@@ -1771,7 +1780,7 @@ export function FashionFooter({
                   )}
                   <div>
                     <h5 className="ff-post-title">
-                      <Link href={resolveStoreLink(post.url, storeCtx?.storeSlug)}>{post.title}</Link>
+                      <Link href={resolveLink(post.url, storeCtx?.storeSlug || "")}>{post.title}</Link>
                     </h5>
                     <span className="ff-post-date">{post.date}</span>
                   </div>
@@ -1789,7 +1798,7 @@ export function FashionFooter({
       <div className="ff-copyrights">
         <div>
           <small>
-            <Link href={storeCtx?.storeSlug ? `/store/${storeCtx.storeSlug}` : "/"}>{copyrightText}</Link>
+            <Link href={resolveLink("/", storeCtx?.storeSlug || "")}>{copyrightText}</Link>
           </small>
         </div>
         {paymentIconsUrl && (

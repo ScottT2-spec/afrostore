@@ -3,6 +3,55 @@ import type { ThemeData } from "@/components/storefront/ThemeProvider";
 import type { CSSProperties } from "react";
 import type { PageSettings } from "@/lib/page-content";
 
+/* ───────── Color Conversion Utilities ───────── */
+
+/**
+ * Convert RGB string to HEX format
+ * Supports: "rgb(r, g, b)", "rgba(r, g, b, a)", "r, g, b"
+ */
+function rgbToHex(color: string | undefined | null): string | null {
+  if (!color) return null;
+  
+  // Already HEX
+  if (color.startsWith('#')) return color;
+  
+  // Try to parse RGB/RGBA
+  const rgbMatch = color.match(/rgba?\((\d+),\s*(\d+),\s*(\d+)(?:,\s*[\d.]+)?\)/);
+  if (rgbMatch) {
+    const r = parseInt(rgbMatch[1], 10).toString(16).padStart(2, '0');
+    const g = parseInt(rgbMatch[2], 10).toString(16).padStart(2, '0');
+    const b = parseInt(rgbMatch[3], 10).toString(16).padStart(2, '0');
+    return `#${r}${g}${b}`;
+  }
+  
+  // Try to parse comma-separated values
+  const commaMatch = color.match(/(\d+),\s*(\d+),\s*(\d+)/);
+  if (commaMatch) {
+    const r = parseInt(commaMatch[1], 10).toString(16).padStart(2, '0');
+    const g = parseInt(commaMatch[2], 10).toString(16).padStart(2, '0');
+    const b = parseInt(commaMatch[3], 10).toString(16).padStart(2, '0');
+    return `#${r}${g}${b}`;
+  }
+  
+  return color; // Return as-is if not recognized
+}
+
+/**
+ * Normalize all color values in theme settings to HEX format
+ */
+export function normalizeColorsToHex(colors: Record<string, string | undefined | null> | undefined | null): Record<string, string> {
+  if (!colors) return {};
+  
+  const normalized: Record<string, string> = {};
+  for (const [key, value] of Object.entries(colors)) {
+    const hexValue = rgbToHex(value);
+    if (hexValue) {
+      normalized[key] = hexValue;
+    }
+  }
+  return normalized;
+}
+
 export interface SiteCustomizationThemeSettings {
   colors?: {
     primary?: string;
@@ -206,6 +255,7 @@ export function buildThemeDataWithCustomization(theme: ThemeData | null, customi
   const themeConfig = theme.config || {};
   const themeSettings = customization?.themeSettings || {};
   const colors = deepMerge(asRecord(themeConfig.colors), asRecord(themeSettings.colors));
+  const normalizedColors = normalizeColorsToHex(colors as Record<string, string>);
   const fonts = deepMerge(asRecord(themeConfig.fonts), asRecord(themeSettings.typography ? {
     heading: themeSettings.typography.headingFont,
     body: themeSettings.typography.bodyFont,
@@ -216,7 +266,7 @@ export function buildThemeDataWithCustomization(theme: ThemeData | null, customi
     ...theme,
     config: {
       ...themeConfig,
-      colors,
+      colors: normalizedColors,
       fonts,
       layout,
     },

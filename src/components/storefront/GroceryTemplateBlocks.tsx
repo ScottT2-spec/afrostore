@@ -4,6 +4,7 @@ import { resolveStoreLink, resolveFooterLink } from "@/lib/template-link-utils";
 import { useState, useEffect, useRef, createContext, useContext } from "react";
 import { safeSrc, onImgError } from "./image-fallback";
 import { useNewsletterSubscribe } from "@/hooks/useNewsletterSubscribe";
+import { useStoreLink } from "@/hooks/useStoreLink";
 
 /* ═══════════════════════════════════════════════════════════════
    FOOD GROCERY TEMPLATE BLOCKS
@@ -117,7 +118,8 @@ export interface GroceryHeroSliderProps {
 
 export function GroceryHeroSlider({ slides, autoplaySpeed = 5000 }: GroceryHeroSliderProps) {
   const storeCtx = useContext(GroceryStoreContext);
-  const fixLink = (link: string) => resolveStoreLink(link, storeCtx?.storeSlug);
+  const { resolveLink } = useStoreLink();
+  const fixLink = (link: string) => resolveLink(link, storeCtx?.storeSlug || "");
 
   const defaultSlides: GroceryHeroSlide[] = [
     {
@@ -127,7 +129,7 @@ export function GroceryHeroSlider({ slides, autoplaySpeed = 5000 }: GroceryHeroS
       description: "A flavour for everyone. Freshly made, delivered to your door.",
       buttonText: "Shop Now",
       buttonLink: "#",
-      backgroundColor: "rgb(42,103,150)",
+      backgroundColor: "#2A6796",
       productImage: `${IMG}/2021/06/wood-food-market-slider-1-opt.png`,
       backgroundImage: `${IMG}/2020/06/wood-food-market-slider-bg-1-opt-1.jpg`,
     },
@@ -138,7 +140,7 @@ export function GroceryHeroSlider({ slides, autoplaySpeed = 5000 }: GroceryHeroS
       description: "Best organic and natural grocery products at your doorstep.",
       buttonText: "Shop Now",
       buttonLink: "#",
-      backgroundColor: "rgb(161,37,37)",
+      backgroundColor: "#A12525",
       productImage: `${IMG}/2022/06/wood-food-market-slider-2-344x394.png`,
       backgroundImage: `${IMG}/2022/06/wood-food-market-slider-bg-3.jpg`,
     },
@@ -149,7 +151,7 @@ export function GroceryHeroSlider({ slides, autoplaySpeed = 5000 }: GroceryHeroS
       description: "Organic fresh fruits and vegetables straight from the farm.",
       buttonText: "Shop Now",
       buttonLink: "#",
-      backgroundColor: "rgb(245,153,70)",
+      backgroundColor: "#F59946",
       productImage: `${IMG}/2021/06/wood-food-market-slider-3-opt.png`,
       backgroundImage: `${IMG}/2020/06/wood-food-market-slider-bg-3-opt.jpg`,
     },
@@ -315,8 +317,9 @@ export function GroceryProductGrid({
   tabs,
 }: GroceryProductGridProps) {
   const storeCtx = useContext(GroceryStoreContext);
+  const { resolveLink } = useStoreLink();
   const fixLink = (slug: string) => {
-    if (storeCtx?.storeSlug) return `/store/${storeCtx.storeSlug}/product/${slug}`;
+    if (storeCtx?.storeSlug) return resolveLink(`product/${slug}`, storeCtx?.storeSlug);
     return `#`;
   };
 
@@ -420,6 +423,7 @@ export interface GroceryPromoBannersProps {
 
 export function GroceryPromoBanners({ banners }: GroceryPromoBannersProps) {
   const storeCtx = useContext(GroceryStoreContext);
+  const { resolveLink } = useStoreLink();
   const defaultBanners: GroceryPromoBanner[] = [
     { subtitle: "NEW PRODUCTS", title: "Roar Ice Cream", image: `${IMG}/2020/06/wood-food-market-ban-1-opt.jpg`, buttonText: "Shop Now" },
     { subtitle: "VEGAN FOOD", title: "Organic Rice", image: `${IMG}/2020/06/wood-food-market-ban-2-opt.jpg`, buttonText: "Shop Now" },
@@ -450,7 +454,7 @@ export function GroceryPromoBanners({ banners }: GroceryPromoBannersProps) {
             <div className="gc-banner-content">
               <div className="gc-banner-sub">{b.subtitle}</div>
               <h4 className="gc-banner-title">{b.title}</h4>
-              {b.buttonText && <Link href={resolveStoreLink(b.buttonLink, storeCtx?.storeSlug)} className="gc-banner-btn">{b.buttonText}</Link>}
+              {b.buttonText && <Link href={resolveLink(b.buttonLink || "", storeCtx?.storeSlug || "")} className="gc-banner-btn">{b.buttonText}</Link>}
             </div>
           </div>
         ))}
@@ -578,8 +582,9 @@ export function GroceryNewsletter({
 
 export function GroceryBestSellers({ products: propProducts, columns = 5, maxProducts = 10 }: { products?: GroceryProduct[]; columns?: number; maxProducts?: number }) {
   const storeCtx = useContext(GroceryStoreContext);
+  const { resolveLink } = useStoreLink();
   const fixLink = (slug: string) => {
-    if (storeCtx?.storeSlug) return `/store/${storeCtx.storeSlug}/product/${slug}`;
+    if (storeCtx?.storeSlug) return resolveLink(`product/${slug}`, storeCtx?.storeSlug);
     return `#`;
   };
 
@@ -808,45 +813,30 @@ export function GroceryFooter({
     const colIndex = idx + 2;
     const isOpen = openColumns.has(colIndex);
 
-    return (
-      <div key={idx} className="gc-col-links">
-        <div
-          className={`gc-col-toggle-head ${isOpen ? "gc-open" : ""}`}
-          onClick={() => toggleColumn(colIndex)}
-        >
-          <h4 className="gc-col-title">{col.title}</h4>
-          {chevronSvg}
-        </div>
-        <div className={`gc-col-toggle-content ${isOpen ? "gc-open" : "gc-closed"}`}>
-          <ul className="gc-link-list">
-            {col.links.map((link, li) => (
-              <li key={li}>
-                <Link href={resolveFooterLink(link.url, link.label, storeCtx?.storeSlug)}>
-                  {link.emphasized ? <em>{link.label}</em> : link.label}
-                </Link>
-              </li>
-            ))}
-          </ul>
-        </div>
-      </div>
-    );
-  };
-
   return (
-    <footer className="gc-footer" style={footerStyle}>
-      <ScopedStyles id="footer" css={scopedCss} />
-
-      <div className="gc-main-footer" style={mainFooterStyle}>
-        <div className="gc-col-brand">
-          {logoUrl && (
-            <div style={{ marginBottom: "16px" }}>
-              <Link href={storeCtx?.storeSlug ? `/store/${storeCtx.storeSlug}` : "/"}>
-                <img
-                  src={logoUrl}
-                  alt={logoAlt}
-                  style={{ maxWidth: "220px", height: "auto" }}
-                />
-              </Link>
+    <footer className="gc-footer">
+      <ScopedStyles id="footer" css={css} />
+      <div style={containerStyle}>
+        <div className="gc-footer-grid">
+          <div>
+            <img className="gc-footer-logo" src={storeCtx?.storeLogo || logo} alt="Logo" />
+            <p className="gc-footer-desc">{description}</p>
+          </div>
+          {cols.map((col, i) => (
+            <div key={i}>
+              <h5 className="gc-footer-col-title">{col.title}</h5>
+              <ul className="gc-footer-links">
+                {col.links.map((link, j) => (
+                  <li key={j}><Link href={resolveFooterLink(link.href, link.label, storeCtx?.storeSlug || "")}>{link.label}</Link></li>
+                ))}
+              </ul>
+            </div>
+          ))}
+          <div>
+            <h5 className="gc-footer-col-title">Contact</h5>
+            <div className="gc-footer-contact-item">
+              <img className="gc-footer-contact-icon" src={`${IMG}/2020/06/svg-wood-food-market-phone.svg`} alt="" />
+              <span className="gc-footer-contact-text">{storeCtx?.contactPhone || contactPhone}</span>
             </div>
           )}
           <p style={{ margin: "0 0 10px", fontSize: "14px", lineHeight: "1.7" }}>

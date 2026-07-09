@@ -4,6 +4,7 @@ import { resolveStoreLink, resolveFooterLink } from "@/lib/template-link-utils";
 import { useState, useEffect, useRef, useCallback, createContext, useContext } from "react";
 import { safeSrc, onImgError } from "./image-fallback";
 import { useNewsletterSubscribe } from "@/hooks/useNewsletterSubscribe";
+import { useStoreLink } from "@/hooks/useStoreLink";
 
 /* ═══════════════════════════════════════════════════════════════
    KIDS TEMPLATE BLOCKS
@@ -119,6 +120,7 @@ export interface KidsAnnouncementBarProps {
 
 export function KidsAnnouncementBar({ text = "Sign up for our newsletter to get 10% off for the week!", link, backgroundColor = TOKENS.primaryColor }: KidsAnnouncementBarProps) {
   const [visible, setVisible] = useState(true);
+  const { resolveLink } = useStoreLink();
   if (!visible) return null;
 
   const scopedCss = `
@@ -138,7 +140,7 @@ export function KidsAnnouncementBar({ text = "Sign up for our newsletter to get 
   return (
     <div className="kab-bar" style={{ background: backgroundColor }}>
       <ScopedStyles id="announcement" css={scopedCss} />
-      {link ? <Link href={resolveStoreLink(link, null)}>{text}</Link> : <span>{text}</span>}
+      {link ? <Link href={resolveLink(link || "", "")}>{text}</Link> : <span>{text}</span>}
       <button className="kab-close" onClick={() => setVisible(false)} aria-label="Close">✕</button>
     </div>
   );
@@ -167,7 +169,8 @@ export interface KidsHeroSliderProps {
 
 export function KidsHeroSlider({ slides, autoplaySpeed = 5000, minHeight = "560px" }: KidsHeroSliderProps) {
   const storeCtx = useContext(KidsStoreContext);
-  const fixLink = (link: string) => resolveStoreLink(link, storeCtx?.storeSlug);
+  const { resolveLink } = useStoreLink();
+  const fixLink = (link: string) => resolveLink(link, storeCtx?.storeSlug || "");
   const [current, setCurrent] = useState(0);
   const timerRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
@@ -347,13 +350,15 @@ export interface KidsCategoryCardsProps {
 
 export function KidsCategoryCards({ categories, sectionTitle, marginBottom = "60px" }: KidsCategoryCardsProps) {
   const storeCtx = useContext(KidsStoreContext);
+  const { resolveLink } = useStoreLink();
   const fixLink = (link: string, name: string) => {
     if (link && link.startsWith("/store/")) return link;
-    if (storeCtx?.storeSlug) {
-      const slug = name.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/(^-|-$)/g, "");
-      return `/store/${storeCtx.storeSlug}/shop?category=${slug}`;
+    const slug = storeCtx?.storeSlug;
+    if (slug) {
+      const catSlug = name.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/(^-|-$)/g, "");
+      return resolveLink(`shop?category=${catSlug}`, slug);
     }
-    return resolveStoreLink(link, storeCtx?.storeSlug);
+    return resolveLink(link, slug || "");
   };
 
   const scopedCss = `
@@ -423,6 +428,7 @@ export interface KidsProductGridProps {
 
 export function KidsProductGrid({ products: propProducts, columns = 4, showCategory = true, showHoverImage = true, sectionTitle, marginBottom = "60px", maxProducts = 8, filter, filterTag }: KidsProductGridProps) {
   const storeCtx = useContext(KidsStoreContext);
+  const { resolveLink } = useStoreLink();
 
   const products: KidsProduct[] = (() => {
     if (!storeCtx || !storeCtx.products || storeCtx.products.length === 0) return propProducts || [];
@@ -459,13 +465,14 @@ export function KidsProductGrid({ products: propProducts, columns = 4, showCateg
     }));
   })();
 
-  const resolveLink = (link: string, name: string) => {
+  const resolveProductLink = (link: string, name: string) => {
     if (link && link.startsWith("/store/")) return link;
-    if (storeCtx?.storeSlug) {
-      const slug = name.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/(^-|-$)/g, "");
-      return `/store/${storeCtx.storeSlug}/product/${slug}`;
+    const slug = storeCtx?.storeSlug;
+    if (slug) {
+      const productSlug = name.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/(^-|-$)/g, "");
+      return resolveLink(`product/${productSlug}`, slug);
     }
-    return resolveStoreLink(link, storeCtx?.storeSlug);
+    return resolveLink(link, slug || "");
   };
 
   const scopedCss = `
@@ -550,7 +557,7 @@ export function KidsProductGrid({ products: propProducts, columns = 4, showCateg
       {sectionTitle && <KidsSectionTitle subtitle={sectionTitle.subtitle} title={sectionTitle.title} />}
       <div className="kpg-grid">
         {products.map((p) => {
-          const pLink = resolveLink(p.link, p.name);
+          const pLink = resolveProductLink(p.link, p.name);
           const badgeClass = p.badge?.toLowerCase() === "sale" ? "kpg-badge-sale" : p.badge?.toLowerCase() === "hot" ? "kpg-badge-hot" : "kpg-badge-new";
           return (
             <div key={p.id} className="kpg-card">
@@ -577,7 +584,7 @@ export function KidsProductGrid({ products: propProducts, columns = 4, showCateg
                 </div>
               )}
               {showCategory && p.category && (
-                <div className="kpg-cat"><Link href={resolveStoreLink(p.categoryLink || "#", storeCtx?.storeSlug)}>{p.category}</Link></div>
+                <div className="kpg-cat"><Link href={resolveLink(p.categoryLink || "#", storeCtx?.storeSlug || "")}>{p.category}</Link></div>
               )}
               <h3 className="kpg-name"><Link href={pLink}>{p.name}</Link></h3>
               <div className="kpg-price">
@@ -611,7 +618,8 @@ export interface KidsBundlePromoProps {
 
 export function KidsBundlePromo({ subtitle = "Buy bundle and get a 25% discount", title, description, buttonText = "Buy bundle now", buttonLink, productImages, backgroundColor = "#f5f0eb", marginBottom = "60px" }: KidsBundlePromoProps) {
   const storeCtx = useContext(KidsStoreContext);
-  const fixLink = (link?: string) => resolveStoreLink(link || "#", storeCtx?.storeSlug);
+  const { resolveLink } = useStoreLink();
+  const fixLink = (link?: string) => resolveLink(link || "#", storeCtx?.storeSlug || "");
   const { ref, inView } = useInView();
 
   const scopedCss = `
@@ -706,6 +714,7 @@ export interface KidsBlogPostsProps {
 
 export function KidsBlogPosts({ posts: propPosts, columns = 3, sectionTitle, marginBottom = "60px" }: KidsBlogPostsProps) {
   const storeCtx = useContext(KidsStoreContext);
+  const { resolveLink } = useStoreLink();
 
   const posts: KidsBlogPost[] = (() => {
     if (!storeCtx || !storeCtx.blogs || storeCtx.blogs.length === 0) return propPosts || [];
@@ -718,7 +727,7 @@ export function KidsBlogPosts({ posts: propPosts, columns = 3, sectionTitle, mar
         date: { day: d.getDate().toString().padStart(2, "0"), month: d.toLocaleString("en-US", { month: "short" }) },
         categories: b.category ? [b.category] : [],
         author: { name: b.author || "Store Team" },
-        link: `/store/${storeCtx.storeSlug}/blog/${b.slug}`,
+        link: resolveLink(`blog/${b.slug}`, storeCtx?.storeSlug || ""),
         commentCount: 0,
       };
     });
@@ -777,7 +786,7 @@ export function KidsBlogPosts({ posts: propPosts, columns = 3, sectionTitle, mar
                 <span className="kbp2-date-day">{p.date.day}</span>
                 <span className="kbp2-date-month">{p.date.month}</span>
               </div>
-              <Link href={resolveStoreLink(p.link, storeCtx?.storeSlug)} className="kbp2-link" aria-label={p.title} />
+              <Link href={resolveLink(p.link, storeCtx?.storeSlug || "")} className="kbp2-link" aria-label={p.title} />
             </div>
             <div className="kbp2-content">
               <div className="kbp2-cats">
@@ -981,6 +990,7 @@ export function KidsFooter({
   backgroundColor = TOKENS.footerBg,
 }: KidsFooterProps) {
   const storeCtx = useContext(KidsStoreContext);
+  const { resolveLink } = useStoreLink();
   const [openColumns, setOpenColumns] = useState<Set<number>>(new Set());
 
   const toggleColumn = (index: number) => {
@@ -1154,13 +1164,7 @@ export function KidsFooter({
         <div className="kd-col-brand">
           {logoUrl && (
             <div style={{ marginBottom: "16px" }}>
-              <Link href={storeCtx?.storeSlug ? `/store/${storeCtx.storeSlug}` : "/"}>
-                <img
-                  src={logoUrl}
-                  alt={logoAlt}
-                  style={{ maxWidth: "220px", height: "auto" }}
-                />
-              </Link>
+              <Link href={resolveLink("/", storeCtx?.storeSlug || "")}><img src={logoUrl} alt={logoAlt} style={{ maxWidth: "150px", height: "auto" }} /></Link>
             </div>
           )}
           <p style={{ margin: "0 0 10px", fontSize: "14px", lineHeight: "1.7" }}>
@@ -1196,39 +1200,25 @@ export function KidsFooter({
           )}
         </div>
 
-        {recentPosts.length > 0 && (
-          <div className="kd-col-posts">
-            <div
-              className={`kd-col-toggle-head ${openColumns.has(1) ? "kd-open" : ""}`}
-              onClick={() => toggleColumn(1)}
-            >
-              <h4 className="kd-col-title">RECENT POSTS</h4>
-              {chevronSvg}
+        {/* Link columns */}
+        {linkColumns.map((col, idx) => {
+          const isOpen = openColumns.has(idx);
+          return (
+            <div key={idx} className="kf-col-links">
+              <div className={`kf-col-toggle-head ${isOpen ? "kf-open" : ""}`} onClick={() => toggleColumn(idx)}>
+                <h4 className="kf-col-title">{col.title}</h4>
+                {chevronSvg}
+              </div>
+              <div className={`kf-col-toggle-content ${isOpen ? "kf-open" : "kf-closed"}`}>
+                <ul className="kf-link-list">
+                  {col.links.map((link, li) => (
+                    <li key={li}><Link href={resolveFooterLink(link.url, link.label, storeCtx?.storeSlug || "")}>{link.label}</Link></li>
+                  ))}
+                </ul>
+              </div>
             </div>
-            <div className={`kd-col-toggle-content ${openColumns.has(1) ? "kd-open" : "kd-closed"}`}>
-              {recentPosts.map((post, i) => (
-                <div key={i} className="kd-post-item">
-                  {post.thumbnail && (
-                    <img
-                      src={post.thumbnail}
-                      alt={post.title}
-                      className="kd-post-thumb"
-                      loading="lazy"
-                    />
-                  )}
-                  <div>
-                    <h5 className="kd-post-title">
-                      <Link href={resolveStoreLink(post.url, storeCtx?.storeSlug)}>{post.title}</Link>
-                    </h5>
-                    <span className="kd-post-date">{post.date}</span>
-                  </div>
-                </div>
-              ))}
-            </div>
-          </div>
-        )}
-
-        {linkColumns.map(renderLinkColumn)}
+          );
+        })}
       </div>
 
       <div className="kd-copyrights">

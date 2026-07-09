@@ -38,12 +38,45 @@ const DEFAULT_CONFIG: ThemeFormConfig = {
 };
 
 function ColorInput({ label, value, onChange }: { label: string; value: string; onChange: (v: string) => void }) {
+  // Convert RGB to HEX for display
+  const colorValue = value || "#000000";
+  let displayValue = colorValue;
+  
+  // Convert RGB/RGBA to HEX for display
+  if (colorValue.startsWith('rgb')) {
+    const rgbMatch = colorValue.match(/rgba?\((\d+),\s*(\d+),\s*(\d+)(?:,\s*[\d.]+)?\)/);
+    if (rgbMatch) {
+      const r = parseInt(rgbMatch[1], 10).toString(16).padStart(2, '0');
+      const g = parseInt(rgbMatch[2], 10).toString(16).padStart(2, '0');
+      const b = parseInt(rgbMatch[3], 10).toString(16).padStart(2, '0');
+      displayValue = `#${r}${g}${b}`;
+    }
+  }
+  
+  // Ensure displayValue is valid HEX for color picker
+  if (!displayValue.startsWith('#')) {
+    displayValue = '#' + displayValue;
+  }
+  
+  const handleColorChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    onChange(e.target.value);
+  };
+  
+  const handleTextChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    let newValue = e.target.value;
+    // Ensure HEX format
+    if (newValue && !newValue.startsWith('#')) {
+      newValue = '#' + newValue;
+    }
+    onChange(newValue);
+  };
+  
   return (
     <div>
       <label className="block text-xs font-medium text-surface-600 mb-1">{label}</label>
       <div className="flex items-center gap-2">
-        <input type="color" value={value || "#000000"} onChange={(e) => onChange(e.target.value)} className="h-9 w-9 rounded-lg border border-surface-200 cursor-pointer p-0.5" />
-        <input type="text" value={value} onChange={(e) => onChange(e.target.value)} placeholder="#000000" className="flex-1 rounded-lg border border-surface-200 px-3 py-2 text-xs font-mono focus:outline-none focus:border-brand-500" />
+        <input type="color" value={displayValue} onChange={handleColorChange} className="h-9 w-9 rounded-lg border border-surface-200 cursor-pointer p-0.5" />
+        <input type="text" value={displayValue} onChange={handleTextChange} placeholder="#000000" className="flex-1 rounded-lg border border-surface-200 px-3 py-2 text-xs font-mono focus:outline-none focus:border-brand-500" />
       </div>
     </div>
   );

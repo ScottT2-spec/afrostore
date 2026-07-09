@@ -3,6 +3,7 @@ import Link from "next/link";
 import { resolveStoreLink, resolveFooterLink } from "@/lib/template-link-utils";
 import { useState, useEffect, useRef, createContext, useContext } from "react";
 import { safeSrc, onImgError } from "./image-fallback";
+import { useStoreLink } from "@/hooks/useStoreLink";
 
 /* ═══════════════════════════════════════════════════════════════
    INTERIOR DESIGN (RETAIL) TEMPLATE BLOCKS
@@ -110,7 +111,8 @@ export interface InteriorHeroSliderProps {
 
 export function InteriorHeroSlider({ slides, autoplaySpeed = 5000 }: InteriorHeroSliderProps) {
   const storeCtx = useContext(InteriorStoreContext);
-  const fixLink = (link: string) => resolveStoreLink(link, storeCtx?.storeSlug);
+  const { resolveLink } = useStoreLink();
+  const fixLink = (link: string) => resolveLink(link, storeCtx?.storeSlug || "");
 
   const defaultSlides: InteriorHeroSlide[] = [
     {
@@ -306,7 +308,8 @@ export function InteriorProductGrid({
   maxProducts = 8,
 }: InteriorProductGridProps) {
   const storeCtx = useContext(InteriorStoreContext);
-  const fixLink = (slug: string) => storeCtx?.storeSlug ? `/store/${storeCtx.storeSlug}/product/${slug}` : "#";
+  const { resolveLink } = useStoreLink();
+  const fixLink = (slug: string) => storeCtx?.storeSlug ? resolveLink(`product/${slug}`, storeCtx?.storeSlug) : "#";
 
   const defaultProducts: InteriorProduct[] = [
     { id: 1, name: "Dark Headphones", slug: "dark-headphones", price: "154.00", image: `${IMG}/2018/10/retail-product-1-opt-330x340.jpg`, category: "Retail", rating: 5 },
@@ -476,6 +479,7 @@ export interface InteriorPromoBannersProps {
 
 export function InteriorPromoBanners({ banners, variant = "garden" }: InteriorPromoBannersProps) {
   const storeCtx = useContext(InteriorStoreContext);
+  const { resolveLink } = useStoreLink();
   const gardenBanners: InteriorPromoBanner[] = [
     { subtitle: "Scelerisque fusce", title: "New Arrival of\nModern Garden Gloves.", image: `${IMG}/2018/10/retail-garden-banner-1-1-opt.jpg`, buttonText: "Shop Now" },
     { subtitle: "A nec augue", title: "Discount 30% Garden Equipment.", image: `${IMG}/2018/10/retail-garden-banner-2-1-opt.jpg`, buttonText: "Shop Now" },
@@ -511,7 +515,7 @@ export function InteriorPromoBanners({ banners, variant = "garden" }: InteriorPr
             <div className="id-banner-content">
               {b.subtitle && <div className="id-banner-sub">{b.subtitle}</div>}
               <h4 className="id-banner-title">{b.title}</h4>
-              {b.buttonText && <Link href={resolveStoreLink(b.buttonLink, storeCtx?.storeSlug)} className="id-banner-btn">{b.buttonText}</Link>}
+              {b.buttonText && <Link href={resolveLink(b.buttonLink || "", storeCtx?.storeSlug || "")} className="id-banner-btn">{b.buttonText}</Link>}
             </div>
           </div>
         ))}
@@ -696,6 +700,7 @@ export function InteriorCta({
   backgroundColor = TOKENS.primaryColor,
 }: InteriorCtaProps) {
   const storeCtx = useContext(InteriorStoreContext);
+  const { resolveLink } = useStoreLink();
   const css = `
     .id-cta { padding: 60px 40px; text-align: center; margin-bottom: 0; }
     .id-cta-title { font-family: ${TOKENS.titleFont}; font-weight: 700; font-size: 28px; line-height: 1.4; color: #fff; margin: 0 0 25px; white-space: pre-line; text-transform: uppercase; letter-spacing: 1px; }
@@ -708,7 +713,7 @@ export function InteriorCta({
     <div className="id-cta" style={{ backgroundColor }}>
       <ScopedStyles id="cta" css={css} />
       <h4 className="id-cta-title">{title}</h4>
-      <Link href={resolveStoreLink(buttonLink, storeCtx?.storeSlug)} className="id-cta-btn">{buttonText}</Link>
+      <Link href={resolveLink(buttonLink, storeCtx?.storeSlug || "")} className="id-cta-btn">{buttonText}</Link>
     </div>
   );
 }
@@ -911,130 +916,35 @@ export function InteriorFooter({
     const colIndex = idx + 2;
     const isOpen = openColumns.has(colIndex);
 
-    return (
-      <div key={idx} className="id-col-links">
-        <div
-          className={`id-col-toggle-head ${isOpen ? "id-open" : ""}`}
-          onClick={() => toggleColumn(colIndex)}
-        >
-          <h4 className="id-col-title">{col.title}</h4>
-          {chevronSvg}
-        </div>
-        <div className={`id-col-toggle-content ${isOpen ? "id-open" : "id-closed"}`}>
-          <ul className="id-link-list">
-            {col.links.map((link, li) => (
-              <li key={li}>
-                <Link href={resolveFooterLink(link.url, link.label, storeCtx?.storeSlug)}>
-                  {link.emphasized ? <em>{link.label}</em> : link.label}
-                </Link>
-              </li>
-            ))}
-          </ul>
-        </div>
-      </div>
-    );
-  };
-
   return (
-    <footer className="id-footer" style={footerStyle}>
-      <ScopedStyles id="footer" css={scopedCss} />
-
-      <div className="id-main-footer" style={mainFooterStyle}>
-        <div className="id-col-brand">
-          {logoUrl && (
-            <div style={{ marginBottom: "16px" }}>
-              <Link href={storeCtx?.storeSlug ? `/store/${storeCtx.storeSlug}` : "/"}>
-                <img
-                  src={logoUrl}
-                  alt={logoAlt}
-                  style={{ maxWidth: "220px", height: "auto" }}
-                />
-              </Link>
-            </div>
-          )}
-          <p style={{ margin: "0 0 10px", fontSize: "14px", lineHeight: "1.7" }}>
-            {description}
-          </p>
-          {contact && (
-            <ul className="id-contact-list">
-              {contact.address && (
-                <li className="id-contact-item">
-                  {contactIcons.address}
-                  <span>{contact.address}</span>
-                </li>
-              )}
-              {contact.phone && (
-                <li className="id-contact-item">
-                  {contactIcons.phone}
-                  <span>Phone: {contact.phone}</span>
-                </li>
-              )}
-              {contact.fax && (
-                <li className="id-contact-item">
-                  {contactIcons.fax}
-                  <span>Fax: {contact.fax}</span>
-                </li>
-              )}
-              {contact.email && (
-                <li className="id-contact-item">
-                  {contactIcons.email}
-                  <span>Email: {contact.email}</span>
-                </li>
-              )}
-            </ul>
-          )}
-        </div>
-
-        {recentPosts.length > 0 && (
-          <div className="id-col-posts">
-            <div
-              className={`id-col-toggle-head ${openColumns.has(1) ? "id-open" : ""}`}
-              onClick={() => toggleColumn(1)}
-            >
-              <h4 className="id-col-title">RECENT POSTS</h4>
-              {chevronSvg}
-            </div>
-            <div className={`id-col-toggle-content ${openColumns.has(1) ? "id-open" : "id-closed"}`}>
-              {recentPosts.map((post, i) => (
-                <div key={i} className="id-post-item">
-                  {post.thumbnail && (
-                    <img
-                      src={post.thumbnail}
-                      alt={post.title}
-                      className="id-post-thumb"
-                      loading="lazy"
-                    />
-                  )}
-                  <div>
-                    <h5 className="id-post-title">
-                      <Link href={resolveStoreLink(post.url, storeCtx?.storeSlug)}>{post.title}</Link>
-                    </h5>
-                    <span className="id-post-date">{post.date}</span>
-                  </div>
-                </div>
-              ))}
-            </div>
-          </div>
-        )}
-
-        {linkColumns.map(renderLinkColumn)}
-      </div>
-
-      <div className="id-copyrights">
-        <div>
-          <small>
-            <Link href={storeCtx?.storeSlug ? `/store/${storeCtx.storeSlug}` : "/"}>{copyrightText}</Link>
-          </small>
-        </div>
-        {paymentIconsUrl && (
+    <footer className="id-footer">
+      <ScopedStyles id="footer" css={css} />
+      <div style={containerStyle}>
+        <div className="id-footer-grid">
           <div>
-            <img
-              src={paymentIconsUrl}
-              alt="Payment methods"
-              loading="lazy"
-            />
+            <img className="id-footer-logo" src={storeCtx?.storeLogo || logo} alt="Logo" />
+            <p className="id-footer-desc">{description}</p>
           </div>
-        )}
+          {cols.map((col, i) => (
+            <div key={i}>
+              <h5 className="id-footer-col-title">{col.title}</h5>
+              <ul className="id-footer-links">
+                {col.links.map((link, j) => (
+                  <li key={j}><Link href={resolveFooterLink(link.href, link.label, storeCtx?.storeSlug || "")}>{link.label}</Link></li>
+                ))}
+              </ul>
+            </div>
+          ))}
+          <div>
+            <h5 className="id-footer-col-title">Download App</h5>
+            <a href="#" className="id-footer-app-btn"><img src={appStoreImage} alt="App Store" /></a>
+            <a href="#" className="id-footer-app-btn"><img src={googlePlayImage} alt="Google Play" /></a>
+          </div>
+        </div>
+        <div className="id-footer-bottom">
+          <span className="id-footer-copyright">{copyright}</span>
+          <div className="id-footer-payment"><img src={paymentImage} alt="Payment methods" /></div>
+        </div>
       </div>
     </footer>
   );
