@@ -3,7 +3,6 @@ import { useState, useEffect, useRef, useCallback, createContext, useContext } f
 import Link from "next/link";
 import { resolveStoreLink, resolveFooterLink } from "@/lib/template-link-utils";
 import { safeSrc, onImgError } from "./image-fallback";
-import { useNewsletterSubscribe } from "@/hooks/useNewsletterSubscribe";
 
 /* ═══════════════════════════════════════════════════════════════
    FASHION TEMPLATE BLOCKS
@@ -968,13 +967,11 @@ export function FashionNewsletter({
   onSubmit,
 }: FashionNewsletterProps) {
   const [email, setEmail] = useState("");
-  const storeCtx = useContext(FashionStoreContext);
-  const { subscribe, status: nlStatus } = useNewsletterSubscribe(storeCtx?.storeSlug || "");
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    if (onSubmit) { onSubmit(email); setEmail(""); return; }
-    subscribe(email).then(() => setEmail(""));
+    onSubmit?.(email);
+    setEmail("");
   };
 
   const socialIcons: Record<string, string> = {
@@ -1035,14 +1032,10 @@ export function FashionNewsletter({
       <ScopedStyles id="newsletter" css={scopedCss} />
       <div className="fn-section">
         <FashionSectionTitle subtitle={subtitle} title={title} description={description} maxWidth="70%" />
-        {nlStatus === "success" ? (
-          <p style={{ fontFamily: TOKENS.bodyFont, fontSize: "16px", color: TOKENS.primaryColor, marginTop: "20px" }}>Thanks for subscribing! 🎉</p>
-        ) : (
         <form className="fn-form" onSubmit={handleSubmit}>
           <input type="email" className="fn-input" placeholder="Your email address" value={email} onChange={(e) => setEmail(e.target.value)} required />
-          <button type="submit" className="fn-submit" disabled={nlStatus === "loading"}>{nlStatus === "loading" ? "Signing up..." : buttonText}</button>
+          <button type="submit" className="fn-submit">{buttonText}</button>
         </form>
-        )}
         {socialLinks.length > 0 && (
           <>
             <div className="fn-separator">
