@@ -73,6 +73,16 @@ interface ProductCategory {
   slug: string;
 }
 
+interface ProductVariant {
+  id: string;
+  name: string;
+  price: number | null;
+  stock: number;
+  inStock: boolean;
+  options: Record<string, string> | null;
+  image: string | null;
+}
+
 interface Product {
   id: string;
   name: string;
@@ -87,6 +97,7 @@ interface Product {
   tags: string[];
   images: ProductImage[];
   category?: ProductCategory;
+  variants?: ProductVariant[];
   reviewCount: number;
 }
 
