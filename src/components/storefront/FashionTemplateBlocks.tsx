@@ -551,8 +551,6 @@ export function FashionProductGrid({ products: propProducts, columns = 4, showCa
           <div key={p.id} className="fpg-card">
             <div className="fpg-thumb">
               <Link href={productLink}>
-                <img src={p.image} alt={p.name} className="fpg-img fpg-main-img" loading="lazy" />
-              <a href={productLink}>
                 <img src={p.image || safeSrc(null, p.name)} alt={p.name} className="fpg-img fpg-main-img" loading="lazy" onError={(e) => onImgError(e, p.name)} />
                 {showHoverImage && p.hoverImage && (
                   <img src={p.hoverImage} alt={p.name} className="fpg-hover-img" loading="lazy" />
