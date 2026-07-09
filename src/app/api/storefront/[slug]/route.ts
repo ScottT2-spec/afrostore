@@ -119,6 +119,10 @@ export async function GET(req: NextRequest, { params }: Params) {
         include: {
           images: { orderBy: { position: "asc" }, take: 3 },
           category: { select: { id: true, name: true, slug: true } },
+          variants: {
+            select: { id: true, name: true, price: true, stock: true, options: true, image: true },
+            orderBy: { position: "asc" },
+          },
           _count: { select: { reviews: true } },
         },
         orderBy: [{ isFeatured: "desc" }, { position: "asc" }, { createdAt: "desc" }],
@@ -232,6 +236,15 @@ export async function GET(req: NextRequest, { params }: Params) {
       tags: p.tags,
       images: p.images,
       category: p.category,
+      variants: (p.variants || []).map((v: any) => ({
+        id: v.id,
+        name: v.name,
+        price: v.price ? Number(v.price) : null,
+        stock: v.stock,
+        inStock: v.stock > 0,
+        options: v.options,
+        image: v.image,
+      })),
       reviewCount: p._count.reviews,
     }));
 

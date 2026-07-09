@@ -1590,6 +1590,15 @@ export interface StoreProduct {
   tags: string[];
   images: Array<{ id: string; url: string; alt?: string }>;
   category?: { id: string; name: string; slug: string };
+  variants?: Array<{
+    id: string;
+    name: string;
+    price: number | null;
+    stock: number;
+    inStock: boolean;
+    options: Record<string, string> | null;
+    image: string | null;
+  }>;
   reviewCount: number;
 }
 
