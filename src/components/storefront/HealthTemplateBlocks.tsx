@@ -1,4 +1,6 @@
 "use client";
+import Link from "next/link";
+import { resolveStoreLink, resolveFooterLink } from "@/lib/template-link-utils";
 import { useState, useEffect, useRef, useCallback, createContext, useContext } from "react";
 
 /* ═══════════════════════════════════════════════════════════════
@@ -121,11 +123,7 @@ export function HealthHero({
   backgroundImage = `${IMG}/2023/08/w-pas-first-screen.jpg`,
 }: HealthHeroProps) {
   const storeCtx = useContext(HealthStoreContext);
-  const fixLink = (link: string) => {
-    if (link && link.startsWith("/store/")) return link;
-    if (storeCtx?.storeSlug) return `/store/${storeCtx.storeSlug}/shop`;
-    return link || "#";
-  };
+  const fixLink = (link: string) => resolveStoreLink(link, storeCtx?.storeSlug);
 
   const css = `
     .hh-hero { position: relative; width: 100%; min-height: 660px; display: flex; align-items: center; overflow: hidden; background: ${TOKENS.bgLight}; }
@@ -147,7 +145,7 @@ export function HealthHero({
         <div className="hh-hero-content">
           <h1 className="hh-hero-title">{title}</h1>
           <p className="hh-hero-sub">{subtitle}</p>
-          <a href={fixLink(buttonLink)} className="hh-hero-btn">{buttonText}</a>
+          <Link href={fixLink(buttonLink)} className="hh-hero-btn">{buttonText}</Link>
         </div>
       </div>
     </div>
@@ -208,11 +206,7 @@ export interface HealthPromoBannersProps {
 
 export function HealthPromoBanners({ banners }: HealthPromoBannersProps) {
   const storeCtx = useContext(HealthStoreContext);
-  const fixLink = (link: string) => {
-    if (link && link.startsWith("/store/")) return link;
-    if (storeCtx?.storeSlug) return `/store/${storeCtx.storeSlug}/shop`;
-    return link || "#";
-  };
+  const fixLink = (link: string) => resolveStoreLink(link, storeCtx?.storeSlug);
 
   const defaultBanners: HealthPromoBanner[] = [
     { image: `${IMG}/2024/03/w-pas-banner-1.jpg`, subtitle: "Save 15%", title: "Bundles", buttonText: "Shop by Need", buttonLink: "#", colorScheme: "light", height: "456px" },
@@ -251,7 +245,7 @@ export function HealthPromoBanners({ banners }: HealthPromoBannersProps) {
                 <h4 className="hh-banner-title" style={{ color: textColor }}>{b.title}</h4>
                 {b.description && <div className="hh-banner-desc" style={{ color: textColor, opacity: 0.7 }}>{b.description}</div>}
               </div>
-              <a href={fixLink(b.buttonLink || "#")} className="hh-banner-link" aria-label={b.title} />
+              <Link href={fixLink(b.buttonLink || "#")} className="hh-banner-link" aria-label={b.title} />
             </div>
           );
         })}
@@ -304,11 +298,7 @@ export interface HealthCategoryCardsProps {
 
 export function HealthCategoryCards({ categories, columns = 4, sectionTitle = "Popular Categories", marginBottom = "80px" }: HealthCategoryCardsProps) {
   const storeCtx = useContext(HealthStoreContext);
-  const fixLink = (link?: string) => {
-    if (link && link.startsWith("/store/")) return link;
-    if (storeCtx?.storeSlug) return `/store/${storeCtx.storeSlug}/shop`;
-    return link || "#";
-  };
+  const fixLink = (link?: string) => resolveStoreLink(link || "#", storeCtx?.storeSlug);
 
   const defaultCats: HealthCategoryCard[] = [
     { name: "Allergy Relief", image: `${IMG}/2023/08/w-pas-category-allergy.jpg` },
@@ -344,7 +334,7 @@ export function HealthCategoryCards({ categories, columns = 4, sectionTitle = "P
             <img className="hh-cat-img" src={cat.image} alt={cat.name} />
             <div className="hh-cat-overlay" />
             <h3 className="hh-cat-name">{cat.name}</h3>
-            <a href={fixLink(cat.link)} className="hh-cat-link" aria-label={cat.name} />
+            <Link href={fixLink(cat.link)} className="hh-cat-link" aria-label={cat.name} />
           </div>
         ))}
       </div>
@@ -431,7 +421,7 @@ export function HealthProductGrid({
             </div>
             <div className="hh-prod-info">
               {showCategory && <div className="hh-prod-cat">{p.category}</div>}
-              <h3 className="hh-prod-name"><a href={fixLink(p.slug)}>{p.name}</a></h3>
+              <h3 className="hh-prod-name"><Link href={fixLink(p.slug)}>{p.name}</Link></h3>
               <div className="hh-prod-stars">{renderStars(p.rating)}</div>
               <div className="hh-prod-price">${p.price}</div>
               <button className="hh-prod-btn">Add to cart</button>
@@ -500,6 +490,7 @@ export function HealthFeatureSection({
   helpAvatars = `${IMG}/2023/08/w-pas-avatars-help-153x42.png`,
   helpText = "Need help choosing?",
 }: HealthFeatureSectionProps) {
+  const storeCtx = useContext(HealthStoreContext);
   const defaultFeatures: HealthFeatureItem[] = [
     { icon: `${IMG}/2023/08/w-pas-m-icon-1.svg`, title: "Used In", description: "Chances are, you've probably heard of the nutrient iron before. As a kid, you may remember the not-so-pleasant finger pricks at the doctor's office to check your iron levels." },
     { icon: `${IMG}/2023/08/w-pas-m-icon-2.svg`, title: "Found In", description: "Chances are, you've probably heard of the nutrient iron before. As a kid, you may remember the not-so-pleasant finger pricks at the doctor's office to check your iron levels." },
@@ -537,7 +528,7 @@ export function HealthFeatureSection({
             <img className="hh-feat-avatars" src={helpAvatars} alt="Support team" />
             <div>
               <div className="hh-feat-help-text">{helpText}</div>
-              <a href="#" className="hh-feat-help-link">Contact Us →</a>
+              <Link href={resolveStoreLink("#", storeCtx?.storeSlug)} className="hh-feat-help-link">Contact Us →</Link>
             </div>
           </div>
         </div>
@@ -883,7 +874,7 @@ export function HealthFooter({
               <h5 className="hh-footer-col-title">{col.title}</h5>
               <ul className="hh-footer-links">
                 {col.links.map((link, j) => (
-                  <li key={j}><a href={link.href}>{link.label}</a></li>
+                  <li key={j}><Link href={resolveFooterLink(link.href, link.label, storeCtx?.storeSlug)}>{link.label}</Link></li>
                 ))}
               </ul>
             </div>

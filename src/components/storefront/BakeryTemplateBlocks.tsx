@@ -1,4 +1,6 @@
 "use client";
+import Link from "next/link";
+import { resolveStoreLink, resolveFooterLink } from "@/lib/template-link-utils";
 import { useState, useEffect, useRef, useCallback, createContext, useContext } from "react";
 
 /* ═══════════════════════════════════════════════════════════════
@@ -127,11 +129,7 @@ export interface BakeryHeroSliderProps {
 
 export function BakeryHeroSlider({ slides, autoplaySpeed = 5000 }: BakeryHeroSliderProps) {
   const storeCtx = useContext(BakeryStoreContext);
-  const fixLink = (link: string) => {
-    if (link && link.startsWith("/store/")) return link;
-    if (storeCtx?.storeSlug) return `/store/${storeCtx.storeSlug}/shop`;
-    return link || "#";
-  };
+  const fixLink = (link: string) => resolveStoreLink(link, storeCtx?.storeSlug);
 
   const defaultSlides: BakeryHeroSlide[] = [
     {
@@ -209,7 +207,7 @@ export function BakeryHeroSlider({ slides, autoplaySpeed = 5000 }: BakeryHeroSli
               <div className="bk-slide-text">
                 <div className="bk-slide-subtitle">{slide.subtitle}</div>
                 <h2 className="bk-slide-title">{slide.titleLine1}<br />{slide.titleLine2}</h2>
-                <a href={fixLink(slide.buttonLink)} className="bk-slide-btn">{slide.buttonText}</a>
+                <Link href={fixLink(slide.buttonLink)} className="bk-slide-btn">{slide.buttonText}</Link>
               </div>
               <div className="bk-slide-img">
                 <img src={slide.productImage} alt={slide.titleLine1} />
@@ -273,6 +271,7 @@ export interface BakeryCategoryInfoBoxesProps {
 }
 
 export function BakeryCategoryInfoBoxes({ sectionTitle = "Our Fine Home-Made Chocolate", sectionSubtitle = "Sweets Bakery", items }: BakeryCategoryInfoBoxesProps) {
+  const storeCtx = useContext(BakeryStoreContext);
   const defaultItems: BakeryCategoryInfoBox[] = [
     { icon: `${IMG}/2019/07/svg-bakery-infobox-1.svg`, title: "Cupcakes", description: "There are some redeeming factors in favor of greeking text", buttonText: "Learn More" },
     { icon: `${IMG}/2019/07/svg-bakery-infobox-2.svg`, title: "Macaroons", description: "Merely the symptom of a worse problem to consideration", buttonText: "Learn More" },
@@ -303,7 +302,7 @@ export function BakeryCategoryInfoBoxes({ sectionTitle = "Our Fine Home-Made Cho
             <div className="bk-catbox-icon"><img src={box.icon} alt={box.title} /></div>
             <h4 className="bk-catbox-title">{box.title}</h4>
             <p className="bk-catbox-desc">{box.description}</p>
-            {box.buttonText && <a href={box.buttonLink || "#"} className="bk-catbox-btn">{box.buttonText} →</a>}
+            {box.buttonText && <Link href={resolveStoreLink(box.buttonLink || "#", storeCtx?.storeSlug)} className="bk-catbox-btn">{box.buttonText} →</Link>}
           </div>
         ))}
       </div>
@@ -332,6 +331,7 @@ export function BakeryHandmade({
   buttonText = "Shop Now",
   buttonLink = "#",
 }: BakeryHandmadeProps) {
+  const storeCtx = useContext(BakeryStoreContext);
   const css = `
     .bk-handmade { display: flex; align-items: center; gap: 60px; margin-bottom: 80px; }
     .bk-handmade-img { flex: 1; border-radius: 10px; overflow: hidden; }
@@ -354,7 +354,7 @@ export function BakeryHandmade({
           <div className="bk-handmade-subtitle">{subtitle}</div>
           <h4 className="bk-handmade-title">{title}</h4>
           <p className="bk-handmade-desc">{description}</p>
-          <a href={buttonLink} className="bk-handmade-btn">{buttonText}</a>
+          <Link href={resolveStoreLink(buttonLink, storeCtx?.storeSlug)} className="bk-handmade-btn">{buttonText}</Link>
         </div>
       </div>
     </div>
@@ -433,7 +433,7 @@ export function BakeryProductGrid({
               </div>
               <div className="bk-prod-info">
                 <div className="bk-prod-cat">{p.category}</div>
-                <h3 className="bk-prod-name"><a href={fixLink(p.slug)}>{p.name}</a></h3>
+                <h3 className="bk-prod-name"><Link href={fixLink(p.slug)}>{p.name}</Link></h3>
                 <div className="bk-prod-stars">{"★".repeat(p.rating || 5)}{"☆".repeat(5 - (p.rating || 5))}</div>
                 <div className="bk-prod-price">${p.price}</div>
                 <button className="bk-prod-btn">Add to cart</button>
@@ -469,6 +469,7 @@ export function BakeryProcess({
   steps,
   image = `${IMG}/2019/07/bakery-donuts-img-opt.png`,
 }: BakeryProcessProps) {
+  const storeCtx = useContext(BakeryStoreContext);
   const defaultSteps: BakeryProcessStep[] = [
     { icon: `${IMG}/2019/07/svg-bakery-infobox-4.svg`, title: "1. Ingredients", description: "Chances are there wasn't collaboration, communication." },
     { icon: `${IMG}/2019/07/svg-bakery-infobox-5.svg`, title: "2. Stuffing", description: "Chances are there wasn't collaboration, communication." },
@@ -505,7 +506,7 @@ export function BakeryProcess({
                 <img className="bk-process-icon" src={step.icon} alt={step.title} />
                 <h4 className="bk-process-step-title">{step.title}</h4>
                 <p className="bk-process-step-desc">{step.description}</p>
-                <a href="#" className="bk-process-step-link">Read More →</a>
+                <Link href={resolveStoreLink("#", storeCtx?.storeSlug)} className="bk-process-step-link">Read More →</Link>
               </div>
             ))}
           </div>
@@ -598,6 +599,7 @@ export function BakeryCta({
   buttonLink = "#",
   backgroundImage = `${IMG}/2018/01/p-bg-3.jpg`,
 }: BakeryCtaProps) {
+  const storeCtx = useContext(BakeryStoreContext);
   const css = `
     .bk-cta { position: relative; padding: 100px 40px; text-align: center; background-size: cover; background-position: center; margin-bottom: 0; }
     .bk-cta-overlay { position: absolute; inset: 0; background: rgba(0,0,0,0.4); }
@@ -617,7 +619,7 @@ export function BakeryCta({
         <div className="bk-cta-content">
           <div className="bk-cta-subtitle">{subtitle}</div>
           <h4 className="bk-cta-title">{title}</h4>
-          <a href={buttonLink} className="bk-cta-btn">{buttonText}</a>
+          <Link href={resolveStoreLink(buttonLink, storeCtx?.storeSlug)} className="bk-cta-btn">{buttonText}</Link>
         </div>
       </div>
     </>
@@ -708,7 +710,7 @@ export function BakeryFooter({
               <h5 className="bk-footer-col-title">{col.title}</h5>
               <ul className="bk-footer-links">
                 {col.links.map((link, j) => (
-                  <li key={j}><a href={link.href}>{link.label}</a></li>
+                  <li key={j}><Link href={resolveFooterLink(link.href, link.label, storeCtx?.storeSlug)}>{link.label}</Link></li>
                 ))}
               </ul>
             </div>

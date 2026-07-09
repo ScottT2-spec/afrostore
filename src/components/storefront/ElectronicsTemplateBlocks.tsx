@@ -1,4 +1,6 @@
 "use client";
+import Link from "next/link";
+import { resolveStoreLink, resolveFooterLink } from "@/lib/template-link-utils";
 import { useState, useEffect, useRef, useCallback, createContext, useContext } from "react";
 
 /* ═══════════════════════════════════════════════════════════════
@@ -93,11 +95,7 @@ function useCurrencySymbol() {
 
 function useFixLink() {
   const ctx = useContext(ElectronicsStoreContext);
-  return (link: string) => {
-    if (link && link.startsWith("/store/")) return link;
-    if (ctx?.storeSlug) return `/store/${ctx.storeSlug}/shop`;
-    return link || "#";
-  };
+  return (link: string) => resolveStoreLink(link, ctx?.storeSlug);
 }
 
 /* ═══════════════════════════════════════════════════════════════
@@ -268,7 +266,7 @@ export function ElectronicsHeroSlider({ slides, autoplaySpeed = 5000, minHeight 
                       <div className={`ehs-title ehs-title-${scheme} ehs-anim-in`} style={{ animationDelay: "0.4s" }}>{slide.titleLine2}</div>
                       <div className={`ehs-desc ehs-desc-${scheme} ehs-anim-in`} style={{ animationDelay: "0.5s" }}>{slide.description}</div>
                       <div className="ehs-anim-in" style={{ animationDelay: "0.6s" }}>
-                        <a href={fixLink(slide.buttonLink)} className="ehs-btn">{slide.buttonText}</a>
+                        <Link href={fixLink(slide.buttonLink)} className="ehs-btn">{slide.buttonText}</Link>
                       </div>
                     </>
                   )}
@@ -364,7 +362,7 @@ export function ElectronicsPromoBanners({ banners }: ElectronicsPromoBannersProp
                   <p className={`epb-desc epb-desc-${scheme}`}>{b.description}</p>
                   <span className={`epb-btn epb-btn-${scheme}`}>{b.buttonText}</span>
                 </div>
-                <a href={fixLink(b.buttonLink)} className="epb-link" aria-label={b.title} />
+                <Link href={fixLink(b.buttonLink)} className="epb-link" aria-label={b.title} />
               </div>
             );
           })}
@@ -502,9 +500,9 @@ export function ElectronicsProductTabs({ sectionTitle = "ELECTRONICS", tabs, col
                 return (
                   <div key={p.id} className="ept-card">
                     <div className="ept-thumb">
-                      <a href={productLink}>
+                      <Link href={productLink}>
                         <img src={p.images[0]?.url || ""} alt={p.name} loading="lazy" />
-                      </a>
+                      </Link>
                       {p.compareAtPrice && <span className="ept-badge">SALE</span>}
                       {!p.compareAtPrice && p.isFeatured && <span className="ept-badge">HOT</span>}
                       <div className="ept-actions">
@@ -515,7 +513,7 @@ export function ElectronicsProductTabs({ sectionTitle = "ELECTRONICS", tabs, col
                     </div>
                     <div className="ept-info">
                       {p.category && <div className="ept-cat">{p.category.name}</div>}
-                      <h3 className="ept-name"><a href={productLink}>{p.name}</a></h3>
+                      <h3 className="ept-name"><Link href={productLink}>{p.name}</Link></h3>
                       <div className="ept-price">
                         {p.compareAtPrice && <span className="ept-price-old">{sym}{p.compareAtPrice.toLocaleString()}</span>}
                         <span>{sym}{p.price.toLocaleString()}</span>
@@ -622,7 +620,7 @@ export function ElectronicsBannerGrid({ banners }: ElectronicsBannerGridProps) {
                   <h4 className={`ebg-title-text ebg-title-${scheme}`}>{b.title}</h4>
                   {b.buttonText && <span className="ebg-btn">{b.buttonText}</span>}
                 </div>
-                <a href={fixLink(b.buttonLink || "#")} className="ebg-link" aria-label={b.title} />
+                <Link href={fixLink(b.buttonLink || "#")} className="ebg-link" aria-label={b.title} />
               </div>
             );
           })}
@@ -751,9 +749,9 @@ export function ElectronicsHotDeals({
                 return (
                   <div key={p.id} className="ehd-card">
                     <div className="ehd-thumb">
-                      <a href={productLink}>
+                      <Link href={productLink}>
                         <img src={p.images[0]?.url || ""} alt={p.name} loading="lazy" />
-                      </a>
+                      </Link>
                       {discount > 0 && <span className="ehd-badge">-{discount}%</span>}
                       <div className="ehd-timer">
                         <div className="ehd-timer-unit"><span className="ehd-timer-val">{String(timeLeft.days).padStart(2, "0")}</span><span className="ehd-timer-label">Days</span></div>
@@ -763,7 +761,7 @@ export function ElectronicsHotDeals({
                       </div>
                     </div>
                     <div className="ehd-info">
-                      <h3 className="ehd-name"><a href={productLink}>{p.name}</a></h3>
+                      <h3 className="ehd-name"><Link href={productLink}>{p.name}</Link></h3>
                       <div className="ehd-price">
                         {p.compareAtPrice && <span className="ehd-price-old">{sym}{p.compareAtPrice.toLocaleString()}</span>}
                         <span>{sym}{p.price.toLocaleString()}</span>
@@ -774,7 +772,7 @@ export function ElectronicsHotDeals({
               })}
             </div>
             <div className="ehd-footer">
-              <a href={fixLink(buttonLink)} className="ehd-view-btn">{buttonText}</a>
+              <Link href={fixLink(buttonLink)} className="ehd-view-btn">{buttonText}</Link>
             </div>
           </>
         )}
@@ -867,7 +865,7 @@ export function ElectronicsSideBanner({
               <div className="esb-banner-content">
                 <div className="esb-banner-sub">{bannerSubtitle}</div>
                 <h4 className="esb-banner-title">{bannerTitle}</h4>
-                <a href={fixLink(bannerButtonLink)} className="esb-banner-btn">{bannerButtonText}</a>
+                <Link href={fixLink(bannerButtonLink)} className="esb-banner-btn">{bannerButtonText}</Link>
               </div>
             </div>
             <h4 className="esb-feat-title">{featuredTitle}</h4>
@@ -878,7 +876,7 @@ export function ElectronicsSideBanner({
                   <div key={p.id} className="esb-feat-item">
                     <img src={p.images[0]?.url || ""} alt={p.name} className="esb-feat-img" loading="lazy" />
                     <div className="esb-feat-info">
-                      <h5 className="esb-feat-name"><a href={productLink}>{p.name}</a></h5>
+                      <h5 className="esb-feat-name"><Link href={productLink}>{p.name}</Link></h5>
                       <div className="esb-feat-price">
                         {p.compareAtPrice && <span className="esb-feat-price-old">{sym}{p.compareAtPrice.toLocaleString()}</span>}
                         {sym}{p.price.toLocaleString()}
@@ -987,9 +985,9 @@ export function ElectronicsGamingCTA({
           <div className="egc-subtitle">{subtitle}</div>
           <h3 className="egc-title">{title}</h3>
           <div className="egc-buttons">
-            <a href={fixLink(primaryButtonLink)} className="egc-btn-primary">{primaryButtonText}</a>
+            <Link href={fixLink(primaryButtonLink)} className="egc-btn-primary">{primaryButtonText}</Link>
             {secondaryButtonText && (
-              <a href={fixLink(secondaryButtonLink || "#")} className="egc-btn-secondary">{secondaryButtonText}</a>
+              <Link href={fixLink(secondaryButtonLink || "#")} className="egc-btn-secondary">{secondaryButtonText}</Link>
             )}
           </div>
         </div>
@@ -1097,11 +1095,11 @@ export function ElectronicsBlogPosts({ sectionTitle = "INNOVATIVE GADGETS", post
                   <span className="ebp-date-day">{p.date.day}</span>
                   <span className="ebp-date-month">{p.date.month}</span>
                 </div>
-                <a href={p.link} style={{ position: "absolute", inset: 0, zIndex: 3 }} aria-label={p.title} />
+                <Link href={resolveStoreLink(p.link, storeCtx?.storeSlug)} style={{ position: "absolute", inset: 0, zIndex: 3 }} aria-label={p.title} />
               </div>
               <div className="ebp-content">
                 <span className="ebp-cat">{p.category}</span>
-                <h3 className="ebp-title"><a href={p.link}>{p.title}</a></h3>
+                <h3 className="ebp-title"><Link href={p.link}>{p.title}</Link></h3>
                 <div className="ebp-meta">By {p.author}</div>
               </div>
             </article>

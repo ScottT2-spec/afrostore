@@ -1,4 +1,6 @@
 "use client";
+import Link from "next/link";
+import { resolveStoreLink, resolveFooterLink } from "@/lib/template-link-utils";
 import { useState, useEffect, useRef, useCallback, createContext, useContext } from "react";
 
 /* ═══════════════════════════════════════════════════════════════
@@ -121,11 +123,7 @@ export interface MakeupHeroSliderProps {
 
 export function MakeupHeroSlider({ slides, autoplaySpeed = 5000, minHeight = "500px", marqueeText = "Free Shipping On Orders Over $100" }: MakeupHeroSliderProps) {
   const storeCtx = useContext(MakeupStoreContext);
-  const fixLink = (link: string) => {
-    if (link && link.startsWith("/store/")) return link;
-    if (storeCtx?.storeSlug) return `/store/${storeCtx.storeSlug}/shop`;
-    return link || "#";
-  };
+  const fixLink = (link: string) => resolveStoreLink(link, storeCtx?.storeSlug);
   const [current, setCurrent] = useState(0);
   const timerRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
@@ -230,7 +228,7 @@ export function MakeupHeroSlider({ slides, autoplaySpeed = 5000, minHeight = "50
                       <h2 className={`mh-title mh-title-${scheme} mh-anim-in`} style={{ animationDelay: "0.2s" }}>{slide.title}</h2>
                       <p className={`mh-desc mh-desc-${scheme} mh-anim-in`} style={{ animationDelay: "0.4s" }}>{slide.description}</p>
                       <div className="mh-anim-in" style={{ animationDelay: "0.5s" }}>
-                        <a href={fixLink(slide.buttonLink)} className="mh-btn">{slide.buttonText}</a>
+                        <Link href={fixLink(slide.buttonLink)} className="mh-btn">{slide.buttonText}</Link>
                       </div>
                     </>
                   )}
@@ -285,7 +283,7 @@ export function MakeupCategorySidebar({ categories, marginBottom = "80px" }: Mak
       const slug = name.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/(^-|-$)/g, "");
       return `/store/${storeCtx.storeSlug}/shop?category=${slug}`;
     }
-    return link || "#";
+    return resolveStoreLink(link, storeCtx?.storeSlug);
   };
 
   const scopedCss = `
@@ -317,7 +315,7 @@ export function MakeupCategorySidebar({ categories, marginBottom = "80px" }: Mak
         {categories.map((cat, i) => (
           <li key={i} className="mcs-item">
             <img src={cat.icon} alt={cat.name} className="mcs-icon" loading="lazy" />
-            <a href={fixLink(cat.link, cat.name)} className="mcs-link">{cat.name}</a>
+            <Link href={fixLink(cat.link, cat.name)} className="mcs-link">{cat.name}</Link>
           </li>
         ))}
       </ul>
@@ -340,11 +338,7 @@ export interface MakeupSectionTitleProps {
 
 export function MakeupSectionTitle({ title, buttonText, buttonLink, align = "between", marginBottom = "25px" }: MakeupSectionTitleProps) {
   const storeCtx = useContext(MakeupStoreContext);
-  const fixLink = (link?: string) => {
-    if (link && link.startsWith("/store/")) return link;
-    if (storeCtx?.storeSlug) return `/store/${storeCtx.storeSlug}/shop`;
-    return link || "#";
-  };
+  const fixLink = (link?: string) => resolveStoreLink(link || "#", storeCtx?.storeSlug);
 
   const scopedCss = `
     .mst-wrap {
@@ -375,10 +369,10 @@ export function MakeupSectionTitle({ title, buttonText, buttonLink, align = "bet
       <ScopedStyles id="section-title" css={scopedCss} />
       <h2 className="mst-title">{title}</h2>
       {buttonText && (
-        <a href={fixLink(buttonLink)} className="mst-btn">
+        <Link href={fixLink(buttonLink)} className="mst-btn">
           <span>{buttonText}</span>
           <span className="mst-btn-arrow">→</span>
-        </a>
+        </Link>
       )}
     </div>
   );
@@ -513,7 +507,7 @@ export function MakeupProductGrid({ products: propProducts, columns = 4, showCat
       const slug = productName.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/(^-|-$)/g, "");
       return `/store/${storeCtx.storeSlug}/product/${slug}`;
     }
-    return link || "#";
+    return resolveStoreLink(link, storeCtx?.storeSlug);
   };
 
   if (products.length === 0) {
@@ -538,12 +532,12 @@ export function MakeupProductGrid({ products: propProducts, columns = 4, showCat
           return (
             <div key={p.id} className="mpg-card">
               <div className="mpg-thumb">
-                <a href={productLink}>
+                <Link href={productLink}>
                   <img src={p.image} alt={p.name} className="mpg-img mpg-main-img" loading="lazy" />
                   {showHoverImage && p.hoverImage && (
                     <img src={p.hoverImage} alt={p.name} className="mpg-hover-img" loading="lazy" />
                   )}
-                </a>
+                </Link>
                 {p.badge && <span className="mpg-badge">{p.badge}</span>}
                 <div className="mpg-actions">
                   <button className="mpg-action-btn" title="Compare" aria-label="Compare">⇌</button>
@@ -552,9 +546,9 @@ export function MakeupProductGrid({ products: propProducts, columns = 4, showCat
                 </div>
                 <button className="mpg-add-btn">Add to cart</button>
               </div>
-              <h3 className="mpg-name"><a href={productLink}>{p.name}</a></h3>
+              <h3 className="mpg-name"><Link href={productLink}>{p.name}</Link></h3>
               {showCategory && p.category && (
-                <div className="mpg-cat"><a href={p.categoryLink || "#"}>{p.category}</a></div>
+                <div className="mpg-cat"><Link href={resolveStoreLink(p.categoryLink || "#", storeCtx?.storeSlug)}>{p.category}</Link></div>
               )}
               <div className="mpg-price">
                 {p.salePrice && <span className="mpg-price-old">{p.price}</span>}
@@ -595,7 +589,7 @@ export function MakeupProductTypeCards({ cards, sectionTitle, marginBottom = "80
       const slug = name.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/(^-|-$)/g, "");
       return `/store/${storeCtx.storeSlug}/shop?category=${slug}`;
     }
-    return link || "#";
+    return resolveStoreLink(link, storeCtx?.storeSlug);
   };
 
   const scopedCss = `
@@ -637,7 +631,7 @@ export function MakeupProductTypeCards({ cards, sectionTitle, marginBottom = "80
               <h3 className="mpt-name">{c.name}</h3>
               {c.productCount !== undefined && <span className="mpt-count">{c.productCount} products</span>}
             </div>
-            <a href={fixLink(c.link, c.name)} className="mpt-link" aria-label={c.name} />
+            <Link href={fixLink(c.link, c.name)} className="mpt-link" aria-label={c.name} />
           </div>
         ))}
       </div>
@@ -666,11 +660,7 @@ export interface MakeupBeforeAfterProps {
 
 export function MakeupBeforeAfter({ title, description, beforeImage, afterImage, buttonText = "Shop Now", buttonLink, badgeText, backgroundColor = "#bedbe1", backgroundImage, marginBottom = "80px" }: MakeupBeforeAfterProps) {
   const storeCtx = useContext(MakeupStoreContext);
-  const fixLink = (link?: string) => {
-    if (link && link.startsWith("/store/")) return link;
-    if (storeCtx?.storeSlug) return `/store/${storeCtx.storeSlug}/shop`;
-    return link || "#";
-  };
+  const fixLink = (link?: string) => resolveStoreLink(link || "#", storeCtx?.storeSlug);
   const [position, setPosition] = useState(50);
   const containerRef = useRef<HTMLDivElement>(null);
   const isDragging = useRef(false);
@@ -767,7 +757,7 @@ export function MakeupBeforeAfter({ title, description, beforeImage, afterImage,
           {badgeText && <span className="mba-badge">{badgeText}</span>}
           <h2 className="mba-title">{title}</h2>
           <p className="mba-desc">{description}</p>
-          <a href={fixLink(buttonLink)} className="mba-btn">{buttonText}</a>
+          <Link href={fixLink(buttonLink)} className="mba-btn">{buttonText}</Link>
         </div>
         <div className="mba-compare">
           <div className="mba-compare-wrap" ref={containerRef}
@@ -810,11 +800,7 @@ export interface MakeupPromoBannerCardsProps {
 
 export function MakeupPromoBannerCards({ cards, marginBottom = "80px" }: MakeupPromoBannerCardsProps) {
   const storeCtx = useContext(MakeupStoreContext);
-  const fixLink = (link: string) => {
-    if (link && link.startsWith("/store/")) return link;
-    if (storeCtx?.storeSlug) return `/store/${storeCtx.storeSlug}/shop`;
-    return link || "#";
-  };
+  const fixLink = (link: string) => resolveStoreLink(link, storeCtx?.storeSlug);
 
   const scopedCss = `
     .mpb-section { margin-bottom: ${marginBottom}; }
@@ -855,7 +841,7 @@ export function MakeupPromoBannerCards({ cards, marginBottom = "80px" }: MakeupP
               <h3 className="mpb-title" style={{ color: card.titleColor }}>{card.title}</h3>
               <p className="mpb-desc" style={{ color: card.descColor }}>{card.description}</p>
             </div>
-            <a href={fixLink(card.link)} className="mpb-link" aria-label={card.title} />
+            <Link href={fixLink(card.link)} className="mpb-link" aria-label={card.title} />
           </div>
         ))}
       </div>
@@ -1011,7 +997,7 @@ export function MakeupBlogPosts({ posts: propPosts, sectionTitle, marginBottom =
         <div key={i} className="mblg-item">
           {p.image && <img src={p.image} alt={p.title} className="mblg-thumb" loading="lazy" />}
           <div className="mblg-content">
-            <h3 className="mblg-title"><a href={p.link}>{p.title}</a></h3>
+            <h3 className="mblg-title"><Link href={p.link}>{p.title}</Link></h3>
             <div className="mblg-meta">
               <span>{p.date}</span>
               {p.commentCount !== undefined && <span>💬 {p.commentCount}</span>}
@@ -1040,6 +1026,7 @@ export interface MakeupBrandsCarouselProps {
 }
 
 export function MakeupBrandsCarousel({ brands, marginBottom = "80px" }: MakeupBrandsCarouselProps) {
+  const storeCtx = useContext(MakeupStoreContext);
   const scopedCss = `
     .mbr-section { margin-bottom: ${marginBottom}; overflow: hidden; }
     .mbr-track {
@@ -1066,9 +1053,9 @@ export function MakeupBrandsCarousel({ brands, marginBottom = "80px" }: MakeupBr
       <div className="mbr-track">
         {[...brands, ...brands].map((b, i) => (
           <div key={i} className="mbr-item">
-            <a href={b.link} className="mbr-link" title={b.name}>
+            <Link href={resolveStoreLink(b.link, storeCtx?.storeSlug)} className="mbr-link" title={b.name}>
               <img src={b.logo} alt={b.name} className="mbr-logo" loading="lazy" />
-            </a>
+            </Link>
           </div>
         ))}
       </div>
@@ -1112,6 +1099,7 @@ export function MakeupFooter({
   paymentIconsUrl,
   backgroundColor = TOKENS.footerBg,
 }: MakeupFooterProps) {
+  const storeCtx = useContext(MakeupStoreContext);
   const [openColumns, setOpenColumns] = useState<Set<number>>(new Set());
   const toggleColumn = (idx: number) => {
     setOpenColumns(prev => {
@@ -1212,7 +1200,7 @@ export function MakeupFooter({
         <div className="mf-col-brand">
           {logoUrl && (
             <div style={{ marginBottom: "16px" }}>
-              <a href="/"><img src={logoUrl} alt={logoAlt} style={{ maxWidth: "150px", height: "auto" }} /></a>
+              <Link href={resolveStoreLink("/", storeCtx?.storeSlug)}><img src={logoUrl} alt={logoAlt} style={{ maxWidth: "150px", height: "auto" }} /></Link>
             </div>
           )}
           <p style={{ margin: "0 0 10px" }}>{description}</p>
@@ -1230,7 +1218,7 @@ export function MakeupFooter({
               <div className={`mf-col-toggle-content ${isOpen ? "mf-open" : "mf-closed"}`}>
                 <ul className="mf-link-list">
                   {col.links.map((link, li) => (
-                    <li key={li}><a href={link.url}>{link.label}</a></li>
+                    <li key={li}><Link href={resolveFooterLink(link.url, link.label, storeCtx?.storeSlug)}>{link.label}</Link></li>
                   ))}
                 </ul>
               </div>
@@ -1248,7 +1236,7 @@ export function MakeupFooter({
             <span style={{ position: "absolute", left: 0, top: 0, overflow: "hidden", width: `${starWidth}%`, color: TOKENS.starColor }}>★★★★★</span>
           </div>
           <div className="mf-rating-text">Based on {ratingCount} Google reviews</div>
-          <a href="#" className="mf-review-btn">Write a Review</a>
+          <Link href={resolveStoreLink("#", storeCtx?.storeSlug)} className="mf-review-btn">Write a Review</Link>
           {socialLinks.length > 0 && (
             <div className="mf-social">
               {socialLinks.map((s, i) => (

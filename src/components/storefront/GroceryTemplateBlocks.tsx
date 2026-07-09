@@ -1,4 +1,6 @@
 "use client";
+import Link from "next/link";
+import { resolveStoreLink, resolveFooterLink } from "@/lib/template-link-utils";
 import { useState, useEffect, useRef, createContext, useContext } from "react";
 
 /* ═══════════════════════════════════════════════════════════════
@@ -109,11 +111,7 @@ export interface GroceryHeroSliderProps {
 
 export function GroceryHeroSlider({ slides, autoplaySpeed = 5000 }: GroceryHeroSliderProps) {
   const storeCtx = useContext(GroceryStoreContext);
-  const fixLink = (link: string) => {
-    if (link && link.startsWith("/store/")) return link;
-    if (storeCtx?.storeSlug) return `/store/${storeCtx.storeSlug}/shop`;
-    return link || "#";
-  };
+  const fixLink = (link: string) => resolveStoreLink(link, storeCtx?.storeSlug);
 
   const defaultSlides: GroceryHeroSlide[] = [
     {
@@ -192,7 +190,7 @@ export function GroceryHeroSlider({ slides, autoplaySpeed = 5000 }: GroceryHeroS
               {slide.label && <div className="gc-slide-label">{slide.label}</div>}
               <h2 className="gc-slide-title">{slide.titleLine1}<br />{slide.titleLine2}</h2>
               {slide.description && <p className="gc-slide-desc">{slide.description}</p>}
-              <a href={fixLink(slide.buttonLink)} className="gc-slide-btn">{slide.buttonText}</a>
+              <Link href={fixLink(slide.buttonLink)} className="gc-slide-btn">{slide.buttonText}</Link>
             </div>
             <div className="gc-slide-img">
               <img src={slide.productImage} alt={slide.titleLine1} />
@@ -382,7 +380,7 @@ export function GroceryProductGrid({
               </div>
               <div className="gc-prod-info">
                 <div className="gc-prod-cat">{p.category}</div>
-                <h3 className="gc-prod-name"><a href={fixLink(p.slug)}>{p.name}</a></h3>
+                <h3 className="gc-prod-name"><Link href={fixLink(p.slug)}>{p.name}</Link></h3>
                 <div className="gc-prod-stars">{"★".repeat(p.rating || 5)}{"☆".repeat(5 - (p.rating || 5))}</div>
                 <div className="gc-prod-price">
                   {p.comparePrice && <del>${p.comparePrice}</del>}
@@ -415,6 +413,7 @@ export interface GroceryPromoBannersProps {
 }
 
 export function GroceryPromoBanners({ banners }: GroceryPromoBannersProps) {
+  const storeCtx = useContext(GroceryStoreContext);
   const defaultBanners: GroceryPromoBanner[] = [
     { subtitle: "NEW PRODUCTS", title: "Roar Ice Cream", image: `${IMG}/2020/06/wood-food-market-ban-1-opt.jpg`, buttonText: "Shop Now" },
     { subtitle: "VEGAN FOOD", title: "Organic Rice", image: `${IMG}/2020/06/wood-food-market-ban-2-opt.jpg`, buttonText: "Shop Now" },
@@ -445,7 +444,7 @@ export function GroceryPromoBanners({ banners }: GroceryPromoBannersProps) {
             <div className="gc-banner-content">
               <div className="gc-banner-sub">{b.subtitle}</div>
               <h4 className="gc-banner-title">{b.title}</h4>
-              {b.buttonText && <a href={b.buttonLink || "#"} className="gc-banner-btn">{b.buttonText}</a>}
+              {b.buttonText && <Link href={resolveStoreLink(b.buttonLink, storeCtx?.storeSlug)} className="gc-banner-btn">{b.buttonText}</Link>}
             </div>
           </div>
         ))}
@@ -691,7 +690,7 @@ export function GroceryFooter({
               <h5 className="gc-footer-col-title">{col.title}</h5>
               <ul className="gc-footer-links">
                 {col.links.map((link, j) => (
-                  <li key={j}><a href={link.href}>{link.label}</a></li>
+                  <li key={j}><Link href={resolveFooterLink(link.href, link.label, storeCtx?.storeSlug)}>{link.label}</Link></li>
                 ))}
               </ul>
             </div>

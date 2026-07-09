@@ -1,5 +1,7 @@
 "use client";
 import { useState, useEffect, useRef, useCallback, createContext, useContext } from "react";
+import Link from "next/link";
+import { resolveStoreLink, resolveFooterLink } from "@/lib/template-link-utils";
 
 /* ═══════════════════════════════════════════════════════════════
    FASHION TEMPLATE BLOCKS
@@ -87,11 +89,7 @@ export interface FashionHeroSliderProps {
 
 export function FashionHeroSlider({ slides, autoplaySpeed = 5000, minHeight = "560px" }: FashionHeroSliderProps) {
   const storeCtx = useContext(FashionStoreContext);
-  const fixLink = (link: string) => {
-    if (link && link.startsWith("/store/")) return link;
-    if (storeCtx?.storeSlug) return `/store/${storeCtx.storeSlug}/shop`;
-    return link || "#";
-  };
+  const fixLink = (link: string) => resolveStoreLink(link, storeCtx?.storeSlug);
   const [current, setCurrent] = useState(0);
   const [isTransitioning, setIsTransitioning] = useState(false);
   const timerRef = useRef<ReturnType<typeof setInterval> | null>(null);
@@ -188,7 +186,7 @@ export function FashionHeroSlider({ slides, autoplaySpeed = 5000, minHeight = "5
                       <div className={`fh-title fh-title-${scheme} fh-anim-in`} style={{ animationDelay: "0.4s" }}>{slide.titleLine2}</div>
                       <div className={`fh-desc fh-desc-${scheme} fh-anim-in`} style={{ animationDelay: "0.5s", marginLeft: align === "center" ? "auto" : undefined, marginRight: align === "center" ? "auto" : undefined }}>{slide.description}</div>
                       <div className="fh-anim-in" style={{ animationDelay: "0.6s" }}>
-                        <a href={fixLink(slide.buttonLink)} className="fh-btn">{slide.buttonText}</a>
+                        <Link href={fixLink(slide.buttonLink)} className="fh-btn">{slide.buttonText}</Link>
                       </div>
                     </>
                   )}
@@ -228,11 +226,7 @@ export interface FashionPromoBannersProps {
 
 export function FashionPromoBanners({ banners }: FashionPromoBannersProps) {
   const storeCtx = useContext(FashionStoreContext);
-  const fixLink = (link: string) => {
-    if (link && link.startsWith("/store/")) return link;
-    if (storeCtx?.storeSlug) return `/store/${storeCtx.storeSlug}/shop`;
-    return link || "#";
-  };
+  const fixLink = (link: string) => resolveStoreLink(link, storeCtx?.storeSlug);
   const scopedCss = `
     .fp-banners { display: grid; grid-template-columns: repeat(3, 1fr); gap: 30px; margin-bottom: 80px; }
     .fp-banner { position: relative; overflow: hidden; cursor: pointer; }
@@ -294,7 +288,7 @@ export function FashionPromoBanners({ banners }: FashionPromoBannersProps) {
                   <div className="fp-banner-btn">{b.buttonText}</div>
                 </div>
               </div>
-              <a href={fixLink(b.buttonLink)} className="fp-banner-link" aria-label={b.title} />
+              <Link href={fixLink(b.buttonLink)} className="fp-banner-link" aria-label={b.title} />
             </div>
           );
         })}
@@ -515,14 +509,13 @@ export function FashionProductGrid({ products: propProducts, columns = 4, showCa
   `;
 
   // Fix broken links — ensure they point to proper product pages
-  const resolveLink = (link: string, productName: string) => {
+  const resolveProductLink = (link: string, productName: string) => {
     if (link && link.startsWith("/store/")) return link;
-    // Generate a proper link from context if available
     if (storeCtx?.storeSlug) {
       const slug = productName.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/(^-|-$)/g, "");
       return `/store/${storeCtx.storeSlug}/product/${slug}`;
     }
-    return link || "#";
+    return resolveStoreLink(link, storeCtx?.storeSlug);
   };
 
   if (products.length === 0) {
@@ -551,16 +544,16 @@ export function FashionProductGrid({ products: propProducts, columns = 4, showCa
       )}
       <div className="fpg-grid">
         {products.map((p) => {
-          const productLink = resolveLink(p.link, p.name);
+          const productLink = resolveProductLink(p.link, p.name);
           return (
           <div key={p.id} className="fpg-card">
             <div className="fpg-thumb">
-              <a href={productLink}>
+              <Link href={productLink}>
                 <img src={p.image} alt={p.name} className="fpg-img fpg-main-img" loading="lazy" />
                 {showHoverImage && p.hoverImage && (
                   <img src={p.hoverImage} alt={p.name} className="fpg-hover-img" loading="lazy" />
                 )}
-              </a>
+              </Link>
               {p.badge && <span className="fpg-badge">{p.badge}</span>}
               <div className="fpg-actions">
                 <button className="fpg-action-btn" title="Compare" aria-label="Compare">⇌</button>
@@ -569,10 +562,10 @@ export function FashionProductGrid({ products: propProducts, columns = 4, showCa
               </div>
               <button className="fpg-add-btn">Add to cart</button>
             </div>
-            <h3 className="fpg-name"><a href={productLink}>{p.name}</a></h3>
+            <h3 className="fpg-name"><Link href={productLink}>{p.name}</Link></h3>
             {showCategory && p.category && (
               <div className="fpg-cat">
-                <a href={p.categoryLink || "#"}>{p.category}</a>
+                <Link href={resolveStoreLink(p.categoryLink, storeCtx?.storeSlug)}>{p.category}</Link>
               </div>
             )}
             <div className="fpg-price">
@@ -609,13 +602,13 @@ export function FashionCategoryCards({ categories, columns = 4, sectionTitle, ma
   const storeCtx = useContext(FashionStoreContext);
 
   // Resolve category links to proper store URLs
-  const resolveLink = (link: string, catName: string) => {
+  const resolveCatLink = (link: string, catName: string) => {
     if (link && link.startsWith("/store/")) return link;
     if (storeCtx?.storeSlug) {
       const catSlug = catName.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/(^-|-$)/g, "");
       return `/store/${storeCtx.storeSlug}/shop?category=${catSlug}`;
     }
-    return link || "#";
+    return resolveStoreLink(link, storeCtx?.storeSlug);
   };
   const scopedCss = `
     .fcc-section { margin-bottom: ${marginBottom}; }
@@ -669,11 +662,11 @@ export function FashionCategoryCards({ categories, columns = 4, sectionTitle, ma
               <h3 className="fcc-name">{c.name}</h3>
               {c.productCount !== undefined && (
                 <div className="fcc-count">
-                  <a href={resolveLink(c.link, c.name)}>{c.productCount} products</a>
+                  <Link href={resolveCatLink(c.link, c.name)}>{c.productCount} products</Link>
                 </div>
               )}
             </div>
-            <a href={resolveLink(c.link, c.name)} className="fcc-link" aria-label={c.name} />
+            <Link href={resolveCatLink(c.link, c.name)} className="fcc-link" aria-label={c.name} />
           </div>
         ))}
       </div>
@@ -922,7 +915,7 @@ export function FashionBlogPosts({ posts: propPosts, columns = 2, sectionTitle, 
                 <span className="fbp-date-day">{p.date.day}</span>
                 <span className="fbp-date-month">{p.date.month}</span>
               </div>
-              <a href={p.link} style={{ position: "absolute", inset: 0, zIndex: 3 }} aria-label={p.title} />
+              <Link href={p.link} style={{ position: "absolute", inset: 0, zIndex: 3 }} aria-label={p.title} />
             </div>
             <div className="fbp-content">
               <div className="fbp-cats">
@@ -930,14 +923,14 @@ export function FashionBlogPosts({ posts: propPosts, columns = 2, sectionTitle, 
                   <span key={ci} className="fbp-cat">{c}</span>
                 ))}
               </div>
-              <h3 className="fbp-title"><a href={p.link}>{p.title}</a></h3>
+              <h3 className="fbp-title"><Link href={p.link}>{p.title}</Link></h3>
               <div className="fbp-meta">
                 {p.author.avatar && <img src={p.author.avatar} alt={p.author.name} className="fbp-meta-avatar" />}
                 <span>Posted by <strong>{p.author.name}</strong></span>
                 {p.commentCount !== undefined && <span>💬 {p.commentCount}</span>}
               </div>
               <p className="fbp-excerpt">{p.excerpt}</p>
-              <a href={p.link} className="fbp-read-more">Continue reading</a>
+              <Link href={p.link} className="fbp-read-more">Continue reading</Link>
             </div>
           </article>
         ))}
@@ -1089,6 +1082,7 @@ export function FashionFeatures({
   columns = 3,
   marginBottom = "50px",
 }: FashionFeaturesProps) {
+  const storeCtx = useContext(FashionStoreContext);
   const scopedCss = `
     .ff-features { margin-bottom: ${marginBottom}; }
     .ff-features-grid {
@@ -1139,9 +1133,9 @@ export function FashionFeatures({
               <h4 className="ff-feature-title">{f.title}</h4>
               <p className="ff-feature-desc">{f.description}</p>
               {f.buttonText && (
-                <a href={f.buttonLink || "#"} className="ff-feature-btn">
+                <Link href={resolveStoreLink(f.buttonLink, storeCtx?.storeSlug)} className="ff-feature-btn">
                   {f.buttonText} →
-                </a>
+                </Link>
               )}
             </div>
           </div>
@@ -1512,6 +1506,7 @@ export function FashionFooter({
   paymentIconsUrl,
   backgroundColor = TOKENS.footerBg,
 }: FashionFooterProps) {
+  const storeCtx = useContext(FashionStoreContext);
   const [openColumns, setOpenColumns] = useState<Set<number>>(new Set());
 
   const toggleColumn = (index: number) => {
@@ -1677,9 +1672,9 @@ export function FashionFooter({
           <ul className="ff-link-list">
             {col.links.map((link, li) => (
               <li key={li}>
-                <a href={link.url}>
+                <Link href={resolveFooterLink(link.url, link.label, storeCtx?.storeSlug)}>
                   {link.emphasized ? <em>{link.label}</em> : link.label}
-                </a>
+                </Link>
               </li>
             ))}
           </ul>
@@ -1698,13 +1693,13 @@ export function FashionFooter({
         <div className="ff-col-brand">
           {logoUrl && (
             <div style={{ marginBottom: "16px" }}>
-              <a href="/">
+              <Link href={storeCtx?.storeSlug ? `/store/${storeCtx.storeSlug}` : "/"}>
                 <img
                   src={logoUrl}
                   alt={logoAlt}
                   style={{ maxWidth: "220px", height: "auto" }}
                 />
-              </a>
+              </Link>
             </div>
           )}
           <p style={{ margin: "0 0 10px", fontSize: "14px", lineHeight: "1.7" }}>
@@ -1763,7 +1758,7 @@ export function FashionFooter({
                   )}
                   <div>
                     <h5 className="ff-post-title">
-                      <a href={post.url}>{post.title}</a>
+                      <Link href={resolveStoreLink(post.url, storeCtx?.storeSlug)}>{post.title}</Link>
                     </h5>
                     <span className="ff-post-date">{post.date}</span>
                   </div>
@@ -1781,7 +1776,7 @@ export function FashionFooter({
       <div className="ff-copyrights">
         <div>
           <small>
-            <a href="/">{copyrightText}</a>
+            <Link href={storeCtx?.storeSlug ? `/store/${storeCtx.storeSlug}` : "/"}>{copyrightText}</Link>
           </small>
         </div>
         {paymentIconsUrl && (

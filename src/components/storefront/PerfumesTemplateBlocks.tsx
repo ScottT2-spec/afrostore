@@ -1,4 +1,6 @@
 "use client";
+import Link from "next/link";
+import { resolveStoreLink, resolveFooterLink } from "@/lib/template-link-utils";
 import { useState, useEffect, useRef, useCallback, createContext, useContext } from "react";
 
 /* ═══════════════════════════════════════════════════════════════
@@ -122,11 +124,7 @@ export interface PerfumesHeroSliderProps {
 
 export function PerfumesHeroSlider({ slides, autoplaySpeed = 6000, minHeight = "100vh" }: PerfumesHeroSliderProps) {
   const storeCtx = useContext(PerfumesStoreContext);
-  const fixLink = (link: string) => {
-    if (link && link.startsWith("/store/")) return link;
-    if (storeCtx?.storeSlug) return `/store/${storeCtx.storeSlug}/shop`;
-    return link || "#";
-  };
+  const fixLink = (link: string) => resolveStoreLink(link, storeCtx?.storeSlug);
   const [current, setCurrent] = useState(0);
   const timerRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
@@ -230,7 +228,7 @@ export function PerfumesHeroSlider({ slides, autoplaySpeed = 6000, minHeight = "
                 <img src={slide.bottleImage} alt="" className="ph-bottle ph-anim-in" style={{ animationDelay: "0.15s" }} />
                 <h2 className="ph-title ph-anim-in" style={{ animationDelay: "0.25s" }}>{slide.title}</h2>
                 <div className="ph-anim-in" style={{ animationDelay: "0.35s" }}>
-                  <a href={fixLink(slide.buttonLink)} className={slide.buttonStyle === "black" ? "ph-btn-black" : "ph-btn-primary"}>{slide.buttonText}</a>
+                  <Link href={fixLink(slide.buttonLink)} className={slide.buttonStyle === "black" ? "ph-btn-black" : "ph-btn-primary"}>{slide.buttonText}</Link>
                 </div>
               </>
             )}
@@ -336,7 +334,7 @@ export function PerfumesProductGrid({ products: propProducts, columns = 3, secti
       const slug = name.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/(^-|-$)/g, "");
       return `/store/${storeCtx.storeSlug}/product/${slug}`;
     }
-    return link || "#";
+    return resolveStoreLink(link, storeCtx?.storeSlug);
   };
 
   const scopedCss = `
@@ -430,12 +428,12 @@ export function PerfumesProductGrid({ products: propProducts, columns = 3, secti
           return (
             <div key={p.id} className="ppg-card">
               <div className="ppg-thumb">
-                <a href={pLink}>
+                <Link href={pLink}>
                   <img src={p.image} alt={p.name} className="ppg-img ppg-main-img" loading="lazy" />
                   {p.hoverImage && <img src={p.hoverImage} alt={p.name} className="ppg-hover-img" loading="lazy" />}
-                </a>
+                </Link>
                 <div className="ppg-info">
-                  <h3 className="ppg-name"><a href={pLink}>{p.name}</a></h3>
+                  <h3 className="ppg-name"><Link href={pLink}>{p.name}</Link></h3>
                   <div className="ppg-price-wrap">
                     <div className="ppg-price">
                       {p.salePrice && <span className="ppg-price-old">{p.price}</span>}
@@ -474,11 +472,7 @@ export interface PerfumesOlfactoryTagsProps {
 
 export function PerfumesOlfactoryTags({ title = "Shop by Olfactory Family", tags, marginBottom = "120px" }: PerfumesOlfactoryTagsProps) {
   const storeCtx = useContext(PerfumesStoreContext);
-  const fixLink = (link: string) => {
-    if (link && link.startsWith("/store/")) return link;
-    if (storeCtx?.storeSlug) return `/store/${storeCtx.storeSlug}/shop`;
-    return link || "#";
-  };
+  const fixLink = (link: string) => resolveStoreLink(link, storeCtx?.storeSlug);
 
   const scopedCss = `
     .pot-section { margin-bottom: ${marginBottom}; }
@@ -587,11 +581,7 @@ export interface PerfumesFeaturedBannersProps {
 
 export function PerfumesFeaturedBanners({ banners, marginBottom = "120px" }: PerfumesFeaturedBannersProps) {
   const storeCtx = useContext(PerfumesStoreContext);
-  const fixLink = (link: string) => {
-    if (link && link.startsWith("/store/")) return link;
-    if (storeCtx?.storeSlug) return `/store/${storeCtx.storeSlug}/shop`;
-    return link || "#";
-  };
+  const fixLink = (link: string) => resolveStoreLink(link, storeCtx?.storeSlug);
 
   const scopedCss = `
     .pfb-section { margin-bottom: ${marginBottom}; }
@@ -654,9 +644,9 @@ export function PerfumesFeaturedBanners({ banners, marginBottom = "120px" }: Per
               <p className="pfb-subtitle">{b.subtitle}</p>
               <h3 className="pfb-title">{b.title}</h3>
               <p className="pfb-desc">{b.description}</p>
-              <a href={fixLink(b.link)} className="pfb-btn">Shop Now</a>
+              <Link href={fixLink(b.link)} className="pfb-btn">Shop Now</Link>
             </div>
-            <a href={fixLink(b.link)} className="pfb-link" aria-label={b.title} />
+            <Link href={fixLink(b.link)} className="pfb-link" aria-label={b.title} />
           </div>
         ))}
       </div>
@@ -754,11 +744,7 @@ export interface PerfumesCollectionBannersProps {
 
 export function PerfumesCollectionBanners({ banners, sectionTitle, marginBottom = "120px" }: PerfumesCollectionBannersProps) {
   const storeCtx = useContext(PerfumesStoreContext);
-  const fixLink = (link: string) => {
-    if (link && link.startsWith("/store/")) return link;
-    if (storeCtx?.storeSlug) return `/store/${storeCtx.storeSlug}/shop`;
-    return link || "#";
-  };
+  const fixLink = (link: string) => resolveStoreLink(link, storeCtx?.storeSlug);
   const { ref, inView } = useInView();
 
   const scopedCss = `
@@ -814,9 +800,9 @@ export function PerfumesCollectionBanners({ banners, sectionTitle, marginBottom 
             <div className="pcb-overlay" />
             <div className="pcb-content">
               <h3 className="pcb-title">{b.title}</h3>
-              <a href={fixLink(b.link)} className="pcb-btn">Shop Now</a>
+              <Link href={fixLink(b.link)} className="pcb-btn">Shop Now</Link>
             </div>
-            <a href={fixLink(b.link)} className="pcb-link" aria-label={b.title} />
+            <Link href={fixLink(b.link)} className="pcb-link" aria-label={b.title} />
           </div>
         ))}
       </div>
@@ -905,14 +891,14 @@ export function PerfumesBlogArticles({ posts: propPosts, sectionTitle = "Journal
           <article key={i} className="pba-card">
             <div className="pba-img-wrap">
               <img src={p.image} alt={p.title} className="pba-img" loading="lazy" />
-              <a href={p.link} className="pba-link" aria-label={p.title} />
+              <Link href={resolveStoreLink(p.link, storeCtx?.storeSlug)} className="pba-link" aria-label={p.title} />
             </div>
             <div className="pba-cats">
               {p.categories.map((c, ci) => (
                 <span key={ci} className="pba-cat">{c}</span>
               ))}
             </div>
-            <h3 className="pba-title"><a href={p.link}>{p.title}</a></h3>
+            <h3 className="pba-title"><Link href={p.link}>{p.title}</Link></h3>
             <div className="pba-date">{p.date}</div>
           </article>
         ))}
@@ -1039,6 +1025,7 @@ export function PerfumesFooter({
   backgroundColor = TOKENS.footerBg,
   newsletterEnabled = true,
 }: PerfumesFooterProps) {
+  const storeCtx = useContext(PerfumesStoreContext);
   const [email, setEmail] = useState("");
   const [openColumns, setOpenColumns] = useState<Set<number>>(new Set());
   const toggleColumn = (idx: number) => {
@@ -1143,7 +1130,7 @@ export function PerfumesFooter({
         <div className="pf-col-brand">
           {logoUrl && (
             <div style={{ marginBottom: "16px" }}>
-              <a href="/"><img src={logoUrl} alt={logoAlt} style={{ maxWidth: "150px", height: "auto" }} /></a>
+              <Link href={resolveStoreLink("/", storeCtx?.storeSlug)}><img src={logoUrl} alt={logoAlt} style={{ maxWidth: "150px", height: "auto" }} /></Link>
             </div>
           )}
           <p style={{ margin: "0 0 10px" }}>{description}</p>
@@ -1170,7 +1157,7 @@ export function PerfumesFooter({
               <div className={`pf-col-toggle-content ${isOpen ? "pf-open" : "pf-closed"}`}>
                 <ul className="pf-link-list">
                   {col.links.map((link, li) => (
-                    <li key={li}><a href={link.url}>{link.label}</a></li>
+                    <li key={li}><Link href={resolveFooterLink(link.url, link.label, storeCtx?.storeSlug)}>{link.label}</Link></li>
                   ))}
                 </ul>
               </div>

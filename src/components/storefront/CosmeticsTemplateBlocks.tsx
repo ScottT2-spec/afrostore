@@ -1,4 +1,6 @@
 "use client";
+import Link from "next/link";
+import { resolveStoreLink, resolveFooterLink } from "@/lib/template-link-utils";
 import { useState, useEffect, useRef, useCallback, createContext, useContext } from "react";
 
 /* ═══════════════════════════════════════════════════════════════
@@ -122,11 +124,7 @@ export interface CosmeticsHeroSliderProps {
 
 export function CosmeticsHeroSlider({ slides, autoplaySpeed = 5000, minHeight = "560px" }: CosmeticsHeroSliderProps) {
   const storeCtx = useContext(CosmeticsStoreContext);
-  const fixLink = (link: string) => {
-    if (link && link.startsWith("/store/")) return link;
-    if (storeCtx?.storeSlug) return `/store/${storeCtx.storeSlug}/shop`;
-    return link || "#";
-  };
+  const fixLink = (link: string) => resolveStoreLink(link, storeCtx?.storeSlug);
   const [current, setCurrent] = useState(0);
   const [isTransitioning, setIsTransitioning] = useState(false);
   const timerRef = useRef<ReturnType<typeof setInterval> | null>(null);
@@ -236,9 +234,9 @@ export function CosmeticsHeroSlider({ slides, autoplaySpeed = 5000, minHeight = 
                       <div className={`ch-title ch-title-${scheme} ch-anim-in`} style={{ animationDelay: "0.4s", marginBottom: "20px" }}>{slide.titleLine2}</div>
                       <div className={`ch-desc ch-desc-${scheme} ch-anim-in`} style={{ animationDelay: "0.5s" }}>{slide.description}</div>
                       <div className="ch-anim-in" style={{ animationDelay: "0.6s" }}>
-                        <a href={fixLink(slide.buttonLink)} className="ch-btn">{slide.buttonText}</a>
+                        <Link href={fixLink(slide.buttonLink)} className="ch-btn">{slide.buttonText}</Link>
                         {slide.secondButtonText && (
-                          <a href={fixLink(slide.secondButtonLink || "#")} className="ch-btn-outline">{slide.secondButtonText}</a>
+                          <Link href={fixLink(slide.secondButtonLink || "#")} className="ch-btn-outline">{slide.secondButtonText}</Link>
                         )}
                       </div>
                     </>
@@ -278,11 +276,7 @@ export interface CosmeticsPromoBannersProps {
 
 export function CosmeticsPromoBanners({ banners }: CosmeticsPromoBannersProps) {
   const storeCtx = useContext(CosmeticsStoreContext);
-  const fixLink = (link: string) => {
-    if (link && link.startsWith("/store/")) return link;
-    if (storeCtx?.storeSlug) return `/store/${storeCtx.storeSlug}/shop`;
-    return link || "#";
-  };
+  const fixLink = (link: string) => resolveStoreLink(link, storeCtx?.storeSlug);
 
   const scopedCss = `
     .cp-banners { display: grid; grid-template-columns: repeat(3, 1fr); gap: 30px; margin-bottom: 60px; }
@@ -339,9 +333,9 @@ export function CosmeticsPromoBanners({ banners }: CosmeticsPromoBannersProps) {
             <div className="cp-banner-overlay">
               <h4 className="cp-banner-title">{b.title}</h4>
               <p className="cp-banner-desc">{b.description}</p>
-              <a href={fixLink(b.buttonLink)} className="cp-banner-btn">{b.buttonText}</a>
+              <Link href={fixLink(b.buttonLink)} className="cp-banner-btn">{b.buttonText}</Link>
             </div>
-            <a href={fixLink(b.buttonLink)} className="cp-banner-link" aria-label={b.title} />
+            <Link href={fixLink(b.buttonLink)} className="cp-banner-link" aria-label={b.title} />
           </div>
         ))}
       </div>
@@ -366,11 +360,7 @@ export interface CosmeticsSectionTitleProps {
 
 export function CosmeticsSectionTitle({ subtitle, title, description, buttonText, buttonLink, align = "center", maxWidth = "50%", titleColor = "dark" }: CosmeticsSectionTitleProps) {
   const storeCtx = useContext(CosmeticsStoreContext);
-  const fixLink = (link: string) => {
-    if (link && link.startsWith("/store/")) return link;
-    if (storeCtx?.storeSlug) return `/store/${storeCtx.storeSlug}/shop`;
-    return link || "#";
-  };
+  const fixLink = (link: string) => resolveStoreLink(link, storeCtx?.storeSlug);
 
   const scopedCss = `
     .cst-wrap { margin-bottom: 35px; }
@@ -411,7 +401,7 @@ export function CosmeticsSectionTitle({ subtitle, title, description, buttonText
         <h2 className={`cst-title cst-title-${titleColor}`}>{title}</h2>
         {description && <p className="cst-desc">{description}</p>}
         {buttonText && (
-          <a href={fixLink(buttonLink || "#")} className="cst-btn">{buttonText}</a>
+          <Link href={fixLink(buttonLink || "#")} className="cst-btn">{buttonText}</Link>
         )}
       </div>
     </div>
@@ -545,7 +535,7 @@ export function CosmeticsProductGrid({ products: propProducts, columns = 4, show
       const slug = productName.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/(^-|-$)/g, "");
       return `/store/${storeCtx.storeSlug}/product/${slug}`;
     }
-    return link || "#";
+    return resolveStoreLink(link, storeCtx?.storeSlug);
   };
 
   if (products.length === 0) {
@@ -574,12 +564,12 @@ export function CosmeticsProductGrid({ products: propProducts, columns = 4, show
           return (
             <div key={p.id} className="cpg-card">
               <div className="cpg-thumb">
-                <a href={productLink}>
+                <Link href={productLink}>
                   <img src={p.image} alt={p.name} className="cpg-img cpg-main-img" loading="lazy" />
                   {showHoverImage && p.hoverImage && (
                     <img src={p.hoverImage} alt={p.name} className="cpg-hover-img" loading="lazy" />
                   )}
-                </a>
+                </Link>
                 {p.badge && <span className="cpg-badge">{p.badge}</span>}
                 <div className="cpg-actions">
                   <button className="cpg-action-btn" title="Compare" aria-label="Compare">⇌</button>
@@ -588,9 +578,9 @@ export function CosmeticsProductGrid({ products: propProducts, columns = 4, show
                 </div>
                 <button className="cpg-add-btn">Add to cart</button>
               </div>
-              <h3 className="cpg-name"><a href={productLink}>{p.name}</a></h3>
+              <h3 className="cpg-name"><Link href={productLink}>{p.name}</Link></h3>
               {showCategory && p.category && (
-                <div className="cpg-cat"><a href={p.categoryLink || "#"}>{p.category}</a></div>
+                <div className="cpg-cat"><Link href={resolveStoreLink(p.categoryLink, storeCtx?.storeSlug)}>{p.category}</Link></div>
               )}
               <div className="cpg-price">
                 {p.salePrice && <span className="cpg-price-old">{p.price}</span>}
@@ -629,7 +619,7 @@ export function CosmeticsCategoryCards({ categories, sectionTitle, marginBottom 
       const catSlug = catName.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/(^-|-$)/g, "");
       return `/store/${storeCtx.storeSlug}/shop?category=${catSlug}`;
     }
-    return link || "#";
+    return resolveStoreLink(link, storeCtx?.storeSlug);
   };
 
   const scopedCss = `
@@ -688,11 +678,11 @@ export function CosmeticsCategoryCards({ categories, sectionTitle, marginBottom 
               <h3 className="ccc-name">{c.name}</h3>
               {c.productCount !== undefined && (
                 <div className="ccc-count">
-                  <a href={resolveLink(c.link, c.name)}>{c.productCount} products</a>
+                  <Link href={resolveLink(c.link, c.name)}>{c.productCount} products</Link>
                 </div>
               )}
             </div>
-            <a href={resolveLink(c.link, c.name)} className="ccc-link" aria-label={c.name} />
+            <Link href={resolveLink(c.link, c.name)} className="ccc-link" aria-label={c.name} />
           </div>
         ))}
       </div>
@@ -724,11 +714,7 @@ export interface CosmeticsDiscoveryProps {
 
 export function CosmeticsDiscovery({ image, title, description, features, buttonText = "SHOP NOW", buttonLink, secondButtonText = "READ MORE", secondButtonLink, marginBottom = "60px" }: CosmeticsDiscoveryProps) {
   const storeCtx = useContext(CosmeticsStoreContext);
-  const fixLink = (link?: string) => {
-    if (link && link.startsWith("/store/")) return link;
-    if (storeCtx?.storeSlug) return `/store/${storeCtx.storeSlug}/shop`;
-    return link || "#";
-  };
+  const fixLink = (link?: string) => resolveStoreLink(link || "#", storeCtx?.storeSlug);
   const { ref, inView } = useInView();
 
   const scopedCss = `
@@ -804,9 +790,9 @@ export function CosmeticsDiscovery({ image, title, description, features, button
             ))}
           </div>
           <div>
-            <a href={fixLink(buttonLink)} className="cd-btn">{buttonText}</a>
+            <Link href={fixLink(buttonLink)} className="cd-btn">{buttonText}</Link>
             {secondButtonText && (
-              <a href={fixLink(secondButtonLink)} className="cd-btn-outline">{secondButtonText}</a>
+              <Link href={fixLink(secondButtonLink)} className="cd-btn-outline">{secondButtonText}</Link>
             )}
           </div>
         </div>
@@ -833,11 +819,7 @@ export interface CosmeticsCountdownBannerProps {
 
 export function CosmeticsCountdownBanner({ title, description, image, targetDate, buttonText = "SHOP NOW", buttonLink, secondButtonText = "READ MORE", secondButtonLink, marginBottom = "60px" }: CosmeticsCountdownBannerProps) {
   const storeCtx = useContext(CosmeticsStoreContext);
-  const fixLink = (link?: string) => {
-    if (link && link.startsWith("/store/")) return link;
-    if (storeCtx?.storeSlug) return `/store/${storeCtx.storeSlug}/shop`;
-    return link || "#";
-  };
+  const fixLink = (link?: string) => resolveStoreLink(link || "#", storeCtx?.storeSlug);
 
   const [timeLeft, setTimeLeft] = useState({ days: 0, hours: 0, minutes: 0, seconds: 0 });
 
@@ -936,9 +918,9 @@ export function CosmeticsCountdownBanner({ title, description, image, targetDate
             </div>
           )}
           <div>
-            <a href={fixLink(buttonLink)} className="ccb-btn">{buttonText}</a>
+            <Link href={fixLink(buttonLink)} className="ccb-btn">{buttonText}</Link>
             {secondButtonText && (
-              <a href={fixLink(secondButtonLink)} className="ccb-btn-outline">{secondButtonText}</a>
+              <Link href={fixLink(secondButtonLink)} className="ccb-btn-outline">{secondButtonText}</Link>
             )}
           </div>
         </div>
@@ -1128,7 +1110,7 @@ export function CosmeticsBlogPosts({ posts: propPosts, columns = 2, sectionTitle
                 <span className="cbp-date-day">{p.date.day}</span>
                 <span className="cbp-date-month">{p.date.month}</span>
               </div>
-              <a href={p.link} style={{ position: "absolute", inset: 0, zIndex: 3 }} aria-label={p.title} />
+              <Link href={resolveStoreLink(p.link, storeCtx?.storeSlug)} style={{ position: "absolute", inset: 0, zIndex: 3 }} aria-label={p.title} />
             </div>
             <div className="cbp-content">
               <div className="cbp-cats">
@@ -1136,14 +1118,14 @@ export function CosmeticsBlogPosts({ posts: propPosts, columns = 2, sectionTitle
                   <span key={ci} className="cbp-cat">{c}</span>
                 ))}
               </div>
-              <h3 className="cbp-title"><a href={p.link}>{p.title}</a></h3>
+              <h3 className="cbp-title"><Link href={p.link}>{p.title}</Link></h3>
               <div className="cbp-meta">
                 {p.author.avatar && <img src={p.author.avatar} alt={p.author.name} className="cbp-meta-avatar" />}
                 <span>Posted by <strong>{p.author.name}</strong></span>
                 {p.commentCount !== undefined && <span>💬 {p.commentCount}</span>}
               </div>
               <p className="cbp-excerpt">{p.excerpt}</p>
-              <a href={p.link} className="cbp-read-more">Continue reading</a>
+              <Link href={p.link} className="cbp-read-more">Continue reading</Link>
             </div>
           </article>
         ))}
@@ -1348,6 +1330,7 @@ export function CosmeticsFooter({
   paymentIconsUrl,
   backgroundColor = TOKENS.footerBg,
 }: CosmeticsFooterProps) {
+  const storeCtx = useContext(CosmeticsStoreContext);
   const [openColumns, setOpenColumns] = useState<Set<number>>(new Set());
 
   const toggleColumn = (index: number) => {
@@ -1454,7 +1437,7 @@ export function CosmeticsFooter({
         <div className="cf-col-brand">
           {logoUrl && (
             <div style={{ marginBottom: "16px" }}>
-              <a href="/"><img src={logoUrl} alt={logoAlt} style={{ maxWidth: "180px", height: "auto" }} /></a>
+              <Link href={resolveStoreLink("/", storeCtx?.storeSlug)}><img src={logoUrl} alt={logoAlt} style={{ maxWidth: "180px", height: "auto" }} /></Link>
             </div>
           )}
           <p style={{ margin: "0 0 10px", fontSize: "14px" }}>{description}</p>
@@ -1488,7 +1471,7 @@ export function CosmeticsFooter({
               <div className={`cf-col-toggle-content ${isOpen ? "cf-open" : "cf-closed"}`}>
                 <ul className="cf-link-list">
                   {col.links.map((link, li) => (
-                    <li key={li}><a href={link.url}>{link.label}</a></li>
+                    <li key={li}><Link href={resolveFooterLink(link.url, link.label, storeCtx?.storeSlug)}>{link.label}</Link></li>
                   ))}
                 </ul>
               </div>

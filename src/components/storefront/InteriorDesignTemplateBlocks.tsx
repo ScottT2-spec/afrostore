@@ -1,4 +1,6 @@
 "use client";
+import Link from "next/link";
+import { resolveStoreLink, resolveFooterLink } from "@/lib/template-link-utils";
 import { useState, useEffect, useRef, createContext, useContext } from "react";
 
 /* ═══════════════════════════════════════════════════════════════
@@ -103,11 +105,7 @@ export interface InteriorHeroSliderProps {
 
 export function InteriorHeroSlider({ slides, autoplaySpeed = 5000 }: InteriorHeroSliderProps) {
   const storeCtx = useContext(InteriorStoreContext);
-  const fixLink = (link: string) => {
-    if (link && link.startsWith("/store/")) return link;
-    if (storeCtx?.storeSlug) return `/store/${storeCtx.storeSlug}/shop`;
-    return link || "#";
-  };
+  const fixLink = (link: string) => resolveStoreLink(link, storeCtx?.storeSlug);
 
   const defaultSlides: InteriorHeroSlide[] = [
     {
@@ -180,7 +178,7 @@ export function InteriorHeroSlider({ slides, autoplaySpeed = 5000 }: InteriorHer
               {slide.subtitle && <div className="id-slide-subtitle">{slide.subtitle}</div>}
               <h2 className="id-slide-title">{slide.titleLine1}{slide.titleLine2 && <><br />{slide.titleLine2}</>}</h2>
               {slide.description && <p className="id-slide-desc">{slide.description}</p>}
-              <a href={fixLink(slide.buttonLink)} className="id-slide-btn">{slide.buttonText}</a>
+              <Link href={fixLink(slide.buttonLink)} className="id-slide-btn">{slide.buttonText}</Link>
             </div>
             <div className="id-slide-img">
               <img src={slide.image} alt={slide.titleLine1} />
@@ -355,7 +353,7 @@ export function InteriorProductGrid({
               </div>
               <div className="id-prod-info">
                 <div className="id-prod-cat">{p.category}</div>
-                <h3 className="id-prod-name"><a href={fixLink(p.slug)}>{p.name}</a></h3>
+                <h3 className="id-prod-name"><Link href={fixLink(p.slug)}>{p.name}</Link></h3>
                 <div className="id-prod-stars">{"★".repeat(p.rating || 5)}{"☆".repeat(5 - (p.rating || 5))}</div>
                 <div className="id-prod-price">
                   {p.comparePrice && <del>${p.comparePrice}</del>}
@@ -472,6 +470,7 @@ export interface InteriorPromoBannersProps {
 }
 
 export function InteriorPromoBanners({ banners, variant = "garden" }: InteriorPromoBannersProps) {
+  const storeCtx = useContext(InteriorStoreContext);
   const gardenBanners: InteriorPromoBanner[] = [
     { subtitle: "Scelerisque fusce", title: "New Arrival of\nModern Garden Gloves.", image: `${IMG}/2018/10/retail-garden-banner-1-1-opt.jpg`, buttonText: "Shop Now" },
     { subtitle: "A nec augue", title: "Discount 30% Garden Equipment.", image: `${IMG}/2018/10/retail-garden-banner-2-1-opt.jpg`, buttonText: "Shop Now" },
@@ -507,7 +506,7 @@ export function InteriorPromoBanners({ banners, variant = "garden" }: InteriorPr
             <div className="id-banner-content">
               {b.subtitle && <div className="id-banner-sub">{b.subtitle}</div>}
               <h4 className="id-banner-title">{b.title}</h4>
-              {b.buttonText && <a href={b.buttonLink || "#"} className="id-banner-btn">{b.buttonText}</a>}
+              {b.buttonText && <Link href={resolveStoreLink(b.buttonLink, storeCtx?.storeSlug)} className="id-banner-btn">{b.buttonText}</Link>}
             </div>
           </div>
         ))}
@@ -691,6 +690,7 @@ export function InteriorCta({
   buttonLink = "#",
   backgroundColor = TOKENS.primaryColor,
 }: InteriorCtaProps) {
+  const storeCtx = useContext(InteriorStoreContext);
   const css = `
     .id-cta { padding: 60px 40px; text-align: center; margin-bottom: 0; }
     .id-cta-title { font-family: ${TOKENS.titleFont}; font-weight: 700; font-size: 28px; line-height: 1.4; color: #fff; margin: 0 0 25px; white-space: pre-line; text-transform: uppercase; letter-spacing: 1px; }
@@ -703,7 +703,7 @@ export function InteriorCta({
     <div className="id-cta" style={{ backgroundColor }}>
       <ScopedStyles id="cta" css={css} />
       <h4 className="id-cta-title">{title}</h4>
-      <a href={buttonLink} className="id-cta-btn">{buttonText}</a>
+      <Link href={resolveStoreLink(buttonLink, storeCtx?.storeSlug)} className="id-cta-btn">{buttonText}</Link>
     </div>
   );
 }
@@ -787,7 +787,7 @@ export function InteriorFooter({
               <h5 className="id-footer-col-title">{col.title}</h5>
               <ul className="id-footer-links">
                 {col.links.map((link, j) => (
-                  <li key={j}><a href={link.href}>{link.label}</a></li>
+                  <li key={j}><Link href={resolveFooterLink(link.href, link.label, storeCtx?.storeSlug)}>{link.label}</Link></li>
                 ))}
               </ul>
             </div>
