@@ -1,3 +1,4 @@
+import { FashionFooter } from "./FashionTemplateBlocks";
 "use client";
 import Link from "next/link";
 import { resolveStoreLink, resolveFooterLink } from "@/lib/template-link-utils";
