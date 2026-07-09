@@ -1502,6 +1502,8 @@ export interface FashionFooterProps {
   paymentIconsUrl?: string;
   /** Background color override */
   backgroundColor?: string;
+  /** Store slug override (so non-fashion templates can reuse this footer) */
+  storeSlug?: string;
 }
 
 export function FashionFooter({
@@ -1518,8 +1520,10 @@ export function FashionFooter({
   copyrightText = `© ${new Date().getFullYear()}. ALL RIGHTS RESERVED.`,
   paymentIconsUrl,
   backgroundColor = TOKENS.footerBg,
+  storeSlug: storeSlugProp,
 }: FashionFooterProps) {
   const storeCtx = useContext(FashionStoreContext);
+  const resolvedSlug = storeSlugProp || storeCtx?.storeSlug;
   const [openColumns, setOpenColumns] = useState<Set<number>>(new Set());
 
   const toggleColumn = (index: number) => {
@@ -1685,7 +1689,7 @@ export function FashionFooter({
           <ul className="ff-link-list">
             {col.links.map((link, li) => (
               <li key={li}>
-                <Link href={resolveFooterLink(link.url, link.label, storeCtx?.storeSlug)}>
+                <Link href={resolveFooterLink(link.url, link.label, resolvedSlug)}>
                   {link.emphasized ? <em>{link.label}</em> : link.label}
                 </Link>
               </li>
@@ -1706,7 +1710,7 @@ export function FashionFooter({
         <div className="ff-col-brand">
           {logoUrl && (
             <div style={{ marginBottom: "16px" }}>
-              <Link href={storeCtx?.storeSlug ? `/store/${storeCtx.storeSlug}` : "/"}>
+              <Link href={resolvedSlug ? `/store/${resolvedSlug}` : "/"}>
                 <img
                   src={logoUrl}
                   alt={logoAlt}
@@ -1771,7 +1775,7 @@ export function FashionFooter({
                   )}
                   <div>
                     <h5 className="ff-post-title">
-                      <Link href={resolveStoreLink(post.url, storeCtx?.storeSlug)}>{post.title}</Link>
+                      <Link href={resolveStoreLink(post.url, resolvedSlug)}>{post.title}</Link>
                     </h5>
                     <span className="ff-post-date">{post.date}</span>
                   </div>
@@ -1789,7 +1793,7 @@ export function FashionFooter({
       <div className="ff-copyrights">
         <div>
           <small>
-            <Link href={storeCtx?.storeSlug ? `/store/${storeCtx.storeSlug}` : "/"}>{copyrightText}</Link>
+            <Link href={resolvedSlug ? `/store/${resolvedSlug}` : "/"}>{copyrightText}</Link>
           </small>
         </div>
         {paymentIconsUrl && (
