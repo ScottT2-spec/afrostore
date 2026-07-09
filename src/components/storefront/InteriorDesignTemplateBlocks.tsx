@@ -80,6 +80,10 @@ export interface InteriorStoreContextData {
   contactAddress?: string;
   socialLinks?: { platform: string; url: string }[];
   footerLinks?: { title: string; links: { label: string; href: string }[] }[];
+  addToCart?: (productId: string, quantity?: number) => void;
+  toggleWishlist?: (productId: string) => void;
+  isWishlisted?: (productId: string) => boolean;
+  onQuickView?: (productId: string) => void;
 }
 
 export const InteriorStoreContext = createContext<InteriorStoreContextData | null>(null);
@@ -360,7 +364,7 @@ export function InteriorProductGrid({
                   {p.comparePrice && <del>${p.comparePrice}</del>}
                   ${p.price}
                 </div>
-                <button className="id-prod-btn">Add to cart</button>
+                <button className="id-prod-btn" onClick={() => storeCtx?.addToCart?.(String(p.id))}>Add to cart</button>
               </div>
             </div>
           ))}

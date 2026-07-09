@@ -201,7 +201,7 @@ function getWhatsAppLink(phone: string | undefined, cart: CartItem[], currency: 
 /* ───────── Template Store Context Provider ───────── */
 
 /** Maps any template slug to the correct StoreContext provider */
-function TemplateStoreContextProvider({ templateSlug, products, blogs, currency, storeSlug, socialLinks, children }: {
+function TemplateStoreContextProvider({ templateSlug, products, blogs, currency, storeSlug, socialLinks, addToCart, toggleWishlist, isWishlisted, onQuickView, children }: {
   templateSlug: string | null;
   products: any[];
   blogs: any[];
@@ -210,7 +210,7 @@ function TemplateStoreContextProvider({ templateSlug, products, blogs, currency,
   socialLinks?: Array<{ platform: string; url: string }>;
   children: React.ReactNode;
 }) {
-  const value = { products, blogs, currency, storeSlug, socialLinks };
+  const value = { products, blogs, currency, storeSlug, socialLinks , addToCart, toggleWishlist, isWishlisted, onQuickView };
 
   // Determine which context to use based on template slug or block prefix
   const slug = templateSlug || "";

@@ -84,6 +84,10 @@ export interface ElectronicsStoreContextData {
   currency: string;
   storeSlug: string;
   socialLinks?: Array<{ platform: string; url: string }>;
+  addToCart?: (productId: string, quantity?: number) => void;
+  toggleWishlist?: (productId: string) => void;
+  isWishlisted?: (productId: string) => boolean;
+  onQuickView?: (productId: string) => void;
 }
 export const ElectronicsStoreContext = createContext<ElectronicsStoreContextData | null>(null);
 
@@ -508,8 +512,8 @@ export function ElectronicsProductTabs({ sectionTitle = "ELECTRONICS", tabs, col
                       {p.compareAtPrice && <span className="ept-badge">SALE</span>}
                       {!p.compareAtPrice && p.isFeatured && <span className="ept-badge">HOT</span>}
                       <div className="ept-actions">
-                        <button className="ept-action-btn" title="Quick view" aria-label="Quick view">👁</button>
-                        <button className="ept-action-btn" title="Wishlist" aria-label="Wishlist">♡</button>
+                        <button className="ept-action-btn" title="Quick view" aria-label="Quick view" onClick={() => storeCtx?.onQuickView?.(String(p.id))}>👁</button>
+                        <button className="ept-action-btn" title="Wishlist" aria-label="Wishlist" onClick={() => storeCtx?.toggleWishlist?.(String(p.id))} style={storeCtx?.isWishlisted?.(String(p.id)) ? { color: "red" } : undefined}>{storeCtx?.isWishlisted?.(String(p.id)) ? "♥" : "♡"}</button>
                         <button className="ept-action-btn" title="Compare" aria-label="Compare">⇌</button>
                       </div>
                     </div>
@@ -521,7 +525,7 @@ export function ElectronicsProductTabs({ sectionTitle = "ELECTRONICS", tabs, col
                         <span>{sym}{p.price.toLocaleString()}</span>
                       </div>
                     </div>
-                    <button className="ept-add-btn">Add to cart</button>
+                    <button className="ept-add-btn" onClick={() => storeCtx?.addToCart?.(String(p.id))}>Add to cart</button>
                   </div>
                 );
               })}

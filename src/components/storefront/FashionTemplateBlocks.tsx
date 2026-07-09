@@ -384,6 +384,10 @@ export interface FashionStoreContextData {
   currency: string;
   storeSlug: string;
   socialLinks?: Array<{ platform: string; url: string }>;
+  addToCart?: (productId: string, quantity?: number) => void;
+  toggleWishlist?: (productId: string) => void;
+  isWishlisted?: (productId: string) => boolean;
+  onQuickView?: (productId: string) => void;
 }
 export const FashionStoreContext = createContext<FashionStoreContextData | null>(null);
 
@@ -559,10 +563,10 @@ export function FashionProductGrid({ products: propProducts, columns = 4, showCa
               {p.badge && <span className="fpg-badge">{p.badge}</span>}
               <div className="fpg-actions">
                 <button className="fpg-action-btn" title="Compare" aria-label="Compare">⇌</button>
-                <button className="fpg-action-btn" title="Quick view" aria-label="Quick view">👁</button>
-                <button className="fpg-action-btn" title="Wishlist" aria-label="Wishlist">♡</button>
+                <button className="fpg-action-btn" title="Quick view" aria-label="Quick view" onClick={() => storeCtx?.onQuickView?.(String(p.id))}>👁</button>
+                <button className="fpg-action-btn" title="Wishlist" aria-label="Wishlist" onClick={() => storeCtx?.toggleWishlist?.(String(p.id))} style={storeCtx?.isWishlisted?.(String(p.id)) ? { color: "red" } : undefined}>{storeCtx?.isWishlisted?.(String(p.id)) ? "♥" : "♡"}</button>
               </div>
-              <button className="fpg-add-btn">Add to cart</button>
+              <button className="fpg-add-btn" onClick={() => storeCtx?.addToCart?.(String(p.id))}>Add to cart</button>
             </div>
             <h3 className="fpg-name"><Link href={productLink}>{p.name}</Link></h3>
             {showCategory && p.category && (

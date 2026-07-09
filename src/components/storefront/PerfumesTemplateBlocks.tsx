@@ -99,6 +99,10 @@ export interface PerfumesStoreContextData {
   currency: string;
   storeSlug: string;
   socialLinks?: Array<{ platform: string; url: string }>;
+  addToCart?: (productId: string, quantity?: number) => void;
+  toggleWishlist?: (productId: string) => void;
+  isWishlisted?: (productId: string) => boolean;
+  onQuickView?: (productId: string) => void;
 }
 export const PerfumesStoreContext = createContext<PerfumesStoreContextData | null>(null);
 
@@ -444,9 +448,9 @@ export function PerfumesProductGrid({ products: propProducts, columns = 3, secti
                   </div>
                 </div>
                 <div className="ppg-actions">
-                  <button className="ppg-action-btn" title="Wishlist" aria-label="Wishlist">♡</button>
+                  <button className="ppg-action-btn" title="Wishlist" aria-label="Wishlist" onClick={() => storeCtx?.toggleWishlist?.(String(p.id))} style={storeCtx?.isWishlisted?.(String(p.id)) ? { color: "red" } : undefined}>{storeCtx?.isWishlisted?.(String(p.id)) ? "♥" : "♡"}</button>
                 </div>
-                <button className="ppg-cart-btn" title="Add to cart" aria-label="Add to cart">🛒</button>
+                <button className="ppg-cart-btn" title="Add to cart" aria-label="Add to cart" onClick={() => storeCtx?.addToCart?.(String(p.id))}>🛒</button>
               </div>
             </div>
           );

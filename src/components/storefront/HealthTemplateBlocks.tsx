@@ -2,11 +2,8 @@
 import Link from "next/link";
 import { resolveStoreLink, resolveFooterLink } from "@/lib/template-link-utils";
 import { useState, useEffect, useRef, useCallback, createContext, useContext } from "react";
-<<<<<<< HEAD
 import { safeSrc, onImgError } from "./image-fallback";
-=======
 import { useNewsletterSubscribe } from "@/hooks/useNewsletterSubscribe";
->>>>>>> 543c35d (fix: wire newsletter forms to API endpoint (CrmContact))
 
 /* ═══════════════════════════════════════════════════════════════
    HEALTH (PILLS & SUPPLEMENTS) TEMPLATE BLOCKS
@@ -104,6 +101,10 @@ export interface HealthStoreContextData {
   contactAddress?: string;
   socialLinks?: { platform: string; url: string }[];
   footerLinks?: { title: string; links: { label: string; href: string }[] }[];
+  addToCart?: (productId: string, quantity?: number) => void;
+  toggleWishlist?: (productId: string) => void;
+  isWishlisted?: (productId: string) => boolean;
+  onQuickView?: (productId: string) => void;
 }
 
 export const HealthStoreContext = createContext<HealthStoreContextData | null>(null);
@@ -429,7 +430,7 @@ export function HealthProductGrid({
               <h3 className="hh-prod-name"><Link href={fixLink(p.slug)}>{p.name}</Link></h3>
               <div className="hh-prod-stars">{renderStars(p.rating)}</div>
               <div className="hh-prod-price">${p.price}</div>
-              <button className="hh-prod-btn">Add to cart</button>
+              <button className="hh-prod-btn" onClick={() => storeCtx?.addToCart?.(String(p.id))}>Add to cart</button>
             </div>
           </div>
         ))}

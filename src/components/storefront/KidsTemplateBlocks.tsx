@@ -100,6 +100,10 @@ export interface KidsStoreContextData {
   currency: string;
   storeSlug: string;
   socialLinks?: Array<{ platform: string; url: string }>;
+  addToCart?: (productId: string, quantity?: number) => void;
+  toggleWishlist?: (productId: string) => void;
+  isWishlisted?: (productId: string) => boolean;
+  onQuickView?: (productId: string) => void;
 }
 export const KidsStoreContext = createContext<KidsStoreContextData | null>(null);
 
@@ -559,11 +563,11 @@ export function KidsProductGrid({ products: propProducts, columns = 4, showCateg
                 </Link>
                 {p.badge && <span className={`kpg-badge ${badgeClass}`}>{p.badge}</span>}
                 <div className="kpg-actions">
-                  <button className="kpg-action-btn" title="Quick view" aria-label="Quick view">👁</button>
-                  <button className="kpg-action-btn" title="Wishlist" aria-label="Wishlist">♡</button>
+                  <button className="kpg-action-btn" title="Quick view" aria-label="Quick view" onClick={() => storeCtx?.onQuickView?.(String(p.id))}>👁</button>
+                  <button className="kpg-action-btn" title="Wishlist" aria-label="Wishlist" onClick={() => storeCtx?.toggleWishlist?.(String(p.id))} style={storeCtx?.isWishlisted?.(String(p.id)) ? { color: "red" } : undefined}>{storeCtx?.isWishlisted?.(String(p.id)) ? "♥" : "♡"}</button>
                   <button className="kpg-action-btn" title="Compare" aria-label="Compare">⇌</button>
                 </div>
-                <button className="kpg-add-btn">Add to cart</button>
+                <button className="kpg-add-btn" onClick={() => storeCtx?.addToCart?.(String(p.id))}>Add to cart</button>
               </div>
               {p.colors && p.colors.length > 0 && (
                 <div className="kpg-swatches">

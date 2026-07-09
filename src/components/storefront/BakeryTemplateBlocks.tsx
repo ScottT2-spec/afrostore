@@ -104,6 +104,10 @@ export interface BakeryStoreContextData {
   contactAddress?: string;
   socialLinks?: { platform: string; url: string }[];
   footerLinks?: { title: string; links: { label: string; href: string }[] }[];
+  addToCart?: (productId: string, quantity?: number) => void;
+  toggleWishlist?: (productId: string) => void;
+  isWishlisted?: (productId: string) => boolean;
+  onQuickView?: (productId: string) => void;
 }
 
 export const BakeryStoreContext = createContext<BakeryStoreContextData | null>(null);
@@ -437,7 +441,7 @@ export function BakeryProductGrid({
                 <h3 className="bk-prod-name"><Link href={fixLink(p.slug)}>{p.name}</Link></h3>
                 <div className="bk-prod-stars">{"★".repeat(p.rating || 5)}{"☆".repeat(5 - (p.rating || 5))}</div>
                 <div className="bk-prod-price">${p.price}</div>
-                <button className="bk-prod-btn">Add to cart</button>
+                <button className="bk-prod-btn" onClick={() => storeCtx?.addToCart?.(String(p.id))}>Add to cart</button>
               </div>
             </div>
           ))}

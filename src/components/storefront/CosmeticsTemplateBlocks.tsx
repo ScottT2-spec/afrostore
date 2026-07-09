@@ -2,11 +2,8 @@
 import Link from "next/link";
 import { resolveStoreLink, resolveFooterLink } from "@/lib/template-link-utils";
 import { useState, useEffect, useRef, useCallback, createContext, useContext } from "react";
-<<<<<<< HEAD
 import { safeSrc, onImgError } from "./image-fallback";
-=======
 import { useNewsletterSubscribe } from "@/hooks/useNewsletterSubscribe";
->>>>>>> 543c35d (fix: wire newsletter forms to API endpoint (CrmContact))
 
 /* ═══════════════════════════════════════════════════════════════
    COSMETICS TEMPLATE BLOCKS
@@ -100,6 +97,10 @@ export interface CosmeticsStoreContextData {
   currency: string;
   storeSlug: string;
   socialLinks?: Array<{ platform: string; url: string }>;
+  addToCart?: (productId: string, quantity?: number) => void;
+  toggleWishlist?: (productId: string) => void;
+  isWishlisted?: (productId: string) => boolean;
+  onQuickView?: (productId: string) => void;
 }
 export const CosmeticsStoreContext = createContext<CosmeticsStoreContextData | null>(null);
 
@@ -579,10 +580,10 @@ export function CosmeticsProductGrid({ products: propProducts, columns = 4, show
                 {p.badge && <span className="cpg-badge">{p.badge}</span>}
                 <div className="cpg-actions">
                   <button className="cpg-action-btn" title="Compare" aria-label="Compare">⇌</button>
-                  <button className="cpg-action-btn" title="Quick view" aria-label="Quick view">👁</button>
-                  <button className="cpg-action-btn" title="Wishlist" aria-label="Wishlist">♡</button>
+                  <button className="cpg-action-btn" title="Quick view" aria-label="Quick view" onClick={() => storeCtx?.onQuickView?.(String(p.id))}>👁</button>
+                  <button className="cpg-action-btn" title="Wishlist" aria-label="Wishlist" onClick={() => storeCtx?.toggleWishlist?.(String(p.id))} style={storeCtx?.isWishlisted?.(String(p.id)) ? { color: "red" } : undefined}>{storeCtx?.isWishlisted?.(String(p.id)) ? "♥" : "♡"}</button>
                 </div>
-                <button className="cpg-add-btn">Add to cart</button>
+                <button className="cpg-add-btn" onClick={() => storeCtx?.addToCart?.(String(p.id))}>Add to cart</button>
               </div>
               <h3 className="cpg-name"><Link href={productLink}>{p.name}</Link></h3>
               {showCategory && p.category && (

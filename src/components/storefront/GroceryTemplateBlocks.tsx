@@ -2,11 +2,8 @@
 import Link from "next/link";
 import { resolveStoreLink, resolveFooterLink } from "@/lib/template-link-utils";
 import { useState, useEffect, useRef, createContext, useContext } from "react";
-<<<<<<< HEAD
 import { safeSrc, onImgError } from "./image-fallback";
-=======
 import { useNewsletterSubscribe } from "@/hooks/useNewsletterSubscribe";
->>>>>>> 543c35d (fix: wire newsletter forms to API endpoint (CrmContact))
 
 /* ═══════════════════════════════════════════════════════════════
    FOOD GROCERY TEMPLATE BLOCKS
@@ -89,6 +86,10 @@ export interface GroceryStoreContextData {
   contactAddress?: string;
   socialLinks?: { platform: string; url: string }[];
   footerLinks?: { title: string; links: { label: string; href: string }[] }[];
+  addToCart?: (productId: string, quantity?: number) => void;
+  toggleWishlist?: (productId: string) => void;
+  isWishlisted?: (productId: string) => boolean;
+  onQuickView?: (productId: string) => void;
 }
 
 export const GroceryStoreContext = createContext<GroceryStoreContextData | null>(null);
@@ -391,7 +392,7 @@ export function GroceryProductGrid({
                   {p.comparePrice && <del>${p.comparePrice}</del>}
                   ${p.price}
                 </div>
-                <button className="gc-prod-btn">Add to cart</button>
+                <button className="gc-prod-btn" onClick={() => storeCtx?.addToCart?.(String(p.id))}>Add to cart</button>
               </div>
             </div>
           ))}
