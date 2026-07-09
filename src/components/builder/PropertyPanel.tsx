@@ -1756,6 +1756,7 @@ const propEditors: Record<string, React.FC<{ block: BuilderBlock; update: (key: 
   electronicsBlogPosts: ElectronicsBlogPostsEditProps,
   electronicsPartners: ElectronicsPartnersEditProps,
   electronicsSectionTitle: ElectronicsSectionTitleEditProps,
+  electronicsFooter: GenericFooterEditProps,
 
   // Bakery template blocks
   bakeryHeroSlider: GenericHeroSliderEditProps,
