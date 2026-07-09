@@ -1,7 +1,6 @@
 "use client";
 import { useState } from "react";
 import Link from "next/link";
-import { useStoreLink } from "@/hooks/useStoreLink";
 
 /* ═══════════════════════════════════════════════════════════════
    FASHION STORE HEADER + FOOTER
@@ -55,30 +54,28 @@ interface FashionHeaderProps {
 }
 
 /**
- * Resolves a nav item's URL to a full href using the reactive useEditLink hook.
+ * Resolves a nav item's URL to a full href.
  * - "home" / "shop" / "reviews" → /store/{slug}/...
  * - "page" → /store/{slug}/{path}
  * - "external" → used as-is
  * - "custom" → prepends /store/{slug} if relative
- * - Preserves afro_editor query param if in edit mode
  */
-function resolveNavHref(item: NavItem, storeSlug: string, resolveLink: (link: string, overrideStoreSlug?: string) => string): string {
+function resolveNavHref(item: NavItem, storeSlug: string): string {
   const base = `/store/${storeSlug}`;
-  
   switch (item.type) {
-    case "home": return resolveLink("/", storeSlug);
-    case "shop": return resolveLink("shop", storeSlug);
-    case "reviews": return resolveLink("reviews", storeSlug);
+    case "home": return base;
+    case "shop": return `${base}/shop`;
+    case "reviews": return `${base}/reviews`;
     case "page": {
       const path = item.url.startsWith("/") ? item.url.slice(1) : item.url;
-      return resolveLink(path, storeSlug);
+      return `${base}/${path}`;
     }
     case "external": return item.url;
     case "custom":
     default: {
       if (item.url.startsWith("http://") || item.url.startsWith("https://")) return item.url;
       const path = item.url.startsWith("/") ? item.url.slice(1) : item.url;
-      return resolveLink(path, storeSlug);
+      return `${base}/${path}`;
     }
   }
 }
@@ -88,7 +85,6 @@ export function FashionHeader({
   topBarText = "FREE SHIPPING FOR ALL ORDERS OF $150",
   socialLinks = [], onSearch, searchQuery = "", onSearchChange, isLanding = false,
 }: FashionHeaderProps) {
-  const { resolveLink, isEditMode } = useStoreLink();
   const [mobileMenu, setMobileMenu] = useState(false);
   const [showSearch, setShowSearch] = useState(false);
   const [showCategories, setShowCategories] = useState(false);
@@ -210,7 +206,7 @@ export function FashionHeader({
           <button className="fsh-mobile-toggle" onClick={() => setMobileMenu(!mobileMenu)} aria-label="Menu">
             {mobileMenu ? "✕" : "☰"}
           </button>
-          <Link href={resolveLink("/", storeSlug)} className="fsh-logo">
+          <Link href={`/store/${storeSlug}`} className="fsh-logo">
             {logo ? <img src={logo} alt={storeName} className="fsh-logo-img" /> : null}
             <span className="fsh-logo-text">{storeName}</span>
           </Link>
@@ -218,7 +214,7 @@ export function FashionHeader({
             {!isLanding && (
               <>
                 <button className="fsh-icon-btn" onClick={() => setShowSearch(!showSearch)} aria-label="Search">🔍</button>
-                <Link href={resolveLink("wishlist", storeSlug)} className="fsh-icon-btn" aria-label="Wishlist">
+                <Link href={`/store/${storeSlug}/wishlist`} className="fsh-icon-btn" aria-label="Wishlist">
                   ♡{wishlistCount > 0 && <span className="fsh-badge">{wishlistCount}</span>}
                 </Link>
                 <Link href="/checkout" className="fsh-icon-btn" aria-label="Cart">
@@ -269,7 +265,7 @@ export function FashionHeader({
                   {categories.map((cat) => (
                     <Link
                       key={cat.id}
-                      href={resolveLink(`shop?category=${encodeURIComponent(cat.slug)}`, storeSlug)}
+                      href={`/store/${storeSlug}/shop?category=${encodeURIComponent(cat.slug)}`}
                       className="fsh-cat-item"
                       onClick={() => setShowCategories(false)}
                     >
@@ -292,7 +288,7 @@ export function FashionHeader({
             {customNavItems && customNavItems.length > 0 ? (
               /* Custom navigation — store owner defined these */
               customNavItems.map((item) => {
-                const href = resolveNavHref(item, storeSlug, resolveLink);
+                const href = resolveNavHref(item, storeSlug);
                 const isExternal = item.type === "external" || item.url.startsWith("http");
                 return isExternal ? (
                   <a key={item.id} href={href} className="fsh-nav-link" target={item.openInNewTab ? "_blank" : undefined} rel={item.openInNewTab ? "noopener noreferrer" : undefined}>{item.label}</a>
@@ -303,11 +299,11 @@ export function FashionHeader({
             ) : (
               /* Default navigation — auto-generated from pages */
               <>
-                <Link href={resolveLink("/", storeSlug)} className="fsh-nav-link fsh-active">Home</Link>
-                {!isLanding && <Link href={resolveLink("shop", storeSlug)} className="fsh-nav-link">Shop</Link>}
-                {!isLanding && <Link href={resolveLink("reviews", storeSlug)} className="fsh-nav-link">Reviews</Link>}
+                <Link href={`/store/${storeSlug}`} className="fsh-nav-link fsh-active">Home</Link>
+                {!isLanding && <Link href={`/store/${storeSlug}/shop`} className="fsh-nav-link">Shop</Link>}
+                {!isLanding && <Link href={`/store/${storeSlug}/reviews`} className="fsh-nav-link">Reviews</Link>}
                 {navPages.map((p) => (
-                  <Link key={p.id} href={resolveLink(p.slug, storeSlug)} className="fsh-nav-link">{p.title}</Link>
+                  <Link key={p.id} href={`/store/${storeSlug}/${p.slug}`} className="fsh-nav-link">{p.title}</Link>
                 ))}
               </>
             )}
@@ -319,7 +315,7 @@ export function FashionHeader({
       <div className={`fsh-mobile-menu ${mobileMenu ? "fsh-open" : ""}`}>
         {customNavItems && customNavItems.length > 0 ? (
           customNavItems.map((item) => {
-            const href = resolveNavHref(item, storeSlug, resolveLink);
+            const href = resolveNavHref(item, storeSlug);
             const isExternal = item.type === "external" || item.url.startsWith("http");
             return isExternal ? (
               <a key={item.id} href={href} onClick={() => setMobileMenu(false)} target={item.openInNewTab ? "_blank" : undefined} rel={item.openInNewTab ? "noopener noreferrer" : undefined}>{item.label}</a>
@@ -329,11 +325,11 @@ export function FashionHeader({
           })
         ) : (
           <>
-            <Link href={resolveLink("/", storeSlug)} onClick={() => setMobileMenu(false)}>Home</Link>
-            {!isLanding && <Link href={resolveLink("shop", storeSlug)} onClick={() => setMobileMenu(false)}>Shop</Link>}
-            {!isLanding && <Link href={resolveLink("reviews", storeSlug)} onClick={() => setMobileMenu(false)}>Reviews</Link>}
+            <Link href={`/store/${storeSlug}`} onClick={() => setMobileMenu(false)}>Home</Link>
+            {!isLanding && <Link href={`/store/${storeSlug}/shop`} onClick={() => setMobileMenu(false)}>Shop</Link>}
+            {!isLanding && <Link href={`/store/${storeSlug}/reviews`} onClick={() => setMobileMenu(false)}>Reviews</Link>}
             {navPages.map((p) => (
-              <Link key={p.id} href={resolveLink(p.slug, storeSlug)} onClick={() => setMobileMenu(false)}>{p.title}</Link>
+              <Link key={p.id} href={`/store/${storeSlug}/${p.slug}`} onClick={() => setMobileMenu(false)}>{p.title}</Link>
             ))}
           </>
         )}
@@ -345,7 +341,7 @@ export function FashionHeader({
             {categories.map((cat) => (
               <Link
                 key={cat.id}
-                href={resolveLink(`shop?category=${encodeURIComponent(cat.slug)}`, storeSlug)}
+                href={`/store/${storeSlug}/shop?category=${encodeURIComponent(cat.slug)}`}
                 onClick={() => setMobileMenu(false)}
               >
                 {cat.name}
@@ -379,7 +375,6 @@ export function FashionFooter({
   storeName, storeSlug, logo, navPages = [], description,
   socialLinks = [], contactInfo,
 }: FashionFooterProps) {
-  const { resolveLink } = useStoreLink();
   const css = `
     .fsf-footer { background: ${T.footerBg}; color: rgba(255,255,255,0.6); font-family: ${T.bodyFont}; padding: 60px 0 0; }
     .fsf-inner { max-width: ${T.containerWidth}; margin: 0 auto; padding: 0 15px; display: grid; grid-template-columns: repeat(4, 1fr); gap: 40px; }
@@ -411,7 +406,7 @@ export function FashionFooter({
       <div className="fsf-inner">
         {/* Col 1: About */}
         <div>
-          <Link href={resolveLink("/", storeSlug)} className="fsf-logo-text">{storeName}</Link>
+          <Link href={`/store/${storeSlug}`} className="fsf-logo-text">{storeName}</Link>
           <p className="fsf-text">{description || "Your one-stop destination for the latest fashion trends and timeless style essentials."}</p>
           <div className="fsf-social">
             {socialLinks.map((s, i) => (
@@ -426,11 +421,11 @@ export function FashionFooter({
         <div>
           <h4 className="fsf-col-title">Quick Links</h4>
           <ul className="fsf-links">
-            <li><Link href={resolveLink("/", storeSlug)}>Home</Link></li>
-            <li><Link href={resolveLink("shop", storeSlug)}>Shop</Link></li>
-            <li><Link href={resolveLink("reviews", storeSlug)}>Reviews</Link></li>
+            <li><Link href={`/store/${storeSlug}`}>Home</Link></li>
+            <li><Link href={`/store/${storeSlug}/shop`}>Shop</Link></li>
+            <li><Link href={`/store/${storeSlug}/reviews`}>Reviews</Link></li>
             {navPages.slice(0, 4).map((p) => (
-              <li key={p.id}><Link href={resolveLink(p.slug, storeSlug)}>{p.title}</Link></li>
+              <li key={p.id}><Link href={`/store/${storeSlug}/${p.slug}`}>{p.title}</Link></li>
             ))}
           </ul>
         </div>
@@ -440,9 +435,9 @@ export function FashionFooter({
           <h4 className="fsf-col-title">Information</h4>
           <ul className="fsf-links">
             {navPages.slice(4, 8).map((p) => (
-              <li key={p.id}><Link href={resolveLink(p.slug, storeSlug)}>{p.title}</Link></li>
+              <li key={p.id}><Link href={`/store/${storeSlug}/${p.slug}`}>{p.title}</Link></li>
             ))}
-            <li><Link href={resolveLink("wishlist", storeSlug)}>Wishlist</Link></li>
+            <li><Link href={`/store/${storeSlug}/wishlist`}>Wishlist</Link></li>
           </ul>
         </div>
 

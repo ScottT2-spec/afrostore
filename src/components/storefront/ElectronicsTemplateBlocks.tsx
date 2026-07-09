@@ -3,7 +3,6 @@ import Link from "next/link";
 import { resolveStoreLink, resolveFooterLink } from "@/lib/template-link-utils";
 import { useState, useEffect, useRef, useCallback, createContext, useContext } from "react";
 import { safeSrc, onImgError } from "./image-fallback";
-import { useStoreLink } from "@/hooks/useStoreLink";
 
 /* ═══════════════════════════════════════════════════════════════
    ELECTRONICS TEMPLATE BLOCKS
@@ -102,8 +101,7 @@ function useCurrencySymbol() {
 
 function useFixLink() {
   const ctx = useContext(ElectronicsStoreContext);
-  const { resolveLink } = useStoreLink();
-  return (link: string) => resolveLink(link, ctx?.storeSlug || "");
+  return (link: string) => resolveStoreLink(link, ctx?.storeSlug);
 }
 
 /* ═══════════════════════════════════════════════════════════════
@@ -504,8 +502,7 @@ export function ElectronicsProductTabs({ sectionTitle = "ELECTRONICS", tabs, col
           <>
             <div className="ept-grid">
               {displayProducts.map((p) => {
-                const { resolveLink } = useStoreLink();
-                const productLink = storeCtx ? resolveLink(`product/${p.slug}`, storeCtx?.storeSlug) : "#";
+                const productLink = storeCtx ? `/store/${storeCtx.storeSlug}/product/${p.slug}` : "#";
                 return (
                   <div key={p.id} className="ept-card">
                     <div className="ept-thumb">
@@ -753,8 +750,7 @@ export function ElectronicsHotDeals({
           <>
             <div className="ehd-grid">
               {products.map((p) => {
-                const { resolveLink } = useStoreLink();
-                const productLink = storeCtx ? resolveLink(`product/${p.slug}`, storeCtx?.storeSlug) : "#";
+                const productLink = storeCtx ? `/store/${storeCtx.storeSlug}/product/${p.slug}` : "#";
                 const discount = p.compareAtPrice ? Math.round(((p.compareAtPrice - p.price) / p.compareAtPrice) * 100) : 0;
                 return (
                   <div key={p.id} className="ehd-card">
@@ -881,8 +877,7 @@ export function ElectronicsSideBanner({
             <h4 className="esb-feat-title">{featuredTitle}</h4>
             <div className="esb-feat-list">
               {featuredProducts.map((p) => {
-                const { resolveLink } = useStoreLink();
-                const productLink = storeCtx ? resolveLink(`product/${p.slug}`, storeCtx?.storeSlug) : "#";
+                const productLink = storeCtx ? `/store/${storeCtx.storeSlug}/product/${p.slug}` : "#";
                 return (
                   <div key={p.id} className="esb-feat-item">
                     <img src={safeSrc(p.images[0]?.url, p.name)} alt={p.name} className="esb-feat-img" loading="lazy" onError={(e) => onImgError(e, p.name)} />
@@ -1030,7 +1025,6 @@ export interface ElectronicsBlogPostsProps {
 
 export function ElectronicsBlogPosts({ sectionTitle = "INNOVATIVE GADGETS", posts: propPosts, columns = 3 }: ElectronicsBlogPostsProps) {
   const storeCtx = useContext(ElectronicsStoreContext);
-  const { resolveLink } = useStoreLink();
   const [scroll, setScroll] = useState(0);
 
   const posts: ElectronicsBlogPost[] = (() => {
@@ -1048,7 +1042,7 @@ export function ElectronicsBlogPosts({ sectionTitle = "INNOVATIVE GADGETS", post
         },
         category: b.category || "Tech",
         author: b.author || "Store Team",
-        link: resolveLink(`blog/${b.slug}`, storeCtx?.storeSlug || ""),
+        link: `/store/${storeCtx.storeSlug}/blog/${b.slug}`,
       };
     });
   })();
@@ -1107,7 +1101,7 @@ export function ElectronicsBlogPosts({ sectionTitle = "INNOVATIVE GADGETS", post
                   <span className="ebp-date-day">{p.date.day}</span>
                   <span className="ebp-date-month">{p.date.month}</span>
                 </div>
-                <Link href={resolveLink(p.link, storeCtx?.storeSlug || "")} style={{ position: "absolute", inset: 0, zIndex: 3 }} aria-label={p.title} />
+                <Link href={resolveStoreLink(p.link, storeCtx?.storeSlug)} style={{ position: "absolute", inset: 0, zIndex: 3 }} aria-label={p.title} />
               </div>
               <div className="ebp-content">
                 <span className="ebp-cat">{p.category}</span>

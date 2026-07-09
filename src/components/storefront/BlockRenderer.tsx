@@ -185,19 +185,10 @@ function HeroBlock({ props }: { props: Record<string, unknown> }) {
   const imageSrc = (props.image as string) || (props.bgImage as string) || "";
   const storeSlug = useContext(StoreSlugContext);
 
-  // Detect edit mode
-  const isEditMode = typeof window !== "undefined" && new URLSearchParams(window.location.search).get("afro_editor") === "1";
-  const editSuffix = isEditMode ? "?afro_editor=1" : "";
-
   // Resolve broken/placeholder hrefs — "#", "#shop", "/store/slug#shop" → actual shop page
   function resolveHref(raw: string | undefined): string {
-    if (!raw || raw === "#") return storeSlug ? `/store/${storeSlug}/shop${editSuffix}` : "#";
-    if (raw === "#shop" || raw.endsWith("#shop")) return storeSlug ? `/store/${storeSlug}/shop${editSuffix}` : raw;
-    // If it's already a full URL with the store path, preserve edit mode
-    if (raw.startsWith(`/store/${storeSlug}`) && isEditMode) {
-      const separator = raw.includes("?") ? "&" : "?";
-      return `${raw}${separator}afro_editor=1`;
-    }
+    if (!raw || raw === "#") return storeSlug ? `/store/${storeSlug}/shop` : "#";
+    if (raw === "#shop" || raw.endsWith("#shop")) return storeSlug ? `/store/${storeSlug}/shop` : raw;
     return raw;
   }
 
@@ -439,10 +430,6 @@ function ProductGridBlock({ props }: { props: Record<string, unknown> }) {
   const cols = (props.columns as number) || 3;
   const categoryFilter = (props.category as string) || "";
   const { products, currency, slug, addToCart, isWishlisted, toggleWishlist, addedToCart } = useContext(StoreContext);
-  
-  // Detect edit mode
-  const isEditMode = typeof window !== "undefined" && new URLSearchParams(window.location.search).get("afro_editor") === "1";
-  const editSuffix = isEditMode ? "?afro_editor=1" : "";
 
   // Filter products by category if specified, then limit
   let displayProducts = products;
@@ -477,7 +464,7 @@ function ProductGridBlock({ props }: { props: Record<string, unknown> }) {
                 const discount = product.compareAtPrice
                   ? Math.round(((Number(product.compareAtPrice) - Number(product.price)) / Number(product.compareAtPrice)) * 100)
                   : 0;
-                const productUrl = slug ? `/store/${slug}/product/${product.slug}${editSuffix}` : "#";
+                const productUrl = slug ? `/store/${slug}/product/${product.slug}` : "#";
                 const wishlisted = isWishlisted ? isWishlisted(product.id) : false;
                 const justAdded = addedToCart === product.id;
                 return (

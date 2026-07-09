@@ -115,41 +115,6 @@ function Field({
   rows?: number;
   placeholder?: string;
 }) {
-  // Convert RGB to HEX for display in color inputs
-  const colorValue = value || "#000000";
-  let displayValue = colorValue;
-  
-  if (type === "color") {
-    // Convert RGB/RGBA to HEX for display
-    if (colorValue.startsWith('rgb')) {
-      const rgbMatch = colorValue.match(/rgba?\((\d+),\s*(\d+),\s*(\d+)(?:,\s*[\d.]+)?\)/);
-      if (rgbMatch) {
-        const r = parseInt(rgbMatch[1], 10).toString(16).padStart(2, '0');
-        const g = parseInt(rgbMatch[2], 10).toString(16).padStart(2, '0');
-        const b = parseInt(rgbMatch[3], 10).toString(16).padStart(2, '0');
-        displayValue = `#${r}${g}${b}`;
-      }
-    }
-    
-    // Ensure displayValue is valid HEX for color picker
-    if (!displayValue.startsWith('#')) {
-      displayValue = '#' + displayValue;
-    }
-  }
-
-  const handleColorChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-    onChange(event.target.value);
-  };
-  
-  const handleTextChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-    let newValue = event.target.value;
-    // Ensure HEX format
-    if (newValue && !newValue.startsWith('#')) {
-      newValue = '#' + newValue;
-    }
-    onChange(newValue);
-  };
-
   return (
     <label className="space-y-1.5 block">
       <span className="block text-xs font-semibold uppercase tracking-wide text-surface-500">{label}</span>
@@ -162,21 +127,12 @@ function Field({
           className="input-field w-full rounded-xl border border-surface-200 bg-white px-3 py-2 text-sm"
         />
       ) : type === "color" ? (
-        <div className="flex items-center gap-2">
-          <input
-            type="color"
-            value={displayValue}
-            onChange={handleColorChange}
-            className="h-10 w-12 rounded-xl border border-surface-200 cursor-pointer"
-          />
-          <input
-            type="text"
-            value={displayValue}
-            onChange={handleTextChange}
-            placeholder="#000000"
-            className="input-field flex-1 rounded-xl border border-surface-200 bg-white px-3 py-2 text-sm font-mono"
-          />
-        </div>
+        <input
+          type="color"
+          value={value || "#000000"}
+          onChange={(event) => onChange(event.target.value)}
+          className="h-10 w-full rounded-xl border border-surface-200 bg-white p-1"
+        />
       ) : (
         <input
           value={value}

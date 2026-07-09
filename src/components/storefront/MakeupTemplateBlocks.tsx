@@ -3,7 +3,6 @@ import Link from "next/link";
 import { resolveStoreLink, resolveFooterLink } from "@/lib/template-link-utils";
 import { useState, useEffect, useRef, useCallback, createContext, useContext } from "react";
 import { safeSrc, onImgError } from "./image-fallback";
-import { useStoreLink } from "@/hooks/useStoreLink";
 
 /* ═══════════════════════════════════════════════════════════════
    MAKEUP TEMPLATE BLOCKS
@@ -130,8 +129,7 @@ export interface MakeupHeroSliderProps {
 
 export function MakeupHeroSlider({ slides, autoplaySpeed = 5000, minHeight = "500px", marqueeText = "Free Shipping On Orders Over $100" }: MakeupHeroSliderProps) {
   const storeCtx = useContext(MakeupStoreContext);
-  const { resolveLink } = useStoreLink();
-  const fixLink = (link: string) => resolveLink(link, storeCtx?.storeSlug || "");
+  const fixLink = (link: string) => resolveStoreLink(link, storeCtx?.storeSlug);
   const [current, setCurrent] = useState(0);
   const timerRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
@@ -285,15 +283,13 @@ export interface MakeupCategorySidebarProps {
 
 export function MakeupCategorySidebar({ categories, marginBottom = "80px" }: MakeupCategorySidebarProps) {
   const storeCtx = useContext(MakeupStoreContext);
-  const { resolveLink } = useStoreLink();
   const fixLink = (link: string, name: string) => {
     if (link && link.startsWith("/store/")) return link;
-    const slug = storeCtx?.storeSlug;
-    if (slug) {
-      const catSlug = name.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/(^-|-$)/g, "");
-      return resolveLink(`shop?category=${catSlug}`, slug);
+    if (storeCtx?.storeSlug) {
+      const slug = name.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/(^-|-$)/g, "");
+      return `/store/${storeCtx.storeSlug}/shop?category=${slug}`;
     }
-    return resolveLink(link, slug || "");
+    return resolveStoreLink(link, storeCtx?.storeSlug);
   };
 
   const scopedCss = `
@@ -348,8 +344,7 @@ export interface MakeupSectionTitleProps {
 
 export function MakeupSectionTitle({ title, buttonText, buttonLink, align = "between", marginBottom = "25px" }: MakeupSectionTitleProps) {
   const storeCtx = useContext(MakeupStoreContext);
-  const { resolveLink } = useStoreLink();
-  const fixLink = (link?: string) => resolveLink(link || "#", storeCtx?.storeSlug || "");
+  const fixLink = (link?: string) => resolveStoreLink(link || "#", storeCtx?.storeSlug);
 
   const scopedCss = `
     .mst-wrap {
@@ -409,7 +404,6 @@ export interface MakeupProductGridProps {
 
 export function MakeupProductGrid({ products: propProducts, columns = 4, showCategory = true, showHoverImage = true, sectionTitle, marginBottom = "80px", maxProducts = 8, filter, filterTag }: MakeupProductGridProps) {
   const storeCtx = useContext(MakeupStoreContext);
-  const { resolveLink } = useStoreLink();
 
   const products: MakeupProduct[] = (() => {
     if (!storeCtx || !storeCtx.products || storeCtx.products.length === 0) return propProducts || [];
@@ -441,12 +435,12 @@ export function MakeupProductGrid({ products: propProducts, columns = 4, showCat
       id: p.id,
       name: p.name,
       category: p.category?.name,
-      categoryLink: p.category?.slug ? resolveLink(`shop?category=${p.category.slug}`, storeCtx?.storeSlug || "") : undefined,
+      categoryLink: p.category?.slug ? `/store/${storeCtx.storeSlug}/shop?category=${p.category.slug}` : undefined,
       price: p.compareAtPrice ? `${sym}${p.compareAtPrice.toLocaleString()}` : `${sym}${p.price.toLocaleString()}`,
       salePrice: p.compareAtPrice ? `${sym}${p.price.toLocaleString()}` : undefined,
       image: p.images[0]?.url || safeSrc(null, p.name),
       hoverImage: p.images[1]?.url,
-      link: resolveLink(`product/${p.slug}`, storeCtx?.storeSlug || ""),
+      link: `/store/${storeCtx.storeSlug}/product/${p.slug}`,
       badge: p.compareAtPrice ? "SALE" : undefined,
     }));
   })();
@@ -513,14 +507,13 @@ export function MakeupProductGrid({ products: propProducts, columns = 4, showCat
     @media (max-width: 767px) { .mpg-grid { grid-template-columns: repeat(2, 1fr); gap: 10px; } }
   `;
 
-  const resolveProductLink = (link: string, productName: string) => {
+  const resolveLink = (link: string, productName: string) => {
     if (link && link.startsWith("/store/")) return link;
-    const slug = storeCtx?.storeSlug;
-    if (slug) {
-      const productSlug = productName.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/(^-|-$)/g, "");
-      return resolveLink(`product/${productSlug}`, slug);
+    if (storeCtx?.storeSlug) {
+      const slug = productName.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/(^-|-$)/g, "");
+      return `/store/${storeCtx.storeSlug}/product/${slug}`;
     }
-    return resolveLink(link, slug || "");
+    return resolveStoreLink(link, storeCtx?.storeSlug);
   };
 
   if (products.length === 0) {
@@ -541,7 +534,7 @@ export function MakeupProductGrid({ products: propProducts, columns = 4, showCat
       {sectionTitle && <MakeupSectionTitle title={sectionTitle.title} buttonText={sectionTitle.buttonText} buttonLink={sectionTitle.buttonLink} />}
       <div className="mpg-grid">
         {products.map((p) => {
-          const productLink = resolveProductLink(p.link, p.name);
+          const productLink = resolveLink(p.link, p.name);
           return (
             <div key={p.id} className="mpg-card">
               <div className="mpg-thumb">
@@ -561,7 +554,7 @@ export function MakeupProductGrid({ products: propProducts, columns = 4, showCat
               </div>
               <h3 className="mpg-name"><Link href={productLink}>{p.name}</Link></h3>
               {showCategory && p.category && (
-                <div className="mpg-cat"><Link href={resolveLink(p.categoryLink || "#", storeCtx?.storeSlug || "")}>{p.category}</Link></div>
+                <div className="mpg-cat"><Link href={resolveStoreLink(p.categoryLink || "#", storeCtx?.storeSlug)}>{p.category}</Link></div>
               )}
               <div className="mpg-price">
                 {p.salePrice && <span className="mpg-price-old">{p.price}</span>}
@@ -596,15 +589,13 @@ export interface MakeupProductTypeCardsProps {
 
 export function MakeupProductTypeCards({ cards, sectionTitle, marginBottom = "80px" }: MakeupProductTypeCardsProps) {
   const storeCtx = useContext(MakeupStoreContext);
-  const { resolveLink } = useStoreLink();
   const fixLink = (link: string, name: string) => {
     if (link && link.startsWith("/store/")) return link;
-    const slug = storeCtx?.storeSlug;
-    if (slug) {
-      const catSlug = name.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/(^-|-$)/g, "");
-      return resolveLink(`shop?category=${catSlug}`, slug);
+    if (storeCtx?.storeSlug) {
+      const slug = name.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/(^-|-$)/g, "");
+      return `/store/${storeCtx.storeSlug}/shop?category=${slug}`;
     }
-    return resolveLink(link, slug || "");
+    return resolveStoreLink(link, storeCtx?.storeSlug);
   };
 
   const scopedCss = `
@@ -675,8 +666,7 @@ export interface MakeupBeforeAfterProps {
 
 export function MakeupBeforeAfter({ title, description, beforeImage, afterImage, buttonText = "Shop Now", buttonLink, badgeText, backgroundColor = "#bedbe1", backgroundImage, marginBottom = "80px" }: MakeupBeforeAfterProps) {
   const storeCtx = useContext(MakeupStoreContext);
-  const { resolveLink } = useStoreLink();
-  const fixLink = (link?: string) => resolveLink(link || "#", storeCtx?.storeSlug || "");
+  const fixLink = (link?: string) => resolveStoreLink(link || "#", storeCtx?.storeSlug);
   const [position, setPosition] = useState(50);
   const containerRef = useRef<HTMLDivElement>(null);
   const isDragging = useRef(false);
@@ -816,8 +806,7 @@ export interface MakeupPromoBannerCardsProps {
 
 export function MakeupPromoBannerCards({ cards, marginBottom = "80px" }: MakeupPromoBannerCardsProps) {
   const storeCtx = useContext(MakeupStoreContext);
-  const { resolveLink } = useStoreLink();
-  const fixLink = (link: string) => resolveLink(link, storeCtx?.storeSlug || "");
+  const fixLink = (link: string) => resolveStoreLink(link, storeCtx?.storeSlug);
 
   const scopedCss = `
     .mpb-section { margin-bottom: ${marginBottom}; }
@@ -1044,7 +1033,6 @@ export interface MakeupBrandsCarouselProps {
 
 export function MakeupBrandsCarousel({ brands, marginBottom = "80px" }: MakeupBrandsCarouselProps) {
   const storeCtx = useContext(MakeupStoreContext);
-  const { resolveLink } = useStoreLink();
   const scopedCss = `
     .mbr-section { margin-bottom: ${marginBottom}; overflow: hidden; }
     .mbr-track {
@@ -1071,7 +1059,7 @@ export function MakeupBrandsCarousel({ brands, marginBottom = "80px" }: MakeupBr
       <div className="mbr-track">
         {[...brands, ...brands].map((b, i) => (
           <div key={i} className="mbr-item">
-            <Link href={resolveLink(b.link, storeCtx?.storeSlug || "")} className="mbr-link" title={b.name}>
+            <Link href={resolveStoreLink(b.link, storeCtx?.storeSlug)} className="mbr-link" title={b.name}>
               <img src={b.logo} alt={b.name} className="mbr-logo" loading="lazy" />
             </Link>
           </div>
@@ -1138,7 +1126,6 @@ export function MakeupFooter({
   backgroundColor = TOKENS.footerBg,
 }: MakeupFooterProps) {
   const storeCtx = useContext(MakeupStoreContext);
-  const { resolveLink } = useStoreLink();
   const [openColumns, setOpenColumns] = useState<Set<number>>(new Set());
 
   const toggleColumn = (index: number) => {
@@ -1280,58 +1267,88 @@ export function MakeupFooter({
     const colIndex = idx + 2;
     const isOpen = openColumns.has(colIndex);
 
+    return (
+      <div key={idx} className="mk-col-links">
+        <div
+          className={`mk-col-toggle-head ${isOpen ? "mk-open" : ""}`}
+          onClick={() => toggleColumn(colIndex)}
+        >
+          <h4 className="mk-col-title">{col.title}</h4>
+          {chevronSvg}
+        </div>
+        <div className={`mk-col-toggle-content ${isOpen ? "mk-open" : "mk-closed"}`}>
+          <ul className="mk-link-list">
+            {col.links.map((link, li) => (
+              <li key={li}>
+                <Link href={resolveFooterLink(link.url, link.label, storeCtx?.storeSlug)}>
+                  {link.emphasized ? <em>{link.label}</em> : link.label}
+                </Link>
+              </li>
+            ))}
+          </ul>
+        </div>
+      </div>
+    );
+  };
+
   return (
-    <footer className="mf-footer">
+    <footer className="mk-footer" style={footerStyle}>
       <ScopedStyles id="footer" css={scopedCss} />
-      <div className="mf-main">
-        {/* Brand column */}
-        <div className="mf-col-brand">
+
+      <div className="mk-main-footer" style={mainFooterStyle}>
+        <div className="mk-col-brand">
           {logoUrl && (
             <div style={{ marginBottom: "16px" }}>
-              <Link href={resolveLink("/", storeCtx?.storeSlug || "")}><img src={logoUrl} alt={logoAlt} style={{ maxWidth: "150px", height: "auto" }} /></Link>
+              <Link href={storeCtx?.storeSlug ? `/store/${storeCtx.storeSlug}` : "/"}>
+                <img
+                  src={logoUrl}
+                  alt={logoAlt}
+                  style={{ maxWidth: "220px", height: "auto" }}
+                />
+              </Link>
             </div>
           )}
-          <p style={{ margin: "0 0 10px" }}>{description}</p>
+          <p style={{ margin: "0 0 10px", fontSize: "14px", lineHeight: "1.7" }}>
+            {description}
+          </p>
+          {contact && (
+            <ul className="mk-contact-list">
+              {contact.address && (
+                <li className="mk-contact-item">
+                  {contactIcons.address}
+                  <span>{contact.address}</span>
+                </li>
+              )}
+              {contact.phone && (
+                <li className="mk-contact-item">
+                  {contactIcons.phone}
+                  <span>Phone: {contact.phone}</span>
+                </li>
+              )}
+              {contact.fax && (
+                <li className="mk-contact-item">
+                  {contactIcons.fax}
+                  <span>Fax: {contact.fax}</span>
+                </li>
+              )}
+              {contact.email && (
+                <li className="mk-contact-item">
+                  {contactIcons.email}
+                  <span>Email: {contact.email}</span>
+                </li>
+              )}
+            </ul>
+          )}
         </div>
 
-        {/* Link columns */}
-        {linkColumns.map((col, idx) => {
-          const isOpen = openColumns.has(idx);
-          return (
-            <div key={idx} className="mf-col-links">
-              <div className={`mf-col-toggle-head ${isOpen ? "mf-open" : ""}`} onClick={() => toggleColumn(idx)}>
-                <h4 className="mf-col-title">{col.title}</h4>
-                {chevronSvg}
-              </div>
-              <div className={`mf-col-toggle-content ${isOpen ? "mf-open" : "mf-closed"}`}>
-                <ul className="mf-link-list">
-                  {col.links.map((link, li) => (
-                    <li key={li}><Link href={resolveFooterLink(link.url, link.label, storeCtx?.storeSlug || "")}>{link.label}</Link></li>
-                  ))}
-                </ul>
-              </div>
-            </div>
-          );
-        })}
-
-        {/* Rating column */}
-        <div className="mf-col-rating">
-          <div className="mf-rating-num">
-            <span className="mf-rating-highlight">{rating.toFixed(1).replace(".", ",")}</span>/5
-          </div>
-          <div className="mf-stars" style={{ position: "relative", display: "inline-block" }}>
-            <span style={{ color: "#555" }}>★★★★★</span>
-            <span style={{ position: "absolute", left: 0, top: 0, overflow: "hidden", width: `${starWidth}%`, color: TOKENS.starColor }}>★★★★★</span>
-          </div>
-          <div className="mf-rating-text">Based on {ratingCount} Google reviews</div>
-          <Link href={resolveLink("#", storeCtx?.storeSlug || "")} className="mf-review-btn">Write a Review</Link>
-          {socialLinks.length > 0 && (
-            <div className="mf-social">
-              {socialLinks.map((s, i) => (
-                <a key={i} href={s.url} className="mf-social-icon" target="_blank" rel="noopener noreferrer" aria-label={s.platform}>
-                  {socialIcons[s.platform] || s.platform[0]?.toUpperCase()}
-                </a>
-              ))}
+        {recentPosts.length > 0 && (
+          <div className="mk-col-posts">
+            <div
+              className={`mk-col-toggle-head ${openColumns.has(1) ? "mk-open" : ""}`}
+              onClick={() => toggleColumn(1)}
+            >
+              <h4 className="mk-col-title">RECENT POSTS</h4>
+              {chevronSvg}
             </div>
             <div className={`mk-col-toggle-content ${openColumns.has(1) ? "mk-open" : "mk-closed"}`}>
               {recentPosts.map((post, i) => (

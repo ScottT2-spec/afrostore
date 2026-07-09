@@ -49,56 +49,12 @@ function PropInput({ label, value, onChange, type = "text", options, rows }: {
   }
 
   if (type === "color") {
-    // Convert RGB to HEX for display
-    const colorValue = (value as string) || "#000000";
-    let displayValue = colorValue;
-    
-    // Convert RGB/RGBA to HEX for display
-    if (colorValue.startsWith('rgb')) {
-      const rgbMatch = colorValue.match(/rgba?\((\d+),\s*(\d+),\s*(\d+)(?:,\s*[\d.]+)?\)/);
-      if (rgbMatch) {
-        const r = parseInt(rgbMatch[1], 10).toString(16).padStart(2, '0');
-        const g = parseInt(rgbMatch[2], 10).toString(16).padStart(2, '0');
-        const b = parseInt(rgbMatch[3], 10).toString(16).padStart(2, '0');
-        displayValue = `#${r}${g}${b}`;
-      }
-    }
-    
-    // Ensure displayValue is valid HEX for color picker
-    if (!displayValue.startsWith('#')) {
-      displayValue = '#' + displayValue;
-    }
-    
-    const handleColorChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-      onChange(e.target.value);
-    };
-    
-    const handleTextChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-      let newValue = e.target.value;
-      // Ensure HEX format
-      if (newValue && !newValue.startsWith('#')) {
-        newValue = '#' + newValue;
-      }
-      onChange(newValue);
-    };
-    
     return (
       <div>
         <label className="block text-xs font-medium text-surface-700 mb-1">{label}</label>
         <div className="flex items-center gap-2">
-          <input 
-            type="color" 
-            value={displayValue} 
-            onChange={handleColorChange} 
-            className="h-8 w-8 rounded border border-surface-200 cursor-pointer"
-          />
-          <input 
-            type="text" 
-            value={displayValue} 
-            onChange={handleTextChange} 
-            className="input-field text-sm py-1.5 flex-1 font-mono" 
-            placeholder="#000000" 
-          />
+          <input type="color" value={(value as string) || "#000000"} onChange={(e) => onChange(e.target.value)} className="h-8 w-8 rounded-lg border border-surface-200 cursor-pointer" />
+          <input type="text" value={(value as string) || ""} onChange={(e) => onChange(e.target.value)} className="input-field text-sm py-1.5 flex-1" />
         </div>
       </div>
     );

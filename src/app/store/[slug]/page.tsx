@@ -31,7 +31,6 @@ import { KidsStoreContext } from "@/components/storefront/KidsTemplateBlocks";
 import { MakeupStoreContext } from "@/components/storefront/MakeupTemplateBlocks";
 import { PerfumesStoreContext } from "@/components/storefront/PerfumesTemplateBlocks";
 import { FashionHeader, FashionFooter, type NavItem } from "@/components/storefront/FashionStoreChrome";
-import { EditModeProvider } from "@/contexts/EditModeContext";
 
 /* ─── Template preset map ─── */
 const TEMPLATE_PRESET_MAP: Record<string, TemplateBlock[]> = {
@@ -391,10 +390,6 @@ export default function StorePage() {
   const currency = store.currency || "NGN";
   const whatsappNumber = settings.whatsappNumber || socialLinks.whatsapp;
   const isLanding = store.siteType === "LANDING_PAGE" || store.siteType === "WEBSITE";
-  
-  // Detect edit mode from URL params
-  const isEditMode = typeof window !== "undefined" && new URLSearchParams(window.location.search).get("afro_editor") === "1";
-  const editSuffix = isEditMode ? "?afro_editor=1" : "";
 
   // Build socialLinks array from DB data for template blocks
   const socialLinksArray: Array<{ platform: string; url: string }> = [
@@ -402,6 +397,7 @@ export default function StorePage() {
     ...(socialLinks?.instagram ? [{ platform: "instagram", url: socialLinks.instagram }] : []),
     ...(socialLinks?.twitter ? [{ platform: "twitter", url: socialLinks.twitter }] : []),
     ...(socialLinks?.tiktok ? [{ platform: "tiktok", url: socialLinks.tiktok }] : []),
+    ...(socialLinks?.youtube ? [{ platform: "youtube", url: socialLinks.youtube }] : []),
     ...(socialLinks?.whatsapp ? [{ platform: "whatsapp", url: socialLinks.whatsapp }] : []),
   ];
 
@@ -429,9 +425,8 @@ export default function StorePage() {
     .sort((a, b) => (navPageOrder[a.type] ?? 99) - (navPageOrder[b.type] ?? 99));
 
   return (
-    <EditModeProvider storeSlug={slug}>
-      <ThemeProvider theme={resolvedTheme}>
-      <div className="min-h-screen bg-white">
+    <ThemeProvider theme={resolvedTheme}>
+    <div className="min-h-screen bg-white">
       {/* ─── FASHION TEMPLATE HEADER ─── */}
       {isFashionTemplate ? (
         <FashionHeader
@@ -490,11 +485,11 @@ export default function StorePage() {
           </div>
 
           <nav className="hidden sm:flex items-center gap-6">
-            <Link href={`/store/${slug}${editSuffix}`} className="text-sm font-medium text-brand-700 transition-colors">Home</Link>
-            {!isLanding && <Link href={`/store/${slug}/shop${editSuffix}`} className="text-sm font-medium text-surface-600 hover:text-surface-900 transition-colors">Shop</Link>}
-            {!isLanding && <Link href={`/store/${slug}/reviews${editSuffix}`} className="text-sm font-medium text-surface-600 hover:text-surface-900 transition-colors">Reviews</Link>}
+            <Link href={`/store/${slug}`} className="text-sm font-medium text-brand-700 transition-colors">Home</Link>
+            {!isLanding && <Link href={`/store/${slug}/shop`} className="text-sm font-medium text-surface-600 hover:text-surface-900 transition-colors">Shop</Link>}
+            {!isLanding && <Link href={`/store/${slug}/reviews`} className="text-sm font-medium text-surface-600 hover:text-surface-900 transition-colors">Reviews</Link>}
             {navPages.slice(0, isLanding ? 6 : 4).map((page) => (
-              <Link key={page.id} href={`/store/${slug}/${page.slug}${editSuffix}`} className="text-sm font-medium text-surface-600 hover:text-surface-900 transition-colors">{page.title}</Link>
+              <Link key={page.id} href={`/store/${slug}/${page.slug}`} className="text-sm font-medium text-surface-600 hover:text-surface-900 transition-colors">{page.title}</Link>
             ))}
           </nav>
 
@@ -502,7 +497,7 @@ export default function StorePage() {
             {!isLanding && (
               <>
                 <button onClick={() => setShowSearch(!showSearch)} className="p-2 text-surface-600 hover:bg-surface-50 rounded-lg"><Search className="h-5 w-5" /></button>
-                <Link href={`/store/${slug}/wishlist${editSuffix}`} className="relative p-2 text-surface-600 hover:bg-surface-50 rounded-lg hidden sm:flex">
+                <Link href={`/store/${slug}/wishlist`} className="relative p-2 text-surface-600 hover:bg-surface-50 rounded-lg hidden sm:flex">
                   <Heart className="h-5 w-5" />
                   {wishlistCount > 0 && (
                     <span className="absolute -top-0.5 -right-0.5 h-5 w-5 rounded-full bg-red-500 text-white text-[10px] font-bold flex items-center justify-center">{wishlistCount}</span>
@@ -544,11 +539,11 @@ export default function StorePage() {
       {/* Mobile menu */}
       {mobileMenu && (
         <div className="sm:hidden bg-white border-b border-surface-200 px-4 py-4 space-y-2">
-          <Link href={`/store/${slug}${editSuffix}`} onClick={() => setMobileMenu(false)} className="block text-sm font-bold text-brand-700 py-2">Home</Link>
-          {!isLanding && <Link href={`/store/${slug}/shop${editSuffix}`} onClick={() => setMobileMenu(false)} className="block text-sm font-medium text-surface-600 py-2">Shop</Link>}
-          {!isLanding && <Link href={`/store/${slug}/reviews${editSuffix}`} onClick={() => setMobileMenu(false)} className="block text-sm font-medium text-surface-600 py-2">Reviews</Link>}
+          <Link href={`/store/${slug}`} onClick={() => setMobileMenu(false)} className="block text-sm font-bold text-brand-700 py-2">Home</Link>
+          {!isLanding && <Link href={`/store/${slug}/shop`} onClick={() => setMobileMenu(false)} className="block text-sm font-medium text-surface-600 py-2">Shop</Link>}
+          {!isLanding && <Link href={`/store/${slug}/reviews`} onClick={() => setMobileMenu(false)} className="block text-sm font-medium text-surface-600 py-2">Reviews</Link>}
           {navPages.map((page) => (
-            <Link key={page.id} href={`/store/${slug}/${page.slug}${editSuffix}`} onClick={() => setMobileMenu(false)} className="block text-sm font-medium text-surface-600 py-2">{page.title}</Link>
+            <Link key={page.id} href={`/store/${slug}/${page.slug}`} onClick={() => setMobileMenu(false)} className="block text-sm font-medium text-surface-600 py-2">{page.title}</Link>
           ))}
           {!isLanding && whatsappNumber && (
             <a href={getWhatsAppLink(whatsappNumber, [], currency, store.name)} className="block text-sm font-medium text-green-600 py-2">WhatsApp us</a>
@@ -568,7 +563,7 @@ export default function StorePage() {
           {!isLanding && products.length > 0 && !homeHasProductGrid && (
             <div className="text-center py-10">
               <Link
-                href={`/store/${slug}/shop${editSuffix}`}
+                href={`/store/${slug}/shop`}
                 className="inline-flex items-center gap-2 rounded-2xl bg-surface-900 text-white px-8 py-3.5 text-sm font-bold hover:bg-surface-800 transition-all shadow-lg hover:-translate-y-0.5"
               >
                 View All Products <ArrowRight className="h-4 w-4" />
@@ -585,7 +580,7 @@ export default function StorePage() {
           {!isLanding && products.length > 0 && (
             <div className="text-center py-10">
               <Link
-                href={`/store/${slug}/shop${editSuffix}`}
+                href={`/store/${slug}/shop`}
                 className="inline-flex items-center gap-2 rounded-2xl bg-surface-900 text-white px-8 py-3.5 text-sm font-bold hover:bg-surface-800 transition-all shadow-lg hover:-translate-y-0.5"
               >
                 View All Products <ArrowRight className="h-4 w-4" />
@@ -670,7 +665,7 @@ export default function StorePage() {
               <h4 className="text-sm font-semibold text-white mb-3">{isLanding ? "Pages" : "Info"}</h4>
               <ul className="space-y-2 text-xs">
                 {navPages.slice(0, 5).map((page) => (
-                  <li key={page.id}><Link href={`/store/${slug}/${page.slug}${editSuffix}`} className="hover:text-white transition-colors">{page.title}</Link></li>
+                  <li key={page.id}><Link href={`/store/${slug}/${page.slug}`} className="hover:text-white transition-colors">{page.title}</Link></li>
                 ))}
               </ul>
             </div>
@@ -803,7 +798,6 @@ export default function StorePage() {
         </div>
       )}
     </div>
-      </ThemeProvider>
-    </EditModeProvider>
+    </ThemeProvider>
   );
 }
