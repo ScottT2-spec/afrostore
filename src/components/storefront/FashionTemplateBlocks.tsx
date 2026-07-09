@@ -356,6 +356,16 @@ export function FashionSectionTitle({ subtitle, title, description, align = "cen
    4. FASHION PRODUCT GRID
    ═══════════════════════════════════════════════════════════════ */
 
+export interface FashionProductVariant {
+  id: string;
+  name: string;
+  price: number | null;
+  stock: number;
+  inStock: boolean;
+  options: Record<string, string> | null;
+  image: string | null;
+}
+
 export interface FashionProduct {
   id: string;
   name: string;
@@ -367,6 +377,7 @@ export interface FashionProduct {
   hoverImage?: string;
   link: string;
   badge?: string;
+  variants?: FashionProductVariant[];
 }
 
 /** Context bridge — lets fashion blocks access real store products and blogs */
@@ -376,6 +387,7 @@ export interface FashionStoreContextData {
     currency: string; inStock: boolean; isFeatured: boolean; tags?: string[];
     images: Array<{ id: string; url: string; alt?: string }>;
     category?: { id: string; name: string; slug: string };
+    variants?: FashionProductVariant[];
   }>;
   blogs: Array<{
     id: string; title: string; slug: string; excerpt?: string | null;
@@ -402,6 +414,120 @@ export interface FashionProductGridProps {
   maxProducts?: number;
   filter?: "featured" | "bestseller" | "new-arrival" | "sale" | "all";
   filterTag?: string;
+}
+
+/* ─── COLOR NAME → HEX MAP ──────────────────────────────────── */
+const COLOR_MAP: Record<string, string> = {
+  black: "#000", white: "#fff", red: "#e53935", blue: "#1e88e5", green: "#43a047",
+  yellow: "#fdd835", orange: "#fb8c00", pink: "#ec407a", purple: "#8e24aa",
+  brown: "#6d4c41", grey: "#9e9e9e", gray: "#9e9e9e", navy: "#1a237e",
+  beige: "#f5f5dc", cream: "#fffdd0", gold: "#ffd700", silver: "#c0c0c0",
+  maroon: "#800000", olive: "#808000", teal: "#008080", coral: "#ff7f50",
+  burgundy: "#800020", khaki: "#c3b091", tan: "#d2b48c", mint: "#98ff98",
+  lavender: "#e6e6fa", ivory: "#fffff0", charcoal: "#36454f", nude: "#f2d2bd",
+  rose: "#ff007f", peach: "#ffcba4", aqua: "#00ffff", cyan: "#00bcd4",
+  magenta: "#ff00ff", indigo: "#3f51b5", lime: "#cddc39", turquoise: "#40e0d0",
+  salmon: "#fa8072", plum: "#9c27b0", sky: "#87ceeb",
+};
+
+function resolveSwatchColor(value: string): string | null {
+  const l = value.toLowerCase().trim();
+  if (COLOR_MAP[l]) return COLOR_MAP[l];
+  if (/^#[0-9a-f]{3,8}$/i.test(l) || /^rgb/i.test(l)) return l;
+  // Check multi-word: "light blue" etc
+  for (const [k, v] of Object.entries(COLOR_MAP)) { if (l.includes(k)) return v; }
+  return null;
+}
+
+function extractVariantSwatches(variants: FashionProductVariant[]) {
+  const colors: Array<{ id: string; color: string | null; image: string | null; name: string; inStock: boolean }> = [];
+  const sizes: Array<{ id: string; label: string; inStock: boolean }> = [];
+  const seenC = new Set<string>();
+  const seenS = new Set<string>();
+
+  for (const v of variants) {
+    const opts = v.options as Record<string, string> | null;
+    if (!opts) {
+      const c = resolveSwatchColor(v.name);
+      if (c && !seenC.has(v.name.toLowerCase())) { seenC.add(v.name.toLowerCase()); colors.push({ id: v.id, color: c, image: v.image, name: v.name, inStock: v.inStock }); }
+      else if (!c && !seenS.has(v.name.toLowerCase())) { seenS.add(v.name.toLowerCase()); sizes.push({ id: v.id, label: v.name, inStock: v.inStock }); }
+      continue;
+    }
+    for (const [key, val] of Object.entries(opts)) {
+      const k = key.toLowerCase();
+      if ((k === "color" || k === "colour" || k === "color name") && !seenC.has(val.toLowerCase())) {
+        seenC.add(val.toLowerCase());
+        colors.push({ id: v.id, color: resolveSwatchColor(val), image: v.image, name: val, inStock: v.inStock });
+      } else if ((k === "size" || k === "taille") && !seenS.has(val.toLowerCase())) {
+        seenS.add(val.toLowerCase());
+        sizes.push({ id: v.id, label: val, inStock: v.inStock });
+      }
+    }
+  }
+  return { colors, sizes };
+}
+
+function FashionProductCard({ product: p, productLink, showCategory, showHoverImage, storeCtx }: {
+  product: FashionProduct; productLink: string; showCategory: boolean; showHoverImage: boolean;
+  storeCtx: FashionStoreContextData | null;
+}) {
+  const variants = p.variants || [];
+  const { colors, sizes } = extractVariantSwatches(variants);
+  const [activeColorId, setActiveColorId] = useState<string | null>(null);
+  const activeColor = colors.find(c => c.id === activeColorId);
+  const displayImage = (activeColor?.image) || p.image || safeSrc(null, p.name);
+
+  return (
+    <div className="fpg-card">
+      <div className="fpg-thumb">
+        <Link href={productLink}>
+          <img src={displayImage} alt={p.name} className="fpg-img fpg-main-img" loading="lazy" onError={(e) => onImgError(e, p.name)} />
+          {showHoverImage && p.hoverImage && !activeColorId && (
+            <img src={p.hoverImage} alt={p.name} className="fpg-hover-img" loading="lazy" />
+          )}
+        </Link>
+        {p.badge && <span className="fpg-badge">{p.badge}</span>}
+        <div className="fpg-actions">
+          <button className="fpg-action-btn" title="Compare" aria-label="Compare">⇌</button>
+          <button className="fpg-action-btn" title="Quick view" aria-label="Quick view" onClick={() => storeCtx?.onQuickView?.(String(p.id))}>👁</button>
+          <button className="fpg-action-btn" title="Wishlist" aria-label="Wishlist" onClick={() => storeCtx?.toggleWishlist?.(String(p.id))} style={storeCtx?.isWishlisted?.(String(p.id)) ? { color: "red" } : undefined}>{storeCtx?.isWishlisted?.(String(p.id)) ? "♥" : "♡"}</button>
+        </div>
+        <button className="fpg-add-btn" onClick={() => storeCtx?.addToCart?.(String(p.id))}>Add to cart</button>
+      </div>
+      <h3 className="fpg-name"><Link href={productLink}>{p.name}</Link></h3>
+      {showCategory && p.category && (
+        <div className="fpg-cat"><Link href={resolveStoreLink(p.categoryLink, storeCtx?.storeSlug)}>{p.category}</Link></div>
+      )}
+      <div className="fpg-price">
+        {p.salePrice && <span className="fpg-price-old">{p.price}</span>}
+        <span>{p.salePrice || p.price}</span>
+      </div>
+      {colors.length > 0 && (
+        <div className="fpg-swatches">
+          {colors.map((c) => (
+            <button key={c.id} className={`fpg-swatch ${activeColorId === c.id ? "fpg-swatch-active" : ""}`}
+              title={c.name} aria-label={`Color: ${c.name}`}
+              onClick={(e) => { e.preventDefault(); setActiveColorId(activeColorId === c.id ? null : c.id); }}
+              onMouseEnter={() => { if (c.image) setActiveColorId(c.id); }}
+              onMouseLeave={() => { if (c.image && activeColorId === c.id) setActiveColorId(null); }}
+            >
+              {c.color ? <span className="fpg-swatch-inner" style={{ backgroundColor: c.color }} />
+                : c.image ? <img src={c.image} alt={c.name} className="fpg-swatch-img" />
+                : <span className="fpg-swatch-inner" style={{ background: "linear-gradient(135deg,#ddd 50%,#aaa 50%)" }} />}
+            </button>
+          ))}
+        </div>
+      )}
+      {sizes.length > 0 && (
+        <div className="fpg-sizes">
+          {sizes.map((s) => (
+            <Link key={s.id} href={productLink} className={`fpg-size ${!s.inStock ? "fpg-size-oos" : ""}`}
+              title={!s.inStock ? `${s.label} — Out of stock` : s.label}>{s.label}</Link>
+          ))}
+        </div>
+      )}
+    </div>
+  );
 }
 
 export function FashionProductGrid({ products: propProducts, columns = 4, showCategory = true, showHoverImage = true, sectionTitle, marginBottom = "60px", maxProducts = 8, filter, filterTag }: FashionProductGridProps) {
@@ -451,6 +577,7 @@ export function FashionProductGrid({ products: propProducts, columns = 4, showCa
       hoverImage: p.images[1]?.url,
       link: `/store/${storeCtx.storeSlug}/product/${p.slug}`,
       badge: p.compareAtPrice ? "SALE" : p.isFeatured ? "FEATURED" : undefined,
+      variants: p.variants || [],
     }));
   })();
   const scopedCss = `
@@ -511,6 +638,34 @@ export function FashionProductGrid({ products: propProducts, columns = 4, showCa
       transform: translateY(100%); transition: all 0.3s ease;
     }
     .fpg-card:hover .fpg-add-btn { opacity: 1; transform: translateY(0); }
+    .fpg-swatches {
+      display: flex; align-items: center; gap: 4px; margin-top: 6px; flex-wrap: wrap;
+    }
+    .fpg-swatch {
+      width: 18px; height: 18px; border-radius: 50%; border: 2px solid #e0e0e0;
+      cursor: pointer; transition: border-color 0.2s, transform 0.15s;
+      padding: 0; position: relative; overflow: hidden; flex-shrink: 0;
+      background: none;
+    }
+    .fpg-swatch:hover, .fpg-swatch.fpg-swatch-active { border-color: ${TOKENS.entityTitleColor}; transform: scale(1.15); }
+    .fpg-swatch-inner {
+      position: absolute; inset: 2px; border-radius: 50%;
+    }
+    .fpg-swatch-img {
+      width: 100%; height: 100%; object-fit: cover; border-radius: 50%;
+    }
+    .fpg-sizes {
+      display: flex; align-items: center; gap: 3px; margin-top: 5px; flex-wrap: wrap;
+    }
+    .fpg-size {
+      font-family: ${TOKENS.bodyFont}; font-size: 10px; font-weight: 600;
+      color: ${TOKENS.textColor}; background: #f5f5f5; border: 1px solid #e0e0e0;
+      padding: 2px 6px; cursor: pointer; transition: all 0.2s;
+      text-transform: uppercase; line-height: 1.3; border-radius: 2px;
+      text-decoration: none;
+    }
+    .fpg-size:hover { border-color: ${TOKENS.entityTitleColor}; color: ${TOKENS.entityTitleColor}; background: #fff; }
+    .fpg-size-oos { opacity: 0.35; text-decoration: line-through; cursor: not-allowed; }
     @media (max-width: 1024px) { .fpg-grid { grid-template-columns: repeat(3, 1fr); } }
     @media (max-width: 767px) { .fpg-grid { grid-template-columns: repeat(2, 1fr); gap: 10px; } }
   `;
@@ -550,38 +705,10 @@ export function FashionProductGrid({ products: propProducts, columns = 4, showCa
         />
       )}
       <div className="fpg-grid">
-        {products.map((p) => {
-          const productLink = resolveProductLink(p.link, p.name);
-          return (
-          <div key={p.id} className="fpg-card">
-            <div className="fpg-thumb">
-              <Link href={productLink}>
-                <img src={p.image || safeSrc(null, p.name)} alt={p.name} className="fpg-img fpg-main-img" loading="lazy" onError={(e) => onImgError(e, p.name)} />
-                {showHoverImage && p.hoverImage && (
-                  <img src={p.hoverImage} alt={p.name} className="fpg-hover-img" loading="lazy" />
-                )}
-              </Link>
-              {p.badge && <span className="fpg-badge">{p.badge}</span>}
-              <div className="fpg-actions">
-                <button className="fpg-action-btn" title="Compare" aria-label="Compare">⇌</button>
-                <button className="fpg-action-btn" title="Quick view" aria-label="Quick view" onClick={() => storeCtx?.onQuickView?.(String(p.id))}>👁</button>
-                <button className="fpg-action-btn" title="Wishlist" aria-label="Wishlist" onClick={() => storeCtx?.toggleWishlist?.(String(p.id))} style={storeCtx?.isWishlisted?.(String(p.id)) ? { color: "red" } : undefined}>{storeCtx?.isWishlisted?.(String(p.id)) ? "♥" : "♡"}</button>
-              </div>
-              <button className="fpg-add-btn" onClick={() => storeCtx?.addToCart?.(String(p.id))}>Add to cart</button>
-            </div>
-            <h3 className="fpg-name"><Link href={productLink}>{p.name}</Link></h3>
-            {showCategory && p.category && (
-              <div className="fpg-cat">
-                <Link href={resolveStoreLink(p.categoryLink, storeCtx?.storeSlug)}>{p.category}</Link>
-              </div>
-            )}
-            <div className="fpg-price">
-              {p.salePrice && <span className="fpg-price-old">{p.price}</span>}
-              <span>{p.salePrice || p.price}</span>
-            </div>
-          </div>
-          );
-        })}
+        {products.map((p) => (
+          <FashionProductCard key={p.id} product={p} productLink={resolveProductLink(p.link, p.name)}
+            showCategory={showCategory} showHoverImage={showHoverImage} storeCtx={storeCtx} />
+        ))}
       </div>
     </div>
   );
