@@ -144,6 +144,25 @@ export default function ShopPage() {
     return [];
   });
   const [mobileMenu, setMobileMenu] = useState(false);
+  const compareKey = `afrostore_compare_${slug}`;
+  const [compareList, setCompareList] = useState<string[]>(() => {
+    if (typeof window === "undefined") return [];
+    try { const s = localStorage.getItem(compareKey); if (s) { const p = JSON.parse(s); if (Array.isArray(p)) return p.map((x: any) => x.id); } } catch {} return [];
+  });
+  const toggleCompare = useCallback((product: Product) => {
+    setCompareList(prev => {
+      const exists = prev.includes(product.id);
+      const next = exists ? prev.filter(id => id !== product.id) : prev.length < 4 ? [...prev, product.id] : prev;
+      // Sync full product data to localStorage for compare page
+      try {
+        const saved = localStorage.getItem(compareKey);
+        let items: Product[] = saved ? JSON.parse(saved) : [];
+        if (exists) { items = items.filter(p => p.id !== product.id); } else if (items.length < 4) { items.push(product); }
+        localStorage.setItem(compareKey, JSON.stringify(items));
+      } catch {}
+      return next;
+    });
+  }, [compareKey]);
 
   const { isWishlisted, toggleWishlist, wishlistCount } = useWishlist(storeData?.store?.id || "");
 
@@ -617,6 +636,13 @@ export default function ShopPage() {
                               >
                                 {justAdded ? <CheckCircle2 className="h-4 w-4" /> : <ShoppingCart className="h-4 w-4" />}
                               </button>
+                              <button
+                                onClick={(e) => { e.preventDefault(); e.stopPropagation(); toggleCompare(product); }}
+                                className={`h-8 w-8 rounded-full backdrop-blur-sm flex items-center justify-center transition-all hover:scale-110 shadow-sm ${compareList.includes(product.id) ? "bg-brand-600 text-white ring-1 ring-brand-300" : "bg-white/90 text-surface-500 hover:bg-white"}`}
+                                title={compareList.includes(product.id) ? "Remove from compare" : "Add to compare"}
+                              >
+                                <SlidersHorizontal className="h-4 w-4" />
+                              </button>
                             </div>
                             <div className="absolute inset-0 bg-black/0 group-hover:bg-black/10 transition-colors" />
                           </div>
@@ -688,6 +714,15 @@ export default function ShopPage() {
         </div>
       </footer>
 
+      {/* ── Compare floating bar ── */}
+      {compareList.length > 0 && (
+        <div className="fixed bottom-16 sm:bottom-6 left-1/2 -translate-x-1/2 z-50 bg-surface-900 text-white rounded-full px-5 py-2.5 shadow-xl flex items-center gap-3 text-sm">
+          <SlidersHorizontal className="h-4 w-4" />
+          <span>{compareList.length} item{compareList.length > 1 ? "s" : ""} selected</span>
+          <Link href={`/store/${slug}/compare`} className="bg-white text-surface-900 px-3 py-1 rounded-full text-xs font-semibold hover:bg-surface-100 transition-colors">Compare</Link>
+          <button onClick={() => { setCompareList([]); localStorage.removeItem(compareKey); }} className="text-surface-400 hover:text-white ml-1"><X className="h-4 w-4" /></button>
+        </div>
+      )}
       {/* ── Mobile cart bar ── */}
       {cartCount > 0 && (
         <div className="fixed bottom-0 left-0 right-0 z-40 bg-white border-t border-surface-200 shadow-2xl px-4 py-3 sm:hidden">
