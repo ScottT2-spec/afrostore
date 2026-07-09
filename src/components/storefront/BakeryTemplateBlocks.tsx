@@ -2,6 +2,7 @@
 import Link from "next/link";
 import { resolveStoreLink, resolveFooterLink } from "@/lib/template-link-utils";
 import { useState, useEffect, useRef, useCallback, createContext, useContext } from "react";
+import { safeSrc, onImgError } from "./image-fallback";
 
 /* ═══════════════════════════════════════════════════════════════
    BAKERY (SWEETS BAKERY) TEMPLATE BLOCKS
@@ -429,7 +430,7 @@ export function BakeryProductGrid({
           {items.map((p) => (
             <div key={p.id} className="bk-prod">
               <div className="bk-prod-img-wrap">
-                <img className="bk-prod-img" src={p.image} alt={p.name} />
+                <img className="bk-prod-img" src={p.image || safeSrc(null, p.name)} alt={p.name} onError={(e) => onImgError(e, p.name)} />
               </div>
               <div className="bk-prod-info">
                 <div className="bk-prod-cat">{p.category}</div>

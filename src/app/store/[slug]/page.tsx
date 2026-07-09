@@ -201,15 +201,16 @@ function getWhatsAppLink(phone: string | undefined, cart: CartItem[], currency: 
 /* ───────── Template Store Context Provider ───────── */
 
 /** Maps any template slug to the correct StoreContext provider */
-function TemplateStoreContextProvider({ templateSlug, products, blogs, currency, storeSlug, children }: {
+function TemplateStoreContextProvider({ templateSlug, products, blogs, currency, storeSlug, socialLinks, children }: {
   templateSlug: string | null;
   products: any[];
   blogs: any[];
   currency: string;
   storeSlug: string;
+  socialLinks?: Array<{ platform: string; url: string }>;
   children: React.ReactNode;
 }) {
-  const value = { products, blogs, currency, storeSlug };
+  const value = { products, blogs, currency, storeSlug, socialLinks };
 
   // Determine which context to use based on template slug or block prefix
   const slug = templateSlug || "";
@@ -390,6 +391,16 @@ export default function StorePage() {
   const whatsappNumber = settings.whatsappNumber || socialLinks.whatsapp;
   const isLanding = store.siteType === "LANDING_PAGE" || store.siteType === "WEBSITE";
 
+  // Build socialLinks array from DB data for template blocks
+  const socialLinksArray: Array<{ platform: string; url: string }> = [
+    ...(socialLinks?.facebook ? [{ platform: "facebook", url: socialLinks.facebook }] : []),
+    ...(socialLinks?.instagram ? [{ platform: "instagram", url: socialLinks.instagram }] : []),
+    ...(socialLinks?.twitter ? [{ platform: "twitter", url: socialLinks.twitter }] : []),
+    ...(socialLinks?.tiktok ? [{ platform: "tiktok", url: socialLinks.tiktok }] : []),
+    ...(socialLinks?.youtube ? [{ platform: "youtube", url: socialLinks.youtube }] : []),
+    ...(socialLinks?.whatsapp ? [{ platform: "whatsapp", url: socialLinks.whatsapp }] : []),
+  ];
+
   const categoryNames = ["All", ...categories.filter((c) => c._count.products > 0).map((c) => c.name)];
 
   // ─── Page helpers ─────────────────────────────────────────
@@ -546,7 +557,7 @@ export default function StorePage() {
       {hasHomeContent ? (
         /* Builder blocks Home page — render template blocks */
         <div style={buildPageBackgroundStyle(homePageSettings)}>
-          <TemplateStoreContextProvider templateSlug={data.templateSlug} products={products} blogs={data.blogs || []} currency={currency} storeSlug={slug}>
+          <TemplateStoreContextProvider templateSlug={data.templateSlug} products={products} blogs={data.blogs || []} currency={currency} storeSlug={slug} socialLinks={socialLinksArray}>
           <RenderBlocks blocks={homeBlocks} storeSlug={slug} products={products} currency={currency} addToCart={(p) => addToCart(p as unknown as Product)} isWishlisted={isWishlisted} toggleWishlist={toggleWishlist} addedToCart={addedToCart} />
           </TemplateStoreContextProvider>
           {!isLanding && products.length > 0 && !homeHasProductGrid && (
@@ -563,7 +574,7 @@ export default function StorePage() {
       ) : templatePreset ? (
         /* Template with editable block preset */
         <div>
-          <TemplateStoreContextProvider templateSlug={data.templateSlug} products={products} blogs={data.blogs || []} currency={currency} storeSlug={slug}>
+          <TemplateStoreContextProvider templateSlug={data.templateSlug} products={products} blogs={data.blogs || []} currency={currency} storeSlug={slug} socialLinks={socialLinksArray}>
             <RenderTemplateBlocks blocks={templatePreset} />
           </TemplateStoreContextProvider>
           {!isLanding && products.length > 0 && (

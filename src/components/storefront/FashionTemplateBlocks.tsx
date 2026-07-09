@@ -2,6 +2,7 @@
 import { useState, useEffect, useRef, useCallback, createContext, useContext } from "react";
 import Link from "next/link";
 import { resolveStoreLink, resolveFooterLink } from "@/lib/template-link-utils";
+import { safeSrc, onImgError } from "./image-fallback";
 
 /* ═══════════════════════════════════════════════════════════════
    FASHION TEMPLATE BLOCKS
@@ -382,6 +383,7 @@ export interface FashionStoreContextData {
   }>;
   currency: string;
   storeSlug: string;
+  socialLinks?: Array<{ platform: string; url: string }>;
 }
 export const FashionStoreContext = createContext<FashionStoreContextData | null>(null);
 
@@ -440,7 +442,7 @@ export function FashionProductGrid({ products: propProducts, columns = 4, showCa
       categoryLink: p.category?.slug ? `/store/${storeCtx.storeSlug}/shop?category=${p.category.slug}` : undefined,
       price: p.compareAtPrice ? `${sym}${p.compareAtPrice.toLocaleString()}` : `${sym}${p.price.toLocaleString()}`,
       salePrice: p.compareAtPrice ? `${sym}${p.price.toLocaleString()}` : undefined,
-      image: p.images[0]?.url || "",
+      image: p.images[0]?.url || safeSrc(null, p.name),
       hoverImage: p.images[1]?.url,
       link: `/store/${storeCtx.storeSlug}/product/${p.slug}`,
       badge: p.compareAtPrice ? "SALE" : p.isFeatured ? "FEATURED" : undefined,
@@ -550,6 +552,8 @@ export function FashionProductGrid({ products: propProducts, columns = 4, showCa
             <div className="fpg-thumb">
               <Link href={productLink}>
                 <img src={p.image} alt={p.name} className="fpg-img fpg-main-img" loading="lazy" />
+              <a href={productLink}>
+                <img src={p.image || safeSrc(null, p.name)} alt={p.name} className="fpg-img fpg-main-img" loading="lazy" onError={(e) => onImgError(e, p.name)} />
                 {showHoverImage && p.hoverImage && (
                   <img src={p.hoverImage} alt={p.name} className="fpg-hover-img" loading="lazy" />
                 )}

@@ -2,6 +2,7 @@
 import Link from "next/link";
 import { resolveStoreLink, resolveFooterLink } from "@/lib/template-link-utils";
 import { useState, useEffect, useRef, useCallback, createContext, useContext } from "react";
+import { safeSrc, onImgError } from "./image-fallback";
 
 /* ═══════════════════════════════════════════════════════════════
    KIDS TEMPLATE BLOCKS
@@ -97,6 +98,7 @@ export interface KidsStoreContextData {
   }>;
   currency: string;
   storeSlug: string;
+  socialLinks?: Array<{ platform: string; url: string }>;
 }
 export const KidsStoreContext = createContext<KidsStoreContextData | null>(null);
 
@@ -445,7 +447,7 @@ export function KidsProductGrid({ products: propProducts, columns = 4, showCateg
       categoryLink: p.category?.slug ? `/store/${storeCtx.storeSlug}/shop?category=${p.category.slug}` : undefined,
       price: p.compareAtPrice ? `${sym}${p.compareAtPrice.toLocaleString()}` : `${sym}${p.price.toLocaleString()}`,
       salePrice: p.compareAtPrice ? `${sym}${p.price.toLocaleString()}` : undefined,
-      image: p.images[0]?.url || "",
+      image: p.images[0]?.url || safeSrc(null, p.name),
       hoverImage: p.images[1]?.url,
       link: `/store/${storeCtx.storeSlug}/product/${p.slug}`,
       badge: p.compareAtPrice ? "Sale" : p.isFeatured ? "Hot" : undefined,
@@ -549,7 +551,7 @@ export function KidsProductGrid({ products: propProducts, columns = 4, showCateg
             <div key={p.id} className="kpg-card">
               <div className="kpg-thumb">
                 <Link href={pLink}>
-                  <img src={p.image} alt={p.name} className="kpg-img kpg-main-img" loading="lazy" />
+                  <img src={p.image || safeSrc(null, p.name)} alt={p.name} className="kpg-img kpg-main-img" loading="lazy" onError={(e) => onImgError(e, p.name)} />
                   {showHoverImage && p.hoverImage && (
                     <img src={p.hoverImage} alt={p.name} className="kpg-hover-img" loading="lazy" />
                   )}

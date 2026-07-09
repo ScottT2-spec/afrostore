@@ -2,6 +2,7 @@
 import Link from "next/link";
 import { resolveStoreLink, resolveFooterLink } from "@/lib/template-link-utils";
 import { useState, useEffect, useRef, createContext, useContext } from "react";
+import { safeSrc, onImgError } from "./image-fallback";
 
 /* ═══════════════════════════════════════════════════════════════
    INTERIOR DESIGN (RETAIL) TEMPLATE BLOCKS
@@ -349,7 +350,7 @@ export function InteriorProductGrid({
             <div key={p.id} className="id-prod">
               {p.badge && <span className="id-prod-badge">{p.badge}</span>}
               <div className="id-prod-img-wrap">
-                <img className="id-prod-img" src={p.image} alt={p.name} />
+                <img className="id-prod-img" src={p.image || safeSrc(null, p.name)} alt={p.name} onError={(e) => onImgError(e, p.name)} />
               </div>
               <div className="id-prod-info">
                 <div className="id-prod-cat">{p.category}</div>

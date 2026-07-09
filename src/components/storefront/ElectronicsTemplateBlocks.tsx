@@ -2,6 +2,7 @@
 import Link from "next/link";
 import { resolveStoreLink, resolveFooterLink } from "@/lib/template-link-utils";
 import { useState, useEffect, useRef, useCallback, createContext, useContext } from "react";
+import { safeSrc, onImgError } from "./image-fallback";
 
 /* ═══════════════════════════════════════════════════════════════
    ELECTRONICS TEMPLATE BLOCKS
@@ -82,6 +83,7 @@ export interface ElectronicsStoreContextData {
   }>;
   currency: string;
   storeSlug: string;
+  socialLinks?: Array<{ platform: string; url: string }>;
 }
 export const ElectronicsStoreContext = createContext<ElectronicsStoreContextData | null>(null);
 
@@ -501,7 +503,7 @@ export function ElectronicsProductTabs({ sectionTitle = "ELECTRONICS", tabs, col
                   <div key={p.id} className="ept-card">
                     <div className="ept-thumb">
                       <Link href={productLink}>
-                        <img src={p.images[0]?.url || ""} alt={p.name} loading="lazy" />
+                        <img src={safeSrc(p.images[0]?.url, p.name)} alt={p.name} loading="lazy" onError={(e) => onImgError(e, p.name)} />
                       </Link>
                       {p.compareAtPrice && <span className="ept-badge">SALE</span>}
                       {!p.compareAtPrice && p.isFeatured && <span className="ept-badge">HOT</span>}
@@ -750,7 +752,7 @@ export function ElectronicsHotDeals({
                   <div key={p.id} className="ehd-card">
                     <div className="ehd-thumb">
                       <Link href={productLink}>
-                        <img src={p.images[0]?.url || ""} alt={p.name} loading="lazy" />
+                        <img src={safeSrc(p.images[0]?.url, p.name)} alt={p.name} loading="lazy" onError={(e) => onImgError(e, p.name)} />
                       </Link>
                       {discount > 0 && <span className="ehd-badge">-{discount}%</span>}
                       <div className="ehd-timer">
@@ -874,7 +876,7 @@ export function ElectronicsSideBanner({
                 const productLink = storeCtx ? `/store/${storeCtx.storeSlug}/product/${p.slug}` : "#";
                 return (
                   <div key={p.id} className="esb-feat-item">
-                    <img src={p.images[0]?.url || ""} alt={p.name} className="esb-feat-img" loading="lazy" />
+                    <img src={safeSrc(p.images[0]?.url, p.name)} alt={p.name} className="esb-feat-img" loading="lazy" onError={(e) => onImgError(e, p.name)} />
                     <div className="esb-feat-info">
                       <h5 className="esb-feat-name"><Link href={productLink}>{p.name}</Link></h5>
                       <div className="esb-feat-price">

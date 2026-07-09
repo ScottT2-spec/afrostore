@@ -2,6 +2,7 @@
 import Link from "next/link";
 import { resolveStoreLink, resolveFooterLink } from "@/lib/template-link-utils";
 import { useState, useEffect, useRef, useCallback, createContext, useContext } from "react";
+import { safeSrc, onImgError } from "./image-fallback";
 
 /* ═══════════════════════════════════════════════════════════════
    HEALTH (PILLS & SUPPLEMENTS) TEMPLATE BLOCKS
@@ -414,7 +415,7 @@ export function HealthProductGrid({
         {items.map((p) => (
           <div key={p.id} className="hh-prod">
             <div className="hh-prod-img-wrap">
-              <img className="hh-prod-img hh-prod-main-img" src={p.image} alt={p.name} />
+              <img className="hh-prod-img hh-prod-main-img" src={p.image || safeSrc(null, p.name)} alt={p.name} onError={(e) => onImgError(e, p.name)} />
               {showHoverImage && p.hoverImage && (
                 <img className="hh-prod-img hh-prod-hover" src={p.hoverImage} alt={p.name} />
               )}

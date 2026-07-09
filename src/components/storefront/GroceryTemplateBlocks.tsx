@@ -2,6 +2,7 @@
 import Link from "next/link";
 import { resolveStoreLink, resolveFooterLink } from "@/lib/template-link-utils";
 import { useState, useEffect, useRef, createContext, useContext } from "react";
+import { safeSrc, onImgError } from "./image-fallback";
 
 /* ═══════════════════════════════════════════════════════════════
    FOOD GROCERY TEMPLATE BLOCKS
@@ -376,7 +377,7 @@ export function GroceryProductGrid({
             <div key={p.id} className="gc-prod">
               {p.badge && <span className="gc-prod-badge">{p.badge}</span>}
               <div className="gc-prod-img-wrap">
-                <img className="gc-prod-img" src={p.image} alt={p.name} />
+                <img className="gc-prod-img" src={p.image || safeSrc(null, p.name)} alt={p.name} onError={(e) => onImgError(e, p.name)} />
               </div>
               <div className="gc-prod-info">
                 <div className="gc-prod-cat">{p.category}</div>
