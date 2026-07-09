@@ -1,5 +1,5 @@
-import { FashionFooter } from "./FashionTemplateBlocks";
 "use client";
+import { FashionFooter } from "./FashionTemplateBlocks";
 import Link from "next/link";
 import { resolveStoreLink, resolveFooterLink } from "@/lib/template-link-utils";
 import { useState, useEffect, useRef, createContext, useContext } from "react";
