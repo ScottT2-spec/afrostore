@@ -1087,17 +1087,132 @@ function GenericNewsletterEditProps({ block, update }: { block: BuilderBlock; up
 }
 
 function GenericFooterEditProps({ block, update }: { block: BuilderBlock; update: (key: string, val: unknown) => void }) {
+  const contact = (block.props.contact as Record<string, string>) || {};
+  const updateContact = (key: string, val: string) => update("contact", { ...contact, [key]: val });
+
+  // linkColumns (cosmetics/fashion/kids/makeup/perfumes style) or columns (bakery/grocery/health/interior style)
+  const linkColumns = (block.props.linkColumns as Array<{ title: string; links: Array<{ label: string; url?: string; href?: string }> }>) ||
+    (block.props.columns as Array<{ title: string; links: Array<{ label: string; url?: string; href?: string }> }>) || [];
+  const linkColumnsKey = block.props.linkColumns !== undefined ? "linkColumns" : "columns";
+
+  const updateColumn = (ci: number, key: string, val: unknown) => {
+    const next = linkColumns.map((c, i) => i === ci ? { ...c, [key]: val } : c);
+    update(linkColumnsKey, next);
+  };
+  const updateColumnLink = (ci: number, li: number, key: string, val: string) => {
+    const col = linkColumns[ci];
+    const links = col.links.map((l, i) => i === li ? { ...l, [key]: val } : l);
+    updateColumn(ci, "links", links);
+  };
+  const addColumnLink = (ci: number) => {
+    const col = linkColumns[ci];
+    const newLink = col.links[0]?.url !== undefined ? { label: "New Link", url: "#" } : { label: "New Link", href: "#" };
+    updateColumn(ci, "links", [...col.links, newLink]);
+  };
+  const removeColumnLink = (ci: number, li: number) => {
+    const col = linkColumns[ci];
+    updateColumn(ci, "links", col.links.filter((_, i) => i !== li));
+  };
+  const addColumn = () => {
+    const newCol = linkColumns[0]?.links[0]?.url !== undefined
+      ? { title: "New Section", links: [{ label: "Link", url: "#" }] }
+      : { title: "New Section", links: [{ label: "Link", href: "#" }] };
+    update(linkColumnsKey, [...linkColumns, newCol]);
+  };
+  const removeColumn = (ci: number) => update(linkColumnsKey, linkColumns.filter((_, i) => i !== ci));
+
+  // Social links
+  const socialLinks = (block.props.socialLinks as Array<{ platform: string; url: string }>) || [];
+  const updateSocial = (i: number, key: string, val: string) => {
+    const next = socialLinks.map((s, si) => si === i ? { ...s, [key]: val } : s);
+    update("socialLinks", next);
+  };
+  const addSocial = () => update("socialLinks", [...socialLinks, { platform: "facebook", url: "#" }]);
+  const removeSocial = (i: number) => update("socialLinks", socialLinks.filter((_, si) => si !== i));
+
   return (
     <>
-      {block.props.description !== undefined && <PropInput label="Description" value={block.props.description} onChange={(v) => update("description", v)} type="textarea" rows={3} />}
+      {/* Logo */}
+      {block.props.logoUrl !== undefined && <SingleImageUpload image={(block.props.logoUrl as string) || null} onChange={(url) => update("logoUrl", url || "")} label="Logo" compact />}
+      {block.props.logoAlt !== undefined && <PropInput label="Logo Alt Text" value={block.props.logoAlt} onChange={(v) => update("logoAlt", v)} />}
+
+      {/* Basic text fields */}
+      {block.props.tagline !== undefined && <PropInput label="Tagline" value={block.props.tagline} onChange={(v) => update("tagline", v)} />}
+      <PropInput label="Description" value={block.props.description || ""} onChange={(v) => update("description", v)} type="textarea" rows={3} />
+      {block.props.copyright !== undefined && <PropInput label="Copyright" value={block.props.copyright} onChange={(v) => update("copyright", v)} />}
+
+      {/* Contact - flat style (bakery/grocery) */}
       {block.props.contactPhone !== undefined && <PropInput label="Phone" value={block.props.contactPhone} onChange={(v) => update("contactPhone", v)} />}
       {block.props.contactEmail !== undefined && <PropInput label="Email" value={block.props.contactEmail} onChange={(v) => update("contactEmail", v)} />}
       {block.props.contactAddress !== undefined && <PropInput label="Address" value={block.props.contactAddress} onChange={(v) => update("contactAddress", v)} />}
-      {block.props.copyright !== undefined && <PropInput label="Copyright" value={block.props.copyright} onChange={(v) => update("copyright", v)} />}
-      {block.props.tagline !== undefined && <PropInput label="Tagline" value={block.props.tagline} onChange={(v) => update("tagline", v)} />}
-      {block.props.email !== undefined && <PropInput label="Email" value={block.props.email} onChange={(v) => update("email", v)} />}
-      {block.props.address !== undefined && <PropInput label="Address" value={block.props.address} onChange={(v) => update("address", v)} />}
-      {block.props.phone !== undefined && <PropInput label="Phone" value={block.props.phone} onChange={(v) => update("phone", v)} />}
+
+      {/* Contact - nested style (fashion/cosmetics/kids) */}
+      {block.props.contact !== undefined && (
+        <div className="border border-surface-200 rounded-lg p-3 space-y-3">
+          <span className="text-xs font-bold text-surface-700">Contact Info</span>
+          <PropInput label="Address" value={contact.address || ""} onChange={(v) => updateContact("address", v)} />
+          <PropInput label="Phone" value={contact.phone || ""} onChange={(v) => updateContact("phone", v)} />
+          {contact.fax !== undefined && <PropInput label="Fax" value={contact.fax || ""} onChange={(v) => updateContact("fax", v)} />}
+          {contact.email !== undefined && <PropInput label="Email" value={contact.email || ""} onChange={(v) => updateContact("email", v)} />}
+        </div>
+      )}
+
+      {/* Flat email/phone (health style) */}
+      {block.props.email !== undefined && block.props.contact === undefined && <PropInput label="Email" value={block.props.email} onChange={(v) => update("email", v)} />}
+      {block.props.phone !== undefined && block.props.contact === undefined && <PropInput label="Phone" value={block.props.phone} onChange={(v) => update("phone", v)} />}
+      {block.props.address !== undefined && block.props.contact === undefined && <PropInput label="Address" value={block.props.address} onChange={(v) => update("address", v)} />}
+
+      {/* Link columns */}
+      {linkColumns.length > 0 && (
+        <div className="space-y-3 mt-2">
+          <span className="text-xs font-bold text-surface-700 block">Footer Link Sections</span>
+          {linkColumns.map((col, ci) => (
+            <div key={ci} className="border border-surface-200 rounded-lg p-3 space-y-2">
+              <div className="flex items-center justify-between">
+                <PropInput label="Section Title" value={col.title} onChange={(v) => updateColumn(ci, "title", v)} />
+                {linkColumns.length > 1 && <button onClick={() => removeColumn(ci)} className="text-red-500 text-xs ml-2">✕</button>}
+              </div>
+              {col.links.map((link, li) => {
+                const urlKey = link.url !== undefined ? "url" : "href";
+                return (
+                  <div key={li} className="flex items-center gap-2 pl-2">
+                    <PropInput label="" value={link.label} onChange={(v) => updateColumnLink(ci, li, "label", v)} />
+                    <PropInput label="" value={(link as Record<string, string>)[urlKey] || ""} onChange={(v) => updateColumnLink(ci, li, urlKey, v)} />
+                    <button onClick={() => removeColumnLink(ci, li)} className="text-red-500 text-xs">✕</button>
+                  </div>
+                );
+              })}
+              <button onClick={() => addColumnLink(ci)} className="w-full flex items-center justify-center gap-1 text-xs font-semibold text-brand-600 py-1.5 border border-dashed border-brand-300 rounded-lg hover:bg-brand-50">
+                <Plus className="h-3 w-3" /> Add Link
+              </button>
+            </div>
+          ))}
+          <button onClick={addColumn} className="w-full flex items-center justify-center gap-1 text-xs font-semibold text-brand-600 py-2 border border-dashed border-brand-300 rounded-lg hover:bg-brand-50">
+            <Plus className="h-3 w-3" /> Add Section
+          </button>
+        </div>
+      )}
+
+      {/* Social links */}
+      {(block.props.socialLinks !== undefined || socialLinks.length > 0) && (
+        <div className="space-y-2 mt-2">
+          <span className="text-xs font-bold text-surface-700 block">Social Links</span>
+          {socialLinks.map((s, i) => (
+            <div key={i} className="flex items-center gap-2">
+              <PropInput label="" value={s.platform} onChange={(v) => updateSocial(i, "platform", v)} type="select"
+                options={[{ value: "facebook", label: "Facebook" }, { value: "twitter", label: "Twitter/X" }, { value: "instagram", label: "Instagram" }, { value: "youtube", label: "YouTube" }, { value: "tiktok", label: "TikTok" }, { value: "whatsapp", label: "WhatsApp" }]} />
+              <PropInput label="" value={s.url} onChange={(v) => updateSocial(i, "url", v)} />
+              <button onClick={() => removeSocial(i)} className="text-red-500 text-xs">✕</button>
+            </div>
+          ))}
+          <button onClick={addSocial} className="w-full flex items-center justify-center gap-1 text-xs font-semibold text-brand-600 py-1.5 border border-dashed border-brand-300 rounded-lg hover:bg-brand-50">
+            <Plus className="h-3 w-3" /> Add Social Link
+          </button>
+        </div>
+      )}
+
+      {/* Payment image */}
+      {block.props.paymentImage !== undefined && <SingleImageUpload image={(block.props.paymentImage as string) || null} onChange={(url) => update("paymentImage", url || "")} label="Payment Image" compact />}
     </>
   );
 }
