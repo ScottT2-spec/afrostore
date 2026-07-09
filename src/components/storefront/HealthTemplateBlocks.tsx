@@ -246,7 +246,7 @@ export function HealthPromoBanners({ banners }: HealthPromoBannersProps) {
           const textColor = isLight ? "#fff" : "#000";
           return (
             <div key={i} className={`hh-banner ${i === 0 ? "hh-banner-left" : ""}`} style={{ height: i === 0 ? "auto" : b.height }}>
-              <img className="hh-banner-img" src={b.image} alt={b.title} />
+              <img className="hh-banner-img" src={b.image} alt={b.title}  onError={(e) => onImgError(e, b.title)} />
               <div className="hh-banner-content" style={{ bottom: i === 0 ? "20px" : "auto", top: i === 0 ? "auto" : "50%", transform: i === 0 ? "none" : "translateY(-50%)", right: i !== 0 ? "20px" : "auto", textAlign: i !== 0 ? "left" : "left", left: i === 0 ? "20px" : "auto" }}>
                 {b.subtitle && <div className="hh-banner-subtitle" style={{ color: textColor }}>{b.subtitle}</div>}
                 <h4 className="hh-banner-title" style={{ color: textColor }}>{b.title}</h4>
@@ -338,7 +338,7 @@ export function HealthCategoryCards({ categories, columns = 4, sectionTitle = "P
       <div className="hh-cats" style={{ gridTemplateColumns: `repeat(${columns}, 1fr)` }}>
         {items.map((cat, i) => (
           <div key={i} className="hh-cat">
-            <img className="hh-cat-img" src={cat.image} alt={cat.name} />
+            <img className="hh-cat-img" src={cat.image} alt={cat.name}  onError={(e) => onImgError(e, cat.name)} />
             <div className="hh-cat-overlay" />
             <h3 className="hh-cat-name">{cat.name}</h3>
             <Link href={fixLink(cat.link)} className="hh-cat-link" aria-label={cat.name} />
@@ -423,7 +423,7 @@ export function HealthProductGrid({
             <div className="hh-prod-img-wrap">
               <img className="hh-prod-img hh-prod-main-img" src={p.image || safeSrc(null, p.name)} alt={p.name} onError={(e) => onImgError(e, p.name)} />
               {showHoverImage && p.hoverImage && (
-                <img className="hh-prod-img hh-prod-hover" src={p.hoverImage} alt={p.name} />
+                <img className="hh-prod-img hh-prod-hover" src={p.hoverImage} alt={p.name}  onError={(e) => onImgError(e, p.name)} />
               )}
             </div>
             <div className="hh-prod-info">
@@ -532,7 +532,7 @@ export function HealthFeatureSection({
           <h4 className="hh-feat-title">{title}</h4>
           <p className="hh-feat-desc">{subtitle}</p>
           <div className="hh-feat-help">
-            <img className="hh-feat-avatars" src={helpAvatars} alt="Support team" />
+            <img className="hh-feat-avatars" src={helpAvatars} alt="Support team"  onError={(e) => onImgError(e, "fallback")} />
             <div>
               <div className="hh-feat-help-text">{helpText}</div>
               <Link href={resolveStoreLink("#", storeCtx?.storeSlug)} className="hh-feat-help-link">Contact Us →</Link>
@@ -542,7 +542,7 @@ export function HealthFeatureSection({
         <div className="hh-feat-right">
           {items.map((f, i) => (
             <div key={i} className="hh-feat-item">
-              <img className="hh-feat-icon" src={f.icon} alt={f.title} />
+              <img className="hh-feat-icon" src={f.icon} alt={f.title}  onError={(e) => onImgError(e, f.title)} />
               <div>
                 <h5 className="hh-feat-item-title">{f.title}</h5>
                 {f.description && <p className="hh-feat-item-desc">{f.description}</p>}
@@ -616,7 +616,7 @@ export function HealthTestimonials({
         <div className="hh-testim-header">
           <HealthSectionTitle title={title} align="left" titleSize="38px" />
           <div className="hh-testim-tp">
-            <img src={trustpilotImage} alt="Trustpilot" />
+            <img src={trustpilotImage} alt="Trustpilot"  onError={(e) => onImgError(e, "fallback")} />
             <div className="hh-testim-tp-info">
               <span className="hh-testim-tp-rating">{trustpilotRating}</span>
               <br />{reviewCount}
@@ -629,7 +629,7 @@ export function HealthTestimonials({
               <div className="hh-testim-stars">{"★".repeat(t.rating || 5)}</div>
               <p className="hh-testim-text">{t.text}</p>
               <div className="hh-testim-author">
-                <img className="hh-testim-avatar" src={t.image} alt={t.name} />
+                <img className="hh-testim-avatar" src={t.image} alt={t.name}  onError={(e) => onImgError(e, t.name)} />
                 <span className="hh-testim-name">{t.name}</span>
               </div>
             </div>
@@ -691,7 +691,7 @@ export function HealthBlogPosts({ posts, columns = 3, sectionTitle, marginBottom
         {items.map((post, i) => (
           <div key={i} className="hh-blog-card">
             <div className="hh-blog-img-wrap">
-              <img className="hh-blog-img" src={post.image} alt={post.title} />
+              <img className="hh-blog-img" src={post.image} alt={post.title}  onError={(e) => onImgError(e, post.title)} />
               <div className="hh-blog-date">{post.date}</div>
             </div>
             <div className="hh-blog-content">
@@ -788,7 +788,7 @@ export function HealthBrandMarquee({ speed = 70, reverse = false }: HealthBrandM
       <ScopedStyles id={`brand-marquee-${reverse ? "r" : "f"}`} css={css} />
       <div className="hh-brand-marquee">
         <div className="hh-brand-track">
-          {doubled.map((src, i) => <img key={i} className="hh-brand-item" src={src} alt="Brand" />)}
+          {doubled.map((src, i) => <img key={i} className="hh-brand-item" src={src} alt="Brand"  onError={(e) => onImgError(e, "fallback")} />)}
         </div>
       </div>
     </>

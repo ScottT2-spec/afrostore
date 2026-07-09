@@ -392,7 +392,7 @@ export function KidsCategoryCards({ categories, sectionTitle, marginBottom = "60
         {categories.map((c, i) => (
           <div key={i} className="kcc-card">
             <div className="kcc-img-wrap">
-              <img src={c.image} alt={c.name} className="kcc-img" loading="lazy" />
+              <img src={c.image} alt={c.name} className="kcc-img" loading="lazy"  onError={(e) => onImgError(e, c.name)} />
               <Link href={fixLink(c.link, c.name)} className="kcc-link" aria-label={c.name} />
             </div>
             <h3 className="kcc-name"><Link href={fixLink(c.link, c.name)}>{c.name}</Link></h3>
@@ -559,7 +559,7 @@ export function KidsProductGrid({ products: propProducts, columns = 4, showCateg
                 <Link href={pLink}>
                   <img src={p.image || safeSrc(null, p.name)} alt={p.name} className="kpg-img kpg-main-img" loading="lazy" onError={(e) => onImgError(e, p.name)} />
                   {showHoverImage && p.hoverImage && (
-                    <img src={p.hoverImage} alt={p.name} className="kpg-hover-img" loading="lazy" />
+                    <img src={p.hoverImage} alt={p.name} className="kpg-hover-img" loading="lazy"  onError={(e) => onImgError(e, p.name)} />
                   )}
                 </Link>
                 {p.badge && <span className={`kpg-badge ${badgeClass}`}>{p.badge}</span>}
@@ -667,13 +667,13 @@ export function KidsBundlePromo({ subtitle = "Buy bundle and get a 25% discount"
           <h2 className="kbp-title">{title}</h2>
           {description && <p className="kbp-desc">{description}</p>}
           <Link href={fixLink(buttonLink)} className="kbp-btn">
-            <img src={`${IMG_BASE}/bundle.svg`} alt="" className="kbp-btn-icon" />
+            <img src={`${IMG_BASE}/bundle.svg`} alt="" className="kbp-btn-icon"  onError={(e) => onImgError(e, "fallback")} />
             {buttonText}
           </Link>
         </div>
         <div className="kbp-images">
           {productImages.map((img, i) => (
-            <img key={i} src={img} alt={`Bundle product ${i + 1}`} className="kbp-product-img" loading="lazy" />
+            <img key={i} src={img} alt={`Bundle product ${i + 1}`} className="kbp-product-img" loading="lazy"  onError={(e) => onImgError(e, `Bundle product ${i + 1)} />
           ))}
         </div>
       </div>
@@ -713,7 +713,7 @@ export function KidsBlogPosts({ posts: propPosts, columns = 3, sectionTitle, mar
     return storeCtx.blogs.slice(0, columns * 2).map(b => {
       const d = b.publishedAt ? new Date(b.publishedAt) : new Date(b.createdAt);
       return {
-        image: b.coverImage || "",
+        image: b.coverImage || safeSrc(null, b.title),
         title: b.title,
         excerpt: b.excerpt || "",
         date: { day: d.getDate().toString().padStart(2, "0"), month: d.toLocaleString("en-US", { month: "short" }) },
@@ -773,7 +773,7 @@ export function KidsBlogPosts({ posts: propPosts, columns = 3, sectionTitle, mar
         {posts.map((p, i) => (
           <article key={i} className="kbp2-card">
             <div className="kbp2-img-wrap">
-              <img src={p.image} alt={p.title} className="kbp2-img" loading="lazy" />
+              <img src={p.image} alt={p.title} className="kbp2-img" loading="lazy"  onError={(e) => onImgError(e, p.title)} />
               <div className="kbp2-date-badge">
                 <span className="kbp2-date-day">{p.date.day}</span>
                 <span className="kbp2-date-month">{p.date.month}</span>
@@ -786,7 +786,7 @@ export function KidsBlogPosts({ posts: propPosts, columns = 3, sectionTitle, mar
               </div>
               <h3 className="kbp2-title"><Link href={p.link}>{p.title}</Link></h3>
               <div className="kbp2-meta">
-                {p.author.avatar && <img src={p.author.avatar} alt={p.author.name} className="kbp2-avatar" />}
+                {p.author.avatar && <img src={p.author.avatar} alt={p.author.name} className="kbp2-avatar"  onError={(e) => onImgError(e, p.author.name)} />}
                 <span>By <strong>{p.author.name}</strong></span>
                 {p.commentCount !== undefined && <span>💬 {p.commentCount}</span>}
               </div>
@@ -846,7 +846,7 @@ export function KidsInstagram({ items, sectionTitle, marginBottom = "60px" }: Ki
       <div className="ki-grid">
         {items.map((item, i) => (
           <div key={i} className="ki-item">
-            <img src={item.image} alt={`Instagram ${i + 1}`} className="ki-img" loading="lazy" />
+            <img src={item.image} alt={`Instagram ${i + 1}`} className="ki-img" loading="lazy"  onError={(e) => onImgError(e, `Instagram ${i + 1)} />
             <div className="ki-overlay">
               <span className="ki-stat">❤ {item.likes.toLocaleString()}</span>
               <span className="ki-stat">💬 {item.comments}</span>

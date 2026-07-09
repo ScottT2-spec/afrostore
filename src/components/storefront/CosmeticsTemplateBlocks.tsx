@@ -230,7 +230,7 @@ export function CosmeticsHeroSlider({ slides, autoplaySpeed = 5000, minHeight = 
           <div key={i} className={`ch-slide ${i === current ? "ch-active" : ""}`}>
             <div className="ch-slide-bg" style={{ backgroundImage: `url(${slide.backgroundImage})` }} />
             {slide.foregroundImage && (
-              <img src={slide.foregroundImage} alt="" className="ch-fg-img" />
+              <img src={slide.foregroundImage} alt="" className="ch-fg-img"  onError={(e) => onImgError(e, "fallback")} />
             )}
             <div className="ch-slide-content">
               <div style={{ ...containerStyle, textAlign: align as React.CSSProperties["textAlign"] }}>
@@ -336,7 +336,7 @@ export function CosmeticsPromoBanners({ banners }: CosmeticsPromoBannersProps) {
         {banners.map((b, i) => (
           <div key={i} className="cp-banner">
             <div className="cp-banner-img-wrap">
-              <img src={b.image} alt={b.title} className="cp-banner-img" loading="lazy" />
+              <img src={b.image} alt={b.title} className="cp-banner-img" loading="lazy"  onError={(e) => onImgError(e, b.title)} />
             </div>
             <div className="cp-banner-overlay">
               <h4 className="cp-banner-title">{b.title}</h4>
@@ -575,7 +575,7 @@ export function CosmeticsProductGrid({ products: propProducts, columns = 4, show
                 <Link href={productLink}>
                   <img src={p.image || safeSrc(null, p.name)} alt={p.name} className="cpg-img cpg-main-img" loading="lazy" onError={(e) => onImgError(e, p.name)} />
                   {showHoverImage && p.hoverImage && (
-                    <img src={p.hoverImage} alt={p.name} className="cpg-hover-img" loading="lazy" />
+                    <img src={p.hoverImage} alt={p.name} className="cpg-hover-img" loading="lazy"  onError={(e) => onImgError(e, p.name)} />
                   )}
                 </Link>
                 {p.badge && <span className="cpg-badge">{p.badge}</span>}
@@ -681,7 +681,7 @@ export function CosmeticsCategoryCards({ categories, sectionTitle, marginBottom 
       <div className="ccc-grid">
         {categories.map((c, i) => (
           <div key={i} className={`ccc-card ${i < 3 ? "ccc-card-tall" : "ccc-card-short"}`}>
-            <img src={c.image} alt={c.name} className="ccc-img" loading="lazy" />
+            <img src={c.image} alt={c.name} className="ccc-img" loading="lazy"  onError={(e) => onImgError(e, c.name)} />
             <div className="ccc-overlay">
               <h3 className="ccc-name">{c.name}</h3>
               {c.productCount !== undefined && (
@@ -782,7 +782,7 @@ export function CosmeticsDiscovery({ image, title, description, features, button
       <ScopedStyles id="discovery" css={scopedCss} />
       <div className="cd-grid">
         <div className={`cd-img-col cd-animate ${inView ? "cd-visible" : ""}`}>
-          <img src={image} alt="Discovery" className="cd-img" loading="lazy" />
+          <img src={image} alt="Discovery" className="cd-img" loading="lazy"  onError={(e) => onImgError(e, "fallback")} />
         </div>
         <div className={`cd-content-col cd-animate ${inView ? "cd-visible" : ""}`} style={{ transitionDelay: "0.2s" }}>
           <h3 className="cd-title">{title}</h3>
@@ -791,7 +791,7 @@ export function CosmeticsDiscovery({ image, title, description, features, button
             {features.map((f, i) => (
               <div key={i} className="cd-feature">
                 <div className="cd-feature-icon">
-                  <img src={f.icon} alt={f.titleLine1} />
+                  <img src={f.icon} alt={f.titleLine1}  onError={(e) => onImgError(e, f.titleLine1)} />
                 </div>
                 <div className="cd-feature-title">{f.titleLine1}<br />{f.titleLine2}</div>
               </div>
@@ -933,7 +933,7 @@ export function CosmeticsCountdownBanner({ title, description, image, targetDate
           </div>
         </div>
         <div className="ccb-img-col">
-          <img src={image} alt="Promo" className="ccb-img" loading="lazy" />
+          <img src={image} alt="Promo" className="ccb-img" loading="lazy"  onError={(e) => onImgError(e, "fallback")} />
         </div>
       </div>
     </div>
@@ -997,7 +997,7 @@ export function CosmeticsInfoBoxes({ sectionTitle, boxes, marginBottom = "60px" 
         {boxes.map((box, i) => (
           <div key={i} className={`cib-card cib-animate ${inView ? "cib-visible" : ""}`} style={{ transitionDelay: `${i * 0.15}s` }}>
             <div className="cib-img-wrap">
-              <img src={box.image} alt={box.title} className="cib-img" loading="lazy" />
+              <img src={box.image} alt={box.title} className="cib-img" loading="lazy"  onError={(e) => onImgError(e, box.title)} />
             </div>
             <div className="cib-number">{box.number}</div>
             <h4 className="cib-title">{box.title}</h4>
@@ -1113,7 +1113,7 @@ export function CosmeticsBlogPosts({ posts: propPosts, columns = 2, sectionTitle
         {posts.map((p, i) => (
           <article key={i} className="cbp-card">
             <div className="cbp-img-wrap">
-              <img src={p.image} alt={p.title} className="cbp-img" loading="lazy" />
+              <img src={p.image} alt={p.title} className="cbp-img" loading="lazy"  onError={(e) => onImgError(e, p.title)} />
               <div className="cbp-date-badge">
                 <span className="cbp-date-day">{p.date.day}</span>
                 <span className="cbp-date-month">{p.date.month}</span>
@@ -1128,7 +1128,7 @@ export function CosmeticsBlogPosts({ posts: propPosts, columns = 2, sectionTitle
               </div>
               <h3 className="cbp-title"><Link href={p.link}>{p.title}</Link></h3>
               <div className="cbp-meta">
-                {p.author.avatar && <img src={p.author.avatar} alt={p.author.name} className="cbp-meta-avatar" />}
+                {p.author.avatar && <img src={p.author.avatar} alt={p.author.name} className="cbp-meta-avatar"  onError={(e) => onImgError(e, p.author.name)} />}
                 <span>Posted by <strong>{p.author.name}</strong></span>
                 {p.commentCount !== undefined && <span>💬 {p.commentCount}</span>}
               </div>
@@ -1186,7 +1186,7 @@ export function CosmeticsInstagram({ items, marginBottom = "0px" }: CosmeticsIns
       <div className="ci-grid">
         {items.map((item, i) => (
           <div key={i} className="ci-item">
-            <img src={item.image} alt={`Instagram ${i + 1}`} className="ci-img" loading="lazy" />
+            <img src={item.image} alt={`Instagram ${i + 1}`} className="ci-img" loading="lazy"  onError={(e) => onImgError(e, `Instagram ${i + 1)} />
             <div className="ci-overlay">
               <span className="ci-stat">❤ {item.likes.toLocaleString()}</span>
               <span className="ci-stat">💬 {item.comments}</span>

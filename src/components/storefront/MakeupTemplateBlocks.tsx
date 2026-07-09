@@ -321,7 +321,7 @@ export function MakeupCategorySidebar({ categories, marginBottom = "80px" }: Mak
       <ul className="mcs-list">
         {categories.map((cat, i) => (
           <li key={i} className="mcs-item">
-            <img src={cat.icon} alt={cat.name} className="mcs-icon" loading="lazy" />
+            <img src={cat.icon} alt={cat.name} className="mcs-icon" loading="lazy"  onError={(e) => onImgError(e, cat.name)} />
             <Link href={fixLink(cat.link, cat.name)} className="mcs-link">{cat.name}</Link>
           </li>
         ))}
@@ -542,7 +542,7 @@ export function MakeupProductGrid({ products: propProducts, columns = 4, showCat
                 <Link href={productLink}>
                   <img src={p.image || safeSrc(null, p.name)} alt={p.name} className="mpg-img mpg-main-img" loading="lazy" onError={(e) => onImgError(e, p.name)} />
                   {showHoverImage && p.hoverImage && (
-                    <img src={p.hoverImage} alt={p.name} className="mpg-hover-img" loading="lazy" />
+                    <img src={p.hoverImage} alt={p.name} className="mpg-hover-img" loading="lazy"  onError={(e) => onImgError(e, p.name)} />
                   )}
                 </Link>
                 {p.badge && <span className="mpg-badge">{p.badge}</span>}
@@ -633,7 +633,7 @@ export function MakeupProductTypeCards({ cards, sectionTitle, marginBottom = "80
       <div className="mpt-grid">
         {cards.map((c, i) => (
           <div key={i} className="mpt-card">
-            <img src={c.image} alt={c.name} className="mpt-img" loading="lazy" />
+            <img src={c.image} alt={c.name} className="mpt-img" loading="lazy"  onError={(e) => onImgError(e, c.name)} />
             <div className="mpt-overlay">
               <h3 className="mpt-name">{c.name}</h3>
               {c.productCount !== undefined && <span className="mpt-count">{c.productCount} products</span>}
@@ -771,9 +771,9 @@ export function MakeupBeforeAfter({ title, description, beforeImage, afterImage,
             onMouseDown={() => { isDragging.current = true; }}
             onTouchStart={() => { isDragging.current = true; }}
           >
-            <img src={afterImage} alt="After" className="mba-after-img" />
+            <img src={afterImage} alt="After" className="mba-after-img"  onError={(e) => onImgError(e, "fallback")} />
             <div className="mba-before-wrap" style={{ width: `${position}%` }}>
-              <img src={beforeImage} alt="Before" className="mba-before-img" />
+              <img src={beforeImage} alt="Before" className="mba-before-img"  onError={(e) => onImgError(e, "fallback")} />
             </div>
             <div className="mba-handle" style={{ left: `${position}%` }}>
               <div className="mba-handle-circle">⟷</div>
@@ -922,7 +922,7 @@ export function MakeupVideoBlog({ videos, sectionTitle, marginBottom = "80px" }:
       <div className="mvb-grid">
         {videos.map((v, i) => (
           <div key={i} className="mvb-item" onClick={() => setActiveVideo(v.videoUrl)}>
-            <img src={v.thumbnail} alt={`Video ${i + 1}`} className="mvb-img" loading="lazy" />
+            <img src={v.thumbnail} alt={`Video ${i + 1}`} className="mvb-img" loading="lazy"  onError={(e) => onImgError(e, `Video ${i + 1)} />
             <div className="mvb-play">
               <button className="mvb-play-btn" aria-label="Play video">▶</button>
             </div>
@@ -969,7 +969,7 @@ export function MakeupBlogPosts({ posts: propPosts, sectionTitle, marginBottom =
       const pubDate = b.publishedAt ? new Date(b.publishedAt) : new Date(b.createdAt);
       const formatted = pubDate.toLocaleDateString("en-US", { day: "2-digit", month: "short", year: "numeric" });
       return {
-        image: b.coverImage || "",
+        image: b.coverImage || safeSrc(null, b.title),
         title: b.title,
         date: formatted,
         link: `/store/${storeCtx.storeSlug}/blog/${b.slug}`,
@@ -1002,7 +1002,7 @@ export function MakeupBlogPosts({ posts: propPosts, sectionTitle, marginBottom =
       {sectionTitle && <MakeupSectionTitle title={sectionTitle.title} align="left" marginBottom="15px" />}
       {posts.map((p, i) => (
         <div key={i} className="mblg-item">
-          {p.image && <img src={p.image} alt={p.title} className="mblg-thumb" loading="lazy" />}
+          {p.image && <img src={p.image} alt={p.title} className="mblg-thumb" loading="lazy"  onError={(e) => onImgError(e, p.title)} />}
           <div className="mblg-content">
             <h3 className="mblg-title"><Link href={p.link}>{p.title}</Link></h3>
             <div className="mblg-meta">
@@ -1061,7 +1061,7 @@ export function MakeupBrandsCarousel({ brands, marginBottom = "80px" }: MakeupBr
         {[...brands, ...brands].map((b, i) => (
           <div key={i} className="mbr-item">
             <Link href={resolveStoreLink(b.link, storeCtx?.storeSlug)} className="mbr-link" title={b.name}>
-              <img src={b.logo} alt={b.name} className="mbr-logo" loading="lazy" />
+              <img src={b.logo} alt={b.name} className="mbr-logo" loading="lazy"  onError={(e) => onImgError(e, b.name)} />
             </Link>
           </div>
         ))}

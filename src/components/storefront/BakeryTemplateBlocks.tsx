@@ -216,7 +216,7 @@ export function BakeryHeroSlider({ slides, autoplaySpeed = 5000 }: BakeryHeroSli
                 <Link href={fixLink(slide.buttonLink)} className="bk-slide-btn">{slide.buttonText}</Link>
               </div>
               <div className="bk-slide-img">
-                <img src={slide.productImage} alt={slide.titleLine1} />
+                <img src={slide.productImage} alt={slide.titleLine1}  onError={(e) => onImgError(e, slide.titleLine1)} />
               </div>
             </div>
           </div>
@@ -305,7 +305,7 @@ export function BakeryCategoryInfoBoxes({ sectionTitle = "Our Fine Home-Made Cho
       <div className="bk-catbox-grid">
         {boxes.map((box, i) => (
           <div key={i} className="bk-catbox">
-            <div className="bk-catbox-icon"><img src={box.icon} alt={box.title} /></div>
+            <div className="bk-catbox-icon"><img src={box.icon} alt={box.title}  onError={(e) => onImgError(e, box.title)} /></div>
             <h4 className="bk-catbox-title">{box.title}</h4>
             <p className="bk-catbox-desc">{box.description}</p>
             {box.buttonText && <Link href={resolveStoreLink(box.buttonLink || "#", storeCtx?.storeSlug)} className="bk-catbox-btn">{box.buttonText} →</Link>}
@@ -355,7 +355,7 @@ export function BakeryHandmade({
     <div style={containerStyle}>
       <ScopedStyles id="handmade" css={css} />
       <div className="bk-handmade">
-        <div className="bk-handmade-img"><img src={image} alt="Handmade Cakes" /></div>
+        <div className="bk-handmade-img"><img src={image} alt="Handmade Cakes"  onError={(e) => onImgError(e, "fallback")} /></div>
         <div className="bk-handmade-content">
           <div className="bk-handmade-subtitle">{subtitle}</div>
           <h4 className="bk-handmade-title">{title}</h4>
@@ -504,12 +504,12 @@ export function BakeryProcess({
       <ScopedStyles id="process" css={css} />
       <BakerySectionTitle subtitle={sectionSubtitle} title={sectionTitle} />
       <div className="bk-process">
-        <div className="bk-process-img"><img src={image} alt="Donuts" /></div>
+        <div className="bk-process-img"><img src={image} alt="Donuts"  onError={(e) => onImgError(e, "fallback")} /></div>
         <div className="bk-process-content">
           <div className="bk-process-grid">
             {items.map((step, i) => (
               <div key={i} className="bk-process-step">
-                <img className="bk-process-icon" src={step.icon} alt={step.title} />
+                <img className="bk-process-icon" src={step.icon} alt={step.title}  onError={(e) => onImgError(e, step.title)} />
                 <h4 className="bk-process-step-title">{step.title}</h4>
                 <p className="bk-process-step-desc">{step.description}</p>
                 <Link href={resolveStoreLink("#", storeCtx?.storeSlug)} className="bk-process-step-link">Read More →</Link>
@@ -573,7 +573,7 @@ export function BakeryBlogPosts({ posts, columns = 4, sectionTitle = "Our New Ar
         {items.map((post, i) => (
           <div key={i} className="bk-blog-card">
             <div className="bk-blog-img-wrap">
-              <img className="bk-blog-img" src={post.image} alt={post.title} />
+              <img className="bk-blog-img" src={post.image} alt={post.title}  onError={(e) => onImgError(e, post.title)} />
             </div>
             <div className="bk-blog-content">
               <div className="bk-blog-date">{post.date}</div>

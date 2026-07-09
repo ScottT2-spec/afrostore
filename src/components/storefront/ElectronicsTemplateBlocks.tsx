@@ -362,7 +362,7 @@ export function ElectronicsPromoBanners({ banners }: ElectronicsPromoBannersProp
             const scheme = b.colorScheme || "dark";
             return (
               <div key={i} className={`epb-card epb-card-${scheme}`}>
-                {b.image && <img src={b.image} alt={b.title} className="epb-img" loading="lazy" />}
+                {b.image && <img src={b.image} alt={b.title} className="epb-img" loading="lazy"  onError={(e) => onImgError(e, b.title)} />}
                 <div className="epb-content">
                   <div className={`epb-subtitle epb-subtitle-${scheme}`}>{b.subtitle}</div>
                   <h4 className={`epb-title epb-title-${scheme}`}>{b.title}</h4>
@@ -621,7 +621,7 @@ export function ElectronicsBannerGrid({ banners }: ElectronicsBannerGridProps) {
             const scheme = b.colorScheme || "dark";
             return (
               <div key={i} className={`ebg-item ebg-item-${i}`}>
-                <img src={b.image} alt={b.title} className="ebg-img" loading="lazy" />
+                <img src={b.image} alt={b.title} className="ebg-img" loading="lazy"  onError={(e) => onImgError(e, b.title)} />
                 <div className={`ebg-overlay ebg-overlay-${scheme}`}>
                   <div className={`ebg-sub ebg-sub-${scheme}`}>{b.subtitle}</div>
                   <h4 className={`ebg-title-text ebg-title-${scheme}`}>{b.title}</h4>
@@ -868,7 +868,7 @@ export function ElectronicsSideBanner({
         <div className="esb-layout">
           <div className="esb-sidebar">
             <div className="esb-banner">
-              <img src={bannerImage} alt={bannerTitle} className="esb-banner-img" loading="lazy" />
+              <img src={bannerImage} alt={bannerTitle} className="esb-banner-img" loading="lazy"  onError={(e) => onImgError(e, bannerTitle)} />
               <div className="esb-banner-content">
                 <div className="esb-banner-sub">{bannerSubtitle}</div>
                 <h4 className="esb-banner-title">{bannerTitle}</h4>
@@ -998,7 +998,7 @@ export function ElectronicsGamingCTA({
             )}
           </div>
         </div>
-        {productImage && <img src={productImage} alt={title} className="egc-product-img" />}
+        {productImage && <img src={productImage} alt={title} className="egc-product-img"  onError={(e) => onImgError(e, title)} />}
       </div>
     </div>
   );
@@ -1097,7 +1097,7 @@ export function ElectronicsBlogPosts({ sectionTitle = "INNOVATIVE GADGETS", post
           {displayPosts.map((p, i) => (
             <article key={i} className="ebp-card">
               <div className="ebp-img-wrap">
-                <img src={p.image} alt={p.title} className="ebp-img" loading="lazy" />
+                <img src={p.image} alt={p.title} className="ebp-img" loading="lazy"  onError={(e) => onImgError(e, p.title)} />
                 <div className="ebp-date-badge">
                   <span className="ebp-date-day">{p.date.day}</span>
                   <span className="ebp-date-month">{p.date.month}</span>
@@ -1198,7 +1198,7 @@ export function ElectronicsPartners({
               <iframe src={embedUrl} allowFullScreen allow="autoplay" title="Partner video" />
             ) : (
               <>
-                {thumbnail && <img src={thumbnail} alt="Video thumbnail" className="epr-video-thumb" />}
+                {thumbnail && <img src={thumbnail} alt="Video thumbnail" className="epr-video-thumb"  onError={(e) => onImgError(e, "fallback")} />}
                 <button className="epr-play-btn" onClick={() => setPlaying(true)} aria-label="Play video">▶</button>
               </>
             )}
@@ -1208,10 +1208,10 @@ export function ElectronicsPartners({
               <div key={i} className="epr-logo">
                 {logo.linkUrl ? (
                   <a href={logo.linkUrl} target="_blank" rel="noopener noreferrer" aria-label={logo.name}>
-                    <img src={logo.logoUrl} alt={logo.name} />
+                    <img src={logo.logoUrl} alt={logo.name}  onError={(e) => onImgError(e, logo.name)} />
                   </a>
                 ) : (
-                  <img src={logo.logoUrl} alt={logo.name} />
+                  <img src={logo.logoUrl} alt={logo.name}  onError={(e) => onImgError(e, logo.name)} />
                 )}
               </div>
             ))}

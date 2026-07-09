@@ -232,7 +232,7 @@ export function PerfumesHeroSlider({ slides, autoplaySpeed = 6000, minHeight = "
           <div className="ph-slide-content">
             {i === current && (
               <>
-                <img src={slide.bottleImage} alt="" className="ph-bottle ph-anim-in" style={{ animationDelay: "0.15s" }} />
+                <img src={slide.bottleImage} alt="" className="ph-bottle ph-anim-in" style={{ animationDelay: "0.15s" }}  onError={(e) => onImgError(e, "fallback")} />
                 <h2 className="ph-title ph-anim-in" style={{ animationDelay: "0.25s" }}>{slide.title}</h2>
                 <div className="ph-anim-in" style={{ animationDelay: "0.35s" }}>
                   <Link href={fixLink(slide.buttonLink)} className={slide.buttonStyle === "black" ? "ph-btn-black" : "ph-btn-primary"}>{slide.buttonText}</Link>
@@ -437,7 +437,7 @@ export function PerfumesProductGrid({ products: propProducts, columns = 3, secti
               <div className="ppg-thumb">
                 <Link href={pLink}>
                   <img src={p.image || safeSrc(null, p.name)} alt={p.name} className="ppg-img ppg-main-img" loading="lazy" onError={(e) => onImgError(e, p.name)} />
-                  {p.hoverImage && <img src={p.hoverImage} alt={p.name} className="ppg-hover-img" loading="lazy" />}
+                  {p.hoverImage && <img src={p.hoverImage} alt={p.name} className="ppg-hover-img" loading="lazy"  onError={(e) => onImgError(e, p.name)} />}
                 </Link>
                 <div className="ppg-info">
                   <h3 className="ppg-name"><Link href={pLink}>{p.name}</Link></h3>
@@ -558,7 +558,7 @@ export function PerfumesMarquee({ items, speed = "45s", marginBottom = "120px" }
           <span key={i}>
             <span className="pm-item">{text}</span>
             <span className="pm-sep" style={{ display: "inline-block", verticalAlign: "middle", margin: "0 15px" }}>
-              <img src={sepImg} alt="" />
+              <img src={sepImg} alt=""  onError={(e) => onImgError(e, "fallback")} />
             </span>
           </span>
         ))}
@@ -803,7 +803,7 @@ export function PerfumesCollectionBanners({ banners, sectionTitle, marginBottom 
       <div className="pcb-grid">
         {banners.map((b, i) => (
           <div key={i} className={`pcb-card pcb-animate ${inView ? "pcb-visible" : ""}`} style={{ transitionDelay: `${i * 0.15}s` }}>
-            <img src={b.image} alt={b.title} className="pcb-bg-img" loading="lazy" />
+            <img src={b.image} alt={b.title} className="pcb-bg-img" loading="lazy"  onError={(e) => onImgError(e, b.title)} />
             <div className="pcb-overlay" />
             <div className="pcb-content">
               <h3 className="pcb-title">{b.title}</h3>
@@ -847,7 +847,7 @@ export function PerfumesBlogArticles({ posts: propPosts, sectionTitle = "Journal
     return storeCtx.blogs.slice(0, columns).map(b => {
       const d = b.publishedAt ? new Date(b.publishedAt) : new Date(b.createdAt);
       return {
-        image: b.coverImage || "", title: b.title, excerpt: b.excerpt || "",
+        image: b.coverImage || safeSrc(null, b.title), title: b.title, excerpt: b.excerpt || "",
         date: d.toLocaleDateString("en-US", { day: "2-digit", month: "short", year: "numeric" }),
         categories: b.category ? [b.category] : [],
         link: `/store/${storeCtx.storeSlug}/blog/${b.slug}`,
@@ -897,7 +897,7 @@ export function PerfumesBlogArticles({ posts: propPosts, sectionTitle = "Journal
         {posts.map((p, i) => (
           <article key={i} className="pba-card">
             <div className="pba-img-wrap">
-              <img src={p.image} alt={p.title} className="pba-img" loading="lazy" />
+              <img src={p.image} alt={p.title} className="pba-img" loading="lazy"  onError={(e) => onImgError(e, p.title)} />
               <Link href={resolveStoreLink(p.link, storeCtx?.storeSlug)} className="pba-link" aria-label={p.title} />
             </div>
             <div className="pba-cats">
@@ -987,7 +987,7 @@ export function PerfumesInstagram({ handle = "@xtemos.studio", handleLink = "htt
             {items.map((item, i) => (
               <div key={i} className="pi-item">
                 <a href={item.link} className="pi-link" target="_blank" rel="noopener noreferrer" aria-label={`Instagram ${i + 1}`}>
-                  <img src={item.image} alt="" className="pi-img" loading="lazy" />
+                  <img src={item.image} alt="" className="pi-img" loading="lazy"  onError={(e) => onImgError(e, "fallback")} />
                 </a>
               </div>
             ))}

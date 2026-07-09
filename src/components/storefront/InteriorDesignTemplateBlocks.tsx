@@ -187,9 +187,9 @@ export function InteriorHeroSlider({ slides, autoplaySpeed = 5000 }: InteriorHer
               <Link href={fixLink(slide.buttonLink)} className="id-slide-btn">{slide.buttonText}</Link>
             </div>
             <div className="id-slide-img">
-              <img src={slide.image} alt={slide.titleLine1} />
+              <img src={slide.image} alt={slide.titleLine1}  onError={(e) => onImgError(e, slide.titleLine1)} />
               {slide.sideImage && (
-                <div className="id-slide-side"><img src={slide.sideImage} alt="Featured" /></div>
+                <div className="id-slide-side"><img src={slide.sideImage} alt="Featured"  onError={(e) => onImgError(e, "fallback")} /></div>
               )}
             </div>
           </div>
@@ -276,7 +276,7 @@ export function InteriorCategoryGrid({ sectionTitle = "TOP CATEGORIES", categori
           {items.map((cat, i) => (
             <div key={i} className="id-cat">
               <div className="id-cat-img-wrap">
-                <img className="id-cat-img" src={cat.image} alt={cat.name} />
+                <img className="id-cat-img" src={cat.image} alt={cat.name}  onError={(e) => onImgError(e, cat.name)} />
               </div>
               <span className="id-cat-name">{cat.name}</span>
             </div>
@@ -418,7 +418,7 @@ export function InteriorInfoBoxes({ items }: InteriorInfoBoxesProps) {
         <div className="id-infobox-grid">
           {boxes.map((box, i) => (
             <div key={i} className="id-infobox">
-              <div className="id-infobox-icon"><img src={box.icon} alt={box.title} /></div>
+              <div className="id-infobox-icon"><img src={box.icon} alt={box.title}  onError={(e) => onImgError(e, box.title)} /></div>
               <div>
                 <h4 className="id-infobox-title">{box.title}</h4>
                 <p className="id-infobox-desc">{box.description}</p>
@@ -508,7 +508,7 @@ export function InteriorPromoBanners({ banners, variant = "garden" }: InteriorPr
       <div className="id-banners">
         {items.map((b, i) => (
           <div key={i} className="id-banner">
-            <img className="id-banner-img" src={b.image} alt={b.title} />
+            <img className="id-banner-img" src={b.image} alt={b.title}  onError={(e) => onImgError(e, b.title)} />
             <div className="id-banner-content">
               {b.subtitle && <div className="id-banner-sub">{b.subtitle}</div>}
               <h4 className="id-banner-title">{b.title}</h4>
@@ -616,7 +616,7 @@ export function InteriorBlogPosts({ posts, columns = 4, sectionTitle = "OUR BLOG
           {items.map((post, i) => (
             <div key={i} className="id-blog-card">
               <div className="id-blog-img-wrap">
-                <img className="id-blog-img" src={post.image} alt={post.title} />
+                <img className="id-blog-img" src={post.image} alt={post.title}  onError={(e) => onImgError(e, post.title)} />
               </div>
               <div className="id-blog-content">
                 {post.date && <div className="id-blog-date">{post.date}</div>}
@@ -670,7 +670,7 @@ export function InteriorBrandsBar({ brands }: InteriorBrandsBarProps) {
         <div className="id-brands-grid">
           {items.map((brand, i) => (
             <div key={i} className="id-brand">
-              <img src={brand.logo} alt={brand.name} />
+              <img src={brand.logo} alt={brand.name}  onError={(e) => onImgError(e, brand.name)} />
             </div>
           ))}
         </div>

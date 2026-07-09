@@ -281,7 +281,7 @@ export function FashionPromoBanners({ banners }: FashionPromoBannersProps) {
           return (
             <div key={i} className="fp-banner">
               <div className="fp-banner-img-wrap">
-                <img src={b.image} alt={b.title} className="fp-banner-img" loading="lazy" />
+                <img src={b.image} alt={b.title} className="fp-banner-img" loading="lazy"  onError={(e) => onImgError(e, b.title)} />
               </div>
               <div className="fp-banner-overlay" style={{ justifyContent: justify }}>
                 <div style={{ textAlign: b.textAlign || "center" }}>
@@ -483,7 +483,7 @@ function FashionProductCard({ product: p, productLink, showCategory, showHoverIm
         <Link href={productLink}>
           <img src={displayImage} alt={p.name} className="fpg-img fpg-main-img" loading="lazy" onError={(e) => onImgError(e, p.name)} />
           {showHoverImage && p.hoverImage && !activeColorId && (
-            <img src={p.hoverImage} alt={p.name} className="fpg-hover-img" loading="lazy" />
+            <img src={p.hoverImage} alt={p.name} className="fpg-hover-img" loading="lazy"  onError={(e) => onImgError(e, p.name)} />
           )}
         </Link>
         {p.badge && <span className="fpg-badge">{p.badge}</span>}
@@ -512,7 +512,7 @@ function FashionProductCard({ product: p, productLink, showCategory, showHoverIm
               onMouseLeave={() => { if (c.image && activeColorId === c.id) setActiveColorId(null); }}
             >
               {c.color ? <span className="fpg-swatch-inner" style={{ backgroundColor: c.color }} />
-                : c.image ? <img src={c.image} alt={c.name} className="fpg-swatch-img" />
+                : c.image ? <img src={c.image} alt={c.name} className="fpg-swatch-img"  onError={(e) => onImgError(e, c.name)} />
                 : <span className="fpg-swatch-inner" style={{ background: "linear-gradient(135deg,#ddd 50%,#aaa 50%)" }} />}
             </button>
           ))}
@@ -791,7 +791,7 @@ export function FashionCategoryCards({ categories, columns = 4, sectionTitle, ma
       <div className="fcc-grid">
         {categories.map((c, i) => (
           <div key={i} className="fcc-card">
-            <img src={c.image} alt={c.name} className="fcc-img" loading="lazy" />
+            <img src={c.image} alt={c.name} className="fcc-img" loading="lazy"  onError={(e) => onImgError(e, c.name)} />
             <div className="fcc-overlay">
               <h3 className="fcc-name">{c.name}</h3>
               {c.productCount !== undefined && (
@@ -908,7 +908,7 @@ export function FashionTestimonials({ title = "CUSTOMERS REVIEWS", backgroundIma
           </svg>
         </div>
         <div className="ft-carousel">
-          <img src={t.avatar} alt={t.name} className="ft-avatar" />
+          <img src={t.avatar} alt={t.name} className="ft-avatar"  onError={(e) => onImgError(e, t.name)} />
           <div className="ft-stars">{renderStars(t.rating)}</div>
           <p className="ft-text">{t.text}</p>
           <p className="ft-author">
@@ -1044,7 +1044,7 @@ export function FashionBlogPosts({ posts: propPosts, columns = 2, sectionTitle, 
         {posts.map((p, i) => (
           <article key={i} className="fbp-card">
             <div className="fbp-img-wrap">
-              <img src={p.image} alt={p.title} className="fbp-img" loading="lazy" />
+              <img src={p.image} alt={p.title} className="fbp-img" loading="lazy"  onError={(e) => onImgError(e, p.title)} />
               <div className="fbp-date-badge">
                 <span className="fbp-date-day">{p.date.day}</span>
                 <span className="fbp-date-month">{p.date.month}</span>
@@ -1059,7 +1059,7 @@ export function FashionBlogPosts({ posts: propPosts, columns = 2, sectionTitle, 
               </div>
               <h3 className="fbp-title"><Link href={p.link}>{p.title}</Link></h3>
               <div className="fbp-meta">
-                {p.author.avatar && <img src={p.author.avatar} alt={p.author.name} className="fbp-meta-avatar" />}
+                {p.author.avatar && <img src={p.author.avatar} alt={p.author.name} className="fbp-meta-avatar"  onError={(e) => onImgError(e, p.author.name)} />}
                 <span>Posted by <strong>{p.author.name}</strong></span>
                 {p.commentCount !== undefined && <span>💬 {p.commentCount}</span>}
               </div>
@@ -1377,7 +1377,7 @@ export function FashionInstagram({
       <div className="fi-grid">
         {images.map((img, i) => (
           <a key={i} className="fi-item" href={img.link || instagramUrl} target="_blank" rel="noopener noreferrer">
-            <img src={img.src} alt={img.alt || `Instagram photo ${i + 1}`} loading="lazy" />
+            <img src={img.src} alt={img.alt || `Instagram photo ${i + 1}`} loading="lazy"  onError={(e) => onImgError(e, img.alt || `Instagram photo ${i + 1)} />
             {(img.likes !== undefined || img.comments !== undefined) && (
               <div className="fi-overlay">
                 {img.likes !== undefined && (
@@ -1842,7 +1842,7 @@ export function FashionFooter({
                   src={logoUrl}
                   alt={logoAlt}
                   style={{ maxWidth: "220px", height: "auto" }}
-                />
+                 onError={(e) => onImgError(e, logoAlt)} />
               </Link>
             </div>
           )}
@@ -1898,7 +1898,7 @@ export function FashionFooter({
                       alt={post.title}
                       className="ff-post-thumb"
                       loading="lazy"
-                    />
+                     onError={(e) => onImgError(e, post.title)} />
                   )}
                   <div>
                     <h5 className="ff-post-title">
@@ -1929,7 +1929,7 @@ export function FashionFooter({
               src={paymentIconsUrl}
               alt="Payment methods"
               loading="lazy"
-            />
+             onError={(e) => onImgError(e, "fallback")} />
           </div>
         )}
       </div>

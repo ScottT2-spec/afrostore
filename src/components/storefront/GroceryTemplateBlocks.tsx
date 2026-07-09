@@ -200,7 +200,7 @@ export function GroceryHeroSlider({ slides, autoplaySpeed = 5000 }: GroceryHeroS
               <Link href={fixLink(slide.buttonLink)} className="gc-slide-btn">{slide.buttonText}</Link>
             </div>
             <div className="gc-slide-img">
-              <img src={slide.productImage} alt={slide.titleLine1} />
+              <img src={slide.productImage} alt={slide.titleLine1}  onError={(e) => onImgError(e, slide.titleLine1)} />
             </div>
           </div>
         </div>
@@ -258,7 +258,7 @@ export function GroceryFeaturesBar({ features }: GroceryFeaturesBarProps) {
         <div className="gc-features-grid">
           {items.map((f, i) => (
             <div key={i} className="gc-feature">
-              <div className="gc-feature-icon"><img src={f.icon} alt={f.title} /></div>
+              <div className="gc-feature-icon"><img src={f.icon} alt={f.title}  onError={(e) => onImgError(e, f.title)} /></div>
               <div>
                 <h4 className="gc-feature-title">{f.title}</h4>
                 {f.description && <p className="gc-feature-desc">{f.description}</p>}
@@ -447,7 +447,7 @@ export function GroceryPromoBanners({ banners }: GroceryPromoBannersProps) {
       <div className="gc-banners">
         {items.map((b, i) => (
           <div key={i} className="gc-banner">
-            <img className="gc-banner-img" src={b.image} alt={b.title} />
+            <img className="gc-banner-img" src={b.image} alt={b.title}  onError={(e) => onImgError(e, b.title)} />
             <div className="gc-banner-content">
               <div className="gc-banner-sub">{b.subtitle}</div>
               <h4 className="gc-banner-title">{b.title}</h4>
@@ -503,7 +503,7 @@ export function GroceryCategoryGrid({ sectionTitle = "POPULAR CATEGORIES", categ
       <div className="gc-cats-grid" style={{ gridTemplateColumns: `repeat(${columns}, 1fr)` }}>
         {items.map((cat, i) => (
           <div key={i} className="gc-cat">
-            <img className="gc-cat-img" src={cat.image} alt={cat.name} />
+            <img className="gc-cat-img" src={cat.image} alt={cat.name}  onError={(e) => onImgError(e, cat.name)} />
             <div className="gc-cat-overlay">
               <span className="gc-cat-name">{cat.name}</span>
             </div>
