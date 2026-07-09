@@ -922,7 +922,7 @@ export function MakeupVideoBlog({ videos, sectionTitle, marginBottom = "80px" }:
       <div className="mvb-grid">
         {videos.map((v, i) => (
           <div key={i} className="mvb-item" onClick={() => setActiveVideo(v.videoUrl)}>
-            <img src={v.thumbnail} alt={`Video ${i + 1}`} className="mvb-img" loading="lazy"  onError={(e) => onImgError(e, `Video ${i + 1)} />
+            <img src={v.thumbnail} alt={`Video ${i + 1}`} className="mvb-img" loading="lazy"  onError={(e) => onImgError(e, `Video ${i + 1}`)} />
             <div className="mvb-play">
               <button className="mvb-play-btn" aria-label="Play video">▶</button>
             </div>

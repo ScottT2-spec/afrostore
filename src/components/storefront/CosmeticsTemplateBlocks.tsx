@@ -1186,7 +1186,7 @@ export function CosmeticsInstagram({ items, marginBottom = "0px" }: CosmeticsIns
       <div className="ci-grid">
         {items.map((item, i) => (
           <div key={i} className="ci-item">
-            <img src={item.image} alt={`Instagram ${i + 1}`} className="ci-img" loading="lazy"  onError={(e) => onImgError(e, `Instagram ${i + 1)} />
+            <img src={item.image} alt={`Instagram ${i + 1}`} className="ci-img" loading="lazy"  onError={(e) => onImgError(e, `Instagram ${i + 1}`)} />
             <div className="ci-overlay">
               <span className="ci-stat">❤ {item.likes.toLocaleString()}</span>
               <span className="ci-stat">💬 {item.comments}</span>

@@ -1377,7 +1377,7 @@ export function FashionInstagram({
       <div className="fi-grid">
         {images.map((img, i) => (
           <a key={i} className="fi-item" href={img.link || instagramUrl} target="_blank" rel="noopener noreferrer">
-            <img src={img.src} alt={img.alt || `Instagram photo ${i + 1}`} loading="lazy"  onError={(e) => onImgError(e, img.alt || `Instagram photo ${i + 1)} />
+            <img src={img.src} alt={img.alt || `Instagram photo ${i + 1}`} loading="lazy"  onError={(e) => onImgError(e, img.alt || `Instagram photo ${i + 1}`)} />
             {(img.likes !== undefined || img.comments !== undefined) && (
               <div className="fi-overlay">
                 {img.likes !== undefined && (

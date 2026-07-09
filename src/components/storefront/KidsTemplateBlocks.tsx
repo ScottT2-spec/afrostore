@@ -673,7 +673,7 @@ export function KidsBundlePromo({ subtitle = "Buy bundle and get a 25% discount"
         </div>
         <div className="kbp-images">
           {productImages.map((img, i) => (
-            <img key={i} src={img} alt={`Bundle product ${i + 1}`} className="kbp-product-img" loading="lazy"  onError={(e) => onImgError(e, `Bundle product ${i + 1)} />
+            <img key={i} src={img} alt={`Bundle product ${i + 1}`} className="kbp-product-img" loading="lazy"  onError={(e) => onImgError(e, `Bundle product ${i + 1}`)} />
           ))}
         </div>
       </div>
@@ -846,7 +846,7 @@ export function KidsInstagram({ items, sectionTitle, marginBottom = "60px" }: Ki
       <div className="ki-grid">
         {items.map((item, i) => (
           <div key={i} className="ki-item">
-            <img src={item.image} alt={`Instagram ${i + 1}`} className="ki-img" loading="lazy"  onError={(e) => onImgError(e, `Instagram ${i + 1)} />
+            <img src={item.image} alt={`Instagram ${i + 1}`} className="ki-img" loading="lazy"  onError={(e) => onImgError(e, `Instagram ${i + 1}`)} />
             <div className="ki-overlay">
               <span className="ki-stat">❤ {item.likes.toLocaleString()}</span>
               <span className="ki-stat">💬 {item.comments}</span>
