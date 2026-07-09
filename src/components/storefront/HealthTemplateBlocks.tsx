@@ -2,7 +2,11 @@
 import Link from "next/link";
 import { resolveStoreLink, resolveFooterLink } from "@/lib/template-link-utils";
 import { useState, useEffect, useRef, useCallback, createContext, useContext } from "react";
+<<<<<<< HEAD
 import { safeSrc, onImgError } from "./image-fallback";
+=======
+import { useNewsletterSubscribe } from "@/hooks/useNewsletterSubscribe";
+>>>>>>> 543c35d (fix: wire newsletter forms to API endpoint (CrmContact))
 
 /* ═══════════════════════════════════════════════════════════════
    HEALTH (PILLS & SUPPLEMENTS) TEMPLATE BLOCKS
@@ -716,6 +720,8 @@ export function HealthNewsletter({
   backgroundColor = TOKENS.bgLight,
 }: HealthNewsletterProps) {
   const [email, setEmail] = useState("");
+  const storeCtx = useContext(HealthStoreContext);
+  const { subscribe, status: nlStatus } = useNewsletterSubscribe(storeCtx?.storeSlug || "");
 
   const css = `
     .hh-newsletter { background: ${backgroundColor}; padding: 80px 40px; text-align: center; margin-bottom: 80px; border-radius: ${TOKENS.borderRadius}; }
@@ -736,10 +742,14 @@ export function HealthNewsletter({
       <div className="hh-newsletter">
         <h4 className="hh-nl-title">{title}</h4>
         <p className="hh-nl-sub">{subtitle}</p>
-        <form className="hh-nl-form" onSubmit={(e) => { e.preventDefault(); setEmail(""); }}>
+        {nlStatus === "success" ? (
+          <p style={{ fontFamily: TOKENS.bodyFont, fontSize: "16px", color: TOKENS.primaryColor, marginTop: "20px" }}>Thanks for subscribing! 🎉</p>
+        ) : (
+        <form className="hh-nl-form" onSubmit={(e) => { e.preventDefault(); subscribe(email).then(() => setEmail("")); }}>
           <input className="hh-nl-input" type="email" placeholder="Your email address" value={email} onChange={(e) => setEmail(e.target.value)} required />
-          <button className="hh-nl-btn" type="submit">Subscribe</button>
+          <button className="hh-nl-btn" type="submit" disabled={nlStatus === "loading"}>{nlStatus === "loading" ? "Signing up..." : "Subscribe"}</button>
         </form>
+        )}
       </div>
     </div>
   );

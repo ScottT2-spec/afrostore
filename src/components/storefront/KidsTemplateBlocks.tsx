@@ -3,6 +3,7 @@ import Link from "next/link";
 import { resolveStoreLink, resolveFooterLink } from "@/lib/template-link-utils";
 import { useState, useEffect, useRef, useCallback, createContext, useContext } from "react";
 import { safeSrc, onImgError } from "./image-fallback";
+import { useNewsletterSubscribe } from "@/hooks/useNewsletterSubscribe";
 
 /* ═══════════════════════════════════════════════════════════════
    KIDS TEMPLATE BLOCKS
@@ -867,11 +868,13 @@ export interface KidsNewsletterProps {
 
 export function KidsNewsletter({ title = "Join our mailing list to receive any latest updates and promotions", buttonText = "Subscribe", backgroundColor = "#faf8f5", onSubmit }: KidsNewsletterProps) {
   const [email, setEmail] = useState("");
+  const storeCtx = useContext(KidsStoreContext);
+  const { subscribe, status: nlStatus } = useNewsletterSubscribe(storeCtx?.storeSlug || "");
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    onSubmit?.(email);
-    setEmail("");
+    if (onSubmit) { onSubmit(email); setEmail(""); return; }
+    subscribe(email).then(() => setEmail(""));
   };
 
   const scopedCss = `
@@ -905,10 +908,14 @@ export function KidsNewsletter({ title = "Join our mailing list to receive any l
     <div className="kn-section" style={{ backgroundColor, ...containerStyle }}>
       <ScopedStyles id="newsletter" css={scopedCss} />
       <h3 className="kn-title">{title}</h3>
+      {nlStatus === "success" ? (
+        <p style={{ fontFamily: TOKENS.bodyFont, fontSize: "16px", color: TOKENS.primaryColor, marginTop: "20px" }}>Thanks for subscribing! 🎉</p>
+      ) : (
       <form className="kn-form" onSubmit={handleSubmit}>
         <input type="email" className="kn-input" placeholder="Your email address" value={email} onChange={e => setEmail(e.target.value)} required />
-        <button type="submit" className="kn-submit">{buttonText}</button>
+        <button type="submit" className="kn-submit" disabled={nlStatus === "loading"}>{nlStatus === "loading" ? "Signing up..." : buttonText}</button>
       </form>
+      )}
     </div>
   );
 }

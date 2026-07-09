@@ -2,7 +2,11 @@
 import Link from "next/link";
 import { resolveStoreLink, resolveFooterLink } from "@/lib/template-link-utils";
 import { useState, useEffect, useRef, useCallback, createContext, useContext } from "react";
+<<<<<<< HEAD
 import { safeSrc, onImgError } from "./image-fallback";
+=======
+import { useNewsletterSubscribe } from "@/hooks/useNewsletterSubscribe";
+>>>>>>> 543c35d (fix: wire newsletter forms to API endpoint (CrmContact))
 
 /* ═══════════════════════════════════════════════════════════════
    COSMETICS TEMPLATE BLOCKS
@@ -1215,11 +1219,13 @@ export function CosmeticsNewsletter({
   onSubmit,
 }: CosmeticsNewsletterProps) {
   const [email, setEmail] = useState("");
+  const storeCtx = useContext(CosmeticsStoreContext);
+  const { subscribe, status: nlStatus } = useNewsletterSubscribe(storeCtx?.storeSlug || "");
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    onSubmit?.(email);
-    setEmail("");
+    if (onSubmit) { onSubmit(email); setEmail(""); return; }
+    subscribe(email).then(() => setEmail(""));
   };
 
   const scopedCss = `
@@ -1275,10 +1281,14 @@ export function CosmeticsNewsletter({
         <div className="cn-subtitle">{subtitle}</div>
         <h3 className="cn-title">{title}</h3>
         <p className="cn-desc">{description}</p>
+        {nlStatus === "success" ? (
+          <p style={{ fontFamily: TOKENS.bodyFont, fontSize: "16px", color: "#fff", marginTop: "20px" }}>Thanks for subscribing! 🎉</p>
+        ) : (
         <form className="cn-form" onSubmit={handleSubmit}>
           <input type="email" className="cn-input" placeholder="Your email address" value={email} onChange={(e) => setEmail(e.target.value)} required />
-          <button type="submit" className="cn-submit">{buttonText}</button>
+          <button type="submit" className="cn-submit" disabled={nlStatus === "loading"}>{nlStatus === "loading" ? "Signing up..." : buttonText}</button>
         </form>
+        )}
       </div>
     </div>
   );

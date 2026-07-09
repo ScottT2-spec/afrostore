@@ -2,7 +2,11 @@
 import Link from "next/link";
 import { resolveStoreLink, resolveFooterLink } from "@/lib/template-link-utils";
 import { useState, useEffect, useRef, createContext, useContext } from "react";
+<<<<<<< HEAD
 import { safeSrc, onImgError } from "./image-fallback";
+=======
+import { useNewsletterSubscribe } from "@/hooks/useNewsletterSubscribe";
+>>>>>>> 543c35d (fix: wire newsletter forms to API endpoint (CrmContact))
 
 /* ═══════════════════════════════════════════════════════════════
    FOOD GROCERY TEMPLATE BLOCKS
@@ -526,7 +530,8 @@ export function GroceryNewsletter({
   backgroundColor = TOKENS.primaryColor,
 }: GroceryNewsletterProps) {
   const [email, setEmail] = useState("");
-  const [submitted, setSubmitted] = useState(false);
+  const storeCtx = useContext(GroceryStoreContext);
+  const { subscribe, status: nlStatus } = useNewsletterSubscribe(storeCtx?.storeSlug || "");
 
   const css = `
     .gc-newsletter { padding: 50px 0; margin-bottom: 60px; }
@@ -552,13 +557,13 @@ export function GroceryNewsletter({
             <h4 className="gc-newsletter-title">{title}</h4>
             <p className="gc-newsletter-desc">{description}</p>
           </div>
-          {!submitted ? (
-            <form className="gc-newsletter-form" onSubmit={(e) => { e.preventDefault(); setSubmitted(true); }}>
-              <input className="gc-newsletter-input" type="email" placeholder="Your email address" value={email} onChange={e => setEmail(e.target.value)} required />
-              <button className="gc-newsletter-btn" type="submit">{buttonText}</button>
-            </form>
-          ) : (
+          {nlStatus === "success" ? (
             <div className="gc-newsletter-success">✓ Thank you for subscribing!</div>
+          ) : (
+            <form className="gc-newsletter-form" onSubmit={(e) => { e.preventDefault(); subscribe(email).then(() => setEmail("")); }}>
+              <input className="gc-newsletter-input" type="email" placeholder="Your email address" value={email} onChange={e => setEmail(e.target.value)} required />
+              <button className="gc-newsletter-btn" type="submit" disabled={nlStatus === "loading"}>{nlStatus === "loading" ? "Signing up..." : buttonText}</button>
+            </form>
           )}
         </div>
       </div>

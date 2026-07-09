@@ -3,6 +3,7 @@ import Link from "next/link";
 import { resolveStoreLink, resolveFooterLink } from "@/lib/template-link-utils";
 import { useState, useEffect, useRef, useCallback, createContext, useContext } from "react";
 import { safeSrc, onImgError } from "./image-fallback";
+import { useNewsletterSubscribe } from "@/hooks/useNewsletterSubscribe";
 
 /* ═══════════════════════════════════════════════════════════════
    PERFUMES TEMPLATE BLOCKS
@@ -1029,6 +1030,8 @@ export function PerfumesFooter({
 }: PerfumesFooterProps) {
   const storeCtx = useContext(PerfumesStoreContext);
   const [email, setEmail] = useState("");
+  const storeCtx = useContext(PerfumesStoreContext);
+  const { subscribe, status: nlStatus } = useNewsletterSubscribe(storeCtx?.storeSlug || "");
   const [openColumns, setOpenColumns] = useState<Set<number>>(new Set());
   const toggleColumn = (idx: number) => {
     setOpenColumns(prev => {
@@ -1172,10 +1175,14 @@ export function PerfumesFooter({
           <div className="pf-col-newsletter">
             <h4 className="pf-col-title">Newsletter</h4>
             <p style={{ margin: "0 0 10px" }}>Subscribe for exclusive fragrances and early access.</p>
-            <form className="pf-newsletter-form" onSubmit={e => { e.preventDefault(); setEmail(""); }}>
+            {nlStatus === "success" ? (
+              <p style={{ fontFamily: TOKENS.bodyFont, fontSize: "14px", color: TOKENS.accentColor, marginTop: "10px" }}>Thanks for subscribing! 🎉</p>
+            ) : (
+            <form className="pf-newsletter-form" onSubmit={e => { e.preventDefault(); subscribe(email).then(() => setEmail("")); }}>
               <input type="email" className="pf-newsletter-input" placeholder="Your email" value={email} onChange={e => setEmail(e.target.value)} required />
-              <button type="submit" className="pf-newsletter-btn">Subscribe</button>
+              <button type="submit" className="pf-newsletter-btn" disabled={nlStatus === "loading"}>{nlStatus === "loading" ? "..." : "Subscribe"}</button>
             </form>
+            )}
           </div>
         )}
       </div>
