@@ -2,6 +2,7 @@
 import { FashionFooter } from "./FashionTemplateBlocks";
 import Link from "next/link";
 import { resolveStoreLink, resolveFooterLink } from "@/lib/template-link-utils";
+import { toggleCompare as toggleCompareItem } from "@/lib/compare-utils";
 import { useState, useEffect, useRef, useCallback, createContext, useContext } from "react";
 import { safeSrc, onImgError } from "./image-fallback";
 
@@ -392,6 +393,7 @@ export interface ElectronicsProductTabsProps {
 
 export function ElectronicsProductTabs({ sectionTitle = "ELECTRONICS", tabs, columns = 4, maxProducts = 8 }: ElectronicsProductTabsProps) {
   const storeCtx = useContext(ElectronicsStoreContext);
+  const [, setCompareState] = useState(false);
   const sym = useCurrencySymbol();
   const [activeTab, setActiveTab] = useState(0);
   const [page, setPage] = useState(0);
@@ -515,7 +517,7 @@ export function ElectronicsProductTabs({ sectionTitle = "ELECTRONICS", tabs, col
                       <div className="ept-actions">
                         <button className="ept-action-btn" title="Quick view" aria-label="Quick view" onClick={() => storeCtx?.onQuickView?.(String(p.id))}>👁</button>
                         <button className="ept-action-btn" title="Wishlist" aria-label="Wishlist" onClick={() => storeCtx?.toggleWishlist?.(String(p.id))} style={storeCtx?.isWishlisted?.(String(p.id)) ? { color: "red" } : undefined}>{storeCtx?.isWishlisted?.(String(p.id)) ? "♥" : "♡"}</button>
-                        <button className="ept-action-btn" title="Compare" aria-label="Compare">⇌</button>
+                        <button className="ept-action-btn" title="Compare" aria-label="Compare" onClick={() => { toggleCompareItem({ id: String(p.id), name: p.name, slug: p.slug, price: p.price, image: p.images?.[0]?.url }, storeCtx?.storeSlug); setCompareState(prev => !prev); }}>⇌</button>
                       </div>
                     </div>
                     <div className="ept-info">

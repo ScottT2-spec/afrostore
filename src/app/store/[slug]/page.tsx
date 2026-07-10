@@ -568,7 +568,7 @@ export default function StorePage() {
                   )}
                 </Link>
                 <Link
-                  href="/checkout"
+                  href={`/store/${slug}/cart`}
                   className="relative p-2 text-surface-600 hover:bg-surface-50 rounded-lg"
                 >
                   <ShoppingCart className="h-5 w-5" />
@@ -684,7 +684,7 @@ export default function StorePage() {
       {/* Cart preview bar */}
       {!isLanding && cartCount > 0 && !selectedProduct && (
         <div className="fixed bottom-0 left-0 right-0 z-40 bg-white border-t border-surface-200 shadow-2xl px-4 sm:px-6 py-3 sm:hidden">
-          <Link href="/checkout" className="btn-primary w-full py-3.5 text-sm">
+          <Link href={`/store/${slug}/cart`} className="btn-primary w-full py-3.5 text-sm">
             <ShoppingCart className="h-4 w-4" />
             View Cart ({cartCount}) — {formatCurrency(cartTotal, currency)}
           </Link>

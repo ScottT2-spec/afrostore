@@ -343,7 +343,7 @@ export default function ShopPage() {
                 <span className="absolute -top-0.5 -right-0.5 h-5 w-5 rounded-full bg-red-500 text-white text-[10px] font-bold flex items-center justify-center">{wishlistCount}</span>
               )}
             </Link>
-            <Link href="/checkout" className="relative p-2 text-surface-600 hover:bg-surface-50 rounded-lg">
+            <Link href={`/store/${slug}/cart`} className="relative p-2 text-surface-600 hover:bg-surface-50 rounded-lg">
               <ShoppingCart className="h-5 w-5" />
               {cartCount > 0 && (
                 <span className="absolute -top-0.5 -right-0.5 h-5 w-5 rounded-full bg-brand-600 text-white text-[10px] font-bold flex items-center justify-center">{cartCount}</span>
@@ -726,7 +726,7 @@ export default function ShopPage() {
       {/* ── Mobile cart bar ── */}
       {cartCount > 0 && (
         <div className="fixed bottom-0 left-0 right-0 z-40 bg-white border-t border-surface-200 shadow-2xl px-4 py-3 sm:hidden">
-          <Link href="/checkout" className="btn-primary w-full py-3.5 text-sm flex items-center justify-center gap-2">
+          <Link href={`/store/${slug}/cart`} className="btn-primary w-full py-3.5 text-sm flex items-center justify-center gap-2">
             <ShoppingCart className="h-4 w-4" />
             View Cart ({cartCount})
           </Link>

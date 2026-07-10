@@ -2,6 +2,7 @@
 import { FashionFooter } from "./FashionTemplateBlocks";
 import Link from "next/link";
 import { resolveStoreLink, resolveFooterLink } from "@/lib/template-link-utils";
+import { toggleCompare as toggleCompareItem } from "@/lib/compare-utils";
 import { useState, useEffect, useRef, useCallback, createContext, useContext } from "react";
 import { safeSrc, onImgError } from "./image-fallback";
 import { useNewsletterSubscribe } from "@/hooks/useNewsletterSubscribe";
@@ -434,6 +435,7 @@ export interface CosmeticsProductGridProps {
 
 export function CosmeticsProductGrid({ products: propProducts, columns = 4, showCategory = true, showHoverImage = true, sectionTitle, marginBottom = "60px", maxProducts = 8, filter, filterTag }: CosmeticsProductGridProps) {
   const storeCtx = useContext(CosmeticsStoreContext);
+  const [, setCompareState] = useState(false);
 
   const products: CosmeticsProduct[] = (() => {
     if (!storeCtx || !storeCtx.products || storeCtx.products.length === 0) return propProducts || [];
@@ -580,7 +582,7 @@ export function CosmeticsProductGrid({ products: propProducts, columns = 4, show
                 </Link>
                 {p.badge && <span className="cpg-badge">{p.badge}</span>}
                 <div className="cpg-actions">
-                  <button className="cpg-action-btn" title="Compare" aria-label="Compare">⇌</button>
+                  <button className="cpg-action-btn" title="Compare" aria-label="Compare" onClick={() => { toggleCompareItem({ id: String(p.id), name: p.name, slug: (p as any).slug || p.name, price: p.price, image: p.image }, storeCtx?.storeSlug); setCompareState(prev => !prev); }}>⇌</button>
                   <button className="cpg-action-btn" title="Quick view" aria-label="Quick view" onClick={() => storeCtx?.onQuickView?.(String(p.id))}>👁</button>
                   <button className="cpg-action-btn" title="Wishlist" aria-label="Wishlist" onClick={() => storeCtx?.toggleWishlist?.(String(p.id))} style={storeCtx?.isWishlisted?.(String(p.id)) ? { color: "red" } : undefined}>{storeCtx?.isWishlisted?.(String(p.id)) ? "♥" : "♡"}</button>
                 </div>

@@ -217,7 +217,7 @@ export function FashionHeader({
                 <Link href={`/store/${storeSlug}/wishlist`} className="fsh-icon-btn" aria-label="Wishlist">
                   ♡{wishlistCount > 0 && <span className="fsh-badge">{wishlistCount}</span>}
                 </Link>
-                <Link href="/checkout" className="fsh-icon-btn" aria-label="Cart">
+                <Link href={`/store/${storeSlug}/cart`} className="fsh-icon-btn" aria-label="Cart">
                   🛒{cartCount > 0 && <span className="fsh-badge">{cartCount}</span>}
                 </Link>
               </>
