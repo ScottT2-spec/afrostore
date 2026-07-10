@@ -283,6 +283,7 @@ export default function StorePage() {
   const [mobileMenu, setMobileMenu] = useState(false);
   const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
   const [qty, setQty] = useState(1);
+  const [selectedVariantId, setSelectedVariantId] = useState<string | null>(null);
   const router = useRouter();
   const [searchQuery, setSearchQuery] = useState("");
   const [showSearch, setShowSearch] = useState(false);
@@ -632,7 +633,7 @@ export default function StorePage() {
       {hasHomeContent ? (
         /* Builder blocks Home page — render template blocks */
         <div style={buildPageBackgroundStyle(homePageSettings)}>
-          <TemplateStoreContextProvider templateSlug={data.templateSlug} products={products} blogs={data.blogs || []} currency={currency} storeSlug={slug} socialLinks={socialLinksArray} addToCart={(pid,qty)=>{const x=products.find(p=>p.id===pid);if(x)addToCart(x,qty);}} toggleWishlist={toggleWishlist} isWishlisted={isWishlisted} onQuickView={(pid)=>{const x=products.find(p=>p.id===pid);if(x)setSelectedProduct(x);}}>
+          <TemplateStoreContextProvider templateSlug={data.templateSlug} products={products} blogs={data.blogs || []} currency={currency} storeSlug={slug} socialLinks={socialLinksArray} addToCart={(pid,qty)=>{const x=products.find(p=>p.id===pid);if(x)addToCart(x,qty);}} toggleWishlist={toggleWishlist} isWishlisted={isWishlisted} onQuickView={(pid)=>{const x=products.find(p=>p.id===pid);if(x){setSelectedProduct(x);setSelectedVariantId(null);setQty(1);}}}>
           <RenderBlocks blocks={homeBlocks} storeSlug={slug} products={products} currency={currency} addToCart={(p) => addToCart(p as unknown as Product)} isWishlisted={isWishlisted} toggleWishlist={toggleWishlist} addedToCart={addedToCart} />
           </TemplateStoreContextProvider>
           {!isLanding && products.length > 0 && !homeHasProductGrid && (
@@ -649,7 +650,7 @@ export default function StorePage() {
       ) : templatePreset ? (
         /* Template with editable block preset */
         <div>
-          <TemplateStoreContextProvider templateSlug={data.templateSlug} products={products} blogs={data.blogs || []} currency={currency} storeSlug={slug} socialLinks={socialLinksArray} addToCart={(pid,qty)=>{const x=products.find(p=>p.id===pid);if(x)addToCart(x,qty);}} toggleWishlist={toggleWishlist} isWishlisted={isWishlisted} onQuickView={(pid)=>{const x=products.find(p=>p.id===pid);if(x)setSelectedProduct(x);}}>
+          <TemplateStoreContextProvider templateSlug={data.templateSlug} products={products} blogs={data.blogs || []} currency={currency} storeSlug={slug} socialLinks={socialLinksArray} addToCart={(pid,qty)=>{const x=products.find(p=>p.id===pid);if(x)addToCart(x,qty);}} toggleWishlist={toggleWishlist} isWishlisted={isWishlisted} onQuickView={(pid)=>{const x=products.find(p=>p.id===pid);if(x){setSelectedProduct(x);setSelectedVariantId(null);setQty(1);}}}>
             <RenderTemplateBlocks blocks={templatePreset} />
           </TemplateStoreContextProvider>
           {!isLanding && products.length > 0 && (
@@ -806,6 +807,59 @@ export default function StorePage() {
                   <p className="mt-4 text-sm text-surface-500 leading-relaxed">{selectedProduct.description}</p>
                 )}
 
+                {/* Variant selector */}
+                {selectedProduct.variants && selectedProduct.variants.length > 0 && (() => {
+                  // Group variants by option keys (e.g. "color", "size")
+                  const optionGroups: Record<string, Array<{ value: string; variantId: string }>> = {};
+                  selectedProduct.variants!.forEach(v => {
+                    if (v.options) {
+                      Object.entries(v.options).forEach(([key, value]) => {
+                        if (!optionGroups[key]) optionGroups[key] = [];
+                        if (!optionGroups[key].some(o => o.value === value)) {
+                          optionGroups[key].push({ value, variantId: v.id });
+                        }
+                      });
+                    }
+                  });
+                  const selectedVariant = selectedProduct.variants!.find(v => v.id === selectedVariantId);
+                  return (
+                    <div className="mt-4 space-y-3">
+                      {Object.entries(optionGroups).map(([key, values]) => (
+                        <div key={key}>
+                          <span className="text-sm font-semibold text-surface-900 capitalize">{key}</span>
+                          <div className="flex flex-wrap gap-2 mt-2">
+                            {values.map(({ value, variantId }) => {
+                              const isColor = key.toLowerCase() === 'color';
+                              const isSelected = selectedVariantId === variantId;
+                              if (isColor) {
+                                const COLOR_MAP: Record<string, string> = { black:"#000",white:"#FFF",red:"#DC2626",blue:"#2563EB",green:"#16A34A",yellow:"#EAB308",orange:"#EA580C",purple:"#9333EA",pink:"#EC4899",brown:"#92400E",grey:"#6B7280",gray:"#6B7280",navy:"#1E3A5F",beige:"#F5F5DC",coral:"#FF7F50",teal:"#0D9488",gold:"#D4AF37",burgundy:"#800020",cream:"#FFFDD0",maroon:"#800000" };
+                                const hex = COLOR_MAP[value.toLowerCase()] || "#ccc";
+                                return (
+                                  <button key={variantId} onClick={() => setSelectedVariantId(isSelected ? null : variantId)} title={value}
+                                    className={`w-8 h-8 rounded-full border-2 transition-all ${isSelected ? "ring-2 ring-offset-1 ring-brand-500 border-brand-500" : "border-surface-200 hover:border-surface-400"}`}
+                                    style={{ background: hex }} />
+                                );
+                              }
+                              return (
+                                <button key={variantId} onClick={() => setSelectedVariantId(isSelected ? null : variantId)}
+                                  className={`px-3 py-1.5 text-sm border rounded-lg transition-all ${isSelected ? "border-brand-500 bg-brand-50 text-brand-700 font-semibold" : "border-surface-200 text-surface-600 hover:border-surface-400"}`}>
+                                  {value}
+                                </button>
+                              );
+                            })}
+                          </div>
+                        </div>
+                      ))}
+                      {selectedVariant && selectedVariant.price !== null && (
+                        <p className="text-sm text-surface-500">Variant price: <span className="font-semibold text-surface-900">{formatCurrency(selectedVariant.price, currency)}</span></p>
+                      )}
+                      {selectedVariant && !selectedVariant.inStock && (
+                        <p className="text-sm text-red-600 font-medium">This variant is out of stock</p>
+                      )}
+                    </div>
+                  );
+                })()}
+
                 {!selectedProduct.inStock && (
                   <div className="mt-4 rounded-xl bg-red-50 border border-red-200 px-4 py-3 text-sm text-red-700 font-medium">Out of stock</div>
                 )}
@@ -823,11 +877,19 @@ export default function StorePage() {
                 )}
 
                 <div className="mt-6 space-y-3 flex-1 flex flex-col justify-end">
-                  {selectedProduct.inStock && (
+                  {selectedProduct.inStock && (() => {
+                  const sv = selectedProduct.variants?.find(v => v.id === selectedVariantId);
+                  const needsVariant = selectedProduct.variants && selectedProduct.variants.length > 0 && !selectedVariantId;
+                  const variantOos = sv && !sv.inStock;
+                  const displayPrice = sv?.price ?? Number(selectedProduct.price);
+                  return (
                     <div className="flex gap-2">
-                      <button onClick={() => { addToCart(selectedProduct, qty); setSelectedProduct(null); }} className="btn-primary flex-1 py-3.5">
+                      <button
+                        onClick={() => { if (!needsVariant && !variantOos) { addToCart(selectedProduct, qty); setSelectedProduct(null); } }}
+                        disabled={needsVariant || variantOos}
+                        className={`btn-primary flex-1 py-3.5 ${needsVariant || variantOos ? "opacity-50 cursor-not-allowed" : ""}`}>
                         <ShoppingCart className="h-5 w-5" />
-                        Add to Cart — {formatCurrency(Number(selectedProduct.price) * qty, currency)}
+                        {needsVariant ? "Select a variant" : `Add to Cart — ${formatCurrency(displayPrice * qty, currency)}`}
                       </button>
                       <button
                         onClick={() => toggleWishlist(selectedProduct.id)}
@@ -836,7 +898,8 @@ export default function StorePage() {
                         <Heart className={`h-5 w-5 ${isWishlisted(selectedProduct.id) ? "fill-red-500" : ""}`} />
                       </button>
                     </div>
-                  )}
+                  );
+                })()}
                   {settings.whatsappOrdering && whatsappNumber && (
                     <a
                       href={getWhatsAppLink(whatsappNumber, [{ productId: selectedProduct.id, quantity: qty, product: selectedProduct }], currency, store.name)}
