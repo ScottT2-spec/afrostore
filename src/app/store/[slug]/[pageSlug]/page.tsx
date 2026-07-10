@@ -318,57 +318,7 @@ export default function StorefrontPage() {
         )}
       </main>
 
-      {/* Footer — same as store homepage */}
-      <footer className="bg-surface-900 text-surface-400 py-12 themed-footer">
-        <div className="max-w-6xl mx-auto px-4 sm:px-6">
-          <div className="grid grid-cols-2 sm:grid-cols-4 gap-8">
-            <div className="col-span-2 sm:col-span-1">
-              <div className="flex items-center gap-2 mb-3">
-                {store.logo ? (
-                  <img src={store.logo} alt={store.name} className="h-8 w-8 rounded-lg object-cover" />
-                ) : (
-                  <div className="h-8 w-8 rounded-lg bg-gradient-to-br from-purple-500 to-pink-500 flex items-center justify-center">
-                    <ShoppingBag className="h-4 w-4 text-white" />
-                  </div>
-                )}
-                <span className="font-display font-bold text-white">{store.name}</span>
-              </div>
-              {store.description && <p className="text-xs leading-relaxed">{store.description}</p>}
-            </div>
-            <div>
-              <h4 className="text-sm font-semibold text-white mb-3">Shop</h4>
-              <ul className="space-y-2 text-xs">
-                {categories.filter((c) => c._count.products > 0).slice(0, 5).map((c) => (
-                  <li key={c.id}>
-                    <Link href={`/store/${slug}/shop?category=${c.slug}`} className="hover:text-white transition-colors">{c.name}</Link>
-                  </li>
-                ))}
-              </ul>
-            </div>
-            <div>
-              <h4 className="text-sm font-semibold text-white mb-3">Info</h4>
-              <ul className="space-y-2 text-xs">
-                {navPages.slice(0, 5).map((p) => (
-                  <li key={p.id}>
-                    <Link href={getLinkedPageHref(p as { slug: string; template?: string | null }, slug)} className="hover:text-white transition-colors">{p.title}</Link>
-                  </li>
-                ))}
-              </ul>
-            </div>
-            <div>
-              <h4 className="text-sm font-semibold text-white mb-3">Contact</h4>
-              <div className="space-y-2 text-xs">
-                {whatsappNumber && <div className="flex items-center gap-2"><Phone className="h-3.5 w-3.5" />{whatsappNumber}</div>}
-                {socialLinks?.instagram && <div className="flex items-center gap-2"><span>📸</span>{socialLinks.instagram}</div>}
-              </div>
-            </div>
-          </div>
-          <div className="mt-8 pt-6 border-t border-surface-800 flex items-center justify-between text-xs text-surface-600">
-            <span>&copy; {new Date().getFullYear()} {store.name}. All rights reserved.</span>
-            <span className="flex items-center gap-1">Powered by <span className="font-semibold text-brand-400">AfroStore</span></span>
-          </div>
-        </div>
-      </footer>
+      {/* Footer is rendered by template block footers */}
 
       {/* Floating WhatsApp */}
       {settings?.whatsappOrdering && whatsappNumber && (

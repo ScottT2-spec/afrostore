@@ -30,7 +30,7 @@ import { InteriorStoreContext } from "@/components/storefront/InteriorDesignTemp
 import { KidsStoreContext } from "@/components/storefront/KidsTemplateBlocks";
 import { MakeupStoreContext } from "@/components/storefront/MakeupTemplateBlocks";
 import { PerfumesStoreContext } from "@/components/storefront/PerfumesTemplateBlocks";
-import { FashionHeader, FashionFooter, type NavItem } from "@/components/storefront/FashionStoreChrome";
+import { FashionHeader, type NavItem } from "@/components/storefront/FashionStoreChrome";
 
 /* ─── Template preset map ─── */
 const TEMPLATE_PRESET_MAP: Record<string, TemplateBlock[]> = {
