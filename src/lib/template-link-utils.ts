@@ -42,6 +42,7 @@ export function resolveStoreLink(link: string | null | undefined, storeSlug: str
     "order-tracking": `${base}/order-tracking`,
     contact: `${base}/contact`,
     about: `${base}/about`,
+    "our-story": `${base}/our-story`,
     faq: `${base}/faq`,
     policy: `${base}/policy`,
   };

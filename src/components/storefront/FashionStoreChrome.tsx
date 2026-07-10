@@ -1,6 +1,7 @@
 "use client";
 import { useState } from "react";
 import Link from "next/link";
+import { resolveStoreLink } from "@/lib/template-link-utils";
 
 /* ═══════════════════════════════════════════════════════════════
    FASHION STORE HEADER + FOOTER
@@ -54,30 +55,11 @@ interface FashionHeaderProps {
 }
 
 /**
- * Resolves a nav item's URL to a full href.
- * - "home" / "shop" / "reviews" → /store/{slug}/...
- * - "page" → /store/{slug}/{path}
- * - "external" → used as-is
- * - "custom" → prepends /store/{slug} if relative
+ * Resolves a nav item's URL to a full href using the centralized link resolver.
+ * This prevents double-prefixing of /store/{slug}.
  */
 function resolveNavHref(item: NavItem, storeSlug: string): string {
-  const base = `/store/${storeSlug}`;
-  switch (item.type) {
-    case "home": return base;
-    case "shop": return `${base}/shop`;
-    case "reviews": return `${base}/reviews`;
-    case "page": {
-      const path = item.url.startsWith("/") ? item.url.slice(1) : item.url;
-      return `${base}/${path}`;
-    }
-    case "external": return item.url;
-    case "custom":
-    default: {
-      if (item.url.startsWith("http://") || item.url.startsWith("https://")) return item.url;
-      const path = item.url.startsWith("/") ? item.url.slice(1) : item.url;
-      return `${base}/${path}`;
-    }
-  }
+  return resolveStoreLink(item.url, storeSlug);
 }
 
 export function FashionHeader({

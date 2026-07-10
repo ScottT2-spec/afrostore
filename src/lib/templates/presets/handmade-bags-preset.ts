@@ -243,11 +243,20 @@ export const HANDMADE_BAGS_PRESET: TemplateBlock[] = [
         {
           title: "SHOP",
           links: [
-            { label: "Tote Bags", url: "#" },
-            { label: "Crossbody Bags", url: "#" },
-            { label: "Backpacks", url: "#" },
-            { label: "Wallets", url: "#" },
-            { label: "Accessories", url: "#" },
+            { label: "Women", url: "/shop?category=women" },
+            { label: "Men", url: "/shop?category=men" },
+            { label: "Bestsellers", url: "/shop?tag=bestseller" },
+            { label: "New Arrivals", url: "/shop?tag=new-arrival" },
+          ],
+        },
+        {
+          title: "INFORMATION",
+          links: [
+            { label: "Blog", url: "/blog" },
+            { label: "About Us", url: "/about" },
+            { label: "Our Story", url: "/our-story" },
+            { label: "Contact Us", url: "/contact" },
+            { label: "Reviews", url: "/reviews" },
           ],
         },
         {
@@ -256,16 +265,7 @@ export const HANDMADE_BAGS_PRESET: TemplateBlock[] = [
             { label: "Shipping & Returns", url: "#" },
             { label: "Care Guide", url: "#" },
             { label: "FAQ", url: "#" },
-            { label: "Contact Us", url: "#" },
-          ],
-        },
-        {
-          title: "ABOUT",
-          links: [
-            { label: "Our Story", url: "#" },
-            { label: "Craftsmanship", url: "#" },
-            { label: "Sustainability", url: "#" },
-            { label: "Instagram", url: "#" },
+            { label: "Contact Us", url: "/contact" },
           ],
         },
       ],

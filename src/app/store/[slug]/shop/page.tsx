@@ -7,6 +7,7 @@ import { useParams, useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
 import { ThemeProvider, type ThemeData } from "@/components/storefront/ThemeProvider";
 import { useWishlist } from "@/hooks/useWishlist";
+import { HandmadeBagsHeader, HandmadeBagsFooter } from "@/components/storefront/HandmadeBagsStoreChrome";
 
 /* ───────── Types ───────── */
 
@@ -54,6 +55,7 @@ interface StoreData {
     description?: string;
     logo?: string;
     currency: string;
+    templateSlug?: string;
   };
   products: Product[];
   pagination: { page: number; limit: number; total: number; pages: number };
@@ -304,11 +306,20 @@ export default function ShopPage() {
 
   const { store } = storeData;
   const activeCategoryName = categories.find((c) => c.slug === selectedCategory)?.name;
+  const isHandmadeBagsTemplate = store.templateSlug === "handmade-bags";
 
   return (
     <ThemeProvider theme={storeData.theme}>
     <div className="min-h-screen bg-surface-50">
       {/* ── Nav ── */}
+      {isHandmadeBagsTemplate ? (
+        <HandmadeBagsHeader
+          storeName={store.name}
+          storeSlug={slug}
+          logo={store.logo}
+          isLanding={false}
+        />
+      ) : (
       <header className="sticky top-0 z-40 bg-white border-b border-surface-200 shadow-sm themed-header">
         <div className="max-w-6xl mx-auto flex h-16 items-center justify-between px-4 sm:px-6">
           <div className="flex items-center gap-4">
@@ -364,6 +375,7 @@ export default function ShopPage() {
           </div>
         )}
       </header>
+      )}
 
       {/* ── Breadcrumb ── */}
       <div className="max-w-6xl mx-auto px-4 sm:px-6 pt-6">
@@ -696,6 +708,14 @@ export default function ShopPage() {
       </div>
 
       {/* ── Footer ── */}
+      {isHandmadeBagsTemplate ? (
+        <HandmadeBagsFooter
+          storeName={store.name}
+          storeSlug={slug}
+          logo={store.logo}
+          description={store.description}
+        />
+      ) : (
       <footer className="bg-surface-900 text-surface-400 py-10 themed-footer">
         <div className="max-w-6xl mx-auto px-4 sm:px-6 flex flex-col sm:flex-row items-center justify-between gap-4 text-xs">
           <div className="flex items-center gap-2">
@@ -713,6 +733,7 @@ export default function ShopPage() {
           </span>
         </div>
       </footer>
+      )}
 
       {/* ── Compare floating bar ── */}
       {compareList.length > 0 && (

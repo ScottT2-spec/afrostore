@@ -5,6 +5,7 @@ import { BadgeCheck, ImageIcon, ShoppingBag, Star } from "@/components/icons/Fil
 import { useState, useEffect, useCallback } from "react";
 import { useParams } from "next/navigation";
 import Link from "next/link";
+import { HandmadeBagsHeader, HandmadeBagsFooter } from "@/components/storefront/HandmadeBagsStoreChrome";
 
 interface ReviewProduct {
   name: string;
@@ -145,24 +146,13 @@ export default function StoreReviewsPage() {
 
   return (
     <div className="min-h-screen bg-white">
-      {/* Header */}
-      <header className="sticky top-0 z-40 bg-white/90 backdrop-blur-lg border-b border-surface-100">
-        <div className="max-w-6xl mx-auto px-4 sm:px-6 h-16 flex items-center justify-between">
-          <Link href={`/store/${slug}`} className="flex items-center gap-2.5">
-            {store?.logo ? (
-              <img src={store.logo} alt={store.name} className="h-8 w-8 rounded-lg object-cover" />
-            ) : (
-              <div className="h-8 w-8 rounded-lg bg-brand-600 flex items-center justify-center">
-                <ShoppingBag className="h-4 w-4 text-white" />
-              </div>
-            )}
-            <span className="font-display font-bold text-surface-900">{store?.name || "Store"}</span>
-          </Link>
-          <Link href={`/store/${slug}`} className="flex items-center gap-1.5 text-sm text-surface-500 hover:text-surface-700 transition-colors">
-            <ArrowLeft className="h-4 w-4" /> Back to store
-          </Link>
-        </div>
-      </header>
+      {/* Header - Handmade Bags Style */}
+      <HandmadeBagsHeader
+        storeName={store?.name || "Store"}
+        storeSlug={slug}
+        logo={store?.logo}
+        isLanding={false}
+      />
 
       <main className="max-w-6xl mx-auto px-4 sm:px-6 py-8 lg:py-12">
         <h1 className="text-2xl lg:text-3xl font-bold text-surface-900 font-display mb-8">Customer Reviews</h1>
@@ -302,12 +292,12 @@ export default function StoreReviewsPage() {
         )}
       </main>
 
-      {/* Footer */}
-      <footer className="border-t border-surface-100 mt-16">
-        <div className="max-w-6xl mx-auto px-4 sm:px-6 py-8 text-center">
-          <p className="text-xs text-surface-400">© {new Date().getFullYear()} {store?.name}. Powered by AfroStore.</p>
-        </div>
-      </footer>
+      {/* Footer - Handmade Bags Style */}
+      <HandmadeBagsFooter
+        storeName={store?.name || "Store"}
+        storeSlug={slug}
+        logo={store?.logo}
+      />
     </div>
   );
 }

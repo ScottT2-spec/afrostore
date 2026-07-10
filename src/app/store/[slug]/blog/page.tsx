@@ -4,6 +4,7 @@ import { useState, useEffect } from "react";
 import { useParams } from "next/navigation";
 import Link from "next/link";
 import { ArrowLeft, ArrowRight, Loader2, Search, X } from "lucide-react";
+import { HandmadeBagsHeader, HandmadeBagsFooter } from "@/components/storefront/HandmadeBagsStoreChrome";
 
 interface BlogPost {
   id: string;
@@ -94,6 +95,11 @@ export default function StoreBlogListingPage() {
 
   return (
     <div className="min-h-screen bg-white" style={{ fontFamily: "'Lato', Arial, sans-serif" }}>
+      <HandmadeBagsHeader
+        storeName={storeName}
+        storeSlug={slug}
+        isLanding={false}
+      />
       {/* Header */}
       <div style={{ background: "#f7f7f7", borderBottom: "1px solid #eee", padding: "40px 15px", textAlign: "center" }}>
         <Link
@@ -274,6 +280,10 @@ export default function StoreBlogListingPage() {
           </div>
         )}
       </div>
+      <HandmadeBagsFooter
+        storeName={storeName}
+        storeSlug={slug}
+      />
     </div>
   );
 }
