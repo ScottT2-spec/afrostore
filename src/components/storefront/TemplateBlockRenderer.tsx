@@ -99,6 +99,8 @@ import {
   HealthNewsletter,
   HealthBrandMarquee,
   HealthFooter,
+  HealthFooterFull,
+  HealthHeader,
 } from "@/components/storefront/HealthTemplateBlocks";
 import {
   InteriorFontLoader,
@@ -254,6 +256,7 @@ const HEALTH_BLOCKS: Record<string, BlockComponent> = {
   healthNewsletter: HealthNewsletter as unknown as BlockComponent,
   healthBrandMarquee: HealthBrandMarquee as unknown as BlockComponent,
   healthFooter: HealthFooter as unknown as BlockComponent,
+  healthFooterFull: HealthFooterFull as unknown as BlockComponent,
 };
 
 const INTERIOR_BLOCKS: Record<string, BlockComponent> = {

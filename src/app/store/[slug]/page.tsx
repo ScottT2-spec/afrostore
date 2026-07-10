@@ -25,7 +25,7 @@ import { ElectronicsStoreContext } from "@/components/storefront/ElectronicsTemp
 import { BakeryStoreContext } from "@/components/storefront/BakeryTemplateBlocks";
 import { CosmeticsStoreContext } from "@/components/storefront/CosmeticsTemplateBlocks";
 import { GroceryStoreContext } from "@/components/storefront/GroceryTemplateBlocks";
-import { HealthStoreContext } from "@/components/storefront/HealthTemplateBlocks";
+import { HealthStoreContext, HealthHeader } from "@/components/storefront/HealthTemplateBlocks";
 import { InteriorStoreContext } from "@/components/storefront/InteriorDesignTemplateBlocks";
 import { KidsStoreContext, KidsHeader } from "@/components/storefront/KidsTemplateBlocks";
 import { MakeupStoreContext } from "@/components/storefront/MakeupTemplateBlocks";
@@ -435,6 +435,7 @@ export default function StorePage() {
   const homeHasProductGrid = homeBlocks.some((b) => b.type === "productGrid");
   const isFashionTemplate = data.templateSlug === "fashion" || data.templateSlug === "fashion-colored" || data.templateSlug === "handmade-bags" || data.templateSlug === "t-shirts-prints" || homeBlocks.some((b) => b.type.startsWith("fashion"));
   const isKidsTemplate = data.templateSlug === "kids" || data.templateSlug === "toys" || homeBlocks.some((b) => b.type.startsWith("kids"));
+  const isHealthTemplate = data.templateSlug === "pills" || homeBlocks.some((b) => b.type.startsWith("health"));
   const templatePreset = data.templateSlug ? TEMPLATE_PRESET_MAP[data.templateSlug] : undefined;
 
   // Template-specific navigation items — tailored to each niche
@@ -528,7 +529,21 @@ export default function StorePage() {
     <ThemeProvider theme={resolvedTheme}>
     <div className="min-h-screen bg-white">
       {/* ─── FASHION TEMPLATE HEADER ─── */}
-      {isKidsTemplate ? (
+      {isHealthTemplate ? (
+        <HealthHeader
+          storeName={store.name}
+          storeSlug={slug}
+          logo={store.logo}
+          cartCount={cartCount}
+          wishlistCount={wishlistCount}
+          searchQuery={searchQuery}
+          onSearchChange={setSearchQuery}
+          onSearch={handleSearch}
+          topBarText={data.deliveryZones.some((z: any) => z.freeAbove)
+            ? `FREE DELIVERY ON ORDERS ABOVE ${formatCurrency(Number(data.deliveryZones.find((z: any) => z.freeAbove)?.freeAbove || 0), currency)}`
+            : `Free shipping on all orders over $30!`}
+        />
+      ) : isKidsTemplate ? (
         <KidsHeader
           storeName={store.name}
           storeSlug={slug}
@@ -757,7 +772,7 @@ export default function StorePage() {
       )}
 
       {/* Footer — fashion handles its own; all other templates get FashionFooter */}
-      {!isFashionTemplate && !isKidsTemplate && (
+      {!isFashionTemplate && !isKidsTemplate && !isHealthTemplate && (
         <FashionFooter
           storeName={store.name}
           storeSlug={slug}

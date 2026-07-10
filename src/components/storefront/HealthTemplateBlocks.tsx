@@ -796,7 +796,241 @@ export function HealthBrandMarquee({ speed = 70, reverse = false }: HealthBrandM
 }
 
 /* ═══════════════════════════════════════════════════════════════
-   FOOTER
+   HEALTH HEADER
+   Clean, modern health/wellness header matching WoodMart Pills.
+   Left: Shop · About Us · Search
+   Center: Logo
+   Right: Login · Wishlist · Cart
+   ═══════════════════════════════════════════════════════════════ */
+
+export interface HealthHeaderProps {
+  storeName: string;
+  storeSlug: string;
+  logo?: string | null;
+  cartCount?: number;
+  wishlistCount?: number;
+  onSearch?: (q: string) => void;
+  searchQuery?: string;
+  onSearchChange?: (q: string) => void;
+  topBarText?: string;
+}
+
+export function HealthHeader({
+  storeName, storeSlug, logo, cartCount = 0, wishlistCount = 0,
+  onSearch, searchQuery = "", onSearchChange,
+  topBarText = "Free shipping on all orders over $30!",
+}: HealthHeaderProps) {
+  const [mobileOpen, setMobileOpen] = useState(false);
+  const [searchOpen, setSearchOpen] = useState(false);
+  const [searchVal, setSearchVal] = useState(searchQuery);
+  const base = `/store/${storeSlug}`;
+
+  const handleSearchSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (searchVal.trim()) {
+      onSearch?.(searchVal.trim());
+      onSearchChange?.(searchVal.trim());
+      setSearchOpen(false);
+      window.location.href = `${base}/shop?q=${encodeURIComponent(searchVal.trim())}`;
+    }
+  };
+
+  const css = `
+    .hh-topbar{background:${TOKENS.primaryColor};color:#fff;font-family:${TOKENS.bodyFont};font-size:13px;text-align:center;padding:8px 15px;font-weight:500}
+    .hh-hdr{background:#fff;border-bottom:1px solid #eee;font-family:${TOKENS.bodyFont};position:sticky;top:0;z-index:100}
+    .hh-inner{max-width:${TOKENS.containerWidth};margin:0 auto;display:flex;align-items:center;justify-content:space-between;padding:0 15px;height:75px}
+    .hh-nav{display:flex;align-items:center;gap:24px}
+    .hh-nav a,.hh-nav button{font-size:14px;font-weight:600;color:${TOKENS.titleColor};text-decoration:none;background:none;border:none;cursor:pointer;padding:0;transition:color .2s;font-family:${TOKENS.bodyFont}}
+    .hh-nav a:hover,.hh-nav button:hover{color:${TOKENS.primaryColor}}
+    .hh-logo{display:flex;align-items:center;gap:8px;text-decoration:none}
+    .hh-logo img{height:38px;width:auto}
+    .hh-logo-text{font-family:${TOKENS.titleFont};font-size:22px;font-weight:700;color:${TOKENS.titleColor}}
+    .hh-icons{display:flex;align-items:center;gap:18px}
+    .hh-icon{position:relative;background:none;border:none;cursor:pointer;padding:4px;color:${TOKENS.titleColor};text-decoration:none;transition:color .2s;display:flex;align-items:center}
+    .hh-icon:hover{color:${TOKENS.primaryColor}}
+    .hh-icon svg{width:21px;height:21px}
+    .hh-badge{position:absolute;top:-4px;right:-6px;background:${TOKENS.primaryColor};color:#fff;font-size:10px;font-weight:700;min-width:16px;height:16px;border-radius:50%;display:flex;align-items:center;justify-content:center}
+    .hh-search-ov{position:fixed;inset:0;background:rgba(0,0,0,.45);z-index:200;display:flex;align-items:flex-start;justify-content:center;padding-top:110px}
+    .hh-search-box{background:#fff;border-radius:${TOKENS.borderRadius};padding:28px;width:90%;max-width:560px;box-shadow:0 16px 48px rgba(0,0,0,.12)}
+    .hh-search-box form{display:flex;gap:10px}
+    .hh-search-box input{flex:1;border:2px solid #e8e8e8;border-radius:10px;padding:12px 16px;font-size:15px;font-family:${TOKENS.bodyFont};outline:none;transition:border-color .2s}
+    .hh-search-box input:focus{border-color:${TOKENS.primaryColor}}
+    .hh-search-box button[type=submit]{background:${TOKENS.primaryColor};color:#fff;border:none;border-radius:10px;padding:12px 22px;font-weight:600;cursor:pointer;font-family:${TOKENS.bodyFont};transition:background .2s}
+    .hh-search-box button[type=submit]:hover{background:${TOKENS.primaryHover}}
+    .hh-mob-tog{display:none;background:none;border:none;cursor:pointer;padding:4px;color:${TOKENS.titleColor}}
+    .hh-mob-tog svg{width:24px;height:24px}
+    .hh-mob-menu{display:none;background:#fff;border-bottom:1px solid #eee;padding:15px}
+    .hh-mob-menu a{display:block;padding:10px 0;font-size:15px;font-weight:600;color:${TOKENS.titleColor};text-decoration:none;border-bottom:1px solid #f5f5f5}
+    .hh-mob-menu a:last-child{border-bottom:none}
+    @media(max-width:768px){.hh-nav{display:none}.hh-mob-tog{display:block}.hh-mob-menu.hh-open{display:block}.hh-inner{height:58px}.hh-icons{gap:12px}.hh-icon svg{width:19px;height:19px}}
+  `;
+
+  const searchIcon = <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>;
+  const userIcon = <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>;
+  const heartIcon = <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>;
+  const cartIcon = <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><circle cx="9" cy="21" r="1"/><circle cx="20" cy="21" r="1"/><path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"/></svg>;
+
+  return (
+    <>
+      <style dangerouslySetInnerHTML={{ __html: css }} />
+      <div className="hh-topbar">{topBarText}</div>
+      <header className="hh-hdr">
+        <div className="hh-inner">
+          <button className="hh-mob-tog" onClick={() => setMobileOpen(!mobileOpen)} aria-label="Menu">
+            {mobileOpen
+              ? <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M18 6L6 18M6 6l12 12"/></svg>
+              : <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M3 12h18M3 6h18M3 18h18"/></svg>}
+          </button>
+          <nav className="hh-nav">
+            <Link href={`${base}/shop`}>Shop</Link>
+            <Link href={`${base}/shop`}>About Us</Link>
+            <button onClick={() => setSearchOpen(true)} aria-label="Search">{searchIcon}</button>
+          </nav>
+          <Link href={base} className="hh-logo">
+            {logo ? <img src={logo} alt={storeName} /> : <span className="hh-logo-text">{storeName}</span>}
+          </Link>
+          <div className="hh-icons">
+            <Link href={`${base}/my-account`} className="hh-icon" aria-label="Account">{userIcon}</Link>
+            <Link href={`${base}/wishlist`} className="hh-icon" aria-label="Wishlist">
+              {heartIcon}
+              {wishlistCount > 0 && <span className="hh-badge">{wishlistCount}</span>}
+            </Link>
+            <Link href={`${base}/cart`} className="hh-icon" aria-label="Cart">
+              {cartIcon}
+              {cartCount > 0 && <span className="hh-badge">{cartCount}</span>}
+            </Link>
+          </div>
+        </div>
+        <div className={`hh-mob-menu ${mobileOpen ? "hh-open" : ""}`}>
+          <Link href={base} onClick={() => setMobileOpen(false)}>Home</Link>
+          <Link href={`${base}/shop`} onClick={() => setMobileOpen(false)}>Shop</Link>
+          <Link href={`${base}/shop`} onClick={() => setMobileOpen(false)}>About Us</Link>
+          <Link href={`${base}/blog`} onClick={() => setMobileOpen(false)}>Blog</Link>
+          <Link href={`${base}/wishlist`} onClick={() => setMobileOpen(false)}>Wishlist</Link>
+          <Link href={`${base}/my-account`} onClick={() => setMobileOpen(false)}>My Account</Link>
+        </div>
+      </header>
+      {searchOpen && (
+        <div className="hh-search-ov" onClick={() => setSearchOpen(false)}>
+          <div className="hh-search-box" onClick={e => e.stopPropagation()}>
+            <form onSubmit={handleSearchSubmit}>
+              <input type="text" placeholder="Search products..." value={searchVal} onChange={e => setSearchVal(e.target.value)} autoFocus />
+              <button type="submit">Search</button>
+            </form>
+          </div>
+        </div>
+      )}
+    </>
+  );
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   HEALTH FOOTER (Custom WoodMart Pills-style)
+   Clean, calm wellness footer with proper store links
+   ═══════════════════════════════════════════════════════════════ */
+
+export interface HealthFooterFullProps {
+  storeName?: string;
+  storeSlug?: string;
+  logo?: string | null;
+  description?: string;
+  contact?: { address?: string; phone?: string; email?: string };
+  socialLinks?: Array<{ platform: string; url: string }>;
+  copyrightText?: string;
+}
+
+export function HealthFooterFull({
+  storeName = "Health Store",
+  storeSlug: storeSlugProp,
+  logo,
+  description = "Your trusted source for vitamins, supplements, and wellness products. Naturally better.",
+  contact = { address: "123 Wellness Ave, Portland, OR 97201", phone: "(503) 555-0123", email: "hello@store.com" },
+  socialLinks = [],
+  copyrightText,
+}: HealthFooterFullProps) {
+  const storeCtx = useContext(HealthStoreContext);
+  const slug = storeSlugProp || storeCtx?.storeSlug;
+  const base = slug ? `/store/${slug}` : "/";
+  const activeSocials = socialLinks.filter(s => s.url && s.url !== "#");
+  const socialIcons: Record<string, string> = { facebook: "f", twitter: "𝕏", instagram: "📷", youtube: "▶", tiktok: "♪", whatsapp: "💬" };
+
+  const css = `
+    .hf-footer{background:#f7f7f7;font-family:${TOKENS.bodyFont};color:${TOKENS.textColor}}
+    .hf-main{max-width:${TOKENS.containerWidth};margin:0 auto;padding:60px 15px 40px;display:grid;grid-template-columns:1.5fr 1fr 1fr 1fr;gap:40px}
+    .hf-brand p{font-size:14px;line-height:1.8;margin:14px 0}
+    .hf-social{display:flex;gap:10px;margin-top:14px}
+    .hf-social a{width:34px;height:34px;border-radius:50%;background:${TOKENS.primaryColor};color:#fff;display:flex;align-items:center;justify-content:center;text-decoration:none;font-size:13px;font-weight:700;transition:background .2s}
+    .hf-social a:hover{background:${TOKENS.primaryHover}}
+    .hf-col-title{font-family:${TOKENS.titleFont};font-size:15px;font-weight:700;color:${TOKENS.titleColor};text-transform:uppercase;margin-bottom:18px;letter-spacing:.3px}
+    .hf-links{list-style:none;margin:0;padding:0}
+    .hf-links li{margin-bottom:10px}
+    .hf-links a{font-size:14px;color:${TOKENS.textColor};text-decoration:none;transition:color .2s}
+    .hf-links a:hover{color:${TOKENS.primaryColor}}
+    .hf-contact{font-size:14px;margin-bottom:10px;display:flex;align-items:flex-start;gap:8px}
+    .hf-bottom{border-top:1px solid #e0e0e0;max-width:${TOKENS.containerWidth};margin:0 auto;padding:18px 15px;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:10px}
+    .hf-bottom small{font-size:13px;color:${TOKENS.textColor}}
+    .hf-bottom small a{color:${TOKENS.textColor};text-decoration:none}
+    @media(max-width:768px){.hf-main{grid-template-columns:1fr;gap:28px;padding:36px 15px 28px}}
+    @media(min-width:769px) and (max-width:1024px){.hf-main{grid-template-columns:1fr 1fr}}
+  `;
+
+  return (
+    <footer className="hf-footer">
+      <style dangerouslySetInnerHTML={{ __html: css }} />
+      <div className="hf-main">
+        <div className="hf-brand">
+          <Link href={base} style={{ textDecoration: "none" }}>
+            {logo ? <img src={logo} alt={storeName} style={{ maxWidth: "170px", height: "auto" }} /> : <span style={{ fontFamily: TOKENS.titleFont, fontSize: "20px", fontWeight: 700, color: TOKENS.titleColor }}>{storeName}</span>}
+          </Link>
+          <p>{description}</p>
+          {contact?.phone && <div className="hf-contact">📞 {contact.phone}</div>}
+          {contact?.email && <div className="hf-contact">✉️ {contact.email}</div>}
+          {contact?.address && <div className="hf-contact">📍 {contact.address}</div>}
+          {activeSocials.length > 0 && (
+            <div className="hf-social">
+              {activeSocials.map((s, i) => <a key={i} href={s.url} target="_blank" rel="noopener noreferrer" aria-label={s.platform}>{socialIcons[s.platform] || s.platform[0]?.toUpperCase()}</a>)}
+            </div>
+          )}
+        </div>
+        <div>
+          <h4 className="hf-col-title">Shop</h4>
+          <ul className="hf-links">
+            <li><Link href={`${base}/shop`}>All Products</Link></li>
+            <li><Link href={`${base}/shop?sort=newest`}>New Arrivals</Link></li>
+            <li><Link href={`${base}/shop?sort=popular`}>Best Sellers</Link></li>
+            <li><Link href={`${base}/shop?sort=price_asc`}>On Sale</Link></li>
+          </ul>
+        </div>
+        <div>
+          <h4 className="hf-col-title">Information</h4>
+          <ul className="hf-links">
+            <li><Link href={`${base}/shop`}>About Us</Link></li>
+            <li><Link href={`${base}/shop`}>Contact Us</Link></li>
+            <li><Link href={`${base}/blog`}>Blog</Link></li>
+            <li><Link href={`${base}/shop`}>Shipping & Returns</Link></li>
+          </ul>
+        </div>
+        <div>
+          <h4 className="hf-col-title">My Account</h4>
+          <ul className="hf-links">
+            <li><Link href={`${base}/my-account`}>Sign In</Link></li>
+            <li><Link href={`${base}/wishlist`}>Wishlist</Link></li>
+            <li><Link href={`${base}/cart`}>Cart</Link></li>
+            <li><Link href={`${base}/compare`}>Compare</Link></li>
+            <li><Link href={`${base}/order-tracking`}>Order Tracking</Link></li>
+          </ul>
+        </div>
+      </div>
+      <div className="hf-bottom">
+        <small><Link href={base}>{copyrightText || `© ${new Date().getFullYear()} ${storeName}. All rights reserved.`}</Link></small>
+        <img src="https://woodmart.xtemos.com/wp-content/uploads/2018/08/payment.png" alt="Payment methods" style={{ height: "21px" }} loading="lazy" />
+      </div>
+    </footer>
+  );
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   LEGACY FOOTER (kept for backward compat)
    ═══════════════════════════════════════════════════════════════ */
 
 export function HealthFooter(props: React.ComponentProps<typeof FashionFooter>) {
