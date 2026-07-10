@@ -940,6 +940,7 @@ export interface KidsHeaderProps {
   storeName: string;
   storeSlug: string;
   logo?: string | null;
+  templateSlug?: string;
   cartCount?: number;
   wishlistCount?: number;
   onSearch?: (q: string) => void;
@@ -952,6 +953,7 @@ export function KidsHeader({
   storeName,
   storeSlug,
   logo,
+  templateSlug,
   cartCount = 0,
   wishlistCount = 0,
   onSearch,
@@ -962,6 +964,7 @@ export function KidsHeader({
   const [mobileOpen, setMobileOpen] = useState(false);
   const [searchOpen, setSearchOpen] = useState(false);
   const [searchVal, setSearchVal] = useState(searchQuery);
+  const exactKids = templateSlug === "kids";
 
   const base = `/store/${storeSlug}`;
 
@@ -989,6 +992,9 @@ export function KidsHeader({
     .kh-icon-btn { position: relative; background: none; border: none; cursor: pointer; padding: 4px; color: ${TOKENS.titleColor}; transition: color 0.2s; }
     .kh-icon-btn:hover { color: ${TOKENS.primaryColor}; }
     .kh-icon-btn svg { width: 22px; height: 22px; }
+    .kh-account-link { display: inline-flex; align-items: center; gap: 8px; color: ${TOKENS.titleColor}; font-size: 13px; font-weight: 600; white-space: nowrap; text-decoration: none; padding: 4px 2px; }
+    .kh-account-link:hover { color: ${TOKENS.primaryColor}; }
+    .kh-account-link svg { width: 19px; height: 19px; }
     .kh-badge { position: absolute; top: -4px; right: -6px; background: ${TOKENS.primaryColor}; color: #fff; font-size: 10px; font-weight: 700; min-width: 16px; height: 16px; border-radius: 50%; display: flex; align-items: center; justify-content: center; }
     .kh-search-overlay { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.5); z-index: 200; display: flex; align-items: flex-start; justify-content: center; padding-top: 120px; }
     .kh-search-box { background: #fff; border-radius: 12px; padding: 30px; width: 90%; max-width: 600px; box-shadow: 0 20px 60px rgba(0,0,0,0.15); }
@@ -1031,8 +1037,8 @@ export function KidsHeader({
 
           {/* Left nav */}
           <nav className="kh-nav">
-            <Link href={`${base}/shop`}>About Us</Link>
-            <Link href={`${base}/shop`}>Contact Us</Link>
+            <Link href={exactKids ? `${base}/about-us` : `${base}/shop`}>About Us</Link>
+            <Link href={exactKids ? `${base}/contact-us` : `${base}/shop`}>Contact Us</Link>
             <Link href={`${base}/blog`}>Blog</Link>
           </nav>
 
@@ -1048,7 +1054,7 @@ export function KidsHeader({
           {/* Right nav */}
           <nav className="kh-nav">
             <Link href={`${base}/shop`}>Shop</Link>
-            <Link href={`${base}/shop`}>Gifts</Link>
+            <Link href={`${base}/product-category/gifts`}>Gifts</Link>
           </nav>
 
           {/* Icon actions */}
@@ -1058,8 +1064,9 @@ export function KidsHeader({
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
             </button>
             {/* Sign In */}
-            <Link href={`${base}/my-account`} className="kh-icon-btn" aria-label="Sign In" style={{ textDecoration: 'none' }}>
+            <Link href={`${base}/my-account`} className="kh-account-link" aria-label="Sign In / Sign Up" style={{ textDecoration: 'none' }}>
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+              <span>Sign In / Sign Up</span>
             </Link>
             {/* Wishlist */}
             <Link href={`${base}/wishlist`} className="kh-icon-btn" aria-label="Wishlist" style={{ textDecoration: 'none' }}>
@@ -1078,9 +1085,9 @@ export function KidsHeader({
         <div className={`kh-mobile-menu ${mobileOpen ? "kh-open" : ""}`}>
           <Link href={base} onClick={() => setMobileOpen(false)}>Home</Link>
           <Link href={`${base}/shop`} onClick={() => setMobileOpen(false)}>Shop</Link>
-          <Link href={`${base}/shop`} onClick={() => setMobileOpen(false)}>Gifts</Link>
-          <Link href={`${base}/shop`} onClick={() => setMobileOpen(false)}>About Us</Link>
-          <Link href={`${base}/shop`} onClick={() => setMobileOpen(false)}>Contact Us</Link>
+          <Link href={`${base}/product-category/gifts`} onClick={() => setMobileOpen(false)}>Gifts</Link>
+          <Link href={exactKids ? `${base}/about-us` : `${base}/shop`} onClick={() => setMobileOpen(false)}>About Us</Link>
+          <Link href={exactKids ? `${base}/contact-us` : `${base}/shop`} onClick={() => setMobileOpen(false)}>Contact Us</Link>
           <Link href={`${base}/blog`} onClick={() => setMobileOpen(false)}>Blog</Link>
           <Link href={`${base}/wishlist`} onClick={() => setMobileOpen(false)}>Wishlist</Link>
           <Link href={`${base}/my-account`} onClick={() => setMobileOpen(false)}>My Account</Link>
@@ -1117,6 +1124,7 @@ export interface KidsFooterFullProps {
   storeName?: string;
   storeSlug?: string;
   logo?: string | null;
+  templateSlug?: string;
   description?: string;
   contact?: { address?: string; phone?: string; email?: string };
   socialLinks?: Array<{ platform: string; url: string }>;
@@ -1127,6 +1135,7 @@ export function KidsFooterFull({
   storeName = "Kids Store",
   storeSlug: storeSlugProp,
   logo,
+  templateSlug,
   description = "We create organic clothes for babies and children. Quality, comfort, and style in every piece.",
   contact = { address: "913 Wyandotte St, Kansas City, MO 64105", phone: "(064) 332-1233", email: "hello@store.com" },
   socialLinks = [],
@@ -1135,6 +1144,7 @@ export function KidsFooterFull({
   const storeCtx = useContext(KidsStoreContext);
   const resolvedSlug = storeSlugProp || storeCtx?.storeSlug;
   const base = resolvedSlug ? `/store/${resolvedSlug}` : "/";
+  const exactKids = templateSlug === "kids";
 
   const activeSocials = socialLinks.filter(s => s.url && s.url !== "#");
 
@@ -1215,35 +1225,36 @@ export function KidsFooterFull({
         <div>
           <h4 className="kf-col-title">Shop</h4>
           <ul className="kf-links">
-            <li><Link href={`${base}/shop`}>All Products</Link></li>
-            <li><Link href={`${base}/shop?sort=newest`}>New Arrivals</Link></li>
-            <li><Link href={`${base}/shop`}>Gifts</Link></li>
-            <li><Link href={`${base}/shop?sort=popular`}>Best Sellers</Link></li>
-            <li><Link href={`${base}/shop?sort=price_asc`}>Sale</Link></li>
+            <li><Link href={`${base}/shop`}>Growsuits</Link></li>
+            <li><Link href={`${base}/shop`}>Jumpers</Link></li>
+            <li><Link href={`${base}/shop`}>Toys</Link></li>
+            <li><Link href={`${base}/product-category/gifts`}>Gifts</Link></li>
+            <li><Link href={`${base}/shop`}>Accessories</Link></li>
+            <li><Link href={`${base}/shop`}>Dresses</Link></li>
+            <li><Link href={`${base}/shop`}>Leggings</Link></li>
           </ul>
         </div>
 
         {/* Information column */}
         <div>
-          <h4 className="kf-col-title">Information</h4>
+          <h4 className="kf-col-title">Useful links</h4>
           <ul className="kf-links">
-            <li><Link href={`${base}/shop`}>About Us</Link></li>
-            <li><Link href={`${base}/shop`}>Contact Us</Link></li>
+            <li><Link href={exactKids ? `${base}/contact-us` : `${base}/shop`}>Contact Us</Link></li>
+            <li><Link href={exactKids ? `${base}/about-us` : `${base}/shop`}>About Us</Link></li>
             <li><Link href={`${base}/blog`}>Blog</Link></li>
-            <li><Link href={`${base}/shop`}>FAQ</Link></li>
-            <li><Link href={`${base}/shop`}>Shipping & Returns</Link></li>
+            <li><Link href={`${base}/shop`}>Delivery & Return</Link></li>
           </ul>
         </div>
 
         {/* Account column */}
         <div>
-          <h4 className="kf-col-title">My Account</h4>
+          <h4 className="kf-col-title">Got a question?</h4>
           <ul className="kf-links">
-            <li><Link href={`${base}/my-account`}>Sign In</Link></li>
-            <li><Link href={`${base}/wishlist`}>Wishlist</Link></li>
-            <li><Link href={`${base}/cart`}>Shopping Cart</Link></li>
-            <li><Link href={`${base}/compare`}>Compare</Link></li>
-            <li><Link href={`${base}/order-tracking`}>Order Tracking</Link></li>
+            <li><Link href={`mailto:hello@kidsstore.com`}>Email: [email protected]</Link></li>
+            <li><span>Call Us: (064) 332-1233</span></li>
+            <li><span>Monday - Friday</span></li>
+            <li><span>Hours: 9:00am - 5:00pm</span></li>
+            <li><span>913 Wyandotte St, Kansas City, MO 64105, United States</span></li>
           </ul>
         </div>
       </div>
@@ -1251,7 +1262,7 @@ export function KidsFooterFull({
       {/* Bottom bar */}
       <div className="kf-bottom">
         <small>
-          <Link href={base}>{copyrightText || `© ${new Date().getFullYear()} ${storeName}. All rights reserved.`}</Link>
+          <Link href={base}>{copyrightText || `Based on WoodMart theme © ${new Date().getFullYear()} WooCommerce Themes.`}</Link>
         </small>
         <div className="kf-payments">
           <img src="https://woodmart.xtemos.com/wp-content/uploads/2018/08/payment.png" alt="Payment methods" loading="lazy" />

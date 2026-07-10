@@ -7,6 +7,7 @@ import { useParams } from "next/navigation";
 import Link from "next/link";
 import { HandmadeBagsHeader, HandmadeBagsFooter } from "@/components/storefront/HandmadeBagsStoreChrome";
 import { ThemeProvider, type ThemeData } from "@/components/storefront/ThemeProvider";
+import { KidsFontLoader, KidsFooterFull, KidsHeader } from "@/components/storefront/KidsTemplateBlocks";
 
 interface ReviewProduct {
   name: string;
@@ -62,6 +63,7 @@ export default function StoreReviewsPage() {
   const [ratingFilter, setRatingFilter] = useState<number | null>(null);
   const [error, setError] = useState("");
   const [themeData, setThemeData] = useState<ThemeData | null>(null);
+  const isKidsTemplate = slug === "kids";
 
   const fetchReviews = useCallback(async (p: number, rating: number | null, append: boolean) => {
     if (p === 1) setLoading(true);
@@ -185,13 +187,26 @@ export default function StoreReviewsPage() {
   return (
     <ThemeProvider theme={themeData}>
       <div className="min-h-screen bg-white">
-        {/* Header - Handmade Bags Style */}
-        <HandmadeBagsHeader
-          storeName={store?.name || "Store"}
-          storeSlug={slug}
-          logo={store?.logo}
-          isLanding={false}
-        />
+        {isKidsTemplate ? (
+          <>
+            <KidsFontLoader />
+            <KidsHeader
+              storeName={store?.name || "Store"}
+              storeSlug={slug}
+              logo={store?.logo}
+              templateSlug="kids"
+              cartCount={0}
+              wishlistCount={0}
+            />
+          </>
+        ) : (
+          <HandmadeBagsHeader
+            storeName={store?.name || "Store"}
+            storeSlug={slug}
+            logo={store?.logo}
+            isLanding={false}
+          />
+        )}
 
       <main className="max-w-6xl mx-auto px-4 sm:px-6 py-8 lg:py-12">
         {/* Hero Section */}
@@ -345,11 +360,20 @@ export default function StoreReviewsPage() {
       </main>
 
       {/* Footer - Handmade Bags Style */}
-      <HandmadeBagsFooter
-        storeName={store?.name || "Store"}
-        storeSlug={slug}
-        logo={store?.logo}
-      />
+      {isKidsTemplate ? (
+        <KidsFooterFull
+          storeName={store?.name || "Store"}
+          storeSlug={slug}
+          logo={store?.logo}
+          templateSlug="kids"
+        />
+      ) : (
+        <HandmadeBagsFooter
+          storeName={store?.name || "Store"}
+          storeSlug={slug}
+          logo={store?.logo}
+        />
+      )}
     </div>
     </ThemeProvider>
   );

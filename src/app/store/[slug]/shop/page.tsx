@@ -9,6 +9,7 @@ import { ThemeProvider, type ThemeData } from "@/components/storefront/ThemeProv
 import { useWishlist } from "@/hooks/useWishlist";
 import { HandmadeBagsHeader, HandmadeBagsFooter } from "@/components/storefront/HandmadeBagsStoreChrome";
 import { CosmeticsHeader, CosmeticsFooter } from "@/components/storefront/CosmeticsTemplateBlocks";
+import { KidsFontLoader, KidsFooterFull, KidsHeader } from "@/components/storefront/KidsTemplateBlocks";
 
 /* ───────── Types ───────── */
 
@@ -315,6 +316,291 @@ export default function ShopPage() {
     slug?.toLowerCase().includes("stacj") ||
     store.name?.toLowerCase().includes("cosmetics") ||
     store.name?.toLowerCase().includes("stacj");
+  const isKidsTemplate = slug === "kids" || store.templateSlug === "kids";
+
+  if (isKidsTemplate) {
+    return (
+      <div className="min-h-screen bg-[#fffef8] text-[#3b3344]" style={{ fontFamily: "'Inter', Arial, sans-serif" }}>
+        <KidsFontLoader />
+        <KidsHeader
+          storeName={store.name}
+          storeSlug={slug}
+          logo={store.logo}
+          templateSlug="kids"
+          cartCount={cartCount}
+          wishlistCount={wishlistCount}
+        />
+
+        <section className="bg-gradient-to-br from-[#fff7df] via-[#fffdf4] to-[#ffeef1] px-4 py-14">
+          <div className="mx-auto max-w-6xl">
+            <div className="flex flex-col gap-6 lg:flex-row lg:items-end lg:justify-between">
+              <div>
+                <p className="text-xs font-bold uppercase tracking-[0.35em] text-[#f5857c]">Kids Shop</p>
+                <h1 className="mt-4 font-serif text-4xl text-[#3b3344] sm:text-5xl">{activeCategoryName || "All Products"}</h1>
+                <p className="mt-4 max-w-2xl text-base leading-8 text-[#6d6277]">
+                  Discover playful clothing, gifts, and everyday essentials from the Kids collection.
+                </p>
+              </div>
+              <div className="rounded-[28px] bg-white px-5 py-4 shadow-[0_16px_40px_rgba(59,51,68,0.06)]">
+                <p className="text-xs font-bold uppercase tracking-[0.25em] text-[#f5857c]">Products</p>
+                <p className="mt-2 text-2xl font-bold text-[#3b3344]">{pagination.total}</p>
+                <p className="text-sm text-[#6d6277]">Bright picks for little ones</p>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <main className="px-4 py-10">
+          <div className="mx-auto grid max-w-6xl gap-8 lg:grid-cols-[280px_minmax(0,1fr)]">
+            <aside className="lg:sticky lg:top-28 lg:h-fit">
+              <div className="rounded-[30px] border border-[#efe6da] bg-white p-6 shadow-[0_20px_50px_rgba(59,51,68,0.05)]">
+                <form onSubmit={handleSearch} className="mb-6">
+                  <label className="mb-2 block text-xs font-bold uppercase tracking-[0.25em] text-[#a69cad]">Search</label>
+                  <div className="flex items-center gap-2 rounded-full border border-[#efe6da] bg-[#fffdf8] px-4 py-3">
+                    <Search className="h-4 w-4 text-[#f5857c]" />
+                    <input
+                      type="text"
+                      value={searchInput}
+                      onChange={(e) => setSearchInput(e.target.value)}
+                      placeholder="Search products..."
+                      className="flex-1 bg-transparent text-sm outline-none placeholder:text-[#a69cad]"
+                    />
+                  </div>
+                </form>
+
+                <div>
+                  <h2 className="mb-3 text-xs font-bold uppercase tracking-[0.25em] text-[#a69cad]">Categories</h2>
+                  <div className="space-y-2">
+                    <button
+                      onClick={() => handleCategoryChange("")}
+                      className={`flex w-full items-center justify-between rounded-2xl px-4 py-3 text-sm font-semibold transition ${
+                        !selectedCategory ? "bg-[#3b3344] text-white" : "bg-[#fffaf1] text-[#3b3344] hover:bg-[#fff4de]"
+                      }`}
+                    >
+                      <span>All Products</span>
+                      <span className="text-xs opacity-70">{pagination.total || "—"}</span>
+                    </button>
+                    {categories
+                      .filter((c) => c._count.products > 0)
+                      .map((cat) => (
+                        <button
+                          key={cat.id}
+                          onClick={() => handleCategoryChange(cat.slug)}
+                          className={`flex w-full items-center justify-between rounded-2xl px-4 py-3 text-sm font-semibold transition ${
+                            selectedCategory === cat.slug ? "bg-[#f5857c] text-white" : "bg-[#fffaf1] text-[#3b3344] hover:bg-[#fff4de]"
+                          }`}
+                        >
+                          <span>{cat.name}</span>
+                          <span className="text-xs opacity-70">{cat._count.products}</span>
+                        </button>
+                      ))}
+                  </div>
+                </div>
+
+                <div className="mt-6 flex flex-wrap gap-2">
+                  {(Object.keys(SORT_LABELS) as SortOption[]).map((key) => (
+                    <button
+                      key={key}
+                      onClick={() => setSort(key)}
+                      className={`rounded-full px-3 py-1.5 text-xs font-semibold transition ${
+                        sort === key ? "bg-[#f5857c] text-white" : "bg-[#fffaf1] text-[#3b3344] hover:bg-[#fff4de]"
+                      }`}
+                    >
+                      {SORT_LABELS[key]}
+                    </button>
+                  ))}
+                </div>
+
+                {hasFilters && (
+                  <button onClick={clearFilters} className="mt-6 w-full rounded-full border border-[#f5857c] px-4 py-2.5 text-sm font-semibold text-[#f5857c] transition hover:bg-[#fff0ee]">
+                    Clear all filters
+                  </button>
+                )}
+              </div>
+            </aside>
+
+            <section>
+              <div className="mb-5 flex flex-wrap items-center gap-3 lg:hidden">
+                <button
+                  onClick={() => setMobileFilters(!mobileFilters)}
+                  className="rounded-full bg-[#3b3344] px-4 py-2 text-sm font-semibold text-white"
+                >
+                  {mobileFilters ? "Hide filters" : "Show filters"}
+                </button>
+                <button
+                  onClick={() => setShowSortMenu(!showSortMenu)}
+                  className="rounded-full border border-[#efe6da] bg-white px-4 py-2 text-sm font-semibold text-[#3b3344]"
+                >
+                  Sort: {SORT_LABELS[sort]}
+                </button>
+              </div>
+
+              {mobileFilters && (
+                <div className="mb-6 rounded-[28px] border border-[#efe6da] bg-white p-5 shadow-[0_20px_50px_rgba(59,51,68,0.05)] lg:hidden">
+                  <form onSubmit={handleSearch} className="mb-5">
+                    <div className="flex items-center gap-2 rounded-full border border-[#efe6da] bg-[#fffdf8] px-4 py-3">
+                      <Search className="h-4 w-4 text-[#f5857c]" />
+                      <input
+                        type="text"
+                        value={searchInput}
+                        onChange={(e) => setSearchInput(e.target.value)}
+                        placeholder="Search products..."
+                        className="flex-1 bg-transparent text-sm outline-none placeholder:text-[#a69cad]"
+                      />
+                    </div>
+                  </form>
+                  <div className="flex flex-wrap gap-2">
+                    <button onClick={() => handleCategoryChange("")} className={`rounded-full px-3 py-1.5 text-xs font-semibold ${!selectedCategory ? "bg-[#3b3344] text-white" : "bg-[#fffaf1] text-[#3b3344]"}`}>All</button>
+                    {categories.filter((c) => c._count.products > 0).map((cat) => (
+                      <button key={cat.id} onClick={() => handleCategoryChange(cat.slug)} className={`rounded-full px-3 py-1.5 text-xs font-semibold ${selectedCategory === cat.slug ? "bg-[#f5857c] text-white" : "bg-[#fffaf1] text-[#3b3344]"}`}>
+                        {cat.name}
+                      </button>
+                    ))}
+                  </div>
+                  {hasFilters && <button onClick={clearFilters} className="mt-4 text-sm font-semibold text-[#f5857c]">Clear filters</button>}
+                </div>
+              )}
+
+              <div className="mb-6 flex flex-wrap items-center gap-2">
+                {activeCategoryName && (
+                  <span className="inline-flex items-center gap-2 rounded-full bg-[#fff0ee] px-4 py-2 text-xs font-semibold text-[#f5857c]">
+                    {activeCategoryName}
+                    <button onClick={() => handleCategoryChange("")}>
+                      <X className="h-3 w-3" />
+                    </button>
+                  </span>
+                )}
+                {searchQuery && (
+                  <span className="inline-flex items-center gap-2 rounded-full bg-[#fff4de] px-4 py-2 text-xs font-semibold text-[#3b3344]">
+                    “{searchQuery}”
+                    <button onClick={() => { setSearchQuery(""); setSearchInput(""); updateParams(selectedCategory, ""); }}>
+                      <X className="h-3 w-3" />
+                    </button>
+                  </span>
+                )}
+              </div>
+
+              {loading && storeData && (
+                <div className="flex items-center justify-center py-20">
+                  <Loader2 className="h-8 w-8 animate-spin text-[#f5857c]" />
+                </div>
+              )}
+
+              {!loading && sortedProducts.length === 0 && (
+                <div className="rounded-[30px] border border-[#efe6da] bg-white px-6 py-20 text-center shadow-[0_20px_50px_rgba(59,51,68,0.05)]">
+                  <ShoppingBag className="mx-auto mb-4 h-12 w-12 text-[#d8c9b7]" />
+                  <h3 className="text-xl font-bold text-[#3b3344]">No products found</h3>
+                  <p className="mt-2 text-sm text-[#6d6277]">
+                    {hasFilters ? "Try adjusting your filters or search terms." : "This store hasn't added any products yet."}
+                  </p>
+                  {hasFilters && (
+                    <button onClick={clearFilters} className="mt-6 rounded-full bg-[#3b3344] px-5 py-2.5 text-sm font-semibold text-white">
+                      Clear filters
+                    </button>
+                  )}
+                </div>
+              )}
+
+              {!loading && sortedProducts.length > 0 && (
+                <>
+                  <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 xl:grid-cols-4">
+                    {sortedProducts.map((product) => {
+                      const hasImage = product.images.length > 0 && product.images[0].url;
+                      const discount = product.compareAtPrice
+                        ? Math.round(((Number(product.compareAtPrice) - Number(product.price)) / Number(product.compareAtPrice)) * 100)
+                        : 0;
+                      const justAdded = addedToCart === product.id;
+
+                      return (
+                        <div key={product.id} className="group">
+                          <Link href={`/store/${slug}/product/${product.slug}`} className="block">
+                            <div className="relative mb-3 aspect-[3/4] overflow-hidden rounded-[30px] bg-white shadow-[0_14px_32px_rgba(59,51,68,0.08)]">
+                              {hasImage ? (
+                                <img
+                                  src={product.images[0].url}
+                                  alt={product.images[0].alt || product.name}
+                                  className="absolute inset-0 h-full w-full object-cover transition duration-500 group-hover:scale-110"
+                                />
+                              ) : (
+                                <div className={`absolute inset-0 flex items-center justify-center bg-gradient-to-br ${getGradient(product.id)}`}>
+                                  <ImageIcon className="h-10 w-10 text-white/50" />
+                                </div>
+                              )}
+                              {discount > 0 && (
+                                <span className="absolute left-3 top-3 rounded-full bg-[#f5857c] px-2.5 py-1 text-[10px] font-bold uppercase tracking-[0.16em] text-white">
+                                  -{discount}%
+                                </span>
+                              )}
+                              {product.isFeatured && (
+                                <span className="absolute left-3 top-3 rounded-full bg-[#3b3344] px-2.5 py-1 text-[10px] font-bold uppercase tracking-[0.16em] text-white">
+                                  Featured
+                                </span>
+                              )}
+                              {!product.inStock && (
+                                <span className="absolute left-3 top-3 rounded-full bg-[#ff7c7c] px-2.5 py-1 text-[10px] font-bold uppercase tracking-[0.16em] text-white">
+                                  Sold Out
+                                </span>
+                              )}
+                              <div className="absolute right-3 top-3 flex gap-2">
+                                <button
+                                  onClick={(e) => { e.preventDefault(); e.stopPropagation(); toggleWishlist(product.id); }}
+                                  className={`flex h-9 w-9 items-center justify-center rounded-full bg-white/90 shadow-sm transition hover:scale-110 ${isWishlisted(product.id) ? "text-[#f5857c]" : "text-[#3b3344]"}`}
+                                >
+                                  <Heart className={`h-4 w-4 ${isWishlisted(product.id) ? "fill-current" : ""}`} />
+                                </button>
+                                <button
+                                  onClick={(e) => { e.preventDefault(); e.stopPropagation(); if (product.inStock) addToCart(product); }}
+                                  disabled={!product.inStock}
+                                  className={`flex h-9 w-9 items-center justify-center rounded-full shadow-sm transition hover:scale-110 disabled:opacity-40 ${justAdded ? "bg-[#5cc48e] text-white" : "bg-white/90 text-[#3b3344]"}`}
+                                >
+                                  {justAdded ? <CheckCircle2 className="h-4 w-4" /> : <ShoppingCart className="h-4 w-4" />}
+                                </button>
+                              </div>
+                            </div>
+                          </Link>
+                          <Link href={`/store/${slug}/product/${product.slug}`}>
+                            <h3 className="text-sm font-semibold text-[#3b3344] transition group-hover:text-[#f5857c]">{product.name}</h3>
+                          </Link>
+                          {product.category && <p className="mt-1 text-[10px] uppercase tracking-[0.18em] text-[#a69cad]">{product.category.name}</p>}
+                          <div className="mt-2 flex items-center gap-2">
+                            <span className="text-base font-bold text-[#3b3344]">{formatCurrency(Number(product.price), currency)}</span>
+                            {product.compareAtPrice && <span className="text-xs text-[#a69cad] line-through">{formatCurrency(Number(product.compareAtPrice), currency)}</span>}
+                          </div>
+                        </div>
+                      );
+                    })}
+                  </div>
+
+                  {pagination.page < pagination.pages && (
+                    <div className="mt-10 text-center">
+                      <button
+                        onClick={() => fetchProducts(pagination.page + 1, true)}
+                        disabled={loadingMore}
+                        className="inline-flex items-center gap-2 rounded-full bg-[#3b3344] px-8 py-3 text-sm font-bold text-white shadow-lg transition hover:bg-[#2f2937] disabled:opacity-50"
+                      >
+                        {loadingMore ? <><Loader2 className="h-4 w-4 animate-spin" /> Loading...</> : <>Load More Products</>}
+                      </button>
+                      <p className="mt-3 text-xs text-[#a69cad]">
+                        Page {pagination.page} of {pagination.pages}
+                      </p>
+                    </div>
+                  )}
+                </>
+              )}
+            </section>
+          </div>
+        </main>
+
+        <KidsFooterFull
+          storeName={store.name}
+          storeSlug={slug}
+          logo={store.logo}
+          templateSlug="kids"
+          description={store.description || "Bright, playful kids fashion and gifts with a premium WoodMart-inspired finish."}
+        />
+      </div>
+    );
+  }
 
   return (
     <ThemeProvider theme={storeData.theme}>

@@ -131,15 +131,4 @@ export const KIDS_TEMPLATE_PRESET: TemplateBlock[] = [
       backgroundColor: "#faf8f5",
     },
   },
-  {
-    id: "kids-footer", type: "kidsFooterFull",
-    props: {
-      description: "We create organic clothes for babies and children. Quality, comfort, and style in every piece.",
-      contact: {
-        address: "913 Wyandotte St, Kansas City, MO 64105",
-        phone: "(064) 332-1233",
-        email: "hello@store.com",
-      },
-    },
-  },
 ];

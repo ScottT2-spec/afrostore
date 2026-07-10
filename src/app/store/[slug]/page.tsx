@@ -27,7 +27,7 @@ import { CosmeticsStoreContext } from "@/components/storefront/CosmeticsTemplate
 import { GroceryStoreContext } from "@/components/storefront/GroceryTemplateBlocks";
 import { HealthStoreContext, HealthHeader } from "@/components/storefront/HealthTemplateBlocks";
 import { InteriorStoreContext } from "@/components/storefront/InteriorDesignTemplateBlocks";
-import { KidsStoreContext, KidsHeader } from "@/components/storefront/KidsTemplateBlocks";
+import { KidsStoreContext, KidsHeader, KidsFooterFull } from "@/components/storefront/KidsTemplateBlocks";
 import { MakeupStoreContext } from "@/components/storefront/MakeupTemplateBlocks";
 import { PerfumesStoreContext } from "@/components/storefront/PerfumesTemplateBlocks";
 import { FashionHeader, FashionFooter, type NavItem } from "@/components/storefront/FashionStoreChrome";
@@ -430,7 +430,7 @@ export default function StorePage() {
     ? parsePageContent(homePage.content)
     : { blocks: [], settings: {} };
   const homePageSettings = homePage ? getResolvedPageSettings(homePage, homeContent.settings, draftCustomization) : {};
-  const homeBlocks: BuilderBlock[] = homeContent.blocks;
+  const homeBlocks: BuilderBlock[] = homeContent.blocks.filter((block) => block.type !== "kidsFooterFull");
   const hasHomeContent = homeBlocks.length > 0;
   const homeHasProductGrid = homeBlocks.some((b) => b.type === "productGrid");
   const isFashionTemplate = data.templateSlug === "fashion" || data.templateSlug === "fashion-colored" || data.templateSlug === "handmade-bags" || data.templateSlug === "t-shirts-prints" || homeBlocks.some((b) => b.type.startsWith("fashion"));
@@ -548,6 +548,7 @@ export default function StorePage() {
           storeName={store.name}
           storeSlug={slug}
           logo={store.logo}
+          templateSlug={data.templateSlug || undefined}
           cartCount={cartCount}
           wishlistCount={wishlistCount}
           searchQuery={searchQuery}
@@ -771,8 +772,16 @@ export default function StorePage() {
         </div>
       )}
 
-      {/* Footer — fashion handles its own; all other templates get FashionFooter */}
-      {!isFashionTemplate && !isKidsTemplate && !isHealthTemplate && (
+      {/* Footer — fashion handles its own; kids and all other templates render their own footer */}
+      {isKidsTemplate ? (
+        <KidsFooterFull
+          storeName={store.name}
+          storeSlug={slug}
+          logo={store.logo}
+          templateSlug="kids"
+          description={store.description || "Playful kidswear, gifts, and accessories with a premium WoodMart-inspired finish."}
+        />
+      ) : !isFashionTemplate ? (
         <FashionFooter
           storeName={store.name}
           storeSlug={slug}
@@ -785,7 +794,7 @@ export default function StorePage() {
             email: (data.socialLinks as any)?.email || undefined,
           }}
         />
-      )}
+      ) : null}
 
       {/* Floating WhatsApp */}
       {!isLanding && settings.whatsappOrdering && whatsappNumber && (

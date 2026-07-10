@@ -1,13 +1,15 @@
 import { prisma } from "@/lib/db";
 import { notFound } from "next/navigation";
+import Link from "next/link";
 import { RenderTemplateBlocks, type TemplateBlock } from "@/components/storefront/TemplateBlockRenderer";
 import { HandmadeBagsHeader, HandmadeBagsFooter } from "@/components/storefront/HandmadeBagsStoreChrome";
-import { ThemeProvider } from "@/components/storefront/ThemeProvider";
+import { ThemeProvider, type ThemeData } from "@/components/storefront/ThemeProvider";
 import { applyPageCustomization, buildPageBackgroundStyle, filterVisiblePages, getResolvedPageSettings, normalizeSiteCustomization, type SiteCustomizationDocument } from "@/lib/site-customization";
 import { parsePageContent } from "@/lib/page-content";
 import { RenderBlocks, type BuilderBlock } from "@/components/storefront/BlockRenderer";
 import { HANDMADE_BAGS_PRESET } from "@/lib/templates/presets/handmade-bags-preset";
 import { serializeProductsForClient } from "@/lib/serialize-products";
+import { KidsFontLoader, KidsFooterFull, KidsHeader } from "@/components/storefront/KidsTemplateBlocks";
 
 type Props = {
   params: Promise<{ slug: string }>;
@@ -163,6 +165,15 @@ async function getStoreData(slug: string) {
     },
     include: {
       customizations: true,
+      templates: {
+        include: {
+          template: true,
+        },
+        where: {
+          isActive: true,
+        },
+        take: 1,
+      },
       pages: {
         where: { slug: "about" },
         take: 1,
@@ -244,19 +255,148 @@ export default async function AboutPage({ params }: Props) {
   }
 
   const pageSettings = aboutPage ? getResolvedPageSettings(aboutPage, pageContent.settings, customization) : {};
-  const themeData = {
-    primaryColor: customization?.themeSettings?.colors?.primary || "#c27843",
-    secondaryColor: customization?.themeSettings?.colors?.secondary || "#242424",
-    accentColor: customization?.themeSettings?.colors?.accent || "#767676",
-    backgroundColor: customization?.themeSettings?.colors?.background || "#ffffff",
-    textColor: customization?.themeSettings?.colors?.text || "#242424",
+  const themeData: ThemeData = {
+    id: "kids-about-page",
+    name: "Kids About Page",
+    slug: "kids-about-page",
+    config: {
+      colors: {
+        primary: customization?.themeSettings?.colors?.primary || "#c27843",
+        secondary: customization?.themeSettings?.colors?.secondary || "#242424",
+        accent: customization?.themeSettings?.colors?.accent || "#767676",
+        background: customization?.themeSettings?.colors?.background || "#ffffff",
+        text: customization?.themeSettings?.colors?.text || "#242424",
+      },
+    },
   };
 
+  const activeTemplateSlug = store.templates?.[0]?.template?.slug || null;
+  const isKidsTemplate =
+    activeTemplateSlug === "kids" ||
+    slug === "kids" ||
+    store.slug === "kids" ||
+    store.name?.toLowerCase().includes("kids");
+
+  if (isKidsTemplate) {
+    return (
+      <div className="min-h-screen bg-[#fffdf7] text-[#242424]">
+        <KidsFontLoader />
+        <KidsHeader
+          storeName={store.name}
+          storeSlug={slug}
+          logo={store.logo}
+          templateSlug="kids"
+        />
+        <main>
+          <section className="relative overflow-hidden bg-gradient-to-br from-[#fff5f1] via-white to-[#f8fbff]">
+            <div className="mx-auto grid max-w-[1222px] gap-10 px-4 py-16 md:grid-cols-[1.05fr_0.95fr] md:px-6 md:py-24">
+              <div className="flex flex-col justify-center">
+                <p className="mb-4 text-sm font-semibold uppercase tracking-[0.28em] text-[#f5857c]">About Us</p>
+                <h1 className="max-w-xl text-4xl font-bold leading-tight text-[#242424] md:text-6xl">We create organic clothes for babies</h1>
+                <p className="mt-6 max-w-xl text-[16px] leading-8 text-[#767676]">
+                  Far far away, behind the word mountains, far from the countries Vokalia and Consonantia, there live the blind texts. Separated they live in Bookmarks grove right at the coast of the Semantics, a large language ocean. Far far away, behind the word mountains, far from the countries Vokalia, there live the blind texts.
+                </p>
+                <p className="mt-4 max-w-xl text-[16px] leading-8 text-[#767676]">
+                  Separated they live in Bookmarks grove right at the coast of the Semantics.
+                </p>
+              </div>
+              <div className="grid gap-4 sm:grid-cols-2">
+                <img src="https://images.unsplash.com/photo-1522771930-78848d9293e8?w=800&h=1000&fit=crop" alt="Kids collection" className="h-full w-full rounded-[28px] object-cover shadow-lg" />
+                <div className="grid gap-4">
+                  <img src="https://images.unsplash.com/photo-1519689680058-324335c77eba?w=800&h=480&fit=crop" alt="Kids knitwear" className="h-full w-full rounded-[28px] object-cover shadow-lg" />
+                  <div className="rounded-[28px] bg-white p-6 shadow-lg">
+                    <p className="text-sm font-semibold uppercase tracking-[0.22em] text-[#f5857c]">Meet our team</p>
+                    <p className="mt-3 text-sm leading-7 text-[#767676]">
+                      Websites in professional use templating systems. Commercial publishing platforms and content management systems ensure show.
+                    </p>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </section>
+
+          <section className="mx-auto max-w-[1222px] px-4 py-16 md:px-6">
+            <div className="grid gap-6 md:grid-cols-2 xl:grid-cols-4">
+              {[
+                { title: "Darlene Robertson", text: "Director" },
+                { title: "Kathryn Murphy", text: "Marketing manager" },
+                { title: "Jenny Wilson", text: "Product designer" },
+                { title: "Kristin Watson", text: "CEO" },
+              ].map((item) => (
+                <div key={item.title} className="rounded-[24px] bg-white p-8 shadow-[0_8px_32px_rgba(0,0,0,0.06)]">
+                  <h2 className="text-xl font-bold text-[#242424]">{item.title}</h2>
+                  <p className="mt-3 text-sm leading-7 text-[#767676]">{item.text}</p>
+                </div>
+              ))}
+            </div>
+          </section>
+
+          <section className="bg-[#faf8f5]">
+            <div className="mx-auto grid max-w-[1222px] gap-10 px-4 py-16 md:grid-cols-[0.9fr_1.1fr] md:px-6">
+              <div>
+                <p className="text-sm font-semibold uppercase tracking-[0.28em] text-[#f5857c]">How we work</p>
+                <h2 className="mt-4 text-3xl font-bold text-[#242424] md:text-4xl">How we work</h2>
+              </div>
+              <div className="space-y-5 text-[16px] leading-8 text-[#767676]">
+                <p>
+                  If that’s what you think how bout the other way around? How can you evaluate content without design? No typography, no colors, no layout, no styles, all those things that convey the important signals that go beyond the mere textual, hierarchies of information, weight, emphasis, oblique stresses, priorities, all those subtle cues that also have visual and emotional.
+                </p>
+                <p>
+                  Accept that it’s sometimes okay to focus just on the content or just on the design. Rigid proponents of content strategy may shun the use of dummy copy but then designers might want to ask them to provide style sheets with the copy decks they supply that are in tune with the design direction they require. Using dummy content or fake information in the Web design.
+                </p>
+              </div>
+            </div>
+          </section>
+
+          <section className="mx-auto max-w-[1222px] px-4 py-16 md:px-6">
+            <div className="grid gap-10 md:grid-cols-[0.95fr_1.05fr]">
+              <div>
+                <p className="text-sm font-semibold uppercase tracking-[0.28em] text-[#f5857c]">What we do</p>
+                <h2 className="mt-4 text-3xl font-bold text-[#242424] md:text-4xl">What we do</h2>
+                <p className="mt-4 text-[16px] leading-8 text-[#767676]">
+                  Accept that it’s sometimes okay to focus just on the content or just on the design. Rigid proponents of content strategy may shun the use of dummy copy but then designers might want to ask them to provide style sheets with the copy decks they supply that are in tune with the design direction they require. Using dummy content or fake information in the Web design.
+                </p>
+              </div>
+              <div className="space-y-4">
+                <h3 className="text-lg font-bold text-[#242424]">Some of your questions answered here</h3>
+                <p className="text-sm leading-7 text-[#767676]">We get a lot of questions about our course. You can get any answers.</p>
+                <div className="space-y-4 rounded-[28px] bg-white p-6 shadow-[0_8px_32px_rgba(0,0,0,0.06)]">
+                  {[
+                    ["Why choose organic cotton fabrics and certified factories?", "A seemingly elegant design can quickly begin to bloat with unexpected content or break under the weight of actual activity. Fake data can ensure a nice looking layout but it doesn’t reflect what a living, breathing application must endure. Real data does."],
+                    ["How is your product packaged?", "Websites in professional use templating systems. Commercial publishing platforms and content management systems ensure that you can show different text, different data using the same template. When it’s about controlling hundreds of articles, product pages for web shops."],
+                    ["What’s the best size to buy for a baby shower gift?", "If the copy becomes distracting in the design then you are doing something wrong or they are discussing copy changes. It might be a bit annoying but you could tell them that that discussion would be best suited for another time. At worst the discussion is at least working towards the final goal of your site where questions about lorem ipsum don’t."],
+                  ].map(([q, a]) => (
+                    <div key={q} className="rounded-[22px] border border-[#efe6da] bg-[#fffdf8] p-5">
+                      <h4 className="font-semibold text-[#242424]">{q}</h4>
+                      <p className="mt-2 text-sm leading-7 text-[#767676]">{a}</p>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </div>
+          </section>
+        </main>
+        <KidsFooterFull
+          storeName={store.name}
+          storeSlug={slug}
+          templateSlug="kids"
+          logo={store.logo}
+          description={store.description || "Playful kidswear, gifts, and accessories with a premium WoodMart-inspired finish."}
+          contact={{
+            address: "913 Wyandotte St, Kansas City, MO 64105",
+            phone: "(064) 332-1233",
+            email: "hello@store.com",
+          }}
+        />
+      </div>
+    );
+  }
+
   return (
-    <ThemeProvider initialTheme={themeData}>
+    <ThemeProvider theme={themeData}>
       <HandmadeBagsHeader
         storeName={store.name}
-        storeSlug={store.slug}
+        storeSlug={store.slug || slug}
         logo={store.logo}
         isLanding={false}
       />
@@ -269,9 +409,9 @@ export default async function AboutPage({ params }: Props) {
       </div>
       <HandmadeBagsFooter
         storeName={store.name}
-        storeSlug={store.slug}
+        storeSlug={store.slug || slug}
         logo={store.logo}
-        description={store.description}
+        description={store.description ?? undefined}
       />
     </ThemeProvider>
   );

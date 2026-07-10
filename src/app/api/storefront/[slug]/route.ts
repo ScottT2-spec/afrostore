@@ -5,6 +5,7 @@ import { buildThemeDataWithCustomization, loadSiteCustomizationSafely } from "@/
 import { mergeStoredTemplatePages } from "@/lib/templates/site-instance";
 import { ensureVegetablePages } from "@/lib/templates/vegetable-pages";
 import type { Prisma } from "@/generated/prisma";
+import type { PageType } from "@/generated/prisma";
 
 type Params = { params: Promise<{ slug: string }> };
 
@@ -31,6 +32,18 @@ async function resolveStore(slug: string) {
       ],
     },
   });
+}
+
+function appendKidsPages(
+  pages: Array<{ id: string; title: string; slug: string; type: PageType; content: Prisma.JsonValue | null; template: string | null }>
+) {
+  const kidsPages = [
+    { id: "kids-about-us", title: "About Us", slug: "about-us", type: "CUSTOM" as PageType, content: { blocks: [], settings: {} } as Prisma.JsonObject, template: "kids" },
+    { id: "kids-contact-us", title: "Contact Us", slug: "contact-us", type: "CUSTOM" as PageType, content: { blocks: [], settings: {} } as Prisma.JsonObject, template: "kids" },
+  ] satisfies Array<{ id: string; title: string; slug: string; type: PageType; content: Prisma.JsonObject; template: string }>;
+
+  const knownSlugs = new Set(pages.map((page) => page.slug));
+  return [...pages, ...kidsPages.filter((page) => !knownSlugs.has(page.slug))];
 }
 
 // GET /api/storefront/:slug — public store data
@@ -309,7 +322,7 @@ export async function GET(req: NextRequest, { params }: Params) {
       console.error("Storefront theme build error:", themeError);
     }
 
-    const publicPages = mergeStoredTemplatePages(
+    let publicPages = mergeStoredTemplatePages(
       pages.map((page) => ({
         ...page,
         content: page.content,
@@ -323,6 +336,10 @@ export async function GET(req: NextRequest, { params }: Params) {
         ? { blocks: page.content, settings: {} }
         : page.content,
     }));
+
+    if (activeTemplate?.template?.slug === "kids") {
+      publicPages = appendKidsPages(publicPages as any) as any;
+    }
 
     return success({
       store: {

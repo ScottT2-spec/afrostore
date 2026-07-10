@@ -5,6 +5,7 @@ import { useParams } from "next/navigation";
 import Link from "next/link";
 import { ArrowLeft, ArrowRight, Loader2, Search, X } from "lucide-react";
 import { CosmeticsHeader, CosmeticsFooter } from "@/components/storefront/CosmeticsTemplateBlocks";
+import { KidsFontLoader, KidsFooterFull, KidsHeader } from "@/components/storefront/KidsTemplateBlocks";
 
 interface BlogPost {
   id: string;
@@ -92,6 +93,164 @@ export default function StoreBlogListingPage() {
   const categories = data?.categories || [];
   const pagination = data?.pagination;
   const storeName = data?.site?.name || "Store";
+  const isKidsTemplate = slug === "kids";
+
+  if (isKidsTemplate) {
+    const kidsCategories = ["All", ...categories];
+
+    return (
+      <div className="min-h-screen bg-[#fffef8] text-[#3b3344]" style={{ fontFamily: "'Inter', Arial, sans-serif" }}>
+        <KidsFontLoader />
+        <KidsHeader
+          storeName={storeName}
+          storeSlug={slug}
+          templateSlug="kids"
+          cartCount={0}
+          wishlistCount={0}
+        />
+
+        <section className="bg-gradient-to-br from-[#fff7df] via-[#fffdf4] to-[#ffeef1] px-4 py-16">
+          <div className="mx-auto max-w-6xl text-center">
+            <p className="text-xs font-bold uppercase tracking-[0.35em] text-[#f5857c]">Kids Blog</p>
+            <h1 className="mt-4 font-serif text-4xl text-[#3b3344] sm:text-5xl">Ideas, stories, and cheerful inspiration</h1>
+            <p className="mx-auto mt-5 max-w-2xl text-base leading-8 text-[#6d6277]">
+              Browse the latest Kids demo posts for styling tips, playful gift ideas, and practical guides for parents.
+            </p>
+            <div className="mx-auto mt-8 flex max-w-3xl flex-wrap items-center justify-center gap-3">
+              {kidsCategories.map((cat) => {
+                const active = cat === "All" ? !category : category === cat;
+                return (
+                  <button
+                    key={cat}
+                    onClick={() => { setCategory(cat === "All" ? null : cat); setPage(1); }}
+                    className={`rounded-full px-5 py-2 text-sm font-semibold transition ${
+                      active ? "bg-[#f5857c] text-white shadow-lg shadow-[#f5857c]/20" : "bg-white text-[#3b3344] hover:text-[#f5857c]"
+                    }`}
+                  >
+                    {cat}
+                  </button>
+                );
+              })}
+            </div>
+          </div>
+        </section>
+
+        <section className="px-4 py-16">
+          <div className="mx-auto max-w-6xl">
+            <div className="mb-8 flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
+              <form
+                onSubmit={(e) => {
+                  e.preventDefault();
+                  setSearch(searchInput);
+                  setPage(1);
+                }}
+                className="flex w-full max-w-xl items-center gap-3 rounded-full border border-[#efe6da] bg-white px-5 py-3 shadow-[0_16px_40px_rgba(59,51,68,0.05)]"
+              >
+                <Search className="h-4 w-4 text-[#f5857c]" />
+                <input
+                  type="text"
+                  value={searchInput}
+                  onChange={(e) => setSearchInput(e.target.value)}
+                  placeholder="Search Kids articles..."
+                  className="flex-1 bg-transparent text-sm outline-none placeholder:text-[#a69cad]"
+                />
+                {search && (
+                  <button type="button" onClick={() => { setSearch(""); setSearchInput(""); setPage(1); }} className="text-[#a69cad] transition hover:text-[#f5857c]">
+                    <X className="h-4 w-4" />
+                  </button>
+                )}
+              </form>
+              <p className="text-sm text-[#6d6277]">
+                {pagination?.total ? `${pagination.total} article${pagination.total === 1 ? "" : "s"} found` : "No posts yet"}
+              </p>
+            </div>
+
+            {blogs.length === 0 ? (
+              <div className="rounded-[32px] border border-[#efe6da] bg-white px-6 py-20 text-center shadow-[0_20px_50px_rgba(59,51,68,0.05)]">
+                <p className="text-lg font-semibold text-[#3b3344]">No blog posts found.</p>
+                {(category || search) && (
+                  <button
+                    onClick={() => { setCategory(null); setSearch(""); setSearchInput(""); setPage(1); }}
+                    className="mt-4 rounded-full bg-[#f5857c] px-5 py-2 text-sm font-semibold text-white transition hover:bg-[#ef7067]"
+                  >
+                    Clear filters
+                  </button>
+                )}
+              </div>
+            ) : (
+              <div className="grid gap-8 md:grid-cols-2 xl:grid-cols-3">
+                {blogs.map((post) => (
+                  <Link key={post.id} href={`/store/${slug}/blog/${post.slug}`} className="group overflow-hidden rounded-[30px] bg-white shadow-[0_18px_50px_rgba(59,51,68,0.06)] transition-transform hover:-translate-y-1">
+                    <div className="relative aspect-[4/3] overflow-hidden bg-[#fff7df]">
+                      {post.coverImage ? (
+                        <img src={post.coverImage} alt={post.title} className="h-full w-full object-cover transition duration-500 group-hover:scale-105" loading="lazy" />
+                      ) : (
+                        <div className="flex h-full w-full items-center justify-center bg-gradient-to-br from-[#f5857c] to-[#f7b267] text-5xl font-bold text-white/60">
+                          {post.title.charAt(0)}
+                        </div>
+                      )}
+                      {post.category && (
+                        <span className="absolute left-4 top-4 rounded-full bg-white/95 px-3 py-1 text-[11px] font-bold uppercase tracking-[0.2em] text-[#f5857c]">
+                          {post.category}
+                        </span>
+                      )}
+                      {(post.publishedAt || post.createdAt) && (
+                        <span className="absolute right-4 top-4 rounded-2xl bg-[#3b3344] px-3 py-2 text-center text-white">
+                          <span className="block text-lg font-bold leading-none">{new Date(post.publishedAt || post.createdAt).getDate()}</span>
+                          <span className="block text-[10px] uppercase tracking-[0.2em] opacity-80">
+                            {new Date(post.publishedAt || post.createdAt).toLocaleString("en-US", { month: "short" })}
+                          </span>
+                        </span>
+                      )}
+                    </div>
+                    <div className="p-6">
+                      <h2 className="font-serif text-2xl text-[#3b3344] transition group-hover:text-[#f5857c]">{post.title}</h2>
+                      <div className="mt-3 text-xs font-medium uppercase tracking-[0.18em] text-[#a69cad]">
+                        {post.author && <span>By {post.author}</span>}
+                        {post.author && (post.publishedAt || post.createdAt) && <span> · </span>}
+                        {(post.publishedAt || post.createdAt) && <span>{formatDate(post.publishedAt || post.createdAt)}</span>}
+                      </div>
+                      {post.excerpt && <p className="mt-4 text-sm leading-7 text-[#6d6277]">{post.excerpt.length > 140 ? `${post.excerpt.slice(0, 140)}...` : post.excerpt}</p>}
+                      <span className="mt-5 inline-flex items-center gap-2 text-sm font-semibold text-[#f5857c]">
+                        Continue reading <ArrowRight className="h-4 w-4" />
+                      </span>
+                    </div>
+                  </Link>
+                ))}
+              </div>
+            )}
+
+            {pagination && pagination.pages > 1 && (
+              <div className="mt-12 flex items-center justify-center gap-3">
+                <button
+                  onClick={() => setPage(Math.max(1, page - 1))}
+                  disabled={page <= 1}
+                  className="rounded-full border border-[#efe6da] bg-white px-5 py-2.5 text-sm font-semibold text-[#3b3344] transition disabled:cursor-default disabled:opacity-40"
+                >
+                  Previous
+                </button>
+                <span className="text-sm text-[#6d6277]">Page {page} of {pagination.pages}</span>
+                <button
+                  onClick={() => setPage(Math.min(pagination.pages, page + 1))}
+                  disabled={!pagination.hasMore}
+                  className="rounded-full border border-[#efe6da] bg-white px-5 py-2.5 text-sm font-semibold text-[#3b3344] transition disabled:cursor-default disabled:opacity-40"
+                >
+                  Next
+                </button>
+              </div>
+            )}
+          </div>
+        </section>
+
+        <KidsFooterFull
+          storeName={storeName}
+          storeSlug={slug}
+          templateSlug="kids"
+          description="Bright kidswear stories, seasonal ideas, and playful product inspiration for the whole family."
+        />
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-white" style={{ fontFamily: "'Lato', Arial, sans-serif" }}>

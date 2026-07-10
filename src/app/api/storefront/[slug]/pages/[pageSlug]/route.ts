@@ -4,6 +4,7 @@ import { asRecord } from "@/lib/json";
 import { buildThemeDataWithCustomization, loadSiteCustomizationSafely } from "@/lib/site-customization";
 import { mergeStoredTemplatePages } from "@/lib/templates/site-instance";
 import { ensureVegetablePages } from "@/lib/templates/vegetable-pages";
+import type { PageType, Prisma } from "@/generated/prisma";
 
 type Params = { params: Promise<{ slug: string; pageSlug: string }> };
 
@@ -13,6 +14,45 @@ function success(data: unknown, status = 200) {
 
 function notFound(message: string) {
   return NextResponse.json({ success: false, error: message }, { status: 404 });
+}
+
+function buildKidsSyntheticPage(pageSlug: string): {
+  id: string;
+  title: string;
+  slug: string;
+  type: PageType;
+  template: string;
+  content: Prisma.JsonValue;
+  metaTitle: string;
+  metaDescription: string;
+} | null {
+  if (pageSlug === "about-us") {
+    return {
+      id: "kids-about-us",
+      title: "About Us",
+      slug: "about-us",
+      type: "CUSTOM" as PageType,
+      template: "kids",
+      content: { blocks: [], settings: {} },
+      metaTitle: "About Us",
+      metaDescription: "About the Kids collection",
+    };
+  }
+
+  if (pageSlug === "contact-us") {
+    return {
+      id: "kids-contact-us",
+      title: "Contact Us",
+      slug: "contact-us",
+      type: "CUSTOM" as PageType,
+      template: "kids",
+      content: { blocks: [], settings: {} },
+      metaTitle: "Contact Us",
+      metaDescription: "Get in touch with the Kids collection",
+    };
+  }
+
+  return null;
 }
 
 // GET /api/storefront/:slug/pages/:pageSlug — public page content + full store context
@@ -134,7 +174,8 @@ export async function GET(_req: NextRequest, { params }: Params) {
     ]);
 
     const resolvedCustomization = customization;
-    const mergedPages = mergeStoredTemplatePages(page ? [page] : [], activeTemplate?.pages);
+    const syntheticPage = activeTemplate?.template?.slug === "kids" ? buildKidsSyntheticPage(pageSlug) : null;
+    const mergedPages = mergeStoredTemplatePages(page ? [page] : syntheticPage ? [syntheticPage] : [], activeTemplate?.pages);
     const fallbackPage = mergedPages.find((item) => item.slug === pageSlug) || mergedPages[0];
     if (!fallbackPage) return notFound("Page not found");
 

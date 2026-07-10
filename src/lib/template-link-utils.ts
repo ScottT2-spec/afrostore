@@ -41,10 +41,14 @@ export function resolveStoreLink(link: string | null | undefined, storeSlug: str
     "my-account": `${base}/my-account`,
     "order-tracking": `${base}/order-tracking`,
     contact: `${base}/contact`,
+    "contact-us": `${base}/contact-us`,
     about: `${base}/about`,
+    "about-us": `${base}/about-us`,
     "our-story": `${base}/our-story`,
     faq: `${base}/faq`,
     policy: `${base}/policy`,
+    gifts: `${base}/product-category/gifts`,
+    "product-category/gifts": `${base}/product-category/gifts`,
   };
 
   if (routeMap[clean]) return routeMap[clean];

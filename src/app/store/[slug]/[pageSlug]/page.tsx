@@ -13,6 +13,7 @@ import { useWishlist } from "@/hooks/useWishlist";
 import { applyPageCustomization, buildPageBackgroundStyle, buildThemeDataWithCustomization, filterVisiblePages, getResolvedPageSettings, normalizeSiteCustomization, type SiteCustomizationDocument } from "@/lib/site-customization";
 import { VegetableAboutPage, VegetableContactPage, VegetableMenuPage, VegetableRecipePage, VegetableReservationPage } from "@/components/storefront/VegetableTemplatePages";
 import { VegetableFooter, VegetableHeader } from "@/components/storefront/VegetableStoreChrome";
+import { KidsFontLoader, KidsFooterFull, KidsHeader } from "@/components/storefront/KidsTemplateBlocks";
 
 /* ─── TYPES ─────────────────────────────────────────────────── */
 
@@ -192,6 +193,278 @@ export default function StorefrontPage() {
   const navPages = customizedPages
     .filter((p) => p.type !== "HOME")
     .sort((a, b) => (navPageOrder[a.type] ?? 99) - (navPageOrder[b.type] ?? 99));
+
+  const isKidsTemplate = data.templateSlug === "kids" || slug === "kids" || data.store.slug === "kids" || data.store.name?.toLowerCase().includes("kids");
+
+  if (isKidsTemplate) {
+    if (pageSlug === "about-us") {
+      return (
+        <ThemeProvider theme={resolvedTheme}>
+          <div className="min-h-screen bg-[#fffdf7] text-[#242424]">
+            <KidsFontLoader />
+            <KidsHeader
+              storeName={store.name}
+              storeSlug={slug}
+              logo={store.logo}
+              templateSlug="kids"
+              cartCount={cartCount}
+              wishlistCount={wishlistCount}
+            />
+            <main>
+              <section className="relative overflow-hidden bg-gradient-to-br from-[#fff5f1] via-white to-[#f8fbff]">
+                <div className="mx-auto grid max-w-[1222px] gap-10 px-4 py-16 md:grid-cols-[1.05fr_0.95fr] md:px-6 md:py-24">
+                  <div className="flex flex-col justify-center">
+                    <p className="mb-4 text-sm font-semibold uppercase tracking-[0.28em] text-[#f5857c]">About Us</p>
+                    <h1 className="max-w-xl text-4xl font-bold leading-tight text-[#242424] md:text-6xl">We create organic clothes for babies</h1>
+                    <p className="mt-6 max-w-xl text-[16px] leading-8 text-[#767676]">
+                      Far far away, behind the word mountains, far from the countries Vokalia and Consonantia, there live the blind texts. Separated they live in Bookmarks grove right at the coast of the Semantics, a large language ocean. Far far away, behind the word mountains, far from the countries Vokalia, there live the blind texts.
+                    </p>
+                    <p className="mt-4 max-w-xl text-[16px] leading-8 text-[#767676]">
+                      Separated they live in Bookmarks grove right at the coast of the Semantics.
+                    </p>
+                  </div>
+                  <div className="grid gap-4 sm:grid-cols-2">
+                    <img src="https://images.unsplash.com/photo-1522771930-78848d9293e8?w=800&h=1000&fit=crop" alt="Kids collection" className="h-full w-full rounded-[28px] object-cover shadow-lg" />
+                    <div className="grid gap-4">
+                      <img src="https://images.unsplash.com/photo-1519689680058-324335c77eba?w=800&h=480&fit=crop" alt="Kids knitwear" className="h-full w-full rounded-[28px] object-cover shadow-lg" />
+                      <div className="rounded-[28px] bg-white p-6 shadow-lg">
+                        <p className="text-sm font-semibold uppercase tracking-[0.22em] text-[#f5857c]">Meet our team</p>
+                        <p className="mt-3 text-sm leading-7 text-[#767676]">
+                          Websites in professional use templating systems. Commercial publishing platforms and content management systems ensure show.
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </section>
+
+              <section className="mx-auto max-w-[1222px] px-4 py-16 md:px-6">
+                <div className="grid gap-6 md:grid-cols-2 xl:grid-cols-4">
+                  {[
+                    { title: "Darlene Robertson", text: "Director" },
+                    { title: "Kathryn Murphy", text: "Marketing manager" },
+                    { title: "Jenny Wilson", text: "Product designer" },
+                    { title: "Kristin Watson", text: "CEO" },
+                  ].map((item) => (
+                    <div key={item.title} className="rounded-[24px] bg-white p-8 shadow-[0_8px_32px_rgba(0,0,0,0.06)]">
+                      <h2 className="text-xl font-bold text-[#242424]">{item.title}</h2>
+                      <p className="mt-3 text-sm leading-7 text-[#767676]">{item.text}</p>
+                    </div>
+                  ))}
+                </div>
+              </section>
+
+              <section className="bg-[#faf8f5]">
+                <div className="mx-auto grid max-w-[1222px] gap-10 px-4 py-16 md:grid-cols-[0.9fr_1.1fr] md:px-6">
+                  <div>
+                    <p className="text-sm font-semibold uppercase tracking-[0.28em] text-[#f5857c]">How we work</p>
+                    <h2 className="mt-4 text-3xl font-bold text-[#242424] md:text-4xl">How we work</h2>
+                  </div>
+                  <div className="space-y-5 text-[16px] leading-8 text-[#767676]">
+                    <p>
+                      If that’s what you think how bout the other way around? How can you evaluate content without design? No typography, no colors, no layout, no styles, all those things that convey the important signals that go beyond the mere textual, hierarchies of information, weight, emphasis, oblique stresses, priorities, all those subtle cues that also have visual and emotional.
+                    </p>
+                    <p>
+                      Accept that it’s sometimes okay to focus just on the content or just on the design. Rigid proponents of content strategy may shun the use of dummy copy but then designers might want to ask them to provide style sheets with the copy decks they supply that are in tune with the design direction they require. Using dummy content or fake information in the Web design.
+                    </p>
+                  </div>
+                </div>
+              </section>
+
+              <section className="mx-auto max-w-[1222px] px-4 py-16 md:px-6">
+                <div className="grid gap-10 md:grid-cols-[0.95fr_1.05fr]">
+                  <div>
+                    <p className="text-sm font-semibold uppercase tracking-[0.28em] text-[#f5857c]">What we do</p>
+                    <h2 className="mt-4 text-3xl font-bold text-[#242424] md:text-4xl">What we do</h2>
+                    <p className="mt-4 text-[16px] leading-8 text-[#767676]">
+                      Accept that it’s sometimes okay to focus just on the content or just on the design. Rigid proponents of content strategy may shun the use of dummy copy but then designers might want to ask them to provide style sheets with the copy decks they supply that are in tune with the design direction they require. Using dummy content or fake information in the Web design.
+                    </p>
+                  </div>
+                  <div className="space-y-4">
+                    <h3 className="text-lg font-bold text-[#242424]">Some of your questions answered here</h3>
+                    <p className="text-sm leading-7 text-[#767676]">We get a lot of questions about our course. You can get any answers.</p>
+                    <div className="space-y-4 rounded-[28px] bg-white p-6 shadow-[0_8px_32px_rgba(0,0,0,0.06)]">
+                      {[
+                        ["Why choose organic cotton fabrics and certified factories?", "A seemingly elegant design can quickly begin to bloat with unexpected content or break under the weight of actual activity. Fake data can ensure a nice looking layout but it doesn’t reflect what a living, breathing application must endure. Real data does."],
+                        ["How is your product packaged?", "Websites in professional use templating systems. Commercial publishing platforms and content management systems ensure that you can show different text, different data using the same template. When it’s about controlling hundreds of articles, product pages for web shops."],
+                        ["What’s the best size to buy for a baby shower gift?", "If the copy becomes distracting in the design then you are doing something wrong or they are discussing copy changes. It might be a bit annoying but you could tell them that that discussion would be best suited for another time. At worst the discussion is at least working towards the final goal of your site where questions about lorem ipsum don’t."],
+                      ].map(([q, a]) => (
+                        <div key={q} className="rounded-[22px] border border-[#efe6da] bg-[#fffdf8] p-5">
+                          <h4 className="font-semibold text-[#242424]">{q}</h4>
+                          <p className="mt-2 text-sm leading-7 text-[#767676]">{a}</p>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                </div>
+              </section>
+            </main>
+            <KidsFooterFull
+              storeName={store.name}
+              storeSlug={slug}
+              logo={store.logo}
+              templateSlug="kids"
+              description={store.description || "Playful kidswear, gifts, and accessories with a premium WoodMart-inspired finish."}
+            />
+          </div>
+        </ThemeProvider>
+      );
+    }
+
+    if (pageSlug === "contact-us") {
+      return (
+        <ThemeProvider theme={resolvedTheme}>
+          <div className="min-h-screen bg-[#fffef8] text-[#3b3344]">
+            <KidsFontLoader />
+            <KidsHeader
+              storeName={store.name}
+              storeSlug={slug}
+              logo={store.logo}
+              templateSlug="kids"
+              cartCount={cartCount}
+              wishlistCount={wishlistCount}
+            />
+            <main>
+              <section className="bg-gradient-to-br from-[#fff7df] via-[#fffdf4] to-[#ffeef1] px-4 py-16">
+                <div className="mx-auto grid max-w-6xl gap-12 lg:grid-cols-[0.9fr_1.1fr] lg:items-start">
+                  <div>
+                    <h1 className="max-w-xl font-serif text-4xl leading-tight text-[#3b3344] sm:text-5xl">
+                      913 Wyandotte St, Kansas City, MO 64105, United States
+                    </h1>
+                    <div className="mt-6 rounded-[32px] bg-white p-6 shadow-[0_18px_40px_rgba(59,51,68,0.06)]">
+                      <Link href="#map" className="mt-3 inline-flex text-sm font-semibold text-[#f5857c]">
+                        Show on a map
+                      </Link>
+                      <div className="mt-6 space-y-2 text-sm text-[#6d6277]">
+                        <p>Call Us: (064) 332-1233</p>
+                        <p>Hours: 9:00am - 5:00pm</p>
+                        <p>Monday - Friday</p>
+                      </div>
+                      <div className="mt-6 flex gap-3 text-[#3b3344]">
+                        {[
+                          { label: "f", href: (socialLinks?.facebook || "#") as string },
+                          { label: "𝕏", href: (socialLinks?.twitter || "#") as string },
+                          { label: "📷", href: (socialLinks?.instagram || "#") as string },
+                          { label: "▶", href: (socialLinks as any)?.youtube || "#" },
+                        ].map((item) => (
+                          <Link key={item.label} href={item.href} className="inline-flex h-10 w-10 items-center justify-center rounded-full bg-white shadow-[0_12px_28px_rgba(59,51,68,0.06)]">
+                            <span className="text-sm font-bold">{item.label}</span>
+                          </Link>
+                        ))}
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="rounded-[34px] bg-white p-6 shadow-[0_30px_70px_rgba(59,51,68,0.08)] sm:p-8">
+                    <div className="mb-6">
+                      <p className="text-xs font-bold uppercase tracking-[0.35em] text-[#f5857c]">Get in touch</p>
+                      <h2 className="mt-2 font-serif text-3xl text-[#3b3344]">Get in touch</h2>
+                    </div>
+                    <form className="grid gap-4">
+                      <div className="grid gap-4 sm:grid-cols-2">
+                        <input className="rounded-2xl border border-[#ece4da] bg-[#fffdf8] px-4 py-3 text-sm outline-none transition focus:border-[#f5857c]" placeholder="Your name" />
+                        <input className="rounded-2xl border border-[#ece4da] bg-[#fffdf8] px-4 py-3 text-sm outline-none transition focus:border-[#f5857c]" placeholder="Email address" />
+                      </div>
+                      <input className="rounded-2xl border border-[#ece4da] bg-[#fffdf8] px-4 py-3 text-sm outline-none transition focus:border-[#f5857c]" placeholder="Subject" />
+                      <textarea className="min-h-[160px] rounded-[24px] border border-[#ece4da] bg-[#fffdf8] px-4 py-3 text-sm outline-none transition focus:border-[#f5857c]" placeholder="How can we help?" />
+                      <button type="button" className="inline-flex items-center justify-center rounded-full bg-[#f5857c] px-6 py-3 text-sm font-semibold text-white transition hover:bg-[#ef7067]">
+                        Send message
+                      </button>
+                    </form>
+                  </div>
+                </div>
+              </section>
+
+              <section id="map" className="px-4 py-16">
+                <div className="mx-auto grid max-w-6xl gap-8 lg:grid-cols-[0.95fr_1.05fr]">
+                  <div className="rounded-[34px] border border-[#efe6da] bg-white p-6 shadow-[0_20px_50px_rgba(59,51,68,0.05)] sm:p-8">
+                    <p className="text-xs font-bold uppercase tracking-[0.35em] text-[#f5857c]">Opening hours</p>
+                    <h2 className="mt-2 font-serif text-3xl text-[#3b3344]">Monday - Friday</h2>
+                    <div className="mt-6 space-y-4 text-sm text-[#6d6277]">
+                      <div className="flex items-center justify-between border-b border-dashed border-[#efe6da] pb-3">
+                        <span>Hours</span>
+                        <span className="font-semibold text-[#3b3344]">9:00am - 5:00pm</span>
+                      </div>
+                      <div className="flex items-center justify-between border-b border-dashed border-[#efe6da] pb-3">
+                        <span>Support</span>
+                        <span className="font-semibold text-[#3b3344]">(064) 332-1233</span>
+                      </div>
+                      <div className="flex items-center justify-between border-b border-dashed border-[#efe6da] pb-3">
+                        <span>Address</span>
+                        <span className="font-semibold text-[#3b3344]">Kansas City, MO</span>
+                      </div>
+                    </div>
+                    <div className="mt-8 rounded-[28px] bg-[#fff7df] p-5">
+                      <p className="text-sm leading-7 text-[#6d6277]">
+                        Based on WoodMart theme 2025 WooCommerce Themes.
+                      </p>
+                      <div className="mt-4 flex flex-wrap gap-3">
+                        <Link href={`/store/${slug}/blog`} className="rounded-full bg-white px-5 py-2 text-sm font-semibold text-[#3b3344] transition hover:text-[#f5857c]">
+                          Visit the blog
+                        </Link>
+                        <Link href={`/store/${slug}/shop`} className="rounded-full border border-[#f5857c] px-5 py-2 text-sm font-semibold text-[#f5857c] transition hover:bg-[#fff0ee]">
+                          Shop the collection
+                        </Link>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="overflow-hidden rounded-[34px] border border-[#efe6da] bg-white shadow-[0_20px_50px_rgba(59,51,68,0.05)]">
+                    <iframe
+                      title="Kids store map"
+                      src="https://www.google.com/maps?q=913%20Wyandotte%20St%2C%20Kansas%20City%2C%20MO%2064105&output=embed"
+                      className="h-[520px] w-full border-0"
+                      loading="lazy"
+                      referrerPolicy="no-referrer-when-downgrade"
+                    />
+                  </div>
+                </div>
+              </section>
+            </main>
+            <KidsFooterFull
+              storeName={store.name}
+              storeSlug={slug}
+              logo={store.logo}
+              templateSlug="kids"
+              description={store.description || "Playful kidswear, gifts, and accessories with a bright, premium WoodMart-inspired finish."}
+            />
+          </div>
+        </ThemeProvider>
+      );
+    }
+
+    return (
+      <ThemeProvider theme={resolvedTheme}>
+        <div className="min-h-screen bg-[#fffef8] text-[#3b3344]">
+          <KidsFontLoader />
+          <KidsHeader
+            storeName={store.name}
+            storeSlug={slug}
+            logo={store.logo}
+            templateSlug="kids"
+            cartCount={cartCount}
+            wishlistCount={wishlistCount}
+          />
+          <main style={buildPageBackgroundStyle(resolvedPageSettings)}>
+            <div className="mx-auto max-w-6xl px-4 py-16 sm:px-6">
+              <div className="mb-6">
+                <p className="text-xs font-bold uppercase tracking-[0.35em] text-[#f5857c]">Page</p>
+                <h1 className="mt-3 font-serif text-4xl text-[#3b3344]">{resolvedPage.title}</h1>
+              </div>
+              <RenderBlocks blocks={blocks} storeSlug={slug} products={products} currency={currency} addToCart={(p) => addToCart(p as unknown as StoreProduct)} isWishlisted={isWishlisted} toggleWishlist={toggleWishlist} addedToCart={addedToCart} />
+            </div>
+          </main>
+          <KidsFooterFull
+            storeName={store.name}
+            storeSlug={slug}
+            logo={store.logo}
+            templateSlug="kids"
+            description={store.description || "Playful kidswear, gifts, and accessories with a premium WoodMart-inspired finish."}
+          />
+        </div>
+      </ThemeProvider>
+    );
+  }
 
   if (data.templateSlug === "vegetables") {
     const vegetableNavItems = [
