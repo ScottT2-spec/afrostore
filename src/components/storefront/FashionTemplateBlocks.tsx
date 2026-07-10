@@ -368,6 +368,45 @@ export interface FashionProduct {
   hoverImage?: string;
   link: string;
   badge?: string;
+  variants?: FashionProductVariant[];
+}
+
+/** Variant type for product swatches */
+export interface FashionProductVariant {
+  id: string;
+  name: string;
+  price: number | null;
+  stock: number;
+  inStock: boolean;
+  options: Record<string, string> | null;
+  image: string | null;
+}
+
+/** Map color names → hex for swatch rendering */
+const COLOR_MAP: Record<string, string> = {
+  black: "#000000", white: "#FFFFFF", red: "#DC2626", blue: "#2563EB", green: "#16A34A",
+  yellow: "#EAB308", orange: "#EA580C", purple: "#9333EA", pink: "#EC4899", brown: "#92400E",
+  grey: "#6B7280", gray: "#6B7280", navy: "#1E3A5F", beige: "#F5F5DC", cream: "#FFFDD0",
+  coral: "#FF7F50", maroon: "#800000", teal: "#0D9488", olive: "#808000", gold: "#D4AF37",
+  silver: "#C0C0C0", burgundy: "#800020", charcoal: "#36454F", ivory: "#FFFFF0", khaki: "#C3B091",
+  lavender: "#E6E6FA", mint: "#98FF98", mustard: "#FFDB58", peach: "#FFCBA4", plum: "#8E4585",
+  rust: "#B7410E", sage: "#BCB88A", salmon: "#FA8072", sand: "#C2B280", slate: "#708090",
+  tan: "#D2B48C", taupe: "#483C32", turquoise: "#40E0D0", wine: "#722F37", camel: "#C19A6B",
+  chocolate: "#7B3F00", copper: "#B87333", denim: "#1560BD", emerald: "#50C878", fuchsia: "#FF00FF",
+  indigo: "#4B0082", magenta: "#FF00FF", mauve: "#E0B0FF", rose: "#FF007F", sapphire: "#0F52BA",
+  scarlet: "#FF2400", sky: "#87CEEB", stone: "#928E85", violet: "#7F00FF", wheat: "#F5DEB3",
+};
+
+function resolveColorHex(colorName: string): string | null {
+  const lower = colorName.toLowerCase().trim();
+  if (COLOR_MAP[lower]) return COLOR_MAP[lower];
+  // Check if it's already a hex code
+  if (/^#[0-9a-fA-F]{3,8}$/.test(lower)) return lower;
+  // Partial match (e.g. "light blue" → "blue")
+  for (const [key, val] of Object.entries(COLOR_MAP)) {
+    if (lower.includes(key)) return val;
+  }
+  return null;
 }
 
 /** Context bridge — lets fashion blocks access real store products and blogs */
@@ -377,6 +416,7 @@ export interface FashionStoreContextData {
     currency: string; inStock: boolean; isFeatured: boolean; tags?: string[];
     images: Array<{ id: string; url: string; alt?: string }>;
     category?: { id: string; name: string; slug: string };
+    variants?: FashionProductVariant[];
   }>;
   blogs: Array<{
     id: string; title: string; slug: string; excerpt?: string | null;
@@ -453,6 +493,7 @@ export function FashionProductGrid({ products: propProducts, columns = 4, showCa
       hoverImage: p.images[1]?.url,
       link: `/store/${storeCtx.storeSlug}/product/${p.slug}`,
       badge: p.compareAtPrice ? "SALE" : p.isFeatured ? "FEATURED" : undefined,
+      variants: (p as any).variants || [],
     }));
   })();
   const scopedCss = `
@@ -513,6 +554,19 @@ export function FashionProductGrid({ products: propProducts, columns = 4, showCa
       transform: translateY(100%); transition: all 0.3s ease;
     }
     .fpg-card:hover .fpg-add-btn { opacity: 1; transform: translateY(0); }
+    .fpg-swatches { display: flex; gap: 4px; margin-top: 6px; flex-wrap: wrap; }
+    .fpg-swatch {
+      width: 18px; height: 18px; border-radius: 50%; border: 2px solid #e5e5e5;
+      cursor: pointer; transition: border-color 0.2s, transform 0.2s; flex-shrink: 0;
+    }
+    .fpg-swatch:hover { border-color: ${TOKENS.primaryColor}; transform: scale(1.15); }
+    .fpg-size-chips { display: flex; gap: 4px; margin-top: 6px; flex-wrap: wrap; }
+    .fpg-size-chip {
+      padding: 2px 8px; font-size: 11px; font-family: ${TOKENS.bodyFont};
+      border: 1px solid #ddd; color: ${TOKENS.textColor}; cursor: pointer;
+      transition: border-color 0.2s; line-height: 1.4;
+    }
+    .fpg-size-chip:hover { border-color: ${TOKENS.primaryColor}; color: ${TOKENS.primaryColor}; }
     @media (max-width: 1024px) { .fpg-grid { grid-template-columns: repeat(3, 1fr); } }
     @media (max-width: 767px) { .fpg-grid { grid-template-columns: repeat(2, 1fr); gap: 10px; } }
   `;
@@ -581,6 +635,42 @@ export function FashionProductGrid({ products: propProducts, columns = 4, showCa
               {p.salePrice && <span className="fpg-price-old">{p.price}</span>}
               <span>{p.salePrice || p.price}</span>
             </div>
+            {(() => {
+              if (!p.variants || p.variants.length === 0) return null;
+              const colorVariants = p.variants.filter(v => v.options && (v.options.color || v.options.Color || v.options.COLOR));
+              const sizeVariants = p.variants.filter(v => v.options && (v.options.size || v.options.Size || v.options.SIZE));
+              return (
+                <>
+                  {colorVariants.length > 0 && (
+                    <div className="fpg-swatches">
+                      {colorVariants.slice(0, 6).map(v => {
+                        const colorName = v.options!.color || v.options!.Color || v.options!.COLOR || "";
+                        const hex = resolveColorHex(colorName);
+                        return (
+                          <Link key={v.id} href={`${productLink}?variant=${v.id}`} title={v.name || colorName}>
+                            <span className="fpg-swatch" style={{ background: hex || "#ccc", borderColor: hex === "#FFFFFF" ? "#ccc" : "#e5e5e5" }} />
+                          </Link>
+                        );
+                      })}
+                      {colorVariants.length > 6 && <span style={{ fontSize: 11, color: TOKENS.textColor, lineHeight: "18px" }}>+{colorVariants.length - 6}</span>}
+                    </div>
+                  )}
+                  {sizeVariants.length > 0 && colorVariants.length === 0 && (
+                    <div className="fpg-size-chips">
+                      {sizeVariants.slice(0, 5).map(v => {
+                        const sizeName = v.options!.size || v.options!.Size || v.options!.SIZE || "";
+                        return (
+                          <Link key={v.id} href={`${productLink}?variant=${v.id}`} className="fpg-size-chip" title={v.name || sizeName}>
+                            {sizeName}
+                          </Link>
+                        );
+                      })}
+                      {sizeVariants.length > 5 && <span style={{ fontSize: 11, color: TOKENS.textColor }}>+{sizeVariants.length - 5}</span>}
+                    </div>
+                  )}
+                </>
+              );
+            })()}
           </div>
           );
         })}
