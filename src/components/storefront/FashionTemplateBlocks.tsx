@@ -1067,6 +1067,14 @@ export function FashionNewsletter({
   const storeCtx = useContext(FashionStoreContext);
   const { subscribe, status: nlStatus } = useNewsletterSubscribe(storeCtx?.storeSlug || "");
 
+  // Merge: prefer real social links from store context over preset placeholders
+  const resolvedSocialLinks = (() => {
+    const ctxLinks = storeCtx?.socialLinks;
+    if (ctxLinks && ctxLinks.length > 0) return ctxLinks;
+    // Filter out placeholder links (href="#")
+    return socialLinks.filter(s => s.url && s.url !== "#");
+  })();
+
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (onSubmit) { onSubmit(email); setEmail(""); return; }
@@ -1139,7 +1147,7 @@ export function FashionNewsletter({
           <button type="submit" className="fn-submit" disabled={nlStatus === "loading"}>{nlStatus === "loading" ? "Signing up..." : buttonText}</button>
         </form>
         )}
-        {socialLinks.length > 0 && (
+        {resolvedSocialLinks.length > 0 && (
           <>
             <div className="fn-separator">
               <span className="fn-sep-line" />
@@ -1147,7 +1155,7 @@ export function FashionNewsletter({
               <span className="fn-sep-line" />
             </div>
             <div className="fn-social">
-              {socialLinks.map((s, i) => (
+              {resolvedSocialLinks.map((s, i) => (
                 <a key={i} href={s.url} className="fn-social-icon" target="_blank" rel="noopener noreferrer" aria-label={s.platform}>
                   {socialIcons[s.platform] || s.platform[0]?.toUpperCase()}
                 </a>
