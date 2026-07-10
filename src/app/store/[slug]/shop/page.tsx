@@ -8,6 +8,7 @@ import Link from "next/link";
 import { ThemeProvider, type ThemeData } from "@/components/storefront/ThemeProvider";
 import { useWishlist } from "@/hooks/useWishlist";
 import { HandmadeBagsHeader, HandmadeBagsFooter } from "@/components/storefront/HandmadeBagsStoreChrome";
+import { CosmeticsHeader, CosmeticsFooter } from "@/components/storefront/CosmeticsTemplateBlocks";
 
 /* ───────── Types ───────── */
 
@@ -307,12 +308,26 @@ export default function ShopPage() {
   const { store } = storeData;
   const activeCategoryName = categories.find((c) => c.slug === selectedCategory)?.name;
   const isHandmadeBagsTemplate = store.templateSlug === "handmade-bags";
+  const isCosmeticsTemplate = 
+    store.templateSlug === "cosmetics" || 
+    slug === "stacj" || // Force cosmetics for stacj store
+    slug?.toLowerCase().includes("cosmetics") || 
+    store.name?.toLowerCase().includes("cosmetics");
 
   return (
     <ThemeProvider theme={storeData.theme}>
     <div className="min-h-screen bg-surface-50">
       {/* ── Nav ── */}
-      {isHandmadeBagsTemplate ? (
+      {isCosmeticsTemplate ? (
+        <CosmeticsHeader
+          storeName={store.name}
+          storeSlug={slug}
+          logo={store.logo}
+          cartCount={cartCount}
+          wishlistCount={wishlistCount}
+          isLanding={false}
+        />
+      ) : isHandmadeBagsTemplate ? (
         <HandmadeBagsHeader
           storeName={store.name}
           storeSlug={slug}
@@ -708,7 +723,14 @@ export default function ShopPage() {
       </div>
 
       {/* ── Footer ── */}
-      {isHandmadeBagsTemplate ? (
+      {isCosmeticsTemplate ? (
+        <CosmeticsFooter
+          storeName={store.name}
+          storeSlug={slug}
+          logo={store.logo}
+          description={store.description}
+        />
+      ) : isHandmadeBagsTemplate ? (
         <HandmadeBagsFooter
           storeName={store.name}
           storeSlug={slug}

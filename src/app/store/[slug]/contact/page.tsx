@@ -3,12 +3,16 @@ import { notFound } from "next/navigation";
 import { RenderTemplateBlocks, type TemplateBlock } from "@/components/storefront/TemplateBlockRenderer";
 import { HandmadeBagsHeader, HandmadeBagsFooter } from "@/components/storefront/HandmadeBagsStoreChrome";
 import { ThemeProvider } from "@/components/storefront/ThemeProvider";
+import { applyPageCustomization, buildPageBackgroundStyle, filterVisiblePages, getResolvedPageSettings, normalizeSiteCustomization, type SiteCustomizationDocument } from "@/lib/site-customization";
+import { parsePageContent } from "@/lib/page-content";
+import { RenderBlocks, type BuilderBlock } from "@/components/storefront/BlockRenderer";
+import { serializeProductsForClient } from "@/lib/serialize-products";
 
 type Props = {
   params: Promise<{ slug: string }>;
 };
 
-/* Contact page blocks - matching Handmade Bags template style */
+/* Contact page blocks - matching Handmade Bags template style (fallback if no custom content) */
 const CONTACT_PAGE_BLOCKS: TemplateBlock[] = [
   {
     id: "contact-hero",
@@ -32,6 +36,27 @@ const CONTACT_PAGE_BLOCKS: TemplateBlock[] = [
     },
   },
   {
+    id: "contact-marquee",
+    type: "fashionMarquee",
+    props: {
+      items: [
+        { text: "24/7 Support", icon: "✦" },
+        { text: "Fast Response", icon: "✦" },
+        { text: "Expert Help", icon: "✦" },
+        { text: "Satisfaction Guaranteed", icon: "✦" },
+      ],
+      speed: "50s",
+      gap: "60px",
+      backgroundColor: "transparent",
+      textColor: "#242424",
+      fontSize: "28px",
+      fontWeight: "600",
+      paddingY: "25px",
+      borderTop: "1px solid #c27843",
+      marginBottom: "0px",
+    },
+  },
+  {
     id: "contact-intro",
     type: "fashionSectionTitle",
     props: {
@@ -40,6 +65,7 @@ const CONTACT_PAGE_BLOCKS: TemplateBlock[] = [
       description: "Our dedicated customer service team is available to assist you with any questions or concerns. We typically respond within 24 hours.",
       align: "center",
       maxWidth: "60%",
+      marginBottom: "60px",
     },
   },
   {
@@ -82,6 +108,7 @@ const CONTACT_PAGE_BLOCKS: TemplateBlock[] = [
       description: "Fill out the form below and we'll get back to you as soon as possible.",
       align: "center",
       maxWidth: "50%",
+      marginBottom: "50px",
     },
   },
   {
@@ -110,10 +137,38 @@ async function getStoreData(slug: string) {
     },
     include: {
       customizations: true,
+      pages: {
+        where: { slug: "contact" },
+        take: 1,
+      },
     },
   });
 
   if (!store) return null;
+
+  // Auto-create Contact page if it doesn't exist
+  if (!store.pages || store.pages.length === 0) {
+    try {
+      await prisma.page.create({
+        data: {
+          siteId: store.id,
+          title: "Contact Us",
+          slug: "contact",
+          type: "CUSTOM",
+          content: [],
+          isPublished: true,
+          position: 12,
+        },
+      });
+      // Re-fetch to include the newly created page
+      store.pages = await prisma.page.findMany({
+        where: { siteId: store.id, slug: "contact" },
+        take: 1,
+      });
+    } catch (error) {
+      console.error("Failed to auto-create Contact page:", error);
+    }
+  }
 
   // Get products for the store
   const products = await prisma.product.findMany({
@@ -145,13 +200,30 @@ export default async function ContactPage({ params }: Props) {
 
   const { store, products, blogs } = data;
 
-  const customization = store.customizations?.themeSettings as any || {};
+  // Serialize products to convert Decimal values to plain numbers for client components
+  const serializedProducts = serializeProductsForClient(products);
+
+  const customization = normalizeSiteCustomization(store.customizations as any);
+  const visiblePages = filterVisiblePages(store.pages || [], customization);
+  const customizedPages = visiblePages.map((page: any) => applyPageCustomization(page, customization));
+  const contactPage = customizedPages.find((p: any) => p.slug === "contact");
+  
+  // Use custom blocks if available, otherwise use preset
+  let pageContent;
+  if (contactPage?.content) {
+    const parsed = parsePageContent(contactPage.content);
+    pageContent = parsed;
+  } else {
+    pageContent = { blocks: CONTACT_PAGE_BLOCKS, settings: {} };
+  }
+
+  const pageSettings = contactPage ? getResolvedPageSettings(contactPage, pageContent.settings, customization) : {};
   const themeData = {
-    primaryColor: customization.primaryColor || "#c27843",
-    secondaryColor: customization.secondaryColor || "#242424",
-    accentColor: customization.accentColor || "#767676",
-    backgroundColor: customization.backgroundColor || "#ffffff",
-    textColor: customization.textColor || "#242424",
+    primaryColor: customization?.themeSettings?.colors?.primary || "#c27843",
+    secondaryColor: customization?.themeSettings?.colors?.secondary || "#242424",
+    accentColor: customization?.themeSettings?.colors?.accent || "#767676",
+    backgroundColor: customization?.themeSettings?.colors?.background || "#ffffff",
+    textColor: customization?.themeSettings?.colors?.text || "#242424",
   };
 
   return (
@@ -162,7 +234,13 @@ export default async function ContactPage({ params }: Props) {
         logo={store.logo}
         isLanding={false}
       />
-      <RenderTemplateBlocks blocks={CONTACT_PAGE_BLOCKS} />
+      <div style={buildPageBackgroundStyle(pageSettings)}>
+        {contactPage?.content ? (
+          <RenderBlocks blocks={pageContent.blocks as BuilderBlock[]} storeSlug={slug} products={serializedProducts} />
+        ) : (
+          <RenderTemplateBlocks blocks={CONTACT_PAGE_BLOCKS} />
+        )}
+      </div>
       <HandmadeBagsFooter
         storeName={store.name}
         storeSlug={store.slug}

@@ -1,6 +1,6 @@
 "use client";
-import { FashionFooter } from "./FashionTemplateBlocks";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { resolveStoreLink, resolveFooterLink } from "@/lib/template-link-utils";
 import { toggleCompare as toggleCompareItem } from "@/lib/compare-utils";
 import { useState, useEffect, useRef, useCallback, createContext, useContext } from "react";
@@ -962,11 +962,20 @@ export interface CosmeticsInfoBoxesProps {
 export function CosmeticsInfoBoxes({ sectionTitle, boxes, marginBottom = "60px" }: CosmeticsInfoBoxesProps) {
   const { ref, inView } = useInView();
 
+  // Defensive guard: filter out boxes with invalid/missing images before mapping
+  const validBoxes = boxes.filter(box => box.image && box.image.trim() !== "");
+
+  const onImgError = (e: React.SyntheticEvent<HTMLImageElement>, boxTitle?: string) => {
+    const target = e.target as HTMLImageElement;
+    target.style.display = "none";
+    console.warn(`Image failed to load for info box: ${boxTitle || "unknown"}`);
+  };
+
   const scopedCss = `
     .cib-section { margin-bottom: ${marginBottom}; }
     .cib-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 30px; }
     .cib-card { text-align: center; }
-    .cib-img-wrap { overflow: hidden; margin-bottom: 20px; }
+    .cib-img-wrap { overflow: hidden; margin-bottom: 20px; min-height: 120px; display: flex; align-items: center; justify-content: center; background: #f9f9f9; }
     .cib-img { width: 100%; height: auto; display: block; transition: transform 0.6s ease; }
     .cib-card:hover .cib-img { transform: scale(1.05); }
     .cib-number {
@@ -996,10 +1005,18 @@ export function CosmeticsInfoBoxes({ sectionTitle, boxes, marginBottom = "60px" 
         <CosmeticsSectionTitle subtitle={sectionTitle.subtitle} title={sectionTitle.title} description={sectionTitle.description} />
       )}
       <div className="cib-grid">
-        {boxes.map((box, i) => (
+        {validBoxes.map((box, i) => (
           <div key={i} className={`cib-card cib-animate ${inView ? "cib-visible" : ""}`} style={{ transitionDelay: `${i * 0.15}s` }}>
             <div className="cib-img-wrap">
-              <img src={box.image} alt={box.title} className="cib-img" loading="lazy"  onError={(e) => onImgError(e, box.title)} />
+              {box.image && box.image.trim() !== "" ? (
+                <img 
+                  src={box.image} 
+                  alt={box.title || ""} 
+                  className="cib-img" 
+                  loading="lazy" 
+                  onError={(e) => onImgError(e, box.title)} 
+                />
+              ) : null}
             </div>
             <div className="cib-number">{box.number}</div>
             <h4 className="cib-title">{box.title}</h4>
@@ -1299,10 +1316,332 @@ export function CosmeticsNewsletter({
 }
 
 /* ═══════════════════════════════════════════════════════════════
-   FOOTER
+   COSMETICS HEADER
+   Clean and minimal header matching WoodMart Cosmetics demo.
    ═══════════════════════════════════════════════════════════════ */
 
-export function CosmeticsFooter(props: React.ComponentProps<typeof FashionFooter>) {
+export interface CosmeticsHeaderProps {
+  storeName: string;
+  storeSlug: string;
+  logo?: string | null;
+  cartCount?: number;
+  wishlistCount?: number;
+  onSearch?: (q: string) => void;
+  searchQuery?: string;
+  onSearchChange?: (q: string) => void;
+  isLanding?: boolean;
+}
+
+export function CosmeticsHeader({
+  storeName,
+  storeSlug,
+  logo,
+  cartCount = 0,
+  wishlistCount = 0,
+  onSearch,
+  searchQuery = "",
+  onSearchChange,
+  isLanding = false,
+}: CosmeticsHeaderProps) {
+  const [mobileMenu, setMobileMenu] = useState(false);
+  const [showSearch, setShowSearch] = useState(false);
+  const [localSearchQuery, setLocalSearchQuery] = useState("");
+  const router = useRouter();
+
+  const handleSearch = (query: string) => {
+    if (query.trim()) {
+      const searchUrl = resolveStoreLink(`/shop?search=${encodeURIComponent(query.trim())}`, storeSlug);
+      router.push(searchUrl);
+      setShowSearch(false);
+      setLocalSearchQuery("");
+    }
+  };
+
+  const navItems = [
+    { label: "Home", href: "/" },
+    { label: "Shop", href: "/shop" },
+    { label: "Blog", href: "/blog" },
+    { label: "Terms and Conditions", href: "/terms" },
+  ];
+
+  const scopedCss = `
+    .ch-header { background: #fff; border-bottom: 1px solid #e5e5e5; }
+    .ch-top-bar { background: ${TOKENS.primaryColor}; color: #fff; font-family: ${TOKENS.bodyFont}; font-size: 12px; padding: 8px 0; text-align: center; }
+    .ch-main { padding: 20px 15px; }
+    .ch-main-inner { max-width: ${TOKENS.containerWidth}; margin: 0 auto; display: flex; align-items: center; justify-content: space-between; }
+    .ch-logo { display: flex; align-items: center; gap: 12px; text-decoration: none; }
+    .ch-logo-img { height: 45px; width: auto; object-fit: contain; }
+    .ch-logo-text { font-family: ${TOKENS.titleFont}; font-weight: 700; font-size: 26px; color: ${TOKENS.titleColor}; text-decoration: none; text-transform: uppercase; letter-spacing: 1px; }
+    .ch-icons { display: flex; align-items: center; gap: 8px; }
+    .ch-icon-btn { position: relative; display: flex; align-items: center; justify-content: center; width: 42px; height: 42px; background: none; border: 1px solid #e5e5e5; cursor: pointer; color: ${TOKENS.linkColor}; font-size: 18px; text-decoration: none; transition: all 0.2s; border-radius: 0; }
+    .ch-icon-btn:hover { background: ${TOKENS.primaryColor}; color: #fff; border-color: ${TOKENS.primaryColor}; }
+    .ch-badge { position: absolute; top: -5px; right: -5px; min-width: 18px; height: 18px; border-radius: 50%; background: ${TOKENS.primaryColor}; color: #fff; font-size: 10px; font-weight: 600; display: flex; align-items: center; justify-content: center; line-height: 1; border: 2px solid #fff; }
+    .ch-nav { background: #fff; border-bottom: 1px solid #e5e5e5; }
+    .ch-nav-inner { max-width: ${TOKENS.containerWidth}; margin: 0 auto; padding: 0 15px; display: flex; align-items: center; height: 55px; }
+    .ch-nav-links { display: flex; align-items: center; gap: 0; height: 100%; }
+    .ch-nav-link { display: flex; align-items: center; height: 100%; padding: 0 25px; font-family: ${TOKENS.bodyFont}; font-weight: 600; font-size: 13px; color: ${TOKENS.linkColor}; text-decoration: none; text-transform: uppercase; transition: color 0.2s; position: relative; letter-spacing: 0.5px; }
+    .ch-nav-link:hover { color: ${TOKENS.primaryColor}; }
+    .ch-nav-link::after { content: ''; position: absolute; bottom: 0; left: 0; right: 0; height: 2px; background: ${TOKENS.primaryColor}; transform: scaleX(0); transition: transform 0.2s; }
+    .ch-nav-link:hover::after { transform: scaleX(1); }
+    .ch-search-bar { max-width: ${TOKENS.containerWidth}; margin: 0 auto; padding: 15px; background: #fff; border-bottom: 1px solid #e5e5e5; }
+    .ch-search-input { width: 100%; padding: 12px 20px; border: 1px solid #ddd; font-family: ${TOKENS.bodyFont}; font-size: 14px; outline: none; background: #f9f9f9; }
+    .ch-search-input:focus { border-color: ${TOKENS.primaryColor}; background: #fff; }
+    .ch-mobile-toggle { display: none; background: none; border: none; font-size: 24px; cursor: pointer; color: ${TOKENS.linkColor}; padding: 8px; }
+    .ch-mobile-menu { display: none; background: #fff; border-bottom: 1px solid #e5e5e5; padding: 20px; }
+    .ch-mobile-menu a { display: block; padding: 12px 0; font-family: ${TOKENS.bodyFont}; font-weight: 600; font-size: 14px; color: ${TOKENS.linkColor}; text-decoration: none; text-transform: uppercase; border-bottom: 1px solid #f5f5f5; letter-spacing: 0.5px; }
+    .ch-mobile-menu a:last-child { border-bottom: none; }
+    .ch-mobile-menu a:hover { color: ${TOKENS.primaryColor}; }
+    @media (max-width: 1024px) {
+      .ch-main-inner { padding: 15px; }
+      .ch-logo-text { font-size: 22px; }
+      .ch-nav { display: none; }
+      .ch-mobile-toggle { display: block; }
+      .ch-mobile-menu.ch-open { display: block; }
+    }
+    @media (max-width: 767px) {
+      .ch-logo-text { font-size: 18px; }
+      .ch-icons { gap: 5px; }
+      .ch-icon-btn { width: 38px; height: 38px; font-size: 16px; }
+    }
+  `;
+
+  return (
+    <div className="ch-header">
+      <ScopedStyles id="cosmetics-header" css={scopedCss} />
+      {/* Top Bar */}
+      <div className="ch-top-bar">
+        <div className="ch-main-inner">
+          <div>Free shipping on orders over $50.00</div>
+        </div>
+      </div>
+
+      {/* Main Header */}
+      <div className="ch-main">
+        <div className="ch-main-inner">
+          <button className="ch-mobile-toggle" onClick={() => setMobileMenu(!mobileMenu)} aria-label="Menu">
+            {mobileMenu ? "✕" : "☰"}
+          </button>
+          <Link href={resolveStoreLink("/", storeSlug)} className="ch-logo">
+            {logo ? <img src={logo} alt={storeName} className="ch-logo-img" /> : null}
+            <span className="ch-logo-text">{storeName}</span>
+          </Link>
+          <div className="ch-icons">
+            {!isLanding && (
+              <>
+                <button className="ch-icon-btn" onClick={() => setShowSearch(!showSearch)} aria-label="Search">🔍</button>
+                <Link href={resolveStoreLink("/wishlist", storeSlug)} className="ch-icon-btn" aria-label="Wishlist">
+                  ♡{wishlistCount > 0 && <span className="ch-badge">{wishlistCount}</span>}
+                </Link>
+                <Link href={resolveStoreLink("/cart", storeSlug)} className="ch-icon-btn" aria-label="Cart">
+                  🛒{cartCount > 0 && <span className="ch-badge">{cartCount}</span>}
+                </Link>
+              </>
+            )}
+          </div>
+        </div>
+      </div>
+
+      {/* Search Bar */}
+      {showSearch && (
+        <div className="ch-search-bar">
+          <input
+            autoFocus
+            type="text"
+            className="ch-search-input"
+            placeholder="Search products..."
+            value={localSearchQuery}
+            onChange={(e) => setLocalSearchQuery(e.target.value)}
+            onKeyDown={(e) => { if (e.key === "Enter") handleSearch(localSearchQuery); }}
+          />
+        </div>
+      )}
+
+      {/* Desktop Nav */}
+      <nav className="ch-nav">
+        <div className="ch-nav-inner">
+          <div className="ch-nav-links">
+            {navItems.map((item) => (
+              <Link key={item.href} href={resolveStoreLink(item.href, storeSlug)} className="ch-nav-link">
+                {item.label}
+              </Link>
+            ))}
+          </div>
+        </div>
+      </nav>
+
+      {/* Mobile Menu */}
+      <div className={`ch-mobile-menu ${mobileMenu ? "ch-open" : ""}`}>
+        {navItems.map((item) => (
+          <Link key={item.href} href={resolveStoreLink(item.href, storeSlug)} onClick={() => setMobileMenu(false)}>
+            {item.label}
+          </Link>
+        ))}
+      </div>
+    </div>
+  );
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   COSMETICS FOOTER
+   Matching WoodMart Cosmetics demo footer exactly.
+   ═══════════════════════════════════════════════════════════════ */
+
+export interface CosmeticsFooterProps {
+  storeName?: string;
+  logo?: string | null;
+  description?: string;
+  contactInfo?: { address?: string; phone?: string; email?: string };
+  socialLinks?: Array<{ platform: string; url: string }>;
+  navPages?: Array<{ id: string; title: string; slug: string }>;
+  copyrightText?: string;
+  paymentIconsUrl?: string;
+  storeSlug?: string;
+}
+
+export function CosmeticsFooter({
+  storeName = "Cosmetics Store",
+  logo,
+  description = "Premium cosmetics and skincare products for natural beauty. Discover our curated collection of high-quality beauty products.",
+  contactInfo = {},
+  socialLinks = [],
+  navPages = [],
+  copyrightText,
+  paymentIconsUrl,
+  storeSlug: storeSlugProp,
+}: CosmeticsFooterProps) {
   const storeCtx = useContext(CosmeticsStoreContext);
-  return <FashionFooter {...props} storeSlug={storeCtx?.storeSlug} />;
+  const resolvedSlug = storeSlugProp || storeCtx?.storeSlug;
+  const [openColumns, setOpenColumns] = useState<Set<number>>(new Set());
+
+  const toggleColumn = (index: number) => {
+    setOpenColumns((prev) => {
+      const next = new Set(prev);
+      if (next.has(index)) next.delete(index);
+      else next.add(index);
+      return next;
+    });
+  };
+
+  const scopedCss = `
+    .cf-footer { background: ${TOKENS.footerBg}; color: rgba(255,255,255,0.7); font-family: ${TOKENS.bodyFont}; padding: 70px 0 0; }
+    .cf-inner { max-width: ${TOKENS.containerWidth}; margin: 0 auto; padding: 0 15px; display: grid; grid-template-columns: repeat(4, 1fr); gap: 45px; }
+    .cf-col-title { font-family: ${TOKENS.titleFont}; font-weight: 700; font-size: 15px; color: #fff; text-transform: uppercase; margin: 0 0 25px; letter-spacing: 1px; }
+    .cf-text { font-size: 14px; line-height: 1.8; color: rgba(255,255,255,0.7); margin-bottom: 20px; }
+    .cf-links { list-style: none; padding: 0; margin: 0; }
+    .cf-links li { margin-bottom: 12px; }
+    .cf-links a { color: rgba(255,255,255,0.7); text-decoration: none; font-size: 14px; transition: color 0.2s; }
+    .cf-links a:hover { color: ${TOKENS.primaryColor}; }
+    .cf-contact-item { display: flex; gap: 12px; margin-bottom: 15px; font-size: 14px; line-height: 1.6; }
+    .cf-contact-label { color: #fff; font-weight: 700; min-width: 70px; }
+    .cf-social { display: flex; gap: 12px; margin-top: 20px; }
+    .cf-social-icon { width: 40px; height: 40px; border-radius: 50%; border: 1px solid rgba(255,255,255,0.15); display: flex; align-items: center; justify-content: center; color: rgba(255,255,255,0.7); text-decoration: none; font-size: 14px; transition: all 0.2s; }
+    .cf-social-icon:hover { border-color: ${TOKENS.primaryColor}; background: ${TOKENS.primaryColor}; color: #fff; }
+    .cf-bottom { max-width: ${TOKENS.containerWidth}; margin: 0 auto; padding: 30px 15px; margin-top: 50px; border-top: 1px solid rgba(255,255,255,0.08); display: flex; align-items: center; justify-content: space-between; font-size: 13px; }
+    .cf-copyright { color: rgba(255,255,255,0.5); }
+    .cf-logo-text { font-family: ${TOKENS.titleFont}; font-weight: 700; font-size: 22px; color: #fff; text-decoration: none; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 20px; display: inline-block; }
+    .cf-toggle-head { display: none; justify-content: space-between; align-items: center; cursor: pointer; user-select: none; padding: 0; }
+    .cf-toggle-content { display: block; }
+    @media (max-width: 1024px) { .cf-inner { grid-template-columns: repeat(2, 1fr); gap: 35px; } }
+    @media (max-width: 767px) {
+      .cf-inner { grid-template-columns: 1fr; gap: 30px; }
+      .cf-bottom { flex-direction: column; gap: 15px; text-align: center; }
+      .cf-toggle-head { display: flex; }
+      .cf-toggle-content { display: none; }
+      .cf-toggle-content.cf-open { display: block; }
+      .cf-col-title { margin-bottom: 0; }
+      .cf-toggle-head.cf-open .cf-col-title { margin-bottom: 15px; }
+    }
+  `;
+
+  const socialIcons: Record<string, string> = {
+    facebook: "f", twitter: "𝕏", instagram: "📷", youtube: "▶", tiktok: "♪",
+  };
+
+  return (
+    <footer className="cf-footer">
+      <ScopedStyles id="cosmetics-footer" css={scopedCss} />
+      <div className="cf-inner">
+        {/* Col 1: About */}
+        <div>
+          <Link href={resolveStoreLink("/", resolvedSlug)} className="cf-logo-text">{storeName}</Link>
+          <p className="cf-text">{description}</p>
+          <div className="cf-social">
+            {socialLinks.map((s, i) => (
+              <a key={i} href={s.url} className="cf-social-icon" target="_blank" rel="noopener noreferrer" aria-label={s.platform}>
+                {socialIcons[s.platform] || s.platform[0]?.toUpperCase()}
+              </a>
+            ))}
+          </div>
+        </div>
+
+        {/* Col 2: Shop */}
+        <div>
+          <div className="cf-toggle-head" onClick={() => toggleColumn(1)}>
+            <h4 className="cf-col-title">Shop</h4>
+            <span>{openColumns.has(1) ? "−" : "+"}</span>
+          </div>
+          <div className={`cf-toggle-content ${openColumns.has(1) ? "cf-open" : ""}`}>
+            <h4 className="cf-col-title">Shop</h4>
+            <ul className="cf-links">
+              <li><Link href={resolveStoreLink("/shop", resolvedSlug)}>All Products</Link></li>
+              <li><Link href={resolveStoreLink("/shop?category=skincare", resolvedSlug)}>Skincare</Link></li>
+              <li><Link href={resolveStoreLink("/shop?tag=bestseller", resolvedSlug)}>Bestsellers</Link></li>
+              <li><Link href={resolveStoreLink("/shop?tag=new-arrival", resolvedSlug)}>New Arrivals</Link></li>
+            </ul>
+          </div>
+        </div>
+
+        {/* Col 3: Information */}
+        <div>
+          <div className="cf-toggle-head" onClick={() => toggleColumn(2)}>
+            <h4 className="cf-col-title">Information</h4>
+            <span>{openColumns.has(2) ? "−" : "+"}</span>
+          </div>
+          <div className={`cf-toggle-content ${openColumns.has(2) ? "cf-open" : ""}`}>
+            <h4 className="cf-col-title">Information</h4>
+            <ul className="cf-links">
+              <li><Link href={resolveStoreLink("/blog", resolvedSlug)}>Blog</Link></li>
+              <li><Link href={resolveStoreLink("/terms", resolvedSlug)}>Terms & Conditions</Link></li>
+              <li><Link href={resolveStoreLink("/privacy", resolvedSlug)}>Privacy Policy</Link></li>
+              <li><Link href={resolveStoreLink("/shipping", resolvedSlug)}>Shipping Info</Link></li>
+            </ul>
+          </div>
+        </div>
+
+        {/* Col 4: Contact */}
+        <div>
+          <div className="cf-toggle-head" onClick={() => toggleColumn(3)}>
+            <h4 className="cf-col-title">Contact Us</h4>
+            <span>{openColumns.has(3) ? "−" : "+"}</span>
+          </div>
+          <div className={`cf-toggle-content ${openColumns.has(3) ? "cf-open" : ""}`}>
+            <h4 className="cf-col-title">Contact Us</h4>
+            {contactInfo?.address && (
+              <div className="cf-contact-item">
+                <span className="cf-contact-label">Address:</span>
+                <span>{contactInfo.address}</span>
+              </div>
+            )}
+            {contactInfo?.phone && (
+              <div className="cf-contact-item">
+                <span className="cf-contact-label">Phone:</span>
+                <span>{contactInfo.phone}</span>
+              </div>
+            )}
+            {contactInfo?.email && (
+              <div className="cf-contact-item">
+                <span className="cf-contact-label">Email:</span>
+                <span>{contactInfo.email}</span>
+              </div>
+            )}
+          </div>
+        </div>
+      </div>
+
+      <div className="cf-bottom">
+        <span className="cf-copyright">{copyrightText || `© ${new Date().getFullYear()} ${storeName}. All rights reserved.`}</span>
+        {paymentIconsUrl && <img src={paymentIconsUrl} alt="Payment methods" style={{ height: "25px", width: "auto" }} />}
+      </div>
+    </footer>
+  );
 }

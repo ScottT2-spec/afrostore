@@ -3,12 +3,16 @@ import { notFound } from "next/navigation";
 import { RenderTemplateBlocks, type TemplateBlock } from "@/components/storefront/TemplateBlockRenderer";
 import { HandmadeBagsHeader, HandmadeBagsFooter } from "@/components/storefront/HandmadeBagsStoreChrome";
 import { ThemeProvider } from "@/components/storefront/ThemeProvider";
+import { applyPageCustomization, buildPageBackgroundStyle, filterVisiblePages, getResolvedPageSettings, normalizeSiteCustomization, type SiteCustomizationDocument } from "@/lib/site-customization";
+import { parsePageContent } from "@/lib/page-content";
+import { RenderBlocks, type BuilderBlock } from "@/components/storefront/BlockRenderer";
+import { serializeProductsForClient } from "@/lib/serialize-products";
 
 type Props = {
   params: Promise<{ slug: string }>;
 };
 
-/* Our Story page blocks - matching Handmade Bags template style */
+/* Our Story page blocks - matching Handmade Bags template style (fallback if no custom content) */
 const OUR_STORY_PAGE_BLOCKS: TemplateBlock[] = [
   {
     id: "story-hero",
@@ -32,6 +36,27 @@ const OUR_STORY_PAGE_BLOCKS: TemplateBlock[] = [
     },
   },
   {
+    id: "story-marquee",
+    type: "fashionMarquee",
+    props: {
+      items: [
+        { text: "Founded 2008", icon: "✦" },
+        { text: "30+ Countries", icon: "✦" },
+        { text: "100+ Artisans", icon: "✦" },
+        { text: "Sustainable", icon: "✦" },
+      ],
+      speed: "50s",
+      gap: "60px",
+      backgroundColor: "transparent",
+      textColor: "#242424",
+      fontSize: "28px",
+      fontWeight: "600",
+      paddingY: "25px",
+      borderTop: "1px solid #c27843",
+      marginBottom: "0px",
+    },
+  },
+  {
     id: "story-intro",
     type: "fashionSectionTitle",
     props: {
@@ -40,6 +65,7 @@ const OUR_STORY_PAGE_BLOCKS: TemplateBlock[] = [
       description: "In 2008, in a modest workshop in the heart of the city, our founder set out with a simple yet ambitious vision: to create leather goods that would stand the test of time. With just three artisans and a handful of tools, the first collection was born – five handcrafted bags that would become the foundation of everything we stand for today.",
       align: "center",
       maxWidth: "70%",
+      marginBottom: "60px",
     },
   },
   {
@@ -51,6 +77,7 @@ const OUR_STORY_PAGE_BLOCKS: TemplateBlock[] = [
       description: "Every year brought new challenges, learnings, and opportunities to grow while staying true to our core values.",
       align: "center",
       maxWidth: "60%",
+      marginBottom: "50px",
     },
   },
   {
@@ -94,6 +121,7 @@ const OUR_STORY_PAGE_BLOCKS: TemplateBlock[] = [
       description: "We believe that true luxury is not about labels or price tags – it's about the story behind each piece, the hands that made it, and the values it represents.",
       align: "center",
       maxWidth: "65%",
+      marginBottom: "50px",
     },
   },
   {
@@ -113,59 +141,9 @@ const OUR_STORY_PAGE_BLOCKS: TemplateBlock[] = [
         {
           number: "02",
           title: "Ethical Sourcing",
-          description: "Every piece of leather we use comes from suppliers who share our commitment to animal welfare and environmental sustainability. We trace our materials from source to finished product.",
+          description: "Every piece of leather we use comes from suppliers who share our commitment to animal welfare, environmental sustainability, and fair labor practices.",
           buttonText: "",
           buttonLink: "",
-        },
-        {
-          number: "03",
-          title: "Artisan Excellence",
-          description: "Our craftsmen and women undergo rigorous training, with many spending years mastering specific techniques before they work on our premium collections.",
-          buttonText: "",
-          buttonLink: "",
-        },
-        {
-          number: "04",
-          title: "Sustainable Future",
-          description: "We're continuously reducing our environmental impact through eco-friendly tanning processes, minimal waste production, and creating products built to last generations.",
-          buttonText: "",
-          buttonLink: "",
-        },
-      ],
-    },
-  },
-  {
-    id: "story-today",
-    type: "fashionSectionTitle",
-    props: {
-      subtitle: "TODAY",
-      title: "Continuing the Legacy",
-      description: "What started as a small workshop has grown into a globally recognized brand, but our commitment to quality and craftsmanship remains unchanged. Every bag we create carries forward the legacy of those first five pieces.",
-      align: "center",
-      maxWidth: "65%",
-    },
-  },
-  {
-    id: "story-image-showcase",
-    type: "fashionCoverBanners",
-    props: {
-      columns: 2,
-      height: "500px",
-      marginBottom: "70px",
-      banners: [
-        {
-          image: "https://images.unsplash.com/photo-1548036328-c9fa89d128fa?w=800&h=1000&fit=crop",
-          icon: "",
-          title: "Our Workshop Today",
-          description: "A state-of-the-art facility that honors traditional craftsmanship while embracing modern technology.",
-          overlayOpacity: 0.3,
-        },
-        {
-          image: "https://images.unsplash.com/photo-1594223274512-ad4803739b7c?w=800&h=1000&fit=crop",
-          icon: "",
-          title: "Global Community",
-          description: "Serving customers worldwide who share our appreciation for quality and artistry.",
-          overlayOpacity: 0.3,
         },
       ],
     },
@@ -174,10 +152,10 @@ const OUR_STORY_PAGE_BLOCKS: TemplateBlock[] = [
     id: "story-cta",
     type: "fashionNewsletter",
     props: {
-      subtitle: "JOIN THE JOURNEY",
+      subtitle: "",
       title: "Be Part of Our Story",
-      description: "Subscribe to receive updates on new collections, behind-the-scenes stories, and exclusive offers for our community members.",
-      buttonText: "Subscribe Now",
+      description: "Join thousands of customers who have made our pieces part of their journey. Subscribe for exclusive updates and early access to new collections.",
+      buttonText: "Subscribe",
       backgroundColor: "#c27843",
       socialLinks: [],
     },
@@ -196,10 +174,38 @@ async function getStoreData(slug: string) {
     },
     include: {
       customizations: true,
+      pages: {
+        where: { slug: "our-story" },
+        take: 1,
+      },
     },
   });
 
   if (!store) return null;
+
+  // Auto-create Our Story page if it doesn't exist
+  if (!store.pages || store.pages.length === 0) {
+    try {
+      await prisma.page.create({
+        data: {
+          siteId: store.id,
+          title: "Our Story",
+          slug: "our-story",
+          type: "CUSTOM",
+          content: [],
+          isPublished: true,
+          position: 11,
+        },
+      });
+      // Re-fetch to include the newly created page
+      store.pages = await prisma.page.findMany({
+        where: { siteId: store.id, slug: "our-story" },
+        take: 1,
+      });
+    } catch (error) {
+      console.error("Failed to auto-create Our Story page:", error);
+    }
+  }
 
   // Get products for the store
   const products = await prisma.product.findMany({
@@ -231,13 +237,30 @@ export default async function OurStoryPage({ params }: Props) {
 
   const { store, products, blogs } = data;
 
-  const customization = store.customizations?.themeSettings as any || {};
+  // Serialize products to convert Decimal values to plain numbers for client components
+  const serializedProducts = serializeProductsForClient(products);
+
+  const customization = normalizeSiteCustomization(store.customizations as any);
+  const visiblePages = filterVisiblePages(store.pages || [], customization);
+  const customizedPages = visiblePages.map((page: any) => applyPageCustomization(page, customization));
+  const ourStoryPage = customizedPages.find((p: any) => p.slug === "our-story");
+  
+  // Use custom blocks if available, otherwise use preset
+  let pageContent;
+  if (ourStoryPage?.content) {
+    const parsed = parsePageContent(ourStoryPage.content);
+    pageContent = parsed;
+  } else {
+    pageContent = { blocks: OUR_STORY_PAGE_BLOCKS, settings: {} };
+  }
+
+  const pageSettings = ourStoryPage ? getResolvedPageSettings(ourStoryPage, pageContent.settings, customization) : {};
   const themeData = {
-    primaryColor: customization.primaryColor || "#c27843",
-    secondaryColor: customization.secondaryColor || "#242424",
-    accentColor: customization.accentColor || "#767676",
-    backgroundColor: customization.backgroundColor || "#ffffff",
-    textColor: customization.textColor || "#242424",
+    primaryColor: customization?.themeSettings?.colors?.primary || "#c27843",
+    secondaryColor: customization?.themeSettings?.colors?.secondary || "#242424",
+    accentColor: customization?.themeSettings?.colors?.accent || "#767676",
+    backgroundColor: customization?.themeSettings?.colors?.background || "#ffffff",
+    textColor: customization?.themeSettings?.colors?.text || "#242424",
   };
 
   return (
@@ -248,7 +271,13 @@ export default async function OurStoryPage({ params }: Props) {
         logo={store.logo}
         isLanding={false}
       />
-      <RenderTemplateBlocks blocks={OUR_STORY_PAGE_BLOCKS} />
+      <div style={buildPageBackgroundStyle(pageSettings)}>
+        {ourStoryPage?.content ? (
+          <RenderBlocks blocks={pageContent.blocks as BuilderBlock[]} storeSlug={slug} products={serializedProducts} />
+        ) : (
+          <RenderTemplateBlocks blocks={OUR_STORY_PAGE_BLOCKS} />
+        )}
+      </div>
       <HandmadeBagsFooter
         storeName={store.name}
         storeSlug={store.slug}

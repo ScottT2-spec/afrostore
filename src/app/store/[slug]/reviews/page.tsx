@@ -6,6 +6,7 @@ import { useState, useEffect, useCallback } from "react";
 import { useParams } from "next/navigation";
 import Link from "next/link";
 import { HandmadeBagsHeader, HandmadeBagsFooter } from "@/components/storefront/HandmadeBagsStoreChrome";
+import { ThemeProvider, type ThemeData } from "@/components/storefront/ThemeProvider";
 
 interface ReviewProduct {
   name: string;
@@ -60,6 +61,7 @@ export default function StoreReviewsPage() {
   const [hasMore, setHasMore] = useState(false);
   const [ratingFilter, setRatingFilter] = useState<number | null>(null);
   const [error, setError] = useState("");
+  const [themeData, setThemeData] = useState<ThemeData | null>(null);
 
   const fetchReviews = useCallback(async (p: number, rating: number | null, append: boolean) => {
     if (p === 1) setLoading(true);
@@ -90,7 +92,7 @@ export default function StoreReviewsPage() {
     }
   }, [slug]);
 
-  // Fetch store info
+  // Fetch store info and customization
   useEffect(() => {
     fetch(`/api/storefront/${slug}`)
       .then((r) => r.json())
@@ -98,6 +100,42 @@ export default function StoreReviewsPage() {
         if (res.success) {
           const s = res.data.store;
           setStore({ id: s.id, name: s.name, slug: s.slug, logo: s.logo });
+          // Set theme data from customization
+          const customization = res.data.customization;
+          if (customization?.themeSettings) {
+            setThemeData({
+              id: "default",
+              name: "Default Theme",
+              slug: "default",
+              config: {
+                colors: {
+                  primary: customization.themeSettings.colors?.primary || "#c27843",
+                  secondary: customization.themeSettings.colors?.secondary || "#242424",
+                  accent: customization.themeSettings.colors?.accent || "#767676",
+                  background: customization.themeSettings.colors?.background || "#ffffff",
+                  text: customization.themeSettings.colors?.text || "#242424",
+                },
+                fonts: {
+                  heading: customization.themeSettings.typography?.headingFont,
+                  body: customization.themeSettings.typography?.bodyFont,
+                },
+                layout: customization.themeSettings.layout,
+              },
+            });
+          }
+          // Auto-create Reviews page if needed
+          fetch(`/api/storefront/${slug}/pages`)
+            .then((r) => r.json())
+            .then((pagesRes) => {
+              if (pagesRes.success && pagesRes.data) {
+                const reviewsPage = pagesRes.data.pages?.find((p: any) => p.slug === "reviews");
+                if (!reviewsPage && s.id) {
+                  // Page doesn't exist, would need server-side creation
+                  console.log("Reviews page needs to be created server-side");
+                }
+              }
+            })
+            .catch(() => {});
         }
       })
       .catch(() => {});
@@ -145,17 +183,31 @@ export default function StoreReviewsPage() {
   ];
 
   return (
-    <div className="min-h-screen bg-white">
-      {/* Header - Handmade Bags Style */}
-      <HandmadeBagsHeader
-        storeName={store?.name || "Store"}
-        storeSlug={slug}
-        logo={store?.logo}
-        isLanding={false}
-      />
+    <ThemeProvider theme={themeData}>
+      <div className="min-h-screen bg-white">
+        {/* Header - Handmade Bags Style */}
+        <HandmadeBagsHeader
+          storeName={store?.name || "Store"}
+          storeSlug={slug}
+          logo={store?.logo}
+          isLanding={false}
+        />
 
       <main className="max-w-6xl mx-auto px-4 sm:px-6 py-8 lg:py-12">
-        <h1 className="text-2xl lg:text-3xl font-bold text-surface-900 font-display mb-8">Customer Reviews</h1>
+        {/* Hero Section */}
+        <div className="text-center mb-12">
+          <h1 className="text-4xl lg:text-5xl font-bold text-surface-900 font-display mb-4">Customer Reviews</h1>
+          <p className="text-lg text-surface-600 max-w-2xl mx-auto">See what our customers are saying about their handcrafted leather pieces</p>
+        </div>
+
+        {/* Marquee */}
+        <div className="mb-12 py-6 border-t border-b border-surface-200 overflow-hidden">
+          <div className="flex items-center gap-16 animate-marquee">
+            {["⭐⭐⭐⭐⭐", "Quality Craftsmanship", "Fast Shipping", "Excellent Service", "Premium Leather", "Satisfied Customers"].map((text, i) => (
+              <span key={i} className="text-xl font-semibold text-surface-700 whitespace-nowrap">{text}</span>
+            ))}
+          </div>
+        </div>
 
         {stats && stats.totalCount > 0 ? (
           <>
@@ -299,5 +351,6 @@ export default function StoreReviewsPage() {
         logo={store?.logo}
       />
     </div>
+    </ThemeProvider>
   );
 }

@@ -4,7 +4,7 @@ import { useState, useEffect } from "react";
 import { useParams } from "next/navigation";
 import Link from "next/link";
 import { ArrowLeft, ArrowRight, Loader2, Search, X } from "lucide-react";
-import { HandmadeBagsHeader, HandmadeBagsFooter } from "@/components/storefront/HandmadeBagsStoreChrome";
+import { CosmeticsHeader, CosmeticsFooter } from "@/components/storefront/CosmeticsTemplateBlocks";
 
 interface BlogPost {
   id: string;
@@ -95,7 +95,7 @@ export default function StoreBlogListingPage() {
 
   return (
     <div className="min-h-screen bg-white" style={{ fontFamily: "'Lato', Arial, sans-serif" }}>
-      <HandmadeBagsHeader
+      <CosmeticsHeader
         storeName={storeName}
         storeSlug={slug}
         isLanding={false}
@@ -280,7 +280,7 @@ export default function StoreBlogListingPage() {
           </div>
         )}
       </div>
-      <HandmadeBagsFooter
+      <CosmeticsFooter
         storeName={storeName}
         storeSlug={slug}
       />

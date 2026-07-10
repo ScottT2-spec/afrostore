@@ -8,6 +8,7 @@ import Link from "next/link";
 import { RenderBlocks, type BuilderBlock } from "@/components/storefront/BlockRenderer";
 import { RenderTemplateBlocks, type TemplateBlock } from "@/components/storefront/TemplateBlockRenderer";
 import { FASHION_TEMPLATE_PRESET } from "@/lib/templates/presets/fashion-preset";
+import { CosmeticsHeader, CosmeticsFooter } from "@/components/storefront/CosmeticsTemplateBlocks";
 import { FASHION_COLORED_PRESET } from "@/lib/templates/presets/fashion-colored-preset";
 import { HANDMADE_BAGS_PRESET } from "@/lib/templates/presets/handmade-bags-preset";
 import { T_SHIRTS_PRINTS_PRESET } from "@/lib/templates/presets/t-shirts-prints-preset";
@@ -472,6 +473,12 @@ export default function StorePage() {
 
   // Handmade Bags specific navigation items
   const isHandmadeBagsTemplate = data.templateSlug === "handmade-bags";
+  const isCosmeticsTemplate = 
+    data.templateSlug === "cosmetics" || 
+    slug === "stacj" || // Force cosmetics for stacj store
+    slug?.toLowerCase().includes("cosmetics") || 
+    data.store?.name?.toLowerCase().includes("cosmetics");
+  
   const handmadeBagsNavItems = [
     { id: "home", label: "Home", url: "/", type: "home" },
     { id: "women", label: "Women", url: "/shop?category=women", type: "shop" },
@@ -491,8 +498,20 @@ export default function StorePage() {
   return (
     <ThemeProvider theme={resolvedTheme}>
     <div className="min-h-screen bg-white">
-      {/* ─── HANDMADE BAGS TEMPLATE HEADER ─── */}
-      {isHandmadeBagsTemplate ? (
+      {/* ─── COSMETICS TEMPLATE HEADER ─── */}
+      {isCosmeticsTemplate ? (
+        <CosmeticsHeader
+          storeName={store.name}
+          storeSlug={slug}
+          logo={store.logo}
+          cartCount={cartCount}
+          wishlistCount={wishlistCount}
+          searchQuery={searchQuery}
+          onSearchChange={setSearchQuery}
+          onSearch={handleSearch}
+          isLanding={isLanding}
+        />
+      ) : isHandmadeBagsTemplate ? (
         <HandmadeBagsHeader
           storeName={store.name}
           storeSlug={slug}
@@ -727,8 +746,20 @@ export default function StorePage() {
         </div>
       )}
 
-      {/* Footer — handmade-bags and fashion handle their own; all other templates get FashionFooter */}
-      {isHandmadeBagsTemplate ? (
+      {/* Footer — cosmetics, handmade-bags and fashion handle their own; all other templates get FashionFooter */}
+      {isCosmeticsTemplate ? (
+        <CosmeticsFooter
+          storeName={store.name}
+          storeSlug={slug}
+          logo={store.logo}
+          description={store.description}
+          socialLinks={socialLinksArray}
+          contactInfo={{
+            phone: whatsappNumber || undefined,
+            email: (data.socialLinks as any)?.email || undefined,
+          }}
+        />
+      ) : isHandmadeBagsTemplate ? (
         <HandmadeBagsFooter
           storeName={store.name}
           storeSlug={slug}

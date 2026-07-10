@@ -145,6 +145,31 @@ async function main() {
   }
   console.log("✅ Customers created:", customers.length);
 
+  // 6.5 Create Handmade Bags pages
+  const pages = await Promise.all([
+    prisma.page.upsert({
+      where: { siteId_slug: { siteId: store.id, slug: "about" } },
+      update: {},
+      create: { siteId: store.id, title: "About Us", slug: "about", type: "CUSTOM", content: [], isPublished: true, position: 10 },
+    }),
+    prisma.page.upsert({
+      where: { siteId_slug: { siteId: store.id, slug: "our-story" } },
+      update: {},
+      create: { siteId: store.id, title: "Our Story", slug: "our-story", type: "CUSTOM", content: [], isPublished: true, position: 11 },
+    }),
+    prisma.page.upsert({
+      where: { siteId_slug: { siteId: store.id, slug: "contact" } },
+      update: {},
+      create: { siteId: store.id, title: "Contact Us", slug: "contact", type: "CUSTOM", content: [], isPublished: true, position: 12 },
+    }),
+    prisma.page.upsert({
+      where: { siteId_slug: { siteId: store.id, slug: "reviews" } },
+      update: {},
+      create: { siteId: store.id, title: "Reviews", slug: "reviews", type: "CUSTOM", content: [], isPublished: true, position: 13 },
+    }),
+  ]);
+  console.log("✅ Pages created:", pages.length);
+
   // 7. Seed Themes
   const defaultThemes = [
     { name: "Lagos Modern", slug: "lagos-modern", category: "ecommerce", industry: "general", description: "A clean, modern theme perfect for any store", config: { colors: { primary: "#1E293B", accent: "#F59E0B" }, fonts: { heading: "Plus Jakarta Sans", body: "Inter" }, layout: "standard" }, isFeatured: true },
