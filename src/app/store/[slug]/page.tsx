@@ -8,7 +8,6 @@ import Link from "next/link";
 import { RenderBlocks, type BuilderBlock } from "@/components/storefront/BlockRenderer";
 import { RenderTemplateBlocks, type TemplateBlock } from "@/components/storefront/TemplateBlockRenderer";
 import { FASHION_TEMPLATE_PRESET } from "@/lib/templates/presets/fashion-preset";
-import { CosmeticsHeader, CosmeticsFooter } from "@/components/storefront/CosmeticsTemplateBlocks";
 import { FASHION_COLORED_PRESET } from "@/lib/templates/presets/fashion-colored-preset";
 import { HANDMADE_BAGS_PRESET } from "@/lib/templates/presets/handmade-bags-preset";
 import { T_SHIRTS_PRINTS_PRESET } from "@/lib/templates/presets/t-shirts-prints-preset";
@@ -28,11 +27,10 @@ import { CosmeticsStoreContext } from "@/components/storefront/CosmeticsTemplate
 import { GroceryStoreContext } from "@/components/storefront/GroceryTemplateBlocks";
 import { HealthStoreContext } from "@/components/storefront/HealthTemplateBlocks";
 import { InteriorStoreContext } from "@/components/storefront/InteriorDesignTemplateBlocks";
-import { KidsStoreContext } from "@/components/storefront/KidsTemplateBlocks";
+import { KidsStoreContext, KidsHeader } from "@/components/storefront/KidsTemplateBlocks";
 import { MakeupStoreContext } from "@/components/storefront/MakeupTemplateBlocks";
 import { PerfumesStoreContext } from "@/components/storefront/PerfumesTemplateBlocks";
 import { FashionHeader, FashionFooter, type NavItem } from "@/components/storefront/FashionStoreChrome";
-import { HandmadeBagsHeader, HandmadeBagsFooter } from "@/components/storefront/HandmadeBagsStoreChrome";
 
 /* ─── Template preset map ─── */
 const TEMPLATE_PRESET_MAP: Record<string, TemplateBlock[]> = {
@@ -434,62 +432,42 @@ export default function StorePage() {
   const hasHomeContent = homeBlocks.length > 0;
   const homeHasProductGrid = homeBlocks.some((b) => b.type === "productGrid");
   const isFashionTemplate = data.templateSlug === "fashion" || data.templateSlug === "fashion-colored" || data.templateSlug === "handmade-bags" || data.templateSlug === "t-shirts-prints" || homeBlocks.some((b) => b.type.startsWith("fashion"));
+  const isKidsTemplate = data.templateSlug === "kids" || data.templateSlug === "toys" || homeBlocks.some((b) => b.type.startsWith("kids"));
   const templatePreset = data.templateSlug ? TEMPLATE_PRESET_MAP[data.templateSlug] : undefined;
 
   // Template-specific navigation items — tailored to each niche
-  // Note: Use relative paths (without /store/{slug}) so resolveStoreLink can handle them correctly
   const TEMPLATE_NAV_ITEMS: Record<string, Array<{ label: string; href: string }>> = {
     // Fashion family
-    "fashion":          [{ label: "New Arrivals", href: "/shop?sort=newest" }, { label: "Collections", href: "/shop" }, { label: "Lookbook", href: "/blog" }],
-    "fashion-colored":  [{ label: "New Arrivals", href: "/shop?sort=newest" }, { label: "Collections", href: "/shop" }, { label: "Lookbook", href: "/blog" }],
-    "handmade-bags":    [{ label: "New Arrivals", href: "/shop?sort=newest" }, { label: "Handbags", href: "/shop" }, { label: "Our Story", href: "/blog" }],
-    "t-shirts-prints":  [{ label: "New Drops", href: "/shop?sort=newest" }, { label: "All Designs", href: "/shop" }, { label: "Custom Prints", href: "/shop" }],
+    "fashion":          [{ label: "New Arrivals", href: `/store/${slug}/shop?sort=newest` }, { label: "Collections", href: `/store/${slug}/shop` }, { label: "Lookbook", href: `/store/${slug}/blog` }],
+    "fashion-colored":  [{ label: "New Arrivals", href: `/store/${slug}/shop?sort=newest` }, { label: "Collections", href: `/store/${slug}/shop` }, { label: "Lookbook", href: `/store/${slug}/blog` }],
+    "handmade-bags":    [{ label: "New Arrivals", href: `/store/${slug}/shop?sort=newest` }, { label: "Handbags", href: `/store/${slug}/shop` }, { label: "Our Story", href: `/store/${slug}/blog` }],
+    "t-shirts-prints":  [{ label: "New Drops", href: `/store/${slug}/shop?sort=newest` }, { label: "All Designs", href: `/store/${slug}/shop` }, { label: "Custom Prints", href: `/store/${slug}/shop` }],
     // Electronics
-    "electronics":              [{ label: "Deals", href: "/shop?sort=price_asc" }, { label: "New Tech", href: "/shop?sort=newest" }, { label: "Brands", href: "/shop" }, { label: "Blog", href: "/blog" }],
-    "electronics-accessories":  [{ label: "Deals", href: "/shop?sort=price_asc" }, { label: "New Tech", href: "/shop?sort=newest" }, { label: "Accessories", href: "/shop" }],
-    "hardware":                 [{ label: "Tools", href: "/shop" }, { label: "New Arrivals", href: "/shop?sort=newest" }, { label: "Guides", href: "/blog" }],
-    "tools":                    [{ label: "Power Tools", href: "/shop" }, { label: "Hand Tools", href: "/shop" }, { label: "Guides", href: "/blog" }],
+    "electronics":              [{ label: "Deals", href: `/store/${slug}/shop?sort=price_asc` }, { label: "New Tech", href: `/store/${slug}/shop?sort=newest` }, { label: "Brands", href: `/store/${slug}/shop` }, { label: "Blog", href: `/store/${slug}/blog` }],
+    "electronics-accessories":  [{ label: "Deals", href: `/store/${slug}/shop?sort=price_asc` }, { label: "New Tech", href: `/store/${slug}/shop?sort=newest` }, { label: "Accessories", href: `/store/${slug}/shop` }],
+    "hardware":                 [{ label: "Tools", href: `/store/${slug}/shop` }, { label: "New Arrivals", href: `/store/${slug}/shop?sort=newest` }, { label: "Guides", href: `/store/${slug}/blog` }],
+    "tools":                    [{ label: "Power Tools", href: `/store/${slug}/shop` }, { label: "Hand Tools", href: `/store/${slug}/shop` }, { label: "Guides", href: `/store/${slug}/blog` }],
     // Bakery
-    "sweets-bakery":    [{ label: "Menu", href: "/shop" }, { label: "Specials", href: "/shop?sort=newest" }, { label: "Catering", href: "/shop" }, { label: "Our Story", href: "/blog" }],
+    "sweets-bakery":    [{ label: "Menu", href: `/store/${slug}/shop` }, { label: "Specials", href: `/store/${slug}/shop?sort=newest` }, { label: "Catering", href: `/store/${slug}/shop` }, { label: "Our Story", href: `/store/${slug}/blog` }],
     // Cosmetics
-    "cosmetics":        [{ label: "Skincare", href: "/shop" }, { label: "Bestsellers", href: "/shop?sort=popular" }, { label: "New In", href: "/shop?sort=newest" }, { label: "Beauty Tips", href: "/blog" }],
+    "cosmetics":        [{ label: "Skincare", href: `/store/${slug}/shop` }, { label: "Bestsellers", href: `/store/${slug}/shop?sort=popular` }, { label: "New In", href: `/store/${slug}/shop?sort=newest` }, { label: "Beauty Tips", href: `/store/${slug}/blog` }],
     // Grocery
-    "grocery":          [{ label: "Weekly Deals", href: "/shop?sort=price_asc" }, { label: "Fresh Produce", href: "/shop" }, { label: "Pantry", href: "/shop" }, { label: "Recipes", href: "/blog" }],
-    "vegetables":       [{ label: "Fresh Today", href: "/shop?sort=newest" }, { label: "Organic", href: "/shop" }, { label: "Seasonal", href: "/shop" }, { label: "Recipes", href: "/blog" }],
+    "grocery":          [{ label: "Weekly Deals", href: `/store/${slug}/shop?sort=price_asc` }, { label: "Fresh Produce", href: `/store/${slug}/shop` }, { label: "Pantry", href: `/store/${slug}/shop` }, { label: "Recipes", href: `/store/${slug}/blog` }],
+    "vegetables":       [{ label: "Fresh Today", href: `/store/${slug}/shop?sort=newest` }, { label: "Organic", href: `/store/${slug}/shop` }, { label: "Seasonal", href: `/store/${slug}/shop` }, { label: "Recipes", href: `/store/${slug}/blog` }],
     // Health
-    "pills":            [{ label: "Supplements", href: "/shop" }, { label: "Bestsellers", href: "/shop?sort=popular" }, { label: "Wellness Blog", href: "/blog" }],
+    "pills":            [{ label: "Supplements", href: `/store/${slug}/shop` }, { label: "Bestsellers", href: `/store/${slug}/shop?sort=popular` }, { label: "Wellness Blog", href: `/store/${slug}/blog` }],
     // Interior
-    "decor":            [{ label: "Furniture", href: "/shop" }, { label: "New Collection", href: "/shop?sort=newest" }, { label: "Inspiration", href: "/blog" }],
-    "retail":           [{ label: "Living Room", href: "/shop" }, { label: "New Arrivals", href: "/shop?sort=newest" }, { label: "Design Ideas", href: "/blog" }],
+    "decor":            [{ label: "Furniture", href: `/store/${slug}/shop` }, { label: "New Collection", href: `/store/${slug}/shop?sort=newest` }, { label: "Inspiration", href: `/store/${slug}/blog` }],
+    "retail":           [{ label: "Living Room", href: `/store/${slug}/shop` }, { label: "New Arrivals", href: `/store/${slug}/shop?sort=newest` }, { label: "Design Ideas", href: `/store/${slug}/blog` }],
     // Kids
-    "kids":             [{ label: "Toys", href: "/shop" }, { label: "New In", href: "/shop?sort=newest" }, { label: "Gift Ideas", href: "/shop" }, { label: "Parenting", href: "/blog" }],
-    "toys":             [{ label: "Age Groups", href: "/shop" }, { label: "New Toys", href: "/shop?sort=newest" }, { label: "Gift Finder", href: "/shop" }],
+    "kids":             [{ label: "Toys", href: `/store/${slug}/shop` }, { label: "New In", href: `/store/${slug}/shop?sort=newest` }, { label: "Gift Ideas", href: `/store/${slug}/shop` }, { label: "Parenting", href: `/store/${slug}/blog` }],
+    "toys":             [{ label: "Age Groups", href: `/store/${slug}/shop` }, { label: "New Toys", href: `/store/${slug}/shop?sort=newest` }, { label: "Gift Finder", href: `/store/${slug}/shop` }],
     // Makeup
-    "makeup":           [{ label: "Face", href: "/shop" }, { label: "Lips", href: "/shop" }, { label: "New Launches", href: "/shop?sort=newest" }, { label: "Tutorials", href: "/blog" }],
+    "makeup":           [{ label: "Face", href: `/store/${slug}/shop` }, { label: "Lips", href: `/store/${slug}/shop` }, { label: "New Launches", href: `/store/${slug}/shop?sort=newest` }, { label: "Tutorials", href: `/store/${slug}/blog` }],
     // Perfumes
-    "perfumes":         [{ label: "Fragrances", href: "/shop" }, { label: "New Scents", href: "/shop?sort=newest" }, { label: "Gift Sets", href: "/shop" }, { label: "Scent Guide", href: "/blog" }],
+    "perfumes":         [{ label: "Fragrances", href: `/store/${slug}/shop` }, { label: "New Scents", href: `/store/${slug}/shop?sort=newest` }, { label: "Gift Sets", href: `/store/${slug}/shop` }, { label: "Scent Guide", href: `/store/${slug}/blog` }],
   };
   const templateNavItems = data.templateSlug ? TEMPLATE_NAV_ITEMS[data.templateSlug] || [] : [];
-
-  // Handmade Bags specific navigation items
-  const isHandmadeBagsTemplate = data.templateSlug === "handmade-bags";
-  const isCosmeticsTemplate = 
-    data.templateSlug === "cosmetics" || 
-    slug === "stacj" || // Force cosmetics for stacj store
-    slug?.toLowerCase().includes("cosmetics") || 
-    slug?.toLowerCase().includes("stacj") ||
-    data.store?.name?.toLowerCase().includes("cosmetics") ||
-    data.store?.name?.toLowerCase().includes("stacj");
-  
-  const handmadeBagsNavItems = [
-    { id: "home", label: "Home", url: "/", type: "home" },
-    { id: "women", label: "Women", url: "/shop?category=women", type: "shop" },
-    { id: "men", label: "Men", url: "/shop?category=men", type: "shop" },
-    { id: "blog", label: "Blog", url: "/blog", type: "page" },
-    { id: "about", label: "About Us", url: "/about", type: "page" },
-    { id: "contact", label: "Contact Us", url: "/contact", type: "page" },
-    { id: "login", label: "Login / Register", url: "/my-account", type: "page" },
-  ];
 
   // Navigation pages: exclude HOME (we're on it), sort sensibly
   const navPageOrder: Record<string, number> = { ABOUT: 0, FAQ: 1, CONTACT: 2, POLICY: 3, CUSTOM: 4, LANDING: 5 };
@@ -500,9 +478,9 @@ export default function StorePage() {
   return (
     <ThemeProvider theme={resolvedTheme}>
     <div className="min-h-screen bg-white">
-      {/* ─── COSMETICS TEMPLATE HEADER ─── */}
-      {isCosmeticsTemplate ? (
-        <CosmeticsHeader
+      {/* ─── FASHION TEMPLATE HEADER ─── */}
+      {isKidsTemplate ? (
+        <KidsHeader
           storeName={store.name}
           storeSlug={slug}
           logo={store.logo}
@@ -511,28 +489,9 @@ export default function StorePage() {
           searchQuery={searchQuery}
           onSearchChange={setSearchQuery}
           onSearch={handleSearch}
-          isLanding={isLanding}
-        />
-      ) : isHandmadeBagsTemplate ? (
-        <HandmadeBagsHeader
-          storeName={store.name}
-          storeSlug={slug}
-          logo={store.logo}
-          customNavItems={handmadeBagsNavItems}
-          cartCount={cartCount}
-          wishlistCount={wishlistCount}
           topBarText={data.deliveryZones.some((z: any) => z.freeAbove)
-            ? `Free delivery on orders over ${formatCurrency(Number(data.deliveryZones.find((z: any) => z.freeAbove)?.freeAbove || 0), currency)}`
-            : `Free delivery on orders over $200.00`}
-          socialLinks={[
-            ...(data.socialLinks?.facebook ? [{ platform: "facebook", url: data.socialLinks.facebook }] : []),
-            ...(data.socialLinks?.instagram ? [{ platform: "instagram", url: data.socialLinks.instagram }] : []),
-            ...(data.socialLinks?.twitter ? [{ platform: "twitter", url: data.socialLinks.twitter }] : []),
-          ]}
-          searchQuery={searchQuery}
-          onSearchChange={setSearchQuery}
-          onSearch={handleSearch}
-          isLanding={isLanding}
+            ? `FREE DELIVERY ON ORDERS ABOVE ${formatCurrency(Number(data.deliveryZones.find((z: any) => z.freeAbove)?.freeAbove || 0), currency)}`
+            : `Sign up for our newsletter to get 10% off for the week!`}
         />
       ) : isFashionTemplate ? (
         <FashionHeader
@@ -541,9 +500,9 @@ export default function StorePage() {
           logo={store.logo}
           navPages={navPages}
           customNavItems={customNavItems || (templateNavItems.length > 0 ? [
-            { id: "home", label: "Home", url: "/", type: "internal" },
-            ...templateNavItems.map((item, i) => ({ id: `tnav-${i}`, label: item.label, url: item.href.replace(`/store/${slug}/`, "/").replace(`/store/${slug}`, "/"), type: "internal" })),
-            { id: "reviews", label: "Reviews", url: "/reviews", type: "internal" },
+            { id: "home", label: "Home", url: `/store/${slug}`, type: "internal" },
+            ...templateNavItems.map((item, i) => ({ id: `tnav-${i}`, label: item.label, url: item.href, type: "internal" })),
+            { id: "reviews", label: "Reviews", url: `/store/${slug}/reviews`, type: "internal" },
           ] : undefined)}
           categories={categories.filter((c) => c._count.products > 0).map((c) => ({ id: c.id, name: c.name, slug: c.slug, productCount: c._count.products }))}
           cartCount={cartCount}
@@ -748,32 +707,8 @@ export default function StorePage() {
         </div>
       )}
 
-      {/* Footer — cosmetics, handmade-bags and fashion handle their own; all other templates get FashionFooter */}
-      {isCosmeticsTemplate ? (
-        <CosmeticsFooter
-          storeName={store.name}
-          storeSlug={slug}
-          logo={store.logo}
-          description={store.description}
-          socialLinks={socialLinksArray}
-          contactInfo={{
-            phone: whatsappNumber || undefined,
-            email: (data.socialLinks as any)?.email || undefined,
-          }}
-        />
-      ) : isHandmadeBagsTemplate ? (
-        <HandmadeBagsFooter
-          storeName={store.name}
-          storeSlug={slug}
-          logo={store.logo}
-          description={store.description}
-          socialLinks={socialLinksArray}
-          contactInfo={{
-            phone: whatsappNumber || undefined,
-            email: (data.socialLinks as any)?.email || undefined,
-          }}
-        />
-      ) : isFashionTemplate ? null : (
+      {/* Footer — fashion handles its own; all other templates get FashionFooter */}
+      {!isFashionTemplate && !isKidsTemplate && (
         <FashionFooter
           storeName={store.name}
           storeSlug={slug}

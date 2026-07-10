@@ -128,6 +128,7 @@ import {
   KidsInstagram,
   KidsNewsletter,
   KidsFooter,
+  KidsFooterFull,
 } from "@/components/storefront/KidsTemplateBlocks";
 import {
   MakeupFontLoader,
@@ -282,6 +283,7 @@ const KIDS_BLOCKS: Record<string, BlockComponent> = {
   kidsInstagram: KidsInstagram as unknown as BlockComponent,
   kidsNewsletter: KidsNewsletter as unknown as BlockComponent,
   kidsFooter: KidsFooter as unknown as BlockComponent,
+  kidsFooterFull: KidsFooterFull as unknown as BlockComponent,
 };
 
 const MAKEUP_BLOCKS: Record<string, BlockComponent> = {

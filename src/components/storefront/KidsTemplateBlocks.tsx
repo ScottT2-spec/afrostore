@@ -928,7 +928,341 @@ export function KidsNewsletter({ title = "Join our mailing list to receive any l
 }
 
 /* ═══════════════════════════════════════════════════════════════
-   FOOTER
+   KIDS HEADER
+   Full WoodMart Kids-style header with:
+   Left: About Us · Contact Us · Blog
+   Center: Logo
+   Right-center: Shop · Gifts
+   Far-right: Search · Sign In · Wishlist · Cart
+   ═══════════════════════════════════════════════════════════════ */
+
+export interface KidsHeaderProps {
+  storeName: string;
+  storeSlug: string;
+  logo?: string | null;
+  cartCount?: number;
+  wishlistCount?: number;
+  onSearch?: (q: string) => void;
+  searchQuery?: string;
+  onSearchChange?: (q: string) => void;
+  topBarText?: string;
+}
+
+export function KidsHeader({
+  storeName,
+  storeSlug,
+  logo,
+  cartCount = 0,
+  wishlistCount = 0,
+  onSearch,
+  searchQuery = "",
+  onSearchChange,
+  topBarText = "Sign up for our newsletter to get 10% off for the week!",
+}: KidsHeaderProps) {
+  const [mobileOpen, setMobileOpen] = useState(false);
+  const [searchOpen, setSearchOpen] = useState(false);
+  const [searchVal, setSearchVal] = useState(searchQuery);
+
+  const base = `/store/${storeSlug}`;
+
+  const handleSearchSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (searchVal.trim()) {
+      onSearch?.(searchVal.trim());
+      onSearchChange?.(searchVal.trim());
+      setSearchOpen(false);
+      window.location.href = `${base}/shop?q=${encodeURIComponent(searchVal.trim())}`;
+    }
+  };
+
+  const headerCss = `
+    .kh-topbar { background: ${TOKENS.primaryColor}; color: #fff; font-family: ${TOKENS.bodyFont}; font-size: 13px; text-align: center; padding: 8px 15px; font-weight: 500; }
+    .kh-header { background: #fff; border-bottom: 1px solid #e8e8e8; font-family: ${TOKENS.bodyFont}; position: sticky; top: 0; z-index: 100; }
+    .kh-inner { max-width: ${TOKENS.containerWidth}; margin: 0 auto; display: flex; align-items: center; justify-content: space-between; padding: 0 15px; height: 80px; }
+    .kh-nav { display: flex; align-items: center; gap: 28px; }
+    .kh-nav a { font-size: 14px; font-weight: 600; color: ${TOKENS.titleColor}; text-decoration: none; text-transform: uppercase; letter-spacing: 0.5px; transition: color 0.2s; }
+    .kh-nav a:hover { color: ${TOKENS.primaryColor}; }
+    .kh-logo { display: flex; align-items: center; gap: 10px; text-decoration: none; }
+    .kh-logo img { height: 40px; width: auto; }
+    .kh-logo-text { font-family: ${TOKENS.titleFont}; font-size: 24px; font-weight: 700; color: ${TOKENS.titleColor}; }
+    .kh-icons { display: flex; align-items: center; gap: 20px; }
+    .kh-icon-btn { position: relative; background: none; border: none; cursor: pointer; padding: 4px; color: ${TOKENS.titleColor}; transition: color 0.2s; }
+    .kh-icon-btn:hover { color: ${TOKENS.primaryColor}; }
+    .kh-icon-btn svg { width: 22px; height: 22px; }
+    .kh-badge { position: absolute; top: -4px; right: -6px; background: ${TOKENS.primaryColor}; color: #fff; font-size: 10px; font-weight: 700; min-width: 16px; height: 16px; border-radius: 50%; display: flex; align-items: center; justify-content: center; }
+    .kh-search-overlay { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.5); z-index: 200; display: flex; align-items: flex-start; justify-content: center; padding-top: 120px; }
+    .kh-search-box { background: #fff; border-radius: 12px; padding: 30px; width: 90%; max-width: 600px; box-shadow: 0 20px 60px rgba(0,0,0,0.15); }
+    .kh-search-box form { display: flex; gap: 10px; }
+    .kh-search-box input { flex: 1; border: 2px solid #e8e8e8; border-radius: 8px; padding: 12px 16px; font-size: 15px; font-family: ${TOKENS.bodyFont}; outline: none; transition: border-color 0.2s; }
+    .kh-search-box input:focus { border-color: ${TOKENS.primaryColor}; }
+    .kh-search-box button[type="submit"] { background: ${TOKENS.primaryColor}; color: #fff; border: none; border-radius: 8px; padding: 12px 24px; font-weight: 600; cursor: pointer; font-family: ${TOKENS.bodyFont}; transition: background 0.2s; }
+    .kh-search-box button[type="submit"]:hover { background: ${TOKENS.primaryHover}; }
+    .kh-mobile-toggle { display: none; background: none; border: none; cursor: pointer; padding: 4px; color: ${TOKENS.titleColor}; }
+    .kh-mobile-toggle svg { width: 24px; height: 24px; }
+    .kh-mobile-menu { display: none; background: #fff; border-bottom: 1px solid #e8e8e8; padding: 15px; }
+    .kh-mobile-menu a { display: block; padding: 10px 0; font-size: 15px; font-weight: 600; color: ${TOKENS.titleColor}; text-decoration: none; border-bottom: 1px solid #f0f0f0; }
+    .kh-mobile-menu a:last-child { border-bottom: none; }
+    @media (max-width: 768px) {
+      .kh-nav { display: none; }
+      .kh-mobile-toggle { display: block; }
+      .kh-mobile-menu.kh-open { display: block; }
+      .kh-inner { height: 60px; }
+      .kh-icons { gap: 14px; }
+      .kh-icon-btn svg { width: 20px; height: 20px; }
+    }
+  `;
+
+  return (
+    <>
+      <style dangerouslySetInnerHTML={{ __html: headerCss }} />
+      {/* Top bar */}
+      <div className="kh-topbar">{topBarText}</div>
+      {/* Main header */}
+      <header className="kh-header">
+        <div className="kh-inner">
+          {/* Mobile hamburger */}
+          <button className="kh-mobile-toggle" onClick={() => setMobileOpen(!mobileOpen)} aria-label="Menu">
+            {mobileOpen ? (
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M18 6L6 18M6 6l12 12"/></svg>
+            ) : (
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M3 12h18M3 6h18M3 18h18"/></svg>
+            )}
+          </button>
+
+          {/* Left nav */}
+          <nav className="kh-nav">
+            <Link href={`${base}/shop`}>About Us</Link>
+            <Link href={`${base}/shop`}>Contact Us</Link>
+            <Link href={`${base}/blog`}>Blog</Link>
+          </nav>
+
+          {/* Center logo */}
+          <Link href={base} className="kh-logo">
+            {logo ? (
+              <img src={logo} alt={storeName} />
+            ) : (
+              <span className="kh-logo-text">{storeName}</span>
+            )}
+          </Link>
+
+          {/* Right nav */}
+          <nav className="kh-nav">
+            <Link href={`${base}/shop`}>Shop</Link>
+            <Link href={`${base}/shop`}>Gifts</Link>
+          </nav>
+
+          {/* Icon actions */}
+          <div className="kh-icons">
+            {/* Search */}
+            <button className="kh-icon-btn" onClick={() => setSearchOpen(true)} aria-label="Search">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
+            </button>
+            {/* Sign In */}
+            <Link href={`${base}/my-account`} className="kh-icon-btn" aria-label="Sign In" style={{ textDecoration: 'none' }}>
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+            </Link>
+            {/* Wishlist */}
+            <Link href={`${base}/wishlist`} className="kh-icon-btn" aria-label="Wishlist" style={{ textDecoration: 'none' }}>
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>
+              {wishlistCount > 0 && <span className="kh-badge">{wishlistCount}</span>}
+            </Link>
+            {/* Cart */}
+            <Link href={`${base}/cart`} className="kh-icon-btn" aria-label="Cart" style={{ textDecoration: 'none' }}>
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><circle cx="9" cy="21" r="1"/><circle cx="20" cy="21" r="1"/><path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"/></svg>
+              {cartCount > 0 && <span className="kh-badge">{cartCount}</span>}
+            </Link>
+          </div>
+        </div>
+
+        {/* Mobile menu */}
+        <div className={`kh-mobile-menu ${mobileOpen ? "kh-open" : ""}`}>
+          <Link href={base} onClick={() => setMobileOpen(false)}>Home</Link>
+          <Link href={`${base}/shop`} onClick={() => setMobileOpen(false)}>Shop</Link>
+          <Link href={`${base}/shop`} onClick={() => setMobileOpen(false)}>Gifts</Link>
+          <Link href={`${base}/shop`} onClick={() => setMobileOpen(false)}>About Us</Link>
+          <Link href={`${base}/shop`} onClick={() => setMobileOpen(false)}>Contact Us</Link>
+          <Link href={`${base}/blog`} onClick={() => setMobileOpen(false)}>Blog</Link>
+          <Link href={`${base}/wishlist`} onClick={() => setMobileOpen(false)}>Wishlist</Link>
+          <Link href={`${base}/my-account`} onClick={() => setMobileOpen(false)}>My Account</Link>
+        </div>
+      </header>
+
+      {/* Search overlay */}
+      {searchOpen && (
+        <div className="kh-search-overlay" onClick={() => setSearchOpen(false)}>
+          <div className="kh-search-box" onClick={e => e.stopPropagation()}>
+            <form onSubmit={handleSearchSubmit}>
+              <input
+                type="text"
+                placeholder="Search products..."
+                value={searchVal}
+                onChange={e => setSearchVal(e.target.value)}
+                autoFocus
+              />
+              <button type="submit">Search</button>
+            </form>
+          </div>
+        </div>
+      )}
+    </>
+  );
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   KIDS FOOTER (Custom WoodMart Kids-style)
+   Playful, warm footer with proper store links
+   ═══════════════════════════════════════════════════════════════ */
+
+export interface KidsFooterFullProps {
+  storeName?: string;
+  storeSlug?: string;
+  logo?: string | null;
+  description?: string;
+  contact?: { address?: string; phone?: string; email?: string };
+  socialLinks?: Array<{ platform: string; url: string }>;
+  copyrightText?: string;
+}
+
+export function KidsFooterFull({
+  storeName = "Kids Store",
+  storeSlug: storeSlugProp,
+  logo,
+  description = "We create organic clothes for babies and children. Quality, comfort, and style in every piece.",
+  contact = { address: "913 Wyandotte St, Kansas City, MO 64105", phone: "(064) 332-1233", email: "hello@store.com" },
+  socialLinks = [],
+  copyrightText,
+}: KidsFooterFullProps) {
+  const storeCtx = useContext(KidsStoreContext);
+  const resolvedSlug = storeSlugProp || storeCtx?.storeSlug;
+  const base = resolvedSlug ? `/store/${resolvedSlug}` : "/";
+
+  const activeSocials = socialLinks.filter(s => s.url && s.url !== "#");
+
+  const socialIcons: Record<string, string> = {
+    facebook: "f", twitter: "𝕏", instagram: "📷", youtube: "▶", tiktok: "♪", whatsapp: "💬",
+  };
+
+  const footerCss = `
+    .kf-footer { background: #faf8f5; font-family: ${TOKENS.bodyFont}; color: ${TOKENS.textColor}; }
+    .kf-main { max-width: ${TOKENS.containerWidth}; margin: 0 auto; padding: 60px 15px 40px; display: grid; grid-template-columns: 1.5fr 1fr 1fr 1fr; gap: 40px; }
+    .kf-brand p { font-size: 14px; line-height: 1.8; margin: 16px 0; }
+    .kf-social { display: flex; gap: 10px; margin-top: 16px; }
+    .kf-social a { width: 36px; height: 36px; border-radius: 50%; background: ${TOKENS.primaryColor}; color: #fff; display: flex; align-items: center; justify-content: center; text-decoration: none; font-size: 14px; font-weight: 700; transition: background 0.2s; }
+    .kf-social a:hover { background: ${TOKENS.primaryHover}; }
+    .kf-col-title { font-family: ${TOKENS.titleFont}; font-size: 16px; font-weight: 700; color: ${TOKENS.titleColor}; text-transform: uppercase; margin-bottom: 20px; letter-spacing: 0.3px; }
+    .kf-links { list-style: none; margin: 0; padding: 0; }
+    .kf-links li { margin-bottom: 10px; }
+    .kf-links a { font-size: 14px; color: ${TOKENS.textColor}; text-decoration: none; transition: color 0.2s; }
+    .kf-links a:hover { color: ${TOKENS.primaryColor}; }
+    .kf-contact-item { display: flex; align-items: flex-start; gap: 10px; margin-bottom: 12px; font-size: 14px; }
+    .kf-contact-icon { width: 16px; height: 16px; flex-shrink: 0; margin-top: 3px; color: ${TOKENS.primaryColor}; }
+    .kf-bottom { border-top: 1px solid #e8e0d8; max-width: ${TOKENS.containerWidth}; margin: 0 auto; padding: 20px 15px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px; }
+    .kf-bottom small { font-size: 13px; color: ${TOKENS.textColor}; }
+    .kf-bottom small a { color: ${TOKENS.textColor}; text-decoration: none; }
+    .kf-payments img { height: 21px; width: auto; }
+    @media (max-width: 768px) {
+      .kf-main { grid-template-columns: 1fr; gap: 30px; padding: 40px 15px 30px; }
+    }
+    @media (min-width: 769px) and (max-width: 1024px) {
+      .kf-main { grid-template-columns: 1fr 1fr; }
+    }
+  `;
+
+  return (
+    <footer className="kf-footer">
+      <style dangerouslySetInnerHTML={{ __html: footerCss }} />
+      <div className="kf-main">
+        {/* Brand column */}
+        <div className="kf-brand">
+          <Link href={base} style={{ textDecoration: 'none' }}>
+            {logo ? (
+              <img src={logo} alt={storeName} style={{ maxWidth: '180px', height: 'auto' }} />
+            ) : (
+              <span style={{ fontFamily: TOKENS.titleFont, fontSize: '22px', fontWeight: 700, color: TOKENS.titleColor }}>{storeName}</span>
+            )}
+          </Link>
+          <p>{description}</p>
+          {contact?.phone && (
+            <div className="kf-contact-item">
+              <span className="kf-contact-icon">📞</span>
+              <span>Phone: {contact.phone}</span>
+            </div>
+          )}
+          {contact?.email && (
+            <div className="kf-contact-item">
+              <span className="kf-contact-icon">✉️</span>
+              <span>Email: {contact.email}</span>
+            </div>
+          )}
+          {contact?.address && (
+            <div className="kf-contact-item">
+              <span className="kf-contact-icon">📍</span>
+              <span>{contact.address}</span>
+            </div>
+          )}
+          {activeSocials.length > 0 && (
+            <div className="kf-social">
+              {activeSocials.map((s, i) => (
+                <a key={i} href={s.url} target="_blank" rel="noopener noreferrer" aria-label={s.platform}>
+                  {socialIcons[s.platform] || s.platform[0]?.toUpperCase()}
+                </a>
+              ))}
+            </div>
+          )}
+        </div>
+
+        {/* Shop column */}
+        <div>
+          <h4 className="kf-col-title">Shop</h4>
+          <ul className="kf-links">
+            <li><Link href={`${base}/shop`}>All Products</Link></li>
+            <li><Link href={`${base}/shop?sort=newest`}>New Arrivals</Link></li>
+            <li><Link href={`${base}/shop`}>Gifts</Link></li>
+            <li><Link href={`${base}/shop?sort=popular`}>Best Sellers</Link></li>
+            <li><Link href={`${base}/shop?sort=price_asc`}>Sale</Link></li>
+          </ul>
+        </div>
+
+        {/* Information column */}
+        <div>
+          <h4 className="kf-col-title">Information</h4>
+          <ul className="kf-links">
+            <li><Link href={`${base}/shop`}>About Us</Link></li>
+            <li><Link href={`${base}/shop`}>Contact Us</Link></li>
+            <li><Link href={`${base}/blog`}>Blog</Link></li>
+            <li><Link href={`${base}/shop`}>FAQ</Link></li>
+            <li><Link href={`${base}/shop`}>Shipping & Returns</Link></li>
+          </ul>
+        </div>
+
+        {/* Account column */}
+        <div>
+          <h4 className="kf-col-title">My Account</h4>
+          <ul className="kf-links">
+            <li><Link href={`${base}/my-account`}>Sign In</Link></li>
+            <li><Link href={`${base}/wishlist`}>Wishlist</Link></li>
+            <li><Link href={`${base}/cart`}>Shopping Cart</Link></li>
+            <li><Link href={`${base}/compare`}>Compare</Link></li>
+            <li><Link href={`${base}/order-tracking`}>Order Tracking</Link></li>
+          </ul>
+        </div>
+      </div>
+
+      {/* Bottom bar */}
+      <div className="kf-bottom">
+        <small>
+          <Link href={base}>{copyrightText || `© ${new Date().getFullYear()} ${storeName}. All rights reserved.`}</Link>
+        </small>
+        <div className="kf-payments">
+          <img src="https://woodmart.xtemos.com/wp-content/uploads/2018/08/payment.png" alt="Payment methods" loading="lazy" />
+        </div>
+      </div>
+    </footer>
+  );
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   LEGACY FOOTER (kept for backward compat)
    ═══════════════════════════════════════════════════════════════ */
 
 export function KidsFooter(props: React.ComponentProps<typeof FashionFooter>) {
