@@ -16,6 +16,7 @@ import { PERFUMES_TEMPLATE_PRESET } from "@/lib/templates/presets/perfumes-prese
 import { FASHION_SAMPLE_PRODUCTS } from "@/lib/templates/presets/fashion-sample-products";
 import { FASHION_SAMPLE_BLOGS } from "@/lib/templates/presets/fashion-sample-blogs";
 import { TEMPLATE_SAMPLE_DATA } from "@/lib/templates/presets/template-sample-data";
+import { ensureVegetablePages } from "@/lib/templates/vegetable-pages";
 
 /**
  * Import a template into a site by:
@@ -92,6 +93,10 @@ export async function importTemplateToSite(
         customHtml: null,
       },
     });
+  }
+
+  if (catalogEntry.slug === "vegetables") {
+    await ensureVegetablePages(siteId);
   }
 
   // Build blocks for the HOME page

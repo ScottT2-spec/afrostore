@@ -11,6 +11,8 @@ import { parsePageContent, getLinkedPageHref } from "@/lib/page-content";
 import { ThemeProvider, type ThemeData } from "@/components/storefront/ThemeProvider";
 import { useWishlist } from "@/hooks/useWishlist";
 import { applyPageCustomization, buildPageBackgroundStyle, buildThemeDataWithCustomization, filterVisiblePages, getResolvedPageSettings, normalizeSiteCustomization, type SiteCustomizationDocument } from "@/lib/site-customization";
+import { VegetableAboutPage, VegetableContactPage, VegetableMenuPage, VegetableRecipePage, VegetableReservationPage } from "@/components/storefront/VegetableTemplatePages";
+import { VegetableFooter, VegetableHeader } from "@/components/storefront/VegetableStoreChrome";
 
 /* ─── TYPES ─────────────────────────────────────────────────── */
 
@@ -190,6 +192,78 @@ export default function StorefrontPage() {
   const navPages = customizedPages
     .filter((p) => p.type !== "HOME")
     .sort((a, b) => (navPageOrder[a.type] ?? 99) - (navPageOrder[b.type] ?? 99));
+
+  if (data.templateSlug === "vegetables") {
+    const vegetableNavItems = [
+      { label: "Home", href: `/store/${slug}` },
+      { label: "Menu", href: `/store/${slug}/menu` },
+      { label: "Recipe", href: `/store/${slug}/recipe` },
+      { label: "About", href: `/store/${slug}/about` },
+      { label: "Contact", href: `/store/${slug}/contact` },
+    ];
+    const vegetableSocialLinks = [
+      ...(socialLinks?.facebook ? [{ platform: "facebook", url: socialLinks.facebook }] : []),
+      ...(socialLinks?.instagram ? [{ platform: "instagram", url: socialLinks.instagram }] : []),
+      ...(socialLinks?.twitter ? [{ platform: "twitter", url: socialLinks.twitter }] : []),
+      ...(socialLinks?.tiktok ? [{ platform: "tiktok", url: socialLinks.tiktok }] : []),
+    ];
+
+    const pageBody = (() => {
+      switch (pageSlug) {
+        case "menu":
+          return <VegetableMenuPage storeName={store.name} storeSlug={slug} currency={currency} socialLinks={vegetableSocialLinks} />;
+        case "recipe":
+          return <VegetableRecipePage storeName={store.name} storeSlug={slug} currency={currency} socialLinks={vegetableSocialLinks} />;
+        case "about":
+          return <VegetableAboutPage storeName={store.name} storeSlug={slug} currency={currency} socialLinks={vegetableSocialLinks} />;
+        case "contact":
+          return (
+            <VegetableContactPage
+              storeName={store.name}
+              storeSlug={slug}
+              currency={currency}
+              socialLinks={vegetableSocialLinks}
+              storeAddress={store.description || `${store.name} restaurant`}
+              storePhone={settings.whatsappNumber || socialLinks.whatsapp || undefined}
+            />
+          );
+        case "reservation":
+          return <VegetableReservationPage storeName={store.name} storeSlug={slug} currency={currency} socialLinks={vegetableSocialLinks} />;
+        default:
+          return (
+            <div className="mx-auto max-w-3xl px-4 py-20 text-center sm:px-6">
+              <h1 className="font-serif text-4xl text-[#243226]">{page.title}</h1>
+              <p className="mt-4 text-sm leading-7 text-[#5d6658]">This page is available in the Vegetable template.</p>
+            </div>
+          );
+      }
+    })();
+
+    return (
+      <ThemeProvider theme={resolvedTheme}>
+        <div className="min-h-screen bg-[#fffdf7] text-[#243226]">
+          <VegetableHeader
+            storeName={store.name}
+            storeSlug={slug}
+            logo={store.logo}
+            navItems={vegetableNavItems}
+            reservationHref={`/store/${slug}/reservation`}
+          />
+          <main style={buildPageBackgroundStyle(resolvedPageSettings)}>
+            {pageBody}
+          </main>
+          <VegetableFooter
+            storeName={store.name}
+            storeSlug={slug}
+            logo={store.logo}
+            description={store.description}
+            navItems={vegetableNavItems}
+            socialLinks={vegetableSocialLinks}
+          />
+        </div>
+      </ThemeProvider>
+    );
+  }
 
   return (
     <ThemeProvider theme={resolvedTheme}>

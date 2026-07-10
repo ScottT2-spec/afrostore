@@ -3,6 +3,7 @@ import { prisma } from "@/lib/db";
 import { asRecord } from "@/lib/json";
 import { buildThemeDataWithCustomization, loadSiteCustomizationSafely } from "@/lib/site-customization";
 import { mergeStoredTemplatePages } from "@/lib/templates/site-instance";
+import { ensureVegetablePages } from "@/lib/templates/vegetable-pages";
 
 type Params = { params: Promise<{ slug: string; pageSlug: string }> };
 
@@ -28,6 +29,23 @@ export async function GET(_req: NextRequest, { params }: Params) {
 
     if (!site) return notFound("Store not found");
 
+    const activeTemplate = await prisma.siteTemplate.findFirst({
+      where: { siteId: site.id, isActive: true },
+      select: {
+        variant: true,
+        themeConfig: true,
+        pages: true,
+        customHtml: true,
+        template: {
+          select: { id: true, name: true, slug: true },
+        },
+      },
+    });
+
+    if (activeTemplate?.template?.slug === "vegetables") {
+      await ensureVegetablePages(site.id);
+    }
+
     const [
       page,
       settings,
@@ -36,7 +54,6 @@ export async function GET(_req: NextRequest, { params }: Params) {
       deliveryZones,
       allPages,
       activeTheme,
-      activeTemplate,
       products,
       customization,
     ] = await Promise.all([
@@ -100,18 +117,6 @@ export async function GET(_req: NextRequest, { params }: Params) {
         include: {
           theme: {
             select: { id: true, name: true, slug: true, config: true },
-          },
-        },
-      }),
-      prisma.siteTemplate.findFirst({
-        where: { siteId: site.id, isActive: true },
-        select: {
-          variant: true,
-          themeConfig: true,
-          pages: true,
-          customHtml: true,
-          template: {
-            select: { id: true, name: true, slug: true },
           },
         },
       }),

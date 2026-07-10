@@ -7,6 +7,8 @@ import { applyPageCustomization, buildPageBackgroundStyle, filterVisiblePages, g
 import { parsePageContent } from "@/lib/page-content";
 import { RenderBlocks, type BuilderBlock } from "@/components/storefront/BlockRenderer";
 import { serializeProductsForClient } from "@/lib/serialize-products";
+import { VegetableContactPage } from "@/components/storefront/VegetableTemplatePages";
+import { VegetableFooter, VegetableHeader } from "@/components/storefront/VegetableStoreChrome";
 
 type Props = {
   params: Promise<{ slug: string }>;
@@ -137,6 +139,16 @@ async function getStoreData(slug: string) {
     },
     include: {
       customizations: true,
+      socialLinks: true,
+      templates: {
+        include: {
+          template: true,
+        },
+        where: {
+          isActive: true,
+        },
+        take: 1,
+      },
       pages: {
         where: { slug: "contact" },
         take: 1,
@@ -225,6 +237,41 @@ export default async function ContactPage({ params }: Props) {
     backgroundColor: customization?.themeSettings?.colors?.background || "#ffffff",
     textColor: customization?.themeSettings?.colors?.text || "#242424",
   };
+
+  const activeTemplateSlug = store.templates?.[0]?.template?.slug || null;
+
+  if (activeTemplateSlug === "vegetables") {
+    const vegetableNavItems = [
+      { label: "Home", href: `/store/${slug}` },
+      { label: "Menu", href: `/store/${slug}/menu` },
+      { label: "Recipe", href: `/store/${slug}/recipe` },
+      { label: "About", href: `/store/${slug}/about` },
+      { label: "Contact", href: `/store/${slug}/contact` },
+    ];
+    const vegetableSocialLinks: Array<{ platform: string; url: string }> = [
+      ...(store.socialLinks?.facebook ? [{ platform: "facebook", url: store.socialLinks.facebook }] : []),
+      ...(store.socialLinks?.instagram ? [{ platform: "instagram", url: store.socialLinks.instagram }] : []),
+      ...(store.socialLinks?.twitter ? [{ platform: "twitter", url: store.socialLinks.twitter }] : []),
+      ...(store.socialLinks?.tiktok ? [{ platform: "tiktok", url: store.socialLinks.tiktok }] : []),
+    ];
+
+    return (
+      <div className="min-h-screen bg-[#fff9ef] text-[#243226]">
+        <VegetableHeader storeName={store.name} storeSlug={slug} logo={store.logo} navItems={vegetableNavItems} reservationHref={`/store/${slug}/reservation`} />
+        <main>
+          <VegetableContactPage
+            storeName={store.name}
+            storeSlug={slug}
+            currency="USD"
+            socialLinks={vegetableSocialLinks}
+            storeAddress={store.description || `${store.name} restaurant`}
+            storePhone={undefined}
+          />
+        </main>
+        <VegetableFooter storeName={store.name} storeSlug={slug} logo={store.logo} description={store.description} navItems={vegetableNavItems} socialLinks={vegetableSocialLinks} />
+      </div>
+    );
+  }
 
   return (
     <ThemeProvider initialTheme={themeData}>

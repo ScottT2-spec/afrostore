@@ -5,6 +5,7 @@ import { createPageSchema } from "@/lib/validators";
 import { unauthorized } from "@/lib/auth";
 import { getLinkedPageTemplate } from "@/lib/page-content";
 import { mergeStoredTemplatePages } from "@/lib/templates/site-instance";
+import { ensureVegetablePages } from "@/lib/templates/vegetable-pages";
 import type { Prisma } from "@/generated/prisma";
 
 type Params = { params: Promise<{ siteId: string }> };
@@ -32,7 +33,19 @@ export async function GET(req: NextRequest, { params }: Params) {
     where.title = { contains: search, mode: "insensitive" };
   }
 
-  const [pages, total, activeTemplate] = await Promise.all([
+  const activeTemplate = await prisma.siteTemplate.findFirst({
+    where: { siteId, isActive: true },
+    select: {
+      pages: true,
+      template: { select: { slug: true } },
+    },
+  });
+
+  if (activeTemplate?.template?.slug === "vegetables") {
+    await ensureVegetablePages(siteId);
+  }
+
+  const [pages, total] = await Promise.all([
     prisma.page.findMany({
       where: where as Prisma.PageWhereInput,
       select: {
@@ -51,10 +64,6 @@ export async function GET(req: NextRequest, { params }: Params) {
       take: limit,
     }),
     prisma.page.count({ where: where as Prisma.PageWhereInput }),
-    prisma.siteTemplate.findFirst({
-      where: { siteId, isActive: true },
-      select: { pages: true },
-    }),
   ]);
 
   return success({

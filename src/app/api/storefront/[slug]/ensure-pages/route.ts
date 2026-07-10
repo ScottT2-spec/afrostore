@@ -1,6 +1,7 @@
 import { NextRequest } from "next/server";
 import { prisma } from "@/lib/db";
 import { success, error } from "@/lib/api-helpers";
+import { ensureVegetablePages } from "@/lib/templates/vegetable-pages";
 
 type Params = { params: Promise<{ slug: string }> };
 
@@ -24,6 +25,20 @@ export async function POST(req: NextRequest, { params }: Params) {
 
     if (!store) {
       return error("Store not found", 404);
+    }
+
+    const activeTemplate = await prisma.siteTemplate.findFirst({
+      where: { siteId: store.id, isActive: true },
+      select: { template: { select: { slug: true } } },
+    });
+
+    if (activeTemplate?.template?.slug === "vegetables") {
+      await ensureVegetablePages(store.id);
+      return success({
+        message: "Vegetable pages ensured successfully",
+        createdPages: [],
+        existingSlugs: ["menu", "recipe", "about", "contact"],
+      });
     }
 
     // Check if pages already exist

@@ -58,6 +58,8 @@ import { getLinkedPageHref, parsePageContent, type PageSettings } from "@/lib/pa
 import { ThemeProvider, type ThemeData } from "@/components/storefront/ThemeProvider";
 import { useWishlist } from "@/hooks/useWishlist";
 import { applyPageCustomization, buildPageBackgroundStyle, buildThemeDataWithCustomization, filterVisiblePages, getResolvedPageSettings, normalizeSiteCustomization, type SiteCustomizationDocument } from "@/lib/site-customization";
+import { VegetableFooter, VegetableHeader } from "@/components/storefront/VegetableStoreChrome";
+import { VegetableHomePage } from "@/components/storefront/VegetableTemplatePages";
 
 /* ───────── Types ───────── */
 
@@ -474,6 +476,53 @@ export default function StorePage() {
   const navPages = customizedPages
     .filter((p) => p.type !== "HOME")
     .sort((a, b) => (navPageOrder[a.type] ?? 99) - (navPageOrder[b.type] ?? 99));
+
+  if (data.templateSlug === "vegetables") {
+    const vegetableNavItems = [
+      { label: "Home", href: `/store/${slug}` },
+      { label: "Menu", href: `/store/${slug}/menu` },
+      { label: "Recipe", href: `/store/${slug}/recipe` },
+      { label: "About", href: `/store/${slug}/about` },
+      { label: "Contact", href: `/store/${slug}/contact` },
+    ];
+    return (
+      <ThemeProvider theme={resolvedTheme}>
+        <div className="min-h-screen bg-[#fffdf7] text-[#243226]">
+          <VegetableHeader
+            storeName={store.name}
+            storeSlug={slug}
+            logo={store.logo}
+            navItems={vegetableNavItems}
+            reservationHref={`/store/${slug}/reservation`}
+          />
+
+          <main style={buildPageBackgroundStyle(homePageSettings)}>
+            <VegetableHomePage storeName={store.name} storeSlug={slug} currency={currency} socialLinks={socialLinksArray} />
+          </main>
+
+          {!isLanding && products.length > 0 && !homeHasProductGrid && (
+            <div className="px-4 pb-10 pt-4 text-center sm:px-6">
+              <Link
+                href={`/store/${slug}/shop`}
+                className="inline-flex items-center gap-2 rounded-full bg-[#243226] px-6 py-3 text-xs font-semibold uppercase tracking-[0.2em] text-white transition-colors hover:bg-[#6b8d49]"
+              >
+                View All Products <ArrowRight className="h-4 w-4" />
+              </Link>
+            </div>
+          )}
+
+          <VegetableFooter
+            storeName={store.name}
+            storeSlug={slug}
+            logo={store.logo}
+            description={store.description}
+            navItems={vegetableNavItems}
+            socialLinks={socialLinksArray}
+          />
+        </div>
+      </ThemeProvider>
+    );
+  }
 
   return (
     <ThemeProvider theme={resolvedTheme}>
