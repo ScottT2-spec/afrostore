@@ -477,7 +477,9 @@ export default function StorePage() {
     data.templateSlug === "cosmetics" || 
     slug === "stacj" || // Force cosmetics for stacj store
     slug?.toLowerCase().includes("cosmetics") || 
-    data.store?.name?.toLowerCase().includes("cosmetics");
+    slug?.toLowerCase().includes("stacj") ||
+    data.store?.name?.toLowerCase().includes("cosmetics") ||
+    data.store?.name?.toLowerCase().includes("stacj");
   
   const handmadeBagsNavItems = [
     { id: "home", label: "Home", url: "/", type: "home" },
@@ -771,7 +773,7 @@ export default function StorePage() {
             email: (data.socialLinks as any)?.email || undefined,
           }}
         />
-      ) : !isFashionTemplate && (
+      ) : isFashionTemplate ? null : (
         <FashionFooter
           storeName={store.name}
           storeSlug={slug}

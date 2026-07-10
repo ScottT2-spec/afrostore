@@ -1364,6 +1364,12 @@ export function CosmeticsHeader({
     { label: "Terms and Conditions", href: "/terms" },
   ];
 
+  const iconLinks: Array<{ icon: string; label: string; action?: () => void; href?: string; count?: number }> = [
+    { icon: "🔍", label: "Search", action: () => setShowSearch(!showSearch) },
+    { icon: "♡", label: "Wishlist", href: "/wishlist", count: wishlistCount },
+    { icon: "🛒", label: "Cart", href: "/cart", count: cartCount },
+  ].filter(link => !isLanding || (link.label !== "Search" && link.label !== "Wishlist" && link.label !== "Cart"));
+
   const scopedCss = `
     .ch-header { background: #fff; border-bottom: 1px solid #e5e5e5; }
     .ch-top-bar { background: ${TOKENS.primaryColor}; color: #fff; font-family: ${TOKENS.bodyFont}; font-size: 12px; padding: 8px 0; text-align: center; }
@@ -1426,17 +1432,17 @@ export function CosmeticsHeader({
             <span className="ch-logo-text">{storeName}</span>
           </Link>
           <div className="ch-icons">
-            {!isLanding && (
-              <>
-                <button className="ch-icon-btn" onClick={() => setShowSearch(!showSearch)} aria-label="Search">🔍</button>
-                <Link href={resolveStoreLink("/wishlist", storeSlug)} className="ch-icon-btn" aria-label="Wishlist">
-                  ♡{wishlistCount > 0 && <span className="ch-badge">{wishlistCount}</span>}
+            {iconLinks.map((link, i) => (
+              link.action ? (
+                <button key={i} className="ch-icon-btn" onClick={link.action} aria-label={link.label}>
+                  {link.icon}{link.count && link.count > 0 && <span className="ch-badge">{link.count}</span>}
+                </button>
+              ) : (
+                <Link key={i} href={resolveStoreLink(link.href || "#", storeSlug)} className="ch-icon-btn" aria-label={link.label}>
+                  {link.icon}{link.count && link.count > 0 && <span className="ch-badge">{link.count}</span>}
                 </Link>
-                <Link href={resolveStoreLink("/cart", storeSlug)} className="ch-icon-btn" aria-label="Cart">
-                  🛒{cartCount > 0 && <span className="ch-badge">{cartCount}</span>}
-                </Link>
-              </>
-            )}
+              )
+            ))}
           </div>
         </div>
       </div>
@@ -1523,9 +1529,9 @@ export function CosmeticsFooter({
   };
 
   const scopedCss = `
-    .cf-footer { background: ${TOKENS.footerBg}; color: rgba(255,255,255,0.7); font-family: ${TOKENS.bodyFont}; padding: 70px 0 0; }
-    .cf-inner { max-width: ${TOKENS.containerWidth}; margin: 0 auto; padding: 0 15px; display: grid; grid-template-columns: repeat(4, 1fr); gap: 45px; }
-    .cf-col-title { font-family: ${TOKENS.titleFont}; font-weight: 700; font-size: 15px; color: #fff; text-transform: uppercase; margin: 0 0 25px; letter-spacing: 1px; }
+    .cf-footer { background: #1a1a1a; color: rgba(255,255,255,0.7); font-family: ${TOKENS.bodyFont}; padding: 80px 0 0; }
+    .cf-inner { max-width: ${TOKENS.containerWidth}; margin: 0 auto; padding: 0 15px; display: grid; grid-template-columns: repeat(4, 1fr); gap: 40px; }
+    .cf-col-title { font-family: ${TOKENS.titleFont}; font-weight: 700; font-size: 14px; color: #fff; text-transform: uppercase; margin: 0 0 25px; letter-spacing: 1.5px; }
     .cf-text { font-size: 14px; line-height: 1.8; color: rgba(255,255,255,0.7); margin-bottom: 20px; }
     .cf-links { list-style: none; padding: 0; margin: 0; }
     .cf-links li { margin-bottom: 12px; }
@@ -1533,14 +1539,19 @@ export function CosmeticsFooter({
     .cf-links a:hover { color: ${TOKENS.primaryColor}; }
     .cf-contact-item { display: flex; gap: 12px; margin-bottom: 15px; font-size: 14px; line-height: 1.6; }
     .cf-contact-label { color: #fff; font-weight: 700; min-width: 70px; }
-    .cf-social { display: flex; gap: 12px; margin-top: 20px; }
-    .cf-social-icon { width: 40px; height: 40px; border-radius: 50%; border: 1px solid rgba(255,255,255,0.15); display: flex; align-items: center; justify-content: center; color: rgba(255,255,255,0.7); text-decoration: none; font-size: 14px; transition: all 0.2s; }
+    .cf-social { display: flex; gap: 10px; margin-top: 20px; }
+    .cf-social-icon { width: 38px; height: 38px; border-radius: 50%; border: 1px solid rgba(255,255,255,0.15); display: flex; align-items: center; justify-content: center; color: rgba(255,255,255,0.7); text-decoration: none; font-size: 14px; transition: all 0.2s; }
     .cf-social-icon:hover { border-color: ${TOKENS.primaryColor}; background: ${TOKENS.primaryColor}; color: #fff; }
-    .cf-bottom { max-width: ${TOKENS.containerWidth}; margin: 0 auto; padding: 30px 15px; margin-top: 50px; border-top: 1px solid rgba(255,255,255,0.08); display: flex; align-items: center; justify-content: space-between; font-size: 13px; }
+    .cf-bottom { max-width: ${TOKENS.containerWidth}; margin: 0 auto; padding: 25px 15px; margin-top: 60px; border-top: 1px solid rgba(255,255,255,0.1); display: flex; align-items: center; justify-content: space-between; font-size: 13px; }
     .cf-copyright { color: rgba(255,255,255,0.5); }
-    .cf-logo-text { font-family: ${TOKENS.titleFont}; font-weight: 700; font-size: 22px; color: #fff; text-decoration: none; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 20px; display: inline-block; }
+    .cf-logo-text { font-family: ${TOKENS.titleFont}; font-weight: 700; font-size: 20px; color: #fff; text-decoration: none; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 20px; display: inline-block; }
     .cf-toggle-head { display: none; justify-content: space-between; align-items: center; cursor: pointer; user-select: none; padding: 0; }
     .cf-toggle-content { display: block; }
+    .cf-newsletter-input { width: 100%; padding: 12px 15px; border: 1px solid rgba(255,255,255,0.2); background: rgba(255,255,255,0.05); color: #fff; font-size: 14px; outline: none; margin-bottom: 10px; }
+    .cf-newsletter-input::placeholder { color: rgba(255,255,255,0.5); }
+    .cf-newsletter-input:focus { border-color: ${TOKENS.primaryColor}; }
+    .cf-newsletter-btn { width: 100%; padding: 12px; background: ${TOKENS.primaryColor}; color: #fff; border: none; font-family: ${TOKENS.bodyFont}; font-weight: 600; font-size: 13px; text-transform: uppercase; letter-spacing: 0.5px; cursor: pointer; transition: background 0.3s; }
+    .cf-newsletter-btn:hover { background: ${TOKENS.primaryHover}; }
     @media (max-width: 1024px) { .cf-inner { grid-template-columns: repeat(2, 1fr); gap: 35px; } }
     @media (max-width: 767px) {
       .cf-inner { grid-template-columns: 1fr; gap: 30px; }
@@ -1563,14 +1574,21 @@ export function CosmeticsFooter({
       <div className="cf-inner">
         {/* Col 1: About */}
         <div>
-          <Link href={resolveStoreLink("/", resolvedSlug)} className="cf-logo-text">{storeName}</Link>
-          <p className="cf-text">{description}</p>
-          <div className="cf-social">
-            {socialLinks.map((s, i) => (
-              <a key={i} href={s.url} className="cf-social-icon" target="_blank" rel="noopener noreferrer" aria-label={s.platform}>
-                {socialIcons[s.platform] || s.platform[0]?.toUpperCase()}
-              </a>
-            ))}
+          <div className="cf-toggle-head" onClick={() => toggleColumn(0)}>
+            <h4 className="cf-col-title">About</h4>
+            <span>{openColumns.has(0) ? "−" : "+"}</span>
+          </div>
+          <div className={`cf-toggle-content ${openColumns.has(0) ? "cf-open" : ""}`}>
+            <h4 className="cf-col-title">About</h4>
+            <Link href={resolveStoreLink("/", resolvedSlug)} className="cf-logo-text">{storeName}</Link>
+            <p className="cf-text">{description}</p>
+            <div className="cf-social">
+              {socialLinks.map((s, i) => (
+                <a key={i} href={s.url} className="cf-social-icon" target="_blank" rel="noopener noreferrer" aria-label={s.platform}>
+                  {socialIcons[s.platform] || s.platform[0]?.toUpperCase()}
+                </a>
+              ))}
+            </div>
           </div>
         </div>
 
@@ -1602,38 +1620,27 @@ export function CosmeticsFooter({
             <ul className="cf-links">
               <li><Link href={resolveStoreLink("/blog", resolvedSlug)}>Blog</Link></li>
               <li><Link href={resolveStoreLink("/terms", resolvedSlug)}>Terms & Conditions</Link></li>
-              <li><Link href={resolveStoreLink("/privacy", resolvedSlug)}>Privacy Policy</Link></li>
-              <li><Link href={resolveStoreLink("/shipping", resolvedSlug)}>Shipping Info</Link></li>
+              <li><Link href={resolveStoreLink("/terms", resolvedSlug)}>Privacy Policy</Link></li>
+              <li><Link href={resolveStoreLink("/my-account", resolvedSlug)}>Shipping Info</Link></li>
             </ul>
           </div>
         </div>
 
-        {/* Col 4: Contact */}
+        {/* Col 4: Newsletter */}
         <div>
           <div className="cf-toggle-head" onClick={() => toggleColumn(3)}>
-            <h4 className="cf-col-title">Contact Us</h4>
+            <h4 className="cf-col-title">Newsletter</h4>
             <span>{openColumns.has(3) ? "−" : "+"}</span>
           </div>
           <div className={`cf-toggle-content ${openColumns.has(3) ? "cf-open" : ""}`}>
-            <h4 className="cf-col-title">Contact Us</h4>
-            {contactInfo?.address && (
-              <div className="cf-contact-item">
-                <span className="cf-contact-label">Address:</span>
-                <span>{contactInfo.address}</span>
-              </div>
-            )}
-            {contactInfo?.phone && (
-              <div className="cf-contact-item">
-                <span className="cf-contact-label">Phone:</span>
-                <span>{contactInfo.phone}</span>
-              </div>
-            )}
-            {contactInfo?.email && (
-              <div className="cf-contact-item">
-                <span className="cf-contact-label">Email:</span>
-                <span>{contactInfo.email}</span>
-              </div>
-            )}
+            <h4 className="cf-col-title">Newsletter</h4>
+            <p className="cf-text">Subscribe to get special offers, free giveaways, and once-in-a-lifetime deals.</p>
+            <input 
+              type="email" 
+              placeholder="Enter your email" 
+              className="cf-newsletter-input"
+            />
+            <button className="cf-newsletter-btn">Subscribe</button>
           </div>
         </div>
       </div>

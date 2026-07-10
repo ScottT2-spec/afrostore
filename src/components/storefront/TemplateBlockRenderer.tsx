@@ -70,7 +70,7 @@ import {
   CosmeticsBlogPosts,
   CosmeticsInstagram,
   CosmeticsNewsletter,
-  CosmeticsFooter,
+  // CosmeticsFooter - handled at page level, not as block
 } from "@/components/storefront/CosmeticsTemplateBlocks";
 import {
   GroceryFontLoader,
@@ -224,7 +224,7 @@ const COSMETICS_BLOCKS: Record<string, BlockComponent> = {
   cosmeticsBlogPosts: CosmeticsBlogPosts as unknown as BlockComponent,
   cosmeticsInstagram: CosmeticsInstagram as unknown as BlockComponent,
   cosmeticsNewsletter: CosmeticsNewsletter as unknown as BlockComponent,
-  cosmeticsFooter: CosmeticsFooter as unknown as BlockComponent,
+  // cosmeticsFooter - handled at page level, not as block
 };
 
 const GROCERY_BLOCKS: Record<string, BlockComponent> = {

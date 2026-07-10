@@ -312,7 +312,9 @@ export default function ShopPage() {
     store.templateSlug === "cosmetics" || 
     slug === "stacj" || // Force cosmetics for stacj store
     slug?.toLowerCase().includes("cosmetics") || 
-    store.name?.toLowerCase().includes("cosmetics");
+    slug?.toLowerCase().includes("stacj") ||
+    store.name?.toLowerCase().includes("cosmetics") ||
+    store.name?.toLowerCase().includes("stacj");
 
   return (
     <ThemeProvider theme={storeData.theme}>
