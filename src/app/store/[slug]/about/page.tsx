@@ -10,6 +10,7 @@ import { RenderBlocks, type BuilderBlock } from "@/components/storefront/BlockRe
 import { HANDMADE_BAGS_PRESET } from "@/lib/templates/presets/handmade-bags-preset";
 import { serializeProductsForClient } from "@/lib/serialize-products";
 import { KidsFontLoader, KidsFooterFull, KidsHeader } from "@/components/storefront/KidsTemplateBlocks";
+import PerfumesAboutPage from "./perfumes-about";
 
 type Props = {
   params: Promise<{ slug: string }>;
@@ -390,6 +391,16 @@ export default async function AboutPage({ params }: Props) {
         />
       </div>
     );
+  }
+
+  const isPerfumesTemplate =
+    activeTemplateSlug === "perfumes" ||
+    slug === "perfumes" ||
+    store.slug === "perfumes" ||
+    store.name?.toLowerCase().includes("perfumes");
+
+  if (isPerfumesTemplate) {
+    return <PerfumesAboutPage />;
   }
 
   return (

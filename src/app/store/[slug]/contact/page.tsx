@@ -11,6 +11,7 @@ import { serializeProductsForClient } from "@/lib/serialize-products";
 import { VegetableContactPage } from "@/components/storefront/VegetableTemplatePages";
 import { VegetableFooter, VegetableHeader } from "@/components/storefront/VegetableStoreChrome";
 import { KidsFontLoader, KidsFooterFull, KidsHeader } from "@/components/storefront/KidsTemplateBlocks";
+import PerfumesContactPage from "./perfumes-contact";
 
 type Props = {
   params: Promise<{ slug: string }>;
@@ -414,6 +415,16 @@ export default async function ContactPage({ params }: Props) {
         <VegetableFooter storeName={store.name} storeSlug={slug} logo={store.logo} description={store.description} navItems={vegetableNavItems} socialLinks={vegetableSocialLinks} />
       </div>
     );
+  }
+
+  const isPerfumesTemplate =
+    activeTemplateSlug === "perfumes" ||
+    slug === "perfumes" ||
+    store.slug === "perfumes" ||
+    store.name?.toLowerCase().includes("perfumes");
+
+  if (isPerfumesTemplate) {
+    return <PerfumesContactPage />;
   }
 
   return (
