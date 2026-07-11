@@ -61,7 +61,7 @@ import { ThemeProvider, type ThemeData } from "@/components/storefront/ThemeProv
 import { useWishlist } from "@/hooks/useWishlist";
 import { applyPageCustomization, buildPageBackgroundStyle, buildThemeDataWithCustomization, filterVisiblePages, getResolvedPageSettings, normalizeSiteCustomization, type SiteCustomizationDocument } from "@/lib/site-customization";
 import { VegetableFooter, VegetableHeader } from "@/components/storefront/VegetableStoreChrome";
-import { PerfumesHeader, PerfumesFooter } from "@/components/storefront/PerfumesStoreChrome";
+import { PerfumesHeader as PerfumesChromeHeader, PerfumesFooter } from "@/components/storefront/PerfumesStoreChrome";
 import { VegetableHomePage } from "@/components/storefront/VegetableTemplatePages";
 
 /* ───────── Types ───────── */
@@ -622,7 +622,7 @@ export default function StorePage() {
             : `Sign up for our newsletter to get 10% off for the week!`}
         />
       ) : isPerfumesTemplate ? (
-        <PerfumesHeader storeName={store.name} storeSlug={slug} logo={store.logo} cartCount={cartCount} wishlistCount={wishlistCount} socialLinks={socialLinksArray} isLanding={isLanding} />
+        <PerfumesChromeHeader storeName={store.name} storeSlug={slug} logo={store.logo} cartCount={cartCount} wishlistCount={wishlistCount} socialLinks={socialLinksArray} isLanding={isLanding} />
       ) : isFashionTemplate ? (
         <FashionHeader
           storeName={store.name}

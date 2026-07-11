@@ -822,6 +822,10 @@ export default function ShopPage() {
           logo={store.logo}
           description={store.description || "Discover a curated collection of modern fragrances designed to hold memory, emotion, and identity in every bottle."}
         />
+      </div>
+    );
+  }
+
   // ─── HEALTH / PILLS SHOP ───
   const isHealthTemplate = slug === "pills" || store.templateSlug === "pills" ||
     store.name?.toLowerCase().includes("pill") || store.name?.toLowerCase().includes("supplement") || store.name?.toLowerCase().includes("health");

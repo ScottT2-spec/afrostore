@@ -692,6 +692,9 @@ export default function StorefrontPage() {
           />
         </div>
       </ThemeProvider>
+    );
+  }
+
   // ─── HEALTH / PILLS PAGES ───
   const isHealthTemplate =
     data.templateSlug === "pills" ||
