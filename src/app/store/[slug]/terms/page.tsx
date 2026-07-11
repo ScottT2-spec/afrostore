@@ -54,14 +54,14 @@ export default function TermsPage() {
         <h1 className="text-4xl font-bold text-gray-900 mb-8 text-center">Terms and Conditions</h1>
         
         <div className="prose prose-lg max-w-none">
-          <section className="mb-8">
+          <section id="introduction" className="mb-8">
             <h2 className="text-2xl font-semibold text-gray-800 mb-4">1. Introduction</h2>
             <p className="text-gray-600 leading-relaxed">
               Welcome to {store?.name || "our store"}. By accessing or using our website and services, you agree to be bound by these Terms and Conditions. Please read them carefully before using our services.
             </p>
           </section>
 
-          <section className="mb-8">
+          <section id="products" className="mb-8">
             <h2 className="text-2xl font-semibold text-gray-800 mb-4">2. Products and Services</h2>
             <p className="text-gray-600 leading-relaxed mb-4">
               We strive to provide accurate descriptions and images of our cosmetics and skincare products. However, we do not warrant that product descriptions, colors, or other content are accurate, complete, reliable, current, or error-free.
@@ -71,7 +71,7 @@ export default function TermsPage() {
             </p>
           </section>
 
-          <section className="mb-8">
+          <section id="orders" className="mb-8">
             <h2 className="text-2xl font-semibold text-gray-800 mb-4">3. Orders and Payment</h2>
             <p className="text-gray-600 leading-relaxed mb-4">
               By placing an order, you offer to purchase the products listed. We reserve the right to accept or decline your order at our discretion. All orders are subject to availability and confirmation of the order price.
@@ -81,7 +81,7 @@ export default function TermsPage() {
             </p>
           </section>
 
-          <section className="mb-8">
+          <section id="shipping" className="mb-8">
             <h2 className="text-2xl font-semibold text-gray-800 mb-4">4. Shipping and Delivery</h2>
             <p className="text-gray-600 leading-relaxed mb-4">
               Shipping times provided at checkout are estimates only. We are not liable for any delays in delivery.
@@ -91,7 +91,7 @@ export default function TermsPage() {
             </p>
           </section>
 
-          <section className="mb-8">
+          <section id="returns" className="mb-8">
             <h2 className="text-2xl font-semibold text-gray-800 mb-4">5. Returns and Refunds</h2>
             <p className="text-gray-600 leading-relaxed mb-4">
               We accept returns within 14 days of delivery for unopened and unused products. Products must be returned in their original packaging.
@@ -101,22 +101,29 @@ export default function TermsPage() {
             </p>
           </section>
 
-          <section className="mb-8">
+          <section id="privacy" className="mb-8">
             <h2 className="text-2xl font-semibold text-gray-800 mb-4">6. Privacy Policy</h2>
             <p className="text-gray-600 leading-relaxed">
               Your use of our website is also subject to our Privacy Policy. Please review our Privacy Policy, which also governs the website and informs users of our data collection practices.
             </p>
           </section>
 
-          <section className="mb-8">
-            <h2 className="text-2xl font-semibold text-gray-800 mb-4">7. Contact Information</h2>
+          <section id="cookies" className="mb-8">
+            <h2 className="text-2xl font-semibold text-gray-800 mb-4">7. Cookies</h2>
+            <p className="text-gray-600 leading-relaxed">
+              We may use cookies and similar technologies to remember preferences, improve site performance, and better understand how visitors use the store.
+            </p>
+          </section>
+
+          <section id="contact" className="mb-8">
+            <h2 className="text-2xl font-semibold text-gray-800 mb-4">8. Contact Information</h2>
             <p className="text-gray-600 leading-relaxed">
               If you have any questions about these Terms and Conditions, please contact us through our contact page or email us at support@{store?.subdomain || "store"}.com.
             </p>
           </section>
 
-          <section>
-            <h2 className="text-2xl font-semibold text-gray-800 mb-4">8. Changes to Terms</h2>
+          <section id="changes">
+            <h2 className="text-2xl font-semibold text-gray-800 mb-4">9. Changes to Terms</h2>
             <p className="text-gray-600 leading-relaxed">
               We reserve the right to modify these terms at any time. Changes will be effective immediately upon posting to the website. Your continued use of the website following the posting of changes constitutes your acceptance of such changes.
             </p>

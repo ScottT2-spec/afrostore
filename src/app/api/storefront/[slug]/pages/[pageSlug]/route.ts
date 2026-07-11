@@ -3,6 +3,7 @@ import { prisma } from "@/lib/db";
 import { asRecord } from "@/lib/json";
 import { buildThemeDataWithCustomization, loadSiteCustomizationSafely } from "@/lib/site-customization";
 import { mergeStoredTemplatePages } from "@/lib/templates/site-instance";
+import { ensurePerfumePages } from "@/lib/templates/perfume-pages";
 import { ensureVegetablePages } from "@/lib/templates/vegetable-pages";
 import type { PageType, Prisma } from "@/generated/prisma";
 
@@ -86,6 +87,10 @@ export async function GET(_req: NextRequest, { params }: Params) {
       await ensureVegetablePages(site.id);
     }
 
+    if (activeTemplate?.template?.slug === "perfumes") {
+      await ensurePerfumePages(site.id);
+    }
+
     const [
       page,
       settings,
@@ -95,6 +100,7 @@ export async function GET(_req: NextRequest, { params }: Params) {
       allPages,
       activeTheme,
       products,
+      blogs,
       customization,
     ] = await Promise.all([
       prisma.page.findFirst({
@@ -169,6 +175,23 @@ export async function GET(_req: NextRequest, { params }: Params) {
         },
         orderBy: [{ isFeatured: "desc" }, { position: "asc" }, { createdAt: "desc" }],
         take: 20,
+      }),
+      prisma.blog.findMany({
+        where: { siteId: site.id, status: "PUBLISHED" },
+        select: {
+          id: true,
+          title: true,
+          slug: true,
+          excerpt: true,
+          coverImage: true,
+          author: true,
+          category: true,
+          tags: true,
+          publishedAt: true,
+          createdAt: true,
+        },
+        orderBy: [{ publishedAt: "desc" }, { createdAt: "desc" }],
+        take: 12,
       }),
       loadSiteCustomizationSafely(prisma.siteCustomization.findUnique({ where: { siteId: site.id } })),
     ]);
@@ -273,6 +296,7 @@ export async function GET(_req: NextRequest, { params }: Params) {
       settings: settings || {},
       socialLinks: socialLinks || {},
       products: publicProducts,
+      blogs: blogs || [],
       categories,
       deliveryZones,
       pages: publicPages,

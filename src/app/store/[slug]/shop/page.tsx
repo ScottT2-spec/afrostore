@@ -10,6 +10,7 @@ import { useWishlist } from "@/hooks/useWishlist";
 import { HandmadeBagsHeader, HandmadeBagsFooter } from "@/components/storefront/HandmadeBagsStoreChrome";
 import { CosmeticsHeader, CosmeticsFooter } from "@/components/storefront/CosmeticsTemplateBlocks";
 import { KidsFontLoader, KidsFooterFull, KidsHeader } from "@/components/storefront/KidsTemplateBlocks";
+import { PerfumesFontLoader, PerfumesFooter, PerfumesHeader } from "@/components/storefront/PerfumesTemplateBlocks";
 
 /* ───────── Types ───────── */
 
@@ -317,6 +318,7 @@ export default function ShopPage() {
     store.name?.toLowerCase().includes("cosmetics") ||
     store.name?.toLowerCase().includes("stacj");
   const isKidsTemplate = slug === "kids" || store.templateSlug === "kids";
+  const isPerfumesTemplate = slug === "perfumes" || store.templateSlug === "perfumes";
 
   if (isKidsTemplate) {
     return (
@@ -597,6 +599,227 @@ export default function ShopPage() {
           logo={store.logo}
           templateSlug="kids"
           description={store.description || "Bright, playful kids fashion and gifts with a premium WoodMart-inspired finish."}
+        />
+      </div>
+    );
+  }
+
+  if (isPerfumesTemplate) {
+    return (
+      <div className="min-h-screen bg-[#f6f0eb] text-[#241f24]" style={{ fontFamily: "'Inter', Arial, sans-serif" }}>
+        <PerfumesFontLoader />
+        <PerfumesHeader
+          storeName={store.name}
+          storeSlug={slug}
+          logo={store.logo}
+          categories={categories}
+          cartCount={cartCount}
+          wishlistCount={wishlistCount}
+        />
+
+        <section className="bg-[#f6f0eb] px-4 py-12">
+          <div className="mx-auto max-w-6xl">
+            <p className="text-xs font-semibold uppercase tracking-[0.35em] text-[#8b6798]">Fragrances</p>
+            <h1 className="mt-4 font-serif text-4xl text-[#241f24] sm:text-5xl">Fragrances</h1>
+            <p className="mt-4 max-w-3xl text-base leading-8 text-[#6f6573]">
+              Discover the full perfume collection, organized by collection and refined by scent family.
+            </p>
+          </div>
+        </section>
+
+        <main className="px-4 pb-16">
+          <div className="mx-auto grid max-w-6xl gap-8 lg:grid-cols-[280px_minmax(0,1fr)]">
+            <aside className="lg:sticky lg:top-28 lg:h-fit">
+              <div className="rounded-[30px] border border-[#e7ddd7] bg-white p-6 shadow-[0_20px_50px_rgba(47,34,46,0.05)]">
+                <form onSubmit={handleSearch} className="mb-6">
+                  <label className="mb-2 block text-xs font-bold uppercase tracking-[0.25em] text-[#a18ea1]">Search</label>
+                  <div className="flex items-center gap-2 rounded-full border border-[#e7ddd7] bg-[#fcfaf8] px-4 py-3">
+                    <Search className="h-4 w-4 text-[#8b6798]" />
+                    <input
+                      type="text"
+                      value={searchInput}
+                      onChange={(e) => setSearchInput(e.target.value)}
+                      placeholder="Search products..."
+                      className="flex-1 bg-transparent text-sm outline-none placeholder:text-[#a18ea1]"
+                    />
+                  </div>
+                </form>
+
+                <div>
+                  <h2 className="mb-3 text-xs font-bold uppercase tracking-[0.25em] text-[#a18ea1]">Collections</h2>
+                  <div className="space-y-2">
+                    <button
+                      onClick={() => handleCategoryChange("")}
+                      className={`flex w-full items-center justify-between rounded-2xl px-4 py-3 text-sm font-semibold transition ${
+                        !selectedCategory ? "bg-[#241f24] text-white" : "bg-[#fbf7f4] text-[#241f24] hover:bg-[#f4ece7]"
+                      }`}
+                    >
+                      <span>All Collections</span>
+                      <span className="text-xs opacity-70">{pagination.total || "—"}</span>
+                    </button>
+                    {categories
+                      .filter((category) => category._count.products > 0)
+                      .map((category) => (
+                        <button
+                          key={category.id}
+                          onClick={() => handleCategoryChange(category.slug)}
+                          className={`flex w-full items-center justify-between rounded-2xl px-4 py-3 text-sm font-semibold transition ${
+                            selectedCategory === category.slug ? "bg-[#8b6798] text-white" : "bg-[#fbf7f4] text-[#241f24] hover:bg-[#f4ece7]"
+                          }`}
+                        >
+                          <span>{category.name}</span>
+                          <span className="text-xs opacity-70">{category._count.products}</span>
+                        </button>
+                      ))}
+                  </div>
+                </div>
+
+                {hasFilters && (
+                  <button onClick={clearFilters} className="mt-6 w-full rounded-full border border-[#8b6798] px-4 py-2.5 text-sm font-semibold text-[#8b6798] transition hover:bg-[#f5edf6]">
+                    Clear all filters
+                  </button>
+                )}
+              </div>
+            </aside>
+
+            <section>
+              {hasFilters && (
+                <div className="mb-6 flex flex-wrap items-center gap-2">
+                  {activeCategoryName && (
+                    <span className="inline-flex items-center gap-2 rounded-full bg-[#f2e8f3] px-4 py-2 text-xs font-semibold text-[#8b6798]">
+                      {activeCategoryName}
+                      <button onClick={() => handleCategoryChange("")}>
+                        <X className="h-3 w-3" />
+                      </button>
+                    </span>
+                  )}
+                  {searchQuery && (
+                    <span className="inline-flex items-center gap-2 rounded-full bg-[#eee8f2] px-4 py-2 text-xs font-semibold text-[#241f24]">
+                      “{searchQuery}”
+                      <button onClick={() => { setSearchQuery(""); setSearchInput(""); updateParams(selectedCategory, ""); }}>
+                        <X className="h-3 w-3" />
+                      </button>
+                    </span>
+                  )}
+                </div>
+              )}
+
+              {loading && storeData && (
+                <div className="flex items-center justify-center py-20">
+                  <Loader2 className="h-8 w-8 animate-spin text-[#8b6798]" />
+                </div>
+              )}
+
+              {!loading && sortedProducts.length === 0 && (
+                <div className="rounded-[30px] border border-[#e7ddd7] bg-white px-6 py-20 text-center shadow-[0_20px_50px_rgba(47,34,46,0.05)]">
+                  <ShoppingBag className="mx-auto mb-4 h-12 w-12 text-[#d8c9d5]" />
+                  <h3 className="text-xl font-bold text-[#241f24]">No products found</h3>
+                  <p className="mt-2 text-sm text-[#6f6573]">
+                    {hasFilters ? "Try adjusting your filters or search terms." : "This collection hasn't added any products yet."}
+                  </p>
+                  {hasFilters && (
+                    <button onClick={clearFilters} className="mt-6 rounded-full bg-[#241f24] px-5 py-2.5 text-sm font-semibold text-white">
+                      Clear filters
+                    </button>
+                  )}
+                </div>
+              )}
+
+              {!loading && sortedProducts.length > 0 && (
+                <>
+                  <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 xl:grid-cols-4">
+                    {sortedProducts.map((product) => {
+                      const hasImage = product.images.length > 0 && product.images[0].url;
+                      const discount = product.compareAtPrice
+                        ? Math.round(((Number(product.compareAtPrice) - Number(product.price)) / Number(product.compareAtPrice)) * 100)
+                        : 0;
+                      const justAdded = addedToCart === product.id;
+
+                      return (
+                        <div key={product.id} className="group">
+                          <Link href={`/store/${slug}/product/${product.slug}`} className="block">
+                            <div className="relative mb-3 aspect-[3/4] overflow-hidden rounded-[30px] bg-white shadow-[0_14px_32px_rgba(47,34,46,0.08)]">
+                              {hasImage ? (
+                                <img
+                                  src={product.images[0].url}
+                                  alt={product.images[0].alt || product.name}
+                                  className="absolute inset-0 h-full w-full object-cover transition duration-500 group-hover:scale-110"
+                                />
+                              ) : (
+                                <div className={`absolute inset-0 flex items-center justify-center bg-gradient-to-br ${getGradient(product.id)}`}>
+                                  <ImageIcon className="h-10 w-10 text-white/50" />
+                                </div>
+                              )}
+                              {discount > 0 && (
+                                <span className="absolute left-3 top-3 rounded-full bg-[#8b6798] px-2.5 py-1 text-[10px] font-bold uppercase tracking-[0.16em] text-white">
+                                  -{discount}%
+                                </span>
+                              )}
+                              {product.isFeatured && (
+                                <span className="absolute left-3 top-3 rounded-full bg-[#241f24] px-2.5 py-1 text-[10px] font-bold uppercase tracking-[0.16em] text-white">
+                                  Featured
+                                </span>
+                              )}
+                              {!product.inStock && (
+                                <span className="absolute left-3 top-3 rounded-full bg-[#ff7c7c] px-2.5 py-1 text-[10px] font-bold uppercase tracking-[0.16em] text-white">
+                                  Sold Out
+                                </span>
+                              )}
+                              <div className="absolute right-3 top-3 flex gap-2">
+                                <button
+                                  onClick={(e) => { e.preventDefault(); e.stopPropagation(); toggleWishlist(product.id); }}
+                                  className={`flex h-9 w-9 items-center justify-center rounded-full bg-white/90 shadow-sm transition hover:scale-110 ${isWishlisted(product.id) ? "text-[#8b6798]" : "text-[#241f24]"}`}
+                                >
+                                  <Heart className={`h-4 w-4 ${isWishlisted(product.id) ? "fill-current" : ""}`} />
+                                </button>
+                                <button
+                                  onClick={(e) => { e.preventDefault(); e.stopPropagation(); if (product.inStock) addToCart(product); }}
+                                  disabled={!product.inStock}
+                                  className={`flex h-9 w-9 items-center justify-center rounded-full shadow-sm transition hover:scale-110 disabled:opacity-40 ${justAdded ? "bg-[#6db08c] text-white" : "bg-white/90 text-[#241f24]"}`}
+                                >
+                                  {justAdded ? <CheckCircle2 className="h-4 w-4" /> : <ShoppingCart className="h-4 w-4" />}
+                                </button>
+                              </div>
+                            </div>
+                          </Link>
+                          <Link href={`/store/${slug}/product/${product.slug}`}>
+                            <h3 className="text-sm font-semibold text-[#241f24] transition group-hover:text-[#8b6798]">{product.name}</h3>
+                          </Link>
+                          {product.category && <p className="mt-1 text-[10px] uppercase tracking-[0.18em] text-[#a18ea1]">{product.category.name}</p>}
+                          <div className="mt-2 flex items-center gap-2">
+                            <span className="text-base font-bold text-[#241f24]">{formatCurrency(Number(product.price), currency)}</span>
+                            {product.compareAtPrice && <span className="text-xs text-[#a18ea1] line-through">{formatCurrency(Number(product.compareAtPrice), currency)}</span>}
+                          </div>
+                        </div>
+                      );
+                    })}
+                  </div>
+
+                  {pagination.page < pagination.pages && (
+                    <div className="mt-10 text-center">
+                      <button
+                        onClick={() => fetchProducts(pagination.page + 1, true)}
+                        disabled={loadingMore}
+                        className="inline-flex items-center gap-2 rounded-full bg-[#241f24] px-8 py-3 text-sm font-bold text-white shadow-lg transition hover:bg-[#120f12] disabled:opacity-50"
+                      >
+                        {loadingMore ? <><Loader2 className="h-4 w-4 animate-spin" /> Loading...</> : <>Load More Products</>}
+                      </button>
+                      <p className="mt-3 text-xs text-[#a18ea1]">
+                        Page {pagination.page} of {pagination.pages}
+                      </p>
+                    </div>
+                  )}
+                </>
+              )}
+            </section>
+          </div>
+        </main>
+
+        <PerfumesFooter
+          storeName={store.name}
+          storeSlug={slug}
+          logo={store.logo}
+          description={store.description || "Discover a curated collection of modern fragrances designed to hold memory, emotion, and identity in every bottle."}
         />
       </div>
     );

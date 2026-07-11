@@ -30,6 +30,7 @@ import { InteriorStoreContext } from "@/components/storefront/InteriorDesignTemp
 import { KidsStoreContext, KidsHeader, KidsFooterFull } from "@/components/storefront/KidsTemplateBlocks";
 import { MakeupStoreContext } from "@/components/storefront/MakeupTemplateBlocks";
 import { PerfumesStoreContext } from "@/components/storefront/PerfumesTemplateBlocks";
+import { PerfumesFontLoader, PerfumesHeader } from "@/components/storefront/PerfumesTemplateBlocks";
 import { FashionHeader, FashionFooter, type NavItem } from "@/components/storefront/FashionStoreChrome";
 import { GardenHeader, GardenFooter } from "@/components/storefront/GardenStoreChrome";
 
@@ -216,10 +217,11 @@ function getWhatsAppLink(phone: string | undefined, cart: CartItem[], currency: 
 /* ───────── Template Store Context Provider ───────── */
 
 /** Maps any template slug to the correct StoreContext provider */
-function TemplateStoreContextProvider({ templateSlug, products, blogs, currency, storeSlug, socialLinks, addToCart, toggleWishlist, isWishlisted, onQuickView, children }: {
+function TemplateStoreContextProvider({ templateSlug, products, blogs, categories, currency, storeSlug, socialLinks, addToCart, toggleWishlist, isWishlisted, onQuickView, children }: {
   templateSlug: string | null;
   products: any[];
   blogs: any[];
+  categories?: Array<{ id: string; name: string; slug: string; description?: string | null; image?: string | null }>;
   currency: string;
   storeSlug: string;
   socialLinks?: Array<{ platform: string; url: string }>;
@@ -229,7 +231,7 @@ function TemplateStoreContextProvider({ templateSlug, products, blogs, currency,
   onQuickView?: (productId: string) => void;
   children: React.ReactNode;
 }) {
-  const value = { products, blogs, currency, storeSlug, socialLinks , addToCart, toggleWishlist, isWishlisted, onQuickView };
+  const value = { products, blogs, categories, currency, storeSlug, socialLinks , addToCart, toggleWishlist, isWishlisted, onQuickView };
 
   // Determine which context to use based on template slug or block prefix
   const slug = templateSlug || "";
@@ -529,6 +531,49 @@ export default function StorePage() {
     );
   }
 
+  if (data.templateSlug === "perfumes") {
+    return (
+      <ThemeProvider theme={resolvedTheme}>
+        <div className="min-h-screen bg-[#f6f0eb] text-[#241f24]">
+          <PerfumesFontLoader />
+          <PerfumesHeader
+            storeName={store.name}
+            storeSlug={slug}
+            logo={store.logo}
+            categories={categories}
+            cartCount={cartCount}
+            wishlistCount={wishlistCount}
+          />
+          <TemplateStoreContextProvider
+            templateSlug={data.templateSlug}
+            products={products}
+            blogs={data.blogs || []}
+            categories={categories}
+            currency={currency}
+            storeSlug={slug}
+            socialLinks={socialLinksArray}
+            addToCart={(pid, qty) => {
+              const product = products.find((item) => item.id === pid);
+              if (product) addToCart(product, qty);
+            }}
+            toggleWishlist={toggleWishlist}
+            isWishlisted={isWishlisted}
+            onQuickView={(pid) => {
+              const product = products.find((item) => item.id === pid);
+              if (product) {
+                setSelectedProduct(product);
+                setSelectedVariantId(null);
+                setQty(1);
+              }
+            }}
+          >
+            <RenderTemplateBlocks blocks={templatePreset || []} />
+          </TemplateStoreContextProvider>
+        </div>
+      </ThemeProvider>
+    );
+  }
+
   return (
     <ThemeProvider theme={resolvedTheme}>
     <div className="min-h-screen bg-white">
@@ -733,7 +778,7 @@ export default function StorePage() {
       {hasHomeContent ? (
         /* Builder blocks Home page — render template blocks */
         <div style={buildPageBackgroundStyle(homePageSettings)}>
-          <TemplateStoreContextProvider templateSlug={data.templateSlug} products={products} blogs={data.blogs || []} currency={currency} storeSlug={slug} socialLinks={socialLinksArray} addToCart={(pid,qty)=>{const x=products.find(p=>p.id===pid);if(x)addToCart(x,qty);}} toggleWishlist={toggleWishlist} isWishlisted={isWishlisted} onQuickView={(pid)=>{const x=products.find(p=>p.id===pid);if(x){setSelectedProduct(x);setSelectedVariantId(null);setQty(1);}}}>
+          <TemplateStoreContextProvider templateSlug={data.templateSlug} products={products} blogs={data.blogs || []} categories={categories} currency={currency} storeSlug={slug} socialLinks={socialLinksArray} addToCart={(pid,qty)=>{const x=products.find(p=>p.id===pid);if(x)addToCart(x,qty);}} toggleWishlist={toggleWishlist} isWishlisted={isWishlisted} onQuickView={(pid)=>{const x=products.find(p=>p.id===pid);if(x){setSelectedProduct(x);setSelectedVariantId(null);setQty(1);}}}>
           <RenderBlocks blocks={homeBlocks} storeSlug={slug} products={products} currency={currency} addToCart={(p) => addToCart(p as unknown as Product)} isWishlisted={isWishlisted} toggleWishlist={toggleWishlist} addedToCart={addedToCart} />
           </TemplateStoreContextProvider>
           {!isLanding && products.length > 0 && !homeHasProductGrid && (
@@ -750,7 +795,7 @@ export default function StorePage() {
       ) : templatePreset ? (
         /* Template with editable block preset */
         <div>
-          <TemplateStoreContextProvider templateSlug={data.templateSlug} products={products} blogs={data.blogs || []} currency={currency} storeSlug={slug} socialLinks={socialLinksArray} addToCart={(pid,qty)=>{const x=products.find(p=>p.id===pid);if(x)addToCart(x,qty);}} toggleWishlist={toggleWishlist} isWishlisted={isWishlisted} onQuickView={(pid)=>{const x=products.find(p=>p.id===pid);if(x){setSelectedProduct(x);setSelectedVariantId(null);setQty(1);}}}>
+          <TemplateStoreContextProvider templateSlug={data.templateSlug} products={products} blogs={data.blogs || []} categories={categories} currency={currency} storeSlug={slug} socialLinks={socialLinksArray} addToCart={(pid,qty)=>{const x=products.find(p=>p.id===pid);if(x)addToCart(x,qty);}} toggleWishlist={toggleWishlist} isWishlisted={isWishlisted} onQuickView={(pid)=>{const x=products.find(p=>p.id===pid);if(x){setSelectedProduct(x);setSelectedVariantId(null);setQty(1);}}}>
             <RenderTemplateBlocks blocks={templatePreset} />
           </TemplateStoreContextProvider>
           {!isLanding && products.length > 0 && (

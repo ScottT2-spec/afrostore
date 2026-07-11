@@ -3,6 +3,7 @@ import { prisma } from "@/lib/db";
 import { asRecord } from "@/lib/json";
 import { buildThemeDataWithCustomization, loadSiteCustomizationSafely } from "@/lib/site-customization";
 import { mergeStoredTemplatePages } from "@/lib/templates/site-instance";
+import { ensurePerfumePages } from "@/lib/templates/perfume-pages";
 import { ensureVegetablePages } from "@/lib/templates/vegetable-pages";
 import type { Prisma } from "@/generated/prisma";
 import type { PageType } from "@/generated/prisma";
@@ -69,6 +70,10 @@ export async function GET(req: NextRequest, { params }: Params) {
 
     if (activeTemplate?.template?.slug === "vegetables") {
       await ensureVegetablePages(site.id);
+    }
+
+    if (activeTemplate?.template?.slug === "perfumes") {
+      await ensurePerfumePages(site.id);
     }
 
     const url = new URL(req.url);

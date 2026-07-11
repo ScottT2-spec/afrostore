@@ -1,8 +1,9 @@
 "use client";
-import { FashionFooter } from "./FashionTemplateBlocks";
+import { ChevronDown, Menu, Search, Heart, ShoppingCart, X } from "lucide-react";
 import Link from "next/link";
-import { resolveStoreLink, resolveFooterLink } from "@/lib/template-link-utils";
+import { resolveStoreLink } from "@/lib/template-link-utils";
 import { useState, useEffect, useRef, useCallback, createContext, useContext } from "react";
+import { useRouter } from "next/navigation";
 import { safeSrc, onImgError } from "./image-fallback";
 
 /* ═══════════════════════════════════════════════════════════════
@@ -92,6 +93,13 @@ export interface PerfumesStoreContextData {
     images: Array<{ id: string; url: string; alt?: string }>;
     category?: { id: string; name: string; slug: string };
   }>;
+  categories?: Array<{
+    id?: string;
+    name: string;
+    slug: string;
+    description?: string | null;
+    image?: string | null;
+  }>;
   blogs: Array<{
     id: string; title: string; slug: string; excerpt?: string | null;
     coverImage?: string | null; author?: string | null; category?: string | null;
@@ -106,6 +114,314 @@ export interface PerfumesStoreContextData {
   onQuickView?: (productId: string) => void;
 }
 export const PerfumesStoreContext = createContext<PerfumesStoreContextData | null>(null);
+
+type PerfumeCategoryData = {
+  id?: string;
+  name: string;
+  slug: string;
+  description?: string | null;
+  image?: string | null;
+};
+
+const PERFUME_COLLECTIONS = {
+  her: [
+    { name: "Étheria", slug: "etheria" },
+    { name: "Celeste Aura", slug: "celeste-aura" },
+    { name: "Opus Essence", slug: "opus-essence" },
+  ],
+  him: [
+    { name: "Velours Noir", slug: "velours-noir" },
+    { name: "Nocturne Essence", slug: "nocturne-essence" },
+    { name: "Elysian Bloom", slug: "elysian-bloom" },
+  ],
+};
+
+function usePerfumeCollections(storeCtx: PerfumesStoreContextData | null, categoryOverrides?: PerfumeCategoryData[]) {
+  const overrideCategories = (categoryOverrides || storeCtx?.categories || []).map((category) => ({
+    name: category.name,
+    slug: category.slug,
+    description: category.description,
+    image: category.image,
+  }));
+
+  const perfumeSlugs = [...PERFUME_COLLECTIONS.her, ...PERFUME_COLLECTIONS.him].map((item) => item.slug);
+  const hasPerfumeOverrides = overrideCategories.some((category) => perfumeSlugs.includes(category.slug));
+  const sourceCategories = hasPerfumeOverrides ? overrideCategories : [...PERFUME_COLLECTIONS.her, ...PERFUME_COLLECTIONS.him];
+  const lookup = new Map(sourceCategories.map((category) => [category.slug, category]));
+  const her = PERFUME_COLLECTIONS.her.map((item) => lookup.get(item.slug) || item);
+  const him = PERFUME_COLLECTIONS.him.map((item) => lookup.get(item.slug) || item);
+  const all = [...her, ...him];
+
+  return { her, him, all };
+}
+
+export interface PerfumesHeaderProps {
+  storeName: string;
+  storeSlug: string;
+  logo?: string | null;
+  categories?: PerfumeCategoryData[];
+  cartCount?: number;
+  wishlistCount?: number;
+}
+
+export function PerfumesHeader({ storeName, storeSlug, logo, categories, cartCount = 0, wishlistCount = 0 }: PerfumesHeaderProps) {
+  const storeCtx = useContext(PerfumesStoreContext);
+  const { her, him, all } = usePerfumeCollections(storeCtx, categories);
+  const [mobileMenu, setMobileMenu] = useState(false);
+  const [searchOpen, setSearchOpen] = useState(false);
+  const [searchValue, setSearchValue] = useState("");
+  const router = useRouter();
+
+  const navItems = [
+    { label: "Home", href: `/store/${storeSlug}` },
+    { label: "Fragrances", href: `/store/${storeSlug}/fragrances`, dropdown: true },
+    { label: "Journal", href: `/store/${storeSlug}/journal` },
+    { label: "About Us", href: `/store/${storeSlug}/about-us` },
+    { label: "Contact Us", href: `/store/${storeSlug}/contact-us` },
+    { label: "FAQ", href: `/store/${storeSlug}/contact-us` },
+  ];
+
+  const goToSearch = (event: React.FormEvent) => {
+    event.preventDefault();
+    const query = searchValue.trim();
+    router.push(query ? `/store/${storeSlug}/shop?search=${encodeURIComponent(query)}` : `/store/${storeSlug}/shop`);
+    setSearchOpen(false);
+  };
+
+  const collectionLink = (slug: string) => `/store/${storeSlug}/shop?category=${slug}`;
+
+  const headerCss = `
+    .phx-header {
+      position: sticky; top: 0; z-index: 40;
+      background: rgba(10, 10, 12, 0.96);
+      backdrop-filter: blur(14px);
+      color: #fff;
+      border-bottom: 1px solid rgba(255,255,255,0.1);
+    }
+    .phx-shell {
+      max-width: 1320px; margin: 0 auto; padding: 18px 15px;
+      display: grid; grid-template-columns: auto 1fr auto; gap: 24px; align-items: center;
+    }
+    .phx-logo {
+      display: inline-flex; align-items: center; gap: 12px; color: inherit; text-decoration: none;
+    }
+    .phx-logo img { display: block; width: auto; height: 30px; max-width: 220px; object-fit: contain; }
+    .phx-brand {
+      font-family: ${TOKENS.titleFont}; font-size: 18px; letter-spacing: 0.12em; text-transform: uppercase;
+      white-space: nowrap;
+    }
+    .phx-nav {
+      display: flex; align-items: center; justify-content: center; gap: 28px;
+    }
+    .phx-nav-item {
+      position: relative; display: inline-flex; align-items: center; gap: 6px;
+      color: #fff; text-decoration: none; font-family: ${TOKENS.bodyFont}; font-size: 14px; font-weight: 600;
+      letter-spacing: 0.04em; text-transform: capitalize;
+    }
+    .phx-nav-item:hover { color: rgba(255,255,255,0.82); }
+    .phx-fragrances:hover .phx-dropdown,
+    .phx-fragrances:focus-within .phx-dropdown { opacity: 1; visibility: visible; transform: translateY(0); pointer-events: auto; }
+    .phx-dropdown {
+      position: absolute; top: calc(100% + 18px); left: 50%; transform: translateX(-50%) translateY(10px);
+      width: min(1060px, calc(100vw - 30px)); padding: 26px;
+      background: #111; color: #fff; border: 1px solid rgba(255,255,255,0.08);
+      box-shadow: 0 24px 80px rgba(0,0,0,0.36); opacity: 0; visibility: hidden; pointer-events: none;
+      transition: opacity 0.18s ease, transform 0.18s ease, visibility 0.18s ease;
+    }
+    .phx-dropdown-grid {
+      display: grid; grid-template-columns: 1.05fr 1.05fr 1.2fr; gap: 24px; align-items: stretch;
+    }
+    .phx-dropdown-group h3 {
+      margin: 0 0 18px; font-family: ${TOKENS.titleFont}; font-size: 20px; font-weight: 600;
+    }
+    .phx-dropdown-list { display: grid; gap: 10px; }
+    .phx-dropdown-link {
+      color: #fff; text-decoration: none; font-family: ${TOKENS.bodyFont}; font-size: 15px;
+      transition: opacity 0.15s ease;
+    }
+    .phx-dropdown-link:hover { opacity: 0.72; }
+    .phx-dropdown-feature {
+      position: relative; min-height: 300px; display: flex; align-items: flex-end; padding: 28px; overflow: hidden;
+      background: #2a2028 center/cover no-repeat;
+    }
+    .phx-dropdown-feature::before {
+      content: ""; position: absolute; inset: 0;
+      background: linear-gradient(to top, rgba(0,0,0,0.58), rgba(0,0,0,0.1));
+    }
+    .phx-dropdown-feature-content { position: relative; z-index: 1; max-width: 340px; }
+    .phx-dropdown-feature h3 { margin: 0 0 10px; font-family: ${TOKENS.titleFont}; font-size: 42px; font-weight: 600; }
+    .phx-dropdown-feature p { margin: 0; color: rgba(255,255,255,0.88); line-height: 1.7; font-size: 15px; }
+    .phx-actions { display: flex; align-items: center; justify-content: flex-end; gap: 14px; }
+    .phx-icon {
+      display: inline-flex; align-items: center; justify-content: center;
+      width: 42px; height: 42px; color: #fff; text-decoration: none;
+      border: 1px solid rgba(255,255,255,0.12); border-radius: 999px;
+      background: rgba(255,255,255,0.04); transition: background 0.15s ease, transform 0.15s ease;
+    }
+    .phx-icon:hover { background: rgba(255,255,255,0.12); transform: translateY(-1px); }
+    .phx-icon svg { width: 18px; height: 18px; }
+    .phx-badge {
+      position: absolute; top: -4px; right: -4px; min-width: 18px; height: 18px; padding: 0 5px;
+      border-radius: 999px; background: #fff; color: #111; font-size: 10px; font-weight: 700;
+      display: inline-flex; align-items: center; justify-content: center;
+    }
+    .phx-search {
+      position: absolute; right: 0; top: calc(100% + 16px); width: min(360px, calc(100vw - 30px));
+      background: #111; border: 1px solid rgba(255,255,255,0.1); padding: 14px; box-shadow: 0 18px 50px rgba(0,0,0,0.28);
+    }
+    .phx-search form { display: flex; gap: 10px; }
+    .phx-search input {
+      flex: 1; min-width: 0; background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.12);
+      color: #fff; padding: 12px 14px; font-family: ${TOKENS.bodyFont}; font-size: 14px;
+    }
+    .phx-search input::placeholder { color: rgba(255,255,255,0.48); }
+    .phx-search button {
+      background: #fff; border: 0; color: #111; font-weight: 700; padding: 12px 16px;
+      font-family: ${TOKENS.bodyFont}; cursor: pointer;
+    }
+    .phx-mobile-toggle { display: none; }
+    .phx-mobile-panel {
+      display: none; padding: 0 15px 18px; border-top: 1px solid rgba(255,255,255,0.08);
+    }
+    .phx-mobile-links { display: grid; gap: 8px; padding-top: 16px; }
+    .phx-mobile-link { color: #fff; text-decoration: none; font-family: ${TOKENS.bodyFont}; font-size: 15px; }
+    .phx-mobile-dropdown { display: grid; gap: 10px; padding-left: 14px; margin-top: 10px; }
+    @media (max-width: 1100px) {
+      .phx-shell { grid-template-columns: auto auto; }
+      .phx-nav, .phx-actions { display: none; }
+      .phx-mobile-toggle { display: inline-flex; width: 42px; height: 42px; align-items: center; justify-content: center; border: 1px solid rgba(255,255,255,0.12); background: rgba(255,255,255,0.04); color: #fff; }
+      .phx-mobile-panel { display: ${mobileMenu ? "block" : "none"}; }
+    }
+    @media (max-width: 767px) {
+      .phx-shell { grid-template-columns: 1fr auto; gap: 14px; }
+      .phx-brand { display: none; }
+      .phx-search { left: 0; right: auto; width: min(100%, calc(100vw - 30px)); }
+      .phx-dropdown { width: calc(100vw - 30px); padding: 18px; }
+      .phx-dropdown-grid { grid-template-columns: 1fr; }
+      .phx-dropdown-feature { min-height: 220px; }
+      .phx-dropdown-feature h3 { font-size: 30px; }
+    }
+  `;
+
+  return (
+    <header className="phx-header">
+      <ScopedStyles id="header" css={headerCss} />
+      <div className="phx-shell">
+        <Link href={`/store/${storeSlug}`} className="phx-logo" aria-label={storeName}>
+          {logo ? <img src={logo} alt={storeName} /> : <span className="phx-brand">{storeName}</span>}
+        </Link>
+
+        <nav className="phx-nav" aria-label="Main navigation">
+          {navItems.map((item) => (
+            <div key={item.label} className={item.dropdown ? "phx-fragrances" : ""}>
+              <Link href={item.href} className="phx-nav-item">
+                {item.label}
+                {item.dropdown && <ChevronDown className="h-3.5 w-3.5" />}
+              </Link>
+              {item.dropdown && (
+                <div className="phx-dropdown" role="menu" aria-label="Fragrances dropdown">
+                  <div className="phx-dropdown-grid">
+                    <div className="phx-dropdown-group">
+                      <h3>Collections for Her</h3>
+                      <div className="phx-dropdown-list">
+                        {her.map((collection) => (
+                          <Link key={collection.slug} href={collectionLink(collection.slug)} className="phx-dropdown-link">
+                            {collection.name}
+                          </Link>
+                        ))}
+                      </div>
+                    </div>
+                    <div className="phx-dropdown-group">
+                      <h3>Collections for Him</h3>
+                      <div className="phx-dropdown-list">
+                        {him.map((collection) => (
+                          <Link key={collection.slug} href={collectionLink(collection.slug)} className="phx-dropdown-link">
+                            {collection.name}
+                          </Link>
+                        ))}
+                      </div>
+                    </div>
+                    <div className="phx-dropdown-feature" style={{ backgroundImage: "url(https://woodmart.xtemos.com/perfumes/wp-content/uploads/sites/32/2025/11/prf-collection-opus-essence.jpg)" }}>
+                      <div className="phx-dropdown-feature-content">
+                        <h3>Opus Essence</h3>
+                        <p>A collection of delicate, weightless fragrances that capture the essence of air and light. Soft florals, sheer musks, and dewy accords.</p>
+                        <div style={{ marginTop: 18 }}>
+                          <Link href={collectionLink("opus-essence")} className="phx-dropdown-link">
+                            View collection
+                          </Link>
+                        </div>
+                        <div style={{ marginTop: 16 }}>
+                          <div className="phx-dropdown-list">
+                            {all.map((collection) => (
+                              <Link key={`all-${collection.slug}`} href={collectionLink(collection.slug)} className="phx-dropdown-link">
+                                {collection.name}
+                              </Link>
+                            ))}
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              )}
+            </div>
+          ))}
+        </nav>
+
+        <div className="phx-actions">
+          <button className="phx-icon" type="button" aria-label="Search" onClick={() => setSearchOpen((value) => !value)}>
+            <Search />
+          </button>
+          <Link href={`/store/${storeSlug}/wishlist`} className="phx-icon" aria-label="Wishlist">
+            <Heart />
+            {wishlistCount > 0 && <span className="phx-badge">{wishlistCount}</span>}
+          </Link>
+          <Link href={`/store/${storeSlug}/cart`} className="phx-icon" aria-label="Cart">
+            <ShoppingCart />
+            {cartCount > 0 && <span className="phx-badge">{cartCount}</span>}
+          </Link>
+        </div>
+
+        <button className="phx-mobile-toggle" type="button" aria-label="Toggle navigation" onClick={() => setMobileMenu((value) => !value)}>
+          <Menu className="h-5 w-5" />
+        </button>
+
+        {searchOpen && (
+          <div className="phx-search">
+            <form onSubmit={goToSearch}>
+              <input value={searchValue} onChange={(event) => setSearchValue(event.target.value)} placeholder="Search for products" />
+              <button type="submit">Search</button>
+              <button type="button" onClick={() => setSearchOpen(false)} aria-label="Close search" style={{ background: "transparent", color: "#fff", border: 0, padding: "0 6px" }}>
+                <X className="h-4 w-4" />
+              </button>
+            </form>
+          </div>
+        )}
+      </div>
+
+      <div className="phx-mobile-panel">
+        <div className="phx-mobile-links">
+          {navItems.map((item) => (
+            <div key={item.label}>
+              <Link href={item.href} className="phx-mobile-link">
+                {item.label}
+              </Link>
+              {item.dropdown && (
+                <div className="phx-mobile-dropdown">
+                  {[...all].map((collection) => (
+                    <Link key={`mobile-${collection.slug}-${collection.name}`} href={collectionLink(collection.slug)} className="phx-mobile-link">
+                      {collection.name}
+                    </Link>
+                  ))}
+                </div>
+              )}
+            </div>
+          ))}
+        </div>
+      </div>
+    </header>
+  );
+}
 
 /* ═══════════════════════════════════════════════════════════════
    1. PERFUMES HERO SLIDER
@@ -1002,7 +1318,169 @@ export function PerfumesInstagram({ handle = "@xtemos.studio", handleLink = "htt
    FOOTER
    ═══════════════════════════════════════════════════════════════ */
 
-export function PerfumesFooter(props: React.ComponentProps<typeof FashionFooter>) {
+export interface PerfumesFooterProps {
+  storeName: string;
+  storeSlug: string;
+  logo?: string | null;
+  description?: string | null;
+}
+
+export function PerfumesFooter({ storeName, storeSlug, logo, description }: PerfumesFooterProps) {
   const storeCtx = useContext(PerfumesStoreContext);
-  return <FashionFooter {...props} storeSlug={storeCtx?.storeSlug} />;
+  const resolvedStoreSlug = storeCtx?.storeSlug || storeSlug;
+  const footerCss = `
+    .pfx-footer {
+      background: #111;
+      color: #fff;
+      margin-top: 80px;
+    }
+    .pfx-inner {
+      max-width: 1320px; margin: 0 auto; padding: 80px 15px 0;
+    }
+    .pfx-top {
+      display: grid; grid-template-columns: 1fr 1.1fr 1fr; gap: 40px; align-items: start;
+      padding-bottom: 40px;
+    }
+    .pfx-brand {
+      display: inline-flex; align-items: center; margin-bottom: 18px;
+      font-family: ${TOKENS.titleFont}; font-size: 28px; font-weight: 600;
+      letter-spacing: 0.1em; text-transform: uppercase; color: #fff;
+    }
+    .pfx-lead {
+      font-family: ${TOKENS.titleFont}; font-size: 30px; line-height: 1.2; margin: 0; max-width: 620px;
+      color: #fff;
+    }
+    .pfx-newsletter h3, .pfx-links h3 {
+      margin: 0 0 16px; font-family: ${TOKENS.titleFont}; font-size: 28px; font-weight: 600;
+    }
+    .pfx-newsletter p, .pfx-links a, .pfx-copy {
+      font-family: ${TOKENS.bodyFont}; font-size: 15px; line-height: 1.7; color: rgba(255,255,255,0.82);
+    }
+    .pfx-form {
+      display: grid; grid-template-columns: 1fr auto; gap: 10px; margin: 18px 0 20px;
+    }
+    .pfx-form input {
+      background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.12);
+      padding: 12px 14px; color: #fff; font-family: ${TOKENS.bodyFont};
+    }
+    .pfx-form input::placeholder { color: rgba(255,255,255,0.45); }
+    .pfx-form button {
+      border: 0; background: #fff; color: #111; font-weight: 700; padding: 12px 18px; cursor: pointer;
+      font-family: ${TOKENS.bodyFont};
+    }
+    .pfx-links-grid {
+      display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 20px;
+    }
+    .pfx-link-col {
+      padding-left: 24px; border-left: 1px solid rgba(255,255,255,0.1);
+    }
+    .pfx-links-list { display: grid; gap: 10px; }
+    .pfx-links-list a { text-decoration: none; }
+    .pfx-links-list a:hover { opacity: 0.75; }
+    .pfx-bottom {
+      border-top: 2px solid rgba(255,255,255,0.14);
+      padding: 20px 0 22px; display: flex; align-items: center; justify-content: space-between; gap: 16px;
+      flex-wrap: wrap;
+    }
+    .pfx-payments { max-width: 350px; width: 100%; height: auto; }
+    .pfx-socials { display: flex; gap: 12px; margin-top: 18px; }
+    .pfx-socials a {
+      display: inline-flex; width: 36px; height: 36px; align-items: center; justify-content: center;
+      border-radius: 999px; border: 1px solid rgba(255,255,255,0.12); color: #fff; text-decoration: none;
+      background: rgba(255,255,255,0.03);
+    }
+    .pfx-socials svg { width: 16px; height: 16px; }
+    @media (max-width: 1024px) {
+      .pfx-top { grid-template-columns: 1fr; gap: 28px; }
+      .pfx-lead { font-size: 24px; }
+      .pfx-links h3, .pfx-newsletter h3 { font-size: 24px; }
+    }
+    @media (max-width: 767px) {
+      .pfx-inner { padding-top: 56px; }
+      .pfx-links-grid { grid-template-columns: 1fr; }
+      .pfx-link-col { padding-left: 0; border-left: 0; }
+      .pfx-form { grid-template-columns: 1fr; }
+      .pfx-bottom { align-items: flex-start; }
+    }
+  `;
+
+  const footerLinks = [
+    { label: "About Us", href: `/store/${resolvedStoreSlug}/about-us` },
+    { label: "Contact Us", href: `/store/${resolvedStoreSlug}/contact-us` },
+    { label: "FAQ", href: `/store/${resolvedStoreSlug}/contact-us` },
+    { label: "Blog", href: `/store/${resolvedStoreSlug}/journal` },
+  ];
+
+  const policyLinks = [
+    { label: "Terms of use", href: `/store/${resolvedStoreSlug}/terms` },
+    { label: "Refund policy", href: `/store/${resolvedStoreSlug}/terms#returns` },
+    { label: "Cookies", href: `/store/${resolvedStoreSlug}/terms#cookies` },
+    { label: "Privacy policy", href: `/store/${resolvedStoreSlug}/terms#privacy` },
+  ];
+
+  return (
+    <footer className="pfx-footer">
+      <ScopedStyles id="footer" css={footerCss} />
+      <div className="pfx-inner">
+        <div className="pfx-top">
+          <div>
+            <Link href={`/store/${resolvedStoreSlug}`} className="pfx-brand" aria-label={storeName}>
+              {storeName}
+            </Link>
+            <p className="pfx-lead">
+              {description || "Discover a curated collection of modern fragrances designed to hold memory, emotion, and identity in every bottle."}
+            </p>
+            <div className="pfx-socials" aria-label="Social links">
+              <a href="https://www.facebook.com/xtemos.studio" target="_blank" rel="noopener noreferrer" aria-label="Facebook">f</a>
+              <a href="https://x.com/xtemos_studio" target="_blank" rel="noopener noreferrer" aria-label="X">x</a>
+              <a href="https://www.instagram.com/xtemos.studio/" target="_blank" rel="noopener noreferrer" aria-label="Instagram">ig</a>
+              <a href="https://www.youtube.com/channel/UCu3loFwqqOQ9z-YTcnplK8w" target="_blank" rel="noopener noreferrer" aria-label="YouTube">yt</a>
+            </div>
+          </div>
+
+          <div className="pfx-newsletter">
+            <h3>Insider Access</h3>
+            <p>Receive exclusive content and be the first to know about product launches and special announcements.</p>
+            <form className="pfx-form" onSubmit={(event) => event.preventDefault()}>
+              <input type="email" placeholder="Your email address" aria-label="Email address" />
+              <button type="submit">Sign up</button>
+            </form>
+          </div>
+
+          <div className="pfx-links">
+            <h3>Quick Links</h3>
+            <div className="pfx-links-grid">
+              <div className="pfx-link-col">
+                <div className="pfx-links-list">
+                  {footerLinks.map((link) => (
+                    <Link key={link.label} href={link.href}>
+                      {link.label}
+                    </Link>
+                  ))}
+                </div>
+              </div>
+              <div className="pfx-link-col">
+                <div className="pfx-links-list">
+                  {policyLinks.map((link) => (
+                    <Link key={link.label} href={link.href}>
+                      {link.label}
+                    </Link>
+                  ))}
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div className="pfx-bottom">
+          <p className="pfx-copy">{storeName} © {new Date().getFullYear()}. All Rights Reserved.</p>
+          <img
+            src="https://woodmart.xtemos.com/perfumes/wp-content/uploads/sites/32/2025/11/ps-mtds.png.webp"
+            alt="Payment methods"
+            className="pfx-payments"
+          />
+        </div>
+      </div>
+    </footer>
+  );
 }

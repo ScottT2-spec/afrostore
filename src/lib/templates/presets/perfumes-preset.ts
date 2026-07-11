@@ -143,5 +143,12 @@ export const PERFUMES_TEMPLATE_PRESET: TemplateBlock[] = [
       items: [],
     },
   },
-  /* Footer rendered by PerfumesStoreChrome */
+  {
+    id: "perfumes-footer", type: "perfumesFooter",
+    props: {
+      storeName: "Perfumes",
+      storeSlug: "perfumes",
+      description: "Discover a curated collection of modern fragrances designed to hold memory, emotion, and identity in every bottle.",
+    },
+  },
 ];
