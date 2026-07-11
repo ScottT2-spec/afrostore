@@ -30,9 +30,10 @@ import { InteriorStoreContext } from "@/components/storefront/InteriorDesignTemp
 import { KidsStoreContext, KidsHeader, KidsFooterFull } from "@/components/storefront/KidsTemplateBlocks";
 import { MakeupStoreContext } from "@/components/storefront/MakeupTemplateBlocks";
 import { PerfumesStoreContext } from "@/components/storefront/PerfumesTemplateBlocks";
-import { PerfumesFontLoader, PerfumesHeader } from "@/components/storefront/PerfumesTemplateBlocks";
+import { PerfumesFontLoader, PerfumesFooter, PerfumesHeader } from "@/components/storefront/PerfumesTemplateBlocks";
 import { FashionHeader, FashionFooter, type NavItem } from "@/components/storefront/FashionStoreChrome";
 import { GardenHeader, GardenFooter } from "@/components/storefront/GardenStoreChrome";
+import { TShirtsPrintsFooter, TShirtsPrintsHeader } from "@/components/storefront/TShirtsPrintsStoreChrome";
 
 /* ─── Template preset map ─── */
 const TEMPLATE_PRESET_MAP: Record<string, TemplateBlock[]> = {
@@ -61,7 +62,6 @@ import { ThemeProvider, type ThemeData } from "@/components/storefront/ThemeProv
 import { useWishlist } from "@/hooks/useWishlist";
 import { applyPageCustomization, buildPageBackgroundStyle, buildThemeDataWithCustomization, filterVisiblePages, getResolvedPageSettings, normalizeSiteCustomization, type SiteCustomizationDocument } from "@/lib/site-customization";
 import { VegetableFooter, VegetableHeader } from "@/components/storefront/VegetableStoreChrome";
-import { PerfumesHeader as PerfumesChromeHeader, PerfumesFooter } from "@/components/storefront/PerfumesStoreChrome";
 import { VegetableHomePage } from "@/components/storefront/VegetableTemplatePages";
 
 /* ───────── Types ───────── */
@@ -434,9 +434,10 @@ export default function StorePage() {
     ? parsePageContent(homePage.content)
     : { blocks: [], settings: {} };
   const homePageSettings = homePage ? getResolvedPageSettings(homePage, homeContent.settings, draftCustomization) : {};
-  const homeBlocks: BuilderBlock[] = homeContent.blocks.filter((block) => block.type !== "kidsFooterFull");
+  const homeBlocks: BuilderBlock[] = homeContent.blocks.filter((block) => block.type !== "kidsFooterFull" && block.type !== "fashionFooter" && block.type !== "bakeryFooter" && block.type !== "interiorFooter" && block.type !== "groceryFooter" && block.type !== "healthFooterFull" && block.type !== "electronicsFooter" && block.type !== "perfumesFooter" && block.type !== "makeupFooter");
   const hasHomeContent = homeBlocks.length > 0;
   const homeHasProductGrid = homeBlocks.some((b) => b.type === "productGrid");
+  const isTShirtsPrintsTemplate = data.templateSlug === "t-shirts-prints" || slug === "t-shirts-prints" || store.slug === "t-shirts-prints";
   const isFashionTemplate = data.templateSlug === "fashion" || data.templateSlug === "fashion-colored" || data.templateSlug === "handmade-bags" || data.templateSlug === "t-shirts-prints" || homeBlocks.some((b) => b.type.startsWith("fashion"));
   const isKidsTemplate = data.templateSlug === "kids" || data.templateSlug === "toys" || homeBlocks.some((b) => b.type.startsWith("kids"));
   const isHealthTemplate = data.templateSlug === "pills" || homeBlocks.some((b) => b.type.startsWith("health"));
@@ -606,6 +607,17 @@ export default function StorePage() {
             ? `FREE DELIVERY ON ORDERS ABOVE ${formatCurrency(Number(data.deliveryZones.find((z: any) => z.freeAbove)?.freeAbove || 0), currency)}`
             : `Free shipping on all orders over $30!`}
         />
+      ) : isTShirtsPrintsTemplate ? (
+        <TShirtsPrintsHeader
+          storeName={store.name}
+          storeSlug={slug}
+          logo={store.logo}
+          cartCount={cartCount}
+          wishlistCount={wishlistCount}
+          searchQuery={searchQuery}
+          onSearchChange={setSearchQuery}
+          onSearch={handleSearch}
+        />
       ) : isKidsTemplate ? (
         <KidsHeader
           storeName={store.name}
@@ -622,7 +634,14 @@ export default function StorePage() {
             : `Sign up for our newsletter to get 10% off for the week!`}
         />
       ) : isPerfumesTemplate ? (
-        <PerfumesChromeHeader storeName={store.name} storeSlug={slug} logo={store.logo} cartCount={cartCount} wishlistCount={wishlistCount} socialLinks={socialLinksArray} isLanding={isLanding} />
+        <PerfumesHeader
+          storeName={store.name}
+          storeSlug={slug}
+          logo={store.logo}
+          categories={categories}
+          cartCount={cartCount}
+          wishlistCount={wishlistCount}
+        />
       ) : isFashionTemplate ? (
         <FashionHeader
           storeName={store.name}
@@ -855,6 +874,13 @@ export default function StorePage() {
             email: (data.socialLinks as any)?.email || undefined,
           }}
         />
+      ) : isTShirtsPrintsTemplate ? (
+        <TShirtsPrintsFooter
+          storeName={store.name}
+          storeSlug={slug}
+          logo={store.logo}
+          socialLinks={socialLinksArray}
+        />
       ) : isKidsTemplate ? (
         <KidsFooterFull
           storeName={store.name}
@@ -864,7 +890,12 @@ export default function StorePage() {
           description={store.description || "Playful kidswear, gifts, and accessories with a premium WoodMart-inspired finish."}
         />
       ) : isPerfumesTemplate ? (
-        <PerfumesFooter storeName={store.name} storeSlug={slug} logo={store.logo} description={store.description} socialLinks={socialLinksArray} contactInfo={{ phone: whatsappNumber || undefined, email: (data.socialLinks as any)?.email || undefined }} />
+        <PerfumesFooter
+          storeName={store.name}
+          storeSlug={slug}
+          logo={store.logo}
+          description={store.description}
+        />
       ) : isFashionTemplate ? (
         <FashionFooter
           storeName={store.name}

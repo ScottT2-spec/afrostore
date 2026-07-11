@@ -11,7 +11,7 @@ import { HandmadeBagsHeader, HandmadeBagsFooter } from "@/components/storefront/
 import { CosmeticsHeader, CosmeticsFooter } from "@/components/storefront/CosmeticsTemplateBlocks";
 import { KidsFontLoader, KidsFooterFull, KidsHeader } from "@/components/storefront/KidsTemplateBlocks";
 import { PerfumesFontLoader, PerfumesFooter, PerfumesHeader } from "@/components/storefront/PerfumesTemplateBlocks";
-import { HealthHeader, HealthFooterFull } from "@/components/storefront/HealthTemplateBlocks";
+import { TShirtsPrintsFooter, TShirtsPrintsHeader } from "@/components/storefront/TShirtsPrintsStoreChrome";
 
 /* ───────── Types ───────── */
 
@@ -262,10 +262,11 @@ export default function ShopPage() {
     setMobileFilters(false);
   };
 
-  const handleSearch = (e: React.FormEvent) => {
-    e.preventDefault();
-    setSearchQuery(searchInput);
-    updateParams(selectedCategory, searchInput);
+  const handleSearch = (query?: string) => {
+    const nextQuery = (query ?? searchInput).trim();
+    setSearchInput(nextQuery);
+    setSearchQuery(nextQuery);
+    updateParams(selectedCategory, nextQuery);
   };
 
   const clearFilters = () => {
@@ -311,6 +312,7 @@ export default function ShopPage() {
   const { store } = storeData;
   const activeCategoryName = categories.find((c) => c.slug === selectedCategory)?.name;
   const isHandmadeBagsTemplate = store.templateSlug === "handmade-bags";
+  const isTShirtsPrintsTemplate = store.templateSlug === "t-shirts-prints" || slug === "t-shirts-prints" || store.slug === "t-shirts-prints";
   const isCosmeticsTemplate = 
     store.templateSlug === "cosmetics" || 
     slug === "stacj" || // Force cosmetics for stacj store
@@ -320,6 +322,245 @@ export default function ShopPage() {
     store.name?.toLowerCase().includes("stacj");
   const isKidsTemplate = slug === "kids" || store.templateSlug === "kids";
   const isPerfumesTemplate = slug === "perfumes" || store.templateSlug === "perfumes";
+
+  if (isTShirtsPrintsTemplate) {
+    // Standalone T-Shirts & Prints Shop page - exact reference structure
+    return (
+      <div className="min-h-screen bg-white text-[#1d1d1d]" style={{ fontFamily: "'Manrope', Arial, sans-serif" }}>
+        <TShirtsPrintsHeader
+          storeName={store.name}
+          storeSlug={slug}
+          logo={store.logo}
+          cartCount={cartCount}
+          wishlistCount={wishlistCount}
+          searchQuery={searchQuery}
+          onSearchChange={setSearchQuery}
+          onSearch={handleSearch}
+        />
+
+        <main className="px-4 py-8">
+          <div className="mx-auto max-w-[1320px]">
+            <div className="mb-6 flex items-center gap-2 text-sm text-[#7c7c7c]">
+              <Link href={`/store/${slug}`} className="hover:text-[#111]">Home</Link>
+              <span>/</span>
+              <span>Shop</span>
+            </div>
+
+            {/* Categories Section */}
+            <div className="mb-8 grid grid-cols-2 gap-4 md:grid-cols-4">
+              <Link href={`/store/${slug}/shop?category=apparel`} className="group">
+                <div className="relative overflow-hidden rounded-[28px] bg-gray-100 aspect-square">
+                  <img src="https://woodmart.xtemos.com/t-shirts-prints/wp-content/uploads/sites/24/2025/02/ps-color-t-shirt.svg" alt="Apparel" className="w-full h-full object-cover p-8" />
+                  <div className="absolute inset-0 flex items-center justify-center bg-black/0 group-hover:bg-black/10 transition">
+                    <span className="text-sm font-semibold text-[#111]">Apparel</span>
+                  </div>
+                </div>
+              </Link>
+              <Link href={`/store/${slug}/shop?category=home-living`} className="group">
+                <div className="relative overflow-hidden rounded-[28px] bg-gray-100 aspect-square">
+                  <img src="https://woodmart.xtemos.com/t-shirts-prints/wp-content/uploads/sites/24/2025/02/ps-color-tote-bag.svg" alt="Home & Living" className="w-full h-full object-cover p-8" />
+                  <div className="absolute inset-0 flex items-center justify-center bg-black/0 group-hover:bg-black/10 transition">
+                    <span className="text-sm font-semibold text-[#111]">Home & Living</span>
+                  </div>
+                </div>
+              </Link>
+              <Link href={`/store/${slug}/shop?category=stickers`} className="group">
+                <div className="relative overflow-hidden rounded-[28px] bg-gray-100 aspect-square">
+                  <img src="https://woodmart.xtemos.com/t-shirts-prints/wp-content/uploads/sites/24/2025/02/ps-color-sticker.svg" alt="Stickers" className="w-full h-full object-cover p-8" />
+                  <div className="absolute inset-0 flex items-center justify-center bg-black/0 group-hover:bg-black/10 transition">
+                    <span className="text-sm font-semibold text-[#111]">Stickers</span>
+                  </div>
+                </div>
+              </Link>
+              <Link href={`/store/${slug}/shop?category=wall-art`} className="group">
+                <div className="relative overflow-hidden rounded-[28px] bg-gray-100 aspect-square">
+                  <img src="https://woodmart.xtemos.com/t-shirts-prints/wp-content/uploads/sites/24/2025/02/ps-color-poster.svg" alt="Wall Art" className="w-full h-full object-cover p-8" />
+                  <div className="absolute inset-0 flex items-center justify-center bg-black/0 group-hover:bg-black/10 transition">
+                    <span className="text-sm font-semibold text-[#111]">Wall Art</span>
+                  </div>
+                </div>
+              </Link>
+            </div>
+
+            <div className="grid gap-8 lg:grid-cols-[280px_minmax(0,1fr)]">
+              <aside className="lg:sticky lg:top-28 lg:h-fit">
+                <div className="rounded-[30px] border border-[#ececec] bg-white p-6 shadow-[0_20px_50px_rgba(17,17,17,0.05)]">
+                  <p className="mb-4 text-sm font-semibold uppercase tracking-[0.25em] text-[#111]">Filters</p>
+                  
+                  <div className="mb-6">
+                    <h2 className="mb-3 text-xs font-bold uppercase tracking-[0.25em] text-[#a69cad]">Sort by</h2>
+                    <div className="grid gap-2">
+                      {["Popularity", "Average rating", "Newness", "Price: low to high", "Price: high to low"].map((label) => (
+                        <button
+                          key={label}
+                          className="rounded-2xl px-4 py-3 text-left text-sm font-semibold bg-[#f7f7f7] text-[#1d1d1d] hover:bg-[#ececec] transition"
+                        >
+                          {label}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+
+                  <div className="mb-6">
+                    <h2 className="mb-3 text-xs font-bold uppercase tracking-[0.25em] text-[#a69cad]">Price filter</h2>
+                    <div className="space-y-2 text-sm text-[#1d1d1d]">
+                      <button className="flex w-full items-center justify-between hover:text-[#111]"><span>All</span><span className="text-[#7c7c7c]">—</span></button>
+                      <button className="flex w-full items-center justify-between hover:text-[#111]"><span>$ 0.00 - $ 10.00</span><span className="text-[#7c7c7c]">—</span></button>
+                      <button className="flex w-full items-center justify-between hover:text-[#111]"><span>$ 10.00 - $ 20.00</span><span className="text-[#7c7c7c]">—</span></button>
+                      <button className="flex w-full items-center justify-between hover:text-[#111]"><span>$ 20.00 +</span><span className="text-[#7c7c7c]">—</span></button>
+                    </div>
+                  </div>
+
+                  <div className="mb-6">
+                    <h2 className="mb-3 text-xs font-bold uppercase tracking-[0.25em] text-[#a69cad]">Color</h2>
+                    <div className="space-y-2 text-sm text-[#1d1d1d]">
+                      {["Black", "Dark Lava", "Deep Chestnut", "Gray", "Morning Blue", "Olive Green", "Ruddy Brown", "Slate Blue", "White"].map((color) => (
+                        <button key={color} className="flex w-full items-center justify-between hover:text-[#111]">
+                          <span>{color}</span>
+                          <span className="text-[#7c7c7c]">13</span>
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+
+                  <div>
+                    <h2 className="mb-3 text-xs font-bold uppercase tracking-[0.25em] text-[#a69cad]">Size</h2>
+                    <div className="space-y-2 text-sm text-[#1d1d1d]">
+                      {["L", "M", "S", "XL", "XS"].map((size) => (
+                        <button key={size} className="flex w-full items-center justify-between hover:text-[#111]">
+                          <span>{size}</span>
+                          <span className="text-[#7c7c7c]">5</span>
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+                </div>
+              </aside>
+
+              <section>
+                <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 xl:grid-cols-4">
+                  {sortedProducts.map((product) => {
+                    const hasImage = product.images.length > 0 && product.images[0].url;
+                    const justAdded = addedToCart === product.id;
+
+                    return (
+                      <div key={product.id} className="group">
+                        <Link href={`/store/${slug}/product/${product.slug}`} className="block">
+                          <div className="relative mb-3 aspect-[3/4] overflow-hidden bg-white">
+                            {hasImage ? (
+                              <img src={product.images[0].url} alt={product.images[0].alt || product.name} className="absolute inset-0 h-full w-full object-cover transition duration-500 group-hover:scale-110" />
+                            ) : (
+                              <div className="absolute inset-0 flex items-center justify-center bg-gray-100">
+                                <ImageIcon className="h-10 w-10 text-gray-400" />
+                              </div>
+                            )}
+                            <div className="absolute right-3 top-3 flex gap-2">
+                              <button
+                                onClick={(e) => { e.preventDefault(); e.stopPropagation(); toggleWishlist(product.id); }}
+                                className={`flex h-9 w-9 items-center justify-center rounded-full bg-white/90 shadow-sm transition hover:scale-110 ${isWishlisted(product.id) ? "text-[#111]" : "text-[#1d1d1d]"}`}
+                              >
+                                <Heart className={`h-4 w-4 ${isWishlisted(product.id) ? "fill-current" : ""}`} />
+                              </button>
+                              <button
+                                onClick={(e) => { e.preventDefault(); e.stopPropagation(); if (product.inStock) addToCart(product); }}
+                                disabled={!product.inStock}
+                                className={`flex h-9 w-9 items-center justify-center rounded-full shadow-sm transition hover:scale-110 disabled:opacity-40 ${justAdded ? "bg-[#111] text-white" : "bg-white/90 text-[#1d1d1d]"}`}
+                              >
+                                {justAdded ? <CheckCircle2 className="h-4 w-4" /> : <ShoppingCart className="h-4 w-4" />}
+                              </button>
+                            </div>
+                            <div className="absolute inset-x-0 bottom-0 bg-black/0 p-3 opacity-0 transition group-hover:opacity-100">
+                              <div className="flex gap-2">
+                                <span className="rounded-full bg-white px-2.5 py-1 text-[10px] font-semibold uppercase tracking-[0.16em] text-[#111]">Compare</span>
+                                <span className="rounded-full bg-white px-2.5 py-1 text-[10px] font-semibold uppercase tracking-[0.16em] text-[#111]">Quick view</span>
+                                <span className="rounded-full bg-white px-2.5 py-1 text-[10px] font-semibold uppercase tracking-[0.16em] text-[#111]">Add to wishlist</span>
+                              </div>
+                            </div>
+                          </div>
+                        </Link>
+                        <Link href={`/store/${slug}/product/${product.slug}`}>
+                          <h3 className="text-sm font-semibold text-[#1d1d1d] transition group-hover:text-[#666]">{product.name}</h3>
+                        </Link>
+                        <div className="mt-2 flex items-center gap-2">
+                          <span className="text-base font-bold text-[#1d1d1d]">{formatCurrency(Number(product.price), currency)}</span>
+                          {product.compareAtPrice && <span className="text-xs text-[#9b9b9b] line-through">{formatCurrency(Number(product.compareAtPrice), currency)}</span>}
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+              </section>
+            </div>
+
+            <div className="mt-16 space-y-12">
+              <div>
+                <h2 className="text-2xl font-semibold text-[#111]">You can create custom design</h2>
+                <p className="mt-4 max-w-4xl text-sm leading-7 text-[#666]">
+                  The price of a T-shirt with an individual design depends on the circulation, the number of images on one product, their size, and the printing method. brand, material and order urgency.
+                </p>
+                <Link href={`/store/${slug}/shop`} className="mt-4 inline-flex rounded-full bg-[#111] px-5 py-2.5 text-sm font-semibold text-white">
+                  Create design
+                </Link>
+              </div>
+
+              <div className="grid gap-8 lg:grid-cols-[1fr_1.15fr]">
+                <div>
+                  <h2 className="text-2xl font-semibold text-[#111]">We Are Open for Your Questions!</h2>
+                  <p className="mt-3 text-sm leading-7 text-[#666]">Feel free to communicate with us</p>
+                  <button type="button" className="mt-5 inline-flex rounded-full border border-[#111] px-5 py-2.5 text-sm font-semibold text-[#111]">
+                    Ask a Question
+                  </button>
+                </div>
+                <div>
+                  <h2 className="text-2xl font-semibold text-[#111]">Send Us a Message</h2>
+                  <div className="mt-4 grid gap-4 sm:grid-cols-2">
+                    <input className="rounded-2xl border border-[#ececec] px-4 py-3 text-sm" placeholder="Your Name" />
+                    <input className="rounded-2xl border border-[#ececec] px-4 py-3 text-sm" placeholder="Your Email" />
+                    <input className="rounded-2xl border border-[#ececec] px-4 py-3 text-sm" placeholder="Phone Number" />
+                    <input className="rounded-2xl border border-[#ececec] px-4 py-3 text-sm" placeholder="Company" />
+                    <textarea className="sm:col-span-2 min-h-[160px] rounded-[24px] border border-[#ececec] px-4 py-3 text-sm" placeholder="Your Message" />
+                  </div>
+                </div>
+              </div>
+
+              <div className="grid gap-8 lg:grid-cols-[1fr_1fr]">
+                <div>
+                  <h2 className="text-2xl font-semibold text-[#111]">Contact Information</h2>
+                  <div className="mt-4 space-y-2 text-sm text-[#666]">
+                    <p>1060 Cudahy Pl, San Diego</p>
+                    <p>(686) 492-1041</p>
+                    <p>xtemos.studio@gmail.com</p>
+                  </div>
+                  <p className="mt-4 text-sm leading-7 text-[#666]">
+                    Do you have questions about how we can help your company? Send us an email and we'll get in touch shortly.
+                  </p>
+                </div>
+                <div>
+                  <h2 className="text-2xl font-semibold text-[#111]">Social links:</h2>
+                  <div className="mt-4 flex flex-wrap gap-4">
+                    <a href="https://www.facebook.com/xtemos.studio" target="_blank" rel="noopener noreferrer" className="text-sm font-semibold text-[#111] hover:text-[#7c7c7c]">
+                      Facebook
+                    </a>
+                    <a href="https://x.com/xtemos_studio" target="_blank" rel="noopener noreferrer" className="text-sm font-semibold text-[#111] hover:text-[#7c7c7c]">
+                      X (Twitter)
+                    </a>
+                    <a href="https://www.instagram.com/xtemos.studio/" target="_blank" rel="noopener noreferrer" className="text-sm font-semibold text-[#111] hover:text-[#7c7c7c]">
+                      Instagram
+                    </a>
+                    <a href="https://www.youtube.com/channel/UCu3loFwqqOQ9z-YTcnplK8w" target="_blank" rel="noopener noreferrer" className="text-sm font-semibold text-[#111] hover:text-[#7c7c7c]">
+                      Youtube
+                    </a>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </main>
+
+        <TShirtsPrintsFooter storeName={store.name} storeSlug={slug} logo={store.logo} />
+      </div>
+    );
+  }
 
   if (isKidsTemplate) {
     return (
@@ -357,7 +598,13 @@ export default function ShopPage() {
           <div className="mx-auto grid max-w-6xl gap-8 lg:grid-cols-[280px_minmax(0,1fr)]">
             <aside className="lg:sticky lg:top-28 lg:h-fit">
               <div className="rounded-[30px] border border-[#efe6da] bg-white p-6 shadow-[0_20px_50px_rgba(59,51,68,0.05)]">
-                <form onSubmit={handleSearch} className="mb-6">
+                <form
+                  onSubmit={(e) => {
+                    e.preventDefault();
+                    handleSearch(searchInput);
+                  }}
+                  className="mb-6"
+                >
                   <label className="mb-2 block text-xs font-bold uppercase tracking-[0.25em] text-[#a69cad]">Search</label>
                   <div className="flex items-center gap-2 rounded-full border border-[#efe6da] bg-[#fffdf8] px-4 py-3">
                     <Search className="h-4 w-4 text-[#f5857c]" />
@@ -440,7 +687,13 @@ export default function ShopPage() {
 
               {mobileFilters && (
                 <div className="mb-6 rounded-[28px] border border-[#efe6da] bg-white p-5 shadow-[0_20px_50px_rgba(59,51,68,0.05)] lg:hidden">
-                  <form onSubmit={handleSearch} className="mb-5">
+                  <form
+                    onSubmit={(e) => {
+                      e.preventDefault();
+                      handleSearch(searchInput);
+                    }}
+                    className="mb-5"
+                  >
                     <div className="flex items-center gap-2 rounded-full border border-[#efe6da] bg-[#fffdf8] px-4 py-3">
                       <Search className="h-4 w-4 text-[#f5857c]" />
                       <input
@@ -632,7 +885,13 @@ export default function ShopPage() {
           <div className="mx-auto grid max-w-6xl gap-8 lg:grid-cols-[280px_minmax(0,1fr)]">
             <aside className="lg:sticky lg:top-28 lg:h-fit">
               <div className="rounded-[30px] border border-[#e7ddd7] bg-white p-6 shadow-[0_20px_50px_rgba(47,34,46,0.05)]">
-                <form onSubmit={handleSearch} className="mb-6">
+                <form
+                  onSubmit={(e) => {
+                    e.preventDefault();
+                    handleSearch(searchInput);
+                  }}
+                  className="mb-6"
+                >
                   <label className="mb-2 block text-xs font-bold uppercase tracking-[0.25em] text-[#a18ea1]">Search</label>
                   <div className="flex items-center gap-2 rounded-full border border-[#e7ddd7] bg-[#fcfaf8] px-4 py-3">
                     <Search className="h-4 w-4 text-[#8b6798]" />
@@ -882,7 +1141,18 @@ export default function ShopPage() {
     <ThemeProvider theme={storeData.theme}>
     <div className="min-h-screen bg-surface-50">
       {/* ── Nav ── */}
-      {isCosmeticsTemplate ? (
+      {isTShirtsPrintsTemplate ? (
+        <TShirtsPrintsHeader
+          storeName={store.name}
+          storeSlug={slug}
+          logo={store.logo}
+          cartCount={cartCount}
+          wishlistCount={wishlistCount}
+          searchQuery={searchQuery}
+          onSearchChange={setSearchQuery}
+          onSearch={handleSearch}
+        />
+      ) : isCosmeticsTemplate ? (
         <CosmeticsHeader
           storeName={store.name}
           storeSlug={slug}
@@ -984,7 +1254,13 @@ export default function ShopPage() {
           {/* ── Sidebar (desktop) ── */}
           <aside className="hidden lg:block w-56 flex-shrink-0">
             {/* Search */}
-            <form onSubmit={handleSearch} className="mb-6">
+            <form
+              onSubmit={(e) => {
+                e.preventDefault();
+                handleSearch(searchInput);
+              }}
+              className="mb-6"
+            >
               <div className="flex items-center gap-2 rounded-xl border border-surface-200 bg-white px-3 py-2.5">
                 <Search className="h-4 w-4 text-surface-400" />
                 <input
@@ -1042,7 +1318,13 @@ export default function ShopPage() {
             {/* Toolbar */}
             <div className="flex items-center gap-3 mb-6">
               {/* Mobile search */}
-              <form onSubmit={handleSearch} className="lg:hidden flex-1">
+              <form
+                onSubmit={(e) => {
+                  e.preventDefault();
+                  handleSearch(searchInput);
+                }}
+                className="lg:hidden flex-1"
+              >
                 <div className="flex items-center gap-2 rounded-xl border border-surface-200 bg-white px-3 py-2.5">
                   <Search className="h-4 w-4 text-surface-400" />
                   <input
@@ -1287,7 +1569,9 @@ export default function ShopPage() {
       </div>
 
       {/* ── Footer ── */}
-      {isCosmeticsTemplate ? (
+      {isTShirtsPrintsTemplate ? (
+        <TShirtsPrintsFooter storeName={store.name} storeSlug={slug} logo={store.logo} />
+      ) : isCosmeticsTemplate ? (
         <CosmeticsFooter
           storeName={store.name}
           storeSlug={slug}

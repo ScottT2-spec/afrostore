@@ -56,6 +56,45 @@ function buildKidsSyntheticPage(pageSlug: string): {
   return null;
 }
 
+function buildTShirtsSyntheticPage(pageSlug: string): {
+  id: string;
+  title: string;
+  slug: string;
+  type: PageType;
+  template: string;
+  content: Prisma.JsonValue;
+  metaTitle: string;
+  metaDescription: string;
+} | null {
+  if (pageSlug === "about-us") {
+    return {
+      id: "tshirts-about-us",
+      title: "About Us",
+      slug: "about-us",
+      type: "CUSTOM" as PageType,
+      template: "t-shirts-prints",
+      content: { blocks: [], settings: {} },
+      metaTitle: "About Us",
+      metaDescription: "About the T-Shirts & Prints studio",
+    };
+  }
+
+  if (pageSlug === "contact-us") {
+    return {
+      id: "tshirts-contact-us",
+      title: "Contact Us",
+      slug: "contact-us",
+      type: "CUSTOM" as PageType,
+      template: "t-shirts-prints",
+      content: { blocks: [], settings: {} },
+      metaTitle: "Contact Us",
+      metaDescription: "Contact the T-Shirts & Prints studio",
+    };
+  }
+
+  return null;
+}
+
 // GET /api/storefront/:slug/pages/:pageSlug — public page content + full store context
 export async function GET(_req: NextRequest, { params }: Params) {
   const { slug, pageSlug } = await params;
@@ -197,7 +236,13 @@ export async function GET(_req: NextRequest, { params }: Params) {
     ]);
 
     const resolvedCustomization = customization;
-    const syntheticPage = activeTemplate?.template?.slug === "kids" ? buildKidsSyntheticPage(pageSlug) : null;
+    const templateSlug = activeTemplate?.template?.slug || "";
+    const syntheticPage =
+      templateSlug === "kids"
+        ? buildKidsSyntheticPage(pageSlug)
+        : templateSlug === "t-shirts-prints" || slug === "t-shirts-prints" || site.slug === "t-shirts-prints" || site.name?.toLowerCase().includes("t-shirts")
+          ? buildTShirtsSyntheticPage(pageSlug)
+          : null;
     const mergedPages = mergeStoredTemplatePages(page ? [page] : syntheticPage ? [syntheticPage] : [], activeTemplate?.pages);
     const fallbackPage = mergedPages.find((item) => item.slug === pageSlug) || mergedPages[0];
     if (!fallbackPage) return notFound("Page not found");

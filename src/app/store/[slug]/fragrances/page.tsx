@@ -23,7 +23,30 @@ export default function FragrancesPage() {
   const [data, setData] = useState<any>(null);
   const [loading, setLoading] = useState(true);
 
-  useEffect(() => { fetch(`/api/storefront/${slug}`).then(r => r.json()).then(d => { setData(d); setLoading(false); }).catch(() => setLoading(false)); }, [slug]);
+  useEffect(() => {
+    let cancelled = false;
+
+    fetch(`/api/storefront/${slug}`)
+      .then((response) => response.json())
+      .then((json) => {
+        if (cancelled) return;
+        if (json?.success && json?.data) {
+          setData(json.data);
+        } else {
+          setData(null);
+        }
+      })
+      .catch(() => {
+        if (!cancelled) setData(null);
+      })
+      .finally(() => {
+        if (!cancelled) setLoading(false);
+      });
+
+    return () => {
+      cancelled = true;
+    };
+  }, [slug]);
 
   const currencySymbols: Record<string, string> = { NGN: "₦", KES: "KSh", GHS: "GH₵", ZAR: "R", USD: "$", GBP: "£", EUR: "€" };
   const formatPrice = (price: number, cur: string) => `${currencySymbols[cur] || cur}${price.toLocaleString()}`;

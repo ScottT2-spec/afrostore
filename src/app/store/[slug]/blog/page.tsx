@@ -6,7 +6,11 @@ import Link from "next/link";
 import { ArrowLeft, ArrowRight, Loader2, Search, X } from "lucide-react";
 import { CosmeticsHeader, CosmeticsFooter } from "@/components/storefront/CosmeticsTemplateBlocks";
 import { KidsFontLoader, KidsFooterFull, KidsHeader } from "@/components/storefront/KidsTemplateBlocks";
+<<<<<<< HEAD
 import { HealthHeader, HealthFooterFull } from "@/components/storefront/HealthTemplateBlocks";
+=======
+import { TShirtsPrintsFooter, TShirtsPrintsHeader } from "@/components/storefront/TShirtsPrintsStoreChrome";
+>>>>>>> 2072168 (Finished T-shirts & Prints template header and Footer)
 
 interface BlogPost {
   id: string;
@@ -28,12 +32,116 @@ interface BlogData {
   pagination: { page: number; limit: number; total: number; pages: number; hasMore: boolean };
 }
 
+interface TShirtsArchivePost {
+  id: string;
+  title: string;
+  slug: string;
+  excerpt: string;
+  badgeDay: string;
+  badgeMonth: string;
+  postedDate: string;
+  author: string;
+  category: string;
+  image: string;
+}
+
+const tshirtsBlogPosts: TShirtsArchivePost[] = [
+  {
+    id: "tshirts-blog-1",
+    title: "The Art of Custom Printing: How to Make Your Design Stand Out",
+    slug: "the-art-of-custom-printing-how-to-make-your-design-stand-out",
+    excerpt:
+      "Creating a custom print is more than just slapping an image on fabric-it's an art! In this post, we'll share expert design tips, from c...",
+    badgeDay: "13",
+    badgeMonth: "Feb",
+    postedDate: "March 21, 2025",
+    author: "Mr. Mackay",
+    category: "Prints",
+    image: "https://woodmart.xtemos.com/t-shirts-prints/wp-content/uploads/sites/24/2025/02/ps-right-custom-design.jpg",
+  },
+  {
+    id: "tshirts-blog-2",
+    title: "T-Shirts vs. Sweatshirts: Which One Is Best for Your Custom Design?",
+    slug: "t-shirts-vs-sweatshirts-which-one-is-best-for-your-custom-design",
+    excerpt:
+      "Not sure whether to print on a t-shirt or a sweatshirt? We break down the differences in material, durability, and print quality so you...",
+    badgeDay: "30",
+    badgeMonth: "Jan",
+    postedDate: "March 21, 2025",
+    author: "Mr. Mackay",
+    category: "Prints",
+    image: "https://woodmart.xtemos.com/t-shirts-prints/wp-content/uploads/sites/24/2025/02/ps-top-image-bg-1-min.jpg",
+  },
+  {
+    id: "tshirts-blog-3",
+    title: "Mug Printing 101: The Secret to a Perfect Personalized Gift",
+    slug: "mug-printing-101-the-secret-to-a-perfect-personalized-gift",
+    excerpt:
+      "Custom mugs make the perfect gift, but how do you make sure your design turns out just right? We’ll walk you through everything from se...",
+    badgeDay: "27",
+    badgeMonth: "Jan",
+    postedDate: "March 21, 2025",
+    author: "Mr. Mackay",
+    category: "Prints",
+    image: "https://woodmart.xtemos.com/t-shirts-prints/wp-content/uploads/sites/24/2025/02/ps-right-custom-design.jpg",
+  },
+  {
+    id: "tshirts-blog-4",
+    title: "Eco-Friendly Printing: How We Keep Your Designs Sustainable",
+    slug: "eco-friendly-printing-how-we-keep-your-designs-sustainable",
+    excerpt:
+      "Want amazing prints without harming the planet? At Print Studio, we use eco-friendly inks and sustainable printing methods to minimize ...",
+    badgeDay: "23",
+    badgeMonth: "Jan",
+    postedDate: "March 21, 2025",
+    author: "Mr. Mackay",
+    category: "Prints",
+    image: "https://woodmart.xtemos.com/t-shirts-prints/wp-content/uploads/sites/24/2025/02/ps-top-image-bg-1-min.jpg",
+  },
+  {
+    id: "tshirts-blog-5",
+    title: "5 Must-Know Trends in Custom Apparel Printing",
+    slug: "5-must-know-trends-in-custom-apparel-printing",
+    excerpt:
+      "The world of custom printing is always evolving! From bold typography to minimalistic designs, we explore the hottest trends in apparel...",
+    badgeDay: "16",
+    badgeMonth: "Jan",
+    postedDate: "March 21, 2025",
+    author: "Mr. Mackay",
+    category: "Prints",
+    image: "https://woodmart.xtemos.com/t-shirts-prints/wp-content/uploads/sites/24/2025/02/ps-right-custom-design.jpg",
+  },
+  {
+    id: "tshirts-blog-6",
+    title: "Behind the Scenes: How We Bring Your Prints to Life",
+    slug: "behind-the-scenes-how-we-bring-your-prints-to-life",
+    excerpt:
+      "Ever wondered what goes into making your custom-printed apparel or mugs? Take a behind-the-scenes look at our production process-from p...",
+    badgeDay: "09",
+    badgeMonth: "Jan",
+    postedDate: "March 21, 2025",
+    author: "Mr. Mackay",
+    category: "Prints",
+    image: "https://woodmart.xtemos.com/t-shirts-prints/wp-content/uploads/sites/24/2025/02/ps-top-image-bg-1-min.jpg",
+  },
+];
+
 export default function StoreBlogListingPage() {
   const params = useParams();
   const slug = params.slug as string;
+  const isTShirtsPrintsTemplate = slug === "t-shirts-prints";
 
-  const [data, setData] = useState<BlogData | null>(null);
-  const [loading, setLoading] = useState(true);
+  const [data, setData] = useState<BlogData | null>(() =>
+    isTShirtsPrintsTemplate
+      ? {
+          site: { id: "t-shirts-prints", name: "T-Shirts & Prints", slug: "t-shirts-prints" },
+          blogs: [],
+          categories: [],
+          pagination: { page: 1, limit: 9, total: 0, pages: 1, hasMore: false },
+        }
+      : null,
+  );
+  const [loading, setLoading] = useState(() => !isTShirtsPrintsTemplate);
   const [error, setError] = useState("");
   const [page, setPage] = useState(1);
   const [category, setCategory] = useState<string | null>(null);
@@ -41,6 +149,10 @@ export default function StoreBlogListingPage() {
   const [searchInput, setSearchInput] = useState("");
 
   useEffect(() => {
+    if (isTShirtsPrintsTemplate) {
+      return;
+    }
+
     let cancelled = false;
     setLoading(true);
 
@@ -62,7 +174,7 @@ export default function StoreBlogListingPage() {
       .finally(() => { if (!cancelled) setLoading(false); });
 
     return () => { cancelled = true; };
-  }, [slug, page, category, search]);
+  }, [slug, page, category, search, isTShirtsPrintsTemplate]);
 
   const formatDate = (dateStr: string) => {
     const d = new Date(dateStr);
@@ -253,6 +365,7 @@ export default function StoreBlogListingPage() {
     );
   }
 
+<<<<<<< HEAD
   // ─── HEALTH / PILLS BLOG ───
   const isHealthTemplate = slug === "pills" || store?.templateSlug === "pills" ||
     storeName?.toLowerCase().includes("pill") || storeName?.toLowerCase().includes("supplement") || storeName?.toLowerCase().includes("health");
@@ -289,6 +402,135 @@ export default function StoreBlogListingPage() {
           )}
         </main>
         <HealthFooterFull storeName={storeName} storeSlug={slug} logo={store?.logo} description={store?.description || "Your trusted source for vitamins, supplements, and wellness products."} contact={{ address: "1901 Thornridge Cir. Shiloh, Hawaii 81063", phone: "(956) 238-7908", email: "hello@store.com" }} />
+=======
+  if (isTShirtsPrintsTemplate) {
+    // Standalone T-Shirts & Prints Blog page - exact reference structure
+    return (
+      <div className="min-h-screen bg-white text-[#1d1d1d]" style={{ fontFamily: "'Manrope', Arial, sans-serif" }}>
+        <TShirtsPrintsHeader storeName={storeName} storeSlug={slug} cartCount={0} wishlistCount={0} />
+
+        <section className="px-4 pt-14">
+          <div className="mx-auto max-w-[1320px]">
+            <p className="text-[13px] font-semibold uppercase tracking-[0.32em] text-[#111]">Blog</p>
+            <div className="mt-4 flex items-center gap-2 text-sm text-[#7c7c7c]">
+              <Link href={`/store/${slug}`} className="hover:text-[#111]">Home</Link>
+              <span>/</span>
+              <span>Prints</span>
+              <span>/</span>
+              <span>Blog</span>
+            </div>
+          </div>
+        </section>
+
+        <main className="px-4 py-10">
+          <div className="mx-auto grid max-w-[1320px] gap-8 xl:grid-cols-2">
+            {tshirtsBlogPosts.map((post) => (
+              <article key={post.id} className="group">
+                <div className="relative overflow-hidden">
+                  <Link href={`/store/${slug}/blog/${post.slug}`}>
+                    <img
+                      src={post.image}
+                      alt={post.title}
+                      className="h-[360px] w-full object-cover transition duration-500 group-hover:scale-105"
+                      loading="lazy"
+                    />
+                  </Link>
+                  <span className="absolute left-0 top-0 bg-[#fff] px-3 py-2 text-center text-[#111]">
+                    <span className="block text-[28px] font-semibold leading-none">{post.badgeDay}</span>
+                    <span className="block text-[11px] uppercase tracking-[0.2em]">{post.badgeMonth}</span>
+                  </span>
+                </div>
+
+                <div className="pt-4">
+                  <div className="text-[11px] font-semibold uppercase tracking-[0.22em] text-[#111]">
+                    {post.category}
+                  </div>
+                  <div className="mt-2 flex items-center gap-2 text-[12px] text-[#7c7c7c]">
+                    <span>Posted by</span>
+                    <span className="font-semibold text-[#111]">{post.author}</span>
+                    <span>{post.postedDate}</span>
+                  </div>
+                  <div className="mt-3 text-[12px] text-[#7c7c7c]">0</div>
+                  <h2 className="mt-3 text-[23px] font-semibold leading-tight text-[#111]">
+                    <Link href={`/store/${slug}/blog/${post.slug}`} className="hover:text-[#7c7c7c]">
+                      {post.title}
+                    </Link>
+                  </h2>
+                  <p className="mt-3 text-sm leading-7 text-[#666]">{post.excerpt}</p>
+                  <Link href={`/store/${slug}/blog/${post.slug}`} className="mt-4 inline-flex text-sm font-semibold text-[#111]">
+                    Continue reading
+                  </Link>
+                </div>
+              </article>
+            ))}
+          </div>
+        </main>
+
+        <section className="px-4 pb-16">
+          <div className="mx-auto max-w-[1320px]">
+            <h2 className="text-2xl font-semibold text-[#111]">You can create custom design</h2>
+            <p className="mt-4 max-w-4xl text-sm leading-7 text-[#666]">
+              The price of a T-shirt with an individual design depends on the circulation, the number of images on one product, their size, and the printing method. brand, material and order urgency.
+            </p>
+            <Link href={`/store/${slug}/shop`} className="mt-4 inline-flex rounded-full bg-[#111] px-5 py-2.5 text-sm font-semibold text-white">
+              Create design
+            </Link>
+
+            <div className="mt-10 grid gap-8 lg:grid-cols-[1fr_1.15fr]">
+              <div>
+                <h2 className="text-2xl font-semibold text-[#111]">We Are Open for Your Questions!</h2>
+                <p className="mt-3 text-sm leading-7 text-[#666]">Feel free to communicate with us</p>
+                <button type="button" className="mt-5 inline-flex rounded-full border border-[#111] px-5 py-2.5 text-sm font-semibold text-[#111]">
+                  Ask a Question
+                </button>
+              </div>
+              <div>
+                <h2 className="text-2xl font-semibold text-[#111]">Send Us a Message</h2>
+                <div className="mt-4 grid gap-4 sm:grid-cols-2">
+                  <input className="rounded-2xl border border-[#ececec] px-4 py-3 text-sm" placeholder="Your Name" />
+                  <input className="rounded-2xl border border-[#ececec] px-4 py-3 text-sm" placeholder="Your Email" />
+                  <input className="rounded-2xl border border-[#ececec] px-4 py-3 text-sm" placeholder="Phone Number" />
+                  <input className="rounded-2xl border border-[#ececec] px-4 py-3 text-sm" placeholder="Company" />
+                  <textarea className="sm:col-span-2 min-h-[160px] rounded-[24px] border border-[#ececec] px-4 py-3 text-sm" placeholder="Your Message" />
+                </div>
+              </div>
+            </div>
+
+            <div className="mt-10 grid gap-8 lg:grid-cols-[1fr_1fr]">
+              <div>
+                <h2 className="text-2xl font-semibold text-[#111]">Contact Information</h2>
+                <div className="mt-4 space-y-2 text-sm text-[#666]">
+                  <p>1060 Cudahy Pl, San Diego</p>
+                  <p>(686) 492-1041</p>
+                  <p>xtemos.studio@gmail.com</p>
+                </div>
+                <p className="mt-4 text-sm leading-7 text-[#666]">
+                  Do you have questions about how we can help your company? Send us an email and we'll get in touch shortly.
+                </p>
+              </div>
+              <div>
+                <h2 className="text-2xl font-semibold text-[#111]">Social links:</h2>
+                <div className="mt-4 flex flex-wrap gap-4">
+                  <a href="https://www.facebook.com/xtemos.studio" target="_blank" rel="noopener noreferrer" className="text-sm font-semibold text-[#111] hover:text-[#7c7c7c]">
+                    Facebook
+                  </a>
+                  <a href="https://x.com/xtemos_studio" target="_blank" rel="noopener noreferrer" className="text-sm font-semibold text-[#111] hover:text-[#7c7c7c]">
+                    X (Twitter)
+                  </a>
+                  <a href="https://www.instagram.com/xtemos.studio/" target="_blank" rel="noopener noreferrer" className="text-sm font-semibold text-[#111] hover:text-[#7c7c7c]">
+                    Instagram
+                  </a>
+                  <a href="https://www.youtube.com/channel/UCu3loFwqqOQ9z-YTcnplK8w" target="_blank" rel="noopener noreferrer" className="text-sm font-semibold text-[#111] hover:text-[#7c7c7c]">
+                    Youtube
+                  </a>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <TShirtsPrintsFooter storeName={storeName} storeSlug={slug} />
+>>>>>>> 2072168 (Finished T-shirts & Prints template header and Footer)
       </div>
     );
   }

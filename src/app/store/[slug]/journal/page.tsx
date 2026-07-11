@@ -13,7 +13,30 @@ export default function JournalPage() {
   const [data, setData] = useState<any>(null);
   const [loading, setLoading] = useState(true);
 
-  useEffect(() => { fetch(`/api/storefront/${slug}`).then(r => r.json()).then(d => { setData(d); setLoading(false); }).catch(() => setLoading(false)); }, [slug]);
+  useEffect(() => {
+    let cancelled = false;
+
+    fetch(`/api/storefront/${slug}`)
+      .then((response) => response.json())
+      .then((json) => {
+        if (cancelled) return;
+        if (json?.success && json?.data) {
+          setData(json.data);
+        } else {
+          setData(null);
+        }
+      })
+      .catch(() => {
+        if (!cancelled) setData(null);
+      })
+      .finally(() => {
+        if (!cancelled) setLoading(false);
+      });
+
+    return () => {
+      cancelled = true;
+    };
+  }, [slug]);
 
   if (loading) return <div style={{ minHeight: "100vh", display: "flex", alignItems: "center", justifyContent: "center", fontFamily: T.bodyFont }}>Loading...</div>;
   if (!data) return <div style={{ minHeight: "100vh", display: "flex", alignItems: "center", justifyContent: "center", fontFamily: T.bodyFont }}>Store not found</div>;

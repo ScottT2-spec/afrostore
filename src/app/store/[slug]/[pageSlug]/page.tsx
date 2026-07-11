@@ -7,6 +7,7 @@ import { useParams } from "next/navigation";
 import Link from "next/link";
 import { RenderBlocks, type BuilderBlock, type StoreProduct } from "@/components/storefront/BlockRenderer";
 import { FashionFooter } from "@/components/storefront/FashionStoreChrome";
+import { TShirtsPrintsFooter, TShirtsPrintsHeader } from "@/components/storefront/TShirtsPrintsStoreChrome";
 import { parsePageContent, getLinkedPageHref } from "@/lib/page-content";
 import { ThemeProvider, type ThemeData } from "@/components/storefront/ThemeProvider";
 import { useWishlist } from "@/hooks/useWishlist";
@@ -209,6 +210,195 @@ export default function StorefrontPage() {
     .sort((a, b) => (navPageOrder[a.type] ?? 99) - (navPageOrder[b.type] ?? 99));
 
   const isKidsTemplate = data.templateSlug === "kids" || slug === "kids" || data.store.slug === "kids" || data.store.name?.toLowerCase().includes("kids");
+  const isTShirtsPrintsTemplate = data.templateSlug === "t-shirts-prints" || slug === "t-shirts-prints" || data.store.slug === "t-shirts-prints" || data.store.name?.toLowerCase().includes("t-shirts");
+  const tshirtsSocialLinks = [
+    ...(socialLinks?.facebook ? [{ label: "Facebook", href: socialLinks.facebook }] : []),
+    ...(socialLinks?.twitter ? [{ label: "X (Twitter)", href: socialLinks.twitter }] : []),
+    ...(socialLinks?.instagram ? [{ label: "Instagram", href: socialLinks.instagram }] : []),
+    ...((socialLinks as any)?.youtube ? [{ label: "Youtube", href: (socialLinks as any).youtube }] : []),
+  ];
+
+  if (isTShirtsPrintsTemplate) {
+    if (pageSlug === "about-us") {
+      return (
+        <ThemeProvider theme={resolvedTheme}>
+          <div className="min-h-screen bg-white text-[#1d1d1d]" style={{ fontFamily: "'Manrope', Arial, sans-serif" }}>
+            <TShirtsPrintsHeader storeName={store.name} storeSlug={slug} logo={store.logo} />
+            <main>
+              <section className="px-4 py-16">
+                <div className="mx-auto grid max-w-6xl gap-10 lg:grid-cols-[1.05fr_0.95fr] lg:items-start">
+                  <div>
+                    <p className="text-xs font-semibold uppercase tracking-[0.35em] text-[#7c7c7c]">About us</p>
+                    <h1 className="mt-4 text-4xl font-bold leading-tight text-[#111] sm:text-5xl">Welcome to Print Studio</h1>
+                    <p className="mt-6 text-base leading-8 text-[#666]">
+                      Your go-to destination for high-quality custom prints! Since 2016, we’ve been transforming t-shirts, sweatshirts, and mugs into unique works of art whether for businesses, special events, or personal expressions.
+                    </p>
+                    <div className="mt-8 grid gap-4 sm:grid-cols-2">
+                      {[
+                        ["Premium Quality", "We use top-grade materials long-lasting inks."],
+                        ["Eco-Friendly", "Our sustainable printing methods reduce waste."],
+                        ["Fast & Reliable", "Custom mug or bulk orders for an event!"],
+                        ["Customization", "You can bring any idea to life with ease."],
+                      ].map(([title, text]) => (
+                        <div key={title} className="rounded-[28px] border border-[#ececec] bg-white p-6 shadow-[0_16px_40px_rgba(17,17,17,0.04)]">
+                          <p className="text-sm font-semibold uppercase tracking-[0.25em] text-[#111]">{title}</p>
+                          <p className="mt-3 text-sm leading-7 text-[#666]">{text}</p>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                  <div className="grid gap-4 sm:grid-cols-2">
+                    <img src="https://woodmart.xtemos.com/t-shirts-prints/wp-content/uploads/sites/24/2025/02/ps-right-custom-design.jpg" alt="Print studio" className="h-full w-full rounded-[28px] object-cover shadow-[0_20px_50px_rgba(17,17,17,0.08)]" />
+                    <div className="grid gap-4">
+                      <img src="https://woodmart.xtemos.com/t-shirts-prints/wp-content/uploads/sites/24/2025/06/ps-top-image-bg-1-min.jpg" alt="Printing tools" className="h-full w-full rounded-[28px] object-cover shadow-[0_20px_50px_rgba(17,17,17,0.08)]" />
+                      <div className="rounded-[28px] border border-[#ececec] bg-white p-6 shadow-[0_16px_40px_rgba(17,17,17,0.04)]">
+                        <p className="text-sm font-semibold uppercase tracking-[0.25em] text-[#111]">You can create custom design</p>
+                        <p className="mt-3 text-sm leading-7 text-[#666]">
+                          The price of a T-shirt with an individual design depends on the circulation, the number of images on one product, their size, and the printing method. brand, material and order urgency.
+                        </p>
+                        <Link href={`/store/${slug}/shop`} className="mt-5 inline-flex rounded-full bg-[#111] px-5 py-2.5 text-sm font-semibold text-white transition hover:bg-[#333]">
+                          Create design
+                        </Link>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </section>
+              <section className="border-y border-[#ececec] px-4 py-16">
+                <div className="mx-auto grid max-w-6xl gap-10 lg:grid-cols-[0.9fr_1.1fr] lg:items-start">
+                  <div>
+                    <p className="text-xs font-semibold uppercase tracking-[0.35em] text-[#7c7c7c]">We are open for your questions</p>
+                    <h2 className="mt-4 text-4xl font-bold leading-tight text-[#111] sm:text-5xl">We Are Open for Your Questions!</h2>
+                    <p className="mt-4 text-base leading-8 text-[#666]">Feel free to communicate with us</p>
+                    <button type="button" className="mt-6 inline-flex rounded-full border border-[#111] px-5 py-2.5 text-sm font-semibold text-[#111] transition hover:bg-[#111] hover:text-white">
+                      Ask a Question
+                    </button>
+                  </div>
+                  <div className="rounded-[34px] border border-[#ececec] bg-white p-8 shadow-[0_30px_70px_rgba(17,17,17,0.05)] sm:p-10">
+                    <h3 className="text-3xl font-bold text-[#111]">Send Us a Message</h3>
+                    <form className="mt-6 grid gap-4">
+                      <div className="grid gap-4 sm:grid-cols-2">
+                        <input className="rounded-2xl border border-[#ececec] bg-[#fbfbfb] px-4 py-3 text-sm outline-none" placeholder="Your Name" />
+                        <input className="rounded-2xl border border-[#ececec] bg-[#fbfbfb] px-4 py-3 text-sm outline-none" placeholder="Your Email" />
+                      </div>
+                      <div className="grid gap-4 sm:grid-cols-2">
+                        <input className="rounded-2xl border border-[#ececec] bg-[#fbfbfb] px-4 py-3 text-sm outline-none" placeholder="Phone Number" />
+                        <input className="rounded-2xl border border-[#ececec] bg-[#fbfbfb] px-4 py-3 text-sm outline-none" placeholder="Company" />
+                      </div>
+                      <textarea className="min-h-[180px] rounded-[24px] border border-[#ececec] bg-[#fbfbfb] px-4 py-3 text-sm outline-none" placeholder="Your Message" />
+                      <button type="button" className="inline-flex items-center justify-center rounded-full bg-[#111] px-6 py-3 text-sm font-semibold text-white">
+                        Ask a Question
+                      </button>
+                    </form>
+                  </div>
+                </div>
+              </section>
+              <section className="px-4 py-16">
+                <div className="mx-auto grid max-w-6xl gap-10 lg:grid-cols-[0.9fr_1.1fr] lg:items-start">
+                  <div className="rounded-[34px] border border-[#ececec] bg-white p-8 shadow-[0_20px_50px_rgba(17,17,17,0.05)]">
+                    <h2 className="text-3xl font-bold text-[#111]">Contact Information</h2>
+                    <div className="mt-6 space-y-4 text-sm leading-7 text-[#666]">
+                      <p><span className="font-semibold text-[#111]">Address:</span> 1060 Cudahy Pl, San Diego</p>
+                      <p><span className="font-semibold text-[#111]">Call Us:</span> (686) 492-1041</p>
+                      <p><span className="font-semibold text-[#111]">Email:</span> xtemos.studio@gmail.com</p>
+                    </div>
+                    <p className="mt-6 text-sm leading-7 text-[#666]">
+                      Do you have questions about how we can help your company? Send us an email and we’ll get in touch shortly.
+                    </p>
+                    <div className="mt-6 flex flex-wrap gap-3">
+                      {tshirtsSocialLinks.map((social) => (
+                        <a key={social.label} href={social.href} target="_blank" rel="noreferrer noopener" className="rounded-full border border-[#ececec] px-4 py-2 text-sm font-semibold text-[#111] transition hover:border-[#111]">
+                          {social.label}
+                        </a>
+                      ))}
+                    </div>
+                  </div>
+                  <div className="rounded-[34px] border border-[#ececec] bg-[#fffdf8] p-8 shadow-[0_20px_50px_rgba(17,17,17,0.04)]">
+                    <h2 className="text-3xl font-bold text-[#111]">Why Choose Our Studio?</h2>
+                    <div className="mt-6 grid gap-4 sm:grid-cols-2">
+                      {[
+                        ["Premium Quality", "We use top-grade materials long-lasting inks."],
+                        ["Eco-Friendly", "Our sustainable printing methods reduce waste."],
+                        ["Fast & Reliable", "Custom mug or bulk orders for an event!"],
+                        ["Customization", "You can bring any idea to life with ease."],
+                      ].map(([title, text]) => (
+                        <div key={title} className="rounded-[24px] bg-white p-5 shadow-[0_10px_30px_rgba(17,17,17,0.04)]">
+                          <p className="text-sm font-semibold uppercase tracking-[0.2em] text-[#111]">{title}</p>
+                          <p className="mt-2 text-sm leading-7 text-[#666]">{text}</p>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                </div>
+              </section>
+            </main>
+            <TShirtsPrintsFooter
+              storeName={store.name}
+              storeSlug={slug}
+              logo={store.logo}
+              socialLinks={tshirtsSocialLinks.map((social) => ({
+                platform: social.label,
+                url: social.href,
+              }))}
+            />
+          </div>
+        </ThemeProvider>
+      );
+    }
+
+    if (pageSlug === "contact-us") {
+      return (
+        <ThemeProvider theme={resolvedTheme}>
+          <div className="min-h-screen bg-white text-[#1d1d1d]" style={{ fontFamily: "'Manrope', Arial, sans-serif" }}>
+            <TShirtsPrintsHeader storeName={store.name} storeSlug={slug} logo={store.logo} />
+            <main>
+              <section className="border-b border-[#ececec] px-4 py-16">
+                <div className="mx-auto grid max-w-6xl gap-10 lg:grid-cols-[0.9fr_1.1fr] lg:items-start">
+                  <div>
+                    <p className="text-xs font-semibold uppercase tracking-[0.35em] text-[#7c7c7c]">Contact us</p>
+                    <h1 className="mt-4 text-4xl font-bold leading-tight text-[#111] sm:text-5xl">Ready to start something together? Get in touch.</h1>
+                    <div className="mt-6 space-y-3 text-sm leading-7 text-[#666]">
+                      <p><span className="font-semibold text-[#111]">Email:</span> xtemos.studio@gmail.com</p>
+                      <p><span className="font-semibold text-[#111]">Call Us:</span> (686) 492-1041</p>
+                      <p><span className="font-semibold text-[#111]">Address:</span> 1060 Cudahy Pl, San Diego</p>
+                      <p><span className="font-semibold text-[#111]">Working Hours:</span> Mon - Fri 10:00am - 10:00pm</p>
+                    </div>
+                  </div>
+                  <div className="rounded-[32px] border border-[#ececec] bg-white p-8 shadow-[0_20px_50px_rgba(17,17,17,0.05)]">
+                    <form className="grid gap-4">
+                      <div className="grid gap-4 sm:grid-cols-2">
+                        <input className="rounded-2xl border border-[#ececec] bg-[#fbfbfb] px-4 py-3 text-sm outline-none" placeholder="Your Name" />
+                        <input className="rounded-2xl border border-[#ececec] bg-[#fbfbfb] px-4 py-3 text-sm outline-none" placeholder="Your Email" />
+                      </div>
+                      <div className="grid gap-4 sm:grid-cols-2">
+                        <input className="rounded-2xl border border-[#ececec] bg-[#fbfbfb] px-4 py-3 text-sm outline-none" placeholder="Phone Number" />
+                        <input className="rounded-2xl border border-[#ececec] bg-[#fbfbfb] px-4 py-3 text-sm outline-none" placeholder="Company" />
+                      </div>
+                      <textarea className="min-h-[180px] rounded-[24px] border border-[#ececec] bg-[#fbfbfb] px-4 py-3 text-sm outline-none" placeholder="Your Message" />
+                      <button type="button" className="inline-flex items-center justify-center rounded-full bg-[#111] px-6 py-3 text-sm font-semibold text-white">
+                        Ask a Question
+                      </button>
+                    </form>
+                  </div>
+                </div>
+              </section>
+            </main>
+            <TShirtsPrintsFooter
+              storeName={store.name}
+              storeSlug={slug}
+              logo={store.logo}
+              socialLinks={[
+                ...(socialLinks?.facebook ? [{ platform: "facebook", url: socialLinks.facebook }] : []),
+                ...(socialLinks?.twitter ? [{ platform: "twitter", url: socialLinks.twitter }] : []),
+                ...(socialLinks?.instagram ? [{ platform: "instagram", url: socialLinks.instagram }] : []),
+                ...((socialLinks as any)?.youtube ? [{ platform: "youtube", url: (socialLinks as any).youtube }] : []),
+              ]}
+            />
+          </div>
+        </ThemeProvider>
+      );
+    }
+  }
 
   if (isKidsTemplate) {
     if (pageSlug === "about-us") {

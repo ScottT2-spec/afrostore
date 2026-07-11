@@ -1,5 +1,5 @@
 import { prisma } from "@/lib/db";
-import { notFound } from "next/navigation";
+import { notFound, redirect } from "next/navigation";
 import Link from "next/link";
 import { RenderTemplateBlocks, type TemplateBlock } from "@/components/storefront/TemplateBlockRenderer";
 import { HandmadeBagsHeader, HandmadeBagsFooter } from "@/components/storefront/HandmadeBagsStoreChrome";
@@ -239,6 +239,17 @@ export default async function AboutPage({ params }: Props) {
 
   const { store, products, blogs } = data;
 
+  const activeTemplateSlug = store.templates?.[0]?.template?.slug || null;
+  const isTShirtsPrintsTemplate =
+    activeTemplateSlug === "t-shirts-prints" ||
+    slug === "t-shirts-prints" ||
+    store.slug === "t-shirts-prints" ||
+    store.name?.toLowerCase().includes("t-shirts");
+
+  if (isTShirtsPrintsTemplate) {
+    redirect(`/store/${slug}/about-us`);
+  }
+
   // Serialize products to convert Decimal values to plain numbers for client components
   const serializedProducts = serializeProductsForClient(products);
 
@@ -272,7 +283,6 @@ export default async function AboutPage({ params }: Props) {
     },
   };
 
-  const activeTemplateSlug = store.templates?.[0]?.template?.slug || null;
   const isKidsTemplate =
     activeTemplateSlug === "kids" ||
     slug === "kids" ||
