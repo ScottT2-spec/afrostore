@@ -785,12 +785,9 @@ export default function StorePage() {
           templateSlug="kids"
           description={store.description || "Playful kidswear, gifts, and accessories with a premium WoodMart-inspired finish."}
         />
-      ) : !isFashionTemplate ? (
-      {/* Footer — fashion handles its own; all other templates get FashionFooter */}
-      {isPerfumesTemplate && (
+      ) : isPerfumesTemplate ? (
         <PerfumesFooter storeName={store.name} storeSlug={slug} logo={store.logo} description={store.description} socialLinks={socialLinksArray} contactInfo={{ phone: whatsappNumber || undefined, email: (data.socialLinks as any)?.email || undefined }} />
-      )}
-      {!isFashionTemplate && !isKidsTemplate && !isHealthTemplate && !isPerfumesTemplate && (
+      ) : !isFashionTemplate && !isHealthTemplate ? (
         <FashionFooter
           storeName={store.name}
           storeSlug={slug}
