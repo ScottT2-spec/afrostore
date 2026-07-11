@@ -35,7 +35,7 @@ const IMG = "https://woodmart.xtemos.com/wp-content/uploads";
 export function InteriorFontLoader() {
   return (
     <style dangerouslySetInnerHTML={{ __html: `
-      @import url('https://fonts.googleapis.com/css2?family=Cabin:wght@400;500;600;700&display=swap');
+      @import url('https://fonts.googleapis.com/css2?family=Cabin:wght@400;500;600;700&family=Raleway:wght@400;600;700&family=Sora:wght@400;600&display=swap');
     `}} />
   );
 }
@@ -721,4 +721,552 @@ export function InteriorCta({
 export function InteriorFooter(props: React.ComponentProps<typeof FashionFooter>) {
   const storeCtx = useContext(InteriorStoreContext);
   return <FashionFooter {...props} storeSlug={storeCtx?.storeSlug} />;
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   GARDEN / HOME & GARDEN DECOR BLOCKS
+   New block components for the Retail template — garden aesthetic.
+   Primary: #038f81, Fonts: Raleway + Sora
+   ═══════════════════════════════════════════════════════════════ */
+
+const GD = {
+  primary: "#038f81",
+  primaryHover: "#007065",
+  accent: "#18b1a2",
+  titleColor: "#000000",
+  textColor: "#292929",
+  lightText: "#666666",
+  white: "#FFFFFF",
+  lightBg: "#fbfbfb",
+  headingFont: "'Raleway', sans-serif",
+  bodyFont: "'Sora', sans-serif",
+  containerWidth: "1200px",
+};
+
+const gdContainer: React.CSSProperties = {
+  maxWidth: GD.containerWidth,
+  margin: "0 auto",
+  padding: "0 20px",
+  boxSizing: "border-box" as const,
+  width: "100%",
+};
+
+/* ─── GARDEN HERO BANNER ────────────────────────────────────── */
+
+export interface GardenHeroBannerProps {
+  heading?: string;
+  subheading?: string;
+  ctaText?: string;
+  ctaLink?: string;
+  image?: string;
+  exploreBtns?: Array<{ label: string; link: string }>;
+}
+
+export function GardenHeroBanner({
+  heading = "Crafted with Care for Memorable Moments",
+  subheading = "From timeless pieces to modern accents, create a home that celebrates your unique story.",
+  ctaText = "SHOP NOW",
+  ctaLink = "/shop",
+  image = "https://websitedemos.net/home-garden-decor-02/wp-content/uploads/sites/1034/2025/11/heroimage-1.png",
+  exploreBtns,
+}: GardenHeroBannerProps) {
+  const storeCtx = useContext(InteriorStoreContext);
+  const fixLink = (link: string) => resolveStoreLink(link, storeCtx?.storeSlug);
+
+  const css = `
+    .gd-hero { background: ${GD.lightBg}; min-height: 560px; display: flex; align-items: center; overflow: hidden; }
+    .gd-hero-inner { display: flex; align-items: center; gap: 40px; width: 100%; }
+    .gd-hero-text { flex: 1; padding: 60px 0; }
+    .gd-hero-heading { font-family: ${GD.headingFont}; font-weight: 600; font-size: 52px; line-height: 1.15; color: ${GD.titleColor}; margin: 0 0 20px; }
+    .gd-hero-sub { font-family: ${GD.bodyFont}; font-size: 16px; line-height: 1.7; color: ${GD.lightText}; margin: 0 0 30px; max-width: 480px; }
+    .gd-hero-cta { display: inline-block; padding: 15px 35px; background: ${GD.primary}; color: #fff; font-family: ${GD.headingFont}; font-weight: 700; font-size: 14px; text-decoration: none; text-transform: uppercase; letter-spacing: 1.5px; transition: background 0.3s; border: none; cursor: pointer; }
+    .gd-hero-cta:hover { background: ${GD.primaryHover}; }
+    .gd-hero-explore { display: flex; gap: 15px; margin-top: 20px; }
+    .gd-hero-explore-btn { font-family: ${GD.headingFont}; font-weight: 600; font-size: 14px; color: ${GD.titleColor}; text-decoration: none; padding: 10px 0; border-bottom: 2px solid ${GD.primary}; transition: color 0.2s; }
+    .gd-hero-explore-btn:hover { color: ${GD.primary}; }
+    .gd-hero-img { flex: 1; position: relative; display: flex; justify-content: center; }
+    .gd-hero-img img { max-width: 100%; max-height: 500px; object-fit: contain; }
+    @media (max-width: 900px) {
+      .gd-hero-inner { flex-direction: column; text-align: center; }
+      .gd-hero-heading { font-size: 36px; }
+      .gd-hero-sub { margin-left: auto; margin-right: auto; }
+      .gd-hero-explore { justify-content: center; }
+      .gd-hero-text { padding: 40px 0 20px; }
+    }
+  `;
+
+  return (
+    <div className="gd-hero">
+      <ScopedStyles id="gd-hero" css={css} />
+      <div style={gdContainer}>
+        <div className="gd-hero-inner">
+          <div className="gd-hero-text">
+            <h1 className="gd-hero-heading">{heading}</h1>
+            <p className="gd-hero-sub">{subheading}</p>
+            <Link href={fixLink(ctaLink || "/shop")} className="gd-hero-cta">{ctaText}</Link>
+            {exploreBtns && exploreBtns.length > 0 && (
+              <div className="gd-hero-explore">
+                {exploreBtns.map((btn, i) => (
+                  <Link key={i} href={fixLink(btn.link)} className="gd-hero-explore-btn">{btn.label}</Link>
+                ))}
+              </div>
+            )}
+          </div>
+          <div className="gd-hero-img">
+            <img src={image} alt={heading} />
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+/* ─── GARDEN CATEGORY BANNER ────────────────────────────────── */
+
+export interface GardenCategoryBannerProps {
+  banners?: Array<{ title: string; subtitle?: string; image: string; link?: string }>;
+}
+
+export function GardenCategoryBanner({ banners }: GardenCategoryBannerProps) {
+  const storeCtx = useContext(InteriorStoreContext);
+  const fixLink = (link: string) => resolveStoreLink(link, storeCtx?.storeSlug);
+
+  const defaultBanners = [
+    { title: "Explore Indoor", subtitle: "Home Décor Collection", image: "https://images.unsplash.com/photo-1616046229478-9901c5536a45?w=700&h=500&fit=crop", link: "/shop?category=home-decor" },
+    { title: "Explore Outdoor", subtitle: "Garden Décor Collection", image: "https://images.unsplash.com/photo-1585320806297-9794b3e4eeae?w=700&h=500&fit=crop", link: "/shop?category=garden-decor" },
+  ];
+  const items = banners || defaultBanners;
+
+  const css = `
+    .gd-catbanner { padding: 60px 0; }
+    .gd-catbanner-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 24px; }
+    .gd-catbanner-card { position: relative; overflow: hidden; min-height: 320px; cursor: pointer; }
+    .gd-catbanner-img { width: 100%; height: 100%; object-fit: cover; position: absolute; inset: 0; transition: transform 0.6s ease; }
+    .gd-catbanner-card:hover .gd-catbanner-img { transform: scale(1.08); }
+    .gd-catbanner-overlay { position: absolute; inset: 0; background: rgba(0,0,0,0.25); display: flex; flex-direction: column; align-items: center; justify-content: center; z-index: 2; }
+    .gd-catbanner-title { font-family: ${GD.headingFont}; font-weight: 700; font-size: 28px; color: #fff; margin: 0 0 8px; text-shadow: 0 2px 8px rgba(0,0,0,0.3); }
+    .gd-catbanner-sub { font-family: ${GD.bodyFont}; font-size: 14px; color: rgba(255,255,255,0.85); }
+    @media (max-width: 700px) { .gd-catbanner-grid { grid-template-columns: 1fr; } }
+  `;
+
+  return (
+    <div className="gd-catbanner">
+      <ScopedStyles id="gd-catbanner" css={css} />
+      <div style={gdContainer}>
+        <div className="gd-catbanner-grid">
+          {items.map((b, i) => (
+            <Link key={i} href={fixLink(b.link || "#")} style={{ textDecoration: "none" }}>
+              <div className="gd-catbanner-card">
+                <img className="gd-catbanner-img" src={b.image} alt={b.title} />
+                <div className="gd-catbanner-overlay">
+                  <h3 className="gd-catbanner-title">{b.title}</h3>
+                  {b.subtitle && <span className="gd-catbanner-sub">{b.subtitle}</span>}
+                </div>
+              </div>
+            </Link>
+          ))}
+        </div>
+      </div>
+    </div>
+  );
+}
+
+/* ─── GARDEN DISCOUNT BANNER ────────────────────────────────── */
+
+export interface GardenDiscountBannerProps {
+  title?: string;
+  ctaText?: string;
+  ctaLink?: string;
+  backgroundColor?: string;
+}
+
+export function GardenDiscountBanner({
+  title = "20% OFF On Your First Order",
+  ctaText = "SHOP NOW",
+  ctaLink = "/shop",
+  backgroundColor = GD.primary,
+}: GardenDiscountBannerProps) {
+  const storeCtx = useContext(InteriorStoreContext);
+
+  const css = `
+    .gd-discount { padding: 50px 20px; text-align: center; }
+    .gd-discount-title { font-family: ${GD.headingFont}; font-weight: 700; font-size: 32px; color: #fff; margin: 0 0 25px; letter-spacing: 1px; }
+    .gd-discount-btn { display: inline-block; padding: 14px 35px; background: #fff; color: ${GD.titleColor}; font-family: ${GD.headingFont}; font-weight: 700; font-size: 14px; text-decoration: none; text-transform: uppercase; letter-spacing: 1.5px; transition: all 0.3s; border: none; cursor: pointer; }
+    .gd-discount-btn:hover { background: rgba(255,255,255,0.9); }
+  `;
+
+  return (
+    <div className="gd-discount" style={{ backgroundColor }}>
+      <ScopedStyles id="gd-discount" css={css} />
+      <h3 className="gd-discount-title">{title}</h3>
+      <Link href={resolveStoreLink(ctaLink, storeCtx?.storeSlug)} className="gd-discount-btn">{ctaText}</Link>
+    </div>
+  );
+}
+
+/* ─── GARDEN NEW ARRIVALS (Product Grid) ────────────────────── */
+
+export interface GardenNewArrivalsProps {
+  sectionTitle?: string;
+  viewAllText?: string;
+  viewAllLink?: string;
+  columns?: number;
+  maxProducts?: number;
+  products?: InteriorProduct[];
+}
+
+export function GardenNewArrivals({
+  sectionTitle = "New Arrivals",
+  viewAllText = "EXPLORE ALL PRODUCTS",
+  viewAllLink = "/shop",
+  columns = 4,
+  maxProducts = 8,
+  products: propProducts,
+}: GardenNewArrivalsProps) {
+  const storeCtx = useContext(InteriorStoreContext);
+  const fixLink = (slug: string) => storeCtx?.storeSlug ? `/store/${storeCtx.storeSlug}/product/${slug}` : "#";
+
+  const defaultProducts: InteriorProduct[] = [
+    { id: 101, name: "Terracotta Planter Set", slug: "terracotta-planter", price: "45.00", image: "https://images.unsplash.com/photo-1459411552884-841db9b3cc2a?w=400&h=480&fit=crop", category: "Garden Decor", rating: 5 },
+    { id: 102, name: "Woven Rattan Basket", slug: "woven-rattan-basket", price: "38.00", image: "https://images.unsplash.com/photo-1595428774223-ef52624120d2?w=400&h=480&fit=crop", category: "Home Decor", rating: 5 },
+    { id: 103, name: "Ceramic Table Vase", slug: "ceramic-table-vase", price: "32.00", image: "https://images.unsplash.com/photo-1612198188060-c7c2a3b66eae?w=400&h=480&fit=crop", category: "Home Decor", rating: 4 },
+    { id: 104, name: "Garden Wind Chime", slug: "garden-wind-chime", price: "28.00", image: "https://images.unsplash.com/photo-1416879595882-3373a0480b5b?w=400&h=480&fit=crop", category: "Garden Decor", rating: 5 },
+    { id: 105, name: "Macrame Wall Hanging", slug: "macrame-wall-hanging", price: "55.00", image: "https://images.unsplash.com/photo-1524758631624-e2822e304c36?w=400&h=480&fit=crop", category: "Home Decor", rating: 5 },
+    { id: 106, name: "Bamboo Lantern Set", slug: "bamboo-lantern-set", price: "42.00", image: "https://images.unsplash.com/photo-1558618666-fcd25c85f82e?w=400&h=480&fit=crop", category: "Garden Decor", rating: 4 },
+    { id: 107, name: "Linen Throw Pillow", slug: "linen-throw-pillow", price: "26.00", image: "https://images.unsplash.com/photo-1586105251261-72a756497a11?w=400&h=480&fit=crop", category: "Home Decor", rating: 5 },
+    { id: 108, name: "Herb Garden Kit", slug: "herb-garden-kit", price: "35.00", image: "https://images.unsplash.com/photo-1466692476868-aef1dfb1e735?w=400&h=480&fit=crop", category: "Garden Decor", rating: 5 },
+  ];
+
+  const items = (propProducts || storeCtx?.products || defaultProducts).slice(0, maxProducts) as InteriorProduct[];
+
+  const css = `
+    .gd-arrivals { padding: 60px 0; }
+    .gd-arrivals-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 35px; }
+    .gd-arrivals-title { font-family: ${GD.headingFont}; font-weight: 600; font-size: 32px; color: ${GD.titleColor}; margin: 0; }
+    .gd-arrivals-link { font-family: ${GD.headingFont}; font-weight: 600; font-size: 13px; color: ${GD.primary}; text-decoration: none; text-transform: uppercase; letter-spacing: 1px; border-bottom: 2px solid ${GD.primary}; padding-bottom: 2px; transition: opacity 0.2s; }
+    .gd-arrivals-link:hover { opacity: 0.7; }
+    .gd-arrivals-grid { display: grid; gap: 24px; }
+    .gd-prod-card { background: #fff; overflow: hidden; transition: box-shadow 0.3s; }
+    .gd-prod-card:hover { box-shadow: 0 8px 25px rgba(0,0,0,0.08); }
+    .gd-prod-img-wrap { position: relative; overflow: hidden; background: ${GD.lightBg}; aspect-ratio: 5/6; }
+    .gd-prod-img { width: 100%; height: 100%; object-fit: cover; transition: transform 0.5s; }
+    .gd-prod-card:hover .gd-prod-img { transform: scale(1.05); }
+    .gd-prod-info { padding: 16px 4px; }
+    .gd-prod-cat { font-family: ${GD.bodyFont}; font-size: 12px; color: ${GD.lightText}; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 4px; }
+    .gd-prod-name { font-family: ${GD.headingFont}; font-weight: 600; font-size: 15px; color: ${GD.titleColor}; margin: 0 0 6px; }
+    .gd-prod-name a { color: inherit; text-decoration: none; }
+    .gd-prod-name a:hover { color: ${GD.primary}; }
+    .gd-prod-price { font-family: ${GD.bodyFont}; font-weight: 600; font-size: 15px; color: ${GD.titleColor}; }
+    .gd-prod-price del { color: ${GD.lightText}; font-weight: 400; margin-right: 6px; }
+    .gd-prod-stars { color: #E8B500; font-size: 12px; letter-spacing: 1px; margin-bottom: 4px; }
+    .gd-prod-btn { display: inline-block; margin-top: 8px; padding: 8px 20px; background: ${GD.primary}; color: #fff; font-family: ${GD.headingFont}; font-weight: 600; font-size: 11px; text-transform: uppercase; border: none; cursor: pointer; transition: background 0.3s; letter-spacing: 0.5px; }
+    .gd-prod-btn:hover { background: ${GD.primaryHover}; }
+    @media (max-width: 1024px) { .gd-arrivals-grid { grid-template-columns: repeat(3, 1fr) !important; } }
+    @media (max-width: 700px) { .gd-arrivals-grid { grid-template-columns: repeat(2, 1fr) !important; } .gd-arrivals-header { flex-direction: column; gap: 10px; text-align: center; } }
+  `;
+
+  return (
+    <div className="gd-arrivals">
+      <ScopedStyles id="gd-arrivals" css={css} />
+      <div style={gdContainer}>
+        <div className="gd-arrivals-header">
+          <h2 className="gd-arrivals-title">{sectionTitle}</h2>
+          {viewAllText && <Link href={resolveStoreLink(viewAllLink || "/shop", storeCtx?.storeSlug)} className="gd-arrivals-link">{viewAllText}</Link>}
+        </div>
+        <div className="gd-arrivals-grid" style={{ gridTemplateColumns: `repeat(${columns}, 1fr)` }}>
+          {items.map((p) => (
+            <div key={p.id} className="gd-prod-card">
+              <div className="gd-prod-img-wrap">
+                <img className="gd-prod-img" src={p.image || safeSrc(null, p.name)} alt={p.name} onError={(e) => onImgError(e, p.name)} />
+              </div>
+              <div className="gd-prod-info">
+                <div className="gd-prod-cat">{p.category}</div>
+                <h3 className="gd-prod-name"><Link href={fixLink(p.slug)}>{p.name}</Link></h3>
+                <div className="gd-prod-stars">{"★".repeat(p.rating || 5)}{"☆".repeat(5 - (p.rating || 5))}</div>
+                <div className="gd-prod-price">
+                  {p.comparePrice && <del>${p.comparePrice}</del>}
+                  ${p.price}
+                </div>
+                <button className="gd-prod-btn" onClick={() => storeCtx?.addToCart?.(String(p.id))}>Add to cart</button>
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
+    </div>
+  );
+}
+
+/* ─── GARDEN FEATURES ───────────────────────────────────────── */
+
+export interface GardenFeature {
+  icon: string;
+  title: string;
+  description: string;
+}
+
+export interface GardenFeaturesProps {
+  features?: GardenFeature[];
+}
+
+export function GardenFeatures({ features }: GardenFeaturesProps) {
+  const defaultFeatures: GardenFeature[] = [
+    { icon: "✨", title: "Unique Designs", description: "Every piece in our collection is created with a sense of artistry and purpose." },
+    { icon: "🌿", title: "Sustainable Materials", description: "We prioritize eco-friendly and responsibly sourced materials." },
+    { icon: "❤️", title: "Crafted with Love", description: "Our artisans bring passion and precision to every product we offer." },
+  ];
+  const items = features || defaultFeatures;
+
+  const css = `
+    .gd-features { padding: 70px 0; background: ${GD.lightBg}; }
+    .gd-features-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 40px; text-align: center; }
+    .gd-feature-icon { font-size: 40px; margin-bottom: 16px; }
+    .gd-feature-title { font-family: ${GD.headingFont}; font-weight: 600; font-size: 20px; color: ${GD.titleColor}; margin: 0 0 10px; }
+    .gd-feature-desc { font-family: ${GD.bodyFont}; font-size: 14px; line-height: 1.7; color: ${GD.lightText}; margin: 0; max-width: 320px; margin-left: auto; margin-right: auto; }
+    @media (max-width: 700px) { .gd-features-grid { grid-template-columns: 1fr; gap: 30px; } }
+  `;
+
+  return (
+    <div className="gd-features">
+      <ScopedStyles id="gd-features" css={css} />
+      <div style={gdContainer}>
+        <div className="gd-features-grid">
+          {items.map((f, i) => (
+            <div key={i}>
+              <div className="gd-feature-icon">{f.icon}</div>
+              <h4 className="gd-feature-title">{f.title}</h4>
+              <p className="gd-feature-desc">{f.description}</p>
+            </div>
+          ))}
+        </div>
+      </div>
+    </div>
+  );
+}
+
+/* ─── GARDEN TESTIMONIALS ───────────────────────────────────── */
+
+export interface GardenTestimonial {
+  name: string;
+  text: string;
+  rating?: number;
+  avatar?: string;
+}
+
+export interface GardenTestimonialsProps {
+  sectionTitle?: string;
+  testimonials?: GardenTestimonial[];
+}
+
+export function GardenTestimonials({
+  sectionTitle = "What Our Customers Say",
+  testimonials,
+}: GardenTestimonialsProps) {
+  const defaultTestimonials: GardenTestimonial[] = [
+    { name: "Sarah M.", text: "The quality of the garden decor is outstanding. Every piece feels unique and well-crafted.", rating: 5 },
+    { name: "James L.", text: "Transformed my living room with their home decor collection. Absolutely love the natural aesthetic.", rating: 5 },
+    { name: "Emily R.", text: "Fast shipping and beautiful packaging. The products exceeded my expectations.", rating: 5 },
+  ];
+  const items = testimonials || defaultTestimonials;
+
+  const css = `
+    .gd-testimonials { padding: 70px 0; }
+    .gd-testimonials-title { font-family: ${GD.headingFont}; font-weight: 600; font-size: 32px; color: ${GD.titleColor}; text-align: center; margin: 0 0 40px; }
+    .gd-testimonials-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 30px; }
+    .gd-testimonial-card { background: ${GD.lightBg}; padding: 30px; text-align: center; }
+    .gd-testimonial-stars { color: #E8B500; font-size: 16px; letter-spacing: 2px; margin-bottom: 16px; }
+    .gd-testimonial-text { font-family: ${GD.bodyFont}; font-size: 14px; line-height: 1.8; color: ${GD.textColor}; margin: 0 0 20px; font-style: italic; }
+    .gd-testimonial-name { font-family: ${GD.headingFont}; font-weight: 600; font-size: 15px; color: ${GD.titleColor}; }
+    @media (max-width: 900px) { .gd-testimonials-grid { grid-template-columns: 1fr; } }
+  `;
+
+  return (
+    <div className="gd-testimonials">
+      <ScopedStyles id="gd-testimonials" css={css} />
+      <div style={gdContainer}>
+        <h2 className="gd-testimonials-title">{sectionTitle}</h2>
+        <div className="gd-testimonials-grid">
+          {items.map((t, i) => (
+            <div key={i} className="gd-testimonial-card">
+              <div className="gd-testimonial-stars">{"★".repeat(t.rating || 5)}</div>
+              <p className="gd-testimonial-text">&ldquo;{t.text}&rdquo;</p>
+              <div className="gd-testimonial-name">{t.name}</div>
+            </div>
+          ))}
+        </div>
+      </div>
+    </div>
+  );
+}
+
+/* ─── GARDEN ABOUT PAGE ─────────────────────────────────────── */
+
+export interface GardenAboutPageProps {
+  heading?: string;
+  text?: string;
+  image?: string;
+  values?: Array<{ title: string; description: string }>;
+}
+
+export function GardenAboutPage({
+  heading = "About Us",
+  text = "We are a passionate home and garden décor brand dedicated to creating spaces that feel alive, warm, and beautifully curated. With a love for nature, craftsmanship, and thoughtful design, we offer pieces that blend indoor comfort with outdoor charm. Our collection is inspired by earthy textures, timeless aesthetics, and the joy of transforming simple spaces into peaceful retreats.",
+  image = "https://images.unsplash.com/photo-1616046229478-9901c5536a45?w=800&h=600&fit=crop",
+  values,
+}: GardenAboutPageProps) {
+  const defaultValues = [
+    { title: "Our Mission", description: "To bring nature-inspired beauty into every home through sustainable, handcrafted décor." },
+    { title: "Quality Promise", description: "Every product is carefully curated and tested to ensure it meets our high standards." },
+    { title: "Sustainability", description: "We are committed to eco-friendly practices and responsibly sourced materials." },
+  ];
+  const items = values || defaultValues;
+
+  const css = `
+    .gd-about { padding: 70px 0; }
+    .gd-about-hero { display: grid; grid-template-columns: 1fr 1fr; gap: 50px; align-items: center; margin-bottom: 60px; }
+    .gd-about-heading { font-family: ${GD.headingFont}; font-weight: 600; font-size: 36px; color: ${GD.titleColor}; margin: 0 0 20px; }
+    .gd-about-text { font-family: ${GD.bodyFont}; font-size: 15px; line-height: 1.8; color: ${GD.textColor}; margin: 0; }
+    .gd-about-img { width: 100%; height: 400px; object-fit: cover; }
+    .gd-about-values { display: grid; grid-template-columns: repeat(3, 1fr); gap: 30px; }
+    .gd-about-value { text-align: center; padding: 30px 20px; background: ${GD.lightBg}; }
+    .gd-about-value-title { font-family: ${GD.headingFont}; font-weight: 600; font-size: 18px; color: ${GD.titleColor}; margin: 0 0 10px; }
+    .gd-about-value-desc { font-family: ${GD.bodyFont}; font-size: 14px; line-height: 1.7; color: ${GD.lightText}; margin: 0; }
+    @media (max-width: 900px) { .gd-about-hero { grid-template-columns: 1fr; } .gd-about-values { grid-template-columns: 1fr; } }
+  `;
+
+  return (
+    <div className="gd-about">
+      <ScopedStyles id="gd-about" css={css} />
+      <div style={gdContainer}>
+        <div className="gd-about-hero">
+          <div>
+            <h1 className="gd-about-heading">{heading}</h1>
+            <p className="gd-about-text">{text}</p>
+          </div>
+          <img className="gd-about-img" src={image} alt="About" />
+        </div>
+        <div className="gd-about-values">
+          {items.map((v, i) => (
+            <div key={i} className="gd-about-value">
+              <h4 className="gd-about-value-title">{v.title}</h4>
+              <p className="gd-about-value-desc">{v.description}</p>
+            </div>
+          ))}
+        </div>
+      </div>
+    </div>
+  );
+}
+
+/* ─── GARDEN CONTACT PAGE ───────────────────────────────────── */
+
+export interface GardenContactPageProps {
+  heading?: string;
+  description?: string;
+  address?: string;
+  phone?: string;
+  email?: string;
+}
+
+export function GardenContactPage({
+  heading = "Get In Touch",
+  description = "Have questions or need styling guidance? We're here to help you create the perfect home and garden space. Reach out anytime — we'd love to connect and support you.",
+  address = "123/B, Route 66, Downtown, Washington, US",
+  phone = "+88 - 78542269744",
+  email = "info@yourdomain.com",
+}: GardenContactPageProps) {
+  const css = `
+    .gd-contact { padding: 70px 0; }
+    .gd-contact-grid { display: grid; grid-template-columns: 1.2fr 0.8fr; gap: 50px; }
+    .gd-contact-heading { font-family: ${GD.headingFont}; font-weight: 600; font-size: 36px; color: ${GD.titleColor}; margin: 0 0 16px; }
+    .gd-contact-desc { font-family: ${GD.bodyFont}; font-size: 15px; line-height: 1.7; color: ${GD.lightText}; margin: 0 0 30px; }
+    .gd-contact-form { display: flex; flex-direction: column; gap: 16px; }
+    .gd-contact-input { padding: 12px 16px; border: 1px solid #ddd; font-family: ${GD.bodyFont}; font-size: 14px; color: ${GD.textColor}; outline: none; transition: border-color 0.2s; }
+    .gd-contact-input:focus { border-color: ${GD.primary}; }
+    .gd-contact-textarea { padding: 12px 16px; border: 1px solid #ddd; font-family: ${GD.bodyFont}; font-size: 14px; color: ${GD.textColor}; outline: none; min-height: 120px; resize: vertical; transition: border-color 0.2s; }
+    .gd-contact-textarea:focus { border-color: ${GD.primary}; }
+    .gd-contact-submit { padding: 14px 35px; background: ${GD.primary}; color: #fff; font-family: ${GD.headingFont}; font-weight: 700; font-size: 14px; text-transform: uppercase; letter-spacing: 1px; border: none; cursor: pointer; transition: background 0.3s; align-self: flex-start; }
+    .gd-contact-submit:hover { background: ${GD.primaryHover}; }
+    .gd-contact-sidebar-title { font-family: ${GD.headingFont}; font-weight: 600; font-size: 24px; color: ${GD.titleColor}; margin: 0 0 25px; }
+    .gd-contact-info { margin-bottom: 20px; }
+    .gd-contact-info-label { font-family: ${GD.headingFont}; font-weight: 600; font-size: 16px; color: ${GD.titleColor}; margin: 0 0 6px; }
+    .gd-contact-info-value { font-family: ${GD.bodyFont}; font-size: 14px; color: ${GD.lightText}; margin: 0; }
+    @media (max-width: 900px) { .gd-contact-grid { grid-template-columns: 1fr; } }
+  `;
+
+  return (
+    <div className="gd-contact">
+      <ScopedStyles id="gd-contact" css={css} />
+      <div style={gdContainer}>
+        <div className="gd-contact-grid">
+          <div>
+            <h1 className="gd-contact-heading">{heading}</h1>
+            <p className="gd-contact-desc">{description}</p>
+            <form className="gd-contact-form" onSubmit={(e) => e.preventDefault()}>
+              <input className="gd-contact-input" type="text" placeholder="Your Name *" required />
+              <input className="gd-contact-input" type="email" placeholder="Your Email *" required />
+              <textarea className="gd-contact-textarea" placeholder="Your Message *" required />
+              <button className="gd-contact-submit" type="submit">Send Message</button>
+            </form>
+          </div>
+          <div>
+            <h3 className="gd-contact-sidebar-title">Connect With Us</h3>
+            <div className="gd-contact-info">
+              <h4 className="gd-contact-info-label">Address</h4>
+              <p className="gd-contact-info-value">{address}</p>
+            </div>
+            <div className="gd-contact-info">
+              <h4 className="gd-contact-info-label">Call Us</h4>
+              <p className="gd-contact-info-value">{phone}</p>
+            </div>
+            <div className="gd-contact-info">
+              <h4 className="gd-contact-info-label">Email</h4>
+              <p className="gd-contact-info-value">{email}</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+/* ─── GARDEN PRODUCT CATEGORY ───────────────────────────────── */
+
+export interface GardenProductCategoryProps {
+  categoryTitle?: string;
+  categoryDescription?: string;
+  products?: InteriorProduct[];
+  columns?: number;
+  maxProducts?: number;
+}
+
+export function GardenProductCategory({
+  categoryTitle = "All Products",
+  categoryDescription = "Browse our curated collection of home and garden décor.",
+  products: propProducts,
+  columns = 4,
+  maxProducts = 12,
+}: GardenProductCategoryProps) {
+  const storeCtx = useContext(InteriorStoreContext);
+  const items = (propProducts || storeCtx?.products || []).slice(0, maxProducts) as InteriorProduct[];
+
+  const css = `
+    .gd-cat-page { padding: 50px 0; }
+    .gd-cat-header { text-align: center; margin-bottom: 40px; padding: 40px 20px; background: ${GD.lightBg}; }
+    .gd-cat-title { font-family: ${GD.headingFont}; font-weight: 600; font-size: 36px; color: ${GD.titleColor}; margin: 0 0 10px; }
+    .gd-cat-desc { font-family: ${GD.bodyFont}; font-size: 15px; color: ${GD.lightText}; margin: 0; }
+  `;
+
+  return (
+    <div className="gd-cat-page">
+      <ScopedStyles id="gd-cat-page" css={css} />
+      <div style={gdContainer}>
+        <div className="gd-cat-header">
+          <h1 className="gd-cat-title">{categoryTitle}</h1>
+          <p className="gd-cat-desc">{categoryDescription}</p>
+        </div>
+      </div>
+      <GardenNewArrivals products={items} columns={columns} maxProducts={maxProducts} sectionTitle="" viewAllText="" />
+    </div>
+  );
 }

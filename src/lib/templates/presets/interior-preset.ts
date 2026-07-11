@@ -157,143 +157,94 @@ export const INTERIOR_DECOR_PRESET: TemplateBlock[] = [
  */
 export const INTERIOR_RETAIL_PRESET: TemplateBlock[] = [
   {
-    id: "retail-hero",
-    type: "interiorHeroSlider",
+    id: "garden-hero",
+    type: "gardenHeroBanner",
     props: {
-      autoplaySpeed: 5000,
-      slides: [
+      heading: "Crafted with Care for Memorable Moments",
+      subheading: "From timeless pieces to modern accents, create a home that celebrates your unique story.",
+      ctaText: "SHOP NOW",
+      ctaLink: "/shop",
+      image: "https://websitedemos.net/home-garden-decor-02/wp-content/uploads/sites/1034/2025/11/heroimage-1.png",
+      exploreBtns: [
+        { label: "Explore Indoor", link: "/shop?category=home-decor" },
+        { label: "Explore Outdoor", link: "/shop?category=garden-decor" },
+      ],
+    },
+  },
+  {
+    id: "garden-categories",
+    type: "gardenCategoryBanner",
+    props: {
+      banners: [
         {
-          titleLine1: "COATED ALUMINUM FRAME",
-          titleLine2: "",
-          description: "Reddington 6-Piece Set Furniture Sectional Living Room Sofa.",
-          buttonText: "VIEW MORE",
-          buttonLink: "/shop",
-          image: "https://woodmart.xtemos.com/wp-content/uploads/2018/08/slide-1.jpg",
+          title: "Explore Indoor",
+          subtitle: "Home Décor Collection",
+          image: "https://images.unsplash.com/photo-1616046229478-9901c5536a45?w=700&h=500&fit=crop",
+          link: "/shop?category=home-decor",
         },
         {
-          titleLine1: "TIME FOR A NEW SPEAKER?",
-          titleLine2: "",
-          description: "Bring The Best Experience Home With A Speaker From Marshall.",
-          buttonText: "VIEW MORE",
-          buttonLink: "/shop",
-          image: "https://woodmart.xtemos.com/wp-content/uploads/2018/08/slide-2.jpg",
-        },
-        {
-          titleLine1: "HIGH STRENGTH AND DURABLE",
-          titleLine2: "",
-          description: "Buy The Best Tourist Equipment For An Excellent Holiday.",
-          buttonText: "VIEW MORE",
-          buttonLink: "/shop",
-          image: "https://woodmart.xtemos.com/wp-content/uploads/2018/08/slide-3.jpg",
+          title: "Explore Outdoor",
+          subtitle: "Garden Décor Collection",
+          image: "https://images.unsplash.com/photo-1585320806297-9794b3e4eeae?w=700&h=500&fit=crop",
+          link: "/shop?category=garden-decor",
         },
       ],
     },
   },
   {
-    id: "retail-categories",
-    type: "interiorCategoryGrid",
+    id: "garden-discount",
+    type: "gardenDiscountBanner",
     props: {
-      sectionTitle: "TOP CATEGORIES",
-      columns: 6,
-      categories: [
-        { name: "Lighting", image: "", link: "/shop" },
-        { name: "Clocks", image: "", link: "/shop" },
-        { name: "Furniture", image: "", link: "/shop" },
-        { name: "Accessories", image: "", link: "/shop" },
-        { name: "Cooking", image: "", link: "/shop" },
-        { name: "Toys", image: "", link: "/shop" },
-      ],
+      title: "20% OFF On Your First Order",
+      ctaText: "SHOP NOW",
+      ctaLink: "/shop",
+      backgroundColor: "#038f81",
     },
   },
   {
-    id: "retail-sale",
-    type: "interiorProductGrid",
+    id: "garden-new-arrivals",
+    type: "gardenNewArrivals",
     props: {
+      sectionTitle: "New Arrivals",
+      viewAllText: "EXPLORE ALL PRODUCTS",
+      viewAllLink: "/shop",
       columns: 4,
       maxProducts: 8,
-      sectionTitle: "SALE PRODUCTS",
-      products: [],
     },
   },
   {
-    id: "retail-info",
-    type: "interiorInfoBoxes",
+    id: "garden-features",
+    type: "gardenFeatures",
     props: {
-      items: [
-        { icon: "🚚", title: "Home Delivery.", description: "The European languages." },
-        { icon: "🎁", title: "Order As a Gift.", description: "Donec odio etiam sceles." },
-        { icon: "⭐", title: "High Quality.", description: "Curabitur hac hac maece." },
-        { icon: "😊", title: "Buy With Joy.", description: "Ullamcorper magna nec." },
-      ],
-    },
-  },
-  {
-    id: "retail-popular",
-    type: "interiorFurnitureProducts",
-    props: {
-      columns: 4,
-      maxProducts: 8,
-      products: [],
-    },
-  },
-  {
-    id: "retail-furniture-cats",
-    type: "interiorFurnitureCategories",
-    props: {
-      columns: 6,
-      categories: [],
-    },
-  },
-  {
-    id: "retail-blog",
-    type: "interiorBlogPosts",
-    props: {
-      columns: 4,
-      sectionTitle: "OUR BLOG",
-      posts: [],
-    },
-  },
-  {
-    id: "retail-brands",
-    type: "interiorBrandsBar",
-    props: {
-      brands: [],
-    },
-  },
-  {
-    id: "retail-cta",
-    type: "interiorCta",
-    props: {
-      title: "CURABITUR ALIQUET QUAM POSUERE",
-      buttonText: "TO SHOP",
-      buttonLink: "/shop",
-    },
-  },
-  {
-    id: "retail-footer",
-    type: "interiorFooter",
-    props: {
-      description: "Discover a curated collection of modern furniture designed to bring comfort and elegance into your home.",
-      columns: [
+      features: [
         {
-          title: "CUSTOMER SERVICE",
-          links: [
-            { label: "Help Centre", href: "#" },
-            { label: "Returns", href: "#" },
-            { label: "Contact Us", href: "#" },
-          ],
+          icon: "✨",
+          title: "Unique Designs",
+          description: "Every piece in our collection is created with a sense of artistry and purpose.",
         },
         {
-          title: "INFORMATION",
-          links: [
-            { label: "About Us", href: "#" },
-            { label: "Careers", href: "#" },
-            { label: "Store Finder", href: "#" },
-          ],
+          icon: "🌿",
+          title: "Sustainable Materials",
+          description: "We prioritize eco-friendly and responsibly sourced materials.",
+        },
+        {
+          icon: "❤️",
+          title: "Crafted with Love",
+          description: "Our artisans bring passion and precision to every product we offer.",
         },
       ],
-      paymentImage: "https://woodmart.xtemos.com/wp-content/uploads/2018/08/payment.png",
-      copyright: "\u00a9 2026. ALL RIGHTS RESERVED.",
+    },
+  },
+  {
+    id: "garden-testimonials",
+    type: "gardenTestimonials",
+    props: {
+      sectionTitle: "What Our Customers Say",
+      testimonials: [
+        { name: "Sarah M.", text: "The quality of the garden decor is outstanding. Every piece feels unique and well-crafted.", rating: 5 },
+        { name: "James L.", text: "Transformed my living room with their home decor collection. Absolutely love the natural aesthetic.", rating: 5 },
+        { name: "Emily R.", text: "Fast shipping and beautiful packaging. The products exceeded my expectations.", rating: 5 },
+      ],
     },
   },
 ];

@@ -31,6 +31,7 @@ import { KidsStoreContext, KidsHeader, KidsFooterFull } from "@/components/store
 import { MakeupStoreContext } from "@/components/storefront/MakeupTemplateBlocks";
 import { PerfumesStoreContext } from "@/components/storefront/PerfumesTemplateBlocks";
 import { FashionHeader, FashionFooter, type NavItem } from "@/components/storefront/FashionStoreChrome";
+import { GardenHeader, GardenFooter } from "@/components/storefront/GardenStoreChrome";
 
 /* ─── Template preset map ─── */
 const TEMPLATE_PRESET_MAP: Record<string, TemplateBlock[]> = {
@@ -438,6 +439,7 @@ export default function StorePage() {
   const isKidsTemplate = data.templateSlug === "kids" || data.templateSlug === "toys" || homeBlocks.some((b) => b.type.startsWith("kids"));
   const isHealthTemplate = data.templateSlug === "pills" || homeBlocks.some((b) => b.type.startsWith("health"));
   const isPerfumesTemplate = data.templateSlug === "perfumes" || homeBlocks.some((b) => b.type.startsWith("perfumes"));
+  const isRetailTemplate = data.templateSlug === "retail";
   const templatePreset = data.templateSlug ? TEMPLATE_PRESET_MAP[data.templateSlug] : undefined;
 
   // Template-specific navigation items — tailored to each niche
@@ -463,7 +465,7 @@ export default function StorePage() {
     "pills":            [{ label: "Supplements", href: `/store/${slug}/shop` }, { label: "Bestsellers", href: `/store/${slug}/shop?sort=popular` }, { label: "Wellness Blog", href: `/store/${slug}/blog` }],
     // Interior
     "decor":            [{ label: "Furniture", href: `/store/${slug}/shop` }, { label: "New Collection", href: `/store/${slug}/shop?sort=newest` }, { label: "Inspiration", href: `/store/${slug}/blog` }],
-    "retail":           [{ label: "Living Room", href: `/store/${slug}/shop` }, { label: "New Arrivals", href: `/store/${slug}/shop?sort=newest` }, { label: "Design Ideas", href: `/store/${slug}/blog` }],
+    "retail":           [{ label: "All Products", href: `/store/${slug}/shop` }, { label: "Garden Decor", href: `/store/${slug}/shop?category=garden-decor` }, { label: "Home Decor", href: `/store/${slug}/shop?category=home-decor` }, { label: "About", href: `/store/${slug}/about` }, { label: "Contact", href: `/store/${slug}/contact` }],
     // Kids
     "kids":             [{ label: "Toys", href: `/store/${slug}/shop` }, { label: "New In", href: `/store/${slug}/shop?sort=newest` }, { label: "Gift Ideas", href: `/store/${slug}/shop` }, { label: "Parenting", href: `/store/${slug}/blog` }],
     "toys":             [{ label: "Age Groups", href: `/store/${slug}/shop` }, { label: "New Toys", href: `/store/${slug}/shop?sort=newest` }, { label: "Gift Finder", href: `/store/${slug}/shop` }],
@@ -530,8 +532,22 @@ export default function StorePage() {
   return (
     <ThemeProvider theme={resolvedTheme}>
     <div className="min-h-screen bg-white">
-      {/* ─── FASHION TEMPLATE HEADER ─── */}
-      {isHealthTemplate ? (
+      {/* ─── TEMPLATE HEADERS ─── */}
+      {isRetailTemplate ? (
+        <GardenHeader
+          storeName={store.name}
+          storeSlug={slug}
+          logo={store.logo}
+          navPages={navPages}
+          categories={categories.filter((c) => c._count.products > 0).map((c) => ({ id: c.id, name: c.name, slug: c.slug, productCount: c._count.products }))}
+          cartCount={cartCount}
+          wishlistCount={wishlistCount}
+          searchQuery={searchQuery}
+          onSearchChange={setSearchQuery}
+          onSearch={handleSearch}
+          isLanding={isLanding}
+        />
+      ) : isHealthTemplate ? (
         <HealthHeader
           storeName={store.name}
           storeSlug={slug}
@@ -776,8 +792,25 @@ export default function StorePage() {
         </div>
       )}
 
-      {/* Footer — fashion handles its own; kids and all other templates render their own footer */}
-      {isKidsTemplate ? (
+      {/* Footer */}
+      {isRetailTemplate ? (
+        <GardenFooter
+          storeName={store.name}
+          storeSlug={slug}
+          logo={store.logo}
+          navPages={navPages}
+          description={store.description}
+          socialLinks={[
+            ...(data.socialLinks?.facebook ? [{ platform: "facebook", url: data.socialLinks.facebook }] : []),
+            ...(data.socialLinks?.instagram ? [{ platform: "instagram", url: data.socialLinks.instagram }] : []),
+            ...(data.socialLinks?.twitter ? [{ platform: "twitter", url: data.socialLinks.twitter }] : []),
+          ]}
+          contactInfo={{
+            phone: whatsappNumber || undefined,
+            email: (data.socialLinks as any)?.email || undefined,
+          }}
+        />
+      ) : isKidsTemplate ? (
         <KidsFooterFull
           storeName={store.name}
           storeSlug={slug}
@@ -787,7 +820,7 @@ export default function StorePage() {
         />
       ) : isPerfumesTemplate ? (
         <PerfumesFooter storeName={store.name} storeSlug={slug} logo={store.logo} description={store.description} socialLinks={socialLinksArray} contactInfo={{ phone: whatsappNumber || undefined, email: (data.socialLinks as any)?.email || undefined }} />
-      ) : !isFashionTemplate && !isHealthTemplate ? (
+      ) : isFashionTemplate ? (
         <FashionFooter
           storeName={store.name}
           storeSlug={slug}

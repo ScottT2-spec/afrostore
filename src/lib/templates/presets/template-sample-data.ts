@@ -330,7 +330,27 @@ export const TEMPLATE_SAMPLE_DATA: Record<string, TemplateSampleData> = {
   pills: HEALTH,
   // Interior
   decor: INTERIOR,
-  retail: INTERIOR,
+  retail: {
+    categories: [
+      { name: "All Products", slug: "all-products", description: "Browse our complete collection", image: "https://images.unsplash.com/photo-1616046229478-9901c5536a45?w=400&h=400&fit=crop", position: 0 },
+      { name: "Garden Decor", slug: "garden-decor", description: "Outdoor planters, wind chimes, lanterns and garden accessories", image: "https://images.unsplash.com/photo-1585320806297-9794b3e4eeae?w=400&h=400&fit=crop", position: 1 },
+      { name: "Home Decor", slug: "home-decor", description: "Vases, wall art, cushions and indoor décor pieces", image: "https://images.unsplash.com/photo-1586023492125-27b2c045efd7?w=400&h=400&fit=crop", position: 2 },
+    ],
+    products: [
+      { name: "Terracotta Planter Set", slug: "terracotta-planter-set", description: "Set of 3 handcrafted terracotta planters in varying sizes, perfect for herbs and small plants.", price: 45, stock: 25, isFeatured: true, tags: ["featured", "new-arrival"], position: 1, category: "garden-decor", images: ["https://images.unsplash.com/photo-1459411552884-841db9b3cc2a?w=600&h=700&fit=crop"] },
+      { name: "Woven Rattan Basket", slug: "woven-rattan-basket", description: "Natural rattan storage basket with handles, ideal for living rooms and bedrooms.", price: 38, stock: 20, isFeatured: true, tags: ["featured", "bestseller"], position: 2, category: "home-decor", images: ["https://images.unsplash.com/photo-1595428774223-ef52624120d2?w=600&h=700&fit=crop"] },
+      { name: "Ceramic Table Vase", slug: "ceramic-table-vase", description: "Minimalist ceramic vase with an earthy glaze finish for dried or fresh flowers.", price: 32, compareAtPrice: 42, stock: 30, isFeatured: true, tags: ["featured", "sale"], position: 3, category: "home-decor", images: ["https://images.unsplash.com/photo-1612198188060-c7c2a3b66eae?w=600&h=700&fit=crop"] },
+      { name: "Garden Wind Chime", slug: "garden-wind-chime", description: "Bamboo and metal wind chime that creates soothing melodies in the breeze.", price: 28, stock: 15, isFeatured: true, tags: ["featured"], position: 4, category: "garden-decor", images: ["https://images.unsplash.com/photo-1416879595882-3373a0480b5b?w=600&h=700&fit=crop"] },
+      { name: "Macramé Wall Hanging", slug: "macrame-wall-hanging", description: "Hand-knotted macramé wall art made from natural cotton cord.", price: 55, stock: 12, isFeatured: false, tags: ["new-arrival"], position: 5, category: "home-decor", images: ["https://images.unsplash.com/photo-1524758631624-e2822e304c36?w=600&h=700&fit=crop"] },
+      { name: "Bamboo Lantern Set", slug: "bamboo-lantern-set", description: "Set of 2 bamboo lanterns with glass candle holders for garden or patio.", price: 42, stock: 18, isFeatured: false, tags: ["bestseller"], position: 6, category: "garden-decor", images: ["https://images.unsplash.com/photo-1558618666-fcd25c85f82e?w=600&h=700&fit=crop"] },
+      { name: "Linen Throw Pillow", slug: "linen-throw-pillow", description: "Soft linen cushion cover in earthy tones with invisible zipper closure.", price: 26, stock: 40, isFeatured: false, tags: ["new-arrival"], position: 7, category: "home-decor", images: ["https://images.unsplash.com/photo-1586105251261-72a756497a11?w=600&h=700&fit=crop"] },
+      { name: "Herb Garden Kit", slug: "herb-garden-kit", description: "Complete indoor herb garden kit with pots, soil, and seed packets for basil, mint, and rosemary.", price: 35, compareAtPrice: 48, stock: 22, isFeatured: false, tags: ["sale", "bestseller"], position: 8, category: "garden-decor", images: ["https://images.unsplash.com/photo-1466692476868-aef1dfb1e735?w=600&h=700&fit=crop"] },
+    ],
+    blogs: [
+      { title: "10 Easy Ways to Brighten Your Garden", slug: "brighten-your-garden", excerpt: "Simple tips to transform your outdoor space into a vibrant retreat...", content: "A beautiful garden doesn't require a huge budget. Start with colorful planters, add solar-powered fairy lights, and plant seasonal flowers for year-round colour.\n\nConsider adding a small water feature or bird bath as a focal point. Use mulch and decorative stones for clean, low-maintenance borders.\n\nFinish with comfortable seating and outdoor cushions to create a space you'll love spending time in.", coverImage: "https://images.unsplash.com/photo-1585320806297-9794b3e4eeae?w=800&h=600&fit=crop", author: "Garden Team", category: "Garden Tips", tags: ["garden", "outdoor", "decor"] },
+      { title: "Creating a Cozy Home with Natural Materials", slug: "cozy-home-natural-materials", excerpt: "Discover how earthy textures and organic pieces transform your living space...", content: "Natural materials like wood, rattan, linen, and ceramic bring warmth and texture to any room. Start with a jute rug, add woven baskets for storage, and incorporate plants for a fresh, alive feeling.\n\nChoose furniture with organic shapes and earth-toned upholstery. Layer textures with throw blankets and cushions in natural fibres.\n\nThe result is a calming, grounded space that connects you to nature even indoors.", coverImage: "https://images.unsplash.com/photo-1616046229478-9901c5536a45?w=800&h=600&fit=crop", author: "Style Editor", category: "Home Tips", tags: ["home", "natural", "interior"] },
+    ],
+  },
   // Kids
   kids: KIDS,
   toys: KIDS,

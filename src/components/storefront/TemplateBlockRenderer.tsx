@@ -117,6 +117,15 @@ import {
   InteriorBrandsBar,
   InteriorCta,
   InteriorFooter,
+  GardenHeroBanner,
+  GardenCategoryBanner,
+  GardenDiscountBanner,
+  GardenNewArrivals,
+  GardenFeatures,
+  GardenTestimonials,
+  GardenAboutPage,
+  GardenContactPage,
+  GardenProductCategory,
 } from "@/components/storefront/InteriorDesignTemplateBlocks";
 import {
   KidsFontLoader,
@@ -273,6 +282,15 @@ const INTERIOR_BLOCKS: Record<string, BlockComponent> = {
   interiorBrandsBar: InteriorBrandsBar as unknown as BlockComponent,
   interiorCta: InteriorCta as unknown as BlockComponent,
   interiorFooter: InteriorFooter as unknown as BlockComponent,
+  gardenHeroBanner: GardenHeroBanner as unknown as BlockComponent,
+  gardenCategoryBanner: GardenCategoryBanner as unknown as BlockComponent,
+  gardenDiscountBanner: GardenDiscountBanner as unknown as BlockComponent,
+  gardenNewArrivals: GardenNewArrivals as unknown as BlockComponent,
+  gardenFeatures: GardenFeatures as unknown as BlockComponent,
+  gardenTestimonials: GardenTestimonials as unknown as BlockComponent,
+  gardenAboutPage: GardenAboutPage as unknown as BlockComponent,
+  gardenContactPage: GardenContactPage as unknown as BlockComponent,
+  gardenProductCategory: GardenProductCategory as unknown as BlockComponent,
 };
 
 const KIDS_BLOCKS: Record<string, BlockComponent> = {
@@ -354,7 +372,7 @@ function detectTemplateFamily(blocks: TemplateBlock[]): string {
     if (t.startsWith("cosmetics")) return "cosmetics";
     if (t.startsWith("grocery")) return "grocery";
     if (t.startsWith("health")) return "health";
-    if (t.startsWith("interior")) return "interior";
+    if (t.startsWith("interior") || t.startsWith("garden")) return "interior";
     if (t.startsWith("kids")) return "kids";
     if (t.startsWith("makeup")) return "makeup";
     if (t.startsWith("perfumes")) return "perfumes";
