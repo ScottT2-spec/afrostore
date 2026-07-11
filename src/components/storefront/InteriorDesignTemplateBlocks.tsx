@@ -715,7 +715,259 @@ export function InteriorCta({
 }
 
 /* ═══════════════════════════════════════════════════════════════
-   FOOTER
+   INTERIOR/DECOR HEADER
+   Modern furniture aesthetic. Center nav, right utility icons.
+   ═══════════════════════════════════════════════════════════════ */
+
+export interface InteriorHeaderProps {
+  storeName: string;
+  storeSlug: string;
+  logo?: string | null;
+  cartCount?: number;
+  wishlistCount?: number;
+  onSearch?: (q: string) => void;
+  searchQuery?: string;
+  onSearchChange?: (q: string) => void;
+}
+
+export function InteriorHeader({
+  storeName, storeSlug, logo, cartCount = 0, wishlistCount = 0,
+  onSearch, searchQuery = "", onSearchChange,
+}: InteriorHeaderProps) {
+  const [mobileOpen, setMobileOpen] = useState(false);
+  const [searchOpen, setSearchOpen] = useState(false);
+  const [searchVal, setSearchVal] = useState(searchQuery);
+  const base = `/store/${storeSlug}`;
+
+  const handleSearch = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (searchVal.trim()) {
+      onSearch?.(searchVal.trim());
+      onSearchChange?.(searchVal.trim());
+      setSearchOpen(false);
+      window.location.href = `${base}/shop?q=${encodeURIComponent(searchVal.trim())}`;
+    }
+  };
+
+  const css = `
+    .ih-hdr{background:#fff;border-bottom:1px solid #e5e5e5;font-family:${TOKENS.bodyFont};position:sticky;top:0;z-index:100}
+    .ih-inner{max-width:${TOKENS.containerWidth};margin:0 auto;display:flex;align-items:center;justify-content:space-between;padding:0 15px;height:78px}
+    .ih-logo{display:flex;align-items:center;gap:8px;text-decoration:none;flex-shrink:0}
+    .ih-logo img{height:36px;width:auto}
+    .ih-logo-text{font-family:${TOKENS.titleFont};font-size:22px;font-weight:700;color:${TOKENS.titleColor};letter-spacing:-.5px}
+    .ih-center{display:flex;align-items:center;gap:28px}
+    .ih-center a{font-size:14px;font-weight:600;color:${TOKENS.titleColor};text-decoration:none;text-transform:uppercase;letter-spacing:.5px;transition:color .2s}
+    .ih-center a:hover{color:${TOKENS.primaryColor}}
+    .ih-right{display:flex;align-items:center;gap:16px}
+    .ih-right a,.ih-right button{font-size:13px;font-weight:600;color:${TOKENS.titleColor};text-decoration:none;background:none;border:none;cursor:pointer;padding:0;transition:color .2s;font-family:${TOKENS.bodyFont};display:flex;align-items:center;gap:4px}
+    .ih-right a:hover,.ih-right button:hover{color:${TOKENS.primaryColor}}
+    .ih-right svg{width:20px;height:20px}
+    .ih-cart-btn{position:relative;background:${TOKENS.primaryColor}!important;color:#fff!important;padding:10px 18px!important;border-radius:6px;font-weight:700;font-size:13px;transition:background .2s!important}
+    .ih-cart-btn:hover{background:${TOKENS.primaryHover}!important}
+    .ih-cart-btn svg{width:18px;height:18px;stroke:#fff}
+    .ih-cart-badge{background:#fff;color:${TOKENS.primaryColor};font-size:10px;font-weight:800;min-width:16px;height:16px;border-radius:50%;display:flex;align-items:center;justify-content:center;margin-left:4px}
+    .ih-sep{width:1px;height:20px;background:#ddd}
+    .ih-search-ov{position:fixed;inset:0;background:rgba(0,0,0,.4);z-index:200;display:flex;align-items:flex-start;justify-content:center;padding-top:100px}
+    .ih-search-box{background:#fff;border-radius:8px;padding:28px;width:90%;max-width:550px;box-shadow:0 16px 48px rgba(0,0,0,.12)}
+    .ih-search-box form{display:flex;gap:10px}
+    .ih-search-box input{flex:1;border:2px solid #e5e5e5;border-radius:6px;padding:12px 16px;font-size:15px;font-family:${TOKENS.bodyFont};outline:none;transition:border-color .2s}
+    .ih-search-box input:focus{border-color:${TOKENS.primaryColor}}
+    .ih-search-box button[type=submit]{background:${TOKENS.primaryColor};color:#fff;border:none;border-radius:6px;padding:12px 22px;font-weight:700;cursor:pointer;font-family:${TOKENS.bodyFont};transition:background .2s}
+    .ih-search-box button[type=submit]:hover{background:${TOKENS.primaryHover}}
+    .ih-mob-tog{display:none;background:none;border:none;cursor:pointer;padding:4px;color:${TOKENS.titleColor}}
+    .ih-mob-tog svg{width:24px;height:24px}
+    .ih-mob-menu{display:none;background:#fff;border-bottom:1px solid #e5e5e5;padding:15px}
+    .ih-mob-menu a{display:block;padding:10px 0;font-size:14px;font-weight:600;color:${TOKENS.titleColor};text-decoration:none;border-bottom:1px solid #f2f2f2}
+    .ih-mob-menu a:last-child{border-bottom:none}
+    @media(max-width:900px){.ih-center,.ih-right-links{display:none!important}.ih-mob-tog{display:block}.ih-mob-menu.ih-open{display:block}.ih-inner{height:58px}}
+  `;
+
+  const searchSvg = <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>;
+  const cartSvg = <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M6 2L3 6v14a2 2 0 002 2h14a2 2 0 002-2V6l-3-4zM3 6h18"/><path d="M16 10a4 4 0 01-8 0"/></svg>;
+
+  return (
+    <>
+      <style dangerouslySetInnerHTML={{ __html: css }} />
+      <header className="ih-hdr">
+        <div className="ih-inner">
+          <button className="ih-mob-tog" onClick={() => setMobileOpen(!mobileOpen)} aria-label="Menu">
+            {mobileOpen
+              ? <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M18 6L6 18M6 6l12 12"/></svg>
+              : <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M3 12h18M3 6h18M3 18h18"/></svg>}
+          </button>
+
+          {/* Logo */}
+          <Link href={base} className="ih-logo">
+            {logo ? <img src={logo} alt={storeName} /> : <span className="ih-logo-text">{storeName}</span>}
+          </Link>
+
+          {/* Center nav */}
+          <nav className="ih-center">
+            <Link href={`${base}/shop`}>Shop All</Link>
+            <Link href={`${base}/shop`}>Decor</Link>
+            <Link href={`${base}/shop`}>Office</Link>
+            <Link href={`${base}/shop`}>Living Room</Link>
+            <Link href={`${base}/shop`}>Bedroom</Link>
+          </nav>
+
+          {/* Right */}
+          <div className="ih-right">
+            <div className="ih-right-links" style={{ display: "flex", alignItems: "center", gap: "16px" }}>
+              <Link href={`${base}/shop`}>Our Story</Link>
+              <Link href={`${base}/shop`}>Contact</Link>
+              <Link href={`${base}/order-tracking`}>Track Order</Link>
+              <Link href={`${base}/shop`}>Help</Link>
+              <span className="ih-sep" />
+              <Link href={`${base}/my-account`}>Login / Register</Link>
+            </div>
+            <button onClick={() => setSearchOpen(true)} aria-label="Search" style={{ background: "none", border: "none", cursor: "pointer", color: TOKENS.titleColor, padding: "4px" }}>{searchSvg}</button>
+            <Link href={`${base}/cart`} className="ih-cart-btn">
+              {cartSvg}
+              <span>Cart</span>
+              {cartCount > 0 && <span className="ih-cart-badge">{cartCount}</span>}
+            </Link>
+          </div>
+        </div>
+
+        <div className={`ih-mob-menu ${mobileOpen ? "ih-open" : ""}`}>
+          <Link href={base} onClick={() => setMobileOpen(false)}>Home</Link>
+          <Link href={`${base}/shop`} onClick={() => setMobileOpen(false)}>Shop All</Link>
+          <Link href={`${base}/shop`} onClick={() => setMobileOpen(false)}>Decor</Link>
+          <Link href={`${base}/shop`} onClick={() => setMobileOpen(false)}>Office</Link>
+          <Link href={`${base}/shop`} onClick={() => setMobileOpen(false)}>Living Room</Link>
+          <Link href={`${base}/shop`} onClick={() => setMobileOpen(false)}>Bedroom</Link>
+          <Link href={`${base}/shop`} onClick={() => setMobileOpen(false)}>Our Story</Link>
+          <Link href={`${base}/shop`} onClick={() => setMobileOpen(false)}>Contact</Link>
+          <Link href={`${base}/order-tracking`} onClick={() => setMobileOpen(false)}>Track Order</Link>
+          <Link href={`${base}/shop`} onClick={() => setMobileOpen(false)}>Help</Link>
+          <Link href={`${base}/my-account`} onClick={() => setMobileOpen(false)}>Login / Register</Link>
+          <Link href={`${base}/wishlist`} onClick={() => setMobileOpen(false)}>Wishlist</Link>
+        </div>
+      </header>
+
+      {searchOpen && (
+        <div className="ih-search-ov" onClick={() => setSearchOpen(false)}>
+          <div className="ih-search-box" onClick={e => e.stopPropagation()}>
+            <form onSubmit={handleSearch}>
+              <input type="text" placeholder="Search products..." value={searchVal} onChange={e => setSearchVal(e.target.value)} autoFocus />
+              <button type="submit">Search</button>
+            </form>
+          </div>
+        </div>
+      )}
+    </>
+  );
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   INTERIOR/DECOR FOOTER
+   Modern dark furniture footer with proper store links
+   ═══════════════════════════════════════════════════════════════ */
+
+export interface InteriorFooterFullProps {
+  storeName?: string;
+  storeSlug?: string;
+  logo?: string | null;
+  description?: string;
+  contact?: { address?: string; phone?: string; email?: string };
+  socialLinks?: Array<{ platform: string; url: string }>;
+  copyrightText?: string;
+}
+
+export function InteriorFooterFull({
+  storeName = "Furniture Store",
+  storeSlug: storeSlugProp,
+  logo,
+  description = "Modern furniture designed to bring comfort and elegance into your home.",
+  contact = { address: "451 Wall Street, London, UK", phone: "(064) 332-1233", email: "hello@store.com" },
+  socialLinks = [],
+  copyrightText,
+}: InteriorFooterFullProps) {
+  const storeCtx = useContext(InteriorStoreContext);
+  const slug = storeSlugProp || storeCtx?.storeSlug;
+  const base = slug ? `/store/${slug}` : "/";
+  const activeSocials = socialLinks.filter(s => s.url && s.url !== "#");
+  const socialIcons: Record<string, string> = { facebook: "f", twitter: "𝕏", instagram: "📷", youtube: "▶", tiktok: "♪" };
+
+  const css = `
+    .if-footer{background:${TOKENS.footerBg};font-family:${TOKENS.bodyFont};color:rgba(255,255,255,.7)}
+    .if-main{max-width:${TOKENS.containerWidth};margin:0 auto;padding:60px 15px 40px;display:grid;grid-template-columns:1.5fr 1fr 1fr 1fr;gap:40px}
+    .if-brand p{font-size:14px;line-height:1.8;margin:14px 0}
+    .if-social{display:flex;gap:10px;margin-top:14px}
+    .if-social a{width:34px;height:34px;border-radius:50%;background:${TOKENS.primaryColor};color:#fff;display:flex;align-items:center;justify-content:center;text-decoration:none;font-size:13px;font-weight:700;transition:background .2s}
+    .if-social a:hover{background:${TOKENS.primaryHover}}
+    .if-col-title{font-family:${TOKENS.titleFont};font-size:15px;font-weight:700;color:#fff;text-transform:uppercase;margin-bottom:18px;letter-spacing:.5px}
+    .if-links{list-style:none;margin:0;padding:0}
+    .if-links li{margin-bottom:10px}
+    .if-links a{font-size:14px;color:rgba(255,255,255,.7);text-decoration:none;transition:color .2s}
+    .if-links a:hover{color:${TOKENS.primaryColor}}
+    .if-contact{font-size:14px;margin-bottom:10px}
+    .if-bottom{border-top:1px solid rgba(255,255,255,.1);max-width:${TOKENS.containerWidth};margin:0 auto;padding:18px 15px;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:10px}
+    .if-bottom small{font-size:13px;color:rgba(255,255,255,.5)}
+    .if-bottom small a{color:rgba(255,255,255,.5);text-decoration:none}
+    @media(max-width:768px){.if-main{grid-template-columns:1fr;gap:28px;padding:36px 15px 28px}}
+    @media(min-width:769px) and (max-width:1024px){.if-main{grid-template-columns:1fr 1fr}}
+  `;
+
+  return (
+    <footer className="if-footer">
+      <style dangerouslySetInnerHTML={{ __html: css }} />
+      <div className="if-main">
+        <div className="if-brand">
+          <Link href={base} style={{ textDecoration: "none" }}>
+            {logo ? <img src={logo} alt={storeName} style={{ maxWidth: "170px", height: "auto" }} /> : <span style={{ fontFamily: TOKENS.titleFont, fontSize: "20px", fontWeight: 700, color: "#fff" }}>{storeName}</span>}
+          </Link>
+          <p>{description}</p>
+          {contact?.phone && <div className="if-contact">📞 {contact.phone}</div>}
+          {contact?.email && <div className="if-contact">✉️ {contact.email}</div>}
+          {contact?.address && <div className="if-contact">📍 {contact.address}</div>}
+          {activeSocials.length > 0 && (
+            <div className="if-social">
+              {activeSocials.map((s, i) => <a key={i} href={s.url} target="_blank" rel="noopener noreferrer" aria-label={s.platform}>{socialIcons[s.platform] || s.platform[0]?.toUpperCase()}</a>)}
+            </div>
+          )}
+        </div>
+        <div>
+          <h4 className="if-col-title">Shop</h4>
+          <ul className="if-links">
+            <li><Link href={`${base}/shop`}>Shop All</Link></li>
+            <li><Link href={`${base}/shop`}>Decor</Link></li>
+            <li><Link href={`${base}/shop`}>Office</Link></li>
+            <li><Link href={`${base}/shop`}>Living Room</Link></li>
+            <li><Link href={`${base}/shop`}>Bedroom</Link></li>
+          </ul>
+        </div>
+        <div>
+          <h4 className="if-col-title">Company</h4>
+          <ul className="if-links">
+            <li><Link href={`${base}/shop`}>Our Story</Link></li>
+            <li><Link href={`${base}/shop`}>Contact</Link></li>
+            <li><Link href={`${base}/order-tracking`}>Track Order</Link></li>
+            <li><Link href={`${base}/shop`}>Help</Link></li>
+            <li><Link href={`${base}/blog`}>Blog</Link></li>
+          </ul>
+        </div>
+        <div>
+          <h4 className="if-col-title">Account</h4>
+          <ul className="if-links">
+            <li><Link href={`${base}/my-account`}>Login / Register</Link></li>
+            <li><Link href={`${base}/wishlist`}>Wishlist</Link></li>
+            <li><Link href={`${base}/cart`}>Cart</Link></li>
+            <li><Link href={`${base}/compare`}>Compare</Link></li>
+            <li><Link href={`${base}/reviews`}>Reviews</Link></li>
+          </ul>
+        </div>
+      </div>
+      <div className="if-bottom">
+        <small><Link href={base}>{copyrightText || `© ${new Date().getFullYear()} ${storeName}. All rights reserved.`}</Link></small>
+        <img src="https://woodmart.xtemos.com/wp-content/uploads/2018/08/payment.png" alt="Payment methods" style={{ height: "21px" }} loading="lazy" />
+      </div>
+    </footer>
+  );
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   LEGACY FOOTER (kept for backward compat)
    ═══════════════════════════════════════════════════════════════ */
 
 export function InteriorFooter(props: React.ComponentProps<typeof FashionFooter>) {

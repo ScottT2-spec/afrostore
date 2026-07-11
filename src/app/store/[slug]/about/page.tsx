@@ -11,6 +11,7 @@ import { HANDMADE_BAGS_PRESET } from "@/lib/templates/presets/handmade-bags-pres
 import { serializeProductsForClient } from "@/lib/serialize-products";
 import { KidsFontLoader, KidsFooterFull, KidsHeader } from "@/components/storefront/KidsTemplateBlocks";
 import PerfumesAboutPage from "./perfumes-about";
+import { HealthFontLoader, HealthHeader, HealthFooterFull } from "@/components/storefront/HealthTemplateBlocks";
 
 type Props = {
   params: Promise<{ slug: string }>;
@@ -401,6 +402,87 @@ export default async function AboutPage({ params }: Props) {
 
   if (isPerfumesTemplate) {
     return <PerfumesAboutPage />;
+  }
+
+  // ─── HEALTH / PILLS ABOUT US ───
+  const isHealthTemplate =
+    activeTemplateSlug === "pills" ||
+    slug === "pills" ||
+    store.slug === "pills" ||
+    store.name?.toLowerCase().includes("pill") ||
+    store.name?.toLowerCase().includes("supplement") ||
+    store.name?.toLowerCase().includes("health");
+
+  if (isHealthTemplate) {
+    return (
+      <div className="min-h-screen bg-white text-[#333]" style={{ fontFamily: "'Cabin', Arial, sans-serif" }}>
+        <link href="https://fonts.googleapis.com/css2?family=Geologica:wght@400;500;600;700;800&family=Cabin:wght@400;500;600;700&display=swap" rel="stylesheet" />
+        <HealthHeader storeName={store.name} storeSlug={slug} logo={store.logo} />
+        <main>
+          {/* Hero */}
+          <section style={{ background: "linear-gradient(135deg, #f0f5f2 0%, #fff 50%, #f7f7f7 100%)" }}>
+            <div style={{ maxWidth: "1222px", margin: "0 auto", padding: "60px 15px 80px", textAlign: "center" }}>
+              <h1 style={{ fontFamily: "'Geologica', sans-serif", fontSize: "48px", fontWeight: 700, color: "#333", marginBottom: "24px" }}>About Us</h1>
+              <h2 style={{ fontFamily: "'Geologica', sans-serif", fontSize: "28px", fontWeight: 600, color: "#333", maxWidth: "700px", margin: "0 auto 20px" }}>
+                Our Company&apos;s Goal Is to Make You Healthy
+              </h2>
+              <p style={{ fontSize: "16px", lineHeight: "1.8", color: "#777", maxWidth: "720px", margin: "0 auto 30px" }}>
+                The best vitamins and supplements are often backed by scientific research and manufactured by reputable companies. They can play a valuable role in filling nutritional gaps and supporting optimal health when used as part.
+              </p>
+            </div>
+          </section>
+
+          {/* Video placeholder */}
+          <section style={{ maxWidth: "1222px", margin: "-40px auto 0", padding: "0 15px 60px", position: "relative", zIndex: 1 }}>
+            <div style={{ borderRadius: "15px", overflow: "hidden", boxShadow: "0 16px 48px rgba(0,0,0,0.08)" }}>
+              <img src="https://woodmart.xtemos.com/pills/wp-content/uploads/sites/15/2023/09/w-pas-video-placehollder.jpg" alt="About video" style={{ width: "100%", display: "block" }} />
+            </div>
+          </section>
+
+          {/* Company Values */}
+          <section style={{ maxWidth: "1222px", margin: "0 auto", padding: "60px 15px" }}>
+            <h2 style={{ fontFamily: "'Geologica', sans-serif", fontSize: "32px", fontWeight: 700, color: "#333", textAlign: "center", marginBottom: "48px" }}>Company Values</h2>
+            <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(280px, 1fr))", gap: "30px" }}>
+              {[
+                { title: "Focus on the Consumer", text: "Anyway, you still use Lorem Ipsum and rightly so, as it will always have a place in the web workers toolbox, as things happen, not always the way you like it, not always in the preferred order." },
+                { title: "Maintain the Highest Standards", text: "No typography, no colors, no layout, no styles, all those things that convey the important signals that go beyond the mere textual, hierarchies of information, weight, emphasis." },
+                { title: "Continuous Improvement", text: "That's not so bad, there's dummy copy to the rescue. But worse, what if the fish doesn't fit in the can, the foot's too big for the boot? Or too small?" },
+                { title: "Consumer Confidence", text: "The best vitamins and supplements are often backed by scientific research and manufactured by reputable companies. They can play a valuable role in filling nutritional gaps." },
+              ].map((v) => (
+                <div key={v.title} style={{ background: "#f7f7f7", borderRadius: "15px", padding: "32px" }}>
+                  <h3 style={{ fontFamily: "'Geologica', sans-serif", fontSize: "18px", fontWeight: 700, color: "#333", marginBottom: "12px" }}>{v.title}</h3>
+                  <p style={{ fontSize: "14px", lineHeight: "1.8", color: "#777" }}>{v.text}</p>
+                </div>
+              ))}
+            </div>
+          </section>
+
+          {/* FAQ */}
+          <section style={{ background: "#f7f7f7" }}>
+            <div style={{ maxWidth: "1222px", margin: "0 auto", padding: "60px 15px" }}>
+              <h2 style={{ fontFamily: "'Geologica', sans-serif", fontSize: "32px", fontWeight: 700, color: "#333", textAlign: "center", marginBottom: "48px" }}>Frequently Asked Questions</h2>
+              <div style={{ maxWidth: "800px", margin: "0 auto", display: "flex", flexDirection: "column", gap: "16px" }}>
+                {[
+                  ["How does my subscription work?", "A seemingly elegant design can quickly begin to bloat with unexpected content or break under the weight of actual activity. Fake data can ensure a nice looking layout but it doesn't reflect what a living, breathing application must endure. Real data does."],
+                  ["How do I edit what's in my plan?", "Websites in professional use templating systems. Commercial publishing platforms and content management systems ensure that you can show different text, different data using the same template."],
+                  ["Can I change my next delivery date?", "A seemingly elegant design can quickly begin to bloat with unexpected content or break under the weight of actual activity. Fake data can ensure a nice looking layout but it doesn't reflect what a living, breathing application must endure."],
+                  ["It's been a while since I took the quiz. Can I get a new recommendation?", "Websites in professional use templating systems. Commercial publishing platforms and content management systems ensure that you can show different text, different data using the same template."],
+                  ["My order hasn't arrived yet. Where is it?", "If the copy becomes distracting in the design then you are doing something wrong or they are discussing copy changes. It might be a bit annoying but you could tell them that that discussion would be best suited for another time."],
+                  ["Do you deliver on public holidays?", "A seemingly elegant design can quickly begin to bloat with unexpected content or break under the weight of actual activity. Fake data can ensure a nice looking layout but it doesn't reflect what a living, breathing application must endure."],
+                  ["Is next-day delivery available on all orders?", "If the copy becomes distracting in the design then you are doing something wrong or they are discussing copy changes. It might be a bit annoying but you could tell them that that discussion would be best suited for another time."],
+                ].map(([q, a]) => (
+                  <details key={q} style={{ background: "#fff", borderRadius: "12px", padding: "20px 24px", cursor: "pointer" }}>
+                    <summary style={{ fontFamily: "'Geologica', sans-serif", fontWeight: 600, fontSize: "15px", color: "#333", listStyle: "none" }}>{q}</summary>
+                    <p style={{ marginTop: "12px", fontSize: "14px", lineHeight: "1.8", color: "#777" }}>{a}</p>
+                  </details>
+                ))}
+              </div>
+            </div>
+          </section>
+        </main>
+        <HealthFooterFull storeName={store.name} storeSlug={slug} logo={store.logo} description={store.description || "Your trusted source for vitamins, supplements, and wellness products."} contact={{ address: "1901 Thornridge Cir. Shiloh, Hawaii 81063", phone: "(956) 238-7908", email: "hello@store.com" }} />
+      </div>
+    );
   }
 
   return (

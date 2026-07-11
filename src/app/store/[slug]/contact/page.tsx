@@ -12,6 +12,7 @@ import { VegetableContactPage } from "@/components/storefront/VegetableTemplateP
 import { VegetableFooter, VegetableHeader } from "@/components/storefront/VegetableStoreChrome";
 import { KidsFontLoader, KidsFooterFull, KidsHeader } from "@/components/storefront/KidsTemplateBlocks";
 import PerfumesContactPage from "./perfumes-contact";
+import { HealthHeader, HealthFooterFull } from "@/components/storefront/HealthTemplateBlocks";
 
 type Props = {
   params: Promise<{ slug: string }>;
@@ -380,6 +381,72 @@ export default async function ContactPage({ params }: Props) {
           description={store.description || "Playful kidswear, gifts, and accessories with a bright, premium WoodMart-inspired finish."}
           socialLinks={kidsSocialLinks}
         />
+      </div>
+    );
+  }
+
+  // ─── HEALTH / PILLS CONTACT US ───
+  const isHealthTemplate =
+    activeTemplateSlug === "pills" || slug === "pills" || store.slug === "pills" ||
+    store.name?.toLowerCase().includes("pill") || store.name?.toLowerCase().includes("supplement") || store.name?.toLowerCase().includes("health");
+
+  if (isHealthTemplate) {
+    return (
+      <div className="min-h-screen bg-white text-[#333]" style={{ fontFamily: "'Cabin', Arial, sans-serif" }}>
+        <link href="https://fonts.googleapis.com/css2?family=Geologica:wght@400;500;600;700;800&family=Cabin:wght@400;500;600;700&display=swap" rel="stylesheet" />
+        <HealthHeader storeName={store.name} storeSlug={slug} logo={store.logo} />
+        <main>
+          <section style={{ background: "linear-gradient(135deg, #f0f5f2 0%, #fff 50%, #f7f7f7 100%)" }}>
+            <div style={{ maxWidth: "1222px", margin: "0 auto", padding: "60px 15px 80px", textAlign: "center" }}>
+              <h1 style={{ fontFamily: "'Geologica', sans-serif", fontSize: "48px", fontWeight: 700, color: "#333", marginBottom: "24px" }}>Contact Us</h1>
+            </div>
+          </section>
+          <section style={{ maxWidth: "1222px", margin: "0 auto", padding: "60px 15px" }}>
+            <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(260px, 1fr))", gap: "30px", marginBottom: "60px" }}>
+              <div style={{ background: "#f7f7f7", borderRadius: "15px", padding: "32px" }}>
+                <h3 style={{ fontFamily: "'Geologica', sans-serif", fontSize: "18px", fontWeight: 700, color: "#333", marginBottom: "16px" }}>Address</h3>
+                <p style={{ fontSize: "14px", lineHeight: "1.8", color: "#777" }}>1901 Thornridge Cir. Shiloh, Hawaii 81063</p>
+                <p style={{ fontSize: "14px", lineHeight: "1.8", color: "#777", marginTop: "12px" }}>Monday – Tuesday 10.00am – 4.00pm (By Appointment Only)<br/>Wednesday – Saturday, 10.00am – 4.00pm<br/>Sunday, Closed</p>
+              </div>
+              <div style={{ background: "#f7f7f7", borderRadius: "15px", padding: "32px" }}>
+                <h3 style={{ fontFamily: "'Geologica', sans-serif", fontSize: "18px", fontWeight: 700, color: "#333", marginBottom: "16px" }}>Phone</h3>
+                <p style={{ fontSize: "16px", color: "rgb(136,173,153)", fontWeight: 600 }}>(956) 238-7908</p>
+              </div>
+              <div style={{ background: "#f7f7f7", borderRadius: "15px", padding: "32px" }}>
+                <h3 style={{ fontFamily: "'Geologica', sans-serif", fontSize: "18px", fontWeight: 700, color: "#333", marginBottom: "16px" }}>Email</h3>
+                <p style={{ fontSize: "16px", color: "rgb(136,173,153)", fontWeight: 600 }}>hello@store.com</p>
+              </div>
+            </div>
+            <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "40px" }}>
+              <div>
+                <h2 style={{ fontFamily: "'Geologica', sans-serif", fontSize: "28px", fontWeight: 700, color: "#333", marginBottom: "24px" }}>Get in Touch</h2>
+                <form onSubmit={(e) => e.preventDefault()} style={{ display: "flex", flexDirection: "column", gap: "16px" }}>
+                  <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "16px" }}>
+                    <input type="text" placeholder="Your Name *" required style={{ border: "2px solid #e8e8e8", borderRadius: "10px", padding: "14px 16px", fontSize: "14px", fontFamily: "'Cabin', sans-serif", outline: "none" }} />
+                    <input type="email" placeholder="Your Email *" required style={{ border: "2px solid #e8e8e8", borderRadius: "10px", padding: "14px 16px", fontSize: "14px", fontFamily: "'Cabin', sans-serif", outline: "none" }} />
+                  </div>
+                  <input type="text" placeholder="Subject" style={{ border: "2px solid #e8e8e8", borderRadius: "10px", padding: "14px 16px", fontSize: "14px", fontFamily: "'Cabin', sans-serif", outline: "none" }} />
+                  <textarea placeholder="Your Message" rows={5} style={{ border: "2px solid #e8e8e8", borderRadius: "10px", padding: "14px 16px", fontSize: "14px", fontFamily: "'Cabin', sans-serif", outline: "none", resize: "vertical" }} />
+                  <button type="submit" style={{ background: "rgb(136,173,153)", color: "#fff", border: "none", borderRadius: "10px", padding: "14px 28px", fontSize: "15px", fontWeight: 700, cursor: "pointer", alignSelf: "flex-start", fontFamily: "'Cabin', sans-serif" }}>Send Message</button>
+                </form>
+              </div>
+              <div style={{ background: "#f0f5f2", borderRadius: "15px", padding: "40px", display: "flex", flexDirection: "column", justifyContent: "center" }}>
+                <p style={{ fontSize: "14px", color: "#777", marginBottom: "8px" }}>Need help choosing?</p>
+                <p style={{ fontFamily: "'Geologica', sans-serif", fontSize: "20px", fontWeight: 700, color: "#333", marginBottom: "16px" }}>Contact With Expert</p>
+                <div style={{ display: "flex", alignItems: "center", gap: "12px", marginBottom: "24px" }}>
+                  <span style={{ fontSize: "14px", color: "rgb(136,173,153)", fontWeight: 600 }}>📍 1901 Thornridge Cir. Shiloh, Hawaii 81063</span>
+                </div>
+                <div style={{ background: "#fff", borderRadius: "12px", padding: "20px", display: "flex", alignItems: "center", gap: "16px" }}>
+                  <div>
+                    <p style={{ fontWeight: 700, color: "#333", fontSize: "15px" }}>Rated 4.9</p>
+                    <p style={{ fontSize: "13px", color: "#777" }}>Based on 374 reviews</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </section>
+        </main>
+        <HealthFooterFull storeName={store.name} storeSlug={slug} logo={store.logo} description={store.description || "Your trusted source for vitamins, supplements, and wellness products."} contact={{ address: "1901 Thornridge Cir. Shiloh, Hawaii 81063", phone: "(956) 238-7908", email: "hello@store.com" }} />
       </div>
     );
   }

@@ -8,6 +8,7 @@ import Link from "next/link";
 import { HandmadeBagsHeader, HandmadeBagsFooter } from "@/components/storefront/HandmadeBagsStoreChrome";
 import { ThemeProvider, type ThemeData } from "@/components/storefront/ThemeProvider";
 import { KidsFontLoader, KidsFooterFull, KidsHeader } from "@/components/storefront/KidsTemplateBlocks";
+import { HealthHeader, HealthFooterFull } from "@/components/storefront/HealthTemplateBlocks";
 
 interface ReviewProduct {
   name: string;
@@ -64,6 +65,7 @@ export default function StoreReviewsPage() {
   const [error, setError] = useState("");
   const [themeData, setThemeData] = useState<ThemeData | null>(null);
   const isKidsTemplate = slug === "kids";
+  const isHealthTemplate = slug === "pills" || store?.slug === "pills" || store?.name?.toLowerCase().includes("pill") || store?.name?.toLowerCase().includes("supplement") || store?.name?.toLowerCase().includes("health");
 
   const fetchReviews = useCallback(async (p: number, rating: number | null, append: boolean) => {
     if (p === 1) setLoading(true);
@@ -198,6 +200,11 @@ export default function StoreReviewsPage() {
               cartCount={0}
               wishlistCount={0}
             />
+          </>
+        ) : isHealthTemplate ? (
+          <>
+            <link href="https://fonts.googleapis.com/css2?family=Geologica:wght@400;500;600;700;800&family=Cabin:wght@400;500;600;700&display=swap" rel="stylesheet" />
+            <HealthHeader storeName={store?.name || "Store"} storeSlug={slug} logo={store?.logo} />
           </>
         ) : (
           <HandmadeBagsHeader
@@ -366,6 +373,14 @@ export default function StoreReviewsPage() {
           storeSlug={slug}
           logo={store?.logo}
           templateSlug="kids"
+        />
+      ) : isHealthTemplate ? (
+        <HealthFooterFull
+          storeName={store?.name || "Store"}
+          storeSlug={slug}
+          logo={store?.logo}
+          description={store?.description || "Your trusted source for vitamins, supplements, and wellness products."}
+          contact={{ address: "1901 Thornridge Cir. Shiloh, Hawaii 81063", phone: "(956) 238-7908", email: "hello@store.com" }}
         />
       ) : (
         <HandmadeBagsFooter

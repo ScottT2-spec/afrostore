@@ -6,6 +6,7 @@ import Link from "next/link";
 import { ArrowLeft, ArrowRight, Loader2, Search, X } from "lucide-react";
 import { CosmeticsHeader, CosmeticsFooter } from "@/components/storefront/CosmeticsTemplateBlocks";
 import { KidsFontLoader, KidsFooterFull, KidsHeader } from "@/components/storefront/KidsTemplateBlocks";
+import { HealthHeader, HealthFooterFull } from "@/components/storefront/HealthTemplateBlocks";
 
 interface BlogPost {
   id: string;
@@ -248,6 +249,46 @@ export default function StoreBlogListingPage() {
           templateSlug="kids"
           description="Bright kidswear stories, seasonal ideas, and playful product inspiration for the whole family."
         />
+      </div>
+    );
+  }
+
+  // ─── HEALTH / PILLS BLOG ───
+  const isHealthTemplate = slug === "pills" || store?.templateSlug === "pills" ||
+    storeName?.toLowerCase().includes("pill") || storeName?.toLowerCase().includes("supplement") || storeName?.toLowerCase().includes("health");
+
+  if (isHealthTemplate) {
+    return (
+      <div className="min-h-screen bg-white text-[#333]" style={{ fontFamily: "'Cabin', Arial, sans-serif" }}>
+        <link href="https://fonts.googleapis.com/css2?family=Geologica:wght@400;500;600;700;800&family=Cabin:wght@400;500;600;700&display=swap" rel="stylesheet" />
+        <HealthHeader storeName={storeName} storeSlug={slug} logo={store?.logo} />
+        <main style={{ maxWidth: "1222px", margin: "0 auto", padding: "40px 15px 60px" }}>
+          <h1 style={{ fontFamily: "'Geologica', sans-serif", fontSize: "32px", fontWeight: 700, color: "#333", marginBottom: "40px" }}>Blog</h1>
+          {blogs.length === 0 ? (
+            <p style={{ textAlign: "center", color: "#777", padding: "60px 0" }}>No blog posts yet.</p>
+          ) : (
+            <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(340px, 1fr))", gap: "30px" }}>
+              {blogs.map((post: any) => (
+                <a key={post.id} href={`/store/${slug}/blog/${post.slug}`} style={{ textDecoration: "none", color: "inherit" }}>
+                  <div style={{ borderRadius: "15px", overflow: "hidden", background: "#f7f7f7", transition: "box-shadow 0.2s" }}>
+                    {post.coverImage && (
+                      <div style={{ aspectRatio: "16/10", overflow: "hidden" }}>
+                        <img src={post.coverImage} alt={post.title} style={{ width: "100%", height: "100%", objectFit: "cover" }} />
+                      </div>
+                    )}
+                    <div style={{ padding: "20px" }}>
+                      {post.category && <span style={{ fontSize: "12px", fontWeight: 600, color: "rgb(136,173,153)", textTransform: "uppercase", letterSpacing: "0.5px" }}>{post.category}</span>}
+                      <h2 style={{ fontFamily: "'Geologica', sans-serif", fontSize: "18px", fontWeight: 700, color: "#333", margin: "8px 0 10px", lineHeight: "1.4" }}>{post.title}</h2>
+                      <p style={{ fontSize: "14px", color: "#777", lineHeight: "1.7" }}>{post.excerpt || ""}</p>
+                      <p style={{ fontSize: "12px", color: "#aaa", marginTop: "12px" }}>{post.publishedAt ? new Date(post.publishedAt).toLocaleDateString("en-US", { year: "numeric", month: "long", day: "numeric" }) : ""}</p>
+                    </div>
+                  </div>
+                </a>
+              ))}
+            </div>
+          )}
+        </main>
+        <HealthFooterFull storeName={storeName} storeSlug={slug} logo={store?.logo} description={store?.description || "Your trusted source for vitamins, supplements, and wellness products."} contact={{ address: "1901 Thornridge Cir. Shiloh, Hawaii 81063", phone: "(956) 238-7908", email: "hello@store.com" }} />
       </div>
     );
   }

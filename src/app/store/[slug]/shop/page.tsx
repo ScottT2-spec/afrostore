@@ -11,6 +11,7 @@ import { HandmadeBagsHeader, HandmadeBagsFooter } from "@/components/storefront/
 import { CosmeticsHeader, CosmeticsFooter } from "@/components/storefront/CosmeticsTemplateBlocks";
 import { KidsFontLoader, KidsFooterFull, KidsHeader } from "@/components/storefront/KidsTemplateBlocks";
 import { PerfumesFontLoader, PerfumesFooter, PerfumesHeader } from "@/components/storefront/PerfumesTemplateBlocks";
+import { HealthHeader, HealthFooterFull } from "@/components/storefront/HealthTemplateBlocks";
 
 /* ───────── Types ───────── */
 
@@ -821,6 +822,54 @@ export default function ShopPage() {
           logo={store.logo}
           description={store.description || "Discover a curated collection of modern fragrances designed to hold memory, emotion, and identity in every bottle."}
         />
+  // ─── HEALTH / PILLS SHOP ───
+  const isHealthTemplate = slug === "pills" || store.templateSlug === "pills" ||
+    store.name?.toLowerCase().includes("pill") || store.name?.toLowerCase().includes("supplement") || store.name?.toLowerCase().includes("health");
+
+  if (isHealthTemplate) {
+    return (
+      <div className="min-h-screen bg-white text-[#333]" style={{ fontFamily: "'Cabin', Arial, sans-serif" }}>
+        <link href="https://fonts.googleapis.com/css2?family=Geologica:wght@400;500;600;700;800&family=Cabin:wght@400;500;600;700&display=swap" rel="stylesheet" />
+        <HealthHeader storeName={store.name} storeSlug={slug} logo={store.logo} cartCount={cartCount} wishlistCount={wishlistCount} />
+        <main style={{ maxWidth: "1222px", margin: "0 auto", padding: "40px 15px 60px" }}>
+          <div style={{ marginBottom: "30px" }}>
+            <h1 style={{ fontFamily: "'Geologica', sans-serif", fontSize: "32px", fontWeight: 700, color: "#333" }}>Shop</h1>
+            <p style={{ color: "#777", fontSize: "14px", marginTop: "8px" }}>Showing {products.length} products</p>
+          </div>
+          {/* Filters */}
+          <div style={{ display: "flex", gap: "12px", marginBottom: "30px", flexWrap: "wrap" }}>
+            {categories.filter((c: any) => c._count?.products > 0).map((cat: any) => (
+              <a key={cat.id} href={`/store/${slug}/shop?category=${cat.slug}`} style={{ padding: "8px 18px", borderRadius: "20px", background: "#f7f7f7", color: "#333", fontSize: "13px", fontWeight: 600, textDecoration: "none", transition: "background 0.2s" }}>{cat.name}</a>
+            ))}
+          </div>
+          {/* Product Grid */}
+          <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(260px, 1fr))", gap: "24px" }}>
+            {products.map((p: any) => {
+              const img = p.images?.[0]?.url;
+              const price = Number(p.price);
+              const comparePrice = p.compareAtPrice ? Number(p.compareAtPrice) : null;
+              return (
+                <a key={p.id} href={`/store/${slug}/product/${p.slug}`} style={{ textDecoration: "none", color: "inherit" }}>
+                  <div style={{ borderRadius: "15px", overflow: "hidden", background: "#f7f7f7", transition: "box-shadow 0.2s" }}>
+                    <div style={{ aspectRatio: "1", position: "relative", overflow: "hidden" }}>
+                      {img ? <img src={img} alt={p.name} style={{ width: "100%", height: "100%", objectFit: "cover" }} /> : <div style={{ width: "100%", height: "100%", background: "linear-gradient(135deg, rgb(136,173,153), #a8d5ba)" }} />}
+                      {p.isFeatured && <span style={{ position: "absolute", top: "12px", left: "12px", background: "rgb(136,173,153)", color: "#fff", padding: "4px 12px", borderRadius: "20px", fontSize: "11px", fontWeight: 700 }}>Featured</span>}
+                    </div>
+                    <div style={{ padding: "16px" }}>
+                      <h3 style={{ fontFamily: "'Geologica', sans-serif", fontSize: "15px", fontWeight: 600, color: "#333", marginBottom: "8px" }}>{p.name}</h3>
+                      <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
+                        <span style={{ fontSize: "16px", fontWeight: 700, color: "rgb(136,173,153)" }}>{currency} {price.toLocaleString()}</span>
+                        {comparePrice && comparePrice > price && <span style={{ fontSize: "13px", color: "#999", textDecoration: "line-through" }}>{currency} {comparePrice.toLocaleString()}</span>}
+                      </div>
+                    </div>
+                  </div>
+                </a>
+              );
+            })}
+          </div>
+          {products.length === 0 && <p style={{ textAlign: "center", color: "#777", padding: "60px 0", fontSize: "16px" }}>No products found.</p>}
+        </main>
+        <HealthFooterFull storeName={store.name} storeSlug={slug} logo={store.logo} description={store.description || "Your trusted source for vitamins, supplements, and wellness products."} contact={{ address: "1901 Thornridge Cir. Shiloh, Hawaii 81063", phone: "(956) 238-7908", email: "hello@store.com" }} />
       </div>
     );
   }

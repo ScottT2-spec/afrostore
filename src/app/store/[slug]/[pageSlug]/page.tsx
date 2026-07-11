@@ -15,6 +15,7 @@ import { VegetableAboutPage, VegetableContactPage, VegetableMenuPage, VegetableR
 import { VegetableFooter, VegetableHeader } from "@/components/storefront/VegetableStoreChrome";
 import { KidsFontLoader, KidsFooterFull, KidsHeader } from "@/components/storefront/KidsTemplateBlocks";
 import { PerfumesFontLoader, PerfumesFooter, PerfumesHeader } from "@/components/storefront/PerfumesTemplateBlocks";
+import { HealthFontLoader, HealthHeader, HealthFooterFull } from "@/components/storefront/HealthTemplateBlocks";
 
 /* ─── TYPES ─────────────────────────────────────────────────── */
 
@@ -691,6 +692,126 @@ export default function StorefrontPage() {
           />
         </div>
       </ThemeProvider>
+  // ─── HEALTH / PILLS PAGES ───
+  const isHealthTemplate =
+    data.templateSlug === "pills" ||
+    slug === "pills" ||
+    data.store.slug === "pills" ||
+    data.store.name?.toLowerCase().includes("pill") ||
+    data.store.name?.toLowerCase().includes("supplement") ||
+    data.store.name?.toLowerCase().includes("health");
+
+  if (isHealthTemplate) {
+    if (pageSlug === "about-us") {
+      return (
+        <div className="min-h-screen bg-white text-[#333]" style={{ fontFamily: "'Cabin', Arial, sans-serif" }}>
+          <link href="https://fonts.googleapis.com/css2?family=Geologica:wght@400;500;600;700;800&family=Cabin:wght@400;500;600;700&display=swap" rel="stylesheet" />
+          <HealthHeader storeName={store.name} storeSlug={slug} logo={store.logo} />
+          <main>
+            <section style={{ background: "linear-gradient(135deg, #f0f5f2 0%, #fff 50%, #f7f7f7 100%)" }}>
+              <div style={{ maxWidth: "1222px", margin: "0 auto", padding: "60px 15px 80px", textAlign: "center" }}>
+                <h1 style={{ fontFamily: "'Geologica', sans-serif", fontSize: "48px", fontWeight: 700, color: "#333", marginBottom: "24px" }}>About Us</h1>
+                <h2 style={{ fontFamily: "'Geologica', sans-serif", fontSize: "28px", fontWeight: 600, color: "#333", maxWidth: "700px", margin: "0 auto 20px" }}>
+                  Our Company&apos;s Goal Is to Make You Healthy
+                </h2>
+                <p style={{ fontSize: "16px", lineHeight: "1.8", color: "#777", maxWidth: "720px", margin: "0 auto 30px" }}>
+                  The best vitamins and supplements are often backed by scientific research and manufactured by reputable companies. They can play a valuable role in filling nutritional gaps and supporting optimal health when used as part.
+                </p>
+              </div>
+            </section>
+            <section style={{ maxWidth: "1222px", margin: "-40px auto 0", padding: "0 15px 60px", position: "relative", zIndex: 1 }}>
+              <div style={{ borderRadius: "15px", overflow: "hidden", boxShadow: "0 16px 48px rgba(0,0,0,0.08)" }}>
+                <img src="https://woodmart.xtemos.com/pills/wp-content/uploads/sites/15/2023/09/w-pas-video-placehollder.jpg" alt="About video" style={{ width: "100%", display: "block" }} />
+              </div>
+            </section>
+            <section style={{ maxWidth: "1222px", margin: "0 auto", padding: "60px 15px" }}>
+              <h2 style={{ fontFamily: "'Geologica', sans-serif", fontSize: "32px", fontWeight: 700, color: "#333", textAlign: "center", marginBottom: "48px" }}>Company Values</h2>
+              <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(280px, 1fr))", gap: "30px" }}>
+                {[
+                  { title: "Focus on the Consumer", text: "Anyway, you still use Lorem Ipsum and rightly so, as it will always have a place in the web workers toolbox, as things happen, not always the way you like it, not always in the preferred order." },
+                  { title: "Maintain the Highest Standards", text: "No typography, no colors, no layout, no styles, all those things that convey the important signals that go beyond the mere textual, hierarchies of information, weight, emphasis." },
+                  { title: "Continuous Improvement", text: "That's not so bad, there's dummy copy to the rescue. But worse, what if the fish doesn't fit in the can, the foot's too big for the boot? Or too small?" },
+                  { title: "Consumer Confidence", text: "The best vitamins and supplements are often backed by scientific research and manufactured by reputable companies. They can play a valuable role in filling nutritional gaps." },
+                ].map((v) => (
+                  <div key={v.title} style={{ background: "#f7f7f7", borderRadius: "15px", padding: "32px" }}>
+                    <h3 style={{ fontFamily: "'Geologica', sans-serif", fontSize: "18px", fontWeight: 700, color: "#333", marginBottom: "12px" }}>{v.title}</h3>
+                    <p style={{ fontSize: "14px", lineHeight: "1.8", color: "#777" }}>{v.text}</p>
+                  </div>
+                ))}
+              </div>
+            </section>
+          </main>
+          <HealthFooterFull storeName={store.name} storeSlug={slug} logo={store.logo} description={store.description || "Your trusted source for vitamins, supplements, and wellness products."} contact={{ address: "1901 Thornridge Cir. Shiloh, Hawaii 81063", phone: "(956) 238-7908", email: "hello@store.com" }} />
+        </div>
+      );
+    }
+
+    if (pageSlug === "contact-us") {
+      return (
+        <div className="min-h-screen bg-white text-[#333]" style={{ fontFamily: "'Cabin', Arial, sans-serif" }}>
+          <link href="https://fonts.googleapis.com/css2?family=Geologica:wght@400;500;600;700;800&family=Cabin:wght@400;500;600;700&display=swap" rel="stylesheet" />
+          <HealthHeader storeName={store.name} storeSlug={slug} logo={store.logo} />
+          <main>
+            <section style={{ background: "linear-gradient(135deg, #f0f5f2 0%, #fff 50%, #f7f7f7 100%)" }}>
+              <div style={{ maxWidth: "1222px", margin: "0 auto", padding: "60px 15px 80px", textAlign: "center" }}>
+                <h1 style={{ fontFamily: "'Geologica', sans-serif", fontSize: "48px", fontWeight: 700, color: "#333", marginBottom: "24px" }}>Contact Us</h1>
+                <p style={{ fontSize: "16px", lineHeight: "1.8", color: "#777", maxWidth: "720px", margin: "0 auto" }}>
+                  Have questions about our products? We&apos;re here to help you find the right supplements for your wellness journey.
+                </p>
+              </div>
+            </section>
+            <section style={{ maxWidth: "1222px", margin: "0 auto", padding: "0 15px 60px" }}>
+              <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(300px, 1fr))", gap: "30px" }}>
+                <div style={{ background: "#f7f7f7", borderRadius: "15px", padding: "40px" }}>
+                  <h2 style={{ fontFamily: "'Geologica', sans-serif", fontSize: "24px", fontWeight: 700, color: "#333", marginBottom: "24px" }}>Get in Touch</h2>
+                  <form style={{ display: "flex", flexDirection: "column", gap: "16px" }}>
+                    <input style={{ padding: "14px 18px", borderRadius: "10px", border: "1px solid #e0e0e0", fontSize: "14px", background: "#fff" }} placeholder="Your name" />
+                    <input style={{ padding: "14px 18px", borderRadius: "10px", border: "1px solid #e0e0e0", fontSize: "14px", background: "#fff" }} placeholder="Email address" />
+                    <input style={{ padding: "14px 18px", borderRadius: "10px", border: "1px solid #e0e0e0", fontSize: "14px", background: "#fff" }} placeholder="Subject" />
+                    <textarea style={{ padding: "14px 18px", borderRadius: "10px", border: "1px solid #e0e0e0", fontSize: "14px", background: "#fff", minHeight: "140px", resize: "vertical" }} placeholder="How can we help?" />
+                    <button type="button" style={{ padding: "14px 28px", borderRadius: "10px", background: "#6dab3c", color: "#fff", fontWeight: 600, fontSize: "14px", border: "none", cursor: "pointer" }}>Send Message</button>
+                  </form>
+                </div>
+                <div style={{ display: "flex", flexDirection: "column", gap: "20px" }}>
+                  <div style={{ background: "#f7f7f7", borderRadius: "15px", padding: "32px" }}>
+                    <h3 style={{ fontFamily: "'Geologica', sans-serif", fontSize: "18px", fontWeight: 700, color: "#333", marginBottom: "12px" }}>Address</h3>
+                    <p style={{ fontSize: "14px", lineHeight: "1.8", color: "#777" }}>1901 Thornridge Cir. Shiloh, Hawaii 81063</p>
+                  </div>
+                  <div style={{ background: "#f7f7f7", borderRadius: "15px", padding: "32px" }}>
+                    <h3 style={{ fontFamily: "'Geologica', sans-serif", fontSize: "18px", fontWeight: 700, color: "#333", marginBottom: "12px" }}>Phone</h3>
+                    <p style={{ fontSize: "14px", lineHeight: "1.8", color: "#777" }}>(956) 238-7908</p>
+                  </div>
+                  <div style={{ background: "#f7f7f7", borderRadius: "15px", padding: "32px" }}>
+                    <h3 style={{ fontFamily: "'Geologica', sans-serif", fontSize: "18px", fontWeight: 700, color: "#333", marginBottom: "12px" }}>Email</h3>
+                    <p style={{ fontSize: "14px", lineHeight: "1.8", color: "#777" }}>hello@store.com</p>
+                  </div>
+                  <div style={{ background: "#f7f7f7", borderRadius: "15px", padding: "32px" }}>
+                    <h3 style={{ fontFamily: "'Geologica', sans-serif", fontSize: "18px", fontWeight: 700, color: "#333", marginBottom: "12px" }}>Hours</h3>
+                    <p style={{ fontSize: "14px", lineHeight: "1.8", color: "#777" }}>Monday - Friday: 9:00am - 5:00pm</p>
+                  </div>
+                </div>
+              </div>
+            </section>
+          </main>
+          <HealthFooterFull storeName={store.name} storeSlug={slug} logo={store.logo} description={store.description || "Your trusted source for vitamins, supplements, and wellness products."} contact={{ address: "1901 Thornridge Cir. Shiloh, Hawaii 81063", phone: "(956) 238-7908", email: "hello@store.com" }} />
+        </div>
+      );
+    }
+
+    // Generic Health page (catch-all)
+    return (
+      <div className="min-h-screen bg-white text-[#333]" style={{ fontFamily: "'Cabin', Arial, sans-serif" }}>
+        <link href="https://fonts.googleapis.com/css2?family=Geologica:wght@400;500;600;700;800&family=Cabin:wght@400;500;600;700&display=swap" rel="stylesheet" />
+        <HealthHeader storeName={store.name} storeSlug={slug} logo={store.logo} />
+        <main style={buildPageBackgroundStyle(resolvedPageSettings)}>
+          <div style={{ maxWidth: "1222px", margin: "0 auto", padding: "60px 15px" }}>
+            <p style={{ fontSize: "12px", fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.35em", color: "#6dab3c", marginBottom: "12px" }}>Page</p>
+            <h1 style={{ fontFamily: "'Geologica', sans-serif", fontSize: "40px", fontWeight: 700, color: "#333", marginBottom: "32px" }}>{resolvedPage.title}</h1>
+            <RenderBlocks blocks={blocks} storeSlug={slug} products={products} currency={currency} addToCart={(p) => addToCart(p as unknown as StoreProduct)} isWishlisted={isWishlisted} toggleWishlist={toggleWishlist} addedToCart={addedToCart} />
+          </div>
+        </main>
+        <HealthFooterFull storeName={store.name} storeSlug={slug} logo={store.logo} description={store.description || "Your trusted source for vitamins, supplements, and wellness products."} contact={{ address: "1901 Thornridge Cir. Shiloh, Hawaii 81063", phone: "(956) 238-7908", email: "hello@store.com" }} />
+      </div>
     );
   }
 
