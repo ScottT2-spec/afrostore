@@ -40,6 +40,8 @@ export function resolveStoreLink(link: string | null | undefined, storeSlug: str
     compare: `${base}/compare`,
     "my-account": `${base}/my-account`,
     "order-tracking": `${base}/order-tracking`,
+    journal: `${base}/journal`,
+    fragrances: `${base}/fragrances`,
     contact: `${base}/contact`,
     "contact-us": `${base}/contact-us`,
     about: `${base}/about`,

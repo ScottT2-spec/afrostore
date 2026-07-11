@@ -59,6 +59,7 @@ import { ThemeProvider, type ThemeData } from "@/components/storefront/ThemeProv
 import { useWishlist } from "@/hooks/useWishlist";
 import { applyPageCustomization, buildPageBackgroundStyle, buildThemeDataWithCustomization, filterVisiblePages, getResolvedPageSettings, normalizeSiteCustomization, type SiteCustomizationDocument } from "@/lib/site-customization";
 import { VegetableFooter, VegetableHeader } from "@/components/storefront/VegetableStoreChrome";
+import { PerfumesHeader, PerfumesFooter } from "@/components/storefront/PerfumesStoreChrome";
 import { VegetableHomePage } from "@/components/storefront/VegetableTemplatePages";
 
 /* ───────── Types ───────── */
@@ -436,6 +437,7 @@ export default function StorePage() {
   const isFashionTemplate = data.templateSlug === "fashion" || data.templateSlug === "fashion-colored" || data.templateSlug === "handmade-bags" || data.templateSlug === "t-shirts-prints" || homeBlocks.some((b) => b.type.startsWith("fashion"));
   const isKidsTemplate = data.templateSlug === "kids" || data.templateSlug === "toys" || homeBlocks.some((b) => b.type.startsWith("kids"));
   const isHealthTemplate = data.templateSlug === "pills" || homeBlocks.some((b) => b.type.startsWith("health"));
+  const isPerfumesTemplate = data.templateSlug === "perfumes" || homeBlocks.some((b) => b.type.startsWith("perfumes"));
   const templatePreset = data.templateSlug ? TEMPLATE_PRESET_MAP[data.templateSlug] : undefined;
 
   // Template-specific navigation items — tailored to each niche
@@ -558,6 +560,8 @@ export default function StorePage() {
             ? `FREE DELIVERY ON ORDERS ABOVE ${formatCurrency(Number(data.deliveryZones.find((z: any) => z.freeAbove)?.freeAbove || 0), currency)}`
             : `Sign up for our newsletter to get 10% off for the week!`}
         />
+      ) : isPerfumesTemplate ? (
+        <PerfumesHeader storeName={store.name} storeSlug={slug} logo={store.logo} cartCount={cartCount} wishlistCount={wishlistCount} socialLinks={socialLinksArray} isLanding={isLanding} />
       ) : isFashionTemplate ? (
         <FashionHeader
           storeName={store.name}
@@ -782,6 +786,11 @@ export default function StorePage() {
           description={store.description || "Playful kidswear, gifts, and accessories with a premium WoodMart-inspired finish."}
         />
       ) : !isFashionTemplate ? (
+      {/* Footer — fashion handles its own; all other templates get FashionFooter */}
+      {isPerfumesTemplate && (
+        <PerfumesFooter storeName={store.name} storeSlug={slug} logo={store.logo} description={store.description} socialLinks={socialLinksArray} contactInfo={{ phone: whatsappNumber || undefined, email: (data.socialLinks as any)?.email || undefined }} />
+      )}
+      {!isFashionTemplate && !isKidsTemplate && !isHealthTemplate && !isPerfumesTemplate && (
         <FashionFooter
           storeName={store.name}
           storeSlug={slug}
