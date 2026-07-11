@@ -13,6 +13,7 @@ import { VegetableFooter, VegetableHeader } from "@/components/storefront/Vegeta
 import { KidsFontLoader, KidsFooterFull, KidsHeader } from "@/components/storefront/KidsTemplateBlocks";
 import PerfumesContactPage from "./perfumes-contact";
 import { HealthHeader, HealthFooterFull } from "@/components/storefront/HealthTemplateBlocks";
+import { GardenHeader, GardenFooter } from "@/components/storefront/GardenStoreChrome";
 
 type Props = {
   params: Promise<{ slug: string }>;
@@ -492,6 +493,43 @@ export default async function ContactPage({ params }: Props) {
 
   if (isPerfumesTemplate) {
     return <PerfumesContactPage />;
+  }
+
+  const isRetailTemplate = activeTemplateSlug === "retail" || activeTemplateSlug === "decor";
+
+  if (isRetailTemplate) {
+    const gardenSocialLinks: Array<{ platform: string; url: string }> = [
+      ...(store.socialLinks?.facebook ? [{ platform: "facebook", url: store.socialLinks.facebook }] : []),
+      ...(store.socialLinks?.instagram ? [{ platform: "instagram", url: store.socialLinks.instagram }] : []),
+      ...(store.socialLinks?.twitter ? [{ platform: "twitter", url: store.socialLinks.twitter }] : []),
+      ...(store.socialLinks?.tiktok ? [{ platform: "tiktok", url: store.socialLinks.tiktok }] : []),
+    ];
+
+    return (
+      <div className="min-h-screen bg-white">
+        <GardenHeader
+          storeName={store.name}
+          storeSlug={slug}
+          logo={store.logo}
+          cartCount={0}
+          wishlistCount={0}
+        />
+        <div style={buildPageBackgroundStyle(pageSettings)}>
+          {contactPage?.content ? (
+            <RenderBlocks blocks={pageContent.blocks as BuilderBlock[]} storeSlug={slug} products={serializedProducts} />
+          ) : (
+            <RenderTemplateBlocks blocks={CONTACT_PAGE_BLOCKS} />
+          )}
+        </div>
+        <GardenFooter
+          storeName={store.name}
+          storeSlug={slug}
+          logo={store.logo}
+          description={store.description || undefined}
+          socialLinks={gardenSocialLinks}
+        />
+      </div>
+    );
   }
 
   return (

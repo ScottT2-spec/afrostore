@@ -7,6 +7,7 @@ import { applyPageCustomization, buildPageBackgroundStyle, filterVisiblePages, g
 import { parsePageContent } from "@/lib/page-content";
 import { RenderBlocks, type BuilderBlock } from "@/components/storefront/BlockRenderer";
 import { serializeProductsForClient } from "@/lib/serialize-products";
+import { GardenHeader, GardenFooter } from "@/components/storefront/GardenStoreChrome";
 
 type Props = {
   params: Promise<{ slug: string }>;
@@ -178,6 +179,11 @@ async function getStoreData(slug: string) {
         where: { slug: "our-story" },
         take: 1,
       },
+      templates: {
+        include: { template: true },
+        where: { isActive: true },
+        take: 1,
+      },
     },
   });
 
@@ -262,6 +268,43 @@ export default async function OurStoryPage({ params }: Props) {
     backgroundColor: customization?.themeSettings?.colors?.background || "#ffffff",
     textColor: customization?.themeSettings?.colors?.text || "#242424",
   };
+
+  const activeTemplateSlug = (store as any).templates?.[0]?.template?.slug || null;
+  const isRetailTemplate = activeTemplateSlug === "retail" || activeTemplateSlug === "decor";
+
+  if (isRetailTemplate) {
+    const gardenSocialLinks: Array<{ platform: string; url: string }> = [
+      ...((store as any).socialLinks?.facebook ? [{ platform: "facebook", url: (store as any).socialLinks.facebook }] : []),
+      ...((store as any).socialLinks?.instagram ? [{ platform: "instagram", url: (store as any).socialLinks.instagram }] : []),
+      ...((store as any).socialLinks?.twitter ? [{ platform: "twitter", url: (store as any).socialLinks.twitter }] : []),
+    ];
+
+    return (
+      <div className="min-h-screen bg-white">
+        <GardenHeader
+          storeName={store.name}
+          storeSlug={slug}
+          logo={store.logo}
+          cartCount={0}
+          wishlistCount={0}
+        />
+        <div style={buildPageBackgroundStyle(pageSettings)}>
+          {ourStoryPage?.content ? (
+            <RenderBlocks blocks={pageContent.blocks as BuilderBlock[]} storeSlug={slug} products={serializedProducts} />
+          ) : (
+            <RenderTemplateBlocks blocks={OUR_STORY_PAGE_BLOCKS} />
+          )}
+        </div>
+        <GardenFooter
+          storeName={store.name}
+          storeSlug={slug}
+          logo={store.logo}
+          description={store.description || undefined}
+          socialLinks={gardenSocialLinks}
+        />
+      </div>
+    );
+  }
 
   return (
     <ThemeProvider initialTheme={themeData}>
