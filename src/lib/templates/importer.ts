@@ -17,6 +17,7 @@ import { FASHION_SAMPLE_PRODUCTS } from "@/lib/templates/presets/fashion-sample-
 import { FASHION_SAMPLE_BLOGS } from "@/lib/templates/presets/fashion-sample-blogs";
 import { TEMPLATE_SAMPLE_DATA } from "@/lib/templates/presets/template-sample-data";
 import { ensureVegetablePages } from "@/lib/templates/vegetable-pages";
+import { ensureTemplatePages } from "@/lib/templates/template-pages";
 
 /**
  * Import a template into a site by:
@@ -98,6 +99,9 @@ export async function importTemplateToSite(
   if (catalogEntry.slug === "vegetables") {
     await ensureVegetablePages(siteId);
   }
+
+  // Ensure template-specific pages exist in DB for the page editor
+  await ensureTemplatePages(siteId, catalogEntry.slug);
 
   // Build blocks for the HOME page
   // For templates with editable block presets, use those instead of htmlEmbed

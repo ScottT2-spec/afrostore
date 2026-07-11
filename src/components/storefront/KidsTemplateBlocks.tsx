@@ -1037,8 +1037,8 @@ export function KidsHeader({
 
           {/* Left nav */}
           <nav className="kh-nav">
-            <Link href={exactKids ? `${base}/about-us` : `${base}/shop`}>About Us</Link>
-            <Link href={exactKids ? `${base}/contact-us` : `${base}/shop`}>Contact Us</Link>
+            <Link href={exactKids ? `${base}/about` : `${base}/shop`}>About Us</Link>
+            <Link href={exactKids ? `${base}/contact` : `${base}/shop`}>Contact Us</Link>
             <Link href={`${base}/blog`}>Blog</Link>
           </nav>
 
@@ -1086,8 +1086,8 @@ export function KidsHeader({
           <Link href={base} onClick={() => setMobileOpen(false)}>Home</Link>
           <Link href={`${base}/shop`} onClick={() => setMobileOpen(false)}>Shop</Link>
           <Link href={`${base}/product-category/gifts`} onClick={() => setMobileOpen(false)}>Gifts</Link>
-          <Link href={exactKids ? `${base}/about-us` : `${base}/shop`} onClick={() => setMobileOpen(false)}>About Us</Link>
-          <Link href={exactKids ? `${base}/contact-us` : `${base}/shop`} onClick={() => setMobileOpen(false)}>Contact Us</Link>
+          <Link href={exactKids ? `${base}/about` : `${base}/shop`} onClick={() => setMobileOpen(false)}>About Us</Link>
+          <Link href={exactKids ? `${base}/contact` : `${base}/shop`} onClick={() => setMobileOpen(false)}>Contact Us</Link>
           <Link href={`${base}/blog`} onClick={() => setMobileOpen(false)}>Blog</Link>
           <Link href={`${base}/wishlist`} onClick={() => setMobileOpen(false)}>Wishlist</Link>
           <Link href={`${base}/my-account`} onClick={() => setMobileOpen(false)}>My Account</Link>
@@ -1239,8 +1239,8 @@ export function KidsFooterFull({
         <div>
           <h4 className="kf-col-title">Useful links</h4>
           <ul className="kf-links">
-            <li><Link href={exactKids ? `${base}/contact-us` : `${base}/shop`}>Contact Us</Link></li>
-            <li><Link href={exactKids ? `${base}/about-us` : `${base}/shop`}>About Us</Link></li>
+            <li><Link href={exactKids ? `${base}/contact` : `${base}/shop`}>Contact Us</Link></li>
+            <li><Link href={exactKids ? `${base}/about` : `${base}/shop`}>About Us</Link></li>
             <li><Link href={`${base}/blog`}>Blog</Link></li>
             <li><Link href={`${base}/shop`}>Delivery & Return</Link></li>
           </ul>
