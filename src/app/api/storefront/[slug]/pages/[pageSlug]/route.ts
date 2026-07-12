@@ -56,6 +56,40 @@ function buildKidsSyntheticPage(pageSlug: string): {
   return null;
 }
 
+function buildCosmeticsSyntheticPage(pageSlug: string): {
+  id: string;
+  title: string;
+  slug: string;
+  type: PageType;
+  template: string;
+  content: Prisma.JsonValue;
+  metaTitle: string;
+  metaDescription: string;
+} | null {
+  const cosmeticsPages: Record<string, { title: string; type: PageType; metaDescription: string }> = {
+    "bestseller": { title: "Bestsellers", type: "CUSTOM" as PageType, metaDescription: "Our most loved cosmetics products" },
+    "new-in": { title: "New Arrivals", type: "CUSTOM" as PageType, metaDescription: "Just arrived cosmetics and beauty products" },
+    "skincare": { title: "Skincare", type: "CUSTOM" as PageType, metaDescription: "Premium skincare collection" },
+    "terms": { title: "Terms and Conditions", type: "POLICY" as PageType, metaDescription: "Store terms and conditions" },
+    "about-us": { title: "About Us", type: "ABOUT" as PageType, metaDescription: "About our cosmetics store" },
+    "contact-us": { title: "Contact Us", type: "CONTACT" as PageType, metaDescription: "Get in touch with us" },
+  };
+
+  const pageDef = cosmeticsPages[pageSlug];
+  if (!pageDef) return null;
+
+  return {
+    id: `cosmetics-${pageSlug}`,
+    title: pageDef.title,
+    slug: pageSlug,
+    type: pageDef.type,
+    template: "cosmetics",
+    content: { blocks: [], settings: {} },
+    metaTitle: pageDef.title,
+    metaDescription: pageDef.metaDescription,
+  };
+}
+
 function buildTShirtsSyntheticPage(pageSlug: string): {
   id: string;
   title: string;
@@ -242,6 +276,8 @@ export async function GET(_req: NextRequest, { params }: Params) {
         ? buildKidsSyntheticPage(pageSlug)
         : templateSlug === "t-shirts-prints" || slug === "t-shirts-prints" || site.slug === "t-shirts-prints" || site.name?.toLowerCase().includes("t-shirts")
           ? buildTShirtsSyntheticPage(pageSlug)
+        : templateSlug === "cosmetics" || templateSlug === "makeup" || slug === "cosmetics" || site.slug === "cosmetics" || site.name?.toLowerCase().includes("cosmetics") || site.name?.toLowerCase().includes("makeup")
+          ? buildCosmeticsSyntheticPage(pageSlug)
           : null;
     const mergedPages = mergeStoredTemplatePages(page ? [page] : syntheticPage ? [syntheticPage] : [], activeTemplate?.pages);
     const fallbackPage = mergedPages.find((item) => item.slug === pageSlug) || mergedPages[0];
