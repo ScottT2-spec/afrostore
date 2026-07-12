@@ -7,7 +7,7 @@ import { api } from "@/lib/api-client";
 import { ProkipSite, DesignSystem, Page, Section } from "@/types";
 import BuilderWorkspace from "@/components/builder/BuilderWorkspace";
 import { Loader2 } from "lucide-react";
-import { convertBlocksToSections } from "@/lib/content-converter";
+import { convertBlocksToSections, convertSectionsToBlocks } from "@/lib/content-converter";
 
 // Default design system
 const defaultDesignSystem: DesignSystem = {
@@ -193,12 +193,30 @@ export default function BuilderPage({ params }: { params: Promise<{ pageId: stri
     if (!site || !siteId) return;
     
     try {
-      const res = await api.put<ProkipSite>(`/api/prokip-sites/${siteId}`, site);
-      if (res.success) {
-        console.log("Site saved successfully");
+      // Convert all pages' sections back to blocks format
+      const pagesToUpdate = site.pages.map((page) => {
+        const blocks = convertSectionsToBlocks(page.sections);
+        return {
+          id: page.id,
+          title: page.name,
+          slug: page.slug,
+          type: page.isSystem ? "HOME" : "CUSTOM",
+          content: { blocks },
+          isPublished: true,
+        };
+      });
+
+      // Update each page individually using the pages API
+      for (const pageData of pagesToUpdate) {
+        const res = await api.patch(`/api/sites/${siteId}/pages/${pageData.id}`, pageData);
+        if (!res.success) {
+          throw new Error(`Failed to save page ${pageData.id}`);
+        }
       }
+
+      console.log("All pages saved successfully");
     } catch (err) {
-      console.error("Failed to save site:", err);
+      console.error("Failed to save pages:", err);
       throw err;
     }
   };

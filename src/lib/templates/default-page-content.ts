@@ -558,14 +558,13 @@ function createColumnsBlock(left: string, right: string): BuilderBlock {
 
 function getTemplateFamily(templateSlug: string): TemplateFamily {
   const slug = templateSlug.toLowerCase();
-  if (slug.startsWith("fashion") || slug === "handmade-bags" || slug === "t-shirts-prints") return "fashion";
-  if (slug.startsWith("electronics") || slug === "hardware" || slug === "tools") return "electronics";
-  if (slug === "cosmetics" || slug === "makeup" || slug.includes("beauty")) return "beauty";
-  if (slug === "grocery" || slug === "vegetables") return "grocery";
-  if (slug === "health" || slug === "pills") return "health";
-  if (slug === "kids" || slug === "toys") return "kids";
-  if (slug === "bakery" || slug === "sweets-bakery") return "bakery";
-  if (slug === "interior" || slug === "decor" || slug === "retail") return "interior";
+  if (slug.startsWith("fashion") || slug === "handmade-bags" || slug === "t-shirts-prints" || slug === "jewellery" || slug === "jewellery-elegance") return "fashion";
+  if (slug.startsWith("electronics") || slug === "hardware" || slug === "hardware-pro" || slug === "tools") return "electronics";
+  if (slug === "cosmetics" || slug === "makeup" || slug.includes("beauty") || slug === "bistro" || slug === "bakery" || slug === "sweets-bakery") return "bakery";
+  if (slug === "grocery" || slug === "vegetables" || slug === "grocery-market") return "grocery";
+  if (slug === "health" || slug === "pills" || slug === "strada") return "health";
+  if (slug === "kids" || slug === "toys" || slug === "children") return "kids";
+  if (slug === "interior" || slug === "decor" || slug === "retail" || slug === "interior-design" || slug === "home-decor") return "interior";
   if (slug === "perfumes") return "perfumes";
   return "generic";
 }
@@ -833,7 +832,7 @@ function buildPolicyLayout(title: string, family: TemplateFamily): BuilderBlock[
 function buildUtilityLayout(title: string, family: TemplateFamily, pageSlug: string): BuilderBlock[] {
   const copy = FAMILY_COPY[family];
   const normalizedSlug = pageSlug.toLowerCase();
-  const isCollectionPage = ["shop", "new-in", "bestseller", "fragrances", "skincare", "menu", "recipe", "products", "catalog", "store", "journal", "blog"].includes(normalizedSlug);
+  const isCollectionPage = ["shop", "new-in", "bestseller", "fragrances", "skincare", "menu", "recipe", "products", "catalog", "store", "journal", "blog", "reservations", "gallery", "departments", "doctors", "appointment", "contractor-program", "inspiration", "collections", "deals", "categories", "courses", "instructors", "destinations", "experiences"].includes(normalizedSlug);
 
   const headlineMap: Record<string, { summary: string; intro: string; features: Array<{ icon: string; title: string; desc: string }> }> = {
     cart: {
@@ -1001,11 +1000,11 @@ export function buildDefaultPageContent(context: DefaultPageContentContext): Pag
     return { blocks: [createRawBlock("healthIngredientsPage", {})], settings: {} };
   }
 
-  if (["shop", "products", "catalog", "store", "new-in", "bestseller", "wishlist", "cart", "compare", "my-account", "order-tracking", "faq", "support", "fragrances", "skincare", "menu", "recipe", "projects", "services", "blog", "journal"].includes(slug)) {
+  if (["shop", "products", "catalog", "store", "new-in", "bestseller", "wishlist", "cart", "compare", "my-account", "order-tracking", "faq", "support", "fragrances", "skincare", "menu", "recipe", "projects", "services", "blog", "journal", "reservations", "gallery", "departments", "doctors", "appointment", "contractor-program", "inspiration", "collections", "deals", "categories", "courses", "instructors", "destinations", "experiences"].includes(slug)) {
     return { blocks: buildUtilityLayout(title, family, slug), settings: {} };
   }
 
-  if (["menu", "recipe", "recipes", "fragrances", "shop", "products", "catalog", "store"].includes(slug)) {
+  if (["menu", "recipe", "recipes", "fragrances", "shop", "products", "catalog", "store", "reservations", "gallery", "departments", "doctors", "appointment", "contractor-program", "inspiration", "collections", "deals", "categories", "courses", "instructors", "destinations", "experiences"].includes(slug)) {
     return { blocks: buildCommerceLayout(title, family), settings: {} };
   }
 

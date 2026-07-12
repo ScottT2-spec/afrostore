@@ -434,7 +434,18 @@ export default function StorePage() {
     ? parsePageContent(homePage.content)
     : { blocks: [], settings: {} };
   const homePageSettings = homePage ? getResolvedPageSettings(homePage, homeContent.settings, draftCustomization) : {};
-  const homeBlocks: BuilderBlock[] = homeContent.blocks.filter((block) => block.type !== "kidsFooterFull" && block.type !== "fashionFooter" && block.type !== "bakeryFooter" && block.type !== "interiorFooter" && block.type !== "groceryFooter" && block.type !== "healthFooterFull" && block.type !== "electronicsFooter" && block.type !== "perfumesFooter" && block.type !== "makeupFooter");
+  // Filter out chrome blocks (header/footer) from editable content - they're rendered via conditional rendering based on template
+  const CHROME_BLOCK_TYPES = new Set([
+    'perfumesHeader', 'perfumesFooter',
+    'handmadeBagsHeader', 'handmadeBagsFooter',
+    'cosmeticsHeader', 'cosmeticsFooter',
+    'kidsHeader', 'kidsFooter', 'kidsFooterFull',
+    'tShirtsPrintsHeader', 'tShirtsPrintsFooter',
+    'fashionFooter', 'bakeryFooter', 'interiorFooter',
+    'groceryFooter', 'healthFooterFull', 'healthFooter',
+    'electronicsFooter', 'makeupFooter',
+  ]);
+  const homeBlocks: BuilderBlock[] = homeContent.blocks.filter((block) => !CHROME_BLOCK_TYPES.has(block.type));
   const hasHomeContent = homeBlocks.length > 0;
   const homeHasProductGrid = homeBlocks.some((b) => b.type === "productGrid");
   const isTShirtsPrintsTemplate = data.templateSlug === "t-shirts-prints" || slug === "t-shirts-prints" || store.slug === "t-shirts-prints";

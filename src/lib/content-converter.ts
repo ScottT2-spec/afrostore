@@ -19,6 +19,26 @@ export function convertBlocksToSections(blocks: BuilderBlock[]): Section[] {
   });
 }
 
+/**
+ * Converts new Section format back to BuilderBlock format for saving to database
+ * This is the reverse operation of convertBlocksToSections
+ */
+export function convertSectionsToBlocks(sections: Section[]): BuilderBlock[] {
+  if (!Array.isArray(sections)) return [];
+
+  return sections.map((section) => {
+    const block: BuilderBlock = {
+      id: section.id,
+      type: section.type,
+      props: {
+        ...section.content,
+        ...section.styleOverrides,
+      },
+    };
+    return block;
+  });
+}
+
 function mapBlockTypeToSectionType(blockType: string): string {
   // Map old BuilderBlock types to new Section types
   const typeMap: Record<string, string> = {

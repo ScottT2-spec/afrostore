@@ -6,6 +6,7 @@ import { unauthorized } from "@/lib/auth";
 import { getLinkedPageTemplate } from "@/lib/page-content";
 import { mergeStoredTemplatePages } from "@/lib/templates/site-instance";
 import { ensureVegetablePages } from "@/lib/templates/vegetable-pages";
+import { mergeBespokeTemplateBlocks } from "@/lib/templates/bespoke-page-content";
 import type { Prisma } from "@/generated/prisma";
 
 type Params = { params: Promise<{ siteId: string }> };
@@ -85,11 +86,37 @@ export async function POST(req: NextRequest, { params }: Params) {
 
     const slug = await ensureUniqueSlug(parsed.data.title, siteId, "page");
 
+    // Get the site's template to seed default blocks
+    const activeTemplate = await prisma.siteTemplate.findFirst({
+      where: { siteId, isActive: true },
+      select: { template: { select: { slug: true } } },
+    });
+
+    const templateSlug = activeTemplate?.template?.slug;
+
+    // If content is not provided, seed it with default blocks
+    let content = parsed.data.content;
+    if (!content || (typeof content === 'object' && !content.blocks)) {
+      const defaultBlocks = mergeBespokeTemplateBlocks(
+        templateSlug,
+        slug,
+        null,
+        {
+          pageSlug: slug,
+          pageTitle: parsed.data.title,
+          pageType: parsed.data.type,
+          templateSlug
+        }
+      );
+      content = { blocks: defaultBlocks };
+    }
+
     const page = await prisma.page.create({
       data: {
         siteId,
         slug,
         ...parsed.data,
+        content,
       },
     });
 

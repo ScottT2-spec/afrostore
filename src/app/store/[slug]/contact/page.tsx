@@ -269,6 +269,8 @@ export default async function ContactPage({ params }: Props) {
     store.name?.toLowerCase().includes("kids");
 
   if (isKidsTemplate) {
+    const parsedContact = contactPage?.content ? parsePageContent(contactPage.content) : null;
+    const hasBlocks = parsedContact && parsedContact.blocks.length > 0;
     const kidsSocialLinks: Array<{ platform: string; url: string }> = [
       ...(store.socialLinks?.facebook ? [{ platform: "facebook", url: store.socialLinks.facebook }] : []),
       ...(store.socialLinks?.instagram ? [{ platform: "instagram", url: store.socialLinks.instagram }] : []),
@@ -280,119 +282,125 @@ export default async function ContactPage({ params }: Props) {
     return (
       <div className="min-h-screen bg-[#fffef8] text-[#3b3344]">
         <KidsFontLoader />
-        <KidsHeader
-          storeName={store.name}
-          storeSlug={slug}
-          logo={store.logo}
-          templateSlug="kids"
-          cartCount={0}
-          wishlistCount={0}
-        />
-        <main>
-          <section className="bg-gradient-to-br from-[#fff7df] via-[#fffdf4] to-[#ffeef1] px-4 py-16">
-            <div className="mx-auto grid max-w-6xl gap-12 lg:grid-cols-[0.9fr_1.1fr] lg:items-start">
-              <div>
-                <h1 className="max-w-xl font-serif text-4xl leading-tight text-[#3b3344] sm:text-5xl">
-                  913 Wyandotte St, Kansas City, MO 64105, United States
-                </h1>
-                <div className="mt-6 rounded-[32px] bg-white p-6 shadow-[0_18px_40px_rgba(59,51,68,0.06)]">
-                  <Link href="#map" className="mt-3 inline-flex text-sm font-semibold text-[#f5857c]">
-                    Show on a map
-                  </Link>
-                  <div className="mt-6 space-y-2 text-sm text-[#6d6277]">
-                    <p>Call Us: (064) 332-1233</p>
-                    <p>Hours: 9:00am - 5:00pm</p>
-                    <p>Monday - Friday</p>
+        {hasBlocks ? (
+          <RenderTemplateBlocks blocks={parsedContact.blocks as TemplateBlock[]} />
+        ) : (
+          <>
+            <KidsHeader
+              storeName={store.name}
+              storeSlug={slug}
+              logo={store.logo}
+              templateSlug="kids"
+              cartCount={0}
+              wishlistCount={0}
+            />
+            <main>
+              <section className="bg-gradient-to-br from-[#fff7df] via-[#fffdf4] to-[#ffeef1] px-4 py-16">
+                <div className="mx-auto grid max-w-6xl gap-12 lg:grid-cols-[0.9fr_1.1fr] lg:items-start">
+                  <div>
+                    <h1 className="max-w-xl font-serif text-4xl leading-tight text-[#3b3344] sm:text-5xl">
+                      913 Wyandotte St, Kansas City, MO 64105, United States
+                    </h1>
+                    <div className="mt-6 rounded-[32px] bg-white p-6 shadow-[0_18px_40px_rgba(59,51,68,0.06)]">
+                      <Link href="#map" className="mt-3 inline-flex text-sm font-semibold text-[#f5857c]">
+                        Show on a map
+                      </Link>
+                      <div className="mt-6 space-y-2 text-sm text-[#6d6277]">
+                        <p>Call Us: (064) 332-1233</p>
+                        <p>Hours: 9:00am - 5:00pm</p>
+                        <p>Monday - Friday</p>
+                      </div>
+                    <div className="mt-6 flex gap-3 text-[#3b3344]">
+                      {[
+                        { label: "f", href: store.socialLinks?.facebook || "#" },
+                        { label: "𝕏", href: store.socialLinks?.twitter || "#" },
+                        { label: "📷", href: store.socialLinks?.instagram || "#" },
+                        { label: "▶", href: (store.socialLinks as any)?.youtube || "#" },
+                      ].map((item) => (
+                        <Link key={item.label} href={item.href} className="inline-flex h-10 w-10 items-center justify-center rounded-full bg-white shadow-[0_12px_28px_rgba(59,51,68,0.06)]">
+                          <span className="text-sm font-bold">{item.label}</span>
+                        </Link>
+                      ))}
+                    </div>
+                    </div>
                   </div>
-                <div className="mt-6 flex gap-3 text-[#3b3344]">
-                  {[
-                    { label: "f", href: store.socialLinks?.facebook || "#" },
-                    { label: "𝕏", href: store.socialLinks?.twitter || "#" },
-                    { label: "📷", href: store.socialLinks?.instagram || "#" },
-                    { label: "▶", href: (store.socialLinks as any)?.youtube || "#" },
-                  ].map((item) => (
-                    <Link key={item.label} href={item.href} className="inline-flex h-10 w-10 items-center justify-center rounded-full bg-white shadow-[0_12px_28px_rgba(59,51,68,0.06)]">
-                      <span className="text-sm font-bold">{item.label}</span>
-                    </Link>
-                  ))}
-                </div>
-                </div>
-              </div>
 
-              <div className="rounded-[34px] bg-white p-6 shadow-[0_30px_70px_rgba(59,51,68,0.08)] sm:p-8">
-                <div className="mb-6">
-                  <p className="text-xs font-bold uppercase tracking-[0.35em] text-[#f5857c]">Get in touch</p>
-                  <h2 className="mt-2 font-serif text-3xl text-[#3b3344]">Get in touch</h2>
-                </div>
-                <form className="grid gap-4">
-                  <div className="grid gap-4 sm:grid-cols-2">
-                    <input className="rounded-2xl border border-[#ece4da] bg-[#fffdf8] px-4 py-3 text-sm outline-none transition focus:border-[#f5857c]" placeholder="Your name" />
-                    <input className="rounded-2xl border border-[#ece4da] bg-[#fffdf8] px-4 py-3 text-sm outline-none transition focus:border-[#f5857c]" placeholder="Email address" />
+                  <div className="rounded-[34px] bg-white p-6 shadow-[0_30px_70px_rgba(59,51,68,0.08)] sm:p-8">
+                    <div className="mb-6">
+                      <p className="text-xs font-bold uppercase tracking-[0.35em] text-[#f5857c]">Get in touch</p>
+                      <h2 className="mt-2 font-serif text-3xl text-[#3b3344]">Get in touch</h2>
+                    </div>
+                    <form className="grid gap-4">
+                      <div className="grid gap-4 sm:grid-cols-2">
+                        <input className="rounded-2xl border border-[#ece4da] bg-[#fffdf8] px-4 py-3 text-sm outline-none transition focus:border-[#f5857c]" placeholder="Your name" />
+                        <input className="rounded-2xl border border-[#ece4da] bg-[#fffdf8] px-4 py-3 text-sm outline-none transition focus:border-[#f5857c]" placeholder="Email address" />
+                      </div>
+                      <input className="rounded-2xl border border-[#ece4da] bg-[#fffdf8] px-4 py-3 text-sm outline-none transition focus:border-[#f5857c]" placeholder="Subject" />
+                      <textarea className="min-h-[160px] rounded-[24px] border border-[#ece4da] bg-[#fffdf8] px-4 py-3 text-sm outline-none transition focus:border-[#f5857c]" placeholder="How can we help?" />
+                      <button type="button" className="inline-flex items-center justify-center rounded-full bg-[#f5857c] px-6 py-3 text-sm font-semibold text-white transition hover:bg-[#ef7067]">
+                        Send message
+                      </button>
+                    </form>
                   </div>
-                  <input className="rounded-2xl border border-[#ece4da] bg-[#fffdf8] px-4 py-3 text-sm outline-none transition focus:border-[#f5857c]" placeholder="Subject" />
-                  <textarea className="min-h-[160px] rounded-[24px] border border-[#ece4da] bg-[#fffdf8] px-4 py-3 text-sm outline-none transition focus:border-[#f5857c]" placeholder="How can we help?" />
-                  <button type="button" className="inline-flex items-center justify-center rounded-full bg-[#f5857c] px-6 py-3 text-sm font-semibold text-white transition hover:bg-[#ef7067]">
-                    Send message
-                  </button>
-                </form>
-              </div>
-            </div>
-          </section>
+                </div>
+              </section>
 
-          <section id="map" className="px-4 py-16">
-            <div className="mx-auto grid max-w-6xl gap-8 lg:grid-cols-[0.95fr_1.05fr]">
-              <div className="rounded-[34px] border border-[#efe6da] bg-white p-6 shadow-[0_20px_50px_rgba(59,51,68,0.05)] sm:p-8">
-                <p className="text-xs font-bold uppercase tracking-[0.35em] text-[#f5857c]">Opening hours</p>
-                <h2 className="mt-2 font-serif text-3xl text-[#3b3344]">Monday - Friday</h2>
-                <div className="mt-6 space-y-4 text-sm text-[#6d6277]">
-                  <div className="flex items-center justify-between border-b border-dashed border-[#efe6da] pb-3">
-                    <span>Hours</span>
-                    <span className="font-semibold text-[#3b3344]">9:00am - 5:00pm</span>
+              <section id="map" className="px-4 py-16">
+                <div className="mx-auto grid max-w-6xl gap-8 lg:grid-cols-[0.95fr_1.05fr]">
+                  <div className="rounded-[34px] border border-[#efe6da] bg-white p-6 shadow-[0_20px_50px_rgba(59,51,68,0.05)] sm:p-8">
+                    <p className="text-xs font-bold uppercase tracking-[0.35em] text-[#f5857c]">Opening hours</p>
+                    <h2 className="mt-2 font-serif text-3xl text-[#3b3344]">Monday - Friday</h2>
+                    <div className="mt-6 space-y-4 text-sm text-[#6d6277]">
+                      <div className="flex items-center justify-between border-b border-dashed border-[#efe6da] pb-3">
+                        <span>Hours</span>
+                        <span className="font-semibold text-[#3b3344]">9:00am - 5:00pm</span>
+                      </div>
+                      <div className="flex items-center justify-between border-b border-dashed border-[#efe6da] pb-3">
+                        <span>Support</span>
+                        <span className="font-semibold text-[#3b3344]">(064) 332-1233</span>
+                      </div>
+                      <div className="flex items-center justify-between border-b border-dashed border-[#efe6da] pb-3">
+                        <span>Address</span>
+                        <span className="font-semibold text-[#3b3344]">Kansas City, MO</span>
+                      </div>
+                    </div>
+                    <div className="mt-8 rounded-[28px] bg-[#fff7df] p-5">
+                      <p className="text-sm leading-7 text-[#6d6277]">
+                        Based on WoodMart theme 2025 WooCommerce Themes.
+                      </p>
+                      <div className="mt-4 flex flex-wrap gap-3">
+                        <Link href={`/store/${slug}/blog`} className="rounded-full bg-white px-5 py-2 text-sm font-semibold text-[#3b3344] transition hover:text-[#f5857c]">
+                          Visit the blog
+                        </Link>
+                        <Link href={`/store/${slug}/shop`} className="rounded-full border border-[#f5857c] px-5 py-2 text-sm font-semibold text-[#f5857c] transition hover:bg-[#fff0ee]">
+                          Shop the collection
+                        </Link>
+                      </div>
+                    </div>
                   </div>
-                  <div className="flex items-center justify-between border-b border-dashed border-[#efe6da] pb-3">
-                    <span>Support</span>
-                    <span className="font-semibold text-[#3b3344]">(064) 332-1233</span>
-                  </div>
-                  <div className="flex items-center justify-between border-b border-dashed border-[#efe6da] pb-3">
-                    <span>Address</span>
-                    <span className="font-semibold text-[#3b3344]">Kansas City, MO</span>
-                  </div>
-                </div>
-                <div className="mt-8 rounded-[28px] bg-[#fff7df] p-5">
-                  <p className="text-sm leading-7 text-[#6d6277]">
-                    Based on WoodMart theme 2025 WooCommerce Themes.
-                  </p>
-                  <div className="mt-4 flex flex-wrap gap-3">
-                    <Link href={`/store/${slug}/blog`} className="rounded-full bg-white px-5 py-2 text-sm font-semibold text-[#3b3344] transition hover:text-[#f5857c]">
-                      Visit the blog
-                    </Link>
-                    <Link href={`/store/${slug}/shop`} className="rounded-full border border-[#f5857c] px-5 py-2 text-sm font-semibold text-[#f5857c] transition hover:bg-[#fff0ee]">
-                      Shop the collection
-                    </Link>
-                  </div>
-                </div>
-              </div>
 
-              <div className="overflow-hidden rounded-[34px] border border-[#efe6da] bg-white shadow-[0_20px_50px_rgba(59,51,68,0.05)]">
-                <iframe
-                  title="Kids store map"
-                  src="https://www.google.com/maps?q=913%20Wyandotte%20St%2C%20Kansas%20City%2C%20MO%2064105&output=embed"
-                  className="h-[520px] w-full border-0"
-                  loading="lazy"
-                  referrerPolicy="no-referrer-when-downgrade"
-                />
-              </div>
-            </div>
-          </section>
-        </main>
-        <KidsFooterFull
-          storeName={store.name}
-          storeSlug={slug}
-          logo={store.logo}
-          templateSlug="kids"
-          description={store.description || "Playful kidswear, gifts, and accessories with a bright, premium WoodMart-inspired finish."}
-          socialLinks={kidsSocialLinks}
-        />
+                  <div className="overflow-hidden rounded-[34px] border border-[#efe6da] bg-white shadow-[0_20px_50px_rgba(59,51,68,0.05)]">
+                    <iframe
+                      title="Kids store map"
+                      src="https://www.google.com/maps?q=913%20Wyandotte%20St%2C%20Kansas%20City%2C%20MO%2064105&output=embed"
+                      className="h-[520px] w-full border-0"
+                      loading="lazy"
+                      referrerPolicy="no-referrer-when-downgrade"
+                    />
+                  </div>
+                </div>
+              </section>
+            </main>
+            <KidsFooterFull
+              storeName={store.name}
+              storeSlug={slug}
+              logo={store.logo}
+              templateSlug="kids"
+              description={store.description || "Playful kidswear, gifts, and accessories with a bright, premium WoodMart-inspired finish."}
+              socialLinks={kidsSocialLinks}
+            />
+          </>
+        )}
       </div>
     );
   }

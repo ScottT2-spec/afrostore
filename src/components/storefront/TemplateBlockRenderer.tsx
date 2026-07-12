@@ -16,6 +16,7 @@ import {
   FashionMarquee,
   FashionCoverBanners,
 } from "@/components/storefront/FashionTemplateBlocks";
+import { TShirtsPrintsHeader, TShirtsPrintsFooter } from "@/components/storefront/TShirtsPrintsStoreChrome";
 import type {
   FashionHeroSliderProps,
   FashionPromoBannersProps,
@@ -144,6 +145,15 @@ import {
   KidsNewsletter,
   KidsFooter,
   KidsFooterFull,
+  KidsHeader,
+  KidsAboutHero,
+  KidsTeamSection,
+  KidsTextSection,
+  KidsFaqSection,
+  KidsContactHero,
+  KidsContactInfo,
+  KidsContactForm,
+  KidsOpeningHours,
 } from "@/components/storefront/KidsTemplateBlocks";
 import {
   MakeupFontLoader,
@@ -324,6 +334,15 @@ const KIDS_BLOCKS: Record<string, BlockComponent> = {
   kidsNewsletter: KidsNewsletter as unknown as BlockComponent,
   kidsFooter: KidsFooter as unknown as BlockComponent,
   kidsFooterFull: KidsFooterFull as unknown as BlockComponent,
+  kidsHeader: KidsHeader as unknown as BlockComponent,
+  kidsAboutHero: KidsAboutHero as unknown as BlockComponent,
+  kidsTeamSection: KidsTeamSection as unknown as BlockComponent,
+  kidsTextSection: KidsTextSection as unknown as BlockComponent,
+  kidsFaqSection: KidsFaqSection as unknown as BlockComponent,
+  kidsContactHero: KidsContactHero as unknown as BlockComponent,
+  kidsContactInfo: KidsContactInfo as unknown as BlockComponent,
+  kidsContactForm: KidsContactForm as unknown as BlockComponent,
+  kidsOpeningHours: KidsOpeningHours as unknown as BlockComponent,
 };
 
 const MAKEUP_BLOCKS: Record<string, BlockComponent> = {
@@ -365,6 +384,11 @@ const PERFUMES_BLOCKS: Record<string, BlockComponent> = {
   perfumesJournalGrid: PerfumesJournalGrid as unknown as BlockComponent,
 };
 
+const TSHIRTS_BLOCKS: Record<string, BlockComponent> = {
+  tShirtsPrintsHeader: TShirtsPrintsHeader as unknown as BlockComponent,
+  tShirtsPrintsFooter: TShirtsPrintsFooter as unknown as BlockComponent,
+};
+
 const ALL_TEMPLATE_BLOCKS: Record<string, BlockComponent> = {
   ...FASHION_BLOCKS,
   ...ELECTRONICS_BLOCKS,
@@ -376,6 +400,7 @@ const ALL_TEMPLATE_BLOCKS: Record<string, BlockComponent> = {
   ...KIDS_BLOCKS,
   ...MAKEUP_BLOCKS,
   ...PERFUMES_BLOCKS,
+  ...TSHIRTS_BLOCKS,
 };
 
 /* ─── FONT LOADER MAP ──────────────────────────────────────── */
@@ -391,6 +416,7 @@ const FONT_LOADERS: Record<string, React.ComponentType> = {
   kids: KidsFontLoader,
   makeup: MakeupFontLoader,
   perfumes: PerfumesFontLoader,
+  "t-shirts-prints": FashionFontLoader,
 };
 
 /** Detect which template family a block set belongs to */
@@ -406,6 +432,7 @@ function detectTemplateFamily(blocks: TemplateBlock[]): string {
     if (t.startsWith("kids")) return "kids";
     if (t.startsWith("makeup")) return "makeup";
     if (t.startsWith("perfumes")) return "perfumes";
+    if (t.startsWith("tShirtsPrints")) return "t-shirts-prints";
     if (t.startsWith("fashion")) return "fashion";
   }
   return "fashion";

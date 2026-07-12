@@ -1273,6 +1273,296 @@ export function KidsFooterFull({
 }
 
 /* ═══════════════════════════════════════════════════════════════
+   RICH CONTENT BLOCK TYPES (extracted from hardcoded JSX)
+   ═══════════════════════════════════════════════════════════════ */
+
+/* ─── KIDS ABOUT HERO ─────────────────────────────────────────── */
+export interface KidsAboutHeroProps {
+  subtitle?: string;
+  title?: string;
+  bodyText?: string[];
+  images?: string[];
+  calloutText?: string;
+  calloutLabel?: string;
+}
+
+export function KidsAboutHero({ 
+  subtitle = "About Us", 
+  title = "We create organic clothes for babies",
+  bodyText = [],
+  images = [],
+  calloutText = "Websites in professional use templating systems. Commercial publishing platforms and content management systems ensure show.",
+  calloutLabel = "Meet our team"
+}: KidsAboutHeroProps) {
+  return (
+    <section className="relative overflow-hidden bg-gradient-to-br from-[#fff5f1] via-white to-[#f8fbff]">
+      <div className="mx-auto grid max-w-[1222px] gap-10 px-4 py-16 md:grid-cols-[1.05fr_0.95fr] md:px-6 md:py-24">
+        <div className="flex flex-col justify-center">
+          <p className="mb-4 text-sm font-semibold uppercase tracking-[0.28em] text-[#f5857c]">{subtitle}</p>
+          <h1 className="max-w-xl text-4xl font-bold leading-tight text-[#242424] md:text-6xl">{title}</h1>
+          {bodyText.map((text, i) => (
+            <p key={i} className={`mt-${i === 0 ? 6 : 4} max-w-xl text-[16px] leading-8 text-[#767676]`}>{text}</p>
+          ))}
+        </div>
+        <div className="grid gap-4 sm:grid-cols-2">
+          {images[0] && <img src={images[0]} alt="Kids collection" className="h-full w-full rounded-[28px] object-cover shadow-lg" />}
+          <div className="grid gap-4">
+            {images[1] && <img src={images[1]} alt="Kids knitwear" className="h-full w-full rounded-[28px] object-cover shadow-lg" />}
+            <div className="rounded-[28px] bg-white p-6 shadow-lg">
+              <p className="text-sm font-semibold uppercase tracking-[0.22em] text-[#f5857c]">{calloutLabel}</p>
+              <p className="mt-3 text-sm leading-7 text-[#767676]">{calloutText}</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+  );
+}
+
+/* ─── KIDS TEAM SECTION ─────────────────────────────────────────── */
+export interface KidsTeamMember {
+  name: string;
+  role: string;
+}
+
+export interface KidsTeamSectionProps {
+  sectionTitle?: { subtitle?: string; title?: string };
+  team: KidsTeamMember[];
+}
+
+export function KidsTeamSection({ 
+  sectionTitle = { subtitle: "", title: "" },
+  team = []
+}: KidsTeamSectionProps) {
+  return (
+    <section className="mx-auto max-w-[1222px] px-4 py-16 md:px-6">
+      <div className="grid gap-6 md:grid-cols-2 xl:grid-cols-4">
+        {team.map((member) => (
+          <div key={member.name} className="rounded-[24px] bg-white p-8 shadow-[0_8px_32px_rgba(0,0,0,0.06)]">
+            <h2 className="text-xl font-bold text-[#242424]">{member.name}</h2>
+            <p className="mt-3 text-sm leading-7 text-[#767676]">{member.role}</p>
+          </div>
+        ))}
+      </div>
+    </section>
+  );
+}
+
+/* ─── KIDS TEXT SECTION ─────────────────────────────────────────── */
+export interface KidsTextSectionProps {
+  sectionTitle?: { subtitle?: string; title?: string };
+  bodyText?: string[];
+  backgroundColor?: string;
+}
+
+export function KidsTextSection({ 
+  sectionTitle = { subtitle: "", title: "" },
+  bodyText = [],
+  backgroundColor = "transparent"
+}: KidsTextSectionProps) {
+  return (
+    <section className={backgroundColor === "#faf8f5" ? "bg-[#faf8f5]" : ""}>
+      <div className="mx-auto grid max-w-[1222px] gap-10 px-4 py-16 md:grid-cols-[0.9fr_1.1fr] md:px-6">
+        <div>
+          {sectionTitle.subtitle && <p className="text-sm font-semibold uppercase tracking-[0.28em] text-[#f5857c]">{sectionTitle.subtitle}</p>}
+          <h2 className="mt-4 text-3xl font-bold text-[#242424] md:text-4xl">{sectionTitle.title}</h2>
+        </div>
+        <div className="space-y-5 text-[16px] leading-8 text-[#767676]">
+          {bodyText.map((text, i) => <p key={i}>{text}</p>)}
+        </div>
+      </div>
+    </section>
+  );
+}
+
+/* ─── KIDS FAQ SECTION ──────────────────────────────────────────── */
+export interface KidsFaqItem {
+  question: string;
+  answer: string;
+}
+
+export interface KidsFaqSectionProps {
+  sectionTitle?: { subtitle?: string; title?: string };
+  subtitle?: string;
+  faqs: KidsFaqItem[];
+}
+
+export function KidsFaqSection({ 
+  sectionTitle = { subtitle: "", title: "" },
+  subtitle = "",
+  faqs = []
+}: KidsFaqSectionProps) {
+  return (
+    <section className="mx-auto max-w-[1222px] px-4 py-16 md:px-6">
+      <div className="grid gap-10 md:grid-cols-[0.95fr_1.05fr]">
+        <div>
+          {sectionTitle.subtitle && <p className="text-sm font-semibold uppercase tracking-[0.28em] text-[#f5857c]">{sectionTitle.subtitle}</p>}
+          <h2 className="mt-4 text-3xl font-bold text-[#242424] md:text-4xl">{sectionTitle.title}</h2>
+          <p className="mt-4 text-[16px] leading-8 text-[#767676]">
+            {sectionTitle.subtitle && subtitle}
+          </p>
+        </div>
+        <div className="space-y-4">
+          <h3 className="text-lg font-bold text-[#242424]">Some of your questions answered here</h3>
+          <p className="text-sm leading-7 text-[#767676]">We get a lot of questions about our course. You can get any answers.</p>
+          <div className="space-y-4 rounded-[28px] bg-white p-6 shadow-[0_8px_32px_rgba(0,0,0,0.06)]">
+            {faqs.map((faq) => (
+              <div key={faq.question} className="rounded-[22px] border border-[#efe6da] bg-[#fffdf8] p-5">
+                <h4 className="font-semibold text-[#242424]">{faq.question}</h4>
+                <p className="mt-2 text-sm leading-7 text-[#767676]">{faq.answer}</p>
+              </div>
+            ))}
+          </div>
+        </div>
+      </div>
+    </section>
+  );
+}
+
+/* ─── KIDS CONTACT HERO ─────────────────────────────────────────── */
+export interface KidsContactHeroProps {
+  address?: string;
+  showMapLink?: boolean;
+}
+
+export function KidsContactHero({ 
+  address = "913 Wyandotte St, Kansas City, MO 64105, United States",
+  showMapLink = true
+}: KidsContactHeroProps) {
+  return (
+    <section className="bg-gradient-to-br from-[#fff7df] via-[#fffdf4] to-[#ffeef1] px-4 py-16">
+      <div className="mx-auto grid max-w-6xl gap-12 lg:grid-cols-[0.9fr_1.1fr] lg:items-start">
+        <div>
+          <h1 className="max-w-xl font-serif text-4xl leading-tight text-[#3b3344] sm:text-5xl">{address}</h1>
+        </div>
+      </div>
+    </section>
+  );
+}
+
+/* ─── KIDS CONTACT INFO ─────────────────────────────────────────── */
+export interface KidsContactInfoProps {
+  phone?: string;
+  hours?: string;
+  days?: string;
+  socialLinks?: { facebook?: string; twitter?: string; instagram?: string; youtube?: string };
+  showMapLink?: boolean;
+}
+
+export function KidsContactInfo({ 
+  phone = "(064) 332-1233",
+  hours = "9:00am - 5:00pm",
+  days = "Monday - Friday",
+  socialLinks = {},
+  showMapLink = true
+}: KidsContactInfoProps) {
+  return (
+    <div className="mt-6 rounded-[32px] bg-white p-6 shadow-[0_18px_40px_rgba(59,51,68,0.06)]">
+      {showMapLink && (
+        <a href="#map" className="mt-3 inline-flex text-sm font-semibold text-[#f5857c]">
+          Show on a map
+        </a>
+      )}
+      <div className="mt-6 space-y-2 text-sm text-[#6d6277]">
+        <p>Call Us: {phone}</p>
+        <p>Hours: {hours}</p>
+        <p>{days}</p>
+      </div>
+      <div className="mt-6 flex gap-3 text-[#3b3344]">
+        {[
+          { label: "f", href: socialLinks.facebook || "#" },
+          { label: "𝕏", href: socialLinks.twitter || "#" },
+          { label: "📷", href: socialLinks.instagram || "#" },
+          { label: "▶", href: socialLinks.youtube || "#" },
+        ].map((item) => (
+          <a key={item.label} href={item.href} className="inline-flex h-10 w-10 items-center justify-center rounded-full bg-white shadow-[0_12px_28px_rgba(59,51,68,0.06)]">
+            <span className="text-sm font-bold">{item.label}</span>
+          </a>
+        ))}
+      </div>
+    </div>
+  );
+}
+
+/* ─── KIDS CONTACT FORM ─────────────────────────────────────────── */
+export interface KidsContactFormProps {
+  title?: string;
+}
+
+export function KidsContactForm({ title = "Get in touch" }: KidsContactFormProps) {
+  return (
+    <div className="rounded-[34px] bg-white p-6 shadow-[0_30px_70px_rgba(59,51,68,0.08)] sm:p-8">
+      <div className="mb-6">
+        <p className="text-xs font-bold uppercase tracking-[0.35em] text-[#f5857c]">{title}</p>
+        <h2 className="mt-2 font-serif text-3xl text-[#3b3344]">{title}</h2>
+      </div>
+      <form className="grid gap-4">
+        <div className="grid gap-4 sm:grid-cols-2">
+          <input className="rounded-2xl border border-[#ece4da] bg-[#fffdf8] px-4 py-3 text-sm outline-none transition focus:border-[#f5857c]" placeholder="Your name" />
+          <input className="rounded-2xl border border-[#ece4da] bg-[#fffdf8] px-4 py-3 text-sm outline-none transition focus:border-[#f5857c]" placeholder="Email address" />
+        </div>
+        <input className="rounded-2xl border border-[#ece4da] bg-[#fffdf8] px-4 py-3 text-sm outline-none transition focus:border-[#f5857c]" placeholder="Subject" />
+        <textarea className="min-h-[160px] rounded-[24px] border border-[#ece4da] bg-[#fffdf8] px-4 py-3 text-sm outline-none transition focus:border-[#f5857c]" placeholder="How can we help?" />
+        <button type="button" className="inline-flex items-center justify-center rounded-full bg-[#f5857c] px-6 py-3 text-sm font-semibold text-white transition hover:bg-[#ef7067]">
+          Send message
+        </button>
+      </form>
+    </div>
+  );
+}
+
+/* ─── KIDS OPENING HOURS ────────────────────────────────────────── */
+export interface KidsHourRow {
+  label: string;
+  value: string;
+}
+
+export interface KidsOpeningHoursProps {
+  title?: string;
+  hours: KidsHourRow[];
+  infoText?: string;
+  links?: { label: string; href: string }[];
+  storeSlug?: string;
+}
+
+export function KidsOpeningHours({ 
+  title = "Monday - Friday",
+  hours = [],
+  infoText = "Based on WoodMart theme 2025 WooCommerce Themes.",
+  links = [],
+  storeSlug = ""
+}: KidsOpeningHoursProps) {
+  return (
+    <section id="map" className="px-4 py-16">
+      <div className="mx-auto grid max-w-6xl gap-8 lg:grid-cols-[0.95fr_1.05fr]">
+        <div className="rounded-[34px] border border-[#efe6da] bg-white p-6 shadow-[0_20px_50px_rgba(59,51,68,0.05)] sm:p-8">
+          <p className="text-xs font-bold uppercase tracking-[0.35em] text-[#f5857c]">Opening hours</p>
+          <h2 className="mt-2 font-serif text-3xl text-[#3b3344]">{title}</h2>
+          <div className="mt-6 space-y-4 text-sm text-[#6d6277]">
+            {hours.map((hour) => (
+              <div key={hour.label} className="flex items-center justify-between border-b border-dashed border-[#efe6da] pb-3">
+                <span>{hour.label}</span>
+                <span className="font-semibold text-[#3b3344]">{hour.value}</span>
+              </div>
+            ))}
+          </div>
+          <div className="mt-8 rounded-[28px] bg-[#fff7df] p-5">
+            <p className="text-sm leading-7 text-[#6d6277]">{infoText}</p>
+            <div className="mt-4 flex flex-wrap gap-3">
+              {links.map((link) => (
+                <a key={link.href} href={link.href} className="rounded-full bg-white px-5 py-2 text-sm font-semibold text-[#3b3344] transition hover:text-[#f5857c]">
+                  {link.label}
+                </a>
+              ))}
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+  );
+}
+
+/* ═══════════════════════════════════════════════════════════════
    LEGACY FOOTER (kept for backward compat)
    ═══════════════════════════════════════════════════════════════ */
 

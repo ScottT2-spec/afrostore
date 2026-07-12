@@ -60,31 +60,54 @@ type RegisteredPageSlug =
   | "fragrances"
   | "skincare"
   | "projects"
-  | "ingredients";
+  | "ingredients"
+  | "reservations"
+  | "gallery"
+  | "departments"
+  | "doctors"
+  | "appointment"
+  | "contractor-program"
+  | "inspiration"
+  | "collections"
+  | "deals"
+  | "categories"
+  | "courses"
+  | "instructors"
+  | "destinations"
+  | "experiences";
 
 export const BESPOKE_TEMPLATE_PRESETS: TemplatePresetMap = {
   fashion: FASHION_TEMPLATE_PRESET,
   "fashion-colored": FASHION_COLORED_PRESET,
+  "fashion-classic": FASHION_TEMPLATE_PRESET,
   "handmade-bags": HANDMADE_BAGS_PRESET,
   "t-shirts-prints": T_SHIRTS_PRINTS_PRESET,
   electronics: ELECTRONICS_TEMPLATE_PRESET,
   "electronics-accessories": ELECTRONICS_TEMPLATE_PRESET,
   hardware: ELECTRONICS_TEMPLATE_PRESET,
+  "hardware-pro": ELECTRONICS_TEMPLATE_PRESET,
   tools: ELECTRONICS_TEMPLATE_PRESET,
   bakery: BAKERY_TEMPLATE_PRESET,
   "sweets-bakery": BAKERY_TEMPLATE_PRESET,
+  bistro: BAKERY_TEMPLATE_PRESET,
   cosmetics: COSMETICS_TEMPLATE_PRESET,
   makeup: MAKEUP_TEMPLATE_PRESET,
   grocery: GROCERY_TEMPLATE_PRESET,
+  "grocery-market": GROCERY_TEMPLATE_PRESET,
   vegetables: GROCERY_TEMPLATE_PRESET,
   health: HEALTH_TEMPLATE_PRESET,
   pills: HEALTH_TEMPLATE_PRESET,
   interior: INTERIOR_DECOR_PRESET,
+  "interior-design": INTERIOR_DECOR_PRESET,
+  "home-decor": INTERIOR_DECOR_PRESET,
   decor: INTERIOR_DECOR_PRESET,
   retail: INTERIOR_RETAIL_PRESET,
   kids: KIDS_TEMPLATE_PRESET,
   toys: KIDS_TEMPLATE_PRESET,
   perfumes: PERFUMES_TEMPLATE_PRESET,
+  jewellery: ELECTRONICS_TEMPLATE_PRESET,
+  "jewellery-elegance": ELECTRONICS_TEMPLATE_PRESET,
+  strada: HEALTH_TEMPLATE_PRESET,
 };
 
 /** Template-specific page presets (non-home pages). */
@@ -130,6 +153,20 @@ export const REGISTERED_BESPOKE_PAGE_SLUGS = new Set<RegisteredPageSlug>([
   "skincare",
   "projects",
   "ingredients",
+  "reservations",
+  "gallery",
+  "departments",
+  "doctors",
+  "appointment",
+  "contractor-program",
+  "inspiration",
+  "collections",
+  "deals",
+  "categories",
+  "courses",
+  "instructors",
+  "destinations",
+  "experiences",
 ]);
 
 function deepClone<T>(value: T): T {
@@ -344,6 +381,9 @@ export function normalizeBespokePageContent(
 }
 
 export function mergeBespokeTemplateBlocks(templateSlug?: string | null, pageSlug?: string | null, content?: unknown, context?: Partial<DefaultPageContentContext>): TemplateBlock[] {
+  // LOUD WARNING: This fallback should rarely be triggered after seeding
+  console.warn(`⚠️ FALLBACK CONTENT GENERATED - Template: ${templateSlug}, Page: ${pageSlug}. This page has no real blocks in the database. Run the seeding script to fix this.`);
+  
   if (!templateSlug || !isBespokeTemplateSlug(templateSlug)) return [];
 
   const defaultDocument = getRegisteredPageContent(templateSlug, pageSlug, context);

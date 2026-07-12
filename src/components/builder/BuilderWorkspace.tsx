@@ -400,6 +400,13 @@ export default function BuilderWorkspace({
   const normalizedSlug = activePage.slug.startsWith('/') ? activePage.slug.slice(1) : activePage.slug;
   const previewUrl = `/builder/preview/${site.id}/${normalizedSlug || 'home'}`;
 
+  // Reload iframe when page changes
+  useEffect(() => {
+    if (iframeRef.current) {
+      iframeRef.current.src = previewUrl;
+    }
+  }, [previewUrl]);
+
   return (
     <div className="h-screen flex flex-col bg-surface-50">
       {/* Top Bar */}
