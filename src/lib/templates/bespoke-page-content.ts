@@ -59,7 +59,8 @@ type RegisteredPageSlug =
   | "shipping"
   | "fragrances"
   | "skincare"
-  | "projects";
+  | "projects"
+  | "ingredients";
 
 export const BESPOKE_TEMPLATE_PRESETS: TemplatePresetMap = {
   fashion: FASHION_TEMPLATE_PRESET,
@@ -128,6 +129,7 @@ export const REGISTERED_BESPOKE_PAGE_SLUGS = new Set<RegisteredPageSlug>([
   "fragrances",
   "skincare",
   "projects",
+  "ingredients",
 ]);
 
 function deepClone<T>(value: T): T {

@@ -997,6 +997,10 @@ export function buildDefaultPageContent(context: DefaultPageContentContext): Pag
     return { blocks: buildEditorialLayout(title, family), settings: {} };
   }
 
+  if (slug === "ingredients" && family === "health") {
+    return { blocks: [createRawBlock("healthIngredientsPage", {})], settings: {} };
+  }
+
   if (["shop", "products", "catalog", "store", "new-in", "bestseller", "wishlist", "cart", "compare", "my-account", "order-tracking", "faq", "support", "fragrances", "skincare", "menu", "recipe", "projects", "services", "blog", "journal"].includes(slug)) {
     return { blocks: buildUtilityLayout(title, family, slug), settings: {} };
   }

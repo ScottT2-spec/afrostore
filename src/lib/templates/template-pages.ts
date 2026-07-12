@@ -1,5 +1,6 @@
 import { prisma } from "@/lib/db";
 import { HANDMADE_BAGS_PAGE_BLOCKS } from "./presets/handmade-bags-pages";
+import { HEALTH_PAGE_BLOCKS } from "./presets/health-pages";
 
 /**
  * Template-specific page definitions.
@@ -45,7 +46,10 @@ const ELECTRONICS_PAGES: PageDef[] = [
 ];
 
 const HEALTH_PAGES: PageDef[] = [
-  { title: "Blog", slug: "blog", type: "CUSTOM", position: 10 },
+  { title: "About Us", slug: "about", type: "CUSTOM", position: 10 },
+  { title: "Contact Us", slug: "contact", type: "CUSTOM", position: 11 },
+  { title: "Blog", slug: "blog", type: "CUSTOM", position: 12 },
+  { title: "Ingredients", slug: "ingredients", type: "CUSTOM", position: 13 },
 ];
 
 const MAKEUP_PAGES: PageDef[] = [
@@ -63,12 +67,15 @@ const TEMPLATE_PAGE_MAP: Record<string, PageDef[]> = {
   electronics: ELECTRONICS_PAGES,
   "electronics-accessories": ELECTRONICS_PAGES,
   health: HEALTH_PAGES,
+  pills: HEALTH_PAGES,
   makeup: MAKEUP_PAGES,
 };
 
 /** Map of template slug → default page block content (keyed by page slug) */
 const TEMPLATE_PAGE_CONTENT_MAP: Record<string, Record<string, unknown[]>> = {
   "handmade-bags": HANDMADE_BAGS_PAGE_BLOCKS,
+  health: HEALTH_PAGE_BLOCKS,
+  pills: HEALTH_PAGE_BLOCKS,
 };
 
 /**
