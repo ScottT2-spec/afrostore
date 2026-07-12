@@ -43,15 +43,28 @@ const blockPalette = [
   { type: "countdown", label: "Countdown", icon: Clock, category: "marketing" },
   { type: "testimonial", label: "Testimonial", icon: HelpCircle, category: "marketing" },
   { type: "cta", label: "CTA", icon: Mail, category: "marketing" },
+  // Cosmetics template blocks
+  { type: "cosmeticsHeroSlider", label: "Cosmetics Hero Slider", icon: Sparkles, category: "cosmetics" },
+  { type: "cosmeticsPromoBanners", label: "Cosmetics Promo Banners", icon: ImageIcon, category: "cosmetics" },
+  { type: "cosmeticsSectionTitle", label: "Cosmetics Section Title", icon: Type, category: "cosmetics" },
+  { type: "cosmeticsProductGrid", label: "Cosmetics Product Grid", icon: Grid3X3, category: "cosmetics" },
+  { type: "cosmeticsCategoryCards", label: "Cosmetics Category Cards", icon: LayoutGrid, category: "cosmetics" },
+  { type: "cosmeticsDiscovery", label: "Cosmetics Discovery", icon: Sparkles, category: "cosmetics" },
+  { type: "cosmeticsCountdownBanner", label: "Cosmetics Countdown", icon: Clock, category: "cosmetics" },
+  { type: "cosmeticsInfoBoxes", label: "Cosmetics Info Boxes", icon: Shield, category: "cosmetics" },
+  { type: "cosmeticsBlogPosts", label: "Cosmetics Blog Posts", icon: FileText, category: "cosmetics" },
+  { type: "cosmeticsNewsletter", label: "Cosmetics Newsletter", icon: Mail, category: "cosmetics" },
+  { type: "cosmeticsInstagram", label: "Cosmetics Instagram", icon: ImageIcon, category: "cosmetics" },
 ];
 
-const categories = ["basic", "layout", "commerce", "social", "marketing"] as const;
+const categories = ["basic", "layout", "commerce", "social", "marketing", "cosmetics"] as const;
 const categoryLabels: Record<string, string> = {
   basic: "Basic",
   layout: "Layout",
   commerce: "Commerce",
   social: "Social",
   marketing: "Marketing",
+  cosmetics: "Cosmetics",
 };
 
 export default function LeftSidebar({
