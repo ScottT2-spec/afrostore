@@ -252,6 +252,11 @@ function ContentTab({
           </>
         )}
 
+        {/* Bespoke / Template block fields — auto-generated from props */}
+        {!["heading", "text", "button", "image"].includes(section.type) && (
+          <BespokeBlockEditor content={content} updateContent={updateContent} />
+        )}
+
         {/* Generic fields for all sections */}
         <div className="mb-3">
           <label className="block text-xs font-medium text-surface-700 mb-1">Badge Text</label>
@@ -687,6 +692,273 @@ function AdvancedTab({
           placeholder="/* Add section-specific CSS here */"
         />
       </div>
+    </div>
+  );
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   BESPOKE BLOCK EDITOR
+   Auto-generates editable fields from block props.
+   Handles strings, numbers, booleans, and arrays of objects.
+   ═══════════════════════════════════════════════════════════════ */
+
+function formatLabel(key: string): string {
+  return key
+    .replace(/([A-Z])/g, " $1")
+    .replace(/^./, (s) => s.toUpperCase())
+    .trim();
+}
+
+function BespokeBlockEditor({
+  content,
+  updateContent,
+}: {
+  content: Record<string, unknown>;
+  updateContent: (key: string, value: unknown) => void;
+}) {
+  const [expandedArrays, setExpandedArrays] = useState<Record<string, boolean>>({});
+
+  const toggleArray = (key: string) => {
+    setExpandedArrays((prev) => ({ ...prev, [key]: !prev[key] }));
+  };
+
+  const entries = Object.entries(content).filter(
+    ([key]) => !["badge", "className"].includes(key)
+  );
+
+  if (entries.length === 0) {
+    return (
+      <p className="text-xs text-surface-400 italic">No editable properties</p>
+    );
+  }
+
+  return (
+    <div className="space-y-3">
+      {entries.map(([key, value]) => {
+        // String fields
+        if (typeof value === "string") {
+          const isLong = value.length > 80;
+          return (
+            <div key={key} className="mb-2">
+              <label className="block text-xs font-medium text-surface-700 mb-1">
+                {formatLabel(key)}
+              </label>
+              {isLong ? (
+                <textarea
+                  value={value}
+                  onChange={(e) => updateContent(key, e.target.value)}
+                  className="w-full text-sm border border-surface-200 rounded-lg px-3 py-2 h-20 resize-none"
+                />
+              ) : (
+                <input
+                  type="text"
+                  value={value}
+                  onChange={(e) => updateContent(key, e.target.value)}
+                  className="w-full text-sm border border-surface-200 rounded-lg px-3 py-2"
+                />
+              )}
+            </div>
+          );
+        }
+
+        // Number fields
+        if (typeof value === "number") {
+          return (
+            <div key={key} className="mb-2">
+              <label className="block text-xs font-medium text-surface-700 mb-1">
+                {formatLabel(key)}
+              </label>
+              <input
+                type="number"
+                value={value}
+                onChange={(e) => updateContent(key, Number(e.target.value))}
+                className="w-full text-sm border border-surface-200 rounded-lg px-3 py-2"
+              />
+            </div>
+          );
+        }
+
+        // Boolean fields
+        if (typeof value === "boolean") {
+          return (
+            <div key={key} className="mb-2 flex items-center gap-2">
+              <input
+                type="checkbox"
+                checked={value}
+                onChange={(e) => updateContent(key, e.target.checked)}
+                className="rounded border-surface-300 text-brand-600 focus:ring-brand-500"
+              />
+              <label className="text-xs font-medium text-surface-700">
+                {formatLabel(key)}
+              </label>
+            </div>
+          );
+        }
+
+        // Array fields (e.g. features, team, faqs, ingredients, posts)
+        if (Array.isArray(value)) {
+          const isExpanded = expandedArrays[key] ?? false;
+          return (
+            <div key={key} className="mb-2">
+              <button
+                type="button"
+                onClick={() => toggleArray(key)}
+                className="flex items-center justify-between w-full text-xs font-medium text-surface-700 mb-1 hover:text-brand-600"
+              >
+                <span>{formatLabel(key)} ({value.length} items)</span>
+                <span className="text-surface-400">{isExpanded ? "▼" : "▶"}</span>
+              </button>
+              {isExpanded && (
+                <div className="space-y-2 pl-2 border-l-2 border-surface-100">
+                  {value.map((item, idx) => {
+                    if (typeof item === "object" && item !== null) {
+                      return (
+                        <div
+                          key={idx}
+                          className="bg-surface-50 rounded-lg p-2 space-y-1.5"
+                        >
+                          <div className="text-[10px] font-bold text-surface-400 uppercase">
+                            Item {idx + 1}
+                          </div>
+                          {Object.entries(item as Record<string, unknown>).map(
+                            ([subKey, subVal]) => {
+                              if (typeof subVal === "string") {
+                                const isSubLong = subVal.length > 60;
+                                return (
+                                  <div key={subKey}>
+                                    <label className="block text-[10px] font-medium text-surface-500 mb-0.5">
+                                      {formatLabel(subKey)}
+                                    </label>
+                                    {isSubLong ? (
+                                      <textarea
+                                        value={subVal}
+                                        onChange={(e) => {
+                                          const newArr = [...value];
+                                          newArr[idx] = {
+                                            ...(item as Record<string, unknown>),
+                                            [subKey]: e.target.value,
+                                          };
+                                          updateContent(key, newArr);
+                                        }}
+                                        className="w-full text-xs border border-surface-200 rounded px-2 py-1 h-14 resize-none"
+                                      />
+                                    ) : (
+                                      <input
+                                        type="text"
+                                        value={subVal}
+                                        onChange={(e) => {
+                                          const newArr = [...value];
+                                          newArr[idx] = {
+                                            ...(item as Record<string, unknown>),
+                                            [subKey]: e.target.value,
+                                          };
+                                          updateContent(key, newArr);
+                                        }}
+                                        className="w-full text-xs border border-surface-200 rounded px-2 py-1"
+                                      />
+                                    )}
+                                  </div>
+                                );
+                              }
+                              if (typeof subVal === "number") {
+                                return (
+                                  <div key={subKey}>
+                                    <label className="block text-[10px] font-medium text-surface-500 mb-0.5">
+                                      {formatLabel(subKey)}
+                                    </label>
+                                    <input
+                                      type="number"
+                                      value={subVal}
+                                      onChange={(e) => {
+                                        const newArr = [...value];
+                                        newArr[idx] = {
+                                          ...(item as Record<string, unknown>),
+                                          [subKey]: Number(e.target.value),
+                                        };
+                                        updateContent(key, newArr);
+                                      }}
+                                      className="w-full text-xs border border-surface-200 rounded px-2 py-1"
+                                    />
+                                  </div>
+                                );
+                              }
+                              return null;
+                            }
+                          )}
+                        </div>
+                      );
+                    }
+                    if (typeof item === "string") {
+                      return (
+                        <input
+                          key={idx}
+                          type="text"
+                          value={item}
+                          onChange={(e) => {
+                            const newArr = [...value];
+                            newArr[idx] = e.target.value;
+                            updateContent(key, newArr);
+                          }}
+                          className="w-full text-xs border border-surface-200 rounded px-2 py-1"
+                        />
+                      );
+                    }
+                    return null;
+                  })}
+                </div>
+              )}
+            </div>
+          );
+        }
+
+        // Object fields (e.g. contact, featuredPost)
+        if (typeof value === "object" && value !== null) {
+          const isExpanded = expandedArrays[key] ?? false;
+          return (
+            <div key={key} className="mb-2">
+              <button
+                type="button"
+                onClick={() => toggleArray(key)}
+                className="flex items-center justify-between w-full text-xs font-medium text-surface-700 mb-1 hover:text-brand-600"
+              >
+                <span>{formatLabel(key)}</span>
+                <span className="text-surface-400">{isExpanded ? "▼" : "▶"}</span>
+              </button>
+              {isExpanded && (
+                <div className="space-y-1.5 pl-2 border-l-2 border-surface-100 bg-surface-50 rounded-lg p-2">
+                  {Object.entries(value as Record<string, unknown>).map(
+                    ([subKey, subVal]) => {
+                      if (typeof subVal === "string") {
+                        return (
+                          <div key={subKey}>
+                            <label className="block text-[10px] font-medium text-surface-500 mb-0.5">
+                              {formatLabel(subKey)}
+                            </label>
+                            <input
+                              type="text"
+                              value={subVal}
+                              onChange={(e) => {
+                                updateContent(key, {
+                                  ...(value as Record<string, unknown>),
+                                  [subKey]: e.target.value,
+                                });
+                              }}
+                              className="w-full text-xs border border-surface-200 rounded px-2 py-1"
+                            />
+                          </div>
+                        );
+                      }
+                      return null;
+                    }
+                  )}
+                </div>
+              )}
+            </div>
+          );
+        }
+
+        return null;
+      })}
     </div>
   );
 }

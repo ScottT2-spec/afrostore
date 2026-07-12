@@ -63,13 +63,21 @@ function mapBlockTypeToSectionType(blockType: string): string {
     "promoSplit": "columns",
   };
   
-  return typeMap[blockType] || "text"; // Default to text for unknown types
+  return typeMap[blockType] || blockType; // Preserve bespoke block types (health, fashion, etc.)
 }
 
 function extractBlockContent(block: BuilderBlock): Record<string, unknown> {
   const content: Record<string, unknown> = {};
   
-  // Extract common content fields
+  // For bespoke/template blocks, preserve ALL props as content
+  const knownGenericTypes = new Set(["heading", "text", "subheading", "image", "imageHeroBanner", "hero", "columns", "grid", "spacer", "divider", "product", "products", "featured_products", "staticProductGrid", "productGrid", "new_arrivals", "best_sellers", "whatsapp", "social", "countdown", "testimonial", "cta", "linkCards", "imageCategoryCards", "imageBrands", "promoSplit", "button"]);
+  
+  if (!knownGenericTypes.has(block.type) && block.props) {
+    // Bespoke block — copy all props into content so the editor can access them
+    return { ...block.props } as Record<string, unknown>;
+  }
+  
+  // Extract common content fields for generic blocks
   if (block.props) {
     if (block.props.heading) content.heading = block.props.heading;
     if (block.props.text) content.text = block.props.text;
