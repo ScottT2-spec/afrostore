@@ -1484,3 +1484,445 @@ export function PerfumesFooter({ storeName, storeSlug, logo, description }: Perf
     </footer>
   );
 }
+
+
+/* ═══════════════════════════════════════════════════════════════
+   PERFUMES SUB-PAGE BLOCKS
+   Block versions of previously hardcoded About, Contact,
+   Fragrances, and Journal pages.
+   ═══════════════════════════════════════════════════════════════ */
+
+/* ─── ABOUT: WELCOME ────────────────────────────────────────── */
+export interface PerfumesAboutWelcomeProps {
+  title?: string;
+  text?: string;
+  image?: string;
+}
+export function PerfumesAboutWelcome({ title = "Welcome to Our Fragrances", text = "", image = `${IMG_BASE}/2025/11/prf-about-us-1.jpg` }: PerfumesAboutWelcomeProps) {
+  const css = `
+    .pa-welcome { max-width: ${TOKENS.containerWidth}; margin: 0 auto; padding: 80px 15px 60px; display: grid; grid-template-columns: 1fr 1fr; gap: 60px; align-items: center; }
+    .pa-welcome-title { font-family: ${TOKENS.titleFont}; font-size: 42px; font-weight: 400; color: ${TOKENS.primaryColor}; margin: 0 0 25px; line-height: 1.2; }
+    .pa-welcome-text { font-family: ${TOKENS.bodyFont}; font-size: 15px; line-height: 1.8; color: ${TOKENS.textColor}; margin: 0; }
+    .pa-welcome-img { width: 100%; height: auto; display: block; }
+    @media (max-width: 1024px) { .pa-welcome { grid-template-columns: 1fr; gap: 30px; } }
+    @media (max-width: 767px) { .pa-welcome-title { font-size: 32px; } }
+  `;
+  return (
+    <div>
+      <ScopedStyles id="about-welcome" css={css} />
+      <div className="pa-welcome">
+        <div>
+          <h1 className="pa-welcome-title">{title}</h1>
+          <p className="pa-welcome-text">{text}</p>
+        </div>
+        <img src={image} alt="About us" className="pa-welcome-img" />
+      </div>
+    </div>
+  );
+}
+
+/* ─── ABOUT: MARQUEE ────────────────────────────────────────── */
+export interface PerfumesAboutMarqueeProps {
+  items?: string[];
+}
+export function PerfumesAboutMarquee({ items = ["Ethereal", "Sensory", "Signature"] }: PerfumesAboutMarqueeProps) {
+  const css = `
+    .pa-marquee-wrap { overflow: hidden; padding: 35px 0; border-top: 1px solid #eee; border-bottom: 1px solid #eee; margin-bottom: 80px; }
+    .pa-marquee { display: flex; gap: 60px; animation: pa-scroll 45s linear infinite; white-space: nowrap; }
+    .pa-marquee-item { font-family: ${TOKENS.titleFont}; font-size: 28px; font-weight: 400; color: ${TOKENS.primaryColor}; display: flex; align-items: center; gap: 30px; }
+    .pa-marquee-sep { width: 8px; height: 8px; background: ${TOKENS.accentColor}; border-radius: 50%; flex-shrink: 0; }
+    @keyframes pa-scroll { 0% { transform: translateX(0); } 100% { transform: translateX(-50%); } }
+  `;
+  const repeated = [...items, ...items, ...items, ...items];
+  return (
+    <div>
+      <ScopedStyles id="about-marquee" css={css} />
+      <div className="pa-marquee-wrap">
+        <div className="pa-marquee">
+          {repeated.map((item, i) => (
+            <span key={i} className="pa-marquee-item"><span className="pa-marquee-sep" />{item}</span>
+          ))}
+        </div>
+      </div>
+    </div>
+  );
+}
+
+/* ─── ABOUT: STORY + FAQ ────────────────────────────────────── */
+export interface PerfumesAboutStoryProps {
+  title?: string;
+  text?: string;
+  faqItems?: Array<{ q: string; a: string }>;
+}
+export function PerfumesAboutStory({ title = "Our Story", text = "", faqItems = [] }: PerfumesAboutStoryProps) {
+  const [openFaq, setOpenFaq] = useState<number | null>(null);
+  const css = `
+    .pa-story { max-width: ${TOKENS.containerWidth}; margin: 0 auto; padding: 0 15px 80px; display: grid; grid-template-columns: 1fr 1fr; gap: 60px; }
+    .pa-story-title { font-family: ${TOKENS.titleFont}; font-size: 42px; font-weight: 400; color: ${TOKENS.primaryColor}; margin: 0 0 25px; }
+    .pa-story-text { font-family: ${TOKENS.bodyFont}; font-size: 15px; line-height: 1.8; color: ${TOKENS.textColor}; margin: 0 0 30px; }
+    .pa-faq { border-top: 1px solid #eee; }
+    .pa-faq-item { border-bottom: 1px solid #eee; }
+    .pa-faq-q { display: flex; justify-content: space-between; align-items: center; padding: 18px 0; cursor: pointer; font-family: ${TOKENS.bodyFont}; font-size: 15px; font-weight: 500; color: ${TOKENS.primaryColor}; }
+    .pa-faq-q:hover { color: ${TOKENS.accentColor}; }
+    .pa-faq-toggle { font-size: 20px; color: ${TOKENS.textColor}; transition: transform 0.3s; }
+    .pa-faq-toggle.pa-open { transform: rotate(45deg); }
+    .pa-faq-a { font-family: ${TOKENS.bodyFont}; font-size: 14px; line-height: 1.7; color: ${TOKENS.textColor}; padding: 0 0 18px; margin: 0; }
+    @media (max-width: 1024px) { .pa-story { grid-template-columns: 1fr; gap: 30px; } }
+    @media (max-width: 767px) { .pa-story-title { font-size: 32px; } }
+  `;
+  return (
+    <div>
+      <ScopedStyles id="about-story" css={css} />
+      <div className="pa-story">
+        <div>
+          <h2 className="pa-story-title">{title}</h2>
+          <p className="pa-story-text">{text}</p>
+        </div>
+        <div className="pa-faq">
+          {faqItems.map((item, i) => (
+            <div key={i} className="pa-faq-item">
+              <div className="pa-faq-q" onClick={() => setOpenFaq(openFaq === i ? null : i)}>
+                {item.q}
+                <span className={`pa-faq-toggle ${openFaq === i ? "pa-open" : ""}`}>+</span>
+              </div>
+              {openFaq === i && <p className="pa-faq-a">{item.a}</p>}
+            </div>
+          ))}
+        </div>
+      </div>
+    </div>
+  );
+}
+
+/* ─── ABOUT: WHY CHOOSE US ──────────────────────────────────── */
+export interface PerfumesWhyChooseUsProps {
+  title?: string;
+  items?: Array<{ icon: string; title: string; desc: string }>;
+}
+export function PerfumesWhyChooseUs({ title = "Why Choose Us?", items = [] }: PerfumesWhyChooseUsProps) {
+  const css = `
+    .pa-why { max-width: ${TOKENS.containerWidth}; margin: 0 auto; padding: 0 15px 80px; }
+    .pa-why-title { font-family: ${TOKENS.titleFont}; font-size: 42px; font-weight: 400; color: ${TOKENS.primaryColor}; margin: 0 0 50px; text-align: center; }
+    .pa-why-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 40px; }
+    .pa-why-card { text-align: center; }
+    .pa-why-icon { width: 60px; height: 60px; margin: 0 auto 20px; }
+    .pa-why-card-title { font-family: ${TOKENS.titleFont}; font-size: 22px; font-weight: 500; color: ${TOKENS.primaryColor}; margin: 0 0 12px; }
+    .pa-why-card-desc { font-family: ${TOKENS.bodyFont}; font-size: 14px; line-height: 1.7; color: ${TOKENS.textColor}; margin: 0; }
+    @media (max-width: 1024px) { .pa-why-grid { grid-template-columns: repeat(2, 1fr); } }
+    @media (max-width: 767px) { .pa-why-grid { grid-template-columns: 1fr; } .pa-why-title { font-size: 32px; } }
+  `;
+  return (
+    <div>
+      <ScopedStyles id="about-why" css={css} />
+      <div className="pa-why">
+        <h2 className="pa-why-title">{title}</h2>
+        <div className="pa-why-grid">
+          {items.map((item, i) => (
+            <div key={i} className="pa-why-card">
+              <img src={item.icon} alt={item.title} className="pa-why-icon" />
+              <h3 className="pa-why-card-title">{item.title}</h3>
+              <p className="pa-why-card-desc">{item.desc}</p>
+            </div>
+          ))}
+        </div>
+      </div>
+    </div>
+  );
+}
+
+/* ─── CONTACT: HERO ─────────────────────────────────────────── */
+export interface PerfumesContactHeroProps {
+  title?: string;
+}
+export function PerfumesContactHero({ title = "Contact Us" }: PerfumesContactHeroProps) {
+  const css = `
+    .pc-hero { max-width: ${TOKENS.containerWidth}; margin: 0 auto; padding: 80px 15px 60px; text-align: center; }
+    .pc-title { font-family: ${TOKENS.titleFont}; font-size: 52px; font-weight: 400; color: ${TOKENS.primaryColor}; margin: 0 0 50px; letter-spacing: -1px; }
+    @media (max-width: 767px) { .pc-title { font-size: 36px; } }
+  `;
+  return (
+    <div>
+      <ScopedStyles id="contact-hero" css={css} />
+      <div className="pc-hero"><h1 className="pc-title">{title}</h1></div>
+    </div>
+  );
+}
+
+/* ─── CONTACT: INFO CARDS ───────────────────────────────────── */
+export interface PerfumesContactInfoProps {
+  items?: Array<{ label: string; value: string; type?: string }>;
+}
+export function PerfumesContactInfo({ items = [] }: PerfumesContactInfoProps) {
+  const storeCtx = useContext(PerfumesStoreContext);
+  const socialIcons: Record<string, string> = { facebook: "f", twitter: "𝕏", instagram: "📷", youtube: "▶", tiktok: "♪" };
+  const css = `
+    .pc-info-grid { max-width: ${TOKENS.containerWidth}; margin: 0 auto; padding: 0 15px 60px; display: grid; grid-template-columns: repeat(4, 1fr); gap: 40px; }
+    .pc-info-card { text-align: center; }
+    .pc-info-label { font-family: ${TOKENS.titleFont}; font-size: 22px; font-weight: 500; color: ${TOKENS.primaryColor}; margin: 0 0 15px; }
+    .pc-info-value { font-family: ${TOKENS.bodyFont}; font-size: 14px; line-height: 1.7; color: ${TOKENS.textColor}; margin: 0; }
+    .pc-social-row { display: flex; justify-content: center; gap: 12px; margin-top: 10px; }
+    .pc-social-icon { width: 40px; height: 40px; border-radius: 50%; border: 1px solid #ddd; display: flex; align-items: center; justify-content: center; color: ${TOKENS.textColor}; text-decoration: none; font-size: 14px; transition: all 0.2s; }
+    .pc-social-icon:hover { border-color: ${TOKENS.primaryColor}; color: ${TOKENS.primaryColor}; }
+    @media (max-width: 1024px) { .pc-info-grid { grid-template-columns: repeat(2, 1fr); } }
+    @media (max-width: 767px) { .pc-info-grid { grid-template-columns: 1fr; } }
+  `;
+  const socialLinks = storeCtx?.socialLinks || [];
+  return (
+    <div>
+      <ScopedStyles id="contact-info" css={css} />
+      <div className="pc-info-grid">
+        {items.map((item, i) => (
+          <div key={i} className="pc-info-card">
+            <h3 className="pc-info-label">{item.label}</h3>
+            {item.type === "social" ? (
+              <div className="pc-social-row">
+                {socialLinks.length > 0 ? socialLinks.map((s, si) => (
+                  <a key={si} href={s.url} className="pc-social-icon" target="_blank" rel="noopener noreferrer">{socialIcons[s.platform] || s.platform[0]?.toUpperCase()}</a>
+                )) : (<><a href="#" className="pc-social-icon">f</a><a href="#" className="pc-social-icon">𝕏</a><a href="#" className="pc-social-icon">📷</a><a href="#" className="pc-social-icon">▶</a></>)}
+              </div>
+            ) : (
+              <p className="pc-info-value" dangerouslySetInnerHTML={{ __html: item.value }} />
+            )}
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
+
+/* ─── CONTACT: FORM ─────────────────────────────────────────── */
+export interface PerfumesContactFormProps {
+  title?: string;
+  description?: string;
+}
+export function PerfumesContactForm({ title = "Get In Touch", description = "" }: PerfumesContactFormProps) {
+  const [form, setForm] = useState({ firstName: "", lastName: "", email: "", message: "" });
+  const [submitted, setSubmitted] = useState(false);
+  const css = `
+    .pc-form-section { max-width: ${TOKENS.containerWidth}; margin: 0 auto; padding: 0 15px 80px; display: grid; grid-template-columns: 1fr 1fr; gap: 60px; align-items: flex-start; }
+    .pc-form-title { font-family: ${TOKENS.titleFont}; font-size: 36px; font-weight: 400; color: ${TOKENS.primaryColor}; margin: 0 0 10px; }
+    .pc-form-desc { font-family: ${TOKENS.bodyFont}; font-size: 14px; line-height: 1.7; color: ${TOKENS.textColor}; margin: 0 0 30px; }
+    .pc-form { display: flex; flex-direction: column; gap: 18px; }
+    .pc-form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 18px; }
+    .pc-input { width: 100%; padding: 14px 18px; border: 1px solid #ddd; font-family: ${TOKENS.bodyFont}; font-size: 14px; outline: none; color: ${TOKENS.primaryColor}; transition: border-color 0.2s; background: #fff; }
+    .pc-input:focus { border-color: ${TOKENS.primaryColor}; }
+    .pc-textarea { width: 100%; padding: 14px 18px; border: 1px solid #ddd; font-family: ${TOKENS.bodyFont}; font-size: 14px; outline: none; color: ${TOKENS.primaryColor}; min-height: 140px; resize: vertical; transition: border-color 0.2s; }
+    .pc-textarea:focus { border-color: ${TOKENS.primaryColor}; }
+    .pc-submit { padding: 14px 40px; background: ${TOKENS.primaryColor}; color: #fff; border: none; font-family: ${TOKENS.bodyFont}; font-size: 13px; font-weight: 500; text-transform: uppercase; letter-spacing: 1.5px; cursor: pointer; transition: background 0.2s; align-self: flex-start; }
+    .pc-submit:hover { background: ${TOKENS.accentColor}; }
+    .pc-success { font-family: ${TOKENS.bodyFont}; font-size: 15px; color: #16a34a; font-weight: 500; }
+    @media (max-width: 1024px) { .pc-form-section { grid-template-columns: 1fr; } }
+    @media (max-width: 767px) { .pc-form-row { grid-template-columns: 1fr; } }
+  `;
+  return (
+    <div>
+      <ScopedStyles id="contact-form" css={css} />
+      <div className="pc-form-section">
+        <div>
+          <h2 className="pc-form-title">{title}</h2>
+          <p className="pc-form-desc">{description}</p>
+        </div>
+        <div>
+          {submitted ? (
+            <p className="pc-success">Thank you for your message! We&apos;ll get back to you soon.</p>
+          ) : (
+            <form className="pc-form" onSubmit={e => { e.preventDefault(); setSubmitted(true); }}>
+              <div className="pc-form-row">
+                <input className="pc-input" placeholder="First name" value={form.firstName} onChange={e => setForm({ ...form, firstName: e.target.value })} required />
+                <input className="pc-input" placeholder="Last name" value={form.lastName} onChange={e => setForm({ ...form, lastName: e.target.value })} required />
+              </div>
+              <input className="pc-input" type="email" placeholder="Email" value={form.email} onChange={e => setForm({ ...form, email: e.target.value })} required />
+              <textarea className="pc-textarea" placeholder="Your Message" value={form.message} onChange={e => setForm({ ...form, message: e.target.value })} required />
+              <button type="submit" className="pc-submit">Send Message</button>
+            </form>
+          )}
+        </div>
+      </div>
+    </div>
+  );
+}
+
+/* ─── CONTACT: BRANDED STORES ───────────────────────────────── */
+export interface PerfumesBrandedStoresProps {
+  title?: string;
+  stores?: Array<{ name: string; phone: string; address: string }>;
+}
+export function PerfumesBrandedStores({ title = "Our Branded Stores", stores = [] }: PerfumesBrandedStoresProps) {
+  const css = `
+    .pc-stores { max-width: ${TOKENS.containerWidth}; margin: 0 auto; padding: 0 15px 80px; }
+    .pc-stores-title { font-family: ${TOKENS.titleFont}; font-size: 36px; font-weight: 400; color: ${TOKENS.primaryColor}; margin: 0 0 40px; text-align: center; }
+    .pc-stores-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 40px; }
+    .pc-store-card { text-align: center; padding: 35px 25px; border: 1px solid #eee; }
+    .pc-store-name { font-family: ${TOKENS.titleFont}; font-size: 24px; font-weight: 500; color: ${TOKENS.primaryColor}; margin: 0 0 18px; }
+    .pc-store-detail { font-family: ${TOKENS.bodyFont}; font-size: 14px; color: ${TOKENS.textColor}; margin: 0 0 8px; line-height: 1.6; }
+    .pc-store-detail strong { color: ${TOKENS.primaryColor}; }
+    @media (max-width: 1024px) { .pc-stores-grid { grid-template-columns: repeat(2, 1fr); } }
+    @media (max-width: 767px) { .pc-stores-grid { grid-template-columns: 1fr; } }
+  `;
+  return (
+    <div>
+      <ScopedStyles id="branded-stores" css={css} />
+      <div className="pc-stores">
+        <h2 className="pc-stores-title">{title}</h2>
+        <div className="pc-stores-grid">
+          {stores.map((s, i) => (
+            <div key={i} className="pc-store-card">
+              <h3 className="pc-store-name">{s.name}</h3>
+              <p className="pc-store-detail"><strong>Call Us:</strong> {s.phone}</p>
+              <p className="pc-store-detail"><strong>Address:</strong> {s.address}</p>
+            </div>
+          ))}
+        </div>
+      </div>
+    </div>
+  );
+}
+
+/* ─── FRAGRANCES: HERO ──────────────────────────────────────── */
+export interface PerfumesPageHeroProps {
+  title?: string;
+}
+export function PerfumesPageHero({ title = "Fragrances" }: PerfumesPageHeroProps) {
+  const css = `
+    .pfr-hero { max-width: ${TOKENS.containerWidth}; margin: 0 auto; padding: 80px 15px 60px; }
+    .pfr-hero-title { font-family: ${TOKENS.titleFont}; font-size: 52px; font-weight: 400; color: ${TOKENS.primaryColor}; margin: 0; letter-spacing: -1px; }
+    @media (max-width: 1024px) { .pfr-hero-title { font-size: 40px; } }
+    @media (max-width: 767px) { .pfr-hero-title { font-size: 32px; } .pfr-hero { padding: 50px 15px 40px; } }
+  `;
+  return (
+    <div>
+      <ScopedStyles id="page-hero" css={css} />
+      <div className="pfr-hero"><h1 className="pfr-hero-title">{title}</h1></div>
+    </div>
+  );
+}
+
+/* ─── FRAGRANCES: COLLECTIONS GRID ──────────────────────────── */
+export interface PerfumesCollectionsGridProps {
+  collections?: Array<{ name: string; slug: string; description: string }>;
+}
+export function PerfumesCollectionsGrid({ collections = [] }: PerfumesCollectionsGridProps) {
+  const storeCtx = useContext(PerfumesStoreContext);
+  const products = storeCtx?.products || [];
+  const currency = storeCtx?.currency || "USD";
+  const storeSlug = storeCtx?.storeSlug || "";
+  const currencySymbols: Record<string, string> = { NGN: "₦", KES: "KSh", GHS: "GH₵", ZAR: "R", USD: "$", GBP: "£", EUR: "€" };
+  const formatPrice = (price: number, cur: string) => `${currencySymbols[cur] || cur}${price.toLocaleString()}`;
+
+  const getCollectionProducts = (collSlug: string) => {
+    const match = products.filter((p: any) => p.category?.slug?.toLowerCase() === collSlug || p.category?.name?.toLowerCase().replace(/\s+/g, "-") === collSlug);
+    return match.length > 0 ? match.slice(0, 8) : [];
+  };
+  const hasMatched = collections.some(c => getCollectionProducts(c.slug).length > 0);
+  const chunk = Math.ceil(products.length / Math.max(collections.length, 1));
+
+  const css = `
+    .pfr-section { max-width: ${TOKENS.containerWidth}; margin: 0 auto; padding: 0 15px 80px; }
+    .pfr-collection-header { display: flex; align-items: flex-start; justify-content: space-between; margin-bottom: 35px; gap: 40px; }
+    .pfr-col-name { font-family: ${TOKENS.titleFont}; font-size: 36px; font-weight: 400; color: ${TOKENS.primaryColor}; margin: 0; }
+    .pfr-col-desc { font-family: ${TOKENS.bodyFont}; font-size: 14px; line-height: 1.7; color: ${TOKENS.textColor}; max-width: 500px; margin: 0; }
+    .pfr-view-link { font-family: ${TOKENS.bodyFont}; font-size: 13px; font-weight: 500; text-transform: uppercase; letter-spacing: 1.5px; color: ${TOKENS.primaryColor}; text-decoration: none; border-bottom: 1px solid ${TOKENS.primaryColor}; padding-bottom: 2px; white-space: nowrap; transition: color 0.2s; }
+    .pfr-view-link:hover { color: ${TOKENS.accentColor}; border-color: ${TOKENS.accentColor}; }
+    .pfr-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 20px; }
+    .pfr-card { position: relative; }
+    .pfr-card-img-wrap { position: relative; overflow: hidden; margin-bottom: 15px; background: #f8f8f8; }
+    .pfr-card-img { width: 100%; aspect-ratio: 430 / 491; object-fit: cover; display: block; transition: transform 0.5s ease; }
+    .pfr-card:hover .pfr-card-img { transform: scale(1.03); }
+    .pfr-card-actions { position: absolute; bottom: 10px; left: 10px; right: 10px; display: flex; gap: 6px; opacity: 0; transform: translateY(8px); transition: all 0.3s ease; }
+    .pfr-card:hover .pfr-card-actions { opacity: 1; transform: translateY(0); }
+    .pfr-card-btn { flex: 1; padding: 10px; background: #fff; border: none; cursor: pointer; font-family: ${TOKENS.bodyFont}; font-size: 12px; font-weight: 500; text-transform: uppercase; letter-spacing: 0.5px; color: ${TOKENS.primaryColor}; text-align: center; text-decoration: none; display: block; transition: background 0.2s; }
+    .pfr-card-btn:hover { background: ${TOKENS.primaryColor}; color: #fff; }
+    .pfr-card-name { font-family: ${TOKENS.bodyFont}; font-size: 14px; font-weight: 500; color: ${TOKENS.primaryColor}; margin: 0 0 6px; }
+    .pfr-card-name a { color: inherit; text-decoration: none; }
+    .pfr-card-name a:hover { color: ${TOKENS.accentColor}; }
+    .pfr-card-price { font-family: ${TOKENS.bodyFont}; font-size: 14px; color: ${TOKENS.textColor}; }
+    .pfr-card-price-old { text-decoration: line-through; margin-right: 8px; color: #bbb; }
+    .pfr-divider { max-width: ${TOKENS.containerWidth}; margin: 0 auto 60px; padding: 0 15px; border: none; border-top: 1px solid #eee; }
+    .pfr-empty { text-align: center; padding: 40px; font-family: ${TOKENS.bodyFont}; color: ${TOKENS.textColor}; }
+    @media (max-width: 1024px) { .pfr-grid { grid-template-columns: repeat(3, 1fr); } .pfr-col-name { font-size: 28px; } .pfr-collection-header { flex-direction: column; gap: 15px; } }
+    @media (max-width: 767px) { .pfr-grid { grid-template-columns: repeat(2, 1fr); gap: 12px; } }
+  `;
+
+  return (
+    <div>
+      <ScopedStyles id="collections-grid" css={css} />
+      {products.length === 0 ? (<div className="pfr-empty">No fragrances available yet.</div>) : (
+        collections.map((col, ci) => {
+          const colProducts = hasMatched ? getCollectionProducts(col.slug) : products.slice(ci * chunk, (ci + 1) * chunk);
+          if (colProducts.length === 0 && hasMatched) return null;
+          return (
+            <div key={col.slug}>
+              {ci > 0 && <hr className="pfr-divider" />}
+              <div className="pfr-section">
+                <div className="pfr-collection-header">
+                  <div><h2 className="pfr-col-name">{col.name}</h2><p className="pfr-col-desc">{col.description}</p></div>
+                  <Link href={resolveStoreLink(`/shop?category=${col.slug}`, storeSlug)} className="pfr-view-link">View Collection</Link>
+                </div>
+                <div className="pfr-grid">
+                  {colProducts.map((p: any) => (
+                    <div key={p.id} className="pfr-card">
+                      <div className="pfr-card-img-wrap">
+                        <Link href={resolveStoreLink(`/product/${p.slug}`, storeSlug)}><img src={p.images?.[0]?.url || safeSrc(null, p.name)} alt={p.name} className="pfr-card-img" loading="lazy" onError={(e: any) => onImgError(e, p.name)} /></Link>
+                        <div className="pfr-card-actions"><Link href={resolveStoreLink(`/product/${p.slug}`, storeSlug)} className="pfr-card-btn">View</Link></div>
+                      </div>
+                      <h3 className="pfr-card-name"><Link href={resolveStoreLink(`/product/${p.slug}`, storeSlug)}>{p.name}</Link></h3>
+                      <div className="pfr-card-price">
+                        {p.compareAtPrice && <span className="pfr-card-price-old">{formatPrice(p.compareAtPrice, currency)}</span>}
+                        {formatPrice(p.price, currency)}
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </div>
+          );
+        })
+      )}
+    </div>
+  );
+}
+
+/* ─── JOURNAL: GRID ─────────────────────────────────────────── */
+export interface PerfumesJournalGridProps {
+  columns?: number;
+}
+export function PerfumesJournalGrid({ columns = 3 }: PerfumesJournalGridProps) {
+  const storeCtx = useContext(PerfumesStoreContext);
+  const blogs = storeCtx?.blogs || [];
+  const storeSlug = storeCtx?.storeSlug || "";
+  const placeholders = Array.from({ length: 6 }, (_, i) => `${IMG_BASE}/2025/11/prf-blog-${i + 1}-588x598.jpg`);
+  const formatDate = (d: string) => new Date(d).toLocaleDateString("en-US", { day: "2-digit", month: "short", year: "numeric" });
+
+  const css = `
+    .pj-grid { max-width: ${TOKENS.containerWidth}; margin: 0 auto; padding: 0 15px 80px; display: grid; grid-template-columns: repeat(${columns}, 1fr); gap: 25px; }
+    .pj-card { position: relative; overflow: hidden; }
+    .pj-card-img { width: 100%; aspect-ratio: 1 / 1.02; object-fit: cover; display: block; transition: transform 0.5s ease; }
+    .pj-card:hover .pj-card-img { transform: scale(1.03); }
+    .pj-card-overlay { position: absolute; bottom: 0; left: 0; right: 0; padding: 30px 25px; background: linear-gradient(transparent, rgba(0,0,0,0.6)); }
+    .pj-card-date { font-family: ${TOKENS.bodyFont}; font-size: 12px; color: rgba(255,255,255,0.7); margin-bottom: 8px; text-transform: uppercase; letter-spacing: 1px; }
+    .pj-card-title { font-family: ${TOKENS.titleFont}; font-size: 24px; font-weight: 500; color: #fff; margin: 0; }
+    .pj-card-title a { color: #fff; text-decoration: none; }
+    .pj-empty { text-align: center; padding: 60px 20px; font-family: ${TOKENS.bodyFont}; color: ${TOKENS.textColor}; }
+    @media (max-width: 1024px) { .pj-grid { grid-template-columns: repeat(2, 1fr); } }
+    @media (max-width: 767px) { .pj-grid { grid-template-columns: 1fr; } }
+  `;
+
+  return (
+    <div>
+      <ScopedStyles id="journal-grid" css={css} />
+      {blogs.length === 0 ? (<div className="pj-empty">No journal entries yet.</div>) : (
+        <div className="pj-grid">
+          {blogs.map((post: any, i: number) => (
+            <div key={post.id} className="pj-card">
+              <img src={post.coverImage || placeholders[i % 6]} alt={post.title} className="pj-card-img" loading="lazy" />
+              <div className="pj-card-overlay">
+                <div className="pj-card-date">{formatDate(post.publishedAt || post.createdAt)}</div>
+                <h3 className="pj-card-title"><Link href={resolveStoreLink(`/blog/${post.slug}`, storeSlug)}>{post.title}</Link></h3>
+              </div>
+            </div>
+          ))}
+        </div>
+      )}
+    </div>
+  );
+}

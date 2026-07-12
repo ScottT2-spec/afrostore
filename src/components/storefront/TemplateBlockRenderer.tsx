@@ -172,6 +172,17 @@ import {
   PerfumesBlogArticles,
   PerfumesInstagram,
   PerfumesFooter,
+  PerfumesAboutWelcome,
+  PerfumesAboutMarquee,
+  PerfumesAboutStory,
+  PerfumesWhyChooseUs,
+  PerfumesContactHero,
+  PerfumesContactInfo,
+  PerfumesContactForm,
+  PerfumesBrandedStores,
+  PerfumesPageHero,
+  PerfumesCollectionsGrid,
+  PerfumesJournalGrid,
 } from "@/components/storefront/PerfumesTemplateBlocks";
 
 /* ─── TYPES ─────────────────────────────────────────────────── */
@@ -341,6 +352,17 @@ const PERFUMES_BLOCKS: Record<string, BlockComponent> = {
   perfumesBlogArticles: PerfumesBlogArticles as unknown as BlockComponent,
   perfumesInstagram: PerfumesInstagram as unknown as BlockComponent,
   perfumesFooter: PerfumesFooter as unknown as BlockComponent,
+  perfumesAboutWelcome: PerfumesAboutWelcome as unknown as BlockComponent,
+  perfumesAboutMarquee: PerfumesAboutMarquee as unknown as BlockComponent,
+  perfumesAboutStory: PerfumesAboutStory as unknown as BlockComponent,
+  perfumesWhyChooseUs: PerfumesWhyChooseUs as unknown as BlockComponent,
+  perfumesContactHero: PerfumesContactHero as unknown as BlockComponent,
+  perfumesContactInfo: PerfumesContactInfo as unknown as BlockComponent,
+  perfumesContactForm: PerfumesContactForm as unknown as BlockComponent,
+  perfumesBrandedStores: PerfumesBrandedStores as unknown as BlockComponent,
+  perfumesPageHero: PerfumesPageHero as unknown as BlockComponent,
+  perfumesCollectionsGrid: PerfumesCollectionsGrid as unknown as BlockComponent,
+  perfumesJournalGrid: PerfumesJournalGrid as unknown as BlockComponent,
 };
 
 const ALL_TEMPLATE_BLOCKS: Record<string, BlockComponent> = {
