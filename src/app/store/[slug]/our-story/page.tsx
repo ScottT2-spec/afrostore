@@ -253,9 +253,9 @@ export default async function OurStoryPage({ params }: Props) {
   
   // Use custom blocks if available, otherwise use preset
   let pageContent;
-  if (ourStoryPage?.content) {
-    const parsed = parsePageContent(ourStoryPage.content);
-    pageContent = parsed;
+  const parsedStory = ourStoryPage?.content ? parsePageContent(ourStoryPage.content) : null;
+  if (parsedStory && parsedStory.blocks.length > 0) {
+    pageContent = parsedStory;
   } else {
     pageContent = { blocks: OUR_STORY_PAGE_BLOCKS, settings: {} };
   }
@@ -289,7 +289,7 @@ export default async function OurStoryPage({ params }: Props) {
           wishlistCount={0}
         />
         <div style={buildPageBackgroundStyle(pageSettings)}>
-          {ourStoryPage?.content ? (
+          {parsedStory && parsedStory.blocks.length > 0 ? (
             <RenderBlocks blocks={pageContent.blocks as BuilderBlock[]} storeSlug={slug} products={serializedProducts} />
           ) : (
             <RenderTemplateBlocks blocks={OUR_STORY_PAGE_BLOCKS} />
@@ -315,7 +315,7 @@ export default async function OurStoryPage({ params }: Props) {
         isLanding={false}
       />
       <div style={buildPageBackgroundStyle(pageSettings)}>
-        {ourStoryPage?.content ? (
+        {parsedStory && parsedStory.blocks.length > 0 ? (
           <RenderBlocks blocks={pageContent.blocks as BuilderBlock[]} storeSlug={slug} products={serializedProducts} />
         ) : (
           <RenderTemplateBlocks blocks={OUR_STORY_PAGE_BLOCKS} />

@@ -238,9 +238,9 @@ export default async function ContactPage({ params }: Props) {
   
   // Use custom blocks if available, otherwise use preset
   let pageContent;
-  if (contactPage?.content) {
-    const parsed = parsePageContent(contactPage.content);
-    pageContent = parsed;
+  const parsedContact = contactPage?.content ? parsePageContent(contactPage.content) : null;
+  if (parsedContact && parsedContact.blocks.length > 0) {
+    pageContent = parsedContact;
   } else {
     pageContent = { blocks: CONTACT_PAGE_BLOCKS, settings: {} };
   }
@@ -525,7 +525,7 @@ export default async function ContactPage({ params }: Props) {
           wishlistCount={0}
         />
         <div style={buildPageBackgroundStyle(pageSettings)}>
-          {contactPage?.content ? (
+          {parsedContact && parsedContact.blocks.length > 0 ? (
             <RenderBlocks blocks={pageContent.blocks as BuilderBlock[]} storeSlug={slug} products={serializedProducts} />
           ) : (
             <RenderTemplateBlocks blocks={CONTACT_PAGE_BLOCKS} />
@@ -551,7 +551,7 @@ export default async function ContactPage({ params }: Props) {
         isLanding={false}
       />
       <div style={buildPageBackgroundStyle(pageSettings)}>
-        {contactPage?.content ? (
+        {parsedContact && parsedContact.blocks.length > 0 ? (
           <RenderBlocks blocks={pageContent.blocks as BuilderBlock[]} storeSlug={slug} products={serializedProducts} />
         ) : (
           <RenderTemplateBlocks blocks={CONTACT_PAGE_BLOCKS} />

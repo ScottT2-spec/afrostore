@@ -260,9 +260,9 @@ export default async function AboutPage({ params }: Props) {
   
   // Use custom blocks if available, otherwise use preset
   let pageContent;
-  if (aboutPage?.content) {
-    const parsed = parsePageContent(aboutPage.content);
-    pageContent = parsed;
+  const parsedAbout = aboutPage?.content ? parsePageContent(aboutPage.content) : null;
+  if (parsedAbout && parsedAbout.blocks.length > 0) {
+    pageContent = parsedAbout;
   } else {
     pageContent = { blocks: ABOUT_PAGE_BLOCKS, settings: {} };
   }
@@ -504,7 +504,7 @@ export default async function AboutPage({ params }: Props) {
         isLanding={false}
       />
       <div style={buildPageBackgroundStyle(pageSettings)}>
-        {aboutPage?.content ? (
+        {parsedAbout && parsedAbout.blocks.length > 0 ? (
           <RenderBlocks blocks={pageContent.blocks as BuilderBlock[]} storeSlug={slug} products={serializedProducts} />
         ) : (
           <RenderTemplateBlocks blocks={ABOUT_PAGE_BLOCKS} />
