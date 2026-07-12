@@ -1,4 +1,5 @@
 import { prisma } from "@/lib/db";
+import { HANDMADE_BAGS_PAGE_BLOCKS } from "./presets/handmade-bags-pages";
 
 /**
  * Template-specific page definitions.
@@ -65,15 +66,25 @@ const TEMPLATE_PAGE_MAP: Record<string, PageDef[]> = {
   makeup: MAKEUP_PAGES,
 };
 
+/** Map of template slug → default page block content (keyed by page slug) */
+const TEMPLATE_PAGE_CONTENT_MAP: Record<string, Record<string, unknown[]>> = {
+  "handmade-bags": HANDMADE_BAGS_PAGE_BLOCKS,
+};
+
 /**
  * Ensure template-specific pages exist in the DB for a given site.
  * Called on template import so pages show up in the editor.
+ * For templates with default block content, seeds the blocks so pages are
+ * editable from day one instead of relying on hardcoded fallbacks.
  */
 export async function ensureTemplatePages(siteId: string, templateSlug: string) {
   const pages = TEMPLATE_PAGE_MAP[templateSlug];
   if (!pages || pages.length === 0) return;
 
+  const contentMap = TEMPLATE_PAGE_CONTENT_MAP[templateSlug] || {};
+
   for (const page of pages) {
+    const defaultContent = contentMap[page.slug] || [];
     await prisma.page.upsert({
       where: {
         siteId_slug: {
@@ -82,14 +93,14 @@ export async function ensureTemplatePages(siteId: string, templateSlug: string) 
         },
       },
       update: {
-        // Don't overwrite title if already customized — only ensure it exists
+        // Don't overwrite title/content if already customized — only ensure it exists
       },
       create: {
         siteId,
         title: page.title,
         slug: page.slug,
         type: page.type,
-        content: [],
+        content: defaultContent as any,
         isPublished: true,
         position: page.position,
       },
