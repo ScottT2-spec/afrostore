@@ -1,4 +1,8 @@
 import { PERFUMES_TEMPLATE_PRESET } from './presets/perfumes-preset';
+import { PERFUMES_ABOUT_PRESET } from './presets/perfumes-about-preset';
+import { PERFUMES_CONTACT_PRESET } from './presets/perfumes-contact-preset';
+import { PERFUMES_FRAGRANCES_PRESET } from './presets/perfumes-fragrances-preset';
+import { PERFUMES_JOURNAL_PRESET } from './presets/perfumes-journal-preset';
 import type { PerfumesSection } from '@/components/storefront/PerfumesPageRenderer';
 
 /**
@@ -42,76 +46,52 @@ export const PERFUMES_DEFAULT_PAGES = {
     id: 'fragrances',
     name: 'Fragrances',
     slug: '/fragrances',
-    sections: seedPerfumesPageSections().filter(s => 
-      s.type === 'perfumesHeroSlider' || 
-      s.type === 'perfumesProductGrid'
-    ),
+    sections: PERFUMES_FRAGRANCES_PRESET.map((block, index) => ({
+      id: block.id,
+      type: block.type,
+      order: index + 1,
+      props: block.props,
+      styleOverrides: {},
+    })),
     isSystem: false,
   },
   about: {
     id: 'about',
     name: 'About Us',
     slug: '/about-us',
-    sections: [
-      {
-        id: 'about-hero',
-        type: 'perfumesHeroSlider',
-        order: 1,
-        props: {
-          autoplaySpeed: 6000,
-          minHeight: '60vh',
-          slides: [
-            {
-              title: 'Our Story',
-              bottleImage: 'https://woodmart.xtemos.com/wp-content/uploads/2024/11/perfumes-slide-bottle-1.png',
-              backgroundColor: '#1a1a2e',
-              buttonText: 'Learn More',
-              buttonLink: '/about-us',
-              buttonStyle: 'primary',
-            },
-          ],
-        },
-        styleOverrides: {},
-      },
-    ],
+    sections: PERFUMES_ABOUT_PRESET.map((block, index) => ({
+      id: block.id,
+      type: block.type,
+      order: index + 1,
+      props: block.props,
+      styleOverrides: {},
+    })),
     isSystem: false,
   },
   contact: {
     id: 'contact',
     name: 'Contact Us',
     slug: '/contact-us',
-    sections: [
-      {
-        id: 'contact-hero',
-        type: 'perfumesHeroSlider',
-        order: 1,
-        props: {
-          autoplaySpeed: 6000,
-          minHeight: '60vh',
-          slides: [
-            {
-              title: 'Get in Touch',
-              bottleImage: 'https://woodmart.xtemos.com/wp-content/uploads/2024/11/perfumes-slide-bottle-2.png',
-              backgroundColor: '#2d1b4e',
-              buttonText: 'Contact Us',
-              buttonLink: '/contact-us',
-              buttonStyle: 'primary',
-            },
-          ],
-        },
-        styleOverrides: {},
-      },
-    ],
+    sections: PERFUMES_CONTACT_PRESET.map((block, index) => ({
+      id: block.id,
+      type: block.type,
+      order: index + 1,
+      props: block.props,
+      styleOverrides: {},
+    })),
     isSystem: false,
   },
   journal: {
     id: 'journal',
     name: 'Journal',
     slug: '/journal',
-    sections: seedPerfumesPageSections().filter(s => 
-      s.type === 'perfumesHeroSlider' || 
-      s.type === 'perfumesTabbedProducts'
-    ),
+    sections: PERFUMES_JOURNAL_PRESET.map((block, index) => ({
+      id: block.id,
+      type: block.type,
+      order: index + 1,
+      props: block.props,
+      styleOverrides: {},
+    })),
     isSystem: false,
   },
 };
