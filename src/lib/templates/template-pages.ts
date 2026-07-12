@@ -85,25 +85,37 @@ export async function ensureTemplatePages(siteId: string, templateSlug: string) 
 
   for (const page of pages) {
     const defaultContent = contentMap[page.slug] || [];
-    await prisma.page.upsert({
-      where: {
-        siteId_slug: {
-          siteId,
-          slug: page.slug,
-        },
-      },
-      update: {
-        // Don't overwrite title/content if already customized — only ensure it exists
-      },
-      create: {
-        siteId,
-        title: page.title,
-        slug: page.slug,
-        type: page.type,
-        content: defaultContent as any,
-        isPublished: true,
-        position: page.position,
-      },
+    const existing = await prisma.page.findUnique({
+      where: { siteId_slug: { siteId, slug: page.slug } },
+      select: { content: true },
     });
+
+    if (existing) {
+      // If page exists but has empty content, seed the default blocks
+      const hasContent = Array.isArray(existing.content)
+        ? (existing.content as unknown[]).length > 0
+        : existing.content && typeof existing.content === "object" && Array.isArray((existing.content as any).blocks)
+          ? ((existing.content as any).blocks as unknown[]).length > 0
+          : false;
+
+      if (!hasContent && defaultContent.length > 0) {
+        await prisma.page.update({
+          where: { siteId_slug: { siteId, slug: page.slug } },
+          data: { content: defaultContent as any },
+        });
+      }
+    } else {
+      await prisma.page.create({
+        data: {
+          siteId,
+          title: page.title,
+          slug: page.slug,
+          type: page.type,
+          content: defaultContent as any,
+          isPublished: true,
+          position: page.position,
+        },
+      });
+    }
   }
 }
