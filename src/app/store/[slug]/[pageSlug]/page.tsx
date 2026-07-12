@@ -9,6 +9,7 @@ import { RenderBlocks, type BuilderBlock, type StoreProduct } from "@/components
 import { FashionFooter } from "@/components/storefront/FashionStoreChrome";
 import { TShirtsPrintsFooter, TShirtsPrintsHeader } from "@/components/storefront/TShirtsPrintsStoreChrome";
 import { parsePageContent, getLinkedPageHref } from "@/lib/page-content";
+import { mergeBespokeTemplateBlocks } from "@/lib/templates/bespoke-page-content";
 import { ThemeProvider, type ThemeData } from "@/components/storefront/ThemeProvider";
 import { useWishlist } from "@/hooks/useWishlist";
 import { applyPageCustomization, buildPageBackgroundStyle, buildThemeDataWithCustomization, filterVisiblePages, getResolvedPageSettings, normalizeSiteCustomization, type SiteCustomizationDocument } from "@/lib/site-customization";
@@ -200,7 +201,11 @@ export default function StorefrontPage() {
   const resolvedPage = applyPageCustomization(page, draftCustomization);
   const parsedContent = parsePageContent(resolvedPage.content);
   const resolvedPageSettings = getResolvedPageSettings(resolvedPage, parsedContent.settings, draftCustomization);
-  const blocks: BuilderBlock[] = parsedContent.blocks;
+  // Use parsed blocks if available; otherwise fall back to template-specific page presets
+  const parsedBlocks = parsedContent.blocks;
+  const blocks: BuilderBlock[] = parsedBlocks.length > 0
+    ? parsedBlocks
+    : (mergeBespokeTemplateBlocks(data.templateSlug, pageSlug, resolvedPage.content, { pageSlug: pageSlug as string, pageTitle: resolvedPage.title, pageType: resolvedPage.type, templateSlug: data.templateSlug }) as unknown as BuilderBlock[]);
   const visiblePages = filterVisiblePages(data.pages, draftCustomization);
   const customizedPages = visiblePages.map((item) => applyPageCustomization(item, draftCustomization));
 
