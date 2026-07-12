@@ -573,6 +573,23 @@ function getTemplateFamily(templateSlug: string): TemplateFamily {
 function buildAboutLayout(title: string, family: TemplateFamily): BuilderBlock[] {
   const copy = FAMILY_COPY[family].about;
 
+  if (family === "health") {
+    return [
+      createRawBlock("healthAboutPage", {
+        heroTitle: title,
+        heroSubtitle: copy.summary,
+        storyTitle: "Our Story",
+        storyText: copy.story,
+        missionTitle: "Our Mission",
+        missionText: copy.mission,
+        features: copy.features.map((f) => ({ icon: f.icon === "shield" ? "🛡️" : f.icon === "heart" ? "💚" : "🚚", title: f.title, description: f.desc })),
+        teamTitle: "Our Team",
+        teamSubtitle: "Meet the people behind the brand",
+        team: copy.team.map((m) => ({ name: m.name, role: m.role })),
+      }),
+    ];
+  }
+
   if (family === "interior") {
     return [
       createRawBlock("gardenAboutPage", {
@@ -630,6 +647,18 @@ function buildAboutLayout(title: string, family: TemplateFamily): BuilderBlock[]
 function buildContactLayout(title: string, family: TemplateFamily): BuilderBlock[] {
   const copy = FAMILY_COPY[family].contact;
 
+  if (family === "health") {
+    return [
+      createRawBlock("healthContactPage", {
+        heroTitle: title,
+        heroSubtitle: copy.summary,
+        hours: copy.hours,
+        faqTitle: "Frequently Asked Questions",
+        faqs: copy.faq,
+      }),
+    ];
+  }
+
   if (family === "interior") {
     return [
       createRawBlock("gardenContactPage", {
@@ -679,6 +708,16 @@ function buildContactLayout(title: string, family: TemplateFamily): BuilderBlock
 
 function buildEditorialLayout(title: string, family: TemplateFamily): BuilderBlock[] {
   const copy = FAMILY_COPY[family].editorial;
+
+  if (family === "health") {
+    return [
+      createRawBlock("healthBlogPage", {
+        heroTitle: title,
+        heroSubtitle: copy.summary,
+      }),
+    ];
+  }
+
   return [
     createBlock("hero", {
       heading: title,

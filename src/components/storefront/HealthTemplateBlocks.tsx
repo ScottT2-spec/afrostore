@@ -1030,6 +1030,591 @@ export function HealthFooterFull({
 }
 
 /* ═══════════════════════════════════════════════════════════════
+   ABOUT US PAGE
+   Full health-styled about page with hero, story, mission, team.
+   ═══════════════════════════════════════════════════════════════ */
+
+export interface HealthAboutFeature {
+  icon: string;
+  title: string;
+  description: string;
+}
+
+export interface HealthTeamMember {
+  name: string;
+  role: string;
+  image?: string;
+}
+
+export interface HealthAboutPageProps {
+  heroTitle?: string;
+  heroSubtitle?: string;
+  heroImage?: string;
+  storyTitle?: string;
+  storyText?: string;
+  storyImage?: string;
+  missionTitle?: string;
+  missionText?: string;
+  features?: HealthAboutFeature[];
+  teamTitle?: string;
+  teamSubtitle?: string;
+  team?: HealthTeamMember[];
+}
+
+export function HealthAboutPage({
+  heroTitle = "About Us",
+  heroSubtitle = "Our mission is to make you healthy and happy, for this we use only natural and high-quality ingredients necessary to achieve an extraordinary effect.",
+  heroImage = `${IMG}/2023/08/w-pas-first-screen.jpg`,
+  storyTitle = "Our Story",
+  storyText = "We started with a simple belief: everyone deserves access to clean, effective supplements. Our team of nutritionists and wellness experts carefully selects every ingredient, ensuring that each product meets the highest standards of quality and purity. From sourcing to formulation, we prioritize transparency and trust.",
+  storyImage = `${IMG}/2023/08/w-pas-iron-72x72.jpg`,
+  missionTitle = "Our Mission",
+  missionText = "Help customers build healthy routines without confusion or hype. We believe in science-backed formulas, honest labeling, and supplements that actually work.",
+  features,
+  teamTitle = "Medical Experts",
+  teamSubtitle = "Meet the professionals behind our formulations",
+  team,
+}: HealthAboutPageProps) {
+  const defaultFeatures: HealthAboutFeature[] = [
+    { icon: "🧪", title: "Tested Formulas", description: "Every product is third-party tested for purity, potency, and safety before it reaches you." },
+    { icon: "🌿", title: "Natural Ingredients", description: "We prioritize plant-based, non-GMO ingredients sourced from trusted global suppliers." },
+    { icon: "🛡️", title: "Quality Guaranteed", description: "GMP-certified manufacturing ensures consistent quality in every batch we produce." },
+    { icon: "💚", title: "Daily Wellness", description: "Designed for everyday use to support energy, sleep, immunity, and overall balance." },
+  ];
+
+  const defaultTeam: HealthTeamMember[] = [
+    { name: "Dr. Sarah Mitchell", role: "Chief Nutritionist", image: `${IMG}/2023/08/w-pas-customer-1.jpg` },
+    { name: "Dr. James Carter", role: "Formulation Specialist", image: `${IMG}/2023/08/w-pas-customer-2.jpg` },
+    { name: "Emily Rodriguez", role: "Wellness Advisor", image: `${IMG}/2023/08/w-pas-customer-3.jpg` },
+    { name: "Dr. Michael Chen", role: "Quality Assurance", image: `${IMG}/2023/08/w-pas-customer-4.jpg` },
+  ];
+
+  const featureItems = features || defaultFeatures;
+  const teamItems = team || defaultTeam;
+
+  const css = `
+    .hh-about-hero { position: relative; min-height: 400px; display: flex; align-items: center; overflow: hidden; background: ${TOKENS.bgLight}; margin-bottom: 80px; }
+    .hh-about-hero-bg { position: absolute; inset: 0; background-size: cover; background-position: center; }
+    .hh-about-hero-overlay { position: absolute; inset: 0; background: rgba(0,0,0,0.35); }
+    .hh-about-hero-content { position: relative; z-index: 2; text-align: center; max-width: 700px; margin: 0 auto; padding: 80px 20px; }
+    .hh-about-hero-title { font-family: ${TOKENS.titleFont}; font-weight: 500; font-size: 52px; line-height: 62px; color: #fff; margin: 0 0 20px; }
+    .hh-about-hero-sub { font-family: ${TOKENS.bodyFont}; font-size: 18px; line-height: 28px; color: rgba(255,255,255,0.9); margin: 0; }
+    .hh-about-story { display: flex; gap: 60px; align-items: center; margin-bottom: 80px; }
+    .hh-about-story-img { flex: 0 0 45%; border-radius: ${TOKENS.borderRadius}; overflow: hidden; }
+    .hh-about-story-img img { width: 100%; height: 100%; object-fit: cover; display: block; min-height: 350px; }
+    .hh-about-story-text { flex: 1; }
+    .hh-about-story-label { font-family: ${TOKENS.bodyFont}; font-size: 13px; text-transform: uppercase; letter-spacing: 1.5px; color: ${TOKENS.primaryColor}; margin-bottom: 10px; }
+    .hh-about-story-h { font-family: ${TOKENS.titleFont}; font-weight: 500; font-size: 38px; line-height: 48px; color: ${TOKENS.titleColor}; margin: 0 0 20px; }
+    .hh-about-story-p { font-family: ${TOKENS.bodyFont}; font-size: 16px; line-height: 28px; color: ${TOKENS.textColor}; margin: 0; }
+    .hh-about-mission { background: ${TOKENS.bgLight}; border-radius: ${TOKENS.borderRadius}; padding: 60px; text-align: center; margin-bottom: 80px; }
+    .hh-about-mission h3 { font-family: ${TOKENS.titleFont}; font-weight: 500; font-size: 38px; color: ${TOKENS.titleColor}; margin: 0 0 15px; }
+    .hh-about-mission p { font-family: ${TOKENS.bodyFont}; font-size: 16px; line-height: 28px; color: ${TOKENS.textColor}; max-width: 600px; margin: 0 auto; }
+    .hh-about-features { display: grid; grid-template-columns: repeat(4, 1fr); gap: 30px; margin-bottom: 80px; }
+    .hh-about-feat-card { text-align: center; padding: 30px 20px; border-radius: 10px; background: #fff; border: 1px solid #f0f0f0; transition: box-shadow 0.3s; }
+    .hh-about-feat-card:hover { box-shadow: 0 8px 30px rgba(0,0,0,0.06); }
+    .hh-about-feat-icon { font-size: 36px; margin-bottom: 15px; }
+    .hh-about-feat-title { font-family: ${TOKENS.titleFont}; font-weight: 500; font-size: 18px; color: ${TOKENS.titleColor}; margin: 0 0 10px; }
+    .hh-about-feat-desc { font-family: ${TOKENS.bodyFont}; font-size: 14px; line-height: 22px; color: ${TOKENS.textColor}; margin: 0; }
+    .hh-about-team { margin-bottom: 80px; }
+    .hh-about-team-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 25px; }
+    .hh-about-team-card { text-align: center; }
+    .hh-about-team-img { width: 120px; height: 120px; border-radius: 50%; object-fit: cover; margin: 0 auto 15px; display: block; border: 3px solid ${TOKENS.primaryColor}; }
+    .hh-about-team-name { font-family: ${TOKENS.titleFont}; font-weight: 500; font-size: 16px; color: ${TOKENS.titleColor}; margin: 0 0 5px; }
+    .hh-about-team-role { font-family: ${TOKENS.bodyFont}; font-size: 13px; color: ${TOKENS.textColor}; }
+    @media (max-width: 1024px) { .hh-about-hero-title { font-size: 38px; line-height: 48px; } .hh-about-story { flex-direction: column; gap: 30px; } .hh-about-features { grid-template-columns: repeat(2, 1fr); } .hh-about-team-grid { grid-template-columns: repeat(2, 1fr); } .hh-about-mission { padding: 40px 25px; } }
+    @media (max-width: 767px) { .hh-about-hero-title { font-size: 28px; line-height: 38px; } .hh-about-features { grid-template-columns: 1fr; } .hh-about-team-grid { grid-template-columns: 1fr 1fr; } }
+  `;
+
+  return (
+    <>
+      <ScopedStyles id="about-page" css={css} />
+      {/* Hero */}
+      <div className="hh-about-hero">
+        <div className="hh-about-hero-bg" style={{ backgroundImage: `url(${heroImage})` }} />
+        <div className="hh-about-hero-overlay" />
+        <div className="hh-about-hero-content">
+          <h1 className="hh-about-hero-title">{heroTitle}</h1>
+          <p className="hh-about-hero-sub">{heroSubtitle}</p>
+        </div>
+      </div>
+
+      {/* Story */}
+      <div style={containerStyle}>
+        <div className="hh-about-story">
+          <div className="hh-about-story-img">
+            <img src={storyImage} alt={storyTitle} onError={(e) => onImgError(e, storyTitle)} />
+          </div>
+          <div className="hh-about-story-text">
+            <div className="hh-about-story-label">Who We Are</div>
+            <h2 className="hh-about-story-h">{storyTitle}</h2>
+            <p className="hh-about-story-p">{storyText}</p>
+          </div>
+        </div>
+
+        {/* Mission */}
+        <div className="hh-about-mission">
+          <h3>{missionTitle}</h3>
+          <p>{missionText}</p>
+        </div>
+
+        {/* Features */}
+        <HealthSectionTitle title="Why Choose Us" subtitle="TRUSTED BY THOUSANDS" />
+        <div className="hh-about-features">
+          {featureItems.map((f, i) => (
+            <div key={i} className="hh-about-feat-card">
+              <div className="hh-about-feat-icon">{f.icon}</div>
+              <h4 className="hh-about-feat-title">{f.title}</h4>
+              <p className="hh-about-feat-desc">{f.description}</p>
+            </div>
+          ))}
+        </div>
+
+        {/* Team */}
+        <div className="hh-about-team">
+          <HealthSectionTitle title={teamTitle} subtitle={teamSubtitle} />
+          <div className="hh-about-team-grid">
+            {teamItems.map((m, i) => (
+              <div key={i} className="hh-about-team-card">
+                <img className="hh-about-team-img" src={m.image || `${IMG}/2023/08/w-pas-customer-${(i % 6) + 1}.jpg`} alt={m.name} onError={(e) => onImgError(e, m.name)} />
+                <h5 className="hh-about-team-name">{m.name}</h5>
+                <div className="hh-about-team-role">{m.role}</div>
+              </div>
+            ))}
+          </div>
+        </div>
+      </div>
+    </>
+  );
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   CONTACT US PAGE
+   Health-styled contact page with info, FAQ, and form.
+   ═══════════════════════════════════════════════════════════════ */
+
+export interface HealthContactFaq {
+  question: string;
+  answer: string;
+}
+
+export interface HealthContactPageProps {
+  heroTitle?: string;
+  heroSubtitle?: string;
+  address?: string;
+  phone?: string;
+  email?: string;
+  hours?: string;
+  formTitle?: string;
+  formSubtitle?: string;
+  faqTitle?: string;
+  faqs?: HealthContactFaq[];
+}
+
+export function HealthContactPage({
+  heroTitle = "Contact Us",
+  heroSubtitle = "Have a question about our products or need help with your order? We're here to help you on your wellness journey.",
+  address = "123 Wellness Ave, Portland, OR 97201",
+  phone = "(503) 555-0123",
+  email = "hello@store.com",
+  hours = "Monday - Saturday, 9:00 AM - 6:00 PM",
+  formTitle = "Send Us a Message",
+  formSubtitle = "We typically respond within 24 hours",
+  faqTitle = "Frequently Asked Questions",
+  faqs,
+}: HealthContactPageProps) {
+  const storeCtx = useContext(HealthStoreContext);
+  const [formData, setFormData] = useState({ name: "", email: "", subject: "", message: "" });
+  const [submitted, setSubmitted] = useState(false);
+  const [openFaq, setOpenFaq] = useState<number | null>(null);
+
+  const defaultFaqs: HealthContactFaq[] = [
+    { question: "Can you recommend a supplement routine?", answer: "Describe your needs and our wellness team can suggest a simple starting point tailored to your goals." },
+    { question: "Do you offer bulk or subscription pricing?", answer: "Yes! We offer discounts on repeat orders and bulk purchases. Contact us for custom pricing." },
+    { question: "How do I know which vitamins to take?", answer: "We recommend reading our ingredient guides and speaking with a healthcare professional for personalized advice." },
+    { question: "What is your return policy?", answer: "We accept returns within 30 days of purchase for unopened products. Contact us to initiate a return." },
+    { question: "Do you ship internationally?", answer: "Currently we ship within the US. International shipping is coming soon — subscribe to our newsletter for updates." },
+  ];
+
+  const faqItems = faqs || defaultFaqs;
+
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    setSubmitted(true);
+  };
+
+  const css = `
+    .hh-contact-hero { background: ${TOKENS.primaryColor}; padding: 80px 20px; text-align: center; margin-bottom: 60px; }
+    .hh-contact-hero-title { font-family: ${TOKENS.titleFont}; font-weight: 500; font-size: 48px; color: #fff; margin: 0 0 15px; }
+    .hh-contact-hero-sub { font-family: ${TOKENS.bodyFont}; font-size: 18px; line-height: 28px; color: rgba(255,255,255,0.9); max-width: 600px; margin: 0 auto; }
+    .hh-contact-grid { display: grid; grid-template-columns: 1fr 1.2fr; gap: 50px; margin-bottom: 80px; }
+    .hh-contact-info-card { background: ${TOKENS.bgLight}; border-radius: ${TOKENS.borderRadius}; padding: 40px; }
+    .hh-contact-info-title { font-family: ${TOKENS.titleFont}; font-weight: 500; font-size: 24px; color: ${TOKENS.titleColor}; margin: 0 0 25px; }
+    .hh-contact-info-item { display: flex; align-items: flex-start; gap: 15px; margin-bottom: 20px; font-family: ${TOKENS.bodyFont}; font-size: 15px; color: ${TOKENS.textColor}; line-height: 24px; }
+    .hh-contact-info-icon { font-size: 20px; flex-shrink: 0; margin-top: 2px; }
+    .hh-contact-info-label { font-weight: 600; color: ${TOKENS.titleColor}; display: block; margin-bottom: 3px; font-size: 14px; }
+    .hh-contact-form-wrap { background: #fff; border: 1px solid #eee; border-radius: ${TOKENS.borderRadius}; padding: 40px; }
+    .hh-contact-form-title { font-family: ${TOKENS.titleFont}; font-weight: 500; font-size: 24px; color: ${TOKENS.titleColor}; margin: 0 0 5px; }
+    .hh-contact-form-sub { font-family: ${TOKENS.bodyFont}; font-size: 14px; color: ${TOKENS.textColor}; margin: 0 0 25px; }
+    .hh-contact-field { margin-bottom: 18px; }
+    .hh-contact-label { display: block; font-family: ${TOKENS.bodyFont}; font-size: 13px; font-weight: 600; color: ${TOKENS.titleColor}; margin-bottom: 6px; text-transform: uppercase; letter-spacing: 0.5px; }
+    .hh-contact-input { width: 100%; padding: 12px 16px; border: 1px solid #ddd; border-radius: 8px; font-family: ${TOKENS.bodyFont}; font-size: 14px; outline: none; transition: border-color 0.2s; box-sizing: border-box; }
+    .hh-contact-input:focus { border-color: ${TOKENS.primaryColor}; }
+    .hh-contact-textarea { min-height: 120px; resize: vertical; }
+    .hh-contact-submit { display: inline-block; padding: 14px 35px; background: ${TOKENS.primaryColor}; color: #fff; border: none; border-radius: 35px; font-family: ${TOKENS.bodyFont}; font-weight: 600; font-size: 14px; cursor: pointer; text-transform: uppercase; letter-spacing: 0.5px; transition: background 0.3s; }
+    .hh-contact-submit:hover { background: ${TOKENS.primaryHover}; }
+    .hh-contact-success { text-align: center; padding: 40px 20px; }
+    .hh-contact-success-icon { font-size: 48px; margin-bottom: 15px; }
+    .hh-contact-success h3 { font-family: ${TOKENS.titleFont}; font-size: 24px; color: ${TOKENS.titleColor}; margin: 0 0 10px; }
+    .hh-contact-success p { font-family: ${TOKENS.bodyFont}; font-size: 15px; color: ${TOKENS.textColor}; }
+    .hh-faq-section { margin-bottom: 80px; }
+    .hh-faq-item { border-bottom: 1px solid #eee; }
+    .hh-faq-q { display: flex; justify-content: space-between; align-items: center; padding: 20px 0; cursor: pointer; font-family: ${TOKENS.titleFont}; font-weight: 500; font-size: 16px; color: ${TOKENS.titleColor}; transition: color 0.2s; }
+    .hh-faq-q:hover { color: ${TOKENS.primaryColor}; }
+    .hh-faq-toggle { font-size: 20px; color: ${TOKENS.primaryColor}; flex-shrink: 0; margin-left: 15px; transition: transform 0.3s; }
+    .hh-faq-a { padding: 0 0 20px; font-family: ${TOKENS.bodyFont}; font-size: 15px; line-height: 26px; color: ${TOKENS.textColor}; }
+    @media (max-width: 768px) { .hh-contact-grid { grid-template-columns: 1fr; gap: 30px; } .hh-contact-hero-title { font-size: 32px; } .hh-contact-hero { padding: 50px 20px; } }
+  `;
+
+  return (
+    <>
+      <ScopedStyles id="contact-page" css={css} />
+      {/* Hero */}
+      <div className="hh-contact-hero">
+        <h1 className="hh-contact-hero-title">{heroTitle}</h1>
+        <p className="hh-contact-hero-sub">{heroSubtitle}</p>
+      </div>
+
+      <div style={containerStyle}>
+        {/* Info + Form Grid */}
+        <div className="hh-contact-grid">
+          <div className="hh-contact-info-card">
+            <h3 className="hh-contact-info-title">Get In Touch</h3>
+            <div className="hh-contact-info-item">
+              <span className="hh-contact-info-icon">📍</span>
+              <div><span className="hh-contact-info-label">Address</span>{address}</div>
+            </div>
+            <div className="hh-contact-info-item">
+              <span className="hh-contact-info-icon">📞</span>
+              <div><span className="hh-contact-info-label">Phone</span>{phone}</div>
+            </div>
+            <div className="hh-contact-info-item">
+              <span className="hh-contact-info-icon">✉️</span>
+              <div><span className="hh-contact-info-label">Email</span>{email}</div>
+            </div>
+            <div className="hh-contact-info-item">
+              <span className="hh-contact-info-icon">🕐</span>
+              <div><span className="hh-contact-info-label">Working Hours</span>{hours}</div>
+            </div>
+          </div>
+
+          <div className="hh-contact-form-wrap">
+            {submitted ? (
+              <div className="hh-contact-success">
+                <div className="hh-contact-success-icon">✅</div>
+                <h3>Message Sent!</h3>
+                <p>Thank you for reaching out. We&apos;ll get back to you soon.</p>
+              </div>
+            ) : (
+              <>
+                <h3 className="hh-contact-form-title">{formTitle}</h3>
+                <p className="hh-contact-form-sub">{formSubtitle}</p>
+                <form onSubmit={handleSubmit}>
+                  <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "18px" }}>
+                    <div className="hh-contact-field">
+                      <label className="hh-contact-label">Name</label>
+                      <input className="hh-contact-input" type="text" placeholder="Your name" value={formData.name} onChange={(e) => setFormData({ ...formData, name: e.target.value })} required />
+                    </div>
+                    <div className="hh-contact-field">
+                      <label className="hh-contact-label">Email</label>
+                      <input className="hh-contact-input" type="email" placeholder="Your email" value={formData.email} onChange={(e) => setFormData({ ...formData, email: e.target.value })} required />
+                    </div>
+                  </div>
+                  <div className="hh-contact-field">
+                    <label className="hh-contact-label">Subject</label>
+                    <input className="hh-contact-input" type="text" placeholder="How can we help?" value={formData.subject} onChange={(e) => setFormData({ ...formData, subject: e.target.value })} />
+                  </div>
+                  <div className="hh-contact-field">
+                    <label className="hh-contact-label">Message</label>
+                    <textarea className="hh-contact-input hh-contact-textarea" placeholder="Tell us more..." value={formData.message} onChange={(e) => setFormData({ ...formData, message: e.target.value })} required />
+                  </div>
+                  <button className="hh-contact-submit" type="submit">Send Message</button>
+                </form>
+              </>
+            )}
+          </div>
+        </div>
+
+        {/* FAQ */}
+        <div className="hh-faq-section">
+          <HealthSectionTitle title={faqTitle} />
+          {faqItems.map((faq, i) => (
+            <div key={i} className="hh-faq-item">
+              <div className="hh-faq-q" onClick={() => setOpenFaq(openFaq === i ? null : i)}>
+                {faq.question}
+                <span className="hh-faq-toggle" style={{ transform: openFaq === i ? "rotate(45deg)" : "none" }}>+</span>
+              </div>
+              {openFaq === i && <div className="hh-faq-a">{faq.answer}</div>}
+            </div>
+          ))}
+        </div>
+      </div>
+    </>
+  );
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   BLOG / EDITORIAL PAGE
+   Health-styled blog listing page with categories and posts.
+   ═══════════════════════════════════════════════════════════════ */
+
+export interface HealthBlogPagePost {
+  title: string;
+  image: string;
+  date: string;
+  author?: string;
+  excerpt?: string;
+  category?: string;
+  link?: string;
+}
+
+export interface HealthBlogPageProps {
+  heroTitle?: string;
+  heroSubtitle?: string;
+  featuredPost?: HealthBlogPagePost;
+  posts?: HealthBlogPagePost[];
+  categories?: string[];
+}
+
+export function HealthBlogPage({
+  heroTitle = "Health & Wellness Blog",
+  heroSubtitle = "Expert advice on vitamins, supplements, and building a healthier lifestyle.",
+  featuredPost,
+  posts,
+  categories,
+}: HealthBlogPageProps) {
+  const defaultFeatured: HealthBlogPagePost = {
+    title: "What is fiber and why is it important for health?",
+    image: `${IMG}/2023/09/w-pas-blog-1.jpg`,
+    date: "September 5, 2023",
+    author: "Wellness Team",
+    excerpt: "Fiber is one of the most underrated nutrients. Learn how it supports digestion, heart health, and sustained energy throughout the day.",
+    category: "Nutrition",
+  };
+
+  const defaultPosts: HealthBlogPagePost[] = [
+    { title: "5 ways to celebrate your mom on Mother's Day", image: `${IMG}/2023/09/w-pas-blog-2-400x247.jpg`, date: "September 4, 2023", author: "Admin", category: "Motivation", excerpt: "Simple, meaningful gestures that go beyond flowers and cards." },
+    { title: "Syncing Up for an Integrated Brain", image: `${IMG}/2023/09/w-pas-blog-3-400x247.jpg`, date: "September 4, 2023", author: "Admin", category: "Health", excerpt: "How sleep, nutrition, and movement work together for cognitive clarity." },
+    { title: "The Complete Guide to Vitamin D", image: `${IMG}/2023/08/w-pas-ev-60-softgel-1.jpg`, date: "August 28, 2023", author: "Dr. Sarah M.", category: "Vitamins", excerpt: "Why vitamin D matters, how much you need, and the best ways to get it." },
+    { title: "Understanding Melatonin and Sleep Quality", image: `${IMG}/2023/08/w-pas-sl-30-capsules-1.jpg`, date: "August 20, 2023", author: "Wellness Team", category: "Sleep", excerpt: "A closer look at how melatonin supplements can support your natural sleep cycle." },
+    { title: "Top 5 Supplements for Hair Health", image: `${IMG}/2023/08/w-pas-hr-60-capsules-1.jpg`, date: "August 15, 2023", author: "Admin", category: "Hair", excerpt: "From biotin to collagen — the supplements that actually support healthy hair growth." },
+    { title: "Allergy Season: Natural Relief Options", image: `${IMG}/2023/08/w-pas-ar-30-tablets-1.jpg`, date: "August 10, 2023", author: "Admin", category: "Health", excerpt: "Explore natural approaches to managing seasonal allergies alongside traditional treatments." },
+  ];
+
+  const defaultCategories = ["All", "Health", "Nutrition", "Vitamins", "Sleep", "Motivation"];
+
+  const featured = featuredPost || defaultFeatured;
+  const postItems = posts || defaultPosts;
+  const catItems = categories || defaultCategories;
+  const [activeCat, setActiveCat] = useState("All");
+
+  const filteredPosts = activeCat === "All" ? postItems : postItems.filter(p => p.category === activeCat);
+
+  const css = `
+    .hh-blog-hero { background: ${TOKENS.bgLight}; padding: 60px 20px; text-align: center; margin-bottom: 60px; }
+    .hh-blog-hero-title { font-family: ${TOKENS.titleFont}; font-weight: 500; font-size: 48px; color: ${TOKENS.titleColor}; margin: 0 0 15px; }
+    .hh-blog-hero-sub { font-family: ${TOKENS.bodyFont}; font-size: 18px; color: ${TOKENS.textColor}; max-width: 600px; margin: 0 auto; }
+    .hh-blog-featured { display: grid; grid-template-columns: 1.2fr 1fr; gap: 40px; margin-bottom: 60px; border-radius: ${TOKENS.borderRadius}; overflow: hidden; background: #fff; border: 1px solid #f0f0f0; }
+    .hh-blog-featured-img { overflow: hidden; }
+    .hh-blog-featured-img img { width: 100%; height: 100%; object-fit: cover; display: block; min-height: 350px; transition: transform 0.5s; }
+    .hh-blog-featured:hover .hh-blog-featured-img img { transform: scale(1.03); }
+    .hh-blog-featured-content { padding: 40px; display: flex; flex-direction: column; justify-content: center; }
+    .hh-blog-featured-cat { display: inline-block; padding: 4px 12px; background: rgba(136,173,153,0.12); color: ${TOKENS.primaryColor}; font-family: ${TOKENS.bodyFont}; font-size: 12px; font-weight: 600; border-radius: 4px; margin-bottom: 12px; text-transform: uppercase; width: fit-content; }
+    .hh-blog-featured-title { font-family: ${TOKENS.titleFont}; font-weight: 500; font-size: 28px; line-height: 38px; color: ${TOKENS.titleColor}; margin: 0 0 15px; }
+    .hh-blog-featured-excerpt { font-family: ${TOKENS.bodyFont}; font-size: 15px; line-height: 26px; color: ${TOKENS.textColor}; margin: 0 0 20px; }
+    .hh-blog-featured-meta { font-family: ${TOKENS.bodyFont}; font-size: 13px; color: ${TOKENS.textColor}; }
+    .hh-blog-featured-read { display: inline-block; margin-top: 20px; padding: 10px 25px; background: ${TOKENS.primaryColor}; color: #fff; border-radius: 25px; font-family: ${TOKENS.bodyFont}; font-weight: 600; font-size: 13px; text-decoration: none; text-transform: uppercase; transition: background 0.3s; }
+    .hh-blog-featured-read:hover { background: ${TOKENS.primaryHover}; }
+    .hh-blog-cats { display: flex; gap: 10px; margin-bottom: 40px; flex-wrap: wrap; justify-content: center; }
+    .hh-blog-cat-btn { padding: 8px 20px; border: 1px solid #ddd; border-radius: 25px; background: #fff; font-family: ${TOKENS.bodyFont}; font-size: 13px; font-weight: 600; color: ${TOKENS.titleColor}; cursor: pointer; transition: all 0.2s; }
+    .hh-blog-cat-btn:hover { border-color: ${TOKENS.primaryColor}; color: ${TOKENS.primaryColor}; }
+    .hh-blog-cat-btn.active { background: ${TOKENS.primaryColor}; color: #fff; border-color: ${TOKENS.primaryColor}; }
+    .hh-blog-list { display: grid; grid-template-columns: repeat(3, 1fr); gap: 25px; margin-bottom: 80px; }
+    .hh-blog-list-card { border-radius: 10px; overflow: hidden; background: #fff; border: 1px solid #f0f0f0; transition: box-shadow 0.3s; }
+    .hh-blog-list-card:hover { box-shadow: 0 6px 24px rgba(0,0,0,0.06); }
+    .hh-blog-list-img { width: 100%; height: 200px; object-fit: cover; display: block; transition: transform 0.5s; }
+    .hh-blog-list-card:hover .hh-blog-list-img { transform: scale(1.05); }
+    .hh-blog-list-body { padding: 20px; }
+    .hh-blog-list-cat { font-family: ${TOKENS.bodyFont}; font-size: 11px; color: ${TOKENS.primaryColor}; background: rgba(136,173,153,0.1); display: inline-block; padding: 3px 10px; border-radius: 3px; margin-bottom: 10px; text-transform: uppercase; font-weight: 600; }
+    .hh-blog-list-title { font-family: ${TOKENS.titleFont}; font-weight: 500; font-size: 17px; line-height: 1.4; color: ${TOKENS.titleColor}; margin: 0 0 8px; }
+    .hh-blog-list-excerpt { font-family: ${TOKENS.bodyFont}; font-size: 13px; line-height: 22px; color: ${TOKENS.textColor}; margin: 0 0 12px; }
+    .hh-blog-list-meta { font-family: ${TOKENS.bodyFont}; font-size: 12px; color: ${TOKENS.textColor}; }
+    @media (max-width: 1024px) { .hh-blog-featured { grid-template-columns: 1fr; } .hh-blog-list { grid-template-columns: repeat(2, 1fr); } }
+    @media (max-width: 767px) { .hh-blog-hero-title { font-size: 32px; } .hh-blog-list { grid-template-columns: 1fr; } }
+  `;
+
+  return (
+    <>
+      <ScopedStyles id="blog-page" css={css} />
+      {/* Hero */}
+      <div className="hh-blog-hero">
+        <h1 className="hh-blog-hero-title">{heroTitle}</h1>
+        <p className="hh-blog-hero-sub">{heroSubtitle}</p>
+      </div>
+
+      <div style={containerStyle}>
+        {/* Featured Post */}
+        <div className="hh-blog-featured">
+          <div className="hh-blog-featured-img">
+            <img src={featured.image} alt={featured.title} onError={(e) => onImgError(e, featured.title)} />
+          </div>
+          <div className="hh-blog-featured-content">
+            {featured.category && <span className="hh-blog-featured-cat">{featured.category}</span>}
+            <h2 className="hh-blog-featured-title">{featured.title}</h2>
+            {featured.excerpt && <p className="hh-blog-featured-excerpt">{featured.excerpt}</p>}
+            <div className="hh-blog-featured-meta">by {featured.author || "Admin"} · {featured.date}</div>
+            <span className="hh-blog-featured-read">Read Article</span>
+          </div>
+        </div>
+
+        {/* Category Filter */}
+        <div className="hh-blog-cats">
+          {catItems.map((cat) => (
+            <button key={cat} className={`hh-blog-cat-btn ${activeCat === cat ? "active" : ""}`} onClick={() => setActiveCat(cat)}>
+              {cat}
+            </button>
+          ))}
+        </div>
+
+        {/* Post Grid */}
+        <div className="hh-blog-list">
+          {filteredPosts.map((post, i) => (
+            <div key={i} className="hh-blog-list-card">
+              <div style={{ overflow: "hidden" }}>
+                <img className="hh-blog-list-img" src={post.image} alt={post.title} onError={(e) => onImgError(e, post.title)} />
+              </div>
+              <div className="hh-blog-list-body">
+                {post.category && <span className="hh-blog-list-cat">{post.category}</span>}
+                <h3 className="hh-blog-list-title">{post.title}</h3>
+                {post.excerpt && <p className="hh-blog-list-excerpt">{post.excerpt}</p>}
+                <div className="hh-blog-list-meta">by {post.author || "Admin"} · {post.date}</div>
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
+    </>
+  );
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   INGREDIENTS PAGE
+   Health-styled ingredients/transparency page.
+   ═══════════════════════════════════════════════════════════════ */
+
+export interface HealthIngredient {
+  name: string;
+  description: string;
+  icon?: string;
+  image?: string;
+}
+
+export interface HealthIngredientsPageProps {
+  heroTitle?: string;
+  heroSubtitle?: string;
+  introTitle?: string;
+  introText?: string;
+  ingredients?: HealthIngredient[];
+  ctaTitle?: string;
+  ctaText?: string;
+  ctaButtonText?: string;
+  ctaButtonLink?: string;
+}
+
+export function HealthIngredientsPage({
+  heroTitle = "Our Ingredients",
+  heroSubtitle = "Transparency is at the heart of everything we do. Learn about the natural ingredients behind our supplements.",
+  introTitle = "What Goes Into Our Products",
+  introText = "Every ingredient is carefully selected for its proven benefits and sourced from trusted suppliers. We never use artificial fillers, synthetic dyes, or unnecessary additives.",
+  ingredients,
+  ctaTitle = "Ready to Start Your Wellness Journey?",
+  ctaText = "Explore our full range of supplements made with these trusted ingredients.",
+  ctaButtonText = "Shop All Products",
+  ctaButtonLink = "/shop",
+}: HealthIngredientsPageProps) {
+  const storeCtx = useContext(HealthStoreContext);
+  const fixLink = (link: string) => resolveStoreLink(link, storeCtx?.storeSlug);
+
+  const defaultIngredients: HealthIngredient[] = [
+    { name: "Vitamin D3", icon: "☀️", description: "Essential for bone health, immune function, and mood regulation. Sourced from lanolin (sheep's wool) for high bioavailability." },
+    { name: "Vitamin K2 (MK-7)", icon: "🌿", description: "Works synergistically with D3 to direct calcium to bones and teeth. Derived from fermented natto for maximum absorption." },
+    { name: "Omega-3 (EPA & DHA)", icon: "🐟", description: "Premium fish oil supporting heart, brain, and joint health. Molecularly distilled to remove contaminants." },
+    { name: "Melatonin", icon: "🌙", description: "A natural hormone that supports healthy sleep cycles. Our low-dose formula promotes restful sleep without grogginess." },
+    { name: "Biotin (B7)", icon: "💇", description: "Supports healthy hair, skin, and nails. Water-soluble B vitamin that aids in keratin production." },
+    { name: "Marine Collagen", icon: "✨", description: "Type I collagen peptides from wild-caught fish. Supports skin elasticity, joint comfort, and gut health." },
+    { name: "Ashwagandha", icon: "🧘", description: "Adaptogenic herb used for centuries to support stress management, energy, and cognitive clarity." },
+    { name: "Zinc Picolinate", icon: "🛡️", description: "Highly absorbable form of zinc supporting immune function, wound healing, and cellular metabolism." },
+  ];
+
+  const items = ingredients || defaultIngredients;
+
+  const css = `
+    .hh-ingr-hero { background: linear-gradient(135deg, ${TOKENS.primaryColor} 0%, rgb(80,130,100) 100%); padding: 80px 20px; text-align: center; margin-bottom: 60px; }
+    .hh-ingr-hero-title { font-family: ${TOKENS.titleFont}; font-weight: 500; font-size: 48px; color: #fff; margin: 0 0 15px; }
+    .hh-ingr-hero-sub { font-family: ${TOKENS.bodyFont}; font-size: 18px; line-height: 28px; color: rgba(255,255,255,0.9); max-width: 650px; margin: 0 auto; }
+    .hh-ingr-intro { text-align: center; margin-bottom: 60px; }
+    .hh-ingr-intro h2 { font-family: ${TOKENS.titleFont}; font-weight: 500; font-size: 34px; color: ${TOKENS.titleColor}; margin: 0 0 15px; }
+    .hh-ingr-intro p { font-family: ${TOKENS.bodyFont}; font-size: 16px; line-height: 28px; color: ${TOKENS.textColor}; max-width: 650px; margin: 0 auto; }
+    .hh-ingr-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 20px; margin-bottom: 80px; }
+    .hh-ingr-card { display: flex; gap: 20px; padding: 30px; background: ${TOKENS.bgLight}; border-radius: 10px; transition: box-shadow 0.3s; align-items: flex-start; }
+    .hh-ingr-card:hover { box-shadow: 0 6px 24px rgba(0,0,0,0.06); }
+    .hh-ingr-icon { font-size: 32px; flex-shrink: 0; width: 50px; height: 50px; display: flex; align-items: center; justify-content: center; background: #fff; border-radius: 12px; }
+    .hh-ingr-name { font-family: ${TOKENS.titleFont}; font-weight: 500; font-size: 18px; color: ${TOKENS.titleColor}; margin: 0 0 8px; }
+    .hh-ingr-desc { font-family: ${TOKENS.bodyFont}; font-size: 14px; line-height: 24px; color: ${TOKENS.textColor}; margin: 0; }
+    .hh-ingr-cta { background: ${TOKENS.bgLight}; border-radius: ${TOKENS.borderRadius}; padding: 60px; text-align: center; margin-bottom: 80px; }
+    .hh-ingr-cta h3 { font-family: ${TOKENS.titleFont}; font-weight: 500; font-size: 34px; color: ${TOKENS.titleColor}; margin: 0 0 12px; }
+    .hh-ingr-cta p { font-family: ${TOKENS.bodyFont}; font-size: 16px; color: ${TOKENS.textColor}; margin: 0 0 25px; }
+    .hh-ingr-cta a { display: inline-block; padding: 14px 35px; background: ${TOKENS.primaryColor}; color: #fff; border-radius: 35px; font-family: ${TOKENS.bodyFont}; font-weight: 600; font-size: 14px; text-decoration: none; text-transform: uppercase; transition: background 0.3s; }
+    .hh-ingr-cta a:hover { background: ${TOKENS.primaryHover}; }
+    @media (max-width: 768px) { .hh-ingr-grid { grid-template-columns: 1fr; } .hh-ingr-hero-title { font-size: 32px; } .hh-ingr-hero { padding: 50px 20px; } .hh-ingr-cta { padding: 40px 20px; } }
+  `;
+
+  return (
+    <>
+      <ScopedStyles id="ingredients-page" css={css} />
+      <div className="hh-ingr-hero">
+        <h1 className="hh-ingr-hero-title">{heroTitle}</h1>
+        <p className="hh-ingr-hero-sub">{heroSubtitle}</p>
+      </div>
+
+      <div style={containerStyle}>
+        <div className="hh-ingr-intro">
+          <h2>{introTitle}</h2>
+          <p>{introText}</p>
+        </div>
+
+        <div className="hh-ingr-grid">
+          {items.map((ing, i) => (
+            <div key={i} className="hh-ingr-card">
+              <div className="hh-ingr-icon">{ing.icon || "💊"}</div>
+              <div>
+                <h4 className="hh-ingr-name">{ing.name}</h4>
+                <p className="hh-ingr-desc">{ing.description}</p>
+              </div>
+            </div>
+          ))}
+        </div>
+
+        <div className="hh-ingr-cta">
+          <h3>{ctaTitle}</h3>
+          <p>{ctaText}</p>
+          <Link href={fixLink(ctaButtonLink)}>{ctaButtonText}</Link>
+        </div>
+      </div>
+    </>
+  );
+}
+
+/* ═══════════════════════════════════════════════════════════════
    LEGACY FOOTER (kept for backward compat)
    ═══════════════════════════════════════════════════════════════ */
 

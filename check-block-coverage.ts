@@ -65,6 +65,7 @@ async function checkBlockCoverage() {
       'healthHero', 'healthMarquee', 'healthPromoBanners', 'healthSectionTitle', 'healthCategoryCards',
       'healthProductGrid', 'healthVideoSection', 'healthFeatureSection', 'healthTestimonials',
       'healthBlogPosts', 'healthNewsletter', 'healthBrandMarquee', 'healthFooter', 'healthFooterFull',
+      'healthAboutPage', 'healthContactPage', 'healthBlogPage', 'healthIngredientsPage',
       // Interior/Garden
       'interiorHeroSlider', 'interiorSectionTitle', 'interiorCategoryGrid', 'interiorProductGrid',
       'interiorInfoBoxes', 'interiorGardenProducts', 'interiorPromoBanners', 'interiorFurnitureCategories',
