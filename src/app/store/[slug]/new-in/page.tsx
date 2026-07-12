@@ -3,6 +3,8 @@ import { useParams } from "next/navigation";
 import { useState, useEffect } from "react";
 import { CosmeticsHeader, CosmeticsFooter } from "@/components/storefront/CosmeticsTemplateBlocks";
 import Link from "next/link";
+import { RenderBlocks } from "@/components/storefront/BlockRenderer";
+import { RETAIL_NEW_IN_BLOCKS } from "@/lib/templates/presets/retail-pages";
 
 export default function NewInPage() {
   const params = useParams();
@@ -74,6 +76,19 @@ export default function NewInPage() {
     const symbol = symbols[currency] || currency;
     return `${symbol}${amount.toLocaleString("en-NG", { minimumFractionDigits: 0, maximumFractionDigits: 2 })}`;
   };
+
+
+  // ─── RETAIL NEW_IN ───
+  const isRetail = storeData?.templateSlug === "retail";
+  if (isRetail) {
+    return (
+      <div className="min-h-screen bg-white">
+        <div className="max-w-6xl mx-auto px-4 sm:px-6 py-10">
+          <RenderBlocks blocks={RETAIL_NEW_IN_BLOCKS} storeSlug={slug} products={products || []} currency={currency} />
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-white">

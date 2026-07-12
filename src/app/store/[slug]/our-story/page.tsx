@@ -7,6 +7,7 @@ import { applyPageCustomization, buildPageBackgroundStyle, filterVisiblePages, g
 import { parsePageContent } from "@/lib/page-content";
 import { RenderBlocks, type BuilderBlock } from "@/components/storefront/BlockRenderer";
 import { serializeProductsForClient } from "@/lib/serialize-products";
+import { RETAIL_OUR_STORY_BLOCKS } from "@/lib/templates/presets/retail-pages";
 import { GardenHeader, GardenFooter } from "@/components/storefront/GardenStoreChrome";
 
 type Props = {
@@ -279,6 +280,7 @@ export default async function OurStoryPage({ params }: Props) {
       ...((store as any).socialLinks?.twitter ? [{ platform: "twitter", url: (store as any).socialLinks.twitter }] : []),
     ];
 
+    const retailStoryBlocks = (parsedStory && parsedStory.blocks.length > 0 ? pageContent.blocks : RETAIL_OUR_STORY_BLOCKS) as BuilderBlock[];
     return (
       <div className="min-h-screen bg-white">
         <GardenHeader
@@ -289,11 +291,7 @@ export default async function OurStoryPage({ params }: Props) {
           wishlistCount={0}
         />
         <div style={buildPageBackgroundStyle(pageSettings)}>
-          {parsedStory && parsedStory.blocks.length > 0 ? (
-            <RenderBlocks blocks={pageContent.blocks as BuilderBlock[]} storeSlug={slug} products={serializedProducts} />
-          ) : (
-            <RenderTemplateBlocks blocks={OUR_STORY_PAGE_BLOCKS} />
-          )}
+          <RenderBlocks blocks={retailStoryBlocks} storeSlug={slug} products={serializedProducts} />
         </div>
         <GardenFooter
           storeName={store.name}

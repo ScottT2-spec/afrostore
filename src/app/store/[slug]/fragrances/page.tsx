@@ -5,6 +5,8 @@ import { PerfumesHeader, PerfumesFooter } from "@/components/storefront/Perfumes
 import { RenderTemplateBlocks } from "@/components/storefront/TemplateBlockRenderer";
 import { PerfumesStoreContext } from "@/components/storefront/PerfumesTemplateBlocks";
 import { PERFUMES_FRAGRANCES_PRESET } from "@/lib/templates/presets/perfumes-fragrances-preset";
+import { RenderBlocks } from "@/components/storefront/BlockRenderer";
+import { RETAIL_FRAGRANCES_BLOCKS } from "@/lib/templates/presets/retail-pages";
 
 export default function FragrancesPage() {
   const params = useParams();
@@ -35,6 +37,19 @@ export default function FragrancesPage() {
     storeSlug: slug,
     socialLinks: socialLinksArray,
   };
+
+
+  // ─── RETAIL FRAGRANCES ───
+  const isRetail = storeData?.templateSlug === "retail";
+  if (isRetail) {
+    return (
+      <div className="min-h-screen bg-white">
+        <div className="max-w-6xl mx-auto px-4 sm:px-6 py-10">
+          <RenderBlocks blocks={RETAIL_FRAGRANCES_BLOCKS} storeSlug={slug} products={products || []} currency={currency} />
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div style={{ minHeight: "100vh", background: "#fff" }}>

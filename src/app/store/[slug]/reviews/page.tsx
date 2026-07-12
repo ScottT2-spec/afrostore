@@ -6,6 +6,8 @@ import { useState, useEffect, useCallback } from "react";
 import { useParams } from "next/navigation";
 import Link from "next/link";
 import { HandmadeBagsHeader, HandmadeBagsFooter } from "@/components/storefront/HandmadeBagsStoreChrome";
+import { RenderBlocks } from "@/components/storefront/BlockRenderer";
+import { RETAIL_REVIEWS_BLOCKS } from "@/lib/templates/presets/retail-pages";
 import { ThemeProvider, type ThemeData } from "@/components/storefront/ThemeProvider";
 import { KidsFontLoader, KidsFooterFull, KidsHeader } from "@/components/storefront/KidsTemplateBlocks";
 import { HealthHeader, HealthFooterFull } from "@/components/storefront/HealthTemplateBlocks";
@@ -185,6 +187,18 @@ export default function StoreReviewsPage() {
     { label: "2 Stars", value: 2 },
     { label: "1 Star", value: 1 },
   ];
+
+  // ─── RETAIL REVIEWS ───
+  const isRetailTemplate = store?.templateSlug === "retail" || (store as any)?.templates?.[0]?.template?.slug === "retail";
+  if (isRetailTemplate) {
+    return (
+      <div className="min-h-screen bg-white">
+        <div className="max-w-6xl mx-auto px-4 sm:px-6 py-10">
+          <RenderBlocks blocks={RETAIL_REVIEWS_BLOCKS} storeSlug={slug} products={[]} />
+        </div>
+      </div>
+    );
+  }
 
   return (
     <ThemeProvider theme={themeData}>

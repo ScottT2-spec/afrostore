@@ -4,6 +4,8 @@ import { Heart, MapPin, Package, ShoppingBag, User } from "@/components/icons/Fi
 import { useState, useEffect } from "react";
 import { useParams } from "next/navigation";
 import Link from "next/link";
+import { RenderBlocks } from "@/components/storefront/BlockRenderer";
+import { RETAIL_MY_ACCOUNT_BLOCKS } from "@/lib/templates/presets/retail-pages";
 
 interface OrderItem {
   id: string;

@@ -3,6 +3,8 @@ import { useParams } from "next/navigation";
 import { useState, useEffect } from "react";
 import { CosmeticsHeader, CosmeticsFooter } from "@/components/storefront/CosmeticsTemplateBlocks";
 import Link from "next/link";
+import { RenderBlocks } from "@/components/storefront/BlockRenderer";
+import { RETAIL_BESTSELLER_BLOCKS } from "@/lib/templates/presets/retail-pages";
 
 export default function BestsellerPage() {
   const params = useParams();
@@ -18,7 +20,6 @@ export default function BestsellerPage() {
         const json = await res.json();
         if (json.success && json.data) {
           setStoreData(json.data);
-          // Filter products tagged as bestseller or with high review count
           const bestsellerProducts = (json.data.products || []).filter((p: any) => 
             p.isFeatured || p.tags?.includes("bestseller") || p.reviewCount > 10
           ).slice(0, 12);
@@ -46,12 +47,24 @@ export default function BestsellerPage() {
 
   const store = storeData?.store;
   const currency = store?.currency || "NGN";
+  const isRetail = storeData?.templateSlug === "retail";
 
   const formatCurrency = (amount: number) => {
     const symbols: Record<string, string> = { NGN: "₦", KES: "KSh", GHS: "GH₵", ZAR: "R", USD: "$", GBP: "£", EUR: "€" };
     const symbol = symbols[currency] || currency;
     return `${symbol}${amount.toLocaleString("en-NG", { minimumFractionDigits: 0, maximumFractionDigits: 2 })}`;
   };
+
+  // ─── RETAIL BESTSELLER ───
+  if (isRetail) {
+    return (
+      <div className="min-h-screen bg-white">
+        <div className="max-w-6xl mx-auto px-4 sm:px-6 py-10">
+          <RenderBlocks blocks={RETAIL_BESTSELLER_BLOCKS} storeSlug={slug} products={products} currency={currency} />
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-white">
@@ -63,7 +76,6 @@ export default function BestsellerPage() {
         wishlistCount={0}
       />
 
-      {/* Hero Section */}
       <div className="bg-gradient-to-r from-pink-100 to-rose-100 py-16">
         <div className="max-w-7xl mx-auto px-4 text-center">
           <h1 className="text-4xl md:text-5xl font-bold text-gray-900 mb-4">Bestsellers</h1>
@@ -73,7 +85,6 @@ export default function BestsellerPage() {
         </div>
       </div>
 
-      {/* Products Grid */}
       <main className="max-w-7xl mx-auto px-4 py-16">
         {products.length > 0 ? (
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8">
@@ -82,25 +93,15 @@ export default function BestsellerPage() {
                 <Link href={`/store/${slug}/product/${product.slug}`}>
                   <div className="relative overflow-hidden bg-gray-100 aspect-[3/4] mb-4">
                     {product.images?.[0] ? (
-                      <img
-                        src={product.images[0].url}
-                        alt={product.name}
-                        className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
-                      />
+                      <img src={product.images[0].url} alt={product.name} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300" />
                     ) : (
-                      <div className="w-full h-full flex items-center justify-center bg-gray-200">
-                        <span className="text-gray-400">No Image</span>
-                      </div>
+                      <div className="w-full h-full flex items-center justify-center bg-gray-200"><span className="text-gray-400">No Image</span></div>
                     )}
                     {product.isFeatured && (
-                      <span className="absolute top-3 left-3 bg-pink-500 text-white text-xs font-semibold px-3 py-1 rounded">
-                        Bestseller
-                      </span>
+                      <span className="absolute top-3 left-3 bg-pink-500 text-white text-xs font-semibold px-3 py-1 rounded">Bestseller</span>
                     )}
                   </div>
-                  <h3 className="font-semibold text-gray-900 mb-2 group-hover:text-pink-600 transition-colors">
-                    {product.name}
-                  </h3>
+                  <h3 className="font-semibold text-gray-900 mb-2 group-hover:text-pink-600 transition-colors">{product.name}</h3>
                   <div className="flex items-center gap-2 mb-2">
                     <span className="font-bold text-gray-900">{formatCurrency(product.price)}</span>
                     {product.compareAtPrice && product.compareAtPrice > product.price && (
@@ -120,9 +121,7 @@ export default function BestsellerPage() {
         ) : (
           <div className="text-center py-16">
             <p className="text-gray-500 text-lg">No bestseller products found.</p>
-            <Link href={`/store/${slug}/shop`} className="inline-block mt-4 text-pink-600 font-semibold hover:text-pink-700">
-              Browse all products →
-            </Link>
+            <Link href={`/store/${slug}/shop`} className="inline-block mt-4 text-pink-600 font-semibold hover:text-pink-700">Browse all products →</Link>
           </div>
         )}
       </main>
@@ -131,11 +130,7 @@ export default function BestsellerPage() {
         storeName={store?.name || "Store"}
         storeSlug={slug}
         description={store?.description}
-        contactInfo={{
-          address: store?.address,
-          phone: store?.phone,
-          email: store?.email,
-        }}
+        contactInfo={{ address: store?.address, phone: store?.phone, email: store?.email }}
         socialLinks={[
           ...(storeData?.socialLinks?.facebook ? [{ platform: "facebook", url: storeData.socialLinks.facebook }] : []),
           ...(storeData?.socialLinks?.instagram ? [{ platform: "instagram", url: storeData.socialLinks.instagram }] : []),

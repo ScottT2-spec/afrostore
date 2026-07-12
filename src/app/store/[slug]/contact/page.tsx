@@ -8,6 +8,7 @@ import { applyPageCustomization, buildPageBackgroundStyle, filterVisiblePages, g
 import { parsePageContent } from "@/lib/page-content";
 import { RenderBlocks, type BuilderBlock } from "@/components/storefront/BlockRenderer";
 import { serializeProductsForClient } from "@/lib/serialize-products";
+import { RETAIL_CONTACT_BLOCKS } from "@/lib/templates/presets/retail-pages";
 import { VegetableContactPage } from "@/components/storefront/VegetableTemplatePages";
 import { VegetableFooter, VegetableHeader } from "@/components/storefront/VegetableStoreChrome";
 import { KidsFontLoader, KidsFooterFull, KidsHeader } from "@/components/storefront/KidsTemplateBlocks";
@@ -539,6 +540,21 @@ export default async function ContactPage({ params }: Props) {
           socialLinks={gardenSocialLinks}
         />
       </div>
+    );
+  }
+
+  // ─── RETAIL CONTACT ───
+  const isRetailTemplate = activeTemplateSlug === "retail";
+  if (isRetailTemplate) {
+    const retailBlocks = (contactPage?.content ? pageContent.blocks : RETAIL_CONTACT_BLOCKS) as BuilderBlock[];
+    return (
+      <ThemeProvider theme={themeData}>
+        <HandmadeBagsHeader storeName={store.name} storeSlug={store.slug || slug} logo={store.logo} isLanding={false} />
+        <div style={buildPageBackgroundStyle(pageSettings)}>
+          <RenderBlocks blocks={retailBlocks} storeSlug={slug} products={serializedProducts} />
+        </div>
+        <HandmadeBagsFooter storeName={store.name} storeSlug={store.slug || slug} logo={store.logo} description={store.description ?? undefined} />
+      </ThemeProvider>
     );
   }
 

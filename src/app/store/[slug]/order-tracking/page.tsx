@@ -4,6 +4,8 @@ import { CheckCircle2, Package, ShoppingBag, Truck } from "@/components/icons/Fi
 import { useState, useEffect } from "react";
 import { useParams, useSearchParams } from "next/navigation";
 import Link from "next/link";
+import { RenderBlocks } from "@/components/storefront/BlockRenderer";
+import { RETAIL_ORDER_TRACKING_BLOCKS } from "@/lib/templates/presets/retail-pages";
 
 interface OrderStatus {
   orderNumber: string;
@@ -149,6 +151,19 @@ export default function OrderTrackingPage() {
                 {statusSteps.map((step, i) => {
                   const active = i <= currentStep;
                   const Icon = i === currentStep ? getStatusIcon(order.status) : (i < currentStep ? CheckCircle2 : Package);
+
+  // ─── RETAIL ORDER_TRACKING ───
+  const isRetail = storeData?.templateSlug === "retail";
+  if (isRetail) {
+    return (
+      <div className="min-h-screen bg-white">
+        <div className="max-w-6xl mx-auto px-4 sm:px-6 py-10">
+          <RenderBlocks blocks={RETAIL_ORDER_TRACKING_BLOCKS} storeSlug={slug} products={products || []} currency={currency} />
+        </div>
+      </div>
+    );
+  }
+
                   return (
                     <div key={step} className="flex flex-col items-center flex-1">
                       <div className={`w-10 h-10 rounded-full flex items-center justify-center ${active ? "bg-gray-900 text-white" : "bg-gray-100 text-gray-400"}`}>

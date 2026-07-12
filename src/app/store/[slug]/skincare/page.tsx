@@ -3,6 +3,8 @@ import { useParams } from "next/navigation";
 import { useState, useEffect } from "react";
 import { CosmeticsHeader, CosmeticsFooter } from "@/components/storefront/CosmeticsTemplateBlocks";
 import Link from "next/link";
+import { RenderBlocks } from "@/components/storefront/BlockRenderer";
+import { RETAIL_SKINCARE_BLOCKS } from "@/lib/templates/presets/retail-pages";
 
 export default function SkincarePage() {
   const params = useParams();
@@ -63,6 +65,19 @@ export default function SkincarePage() {
     { title: "Cruelty Free", description: "We never test on animals, committed to ethical beauty" },
     { title: "Fast Results", description: "Visible improvements in skin texture and tone within weeks" },
   ];
+
+
+  // ─── RETAIL SKINCARE ───
+  const isRetail = storeData?.templateSlug === "retail";
+  if (isRetail) {
+    return (
+      <div className="min-h-screen bg-white">
+        <div className="max-w-6xl mx-auto px-4 sm:px-6 py-10">
+          <RenderBlocks blocks={RETAIL_SKINCARE_BLOCKS} storeSlug={slug} products={products || []} currency={currency} />
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-white">

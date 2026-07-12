@@ -8,6 +8,7 @@ import { applyPageCustomization, buildPageBackgroundStyle, filterVisiblePages, g
 import { parsePageContent } from "@/lib/page-content";
 import { RenderBlocks, type BuilderBlock } from "@/components/storefront/BlockRenderer";
 import { HANDMADE_BAGS_PRESET } from "@/lib/templates/presets/handmade-bags-preset";
+import { RETAIL_ABOUT_BLOCKS } from "@/lib/templates/presets/retail-pages";
 import { serializeProductsForClient } from "@/lib/serialize-products";
 import { KidsFontLoader, KidsFooterFull, KidsHeader } from "@/components/storefront/KidsTemplateBlocks";
 import PerfumesAboutPage from "./perfumes-about";
@@ -492,6 +493,21 @@ export default async function AboutPage({ params }: Props) {
         </main>
         <HealthFooterFull storeName={store.name} storeSlug={slug} logo={store.logo} description={store.description || "Your trusted source for vitamins, supplements, and wellness products."} contact={{ address: "1901 Thornridge Cir. Shiloh, Hawaii 81063", phone: "(956) 238-7908", email: "hello@store.com" }} />
       </div>
+    );
+  }
+
+  // ─── RETAIL ABOUT ───
+  const isRetailTemplate = activeTemplateSlug === "retail";
+  if (isRetailTemplate) {
+    const retailBlocks = (aboutPage?.content ? pageContent.blocks : RETAIL_ABOUT_BLOCKS) as BuilderBlock[];
+    return (
+      <ThemeProvider theme={themeData}>
+        <HandmadeBagsHeader storeName={store.name} storeSlug={store.slug || slug} logo={store.logo} isLanding={false} />
+        <div style={buildPageBackgroundStyle(pageSettings)}>
+          <RenderBlocks blocks={retailBlocks} storeSlug={slug} products={serializedProducts} />
+        </div>
+        <HandmadeBagsFooter storeName={store.name} storeSlug={store.slug || slug} logo={store.logo} description={store.description ?? undefined} />
+      </ThemeProvider>
     );
   }
 

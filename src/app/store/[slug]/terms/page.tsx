@@ -2,6 +2,8 @@
 import { useParams } from "next/navigation";
 import { useState, useEffect } from "react";
 import { CosmeticsHeader, CosmeticsFooter } from "@/components/storefront/CosmeticsTemplateBlocks";
+import { RenderBlocks } from "@/components/storefront/BlockRenderer";
+import { RETAIL_TERMS_BLOCKS } from "@/lib/templates/presets/retail-pages";
 
 export default function TermsPage() {
   const params = useParams();
@@ -39,6 +41,19 @@ export default function TermsPage() {
 
   const store = storeData?.store;
   const currency = store?.currency || "NGN";
+
+
+  // ─── RETAIL TERMS ───
+  const isRetail = storeData?.templateSlug === "retail";
+  if (isRetail) {
+    return (
+      <div className="min-h-screen bg-white">
+        <div className="max-w-6xl mx-auto px-4 sm:px-6 py-10">
+          <RenderBlocks blocks={RETAIL_TERMS_BLOCKS} storeSlug={slug} products={products || []} currency={currency} />
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-white">

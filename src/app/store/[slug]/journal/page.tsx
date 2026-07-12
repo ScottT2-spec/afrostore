@@ -5,6 +5,8 @@ import { PerfumesHeader, PerfumesFooter } from "@/components/storefront/Perfumes
 import { RenderTemplateBlocks } from "@/components/storefront/TemplateBlockRenderer";
 import { PerfumesStoreContext } from "@/components/storefront/PerfumesTemplateBlocks";
 import { PERFUMES_JOURNAL_PRESET } from "@/lib/templates/presets/perfumes-journal-preset";
+import { RenderBlocks } from "@/components/storefront/BlockRenderer";
+import { RETAIL_JOURNAL_BLOCKS } from "@/lib/templates/presets/retail-pages";
 
 export default function JournalPage() {
   const params = useParams();
@@ -35,6 +37,19 @@ export default function JournalPage() {
     storeSlug: slug,
     socialLinks: socialLinksArray,
   };
+
+
+  // ─── RETAIL JOURNAL ───
+  const isRetail = storeData?.templateSlug === "retail";
+  if (isRetail) {
+    return (
+      <div className="min-h-screen bg-white">
+        <div className="max-w-6xl mx-auto px-4 sm:px-6 py-10">
+          <RenderBlocks blocks={RETAIL_JOURNAL_BLOCKS} storeSlug={slug} products={products || []} currency={currency} />
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div style={{ minHeight: "100vh", background: "#fff" }}>
