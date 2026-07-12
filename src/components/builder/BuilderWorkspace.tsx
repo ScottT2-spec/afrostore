@@ -368,6 +368,22 @@ export default function BuilderWorkspace({
     }
   }, [viewport]);
 
+  // Listen for block selection messages from preview iframe
+  useEffect(() => {
+    const handleMessage = (event: MessageEvent) => {
+      if (event.data?.type === "builder-block-select") {
+        const { blockId } = event.data;
+        // Find the matching section in our page sections
+        const section = activePage.sections.find((s) => s.id === blockId);
+        if (section) {
+          setSelectedSectionId(blockId);
+        }
+      }
+    };
+    window.addEventListener("message", handleMessage);
+    return () => window.removeEventListener("message", handleMessage);
+  }, [activePage.sections]);
+
   // Send section updates to iframe
   useEffect(() => {
     if (iframeRef.current && iframeRef.current.contentWindow) {

@@ -239,8 +239,9 @@ export default function BuilderPreviewPage() {
         data-block-id={block.id}
         data-block-type={block.type}
         data-block-index={index}
-        className="relative group/block"
+        className="relative group/block builder-block-wrapper"
         onClick={(e) => {
+          e.preventDefault();
           e.stopPropagation();
           // Send block selection message to parent editor
           window.parent.postMessage({
@@ -272,6 +273,17 @@ export default function BuilderPreviewPage() {
 
   return (
     <div className="min-h-screen bg-white">
+      {/* Disable all link navigation in editor mode */}
+      <style dangerouslySetInnerHTML={{ __html: `
+        .builder-block-wrapper a,
+        .builder-block-wrapper button[type="submit"] {
+          pointer-events: none !important;
+          cursor: default !important;
+        }
+        .builder-block-wrapper {
+          cursor: pointer !important;
+        }
+      `}} />
       {renderChrome()}
       <RenderBlocks 
         blocks={contentBlocks} 
