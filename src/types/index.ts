@@ -341,3 +341,153 @@ export interface BuilderBlock {
   props: Record<string, unknown>;
   children?: BuilderBlock[];
 }
+
+// ─── Prokip Sites OS Types ────────────────────────────────────────
+export interface ProkipSite {
+  id: string;
+  workspaceId: string;
+  name: string;
+  contactWhatsApp?: string;
+  businessName?: string;
+  logoUrl?: string;
+  theme: ProkipTheme;
+  sections: Section[];
+  pages?: Page[];
+  activePageId?: string;
+  customCss?: string;
+  mediaLibrary?: string[];
+  products: Product[];
+  deliveryAreas: DeliveryArea[];
+  lowDataMode?: boolean;
+}
+
+export interface ProkipTheme {
+  id: string;
+  name: string;
+  designSystem: DesignSystem;
+}
+
+export interface DesignSystem {
+  colors: ColorPalette;
+  fonts: FontSystem;
+  typography: TypographySystem;
+  borderRadius: string;
+  spacing?: SpacingSystem;
+}
+
+export interface ColorPalette {
+  primary: string;
+  secondary: string;
+  accent: string;
+  background: string;
+  text: string;
+  mutedText: string;
+  border: string;
+}
+
+export interface FontSystem {
+  heading: string;
+  body: string;
+}
+
+export interface TypographySystem {
+  h1?: FontStyle;
+  h2?: FontStyle;
+  h3?: FontStyle;
+  body?: FontStyle;
+  button?: FontStyle;
+  menu?: FontStyle;
+}
+
+export interface FontStyle {
+  fontFamily?: string;
+  fontSize?: string;
+  fontWeight?: string;
+  lineHeight?: string;
+  letterSpacing?: string;
+  textTransform?: string;
+  color?: string;
+}
+
+export interface SpacingSystem {
+  xs: string;
+  sm: string;
+  md: string;
+  lg: string;
+  xl: string;
+}
+
+export interface Page {
+  id: string;
+  name: string;
+  slug: string;
+  sections: Section[];
+  isSystem?: boolean;
+}
+
+export interface Section {
+  id: string;
+  type: string;
+  content?: Record<string, unknown>;
+  styleOverrides?: SectionStyleOverrides;
+}
+
+export interface SectionStyleOverrides {
+  backgroundColor?: string;
+  textColor?: string;
+  paddingY?: string;
+  marginTop?: string;
+  marginBottom?: string;
+  marginLeft?: string;
+  marginRight?: string;
+  paddingTop?: string;
+  paddingBottom?: string;
+  paddingLeft?: string;
+  paddingRight?: string;
+  marginLock?: boolean;
+  paddingLock?: boolean;
+  borderColor?: string;
+  borderWidth?: string;
+  borderRadius?: string;
+  borderStyle?: string;
+  boxShadow?: string;
+  backgroundType?: 'color' | 'gradient' | 'image' | 'video';
+  backgroundGradient?: string;
+  backgroundImage?: string;
+  backgroundVideo?: string;
+  backgroundOverlay?: string;
+  transitionDuration?: string;
+  hoverScale?: string;
+  hoverOpacity?: string;
+  hoverShadow?: string;
+  responsiveVisibility?: {
+    desktop: boolean;
+    tablet: boolean;
+    mobile: boolean;
+  };
+  customCss?: string;
+}
+
+export interface DeliveryArea {
+  id: string;
+  name: string;
+  fee: number;
+  estimatedDays: string;
+}
+
+// Google Fonts Database
+export interface GoogleFont {
+  name: string;
+  importUrl: string;
+  category: 'serif' | 'sans-serif' | 'display' | 'monospace';
+}
+
+export const GOOGLE_FONTS_DATABASE: GoogleFont[] = [
+  { name: 'Inter', importUrl: 'https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap', category: 'sans-serif' },
+  { name: 'Playfair Display', importUrl: 'https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;500;600;700&display=swap', category: 'serif' },
+  { name: 'Space Grotesk', importUrl: 'https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&display=swap', category: 'sans-serif' },
+  { name: 'Outfit', importUrl: 'https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&display=swap', category: 'sans-serif' },
+  { name: 'JetBrains Mono', importUrl: 'https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;;display=swap', category: 'monospace' },
+  { name: 'Cabinet Grotesk', importUrl: 'https://fonts.googleapis.com/css2?family=Cabinet+Grotesk:wght@300;400;500;600;700&display=swap', category: 'sans-serif' },
+  { name: 'Syne', importUrl: 'https://fonts.googleapis.com/css2?family=Syne:wght@400;500;600;700;800&display=swap', category: 'display' },
+];

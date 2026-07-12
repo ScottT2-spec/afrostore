@@ -445,45 +445,18 @@ export default function StorePage() {
   const isRetailTemplate = data.templateSlug === "retail";
   const templatePreset = data.templateSlug ? TEMPLATE_PRESET_MAP[data.templateSlug] : undefined;
 
-  // Template-specific navigation items — tailored to each niche
-  const TEMPLATE_NAV_ITEMS: Record<string, Array<{ label: string; href: string }>> = {
-    // Fashion family
-    "fashion":          [{ label: "New Arrivals", href: `/store/${slug}/shop?sort=newest` }, { label: "Collections", href: `/store/${slug}/shop` }, { label: "Lookbook", href: `/store/${slug}/blog` }],
-    "fashion-colored":  [{ label: "New Arrivals", href: `/store/${slug}/shop?sort=newest` }, { label: "Collections", href: `/store/${slug}/shop` }, { label: "Lookbook", href: `/store/${slug}/blog` }],
-    "handmade-bags":    [{ label: "New Arrivals", href: `/store/${slug}/shop?sort=newest` }, { label: "Handbags", href: `/store/${slug}/shop` }, { label: "Our Story", href: `/store/${slug}/blog` }],
-    "t-shirts-prints":  [{ label: "New Drops", href: `/store/${slug}/shop?sort=newest` }, { label: "All Designs", href: `/store/${slug}/shop` }, { label: "Custom Prints", href: `/store/${slug}/shop` }],
-    // Electronics
-    "electronics":              [{ label: "Deals", href: `/store/${slug}/shop?sort=price_asc` }, { label: "New Tech", href: `/store/${slug}/shop?sort=newest` }, { label: "Brands", href: `/store/${slug}/shop` }, { label: "Blog", href: `/store/${slug}/blog` }],
-    "electronics-accessories":  [{ label: "Deals", href: `/store/${slug}/shop?sort=price_asc` }, { label: "New Tech", href: `/store/${slug}/shop?sort=newest` }, { label: "Accessories", href: `/store/${slug}/shop` }],
-    "hardware":                 [{ label: "Tools", href: `/store/${slug}/shop` }, { label: "New Arrivals", href: `/store/${slug}/shop?sort=newest` }, { label: "Guides", href: `/store/${slug}/blog` }],
-    "tools":                    [{ label: "Power Tools", href: `/store/${slug}/shop` }, { label: "Hand Tools", href: `/store/${slug}/shop` }, { label: "Guides", href: `/store/${slug}/blog` }],
-    // Bakery
-    "sweets-bakery":    [{ label: "Menu", href: `/store/${slug}/shop` }, { label: "Specials", href: `/store/${slug}/shop?sort=newest` }, { label: "Catering", href: `/store/${slug}/shop` }, { label: "Our Story", href: `/store/${slug}/blog` }],
-    // Cosmetics
-    "cosmetics":        [{ label: "Skincare", href: `/store/${slug}/shop` }, { label: "Bestsellers", href: `/store/${slug}/shop?sort=popular` }, { label: "New In", href: `/store/${slug}/shop?sort=newest` }, { label: "Beauty Tips", href: `/store/${slug}/blog` }],
-    // Grocery
-    "grocery":          [{ label: "Weekly Deals", href: `/store/${slug}/shop?sort=price_asc` }, { label: "Fresh Produce", href: `/store/${slug}/shop` }, { label: "Pantry", href: `/store/${slug}/shop` }, { label: "Recipes", href: `/store/${slug}/blog` }],
-    "vegetables":       [{ label: "Fresh Today", href: `/store/${slug}/shop?sort=newest` }, { label: "Organic", href: `/store/${slug}/shop` }, { label: "Seasonal", href: `/store/${slug}/shop` }, { label: "Recipes", href: `/store/${slug}/blog` }],
-    // Health
-    "pills":            [{ label: "Supplements", href: `/store/${slug}/shop` }, { label: "Bestsellers", href: `/store/${slug}/shop?sort=popular` }, { label: "Wellness Blog", href: `/store/${slug}/blog` }],
-    // Interior
-    "decor":            [{ label: "Furniture", href: `/store/${slug}/shop` }, { label: "New Collection", href: `/store/${slug}/shop?sort=newest` }, { label: "Inspiration", href: `/store/${slug}/blog` }],
-    "retail":           [{ label: "All Products", href: `/store/${slug}/shop` }, { label: "Garden Decor", href: `/store/${slug}/shop?category=garden-decor` }, { label: "Home Decor", href: `/store/${slug}/shop?category=home-decor` }, { label: "About", href: `/store/${slug}/about` }, { label: "Contact", href: `/store/${slug}/contact` }],
-    // Kids
-    "kids":             [{ label: "Toys", href: `/store/${slug}/shop` }, { label: "New In", href: `/store/${slug}/shop?sort=newest` }, { label: "Gift Ideas", href: `/store/${slug}/shop` }, { label: "Parenting", href: `/store/${slug}/blog` }],
-    "toys":             [{ label: "Age Groups", href: `/store/${slug}/shop` }, { label: "New Toys", href: `/store/${slug}/shop?sort=newest` }, { label: "Gift Finder", href: `/store/${slug}/shop` }],
-    // Makeup
-    "makeup":           [{ label: "Face", href: `/store/${slug}/shop` }, { label: "Lips", href: `/store/${slug}/shop` }, { label: "New Launches", href: `/store/${slug}/shop?sort=newest` }, { label: "Tutorials", href: `/store/${slug}/blog` }],
-    // Perfumes
-    "perfumes":         [{ label: "Fragrances", href: `/store/${slug}/shop` }, { label: "New Scents", href: `/store/${slug}/shop?sort=newest` }, { label: "Gift Sets", href: `/store/${slug}/shop` }, { label: "Scent Guide", href: `/store/${slug}/blog` }],
-  };
-  const templateNavItems = data.templateSlug ? TEMPLATE_NAV_ITEMS[data.templateSlug] || [] : [];
-
-  // Navigation pages: exclude HOME (we're on it), sort sensibly
+  // Build navigation items dynamically from actual pages in database
+  // This avoids 404s from hardcoded template navigation that references non-existent pages
   const navPageOrder: Record<string, number> = { ABOUT: 0, FAQ: 1, CONTACT: 2, POLICY: 3, CUSTOM: 4, LANDING: 5 };
   const navPages = customizedPages
     .filter((p) => p.type !== "HOME")
     .sort((a, b) => (navPageOrder[a.type] ?? 99) - (navPageOrder[b.type] ?? 99));
+  
+  // Build dynamic navigation items from actual pages
+  const dynamicNavItems = navPages.map((page) => ({
+    label: page.title,
+    href: `/store/${slug}/${page.slug}`,
+  }));
 
   if (data.templateSlug === "vegetables") {
     const vegetableNavItems = [
@@ -648,9 +621,9 @@ export default function StorePage() {
           storeSlug={slug}
           logo={store.logo}
           navPages={navPages}
-          customNavItems={customNavItems || (templateNavItems.length > 0 ? [
+          customNavItems={customNavItems || (dynamicNavItems.length > 0 ? [
             { id: "home", label: "Home", url: `/store/${slug}`, type: "internal" },
-            ...templateNavItems.map((item, i) => ({ id: `tnav-${i}`, label: item.label, url: item.href, type: "internal" })),
+            ...dynamicNavItems.map((item, i) => ({ id: `dynav-${i}`, label: item.label, url: item.href, type: "internal" })),
             { id: "reviews", label: "Reviews", url: `/store/${slug}/reviews`, type: "internal" },
           ] : undefined)}
           categories={categories.filter((c) => c._count.products > 0).map((c) => ({ id: c.id, name: c.name, slug: c.slug, productCount: c._count.products }))}
@@ -704,9 +677,9 @@ export default function StorePage() {
 
           <nav className="hidden sm:flex items-center gap-6">
             <Link href={`/store/${slug}`} className="text-sm font-medium text-brand-700 transition-colors">Home</Link>
-            {!isLanding && templateNavItems.length > 0 ? (
+            {!isLanding && dynamicNavItems.length > 0 ? (
               <>
-                {templateNavItems.map((item, i) => (
+                {dynamicNavItems.map((item, i) => (
                   <Link key={i} href={item.href} className="text-sm font-medium text-surface-600 hover:text-surface-900 transition-colors">{item.label}</Link>
                 ))}
                 <Link href={`/store/${slug}/reviews`} className="text-sm font-medium text-surface-600 hover:text-surface-900 transition-colors">Reviews</Link>
@@ -769,9 +742,9 @@ export default function StorePage() {
       {mobileMenu && (
         <div className="sm:hidden bg-white border-b border-surface-200 px-4 py-4 space-y-2">
           <Link href={`/store/${slug}`} onClick={() => setMobileMenu(false)} className="block text-sm font-bold text-brand-700 py-2">Home</Link>
-          {!isLanding && templateNavItems.length > 0 ? (
+          {!isLanding && dynamicNavItems.length > 0 ? (
             <>
-              {templateNavItems.map((item, i) => (
+              {dynamicNavItems.map((item, i) => (
                 <Link key={i} href={item.href} onClick={() => setMobileMenu(false)} className="block text-sm font-medium text-surface-600 py-2">{item.label}</Link>
               ))}
               <Link href={`/store/${slug}/reviews`} onClick={() => setMobileMenu(false)} className="block text-sm font-medium text-surface-600 py-2">Reviews</Link>

@@ -144,6 +144,7 @@ model Site {
   products          Product[]
   referralProgram   ReferralProgram?
   returns           Return[]
+  customizations    SiteCustomization?
   members           SiteMember[]
   notifications     SiteNotification[]
   plugins           SitePlugin[]
@@ -151,7 +152,6 @@ model Site {
   socialLinks       SiteSocialLinks?
   templates         SiteTemplate[]
   themes            SiteTheme[]
-  customizations    SiteCustomization?
   workspace         Workspace          @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
   smsCampaigns      SmsCampaign[]
   taxRules          TaxRule[]
@@ -218,8 +218,8 @@ model SiteSocialLinks {
 }
 
 model SiteCustomization {
-  id                 String   @id @default(cuid())
-  siteId             String   @unique
+  id                 String    @id @default(cuid())
+  siteId             String    @unique
   themeSettings      Json?
   pageSettings       Json?
   sectionSettings    Json?
@@ -232,12 +232,12 @@ model SiteCustomization {
   revisionHistory    Json?
   customCss          String?
   customJs           String?
-  currentVersion     Int      @default(1)
-  publishedVersion   Int      @default(1)
+  currentVersion     Int       @default(1)
+  publishedVersion   Int       @default(1)
   lastPublishedAt    DateTime?
-  createdAt          DateTime @default(now())
-  updatedAt          DateTime @updatedAt
-  site               Site     @relation(fields: [siteId], references: [id], onDelete: Cascade)
+  createdAt          DateTime  @default(now())
+  updatedAt          DateTime  @updatedAt
+  site               Site      @relation(fields: [siteId], references: [id], onDelete: Cascade)
 
   @@index([siteId])
   @@map("site_customizations")
