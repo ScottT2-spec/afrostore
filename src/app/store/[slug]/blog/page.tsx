@@ -6,11 +6,8 @@ import Link from "next/link";
 import { ArrowLeft, ArrowRight, Loader2, Search, X } from "lucide-react";
 import { CosmeticsHeader, CosmeticsFooter } from "@/components/storefront/CosmeticsTemplateBlocks";
 import { KidsFontLoader, KidsFooterFull, KidsHeader } from "@/components/storefront/KidsTemplateBlocks";
-<<<<<<< HEAD
 import { HealthHeader, HealthFooterFull } from "@/components/storefront/HealthTemplateBlocks";
-=======
 import { TShirtsPrintsFooter, TShirtsPrintsHeader } from "@/components/storefront/TShirtsPrintsStoreChrome";
->>>>>>> 2072168 (Finished T-shirts & Prints template header and Footer)
 
 interface BlogPost {
   id: string;
@@ -365,16 +362,14 @@ export default function StoreBlogListingPage() {
     );
   }
 
-<<<<<<< HEAD
   // ─── HEALTH / PILLS BLOG ───
-  const isHealthTemplate = slug === "pills" || store?.templateSlug === "pills" ||
-    storeName?.toLowerCase().includes("pill") || storeName?.toLowerCase().includes("supplement") || storeName?.toLowerCase().includes("health");
+  const isHealthTemplate = slug === "pills" || storeName?.toLowerCase().includes("pill") || storeName?.toLowerCase().includes("supplement") || storeName?.toLowerCase().includes("health");
 
   if (isHealthTemplate) {
     return (
       <div className="min-h-screen bg-white text-[#333]" style={{ fontFamily: "'Cabin', Arial, sans-serif" }}>
         <link href="https://fonts.googleapis.com/css2?family=Geologica:wght@400;500;600;700;800&family=Cabin:wght@400;500;600;700&display=swap" rel="stylesheet" />
-        <HealthHeader storeName={storeName} storeSlug={slug} logo={store?.logo} />
+        <HealthHeader storeName={storeName} storeSlug={slug} />
         <main style={{ maxWidth: "1222px", margin: "0 auto", padding: "40px 15px 60px" }}>
           <h1 style={{ fontFamily: "'Geologica', sans-serif", fontSize: "32px", fontWeight: 700, color: "#333", marginBottom: "40px" }}>Blog</h1>
           {blogs.length === 0 ? (
@@ -401,8 +396,11 @@ export default function StoreBlogListingPage() {
             </div>
           )}
         </main>
-        <HealthFooterFull storeName={storeName} storeSlug={slug} logo={store?.logo} description={store?.description || "Your trusted source for vitamins, supplements, and wellness products."} contact={{ address: "1901 Thornridge Cir. Shiloh, Hawaii 81063", phone: "(956) 238-7908", email: "hello@store.com" }} />
-=======
+        <HealthFooterFull storeName={storeName} storeSlug={slug} description={"Your trusted source for vitamins, supplements, and wellness products."} contact={{ address: "1901 Thornridge Cir. Shiloh, Hawaii 81063", phone: "(956) 238-7908", email: "hello@store.com" }} />
+      </div>
+    );
+  }
+
   if (isTShirtsPrintsTemplate) {
     // Standalone T-Shirts & Prints Blog page - exact reference structure
     return (
@@ -530,7 +528,6 @@ export default function StoreBlogListingPage() {
         </section>
 
         <TShirtsPrintsFooter storeName={storeName} storeSlug={slug} />
->>>>>>> 2072168 (Finished T-shirts & Prints template header and Footer)
       </div>
     );
   }
