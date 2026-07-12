@@ -14,14 +14,14 @@ import { useNewsletterSubscribe } from "@/hooks/useNewsletterSubscribe";
 
 /* ─── DESIGN TOKENS ─────────────────────────────────────────── */
 const TOKENS = {
-  primaryColor: "#da3c3c",
-  primaryHover: "#c13030",
-  titleColor: "#242424",
-  textColor: "#767676",
-  entityTitleColor: "#333333",
-  linkColor: "#333333",
-  starColor: "#EABE12",
-  footerBg: "#0c0c0c",
+  primaryColor: "var(--color-primary)",
+  primaryHover: "var(--color-primary)", // Will use CSS filter for hover effect
+  titleColor: "var(--color-text)",
+  textColor: "var(--color-muted-text)",
+  entityTitleColor: "var(--color-text)",
+  linkColor: "var(--color-text)",
+  starColor: "var(--color-accent)",
+  footerBg: "var(--color-background)",
   containerWidth: "1222px",
   borderRadius: "0px",
   titleFont: "'Montserrat', Arial, Helvetica, sans-serif",
@@ -141,7 +141,7 @@ export function FashionHeroSlider({ slides, autoplaySpeed = 5000, minHeight = "5
       text-decoration: none; border: none; cursor: pointer; border-radius: 25px;
       transition: background-color 0.3s ease; letter-spacing: 0.5px;
     }
-    .fh-btn:hover { background: ${TOKENS.primaryHover}; }
+    .fh-btn:hover { filter: brightness(0.9); }
     .fh-dots { 
       position: absolute; bottom: 25px; left: 50%; transform: translateX(-50%);
       display: flex; gap: 10px; z-index: 5; 
@@ -1110,7 +1110,7 @@ export function FashionNewsletter({
       font-size: 13px; text-transform: uppercase; cursor: pointer;
       border-radius: ${TOKENS.borderRadius}; transition: background 0.3s;
     }
-    .fn-submit:hover { background: ${TOKENS.primaryHover}; }
+    .fn-submit:hover { filter: brightness(0.9); }
     .fn-separator { 
       display: flex; align-items: center; gap: 15px; margin: 25px auto;
       max-width: 400px; color: ${TOKENS.textColor}; font-size: 14px;

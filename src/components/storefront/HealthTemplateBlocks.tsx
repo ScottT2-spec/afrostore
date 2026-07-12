@@ -14,14 +14,14 @@ import { useNewsletterSubscribe } from "@/hooks/useNewsletterSubscribe";
 
 /* ─── DESIGN TOKENS ─────────────────────────────────────────── */
 const TOKENS = {
-  primaryColor: "rgb(136,173,153)",
-  primaryHover: "rgb(110,150,130)",
-  titleColor: "#333333",
-  textColor: "#777777",
-  entityTitleColor: "#333333",
-  linkColor: "#333333",
-  starColor: "#EABE12",
-  footerBg: "#ffffff",
+  primaryColor: "var(--color-primary)",
+  primaryHover: "var(--color-primary)", // Will use CSS filter for hover effect
+  titleColor: "var(--color-text)",
+  textColor: "var(--color-muted-text)",
+  entityTitleColor: "var(--color-text)",
+  linkColor: "var(--color-text)",
+  starColor: "var(--color-accent)",
+  footerBg: "var(--color-background)",
   containerWidth: "1222px",
   borderRadius: "15px",
   titleFont: "'Geologica', Arial, Helvetica, sans-serif",
@@ -139,7 +139,7 @@ export function HealthHero({
     .hh-hero-title { font-family: ${TOKENS.titleFont}; font-weight: 500; font-size: 58px; line-height: 68px; color: ${TOKENS.titleColor}; margin: 0 0 20px; }
     .hh-hero-sub { font-family: ${TOKENS.bodyFont}; font-size: 22px; line-height: 32px; color: ${TOKENS.textColor}; max-width: 780px; margin: 0 0 30px; }
     .hh-hero-btn { display: inline-block; padding: 14px 35px; background: ${TOKENS.primaryColor}; color: #fff; font-family: ${TOKENS.bodyFont}; font-weight: 600; font-size: 14px; text-decoration: none; border-radius: 35px; text-transform: uppercase; letter-spacing: 0.5px; transition: background 0.3s; }
-    .hh-hero-btn:hover { background: ${TOKENS.primaryHover}; }
+    .hh-hero-btn:hover { filter: brightness(0.9); }
     @media (max-width: 1024px) { .hh-hero { min-height: 500px; } .hh-hero-title { font-size: 42px; line-height: 52px; } .hh-hero-sub { font-size: 20px; line-height: 30px; } }
     @media (max-width: 767px) { .hh-hero { min-height: 400px; } .hh-hero-title { font-size: 32px; line-height: 42px; } .hh-hero-sub { font-size: 18px; line-height: 28px; } }
   `;
@@ -408,7 +408,7 @@ export function HealthProductGrid({
     .hh-prod-price { font-family: ${TOKENS.bodyFont}; font-weight: 600; font-size: 16px; color: ${TOKENS.primaryColor}; }
     .hh-prod-stars { color: ${TOKENS.starColor}; font-size: 12px; letter-spacing: 2px; margin-bottom: 5px; }
     .hh-prod-btn { display: inline-block; margin-top: 10px; padding: 8px 20px; background: ${TOKENS.primaryColor}; color: #fff; font-family: ${TOKENS.bodyFont}; font-weight: 600; font-size: 12px; text-decoration: none; border-radius: 25px; text-transform: uppercase; border: none; cursor: pointer; transition: background 0.3s; }
-    .hh-prod-btn:hover { background: ${TOKENS.primaryHover}; }
+    .hh-prod-btn:hover { filter: brightness(0.9); }
   `;
 
   const renderStars = (rating: number = 5) => "★".repeat(rating) + "☆".repeat(5 - rating);
@@ -733,7 +733,7 @@ export function HealthNewsletter({
     .hh-nl-input { flex: 1; padding: 14px 20px; border: 1px solid #ddd; border-radius: 35px 0 0 35px; font-family: ${TOKENS.bodyFont}; font-size: 14px; outline: none; border-right: none; }
     .hh-nl-input:focus { border-color: ${TOKENS.primaryColor}; }
     .hh-nl-btn { padding: 14px 30px; background: ${TOKENS.primaryColor}; color: #fff; border: none; border-radius: 0 35px 35px 0; font-family: ${TOKENS.bodyFont}; font-weight: 600; font-size: 14px; cursor: pointer; text-transform: uppercase; transition: background 0.3s; }
-    .hh-nl-btn:hover { background: ${TOKENS.primaryHover}; }
+    .hh-nl-btn:hover { filter: brightness(0.9); }
     @media (max-width: 1024px) { .hh-nl-title { font-size: 34px; line-height: 44px; } }
     @media (max-width: 767px) { .hh-nl-title { font-size: 22px; line-height: 32px; } .hh-newsletter { padding: 40px 20px; } }
   `;
@@ -856,7 +856,7 @@ export function HealthHeader({
     .hh-search-box input{flex:1;border:2px solid #e8e8e8;border-radius:10px;padding:12px 16px;font-size:15px;font-family:${TOKENS.bodyFont};outline:none;transition:border-color .2s}
     .hh-search-box input:focus{border-color:${TOKENS.primaryColor}}
     .hh-search-box button[type=submit]{background:${TOKENS.primaryColor};color:#fff;border:none;border-radius:10px;padding:12px 22px;font-weight:600;cursor:pointer;font-family:${TOKENS.bodyFont};transition:background .2s}
-    .hh-search-box button[type=submit]:hover{background:${TOKENS.primaryHover}}
+    .hh-search-box button[type=submit]:hover{filter:brightness(0.9)}
     .hh-mob-tog{display:none;background:none;border:none;cursor:pointer;padding:4px;color:${TOKENS.titleColor}}
     .hh-mob-tog svg{width:24px;height:24px}
     .hh-mob-menu{display:none;background:#fff;border-bottom:1px solid #eee;padding:15px}
@@ -960,7 +960,7 @@ export function HealthFooterFull({
     .hf-brand p{font-size:14px;line-height:1.8;margin:14px 0}
     .hf-social{display:flex;gap:10px;margin-top:14px}
     .hf-social a{width:34px;height:34px;border-radius:50%;background:${TOKENS.primaryColor};color:#fff;display:flex;align-items:center;justify-content:center;text-decoration:none;font-size:13px;font-weight:700;transition:background .2s}
-    .hf-social a:hover{background:${TOKENS.primaryHover}}
+    .hf-social a:hover{filter:brightness(0.9)}
     .hf-col-title{font-family:${TOKENS.titleFont};font-size:15px;font-weight:700;color:${TOKENS.titleColor};text-transform:uppercase;margin-bottom:18px;letter-spacing:.3px}
     .hf-links{list-style:none;margin:0;padding:0}
     .hf-links li{margin-bottom:10px}
@@ -1261,7 +1261,7 @@ export function HealthContactPage({
     .hh-contact-input:focus { border-color: ${TOKENS.primaryColor}; }
     .hh-contact-textarea { min-height: 120px; resize: vertical; }
     .hh-contact-submit { display: inline-block; padding: 14px 35px; background: ${TOKENS.primaryColor}; color: #fff; border: none; border-radius: 35px; font-family: ${TOKENS.bodyFont}; font-weight: 600; font-size: 14px; cursor: pointer; text-transform: uppercase; letter-spacing: 0.5px; transition: background 0.3s; }
-    .hh-contact-submit:hover { background: ${TOKENS.primaryHover}; }
+    .hh-contact-submit:hover { filter: brightness(0.9); }
     .hh-contact-success { text-align: center; padding: 40px 20px; }
     .hh-contact-success-icon { font-size: 48px; margin-bottom: 15px; }
     .hh-contact-success h3 { font-family: ${TOKENS.titleFont}; font-size: 24px; color: ${TOKENS.titleColor}; margin: 0 0 10px; }
@@ -1433,7 +1433,7 @@ export function HealthBlogPage({
     .hh-blog-featured-excerpt { font-family: ${TOKENS.bodyFont}; font-size: 15px; line-height: 26px; color: ${TOKENS.textColor}; margin: 0 0 20px; }
     .hh-blog-featured-meta { font-family: ${TOKENS.bodyFont}; font-size: 13px; color: ${TOKENS.textColor}; }
     .hh-blog-featured-read { display: inline-block; margin-top: 20px; padding: 10px 25px; background: ${TOKENS.primaryColor}; color: #fff; border-radius: 25px; font-family: ${TOKENS.bodyFont}; font-weight: 600; font-size: 13px; text-decoration: none; text-transform: uppercase; transition: background 0.3s; }
-    .hh-blog-featured-read:hover { background: ${TOKENS.primaryHover}; }
+    .hh-blog-featured-read:hover { filter: brightness(0.9); }
     .hh-blog-cats { display: flex; gap: 10px; margin-bottom: 40px; flex-wrap: wrap; justify-content: center; }
     .hh-blog-cat-btn { padding: 8px 20px; border: 1px solid #ddd; border-radius: 25px; background: #fff; font-family: ${TOKENS.bodyFont}; font-size: 13px; font-weight: 600; color: ${TOKENS.titleColor}; cursor: pointer; transition: all 0.2s; }
     .hh-blog-cat-btn:hover { border-color: ${TOKENS.primaryColor}; color: ${TOKENS.primaryColor}; }
@@ -1574,7 +1574,7 @@ export function HealthIngredientsPage({
     .hh-ingr-cta h3 { font-family: ${TOKENS.titleFont}; font-weight: 500; font-size: 34px; color: ${TOKENS.titleColor}; margin: 0 0 12px; }
     .hh-ingr-cta p { font-family: ${TOKENS.bodyFont}; font-size: 16px; color: ${TOKENS.textColor}; margin: 0 0 25px; }
     .hh-ingr-cta a { display: inline-block; padding: 14px 35px; background: ${TOKENS.primaryColor}; color: #fff; border-radius: 35px; font-family: ${TOKENS.bodyFont}; font-weight: 600; font-size: 14px; text-decoration: none; text-transform: uppercase; transition: background 0.3s; }
-    .hh-ingr-cta a:hover { background: ${TOKENS.primaryHover}; }
+    .hh-ingr-cta a:hover { filter: brightness(0.9); }
     @media (max-width: 768px) { .hh-ingr-grid { grid-template-columns: 1fr; } .hh-ingr-hero-title { font-size: 32px; } .hh-ingr-hero { padding: 50px 20px; } .hh-ingr-cta { padding: 40px 20px; } }
   `;
 

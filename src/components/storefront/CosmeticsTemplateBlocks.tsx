@@ -15,14 +15,14 @@ import { useNewsletterSubscribe } from "@/hooks/useNewsletterSubscribe";
 
 /* ─── DESIGN TOKENS ─────────────────────────────────────────── */
 const TOKENS = {
-  primaryColor: "#7eb934",
-  primaryHover: "#6da329",
-  titleColor: "#242424",
-  textColor: "#767676",
-  entityTitleColor: "#333333",
-  linkColor: "#333333",
-  starColor: "#EABE12",
-  footerBg: "#ffffff",
+  primaryColor: "var(--color-primary)",
+  primaryHover: "var(--color-primary)", // Will use CSS filter for hover effect
+  titleColor: "var(--color-text)",
+  textColor: "var(--color-muted-text)",
+  entityTitleColor: "var(--color-text)",
+  linkColor: "var(--color-text)",
+  starColor: "var(--color-accent)",
+  footerBg: "var(--color-background)",
   containerWidth: "1222px",
   borderRadius: "0px",
   titleFont: "'Montserrat', Arial, Helvetica, sans-serif",
@@ -184,7 +184,7 @@ export function CosmeticsHeroSlider({ slides, autoplaySpeed = 5000, minHeight = 
       text-decoration: none; border: none; cursor: pointer; border-radius: 25px;
       transition: background-color 0.3s ease; letter-spacing: 0.5px; margin-right: 10px;
     }
-    .ch-btn:hover { background: ${TOKENS.primaryHover}; }
+    .ch-btn:hover { filter: brightness(0.9); }
     .ch-btn-outline {
       display: inline-block; padding: 12px 30px;
       background: transparent; color: ${TOKENS.titleColor}; text-transform: uppercase;
@@ -395,7 +395,7 @@ export function CosmeticsSectionTitle({ subtitle, title, description, buttonText
       text-decoration: none; border-radius: 0; transition: background 0.3s;
       letter-spacing: 1px;
     }
-    .cst-btn:hover { background: ${TOKENS.primaryHover}; }
+    .cst-btn:hover { filter: brightness(0.9); }
     @media (max-width: 767px) {
       .cst-title { font-size: 24px; }
       .cst-wrap { margin-bottom: 25px; }
@@ -756,7 +756,7 @@ export function CosmeticsDiscovery({ image, title, description, features, button
       text-decoration: none; border-radius: 0; transition: background 0.3s;
       letter-spacing: 0.5px; margin-right: 10px;
     }
-    .cd-btn:hover { background: ${TOKENS.primaryHover}; }
+    .cd-btn:hover { filter: brightness(0.9); }
     .cd-btn-outline {
       display: inline-block; padding: 12px 30px;
       background: transparent; color: ${TOKENS.titleColor}; text-transform: uppercase;
@@ -881,7 +881,7 @@ export function CosmeticsCountdownBanner({ title, description, image, targetDate
       font-family: ${TOKENS.bodyFont}; font-weight: 600; font-size: 13px;
       text-decoration: none; transition: background 0.3s; margin-right: 10px;
     }
-    .ccb-btn:hover { background: ${TOKENS.primaryHover}; }
+    .ccb-btn:hover { filter: brightness(0.9); }
     .ccb-btn-outline {
       display: inline-block; padding: 12px 30px;
       background: transparent; color: ${TOKENS.titleColor}; text-transform: uppercase;
@@ -1285,7 +1285,7 @@ export function CosmeticsNewsletter({
       font-weight: 600; font-size: 13px; text-transform: uppercase; cursor: pointer;
       transition: background 0.3s;
     }
-    .cn-submit:hover { background: ${TOKENS.primaryHover}; border-color: ${TOKENS.primaryHover}; }
+    .cn-submit:hover { filter: brightness(0.9); }
     @media (max-width: 767px) {
       .cn-form { flex-direction: column; gap: 10px; }
       .cn-input { border-right: 2px solid rgba(255,255,255,0.3); }
@@ -1551,7 +1551,7 @@ export function CosmeticsFooter({
     .cf-newsletter-input::placeholder { color: rgba(255,255,255,0.5); }
     .cf-newsletter-input:focus { border-color: ${TOKENS.primaryColor}; }
     .cf-newsletter-btn { width: 100%; padding: 12px; background: ${TOKENS.primaryColor}; color: #fff; border: none; font-family: ${TOKENS.bodyFont}; font-weight: 600; font-size: 13px; text-transform: uppercase; letter-spacing: 0.5px; cursor: pointer; transition: background 0.3s; }
-    .cf-newsletter-btn:hover { background: ${TOKENS.primaryHover}; }
+    .cf-newsletter-btn:hover { filter: brightness(0.9); }
     @media (max-width: 1024px) { .cf-inner { grid-template-columns: repeat(2, 1fr); gap: 35px; } }
     @media (max-width: 767px) {
       .cf-inner { grid-template-columns: 1fr; gap: 30px; }

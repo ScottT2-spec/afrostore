@@ -14,14 +14,14 @@ import { safeSrc, onImgError } from "./image-fallback";
 
 /* ─── DESIGN TOKENS ─────────────────────────────────────────── */
 const TOKENS = {
-  primaryColor: "#007bc4",
-  primaryHover: "#006aa9",
-  alternativeColor: "#fbbc34",
-  titleColor: "#242424",
-  textColor: "#767676",
-  entityTitleColor: "#333333",
-  linkColor: "#333333",
-  starColor: "#EABE12",
+  primaryColor: "var(--color-primary)",
+  primaryHover: "var(--color-primary)", // Will use CSS filter for hover effect
+  alternativeColor: "var(--color-accent)",
+  titleColor: "var(--color-text)",
+  textColor: "var(--color-muted-text)",
+  entityTitleColor: "var(--color-text)",
+  linkColor: "var(--color-text)",
+  starColor: "var(--color-accent)",
   containerWidth: "1222px",
   borderRadius: "0px",
   titleFont: "'Poppins', Arial, Helvetica, sans-serif",
@@ -219,7 +219,7 @@ export function ElectronicsHeroSlider({ slides, autoplaySpeed = 5000, minHeight 
       text-decoration: none; border: none; cursor: pointer; border-radius: 35px;
       transition: background-color 0.3s ease; letter-spacing: 0.5px;
     }
-    .ehs-btn:hover { background: ${TOKENS.primaryHover}; }
+    .ehs-btn:hover { filter: brightness(0.9); }
     .ehs-dots {
       position: absolute; bottom: 25px; left: 50%; transform: translateX(-50%);
       display: flex; gap: 10px; z-index: 5;
@@ -343,7 +343,7 @@ export function ElectronicsPromoBanners({ banners }: ElectronicsPromoBannersProp
       transition: all 0.3s; font-family: ${TOKENS.bodyFont}; letter-spacing: 0.5px;
     }
     .epb-btn-dark { background: ${TOKENS.primaryColor}; color: #fff; border-radius: 35px; }
-    .epb-btn-dark:hover { background: ${TOKENS.primaryHover}; }
+    .epb-btn-dark:hover { filter: brightness(0.9); }
     .epb-btn-light { background: #fff; color: ${TOKENS.titleColor}; border-radius: 35px; }
     .epb-btn-light:hover { background: #f0f0f0; }
     .epb-link { position: absolute; inset: 0; z-index: 3; }
@@ -731,7 +731,7 @@ export function ElectronicsHotDeals({
       text-decoration: none; border-radius: 35px; transition: all 0.3s;
       font-family: ${TOKENS.bodyFont}; letter-spacing: 0.5px;
     }
-    .ehd-view-btn:hover { background: ${TOKENS.primaryHover}; }
+    .ehd-view-btn:hover { filter: brightness(0.9); }
     .ehd-empty { text-align: center; padding: 40px; color: ${TOKENS.textColor}; font-family: ${TOKENS.bodyFont}; }
     @media (max-width: 1024px) { .ehd-grid { grid-template-columns: repeat(2, 1fr); } }
     @media (max-width: 767px) { .ehd-grid { grid-template-columns: repeat(2, 1fr); gap: 10px; } }
@@ -845,7 +845,7 @@ export function ElectronicsSideBanner({
       font-size: 11px; font-weight: 700; text-transform: uppercase; text-decoration: none;
       border-radius: 35px; transition: background 0.3s;
     }
-    .esb-banner-btn:hover { background: ${TOKENS.primaryHover}; }
+    .esb-banner-btn:hover { filter: brightness(0.9); }
     .esb-feat-title {
       font-family: ${TOKENS.titleFont}; font-weight: ${TOKENS.titleFontWeight}; font-size: 16px;
       text-transform: uppercase; color: #fff; margin: 0 0 15px;
@@ -962,7 +962,7 @@ export function ElectronicsGamingCTA({
       font-size: 13px; font-weight: 700; text-transform: uppercase; text-decoration: none;
       border-radius: 35px; transition: background 0.3s; font-family: ${TOKENS.bodyFont};
     }
-    .egc-btn-primary:hover { background: ${TOKENS.primaryHover}; }
+    .egc-btn-primary:hover { filter: brightness(0.9); }
     .egc-btn-secondary {
       padding: 12px 30px; background: transparent; color: #fff;
       font-size: 13px; font-weight: 700; text-transform: uppercase; text-decoration: none;
@@ -1175,7 +1175,7 @@ export function ElectronicsPartners({
       color: #fff; font-size: 22px; transition: all 0.3s; z-index: 2;
       box-shadow: 0 4px 20px rgba(0,123,196,0.4);
     }
-    .epr-play-btn:hover { transform: translate(-50%, -50%) scale(1.1); background: ${TOKENS.primaryHover}; }
+    .epr-play-btn:hover { transform: translate(-50%, -50%) scale(1.1); filter: brightness(0.9); }
     .epr-video iframe { width: 100%; height: 100%; border: 0; }
     .epr-logos { display: grid; grid-template-columns: repeat(3, 1fr); gap: 0; }
     .epr-logo {

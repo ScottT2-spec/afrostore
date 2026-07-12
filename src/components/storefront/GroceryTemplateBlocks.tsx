@@ -14,15 +14,15 @@ import { useNewsletterSubscribe } from "@/hooks/useNewsletterSubscribe";
 
 /* ─── DESIGN TOKENS ─────────────────────────────────────────── */
 const TOKENS = {
-  primaryColor: "#d12c2c",
-  primaryHover: "#bf2828",
-  alternativeColor: "#fbbc34",
-  titleColor: "#242424",
-  textColor: "#767676",
-  entityTitleColor: "#333333",
-  linkColor: "#333333",
-  starColor: "#EABE12",
-  footerBg: "#373839",
+  primaryColor: "var(--color-primary)",
+  primaryHover: "var(--color-primary)", // Will use CSS filter for hover effect
+  alternativeColor: "var(--color-accent)",
+  titleColor: "var(--color-text)",
+  textColor: "var(--color-muted-text)",
+  entityTitleColor: "var(--color-text)",
+  linkColor: "var(--color-text)",
+  starColor: "var(--color-accent)",
+  footerBg: "var(--color-background)",
   bgWhite: "#ffffff",
   containerWidth: "1222px",
   borderRadius: "0px",
@@ -176,7 +176,7 @@ export function GroceryHeroSlider({ slides, autoplaySpeed = 5000 }: GroceryHeroS
     .gc-slide-title { font-family: ${TOKENS.titleFont}; font-weight: 700; font-size: 50px; line-height: 60px; color: #fff; margin: 0 0 15px; }
     .gc-slide-desc { font-family: ${TOKENS.bodyFont}; font-size: 14px; line-height: 24px; color: rgba(255,255,255,0.8); margin: 0 0 25px; max-width: 380px; }
     .gc-slide-btn { display: inline-block; padding: 14px 35px; background: ${TOKENS.primaryColor}; color: #fff; font-family: ${TOKENS.bodyFont}; font-weight: 500; font-size: 13px; text-decoration: none; text-transform: uppercase; letter-spacing: 1px; transition: background 0.3s; border: none; cursor: pointer; box-shadow: inset 0 -2px 0 rgba(0,0,0,0.15); }
-    .gc-slide-btn:hover { background: ${TOKENS.primaryHover}; }
+    .gc-slide-btn:hover { filter: brightness(0.9); }
     .gc-slide-img { flex: 0 0 auto; max-width: 400px; }
     .gc-slide-img img { max-width: 100%; height: auto; }
     .gc-dots { position: absolute; bottom: 30px; left: 50%; transform: translateX(-50%); display: flex; gap: 8px; z-index: 5; }
@@ -360,7 +360,7 @@ export function GroceryProductGrid({
     .gc-prod-price del { color: ${TOKENS.textColor}; font-weight: 400; font-size: 13px; margin-right: 5px; }
     .gc-prod-stars { color: ${TOKENS.starColor}; font-size: 11px; letter-spacing: 1px; margin-bottom: 4px; }
     .gc-prod-btn { display: inline-block; margin-top: 8px; padding: 7px 18px; background: ${TOKENS.primaryColor}; color: #fff; font-family: ${TOKENS.bodyFont}; font-weight: 500; font-size: 11px; text-decoration: none; text-transform: uppercase; border: none; cursor: pointer; transition: background 0.3s; box-shadow: inset 0 -2px 0 rgba(0,0,0,0.15); }
-    .gc-prod-btn:hover { background: ${TOKENS.primaryHover}; }
+    .gc-prod-btn:hover { filter: brightness(0.9); }
     .gc-prod-badge { position: absolute; top: 10px; left: 10px; background: ${TOKENS.primaryColor}; color: #fff; font-family: ${TOKENS.bodyFont}; font-size: 11px; font-weight: 600; padding: 3px 10px; text-transform: uppercase; z-index: 2; }
     @media (max-width: 1024px) { .gc-prod-grid { grid-template-columns: repeat(3, 1fr) !important; } }
     @media (max-width: 767px) { .gc-prod-grid { grid-template-columns: repeat(2, 1fr) !important; } }
@@ -437,7 +437,7 @@ export function GroceryPromoBanners({ banners }: GroceryPromoBannersProps) {
     .gc-banner-sub { font-family: ${TOKENS.bodyFont}; font-size: 12px; font-weight: 500; color: ${TOKENS.primaryColor}; text-transform: uppercase; letter-spacing: 2px; margin-bottom: 8px; }
     .gc-banner-title { font-family: ${TOKENS.titleFont}; font-weight: 500; font-size: 28px; color: ${TOKENS.titleColor}; margin: 0 0 15px; }
     .gc-banner-btn { display: inline-block; padding: 10px 25px; background: ${TOKENS.primaryColor}; color: #fff; font-family: ${TOKENS.bodyFont}; font-weight: 500; font-size: 12px; text-decoration: none; text-transform: uppercase; letter-spacing: 1px; transition: background 0.3s; box-shadow: inset 0 -2px 0 rgba(0,0,0,0.15); }
-    .gc-banner-btn:hover { background: ${TOKENS.primaryHover}; }
+    .gc-banner-btn:hover { filter: brightness(0.9); }
     @media (max-width: 767px) { .gc-banners { grid-template-columns: 1fr; } }
   `;
 

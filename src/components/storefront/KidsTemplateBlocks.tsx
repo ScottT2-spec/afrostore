@@ -15,14 +15,14 @@ import { useNewsletterSubscribe } from "@/hooks/useNewsletterSubscribe";
 
 /* ─── DESIGN TOKENS ─────────────────────────────────────────── */
 const TOKENS = {
-  primaryColor: "#f5857c",
-  primaryHover: "#e76e64",
-  titleColor: "#242424",
-  textColor: "#767676",
-  entityTitleColor: "#333333",
-  linkColor: "#333333",
-  starColor: "#EABE12",
-  footerBg: "#faf8f5",
+  primaryColor: "var(--color-primary)",
+  primaryHover: "var(--color-primary)", // Will use CSS filter for hover effect
+  titleColor: "var(--color-text)",
+  textColor: "var(--color-muted-text)",
+  entityTitleColor: "var(--color-text)",
+  linkColor: "var(--color-text)",
+  starColor: "var(--color-accent)",
+  footerBg: "var(--color-background)",
   containerWidth: "1222px",
   borderRadius: "10px",
   titleFont: "'Quicksand', Arial, Helvetica, sans-serif",
@@ -208,7 +208,7 @@ export function KidsHeroSlider({ slides, autoplaySpeed = 5000, minHeight = "560p
       text-decoration: none; border: none; cursor: pointer;
       border-radius: 5px; transition: background-color 0.3s;
     }
-    .kh-btn:hover { background: ${TOKENS.primaryHover}; }
+    .kh-btn:hover { filter: brightness(0.9); }
     .kh-dots {
       position: absolute; bottom: 30px; left: 50%; transform: translateX(-50%);
       display: flex; gap: 8px; z-index: 5;
@@ -230,7 +230,7 @@ export function KidsHeroSlider({ slides, autoplaySpeed = 5000, minHeight = "560p
     }
     .kh-arrow {
       pointer-events: auto; width: 45px; height: 45px; border-radius: 50%;
-      border: none; background: rgba(255,255,255,0.8); color: #333;
+      border: none; background: rgba(255,255,255,0.8); color: var(--color-text);
       font-size: 18px; cursor: pointer; display: flex; align-items: center;
       justify-content: center; transition: all 0.3s; box-shadow: 0 2px 8px rgba(0,0,0,0.1);
     }
@@ -475,7 +475,7 @@ export function KidsProductGrid({ products: propProducts, columns = 4, showCateg
     .kpg-section { margin-bottom: ${marginBottom}; }
     .kpg-grid { display: grid; grid-template-columns: repeat(${columns}, 1fr); gap: 20px; }
     .kpg-card { position: relative; }
-    .kpg-thumb { position: relative; overflow: hidden; margin-bottom: 12px; border-radius: ${TOKENS.borderRadius}; background: #f5f5f5; }
+    .kpg-thumb { position: relative; overflow: hidden; margin-bottom: 12px; border-radius: ${TOKENS.borderRadius}; background: var(--color-background); }
     .kpg-img { width: 100%; height: auto; display: block; transition: opacity 0.5s; }
     .kpg-hover-img {
       position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover;
@@ -493,7 +493,7 @@ export function KidsProductGrid({ products: propProducts, columns = 4, showCateg
       border: none; cursor: pointer; display: flex; align-items: center; justify-content: center;
       box-shadow: 0 2px 6px rgba(0,0,0,0.1); font-size: 14px; transition: background 0.2s;
     }
-    .kpg-action-btn:hover { background: ${TOKENS.primaryColor}; color: #fff; }
+    .kpg-action-btn:hover { background: ${TOKENS.primaryColor}; color: var(--color-background); }
     .kpg-badge {
       position: absolute; top: 10px; left: 10px; z-index: 3;
       padding: 3px 12px; border-radius: 3px; font-size: 12px; font-weight: 700;
@@ -612,7 +612,7 @@ export interface KidsBundlePromoProps {
   marginBottom?: string;
 }
 
-export function KidsBundlePromo({ subtitle = "Buy bundle and get a 25% discount", title, description, buttonText = "Buy bundle now", buttonLink, productImages, backgroundColor = "#f5f0eb", marginBottom = "60px" }: KidsBundlePromoProps) {
+export function KidsBundlePromo({ subtitle = "Buy bundle and get a 25% discount", title, description, buttonText = "Buy bundle now", buttonLink, productImages, backgroundColor, marginBottom = "60px" }: KidsBundlePromoProps) {
   const storeCtx = useContext(KidsStoreContext);
   const fixLink = (link?: string) => resolveStoreLink(link || "#", storeCtx?.storeSlug);
   const { ref, inView } = useInView();
@@ -640,7 +640,7 @@ export function KidsBundlePromo({ subtitle = "Buy bundle and get a 25% discount"
       font-family: ${TOKENS.bodyFont}; font-weight: 700; font-size: 14px;
       text-decoration: none; border-radius: 5px; transition: background 0.3s;
     }
-    .kbp-btn:hover { background: ${TOKENS.primaryHover}; }
+    .kbp-btn:hover { filter: brightness(0.9); }
     .kbp-btn-icon { width: 18px; height: 18px; }
     .kbp-product-img {
       flex: 0 0 auto; width: 200px; border-radius: ${TOKENS.borderRadius};
@@ -873,7 +873,7 @@ export interface KidsNewsletterProps {
   onSubmit?: (email: string) => void;
 }
 
-export function KidsNewsletter({ title = "Join our mailing list to receive any latest updates and promotions", buttonText = "Subscribe", backgroundColor = "#faf8f5", onSubmit }: KidsNewsletterProps) {
+export function KidsNewsletter({ title = "Join our mailing list to receive any latest updates and promotions", buttonText = "Subscribe", backgroundColor, onSubmit }: KidsNewsletterProps) {
   const [email, setEmail] = useState("");
   const storeCtx = useContext(KidsStoreContext);
   const { subscribe, status: nlStatus } = useNewsletterSubscribe(storeCtx?.storeSlug || "");
@@ -903,7 +903,7 @@ export function KidsNewsletter({ title = "Join our mailing list to receive any l
       font-weight: 700; font-size: 13px; cursor: pointer;
       border-radius: 0 5px 5px 0; transition: background 0.3s;
     }
-    .kn-submit:hover { background: ${TOKENS.primaryHover}; border-color: ${TOKENS.primaryHover}; }
+    .kn-submit:hover { filter: brightness(0.9); }
     @media (max-width: 767px) {
       .kn-form { flex-direction: column; gap: 10px; }
       .kn-input { border-right: 2px solid #e0e0e0; border-radius: 5px; }
@@ -912,7 +912,7 @@ export function KidsNewsletter({ title = "Join our mailing list to receive any l
   `;
 
   return (
-    <div className="kn-section" style={{ backgroundColor, ...containerStyle }}>
+    <div className="kn-section" style={{ backgroundColor: backgroundColor || 'var(--color-background)', ...containerStyle }}>
       <ScopedStyles id="newsletter" css={scopedCss} />
       <h3 className="kn-title">{title}</h3>
       {nlStatus === "success" ? (
@@ -1002,7 +1002,7 @@ export function KidsHeader({
     .kh-search-box input { flex: 1; border: 2px solid #e8e8e8; border-radius: 8px; padding: 12px 16px; font-size: 15px; font-family: ${TOKENS.bodyFont}; outline: none; transition: border-color 0.2s; }
     .kh-search-box input:focus { border-color: ${TOKENS.primaryColor}; }
     .kh-search-box button[type="submit"] { background: ${TOKENS.primaryColor}; color: #fff; border: none; border-radius: 8px; padding: 12px 24px; font-weight: 600; cursor: pointer; font-family: ${TOKENS.bodyFont}; transition: background 0.2s; }
-    .kh-search-box button[type="submit"]:hover { background: ${TOKENS.primaryHover}; }
+    .kh-search-box button[type="submit"]:hover { filter: brightness(0.9); }
     .kh-mobile-toggle { display: none; background: none; border: none; cursor: pointer; padding: 4px; color: ${TOKENS.titleColor}; }
     .kh-mobile-toggle svg { width: 24px; height: 24px; }
     .kh-mobile-menu { display: none; background: #fff; border-bottom: 1px solid #e8e8e8; padding: 15px; }
@@ -1153,12 +1153,12 @@ export function KidsFooterFull({
   };
 
   const footerCss = `
-    .kf-footer { background: #faf8f5; font-family: ${TOKENS.bodyFont}; color: ${TOKENS.textColor}; }
+    .kf-footer { background: ${TOKENS.footerBg}; font-family: ${TOKENS.bodyFont}; color: ${TOKENS.textColor}; }
     .kf-main { max-width: ${TOKENS.containerWidth}; margin: 0 auto; padding: 60px 15px 40px; display: grid; grid-template-columns: 1.5fr 1fr 1fr 1fr; gap: 40px; }
     .kf-brand p { font-size: 14px; line-height: 1.8; margin: 16px 0; }
     .kf-social { display: flex; gap: 10px; margin-top: 16px; }
-    .kf-social a { width: 36px; height: 36px; border-radius: 50%; background: ${TOKENS.primaryColor}; color: #fff; display: flex; align-items: center; justify-content: center; text-decoration: none; font-size: 14px; font-weight: 700; transition: background 0.2s; }
-    .kf-social a:hover { background: ${TOKENS.primaryHover}; }
+    .kf-social a { width: 36px; height: 36px; border-radius: 50%; background: ${TOKENS.primaryColor}; color: var(--color-background); display: flex; align-items: center; justify-content: center; text-decoration: none; font-size: 14px; font-weight: 700; transition: background 0.2s; }
+    .kf-social a:hover { filter: brightness(0.9); }
     .kf-col-title { font-family: ${TOKENS.titleFont}; font-size: 16px; font-weight: 700; color: ${TOKENS.titleColor}; text-transform: uppercase; margin-bottom: 20px; letter-spacing: 0.3px; }
     .kf-links { list-style: none; margin: 0; padding: 0; }
     .kf-links li { margin-bottom: 10px; }
@@ -1166,7 +1166,7 @@ export function KidsFooterFull({
     .kf-links a:hover { color: ${TOKENS.primaryColor}; }
     .kf-contact-item { display: flex; align-items: flex-start; gap: 10px; margin-bottom: 12px; font-size: 14px; }
     .kf-contact-icon { width: 16px; height: 16px; flex-shrink: 0; margin-top: 3px; color: ${TOKENS.primaryColor}; }
-    .kf-bottom { border-top: 1px solid #e8e0d8; max-width: ${TOKENS.containerWidth}; margin: 0 auto; padding: 20px 15px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px; }
+    .kf-bottom { border-top: 1px solid var(--color-border); max-width: ${TOKENS.containerWidth}; margin: 0 auto; padding: 20px 15px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px; }
     .kf-bottom small { font-size: 13px; color: ${TOKENS.textColor}; }
     .kf-bottom small a { color: ${TOKENS.textColor}; text-decoration: none; }
     .kf-payments img { height: 21px; width: auto; }

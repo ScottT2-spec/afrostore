@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { X, Settings, Sliders, Copy, Trash2, Sparkles } from "lucide-react";
 import { Section, SectionStyleOverrides } from "@/types";
+import ImageField from "./ImageField";
 
 interface RightSidebarProps {
   selectedSection: Section | null;
@@ -13,6 +14,8 @@ interface RightSidebarProps {
   onCopyStyles: (sectionId: string) => void;
   onPasteStyles: (sectionId: string) => void;
   hasCopiedStyles: boolean;
+  mediaLibrary?: string[];
+  onUploadImage?: (file: File) => Promise<string>;
 }
 
 type StylingTab = "content" | "advanced";
@@ -26,6 +29,8 @@ export default function RightSidebar({
   onCopyStyles,
   onPasteStyles,
   hasCopiedStyles,
+  mediaLibrary,
+  onUploadImage,
 }: RightSidebarProps) {
   const [activeTab, setActiveTab] = useState<StylingTab>("content");
 
@@ -138,7 +143,12 @@ export default function RightSidebar({
       {/* Tab Content */}
       <div className="flex-1 overflow-y-auto">
         {activeTab === "content" ? (
-          <ContentTab section={selectedSection} updateContent={updateContent} />
+          <ContentTab 
+            section={selectedSection} 
+            updateContent={updateContent}
+            mediaLibrary={mediaLibrary}
+            onUploadImage={onUploadImage}
+          />
         ) : (
           <AdvancedTab
             styleOverrides={selectedSection.styleOverrides || {}}
@@ -153,9 +163,13 @@ export default function RightSidebar({
 function ContentTab({
   section,
   updateContent,
+  mediaLibrary,
+  onUploadImage,
 }: {
   section: Section;
   updateContent: (key: string, value: any) => void;
+  mediaLibrary?: string[];
+  onUploadImage?: (file: File) => Promise<string>;
 }) {
   const content = section.content || {};
 
@@ -254,7 +268,12 @@ function ContentTab({
 
         {/* Bespoke / Template block fields — auto-generated from props */}
         {!["heading", "text", "button", "image"].includes(section.type) && (
-          <BespokeBlockEditor content={content} updateContent={updateContent} />
+          <BespokeBlockEditor 
+            content={content} 
+            updateContent={updateContent}
+            mediaLibrary={mediaLibrary}
+            onUploadImage={onUploadImage}
+          />
         )}
 
         {/* Generic fields for all sections */}
@@ -712,9 +731,13 @@ function formatLabel(key: string): string {
 function BespokeBlockEditor({
   content,
   updateContent,
+  mediaLibrary,
+  onUploadImage,
 }: {
   content: Record<string, unknown>;
   updateContent: (key: string, value: unknown) => void;
+  mediaLibrary?: string[];
+  onUploadImage?: (file: File) => Promise<string>;
 }) {
   const [expandedArrays, setExpandedArrays] = useState<Record<string, boolean>>({});
 
@@ -732,18 +755,36 @@ function BespokeBlockEditor({
     );
   }
 
+  // Detect if a key is likely an image field
+  const isImageField = (key: string, value: string): boolean => {
+    const imageKeywords = ["image", "img", "photo", "picture", "pic", "avatar", "background", "banner", "logo", "icon", "thumbnail", "thumb"];
+    const keyLower = key.toLowerCase();
+    // Check if key contains image keywords - don't require value to be a URL
+    return imageKeywords.some(keyword => keyLower.includes(keyword));
+  };
+
   return (
     <div className="space-y-3">
       {entries.map(([key, value]) => {
         // String fields
         if (typeof value === "string") {
           const isLong = value.length > 80;
+          const isImage = isImageField(key, value);
+          
           return (
             <div key={key} className="mb-2">
               <label className="block text-xs font-medium text-surface-700 mb-1">
                 {formatLabel(key)}
               </label>
-              {isLong ? (
+              {isImage ? (
+                <ImageField
+                  value={value}
+                  onChange={(newValue) => updateContent(key, newValue)}
+                  label={formatLabel(key)}
+                  mediaLibrary={mediaLibrary}
+                  onUploadImage={onUploadImage}
+                />
+              ) : isLong ? (
                 <textarea
                   value={value}
                   onChange={(e) => updateContent(key, e.target.value)}
@@ -824,12 +865,29 @@ function BespokeBlockEditor({
                             ([subKey, subVal]) => {
                               if (typeof subVal === "string") {
                                 const isSubLong = subVal.length > 60;
+                                const isSubImage = isImageField(subKey, subVal);
+                                
                                 return (
                                   <div key={subKey}>
                                     <label className="block text-[10px] font-medium text-surface-500 mb-0.5">
                                       {formatLabel(subKey)}
                                     </label>
-                                    {isSubLong ? (
+                                    {isSubImage ? (
+                                      <ImageField
+                                        value={subVal}
+                                        onChange={(newValue) => {
+                                          const newArr = [...value];
+                                          newArr[idx] = {
+                                            ...(item as Record<string, unknown>),
+                                            [subKey]: newValue,
+                                          };
+                                          updateContent(key, newArr);
+                                        }}
+                                        label={formatLabel(subKey)}
+                                        mediaLibrary={mediaLibrary}
+                                        onUploadImage={onUploadImage}
+                                      />
+                                    ) : isSubLong ? (
                                       <textarea
                                         value={subVal}
                                         onChange={(e) => {

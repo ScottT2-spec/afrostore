@@ -14,14 +14,14 @@ import { safeSrc, onImgError } from "./image-fallback";
 
 /* ─── DESIGN TOKENS ─────────────────────────────────────────── */
 const TOKENS = {
-  primaryColor: "#5c9fad",
-  primaryHover: "#4a8a97",
-  titleColor: "#242424",
-  textColor: "#767676",
-  entityTitleColor: "#333333",
-  linkColor: "#333333",
-  starColor: "#EABE12",
-  footerBg: "#191919",
+  primaryColor: "var(--color-primary)",
+  primaryHover: "var(--color-primary)", // Will use CSS filter for hover effect
+  titleColor: "var(--color-text)",
+  textColor: "var(--color-muted-text)",
+  entityTitleColor: "var(--color-text)",
+  linkColor: "var(--color-text)",
+  starColor: "var(--color-accent)",
+  footerBg: "var(--color-background)",
   containerWidth: "1222px",
   borderRadius: "10px",
   titleFont: "'Inter', Arial, Helvetica, sans-serif",
@@ -172,7 +172,7 @@ export function MakeupHeroSlider({ slides, autoplaySpeed = 5000, minHeight = "50
       text-decoration: none; border: none; cursor: pointer; border-radius: 25px;
       transition: background-color 0.3s ease;
     }
-    .mh-btn:hover { background: ${TOKENS.primaryHover}; }
+    .mh-btn:hover { filter: brightness(0.9); }
     .mh-dots {
       position: absolute; bottom: 40px; left: 50px;
       display: flex; gap: 10px; z-index: 5;
@@ -366,7 +366,7 @@ export function MakeupSectionTitle({ title, buttonText, buttonLink, align = "bet
       font-family: ${TOKENS.bodyFont}; font-weight: 600; font-size: 13px;
       text-decoration: none; border-radius: 25px; transition: background 0.3s;
     }
-    .mst-btn:hover { background: ${TOKENS.primaryHover}; }
+    .mst-btn:hover { filter: brightness(0.9); }
     .mst-btn-arrow { font-size: 12px; }
     @media (max-width: 1024px) { .mst-title { font-size: 24px; } }
     @media (max-width: 767px) { .mst-title { font-size: 22px; } }
@@ -726,7 +726,7 @@ export function MakeupBeforeAfter({ title, description, beforeImage, afterImage,
       font-family: ${TOKENS.bodyFont}; font-weight: 600; font-size: 14px;
       text-decoration: none; border-radius: 25px; transition: background 0.3s;
     }
-    .mba-btn:hover { background: ${TOKENS.primaryHover}; }
+    .mba-btn:hover { filter: brightness(0.9); }
     .mba-compare-wrap {
       position: relative; overflow: hidden; border-radius: ${TOKENS.borderRadius};
       cursor: ew-resize; user-select: none; aspect-ratio: 820/500;

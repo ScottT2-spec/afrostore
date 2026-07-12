@@ -196,6 +196,11 @@ export default function BuilderPage({ params }: { params: Promise<{ pageId: stri
       // Convert all pages' sections back to blocks format
       const pagesToUpdate = site.pages.map((page) => {
         const blocks = convertSectionsToBlocks(page.sections);
+        console.log(`[Save] Converting page ${page.id} (${page.name}):`, {
+          sectionsCount: page.sections.length,
+          blocksCount: blocks.length,
+          firstBlock: blocks[0] ? { id: blocks[0].id, type: blocks[0].type, props: blocks[0].props } : null,
+        });
         return {
           id: page.id,
           title: page.name,

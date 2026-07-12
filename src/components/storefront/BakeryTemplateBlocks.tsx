@@ -13,15 +13,15 @@ import { safeSrc, onImgError } from "./image-fallback";
 
 /* ─── DESIGN TOKENS ─────────────────────────────────────────── */
 const TOKENS = {
-  primaryColor: "#fd4680",
-  primaryHover: "#e23a6f",
-  accentBlue: "#16527f",
-  titleColor: "#16527f",
-  textColor: "#777777",
-  entityTitleColor: "#333333",
-  linkColor: "#333333",
-  starColor: "#EABE12",
-  footerBg: "#ffffff",
+  primaryColor: "var(--color-primary)",
+  primaryHover: "var(--color-primary)", // Will use CSS filter for hover effect
+  accentBlue: "var(--color-accent)",
+  titleColor: "var(--color-text)",
+  textColor: "var(--color-muted-text)",
+  entityTitleColor: "var(--color-text)",
+  linkColor: "var(--color-text)",
+  starColor: "var(--color-accent)",
+  footerBg: "var(--color-background)",
   bgLight: "#f4f8fb",
   bgPink: "rgb(255,215,220)",
   bgPeach: "rgb(254,214,192)",
@@ -192,7 +192,7 @@ export function BakeryHeroSlider({ slides, autoplaySpeed = 5000 }: BakeryHeroSli
     .bk-slide-subtitle { font-family: ${TOKENS.scriptFont}; font-size: 30px; color: ${TOKENS.primaryColor}; margin-bottom: 10px; }
     .bk-slide-title { font-family: ${TOKENS.titleFont}; font-weight: 600; font-size: 72px; line-height: 1.1; color: ${TOKENS.titleColor}; margin: 0 0 20px; text-transform: uppercase; }
     .bk-slide-btn { display: inline-block; padding: 14px 35px; background: ${TOKENS.primaryColor}; color: #fff; font-family: ${TOKENS.bodyFont}; font-weight: 500; font-size: 14px; text-decoration: none; text-transform: uppercase; letter-spacing: 1px; transition: background 0.3s; border: none; cursor: pointer; }
-    .bk-slide-btn:hover { background: ${TOKENS.primaryHover}; }
+    .bk-slide-btn:hover { filter: brightness(0.9); }
     .bk-slide-img { flex: 0 0 auto; max-width: 500px; }
     .bk-slide-img img { max-width: 100%; height: auto; }
     .bk-dots { position: absolute; bottom: 30px; left: 50%; transform: translateX(-50%); display: flex; gap: 10px; z-index: 5; }
@@ -347,7 +347,7 @@ export function BakeryHandmade({
     .bk-handmade-title { font-family: ${TOKENS.titleFont}; font-weight: 600; font-size: 42px; line-height: 52px; color: ${TOKENS.titleColor}; margin: 0 0 20px; white-space: pre-line; }
     .bk-handmade-desc { font-family: ${TOKENS.bodyFont}; font-size: 16px; line-height: 26px; color: ${TOKENS.textColor}; margin: 0 0 25px; }
     .bk-handmade-btn { display: inline-block; padding: 14px 35px; background: ${TOKENS.primaryColor}; color: #fff; font-family: ${TOKENS.bodyFont}; font-weight: 500; font-size: 14px; text-decoration: none; text-transform: uppercase; letter-spacing: 1px; transition: background 0.3s; }
-    .bk-handmade-btn:hover { background: ${TOKENS.primaryHover}; }
+    .bk-handmade-btn:hover { filter: brightness(0.9); }
     @media (max-width: 767px) { .bk-handmade { flex-direction: column; gap: 30px; } .bk-handmade-title { font-size: 28px; line-height: 38px; } }
   `;
 
@@ -423,7 +423,7 @@ export function BakeryProductGrid({
     .bk-prod-price { font-family: ${TOKENS.bodyFont}; font-weight: 600; font-size: 16px; color: ${TOKENS.primaryColor}; }
     .bk-prod-stars { color: ${TOKENS.starColor}; font-size: 12px; letter-spacing: 2px; margin-bottom: 5px; }
     .bk-prod-btn { display: inline-block; margin-top: 10px; padding: 8px 20px; background: ${TOKENS.primaryColor}; color: #fff; font-family: ${TOKENS.bodyFont}; font-weight: 500; font-size: 12px; text-decoration: none; text-transform: uppercase; border: none; cursor: pointer; transition: background 0.3s; }
-    .bk-prod-btn:hover { background: ${TOKENS.primaryHover}; }
+    .bk-prod-btn:hover { filter: brightness(0.9); }
   `;
 
   return (
@@ -613,7 +613,7 @@ export function BakeryCta({
     .bk-cta-subtitle { font-family: ${TOKENS.scriptFont}; font-size: 30px; color: ${TOKENS.primaryColor}; margin-bottom: 5px; }
     .bk-cta-title { font-family: ${TOKENS.titleFont}; font-weight: 600; font-size: 42px; line-height: 52px; color: #fff; margin: 0 0 30px; white-space: pre-line; }
     .bk-cta-btn { display: inline-block; padding: 16px 40px; background: ${TOKENS.primaryColor}; color: #fff; font-family: ${TOKENS.bodyFont}; font-weight: 500; font-size: 14px; text-decoration: none; text-transform: uppercase; letter-spacing: 1px; transition: background 0.3s; border: none; cursor: pointer; }
-    .bk-cta-btn:hover { background: ${TOKENS.primaryHover}; }
+    .bk-cta-btn:hover { filter: brightness(0.9); }
     @media (max-width: 767px) { .bk-cta-title { font-size: 28px; line-height: 38px; } .bk-cta { padding: 60px 20px; } }
   `;
 

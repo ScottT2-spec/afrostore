@@ -9,7 +9,6 @@ import { ProkipSite, DesignSystem, Page, Section, SectionStyleOverrides } from "
 import ThemeProvider from "./ThemeProvider";
 import LeftSidebar from "./LeftSidebar";
 import RightSidebar from "./RightSidebar";
-import TemplateRenderer from "./TemplateRenderer";
 import MediaLibrary from "./MediaLibrary";
 
 interface BuilderWorkspaceProps {
@@ -36,6 +35,7 @@ export default function BuilderWorkspace({
   const [undoStack, setUndoStack] = useState<ProkipSite[]>([]);
   const [redoStack, setRedoStack] = useState<ProkipSite[]>([]);
   const [copiedStyles, setCopiedStyles] = useState<SectionStyleOverrides | null>(null);
+  const [iframeReady, setIframeReady] = useState(false);
   const iframeRef = useRef<HTMLIFrameElement>(null);
 
   // Get active page
@@ -379,6 +379,9 @@ export default function BuilderWorkspace({
           setSelectedSectionId(blockId);
         }
       }
+      if (event.data?.type === "builder-iframe-ready") {
+        setIframeReady(true);
+      }
     };
     window.addEventListener("message", handleMessage);
     return () => window.removeEventListener("message", handleMessage);
@@ -386,13 +389,24 @@ export default function BuilderWorkspace({
 
   // Send section updates to iframe
   useEffect(() => {
-    if (iframeRef.current && iframeRef.current.contentWindow) {
+    if (iframeRef.current && iframeRef.current.contentWindow && selectedSection) {
       iframeRef.current.contentWindow.postMessage({
         type: "builder-section-update",
+        sectionId: selectedSection.id,
         section: selectedSection,
       }, "*");
     }
   }, [selectedSection]);
+
+  // Send theme updates to iframe
+  useEffect(() => {
+    if (iframeRef.current && iframeRef.current.contentWindow && iframeReady) {
+      iframeRef.current.contentWindow.postMessage({
+        type: "builder-theme-update",
+        theme: site.theme,
+      }, "*");
+    }
+  }, [site.theme, iframeReady]);
 
   // Get the preview URL based on site and page
   // Use the actual page slug from the database, not a hardcoded list
@@ -543,6 +557,8 @@ export default function BuilderWorkspace({
           onCopyStyles={handleCopyStyles}
           onPasteStyles={handlePasteStyles}
           hasCopiedStyles={copiedStyles !== null}
+          mediaLibrary={site.mediaLibrary}
+          onUploadImage={handleFileUpload}
         />
       </div>
 

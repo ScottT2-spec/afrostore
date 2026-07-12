@@ -14,15 +14,15 @@ import { safeSrc, onImgError } from "./image-fallback";
 
 /* ─── DESIGN TOKENS ─────────────────────────────────────────── */
 const TOKENS = {
-  primaryColor: "#242424",
-  primaryHover: "#000000",
-  accentColor: "#8b6798",
-  titleColor: "#242424",
-  textColor: "#767676",
-  entityTitleColor: "#333333",
-  linkColor: "#333333",
-  starColor: "#EABE12",
-  footerBg: "#1a1a1a",
+  primaryColor: "var(--color-primary)",
+  primaryHover: "var(--color-primary)", // Will use CSS filter for hover effect
+  accentColor: "var(--color-accent)",
+  titleColor: "var(--color-text)",
+  textColor: "var(--color-muted-text)",
+  entityTitleColor: "var(--color-text)",
+  linkColor: "var(--color-text)",
+  starColor: "var(--color-accent)",
+  footerBg: "var(--color-background)",
   containerWidth: "1320px",
   borderRadius: "0px",
   titleFont: "'Cormorant Garamond', Georgia, serif",
@@ -487,7 +487,7 @@ export function PerfumesHeroSlider({ slides, autoplaySpeed = 6000, minHeight = "
     .ph-btn-primary:hover { opacity: 0.85; }
     .ph-btn-black {
       display: inline-block; padding: 16px 40px;
-      background: #000; color: #fff; text-transform: none;
+      background: ${TOKENS.primaryColor}; color: #fff; text-transform: none;
       font-family: ${TOKENS.bodyFont}; font-weight: 600; font-size: 15px;
       text-decoration: none; border: none; cursor: pointer;
       transition: opacity 0.3s;
@@ -664,10 +664,10 @@ export function PerfumesProductGrid({ products: propProducts, columns = 3, secti
     .ppg-section { margin-bottom: ${marginBottom}; }
     .ppg-grid {
       display: grid; grid-template-columns: repeat(${columns}, 1fr); gap: 0;
-      border: 1px solid #e8e8e8;
+      border: 1px solid var(--color-border);
     }
     .ppg-card {
-      position: relative; border-right: 1px solid #e8e8e8; border-bottom: 1px solid #e8e8e8;
+      position: relative; border-right: 1px solid var(--color-border); border-bottom: 1px solid var(--color-border);
       overflow: hidden;
     }
     .ppg-card:nth-child(${columns}n) { border-right: none; }
@@ -712,7 +712,7 @@ export function PerfumesProductGrid({ products: propProducts, columns = 3, secti
       border: none; cursor: pointer; display: flex; align-items: center; justify-content: center;
       font-size: 14px; transition: background 0.2s;
     }
-    .ppg-action-btn:hover { background: #f0f0f0; }
+    .ppg-action-btn:hover { background: var(--color-background); }
     .ppg-cart-btn {
       position: absolute; bottom: 10px; right: 10px;
       width: 38px; height: 38px; background: #fff; border: none;
@@ -937,7 +937,7 @@ export function PerfumesFeaturedBanners({ banners, marginBottom = "120px" }: Per
       opacity: 0; transform: translateY(15px);
     }
     .pfb-card:hover .pfb-btn { opacity: 1; transform: translateY(0); }
-    .pfb-btn:hover { background: #fff; color: #000; }
+    .pfb-btn:hover { background: #fff; color: ${TOKENS.primaryColor}; }
     .pfb-link { position: absolute; inset: 0; z-index: 3; }
     .pfb-overlay {
       position: absolute; inset: 0;
@@ -1096,7 +1096,7 @@ export function PerfumesCollectionBanners({ banners, sectionTitle, marginBottom 
       opacity: 0; transform: translateY(15px);
     }
     .pcb-card:hover .pcb-btn { opacity: 1; transform: translateY(0); }
-    .pcb-btn:hover { background: #fff; color: #000; }
+    .pcb-btn:hover { background: #fff; color: ${TOKENS.primaryColor}; }
     .pcb-link { position: absolute; inset: 0; z-index: 3; }
     .pcb-overlay {
       position: absolute; inset: 0;

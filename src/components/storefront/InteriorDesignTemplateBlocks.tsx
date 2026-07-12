@@ -13,15 +13,15 @@ import { safeSrc, onImgError } from "./image-fallback";
 
 /* ─── DESIGN TOKENS ─────────────────────────────────────────── */
 const TOKENS = {
-  primaryColor: "#f4a51c",
-  primaryHover: "#db9318",
-  altColor: "#fbbc34",
-  titleColor: "#242424",
-  textColor: "#767676",
-  entityTitleColor: "#333333",
-  linkColor: "#333333",
-  starColor: "#EABE12",
-  footerBg: "#092143",
+  primaryColor: "var(--color-primary)",
+  primaryHover: "var(--color-primary)", // Will use CSS filter for hover effect
+  altColor: "var(--color-accent)",
+  titleColor: "var(--color-text)",
+  textColor: "var(--color-muted-text)",
+  entityTitleColor: "var(--color-text)",
+  linkColor: "var(--color-text)",
+  starColor: "var(--color-accent)",
+  footerBg: "var(--color-background)",
   bgWhite: "#ffffff",
   containerWidth: "1222px",
   borderRadius: "0px",
@@ -162,7 +162,7 @@ export function InteriorHeroSlider({ slides, autoplaySpeed = 5000 }: InteriorHer
     .id-slide-title { font-family: ${TOKENS.titleFont}; font-weight: 700; font-size: 72px; line-height: 1.1; color: ${TOKENS.titleColor}; margin: 0 0 15px; }
     .id-slide-desc { font-family: ${TOKENS.bodyFont}; font-size: 16px; line-height: 26px; color: ${TOKENS.textColor}; margin: 0 0 30px; max-width: 400px; }
     .id-slide-btn { display: inline-block; padding: 14px 35px; background: ${TOKENS.primaryColor}; color: #fff; font-family: ${TOKENS.bodyFont}; font-weight: 600; font-size: 13px; text-decoration: none; text-transform: uppercase; letter-spacing: 1px; transition: background 0.3s; border: none; cursor: pointer; }
-    .id-slide-btn:hover { background: ${TOKENS.primaryHover}; }
+    .id-slide-btn:hover { filter: brightness(0.9); }
     .id-slide-img { flex: 1; position: relative; height: 560px; overflow: hidden; }
     .id-slide-img img { width: 100%; height: 100%; object-fit: cover; }
     .id-slide-side { position: absolute; bottom: 30px; left: -60px; width: 200px; height: 200px; border: 5px solid #fff; box-shadow: 0 5px 20px rgba(0,0,0,0.1); }
@@ -339,7 +339,7 @@ export function InteriorProductGrid({
     .id-prod-price del { color: ${TOKENS.textColor}; font-weight: 400; font-size: 13px; margin-right: 5px; }
     .id-prod-stars { color: ${TOKENS.starColor}; font-size: 11px; letter-spacing: 1px; margin-bottom: 4px; }
     .id-prod-btn { display: inline-block; margin-top: 8px; padding: 8px 20px; background: ${TOKENS.primaryColor}; color: #fff; font-family: ${TOKENS.bodyFont}; font-weight: 600; font-size: 11px; text-decoration: none; text-transform: uppercase; border: none; cursor: pointer; transition: background 0.3s; }
-    .id-prod-btn:hover { background: ${TOKENS.primaryHover}; }
+    .id-prod-btn:hover { filter: brightness(0.9); }
     .id-prod-badge { position: absolute; top: 10px; left: 10px; background: ${TOKENS.primaryColor}; color: #fff; font-family: ${TOKENS.bodyFont}; font-size: 11px; font-weight: 600; padding: 3px 10px; text-transform: uppercase; z-index: 2; }
     @media (max-width: 1024px) { .id-prod-grid { grid-template-columns: repeat(3, 1fr) !important; } }
     @media (max-width: 767px) { .id-prod-grid { grid-template-columns: repeat(2, 1fr) !important; } }
@@ -498,7 +498,7 @@ export function InteriorPromoBanners({ banners, variant = "garden" }: InteriorPr
     .id-banner-sub { font-family: ${TOKENS.bodyFont}; font-size: 13px; color: ${TOKENS.textColor}; margin-bottom: 10px; }
     .id-banner-title { font-family: ${TOKENS.titleFont}; font-weight: 700; font-size: 28px; line-height: 1.3; color: ${TOKENS.titleColor}; margin: 0 0 20px; white-space: pre-line; }
     .id-banner-btn { display: inline-block; padding: 12px 28px; background: ${TOKENS.primaryColor}; color: #fff; font-family: ${TOKENS.bodyFont}; font-weight: 600; font-size: 13px; text-decoration: none; text-transform: uppercase; letter-spacing: 1px; transition: background 0.3s; }
-    .id-banner-btn:hover { background: ${TOKENS.primaryHover}; }
+    .id-banner-btn:hover { filter: brightness(0.9); }
     @media (max-width: 767px) { .id-banners { grid-template-columns: 1fr; } }
   `;
 
@@ -763,7 +763,7 @@ export function InteriorHeader({
     .ih-right a:hover,.ih-right button:hover{color:${TOKENS.primaryColor}}
     .ih-right svg{width:20px;height:20px}
     .ih-cart-btn{position:relative;background:${TOKENS.primaryColor}!important;color:#fff!important;padding:10px 18px!important;border-radius:6px;font-weight:700;font-size:13px;transition:background .2s!important}
-    .ih-cart-btn:hover{background:${TOKENS.primaryHover}!important}
+    .ih-cart-btn:hover{filter:brightness(0.9)!important}
     .ih-cart-btn svg{width:18px;height:18px;stroke:#fff}
     .ih-cart-badge{background:#fff;color:${TOKENS.primaryColor};font-size:10px;font-weight:800;min-width:16px;height:16px;border-radius:50%;display:flex;align-items:center;justify-content:center;margin-left:4px}
     .ih-sep{width:1px;height:20px;background:#ddd}
@@ -773,7 +773,7 @@ export function InteriorHeader({
     .ih-search-box input{flex:1;border:2px solid #e5e5e5;border-radius:6px;padding:12px 16px;font-size:15px;font-family:${TOKENS.bodyFont};outline:none;transition:border-color .2s}
     .ih-search-box input:focus{border-color:${TOKENS.primaryColor}}
     .ih-search-box button[type=submit]{background:${TOKENS.primaryColor};color:#fff;border:none;border-radius:6px;padding:12px 22px;font-weight:700;cursor:pointer;font-family:${TOKENS.bodyFont};transition:background .2s}
-    .ih-search-box button[type=submit]:hover{background:${TOKENS.primaryHover}}
+    .ih-search-box button[type=submit]:hover{filter:brightness(0.9)}
     .ih-mob-tog{display:none;background:none;border:none;cursor:pointer;padding:4px;color:${TOKENS.titleColor}}
     .ih-mob-tog svg{width:24px;height:24px}
     .ih-mob-menu{display:none;background:#fff;border-bottom:1px solid #e5e5e5;padding:15px}
@@ -895,7 +895,7 @@ export function InteriorFooterFull({
     .if-brand p{font-size:14px;line-height:1.8;margin:14px 0}
     .if-social{display:flex;gap:10px;margin-top:14px}
     .if-social a{width:34px;height:34px;border-radius:50%;background:${TOKENS.primaryColor};color:#fff;display:flex;align-items:center;justify-content:center;text-decoration:none;font-size:13px;font-weight:700;transition:background .2s}
-    .if-social a:hover{background:${TOKENS.primaryHover}}
+    .if-social a:hover{filter:brightness(0.9)}
     .if-col-title{font-family:${TOKENS.titleFont};font-size:15px;font-weight:700;color:#fff;text-transform:uppercase;margin-bottom:18px;letter-spacing:.5px}
     .if-links{list-style:none;margin:0;padding:0}
     .if-links li{margin-bottom:10px}
@@ -982,11 +982,11 @@ export function InteriorFooter(props: React.ComponentProps<typeof FashionFooter>
    ═══════════════════════════════════════════════════════════════ */
 
 const GD = {
-  primary: "#038f81",
-  primaryHover: "#007065",
-  accent: "#18b1a2",
-  titleColor: "#000000",
-  textColor: "#292929",
+  primary: "var(--color-primary)",
+  primaryHover: "var(--color-primary)",
+  accent: "var(--color-accent)",
+  titleColor: "var(--color-text)",
+  textColor: "var(--color-muted-text)",
   lightText: "#666666",
   white: "#FFFFFF",
   lightBg: "#fbfbfb",
@@ -1032,7 +1032,7 @@ export function GardenHeroBanner({
     .gd-hero-heading { font-family: ${GD.headingFont}; font-weight: 600; font-size: 52px; line-height: 1.15; color: ${GD.titleColor}; margin: 0 0 20px; }
     .gd-hero-sub { font-family: ${GD.bodyFont}; font-size: 16px; line-height: 1.7; color: ${GD.lightText}; margin: 0 0 30px; max-width: 480px; }
     .gd-hero-cta { display: inline-block; padding: 15px 35px; background: ${GD.primary}; color: #fff; font-family: ${GD.headingFont}; font-weight: 700; font-size: 14px; text-decoration: none; text-transform: uppercase; letter-spacing: 1.5px; transition: background 0.3s; border: none; cursor: pointer; }
-    .gd-hero-cta:hover { background: ${GD.primaryHover}; }
+    .gd-hero-cta:hover { filter: brightness(0.9); }
     .gd-hero-explore { display: flex; gap: 15px; margin-top: 20px; }
     .gd-hero-explore-btn { font-family: ${GD.headingFont}; font-weight: 600; font-size: 14px; color: ${GD.titleColor}; text-decoration: none; padding: 10px 0; border-bottom: 2px solid ${GD.primary}; transition: color 0.2s; }
     .gd-hero-explore-btn:hover { color: ${GD.primary}; }
@@ -1212,7 +1212,7 @@ export function GardenNewArrivals({
     .gd-prod-price del { color: ${GD.lightText}; font-weight: 400; margin-right: 6px; }
     .gd-prod-stars { color: #E8B500; font-size: 12px; letter-spacing: 1px; margin-bottom: 4px; }
     .gd-prod-btn { display: inline-block; margin-top: 8px; padding: 8px 20px; background: ${GD.primary}; color: #fff; font-family: ${GD.headingFont}; font-weight: 600; font-size: 11px; text-transform: uppercase; border: none; cursor: pointer; transition: background 0.3s; letter-spacing: 0.5px; }
-    .gd-prod-btn:hover { background: ${GD.primaryHover}; }
+    .gd-prod-btn:hover { filter: brightness(0.9); }
     @media (max-width: 1024px) { .gd-arrivals-grid { grid-template-columns: repeat(3, 1fr) !important; } }
     @media (max-width: 700px) { .gd-arrivals-grid { grid-template-columns: repeat(2, 1fr) !important; } .gd-arrivals-header { flex-direction: column; gap: 10px; text-align: center; } }
   `;
