@@ -17,6 +17,7 @@ import { VegetableFooter, VegetableHeader } from "@/components/storefront/Vegeta
 import { KidsFontLoader, KidsFooterFull, KidsHeader } from "@/components/storefront/KidsTemplateBlocks";
 import { PerfumesFontLoader, PerfumesFooter, PerfumesHeader } from "@/components/storefront/PerfumesTemplateBlocks";
 import { HealthFontLoader, HealthHeader, HealthFooterFull } from "@/components/storefront/HealthTemplateBlocks";
+import { CosmeticsFontLoader, CosmeticsHeader, CosmeticsFooter } from "@/components/storefront/CosmeticsTemplateBlocks";
 
 /* ─── TYPES ─────────────────────────────────────────────────── */
 
@@ -879,6 +880,57 @@ export default function StorefrontPage() {
             storeSlug={slug}
             logo={store.logo}
             description={store.description || "Discover a curated collection of modern fragrances designed to hold memory, emotion, and identity in every bottle."}
+          />
+        </div>
+      </ThemeProvider>
+    );
+  }
+
+  // ─── COSMETICS PAGES ───
+  const isCosmeticsTemplate =
+    data.templateSlug === "cosmetics" ||
+    slug === "cosmetics" ||
+    data.store.slug === "cosmetics" ||
+    data.store.name?.toLowerCase().includes("cosmetics");
+
+  if (isCosmeticsTemplate) {
+    return (
+      <ThemeProvider theme={resolvedTheme}>
+        <div className="min-h-screen bg-white" style={{ fontFamily: "'Lato', Arial, sans-serif" }}>
+          <CosmeticsFontLoader />
+          <CosmeticsHeader
+            storeName={store.name}
+            storeSlug={slug}
+            logo={store.logo}
+            cartCount={0}
+            wishlistCount={0}
+          />
+          <main style={buildPageBackgroundStyle(resolvedPageSettings)}>
+            <RenderBlocks
+              blocks={blocks}
+              storeSlug={slug}
+              products={products}
+              currency={currency}
+              addToCart={(p) => addToCart(p as unknown as StoreProduct)}
+              isWishlisted={isWishlisted}
+              toggleWishlist={toggleWishlist}
+              addedToCart={addedToCart}
+            />
+          </main>
+          <CosmeticsFooter
+            storeName={store.name}
+            storeSlug={slug}
+            description={store.description}
+            contactInfo={{
+              address: (store as any).address,
+              phone: (store as any).phone,
+              email: (store as any).email,
+            }}
+            socialLinks={[
+              ...(socialLinks?.facebook ? [{ platform: "facebook", url: socialLinks.facebook }] : []),
+              ...(socialLinks?.instagram ? [{ platform: "instagram", url: socialLinks.instagram }] : []),
+              ...(socialLinks?.twitter ? [{ platform: "twitter", url: socialLinks.twitter }] : []),
+            ]}
           />
         </div>
       </ThemeProvider>

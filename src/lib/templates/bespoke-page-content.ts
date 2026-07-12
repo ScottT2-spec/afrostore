@@ -7,6 +7,12 @@ import { T_SHIRTS_PRINTS_PRESET } from "@/lib/templates/presets/t-shirts-prints-
 import { ELECTRONICS_TEMPLATE_PRESET } from "@/lib/templates/presets/electronics-preset";
 import { BAKERY_TEMPLATE_PRESET } from "@/lib/templates/presets/bakery-preset";
 import { COSMETICS_TEMPLATE_PRESET } from "@/lib/templates/presets/cosmetics-preset";
+import {
+  COSMETICS_BESTSELLER_BLOCKS,
+  COSMETICS_NEW_IN_BLOCKS,
+  COSMETICS_SKINCARE_BLOCKS,
+  COSMETICS_TERMS_BLOCKS,
+} from "@/lib/templates/presets/cosmetics-pages-preset";
 import { GROCERY_TEMPLATE_PRESET } from "@/lib/templates/presets/grocery-preset";
 import { HEALTH_TEMPLATE_PRESET } from "@/lib/templates/presets/health-preset";
 import { INTERIOR_DECOR_PRESET, INTERIOR_RETAIL_PRESET } from "@/lib/templates/presets/interior-preset";
@@ -78,6 +84,16 @@ export const BESPOKE_TEMPLATE_PRESETS: TemplatePresetMap = {
   kids: KIDS_TEMPLATE_PRESET,
   toys: KIDS_TEMPLATE_PRESET,
   perfumes: PERFUMES_TEMPLATE_PRESET,
+};
+
+/** Template-specific page presets (non-home pages). */
+const BESPOKE_PAGE_PRESETS: Record<string, Record<string, TemplateBlock[]>> = {
+  cosmetics: {
+    bestseller: COSMETICS_BESTSELLER_BLOCKS,
+    "new-in": COSMETICS_NEW_IN_BLOCKS,
+    skincare: COSMETICS_SKINCARE_BLOCKS,
+    terms: COSMETICS_TERMS_BLOCKS,
+  },
 };
 
 export const REGISTERED_BESPOKE_PAGE_SLUGS = new Set<RegisteredPageSlug>([
@@ -264,6 +280,13 @@ function getRegisteredPageContent(
       return null;
     }
     return { blocks, settings: {} };
+  }
+
+  // Check for template-specific page presets before falling back to generic defaults
+  const templateKey = templateSlug.toLowerCase();
+  const pagePresets = BESPOKE_PAGE_PRESETS[templateKey];
+  if (pagePresets && normalizedPageSlug && pagePresets[normalizedPageSlug]) {
+    return { blocks: deepClone(pagePresets[normalizedPageSlug]), settings: {} };
   }
 
   const built = buildDefaultPageContent({
