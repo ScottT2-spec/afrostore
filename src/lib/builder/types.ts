@@ -33,7 +33,18 @@ export type BlockType =
   | "fashionCategoryCards"
   | "fashionTestimonials"
   | "fashionBlogPosts"
-  | "fashionNewsletter";
+  | "fashionNewsletter"
+  | "cosmeticsHeroSlider"
+  | "cosmeticsPromoBanners"
+  | "cosmeticsSectionTitle"
+  | "cosmeticsProductGrid"
+  | "cosmeticsCategoryCards"
+  | "cosmeticsDiscovery"
+  | "cosmeticsCountdownBanner"
+  | "cosmeticsInfoBoxes"
+  | "cosmeticsBlogPosts"
+  | "cosmeticsNewsletter"
+  | "cosmeticsInstagram";
 
 export interface BuilderBlock {
   id: string;
@@ -286,6 +297,83 @@ export const blockDefaults: Record<BlockType, () => Record<string, unknown>> = {
       { platform: "instagram", url: "#" },
     ],
   }),
+  // ─── COSMETICS TEMPLATE DEFAULTS ─────────────────────────────
+  cosmeticsHeroSlider: () => ({
+    autoplaySpeed: 5000,
+    minHeight: "560px",
+    slides: [
+      { subtitle: "Commodo", titleLine1: "The Best Natural", titleLine2: "& Organic Mascara.", description: "There are many variations of passages of Lorem Ipsum available.", buttonText: "View More", buttonLink: "/shop", secondButtonText: "Read more", secondButtonLink: "/about" },
+    ],
+  }),
+  cosmeticsPromoBanners: () => ({
+    banners: [
+      { image: "", title: "REVITALIZING\nFACE MASKS", description: "It is a long established fact that a reader will be distracted.", buttonText: "SHOP NOW", buttonLink: "/shop" },
+    ],
+  }),
+  cosmeticsSectionTitle: () => ({
+    subtitle: "",
+    title: "Section Title",
+    description: "",
+    align: "center",
+    maxWidth: "50%",
+  }),
+  cosmeticsProductGrid: () => ({
+    columns: 4,
+    maxProducts: 8,
+    filter: "featured",
+    showCategory: true,
+    showHoverImage: true,
+    sectionTitle: { subtitle: "", title: "PRODUCTS" },
+    products: [],
+  }),
+  cosmeticsCategoryCards: () => ({
+    sectionTitle: { title: "SHOP BY CATEGORY" },
+    categories: [
+      { name: "Category", image: "", productCount: 0, link: "/shop" },
+    ],
+  }),
+  cosmeticsDiscovery: () => ({
+    title: "Discover a beautiful you",
+    description: "There are many variations of passages of Lorem Ipsum available.",
+    image: "",
+    features: [
+      { icon: "✨", titleLine1: "Lasting", titleLine2: "Formulas" },
+    ],
+    buttonText: "SHOP NOW",
+    buttonLink: "/shop",
+    secondButtonText: "READ MORE",
+    secondButtonLink: "/about",
+  }),
+  cosmeticsCountdownBanner: () => ({
+    title: "Special Offer",
+    description: "The generated Lorem Ipsum is therefore always free from repetition.",
+    image: "",
+    buttonText: "SHOP NOW",
+    buttonLink: "/shop",
+    secondButtonText: "READ MORE",
+    secondButtonLink: "/about",
+  }),
+  cosmeticsInfoBoxes: () => ({
+    sectionTitle: { title: "WHY CHOOSE US" },
+    boxes: [
+      { image: "", number: "01", title: "Feature Title", description: "Feature description goes here." },
+    ],
+  }),
+  cosmeticsBlogPosts: () => ({
+    columns: 2,
+    sectionTitle: { subtitle: "OUR BLOG", title: "LATEST NEWS" },
+    posts: [],
+  }),
+  cosmeticsNewsletter: () => ({
+    backgroundImage: "",
+    title: "JOIN OUR NEWSLETTER",
+    description: "Will be used in accordance with our Privacy Policy",
+    buttonText: "Sign up",
+  }),
+  cosmeticsInstagram: () => ({
+    items: [],
+    marginBottom: "0px",
+  }),
 };
 
 // ─── BLOCK PALETTE ───────────────────────────────────────────
@@ -332,4 +420,16 @@ export const blockPalette: PaletteItem[] = [
   { type: "fashionTestimonials", label: "Fashion Testimonials", icon: "message-circle", category: "social" },
   { type: "fashionBlogPosts", label: "Fashion Blog Posts", icon: "layout", category: "social" },
   { type: "fashionNewsletter", label: "Fashion Newsletter", icon: "send", category: "marketing" },
+  // Cosmetics Template Blocks
+  { type: "cosmeticsHeroSlider", label: "Cosmetics Hero Slider", icon: "layout", category: "layout" },
+  { type: "cosmeticsPromoBanners", label: "Cosmetics Promo Banners", icon: "image", category: "commerce" },
+  { type: "cosmeticsSectionTitle", label: "Cosmetics Section Title", icon: "type", category: "basic" },
+  { type: "cosmeticsProductGrid", label: "Cosmetics Products", icon: "shopping-bag", category: "commerce" },
+  { type: "cosmeticsCategoryCards", label: "Cosmetics Categories", icon: "grid", category: "commerce" },
+  { type: "cosmeticsDiscovery", label: "Cosmetics Discovery", icon: "sparkles", category: "layout" },
+  { type: "cosmeticsCountdownBanner", label: "Cosmetics Countdown", icon: "clock", category: "commerce" },
+  { type: "cosmeticsInfoBoxes", label: "Cosmetics Info Boxes", icon: "shield", category: "layout" },
+  { type: "cosmeticsBlogPosts", label: "Cosmetics Blog Posts", icon: "layout", category: "social" },
+  { type: "cosmeticsNewsletter", label: "Cosmetics Newsletter", icon: "send", category: "marketing" },
+  { type: "cosmeticsInstagram", label: "Cosmetics Instagram", icon: "image", category: "social" },
 ];
