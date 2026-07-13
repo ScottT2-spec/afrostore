@@ -962,9 +962,6 @@ export interface CosmeticsInfoBoxesProps {
 export function CosmeticsInfoBoxes({ sectionTitle, boxes, marginBottom = "60px" }: CosmeticsInfoBoxesProps) {
   const { ref, inView } = useInView();
 
-  // Defensive guard: filter out boxes with invalid/missing images before mapping
-  const validBoxes = boxes.filter(box => box.image && box.image.trim() !== "");
-
   const onImgError = (e: React.SyntheticEvent<HTMLImageElement>, boxTitle?: string) => {
     const target = e.target as HTMLImageElement;
     target.style.display = "none";
@@ -1005,7 +1002,7 @@ export function CosmeticsInfoBoxes({ sectionTitle, boxes, marginBottom = "60px" 
         <CosmeticsSectionTitle subtitle={sectionTitle.subtitle} title={sectionTitle.title} description={sectionTitle.description} />
       )}
       <div className="cib-grid">
-        {validBoxes.map((box, i) => (
+        {boxes.map((box, i) => (
           <div key={i} className={`cib-card cib-animate ${inView ? "cib-visible" : ""}`} style={{ transitionDelay: `${i * 0.15}s` }}>
             <div className="cib-img-wrap">
               {box.image && box.image.trim() !== "" ? (

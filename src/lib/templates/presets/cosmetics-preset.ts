@@ -180,3 +180,6 @@ export const COSMETICS_TEMPLATE_PRESET: TemplateBlock[] = [
   },
   // Footer is handled at page level in page.tsx, not in preset
 ];
+
+// Alias for clarity - COSMETICS_HOME_BLOCKS is the canonical home page preset
+export const COSMETICS_HOME_BLOCKS = COSMETICS_TEMPLATE_PRESET;

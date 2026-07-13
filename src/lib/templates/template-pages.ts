@@ -1,6 +1,7 @@
 import { prisma } from "@/lib/db";
 import { HANDMADE_BAGS_PAGE_BLOCKS } from "./presets/handmade-bags-pages";
 import { HEALTH_PAGE_BLOCKS } from "./presets/health-pages";
+import { COSMETICS_TERMS_BLOCKS, COSMETICS_SHOP_BLOCKS, COSMETICS_BLOG_BLOCKS } from "./presets/cosmetics-pages-preset";
 
 /**
  * Template-specific page definitions.
@@ -33,8 +34,9 @@ const HANDMADE_BAGS_PAGES: PageDef[] = [
 ];
 
 const COSMETICS_PAGES: PageDef[] = [
-  { title: "Blog", slug: "blog", type: "CUSTOM", position: 10 },
-  { title: "Terms", slug: "terms", type: "CUSTOM", position: 11 },
+  { title: "Shop", slug: "shop", type: "CUSTOM", position: 10 },
+  { title: "Blog", slug: "blog", type: "CUSTOM", position: 11 },
+  { title: "Terms", slug: "terms", type: "CUSTOM", position: 12 },
 ];
 
 const FASHION_PAGES: PageDef[] = [
@@ -76,6 +78,11 @@ const TEMPLATE_PAGE_CONTENT_MAP: Record<string, Record<string, unknown[]>> = {
   "handmade-bags": HANDMADE_BAGS_PAGE_BLOCKS,
   health: HEALTH_PAGE_BLOCKS,
   pills: HEALTH_PAGE_BLOCKS,
+  cosmetics: { 
+    shop: COSMETICS_SHOP_BLOCKS,
+    blog: COSMETICS_BLOG_BLOCKS,
+    terms: COSMETICS_TERMS_BLOCKS 
+  },
 };
 
 /**

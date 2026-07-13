@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { useParams } from "next/navigation";
+import Link from "next/link";
 import { RenderBlocks, type BuilderBlock } from "@/components/storefront/BlockRenderer";
 import { PerfumesHeader, PerfumesFooter, PerfumesFontLoader } from "@/components/storefront/PerfumesTemplateBlocks";
 import { KidsHeader, KidsFooterFull, KidsFontLoader } from "@/components/storefront/KidsTemplateBlocks";
@@ -30,6 +31,8 @@ export default function BuilderPreviewPage() {
   const [blocks, setBlocks] = useState<BuilderBlock[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
+  const [productData, setProductData] = useState<any>(null);
+  const [blogData, setBlogData] = useState<any>(null);
 
   useEffect(() => {
     async function loadStore() {
@@ -66,6 +69,32 @@ export default function BuilderPreviewPage() {
     }
     loadStore();
   }, [siteId, pageSlug]);
+
+  // Fetch product/blog data for cosmetics shop/blog pages
+  useEffect(() => {
+    if (!storeData) return;
+    
+    const { store, templateSlug } = storeData;
+    const storeSlug = store.slug || store.subdomain;
+    
+    if (templateSlug === 'cosmetics' && pageSlug === 'shop') {
+      fetch(`/api/storefront/${storeSlug}`)
+        .then(res => res.json())
+        .then(json => {
+          if (json.success) setProductData(json.data);
+        })
+        .catch(err => console.error('Failed to fetch product data:', err));
+    }
+    
+    if (templateSlug === 'cosmetics' && pageSlug === 'blog') {
+      fetch(`/api/storefront/${storeSlug}/blog`)
+        .then(res => res.json())
+        .then(json => {
+          if (json.success) setBlogData(json.data);
+        })
+        .catch(err => console.error('Failed to fetch blog data:', err));
+    }
+  }, [storeData, pageSlug]);
 
   // Listen for messages from the parent editor
   useEffect(() => {
@@ -183,6 +212,79 @@ export default function BuilderPreviewPage() {
   
   // Filter out chrome blocks from editable content
   const contentBlocks = blocks.filter(b => !CHROME_BLOCK_TYPES.has(b.type));
+
+  // Render product grid for cosmetics shop pages
+  const renderProductGrid = () => {
+    if (templateSlug !== 'cosmetics' || pageSlug !== 'shop' || !productData) return null;
+    const products = productData.products || [];
+    const currency = store.currency || 'NGN';
+    
+    return (
+      <div className="max-w-[1222px] mx-auto px-4 pb-16">
+        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4">
+          {products.map((p: any) => {
+            const hasImage = p.images?.length > 0 && p.images[0].url;
+            return (
+              <div key={p.id} className="group">
+                <Link href={`/store/${storeSlug}/product/${p.slug}`} className="block">
+                  <div className="relative aspect-[3/4] rounded-2xl overflow-hidden mb-3 bg-white">
+                    {hasImage ? (
+                      <img src={p.images[0].url} alt={p.name} className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110" />
+                    ) : (
+                      <div className="w-full h-full bg-gradient-to-br from-pink-400 to-rose-500 flex items-center justify-center">
+                        <span className="text-white/40 text-4xl font-bold">{p.name.charAt(0)}</span>
+                      </div>
+                    )}
+                  </div>
+                </Link>
+                <Link href={`/store/${storeSlug}/product/${p.slug}`}>
+                  <h3 className="text-sm font-semibold text-[#242424] group-hover:text-red-600 transition-colors">{p.name}</h3>
+                </Link>
+                {p.category && <p className="text-[10px] text-[#767676] mt-0.5">{p.category.name}</p>}
+                <div className="flex items-center gap-2 mt-1.5">
+                  <span className="text-base font-bold text-[#242424]">₦{Number(p.price).toLocaleString()}</span>
+                  {p.compareAtPrice && <span className="text-xs text-[#767676] line-through">₦{Number(p.compareAtPrice).toLocaleString()}</span>}
+                </div>
+              </div>
+            );
+          })}
+        </div>
+      </div>
+    );
+  };
+
+  // Render blog list for cosmetics blog pages
+  const renderBlogList = () => {
+    if (templateSlug !== 'cosmetics' || pageSlug !== 'blog' || !blogData) return null;
+    const blogs = blogData.blogs || [];
+    
+    return (
+      <div className="max-w-[1222px] mx-auto px-4 pb-16">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          {blogs.map((b: any) => (
+            <Link key={b.id} href={`/store/${storeSlug}/blog/${b.slug}`} className="block group">
+              <div className="rounded-2xl overflow-hidden bg-white shadow-sm transition-transform hover:-translate-y-1">
+                {b.coverImage ? (
+                  <img src={b.coverImage} alt={b.title} className="w-full aspect-[16/10] object-cover" />
+                ) : (
+                  <div className="w-full aspect-[16/10] bg-gradient-to-br from-purple-400 to-indigo-500 flex items-center justify-center">
+                    <span className="text-white/40 text-4xl font-bold">{b.title.charAt(0)}</span>
+                  </div>
+                )}
+                <div className="p-6">
+                  <h2 className="font-bold text-lg text-[#242424] group-hover:text-red-600 transition-colors">{b.title}</h2>
+                  {b.excerpt && <p className="text-sm text-[#767676] mt-2">{b.excerpt}</p>}
+                  <span className="mt-4 inline-flex text-sm font-semibold text-[#242424]">
+                    Continue reading →
+                  </span>
+                </div>
+              </div>
+            </Link>
+          ))}
+        </div>
+      </div>
+    );
+  };
 
   // Render template-specific header/footer
   const renderChrome = () => {
@@ -456,6 +558,8 @@ export default function BuilderPreviewPage() {
         isEditorMode={true}
         wrapBlock={wrapBlockForEditor}
       />
+      {renderProductGrid()}
+      {renderBlogList()}
       {renderFooter()}
     </div>
   );

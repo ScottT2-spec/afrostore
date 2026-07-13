@@ -182,176 +182,130 @@ export const COSMETICS_SKINCARE_BLOCKS: TemplateBlock[] = [
 
 export const COSMETICS_TERMS_BLOCKS: TemplateBlock[] = [
   {
-    id: "cosmetics-terms-title",
-    type: "cosmeticsSectionTitle",
+    id: "cosmetics-terms-hero",
+    type: "cosmeticsHeroSlider",
     props: {
-      subtitle: "",
-      title: "Terms and Conditions",
-      description: "",
-      align: "center",
-      maxWidth: "60%",
+      slides: [
+        {
+          subtitle: "LEGAL",
+          titleLine1: "Terms and",
+          titleLine2: "Conditions",
+          description: "Please read our terms and conditions carefully before using our services.",
+          buttonLink: "",
+          buttonText: "",
+          secondButtonLink: "",
+          secondButtonText: "",
+        },
+      ],
+      minHeight: "400px",
+      autoplaySpeed: 0,
     },
   },
   {
-    id: "cosmetics-terms-introduction",
-    type: "heading",
+    id: "cosmetics-terms-content",
+    type: "cosmeticsInfoBoxes",
     props: {
-      text: "1. Introduction",
-      level: "h2",
-      align: "left",
-      color: "#242424",
+      sectionTitle: {
+        title: "TERMS AND CONDITIONS",
+      },
+      boxes: [
+        {
+          image: "",
+          number: "01",
+          title: "General Terms",
+          description: "By placing an order through our website, you warrant that you are at least 18 years old and are legally capable of entering into binding contracts. We reserve the right to refuse service to anyone for any reason at any time. All products are subject to availability.",
+        },
+        {
+          image: "",
+          number: "02",
+          title: "Products & Pricing",
+          description: "We reserve the right to discontinue any product at any time. Prices are subject to change without notice. We make every effort to display accurate pricing, but errors may occur. In the event of a pricing error, we reserve the right to cancel the order.",
+        },
+        {
+          image: "",
+          number: "03",
+          title: "Orders & Payment",
+          description: "When you place an order, you will receive an email confirmation. This does not mean your order has been accepted. We reserve the right to refuse or cancel any order. Payment must be made in full at the time of purchase through our accepted payment methods.",
+        },
+        {
+          image: "",
+          number: "04",
+          title: "Shipping & Delivery",
+          description: "Delivery times are estimates and not guaranteed. We are not responsible for delays caused by shipping carriers, customs, or events beyond our control. Risk of loss passes to you upon delivery to the carrier.",
+        },
+        {
+          image: "",
+          number: "05",
+          title: "Returns & Refunds",
+          description: "We accept returns within 30 days of delivery for items in their original, unused condition. Refunds will be processed to the original payment method within 5-10 business days. Shipping costs are non-refundable unless the return is due to our error.",
+        },
+        {
+          image: "",
+          number: "06",
+          title: "Privacy & Data",
+          description: "We collect and process personal data in accordance with our Privacy Policy. By using our website, you consent to our data practices as described therein. We do not sell your personal information to third parties.",
+        },
+        {
+          image: "",
+          number: "07",
+          title: "Cookies",
+          description: "We may use cookies and similar technologies to remember preferences, improve site performance, and better understand how visitors use the store. You can manage cookie preferences through your browser settings.",
+        },
+        {
+          image: "",
+          number: "08",
+          title: "Limitation of Liability",
+          description: "To the fullest extent permitted by law, we shall not be liable for any indirect, incidental, special, or consequential damages arising from your use of our products or services. Our liability is limited to the purchase price of the product.",
+        },
+        {
+          image: "",
+          number: "09",
+          title: "Contact Information",
+          description: "If you have any questions about these Terms and Conditions, please contact us through our contact page or email us at support@cosmetics.com. We will respond to your inquiry within 2-3 business days.",
+        },
+      ],
     },
   },
+];
+
+/* ═══════════════════════════════════════════════════════════════
+   SHOP PAGE
+   ═══════════════════════════════════════════════════════════════ */
+
+export const COSMETICS_SHOP_BLOCKS: TemplateBlock[] = [
   {
-    id: "cosmetics-terms-introduction-text",
-    type: "text",
+    id: "cosmetics-shop-header",
+    type: "cosmeticsShopPageHeader",
     props: {
-      text: "Welcome to our store. By accessing or using our website and services, you agree to be bound by these Terms and Conditions. Please read them carefully before using our services.",
-      color: "#767676",
+      title: "Shop",
+      allLabel: "All",
+      subtitle: "Browse all products at {store name}",
+      emptyState: "No products found",
+      filterLabel: "Filters",
+      loadMoreText: "Load More",
+      categoriesLabel: "Categories",
+      sortLabelNewest: "Newest",
+      searchPlaceholder: "Search products...",
+      sortLabelPriceLow: "Price: Low → High",
+      sortLabelPriceHigh: "Price: High → Low",
     },
   },
+];
+
+/* ═══════════════════════════════════════════════════════════════
+   BLOG PAGE
+   ═══════════════════════════════════════════════════════════════ */
+
+export const COSMETICS_BLOG_BLOCKS: TemplateBlock[] = [
   {
-    id: "cosmetics-terms-products",
-    type: "heading",
+    id: "cosmetics-blog-header",
+    type: "cosmeticsBlogPageHeader",
     props: {
-      text: "2. Products and Services",
-      level: "h2",
-      align: "left",
-      color: "#242424",
-    },
-  },
-  {
-    id: "cosmetics-terms-products-text",
-    type: "text",
-    props: {
-      text: "We strive to provide accurate descriptions and images of our cosmetics and skincare products. However, we do not warrant that product descriptions, colors, or other content are accurate, complete, reliable, current, or error-free.\n\nAll prices are listed in the store currency and are subject to change without notice. We reserve the right to discontinue any product at any time.",
-      color: "#767676",
-    },
-  },
-  {
-    id: "cosmetics-terms-orders",
-    type: "heading",
-    props: {
-      text: "3. Orders and Payment",
-      level: "h2",
-      align: "left",
-      color: "#242424",
-    },
-  },
-  {
-    id: "cosmetics-terms-orders-text",
-    type: "text",
-    props: {
-      text: "By placing an order, you offer to purchase the products listed. We reserve the right to accept or decline your order at our discretion. All orders are subject to availability and confirmation of the order price.\n\nPayment is due at the time of placing your order. We accept various payment methods as indicated on our website.",
-      color: "#767676",
-    },
-  },
-  {
-    id: "cosmetics-terms-shipping",
-    type: "heading",
-    props: {
-      text: "4. Shipping and Delivery",
-      level: "h2",
-      align: "left",
-      color: "#242424",
-    },
-  },
-  {
-    id: "cosmetics-terms-shipping-text",
-    type: "text",
-    props: {
-      text: "Shipping times provided at checkout are estimates only. We are not liable for any delays in delivery.\n\nRisk of loss and title for items purchased pass to you upon delivery to the shipping carrier.",
-      color: "#767676",
-    },
-  },
-  {
-    id: "cosmetics-terms-returns",
-    type: "heading",
-    props: {
-      text: "5. Returns and Refunds",
-      level: "h2",
-      align: "left",
-      color: "#242424",
-    },
-  },
-  {
-    id: "cosmetics-terms-returns-text",
-    type: "text",
-    props: {
-      text: "We accept returns within 14 days of delivery for unopened and unused products. Products must be returned in their original packaging.\n\nTo initiate a return, please contact our customer service team. Refunds will be processed within 5-7 business days of receiving the returned item.",
-      color: "#767676",
-    },
-  },
-  {
-    id: "cosmetics-terms-privacy",
-    type: "heading",
-    props: {
-      text: "6. Privacy Policy",
-      level: "h2",
-      align: "left",
-      color: "#242424",
-    },
-  },
-  {
-    id: "cosmetics-terms-privacy-text",
-    type: "text",
-    props: {
-      text: "Your use of our website is also subject to our Privacy Policy. Please review our Privacy Policy, which also governs the website and informs users of our data collection practices.",
-      color: "#767676",
-    },
-  },
-  {
-    id: "cosmetics-terms-cookies",
-    type: "heading",
-    props: {
-      text: "7. Cookies",
-      level: "h2",
-      align: "left",
-      color: "#242424",
-    },
-  },
-  {
-    id: "cosmetics-terms-cookies-text",
-    type: "text",
-    props: {
-      text: "We may use cookies and similar technologies to remember preferences, improve site performance, and better understand how visitors use the store.",
-      color: "#767676",
-    },
-  },
-  {
-    id: "cosmetics-terms-contact",
-    type: "heading",
-    props: {
-      text: "8. Contact Information",
-      level: "h2",
-      align: "left",
-      color: "#242424",
-    },
-  },
-  {
-    id: "cosmetics-terms-contact-text",
-    type: "text",
-    props: {
-      text: "If you have any questions about these Terms and Conditions, please contact us through our contact page or email us at our support address.",
-      color: "#767676",
-    },
-  },
-  {
-    id: "cosmetics-terms-changes",
-    type: "heading",
-    props: {
-      text: "9. Changes to Terms",
-      level: "h2",
-      align: "left",
-      color: "#242424",
-    },
-  },
-  {
-    id: "cosmetics-terms-changes-text",
-    type: "text",
-    props: {
-      text: "We reserve the right to modify these terms at any time. Changes will be effective immediately upon posting to the website. Your continued use of the website following the posting of changes constitutes your acceptance of such changes.",
-      color: "#767676",
+      title: "Blog",
+      allLabel: "All",
+      subtitle: "Latest news and updates from {site name}",
+      emptyState: "No blog posts found",
+      searchPlaceholder: "Search blog posts...",
     },
   },
 ];
