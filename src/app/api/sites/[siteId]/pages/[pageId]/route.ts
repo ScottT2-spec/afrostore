@@ -4,6 +4,7 @@ import { getStoreContext, success, error, validationError, ensureUniqueSlug, log
 import { updatePageSchema } from "@/lib/validators";
 import { unauthorized } from "@/lib/auth";
 import { findStoredTemplatePage } from "@/lib/templates/site-instance";
+import { revalidatePath } from "next/cache";
 import type { Prisma } from "@/generated/prisma";
 
 type Params = { params: Promise<{ siteId: string; pageId: string }> };
@@ -38,7 +39,10 @@ export async function PATCH(req: NextRequest, { params }: Params) {
     const parsed = updatePageSchema.safeParse(body);
     if (!parsed.success) return validationError(parsed.error.flatten().fieldErrors);
 
-    const existing = await prisma.page.findFirst({ where: { id: pageId, siteId } });
+    const existing = await prisma.page.findFirst({ 
+      where: { id: pageId, siteId },
+      include: { site: { select: { slug: true } } }
+    });
     if (!existing) return error("Page not found", 404);
 
     const updateData: Record<string, unknown> = { ...parsed.data };
@@ -52,6 +56,13 @@ export async function PATCH(req: NextRequest, { params }: Params) {
       where: { id: pageId },
       data: updateData as Prisma.PageUpdateInput,
     });
+
+    // Revalidate the store page path to clear Next.js cache
+    revalidatePath(`/store/${existing.site.slug}/${page.slug}`);
+    revalidatePath(`/store/${existing.site.slug}`);
+    
+    // Also revalidate the API route that fetches page data
+    revalidatePath(`/api/storefront/${existing.site.slug}/pages/${page.slug}`);
 
     await logAudit({
       siteId,
@@ -77,10 +88,17 @@ export async function DELETE(req: NextRequest, { params }: Params) {
   if (ctx.error) return ctx.user ? error(ctx.error, 403) : unauthorized();
 
   try {
-    const existing = await prisma.page.findFirst({ where: { id: pageId, siteId } });
+    const existing = await prisma.page.findFirst({ 
+      where: { id: pageId, siteId },
+      include: { site: { select: { slug: true } } }
+    });
     if (!existing) return error("Page not found", 404);
 
     await prisma.page.delete({ where: { id: pageId } });
+
+    // Revalidate the store page path to clear Next.js cache
+    revalidatePath(`/store/${existing.site.slug}/${existing.slug}`);
+    revalidatePath(`/store/${existing.site.slug}`);
 
     await logAudit({
       siteId,

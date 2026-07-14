@@ -252,19 +252,51 @@ export const PERFUMES_FRAGRANCES_PAGE_BLOCKS: TemplateBlock[] = [
     props: {
       title: "Fragrances",
       subtitle: "Discover Our Collections",
+      backgroundImage: "https://woodmart.xtemos.com/perfumes/wp-content/uploads/sites/32/2025/11/prf-collection-opus-essence.jpg",
     },
   },
   {
     id: "perfumes-collections-grid",
     type: "perfumesCollectionsGrid",
     props: {
+      title: "Collections",
       collections: [
-        { name: "Étheria", slug: "etheria", description: "A collection of delicate, weightless fragrances that capture the essence of air and light. Soft florals, sheer musks, and dewy accords." },
-        { name: "Celeste Aura", slug: "celeste-aura", description: "Elegant fragrances blending vibrant citrus, shimmering aldehydes, and refined light woods creating an aura of inner glow." },
-        { name: "Opus Essence", slug: "opus-essence", description: "Rich, complex compositions. Deep florals, precious woods, and warm ambers create a multidimensional fragrance experience." },
-        { name: "Velours Noir", slug: "velours-noir", description: "Dark, velvety fragrances with depth and mystery. Smoky oud, leather accords, and black vanilla." },
-        { name: "Nocturne Essence", slug: "nocturne-essence", description: "Fragrances inspired by nightfall. Cool musks, aromatic herbs, and dark spices capture twilight elegance." },
-        { name: "Elysian Bloom", slug: "elysian-bloom", description: "Fresh, green fragrances celebrating nature. Dewy petals, crisp leaves, and earthy vetiver." },
+        { 
+          name: "Étheria", 
+          slug: "etheria", 
+          description: "A collection of delicate, weightless fragrances that capture the essence of air and light. Soft florals, sheer musks, and dewy accords.",
+          image: "https://woodmart.xtemos.com/perfumes/wp-content/uploads/sites/32/2025/11/prf-collection-etheria.jpg"
+        },
+        { 
+          name: "Celeste Aura", 
+          slug: "celeste-aura", 
+          description: "Elegant fragrances blending vibrant citrus, shimmering aldehydes, and refined light woods creating an aura of inner glow.",
+          image: "https://woodmart.xtemos.com/perfumes/wp-content/uploads/sites/32/2025/11/prf-collection-celeste-aura.jpg"
+        },
+        { 
+          name: "Opus Essence", 
+          slug: "opus-essence", 
+          description: "Rich, complex compositions. Deep florals, precious woods, and warm ambers create a multidimensional fragrance experience.",
+          image: "https://woodmart.xtemos.com/perfumes/wp-content/uploads/sites/32/2025/11/prf-collection-opus-essence.jpg"
+        },
+        { 
+          name: "Velours Noir", 
+          slug: "velours-noir", 
+          description: "Dark, velvety fragrances with depth and mystery. Smoky oud, leather accords, and black vanilla.",
+          image: "https://woodmart.xtemos.com/perfumes/wp-content/uploads/sites/32/2025/11/prf-collection-velours-noir.jpg"
+        },
+        { 
+          name: "Nocturne Essence", 
+          slug: "nocturne-essence", 
+          description: "Fragrances inspired by nightfall. Cool musks, aromatic herbs, and dark spices capture twilight elegance.",
+          image: "https://woodmart.xtemos.com/perfumes/wp-content/uploads/sites/32/2025/11/prf-collection-nocturne-essence.jpg"
+        },
+        { 
+          name: "Elysian Bloom", 
+          slug: "elysian-bloom", 
+          description: "Fresh, green fragrances celebrating nature. Dewy petals, crisp leaves, and earthy vetiver.",
+          image: "https://woodmart.xtemos.com/perfumes/wp-content/uploads/sites/32/2025/11/prf-collection-elysian-bloom.jpg"
+        },
       ],
     },
   },
@@ -274,6 +306,7 @@ export const PERFUMES_FRAGRANCES_PAGE_BLOCKS: TemplateBlock[] = [
     props: {
       title: "Featured Fragrances",
       subtitle: "Our most beloved scents",
+      maxProducts: 6,
     },
   },
 ];
@@ -285,6 +318,7 @@ export const PERFUMES_JOURNAL_PAGE_BLOCKS: TemplateBlock[] = [
     props: {
       title: "Journal",
       subtitle: "Explore Our Stories",
+      backgroundImage: "https://woodmart.xtemos.com/perfumes/wp-content/uploads/sites/32/2025/11/prf-blog-3-588x598.jpg",
     },
   },
   {
@@ -292,7 +326,9 @@ export const PERFUMES_JOURNAL_PAGE_BLOCKS: TemplateBlock[] = [
     type: "perfumesJournalGrid",
     props: {
       title: "Journal Articles",
+      subtitle: "Discover the art of fragrance",
       columns: 3,
+      maxPosts: 6,
     },
   },
   {
@@ -301,6 +337,7 @@ export const PERFUMES_JOURNAL_PAGE_BLOCKS: TemplateBlock[] = [
     props: {
       title: "Latest Stories",
       subtitle: "Discover the art of fragrance",
+      maxPosts: 3,
     },
   },
 ];

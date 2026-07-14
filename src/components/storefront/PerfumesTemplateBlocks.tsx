@@ -176,9 +176,9 @@ export function PerfumesHeader({ storeName, storeSlug, logo, categories, cartCou
     { label: "Home", href: `/store/${storeSlug}` },
     { label: "Fragrances", href: `/store/${storeSlug}/fragrances`, dropdown: true },
     { label: "Journal", href: `/store/${storeSlug}/journal` },
-    { label: "About Us", href: `/store/${storeSlug}/about-us` },
-    { label: "Contact Us", href: `/store/${storeSlug}/contact-us` },
-    { label: "FAQ", href: `/store/${storeSlug}/contact-us` },
+    { label: "About Us", href: `/store/${storeSlug}/about` },
+    { label: "Contact Us", href: `/store/${storeSlug}/contact` },
+    { label: "FAQ", href: `/store/${storeSlug}/contact` },
   ];
 
   const goToSearch = (event: React.FormEvent) => {
@@ -2006,7 +2006,10 @@ export function PerfumesFeaturedProducts({ title = "Featured Fragrances", subtit
   const storeSlug = storeCtx?.storeSlug || "";
   const currency = storeCtx?.currency || "USD";
   const featuredProducts = products.slice(0, 6);
-  const formatPrice = (price: number) => `${currency} ${price.toFixed(2)}`;
+  const formatPrice = (price: number | string | null | undefined) => {
+    const numPrice = typeof price === 'number' ? price : typeof price === 'string' ? parseFloat(price) : 0;
+    return `${currency} ${isNaN(numPrice) ? '0.00' : numPrice.toFixed(2)}`;
+  };
 
   const css = `
     .pfp-section { max-width: ${TOKENS.containerWidth}; margin: 0 auto; padding: 0 15px 80px; }

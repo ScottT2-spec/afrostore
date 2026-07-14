@@ -368,7 +368,7 @@ export async function GET(_req: NextRequest, { params }: Params) {
 
     const publicPages = mergeStoredTemplatePages(allPages, activeTemplate?.pages);
 
-    return success({
+    const response = success({
       store: {
         id: site.id,
         name: site.name,
@@ -394,6 +394,13 @@ export async function GET(_req: NextRequest, { params }: Params) {
       customization: resolvedCustomization,
       theme: resolvedTheme,
     });
+
+    // Add cache headers to prevent browser caching
+    response.headers.set('Cache-Control', 'no-store, no-cache, must-revalidate, private');
+    response.headers.set('Pragma', 'no-cache');
+    response.headers.set('Expires', '0');
+
+    return response;
   } catch (err) {
     console.error("Storefront page fetch error:", err);
     return NextResponse.json({ success: false, error: "Internal server error" }, { status: 500 });

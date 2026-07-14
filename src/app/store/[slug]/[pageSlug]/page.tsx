@@ -116,7 +116,7 @@ export default function StorefrontPage() {
   useEffect(() => {
     (async () => {
       try {
-      const res = await fetch(`/api/storefront/${slug}/pages/${pageSlug}`);
+      const res = await fetch(`/api/storefront/${slug}/pages/${pageSlug}`, { cache: 'no-store' });
       const json = await res.json();
       if (json.success && json.data) {
         setData(json.data);
@@ -314,178 +314,15 @@ export default function StorefrontPage() {
     const herCollections = renderedCollections.filter((category) => ["etheria", "celeste-aura", "opus-essence"].includes(category.slug));
     const himCollections = renderedCollections.filter((category) => ["velours-noir", "nocturne-essence", "elysian-bloom"].includes(category.slug));
     const pageBody = (() => {
-      switch (pageSlug) {
-        case "fragrances":
-          return (
-            <main>
-              <section className="bg-[#f6f0eb] px-4 py-16">
-                <div className="mx-auto max-w-6xl">
-                  <p className="text-xs font-semibold uppercase tracking-[0.35em] text-[#8b6798]">Fragrances</p>
-                  <h1 className="mt-4 font-serif text-4xl text-[#241f24] sm:text-5xl">Fragrances</h1>
-                  <p className="mt-4 max-w-3xl text-base leading-8 text-[#6f6573]">
-                    Explore the collection structure exactly as presented in the reference storefront.
-                  </p>
-                </div>
-              </section>
-              <section className="px-4 pb-12">
-                <div className="mx-auto grid max-w-6xl gap-6 md:grid-cols-3">
-                  <article className="rounded-[32px] bg-white p-6 shadow-[0_20px_50px_rgba(47,34,46,0.05)]">
-                    <h2 className="font-serif text-2xl text-[#241f24]">Collections for Her</h2>
-                    <div className="mt-4 grid gap-3">
-                      {herCollections.map((collection) => (
-                        <Link key={collection.slug} href={`/store/${slug}/shop?category=${collection.slug}`} className="rounded-2xl border border-[#eee4de] bg-[#fcfaf8] px-4 py-3 text-sm font-semibold text-[#241f24]">
-                          {collection.name}
-                        </Link>
-                      ))}
-                    </div>
-                  </article>
-                  <article className="rounded-[32px] bg-white p-6 shadow-[0_20px_50px_rgba(47,34,46,0.05)]">
-                    <h2 className="font-serif text-2xl text-[#241f24]">Collections for Him</h2>
-                    <div className="mt-4 grid gap-3">
-                      {himCollections.map((collection) => (
-                        <Link key={collection.slug} href={`/store/${slug}/shop?category=${collection.slug}`} className="rounded-2xl border border-[#eee4de] bg-[#fcfaf8] px-4 py-3 text-sm font-semibold text-[#241f24]">
-                          {collection.name}
-                        </Link>
-                      ))}
-                    </div>
-                  </article>
-                  <article className="rounded-[32px] bg-[#1a1a1a] px-6 py-8 text-white shadow-[0_20px_50px_rgba(47,34,46,0.08)]">
-                    <h2 className="font-serif text-3xl">Opus Essence</h2>
-                    <p className="mt-3 text-sm leading-7 text-white/85">
-                      A collection of delicate, weightless fragrances that capture the essence of air and light. Soft florals, sheer musks, and dewy accords.
-                    </p>
-                    <Link href={`/store/${slug}/shop?category=opus-essence`} className="mt-6 inline-flex rounded-full bg-white px-5 py-2.5 text-sm font-semibold text-[#111]">
-                      View Collection
-                    </Link>
-                  </article>
-                </div>
-              </section>
-              <section className="px-4 pb-16">
-                <div className="mx-auto grid max-w-6xl gap-6 sm:grid-cols-2 xl:grid-cols-3">
-                  {perfumeCollections.map((collection) => {
-                    const categoryProducts = products.filter((product) => product.category?.slug === collection.slug).slice(0, 3);
-                    const collectionDescription = categoryProducts[0]?.description || "";
-                    return (
-                      <article key={collection.slug} className="rounded-[32px] bg-white p-6 shadow-[0_20px_50px_rgba(47,34,46,0.05)]">
-                        <p className="text-xs font-semibold uppercase tracking-[0.35em] text-[#8b6798]">Collection</p>
-                        <h3 className="mt-3 font-serif text-3xl text-[#241f24]">{collection.name}</h3>
-                        <p className="mt-4 text-sm leading-7 text-[#6f6573]">{collectionDescription}</p>
-                        <div className="mt-6 grid gap-3">
-                          {categoryProducts.map((product) => (
-                            <Link key={product.id} href={`/store/${slug}/product/${product.slug}`} className="flex items-center justify-between rounded-2xl border border-[#eee4de] bg-[#fcfaf8] px-4 py-3 text-sm font-medium text-[#241f24]">
-                              <span>{product.name}</span>
-                              <span>{formatCurrency(Number(product.price), currency)}</span>
-                            </Link>
-                          ))}
-                        </div>
-                      </article>
-                    );
-                  })}
-                </div>
-              </section>
-            </main>
-          );
-        case "journal":
-          return (
-            <main className="px-4 py-16">
-              <div className="mx-auto max-w-6xl">
-                <p className="text-xs font-semibold uppercase tracking-[0.35em] text-[#8b6798]">Journal</p>
-                <h1 className="mt-4 font-serif text-4xl text-[#241f24] sm:text-5xl">Journal</h1>
-                <p className="mt-4 max-w-3xl text-base leading-8 text-[#6f6573]">
-                  Stories, rituals, and editorial notes from the Perfumes collection.
-                </p>
-                <div className="mt-10 grid gap-6 md:grid-cols-2 xl:grid-cols-3">
-                  {blogs.map((blog) => (
-                    <article key={blog.id} className="overflow-hidden rounded-[30px] bg-white shadow-[0_20px_50px_rgba(47,34,46,0.05)]">
-                      <div className="aspect-[4/3] overflow-hidden bg-[#efe7ea]">
-                        {blog.coverImage ? <img src={blog.coverImage} alt={blog.title} className="h-full w-full object-cover" /> : null}
-                      </div>
-                      <div className="p-6">
-                        <p className="text-xs uppercase tracking-[0.25em] text-[#8b6798]">{blog.category || "Journal"}</p>
-                        <h2 className="mt-3 font-serif text-2xl text-[#241f24]">{blog.title}</h2>
-                        <p className="mt-3 text-sm leading-7 text-[#6f6573]">{blog.excerpt || ""}</p>
-                        <Link href={`/store/${slug}/blog/${blog.slug}`} className="mt-4 inline-flex text-sm font-semibold text-[#8b6798]">
-                          Read article
-                        </Link>
-                      </div>
-                    </article>
-                  ))}
-                </div>
-              </div>
-            </main>
-          );
-        case "about-us":
-          return (
-            <main className="px-4 py-16">
-              <div className="mx-auto grid max-w-6xl gap-10 lg:grid-cols-[1.1fr_0.9fr] lg:items-start">
-                <div>
-                  <p className="text-xs font-semibold uppercase tracking-[0.35em] text-[#8b6798]">About Us</p>
-                  <h1 className="mt-4 font-serif text-4xl leading-tight text-[#241f24] sm:text-5xl">Our approach to fragrance is emotional, not decorative.</h1>
-                  <p className="mt-6 text-base leading-8 text-[#6f6573]">
-                    Perfume is memory, identity, and atmosphere captured in a bottle. We build collections that feel editorial, tactile, and deeply personal.
-                  </p>
-                  <p className="mt-4 text-base leading-8 text-[#6f6573]">
-                    Every scent collection is designed to remain editable for merchants while preserving the structure from the reference site.
-                  </p>
-                </div>
-                <div className="grid gap-4 sm:grid-cols-2">
-                  <img src="https://woodmart.xtemos.com/perfumes/wp-content/uploads/sites/32/2025/11/prf-collection-opus-essence.jpg" alt="Perfumes collection" className="h-full w-full rounded-[28px] object-cover" />
-                  <div className="grid gap-4">
-                    <div className="rounded-[28px] bg-white p-6 shadow-[0_20px_50px_rgba(47,34,46,0.05)]">
-                      <p className="text-xs font-semibold uppercase tracking-[0.25em] text-[#8b6798]">Collections</p>
-                      <p className="mt-3 text-sm leading-7 text-[#6f6573]">Étheria, Celeste Aura, Opus Essence, Velours Noir, Nocturne Essence, and Elysian Bloom.</p>
-                    </div>
-                    <div className="rounded-[28px] bg-[#1a1a1a] p-6 text-white">
-                      <p className="text-xs font-semibold uppercase tracking-[0.25em] text-white/70">Contact</p>
-                      <p className="mt-3 text-sm leading-7 text-white/80">Use Contact Us or FAQ for direct help and store support.</p>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </main>
-          );
-        case "contact-us":
-          return (
-            <main className="px-4 py-16">
-              <div className="mx-auto grid max-w-6xl gap-10 lg:grid-cols-[0.9fr_1.1fr]">
-                <div className="rounded-[32px] bg-white p-8 shadow-[0_20px_50px_rgba(47,34,46,0.05)]">
-                  <p className="text-xs font-semibold uppercase tracking-[0.35em] text-[#8b6798]">Contact Us</p>
-                  <h1 className="mt-4 font-serif text-4xl text-[#241f24]">Get in touch</h1>
-                  <p className="mt-4 text-base leading-8 text-[#6f6573]">
-                    Reach out for product guidance, store support, or collection inquiries.
-                  </p>
-                  <div className="mt-8 space-y-3 text-sm text-[#6f6573]">
-                    <p>Call Us: (064) 332-1233</p>
-                    <p>Hours: 9:00am - 5:00pm</p>
-                    <p>Monday - Friday</p>
-                  </div>
-                </div>
-                <div className="rounded-[32px] bg-white p-8 shadow-[0_20px_50px_rgba(47,34,46,0.05)]">
-                  <form className="grid gap-4">
-                    <div className="grid gap-4 sm:grid-cols-2">
-                      <input className="rounded-2xl border border-[#ece4da] bg-[#fffdf8] px-4 py-3 text-sm outline-none" placeholder="Your name" />
-                      <input className="rounded-2xl border border-[#ece4da] bg-[#fffdf8] px-4 py-3 text-sm outline-none" placeholder="Email address" />
-                    </div>
-                    <input className="rounded-2xl border border-[#ece4da] bg-[#fffdf8] px-4 py-3 text-sm outline-none" placeholder="Subject" />
-                    <textarea className="min-h-[180px] rounded-[24px] border border-[#ece4da] bg-[#fffdf8] px-4 py-3 text-sm outline-none" placeholder="How can we help?" />
-                    <button type="button" className="inline-flex items-center justify-center rounded-full bg-[#8b6798] px-6 py-3 text-sm font-semibold text-white">
-                      Send message
-                    </button>
-                  </form>
-                </div>
-              </div>
-            </main>
-          );
-        default:
-          return (
-            <main className="px-4 py-16">
-              <div className="mx-auto max-w-4xl">
-                <h1 className="font-serif text-4xl text-[#241f24]">{resolvedPage.title}</h1>
-                <RenderBlocks blocks={blocks} storeSlug={slug} products={products} currency={currency} addToCart={(p) => addToCart(p as unknown as StoreProduct)} isWishlisted={isWishlisted} toggleWishlist={toggleWishlist} addedToCart={addedToCart} />
-              </div>
-            </main>
-          );
-      }
+      // All perfumes pages now use block-based rendering from the database
+      // This ensures editor changes are reflected on the live site
+      return (
+        <main className="px-4 py-16">
+          <div className="mx-auto max-w-4xl">
+            <RenderTemplateBlocks blocks={blocks} />
+          </div>
+        </main>
+      );
     })();
 
     return (
