@@ -1,13 +1,13 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getStoreContext, success, error } from "@/lib/api-helpers";
 import { unauthorized } from "@/lib/auth";
-import { mcpChat, getMCPStatus } from "@/lib/mcp-ai-service";
+import { chatWithAI, getAIStatus } from "@/lib/ai-service";
 
-export const maxDuration = 120; // Longer timeout for tool calling loops
+export const maxDuration = 60;
 
 type Params = { params: Promise<{ siteId: string }> };
 
-// POST /api/sites/:siteId/ai — MCP-powered AI chat
+// POST /api/sites/:siteId/ai — RAG-powered AI chat
 export async function POST(req: NextRequest, { params }: Params) {
   const { siteId } = await params;
   const ctx = await getStoreContext(req, siteId);
@@ -52,7 +52,7 @@ export async function POST(req: NextRequest, { params }: Params) {
         .map((m) => ({ role: m.role as "user" | "assistant", content: m.content }));
     }
 
-    const response = await mcpChat({
+    const response = await chatWithAI({
       siteId,
       userId: ctx.user!.id,
       message: message.trim(),
@@ -62,7 +62,7 @@ export async function POST(req: NextRequest, { params }: Params) {
 
     return success(response);
   } catch (err) {
-    console.error("MCP AI chat error:", err);
+    console.error("AI chat error:", err);
     const message = (err as Error).message || "AI service unavailable";
 
     if (message.includes("No AI providers configured")) {
@@ -87,12 +87,12 @@ export async function POST(req: NextRequest, { params }: Params) {
   }
 }
 
-// GET /api/sites/:siteId/ai — Get MCP + AI status
+// GET /api/sites/:siteId/ai — Get AI status
 export async function GET(req: NextRequest, { params }: Params) {
   const { siteId } = await params;
   const ctx = await getStoreContext(req, siteId);
   if (ctx.error) return ctx.user ? error(ctx.error, 403) : unauthorized();
 
-  const status = getMCPStatus();
+  const status = getAIStatus();
   return success(status);
 }
