@@ -76,7 +76,8 @@ export default function StoreReviewsPage() {
   const isKidsTemplate = slug === "kids";
   const isHealthTemplate = slug === "pills" || store?.slug === "pills" || store?.name?.toLowerCase().includes("pill") || store?.name?.toLowerCase().includes("supplement") || store?.name?.toLowerCase().includes("health");
   const isTShirtsPrintsTemplate = slug === "huty" || store?.slug === "huty" || store?.name?.toLowerCase().includes("t-shirts") || store?.name?.toLowerCase().includes("prints");
-  const isPerfumesTemplate = store?.slug === "perfumes" || store?.name?.toLowerCase().includes("perfumes");
+  const activeTemplateSlug = storeData?.store?.templates?.[0]?.template?.slug || null;
+  const isPerfumesTemplate = activeTemplateSlug === "perfumes" || slug === "perfumes" || store?.slug === "perfumes" || store?.name?.toLowerCase().includes("perfumes");
 
   const fetchReviews = useCallback(async (p: number, rating: number | null, append: boolean) => {
     if (p === 1) setLoading(true);
@@ -191,9 +192,6 @@ export default function StoreReviewsPage() {
   ];
 
   // ─── PERFUMES REVIEWS ───
-  const activeTemplateSlug = storeData?.store?.templates?.[0]?.template?.slug || null;
-  const isPerfumesTemplate = activeTemplateSlug === "perfumes" || slug === "perfumes" || store?.slug === "perfumes" || store?.name?.toLowerCase().includes("perfumes");
-  
   if (isPerfumesTemplate) {
     const socialLinksArray = Object.entries(storeData?.socialLinks || {}).filter(([, url]: any) => url).map(([p, u]: any) => ({ platform: p, url: u as string }));
     const ctxValue = {
