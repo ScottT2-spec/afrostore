@@ -19,6 +19,9 @@ import { INTERIOR_DECOR_PRESET, INTERIOR_RETAIL_PRESET } from "@/lib/templates/p
 import { KIDS_TEMPLATE_PRESET } from "@/lib/templates/presets/kids-preset";
 import { MAKEUP_TEMPLATE_PRESET } from "@/lib/templates/presets/makeup-preset";
 import { PERFUMES_TEMPLATE_PRESET } from "@/lib/templates/presets/perfumes-preset";
+import { TSHIRTS_PRINTS_ABOUT_PAGE_BLOCKS, TSHIRTS_PRINTS_CONTACT_PAGE_BLOCKS, TSHIRTS_PRINTS_BLOG_PAGE_BLOCKS } from "@/lib/templates/presets/t-shirts-prints-page-presets";
+import { VEGETABLE_HOME_PAGE_BLOCKS, VEGETABLE_MENU_PAGE_BLOCKS, VEGETABLE_RECIPE_PAGE_BLOCKS, VEGETABLE_ABOUT_PAGE_BLOCKS, VEGETABLE_CONTACT_PAGE_BLOCKS, VEGETABLE_RESERVATION_PAGE_BLOCKS } from "@/lib/templates/presets/vegetables-page-presets";
+import { PERFUMES_HOME_PAGE_BLOCKS, PERFUMES_ABOUT_PAGE_BLOCKS, PERFUMES_CONTACT_PAGE_BLOCKS, PERFUMES_FRAGRANCES_PAGE_BLOCKS, PERFUMES_JOURNAL_PAGE_BLOCKS, PERFUMES_REVIEWS_PAGE_BLOCKS } from "@/lib/templates/presets/perfumes-page-presets";
 import { isBespokeTemplateSlug } from "@/lib/templates/bespoke-template-slugs";
 
 export type BespokeOverrides = Record<string, Record<string, unknown>>;
@@ -62,6 +65,7 @@ type RegisteredPageSlug =
   | "projects"
   | "ingredients"
   | "reservations"
+  | "reservation"
   | "gallery"
   | "departments"
   | "doctors"
@@ -94,7 +98,7 @@ export const BESPOKE_TEMPLATE_PRESETS: TemplatePresetMap = {
   makeup: MAKEUP_TEMPLATE_PRESET,
   grocery: GROCERY_TEMPLATE_PRESET,
   "grocery-market": GROCERY_TEMPLATE_PRESET,
-  vegetables: GROCERY_TEMPLATE_PRESET,
+  vegetables: VEGETABLE_HOME_PAGE_BLOCKS,
   health: HEALTH_TEMPLATE_PRESET,
   pills: HEALTH_TEMPLATE_PRESET,
   interior: INTERIOR_DECOR_PRESET,
@@ -117,6 +121,27 @@ const BESPOKE_PAGE_PRESETS: Record<string, Record<string, TemplateBlock[]>> = {
     "new-in": COSMETICS_NEW_IN_BLOCKS,
     skincare: COSMETICS_SKINCARE_BLOCKS,
     terms: COSMETICS_TERMS_BLOCKS,
+  },
+  "t-shirts-prints": {
+    "about-us": TSHIRTS_PRINTS_ABOUT_PAGE_BLOCKS,
+    "contact-us": TSHIRTS_PRINTS_CONTACT_PAGE_BLOCKS,
+    "blog": TSHIRTS_PRINTS_BLOG_PAGE_BLOCKS,
+  },
+  vegetables: {
+    home: VEGETABLE_HOME_PAGE_BLOCKS,
+    menu: VEGETABLE_MENU_PAGE_BLOCKS,
+    recipe: VEGETABLE_RECIPE_PAGE_BLOCKS,
+    about: VEGETABLE_ABOUT_PAGE_BLOCKS,
+    contact: VEGETABLE_CONTACT_PAGE_BLOCKS,
+    reservation: VEGETABLE_RESERVATION_PAGE_BLOCKS,
+  },
+  perfumes: {
+    home: PERFUMES_HOME_PAGE_BLOCKS,
+    about: PERFUMES_ABOUT_PAGE_BLOCKS,
+    contact: PERFUMES_CONTACT_PAGE_BLOCKS,
+    fragrances: PERFUMES_FRAGRANCES_PAGE_BLOCKS,
+    journal: PERFUMES_JOURNAL_PAGE_BLOCKS,
+    reviews: PERFUMES_REVIEWS_PAGE_BLOCKS,
   },
 };
 

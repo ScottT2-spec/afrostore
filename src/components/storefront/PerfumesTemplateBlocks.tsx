@@ -1781,18 +1781,23 @@ export function PerfumesBrandedStores({ title = "Our Branded Stores", stores = [
 /* ─── FRAGRANCES: HERO ──────────────────────────────────────── */
 export interface PerfumesPageHeroProps {
   title?: string;
+  subtitle?: string;
 }
-export function PerfumesPageHero({ title = "Fragrances" }: PerfumesPageHeroProps) {
+export function PerfumesPageHero({ title = "Fragrances", subtitle }: PerfumesPageHeroProps) {
   const css = `
-    .pfr-hero { max-width: ${TOKENS.containerWidth}; margin: 0 auto; padding: 80px 15px 60px; }
-    .pfr-hero-title { font-family: ${TOKENS.titleFont}; font-size: 52px; font-weight: 400; color: ${TOKENS.primaryColor}; margin: 0; letter-spacing: -1px; }
+    .pfr-hero { max-width: ${TOKENS.containerWidth}; margin: 0 auto; padding: 80px 15px 60px; text-align: center; }
+    .pfr-hero-title { font-family: ${TOKENS.titleFont}; font-size: 52px; font-weight: 400; color: ${TOKENS.primaryColor}; margin: 0 0 15px; letter-spacing: -1px; }
+    .pfr-hero-subtitle { font-family: ${TOKENS.bodyFont}; font-size: 16px; color: ${TOKENS.textColor}; margin: 0; letter-spacing: 2px; text-transform: uppercase; }
     @media (max-width: 1024px) { .pfr-hero-title { font-size: 40px; } }
     @media (max-width: 767px) { .pfr-hero-title { font-size: 32px; } .pfr-hero { padding: 50px 15px 40px; } }
   `;
   return (
     <div>
       <ScopedStyles id="page-hero" css={css} />
-      <div className="pfr-hero"><h1 className="pfr-hero-title">{title}</h1></div>
+      <div className="pfr-hero">
+        <h1 className="pfr-hero-title">{title}</h1>
+        {subtitle && <p className="pfr-hero-subtitle">{subtitle}</p>}
+      </div>
     </div>
   );
 }
@@ -1923,6 +1928,188 @@ export function PerfumesJournalGrid({ columns = 3 }: PerfumesJournalGridProps) {
           ))}
         </div>
       )}
+    </div>
+  );
+}
+
+/* ─── REVIEWS: HERO ─────────────────────────────────────────── */
+export interface PerfumesReviewsHeroProps {
+  title?: string;
+}
+export function PerfumesReviewsHero({ title = "Reviews" }: PerfumesReviewsHeroProps) {
+  const css = `
+    .pr-hero { max-width: ${TOKENS.containerWidth}; margin: 0 auto; padding: 80px 15px 60px; text-align: center; }
+    .pr-hero-title { font-family: ${TOKENS.titleFont}; font-size: 52px; font-weight: 400; color: ${TOKENS.primaryColor}; margin: 0; letter-spacing: -1px; }
+    @media (max-width: 767px) { .pr-hero-title { font-size: 36px; } }
+  `;
+  return (
+    <div>
+      <ScopedStyles id="reviews-hero" css={css} />
+      <div className="pr-hero">
+        <h1 className="pr-hero-title">{title}</h1>
+      </div>
+    </div>
+  );
+}
+
+/* ─── REVIEWS: GRID ─────────────────────────────────────────── */
+export interface PerfumesReviewsGridProps {
+  columns?: number;
+}
+export function PerfumesReviewsGrid({ columns = 3 }: PerfumesReviewsGridProps) {
+  const css = `
+    .pr-grid { max-width: ${TOKENS.containerWidth}; margin: 0 auto; padding: 0 15px 80px; display: grid; grid-template-columns: repeat(${columns}, 1fr); gap: 30px; }
+    .pr-card { background: #f8f8f8; padding: 35px 30px; }
+    .pr-stars { color: #EABE12; font-size: 18px; margin-bottom: 15px; letter-spacing: 2px; }
+    .pr-text { font-family: ${TOKENS.bodyFont}; font-size: 15px; line-height: 1.7; color: ${TOKENS.textColor}; margin-bottom: 20px; }
+    .pr-author { font-family: ${TOKENS.bodyFont}; font-weight: 600; font-size: 14px; color: ${TOKENS.primaryColor}; }
+    .pr-date { font-family: ${TOKENS.bodyFont}; font-size: 13px; color: #999; margin-top: 5px; }
+    .pr-empty { text-align: center; padding: 60px 20px; font-family: ${TOKENS.bodyFont}; color: ${TOKENS.textColor}; }
+    @media (max-width: 1024px) { .pr-grid { grid-template-columns: repeat(2, 1fr); } }
+    @media (max-width: 767px) { .pr-grid { grid-template-columns: 1fr; } }
+  `;
+  
+  const placeholderReviews = [
+    { name: "Sarah M.", text: "Absolutely love the Opus Essence fragrance. It's become my signature scent and I receive compliments everywhere I go.", rating: 5, date: "2 weeks ago" },
+    { name: "James L.", text: "The Velours Noir collection is exquisite. Deep, mysterious, and long-lasting. Highly recommend for evening wear.", rating: 5, date: "1 month ago" },
+    { name: "Emma R.", text: "Étheria is light and airy - perfect for everyday wear. The packaging is also beautiful.", rating: 4, date: "3 weeks ago" },
+    { name: "Michael K.", text: "Exceptional quality and customer service. The Celeste Aura fragrance is my new favorite.", rating: 5, date: "2 months ago" },
+    { name: "Lisa T.", text: "Nocturne Essence captures the essence of nightfall perfectly. Subtle yet sophisticated.", rating: 5, date: "1 month ago" },
+    { name: "David W.", text: "Elysian Bloom is fresh and green - exactly what I was looking for. Will definitely order again.", rating: 4, date: "3 weeks ago" },
+  ];
+
+  return (
+    <div>
+      <ScopedStyles id="reviews-grid" css={css} />
+      <div className="pr-grid">
+        {placeholderReviews.map((review, i) => (
+          <div key={i} className="pr-card">
+            <div className="pr-stars">{"★".repeat(review.rating)}</div>
+            <p className="pr-text">"{review.text}"</p>
+            <div className="pr-author">{review.name}</div>
+            <div className="pr-date">{review.date}</div>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
+
+/* ─── FRAGRANCES: FEATURED PRODUCTS ─────────────────────────── */
+export interface PerfumesFeaturedProductsProps {
+  title?: string;
+  subtitle?: string;
+}
+export function PerfumesFeaturedProducts({ title = "Featured Fragrances", subtitle = "Our most beloved scents" }: PerfumesFeaturedProductsProps) {
+  const storeCtx = useContext(PerfumesStoreContext);
+  const products = storeCtx?.products || [];
+  const storeSlug = storeCtx?.storeSlug || "";
+  const currency = storeCtx?.currency || "USD";
+  const featuredProducts = products.slice(0, 6);
+  const formatPrice = (price: number) => `${currency} ${price.toFixed(2)}`;
+
+  const css = `
+    .pfp-section { max-width: ${TOKENS.containerWidth}; margin: 0 auto; padding: 0 15px 80px; }
+    .pfp-header { text-align: center; margin-bottom: 50px; }
+    .pfp-title { font-family: ${TOKENS.titleFont}; font-size: 42px; font-weight: 400; color: ${TOKENS.primaryColor}; margin: 0 0 15px; }
+    .pfp-subtitle { font-family: ${TOKENS.bodyFont}; font-size: 16px; color: ${TOKENS.textColor}; margin: 0; letter-spacing: 2px; text-transform: uppercase; }
+    .pfp-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 30px; }
+    .pfp-card { background: #fff; }
+    .pfp-card-img-wrap { position: relative; overflow: hidden; aspect-ratio: 1; }
+    .pfp-card-img { width: 100%; height: 100%; object-fit: cover; transition: transform 0.3s; }
+    .pfp-card:hover .pfp-card-img { transform: scale(1.05); }
+    .pfp-card-name { font-family: ${TOKENS.titleFont}; font-size: 20px; font-weight: 500; color: ${TOKENS.primaryColor}; margin: 20px 0 10px; }
+    .pfp-card-price { font-family: ${TOKENS.bodyFont}; font-size: 16px; color: ${TOKENS.textColor}; }
+    .pfp-empty { text-align: center; padding: 60px 20px; font-family: ${TOKENS.bodyFont}; color: ${TOKENS.textColor}; }
+    @media (max-width: 1024px) { .pfp-grid { grid-template-columns: repeat(2, 1fr); } }
+    @media (max-width: 767px) { .pfp-grid { grid-template-columns: 1fr; } }
+  `;
+
+  return (
+    <div>
+      <ScopedStyles id="featured-products" css={css} />
+      <div className="pfp-section">
+        <div className="pfp-header">
+          <h2 className="pfp-title">{title}</h2>
+          <p className="pfp-subtitle">{subtitle}</p>
+        </div>
+        {featuredProducts.length === 0 ? (
+          <div className="pfp-empty">No featured products available yet.</div>
+        ) : (
+          <div className="pfp-grid">
+            {featuredProducts.map((p: any) => (
+              <div key={p.id} className="pfp-card">
+                <div className="pfp-card-img-wrap">
+                  <Link href={resolveStoreLink(`/product/${p.slug}`, storeSlug)}>
+                    <img src={p.images?.[0]?.url || safeSrc(null, p.name)} alt={p.name} className="pfp-card-img" loading="lazy" onError={(e: any) => onImgError(e, p.name)} />
+                  </Link>
+                </div>
+                <h3 className="pfp-card-name"><Link href={resolveStoreLink(`/product/${p.slug}`, storeSlug)}>{p.name}</Link></h3>
+                <div className="pfp-card-price">{formatPrice(p.price)}</div>
+              </div>
+            ))}
+          </div>
+        )}
+      </div>
+    </div>
+  );
+}
+
+/* ─── JOURNAL: FEATURED POSTS ───────────────────────────────── */
+export interface PerfumesFeaturedPostsProps {
+  title?: string;
+  subtitle?: string;
+}
+export function PerfumesFeaturedPosts({ title = "Latest Stories", subtitle = "Discover the art of fragrance" }: PerfumesFeaturedPostsProps) {
+  const storeCtx = useContext(PerfumesStoreContext);
+  const blogs = storeCtx?.blogs || [];
+  const storeSlug = storeCtx?.storeSlug || "";
+  const featuredPosts = blogs.slice(0, 3);
+  const formatDate = (d: string) => new Date(d).toLocaleDateString("en-US", { day: "2-digit", month: "short", year: "numeric" });
+
+  const css = `
+    .pfp-posts-section { max-width: ${TOKENS.containerWidth}; margin: 0 auto; padding: 0 15px 80px; }
+    .pfp-posts-header { text-align: center; margin-bottom: 50px; }
+    .pfp-posts-title { font-family: ${TOKENS.titleFont}; font-size: 42px; font-weight: 400; color: ${TOKENS.primaryColor}; margin: 0 0 15px; }
+    .pfp-posts-subtitle { font-family: ${TOKENS.bodyFont}; font-size: 16px; color: ${TOKENS.textColor}; margin: 0; letter-spacing: 2px; text-transform: uppercase; }
+    .pfp-posts-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 30px; }
+    .pfp-post-card { background: #fff; }
+    .pfp-post-img-wrap { position: relative; overflow: hidden; aspect-ratio: 1; }
+    .pfp-post-img { width: 100%; height: 100%; object-fit: cover; transition: transform 0.3s; }
+    .pfp-post-card:hover .pfp-post-img { transform: scale(1.05); }
+    .pfp-post-title { font-family: ${TOKENS.titleFont}; font-size: 22px; font-weight: 500; color: ${TOKENS.primaryColor}; margin: 20px 0 10px; }
+    .pfp-post-date { font-family: ${TOKENS.bodyFont}; font-size: 14px; color: ${TOKENS.textColor}; }
+    .pfp-posts-empty { text-align: center; padding: 60px 20px; font-family: ${TOKENS.bodyFont}; color: ${TOKENS.textColor}; }
+    @media (max-width: 1024px) { .pfp-posts-grid { grid-template-columns: repeat(2, 1fr); } }
+    @media (max-width: 767px) { .pfp-posts-grid { grid-template-columns: 1fr; } }
+  `;
+
+  return (
+    <div>
+      <ScopedStyles id="featured-posts" css={css} />
+      <div className="pfp-posts-section">
+        <div className="pfp-posts-header">
+          <h2 className="pfp-posts-title">{title}</h2>
+          <p className="pfp-posts-subtitle">{subtitle}</p>
+        </div>
+        {featuredPosts.length === 0 ? (
+          <div className="pfp-posts-empty">No journal posts available yet.</div>
+        ) : (
+          <div className="pfp-posts-grid">
+            {featuredPosts.map((post: any) => (
+              <div key={post.id} className="pfp-post-card">
+                <div className="pfp-post-img-wrap">
+                  <Link href={resolveStoreLink(`/blog/${post.slug}`, storeSlug)}>
+                    <img src={post.coverImage || safeSrc(null, post.title)} alt={post.title} className="pfp-post-img" loading="lazy" onError={(e: any) => onImgError(e, post.title)} />
+                  </Link>
+                </div>
+                <h3 className="pfp-post-title"><Link href={resolveStoreLink(`/blog/${post.slug}`, storeSlug)}>{post.title}</Link></h3>
+                <div className="pfp-post-date">{formatDate(post.publishedAt || post.createdAt)}</div>
+              </div>
+            ))}
+          </div>
+        )}
+      </div>
     </div>
   );
 }

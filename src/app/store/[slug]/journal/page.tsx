@@ -4,9 +4,9 @@ import { useParams } from "next/navigation";
 import { PerfumesHeader, PerfumesFooter } from "@/components/storefront/PerfumesStoreChrome";
 import { RenderTemplateBlocks } from "@/components/storefront/TemplateBlockRenderer";
 import { PerfumesStoreContext } from "@/components/storefront/PerfumesTemplateBlocks";
-import { PERFUMES_CONTACT_PAGE_BLOCKS } from "@/lib/templates/presets/perfumes-page-presets";
+import { PERFUMES_JOURNAL_PAGE_BLOCKS } from "@/lib/templates/presets/perfumes-page-presets";
 
-export default function PerfumesContactPage() {
+export default function PerfumesJournalPage() {
   const params = useParams();
   const slug = params.slug as string;
   const [data, setData] = useState<any>(null);
@@ -17,7 +17,7 @@ export default function PerfumesContactPage() {
     let cancelled = false;
     Promise.all([
       fetch(`/api/storefront/${slug}`).then(r => r.json()),
-      fetch(`/api/storefront/${slug}/pages/contact`).then(r => r.json().catch(() => ({ success: false })))
+      fetch(`/api/storefront/${slug}/pages/journal`).then(r => r.json().catch(() => ({ success: false })))
     ])
       .then(([storeRes, pageRes]) => {
         if (!cancelled) {
@@ -48,7 +48,7 @@ export default function PerfumesContactPage() {
   // Use blocks from database if available, otherwise use preset
   const blocks = pageData?.content?.blocks && pageData.content.blocks.length > 0 
     ? pageData.content.blocks 
-    : PERFUMES_CONTACT_PAGE_BLOCKS;
+    : PERFUMES_JOURNAL_PAGE_BLOCKS;
 
   return (
     <div style={{ minHeight: "100vh", background: "#fff" }}>

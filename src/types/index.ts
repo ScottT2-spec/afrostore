@@ -456,16 +456,52 @@ export interface SectionStyleOverrides {
   backgroundImage?: string;
   backgroundVideo?: string;
   backgroundOverlay?: string;
+  backgroundOverlayOpacity?: number;
   transitionDuration?: string;
+  transitionTimingFunction?: string;
   hoverScale?: string;
   hoverOpacity?: string;
   hoverShadow?: string;
+  hoverBackgroundColor?: string;
+  hoverTextColor?: string;
   responsiveVisibility?: {
     desktop: boolean;
     tablet: boolean;
     mobile: boolean;
   };
   customCss?: string;
+  // Typography
+  fontFamily?: string;
+  fontSize?: string;
+  fontWeight?: string;
+  lineHeight?: string;
+  letterSpacing?: string;
+  textTransform?: string;
+  textAlign?: 'left' | 'center' | 'right' | 'justify';
+  // Layout
+  alignContent?: 'flex-start' | 'flex-end' | 'center' | 'space-between' | 'space-around' | 'space-evenly';
+  alignItems?: 'flex-start' | 'flex-end' | 'center' | 'stretch' | 'baseline';
+  justifyContent?: 'flex-start' | 'flex-end' | 'center' | 'space-between' | 'space-around' | 'space-evenly';
+  flexDirection?: 'row' | 'row-reverse' | 'column' | 'column-reverse';
+  flexWrap?: 'wrap' | 'nowrap' | 'wrap-reverse';
+  gap?: string;
+  maxWidth?: string;
+  minWidth?: string;
+  display?: 'block' | 'flex' | 'grid' | 'inline-block' | 'inline-flex' | 'none';
+  position?: 'static' | 'relative' | 'absolute' | 'fixed' | 'sticky';
+  zIndex?: string | number;
+  overflow?: 'visible' | 'hidden' | 'scroll' | 'auto';
+  // Grid Layout
+  gridColumns?: string;
+  gridRows?: string;
+  gridTemplateColumns?: string;
+  gridTemplateRows?: string;
+  gridColumnGap?: string;
+  gridRowGap?: string;
+  // Content Layout (for Shop/Blog grids)
+  contentColumns?: number;
+  contentGap?: string;
+  contentAlign?: 'left' | 'center' | 'right';
 }
 
 export interface DeliveryArea {
@@ -482,12 +518,5 @@ export interface GoogleFont {
   category: 'serif' | 'sans-serif' | 'display' | 'monospace';
 }
 
-export const GOOGLE_FONTS_DATABASE: GoogleFont[] = [
-  { name: 'Inter', importUrl: 'https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap', category: 'sans-serif' },
-  { name: 'Playfair Display', importUrl: 'https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;500;600;700&display=swap', category: 'serif' },
-  { name: 'Space Grotesk', importUrl: 'https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&display=swap', category: 'sans-serif' },
-  { name: 'Outfit', importUrl: 'https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&display=swap', category: 'sans-serif' },
-  { name: 'JetBrains Mono', importUrl: 'https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;;display=swap', category: 'monospace' },
-  { name: 'Cabinet Grotesk', importUrl: 'https://fonts.googleapis.com/css2?family=Cabinet+Grotesk:wght@300;400;500;600;700&display=swap', category: 'sans-serif' },
-  { name: 'Syne', importUrl: 'https://fonts.googleapis.com/css2?family=Syne:wght@400;500;600;700;800&display=swap', category: 'display' },
-];
+// Legacy export - use ALL_FONTS from @/lib/constants/fonts instead
+export { GOOGLE_FONTS_DATABASE } from '@/lib/constants/fonts';

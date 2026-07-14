@@ -71,10 +71,14 @@ export interface SectionStyleOverrides {
   backgroundImage?: string;
   backgroundVideo?: string;
   backgroundOverlay?: string;
+  backgroundOverlayOpacity?: number;
   transitionDuration?: string;
+  transitionTimingFunction?: string;
   hoverScale?: string;
   hoverOpacity?: string;
   hoverShadow?: string;
+  hoverBackgroundColor?: string;
+  hoverTextColor?: string;
   parallaxSpeed?: string;
   shapeDividerTop?: string;
   shapeDividerBottom?: string;
@@ -84,6 +88,38 @@ export interface SectionStyleOverrides {
     mobile: boolean;
   };
   customCss?: string;
+  // Typography
+  fontFamily?: string;
+  fontSize?: string;
+  fontWeight?: string;
+  lineHeight?: string;
+  letterSpacing?: string;
+  textTransform?: string;
+  textAlign?: 'left' | 'center' | 'right' | 'justify';
+  // Layout
+  alignContent?: 'flex-start' | 'flex-end' | 'center' | 'space-between' | 'space-around' | 'space-evenly';
+  alignItems?: 'flex-start' | 'flex-end' | 'center' | 'stretch' | 'baseline';
+  justifyContent?: 'flex-start' | 'flex-end' | 'center' | 'space-between' | 'space-around' | 'space-evenly';
+  flexDirection?: 'row' | 'row-reverse' | 'column' | 'column-reverse';
+  flexWrap?: 'wrap' | 'nowrap' | 'wrap-reverse';
+  gap?: string;
+  maxWidth?: string;
+  minWidth?: string;
+  display?: 'block' | 'flex' | 'grid' | 'inline-block' | 'inline-flex' | 'none';
+  position?: 'static' | 'relative' | 'absolute' | 'fixed' | 'sticky';
+  zIndex?: string | number;
+  overflow?: 'visible' | 'hidden' | 'scroll' | 'auto';
+  // Grid Layout
+  gridColumns?: string;
+  gridRows?: string;
+  gridTemplateColumns?: string;
+  gridTemplateRows?: string;
+  gridColumnGap?: string;
+  gridRowGap?: string;
+  // Content Layout (for Shop/Blog grids)
+  contentColumns?: number;
+  contentGap?: string;
+  contentAlign?: 'left' | 'center' | 'right';
 }
 
 export interface Section {

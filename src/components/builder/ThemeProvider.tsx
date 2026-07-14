@@ -1,7 +1,8 @@
 "use client";
 
 import { useEffect } from "react";
-import { DesignSystem, GOOGLE_FONTS_DATABASE } from "@/types";
+import { DesignSystem } from "@/types";
+import { ALL_FONTS, getFontImportUrls } from "@/lib/constants/fonts";
 
 interface ThemeProviderProps {
   designSystem: DesignSystem;
@@ -37,16 +38,17 @@ export default function ThemeProvider({ designSystem, customCss, children }: The
     }
 
     const fontsToLoad = Array.from(activeFonts)
-      .map((name) => GOOGLE_FONTS_DATABASE.find((f) => f.name === name))
+      .map((name) => ALL_FONTS.find((f) => f.name === name))
       .filter(Boolean);
 
     fontsToLoad.forEach((font) => {
-      if (!font) return;
-      const exists = document.querySelector(`link[href="${font.importUrl}"]`);
+      if (!font || !font.importUrl) return;
+      const importUrl = font.importUrl;
+      const exists = document.querySelector(`link[href="${importUrl}"]`);
       if (!exists) {
         const link = document.createElement("link");
         link.rel = "stylesheet";
-        link.href = font.importUrl;
+        link.href = importUrl;
         document.head.appendChild(link);
       }
     });
@@ -54,8 +56,9 @@ export default function ThemeProvider({ designSystem, customCss, children }: The
     // Cleanup function to remove font links when component unmounts
     return () => {
       fontsToLoad.forEach((font) => {
-        if (!font) return;
-        const link = document.querySelector(`link[href="${font.importUrl}"]`);
+        if (!font || !font.importUrl) return;
+        const importUrl = font.importUrl;
+        const link = document.querySelector(`link[href="${importUrl}"]`);
         if (link) {
           document.head.removeChild(link);
         }

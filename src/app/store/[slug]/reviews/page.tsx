@@ -7,11 +7,15 @@ import { useParams } from "next/navigation";
 import Link from "next/link";
 import { HandmadeBagsHeader, HandmadeBagsFooter } from "@/components/storefront/HandmadeBagsStoreChrome";
 import { RenderBlocks } from "@/components/storefront/BlockRenderer";
+import { RenderTemplateBlocks } from "@/components/storefront/TemplateBlockRenderer";
 import { RETAIL_REVIEWS_BLOCKS } from "@/lib/templates/presets/retail-pages";
 import { ThemeProvider, type ThemeData } from "@/components/storefront/ThemeProvider";
 import { KidsFontLoader, KidsFooterFull, KidsHeader } from "@/components/storefront/KidsTemplateBlocks";
 import { HealthHeader, HealthFooterFull } from "@/components/storefront/HealthTemplateBlocks";
 import { TShirtsPrintsHeader, TShirtsPrintsFooter } from "@/components/storefront/TShirtsPrintsStoreChrome";
+import { PerfumesHeader, PerfumesFooter } from "@/components/storefront/PerfumesStoreChrome";
+import { PerfumesStoreContext } from "@/components/storefront/PerfumesTemplateBlocks";
+import { PERFUMES_REVIEWS_PAGE_BLOCKS } from "@/lib/templates/presets/perfumes-page-presets";
 
 interface ReviewProduct {
   name: string;
@@ -67,9 +71,12 @@ export default function StoreReviewsPage() {
   const [ratingFilter, setRatingFilter] = useState<number | null>(null);
   const [error, setError] = useState("");
   const [themeData, setThemeData] = useState<ThemeData | null>(null);
+  const [pageData, setPageData] = useState<any>(null);
+  const [storeData, setStoreData] = useState<any>(null);
   const isKidsTemplate = slug === "kids";
   const isHealthTemplate = slug === "pills" || store?.slug === "pills" || store?.name?.toLowerCase().includes("pill") || store?.name?.toLowerCase().includes("supplement") || store?.name?.toLowerCase().includes("health");
   const isTShirtsPrintsTemplate = slug === "huty" || store?.slug === "huty" || store?.name?.toLowerCase().includes("t-shirts") || store?.name?.toLowerCase().includes("prints");
+  const isPerfumesTemplate = store?.slug === "perfumes" || store?.name?.toLowerCase().includes("perfumes");
 
   const fetchReviews = useCallback(async (p: number, rating: number | null, append: boolean) => {
     if (p === 1) setLoading(true);
@@ -102,14 +109,17 @@ export default function StoreReviewsPage() {
 
   // Fetch store info and customization
   useEffect(() => {
-    fetch(`/api/storefront/${slug}`)
-      .then((r) => r.json())
-      .then((res) => {
-        if (res.success) {
-          const s = res.data.store;
+    Promise.all([
+      fetch(`/api/storefront/${slug}`).then(r => r.json()),
+      fetch(`/api/storefront/${slug}/pages/reviews`).then(r => r.json().catch(() => ({ success: false })))
+    ])
+      .then(([storeRes, pageRes]) => {
+        if (storeRes.success) {
+          const s = storeRes.data.store;
           setStore({ id: s.id, name: s.name, slug: s.slug, logo: s.logo });
+          setStoreData(storeRes.data);
           // Set theme data from customization
-          const customization = res.data.customization;
+          const customization = storeRes.data.customization;
           if (customization?.themeSettings) {
             setThemeData({
               id: "default",
@@ -131,19 +141,9 @@ export default function StoreReviewsPage() {
               },
             });
           }
-          // Auto-create Reviews page if needed
-          fetch(`/api/storefront/${slug}/pages`)
-            .then((r) => r.json())
-            .then((pagesRes) => {
-              if (pagesRes.success && pagesRes.data) {
-                const reviewsPage = pagesRes.data.pages?.find((p: any) => p.slug === "reviews");
-                if (!reviewsPage && s.id) {
-                  // Page doesn't exist, would need server-side creation
-                  console.log("Reviews page needs to be created server-side");
-                }
-              }
-            })
-            .catch(() => {});
+          if (pageRes?.success && pageRes?.data) {
+            setPageData(pageRes.data);
+          }
         }
       })
       .catch(() => {});
@@ -190,8 +190,36 @@ export default function StoreReviewsPage() {
     { label: "1 Star", value: 1 },
   ];
 
+  // ─── PERFUMES REVIEWS ───
+  const activeTemplateSlug = storeData?.store?.templates?.[0]?.template?.slug || null;
+  const isPerfumesTemplate = activeTemplateSlug === "perfumes" || slug === "perfumes" || store?.slug === "perfumes" || store?.name?.toLowerCase().includes("perfumes");
+  
+  if (isPerfumesTemplate) {
+    const socialLinksArray = Object.entries(storeData?.socialLinks || {}).filter(([, url]: any) => url).map(([p, u]: any) => ({ platform: p, url: u as string }));
+    const ctxValue = {
+      products: storeData?.products || [],
+      blogs: storeData?.blogs || [],
+      currency: storeData?.store?.currency || "USD",
+      storeSlug: slug,
+      socialLinks: socialLinksArray,
+    };
+    const blocks = pageData?.content?.blocks && pageData.content.blocks.length > 0 
+      ? pageData.content.blocks 
+      : PERFUMES_REVIEWS_PAGE_BLOCKS;
+
+    return (
+      <div style={{ minHeight: "100vh", background: "#fff" }}>
+        <PerfumesHeader storeName={store?.name || "Store"} storeSlug={slug} logo={store?.logo} />
+        <PerfumesStoreContext.Provider value={ctxValue}>
+          <RenderTemplateBlocks blocks={blocks} />
+        </PerfumesStoreContext.Provider>
+        <PerfumesFooter storeName={store?.name || "Store"} storeSlug={slug} logo={store?.logo} description={storeData?.store?.description} socialLinks={socialLinksArray} />
+      </div>
+    );
+  }
+
   // ─── RETAIL REVIEWS ───
-  const isRetailTemplate = store?.templateSlug === "retail" || (store as any)?.templates?.[0]?.template?.slug === "retail";
+  const isRetailTemplate = activeTemplateSlug === "retail" || (storeData?.store as any)?.templates?.[0]?.template?.slug === "retail";
   if (isRetailTemplate) {
     return (
       <div className="min-h-screen bg-white">

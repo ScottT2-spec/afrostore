@@ -477,6 +477,11 @@ export default function StorePage() {
       { label: "About", href: `/store/${slug}/about` },
       { label: "Contact", href: `/store/${slug}/contact` },
     ];
+    // Use block-based rendering for vegetables home page to enable editor persistence
+    const homeBlocks = homePage?.content && typeof homePage.content === "object" && "blocks" in homePage.content
+      ? (homePage.content as { blocks: unknown[] }).blocks
+      : [];
+
     return (
       <ThemeProvider theme={resolvedTheme}>
         <div className="min-h-screen bg-[#fffdf7] text-[#243226]">
@@ -489,7 +494,11 @@ export default function StorePage() {
           />
 
           <main style={buildPageBackgroundStyle(homePageSettings)}>
-            <VegetableHomePage storeName={store.name} storeSlug={slug} currency={currency} socialLinks={socialLinksArray} />
+            {homeBlocks.length > 0 ? (
+              <RenderTemplateBlocks blocks={homeBlocks as TemplateBlock[]} />
+            ) : (
+              <VegetableHomePage storeName={store.name} storeSlug={slug} currency={currency} socialLinks={socialLinksArray} />
+            )}
           </main>
 
           {!isLanding && products.length > 0 && !homeHasProductGrid && (

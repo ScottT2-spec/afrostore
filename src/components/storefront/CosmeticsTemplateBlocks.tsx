@@ -129,9 +129,11 @@ export interface CosmeticsHeroSliderProps {
   slides: CosmeticsHeroSlide[];
   autoplaySpeed?: number;
   minHeight?: string;
+  resolvedStyles?: React.CSSProperties;
+  resolvedClasses?: string;
 }
 
-export function CosmeticsHeroSlider({ slides, autoplaySpeed = 5000, minHeight = "560px" }: CosmeticsHeroSliderProps) {
+export function CosmeticsHeroSlider({ slides, autoplaySpeed = 5000, minHeight = "560px", resolvedStyles, resolvedClasses }: CosmeticsHeroSliderProps) {
   const storeCtx = useContext(CosmeticsStoreContext);
   const fixLink = (link: string) => resolveStoreLink(link, storeCtx?.storeSlug);
   const [current, setCurrent] = useState(0);
@@ -152,6 +154,12 @@ export function CosmeticsHeroSlider({ slides, autoplaySpeed = 5000, minHeight = 
     }, autoplaySpeed);
     return () => { if (timerRef.current) clearInterval(timerRef.current); };
   }, [slides.length, autoplaySpeed]);
+
+  // Merge resolved styles with default minHeight
+  const rootStyle: React.CSSProperties = {
+    minHeight,
+    ...resolvedStyles,
+  };
 
   const scopedCss = `
     .ch-slider { position: relative; width: 100%; overflow: hidden; background: #f5f0eb; }
@@ -222,7 +230,7 @@ export function CosmeticsHeroSlider({ slides, autoplaySpeed = 5000, minHeight = 
   `;
 
   return (
-    <div className="ch-slider" style={{ minHeight }}>
+    <div className={`ch-slider ${resolvedClasses || ''}`} style={rootStyle}>
       <ScopedStyles id="hero-slider" css={scopedCss} />
       {slides.map((slide, i) => {
         const scheme = slide.colorScheme || "dark";
@@ -431,11 +439,19 @@ export interface CosmeticsProductGridProps {
   maxProducts?: number;
   filter?: "featured" | "bestseller" | "new-arrival" | "sale" | "all";
   filterTag?: string;
+  resolvedStyles?: React.CSSProperties;
+  resolvedClasses?: string;
 }
 
-export function CosmeticsProductGrid({ products: propProducts, columns = 4, showCategory = true, showHoverImage = true, sectionTitle, marginBottom = "60px", maxProducts = 8, filter, filterTag }: CosmeticsProductGridProps) {
+export function CosmeticsProductGrid({ products: propProducts, columns = 4, showCategory = true, showHoverImage = true, sectionTitle, marginBottom = "60px", maxProducts = 8, filter, filterTag, resolvedStyles, resolvedClasses }: CosmeticsProductGridProps) {
   const storeCtx = useContext(CosmeticsStoreContext);
   const [, setCompareState] = useState(false);
+
+  // Merge resolved styles with default marginBottom
+  const rootStyle: React.CSSProperties = {
+    marginBottom,
+    ...resolvedStyles,
+  };
 
   const products: CosmeticsProduct[] = (() => {
     if (!storeCtx || !storeCtx.products || storeCtx.products.length === 0) return propProducts || [];
@@ -550,7 +566,7 @@ export function CosmeticsProductGrid({ products: propProducts, columns = 4, show
 
   if (products.length === 0) {
     return (
-      <div className="cpg-section" style={containerStyle}>
+      <div className={`cpg-section ${resolvedClasses || ''}`} style={rootStyle}>
         <ScopedStyles id="product-grid" css={scopedCss} />
         {sectionTitle && (
           <CosmeticsSectionTitle subtitle={sectionTitle.subtitle} title={sectionTitle.title} description={sectionTitle.description} buttonText={sectionTitle.buttonText} buttonLink={sectionTitle.buttonLink} />
@@ -563,7 +579,7 @@ export function CosmeticsProductGrid({ products: propProducts, columns = 4, show
   }
 
   return (
-    <div className="cpg-section" style={containerStyle}>
+    <div className={`cpg-section ${resolvedClasses || ''}`} style={rootStyle}>
       <ScopedStyles id="product-grid" css={scopedCss} />
       {sectionTitle && (
         <CosmeticsSectionTitle subtitle={sectionTitle.subtitle} title={sectionTitle.title} description={sectionTitle.description} buttonText={sectionTitle.buttonText} buttonLink={sectionTitle.buttonLink} />
@@ -1226,6 +1242,8 @@ export interface CosmeticsNewsletterProps {
   description?: string;
   buttonText?: string;
   onSubmit?: (email: string) => void;
+  resolvedStyles?: React.CSSProperties;
+  resolvedClasses?: string;
 }
 
 export function CosmeticsNewsletter({
@@ -1235,6 +1253,8 @@ export function CosmeticsNewsletter({
   description = "Get the latest updates on new products and upcoming sales.",
   buttonText = "Sign up",
   onSubmit,
+  resolvedStyles,
+  resolvedClasses,
 }: CosmeticsNewsletterProps) {
   const [email, setEmail] = useState("");
   const storeCtx = useContext(CosmeticsStoreContext);
@@ -1244,6 +1264,12 @@ export function CosmeticsNewsletter({
     e.preventDefault();
     if (onSubmit) { onSubmit(email); setEmail(""); return; }
     subscribe(email).then(() => setEmail(""));
+  };
+
+  // Merge resolved styles with default background image
+  const rootStyle: React.CSSProperties = {
+    backgroundImage: `url(${backgroundImage})`,
+    ...resolvedStyles,
   };
 
   const scopedCss = `
@@ -1292,7 +1318,7 @@ export function CosmeticsNewsletter({
   `;
 
   return (
-    <div className="cn-section" style={{ backgroundImage: `url(${backgroundImage})` }}>
+    <div className={`cn-section ${resolvedClasses || ''}`} style={rootStyle}>
       <ScopedStyles id="newsletter" css={scopedCss} />
       <div className="cn-overlay" />
       <div className="cn-content">

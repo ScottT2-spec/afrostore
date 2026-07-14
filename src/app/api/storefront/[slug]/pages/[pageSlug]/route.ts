@@ -5,6 +5,7 @@ import { buildThemeDataWithCustomization, loadSiteCustomizationSafely } from "@/
 import { mergeStoredTemplatePages } from "@/lib/templates/site-instance";
 import { ensurePerfumePages } from "@/lib/templates/perfume-pages";
 import { ensureVegetablePages } from "@/lib/templates/vegetable-pages";
+import { ensureTemplatePages } from "@/lib/templates/template-pages";
 import type { PageType, Prisma } from "@/generated/prisma";
 
 type Params = { params: Promise<{ slug: string; pageSlug: string }> };
@@ -67,6 +68,9 @@ function buildCosmeticsSyntheticPage(pageSlug: string): {
   metaDescription: string;
 } | null {
   const cosmeticsPages: Record<string, { title: string; type: PageType; metaDescription: string }> = {
+    "home": { title: "Home", type: "HOME" as PageType, metaDescription: "Welcome to our cosmetics store" },
+    "shop": { title: "Shop", type: "SHOP" as PageType, metaDescription: "Browse our cosmetics collection" },
+    "blog": { title: "Blog", type: "BLOG" as PageType, metaDescription: "Latest beauty tips and trends" },
     "bestseller": { title: "Bestsellers", type: "CUSTOM" as PageType, metaDescription: "Our most loved cosmetics products" },
     "new-in": { title: "New Arrivals", type: "CUSTOM" as PageType, metaDescription: "Just arrived cosmetics and beauty products" },
     "skincare": { title: "Skincare", type: "CUSTOM" as PageType, metaDescription: "Premium skincare collection" },
@@ -162,6 +166,11 @@ export async function GET(_req: NextRequest, { params }: Params) {
 
     if (activeTemplate?.template?.slug === "perfumes") {
       await ensurePerfumePages(site.id);
+    }
+
+    // Ensure template-specific pages exist for all bespoke templates
+    if (activeTemplate?.template?.slug) {
+      await ensureTemplatePages(site.id, activeTemplate.template.slug);
     }
 
     const [

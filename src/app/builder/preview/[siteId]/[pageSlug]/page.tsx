@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import { useParams } from "next/navigation";
 import Link from "next/link";
 import { RenderBlocks, type BuilderBlock } from "@/components/storefront/BlockRenderer";
+import { resolveSectionStyleOverrides } from "@/components/storefront/block-style";
 import { PerfumesHeader, PerfumesFooter, PerfumesFontLoader } from "@/components/storefront/PerfumesTemplateBlocks";
 import { KidsHeader, KidsFooterFull, KidsFontLoader } from "@/components/storefront/KidsTemplateBlocks";
 import { HandmadeBagsHeader, HandmadeBagsFooter } from "@/components/storefront/HandmadeBagsStoreChrome";
@@ -33,6 +34,7 @@ export default function BuilderPreviewPage() {
   const [error, setError] = useState("");
   const [productData, setProductData] = useState<any>(null);
   const [blogData, setBlogData] = useState<any>(null);
+  const [globalDesignSystem, setGlobalDesignSystem] = useState<any>(null);
 
   useEffect(() => {
     async function loadStore() {
@@ -51,13 +53,43 @@ export default function BuilderPreviewPage() {
         
         // Load the actual storefront data using the public API with the resolved slug
         const res = await fetch(`/api/storefront/${siteSlug}/pages/${pageSlug}`);
-        const json = await res.json();
+        
+        if (!res.ok) {
+          console.error(`Failed to fetch page data: ${res.status} ${res.statusText}`);
+          // Fallback: use site data directly if page API fails
+          setStoreData({
+            store: siteJson.data,
+            page: {
+              id: 'fallback',
+              slug: pageSlug,
+              title: pageSlug,
+              content: { blocks: [] },
+            },
+            templateSlug: siteJson.data.template?.slug || 'default',
+            products: [],
+            categories: [],
+          });
+          setBlocks([]);
+          setLoading(false);
+          return;
+        }
+        
+        let json;
+        try {
+          json = await res.json();
+        } catch (parseError) {
+          console.error("Failed to parse JSON response:", parseError);
+          setError("Invalid response from server");
+          setLoading(false);
+          return;
+        }
         
         if (json.success && json.data) {
           setStoreData(json.data);
           const pageBlocks = (json.data.page.content?.blocks || []) as BuilderBlock[];
           setBlocks(pageBlocks);
         } else {
+          console.error("API returned error:", json.error);
           setError(json.error || "Page not found");
         }
       } catch (error) {
@@ -79,18 +111,30 @@ export default function BuilderPreviewPage() {
     
     if (templateSlug === 'cosmetics' && pageSlug === 'shop') {
       fetch(`/api/storefront/${storeSlug}`)
-        .then(res => res.json())
+        .then(res => {
+          if (!res.ok) {
+            console.error('Failed to fetch product data:', res.status);
+            return null;
+          }
+          return res.json();
+        })
         .then(json => {
-          if (json.success) setProductData(json.data);
+          if (json?.success) setProductData(json.data);
         })
         .catch(err => console.error('Failed to fetch product data:', err));
     }
     
     if (templateSlug === 'cosmetics' && pageSlug === 'blog') {
-      fetch(`/api/storefront/${storeSlug}/blog`)
-        .then(res => res.json())
+      fetch(`/api/storefront/${storeSlug}/blogs`)
+        .then(res => {
+          if (!res.ok) {
+            console.error('Failed to fetch blog data:', res.status);
+            return null;
+          }
+          return res.json();
+        })
         .then(json => {
-          if (json.success) setBlogData(json.data);
+          if (json?.success) setBlogData(json.data);
         })
         .catch(err => console.error('Failed to fetch blog data:', err));
     }
@@ -125,10 +169,13 @@ export default function BuilderPreviewPage() {
         // Handle theme updates from editor
         console.log("Theme update received:", event.data);
         
-        // Apply theme CSS variables to the document
+        // Store global design system for merging with block overrides
         const { theme } = event.data;
+        setGlobalDesignSystem(theme?.designSystem);
+        
+        // Apply theme CSS variables to the document
         const root = document.documentElement;
-        const colors = theme.designSystem.colors;
+        const colors = theme?.designSystem?.colors;
         
         console.log("About to set CSS variables. colors object:", colors);
         
@@ -406,108 +453,72 @@ export default function BuilderPreviewPage() {
   const wrapBlockForEditor = (block: BuilderBlock, content: React.ReactNode, index: number) => {
     // Extract style overrides from block props
     const props = block.props as Record<string, unknown>;
-    const wrapperStyle: React.CSSProperties = {
-      outline: '2px solid transparent',
-      transition: 'outline 0.15s ease',
-    };
-
-    // Build CSS for this specific block to override component styles
-    let blockCss = '';
-    // The DOM structure is: <div key={block.id}> <div data-block-id={block.id}> {content} </div> </div>
-    // So we need to target the direct child of the data-block-id element
-    const blockSelector = `[data-block-id="${block.id}"] > *`;
     
     console.log(`[wrapBlockForEditor] Block ${block.id} (${block.type}) props:`, props);
     
-    // Helper function to validate CSS value
-    const isValidCssValue = (value: unknown): boolean => {
-      if (value === undefined || value === null || value === '') return false;
-      const str = String(value).trim();
-      if (str === '') return false;
-      // Check for obviously invalid patterns like trailing commas
-      if (str.endsWith(',')) return false;
-      // Check for unitless numeric values that need units (except 0)
-      if (/^\d+$/.test(str) && str !== '0') return false;
-      return true;
+    // Convert global design system to BlockStyleSettings format for merging
+    const globalDefaults = globalDesignSystem ? {
+      backgroundColor: globalDesignSystem.colors?.background,
+      textColor: globalDesignSystem.colors?.text,
+      fontFamily: globalDesignSystem.fonts?.body,
+      borderRadius: globalDesignSystem.borderRadius,
+    } : undefined;
+    
+    // Resolve styles using the universal resolver
+    const { styles, classes, overlayStyles, hoverCss } = resolveSectionStyleOverrides(
+      props as Record<string, unknown>,
+      block.type,
+      globalDefaults
+    );
+    
+    console.log(`[wrapBlockForEditor] Resolved styles for block ${block.id}:`, { styles, classes, overlayStyles, hoverCss });
+
+    // Final wrapper style combining editor outline with resolved styles
+    const finalWrapperStyle: React.CSSProperties = {
+      outline: '2px solid transparent',
+      transition: 'outline 0.15s ease',
+      ...styles,
+    };
+
+    console.log(`[wrapBlockForEditor] Final <div style={...}> props for block ${block.id}:`, finalWrapperStyle);
+
+    // Generate high-specificity CSS for hover effects and complex rules
+    let dynamicCss = '';
+    
+    // Add hover CSS with block-specific selector
+    if (hoverCss) {
+      dynamicCss += `[data-block-id="${block.id}"]:hover { ${hoverCss} } `;
+    }
+
+    // Generate CSS to override internal block component styles with !important
+    // This ensures resolved styles win over hardcoded inline styles in template blocks
+    const internalBlockSelector = `[data-block-id="${block.id}"] > .relative.z-10 > *`;
+    let overrideCss = '';
+    
+    // Helper to convert CSSProperties to CSS string with !important
+    const styleToCss = (styleObj: React.CSSProperties) => {
+      return Object.entries(styleObj).map(([key, value]) => {
+        if (!value) return '';
+        const cssKey = key.replace(/([A-Z])/g, '-$1').toLowerCase();
+        return `${cssKey}: ${value} !important; `;
+      }).join('');
     };
     
-    // Helper function to ensure unit for numeric values
-    const ensureUnit = (value: unknown, defaultUnit: string = 'px'): string => {
-      const str = String(value).trim();
-      if (!isValidCssValue(value)) return '';
-      // If it's just a number (not 0), add the default unit
-      if (/^\d+$/.test(str) && str !== '0') {
-        return str + defaultUnit;
-      }
-      return str;
-    };
-    
-    if (isValidCssValue(props.paddingY)) {
-      const val = ensureUnit(props.paddingY, 'rem');
-      if (val) blockCss += `padding-top: ${val}; padding-bottom: ${val}; `;
-    }
-    if (isValidCssValue(props.paddingTop)) {
-      const val = ensureUnit(props.paddingTop, 'rem');
-      if (val) blockCss += `padding-top: ${val}; `;
-    }
-    if (isValidCssValue(props.paddingBottom)) {
-      const val = ensureUnit(props.paddingBottom, 'rem');
-      if (val) blockCss += `padding-bottom: ${val}; `;
-    }
-    if (isValidCssValue(props.paddingLeft)) {
-      const val = ensureUnit(props.paddingLeft, 'rem');
-      if (val) blockCss += `padding-left: ${val}; `;
-    }
-    if (isValidCssValue(props.paddingRight)) {
-      const val = ensureUnit(props.paddingRight, 'rem');
-      if (val) blockCss += `padding-right: ${val}; `;
-    }
-    if (isValidCssValue(props.marginTop)) {
-      const val = ensureUnit(props.marginTop, 'rem');
-      if (val) blockCss += `margin-top: ${val}; `;
-    }
-    if (isValidCssValue(props.marginBottom)) {
-      const val = ensureUnit(props.marginBottom, 'rem');
-      if (val) blockCss += `margin-bottom: ${val}; `;
-    }
-    if (isValidCssValue(props.marginLeft)) {
-      const val = ensureUnit(props.marginLeft, 'rem');
-      if (val) blockCss += `margin-left: ${val}; `;
-    }
-    if (isValidCssValue(props.marginRight)) {
-      const val = ensureUnit(props.marginRight, 'rem');
-      if (val) blockCss += `margin-right: ${val}; `;
-    }
-    if (isValidCssValue(props.backgroundColor)) blockCss += `background-color: ${props.backgroundColor} !important; `;
-    if (isValidCssValue(props.backgroundImage)) blockCss += `background-image: url(${props.backgroundImage}) !important; background-size: cover !important; background-position: center !important; background-repeat: no-repeat !important; `;
-    if (isValidCssValue(props.borderStyle)) blockCss += `border-style: ${props.borderStyle}; `;
-    if (isValidCssValue(props.borderWidth)) {
-      const val = ensureUnit(props.borderWidth, 'px');
-      if (val) blockCss += `border-width: ${val}; `;
-    }
-    if (isValidCssValue(props.borderColor)) blockCss += `border-color: ${props.borderColor}; `;
-    if (isValidCssValue(props.borderRadius)) {
-      const val = ensureUnit(props.borderRadius, 'px');
-      if (val) blockCss += `border-radius: ${val}; `;
-    }
-    if (isValidCssValue(props.boxShadow)) blockCss += `box-shadow: ${props.boxShadow}; `;
-    
-    if (blockCss) {
-      console.log(`[wrapBlockForEditor] Injecting CSS for block ${block.id}:`, blockSelector, blockCss);
-    }
+    // Apply ALL resolved styles to internal block elements to override hardcoded styles
+    overrideCss += `${internalBlockSelector} { ${styleToCss(styles)} } `;
 
     return (
       <>
-        {/* Inject block-specific styles */}
-        {blockCss && (
-          <style dangerouslySetInnerHTML={{ __html: `${blockSelector} { ${blockCss} }` }} />
+        {/* Inject dynamic CSS for hover effects and style overrides */}
+        {(dynamicCss || overrideCss) && (
+          <style dangerouslySetInnerHTML={{ __html: dynamicCss + overrideCss }} />
         )}
         <div
           key={block.id}
           data-block-id={block.id}
           data-block-type={block.type}
           data-block-index={index}
-          className="relative group/block builder-block-wrapper"
+          className={`relative group/block builder-block-wrapper ${classes}`}
           onClick={(e) => {
             e.preventDefault();
             e.stopPropagation();
@@ -519,7 +530,7 @@ export default function BuilderPreviewPage() {
               blockProps: block.props,
             }, '*');
           }}
-          style={wrapperStyle}
+          style={finalWrapperStyle}
           onMouseEnter={(e) => {
             (e.currentTarget as HTMLElement).style.outline = '2px solid #3b82f6';
           }}
@@ -527,9 +538,21 @@ export default function BuilderPreviewPage() {
             (e.currentTarget as HTMLElement).style.outline = '2px solid transparent';
           }}
         >
-          {content}
+          {/* Background overlay if needed */}
+          {overlayStyles && (
+            <div 
+              className="absolute inset-0 z-0 pointer-events-none" 
+              style={overlayStyles}
+            />
+          )}
+          
+          {/* Block content */}
+          <div className="relative z-10">
+            {content}
+          </div>
+          
           {/* Block label overlay on hover */}
-          <div className="absolute top-2 right-2 bg-blue-600 text-white text-xs px-2 py-1 rounded opacity-0 group-hover/block:opacity-100 transition-opacity pointer-events-none z-10">
+          <div className="absolute top-2 right-2 bg-blue-600 text-white text-xs px-2 py-1 rounded opacity-0 group-hover/block:opacity-100 transition-opacity pointer-events-none z-20">
             {block.type}
           </div>
         </div>

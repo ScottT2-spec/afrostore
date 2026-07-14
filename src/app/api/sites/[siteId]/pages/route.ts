@@ -6,6 +6,7 @@ import { unauthorized } from "@/lib/auth";
 import { getLinkedPageTemplate } from "@/lib/page-content";
 import { mergeStoredTemplatePages } from "@/lib/templates/site-instance";
 import { ensureVegetablePages } from "@/lib/templates/vegetable-pages";
+import { ensureTemplatePages } from "@/lib/templates/template-pages";
 import { mergeBespokeTemplateBlocks } from "@/lib/templates/bespoke-page-content";
 import type { Prisma } from "@/generated/prisma";
 
@@ -44,6 +45,11 @@ export async function GET(req: NextRequest, { params }: Params) {
 
   if (activeTemplate?.template?.slug === "vegetables") {
     await ensureVegetablePages(siteId);
+  }
+
+  // Ensure template-specific pages exist for all bespoke templates
+  if (activeTemplate?.template?.slug) {
+    await ensureTemplatePages(siteId, activeTemplate.template.slug);
   }
 
   const [pages, total] = await Promise.all([

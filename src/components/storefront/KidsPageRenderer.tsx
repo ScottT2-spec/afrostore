@@ -21,37 +21,7 @@ export interface KidsSection {
   type: string;
   order: number;
   props: Record<string, any>;
-  styleOverrides?: {
-    backgroundType?: 'color' | 'gradient' | 'image';
-    backgroundColor?: string;
-    backgroundGradient?: string;
-    backgroundImage?: string;
-    backgroundOverlay?: string;
-    textColor?: string;
-    paddingTop?: string;
-    paddingBottom?: string;
-    paddingLeft?: string;
-    paddingRight?: string;
-    paddingY?: string;
-    marginTop?: string;
-    marginBottom?: string;
-    marginLeft?: string;
-    marginRight?: string;
-    borderColor?: string;
-    borderWidth?: string;
-    borderStyle?: string;
-    borderRadius?: string;
-    boxShadow?: string;
-    transitionDuration?: string;
-    hoverScale?: string;
-    hoverOpacity?: string;
-    hoverShadow?: string;
-    responsiveVisibility?: {
-      desktop?: boolean;
-      tablet?: boolean;
-      mobile?: boolean;
-    };
-  };
+  styleOverrides?: Record<string, unknown>;
 }
 
 interface KidsPageRendererProps {
@@ -81,86 +51,30 @@ export const KidsPageRenderer: React.FC<KidsPageRendererProps> = ({
 }) => {
   const [contextMenu, setContextMenu] = useState<{ x: number; y: number; sectionId: string } | null>(null);
 
-  // Compile section style properties
+  // Use the new universal style resolver
+  const { resolveSectionStyleOverrides } = require("@/components/storefront/block-style");
+
+  // Compile section style properties using the new resolver
   const getSectionStyles = (sec: KidsSection): React.CSSProperties => {
-    const overrides = sec.styleOverrides;
-    if (!overrides) return {};
+    const { styles } = resolveSectionStyleOverrides(sec.styleOverrides, sec.type);
+    return styles;
+  };
 
-    const s: React.CSSProperties = {};
+  // Get responsive visibility classes
+  const getSectionClasses = (sec: KidsSection): string => {
+    const { classes } = resolveSectionStyleOverrides(sec.styleOverrides, sec.type);
+    return classes;
+  };
 
-    // Background type settings
-    if (overrides.backgroundType === 'color' && overrides.backgroundColor) {
-      s.backgroundColor = overrides.backgroundColor;
-    } else if (overrides.backgroundType === 'gradient' && overrides.backgroundGradient) {
-      s.background = overrides.backgroundGradient;
-    } else if (overrides.backgroundType === 'image' && overrides.backgroundImage) {
-      s.backgroundImage = `url(${overrides.backgroundImage})`;
-      s.backgroundSize = 'cover';
-      s.backgroundPosition = 'center';
-    } else if (overrides.backgroundColor) {
-      s.backgroundColor = overrides.backgroundColor;
-    }
+  // Get background overlay styles
+  const getSectionOverlayStyles = (sec: KidsSection): React.CSSProperties | null => {
+    const { overlayStyles } = resolveSectionStyleOverrides(sec.styleOverrides, sec.type);
+    return overlayStyles;
+  };
 
-    if (overrides.textColor) {
-      s.color = overrides.textColor;
-    }
-
-    // Advanced paddings
-    if (overrides.paddingTop) s.paddingTop = overrides.paddingTop;
-    if (overrides.paddingBottom) s.paddingBottom = overrides.paddingBottom;
-    if (overrides.paddingLeft) s.paddingLeft = overrides.paddingLeft;
-    if (overrides.paddingRight) s.paddingRight = overrides.paddingRight;
-
-    // Fallback standard spacing if individual directions are not defined
-    if (!overrides.paddingTop && !overrides.paddingBottom && overrides.paddingY) {
-      s.paddingTop = overrides.paddingY;
-      s.paddingBottom = overrides.paddingY;
-    }
-
-    // Advanced margins
-    if (overrides.marginTop) s.marginTop = overrides.marginTop;
-    if (overrides.marginBottom) s.marginBottom = overrides.marginBottom;
-    if (overrides.marginLeft) s.marginLeft = overrides.marginLeft;
-    if (overrides.marginRight) s.marginRight = overrides.marginRight;
-
-    // Borders
-    if (overrides.borderColor) s.borderColor = overrides.borderColor;
-    if (overrides.borderWidth) s.borderWidth = overrides.borderWidth;
-    if (overrides.borderStyle) s.borderStyle = overrides.borderStyle;
-    if (overrides.borderRadius) {
-      switch (overrides.borderRadius) {
-        case 'none': s.borderRadius = '0px'; break;
-        case 'sm': s.borderRadius = '0.125rem'; break;
-        case 'md': s.borderRadius = '0.375rem'; break;
-        case 'lg': s.borderRadius = '0.5rem'; break;
-        case 'xl': s.borderRadius = '0.75rem'; break;
-        case '2xl': s.borderRadius = '1rem'; break;
-        case '3xl': s.borderRadius = '1.5rem'; break;
-        case 'full': s.borderRadius = '9999px'; break;
-        default: s.borderRadius = overrides.borderRadius;
-      }
-    }
-
-    // Shadow
-    if (overrides.boxShadow) {
-      switch (overrides.boxShadow) {
-        case 'none': s.boxShadow = 'none'; break;
-        case 'sm': s.boxShadow = '0 1px 2px 0 rgba(0, 0, 0, 0.05)'; break;
-        case 'md': s.boxShadow = '0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06)'; break;
-        case 'lg': s.boxShadow = '0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05)'; break;
-        case 'xl': s.boxShadow = '0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04)'; break;
-        case '2xl': s.boxShadow = '0 25px 50px -12px rgba(0, 0, 0, 0.25)'; break;
-        default: s.boxShadow = overrides.boxShadow;
-      }
-    }
-
-    // Manual transitions
-    if (overrides.transitionDuration) {
-      s.transitionDuration = overrides.transitionDuration;
-      s.transitionProperty = 'all';
-    }
-
-    return s;
+  // Helper to safely get style override values
+  const getOverride = <T,>(overrides: Record<string, unknown> | undefined, key: string, defaultValue: T): T => {
+    return (overrides?.[key] as T) ?? defaultValue;
   };
 
   // Render individual block based on type
@@ -200,31 +114,27 @@ export const KidsPageRenderer: React.FC<KidsPageRendererProps> = ({
             const isSelected = selectedSectionId === sec.id;
             const overrides = sec.styleOverrides || {};
             const sectionStyles = getSectionStyles(sec);
-
-            // Responsive Visibility Classes
-            const hideDesktop = overrides.responsiveVisibility?.desktop === false;
-            const hideTablet = overrides.responsiveVisibility?.tablet === false;
-            const hideMobile = overrides.responsiveVisibility?.mobile === false;
-
-            const visibilityClass = `
-              ${hideDesktop ? 'lg:hidden' : ''}
-              ${hideTablet ? 'md:max-lg:hidden' : ''}
-              ${hideMobile ? 'max-md:hidden' : ''}
-            `.trim().replace(/\s+/g, ' ');
+            const sectionClasses = getSectionClasses(sec);
+            const overlayStyles = getSectionOverlayStyles(sec);
 
             // Hover effects mapping
-            const isHoverEnabled = overrides.hoverScale || overrides.hoverOpacity || overrides.hoverShadow;
+            const hoverScale = getOverride<string>(overrides, 'hoverScale', '');
+            const hoverOpacity = getOverride<string>(overrides, 'hoverOpacity', '');
+            const hoverShadow = getOverride<string>(overrides, 'hoverShadow', '');
+            const transitionDuration = getOverride<string>(overrides, 'transitionDuration', '');
+            
+            const isHoverEnabled = hoverScale || hoverOpacity || hoverShadow;
             const motionProps = isHoverEnabled && mode === 'edit' ? {
               whileHover: {
-                scale: overrides.hoverScale ? parseFloat(overrides.hoverScale) : 1,
-                opacity: overrides.hoverOpacity ? parseFloat(overrides.hoverOpacity) : 1,
-                boxShadow: overrides.hoverShadow === 'sm' ? '0 1px 2px rgba(0,0,0,0.05)' :
-                           overrides.hoverShadow === 'md' ? '0 4px 6px rgba(0,0,0,0.1)' :
-                           overrides.hoverShadow === 'lg' ? '0 10px 15px rgba(0,0,0,0.1)' :
-                           overrides.hoverShadow === 'xl' ? '0 20px 25px rgba(0,0,0,0.1)' : undefined
+                scale: hoverScale ? parseFloat(hoverScale) : 1,
+                opacity: hoverOpacity ? parseFloat(hoverOpacity) : 1,
+                boxShadow: hoverShadow === 'sm' ? '0 1px 2px rgba(0,0,0,0.05)' :
+                           hoverShadow === 'md' ? '0 4px 6px rgba(0,0,0,0.1)' :
+                           hoverShadow === 'lg' ? '0 10px 15px rgba(0,0,0,0.1)' :
+                           hoverShadow === 'xl' ? '0 20px 25px rgba(0,0,0,0.1)' : undefined
               },
               transition: {
-                duration: overrides.transitionDuration ? parseFloat(overrides.transitionDuration) / 1000 : 0.2
+                duration: transitionDuration ? parseFloat(transitionDuration) / 1000 : 0.2
               }
             } : {};
             
@@ -251,7 +161,7 @@ export const KidsPageRenderer: React.FC<KidsPageRendererProps> = ({
                     });
                   }
                 }}
-                className={`relative group transition-all duration-200 ${visibilityClass} ${
+                className={`relative group transition-all duration-200 ${sectionClasses} ${
                   mode === 'edit' ? 'cursor-pointer hover:ring-2 hover:ring-indigo-500 hover:ring-offset-1' : ''
                 } ${isSelected && mode === 'edit' ? 'ring-2 ring-indigo-600 ring-offset-2 z-10' : ''}`}
               >
@@ -264,10 +174,10 @@ export const KidsPageRenderer: React.FC<KidsPageRendererProps> = ({
                 )}
 
                 {/* Background overlay div if requested */}
-                {overrides.backgroundOverlay && (
+                {overlayStyles && (
                   <div 
                     className="absolute inset-0 z-0 pointer-events-none" 
-                    style={{ backgroundColor: overrides.backgroundOverlay }}
+                    style={overlayStyles}
                   />
                 )}
 

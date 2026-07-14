@@ -4,6 +4,14 @@ import { useState } from "react";
 import { X, Settings, Sliders, Copy, Trash2, Sparkles } from "lucide-react";
 import { Section, SectionStyleOverrides } from "@/types";
 import ImageField from "./ImageField";
+import { 
+  CONTROL_DEFINITIONS, 
+  getControlsByCategory, 
+  getControlCategories,
+  type ControlCategory 
+} from "@/lib/builder/control-registry";
+import { getBlockSchema } from "@/lib/builder/block-style-schema";
+import { FONTS_BY_CATEGORY } from "@/lib/constants/fonts";
 
 interface RightSidebarProps {
   selectedSection: Section | null;
@@ -46,6 +54,7 @@ export default function RightSidebar({
   }
 
   const updateStyleOverride = (key: keyof SectionStyleOverrides, value: any) => {
+    console.log('[RightSidebar updateStyleOverride] CALLED:', { key, value, sectionId: selectedSection?.id });
     onSectionUpdate({
       ...selectedSection,
       styleOverrides: {
@@ -153,6 +162,7 @@ export default function RightSidebar({
           <AdvancedTab
             styleOverrides={selectedSection.styleOverrides || {}}
             updateStyleOverride={updateStyleOverride}
+            sectionType={selectedSection.type}
           />
         )}
       </div>
@@ -317,400 +327,191 @@ function ContentTab({
 function AdvancedTab({
   styleOverrides,
   updateStyleOverride,
+  sectionType,
 }: {
   styleOverrides: SectionStyleOverrides;
   updateStyleOverride: (key: keyof SectionStyleOverrides, value: any) => void;
+  sectionType: string;
 }) {
+  // Get the block schema to determine which controls to show
+  const schema = getBlockSchema(sectionType);
+  const categories = getControlCategories();
+
+  // Helper to render a control based on its type
+  const renderControl = (controlId: string) => {
+    const control = CONTROL_DEFINITIONS[controlId];
+    if (!control) return null;
+
+    const value = styleOverrides[controlId as keyof SectionStyleOverrides] ?? control.defaultValue;
+
+    switch (control.type) {
+      case 'color':
+        return (
+          <div key={controlId}>
+            <label className="block text-xs font-medium text-surface-700 mb-1">{control.label}</label>
+            <div className="flex items-center gap-2">
+              <input
+                type="color"
+                value={value as string || '#ffffff'}
+                onChange={(e) => updateStyleOverride(controlId as keyof SectionStyleOverrides, e.target.value)}
+                className="h-8 w-8 rounded border border-surface-200 cursor-pointer"
+              />
+              <input
+                type="text"
+                value={value as string || ''}
+                onChange={(e) => updateStyleOverride(controlId as keyof SectionStyleOverrides, e.target.value)}
+                className="flex-1 text-xs border border-surface-200 rounded px-2 py-1.5"
+                placeholder={control.placeholder}
+              />
+            </div>
+          </div>
+        );
+
+      case 'select':
+        let options: string[] = [];
+        if (control.optionsSource === 'FONT_LIST') {
+          options = Object.entries(FONTS_BY_CATEGORY).flatMap(([category, fonts]) => 
+            fonts.map(f => f.name)
+          );
+        } else if (Array.isArray(control.options)) {
+          options = control.options;
+        } else if (typeof control.options === 'function') {
+          options = control.options();
+        }
+
+        return (
+          <div key={controlId}>
+            <label className="block text-xs font-medium text-surface-700 mb-1">{control.label}</label>
+            <select
+              value={value as string || ''}
+              onChange={(e) => updateStyleOverride(controlId as keyof SectionStyleOverrides, e.target.value)}
+              className="w-full text-xs border border-surface-200 rounded px-2 py-1.5"
+            >
+              {options.map((opt) => (
+                <option key={opt} value={opt}>{opt}</option>
+              ))}
+            </select>
+          </div>
+        );
+
+      case 'text':
+        return (
+          <div key={controlId}>
+            <label className="block text-xs font-medium text-surface-700 mb-1">{control.label}</label>
+            <input
+              type="text"
+              value={value as string || ''}
+              onChange={(e) => updateStyleOverride(controlId as keyof SectionStyleOverrides, e.target.value)}
+              className="w-full text-xs border border-surface-200 rounded px-2 py-1.5"
+              placeholder={control.placeholder}
+            />
+          </div>
+        );
+
+      case 'number':
+        return (
+          <div key={controlId}>
+            <label className="block text-xs font-medium text-surface-700 mb-1">{control.label}</label>
+            <input
+              type="number"
+              value={value as number || 0}
+              onChange={(e) => updateStyleOverride(controlId as keyof SectionStyleOverrides, parseFloat(e.target.value))}
+              className="w-full text-xs border border-surface-200 rounded px-2 py-1.5"
+              min={control.min}
+              max={control.max}
+              step={control.step}
+            />
+          </div>
+        );
+
+      case 'range':
+        return (
+          <div key={controlId}>
+            <label className="block text-xs font-medium text-surface-700 mb-1">{control.label}</label>
+            <div className="flex items-center gap-2">
+              <input
+                type="range"
+                value={value as number || control.min}
+                onChange={(e) => updateStyleOverride(controlId as keyof SectionStyleOverrides, parseFloat(e.target.value))}
+                className="flex-1"
+                min={control.min}
+                max={control.max}
+                step={control.step}
+              />
+              <span className="text-xs text-surface-600 w-12 text-right">{value as number}{control.unit}</span>
+            </div>
+          </div>
+        );
+
+      case 'checkbox':
+        return (
+          <div key={controlId} className="flex items-center gap-2">
+            <input
+              type="checkbox"
+              checked={value as boolean || false}
+              onChange={(e) => updateStyleOverride(controlId as keyof SectionStyleOverrides, e.target.checked)}
+              className="rounded border-surface-300"
+            />
+            <label className="text-xs font-medium text-surface-700">{control.label}</label>
+          </div>
+        );
+
+      case 'textarea':
+        return (
+          <div key={controlId}>
+            <label className="block text-xs font-medium text-surface-700 mb-1">{control.label}</label>
+            <textarea
+              value={value as string || ''}
+              onChange={(e) => updateStyleOverride(controlId as keyof SectionStyleOverrides, e.target.value)}
+              className="w-full text-xs border border-surface-200 rounded px-2 py-1.5 h-24 font-mono resize-none"
+              placeholder={control.placeholder}
+            />
+          </div>
+        );
+
+      default:
+        return null;
+    }
+  };
+
+  // Map schema supports to control categories
+  const categoryMap: Record<keyof typeof schema.supports, ControlCategory[]> = {
+    colors: ['colors'],
+    background: ['background'],
+    spacing: ['spacing'],
+    typography: ['typography'],
+    layout: ['layout'],
+    borders: ['borders'],
+    shadows: ['shadows'],
+    motion: ['motion'],
+    responsive: ['responsive'],
+    customCss: ['customCss'],
+  };
+
   return (
     <div className="p-4 space-y-5">
-      {/* Colors & Background */}
-      <div>
-        <h3 className="text-xs font-bold text-surface-900 uppercase tracking-wider mb-3">Colors & Background</h3>
-        <div className="space-y-3">
-          <div>
-            <label className="block text-xs font-medium text-surface-700 mb-1">Background Color</label>
-            <div className="flex items-center gap-2">
-              <input
-                type="color"
-                value={styleOverrides.backgroundColor || "#ffffff"}
-                onChange={(e) => updateStyleOverride("backgroundColor", e.target.value)}
-                className="h-8 w-8 rounded border border-surface-200 cursor-pointer"
-              />
-              <input
-                type="text"
-                value={styleOverrides.backgroundColor || ""}
-                onChange={(e) => updateStyleOverride("backgroundColor", e.target.value)}
-                className="flex-1 text-xs border border-surface-200 rounded px-2 py-1.5"
-                placeholder="#ffffff"
-              />
-            </div>
-          </div>
-          <div>
-            <label className="block text-xs font-medium text-surface-700 mb-1">Text Color</label>
-            <div className="flex items-center gap-2">
-              <input
-                type="color"
-                value={styleOverrides.textColor || "#000000"}
-                onChange={(e) => updateStyleOverride("textColor", e.target.value)}
-                className="h-8 w-8 rounded border border-surface-200 cursor-pointer"
-              />
-              <input
-                type="text"
-                value={styleOverrides.textColor || ""}
-                onChange={(e) => updateStyleOverride("textColor", e.target.value)}
-                className="flex-1 text-xs border border-surface-200 rounded px-2 py-1.5"
-                placeholder="#000000"
-              />
-            </div>
-          </div>
-          <div>
-            <label className="block text-xs font-medium text-surface-700 mb-1">Background Type</label>
-            <select
-              value={styleOverrides.backgroundType || "color"}
-              onChange={(e) => updateStyleOverride("backgroundType", e.target.value)}
-              className="w-full text-xs border border-surface-200 rounded px-2 py-1.5"
-            >
-              <option value="color">Solid Color</option>
-              <option value="gradient">Gradient</option>
-              <option value="image">Image</option>
-              <option value="video">Video</option>
-            </select>
-          </div>
-          {styleOverrides.backgroundType === "gradient" && (
-            <div>
-              <label className="block text-xs font-medium text-surface-700 mb-1">Gradient CSS</label>
-              <input
-                type="text"
-                value={styleOverrides.backgroundGradient || ""}
-                onChange={(e) => updateStyleOverride("backgroundGradient", e.target.value)}
-                className="w-full text-xs border border-surface-200 rounded px-2 py-1.5"
-                placeholder="linear-gradient(90deg, #667eea 0%, #764ba2 100%)"
-              />
-            </div>
-          )}
-          {(styleOverrides.backgroundType === "image" || styleOverrides.backgroundType === "video") && (
-            <>
-              <div>
-                <label className="block text-xs font-medium text-surface-700 mb-1">
-                  {styleOverrides.backgroundType === "image" ? "Image URL" : "Video URL"}
-                </label>
-                <input
-                  type="text"
-                  value={styleOverrides.backgroundImage || styleOverrides.backgroundVideo || ""}
-                  onChange={(e) =>
-                    updateStyleOverride(
-                      styleOverrides.backgroundType === "image" ? "backgroundImage" : "backgroundVideo",
-                      e.target.value
-                    )
-                  }
-                  className="w-full text-xs border border-surface-200 rounded px-2 py-1.5"
-                  placeholder="https://..."
-                />
-              </div>
-              <div>
-                <label className="block text-xs font-medium text-surface-700 mb-1">Overlay Color</label>
-                <div className="flex items-center gap-2">
-                  <input
-                    type="color"
-                    value={styleOverrides.backgroundOverlay || "#000000"}
-                    onChange={(e) => updateStyleOverride("backgroundOverlay", e.target.value)}
-                    className="h-8 w-8 rounded border border-surface-200 cursor-pointer"
-                  />
-                  <input
-                    type="text"
-                    value={styleOverrides.backgroundOverlay || ""}
-                    onChange={(e) => updateStyleOverride("backgroundOverlay", e.target.value)}
-                    className="flex-1 text-xs border border-surface-200 rounded px-2 py-1.5"
-                    placeholder="#000000"
-                  />
-                </div>
-              </div>
-            </>
-          )}
-        </div>
-      </div>
+      {categories.map((category) => {
+        // Check if this category is supported by the block schema
+        const isSupported = Object.entries(categoryMap).some(([key, cats]) => 
+          schema.supports[key as keyof typeof schema.supports] && cats.includes(category)
+        );
 
-      {/* Spacing */}
-      <div>
-        <h3 className="text-xs font-bold text-surface-900 uppercase tracking-wider mb-3">Spacing</h3>
-        <div className="space-y-3">
-          <div>
-            <label className="block text-xs font-medium text-surface-700 mb-1">Padding (Top/Bottom)</label>
-            <input
-              type="text"
-              value={styleOverrides.paddingY || ""}
-              onChange={(e) => updateStyleOverride("paddingY", e.target.value)}
-              className="w-full text-xs border border-surface-200 rounded px-2 py-1.5"
-              placeholder="4rem"
-            />
-          </div>
-          <div className="grid grid-cols-2 gap-2">
-            <div>
-              <label className="block text-[10px] text-surface-500 mb-0.5">Margin Top</label>
-              <input
-                type="text"
-                value={styleOverrides.marginTop || ""}
-                onChange={(e) => updateStyleOverride("marginTop", e.target.value)}
-                className="w-full text-xs border border-surface-200 rounded px-2 py-1"
-                placeholder="0"
-              />
-            </div>
-            <div>
-              <label className="block text-[10px] text-surface-500 mb-0.5">Margin Bottom</label>
-              <input
-                type="text"
-                value={styleOverrides.marginBottom || ""}
-                onChange={(e) => updateStyleOverride("marginBottom", e.target.value)}
-                className="w-full text-xs border border-surface-200 rounded px-2 py-1"
-                placeholder="0"
-              />
-            </div>
-            <div>
-              <label className="block text-[10px] text-surface-500 mb-0.5">Margin Left</label>
-              <input
-                type="text"
-                value={styleOverrides.marginLeft || ""}
-                onChange={(e) => updateStyleOverride("marginLeft", e.target.value)}
-                className="w-full text-xs border border-surface-200 rounded px-2 py-1"
-                placeholder="0"
-              />
-            </div>
-            <div>
-              <label className="block text-[10px] text-surface-500 mb-0.5">Margin Right</label>
-              <input
-                type="text"
-                value={styleOverrides.marginRight || ""}
-                onChange={(e) => updateStyleOverride("marginRight", e.target.value)}
-                className="w-full text-xs border border-surface-200 rounded px-2 py-1"
-                placeholder="0"
-              />
-            </div>
-          </div>
-          <div className="grid grid-cols-2 gap-2">
-            <div>
-              <label className="block text-[10px] text-surface-500 mb-0.5">Padding Top</label>
-              <input
-                type="text"
-                value={styleOverrides.paddingTop || ""}
-                onChange={(e) => updateStyleOverride("paddingTop", e.target.value)}
-                className="w-full text-xs border border-surface-200 rounded px-2 py-1"
-                placeholder="0"
-              />
-            </div>
-            <div>
-              <label className="block text-[10px] text-surface-500 mb-0.5">Padding Bottom</label>
-              <input
-                type="text"
-                value={styleOverrides.paddingBottom || ""}
-                onChange={(e) => updateStyleOverride("paddingBottom", e.target.value)}
-                className="w-full text-xs border border-surface-200 rounded px-2 py-1"
-                placeholder="0"
-              />
-            </div>
-            <div>
-              <label className="block text-[10px] text-surface-500 mb-0.5">Padding Left</label>
-              <input
-                type="text"
-                value={styleOverrides.paddingLeft || ""}
-                onChange={(e) => updateStyleOverride("paddingLeft", e.target.value)}
-                className="w-full text-xs border border-surface-200 rounded px-2 py-1"
-                placeholder="0"
-              />
-            </div>
-            <div>
-              <label className="block text-[10px] text-surface-500 mb-0.5">Padding Right</label>
-              <input
-                type="text"
-                value={styleOverrides.paddingRight || ""}
-                onChange={(e) => updateStyleOverride("paddingRight", e.target.value)}
-                className="w-full text-xs border border-surface-200 rounded px-2 py-1"
-                placeholder="0"
-              />
-            </div>
-          </div>
-        </div>
-      </div>
+        if (!isSupported) return null;
 
-      {/* Borders */}
-      <div>
-        <h3 className="text-xs font-bold text-surface-900 uppercase tracking-wider mb-3">Borders</h3>
-        <div className="space-y-3">
-          <div>
-            <label className="block text-xs font-medium text-surface-700 mb-1">Border Style</label>
-            <select
-              value={styleOverrides.borderStyle || "none"}
-              onChange={(e) => updateStyleOverride("borderStyle", e.target.value)}
-              className="w-full text-xs border border-surface-200 rounded px-2 py-1.5"
-            >
-              <option value="none">None</option>
-              <option value="solid">Solid</option>
-              <option value="dashed">Dashed</option>
-              <option value="dotted">Dotted</option>
-              <option value="double">Double</option>
-            </select>
-          </div>
-          <div>
-            <label className="block text-xs font-medium text-surface-700 mb-1">Border Width</label>
-            <input
-              type="text"
-              value={styleOverrides.borderWidth || ""}
-              onChange={(e) => updateStyleOverride("borderWidth", e.target.value)}
-              className="w-full text-xs border border-surface-200 rounded px-2 py-1.5"
-              placeholder="1px"
-            />
-          </div>
-          <div>
-            <label className="block text-xs font-medium text-surface-700 mb-1">Border Color</label>
-            <div className="flex items-center gap-2">
-              <input
-                type="color"
-                value={styleOverrides.borderColor || "#000000"}
-                onChange={(e) => updateStyleOverride("borderColor", e.target.value)}
-                className="h-8 w-8 rounded border border-surface-200 cursor-pointer"
-              />
-              <input
-                type="text"
-                value={styleOverrides.borderColor || ""}
-                onChange={(e) => updateStyleOverride("borderColor", e.target.value)}
-                className="flex-1 text-xs border border-surface-200 rounded px-2 py-1.5"
-                placeholder="#000000"
-              />
+        const controls = getControlsByCategory(category);
+        if (controls.length === 0) return null;
+
+        return (
+          <div key={category}>
+            <h3 className="text-xs font-bold text-surface-900 uppercase tracking-wider mb-3">
+              {category.replace(/([A-Z])/g, ' $1').trim()}
+            </h3>
+            <div className="space-y-3">
+              {controls.map((control) => renderControl(control.id))}
             </div>
           </div>
-          <div>
-            <label className="block text-xs font-medium text-surface-700 mb-1">Border Radius</label>
-            <input
-              type="text"
-              value={styleOverrides.borderRadius || ""}
-              onChange={(e) => updateStyleOverride("borderRadius", e.target.value)}
-              className="w-full text-xs border border-surface-200 rounded px-2 py-1.5"
-              placeholder="8px"
-            />
-          </div>
-        </div>
-      </div>
-
-      {/* Shadows */}
-      <div>
-        <h3 className="text-xs font-bold text-surface-900 uppercase tracking-wider mb-3">Shadows</h3>
-        <div>
-          <label className="block text-xs font-medium text-surface-700 mb-1">Box Shadow</label>
-          <input
-            type="text"
-            value={styleOverrides.boxShadow || ""}
-            onChange={(e) => updateStyleOverride("boxShadow", e.target.value)}
-            className="w-full text-xs border border-surface-200 rounded px-2 py-1.5"
-            placeholder="0 4px 6px rgba(0,0,0,0.1)"
-          />
-        </div>
-      </div>
-
-      {/* Motion FX */}
-      <div>
-        <h3 className="text-xs font-bold text-surface-900 uppercase tracking-wider mb-3">Motion FX</h3>
-        <div className="space-y-3">
-          <div>
-            <label className="block text-xs font-medium text-surface-700 mb-1">Transition Duration</label>
-            <input
-              type="text"
-              value={styleOverrides.transitionDuration || ""}
-              onChange={(e) => updateStyleOverride("transitionDuration", e.target.value)}
-              className="w-full text-xs border border-surface-200 rounded px-2 py-1.5"
-              placeholder="0.3s"
-            />
-          </div>
-          <div>
-            <label className="block text-xs font-medium text-surface-700 mb-1">Hover Scale</label>
-            <input
-              type="text"
-              value={styleOverrides.hoverScale || ""}
-              onChange={(e) => updateStyleOverride("hoverScale", e.target.value)}
-              className="w-full text-xs border border-surface-200 rounded px-2 py-1.5"
-              placeholder="1.05"
-            />
-          </div>
-          <div>
-            <label className="block text-xs font-medium text-surface-700 mb-1">Hover Opacity</label>
-            <input
-              type="text"
-              value={styleOverrides.hoverOpacity || ""}
-              onChange={(e) => updateStyleOverride("hoverOpacity", e.target.value)}
-              className="w-full text-xs border border-surface-200 rounded px-2 py-1.5"
-              placeholder="0.9"
-            />
-          </div>
-          <div>
-            <label className="block text-xs font-medium text-surface-700 mb-1">Hover Shadow</label>
-            <input
-              type="text"
-              value={styleOverrides.hoverShadow || ""}
-              onChange={(e) => updateStyleOverride("hoverShadow", e.target.value)}
-              className="w-full text-xs border border-surface-200 rounded px-2 py-1.5"
-              placeholder="0 8px 16px rgba(0,0,0,0.15)"
-            />
-          </div>
-        </div>
-      </div>
-
-      {/* Responsive Visibility */}
-      <div>
-        <h3 className="text-xs font-bold text-surface-900 uppercase tracking-wider mb-3">Responsive Visibility</h3>
-        <div className="space-y-2">
-          <label className="flex items-center gap-2">
-            <input
-              type="checkbox"
-              checked={styleOverrides.responsiveVisibility?.desktop ?? true}
-              onChange={(e) =>
-                updateStyleOverride("responsiveVisibility", {
-                  ...styleOverrides.responsiveVisibility,
-                  desktop: e.target.checked,
-                })
-              }
-              className="rounded border-surface-300 text-brand-600 focus:ring-brand-500"
-            />
-            <span className="text-xs text-surface-700">Show on Desktop</span>
-          </label>
-          <label className="flex items-center gap-2">
-            <input
-              type="checkbox"
-              checked={styleOverrides.responsiveVisibility?.tablet ?? true}
-              onChange={(e) =>
-                updateStyleOverride("responsiveVisibility", {
-                  ...styleOverrides.responsiveVisibility,
-                  tablet: e.target.checked,
-                })
-              }
-              className="rounded border-surface-300 text-brand-600 focus:ring-brand-500"
-            />
-            <span className="text-xs text-surface-700">Show on Tablet</span>
-          </label>
-          <label className="flex items-center gap-2">
-            <input
-              type="checkbox"
-              checked={styleOverrides.responsiveVisibility?.mobile ?? true}
-              onChange={(e) =>
-                updateStyleOverride("responsiveVisibility", {
-                  ...styleOverrides.responsiveVisibility,
-                  mobile: e.target.checked,
-                })
-              }
-              className="rounded border-surface-300 text-brand-600 focus:ring-brand-500"
-            />
-            <span className="text-xs text-surface-700">Show on Mobile</span>
-          </label>
-        </div>
-      </div>
-
-      {/* Section Custom CSS */}
-      <div>
-        <h3 className="text-xs font-bold text-surface-900 uppercase tracking-wider mb-3">Custom CSS</h3>
-        <textarea
-          value={styleOverrides.customCss || ""}
-          onChange={(e) => updateStyleOverride("customCss", e.target.value)}
-          className="w-full text-xs border border-surface-200 rounded px-2 py-1.5 h-24 font-mono"
-          placeholder="/* Add section-specific CSS here */"
-        />
-      </div>
+        );
+      })}
     </div>
   );
 }

@@ -7,7 +7,8 @@ import {
   Type, Image as ImageIcon, MousePointer, Columns, Grid3X3,
   ShoppingBag, MessageCircle, HelpCircle, Mail, Play, Clock, Shield, User
 } from "lucide-react";
-import { DesignSystem, Page, Section, GOOGLE_FONTS_DATABASE } from "@/types";
+import { DesignSystem, Page, Section } from "@/types";
+import { ALL_FONTS, FONTS_BY_CATEGORY } from "@/lib/constants/fonts";
 
 interface LeftSidebarProps {
   designSystem: DesignSystem;
@@ -269,10 +270,14 @@ export default function LeftSidebar({
                     onChange={(e) => updateFont("heading", e.target.value)}
                     className="w-full text-xs border border-surface-200 rounded px-2 py-1.5"
                   >
-                    {GOOGLE_FONTS_DATABASE.map((font) => (
-                      <option key={font.name} value={font.name}>
-                        {font.name}
-                      </option>
+                    {Object.entries(FONTS_BY_CATEGORY).map(([category, fonts]) => (
+                      <optgroup key={category} label={category}>
+                        {fonts.map((font) => (
+                          <option key={font.name} value={font.name}>
+                            {font.name}
+                          </option>
+                        ))}
+                      </optgroup>
                     ))}
                   </select>
                 </div>
@@ -283,10 +288,14 @@ export default function LeftSidebar({
                     onChange={(e) => updateFont("body", e.target.value)}
                     className="w-full text-xs border border-surface-200 rounded px-2 py-1.5"
                   >
-                    {GOOGLE_FONTS_DATABASE.map((font) => (
-                      <option key={font.name} value={font.name}>
-                        {font.name}
-                      </option>
+                    {Object.entries(FONTS_BY_CATEGORY).map(([category, fonts]) => (
+                      <optgroup key={category} label={category}>
+                        {fonts.map((font) => (
+                          <option key={font.name} value={font.name}>
+                            {font.name}
+                          </option>
+                        ))}
+                      </optgroup>
                     ))}
                   </select>
                 </div>

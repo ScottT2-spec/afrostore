@@ -16,7 +16,17 @@ import {
   FashionMarquee,
   FashionCoverBanners,
 } from "@/components/storefront/FashionTemplateBlocks";
+import { resolveSectionStyleOverrides } from "@/components/storefront/block-style";
 import { TShirtsPrintsHeader, TShirtsPrintsFooter } from "@/components/storefront/TShirtsPrintsStoreChrome";
+import {
+  TShirtAboutHero,
+  TShirtFeatureCards,
+  TShirtImageCallout,
+  TShirtContactFormSection,
+  TShirtContactInfo,
+  TShirtContactHero,
+  TShirtBlogPosts,
+} from "@/components/storefront/TShirtsPrintsTemplateBlocks";
 import type {
   FashionHeroSliderProps,
   FashionPromoBannersProps,
@@ -193,7 +203,22 @@ import {
   PerfumesPageHero,
   PerfumesCollectionsGrid,
   PerfumesJournalGrid,
+  PerfumesReviewsHero,
+  PerfumesReviewsGrid,
+  PerfumesFeaturedProducts,
+  PerfumesFeaturedPosts,
 } from "@/components/storefront/PerfumesTemplateBlocks";
+import {
+  VegetableHero,
+  VegetableFeatures,
+  VegetableMenu,
+  VegetableMenuSections,
+  VegetableRecipeGrid,
+  VegetableAboutHero,
+  VegetableTeam,
+  VegetableContact,
+  VegetableReservation,
+} from "@/components/storefront/VegetableTemplateBlocks";
 
 /* ─── TYPES ─────────────────────────────────────────────────── */
 
@@ -201,6 +226,7 @@ export interface TemplateBlock {
   id: string;
   type: string;
   props: Record<string, unknown>;
+  styleOverrides?: Record<string, unknown>;
 }
 
 /* ─── BLOCK TYPE MAP ────────────────────────────────────────── */
@@ -382,11 +408,34 @@ const PERFUMES_BLOCKS: Record<string, BlockComponent> = {
   perfumesPageHero: PerfumesPageHero as unknown as BlockComponent,
   perfumesCollectionsGrid: PerfumesCollectionsGrid as unknown as BlockComponent,
   perfumesJournalGrid: PerfumesJournalGrid as unknown as BlockComponent,
+  perfumesReviewsHero: PerfumesReviewsHero as unknown as BlockComponent,
+  perfumesReviewsGrid: PerfumesReviewsGrid as unknown as BlockComponent,
+  perfumesFeaturedProducts: PerfumesFeaturedProducts as unknown as BlockComponent,
+  perfumesFeaturedPosts: PerfumesFeaturedPosts as unknown as BlockComponent,
 };
 
 const TSHIRTS_BLOCKS: Record<string, BlockComponent> = {
   tShirtsPrintsHeader: TShirtsPrintsHeader as unknown as BlockComponent,
   tShirtsPrintsFooter: TShirtsPrintsFooter as unknown as BlockComponent,
+  tshirtAboutHero: TShirtAboutHero as unknown as BlockComponent,
+  tshirtFeatureCards: TShirtFeatureCards as unknown as BlockComponent,
+  tshirtImageCallout: TShirtImageCallout as unknown as BlockComponent,
+  tshirtContactFormSection: TShirtContactFormSection as unknown as BlockComponent,
+  tshirtContactInfo: TShirtContactInfo as unknown as BlockComponent,
+  tshirtContactHero: TShirtContactHero as unknown as BlockComponent,
+  tshirtBlogPosts: TShirtBlogPosts as unknown as BlockComponent,
+};
+
+const VEGETABLE_BLOCKS: Record<string, BlockComponent> = {
+  vegetableHero: VegetableHero as unknown as BlockComponent,
+  vegetableFeatures: VegetableFeatures as unknown as BlockComponent,
+  vegetableMenu: VegetableMenu as unknown as BlockComponent,
+  vegetableMenuSections: VegetableMenuSections as unknown as BlockComponent,
+  vegetableRecipeGrid: VegetableRecipeGrid as unknown as BlockComponent,
+  vegetableAboutHero: VegetableAboutHero as unknown as BlockComponent,
+  vegetableTeam: VegetableTeam as unknown as BlockComponent,
+  vegetableContact: VegetableContact as unknown as BlockComponent,
+  vegetableReservation: VegetableReservation as unknown as BlockComponent,
 };
 
 const ALL_TEMPLATE_BLOCKS: Record<string, BlockComponent> = {
@@ -401,6 +450,7 @@ const ALL_TEMPLATE_BLOCKS: Record<string, BlockComponent> = {
   ...MAKEUP_BLOCKS,
   ...PERFUMES_BLOCKS,
   ...TSHIRTS_BLOCKS,
+  ...VEGETABLE_BLOCKS,
 };
 
 /* ─── FONT LOADER MAP ──────────────────────────────────────── */
@@ -417,6 +467,7 @@ const FONT_LOADERS: Record<string, React.ComponentType> = {
   makeup: MakeupFontLoader,
   perfumes: PerfumesFontLoader,
   "t-shirts-prints": FashionFontLoader,
+  vegetables: FashionFontLoader,
 };
 
 /** Detect which template family a block set belongs to */
@@ -427,6 +478,7 @@ function detectTemplateFamily(blocks: TemplateBlock[]): string {
     if (t.startsWith("bakery")) return "bakery";
     if (t.startsWith("cosmetics")) return "cosmetics";
     if (t.startsWith("grocery")) return "grocery";
+    if (t.startsWith("vegetable")) return "vegetables";
     if (t.startsWith("health")) return "health";
     if (t.startsWith("interior") || t.startsWith("garden")) return "interior";
     if (t.startsWith("kids")) return "kids";
@@ -454,7 +506,25 @@ function RenderTemplateBlock({ block }: { block: TemplateBlock }) {
     return null;
   }
 
-  return <Component {...block.props} />;
+  // Resolve style overrides using the universal resolver
+  const { styles, classes, overlayStyles } = resolveSectionStyleOverrides(
+    block.styleOverrides,
+    block.type
+  );
+
+  // Forward resolved styles to the component so it can merge them with its own styles
+  const componentProps = {
+    ...block.props,
+    resolvedStyles: styles,
+    resolvedClasses: classes,
+  };
+
+  return (
+    <div style={styles} className={classes}>
+      {overlayStyles && <div style={overlayStyles} />}
+      <Component {...componentProps} />
+    </div>
+  );
 }
 
 /* ─── MAIN RENDERER ─────────────────────────────────────────── */

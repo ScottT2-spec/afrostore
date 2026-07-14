@@ -514,45 +514,8 @@ export default async function ContactPage({ params }: Props) {
     return <PerfumesContactPage />;
   }
 
+  // ─── RETAIL / DECOR CONTACT ───
   const isRetailTemplate = activeTemplateSlug === "retail" || activeTemplateSlug === "decor";
-
-  if (isRetailTemplate) {
-    const gardenSocialLinks: Array<{ platform: string; url: string }> = [
-      ...(store.socialLinks?.facebook ? [{ platform: "facebook", url: store.socialLinks.facebook }] : []),
-      ...(store.socialLinks?.instagram ? [{ platform: "instagram", url: store.socialLinks.instagram }] : []),
-      ...(store.socialLinks?.twitter ? [{ platform: "twitter", url: store.socialLinks.twitter }] : []),
-      ...(store.socialLinks?.tiktok ? [{ platform: "tiktok", url: store.socialLinks.tiktok }] : []),
-    ];
-
-    return (
-      <div className="min-h-screen bg-white">
-        <GardenHeader
-          storeName={store.name}
-          storeSlug={slug}
-          logo={store.logo}
-          cartCount={0}
-          wishlistCount={0}
-        />
-        <div style={buildPageBackgroundStyle(pageSettings)}>
-          {parsedContact && parsedContact.blocks.length > 0 ? (
-            <RenderBlocks blocks={pageContent.blocks as BuilderBlock[]} storeSlug={slug} products={serializedProducts} />
-          ) : (
-            <RenderTemplateBlocks blocks={CONTACT_PAGE_BLOCKS} />
-          )}
-        </div>
-        <GardenFooter
-          storeName={store.name}
-          storeSlug={slug}
-          logo={store.logo}
-          description={store.description || undefined}
-          socialLinks={gardenSocialLinks}
-        />
-      </div>
-    );
-  }
-
-  // ─── RETAIL CONTACT ───
-  const isRetailTemplate = activeTemplateSlug === "retail";
   if (isRetailTemplate) {
     const retailBlocks = (contactPage?.content ? pageContent.blocks : RETAIL_CONTACT_BLOCKS) as BuilderBlock[];
     return (
