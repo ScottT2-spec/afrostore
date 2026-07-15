@@ -219,6 +219,24 @@ import {
   VegetableContact,
   VegetableReservation,
 } from "@/components/storefront/VegetableTemplateBlocks";
+import {
+  JumiaFontLoader,
+  JumiaTopBar,
+  JumiaHeader,
+  JumiaHeroBanner,
+  JumiaFlashDeals,
+  JumiaCategoryGrid,
+  JumiaSectionTitle,
+  JumiaProductGrid,
+  JumiaPromoBanners,
+  JumiaOfficialStores,
+  JumiaFeaturesBar,
+  JumiaAppBanner,
+  JumiaNewsletter,
+  JumiaFooter,
+  JumiaTopDeals,
+  JumiaSponsored,
+} from "@/components/storefront/JumiaTemplateBlocks";
 
 /* ─── TYPES ─────────────────────────────────────────────────── */
 
@@ -438,6 +456,24 @@ const VEGETABLE_BLOCKS: Record<string, BlockComponent> = {
   vegetableReservation: VegetableReservation as unknown as BlockComponent,
 };
 
+const JUMIA_BLOCKS: Record<string, BlockComponent> = {
+  jumiaTopBar: JumiaTopBar as unknown as BlockComponent,
+  jumiaHeader: JumiaHeader as unknown as BlockComponent,
+  jumiaHeroBanner: JumiaHeroBanner as unknown as BlockComponent,
+  jumiaFlashDeals: JumiaFlashDeals as unknown as BlockComponent,
+  jumiaCategoryGrid: JumiaCategoryGrid as unknown as BlockComponent,
+  jumiaSectionTitle: JumiaSectionTitle as unknown as BlockComponent,
+  jumiaProductGrid: JumiaProductGrid as unknown as BlockComponent,
+  jumiaPromoBanners: JumiaPromoBanners as unknown as BlockComponent,
+  jumiaOfficialStores: JumiaOfficialStores as unknown as BlockComponent,
+  jumiaFeaturesBar: JumiaFeaturesBar as unknown as BlockComponent,
+  jumiaAppBanner: JumiaAppBanner as unknown as BlockComponent,
+  jumiaNewsletter: JumiaNewsletter as unknown as BlockComponent,
+  jumiaFooter: JumiaFooter as unknown as BlockComponent,
+  jumiaTopDeals: JumiaTopDeals as unknown as BlockComponent,
+  jumiaSponsored: JumiaSponsored as unknown as BlockComponent,
+};
+
 const ALL_TEMPLATE_BLOCKS: Record<string, BlockComponent> = {
   ...FASHION_BLOCKS,
   ...ELECTRONICS_BLOCKS,
@@ -451,6 +487,7 @@ const ALL_TEMPLATE_BLOCKS: Record<string, BlockComponent> = {
   ...PERFUMES_BLOCKS,
   ...TSHIRTS_BLOCKS,
   ...VEGETABLE_BLOCKS,
+  ...JUMIA_BLOCKS,
 };
 
 /* ─── FONT LOADER MAP ──────────────────────────────────────── */
@@ -468,12 +505,15 @@ const FONT_LOADERS: Record<string, React.ComponentType> = {
   perfumes: PerfumesFontLoader,
   "t-shirts-prints": FashionFontLoader,
   vegetables: FashionFontLoader,
+  jumia: JumiaFontLoader,
+  marketplace: JumiaFontLoader,
 };
 
 /** Detect which template family a block set belongs to */
 function detectTemplateFamily(blocks: TemplateBlock[]): string {
   for (const b of blocks) {
     const t = b.type;
+    if (t.startsWith("jumia")) return "jumia";
     if (t.startsWith("electronics")) return "electronics";
     if (t.startsWith("bakery")) return "bakery";
     if (t.startsWith("cosmetics")) return "cosmetics";
