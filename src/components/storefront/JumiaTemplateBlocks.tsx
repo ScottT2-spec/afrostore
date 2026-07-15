@@ -947,7 +947,279 @@ export function JumiaTopDeals({ title = "Top Deals", subtitle = "Limited time of
 }
 
 // ═══════════════════════════════════════════════════════════
-// 15. SPONSORED PRODUCTS — Single row highlight
+// 15. CATEGORY DEAL ROW — The core repeating Jumia pattern
+//     "Phone deals | Clearance Sales", "Beauty Deals", etc.
+//     Each is a titled card with a horizontal product carousel
+// ═══════════════════════════════════════════════════════════
+export interface JumiaCategoryDealRowProps {
+  title?: string;
+  subtitle?: string;
+  products?: Product[];
+  storeSlug?: string;
+  seeAllLink?: string;
+  bannerImage?: string;
+  bannerLink?: string;
+}
+
+export function JumiaCategoryDealRow({
+  title = "Deals",
+  subtitle,
+  products = [],
+  storeSlug = "",
+  seeAllLink,
+  bannerImage,
+  bannerLink,
+}: JumiaCategoryDealRowProps) {
+  const scrollRef = useRef<HTMLDivElement>(null);
+
+  const scroll = (dir: "left" | "right") => {
+    scrollRef.current?.scrollBy({ left: dir === "left" ? -300 : 300, behavior: "smooth" });
+  };
+
+  if (products.length === 0) return null;
+
+  return (
+    <div className="jumia-block bg-[var(--j-bg)]">
+      <div className="max-w-[1220px] mx-auto px-4 pb-3">
+        <div className="bg-white rounded-lg overflow-hidden">
+          {/* Title */}
+          <div className="flex items-center justify-between px-4 py-3 border-b border-[var(--j-border)]">
+            <h2 className="text-base font-bold text-[var(--j-dark)] truncate">
+              {title}
+              {subtitle && <span className="text-[var(--j-primary)] font-normal text-sm ml-2">| {subtitle}</span>}
+            </h2>
+            <Link
+              href={seeAllLink || `/store/${storeSlug}/shop`}
+              className="text-[var(--j-primary)] text-sm font-semibold hover:underline flex items-center gap-1 flex-shrink-0"
+            >
+              SEE ALL <ArrowRight className="h-3.5 w-3.5" />
+            </Link>
+          </div>
+
+          {/* Banner + Products row (Jumia pattern: optional left banner + scrolling products) */}
+          <div className="flex">
+            {/* Optional side banner */}
+            {bannerImage && (
+              <Link
+                href={bannerLink || seeAllLink || `/store/${storeSlug}/shop`}
+                className="hidden lg:block flex-shrink-0 w-[220px] border-r border-[var(--j-border)]"
+              >
+                <img src={bannerImage} alt={title} className="w-full h-full object-cover" />
+              </Link>
+            )}
+
+            {/* Horizontal product scroll */}
+            <div className="flex-1 relative group min-w-0">
+              <button onClick={() => scroll("left")} className="absolute left-1 top-1/2 -translate-y-1/2 z-10 h-9 w-9 bg-white shadow-lg rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
+                <ChevronLeft className="h-5 w-5" />
+              </button>
+              <div ref={scrollRef} className="flex overflow-x-auto scrollbar-hide divide-x divide-[var(--j-border)]">
+                {products.map((product) => {
+                  const discount = calcDiscount(product.price, product.compareAtPrice);
+                  const img = product.images?.[0]?.url;
+                  return (
+                    <Link
+                      key={product.id}
+                      href={`/store/${storeSlug}/product/${product.slug}`}
+                      className="flex-shrink-0 w-[160px] sm:w-[180px] p-3 hover:shadow-md transition-shadow block"
+                    >
+                      <div className="relative aspect-square mb-2 bg-[var(--j-light)] rounded flex items-center justify-center overflow-hidden">
+                        {img ? (
+                          <img src={img} alt={product.name} className="w-full h-full object-contain p-2" />
+                        ) : (
+                          <Package className="h-10 w-10 text-gray-300" />
+                        )}
+                        {discount > 0 && (
+                          <span className="absolute top-1.5 right-1.5 bg-[var(--j-primary)] text-white text-[10px] font-bold px-1.5 py-0.5 rounded">
+                            -{discount}%
+                          </span>
+                        )}
+                      </div>
+                      <h3 className="text-xs text-[var(--j-text)] line-clamp-2 mb-1 leading-tight">{product.name}</h3>
+                      <p className="text-sm font-bold text-[var(--j-dark)]">{formatPrice(product.price, product.currency)}</p>
+                      {product.compareAtPrice && product.compareAtPrice > product.price && (
+                        <p className="text-[11px] text-[var(--j-muted)] line-through">{formatPrice(product.compareAtPrice, product.currency)}</p>
+                      )}
+                      <div className="mt-1"><StarRating rating={product.rating || 0} count={product.reviewCount || 0} /></div>
+                    </Link>
+                  );
+                })}
+              </div>
+              <button onClick={() => scroll("right")} className="absolute right-1 top-1/2 -translate-y-1/2 z-10 h-9 w-9 bg-white shadow-lg rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
+                <ChevronRight className="h-5 w-5" />
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+// ═══════════════════════════════════════════════════════════
+// 16. BRAND STORE ROW — "Nivea Official Store", "Xiaomi" etc.
+//     Brand banner left + products right (Jumia pattern)
+// ═══════════════════════════════════════════════════════════
+export interface JumiaBrandStoreRowProps {
+  brandName?: string;
+  subtitle?: string;
+  logo?: string;
+  bgColor?: string;
+  products?: Product[];
+  storeSlug?: string;
+  seeAllLink?: string;
+}
+
+export function JumiaBrandStoreRow({
+  brandName = "Brand Store",
+  subtitle = "Official Store",
+  logo,
+  bgColor = "#004DC1",
+  products = [],
+  storeSlug = "",
+  seeAllLink,
+}: JumiaBrandStoreRowProps) {
+  const scrollRef = useRef<HTMLDivElement>(null);
+
+  const scroll = (dir: "left" | "right") => {
+    scrollRef.current?.scrollBy({ left: dir === "left" ? -300 : 300, behavior: "smooth" });
+  };
+
+  if (products.length === 0) return null;
+
+  return (
+    <div className="jumia-block bg-[var(--j-bg)]">
+      <div className="max-w-[1220px] mx-auto px-4 pb-3">
+        <div className="bg-white rounded-lg overflow-hidden">
+          {/* Brand header */}
+          <div className="flex items-center justify-between px-4 py-3 border-b border-[var(--j-border)]">
+            <div className="flex items-center gap-2">
+              <h2 className="text-base font-bold text-[var(--j-dark)]">
+                {brandName}
+                {subtitle && <span className="text-[var(--j-primary)] font-normal text-sm ml-2">| {subtitle}</span>}
+              </h2>
+              <BadgeCheck className="h-4 w-4 text-[#004DC1]" />
+            </div>
+            <Link
+              href={seeAllLink || `/store/${storeSlug}/shop`}
+              className="text-[var(--j-primary)] text-sm font-semibold hover:underline flex items-center gap-1"
+            >
+              SEE ALL <ArrowRight className="h-3.5 w-3.5" />
+            </Link>
+          </div>
+
+          <div className="flex">
+            {/* Brand banner on left */}
+            <div className="hidden lg:flex flex-shrink-0 w-[220px] flex-col items-center justify-center p-6 border-r border-[var(--j-border)]" style={{ background: bgColor }}>
+              {logo ? (
+                <img src={logo} alt={brandName} className="max-w-[140px] max-h-[80px] object-contain mb-3" />
+              ) : (
+                <span className="text-white text-lg font-extrabold mb-2">{brandName}</span>
+              )}
+              <span className="text-white/80 text-xs text-center">Shop exclusive deals</span>
+            </div>
+
+            {/* Products */}
+            <div className="flex-1 relative group min-w-0">
+              <button onClick={() => scroll("left")} className="absolute left-1 top-1/2 -translate-y-1/2 z-10 h-9 w-9 bg-white shadow-lg rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
+                <ChevronLeft className="h-5 w-5" />
+              </button>
+              <div ref={scrollRef} className="flex overflow-x-auto scrollbar-hide divide-x divide-[var(--j-border)]">
+                {products.map((product) => {
+                  const discount = calcDiscount(product.price, product.compareAtPrice);
+                  const img = product.images?.[0]?.url;
+                  return (
+                    <Link
+                      key={product.id}
+                      href={`/store/${storeSlug}/product/${product.slug}`}
+                      className="flex-shrink-0 w-[160px] sm:w-[180px] p-3 hover:shadow-md transition-shadow block"
+                    >
+                      <div className="relative aspect-square mb-2 bg-[var(--j-light)] rounded flex items-center justify-center overflow-hidden">
+                        {img ? (
+                          <img src={img} alt={product.name} className="w-full h-full object-contain p-2" />
+                        ) : (
+                          <Package className="h-10 w-10 text-gray-300" />
+                        )}
+                        {discount > 0 && (
+                          <span className="absolute top-1.5 right-1.5 bg-[var(--j-primary)] text-white text-[10px] font-bold px-1.5 py-0.5 rounded">
+                            -{discount}%
+                          </span>
+                        )}
+                        {/* Official badge */}
+                        <span className="absolute bottom-1 left-1 bg-[#004DC1] text-white text-[8px] font-bold px-1 py-0.5 rounded flex items-center gap-0.5">
+                          <BadgeCheck className="h-2 w-2" /> Official
+                        </span>
+                      </div>
+                      <h3 className="text-xs text-[var(--j-text)] line-clamp-2 mb-1 leading-tight">{product.name}</h3>
+                      <p className="text-sm font-bold text-[var(--j-dark)]">{formatPrice(product.price, product.currency)}</p>
+                      {product.compareAtPrice && product.compareAtPrice > product.price && (
+                        <p className="text-[11px] text-[var(--j-muted)] line-through">{formatPrice(product.compareAtPrice, product.currency)}</p>
+                      )}
+                      <div className="mt-1"><StarRating rating={product.rating || 0} count={product.reviewCount || 0} /></div>
+                    </Link>
+                  );
+                })}
+              </div>
+              <button onClick={() => scroll("right")} className="absolute right-1 top-1/2 -translate-y-1/2 z-10 h-9 w-9 bg-white shadow-lg rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
+                <ChevronRight className="h-5 w-5" />
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+// ═══════════════════════════════════════════════════════════
+// 17. CATEGORY ICON BAR — Small horizontal bar with icons
+//     (Buy Phones, Sell on Jumia, Delivery, JForce)
+// ═══════════════════════════════════════════════════════════
+export interface JumiaCategoryIconBarProps {
+  items?: Array<{ icon?: string; label: string; link?: string }>;
+  storeSlug?: string;
+}
+
+export function JumiaCategoryIconBar({ items = [], storeSlug = "" }: JumiaCategoryIconBarProps) {
+  const defaultItems = items.length > 0 ? items : [
+    { label: "Phones & Tablets", link: "" },
+    { label: "Sell on Store", link: "" },
+    { label: "Free Delivery", link: "" },
+    { label: "Best Deals", link: "" },
+    { label: "Groceries", link: "" },
+    { label: "Fashion", link: "" },
+  ];
+
+  return (
+    <div className="jumia-block bg-[var(--j-bg)]">
+      <div className="max-w-[1220px] mx-auto px-4 pb-3">
+        <div className="bg-white rounded-lg overflow-hidden">
+          <div className="flex overflow-x-auto scrollbar-hide divide-x divide-[var(--j-border)]">
+            {defaultItems.map((item, i) => (
+              <Link
+                key={i}
+                href={item.link || `/store/${storeSlug}/shop`}
+                className="flex-shrink-0 flex flex-col items-center justify-center py-3 px-5 hover:bg-[var(--j-light)] transition-colors min-w-[120px]"
+              >
+                {item.icon ? (
+                  <img src={item.icon} alt={item.label} className="h-8 w-8 object-contain mb-1.5" />
+                ) : (
+                  <div className="h-8 w-8 rounded-full bg-[var(--j-light)] flex items-center justify-center mb-1.5">
+                    <Package className="h-4 w-4 text-[var(--j-muted)]" />
+                  </div>
+                )}
+                <span className="text-[11px] font-medium text-[var(--j-text)] text-center">{item.label}</span>
+              </Link>
+            ))}
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+// ═══════════════════════════════════════════════════════════
+// 18. SPONSORED PRODUCTS — Single row highlight
 // ═══════════════════════════════════════════════════════════
 export interface JumiaSponsoredProps {
   title?: string;
