@@ -358,7 +358,7 @@ export default function Sidebar({ onNavigate }: { onNavigate?: () => void } = {}
       </div>
 
       {/* Navigation */}
-      <nav className="flex-1 overflow-y-auto px-3 py-2">
+      <nav className="flex-1 min-h-0 overflow-y-auto px-3 py-2">
         {navGroups.map((group, gi) => (
           <div key={gi} className={cn(group.label ? "mt-4 first:mt-0" : "")}>
             {group.label && !collapsed && (
