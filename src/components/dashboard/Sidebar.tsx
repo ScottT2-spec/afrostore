@@ -248,9 +248,9 @@ export default function Sidebar({ onNavigate }: { onNavigate?: () => void } = {}
       )}
     >
       {/* Logo */}
-      <div className="flex h-16 items-center justify-between px-4 border-b border-gray-100">
+      <div className="flex h-14 items-center justify-between px-4 border-b border-gray-100 flex-shrink-0">
         <Link href="/dashboard/workspaces" className="flex items-center min-w-0">
-          <img src="/prokip-logo.png" alt="Prokip" className={`${collapsed ? "h-16 w-16" : "h-28 w-28"} flex-shrink-0 object-contain`} />
+          <img src="/prokip-logo.png" alt="Prokip" className={`${collapsed ? "h-8 w-8" : "h-10 w-10"} flex-shrink-0 object-contain`} />
         </Link>
         <button
           onClick={() => setCollapsed(!collapsed)}
@@ -261,7 +261,7 @@ export default function Sidebar({ onNavigate }: { onNavigate?: () => void } = {}
       </div>
 
       {/* Site Switcher */}
-      <div className="px-3 py-3 border-b border-gray-100 relative">
+      <div className="px-3 py-2 border-b border-gray-100 relative flex-shrink-0">
         <button
           onClick={() => setSiteSwitcherOpen(!siteSwitcherOpen)}
           className={cn(
@@ -377,7 +377,7 @@ export default function Sidebar({ onNavigate }: { onNavigate?: () => void } = {}
       </nav>
 
       {/* Bottom */}
-      <div className="border-t border-gray-100 px-3 py-3 space-y-0.5">
+      <div className="border-t border-gray-100 px-3 py-2 space-y-0.5 flex-shrink-0">
         {bottomNav.map((item) => {
           const Icon = item.icon;
           return (
