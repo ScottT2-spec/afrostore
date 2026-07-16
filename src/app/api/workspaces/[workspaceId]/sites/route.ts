@@ -187,6 +187,99 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ wor
           },
         });
 
+        // ── Seed sample categories ────────────────────────────
+        const sampleCategories = [
+          { name: "Electronics", slug: "electronics", image: "https://images.unsplash.com/photo-1498049794561-7780e7231661?w=400&h=400&fit=crop", description: "Phones, laptops, gadgets & accessories" },
+          { name: "Fashion", slug: "fashion", image: "https://images.unsplash.com/photo-1445205170230-053b83016050?w=400&h=400&fit=crop", description: "Clothing, shoes & accessories" },
+          { name: "Home & Kitchen", slug: "home-kitchen", image: "https://images.unsplash.com/photo-1556909114-f6e7ad7d3136?w=400&h=400&fit=crop", description: "Furniture, appliances & décor" },
+          { name: "Health & Beauty", slug: "health-beauty", image: "https://images.unsplash.com/photo-1596462502278-27bfdc403348?w=400&h=400&fit=crop", description: "Skincare, makeup & wellness" },
+          { name: "Sports & Outdoors", slug: "sports", image: "https://images.unsplash.com/photo-1461896836934-bd45ba9c5f3a?w=400&h=400&fit=crop", description: "Fitness, sports gear & outdoor equipment" },
+          { name: "Baby & Kids", slug: "baby-kids", image: "https://images.unsplash.com/photo-1515488042361-ee00e0ddd4e4?w=400&h=400&fit=crop", description: "Toys, clothing & essentials" },
+        ];
+
+        const createdCategories = await Promise.all(
+          sampleCategories.map((cat, i) =>
+            prisma.category.create({
+              data: { siteId: site.id, name: cat.name, slug: cat.slug, image: cat.image, description: cat.description, position: i },
+            })
+          )
+        );
+
+        // ── Seed sample products ─────────────────────────────
+        const sampleProducts = [
+          { name: "Wireless Noise Cancelling Headphones", slug: "wireless-headphones", price: 24999, compareAtPrice: 45000, description: "Premium wireless headphones with active noise cancellation, 40-hour battery life, and crystal-clear sound quality.", catIdx: 0, isFeatured: true, stock: 48, images: ["https://images.unsplash.com/photo-1505740420928-5e560c06d30e?w=600&h=600&fit=crop", "https://images.unsplash.com/photo-1583394838336-acd977736f90?w=600&h=600&fit=crop"] },
+          { name: "Smart Watch Pro Series", slug: "smart-watch-pro", price: 35500, compareAtPrice: 55000, description: "Advanced smartwatch with heart rate monitoring, GPS tracking, and 7-day battery life.", catIdx: 0, isFeatured: true, stock: 32, images: ["https://images.unsplash.com/photo-1523275335684-37898b6baf30?w=600&h=600&fit=crop"] },
+          { name: "Bluetooth Portable Speaker", slug: "bluetooth-speaker", price: 12800, compareAtPrice: 22000, description: "Waterproof portable speaker with deep bass and 12-hour playtime.", catIdx: 0, isFeatured: false, stock: 65, images: ["https://images.unsplash.com/photo-1608043152269-423dbba4e7e1?w=600&h=600&fit=crop"] },
+          { name: "USB-C Fast Charging Cable 2m", slug: "usb-c-cable", price: 2500, compareAtPrice: 5000, description: "Braided nylon USB-C cable with 100W fast charging support.", catIdx: 0, isFeatured: false, stock: 150, images: ["https://images.unsplash.com/photo-1583863788434-e58a36330cf0?w=600&h=600&fit=crop"] },
+          { name: "Classic Leather Crossbody Bag", slug: "leather-crossbody", price: 18500, compareAtPrice: 32000, description: "Genuine leather crossbody bag with adjustable strap and multiple compartments.", catIdx: 1, isFeatured: true, stock: 25, images: ["https://images.unsplash.com/photo-1548036328-c9fa89d128fa?w=600&h=600&fit=crop"] },
+          { name: "Men's Casual Slim Fit Shirt", slug: "slim-fit-shirt", price: 8900, compareAtPrice: 15000, description: "Premium cotton slim fit shirt, available in multiple colors.", catIdx: 1, isFeatured: false, stock: 80, images: ["https://images.unsplash.com/photo-1596755094514-f87e34085b2c?w=600&h=600&fit=crop"] },
+          { name: "Women's Running Sneakers", slug: "running-sneakers", price: 15700, compareAtPrice: 28000, description: "Lightweight running shoes with cushioned sole and breathable mesh upper.", catIdx: 1, isFeatured: true, stock: 40, images: ["https://images.unsplash.com/photo-1542291026-7eec264c27ff?w=600&h=600&fit=crop"] },
+          { name: "Stainless Steel Cookware Set", slug: "cookware-set", price: 28000, compareAtPrice: 48000, description: "6-piece premium stainless steel cookware set with tempered glass lids.", catIdx: 2, isFeatured: true, stock: 18, images: ["https://images.unsplash.com/photo-1556909114-44e3e70034e2?w=600&h=600&fit=crop"] },
+          { name: "LED Desk Lamp with USB Port", slug: "led-desk-lamp", price: 7500, compareAtPrice: 14000, description: "Adjustable LED desk lamp with 3 color modes and built-in USB charging port.", catIdx: 2, isFeatured: false, stock: 55, images: ["https://images.unsplash.com/photo-1507473885765-e6ed057ab6fe?w=600&h=600&fit=crop"] },
+          { name: "Organic Vitamin C Serum", slug: "vitamin-c-serum", price: 6800, compareAtPrice: 12000, description: "30ml organic vitamin C face serum with hyaluronic acid for glowing skin.", catIdx: 3, isFeatured: true, stock: 70, images: ["https://images.unsplash.com/photo-1620916566398-39f1143ab7be?w=600&h=600&fit=crop"] },
+          { name: "Resistance Bands Set", slug: "resistance-bands", price: 4500, compareAtPrice: 8500, description: "Set of 5 resistance bands with different strength levels for home workouts.", catIdx: 4, isFeatured: false, stock: 90, images: ["https://images.unsplash.com/photo-1598289431512-b97b0917affc?w=600&h=600&fit=crop"] },
+          { name: "Kids Educational Tablet", slug: "kids-tablet", price: 22000, compareAtPrice: 38000, description: "7-inch kids tablet with parental controls, learning apps, and protective case.", catIdx: 5, isFeatured: true, stock: 30, images: ["https://images.unsplash.com/photo-1544776193-352d25ca82cd?w=600&h=600&fit=crop"] },
+        ];
+
+        for (const prod of sampleProducts) {
+          const product = await prisma.product.create({
+            data: {
+              siteId: site.id,
+              categoryId: createdCategories[prod.catIdx]?.id || null,
+              name: prod.name,
+              slug: prod.slug,
+              description: prod.description,
+              price: prod.price,
+              compareAtPrice: prod.compareAtPrice,
+              currency: "NGN",
+              stock: prod.stock,
+              isFeatured: prod.isFeatured,
+              status: "ACTIVE",
+              isPublished: true,
+              tags: [],
+            },
+          });
+          // Create product images
+          for (let j = 0; j < prod.images.length; j++) {
+            await prisma.productImage.create({
+              data: { productId: product.id, url: prod.images[j], alt: prod.name, position: j },
+            });
+          }
+        }
+
+        // ── Hero banners with real images ─────────────────────
+        // Update hero block with professional banner images
+        const updatedJumiaBlocks = jumiaBlocks.map(block => {
+          if (block.type === "jumiaHeroBanner") {
+            return { ...block, props: { ...block.props, slides: [
+              { image: "https://images.unsplash.com/photo-1607082349566-187342175e2f?w=1200&h=500&fit=crop", title: `Welcome to ${storeName}`, subtitle: "Discover amazing deals on top products", buttonText: "Shop Now", buttonLink: `/store/${storeSlug}/shop` },
+              { image: "https://images.unsplash.com/photo-1556742049-0cfed4f6a45d?w=1200&h=500&fit=crop", title: "Flash Sales Live Now", subtitle: "Up to 70% off on selected items", buttonText: "View Deals", buttonLink: `/store/${storeSlug}/shop` },
+              { image: "https://images.unsplash.com/photo-1441986300917-64674bd600d8?w=1200&h=500&fit=crop", title: "Free Delivery", subtitle: "On orders above ₦15,000", buttonText: "Start Shopping", buttonLink: `/store/${storeSlug}/shop` },
+            ]}};
+          }
+          if (block.type === "jumiaPromoBanners") {
+            return { ...block, props: { ...block.props, banners: [
+              { image: "https://images.unsplash.com/photo-1607082350899-7e105aa886ae?w=600&h=300&fit=crop", title: "New Arrivals", link: `/store/${storeSlug}/shop` },
+              { image: "https://images.unsplash.com/photo-1483985988355-763728e1935b?w=600&h=300&fit=crop", title: "Fashion Week", link: `/store/${storeSlug}/shop` },
+            ]}};
+          }
+          if (block.type === "jumiaPromoTiles") {
+            return { ...block, props: { ...block.props, tiles: [
+              { title: "Flash Sales", image: "https://images.unsplash.com/photo-1607083206869-4c7672e72a8a?w=200&h=200&fit=crop", bgColor: "#FFF3E0", link: `/store/${storeSlug}/shop` },
+              { title: "Free Delivery", image: "https://images.unsplash.com/photo-1566576912321-d58ddd7a6088?w=200&h=200&fit=crop", bgColor: "#E8F5E9", link: `/store/${storeSlug}/shop` },
+              { title: "Official Stores", image: "https://images.unsplash.com/photo-1472851294608-062f824d29cc?w=200&h=200&fit=crop", bgColor: "#E3F2FD", link: `/store/${storeSlug}/shop` },
+              { title: "New Arrivals", image: "https://images.unsplash.com/photo-1460353581641-37baddab0fa2?w=200&h=200&fit=crop", bgColor: "#FCE4EC", link: `/store/${storeSlug}/shop` },
+            ]}};
+          }
+          return block;
+        });
+
+        // Update the homepage with the enhanced blocks
+        await prisma.page.updateMany({
+          where: { siteId: site.id, slug: "home" },
+          data: { content: { blocks: updatedJumiaBlocks, settings: {} } },
+        });
+
         templateResult = { method: "ai", template: "jumia-marketplace", blocksCreated: jumiaBlocks.length };
       } catch (aiErr) {
         console.error("AI build error:", aiErr);
