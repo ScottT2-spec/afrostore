@@ -19,6 +19,7 @@ import { INTERIOR_DECOR_PRESET, INTERIOR_RETAIL_PRESET } from "@/lib/templates/p
 import { KIDS_TEMPLATE_PRESET } from "@/lib/templates/presets/kids-preset";
 import { MAKEUP_TEMPLATE_PRESET } from "@/lib/templates/presets/makeup-preset";
 import { PERFUMES_TEMPLATE_PRESET } from "@/lib/templates/presets/perfumes-preset";
+import { AI_TEMPLATE_PRESET } from "@/lib/templates/presets/ai-preset";
 import { TSHIRTS_PRINTS_ABOUT_PAGE_BLOCKS, TSHIRTS_PRINTS_CONTACT_PAGE_BLOCKS, TSHIRTS_PRINTS_BLOG_PAGE_BLOCKS } from "@/lib/templates/presets/t-shirts-prints-page-presets";
 import { VEGETABLE_HOME_PAGE_BLOCKS, VEGETABLE_MENU_PAGE_BLOCKS, VEGETABLE_RECIPE_PAGE_BLOCKS, VEGETABLE_ABOUT_PAGE_BLOCKS, VEGETABLE_CONTACT_PAGE_BLOCKS, VEGETABLE_RESERVATION_PAGE_BLOCKS } from "@/lib/templates/presets/vegetables-page-presets";
 import { PERFUMES_HOME_PAGE_BLOCKS, PERFUMES_ABOUT_PAGE_BLOCKS, PERFUMES_CONTACT_PAGE_BLOCKS, PERFUMES_FRAGRANCES_PAGE_BLOCKS, PERFUMES_JOURNAL_PAGE_BLOCKS, PERFUMES_REVIEWS_PAGE_BLOCKS } from "@/lib/templates/presets/perfumes-page-presets";
@@ -112,6 +113,7 @@ export const BESPOKE_TEMPLATE_PRESETS: TemplatePresetMap = {
   jewellery: ELECTRONICS_TEMPLATE_PRESET,
   "jewellery-elegance": ELECTRONICS_TEMPLATE_PRESET,
   strada: HEALTH_TEMPLATE_PRESET,
+  ai: AI_TEMPLATE_PRESET,
 };
 
 /** Template-specific page presets (non-home pages). */

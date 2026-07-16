@@ -13,6 +13,7 @@ import { INTERIOR_DECOR_PRESET, INTERIOR_RETAIL_PRESET } from "@/lib/templates/p
 import { KIDS_TEMPLATE_PRESET } from "@/lib/templates/presets/kids-preset";
 import { MAKEUP_TEMPLATE_PRESET } from "@/lib/templates/presets/makeup-preset";
 import { PERFUMES_TEMPLATE_PRESET } from "@/lib/templates/presets/perfumes-preset";
+import { AI_TEMPLATE_PRESET } from "@/lib/templates/presets/ai-preset";
 import { FASHION_SAMPLE_PRODUCTS } from "@/lib/templates/presets/fashion-sample-products";
 import { FASHION_SAMPLE_BLOGS } from "@/lib/templates/presets/fashion-sample-blogs";
 import { TEMPLATE_SAMPLE_DATA } from "@/lib/templates/presets/template-sample-data";
@@ -125,6 +126,7 @@ export async function importTemplateToSite(
     toys: KIDS_TEMPLATE_PRESET,
     makeup: MAKEUP_TEMPLATE_PRESET,
     perfumes: PERFUMES_TEMPLATE_PRESET,
+    ai: AI_TEMPLATE_PRESET,
   };
 
   const preset = TEMPLATE_PRESETS[catalogEntry.slug];

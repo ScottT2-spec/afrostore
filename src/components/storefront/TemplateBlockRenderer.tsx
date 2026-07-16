@@ -220,6 +220,19 @@ import {
   VegetableReservation,
 } from "@/components/storefront/VegetableTemplateBlocks";
 import {
+  AiFontLoader,
+  AiAnnouncementBar,
+  AiHeroVideo,
+  AiCategoryRow,
+  AiLargeProductCarousel,
+  AiPromoTiles,
+  AiProductCarousel,
+  AiValueProps,
+  AiNewsletter,
+  AiFooter,
+  AiSectionTitle,
+} from "@/components/storefront/AiTemplateBlocks";
+import {
   JumiaFontLoader,
   JumiaTopBar,
   JumiaHeader,
@@ -486,6 +499,19 @@ const JUMIA_BLOCKS: Record<string, BlockComponent> = {
   jumiaSpacer: JumiaSpacer as unknown as BlockComponent,
 };
 
+const AI_BLOCKS: Record<string, BlockComponent> = {
+  aiAnnouncementBar: AiAnnouncementBar as unknown as BlockComponent,
+  aiHeroVideo: AiHeroVideo as unknown as BlockComponent,
+  aiCategoryRow: AiCategoryRow as unknown as BlockComponent,
+  aiLargeProductCarousel: AiLargeProductCarousel as unknown as BlockComponent,
+  aiPromoTiles: AiPromoTiles as unknown as BlockComponent,
+  aiProductCarousel: AiProductCarousel as unknown as BlockComponent,
+  aiValueProps: AiValueProps as unknown as BlockComponent,
+  aiNewsletter: AiNewsletter as unknown as BlockComponent,
+  aiFooter: AiFooter as unknown as BlockComponent,
+  aiSectionTitle: AiSectionTitle as unknown as BlockComponent,
+};
+
 const ALL_TEMPLATE_BLOCKS: Record<string, BlockComponent> = {
   ...FASHION_BLOCKS,
   ...ELECTRONICS_BLOCKS,
@@ -500,6 +526,7 @@ const ALL_TEMPLATE_BLOCKS: Record<string, BlockComponent> = {
   ...TSHIRTS_BLOCKS,
   ...VEGETABLE_BLOCKS,
   ...JUMIA_BLOCKS,
+  ...AI_BLOCKS,
 };
 
 /* ─── FONT LOADER MAP ──────────────────────────────────────── */
@@ -519,12 +546,14 @@ const FONT_LOADERS: Record<string, React.ComponentType> = {
   vegetables: FashionFontLoader,
   jumia: JumiaFontLoader,
   marketplace: JumiaFontLoader,
+  ai: AiFontLoader,
 };
 
 /** Detect which template family a block set belongs to */
 function detectTemplateFamily(blocks: TemplateBlock[]): string {
   for (const b of blocks) {
     const t = b.type;
+    if (t.startsWith("ai")) return "ai";
     if (t.startsWith("jumia")) return "jumia";
     if (t.startsWith("electronics")) return "electronics";
     if (t.startsWith("bakery")) return "bakery";

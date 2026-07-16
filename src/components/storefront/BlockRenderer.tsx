@@ -19,8 +19,10 @@ import { InteriorFontLoader } from "@/components/storefront/InteriorDesignTempla
 import { KidsFontLoader } from "@/components/storefront/KidsTemplateBlocks";
 import { MakeupFontLoader } from "@/components/storefront/MakeupTemplateBlocks";
 import { PerfumesFontLoader } from "@/components/storefront/PerfumesTemplateBlocks";
+import { AiFontLoader } from "@/components/storefront/AiTemplateBlocks";
 
 function getTemplateFontLoader(type: string): React.ComponentType {
+  if (type.startsWith("ai")) return AiFontLoader;
   if (type.startsWith("electronics")) return ElectronicsFontLoader;
   if (type.startsWith("bakery")) return BakeryFontLoader;
   if (type.startsWith("cosmetics")) return CosmeticsFontLoader;

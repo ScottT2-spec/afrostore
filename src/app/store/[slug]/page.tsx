@@ -20,6 +20,7 @@ import { INTERIOR_DECOR_PRESET, INTERIOR_RETAIL_PRESET } from "@/lib/templates/p
 import { KIDS_TEMPLATE_PRESET } from "@/lib/templates/presets/kids-preset";
 import { MAKEUP_TEMPLATE_PRESET } from "@/lib/templates/presets/makeup-preset";
 import { PERFUMES_TEMPLATE_PRESET } from "@/lib/templates/presets/perfumes-preset";
+import { AI_TEMPLATE_PRESET } from "@/lib/templates/presets/ai-preset";
 import { FashionStoreContext } from "@/components/storefront/FashionTemplateBlocks";
 import { ElectronicsStoreContext } from "@/components/storefront/ElectronicsTemplateBlocks";
 import { BakeryStoreContext } from "@/components/storefront/BakeryTemplateBlocks";
@@ -56,6 +57,7 @@ const TEMPLATE_PRESET_MAP: Record<string, TemplateBlock[]> = {
   toys: KIDS_TEMPLATE_PRESET,
   makeup: MAKEUP_TEMPLATE_PRESET,
   perfumes: PERFUMES_TEMPLATE_PRESET,
+  ai: AI_TEMPLATE_PRESET,
 };
 import { getLinkedPageHref, parsePageContent, type PageSettings } from "@/lib/page-content";
 import { ThemeProvider, type ThemeData } from "@/components/storefront/ThemeProvider";

@@ -77,6 +77,9 @@ export const TEMPLATES: TemplateMeta[] = [
 
   // Health
   { slug: 'pills', name: 'Health & Supplements', category: 'health', categoryLabel: 'Health & Wellness', description: 'Health supplements and pharmacy store', previewImage: 'https://woodmart.xtemos.com/wp-content/uploads/2021/08/01_theme-preview.__large_preview.jpg', file: 'health/pills.html', industries: ['health'] },
+
+  // AI-Generated
+  { slug: 'ai', name: 'AI Modern', category: 'ai', categoryLabel: 'AI Templates', description: 'Clean, modern Allbirds-inspired e-commerce template with full-bleed imagery, editorial layout, and video hero', previewImage: 'https://images.unsplash.com/photo-1441986300917-64674bd600d8?w=400&h=300&fit=crop', file: 'ai/modern.html', industries: ['fashion', 'lifestyle', 'retail'] },
 ];
 
 export function getTemplateBySlug(slug: string): TemplateMeta | undefined {
