@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useRef, useCallback } from "react";
+import { useState, useEffect, useRef, useCallback, createContext, useContext } from "react";
 import Link from "next/link";
 import {
   ChevronLeft,
@@ -97,6 +97,55 @@ function StockBar({ itemsLeft = 0, total = 50 }: { itemsLeft?: number; total?: n
   );
 }
 
+// ─── STORE CONTEXT ─────────────────────────────────────────
+export interface JumiaStoreContextData {
+  products: Product[];
+  categories: Category[];
+  currency: string;
+  storeSlug: string;
+  storeName: string;
+  logo?: string | null;
+}
+
+export const JumiaStoreContext = createContext<JumiaStoreContextData | null>(null);
+
+function useJumiaStore(storeSlug?: string): JumiaStoreContextData | null {
+  const ctx = useContext(JumiaStoreContext);
+  const [fetched, setFetched] = useState<JumiaStoreContextData | null>(null);
+
+  useEffect(() => {
+    if (ctx || !storeSlug) return;
+    fetch(`/api/storefront/${storeSlug}`)
+      .then((r) => r.json())
+      .then((json) => {
+        if (json.success && json.data) {
+          const d = json.data;
+          setFetched({
+            products: (d.products || []).map((p: any) => ({
+              id: p.id, name: p.name, slug: p.slug, price: p.price,
+              compareAtPrice: p.compareAtPrice, currency: p.currency || "NGN",
+              images: p.images || [], category: p.category,
+              isFeatured: p.isFeatured, inStock: p.inStock ?? p.stock > 0,
+              tags: p.tags || [], reviewCount: p.reviewCount || p._count?.reviews || 0,
+              rating: p.rating || 0, stock: p.stock,
+            })),
+            categories: (d.categories || []).map((c: any) => ({
+              id: c.id, name: c.name, slug: c.slug, image: c.image,
+              _count: c._count,
+            })),
+            currency: d.store?.currency || "NGN",
+            storeSlug: d.store?.slug || storeSlug,
+            storeName: d.store?.name || "",
+            logo: d.store?.logo,
+          });
+        }
+      })
+      .catch(() => {});
+  }, [ctx, storeSlug]);
+
+  return ctx || fetched;
+}
+
 // ─── TYPES ─────────────────────────────────────────────────
 interface ProductImage { id: string; url: string; alt?: string; }
 interface Product {
@@ -108,56 +157,27 @@ interface Product {
 }
 interface Category { id: string; name: string; slug: string; image?: string; _count?: { products: number }; }
 
-// ─── DEMO DATA ─────────────────────────────────────────────
-// Realistic placeholder data so the store looks alive even without real products
-
-const DEMO_PRODUCTS: Product[] = [
-  { id: "d1", name: "Wireless Bluetooth Earbuds TWS Stereo", slug: "earbuds", price: 4500, compareAtPrice: 12500, currency: "NGN", images: [], rating: 4.2, reviewCount: 156, stock: 26 },
-  { id: "d2", name: "Men's Casual Cotton T-Shirt Round Neck", slug: "tshirt", price: 2800, compareAtPrice: 5500, currency: "NGN", images: [], rating: 3.8, reviewCount: 89, stock: 43 },
-  { id: "d3", name: "Non-stick Cooking Pot Set 3 Pieces", slug: "cooking-pot", price: 15000, compareAtPrice: 25000, currency: "NGN", images: [], rating: 4.5, reviewCount: 234, stock: 8 },
-  { id: "d4", name: "Smartphone Screen Protector Tempered Glass", slug: "screen-protector", price: 1200, compareAtPrice: 3500, currency: "NGN", images: [], rating: 4.0, reviewCount: 312, stock: 67 },
-  { id: "d5", name: "Ladies Fashion Handbag PU Leather", slug: "handbag", price: 8500, compareAtPrice: 18000, currency: "NGN", images: [], rating: 4.3, reviewCount: 78, stock: 15 },
-  { id: "d6", name: "Rechargeable LED Desk Lamp Touch Control", slug: "desk-lamp", price: 6200, compareAtPrice: 12000, currency: "NGN", images: [], rating: 4.1, reviewCount: 45, stock: 31 },
-  { id: "d7", name: "Children's Educational Building Blocks Set", slug: "blocks", price: 3800, compareAtPrice: 7500, currency: "NGN", images: [], rating: 4.6, reviewCount: 167, stock: 5 },
-  { id: "d8", name: "Stainless Steel Water Bottle 750ml", slug: "water-bottle", price: 2200, compareAtPrice: 4500, currency: "NGN", images: [], rating: 4.4, reviewCount: 203, stock: 52 },
-  { id: "d9", name: "Portable Bluetooth Speaker Waterproof", slug: "speaker", price: 7800, compareAtPrice: 15000, currency: "NGN", images: [], rating: 4.0, reviewCount: 124, stock: 19 },
-  { id: "d10", name: "Organic Face Moisturizer Cream 100ml", slug: "moisturizer", price: 3200, compareAtPrice: 6500, currency: "NGN", images: [], rating: 4.7, reviewCount: 298, stock: 37 },
-];
-
-const DEMO_CATEGORIES = [
-  { id: "c1", name: "Phones & Tablets", slug: "phones", emoji: "📱" },
-  { id: "c2", name: "Electronics", slug: "electronics", emoji: "💻" },
-  { id: "c3", name: "Fashion", slug: "fashion", emoji: "👗" },
-  { id: "c4", name: "Home & Kitchen", slug: "home", emoji: "🏠" },
-  { id: "c5", name: "Health & Beauty", slug: "beauty", emoji: "💄" },
-  { id: "c6", name: "Baby Products", slug: "baby", emoji: "👶" },
-  { id: "c7", name: "Computing", slug: "computing", emoji: "🖥️" },
-  { id: "c8", name: "Groceries", slug: "groceries", emoji: "🛒" },
-  { id: "c9", name: "Gaming", slug: "gaming", emoji: "🎮" },
-  { id: "c10", name: "Sports", slug: "sports", emoji: "⚽" },
-  { id: "c11", name: "Automobile", slug: "automobile", emoji: "🚗" },
-  { id: "c12", name: "Books", slug: "books", emoji: "📚" },
-];
-
-// Placeholder product image using colored gradients
-function PlaceholderImage({ index = 0, size = "md" }: { index?: number; size?: "sm" | "md" | "lg" }) {
-  const colors = [
-    "from-orange-100 to-orange-50",
-    "from-blue-100 to-blue-50",
-    "from-pink-100 to-pink-50",
-    "from-green-100 to-green-50",
-    "from-purple-100 to-purple-50",
-    "from-yellow-100 to-yellow-50",
-    "from-red-100 to-red-50",
-    "from-teal-100 to-teal-50",
-    "from-indigo-100 to-indigo-50",
-    "from-rose-100 to-rose-50",
-  ];
-  const icons = ["📱", "👕", "🍳", "📲", "👜", "💡", "🧩", "🫗", "🔊", "🧴"];
-  const sizeClass = size === "sm" ? "text-2xl" : size === "lg" ? "text-5xl" : "text-3xl";
+// Product image — uses real image or clean placeholder
+function ProductImage({ product, index = 0, className = "" }: { product?: Product; index?: number; className?: string }) {
+  const imgUrl = product?.images?.[0]?.url;
+  if (imgUrl) {
+    return <img src={imgUrl} alt={product?.name || "Product"} className={`w-full h-full object-contain ${className}`} loading="lazy" />;
+  }
   return (
-    <div className={`w-full h-full bg-gradient-to-br ${colors[index % colors.length]} flex items-center justify-center`}>
-      <span className={sizeClass}>{icons[index % icons.length]}</span>
+    <div className={`w-full h-full bg-[var(--j-light)] flex items-center justify-center ${className}`}>
+      <Package className="w-8 h-8 text-[var(--j-muted)] opacity-40" />
+    </div>
+  );
+}
+
+// Category image
+function CategoryImage({ category, className = "" }: { category?: Category; className?: string }) {
+  if (category?.image) {
+    return <img src={category.image} alt={category.name} className={`w-full h-full object-cover ${className}`} loading="lazy" />;
+  }
+  return (
+    <div className={`w-full h-full bg-[var(--j-light)] flex items-center justify-center ${className}`}>
+      <Grid3X3 className="w-6 h-6 text-[var(--j-muted)] opacity-40" />
     </div>
   );
 }
@@ -189,7 +209,7 @@ function JumiaProductCard({
         {img ? (
           <img src={img} alt={product.name} className="w-full h-full object-contain p-3" />
         ) : (
-          <PlaceholderImage index={index} />
+          <ProductImage product={product} index={index} className="p-3" />
         )}
         {discount > 0 && (
           <span className="absolute top-0 right-0 bg-[var(--j-primary)] text-white text-[10px] font-bold px-2 py-1 rounded-bl-lg">
@@ -383,11 +403,13 @@ export interface JumiaCategoryIconBarProps {
 }
 
 export function JumiaCategoryIconBar({ items = [], categories = [], storeSlug = "" }: JumiaCategoryIconBarProps) {
-  const cats = categories.length > 0
-    ? categories.slice(0, 12).map(c => ({ label: c.name, emoji: "", link: `/store/${storeSlug}/category/${c.slug}`, icon: c.image }))
+  const store = useJumiaStore(storeSlug);
+  const realCats = categories.length > 0 ? categories : (store?.categories || []);
+  const cats = realCats.length > 0
+    ? realCats.slice(0, 12).map(c => ({ label: c.name, emoji: "", link: `/store/${storeSlug}/category/${c.slug}`, icon: c.image }))
     : items.length > 0
       ? items
-      : DEMO_CATEGORIES.map(c => ({ label: c.name, emoji: c.emoji, link: `/store/${storeSlug}/shop` }));
+      : [];
 
   return (
     <div className="jumia-block bg-[var(--j-bg)]">
@@ -404,7 +426,7 @@ export function JumiaCategoryIconBar({ items = [], categories = [], storeSlug = 
                   {item.icon ? (
                     <img src={item.icon} alt={item.label} className="w-full h-full object-cover" />
                   ) : (
-                    <span className="text-xl">{item.emoji || "📦"}</span>
+                    <Grid3X3 className="w-5 h-5 text-[var(--j-muted)] opacity-50" />
                   )}
                 </div>
                 <span className="text-[9px] font-medium text-[var(--j-text)] text-center line-clamp-1 w-full">{item.label}</span>
@@ -446,7 +468,7 @@ export function JumiaFlashDeals({ title = "Flash Sales", products = [], storeSlu
     return () => clearInterval(interval);
   }, [endTime]);
 
-  const items = products.length > 0 ? products : DEMO_PRODUCTS.slice(0, 8);
+  const store = useJumiaStore(storeSlug); const items = products.length > 0 ? products : (store?.products || []);
 
   return (
     <div className="jumia-block bg-[var(--j-bg)]">
@@ -572,7 +594,7 @@ export function JumiaProductGrid({
   showSeeAll = true,
   seeAllLink,
 }: JumiaProductGridProps) {
-  const items = products.length > 0 ? products : DEMO_PRODUCTS;
+  const store = useJumiaStore(storeSlug); const items = products.length > 0 ? products : (store?.products || []);
 
   return (
     <div className="jumia-block bg-[var(--j-bg)]">
@@ -621,7 +643,7 @@ export function JumiaCategoryDealRow({
   storeSlug = "",
   seeAllLink,
 }: JumiaCategoryDealRowProps) {
-  const items = products.length > 0 ? products : DEMO_PRODUCTS.slice(3, 9);
+  const store = useJumiaStore(storeSlug); const items = products.length > 0 ? products : (store?.products || []);
 
   return (
     <div className="jumia-block bg-[var(--j-bg)]">
@@ -671,7 +693,7 @@ export function JumiaBrandStoreRow({
   storeSlug = "",
   seeAllLink,
 }: JumiaBrandStoreRowProps) {
-  const items = products.length > 0 ? products : DEMO_PRODUCTS.slice(5, 10);
+  const store = useJumiaStore(storeSlug); const items = products.length > 0 ? products : (store?.products || []);
 
   return (
     <div className="jumia-block bg-[var(--j-bg)]">
@@ -746,7 +768,7 @@ export interface JumiaTopDealsProps {
 }
 
 export function JumiaTopDeals({ title = "Top Deals", subtitle, bgColor = "#CC0000", products = [], storeSlug = "" }: JumiaTopDealsProps) {
-  const items = products.length > 0 ? products : DEMO_PRODUCTS.slice(2, 8);
+  const store = useJumiaStore(storeSlug); const items = products.length > 0 ? products : (store?.products || []);
 
   return (
     <div className="jumia-block bg-[var(--j-bg)]">
@@ -942,7 +964,7 @@ export interface JumiaSponsoredProps {
 }
 
 export function JumiaSponsored({ title = "Sponsored Products", products = [], storeSlug = "" }: JumiaSponsoredProps) {
-  const items = products.length > 0 ? products : DEMO_PRODUCTS.slice(1, 7);
+  const store = useJumiaStore(storeSlug); const items = products.length > 0 ? products : (store?.products || []);
 
   return (
     <div className="jumia-block bg-[var(--j-bg)]">
@@ -974,7 +996,8 @@ export interface JumiaCategoryGridProps {
 }
 
 export function JumiaCategoryGrid({ title = "Top Categories", categories = [], storeSlug = "" }: JumiaCategoryGridProps) {
-  const cats = categories.length > 0 ? categories : DEMO_CATEGORIES.map(c => ({ id: c.id, name: c.name, slug: c.slug, image: "" }));
+  const store = useJumiaStore(storeSlug);
+  const cats = categories.length > 0 ? categories : (store?.categories || []);
 
   return (
     <div className="jumia-block bg-[var(--j-bg)]">
@@ -990,7 +1013,7 @@ export function JumiaCategoryGrid({ title = "Top Categories", categories = [], s
                   {cat.image ? (
                     <img src={cat.image} alt={cat.name} className="w-full h-full object-cover" />
                   ) : (
-                    <span className="text-lg">{DEMO_CATEGORIES[i]?.emoji || "📦"}</span>
+                    <Grid3X3 className="w-5 h-5 text-[var(--j-muted)] opacity-40" />
                   )}
                 </div>
                 <span className="text-[10px] font-medium text-[var(--j-text)] text-center">{cat.name}</span>

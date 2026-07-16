@@ -826,7 +826,7 @@ export default function StorePage() {
       ) : isJumiaTemplate && homeBlocks.length > 0 ? (
         /* AI-built Jumia marketplace layout */
         <div>
-          <RenderTemplateBlocks blocks={homeBlocks as unknown as TemplateBlock[]} />
+          <RenderBlocks blocks={homeBlocks} storeSlug={slug} products={products} currency={currency} addToCart={(p) => addToCart(p as unknown as Product)} isWishlisted={isWishlisted} toggleWishlist={toggleWishlist} addedToCart={addedToCart} />
         </div>
       ) : homeBlocks.length > 0 ? (
         /* Fallback: render blocks even if hasHomeContent is false but blocks exist */
