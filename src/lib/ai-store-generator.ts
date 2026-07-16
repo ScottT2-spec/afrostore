@@ -14,6 +14,7 @@ import { AIFailover } from "@/lib/failover";
 import type { AIProviderConfig } from "@/lib/failover";
 import { AICapability } from "@/lib/failover";
 import type { BuilderBlock, BlockType } from "@/lib/builder/types";
+import { AI_TEMPLATE_PRESET } from "@/lib/templates/presets/ai-preset";
 
 // ─── Types ──────────────────────────────────────────────────
 
@@ -231,114 +232,105 @@ function parseAIResponse(content: string): Record<string, any> {
 function buildHomePage(data: Record<string, any>, storeName: string, storeSlug: string): GeneratedPage {
   const brand = data.brand || {};
   const features = data.features || [];
-  const testimonials = data.testimonials || [];
 
-  const featureIcons = ["truck", "shield", "headphones", "zap", "heart", "award", "globe", "rocket"];
+  // Use the Allbirds-inspired AI template preset as the base
+  // Deep clone so we can inject AI-generated content
+  const templateBlocks = JSON.parse(JSON.stringify(AI_TEMPLATE_PRESET));
 
-  const blocks: BuilderBlock[] = [
-    // Premium Hero
-    block("hero", {
-      heading: brand.heroHeading || `Welcome to ${storeName}`,
-      subheading: brand.heroSubheading || brand.tagline || "Discover amazing products",
-      buttonText: brand.ctaText || "Shop Now",
-      buttonHref: `/store/${storeSlug}/shop`,
-      secondaryButtonText: "Learn More",
-      secondaryButtonHref: `/store/${storeSlug}/about`,
-      badge: brand.tagline || `✨ Welcome to ${storeName}`,
-      bgStyle: "gradient",
-      align: "center",
-    }),
-    block("spacer", { height: 56 }),
-
-    // Stats
-    block("stats", {
-      bgColor: "brand",
-      items: [
-        { value: "1,000+", label: "Happy Customers", icon: "users" },
-        { value: "500+", label: "Products", icon: "package" },
-        { value: "4.9", label: "Customer Rating", icon: "star" },
-        { value: "24/7", label: "Support", icon: "headphones" },
-      ],
-    }),
-    block("spacer", { height: 56 }),
-
-    // Featured products
-    block("productGrid", {
-      title: "Our Products",
-      subtitle: "Handpicked just for you",
-      columns: 3,
-      limit: 6,
-      showPrice: true,
-      category: "",
-    }),
-    block("spacer", { height: 56 }),
-
-    // Features / Why choose us
-    block("features", {
-      title: "Why Choose Us",
-      subtitle: "Here's what makes us different",
-      bgColor: "surface",
-      items: features.length >= 3
-        ? features.slice(0, 4).map((f: any, i: number) => ({
-            icon: featureIcons[i % featureIcons.length],
+  // Inject AI-generated content into the template blocks
+  for (const block of templateBlocks) {
+    switch (block.type) {
+      case "aiAnnouncementBar": {
+        // Use AI-generated features as marquee messages
+        const messages = [
+          brand.tagline || `Welcome to ${storeName}`,
+          ...(features.slice(0, 3).map((f: any) => f.title || f.desc)),
+        ].filter(Boolean);
+        if (messages.length > 0) block.props.messages = messages;
+        break;
+      }
+      case "aiHeroVideo": {
+        // Update hero buttons with store-specific links
+        block.props.buttons = [
+          { text: brand.ctaText || "Shop Now", link: `/store/${storeSlug}/shop`, style: "primary" },
+          { text: "Learn More", link: `/store/${storeSlug}/about`, style: "primary" },
+        ];
+        break;
+      }
+      case "aiCategoryRow": {
+        // Update category card links to store-specific paths
+        for (const card of block.props.cards) {
+          for (const btn of card.buttons) {
+            if (btn.link.startsWith("/collections")) {
+              btn.link = `/store/${storeSlug}/shop`;
+            }
+          }
+        }
+        break;
+      }
+      case "aiLargeProductCarousel": {
+        // Update product links
+        for (const tab of block.props.tabs) {
+          for (const product of tab.products) {
+            if (product.mensLink) product.mensLink = `/store/${storeSlug}/shop`;
+            if (product.womensLink) product.womensLink = `/store/${storeSlug}/shop`;
+            if (product.link) product.link = `/store/${storeSlug}/shop`;
+          }
+        }
+        break;
+      }
+      case "aiPromoTiles": {
+        // Update tile links
+        for (const tile of block.props.tiles) {
+          for (const btn of tile.buttons) {
+            if (btn.link.startsWith("/collections")) {
+              btn.link = `/store/${storeSlug}/shop`;
+            }
+          }
+        }
+        break;
+      }
+      case "aiProductCarousel": {
+        // Update product card links
+        for (const tab of block.props.tabs) {
+          for (const product of tab.products) {
+            if (product.link) product.link = `/store/${storeSlug}/shop`;
+          }
+        }
+        break;
+      }
+      case "aiValueProps": {
+        // Inject AI-generated features into value props
+        if (features.length >= 3) {
+          block.props.props = features.slice(0, 3).map((f: any) => ({
             title: f.title,
-            desc: f.desc,
-          }))
-        : [
-            { icon: "truck", title: "Fast Delivery", desc: "Swift delivery across Nigeria" },
-            { icon: "shield", title: "Secure Payments", desc: "Pay with card, bank transfer, or on delivery" },
-            { icon: "headphones", title: "24/7 Support", desc: "Reach us anytime on WhatsApp" },
-            { icon: "refresh", title: "Easy Returns", desc: "Hassle-free returns within 7 days" },
-          ],
-    }),
-    block("spacer", { height: 56 }),
-  ];
-
-  // Testimonials grid (not individual cards)
-  if (testimonials.length > 0) {
-    blocks.push(
-      block("testimonials", {
-        title: "What Our Customers Say",
-        subtitle: "Real reviews from real customers",
-        bgColor: "transparent",
-        items: testimonials.slice(0, 3).map((t: any) => ({
-          name: t.name,
-          role: t.role || "Verified Buyer",
-          text: t.text,
-          rating: 5,
-        })),
-      })
-    );
-    blocks.push(block("spacer", { height: 56 }));
+            description: f.desc,
+          }));
+        }
+        break;
+      }
+      case "aiFooter": {
+        // Update footer links and copyright
+        block.props.copyrightText = `© ${new Date().getFullYear()} ${storeName}. All rights reserved.`;
+        for (const col of block.props.columns) {
+          for (const link of col.links) {
+            if (link.link.startsWith("/collections") || link.link === "/gift-cards") {
+              link.link = `/store/${storeSlug}/shop`;
+            } else if (link.link.startsWith("/")) {
+              link.link = `/store/${storeSlug}${link.link}`;
+            }
+          }
+        }
+        break;
+      }
+    }
   }
-
-  // Newsletter
-  blocks.push(
-    block("newsletter", {
-      title: "Stay Updated",
-      subtitle: "Get the latest offers and new arrivals straight to your inbox.",
-      bgColor: "brand",
-    })
-  );
-  blocks.push(block("spacer", { height: 40 }));
-
-  // Trust badges
-  blocks.push(
-    block("trustBadges", {
-      items: [
-        { icon: "shield", label: "Secure Checkout" },
-        { icon: "truck", label: "Nationwide Delivery" },
-        { icon: "refresh", label: "Easy Returns" },
-        { icon: "headphones", label: "WhatsApp Support" },
-      ],
-    })
-  );
 
   return {
     title: "Home",
     slug: "home",
     type: "HOME",
-    blocks,
+    blocks: templateBlocks as unknown as BuilderBlock[],
     metaTitle: data.seo?.homeTitle || `${storeName} — Official Store`,
     metaDescription: data.seo?.homeDesc || brand.heroSubheading || "",
   };
