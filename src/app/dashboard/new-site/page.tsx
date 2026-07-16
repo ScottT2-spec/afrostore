@@ -543,7 +543,7 @@ export default function NewSitePage() {
         {/* Step 5: AI Build / Theme Package Selection + Theme Customization */}
         {step === 5 && !created && (
           <div className="fade-in py-10">
-            {(creating || launchMethod === 'quick') && !createError ? (
+            {creating ? (
               <div className="text-center">
                 <div className="w-20 h-20 bg-gradient-to-br from-emerald-100 to-blue-100 rounded-full flex items-center justify-center mx-auto mb-6">
                   <Loader2 className="w-10 h-10 text-emerald-600 animate-spin" />
