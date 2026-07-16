@@ -458,6 +458,7 @@ export default function StorePage() {
   const isPerfumesTemplate = data.templateSlug === "perfumes" || homeBlocks.some((b) => b.type.startsWith("perfumes"));
   const isRetailTemplate = data.templateSlug === "retail";
   const isJumiaTemplate = homeBlocks.some((b) => b.type.startsWith("jumia"));
+  const isAiTemplate = data.templateSlug === "ai" || homeBlocks.some((b) => b.type.startsWith("ai"));
   const templatePreset = data.templateSlug ? TEMPLATE_PRESET_MAP[data.templateSlug] : undefined;
 
   // Build navigation items dynamically from actual pages in database
@@ -639,6 +640,9 @@ export default function StorePage() {
           cartCount={cartCount}
           wishlistCount={wishlistCount}
         />
+      ) : isAiTemplate ? (
+        /* AI template — minimal/no chrome header, the blocks handle it */
+        null
       ) : isFashionTemplate ? (
         <FashionHeader
           storeName={store.name}
@@ -791,7 +795,14 @@ export default function StorePage() {
       )}
 
       {/* ─── HOME PAGE CONTENT ─────────────────────────────────── */}
-      {hasHomeContent ? (
+      {isAiTemplate && homeBlocks.length > 0 ? (
+        /* AI template blocks — use RenderTemplateBlocks */
+        <div style={{ background: "#F1F1F1" }}>
+          <TemplateStoreContextProvider templateSlug={data.templateSlug || "ai"} products={products} blogs={data.blogs || []} categories={categories} currency={currency} storeSlug={slug} socialLinks={socialLinksArray} addToCart={(pid,qty)=>{const x=products.find(p=>p.id===pid);if(x)addToCart(x,qty);}} toggleWishlist={toggleWishlist} isWishlisted={isWishlisted} onQuickView={(pid)=>{const x=products.find(p=>p.id===pid);if(x){setSelectedProduct(x);setSelectedVariantId(null);setQty(1);}}}>
+            <RenderTemplateBlocks blocks={homeBlocks as unknown as TemplateBlock[]} />
+          </TemplateStoreContextProvider>
+        </div>
+      ) : hasHomeContent ? (
         /* Builder blocks Home page — render template blocks */
         <div style={buildPageBackgroundStyle(homePageSettings)}>
           <TemplateStoreContextProvider templateSlug={data.templateSlug} products={products} blogs={data.blogs || []} categories={categories} currency={currency} storeSlug={slug} socialLinks={socialLinksArray} addToCart={(pid,qty)=>{const x=products.find(p=>p.id===pid);if(x)addToCart(x,qty);}} toggleWishlist={toggleWishlist} isWishlisted={isWishlisted} onQuickView={(pid)=>{const x=products.find(p=>p.id===pid);if(x){setSelectedProduct(x);setSelectedVariantId(null);setQty(1);}}}>
