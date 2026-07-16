@@ -154,24 +154,22 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ wor
         const storeSlug = site.slug;
 
         const jumiaBlocks = [
-          { id: "jb-topbar", type: "jumiaTopBar", props: { storeSlug, message: `Free delivery on orders from ${storeName}` } },
           { id: "jb-header", type: "jumiaHeader", props: { storeName, storeSlug, logo: logo || null } },
-          { id: "jb-hero", type: "jumiaHeroBanner", props: { storeSlug, slides: [
-            { image: "", title: `Welcome to ${storeName}`, subtitle: "Discover amazing deals today", bgColor: "#F68B1E" },
-            { image: "", title: "New Arrivals Just Dropped", subtitle: "Shop the latest products", bgColor: "#CC0000" },
-            { image: "", title: "Free Delivery Available", subtitle: "On qualifying orders", bgColor: "#282828" },
-          ] } },
+          { id: "jb-hero", type: "jumiaHeroBanner", props: { storeSlug } },
           { id: "jb-iconbar", type: "jumiaCategoryIconBar", props: { storeSlug } },
           { id: "jb-flash", type: "jumiaFlashDeals", props: { title: "Flash Sales", storeSlug } },
-          { id: "jb-categories", type: "jumiaCategoryGrid", props: { title: "Top Categories", storeSlug } },
+          { id: "jb-tiles", type: "jumiaPromoTiles", props: { storeSlug } },
           { id: "jb-products1", type: "jumiaProductGrid", props: { title: "Popular Products", storeSlug } },
           { id: "jb-promo", type: "jumiaPromoBanners", props: { storeSlug } },
           { id: "jb-deals", type: "jumiaCategoryDealRow", props: { title: "Top Deals", subtitle: "Limited time offers", storeSlug } },
+          { id: "jb-categories", type: "jumiaCategoryGrid", props: { title: "Top Categories", storeSlug } },
           { id: "jb-products2", type: "jumiaProductGrid", props: { title: "Recommended For You", storeSlug } },
           { id: "jb-topdeals", type: "jumiaTopDeals", props: { title: "Best Sellers", subtitle: "Most popular items", storeSlug } },
           { id: "jb-features", type: "jumiaFeaturesBar", props: {} },
           { id: "jb-newsletter", type: "jumiaNewsletter", props: { storeName } },
           { id: "jb-footer", type: "jumiaFooter", props: { storeName, storeSlug } },
+          { id: "jb-spacer", type: "jumiaSpacer", props: {} },
+          { id: "jb-bottomnav", type: "jumiaBottomNav", props: { storeSlug } },
         ];
 
         // Create homepage with Jumia blocks
