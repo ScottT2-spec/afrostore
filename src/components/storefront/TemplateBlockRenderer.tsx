@@ -239,6 +239,9 @@ import {
   JumiaCategoryDealRow,
   JumiaBrandStoreRow,
   JumiaCategoryIconBar,
+  JumiaPromoTiles,
+  JumiaBottomNav,
+  JumiaSpacer,
 } from "@/components/storefront/JumiaTemplateBlocks";
 
 /* ─── TYPES ─────────────────────────────────────────────────── */
@@ -478,6 +481,9 @@ const JUMIA_BLOCKS: Record<string, BlockComponent> = {
   jumiaCategoryDealRow: JumiaCategoryDealRow as unknown as BlockComponent,
   jumiaBrandStoreRow: JumiaBrandStoreRow as unknown as BlockComponent,
   jumiaCategoryIconBar: JumiaCategoryIconBar as unknown as BlockComponent,
+  jumiaPromoTiles: JumiaPromoTiles as unknown as BlockComponent,
+  jumiaBottomNav: JumiaBottomNav as unknown as BlockComponent,
+  jumiaSpacer: JumiaSpacer as unknown as BlockComponent,
 };
 
 const ALL_TEMPLATE_BLOCKS: Record<string, BlockComponent> = {
