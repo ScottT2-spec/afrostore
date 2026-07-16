@@ -444,6 +444,7 @@ export default function StorePage() {
     'fashionFooter', 'bakeryFooter', 'interiorFooter',
     'groceryFooter', 'healthFooterFull', 'healthFooter',
     'electronicsFooter', 'makeupFooter',
+    // Note: jumia header/footer are NOT filtered — they're rendered as part of the block content
   ]);
   const homeBlocks: BuilderBlock[] = homeContent.blocks.filter((block) => !CHROME_BLOCK_TYPES.has(block.type));
   const hasHomeContent = homeBlocks.length > 0;
@@ -454,6 +455,7 @@ export default function StorePage() {
   const isHealthTemplate = data.templateSlug === "pills" || homeBlocks.some((b) => b.type.startsWith("health"));
   const isPerfumesTemplate = data.templateSlug === "perfumes" || homeBlocks.some((b) => b.type.startsWith("perfumes"));
   const isRetailTemplate = data.templateSlug === "retail";
+  const isJumiaTemplate = homeBlocks.some((b) => b.type.startsWith("jumia"));
   const templatePreset = data.templateSlug ? TEMPLATE_PRESET_MAP[data.templateSlug] : undefined;
 
   // Build navigation items dynamically from actual pages in database
@@ -820,6 +822,11 @@ export default function StorePage() {
               </Link>
             </div>
           )}
+        </div>
+      ) : isJumiaTemplate && homeBlocks.length > 0 ? (
+        /* AI-built Jumia marketplace layout */
+        <div>
+          <RenderTemplateBlocks blocks={homeBlocks as unknown as TemplateBlock[]} />
         </div>
       ) : homeBlocks.length > 0 ? (
         /* Fallback: render blocks even if hasHomeContent is false but blocks exist */

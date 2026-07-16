@@ -180,6 +180,7 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ wor
             siteId: site.id,
             title: "Home",
             slug: "home",
+            type: "HOME",
             isPublished: true,
             template: "jumia",
             content: { blocks: jumiaBlocks, settings: {} },
