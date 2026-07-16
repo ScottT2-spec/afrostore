@@ -168,7 +168,7 @@ export default function NewSitePage() {
       case 2: return !!industry;
       case 3: return !!launchMethod;
       case 4: return businessInfo.name.trim().length >= 2;
-      case 5: return launchMethod === 'blank' || !!selectedTemplateId;
+      case 5: return launchMethod === 'blank' || launchMethod === 'quick' || !!selectedTemplateId;
       case 6: return true; // payment optional
       case 7: return true; // domain optional
       default: return false;
@@ -260,6 +260,13 @@ export default function NewSitePage() {
   };
 
   const handleNext = () => {
+    // "Build with AI" skips template selection — go straight to create
+    if (step === 4 && launchMethod === 'quick') {
+      setStep(5);
+      // Auto-trigger site creation for AI path
+      setTimeout(() => createSite(), 100);
+      return;
+    }
     if (step === 5) {
       createSite();
       return;
@@ -533,16 +540,32 @@ export default function NewSitePage() {
           </div>
         )}
 
-        {/* Step 5: Theme Package Selection + Theme Customization */}
+        {/* Step 5: AI Build / Theme Package Selection + Theme Customization */}
         {step === 5 && !created && (
           <div className="fade-in py-10">
-            {creating ? (
+            {(creating || launchMethod === 'quick') && !createError ? (
               <div className="text-center">
-                <div className="w-20 h-20 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-6">
-                  <Loader2 className="w-10 h-10 text-gray-600 animate-spin" />
+                <div className="w-20 h-20 bg-gradient-to-br from-emerald-100 to-blue-100 rounded-full flex items-center justify-center mx-auto mb-6">
+                  <Loader2 className="w-10 h-10 text-emerald-600 animate-spin" />
                 </div>
-                <h1 className="text-2xl font-bold text-gray-900 mb-2">Creating your site...</h1>
-                <p className="text-gray-500">Selecting a template, generating pages, and cloning your theme config</p>
+                <h1 className="text-2xl font-bold text-gray-900 mb-2">
+                  {launchMethod === 'quick' ? 'AI is building your store...' : 'Creating your site...'}
+                </h1>
+                <p className="text-gray-500">
+                  {launchMethod === 'quick'
+                    ? `Setting up ${businessInfo.name} with a professional marketplace layout, product grids, and all the essentials`
+                    : 'Selecting a template, generating pages, and cloning your theme config'}
+                </p>
+                {launchMethod === 'quick' && (
+                  <div className="mt-6 max-w-sm mx-auto space-y-2">
+                    {['Generating store layout', 'Setting up product sections', 'Configuring categories', 'Adding store features'].map((text, i) => (
+                      <div key={i} className="flex items-center gap-2 text-sm text-gray-400 animate-pulse" style={{ animationDelay: `${i * 0.5}s` }}>
+                        <Sparkles className="w-3.5 h-3.5" />
+                        <span>{text}</span>
+                      </div>
+                    ))}
+                  </div>
+                )}
               </div>
             ) : (
               <>
@@ -551,14 +574,14 @@ export default function NewSitePage() {
                     <Sparkles className="w-10 h-10 text-emerald-600" />
                   </div>
                   <h1 className="text-2xl font-bold text-gray-900 mb-2">
-                    {launchMethod === 'blank' ? 'Ready to create your site' : launchMethod === 'template' ? 'Choose a template' : 'Choose a theme package'}
+                    {launchMethod === 'blank' ? 'Ready to create your site' : 'Choose a template'}
                   </h1>
                   <p className="text-gray-500 mb-6 max-w-md mx-auto">
                     We&apos;ll create a {siteType === 'ECOMMERCE' ? 'store' : siteType === 'WEBSITE' ? 'website' : 'landing page'} for
                     <strong> {businessInfo.name}</strong> in the <strong>{INDUSTRIES.find(i => i.id === industry)?.name}</strong> industry.
                   </p>
                 </div>
-                {launchMethod !== 'blank' && (
+                {launchMethod === 'template' && (
                   <div className="mt-8">
                     <TemplateSelector
                       industry={industry}
@@ -566,7 +589,6 @@ export default function NewSitePage() {
                       onSelect={(t) => {
                         setSelectedTemplate({ slug: t.slug, name: t.name, category: t.category, description: t.description, previewImage: t.previewImage, previewUrl: t.previewUrl, recommendationKeywords: t.industries });
                         setSelectedTemplateId(t.slug);
-                        // Smooth scroll to bottom after template selection so user sees theme customization
                         setTimeout(() => {
                           window.scrollTo({ top: document.body.scrollHeight, behavior: 'smooth' });
                         }, 100);
@@ -589,13 +611,12 @@ export default function NewSitePage() {
                     )}
                   </div>
                 )}
-                {launchMethod !== 'blank' && (
+                {launchMethod === 'template' && (
                   <div className="mt-8 rounded-xl border border-gray-200 bg-white p-5">
                     <div className="flex items-center gap-2 mb-4">
                       <Palette className="w-5 h-5 text-gray-500" />
                       <h2 className="font-semibold text-gray-900">Theme customization</h2>
                     </div>
-                    {/* Color inputs - all visible by default with proper spacing */}
                     <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-4">
                       {(['primary', 'secondary', 'accent', 'background', 'text'] as const).map(key => (
                         <div key={key} className="flex flex-col">
@@ -609,7 +630,6 @@ export default function NewSitePage() {
                         </div>
                       ))}
                     </div>
-                    {/* Font inputs */}
                     <div className="grid sm:grid-cols-2 gap-4 mt-5">
                       <div>
                         <label className="text-xs font-medium text-gray-600 mb-2 block">Heading font</label>
