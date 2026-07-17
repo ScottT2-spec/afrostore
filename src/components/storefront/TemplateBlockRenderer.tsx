@@ -15,6 +15,17 @@ import {
   FashionInstagram,
   FashionMarquee,
   FashionCoverBanners,
+  FashionAboutContent,
+  FashionStatsCounters,
+  FashionServicesGrid,
+  FashionGalleryGrid,
+  FashionVideoSection,
+  FashionQuoteSection,
+  FashionTeamSection,
+  FashionOfficeLocations,
+  FashionStoreVisit,
+  FashionFaqAccordion,
+  FashionContactForm,
 } from "@/components/storefront/FashionTemplateBlocks";
 import { resolveSectionStyleOverrides } from "@/components/storefront/block-style";
 import { TShirtsPrintsHeader, TShirtsPrintsFooter } from "@/components/storefront/TShirtsPrintsStoreChrome";
@@ -284,6 +295,17 @@ const FASHION_BLOCKS: Record<string, BlockComponent> = {
   fashionInstagram: FashionInstagram as unknown as BlockComponent,
   fashionMarquee: FashionMarquee as unknown as BlockComponent,
   fashionCoverBanners: FashionCoverBanners as unknown as BlockComponent,
+  fashionAboutContent: FashionAboutContent as unknown as BlockComponent,
+  fashionStatsCounters: FashionStatsCounters as unknown as BlockComponent,
+  fashionServicesGrid: FashionServicesGrid as unknown as BlockComponent,
+  fashionGalleryGrid: FashionGalleryGrid as unknown as BlockComponent,
+  fashionVideoSection: FashionVideoSection as unknown as BlockComponent,
+  fashionQuoteSection: FashionQuoteSection as unknown as BlockComponent,
+  fashionTeamSection: FashionTeamSection as unknown as BlockComponent,
+  fashionOfficeLocations: FashionOfficeLocations as unknown as BlockComponent,
+  fashionStoreVisit: FashionStoreVisit as unknown as BlockComponent,
+  fashionFaqAccordion: FashionFaqAccordion as unknown as BlockComponent,
+  fashionContactForm: FashionContactForm as unknown as BlockComponent,
 };
 
 const ELECTRONICS_BLOCKS: Record<string, BlockComponent> = {

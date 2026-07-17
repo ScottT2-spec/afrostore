@@ -5,6 +5,7 @@ import { COSMETICS_TERMS_BLOCKS, COSMETICS_SHOP_BLOCKS, COSMETICS_BLOG_BLOCKS } 
 import { TSHIRTS_PRINTS_ABOUT_PAGE_BLOCKS, TSHIRTS_PRINTS_CONTACT_PAGE_BLOCKS, TSHIRTS_PRINTS_BLOG_PAGE_BLOCKS } from "./presets/t-shirts-prints-page-presets";
 import { VEGETABLE_HOME_PAGE_BLOCKS, VEGETABLE_MENU_PAGE_BLOCKS, VEGETABLE_RECIPE_PAGE_BLOCKS, VEGETABLE_ABOUT_PAGE_BLOCKS, VEGETABLE_CONTACT_PAGE_BLOCKS, VEGETABLE_RESERVATION_PAGE_BLOCKS } from "./presets/vegetables-page-presets";
 import { PERFUMES_HOME_PAGE_BLOCKS, PERFUMES_ABOUT_PAGE_BLOCKS, PERFUMES_CONTACT_PAGE_BLOCKS, PERFUMES_FRAGRANCES_PAGE_BLOCKS, PERFUMES_JOURNAL_PAGE_BLOCKS, PERFUMES_REVIEWS_PAGE_BLOCKS } from "./presets/perfumes-page-presets";
+import { FASHION_ABOUT_PAGE_BLOCKS, FASHION_CONTACT_PAGE_BLOCKS, FASHION_BLOG_PAGE_BLOCKS, FASHION_SHOP_PAGE_BLOCKS } from "./presets/fashion-page-presets";
 
 /**
  * Template-specific page definitions.
@@ -43,7 +44,10 @@ const COSMETICS_PAGES: PageDef[] = [
 ];
 
 const FASHION_PAGES: PageDef[] = [
-  { title: "Blog", slug: "blog", type: "CUSTOM", position: 10 },
+  { title: "About Us", slug: "about", type: "CUSTOM", position: 10 },
+  { title: "Contact Us", slug: "contact", type: "CUSTOM", position: 11 },
+  { title: "Blog", slug: "blog", type: "CUSTOM", position: 12 },
+  { title: "Shop", slug: "shop", type: "CUSTOM", position: 13 },
 ];
 
 const ELECTRONICS_PAGES: PageDef[] = [
@@ -94,6 +98,18 @@ const TEMPLATE_PAGE_MAP: Record<string, PageDef[]> = {
 
 /** Map of template slug → default page block content (keyed by page slug) */
 const TEMPLATE_PAGE_CONTENT_MAP: Record<string, Record<string, unknown[]>> = {
+  fashion: {
+    about: FASHION_ABOUT_PAGE_BLOCKS,
+    contact: FASHION_CONTACT_PAGE_BLOCKS,
+    blog: FASHION_BLOG_PAGE_BLOCKS,
+    shop: FASHION_SHOP_PAGE_BLOCKS,
+  },
+  "fashion-colored": {
+    about: FASHION_ABOUT_PAGE_BLOCKS,
+    contact: FASHION_CONTACT_PAGE_BLOCKS,
+    blog: FASHION_BLOG_PAGE_BLOCKS,
+    shop: FASHION_SHOP_PAGE_BLOCKS,
+  },
   "handmade-bags": HANDMADE_BAGS_PAGE_BLOCKS,
   health: HEALTH_PAGE_BLOCKS,
   pills: HEALTH_PAGE_BLOCKS,
