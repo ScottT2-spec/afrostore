@@ -4,6 +4,8 @@ import { prisma } from "@/lib/db";
 import { success, error, generateSubdomain } from "@/lib/api-helpers";
 import { slugify } from "@/lib/utils";
 import { importTemplateToSite } from "@/lib/templates/importer";
+import { buildSmartAiBlocks, buildBlockContentPrompt } from "@/lib/ai-block-content-generator";
+import { AIFailover, AICapability } from "@/lib/failover";
 
 // GET /api/workspaces/[workspaceId]/sites — list sites in workspace
 export async function GET(req: NextRequest, { params }: { params: Promise<{ workspaceId: string }> }) {
@@ -149,75 +151,50 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ wor
     // ── AI Build (Build with AI) ─────────────────────────────
     if (launchMethod === "quick") {
       try {
-        // Generate AI template blocks (Allbirds-inspired) for the homepage
         const storeName = name.trim();
         const storeSlug = site.slug;
+        const bizType = body.businessType || body.industry || "general";
 
-        // Deep clone the AI preset and inject store-specific content
-        const { AI_TEMPLATE_PRESET } = await import("@/lib/templates/presets/ai-preset");
-        const aiBlocks = JSON.parse(JSON.stringify(AI_TEMPLATE_PRESET));
+        // ── Step 1: Try AI content generation (non-blocking fallback) ──
+        let aiContent: Record<string, unknown> | undefined;
+        try {
+          const providers: import("@/lib/failover").AIProviderConfig[] = [];
+          if (process.env.GROQ_API_KEY) providers.push({ provider: "groq", apiKey: process.env.GROQ_API_KEY, model: "llama-3.3-70b-versatile", capabilities: [AICapability.CHAT] });
+          if (process.env.GOOGLE_AI_KEY) providers.push({ provider: "google", apiKey: process.env.GOOGLE_AI_KEY, model: "gemini-2.0-flash", capabilities: [AICapability.CHAT] });
+          if (process.env.OPENAI_API_KEY) providers.push({ provider: "openai", apiKey: process.env.OPENAI_API_KEY, model: "gpt-4o-mini", capabilities: [AICapability.CHAT] });
+          if (process.env.ANTHROPIC_API_KEY) providers.push({ provider: "anthropic", apiKey: process.env.ANTHROPIC_API_KEY, model: "claude-3-haiku-20240307", capabilities: [AICapability.CHAT] });
 
-        // Inject store name and links into blocks
-        for (const block of aiBlocks) {
-          switch (block.type) {
-            case "aiAnnouncementBar":
-              block.props.messages = [
-                `Welcome to ${storeName} — Shop Now`,
-                "Free Shipping on Orders Over $75",
-                "New Collection Just Dropped",
-                "30-Day Free Returns on All Orders",
-              ];
-              break;
-            case "aiHeroVideo":
-              block.props.buttons = [
-                { text: "Shop Now", link: `/store/${storeSlug}/shop`, style: "primary" },
-                { text: "About Us", link: `/store/${storeSlug}/about`, style: "primary" },
-              ];
-              break;
-            case "aiCategoryRow":
-              for (const card of block.props.cards) {
-                for (const btn of card.buttons) {
-                  btn.link = `/store/${storeSlug}/shop`;
-                }
-              }
-              break;
-            case "aiLargeProductCarousel":
-              for (const tab of block.props.tabs) {
-                for (const product of tab.products) {
-                  if (product.mensLink) product.mensLink = `/store/${storeSlug}/shop`;
-                  if (product.womensLink) product.womensLink = `/store/${storeSlug}/shop`;
-                  if (product.link) product.link = `/store/${storeSlug}/shop`;
-                }
-              }
-              break;
-            case "aiPromoTiles":
-              for (const tile of block.props.tiles) {
-                for (const btn of tile.buttons) {
-                  btn.link = `/store/${storeSlug}/shop`;
-                }
-              }
-              break;
-            case "aiProductCarousel":
-              for (const tab of block.props.tabs) {
-                for (const product of tab.products) {
-                  if (product.link) product.link = `/store/${storeSlug}/shop`;
-                }
-              }
-              break;
-            case "aiFooter":
-              block.props.copyrightText = `© ${new Date().getFullYear()} ${storeName}. All rights reserved.`;
-              for (const col of block.props.columns) {
-                for (const link of col.links) {
-                  if (link.link.startsWith("/collections") || link.link === "/gift-cards") {
-                    link.link = `/store/${storeSlug}/shop`;
-                  } else if (link.link.startsWith("/")) {
-                    link.link = `/store/${storeSlug}${link.link}`;
-                  }
-                }
-              }
-              break;
+          if (providers.length > 0) {
+            const ai = new AIFailover({ providers, priorityOrder: providers.map(p => p.provider), requestTimeoutMs: 25_000 });
+            const prompt = buildBlockContentPrompt(storeName, bizType, description || undefined);
+            const result = await ai.chat({
+              capability: AICapability.CHAT,
+              messages: [
+                { role: "system" as const, content: "Return ONLY valid JSON. No markdown, no explanation." },
+                { role: "user" as const, content: prompt },
+              ],
+              maxTokens: 4000,
+              temperature: 0.7,
+            });
+            if (result.success && result.data?.content) {
+              let cleaned = result.data.content.trim();
+              if (cleaned.startsWith("```")) cleaned = cleaned.replace(/^```(?:json)?\s*\n?/, "").replace(/\n?```\s*$/, "");
+              aiContent = JSON.parse(cleaned);
+            }
           }
+        } catch (aiErr) {
+          console.warn("AI content generation failed, using industry defaults:", aiErr);
+          // Non-fatal — we'll use industry-matched defaults
         }
+
+        // ── Step 2: Build smart blocks with AI content + industry images ──
+        const aiBlocks = buildSmartAiBlocks({
+          storeName,
+          storeSlug,
+          businessType: bizType,
+          description: description || undefined,
+          aiContent,
+        });
 
         // Create homepage with AI template blocks
         await prisma.page.create({
@@ -228,9 +205,9 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ wor
             type: "HOME",
             isPublished: true,
             template: "ai",
-            content: { blocks: aiBlocks, settings: {} },
-            metaTitle: `${storeName} — Shop Online`,
-            metaDescription: description || `Shop the best products at ${storeName}. Great deals, fast delivery.`,
+            content: { blocks: aiBlocks as unknown as Record<string, unknown>[], settings: {} },
+            metaTitle: `${storeName} — ${bizType.charAt(0).toUpperCase() + bizType.slice(1)}`,
+            metaDescription: description || `${storeName} — your trusted ${bizType} destination.`,
           },
         });
 
@@ -294,40 +271,7 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ wor
           }
         }
 
-        // ── Hero banners with real images ─────────────────────
-        // Update hero block with professional banner images
-        const updatedJumiaBlocks = jumiaBlocks.map(block => {
-          if (block.type === "jumiaHeroBanner") {
-            return { ...block, props: { ...block.props, slides: [
-              { image: "https://images.unsplash.com/photo-1607082349566-187342175e2f?w=1200&h=500&fit=crop", title: `Welcome to ${storeName}`, subtitle: "Discover amazing deals on top products", buttonText: "Shop Now", buttonLink: `/store/${storeSlug}/shop` },
-              { image: "https://images.unsplash.com/photo-1556742049-0cfed4f6a45d?w=1200&h=500&fit=crop", title: "Flash Sales Live Now", subtitle: "Up to 70% off on selected items", buttonText: "View Deals", buttonLink: `/store/${storeSlug}/shop` },
-              { image: "https://images.unsplash.com/photo-1441986300917-64674bd600d8?w=1200&h=500&fit=crop", title: "Free Delivery", subtitle: "On orders above ₦15,000", buttonText: "Start Shopping", buttonLink: `/store/${storeSlug}/shop` },
-            ]}};
-          }
-          if (block.type === "jumiaPromoBanners") {
-            return { ...block, props: { ...block.props, banners: [
-              { image: "https://images.unsplash.com/photo-1607082350899-7e105aa886ae?w=600&h=300&fit=crop", title: "New Arrivals", link: `/store/${storeSlug}/shop` },
-              { image: "https://images.unsplash.com/photo-1483985988355-763728e1935b?w=600&h=300&fit=crop", title: "Fashion Week", link: `/store/${storeSlug}/shop` },
-            ]}};
-          }
-          if (block.type === "jumiaPromoTiles") {
-            return { ...block, props: { ...block.props, tiles: [
-              { title: "Flash Sales", image: "https://images.unsplash.com/photo-1607083206869-4c7672e72a8a?w=200&h=200&fit=crop", bgColor: "#FFF3E0", link: `/store/${storeSlug}/shop` },
-              { title: "Free Delivery", image: "https://images.unsplash.com/photo-1566576912321-d58ddd7a6088?w=200&h=200&fit=crop", bgColor: "#E8F5E9", link: `/store/${storeSlug}/shop` },
-              { title: "Official Stores", image: "https://images.unsplash.com/photo-1472851294608-062f824d29cc?w=200&h=200&fit=crop", bgColor: "#E3F2FD", link: `/store/${storeSlug}/shop` },
-              { title: "New Arrivals", image: "https://images.unsplash.com/photo-1460353581641-37baddab0fa2?w=200&h=200&fit=crop", bgColor: "#FCE4EC", link: `/store/${storeSlug}/shop` },
-            ]}};
-          }
-          return block;
-        });
-
-        // Update the homepage with the enhanced blocks
-        await prisma.page.updateMany({
-          where: { siteId: site.id, slug: "home" },
-          data: { content: { blocks: updatedJumiaBlocks, settings: {} } },
-        });
-
-        templateResult = { method: "ai", template: "jumia-marketplace", blocksCreated: jumiaBlocks.length };
+        templateResult = { method: "ai", template: "ai-modern", blocksCreated: aiBlocks.length };
       } catch (aiErr) {
         console.error("AI build error:", aiErr);
         // Non-fatal — site is still created
