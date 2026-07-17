@@ -56,16 +56,53 @@ const blockPalette = [
   { type: "cosmeticsBlogPosts", label: "Cosmetics Blog Posts", icon: FileText, category: "cosmetics" },
   { type: "cosmeticsNewsletter", label: "Cosmetics Newsletter", icon: Mail, category: "cosmetics" },
   { type: "cosmeticsInstagram", label: "Cosmetics Instagram", icon: ImageIcon, category: "cosmetics" },
+  // Fashion template blocks
+  { type: "fashionHeroSlider", label: "Fashion Hero Slider", icon: Sparkles, category: "fashion" },
+  { type: "fashionPromoBanners", label: "Fashion Promo Banners", icon: ImageIcon, category: "fashion" },
+  { type: "fashionSectionTitle", label: "Fashion Section Title", icon: Type, category: "fashion" },
+  { type: "fashionProductGrid", label: "Fashion Product Grid", icon: Grid3X3, category: "fashion" },
+  { type: "fashionCategoryCards", label: "Fashion Category Cards", icon: LayoutGrid, category: "fashion" },
+  { type: "fashionTestimonials", label: "Fashion Testimonials", icon: HelpCircle, category: "fashion" },
+  { type: "fashionBlogPosts", label: "Fashion Blog Posts", icon: FileText, category: "fashion" },
+  { type: "fashionNewsletter", label: "Fashion Newsletter", icon: Mail, category: "fashion" },
+  { type: "fashionFooter", label: "Fashion Footer", icon: LayoutGrid, category: "fashion" },
+  { type: "fashionFeatures", label: "Fashion Features", icon: Shield, category: "fashion" },
+  { type: "fashionInstagram", label: "Fashion Instagram", icon: ImageIcon, category: "fashion" },
+  { type: "fashionMarquee", label: "Fashion Marquee", icon: Type, category: "fashion" },
+  { type: "fashionCoverBanners", label: "Fashion Cover Banners", icon: ImageIcon, category: "fashion" },
+  { type: "fashionAboutContent", label: "Fashion About Content", icon: FileText, category: "fashion" },
+  { type: "fashionStatsCounters", label: "Fashion Stats Counters", icon: Layers, category: "fashion" },
+  { type: "fashionServicesGrid", label: "Fashion Services Grid", icon: Grid3X3, category: "fashion" },
+  { type: "fashionGalleryGrid", label: "Fashion Gallery Grid", icon: ImageIcon, category: "fashion" },
+  { type: "fashionVideoSection", label: "Fashion Video Section", icon: Play, category: "fashion" },
+  { type: "fashionQuoteSection", label: "Fashion Quote", icon: Type, category: "fashion" },
+  { type: "fashionTeamSection", label: "Fashion Team Section", icon: User, category: "fashion" },
+  { type: "fashionOfficeLocations", label: "Fashion Office Locations", icon: LayoutGrid, category: "fashion" },
+  { type: "fashionStoreVisit", label: "Fashion Store Visit", icon: ShoppingBag, category: "fashion" },
+  { type: "fashionFaqAccordion", label: "Fashion FAQ", icon: HelpCircle, category: "fashion" },
+  { type: "fashionContactForm", label: "Fashion Contact Form", icon: Mail, category: "fashion" },
+  // Bakery template blocks
+  { type: "bakeryHeroSlider", label: "Bakery Hero Slider", icon: Sparkles, category: "bakery" },
+  { type: "bakerySectionTitle", label: "Bakery Section Title", icon: Type, category: "bakery" },
+  { type: "bakeryCategoryInfoBoxes", label: "Bakery Category Boxes", icon: LayoutGrid, category: "bakery" },
+  { type: "bakeryHandmade", label: "Bakery Handmade", icon: ImageIcon, category: "bakery" },
+  { type: "bakeryProductGrid", label: "Bakery Product Grid", icon: Grid3X3, category: "bakery" },
+  { type: "bakeryProcess", label: "Bakery Process", icon: Layers, category: "bakery" },
+  { type: "bakeryBlogPosts", label: "Bakery Blog Posts", icon: FileText, category: "bakery" },
+  { type: "bakeryCta", label: "Bakery CTA", icon: Mail, category: "bakery" },
+  { type: "bakeryFooter", label: "Bakery Footer", icon: LayoutGrid, category: "bakery" },
 ];
 
-const categories = ["basic", "layout", "commerce", "social", "marketing", "cosmetics"] as const;
+const categories = ["basic", "layout", "commerce", "social", "marketing", "fashion", "cosmetics", "bakery"] as const;
 const categoryLabels: Record<string, string> = {
   basic: "Basic",
   layout: "Layout",
   commerce: "Commerce",
   social: "Social",
   marketing: "Marketing",
+  fashion: "Fashion",
   cosmetics: "Cosmetics",
+  bakery: "Bakery",
 };
 
 export default function LeftSidebar({
