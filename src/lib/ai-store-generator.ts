@@ -145,8 +145,8 @@ function block(type: BlockType, props: Record<string, unknown>): BuilderBlock {
 // ─── Prompt ─────────────────────────────────────────────────
 
 function buildGenerationPrompt(input: StoreGeneratorInput): string {
-  const currency = input.currency || "NGN";
-  const country = input.country || "Nigeria";
+  const currency = input.currency || "GHS";
+  const country = input.country || "Ghana";
 
   return `You are a professional ecommerce website content writer for African businesses.
 
@@ -216,16 +216,35 @@ Return ONLY valid JSON with this exact structure:
     {"title": "feature/benefit 3", "desc": "short description"}
   ],
   "layout": {
-    "sections": ["pick 6-10 from: hero-image, hero-minimal, hero-split, products, products-featured, products-compact, features, stats, testimonials, story, story-full, newsletter, trust, banner, gallery, contact, faq, values, countdown"],
+    "sections": ["pick 6-10 from: hero-image, hero-minimal, hero-split, hero-bold, products, products-featured, products-compact, features, stats, testimonials, story, story-full, newsletter, trust, banner, gallery, contact, faq, values, team, countdown"],
     "vibe": "one word describing the visual feel (e.g. bold, elegant, minimal, warm, playful, clean, luxurious, earthy)"
-  }
+  },
+  "stats": [
+    {"value": "e.g. 500+", "label": "e.g. Happy Clients"},
+    {"value": "e.g. 4.9", "label": "e.g. Customer Rating"},
+    {"value": "e.g. 24/7", "label": "e.g. Support"},
+    {"value": "e.g. 100%", "label": "e.g. Satisfaction"}
+  ],
+  "bannerCta": {
+    "title": "compelling CTA headline for a promotional banner",
+    "subtitle": "1 sentence supporting text",
+    "buttonText": "CTA button text (2-4 words)"
+  },
+  "newsletterCopy": {
+    "title": "newsletter signup heading",
+    "subtitle": "1 sentence encouraging signups"
+  },
+  "productSectionTitle": "title for the main product section (e.g. Our Menu, Featured Properties, New Arrivals)",
+  "productSectionSubtitle": "subtitle for the product section"
 }
 
 Rules:
-- For layout.sections, pick 6-10 section names from the available list above. Order them how the homepage should flow. Start with a hero variant. Pick sections that make sense for this specific business type — a restaurant needs gallery and contact, a fashion store needs products-featured, a service business needs features and values, etc. Mix it up — don't always use the same combination.
-- Use real-sounding African names for testimonials
+- For layout.sections, pick 6-10 section names from the available list above. Order them how the homepage should flow. MUST start with a hero variant. Pick sections that make sense for this specific business type — a restaurant needs gallery and contact, a fashion store needs products-featured, a service business needs features and values, a church needs values and team, etc. Vary the combination — don't always use the same set.
+- stats: generate realistic, MODEST numbers appropriate for a new/growing business. Don't claim "10,000+ customers" for a startup. Be honest and aspirational.
+- bannerCta, newsletterCopy, productSectionTitle: tailor these to the specific business. A real estate site says "Featured Properties", not "Our Products". A restaurant says "Our Menu", not "Shop Now".
+- Use real-sounding African names for testimonials (${country}-appropriate)
 - Make FAQ answers specific to ${input.businessType} businesses
-- Shipping/delivery policy should reference local delivery context
+- Shipping/delivery policy should reference local delivery in ${country}
 - Payment section should reference local payment methods
 - Keep tone warm, confident, and trustworthy
 - NO placeholder brackets like [Your Name] — write real content
@@ -594,9 +613,9 @@ function buildContactPage(data: Record<string, any>, storeName: string): Generat
       title: "Contact Information",
       items: [
         { icon: "mail", title: "Email", value: "hello@example.com" },
-        { icon: "phone", title: "Phone", value: "+234 800 000 0000" },
+        { icon: "phone", title: "Phone", value: "+233 XX XXX XXXX" },
         { icon: "message", title: "WhatsApp", value: "Quick chat support" },
-        { icon: "map-pin", title: "Address", value: "Lagos, Nigeria" },
+        { icon: "map-pin", title: "Address", value: "Accra, Ghana" },
       ],
       hours: "Monday - Saturday, 9:00 AM - 6:00 PM",
     }),
@@ -648,7 +667,7 @@ function buildPoliciesPage(data: Record<string, any>, storeName: string): Genera
     }),
     block("spacer", { height: 8 }),
     block("text", {
-      text: policies.shipping || "We deliver nationwide. Orders within Lagos are delivered in 1-2 business days. Other states take 3-5 business days.",
+      text: policies.shipping || "We deliver nationwide. Orders within Accra are delivered in 1-2 business days. Other regions take 3-5 business days.",
       align: "left",
       color: "#525252",
       fontSize: "base",
