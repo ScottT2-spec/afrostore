@@ -149,30 +149,77 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ wor
     // ── AI Build (Build with AI) ─────────────────────────────
     if (launchMethod === "quick") {
       try {
-        // Generate Jumia-style marketplace blocks for the homepage
+        // Generate AI template blocks (Allbirds-inspired) for the homepage
         const storeName = name.trim();
         const storeSlug = site.slug;
 
-        const jumiaBlocks = [
-          { id: "jb-header", type: "jumiaHeader", props: { storeName, storeSlug, logo: logo || null } },
-          { id: "jb-hero", type: "jumiaHeroBanner", props: { storeSlug } },
-          { id: "jb-iconbar", type: "jumiaCategoryIconBar", props: { storeSlug } },
-          { id: "jb-flash", type: "jumiaFlashDeals", props: { title: "Flash Sales", storeSlug } },
-          { id: "jb-tiles", type: "jumiaPromoTiles", props: { storeSlug } },
-          { id: "jb-products1", type: "jumiaProductGrid", props: { title: "Popular Products", storeSlug } },
-          { id: "jb-promo", type: "jumiaPromoBanners", props: { storeSlug } },
-          { id: "jb-deals", type: "jumiaCategoryDealRow", props: { title: "Top Deals", subtitle: "Limited time offers", storeSlug } },
-          { id: "jb-categories", type: "jumiaCategoryGrid", props: { title: "Top Categories", storeSlug } },
-          { id: "jb-products2", type: "jumiaProductGrid", props: { title: "Recommended For You", storeSlug } },
-          { id: "jb-topdeals", type: "jumiaTopDeals", props: { title: "Best Sellers", subtitle: "Most popular items", storeSlug } },
-          { id: "jb-features", type: "jumiaFeaturesBar", props: {} },
-          { id: "jb-newsletter", type: "jumiaNewsletter", props: { storeName } },
-          { id: "jb-footer", type: "jumiaFooter", props: { storeName, storeSlug } },
-          { id: "jb-spacer", type: "jumiaSpacer", props: {} },
-          { id: "jb-bottomnav", type: "jumiaBottomNav", props: { storeSlug } },
-        ];
+        // Deep clone the AI preset and inject store-specific content
+        const { AI_TEMPLATE_PRESET } = await import("@/lib/templates/presets/ai-preset");
+        const aiBlocks = JSON.parse(JSON.stringify(AI_TEMPLATE_PRESET));
 
-        // Create homepage with Jumia blocks
+        // Inject store name and links into blocks
+        for (const block of aiBlocks) {
+          switch (block.type) {
+            case "aiAnnouncementBar":
+              block.props.messages = [
+                `Welcome to ${storeName} — Shop Now`,
+                "Free Shipping on Orders Over $75",
+                "New Collection Just Dropped",
+                "30-Day Free Returns on All Orders",
+              ];
+              break;
+            case "aiHeroVideo":
+              block.props.buttons = [
+                { text: "Shop Now", link: `/store/${storeSlug}/shop`, style: "primary" },
+                { text: "About Us", link: `/store/${storeSlug}/about`, style: "primary" },
+              ];
+              break;
+            case "aiCategoryRow":
+              for (const card of block.props.cards) {
+                for (const btn of card.buttons) {
+                  btn.link = `/store/${storeSlug}/shop`;
+                }
+              }
+              break;
+            case "aiLargeProductCarousel":
+              for (const tab of block.props.tabs) {
+                for (const product of tab.products) {
+                  if (product.mensLink) product.mensLink = `/store/${storeSlug}/shop`;
+                  if (product.womensLink) product.womensLink = `/store/${storeSlug}/shop`;
+                  if (product.link) product.link = `/store/${storeSlug}/shop`;
+                }
+              }
+              break;
+            case "aiPromoTiles":
+              for (const tile of block.props.tiles) {
+                for (const btn of tile.buttons) {
+                  btn.link = `/store/${storeSlug}/shop`;
+                }
+              }
+              break;
+            case "aiProductCarousel":
+              for (const tab of block.props.tabs) {
+                for (const product of tab.products) {
+                  if (product.link) product.link = `/store/${storeSlug}/shop`;
+                }
+              }
+              break;
+            case "aiFooter":
+              block.props.copyrightText = `© ${new Date().getFullYear()} ${storeName}. All rights reserved.`;
+              for (const col of block.props.columns) {
+                for (const link of col.links) {
+                  if (link.link.startsWith("/collections") || link.link === "/gift-cards") {
+                    link.link = `/store/${storeSlug}/shop`;
+                  } else if (link.link.startsWith("/")) {
+                    link.link = `/store/${storeSlug}${link.link}`;
+                  }
+                }
+              }
+              break;
+          }
+        }
+
+        // Create homepage with AI template blocks
         await prisma.page.create({
           data: {
             siteId: site.id,
@@ -180,8 +227,8 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ wor
             slug: "home",
             type: "HOME",
             isPublished: true,
-            template: "jumia",
-            content: { blocks: jumiaBlocks, settings: {} },
+            template: "ai",
+            content: { blocks: aiBlocks, settings: {} },
             metaTitle: `${storeName} — Shop Online`,
             metaDescription: description || `Shop the best products at ${storeName}. Great deals, fast delivery.`,
           },
