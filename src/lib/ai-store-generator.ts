@@ -15,6 +15,16 @@ import type { AIProviderConfig } from "@/lib/failover";
 import { AICapability } from "@/lib/failover";
 import type { BuilderBlock, BlockType } from "@/lib/builder/types";
 import { AI_TEMPLATE_PRESET } from "@/lib/templates/presets/ai-preset";
+import { detectIndustry, getRandomIndustryImages } from "@/lib/ai-image-pools";
+
+/** Randomized image set for this store generation run */
+interface StoreImages {
+  hero: string;
+  about: string;
+  lifestyle: string;
+  showcase: string[];
+  banner: string;
+}
 
 // ─── Types ──────────────────────────────────────────────────
 
@@ -229,7 +239,7 @@ function parseAIResponse(content: string): Record<string, any> {
 
 // ─── Build pages from AI content ────────────────────────────
 
-function buildHomePage(data: Record<string, any>, storeName: string, storeSlug: string): GeneratedPage {
+function buildHomePage(data: Record<string, any>, storeName: string, storeSlug: string, images: StoreImages): GeneratedPage {
   const brand = data.brand || {};
   const features = data.features || [];
 
@@ -326,6 +336,48 @@ function buildHomePage(data: Record<string, any>, storeName: string, storeSlug: 
     }
   }
 
+  // Inject industry-specific images into blocks that have image props
+  for (const block of templateBlocks) {
+    // Replace hero/video background images
+    if (block.type === "aiHeroVideo" && block.props) {
+      if (block.props.backgroundImage || block.props.videoUrl) {
+        block.props.backgroundImage = images.hero;
+      }
+    }
+    // Replace product carousel images with industry-matched ones
+    if ((block.type === "aiLargeProductCarousel" || block.type === "aiProductCarousel") && block.props?.tabs) {
+      let imgIdx = 0;
+      for (const tab of block.props.tabs) {
+        for (const product of tab.products) {
+          if (product.image) {
+            product.image = images.showcase[imgIdx % images.showcase.length];
+            imgIdx++;
+          }
+        }
+      }
+    }
+    // Replace category card images
+    if (block.type === "aiCategoryRow" && block.props?.cards) {
+      let imgIdx = 0;
+      for (const card of block.props.cards) {
+        if (card.image) {
+          card.image = images.showcase[imgIdx % images.showcase.length];
+          imgIdx++;
+        }
+      }
+    }
+    // Replace promo tile images
+    if (block.type === "aiPromoTiles" && block.props?.tiles) {
+      let imgIdx = 0;
+      for (const tile of block.props.tiles) {
+        if (tile.image) {
+          tile.image = images.showcase[imgIdx % images.showcase.length];
+          imgIdx++;
+        }
+      }
+    }
+  }
+
   return {
     title: "Home",
     slug: "home",
@@ -336,7 +388,7 @@ function buildHomePage(data: Record<string, any>, storeName: string, storeSlug: 
   };
 }
 
-function buildAboutPage(data: Record<string, any>, storeName: string, storeSlug: string): GeneratedPage {
+function buildAboutPage(data: Record<string, any>, storeName: string, storeSlug: string, images: StoreImages): GeneratedPage {
   const about = data.about || {};
   const testimonials = data.testimonials || [];
   const valueIcons = ["heart", "award", "globe", "shield", "target", "rocket"];
@@ -361,6 +413,8 @@ function buildAboutPage(data: Record<string, any>, storeName: string, storeSlug:
       badge: "Our Story",
       title: `Why ${storeName}?`,
       text: firstHalf,
+      image: images.about,
+      imageAlt: `${storeName} - Our Story`,
       reverse: false,
       buttonText: "",
     }),
@@ -374,6 +428,8 @@ function buildAboutPage(data: Record<string, any>, storeName: string, storeSlug:
         badge: "Our Mission",
         title: "What Drives Us",
         text: secondHalf,
+        image: images.lifestyle,
+        imageAlt: `${storeName} - Our Mission`,
         reverse: true,
         buttonText: "",
       })
@@ -671,10 +727,14 @@ export async function generateStore(input: StoreGeneratorInput): Promise<StoreGe
     throw new Error("AI returned invalid content. Please try again.");
   }
 
-  // 3. Build pages from the generated content
+  // 3. Detect industry and get randomized images
+  const industry = detectIndustry(input.businessType, input.description);
+  const images = getRandomIndustryImages(industry);
+
+  // 4. Build pages from the generated content with industry-matched images
   const pages: GeneratedPage[] = [
-    buildHomePage(data, input.storeName, input.storeSlug),
-    buildAboutPage(data, input.storeName, input.storeSlug),
+    buildHomePage(data, input.storeName, input.storeSlug, images),
+    buildAboutPage(data, input.storeName, input.storeSlug, images),
     buildFAQPage(data, input.storeName, input.storeSlug),
     buildContactPage(data, input.storeName),
     buildPoliciesPage(data, input.storeName),
