@@ -16,6 +16,7 @@ import { AICapability } from "@/lib/failover";
 import type { BuilderBlock, BlockType } from "@/lib/builder/types";
 import { AI_TEMPLATE_PRESET } from "@/lib/templates/presets/ai-preset";
 import { detectIndustry, getRandomIndustryImages } from "@/lib/ai-image-pools";
+import { buildDynamicHomePage } from "@/lib/ai-layout-engine";
 
 /** Randomized image set for this store generation run */
 interface StoreImages {
@@ -213,14 +214,19 @@ Return ONLY valid JSON with this exact structure:
     {"title": "feature/benefit 1", "desc": "short description"},
     {"title": "feature/benefit 2", "desc": "short description"},
     {"title": "feature/benefit 3", "desc": "short description"}
-  ]
+  ],
+  "layout": {
+    "sections": ["pick 6-10 from: hero-image, hero-minimal, hero-split, products, products-featured, products-compact, features, stats, testimonials, story, story-full, newsletter, trust, banner, gallery, contact, faq, values, countdown"],
+    "vibe": "one word describing the visual feel (e.g. bold, elegant, minimal, warm, playful, clean, luxurious, earthy)"
+  }
 }
 
 Rules:
-- Use real-sounding Nigerian/African names for testimonials
+- For layout.sections, pick 6-10 section names from the available list above. Order them how the homepage should flow. Start with a hero variant. Pick sections that make sense for this specific business type — a restaurant needs gallery and contact, a fashion store needs products-featured, a service business needs features and values, etc. Mix it up — don't always use the same combination.
+- Use real-sounding African names for testimonials
 - Make FAQ answers specific to ${input.businessType} businesses
-- Shipping policy should mention Lagos, Abuja, and nationwide delivery
-- Payment section should reference bank transfer, card payment, and pay-on-delivery
+- Shipping/delivery policy should reference local delivery context
+- Payment section should reference local payment methods
 - Keep tone warm, confident, and trustworthy
 - NO placeholder brackets like [Your Name] — write real content
 - Return ONLY the JSON, no markdown fences, no explanation`;
@@ -239,8 +245,24 @@ function parseAIResponse(content: string): Record<string, any> {
 
 // ─── Build pages from AI content ────────────────────────────
 
-function buildHomePage(data: Record<string, any>, storeName: string, storeSlug: string, images: StoreImages): GeneratedPage {
+function buildHomePage(data: Record<string, any>, storeName: string, storeSlug: string, images: StoreImages, industry: string): GeneratedPage {
   const brand = data.brand || {};
+
+  // Use the dynamic layout engine — AI decides section order
+  const dynamicBlocks = buildDynamicHomePage(data, storeName, storeSlug, industry, images);
+
+  if (dynamicBlocks.length > 0) {
+    return {
+      title: "Home",
+      slug: "home",
+      type: "HOME",
+      blocks: dynamicBlocks,
+      metaTitle: data.seo?.homeTitle || `${storeName} — Official Store`,
+      metaDescription: data.seo?.homeDesc || brand.heroSubheading || "",
+    };
+  }
+
+  // Fallback: use the Allbirds-inspired AI template preset
   const features = data.features || [];
 
   // Use the Allbirds-inspired AI template preset as the base
@@ -733,7 +755,7 @@ export async function generateStore(input: StoreGeneratorInput): Promise<StoreGe
 
   // 4. Build pages from the generated content with industry-matched images
   const pages: GeneratedPage[] = [
-    buildHomePage(data, input.storeName, input.storeSlug, images),
+    buildHomePage(data, input.storeName, input.storeSlug, images, industry),
     buildAboutPage(data, input.storeName, input.storeSlug, images),
     buildFAQPage(data, input.storeName, input.storeSlug),
     buildContactPage(data, input.storeName),
