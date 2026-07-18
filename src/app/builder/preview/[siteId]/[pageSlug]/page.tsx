@@ -470,6 +470,8 @@ export default function BuilderPreviewPage() {
         return <InteriorFooter storeSlug={storeSlug} />;
       case 'electronics':
       case 'electronics-accessories':
+      case 'hardware':
+      case 'tools':
         return <ElectronicsFooter storeSlug={storeSlug} />;
       case 'fashion':
       case 'fashion-colored':

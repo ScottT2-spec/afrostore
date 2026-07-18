@@ -1663,7 +1663,7 @@ export function RenderBlocks({ blocks, storeSlug, products, currency, addToCart,
     </div>
   );
   const hasFashionBlocks = blocks.some((b) => b.type.startsWith("fashion"));
-  const hasElectronicsBlocks = blocks.some((b) => b.type.startsWith("electronics"));
+  const hasElectronicsBlocks = blocks.some((b) => b.type.startsWith("electronics") || b.type.startsWith("tools") || b.type.startsWith("hardware"));
   const electronicsCtxValue = hasElectronicsBlocks ? { products: (products || []) as unknown as ElectronicsStoreContextData["products"], blogs: [], currency: currency || "NGN", storeSlug: storeSlug || "" } : null;
   const wrappedContent = storeSlug ? (
     <StoreSlugContext.Provider value={storeSlug}>
