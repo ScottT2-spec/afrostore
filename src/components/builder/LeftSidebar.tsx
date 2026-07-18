@@ -91,6 +91,18 @@ const blockPalette = [
   { type: "bakeryBlogPosts", label: "Bakery Blog Posts", icon: FileText, category: "bakery" },
   { type: "bakeryCta", label: "Bakery CTA", icon: Mail, category: "bakery" },
   { type: "bakeryFooter", label: "Bakery Footer", icon: LayoutGrid, category: "bakery" },
+  { type: "bakeryAboutContent", label: "Bakery About Content", icon: FileText, category: "bakery" },
+  { type: "bakeryStatsCounters", label: "Bakery Stats Counters", icon: Layers, category: "bakery" },
+  { type: "bakeryServicesGrid", label: "Bakery Services Grid", icon: Grid3X3, category: "bakery" },
+  { type: "bakeryGalleryGrid", label: "Bakery Gallery Grid", icon: ImageIcon, category: "bakery" },
+  { type: "bakeryVideoSection", label: "Bakery Video Section", icon: Play, category: "bakery" },
+  { type: "bakeryQuoteSection", label: "Bakery Quote", icon: Type, category: "bakery" },
+  { type: "bakeryTeamSection", label: "Bakery Team Section", icon: User, category: "bakery" },
+  { type: "bakeryOfficeLocations", label: "Bakery Office Locations", icon: LayoutGrid, category: "bakery" },
+  { type: "bakeryCoverBanners", label: "Bakery Cover Banners", icon: ImageIcon, category: "bakery" },
+  { type: "bakeryStoreVisit", label: "Bakery Store Visit", icon: ShoppingBag, category: "bakery" },
+  { type: "bakeryFaqAccordion", label: "Bakery FAQ", icon: HelpCircle, category: "bakery" },
+  { type: "bakeryContactForm", label: "Bakery Contact Form", icon: Mail, category: "bakery" },
 ];
 
 const categories = ["basic", "layout", "commerce", "social", "marketing", "fashion", "cosmetics", "bakery"] as const;

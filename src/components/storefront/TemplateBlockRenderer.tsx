@@ -78,6 +78,18 @@ import {
   BakeryBlogPosts,
   BakeryCta,
   BakeryFooter,
+  BakeryAboutContent,
+  BakeryStatsCounters,
+  BakeryServicesGrid,
+  BakeryGalleryGrid,
+  BakeryVideoSection,
+  BakeryQuoteSection,
+  BakeryTeamSection,
+  BakeryOfficeLocations,
+  BakeryCoverBanners,
+  BakeryStoreVisit,
+  BakeryFaqAccordion,
+  BakeryContactForm,
 } from "@/components/storefront/BakeryTemplateBlocks";
 import {
   CosmeticsFontLoader,
@@ -332,6 +344,18 @@ const BAKERY_BLOCKS: Record<string, BlockComponent> = {
   bakeryBlogPosts: BakeryBlogPosts as unknown as BlockComponent,
   bakeryCta: BakeryCta as unknown as BlockComponent,
   bakeryFooter: BakeryFooter as unknown as BlockComponent,
+  bakeryAboutContent: BakeryAboutContent as unknown as BlockComponent,
+  bakeryStatsCounters: BakeryStatsCounters as unknown as BlockComponent,
+  bakeryServicesGrid: BakeryServicesGrid as unknown as BlockComponent,
+  bakeryGalleryGrid: BakeryGalleryGrid as unknown as BlockComponent,
+  bakeryVideoSection: BakeryVideoSection as unknown as BlockComponent,
+  bakeryQuoteSection: BakeryQuoteSection as unknown as BlockComponent,
+  bakeryTeamSection: BakeryTeamSection as unknown as BlockComponent,
+  bakeryOfficeLocations: BakeryOfficeLocations as unknown as BlockComponent,
+  bakeryCoverBanners: BakeryCoverBanners as unknown as BlockComponent,
+  bakeryStoreVisit: BakeryStoreVisit as unknown as BlockComponent,
+  bakeryFaqAccordion: BakeryFaqAccordion as unknown as BlockComponent,
+  bakeryContactForm: BakeryContactForm as unknown as BlockComponent,
 };
 
 const COSMETICS_BLOCKS: Record<string, BlockComponent> = {

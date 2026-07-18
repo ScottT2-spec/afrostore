@@ -633,6 +633,441 @@ export function BakeryCta({
 }
 
 /* ═══════════════════════════════════════════════════════════════
+   9. ABOUT CONTENT (text block with optional heading, buttons, credit)
+   ═══════════════════════════════════════════════════════════════ */
+
+export interface BakeryAboutContentProps {
+  subtitle?: string;
+  title?: string;
+  paragraphs?: string[];
+  buttons?: { text: string; link: string }[];
+  credit?: string;
+}
+
+export function BakeryAboutContent({ subtitle, title, paragraphs = [], buttons = [], credit }: BakeryAboutContentProps) {
+  const storeCtx = useContext(BakeryStoreContext);
+  const fixLink = (link: string) => resolveStoreLink(link, storeCtx?.storeSlug);
+  const css = `
+    .bk-about { padding: 40px 15px; }
+    .bk-about-subtitle { color: ${TOKENS.primaryColor}; text-transform: uppercase; font-weight: 700; font-size: 14px; font-family: ${TOKENS.bodyFont}; margin-bottom: 8px; }
+    .bk-about-title { font-family: ${TOKENS.titleFont}; font-weight: 600; font-size: 28px; line-height: 1.3; color: ${TOKENS.titleColor}; margin: 0 0 20px; }
+    .bk-about-text { font-family: ${TOKENS.bodyFont}; font-size: 16px; line-height: 28px; color: ${TOKENS.textColor}; margin: 0 0 16px; }
+    .bk-about-btns { display: flex; gap: 15px; margin-top: 20px; flex-wrap: wrap; }
+    .bk-about-btn { display: inline-block; padding: 12px 30px; background: ${TOKENS.primaryColor}; color: #fff; font-family: ${TOKENS.bodyFont}; font-weight: 500; font-size: 13px; text-decoration: none; text-transform: uppercase; letter-spacing: 1px; transition: background 0.3s; }
+    .bk-about-btn:hover { filter: brightness(0.9); }
+    .bk-about-credit { font-family: ${TOKENS.bodyFont}; font-size: 13px; color: ${TOKENS.textColor}; font-style: italic; margin-top: 20px; }
+  `;
+  return (
+    <div style={containerStyle}>
+      <ScopedStyles id="about-content" css={css} />
+      <div className="bk-about">
+        {subtitle && <div className="bk-about-subtitle">{subtitle}</div>}
+        {title && <h4 className="bk-about-title">{title}</h4>}
+        {paragraphs.map((p, i) => <p key={i} className="bk-about-text">{p}</p>)}
+        {buttons.length > 0 && (
+          <div className="bk-about-btns">
+            {buttons.map((btn, i) => <Link key={i} href={fixLink(btn.link)} className="bk-about-btn">{btn.text}</Link>)}
+          </div>
+        )}
+        {credit && <div className="bk-about-credit">{credit}</div>}
+      </div>
+    </div>
+  );
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   10. STATS COUNTERS
+   ═══════════════════════════════════════════════════════════════ */
+
+export interface BakeryStatsCountersProps {
+  counters?: { value: number; label: string }[];
+}
+
+export function BakeryStatsCounters({ counters = [] }: BakeryStatsCountersProps) {
+  const css = `
+    .bk-stats { display: flex; flex-wrap: wrap; justify-content: center; gap: 40px; padding: 40px 0; border-top: 1px solid #eee; border-bottom: 1px solid #eee; margin-bottom: 40px; }
+    .bk-stat { text-align: center; min-width: 120px; }
+    .bk-stat-value { font-family: ${TOKENS.titleFont}; font-weight: 600; font-size: 42px; color: ${TOKENS.primaryColor}; line-height: 1; margin-bottom: 8px; }
+    .bk-stat-label { font-family: ${TOKENS.bodyFont}; font-size: 13px; color: ${TOKENS.textColor}; text-transform: uppercase; letter-spacing: 1px; }
+  `;
+  return (
+    <div style={containerStyle}>
+      <ScopedStyles id="stats" css={css} />
+      <div className="bk-stats">
+        {counters.map((c, i) => (
+          <div key={i} className="bk-stat">
+            <div className="bk-stat-value">{c.value}</div>
+            <div className="bk-stat-label">{c.label}</div>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   11. SERVICES GRID (icon + title + description cards)
+   ═══════════════════════════════════════════════════════════════ */
+
+export interface BakeryServicesGridProps {
+  subtitle?: string;
+  title?: string;
+  services?: { icon: string; title: string; description: string }[];
+}
+
+export function BakeryServicesGrid({ subtitle, title, services = [] }: BakeryServicesGridProps) {
+  const css = `
+    .bk-services { padding: 40px 0; }
+    .bk-services-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 30px; margin-top: 30px; }
+    .bk-service { text-align: center; }
+    .bk-service-icon { width: 70px; height: 70px; margin: 0 auto 15px; }
+    .bk-service-icon img { width: 100%; height: 100%; }
+    .bk-service-title { font-family: ${TOKENS.titleFont}; font-weight: 600; font-size: 16px; color: ${TOKENS.titleColor}; text-transform: uppercase; margin: 0 0 8px; }
+    .bk-service-desc { font-family: ${TOKENS.bodyFont}; font-size: 14px; line-height: 1.6; color: ${TOKENS.textColor}; }
+    @media (max-width: 767px) { .bk-services-grid { grid-template-columns: 1fr 1fr; } }
+  `;
+  return (
+    <div style={containerStyle}>
+      <ScopedStyles id="services" css={css} />
+      <div className="bk-services">
+        {(subtitle || title) && <BakerySectionTitle subtitle={subtitle} title={title || ""} />}
+        <div className="bk-services-grid">
+          {services.map((s, i) => (
+            <div key={i} className="bk-service">
+              <div className="bk-service-icon"><img src={s.icon} alt={s.title} onError={(e) => onImgError(e, s.title)} /></div>
+              <h4 className="bk-service-title">{s.title}</h4>
+              <p className="bk-service-desc">{s.description}</p>
+            </div>
+          ))}
+        </div>
+      </div>
+    </div>
+  );
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   12. GALLERY GRID
+   ═══════════════════════════════════════════════════════════════ */
+
+export interface BakeryGalleryGridProps {
+  images?: string[];
+}
+
+export function BakeryGalleryGrid({ images = [] }: BakeryGalleryGridProps) {
+  const css = `
+    .bk-gallery { display: grid; grid-template-columns: repeat(2, 1fr); gap: 20px; margin: 40px 0; }
+    .bk-gallery img { width: 100%; height: auto; display: block; }
+    @media (max-width: 767px) { .bk-gallery { grid-template-columns: 1fr; } }
+  `;
+  return (
+    <div style={containerStyle}>
+      <ScopedStyles id="gallery" css={css} />
+      <div className="bk-gallery">
+        {images.map((img, i) => <img key={i} src={img} alt={`Gallery ${i + 1}`} onError={(e) => onImgError(e, "gallery")} />)}
+      </div>
+    </div>
+  );
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   13. VIDEO SECTION
+   ═══════════════════════════════════════════════════════════════ */
+
+export interface BakeryVideoSectionProps {
+  subtitle?: string;
+  title?: string;
+  description?: string;
+  videos?: { thumbnail: string; youtubeUrl: string; title: string }[];
+}
+
+export function BakeryVideoSection({ subtitle, title, description, videos = [] }: BakeryVideoSectionProps) {
+  const css = `
+    .bk-videos { display: grid; grid-template-columns: repeat(2, 1fr); gap: 30px; margin: 30px 0 40px; }
+    .bk-video { position: relative; overflow: hidden; cursor: pointer; }
+    .bk-video img { width: 100%; height: auto; display: block; }
+    .bk-video-overlay { position: absolute; inset: 0; background: rgba(0,0,0,0.3); display: flex; flex-direction: column; align-items: center; justify-content: center; transition: background 0.3s; }
+    .bk-video:hover .bk-video-overlay { background: rgba(0,0,0,0.5); }
+    .bk-video-play { width: 60px; height: 60px; border: 2px solid #fff; border-radius: 50%; display: flex; align-items: center; justify-content: center; margin-bottom: 15px; }
+    .bk-video-play::after { content: '▶'; color: #fff; font-size: 20px; margin-left: 4px; }
+    .bk-video-title { font-family: ${TOKENS.titleFont}; font-weight: 500; font-size: 18px; color: #fff; }
+    @media (max-width: 767px) { .bk-videos { grid-template-columns: 1fr; } }
+  `;
+  return (
+    <div style={containerStyle}>
+      {(subtitle || title) && <BakerySectionTitle subtitle={subtitle} title={title || ""} description={description} />}
+      <ScopedStyles id="videos" css={css} />
+      <div className="bk-videos">
+        {videos.map((v, i) => (
+          <a key={i} href={v.youtubeUrl} target="_blank" rel="noopener noreferrer" className="bk-video" style={{ textDecoration: "none" }}>
+            <img src={v.thumbnail} alt={v.title} onError={(e) => onImgError(e, v.title)} />
+            <div className="bk-video-overlay">
+              <div className="bk-video-play" />
+              <div className="bk-video-title">{v.title}</div>
+            </div>
+          </a>
+        ))}
+      </div>
+    </div>
+  );
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   14. QUOTE SECTION
+   ═══════════════════════════════════════════════════════════════ */
+
+export interface BakeryQuoteSectionProps {
+  subtitle?: string;
+  quote?: string;
+  attribution?: string;
+  description?: string;
+  credit?: string;
+}
+
+export function BakeryQuoteSection({ subtitle, quote, attribution, description, credit }: BakeryQuoteSectionProps) {
+  const css = `
+    .bk-quote { text-align: center; padding: 60px 15px; max-width: 800px; margin: 0 auto; }
+    .bk-quote-subtitle { color: ${TOKENS.primaryColor}; text-transform: uppercase; font-weight: 700; font-size: 14px; font-family: ${TOKENS.bodyFont}; margin-bottom: 8px; }
+    .bk-quote-text { font-family: ${TOKENS.titleFont}; font-weight: 600; font-size: 28px; line-height: 1.4; color: ${TOKENS.titleColor}; margin: 0 0 20px; }
+    .bk-quote-desc { font-family: ${TOKENS.bodyFont}; font-size: 16px; line-height: 28px; color: ${TOKENS.textColor}; margin: 0 0 16px; }
+    .bk-quote-credit { font-family: ${TOKENS.bodyFont}; font-size: 13px; color: ${TOKENS.textColor}; font-style: italic; }
+  `;
+  return (
+    <>
+      <ScopedStyles id="quote" css={css} />
+      <div className="bk-quote">
+        {subtitle && <div className="bk-quote-subtitle">{subtitle}</div>}
+        {quote && <h4 className="bk-quote-text">&ldquo;{quote}&rdquo;{attribution && ` — ${attribution}`}</h4>}
+        {description && <p className="bk-quote-desc">{description}</p>}
+        {credit && <div className="bk-quote-credit">{credit}</div>}
+      </div>
+    </>
+  );
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   15. TEAM SECTION
+   ═══════════════════════════════════════════════════════════════ */
+
+export interface BakeryTeamSectionProps {
+  members?: { name: string; role: string; image: string; socials?: string[] }[];
+}
+
+export function BakeryTeamSection({ members = [] }: BakeryTeamSectionProps) {
+  const css = `
+    .bk-team { display: grid; grid-template-columns: repeat(4, 1fr); gap: 30px; margin: 40px 0; }
+    .bk-team-member { text-align: center; }
+    .bk-team-img { width: 100%; aspect-ratio: 1; object-fit: cover; display: block; margin-bottom: 15px; }
+    .bk-team-name { font-family: ${TOKENS.titleFont}; font-weight: 600; font-size: 16px; color: ${TOKENS.titleColor}; margin: 0 0 4px; }
+    .bk-team-role { font-family: ${TOKENS.bodyFont}; font-size: 13px; color: ${TOKENS.textColor}; text-transform: uppercase; letter-spacing: 1px; }
+    @media (max-width: 767px) { .bk-team { grid-template-columns: 1fr 1fr; } }
+  `;
+  return (
+    <div style={containerStyle}>
+      <ScopedStyles id="team" css={css} />
+      <div className="bk-team">
+        {members.map((m, i) => (
+          <div key={i} className="bk-team-member">
+            <img className="bk-team-img" src={m.image} alt={m.name} onError={(e) => onImgError(e, m.name)} />
+            <h4 className="bk-team-name">{m.name}</h4>
+            <div className="bk-team-role">{m.role}</div>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   16. OFFICE LOCATIONS
+   ═══════════════════════════════════════════════════════════════ */
+
+export interface BakeryOfficeLocationsProps {
+  subtitle?: string;
+  title?: string;
+  description?: string;
+  offices?: { city: string; address: string; phone: string; email: string }[];
+}
+
+export function BakeryOfficeLocations({ subtitle, title, description, offices = [] }: BakeryOfficeLocationsProps) {
+  const css = `
+    .bk-offices { padding: 40px 0; }
+    .bk-offices-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 30px; margin-top: 30px; }
+    .bk-office { padding: 25px; background: ${TOKENS.bgLight}; }
+    .bk-office-city { font-family: ${TOKENS.titleFont}; font-weight: 600; font-size: 18px; color: ${TOKENS.titleColor}; margin: 0 0 12px; }
+    .bk-office-addr { font-family: ${TOKENS.bodyFont}; font-size: 14px; line-height: 1.6; color: ${TOKENS.textColor}; white-space: pre-line; margin: 0 0 12px; }
+    .bk-office-contact { font-family: ${TOKENS.bodyFont}; font-size: 14px; color: ${TOKENS.textColor}; }
+    .bk-office-contact strong { color: ${TOKENS.titleColor}; }
+    @media (max-width: 767px) { .bk-offices-grid { grid-template-columns: 1fr; } }
+  `;
+  return (
+    <div style={containerStyle}>
+      <ScopedStyles id="offices" css={css} />
+      <div className="bk-offices">
+        {(subtitle || title) && <BakerySectionTitle subtitle={subtitle} title={title || ""} description={description} />}
+        <div className="bk-offices-grid">
+          {offices.map((o, i) => (
+            <div key={i} className="bk-office">
+              <h4 className="bk-office-city">{o.city}</h4>
+              <p className="bk-office-addr">{o.address}</p>
+              <div className="bk-office-contact"><strong>Phone:</strong> {o.phone}<br /><strong>Email:</strong> {o.email}</div>
+            </div>
+          ))}
+        </div>
+      </div>
+    </div>
+  );
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   17. COVER BANNERS (news/article cards)
+   ═══════════════════════════════════════════════════════════════ */
+
+export interface BakeryCoverBannersProps {
+  banners?: { image: string; title: string; description: string; buttonText: string; link: string }[];
+}
+
+export function BakeryCoverBanners({ banners = [] }: BakeryCoverBannersProps) {
+  const storeCtx = useContext(BakeryStoreContext);
+  const css = `
+    .bk-covers { display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; margin: 40px 0; }
+    .bk-cover { position: relative; overflow: hidden; min-height: 280px; }
+    .bk-cover img { width: 100%; height: 100%; object-fit: cover; display: block; }
+    .bk-cover-overlay { position: absolute; inset: 0; background: rgba(0,0,0,0.35); display: flex; flex-direction: column; justify-content: flex-end; padding: 25px; transition: background 0.3s; }
+    .bk-cover:hover .bk-cover-overlay { background: rgba(0,0,0,0.5); }
+    .bk-cover-title { font-family: ${TOKENS.titleFont}; font-weight: 500; font-size: 18px; color: #fff; margin: 0 0 8px; }
+    .bk-cover-desc { font-family: ${TOKENS.bodyFont}; font-size: 13px; color: rgba(255,255,255,0.8); margin: 0 0 12px; }
+    .bk-cover-link { font-family: ${TOKENS.bodyFont}; font-size: 13px; color: #fff; text-decoration: underline; }
+    @media (max-width: 767px) { .bk-covers { grid-template-columns: 1fr; } }
+  `;
+  return (
+    <div style={containerStyle}>
+      <ScopedStyles id="covers" css={css} />
+      <div className="bk-covers">
+        {banners.map((b, i) => (
+          <Link key={i} href={resolveStoreLink(b.link, storeCtx?.storeSlug)} className="bk-cover" style={{ textDecoration: "none" }}>
+            <img src={b.image} alt={b.title} onError={(e) => onImgError(e, b.title)} />
+            <div className="bk-cover-overlay">
+              <h4 className="bk-cover-title">{b.title}</h4>
+              <p className="bk-cover-desc">{b.description}</p>
+              <span className="bk-cover-link">{b.buttonText}</span>
+            </div>
+          </Link>
+        ))}
+      </div>
+    </div>
+  );
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   18. STORE VISIT SECTION
+   ═══════════════════════════════════════════════════════════════ */
+
+export interface BakeryStoreVisitProps {
+  subtitle?: string;
+  title?: string;
+  address?: string;
+  buttonText?: string;
+  buttonLink?: string;
+}
+
+export function BakeryStoreVisit({ subtitle, title, address, buttonText, buttonLink = "#" }: BakeryStoreVisitProps) {
+  const storeCtx = useContext(BakeryStoreContext);
+  const css = `
+    .bk-visit { padding: 60px 0; background: ${TOKENS.bgLight}; text-align: center; margin-bottom: 40px; }
+    .bk-visit-subtitle { color: ${TOKENS.primaryColor}; text-transform: uppercase; font-weight: 700; font-size: 14px; font-family: ${TOKENS.bodyFont}; margin-bottom: 8px; }
+    .bk-visit-title { font-family: ${TOKENS.titleFont}; font-weight: 600; font-size: 28px; line-height: 1.4; color: ${TOKENS.titleColor}; margin: 0 0 15px; white-space: pre-line; }
+    .bk-visit-addr { font-family: ${TOKENS.bodyFont}; font-size: 16px; color: ${TOKENS.textColor}; white-space: pre-line; margin: 0 0 20px; }
+    .bk-visit-btn { display: inline-block; padding: 12px 30px; background: ${TOKENS.primaryColor}; color: #fff; font-family: ${TOKENS.bodyFont}; font-weight: 500; font-size: 13px; text-decoration: none; text-transform: uppercase; letter-spacing: 1px; }
+  `;
+  return (
+    <>
+      <ScopedStyles id="visit" css={css} />
+      <div className="bk-visit">
+        {subtitle && <div className="bk-visit-subtitle">{subtitle}</div>}
+        {title && <h4 className="bk-visit-title">{title}</h4>}
+        {address && <p className="bk-visit-addr">{address}</p>}
+        {buttonText && <Link href={resolveStoreLink(buttonLink, storeCtx?.storeSlug)} className="bk-visit-btn">{buttonText}</Link>}
+      </div>
+    </>
+  );
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   19. FAQ ACCORDION
+   ═══════════════════════════════════════════════════════════════ */
+
+export interface BakeryFaqAccordionProps {
+  subtitle?: string;
+  title?: string;
+  items?: { question: string; answer: string }[];
+}
+
+export function BakeryFaqAccordion({ subtitle, title, items = [] }: BakeryFaqAccordionProps) {
+  const [openIndex, setOpenIndex] = useState<number | null>(null);
+  const css = `
+    .bk-faq { padding: 40px 0; }
+    .bk-faq-item { border-bottom: 1px solid #eee; }
+    .bk-faq-q { display: flex; justify-content: space-between; align-items: center; padding: 18px 0; cursor: pointer; font-family: ${TOKENS.titleFont}; font-weight: 500; font-size: 16px; color: ${TOKENS.titleColor}; }
+    .bk-faq-q:hover { color: ${TOKENS.primaryColor}; }
+    .bk-faq-toggle { font-size: 20px; color: ${TOKENS.textColor}; transition: transform 0.3s; }
+    .bk-faq-a { font-family: ${TOKENS.bodyFont}; font-size: 15px; line-height: 1.7; color: ${TOKENS.textColor}; padding: 0 0 18px; white-space: pre-line; }
+  `;
+  return (
+    <div style={containerStyle}>
+      <ScopedStyles id="faq" css={css} />
+      <div className="bk-faq">
+        {(subtitle || title) && <BakerySectionTitle subtitle={subtitle} title={title || ""} />}
+        {items.map((item, i) => (
+          <div key={i} className="bk-faq-item">
+            <div className="bk-faq-q" onClick={() => setOpenIndex(openIndex === i ? null : i)}>
+              <span>{item.question}</span>
+              <span className="bk-faq-toggle" style={{ transform: openIndex === i ? "rotate(45deg)" : "none" }}>+</span>
+            </div>
+            {openIndex === i && <div className="bk-faq-a">{item.answer}</div>}
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   20. CONTACT FORM
+   ═══════════════════════════════════════════════════════════════ */
+
+export interface BakeryContactFormProps {
+  subtitle?: string;
+  title?: string;
+  fields?: string[];
+  buttonText?: string;
+}
+
+export function BakeryContactForm({ subtitle, title, fields = ["name", "email", "phone", "company", "message"], buttonText = "Submit" }: BakeryContactFormProps) {
+  const css = `
+    .bk-contact-form { padding: 40px 0; max-width: 700px; margin: 0 auto; }
+    .bk-contact-form input, .bk-contact-form textarea { width: 100%; padding: 12px 15px; margin-bottom: 15px; border: 1px solid #ddd; font-family: ${TOKENS.bodyFont}; font-size: 14px; box-sizing: border-box; outline: none; }
+    .bk-contact-form input:focus, .bk-contact-form textarea:focus { border-color: ${TOKENS.primaryColor}; }
+    .bk-contact-form textarea { height: 120px; resize: vertical; }
+    .bk-contact-submit { display: inline-block; padding: 14px 35px; background: ${TOKENS.primaryColor}; color: #fff; font-family: ${TOKENS.bodyFont}; font-weight: 500; font-size: 14px; text-transform: uppercase; letter-spacing: 1px; border: none; cursor: pointer; transition: background 0.3s; }
+    .bk-contact-submit:hover { filter: brightness(0.9); }
+  `;
+  return (
+    <div style={containerStyle}>
+      <ScopedStyles id="contact-form" css={css} />
+      {(subtitle || title) && <BakerySectionTitle subtitle={subtitle} title={title || ""} />}
+      <div className="bk-contact-form">
+        {fields.includes("name") && <input type="text" placeholder="Your Name" />}
+        {fields.includes("email") && <input type="email" placeholder="Your Email" />}
+        {fields.includes("phone") && <input type="tel" placeholder="Phone Number" />}
+        {fields.includes("company") && <input type="text" placeholder="Company" />}
+        {fields.includes("message") && <textarea placeholder="Your Message" />}
+        <button className="bk-contact-submit">{buttonText}</button>
+      </div>
+    </div>
+  );
+}
+
+/* ═══════════════════════════════════════════════════════════════
    FOOTER
    ═══════════════════════════════════════════════════════════════ */
 
