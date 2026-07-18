@@ -1663,10 +1663,13 @@ export function RenderBlocks({ blocks, storeSlug, products, currency, addToCart,
     </div>
   );
   const hasFashionBlocks = blocks.some((b) => b.type.startsWith("fashion"));
+  const hasElectronicsBlocks = blocks.some((b) => b.type.startsWith("electronics"));
+  const electronicsCtxValue = hasElectronicsBlocks ? { products: (products || []) as unknown as ElectronicsStoreContextData["products"], blogs: [], currency: currency || "NGN", storeSlug: storeSlug || "" } : null;
   const wrappedContent = storeSlug ? (
     <StoreSlugContext.Provider value={storeSlug}>
       <StoreContext.Provider value={{ slug: storeSlug || "", products: products || [], currency: currency || "NGN", addToCart, isWishlisted, toggleWishlist, addedToCart }}>
         <FashionStoreContext.Provider value={hasFashionBlocks ? { products: (products || []) as unknown as FashionStoreContextData["products"], blogs: [], currency: currency || "NGN", storeSlug: storeSlug || "" } : null as unknown as FashionStoreContextData}>
+        <ElectronicsStoreContext.Provider value={electronicsCtxValue as unknown as ElectronicsStoreContextData}>
         <div className="relative">
           {isEditorMode && (
             <div className="pointer-events-none sticky top-0 z-30 border-b border-brand-200 bg-brand-50/95 px-4 py-2 text-[10px] font-mono text-brand-800 backdrop-blur">
@@ -1680,6 +1683,7 @@ export function RenderBlocks({ blocks, storeSlug, products, currency, addToCart,
           )}
           {content}
         </div>
+        </ElectronicsStoreContext.Provider>
         </FashionStoreContext.Provider>
       </StoreContext.Provider>
     </StoreSlugContext.Provider>

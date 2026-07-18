@@ -12,6 +12,7 @@ import { CosmeticsHeader, CosmeticsFooter, CosmeticsFontLoader } from "@/compone
 import { TShirtsPrintsHeader, TShirtsPrintsFooter } from "@/components/storefront/TShirtsPrintsStoreChrome";
 import { VegetableHeader, VegetableFooter } from "@/components/storefront/VegetableStoreChrome";
 import { FashionHeader, FashionFooter } from "@/components/storefront/FashionStoreChrome";
+import { ElectronicsFontLoader, ElectronicsFooter } from "@/components/storefront/ElectronicsTemplateBlocks";
 import { GardenHeader, GardenFooter } from "@/components/storefront/GardenStoreChrome";
 import { HealthHeader, HealthFooterFull, HealthFontLoader } from "@/components/storefront/HealthTemplateBlocks";
 import { InteriorHeader, InteriorFooter } from "@/components/storefront/InteriorDesignTemplateBlocks";
@@ -415,6 +416,29 @@ export default function BuilderPreviewPage() {
             logo={store.logo}
           />
         );
+      case 'electronics':
+      case 'electronics-accessories':
+        return (
+          <>
+            <ElectronicsFontLoader />
+            <FashionHeader
+              storeName={store.name}
+              storeSlug={storeSlug}
+              logo={store.logo}
+            />
+          </>
+        );
+      case 'fashion':
+      case 'fashion-colored':
+        return (
+          <>
+            <FashionHeader
+              storeName={store.name}
+              storeSlug={storeSlug}
+              logo={store.logo}
+            />
+          </>
+        );
       default:
         return (
           <FashionHeader
@@ -444,6 +468,12 @@ export default function BuilderPreviewPage() {
         return <HealthFooterFull storeName={store.name} storeSlug={storeSlug} />;
       case 'interior':
         return <InteriorFooter storeSlug={storeSlug} />;
+      case 'electronics':
+      case 'electronics-accessories':
+        return <ElectronicsFooter storeSlug={storeSlug} />;
+      case 'fashion':
+      case 'fashion-colored':
+        return <FashionFooter storeName={store.name} storeSlug={storeSlug} />;
       default:
         return <FashionFooter storeName={store.name} storeSlug={storeSlug} />;
     }
