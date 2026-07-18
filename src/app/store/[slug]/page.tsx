@@ -452,12 +452,13 @@ export default function StorePage() {
   const hasHomeContent = homeBlocks.length > 0;
   const homeHasProductGrid = homeBlocks.some((b) => b.type === "productGrid");
   const isTShirtsPrintsTemplate = data.templateSlug === "t-shirts-prints" || slug === "t-shirts-prints" || store.slug === "t-shirts-prints";
-  const isFashionTemplate = data.templateSlug === "fashion" || data.templateSlug === "fashion-colored" || data.templateSlug === "handmade-bags" || data.templateSlug === "t-shirts-prints" || data.templateSlug === "sweets-bakery" || homeBlocks.some((b) => b.type.startsWith("fashion")) || homeBlocks.some((b) => b.type.startsWith("bakery"));
+  const isFashionTemplate = data.templateSlug === "fashion" || data.templateSlug === "fashion-colored" || data.templateSlug === "handmade-bags" || data.templateSlug === "t-shirts-prints" || data.templateSlug === "sweets-bakery" || data.templateSlug === "electronics" || data.templateSlug === "electronics-accessories" || data.templateSlug === "hardware" || data.templateSlug === "tools" || homeBlocks.some((b) => b.type.startsWith("fashion")) || homeBlocks.some((b) => b.type.startsWith("bakery")) || homeBlocks.some((b) => b.type.startsWith("electronics"));
   const isKidsTemplate = data.templateSlug === "kids" || data.templateSlug === "toys" || homeBlocks.some((b) => b.type.startsWith("kids"));
   const isHealthTemplate = data.templateSlug === "pills" || homeBlocks.some((b) => b.type.startsWith("health"));
   const isPerfumesTemplate = data.templateSlug === "perfumes" || homeBlocks.some((b) => b.type.startsWith("perfumes"));
   const isRetailTemplate = data.templateSlug === "retail";
   const isJumiaTemplate = homeBlocks.some((b) => b.type.startsWith("jumia"));
+  const isElectronicsTemplate = data.templateSlug === "electronics" || data.templateSlug === "electronics-accessories" || data.templateSlug === "hardware" || data.templateSlug === "tools" || homeBlocks.some((b) => b.type.startsWith("electronics"));
   const isAiTemplate = data.templateSlug === "ai" || homeBlocks.some((b) => b.type.startsWith("ai"));
   const templatePreset = data.templateSlug ? TEMPLATE_PRESET_MAP[data.templateSlug] : undefined;
 
