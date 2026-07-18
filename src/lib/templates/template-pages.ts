@@ -8,6 +8,7 @@ import { PERFUMES_HOME_PAGE_BLOCKS, PERFUMES_ABOUT_PAGE_BLOCKS, PERFUMES_CONTACT
 import { FASHION_ABOUT_PAGE_BLOCKS, FASHION_CONTACT_PAGE_BLOCKS, FASHION_BLOG_PAGE_BLOCKS, FASHION_SHOP_PAGE_BLOCKS } from "./presets/fashion-page-presets";
 import { FASHION_COLORED_ABOUT_PAGE_BLOCKS, FASHION_COLORED_CONTACT_PAGE_BLOCKS, FASHION_COLORED_BLOG_PAGE_BLOCKS, FASHION_COLORED_SHOP_PAGE_BLOCKS } from "./presets/fashion-colored-page-presets";
 import { BAKERY_ABOUT_PAGE_BLOCKS, BAKERY_CONTACT_PAGE_BLOCKS, BAKERY_BLOG_PAGE_BLOCKS, BAKERY_SHOP_PAGE_BLOCKS } from "./presets/bakery-page-presets";
+import { ELECTRONICS_ABOUT_PAGE_BLOCKS, ELECTRONICS_CONTACT_PAGE_BLOCKS, ELECTRONICS_BLOG_PAGE_BLOCKS, ELECTRONICS_SHOP_PAGE_BLOCKS } from "./presets/electronics-page-presets";
 
 /**
  * Template-specific page definitions.
@@ -53,7 +54,10 @@ const FASHION_PAGES: PageDef[] = [
 ];
 
 const ELECTRONICS_PAGES: PageDef[] = [
-  { title: "Blog", slug: "blog", type: "CUSTOM", position: 10 },
+  { title: "About Us", slug: "about", type: "CUSTOM", position: 10 },
+  { title: "Contact Us", slug: "contact", type: "CUSTOM", position: 11 },
+  { title: "Blog", slug: "blog", type: "CUSTOM", position: 12 },
+  { title: "Shop", slug: "shop", type: "CUSTOM", position: 13 },
 ];
 
 const HEALTH_PAGES: PageDef[] = [
@@ -112,6 +116,18 @@ const TEMPLATE_PAGE_CONTENT_MAP: Record<string, Record<string, unknown[]>> = {
     contact: FASHION_COLORED_CONTACT_PAGE_BLOCKS,
     blog: FASHION_COLORED_BLOG_PAGE_BLOCKS,
     shop: FASHION_COLORED_SHOP_PAGE_BLOCKS,
+  },
+  electronics: {
+    about: ELECTRONICS_ABOUT_PAGE_BLOCKS,
+    contact: ELECTRONICS_CONTACT_PAGE_BLOCKS,
+    blog: ELECTRONICS_BLOG_PAGE_BLOCKS,
+    shop: ELECTRONICS_SHOP_PAGE_BLOCKS,
+  },
+  "electronics-accessories": {
+    about: ELECTRONICS_ABOUT_PAGE_BLOCKS,
+    contact: ELECTRONICS_CONTACT_PAGE_BLOCKS,
+    blog: ELECTRONICS_BLOG_PAGE_BLOCKS,
+    shop: ELECTRONICS_SHOP_PAGE_BLOCKS,
   },
   "handmade-bags": HANDMADE_BAGS_PAGE_BLOCKS,
   health: HEALTH_PAGE_BLOCKS,

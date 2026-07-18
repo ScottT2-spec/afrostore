@@ -9,6 +9,7 @@ import { RenderBlocks, type BuilderBlock, type StoreProduct } from "@/components
 import { RenderTemplateBlocks, type TemplateBlock } from "@/components/storefront/TemplateBlockRenderer";
 import { FashionHeader, FashionFooter } from "@/components/storefront/FashionStoreChrome";
 import { FashionFontLoader, FashionStoreContext } from "@/components/storefront/FashionTemplateBlocks";
+import { ElectronicsFontLoader, ElectronicsFooter, ElectronicsStoreContext } from "@/components/storefront/ElectronicsTemplateBlocks";
 import { TShirtsPrintsFooter, TShirtsPrintsHeader } from "@/components/storefront/TShirtsPrintsStoreChrome";
 import { TShirtsPrintsFontLoader } from "@/components/storefront/TShirtsPrintsTemplateBlocks";
 import { parsePageContent, getLinkedPageHref } from "@/lib/page-content";
@@ -233,6 +234,7 @@ export default function StorefrontPage() {
   const isKidsTemplate = data.templateSlug === "kids" || slug === "kids" || data.store.slug === "kids" || data.store.name?.toLowerCase().includes("kids");
   const isTShirtsPrintsTemplate = data.templateSlug === "t-shirts-prints" || slug === "t-shirts-prints" || data.store.slug === "t-shirts-prints" || data.store.name?.toLowerCase().includes("t-shirts");
   const isFashionTemplate = data.templateSlug === "fashion" || data.templateSlug === "fashion-colored" || data.templateSlug === "handmade-bags" || data.templateSlug === "sweets-bakery";
+  const isElectronicsTemplate = data.templateSlug === "electronics" || data.templateSlug === "electronics-accessories";
   const tshirtsSocialLinks = [
     ...(socialLinks?.facebook ? [{ label: "Facebook", href: socialLinks.facebook }] : []),
     ...(socialLinks?.twitter ? [{ label: "X (Twitter)", href: socialLinks.twitter }] : []),
@@ -273,6 +275,33 @@ export default function StorefrontPage() {
             description={store.description}
           />
         </FashionStoreContext.Provider>
+      </ThemeProvider>
+    );
+  }
+
+  if (isElectronicsTemplate) {
+    const elecCtx = {
+      products: (products || []).map((p: any) => ({
+        id: p.id, name: p.name, slug: p.slug, price: p.price ?? 0, compareAtPrice: p.compareAtPrice,
+        currency: currency, inStock: p.inStock ?? true, isFeatured: p.isFeatured ?? false, tags: p.tags ?? [],
+        images: p.images ?? [], category: p.category,
+      })),
+      blogs: (blogs || []).map((b: any) => ({
+        id: b.id, title: b.title, slug: b.slug, excerpt: b.excerpt, coverImage: b.coverImage,
+        author: b.author, category: b.category, tags: b.tags ?? [], publishedAt: b.publishedAt, createdAt: b.createdAt,
+      })),
+      currency,
+      storeSlug: slug,
+    };
+    return (
+      <ThemeProvider theme={resolvedTheme}>
+        <ElectronicsStoreContext.Provider value={elecCtx}>
+          <ElectronicsFontLoader />
+          <main style={buildPageBackgroundStyle(resolvedPageSettings)}>
+            <RenderTemplateBlocks blocks={blocks as TemplateBlock[]} />
+          </main>
+          <ElectronicsFooter storeSlug={slug} />
+        </ElectronicsStoreContext.Provider>
       </ThemeProvider>
     );
   }

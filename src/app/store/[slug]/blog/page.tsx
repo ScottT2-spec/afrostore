@@ -3,6 +3,8 @@ import { notFound } from "next/navigation";
 import { RenderTemplateBlocks, type TemplateBlock } from "@/components/storefront/TemplateBlockRenderer";
 import { TShirtsPrintsFooter, TShirtsPrintsHeader } from "@/components/storefront/TShirtsPrintsStoreChrome";
 import { FashionHeader, FashionFooter } from "@/components/storefront/FashionStoreChrome";
+import { ElectronicsFontLoader, ElectronicsFooter } from "@/components/storefront/ElectronicsTemplateBlocks";
+// Note: Electronics pages don't use FashionHeader - they render headerless (header handled by block content or page-level chrome)
 import { ThemeProvider, type ThemeData } from "@/components/storefront/ThemeProvider";
 import { TShirtsPrintsFontLoader } from "@/components/storefront/TShirtsPrintsTemplateBlocks";
 import { FashionFontLoader } from "@/components/storefront/FashionTemplateBlocks";
@@ -91,6 +93,10 @@ export default async function BlogPage({ params }: Props) {
     templateSlug === "fashion-colored" ||
     templateSlug === "handmade-bags";
 
+  const isElectronicsTemplate =
+    templateSlug === "electronics" ||
+    templateSlug === "electronics-accessories";
+
   const themeData: ThemeData = {
     id: "blog-page",
     name: "Blog Page",
@@ -151,6 +157,19 @@ export default async function BlogPage({ params }: Props) {
             ]}
           />
         </div>
+      </ThemeProvider>
+    );
+  }
+
+  /* ── Electronics template ── */
+  if (isElectronicsTemplate) {
+    return (
+      <ThemeProvider theme={themeData}>
+        <ElectronicsFontLoader />
+        <main style={buildPageBackgroundStyle(pageSettings)}>
+          <RenderTemplateBlocks blocks={blocks} />
+        </main>
+        <ElectronicsFooter storeSlug={slug} />
       </ThemeProvider>
     );
   }

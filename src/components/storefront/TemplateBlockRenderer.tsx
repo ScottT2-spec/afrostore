@@ -66,6 +66,17 @@ import {
   ElectronicsPartners,
   ElectronicsFooter,
   ElectronicsSectionTitle,
+  ElectronicsAboutContent,
+  ElectronicsStatsCounters,
+  ElectronicsServicesGrid,
+  ElectronicsGalleryGrid,
+  ElectronicsVideoSection,
+  ElectronicsQuoteSection,
+  ElectronicsTeamSection,
+  ElectronicsOfficeLocations,
+  ElectronicsStoreVisit,
+  ElectronicsFaqAccordion,
+  ElectronicsContactForm,
 } from "@/components/storefront/ElectronicsTemplateBlocks";
 import {
   BakeryFontLoader,
@@ -332,6 +343,17 @@ const ELECTRONICS_BLOCKS: Record<string, BlockComponent> = {
   electronicsPartners: ElectronicsPartners as unknown as BlockComponent,
   electronicsFooter: ElectronicsFooter as unknown as BlockComponent,
   electronicsSectionTitle: ElectronicsSectionTitle as unknown as BlockComponent,
+  electronicsAboutContent: ElectronicsAboutContent as unknown as BlockComponent,
+  electronicsStatsCounters: ElectronicsStatsCounters as unknown as BlockComponent,
+  electronicsServicesGrid: ElectronicsServicesGrid as unknown as BlockComponent,
+  electronicsGalleryGrid: ElectronicsGalleryGrid as unknown as BlockComponent,
+  electronicsVideoSection: ElectronicsVideoSection as unknown as BlockComponent,
+  electronicsQuoteSection: ElectronicsQuoteSection as unknown as BlockComponent,
+  electronicsTeamSection: ElectronicsTeamSection as unknown as BlockComponent,
+  electronicsOfficeLocations: ElectronicsOfficeLocations as unknown as BlockComponent,
+  electronicsStoreVisit: ElectronicsStoreVisit as unknown as BlockComponent,
+  electronicsFaqAccordion: ElectronicsFaqAccordion as unknown as BlockComponent,
+  electronicsContactForm: ElectronicsContactForm as unknown as BlockComponent,
 };
 
 const BAKERY_BLOCKS: Record<string, BlockComponent> = {
