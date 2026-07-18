@@ -119,6 +119,15 @@ import {
   BakeryContactForm,
 } from "@/components/storefront/BakeryTemplateBlocks";
 import {
+  ToolsGridBanners,
+  ToolsFeatureIcons,
+  ToolsSectionTitle,
+  ToolsProductGrid,
+  ToolsFeatureSection,
+  ToolsDeliveryBanner,
+  ToolsPreFooter,
+} from "@/components/storefront/ToolsTemplateBlocks";
+import {
   CosmeticsFontLoader,
   CosmeticsHeroSlider,
   CosmeticsPromoBanners,
@@ -389,6 +398,16 @@ const HARDWARE_BLOCKS: Record<string, BlockComponent> = {
   hardwareBlogPosts: HardwareBlogPosts as unknown as BlockComponent,
 };
 
+const TOOLS_HOME_BLOCKS: Record<string, BlockComponent> = {
+  toolsGridBanners: ToolsGridBanners as unknown as BlockComponent,
+  toolsFeatureIcons: ToolsFeatureIcons as unknown as BlockComponent,
+  toolsSectionTitle: ToolsSectionTitle as unknown as BlockComponent,
+  toolsProductGrid: ToolsProductGrid as unknown as BlockComponent,
+  toolsFeatureSection: ToolsFeatureSection as unknown as BlockComponent,
+  toolsDeliveryBanner: ToolsDeliveryBanner as unknown as BlockComponent,
+  toolsPreFooter: ToolsPreFooter as unknown as BlockComponent,
+};
+
 const BAKERY_BLOCKS: Record<string, BlockComponent> = {
   bakeryHeroSlider: BakeryHeroSlider as unknown as BlockComponent,
   bakerySectionTitle: BakerySectionTitle as unknown as BlockComponent,
@@ -617,6 +636,7 @@ const ALL_TEMPLATE_BLOCKS: Record<string, BlockComponent> = {
   ...FASHION_BLOCKS,
   ...ELECTRONICS_BLOCKS,
   ...HARDWARE_BLOCKS,
+  ...TOOLS_HOME_BLOCKS,
   ...BAKERY_BLOCKS,
   ...COSMETICS_BLOCKS,
   ...GROCERY_BLOCKS,

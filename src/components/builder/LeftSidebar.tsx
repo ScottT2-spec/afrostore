@@ -96,6 +96,14 @@ const blockPalette = [
   { type: "hardwareFaqAccordion", label: "Hardware FAQ", icon: HelpCircle, category: "hardware" },
   { type: "hardwareContactForm", label: "Hardware Contact Form", icon: Mail, category: "hardware" },
   { type: "hardwareBlogPosts", label: "Hardware Blog Posts", icon: FileText, category: "hardware" },
+  // Tools template blocks
+  { type: "toolsGridBanners", label: "Tools Grid Banners", icon: LayoutGrid, category: "tools" },
+  { type: "toolsFeatureIcons", label: "Tools Feature Icons", icon: Sparkles, category: "tools" },
+  { type: "toolsSectionTitle", label: "Tools Section Title", icon: Type, category: "tools" },
+  { type: "toolsProductGrid", label: "Tools Product Grid", icon: Grid3X3, category: "tools" },
+  { type: "toolsFeatureSection", label: "Tools Feature Section", icon: ImageIcon, category: "tools" },
+  { type: "toolsDeliveryBanner", label: "Tools Delivery Banner", icon: ShoppingBag, category: "tools" },
+  { type: "toolsPreFooter", label: "Tools Pre-Footer", icon: Mail, category: "tools" },
   // Bakery template blocks
   { type: "bakeryHeroSlider", label: "Bakery Hero Slider", icon: Sparkles, category: "bakery" },
   { type: "bakerySectionTitle", label: "Bakery Section Title", icon: Type, category: "bakery" },
@@ -120,7 +128,7 @@ const blockPalette = [
   { type: "bakeryContactForm", label: "Bakery Contact Form", icon: Mail, category: "bakery" },
 ];
 
-const categories = ["basic", "layout", "commerce", "social", "marketing", "fashion", "cosmetics", "hardware", "bakery"] as const;
+const categories = ["basic", "layout", "commerce", "social", "marketing", "fashion", "cosmetics", "hardware", "tools", "bakery"] as const;
 const categoryLabels: Record<string, string> = {
   basic: "Basic",
   layout: "Layout",

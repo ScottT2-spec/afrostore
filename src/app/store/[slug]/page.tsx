@@ -12,6 +12,7 @@ import { FASHION_COLORED_PRESET } from "@/lib/templates/presets/fashion-colored-
 import { HANDMADE_BAGS_PRESET } from "@/lib/templates/presets/handmade-bags-preset";
 import { T_SHIRTS_PRINTS_PRESET } from "@/lib/templates/presets/t-shirts-prints-preset";
 import { ELECTRONICS_TEMPLATE_PRESET } from "@/lib/templates/presets/electronics-preset";
+import { TOOLS_TEMPLATE_PRESET } from "@/lib/templates/presets/tools-preset";
 import { BAKERY_TEMPLATE_PRESET } from "@/lib/templates/presets/bakery-preset";
 import { COSMETICS_TEMPLATE_PRESET } from "@/lib/templates/presets/cosmetics-preset";
 import { GROCERY_TEMPLATE_PRESET } from "@/lib/templates/presets/grocery-preset";
@@ -45,7 +46,7 @@ const TEMPLATE_PRESET_MAP: Record<string, TemplateBlock[]> = {
   electronics: ELECTRONICS_TEMPLATE_PRESET,
   "electronics-accessories": ELECTRONICS_TEMPLATE_PRESET,
   hardware: ELECTRONICS_TEMPLATE_PRESET,
-  tools: ELECTRONICS_TEMPLATE_PRESET,
+  tools: TOOLS_TEMPLATE_PRESET,
   "sweets-bakery": BAKERY_TEMPLATE_PRESET,
   cosmetics: COSMETICS_TEMPLATE_PRESET,
   grocery: GROCERY_TEMPLATE_PRESET,
