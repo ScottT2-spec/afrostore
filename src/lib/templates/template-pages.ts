@@ -95,6 +95,7 @@ const TEMPLATE_PAGE_MAP: Record<string, PageDef[]> = {
   pills: HEALTH_PAGES,
   makeup: MAKEUP_PAGES,
   "t-shirts-prints": TSHIRTS_PRINTS_PAGES,
+  "sweets-bakery": FASHION_PAGES,
   vegetables: VEGETABLE_PAGES,
 };
 
@@ -124,6 +125,12 @@ const TEMPLATE_PAGE_CONTENT_MAP: Record<string, Record<string, unknown[]>> = {
     "about-us": TSHIRTS_PRINTS_ABOUT_PAGE_BLOCKS,
     "contact-us": TSHIRTS_PRINTS_CONTACT_PAGE_BLOCKS,
     "blog": TSHIRTS_PRINTS_BLOG_PAGE_BLOCKS,
+  },
+  "sweets-bakery": {
+    about: BAKERY_ABOUT_PAGE_BLOCKS,
+    contact: BAKERY_CONTACT_PAGE_BLOCKS,
+    blog: BAKERY_BLOG_PAGE_BLOCKS,
+    shop: BAKERY_SHOP_PAGE_BLOCKS,
   },
   vegetables: {
     home: VEGETABLE_HOME_PAGE_BLOCKS,
