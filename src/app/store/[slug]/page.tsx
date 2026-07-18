@@ -450,7 +450,14 @@ export default function StorePage() {
     // Note: jumia header/footer are NOT filtered — they're rendered as part of the block content
   ]);
   const homeBlocks: BuilderBlock[] = homeContent.blocks.filter((block) => !CHROME_BLOCK_TYPES.has(block.type));
-  const hasHomeContent = homeBlocks.length > 0;
+  // If saved blocks are from a different template family, ignore them and use preset
+  const TEMPLATE_BLOCK_PREFIXES: Record<string, string> = {
+    tools: "tools",
+    hardware: "hardware",
+  };
+  const expectedPrefix = data.templateSlug ? TEMPLATE_BLOCK_PREFIXES[data.templateSlug] : undefined;
+  const savedBlocksMatchTemplate = !expectedPrefix || homeBlocks.length === 0 || homeBlocks.some((b) => b.type.startsWith(expectedPrefix));
+  const hasHomeContent = homeBlocks.length > 0 && savedBlocksMatchTemplate;
   const homeHasProductGrid = homeBlocks.some((b) => b.type === "productGrid");
   const isTShirtsPrintsTemplate = data.templateSlug === "t-shirts-prints" || slug === "t-shirts-prints" || store.slug === "t-shirts-prints";
   const isFashionTemplate = data.templateSlug === "fashion" || data.templateSlug === "fashion-colored" || data.templateSlug === "handmade-bags" || data.templateSlug === "t-shirts-prints" || data.templateSlug === "sweets-bakery" || data.templateSlug === "electronics" || data.templateSlug === "electronics-accessories" || data.templateSlug === "hardware" || data.templateSlug === "tools" || homeBlocks.some((b) => b.type.startsWith("fashion")) || homeBlocks.some((b) => b.type.startsWith("bakery")) || homeBlocks.some((b) => b.type.startsWith("electronics"));
