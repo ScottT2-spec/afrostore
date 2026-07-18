@@ -79,6 +79,22 @@ import {
   ElectronicsContactForm,
 } from "@/components/storefront/ElectronicsTemplateBlocks";
 import {
+  HardwareSectionTitle,
+  HardwareAboutContent,
+  HardwareStatsCounters,
+  HardwareServicesGrid,
+  HardwareGalleryGrid,
+  HardwareVideoSection,
+  HardwareQuoteSection,
+  HardwareTeamSection,
+  HardwareOfficeLocations,
+  HardwareCoverBanners,
+  HardwareStoreVisit,
+  HardwareFaqAccordion,
+  HardwareContactForm,
+  HardwareBlogPosts,
+} from "@/components/storefront/HardwareTemplateBlocks";
+import {
   BakeryFontLoader,
   BakeryHeroSlider,
   BakerySectionTitle,
@@ -356,6 +372,23 @@ const ELECTRONICS_BLOCKS: Record<string, BlockComponent> = {
   electronicsContactForm: ElectronicsContactForm as unknown as BlockComponent,
 };
 
+const HARDWARE_BLOCKS: Record<string, BlockComponent> = {
+  hardwareSectionTitle: HardwareSectionTitle as unknown as BlockComponent,
+  hardwareAboutContent: HardwareAboutContent as unknown as BlockComponent,
+  hardwareStatsCounters: HardwareStatsCounters as unknown as BlockComponent,
+  hardwareServicesGrid: HardwareServicesGrid as unknown as BlockComponent,
+  hardwareGalleryGrid: HardwareGalleryGrid as unknown as BlockComponent,
+  hardwareVideoSection: HardwareVideoSection as unknown as BlockComponent,
+  hardwareQuoteSection: HardwareQuoteSection as unknown as BlockComponent,
+  hardwareTeamSection: HardwareTeamSection as unknown as BlockComponent,
+  hardwareOfficeLocations: HardwareOfficeLocations as unknown as BlockComponent,
+  hardwareCoverBanners: HardwareCoverBanners as unknown as BlockComponent,
+  hardwareStoreVisit: HardwareStoreVisit as unknown as BlockComponent,
+  hardwareFaqAccordion: HardwareFaqAccordion as unknown as BlockComponent,
+  hardwareContactForm: HardwareContactForm as unknown as BlockComponent,
+  hardwareBlogPosts: HardwareBlogPosts as unknown as BlockComponent,
+};
+
 const BAKERY_BLOCKS: Record<string, BlockComponent> = {
   bakeryHeroSlider: BakeryHeroSlider as unknown as BlockComponent,
   bakerySectionTitle: BakerySectionTitle as unknown as BlockComponent,
@@ -583,6 +616,7 @@ const AI_BLOCKS: Record<string, BlockComponent> = {
 const ALL_TEMPLATE_BLOCKS: Record<string, BlockComponent> = {
   ...FASHION_BLOCKS,
   ...ELECTRONICS_BLOCKS,
+  ...HARDWARE_BLOCKS,
   ...BAKERY_BLOCKS,
   ...COSMETICS_BLOCKS,
   ...GROCERY_BLOCKS,

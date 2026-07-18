@@ -234,7 +234,7 @@ export default function StorefrontPage() {
   const isKidsTemplate = data.templateSlug === "kids" || slug === "kids" || data.store.slug === "kids" || data.store.name?.toLowerCase().includes("kids");
   const isTShirtsPrintsTemplate = data.templateSlug === "t-shirts-prints" || slug === "t-shirts-prints" || data.store.slug === "t-shirts-prints" || data.store.name?.toLowerCase().includes("t-shirts");
   const isFashionTemplate = data.templateSlug === "fashion" || data.templateSlug === "fashion-colored" || data.templateSlug === "handmade-bags" || data.templateSlug === "sweets-bakery";
-  const isElectronicsTemplate = data.templateSlug === "electronics" || data.templateSlug === "electronics-accessories";
+  const isElectronicsTemplate = data.templateSlug === "electronics" || data.templateSlug === "electronics-accessories" || data.templateSlug === "hardware";
   const tshirtsSocialLinks = [
     ...(socialLinks?.facebook ? [{ label: "Facebook", href: socialLinks.facebook }] : []),
     ...(socialLinks?.twitter ? [{ label: "X (Twitter)", href: socialLinks.twitter }] : []),

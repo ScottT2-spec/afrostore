@@ -81,6 +81,21 @@ const blockPalette = [
   { type: "fashionStoreVisit", label: "Fashion Store Visit", icon: ShoppingBag, category: "fashion" },
   { type: "fashionFaqAccordion", label: "Fashion FAQ", icon: HelpCircle, category: "fashion" },
   { type: "fashionContactForm", label: "Fashion Contact Form", icon: Mail, category: "fashion" },
+  // Hardware template blocks
+  { type: "hardwareSectionTitle", label: "Hardware Section Title", icon: Type, category: "hardware" },
+  { type: "hardwareAboutContent", label: "Hardware About Content", icon: FileText, category: "hardware" },
+  { type: "hardwareStatsCounters", label: "Hardware Stats Counters", icon: Layers, category: "hardware" },
+  { type: "hardwareServicesGrid", label: "Hardware Services Grid", icon: Grid3X3, category: "hardware" },
+  { type: "hardwareGalleryGrid", label: "Hardware Gallery Grid", icon: ImageIcon, category: "hardware" },
+  { type: "hardwareVideoSection", label: "Hardware Video Section", icon: Play, category: "hardware" },
+  { type: "hardwareQuoteSection", label: "Hardware Quote", icon: Type, category: "hardware" },
+  { type: "hardwareTeamSection", label: "Hardware Team Section", icon: User, category: "hardware" },
+  { type: "hardwareOfficeLocations", label: "Hardware Office Locations", icon: LayoutGrid, category: "hardware" },
+  { type: "hardwareCoverBanners", label: "Hardware Cover Banners", icon: ImageIcon, category: "hardware" },
+  { type: "hardwareStoreVisit", label: "Hardware Store Visit", icon: ShoppingBag, category: "hardware" },
+  { type: "hardwareFaqAccordion", label: "Hardware FAQ", icon: HelpCircle, category: "hardware" },
+  { type: "hardwareContactForm", label: "Hardware Contact Form", icon: Mail, category: "hardware" },
+  { type: "hardwareBlogPosts", label: "Hardware Blog Posts", icon: FileText, category: "hardware" },
   // Bakery template blocks
   { type: "bakeryHeroSlider", label: "Bakery Hero Slider", icon: Sparkles, category: "bakery" },
   { type: "bakerySectionTitle", label: "Bakery Section Title", icon: Type, category: "bakery" },
@@ -105,7 +120,7 @@ const blockPalette = [
   { type: "bakeryContactForm", label: "Bakery Contact Form", icon: Mail, category: "bakery" },
 ];
 
-const categories = ["basic", "layout", "commerce", "social", "marketing", "fashion", "cosmetics", "bakery"] as const;
+const categories = ["basic", "layout", "commerce", "social", "marketing", "fashion", "cosmetics", "hardware", "bakery"] as const;
 const categoryLabels: Record<string, string> = {
   basic: "Basic",
   layout: "Layout",
@@ -114,6 +129,7 @@ const categoryLabels: Record<string, string> = {
   marketing: "Marketing",
   fashion: "Fashion",
   cosmetics: "Cosmetics",
+  hardware: "Hardware",
   bakery: "Bakery",
 };
 
