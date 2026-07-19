@@ -270,6 +270,13 @@ import {
   MakeupBlogPosts,
   MakeupBrandsCarousel,
   MakeupFooter,
+  MakeupAboutHero,
+  MakeupTextSection,
+  MakeupTeamSection,
+  MakeupFaqSection,
+  MakeupContactHero,
+  MakeupContactForm,
+  MakeupBlogGrid,
 } from "@/components/storefront/MakeupTemplateBlocks";
 import {
   PerfumesFontLoader,
@@ -604,6 +611,13 @@ const MAKEUP_BLOCKS: Record<string, BlockComponent> = {
   makeupBlogPosts: MakeupBlogPosts as unknown as BlockComponent,
   makeupBrandsCarousel: MakeupBrandsCarousel as unknown as BlockComponent,
   makeupFooter: MakeupFooter as unknown as BlockComponent,
+  makeupAboutHero: MakeupAboutHero as unknown as BlockComponent,
+  makeupTextSection: MakeupTextSection as unknown as BlockComponent,
+  makeupTeamSection: MakeupTeamSection as unknown as BlockComponent,
+  makeupFaqSection: MakeupFaqSection as unknown as BlockComponent,
+  makeupContactHero: MakeupContactHero as unknown as BlockComponent,
+  makeupContactForm: MakeupContactForm as unknown as BlockComponent,
+  makeupBlogGrid: MakeupBlogGrid as unknown as BlockComponent,
 };
 
 const PERFUMES_BLOCKS: Record<string, BlockComponent> = {

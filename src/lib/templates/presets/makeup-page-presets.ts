@@ -7,6 +7,18 @@ import type { TemplateBlock } from "@/components/storefront/TemplateBlockRendere
  * Uses makeup block types registered in MakeupTemplateBlocks.tsx.
  */
 
+const IMG_BASE = "https://woodmart.xtemos.com/makeup/wp-content/uploads/sites/22/2024/10";
+
+const MAKEUP_BRANDS = [
+  { name: "Caudalie", logo: `${IMG_BASE}/c2-brand-1.png`, link: "/shop?filter_brand=caudalie" },
+  { name: "Cerave", logo: `${IMG_BASE}/c2-brand-2.png`, link: "/shop?filter_brand=cerave" },
+  { name: "Mizon", logo: `${IMG_BASE}/c2-brand-3.png`, link: "/shop?filter_brand=mizon" },
+  { name: "Payot", logo: `${IMG_BASE}/c2-brand-4.png`, link: "/shop?filter_brand=payot" },
+  { name: "SVR", logo: `${IMG_BASE}/c2-brand-5.png`, link: "/shop?filter_brand=svr" },
+  { name: "Tocobo", logo: `${IMG_BASE}/c2-brand-6.png`, link: "/shop?filter_brand=tocobo" },
+  { name: "Uriage", logo: `${IMG_BASE}/c2-brand-7.png`, link: "/shop?filter_brand=uriage" },
+];
+
 /* ═══════════════════════════════════════════════════════════════
    ABOUT US PAGE
    Source: https://woodmart.xtemos.com/makeup/about-us/
@@ -15,77 +27,74 @@ import type { TemplateBlock } from "@/components/storefront/TemplateBlockRendere
 export const MAKEUP_ABOUT_PAGE_BLOCKS: TemplateBlock[] = [
   {
     id: "makeup-about-hero",
-    type: "makeupSectionTitle",
+    type: "makeupAboutHero",
     props: {
+      subtitle: "Care to Beauty",
       title: "A Complete Assortment of Cosmetics, At the Touch of a Finger.",
-      align: "center",
-      marginBottom: "0px",
+      bodyText: [
+        "Wherever you are in the world, we believe you deserve the very best products.",
+      ],
+      images: [
+        `${IMG_BASE}/c2-abt-1.jpg`,
+        `${IMG_BASE}/c2-abt-2.jpg`,
+      ],
+      ctaText: "Learn More",
+      ctaLink: "/about",
     },
   },
   {
-    id: "makeup-about-intro",
-    type: "makeupBeforeAfter",
+    id: "makeup-about-story",
+    type: "makeupTextSection",
     props: {
-      title: "Care to Beauty is all about simplifying your way to beauty and skincare.",
-      description: "Wherever you are in the world, we believe you deserve the very best products.",
-      beforeImage: "https://woodmart.xtemos.com/cosmetics/wp-content/uploads/sites/22/2024/10/c2-glry-3.jpg",
-      afterImage: "https://woodmart.xtemos.com/cosmetics/wp-content/uploads/sites/22/2024/10/c2-glry-3.jpg",
-      buttonText: "",
-      buttonLink: "#",
-      backgroundColor: "#fff",
-      marginBottom: "60px",
+      sectionTitle: {
+        subtitle: "Care to Beauty",
+        title: "About Our Store",
+      },
+      bodyText: [
+        "Care to Beauty is all about simplifying your way to beauty and skincare. We offer a complete assortment of cosmetics from world-renowned brands, carefully curated to meet all your beauty needs.",
+        "Our mission is to bring premium skincare and beauty products closer to you, regardless of where you are in the world. We believe everyone deserves access to the very best products at fair prices.",
+        "From cleansers and moisturizers to serums and sunscreens, our selection covers every step of your beauty routine. Each product is chosen with care, ensuring quality and effectiveness.",
+      ],
+      backgroundColor: "#f9f9f9",
     },
   },
   {
-    id: "makeup-about-team-title",
-    type: "makeupSectionTitle",
+    id: "makeup-about-team",
+    type: "makeupTeamSection",
     props: {
-      title: "Meet The Team",
-      align: "center",
-      marginBottom: "15px",
-    },
-  },
-  {
-    id: "makeup-about-team-desc",
-    type: "makeupSectionTitle",
-    props: {
-      title: "Each member excels both professionally and personally, contributing their unique talents to create a harmonious and effective work environment.",
-      align: "center",
-      marginBottom: "40px",
-    },
-  },
-  {
-    id: "makeup-about-business",
-    type: "makeupSectionTitle",
-    props: {
-      title: "How We Start Our Business",
-      align: "center",
-      marginBottom: "40px",
+      sectionTitle: {
+        subtitle: "The Team",
+        title: "Meet The Team",
+      },
+      team: [
+        { name: "Mark Jance", role: "CEO / Founder", photoUrl: "https://woodmart.xtemos.com/wp-content/uploads/2017/01/team26.jpg" },
+        { name: "Everly Quinn", role: "Creative Director", photoUrl: "https://woodmart.xtemos.com/wp-content/uploads/2017/01/team19.jpg" },
+        { name: "Anna Watson", role: "Marketing Lead", photoUrl: "https://woodmart.xtemos.com/wp-content/uploads/2017/01/team24.jpg" },
+        { name: "Oliver James", role: "Product Manager", photoUrl: "https://woodmart.xtemos.com/wp-content/uploads/2017/01/team21.jpg" },
+      ],
     },
   },
   {
     id: "makeup-about-brands",
     type: "makeupBrandsCarousel",
     props: {
-      brands: [
-        { name: "Caudalie", logo: "https://woodmart.xtemos.com/cosmetics/wp-content/uploads/sites/22/2024/10/c2-brand-1.png", url: "/shop?filter_brand=caudalie" },
-        { name: "Cerave", logo: "https://woodmart.xtemos.com/cosmetics/wp-content/uploads/sites/22/2024/10/c2-brand-2.png", url: "/shop?filter_brand=cerave" },
-        { name: "Mizon", logo: "https://woodmart.xtemos.com/cosmetics/wp-content/uploads/sites/22/2024/10/c2-brand-3.png", url: "/shop?filter_brand=mizon" },
-        { name: "Payot", logo: "https://woodmart.xtemos.com/cosmetics/wp-content/uploads/sites/22/2024/10/c2-brand-4.png", url: "/shop?filter_brand=payot" },
-        { name: "SVR", logo: "https://woodmart.xtemos.com/cosmetics/wp-content/uploads/sites/22/2024/10/c2-brand-5.png", url: "/shop?filter_brand=svr" },
-        { name: "Tocobo", logo: "https://woodmart.xtemos.com/cosmetics/wp-content/uploads/sites/22/2024/10/c2-brand-6.png", url: "/shop?filter_brand=tocobo" },
-        { name: "Uriage", logo: "https://woodmart.xtemos.com/cosmetics/wp-content/uploads/sites/22/2024/10/c2-brand-7.png", url: "/shop?filter_brand=uriage" },
-      ],
+      brands: MAKEUP_BRANDS,
       marginBottom: "60px",
     },
   },
   {
-    id: "makeup-about-article-title",
-    type: "makeupSectionTitle",
+    id: "makeup-about-special",
+    type: "makeupTextSection",
     props: {
-      title: "Makeup for special events: shine uniquely!",
-      align: "center",
-      marginBottom: "20px",
+      sectionTitle: {
+        subtitle: "Beauty Tips",
+        title: "Makeup for special events: shine uniquely!",
+      },
+      bodyText: [
+        "A special day requires a special look, and bright makeup will be its highlight. Regardless of whether it is a wedding, a corporate event, or a romantic dinner, the right makeup will help you feel confident and unforgettable.",
+        "An effective skincare routine starts with an effective cleansing routine. Finding the right cleanser for your skin can make a significant difference in maintaining healthy, radiant skin throughout the day.",
+      ],
+      backgroundColor: "transparent",
     },
   },
   {
@@ -103,36 +112,43 @@ export const MAKEUP_ABOUT_PAGE_BLOCKS: TemplateBlock[] = [
 export const MAKEUP_CONTACT_PAGE_BLOCKS: TemplateBlock[] = [
   {
     id: "makeup-contact-hero",
-    type: "makeupSectionTitle",
+    type: "makeupContactHero",
     props: {
       title: "Contact us",
-      align: "center",
-      marginBottom: "40px",
+      address: "2116 W McCormick St, Wichita, KS 67213, USA",
+      phone: "(316) 389-7041",
+      email: "xtemos.studio@gmail.com",
+      hours: "Monday – Tuesday 10.00am – 6.00pm (By Appointment Only)\nWednesday – Saturday, 11.00am – 5.00pm\nSunday, Closed",
     },
   },
   {
-    id: "makeup-contact-address",
-    type: "makeupSectionTitle",
+    id: "makeup-contact-form",
+    type: "makeupContactForm",
     props: {
-      title: "Address",
-      align: "left",
-      marginBottom: "10px",
+      title: "Send Us a Message",
     },
   },
   {
     id: "makeup-contact-brands",
     type: "makeupBrandsCarousel",
     props: {
-      brands: [
-        { name: "Caudalie", logo: "https://woodmart.xtemos.com/cosmetics/wp-content/uploads/sites/22/2024/10/c2-brand-1.png", url: "/shop?filter_brand=caudalie" },
-        { name: "Cerave", logo: "https://woodmart.xtemos.com/cosmetics/wp-content/uploads/sites/22/2024/10/c2-brand-2.png", url: "/shop?filter_brand=cerave" },
-        { name: "Mizon", logo: "https://woodmart.xtemos.com/cosmetics/wp-content/uploads/sites/22/2024/10/c2-brand-3.png", url: "/shop?filter_brand=mizon" },
-        { name: "Payot", logo: "https://woodmart.xtemos.com/cosmetics/wp-content/uploads/sites/22/2024/10/c2-brand-4.png", url: "/shop?filter_brand=payot" },
-        { name: "SVR", logo: "https://woodmart.xtemos.com/cosmetics/wp-content/uploads/sites/22/2024/10/c2-brand-5.png", url: "/shop?filter_brand=svr" },
-        { name: "Tocobo", logo: "https://woodmart.xtemos.com/cosmetics/wp-content/uploads/sites/22/2024/10/c2-brand-6.png", url: "/shop?filter_brand=tocobo" },
-        { name: "Uriage", logo: "https://woodmart.xtemos.com/cosmetics/wp-content/uploads/sites/22/2024/10/c2-brand-7.png", url: "/shop?filter_brand=uriage" },
-      ],
+      brands: MAKEUP_BRANDS,
       marginBottom: "60px",
+    },
+  },
+  {
+    id: "makeup-contact-special",
+    type: "makeupTextSection",
+    props: {
+      sectionTitle: {
+        subtitle: "Beauty Tips",
+        title: "Makeup for special events: shine uniquely!",
+      },
+      bodyText: [
+        "A special day requires a special look, and bright makeup will be its highlight. Regardless of whether it is a wedding, a corporate event, or a romantic dinner, the right makeup will help you feel confident and unforgettable.",
+        "An effective skincare routine starts with an effective cleansing routine. Finding the right cleanser for your skin can make a significant difference in maintaining healthy, radiant skin throughout the day.",
+      ],
+      backgroundColor: "transparent",
     },
   },
   {
@@ -149,28 +165,17 @@ export const MAKEUP_CONTACT_PAGE_BLOCKS: TemplateBlock[] = [
 
 export const MAKEUP_BLOG_PAGE_BLOCKS: TemplateBlock[] = [
   {
-    id: "makeup-blog-hero",
-    type: "makeupSectionTitle",
+    id: "makeup-blog-grid",
+    type: "makeupBlogGrid",
     props: {
-      title: "Blog",
-      align: "center",
-      marginBottom: "40px",
-    },
-  },
-  {
-    id: "makeup-blog-posts",
-    type: "makeupBlogPosts",
-    props: {
-      sectionTitle: {
-        title: "Latest Articles",
-      },
+      sectionTitle: "Latest Articles",
       posts: [
         {
           id: "makeup-blog-1",
           title: "Exploring the World of Cosmetics and Skincare",
           slug: "exploring-the-world-of-cosmetics-and-skincare",
-          excerpt: "",
-          image: "https://woodmart.xtemos.com/makeup/wp-content/uploads/sites/22/2024/10/c2-blg-1.jpg",
+          excerpt: "Discover the ultimate blend of beauty, innovation, and self-care. We explore the latest trends in cosmetics and skincare that are transforming the industry.",
+          image: `${IMG_BASE}/c2-blg-1.jpg`,
           category: "Hair",
           author: "Mr. Mackay",
           date: "Oct 16",
@@ -179,8 +184,8 @@ export const MAKEUP_BLOG_PAGE_BLOCKS: TemplateBlock[] = [
           id: "makeup-blog-2",
           title: "Insider Secrets and Expert Advice",
           slug: "insider-secrets-and-expert-advice",
-          excerpt: "",
-          image: "https://woodmart.xtemos.com/makeup/wp-content/uploads/sites/22/2024/10/c2-blg-2.jpg",
+          excerpt: "Get exclusive tips from industry professionals on how to achieve flawless skin and makeup looks that last all day long.",
+          image: `${IMG_BASE}/c2-blg-2.jpg`,
           category: "Sunscreen",
           author: "Mr. Mackay",
           date: "Oct 1",
@@ -189,8 +194,8 @@ export const MAKEUP_BLOG_PAGE_BLOCKS: TemplateBlock[] = [
           id: "makeup-blog-3",
           title: "Beauty Tips and Trends Unveiled",
           slug: "beauty-tips-and-trends-unveiled",
-          excerpt: "",
-          image: "https://woodmart.xtemos.com/makeup/wp-content/uploads/sites/22/2024/10/c2-blg-3.jpg",
+          excerpt: "Stay ahead of the curve with our curated guide to the hottest beauty trends and timeless tips for every skin type.",
+          image: `${IMG_BASE}/c2-blg-3.jpg`,
           category: "Skincare",
           author: "Mr. Mackay",
           date: "Sep 22",
@@ -199,8 +204,8 @@ export const MAKEUP_BLOG_PAGE_BLOCKS: TemplateBlock[] = [
           id: "makeup-blog-4",
           title: "A Journey Through the History and Trends of Cosmetic Products",
           slug: "a-journey-through-the-history-and-trends-of-cosmetic-products",
-          excerpt: "",
-          image: "https://woodmart.xtemos.com/makeup/wp-content/uploads/sites/22/2024/10/c2-blg-4.jpg",
+          excerpt: "From ancient beauty rituals to modern innovations, explore how cosmetic products have evolved through the centuries.",
+          image: `${IMG_BASE}/c2-blg-4.jpg`,
           category: "Makeup",
           author: "Mr. Mackay",
           date: "Sep 10",
@@ -209,8 +214,8 @@ export const MAKEUP_BLOG_PAGE_BLOCKS: TemplateBlock[] = [
           id: "makeup-blog-5",
           title: "Exploring the Ingredients Behind Your Favorite Cosmetics",
           slug: "exploring-the-ingredients-behind-your-favorite-cosmetics",
-          excerpt: "",
-          image: "https://woodmart.xtemos.com/makeup/wp-content/uploads/sites/22/2024/10/c2-blg-5.jpg",
+          excerpt: "Learn about the science behind key ingredients like hyaluronic acid, retinol, and niacinamide that power your favorite products.",
+          image: `${IMG_BASE}/c2-blg-5.jpg`,
           category: "Hair",
           author: "Mr. Mackay",
           date: "Aug 29",
@@ -219,14 +224,13 @@ export const MAKEUP_BLOG_PAGE_BLOCKS: TemplateBlock[] = [
           id: "makeup-blog-6",
           title: "Exploring the Latest Innovations in Cosmetic Technology",
           slug: "exploring-the-latest-innovations-in-cosmetic-technology",
-          excerpt: "",
-          image: "https://woodmart.xtemos.com/makeup/wp-content/uploads/sites/22/2024/10/c2-blg-6.jpg",
+          excerpt: "From AI-powered skincare analysis to sustainable packaging, discover the technologies reshaping the beauty industry.",
+          image: `${IMG_BASE}/c2-blg-6.jpg`,
           category: "Body",
           author: "Mr. Mackay",
           date: "Aug 2",
         },
       ],
-      marginBottom: "60px",
     },
   },
   {
@@ -243,79 +247,34 @@ export const MAKEUP_BLOG_PAGE_BLOCKS: TemplateBlock[] = [
 
 export const MAKEUP_SHOP_PAGE_BLOCKS: TemplateBlock[] = [
   {
-    id: "makeup-shop-hero",
-    type: "makeupSectionTitle",
-    props: {
-      title: "Shop",
-      align: "center",
-      marginBottom: "40px",
-    },
-  },
-  {
     id: "makeup-shop-categories",
     type: "makeupCategorySidebar",
     props: {
       categories: [
         {
           name: "Body",
-          slug: "body",
-          image: "",
-          children: [
-            { name: "Body Lotions", slug: "body-lotions" },
-            { name: "Body Washes", slug: "body-washes" },
-            { name: "Foot Care", slug: "foot-care" },
-            { name: "Hand Care", slug: "hand-care" },
-            { name: "Perfumes", slug: "perfumes" },
-            { name: "Scrubs", slug: "scrubs" },
-          ],
+          icon: `${IMG_BASE}/c2-cat-body.png`,
+          link: "/shop?category=body",
         },
         {
           name: "Hair",
-          slug: "hair",
-          image: "",
-          children: [
-            { name: "Conditioners", slug: "conditioners" },
-            { name: "Hair Masks", slug: "hair-masks" },
-            { name: "Scalp Care", slug: "scalp-care" },
-            { name: "Shampoos", slug: "shampoos" },
-            { name: "Styling", slug: "styling" },
-          ],
+          icon: `${IMG_BASE}/c2-cat-hair.png`,
+          link: "/shop?category=hair",
         },
         {
           name: "Makeup",
-          slug: "makeup",
-          image: "",
-          children: [
-            { name: "Eyes", slug: "eyes" },
-            { name: "Face", slug: "face" },
-            { name: "Lips", slug: "lips" },
-          ],
+          icon: `${IMG_BASE}/c2-cat-makeup.png`,
+          link: "/shop?category=makeup",
         },
         {
           name: "Skincare",
-          slug: "skincare",
-          image: "",
-          children: [
-            { name: "Cleansers", slug: "cleansers" },
-            { name: "Creams", slug: "creams" },
-            { name: "Eye Care", slug: "eye-care" },
-            { name: "Lip Care", slug: "lip-care" },
-            { name: "Masks", slug: "masks" },
-            { name: "Peeling", slug: "peeling" },
-            { name: "Serums", slug: "serums" },
-            { name: "Toners", slug: "toners" },
-          ],
+          icon: `${IMG_BASE}/c2-cat-skincare.png`,
+          link: "/shop?category=skincare",
         },
         {
           name: "Sunscreen",
-          slug: "sunscreen",
-          image: "",
-          children: [
-            { name: "After Sun", slug: "after-sun" },
-            { name: "Body Sunscreen", slug: "body-sunscreen" },
-            { name: "Face Sunscreen", slug: "face-sunscreen" },
-            { name: "Hair Sunscreen", slug: "hair-sunscreen" },
-          ],
+          icon: `${IMG_BASE}/c2-cat-sunscreen.png`,
+          link: "/shop?category=sunscreen",
         },
       ],
       marginBottom: "40px",
