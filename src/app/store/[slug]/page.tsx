@@ -14,7 +14,7 @@ import { BakeryStoreContext } from "@/components/storefront/BakeryTemplateBlocks
 import { CosmeticsStoreContext } from "@/components/storefront/CosmeticsTemplateBlocks";
 import { GroceryStoreContext } from "@/components/storefront/GroceryTemplateBlocks";
 import { HealthStoreContext, HealthHeader } from "@/components/storefront/HealthTemplateBlocks";
-import { InteriorStoreContext } from "@/components/storefront/InteriorDesignTemplateBlocks";
+import { InteriorStoreContext, InteriorHeader, InteriorFooter, InteriorFontLoader } from "@/components/storefront/InteriorDesignTemplateBlocks";
 import { KidsStoreContext, KidsHeader, KidsFooterFull } from "@/components/storefront/KidsTemplateBlocks";
 import { MakeupStoreContext } from "@/components/storefront/MakeupTemplateBlocks";
 import { PerfumesStoreContext } from "@/components/storefront/PerfumesTemplateBlocks";
@@ -429,6 +429,7 @@ export default function StorePage() {
   const isHealthTemplate = data.templateSlug === "pills" || homeBlocks.some((b) => b.type.startsWith("health"));
   const isPerfumesTemplate = data.templateSlug === "perfumes" || homeBlocks.some((b) => b.type.startsWith("perfumes"));
   const isRetailTemplate = data.templateSlug === "retail";
+  const isDecorTemplate = data.templateSlug === "decor" || data.templateSlug === "interior" || data.templateSlug === "interior-design" || data.templateSlug === "home-decor" || homeBlocks.some((b) => b.type.startsWith("interior"));
   const isJumiaTemplate = homeBlocks.some((b) => b.type.startsWith("jumia"));
   const isElectronicsTemplate = data.templateSlug === "electronics" || data.templateSlug === "electronics-accessories" || data.templateSlug === "hardware" || data.templateSlug === "tools" || homeBlocks.some((b) => b.type.startsWith("electronics"));
   const isAiTemplate = data.templateSlug === "ai" || homeBlocks.some((b) => b.type.startsWith("ai"));
@@ -550,7 +551,16 @@ export default function StorePage() {
     <ThemeProvider theme={resolvedTheme}>
     <div className="min-h-screen bg-white">
       {/* ─── TEMPLATE HEADERS ─── */}
-      {isRetailTemplate ? (
+      {isDecorTemplate ? (
+        <>
+          <InteriorFontLoader />
+          <InteriorHeader
+            storeName={store.name}
+            storeSlug={slug}
+            logo={store.logo}
+          />
+        </>
+      ) : isRetailTemplate ? (
         <GardenHeader
           storeName={store.name}
           storeSlug={slug}
@@ -843,7 +853,9 @@ export default function StorePage() {
       )}
 
       {/* Footer */}
-      {isRetailTemplate ? (
+      {isDecorTemplate ? (
+        <InteriorFooter storeSlug={slug} />
+      ) : isRetailTemplate ? (
         <GardenFooter
           storeName={store.name}
           storeSlug={slug}
