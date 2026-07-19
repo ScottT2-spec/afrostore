@@ -136,6 +136,9 @@ const TEMPLATE_PAGE_MAP: Record<string, PageDef[]> = {
   vegetables: VEGETABLE_PAGES,
   decor: DECOR_PAGES,
   retail: DECOR_PAGES,
+  interior: DECOR_PAGES,
+  "interior-design": DECOR_PAGES,
+  "home-decor": DECOR_PAGES,
 };
 
 /** Map of template slug → default page block content (keyed by page slug) */
@@ -230,6 +233,24 @@ export const TEMPLATE_PAGE_CONTENT_MAP: Record<string, Record<string, unknown[]>
     shop: DECOR_SHOP_PAGE_BLOCKS,
   },
   retail: {
+    about: DECOR_ABOUT_PAGE_BLOCKS,
+    contact: DECOR_CONTACT_PAGE_BLOCKS,
+    blog: DECOR_BLOG_PAGE_BLOCKS,
+    shop: DECOR_SHOP_PAGE_BLOCKS,
+  },
+  interior: {
+    about: DECOR_ABOUT_PAGE_BLOCKS,
+    contact: DECOR_CONTACT_PAGE_BLOCKS,
+    blog: DECOR_BLOG_PAGE_BLOCKS,
+    shop: DECOR_SHOP_PAGE_BLOCKS,
+  },
+  "interior-design": {
+    about: DECOR_ABOUT_PAGE_BLOCKS,
+    contact: DECOR_CONTACT_PAGE_BLOCKS,
+    blog: DECOR_BLOG_PAGE_BLOCKS,
+    shop: DECOR_SHOP_PAGE_BLOCKS,
+  },
+  "home-decor": {
     about: DECOR_ABOUT_PAGE_BLOCKS,
     contact: DECOR_CONTACT_PAGE_BLOCKS,
     blog: DECOR_BLOG_PAGE_BLOCKS,

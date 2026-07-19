@@ -238,7 +238,7 @@ export default function StorefrontPage() {
   const isFashionTemplate = data.templateSlug === "fashion" || data.templateSlug === "fashion-colored" || data.templateSlug === "handmade-bags" || data.templateSlug === "sweets-bakery";
   const isAccessoriesTemplate = data.templateSlug === "electronics-accessories";
   const isElectronicsTemplate = data.templateSlug === "electronics" || data.templateSlug === "hardware" || data.templateSlug === "tools";
-  const isDecorTemplate = data.templateSlug === "decor" || data.templateSlug === "retail";
+  const isDecorTemplate = data.templateSlug === "decor" || data.templateSlug === "retail" || data.templateSlug === "interior" || data.templateSlug === "interior-design" || data.templateSlug === "home-decor";
   const tshirtsSocialLinks = [
     ...(socialLinks?.facebook ? [{ label: "Facebook", href: socialLinks.facebook }] : []),
     ...(socialLinks?.twitter ? [{ label: "X (Twitter)", href: socialLinks.twitter }] : []),

@@ -104,7 +104,10 @@ export default async function BlogPage({ params }: Props) {
 
   const isDecorTemplate =
     templateSlug === "decor" ||
-    templateSlug === "retail";
+    templateSlug === "retail" ||
+    templateSlug === "interior" ||
+    templateSlug === "interior-design" ||
+    templateSlug === "home-decor";
 
   const themeData: ThemeData = {
     id: "blog-page",
