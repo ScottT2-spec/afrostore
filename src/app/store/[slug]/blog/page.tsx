@@ -7,6 +7,7 @@ import { ElectronicsFontLoader, ElectronicsFooter } from "@/components/storefron
 import { InteriorFontLoader, InteriorHeader, InteriorFooter } from "@/components/storefront/InteriorDesignTemplateBlocks";
 import { AccessoriesFontLoader } from "@/components/storefront/AccessoriesTemplateBlocks";
 import { KidsFontLoader } from "@/components/storefront/KidsTemplateBlocks";
+import { MakeupFontLoader } from "@/components/storefront/MakeupTemplateBlocks";
 // Note: Electronics pages don't use FashionHeader - they render headerless (header handled by block content or page-level chrome)
 import { ThemeProvider, type ThemeData } from "@/components/storefront/ThemeProvider";
 import { TShirtsPrintsFontLoader } from "@/components/storefront/TShirtsPrintsTemplateBlocks";
@@ -212,6 +213,22 @@ export default async function BlogPage({ params }: Props) {
           <RenderTemplateBlocks blocks={blocks} />
         </main>
         <InteriorFooter storeSlug={slug} />
+      </ThemeProvider>
+    );
+  }
+
+  /* ── Makeup template ── */
+  const isMakeupTemplate = templateSlug === "makeup";
+
+  if (isMakeupTemplate) {
+    return (
+      <ThemeProvider theme={themeData}>
+        <div className="min-h-screen bg-white text-[#1d1d1d]">
+          <MakeupFontLoader />
+          <main style={buildPageBackgroundStyle(pageSettings)}>
+            <RenderTemplateBlocks blocks={blocks} />
+          </main>
+        </div>
       </ThemeProvider>
     );
   }

@@ -15,6 +15,7 @@ import { DECOR_ABOUT_PAGE_BLOCKS, DECOR_CONTACT_PAGE_BLOCKS, DECOR_BLOG_PAGE_BLO
 import { ACCESSORIES_ABOUT_PAGE_BLOCKS, ACCESSORIES_CONTACT_PAGE_BLOCKS, ACCESSORIES_BLOG_PAGE_BLOCKS, ACCESSORIES_SHOP_PAGE_BLOCKS, ACCESSORIES_FAQS_PAGE_BLOCKS } from "./presets/accessories-page-presets";
 import { KIDS_ABOUT_PAGE_BLOCKS, KIDS_CONTACT_PAGE_BLOCKS, KIDS_BLOG_PAGE_BLOCKS, KIDS_SHOP_PAGE_BLOCKS } from "./presets/kids-page-presets";
 import { TOYS_ABOUT_PAGE_BLOCKS, TOYS_CONTACT_PAGE_BLOCKS, TOYS_BLOG_PAGE_BLOCKS, TOYS_SHOP_PAGE_BLOCKS, TOYS_FAQS_PAGE_BLOCKS } from "./presets/toys-page-presets";
+import { MAKEUP_ABOUT_PAGE_BLOCKS, MAKEUP_CONTACT_PAGE_BLOCKS, MAKEUP_BLOG_PAGE_BLOCKS, MAKEUP_SHOP_PAGE_BLOCKS } from "./presets/makeup-page-presets";
 
 /**
  * Template-specific page definitions.
@@ -98,7 +99,10 @@ const HEALTH_PAGES: PageDef[] = [
 ];
 
 const MAKEUP_PAGES: PageDef[] = [
-  { title: "Blog", slug: "blog", type: "CUSTOM", position: 10 },
+  { title: "About Us", slug: "about", type: "CUSTOM", position: 10 },
+  { title: "Contact Us", slug: "contact", type: "CUSTOM", position: 11 },
+  { title: "Blog", slug: "blog", type: "CUSTOM", position: 12 },
+  { title: "Shop", slug: "shop", type: "CUSTOM", position: 13 },
 ];
 
 const TSHIRTS_PRINTS_PAGES: PageDef[] = [
@@ -225,6 +229,12 @@ export const TEMPLATE_PAGE_CONTENT_MAP: Record<string, Record<string, unknown[]>
     blog: TOYS_BLOG_PAGE_BLOCKS,
     shop: TOYS_SHOP_PAGE_BLOCKS,
     faqs: TOYS_FAQS_PAGE_BLOCKS,
+  },
+  makeup: {
+    about: MAKEUP_ABOUT_PAGE_BLOCKS,
+    contact: MAKEUP_CONTACT_PAGE_BLOCKS,
+    blog: MAKEUP_BLOG_PAGE_BLOCKS,
+    shop: MAKEUP_SHOP_PAGE_BLOCKS,
   },
   decor: {
     about: DECOR_ABOUT_PAGE_BLOCKS,
