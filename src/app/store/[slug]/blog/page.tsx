@@ -223,12 +223,21 @@ export default async function BlogPage({ params }: Props) {
   if (isMakeupTemplate) {
     return (
       <ThemeProvider theme={themeData}>
-        <div className="min-h-screen bg-white text-[#1d1d1d]">
-          <MakeupFontLoader />
-          <main style={buildPageBackgroundStyle(pageSettings)}>
-            <RenderTemplateBlocks blocks={blocks} />
-          </main>
-        </div>
+        <MakeupFontLoader />
+        <FashionHeader
+          storeName={store.name}
+          storeSlug={slug}
+          logo={store.logo}
+          isLanding={false}
+        />
+        <main style={buildPageBackgroundStyle(pageSettings)}>
+          <RenderTemplateBlocks blocks={blocks} />
+        </main>
+        <FashionFooter
+          storeName={store.name}
+          storeSlug={slug}
+          description={store.description ?? undefined}
+        />
       </ThemeProvider>
     );
   }
