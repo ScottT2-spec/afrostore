@@ -14,6 +14,8 @@ import { VegetableHeader, VegetableFooter } from "@/components/storefront/Vegeta
 import { FashionHeader, FashionFooter } from "@/components/storefront/FashionStoreChrome";
 import { ElectronicsFontLoader, ElectronicsFooter } from "@/components/storefront/ElectronicsTemplateBlocks";
 import { GardenHeader, GardenFooter } from "@/components/storefront/GardenStoreChrome";
+import { TEMPLATE_PRESET_MAP } from "@/lib/templates/template-preset-map";
+import { TEMPLATE_PAGE_CONTENT_MAP } from "@/lib/templates/template-pages";
 import { HealthHeader, HealthFooterFull, HealthFontLoader } from "@/components/storefront/HealthTemplateBlocks";
 import { InteriorHeader, InteriorFooter } from "@/components/storefront/InteriorDesignTemplateBlocks";
 
@@ -87,7 +89,35 @@ export default function BuilderPreviewPage() {
         
         if (json.success && json.data) {
           setStoreData(json.data);
-          const pageBlocks = (json.data.page.content?.blocks || []) as BuilderBlock[];
+          let pageBlocks = (json.data.page.content?.blocks || []) as BuilderBlock[];
+          
+          // Seed preset blocks when the page has no saved blocks
+          if (pageBlocks.length === 0 && json.data.templateSlug) {
+            const slug = json.data.templateSlug;
+            const isHomePage = pageSlug === "home" || pageSlug === "/";
+            if (isHomePage) {
+              const preset = TEMPLATE_PRESET_MAP[slug];
+              if (preset) {
+                pageBlocks = preset.map((b: any) => ({
+                  id: b.id,
+                  type: b.type,
+                  props: b.props || {},
+                }));
+              }
+            } else {
+              // Sub-pages: check TEMPLATE_PAGE_CONTENT_MAP
+              const templateContent = TEMPLATE_PAGE_CONTENT_MAP[slug];
+              if (templateContent && templateContent[pageSlug as string]) {
+                const subPreset = templateContent[pageSlug as string];
+                pageBlocks = subPreset.map((b: any) => ({
+                  id: b.id,
+                  type: b.type,
+                  props: b.props || {},
+                }));
+              }
+            }
+          }
+          
           setBlocks(pageBlocks);
         } else {
           console.error("API returned error:", json.error);

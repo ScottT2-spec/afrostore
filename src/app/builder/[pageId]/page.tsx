@@ -8,6 +8,8 @@ import { ProkipSite, DesignSystem, Page, Section } from "@/types";
 import BuilderWorkspace from "@/components/builder/BuilderWorkspace";
 import { Loader2 } from "lucide-react";
 import { convertBlocksToSections, convertSectionsToBlocks } from "@/lib/content-converter";
+import { TEMPLATE_PRESET_MAP } from "@/lib/templates/template-preset-map";
+import { TEMPLATE_PAGE_CONTENT_MAP } from "@/lib/templates/template-pages";
 
 // Default design system
 const defaultDesignSystem: DesignSystem = {
@@ -128,14 +130,47 @@ export default function BuilderPage({ params }: { params: Promise<{ pageId: stri
         if (cancelled) return;
         
         if (siteRes.success && siteRes.data) {
+          // Get template slug for preset seeding
+          const templateSlug = siteRes.data.template?.slug || "";
+          
           // Convert existing pages to ProkipSite format
-          const convertedPages = (pagesRes.data?.pages || []).map((page: any) => ({
-            id: page.id,
-            name: page.title,
-            slug: page.slug,
-            sections: page.content ? convertBlocksToSections((page.content as any).blocks || []) : [],
-            isSystem: page.type === "HOME" || page.type === "LANDING",
-          }));
+          const convertedPages = (pagesRes.data?.pages || []).map((page: any) => {
+            const dbBlocks = page.content ? (page.content as any).blocks || [] : [];
+            let sections = convertBlocksToSections(dbBlocks);
+            
+            // Seed preset blocks when page has no saved blocks
+            if (sections.length === 0 && templateSlug) {
+              const isHome = page.type === "HOME" || page.type === "LANDING" || page.slug === "home" || page.slug === "/";
+              if (isHome) {
+                const preset = TEMPLATE_PRESET_MAP[templateSlug];
+                if (preset) {
+                  sections = convertBlocksToSections(preset.map((b: any) => ({
+                    id: b.id,
+                    type: b.type,
+                    props: b.props || {},
+                  })));
+                }
+              } else {
+                const templateContent = TEMPLATE_PAGE_CONTENT_MAP[templateSlug];
+                const pageSlug = page.slug as string;
+                if (templateContent && templateContent[pageSlug]) {
+                  sections = convertBlocksToSections(templateContent[pageSlug].map((b: any) => ({
+                    id: b.id,
+                    type: b.type,
+                    props: b.props || {},
+                  })));
+                }
+              }
+            }
+            
+            return {
+              id: page.id,
+              name: page.title,
+              slug: page.slug,
+              sections,
+              isSystem: page.type === "HOME" || page.type === "LANDING",
+            };
+          });
           
           // Find the current page
           const currentPage = convertedPages.find((p: Page) => p.id === pageId) || convertedPages[0];
