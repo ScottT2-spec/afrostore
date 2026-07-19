@@ -15,7 +15,7 @@ import { FashionHeader, FashionFooter } from "@/components/storefront/FashionSto
 import { ElectronicsFontLoader, ElectronicsFooter } from "@/components/storefront/ElectronicsTemplateBlocks";
 import { GardenHeader, GardenFooter } from "@/components/storefront/GardenStoreChrome";
 import { TEMPLATE_PRESET_MAP } from "@/lib/templates/template-preset-map";
-import { TEMPLATE_PAGE_CONTENT_MAP } from "@/lib/templates/template-pages";
+import { TEMPLATE_PAGE_CONTENT_MAP } from "@/lib/templates/template-page-content-map";
 import { HealthHeader, HealthFooterFull, HealthFontLoader } from "@/components/storefront/HealthTemplateBlocks";
 import { InteriorHeader, InteriorFooter, InteriorFontLoader } from "@/components/storefront/InteriorDesignTemplateBlocks";
 

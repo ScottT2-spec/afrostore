@@ -9,7 +9,7 @@ import BuilderWorkspace from "@/components/builder/BuilderWorkspace";
 import { Loader2 } from "lucide-react";
 import { convertBlocksToSections, convertSectionsToBlocks } from "@/lib/content-converter";
 import { TEMPLATE_PRESET_MAP } from "@/lib/templates/template-preset-map";
-import { TEMPLATE_PAGE_CONTENT_MAP } from "@/lib/templates/template-pages";
+import { TEMPLATE_PAGE_CONTENT_MAP } from "@/lib/templates/template-page-content-map";
 
 // Default design system
 const defaultDesignSystem: DesignSystem = {

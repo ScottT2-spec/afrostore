@@ -1,0 +1,97 @@
+/**
+ * Client-safe template page content map.
+ * Split from template-pages.ts to avoid importing prisma/server-only modules
+ * into client components (builder preview, etc.).
+ */
+
+import { HANDMADE_BAGS_PAGE_BLOCKS } from "./presets/handmade-bags-pages";
+import { HEALTH_PAGE_BLOCKS } from "./presets/health-pages";
+import { COSMETICS_TERMS_BLOCKS, COSMETICS_SHOP_BLOCKS, COSMETICS_BLOG_BLOCKS } from "./presets/cosmetics-pages-preset";
+import { TSHIRTS_PRINTS_ABOUT_PAGE_BLOCKS, TSHIRTS_PRINTS_CONTACT_PAGE_BLOCKS, TSHIRTS_PRINTS_BLOG_PAGE_BLOCKS } from "./presets/t-shirts-prints-page-presets";
+import { VEGETABLE_HOME_PAGE_BLOCKS, VEGETABLE_MENU_PAGE_BLOCKS, VEGETABLE_RECIPE_PAGE_BLOCKS, VEGETABLE_ABOUT_PAGE_BLOCKS, VEGETABLE_CONTACT_PAGE_BLOCKS, VEGETABLE_RESERVATION_PAGE_BLOCKS } from "./presets/vegetables-page-presets";
+import { PERFUMES_HOME_PAGE_BLOCKS, PERFUMES_ABOUT_PAGE_BLOCKS, PERFUMES_CONTACT_PAGE_BLOCKS, PERFUMES_FRAGRANCES_PAGE_BLOCKS, PERFUMES_JOURNAL_PAGE_BLOCKS, PERFUMES_REVIEWS_PAGE_BLOCKS } from "./presets/perfumes-page-presets";
+import { FASHION_ABOUT_PAGE_BLOCKS, FASHION_CONTACT_PAGE_BLOCKS, FASHION_BLOG_PAGE_BLOCKS, FASHION_SHOP_PAGE_BLOCKS } from "./presets/fashion-page-presets";
+import { FASHION_COLORED_ABOUT_PAGE_BLOCKS, FASHION_COLORED_CONTACT_PAGE_BLOCKS, FASHION_COLORED_BLOG_PAGE_BLOCKS, FASHION_COLORED_SHOP_PAGE_BLOCKS } from "./presets/fashion-colored-page-presets";
+import { BAKERY_ABOUT_PAGE_BLOCKS, BAKERY_CONTACT_PAGE_BLOCKS, BAKERY_BLOG_PAGE_BLOCKS, BAKERY_SHOP_PAGE_BLOCKS } from "./presets/bakery-page-presets";
+import { HARDWARE_ABOUT_PAGE_BLOCKS, HARDWARE_CONTACT_PAGE_BLOCKS, HARDWARE_BLOG_PAGE_BLOCKS } from "./presets/hardware-page-presets";
+import { TOOLS_ABOUT_PAGE_BLOCKS, TOOLS_CONTACT_PAGE_BLOCKS, TOOLS_BLOG_PAGE_BLOCKS } from "./presets/tools-page-presets";
+import { ELECTRONICS_ABOUT_PAGE_BLOCKS, ELECTRONICS_CONTACT_PAGE_BLOCKS, ELECTRONICS_BLOG_PAGE_BLOCKS, ELECTRONICS_SHOP_PAGE_BLOCKS } from "./presets/electronics-page-presets";
+import { DECOR_ABOUT_PAGE_BLOCKS, DECOR_CONTACT_PAGE_BLOCKS, DECOR_BLOG_PAGE_BLOCKS, DECOR_SHOP_PAGE_BLOCKS } from "./presets/decor-page-presets";
+
+export const TEMPLATE_PAGE_CONTENT_MAP: Record<string, Record<string, unknown[]>> = {
+  fashion: {
+    about: FASHION_ABOUT_PAGE_BLOCKS,
+    contact: FASHION_CONTACT_PAGE_BLOCKS,
+    blog: FASHION_BLOG_PAGE_BLOCKS,
+    shop: FASHION_SHOP_PAGE_BLOCKS,
+  },
+  "fashion-colored": {
+    about: FASHION_COLORED_ABOUT_PAGE_BLOCKS,
+    contact: FASHION_COLORED_CONTACT_PAGE_BLOCKS,
+    blog: FASHION_COLORED_BLOG_PAGE_BLOCKS,
+    shop: FASHION_COLORED_SHOP_PAGE_BLOCKS,
+  },
+  electronics: {
+    about: ELECTRONICS_ABOUT_PAGE_BLOCKS,
+    contact: ELECTRONICS_CONTACT_PAGE_BLOCKS,
+    blog: ELECTRONICS_BLOG_PAGE_BLOCKS,
+    shop: ELECTRONICS_SHOP_PAGE_BLOCKS,
+  },
+  "electronics-accessories": {
+    about: ELECTRONICS_ABOUT_PAGE_BLOCKS,
+    contact: ELECTRONICS_CONTACT_PAGE_BLOCKS,
+    blog: ELECTRONICS_BLOG_PAGE_BLOCKS,
+    shop: ELECTRONICS_SHOP_PAGE_BLOCKS,
+  },
+  "handmade-bags": HANDMADE_BAGS_PAGE_BLOCKS,
+  health: HEALTH_PAGE_BLOCKS,
+  pills: HEALTH_PAGE_BLOCKS,
+  cosmetics: {
+    shop: COSMETICS_SHOP_BLOCKS,
+    blog: COSMETICS_BLOG_BLOCKS,
+    terms: COSMETICS_TERMS_BLOCKS,
+  },
+  "t-shirts-prints": {
+    "about-us": TSHIRTS_PRINTS_ABOUT_PAGE_BLOCKS,
+    "contact-us": TSHIRTS_PRINTS_CONTACT_PAGE_BLOCKS,
+    blog: TSHIRTS_PRINTS_BLOG_PAGE_BLOCKS,
+  },
+  hardware: {
+    about: HARDWARE_ABOUT_PAGE_BLOCKS,
+    contact: HARDWARE_CONTACT_PAGE_BLOCKS,
+    blog: HARDWARE_BLOG_PAGE_BLOCKS,
+  },
+  tools: {
+    about: TOOLS_ABOUT_PAGE_BLOCKS,
+    contact: TOOLS_CONTACT_PAGE_BLOCKS,
+    blog: TOOLS_BLOG_PAGE_BLOCKS,
+  },
+  "sweets-bakery": {
+    about: BAKERY_ABOUT_PAGE_BLOCKS,
+    contact: BAKERY_CONTACT_PAGE_BLOCKS,
+    blog: BAKERY_BLOG_PAGE_BLOCKS,
+    shop: BAKERY_SHOP_PAGE_BLOCKS,
+  },
+  vegetables: {
+    home: VEGETABLE_HOME_PAGE_BLOCKS,
+    menu: VEGETABLE_MENU_PAGE_BLOCKS,
+    recipe: VEGETABLE_RECIPE_PAGE_BLOCKS,
+    about: VEGETABLE_ABOUT_PAGE_BLOCKS,
+    contact: VEGETABLE_CONTACT_PAGE_BLOCKS,
+    reservation: VEGETABLE_RESERVATION_PAGE_BLOCKS,
+  },
+  decor: {
+    about: DECOR_ABOUT_PAGE_BLOCKS,
+    contact: DECOR_CONTACT_PAGE_BLOCKS,
+    blog: DECOR_BLOG_PAGE_BLOCKS,
+    shop: DECOR_SHOP_PAGE_BLOCKS,
+  },
+  perfumes: {
+    home: PERFUMES_HOME_PAGE_BLOCKS,
+    about: PERFUMES_ABOUT_PAGE_BLOCKS,
+    contact: PERFUMES_CONTACT_PAGE_BLOCKS,
+    fragrances: PERFUMES_FRAGRANCES_PAGE_BLOCKS,
+    journal: PERFUMES_JOURNAL_PAGE_BLOCKS,
+    reviews: PERFUMES_REVIEWS_PAGE_BLOCKS,
+  },
+};
