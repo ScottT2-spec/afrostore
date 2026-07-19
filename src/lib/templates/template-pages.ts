@@ -12,6 +12,7 @@ import { HARDWARE_ABOUT_PAGE_BLOCKS, HARDWARE_CONTACT_PAGE_BLOCKS, HARDWARE_BLOG
 import { TOOLS_ABOUT_PAGE_BLOCKS, TOOLS_CONTACT_PAGE_BLOCKS, TOOLS_BLOG_PAGE_BLOCKS } from "./presets/tools-page-presets";
 import { ELECTRONICS_ABOUT_PAGE_BLOCKS, ELECTRONICS_CONTACT_PAGE_BLOCKS, ELECTRONICS_BLOG_PAGE_BLOCKS, ELECTRONICS_SHOP_PAGE_BLOCKS } from "./presets/electronics-page-presets";
 import { DECOR_ABOUT_PAGE_BLOCKS, DECOR_CONTACT_PAGE_BLOCKS, DECOR_BLOG_PAGE_BLOCKS, DECOR_SHOP_PAGE_BLOCKS } from "./presets/decor-page-presets";
+import { ACCESSORIES_ABOUT_PAGE_BLOCKS, ACCESSORIES_CONTACT_PAGE_BLOCKS, ACCESSORIES_BLOG_PAGE_BLOCKS, ACCESSORIES_SHOP_PAGE_BLOCKS, ACCESSORIES_FAQS_PAGE_BLOCKS } from "./presets/accessories-page-presets";
 
 /**
  * Template-specific page definitions.
@@ -63,6 +64,14 @@ const ELECTRONICS_PAGES: PageDef[] = [
   { title: "Shop", slug: "shop", type: "CUSTOM", position: 13 },
 ];
 
+const ACCESSORIES_PAGES: PageDef[] = [
+  { title: "About Us", slug: "about", type: "CUSTOM", position: 10 },
+  { title: "Contact Us", slug: "contact", type: "CUSTOM", position: 11 },
+  { title: "Blog", slug: "blog", type: "CUSTOM", position: 12 },
+  { title: "Shop", slug: "shop", type: "CUSTOM", position: 13 },
+  { title: "FAQs", slug: "faqs", type: "CUSTOM", position: 14 },
+];
+
 const DECOR_PAGES: PageDef[] = [
   { title: "About Us", slug: "about", type: "CUSTOM", position: 10 },
   { title: "Contact Us", slug: "contact", type: "CUSTOM", position: 11 },
@@ -104,7 +113,7 @@ const TEMPLATE_PAGE_MAP: Record<string, PageDef[]> = {
   fashion: FASHION_PAGES,
   "fashion-colored": FASHION_PAGES,
   electronics: ELECTRONICS_PAGES,
-  "electronics-accessories": ELECTRONICS_PAGES,
+  "electronics-accessories": ACCESSORIES_PAGES,
   health: HEALTH_PAGES,
   pills: HEALTH_PAGES,
   makeup: MAKEUP_PAGES,
@@ -138,10 +147,11 @@ export const TEMPLATE_PAGE_CONTENT_MAP: Record<string, Record<string, unknown[]>
     shop: ELECTRONICS_SHOP_PAGE_BLOCKS,
   },
   "electronics-accessories": {
-    about: ELECTRONICS_ABOUT_PAGE_BLOCKS,
-    contact: ELECTRONICS_CONTACT_PAGE_BLOCKS,
-    blog: ELECTRONICS_BLOG_PAGE_BLOCKS,
-    shop: ELECTRONICS_SHOP_PAGE_BLOCKS,
+    about: ACCESSORIES_ABOUT_PAGE_BLOCKS,
+    contact: ACCESSORIES_CONTACT_PAGE_BLOCKS,
+    blog: ACCESSORIES_BLOG_PAGE_BLOCKS,
+    shop: ACCESSORIES_SHOP_PAGE_BLOCKS,
+    faqs: ACCESSORIES_FAQS_PAGE_BLOCKS,
   },
   "handmade-bags": HANDMADE_BAGS_PAGE_BLOCKS,
   health: HEALTH_PAGE_BLOCKS,

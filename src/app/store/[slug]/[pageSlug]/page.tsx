@@ -11,6 +11,7 @@ import { FashionHeader, FashionFooter } from "@/components/storefront/FashionSto
 import { FashionFontLoader, FashionStoreContext } from "@/components/storefront/FashionTemplateBlocks";
 import { ElectronicsFontLoader, ElectronicsFooter, ElectronicsStoreContext } from "@/components/storefront/ElectronicsTemplateBlocks";
 import { InteriorFontLoader, InteriorHeader, InteriorFooter, InteriorStoreContext } from "@/components/storefront/InteriorDesignTemplateBlocks";
+import { AccessoriesFontLoader, AccessoriesStoreContext } from "@/components/storefront/AccessoriesTemplateBlocks";
 import { TShirtsPrintsFooter, TShirtsPrintsHeader } from "@/components/storefront/TShirtsPrintsStoreChrome";
 import { TShirtsPrintsFontLoader } from "@/components/storefront/TShirtsPrintsTemplateBlocks";
 import { parsePageContent, getLinkedPageHref } from "@/lib/page-content";
@@ -235,7 +236,8 @@ export default function StorefrontPage() {
   const isKidsTemplate = data.templateSlug === "kids" || slug === "kids" || data.store.slug === "kids" || data.store.name?.toLowerCase().includes("kids");
   const isTShirtsPrintsTemplate = data.templateSlug === "t-shirts-prints" || slug === "t-shirts-prints" || data.store.slug === "t-shirts-prints" || data.store.name?.toLowerCase().includes("t-shirts");
   const isFashionTemplate = data.templateSlug === "fashion" || data.templateSlug === "fashion-colored" || data.templateSlug === "handmade-bags" || data.templateSlug === "sweets-bakery";
-  const isElectronicsTemplate = data.templateSlug === "electronics" || data.templateSlug === "electronics-accessories" || data.templateSlug === "hardware" || data.templateSlug === "tools";
+  const isAccessoriesTemplate = data.templateSlug === "electronics-accessories";
+  const isElectronicsTemplate = data.templateSlug === "electronics" || data.templateSlug === "hardware" || data.templateSlug === "tools";
   const isDecorTemplate = data.templateSlug === "decor" || data.templateSlug === "retail";
   const tshirtsSocialLinks = [
     ...(socialLinks?.facebook ? [{ label: "Facebook", href: socialLinks.facebook }] : []),
@@ -277,6 +279,28 @@ export default function StorefrontPage() {
             description={store.description}
           />
         </FashionStoreContext.Provider>
+      </ThemeProvider>
+    );
+  }
+
+  if (isAccessoriesTemplate) {
+    const accCtx = {
+      products: (products || []).map((p: any) => ({
+        id: p.id, name: p.name, slug: p.slug, price: p.price ?? 0, compareAtPrice: p.compareAtPrice,
+        currency: currency, inStock: p.inStock ?? true, isFeatured: p.isFeatured ?? false, tags: p.tags ?? [],
+        images: p.images ?? [], category: p.category,
+      })),
+      currency,
+      storeSlug: slug,
+    };
+    return (
+      <ThemeProvider theme={resolvedTheme}>
+        <AccessoriesStoreContext.Provider value={accCtx}>
+          <AccessoriesFontLoader />
+          <main style={buildPageBackgroundStyle(resolvedPageSettings)}>
+            <RenderTemplateBlocks blocks={blocks as TemplateBlock[]} />
+          </main>
+        </AccessoriesStoreContext.Provider>
       </ThemeProvider>
     );
   }

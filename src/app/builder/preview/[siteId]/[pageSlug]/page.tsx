@@ -18,6 +18,7 @@ import { TEMPLATE_PRESET_MAP } from "@/lib/templates/template-preset-map";
 import { TEMPLATE_PAGE_CONTENT_MAP } from "@/lib/templates/template-page-content-map";
 import { HealthHeader, HealthFooterFull, HealthFontLoader } from "@/components/storefront/HealthTemplateBlocks";
 import { InteriorHeader, InteriorFooter, InteriorFontLoader } from "@/components/storefront/InteriorDesignTemplateBlocks";
+import { AccessoriesFontLoader } from "@/components/storefront/AccessoriesTemplateBlocks";
 
 // Chrome block types that should not be in the editable block list
 const CHROME_BLOCK_TYPES = new Set([
@@ -456,8 +457,13 @@ export default function BuilderPreviewPage() {
             />
           </>
         );
-      case 'electronics':
       case 'electronics-accessories':
+        return (
+          <>
+            <AccessoriesFontLoader />
+          </>
+        );
+      case 'electronics':
         return (
           <>
             <ElectronicsFontLoader />
@@ -510,8 +516,9 @@ export default function BuilderPreviewPage() {
       case 'retail':
       case 'interior':
         return <InteriorFooter storeSlug={storeSlug} />;
-      case 'electronics':
       case 'electronics-accessories':
+        return null;
+      case 'electronics':
       case 'hardware':
       case 'tools':
         return <ElectronicsFooter storeSlug={storeSlug} />;
