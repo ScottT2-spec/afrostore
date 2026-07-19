@@ -108,7 +108,7 @@ const TEMPLATE_PAGE_MAP: Record<string, PageDef[]> = {
 };
 
 /** Map of template slug → default page block content (keyed by page slug) */
-const TEMPLATE_PAGE_CONTENT_MAP: Record<string, Record<string, unknown[]>> = {
+export const TEMPLATE_PAGE_CONTENT_MAP: Record<string, Record<string, unknown[]>> = {
   fashion: {
     about: FASHION_ABOUT_PAGE_BLOCKS,
     contact: FASHION_CONTACT_PAGE_BLOCKS,

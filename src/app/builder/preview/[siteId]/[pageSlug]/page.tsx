@@ -91,8 +91,13 @@ export default function BuilderPreviewPage() {
           setStoreData(json.data);
           let pageBlocks = (json.data.page.content?.blocks || []) as BuilderBlock[];
           
-          // Seed preset blocks when the page has no saved blocks
-          if (pageBlocks.length === 0 && json.data.templateSlug) {
+          // Seed preset blocks when page has no saved blocks or blocks don't match template
+          const TEMPLATE_BLOCK_PREFIXES: Record<string, string> = { tools: "tools", hardware: "hardware" };
+          const expectedPrefix = json.data.templateSlug ? TEMPLATE_BLOCK_PREFIXES[json.data.templateSlug] : undefined;
+          const blocksMatchTemplate = !expectedPrefix || pageBlocks.length === 0 || pageBlocks.some((b: any) => b.type.startsWith(expectedPrefix));
+          const needsSeeding = (pageBlocks.length === 0 || !blocksMatchTemplate) && json.data.templateSlug;
+          
+          if (needsSeeding) {
             const slug = json.data.templateSlug;
             const isHomePage = pageSlug === "home" || pageSlug === "/";
             if (isHomePage) {
