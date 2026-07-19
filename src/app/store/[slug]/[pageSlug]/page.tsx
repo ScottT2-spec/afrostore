@@ -10,6 +10,7 @@ import { RenderTemplateBlocks, type TemplateBlock } from "@/components/storefron
 import { FashionHeader, FashionFooter } from "@/components/storefront/FashionStoreChrome";
 import { FashionFontLoader, FashionStoreContext } from "@/components/storefront/FashionTemplateBlocks";
 import { ElectronicsFontLoader, ElectronicsFooter, ElectronicsStoreContext } from "@/components/storefront/ElectronicsTemplateBlocks";
+import { InteriorFontLoader, InteriorHeader, InteriorFooter, InteriorStoreContext } from "@/components/storefront/InteriorDesignTemplateBlocks";
 import { TShirtsPrintsFooter, TShirtsPrintsHeader } from "@/components/storefront/TShirtsPrintsStoreChrome";
 import { TShirtsPrintsFontLoader } from "@/components/storefront/TShirtsPrintsTemplateBlocks";
 import { parsePageContent, getLinkedPageHref } from "@/lib/page-content";
@@ -235,6 +236,7 @@ export default function StorefrontPage() {
   const isTShirtsPrintsTemplate = data.templateSlug === "t-shirts-prints" || slug === "t-shirts-prints" || data.store.slug === "t-shirts-prints" || data.store.name?.toLowerCase().includes("t-shirts");
   const isFashionTemplate = data.templateSlug === "fashion" || data.templateSlug === "fashion-colored" || data.templateSlug === "handmade-bags" || data.templateSlug === "sweets-bakery";
   const isElectronicsTemplate = data.templateSlug === "electronics" || data.templateSlug === "electronics-accessories" || data.templateSlug === "hardware" || data.templateSlug === "tools";
+  const isDecorTemplate = data.templateSlug === "decor" || data.templateSlug === "retail";
   const tshirtsSocialLinks = [
     ...(socialLinks?.facebook ? [{ label: "Facebook", href: socialLinks.facebook }] : []),
     ...(socialLinks?.twitter ? [{ label: "X (Twitter)", href: socialLinks.twitter }] : []),
@@ -302,6 +304,34 @@ export default function StorefrontPage() {
           </main>
           <ElectronicsFooter storeSlug={slug} />
         </ElectronicsStoreContext.Provider>
+      </ThemeProvider>
+    );
+  }
+
+  if (isDecorTemplate) {
+    const decorCtx = {
+      products: (products || []).map((p: any) => ({
+        id: p.id, name: p.name, slug: p.slug, price: p.price ?? 0, compareAtPrice: p.compareAtPrice,
+        currency: currency, inStock: p.inStock ?? true, isFeatured: p.isFeatured ?? false, tags: p.tags ?? [],
+        images: p.images ?? [], category: p.category,
+      })),
+      currency,
+      storeSlug: slug,
+    };
+    return (
+      <ThemeProvider theme={resolvedTheme}>
+        <InteriorStoreContext.Provider value={decorCtx}>
+          <InteriorFontLoader />
+          <InteriorHeader
+            storeName={store.name}
+            storeSlug={slug}
+            logo={store.logo}
+          />
+          <main style={buildPageBackgroundStyle(resolvedPageSettings)}>
+            <RenderTemplateBlocks blocks={blocks as TemplateBlock[]} />
+          </main>
+          <InteriorFooter storeSlug={slug} />
+        </InteriorStoreContext.Provider>
       </ThemeProvider>
     );
   }

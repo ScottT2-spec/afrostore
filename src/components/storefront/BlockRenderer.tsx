@@ -15,7 +15,7 @@ import { BakeryFontLoader } from "@/components/storefront/BakeryTemplateBlocks";
 import { CosmeticsFontLoader } from "@/components/storefront/CosmeticsTemplateBlocks";
 import { GroceryFontLoader } from "@/components/storefront/GroceryTemplateBlocks";
 import { HealthFontLoader } from "@/components/storefront/HealthTemplateBlocks";
-import { InteriorFontLoader } from "@/components/storefront/InteriorDesignTemplateBlocks";
+import { InteriorFontLoader, InteriorStoreContext, type InteriorStoreContextData } from "@/components/storefront/InteriorDesignTemplateBlocks";
 import { KidsFontLoader } from "@/components/storefront/KidsTemplateBlocks";
 import { MakeupFontLoader } from "@/components/storefront/MakeupTemplateBlocks";
 import { PerfumesFontLoader } from "@/components/storefront/PerfumesTemplateBlocks";
@@ -1664,12 +1664,15 @@ export function RenderBlocks({ blocks, storeSlug, products, currency, addToCart,
   );
   const hasFashionBlocks = blocks.some((b) => b.type.startsWith("fashion"));
   const hasElectronicsBlocks = blocks.some((b) => b.type.startsWith("electronics") || b.type.startsWith("tools") || b.type.startsWith("hardware"));
+  const hasInteriorBlocks = blocks.some((b) => b.type.startsWith("interior"));
   const electronicsCtxValue = hasElectronicsBlocks ? { products: (products || []) as unknown as ElectronicsStoreContextData["products"], blogs: [], currency: currency || "NGN", storeSlug: storeSlug || "" } : null;
+  const interiorCtxValue = hasInteriorBlocks ? { products: (products || []) as unknown as InteriorStoreContextData["products"], blogs: [], currency: currency || "NGN", storeSlug: storeSlug || "" } : null;
   const wrappedContent = storeSlug ? (
     <StoreSlugContext.Provider value={storeSlug}>
       <StoreContext.Provider value={{ slug: storeSlug || "", products: products || [], currency: currency || "NGN", addToCart, isWishlisted, toggleWishlist, addedToCart }}>
         <FashionStoreContext.Provider value={hasFashionBlocks ? { products: (products || []) as unknown as FashionStoreContextData["products"], blogs: [], currency: currency || "NGN", storeSlug: storeSlug || "" } : null as unknown as FashionStoreContextData}>
         <ElectronicsStoreContext.Provider value={electronicsCtxValue as unknown as ElectronicsStoreContextData}>
+        <InteriorStoreContext.Provider value={interiorCtxValue as unknown as InteriorStoreContextData}>
         <div className="relative">
           {isEditorMode && (
             <div className="pointer-events-none sticky top-0 z-30 border-b border-brand-200 bg-brand-50/95 px-4 py-2 text-[10px] font-mono text-brand-800 backdrop-blur">
@@ -1683,6 +1686,7 @@ export function RenderBlocks({ blocks, storeSlug, products, currency, addToCart,
           )}
           {content}
         </div>
+        </InteriorStoreContext.Provider>
         </ElectronicsStoreContext.Provider>
         </FashionStoreContext.Provider>
       </StoreContext.Provider>

@@ -11,6 +11,7 @@ import { BAKERY_ABOUT_PAGE_BLOCKS, BAKERY_CONTACT_PAGE_BLOCKS, BAKERY_BLOG_PAGE_
 import { HARDWARE_ABOUT_PAGE_BLOCKS, HARDWARE_CONTACT_PAGE_BLOCKS, HARDWARE_BLOG_PAGE_BLOCKS } from "./presets/hardware-page-presets";
 import { TOOLS_ABOUT_PAGE_BLOCKS, TOOLS_CONTACT_PAGE_BLOCKS, TOOLS_BLOG_PAGE_BLOCKS } from "./presets/tools-page-presets";
 import { ELECTRONICS_ABOUT_PAGE_BLOCKS, ELECTRONICS_CONTACT_PAGE_BLOCKS, ELECTRONICS_BLOG_PAGE_BLOCKS, ELECTRONICS_SHOP_PAGE_BLOCKS } from "./presets/electronics-page-presets";
+import { DECOR_ABOUT_PAGE_BLOCKS, DECOR_CONTACT_PAGE_BLOCKS, DECOR_BLOG_PAGE_BLOCKS, DECOR_SHOP_PAGE_BLOCKS } from "./presets/decor-page-presets";
 
 /**
  * Template-specific page definitions.
@@ -62,6 +63,13 @@ const ELECTRONICS_PAGES: PageDef[] = [
   { title: "Shop", slug: "shop", type: "CUSTOM", position: 13 },
 ];
 
+const DECOR_PAGES: PageDef[] = [
+  { title: "About Us", slug: "about", type: "CUSTOM", position: 10 },
+  { title: "Contact Us", slug: "contact", type: "CUSTOM", position: 11 },
+  { title: "Blog", slug: "blog", type: "CUSTOM", position: 12 },
+  { title: "Shop", slug: "shop", type: "CUSTOM", position: 13 },
+];
+
 const HEALTH_PAGES: PageDef[] = [
   { title: "About Us", slug: "about", type: "CUSTOM", position: 10 },
   { title: "Contact Us", slug: "contact", type: "CUSTOM", position: 11 },
@@ -105,6 +113,8 @@ const TEMPLATE_PAGE_MAP: Record<string, PageDef[]> = {
   hardware: ELECTRONICS_PAGES,
   tools: ELECTRONICS_PAGES,
   vegetables: VEGETABLE_PAGES,
+  decor: DECOR_PAGES,
+  retail: DECOR_PAGES,
 };
 
 /** Map of template slug → default page block content (keyed by page slug) */
@@ -177,6 +187,18 @@ export const TEMPLATE_PAGE_CONTENT_MAP: Record<string, Record<string, unknown[]>
     fragrances: PERFUMES_FRAGRANCES_PAGE_BLOCKS,
     journal: PERFUMES_JOURNAL_PAGE_BLOCKS,
     reviews: PERFUMES_REVIEWS_PAGE_BLOCKS,
+  },
+  decor: {
+    about: DECOR_ABOUT_PAGE_BLOCKS,
+    contact: DECOR_CONTACT_PAGE_BLOCKS,
+    blog: DECOR_BLOG_PAGE_BLOCKS,
+    shop: DECOR_SHOP_PAGE_BLOCKS,
+  },
+  retail: {
+    about: DECOR_ABOUT_PAGE_BLOCKS,
+    contact: DECOR_CONTACT_PAGE_BLOCKS,
+    blog: DECOR_BLOG_PAGE_BLOCKS,
+    shop: DECOR_SHOP_PAGE_BLOCKS,
   },
 };
 

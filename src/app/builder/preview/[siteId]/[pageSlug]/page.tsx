@@ -17,7 +17,7 @@ import { GardenHeader, GardenFooter } from "@/components/storefront/GardenStoreC
 import { TEMPLATE_PRESET_MAP } from "@/lib/templates/template-preset-map";
 import { TEMPLATE_PAGE_CONTENT_MAP } from "@/lib/templates/template-pages";
 import { HealthHeader, HealthFooterFull, HealthFontLoader } from "@/components/storefront/HealthTemplateBlocks";
-import { InteriorHeader, InteriorFooter } from "@/components/storefront/InteriorDesignTemplateBlocks";
+import { InteriorHeader, InteriorFooter, InteriorFontLoader } from "@/components/storefront/InteriorDesignTemplateBlocks";
 
 // Chrome block types that should not be in the editable block list
 const CHROME_BLOCK_TYPES = new Set([
@@ -443,13 +443,18 @@ export default function BuilderPreviewPage() {
             />
           </>
         );
+      case 'decor':
+      case 'retail':
       case 'interior':
         return (
-          <InteriorHeader
-            storeName={store.name}
-            storeSlug={storeSlug}
-            logo={store.logo}
-          />
+          <>
+            <InteriorFontLoader />
+            <InteriorHeader
+              storeName={store.name}
+              storeSlug={storeSlug}
+              logo={store.logo}
+            />
+          </>
         );
       case 'electronics':
       case 'electronics-accessories':
@@ -501,6 +506,8 @@ export default function BuilderPreviewPage() {
         return <VegetableFooter storeName={store.name} storeSlug={storeSlug} navItems={[]} />;
       case 'health':
         return <HealthFooterFull storeName={store.name} storeSlug={storeSlug} />;
+      case 'decor':
+      case 'retail':
       case 'interior':
         return <InteriorFooter storeSlug={storeSlug} />;
       case 'electronics':
