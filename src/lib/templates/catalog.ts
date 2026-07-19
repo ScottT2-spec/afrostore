@@ -18,11 +18,9 @@ export const TEMPLATE_CATEGORIES = [
   { id: 'food', label: 'Food & Restaurant' },
   { id: 'health', label: 'Health & Wellness' },
   { id: 'children', label: 'Children & Toys' },
-  { id: 'beverage', label: 'Beverages' },
+
   { id: 'bakery', label: 'Bakery & Sweets' },
-  { id: 'artsy', label: 'Art & Crafts' },
-  { id: 'accessories', label: 'Accessories & Jewellery' },
-  { id: 'digital-services', label: 'Digital Services' },
+
   { id: 'interior-design', label: 'Interior Design' },
   { id: 'food-grocery', label: 'Grocery' },
 ] as const;
@@ -45,9 +43,7 @@ export const TEMPLATES: TemplateMeta[] = [
   { slug: 'makeup', name: 'Makeup', category: 'beauty', categoryLabel: 'Beauty & Skincare', description: 'Makeup and beauty products with glamorous design', previewImage: 'https://woodmart.xtemos.com/wp-content/uploads/2021/08/01_theme-preview.__large_preview.jpg', file: 'beauty/makeup.html', industries: ['beauty'] },
   { slug: 'perfumes', name: 'Perfumes', category: 'beauty', categoryLabel: 'Beauty & Skincare', description: 'Luxury perfumes and fragrances store', previewImage: 'https://woodmart.xtemos.com/wp-content/uploads/2021/08/01_theme-preview.__large_preview.jpg', file: 'beauty/perfumes.html', industries: ['beauty'] },
 
-  // Beverages
-  { slug: 'drinks', name: 'Drinks', category: 'beverage', categoryLabel: 'Beverages', description: 'Beverage and drinks store with refreshing design', previewImage: 'https://woodmart.xtemos.com/wp-content/uploads/2021/08/01_theme-preview.__large_preview.jpg', file: 'beverage/drinks.html', industries: ['food'] },
-  { slug: 'wine', name: 'Wine', category: 'beverage', categoryLabel: 'Beverages', description: 'Wine and spirits store with elegant presentation', previewImage: 'https://woodmart.xtemos.com/wp-content/uploads/2021/08/01_theme-preview.__large_preview.jpg', file: 'beverage/wine.html', industries: ['food'] },
+
 
   // Children
   { slug: 'kids', name: 'Kids', category: 'children', categoryLabel: 'Children & Toys', description: 'Children\'s clothing and accessories store', previewImage: 'https://woodmart.xtemos.com/wp-content/uploads/2021/08/01_theme-preview.__large_preview.jpg', file: 'children/kids.html', industries: ['fashion'] },
@@ -56,16 +52,7 @@ export const TEMPLATES: TemplateMeta[] = [
   // Bakery
   { slug: 'sweets-bakery', name: 'Bakery', category: 'bakery', categoryLabel: 'Bakery & Sweets', description: 'Bakery and sweets store with warm, inviting design', previewImage: 'https://woodmart.xtemos.com/wp-content/uploads/2021/08/01_theme-preview.__large_preview.jpg', file: 'bakery/sweets-bakery.html', industries: ['food'] },
 
-  // Artsy
-  { slug: 'handmade', name: 'Handmade', category: 'artsy', categoryLabel: 'Art & Crafts', description: 'Handmade and artisan products marketplace', previewImage: 'https://woodmart.xtemos.com/wp-content/uploads/2021/08/01_theme-preview.__large_preview.jpg', file: 'artsy/handmade.html', industries: ['art'] },
-  { slug: 'pottery', name: 'Pottery', category: 'artsy', categoryLabel: 'Art & Crafts', description: 'Pottery and ceramics store with earthy aesthetic', previewImage: 'https://woodmart.xtemos.com/wp-content/uploads/2021/08/01_theme-preview.__large_preview.jpg', file: 'artsy/pottery.html', industries: ['art'] },
 
-  // Accessories
-  { slug: 'jewellery', name: 'Jewellery', category: 'accessories', categoryLabel: 'Accessories & Jewellery', description: 'Elegant jewellery store with luxury presentation', previewImage: 'https://woodmart.xtemos.com/wp-content/uploads/2021/08/01_theme-preview.__large_preview.jpg', file: 'accessories/jewellery-2.html', industries: ['fashion'] },
-
-  // Digital Services
-  { slug: 'event-agency', name: 'Event Agency', category: 'digital-services', categoryLabel: 'Digital Services', description: 'Event planning and agency website', previewImage: 'https://woodmart.xtemos.com/wp-content/uploads/2021/08/01_theme-preview.__large_preview.jpg', file: 'digital-services/event-agency.html', industries: ['agency', 'services'] },
-  { slug: 'food-delivery', name: 'Food Delivery', category: 'digital-services', categoryLabel: 'Digital Services', description: 'Food delivery service with ordering interface', previewImage: 'https://woodmart.xtemos.com/wp-content/uploads/2021/08/01_theme-preview.__large_preview.jpg', file: 'digital-services/food-delivery.html', industries: ['food'] },
 
   // Interior Design
   { slug: 'decor', name: 'Decor', category: 'interior-design', categoryLabel: 'Interior Design', description: 'Home decor and interior design store', previewImage: 'https://woodmart.xtemos.com/wp-content/uploads/2021/08/01_theme-preview.__large_preview.jpg', file: 'interior-design/decor.html', industries: ['other'] },

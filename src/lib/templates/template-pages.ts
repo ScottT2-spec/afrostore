@@ -16,6 +16,7 @@ import { ACCESSORIES_ABOUT_PAGE_BLOCKS, ACCESSORIES_CONTACT_PAGE_BLOCKS, ACCESSO
 import { KIDS_ABOUT_PAGE_BLOCKS, KIDS_CONTACT_PAGE_BLOCKS, KIDS_BLOG_PAGE_BLOCKS, KIDS_SHOP_PAGE_BLOCKS } from "./presets/kids-page-presets";
 import { TOYS_ABOUT_PAGE_BLOCKS, TOYS_CONTACT_PAGE_BLOCKS, TOYS_BLOG_PAGE_BLOCKS, TOYS_SHOP_PAGE_BLOCKS, TOYS_FAQS_PAGE_BLOCKS } from "./presets/toys-page-presets";
 import { MAKEUP_ABOUT_PAGE_BLOCKS, MAKEUP_CONTACT_PAGE_BLOCKS, MAKEUP_BLOG_PAGE_BLOCKS, MAKEUP_SHOP_PAGE_BLOCKS } from "./presets/makeup-page-presets";
+import { GROCERY_ABOUT_PAGE_BLOCKS, GROCERY_CONTACT_PAGE_BLOCKS, GROCERY_BLOG_PAGE_BLOCKS, GROCERY_SHOP_PAGE_BLOCKS } from "./presets/grocery-page-presets";
 
 /**
  * Template-specific page definitions.
@@ -105,6 +106,13 @@ const MAKEUP_PAGES: PageDef[] = [
   { title: "Shop", slug: "shop", type: "CUSTOM", position: 13 },
 ];
 
+const GROCERY_PAGES: PageDef[] = [
+  { title: "About Us", slug: "about", type: "CUSTOM", position: 10 },
+  { title: "Contact Us", slug: "contact", type: "CUSTOM", position: 11 },
+  { title: "Blog", slug: "blog", type: "CUSTOM", position: 12 },
+  { title: "Shop", slug: "shop", type: "CUSTOM", position: 13 },
+];
+
 const TSHIRTS_PRINTS_PAGES: PageDef[] = [
   { title: "About Us", slug: "about-us", type: "CUSTOM", position: 10 },
   { title: "Contact Us", slug: "contact-us", type: "CUSTOM", position: 11 },
@@ -137,6 +145,7 @@ const TEMPLATE_PAGE_MAP: Record<string, PageDef[]> = {
   "sweets-bakery": FASHION_PAGES,
   hardware: ELECTRONICS_PAGES,
   tools: ELECTRONICS_PAGES,
+  grocery: GROCERY_PAGES,
   vegetables: VEGETABLE_PAGES,
   decor: DECOR_PAGES,
   retail: DECOR_PAGES,
@@ -235,6 +244,12 @@ export const TEMPLATE_PAGE_CONTENT_MAP: Record<string, Record<string, unknown[]>
     contact: MAKEUP_CONTACT_PAGE_BLOCKS,
     blog: MAKEUP_BLOG_PAGE_BLOCKS,
     shop: MAKEUP_SHOP_PAGE_BLOCKS,
+  },
+  grocery: {
+    about: GROCERY_ABOUT_PAGE_BLOCKS,
+    contact: GROCERY_CONTACT_PAGE_BLOCKS,
+    blog: GROCERY_BLOG_PAGE_BLOCKS,
+    shop: GROCERY_SHOP_PAGE_BLOCKS,
   },
   decor: {
     about: DECOR_ABOUT_PAGE_BLOCKS,

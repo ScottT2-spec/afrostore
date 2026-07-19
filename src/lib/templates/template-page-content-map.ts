@@ -20,6 +20,7 @@ import { DECOR_ABOUT_PAGE_BLOCKS, DECOR_CONTACT_PAGE_BLOCKS, DECOR_BLOG_PAGE_BLO
 import { KIDS_ABOUT_PAGE_BLOCKS, KIDS_CONTACT_PAGE_BLOCKS, KIDS_BLOG_PAGE_BLOCKS, KIDS_SHOP_PAGE_BLOCKS } from "./presets/kids-page-presets";
 import { TOYS_ABOUT_PAGE_BLOCKS, TOYS_CONTACT_PAGE_BLOCKS, TOYS_BLOG_PAGE_BLOCKS, TOYS_SHOP_PAGE_BLOCKS, TOYS_FAQS_PAGE_BLOCKS } from "./presets/toys-page-presets";
 import { MAKEUP_ABOUT_PAGE_BLOCKS, MAKEUP_CONTACT_PAGE_BLOCKS, MAKEUP_BLOG_PAGE_BLOCKS, MAKEUP_SHOP_PAGE_BLOCKS } from "./presets/makeup-page-presets";
+import { GROCERY_ABOUT_PAGE_BLOCKS, GROCERY_CONTACT_PAGE_BLOCKS, GROCERY_BLOG_PAGE_BLOCKS, GROCERY_SHOP_PAGE_BLOCKS } from "./presets/grocery-page-presets";
 
 export const TEMPLATE_PAGE_CONTENT_MAP: Record<string, Record<string, unknown[]>> = {
   fashion: {
@@ -107,6 +108,12 @@ export const TEMPLATE_PAGE_CONTENT_MAP: Record<string, Record<string, unknown[]>
     contact: MAKEUP_CONTACT_PAGE_BLOCKS,
     blog: MAKEUP_BLOG_PAGE_BLOCKS,
     shop: MAKEUP_SHOP_PAGE_BLOCKS,
+  },
+  grocery: {
+    about: GROCERY_ABOUT_PAGE_BLOCKS,
+    contact: GROCERY_CONTACT_PAGE_BLOCKS,
+    blog: GROCERY_BLOG_PAGE_BLOCKS,
+    shop: GROCERY_SHOP_PAGE_BLOCKS,
   },
   perfumes: {
     home: PERFUMES_HOME_PAGE_BLOCKS,
