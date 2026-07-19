@@ -153,6 +153,13 @@ import {
   GroceryNewsletter,
   GroceryBestSellers,
   GroceryFooter,
+  GroceryAboutHero,
+  GroceryTextSection,
+  GroceryTeamSection,
+  GroceryFaqSection,
+  GroceryContactHero,
+  GroceryContactForm,
+  GroceryBlogGrid,
 } from "@/components/storefront/GroceryTemplateBlocks";
 import {
   HealthFontLoader,
@@ -483,6 +490,13 @@ const GROCERY_BLOCKS: Record<string, BlockComponent> = {
   groceryNewsletter: GroceryNewsletter as unknown as BlockComponent,
   groceryBestSellers: GroceryBestSellers as unknown as BlockComponent,
   groceryFooter: GroceryFooter as unknown as BlockComponent,
+  groceryAboutHero: GroceryAboutHero as unknown as BlockComponent,
+  groceryTextSection: GroceryTextSection as unknown as BlockComponent,
+  groceryTeamSection: GroceryTeamSection as unknown as BlockComponent,
+  groceryFaqSection: GroceryFaqSection as unknown as BlockComponent,
+  groceryContactHero: GroceryContactHero as unknown as BlockComponent,
+  groceryContactForm: GroceryContactForm as unknown as BlockComponent,
+  groceryBlogGrid: GroceryBlogGrid as unknown as BlockComponent,
 };
 
 const HEALTH_BLOCKS: Record<string, BlockComponent> = {
