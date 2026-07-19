@@ -17,6 +17,8 @@ import { HARDWARE_ABOUT_PAGE_BLOCKS, HARDWARE_CONTACT_PAGE_BLOCKS, HARDWARE_BLOG
 import { TOOLS_ABOUT_PAGE_BLOCKS, TOOLS_CONTACT_PAGE_BLOCKS, TOOLS_BLOG_PAGE_BLOCKS } from "./presets/tools-page-presets";
 import { ELECTRONICS_ABOUT_PAGE_BLOCKS, ELECTRONICS_CONTACT_PAGE_BLOCKS, ELECTRONICS_BLOG_PAGE_BLOCKS, ELECTRONICS_SHOP_PAGE_BLOCKS } from "./presets/electronics-page-presets";
 import { DECOR_ABOUT_PAGE_BLOCKS, DECOR_CONTACT_PAGE_BLOCKS, DECOR_BLOG_PAGE_BLOCKS, DECOR_SHOP_PAGE_BLOCKS } from "./presets/decor-page-presets";
+import { KIDS_ABOUT_PAGE_BLOCKS, KIDS_CONTACT_PAGE_BLOCKS, KIDS_BLOG_PAGE_BLOCKS, KIDS_SHOP_PAGE_BLOCKS } from "./presets/kids-page-presets";
+import { TOYS_ABOUT_PAGE_BLOCKS, TOYS_CONTACT_PAGE_BLOCKS, TOYS_BLOG_PAGE_BLOCKS, TOYS_SHOP_PAGE_BLOCKS, TOYS_FAQS_PAGE_BLOCKS } from "./presets/toys-page-presets";
 
 export const TEMPLATE_PAGE_CONTENT_MAP: Record<string, Record<string, unknown[]>> = {
   fashion: {
@@ -85,6 +87,19 @@ export const TEMPLATE_PAGE_CONTENT_MAP: Record<string, Record<string, unknown[]>
     contact: DECOR_CONTACT_PAGE_BLOCKS,
     blog: DECOR_BLOG_PAGE_BLOCKS,
     shop: DECOR_SHOP_PAGE_BLOCKS,
+  },
+  kids: {
+    about: KIDS_ABOUT_PAGE_BLOCKS,
+    contact: KIDS_CONTACT_PAGE_BLOCKS,
+    blog: KIDS_BLOG_PAGE_BLOCKS,
+    shop: KIDS_SHOP_PAGE_BLOCKS,
+  },
+  toys: {
+    about: TOYS_ABOUT_PAGE_BLOCKS,
+    contact: TOYS_CONTACT_PAGE_BLOCKS,
+    blog: TOYS_BLOG_PAGE_BLOCKS,
+    shop: TOYS_SHOP_PAGE_BLOCKS,
+    faqs: TOYS_FAQS_PAGE_BLOCKS,
   },
   perfumes: {
     home: PERFUMES_HOME_PAGE_BLOCKS,
