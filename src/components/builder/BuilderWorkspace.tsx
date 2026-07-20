@@ -372,9 +372,28 @@ export default function BuilderWorkspace({
   useEffect(() => {
     const handleMessage = (event: MessageEvent) => {
       if (event.data?.type === "builder-block-select") {
-        const { blockId } = event.data;
+        const { blockId, blockType, blockProps } = event.data;
         // Find the matching section in our page sections
-        const section = activePage.sections.find((s) => s.id === blockId);
+        let section = activePage.sections.find((s) => s.id === blockId);
+        if (!section && blockId && blockType) {
+          // Template preset block not yet in sections — inject a virtual section
+          // so the RightSidebar can display and edit its props
+          const newSection: Section = {
+            id: blockId,
+            type: blockType,
+            content: blockProps || {},
+          };
+          const updatedSections = [...activePage.sections, newSection];
+          const updatedPages = site.pages?.map((p) =>
+            p.id === activePage.id ? { ...p, sections: updatedSections } : p
+          );
+          onSiteUpdate({
+            ...site,
+            sections: updatedSections,
+            pages: updatedPages,
+          });
+          section = newSection;
+        }
         if (section) {
           setSelectedSectionId(blockId);
         }
@@ -385,7 +404,8 @@ export default function BuilderWorkspace({
     };
     window.addEventListener("message", handleMessage);
     return () => window.removeEventListener("message", handleMessage);
-  }, [activePage.sections]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [activePage.sections, activePage.id, site, onSiteUpdate]);
 
   // Send section updates to iframe
   useEffect(() => {
