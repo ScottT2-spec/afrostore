@@ -585,6 +585,7 @@ export default function NewSitePage() {
                   <div className="mt-8">
                     <TemplateSelector
                       industry={industry}
+                      siteType={siteType}
                       selectedSlug={selectedTemplate?.slug || null}
                       onSelect={(t) => {
                         setSelectedTemplate({ slug: t.slug, name: t.name, category: t.category, description: t.description, previewImage: t.previewImage, previewUrl: t.previewUrl, recommendationKeywords: t.industries });
