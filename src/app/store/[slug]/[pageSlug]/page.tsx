@@ -22,6 +22,7 @@ import { applyPageCustomization, buildPageBackgroundStyle, buildThemeDataWithCus
 import { VegetableAboutPage, VegetableContactPage, VegetableMenuPage, VegetableRecipePage, VegetableReservationPage } from "@/components/storefront/VegetableTemplatePages";
 import { VegetableFooter, VegetableHeader } from "@/components/storefront/VegetableStoreChrome";
 import { KidsFontLoader, KidsFooterFull, KidsHeader } from "@/components/storefront/KidsTemplateBlocks";
+import { ToysFontLoader, ToysFooter, ToysStoreContext } from "@/components/storefront/ToysTemplateBlocks";
 import { PerfumesFontLoader, PerfumesFooter, PerfumesHeader } from "@/components/storefront/PerfumesTemplateBlocks";
 import { HealthFontLoader, HealthHeader, HealthFooterFull } from "@/components/storefront/HealthTemplateBlocks";
 import { CosmeticsFontLoader, CosmeticsHeader, CosmeticsFooter } from "@/components/storefront/CosmeticsTemplateBlocks";
@@ -217,6 +218,7 @@ export default function StorefrontPage() {
     'fashionFooter', 'bakeryFooter', 'interiorFooter',
     'groceryFooter', 'healthFooterFull', 'healthFooter',
     'electronicsFooter', 'makeupFooter',
+    'toysFooter',
   ]);
   // Use parsed blocks if available; only fall back to template-specific page presets if original content was truly empty
   const parsedBlocks = parsedContent.blocks.filter((block) => !CHROME_BLOCK_TYPES.has(block.type));
@@ -233,7 +235,8 @@ export default function StorefrontPage() {
     .filter((p) => p.type !== "HOME")
     .sort((a, b) => (navPageOrder[a.type] ?? 99) - (navPageOrder[b.type] ?? 99));
 
-  const isKidsTemplate = data.templateSlug === "kids" || slug === "kids" || data.store.slug === "kids" || data.store.name?.toLowerCase().includes("kids");
+  const isToysTemplate = data.templateSlug === "toys" || slug === "toys" || data.store.slug === "toys";
+  const isKidsTemplate = !isToysTemplate && (data.templateSlug === "kids" || slug === "kids" || data.store.slug === "kids" || data.store.name?.toLowerCase().includes("kids"));
   const isTShirtsPrintsTemplate = data.templateSlug === "t-shirts-prints" || slug === "t-shirts-prints" || data.store.slug === "t-shirts-prints" || data.store.name?.toLowerCase().includes("t-shirts");
   const isFashionTemplate = data.templateSlug === "fashion" || data.templateSlug === "fashion-colored" || data.templateSlug === "handmade-bags" || data.templateSlug === "sweets-bakery";
   const isAccessoriesTemplate = data.templateSlug === "electronics-accessories";
@@ -381,6 +384,39 @@ export default function StorefrontPage() {
             ]}
           />
         </div>
+      </ThemeProvider>
+    );
+  }
+
+  if (isToysTemplate) {
+    const toysCtx = {
+      products: (products || []).map((p: any) => ({
+        id: p.id, name: p.name, slug: p.slug, price: p.price ?? 0, compareAtPrice: p.compareAtPrice,
+        currency, inStock: p.inStock ?? true, isFeatured: p.isFeatured ?? false, tags: p.tags ?? [],
+        images: p.images ?? [], category: p.category,
+      })),
+      currency,
+      storeSlug: slug,
+    };
+    return (
+      <ThemeProvider theme={resolvedTheme}>
+        <ToysStoreContext.Provider value={toysCtx}>
+          <ToysFontLoader />
+          <FashionHeader
+            storeName={store.name}
+            storeSlug={slug}
+            logo={store.logo}
+            isLanding={false}
+          />
+          <main style={buildPageBackgroundStyle(resolvedPageSettings)}>
+            <RenderTemplateBlocks blocks={blocks as TemplateBlock[]} />
+          </main>
+          <ToysFooter
+            storeName={store.name}
+            storeSlug={slug}
+            description={store.description ?? undefined}
+          />
+        </ToysStoreContext.Provider>
       </ThemeProvider>
     );
   }

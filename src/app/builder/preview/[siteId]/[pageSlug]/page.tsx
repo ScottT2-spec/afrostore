@@ -7,6 +7,7 @@ import { RenderBlocks, type BuilderBlock } from "@/components/storefront/BlockRe
 import { resolveSectionStyleOverrides } from "@/components/storefront/block-style";
 import { PerfumesHeader, PerfumesFooter, PerfumesFontLoader } from "@/components/storefront/PerfumesTemplateBlocks";
 import { KidsHeader, KidsFooterFull, KidsFontLoader } from "@/components/storefront/KidsTemplateBlocks";
+import { ToysFontLoader, ToysFooter } from "@/components/storefront/ToysTemplateBlocks";
 import { HandmadeBagsHeader, HandmadeBagsFooter } from "@/components/storefront/HandmadeBagsStoreChrome";
 import { CosmeticsHeader, CosmeticsFooter, CosmeticsFontLoader } from "@/components/storefront/CosmeticsTemplateBlocks";
 import { TShirtsPrintsHeader, TShirtsPrintsFooter } from "@/components/storefront/TShirtsPrintsStoreChrome";
@@ -26,6 +27,7 @@ const CHROME_BLOCK_TYPES = new Set([
   'handmadeBagsHeader', 'handmadeBagsFooter',
   'cosmeticsHeader', 'cosmeticsFooter',
   'kidsHeader', 'kidsFooter',
+  'toysFooter',
   'tShirtsPrintsHeader', 'tShirtsPrintsFooter',
 ]);
 
@@ -385,6 +387,17 @@ export default function BuilderPreviewPage() {
             />
           </>
         );
+      case 'toys':
+        return (
+          <>
+            <ToysFontLoader />
+            <FashionHeader
+              storeName={store.name}
+              storeSlug={storeSlug}
+              logo={store.logo}
+            />
+          </>
+        );
       case 'kids':
         return (
           <>
@@ -500,6 +513,8 @@ export default function BuilderPreviewPage() {
     switch (templateSlug) {
       case 'perfumes':
         return <PerfumesFooter storeName={store.name} storeSlug={storeSlug} />;
+      case 'toys':
+        return <ToysFooter storeName={store.name} storeSlug={storeSlug} />;
       case 'kids':
         return <KidsFooterFull storeName={store.name} storeSlug={storeSlug} />;
       case 'handmade-bags':
