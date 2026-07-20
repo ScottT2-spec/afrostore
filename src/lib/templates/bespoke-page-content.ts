@@ -18,6 +18,7 @@ import { HEALTH_TEMPLATE_PRESET } from "@/lib/templates/presets/health-preset";
 import { INTERIOR_DECOR_PRESET, INTERIOR_RETAIL_PRESET } from "@/lib/templates/presets/interior-preset";
 import { KIDS_TEMPLATE_PRESET } from "@/lib/templates/presets/kids-preset";
 import { TOYS_TEMPLATE_PRESET } from "@/lib/templates/presets/toys-preset";
+import { LANDING_GADGET_PRESET } from "@/lib/templates/presets/landing-gadget-preset";
 import { MAKEUP_TEMPLATE_PRESET } from "@/lib/templates/presets/makeup-preset";
 import { PERFUMES_TEMPLATE_PRESET } from "@/lib/templates/presets/perfumes-preset";
 import { AI_TEMPLATE_PRESET } from "@/lib/templates/presets/ai-preset";
@@ -110,6 +111,7 @@ export const BESPOKE_TEMPLATE_PRESETS: TemplatePresetMap = {
   retail: INTERIOR_RETAIL_PRESET,
   kids: KIDS_TEMPLATE_PRESET,
   toys: TOYS_TEMPLATE_PRESET,
+  "landing-gadget": LANDING_GADGET_PRESET,
   perfumes: PERFUMES_TEMPLATE_PRESET,
   jewellery: ELECTRONICS_TEMPLATE_PRESET,
   "jewellery-elegance": ELECTRONICS_TEMPLATE_PRESET,

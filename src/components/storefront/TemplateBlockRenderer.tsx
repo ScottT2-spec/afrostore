@@ -286,6 +286,21 @@ import {
   ToysFooter,
 } from "@/components/storefront/ToysTemplateBlocks";
 import {
+  LandingGadgetFontLoader,
+  LandingGadgetHero,
+  LandingGadgetStatsBar,
+  LandingGadgetFeatureSplit,
+  LandingGadgetDarkFeature,
+  LandingGadgetPhotoGallery,
+  LandingGadgetCameraDark,
+  LandingGadgetSecurity,
+  LandingGadgetCameraOptics,
+  LandingGadgetProductsShowcase,
+  LandingGadgetNewsletter,
+  LandingGadgetFooter,
+  LandingGadgetFullWidthImage,
+} from "@/components/storefront/LandingGadgetBlocks";
+import {
   MakeupFontLoader,
   MakeupHeroSlider,
   MakeupCategorySidebar,
@@ -655,6 +670,22 @@ const TOYS_BLOCKS: Record<string, BlockComponent> = {
   toysFooter: ToysFooter as unknown as BlockComponent,
 };
 
+const GADGET_BLOCKS: Record<string, BlockComponent> = {
+  gadgetFontLoader: LandingGadgetFontLoader as unknown as BlockComponent,
+  gadgetHero: LandingGadgetHero as unknown as BlockComponent,
+  gadgetStatsBar: LandingGadgetStatsBar as unknown as BlockComponent,
+  gadgetFeatureSplit: LandingGadgetFeatureSplit as unknown as BlockComponent,
+  gadgetDarkFeature: LandingGadgetDarkFeature as unknown as BlockComponent,
+  gadgetPhotoGallery: LandingGadgetPhotoGallery as unknown as BlockComponent,
+  gadgetCameraDark: LandingGadgetCameraDark as unknown as BlockComponent,
+  gadgetSecurity: LandingGadgetSecurity as unknown as BlockComponent,
+  gadgetCameraOptics: LandingGadgetCameraOptics as unknown as BlockComponent,
+  gadgetProductsShowcase: LandingGadgetProductsShowcase as unknown as BlockComponent,
+  gadgetNewsletter: LandingGadgetNewsletter as unknown as BlockComponent,
+  gadgetFooter: LandingGadgetFooter as unknown as BlockComponent,
+  gadgetFullWidthImage: LandingGadgetFullWidthImage as unknown as BlockComponent,
+};
+
 const MAKEUP_BLOCKS: Record<string, BlockComponent> = {
   makeupHeroSlider: MakeupHeroSlider as unknown as BlockComponent,
   makeupCategorySidebar: MakeupCategorySidebar as unknown as BlockComponent,
@@ -784,6 +815,7 @@ const ALL_TEMPLATE_BLOCKS: Record<string, BlockComponent> = {
   ...VEGETABLE_BLOCKS,
   ...JUMIA_BLOCKS,
   ...AI_BLOCKS,
+  ...GADGET_BLOCKS,
 };
 
 /* ─── FONT LOADER MAP ──────────────────────────────────────── */
@@ -804,12 +836,14 @@ const FONT_LOADERS: Record<string, React.ComponentType> = {
   jumia: JumiaFontLoader,
   marketplace: JumiaFontLoader,
   ai: AiFontLoader,
+  "landing-gadget": LandingGadgetFontLoader,
 };
 
 /** Detect which template family a block set belongs to */
 function detectTemplateFamily(blocks: TemplateBlock[]): string {
   for (const b of blocks) {
     const t = b.type;
+    if (t.startsWith("gadget")) return "landing-gadget";
     if (t.startsWith("ai")) return "ai";
     if (t.startsWith("jumia")) return "jumia";
     if (t.startsWith("hardware")) return "electronics";
