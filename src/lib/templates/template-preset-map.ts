@@ -15,6 +15,7 @@ import { TOYS_TEMPLATE_PRESET } from "./presets/toys-preset";
 import { MAKEUP_TEMPLATE_PRESET } from "./presets/makeup-preset";
 import { PERFUMES_TEMPLATE_PRESET } from "./presets/perfumes-preset";
 import { AI_TEMPLATE_PRESET } from "./presets/ai-preset";
+import { HARDWARE_TEMPLATE_PRESET } from "./presets/hardware-preset";
 
 export const TEMPLATE_PRESET_MAP: Record<string, TemplateBlock[]> = {
   fashion: FASHION_TEMPLATE_PRESET,
@@ -23,7 +24,7 @@ export const TEMPLATE_PRESET_MAP: Record<string, TemplateBlock[]> = {
   "t-shirts-prints": T_SHIRTS_PRINTS_PRESET,
   electronics: ELECTRONICS_TEMPLATE_PRESET,
   "electronics-accessories": ELECTRONICS_TEMPLATE_PRESET,
-  hardware: ELECTRONICS_TEMPLATE_PRESET,
+  hardware: HARDWARE_TEMPLATE_PRESET,
   tools: TOOLS_TEMPLATE_PRESET,
   "sweets-bakery": BAKERY_TEMPLATE_PRESET,
   cosmetics: COSMETICS_TEMPLATE_PRESET,

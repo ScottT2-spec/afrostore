@@ -95,6 +95,20 @@ import {
   HardwareBlogPosts,
 } from "@/components/storefront/HardwareTemplateBlocks";
 import {
+  HardwareHomeHeroSlider,
+  HardwareHomeCategoryGrid,
+  HardwareHomeFeaturedProducts,
+  HardwareHomeBuildPC,
+  HardwareHomePricingTable,
+  HardwareHomeGearUpCTA,
+  HardwareHomeCustomDesktops,
+  HardwareHomeGamingGallery,
+  HardwareHomeTestimonial,
+  HardwareHomeLatestEvents,
+  HardwareHomeNewsletter,
+  HardwareHomeFooter,
+} from "@/components/storefront/HardwareHomepageBlocks";
+import {
   BakeryFontLoader,
   BakeryHeroSlider,
   BakerySectionTitle,
@@ -450,6 +464,19 @@ const HARDWARE_BLOCKS: Record<string, BlockComponent> = {
   hardwareFaqAccordion: HardwareFaqAccordion as unknown as BlockComponent,
   hardwareContactForm: HardwareContactForm as unknown as BlockComponent,
   hardwareBlogPosts: HardwareBlogPosts as unknown as BlockComponent,
+  // Homepage blocks
+  hardwareHomeHeroSlider: HardwareHomeHeroSlider as unknown as BlockComponent,
+  hardwareHomeCategoryGrid: HardwareHomeCategoryGrid as unknown as BlockComponent,
+  hardwareHomeFeaturedProducts: HardwareHomeFeaturedProducts as unknown as BlockComponent,
+  hardwareHomeBuildPC: HardwareHomeBuildPC as unknown as BlockComponent,
+  hardwareHomePricingTable: HardwareHomePricingTable as unknown as BlockComponent,
+  hardwareHomeGearUpCTA: HardwareHomeGearUpCTA as unknown as BlockComponent,
+  hardwareHomeCustomDesktops: HardwareHomeCustomDesktops as unknown as BlockComponent,
+  hardwareHomeGamingGallery: HardwareHomeGamingGallery as unknown as BlockComponent,
+  hardwareHomeTestimonial: HardwareHomeTestimonial as unknown as BlockComponent,
+  hardwareHomeLatestEvents: HardwareHomeLatestEvents as unknown as BlockComponent,
+  hardwareHomeNewsletter: HardwareHomeNewsletter as unknown as BlockComponent,
+  hardwareHomeFooter: HardwareHomeFooter as unknown as BlockComponent,
 };
 
 const TOOLS_HOME_BLOCKS: Record<string, BlockComponent> = {
@@ -785,6 +812,7 @@ function detectTemplateFamily(blocks: TemplateBlock[]): string {
     const t = b.type;
     if (t.startsWith("ai")) return "ai";
     if (t.startsWith("jumia")) return "jumia";
+    if (t.startsWith("hardware")) return "electronics";
     if (t.startsWith("electronics")) return "electronics";
     if (t.startsWith("bakery")) return "bakery";
     if (t.startsWith("cosmetics")) return "cosmetics";
