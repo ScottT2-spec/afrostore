@@ -1,0 +1,352 @@
+<!DOCTYPE html>
+
+<html class="scroll-smooth" lang="en">
+
+<head>
+    <meta charset="utf-8" />
+    <meta content="width=device-width, initial-scale=1.0" name="viewport" />
+    <title>Aegis Health | Living Beyond, Living Well</title>
+    <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Noto+Serif:wght@400;700&amp;family=Manrope:wght@300;400;500;600;700;800&amp;display=swap"
+        rel="stylesheet" />
+    <link
+        href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap"
+        rel="stylesheet" />
+    <link
+        href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap"
+        rel="stylesheet" />
+
+    <link rel="stylesheet" href="https://demo.templatesjungle.com/aegis/css/style.css">
+    <script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "background": "#f9f9fb",
+                        "surface-bright": "#f9f9fb",
+                        "on-secondary": "#ffffff",
+                        "surface-dim": "#d9dadc",
+                        "on-surface": "#1a1c1d",
+                        "tertiary-fixed-dim": "#ffb59f",
+                        "on-secondary-container": "#fffbff",
+                        "tertiary-fixed": "#ffdbd0",
+                        "surface-container-highest": "#e2e2e4",
+                        "on-error": "#ffffff",
+                        "primary": "#000666",
+                        "on-tertiary-fixed-variant": "#852300",
+                        "error": "#ba1a1a",
+                        "surface-container-low": "#f3f3f5",
+                        "on-error-container": "#93000a",
+                        "secondary": "#b80049",
+                        "primary-fixed-dim": "#bdc2ff",
+                        "on-secondary-fixed": "#400014",
+                        "error-container": "#ffdad6",
+                        "surface-variant": "#e2e2e4",
+                        "surface-tint": "#4c56af",
+                        "on-primary-fixed": "#000767",
+                        "outline": "#767683",
+                        "on-primary-fixed-variant": "#343d96",
+                        "on-primary-container": "#8690ee",
+                        "on-background": "#1a1c1d",
+                        "on-primary": "#ffffff",
+                        "surface-container-lowest": "#ffffff",
+                        "secondary-fixed": "#ffd9de",
+                        "secondary-fixed-dim": "#ffb2be",
+                        "surface-container-high": "#e8e8ea",
+                        "outline-variant": "#c6c5d4",
+                        "primary-fixed": "#e0e0ff",
+                        "inverse-surface": "#2f3132",
+                        "surface-container": "#eeeef0",
+                        "on-secondary-fixed-variant": "#900038",
+                        "on-tertiary-fixed": "#3a0a00",
+                        "tertiary": "#390a00",
+                        "on-tertiary-container": "#f96b3f",
+                        "on-tertiary": "#ffffff",
+                        "on-surface-variant": "#454652",
+                        "tertiary-container": "#5d1600",
+                        "secondary-container": "#e2165f",
+                        "inverse-primary": "#bdc2ff",
+                        "surface": "#f9f9fb",
+                        "primary-container": "#1a237e",
+                        "inverse-on-surface": "#f0f0f2"
+                    },
+                    fontFamily: {
+                        "headline": ["Noto Serif"],
+                        "body": ["Manrope"],
+                        "label": ["Manrope"]
+                    },
+                    borderRadius: { "DEFAULT": "0.25rem", "lg": "0.5rem", "xl": "0.75rem", "full": "9999px" },
+                },
+            },
+        }
+    </script>
+
+</head>
+
+<body class="bg-background text-on-surface font-body selection:bg-secondary-fixed selection:text-secondary">
+    <!-- TopNavBar -->
+    <nav class="w-full top-0 sticky z-50 bg-[#f9f9fb] dark:bg-slate-950">
+        <div class="flex justify-between items-center max-w-7xl mx-auto px-8 py-4">
+            <div class="text-2xl font-serif font-bold text-[#000666] dark:text-blue-300">
+                Aegis Health
+            </div>
+            <div class="hidden md:flex items-center space-x-8">
+                <a class="text-[#000666] font-bold border-b-2 border-[#b80049] pb-1" href="#">Our Mission</a>
+                <a class="text-slate-600 dark:text-slate-400 hover:text-[#000666] transition-colors" href="#">Get
+                    Tested</a>
+                <a class="text-slate-600 dark:text-slate-400 hover:text-[#000666] transition-colors"
+                    href="#">Programs</a>
+                <a class="text-slate-600 dark:text-slate-400 hover:text-[#000666] transition-colors" href="#">Impact</a>
+                <a class="text-slate-600 dark:text-slate-400 hover:text-[#000666] transition-colors" href="#">Join
+                    Us</a>
+            </div>
+            <div class="flex items-center space-x-4">
+                <a class="text-primary font-semibold text-sm hover:text-secondary transition-colors" href="#">Patient
+                    Portal</a>
+                <button
+                    class="bg-secondary text-on-secondary px-6 py-2 rounded-lg font-bold transition-all hover:scale-[1.02] active:scale-[0.98]">
+                    Donate
+                </button>
+            </div>
+        </div>
+    </nav>
+    <!-- Hero Section -->
+    <header class="relative min-h-[870px] flex items-center overflow-hidden bg-primary overflow-hidden">
+        <!-- Background Image with Gradient Overlay -->
+        <div class="absolute inset-0 z-0">
+            <img alt="Healthcare Professional" class="w-full h-full object-cover opacity-30 mix-blend-overlay"
+                data-alt="A warm, sun-drenched close-up of a healthcare provider gently holding a patient's hand in a clinical but comfortable sanctuary setting."
+                src="https://demo.templatesjungle.com/aegis/images/banner.jpg" />
+            <div class="absolute inset-0 bg-gradient-to-br from-primary via-primary/90 to-transparent"></div>
+        </div>
+        <div class="relative z-10 max-w-7xl mx-auto px-8 py-24 grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
+            <div class="space-y-8">
+                <h1 class="font-headline text-5xl md:text-7xl text-white leading-tight">
+                    Living Beyond, <br />
+                    <span class="text-on-primary-container italic">Living Well.</span>
+                </h1>
+                <p class="text-lg md:text-xl text-primary-fixed max-w-xl font-light leading-relaxed">
+                    We empower lives through innovative HIV/AIDS care, advocacy, and community support. Together, we
+                    build a future defined by health, not diagnosis.
+                </p>
+                <div class="flex flex-col sm:flex-row gap-4 pt-4">
+                    <button
+                        class="bg-secondary text-white px-8 py-4 rounded-lg font-bold text-lg flex items-center justify-center gap-2 group transition-all hover:bg-secondary-container">
+                        Get Tested Today
+                        <span
+                            class="material-symbols-outlined group-hover:translate-x-1 transition-transform">arrow_forward</span>
+                    </button>
+                    <button
+                        class="border border-white/30 text-white px-8 py-4 rounded-lg font-bold text-lg hover:bg-white/10 transition-colors">
+                        View Care Programs
+                    </button>
+                </div>
+            </div>
+            <!-- Bento-style Stats Overlay -->
+            <div class="hidden lg:grid grid-cols-2 gap-4">
+                <div class="bg-surface-container-lowest p-8 rounded-xl flex flex-col justify-end h-48">
+                    <span class="text-4xl font-headline font-bold text-secondary">15k+</span>
+                    <span class="text-on-surface-variant font-medium">Tests Provided</span>
+                </div>
+                <div class="bg-primary-container p-8 rounded-xl flex flex-col justify-end h-64 translate-y-8">
+                    <span class="text-4xl font-headline font-bold text-on-primary-container">200+</span>
+                    <span class="text-primary-fixed-dim font-medium">Clinics Supported</span>
+                </div>
+                <div class="bg-secondary-container p-8 rounded-xl flex flex-col justify-end h-64 -translate-y-8">
+                    <span class="text-4xl font-headline font-bold text-white">98%</span>
+                    <span class="text-white/80 font-medium">Retention in Care</span>
+                </div>
+                <div class="bg-surface-container-low p-8 rounded-xl flex flex-col justify-end h-48">
+                    <span class="text-4xl font-headline font-bold text-primary">Global</span>
+                    <span class="text-on-surface-variant font-medium">Advocacy Impact</span>
+                </div>
+            </div>
+        </div>
+    </header>
+    <!-- Impact Stats Mobile -->
+    <section class="lg:hidden bg-surface-container-low py-12 px-8">
+        <div class="grid grid-cols-2 gap-6 text-center">
+            <div>
+                <div class="text-3xl font-headline font-bold text-secondary">15k+</div>
+                <div class="text-sm text-on-surface-variant">Tests Provided</div>
+            </div>
+            <div>
+                <div class="text-3xl font-headline font-bold text-primary">200+</div>
+                <div class="text-sm text-on-surface-variant">Clinics Supported</div>
+            </div>
+        </div>
+    </section>
+    <!-- Content Section: The Clinical Sanctuary -->
+    <section class="py-24 px-8 max-w-7xl mx-auto">
+        <div class="flex flex-col lg:flex-row gap-16 items-start">
+            <div class="lg:w-1/3 sticky top-32">
+                <span class="text-secondary font-bold tracking-widest uppercase text-sm block mb-4">Our Approach</span>
+                <h2 class="font-headline text-4xl text-primary mb-6">Innovative Care, <br />Personalized Journeys</h2>
+                <p class="text-on-surface-variant text-lg leading-relaxed mb-8">
+                    Healthcare is never one-size-fits-all. We combine cutting-edge biomedical research with a deeply
+                    human touch to ensure every individual thrives.
+                </p>
+                <a class="text-secondary font-bold flex items-center gap-2 group" href="#">
+                    Explore our medical protocols
+                    <span
+                        class="material-symbols-outlined text-sm group-hover:translate-x-1 transition-transform">east</span>
+                </a>
+            </div>
+            <div class="lg:w-2/3 grid grid-cols-1 md:grid-cols-2 gap-8">
+                <!-- Service Cards -->
+                <div class="bg-surface-container-lowest p-10 rounded-xl space-y-4">
+                    <span class="material-symbols-outlined text-secondary text-4xl" data-weight="fill">biotech</span>
+                    <h3 class="font-headline text-2xl text-primary">Advanced Screening</h3>
+                    <p class="text-on-surface-variant">Rapid, confidential testing using the latest generation
+                        diagnostic technology for immediate peace of mind.</p>
+                </div>
+                <div class="bg-surface-container-low p-10 rounded-xl space-y-4 md:translate-y-12">
+                    <span class="material-symbols-outlined text-primary text-4xl" data-weight="fill">diversity_3</span>
+                    <h3 class="font-headline text-2xl text-primary">Peer Support</h3>
+                    <p class="text-on-surface-variant">Connecting you with a community that understands the journey,
+                        fostering resilience through shared experience.</p>
+                </div>
+                <div class="bg-surface-container-low p-10 rounded-xl space-y-4">
+                    <span class="material-symbols-outlined text-primary text-4xl" data-weight="fill">policy</span>
+                    <h3 class="font-headline text-2xl text-primary">Advocacy</h3>
+                    <p class="text-on-surface-variant">Fighting for policy changes and removing the stigma surrounding
+                        HIV/AIDS at local and national levels.</p>
+                </div>
+                <div class="bg-surface-container-lowest p-10 rounded-xl space-y-4 md:translate-y-12">
+                    <span class="material-symbols-outlined text-secondary text-4xl" data-weight="fill">medication</span>
+                    <h3 class="font-headline text-2xl text-primary">ART Access</h3>
+                    <p class="text-on-surface-variant">Ensuring uninterrupted access to life-saving Antiretroviral
+                        Therapy for all community members.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+    <!-- Highlighted Stories: Asymmetric Layout -->
+    <section class="bg-surface-container-low py-32 px-8">
+        <div class="max-w-7xl mx-auto">
+            <div class="text-center mb-20">
+                <h2 class="font-headline text-4xl md:text-5xl text-primary">Stories of Resilience</h2>
+                <div class="w-24 h-1 bg-secondary mx-auto mt-6"></div>
+            </div>
+            <div class="grid grid-cols-1 lg:grid-cols-12 gap-8 items-center">
+                <!-- Story 1 -->
+                <div class="lg:col-span-7 group relative overflow-hidden rounded-2xl aspect-[16/9]">
+                    <img alt="Community Member"
+                        class="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
+                        data-alt="A portrait of a confident woman in a brightly lit, modern office space, smiling warmly at the camera with soft natural light."
+                        src="https://demo.templatesjungle.com/aegis/images/image-01.jpg" />
+                    <div class="absolute inset-0 bg-gradient-to-t from-primary/80 to-transparent"></div>
+                    <div class="absolute bottom-0 left-0 p-8 text-white">
+                        <span
+                            class="bg-secondary px-3 py-1 rounded-full text-xs font-bold uppercase mb-4 inline-block tracking-wider">Advocate
+                            Story</span>
+                        <h4 class="text-3xl font-headline mb-2">"My diagnosis was a beginning, not an end."</h4>
+                        <p class="text-white/80 max-w-md italic">— Marcus, 12 years thriving with Aegis support.</p>
+                    </div>
+                </div>
+                <!-- Story 2 -->
+                <div
+                    class="lg:col-span-5 bg-surface-container-lowest p-12 rounded-2xl flex flex-col justify-center border-l-4 border-secondary">
+                    <span class="material-symbols-outlined text-secondary mb-6 text-5xl">format_quote</span>
+                    <p class="text-xl leading-relaxed text-on-surface-variant mb-8">
+                        "The team at Aegis didn't just give me medicine; they gave me my dignity back. They saw the
+                        person, not the patient."
+                    </p>
+                    <div class="flex items-center gap-4">
+                        <div class="w-12 h-12 rounded-full overflow-hidden bg-surface-container">
+                            <img alt="Story Author"
+                                data-alt="A close up portrait of a middle-aged man with a gentle expression and kind eyes."
+                                src="https://demo.templatesjungle.com/aegis/images/client-01.jpg" />
+                        </div>
+                        <div>
+                            <p class="font-bold text-primary">Elena Rodriguez</p>
+                            <p class="text-sm text-on-surface-variant">Community Member since 2018</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+    <!-- CTA Section: The Call to Action -->
+    <section class="py-24 px-8">
+        <div class="max-w-5xl mx-auto bg-primary rounded-3xl p-12 md:p-20 text-center relative overflow-hidden">
+            <div
+                class="absolute top-0 right-0 w-64 h-64 bg-secondary rounded-full -translate-y-1/2 translate-x-1/2 opacity-20 blur-3xl">
+            </div>
+            <div
+                class="absolute bottom-0 left-0 w-64 h-64 bg-on-primary-container rounded-full translate-y-1/2 -translate-x-1/2 opacity-10 blur-3xl">
+            </div>
+            <div class="relative z-10 space-y-8">
+                <h2 class="font-headline text-4xl md:text-5xl text-white">Take the first step towards clarity.</h2>
+                <p class="text-primary-fixed-dim text-lg md:text-xl max-w-2xl mx-auto">
+                    Confidential, free, and compassionate testing is available at all our partner clinics. No
+                    appointment necessary for initial screening.
+                </p>
+                <div class="flex flex-col sm:flex-row justify-center gap-6">
+                    <button
+                        class="bg-white text-primary px-10 py-4 rounded-lg font-bold text-lg hover:bg-primary-fixed transition-colors">
+                        Find a Clinic Near You
+                    </button>
+                    <button
+                        class="bg-secondary text-white px-10 py-4 rounded-lg font-bold text-lg hover:bg-on-secondary-fixed-variant transition-colors shadow-xl shadow-secondary/20">
+                        Speak with a Specialist
+                    </button>
+                </div>
+            </div>
+        </div>
+    </section>
+    <!-- Footer -->
+    <footer class="bg-[#f3f3f5] dark:bg-slate-900 w-full mt-auto">
+        <div class="grid grid-cols-1 md:grid-cols-4 gap-8 max-w-7xl mx-auto px-8 py-12">
+            <div class="space-y-4">
+                <div class="font-serif text-xl font-semibold text-[#000666]">Aegis Health</div>
+                <p class="font-sans text-sm tracking-wide text-slate-500">Dedicated to a world where health is a right,
+                    and every life is celebrated.</p>
+            </div>
+            <div class="space-y-4">
+                <h4 class="font-bold text-[#000666] uppercase text-xs tracking-widest">Resources</h4>
+                <nav class="flex flex-col space-y-2">
+                    <a class="text-slate-500 dark:text-slate-400 hover:text-[#000666] transition-colors font-sans text-sm"
+                        href="#">Testing Centers</a>
+                    <a class="text-slate-500 dark:text-slate-400 hover:text-[#000666] transition-colors font-sans text-sm"
+                        href="#">Patient Education</a>
+                    <a class="text-slate-500 dark:text-slate-400 hover:text-[#000666] transition-colors font-sans text-sm"
+                        href="#">PrEP &amp; PEP Info</a>
+                </nav>
+            </div>
+            <div class="space-y-4">
+                <h4 class="font-bold text-[#000666] uppercase text-xs tracking-widest">Quick Links</h4>
+                <nav class="flex flex-col space-y-2">
+                    <a class="text-slate-500 dark:text-slate-400 hover:text-[#000666] transition-colors font-sans text-sm"
+                        href="#">Privacy Policy</a>
+                    <a class="text-slate-500 dark:text-slate-400 hover:text-[#000666] transition-colors font-sans text-sm"
+                        href="#">Terms of Service</a>
+                    <a class="text-slate-500 dark:text-slate-400 hover:text-[#000666] transition-colors font-sans text-sm"
+                        href="#">Newsletter Signup</a>
+                    <a class="text-slate-500 dark:text-slate-400 hover:text-[#000666] transition-colors font-sans text-sm"
+                        href="#">Contact Us</a>
+                </nav>
+            </div>
+            <div class="space-y-4">
+                <h4 class="font-bold text-[#000666] uppercase text-xs tracking-widest">Connect</h4>
+                <div class="flex gap-4">
+                    <a class="w-10 h-10 rounded-full bg-surface-container flex items-center justify-center text-primary hover:bg-primary hover:text-white transition-all"
+                        href="#">
+                        <span class="material-symbols-outlined text-xl">share</span>
+                    </a>
+                    <a class="w-10 h-10 rounded-full bg-surface-container flex items-center justify-center text-primary hover:bg-primary hover:text-white transition-all"
+                        href="#">
+                        <span class="material-symbols-outlined text-xl">mail</span>
+                    </a>
+                </div>
+                <p class="font-sans text-[10px] text-slate-400 uppercase tracking-[0.2em] pt-4">© 2024 Aegis Health.
+                    Free HTML Template by <a href="https://templatesjungle.com/"
+                        target="_blank">TemplatesJungle.com</a>.</p>
+            </div>
+        </div>
+    </footer>
+</body>
+
+</html>
