@@ -16,6 +16,7 @@ import { GroceryStoreContext } from "@/components/storefront/GroceryTemplateBloc
 import { HealthStoreContext, HealthHeader } from "@/components/storefront/HealthTemplateBlocks";
 import { InteriorStoreContext, InteriorHeader, InteriorFooter, InteriorFontLoader } from "@/components/storefront/InteriorDesignTemplateBlocks";
 import { KidsStoreContext, KidsHeader, KidsFooterFull } from "@/components/storefront/KidsTemplateBlocks";
+import { ToysStoreContext, ToysFontLoader } from "@/components/storefront/ToysTemplateBlocks";
 import { MakeupStoreContext } from "@/components/storefront/MakeupTemplateBlocks";
 import { PerfumesStoreContext } from "@/components/storefront/PerfumesTemplateBlocks";
 import { PerfumesFontLoader, PerfumesFooter, PerfumesHeader } from "@/components/storefront/PerfumesTemplateBlocks";
@@ -220,8 +221,11 @@ function TemplateStoreContextProvider({ templateSlug, products, blogs, categorie
   if (slug === "decor" || slug === "retail") {
     return <InteriorStoreContext.Provider value={value}>{children}</InteriorStoreContext.Provider>;
   }
-  if (slug === "kids" || slug === "toys") {
+  if (slug === "kids") {
     return <KidsStoreContext.Provider value={value}>{children}</KidsStoreContext.Provider>;
+  }
+  if (slug === "toys") {
+    return <ToysStoreContext.Provider value={value}>{children}</ToysStoreContext.Provider>;
   }
   if (slug === "makeup") {
     return <MakeupStoreContext.Provider value={value}>{children}</MakeupStoreContext.Provider>;
@@ -425,7 +429,8 @@ export default function StorePage() {
   const homeHasProductGrid = homeBlocks.some((b) => b.type === "productGrid");
   const isTShirtsPrintsTemplate = data.templateSlug === "t-shirts-prints" || slug === "t-shirts-prints" || store.slug === "t-shirts-prints";
   const isFashionTemplate = data.templateSlug === "fashion" || data.templateSlug === "fashion-colored" || data.templateSlug === "handmade-bags" || data.templateSlug === "t-shirts-prints" || data.templateSlug === "sweets-bakery" || data.templateSlug === "electronics" || data.templateSlug === "electronics-accessories" || data.templateSlug === "hardware" || data.templateSlug === "tools" || data.templateSlug === "makeup" || data.templateSlug === "grocery" || homeBlocks.some((b) => b.type.startsWith("fashion")) || homeBlocks.some((b) => b.type.startsWith("bakery")) || homeBlocks.some((b) => b.type.startsWith("electronics")) || homeBlocks.some((b) => b.type.startsWith("makeup")) || homeBlocks.some((b) => b.type.startsWith("grocery"));
-  const isKidsTemplate = data.templateSlug === "kids" || data.templateSlug === "toys" || homeBlocks.some((b) => b.type.startsWith("kids"));
+  const isKidsTemplate = data.templateSlug === "kids" || homeBlocks.some((b) => b.type.startsWith("kids"));
+  const isToysTemplate = data.templateSlug === "toys" || homeBlocks.some((b) => b.type.startsWith("toys"));
   const isHealthTemplate = data.templateSlug === "pills" || homeBlocks.some((b) => b.type.startsWith("health"));
   const isPerfumesTemplate = data.templateSlug === "perfumes" || homeBlocks.some((b) => b.type.startsWith("perfumes"));
   const isRetailTemplate = data.templateSlug === "retail";
@@ -598,6 +603,13 @@ export default function StorePage() {
           searchQuery={searchQuery}
           onSearchChange={setSearchQuery}
           onSearch={handleSearch}
+        />
+      ) : isToysTemplate ? (
+        <FashionHeader
+          storeName={store.name}
+          storeSlug={slug}
+          logo={store.logo}
+          isLanding={false}
         />
       ) : isKidsTemplate ? (
         <KidsHeader
@@ -878,6 +890,12 @@ export default function StorePage() {
           storeSlug={slug}
           logo={store.logo}
           socialLinks={socialLinksArray}
+        />
+      ) : isToysTemplate ? (
+        <FashionFooter
+          storeName={store.name}
+          storeSlug={slug}
+          description={store.description ?? undefined}
         />
       ) : isKidsTemplate ? (
         <KidsFooterFull

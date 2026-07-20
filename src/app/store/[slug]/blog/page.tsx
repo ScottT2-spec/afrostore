@@ -7,6 +7,7 @@ import { ElectronicsFontLoader, ElectronicsFooter } from "@/components/storefron
 import { InteriorFontLoader, InteriorHeader, InteriorFooter } from "@/components/storefront/InteriorDesignTemplateBlocks";
 import { AccessoriesFontLoader } from "@/components/storefront/AccessoriesTemplateBlocks";
 import { KidsFontLoader } from "@/components/storefront/KidsTemplateBlocks";
+import { ToysFontLoader } from "@/components/storefront/ToysTemplateBlocks";
 import { MakeupFontLoader } from "@/components/storefront/MakeupTemplateBlocks";
 import { GroceryFontLoader } from "@/components/storefront/GroceryTemplateBlocks";
 // Note: Electronics pages don't use FashionHeader - they render headerless (header handled by block content or page-level chrome)
@@ -268,14 +269,37 @@ export default async function BlogPage({ params }: Props) {
     );
   }
 
-  /* ── Kids / Toys template ── */
-  const isKidsOrToysTemplate =
-    templateSlug === "kids" ||
-    templateSlug === "toys" ||
-    slug === "kids" ||
-    slug === "toys";
+  /* ── Toys template ── */
+  const isToysTemplate = templateSlug === "toys";
 
-  if (isKidsOrToysTemplate) {
+  if (isToysTemplate) {
+    return (
+      <ThemeProvider theme={themeData}>
+        <ToysFontLoader />
+        <FashionHeader
+          storeName={store.name}
+          storeSlug={slug}
+          logo={store.logo}
+          isLanding={false}
+        />
+        <main style={buildPageBackgroundStyle(pageSettings)}>
+          <RenderTemplateBlocks blocks={blocks} />
+        </main>
+        <FashionFooter
+          storeName={store.name}
+          storeSlug={slug}
+          description={store.description ?? undefined}
+        />
+      </ThemeProvider>
+    );
+  }
+
+  /* ── Kids template ── */
+  const isKidsTemplate =
+    templateSlug === "kids" ||
+    slug === "kids";
+
+  if (isKidsTemplate) {
     return (
       <ThemeProvider theme={themeData}>
         <div className="min-h-screen bg-[#fffdf7] text-[#242424]">

@@ -258,6 +258,20 @@ import {
   KidsOpeningHours,
 } from "@/components/storefront/KidsTemplateBlocks";
 import {
+  ToysFontLoader,
+  ToysHeroSlider,
+  ToysBannerCards,
+  ToysVideoWelcome,
+  ToysFeaturesBar,
+  ToysAgeCategories,
+  ToysSectionTitle,
+  ToysProductGrid,
+  ToysLimitedOffer,
+  ToysTestimonials,
+  ToysNewsletter,
+  ToysFooter,
+} from "@/components/storefront/ToysTemplateBlocks";
+import {
   MakeupFontLoader,
   MakeupHeroSlider,
   MakeupCategorySidebar,
@@ -599,6 +613,21 @@ const KIDS_BLOCKS: Record<string, BlockComponent> = {
   kidsOpeningHours: KidsOpeningHours as unknown as BlockComponent,
 };
 
+const TOYS_BLOCKS: Record<string, BlockComponent> = {
+  toysFontLoader: ToysFontLoader as unknown as BlockComponent,
+  toysHeroSlider: ToysHeroSlider as unknown as BlockComponent,
+  toysBannerCards: ToysBannerCards as unknown as BlockComponent,
+  toysVideoWelcome: ToysVideoWelcome as unknown as BlockComponent,
+  toysFeaturesBar: ToysFeaturesBar as unknown as BlockComponent,
+  toysAgeCategories: ToysAgeCategories as unknown as BlockComponent,
+  toysSectionTitle: ToysSectionTitle as unknown as BlockComponent,
+  toysProductGrid: ToysProductGrid as unknown as BlockComponent,
+  toysLimitedOffer: ToysLimitedOffer as unknown as BlockComponent,
+  toysTestimonials: ToysTestimonials as unknown as BlockComponent,
+  toysNewsletter: ToysNewsletter as unknown as BlockComponent,
+  toysFooter: ToysFooter as unknown as BlockComponent,
+};
+
 const MAKEUP_BLOCKS: Record<string, BlockComponent> = {
   makeupHeroSlider: MakeupHeroSlider as unknown as BlockComponent,
   makeupCategorySidebar: MakeupCategorySidebar as unknown as BlockComponent,
@@ -721,6 +750,7 @@ const ALL_TEMPLATE_BLOCKS: Record<string, BlockComponent> = {
   ...HEALTH_BLOCKS,
   ...INTERIOR_BLOCKS,
   ...KIDS_BLOCKS,
+  ...TOYS_BLOCKS,
   ...MAKEUP_BLOCKS,
   ...PERFUMES_BLOCKS,
   ...TSHIRTS_BLOCKS,
