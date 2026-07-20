@@ -19,6 +19,7 @@ import { InteriorFontLoader, InteriorStoreContext, type InteriorStoreContextData
 import { AccessoriesFontLoader, AccessoriesStoreContext, type AccessoriesStoreContextData } from "@/components/storefront/AccessoriesTemplateBlocks";
 import { KidsFontLoader } from "@/components/storefront/KidsTemplateBlocks";
 import { ToysFontLoader } from "@/components/storefront/ToysTemplateBlocks";
+import { LandingGadgetFontLoader } from "@/components/storefront/LandingGadgetBlocks";
 import { MakeupFontLoader } from "@/components/storefront/MakeupTemplateBlocks";
 import { PerfumesFontLoader } from "@/components/storefront/PerfumesTemplateBlocks";
 import { AiFontLoader } from "@/components/storefront/AiTemplateBlocks";
@@ -34,6 +35,7 @@ function getTemplateFontLoader(type: string): React.ComponentType {
   if (type.startsWith("interior")) return InteriorFontLoader;
   if (type.startsWith("kids")) return KidsFontLoader;
   if (type.startsWith("toys")) return ToysFontLoader;
+  if (type.startsWith("gadget")) return LandingGadgetFontLoader;
   if (type.startsWith("makeup")) return MakeupFontLoader;
   if (type.startsWith("perfumes")) return PerfumesFontLoader;
   return FashionFontLoaderDirect;
