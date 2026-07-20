@@ -23,6 +23,10 @@ export const TEMPLATE_CATEGORIES = [
 
   { id: 'interior-design', label: 'Interior Design' },
   { id: 'food-grocery', label: 'Grocery' },
+  { id: 'landing-simple', label: 'Simple Landing Page' },
+  { id: 'landing-portfolio', label: 'Artsy Portfolio' },
+  { id: 'landing-kids', label: 'Children-focused' },
+  { id: 'landing-tech', label: 'Tech & SaaS' },
 ] as const;
 
 export const TEMPLATES: TemplateMeta[] = [
@@ -67,6 +71,20 @@ export const TEMPLATES: TemplateMeta[] = [
 
   // AI-Generated
   { slug: 'ai', name: 'AI Modern', category: 'ai', categoryLabel: 'AI Templates', description: 'Clean, modern Allbirds-inspired e-commerce template with full-bleed imagery, editorial layout, and video hero', previewImage: 'https://images.unsplash.com/photo-1441986300917-64674bd600d8?w=400&h=300&fit=crop', file: 'ai/modern.html', industries: ['fashion', 'lifestyle', 'retail'] },
+
+  // Landing Pages — Simple
+  { slug: 'landing-gadget', name: 'Gadget Landing', category: 'landing-simple', categoryLabel: 'Simple Landing Page', description: 'Clean product landing page for gadgets and devices', previewImage: '', file: 'sites/landing-gadget/index.html', industries: ['electronics', 'other'] },
+
+  // Landing Pages — Artsy Portfolio
+  { slug: 'landing-artsy', name: 'Artsy Portfolio', category: 'landing-portfolio', categoryLabel: 'Artsy Portfolio', description: 'Creative portfolio landing page with artistic flair', previewImage: '', file: 'sites/landing-artsy/index.html', industries: ['art', 'other'] },
+  { slug: 'landing-dev-portfolio', name: 'Dev Portfolio', category: 'landing-portfolio', categoryLabel: 'Artsy Portfolio', description: 'Developer portfolio with project showcase', previewImage: '', file: 'sites/landing-dev-portfolio/index.html', industries: ['other'] },
+
+  // Landing Pages — Children-focused
+  { slug: 'landing-kids', name: 'Kids Landing', category: 'landing-kids', categoryLabel: 'Children-focused', description: 'Playful children-focused landing page', previewImage: '', file: 'sites/landing-kids/index.html', industries: ['other'] },
+
+  // Landing Pages — Tech & SaaS
+  { slug: 'landing-tech-saas', name: 'Tech SaaS', category: 'landing-tech', categoryLabel: 'Tech & SaaS', description: 'Modern SaaS product landing page with pricing sections', previewImage: '', file: 'sites/landing-tech-saas/index.html', industries: ['other'] },
+  { slug: 'landing-travel', name: 'Travel Landing', category: 'landing-tech', categoryLabel: 'Tech & SaaS', description: 'Travel booking and destination landing page', previewImage: '', file: 'sites/landing-travel/index.html', industries: ['other'] },
 ];
 
 export function getTemplateBySlug(slug: string): TemplateMeta | undefined {
