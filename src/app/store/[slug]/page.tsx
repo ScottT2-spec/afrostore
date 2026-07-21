@@ -30,6 +30,7 @@ import { ThemeProvider, type ThemeData } from "@/components/storefront/ThemeProv
 import { useWishlist } from "@/hooks/useWishlist";
 import { applyPageCustomization, buildPageBackgroundStyle, buildThemeDataWithCustomization, filterVisiblePages, getResolvedPageSettings, normalizeSiteCustomization, type SiteCustomizationDocument } from "@/lib/site-customization";
 import { VegetableFooter, VegetableHeader } from "@/components/storefront/VegetableStoreChrome";
+import { LandingGadgetContext, LandingGadgetFontLoader } from "@/components/storefront/LandingGadgetBlocks";
 import { VegetableHomePage } from "@/components/storefront/VegetableTemplatePages";
 
 /* ───────── Types ───────── */
@@ -233,6 +234,9 @@ function TemplateStoreContextProvider({ templateSlug, products, blogs, categorie
   if (slug === "perfumes") {
     return <PerfumesStoreContext.Provider value={value}>{children}</PerfumesStoreContext.Provider>;
   }
+  if (slug === "landing-gadget") {
+    return <LandingGadgetContext.Provider value={{ storeSlug: storeSlug, products, currency, addToCart: addToCart as any }}>{children}</LandingGadgetContext.Provider>;
+  }
   // Default: fashion family
   return <FashionStoreContext.Provider value={value}>{children}</FashionStoreContext.Provider>;
 }
@@ -422,6 +426,7 @@ export default function StorePage() {
   const TEMPLATE_BLOCK_PREFIXES: Record<string, string> = {
     tools: "tools",
     hardware: "hardwareHome",
+    "landing-gadget": "gadget",
   };
   const expectedPrefix = data.templateSlug ? TEMPLATE_BLOCK_PREFIXES[data.templateSlug] : undefined;
   // Filter out stale blocks from other templates when a prefix is enforced
@@ -483,6 +488,39 @@ export default function StorePage() {
     label: page.title,
     href: `/store/${slug}/${page.slug}`,
   }));
+
+  if (data.templateSlug === "landing-gadget") {
+    const gadgetBlocks = homePage?.content && typeof homePage.content === "object" && "blocks" in homePage.content
+      ? (homePage.content as { blocks: unknown[] }).blocks
+      : [];
+
+    return (
+      <ThemeProvider theme={resolvedTheme}>
+        <div className="min-h-screen bg-white">
+          <LandingGadgetFontLoader />
+          <TemplateStoreContextProvider
+            templateSlug="landing-gadget"
+            products={products}
+            blogs={data.blogs || []}
+            categories={categories}
+            currency={currency}
+            storeSlug={slug}
+            socialLinks={socialLinksArray}
+            addToCart={(pid, qty) => { const x = products.find(p => p.id === pid); if (x) addToCart(x, qty); }}
+            toggleWishlist={toggleWishlist}
+            isWishlisted={isWishlisted}
+            onQuickView={(pid) => { const x = products.find(p => p.id === pid); if (x) { setSelectedProduct(x); setSelectedVariantId(null); setQty(1); } }}
+          >
+            {gadgetBlocks.length > 0 ? (
+              <RenderTemplateBlocks blocks={gadgetBlocks as TemplateBlock[]} />
+            ) : (
+              <RenderTemplateBlocks blocks={templatePreset || []} />
+            )}
+          </TemplateStoreContextProvider>
+        </div>
+      </ThemeProvider>
+    );
+  }
 
   if (data.templateSlug === "vegetables") {
     const vegetableNavItems = [

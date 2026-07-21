@@ -139,7 +139,7 @@ export default function BuilderPage({ params }: { params: Promise<{ pageId: stri
             let sections = convertBlocksToSections(dbBlocks);
             
             // Seed preset blocks when page has no saved blocks or blocks don't match template
-            const TEMPLATE_BLOCK_PREFIXES: Record<string, string> = { tools: "tools", hardware: "hardwareHome" };
+            const TEMPLATE_BLOCK_PREFIXES: Record<string, string> = { tools: "tools", hardware: "hardwareHome", "landing-gadget": "gadget" };
             const expectedPrefix = templateSlug ? TEMPLATE_BLOCK_PREFIXES[templateSlug] : undefined;
             const blocksMatchTemplate = !expectedPrefix || sections.length === 0 || sections.some((s: any) => s.type.startsWith(expectedPrefix));
             const needsSeeding = (sections.length === 0 || !blocksMatchTemplate) && templateSlug;
