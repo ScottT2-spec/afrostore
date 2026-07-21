@@ -417,13 +417,20 @@ export default function StorePage() {
     'electronicsFooter', 'makeupFooter',
     // Note: jumia header/footer are NOT filtered — they're rendered as part of the block content
   ]);
-  const homeBlocks: BuilderBlock[] = homeContent.blocks.filter((block) => !CHROME_BLOCK_TYPES.has(block.type));
+  let homeBlocks: BuilderBlock[] = homeContent.blocks.filter((block) => !CHROME_BLOCK_TYPES.has(block.type));
   // If saved blocks are from a different template family, ignore them and use preset
   const TEMPLATE_BLOCK_PREFIXES: Record<string, string> = {
     tools: "tools",
-    hardware: "hardware",
+    hardware: "hardwareHome",
   };
   const expectedPrefix = data.templateSlug ? TEMPLATE_BLOCK_PREFIXES[data.templateSlug] : undefined;
+  // Filter out stale blocks from other templates when a prefix is enforced
+  if (expectedPrefix && homeBlocks.length > 0) {
+    const filtered = homeBlocks.filter((b) => b.type.startsWith(expectedPrefix));
+    if (filtered.length > 0) {
+      homeBlocks = filtered;
+    }
+  }
   const savedBlocksMatchTemplate = !expectedPrefix || homeBlocks.length === 0 || homeBlocks.some((b) => b.type.startsWith(expectedPrefix));
   const hasHomeContent = homeBlocks.length > 0 && savedBlocksMatchTemplate;
   const homeHasProductGrid = homeBlocks.some((b) => b.type === "productGrid");

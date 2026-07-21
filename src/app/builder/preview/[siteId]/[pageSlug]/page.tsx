@@ -95,7 +95,7 @@ export default function BuilderPreviewPage() {
           let pageBlocks = (json.data.page.content?.blocks || []) as BuilderBlock[];
           
           // Seed preset blocks when page has no saved blocks or blocks don't match template
-          const TEMPLATE_BLOCK_PREFIXES: Record<string, string> = { tools: "tools", hardware: "hardware" };
+          const TEMPLATE_BLOCK_PREFIXES: Record<string, string> = { tools: "tools", hardware: "hardwareHome" };
           const expectedPrefix = json.data.templateSlug ? TEMPLATE_BLOCK_PREFIXES[json.data.templateSlug] : undefined;
           const blocksMatchTemplate = !expectedPrefix || pageBlocks.length === 0 || pageBlocks.some((b: any) => b.type.startsWith(expectedPrefix));
           const needsSeeding = (pageBlocks.length === 0 || !blocksMatchTemplate) && json.data.templateSlug;
