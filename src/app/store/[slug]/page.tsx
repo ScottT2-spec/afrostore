@@ -431,6 +431,30 @@ export default function StorePage() {
       homeBlocks = filtered;
     }
   }
+  // For template-prefixed stores, merge saved blocks with preset so missing sections still render
+  const templatePresetForMerge = data.templateSlug ? TEMPLATE_PRESET_MAP[data.templateSlug] : undefined;
+  if (expectedPrefix && homeBlocks.length > 0 && templatePresetForMerge) {
+    const savedIds = new Set(homeBlocks.map((b) => b.id));
+    const savedTypes = new Set(homeBlocks.map((b) => b.type));
+    const missingBlocks = templatePresetForMerge
+      .filter((pb) => !savedIds.has(pb.id) && !savedTypes.has(pb.type))
+      .map((pb) => ({ id: pb.id, type: pb.type, props: pb.props || {} }));
+    if (missingBlocks.length > 0) {
+      // Reconstruct full block order: use preset order, replacing with saved versions where available
+      const mergedBlocks: BuilderBlock[] = [];
+      for (const pb of templatePresetForMerge) {
+        const saved = homeBlocks.find((b) => b.id === pb.id || b.type === pb.type);
+        mergedBlocks.push(saved || { id: pb.id, type: pb.type, props: pb.props || {} });
+      }
+      // Append any extra saved blocks not in preset
+      for (const sb of homeBlocks) {
+        if (!mergedBlocks.some((b) => b.id === sb.id)) {
+          mergedBlocks.push(sb);
+        }
+      }
+      homeBlocks = mergedBlocks;
+    }
+  }
   const savedBlocksMatchTemplate = !expectedPrefix || homeBlocks.length === 0 || homeBlocks.some((b) => b.type.startsWith(expectedPrefix));
   const hasHomeContent = homeBlocks.length > 0 && savedBlocksMatchTemplate;
   const homeHasProductGrid = homeBlocks.some((b) => b.type === "productGrid");
