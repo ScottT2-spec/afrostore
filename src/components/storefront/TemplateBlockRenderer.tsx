@@ -301,6 +301,15 @@ import {
   LandingGadgetFullWidthImage,
 } from "@/components/storefront/LandingGadgetBlocks";
 import {
+  AegisLandingFontLoader,
+  AegisHeader,
+  AegisHero,
+  AegisServices,
+  AegisStories,
+  AegisCTA,
+  AegisFooter,
+} from "@/components/storefront/AegisLandingBlocks";
+import {
   MakeupFontLoader,
   MakeupHeroSlider,
   MakeupCategorySidebar,
@@ -686,6 +695,15 @@ const GADGET_BLOCKS: Record<string, BlockComponent> = {
   gadgetFullWidthImage: LandingGadgetFullWidthImage as unknown as BlockComponent,
 };
 
+const AEGIS_BLOCKS: Record<string, BlockComponent> = {
+  aegisHeader: AegisHeader as unknown as BlockComponent,
+  aegisHero: AegisHero as unknown as BlockComponent,
+  aegisServices: AegisServices as unknown as BlockComponent,
+  aegisStories: AegisStories as unknown as BlockComponent,
+  aegisCTA: AegisCTA as unknown as BlockComponent,
+  aegisFooter: AegisFooter as unknown as BlockComponent,
+};
+
 const MAKEUP_BLOCKS: Record<string, BlockComponent> = {
   makeupHeroSlider: MakeupHeroSlider as unknown as BlockComponent,
   makeupCategorySidebar: MakeupCategorySidebar as unknown as BlockComponent,
@@ -816,6 +834,7 @@ const ALL_TEMPLATE_BLOCKS: Record<string, BlockComponent> = {
   ...JUMIA_BLOCKS,
   ...AI_BLOCKS,
   ...GADGET_BLOCKS,
+  ...AEGIS_BLOCKS,
 };
 
 /* ─── FONT LOADER MAP ──────────────────────────────────────── */
@@ -837,12 +856,15 @@ const FONT_LOADERS: Record<string, React.ComponentType> = {
   marketplace: JumiaFontLoader,
   ai: AiFontLoader,
   "landing-gadget": LandingGadgetFontLoader,
+  "aegis": AegisLandingFontLoader,
+  "aegis-landing": AegisLandingFontLoader,
 };
 
 /** Detect which template family a block set belongs to */
 function detectTemplateFamily(blocks: TemplateBlock[]): string {
   for (const b of blocks) {
     const t = b.type;
+    if (t.startsWith("aegis")) return "aegis-landing";
     if (t.startsWith("gadget")) return "landing-gadget";
     if (t.startsWith("ai")) return "ai";
     if (t.startsWith("jumia")) return "jumia";

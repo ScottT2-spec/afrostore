@@ -31,6 +31,7 @@ import { useWishlist } from "@/hooks/useWishlist";
 import { applyPageCustomization, buildPageBackgroundStyle, buildThemeDataWithCustomization, filterVisiblePages, getResolvedPageSettings, normalizeSiteCustomization, type SiteCustomizationDocument } from "@/lib/site-customization";
 import { VegetableFooter, VegetableHeader } from "@/components/storefront/VegetableStoreChrome";
 import { LandingGadgetContext, LandingGadgetFontLoader } from "@/components/storefront/LandingGadgetBlocks";
+import { AegisLandingContext, AegisLandingFontLoader } from "@/components/storefront/AegisLandingBlocks";
 import { VegetableHomePage } from "@/components/storefront/VegetableTemplatePages";
 
 /* ───────── Types ───────── */
@@ -237,6 +238,9 @@ function TemplateStoreContextProvider({ templateSlug, products, blogs, categorie
   if (slug === "landing-gadget") {
     return <LandingGadgetContext.Provider value={{ storeSlug: storeSlug, products, currency, addToCart: addToCart as any }}>{children}</LandingGadgetContext.Provider>;
   }
+  if (slug === "aegis" || slug === "aegis-landing") {
+    return <AegisLandingContext.Provider value={{ storeSlug: storeSlug }}>{children}</AegisLandingContext.Provider>;
+  }
   // Default: fashion family
   return <FashionStoreContext.Provider value={value}>{children}</FashionStoreContext.Provider>;
 }
@@ -427,6 +431,8 @@ export default function StorePage() {
     tools: "tools",
     hardware: "hardwareHome",
     "landing-gadget": "gadget",
+    "aegis": "aegis",
+    "aegis-landing": "aegis",
   };
   const expectedPrefix = data.templateSlug ? TEMPLATE_BLOCK_PREFIXES[data.templateSlug] : undefined;
   // Filter out stale blocks from other templates when a prefix is enforced
@@ -488,6 +494,32 @@ export default function StorePage() {
     label: page.title,
     href: `/store/${slug}/${page.slug}`,
   }));
+
+  if (data.templateSlug === "aegis" || data.templateSlug === "aegis-landing") {
+    const aegisBlocks = homeBlocks.length > 0 ? homeBlocks : (templatePreset || []);
+    return (
+      <ThemeProvider theme={resolvedTheme}>
+        <div className="min-h-screen" style={{ background: "#f9f9fb", color: "#1a1c1d" }}>
+          <AegisLandingFontLoader />
+          <TemplateStoreContextProvider
+            templateSlug={data.templateSlug}
+            products={products}
+            blogs={data.blogs || []}
+            categories={categories}
+            currency={currency}
+            storeSlug={slug}
+            socialLinks={socialLinksArray}
+            addToCart={(pid, qty) => { const x = products.find(p => p.id === pid); if (x) addToCart(x, qty); }}
+            toggleWishlist={toggleWishlist}
+            isWishlisted={isWishlisted}
+            onQuickView={(pid) => { const x = products.find(p => p.id === pid); if (x) { setSelectedProduct(x); setSelectedVariantId(null); setQty(1); } }}
+          >
+            <RenderTemplateBlocks blocks={aegisBlocks as TemplateBlock[]} />
+          </TemplateStoreContextProvider>
+        </div>
+      </ThemeProvider>
+    );
+  }
 
   if (data.templateSlug === "landing-gadget") {
     // Use homeBlocks which already has merge logic applied (fills missing blocks from preset)
