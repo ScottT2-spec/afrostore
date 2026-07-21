@@ -490,9 +490,8 @@ export default function StorePage() {
   }));
 
   if (data.templateSlug === "landing-gadget") {
-    const gadgetBlocks = homePage?.content && typeof homePage.content === "object" && "blocks" in homePage.content
-      ? (homePage.content as { blocks: unknown[] }).blocks
-      : [];
+    // Use homeBlocks which already has merge logic applied (fills missing blocks from preset)
+    const gadgetBlocks = homeBlocks.length > 0 ? homeBlocks : (templatePreset || []);
 
     return (
       <ThemeProvider theme={resolvedTheme}>
@@ -511,11 +510,7 @@ export default function StorePage() {
             isWishlisted={isWishlisted}
             onQuickView={(pid) => { const x = products.find(p => p.id === pid); if (x) { setSelectedProduct(x); setSelectedVariantId(null); setQty(1); } }}
           >
-            {gadgetBlocks.length > 0 ? (
-              <RenderTemplateBlocks blocks={gadgetBlocks as TemplateBlock[]} />
-            ) : (
-              <RenderTemplateBlocks blocks={templatePreset || []} />
-            )}
+            <RenderTemplateBlocks blocks={gadgetBlocks as TemplateBlock[]} />
           </TemplateStoreContextProvider>
         </div>
       </ThemeProvider>
