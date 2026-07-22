@@ -310,6 +310,19 @@ import {
   AegisFooter,
 } from "@/components/storefront/AegisLandingBlocks";
 import {
+  ProkipAgentFontLoader,
+  ProkipAgentModal,
+  ProkipAgentTopBanner,
+  ProkipAgentHero,
+  ProkipAgentIntro,
+  ProkipAgentAbout,
+  ProkipAgentBenefits,
+  ProkipAgentMedia,
+  ProkipAgentSupport,
+  ProkipAgentConversion,
+  ProkipAgentFooter,
+} from "@/components/storefront/ProkipAgentLandingBlocks";
+import {
   MakeupFontLoader,
   MakeupHeroSlider,
   MakeupCategorySidebar,
@@ -704,6 +717,19 @@ const AEGIS_BLOCKS: Record<string, BlockComponent> = {
   aegisFooter: AegisFooter as unknown as BlockComponent,
 };
 
+const PROKIP_AGENT_BLOCKS: Record<string, BlockComponent> = {
+  prokipAgentModal: ProkipAgentModal as unknown as BlockComponent,
+  prokipAgentTopBanner: ProkipAgentTopBanner as unknown as BlockComponent,
+  prokipAgentHero: ProkipAgentHero as unknown as BlockComponent,
+  prokipAgentIntro: ProkipAgentIntro as unknown as BlockComponent,
+  prokipAgentAbout: ProkipAgentAbout as unknown as BlockComponent,
+  prokipAgentBenefits: ProkipAgentBenefits as unknown as BlockComponent,
+  prokipAgentMedia: ProkipAgentMedia as unknown as BlockComponent,
+  prokipAgentSupport: ProkipAgentSupport as unknown as BlockComponent,
+  prokipAgentConversion: ProkipAgentConversion as unknown as BlockComponent,
+  prokipAgentFooter: ProkipAgentFooter as unknown as BlockComponent,
+};
+
 const MAKEUP_BLOCKS: Record<string, BlockComponent> = {
   makeupHeroSlider: MakeupHeroSlider as unknown as BlockComponent,
   makeupCategorySidebar: MakeupCategorySidebar as unknown as BlockComponent,
@@ -835,6 +861,7 @@ const ALL_TEMPLATE_BLOCKS: Record<string, BlockComponent> = {
   ...AI_BLOCKS,
   ...GADGET_BLOCKS,
   ...AEGIS_BLOCKS,
+  ...PROKIP_AGENT_BLOCKS,
 };
 
 /* ─── FONT LOADER MAP ──────────────────────────────────────── */

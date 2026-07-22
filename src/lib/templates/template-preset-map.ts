@@ -18,6 +18,7 @@ import { MAKEUP_TEMPLATE_PRESET } from "./presets/makeup-preset";
 import { PERFUMES_TEMPLATE_PRESET } from "./presets/perfumes-preset";
 import { AI_TEMPLATE_PRESET } from "./presets/ai-preset";
 import { HARDWARE_TEMPLATE_PRESET } from "./presets/hardware-preset";
+import { PROKIP_AGENT_PRESET } from "./presets/prokip-agent-preset";
 
 export const TEMPLATE_PRESET_MAP: Record<string, TemplateBlock[]> = {
   fashion: FASHION_TEMPLATE_PRESET,
@@ -43,4 +44,5 @@ export const TEMPLATE_PRESET_MAP: Record<string, TemplateBlock[]> = {
   makeup: MAKEUP_TEMPLATE_PRESET,
   perfumes: PERFUMES_TEMPLATE_PRESET,
   ai: AI_TEMPLATE_PRESET,
+  "prokip-agent": PROKIP_AGENT_PRESET,
 };

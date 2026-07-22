@@ -32,6 +32,7 @@ import { applyPageCustomization, buildPageBackgroundStyle, buildThemeDataWithCus
 import { VegetableFooter, VegetableHeader } from "@/components/storefront/VegetableStoreChrome";
 import { LandingGadgetContext, LandingGadgetFontLoader } from "@/components/storefront/LandingGadgetBlocks";
 import { AegisLandingContext, AegisLandingFontLoader } from "@/components/storefront/AegisLandingBlocks";
+import { ProkipAgentLandingContext, ProkipAgentFontLoader } from "@/components/storefront/ProkipAgentLandingBlocks";
 import { VegetableHomePage } from "@/components/storefront/VegetableTemplatePages";
 
 /* ───────── Types ───────── */
@@ -241,6 +242,9 @@ function TemplateStoreContextProvider({ templateSlug, products, blogs, categorie
   if (slug === "aegis" || slug === "aegis-landing") {
     return <AegisLandingContext.Provider value={{ storeSlug: storeSlug }}>{children}</AegisLandingContext.Provider>;
   }
+  if (slug === "prokip-agent") {
+    return <ProkipAgentLandingContext.Provider value={{ storeSlug: storeSlug }}>{children}</ProkipAgentLandingContext.Provider>;
+  }
   // Default: fashion family
   return <FashionStoreContext.Provider value={value}>{children}</FashionStoreContext.Provider>;
 }
@@ -433,6 +437,7 @@ export default function StorePage() {
     "landing-gadget": "gadget",
     "aegis": "aegis",
     "aegis-landing": "aegis",
+    "prokip-agent": "prokipAgent",
   };
   const expectedPrefix = data.templateSlug ? TEMPLATE_BLOCK_PREFIXES[data.templateSlug] : undefined;
   // Filter out stale blocks from other templates when a prefix is enforced
@@ -515,6 +520,32 @@ export default function StorePage() {
             onQuickView={(pid) => { const x = products.find(p => p.id === pid); if (x) { setSelectedProduct(x); setSelectedVariantId(null); setQty(1); } }}
           >
             <RenderTemplateBlocks blocks={aegisBlocks as TemplateBlock[]} />
+          </TemplateStoreContextProvider>
+        </div>
+      </ThemeProvider>
+    );
+  }
+
+  if (data.templateSlug === "prokip-agent") {
+    const prokipBlocks = homeBlocks.length > 0 ? homeBlocks : (templatePreset || []);
+    return (
+      <ThemeProvider theme={resolvedTheme}>
+        <div className="min-h-screen" style={{ background: "#0a1628", color: "#ffffff" }}>
+          <ProkipAgentFontLoader />
+          <TemplateStoreContextProvider
+            templateSlug={data.templateSlug}
+            products={products}
+            blogs={data.blogs || []}
+            categories={categories}
+            currency={currency}
+            storeSlug={slug}
+            socialLinks={socialLinksArray}
+            addToCart={(pid, qty) => { const x = products.find(p => p.id === pid); if (x) addToCart(x, qty); }}
+            toggleWishlist={toggleWishlist}
+            isWishlisted={isWishlisted}
+            onQuickView={(pid) => { const x = products.find(p => p.id === pid); if (x) { setSelectedProduct(x); setSelectedVariantId(null); setQty(1); } }}
+          >
+            <RenderTemplateBlocks blocks={prokipBlocks as TemplateBlock[]} />
           </TemplateStoreContextProvider>
         </div>
       </ThemeProvider>

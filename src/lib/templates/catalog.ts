@@ -30,6 +30,7 @@ export const TEMPLATE_CATEGORIES = [
   { id: 'landing-portfolio', label: 'Artsy Portfolio' },
   { id: 'landing-kids', label: 'Children-focused' },
   { id: 'landing-tech', label: 'Tech & SaaS' },
+  { id: 'landing-health', label: 'Health & Medical' },
 ] as const;
 
 export const TEMPLATES: TemplateMeta[] = [
@@ -88,6 +89,12 @@ export const TEMPLATES: TemplateMeta[] = [
   // Landing Pages — Tech & SaaS
   { slug: 'landing-tech-saas', name: 'Tech SaaS', category: 'landing-tech', categoryLabel: 'Tech & SaaS', description: 'Modern SaaS product landing page with pricing sections', previewImage: '', file: 'sites/landing-tech-saas/index.html', siteType: 'LANDING_PAGE', industries: ['other'] },
   { slug: 'landing-travel', name: 'Travel Landing', category: 'landing-tech', categoryLabel: 'Tech & SaaS', description: 'Travel booking and destination landing page', previewImage: '', file: 'sites/landing-travel/index.html', siteType: 'LANDING_PAGE', industries: ['other'] },
+
+  // Landing Pages — Health & Medical
+  { slug: 'aegis', name: 'Aegis Health', category: 'landing-health', categoryLabel: 'Health & Medical', description: 'Health and medical landing page with bento stats, service cards, testimonials, and CTA sections', previewImage: '', file: '', siteType: 'LANDING_PAGE', industries: ['health', 'other'] },
+
+  // Landing Pages — Recruitment
+  { slug: 'prokip-agent', name: 'Prokip Sales Agent', category: 'landing-simple', categoryLabel: 'Simple Landing Page', description: 'Dark navy recruitment landing page for sales agent opportunities with video, benefits, and conversion sections', previewImage: '', file: '', siteType: 'LANDING_PAGE', industries: ['other'] },
 ];
 
 export function getTemplateBySlug(slug: string): TemplateMeta | undefined {
