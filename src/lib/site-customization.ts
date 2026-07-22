@@ -201,10 +201,25 @@ export function mergeSiteCustomization(base: SiteCustomizationDocument, patch: P
 }
 
 export function buildThemeDataWithCustomization(theme: ThemeData | null, customization: SiteCustomizationDocument | null): ThemeData | null {
-  if (!theme) return null;
-
-  const themeConfig = theme.config || {};
+  // If no theme AND no customization with meaningful settings, return null
   const themeSettings = customization?.themeSettings || {};
+  const hasCustomization = !!(
+    themeSettings.colors && Object.values(themeSettings.colors).some(Boolean) ||
+    themeSettings.typography && Object.values(themeSettings.typography).some(Boolean) ||
+    themeSettings.layout && Object.values(themeSettings.layout).some(Boolean)
+  );
+
+  if (!theme && !hasCustomization) return null;
+
+  // Create a default theme shell if none exists but customization has settings
+  const baseTheme: ThemeData = theme || {
+    id: "default",
+    name: "Default",
+    slug: "default",
+    config: {},
+  };
+
+  const themeConfig = baseTheme.config || {};
   const colors = deepMerge(asRecord(themeConfig.colors), asRecord(themeSettings.colors));
   const fonts = deepMerge(asRecord(themeConfig.fonts), asRecord(themeSettings.typography ? {
     heading: themeSettings.typography.headingFont,
@@ -213,7 +228,7 @@ export function buildThemeDataWithCustomization(theme: ThemeData | null, customi
   const layout = deepMerge(asRecord(themeConfig.layout), asRecord(themeSettings.layout));
 
   return {
-    ...theme,
+    ...baseTheme,
     config: {
       ...themeConfig,
       colors,
