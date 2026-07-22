@@ -95,6 +95,9 @@ export const TEMPLATES: TemplateMeta[] = [
 
   // Landing Pages — Recruitment
   { slug: 'prokip-agent', name: 'Prokip Sales Agent', category: 'landing-simple', categoryLabel: 'Simple Landing Page', description: 'Dark navy recruitment landing page for sales agent opportunities with video, benefits, and conversion sections', previewImage: '', file: '', siteType: 'LANDING_PAGE', industries: ['other'] },
+
+  // Landing Pages — Demo Booking
+  { slug: 'prokip-booking', name: 'Prokip Demo Booking', category: 'landing-simple', categoryLabel: 'Simple Landing Page', description: 'Demo booking landing page with multi-step form, video hero, problem/solution sections, testimonials, and process timeline', previewImage: '', file: '', siteType: 'LANDING_PAGE', industries: ['other'] },
 ];
 
 export function getTemplateBySlug(slug: string): TemplateMeta | undefined {

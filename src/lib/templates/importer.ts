@@ -19,6 +19,7 @@ import { MAKEUP_TEMPLATE_PRESET } from "@/lib/templates/presets/makeup-preset";
 import { PERFUMES_TEMPLATE_PRESET } from "@/lib/templates/presets/perfumes-preset";
 import { AI_TEMPLATE_PRESET } from "@/lib/templates/presets/ai-preset";
 import { PROKIP_AGENT_PRESET } from "@/lib/templates/presets/prokip-agent-preset";
+import { PROKIP_BOOKING_PRESET } from "@/lib/templates/presets/prokip-booking-preset";
 import { FASHION_SAMPLE_PRODUCTS } from "@/lib/templates/presets/fashion-sample-products";
 import { FASHION_SAMPLE_BLOGS } from "@/lib/templates/presets/fashion-sample-blogs";
 import { TEMPLATE_SAMPLE_DATA } from "@/lib/templates/presets/template-sample-data";
@@ -136,6 +137,7 @@ export async function importTemplateToSite(
     aegis: AEGIS_LANDING_PRESET,
     "aegis-landing": AEGIS_LANDING_PRESET,
     "prokip-agent": PROKIP_AGENT_PRESET,
+    "prokip-booking": PROKIP_BOOKING_PRESET,
   };
 
   const preset = TEMPLATE_PRESETS[catalogEntry.slug];

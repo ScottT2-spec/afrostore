@@ -323,6 +323,17 @@ import {
   ProkipAgentFooter,
 } from "@/components/storefront/ProkipAgentLandingBlocks";
 import {
+  ProkipBookingFontLoader,
+  ProkipBookingHero,
+  ProkipBookingProblemSection,
+  ProkipBookingSolution,
+  ProkipBookingDemoDetails,
+  ProkipBookingTestimonials,
+  ProkipBookingProcess,
+  ProkipBookingForm,
+  ProkipBookingFooter,
+} from "@/components/storefront/ProkipBookingLandingBlocks";
+import {
   MakeupFontLoader,
   MakeupHeroSlider,
   MakeupCategorySidebar,
@@ -730,6 +741,17 @@ const PROKIP_AGENT_BLOCKS: Record<string, BlockComponent> = {
   prokipAgentFooter: ProkipAgentFooter as unknown as BlockComponent,
 };
 
+const PROKIP_BOOKING_BLOCKS: Record<string, BlockComponent> = {
+  prokipBookingHero: ProkipBookingHero as unknown as BlockComponent,
+  prokipBookingProblemSection: ProkipBookingProblemSection as unknown as BlockComponent,
+  prokipBookingSolution: ProkipBookingSolution as unknown as BlockComponent,
+  prokipBookingDemoDetails: ProkipBookingDemoDetails as unknown as BlockComponent,
+  prokipBookingTestimonials: ProkipBookingTestimonials as unknown as BlockComponent,
+  prokipBookingProcess: ProkipBookingProcess as unknown as BlockComponent,
+  prokipBookingForm: ProkipBookingForm as unknown as BlockComponent,
+  prokipBookingFooter: ProkipBookingFooter as unknown as BlockComponent,
+};
+
 const MAKEUP_BLOCKS: Record<string, BlockComponent> = {
   makeupHeroSlider: MakeupHeroSlider as unknown as BlockComponent,
   makeupCategorySidebar: MakeupCategorySidebar as unknown as BlockComponent,
@@ -862,6 +884,7 @@ const ALL_TEMPLATE_BLOCKS: Record<string, BlockComponent> = {
   ...GADGET_BLOCKS,
   ...AEGIS_BLOCKS,
   ...PROKIP_AGENT_BLOCKS,
+  ...PROKIP_BOOKING_BLOCKS,
 };
 
 /* ─── FONT LOADER MAP ──────────────────────────────────────── */
