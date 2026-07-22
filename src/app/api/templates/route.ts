@@ -49,7 +49,7 @@ export async function GET(req: NextRequest) {
       categoryLabel: t.categoryLabel,
       description: t.description,
       previewImage: t.previewImage,
-      previewUrl: `/templates/${t.file}`,
+      previewUrl: t.file ? `/templates/${t.file}` : `/templates/preview/${t.slug}`,
       siteType: t.siteType,
       industries: t.industries,
     })),
