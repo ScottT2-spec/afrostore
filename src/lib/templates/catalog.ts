@@ -27,9 +27,6 @@ export const TEMPLATE_CATEGORIES = [
   { id: 'interior-design', label: 'Interior Design' },
   { id: 'food-grocery', label: 'Grocery' },
   { id: 'landing-simple', label: 'Simple Landing Page' },
-  { id: 'landing-portfolio', label: 'Artsy Portfolio' },
-  { id: 'landing-kids', label: 'Children-focused' },
-  { id: 'landing-tech', label: 'Tech & SaaS' },
   { id: 'landing-health', label: 'Health & Medical' },
 ] as const;
 
@@ -78,17 +75,6 @@ export const TEMPLATES: TemplateMeta[] = [
 
   // Landing Pages — Simple
   { slug: 'landing-gadget', name: 'Gadget Landing', category: 'landing-simple', categoryLabel: 'Simple Landing Page', description: 'Clean product landing page for gadgets and devices', previewImage: '', file: 'sites/landing-gadget/index.html', siteType: 'LANDING_PAGE', industries: ['electronics', 'other'] },
-
-  // Landing Pages — Artsy Portfolio
-  { slug: 'landing-artsy', name: 'Artsy Portfolio', category: 'landing-portfolio', categoryLabel: 'Artsy Portfolio', description: 'Creative portfolio landing page with artistic flair', previewImage: '', file: 'sites/landing-artsy/index.html', siteType: 'LANDING_PAGE', industries: ['art', 'other'] },
-  { slug: 'landing-dev-portfolio', name: 'Dev Portfolio', category: 'landing-portfolio', categoryLabel: 'Artsy Portfolio', description: 'Developer portfolio with project showcase', previewImage: '', file: 'sites/landing-dev-portfolio/index.html', siteType: 'LANDING_PAGE', industries: ['other'] },
-
-  // Landing Pages — Children-focused
-  { slug: 'landing-kids', name: 'Kids Landing', category: 'landing-kids', categoryLabel: 'Children-focused', description: 'Playful children-focused landing page', previewImage: '', file: 'sites/landing-kids/index.html', siteType: 'LANDING_PAGE', industries: ['other'] },
-
-  // Landing Pages — Tech & SaaS
-  { slug: 'landing-tech-saas', name: 'Tech SaaS', category: 'landing-tech', categoryLabel: 'Tech & SaaS', description: 'Modern SaaS product landing page with pricing sections', previewImage: '', file: 'sites/landing-tech-saas/index.html', siteType: 'LANDING_PAGE', industries: ['other'] },
-  { slug: 'landing-travel', name: 'Travel Landing', category: 'landing-tech', categoryLabel: 'Tech & SaaS', description: 'Travel booking and destination landing page', previewImage: '', file: 'sites/landing-travel/index.html', siteType: 'LANDING_PAGE', industries: ['other'] },
 
   // Landing Pages — Health & Medical
   { slug: 'aegis', name: 'Aegis Health', category: 'landing-health', categoryLabel: 'Health & Medical', description: 'Health and medical landing page with bento stats, service cards, testimonials, and CTA sections', previewImage: '', file: '', siteType: 'LANDING_PAGE', industries: ['health', 'other'] },
