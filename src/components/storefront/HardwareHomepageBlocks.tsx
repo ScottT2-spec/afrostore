@@ -25,7 +25,7 @@ const T = {
   border: "rgba(255,255,255,0.08)",
   containerW: "1222px",
   titleFont: "'Poppins', Arial, Helvetica, sans-serif",
-  bodyFont: "'Lato', Arial, Helvetica, sans-serif",
+  bodyFont: "var(--theme-font-body, 'Lato', Arial, Helvetica, sans-serif)",
 };
 
 const ctr: React.CSSProperties = {

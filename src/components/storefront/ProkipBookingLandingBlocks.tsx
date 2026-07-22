@@ -15,7 +15,7 @@ export function ProkipBookingFontLoader() {
       <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="" />
       <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;900&display=swap" rel="stylesheet" />
       <style>{`
-        .prokip-booking * { font-family: 'Inter', ui-sans-serif, system-ui, sans-serif; }
+        .prokip-booking { font-family: var(--theme-font-body, 'Inter', ui-sans-serif, system-ui, sans-serif); }
         @keyframes prokipFadeIn { from { opacity:0; transform:translateY(5px); } to { opacity:1; transform:translateY(0); } }
         .prokip-fade-in { animation: prokipFadeIn 0.4s ease-out forwards; }
         .prokip-booking select { -webkit-appearance: none; -moz-appearance: none; appearance: none; }

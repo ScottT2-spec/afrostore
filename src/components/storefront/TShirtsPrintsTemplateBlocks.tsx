@@ -21,7 +21,7 @@ const TOKENS = {
   containerWidth: "1320px",
   borderRadius: "28px",
   titleFont: "'Manrope', Arial, sans-serif",
-  bodyFont: "'Manrope', Arial, sans-serif",
+  bodyFont: "var(--theme-font-body, 'Manrope', Arial, sans-serif)",
 };
 
 /* ─── FONT LOADER ───────────────────────────────────────────── */

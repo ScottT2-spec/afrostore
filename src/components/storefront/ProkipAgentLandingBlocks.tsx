@@ -23,8 +23,8 @@ const T = {
   gray300: "#d1d5db",
   gray400: "#9ca3af",
   gray500: "#6b7280",
-  headFont: "'Inter', 'Segoe UI', sans-serif",
-  bodyFont: "'Inter', 'Segoe UI', sans-serif",
+  headFont: "var(--theme-font-heading, 'Inter', 'Segoe UI', sans-serif)",
+  bodyFont: "var(--theme-font-body, 'Inter', 'Segoe UI', sans-serif)",
   radius: "1.5rem",
 };
 

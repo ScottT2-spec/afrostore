@@ -20,7 +20,7 @@ const G = {
   lightBg: "#fbfbfb",
   containerWidth: "1200px",
   headingFont: "'Raleway', sans-serif",
-  bodyFont: "'Sora', sans-serif",
+  bodyFont: "var(--theme-font-body, 'Sora', sans-serif)",
 };
 
 /* ─── Shared SVG Icons ───────────────────────────────────────── */

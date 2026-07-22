@@ -18,7 +18,7 @@ const TOKENS = {
   textColor: "#777",
   containerWidth: "1222px",
   titleFont: "'Poppins', Arial, Helvetica, sans-serif",
-  bodyFont: "'Lato', Arial, Helvetica, sans-serif",
+  bodyFont: "var(--theme-font-body, 'Lato', Arial, Helvetica, sans-serif)",
 };
 
 /* ─── FONT LOADER ───────────────────────────────────────────── */

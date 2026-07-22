@@ -26,7 +26,7 @@ const TOKENS = {
   containerWidth: "1320px",
   borderRadius: "0px",
   titleFont: "'Cormorant Garamond', Georgia, serif",
-  bodyFont: "'Inter', Arial, Helvetica, sans-serif",
+  bodyFont: "var(--theme-font-body, 'Inter', Arial, Helvetica, sans-serif)",
 };
 
 const IMG_BASE = "https://woodmart.xtemos.com/perfumes/wp-content/uploads/sites/32";

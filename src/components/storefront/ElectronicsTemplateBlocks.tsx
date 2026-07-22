@@ -25,7 +25,7 @@ const TOKENS = {
   containerWidth: "1222px",
   borderRadius: "0px",
   titleFont: "'Poppins', Arial, Helvetica, sans-serif",
-  bodyFont: "'Lato', Arial, Helvetica, sans-serif",
+  bodyFont: "var(--theme-font-body, 'Lato', Arial, Helvetica, sans-serif)",
   titleFontWeight: "600",
   entityTitleFontWeight: "500",
 };

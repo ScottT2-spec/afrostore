@@ -19,7 +19,7 @@ const T = {
   footerBg: "#0c0c0c",
   containerWidth: "1222px",
   titleFont: "'Montserrat', Arial, Helvetica, sans-serif",
-  bodyFont: "'Lato', Arial, Helvetica, sans-serif",
+  bodyFont: "var(--theme-font-body, 'Lato', Arial, Helvetica, sans-serif)",
 };
 
 export interface NavItem {

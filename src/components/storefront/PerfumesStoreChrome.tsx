@@ -13,7 +13,7 @@ const T = {
   footerBg: "#1a1a1a",
   containerWidth: "1320px",
   titleFont: "'Cormorant Garamond', Georgia, serif",
-  bodyFont: "'Inter', Arial, Helvetica, sans-serif",
+  bodyFont: "var(--theme-font-body, 'Inter', Arial, Helvetica, sans-serif)",
 };
 
 export interface NavItem { id: string; label: string; url: string; type: string; openInNewTab?: boolean; }

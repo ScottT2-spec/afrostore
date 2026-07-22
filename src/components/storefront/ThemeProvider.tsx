@@ -93,6 +93,16 @@ interface ThemeProviderProps {
   children: React.ReactNode;
 }
 
+/** Build a Google Fonts <link> URL for one or more family names */
+function googleFontsUrl(families: string[]): string | null {
+  const unique = [...new Set(families.filter(Boolean))];
+  if (unique.length === 0) return null;
+  const params = unique
+    .map((f) => `family=${encodeURIComponent(f)}:wght@300;400;500;600;700;800;900`)
+    .join("&");
+  return `https://fonts.googleapis.com/css2?${params}&display=swap`;
+}
+
 export function ThemeProvider({ theme, children }: ThemeProviderProps) {
   const config = theme?.config;
   const colors = config?.colors;
@@ -128,8 +138,24 @@ export function ThemeProvider({ theme, children }: ThemeProviderProps) {
   if (layout?.maxWidth) themeVars["--theme-max-width"] = layout.maxWidth;
   if (layout?.productColumns) themeVars["--theme-product-columns"] = String(layout.productColumns);
 
+  // Build Google Fonts link for custom fonts
+  const customFontFamilies = [fonts?.heading, fonts?.body].filter(Boolean) as string[];
+  const fontsHref = googleFontsUrl(customFontFamilies);
+
+  // Determine class names — add markers when theme fonts are overridden
+  const classNames = ["theme-root"];
+  if (fonts?.body) classNames.push("theme-has-body-font");
+  if (fonts?.heading) classNames.push("theme-has-heading-font");
+
   return (
-    <div className="theme-root" style={themeVars as React.CSSProperties}>
+    <div className={classNames.join(" ")} style={themeVars as React.CSSProperties}>
+      {fontsHref && (
+        <>
+          <link rel="preconnect" href="https://fonts.googleapis.com" />
+          <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="" />
+          <link href={fontsHref} rel="stylesheet" />
+        </>
+      )}
       {children}
     </div>
   );
