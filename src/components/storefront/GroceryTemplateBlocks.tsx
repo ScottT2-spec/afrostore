@@ -27,7 +27,7 @@ const TOKENS = {
   containerWidth: "1222px",
   borderRadius: "0px",
   titleFont: "'Yantramanav', Arial, Helvetica, sans-serif",
-  bodyFont: "var(--theme-font-body, 'Inter', Arial, Helvetica, sans-serif)",
+  bodyFont: "'Inter', Arial, Helvetica, sans-serif",
   altFont: "'Lato', Arial, Helvetica, sans-serif",
 };
 

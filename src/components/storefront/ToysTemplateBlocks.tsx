@@ -21,7 +21,7 @@ const TOKENS = {
   containerWidth: "1222px",
   borderRadius: "8px",
   titleFont: "'Poppins', Arial, Helvetica, sans-serif",
-  bodyFont: "var(--theme-font-body, 'Open Sans', Arial, Helvetica, sans-serif)",
+  bodyFont: "'Open Sans', Arial, Helvetica, sans-serif",
 };
 
 const IMG = "https://woodmart.xtemos.com/wp-content/uploads";

@@ -26,7 +26,7 @@ const TOKENS = {
   containerWidth: "1222px",
   borderRadius: "10px",
   titleFont: "'Quicksand', Arial, Helvetica, sans-serif",
-  bodyFont: "var(--theme-font-body, 'Quicksand', Arial, Helvetica, sans-serif)",
+  bodyFont: "'Quicksand', Arial, Helvetica, sans-serif",
 };
 
 const IMG_BASE = "https://woodmart.xtemos.com/kids/wp-content/uploads/sites/13/2023/05";

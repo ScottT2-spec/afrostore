@@ -33,8 +33,8 @@ const C = {
   onSurface: "#1a1c1d",
   onSurfaceVariant: "#454652",
   outline: "#767683",
-  headlineFont: "var(--theme-font-heading, 'Noto Serif', Georgia, serif)",
-  bodyFont: "var(--theme-font-body, 'Manrope', Arial, sans-serif)",
+  headlineFont: "'Noto Serif', Georgia, serif",
+  bodyFont: "'Manrope', Arial, sans-serif",
 };
 
 /* ─── Font Loader ──────────────────────────────────────────── */

@@ -201,25 +201,10 @@ export function mergeSiteCustomization(base: SiteCustomizationDocument, patch: P
 }
 
 export function buildThemeDataWithCustomization(theme: ThemeData | null, customization: SiteCustomizationDocument | null): ThemeData | null {
-  // If no theme AND no customization with meaningful settings, return null
+  if (!theme) return null;
+
+  const themeConfig = theme.config || {};
   const themeSettings = customization?.themeSettings || {};
-  const hasCustomization = !!(
-    themeSettings.colors && Object.values(themeSettings.colors).some(Boolean) ||
-    themeSettings.typography && Object.values(themeSettings.typography).some(Boolean) ||
-    themeSettings.layout && Object.values(themeSettings.layout).some(Boolean)
-  );
-
-  if (!theme && !hasCustomization) return null;
-
-  // Create a default theme shell if none exists but customization has settings
-  const baseTheme: ThemeData = theme || {
-    id: "default",
-    name: "Default",
-    slug: "default",
-    config: {},
-  };
-
-  const themeConfig = baseTheme.config || {};
   const colors = deepMerge(asRecord(themeConfig.colors), asRecord(themeSettings.colors));
   const fonts = deepMerge(asRecord(themeConfig.fonts), asRecord(themeSettings.typography ? {
     heading: themeSettings.typography.headingFont,
@@ -228,7 +213,7 @@ export function buildThemeDataWithCustomization(theme: ThemeData | null, customi
   const layout = deepMerge(asRecord(themeConfig.layout), asRecord(themeSettings.layout));
 
   return {
-    ...baseTheme,
+    ...theme,
     config: {
       ...themeConfig,
       colors,
@@ -404,37 +389,6 @@ export function buildCustomizationBridgeScript(customization: SiteCustomizationD
     set("--afro-font-button", typography.buttonFont ? ("'" + typography.buttonFont + "', system-ui, sans-serif") : "");
     set("--afro-radius", layout.radius);
     set("--afro-spacing-scale", layout.spacingScale);
-
-    // Also map to --theme-font-* so templates using var(--theme-font-body) pick up changes
-    set("--theme-font-heading", typography.headingFont ? ("'" + typography.headingFont + "', system-ui, sans-serif") : "");
-    set("--theme-font-body", typography.bodyFont ? ("'" + typography.bodyFont + "', system-ui, sans-serif") : "");
-
-    // Toggle theme-has-*-font classes on .theme-root for CSS specificity overrides
-    var themeRoots = document.querySelectorAll(".theme-root");
-    for (var i = 0; i < themeRoots.length; i++) {
-      if (typography.bodyFont) themeRoots[i].classList.add("theme-has-body-font");
-      else themeRoots[i].classList.remove("theme-has-body-font");
-      if (typography.headingFont) themeRoots[i].classList.add("theme-has-heading-font");
-      else themeRoots[i].classList.remove("theme-has-heading-font");
-    }
-
-    // Dynamically load Google Fonts for custom font families
-    var fontFamilies = [typography.headingFont, typography.bodyFont, typography.buttonFont].filter(Boolean);
-    var uniqueFonts = fontFamilies.filter(function(f, i) { return fontFamilies.indexOf(f) === i; });
-    if (uniqueFonts.length > 0) {
-      var existingLink = document.getElementById("afro-custom-google-fonts");
-      var params = uniqueFonts.map(function(f) { return "family=" + encodeURIComponent(f) + ":wght@300;400;500;600;700;800;900"; }).join("&");
-      var href = "https://fonts.googleapis.com/css2?" + params + "&display=swap";
-      if (existingLink) {
-        existingLink.setAttribute("href", href);
-      } else {
-        var link = document.createElement("link");
-        link.id = "afro-custom-google-fonts";
-        link.rel = "stylesheet";
-        link.href = href;
-        document.head.appendChild(link);
-      }
-    }
 
     var styleEl = document.getElementById("afro-site-customization-css");
     if (!styleEl) {

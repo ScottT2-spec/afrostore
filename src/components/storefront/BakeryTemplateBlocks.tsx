@@ -30,7 +30,7 @@ const TOKENS = {
   borderRadius: "0px",
   titleFont: "'Jost', Arial, Helvetica, sans-serif",
   scriptFont: "'Cookie', cursive",
-  bodyFont: "var(--theme-font-body, 'Jost', Arial, Helvetica, sans-serif)",
+  bodyFont: "'Jost', Arial, Helvetica, sans-serif",
 };
 
 const IMG = "https://woodmart.xtemos.com/wp-content/uploads";

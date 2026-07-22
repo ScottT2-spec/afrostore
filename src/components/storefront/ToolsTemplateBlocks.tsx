@@ -18,7 +18,7 @@ const TOKENS = {
   starColor: "var(--color-accent)",
   containerWidth: "1222px",
   titleFont: "'Roboto', Arial, sans-serif",
-  bodyFont: "var(--theme-font-body, 'Roboto', Arial, sans-serif)",
+  bodyFont: "'Roboto', Arial, sans-serif",
 };
 
 const IMG = "https://woodmart.xtemos.com/wp-content/uploads";

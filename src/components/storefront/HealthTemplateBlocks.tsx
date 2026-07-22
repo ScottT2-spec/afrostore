@@ -25,7 +25,7 @@ const TOKENS = {
   containerWidth: "1222px",
   borderRadius: "15px",
   titleFont: "'Geologica', Arial, Helvetica, sans-serif",
-  bodyFont: "var(--theme-font-body, 'Cabin', Arial, Helvetica, sans-serif)",
+  bodyFont: "'Cabin', Arial, Helvetica, sans-serif",
   altFont: "'Lato', Arial, Helvetica, sans-serif",
   bgLight: "#f7f7f7",
 };

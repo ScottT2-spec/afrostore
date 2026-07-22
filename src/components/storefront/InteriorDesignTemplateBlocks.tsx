@@ -26,7 +26,7 @@ const TOKENS = {
   containerWidth: "1222px",
   borderRadius: "0px",
   titleFont: "'Cabin', Arial, Helvetica, sans-serif",
-  bodyFont: "var(--theme-font-body, 'Cabin', Arial, Helvetica, sans-serif)",
+  bodyFont: "'Cabin', Arial, Helvetica, sans-serif",
 };
 
 const IMG = "https://woodmart.xtemos.com/wp-content/uploads";

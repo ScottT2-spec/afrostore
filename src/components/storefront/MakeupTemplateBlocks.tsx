@@ -25,7 +25,7 @@ const TOKENS = {
   containerWidth: "1222px",
   borderRadius: "10px",
   titleFont: "'Inter', Arial, Helvetica, sans-serif",
-  bodyFont: "var(--theme-font-body, 'Inter', Arial, Helvetica, sans-serif)",
+  bodyFont: "'Inter', Arial, Helvetica, sans-serif",
 };
 
 const IMG_BASE = "https://woodmart.xtemos.com/makeup/wp-content/uploads/sites/22/2024/10";
