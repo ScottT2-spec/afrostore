@@ -206,6 +206,7 @@ export function HandmadeBagsHeader({
                 {!isLanding && <Link href={resolveStoreLink("/shop?category=men", storeSlug)} className="hbh-nav-link">Men</Link>}
                 {!isLanding && <Link href={resolveStoreLink("/blog", storeSlug)} className="hbh-nav-link">Blog</Link>}
                 <Link href={resolveStoreLink("/about", storeSlug)} className="hbh-nav-link">About Us</Link>
+                {!isLanding && <Link href={resolveStoreLink("/projects", storeSlug)} className="hbh-nav-link">Projects</Link>}
                 {!isLanding && <Link href={resolveStoreLink("/contact", storeSlug)} className="hbh-nav-link">Contact Us</Link>}
                 {!isLanding && <Link href={resolveStoreLink("/my-account", storeSlug)} className="hbh-nav-link">Login / Register</Link>}
               </>
@@ -233,6 +234,7 @@ export function HandmadeBagsHeader({
             {!isLanding && <Link href={resolveStoreLink("/shop?category=men", storeSlug)} onClick={() => setMobileMenu(false)}>Men</Link>}
             {!isLanding && <Link href={resolveStoreLink("/blog", storeSlug)} onClick={() => setMobileMenu(false)}>Blog</Link>}
             <Link href={resolveStoreLink("/about", storeSlug)} onClick={() => setMobileMenu(false)}>About Us</Link>
+            {!isLanding && <Link href={resolveStoreLink("/projects", storeSlug)} onClick={() => setMobileMenu(false)}>Projects</Link>}
             {!isLanding && <Link href={resolveStoreLink("/contact", storeSlug)} onClick={() => setMobileMenu(false)}>Contact Us</Link>}
             {!isLanding && <Link href={resolveStoreLink("/my-account", storeSlug)} onClick={() => setMobileMenu(false)}>Login / Register</Link>}
           </>
@@ -320,6 +322,7 @@ export function HandmadeBagsFooter({
           <ul className="hbf-links">
             <li><Link href={resolveStoreLink("/blog", storeSlug)}>Blog</Link></li>
             <li><Link href={resolveStoreLink("/about", storeSlug)}>About Us</Link></li>
+            <li><Link href={resolveStoreLink("/projects", storeSlug)}>Projects</Link></li>
             <li><Link href={resolveStoreLink("/our-story", storeSlug)}>Our Story</Link></li>
             <li><Link href={resolveStoreLink("/contact", storeSlug)}>Contact Us</Link></li>
             <li><Link href={resolveStoreLink("/reviews", storeSlug)}>Reviews</Link></li>

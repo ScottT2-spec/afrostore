@@ -517,10 +517,143 @@ export const HANDMADE_BAGS_REVIEWS_BLOCKS: TemplateBlock[] = [
   },
 ];
 
+/* ── BLOG PAGE ─────────────────────────────────────────────── */
+export const HANDMADE_BAGS_BLOG_BLOCKS: TemplateBlock[] = [
+  {
+    id: "blog-hero",
+    type: "fashionHeroSlider",
+    props: {
+      slides: [
+        {
+          subtitle: "OUR JOURNAL",
+          titleLine1: "Leather",
+          titleLine2: "Stories",
+          description:
+            "Discover the artistry, craftsmanship, and stories behind our handcrafted leather goods.",
+          buttonText: "Explore Collection",
+          buttonLink: "/shop",
+          colorScheme: "dark",
+          textPosition: "center",
+          backgroundImage:
+            "https://images.unsplash.com/photo-1596462502278-27bfdc403348?w=1920&h=900&fit=crop",
+        },
+      ],
+      minHeight: "550px",
+      autoplaySpeed: 0,
+    },
+  },
+  {
+    id: "blog-intro",
+    type: "fashionSectionTitle",
+    props: {
+      subtitle: "LATEST STORIES",
+      title: "From Our Workshop",
+      description:
+        "Explore our collection of articles about leather craftsmanship, care tips, style inspiration, and the stories behind our handcrafted pieces.",
+      align: "center",
+      maxWidth: "65%",
+      marginBottom: "60px",
+    },
+  },
+  {
+    id: "blog-posts",
+    type: "fashionBlogPosts",
+    props: {
+      sectionTitle: {
+        subtitle: "",
+        title: "Recent Articles",
+        description: "",
+      },
+      columns: 2,
+      posts: [
+        {
+          id: "handmade-blog-1",
+          title: "Minimalist Japanese-inspired Leather Goods",
+          slug: "minimalist-japanese-inspired-leather-goods",
+          excerpt:
+            "Discover how Japanese minimalism influences our leather craftsmanship. Clean lines, functional design, and exceptional quality meet traditional artistry.",
+          image: "https://images.unsplash.com/photo-1553062407-98eeb64c6a62?w=800&h=600&fit=crop",
+          date: { day: "22", month: "Jun" },
+          categories: ["Home Decor"],
+          author: { name: "S. Rogers", avatar: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=100&h=100&fit=crop&crop=face" },
+          link: "/blog/minimalist-japanese-inspired-leather-goods",
+          commentCount: 0,
+        },
+        {
+          id: "handmade-blog-2",
+          title: "New Leather Care Essentials from Our Workshop",
+          slug: "new-leather-care-essentials-from-our-workshop",
+          excerpt:
+            "Introducing our latest collection of leather care products. From conditioners to protectors, everything you need to maintain your handcrafted pieces.",
+          image: "https://images.unsplash.com/photo-1548036328-c9fa89d128fa?w=800&h=600&fit=crop",
+          date: { day: "16", month: "Jun" },
+          categories: ["Design trends"],
+          author: { name: "S. Rogers", avatar: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=100&h=100&fit=crop&crop=face" },
+          link: "/blog/new-leather-care-essentials-from-our-workshop",
+          commentCount: 0,
+        },
+        {
+          id: "handmade-blog-3",
+          title: "The Big Design: Wall Likes Pictures",
+          slug: "the-big-design-wall-likes-pictures",
+          excerpt:
+            "How to display your leather bags as art in your home. Creative styling tips for showcasing your collection while keeping pieces protected and accessible.",
+          image: "https://images.unsplash.com/photo-1594223274512-ad4803739b7c?w=800&h=600&fit=crop",
+          date: { day: "16", month: "Jun" },
+          categories: ["Home Decor"],
+          author: { name: "S. Rogers", avatar: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=100&h=100&fit=crop&crop=face" },
+          link: "/blog/the-big-design-wall-likes-pictures",
+          commentCount: 0,
+        },
+        {
+          id: "handmade-blog-4",
+          title: "Sweet Seat: Functional Leather for Everyday",
+          slug: "sweet-seat-functional-leather-for-everyday",
+          excerpt:
+            "Practical leather goods designed for daily use. Discover our collection of functional pieces that combine durability with elegant design for modern lifestyles.",
+          image: "https://images.unsplash.com/photo-1560472355-536de3962603?w=800&h=600&fit=crop",
+          date: { day: "14", month: "Jun" },
+          categories: ["Decoration"],
+          author: { name: "S. Rogers", avatar: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=100&h=100&fit=crop&crop=face" },
+          link: "/blog/sweet-seat-functional-leather-for-everyday",
+          commentCount: 0,
+        },
+        {
+          id: "handmade-blog-5",
+          title: "Creative Leather Features and Exterior Design",
+          slug: "creative-leather-features-and-exterior-design",
+          excerpt:
+            "Exploring innovative leather treatments and exterior finishes. From natural patinas to protective coatings, learn about the techniques that make our pieces unique.",
+          image: "https://images.unsplash.com/photo-1473188588951-1d4f0e31f5e0?w=800&h=600&fit=crop",
+          date: { day: "14", month: "Jun" },
+          categories: ["Decoration"],
+          author: { name: "S. Rogers", avatar: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=100&h=100&fit=crop&crop=face" },
+          link: "/blog/creative-leather-features-and-exterior-design",
+          commentCount: 0,
+        },
+      ],
+    },
+  },
+  {
+    id: "blog-cta",
+    type: "fashionNewsletter",
+    props: {
+      subtitle: "",
+      title: "Stay Connected",
+      description:
+        "Subscribe to our newsletter for the latest stories, leather care tips, and exclusive updates from our workshop.",
+      buttonText: "Subscribe",
+      backgroundColor: "#c27843",
+      socialLinks: [],
+    },
+  },
+];
+
 /** Map slug → default blocks for handbag template pages */
 export const HANDMADE_BAGS_PAGE_BLOCKS: Record<string, TemplateBlock[]> = {
   about: HANDMADE_BAGS_ABOUT_BLOCKS,
   contact: HANDMADE_BAGS_CONTACT_BLOCKS,
   "our-story": HANDMADE_BAGS_OUR_STORY_BLOCKS,
   reviews: HANDMADE_BAGS_REVIEWS_BLOCKS,
+  blog: HANDMADE_BAGS_BLOG_BLOCKS,
 };

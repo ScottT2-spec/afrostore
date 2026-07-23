@@ -4,6 +4,8 @@ import { useState, useEffect } from "react";
 import { useParams } from "next/navigation";
 import Link from "next/link";
 import { ArrowLeft, Calendar, Loader2, Tag, User } from "lucide-react";
+import { HandmadeBagsHeader, HandmadeBagsFooter } from "@/components/storefront/HandmadeBagsStoreChrome";
+import { KidsHeader, KidsFooterFull, KidsFontLoader } from "@/components/storefront/KidsTemplateBlocks";
 
 interface BlogPost {
   id: string;
@@ -33,7 +35,7 @@ interface RelatedPost {
 }
 
 interface BlogDetailData {
-  site: { id: string; name: string; slug: string; logo?: string | null };
+  site: { id: string; name: string; slug: string; logo?: string | null; templateSlug?: string | null };
   blog: BlogPost;
   relatedPosts: RelatedPost[];
 }
@@ -98,6 +100,9 @@ export default function StoreBlogPostPage() {
 
   const { blog, relatedPosts, site } = data;
   const pubDate = blog.publishedAt || blog.createdAt;
+  const templateSlug = site.templateSlug || "";
+  const isHandmadeBagsTemplate = templateSlug === "handmade-bags";
+  const isKidsTemplate = templateSlug === "kids" || templateSlug === "kids-world";
 
   // Render blog content: prefer contentHtml, fallback to plain content with line breaks
   const renderContent = () => {
@@ -105,8 +110,10 @@ export default function StoreBlogPostPage() {
       return <div dangerouslySetInnerHTML={{ __html: blog.contentHtml }} />;
     }
     if (blog.content) {
+      // Defensive: ensure content is a string before calling split
+      const contentStr = typeof blog.content === "string" ? blog.content : JSON.stringify(blog.content);
       // Simple markdown-like rendering: split by double newlines for paragraphs
-      return blog.content.split(/\n\n+/).map((para, i) => (
+      return contentStr.split(/\n\n+/).map((para, i) => (
         <p key={i}>{para}</p>
       ));
     }
@@ -114,7 +121,29 @@ export default function StoreBlogPostPage() {
   };
 
   return (
-    <div className="min-h-screen bg-white" style={{ fontFamily: "'Lato', Arial, sans-serif" }}>
+    <div className="min-h-screen bg-white" style={{ fontFamily: isKidsTemplate ? "'Quicksand', Arial, sans-serif" : "'Lato', Arial, sans-serif" }}>
+      {/* Kids Template Font Loader */}
+      {isKidsTemplate && <KidsFontLoader />}
+
+      {/* Handmade Bags Template Header */}
+      {isHandmadeBagsTemplate && (
+        <HandmadeBagsHeader
+          storeName={site.name}
+          storeSlug={slug}
+          logo={site.logo}
+          isLanding={false}
+        />
+      )}
+
+      {/* Kids Template Header */}
+      {isKidsTemplate && (
+        <KidsHeader
+          storeName={site.name}
+          storeSlug={slug}
+          logo={site.logo}
+        />
+      )}
+
       <style dangerouslySetInnerHTML={{ __html: `
         @import url('https://fonts.googleapis.com/css2?family=Lato:wght@400;700&family=Montserrat:wght@700&display=swap');
         .blog-content { font-size: 16px; line-height: 1.8; color: #444; }
@@ -277,6 +306,24 @@ export default function StoreBlogPostPage() {
             </div>
           </div>
         </div>
+      )}
+
+      {/* Handmade Bags Template Footer */}
+      {isHandmadeBagsTemplate && (
+        <HandmadeBagsFooter
+          storeName={site.name}
+          storeSlug={slug}
+          logo={site.logo}
+        />
+      )}
+
+      {/* Kids Template Footer */}
+      {isKidsTemplate && (
+        <KidsFooterFull
+          storeName={site.name}
+          storeSlug={slug}
+          logo={site.logo}
+        />
       )}
     </div>
   );

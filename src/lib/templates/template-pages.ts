@@ -5,6 +5,8 @@ import { COSMETICS_TERMS_BLOCKS, COSMETICS_SHOP_BLOCKS, COSMETICS_BLOG_BLOCKS } 
 import { TSHIRTS_PRINTS_ABOUT_PAGE_BLOCKS, TSHIRTS_PRINTS_CONTACT_PAGE_BLOCKS, TSHIRTS_PRINTS_BLOG_PAGE_BLOCKS } from "./presets/t-shirts-prints-page-presets";
 import { VEGETABLE_HOME_PAGE_BLOCKS, VEGETABLE_MENU_PAGE_BLOCKS, VEGETABLE_RECIPE_PAGE_BLOCKS, VEGETABLE_ABOUT_PAGE_BLOCKS, VEGETABLE_CONTACT_PAGE_BLOCKS, VEGETABLE_RESERVATION_PAGE_BLOCKS } from "./presets/vegetables-page-presets";
 import { PERFUMES_HOME_PAGE_BLOCKS, PERFUMES_ABOUT_PAGE_BLOCKS, PERFUMES_CONTACT_PAGE_BLOCKS, PERFUMES_FRAGRANCES_PAGE_BLOCKS, PERFUMES_JOURNAL_PAGE_BLOCKS, PERFUMES_REVIEWS_PAGE_BLOCKS } from "./presets/perfumes-page-presets";
+import { RETAIL_ABOUT_BLOCKS, RETAIL_CONTACT_BLOCKS, RETAIL_PROJECTS_BLOCKS, RETAIL_OUR_STORY_BLOCKS, RETAIL_REVIEWS_BLOCKS, RETAIL_PROJECT_DETAIL_BLOCKS } from "./presets/retail-pages";
+import { KIDS_ABOUT_PAGE_BLOCKS, KIDS_CONTACT_PAGE_BLOCKS, KIDS_BLOG_PAGE_BLOCKS } from "./presets/kids-pages-preset";
 
 /**
  * Template-specific page definitions.
@@ -55,6 +57,7 @@ const HEALTH_PAGES: PageDef[] = [
   { title: "Contact Us", slug: "contact", type: "CUSTOM", position: 11 },
   { title: "Blog", slug: "blog", type: "CUSTOM", position: 12 },
   { title: "Ingredients", slug: "ingredients", type: "CUSTOM", position: 13 },
+  { title: "Medical Experts", slug: "medical-experts", type: "CUSTOM", position: 14 },
 ];
 
 const MAKEUP_PAGES: PageDef[] = [
@@ -75,6 +78,18 @@ const VEGETABLE_PAGES: PageDef[] = [
   { title: "Reservation", slug: "reservation", type: "CUSTOM", position: 14 },
 ];
 
+const RETAIL_PAGES: PageDef[] = [
+  { title: "About Us", slug: "about", type: "CUSTOM", position: 10 },
+  { title: "Contact Us", slug: "contact", type: "CUSTOM", position: 11 },
+  { title: "Projects", slug: "projects", type: "CUSTOM", position: 12 },
+  { title: "Our Story", slug: "our-story", type: "CUSTOM", position: 13 },
+  { title: "Reviews", slug: "reviews", type: "CUSTOM", position: 14 },
+  { title: "Look Deep Into Nature", slug: "project-look-deep-into-nature", type: "CUSTOM", position: 15 },
+  { title: "Just Living Is Not Enough", slug: "project-just-living-is-not-enough", type: "CUSTOM", position: 16 },
+  { title: "Adopt the pace of Nature", slug: "project-adopt-the-pace-of-nature", type: "CUSTOM", position: 17 },
+  { title: "Go Along With the Nature", slug: "project-go-along-with-nature", type: "CUSTOM", position: 18 },
+];
+
 /** Map of template slug → pages to ensure */
 const TEMPLATE_PAGE_MAP: Record<string, PageDef[]> = {
   kids: KIDS_PAGES,
@@ -90,10 +105,17 @@ const TEMPLATE_PAGE_MAP: Record<string, PageDef[]> = {
   makeup: MAKEUP_PAGES,
   "t-shirts-prints": TSHIRTS_PRINTS_PAGES,
   vegetables: VEGETABLE_PAGES,
+  retail: RETAIL_PAGES,
+  decor: RETAIL_PAGES,
 };
 
 /** Map of template slug → default page block content (keyed by page slug) */
 const TEMPLATE_PAGE_CONTENT_MAP: Record<string, Record<string, unknown[]>> = {
+  kids: {
+    about: KIDS_ABOUT_PAGE_BLOCKS,
+    contact: KIDS_CONTACT_PAGE_BLOCKS,
+    blog: KIDS_BLOG_PAGE_BLOCKS,
+  },
   "handmade-bags": HANDMADE_BAGS_PAGE_BLOCKS,
   health: HEALTH_PAGE_BLOCKS,
   pills: HEALTH_PAGE_BLOCKS,
@@ -122,6 +144,28 @@ const TEMPLATE_PAGE_CONTENT_MAP: Record<string, Record<string, unknown[]>> = {
     fragrances: PERFUMES_FRAGRANCES_PAGE_BLOCKS,
     journal: PERFUMES_JOURNAL_PAGE_BLOCKS,
     reviews: PERFUMES_REVIEWS_PAGE_BLOCKS,
+  },
+  retail: {
+    about: RETAIL_ABOUT_BLOCKS,
+    contact: RETAIL_CONTACT_BLOCKS,
+    projects: RETAIL_PROJECTS_BLOCKS,
+    "our-story": RETAIL_OUR_STORY_BLOCKS,
+    reviews: RETAIL_REVIEWS_BLOCKS,
+    "project-look-deep-into-nature": RETAIL_PROJECT_DETAIL_BLOCKS["project-look-deep-into-nature"],
+    "project-just-living-is-not-enough": RETAIL_PROJECT_DETAIL_BLOCKS["project-just-living-is-not-enough"],
+    "project-adopt-the-pace-of-nature": RETAIL_PROJECT_DETAIL_BLOCKS["project-adopt-the-pace-of-nature"],
+    "project-go-along-with-nature": RETAIL_PROJECT_DETAIL_BLOCKS["project-go-along-with-nature"],
+  },
+  decor: {
+    about: RETAIL_ABOUT_BLOCKS,
+    contact: RETAIL_CONTACT_BLOCKS,
+    projects: RETAIL_PROJECTS_BLOCKS,
+    "our-story": RETAIL_OUR_STORY_BLOCKS,
+    reviews: RETAIL_REVIEWS_BLOCKS,
+    "project-look-deep-into-nature": RETAIL_PROJECT_DETAIL_BLOCKS["project-look-deep-into-nature"],
+    "project-just-living-is-not-enough": RETAIL_PROJECT_DETAIL_BLOCKS["project-just-living-is-not-enough"],
+    "project-adopt-the-pace-of-nature": RETAIL_PROJECT_DETAIL_BLOCKS["project-adopt-the-pace-of-nature"],
+    "project-go-along-with-nature": RETAIL_PROJECT_DETAIL_BLOCKS["project-go-along-with-nature"],
   },
 };
 

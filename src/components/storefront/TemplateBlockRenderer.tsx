@@ -116,6 +116,7 @@ import {
   HealthContactPage,
   HealthBlogPage,
   HealthIngredientsPage,
+  HealthMedicalExpertsPage,
 } from "@/components/storefront/HealthTemplateBlocks";
 import {
   InteriorFontLoader,
@@ -321,6 +322,7 @@ const HEALTH_BLOCKS: Record<string, BlockComponent> = {
   healthContactPage: HealthContactPage as unknown as BlockComponent,
   healthBlogPage: HealthBlogPage as unknown as BlockComponent,
   healthIngredientsPage: HealthIngredientsPage as unknown as BlockComponent,
+  healthMedicalExpertsPage: HealthMedicalExpertsPage as unknown as BlockComponent,
 };
 
 const INTERIOR_BLOCKS: Record<string, BlockComponent> = {

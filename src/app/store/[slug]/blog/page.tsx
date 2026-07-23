@@ -2,8 +2,13 @@ import { prisma } from "@/lib/db";
 import { notFound, redirect } from "next/navigation";
 import { RenderTemplateBlocks, type TemplateBlock } from "@/components/storefront/TemplateBlockRenderer";
 import { TShirtsPrintsFooter, TShirtsPrintsHeader } from "@/components/storefront/TShirtsPrintsStoreChrome";
+import { HandmadeBagsHeader, HandmadeBagsFooter } from "@/components/storefront/HandmadeBagsStoreChrome";
+import { HealthHeader, HealthFooterFull, HealthFontLoader } from "@/components/storefront/HealthTemplateBlocks";
+import { RetailHeader, RetailFooter } from "@/components/storefront/RetailTemplateBlocks";
+import { KidsHeader, KidsFooterFull, KidsFontLoader } from "@/components/storefront/KidsTemplateBlocks";
 import { ThemeProvider, type ThemeData } from "@/components/storefront/ThemeProvider";
 import { TShirtsPrintsFontLoader } from "@/components/storefront/TShirtsPrintsTemplateBlocks";
+import { BlogPageClient } from "@/components/storefront/BlogPageClient";
 import { buildPageBackgroundStyle } from "@/lib/site-customization";
 import { parsePageContent } from "@/lib/page-content";
 import { mergeBespokeTemplateBlocks } from "@/lib/templates/bespoke-page-content";
@@ -27,6 +32,11 @@ async function getStoreData(slug: string) {
       pages: {
         where: { slug: "blog" },
         take: 1,
+      },
+      blogs: {
+        where: { status: 'PUBLISHED' },
+        orderBy: { createdAt: 'desc' },
+        take: 10,
       },
     },
   });
@@ -66,12 +76,48 @@ export default async function BlogPage({ params }: Props) {
     store.slug === "t-shirts-prints" ||
     store.name?.toLowerCase().includes("t-shirts");
 
-  if (!isTShirtsPrintsTemplate) {
-    // For non-tshirt templates, redirect to the dynamic page handler
+  const isHandmadeBagsTemplate =
+    templateSlug === "handmade-bags" ||
+    slug === "handmade-bags" ||
+    store.slug === "handmade-bags" ||
+    store.name?.toLowerCase().includes("handmade") ||
+    store.name?.toLowerCase().includes("leather");
+
+  const isHealthTemplate =
+    templateSlug === "health" ||
+    templateSlug === "pills" ||
+    slug === "health" ||
+    slug === "pills" ||
+    store.slug === "health" ||
+    store.slug === "pills" ||
+    store.name?.toLowerCase().includes("health") ||
+    store.name?.toLowerCase().includes("supplement") ||
+    store.name?.toLowerCase().includes("pill");
+
+  const isRetailTemplate =
+    templateSlug === "retail" ||
+    templateSlug === "decor" ||
+    slug === "retail" ||
+    slug === "decor" ||
+    store.slug === "retail" ||
+    store.slug === "decor" ||
+    store.name?.toLowerCase().includes("retail") ||
+    store.name?.toLowerCase().includes("decor");
+
+  const isKidsTemplate =
+    templateSlug === "kids" ||
+    templateSlug === "kids-world" ||
+    slug === "kids" ||
+    slug === "kids-world" ||
+    store.slug === "kids" ||
+    store.name?.toLowerCase().includes("kids");
+
+  if (!isTShirtsPrintsTemplate && !isHandmadeBagsTemplate && !isHealthTemplate && !isRetailTemplate && !isKidsTemplate) {
+    // For other templates, redirect to the dynamic page handler
     redirect(`/store/${slug}/blog`);
   }
 
-  const blogPage = store.pages?.[0];
+  const blogPage = store.pages?.find((p: any) => p.slug === 'blog');
   if (!blogPage) notFound();
 
   // Parse page content and merge with template presets
@@ -86,44 +132,249 @@ export default async function BlogPage({ params }: Props) {
     blocks = presetBlocks;
   }
 
+  // Remove hardcoded posts from blog blocks to use context data instead
+  blocks = blocks.map(block => {
+    if (block.type === 'fashionBlogPosts' && block.props.posts) {
+      return { ...block, props: { ...block.props, posts: [] } };
+    }
+    if (block.type === 'healthBlogPosts' && block.props.posts) {
+      return { ...block, props: { ...block.props, posts: [] } };
+    }
+    if (block.type === 'kidsBlogPosts' && block.props.posts) {
+      return { ...block, props: { ...block.props, posts: [] } };
+    }
+    return block;
+  });
+
   const customization = (store.customizations as any) || null;
   const pageSettings = parsedContent?.settings || {};
 
   const themeData: ThemeData = {
-    id: "tshirts-blog-page",
-    name: "T-Shirts Blog Page",
-    slug: "tshirts-blog-page",
+    id: isHealthTemplate ? "health-blog-page" : (isHandmadeBagsTemplate ? "handmade-bags-blog-page" : (isRetailTemplate ? "retail-blog-page" : (isKidsTemplate ? "kids-blog-page" : "tshirts-blog-page"))),
+    name: isHealthTemplate ? "Health Blog Page" : (isHandmadeBagsTemplate ? "Handmade Bags Blog Page" : (isRetailTemplate ? "Retail Blog Page" : (isKidsTemplate ? "Kids Blog Page" : "T-Shirts Blog Page"))),
+    slug: isHealthTemplate ? "health-blog-page" : (isHandmadeBagsTemplate ? "handmade-bags-blog-page" : (isRetailTemplate ? "retail-blog-page" : (isKidsTemplate ? "kids-blog-page" : "tshirts-blog-page"))),
     config: {
       colors: {
-        primary: customization?.themeSettings?.colors?.primary || "#111",
+        primary: customization?.themeSettings?.colors?.primary || (isHealthTemplate ? "#88ad99" : (isHandmadeBagsTemplate ? "#c27843" : (isRetailTemplate ? "#2c2c2c" : (isKidsTemplate ? "#2563EB" : "#111")))),
         secondary: customization?.themeSettings?.colors?.secondary || "#333",
         accent: customization?.themeSettings?.colors?.accent || "#666",
         background: customization?.themeSettings?.colors?.background || "#ffffff",
-        text: customization?.themeSettings?.colors?.text || "#1d1d1d",
+        text: customization?.themeSettings?.colors?.text || "#242424",
       },
     },
   };
 
+  const socialLinks = [
+    ...(store.customizations as any)?.socialLinks?.facebook ? [{ platform: "facebook", url: (store.customizations as any).socialLinks.facebook }] : [],
+    ...(store.customizations as any)?.socialLinks?.twitter ? [{ platform: "twitter", url: (store.customizations as any).socialLinks.twitter }] : [],
+    ...(store.customizations as any)?.socialLinks?.instagram ? [{ platform: "instagram", url: (store.customizations as any).socialLinks.instagram }] : [],
+    ...((store.customizations as any)?.socialLinks?.youtube ? [{ platform: "youtube", url: (store.customizations as any).socialLinks.youtube }] : []),
+  ];
+
+  if (isHandmadeBagsTemplate) {
+    // Format blogs for FashionStoreContext
+    const formattedBlogs = (store.blogs || []).map(blog => ({
+      id: blog.id,
+      title: blog.title,
+      slug: blog.slug,
+      excerpt: blog.excerpt,
+      coverImage: blog.coverImage,
+      author: blog.author,
+      category: blog.category,
+      tags: blog.tags || [],
+      publishedAt: blog.publishedAt?.toISOString(),
+      createdAt: blog.createdAt.toISOString(),
+    }));
+
+    return (
+      <ThemeProvider theme={themeData}>
+        <BlogPageClient
+          storeSlug={slug}
+          blogs={formattedBlogs}
+          currency={store.currency || "NGN"}
+          socialLinks={socialLinks}
+        >
+          <div className="min-h-screen bg-white" style={{ fontFamily: "'Lato', Arial, sans-serif" }}>
+            <HandmadeBagsHeader storeName={store.name} storeSlug={slug} logo={store.logo} />
+            <main style={buildPageBackgroundStyle(pageSettings)}>
+              <RenderTemplateBlocks blocks={blocks} />
+            </main>
+            <HandmadeBagsFooter
+              storeName={store.name}
+              storeSlug={slug}
+              logo={store.logo}
+              socialLinks={socialLinks}
+              description={customization?.about?.description || "Handcrafted leather goods made with passion and precision."}
+            />
+          </div>
+        </BlogPageClient>
+      </ThemeProvider>
+    );
+  }
+
+  if (isRetailTemplate) {
+    // Format blogs for Retail template
+    const formattedBlogs = (store.blogs || []).map(blog => ({
+      id: blog.id,
+      title: blog.title,
+      slug: blog.slug,
+      excerpt: blog.excerpt,
+      coverImage: blog.coverImage,
+      author: blog.author,
+      category: blog.category,
+      tags: blog.tags || [],
+      publishedAt: blog.publishedAt?.toISOString(),
+      createdAt: blog.createdAt.toISOString(),
+    }));
+
+    return (
+      <ThemeProvider theme={themeData}>
+        <BlogPageClient
+          storeSlug={slug}
+          blogs={formattedBlogs}
+          currency={store.currency || "NGN"}
+          socialLinks={socialLinks}
+          template={templateSlug}
+        >
+          <div className="min-h-screen bg-white">
+            <RetailHeader storeName={store.name} storeSlug={slug} logo={store.logo} isLanding={false} />
+            <main style={buildPageBackgroundStyle(pageSettings)}>
+              <RenderTemplateBlocks blocks={blocks} />
+            </main>
+            <RetailFooter
+              storeName={store.name}
+              storeSlug={slug}
+              logo={store.logo}
+              description={customization?.about?.description || store.description || undefined}
+            />
+          </div>
+        </BlogPageClient>
+      </ThemeProvider>
+    );
+  }
+
+  if (isKidsTemplate) {
+    // Format blogs for Kids template
+    const formattedBlogs = (store.blogs || []).map(blog => ({
+      id: blog.id,
+      title: blog.title,
+      slug: blog.slug,
+      excerpt: blog.excerpt,
+      coverImage: blog.coverImage,
+      author: blog.author,
+      category: blog.category,
+      tags: blog.tags || [],
+      publishedAt: blog.publishedAt?.toISOString(),
+      createdAt: blog.createdAt.toISOString(),
+    }));
+
+    return (
+      <ThemeProvider theme={themeData}>
+        <BlogPageClient
+          storeSlug={slug}
+          blogs={formattedBlogs}
+          currency={store.currency || "NGN"}
+          socialLinks={socialLinks}
+          template={templateSlug}
+        >
+          <div className="min-h-screen bg-white text-[#0F172A]" style={{ fontFamily: "'Quicksand', Arial, sans-serif" }}>
+            <KidsFontLoader />
+            <KidsHeader storeName={store.name} storeSlug={slug} logo={store.logo} />
+            <main style={buildPageBackgroundStyle(pageSettings)}>
+              <RenderTemplateBlocks blocks={blocks} />
+            </main>
+            <KidsFooterFull
+              storeName={store.name}
+              storeSlug={slug}
+              logo={store.logo}
+              socialLinks={socialLinks}
+              description={customization?.about?.description || store.description || "A colorful kids and baby store with age categories, educational products, and safety callouts."}
+            />
+          </div>
+        </BlogPageClient>
+      </ThemeProvider>
+    );
+  }
+
+  if (isHealthTemplate) {
+    // Format blogs for HealthStoreContext
+    const formattedBlogs = (store.blogs || []).map(blog => ({
+      id: blog.id,
+      title: blog.title,
+      slug: blog.slug,
+      excerpt: blog.excerpt,
+      coverImage: blog.coverImage,
+      author: blog.author,
+      category: blog.category,
+      tags: blog.tags || [],
+      publishedAt: blog.publishedAt?.toISOString(),
+      createdAt: blog.createdAt.toISOString(),
+    }));
+
+    return (
+      <ThemeProvider theme={themeData}>
+        <BlogPageClient
+          storeSlug={slug}
+          blogs={formattedBlogs}
+          currency={store.currency || "NGN"}
+          socialLinks={socialLinks}
+          template={templateSlug}
+        >
+          <div className="min-h-screen bg-white text-[#333]" style={{ fontFamily: "'Cabin', Arial, sans-serif" }}>
+            <HealthFontLoader />
+            <HealthHeader storeName={store.name} storeSlug={slug} logo={store.logo} />
+            <main style={buildPageBackgroundStyle(pageSettings)}>
+              <RenderTemplateBlocks blocks={blocks} />
+            </main>
+            <HealthFooterFull
+              storeName={store.name}
+              storeSlug={slug}
+              logo={store.logo}
+              socialLinks={socialLinks}
+              description={customization?.about?.description || "Your trusted source for vitamins, supplements, and wellness products."}
+            />
+          </div>
+        </BlogPageClient>
+      </ThemeProvider>
+    );
+  }
+
+  // Format blogs for FashionStoreContext (T-Shirts template)
+  const formattedBlogs = (store.blogs || []).map(blog => ({
+    id: blog.id,
+    title: blog.title,
+    slug: blog.slug,
+    excerpt: blog.excerpt,
+    coverImage: blog.coverImage,
+    author: blog.author,
+    category: blog.category,
+    tags: blog.tags || [],
+    publishedAt: blog.publishedAt?.toISOString(),
+    createdAt: blog.createdAt.toISOString(),
+  }));
+
   return (
     <ThemeProvider theme={themeData}>
-      <div className="min-h-screen bg-white text-[#1d1d1d]" style={{ fontFamily: "'Manrope', Arial, sans-serif" }}>
-        <TShirtsPrintsFontLoader />
-        <TShirtsPrintsHeader storeName={store.name} storeSlug={slug} logo={store.logo} />
-        <main style={buildPageBackgroundStyle(pageSettings)}>
-          <RenderTemplateBlocks blocks={blocks} />
-        </main>
-        <TShirtsPrintsFooter
-          storeName={store.name}
-          storeSlug={slug}
-          logo={store.logo}
-          socialLinks={[
-            ...(store.customizations as any)?.socialLinks?.facebook ? [{ platform: "facebook", url: (store.customizations as any).socialLinks.facebook }] : [],
-            ...(store.customizations as any)?.socialLinks?.twitter ? [{ platform: "twitter", url: (store.customizations as any).socialLinks.twitter }] : [],
-            ...(store.customizations as any)?.socialLinks?.instagram ? [{ platform: "instagram", url: (store.customizations as any).socialLinks.instagram }] : [],
-            ...((store.customizations as any)?.socialLinks?.youtube ? [{ platform: "youtube", url: (store.customizations as any).socialLinks.youtube }] : []),
-          ]}
-        />
-      </div>
+      <BlogPageClient
+        storeSlug={slug}
+        blogs={formattedBlogs}
+        currency={store.currency || "NGN"}
+        socialLinks={socialLinks}
+      >
+        <div className="min-h-screen bg-white text-[#1d1d1d]" style={{ fontFamily: "'Manrope', Arial, sans-serif" }}>
+          <TShirtsPrintsFontLoader />
+          <TShirtsPrintsHeader storeName={store.name} storeSlug={slug} logo={store.logo} />
+          <main style={buildPageBackgroundStyle(pageSettings)}>
+            <RenderTemplateBlocks blocks={blocks} />
+          </main>
+          <TShirtsPrintsFooter
+            storeName={store.name}
+            storeSlug={slug}
+            logo={store.logo}
+            socialLinks={socialLinks}
+          />
+        </div>
+      </BlogPageClient>
     </ThemeProvider>
   );
 }

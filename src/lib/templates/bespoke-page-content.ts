@@ -22,6 +22,7 @@ import { PERFUMES_TEMPLATE_PRESET } from "@/lib/templates/presets/perfumes-prese
 import { TSHIRTS_PRINTS_ABOUT_PAGE_BLOCKS, TSHIRTS_PRINTS_CONTACT_PAGE_BLOCKS, TSHIRTS_PRINTS_BLOG_PAGE_BLOCKS } from "@/lib/templates/presets/t-shirts-prints-page-presets";
 import { VEGETABLE_HOME_PAGE_BLOCKS, VEGETABLE_MENU_PAGE_BLOCKS, VEGETABLE_RECIPE_PAGE_BLOCKS, VEGETABLE_ABOUT_PAGE_BLOCKS, VEGETABLE_CONTACT_PAGE_BLOCKS, VEGETABLE_RESERVATION_PAGE_BLOCKS } from "@/lib/templates/presets/vegetables-page-presets";
 import { PERFUMES_HOME_PAGE_BLOCKS, PERFUMES_ABOUT_PAGE_BLOCKS, PERFUMES_CONTACT_PAGE_BLOCKS, PERFUMES_FRAGRANCES_PAGE_BLOCKS, PERFUMES_JOURNAL_PAGE_BLOCKS, PERFUMES_REVIEWS_PAGE_BLOCKS } from "@/lib/templates/presets/perfumes-page-presets";
+import { KIDS_BLOG_PAGE_BLOCKS } from "@/lib/templates/presets/kids-page-presets";
 import { isBespokeTemplateSlug } from "@/lib/templates/bespoke-template-slugs";
 
 export type BespokeOverrides = Record<string, Record<string, unknown>>;
@@ -142,6 +143,9 @@ const BESPOKE_PAGE_PRESETS: Record<string, Record<string, TemplateBlock[]>> = {
     fragrances: PERFUMES_FRAGRANCES_PAGE_BLOCKS,
     journal: PERFUMES_JOURNAL_PAGE_BLOCKS,
     reviews: PERFUMES_REVIEWS_PAGE_BLOCKS,
+  },
+  kids: {
+    blog: KIDS_BLOG_PAGE_BLOCKS,
   },
 };
 

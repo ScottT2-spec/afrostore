@@ -14,6 +14,28 @@ const GRADIENTS = [
   ["#f97316", "#eab308"], // orange → yellow
 ];
 
+// Kids template default images
+const KIDS_PRODUCT_IMAGES = [
+  "/uploads/kids_images/growsuit.webp",
+  "/uploads/kids_images/jumper.webp",
+  "/uploads/kids_images/toys.webp",
+  "/uploads/kids_images/animals.webp",
+  "/uploads/kids_images/dresses.webp",
+  "/uploads/kids_images/gifts.webp",
+  "/uploads/kids_images/gift.webp",
+];
+
+const KIDS_BLOG_IMAGES = [
+  "/uploads/kids_images/About.webp",
+  "/uploads/kids_images/About1.webp",
+  "/uploads/kids_images/About2.webp",
+  "/uploads/kids_images/Bblog1.webp",
+  "/uploads/kids_images/Bblog2.webp",
+  "/uploads/kids_images/Bblog3.webp",
+  "/uploads/kids_images/Bblog4.webp",
+  "/uploads/kids_images/Bblogz.webp",
+];
+
 function hashStr(s: string): number {
   let h = 0;
   for (let i = 0; i < s.length; i++) h = s.charCodeAt(i) + ((h << 5) - h);
@@ -33,6 +55,20 @@ export function placeholderImage(seed?: string, width = 600, height = 700): stri
 /** Get a safe image src — returns the url if truthy, or a placeholder */
 export function safeSrc(url: string | undefined | null, seed?: string): string {
   return url || placeholderImage(seed || "default");
+}
+
+/** Get a Kids template-specific product image (uses DB image if available, else template image) */
+export function kidsProductImage(url: string | undefined | null, seed?: string): string {
+  if (url) return url;
+  const idx = seed ? hashStr(seed) % KIDS_PRODUCT_IMAGES.length : 0;
+  return KIDS_PRODUCT_IMAGES[idx];
+}
+
+/** Get a Kids template-specific blog image (uses DB image if available, else template image) */
+export function kidsBlogImage(url: string | undefined | null, index?: number): string {
+  if (url) return url;
+  const idx = index !== undefined ? index % KIDS_BLOG_IMAGES.length : 0;
+  return KIDS_BLOG_IMAGES[idx];
 }
 
 /** onError handler for <img> tags — swaps to placeholder on load failure */

@@ -57,12 +57,14 @@ export async function PATCH(req: NextRequest, { params }: Params) {
       data: updateData as Prisma.PageUpdateInput,
     });
 
-    // Revalidate the store page path to clear Next.js cache
+    // Revalidate all relevant paths to clear Next.js cache
     revalidatePath(`/store/${existing.site.slug}/${page.slug}`);
     revalidatePath(`/store/${existing.site.slug}`);
+    revalidatePath(`/store/${existing.site.slug}/pages/${page.slug}`);
     
     // Also revalidate the API route that fetches page data
     revalidatePath(`/api/storefront/${existing.site.slug}/pages/${page.slug}`);
+    revalidatePath(`/api/storefront/${existing.site.slug}`);
 
     await logAudit({
       siteId,

@@ -5,6 +5,7 @@ import { Award, CheckCircle2, Clock, CreditCard, Eye, Globe, Headphones, Heart, 
 import { useState, useEffect, useMemo, useRef, createContext, useContext } from "react";
 import { getSectionStyle, resolveOpacity } from "@/components/storefront/block-style";
 import { ALL_TEMPLATE_BLOCKS } from "@/components/storefront/TemplateBlockRenderer";
+import { resolveStoreLink } from "@/lib/template-link-utils";
 import {
   FashionFontLoader as FashionFontLoaderDirect,
   FashionStoreContext,
@@ -1231,6 +1232,41 @@ function GalleryBlock({ props }: { props: Record<string, unknown> }) {
   );
 }
 
+/* ── Projects ─────────────────────────────────────────────────── */
+function ProjectsBlock({ props }: { props: Record<string, unknown> }) {
+  const storeSlug = useContext(StoreSlugContext);
+  const items = (props.items as Array<{ id: string; title: string; description: string; image: string; link: string }>) || [];
+  const columns = (props.columns as number) || 2;
+  const gridClass = { 1: "grid-cols-1", 2: "grid-cols-1 md:grid-cols-2", 3: "grid-cols-1 md:grid-cols-3" }[Math.min(columns, 3) as 1 | 2 | 3] || "grid-cols-1 md:grid-cols-2";
+  
+  if (items.length === 0) return null;
+  
+  return (
+    <AnimateIn>
+      <div>
+        {(props.title as string) && (
+          <h3 className="text-2xl sm:text-3xl font-display font-extrabold text-surface-900 mb-8 text-center">{props.title as string}</h3>
+        )}
+        <div className={`grid gap-8 ${gridClass}`}>
+          {items.map((item, i) => (
+            <div key={item.id || i} className="group">
+              <div className="relative rounded-2xl overflow-hidden mb-4 aspect-[4/3]">
+                <img src={item.image} alt={item.title} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
+              </div>
+              <h4 className="text-xl font-bold text-surface-900 mb-2">{item.title}</h4>
+              <p className="text-surface-500 mb-4 line-clamp-3">{item.description}</p>
+              <a href={resolveStoreLink(item.link, storeSlug)} className="inline-flex items-center text-sm font-semibold text-brand-600 hover:text-brand-700 transition-colors">
+                Continue Reading
+                <ArrowRight className="ml-2 h-4 w-4" />
+              </a>
+            </div>
+          ))}
+        </div>
+      </div>
+    </AnimateIn>
+  );
+}
+
 /* ── Team ────────────────────────────────────────────────────── */
 function TeamBlock({ props }: { props: Record<string, unknown> }) {
   const members = (props.members as Array<{ name: string; role: string; image?: string; bio?: string }>) || [];
@@ -1546,7 +1582,7 @@ const renderers: Record<string, React.FC<{ props: Record<string, unknown> }>> = 
   opening_hours: ContactInfoBlock,
   lookbook: GalleryBlock,
   promotions: BannerBlock,
-  projects: GalleryBlock,
+  projects: ProjectsBlock,
   portfolio: GalleryBlock,
   service_cards: FeaturesBlock,
   services: FeaturesBlock,

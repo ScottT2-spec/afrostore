@@ -94,8 +94,6 @@ export const HEALTH_TEMPLATE_PRESET: TemplateBlock[] = [
     type: "healthTestimonials",
     props: {
       title: "What Our Customers Say",
-      trustpilotRating: "4.9",
-      reviewCount: "Based on 374 reviews",
       testimonials: [
         { name: "Sarah M.", image: "", text: "The best vitamins and supplements are made from natural ingredients using modern technologies aimed at improving personal health.", rating: 5 },
         { name: "James K.", image: "", text: "Our vitamins and supplements are designed to provide essential nutrients that may be lacking in our diet.", rating: 5 },

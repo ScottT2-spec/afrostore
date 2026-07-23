@@ -11,9 +11,9 @@ export const KIDS_ABOUT_PAGE_BLOCKS: TemplateBlock[] = [
     id: "kids-about-announcement",
     type: "kidsAnnouncementBar",
     props: {
-      text: "Sign up for our newsletter to get 10% off for the week!",
+      text: "Sign up for our newsletter to get 30% off for the week!",
       link: "#newsletter",
-      backgroundColor: "#f5857c",
+      backgroundColor: "#10c349",
     },
   },
   {
@@ -29,17 +29,17 @@ export const KIDS_ABOUT_PAGE_BLOCKS: TemplateBlock[] = [
     type: "kidsAboutHero",
     props: {
       subtitle: "About Us",
-      title: "We create organic clothes for babies",
+      title: "Discover Favorites for Every Little One",
       bodyText: [
-        "Far far away, behind the word mountains, far from the countries Vokalia and Consonantia, there live the blind texts. Separated they live in Bookmarks grove right at the coast of the Semantics, a large language ocean. Far far away, behind the word mountains, far from the countries Vokalia, there live the blind texts.",
-        "Separated they live in Bookmarks grove right at the coast of the Semantics.",
+        "Our shelves are filled with carefully selected clothing, toys, and accessories that make every day a little brighter. From newborn essentials to playful finds, every item is chosen for its quality, comfort, and lasting value.",
+        "Whether you're shopping for your own child or searching for the perfect gift, you'll find something special for every stage of childhood.",
       ],
       images: [
-        "https://images.unsplash.com/photo-1522771930-78848d9293e8?w=800&h=1000&fit=crop",
-        "https://images.unsplash.com/photo-1519689680058-324335c77eba?w=800&h=480&fit=crop",
+        "/uploads/kids_images/About.webp",
+        "/uploads/kids_images/Bblogz.webp",
       ],
-      calloutText: "Websites in professional use templating systems. Commercial publishing platforms and content management systems ensure show.",
-      calloutLabel: "Meet our team",
+      calloutText: "We handpick every item for its quality, safety, and playful charm, ensuring every collection meets the needs of modern parents and curious little explorers.",
+      calloutLabel: "Meet the team",
     },
   },
   {
@@ -51,10 +51,10 @@ export const KIDS_ABOUT_PAGE_BLOCKS: TemplateBlock[] = [
         title: "",
       },
       team: [
-        { name: "Darlene Robertson", role: "Director" },
-        { name: "Kathryn Murphy", role: "Marketing manager" },
-        { name: "Jenny Wilson", role: "Product designer" },
-        { name: "Kristin Watson", role: "CEO" },
+        { name: "Sally Coulibaly", role: "Director" },
+        { name: "Rebecca Davina", role: "Marketing strategist" },
+        { name: "Jarelle Fateh", role: "Product designer" },
+        { name: "Khalisto Arielle", role: "CEO" },
       ],
     },
   },
@@ -63,28 +63,14 @@ export const KIDS_ABOUT_PAGE_BLOCKS: TemplateBlock[] = [
     type: "kidsTextSection",
     props: {
       sectionTitle: {
-        subtitle: "How we work",
-        title: "How we work",
+        subtitle: "Why Parents Choose Us",
+        title: "What we Do",
       },
       bodyText: [
-        "If that's what you think how bout the other way around? How can you evaluate content without design? No typography, no colors, no layout, no styles, all those things that convey the important signals that go beyond the mere textual, hierarchies of information, weight, emphasis, oblique stresses, priorities, all those subtle cues that also have visual and emotional.",
-        "Accept that it's sometimes okay to focus just on the content or just on the design. Rigid proponents of content strategy may shun the use of dummy copy but then designers might want to ask them to provide style sheets with the copy decks they supply that are in tune with the design direction they require. Using dummy content or fake information in the Web design.",
+        "We carefully select every product with children and parents in mind, focusing on quality, comfort, and everyday practicality. From trendy outfits and educational toys to must-have accessories, each item is chosen to bring happiness, value, and confidence to every purchase.",
+        "Our goal is to create a simple and enjoyable shopping experience from start to finish. With thoughtfully curated collections, trusted products, and friendly service, we help families find everything their little ones need in one convenient place.",
       ],
       backgroundColor: "#faf8f5",
-    },
-  },
-  {
-    id: "kids-about-what-we-do",
-    type: "kidsTextSection",
-    props: {
-      sectionTitle: {
-        subtitle: "What we do",
-        title: "What we do",
-      },
-      bodyText: [
-        "Accept that it's sometimes okay to focus just on the content or just on the design. Rigid proponents of content strategy may shun the use of dummy copy but then designers might want to ask them to provide style sheets with the copy decks they supply that are in tune with the design direction they require. Using dummy content or fake information in the Web design.",
-      ],
-      backgroundColor: "transparent",
     },
   },
   {
@@ -92,22 +78,22 @@ export const KIDS_ABOUT_PAGE_BLOCKS: TemplateBlock[] = [
     type: "kidsFaqSection",
     props: {
       sectionTitle: {
-        subtitle: "What we do",
-        title: "What we do",
+        subtitle: "What You'll Find",
+        title: "Baby Love",
       },
-      subtitle: "We get a lot of questions about our course. You can get any answers.",
+      subtitle: "Discover a carefully curated collection of children's clothing, toys, accessories, and everyday essentials designed to make growing up more fun.",
       faqs: [
         {
-          question: "Why choose organic cotton fabrics and certified factories?",
-          answer: "A seemingly elegant design can quickly begin to bloat with unexpected content or break under the weight of actual activity. Fake data can ensure a nice looking layout but it doesn't reflect what a living, breathing application must endure. Real data does.",
+          question: "Are your products safe for children?",
+          answer: "Yes. We carefully source products from trusted manufacturers that meet recognized safety and quality standards, giving parents confidence with every purchase.",
         },
         {
-          question: "How is your product packaged?",
-          answer: "Websites in professional use templating systems. Commercial publishing platforms and content management systems ensure that you can show different text, different data using the same template. When it's about controlling hundreds of articles, product pages for web shops.",
+          question: "How long does shipping take?",
+          answer: "Most orders are processed quickly and shipped within a few business days. Delivery times may vary depending on your location and the shipping option you choose.",
         },
         {
           question: "What's the best size to buy for a baby shower gift?",
-          answer: "If the copy becomes distracting in the design then you are doing something wrong or they are discussing copy changes. It might be a bit annoying but you could tell them that that discussion would be best suited for another time. At worst the discussion is at least working towards the final goal of your site where questions about lorem ipsum don't.",
+          answer: "A great choice is 3–6 months or 6–12 months, as babies often outgrow newborn sizes very quickly. These sizes give parents something practical for the months ahead while ensuring your gift gets plenty of use.",
         },
       ],
     },
@@ -127,9 +113,9 @@ export const KIDS_CONTACT_PAGE_BLOCKS: TemplateBlock[] = [
     id: "kids-contact-announcement",
     type: "kidsAnnouncementBar",
     props: {
-      text: "Sign up for our newsletter to get 10% off for the week!",
+      text: "Sign up for our newsletter to get 20% off for the week!",
       link: "#newsletter",
-      backgroundColor: "#f5857c",
+      backgroundColor: "#39a454",
     },
   },
   {
@@ -144,7 +130,7 @@ export const KIDS_CONTACT_PAGE_BLOCKS: TemplateBlock[] = [
     id: "kids-contact-hero",
     type: "kidsContactHero",
     props: {
-      address: "913 Wyandotte St, Kansas City, MO 64105, United States",
+      address: "413 Waystreet Road, North Carolina, United States",
       showMapLink: true,
     },
   },
@@ -152,7 +138,7 @@ export const KIDS_CONTACT_PAGE_BLOCKS: TemplateBlock[] = [
     id: "kids-contact-info",
     type: "kidsContactInfo",
     props: {
-      phone: "(064) 332-1233",
+      phone: "(097) 330-1233",
       hours: "9:00am - 5:00pm",
       days: "Monday - Friday",
       socialLinks: {
@@ -179,9 +165,9 @@ export const KIDS_CONTACT_PAGE_BLOCKS: TemplateBlock[] = [
       hours: [
         { label: "Hours", value: "9:00am - 5:00pm" },
         { label: "Support", value: "(064) 332-1233" },
-        { label: "Address", value: "Kansas City, MO" },
+        { label: "Address", value: "North Carolina, MO" },
       ],
-      infoText: "Based on WoodMart theme 2025 WooCommerce Themes.",
+      infoText: "Technology made for Good. Prokip Africa.",
       links: [
         { label: "Visit the blog", href: "/blog" },
         { label: "Shop the collection", href: "/shop" },
@@ -204,9 +190,9 @@ export const KIDS_BLOG_PAGE_BLOCKS: TemplateBlock[] = [
     id: "kids-blog-announcement",
     type: "kidsAnnouncementBar",
     props: {
-      text: "Sign up for our newsletter to get 10% off for the week!",
+      text: "Sign up for our newsletter to get 45% off for the week!",
       link: "#newsletter",
-      backgroundColor: "#f5857c",
+      backgroundColor: "#73a97b",
     },
   },
   {
@@ -215,20 +201,6 @@ export const KIDS_BLOG_PAGE_BLOCKS: TemplateBlock[] = [
     props: {
       storeName: "Kids Store",
       storeSlug: "kids-store",
-    },
-  },
-  {
-    id: "kids-blog-hero",
-    type: "kidsAboutHero",
-    props: {
-      subtitle: "Kids Blog",
-      title: "Ideas, stories, and cheerful inspiration",
-      bodyText: [
-        "Browse the latest Kids demo posts for styling tips, playful gift ideas, and practical guides for parents.",
-      ],
-      images: [],
-      calloutText: "",
-      calloutLabel: "",
     },
   },
   {
@@ -257,9 +229,9 @@ export const KIDS_SHOP_PAGE_BLOCKS: TemplateBlock[] = [
     id: "kids-shop-announcement",
     type: "kidsAnnouncementBar",
     props: {
-      text: "Sign up for our newsletter to get 10% off for the week!",
+      text: "Sign up for our newsletter to get 30% off for the week!",
       link: "#newsletter",
-      backgroundColor: "#f5857c",
+      backgroundColor: "#d0d85f",
     },
   },
   {
@@ -277,7 +249,7 @@ export const KIDS_SHOP_PAGE_BLOCKS: TemplateBlock[] = [
       subtitle: "Kids Shop",
       title: "All Products",
       bodyText: [
-        "Discover playful clothing, gifts, and everyday essentials from the Kids collection.",
+        "Discover everyday essentials to make your kid shine this season from the Kids collection.",
       ],
       images: [],
       calloutText: "",
@@ -293,12 +265,12 @@ export const KIDS_SHOP_PAGE_BLOCKS: TemplateBlock[] = [
         title: "Shop by category",
       },
       categories: [
-        { name: "Growsuits", image: "https://images.unsplash.com/photo-1522771930-78848d9293e8?w=300&h=400&fit=crop", productCount: 12, link: "/shop" },
+        { name: "Jumpsuits", image: "https://images.unsplash.com/photo-1522771930-78848d9293e8?w=300&h=400&fit=crop", productCount: 12, link: "/shop" },
         { name: "Jumpers", image: "https://images.unsplash.com/photo-1519689680058-324335c77eba?w=300&h=400&fit=crop", productCount: 8, link: "/shop" },
         { name: "Toys", image: "https://images.unsplash.com/photo-1558060370-d644479cb6f7?w=300&h=400&fit=crop", productCount: 15, link: "/shop" },
         { name: "Accessories", image: "https://images.unsplash.com/photo-1566454419290-57a0589c9b17?w=300&h=400&fit=crop", productCount: 10, link: "/shop" },
         { name: "Dresses", image: "https://images.unsplash.com/photo-1518831959646-742c3a14ebf7?w=300&h=400&fit=crop", productCount: 9, link: "/shop" },
-        { name: "Leggings", image: "https://images.unsplash.com/photo-1471286174890-9c112ffca5b4?w=300&h=400&fit=crop", productCount: 7, link: "/shop" },
+        { name: "Warm Leggings", image: "https://images.unsplash.com/photo-1471286174890-9c112ffca5b4?w=300&h=400&fit=crop", productCount: 7, link: "/shop" },
       ],
     },
   },

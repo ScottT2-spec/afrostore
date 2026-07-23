@@ -10,14 +10,15 @@ import type { BuilderBlock } from "@/components/storefront/BlockRenderer";
 
 /* ═══════════════════════════════════════════════════════════════
    ABOUT PAGE
+   Matching home-garden-decor-02 demo exactly
    ═══════════════════════════════════════════════════════════════ */
 export const RETAIL_ABOUT_BLOCKS: BuilderBlock[] = [
   {
     id: "retail-about-hero",
     type: "hero",
     props: {
-      heading: "Our Story",
-      subheading: "We believe your home should tell your story. Since 2018, we've been curating beautiful, functional pieces that transform spaces into sanctuaries.",
+      heading: "Style Is What You Make It",
+      subheading: "Bringing style, serenity, and natural beauty to every corner of your home and garden.",
       buttonText: "Shop Collection",
       buttonHref: "/shop",
       bgImage: "https://images.unsplash.com/photo-1616046229478-9901c5536a45?w=1920&h=900&fit=crop",
@@ -36,10 +37,10 @@ export const RETAIL_ABOUT_BLOCKS: BuilderBlock[] = [
     props: { height: 60 },
   },
   {
-    id: "retail-about-intro-heading",
+    id: "retail-about-who-heading",
     type: "heading",
     props: {
-      text: "Crafted for Living",
+      text: "Who We Are",
       level: "h2",
       fontSize: "3xl",
       align: "center",
@@ -47,10 +48,10 @@ export const RETAIL_ABOUT_BLOCKS: BuilderBlock[] = [
     },
   },
   {
-    id: "retail-about-intro-text",
+    id: "retail-about-who-text",
     type: "text",
     props: {
-      text: "Every item in our collection is chosen with intention. We partner with artisans and sustainable makers who share our belief that beautiful design should be accessible, ethical, and built to last.\n\nFrom hand-thrown ceramics to woven textiles, each piece carries the mark of its maker and the warmth of natural materials. Our goal is simple: help you create a home that feels genuinely yours.",
+      text: "We are a passionate home and garden décor brand dedicated to creating spaces that feel alive, warm, and beautifully curated. With a love for nature, craftsmanship, and thoughtful design, we offer pieces that transform houses into homes.\n\nEvery item in our collection is chosen with intention. We partner with artisans and sustainable makers who share our belief that beautiful design should be accessible, ethical, and built to last.",
       align: "center",
       fontSize: "base",
       color: "#555555",
@@ -59,51 +60,7 @@ export const RETAIL_ABOUT_BLOCKS: BuilderBlock[] = [
   {
     id: "retail-about-spacer-2",
     type: "spacer",
-    props: { height: 50 },
-  },
-  {
-    id: "retail-about-values",
-    type: "features",
-    props: {
-      title: "What We Stand For",
-      columns: 3,
-      items: [
-        {
-          icon: "heart",
-          title: "Handcrafted Quality",
-          description: "Every product is made by skilled artisans using time-honoured techniques and premium natural materials.",
-        },
-        {
-          icon: "globe",
-          title: "Sustainably Sourced",
-          description: "We work with ethical suppliers committed to fair wages, eco-friendly production, and minimal waste.",
-        },
-        {
-          icon: "award",
-          title: "Curated with Care",
-          description: "Each piece is personally selected to ensure it meets our standards for design, durability, and beauty.",
-        },
-      ],
-    },
-  },
-  {
-    id: "retail-about-spacer-3",
-    type: "spacer",
-    props: { height: 50 },
-  },
-  {
-    id: "retail-about-image-1",
-    type: "image",
-    props: {
-      src: "https://images.unsplash.com/photo-1586023492125-27b2c045efd7?w=1200&h=600&fit=crop",
-      alt: "Our curated home decor collection",
-      rounded: "2xl",
-    },
-  },
-  {
-    id: "retail-about-spacer-4",
-    type: "spacer",
-    props: { height: 50 },
+    props: { height: 60 },
   },
   {
     id: "retail-about-mission-heading",
@@ -127,51 +84,100 @@ export const RETAIL_ABOUT_BLOCKS: BuilderBlock[] = [
     },
   },
   {
+    id: "retail-about-spacer-3",
+    type: "spacer",
+    props: { height: 60 },
+  },
+  {
+    id: "retail-about-founder-heading",
+    type: "heading",
+    props: {
+      text: "Elizabeth Harris",
+      level: "h2",
+      fontSize: "2xl",
+      align: "center",
+      color: "#1a1a1a",
+    },
+  },
+  {
+    id: "retail-about-founder-text",
+    type: "text",
+    props: {
+      text: "Our founder is a passionate creator who believes that a beautiful home starts with meaningful details. With an eye for design and a love for craftsmanship, they built this brand to bring thoughtful garden décor to every home.",
+      align: "center",
+      fontSize: "base",
+      color: "#555555",
+    },
+  },
+  {
+    id: "retail-about-founder-social",
+    type: "socialLinks",
+    props: {
+      platforms: [
+        { platform: "facebook", url: "https://facebook.com" },
+        { platform: "twitter", url: "https://twitter.com" },
+        { platform: "youtube", url: "https://youtube.com" },
+      ],
+      align: "center",
+    },
+  },
+  {
+    id: "retail-about-spacer-4",
+    type: "spacer",
+    props: { height: 60 },
+  },
+  {
+    id: "retail-about-instagram-heading",
+    type: "heading",
+    props: {
+      text: "Follow @antiques",
+      level: "h3",
+      fontSize: "xl",
+      align: "center",
+      color: "#1a1a1a",
+    },
+  },
+  {
+    id: "retail-about-instagram-text",
+    type: "text",
+    props: {
+      text: "Follow us on Instagram for daily décor inspiration and new arrivals.",
+      align: "center",
+      fontSize: "base",
+      color: "#555555",
+    },
+  },
+  {
+    id: "retail-about-instagram-gallery",
+    type: "gallery",
+    props: {
+      images: [
+        { src: "https://images.unsplash.com/photo-1616486338812-3dadae4b4ace?w=400&h=400&fit=crop", alt: "Instagram post 1" },
+        { src: "https://images.unsplash.com/photo-1618221195710-dd6b41faaea6?w=400&h=400&fit=crop", alt: "Instagram post 2" },
+        { src: "https://images.unsplash.com/photo-1615873968403-89e068629265?w=400&h=400&fit=crop", alt: "Instagram post 3" },
+        { src: "https://images.unsplash.com/photo-1615870210515-3d5c4b0f2f8e?w=400&h=400&fit=crop", alt: "Instagram post 4" },
+      ],
+      columns: 4,
+    },
+  },
+  {
     id: "retail-about-spacer-5",
     type: "spacer",
-    props: { height: 50 },
-  },
-  {
-    id: "retail-about-stats",
-    type: "stats",
-    props: {
-      title: "By the Numbers",
-      items: [
-        { value: "2018", label: "Founded" },
-        { value: "500+", label: "Products" },
-        { value: "30+", label: "Artisan Partners" },
-        { value: "10K+", label: "Happy Homes" },
-      ],
-    },
-  },
-  {
-    id: "retail-about-spacer-6",
-    type: "spacer",
-    props: { height: 50 },
-  },
-  {
-    id: "retail-about-newsletter",
-    type: "newsletter",
-    props: {
-      title: "Join Our Community",
-      subtitle: "Get styling tips, new arrivals, and exclusive offers delivered to your inbox.",
-      buttonText: "Subscribe",
-      bgColor: "#2c2c2c",
-      textColor: "#ffffff",
-    },
+    props: { height: 80 },
   },
 ];
 
 /* ═══════════════════════════════════════════════════════════════
    CONTACT PAGE
+   Matching love-nature-02 demo exactly
    ═══════════════════════════════════════════════════════════════ */
 export const RETAIL_CONTACT_BLOCKS: BuilderBlock[] = [
   {
     id: "retail-contact-hero",
     type: "hero",
     props: {
-      heading: "Get in Touch",
-      subheading: "We'd love to hear from you. Whether you have a question about our products, need help with an order, or just want to say hello — we're here.",
+      heading: "contact us",
+      subheading: "",
       bgImage: "https://images.unsplash.com/photo-1497366216548-37526070297c?w=1920&h=900&fit=crop",
       bgStyle: "custom",
       bgColor: "#2c2c2c",
@@ -179,7 +185,6 @@ export const RETAIL_CONTACT_BLOCKS: BuilderBlock[] = [
       overlayColor: "#000000",
       overlayOpacity: 0.45,
       layout: "center",
-      badge: "CONTACT US",
     },
   },
   {
@@ -188,54 +193,43 @@ export const RETAIL_CONTACT_BLOCKS: BuilderBlock[] = [
     props: { height: 60 },
   },
   {
-    id: "retail-contact-info",
-    type: "features",
-    props: {
-      title: "How to Reach Us",
-      columns: 3,
-      items: [
-        {
-          icon: "map-pin",
-          title: "Visit Our Store",
-          description: "451 Wall Street, UK, London. Come experience our collection in person and get expert styling advice.",
-        },
-        {
-          icon: "phone",
-          title: "Call Us",
-          description: "(064) 332-1233\nMonday – Friday, 9am – 6pm.\nWe're happy to help with any questions.",
-        },
-        {
-          icon: "mail",
-          title: "Email Us",
-          description: "hello@store.com\nWe typically respond within 24 hours. For urgent orders, please call.",
-        },
-      ],
-    },
-  },
-  {
-    id: "retail-contact-spacer-2",
-    type: "spacer",
-    props: { height: 50 },
-  },
-  {
-    id: "retail-contact-heading",
+    id: "retail-contact-info-heading",
     type: "heading",
     props: {
-      text: "Send Us a Message",
+      text: "You can find us at",
       level: "h2",
-      fontSize: "3xl",
+      fontSize: "2xl",
       align: "center",
       color: "#1a1a1a",
     },
   },
   {
-    id: "retail-contact-text",
-    type: "text",
+    id: "retail-contact-spacer-2",
+    type: "spacer",
+    props: { height: 40 },
+  },
+  {
+    id: "retail-contact-info",
+    type: "features",
     props: {
-      text: "Fill out the form below and we'll get back to you as soon as possible. For order-related inquiries, please include your order number.",
-      align: "center",
-      fontSize: "base",
-      color: "#555555",
+      columns: 3,
+      items: [
+        {
+          icon: "mail",
+          title: "EMAIL",
+          description: "hello@tyler.com",
+        },
+        {
+          icon: "phone",
+          title: "PHONE NUMBER",
+          description: "202-555-0188",
+        },
+        {
+          icon: "map-pin",
+          title: "LOCATION",
+          description: "2360 Hood Avenue, San Diego, CA, 92123",
+        },
+      ],
     },
   },
   {
@@ -244,26 +238,25 @@ export const RETAIL_CONTACT_BLOCKS: BuilderBlock[] = [
     props: { height: 40 },
   },
   {
-    id: "retail-contact-faq",
-    type: "faq",
+    id: "retail-contact-social",
+    type: "features",
     props: {
-      title: "Frequently Asked Questions",
+      columns: 3,
       items: [
         {
-          question: "What are your delivery times?",
-          answer: "Standard delivery takes 3-5 business days within the country. International shipping takes 7-14 business days depending on destination.",
+          icon: "message",
+          title: "Twitter",
+          description: "",
         },
         {
-          question: "Do you offer returns?",
-          answer: "Yes! We offer a 30-day return policy on all items in original condition. Simply contact us with your order number to initiate a return.",
+          icon: "message",
+          title: "Instagram",
+          description: "",
         },
         {
-          question: "Can I visit your showroom?",
-          answer: "Absolutely! Our showroom is open Monday to Friday, 9am to 6pm, and Saturdays 10am to 4pm. No appointment needed.",
-        },
-        {
-          question: "Do you ship internationally?",
-          answer: "Yes, we ship to over 30 countries. Shipping rates and delivery times vary by destination. Contact us for a quote on your specific location.",
+          icon: "message",
+          title: "Youtube",
+          description: "",
         },
       ],
     },
@@ -271,18 +264,51 @@ export const RETAIL_CONTACT_BLOCKS: BuilderBlock[] = [
   {
     id: "retail-contact-spacer-4",
     type: "spacer",
-    props: { height: 50 },
+    props: { height: 60 },
   },
   {
-    id: "retail-contact-newsletter",
-    type: "newsletter",
+    id: "retail-contact-form-heading",
+    type: "heading",
     props: {
-      title: "Need Immediate Assistance?",
-      subtitle: "For urgent matters, please call our customer service hotline or reach out via WhatsApp for a faster response.",
-      buttonText: "Call Now",
-      bgColor: "#2c2c2c",
-      textColor: "#ffffff",
+      text: "Let's get in touch",
+      level: "h2",
+      fontSize: "2xl",
+      align: "center",
+      color: "#1a1a1a",
     },
+  },
+  {
+    id: "retail-contact-spacer-5",
+    type: "spacer",
+    props: { height: 40 },
+  },
+  {
+    id: "retail-contact-form",
+    type: "contactForm",
+    props: {
+      submitButtonText: "Send Message",
+    },
+  },
+  {
+    id: "retail-contact-spacer-6",
+    type: "spacer",
+    props: { height: 80 },
+  },
+  {
+    id: "retail-contact-closing",
+    type: "heading",
+    props: {
+      text: "We are optimists who love to work together",
+      level: "h3",
+      fontSize: "xl",
+      align: "center",
+      color: "#1a1a1a",
+    },
+  },
+  {
+    id: "retail-contact-spacer-7",
+    type: "spacer",
+    props: { height: 80 },
   },
 ];
 
@@ -1032,11 +1058,384 @@ export const RETAIL_JOURNAL_BLOCKS: BuilderBlock[] = [
 ];
 
 /* ═══════════════════════════════════════════════════════════════
+   PROJECTS PAGE
+   Matching sierra-nature-02 demo exactly
+   ═══════════════════════════════════════════════════════════════ */
+export const RETAIL_PROJECTS_BLOCKS: BuilderBlock[] = [
+  {
+    id: "retail-projects-hero",
+    type: "hero",
+    props: {
+      heading: "Projects",
+      subheading: "Explore our latest home and garden transformations",
+      bgStyle: "light",
+      layout: "center",
+      badge: "OUR WORK",
+    },
+  },
+  {
+    id: "retail-projects-spacer-1",
+    type: "spacer",
+    props: { height: 80 },
+  },
+  {
+    id: "retail-projects-grid",
+    type: "projects",
+    props: {
+      title: "",
+      columns: 2,
+      items: [
+        {
+          id: "project-1",
+          title: "Look Deep Into Nature",
+          description: "Click edit button to change this text. Lorem ipsum dolor sit amet, consectetur adipiscing elit. Ut elit tellus, luctus nec ullamcorper mattis, pulvinar dapibus leo. Proin gravida nibh vel velit auctor aliquet. Aenean sollicitudin, lorem quis.",
+          image: "https://images.unsplash.com/photo-1441984904996-e0b6ba687e04?w=800&h=600&fit=crop",
+          link: "/blog/project-look-deep-into-nature",
+          linkText: "Continue Reading",
+        },
+        {
+          id: "project-2",
+          title: "Just Living Is Not Enough",
+          description: "Click edit button to change this text. Lorem ipsum dolor sit amet, consectetur adipiscing elit. Ut elit tellus, luctus nec ullamcorper mattis, pulvinar dapibus leo. Proin gravida nibh vel velit auctor aliquet. Aenean sollicitudin, lorem quis.",
+          image: "https://images.unsplash.com/photo-1556909114-f6e7ad7d3136?w=800&h=600&fit=crop",
+          link: "/blog/project-just-living-is-not-enough",
+          linkText: "Continue Reading",
+        },
+        {
+          id: "project-3",
+          title: "Adopt the pace of Nature",
+          description: "Click edit button to change this text. Lorem ipsum dolor sit amet, consectetur adipiscing elit. Ut elit tellus, luctus nec ullamcorper mattis, pulvinar dapibus leo. Proin gravida nibh vel velit auctor aliquet. Aenean sollicitudin, lorem quis.",
+          image: "https://images.unsplash.com/photo-1585320806297-9794b3e4eeae?w=800&h=600&fit=crop",
+          link: "/blog/project-adopt-the-pace-of-nature",
+          linkText: "Continue Reading",
+        },
+        {
+          id: "project-4",
+          title: "Go Along With the Nature",
+          description: "Click edit button to change this text. Lorem ipsum dolor sit amet, consectetur adipiscing elit. Ut elit tellus, luctus nec ullamcorper mattis, pulvinar dapibus leo. Proin gravida nibh vel velit auctor aliquet. Aenean sollicitudin, lorem quis.",
+          image: "https://images.unsplash.com/photo-1616046229478-9901c5536a45?w=800&h=600&fit=crop",
+          link: "/blog/project-go-along-with-nature",
+          linkText: "Continue Reading",
+        },
+      ],
+    },
+  },
+  {
+    id: "retail-projects-spacer-2",
+    type: "spacer",
+    props: { height: 80 },
+  },
+  {
+    id: "retail-projects-cta",
+    type: "newsletter",
+    props: {
+      title: "Get started with lorem ipsum dolor sit amet consectetur.",
+      subtitle: "",
+      buttonText: "Learn More",
+      bgColor: "#2c2c2c",
+      textColor: "#ffffff",
+    },
+  },
+];
+
+/* ═══════════════════════════════════════════════════════════════
+   PROJECT DETAIL PAGES
+   Individual project detail pages with rich content
+   ═══════════════════════════════════════════════════════════════ */
+export const RETAIL_PROJECT_DETAIL_BLOCKS: Record<string, BuilderBlock[]> = {
+  "project-look-deep-into-nature": [
+    {
+      id: "project-1-detail-hero",
+      type: "hero",
+      props: {
+        heading: "Look Deep Into Nature",
+        subheading: "A journey through untouched landscapes",
+        bgImage: "https://images.unsplash.com/photo-1441984904996-e0b6ba687e04?w=1920&h=900&fit=crop",
+        bgStyle: "custom",
+        bgColor: "#2c2c2c",
+        textColor: "#ffffff",
+        overlayColor: "#000000",
+        overlayOpacity: 0.45,
+        layout: "center",
+      },
+    },
+    {
+      id: "project-1-detail-spacer-1",
+      type: "spacer",
+      props: { height: 60 },
+    },
+    {
+      id: "project-1-detail-heading",
+      type: "heading",
+      props: {
+        text: "Project Overview",
+        level: "h2",
+        fontSize: "2xl",
+        align: "center",
+        color: "#1a1a1a",
+      },
+    },
+    {
+      id: "project-1-detail-spacer-2",
+      type: "spacer",
+      props: { height: 40 },
+    },
+    {
+      id: "project-1-detail-content",
+      type: "text",
+      props: {
+        text: "This project explores the untouched beauty of natural landscapes, capturing moments where light and shadow dance across mountains, forests, and rivers. Our team spent weeks documenting these pristine environments, from misty mornings at dawn to golden sunsets that paint the sky in vibrant hues.\n\nThrough careful observation and artistic vision, we've created a collection that celebrates the raw, unfiltered essence of nature. Each image tells a story of resilience, growth, and the timeless beauty that surrounds us.",
+        align: "center",
+        fontSize: "base",
+        color: "#555555",
+      },
+    },
+    {
+      id: "project-1-detail-spacer-3",
+      type: "spacer",
+      props: { height: 60 },
+    },
+    {
+      id: "project-1-detail-gallery",
+      type: "gallery",
+      props: {
+        images: [
+          { src: "https://images.unsplash.com/photo-1441984904996-e0b6ba687e04?w=800&h=600&fit=crop", alt: "Nature landscape 1" },
+          { src: "https://images.unsplash.com/photo-1556909114-f6e7ad7d3136?w=800&h=600&fit=crop", alt: "Nature landscape 2" },
+          { src: "https://images.unsplash.com/photo-1585320806297-9794b3e4eeae?w=800&h=600&fit=crop", alt: "Nature landscape 3" },
+          { src: "https://images.unsplash.com/photo-1616046229478-9901c5536a45?w=800&h=600&fit=crop", alt: "Nature landscape 4" },
+        ],
+        columns: 2,
+      },
+    },
+    {
+      id: "project-1-detail-spacer-4",
+      type: "spacer",
+      props: { height: 80 },
+    },
+  ],
+  "project-just-living-is-not-enough": [
+    {
+      id: "project-2-detail-hero",
+      type: "hero",
+      props: {
+        heading: "Just Living Is Not Enough",
+        subheading: "Finding meaning in everyday moments",
+        bgImage: "https://images.unsplash.com/photo-1556909114-f6e7ad7d3136?w=1920&h=900&fit=crop",
+        bgStyle: "custom",
+        bgColor: "#2c2c2c",
+        textColor: "#ffffff",
+        overlayColor: "#000000",
+        overlayOpacity: 0.45,
+        layout: "center",
+      },
+    },
+    {
+      id: "project-2-detail-spacer-1",
+      type: "spacer",
+      props: { height: 60 },
+    },
+    {
+      id: "project-2-detail-heading",
+      type: "heading",
+      props: {
+        text: "Project Overview",
+        level: "h2",
+        fontSize: "2xl",
+        align: "center",
+        color: "#1a1a1a",
+      },
+    },
+    {
+      id: "project-2-detail-spacer-2",
+      type: "spacer",
+      props: { height: 40 },
+    },
+    {
+      id: "project-2-detail-content",
+      type: "text",
+      props: {
+        text: "Life is more than just existing—it's about finding purpose, connection, and joy in the everyday. This project explores the art of mindful living, from the simple pleasure of a morning coffee to the profound beauty of human connection.\n\nWe've documented stories of people who have transformed their lives by embracing intentionality, creativity, and gratitude. Their journeys remind us that fulfillment isn't found in grand gestures, but in the conscious choices we make each day.",
+        align: "center",
+        fontSize: "base",
+        color: "#555555",
+      },
+    },
+    {
+      id: "project-2-detail-spacer-3",
+      type: "spacer",
+      props: { height: 60 },
+    },
+    {
+      id: "project-2-detail-gallery",
+      type: "gallery",
+      props: {
+        images: [
+          { src: "https://images.unsplash.com/photo-1556909114-f6e7ad7d3136?w=800&h=600&fit=crop", alt: "Lifestyle 1" },
+          { src: "https://images.unsplash.com/photo-1441984904996-e0b6ba687e04?w=800&h=600&fit=crop", alt: "Lifestyle 2" },
+          { src: "https://images.unsplash.com/photo-1616046229478-9901c5536a45?w=800&h=600&fit=crop", alt: "Lifestyle 3" },
+          { src: "https://images.unsplash.com/photo-1585320806297-9794b3e4eeae?w=800&h=600&fit=crop", alt: "Lifestyle 4" },
+        ],
+        columns: 2,
+      },
+    },
+    {
+      id: "project-2-detail-spacer-4",
+      type: "spacer",
+      props: { height: 80 },
+    },
+  ],
+  "project-adopt-the-pace-of-nature": [
+    {
+      id: "project-3-detail-hero",
+      type: "hero",
+      props: {
+        heading: "Adopt the pace of Nature",
+        subheading: "Finding harmony in natural rhythms",
+        bgImage: "https://images.unsplash.com/photo-1585320806297-9794b3e4eeae?w=1920&h=900&fit=crop",
+        bgStyle: "custom",
+        bgColor: "#2c2c2c",
+        textColor: "#ffffff",
+        overlayColor: "#000000",
+        overlayOpacity: 0.45,
+        layout: "center",
+      },
+    },
+    {
+      id: "project-3-detail-spacer-1",
+      type: "spacer",
+      props: { height: 60 },
+    },
+    {
+      id: "project-3-detail-heading",
+      type: "heading",
+      props: {
+        text: "Project Overview",
+        level: "h2",
+        fontSize: "2xl",
+        align: "center",
+        color: "#1a1a1a",
+      },
+    },
+    {
+      id: "project-3-detail-spacer-2",
+      type: "spacer",
+      props: { height: 40 },
+    },
+    {
+      id: "project-3-detail-content",
+      type: "text",
+      props: {
+        text: "In a world that moves faster every day, nature reminds us to slow down and find our own rhythm. This project explores the wisdom of natural cycles—the changing seasons, the ebb and flow of tides, the gentle unfolding of flowers.\n\nBy observing and learning from these natural patterns, we've discovered ways to bring balance and tranquility into modern life. From sustainable design principles to mindfulness practices inspired by forest bathing, this collection offers practical insights for living in harmony with the natural world.",
+        align: "center",
+        fontSize: "base",
+        color: "#555555",
+      },
+    },
+    {
+      id: "project-3-detail-spacer-3",
+      type: "spacer",
+      props: { height: 60 },
+    },
+    {
+      id: "project-3-detail-gallery",
+      type: "gallery",
+      props: {
+        images: [
+          { src: "https://images.unsplash.com/photo-1585320806297-9794b3e4eeae?w=800&h=600&fit=crop", alt: "Nature rhythm 1" },
+          { src: "https://images.unsplash.com/photo-1616046229478-9901c5536a45?w=800&h=600&fit=crop", alt: "Nature rhythm 2" },
+          { src: "https://images.unsplash.com/photo-1441984904996-e0b6ba687e04?w=800&h=600&fit=crop", alt: "Nature rhythm 3" },
+          { src: "https://images.unsplash.com/photo-1556909114-f6e7ad7d3136?w=800&h=600&fit=crop", alt: "Nature rhythm 4" },
+        ],
+        columns: 2,
+      },
+    },
+    {
+      id: "project-3-detail-spacer-4",
+      type: "spacer",
+      props: { height: 80 },
+    },
+  ],
+  "project-go-along-with-nature": [
+    {
+      id: "project-4-detail-hero",
+      type: "hero",
+      props: {
+        heading: "Go Along With the Nature",
+        subheading: "Embracing sustainable living",
+        bgImage: "https://images.unsplash.com/photo-1616046229478-9901c5536a45?w=1920&h=900&fit=crop",
+        bgStyle: "custom",
+        bgColor: "#2c2c2c",
+        textColor: "#ffffff",
+        overlayColor: "#000000",
+        overlayOpacity: 0.45,
+        layout: "center",
+      },
+    },
+    {
+      id: "project-4-detail-spacer-1",
+      type: "spacer",
+      props: { height: 60 },
+    },
+    {
+      id: "project-4-detail-heading",
+      type: "heading",
+      props: {
+        text: "Project Overview",
+        level: "h2",
+        fontSize: "2xl",
+        align: "center",
+        color: "#1a1a1a",
+      },
+    },
+    {
+      id: "project-4-detail-spacer-2",
+      type: "spacer",
+      props: { height: 40 },
+    },
+    {
+      id: "project-4-detail-content",
+      type: "text",
+      props: {
+        text: "Sustainable living isn't just about reducing our footprint—it's about creating a future where humans and nature thrive together. This project showcases innovative approaches to eco-friendly living, from zero-waste homes to community gardens that transform urban spaces.\n\nWe've gathered stories of individuals and communities who are leading the way in environmental stewardship. Their experiences demonstrate that small, consistent actions can create meaningful change, and that living sustainably can be both practical and beautiful.",
+        align: "center",
+        fontSize: "base",
+        color: "#555555",
+      },
+    },
+    {
+      id: "project-4-detail-spacer-3",
+      type: "spacer",
+      props: { height: 60 },
+    },
+    {
+      id: "project-4-detail-gallery",
+      type: "gallery",
+      props: {
+        images: [
+          { src: "https://images.unsplash.com/photo-1616046229478-9901c5536a45?w=800&h=600&fit=crop", alt: "Sustainable living 1" },
+          { src: "https://images.unsplash.com/photo-1585320806297-9794b3e4eeae?w=800&h=600&fit=crop", alt: "Sustainable living 2" },
+          { src: "https://images.unsplash.com/photo-1556909114-f6e7ad7d3136?w=800&h=600&fit=crop", alt: "Sustainable living 3" },
+          { src: "https://images.unsplash.com/photo-1441984904996-e0b6ba687e04?w=800&h=600&fit=crop", alt: "Sustainable living 4" },
+        ],
+        columns: 2,
+      },
+    },
+    {
+      id: "project-4-detail-spacer-4",
+      type: "spacer",
+      props: { height: 80 },
+    },
+  ],
+};
+
+/* ═══════════════════════════════════════════════════════════════
    ALL RETAIL PAGE PRESETS (convenience export)
    ═══════════════════════════════════════════════════════════════ */
 export const RETAIL_PAGE_PRESETS: Record<string, BuilderBlock[]> = {
   about: RETAIL_ABOUT_BLOCKS,
   contact: RETAIL_CONTACT_BLOCKS,
+  projects: RETAIL_PROJECTS_BLOCKS,
   "our-story": RETAIL_OUR_STORY_BLOCKS,
   terms: RETAIL_TERMS_BLOCKS,
   reviews: RETAIL_REVIEWS_BLOCKS,

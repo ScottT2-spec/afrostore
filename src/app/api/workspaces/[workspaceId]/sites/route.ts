@@ -84,12 +84,24 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ wor
       return error("Invalid site type. Must be ECOMMERCE, WEBSITE, or LANDING_PAGE", 422);
     }
 
-  // Generate unique slug & subdomain
+    // Check for duplicate site name within the same workspace
+    const existingSiteInWorkspace = await prisma.site.findFirst({
+      where: {
+        workspaceId,
+        name: name.trim(),
+      },
+    });
+
+    if (existingSiteInWorkspace) {
+      return error("A site with this name already exists in this workspace. Please choose a different name.", 409);
+    }
+
+  // Generate unique slug & subdomain (only check within the same workspace)
     let slug = slugify(name.trim());
     let counter = 0;
     while (true) {
       const candidate = counter === 0 ? slug : `${slug}-${counter}`;
-      const existing = await prisma.site.findUnique({ where: { slug: candidate } });
+      const existing = await prisma.site.findFirst({ where: { workspaceId, slug: candidate } });
       if (!existing) { slug = candidate; break; }
       counter++;
     }
@@ -98,7 +110,7 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ wor
     counter = 0;
     while (true) {
       const candidate = counter === 0 ? subdomain : `${subdomain}-${counter}`;
-      const existing = await prisma.site.findUnique({ where: { subdomain: candidate } });
+      const existing = await prisma.site.findFirst({ where: { workspaceId, subdomain: candidate } });
       if (!existing) { subdomain = candidate; break; }
       counter++;
     }

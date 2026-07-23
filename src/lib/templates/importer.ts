@@ -101,7 +101,9 @@ export async function importTemplateToSite(
   }
 
   // Ensure template-specific pages exist in DB for the page editor
-  await ensureTemplatePages(siteId, catalogEntry.slug);
+  // Force update for Retail/Decor templates to ensure latest blocks are applied
+  const forceUpdateRetail = catalogEntry.slug === "retail" || catalogEntry.slug === "decor";
+  await ensureTemplatePages(siteId, catalogEntry.slug, forceUpdateRetail);
 
   // Build blocks for the HOME page
   // For templates with editable block presets, use those instead of htmlEmbed

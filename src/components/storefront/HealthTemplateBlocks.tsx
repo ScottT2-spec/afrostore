@@ -2,6 +2,7 @@
 import { FashionFooter } from "./FashionTemplateBlocks";
 import Link from "next/link";
 import { resolveStoreLink, resolveFooterLink } from "@/lib/template-link-utils";
+import { HealthContactForm } from "./HealthContactForm";
 import { useState, useEffect, useRef, useCallback, createContext, useContext } from "react";
 import { safeSrc, onImgError } from "./image-fallback";
 import { useNewsletterSubscribe } from "@/hooks/useNewsletterSubscribe";
@@ -568,17 +569,11 @@ export interface HealthTestimonial {
 
 export interface HealthTestimonialsProps {
   title?: string;
-  trustpilotImage?: string;
-  trustpilotRating?: string;
-  reviewCount?: string;
   testimonials?: HealthTestimonial[];
 }
 
 export function HealthTestimonials({
   title = "Feedback From Real Customers",
-  trustpilotImage = `${IMG}/2023/08/w-pas-trustpilot-1.svg`,
-  trustpilotRating = "Rated 4.9",
-  reviewCount = "Based on 374 reviews",
   testimonials,
 }: HealthTestimonialsProps) {
   const defaultTestimonials: HealthTestimonial[] = [
@@ -594,11 +589,7 @@ export function HealthTestimonials({
 
   const css = `
     .hh-testim-section { margin-bottom: 80px; }
-    .hh-testim-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 30px; flex-wrap: wrap; gap: 15px; }
-    .hh-testim-tp { display: flex; align-items: center; gap: 15px; }
-    .hh-testim-tp img { height: 24px; }
-    .hh-testim-tp-info { font-family: ${TOKENS.bodyFont}; font-size: 14px; color: ${TOKENS.textColor}; }
-    .hh-testim-tp-rating { font-weight: 600; color: ${TOKENS.titleColor}; }
+    .hh-testim-header { margin-bottom: 30px; }
     .hh-testim-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; }
     .hh-testim-card { background: ${TOKENS.bgLight}; border-radius: 10px; padding: 30px; }
     .hh-testim-stars { color: ${TOKENS.starColor}; font-size: 14px; letter-spacing: 2px; margin-bottom: 15px; }
@@ -615,13 +606,6 @@ export function HealthTestimonials({
       <div className="hh-testim-section">
         <div className="hh-testim-header">
           <HealthSectionTitle title={title} align="left" titleSize="38px" />
-          <div className="hh-testim-tp">
-            <img src={trustpilotImage} alt="Trustpilot"  onError={(e) => onImgError(e, "fallback")} />
-            <div className="hh-testim-tp-info">
-              <span className="hh-testim-tp-rating">{trustpilotRating}</span>
-              <br />{reviewCount}
-            </div>
-          </div>
         </div>
         <div className="hh-testim-grid">
           {items.slice(0, 6).map((t, i) => (
@@ -776,12 +760,9 @@ export function HealthBrandMarquee({ speed = 70, reverse = false }: HealthBrandM
   `;
 
   const brands = [
-    `${IMG}/2023/08/w-pas-trustpilot-1.svg`,
-    `${IMG}/2023/08/w-pas-logo-color.svg`,
-    `${IMG}/2023/08/w-pas-trustpilot-1.svg`,
     `${IMG}/2023/08/w-pas-logo-color.svg`,
   ];
-  const doubled = [...brands, ...brands, ...brands, ...brands];
+  const doubled = [...brands, ...brands, ...brands, ...brands, ...brands, ...brands];
 
   return (
     <>
@@ -798,9 +779,9 @@ export function HealthBrandMarquee({ speed = 70, reverse = false }: HealthBrandM
 /* ═══════════════════════════════════════════════════════════════
    HEALTH HEADER
    Clean, modern health/wellness header matching WoodMart Pills.
-   Left: Shop · About Us · Search
-   Center: Logo
-   Right: Login · Wishlist · Cart
+   Left: Shop · About Us
+   Middle: Business name + Logo
+   Right: Blog · Contact Us · Wishlist · Register · Cart
    ═══════════════════════════════════════════════════════════════ */
 
 export interface HealthHeaderProps {
@@ -883,18 +864,19 @@ export function HealthHeader({
           </button>
           <nav className="hh-nav">
             <Link href={`${base}/shop`}>Shop</Link>
-            <Link href={`${base}/shop`}>About Us</Link>
-            <button onClick={() => setSearchOpen(true)} aria-label="Search">{searchIcon}</button>
+            <Link href={`${base}/about`}>About Us</Link>
           </nav>
           <Link href={base} className="hh-logo">
             {logo ? <img src={logo} alt={storeName} /> : <span className="hh-logo-text">{storeName}</span>}
           </Link>
           <div className="hh-icons">
-            <Link href={`${base}/my-account`} className="hh-icon" aria-label="Account">{userIcon}</Link>
+            <Link href={`${base}/blog`} className="hh-icon" style={{ fontSize: '14px', fontWeight: '600' }}>Blog</Link>
+            <Link href={`${base}/contact`} className="hh-icon" style={{ fontSize: '14px', fontWeight: '600' }}>Contact Us</Link>
             <Link href={`${base}/wishlist`} className="hh-icon" aria-label="Wishlist">
               {heartIcon}
               {wishlistCount > 0 && <span className="hh-badge">{wishlistCount}</span>}
             </Link>
+            <Link href={`${base}/my-account`} className="hh-icon" aria-label="Register" style={{ fontSize: '14px', fontWeight: '600' }}>Register</Link>
             <Link href={`${base}/cart`} className="hh-icon" aria-label="Cart">
               {cartIcon}
               {cartCount > 0 && <span className="hh-badge">{cartCount}</span>}
@@ -904,10 +886,12 @@ export function HealthHeader({
         <div className={`hh-mob-menu ${mobileOpen ? "hh-open" : ""}`}>
           <Link href={base} onClick={() => setMobileOpen(false)}>Home</Link>
           <Link href={`${base}/shop`} onClick={() => setMobileOpen(false)}>Shop</Link>
-          <Link href={`${base}/shop`} onClick={() => setMobileOpen(false)}>About Us</Link>
+          <Link href={`${base}/about`} onClick={() => setMobileOpen(false)}>About Us</Link>
           <Link href={`${base}/blog`} onClick={() => setMobileOpen(false)}>Blog</Link>
+          <Link href={`${base}/contact`} onClick={() => setMobileOpen(false)}>Contact Us</Link>
           <Link href={`${base}/wishlist`} onClick={() => setMobileOpen(false)}>Wishlist</Link>
-          <Link href={`${base}/my-account`} onClick={() => setMobileOpen(false)}>My Account</Link>
+          <Link href={`${base}/my-account`} onClick={() => setMobileOpen(false)}>Register</Link>
+          <Link href={`${base}/cart`} onClick={() => setMobileOpen(false)}>Cart</Link>
         </div>
       </header>
       {searchOpen && (
@@ -955,21 +939,21 @@ export function HealthFooterFull({
   const socialIcons: Record<string, string> = { facebook: "f", twitter: "𝕏", instagram: "📷", youtube: "▶", tiktok: "♪", whatsapp: "💬" };
 
   const css = `
-    .hf-footer{background:#f7f7f7;font-family:${TOKENS.bodyFont};color:${TOKENS.textColor}}
+    .hf-footer{background:#0f0f0f;font-family:${TOKENS.bodyFont};color:#fff}
     .hf-main{max-width:${TOKENS.containerWidth};margin:0 auto;padding:60px 15px 40px;display:grid;grid-template-columns:1.5fr 1fr 1fr 1fr;gap:40px}
-    .hf-brand p{font-size:14px;line-height:1.8;margin:14px 0}
+    .hf-brand p{font-size:14px;line-height:1.8;margin:14px 0;color:#fff}
     .hf-social{display:flex;gap:10px;margin-top:14px}
     .hf-social a{width:34px;height:34px;border-radius:50%;background:${TOKENS.primaryColor};color:#fff;display:flex;align-items:center;justify-content:center;text-decoration:none;font-size:13px;font-weight:700;transition:background .2s}
     .hf-social a:hover{filter:brightness(0.9)}
-    .hf-col-title{font-family:${TOKENS.titleFont};font-size:15px;font-weight:700;color:${TOKENS.titleColor};text-transform:uppercase;margin-bottom:18px;letter-spacing:.3px}
+    .hf-col-title{font-family:${TOKENS.titleFont};font-size:15px;font-weight:700;color:#fff;text-transform:uppercase;margin-bottom:18px;letter-spacing:.3px}
     .hf-links{list-style:none;margin:0;padding:0}
     .hf-links li{margin-bottom:10px}
-    .hf-links a{font-size:14px;color:${TOKENS.textColor};text-decoration:none;transition:color .2s}
+    .hf-links a{font-size:14px;color:#fff;text-decoration:none;transition:color .2s}
     .hf-links a:hover{color:${TOKENS.primaryColor}}
-    .hf-contact{font-size:14px;margin-bottom:10px;display:flex;align-items:flex-start;gap:8px}
-    .hf-bottom{border-top:1px solid #e0e0e0;max-width:${TOKENS.containerWidth};margin:0 auto;padding:18px 15px;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:10px}
-    .hf-bottom small{font-size:13px;color:${TOKENS.textColor}}
-    .hf-bottom small a{color:${TOKENS.textColor};text-decoration:none}
+    .hf-contact{font-size:14px;margin-bottom:10px;display:flex;align-items:flex-start;gap:8px;color:#fff}
+    .hf-bottom{border-top:1px solid #333;max-width:${TOKENS.containerWidth};margin:0 auto;padding:18px 15px;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:10px}
+    .hf-bottom small{font-size:13px;color:#fff}
+    .hf-bottom small a{color:#fff;text-decoration:none}
     @media(max-width:768px){.hf-main{grid-template-columns:1fr;gap:28px;padding:36px 15px 28px}}
     @media(min-width:769px) and (max-width:1024px){.hf-main{grid-template-columns:1fr 1fr}}
   `;
@@ -1002,12 +986,20 @@ export function HealthFooterFull({
           </ul>
         </div>
         <div>
-          <h4 className="hf-col-title">Information</h4>
+          <h4 className="hf-col-title">Popular</h4>
           <ul className="hf-links">
-            <li><Link href={`${base}/shop`}>About Us</Link></li>
-            <li><Link href={`${base}/shop`}>Contact Us</Link></li>
+            <li><Link href={`${base}/shop?category=anxiety`}>Anxiety</Link></li>
+            <li><Link href={`${base}/shop?category=skin`}>Skin</Link></li>
+            <li><Link href={`${base}/shop?category=depression`}>Depression</Link></li>
+            <li><Link href={`${base}/shop?category=allergy`}>Allergy</Link></li>
+          </ul>
+        </div>
+        <div>
+          <h4 className="hf-col-title">Useful Links</h4>
+          <ul className="hf-links">
+            <li><Link href={`${base}/about`}>About Us</Link></li>
+            <li><Link href={`${base}/contact`}>Contact Us</Link></li>
             <li><Link href={`${base}/blog`}>Blog</Link></li>
-            <li><Link href={`${base}/shop`}>Shipping & Returns</Link></li>
           </ul>
         </div>
         <div>
@@ -1023,7 +1015,6 @@ export function HealthFooterFull({
       </div>
       <div className="hf-bottom">
         <small><Link href={base}>{copyrightText || `© ${new Date().getFullYear()} ${storeName}. All rights reserved.`}</Link></small>
-        <img src="https://woodmart.xtemos.com/wp-content/uploads/2018/08/payment.png" alt="Payment methods" style={{ height: "21px" }} loading="lazy" />
       </div>
     </footer>
   );
@@ -1223,8 +1214,6 @@ export function HealthContactPage({
   faqs,
 }: HealthContactPageProps) {
   const storeCtx = useContext(HealthStoreContext);
-  const [formData, setFormData] = useState({ name: "", email: "", subject: "", message: "" });
-  const [submitted, setSubmitted] = useState(false);
   const [openFaq, setOpenFaq] = useState<number | null>(null);
 
   const defaultFaqs: HealthContactFaq[] = [
@@ -1237,11 +1226,6 @@ export function HealthContactPage({
 
   const faqItems = faqs || defaultFaqs;
 
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    setSubmitted(true);
-  };
-
   const css = `
     .hh-contact-hero { background: ${TOKENS.primaryColor}; padding: 80px 20px; text-align: center; margin-bottom: 60px; }
     .hh-contact-hero-title { font-family: ${TOKENS.titleFont}; font-weight: 500; font-size: 48px; color: #fff; margin: 0 0 15px; }
@@ -1252,20 +1236,6 @@ export function HealthContactPage({
     .hh-contact-info-item { display: flex; align-items: flex-start; gap: 15px; margin-bottom: 20px; font-family: ${TOKENS.bodyFont}; font-size: 15px; color: ${TOKENS.textColor}; line-height: 24px; }
     .hh-contact-info-icon { font-size: 20px; flex-shrink: 0; margin-top: 2px; }
     .hh-contact-info-label { font-weight: 600; color: ${TOKENS.titleColor}; display: block; margin-bottom: 3px; font-size: 14px; }
-    .hh-contact-form-wrap { background: #fff; border: 1px solid #eee; border-radius: ${TOKENS.borderRadius}; padding: 40px; }
-    .hh-contact-form-title { font-family: ${TOKENS.titleFont}; font-weight: 500; font-size: 24px; color: ${TOKENS.titleColor}; margin: 0 0 5px; }
-    .hh-contact-form-sub { font-family: ${TOKENS.bodyFont}; font-size: 14px; color: ${TOKENS.textColor}; margin: 0 0 25px; }
-    .hh-contact-field { margin-bottom: 18px; }
-    .hh-contact-label { display: block; font-family: ${TOKENS.bodyFont}; font-size: 13px; font-weight: 600; color: ${TOKENS.titleColor}; margin-bottom: 6px; text-transform: uppercase; letter-spacing: 0.5px; }
-    .hh-contact-input { width: 100%; padding: 12px 16px; border: 1px solid #ddd; border-radius: 8px; font-family: ${TOKENS.bodyFont}; font-size: 14px; outline: none; transition: border-color 0.2s; box-sizing: border-box; }
-    .hh-contact-input:focus { border-color: ${TOKENS.primaryColor}; }
-    .hh-contact-textarea { min-height: 120px; resize: vertical; }
-    .hh-contact-submit { display: inline-block; padding: 14px 35px; background: ${TOKENS.primaryColor}; color: #fff; border: none; border-radius: 35px; font-family: ${TOKENS.bodyFont}; font-weight: 600; font-size: 14px; cursor: pointer; text-transform: uppercase; letter-spacing: 0.5px; transition: background 0.3s; }
-    .hh-contact-submit:hover { filter: brightness(0.9); }
-    .hh-contact-success { text-align: center; padding: 40px 20px; }
-    .hh-contact-success-icon { font-size: 48px; margin-bottom: 15px; }
-    .hh-contact-success h3 { font-family: ${TOKENS.titleFont}; font-size: 24px; color: ${TOKENS.titleColor}; margin: 0 0 10px; }
-    .hh-contact-success p { font-family: ${TOKENS.bodyFont}; font-size: 15px; color: ${TOKENS.textColor}; }
     .hh-faq-section { margin-bottom: 80px; }
     .hh-faq-item { border-bottom: 1px solid #eee; }
     .hh-faq-q { display: flex; justify-content: space-between; align-items: center; padding: 20px 0; cursor: pointer; font-family: ${TOKENS.titleFont}; font-weight: 500; font-size: 16px; color: ${TOKENS.titleColor}; transition: color 0.2s; }
@@ -1307,41 +1277,7 @@ export function HealthContactPage({
             </div>
           </div>
 
-          <div className="hh-contact-form-wrap">
-            {submitted ? (
-              <div className="hh-contact-success">
-                <div className="hh-contact-success-icon">✅</div>
-                <h3>Message Sent!</h3>
-                <p>Thank you for reaching out. We&apos;ll get back to you soon.</p>
-              </div>
-            ) : (
-              <>
-                <h3 className="hh-contact-form-title">{formTitle}</h3>
-                <p className="hh-contact-form-sub">{formSubtitle}</p>
-                <form onSubmit={handleSubmit}>
-                  <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "18px" }}>
-                    <div className="hh-contact-field">
-                      <label className="hh-contact-label">Name</label>
-                      <input className="hh-contact-input" type="text" placeholder="Your name" value={formData.name} onChange={(e) => setFormData({ ...formData, name: e.target.value })} required />
-                    </div>
-                    <div className="hh-contact-field">
-                      <label className="hh-contact-label">Email</label>
-                      <input className="hh-contact-input" type="email" placeholder="Your email" value={formData.email} onChange={(e) => setFormData({ ...formData, email: e.target.value })} required />
-                    </div>
-                  </div>
-                  <div className="hh-contact-field">
-                    <label className="hh-contact-label">Subject</label>
-                    <input className="hh-contact-input" type="text" placeholder="How can we help?" value={formData.subject} onChange={(e) => setFormData({ ...formData, subject: e.target.value })} />
-                  </div>
-                  <div className="hh-contact-field">
-                    <label className="hh-contact-label">Message</label>
-                    <textarea className="hh-contact-input hh-contact-textarea" placeholder="Tell us more..." value={formData.message} onChange={(e) => setFormData({ ...formData, message: e.target.value })} required />
-                  </div>
-                  <button className="hh-contact-submit" type="submit">Send Message</button>
-                </form>
-              </>
-            )}
-          </div>
+          <HealthContactForm formTitle={formTitle} formSubtitle={formSubtitle} />
         </div>
 
         {/* FAQ */}
@@ -1605,6 +1541,118 @@ export function HealthIngredientsPage({
         </div>
 
         <div className="hh-ingr-cta">
+          <h3>{ctaTitle}</h3>
+          <p>{ctaText}</p>
+          <Link href={fixLink(ctaButtonLink)}>{ctaButtonText}</Link>
+        </div>
+      </div>
+    </>
+  );
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   MEDICAL EXPERTS PAGE
+   ═══════════════════════════════════════════════════════════════ */
+
+export interface HealthExpert {
+  name: string;
+  role: string;
+  image?: string;
+  bio?: string;
+}
+
+export interface HealthMedicalExpertsPageProps {
+  heroTitle?: string;
+  heroSubtitle?: string;
+  heroImage?: string;
+  introTitle?: string;
+  introText?: string;
+  experts?: HealthExpert[];
+  ctaTitle?: string;
+  ctaText?: string;
+  ctaButtonText?: string;
+  ctaButtonLink?: string;
+}
+
+export function HealthMedicalExpertsPage({
+  heroTitle = "Medical Experts",
+  heroSubtitle = "Meet the professionals behind our formulations",
+  heroImage = `${IMG}/2023/08/w-pas-first-screen.jpg`,
+  introTitle = "Our Team of Professionals",
+  introText = "Our formulations are developed by a team of certified nutritionists, doctors, and wellness experts who are passionate about helping you achieve your health goals.",
+  experts,
+  ctaTitle = "Need Help Choosing?",
+  ctaText = "Our team is here to help you find the right supplements for your needs.",
+  ctaButtonText = "Contact Us",
+  ctaButtonLink = "/contact",
+}: HealthMedicalExpertsPageProps) {
+  const storeCtx = useContext(HealthStoreContext);
+  const fixLink = (link: string) => resolveStoreLink(link, storeCtx?.storeSlug);
+
+  const defaultExperts: HealthExpert[] = [
+    { name: "Dr. Sarah Mitchell", role: "Chief Nutritionist", image: `${IMG}/2023/08/w-pas-customer-1.jpg`, bio: "PhD in Nutritional Science with 15+ years of experience in dietary supplement research and development." },
+    { name: "Dr. James Carter", role: "Formulation Specialist", image: `${IMG}/2023/08/w-pas-customer-2.jpg`, bio: "Board-certified pharmacist specializing in bioavailability and nutrient absorption optimization." },
+    { name: "Emily Rodriguez", role: "Wellness Advisor", image: `${IMG}/2023/08/w-pas-customer-3.jpg`, bio: "Certified holistic health coach focused on integrative wellness approaches and lifestyle medicine." },
+    { name: "Dr. Michael Chen", role: "Quality Assurance", image: `${IMG}/2023/08/w-pas-customer-4.jpg`, bio: "Expert in GMP compliance and third-party testing protocols ensuring product purity and safety." },
+  ];
+
+  const items = experts || defaultExperts;
+
+  const css = `
+    .hh-medical-hero { position: relative; min-height: 400px; display: flex; align-items: center; overflow: hidden; background: ${TOKENS.bgLight}; margin-bottom: 80px; }
+    .hh-medical-hero-bg { position: absolute; inset: 0; background-size: cover; background-position: center; }
+    .hh-medical-hero-overlay { position: absolute; inset: 0; background: rgba(0,0,0,0.35); }
+    .hh-medical-hero-content { position: relative; z-index: 2; text-align: center; max-width: 700px; margin: 0 auto; padding: 80px 20px; }
+    .hh-medical-hero-title { font-family: ${TOKENS.titleFont}; font-weight: 500; font-size: 48px; color: #fff; margin: 0 0 15px; }
+    .hh-medical-hero-sub { font-family: ${TOKENS.bodyFont}; font-size: 18px; line-height: 28px; color: rgba(255,255,255,0.9); }
+    .hh-medical-intro { text-align: center; margin-bottom: 60px; }
+    .hh-medical-intro h2 { font-family: ${TOKENS.titleFont}; font-weight: 500; font-size: 34px; color: ${TOKENS.titleColor}; margin: 0 0 15px; }
+    .hh-medical-intro p { font-family: ${TOKENS.bodyFont}; font-size: 16px; line-height: 28px; color: ${TOKENS.textColor}; max-width: 650px; margin: 0 auto; }
+    .hh-medical-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 30px; margin-bottom: 80px; }
+    .hh-medical-card { background: #fff; border-radius: 10px; padding: 40px; text-align: center; box-shadow: 0 2px 12px rgba(0,0,0,0.04); transition: box-shadow 0.3s; }
+    .hh-medical-card:hover { box-shadow: 0 6px 24px rgba(0,0,0,0.08); }
+    .hh-medical-avatar { width: 120px; height: 120px; border-radius: 50%; object-fit: cover; margin: 0 auto 20px; }
+    .hh-medical-name { font-family: ${TOKENS.titleFont}; font-weight: 500; font-size: 20px; color: ${TOKENS.titleColor}; margin: 0 0 5px; }
+    .hh-medical-role { font-family: ${TOKENS.bodyFont}; font-size: 14px; color: ${TOKENS.primaryColor}; font-weight: 600; margin: 0 0 15px; }
+    .hh-medical-bio { font-family: ${TOKENS.bodyFont}; font-size: 14px; line-height: 24px; color: ${TOKENS.textColor}; margin: 0; }
+    .hh-medical-cta { background: ${TOKENS.bgLight}; border-radius: ${TOKENS.borderRadius}; padding: 60px; text-align: center; margin-bottom: 80px; }
+    .hh-medical-cta h3 { font-family: ${TOKENS.titleFont}; font-weight: 500; font-size: 34px; color: ${TOKENS.titleColor}; margin: 0 0 12px; }
+    .hh-medical-cta p { font-family: ${TOKENS.bodyFont}; font-size: 16px; color: ${TOKENS.textColor}; margin: 0 0 25px; }
+    .hh-medical-cta a { display: inline-block; padding: 14px 35px; background: ${TOKENS.primaryColor}; color: #fff; border-radius: 35px; font-family: ${TOKENS.bodyFont}; font-weight: 600; font-size: 14px; text-decoration: none; text-transform: uppercase; transition: background 0.3s; }
+    .hh-medical-cta a:hover { filter: brightness(0.9); }
+    @media (max-width: 768px) { .hh-medical-grid { grid-template-columns: 1fr; } .hh-medical-hero-title { font-size: 32px; } .hh-medical-hero { padding: 50px 20px; } .hh-medical-cta { padding: 40px 20px; } }
+  `;
+
+  return (
+    <>
+      <ScopedStyles id="medical-experts-page" css={css} />
+      <div className="hh-medical-hero">
+        <div className="hh-medical-hero-bg" style={{ backgroundImage: `url(${heroImage})` }} />
+        <div className="hh-medical-hero-overlay" />
+        <div className="hh-medical-hero-content">
+          <h1 className="hh-medical-hero-title">{heroTitle}</h1>
+          <p className="hh-medical-hero-sub">{heroSubtitle}</p>
+        </div>
+      </div>
+
+      <div style={containerStyle}>
+        <div className="hh-medical-intro">
+          <h2>{introTitle}</h2>
+          <p>{introText}</p>
+        </div>
+
+        <div className="hh-medical-grid">
+          {items.map((expert, i) => (
+            <div key={i} className="hh-medical-card">
+              <img className="hh-medical-avatar" src={expert.image || safeSrc(null, expert.name)} alt={expert.name} onError={(e) => onImgError(e, expert.name)} />
+              <h4 className="hh-medical-name">{expert.name}</h4>
+              <div className="hh-medical-role">{expert.role}</div>
+              {expert.bio && <p className="hh-medical-bio">{expert.bio}</p>}
+            </div>
+          ))}
+        </div>
+
+        <div className="hh-medical-cta">
           <h3>{ctaTitle}</h3>
           <p>{ctaText}</p>
           <Link href={fixLink(ctaButtonLink)}>{ctaButtonText}</Link>

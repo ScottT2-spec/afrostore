@@ -121,10 +121,36 @@ export const HEALTH_INGREDIENTS_BLOCKS: TemplateBlock[] = [
   },
 ];
 
+/* ── MEDICAL EXPERTS PAGE ─────────────────────────────────────── */
+export const HEALTH_MEDICAL_EXPERTS_BLOCKS: TemplateBlock[] = [
+  {
+    id: "health-medical-experts-page",
+    type: "healthMedicalExpertsPage",
+    props: {
+      heroTitle: "Medical Experts",
+      heroSubtitle: "Meet the professionals behind our formulations",
+      heroImage: "https://woodmart.xtemos.com/pills/wp-content/uploads/sites/15/2023/08/w-pas-first-screen.jpg",
+      introTitle: "Our Team of Professionals",
+      introText: "Our formulations are developed by a team of certified nutritionists, doctors, and wellness experts who are passionate about helping you achieve your health goals.",
+      experts: [
+        { name: "Dr. Sarah Mitchell", role: "Chief Nutritionist", image: "https://woodmart.xtemos.com/pills/wp-content/uploads/sites/15/2023/08/w-pas-customer-1.jpg", bio: "PhD in Nutritional Science with 15+ years of experience in dietary supplement research and development." },
+        { name: "Dr. James Carter", role: "Formulation Specialist", image: "https://woodmart.xtemos.com/pills/wp-content/uploads/sites/15/2023/08/w-pas-customer-2.jpg", bio: "Board-certified pharmacist specializing in bioavailability and nutrient absorption optimization." },
+        { name: "Emily Rodriguez", role: "Wellness Advisor", image: "https://woodmart.xtemos.com/pills/wp-content/uploads/sites/15/2023/08/w-pas-customer-3.jpg", bio: "Certified holistic health coach focused on integrative wellness approaches and lifestyle medicine." },
+        { name: "Dr. Michael Chen", role: "Quality Assurance", image: "https://woodmart.xtemos.com/pills/wp-content/uploads/sites/15/2023/08/w-pas-customer-4.jpg", bio: "Expert in GMP compliance and third-party testing protocols ensuring product purity and safety." },
+      ],
+      ctaTitle: "Need Help Choosing?",
+      ctaText: "Our team is here to help you find the right supplements for your needs.",
+      ctaButtonText: "Contact Us",
+      ctaButtonLink: "/contact",
+    },
+  },
+];
+
 /** Map slug → default blocks for health template pages */
 export const HEALTH_PAGE_BLOCKS: Record<string, TemplateBlock[]> = {
   about: HEALTH_ABOUT_BLOCKS,
   contact: HEALTH_CONTACT_BLOCKS,
   blog: HEALTH_BLOG_BLOCKS,
   ingredients: HEALTH_INGREDIENTS_BLOCKS,
+  "medical-experts": HEALTH_MEDICAL_EXPERTS_BLOCKS,
 };

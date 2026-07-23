@@ -25,7 +25,7 @@ import { ElectronicsStoreContext } from "@/components/storefront/ElectronicsTemp
 import { BakeryStoreContext } from "@/components/storefront/BakeryTemplateBlocks";
 import { CosmeticsStoreContext } from "@/components/storefront/CosmeticsTemplateBlocks";
 import { GroceryStoreContext } from "@/components/storefront/GroceryTemplateBlocks";
-import { HealthStoreContext, HealthHeader } from "@/components/storefront/HealthTemplateBlocks";
+import { HealthStoreContext, HealthHeader, HealthFooterFull } from "@/components/storefront/HealthTemplateBlocks";
 import { InteriorStoreContext } from "@/components/storefront/InteriorDesignTemplateBlocks";
 import { KidsStoreContext, KidsHeader, KidsFooterFull } from "@/components/storefront/KidsTemplateBlocks";
 import { MakeupStoreContext } from "@/components/storefront/MakeupTemplateBlocks";
@@ -34,6 +34,7 @@ import { PerfumesFontLoader, PerfumesFooter, PerfumesHeader } from "@/components
 import { FashionHeader, FashionFooter, type NavItem } from "@/components/storefront/FashionStoreChrome";
 import { GardenHeader, GardenFooter } from "@/components/storefront/GardenStoreChrome";
 import { TShirtsPrintsFooter, TShirtsPrintsHeader } from "@/components/storefront/TShirtsPrintsStoreChrome";
+import { RetailHeader, RetailFooter } from "@/components/storefront/RetailTemplateBlocks";
 
 /* ─── Template preset map ─── */
 const TEMPLATE_PRESET_MAP: Record<string, TemplateBlock[]> = {
@@ -573,12 +574,10 @@ export default function StorePage() {
     <div className="min-h-screen bg-white">
       {/* ─── TEMPLATE HEADERS ─── */}
       {isRetailTemplate ? (
-        <GardenHeader
+        <RetailHeader
           storeName={store.name}
           storeSlug={slug}
           logo={store.logo}
-          navPages={navPages}
-          categories={categories.filter((c) => c._count.products > 0).map((c) => ({ id: c.id, name: c.name, slug: c.slug, productCount: c._count.products }))}
           cartCount={cartCount}
           wishlistCount={wishlistCount}
           searchQuery={searchQuery}
@@ -851,21 +850,11 @@ export default function StorePage() {
 
       {/* Footer */}
       {isRetailTemplate ? (
-        <GardenFooter
+        <RetailFooter
           storeName={store.name}
           storeSlug={slug}
           logo={store.logo}
-          navPages={navPages}
           description={store.description}
-          socialLinks={[
-            ...(data.socialLinks?.facebook ? [{ platform: "facebook", url: data.socialLinks.facebook }] : []),
-            ...(data.socialLinks?.instagram ? [{ platform: "instagram", url: data.socialLinks.instagram }] : []),
-            ...(data.socialLinks?.twitter ? [{ platform: "twitter", url: data.socialLinks.twitter }] : []),
-          ]}
-          contactInfo={{
-            phone: whatsappNumber || undefined,
-            email: (data.socialLinks as any)?.email || undefined,
-          }}
         />
       ) : isTShirtsPrintsTemplate ? (
         <TShirtsPrintsFooter
@@ -888,6 +877,23 @@ export default function StorePage() {
           storeSlug={slug}
           logo={store.logo}
           description={store.description}
+        />
+      ) : isHealthTemplate ? (
+        <HealthFooterFull
+          storeName={store.name}
+          storeSlug={slug}
+          logo={store.logo}
+          description={store.description || "Your trusted source for vitamins, supplements, and wellness products."}
+          contact={{
+            address: (store as any).address || "123 Wellness Ave, Portland, OR 97201",
+            phone: (store as any).phone || "(503) 555-0123",
+            email: (store as any).email || "hello@store.com"
+          }}
+          socialLinks={[
+            ...(data.socialLinks?.facebook ? [{ platform: "facebook", url: data.socialLinks.facebook }] : []),
+            ...(data.socialLinks?.twitter ? [{ platform: "twitter", url: data.socialLinks.twitter }] : []),
+            ...(data.socialLinks?.instagram ? [{ platform: "instagram", url: data.socialLinks.instagram }] : []),
+          ]}
         />
       ) : isFashionTemplate ? (
         <FashionFooter

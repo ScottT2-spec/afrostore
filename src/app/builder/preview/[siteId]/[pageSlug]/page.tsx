@@ -5,16 +5,16 @@ import { useParams } from "next/navigation";
 import Link from "next/link";
 import { RenderBlocks, type BuilderBlock } from "@/components/storefront/BlockRenderer";
 import { resolveSectionStyleOverrides } from "@/components/storefront/block-style";
-import { PerfumesHeader, PerfumesFooter, PerfumesFontLoader } from "@/components/storefront/PerfumesTemplateBlocks";
-import { KidsHeader, KidsFooterFull, KidsFontLoader } from "@/components/storefront/KidsTemplateBlocks";
+import { PerfumesHeader, PerfumesFooter, PerfumesFontLoader, PerfumesStoreContext } from "@/components/storefront/PerfumesTemplateBlocks";
+import { KidsHeader, KidsFooterFull, KidsFontLoader, KidsStoreContext } from "@/components/storefront/KidsTemplateBlocks";
 import { HandmadeBagsHeader, HandmadeBagsFooter } from "@/components/storefront/HandmadeBagsStoreChrome";
-import { CosmeticsHeader, CosmeticsFooter, CosmeticsFontLoader } from "@/components/storefront/CosmeticsTemplateBlocks";
+import { CosmeticsHeader, CosmeticsFooter, CosmeticsFontLoader, CosmeticsStoreContext } from "@/components/storefront/CosmeticsTemplateBlocks";
 import { TShirtsPrintsHeader, TShirtsPrintsFooter } from "@/components/storefront/TShirtsPrintsStoreChrome";
 import { VegetableHeader, VegetableFooter } from "@/components/storefront/VegetableStoreChrome";
 import { FashionHeader, FashionFooter } from "@/components/storefront/FashionStoreChrome";
 import { GardenHeader, GardenFooter } from "@/components/storefront/GardenStoreChrome";
-import { HealthHeader, HealthFooterFull, HealthFontLoader } from "@/components/storefront/HealthTemplateBlocks";
-import { InteriorHeader, InteriorFooter } from "@/components/storefront/InteriorDesignTemplateBlocks";
+import { HealthHeader, HealthFooterFull, HealthFontLoader, HealthStoreContext } from "@/components/storefront/HealthTemplateBlocks";
+import { InteriorHeader, InteriorFooter, InteriorStoreContext } from "@/components/storefront/InteriorDesignTemplateBlocks";
 
 // Chrome block types that should not be in the editable block list
 const CHROME_BLOCK_TYPES = new Set([
@@ -102,7 +102,7 @@ export default function BuilderPreviewPage() {
     loadStore();
   }, [siteId, pageSlug]);
 
-  // Fetch product/blog data for cosmetics shop/blog pages
+  // Fetch product/blog data for cosmetics shop/blog pages and Kids blog pages
   useEffect(() => {
     if (!storeData) return;
     
@@ -125,6 +125,22 @@ export default function BuilderPreviewPage() {
     }
     
     if (templateSlug === 'cosmetics' && pageSlug === 'blog') {
+      fetch(`/api/storefront/${storeSlug}/blogs`)
+        .then(res => {
+          if (!res.ok) {
+            console.error('Failed to fetch blog data:', res.status);
+            return null;
+          }
+          return res.json();
+        })
+        .then(json => {
+          if (json?.success) setBlogData(json.data);
+        })
+        .catch(err => console.error('Failed to fetch blog data:', err));
+    }
+    
+    // Fetch blog data for Kids template to populate KidsStoreContext
+    if (templateSlug === 'kids') {
       fetch(`/api/storefront/${storeSlug}/blogs`)
         .then(res => {
           if (!res.ok) {
@@ -254,7 +270,7 @@ export default function BuilderPreviewPage() {
     );
   }
 
-  const { store, page, templateSlug, products, categories } = storeData;
+  const { store, page, templateSlug, products, categories, socialLinks } = storeData;
   const storeSlug = store.slug || store.subdomain;
   
   // Filter out chrome blocks from editable content
@@ -300,7 +316,7 @@ export default function BuilderPreviewPage() {
     );
   };
 
-  // Render blog list for cosmetics blog pages
+  // Render blog list for cosmetics blog pages only
   const renderBlogList = () => {
     if (templateSlug !== 'cosmetics' || pageSlug !== 'blog' || !blogData) return null;
     const blogs = blogData.blogs || [];
@@ -560,6 +576,52 @@ export default function BuilderPreviewPage() {
     );
   };
 
+  // Create store context value for Kids template
+  const kidsStoreContextValue = {
+    products: products || [],
+    blogs: blogData?.blogs || [],
+    currency: store.currency || 'NGN',
+    storeSlug: storeSlug,
+    socialLinks: socialLinks || {},
+  };
+
+  const renderWithStoreContext = (children: React.ReactNode) => {
+    switch (templateSlug) {
+      case 'kids':
+        return (
+          <KidsStoreContext.Provider value={kidsStoreContextValue}>
+            {children}
+          </KidsStoreContext.Provider>
+        );
+      case 'cosmetics':
+        return (
+          <CosmeticsStoreContext.Provider value={kidsStoreContextValue}>
+            {children}
+          </CosmeticsStoreContext.Provider>
+        );
+      case 'perfumes':
+        return (
+          <PerfumesStoreContext.Provider value={kidsStoreContextValue}>
+            {children}
+          </PerfumesStoreContext.Provider>
+        );
+      case 'health':
+        return (
+          <HealthStoreContext.Provider value={kidsStoreContextValue}>
+            {children}
+          </HealthStoreContext.Provider>
+        );
+      case 'interior':
+        return (
+          <InteriorStoreContext.Provider value={kidsStoreContextValue}>
+            {children}
+          </InteriorStoreContext.Provider>
+        );
+      default:
+        return children;
+    }
+  };
+
   return (
     <div className="min-h-screen bg-white">
       {/* Disable all link navigation in editor mode */}
@@ -574,15 +636,19 @@ export default function BuilderPreviewPage() {
         }
       `}} />
       {renderChrome()}
-      <RenderBlocks 
-        blocks={contentBlocks} 
-        storeSlug={storeSlug}
-        products={products}
-        isEditorMode={true}
-        wrapBlock={wrapBlockForEditor}
-      />
-      {renderProductGrid()}
-      {renderBlogList()}
+      {renderWithStoreContext(
+        <>
+          <RenderBlocks 
+            blocks={contentBlocks} 
+            storeSlug={storeSlug}
+            products={products}
+            isEditorMode={true}
+            wrapBlock={wrapBlockForEditor}
+          />
+          {renderProductGrid()}
+          {renderBlogList()}
+        </>
+      )}
       {renderFooter()}
     </div>
   );

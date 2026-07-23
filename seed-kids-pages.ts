@@ -9,7 +9,7 @@ async function seedKidsPages() {
   try {
     const kidsSites = await prisma.site.findMany({
       where: {
-        slug: { in: ['kids', 'kids2', 'kids3', 'kids4'] }
+        slug: { in: ['kids', 'kids2', 'kids3', 'kids4', 'Kids'] }
       },
       include: {
         pages: true,
@@ -34,7 +34,7 @@ async function seedKidsPages() {
         
         // Force re-seed if page has generic content (simple hero blocks)
         // or if it's one of the pages we want to re-seed with rich content
-        const shouldReseed = ['about', 'about-us', 'contact', 'contact-us', 'blog', 'shop'].includes(pageSlug);
+        const shouldReseed = ['about', 'about-us', 'contact', 'contact-us', 'blog', 'shop', 'home', '/'].includes(pageSlug);
         if (blocks.length > 0 && !shouldReseed) {
           console.log(`  Skipping ${page.title} (${page.slug}): ${blocks.length} blocks (already has content)`);
           skippedCount++;

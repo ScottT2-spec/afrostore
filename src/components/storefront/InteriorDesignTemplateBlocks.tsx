@@ -65,7 +65,7 @@ export interface InteriorProduct {
   comparePrice?: string;
   image: string;
   hoverImage?: string;
-  category: string;
+  category: string | { id: string; name: string; slug: string };
   rating?: number;
   badge?: string;
   tags?: string[];
@@ -358,7 +358,7 @@ export function InteriorProductGrid({
                 <img className="id-prod-img" src={p.image || safeSrc(null, p.name)} alt={p.name} onError={(e) => onImgError(e, p.name)} />
               </div>
               <div className="id-prod-info">
-                <div className="id-prod-cat">{p.category}</div>
+                <div className="id-prod-cat">{typeof p.category === 'string' ? p.category : p.category?.name || ''}</div>
                 <h3 className="id-prod-name"><Link href={fixLink(p.slug)}>{p.name}</Link></h3>
                 <div className="id-prod-stars">{"★".repeat(p.rating || 5)}{"☆".repeat(5 - (p.rating || 5))}</div>
                 <div className="id-prod-price">
@@ -1232,7 +1232,7 @@ export function GardenNewArrivals({
                 <img className="gd-prod-img" src={p.image || safeSrc(null, p.name)} alt={p.name} onError={(e) => onImgError(e, p.name)} />
               </div>
               <div className="gd-prod-info">
-                <div className="gd-prod-cat">{p.category}</div>
+                <div className="gd-prod-cat">{typeof p.category === 'string' ? p.category : p.category?.name || ''}</div>
                 <h3 className="gd-prod-name"><Link href={fixLink(p.slug)}>{p.name}</Link></h3>
                 <div className="gd-prod-stars">{"★".repeat(p.rating || 5)}{"☆".repeat(5 - (p.rating || 5))}</div>
                 <div className="gd-prod-price">

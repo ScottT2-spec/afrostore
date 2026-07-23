@@ -76,7 +76,6 @@ export default function StoreReviewsPage() {
   const isKidsTemplate = slug === "kids";
   const isHealthTemplate = slug === "pills" || store?.slug === "pills" || store?.name?.toLowerCase().includes("pill") || store?.name?.toLowerCase().includes("supplement") || store?.name?.toLowerCase().includes("health");
   const isTShirtsPrintsTemplate = slug === "huty" || store?.slug === "huty" || store?.name?.toLowerCase().includes("t-shirts") || store?.name?.toLowerCase().includes("prints");
-  const isPerfumesTemplate = store?.slug === "perfumes" || store?.name?.toLowerCase().includes("perfumes");
 
   const fetchReviews = useCallback(async (p: number, rating: number | null, append: boolean) => {
     if (p === 1) setLoading(true);

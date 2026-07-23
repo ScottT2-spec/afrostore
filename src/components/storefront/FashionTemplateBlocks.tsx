@@ -908,6 +908,8 @@ export function FashionTestimonials({ title = "CUSTOMERS REVIEWS", backgroundIma
    ═══════════════════════════════════════════════════════════════ */
 
 export interface FashionBlogPost {
+  id?: string;
+  slug?: string;
   image: string;
   title: string;
   excerpt: string;
@@ -928,14 +930,48 @@ export interface FashionBlogPostsProps {
 export function FashionBlogPosts({ posts: propPosts, columns = 2, sectionTitle, marginBottom = "30px" }: FashionBlogPostsProps) {
   const storeCtx = useContext(FashionStoreContext);
 
-  // Convert real store blogs to FashionBlogPost format (same pattern as product grid)
-  const posts: FashionBlogPost[] = (() => {
-    if (!storeCtx || !storeCtx.blogs || storeCtx.blogs.length === 0) return propPosts || [];
+  // Resolve blog post links to proper store URLs
+  const resolveBlogLink = (link: string, slug: string) => {
+    // If link is already a proper store URL, return it
+    if (link && link.startsWith("/store/")) return link;
+    // If link is a relative blog path (e.g., /blog/slug), convert to store-scoped URL
+    if (link && link.startsWith("/blog/")) {
+      const blogSlug = link.replace("/blog/", "");
+      if (storeCtx?.storeSlug) {
+        return `/store/${storeCtx.storeSlug}/blog/${blogSlug}`;
+      }
+    }
+    // If we have a store slug and a post slug, construct the proper URL
+    if (storeCtx?.storeSlug && slug) {
+      return `/store/${storeCtx.storeSlug}/blog/${slug}`;
+    }
+    // Fallback to the original link or empty string
+    return link || "";
+  };
 
-    return storeCtx.blogs.slice(0, columns * 2).map((b) => {
+  // Convert real store blogs to FashionBlogPost format (same pattern as product grid)
+  let posts: FashionBlogPost[] = [];
+  
+  if (!storeCtx || !storeCtx.blogs || storeCtx.blogs.length === 0) {
+    // Use seeded data with forced full store path
+    posts = (propPosts || []).map((p) => {
+      const slug = (p as any).slug || (p as any).id || "";
+      const resolvedLink = storeCtx?.storeSlug 
+        ? `/store/${storeCtx.storeSlug}/blog/${slug}` 
+        : p.link || "";
+      return {
+        ...p,
+        link: resolvedLink,
+      };
+    });
+  } else {
+    posts = storeCtx.blogs.slice(0, columns * 2).map((b) => {
       const pubDate = b.publishedAt ? new Date(b.publishedAt) : new Date(b.createdAt);
       const day = pubDate.getDate().toString().padStart(2, "0");
       const month = pubDate.toLocaleString("en-US", { month: "short" });
+      const resolvedLink = storeCtx?.storeSlug 
+        ? `/store/${storeCtx.storeSlug}/blog/${b.slug}` 
+        : "";
 
       return {
         image: b.coverImage || "https://images.unsplash.com/photo-1558171813-4c088753af8f?w=400&h=400&fit=crop",
@@ -944,11 +980,11 @@ export function FashionBlogPosts({ posts: propPosts, columns = 2, sectionTitle, 
         date: { day, month },
         categories: b.category ? [b.category] : [],
         author: { name: b.author || "Store Team" },
-        link: `/store/${storeCtx.storeSlug}/blog/${b.slug}`,
+        link: resolvedLink,
         commentCount: 0,
       };
     });
-  })();
+  }
   const scopedCss = `
     .fbp-section { margin-bottom: ${marginBottom}; }
     .fbp-grid { display: grid; grid-template-columns: repeat(${columns}, 1fr); gap: 20px; }
@@ -1010,33 +1046,54 @@ export function FashionBlogPosts({ posts: propPosts, columns = 2, sectionTitle, 
         />
       )}
       <div className="fbp-grid">
-        {posts.map((p, i) => (
-          <article key={i} className="fbp-card">
-            <div className="fbp-img-wrap">
-              <img src={p.image} alt={p.title} className="fbp-img" loading="lazy" />
-              <div className="fbp-date-badge">
-                <span className="fbp-date-day">{p.date.day}</span>
-                <span className="fbp-date-month">{p.date.month}</span>
+        {posts.map((p, i) => {
+          // Use the already-resolved link from the post object
+          const fullLink = p.link || "";
+          const hasValidLink = fullLink && fullLink !== "#" && fullLink !== "/store/${storeCtx?.storeSlug}/blog/";
+          const authorName = p.author?.name || "Author";
+          const authorAvatar = p.author?.avatar;
+          const categories = p.categories && Array.isArray(p.categories) ? p.categories : [];
+          
+          return (
+            <Link key={i} href={fullLink} className="fbp-card" style={{ textDecoration: "none", color: "inherit" }}>
+              <div className="fbp-img-wrap">
+                <img src={p.image} alt={p.title} className="fbp-img" loading="lazy" />
+                {p.date && p.date.day && p.date.month && (
+                  <div className="fbp-date-badge">
+                    <span className="fbp-date-day">{p.date.day}</span>
+                    <span className="fbp-date-month">{p.date.month}</span>
+                  </div>
+                )}
               </div>
-              <Link href={p.link} style={{ position: "absolute", inset: 0, zIndex: 3 }} aria-label={p.title} />
-            </div>
-            <div className="fbp-content">
-              <div className="fbp-cats">
-                {p.categories.map((c, ci) => (
-                  <span key={ci} className="fbp-cat">{c}</span>
-                ))}
+              <div className="fbp-content">
+                {categories.length > 0 && (
+                  <div className="fbp-cats">
+                    {categories.map((c, ci) => (
+                      <span key={ci} className="fbp-cat">{c}</span>
+                    ))}
+                  </div>
+                )}
+                <h3 className="fbp-title">{p.title}</h3>
+                <div className="fbp-meta">
+                  {authorAvatar && <img src={authorAvatar} alt={authorName} className="fbp-meta-avatar" />}
+                  <span>Posted by <strong>{authorName}</strong></span>
+                  {p.commentCount !== undefined && p.commentCount !== null && <span>💬 {p.commentCount}</span>}
+                </div>
+                <p className="fbp-excerpt">{p.excerpt}</p>
+                <span 
+                  className="fbp-read-more"
+                  style={{ 
+                    color: hasValidLink ? TOKENS.primaryColor : '#999',
+                    pointerEvents: hasValidLink ? 'auto' : 'none',
+                    cursor: hasValidLink ? 'pointer' : 'default'
+                  }}
+                >
+                  Continue reading →
+                </span>
               </div>
-              <h3 className="fbp-title"><Link href={p.link}>{p.title}</Link></h3>
-              <div className="fbp-meta">
-                {p.author.avatar && <img src={p.author.avatar} alt={p.author.name} className="fbp-meta-avatar" />}
-                <span>Posted by <strong>{p.author.name}</strong></span>
-                {p.commentCount !== undefined && <span>💬 {p.commentCount}</span>}
-              </div>
-              <p className="fbp-excerpt">{p.excerpt}</p>
-              <Link href={p.link} className="fbp-read-more">Continue reading</Link>
-            </div>
-          </article>
-        ))}
+            </Link>
+          );
+        })}
       </div>
     </div>
   );
