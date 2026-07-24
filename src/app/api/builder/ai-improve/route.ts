@@ -127,10 +127,17 @@ ${contentJson}`;
       capability: AICapability.CHAT,
     });
 
+    if (!result || !result.content) {
+      return NextResponse.json(
+        { error: "AI returned an empty response. Please try again." },
+        { status: 502 }
+      );
+    }
+
     // Parse the AI response as JSON — handle various AI formatting quirks
     let improved: Record<string, unknown>;
     try {
-      let raw = result.content.trim();
+      let raw = (result.content || "").trim();
 
       // Strip markdown code fences (```json ... ``` or ``` ... ```)
       raw = raw.replace(/^```(?:json|JSON)?\s*\n?/, "").replace(/\n?```\s*$/, "");
@@ -144,7 +151,7 @@ ${contentJson}`;
 
       improved = JSON.parse(raw);
     } catch (parseErr) {
-      console.error("AI JSON parse error:", parseErr, "Raw content:", result.content.slice(0, 500));
+      console.error("AI JSON parse error:", parseErr, "Raw content:", (result?.content || "").substring(0, 500));
       return NextResponse.json(
         { error: "AI returned invalid JSON. Please try again." },
         { status: 502 }
