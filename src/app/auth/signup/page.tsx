@@ -66,6 +66,7 @@ export default function SignupPage() {
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
   const [submitting, setSubmitting] = useState(false);
+  const [signupSuccess, setSignupSuccess] = useState(false);
   const { signup } = useAuth();
   const router = useRouter();
 
@@ -83,12 +84,43 @@ export default function SignupPage() {
     });
 
     if (result.success) {
-      router.push("/dashboard");
+      setSignupSuccess(true);
     } else {
       setError(result.error || "Signup failed");
     }
     setSubmitting(false);
   };
+
+  if (signupSuccess) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-gradient-to-b from-gray-50 to-emerald-50/30 px-4 py-12">
+        <div className="w-full max-w-md">
+          <div className="rounded-3xl bg-white p-8 shadow-lg shadow-gray-200/60 text-center">
+            <div className="flex justify-center mb-6">
+              <img src="/prokip-logo.png" alt="Prokip" className="h-16 w-16 object-contain" />
+            </div>
+            <div className="inline-flex items-center justify-center w-14 h-14 bg-emerald-50 rounded-2xl mb-4">
+              <svg className="w-7 h-7 text-emerald-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" /></svg>
+            </div>
+            <h1 className="text-2xl font-bold text-gray-900 mb-2">Check Your Email</h1>
+            <p className="text-gray-500 text-sm leading-relaxed mb-6">
+              Account created! We&apos;ve sent a verification link to <strong>{email}</strong>. Please check your inbox and verify your email to get started.
+            </p>
+            <button
+              onClick={() => router.push("/dashboard")}
+              className="w-full rounded-xl bg-slate-600 hover:bg-slate-700 text-white font-semibold py-3 text-base transition-all duration-200 shadow-md shadow-slate-300/40"
+            >
+              Continue to Dashboard
+            </button>
+            <p className="text-xs text-gray-400 mt-4">
+              Didn&apos;t get the email?{" "}
+              <a href="/auth/verify-email" className="text-slate-600 font-semibold hover:text-slate-800">Resend verification</a>
+            </p>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-gradient-to-b from-gray-50 to-emerald-50/30 px-4 py-12">

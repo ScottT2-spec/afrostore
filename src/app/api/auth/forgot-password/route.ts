@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/db";
 import { sendPasswordResetEmail } from "@/lib/email";
+import { rateLimit } from "@/lib/rate-limit";
 import crypto from "crypto";
 
 const RESET_TOKEN_EXPIRY_MINUTES = 30;
@@ -14,6 +15,11 @@ export async function POST(req: NextRequest) {
     }
 
     const normalizedEmail = email.trim().toLowerCase();
+
+    const rl = rateLimit(`forgot:${normalizedEmail}`, 3, 15 * 60 * 1000);
+    if (!rl.allowed) {
+      return NextResponse.json({ error: "Too many attempts. Please try again later." }, { status: 429 });
+    }
 
     // Always return success to prevent email enumeration
     const successResponse = NextResponse.json({

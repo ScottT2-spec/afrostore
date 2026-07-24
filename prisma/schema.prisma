@@ -20,9 +20,11 @@ model User {
   role             UserRole          @default(MERCHANT)
   createdAt        DateTime          @default(now())
   updatedAt        DateTime          @updatedAt
-  resetToken       String?           @unique
-  resetTokenExpiry DateTime?
-  accounts         Account[]
+  resetToken             String?   @unique
+  resetTokenExpiry       DateTime?
+  emailVerifyToken       String?   @unique
+  emailVerifyTokenExpiry DateTime?
+  accounts               Account[]
   notifications    Notification[]
   sessions         Session[]
   siteMembers      SiteMember[]
