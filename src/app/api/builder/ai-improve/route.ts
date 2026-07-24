@@ -156,9 +156,9 @@ ${contentJson}`;
       improved,
       provider: result.provider,
     });
-  } catch (error: any) {
-    console.error("AI improve error:", error?.message || error);
-    const msg = error?.message || "Unknown error";
+  } catch (err: unknown) {
+    const msg = err instanceof Error ? err.message : String(err || "Unknown error");
+    console.error("AI improve error:", msg);
     // Surface rate limit errors clearly
     if (msg.includes("rate") || msg.includes("429") || msg.includes("quota")) {
       return NextResponse.json(
@@ -167,7 +167,7 @@ ${contentJson}`;
       );
     }
     return NextResponse.json(
-      { error: `AI error: ${msg.slice(0, 120)}` },
+      { error: `AI error: ${msg.substring(0, 150)}` },
       { status: 500 }
     );
   }
