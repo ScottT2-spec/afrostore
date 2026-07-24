@@ -86,19 +86,21 @@ export async function POST(req: NextRequest) {
     // Build a focused prompt
     const contentJson = JSON.stringify(content, null, 2);
 
-    const systemPrompt = `You are a professional copywriter for African ecommerce businesses. Your job is to improve website section content to be more compelling, conversion-focused, and engaging.
+    const systemPrompt = `You are a JSON-only API. You improve website copy for African ecommerce businesses.
+
+CRITICAL: Your entire response must be a single valid JSON object. No markdown. No explanation. No text before or after the JSON.
 
 Rules:
-- Return ONLY valid JSON with the same keys as the input
+- Return ONLY the JSON object with the same keys as the input
 - Improve headlines to be punchier and more attention-grabbing
 - Make descriptions more compelling and benefit-focused
 - Keep the same structure — same keys, same array lengths
-- Don't change URLs, image paths, icons, hrefs, or technical values
+- Don't change URLs, image paths, icons, hrefs, or technical values (keep them exactly as-is)
 - Don't add new keys or remove existing ones
 - Keep text concise — website copy should be scannable
 - Tailor language for African businesses and customers
-- If a value is a number, boolean, URL, or icon name, keep it as-is
-- Return raw JSON only — no markdown, no code fences, no explanation`;
+- If a value is a number, boolean, URL, or icon name, keep it unchanged
+- NEVER wrap output in code fences or markdown`;
 
     const userPrompt = `Improve this "${sectionType}" section content. Return the improved version as JSON with the exact same structure:
 
@@ -112,16 +114,24 @@ ${contentJson}`;
       capability: AICapability.CHAT,
     });
 
-    // Parse the AI response as JSON
+    // Parse the AI response as JSON — handle various AI formatting quirks
     let improved: Record<string, unknown>;
     try {
-      // Strip markdown code fences if present
       let raw = result.content.trim();
-      if (raw.startsWith("```")) {
-        raw = raw.replace(/^```(?:json)?\s*\n?/, "").replace(/\n?```\s*$/, "");
+
+      // Strip markdown code fences (```json ... ``` or ``` ... ```)
+      raw = raw.replace(/^```(?:json|JSON)?\s*\n?/, "").replace(/\n?```\s*$/, "");
+
+      // If AI prepended explanation text before the JSON, extract the JSON object
+      const firstBrace = raw.indexOf("{");
+      const lastBrace = raw.lastIndexOf("}");
+      if (firstBrace !== -1 && lastBrace !== -1 && firstBrace < lastBrace) {
+        raw = raw.slice(firstBrace, lastBrace + 1);
       }
+
       improved = JSON.parse(raw);
-    } catch {
+    } catch (parseErr) {
+      console.error("AI JSON parse error:", parseErr, "Raw content:", result.content.slice(0, 500));
       return NextResponse.json(
         { error: "AI returned invalid JSON. Please try again." },
         { status: 502 }
