@@ -83,8 +83,21 @@ export async function POST(req: NextRequest) {
       requestTimeoutMs: 30_000,
     });
 
-    // Build a focused prompt
-    const contentJson = JSON.stringify(content, null, 2);
+    // Build a focused prompt — limit content size to avoid token limits
+    const contentStr = JSON.stringify(content, null, 2);
+    // If content is too large (>8k chars), truncate nested arrays to first 2 items
+    let trimmedContent = content;
+    if (contentStr.length > 8000) {
+      trimmedContent = Object.fromEntries(
+        Object.entries(content).map(([k, v]) => {
+          if (Array.isArray(v) && v.length > 2) {
+            return [k, v.slice(0, 2)];
+          }
+          return [k, v];
+        })
+      );
+    }
+    const contentJson = JSON.stringify(trimmedContent, null, 2);
 
     const systemPrompt = `You are a JSON-only API. You improve website copy for African ecommerce businesses.
 
@@ -143,10 +156,18 @@ ${contentJson}`;
       improved,
       provider: result.provider,
     });
-  } catch (error) {
-    console.error("AI improve error:", error);
+  } catch (error: any) {
+    console.error("AI improve error:", error?.message || error);
+    const msg = error?.message || "Unknown error";
+    // Surface rate limit errors clearly
+    if (msg.includes("rate") || msg.includes("429") || msg.includes("quota")) {
+      return NextResponse.json(
+        { error: "AI rate limit reached. Please wait a moment and try again." },
+        { status: 429 }
+      );
+    }
     return NextResponse.json(
-      { error: "Failed to improve section. Please try again." },
+      { error: `AI error: ${msg.slice(0, 120)}` },
       { status: 500 }
     );
   }
