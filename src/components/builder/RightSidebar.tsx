@@ -1,7 +1,7 @@
 "use client";
 
-import { useState } from "react";
-import { X, Settings, Sliders, Copy, Trash2, Sparkles } from "lucide-react";
+import { useState, useCallback } from "react";
+import { X, Settings, Sliders, Copy, Trash2, Sparkles, Loader2 } from "lucide-react";
 import { Section, SectionStyleOverrides } from "@/types";
 import ImageField from "./ImageField";
 import { 
@@ -155,6 +155,7 @@ export default function RightSidebar({
           <ContentTab 
             section={selectedSection} 
             updateContent={updateContent}
+            onSectionUpdate={onSectionUpdate}
             mediaLibrary={mediaLibrary}
             onUploadImage={onUploadImage}
           />
@@ -173,15 +174,60 @@ export default function RightSidebar({
 function ContentTab({
   section,
   updateContent,
+  onSectionUpdate,
   mediaLibrary,
   onUploadImage,
 }: {
   section: Section;
   updateContent: (key: string, value: any) => void;
+  onSectionUpdate: (section: Section) => void;
   mediaLibrary?: string[];
   onUploadImage?: (file: File) => Promise<string>;
 }) {
   const content = section.content || {};
+  const [aiLoading, setAiLoading] = useState(false);
+  const [aiError, setAiError] = useState("");
+
+  const handleAiImprove = useCallback(async () => {
+    setAiLoading(true);
+    setAiError("");
+
+    try {
+      const res = await fetch("/api/builder/ai-improve", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${localStorage.getItem("token") || ""}`,
+        },
+        body: JSON.stringify({
+          sectionType: section.type,
+          content: section.content,
+        }),
+      });
+
+      const data = await res.json();
+
+      if (!res.ok) {
+        setAiError(data.error || "Failed to improve section");
+        return;
+      }
+
+      if (data.success && data.improved) {
+        // Apply all improved content at once
+        onSectionUpdate({
+          ...section,
+          content: {
+            ...section.content,
+            ...data.improved,
+          },
+        });
+      }
+    } catch {
+      setAiError("Network error. Please try again.");
+    } finally {
+      setAiLoading(false);
+    }
+  }, [section, onSectionUpdate]);
 
   return (
     <div className="p-4 space-y-4">
@@ -311,14 +357,28 @@ function ContentTab({
       </div>
 
       {/* AI Improve Button */}
-      <div className="pt-4 border-t border-surface-100">
+      <div className="pt-4 border-t border-surface-100 space-y-2">
         <button
           type="button"
-          className="w-full flex items-center justify-center gap-2 bg-gradient-to-r from-brand-600 to-purple-600 text-white text-xs font-semibold py-2.5 rounded-lg hover:from-brand-700 hover:to-purple-700 transition-colors"
+          onClick={handleAiImprove}
+          disabled={aiLoading}
+          className="w-full flex items-center justify-center gap-2 bg-gradient-to-r from-brand-600 to-purple-600 text-white text-xs font-semibold py-2.5 rounded-lg hover:from-brand-700 hover:to-purple-700 transition-colors disabled:opacity-60 disabled:cursor-not-allowed"
         >
-          <Sparkles className="h-4 w-4" />
-          AI Improve Section
+          {aiLoading ? (
+            <>
+              <Loader2 className="h-4 w-4 animate-spin" />
+              Improving...
+            </>
+          ) : (
+            <>
+              <Sparkles className="h-4 w-4" />
+              AI Improve Section
+            </>
+          )}
         </button>
+        {aiError && (
+          <p className="text-xs text-red-500 text-center">{aiError}</p>
+        )}
       </div>
     </div>
   );
