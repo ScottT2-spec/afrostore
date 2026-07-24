@@ -217,16 +217,19 @@ export default function CheckoutPage() {
         body: JSON.stringify({
           orderId: order.id,
           provider: paymentMethod,
-          callbackUrl: `${window.location.origin}/checkout?status=success&order=${order.orderNumber}`,
+          callbackUrl: `${window.location.origin}/checkout?status=pending&order=${order.orderNumber}`,
         }),
       });
 
       const payJson = await payRes.json();
 
       if (payJson.success && payJson.data?.paymentUrl) {
+        const ref = payJson.data.reference;
         // Clear cart
         localStorage.removeItem(cartKey);
         setCart([]);
+        // Store reference for verification on return
+        if (ref) sessionStorage.setItem("afro_pay_ref", ref);
         // Redirect to payment page
         window.location.href = payJson.data.paymentUrl;
         return;
@@ -244,18 +247,66 @@ export default function CheckoutPage() {
     }
   };
 
-  // Check for payment return
+  // Check for payment return — verify server-side
+  const [verifying, setVerifying] = useState(false);
   useEffect(() => {
     if (typeof window === "undefined") return;
     const params = new URLSearchParams(window.location.search);
     const status = params.get("status");
     const orderNum = params.get("order");
-    if (status === "success" && orderNum) {
+    if (!status || !orderNum) return;
+
+    const ref = params.get("ref") || sessionStorage.getItem("afro_pay_ref");
+    localStorage.removeItem(cartKey);
+    setCart([]);
+    sessionStorage.removeItem("afro_pay_ref");
+
+    if (ref && siteId) {
+      // Verify payment server-side
+      setVerifying(true);
+      fetch(`/api/sites/${siteId}/checkout/verify`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ reference: ref }),
+      })
+        .then((r) => r.json())
+        .then((json) => {
+          if (json.success && json.data?.status === "SUCCESS") {
+            setOrderSuccess({ orderNumber: orderNum, orderId: json.data.orderId || "" });
+          } else if (json.success && json.data?.status === "PENDING") {
+            // Webhook may still be processing
+            setOrderSuccess({ orderNumber: orderNum, orderId: "" });
+            setOrderError("Payment is being processed. You'll receive confirmation shortly.");
+          } else {
+            setOrderSuccess({ orderNumber: orderNum, orderId: "" });
+            setOrderError("We couldn't confirm your payment yet. If you were charged, please contact the store.");
+          }
+        })
+        .catch(() => {
+          // Fallback — show order but flag uncertainty
+          setOrderSuccess({ orderNumber: orderNum, orderId: "" });
+        })
+        .finally(() => setVerifying(false));
+    } else {
+      // No reference available — fallback to old behavior
       setOrderSuccess({ orderNumber: orderNum, orderId: "" });
-      localStorage.removeItem(cartKey);
-      setCart([]);
     }
-  }, []);
+  }, [siteId]);
+
+  /* ── Verifying Payment ── */
+  if (verifying) {
+    return (
+      <div className="min-h-screen bg-surface-50 flex items-center justify-center p-4">
+        <div className="max-w-md w-full text-center">
+          <div className="h-20 w-20 rounded-3xl bg-gradient-to-br from-blue-400 to-blue-500 flex items-center justify-center text-white mx-auto mb-6 shadow-xl animate-pulse">
+            <Shield className="h-10 w-10" />
+          </div>
+          <h1 className="font-display text-2xl font-extrabold text-surface-900 mb-2">Verifying Payment...</h1>
+          <p className="text-surface-500">Please wait while we confirm your payment.</p>
+        </div>
+      </div>
+    );
+  }
 
   /* ── Order Success ── */
   if (orderSuccess) {

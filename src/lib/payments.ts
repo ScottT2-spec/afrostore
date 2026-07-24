@@ -83,6 +83,15 @@ export async function initializeFlutterwavePayment(params: {
   return data.data as { link: string };
 }
 
+export async function verifyFlutterwaveTransaction(transactionId: string, secretKey: string) {
+  const res = await fetch(
+    `https://api.flutterwave.com/v3/transactions/${transactionId}/verify`,
+    { headers: { Authorization: `Bearer ${secretKey}` } }
+  );
+  const data = await res.json();
+  return data;
+}
+
 export function verifyFlutterwaveWebhook(signature: string, secret: string): boolean {
   return signature === secret;
 }
@@ -135,6 +144,15 @@ export async function initializeMonnifyPayment(params: {
   return data.responseBody as { transactionReference: string; checkoutUrl: string };
 }
 
+export async function verifyMonnifyTransaction(reference: string, accessToken: string, baseUrl: string) {
+  const res = await fetch(
+    `${baseUrl}/api/v2/merchant/transactions/query?paymentReference=${encodeURIComponent(reference)}`,
+    { headers: { Authorization: `Bearer ${accessToken}` } }
+  );
+  const data = await res.json();
+  return data;
+}
+
 export function verifyMonnifyWebhook(body: string, signature: string, secret: string): boolean {
   const hash = crypto.createHmac("sha512", secret).update(body).digest("hex");
   return hash === signature;
@@ -162,43 +180,60 @@ export async function processPaymentConfirmation(params: {
     return transaction; // Already processed
   }
 
-  const updated = await prisma.paymentTransaction.update({
-    where: { id: transaction.id },
-    data: {
-      status: params.status,
-      method: params.method,
-      externalRef: params.externalRef,
-      metadata: params.metadata as any,
-      paidAt: params.status === "SUCCESS" ? new Date() : undefined,
-    },
+  // Use a Prisma transaction with atomic where clause to prevent race conditions
+  const result = await prisma.$transaction(async (tx) => {
+    // Atomically update only if status is still PENDING
+    const updateResult = await tx.paymentTransaction.updateMany({
+      where: { id: transaction.id, status: "PENDING" },
+      data: {
+        status: params.status,
+        method: params.method,
+        externalRef: params.externalRef,
+        metadata: params.metadata as any,
+        paidAt: params.status === "SUCCESS" ? new Date() : undefined,
+      },
+    });
+
+    // If no rows updated, another process already handled it
+    if (updateResult.count === 0) {
+      return null;
+    }
+
+    // Update order payment status
+    if (transaction.orderId) {
+      if (params.status === "SUCCESS") {
+        await tx.order.update({
+          where: { id: transaction.orderId },
+          data: {
+            paymentStatus: "PAID",
+            status: "CONFIRMED",
+            paidAt: new Date(),
+          },
+        });
+
+        await tx.orderTimeline.create({
+          data: {
+            orderId: transaction.orderId,
+            status: "CONFIRMED",
+            note: `Payment confirmed via ${params.method || "unknown"}`,
+          },
+        });
+      } else {
+        await tx.order.update({
+          where: { id: transaction.orderId },
+          data: { paymentStatus: "FAILED" },
+        });
+      }
+    }
+
+    // Return the updated transaction
+    return tx.paymentTransaction.findUnique({ where: { id: transaction.id } });
   });
 
-  // Update order payment status
-  if (transaction.orderId) {
-    if (params.status === "SUCCESS") {
-      await prisma.order.update({
-        where: { id: transaction.orderId },
-        data: {
-          paymentStatus: "PAID",
-          status: "CONFIRMED",
-          paidAt: new Date(),
-        },
-      });
-
-      await prisma.orderTimeline.create({
-        data: {
-          orderId: transaction.orderId,
-          status: "CONFIRMED",
-          note: `Payment confirmed via ${params.method || "unknown"}`,
-        },
-      });
-    } else {
-      await prisma.order.update({
-        where: { id: transaction.orderId },
-        data: { paymentStatus: "FAILED" },
-      });
-    }
+  if (!result) {
+    // Race condition: already processed by another request
+    return prisma.paymentTransaction.findUnique({ where: { id: transaction.id } });
   }
 
-  return updated;
+  return result;
 }
