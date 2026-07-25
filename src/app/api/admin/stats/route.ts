@@ -10,12 +10,12 @@ export async function GET(req: NextRequest) {
 
     const [
       totalUsers,
-      totalSites,
+      totalStores,
       totalOrders,
-      activeSites,
+      activeStores,
       totalRevenue,
       recentSignups,
-      recentSites,
+      recentSitesRaw,
     ] = await Promise.all([
       prisma.user.count(),
       prisma.site.count(),
@@ -40,9 +40,15 @@ export async function GET(req: NextRequest) {
       prisma.site.findMany({
         orderBy: { createdAt: "desc" },
         take: 5,
-        include: {
+        select: {
+          id: true,
+          name: true,
+          slug: true,
+          plan: true,
+          status: true,
+          createdAt: true,
           workspace: {
-            include: {
+            select: {
               owner: {
                 select: { firstName: true, lastName: true },
               },
@@ -52,14 +58,25 @@ export async function GET(req: NextRequest) {
       }),
     ]);
 
+    // Flatten workspace.owner to owner for frontend compatibility
+    const recentStores = recentSitesRaw.map((s) => ({
+      id: s.id,
+      name: s.name,
+      slug: s.slug,
+      plan: s.plan,
+      status: s.status,
+      createdAt: s.createdAt,
+      owner: s.workspace?.owner || { firstName: "Unknown", lastName: "" },
+    }));
+
     const stats = {
       totalUsers,
-      totalSites,
+      totalStores,
       totalOrders,
-      activeSites,
+      activeStores,
       totalRevenue: totalRevenue._sum.total || 0,
       recentSignups,
-      recentSites,
+      recentStores,
     };
 
     return success(stats);

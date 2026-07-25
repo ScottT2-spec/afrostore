@@ -24,7 +24,7 @@ export async function GET(req: NextRequest) {
     }
     if (status) where.status = status;
 
-    const [sites, total] = await Promise.all([
+    const [sitesRaw, total] = await Promise.all([
       prisma.site.findMany({
         where,
         skip,
@@ -41,6 +41,13 @@ export async function GET(req: NextRequest) {
       }),
       prisma.site.count({ where }),
     ]);
+
+    // Flatten workspace.owner to owner for frontend compatibility
+    const sites = sitesRaw.map((s) => ({
+      ...s,
+      owner: s.workspace?.owner || { firstName: "Unknown", lastName: "", email: "" },
+      workspace: undefined,
+    }));
 
     return success({ sites, total, page, pages: Math.ceil(total / limit) });
   } catch (err) {
