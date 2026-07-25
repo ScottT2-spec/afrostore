@@ -1,5 +1,5 @@
 'use client';
-import { ArrowLeft, ArrowRight, Check, Loader2 } from "lucide-react";
+import { ArrowLeft, ArrowRight, Check, Loader2, X, MessageSquare } from "lucide-react";
 import { FileText, Globe, Layout, Link as LinkIcon, Palette, ShoppingBag, Sparkles, Square, Zap } from "@/components/icons/FilledIcons";
 
 import { useState, useEffect, useMemo } from 'react';
@@ -101,6 +101,10 @@ export default function NewSitePage() {
   const [customDomain, setCustomDomain] = useState('');
   const [recommendedTemplates, setRecommendedTemplates] = useState<ScoredTemplate[]>(Array.isArray(draft?.recommendations) ? (draft?.recommendations as ScoredTemplate[]) : []);
 
+  // Guided selection state
+  const [showGuided, setShowGuided] = useState(false);
+  const [guidedInput, setGuidedInput] = useState('');
+
   // Load workspaces if none specified
   const [selectedWorkspace, setSelectedWorkspace] = useState(workspaceId || '');
   const businessContext = useMemo(() => ({
@@ -160,6 +164,51 @@ export default function NewSitePage() {
       window.scrollTo({ top: 0, behavior: 'smooth' });
     }
   }, [step, created]);
+
+  // ─── Guided Selection Logic ──────────────────────────────
+  const GUIDED_RULES: Array<{ keywords: string[]; siteType: SiteType; industry: string }> = [
+    { keywords: ['sell', 'shop', 'store', 'product', 'buy', 'order', 'inventory', 'ecommerce', 'retail', 'merchant', 'marketplace'], siteType: 'ECOMMERCE', industry: 'other' },
+    { keywords: ['fashion', 'cloth', 'wear', 'dress', 'shirt', 'shoe', 'sneaker', 'apparel', 'boutique', 'tailoring'], siteType: 'ECOMMERCE', industry: 'fashion' },
+    { keywords: ['phone', 'laptop', 'gadget', 'electronic', 'tech', 'computer', 'accessori', 'device', 'hardware'], siteType: 'ECOMMERCE', industry: 'electronics' },
+    { keywords: ['food', 'restaurant', 'catering', 'kitchen', 'meal', 'chef', 'bakery', 'cafe', 'grill'], siteType: 'ECOMMERCE', industry: 'food' },
+    { keywords: ['beauty', 'skincare', 'cosmetic', 'makeup', 'hair', 'salon', 'spa', 'cream', 'perfume'], siteType: 'ECOMMERCE', industry: 'beauty' },
+    { keywords: ['health', 'wellness', 'gym', 'fitness', 'supplement', 'vitamin', 'pharma', 'medical', 'clinic', 'hospital'], siteType: 'WEBSITE', industry: 'health' },
+    { keywords: ['real estate', 'property', 'house', 'apartment', 'land', 'rent', 'building'], siteType: 'WEBSITE', industry: 'real-estate' },
+    { keywords: ['school', 'education', 'course', 'learn', 'tutor', 'training', 'academy', 'university'], siteType: 'WEBSITE', industry: 'education' },
+    { keywords: ['church', 'ministry', 'pastor', 'worship', 'faith', 'sermon', 'congregation'], siteType: 'WEBSITE', industry: 'church' },
+    { keywords: ['ngo', 'non-profit', 'nonprofit', 'charity', 'foundation', 'donate', 'volunteer'], siteType: 'WEBSITE', industry: 'ngo' },
+    { keywords: ['agency', 'marketing', 'design', 'brand', 'consult', 'freelance', 'creative'], siteType: 'WEBSITE', industry: 'agency' },
+    { keywords: ['construction', 'building', 'architect', 'contractor', 'plumb', 'electric'], siteType: 'WEBSITE', industry: 'construction' },
+    { keywords: ['car', 'auto', 'vehicle', 'mechanic', 'motor', 'garage', 'spare part'], siteType: 'WEBSITE', industry: 'auto' },
+    { keywords: ['art', 'craft', 'handmade', 'painting', 'draw', 'sculpture', 'pottery'], siteType: 'ECOMMERCE', industry: 'art' },
+    { keywords: ['sport', 'fitness', 'football', 'basketball', 'athlet', 'jersey', 'equipment'], siteType: 'ECOMMERCE', industry: 'sports' },
+    { keywords: ['service', 'cleaning', 'laundry', 'repair', 'plumber', 'delivery', 'logistics'], siteType: 'WEBSITE', industry: 'services' },
+    { keywords: ['landing', 'launch', 'waitlist', 'coming soon', 'single page', 'one page', 'lead', 'funnel', 'campaign'], siteType: 'LANDING_PAGE', industry: 'other' },
+    { keywords: ['portfolio', 'showcase', 'gallery', 'personal', 'cv', 'resume'], siteType: 'WEBSITE', industry: 'other' },
+  ];
+
+  const handleGuidedSubmit = () => {
+    const input = guidedInput.toLowerCase();
+    if (input.trim().length < 3) return;
+
+    let bestMatch: { siteType: SiteType; industry: string; score: number } = { siteType: 'ECOMMERCE', industry: 'other', score: 0 };
+
+    for (const rule of GUIDED_RULES) {
+      let score = 0;
+      for (const kw of rule.keywords) {
+        if (input.includes(kw)) score++;
+      }
+      if (score > bestMatch.score) {
+        bestMatch = { siteType: rule.siteType, industry: rule.industry, score };
+      }
+    }
+
+    setSiteType(bestMatch.siteType);
+    setIndustry(bestMatch.industry);
+    setShowGuided(false);
+    setGuidedInput('');
+    setStep(3); // Skip to step 3 since we've set both type and industry
+  };
 
   const totalSteps = 7;
   const canProceed = () => {
@@ -260,7 +309,7 @@ export default function NewSitePage() {
   };
 
   const handleNext = () => {
-    // "Build with AI" skips template selection — go straight to create
+    // "Build with AI" skips template selection - go straight to create
     if (step === 4 && launchMethod === 'quick') {
       setStep(5);
       // Auto-trigger site creation for AI path
@@ -360,18 +409,55 @@ export default function NewSitePage() {
               })}
 
               {/* Guided selection option */}
-                <button
-                  onClick={() => setSiteType('ECOMMERCE')} // Default to ecommerce for guided selection
-                className="flex items-start gap-4 p-5 rounded-xl border-2 border-dashed border-gray-200 bg-white hover:border-gray-300 text-left transition"
+              <button
+                onClick={() => setShowGuided(true)}
+                className="flex items-start gap-4 p-5 rounded-xl border-2 border-dashed border-gray-200 bg-white hover:border-purple-300 hover:bg-purple-50/30 text-left transition"
               >
                 <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-purple-100 to-blue-100 flex items-center justify-center">
                   <Sparkles className="w-6 h-6 text-purple-500" />
                 </div>
                 <div>
                   <p className="font-semibold text-gray-900">Use guided selection</p>
-                  <p className="text-sm text-gray-500 mt-0.5">Tell us about your business and we’ll guide the category choice</p>
+                  <p className="text-sm text-gray-500 mt-0.5">Tell us about your business and we&apos;ll pick the best option for you</p>
                 </div>
               </button>
+
+              {/* Guided selection modal */}
+              {showGuided && (
+                <div className="fixed inset-0 z-50 bg-black/50 flex items-center justify-center p-4">
+                  <div className="bg-white rounded-2xl shadow-2xl w-full max-w-md overflow-hidden">
+                    <div className="flex items-center justify-between px-6 py-4 border-b border-gray-100">
+                      <div className="flex items-center gap-2">
+                        <MessageSquare className="w-5 h-5 text-purple-500" />
+                        <h3 className="font-bold text-gray-900">Guided Selection</h3>
+                      </div>
+                      <button onClick={() => setShowGuided(false)} className="p-1.5 rounded-lg hover:bg-gray-100 transition">
+                        <X className="w-4 h-4 text-gray-400" />
+                      </button>
+                    </div>
+                    <div className="p-6">
+                      <p className="text-sm text-gray-600 mb-4">
+                        Describe what your business does and what you want to build. We&apos;ll recommend the best site type and industry for you.
+                      </p>
+                      <textarea
+                        value={guidedInput}
+                        onChange={(e) => setGuidedInput(e.target.value)}
+                        placeholder="e.g. I sell handmade bags and accessories online, mostly through Instagram and WhatsApp..."
+                        className="w-full h-32 rounded-xl border border-gray-200 bg-gray-50 px-4 py-3 text-sm text-gray-700 placeholder:text-gray-400 resize-none focus:outline-none focus:ring-2 focus:ring-purple-400/40 focus:border-purple-300"
+                        autoFocus
+                      />
+                      <button
+                        onClick={handleGuidedSubmit}
+                        disabled={guidedInput.trim().length < 3}
+                        className="w-full mt-4 rounded-xl bg-gradient-to-r from-purple-600 to-blue-600 text-white font-semibold py-3 text-sm hover:from-purple-700 hover:to-blue-700 transition disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+                      >
+                        <Sparkles className="w-4 h-4" />
+                        Find My Best Match
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              )}
             </div>
           </div>
         )}
