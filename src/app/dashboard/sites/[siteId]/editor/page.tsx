@@ -685,8 +685,30 @@ export default function SiteEditorPage({ params }: { params: Promise<{ siteId: s
                 <Field label="Footer bg" type="color" value={customization.themeSettings.colors?.footerBg || "#111827"} onChange={(value) => setCustomization((prev) => ({ ...prev, themeSettings: { ...prev.themeSettings, colors: { ...(prev.themeSettings.colors || {}), footerBg: value } } }))} />
               </div>
               <div className="grid grid-cols-2 gap-3">
-                <Field label="Heading font" value={customization.themeSettings.typography?.headingFont || "Inter"} onChange={(value) => setCustomization((prev) => ({ ...prev, themeSettings: { ...prev.themeSettings, typography: { ...(prev.themeSettings.typography || {}), headingFont: value } } }))} />
-                <Field label="Body font" value={customization.themeSettings.typography?.bodyFont || "Inter"} onChange={(value) => setCustomization((prev) => ({ ...prev, themeSettings: { ...prev.themeSettings, typography: { ...(prev.themeSettings.typography || {}), bodyFont: value } } }))} />
+                <label className="space-y-1.5 block">
+                  <span className="block text-xs font-semibold uppercase tracking-wide text-surface-500">Heading font</span>
+                  <select
+                    value={customization.themeSettings.typography?.headingFont || "Inter"}
+                    onChange={(e) => setCustomization((prev) => ({ ...prev, themeSettings: { ...prev.themeSettings, typography: { ...(prev.themeSettings.typography || {}), headingFont: e.target.value } } }))}
+                    className="w-full rounded-xl border border-surface-200 bg-white px-3 py-2 text-sm"
+                  >
+                    {["Inter", "Plus Jakarta Sans", "Poppins", "Roboto", "Open Sans", "Lato", "Montserrat", "Raleway", "Nunito", "Playfair Display", "Merriweather", "Oswald", "DM Sans", "Space Grotesk", "Outfit", "Sora", "Urbanist", "Manrope", "Work Sans", "Libre Baskerville"].map((f) => (
+                      <option key={f} value={f}>{f}</option>
+                    ))}
+                  </select>
+                </label>
+                <label className="space-y-1.5 block">
+                  <span className="block text-xs font-semibold uppercase tracking-wide text-surface-500">Body font</span>
+                  <select
+                    value={customization.themeSettings.typography?.bodyFont || "Inter"}
+                    onChange={(e) => setCustomization((prev) => ({ ...prev, themeSettings: { ...prev.themeSettings, typography: { ...(prev.themeSettings.typography || {}), bodyFont: e.target.value } } }))}
+                    className="w-full rounded-xl border border-surface-200 bg-white px-3 py-2 text-sm"
+                  >
+                    {["Inter", "Plus Jakarta Sans", "Poppins", "Roboto", "Open Sans", "Lato", "Montserrat", "Raleway", "Nunito", "Playfair Display", "Merriweather", "Oswald", "DM Sans", "Space Grotesk", "Outfit", "Sora", "Urbanist", "Manrope", "Work Sans", "Libre Baskerville"].map((f) => (
+                      <option key={f} value={f}>{f}</option>
+                    ))}
+                  </select>
+                </label>
               </div>
             </section>
           )}
