@@ -31,6 +31,10 @@ export async function POST(req: NextRequest) {
       return error("Invalid email or password", 401);
     }
 
+    if (user.isBanned) {
+      return error("Your account has been suspended. Contact support for assistance.", 403);
+    }
+
     const token = await createToken(user.id);
 
     const response = success({

@@ -24,6 +24,9 @@ model User {
   resetTokenExpiry       DateTime?
   emailVerifyToken       String?   @unique
   emailVerifyTokenExpiry DateTime?
+  isBanned               Boolean   @default(false)
+  bannedAt               DateTime?
+  bannedReason           String?
   accounts               Account[]
   notifications    Notification[]
   sessions         Session[]

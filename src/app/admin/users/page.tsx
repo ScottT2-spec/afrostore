@@ -1,6 +1,6 @@
 "use client";
 import { ChevronLeft, ChevronRight, Loader2, X } from "lucide-react";
-import { Search, Shield, UserPlus, Users } from "@/components/icons/FilledIcons";
+import { Search, Shield, Trash2, UserPlus, Users } from "@/components/icons/FilledIcons";
 
 import { useState, useEffect, useCallback } from "react";
 import { api } from "@/lib/api-client";
@@ -13,6 +13,9 @@ interface User {
   role: string;
   storesCount: number;
   createdAt: string;
+  isBanned: boolean;
+  bannedAt: string | null;
+  bannedReason: string | null;
 }
 
 export default function AdminUsersPage() {
@@ -26,6 +29,15 @@ export default function AdminUsersPage() {
   const [creating, setCreating] = useState(false);
   const [createForm, setCreateForm] = useState({ email: "", firstName: "", lastName: "", password: "", role: "MERCHANT" });
   const [createError, setCreateError] = useState("");
+
+  // Ban modal state
+  const [banModal, setBanModal] = useState<{ userId: string; userName: string } | null>(null);
+  const [banReason, setBanReason] = useState("");
+  const [banning, setBanning] = useState(false);
+
+  // Delete confirm state
+  const [deleteModal, setDeleteModal] = useState<{ userId: string; userName: string } | null>(null);
+  const [deleting, setDeleting] = useState(false);
 
   const createUser = async () => {
     if (!createForm.email || !createForm.firstName || !createForm.lastName || !createForm.password) return;
@@ -62,9 +74,47 @@ export default function AdminUsersPage() {
       setUsers((prev) => prev.map((u) => u.id === userId ? { ...u, role: newRole } : u));
     } else {
       alert(res.error || "Failed to update role");
-      fetchUsers(); // refetch to restore correct state
+      fetchUsers();
     }
     setUpdatingId(null);
+  };
+
+  const banUser = async () => {
+    if (!banModal) return;
+    setBanning(true);
+    const res = await api.patch(`/api/admin/users/${banModal.userId}`, { isBanned: true, bannedReason: banReason || undefined });
+    if (res.success) {
+      setUsers((prev) => prev.map((u) => u.id === banModal.userId ? { ...u, isBanned: true, bannedAt: new Date().toISOString(), bannedReason: banReason || null } : u));
+      setBanModal(null);
+      setBanReason("");
+    } else {
+      alert(res.error || "Failed to ban user");
+    }
+    setBanning(false);
+  };
+
+  const unbanUser = async (userId: string) => {
+    setUpdatingId(userId);
+    const res = await api.patch(`/api/admin/users/${userId}`, { isBanned: false });
+    if (res.success) {
+      setUsers((prev) => prev.map((u) => u.id === userId ? { ...u, isBanned: false, bannedAt: null, bannedReason: null } : u));
+    } else {
+      alert(res.error || "Failed to unban user");
+    }
+    setUpdatingId(null);
+  };
+
+  const deleteUser = async () => {
+    if (!deleteModal) return;
+    setDeleting(true);
+    const res = await api.delete(`/api/admin/users/${deleteModal.userId}`);
+    if (res.success) {
+      setDeleteModal(null);
+      fetchUsers();
+    } else {
+      alert(res.error || "Failed to delete user");
+    }
+    setDeleting(false);
   };
 
   return (
@@ -101,6 +151,55 @@ export default function AdminUsersPage() {
               {creating && <Loader2 className="h-4 w-4 animate-spin" />} Create
             </button>
             <button onClick={() => { setShowCreate(false); setCreateError(""); }} className="px-4 py-2 text-sm rounded-xl border border-surface-200 hover:bg-surface-50">Cancel</button>
+          </div>
+        </div>
+      )}
+
+      {/* Ban Confirmation Modal */}
+      {banModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50">
+          <div className="rounded-2xl border border-surface-200 bg-white p-6 w-full max-w-md mx-4">
+            <div className="flex items-center justify-between mb-4">
+              <h3 className="text-base font-bold text-surface-900">Ban User</h3>
+              <button onClick={() => { setBanModal(null); setBanReason(""); }} className="text-surface-400 hover:text-surface-600"><X className="h-5 w-5" /></button>
+            </div>
+            <p className="text-sm text-surface-600 mb-4">
+              Are you sure you want to ban <span className="font-semibold">{banModal.userName}</span>? They will not be able to log in.
+            </p>
+            <textarea
+              placeholder="Reason for ban (optional)"
+              value={banReason}
+              onChange={(e) => setBanReason(e.target.value)}
+              rows={3}
+              className="w-full rounded-xl border border-surface-200 px-4 py-2.5 text-sm focus:outline-none focus:border-brand-500 mb-4"
+            />
+            <div className="flex gap-2">
+              <button onClick={banUser} disabled={banning} className="px-4 py-2 text-sm rounded-xl bg-red-600 text-white hover:bg-red-700 disabled:opacity-50 flex items-center gap-2">
+                {banning && <Loader2 className="h-4 w-4 animate-spin" />} Ban User
+              </button>
+              <button onClick={() => { setBanModal(null); setBanReason(""); }} className="px-4 py-2 text-sm rounded-xl border border-surface-200 hover:bg-surface-50">Cancel</button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Delete Confirmation Modal */}
+      {deleteModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50">
+          <div className="rounded-2xl border border-surface-200 bg-white p-6 w-full max-w-md mx-4">
+            <div className="flex items-center justify-between mb-4">
+              <h3 className="text-base font-bold text-surface-900">Delete User</h3>
+              <button onClick={() => setDeleteModal(null)} className="text-surface-400 hover:text-surface-600"><X className="h-5 w-5" /></button>
+            </div>
+            <p className="text-sm text-surface-600 mb-4">
+              Are you sure you want to permanently delete <span className="font-semibold">{deleteModal.userName}</span>? This action cannot be undone.
+            </p>
+            <div className="flex gap-2">
+              <button onClick={deleteUser} disabled={deleting} className="px-4 py-2 text-sm rounded-xl bg-red-600 text-white hover:bg-red-700 disabled:opacity-50 flex items-center gap-2">
+                {deleting && <Loader2 className="h-4 w-4 animate-spin" />} Delete
+              </button>
+              <button onClick={() => setDeleteModal(null)} className="px-4 py-2 text-sm rounded-xl border border-surface-200 hover:bg-surface-50">Cancel</button>
+            </div>
           </div>
         </div>
       )}
@@ -145,7 +244,12 @@ export default function AdminUsersPage() {
                           <div className="h-8 w-8 rounded-full bg-gradient-to-br from-brand-600 to-accent-400 flex items-center justify-center text-white text-[10px] font-bold">
                             {u.firstName[0]}{u.lastName[0]}
                           </div>
-                          <span className="text-sm font-medium text-surface-900">{u.firstName} {u.lastName}</span>
+                          <div className="flex items-center gap-2">
+                            <span className="text-sm font-medium text-surface-900">{u.firstName} {u.lastName}</span>
+                            {u.isBanned && (
+                              <span className="text-[10px] font-semibold px-2 py-0.5 rounded-full bg-red-100 text-red-700">BANNED</span>
+                            )}
+                          </div>
                         </div>
                       </td>
                       <td className="px-6 py-3.5 text-sm text-surface-500">{u.email}</td>
@@ -156,19 +260,45 @@ export default function AdminUsersPage() {
                       </td>
                       <td className="px-6 py-3.5 text-center text-sm font-semibold text-surface-900">{u.storesCount}</td>
                       <td className="px-6 py-3.5 text-sm text-surface-500">{new Date(u.createdAt).toLocaleDateString()}</td>
-                      <td className="px-6 py-3.5 text-center">
-                        {updatingId === u.id ? (
-                          <Loader2 className="h-4 w-4 animate-spin text-accent-600 mx-auto" />
-                        ) : (
-                          <select
-                            value={u.role}
-                            onChange={(e) => updateRole(u.id, e.target.value)}
-                            className="text-xs rounded-lg border border-surface-200 px-2 py-1 focus:outline-none focus:border-brand-500"
-                          >
-                            <option value="MERCHANT">MERCHANT</option>
-                            <option value="ADMIN">ADMIN</option>
-                          </select>
-                        )}
+                      <td className="px-6 py-3.5">
+                        <div className="flex items-center justify-center gap-2">
+                          {updatingId === u.id ? (
+                            <Loader2 className="h-4 w-4 animate-spin text-accent-600" />
+                          ) : (
+                            <>
+                              <select
+                                value={u.role}
+                                onChange={(e) => updateRole(u.id, e.target.value)}
+                                className="text-xs rounded-lg border border-surface-200 px-2 py-1 focus:outline-none focus:border-brand-500"
+                              >
+                                <option value="MERCHANT">MERCHANT</option>
+                                <option value="ADMIN">ADMIN</option>
+                              </select>
+                              {u.isBanned ? (
+                                <button
+                                  onClick={() => unbanUser(u.id)}
+                                  className="text-xs px-2.5 py-1 rounded-lg bg-green-100 text-green-700 hover:bg-green-200 font-medium transition-colors"
+                                >
+                                  Unban
+                                </button>
+                              ) : (
+                                <button
+                                  onClick={() => setBanModal({ userId: u.id, userName: `${u.firstName} ${u.lastName}` })}
+                                  className="text-xs px-2.5 py-1 rounded-lg bg-red-100 text-red-700 hover:bg-red-200 font-medium transition-colors"
+                                >
+                                  Ban
+                                </button>
+                              )}
+                              <button
+                                onClick={() => setDeleteModal({ userId: u.id, userName: `${u.firstName} ${u.lastName}` })}
+                                className="p-1 rounded-lg text-surface-400 hover:text-red-600 hover:bg-red-50 transition-colors"
+                                title="Delete user"
+                              >
+                                <Trash2 className="h-3.5 w-3.5" />
+                              </button>
+                            </>
+                          )}
+                        </div>
                       </td>
                     </tr>
                   ))}
