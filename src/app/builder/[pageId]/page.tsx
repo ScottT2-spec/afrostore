@@ -260,6 +260,20 @@ export default function BuilderPage({ params }: { params: Promise<{ pageId: stri
       }
 
       console.log("All pages saved successfully");
+
+      // Save design system (fonts, colors, typography) to site customization
+      if (site.theme?.designSystem) {
+        const ds = site.theme.designSystem;
+        await api.patch(`/api/sites/${siteId}/customization`, {
+          themeSettings: {
+            fonts: ds.fonts,
+            colors: ds.colors,
+            typography: ds.typography,
+            borderRadius: ds.borderRadius,
+          },
+        });
+        console.log("Design system saved to customization");
+      }
     } catch (err) {
       console.error("Failed to save pages:", err);
       throw err;

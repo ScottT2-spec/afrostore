@@ -206,10 +206,15 @@ export function buildThemeDataWithCustomization(theme: ThemeData | null, customi
   const themeConfig = theme.config || {};
   const themeSettings = customization?.themeSettings || {};
   const colors = deepMerge(asRecord(themeConfig.colors), asRecord(themeSettings.colors));
-  const fonts = deepMerge(asRecord(themeConfig.fonts), asRecord(themeSettings.typography ? {
+  const fontsFromTypography = themeSettings.typography ? {
     heading: themeSettings.typography.headingFont,
     body: themeSettings.typography.bodyFont,
-  } : {}));
+  } : {};
+  const fontsFromSettings = themeSettings.fonts ? {
+    heading: themeSettings.fonts.heading,
+    body: themeSettings.fonts.body,
+  } : {};
+  const fonts = deepMerge(asRecord(themeConfig.fonts), deepMerge(asRecord(fontsFromTypography), asRecord(fontsFromSettings)));
   const layout = deepMerge(asRecord(themeConfig.layout), asRecord(themeSettings.layout));
 
   return {

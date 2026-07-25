@@ -1,6 +1,6 @@
 "use client";
 
-import React from "react";
+import React, { useEffect } from "react";
 
 /* ───────── Theme Config Types ───────── */
 
@@ -123,6 +123,24 @@ export function ThemeProvider({ theme, children }: ThemeProviderProps) {
   // Fonts
   if (fonts?.heading) themeVars["--theme-font-heading"] = `'${fonts.heading}', system-ui, sans-serif`;
   if (fonts?.body) themeVars["--theme-font-body"] = `'${fonts.body}', system-ui, sans-serif`;
+
+  // Load Google Fonts dynamically
+  useEffect(() => {
+    const fontsToLoad = new Set<string>();
+    if (fonts?.heading) fontsToLoad.add(fonts.heading);
+    if (fonts?.body) fontsToLoad.add(fonts.body);
+
+    fontsToLoad.forEach((fontName) => {
+      const encoded = fontName.replace(/ /g, "+");
+      const href = `https://fonts.googleapis.com/css2?family=${encoded}:wght@300;400;500;600;700;800&display=swap`;
+      if (!document.querySelector(`link[href="${href}"]`)) {
+        const link = document.createElement("link");
+        link.rel = "stylesheet";
+        link.href = href;
+        document.head.appendChild(link);
+      }
+    });
+  }, [fonts?.heading, fonts?.body]);
 
   // Layout
   if (layout?.maxWidth) themeVars["--theme-max-width"] = layout.maxWidth;
