@@ -44,11 +44,11 @@ export async function GET(req: NextRequest) {
           id: true,
           name: true,
           slug: true,
-          plan: true,
           status: true,
           createdAt: true,
           workspace: {
             select: {
+              plan: true,
               owner: {
                 select: { firstName: true, lastName: true },
               },
@@ -63,7 +63,7 @@ export async function GET(req: NextRequest) {
       id: s.id,
       name: s.name,
       slug: s.slug,
-      plan: s.plan,
+      plan: s.workspace?.plan || "FREE",
       status: s.status,
       createdAt: s.createdAt,
       owner: s.workspace?.owner || { firstName: "Unknown", lastName: "" },

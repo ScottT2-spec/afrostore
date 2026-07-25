@@ -42,9 +42,10 @@ export async function GET(req: NextRequest) {
       prisma.site.count({ where }),
     ]);
 
-    // Flatten workspace.owner to owner for frontend compatibility
+    // Flatten workspace.owner and plan to top level for frontend compatibility
     const sites = sitesRaw.map((s) => ({
       ...s,
+      plan: s.workspace?.plan || "FREE",
       owner: s.workspace?.owner || { firstName: "Unknown", lastName: "", email: "" },
       workspace: undefined,
     }));
