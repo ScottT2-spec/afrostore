@@ -10,8 +10,11 @@ import { sendPasswordResetEmail } from "@/lib/email";
 // ─── Send Password Reset Email (background) ────────────────
 
 const sendPasswordReset = inngest.createFunction(
-  { id: "send-password-reset-email", retries: 3 },
-  { event: "auth/password-reset.requested" },
+  {
+    id: "send-password-reset-email",
+    retries: 3,
+    triggers: [{ event: "auth/password-reset.requested" }],
+  },
   async ({ event }) => {
     const { to, name, resetLink } = event.data;
     const result = await sendPasswordResetEmail({ to, name, resetLink });
