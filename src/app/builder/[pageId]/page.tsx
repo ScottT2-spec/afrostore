@@ -128,6 +128,10 @@ export default function BuilderPage({ params }: { params: Promise<{ pageId: stri
         // Load pages to get actual content
         const pagesRes = await api.get<any>(`/api/sites/${resolvedSiteId}/pages`);
         if (cancelled) return;
+
+        // Load saved customization (fonts, colors, etc.)
+        const customRes = await api.get<any>(`/api/sites/${resolvedSiteId}/customization`);
+        if (cancelled) return;
         
         if (siteRes.success && siteRes.data) {
           // Get template slug for preset seeding
@@ -191,7 +195,17 @@ export default function BuilderPage({ params }: { params: Promise<{ pageId: stri
             theme: {
               id: "default",
               name: "Default Theme",
-              designSystem: defaultDesignSystem,
+              designSystem: (() => {
+                const saved = customRes.success ? customRes.data?.customization?.themeSettings : null;
+                if (!saved) return defaultDesignSystem;
+                return {
+                  ...defaultDesignSystem,
+                  colors: { ...defaultDesignSystem.colors, ...(saved.colors || {}) },
+                  fonts: { ...defaultDesignSystem.fonts, ...(saved.fonts || {}) },
+                  typography: saved.typography ? { ...defaultDesignSystem.typography, ...(saved.typography || {}) } : defaultDesignSystem.typography,
+                  borderRadius: saved.borderRadius || defaultDesignSystem.borderRadius,
+                };
+              })(),
             },
             sections: currentPage?.sections || [],
             pages: convertedPages.length > 0 ? convertedPages : defaultPages,
