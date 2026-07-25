@@ -81,7 +81,13 @@ model Workspace {
   name      String
   slug      String            @unique
   logo      String?
-  plan      WorkspacePlan     @default(FREE)
+  plan                    WorkspacePlan     @default(FREE)
+  planPeriod              String?
+  planStartDate           DateTime?
+  planEndDate             DateTime?
+  paystackCustomerCode    String?
+  paystackSubscriptionCode String?
+  paystackPlanCode        String?
   status    WorkspaceStatus   @default(ACTIVE)
   createdAt DateTime          @default(now())
   updatedAt DateTime          @updatedAt
