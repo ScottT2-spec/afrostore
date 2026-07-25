@@ -80,6 +80,8 @@ export default function ThemeProvider({ designSystem, customCss, children }: The
     "--pk-border": designSystem.colors.border,
     "--pk-font-heading": `'${designSystem.fonts.heading}', sans-serif`,
     "--pk-font-body": `'${designSystem.fonts.body}', sans-serif`,
+    "--theme-font-heading": `'${designSystem.fonts.heading}', sans-serif`,
+    "--theme-font-body": `'${designSystem.fonts.body}', sans-serif`,
     "--pk-radius": getRadiusValue(designSystem.borderRadius),
   };
 
@@ -126,7 +128,7 @@ export default function ThemeProvider({ designSystem, customCss, children }: The
   };
 
   return (
-    <div style={styleVariables} className="theme-wrapper">
+    <div style={styleVariables} className="theme-wrapper theme-root">
       <style>{generateTypographyCSS()}</style>
       {customCss && <style>{customCss}</style>}
       {children}
