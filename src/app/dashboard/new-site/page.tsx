@@ -205,9 +205,10 @@ export default function NewSitePage() {
 
     setSiteType(bestMatch.siteType);
     setIndustry(bestMatch.industry);
+    setLaunchMethod('quick'); // Auto-select "Build with AI"
     setShowGuided(false);
     setGuidedInput('');
-    setStep(3); // Skip to step 3 since we've set both type and industry
+    setStep(4); // Skip straight to business info — type, industry, and method are all set
   };
 
   const totalSteps = 7;
