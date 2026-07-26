@@ -146,8 +146,14 @@ export function ThemeProvider({ theme, children }: ThemeProviderProps) {
   if (layout?.maxWidth) themeVars["--theme-max-width"] = layout.maxWidth;
   if (layout?.productColumns) themeVars["--theme-product-columns"] = String(layout.productColumns);
 
+  // Add marker classes when custom fonts are set — globals.css uses these
+  // for high-specificity overrides that beat template-hardcoded fonts
+  const classNames = ["theme-root"];
+  if (fonts?.body) classNames.push("theme-has-body-font");
+  if (fonts?.heading) classNames.push("theme-has-heading-font");
+
   return (
-    <div className="theme-root" style={themeVars as React.CSSProperties}>
+    <div className={classNames.join(" ")} style={themeVars as React.CSSProperties}>
       {children}
     </div>
   );
