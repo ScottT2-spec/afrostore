@@ -251,6 +251,36 @@ export default function BuilderPreviewPage() {
         } else {
           console.log("No colors object found in theme.designSystem");
         }
+
+        // Apply font changes
+        const fonts = theme?.designSystem?.fonts;
+        if (fonts) {
+          const themeRoot = document.querySelector(".theme-root");
+          if (fonts.heading) {
+            root.style.setProperty("--theme-font-heading", `'${fonts.heading}', system-ui, sans-serif`);
+            themeRoot?.classList.add("theme-has-heading-font");
+          } else {
+            themeRoot?.classList.remove("theme-has-heading-font");
+          }
+          if (fonts.body) {
+            root.style.setProperty("--theme-font-body", `'${fonts.body}', system-ui, sans-serif`);
+            themeRoot?.classList.add("theme-has-body-font");
+          } else {
+            themeRoot?.classList.remove("theme-has-body-font");
+          }
+
+          // Load Google Fonts
+          [fonts.heading, fonts.body].filter(Boolean).forEach((fontName) => {
+            const encoded = fontName!.replace(/ /g, "+");
+            const href = `https://fonts.googleapis.com/css2?family=${encoded}:wght@300;400;500;600;700;800&display=swap`;
+            if (!document.querySelector(`link[href="${href}"]`)) {
+              const link = document.createElement("link");
+              link.rel = "stylesheet";
+              link.href = href;
+              document.head.appendChild(link);
+            }
+          });
+        }
       }
       if (event.data.type === "builder-viewport-change") {
         // Handle viewport changes
