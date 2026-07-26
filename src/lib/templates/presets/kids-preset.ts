@@ -6,6 +6,14 @@ import type { TemplateBlock } from "@/components/storefront/TemplateBlockRendere
  */
 export const KIDS_TEMPLATE_PRESET: TemplateBlock[] = [
   {
+    id: "kids-header",
+    type: "kidsHeader",
+    props: {
+      storeName: "Kids Store",
+      storeSlug: "kids-store",
+    },
+  },
+  {
     id: "kids-announcement",
     type: "kidsAnnouncementBar",
     props: {
@@ -130,5 +138,10 @@ export const KIDS_TEMPLATE_PRESET: TemplateBlock[] = [
       buttonText: "Subscribe",
       backgroundColor: "#faf8f5",
     },
+  },
+  {
+    id: "kids-footer",
+    type: "kidsFooter",
+    props: {},
   },
 ];
