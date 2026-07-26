@@ -3,6 +3,7 @@ import { prisma } from "@/lib/db";
 import { getStoreContext, success, error, validationError, generateOrderNumber, logAudit } from "@/lib/api-helpers";
 import { createOrderSchema } from "@/lib/validators";
 import { unauthorized } from "@/lib/auth";
+import { sendOrderConfirmationEmail } from "@/lib/email";
 
 
 type Params = { params: Promise<{ siteId: string }> };
@@ -247,6 +248,22 @@ export async function POST(req: NextRequest, { params }: Params) {
       siteId, action: "CREATE", entity: "order",
       entityId: order.id, after: order,
     });
+
+    // Send order confirmation email (fire-and-forget — don't block the response)
+    sendOrderConfirmationEmail({
+      to: email,
+      customerName: `${firstName} ${lastName}`,
+      storeName: site.name,
+      orderNumber: order.orderNumber,
+      items: orderItems,
+      subtotal,
+      deliveryFee,
+      discount,
+      total,
+      currency: site.currency,
+      paymentMethod,
+      deliveryAddress: deliveryAddress as { address?: string; city?: string; state?: string },
+    }).catch((err) => console.error("Order confirmation email error:", err));
 
     return success(order, 201);
   } catch (err: any) {
