@@ -197,6 +197,19 @@
     font-family: var(--theme-font-heading) !important;
   }
 
+  /* Override template <style> blocks that hardcode titleFont on custom classes.
+     These use higher specificity to beat template font-family rules. */
+  .theme-root.theme-has-heading-font [class*="-title"],
+  .theme-root.theme-has-heading-font [class*="-heading"],
+  .theme-root.theme-has-heading-font [class*="-headline"],
+  .theme-root.theme-has-heading-font [class*="Title"],
+  .theme-root.theme-has-heading-font [class*="Heading"],
+  .theme-root.theme-has-heading-font [class*="hero-title"],
+  .theme-root.theme-has-heading-font [class*="banner-title"],
+  .theme-root.theme-has-heading-font [class*="section-title"] {
+    font-family: var(--theme-font-heading) !important;
+  }
+
   /* Theme-aware footer */
   .theme-root footer.themed-footer {
     background-color: var(--theme-footer-bg);

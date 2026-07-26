@@ -687,7 +687,7 @@ export default function BuilderPreviewPage() {
   };
 
   return (
-    <div className="min-h-screen bg-white">
+    <div className="min-h-screen bg-white theme-root">
       {/* Disable all link navigation in editor mode */}
       <style dangerouslySetInnerHTML={{ __html: `
         .builder-block-wrapper a,
