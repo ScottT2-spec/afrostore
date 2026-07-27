@@ -390,3 +390,75 @@ This link expires in 30 minutes. If you didn't request this, you can safely igno
     };
   }
 }
+
+// ─── Newsletter Welcome Email ─────────────────────────────────────
+
+interface NewsletterWelcomeData {
+  to: string;
+  storeName: string;
+  storeUrl: string;
+}
+
+export async function sendNewsletterWelcomeEmail(
+  data: NewsletterWelcomeData
+): Promise<{ success: boolean; error?: string }> {
+  const year = new Date().getFullYear();
+  const htmlBody = `
+<!DOCTYPE html>
+<html>
+<head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"></head>
+<body style="margin:0;padding:0;background:#F8FAFC;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;">
+  <div style="max-width:600px;margin:0 auto;padding:20px;">
+    <div style="background:#0F766E;border-radius:16px 16px 0 0;padding:30px;text-align:center;">
+      <h1 style="color:#FFFFFF;margin:0;font-size:24px;">${data.storeName}</h1>
+      <p style="color:#A7F3D0;margin:8px 0 0;font-size:14px;">Welcome to our newsletter!</p>
+    </div>
+    <div style="background:#FFFFFF;padding:30px;border:1px solid #E2E8F0;border-top:none;">
+      <p style="color:#1B2B4B;font-size:16px;margin:0 0 20px;">Hi there 👋</p>
+      <p style="color:#475569;font-size:14px;line-height:1.6;margin:0 0 20px;">
+        Thanks for subscribing to <strong>${data.storeName}</strong>! You'll be the first to know about new products, exclusive deals, and special promotions.
+      </p>
+      <div style="text-align:center;margin:30px 0;">
+        <a href="${data.storeUrl}" style="display:inline-block;background:#0F766E;color:#FFFFFF;padding:14px 32px;border-radius:12px;font-size:15px;font-weight:600;text-decoration:none;">
+          Visit Our Store
+        </a>
+      </div>
+      <p style="color:#94A3B8;font-size:12px;line-height:1.5;margin:20px 0 0;">
+        You're receiving this because you subscribed to ${data.storeName}'s newsletter.
+      </p>
+    </div>
+    <div style="text-align:center;padding:20px;">
+      <p style="color:#94A3B8;font-size:11px;margin:0;">© ${year} ${data.storeName}. All rights reserved.</p>
+    </div>
+  </div>
+</body>
+</html>`;
+
+  const textBody = `Welcome to ${data.storeName}!\n\nThanks for subscribing to our newsletter. You'll be the first to know about new products, exclusive deals, and special promotions.\n\nVisit our store: ${data.storeUrl}\n\n— ${data.storeName}`;
+
+  try {
+    const command = new SendEmailCommand({
+      Source: `${data.storeName} <${FROM_EMAIL}>`,
+      Destination: { ToAddresses: [data.to] },
+      Message: {
+        Subject: {
+          Data: `Welcome to ${data.storeName}! 🎉`,
+          Charset: "UTF-8",
+        },
+        Body: {
+          Html: { Data: htmlBody, Charset: "UTF-8" },
+          Text: { Data: textBody, Charset: "UTF-8" },
+        },
+      },
+    });
+
+    await ses.send(command);
+    return { success: true };
+  } catch (error) {
+    console.error("Newsletter welcome email failed:", error);
+    return {
+      success: false,
+      error: error instanceof Error ? error.message : "Unknown error",
+    };
+  }
+}

@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/db";
+import { sendNewsletterWelcomeEmail } from "@/lib/email";
 
 type Params = { params: Promise<{ slug: string }> };
 
@@ -19,7 +20,7 @@ export async function POST(req: NextRequest, { params }: Params) {
 
     const site = await prisma.site.findFirst({
       where: { slug, status: "ACTIVE" },
-      select: { id: true },
+      select: { id: true, name: true },
     });
 
     if (!site) {
@@ -28,6 +29,13 @@ export async function POST(req: NextRequest, { params }: Params) {
         { status: 404 }
       );
     }
+
+    // Check if already subscribed before upserting
+    const existing = await prisma.crmContact.findUnique({
+      where: { siteId_email: { siteId: site.id, email } },
+      select: { tags: true },
+    });
+    const isNew = !existing || !existing.tags.includes("newsletter");
 
     // Upsert into CrmContact with source "newsletter"
     await prisma.crmContact.upsert({
@@ -44,6 +52,16 @@ export async function POST(req: NextRequest, { params }: Params) {
         lastActivityAt: new Date(),
       },
     });
+
+    // Send welcome email only to new subscribers (non-blocking)
+    if (isNew) {
+      const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || `https://${slug}.prokip.com`;
+      sendNewsletterWelcomeEmail({
+        to: email,
+        storeName: site.name || slug,
+        storeUrl: `${baseUrl}/store/${slug}`,
+      }).catch((err) => console.error("Newsletter welcome email error:", err));
+    }
 
     return NextResponse.json({ success: true });
   } catch (error) {
