@@ -121,7 +121,7 @@ export function TShirtsPrintsHeader({
           <button className="tp-mobile-toggle" type="button" aria-label="Toggle navigation" onClick={() => setMobileMenu((value) => !value)}>
             <Menu className="h-5 w-5" />
           </button>
-          <Link href={`/store/${storeSlug}/my-account`} className="tp-action tp-login" aria-label="Login or register">
+          <Link href={`/store/${storeSlug}/login`} className="tp-action tp-login" aria-label="Login or register">
             <span className="tp-action-icon" aria-hidden="true">
               <User className="h-4 w-4" />
             </span>
@@ -170,7 +170,7 @@ export function TShirtsPrintsHeader({
           <Link href={`/store/${storeSlug}/cart`} onClick={() => setMobileMenu(false)}>
             Cart
           </Link>
-          <Link href={`/store/${storeSlug}/my-account`} onClick={() => setMobileMenu(false)}>
+          <Link href={`/store/${storeSlug}/login`} onClick={() => setMobileMenu(false)}>
             Login / Register
           </Link>
         </div>

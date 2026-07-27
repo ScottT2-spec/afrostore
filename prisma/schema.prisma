@@ -504,6 +504,7 @@ model Customer {
   firstName          String
   lastName           String
   phone              String?
+  passwordHash       String?
   address            Json?
   tags               String[]
   note               String?

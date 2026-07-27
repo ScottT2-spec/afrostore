@@ -1064,7 +1064,7 @@ export function KidsHeader({
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
             </button>
             {/* Sign In */}
-            <Link href={`${base}/my-account`} className="kh-account-link" aria-label="Sign In / Sign Up" style={{ textDecoration: 'none' }}>
+            <Link href={`${base}/login`} className="kh-account-link" aria-label="Sign In / Sign Up" style={{ textDecoration: 'none' }}>
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
               <span>Sign In / Sign Up</span>
             </Link>

@@ -818,7 +818,7 @@ export function InteriorHeader({
               <Link href={`${base}/order-tracking`}>Track Order</Link>
               <Link href={`${base}/shop`}>Help</Link>
               <span className="ih-sep" />
-              <Link href={`${base}/my-account`}>Login / Register</Link>
+              <Link href={`${base}/login`}>Login / Register</Link>
             </div>
             <button onClick={() => setSearchOpen(true)} aria-label="Search" style={{ background: "none", border: "none", cursor: "pointer", color: TOKENS.titleColor, padding: "4px" }}>{searchSvg}</button>
             <Link href={`${base}/cart`} className="ih-cart-btn">
@@ -840,7 +840,7 @@ export function InteriorHeader({
           <Link href={`${base}/shop`} onClick={() => setMobileOpen(false)}>Contact</Link>
           <Link href={`${base}/order-tracking`} onClick={() => setMobileOpen(false)}>Track Order</Link>
           <Link href={`${base}/shop`} onClick={() => setMobileOpen(false)}>Help</Link>
-          <Link href={`${base}/my-account`} onClick={() => setMobileOpen(false)}>Login / Register</Link>
+          <Link href={`${base}/login`} onClick={() => setMobileOpen(false)}>Login / Register</Link>
           <Link href={`${base}/wishlist`} onClick={() => setMobileOpen(false)}>Wishlist</Link>
         </div>
       </header>
@@ -950,7 +950,7 @@ export function InteriorFooterFull({
         <div>
           <h4 className="if-col-title">Account</h4>
           <ul className="if-links">
-            <li><Link href={`${base}/my-account`}>Login / Register</Link></li>
+            <li><Link href={`${base}/login`}>Login / Register</Link></li>
             <li><Link href={`${base}/wishlist`}>Wishlist</Link></li>
             <li><Link href={`${base}/cart`}>Cart</Link></li>
             <li><Link href={`${base}/compare`}>Compare</Link></li>

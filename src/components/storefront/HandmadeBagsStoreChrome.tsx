@@ -207,7 +207,7 @@ export function HandmadeBagsHeader({
                 {!isLanding && <Link href={resolveStoreLink("/blog", storeSlug)} className="hbh-nav-link">Blog</Link>}
                 <Link href={resolveStoreLink("/about", storeSlug)} className="hbh-nav-link">About Us</Link>
                 {!isLanding && <Link href={resolveStoreLink("/contact", storeSlug)} className="hbh-nav-link">Contact Us</Link>}
-                {!isLanding && <Link href={resolveStoreLink("/my-account", storeSlug)} className="hbh-nav-link">Login / Register</Link>}
+                {!isLanding && <Link href={resolveStoreLink("/login", storeSlug)} className="hbh-nav-link">Login / Register</Link>}
               </>
             )}
           </div>
@@ -234,7 +234,7 @@ export function HandmadeBagsHeader({
             {!isLanding && <Link href={resolveStoreLink("/blog", storeSlug)} onClick={() => setMobileMenu(false)}>Blog</Link>}
             <Link href={resolveStoreLink("/about", storeSlug)} onClick={() => setMobileMenu(false)}>About Us</Link>
             {!isLanding && <Link href={resolveStoreLink("/contact", storeSlug)} onClick={() => setMobileMenu(false)}>Contact Us</Link>}
-            {!isLanding && <Link href={resolveStoreLink("/my-account", storeSlug)} onClick={() => setMobileMenu(false)}>Login / Register</Link>}
+            {!isLanding && <Link href={resolveStoreLink("/login", storeSlug)} onClick={() => setMobileMenu(false)}>Login / Register</Link>}
           </>
         )}
       </div>

@@ -1013,7 +1013,7 @@ export function HealthFooterFull({
         <div>
           <h4 className="hf-col-title">My Account</h4>
           <ul className="hf-links">
-            <li><Link href={`${base}/my-account`}>Sign In</Link></li>
+            <li><Link href={`${base}/login`}>Sign In</Link></li>
             <li><Link href={`${base}/wishlist`}>Wishlist</Link></li>
             <li><Link href={`${base}/cart`}>Cart</Link></li>
             <li><Link href={`${base}/compare`}>Compare</Link></li>
