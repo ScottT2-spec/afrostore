@@ -41,7 +41,7 @@ const statusColors: Record<string, string> = {
 };
 
 const statusLabels = ["NEW", "CONTACTED", "QUALIFIED", "PROPOSAL", "NEGOTIATION", "WON", "LOST", "UNSUBSCRIBED"];
-const sourceOptions = ["organic", "referral", "ad", "form", "social", "email", "manual", "other"];
+const sourceOptions = ["organic", "referral", "ad", "form", "social", "email", "newsletter", "manual", "other"];
 
 export default function CrmPage() {
   const { currentStore } = useSite();
