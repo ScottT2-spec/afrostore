@@ -298,14 +298,246 @@ export const COSMETICS_SHOP_BLOCKS: TemplateBlock[] = [
 
 export const COSMETICS_BLOG_BLOCKS: TemplateBlock[] = [
   {
-    id: "cosmetics-blog-header",
-    type: "cosmeticsBlogPageHeader",
+    id: "cosmetics-blog-title",
+    type: "cosmeticsSectionTitle",
     props: {
+      subtitle: "",
       title: "Blog",
-      allLabel: "All",
-      subtitle: "Latest news and updates from {site name}",
-      emptyState: "No blog posts found",
-      searchPlaceholder: "Search blog posts...",
+      description: "Latest news and updates from our store",
+      align: "center",
+      maxWidth: "60%",
+    },
+  },
+  {
+    id: "cosmetics-blog-posts",
+    type: "cosmeticsBlogPosts",
+    props: {
+      maxPosts: 9,
+      columns: 3,
+      showExcerpt: true,
+      showDate: true,
+      sectionTitle: {},
+    },
+  },
+];
+
+/* ═══════════════════════════════════════════════════════════════
+   ABOUT PAGE
+   ═══════════════════════════════════════════════════════════════ */
+
+export const COSMETICS_ABOUT_BLOCKS: TemplateBlock[] = [
+  {
+    id: "cosmetics-about-hero",
+    type: "cosmeticsSectionTitle",
+    props: {
+      subtitle: "BEAUTY & COSMETICS",
+      title: "Our success and company history.",
+      description: "A wonderful serenity has taken possession of my entire soul, like these sweet mornings of spring which I enjoy with my whole heart.",
+      align: "center",
+      maxWidth: "60%",
+      marginBottom: "0px",
+    },
+  },
+  {
+    id: "cosmetics-about-story",
+    type: "fashionAboutContent",
+    props: {
+      layout: "text-with-heading",
+      subtitle: "PREMIUM BEAUTY SINCE 2020",
+      title: "About Our Online Store",
+      paragraphs: [
+        "We believe that beauty is more than skin deep. Our curated collection of premium cosmetics and skincare products is designed to help you look and feel your best, naturally.",
+        "From luxurious moisturizers to vibrant color cosmetics, every product in our store is carefully selected for quality, efficacy, and sustainability. We partner with trusted brands that share our commitment to clean beauty.",
+        "Our team of beauty experts is passionate about helping you discover products that work for your unique skin type and style. Whether you're building a daily routine or exploring new trends, we're here to guide you.",
+        "Founded with a vision to make premium beauty accessible to everyone, we've grown from a small boutique into a trusted destination for beauty enthusiasts worldwide.",
+      ],
+      credit: "Established 2020",
+    },
+  },
+  {
+    id: "cosmetics-about-stats",
+    type: "fashionStatsCounters",
+    props: {
+      counters: [
+        { value: 15000, label: "SATISFIED CLIENTS" },
+        { value: 850, label: "FINISHED PROJECTS" },
+        { value: 45, label: "TEAM MEMBERS" },
+        { value: 12, label: "OFFICES" },
+      ],
+    },
+  },
+  {
+    id: "cosmetics-about-convert",
+    type: "fashionAboutContent",
+    props: {
+      layout: "text-with-heading",
+      subtitle: "BEAUTY INNOVATION",
+      title: "We convert your idea into a reality.",
+      paragraphs: [
+        "Our commitment to innovation drives us to continuously explore new formulations, sustainable packaging, and cutting-edge beauty technologies. We work closely with dermatologists and beauty scientists to bring you products that deliver real results.",
+      ],
+      buttons: [
+        { text: "SHOP NOW", link: "/shop" },
+        { text: "LEARN MORE", link: "#" },
+      ],
+    },
+  },
+  {
+    id: "cosmetics-about-services",
+    type: "fashionServicesGrid",
+    props: {
+      subtitle: "WHAT WE OFFER",
+      title: "Our Expertise",
+      services: [
+        {
+          icon: "✨",
+          title: "SKINCARE",
+          description: "Premium skincare solutions for every skin type and concern.",
+        },
+        {
+          icon: "💄",
+          title: "COLOR COSMETICS",
+          description: "Vibrant, long-lasting makeup for every occasion.",
+        },
+        {
+          icon: "🌿",
+          title: "CLEAN BEAUTY",
+          description: "Natural and organic products free from harmful chemicals.",
+        },
+        {
+          icon: "🧴",
+          title: "PERSONAL CARE",
+          description: "Complete body care and wellness essentials.",
+        },
+      ],
+    },
+  },
+  {
+    id: "cosmetics-about-team",
+    type: "fashionTeamSection",
+    props: {
+      members: [
+        {
+          name: "SARAH JOHNSON",
+          role: "CEO / FOUNDER",
+          image: "",
+          socials: ["facebook", "twitter", "instagram", "linkedin"],
+        },
+        {
+          name: "EMMA DAVIS",
+          role: "CREATIVE DIRECTOR",
+          image: "",
+          socials: ["facebook", "twitter", "instagram"],
+        },
+        {
+          name: "OLIVIA MARTINEZ",
+          role: "HEAD OF PRODUCT",
+          image: "",
+          socials: ["facebook", "instagram", "linkedin"],
+        },
+        {
+          name: "SOPHIA CHEN",
+          role: "LEAD DERMATOLOGIST",
+          image: "",
+          socials: ["twitter", "instagram", "linkedin"],
+        },
+      ],
+    },
+  },
+  {
+    id: "cosmetics-about-offices",
+    type: "fashionOfficeLocations",
+    props: {
+      subtitle: "GET IN TOUCH WITH US",
+      title: "Our Locations",
+      description: "Visit us at any of our locations worldwide. Our beauty consultants are ready to help you find the perfect products.",
+      offices: [
+        {
+          city: "NEW YORK",
+          address: "113 New Avenue, Roadway,\n67 Brewer St, New York, USA",
+          phone: "+1 234-567-8901",
+          email: "newyork@store.com",
+        },
+        {
+          city: "LONDON",
+          address: "45 Oxford Street,\nMayfair, London, UK",
+          phone: "+44 20 7946 0958",
+          email: "london@store.com",
+        },
+        {
+          city: "PARIS",
+          address: "23 Rue de Rivoli,\n75001 Paris, France",
+          phone: "+33 1 42 60 31 70",
+          email: "paris@store.com",
+        },
+      ],
+    },
+  },
+];
+
+/* ═══════════════════════════════════════════════════════════════
+   CONTACT PAGE
+   ═══════════════════════════════════════════════════════════════ */
+
+export const COSMETICS_CONTACT_BLOCKS: TemplateBlock[] = [
+  {
+    id: "cosmetics-contact-store",
+    type: "fashionStoreVisit",
+    props: {
+      subtitle: "OUR STORES",
+      title: "VISIT OUR NEW\nSTORE IN NEW YORK",
+      address: "294 Bay Meadows Ave.\nBay Shore, NY 11706",
+      buttonText: "See More About",
+      buttonLink: "#",
+    },
+  },
+  {
+    id: "cosmetics-contact-faq",
+    type: "fashionFaqAccordion",
+    props: {
+      subtitle: "INFORMATION QUESTIONS",
+      title: "FREQUENTLY ASKED QUESTIONS",
+      items: [
+        {
+          question: "Will I receive the same product that I see in the picture?",
+          answer: "Yes, all product images on our site accurately represent the items you will receive. We use high-quality photography to showcase our cosmetics and skincare products. Minor variations in color may occur due to screen settings.",
+        },
+        {
+          question: "Where can I view my sales receipt?",
+          answer: "You can view your sales receipt by logging into your account and navigating to 'Order History'. Each order has a detailed receipt that you can view online or download as a PDF for your records.",
+        },
+        {
+          question: "How can I return an item?",
+          answer: "We accept returns within 30 days of delivery for unopened items in their original packaging. To initiate a return, go to 'My Orders', select the order, and click 'Request Return'. You'll receive a prepaid shipping label via email.",
+        },
+        {
+          question: "Are your products cruelty-free?",
+          answer: "Yes, we are committed to cruelty-free beauty. None of our products are tested on animals, and we work exclusively with brands that share our ethical values. Look for the cruelty-free badge on each product page.",
+        },
+        {
+          question: "Where can I ship my order?",
+          answer: "We currently ship to over 50 countries worldwide. Shipping costs and delivery times vary by destination. You can check available shipping options and estimated delivery dates at checkout before placing your order.",
+        },
+      ],
+    },
+  },
+  {
+    id: "cosmetics-contact-form",
+    type: "fashionContactForm",
+    props: {
+      subtitle: "REACH OUT TO US",
+      title: "CONTACT US FOR ANY QUESTIONS",
+      fields: ["name", "email", "phone", "company", "message"],
+    },
+  },
+  {
+    id: "cosmetics-contact-newsletter",
+    type: "cosmeticsNewsletter",
+    props: {
+      backgroundImage: "",
+      title: "Stay Updated",
+      description: "Subscribe to our newsletter and be the first to know about new arrivals, exclusive offers, and beauty tips.",
+      buttonText: "Subscribe",
     },
   },
 ];

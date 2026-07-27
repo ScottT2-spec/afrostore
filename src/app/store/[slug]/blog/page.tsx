@@ -310,14 +310,7 @@ export default async function BlogPage({ params }: Props) {
         <CosmeticsFontLoader />
         <CosmeticsHeader storeName={store.name} storeSlug={slug} logo={store.logo} />
         <main style={buildPageBackgroundStyle(pageSettings)}>
-          {blocks.length > 0 ? (
-            <RenderTemplateBlocks blocks={blocks} />
-          ) : (
-            <div style={{ maxWidth: "900px", margin: "0 auto", padding: "60px 20px", textAlign: "center" }}>
-              <h1 style={{ fontFamily: "'Tenor Sans', serif", fontSize: "36px", marginBottom: "24px", letterSpacing: "2px", textTransform: "uppercase" }}>Blog</h1>
-              <p style={{ fontSize: "16px", lineHeight: "1.8", color: "#555" }}>No blog posts yet. Check back soon!</p>
-            </div>
-          )}
+          <RenderTemplateBlocks blocks={blocks} />
         </main>
         <CosmeticsFooter storeName={store.name} storeSlug={slug} logo={store.logo} description={store.description ?? undefined} />
       </ThemeProvider>

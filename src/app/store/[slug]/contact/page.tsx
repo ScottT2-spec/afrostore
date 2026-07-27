@@ -15,6 +15,7 @@ import { KidsFontLoader, KidsFooterFull, KidsHeader } from "@/components/storefr
 import PerfumesContactPage from "./perfumes-contact";
 import { HealthHeader, HealthFooterFull } from "@/components/storefront/HealthTemplateBlocks";
 import { CosmeticsFontLoader, CosmeticsHeader, CosmeticsFooter } from "@/components/storefront/CosmeticsTemplateBlocks";
+import { COSMETICS_CONTACT_BLOCKS } from "@/lib/templates/presets/cosmetics-pages-preset";
 import { GardenHeader, GardenFooter } from "@/components/storefront/GardenStoreChrome";
 
 type Props = {
@@ -525,27 +526,13 @@ export default async function ContactPage({ params }: Props) {
     store.name?.toLowerCase().includes("stacj");
 
   if (isCosmeticsTemplate) {
+    const cosmeticsBlocks = (parsedContact && parsedContact.blocks.length > 0 ? parsedContact.blocks : COSMETICS_CONTACT_BLOCKS) as TemplateBlock[];
     return (
       <ThemeProvider theme={themeData}>
         <CosmeticsFontLoader />
         <CosmeticsHeader storeName={store.name} storeSlug={slug} logo={store.logo} />
         <main style={buildPageBackgroundStyle(pageSettings)}>
-          {parsedContact && parsedContact.blocks.length > 0 ? (
-            <RenderBlocks blocks={pageContent.blocks as BuilderBlock[]} storeSlug={slug} products={serializedProducts} />
-          ) : (
-            <div style={{ maxWidth: "900px", margin: "0 auto", padding: "60px 20px" }}>
-              <h1 style={{ fontFamily: "'Tenor Sans', serif", fontSize: "36px", textAlign: "center", marginBottom: "24px", letterSpacing: "2px", textTransform: "uppercase" }}>Contact Us</h1>
-              <p style={{ fontSize: "16px", lineHeight: "1.8", color: "#555", textAlign: "center", maxWidth: "600px", margin: "0 auto 40px" }}>
-                Have a question or need help? We&apos;d love to hear from you.
-              </p>
-              <div style={{ maxWidth: "500px", margin: "0 auto", display: "flex", flexDirection: "column", gap: "16px" }}>
-                <input type="text" placeholder="Your Name" style={{ padding: "14px 18px", border: "1px solid #ddd", fontSize: "14px", fontFamily: "'Tenor Sans', serif" }} />
-                <input type="email" placeholder="Your Email" style={{ padding: "14px 18px", border: "1px solid #ddd", fontSize: "14px", fontFamily: "'Tenor Sans', serif" }} />
-                <textarea placeholder="Your Message" rows={5} style={{ padding: "14px 18px", border: "1px solid #ddd", fontSize: "14px", fontFamily: "'Tenor Sans', serif", resize: "vertical" }} />
-                <button style={{ padding: "14px 32px", background: "#222", color: "#fff", border: "none", fontSize: "13px", letterSpacing: "2px", textTransform: "uppercase", cursor: "pointer", fontFamily: "'Tenor Sans', serif" }}>Send Message</button>
-              </div>
-            </div>
-          )}
+          <RenderTemplateBlocks blocks={cosmeticsBlocks} />
         </main>
         <CosmeticsFooter storeName={store.name} storeSlug={slug} logo={store.logo} description={store.description ?? undefined} />
       </ThemeProvider>

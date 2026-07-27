@@ -1,7 +1,7 @@
 import { prisma } from "@/lib/db";
 import { HANDMADE_BAGS_PAGE_BLOCKS } from "./presets/handmade-bags-pages";
 import { HEALTH_PAGE_BLOCKS } from "./presets/health-pages";
-import { COSMETICS_TERMS_BLOCKS, COSMETICS_SHOP_BLOCKS, COSMETICS_BLOG_BLOCKS } from "./presets/cosmetics-pages-preset";
+import { COSMETICS_TERMS_BLOCKS, COSMETICS_SHOP_BLOCKS, COSMETICS_BLOG_BLOCKS, COSMETICS_ABOUT_BLOCKS, COSMETICS_CONTACT_BLOCKS } from "./presets/cosmetics-pages-preset";
 import { TSHIRTS_PRINTS_ABOUT_PAGE_BLOCKS, TSHIRTS_PRINTS_CONTACT_PAGE_BLOCKS, TSHIRTS_PRINTS_BLOG_PAGE_BLOCKS } from "./presets/t-shirts-prints-page-presets";
 import { VEGETABLE_HOME_PAGE_BLOCKS, VEGETABLE_MENU_PAGE_BLOCKS, VEGETABLE_RECIPE_PAGE_BLOCKS, VEGETABLE_ABOUT_PAGE_BLOCKS, VEGETABLE_CONTACT_PAGE_BLOCKS, VEGETABLE_RESERVATION_PAGE_BLOCKS } from "./presets/vegetables-page-presets";
 import { PERFUMES_HOME_PAGE_BLOCKS, PERFUMES_ABOUT_PAGE_BLOCKS, PERFUMES_CONTACT_PAGE_BLOCKS, PERFUMES_FRAGRANCES_PAGE_BLOCKS, PERFUMES_JOURNAL_PAGE_BLOCKS, PERFUMES_REVIEWS_PAGE_BLOCKS } from "./presets/perfumes-page-presets";
@@ -61,6 +61,8 @@ const COSMETICS_PAGES: PageDef[] = [
   { title: "Shop", slug: "shop", type: "CUSTOM", position: 10 },
   { title: "Blog", slug: "blog", type: "CUSTOM", position: 11 },
   { title: "Terms", slug: "terms", type: "CUSTOM", position: 12 },
+  { title: "About Us", slug: "about", type: "CUSTOM", position: 13 },
+  { title: "Contact Us", slug: "contact", type: "CUSTOM", position: 14 },
 ];
 
 const FASHION_PAGES: PageDef[] = [
@@ -187,7 +189,9 @@ export const TEMPLATE_PAGE_CONTENT_MAP: Record<string, Record<string, unknown[]>
   cosmetics: {
     shop: COSMETICS_SHOP_BLOCKS,
     blog: COSMETICS_BLOG_BLOCKS,
-    terms: COSMETICS_TERMS_BLOCKS
+    terms: COSMETICS_TERMS_BLOCKS,
+    about: COSMETICS_ABOUT_BLOCKS,
+    contact: COSMETICS_CONTACT_BLOCKS,
   },
   "t-shirts-prints": {
     "about-us": TSHIRTS_PRINTS_ABOUT_PAGE_BLOCKS,
@@ -322,7 +326,7 @@ export async function ensureTemplatePages(siteId: string, templateSlug: string, 
           siteId,
           title: page.title,
           slug: page.slug,
-          type: page.type,
+          type: page.type as any,
           content: { blocks: defaultContent } as any,
           isPublished: true,
           position: page.position,
