@@ -7,6 +7,7 @@ import { ElectronicsFontLoader, ElectronicsFooter } from "@/components/storefron
 import { InteriorFontLoader, InteriorHeader, InteriorFooter } from "@/components/storefront/InteriorDesignTemplateBlocks";
 import { AccessoriesFontLoader } from "@/components/storefront/AccessoriesTemplateBlocks";
 import { KidsFontLoader } from "@/components/storefront/KidsTemplateBlocks";
+import { CosmeticsFontLoader, CosmeticsHeader, CosmeticsFooter } from "@/components/storefront/CosmeticsTemplateBlocks";
 import { ToysFontLoader } from "@/components/storefront/ToysTemplateBlocks";
 import { MakeupFontLoader } from "@/components/storefront/MakeupTemplateBlocks";
 import { GroceryFontLoader } from "@/components/storefront/GroceryTemplateBlocks";
@@ -290,6 +291,35 @@ export default async function BlogPage({ params }: Props) {
           storeSlug={slug}
           description={store.description ?? undefined}
         />
+      </ThemeProvider>
+    );
+  }
+
+  /* ── Cosmetics template ── */
+  const isCosmeticsTemplate =
+    templateSlug === "cosmetics" ||
+    slug === "stacj" ||
+    slug?.toLowerCase().includes("cosmetics") ||
+    slug?.toLowerCase().includes("stacj") ||
+    store.name?.toLowerCase().includes("cosmetics") ||
+    store.name?.toLowerCase().includes("stacj");
+
+  if (isCosmeticsTemplate) {
+    return (
+      <ThemeProvider theme={themeData}>
+        <CosmeticsFontLoader />
+        <CosmeticsHeader storeName={store.name} storeSlug={slug} logo={store.logo} />
+        <main style={buildPageBackgroundStyle(pageSettings)}>
+          {blocks.length > 0 ? (
+            <RenderTemplateBlocks blocks={blocks} />
+          ) : (
+            <div style={{ maxWidth: "900px", margin: "0 auto", padding: "60px 20px", textAlign: "center" }}>
+              <h1 style={{ fontFamily: "'Tenor Sans', serif", fontSize: "36px", marginBottom: "24px", letterSpacing: "2px", textTransform: "uppercase" }}>Blog</h1>
+              <p style={{ fontSize: "16px", lineHeight: "1.8", color: "#555" }}>No blog posts yet. Check back soon!</p>
+            </div>
+          )}
+        </main>
+        <CosmeticsFooter storeName={store.name} storeSlug={slug} logo={store.logo} description={store.description ?? undefined} />
       </ThemeProvider>
     );
   }

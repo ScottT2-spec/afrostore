@@ -13,6 +13,7 @@ import { serializeProductsForClient } from "@/lib/serialize-products";
 import { KidsFontLoader, KidsFooterFull, KidsHeader } from "@/components/storefront/KidsTemplateBlocks";
 import PerfumesAboutPage from "./perfumes-about";
 import { HealthFontLoader, HealthHeader, HealthFooterFull } from "@/components/storefront/HealthTemplateBlocks";
+import { CosmeticsFontLoader, CosmeticsHeader, CosmeticsFooter } from "@/components/storefront/CosmeticsTemplateBlocks";
 
 type Props = {
   params: Promise<{ slug: string }>;
@@ -502,6 +503,37 @@ export default async function AboutPage({ params }: Props) {
         </main>
         <HealthFooterFull storeName={store.name} storeSlug={slug} logo={store.logo} description={store.description || "Your trusted source for vitamins, supplements, and wellness products."} contact={{ address: "1901 Thornridge Cir. Shiloh, Hawaii 81063", phone: "(956) 238-7908", email: "hello@store.com" }} />
       </div>
+    );
+  }
+
+  // ─── COSMETICS ABOUT ───
+  const isCosmeticsTemplate =
+    activeTemplateSlug === "cosmetics" ||
+    slug === "stacj" ||
+    slug?.toLowerCase().includes("cosmetics") ||
+    slug?.toLowerCase().includes("stacj") ||
+    store.name?.toLowerCase().includes("cosmetics") ||
+    store.name?.toLowerCase().includes("stacj");
+
+  if (isCosmeticsTemplate) {
+    return (
+      <ThemeProvider theme={themeData}>
+        <CosmeticsFontLoader />
+        <CosmeticsHeader storeName={store.name} storeSlug={slug} logo={store.logo} />
+        <main style={buildPageBackgroundStyle(pageSettings)}>
+          {parsedAbout && parsedAbout.blocks.length > 0 ? (
+            <RenderBlocks blocks={pageContent.blocks as BuilderBlock[]} storeSlug={slug} products={serializedProducts} />
+          ) : (
+            <div style={{ maxWidth: "900px", margin: "0 auto", padding: "60px 20px" }}>
+              <h1 style={{ fontFamily: "'Tenor Sans', serif", fontSize: "36px", textAlign: "center", marginBottom: "24px", letterSpacing: "2px", textTransform: "uppercase" }}>About Us</h1>
+              <p style={{ fontSize: "16px", lineHeight: "1.8", color: "#555", textAlign: "center", maxWidth: "700px", margin: "0 auto 40px" }}>
+                {store.description || "Welcome to our store. We are dedicated to bringing you the finest cosmetics and beauty products."}
+              </p>
+            </div>
+          )}
+        </main>
+        <CosmeticsFooter storeName={store.name} storeSlug={slug} logo={store.logo} description={store.description ?? undefined} />
+      </ThemeProvider>
     );
   }
 
