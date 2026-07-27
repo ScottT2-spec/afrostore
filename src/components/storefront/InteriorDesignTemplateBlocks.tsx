@@ -4,6 +4,7 @@ import Link from "next/link";
 import { resolveStoreLink, resolveFooterLink } from "@/lib/template-link-utils";
 import { useState, useEffect, useRef, createContext, useContext } from "react";
 import { safeSrc, onImgError } from "./image-fallback";
+import { useCustomerAuth } from "@/hooks/useCustomerAuth";
 
 /* ═══════════════════════════════════════════════════════════════
    INTERIOR DESIGN (RETAIL) TEMPLATE BLOCKS
@@ -737,6 +738,7 @@ export function InteriorHeader({
   const [mobileOpen, setMobileOpen] = useState(false);
   const [searchOpen, setSearchOpen] = useState(false);
   const [searchVal, setSearchVal] = useState(searchQuery);
+  const { customer, isLoggedIn } = useCustomerAuth(storeSlug);
   const base = `/store/${storeSlug}`;
 
   const handleSearch = (e: React.FormEvent) => {
@@ -818,7 +820,9 @@ export function InteriorHeader({
               <Link href={`${base}/order-tracking`}>Track Order</Link>
               <Link href={`${base}/shop`}>Help</Link>
               <span className="ih-sep" />
-              <Link href={`${base}/login`}>Login / Register</Link>
+              {isLoggedIn
+                ? <Link href={`${base}/my-account`}>My Account</Link>
+                : <Link href={`${base}/login`}>Login / Register</Link>}
             </div>
             <button onClick={() => setSearchOpen(true)} aria-label="Search" style={{ background: "none", border: "none", cursor: "pointer", color: TOKENS.titleColor, padding: "4px" }}>{searchSvg}</button>
             <Link href={`${base}/cart`} className="ih-cart-btn">
@@ -840,7 +844,9 @@ export function InteriorHeader({
           <Link href={`${base}/shop`} onClick={() => setMobileOpen(false)}>Contact</Link>
           <Link href={`${base}/order-tracking`} onClick={() => setMobileOpen(false)}>Track Order</Link>
           <Link href={`${base}/shop`} onClick={() => setMobileOpen(false)}>Help</Link>
-          <Link href={`${base}/login`} onClick={() => setMobileOpen(false)}>Login / Register</Link>
+          {isLoggedIn
+            ? <Link href={`${base}/my-account`} onClick={() => setMobileOpen(false)}>My Account ({customer?.name?.split(" ")[0]})</Link>
+            : <Link href={`${base}/login`} onClick={() => setMobileOpen(false)}>Login / Register</Link>}
           <Link href={`${base}/wishlist`} onClick={() => setMobileOpen(false)}>Wishlist</Link>
         </div>
       </header>

@@ -5,6 +5,7 @@ import { resolveStoreLink, resolveFooterLink } from "@/lib/template-link-utils";
 import { useState, useEffect, useRef, useCallback, createContext, useContext } from "react";
 import { safeSrc, onImgError } from "./image-fallback";
 import { useNewsletterSubscribe } from "@/hooks/useNewsletterSubscribe";
+import { useCustomerAuth } from "@/hooks/useCustomerAuth";
 
 /* ═══════════════════════════════════════════════════════════════
    HEALTH (PILLS & SUPPLEMENTS) TEMPLATE BLOCKS
@@ -823,6 +824,7 @@ export function HealthHeader({
   const [mobileOpen, setMobileOpen] = useState(false);
   const [searchOpen, setSearchOpen] = useState(false);
   const [searchVal, setSearchVal] = useState(searchQuery);
+  const { customer, isLoggedIn } = useCustomerAuth(storeSlug);
   const base = `/store/${storeSlug}`;
 
   const handleSearchSubmit = (e: React.FormEvent) => {
@@ -907,7 +909,11 @@ export function HealthHeader({
           <Link href={`${base}/shop`} onClick={() => setMobileOpen(false)}>About Us</Link>
           <Link href={`${base}/blog`} onClick={() => setMobileOpen(false)}>Blog</Link>
           <Link href={`${base}/wishlist`} onClick={() => setMobileOpen(false)}>Wishlist</Link>
-          <Link href={`${base}/my-account`} onClick={() => setMobileOpen(false)}>My Account</Link>
+          {isLoggedIn ? (
+            <Link href={`${base}/my-account`} onClick={() => setMobileOpen(false)}>My Account ({customer?.name?.split(" ")[0]})</Link>
+          ) : (
+            <Link href={`${base}/login`} onClick={() => setMobileOpen(false)}>Sign In / Sign Up</Link>
+          )}
         </div>
       </header>
       {searchOpen && (

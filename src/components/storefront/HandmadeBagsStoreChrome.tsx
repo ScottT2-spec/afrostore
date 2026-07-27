@@ -3,6 +3,7 @@ import { useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { resolveStoreLink, resolveFooterLink } from "@/lib/template-link-utils";
+import { useCustomerAuth } from "@/hooks/useCustomerAuth";
 
 /* ═══════════════════════════════════════════════════════════════
    HANDMADE BAGS STORE HEADER + FOOTER
@@ -73,6 +74,7 @@ export function HandmadeBagsHeader({
   const [showSearch, setShowSearch] = useState(false);
   const router = useRouter();
   const [localSearchQuery, setLocalSearchQuery] = useState("");
+  const { customer, isLoggedIn } = useCustomerAuth(storeSlug);
 
   const handleSearch = (query: string) => {
     if (query.trim()) {
@@ -207,7 +209,10 @@ export function HandmadeBagsHeader({
                 {!isLanding && <Link href={resolveStoreLink("/blog", storeSlug)} className="hbh-nav-link">Blog</Link>}
                 <Link href={resolveStoreLink("/about", storeSlug)} className="hbh-nav-link">About Us</Link>
                 {!isLanding && <Link href={resolveStoreLink("/contact", storeSlug)} className="hbh-nav-link">Contact Us</Link>}
-                {!isLanding && <Link href={resolveStoreLink("/login", storeSlug)} className="hbh-nav-link">Login / Register</Link>}
+                {!isLanding && (isLoggedIn
+                  ? <Link href={resolveStoreLink("/my-account", storeSlug)} className="hbh-nav-link">My Account</Link>
+                  : <Link href={resolveStoreLink("/login", storeSlug)} className="hbh-nav-link">Login / Register</Link>
+                )}
               </>
             )}
           </div>
@@ -234,7 +239,10 @@ export function HandmadeBagsHeader({
             {!isLanding && <Link href={resolveStoreLink("/blog", storeSlug)} onClick={() => setMobileMenu(false)}>Blog</Link>}
             <Link href={resolveStoreLink("/about", storeSlug)} onClick={() => setMobileMenu(false)}>About Us</Link>
             {!isLanding && <Link href={resolveStoreLink("/contact", storeSlug)} onClick={() => setMobileMenu(false)}>Contact Us</Link>}
-            {!isLanding && <Link href={resolveStoreLink("/login", storeSlug)} onClick={() => setMobileMenu(false)}>Login / Register</Link>}
+            {!isLanding && (isLoggedIn
+              ? <Link href={resolveStoreLink("/my-account", storeSlug)} onClick={() => setMobileMenu(false)}>My Account ({customer?.name?.split(" ")[0]})</Link>
+              : <Link href={resolveStoreLink("/login", storeSlug)} onClick={() => setMobileMenu(false)}>Login / Register</Link>
+            )}
           </>
         )}
       </div>

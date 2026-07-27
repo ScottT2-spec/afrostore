@@ -3,6 +3,7 @@
 import { useState } from "react";
 import Link from "next/link";
 import { Heart, Menu, ShoppingCart, User } from "lucide-react";
+import { useCustomerAuth } from "@/hooks/useCustomerAuth";
 
 interface TShirtsPrintsHeaderProps {
   storeName: string;
@@ -49,6 +50,7 @@ export function TShirtsPrintsHeader({
   onSearchChange,
 }: TShirtsPrintsHeaderProps) {
   const [mobileMenu, setMobileMenu] = useState(false);
+  const { customer, isLoggedIn } = useCustomerAuth(storeSlug);
   const navItems = [
     { label: "Home", href: `/store/${storeSlug}` },
     { label: "Shop", href: `/store/${storeSlug}/shop` },
@@ -121,11 +123,11 @@ export function TShirtsPrintsHeader({
           <button className="tp-mobile-toggle" type="button" aria-label="Toggle navigation" onClick={() => setMobileMenu((value) => !value)}>
             <Menu className="h-5 w-5" />
           </button>
-          <Link href={`/store/${storeSlug}/login`} className="tp-action tp-login" aria-label="Login or register">
+          <Link href={isLoggedIn ? `/store/${storeSlug}/my-account` : `/store/${storeSlug}/login`} className="tp-action tp-login" aria-label={isLoggedIn ? "My Account" : "Login or register"}>
             <span className="tp-action-icon" aria-hidden="true">
               <User className="h-4 w-4" />
             </span>
-            <span>Login / Register</span>
+            <span>{isLoggedIn ? `Hi, ${customer?.name?.split(" ")[0]}` : "Login / Register"}</span>
           </Link>
           <Link href={`/store/${storeSlug}/wishlist`} className="tp-action tp-wishlist-text" aria-label="Wishlist">
             <span className="tp-action-icon" aria-hidden="true">
@@ -170,9 +172,15 @@ export function TShirtsPrintsHeader({
           <Link href={`/store/${storeSlug}/cart`} onClick={() => setMobileMenu(false)}>
             Cart
           </Link>
-          <Link href={`/store/${storeSlug}/login`} onClick={() => setMobileMenu(false)}>
-            Login / Register
-          </Link>
+          {isLoggedIn ? (
+            <Link href={`/store/${storeSlug}/my-account`} onClick={() => setMobileMenu(false)}>
+              My Account ({customer?.name?.split(" ")[0]})
+            </Link>
+          ) : (
+            <Link href={`/store/${storeSlug}/login`} onClick={() => setMobileMenu(false)}>
+              Login / Register
+            </Link>
+          )}
         </div>
       </div>
     </header>
