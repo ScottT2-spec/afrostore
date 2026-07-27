@@ -1,5 +1,6 @@
 "use client";
 
+import { useParams } from "next/navigation";
 import {
   FashionFontLoader,
   FashionHeroSlider,
@@ -937,7 +938,7 @@ function detectTemplateFamily(blocks: TemplateBlock[]): string {
 
 /* ─── SINGLE BLOCK RENDERER ────────────────────────────────── */
 
-function RenderTemplateBlock({ block }: { block: TemplateBlock }) {
+function RenderTemplateBlock({ block, storeSlug }: { block: TemplateBlock; storeSlug?: string }) {
   const Component = ALL_TEMPLATE_BLOCKS[block.type];
 
   if (!Component) {
@@ -958,8 +959,10 @@ function RenderTemplateBlock({ block }: { block: TemplateBlock }) {
   );
 
   // Forward resolved styles to the component so it can merge them with its own styles
+  // Override storeSlug with the real slug from the URL so nav links work correctly
   const componentProps = {
     ...block.props,
+    ...(storeSlug && block.props?.storeSlug ? { storeSlug } : {}),
     resolvedStyles: styles,
     resolvedClasses: classes,
   };
@@ -983,11 +986,14 @@ export interface RenderTemplateBlocksProps {
 export function RenderTemplateBlocks({ blocks }: RenderTemplateBlocksProps) {
   const family = detectTemplateFamily(blocks);
   const FontLoader = FONT_LOADERS[family] || FashionFontLoader;
+  // Extract real store slug from URL so block nav links work correctly
+  const params = useParams();
+  const storeSlug = params?.slug as string | undefined;
   return (
     <div className={`${family}-template`}>
       <FontLoader />
       {blocks.map((block) => (
-        <RenderTemplateBlock key={block.id} block={block} />
+        <RenderTemplateBlock key={block.id} block={block} storeSlug={storeSlug} />
       ))}
     </div>
   );
