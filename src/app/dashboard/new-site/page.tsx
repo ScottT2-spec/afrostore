@@ -699,47 +699,6 @@ export default function NewSitePage() {
                     )}
                   </div>
                 )}
-                {launchMethod === 'template' && (
-                  <div className="mt-8 rounded-xl border border-gray-200 bg-white p-5">
-                    <div className="flex items-center gap-2 mb-4">
-                      <Palette className="w-5 h-5 text-gray-500" />
-                      <h2 className="font-semibold text-gray-900">Theme customization</h2>
-                    </div>
-                    <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-4">
-                      {(['primary', 'secondary', 'accent', 'background', 'text'] as const).map(key => (
-                        <div key={key} className="flex flex-col">
-                          <label className="text-xs font-medium text-gray-600 capitalize mb-2">{key}</label>
-                          <input
-                            type="color"
-                            value={branding[key]}
-                            onChange={e => setBranding(prev => ({ ...prev, [key]: e.target.value }))}
-                            className="h-12 w-full rounded-lg border border-gray-200 p-1 cursor-pointer hover:border-gray-300 transition"
-                          />
-                        </div>
-                      ))}
-                    </div>
-                    <div className="grid sm:grid-cols-2 gap-4 mt-5">
-                      <div>
-                        <label className="text-xs font-medium text-gray-600 mb-2 block">Heading font</label>
-                        <input
-                          value={branding.headingFont}
-                          onChange={e => setBranding(prev => ({ ...prev, headingFont: e.target.value }))}
-                          className="w-full rounded-lg border border-gray-200 px-3 py-2.5 text-sm outline-none focus:ring-2 focus:ring-gray-900"
-                          placeholder="e.g. Plus Jakarta Sans"
-                        />
-                      </div>
-                      <div>
-                        <label className="text-xs font-medium text-gray-600 mb-2 block">Body font</label>
-                        <input
-                          value={branding.bodyFont}
-                          onChange={e => setBranding(prev => ({ ...prev, bodyFont: e.target.value }))}
-                          className="w-full rounded-lg border border-gray-200 px-3 py-2.5 text-sm outline-none focus:ring-2 focus:ring-gray-900"
-                          placeholder="e.g. Inter"
-                        />
-                      </div>
-                    </div>
-                  </div>
-                )}
                 {createError && <p className="mt-4 text-center text-sm font-medium text-red-600">{createError}</p>}
               </>
             )}
