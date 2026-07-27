@@ -401,7 +401,7 @@ export default async function AboutPage({ params }: Props) {
               storeSlug={slug}
               templateSlug="kids"
               logo={store.logo}
-              description={store.description || "Playful kidswear, gifts, and accessories with a premium WoodMart-inspired finish."}
+              description={store.description || "Playful kidswear, gifts, and accessories with a premium finish."}
               contact={{
                 address: "913 Wyandotte St, Kansas City, MO 64105",
                 phone: "(064) 332-1233",

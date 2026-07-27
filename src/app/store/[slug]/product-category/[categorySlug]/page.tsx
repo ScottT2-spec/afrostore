@@ -199,7 +199,7 @@ export default async function ProductCategoryPage({ params }: Props) {
         storeSlug={slug}
         logo={site.logo}
         templateSlug="kids"
-        description={site.description || "Bright, playful kids fashion and gifts with a premium WoodMart-inspired finish."}
+        description={site.description || "Bright, playful kids fashion and gifts with a premium finish."}
       />
     </div>
   );

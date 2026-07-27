@@ -366,7 +366,7 @@ export default async function ContactPage({ params }: Props) {
                     </div>
                     <div className="mt-8 rounded-[28px] bg-[#fff7df] p-5">
                       <p className="text-sm leading-7 text-[#6d6277]">
-                        Based on WoodMart theme 2025 WooCommerce Themes.
+                        © 2025 All rights reserved.
                       </p>
                       <div className="mt-4 flex flex-wrap gap-3">
                         <Link href={`/store/${slug}/blog`} className="rounded-full bg-white px-5 py-2 text-sm font-semibold text-[#3b3344] transition hover:text-[#f5857c]">
@@ -396,7 +396,7 @@ export default async function ContactPage({ params }: Props) {
               storeSlug={slug}
               logo={store.logo}
               templateSlug="kids"
-              description={store.description || "Playful kidswear, gifts, and accessories with a bright, premium WoodMart-inspired finish."}
+              description={store.description || "Playful kidswear, gifts, and accessories with a bright, premium finish."}
               socialLinks={kidsSocialLinks}
             />
           </>

@@ -717,7 +717,7 @@ export interface HealthNewsletterProps {
 }
 
 export function HealthNewsletter({
-  title = "Sign Up And Connect to WoodMart",
+  title = "Sign Up And Stay Connected",
   subtitle = "The best vitamins and supplements are made from natural ingredients using modern technologies aimed at improving personal and mental health.",
   backgroundColor = TOKENS.bgLight,
 }: HealthNewsletterProps) {

@@ -181,7 +181,7 @@ export const KIDS_CONTACT_PAGE_BLOCKS: TemplateBlock[] = [
         { label: "Support", value: "(064) 332-1233" },
         { label: "Address", value: "Kansas City, MO" },
       ],
-      infoText: "Based on WoodMart theme 2025 WooCommerce Themes.",
+      infoText: "© 2025 All rights reserved.",
       links: [
         { label: "Visit the blog", href: "/blog" },
         { label: "Shop the collection", href: "/shop" },

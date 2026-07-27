@@ -852,7 +852,7 @@ export default function ShopPage() {
           storeSlug={slug}
           logo={store.logo}
           templateSlug="kids"
-          description={store.description || "Bright, playful kids fashion and gifts with a premium WoodMart-inspired finish."}
+          description={store.description || "Bright, playful kids fashion and gifts with a premium finish."}
         />
       </div>
     );

@@ -1262,11 +1262,8 @@ export function KidsFooterFull({
       {/* Bottom bar */}
       <div className="kf-bottom">
         <small>
-          <Link href={base}>{copyrightText || `Based on WoodMart theme © ${new Date().getFullYear()} WooCommerce Themes.`}</Link>
+          <Link href={base}>{copyrightText || `© ${new Date().getFullYear()} All rights reserved.`}</Link>
         </small>
-        <div className="kf-payments">
-          <img src="https://woodmart.xtemos.com/wp-content/uploads/2018/08/payment.png" alt="Payment methods" loading="lazy" />
-        </div>
       </div>
     </footer>
   );
@@ -1528,7 +1525,7 @@ export interface KidsOpeningHoursProps {
 export function KidsOpeningHours({ 
   title = "Monday - Friday",
   hours = [],
-  infoText = "Based on WoodMart theme 2025 WooCommerce Themes.",
+  infoText = "© 2025 All rights reserved.",
   links = [],
   storeSlug = ""
 }: KidsOpeningHoursProps) {

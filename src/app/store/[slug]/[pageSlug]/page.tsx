@@ -448,7 +448,7 @@ export default function StorefrontPage() {
             storeSlug={slug}
             logo={store.logo}
             templateSlug="kids"
-            description={store.description || "Playful kidswear, gifts, and accessories with a premium WoodMart-inspired finish."}
+            description={store.description || "Playful kidswear, gifts, and accessories with a premium finish."}
           />
         </div>
       </ThemeProvider>
