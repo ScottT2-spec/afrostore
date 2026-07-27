@@ -40,13 +40,6 @@ const ecommerceNav: NavGroup[] = [
     ],
   },
   {
-    label: "CRM",
-    items: [
-      { name: "Contacts", href: "/dashboard/crm", icon: Users },
-      { name: "Lead Forms", href: "/dashboard/forms", icon: PenTool },
-    ],
-  },
-  {
     label: "Marketing",
     items: [
       { name: "Coupons", href: "/dashboard/coupons", icon: Tag },
