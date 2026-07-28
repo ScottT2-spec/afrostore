@@ -1075,7 +1075,7 @@ export function CosmeticsBlogPosts({ posts: propPosts, columns = 2, sectionTitle
       date: { day: "28", month: "Jul" },
       categories: ["Skincare"],
       author: { name: "Scott Antwi" },
-      link: blogBase,
+      link: `${blogBase}/5-skincare-mistakes-youre-probably-making`,
       commentCount: 9,
     },
     {
@@ -1085,7 +1085,7 @@ export function CosmeticsBlogPosts({ posts: propPosts, columns = 2, sectionTitle
       date: { day: "24", month: "Jul" },
       categories: ["Beauty Tips"],
       author: { name: "Scott Antwi" },
-      link: blogBase,
+      link: `${blogBase}/the-ultimate-guide-to-building-a-makeup-collection`,
       commentCount: 15,
     },
   ];

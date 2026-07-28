@@ -22,6 +22,8 @@ import { PROKIP_AGENT_PRESET } from "@/lib/templates/presets/prokip-agent-preset
 import { PROKIP_BOOKING_PRESET } from "@/lib/templates/presets/prokip-booking-preset";
 import { FASHION_SAMPLE_PRODUCTS } from "@/lib/templates/presets/fashion-sample-products";
 import { FASHION_SAMPLE_BLOGS } from "@/lib/templates/presets/fashion-sample-blogs";
+import { KIDS_SAMPLE_BLOGS } from "@/lib/templates/presets/kids-sample-blogs";
+import { COSMETICS_SAMPLE_BLOGS } from "@/lib/templates/presets/cosmetics-sample-blogs";
 import { TEMPLATE_SAMPLE_DATA } from "@/lib/templates/presets/template-sample-data";
 import { ensureVegetablePages } from "@/lib/templates/vegetable-pages";
 import { ensureTemplatePages } from "@/lib/templates/template-pages";
@@ -281,7 +283,13 @@ export async function importTemplateToSite(
   }
 
   // ── Blogs ───────────────────────────────────────────────────
-  const blogsToSeed = isFashionFamily ? FASHION_SAMPLE_BLOGS : (templateData?.blogs || []);
+  const blogsToSeed = isFashionFamily
+    ? FASHION_SAMPLE_BLOGS
+    : slug === "kids"
+    ? KIDS_SAMPLE_BLOGS
+    : slug === "cosmetics"
+    ? COSMETICS_SAMPLE_BLOGS
+    : (templateData?.blogs || []);
   if (blogsToSeed.length > 0) {
     const existingBlogCount = await prisma.blog.count({ where: { siteId } });
     if (existingBlogCount === 0) {

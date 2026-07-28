@@ -718,7 +718,7 @@ export function KidsBlogPosts({ posts: propPosts, columns = 3, sectionTitle, mar
       date: { day: "28", month: "Jul" },
       categories: ["Fashion Tips"],
       author: { name: "Scott Antwi" },
-      link: blogBase,
+      link: `${blogBase}/how-to-choose-the-perfect-outfit-for-your-little-one`,
       commentCount: 5,
     },
     {
@@ -728,7 +728,7 @@ export function KidsBlogPosts({ posts: propPosts, columns = 3, sectionTitle, mar
       date: { day: "25", month: "Jul" },
       categories: ["Gift Guide"],
       author: { name: "Scott Antwi" },
-      link: blogBase,
+      link: `${blogBase}/top-10-gift-ideas-for-kids-this-holiday-season`,
       commentCount: 12,
     },
     {
@@ -738,7 +738,7 @@ export function KidsBlogPosts({ posts: propPosts, columns = 3, sectionTitle, mar
       date: { day: "20", month: "Jul" },
       categories: ["Parenting"],
       author: { name: "Scott Antwi" },
-      link: blogBase,
+      link: `${blogBase}/why-organic-fabrics-matter-for-childrens-clothing`,
       commentCount: 8,
     },
   ];
