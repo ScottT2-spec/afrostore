@@ -6,6 +6,7 @@ import { toggleCompare as toggleCompareItem } from "@/lib/compare-utils";
 import { useState, useEffect, useRef, useCallback, createContext, useContext } from "react";
 import { safeSrc, onImgError, kidsProductImage, kidsBlogImage } from "./image-fallback";
 import { useNewsletterSubscribe } from "@/hooks/useNewsletterSubscribe";
+import { useCustomerAuth } from "@/hooks/useCustomerAuth";
 
 /* ═══════════════════════════════════════════════════════════════
    KIDS TEMPLATE BLOCKS
@@ -975,6 +976,7 @@ export function KidsHeader({
   const [mobileOpen, setMobileOpen] = useState(false);
   const [searchOpen, setSearchOpen] = useState(false);
   const [searchVal, setSearchVal] = useState(searchQuery);
+  const { customer, isLoggedIn } = useCustomerAuth(storeSlug);
 
   const base = `/store/${storeSlug}`;
 
@@ -1073,10 +1075,10 @@ export function KidsHeader({
             <button className="kh-icon-btn" onClick={() => setSearchOpen(true)} aria-label="Search">
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
             </button>
-            {/* Sign In */}
-            <Link href={`${base}/my-account`} className="kh-account-link" aria-label="Sign In / Sign Up" style={{ textDecoration: 'none' }}>
+            {/* Account */}
+            <Link href={`${base}/my-account`} className="kh-account-link" aria-label={isLoggedIn ? "My Account" : "Sign In / Sign Up"} style={{ textDecoration: 'none' }}>
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
-              <span>Sign In / Sign Up</span>
+              <span>{isLoggedIn ? (customer?.name || "My Account") : "Sign In / Sign Up"}</span>
             </Link>
             {/* Wishlist */}
             <Link href={`${base}/wishlist`} className="kh-icon-btn" aria-label="Wishlist" style={{ textDecoration: 'none' }}>
