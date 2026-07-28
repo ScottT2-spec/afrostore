@@ -4,9 +4,8 @@ import Link from "next/link";
 import { resolveStoreLink, resolveFooterLink } from "@/lib/template-link-utils";
 import { toggleCompare as toggleCompareItem } from "@/lib/compare-utils";
 import { useState, useEffect, useRef, useCallback, createContext, useContext } from "react";
-import { safeSrc, onImgError } from "./image-fallback";
+import { safeSrc, onImgError, kidsProductImage, kidsBlogImage } from "./image-fallback";
 import { useNewsletterSubscribe } from "@/hooks/useNewsletterSubscribe";
-import { useCustomerAuth } from "@/hooks/useCustomerAuth";
 
 /* ═══════════════════════════════════════════════════════════════
    KIDS TEMPLATE BLOCKS
@@ -168,7 +167,7 @@ export interface KidsHeroSliderProps {
   minHeight?: string;
 }
 
-export function KidsHeroSlider({ slides, autoplaySpeed = 5000, minHeight = "560px" }: KidsHeroSliderProps) {
+export function KidsHeroSlider({ slides, autoplaySpeed = 5000, minHeight = "1020px" }: KidsHeroSliderProps) {
   const storeCtx = useContext(KidsStoreContext);
   const fixLink = (link: string) => resolveStoreLink(link, storeCtx?.storeSlug);
   const [current, setCurrent] = useState(0);
@@ -186,10 +185,10 @@ export function KidsHeroSlider({ slides, autoplaySpeed = 5000, minHeight = "560p
 
   const scopedCss = `
     .kh-slider { position: relative; width: 100%; overflow: hidden; }
-    .kh-slide { position: absolute; inset: 0; opacity: 0; transition: opacity 0.7s ease; display: flex; align-items: center; }
-    .kh-slide.kh-active { opacity: 1; position: relative; }
-    .kh-slide-bg { position: absolute; inset: 0; background-size: cover; background-position: center; z-index: 0; }
-    .kh-slide-content { position: relative; z-index: 2; width: 100%; }
+    .kh-slide { position: absolute; inset: 0; opacity: 0; min-height: var(--kh-height); }
+    .kh-slide.kh-active { opacity: 1; position: absolute; }
+    .kh-slide-bg { position: absolute; inset: 0; background-size: cover; background-position: center; z-index: 0; width: 100%; height: 100%; min-height: var(--kh-height); }
+    .kh-slide-content { position: relative; z-index: 2; width: 100%; height: 100%; display: flex; align-items: center; min-height: var(--kh-height); }
     .kh-title {
       font-family: ${TOKENS.titleFont}; font-weight: 700; font-size: 64px;
       line-height: 74px; margin: 0 0 20px; max-width: 685px;
@@ -237,18 +236,16 @@ export function KidsHeroSlider({ slides, autoplaySpeed = 5000, minHeight = "560p
     }
     .kh-arrow:hover { background: #fff; }
     @media (max-width: 1024px) {
-      .kh-slider { min-height: 450px !important; }
       .kh-title { font-size: 38px; line-height: 48px; max-width: 450px; }
     }
     @media (max-width: 767px) {
-      .kh-slider { min-height: 380px !important; }
       .kh-title { font-size: 28px; line-height: 38px; }
       .kh-desc { font-size: 14px; }
     }
   `;
 
   return (
-    <div className="kh-slider" style={{ minHeight }}>
+    <div className="kh-slider" style={{ '--kh-height': minHeight, minHeight: 'var(--kh-height)', height: 'var(--kh-height)' } as React.CSSProperties}>
       <ScopedStyles id="hero-slider" css={scopedCss} />
       {slides.map((slide, i) => {
         const scheme = slide.colorScheme || "light";
@@ -456,7 +453,7 @@ export function KidsProductGrid({ products: propProducts, columns = 4, showCateg
       categoryLink: p.category?.slug ? `/store/${storeCtx.storeSlug}/shop?category=${p.category.slug}` : undefined,
       price: p.compareAtPrice ? `${sym}${p.compareAtPrice.toLocaleString()}` : `${sym}${p.price.toLocaleString()}`,
       salePrice: p.compareAtPrice ? `${sym}${p.price.toLocaleString()}` : undefined,
-      image: p.images[0]?.url || safeSrc(null, p.name),
+      image: kidsProductImage(p.images[0]?.url, p.name),
       hoverImage: p.images[1]?.url,
       link: `/store/${storeCtx.storeSlug}/product/${p.slug}`,
       badge: p.compareAtPrice ? "Sale" : p.isFeatured ? "Hot" : undefined,
@@ -560,9 +557,9 @@ export function KidsProductGrid({ products: propProducts, columns = 4, showCateg
             <div key={p.id} className="kpg-card">
               <div className="kpg-thumb">
                 <Link href={pLink}>
-                  <img src={p.image || safeSrc(null, p.name)} alt={p.name} className="kpg-img kpg-main-img" loading="lazy" onError={(e) => onImgError(e, p.name)} />
+                  <img src={p.image} alt={p.name} className="kpg-img kpg-main-img" loading="lazy" onError={(e) => { e.currentTarget.src = kidsProductImage(null, p.name); }} />
                   {showHoverImage && p.hoverImage && (
-                    <img src={p.hoverImage} alt={p.name} className="kpg-hover-img" loading="lazy"  onError={(e) => onImgError(e, p.name)} />
+                    <img src={p.hoverImage} alt={p.name} className="kpg-hover-img" loading="lazy"  onError={(e) => { e.currentTarget.src = kidsProductImage(null, p.name); }} />
                   )}
                 </Link>
                 {p.badge && <span className={`kpg-badge ${badgeClass}`}>{p.badge}</span>}
@@ -713,10 +710,10 @@ export function KidsBlogPosts({ posts: propPosts, columns = 3, sectionTitle, mar
 
   const posts: KidsBlogPost[] = (() => {
     if (!storeCtx || !storeCtx.blogs || storeCtx.blogs.length === 0) return propPosts || [];
-    return storeCtx.blogs.slice(0, columns * 2).map(b => {
+    return storeCtx.blogs.slice(0, columns * 2).map((b, index) => {
       const d = b.publishedAt ? new Date(b.publishedAt) : new Date(b.createdAt);
       return {
-        image: b.coverImage || safeSrc(null, b.title),
+        image: kidsBlogImage(b.coverImage, index),
         title: b.title,
         excerpt: b.excerpt || "",
         date: { day: d.getDate().toString().padStart(2, "0"), month: d.toLocaleString("en-US", { month: "short" }) },
@@ -767,6 +764,19 @@ export function KidsBlogPosts({ posts: propPosts, columns = 3, sectionTitle, mar
     @media (max-width: 1024px) { .kbp2-grid { grid-template-columns: repeat(2, 1fr); } }
     @media (max-width: 767px) { .kbp2-grid { grid-template-columns: 1fr; } }
   `;
+
+  // Fallback message if no posts
+  if (posts.length === 0) {
+    return (
+      <div className="kbp2-section" style={containerStyle}>
+        <ScopedStyles id="blog-posts" css={scopedCss} />
+        {sectionTitle && <KidsSectionTitle subtitle={sectionTitle.subtitle} title={sectionTitle.title} />}
+        <div className="text-center py-12 px-6 bg-surface-50 rounded-2xl">
+          <p className="text-surface-600 text-sm">No blog posts yet. Check back soon for updates!</p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="kbp2-section" style={containerStyle}>
@@ -960,13 +970,11 @@ export function KidsHeader({
   onSearch,
   searchQuery = "",
   onSearchChange,
-  topBarText = "Sign up for our newsletter to get 10% off for the week!",
+  topBarText = "Sign up for our newsletter to get 30% off for the week!",
 }: KidsHeaderProps) {
   const [mobileOpen, setMobileOpen] = useState(false);
   const [searchOpen, setSearchOpen] = useState(false);
   const [searchVal, setSearchVal] = useState(searchQuery);
-  const { customer, isLoggedIn } = useCustomerAuth(storeSlug);
-  const exactKids = templateSlug === "kids";
 
   const base = `/store/${storeSlug}`;
 
@@ -1039,8 +1047,8 @@ export function KidsHeader({
 
           {/* Left nav */}
           <nav className="kh-nav">
-            <Link href={exactKids ? `${base}/about` : `${base}/shop`}>About Us</Link>
-            <Link href={exactKids ? `${base}/contact` : `${base}/shop`}>Contact Us</Link>
+            <Link href={`${base}/about`}>About Us</Link>
+            <Link href={`${base}/contact`}>Contact Us</Link>
             <Link href={`${base}/blog`}>Blog</Link>
           </nav>
 
@@ -1065,10 +1073,10 @@ export function KidsHeader({
             <button className="kh-icon-btn" onClick={() => setSearchOpen(true)} aria-label="Search">
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
             </button>
-            {/* Sign In / Account */}
-            <Link href={isLoggedIn ? `${base}/my-account` : `${base}/login`} className="kh-account-link" aria-label={isLoggedIn ? "My Account" : "Sign In / Sign Up"} style={{ textDecoration: 'none' }}>
+            {/* Sign In */}
+            <Link href={`${base}/my-account`} className="kh-account-link" aria-label="Sign In / Sign Up" style={{ textDecoration: 'none' }}>
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
-              <span>{isLoggedIn ? `Hi, ${customer?.name?.split(" ")[0]}` : "Sign In / Sign Up"}</span>
+              <span>Sign In / Sign Up</span>
             </Link>
             {/* Wishlist */}
             <Link href={`${base}/wishlist`} className="kh-icon-btn" aria-label="Wishlist" style={{ textDecoration: 'none' }}>
@@ -1088,13 +1096,11 @@ export function KidsHeader({
           <Link href={base} onClick={() => setMobileOpen(false)}>Home</Link>
           <Link href={`${base}/shop`} onClick={() => setMobileOpen(false)}>Shop</Link>
           <Link href={`${base}/product-category/gifts`} onClick={() => setMobileOpen(false)}>Gifts</Link>
-          <Link href={exactKids ? `${base}/about` : `${base}/shop`} onClick={() => setMobileOpen(false)}>About Us</Link>
-          <Link href={exactKids ? `${base}/contact` : `${base}/shop`} onClick={() => setMobileOpen(false)}>Contact Us</Link>
+          <Link href={`${base}/about`} onClick={() => setMobileOpen(false)}>About Us</Link>
+          <Link href={`${base}/contact`} onClick={() => setMobileOpen(false)}>Contact Us</Link>
           <Link href={`${base}/blog`} onClick={() => setMobileOpen(false)}>Blog</Link>
           <Link href={`${base}/wishlist`} onClick={() => setMobileOpen(false)}>Wishlist</Link>
-          {isLoggedIn
-            ? <Link href={`${base}/my-account`} onClick={() => setMobileOpen(false)}>My Account ({customer?.name?.split(" ")[0]})</Link>
-            : <Link href={`${base}/login`} onClick={() => setMobileOpen(false)}>Sign In / Sign Up</Link>}
+          <Link href={`${base}/my-account`} onClick={() => setMobileOpen(false)}>My Account</Link>
         </div>
       </header>
 
@@ -1140,8 +1146,8 @@ export function KidsFooterFull({
   storeSlug: storeSlugProp,
   logo,
   templateSlug,
-  description = "We create organic clothes for babies and children. Quality, comfort, and style in every piece.",
-  contact = { address: "913 Wyandotte St, Kansas City, MO 64105", phone: "(064) 332-1233", email: "hello@store.com" },
+  description = "Whether you're shopping for your own child or searching for the perfect gift, you'll find something special for every stage of childhood.",
+  contact = { address: "420 North Carolina", phone: "(092) 350-1233", email: "hello@store.com" },
   socialLinks = [],
   copyrightText,
 }: KidsFooterFullProps) {
@@ -1229,7 +1235,7 @@ export function KidsFooterFull({
         <div>
           <h4 className="kf-col-title">Shop</h4>
           <ul className="kf-links">
-            <li><Link href={`${base}/shop`}>Growsuits</Link></li>
+            <li><Link href={`${base}/shop`}>Jumpsuits</Link></li>
             <li><Link href={`${base}/shop`}>Jumpers</Link></li>
             <li><Link href={`${base}/shop`}>Toys</Link></li>
             <li><Link href={`${base}/product-category/gifts`}>Gifts</Link></li>
@@ -1243,8 +1249,8 @@ export function KidsFooterFull({
         <div>
           <h4 className="kf-col-title">Useful links</h4>
           <ul className="kf-links">
-            <li><Link href={exactKids ? `${base}/contact` : `${base}/shop`}>Contact Us</Link></li>
-            <li><Link href={exactKids ? `${base}/about` : `${base}/shop`}>About Us</Link></li>
+            <li><Link href={`${base}/contact`}>Contact Us</Link></li>
+            <li><Link href={`${base}/about`}>About Us</Link></li>
             <li><Link href={`${base}/blog`}>Blog</Link></li>
             <li><Link href={`${base}/shop`}>Delivery & Return</Link></li>
           </ul>
@@ -1258,7 +1264,7 @@ export function KidsFooterFull({
             <li><span>Call Us: (064) 332-1233</span></li>
             <li><span>Monday - Friday</span></li>
             <li><span>Hours: 9:00am - 5:00pm</span></li>
-            <li><span>913 Wyandotte St, Kansas City, MO 64105, United States</span></li>
+            <li><span>420 Waystreet Road, North Carolina, United States</span></li>
           </ul>
         </div>
       </div>
@@ -1289,10 +1295,10 @@ export interface KidsAboutHeroProps {
 
 export function KidsAboutHero({ 
   subtitle = "About Us", 
-  title = "We create organic clothes for babies",
+  title = "Discover Favorites for Every Little One",
   bodyText = [],
   images = [],
-  calloutText = "Websites in professional use templating systems. Commercial publishing platforms and content management systems ensure show.",
+  calloutText = "Our shelves are filled with carefully selected clothing, toys, and accessories that make every day a little brighter. From newborn essentials to playful finds, every item is chosen for its quality, comfort, and lasting value.",
   calloutLabel = "Meet our team"
 }: KidsAboutHeroProps) {
   return (
@@ -1405,7 +1411,7 @@ export function KidsFaqSection({
         </div>
         <div className="space-y-4">
           <h3 className="text-lg font-bold text-[#242424]">Some of your questions answered here</h3>
-          <p className="text-sm leading-7 text-[#767676]">We get a lot of questions about our course. You can get any answers.</p>
+          <p className="text-sm leading-7 text-[#767676]">We have a dedicated section for answering all your queries here.</p>
           <div className="space-y-4 rounded-[28px] bg-white p-6 shadow-[0_8px_32px_rgba(0,0,0,0.06)]">
             {faqs.map((faq) => (
               <div key={faq.question} className="rounded-[22px] border border-[#efe6da] bg-[#fffdf8] p-5">
@@ -1451,7 +1457,7 @@ export interface KidsContactInfoProps {
 }
 
 export function KidsContactInfo({ 
-  phone = "(064) 332-1233",
+  phone = "(090) 276-1233",
   hours = "9:00am - 5:00pm",
   days = "Monday - Friday",
   socialLinks = {},

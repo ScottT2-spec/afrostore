@@ -1,12 +1,12 @@
-import { KIDS_TEMPLATE_PRESET } from './presets/kids-preset';
+import { KIDS_ABOUT_PAGE_BLOCKS, KIDS_CONTACT_PAGE_BLOCKS, KIDS_BLOG_PAGE_BLOCKS } from './presets/kids-page-presets';
 import type { KidsSection } from '@/components/storefront/KidsPageRenderer';
 
 /**
  * Converts TemplateBlock[] to KidsSection[] format
  * This is the seeding function that converts the hardcoded preset into database-ready sections
  */
-export function seedKidsPageSections(): KidsSection[] {
-  return KIDS_TEMPLATE_PRESET.map((block, index) => ({
+function convertBlocksToSections(blocks: any[]): KidsSection[] {
+  return blocks.map((block, index) => ({
     id: block.id,
     type: block.type,
     order: index + 1,
@@ -18,80 +18,42 @@ export function seedKidsPageSections(): KidsSection[] {
 /**
  * Default page configurations for Kids template
  * Following the Prokip ensurePagesExist pattern
+ * Content from kids-page-presets.ts
  */
 export const KIDS_DEFAULT_PAGES = {
   home: {
     id: 'home',
     name: 'Home',
     slug: '/',
-    sections: seedKidsPageSections(),
+    sections: [],
     isSystem: true,
   },
   shop: {
     id: 'shop',
     name: 'Shop All',
     slug: '/shop',
-    sections: seedKidsPageSections().filter(s => 
-      s.type === 'kidsHeroSlider' || 
-      s.type === 'kidsProductGrid' ||
-      s.type === 'kidsCategoryCards'
-    ),
+    sections: [],
     isSystem: true,
   },
   about: {
     id: 'about',
     name: 'About Us',
-    slug: '/about-us',
-    sections: [
-      {
-        id: 'about-hero',
-        type: 'kidsHeroSlider',
-        order: 1,
-        props: {
-          autoplaySpeed: 5000,
-          minHeight: '560px',
-          slides: [
-            {
-              title: 'About Our Kids Store',
-              description: 'We provide the best quality clothes and toys for your little ones.',
-              buttonText: 'Learn More',
-              buttonLink: '/about-us',
-              backgroundImage: 'https://woodmart.xtemos.com/wp-content/uploads/2022/01/kids-slide-1.jpg',
-              colorScheme: 'dark',
-            },
-          ],
-        },
-        styleOverrides: {},
-      },
-    ],
+    slug: 'about',
+    sections: convertBlocksToSections(KIDS_ABOUT_PAGE_BLOCKS),
     isSystem: false,
   },
   contact: {
     id: 'contact',
     name: 'Contact Us',
-    slug: '/contact-us',
-    sections: [
-      {
-        id: 'contact-hero',
-        type: 'kidsHeroSlider',
-        order: 1,
-        props: {
-          autoplaySpeed: 5000,
-          minHeight: '560px',
-          slides: [
-            {
-              title: 'Get In Touch',
-              description: 'We would love to hear from you. Contact us for any questions.',
-              buttonText: 'Contact Us',
-              buttonLink: '/contact-us',
-              backgroundImage: 'https://woodmart.xtemos.com/wp-content/uploads/2022/01/kids-slide-2.jpg',
-              colorScheme: 'dark',
-            },
-          ],
-        },
-        styleOverrides: {},
-      },
-    ],
+    slug: 'contact',
+    sections: convertBlocksToSections(KIDS_CONTACT_PAGE_BLOCKS),
+    isSystem: false,
+  },
+  blog: {
+    id: 'blog',
+    name: 'Blog',
+    slug: 'blog',
+    sections: convertBlocksToSections(KIDS_BLOG_PAGE_BLOCKS),
     isSystem: false,
   },
 };

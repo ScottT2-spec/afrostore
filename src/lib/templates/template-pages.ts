@@ -13,7 +13,7 @@ import { TOOLS_ABOUT_PAGE_BLOCKS, TOOLS_CONTACT_PAGE_BLOCKS, TOOLS_BLOG_PAGE_BLO
 import { ELECTRONICS_ABOUT_PAGE_BLOCKS, ELECTRONICS_CONTACT_PAGE_BLOCKS, ELECTRONICS_BLOG_PAGE_BLOCKS, ELECTRONICS_SHOP_PAGE_BLOCKS } from "./presets/electronics-page-presets";
 import { DECOR_ABOUT_PAGE_BLOCKS, DECOR_CONTACT_PAGE_BLOCKS, DECOR_BLOG_PAGE_BLOCKS, DECOR_SHOP_PAGE_BLOCKS } from "./presets/decor-page-presets";
 import { ACCESSORIES_ABOUT_PAGE_BLOCKS, ACCESSORIES_CONTACT_PAGE_BLOCKS, ACCESSORIES_BLOG_PAGE_BLOCKS, ACCESSORIES_SHOP_PAGE_BLOCKS, ACCESSORIES_FAQS_PAGE_BLOCKS } from "./presets/accessories-page-presets";
-import { KIDS_ABOUT_PAGE_BLOCKS, KIDS_CONTACT_PAGE_BLOCKS, KIDS_BLOG_PAGE_BLOCKS, KIDS_SHOP_PAGE_BLOCKS } from "./presets/kids-page-presets";
+import { KIDS_ABOUT_PAGE_BLOCKS, KIDS_CONTACT_PAGE_BLOCKS, KIDS_BLOG_PAGE_BLOCKS } from "./presets/kids-pages-preset";
 import { TOYS_ABOUT_PAGE_BLOCKS, TOYS_CONTACT_PAGE_BLOCKS, TOYS_BLOG_PAGE_BLOCKS, TOYS_SHOP_PAGE_BLOCKS, TOYS_FAQS_PAGE_BLOCKS } from "./presets/toys-page-presets";
 import { MAKEUP_ABOUT_PAGE_BLOCKS, MAKEUP_CONTACT_PAGE_BLOCKS, MAKEUP_BLOG_PAGE_BLOCKS, MAKEUP_SHOP_PAGE_BLOCKS } from "./presets/makeup-page-presets";
 import { GROCERY_ABOUT_PAGE_BLOCKS, GROCERY_CONTACT_PAGE_BLOCKS, GROCERY_BLOG_PAGE_BLOCKS, GROCERY_SHOP_PAGE_BLOCKS } from "./presets/grocery-page-presets";
@@ -30,7 +30,6 @@ const KIDS_PAGES: PageDef[] = [
   { title: "About", slug: "about", type: "CUSTOM", position: 10 },
   { title: "Contact", slug: "contact", type: "CUSTOM", position: 11 },
   { title: "Blog", slug: "blog", type: "CUSTOM", position: 12 },
-  { title: "Shop", slug: "shop", type: "CUSTOM", position: 13 },
 ];
 
 const TOYS_PAGES: PageDef[] = [
@@ -234,7 +233,6 @@ export const TEMPLATE_PAGE_CONTENT_MAP: Record<string, Record<string, unknown[]>
     about: KIDS_ABOUT_PAGE_BLOCKS,
     contact: KIDS_CONTACT_PAGE_BLOCKS,
     blog: KIDS_BLOG_PAGE_BLOCKS,
-    shop: KIDS_SHOP_PAGE_BLOCKS,
   },
   toys: {
     about: TOYS_ABOUT_PAGE_BLOCKS,

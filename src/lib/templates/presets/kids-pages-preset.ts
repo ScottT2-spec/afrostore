@@ -1,12 +1,10 @@
-import type { TemplateBlock } from "@/components/storefront/TemplateBlockRenderer";
-
 /**
- * Kids Template Page Presets
- * Using new rich content block types with EXACT content from hardcoded JSX
- * Content extracted verbatim from page components - no placeholders
+ * Kids template page block presets
+ * These blocks are used to seed the About, Contact, and Blog pages for Kids template sites
+ * Content from kids-page-presets.ts
  */
 
-export const KIDS_ABOUT_PAGE_BLOCKS: TemplateBlock[] = [
+export const KIDS_ABOUT_PAGE_BLOCKS = [
   {
     id: "kids-about-announcement",
     type: "kidsAnnouncementBar",
@@ -21,7 +19,7 @@ export const KIDS_ABOUT_PAGE_BLOCKS: TemplateBlock[] = [
     type: "kidsHeader",
     props: {
       storeName: "Kids Store",
-      storeSlug: "kids-store",
+      storeSlug: "kids",
     },
   },
   {
@@ -100,15 +98,15 @@ export const KIDS_ABOUT_PAGE_BLOCKS: TemplateBlock[] = [
   },
   {
     id: "kids-about-footer",
-    type: "kidsFooter",
+    type: "kidsFooterFull",
     props: {
       storeName: "Kids Store",
-      storeSlug: "kids-store",
+      storeSlug: "kids",
     },
   },
 ];
 
-export const KIDS_CONTACT_PAGE_BLOCKS: TemplateBlock[] = [
+export const KIDS_CONTACT_PAGE_BLOCKS = [
   {
     id: "kids-contact-announcement",
     type: "kidsAnnouncementBar",
@@ -123,7 +121,7 @@ export const KIDS_CONTACT_PAGE_BLOCKS: TemplateBlock[] = [
     type: "kidsHeader",
     props: {
       storeName: "Kids Store",
-      storeSlug: "kids-store",
+      storeSlug: "kids",
     },
   },
   {
@@ -172,20 +170,20 @@ export const KIDS_CONTACT_PAGE_BLOCKS: TemplateBlock[] = [
         { label: "Visit the blog", href: "/blog" },
         { label: "Shop the collection", href: "/shop" },
       ],
-      storeSlug: "kids-store",
+      storeSlug: "kids",
     },
   },
   {
     id: "kids-contact-footer",
-    type: "kidsFooter",
+    type: "kidsFooterFull",
     props: {
       storeName: "Kids Store",
-      storeSlug: "kids-store",
+      storeSlug: "kids",
     },
   },
 ];
 
-export const KIDS_BLOG_PAGE_BLOCKS: TemplateBlock[] = [
+export const KIDS_BLOG_PAGE_BLOCKS = [
   {
     id: "kids-blog-announcement",
     type: "kidsAnnouncementBar",
@@ -200,7 +198,7 @@ export const KIDS_BLOG_PAGE_BLOCKS: TemplateBlock[] = [
     type: "kidsHeader",
     props: {
       storeName: "Kids Store",
-      storeSlug: "kids-store",
+      storeSlug: "kids",
     },
   },
   {
@@ -216,82 +214,10 @@ export const KIDS_BLOG_PAGE_BLOCKS: TemplateBlock[] = [
   },
   {
     id: "kids-blog-footer",
-    type: "kidsFooter",
+    type: "kidsFooterFull",
     props: {
       storeName: "Kids Store",
-      storeSlug: "kids-store",
-    },
-  },
-];
-
-export const KIDS_SHOP_PAGE_BLOCKS: TemplateBlock[] = [
-  {
-    id: "kids-shop-announcement",
-    type: "kidsAnnouncementBar",
-    props: {
-      text: "Sign up for our newsletter to get 30% off for the week!",
-      link: "#newsletter",
-      backgroundColor: "#d0d85f",
-    },
-  },
-  {
-    id: "kids-shop-header",
-    type: "kidsHeader",
-    props: {
-      storeName: "Kids Store",
-      storeSlug: "kids-store",
-    },
-  },
-  {
-    id: "kids-shop-hero",
-    type: "kidsAboutHero",
-    props: {
-      subtitle: "Kids Shop",
-      title: "All Products",
-      bodyText: [
-        "Discover everyday essentials to make your kid shine this season from the Kids collection.",
-      ],
-      images: [],
-      calloutText: "",
-      calloutLabel: "",
-    },
-  },
-  {
-    id: "kids-shop-categories",
-    type: "kidsCategoryCards",
-    props: {
-      sectionTitle: {
-        subtitle: "Shop",
-        title: "Shop by category",
-      },
-      categories: [
-        { name: "Jumpsuits", image: "https://images.unsplash.com/photo-1522771930-78848d9293e8?w=300&h=400&fit=crop", productCount: 12, link: "/shop" },
-        { name: "Jumpers", image: "https://images.unsplash.com/photo-1519689680058-324335c77eba?w=300&h=400&fit=crop", productCount: 8, link: "/shop" },
-        { name: "Toys", image: "https://images.unsplash.com/photo-1558060370-d644479cb6f7?w=300&h=400&fit=crop", productCount: 15, link: "/shop" },
-        { name: "Accessories", image: "https://images.unsplash.com/photo-1566454419290-57a0589c9b17?w=300&h=400&fit=crop", productCount: 10, link: "/shop" },
-        { name: "Dresses", image: "https://images.unsplash.com/photo-1518831959646-742c3a14ebf7?w=300&h=400&fit=crop", productCount: 9, link: "/shop" },
-        { name: "Warm Leggings", image: "https://images.unsplash.com/photo-1471286174890-9c112ffca5b4?w=300&h=400&fit=crop", productCount: 7, link: "/shop" },
-      ],
-    },
-  },
-  {
-    id: "kids-shop-grid",
-    type: "kidsProductGrid",
-    props: {
-      columns: 4,
-      maxProducts: 12,
-      filter: "all",
-      sectionTitle: {
-        title: "Products",
-      },
-    },
-  },
-  {
-    id: "kids-shop-footer",
-    type: "kidsFooter",
-    props: {
-      storeName: "Kids Store",
-      storeSlug: "kids-store",
+      storeSlug: "kids",
     },
   },
 ];
