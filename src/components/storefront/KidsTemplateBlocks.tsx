@@ -709,6 +709,7 @@ export interface KidsBlogPostsProps {
 export function KidsBlogPosts({ posts: propPosts, columns = 3, sectionTitle, marginBottom = "60px" }: KidsBlogPostsProps) {
   const storeCtx = useContext(KidsStoreContext);
 
+  const blogBase = storeCtx?.storeSlug ? `/store/${storeCtx.storeSlug}/blog` : "/blog";
   const SAMPLE_KIDS_BLOGS: KidsBlogPost[] = [
     {
       image: "/uploads/kids_images/Bblog1.webp",
@@ -717,7 +718,7 @@ export function KidsBlogPosts({ posts: propPosts, columns = 3, sectionTitle, mar
       date: { day: "28", month: "Jul" },
       categories: ["Fashion Tips"],
       author: { name: "Scott Antwi" },
-      link: "/blog",
+      link: blogBase,
       commentCount: 5,
     },
     {
@@ -727,7 +728,7 @@ export function KidsBlogPosts({ posts: propPosts, columns = 3, sectionTitle, mar
       date: { day: "25", month: "Jul" },
       categories: ["Gift Guide"],
       author: { name: "Scott Antwi" },
-      link: "/blog",
+      link: blogBase,
       commentCount: 12,
     },
     {
@@ -737,7 +738,7 @@ export function KidsBlogPosts({ posts: propPosts, columns = 3, sectionTitle, mar
       date: { day: "20", month: "Jul" },
       categories: ["Parenting"],
       author: { name: "Scott Antwi" },
-      link: "/blog",
+      link: blogBase,
       commentCount: 8,
     },
   ];

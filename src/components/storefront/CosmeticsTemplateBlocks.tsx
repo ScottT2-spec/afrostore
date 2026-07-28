@@ -1066,7 +1066,8 @@ export interface CosmeticsBlogPostsProps {
 export function CosmeticsBlogPosts({ posts: propPosts, columns = 2, sectionTitle, marginBottom = "60px" }: CosmeticsBlogPostsProps) {
   const storeCtx = useContext(CosmeticsStoreContext);
 
-    const SAMPLE_COSMETICS_BLOGS: CosmeticsBlogPost[] = [
+    const blogBase = storeCtx?.storeSlug ? `/store/${storeCtx.storeSlug}/blog` : "/blog";
+  const SAMPLE_COSMETICS_BLOGS: CosmeticsBlogPost[] = [
     {
       image: "https://images.unsplash.com/photo-1596462502278-27bfdc403348?w=600&h=400&fit=crop",
       title: "5 Skincare Mistakes You're Probably Making",
@@ -1074,7 +1075,7 @@ export function CosmeticsBlogPosts({ posts: propPosts, columns = 2, sectionTitle
       date: { day: "28", month: "Jul" },
       categories: ["Skincare"],
       author: { name: "Scott Antwi" },
-      link: "/blog",
+      link: blogBase,
       commentCount: 9,
     },
     {
@@ -1084,7 +1085,7 @@ export function CosmeticsBlogPosts({ posts: propPosts, columns = 2, sectionTitle
       date: { day: "24", month: "Jul" },
       categories: ["Beauty Tips"],
       author: { name: "Scott Antwi" },
-      link: "/blog",
+      link: blogBase,
       commentCount: 15,
     },
   ];
