@@ -12,7 +12,13 @@ import { useAuth } from '@/context/AuthContext';
 async function parseResponse<T>(response: Response): Promise<T | null> {
   const text = await response.text();
   if (!text) return null;
-  return JSON.parse(text) as T;
+  try {
+    return JSON.parse(text) as T;
+  } catch {
+    // Server returned non-JSON (e.g. HTML error page)
+    console.error("Non-JSON response:", text.slice(0, 200));
+    return { success: false, error: `Server error (${response.status}). Please try again.` } as T;
+  }
 }
 
 const INDUSTRIES = [
