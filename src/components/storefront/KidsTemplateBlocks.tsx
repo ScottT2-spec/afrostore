@@ -1078,7 +1078,7 @@ export function KidsHeader({
             {/* Account */}
             <Link href={`${base}/my-account`} className="kh-account-link" aria-label={isLoggedIn ? "My Account" : "Sign In / Sign Up"} style={{ textDecoration: 'none' }}>
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
-              <span>{isLoggedIn ? (customer?.name || "My Account") : "Sign In / Sign Up"}</span>
+              <span>{isLoggedIn ? `Hi, ${customer?.name?.split(" ")[0] || "Welcome back"}!` : "Sign In / Sign Up"}</span>
             </Link>
             {/* Wishlist */}
             <Link href={`${base}/wishlist`} className="kh-icon-btn" aria-label="Wishlist" style={{ textDecoration: 'none' }}>
