@@ -63,6 +63,7 @@ export interface ProkipAgentModalProps {
   fields?: Array<{ name: string; label: string; type: string; placeholder: string; prefix?: string }>;
   submitText?: string;
   onSubmitRedirect?: string;
+  storeSlug?: string; // ADDED LINE
 }
 
 export function ProkipAgentModal({
@@ -74,6 +75,8 @@ export function ProkipAgentModal({
     { name: "phone", label: "Phone Number", type: "tel", placeholder: "801 234 5678", prefix: "+234" },
   ],
   submitText = "JOIN OUR TEAM NOW",
+  onSubmitRedirect,
+  storeSlug,
 }: ProkipAgentModalProps) {
   const [open, setOpen] = useState(false);
   const [formData, setFormData] = useState({
@@ -85,7 +88,7 @@ export function ProkipAgentModal({
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState(false);
   const router = useRouter(); // Initialize router
-  const { storeSlug } = useContext(ProkipAgentCtx); // Get storeSlug from context
+  // const { storeSlug } = useContext(ProkipAgentCtx); // REMOVED: Get storeSlug from context
 
   useEffect(() => {
     const handler = () => setOpen(true);

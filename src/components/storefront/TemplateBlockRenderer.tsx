@@ -962,7 +962,7 @@ function RenderTemplateBlock({ block, storeSlug }: { block: TemplateBlock; store
   // Override storeSlug with the real slug from the URL so nav links work correctly
   const componentProps = {
     ...block.props,
-    ...(storeSlug && block.props?.storeSlug ? { storeSlug } : {}),
+    storeSlug: storeSlug, // Explicitly pass the storeSlug to the component
     resolvedStyles: styles,
     resolvedClasses: classes,
   };
