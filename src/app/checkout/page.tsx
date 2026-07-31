@@ -182,7 +182,7 @@ export default function CheckoutPage() {
           lastName,
           email,
           phone,
-          deliveryAddress: { address, city, state, instructions: deliveryInstructions },
+          deliveryAddress: { line1: address, city, state, country: "Nigeria", deliveryInstructions },
           deliveryZoneId: selectedZone || undefined,
           paymentMethod: paymentMethod === "COD" ? "PAY_ON_DELIVERY" : paymentMethod,
           couponCode: couponCode.trim() || undefined,
