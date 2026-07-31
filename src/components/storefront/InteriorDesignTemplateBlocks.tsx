@@ -1522,3 +1522,137 @@ export function GardenProductCategory({
     </div>
   );
 }
+
+/* ═══════════════════════════════════════════════════════════════
+   INTERIOR ABOUT CONTENT
+   ═══════════════════════════════════════════════════════════════ */
+export interface InteriorAboutContentButton { text: string; link: string; }
+export interface InteriorAboutContentProps { layout: "text-with-heading" | "ctas-only"; subtitle?: string; title?: string; paragraphs?: string[]; buttons?: InteriorAboutContentButton[]; credit?: string; }
+
+export function InteriorAboutContent({ layout, subtitle, title, paragraphs = [], buttons = [], credit }: InteriorAboutContentProps) {
+  const storeCtx = useContext(InteriorStoreContext);
+  const fixLink = (link: string) => resolveStoreLink(link, storeCtx?.storeSlug);
+  const cst: React.CSSProperties = { maxWidth: TOKENS.containerWidth, margin: "0 auto", padding: "0 15px", boxSizing: "border-box" as const, width: "100%" };
+  const css = `
+    .iac-section { padding: 40px 15px; }
+    .iac-subtitle { color: ${TOKENS.primaryColor}; text-transform: uppercase; font-weight: 600; font-size: 14px; font-family: ${TOKENS.bodyFont}; margin-bottom: 8px; }
+    .iac-title { font-family: ${TOKENS.titleFont}; font-weight: 600; font-size: 28px; text-transform: uppercase; color: ${TOKENS.titleColor}; margin: 0 0 20px; line-height: 1.3; }
+    .iac-p { font-family: ${TOKENS.bodyFont}; font-size: 15px; color: ${TOKENS.textColor}; line-height: 1.8; margin: 0 0 16px; }
+    .iac-credit { font-family: ${TOKENS.bodyFont}; font-size: 14px; color: ${TOKENS.textColor}; font-style: italic; margin-top: 20px; }
+    .iac-buttons { display: flex; gap: 16px; margin-top: 24px; flex-wrap: wrap; }
+    .iac-btn { display: inline-block; padding: 12px 28px; font-family: ${TOKENS.bodyFont}; font-size: 13px; font-weight: 700; text-transform: uppercase; text-decoration: none; transition: all 0.3s; }
+    .iac-btn-p { background: ${TOKENS.titleColor}; color: #fff; }
+    .iac-btn-s { background: transparent; color: ${TOKENS.titleColor}; border: 2px solid ${TOKENS.titleColor}; }
+    .iac-ctas { text-align: center; padding: 20px 15px 40px; }
+  `;
+  if (layout === "ctas-only") return (<div className="iac-ctas"><style dangerouslySetInnerHTML={{ __html: css }} /><div className="iac-buttons" style={{ justifyContent: "center" }}>{buttons.map((b, i) => <Link key={i} href={fixLink(b.link)} className={`iac-btn ${i === 0 ? "iac-btn-p" : "iac-btn-s"}`}>{b.text}</Link>)}</div></div>);
+  return (<section className="iac-section"><style dangerouslySetInnerHTML={{ __html: css }} /><div style={cst}>{subtitle && <div className="iac-subtitle">{subtitle}</div>}{title && <h3 className="iac-title">{title}</h3>}{paragraphs.map((p, i) => <p key={i} className="iac-p">{p}</p>)}{credit && <p className="iac-credit">{credit}</p>}{buttons.length > 0 && <div className="iac-buttons">{buttons.map((b, i) => <Link key={i} href={fixLink(b.link)} className={`iac-btn ${i === 0 ? "iac-btn-p" : "iac-btn-s"}`}>{b.text}</Link>)}</div>}</div></section>);
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   INTERIOR STATS COUNTERS
+   ═══════════════════════════════════════════════════════════════ */
+export interface InteriorStatsCounter { value: number; label: string; }
+export interface InteriorStatsCountersProps { counters: InteriorStatsCounter[]; }
+export function InteriorStatsCounters({ counters }: InteriorStatsCountersProps) {
+  const ref = useRef<HTMLDivElement>(null);
+  const [inView, setInView] = useState(false);
+  const [displayed, setDisplayed] = useState<number[]>(counters.map(() => 0));
+  useEffect(() => { const el = ref.current; if (!el) return; const obs = new IntersectionObserver(([e]) => { if (e.isIntersecting) { setInView(true); obs.disconnect(); } }, { threshold: 0.3 }); obs.observe(el); return () => obs.disconnect(); }, []);
+  useEffect(() => { if (!inView) return; const steps = 60; let step = 0; const timer = setInterval(() => { step++; setDisplayed(counters.map(c => Math.round(c.value * Math.min(step / steps, 1)))); if (step >= steps) clearInterval(timer); }, 2000 / steps); return () => clearInterval(timer); }, [inView, counters]);
+  const css = `.isc-section{padding:50px 15px;background:#f7f7f7}.isc-grid{display:grid;grid-template-columns:repeat(${counters.length},1fr);gap:30px;text-align:center}.isc-value{font-family:${TOKENS.titleFont};font-size:48px;font-weight:600;color:${TOKENS.titleColor};line-height:1;margin-bottom:8px}.isc-label{font-family:${TOKENS.bodyFont};font-size:13px;font-weight:700;text-transform:uppercase;letter-spacing:1px;color:${TOKENS.textColor}}@media(max-width:767px){.isc-grid{grid-template-columns:repeat(2,1fr)}.isc-value{font-size:36px}}`;
+  return (<section className="isc-section" ref={ref}><style dangerouslySetInnerHTML={{ __html: css }} /><div style={{ maxWidth: TOKENS.containerWidth, margin: "0 auto", padding: "0 15px" }}><div className="isc-grid">{counters.map((c, i) => <div key={i}><div className="isc-value">{displayed[i]}</div><div className="isc-label">{c.label}</div></div>)}</div></div></section>);
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   INTERIOR SERVICES GRID
+   ═══════════════════════════════════════════════════════════════ */
+export interface InteriorService { icon: string; title: string; description: string; }
+export interface InteriorServicesGridProps { subtitle?: string; title?: string; services: InteriorService[]; }
+export function InteriorServicesGrid({ subtitle, title, services }: InteriorServicesGridProps) {
+  const css = `.isg-section{padding:60px 15px}.isg-header{text-align:center;margin-bottom:40px}.isg-subtitle{color:${TOKENS.primaryColor};text-transform:uppercase;font-weight:600;font-size:14px;font-family:${TOKENS.bodyFont};margin-bottom:8px}.isg-title{font-family:${TOKENS.titleFont};font-weight:600;font-size:28px;text-transform:uppercase;color:${TOKENS.titleColor};margin:0;line-height:1.3}.isg-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:30px}.isg-card{text-align:center}.isg-icon{width:70px;height:70px;margin:0 auto 16px}.isg-ct{font-family:${TOKENS.titleFont};font-weight:600;font-size:15px;text-transform:uppercase;color:${TOKENS.titleColor};margin:0 0 8px}.isg-cd{font-family:${TOKENS.bodyFont};font-size:14px;color:${TOKENS.textColor};line-height:1.6;margin:0}@media(max-width:767px){.isg-grid{grid-template-columns:repeat(2,1fr)}}`;
+  return (<section className="isg-section"><style dangerouslySetInnerHTML={{ __html: css }} /><div style={{ maxWidth: TOKENS.containerWidth, margin: "0 auto", padding: "0 15px" }}>{(subtitle || title) && <div className="isg-header">{subtitle && <div className="isg-subtitle">{subtitle}</div>}{title && <h3 className="isg-title">{title}</h3>}</div>}<div className="isg-grid">{services.map((s, i) => <div key={i} className="isg-card"><img src={s.icon} alt={s.title} className="isg-icon" loading="lazy" /><h4 className="isg-ct">{s.title}</h4><p className="isg-cd">{s.description}</p></div>)}</div></div></section>);
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   INTERIOR GALLERY GRID
+   ═══════════════════════════════════════════════════════════════ */
+export interface InteriorGalleryGridProps { images: string[]; columns?: number; }
+export function InteriorGalleryGrid({ images, columns = 2 }: InteriorGalleryGridProps) {
+  const css = `.igg-section{padding:40px 15px}.igg-grid{display:grid;grid-template-columns:repeat(${columns},1fr);gap:20px}.igg-img{width:100%;height:auto;display:block;transition:opacity 0.3s}.igg-img:hover{opacity:0.85}@media(max-width:767px){.igg-grid{grid-template-columns:1fr}}`;
+  return (<section className="igg-section"><style dangerouslySetInnerHTML={{ __html: css }} /><div style={{ maxWidth: TOKENS.containerWidth, margin: "0 auto", padding: "0 15px" }}><div className="igg-grid">{images.map((src, i) => <img key={i} src={src} alt={`Gallery ${i + 1}`} className="igg-img" loading="lazy" />)}</div></div></section>);
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   INTERIOR VIDEO SECTION
+   ═══════════════════════════════════════════════════════════════ */
+export interface InteriorVideo { thumbnail: string; youtubeUrl: string; title: string; }
+export interface InteriorVideoSectionProps { subtitle?: string; title?: string; description?: string; videos: InteriorVideo[]; }
+export function InteriorVideoSection({ subtitle, title, description, videos }: InteriorVideoSectionProps) {
+  const [pi, setPi] = useState<number | null>(null);
+  const ge = (u: string) => { const m = u.match(/(?:watch\?v=|youtu\.be\/)([^&?]+)/); return m ? `https://www.youtube.com/embed/${m[1]}?autoplay=1` : u; };
+  const css = `.ivs-section{padding:60px 15px}.ivs-header{text-align:center;margin-bottom:40px;max-width:60%;margin-left:auto;margin-right:auto}.ivs-sub{color:${TOKENS.primaryColor};text-transform:uppercase;font-weight:600;font-size:12px;font-family:${TOKENS.bodyFont};margin-bottom:8px;letter-spacing:2px}.ivs-title{font-family:${TOKENS.titleFont};font-weight:600;font-size:28px;text-transform:uppercase;color:${TOKENS.titleColor};margin:0 0 12px;line-height:1.3}.ivs-desc{font-family:${TOKENS.bodyFont};font-size:15px;color:${TOKENS.textColor};line-height:1.6;margin:0}.ivs-grid{display:grid;grid-template-columns:repeat(${videos.length},1fr);gap:30px}.ivs-card{position:relative;overflow:hidden;cursor:pointer}.ivs-thumb{width:100%;height:auto;display:block}.ivs-play{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);width:60px;height:60px;background:rgba(0,0,0,0.6);border-radius:50%;display:flex;align-items:center;justify-content:center}.ivs-arrow{width:0;height:0;border-style:solid;border-width:10px 0 10px 18px;border-color:transparent transparent transparent #fff;margin-left:4px}.ivs-ct{font-family:${TOKENS.titleFont};font-weight:600;font-size:17px;color:${TOKENS.titleColor};margin:12px 0 4px}.ivs-iframe{width:100%;aspect-ratio:16/9;border:none}@media(max-width:767px){.ivs-grid{grid-template-columns:1fr}}`;
+  return (<section className="ivs-section"><style dangerouslySetInnerHTML={{ __html: css }} /><div style={{ maxWidth: TOKENS.containerWidth, margin: "0 auto", padding: "0 15px" }}>{(subtitle || title) && <div className="ivs-header">{subtitle && <div className="ivs-sub">{subtitle}</div>}{title && <h3 className="ivs-title">{title}</h3>}{description && <p className="ivs-desc">{description}</p>}</div>}<div className="ivs-grid">{videos.map((v, i) => <div key={i}><div className="ivs-card" onClick={() => setPi(i)}>{pi === i ? <iframe className="ivs-iframe" src={ge(v.youtubeUrl)} allow="autoplay; encrypted-media" allowFullScreen /> : <><img src={v.thumbnail} alt={v.title} className="ivs-thumb" loading="lazy" /><div className="ivs-play"><div className="ivs-arrow" /></div></>}</div><h4 className="ivs-ct">{v.title}</h4></div>)}</div></div></section>);
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   INTERIOR QUOTE SECTION
+   ═══════════════════════════════════════════════════════════════ */
+export interface InteriorQuoteSectionProps { subtitle?: string; quote: string; attribution: string; description?: string; credit?: string; }
+export function InteriorQuoteSection({ subtitle, quote, attribution, description, credit }: InteriorQuoteSectionProps) {
+  const css = `.iqs-section{padding:60px 15px;text-align:center}.iqs-sub{color:${TOKENS.primaryColor};text-transform:uppercase;font-weight:600;font-size:14px;font-family:${TOKENS.bodyFont};margin-bottom:16px}.iqs-q{font-family:${TOKENS.titleFont};font-weight:600;font-size:26px;color:${TOKENS.titleColor};line-height:1.3;margin:0 auto 8px;max-width:70%}.iqs-a{font-family:${TOKENS.bodyFont};font-size:14px;color:${TOKENS.textColor};margin-bottom:24px}.iqs-d{font-family:${TOKENS.bodyFont};font-size:15px;color:${TOKENS.textColor};line-height:1.8;max-width:60%;margin:0 auto 16px}.iqs-c{font-family:${TOKENS.bodyFont};font-size:14px;color:${TOKENS.textColor};font-style:italic}@media(max-width:767px){.iqs-q{font-size:20px;max-width:90%}.iqs-d{max-width:90%}}`;
+  return (<section className="iqs-section"><style dangerouslySetInnerHTML={{ __html: css }} /><div style={{ maxWidth: TOKENS.containerWidth, margin: "0 auto", padding: "0 15px" }}>{subtitle && <div className="iqs-sub">{subtitle}</div>}<blockquote className="iqs-q">&lsquo;&lsquo;{quote}&rsquo;&rsquo;</blockquote><p className="iqs-a">&mdash; {attribution}</p>{description && <p className="iqs-d">{description}</p>}{credit && <p className="iqs-c">{credit}</p>}</div></section>);
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   INTERIOR TEAM SECTION
+   ═══════════════════════════════════════════════════════════════ */
+export interface InteriorTeamMember { name: string; role: string; image: string; socials?: string[]; }
+export interface InteriorTeamSectionProps { members: InteriorTeamMember[]; }
+export function InteriorTeamSection({ members }: InteriorTeamSectionProps) {
+  const ic: Record<string, string> = { facebook: "f", twitter: "\ud835\udd4F", instagram: "\ud83d\udcf7", linkedin: "in" };
+  const css = `.its-section{padding:60px 15px}.its-grid{display:grid;grid-template-columns:repeat(${members.length},1fr);gap:30px}.its-card{text-align:center}.its-img{width:100%;height:auto;display:block;margin-bottom:20px}.its-name{font-family:${TOKENS.titleFont};font-weight:600;font-size:15px;text-transform:uppercase;color:${TOKENS.titleColor};margin:0 0 4px}.its-role{font-family:${TOKENS.bodyFont};font-size:13px;color:${TOKENS.textColor};text-transform:uppercase;letter-spacing:1px;margin:0 0 12px}.its-soc{display:flex;gap:10px;justify-content:center}.its-sl{width:36px;height:36px;border-radius:50%;background:#f7f7f7;display:flex;align-items:center;justify-content:center;text-decoration:none;color:${TOKENS.titleColor};font-size:14px;font-weight:700;transition:all 0.3s}.its-sl:hover{background:${TOKENS.titleColor};color:#fff}@media(max-width:767px){.its-grid{grid-template-columns:repeat(2,1fr)}}`;
+  return (<section className="its-section"><style dangerouslySetInnerHTML={{ __html: css }} /><div style={{ maxWidth: TOKENS.containerWidth, margin: "0 auto", padding: "0 15px" }}><div className="its-grid">{members.map((m, i) => <div key={i} className="its-card"><img src={m.image} alt={m.name} className="its-img" loading="lazy" /><h4 className="its-name">{m.name}</h4><p className="its-role">{m.role}</p>{m.socials && m.socials.length > 0 && <div className="its-soc">{m.socials.map((s, j) => <a key={j} href="#" className="its-sl" title={s}>{ic[s] || s[0]}</a>)}</div>}</div>)}</div></div></section>);
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   INTERIOR OFFICE LOCATIONS
+   ═══════════════════════════════════════════════════════════════ */
+export interface InteriorOffice { city: string; address: string; phone: string; email: string; }
+export interface InteriorOfficeLocationsProps { subtitle?: string; title?: string; description?: string; offices: InteriorOffice[]; }
+export function InteriorOfficeLocations({ subtitle, title, description, offices }: InteriorOfficeLocationsProps) {
+  const css = `.iol-section{padding:60px 15px}.iol-header{text-align:center;margin-bottom:40px;max-width:60%;margin-left:auto;margin-right:auto}.iol-sub{color:${TOKENS.primaryColor};text-transform:uppercase;font-weight:600;font-size:12px;font-family:${TOKENS.bodyFont};margin-bottom:8px;letter-spacing:2px}.iol-title{font-family:${TOKENS.titleFont};font-weight:600;font-size:28px;text-transform:uppercase;color:${TOKENS.titleColor};margin:0 0 12px;line-height:1.3}.iol-desc{font-family:${TOKENS.bodyFont};font-size:15px;color:${TOKENS.textColor};line-height:1.6;margin:0}.iol-grid{display:grid;grid-template-columns:repeat(${offices.length},1fr);gap:30px}.iol-card{text-align:center}.iol-city{font-family:${TOKENS.titleFont};font-weight:600;font-size:17px;text-transform:uppercase;color:${TOKENS.titleColor};margin:0 0 12px}.iol-addr{font-family:${TOKENS.bodyFont};font-size:14px;color:${TOKENS.textColor};line-height:1.6;margin:0 0 12px;white-space:pre-line}.iol-ct{font-family:${TOKENS.bodyFont};font-size:14px;color:${TOKENS.textColor};line-height:1.8}.iol-ct strong{color:${TOKENS.titleColor}}@media(max-width:767px){.iol-grid{grid-template-columns:repeat(2,1fr)}}`;
+  return (<section className="iol-section"><style dangerouslySetInnerHTML={{ __html: css }} /><div style={{ maxWidth: TOKENS.containerWidth, margin: "0 auto", padding: "0 15px" }}>{(subtitle || title) && <div className="iol-header">{subtitle && <div className="iol-sub">{subtitle}</div>}{title && <h3 className="iol-title">{title}</h3>}{description && <p className="iol-desc">{description}</p>}</div>}<div className="iol-grid">{offices.map((o, i) => <div key={i} className="iol-card"><h4 className="iol-city">{o.city}</h4><p className="iol-addr">{o.address}</p><div className="iol-ct"><div><strong>Phone:</strong> {o.phone}</div><div><strong>Email:</strong> {o.email}</div></div></div>)}</div></div></section>);
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   INTERIOR STORE VISIT
+   ═══════════════════════════════════════════════════════════════ */
+export interface InteriorStoreVisitProps { subtitle?: string; title: string; address: string; buttonText?: string; buttonLink?: string; }
+export function InteriorStoreVisit({ subtitle, title, address, buttonText = "See More About", buttonLink = "#" }: InteriorStoreVisitProps) {
+  const storeCtx = useContext(InteriorStoreContext);
+  const fixLink = (link: string) => resolveStoreLink(link, storeCtx?.storeSlug);
+  const css = `.isv-section{padding:60px 15px;text-align:center}.isv-sub{color:${TOKENS.primaryColor};text-transform:uppercase;font-weight:600;font-size:12px;font-family:${TOKENS.bodyFont};margin-bottom:12px;letter-spacing:2px}.isv-title{font-family:${TOKENS.titleFont};font-weight:600;font-size:32px;text-transform:uppercase;color:${TOKENS.titleColor};margin:0 0 16px;line-height:1.2;white-space:pre-line}.isv-addr{font-family:${TOKENS.bodyFont};font-size:15px;color:${TOKENS.textColor};line-height:1.6;margin:0 0 24px;white-space:pre-line}.isv-btn{display:inline-block;padding:12px 28px;background:${TOKENS.titleColor};color:#fff;font-family:${TOKENS.bodyFont};font-size:13px;font-weight:700;text-transform:uppercase;text-decoration:none;transition:opacity 0.3s}.isv-btn:hover{opacity:0.85}@media(max-width:767px){.isv-title{font-size:24px}}`;
+  return (<section className="isv-section"><style dangerouslySetInnerHTML={{ __html: css }} /><div style={{ maxWidth: TOKENS.containerWidth, margin: "0 auto", padding: "0 15px" }}>{subtitle && <div className="isv-sub">{subtitle}</div>}<h2 className="isv-title">{title}</h2><p className="isv-addr">{address}</p><Link href={fixLink(buttonLink)} className="isv-btn">{buttonText}</Link></div></section>);
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   INTERIOR FAQ ACCORDION
+   ═══════════════════════════════════════════════════════════════ */
+export interface InteriorFaqItem { question: string; answer: string; }
+export interface InteriorFaqAccordionProps { subtitle?: string; title?: string; items: InteriorFaqItem[]; }
+export function InteriorFaqAccordion({ subtitle, title, items }: InteriorFaqAccordionProps) {
+  const [oi, setOi] = useState<number | null>(null);
+  const css = `.ifa-section{padding:60px 15px}.ifa-header{margin-bottom:30px}.ifa-sub{color:${TOKENS.primaryColor};text-transform:uppercase;font-weight:600;font-size:12px;font-family:${TOKENS.bodyFont};margin-bottom:8px;letter-spacing:2px}.ifa-title{font-family:${TOKENS.titleFont};font-weight:600;font-size:28px;text-transform:uppercase;color:${TOKENS.titleColor};margin:0;line-height:1.3}.ifa-item{border-bottom:1px solid #e0e0e0}.ifa-q{width:100%;display:flex;justify-content:space-between;align-items:center;padding:18px 0;background:none;border:none;cursor:pointer;text-align:left;font-family:${TOKENS.bodyFont};font-size:15px;font-weight:700;color:${TOKENS.titleColor}}.ifa-arr{font-size:18px;transition:transform 0.3s;color:${TOKENS.textColor}}.ifa-arr-o{transform:rotate(180deg)}.ifa-ans{padding:0 0 18px;font-family:${TOKENS.bodyFont};font-size:14px;color:${TOKENS.textColor};line-height:1.8;white-space:pre-line}`;
+  return (<section className="ifa-section"><style dangerouslySetInnerHTML={{ __html: css }} /><div style={{ maxWidth: TOKENS.containerWidth, margin: "0 auto", padding: "0 15px" }}>{(subtitle || title) && <div className="ifa-header">{subtitle && <div className="ifa-sub">{subtitle}</div>}{title && <h3 className="ifa-title">{title}</h3>}</div>}{items.map((item, i) => <div key={i} className="ifa-item"><button className="ifa-q" onClick={() => setOi(oi === i ? null : i)}><span>{item.question}</span><span className={`ifa-arr ${oi === i ? "ifa-arr-o" : ""}`}>&#9660;</span></button>{oi === i && <div className="ifa-ans">{item.answer}</div>}</div>)}</div></section>);
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   INTERIOR CONTACT FORM
+   ═══════════════════════════════════════════════════════════════ */
+export interface InteriorContactFormProps { subtitle?: string; title?: string; fields?: string[]; }
+export function InteriorContactForm({ subtitle, title, fields = ["name", "email", "phone", "company", "message"] }: InteriorContactFormProps) {
+  const labels: Record<string, string> = { name: "Your Name", email: "Your Email", phone: "Phone Number", company: "Company", message: "Your Message" };
+  const css = `.icf-section{padding:60px 15px}.icf-header{margin-bottom:30px}.icf-sub{color:${TOKENS.primaryColor};text-transform:uppercase;font-weight:600;font-size:12px;font-family:${TOKENS.bodyFont};margin-bottom:8px;letter-spacing:2px}.icf-title{font-family:${TOKENS.titleFont};font-weight:600;font-size:28px;text-transform:uppercase;color:${TOKENS.titleColor};margin:0;line-height:1.3}.icf-form{display:grid;grid-template-columns:1fr 1fr;gap:20px}.icf-full{grid-column:1/-1}.icf-input{width:100%;padding:14px 16px;font-family:${TOKENS.bodyFont};font-size:14px;border:1px solid #e0e0e0;background:#fff;color:${TOKENS.titleColor};outline:none;transition:border-color 0.3s;box-sizing:border-box}.icf-input:focus{border-color:${TOKENS.titleColor}}.icf-ta{min-height:150px;resize:vertical}.icf-submit{display:inline-block;padding:14px 32px;background:${TOKENS.titleColor};color:#fff;font-family:${TOKENS.bodyFont};font-size:13px;font-weight:700;text-transform:uppercase;border:none;cursor:pointer;transition:opacity 0.3s}.icf-submit:hover{opacity:0.85}@media(max-width:767px){.icf-form{grid-template-columns:1fr}}`;
+  return (<section className="icf-section"><style dangerouslySetInnerHTML={{ __html: css }} /><div style={{ maxWidth: TOKENS.containerWidth, margin: "0 auto", padding: "0 15px" }}>{(subtitle || title) && <div className="icf-header">{subtitle && <div className="icf-sub">{subtitle}</div>}{title && <h3 className="icf-title">{title}</h3>}</div>}<form className="icf-form" onSubmit={(e) => e.preventDefault()}>{fields.map((f) => f === "message" ? <textarea key={f} className="icf-input icf-ta icf-full" placeholder={labels[f] || f} /> : <input key={f} type={f === "email" ? "email" : "text"} className="icf-input" placeholder={labels[f] || f} />)}<div className="icf-full"><button type="submit" className="icf-submit">Send Message</button></div></form></div></section>);
+}

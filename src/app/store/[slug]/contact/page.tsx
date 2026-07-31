@@ -16,6 +16,7 @@ import { KidsFontLoader, KidsFooterFull, KidsHeader } from "@/components/storefr
 import PerfumesContactPage from "./perfumes-contact";
 import { HealthHeader, HealthFooterFull, HealthFontLoader } from "@/components/storefront/HealthTemplateBlocks";
 import { GardenHeader, GardenFooter } from "@/components/storefront/GardenStoreChrome";
+import { HandmadeBagsHeader, HandmadeBagsFooter } from "@/components/storefront/HandmadeBagsStoreChrome";
 
 type Props = {
   params: Promise<{ slug: string }>;

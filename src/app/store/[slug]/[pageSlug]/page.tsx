@@ -7,7 +7,11 @@ import { useParams } from "next/navigation";
 import Link from "next/link";
 import { RenderBlocks, type BuilderBlock, type StoreProduct } from "@/components/storefront/BlockRenderer";
 import { RenderTemplateBlocks, type TemplateBlock } from "@/components/storefront/TemplateBlockRenderer";
-import { FashionFooter } from "@/components/storefront/FashionStoreChrome";
+import { FashionHeader, FashionFooter } from "@/components/storefront/FashionStoreChrome";
+import { FashionFontLoader, FashionStoreContext } from "@/components/storefront/FashionTemplateBlocks";
+import { ElectronicsFontLoader, ElectronicsFooter, ElectronicsStoreContext } from "@/components/storefront/ElectronicsTemplateBlocks";
+import { InteriorFontLoader, InteriorHeader, InteriorFooter, InteriorStoreContext } from "@/components/storefront/InteriorDesignTemplateBlocks";
+import { AccessoriesFontLoader, AccessoriesStoreContext } from "@/components/storefront/AccessoriesTemplateBlocks";
 import { TShirtsPrintsFooter, TShirtsPrintsHeader } from "@/components/storefront/TShirtsPrintsStoreChrome";
 import { TShirtsPrintsFontLoader } from "@/components/storefront/TShirtsPrintsTemplateBlocks";
 import { parsePageContent, getLinkedPageHref } from "@/lib/page-content";
@@ -18,6 +22,7 @@ import { applyPageCustomization, buildPageBackgroundStyle, buildThemeDataWithCus
 import { VegetableAboutPage, VegetableContactPage, VegetableMenuPage, VegetableRecipePage, VegetableReservationPage } from "@/components/storefront/VegetableTemplatePages";
 import { VegetableFooter, VegetableHeader } from "@/components/storefront/VegetableStoreChrome";
 import { KidsFontLoader, KidsFooterFull, KidsHeader } from "@/components/storefront/KidsTemplateBlocks";
+import { ToysFontLoader, ToysFooter, ToysStoreContext } from "@/components/storefront/ToysTemplateBlocks";
 import { PerfumesFontLoader, PerfumesFooter, PerfumesHeader } from "@/components/storefront/PerfumesTemplateBlocks";
 import { HealthFontLoader, HealthHeader, HealthFooterFull } from "@/components/storefront/HealthTemplateBlocks";
 import { CosmeticsFontLoader, CosmeticsHeader, CosmeticsFooter } from "@/components/storefront/CosmeticsTemplateBlocks";
@@ -215,6 +220,7 @@ export default function StorefrontPage() {
     'fashionFooter', 'bakeryFooter', 'interiorFooter',
     'groceryFooter', 'healthFooterFull', 'healthFooter',
     'electronicsFooter', 'makeupFooter',
+    'toysFooter',
   ]);
   // Use parsed blocks if available; only fall back to template-specific page presets if original content was truly empty
   const parsedBlocks = parsedContent.blocks.filter((block) => !CHROME_BLOCK_TYPES.has(block.type));
@@ -231,14 +237,133 @@ export default function StorefrontPage() {
     .filter((p) => p.type !== "HOME")
     .sort((a, b) => (navPageOrder[a.type] ?? 99) - (navPageOrder[b.type] ?? 99));
 
-  const isKidsTemplate = data.templateSlug === "kids" || slug === "kids" || data.store.slug === "kids" || data.store.name?.toLowerCase().includes("kids");
+  const isToysTemplate = data.templateSlug === "toys" || slug === "toys" || data.store.slug === "toys";
+  const isKidsTemplate = !isToysTemplate && (data.templateSlug === "kids" || slug === "kids" || data.store.slug === "kids" || data.store.name?.toLowerCase().includes("kids"));
   const isTShirtsPrintsTemplate = data.templateSlug === "t-shirts-prints" || slug === "t-shirts-prints" || data.store.slug === "t-shirts-prints" || data.store.name?.toLowerCase().includes("t-shirts");
+  const isFashionTemplate = data.templateSlug === "fashion" || data.templateSlug === "fashion-colored" || data.templateSlug === "handmade-bags" || data.templateSlug === "sweets-bakery";
+  const isAccessoriesTemplate = data.templateSlug === "electronics-accessories";
+  const isElectronicsTemplate = data.templateSlug === "electronics" || data.templateSlug === "hardware" || data.templateSlug === "tools";
+  const isDecorTemplate = data.templateSlug === "decor" || data.templateSlug === "retail" || data.templateSlug === "interior" || data.templateSlug === "interior-design" || data.templateSlug === "home-decor";
   const tshirtsSocialLinks = [
     ...(socialLinks?.facebook ? [{ label: "Facebook", href: socialLinks.facebook }] : []),
     ...(socialLinks?.twitter ? [{ label: "X (Twitter)", href: socialLinks.twitter }] : []),
     ...(socialLinks?.instagram ? [{ label: "Instagram", href: socialLinks.instagram }] : []),
     ...((socialLinks as any)?.youtube ? [{ label: "Youtube", href: (socialLinks as any).youtube }] : []),
   ];
+
+  if (isFashionTemplate) {
+    const fashionCtx = {
+      products: (products || []).map((p: any) => ({
+        id: p.id, name: p.name, slug: p.slug, price: p.price ?? 0, compareAtPrice: p.compareAtPrice,
+        currency: currency, inStock: p.inStock ?? true, isFeatured: p.isFeatured ?? false, tags: p.tags ?? [],
+        images: p.images ?? [], category: p.category, variants: p.variants,
+      })),
+      blogs: (blogs || []).map((b: any) => ({
+        id: b.id, title: b.title, slug: b.slug, excerpt: b.excerpt, coverImage: b.coverImage,
+        author: b.author, category: b.category, tags: b.tags ?? [], publishedAt: b.publishedAt, createdAt: b.createdAt,
+      })),
+      currency,
+      storeSlug: slug,
+    };
+    return (
+      <ThemeProvider theme={resolvedTheme}>
+        <FashionStoreContext.Provider value={fashionCtx}>
+          <FashionFontLoader />
+          <FashionHeader
+            storeName={store.name}
+            storeSlug={slug}
+            logo={store.logo}
+            isLanding={false}
+          />
+          <main style={buildPageBackgroundStyle(resolvedPageSettings)}>
+            <RenderTemplateBlocks blocks={blocks as TemplateBlock[]} />
+          </main>
+          <FashionFooter
+            storeName={store.name}
+            storeSlug={slug}
+            description={store.description}
+          />
+        </FashionStoreContext.Provider>
+      </ThemeProvider>
+    );
+  }
+
+  if (isAccessoriesTemplate) {
+    const accCtx = {
+      products: (products || []).map((p: any) => ({
+        id: p.id, name: p.name, slug: p.slug, price: p.price ?? 0, compareAtPrice: p.compareAtPrice,
+        currency: currency, inStock: p.inStock ?? true, isFeatured: p.isFeatured ?? false, tags: p.tags ?? [],
+        images: p.images ?? [], category: p.category,
+      })),
+      currency,
+      storeSlug: slug,
+    };
+    return (
+      <ThemeProvider theme={resolvedTheme}>
+        <AccessoriesStoreContext.Provider value={accCtx}>
+          <AccessoriesFontLoader />
+          <main style={buildPageBackgroundStyle(resolvedPageSettings)}>
+            <RenderTemplateBlocks blocks={blocks as TemplateBlock[]} />
+          </main>
+        </AccessoriesStoreContext.Provider>
+      </ThemeProvider>
+    );
+  }
+
+  if (isElectronicsTemplate) {
+    const elecCtx = {
+      products: (products || []).map((p: any) => ({
+        id: p.id, name: p.name, slug: p.slug, price: p.price ?? 0, compareAtPrice: p.compareAtPrice,
+        currency: currency, inStock: p.inStock ?? true, isFeatured: p.isFeatured ?? false, tags: p.tags ?? [],
+        images: p.images ?? [], category: p.category,
+      })),
+      blogs: (blogs || []).map((b: any) => ({
+        id: b.id, title: b.title, slug: b.slug, excerpt: b.excerpt, coverImage: b.coverImage,
+        author: b.author, category: b.category, tags: b.tags ?? [], publishedAt: b.publishedAt, createdAt: b.createdAt,
+      })),
+      currency,
+      storeSlug: slug,
+    };
+    return (
+      <ThemeProvider theme={resolvedTheme}>
+        <ElectronicsStoreContext.Provider value={elecCtx}>
+          <ElectronicsFontLoader />
+          <main style={buildPageBackgroundStyle(resolvedPageSettings)}>
+            <RenderTemplateBlocks blocks={blocks as TemplateBlock[]} />
+          </main>
+          <ElectronicsFooter storeSlug={slug} />
+        </ElectronicsStoreContext.Provider>
+      </ThemeProvider>
+    );
+  }
+
+  if (isDecorTemplate) {
+    const decorCtx = {
+      products: (products || []).map((p: any) => ({
+        id: p.id, name: p.name, slug: p.slug, price: p.price ?? 0, compareAtPrice: p.compareAtPrice,
+        currency: currency, inStock: p.inStock ?? true, isFeatured: p.isFeatured ?? false, tags: p.tags ?? [],
+        images: p.images ?? [], category: p.category,
+      })),
+      currency,
+      storeSlug: slug,
+    };
+    return (
+      <ThemeProvider theme={resolvedTheme}>
+        <InteriorStoreContext.Provider value={decorCtx}>
+          <InteriorFontLoader />
+          <InteriorHeader
+            storeName={store.name}
+            storeSlug={slug}
+            logo={store.logo}
+          />
+          <main style={buildPageBackgroundStyle(resolvedPageSettings)}>
+            <RenderTemplateBlocks blocks={blocks as TemplateBlock[]} />
+          </main>
+          <InteriorFooter storeSlug={slug} />
+        </InteriorStoreContext.Provider>
+      </ThemeProvider>
+    );
+  }
 
   if (isTShirtsPrintsTemplate) {
     return (
@@ -261,6 +386,39 @@ export default function StorefrontPage() {
             ]}
           />
         </div>
+      </ThemeProvider>
+    );
+  }
+
+  if (isToysTemplate) {
+    const toysCtx = {
+      products: (products || []).map((p: any) => ({
+        id: p.id, name: p.name, slug: p.slug, price: p.price ?? 0, compareAtPrice: p.compareAtPrice,
+        currency, inStock: p.inStock ?? true, isFeatured: p.isFeatured ?? false, tags: p.tags ?? [],
+        images: p.images ?? [], category: p.category,
+      })),
+      currency,
+      storeSlug: slug,
+    };
+    return (
+      <ThemeProvider theme={resolvedTheme}>
+        <ToysStoreContext.Provider value={toysCtx}>
+          <ToysFontLoader />
+          <FashionHeader
+            storeName={store.name}
+            storeSlug={slug}
+            logo={store.logo}
+            isLanding={false}
+          />
+          <main style={buildPageBackgroundStyle(resolvedPageSettings)}>
+            <RenderTemplateBlocks blocks={blocks as TemplateBlock[]} />
+          </main>
+          <ToysFooter
+            storeName={store.name}
+            storeSlug={slug}
+            description={store.description ?? undefined}
+          />
+        </ToysStoreContext.Provider>
       </ThemeProvider>
     );
   }

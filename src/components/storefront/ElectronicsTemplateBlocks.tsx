@@ -3,7 +3,7 @@ import { FashionFooter } from "./FashionTemplateBlocks";
 import Link from "next/link";
 import { resolveStoreLink, resolveFooterLink } from "@/lib/template-link-utils";
 import { toggleCompare as toggleCompareItem } from "@/lib/compare-utils";
-import { useState, useEffect, useRef, useCallback, createContext, useContext } from "react";
+import { useState, useEffect, useRef, useCallback, createContext, useContext, useMemo } from "react";
 import { safeSrc, onImgError } from "./image-fallback";
 
 /* ═══════════════════════════════════════════════════════════════
@@ -682,7 +682,7 @@ export function ElectronicsHotDeals({
   })();
 
   // Countdown timer
-  const endDate = dealEndDate || new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString();
+  const endDate = useMemo(() => dealEndDate || new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString(), [dealEndDate]);
   const [timeLeft, setTimeLeft] = useState({ days: 0, hours: 0, min: 0, sec: 0 });
   useEffect(() => {
     const tick = () => {
@@ -1231,4 +1231,424 @@ export function ElectronicsPartners({
 export function ElectronicsFooter(props: React.ComponentProps<typeof FashionFooter>) {
   const storeCtx = useContext(ElectronicsStoreContext);
   return <FashionFooter {...props} storeSlug={storeCtx?.storeSlug} />;
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   ELECTRONICS ABOUT CONTENT
+   Long-form text with headings, paragraphs, CTAs.
+   ═══════════════════════════════════════════════════════════════ */
+
+export interface ElectronicsAboutContentButton {
+  text: string;
+  link: string;
+}
+
+export interface ElectronicsAboutContentProps {
+  layout: "text-with-heading" | "ctas-only";
+  subtitle?: string;
+  title?: string;
+  paragraphs?: string[];
+  buttons?: ElectronicsAboutContentButton[];
+  credit?: string;
+}
+
+export function ElectronicsAboutContent({ layout, subtitle, title, paragraphs = [], buttons = [], credit }: ElectronicsAboutContentProps) {
+  const storeCtx = useContext(ElectronicsStoreContext);
+  const fixLink = (link: string) => resolveStoreLink(link, storeCtx?.storeSlug);
+  const scopedCss = `
+    .eac-section { padding: 40px 15px; }
+    .eac-subtitle { color: ${TOKENS.primaryColor}; text-transform: uppercase; font-weight: 600; font-size: 14px; font-family: ${TOKENS.bodyFont}; margin-bottom: 8px; }
+    .eac-title { font-family: ${TOKENS.titleFont}; font-weight: ${TOKENS.titleFontWeight}; font-size: 28px; text-transform: uppercase; color: ${TOKENS.titleColor}; margin: 0 0 20px; line-height: 1.3; }
+    .eac-paragraph { font-family: ${TOKENS.bodyFont}; font-size: 15px; color: ${TOKENS.textColor}; line-height: 1.8; margin: 0 0 16px; }
+    .eac-credit { font-family: ${TOKENS.bodyFont}; font-size: 14px; color: ${TOKENS.textColor}; font-style: italic; margin-top: 20px; }
+    .eac-buttons { display: flex; gap: 16px; margin-top: 24px; flex-wrap: wrap; }
+    .eac-btn { display: inline-block; padding: 12px 28px; font-family: ${TOKENS.bodyFont}; font-size: 13px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; text-decoration: none; transition: all 0.3s; }
+    .eac-btn-primary { background: ${TOKENS.titleColor}; color: #fff; }
+    .eac-btn-primary:hover { opacity: 0.85; }
+    .eac-btn-secondary { background: transparent; color: ${TOKENS.titleColor}; border: 2px solid ${TOKENS.titleColor}; }
+    .eac-btn-secondary:hover { background: ${TOKENS.titleColor}; color: #fff; }
+    .eac-ctas-center { text-align: center; padding: 20px 15px 40px; }
+  `;
+  const containerSt: React.CSSProperties = { maxWidth: TOKENS.containerWidth, margin: "0 auto", padding: "0 15px", boxSizing: "border-box" as const, width: "100%" };
+
+  if (layout === "ctas-only") {
+    return (
+      <div className="eac-ctas-center">
+        <style dangerouslySetInnerHTML={{ __html: scopedCss }} />
+        <div className="eac-buttons" style={{ justifyContent: "center" }}>
+          {buttons.map((btn, i) => (
+            <Link key={i} href={fixLink(btn.link)} className={`eac-btn ${i === 0 ? "eac-btn-primary" : "eac-btn-secondary"}`}>
+              {btn.text}
+            </Link>
+          ))}
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    <section className="eac-section">
+      <style dangerouslySetInnerHTML={{ __html: scopedCss }} />
+      <div style={containerSt}>
+        {subtitle && <div className="eac-subtitle">{subtitle}</div>}
+        {title && <h3 className="eac-title">{title}</h3>}
+        {paragraphs.map((p, i) => <p key={i} className="eac-paragraph">{p}</p>)}
+        {credit && <p className="eac-credit">{credit}</p>}
+        {buttons.length > 0 && (
+          <div className="eac-buttons">
+            {buttons.map((btn, i) => (
+              <Link key={i} href={fixLink(btn.link)} className={`eac-btn ${i === 0 ? "eac-btn-primary" : "eac-btn-secondary"}`}>
+                {btn.text}
+              </Link>
+            ))}
+          </div>
+        )}
+      </div>
+    </section>
+  );
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   ELECTRONICS STATS COUNTERS
+   ═══════════════════════════════════════════════════════════════ */
+
+export interface ElectronicsStatsCounter { value: number; label: string; }
+export interface ElectronicsStatsCountersProps { counters: ElectronicsStatsCounter[]; }
+
+export function ElectronicsStatsCounters({ counters }: ElectronicsStatsCountersProps) {
+  const ref = useRef<HTMLDivElement>(null);
+  const [inView, setInView] = useState(false);
+  const [displayed, setDisplayed] = useState<number[]>(counters.map(() => 0));
+
+  useEffect(() => {
+    const el = ref.current;
+    if (!el) return;
+    const obs = new IntersectionObserver(([e]) => { if (e.isIntersecting) { setInView(true); obs.disconnect(); } }, { threshold: 0.3 });
+    obs.observe(el);
+    return () => obs.disconnect();
+  }, []);
+
+  useEffect(() => {
+    if (!inView) return;
+    const steps = 60; let step = 0;
+    const timer = setInterval(() => {
+      step++;
+      setDisplayed(counters.map(c => Math.round(c.value * Math.min(step / steps, 1))));
+      if (step >= steps) clearInterval(timer);
+    }, 2000 / steps);
+    return () => clearInterval(timer);
+  }, [inView, counters]);
+
+  const scopedCss = `
+    .esc-section { padding: 50px 15px; background: #f7f7f7; }
+    .esc-grid { display: grid; grid-template-columns: repeat(${counters.length}, 1fr); gap: 30px; text-align: center; }
+    .esc-value { font-family: ${TOKENS.titleFont}; font-size: 48px; font-weight: ${TOKENS.titleFontWeight}; color: ${TOKENS.titleColor}; line-height: 1; margin-bottom: 8px; }
+    .esc-label { font-family: ${TOKENS.bodyFont}; font-size: 13px; font-weight: 700; text-transform: uppercase; letter-spacing: 1px; color: ${TOKENS.textColor}; }
+    @media (max-width: 767px) { .esc-grid { grid-template-columns: repeat(2, 1fr); } .esc-value { font-size: 36px; } }
+  `;
+
+  return (
+    <section className="esc-section" ref={ref}>
+      <style dangerouslySetInnerHTML={{ __html: scopedCss }} />
+      <div style={{ maxWidth: TOKENS.containerWidth, margin: "0 auto", padding: "0 15px" }}>
+        <div className="esc-grid">
+          {counters.map((c, i) => <div key={i}><div className="esc-value">{displayed[i]}</div><div className="esc-label">{c.label}</div></div>)}
+        </div>
+      </div>
+    </section>
+  );
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   ELECTRONICS SERVICES GRID
+   ═══════════════════════════════════════════════════════════════ */
+
+export interface ElectronicsService { icon: string; title: string; description: string; }
+export interface ElectronicsServicesGridProps { subtitle?: string; title?: string; services: ElectronicsService[]; }
+
+export function ElectronicsServicesGrid({ subtitle, title, services }: ElectronicsServicesGridProps) {
+  const scopedCss = `
+    .esg-section { padding: 60px 15px; }
+    .esg-header { text-align: center; margin-bottom: 40px; }
+    .esg-subtitle { color: ${TOKENS.primaryColor}; text-transform: uppercase; font-weight: 600; font-size: 14px; font-family: ${TOKENS.bodyFont}; margin-bottom: 8px; }
+    .esg-title { font-family: ${TOKENS.titleFont}; font-weight: ${TOKENS.titleFontWeight}; font-size: 28px; text-transform: uppercase; color: ${TOKENS.titleColor}; margin: 0; line-height: 1.3; }
+    .esg-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 30px; }
+    .esg-card { text-align: center; }
+    .esg-icon { width: 70px; height: 70px; margin: 0 auto 16px; }
+    .esg-card-title { font-family: ${TOKENS.titleFont}; font-weight: ${TOKENS.titleFontWeight}; font-size: 15px; text-transform: uppercase; color: ${TOKENS.titleColor}; margin: 0 0 8px; }
+    .esg-card-desc { font-family: ${TOKENS.bodyFont}; font-size: 14px; color: ${TOKENS.textColor}; line-height: 1.6; margin: 0; }
+    @media (max-width: 767px) { .esg-grid { grid-template-columns: repeat(2, 1fr); } }
+  `;
+  return (
+    <section className="esg-section">
+      <style dangerouslySetInnerHTML={{ __html: scopedCss }} />
+      <div style={{ maxWidth: TOKENS.containerWidth, margin: "0 auto", padding: "0 15px" }}>
+        {(subtitle || title) && <div className="esg-header">{subtitle && <div className="esg-subtitle">{subtitle}</div>}{title && <h3 className="esg-title">{title}</h3>}</div>}
+        <div className="esg-grid">
+          {services.map((s, i) => <div key={i} className="esg-card"><img src={s.icon} alt={s.title} className="esg-icon" loading="lazy" /><h4 className="esg-card-title">{s.title}</h4><p className="esg-card-desc">{s.description}</p></div>)}
+        </div>
+      </div>
+    </section>
+  );
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   ELECTRONICS GALLERY GRID
+   ═══════════════════════════════════════════════════════════════ */
+
+export interface ElectronicsGalleryGridProps { images: string[]; columns?: number; }
+
+export function ElectronicsGalleryGrid({ images, columns = 2 }: ElectronicsGalleryGridProps) {
+  const scopedCss = `
+    .egg-section { padding: 40px 15px; }
+    .egg-grid { display: grid; grid-template-columns: repeat(${columns}, 1fr); gap: 20px; }
+    .egg-img { width: 100%; height: auto; display: block; cursor: pointer; transition: opacity 0.3s; }
+    .egg-img:hover { opacity: 0.85; }
+    @media (max-width: 767px) { .egg-grid { grid-template-columns: 1fr; } }
+  `;
+  return (
+    <section className="egg-section">
+      <style dangerouslySetInnerHTML={{ __html: scopedCss }} />
+      <div style={{ maxWidth: TOKENS.containerWidth, margin: "0 auto", padding: "0 15px" }}>
+        <div className="egg-grid">
+          {images.map((src, i) => <img key={i} src={src} alt={`Gallery ${i + 1}`} className="egg-img" loading="lazy" />)}
+        </div>
+      </div>
+    </section>
+  );
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   ELECTRONICS VIDEO SECTION
+   ═══════════════════════════════════════════════════════════════ */
+
+export interface ElectronicsVideo { thumbnail: string; youtubeUrl: string; title: string; }
+export interface ElectronicsVideoSectionProps { subtitle?: string; title?: string; description?: string; videos: ElectronicsVideo[]; }
+
+export function ElectronicsVideoSection({ subtitle, title, description, videos }: ElectronicsVideoSectionProps) {
+  const [playingIdx, setPlayingIdx] = useState<number | null>(null);
+  const getEmbed = (url: string) => { const m = url.match(/(?:watch\?v=|youtu\.be\/)([^&?]+)/); return m ? `https://www.youtube.com/embed/${m[1]}?autoplay=1` : url; };
+  const scopedCss = `
+    .evs-section { padding: 60px 15px; }
+    .evs-header { text-align: center; margin-bottom: 40px; max-width: 60%; margin-left: auto; margin-right: auto; }
+    .evs-subtitle { color: ${TOKENS.primaryColor}; text-transform: uppercase; font-weight: 600; font-size: 12px; font-family: ${TOKENS.bodyFont}; margin-bottom: 8px; letter-spacing: 2px; }
+    .evs-title { font-family: ${TOKENS.titleFont}; font-weight: ${TOKENS.titleFontWeight}; font-size: 28px; text-transform: uppercase; color: ${TOKENS.titleColor}; margin: 0 0 12px; line-height: 1.3; }
+    .evs-desc { font-family: ${TOKENS.bodyFont}; font-size: 15px; color: ${TOKENS.textColor}; line-height: 1.6; margin: 0; }
+    .evs-grid { display: grid; grid-template-columns: repeat(${videos.length}, 1fr); gap: 30px; }
+    .evs-card { position: relative; overflow: hidden; cursor: pointer; }
+    .evs-thumb { width: 100%; height: auto; display: block; }
+    .evs-play { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); width: 60px; height: 60px; background: rgba(0,0,0,0.6); border-radius: 50%; display: flex; align-items: center; justify-content: center; transition: background 0.3s; }
+    .evs-card:hover .evs-play { background: rgba(0,0,0,0.8); }
+    .evs-play-arrow { width: 0; height: 0; border-style: solid; border-width: 10px 0 10px 18px; border-color: transparent transparent transparent #fff; margin-left: 4px; }
+    .evs-card-title { font-family: ${TOKENS.titleFont}; font-weight: ${TOKENS.titleFontWeight}; font-size: 17px; color: ${TOKENS.titleColor}; margin: 12px 0 4px; }
+    .evs-iframe { width: 100%; aspect-ratio: 16/9; border: none; }
+    @media (max-width: 767px) { .evs-grid { grid-template-columns: 1fr; } }
+  `;
+  return (
+    <section className="evs-section">
+      <style dangerouslySetInnerHTML={{ __html: scopedCss }} />
+      <div style={{ maxWidth: TOKENS.containerWidth, margin: "0 auto", padding: "0 15px" }}>
+        {(subtitle || title) && <div className="evs-header">{subtitle && <div className="evs-subtitle">{subtitle}</div>}{title && <h3 className="evs-title">{title}</h3>}{description && <p className="evs-desc">{description}</p>}</div>}
+        <div className="evs-grid">
+          {videos.map((v, i) => <div key={i}><div className="evs-card" onClick={() => setPlayingIdx(i)}>{playingIdx === i ? <iframe className="evs-iframe" src={getEmbed(v.youtubeUrl)} allow="autoplay; encrypted-media" allowFullScreen /> : <><img src={v.thumbnail} alt={v.title} className="evs-thumb" loading="lazy" /><div className="evs-play"><div className="evs-play-arrow" /></div></>}</div><h4 className="evs-card-title">{v.title}</h4></div>)}
+        </div>
+      </div>
+    </section>
+  );
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   ELECTRONICS QUOTE SECTION
+   ═══════════════════════════════════════════════════════════════ */
+
+export interface ElectronicsQuoteSectionProps { subtitle?: string; quote: string; attribution: string; description?: string; credit?: string; }
+
+export function ElectronicsQuoteSection({ subtitle, quote, attribution, description, credit }: ElectronicsQuoteSectionProps) {
+  const scopedCss = `
+    .eqs-section { padding: 60px 15px; text-align: center; }
+    .eqs-subtitle { color: ${TOKENS.primaryColor}; text-transform: uppercase; font-weight: 600; font-size: 14px; font-family: ${TOKENS.bodyFont}; margin-bottom: 16px; }
+    .eqs-quote { font-family: ${TOKENS.titleFont}; font-weight: ${TOKENS.titleFontWeight}; font-size: 26px; color: ${TOKENS.titleColor}; line-height: 1.3; margin: 0 auto 8px; max-width: 70%; }
+    .eqs-attribution { font-family: ${TOKENS.bodyFont}; font-size: 14px; color: ${TOKENS.textColor}; margin-bottom: 24px; }
+    .eqs-desc { font-family: ${TOKENS.bodyFont}; font-size: 15px; color: ${TOKENS.textColor}; line-height: 1.8; max-width: 60%; margin: 0 auto 16px; }
+    .eqs-credit { font-family: ${TOKENS.bodyFont}; font-size: 14px; color: ${TOKENS.textColor}; font-style: italic; }
+    @media (max-width: 767px) { .eqs-quote { font-size: 20px; max-width: 90%; } .eqs-desc { max-width: 90%; } }
+  `;
+  return (
+    <section className="eqs-section">
+      <style dangerouslySetInnerHTML={{ __html: scopedCss }} />
+      <div style={{ maxWidth: TOKENS.containerWidth, margin: "0 auto", padding: "0 15px" }}>
+        {subtitle && <div className="eqs-subtitle">{subtitle}</div>}
+        <blockquote className="eqs-quote">&lsquo;&lsquo;{quote}&rsquo;&rsquo;</blockquote>
+        <p className="eqs-attribution">&mdash; {attribution}</p>
+        {description && <p className="eqs-desc">{description}</p>}
+        {credit && <p className="eqs-credit">{credit}</p>}
+      </div>
+    </section>
+  );
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   ELECTRONICS TEAM SECTION
+   ═══════════════════════════════════════════════════════════════ */
+
+export interface ElectronicsTeamMember { name: string; role: string; image: string; socials?: string[]; }
+export interface ElectronicsTeamSectionProps { members: ElectronicsTeamMember[]; }
+
+export function ElectronicsTeamSection({ members }: ElectronicsTeamSectionProps) {
+  const icons: Record<string, string> = { facebook: "f", twitter: "\ud835\udd4F", instagram: "\ud83d\udcf7", linkedin: "in" };
+  const scopedCss = `
+    .ets-section { padding: 60px 15px; }
+    .ets-grid { display: grid; grid-template-columns: repeat(${members.length}, 1fr); gap: 30px; }
+    .ets-card { text-align: center; }
+    .ets-img { width: 100%; height: auto; display: block; margin-bottom: 20px; }
+    .ets-name { font-family: ${TOKENS.titleFont}; font-weight: ${TOKENS.titleFontWeight}; font-size: 15px; text-transform: uppercase; color: ${TOKENS.titleColor}; margin: 0 0 4px; }
+    .ets-role { font-family: ${TOKENS.bodyFont}; font-size: 13px; color: ${TOKENS.textColor}; text-transform: uppercase; letter-spacing: 1px; margin: 0 0 12px; }
+    .ets-socials { display: flex; gap: 10px; justify-content: center; }
+    .ets-slink { width: 36px; height: 36px; border-radius: 50%; background: #f7f7f7; display: flex; align-items: center; justify-content: center; text-decoration: none; color: ${TOKENS.titleColor}; font-size: 14px; font-weight: 700; transition: all 0.3s; }
+    .ets-slink:hover { background: ${TOKENS.titleColor}; color: #fff; }
+    @media (max-width: 767px) { .ets-grid { grid-template-columns: repeat(2, 1fr); } }
+  `;
+  return (
+    <section className="ets-section">
+      <style dangerouslySetInnerHTML={{ __html: scopedCss }} />
+      <div style={{ maxWidth: TOKENS.containerWidth, margin: "0 auto", padding: "0 15px" }}>
+        <div className="ets-grid">
+          {members.map((m, i) => <div key={i} className="ets-card"><img src={m.image} alt={m.name} className="ets-img" loading="lazy" /><h4 className="ets-name">{m.name}</h4><p className="ets-role">{m.role}</p>{m.socials && m.socials.length > 0 && <div className="ets-socials">{m.socials.map((s, j) => <a key={j} href="#" className="ets-slink" title={s}>{icons[s] || s[0]}</a>)}</div>}</div>)}
+        </div>
+      </div>
+    </section>
+  );
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   ELECTRONICS OFFICE LOCATIONS
+   ═══════════════════════════════════════════════════════════════ */
+
+export interface ElectronicsOffice { city: string; address: string; phone: string; email: string; }
+export interface ElectronicsOfficeLocationsProps { subtitle?: string; title?: string; description?: string; offices: ElectronicsOffice[]; }
+
+export function ElectronicsOfficeLocations({ subtitle, title, description, offices }: ElectronicsOfficeLocationsProps) {
+  const scopedCss = `
+    .eol-section { padding: 60px 15px; }
+    .eol-header { text-align: center; margin-bottom: 40px; max-width: 60%; margin-left: auto; margin-right: auto; }
+    .eol-subtitle { color: ${TOKENS.primaryColor}; text-transform: uppercase; font-weight: 600; font-size: 12px; font-family: ${TOKENS.bodyFont}; margin-bottom: 8px; letter-spacing: 2px; }
+    .eol-title { font-family: ${TOKENS.titleFont}; font-weight: ${TOKENS.titleFontWeight}; font-size: 28px; text-transform: uppercase; color: ${TOKENS.titleColor}; margin: 0 0 12px; line-height: 1.3; }
+    .eol-desc { font-family: ${TOKENS.bodyFont}; font-size: 15px; color: ${TOKENS.textColor}; line-height: 1.6; margin: 0; }
+    .eol-grid { display: grid; grid-template-columns: repeat(${offices.length}, 1fr); gap: 30px; }
+    .eol-card { text-align: center; }
+    .eol-city { font-family: ${TOKENS.titleFont}; font-weight: ${TOKENS.titleFontWeight}; font-size: 17px; text-transform: uppercase; color: ${TOKENS.titleColor}; margin: 0 0 12px; }
+    .eol-address { font-family: ${TOKENS.bodyFont}; font-size: 14px; color: ${TOKENS.textColor}; line-height: 1.6; margin: 0 0 12px; white-space: pre-line; }
+    .eol-contact { font-family: ${TOKENS.bodyFont}; font-size: 14px; color: ${TOKENS.textColor}; line-height: 1.8; }
+    .eol-contact strong { color: ${TOKENS.titleColor}; }
+    @media (max-width: 767px) { .eol-grid { grid-template-columns: repeat(2, 1fr); } }
+  `;
+  return (
+    <section className="eol-section">
+      <style dangerouslySetInnerHTML={{ __html: scopedCss }} />
+      <div style={{ maxWidth: TOKENS.containerWidth, margin: "0 auto", padding: "0 15px" }}>
+        {(subtitle || title) && <div className="eol-header">{subtitle && <div className="eol-subtitle">{subtitle}</div>}{title && <h3 className="eol-title">{title}</h3>}{description && <p className="eol-desc">{description}</p>}</div>}
+        <div className="eol-grid">
+          {offices.map((o, i) => <div key={i} className="eol-card"><h4 className="eol-city">{o.city}</h4><p className="eol-address">{o.address}</p><div className="eol-contact"><div><strong>Phone:</strong> {o.phone}</div><div><strong>Email:</strong> {o.email}</div></div></div>)}
+        </div>
+      </div>
+    </section>
+  );
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   ELECTRONICS STORE VISIT
+   ═══════════════════════════════════════════════════════════════ */
+
+export interface ElectronicsStoreVisitProps { subtitle?: string; title: string; address: string; buttonText?: string; buttonLink?: string; }
+
+export function ElectronicsStoreVisit({ subtitle, title, address, buttonText = "See More About", buttonLink = "#" }: ElectronicsStoreVisitProps) {
+  const storeCtx = useContext(ElectronicsStoreContext);
+  const fixLink = (link: string) => resolveStoreLink(link, storeCtx?.storeSlug);
+  const scopedCss = `
+    .esv-section { padding: 60px 15px; text-align: center; }
+    .esv-subtitle { color: ${TOKENS.primaryColor}; text-transform: uppercase; font-weight: 600; font-size: 12px; font-family: ${TOKENS.bodyFont}; margin-bottom: 12px; letter-spacing: 2px; }
+    .esv-title { font-family: ${TOKENS.titleFont}; font-weight: ${TOKENS.titleFontWeight}; font-size: 32px; text-transform: uppercase; color: ${TOKENS.titleColor}; margin: 0 0 16px; line-height: 1.2; white-space: pre-line; }
+    .esv-address { font-family: ${TOKENS.bodyFont}; font-size: 15px; color: ${TOKENS.textColor}; line-height: 1.6; margin: 0 0 24px; white-space: pre-line; }
+    .esv-btn { display: inline-block; padding: 12px 28px; background: ${TOKENS.titleColor}; color: #fff; font-family: ${TOKENS.bodyFont}; font-size: 13px; font-weight: 700; text-transform: uppercase; text-decoration: none; transition: opacity 0.3s; }
+    .esv-btn:hover { opacity: 0.85; }
+    @media (max-width: 767px) { .esv-title { font-size: 24px; } }
+  `;
+  return (
+    <section className="esv-section">
+      <style dangerouslySetInnerHTML={{ __html: scopedCss }} />
+      <div style={{ maxWidth: TOKENS.containerWidth, margin: "0 auto", padding: "0 15px" }}>
+        {subtitle && <div className="esv-subtitle">{subtitle}</div>}
+        <h2 className="esv-title">{title}</h2>
+        <p className="esv-address">{address}</p>
+        <Link href={fixLink(buttonLink)} className="esv-btn">{buttonText}</Link>
+      </div>
+    </section>
+  );
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   ELECTRONICS FAQ ACCORDION
+   ═══════════════════════════════════════════════════════════════ */
+
+export interface ElectronicsFaqItem { question: string; answer: string; }
+export interface ElectronicsFaqAccordionProps { subtitle?: string; title?: string; items: ElectronicsFaqItem[]; }
+
+export function ElectronicsFaqAccordion({ subtitle, title, items }: ElectronicsFaqAccordionProps) {
+  const [openIdx, setOpenIdx] = useState<number | null>(null);
+  const scopedCss = `
+    .efa-section { padding: 60px 15px; }
+    .efa-header { margin-bottom: 30px; }
+    .efa-subtitle { color: ${TOKENS.primaryColor}; text-transform: uppercase; font-weight: 600; font-size: 12px; font-family: ${TOKENS.bodyFont}; margin-bottom: 8px; letter-spacing: 2px; }
+    .efa-title { font-family: ${TOKENS.titleFont}; font-weight: ${TOKENS.titleFontWeight}; font-size: 28px; text-transform: uppercase; color: ${TOKENS.titleColor}; margin: 0; line-height: 1.3; }
+    .efa-item { border-bottom: 1px solid #e0e0e0; }
+    .efa-question { width: 100%; display: flex; justify-content: space-between; align-items: center; padding: 18px 0; background: none; border: none; cursor: pointer; text-align: left; font-family: ${TOKENS.bodyFont}; font-size: 15px; font-weight: 700; color: ${TOKENS.titleColor}; }
+    .efa-arrow { font-size: 18px; transition: transform 0.3s; color: ${TOKENS.textColor}; }
+    .efa-arrow-open { transform: rotate(180deg); }
+    .efa-answer { padding: 0 0 18px; font-family: ${TOKENS.bodyFont}; font-size: 14px; color: ${TOKENS.textColor}; line-height: 1.8; white-space: pre-line; }
+  `;
+  return (
+    <section className="efa-section">
+      <style dangerouslySetInnerHTML={{ __html: scopedCss }} />
+      <div style={{ maxWidth: TOKENS.containerWidth, margin: "0 auto", padding: "0 15px" }}>
+        {(subtitle || title) && <div className="efa-header">{subtitle && <div className="efa-subtitle">{subtitle}</div>}{title && <h3 className="efa-title">{title}</h3>}</div>}
+        {items.map((item, i) => <div key={i} className="efa-item"><button className="efa-question" onClick={() => setOpenIdx(openIdx === i ? null : i)}><span>{item.question}</span><span className={`efa-arrow ${openIdx === i ? "efa-arrow-open" : ""}`}>&#9660;</span></button>{openIdx === i && <div className="efa-answer">{item.answer}</div>}</div>)}
+      </div>
+    </section>
+  );
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   ELECTRONICS CONTACT FORM
+   ═══════════════════════════════════════════════════════════════ */
+
+export interface ElectronicsContactFormProps { subtitle?: string; title?: string; fields?: string[]; }
+
+export function ElectronicsContactForm({ subtitle, title, fields = ["name", "email", "phone", "company", "message"] }: ElectronicsContactFormProps) {
+  const labels: Record<string, string> = { name: "Your Name", email: "Your Email", phone: "Phone Number", company: "Company", message: "Your Message" };
+  const scopedCss = `
+    .ecf-section { padding: 60px 15px; }
+    .ecf-header { margin-bottom: 30px; }
+    .ecf-subtitle { color: ${TOKENS.primaryColor}; text-transform: uppercase; font-weight: 600; font-size: 12px; font-family: ${TOKENS.bodyFont}; margin-bottom: 8px; letter-spacing: 2px; }
+    .ecf-title { font-family: ${TOKENS.titleFont}; font-weight: ${TOKENS.titleFontWeight}; font-size: 28px; text-transform: uppercase; color: ${TOKENS.titleColor}; margin: 0; line-height: 1.3; }
+    .ecf-form { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+    .ecf-full { grid-column: 1 / -1; }
+    .ecf-input { width: 100%; padding: 14px 16px; font-family: ${TOKENS.bodyFont}; font-size: 14px; border: 1px solid #e0e0e0; background: #fff; color: ${TOKENS.titleColor}; outline: none; transition: border-color 0.3s; box-sizing: border-box; }
+    .ecf-input:focus { border-color: ${TOKENS.titleColor}; }
+    .ecf-textarea { min-height: 150px; resize: vertical; }
+    .ecf-submit { display: inline-block; padding: 14px 32px; background: ${TOKENS.titleColor}; color: #fff; font-family: ${TOKENS.bodyFont}; font-size: 13px; font-weight: 700; text-transform: uppercase; border: none; cursor: pointer; transition: opacity 0.3s; }
+    .ecf-submit:hover { opacity: 0.85; }
+    @media (max-width: 767px) { .ecf-form { grid-template-columns: 1fr; } }
+  `;
+  return (
+    <section className="ecf-section">
+      <style dangerouslySetInnerHTML={{ __html: scopedCss }} />
+      <div style={{ maxWidth: TOKENS.containerWidth, margin: "0 auto", padding: "0 15px" }}>
+        {(subtitle || title) && <div className="ecf-header">{subtitle && <div className="ecf-subtitle">{subtitle}</div>}{title && <h3 className="ecf-title">{title}</h3>}</div>}
+        <form className="ecf-form" onSubmit={(e) => e.preventDefault()}>
+          {fields.map((f) => f === "message" ? <textarea key={f} className="ecf-input ecf-textarea ecf-full" placeholder={labels[f] || f} /> : <input key={f} type={f === "email" ? "email" : "text"} className="ecf-input" placeholder={labels[f] || f} />)}
+          <div className="ecf-full"><button type="submit" className="ecf-submit">Send Message</button></div>
+        </form>
+      </div>
+    </section>
+  );
 }

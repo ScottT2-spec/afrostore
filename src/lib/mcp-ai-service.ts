@@ -58,8 +58,8 @@ function getAIProviders(): AIProviderConfig[] {
     providers.push({
       provider: "google",
       apiKey: process.env.GOOGLE_AI_KEY,
-      model: "gemini-1.5-pro",
-      fallbackModels: ["gemini-1.5-flash"],
+      model: "gemini-2.0-flash",
+      fallbackModels: ["gemini-2.0-flash-lite"],
       capabilities: [AICapability.CHAT, AICapability.FUNCTION_CALLING, AICapability.VISION],
     });
   }
@@ -99,7 +99,7 @@ function getAI(): AIFailover {
     }
     aiFailover = new AIFailover({
       providers,
-      priorityOrder: ["openai", "anthropic", "google", "groq", "groq_2", "groq_3", "groq_4", "deepseek"],
+      priorityOrder: ["groq", "groq_2", "groq_3", "groq_4", "google", "openai", "anthropic", "deepseek"],
       circuitBreaker: { failureThreshold: 3, recoveryTimeoutMs: 30_000 },
       healthCheckIntervalMs: 60_000,
       requestTimeoutMs: 60_000, // Longer timeout for tool calling

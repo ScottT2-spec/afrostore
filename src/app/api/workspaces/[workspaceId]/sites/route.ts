@@ -4,6 +4,9 @@ import { prisma } from "@/lib/db";
 import { success, error, generateSubdomain } from "@/lib/api-helpers";
 import { slugify } from "@/lib/utils";
 import { importTemplateToSite } from "@/lib/templates/importer";
+import { buildSmartAiBlocks, buildBlockContentPrompt } from "@/lib/ai-block-content-generator";
+import { getIndustrySampleData, DEFAULT_SAMPLE_DATA } from "@/lib/ai-sample-data";
+import { AIFailover, AICapability } from "@/lib/failover";
 
 // GET /api/workspaces/[workspaceId]/sites — list sites in workspace
 export async function GET(req: NextRequest, { params }: { params: Promise<{ workspaceId: string }> }) {
@@ -157,6 +160,172 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ wor
     // No default page synthesis is allowed in the import flow.
 
     let templateResult: unknown = null;
+
+    // ── AI Build (Build with AI) ─────────────────────────────
+    if (launchMethod === "quick") {
+      try {
+        const storeName = name.trim();
+        const storeSlug = site.slug;
+        const bizType = body.businessType || body.industry || "general";
+
+        // ── Step 1: Try AI content generation (non-blocking fallback) ──
+        let aiContent: Record<string, unknown> | undefined;
+        try {
+          const providers: import("@/lib/failover").AIProviderConfig[] = [];
+          if (process.env.GROQ_API_KEY) providers.push({ provider: "groq", apiKey: process.env.GROQ_API_KEY, model: "llama-3.3-70b-versatile", capabilities: [AICapability.CHAT] });
+          if (process.env.GOOGLE_AI_KEY) providers.push({ provider: "google", apiKey: process.env.GOOGLE_AI_KEY, model: "gemini-2.0-flash", capabilities: [AICapability.CHAT] });
+          if (process.env.OPENAI_API_KEY) providers.push({ provider: "openai", apiKey: process.env.OPENAI_API_KEY, model: "gpt-4o-mini", capabilities: [AICapability.CHAT] });
+          if (process.env.ANTHROPIC_API_KEY) providers.push({ provider: "anthropic", apiKey: process.env.ANTHROPIC_API_KEY, model: "claude-3-haiku-20240307", capabilities: [AICapability.CHAT] });
+
+          if (providers.length > 0) {
+            const ai = new AIFailover({ providers, priorityOrder: providers.map(p => p.provider), requestTimeoutMs: 25_000 });
+            const prompt = buildBlockContentPrompt(storeName, bizType, description || undefined);
+            const result = await ai.chat({
+              capability: AICapability.CHAT,
+              messages: [
+                { role: "system" as const, content: "Return ONLY valid JSON. No markdown, no explanation." },
+                { role: "user" as const, content: prompt },
+              ],
+              maxTokens: 4000,
+              temperature: 0.7,
+            });
+            if (result.success && result.data?.content) {
+              let cleaned = result.data.content.trim();
+              if (cleaned.startsWith("```")) cleaned = cleaned.replace(/^```(?:json)?\s*\n?/, "").replace(/\n?```\s*$/, "");
+              aiContent = JSON.parse(cleaned);
+            }
+          }
+        } catch (aiErr) {
+          console.warn("AI content generation failed, using industry defaults:", aiErr);
+          // Non-fatal — we'll use industry-matched defaults
+        }
+
+        // ── Step 2: Build smart blocks with AI content + industry images ──
+        const aiBlocks = buildSmartAiBlocks({
+          storeName,
+          storeSlug,
+          businessType: bizType,
+          description: description || undefined,
+          aiContent,
+        });
+
+        // Create homepage with AI template blocks
+        await prisma.page.create({
+          data: {
+            siteId: site.id,
+            title: "Home",
+            slug: "home",
+            type: "HOME",
+            isPublished: true,
+            template: "ai",
+            content: { blocks: aiBlocks as unknown as Record<string, unknown>[], settings: {} },
+            metaTitle: `${storeName} — ${bizType.charAt(0).toUpperCase() + bizType.slice(1)}`,
+            metaDescription: description || `${storeName} — your trusted ${bizType} destination.`,
+          },
+        });
+
+        // ── Seed industry-specific categories & products ──────
+        const sampleData = getIndustrySampleData(bizType) || DEFAULT_SAMPLE_DATA;
+        const siteCurrency = site.currency || sampleData.currency || "NGN";
+
+        const createdCategories = await Promise.all(
+          sampleData.categories.map((cat, i) =>
+            prisma.category.create({
+              data: { siteId: site.id, name: cat.name, slug: cat.slug, image: cat.image, description: cat.description, position: i },
+            })
+          )
+        );
+
+        for (const prod of sampleData.products) {
+          const product = await prisma.product.create({
+            data: {
+              siteId: site.id,
+              categoryId: createdCategories[prod.catIdx]?.id || createdCategories[0]?.id || null,
+              name: prod.name,
+              slug: prod.slug,
+              description: prod.description,
+              price: prod.price,
+              compareAtPrice: prod.compareAtPrice || null,
+              currency: siteCurrency,
+              stock: prod.stock,
+              isFeatured: prod.isFeatured,
+              status: "ACTIVE",
+              isPublished: true,
+              tags: [],
+            },
+          });
+          for (let j = 0; j < prod.images.length; j++) {
+            await prisma.productImage.create({
+              data: { productId: product.id, url: prod.images[j], alt: prod.name, position: j },
+            });
+          }
+        }
+
+        // ── Generate About, FAQ, Contact, Policies pages ─────
+        const pageSeeds = [
+          {
+            title: "About Us", slug: "about", type: "ABOUT" as const, position: 1,
+            metaTitle: `About — ${storeName}`,
+            metaDescription: `Learn about ${storeName} and our mission.`,
+          },
+          {
+            title: "FAQ", slug: "faq", type: "FAQ" as const, position: 2,
+            metaTitle: `FAQ — ${storeName}`,
+            metaDescription: `Frequently asked questions about ${storeName}.`,
+          },
+          {
+            title: "Contact Us", slug: "contact", type: "CONTACT" as const, position: 3,
+            metaTitle: `Contact — ${storeName}`,
+            metaDescription: `Get in touch with ${storeName}.`,
+          },
+          {
+            title: "Policies", slug: "policies", type: "POLICY" as const, position: 4,
+            metaTitle: `Policies — ${storeName}`,
+            metaDescription: `Shipping, returns, and privacy policies for ${storeName}.`,
+          },
+        ];
+
+        for (const pg of pageSeeds) {
+          await prisma.page.create({
+            data: {
+              siteId: site.id,
+              title: pg.title,
+              slug: pg.slug,
+              type: pg.type,
+              isPublished: true,
+              position: pg.position,
+              content: { blocks: [], settings: {} },
+              metaTitle: pg.metaTitle,
+              metaDescription: pg.metaDescription,
+            },
+          });
+        }
+
+        // ── Fire AI page generation in background (non-blocking) ──
+        // This will populate About/FAQ/Contact/Policies with real AI content
+        try {
+          const { generateStore } = await import("@/lib/ai-store-generator");
+          generateStore({
+            siteId: site.id,
+            storeSlug: storeSlug,
+            storeName,
+            businessType: bizType,
+            description: description || undefined,
+            country: site.country || "NG",
+            currency: siteCurrency,
+          }).catch((err: unknown) => console.warn("Background AI page generation failed:", err));
+        } catch {
+          // Non-fatal — pages exist with empty content, user can edit
+        }
+
+        templateResult = { method: "ai", template: "ai-modern", blocksCreated: aiBlocks.length, categories: createdCategories.length, products: sampleData.products.length };
+      } catch (aiErr) {
+        console.error("AI build error:", aiErr);
+        // Non-fatal — site is still created
+      }
+    }
+
+    // ── Template Import ──────────────────────────────────────
     const shouldUseTemplate = launchMethod === "template" || !!templateId || !!templateSlug;
 
     if (launchMethod === "template" && !templateId && !templateSlug) {

@@ -17,8 +17,11 @@ import { GROCERY_TEMPLATE_PRESET } from "@/lib/templates/presets/grocery-preset"
 import { HEALTH_TEMPLATE_PRESET } from "@/lib/templates/presets/health-preset";
 import { INTERIOR_DECOR_PRESET, INTERIOR_RETAIL_PRESET } from "@/lib/templates/presets/interior-preset";
 import { KIDS_TEMPLATE_PRESET } from "@/lib/templates/presets/kids-preset";
+import { TOYS_TEMPLATE_PRESET } from "@/lib/templates/presets/toys-preset";
+import { LANDING_GADGET_PRESET } from "@/lib/templates/presets/landing-gadget-preset";
 import { MAKEUP_TEMPLATE_PRESET } from "@/lib/templates/presets/makeup-preset";
 import { PERFUMES_TEMPLATE_PRESET } from "@/lib/templates/presets/perfumes-preset";
+import { AI_TEMPLATE_PRESET } from "@/lib/templates/presets/ai-preset";
 import { TSHIRTS_PRINTS_ABOUT_PAGE_BLOCKS, TSHIRTS_PRINTS_CONTACT_PAGE_BLOCKS, TSHIRTS_PRINTS_BLOG_PAGE_BLOCKS } from "@/lib/templates/presets/t-shirts-prints-page-presets";
 import { VEGETABLE_HOME_PAGE_BLOCKS, VEGETABLE_MENU_PAGE_BLOCKS, VEGETABLE_RECIPE_PAGE_BLOCKS, VEGETABLE_ABOUT_PAGE_BLOCKS, VEGETABLE_CONTACT_PAGE_BLOCKS, VEGETABLE_RESERVATION_PAGE_BLOCKS } from "@/lib/templates/presets/vegetables-page-presets";
 import { PERFUMES_HOME_PAGE_BLOCKS, PERFUMES_ABOUT_PAGE_BLOCKS, PERFUMES_CONTACT_PAGE_BLOCKS, PERFUMES_FRAGRANCES_PAGE_BLOCKS, PERFUMES_JOURNAL_PAGE_BLOCKS, PERFUMES_REVIEWS_PAGE_BLOCKS } from "@/lib/templates/presets/perfumes-page-presets";
@@ -108,11 +111,13 @@ export const BESPOKE_TEMPLATE_PRESETS: TemplatePresetMap = {
   decor: INTERIOR_DECOR_PRESET,
   retail: INTERIOR_RETAIL_PRESET,
   kids: KIDS_TEMPLATE_PRESET,
-  toys: KIDS_TEMPLATE_PRESET,
+  toys: TOYS_TEMPLATE_PRESET,
+  "landing-gadget": LANDING_GADGET_PRESET,
   perfumes: PERFUMES_TEMPLATE_PRESET,
   jewellery: ELECTRONICS_TEMPLATE_PRESET,
   "jewellery-elegance": ELECTRONICS_TEMPLATE_PRESET,
   strada: HEALTH_TEMPLATE_PRESET,
+  ai: AI_TEMPLATE_PRESET,
 };
 
 /** Template-specific page presets (non-home pages). */

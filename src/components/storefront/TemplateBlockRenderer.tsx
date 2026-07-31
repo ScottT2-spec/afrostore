@@ -1,5 +1,6 @@
 "use client";
 
+import type { CSSProperties } from "react";
 import {
   FashionFontLoader,
   FashionHeroSlider,
@@ -15,6 +16,17 @@ import {
   FashionInstagram,
   FashionMarquee,
   FashionCoverBanners,
+  FashionAboutContent,
+  FashionStatsCounters,
+  FashionServicesGrid,
+  FashionGalleryGrid,
+  FashionVideoSection,
+  FashionQuoteSection,
+  FashionTeamSection,
+  FashionOfficeLocations,
+  FashionStoreVisit,
+  FashionFaqAccordion,
+  FashionContactForm,
 } from "@/components/storefront/FashionTemplateBlocks";
 import { resolveSectionStyleOverrides } from "@/components/storefront/block-style";
 import { TShirtsPrintsHeader, TShirtsPrintsFooter } from "@/components/storefront/TShirtsPrintsStoreChrome";
@@ -55,7 +67,48 @@ import {
   ElectronicsPartners,
   ElectronicsFooter,
   ElectronicsSectionTitle,
+  ElectronicsAboutContent,
+  ElectronicsStatsCounters,
+  ElectronicsServicesGrid,
+  ElectronicsGalleryGrid,
+  ElectronicsVideoSection,
+  ElectronicsQuoteSection,
+  ElectronicsTeamSection,
+  ElectronicsOfficeLocations,
+  ElectronicsStoreVisit,
+  ElectronicsFaqAccordion,
+  ElectronicsContactForm,
 } from "@/components/storefront/ElectronicsTemplateBlocks";
+import {
+  HardwareSectionTitle,
+  HardwareAboutContent,
+  HardwareStatsCounters,
+  HardwareServicesGrid,
+  HardwareGalleryGrid,
+  HardwareVideoSection,
+  HardwareQuoteSection,
+  HardwareTeamSection,
+  HardwareOfficeLocations,
+  HardwareCoverBanners,
+  HardwareStoreVisit,
+  HardwareFaqAccordion,
+  HardwareContactForm,
+  HardwareBlogPosts,
+} from "@/components/storefront/HardwareTemplateBlocks";
+import {
+  HardwareHomeHeroSlider,
+  HardwareHomeCategoryGrid,
+  HardwareHomeFeaturedProducts,
+  HardwareHomeBuildPC,
+  HardwareHomePricingTable,
+  HardwareHomeGearUpCTA,
+  HardwareHomeCustomDesktops,
+  HardwareHomeGamingGallery,
+  HardwareHomeTestimonial,
+  HardwareHomeLatestEvents,
+  HardwareHomeNewsletter,
+  HardwareHomeFooter,
+} from "@/components/storefront/HardwareHomepageBlocks";
 import {
   BakeryFontLoader,
   BakeryHeroSlider,
@@ -67,7 +120,28 @@ import {
   BakeryBlogPosts,
   BakeryCta,
   BakeryFooter,
+  BakeryAboutContent,
+  BakeryStatsCounters,
+  BakeryServicesGrid,
+  BakeryGalleryGrid,
+  BakeryVideoSection,
+  BakeryQuoteSection,
+  BakeryTeamSection,
+  BakeryOfficeLocations,
+  BakeryCoverBanners,
+  BakeryStoreVisit,
+  BakeryFaqAccordion,
+  BakeryContactForm,
 } from "@/components/storefront/BakeryTemplateBlocks";
+import {
+  ToolsGridBanners,
+  ToolsFeatureIcons,
+  ToolsSectionTitle,
+  ToolsProductGrid,
+  ToolsFeatureSection,
+  ToolsDeliveryBanner,
+  ToolsPreFooter,
+} from "@/components/storefront/ToolsTemplateBlocks";
 import {
   CosmeticsFontLoader,
   CosmeticsHeroSlider,
@@ -94,6 +168,13 @@ import {
   GroceryNewsletter,
   GroceryBestSellers,
   GroceryFooter,
+  GroceryAboutHero,
+  GroceryTextSection,
+  GroceryTeamSection,
+  GroceryFaqSection,
+  GroceryContactHero,
+  GroceryContactForm,
+  GroceryBlogGrid,
 } from "@/components/storefront/GroceryTemplateBlocks";
 import {
   HealthFontLoader,
@@ -133,6 +214,17 @@ import {
   InteriorBrandsBar,
   InteriorCta,
   InteriorFooter,
+  InteriorAboutContent,
+  InteriorStatsCounters,
+  InteriorServicesGrid,
+  InteriorGalleryGrid,
+  InteriorVideoSection,
+  InteriorQuoteSection,
+  InteriorTeamSection,
+  InteriorOfficeLocations,
+  InteriorStoreVisit,
+  InteriorFaqAccordion,
+  InteriorContactForm,
   GardenHeroBanner,
   GardenCategoryBanner,
   GardenDiscountBanner,
@@ -143,6 +235,21 @@ import {
   GardenContactPage,
   GardenProductCategory,
 } from "@/components/storefront/InteriorDesignTemplateBlocks";
+import {
+  AccessoriesAboutHero,
+  AccessoriesTeamSection,
+  AccessoriesStrategySection,
+  AccessoriesCommunityCta,
+  AccessoriesStoreVisit,
+  AccessoriesFaqAccordion,
+  AccessoriesContactForm,
+  AccessoriesBlogHeader,
+  AccessoriesBlogPosts,
+  AccessoriesProductGrid,
+  AccessoriesFaqsHeader,
+  AccessoriesFaqsContactInfo,
+  AccessoriesCategorizedFaq,
+} from "@/components/storefront/AccessoriesTemplateBlocks";
 import {
   KidsFontLoader,
   KidsAnnouncementBar,
@@ -167,6 +274,68 @@ import {
   KidsOpeningHours,
 } from "@/components/storefront/KidsTemplateBlocks";
 import {
+  ToysFontLoader,
+  ToysHeroSlider,
+  ToysBannerCards,
+  ToysVideoWelcome,
+  ToysFeaturesBar,
+  ToysAgeCategories,
+  ToysSectionTitle,
+  ToysProductGrid,
+  ToysLimitedOffer,
+  ToysTestimonials,
+  ToysNewsletter,
+  ToysFooter,
+} from "@/components/storefront/ToysTemplateBlocks";
+import {
+  LandingGadgetFontLoader,
+  LandingGadgetHero,
+  LandingGadgetStatsBar,
+  LandingGadgetFeatureSplit,
+  LandingGadgetDarkFeature,
+  LandingGadgetPhotoGallery,
+  LandingGadgetCameraDark,
+  LandingGadgetSecurity,
+  LandingGadgetCameraOptics,
+  LandingGadgetProductsShowcase,
+  LandingGadgetNewsletter,
+  LandingGadgetFooter,
+  LandingGadgetFullWidthImage,
+} from "@/components/storefront/LandingGadgetBlocks";
+import {
+  AegisLandingFontLoader,
+  AegisHeader,
+  AegisHero,
+  AegisServices,
+  AegisStories,
+  AegisCTA,
+  AegisFooter,
+} from "@/components/storefront/AegisLandingBlocks";
+import {
+  ProkipAgentFontLoader,
+  ProkipAgentModal,
+  ProkipAgentTopBanner,
+  ProkipAgentHero,
+  ProkipAgentIntro,
+  ProkipAgentAbout,
+  ProkipAgentBenefits,
+  ProkipAgentMedia,
+  ProkipAgentSupport,
+  ProkipAgentConversion,
+  ProkipAgentFooter,
+} from "@/components/storefront/ProkipAgentLandingBlocks";
+import {
+  ProkipBookingFontLoader,
+  ProkipBookingHero,
+  ProkipBookingProblemSection,
+  ProkipBookingSolution,
+  ProkipBookingDemoDetails,
+  ProkipBookingTestimonials,
+  ProkipBookingProcess,
+  ProkipBookingForm,
+  ProkipBookingFooter,
+} from "@/components/storefront/ProkipBookingLandingBlocks";
+import {
   MakeupFontLoader,
   MakeupHeroSlider,
   MakeupCategorySidebar,
@@ -179,6 +348,13 @@ import {
   MakeupBlogPosts,
   MakeupBrandsCarousel,
   MakeupFooter,
+  MakeupAboutHero,
+  MakeupTextSection,
+  MakeupTeamSection,
+  MakeupFaqSection,
+  MakeupContactHero,
+  MakeupContactForm,
+  MakeupBlogGrid,
 } from "@/components/storefront/MakeupTemplateBlocks";
 import {
   PerfumesFontLoader,
@@ -220,6 +396,43 @@ import {
   VegetableContact,
   VegetableReservation,
 } from "@/components/storefront/VegetableTemplateBlocks";
+import {
+  AiFontLoader,
+  AiAnnouncementBar,
+  AiHeroVideo,
+  AiCategoryRow,
+  AiLargeProductCarousel,
+  AiPromoTiles,
+  AiProductCarousel,
+  AiValueProps,
+  AiNewsletter,
+  AiFooter,
+  AiSectionTitle,
+} from "@/components/storefront/AiTemplateBlocks";
+import {
+  JumiaFontLoader,
+  JumiaTopBar,
+  JumiaHeader,
+  JumiaHeroBanner,
+  JumiaFlashDeals,
+  JumiaCategoryGrid,
+  JumiaSectionTitle,
+  JumiaProductGrid,
+  JumiaPromoBanners,
+  JumiaOfficialStores,
+  JumiaFeaturesBar,
+  JumiaAppBanner,
+  JumiaNewsletter,
+  JumiaFooter,
+  JumiaTopDeals,
+  JumiaSponsored,
+  JumiaCategoryDealRow,
+  JumiaBrandStoreRow,
+  JumiaCategoryIconBar,
+  JumiaPromoTiles,
+  JumiaBottomNav,
+  JumiaSpacer,
+} from "@/components/storefront/JumiaTemplateBlocks";
 
 /* ─── TYPES ─────────────────────────────────────────────────── */
 
@@ -248,6 +461,17 @@ const FASHION_BLOCKS: Record<string, BlockComponent> = {
   fashionInstagram: FashionInstagram as unknown as BlockComponent,
   fashionMarquee: FashionMarquee as unknown as BlockComponent,
   fashionCoverBanners: FashionCoverBanners as unknown as BlockComponent,
+  fashionAboutContent: FashionAboutContent as unknown as BlockComponent,
+  fashionStatsCounters: FashionStatsCounters as unknown as BlockComponent,
+  fashionServicesGrid: FashionServicesGrid as unknown as BlockComponent,
+  fashionGalleryGrid: FashionGalleryGrid as unknown as BlockComponent,
+  fashionVideoSection: FashionVideoSection as unknown as BlockComponent,
+  fashionQuoteSection: FashionQuoteSection as unknown as BlockComponent,
+  fashionTeamSection: FashionTeamSection as unknown as BlockComponent,
+  fashionOfficeLocations: FashionOfficeLocations as unknown as BlockComponent,
+  fashionStoreVisit: FashionStoreVisit as unknown as BlockComponent,
+  fashionFaqAccordion: FashionFaqAccordion as unknown as BlockComponent,
+  fashionContactForm: FashionContactForm as unknown as BlockComponent,
 };
 
 const ELECTRONICS_BLOCKS: Record<string, BlockComponent> = {
@@ -262,6 +486,57 @@ const ELECTRONICS_BLOCKS: Record<string, BlockComponent> = {
   electronicsPartners: ElectronicsPartners as unknown as BlockComponent,
   electronicsFooter: ElectronicsFooter as unknown as BlockComponent,
   electronicsSectionTitle: ElectronicsSectionTitle as unknown as BlockComponent,
+  electronicsAboutContent: ElectronicsAboutContent as unknown as BlockComponent,
+  electronicsStatsCounters: ElectronicsStatsCounters as unknown as BlockComponent,
+  electronicsServicesGrid: ElectronicsServicesGrid as unknown as BlockComponent,
+  electronicsGalleryGrid: ElectronicsGalleryGrid as unknown as BlockComponent,
+  electronicsVideoSection: ElectronicsVideoSection as unknown as BlockComponent,
+  electronicsQuoteSection: ElectronicsQuoteSection as unknown as BlockComponent,
+  electronicsTeamSection: ElectronicsTeamSection as unknown as BlockComponent,
+  electronicsOfficeLocations: ElectronicsOfficeLocations as unknown as BlockComponent,
+  electronicsStoreVisit: ElectronicsStoreVisit as unknown as BlockComponent,
+  electronicsFaqAccordion: ElectronicsFaqAccordion as unknown as BlockComponent,
+  electronicsContactForm: ElectronicsContactForm as unknown as BlockComponent,
+};
+
+const HARDWARE_BLOCKS: Record<string, BlockComponent> = {
+  hardwareSectionTitle: HardwareSectionTitle as unknown as BlockComponent,
+  hardwareAboutContent: HardwareAboutContent as unknown as BlockComponent,
+  hardwareStatsCounters: HardwareStatsCounters as unknown as BlockComponent,
+  hardwareServicesGrid: HardwareServicesGrid as unknown as BlockComponent,
+  hardwareGalleryGrid: HardwareGalleryGrid as unknown as BlockComponent,
+  hardwareVideoSection: HardwareVideoSection as unknown as BlockComponent,
+  hardwareQuoteSection: HardwareQuoteSection as unknown as BlockComponent,
+  hardwareTeamSection: HardwareTeamSection as unknown as BlockComponent,
+  hardwareOfficeLocations: HardwareOfficeLocations as unknown as BlockComponent,
+  hardwareCoverBanners: HardwareCoverBanners as unknown as BlockComponent,
+  hardwareStoreVisit: HardwareStoreVisit as unknown as BlockComponent,
+  hardwareFaqAccordion: HardwareFaqAccordion as unknown as BlockComponent,
+  hardwareContactForm: HardwareContactForm as unknown as BlockComponent,
+  hardwareBlogPosts: HardwareBlogPosts as unknown as BlockComponent,
+  // Homepage blocks
+  hardwareHomeHeroSlider: HardwareHomeHeroSlider as unknown as BlockComponent,
+  hardwareHomeCategoryGrid: HardwareHomeCategoryGrid as unknown as BlockComponent,
+  hardwareHomeFeaturedProducts: HardwareHomeFeaturedProducts as unknown as BlockComponent,
+  hardwareHomeBuildPC: HardwareHomeBuildPC as unknown as BlockComponent,
+  hardwareHomePricingTable: HardwareHomePricingTable as unknown as BlockComponent,
+  hardwareHomeGearUpCTA: HardwareHomeGearUpCTA as unknown as BlockComponent,
+  hardwareHomeCustomDesktops: HardwareHomeCustomDesktops as unknown as BlockComponent,
+  hardwareHomeGamingGallery: HardwareHomeGamingGallery as unknown as BlockComponent,
+  hardwareHomeTestimonial: HardwareHomeTestimonial as unknown as BlockComponent,
+  hardwareHomeLatestEvents: HardwareHomeLatestEvents as unknown as BlockComponent,
+  hardwareHomeNewsletter: HardwareHomeNewsletter as unknown as BlockComponent,
+  hardwareHomeFooter: HardwareHomeFooter as unknown as BlockComponent,
+};
+
+const TOOLS_HOME_BLOCKS: Record<string, BlockComponent> = {
+  toolsGridBanners: ToolsGridBanners as unknown as BlockComponent,
+  toolsFeatureIcons: ToolsFeatureIcons as unknown as BlockComponent,
+  toolsSectionTitle: ToolsSectionTitle as unknown as BlockComponent,
+  toolsProductGrid: ToolsProductGrid as unknown as BlockComponent,
+  toolsFeatureSection: ToolsFeatureSection as unknown as BlockComponent,
+  toolsDeliveryBanner: ToolsDeliveryBanner as unknown as BlockComponent,
+  toolsPreFooter: ToolsPreFooter as unknown as BlockComponent,
 };
 
 const BAKERY_BLOCKS: Record<string, BlockComponent> = {
@@ -274,6 +549,18 @@ const BAKERY_BLOCKS: Record<string, BlockComponent> = {
   bakeryBlogPosts: BakeryBlogPosts as unknown as BlockComponent,
   bakeryCta: BakeryCta as unknown as BlockComponent,
   bakeryFooter: BakeryFooter as unknown as BlockComponent,
+  bakeryAboutContent: BakeryAboutContent as unknown as BlockComponent,
+  bakeryStatsCounters: BakeryStatsCounters as unknown as BlockComponent,
+  bakeryServicesGrid: BakeryServicesGrid as unknown as BlockComponent,
+  bakeryGalleryGrid: BakeryGalleryGrid as unknown as BlockComponent,
+  bakeryVideoSection: BakeryVideoSection as unknown as BlockComponent,
+  bakeryQuoteSection: BakeryQuoteSection as unknown as BlockComponent,
+  bakeryTeamSection: BakeryTeamSection as unknown as BlockComponent,
+  bakeryOfficeLocations: BakeryOfficeLocations as unknown as BlockComponent,
+  bakeryCoverBanners: BakeryCoverBanners as unknown as BlockComponent,
+  bakeryStoreVisit: BakeryStoreVisit as unknown as BlockComponent,
+  bakeryFaqAccordion: BakeryFaqAccordion as unknown as BlockComponent,
+  bakeryContactForm: BakeryContactForm as unknown as BlockComponent,
 };
 
 const COSMETICS_BLOCKS: Record<string, BlockComponent> = {
@@ -301,6 +588,13 @@ const GROCERY_BLOCKS: Record<string, BlockComponent> = {
   groceryNewsletter: GroceryNewsletter as unknown as BlockComponent,
   groceryBestSellers: GroceryBestSellers as unknown as BlockComponent,
   groceryFooter: GroceryFooter as unknown as BlockComponent,
+  groceryAboutHero: GroceryAboutHero as unknown as BlockComponent,
+  groceryTextSection: GroceryTextSection as unknown as BlockComponent,
+  groceryTeamSection: GroceryTeamSection as unknown as BlockComponent,
+  groceryFaqSection: GroceryFaqSection as unknown as BlockComponent,
+  groceryContactHero: GroceryContactHero as unknown as BlockComponent,
+  groceryContactForm: GroceryContactForm as unknown as BlockComponent,
+  groceryBlogGrid: GroceryBlogGrid as unknown as BlockComponent,
 };
 
 const HEALTH_BLOCKS: Record<string, BlockComponent> = {
@@ -339,6 +633,30 @@ const INTERIOR_BLOCKS: Record<string, BlockComponent> = {
   interiorBrandsBar: InteriorBrandsBar as unknown as BlockComponent,
   interiorCta: InteriorCta as unknown as BlockComponent,
   interiorFooter: InteriorFooter as unknown as BlockComponent,
+  interiorAboutContent: InteriorAboutContent as unknown as BlockComponent,
+  interiorStatsCounters: InteriorStatsCounters as unknown as BlockComponent,
+  interiorServicesGrid: InteriorServicesGrid as unknown as BlockComponent,
+  interiorGalleryGrid: InteriorGalleryGrid as unknown as BlockComponent,
+  interiorVideoSection: InteriorVideoSection as unknown as BlockComponent,
+  interiorQuoteSection: InteriorQuoteSection as unknown as BlockComponent,
+  interiorTeamSection: InteriorTeamSection as unknown as BlockComponent,
+  interiorOfficeLocations: InteriorOfficeLocations as unknown as BlockComponent,
+  interiorStoreVisit: InteriorStoreVisit as unknown as BlockComponent,
+  interiorFaqAccordion: InteriorFaqAccordion as unknown as BlockComponent,
+  interiorContactForm: InteriorContactForm as unknown as BlockComponent,
+  accessoriesAboutHero: AccessoriesAboutHero as unknown as BlockComponent,
+  accessoriesTeamSection: AccessoriesTeamSection as unknown as BlockComponent,
+  accessoriesStrategySection: AccessoriesStrategySection as unknown as BlockComponent,
+  accessoriesCommunityCta: AccessoriesCommunityCta as unknown as BlockComponent,
+  accessoriesStoreVisit: AccessoriesStoreVisit as unknown as BlockComponent,
+  accessoriesFaqAccordion: AccessoriesFaqAccordion as unknown as BlockComponent,
+  accessoriesContactForm: AccessoriesContactForm as unknown as BlockComponent,
+  accessoriesBlogHeader: AccessoriesBlogHeader as unknown as BlockComponent,
+  accessoriesBlogPosts: AccessoriesBlogPosts as unknown as BlockComponent,
+  accessoriesProductGrid: AccessoriesProductGrid as unknown as BlockComponent,
+  accessoriesFaqsHeader: AccessoriesFaqsHeader as unknown as BlockComponent,
+  accessoriesFaqsContactInfo: AccessoriesFaqsContactInfo as unknown as BlockComponent,
+  accessoriesCategorizedFaq: AccessoriesCategorizedFaq as unknown as BlockComponent,
   gardenHeroBanner: GardenHeroBanner as unknown as BlockComponent,
   gardenCategoryBanner: GardenCategoryBanner as unknown as BlockComponent,
   gardenDiscountBanner: GardenDiscountBanner as unknown as BlockComponent,
@@ -373,6 +691,70 @@ const KIDS_BLOCKS: Record<string, BlockComponent> = {
   kidsOpeningHours: KidsOpeningHours as unknown as BlockComponent,
 };
 
+const TOYS_BLOCKS: Record<string, BlockComponent> = {
+  toysFontLoader: ToysFontLoader as unknown as BlockComponent,
+  toysHeroSlider: ToysHeroSlider as unknown as BlockComponent,
+  toysBannerCards: ToysBannerCards as unknown as BlockComponent,
+  toysVideoWelcome: ToysVideoWelcome as unknown as BlockComponent,
+  toysFeaturesBar: ToysFeaturesBar as unknown as BlockComponent,
+  toysAgeCategories: ToysAgeCategories as unknown as BlockComponent,
+  toysSectionTitle: ToysSectionTitle as unknown as BlockComponent,
+  toysProductGrid: ToysProductGrid as unknown as BlockComponent,
+  toysLimitedOffer: ToysLimitedOffer as unknown as BlockComponent,
+  toysTestimonials: ToysTestimonials as unknown as BlockComponent,
+  toysNewsletter: ToysNewsletter as unknown as BlockComponent,
+  toysFooter: ToysFooter as unknown as BlockComponent,
+};
+
+const GADGET_BLOCKS: Record<string, BlockComponent> = {
+  gadgetFontLoader: LandingGadgetFontLoader as unknown as BlockComponent,
+  gadgetHero: LandingGadgetHero as unknown as BlockComponent,
+  gadgetStatsBar: LandingGadgetStatsBar as unknown as BlockComponent,
+  gadgetFeatureSplit: LandingGadgetFeatureSplit as unknown as BlockComponent,
+  gadgetDarkFeature: LandingGadgetDarkFeature as unknown as BlockComponent,
+  gadgetPhotoGallery: LandingGadgetPhotoGallery as unknown as BlockComponent,
+  gadgetCameraDark: LandingGadgetCameraDark as unknown as BlockComponent,
+  gadgetSecurity: LandingGadgetSecurity as unknown as BlockComponent,
+  gadgetCameraOptics: LandingGadgetCameraOptics as unknown as BlockComponent,
+  gadgetProductsShowcase: LandingGadgetProductsShowcase as unknown as BlockComponent,
+  gadgetNewsletter: LandingGadgetNewsletter as unknown as BlockComponent,
+  gadgetFooter: LandingGadgetFooter as unknown as BlockComponent,
+  gadgetFullWidthImage: LandingGadgetFullWidthImage as unknown as BlockComponent,
+};
+
+const AEGIS_BLOCKS: Record<string, BlockComponent> = {
+  aegisHeader: AegisHeader as unknown as BlockComponent,
+  aegisHero: AegisHero as unknown as BlockComponent,
+  aegisServices: AegisServices as unknown as BlockComponent,
+  aegisStories: AegisStories as unknown as BlockComponent,
+  aegisCTA: AegisCTA as unknown as BlockComponent,
+  aegisFooter: AegisFooter as unknown as BlockComponent,
+};
+
+const PROKIP_AGENT_BLOCKS: Record<string, BlockComponent> = {
+  prokipAgentModal: ProkipAgentModal as unknown as BlockComponent,
+  prokipAgentTopBanner: ProkipAgentTopBanner as unknown as BlockComponent,
+  prokipAgentHero: ProkipAgentHero as unknown as BlockComponent,
+  prokipAgentIntro: ProkipAgentIntro as unknown as BlockComponent,
+  prokipAgentAbout: ProkipAgentAbout as unknown as BlockComponent,
+  prokipAgentBenefits: ProkipAgentBenefits as unknown as BlockComponent,
+  prokipAgentMedia: ProkipAgentMedia as unknown as BlockComponent,
+  prokipAgentSupport: ProkipAgentSupport as unknown as BlockComponent,
+  prokipAgentConversion: ProkipAgentConversion as unknown as BlockComponent,
+  prokipAgentFooter: ProkipAgentFooter as unknown as BlockComponent,
+};
+
+const PROKIP_BOOKING_BLOCKS: Record<string, BlockComponent> = {
+  prokipBookingHero: ProkipBookingHero as unknown as BlockComponent,
+  prokipBookingProblemSection: ProkipBookingProblemSection as unknown as BlockComponent,
+  prokipBookingSolution: ProkipBookingSolution as unknown as BlockComponent,
+  prokipBookingDemoDetails: ProkipBookingDemoDetails as unknown as BlockComponent,
+  prokipBookingTestimonials: ProkipBookingTestimonials as unknown as BlockComponent,
+  prokipBookingProcess: ProkipBookingProcess as unknown as BlockComponent,
+  prokipBookingForm: ProkipBookingForm as unknown as BlockComponent,
+  prokipBookingFooter: ProkipBookingFooter as unknown as BlockComponent,
+};
+
 const MAKEUP_BLOCKS: Record<string, BlockComponent> = {
   makeupHeroSlider: MakeupHeroSlider as unknown as BlockComponent,
   makeupCategorySidebar: MakeupCategorySidebar as unknown as BlockComponent,
@@ -385,6 +767,13 @@ const MAKEUP_BLOCKS: Record<string, BlockComponent> = {
   makeupBlogPosts: MakeupBlogPosts as unknown as BlockComponent,
   makeupBrandsCarousel: MakeupBrandsCarousel as unknown as BlockComponent,
   makeupFooter: MakeupFooter as unknown as BlockComponent,
+  makeupAboutHero: MakeupAboutHero as unknown as BlockComponent,
+  makeupTextSection: MakeupTextSection as unknown as BlockComponent,
+  makeupTeamSection: MakeupTeamSection as unknown as BlockComponent,
+  makeupFaqSection: MakeupFaqSection as unknown as BlockComponent,
+  makeupContactHero: MakeupContactHero as unknown as BlockComponent,
+  makeupContactForm: MakeupContactForm as unknown as BlockComponent,
+  makeupBlogGrid: MakeupBlogGrid as unknown as BlockComponent,
 };
 
 const PERFUMES_BLOCKS: Record<string, BlockComponent> = {
@@ -440,19 +829,65 @@ const VEGETABLE_BLOCKS: Record<string, BlockComponent> = {
   vegetableReservation: VegetableReservation as unknown as BlockComponent,
 };
 
+const JUMIA_BLOCKS: Record<string, BlockComponent> = {
+  jumiaTopBar: JumiaTopBar as unknown as BlockComponent,
+  jumiaHeader: JumiaHeader as unknown as BlockComponent,
+  jumiaHeroBanner: JumiaHeroBanner as unknown as BlockComponent,
+  jumiaFlashDeals: JumiaFlashDeals as unknown as BlockComponent,
+  jumiaCategoryGrid: JumiaCategoryGrid as unknown as BlockComponent,
+  jumiaSectionTitle: JumiaSectionTitle as unknown as BlockComponent,
+  jumiaProductGrid: JumiaProductGrid as unknown as BlockComponent,
+  jumiaPromoBanners: JumiaPromoBanners as unknown as BlockComponent,
+  jumiaOfficialStores: JumiaOfficialStores as unknown as BlockComponent,
+  jumiaFeaturesBar: JumiaFeaturesBar as unknown as BlockComponent,
+  jumiaAppBanner: JumiaAppBanner as unknown as BlockComponent,
+  jumiaNewsletter: JumiaNewsletter as unknown as BlockComponent,
+  jumiaFooter: JumiaFooter as unknown as BlockComponent,
+  jumiaTopDeals: JumiaTopDeals as unknown as BlockComponent,
+  jumiaSponsored: JumiaSponsored as unknown as BlockComponent,
+  jumiaCategoryDealRow: JumiaCategoryDealRow as unknown as BlockComponent,
+  jumiaBrandStoreRow: JumiaBrandStoreRow as unknown as BlockComponent,
+  jumiaCategoryIconBar: JumiaCategoryIconBar as unknown as BlockComponent,
+  jumiaPromoTiles: JumiaPromoTiles as unknown as BlockComponent,
+  jumiaBottomNav: JumiaBottomNav as unknown as BlockComponent,
+  jumiaSpacer: JumiaSpacer as unknown as BlockComponent,
+};
+
+const AI_BLOCKS: Record<string, BlockComponent> = {
+  aiAnnouncementBar: AiAnnouncementBar as unknown as BlockComponent,
+  aiHeroVideo: AiHeroVideo as unknown as BlockComponent,
+  aiCategoryRow: AiCategoryRow as unknown as BlockComponent,
+  aiLargeProductCarousel: AiLargeProductCarousel as unknown as BlockComponent,
+  aiPromoTiles: AiPromoTiles as unknown as BlockComponent,
+  aiProductCarousel: AiProductCarousel as unknown as BlockComponent,
+  aiValueProps: AiValueProps as unknown as BlockComponent,
+  aiNewsletter: AiNewsletter as unknown as BlockComponent,
+  aiFooter: AiFooter as unknown as BlockComponent,
+  aiSectionTitle: AiSectionTitle as unknown as BlockComponent,
+};
+
 const ALL_TEMPLATE_BLOCKS: Record<string, BlockComponent> = {
   ...FASHION_BLOCKS,
   ...ELECTRONICS_BLOCKS,
+  ...HARDWARE_BLOCKS,
+  ...TOOLS_HOME_BLOCKS,
   ...BAKERY_BLOCKS,
   ...COSMETICS_BLOCKS,
   ...GROCERY_BLOCKS,
   ...HEALTH_BLOCKS,
   ...INTERIOR_BLOCKS,
   ...KIDS_BLOCKS,
+  ...TOYS_BLOCKS,
   ...MAKEUP_BLOCKS,
   ...PERFUMES_BLOCKS,
   ...TSHIRTS_BLOCKS,
   ...VEGETABLE_BLOCKS,
+  ...JUMIA_BLOCKS,
+  ...AI_BLOCKS,
+  ...GADGET_BLOCKS,
+  ...AEGIS_BLOCKS,
+  ...PROKIP_AGENT_BLOCKS,
+  ...PROKIP_BOOKING_BLOCKS,
 };
 
 /* ─── FONT LOADER MAP ──────────────────────────────────────── */
@@ -470,12 +905,23 @@ const FONT_LOADERS: Record<string, React.ComponentType> = {
   perfumes: PerfumesFontLoader,
   "t-shirts-prints": FashionFontLoader,
   vegetables: FashionFontLoader,
+  jumia: JumiaFontLoader,
+  marketplace: JumiaFontLoader,
+  ai: AiFontLoader,
+  "landing-gadget": LandingGadgetFontLoader,
+  "aegis": AegisLandingFontLoader,
+  "aegis-landing": AegisLandingFontLoader,
 };
 
 /** Detect which template family a block set belongs to */
 function detectTemplateFamily(blocks: TemplateBlock[]): string {
   for (const b of blocks) {
     const t = b.type;
+    if (t.startsWith("aegis")) return "aegis-landing";
+    if (t.startsWith("gadget")) return "landing-gadget";
+    if (t.startsWith("ai")) return "ai";
+    if (t.startsWith("jumia")) return "jumia";
+    if (t.startsWith("hardware")) return "electronics";
     if (t.startsWith("electronics")) return "electronics";
     if (t.startsWith("bakery")) return "bakery";
     if (t.startsWith("cosmetics")) return "cosmetics";
@@ -492,9 +938,120 @@ function detectTemplateFamily(blocks: TemplateBlock[]): string {
   return "fashion";
 }
 
+function buildEditorOverrideCss(blockId: string, styles: CSSProperties, hoverCss = ""): string {
+  const scope = `[data-editor-block-id="${blockId}"]`;
+  const root = `${scope} > *`;
+  const textTargets = `${scope} :is(h1, h2, h3, h4, h5, h6, p, span, a, button, li, label, strong, em, small)`;
+  const mediaTargets = `${scope} :is(img, video, svg)`;
+  const css: string[] = [];
+
+  if (
+    styles.backgroundColor ||
+    styles.paddingTop ||
+    styles.paddingRight ||
+    styles.paddingBottom ||
+    styles.paddingLeft ||
+    styles.marginTop ||
+    styles.marginRight ||
+    styles.marginBottom ||
+    styles.marginLeft ||
+    styles.borderRadius ||
+    styles.borderWidth ||
+    styles.borderStyle ||
+    styles.borderColor ||
+    styles.boxShadow ||
+    styles.position ||
+    typeof styles.zIndex === "number" ||
+    typeof styles.opacity === "number" ||
+    styles.maxWidth ||
+    styles.minWidth ||
+    styles.display ||
+    styles.justifyContent ||
+    styles.alignItems ||
+    styles.flexDirection ||
+    styles.flexWrap ||
+    styles.gap
+  ) {
+    css.push(`
+${scope} {
+  ${styles.position ? `position: ${styles.position} !important;` : ""}
+  ${typeof styles.zIndex === "number" ? `z-index: ${styles.zIndex} !important;` : ""}
+  ${typeof styles.opacity === "number" ? `opacity: ${styles.opacity} !important;` : ""}
+  ${styles.maxWidth ? `max-width: ${styles.maxWidth} !important;` : ""}
+  ${styles.minWidth ? `min-width: ${styles.minWidth} !important;` : ""}
+  ${styles.display ? `display: ${styles.display} !important;` : ""}
+  ${styles.justifyContent ? `justify-content: ${styles.justifyContent} !important;` : ""}
+  ${styles.alignItems ? `align-items: ${styles.alignItems} !important;` : ""}
+  ${styles.flexDirection ? `flex-direction: ${styles.flexDirection} !important;` : ""}
+  ${styles.flexWrap ? `flex-wrap: ${styles.flexWrap} !important;` : ""}
+  ${styles.gap ? `gap: ${styles.gap} !important;` : ""}
+}
+
+${root} {
+  ${styles.backgroundColor ? `background-color: ${styles.backgroundColor} !important;` : ""}
+  ${styles.paddingTop ? `padding-top: ${styles.paddingTop} !important;` : ""}
+  ${styles.paddingRight ? `padding-right: ${styles.paddingRight} !important;` : ""}
+  ${styles.paddingBottom ? `padding-bottom: ${styles.paddingBottom} !important;` : ""}
+  ${styles.paddingLeft ? `padding-left: ${styles.paddingLeft} !important;` : ""}
+  ${styles.marginTop ? `margin-top: ${styles.marginTop} !important;` : ""}
+  ${styles.marginRight ? `margin-right: ${styles.marginRight} !important;` : ""}
+  ${styles.marginBottom ? `margin-bottom: ${styles.marginBottom} !important;` : ""}
+  ${styles.marginLeft ? `margin-left: ${styles.marginLeft} !important;` : ""}
+  ${styles.borderRadius ? `border-radius: ${styles.borderRadius} !important;` : ""}
+  ${styles.boxShadow ? `box-shadow: ${styles.boxShadow} !important;` : ""}
+  ${styles.borderWidth ? `border-width: ${styles.borderWidth} !important;` : ""}
+  ${styles.borderStyle ? `border-style: ${styles.borderStyle} !important;` : ""}
+  ${styles.borderColor ? `border-color: ${styles.borderColor} !important;` : ""}
+}`);
+  }
+
+  if (
+    styles.color ||
+    styles.fontFamily ||
+    styles.fontSize ||
+    styles.fontWeight ||
+    styles.lineHeight ||
+    styles.letterSpacing ||
+    styles.textAlign ||
+    styles.textTransform ||
+    styles.textDecoration
+  ) {
+    css.push(`
+${textTargets} {
+  ${styles.color ? `color: ${styles.color} !important;` : ""}
+  ${styles.fontFamily ? `font-family: ${styles.fontFamily} !important;` : ""}
+  ${styles.fontSize ? `font-size: ${styles.fontSize} !important;` : ""}
+  ${styles.fontWeight ? `font-weight: ${styles.fontWeight} !important;` : ""}
+  ${styles.lineHeight ? `line-height: ${styles.lineHeight} !important;` : ""}
+  ${styles.letterSpacing ? `letter-spacing: ${styles.letterSpacing} !important;` : ""}
+  ${styles.textAlign ? `text-align: ${styles.textAlign} !important;` : ""}
+  ${styles.textTransform ? `text-transform: ${styles.textTransform} !important;` : ""}
+  ${styles.textDecoration ? `text-decoration: ${styles.textDecoration} !important;` : ""}
+}`);
+  }
+
+  if (styles.backgroundColor || styles.borderColor || styles.borderWidth || styles.borderStyle || styles.borderRadius || styles.boxShadow || typeof styles.opacity === "number") {
+    css.push(`
+${mediaTargets} {
+  ${styles.borderRadius ? `border-radius: ${styles.borderRadius} !important;` : ""}
+  ${styles.boxShadow ? `box-shadow: ${styles.boxShadow} !important;` : ""}
+  ${styles.borderWidth ? `border-width: ${styles.borderWidth} !important;` : ""}
+  ${styles.borderStyle ? `border-style: ${styles.borderStyle} !important;` : ""}
+  ${styles.borderColor ? `border-color: ${styles.borderColor} !important;` : ""}
+  ${typeof styles.opacity === "number" ? `opacity: ${styles.opacity} !important;` : ""}
+}`);
+  }
+
+  if (hoverCss) {
+    css.push(hoverCss);
+  }
+
+  return css.join("\n");
+}
+
 /* ─── SINGLE BLOCK RENDERER ────────────────────────────────── */
 
-function RenderTemplateBlock({ block }: { block: TemplateBlock }) {
+function RenderTemplateBlock({ block, isEditor = false }: { block: TemplateBlock; isEditor?: boolean }) {
   const Component = ALL_TEMPLATE_BLOCKS[block.type];
 
   if (!Component) {
@@ -509,20 +1066,34 @@ function RenderTemplateBlock({ block }: { block: TemplateBlock }) {
   }
 
   // Resolve style overrides using the universal resolver
-  const { styles, classes, overlayStyles } = resolveSectionStyleOverrides(
+  const { styles, classes, overlayStyles, hoverCss } = resolveSectionStyleOverrides(
     block.styleOverrides,
     block.type
   );
+  const customCss = typeof block.styleOverrides?.customCss === "string" ? block.styleOverrides.customCss.trim() : "";
+  const blockCss = buildEditorOverrideCss(block.id, styles, hoverCss);
 
   // Forward resolved styles to the component so it can merge them with its own styles
   const componentProps = {
     ...block.props,
     resolvedStyles: styles,
     resolvedClasses: classes,
+    isEditor,
   };
 
   return (
-    <div style={styles} className={classes}>
+    <div
+      data-editor-block-id={block.id}
+      className={`builder-block-wrapper ${classes}`.trim()}
+      style={styles}
+    >
+      {(customCss || blockCss) && (
+        <style
+          dangerouslySetInnerHTML={{
+            __html: `${customCss ? `${customCss}\n` : ""}${blockCss}`,
+          }}
+        />
+      )}
       {overlayStyles && <div style={overlayStyles} />}
       <Component {...componentProps} />
     </div>
@@ -535,16 +1106,18 @@ export interface RenderTemplateBlocksProps {
   blocks: TemplateBlock[];
   /** Pass real products to product grid blocks */
   products?: Array<Record<string, unknown>>;
+  /** Enable editor mode - prevents navigation and makes elements selectable */
+  isEditor?: boolean;
 }
 
-export function RenderTemplateBlocks({ blocks }: RenderTemplateBlocksProps) {
+export function RenderTemplateBlocks({ blocks, isEditor = false }: RenderTemplateBlocksProps) {
   const family = detectTemplateFamily(blocks);
   const FontLoader = FONT_LOADERS[family] || FashionFontLoader;
   return (
-    <div className={`${family}-template`}>
+    <div className={`${family}-template`} data-editor-mode={isEditor}>
       <FontLoader />
       {blocks.map((block) => (
-        <RenderTemplateBlock key={block.id} block={block} />
+        <RenderTemplateBlock key={block.id} block={block} isEditor={isEditor} />
       ))}
     </div>
   );
@@ -552,7 +1125,7 @@ export function RenderTemplateBlocks({ blocks }: RenderTemplateBlocksProps) {
 
 /* ─── EXPORTS ───────────────────────────────────────────────── */
 
-export { FASHION_BLOCKS, ALL_TEMPLATE_BLOCKS };
+export { FASHION_BLOCKS, ALL_TEMPLATE_BLOCKS, RenderTemplateBlock };
 export type {
   FashionHeroSliderProps,
   FashionPromoBannersProps,

@@ -9,10 +9,17 @@ import { BAKERY_TEMPLATE_PRESET } from "@/lib/templates/presets/bakery-preset";
 import { COSMETICS_TEMPLATE_PRESET } from "@/lib/templates/presets/cosmetics-preset";
 import { GROCERY_TEMPLATE_PRESET } from "@/lib/templates/presets/grocery-preset";
 import { HEALTH_TEMPLATE_PRESET } from "@/lib/templates/presets/health-preset";
+import { HARDWARE_TEMPLATE_PRESET } from "@/lib/templates/presets/hardware-preset";
+import { LANDING_GADGET_PRESET } from "@/lib/templates/presets/landing-gadget-preset";
+import { AEGIS_LANDING_PRESET } from "@/lib/templates/presets/aegis-landing-preset";
 import { INTERIOR_DECOR_PRESET, INTERIOR_RETAIL_PRESET } from "@/lib/templates/presets/interior-preset";
 import { KIDS_TEMPLATE_PRESET } from "@/lib/templates/presets/kids-preset";
+import { TOYS_TEMPLATE_PRESET } from "@/lib/templates/presets/toys-preset";
 import { MAKEUP_TEMPLATE_PRESET } from "@/lib/templates/presets/makeup-preset";
 import { PERFUMES_TEMPLATE_PRESET } from "@/lib/templates/presets/perfumes-preset";
+import { AI_TEMPLATE_PRESET } from "@/lib/templates/presets/ai-preset";
+import { PROKIP_AGENT_PRESET } from "@/lib/templates/presets/prokip-agent-preset";
+import { PROKIP_BOOKING_PRESET } from "@/lib/templates/presets/prokip-booking-preset";
 import { FASHION_SAMPLE_PRODUCTS } from "@/lib/templates/presets/fashion-sample-products";
 import { FASHION_SAMPLE_BLOGS } from "@/lib/templates/presets/fashion-sample-blogs";
 import { TEMPLATE_SAMPLE_DATA } from "@/lib/templates/presets/template-sample-data";
@@ -114,7 +121,7 @@ export async function importTemplateToSite(
     "t-shirts-prints": T_SHIRTS_PRINTS_PRESET,
     electronics: ELECTRONICS_TEMPLATE_PRESET,
     "electronics-accessories": ELECTRONICS_TEMPLATE_PRESET,
-    hardware: ELECTRONICS_TEMPLATE_PRESET,
+    hardware: HARDWARE_TEMPLATE_PRESET,
     tools: ELECTRONICS_TEMPLATE_PRESET,
     "sweets-bakery": BAKERY_TEMPLATE_PRESET,
     cosmetics: COSMETICS_TEMPLATE_PRESET,
@@ -124,9 +131,15 @@ export async function importTemplateToSite(
     decor: INTERIOR_DECOR_PRESET,
     retail: INTERIOR_RETAIL_PRESET,
     kids: KIDS_TEMPLATE_PRESET,
-    toys: KIDS_TEMPLATE_PRESET,
+    toys: TOYS_TEMPLATE_PRESET,
     makeup: MAKEUP_TEMPLATE_PRESET,
     perfumes: PERFUMES_TEMPLATE_PRESET,
+    ai: AI_TEMPLATE_PRESET,
+    "landing-gadget": LANDING_GADGET_PRESET,
+    aegis: AEGIS_LANDING_PRESET,
+    "aegis-landing": AEGIS_LANDING_PRESET,
+    "prokip-agent": PROKIP_AGENT_PRESET,
+    "prokip-booking": PROKIP_BOOKING_PRESET,
   };
 
   const preset = TEMPLATE_PRESETS[catalogEntry.slug];

@@ -3,6 +3,7 @@ import { notFound, redirect } from "next/navigation";
 import Link from "next/link";
 import { RenderTemplateBlocks, type TemplateBlock } from "@/components/storefront/TemplateBlockRenderer";
 import { RetailHeader, RetailFooter } from "@/components/storefront/RetailTemplateBlocks";
+import { HandmadeBagsHeader, HandmadeBagsFooter } from "@/components/storefront/HandmadeBagsStoreChrome";
 import { ThemeProvider, type ThemeData } from "@/components/storefront/ThemeProvider";
 import { applyPageCustomization, buildPageBackgroundStyle, filterVisiblePages, getResolvedPageSettings, normalizeSiteCustomization, type SiteCustomizationDocument } from "@/lib/site-customization";
 import { parsePageContent } from "@/lib/page-content";
@@ -262,6 +263,9 @@ export default async function AboutPage({ params }: Props) {
   // Use custom blocks if available, otherwise use preset
   let pageContent;
   const parsedAbout = aboutPage?.content ? parsePageContent(aboutPage.content) : null;
+  console.log('[AboutPage] aboutPage.content:', aboutPage?.content);
+  console.log('[AboutPage] parsedAbout:', parsedAbout);
+  console.log('[AboutPage] First block styleOverrides:', parsedAbout?.blocks[0]?.styleOverrides);
   if (parsedAbout && parsedAbout.blocks.length > 0) {
     pageContent = parsedAbout;
   } else {

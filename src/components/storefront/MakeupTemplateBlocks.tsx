@@ -1032,9 +1032,10 @@ export interface MakeupBrand {
 export interface MakeupBrandsCarouselProps {
   brands: MakeupBrand[];
   marginBottom?: string;
+  resolvedStyles?: React.CSSProperties;
 }
 
-export function MakeupBrandsCarousel({ brands, marginBottom = "80px" }: MakeupBrandsCarouselProps) {
+export function MakeupBrandsCarousel({ brands, marginBottom = "80px", resolvedStyles }: MakeupBrandsCarouselProps) {
   const storeCtx = useContext(MakeupStoreContext);
   const scopedCss = `
     .mbr-section { margin-bottom: ${marginBottom}; overflow: hidden; }
@@ -1057,7 +1058,7 @@ export function MakeupBrandsCarousel({ brands, marginBottom = "80px" }: MakeupBr
   `;
 
   return (
-    <div className="mbr-section" style={containerStyle}>
+    <div className="mbr-section" style={{ ...containerStyle, ...resolvedStyles }}>
       <ScopedStyles id="brands" css={scopedCss} />
       <div className="mbr-track">
         {[...brands, ...brands].map((b, i) => (
@@ -1067,6 +1068,605 @@ export function MakeupBrandsCarousel({ brands, marginBottom = "80px" }: MakeupBr
             </Link>
           </div>
         ))}
+      </div>
+    </div>
+  );
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   11. MAKEUP ABOUT HERO
+   Full-width hero with subtitle, title, body paragraphs left,
+   images right. Elegant/luxurious makeup style.
+   ═══════════════════════════════════════════════════════════════ */
+
+export interface MakeupAboutHeroProps {
+  subtitle: string;
+  title: string;
+  bodyText: string[];
+  images: string[];
+  ctaText?: string;
+  ctaLink?: string;
+  resolvedStyles?: React.CSSProperties;
+}
+
+export function MakeupAboutHero({ subtitle, title, bodyText, images, ctaText, ctaLink, resolvedStyles }: MakeupAboutHeroProps) {
+  const storeCtx = useContext(MakeupStoreContext);
+  const fixLink = (link?: string) => resolveStoreLink(link || "#", storeCtx?.storeSlug);
+
+  const scopedCss = `
+    .mk-about-hero { padding: 60px 0; }
+    .mk-about-hero-grid { display: flex; gap: 50px; align-items: center; }
+    .mk-about-hero-text { flex: 1; }
+    .mk-about-hero-images { flex: 1; display: flex; gap: 15px; }
+    .mk-about-hero-images img {
+      width: 50%; height: auto; border-radius: ${TOKENS.borderRadius};
+      object-fit: cover; aspect-ratio: 3/4;
+    }
+    .mk-about-hero-subtitle {
+      font-family: ${TOKENS.bodyFont}; font-size: 14px; font-weight: 600;
+      text-transform: uppercase; letter-spacing: 2px;
+      color: ${TOKENS.primaryColor}; margin: 0 0 15px;
+    }
+    .mk-about-hero-title {
+      font-family: ${TOKENS.titleFont}; font-weight: 700; font-size: 42px;
+      color: ${TOKENS.titleColor}; line-height: 1.2; margin: 0 0 20px;
+    }
+    .mk-about-hero-body {
+      font-family: ${TOKENS.bodyFont}; font-size: 15px; color: ${TOKENS.textColor};
+      line-height: 1.7; margin: 0 0 10px;
+    }
+    .mk-about-hero-cta {
+      display: inline-block; padding: 14px 32px; margin-top: 15px;
+      background: ${TOKENS.primaryColor}; color: #fff;
+      font-family: ${TOKENS.bodyFont}; font-weight: 600; font-size: 14px;
+      text-decoration: none; border-radius: 25px; transition: filter 0.3s;
+    }
+    .mk-about-hero-cta:hover { filter: brightness(0.9); }
+    @media (max-width: 1024px) {
+      .mk-about-hero-title { font-size: 32px; }
+    }
+    @media (max-width: 767px) {
+      .mk-about-hero-grid { flex-direction: column; gap: 30px; }
+      .mk-about-hero-title { font-size: 26px; }
+    }
+  `;
+
+  return (
+    <div className="mk-about-hero" style={resolvedStyles}>
+      <ScopedStyles id="about-hero" css={scopedCss} />
+      <div style={containerStyle}>
+        <div className="mk-about-hero-grid">
+          <div className="mk-about-hero-text">
+            <p className="mk-about-hero-subtitle">{subtitle}</p>
+            <h1 className="mk-about-hero-title">{title}</h1>
+            {bodyText.map((p, i) => (
+              <p key={i} className="mk-about-hero-body">{p}</p>
+            ))}
+            {ctaText && (
+              <Link href={fixLink(ctaLink)} className="mk-about-hero-cta">{ctaText}</Link>
+            )}
+          </div>
+          {images.length > 0 && (
+            <div className="mk-about-hero-images">
+              {images.map((img, i) => (
+                <img key={i} src={img} alt={`About ${i + 1}`} loading="lazy" onError={(e) => onImgError(e, "about")} />
+              ))}
+            </div>
+          )}
+        </div>
+      </div>
+    </div>
+  );
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   12. MAKEUP TEXT SECTION
+   Two-column: title+subtitle left, body paragraphs right.
+   ═══════════════════════════════════════════════════════════════ */
+
+export interface MakeupTextSectionProps {
+  sectionTitle: { title: string; subtitle?: string };
+  bodyText: string[];
+  backgroundColor?: string;
+  resolvedStyles?: React.CSSProperties;
+}
+
+export function MakeupTextSection({ sectionTitle, bodyText, backgroundColor = "transparent", resolvedStyles }: MakeupTextSectionProps) {
+  const scopedCss = `
+    .mk-text-section { padding: 60px 0; }
+    .mk-text-grid { display: flex; gap: 50px; }
+    .mk-text-left { flex: 0 0 40%; }
+    .mk-text-right { flex: 1; }
+    .mk-text-subtitle {
+      font-family: ${TOKENS.bodyFont}; font-size: 14px; font-weight: 600;
+      text-transform: uppercase; letter-spacing: 2px;
+      color: ${TOKENS.primaryColor}; margin: 0 0 12px;
+    }
+    .mk-text-title {
+      font-family: ${TOKENS.titleFont}; font-weight: 700; font-size: 32px;
+      color: ${TOKENS.titleColor}; line-height: 1.3; margin: 0;
+    }
+    .mk-text-body {
+      font-family: ${TOKENS.bodyFont}; font-size: 15px; color: ${TOKENS.textColor};
+      line-height: 1.7; margin: 0 0 15px;
+    }
+    .mk-text-body:last-child { margin-bottom: 0; }
+    @media (max-width: 767px) {
+      .mk-text-grid { flex-direction: column; gap: 20px; }
+      .mk-text-title { font-size: 24px; }
+    }
+  `;
+
+  return (
+    <div className="mk-text-section" style={{ backgroundColor, ...resolvedStyles }}>
+      <ScopedStyles id="text-section" css={scopedCss} />
+      <div style={containerStyle}>
+        <div className="mk-text-grid">
+          <div className="mk-text-left">
+            {sectionTitle.subtitle && <p className="mk-text-subtitle">{sectionTitle.subtitle}</p>}
+            <h2 className="mk-text-title">{sectionTitle.title}</h2>
+          </div>
+          <div className="mk-text-right">
+            {bodyText.map((p, i) => (
+              <p key={i} className="mk-text-body">{p}</p>
+            ))}
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   13. MAKEUP TEAM SECTION
+   Grid of team member cards (4 columns) with photos.
+   ═══════════════════════════════════════════════════════════════ */
+
+export interface MakeupTeamMember {
+  name: string;
+  role: string;
+  photoUrl: string;
+}
+
+export interface MakeupTeamSectionProps {
+  sectionTitle: { title: string; subtitle?: string };
+  team: MakeupTeamMember[];
+  resolvedStyles?: React.CSSProperties;
+}
+
+export function MakeupTeamSection({ sectionTitle, team, resolvedStyles }: MakeupTeamSectionProps) {
+  const scopedCss = `
+    .mk-team { padding: 60px 0; }
+    .mk-team-header { text-align: center; margin-bottom: 40px; }
+    .mk-team-subtitle {
+      font-family: ${TOKENS.bodyFont}; font-size: 14px; font-weight: 600;
+      text-transform: uppercase; letter-spacing: 2px;
+      color: ${TOKENS.primaryColor}; margin: 0 0 12px;
+    }
+    .mk-team-title {
+      font-family: ${TOKENS.titleFont}; font-weight: 700; font-size: 32px;
+      color: ${TOKENS.titleColor}; line-height: 1.3; margin: 0;
+    }
+    .mk-team-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 25px; }
+    .mk-team-card { text-align: center; }
+    .mk-team-photo {
+      width: 100%; aspect-ratio: 3/4; object-fit: cover;
+      border-radius: ${TOKENS.borderRadius}; margin-bottom: 15px;
+    }
+    .mk-team-name {
+      font-family: ${TOKENS.titleFont}; font-weight: 700; font-size: 18px;
+      color: ${TOKENS.titleColor}; margin: 0 0 4px;
+    }
+    .mk-team-role {
+      font-family: ${TOKENS.bodyFont}; font-size: 14px; color: ${TOKENS.textColor};
+      margin: 0;
+    }
+    @media (max-width: 1024px) { .mk-team-grid { grid-template-columns: repeat(2, 1fr); } }
+    @media (max-width: 767px) { .mk-team-grid { grid-template-columns: 1fr; } }
+  `;
+
+  return (
+    <div className="mk-team" style={resolvedStyles}>
+      <ScopedStyles id="team-section" css={scopedCss} />
+      <div style={containerStyle}>
+        <div className="mk-team-header">
+          {sectionTitle.subtitle && <p className="mk-team-subtitle">{sectionTitle.subtitle}</p>}
+          <h2 className="mk-team-title">{sectionTitle.title}</h2>
+        </div>
+        <div className="mk-team-grid">
+          {team.map((m, i) => (
+            <div key={i} className="mk-team-card">
+              <img src={m.photoUrl} alt={m.name} className="mk-team-photo" loading="lazy" onError={(e) => onImgError(e, m.name)} />
+              <h3 className="mk-team-name">{m.name}</h3>
+              <p className="mk-team-role">{m.role}</p>
+            </div>
+          ))}
+        </div>
+      </div>
+    </div>
+  );
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   14. MAKEUP FAQ SECTION
+   Expandable accordion FAQ with useState toggle.
+   ═══════════════════════════════════════════════════════════════ */
+
+export interface MakeupFaqItem {
+  question: string;
+  answer: string;
+}
+
+export interface MakeupFaqSectionProps {
+  sectionTitle: { subtitle?: string; title: string };
+  faqs: MakeupFaqItem[];
+}
+
+export function MakeupFaqSection({ sectionTitle, faqs }: MakeupFaqSectionProps) {
+  const [openIndex, setOpenIndex] = useState<number | null>(null);
+
+  const toggle = (i: number) => {
+    setOpenIndex(prev => (prev === i ? null : i));
+  };
+
+  const scopedCss = `
+    .mk-faq { padding: 60px 0; }
+    .mk-faq-header { text-align: center; margin-bottom: 40px; }
+    .mk-faq-subtitle {
+      font-family: ${TOKENS.bodyFont}; font-size: 14px; font-weight: 600;
+      text-transform: uppercase; letter-spacing: 2px;
+      color: ${TOKENS.primaryColor}; margin: 0 0 12px;
+    }
+    .mk-faq-title {
+      font-family: ${TOKENS.titleFont}; font-weight: 700; font-size: 32px;
+      color: ${TOKENS.titleColor}; line-height: 1.3; margin: 0;
+    }
+    .mk-faq-list { max-width: 800px; margin: 0 auto; }
+    .mk-faq-item {
+      border-bottom: 1px solid #e8e8e8; overflow: hidden;
+    }
+    .mk-faq-question {
+      display: flex; justify-content: space-between; align-items: center;
+      padding: 20px 0; cursor: pointer; background: none; border: none;
+      width: 100%; text-align: left;
+      font-family: ${TOKENS.titleFont}; font-weight: 600; font-size: 16px;
+      color: ${TOKENS.titleColor}; transition: color 0.2s;
+    }
+    .mk-faq-question:hover { color: ${TOKENS.primaryColor}; }
+    .mk-faq-icon {
+      font-size: 20px; flex-shrink: 0; margin-left: 15px;
+      transition: transform 0.3s;
+    }
+    .mk-faq-icon-open { transform: rotate(45deg); }
+    .mk-faq-answer {
+      max-height: 0; overflow: hidden; transition: max-height 0.35s ease, padding 0.35s ease;
+      padding: 0 0;
+    }
+    .mk-faq-answer-open {
+      max-height: 500px; padding: 0 0 20px;
+    }
+    .mk-faq-answer-text {
+      font-family: ${TOKENS.bodyFont}; font-size: 15px; color: ${TOKENS.textColor};
+      line-height: 1.7; margin: 0;
+    }
+  `;
+
+  return (
+    <div className="mk-faq">
+      <ScopedStyles id="faq-section" css={scopedCss} />
+      <div style={containerStyle}>
+        <div className="mk-faq-header">
+          {sectionTitle.subtitle && <p className="mk-faq-subtitle">{sectionTitle.subtitle}</p>}
+          <h2 className="mk-faq-title">{sectionTitle.title}</h2>
+        </div>
+        <div className="mk-faq-list">
+          {faqs.map((faq, i) => (
+            <div key={i} className="mk-faq-item">
+              <button className="mk-faq-question" onClick={() => toggle(i)}>
+                <span>{faq.question}</span>
+                <span className={`mk-faq-icon ${openIndex === i ? "mk-faq-icon-open" : ""}`}>+</span>
+              </button>
+              <div className={`mk-faq-answer ${openIndex === i ? "mk-faq-answer-open" : ""}`}>
+                <p className="mk-faq-answer-text">{faq.answer}</p>
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
+    </div>
+  );
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   15. MAKEUP CONTACT HERO
+   Contact info section with address, phone, email, hours.
+   ═══════════════════════════════════════════════════════════════ */
+
+export interface MakeupContactHeroProps {
+  subtitle?: string;
+  title: string;
+  address?: string;
+  phone?: string;
+  email?: string;
+  hours?: string;
+}
+
+export function MakeupContactHero({ subtitle, title, address, phone, email, hours }: MakeupContactHeroProps) {
+  const scopedCss = `
+    .mk-contact-hero { padding: 60px 0; }
+    .mk-contact-hero-header { text-align: center; margin-bottom: 40px; }
+    .mk-contact-hero-subtitle {
+      font-family: ${TOKENS.bodyFont}; font-size: 14px; font-weight: 600;
+      text-transform: uppercase; letter-spacing: 2px;
+      color: ${TOKENS.primaryColor}; margin: 0 0 12px;
+    }
+    .mk-contact-hero-title {
+      font-family: ${TOKENS.titleFont}; font-weight: 700; font-size: 42px;
+      color: ${TOKENS.titleColor}; line-height: 1.2; margin: 0;
+    }
+    .mk-contact-info-grid {
+      display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      gap: 30px; max-width: 900px; margin: 0 auto;
+    }
+    .mk-contact-info-card { text-align: center; }
+    .mk-contact-info-label {
+      font-family: ${TOKENS.bodyFont}; font-size: 13px; font-weight: 600;
+      text-transform: uppercase; letter-spacing: 1px;
+      color: ${TOKENS.primaryColor}; margin: 0 0 8px;
+    }
+    .mk-contact-info-value {
+      font-family: ${TOKENS.bodyFont}; font-size: 15px; color: ${TOKENS.textColor};
+      line-height: 1.6; margin: 0; white-space: pre-line;
+    }
+    .mk-contact-info-value a {
+      color: ${TOKENS.titleColor}; text-decoration: none; transition: color 0.2s;
+    }
+    .mk-contact-info-value a:hover { color: ${TOKENS.primaryColor}; }
+    @media (max-width: 767px) {
+      .mk-contact-hero-title { font-size: 28px; }
+    }
+  `;
+
+  return (
+    <div className="mk-contact-hero">
+      <ScopedStyles id="contact-hero" css={scopedCss} />
+      <div style={containerStyle}>
+        <div className="mk-contact-hero-header">
+          {subtitle && <p className="mk-contact-hero-subtitle">{subtitle}</p>}
+          <h1 className="mk-contact-hero-title">{title}</h1>
+        </div>
+        <div className="mk-contact-info-grid">
+          {address && (
+            <div className="mk-contact-info-card">
+              <p className="mk-contact-info-label">Address</p>
+              <p className="mk-contact-info-value">{address}</p>
+            </div>
+          )}
+          {phone && (
+            <div className="mk-contact-info-card">
+              <p className="mk-contact-info-label">Phone</p>
+              <p className="mk-contact-info-value"><a href={`tel:${phone}`}>{phone}</a></p>
+            </div>
+          )}
+          {email && (
+            <div className="mk-contact-info-card">
+              <p className="mk-contact-info-label">Email</p>
+              <p className="mk-contact-info-value"><a href={`mailto:${email}`}>{email}</a></p>
+            </div>
+          )}
+          {hours && (
+            <div className="mk-contact-info-card">
+              <p className="mk-contact-info-label">Opening Hours</p>
+              <p className="mk-contact-info-value">{hours}</p>
+            </div>
+          )}
+        </div>
+      </div>
+    </div>
+  );
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   16. MAKEUP CONTACT FORM
+   Form with name, email, phone, company, message + submit.
+   ═══════════════════════════════════════════════════════════════ */
+
+export interface MakeupContactFormProps {
+  title?: string;
+}
+
+export function MakeupContactForm({ title }: MakeupContactFormProps) {
+  const scopedCss = `
+    .mk-contact-form { padding: 60px 0; }
+    .mk-contact-form-title {
+      font-family: ${TOKENS.titleFont}; font-weight: 700; font-size: 32px;
+      color: ${TOKENS.titleColor}; text-align: center; margin: 0 0 35px;
+    }
+    .mk-contact-form-wrap { max-width: 800px; margin: 0 auto; }
+    .mk-contact-form-row { display: flex; gap: 20px; margin-bottom: 20px; }
+    .mk-contact-form-field { flex: 1; }
+    .mk-contact-form-input {
+      width: 100%; padding: 14px 18px; border: 1px solid #ddd;
+      border-radius: 8px; font-family: ${TOKENS.bodyFont}; font-size: 14px;
+      color: ${TOKENS.titleColor}; background: #fff; outline: none;
+      transition: border-color 0.2s; box-sizing: border-box;
+    }
+    .mk-contact-form-input:focus { border-color: ${TOKENS.primaryColor}; }
+    .mk-contact-form-textarea {
+      width: 100%; padding: 14px 18px; border: 1px solid #ddd;
+      border-radius: 8px; font-family: ${TOKENS.bodyFont}; font-size: 14px;
+      color: ${TOKENS.titleColor}; background: #fff; outline: none;
+      transition: border-color 0.2s; min-height: 140px; resize: vertical;
+      box-sizing: border-box;
+    }
+    .mk-contact-form-textarea:focus { border-color: ${TOKENS.primaryColor}; }
+    .mk-contact-form-submit {
+      display: inline-block; padding: 14px 40px; margin-top: 10px;
+      background: ${TOKENS.primaryColor}; color: #fff; border: none;
+      border-radius: 25px; font-family: ${TOKENS.bodyFont}; font-weight: 600;
+      font-size: 14px; cursor: pointer; transition: filter 0.3s;
+    }
+    .mk-contact-form-submit:hover { filter: brightness(0.9); }
+    @media (max-width: 767px) {
+      .mk-contact-form-row { flex-direction: column; }
+      .mk-contact-form-title { font-size: 24px; }
+    }
+  `;
+
+  return (
+    <div className="mk-contact-form">
+      <ScopedStyles id="contact-form" css={scopedCss} />
+      <div style={containerStyle}>
+        {title && <h2 className="mk-contact-form-title">{title}</h2>}
+        <div className="mk-contact-form-wrap">
+          <form onSubmit={(e) => e.preventDefault()}>
+            <div className="mk-contact-form-row">
+              <div className="mk-contact-form-field">
+                <input type="text" className="mk-contact-form-input" placeholder="Your Name *" required />
+              </div>
+              <div className="mk-contact-form-field">
+                <input type="email" className="mk-contact-form-input" placeholder="Your Email *" required />
+              </div>
+            </div>
+            <div className="mk-contact-form-row">
+              <div className="mk-contact-form-field">
+                <input type="tel" className="mk-contact-form-input" placeholder="Phone Number" />
+              </div>
+              <div className="mk-contact-form-field">
+                <input type="text" className="mk-contact-form-input" placeholder="Company Name" />
+              </div>
+            </div>
+            <div style={{ marginBottom: "20px" }}>
+              <textarea className="mk-contact-form-textarea" placeholder="Your Message *" required />
+            </div>
+            <button type="submit" className="mk-contact-form-submit">Send Message</button>
+          </form>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   17. MAKEUP BLOG GRID
+   Blog cards grid (3 columns), each with image, date, category,
+   title, author, excerpt.
+   ═══════════════════════════════════════════════════════════════ */
+
+export interface MakeupBlogGridPost {
+  id: string | number;
+  title: string;
+  slug: string;
+  excerpt?: string;
+  image: string;
+  category?: string;
+  author?: string;
+  date?: string;
+}
+
+export interface MakeupBlogGridProps {
+  sectionTitle?: string;
+  posts: MakeupBlogGridPost[];
+}
+
+export function MakeupBlogGrid({ sectionTitle, posts: propPosts }: MakeupBlogGridProps) {
+  const storeCtx = useContext(MakeupStoreContext);
+
+  const posts: MakeupBlogGridPost[] = (() => {
+    if (!storeCtx || !storeCtx.blogs || storeCtx.blogs.length === 0) return propPosts || [];
+    return storeCtx.blogs.slice(0, 6).map((b) => {
+      const pubDate = b.publishedAt ? new Date(b.publishedAt) : new Date(b.createdAt);
+      const formatted = pubDate.toLocaleDateString("en-US", { day: "2-digit", month: "short" });
+      return {
+        id: b.id,
+        title: b.title,
+        slug: b.slug,
+        excerpt: b.excerpt || "",
+        image: b.coverImage || safeSrc(null, b.title),
+        category: b.category || (b.tags && b.tags[0]) || "",
+        author: b.author || "",
+        date: formatted,
+      };
+    });
+  })();
+
+  const scopedCss = `
+    .mk-blog-grid-section { padding: 60px 0; }
+    .mk-blog-grid-title {
+      font-family: ${TOKENS.titleFont}; font-weight: 700; font-size: 32px;
+      color: ${TOKENS.titleColor}; text-align: center; margin: 0 0 40px;
+    }
+    .mk-blog-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 25px; }
+    .mk-blog-card {
+      background: #fff; border-radius: ${TOKENS.borderRadius}; overflow: hidden;
+      transition: box-shadow 0.3s;
+    }
+    .mk-blog-card:hover { box-shadow: 0 8px 30px rgba(0,0,0,0.08); }
+    .mk-blog-card-img-wrap { position: relative; overflow: hidden; }
+    .mk-blog-card-img {
+      width: 100%; aspect-ratio: 16/10; object-fit: cover; display: block;
+      transition: transform 0.5s;
+    }
+    .mk-blog-card:hover .mk-blog-card-img { transform: scale(1.05); }
+    .mk-blog-card-body { padding: 20px; }
+    .mk-blog-card-meta {
+      display: flex; align-items: center; gap: 12px; margin-bottom: 10px;
+      font-family: ${TOKENS.bodyFont}; font-size: 13px; color: ${TOKENS.textColor};
+    }
+    .mk-blog-card-cat {
+      color: ${TOKENS.primaryColor}; font-weight: 600; text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+    .mk-blog-card-title {
+      font-family: ${TOKENS.titleFont}; font-weight: 700; font-size: 18px;
+      color: ${TOKENS.titleColor}; margin: 0 0 8px; line-height: 1.4;
+    }
+    .mk-blog-card-title a { color: inherit; text-decoration: none; transition: color 0.2s; }
+    .mk-blog-card-title a:hover { color: ${TOKENS.primaryColor}; }
+    .mk-blog-card-author {
+      font-family: ${TOKENS.bodyFont}; font-size: 13px; color: ${TOKENS.textColor};
+      margin-bottom: 10px;
+    }
+    .mk-blog-card-excerpt {
+      font-family: ${TOKENS.bodyFont}; font-size: 14px; color: ${TOKENS.textColor};
+      line-height: 1.6; margin: 0;
+    }
+    @media (max-width: 1024px) { .mk-blog-grid { grid-template-columns: repeat(2, 1fr); } }
+    @media (max-width: 767px) { .mk-blog-grid { grid-template-columns: 1fr; } }
+  `;
+
+  return (
+    <div className="mk-blog-grid-section">
+      <ScopedStyles id="blog-grid" css={scopedCss} />
+      <div style={containerStyle}>
+        {sectionTitle && <h2 className="mk-blog-grid-title">{sectionTitle}</h2>}
+        <div className="mk-blog-grid">
+          {posts.map((post) => {
+            const postLink = storeCtx?.storeSlug
+              ? `/store/${storeCtx.storeSlug}/blog/${post.slug}`
+              : `/blog/${post.slug}`;
+            return (
+              <div key={post.id} className="mk-blog-card">
+                <div className="mk-blog-card-img-wrap">
+                  <Link href={postLink}>
+                    <img src={post.image} alt={post.title} className="mk-blog-card-img" loading="lazy" onError={(e) => onImgError(e, post.title)} />
+                  </Link>
+                </div>
+                <div className="mk-blog-card-body">
+                  <div className="mk-blog-card-meta">
+                    {post.date && <span>{post.date}</span>}
+                    {post.category && <span className="mk-blog-card-cat">{post.category}</span>}
+                  </div>
+                  <h3 className="mk-blog-card-title">
+                    <Link href={postLink}>{post.title}</Link>
+                  </h3>
+                  {post.author && <div className="mk-blog-card-author">By {post.author}</div>}
+                  {post.excerpt && <p className="mk-blog-card-excerpt">{post.excerpt}</p>}
+                </div>
+              </div>
+            );
+          })}
+        </div>
       </div>
     </div>
   );

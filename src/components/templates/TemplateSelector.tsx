@@ -64,11 +64,12 @@ interface CategoryItem {
 
 interface TemplateSelectorProps {
   industry?: string | null;
+  siteType?: string | null;
   selectedSlug?: string | null;
   onSelect: (template: TemplateItem) => void;
 }
 
-export default function TemplateSelector({ industry, selectedSlug, onSelect }: TemplateSelectorProps) {
+export default function TemplateSelector({ industry, siteType, selectedSlug, onSelect }: TemplateSelectorProps) {
   const [templates, setTemplates] = useState<TemplateItem[]>([]);
   const [categories, setCategories] = useState<CategoryItem[]>([]);
   const [loading, setLoading] = useState(true);
@@ -80,7 +81,10 @@ export default function TemplateSelector({ industry, selectedSlug, onSelect }: T
     const fetchTemplates = async () => {
       try {
         // Always fetch all templates; industry just sorts relevant ones first
-        const url = `/api/templates${industry ? `?industry=${industry}` : ''}`;
+        const params = new URLSearchParams();
+        if (industry) params.set('industry', industry);
+        if (siteType) params.set('siteType', siteType);
+        const url = `/api/templates${params.toString() ? `?${params}` : ''}`;
         const res = await fetch(url);
         const data = await res.json();
         setTemplates(data.templates || []);
@@ -92,7 +96,7 @@ export default function TemplateSelector({ industry, selectedSlug, onSelect }: T
       }
     };
     fetchTemplates();
-  }, [industry]);
+  }, [industry, siteType]);
 
   const filtered = useMemo(() => {
     let list = templates;

@@ -31,6 +31,7 @@ const BESPOKE_TEMPLATE_SLUGS = new Set([
   "perfumes",
   "jewellery",
   "jewellery-elegance",
+  "ai",
 ]);
 
 export function isBespokeTemplateSlug(templateSlug?: string | null): boolean {

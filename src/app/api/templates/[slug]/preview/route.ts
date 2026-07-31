@@ -12,7 +12,15 @@ export async function GET(
     return NextResponse.json({ error: "Template not found" }, { status: 404 });
   }
 
-  // Redirect to static file in public/templates/
+  // Block-based templates (no HTML file) → render via React preview page
+  if (!template.file) {
+    return NextResponse.redirect(
+      new URL(`/templates/preview/${template.slug}`, _req.url),
+      302
+    );
+  }
+
+  // Static HTML templates → redirect to public/templates/
   return NextResponse.redirect(
     new URL(`/templates/${template.file}`, _req.url),
     302

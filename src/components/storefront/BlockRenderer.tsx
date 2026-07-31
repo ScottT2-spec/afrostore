@@ -1,8 +1,9 @@
 "use client";
-import { ArrowRight, ChevronDown, ChevronUp, Loader2 } from "lucide-react";
+import { ArrowRight, ChevronDown, ChevronUp, Loader2, GripVertical } from "lucide-react";
 import { Award, CheckCircle2, Clock, CreditCard, Eye, Globe, Headphones, Heart, Lock, Mail, MapPin, MessageCircle, Package, Palette, Phone, Play, RefreshCw, Rocket, Send, Shield, ShoppingBag, ShoppingCart, Sparkles, Star, Target, ThumbsUp, TrendingUp, Truck, Users, Zap } from "@/components/icons/FilledIcons";
 
 import { useState, useEffect, useMemo, useRef, createContext, useContext } from "react";
+import { useDraggable, useDroppable, DndContext, closestCenter, DragEndEvent } from "@dnd-kit/core";
 import { getSectionStyle, resolveOpacity } from "@/components/storefront/block-style";
 import { ALL_TEMPLATE_BLOCKS } from "@/components/storefront/TemplateBlockRenderer";
 import { resolveStoreLink } from "@/lib/template-link-utils";
@@ -16,19 +17,27 @@ import { BakeryFontLoader } from "@/components/storefront/BakeryTemplateBlocks";
 import { CosmeticsFontLoader } from "@/components/storefront/CosmeticsTemplateBlocks";
 import { GroceryFontLoader } from "@/components/storefront/GroceryTemplateBlocks";
 import { HealthFontLoader } from "@/components/storefront/HealthTemplateBlocks";
-import { InteriorFontLoader } from "@/components/storefront/InteriorDesignTemplateBlocks";
+import { InteriorFontLoader, InteriorStoreContext, type InteriorStoreContextData } from "@/components/storefront/InteriorDesignTemplateBlocks";
+import { AccessoriesFontLoader, AccessoriesStoreContext, type AccessoriesStoreContextData } from "@/components/storefront/AccessoriesTemplateBlocks";
 import { KidsFontLoader } from "@/components/storefront/KidsTemplateBlocks";
+import { ToysFontLoader } from "@/components/storefront/ToysTemplateBlocks";
+import { LandingGadgetFontLoader } from "@/components/storefront/LandingGadgetBlocks";
 import { MakeupFontLoader } from "@/components/storefront/MakeupTemplateBlocks";
 import { PerfumesFontLoader } from "@/components/storefront/PerfumesTemplateBlocks";
+import { AiFontLoader } from "@/components/storefront/AiTemplateBlocks";
 
 function getTemplateFontLoader(type: string): React.ComponentType {
+  if (type.startsWith("ai")) return AiFontLoader;
   if (type.startsWith("electronics")) return ElectronicsFontLoader;
   if (type.startsWith("bakery")) return BakeryFontLoader;
   if (type.startsWith("cosmetics")) return CosmeticsFontLoader;
   if (type.startsWith("grocery")) return GroceryFontLoader;
   if (type.startsWith("health")) return HealthFontLoader;
+  if (type.startsWith("accessories")) return AccessoriesFontLoader;
   if (type.startsWith("interior")) return InteriorFontLoader;
   if (type.startsWith("kids")) return KidsFontLoader;
+  if (type.startsWith("toys")) return ToysFontLoader;
+  if (type.startsWith("gadget")) return LandingGadgetFontLoader;
   if (type.startsWith("makeup")) return MakeupFontLoader;
   if (type.startsWith("perfumes")) return PerfumesFontLoader;
   return FashionFontLoaderDirect;
@@ -40,6 +49,7 @@ export interface BuilderBlock {
   id: string;
   type: string;
   props: Record<string, unknown>;
+  styleOverrides?: Record<string, unknown>;
 }
 
 /* ─── ANIMATION HOOK ────────────────────────────────────────── */
@@ -1651,6 +1661,48 @@ interface StoreContextData {
 const StoreContext = createContext<StoreContextData>({ slug: "", products: [], currency: "NGN" });
 const StoreSlugContext = createContext<string>("");
 
+/* ─── DRAG AND DROP COMPONENTS ───────────────────────────────── */
+
+function DraggableBlock({ block, children, isEditorMode }: { block: BuilderBlock; children: React.ReactNode; isEditorMode?: boolean }) {
+  const { attributes, listeners, setNodeRef, transform, isDragging } = useDraggable({
+    id: block.id,
+    disabled: !isEditorMode,
+  });
+
+  const style = transform ? {
+    transform: `translate3d(${transform.x}px, ${transform.y}px, 0)`,
+    opacity: isDragging ? 0.5 : 1,
+  } : undefined;
+
+  return (
+    <div
+      ref={setNodeRef}
+      style={style}
+      className={`relative ${isEditorMode ? 'group' : ''}`}
+    >
+      {isEditorMode && (
+        <div
+          {...attributes}
+          {...listeners}
+          className="absolute left-0 top-1/2 -translate-y-1/2 -translate-x-full pr-2 cursor-grab active:cursor-grabbing opacity-0 group-hover:opacity-100 transition-opacity z-10"
+        >
+          <GripVertical className="h-5 w-5 text-surface-400 hover:text-surface-600" />
+        </div>
+      )}
+      {children}
+    </div>
+  );
+}
+
+function DroppableBlockList({ children, isEditorMode }: { children: React.ReactNode; isEditorMode?: boolean }) {
+  const { setNodeRef } = useDroppable({
+    id: "block-list",
+    disabled: !isEditorMode,
+  });
+
+  return <div ref={setNodeRef}>{children}</div>;
+}
+
 /* ─── PUBLIC API ────────────────────────────────────────────── */
 
 export function PublicBlockRenderer({ block }: { block: BuilderBlock; isEditorMode?: boolean }) {
@@ -1685,8 +1737,42 @@ export function RenderBlocks({ blocks, storeSlug, products, currency, addToCart,
   dataSource?: string;
   wrapBlock?: (block: BuilderBlock, content: React.ReactNode, index: number) => React.ReactNode;
 }) {
-  const content = (
-    <div className={isEditorMode ? "" : "space-y-8"}>
+  const handleDragEnd = (event: DragEndEvent) => {
+    const { active, over } = event;
+    if (!over || active.id === over.id) return;
+
+    const oldIndex = blocks.findIndex((b) => b.id === active.id);
+    const newIndex = blocks.findIndex((b) => b.id === over.id);
+
+    if (oldIndex === -1 || newIndex === -1) return;
+
+    // Send reorder message to parent
+    window.parent.postMessage({
+      type: "builder-block-reorder",
+      blockId: active.id as string,
+      oldIndex,
+      newIndex,
+    }, "*");
+  };
+
+  const content = isEditorMode ? (
+    <DndContext collisionDetection={closestCenter} onDragEnd={handleDragEnd}>
+      <DroppableBlockList isEditorMode={isEditorMode}>
+        <div className="space-y-8">
+          {blocks.map((block, index) => {
+            const node = <PublicBlockRenderer key={block.id} block={block} isEditorMode={isEditorMode} />;
+            const wrappedNode = wrapBlock ? wrapBlock(block, node, index) : node;
+            return (
+              <DraggableBlock key={block.id} block={block} isEditorMode={isEditorMode}>
+                {wrappedNode}
+              </DraggableBlock>
+            );
+          })}
+        </div>
+      </DroppableBlockList>
+    </DndContext>
+  ) : (
+    <div className="space-y-8">
       {blocks.map((block, index) => {
         const node = <PublicBlockRenderer key={block.id} block={block} isEditorMode={isEditorMode} />;
         if (wrapBlock) {
@@ -1697,10 +1783,19 @@ export function RenderBlocks({ blocks, storeSlug, products, currency, addToCart,
     </div>
   );
   const hasFashionBlocks = blocks.some((b) => b.type.startsWith("fashion"));
+  const hasElectronicsBlocks = blocks.some((b) => b.type.startsWith("electronics") || b.type.startsWith("tools") || b.type.startsWith("hardware"));
+  const hasInteriorBlocks = blocks.some((b) => b.type.startsWith("interior"));
+  const hasAccessoriesBlocks = blocks.some((b) => b.type.startsWith("accessories"));
+  const electronicsCtxValue = hasElectronicsBlocks ? { products: (products || []) as unknown as ElectronicsStoreContextData["products"], blogs: [], currency: currency || "NGN", storeSlug: storeSlug || "" } : null;
+  const interiorCtxValue = hasInteriorBlocks ? { products: (products || []) as unknown as InteriorStoreContextData["products"], blogs: [], currency: currency || "NGN", storeSlug: storeSlug || "" } : null;
+  const accessoriesCtxValue = hasAccessoriesBlocks ? { products: (products || []) as unknown as AccessoriesStoreContextData["products"], currency: currency || "NGN", storeSlug: storeSlug || "" } : null;
   const wrappedContent = storeSlug ? (
     <StoreSlugContext.Provider value={storeSlug}>
       <StoreContext.Provider value={{ slug: storeSlug || "", products: products || [], currency: currency || "NGN", addToCart, isWishlisted, toggleWishlist, addedToCart }}>
         <FashionStoreContext.Provider value={hasFashionBlocks ? { products: (products || []) as unknown as FashionStoreContextData["products"], blogs: [], currency: currency || "NGN", storeSlug: storeSlug || "" } : null as unknown as FashionStoreContextData}>
+        <ElectronicsStoreContext.Provider value={electronicsCtxValue as unknown as ElectronicsStoreContextData}>
+        <InteriorStoreContext.Provider value={interiorCtxValue as unknown as InteriorStoreContextData}>
+        <AccessoriesStoreContext.Provider value={accessoriesCtxValue as unknown as AccessoriesStoreContextData}>
         <div className="relative">
           {isEditorMode && (
             <div className="pointer-events-none sticky top-0 z-30 border-b border-brand-200 bg-brand-50/95 px-4 py-2 text-[10px] font-mono text-brand-800 backdrop-blur">
@@ -1714,6 +1809,9 @@ export function RenderBlocks({ blocks, storeSlug, products, currency, addToCart,
           )}
           {content}
         </div>
+        </AccessoriesStoreContext.Provider>
+        </InteriorStoreContext.Provider>
+        </ElectronicsStoreContext.Provider>
         </FashionStoreContext.Provider>
       </StoreContext.Provider>
     </StoreSlugContext.Provider>

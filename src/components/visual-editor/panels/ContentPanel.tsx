@@ -1,0 +1,503 @@
+"use client";
+
+import { ElementType } from "@/lib/visual-editor/types";
+
+interface ContentPanelProps {
+  element: any;
+  onUpdate: (updates: any) => void;
+}
+
+type PropPath = Array<string | number>;
+
+const labelize = (value: string) =>
+  value
+    .replace(/([a-z0-9])([A-Z])/g, "$1 $2")
+    .replace(/[_-]+/g, " ")
+    .replace(/\b\w/g, (letter) => letter.toUpperCase());
+
+const cloneValue = (value: any): any => {
+  if (Array.isArray(value)) return value.map(cloneValue);
+  if (value && typeof value === "object") {
+    return Object.fromEntries(Object.entries(value).map(([key, child]) => [key, cloneValue(child)]));
+  }
+  return value;
+};
+
+const createDefaultValue = (sample: any): any => {
+  if (Array.isArray(sample)) {
+    return sample.length > 0 ? [createDefaultValue(sample[0])] : [""];
+  }
+
+  if (sample && typeof sample === "object") {
+    return Object.fromEntries(
+      Object.entries(sample).map(([key, child]) => [key, createDefaultValue(child)])
+    );
+  }
+
+  switch (typeof sample) {
+    case "number":
+      return 0;
+    case "boolean":
+      return false;
+    default:
+      return "";
+  }
+};
+
+const updateValueAtPath = (root: any, path: PropPath, value: any): any => {
+  if (path.length === 0) return cloneValue(value);
+
+  const [head, ...rest] = path;
+  const nextRoot = Array.isArray(root) ? [...root] : { ...(root || {}) };
+  const currentValue = root?.[head as any];
+
+  nextRoot[head as any] = rest.length === 0
+    ? value
+    : updateValueAtPath(
+        currentValue ?? (typeof rest[0] === "number" ? [] : {}),
+        rest,
+        value
+      );
+
+  return nextRoot;
+};
+
+function TemplatePropEditor({
+  label,
+  value,
+  path,
+  onChange,
+  depth = 0,
+}: {
+  label: string;
+  value: any;
+  path: PropPath;
+  onChange: (path: PropPath, value: any) => void;
+  depth?: number;
+}) {
+  const wrapperClass = depth > 0 ? "pl-3 border-l border-gray-200 dark:border-gray-700" : "";
+  const displayLabel = labelize(label);
+
+  if (Array.isArray(value)) {
+    return (
+      <details open={depth === 0} className={`rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 ${wrapperClass}`}>
+        <summary className="cursor-pointer list-none px-3 py-2 text-xs font-medium text-gray-900 dark:text-white flex items-center justify-between gap-3">
+          <span>{displayLabel} <span className="text-gray-500 dark:text-gray-400">Array ({value.length} items)</span></span>
+        </summary>
+        <div className="px-3 pb-3 space-y-3">
+          {value.length === 0 && (
+            <div className="text-xs text-gray-500 dark:text-gray-400 italic">
+              No items yet. Add one to start editing.
+            </div>
+          )}
+          {value.map((item, index) => (
+            <div key={`${label}-${index}`} className="space-y-2 rounded-md bg-gray-50 dark:bg-gray-800/60 p-3">
+              <div className="flex items-center justify-between gap-2">
+                <div className="text-xs font-medium text-gray-700 dark:text-gray-300">
+                  Item {index + 1}
+                </div>
+                <button
+                  type="button"
+                  onClick={() => onChange(path, value.filter((_, itemIndex) => itemIndex !== index))}
+                  className="text-[11px] text-red-600 hover:text-red-700"
+                >
+                  Remove
+                </button>
+              </div>
+              <TemplatePropEditor
+                label={`${label}[${index}]`}
+                value={item}
+                path={[...path, index]}
+                onChange={onChange}
+                depth={depth + 1}
+              />
+            </div>
+          ))}
+          <button
+            type="button"
+            onClick={() => onChange(path, [...value, createDefaultValue(value[0])])}
+            className="inline-flex items-center gap-2 rounded-md border border-gray-300 dark:border-gray-600 px-3 py-2 text-xs font-medium text-gray-700 dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-gray-800"
+          >
+            Add item
+          </button>
+        </div>
+      </details>
+    );
+  }
+
+  if (value && typeof value === "object") {
+    const entries = Object.entries(value);
+
+    return (
+      <details open={depth === 0} className={`rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 ${wrapperClass}`}>
+        <summary className="cursor-pointer list-none px-3 py-2 text-xs font-medium text-gray-900 dark:text-white flex items-center justify-between gap-3">
+          <span>{displayLabel} <span className="text-gray-500 dark:text-gray-400">Object ({entries.length} properties)</span></span>
+        </summary>
+        <div className="px-3 pb-3 space-y-3">
+          {entries.length === 0 && (
+            <div className="text-xs text-gray-500 dark:text-gray-400 italic">
+              No properties available.
+            </div>
+          )}
+          {entries.map(([childKey, childValue]) => (
+            <TemplatePropEditor
+              key={`${label}.${childKey}`}
+              label={childKey}
+              value={childValue}
+              path={[...path, childKey]}
+              onChange={onChange}
+              depth={depth + 1}
+            />
+          ))}
+        </div>
+      </details>
+    );
+  }
+
+  const commonInputClass = "w-full px-3 py-2 text-sm border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500";
+  const isLongText = typeof value === "string" && (value.includes("\n") || value.length > 80);
+
+  return (
+    <div className={wrapperClass}>
+      <label className="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1.5 capitalize">
+        {displayLabel}
+      </label>
+      {typeof value === "boolean" ? (
+        <div className="flex items-center gap-2">
+          <input
+            type="checkbox"
+            checked={value}
+            onChange={(e) => onChange(path, e.target.checked)}
+            className="w-4 h-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
+          />
+          <span className="text-xs text-gray-500 dark:text-gray-400">Toggle value</span>
+        </div>
+      ) : typeof value === "number" ? (
+        <input
+          type="number"
+          value={value}
+          onChange={(e) => onChange(path, Number(e.target.value))}
+          className={commonInputClass}
+        />
+      ) : isLongText ? (
+        <textarea
+          value={value}
+          onChange={(e) => onChange(path, e.target.value)}
+          rows={4}
+          className={`${commonInputClass} resize-none`}
+        />
+      ) : (
+        <input
+          type="text"
+          value={value}
+          onChange={(e) => onChange(path, e.target.value)}
+          className={commonInputClass}
+          placeholder={keyHintFromLabel(displayLabel)}
+        />
+      )}
+    </div>
+  );
+}
+
+function keyHintFromLabel(label: string) {
+  const normalized = label.toLowerCase();
+  if (normalized.includes("url") || normalized.includes("src") || normalized.includes("href")) return "https://";
+  return "";
+}
+
+export default function ContentPanel({ element, onUpdate }: ContentPanelProps) {
+  const updateSetting = (key: string, value: any) => {
+    onUpdate({
+      settings: {
+        ...element.settings,
+        [key]: value,
+      },
+      content: {
+        ...element.content,
+        [key]: value,
+      },
+    });
+  };
+
+  const updateContent = (key: string, value: any) => {
+    onUpdate({
+      content: {
+        ...element.content,
+        [key]: value,
+      },
+    });
+  };
+
+  const updateProp = (key: string, value: any) => {
+    onUpdate({
+      content: {
+        ...element.content,
+        props: {
+          ...element.content?.props,
+          [key]: value,
+        },
+      },
+    });
+  };
+
+  // Check if this is a template block
+  const isTemplateBlock = element.content?.props && typeof element.content.props === 'object';
+  const props = element.content?.props || {};
+
+  return (
+    <div className="space-y-6">
+      {/* Heading-specific content */}
+      {element.type === "heading" && (
+        <div className="space-y-4">
+          <div>
+            <label className="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1.5">
+              Heading Text
+            </label>
+            <input
+              type="text"
+              value={element.content?.text || element.settings?.text || ""}
+              onChange={(e) => updateSetting("text", e.target.value)}
+              className="w-full px-3 py-2 text-sm border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
+            />
+          </div>
+          <div>
+            <label className="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1.5">
+              Heading Level
+            </label>
+            <select
+              value={element.content?.level || element.settings?.level || "h2"}
+              onChange={(e) => updateSetting("level", e.target.value)}
+              className="w-full px-3 py-2 text-sm border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
+            >
+              <option value="h1">H1</option>
+              <option value="h2">H2</option>
+              <option value="h3">H3</option>
+              <option value="h4">H4</option>
+              <option value="h5">H5</option>
+              <option value="h6">H6</option>
+            </select>
+          </div>
+          <div>
+            <label className="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1.5">
+              Alignment
+            </label>
+            <select
+              value={element.content?.align || element.settings?.align || "left"}
+              onChange={(e) => updateSetting("align", e.target.value)}
+              className="w-full px-3 py-2 text-sm border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
+            >
+              <option value="left">Left</option>
+              <option value="center">Center</option>
+              <option value="right">Right</option>
+              <option value="justify">Justify</option>
+            </select>
+          </div>
+        </div>
+      )}
+
+      {/* Paragraph/Text-specific content */}
+      {(element.type === "paragraph" || element.type === "text") && (
+        <div className="space-y-4">
+          <div>
+            <label className="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1.5">
+              Content
+            </label>
+            <textarea
+              value={element.content?.content || element.content?.text || element.settings?.content || ""}
+              onChange={(e) => updateSetting("content", e.target.value)}
+              rows={6}
+              className="w-full px-3 py-2 text-sm border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500 resize-none"
+            />
+          </div>
+          <div>
+            <label className="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1.5">
+              Alignment
+            </label>
+            <select
+              value={element.content?.align || element.settings?.align || "left"}
+              onChange={(e) => updateSetting("align", e.target.value)}
+              className="w-full px-3 py-2 text-sm border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
+            >
+              <option value="left">Left</option>
+              <option value="center">Center</option>
+              <option value="right">Right</option>
+              <option value="justify">Justify</option>
+            </select>
+          </div>
+        </div>
+      )}
+
+      {/* Button-specific content */}
+      {element.type === "button" && (
+        <div className="space-y-4">
+          <div>
+            <label className="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1.5">
+              Button Text
+            </label>
+            <input
+              type="text"
+              value={element.content?.text || element.settings?.text || ""}
+              onChange={(e) => updateSetting("text", e.target.value)}
+              className="w-full px-3 py-2 text-sm border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
+            />
+          </div>
+          <div>
+            <label className="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1.5">
+              Link URL
+            </label>
+            <input
+              type="text"
+              value={element.content?.link || element.settings?.link || ""}
+              onChange={(e) => updateSetting("link", e.target.value)}
+              className="w-full px-3 py-2 text-sm border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
+              placeholder="https://"
+            />
+          </div>
+          <div>
+            <label className="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1.5">
+              Button Style
+            </label>
+            <select
+              value={element.content?.variant || element.settings?.variant || "primary"}
+              onChange={(e) => updateSetting("variant", e.target.value)}
+              className="w-full px-3 py-2 text-sm border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
+            >
+              <option value="primary">Primary</option>
+              <option value="secondary">Secondary</option>
+              <option value="outline">Outline</option>
+              <option value="ghost">Ghost</option>
+            </select>
+          </div>
+          <div>
+            <label className="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1.5">
+              Size
+            </label>
+            <select
+              value={element.content?.size || element.settings?.size || "medium"}
+              onChange={(e) => updateSetting("size", e.target.value)}
+              className="w-full px-3 py-2 text-sm border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
+            >
+              <option value="small">Small</option>
+              <option value="medium">Medium</option>
+              <option value="large">Large</option>
+            </select>
+          </div>
+          <div className="flex items-center gap-2">
+            <input
+              type="checkbox"
+              id="fullWidth"
+              checked={element.content?.fullWidth || element.settings?.fullWidth || false}
+              onChange={(e) => updateSetting("fullWidth", e.target.checked)}
+              className="w-4 h-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
+            />
+            <label htmlFor="fullWidth" className="text-xs text-gray-700 dark:text-gray-300">
+              Full Width
+            </label>
+          </div>
+        </div>
+      )}
+
+      {/* Image-specific content */}
+      {element.type === "image" && (
+        <div className="space-y-4">
+          <div>
+            <label className="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1.5">
+              Image Preview
+            </label>
+            <div className="relative w-full h-40 bg-gray-100 dark:bg-gray-800 rounded-lg overflow-hidden border border-gray-200 dark:border-gray-700">
+              <img
+                src={element.content?.src || element.settings?.src || "https://via.placeholder.com/400x300"}
+                alt={element.content?.alt || element.settings?.alt || "Image"}
+                className="w-full h-full object-contain"
+              />
+            </div>
+          </div>
+          <div>
+            <label htmlFor="image-src" className="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1.5">
+              Image URL
+            </label>
+            <input
+              id="image-src"
+              name="image-src"
+              type="text"
+              value={element.content?.src || element.settings?.src || ""}
+              onChange={(e) => updateSetting("src", e.target.value)}
+              className="w-full px-3 py-2 text-sm border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
+              placeholder="https://"
+            />
+          </div>
+          <div>
+            <label htmlFor="image-alt" className="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1.5">
+              Alt Text
+            </label>
+            <input
+              id="image-alt"
+              name="image-alt"
+              type="text"
+              value={element.content?.alt || element.settings?.alt || ""}
+              onChange={(e) => updateSetting("alt", e.target.value)}
+              className="w-full px-3 py-2 text-sm border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
+            />
+          </div>
+          <div>
+            <label htmlFor="image-link" className="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1.5">
+              Link URL
+            </label>
+            <input
+              id="image-link"
+              name="image-link"
+              type="text"
+              value={element.content?.link || element.settings?.link || ""}
+              onChange={(e) => updateSetting("link", e.target.value)}
+              className="w-full px-3 py-2 text-sm border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
+              placeholder="https://"
+            />
+          </div>
+        </div>
+      )}
+
+      {/* Template block props editor */}
+      {isTemplateBlock && (
+        <div className="space-y-4">
+          <div className="text-xs font-medium text-gray-900 dark:text-white mb-3">
+            Block Properties ({Object.keys(props).length} properties)
+          </div>
+          {Object.keys(props).length === 0 ? (
+            <div className="text-xs text-gray-500 dark:text-gray-400">
+              This block has no editable properties yet.
+            </div>
+          ) : (
+            <div className="space-y-3">
+              {Object.entries(props).map(([key, value]) => (
+                <TemplatePropEditor
+                  key={key}
+                  label={key}
+                  value={value}
+                  path={["props", key]}
+                  onChange={(path, nextValue) => {
+                    const nextProps = updateValueAtPath(element.content?.props || {}, path.slice(1), nextValue);
+                    onUpdate({
+                      content: {
+                        ...element.content,
+                        props: nextProps,
+                      },
+                    });
+                  }}
+                />
+              ))}
+            </div>
+          )}
+        </div>
+      )}
+
+      {/* Default content for other types */}
+      {!["heading", "paragraph", "text", "button", "image"].includes(element.type) && !isTemplateBlock && (
+        <div className="text-center py-8">
+          <p className="text-xs text-gray-500 dark:text-gray-400">
+            Content settings for {element.type} coming soon...
+          </p>
+        </div>
+      )}
+    </div>
+  );
+}

@@ -16,13 +16,21 @@ export interface PageContentDocument {
   settings: PageSettings;
 }
 
+export interface BuilderBlock {
+  id: string;
+  type: string;
+  props: Record<string, unknown>;
+  styleOverrides?: Record<string, unknown>;
+}
+
 const EMPTY_PAGE_CONTENT: PageContentDocument = {
   blocks: [],
   settings: {},
 };
 
 function normalizeBlocks(value: unknown): BuilderBlock[] {
-  return Array.isArray(value) ? (value as BuilderBlock[]) : [];
+  if (!Array.isArray(value)) return [];
+  return value as BuilderBlock[];
 }
 
 function normalizeSettings(value: unknown): PageSettings {

@@ -14,6 +14,18 @@ import { AIFailover } from "@/lib/failover";
 import type { AIProviderConfig } from "@/lib/failover";
 import { AICapability } from "@/lib/failover";
 import type { BuilderBlock, BlockType } from "@/lib/builder/types";
+import { AI_TEMPLATE_PRESET } from "@/lib/templates/presets/ai-preset";
+import { detectIndustry, getRandomIndustryImages } from "@/lib/ai-image-pools";
+import { buildDynamicHomePage } from "@/lib/ai-layout-engine";
+
+/** Randomized image set for this store generation run */
+interface StoreImages {
+  hero: string;
+  about: string;
+  lifestyle: string;
+  showcase: string[];
+  banner: string;
+}
 
 // ─── Types ──────────────────────────────────────────────────
 
@@ -71,8 +83,8 @@ function getAIProviders(): AIProviderConfig[] {
     providers.push({
       provider: "google",
       apiKey: process.env.GOOGLE_AI_KEY,
-      model: "gemini-1.5-pro",
-      fallbackModels: ["gemini-1.5-flash"],
+      model: "gemini-2.0-flash",
+      fallbackModels: ["gemini-2.0-flash-lite"],
       capabilities: [AICapability.CHAT, AICapability.FUNCTION_CALLING],
     });
   }
@@ -111,7 +123,7 @@ function getAI(): AIFailover {
     }
     aiFailover = new AIFailover({
       providers,
-      priorityOrder: ["openai", "anthropic", "google", "groq", "groq_2", "groq_3", "groq_4", "deepseek"],
+      priorityOrder: ["groq", "groq_2", "groq_3", "groq_4", "google", "openai", "anthropic", "deepseek"],
       circuitBreaker: { failureThreshold: 3, recoveryTimeoutMs: 30_000 },
       healthCheckIntervalMs: 0,
       requestTimeoutMs: 90_000, // longer timeout for generation
@@ -133,8 +145,8 @@ function block(type: BlockType, props: Record<string, unknown>): BuilderBlock {
 // ─── Prompt ─────────────────────────────────────────────────
 
 function buildGenerationPrompt(input: StoreGeneratorInput): string {
-  const currency = input.currency || "NGN";
-  const country = input.country || "Nigeria";
+  const currency = input.currency || "GHS";
+  const country = input.country || "Ghana";
 
   return `You are a professional ecommerce website content writer for African businesses.
 
@@ -202,14 +214,38 @@ Return ONLY valid JSON with this exact structure:
     {"title": "feature/benefit 1", "desc": "short description"},
     {"title": "feature/benefit 2", "desc": "short description"},
     {"title": "feature/benefit 3", "desc": "short description"}
-  ]
+  ],
+  "layout": {
+    "sections": ["pick 6-10 from: hero-image, hero-minimal, hero-split, hero-bold, products, products-featured, products-compact, features, stats, testimonials, story, story-full, newsletter, trust, banner, gallery, contact, faq, values, team, countdown"],
+    "vibe": "one word describing the visual feel (e.g. bold, elegant, minimal, warm, playful, clean, luxurious, earthy)"
+  },
+  "stats": [
+    {"value": "e.g. 500+", "label": "e.g. Happy Clients"},
+    {"value": "e.g. 4.9", "label": "e.g. Customer Rating"},
+    {"value": "e.g. 24/7", "label": "e.g. Support"},
+    {"value": "e.g. 100%", "label": "e.g. Satisfaction"}
+  ],
+  "bannerCta": {
+    "title": "compelling CTA headline for a promotional banner",
+    "subtitle": "1 sentence supporting text",
+    "buttonText": "CTA button text (2-4 words)"
+  },
+  "newsletterCopy": {
+    "title": "newsletter signup heading",
+    "subtitle": "1 sentence encouraging signups"
+  },
+  "productSectionTitle": "title for the main product section (e.g. Our Menu, Featured Properties, New Arrivals)",
+  "productSectionSubtitle": "subtitle for the product section"
 }
 
 Rules:
-- Use real-sounding Nigerian/African names for testimonials
+- For layout.sections, pick 6-10 section names from the available list above. Order them how the homepage should flow. MUST start with a hero variant. Pick sections that make sense for this specific business type — a restaurant needs gallery and contact, a fashion store needs products-featured, a service business needs features and values, a church needs values and team, etc. Vary the combination — don't always use the same set.
+- stats: generate realistic, MODEST numbers appropriate for a new/growing business. Don't claim "10,000+ customers" for a startup. Be honest and aspirational.
+- bannerCta, newsletterCopy, productSectionTitle: tailor these to the specific business. A real estate site says "Featured Properties", not "Our Products". A restaurant says "Our Menu", not "Shop Now".
+- Use real-sounding African names for testimonials (${country}-appropriate)
 - Make FAQ answers specific to ${input.businessType} businesses
-- Shipping policy should mention Lagos, Abuja, and nationwide delivery
-- Payment section should reference bank transfer, card payment, and pay-on-delivery
+- Shipping/delivery policy should reference local delivery in ${country}
+- Payment section should reference local payment methods
 - Keep tone warm, confident, and trustworthy
 - NO placeholder brackets like [Your Name] — write real content
 - Return ONLY the JSON, no markdown fences, no explanation`;
@@ -228,123 +264,172 @@ function parseAIResponse(content: string): Record<string, any> {
 
 // ─── Build pages from AI content ────────────────────────────
 
-function buildHomePage(data: Record<string, any>, storeName: string, storeSlug: string): GeneratedPage {
+function buildHomePage(data: Record<string, any>, storeName: string, storeSlug: string, images: StoreImages, industry: string): GeneratedPage {
   const brand = data.brand || {};
-  const features = data.features || [];
-  const testimonials = data.testimonials || [];
 
-  const featureIcons = ["truck", "shield", "headphones", "zap", "heart", "award", "globe", "rocket"];
+  // Use the dynamic layout engine — AI decides section order
+  const dynamicBlocks = buildDynamicHomePage(data, storeName, storeSlug, industry, images);
 
-  const blocks: BuilderBlock[] = [
-    // Premium Hero
-    block("hero", {
-      heading: brand.heroHeading || `Welcome to ${storeName}`,
-      subheading: brand.heroSubheading || brand.tagline || "Discover amazing products",
-      buttonText: brand.ctaText || "Shop Now",
-      buttonHref: `/store/${storeSlug}/shop`,
-      secondaryButtonText: "Learn More",
-      secondaryButtonHref: `/store/${storeSlug}/about`,
-      badge: brand.tagline || `✨ Welcome to ${storeName}`,
-      bgStyle: "gradient",
-      align: "center",
-    }),
-    block("spacer", { height: 56 }),
-
-    // Stats
-    block("stats", {
-      bgColor: "brand",
-      items: [
-        { value: "1,000+", label: "Happy Customers", icon: "users" },
-        { value: "500+", label: "Products", icon: "package" },
-        { value: "4.9", label: "Customer Rating", icon: "star" },
-        { value: "24/7", label: "Support", icon: "headphones" },
-      ],
-    }),
-    block("spacer", { height: 56 }),
-
-    // Featured products
-    block("productGrid", {
-      title: "Our Products",
-      subtitle: "Handpicked just for you",
-      columns: 3,
-      limit: 6,
-      showPrice: true,
-      category: "",
-    }),
-    block("spacer", { height: 56 }),
-
-    // Features / Why choose us
-    block("features", {
-      title: "Why Choose Us",
-      subtitle: "Here's what makes us different",
-      bgColor: "surface",
-      items: features.length >= 3
-        ? features.slice(0, 4).map((f: any, i: number) => ({
-            icon: featureIcons[i % featureIcons.length],
-            title: f.title,
-            desc: f.desc,
-          }))
-        : [
-            { icon: "truck", title: "Fast Delivery", desc: "Swift delivery across Nigeria" },
-            { icon: "shield", title: "Secure Payments", desc: "Pay with card, bank transfer, or on delivery" },
-            { icon: "headphones", title: "24/7 Support", desc: "Reach us anytime on WhatsApp" },
-            { icon: "refresh", title: "Easy Returns", desc: "Hassle-free returns within 7 days" },
-          ],
-    }),
-    block("spacer", { height: 56 }),
-  ];
-
-  // Testimonials grid (not individual cards)
-  if (testimonials.length > 0) {
-    blocks.push(
-      block("testimonials", {
-        title: "What Our Customers Say",
-        subtitle: "Real reviews from real customers",
-        bgColor: "transparent",
-        items: testimonials.slice(0, 3).map((t: any) => ({
-          name: t.name,
-          role: t.role || "Verified Buyer",
-          text: t.text,
-          rating: 5,
-        })),
-      })
-    );
-    blocks.push(block("spacer", { height: 56 }));
+  if (dynamicBlocks.length > 0) {
+    return {
+      title: "Home",
+      slug: "home",
+      type: "HOME",
+      blocks: dynamicBlocks,
+      metaTitle: data.seo?.homeTitle || `${storeName} — Official Store`,
+      metaDescription: data.seo?.homeDesc || brand.heroSubheading || "",
+    };
   }
 
-  // Newsletter
-  blocks.push(
-    block("newsletter", {
-      title: "Stay Updated",
-      subtitle: "Get the latest offers and new arrivals straight to your inbox.",
-      bgColor: "brand",
-    })
-  );
-  blocks.push(block("spacer", { height: 40 }));
+  // Fallback: use the Allbirds-inspired AI template preset
+  const features = data.features || [];
 
-  // Trust badges
-  blocks.push(
-    block("trustBadges", {
-      items: [
-        { icon: "shield", label: "Secure Checkout" },
-        { icon: "truck", label: "Nationwide Delivery" },
-        { icon: "refresh", label: "Easy Returns" },
-        { icon: "headphones", label: "WhatsApp Support" },
-      ],
-    })
-  );
+  // Use the Allbirds-inspired AI template preset as the base
+  // Deep clone so we can inject AI-generated content
+  const templateBlocks = JSON.parse(JSON.stringify(AI_TEMPLATE_PRESET));
+
+  // Inject AI-generated content into the template blocks
+  for (const block of templateBlocks) {
+    switch (block.type) {
+      case "aiAnnouncementBar": {
+        // Use AI-generated features as marquee messages
+        const messages = [
+          brand.tagline || `Welcome to ${storeName}`,
+          ...(features.slice(0, 3).map((f: any) => f.title || f.desc)),
+        ].filter(Boolean);
+        if (messages.length > 0) block.props.messages = messages;
+        break;
+      }
+      case "aiHeroVideo": {
+        // Update hero buttons with store-specific links
+        block.props.buttons = [
+          { text: brand.ctaText || "Shop Now", link: `/store/${storeSlug}/shop`, style: "primary" },
+          { text: "Learn More", link: `/store/${storeSlug}/about`, style: "primary" },
+        ];
+        break;
+      }
+      case "aiCategoryRow": {
+        // Update category card links to store-specific paths
+        for (const card of block.props.cards) {
+          for (const btn of card.buttons) {
+            if (btn.link.startsWith("/collections")) {
+              btn.link = `/store/${storeSlug}/shop`;
+            }
+          }
+        }
+        break;
+      }
+      case "aiLargeProductCarousel": {
+        // Update product links
+        for (const tab of block.props.tabs) {
+          for (const product of tab.products) {
+            if (product.mensLink) product.mensLink = `/store/${storeSlug}/shop`;
+            if (product.womensLink) product.womensLink = `/store/${storeSlug}/shop`;
+            if (product.link) product.link = `/store/${storeSlug}/shop`;
+          }
+        }
+        break;
+      }
+      case "aiPromoTiles": {
+        // Update tile links
+        for (const tile of block.props.tiles) {
+          for (const btn of tile.buttons) {
+            if (btn.link.startsWith("/collections")) {
+              btn.link = `/store/${storeSlug}/shop`;
+            }
+          }
+        }
+        break;
+      }
+      case "aiProductCarousel": {
+        // Update product card links
+        for (const tab of block.props.tabs) {
+          for (const product of tab.products) {
+            if (product.link) product.link = `/store/${storeSlug}/shop`;
+          }
+        }
+        break;
+      }
+      case "aiValueProps": {
+        // Inject AI-generated features into value props
+        if (features.length >= 3) {
+          block.props.props = features.slice(0, 3).map((f: any) => ({
+            title: f.title,
+            description: f.desc,
+          }));
+        }
+        break;
+      }
+      case "aiFooter": {
+        // Update footer links and copyright
+        block.props.copyrightText = `© ${new Date().getFullYear()} ${storeName}. All rights reserved.`;
+        for (const col of block.props.columns) {
+          for (const link of col.links) {
+            if (link.link.startsWith("/collections") || link.link === "/gift-cards") {
+              link.link = `/store/${storeSlug}/shop`;
+            } else if (link.link.startsWith("/")) {
+              link.link = `/store/${storeSlug}${link.link}`;
+            }
+          }
+        }
+        break;
+      }
+    }
+  }
+
+  // Inject industry-specific images into blocks that have image props
+  for (const block of templateBlocks) {
+    // Replace hero/video background images
+    if (block.type === "aiHeroVideo" && block.props) {
+      if (block.props.backgroundImage || block.props.videoUrl) {
+        block.props.backgroundImage = images.hero;
+      }
+    }
+    // Replace product carousel images with industry-matched ones
+    if ((block.type === "aiLargeProductCarousel" || block.type === "aiProductCarousel") && block.props?.tabs) {
+      let imgIdx = 0;
+      for (const tab of block.props.tabs) {
+        for (const product of tab.products) {
+          if (product.image) {
+            product.image = images.showcase[imgIdx % images.showcase.length];
+            imgIdx++;
+          }
+        }
+      }
+    }
+    // Replace category card images
+    if (block.type === "aiCategoryRow" && block.props?.cards) {
+      let imgIdx = 0;
+      for (const card of block.props.cards) {
+        if (card.image) {
+          card.image = images.showcase[imgIdx % images.showcase.length];
+          imgIdx++;
+        }
+      }
+    }
+    // Replace promo tile images
+    if (block.type === "aiPromoTiles" && block.props?.tiles) {
+      let imgIdx = 0;
+      for (const tile of block.props.tiles) {
+        if (tile.image) {
+          tile.image = images.showcase[imgIdx % images.showcase.length];
+          imgIdx++;
+        }
+      }
+    }
+  }
 
   return {
     title: "Home",
     slug: "home",
     type: "HOME",
-    blocks,
+    blocks: templateBlocks as unknown as BuilderBlock[],
     metaTitle: data.seo?.homeTitle || `${storeName} — Official Store`,
     metaDescription: data.seo?.homeDesc || brand.heroSubheading || "",
   };
 }
 
-function buildAboutPage(data: Record<string, any>, storeName: string, storeSlug: string): GeneratedPage {
+function buildAboutPage(data: Record<string, any>, storeName: string, storeSlug: string, images: StoreImages): GeneratedPage {
   const about = data.about || {};
   const testimonials = data.testimonials || [];
   const valueIcons = ["heart", "award", "globe", "shield", "target", "rocket"];
@@ -369,6 +454,8 @@ function buildAboutPage(data: Record<string, any>, storeName: string, storeSlug:
       badge: "Our Story",
       title: `Why ${storeName}?`,
       text: firstHalf,
+      image: images.about,
+      imageAlt: `${storeName} - Our Story`,
       reverse: false,
       buttonText: "",
     }),
@@ -382,6 +469,8 @@ function buildAboutPage(data: Record<string, any>, storeName: string, storeSlug:
         badge: "Our Mission",
         title: "What Drives Us",
         text: secondHalf,
+        image: images.lifestyle,
+        imageAlt: `${storeName} - Our Mission`,
         reverse: true,
         buttonText: "",
       })
@@ -524,9 +613,9 @@ function buildContactPage(data: Record<string, any>, storeName: string): Generat
       title: "Contact Information",
       items: [
         { icon: "mail", title: "Email", value: "hello@example.com" },
-        { icon: "phone", title: "Phone", value: "+234 800 000 0000" },
+        { icon: "phone", title: "Phone", value: "+233 XX XXX XXXX" },
         { icon: "message", title: "WhatsApp", value: "Quick chat support" },
-        { icon: "map-pin", title: "Address", value: "Lagos, Nigeria" },
+        { icon: "map-pin", title: "Address", value: "Accra, Ghana" },
       ],
       hours: "Monday - Saturday, 9:00 AM - 6:00 PM",
     }),
@@ -578,7 +667,7 @@ function buildPoliciesPage(data: Record<string, any>, storeName: string): Genera
     }),
     block("spacer", { height: 8 }),
     block("text", {
-      text: policies.shipping || "We deliver nationwide. Orders within Lagos are delivered in 1-2 business days. Other states take 3-5 business days.",
+      text: policies.shipping || "We deliver nationwide. Orders within Accra are delivered in 1-2 business days. Other regions take 3-5 business days.",
       align: "left",
       color: "#525252",
       fontSize: "base",
@@ -679,10 +768,14 @@ export async function generateStore(input: StoreGeneratorInput): Promise<StoreGe
     throw new Error("AI returned invalid content. Please try again.");
   }
 
-  // 3. Build pages from the generated content
+  // 3. Detect industry and get randomized images
+  const industry = detectIndustry(input.businessType, input.description);
+  const images = getRandomIndustryImages(industry);
+
+  // 4. Build pages from the generated content with industry-matched images
   const pages: GeneratedPage[] = [
-    buildHomePage(data, input.storeName, input.storeSlug),
-    buildAboutPage(data, input.storeName, input.storeSlug),
+    buildHomePage(data, input.storeName, input.storeSlug, images, industry),
+    buildAboutPage(data, input.storeName, input.storeSlug, images),
     buildFAQPage(data, input.storeName, input.storeSlug),
     buildContactPage(data, input.storeName),
     buildPoliciesPage(data, input.storeName),

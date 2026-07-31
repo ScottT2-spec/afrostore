@@ -311,22 +311,23 @@ export interface FashionSectionTitleProps {
   align?: "left" | "center" | "right";
   maxWidth?: string;
   titleColor?: "primary" | "white";
+  resolvedStyles?: React.CSSProperties;
 }
 
-export function FashionSectionTitle({ subtitle, title, description, align = "center", maxWidth = "40%", titleColor = "primary" }: FashionSectionTitleProps) {
+export function FashionSectionTitle({ subtitle, title, description, align = "center", maxWidth = "40%", titleColor = "primary", resolvedStyles }: FashionSectionTitleProps) {
   const scopedCss = `
     .fst-wrapper { margin-bottom: 25px; }
-    .fst-subtitle { 
+    .fst-subtitle {
       color: ${TOKENS.primaryColor}; text-transform: uppercase; font-weight: 700;
       font-size: 14px; font-family: ${TOKENS.bodyFont}; margin-bottom: 8px;
     }
-    .fst-title { 
+    .fst-title {
       font-family: ${TOKENS.titleFont}; font-weight: 700; font-size: 36px;
       text-transform: uppercase; margin: 0 0 15px; line-height: 1.2;
     }
     .fst-title-primary { color: ${TOKENS.titleColor}; }
     .fst-title-white { color: #ffffff; }
-    .fst-desc { 
+    .fst-desc {
       font-family: ${TOKENS.bodyFont}; font-size: 16px; color: ${TOKENS.textColor};
       line-height: 1.6; margin: 0;
     }
@@ -341,8 +342,14 @@ export function FashionSectionTitle({ subtitle, title, description, align = "cen
     }
   `;
 
+  // Merge resolved styles with default styles
+  const wrapperStyle: React.CSSProperties = {
+    textAlign: align as React.CSSProperties["textAlign"],
+    ...resolvedStyles,
+  };
+
   return (
-    <div className="fst-wrapper" style={{ textAlign: align as React.CSSProperties["textAlign"] }}>
+    <div className="fst-wrapper" style={wrapperStyle}>
       <ScopedStyles id="section-title" css={scopedCss} />
       <div className="fst-inner" style={{ maxWidth, margin: align === "center" ? "0 auto" : undefined, display: "inline-block", width: "100%" }}>
         {subtitle && <div className="fst-subtitle">{subtitle}</div>}
@@ -1545,6 +1552,7 @@ export interface FashionCoverBannersProps {
   columns?: number;
   height?: string;
   marginBottom?: string;
+  resolvedStyles?: React.CSSProperties;
 }
 
 export function FashionCoverBanners({
@@ -1552,6 +1560,7 @@ export function FashionCoverBanners({
   columns = 3,
   height = "580px",
   marginBottom = "60px",
+  resolvedStyles,
 }: FashionCoverBannersProps) {
   const scopedCss = `
     .fcb-wrap { margin-bottom: ${marginBottom}; }
@@ -1595,7 +1604,7 @@ export function FashionCoverBanners({
   `;
 
   return (
-    <div className="fcb-wrap">
+    <div className="fcb-wrap" style={resolvedStyles}>
       <ScopedStyles id="cover-banners" css={scopedCss} />
       <div className="fcb-grid">
         {banners.map((b, i) => (
@@ -1968,5 +1977,656 @@ export function FashionFooter({
         )}
       </div>
     </footer>
+  );
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   14. FASHION ABOUT CONTENT
+   Flexible text block with headings, paragraphs, CTAs.
+   Used for About Us long-form sections.
+   ═══════════════════════════════════════════════════════════════ */
+
+export interface FashionAboutContentButton {
+  text: string;
+  link: string;
+}
+
+export interface FashionAboutContentProps {
+  layout: "text-with-heading" | "ctas-only";
+  subtitle?: string;
+  title?: string;
+  paragraphs?: string[];
+  buttons?: FashionAboutContentButton[];
+  credit?: string;
+  resolvedStyles?: React.CSSProperties;
+}
+
+export function FashionAboutContent({ layout, subtitle, title, paragraphs = [], buttons = [], credit, resolvedStyles }: FashionAboutContentProps) {
+  const storeCtx = useContext(FashionStoreContext);
+  const fixLink = (link: string) => resolveStoreLink(link, storeCtx?.storeSlug);
+  const scopedCss = `
+    .fac-section { padding: 40px 15px; }
+    .fac-subtitle { color: ${TOKENS.primaryColor}; text-transform: uppercase; font-weight: 700; font-size: 14px; font-family: ${TOKENS.bodyFont}; margin-bottom: 8px; }
+    .fac-title { font-family: ${TOKENS.titleFont}; font-weight: 700; font-size: 30px; text-transform: uppercase; color: ${TOKENS.titleColor}; margin: 0 0 20px; line-height: 1.2; }
+    .fac-paragraph { font-family: ${TOKENS.bodyFont}; font-size: 16px; color: ${TOKENS.textColor}; line-height: 1.8; margin: 0 0 16px; }
+    .fac-credit { font-family: ${TOKENS.bodyFont}; font-size: 14px; color: ${TOKENS.textColor}; font-style: italic; margin-top: 20px; }
+    .fac-buttons { display: flex; gap: 16px; margin-top: 24px; flex-wrap: wrap; }
+    .fac-btn { display: inline-block; padding: 12px 28px; font-family: ${TOKENS.bodyFont}; font-size: 13px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; text-decoration: none; transition: all 0.3s; }
+    .fac-btn-primary { background: ${TOKENS.titleColor}; color: #fff; }
+    .fac-btn-primary:hover { opacity: 0.85; }
+    .fac-btn-secondary { background: transparent; color: ${TOKENS.titleColor}; border: 2px solid ${TOKENS.titleColor}; }
+    .fac-btn-secondary:hover { background: ${TOKENS.titleColor}; color: #fff; }
+    .fac-ctas-center { text-align: center; padding: 20px 15px 40px; }
+  `;
+
+  if (layout === "ctas-only") {
+    return (
+      <div className="fac-ctas-center" style={resolvedStyles}>
+        <ScopedStyles id="about-content" css={scopedCss} />
+        <div className="fac-buttons" style={{ justifyContent: "center" }}>
+          {buttons.map((btn, i) => (
+            <Link key={i} href={fixLink(btn.link)} className={`fac-btn ${i === 0 ? "fac-btn-primary" : "fac-btn-secondary"}`}>
+              {btn.text}
+            </Link>
+          ))}
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    <section className="fac-section" style={resolvedStyles}>
+      <ScopedStyles id="about-content" css={scopedCss} />
+      <div style={containerStyle}>
+        {subtitle && <div className="fac-subtitle">{subtitle}</div>}
+        {title && <h3 className="fac-title">{title}</h3>}
+        {paragraphs.map((p, i) => (
+          <p key={i} className="fac-paragraph">{p}</p>
+        ))}
+        {credit && <p className="fac-credit">{credit}</p>}
+        {buttons.length > 0 && (
+          <div className="fac-buttons">
+            {buttons.map((btn, i) => (
+              <Link key={i} href={fixLink(btn.link)} className={`fac-btn ${i === 0 ? "fac-btn-primary" : "fac-btn-secondary"}`}>
+                {btn.text}
+              </Link>
+            ))}
+          </div>
+        )}
+      </div>
+    </section>
+  );
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   15. FASHION STATS COUNTERS
+   Animated number counters row.
+   ═══════════════════════════════════════════════════════════════ */
+
+export interface FashionStatsCounter {
+  value: number;
+  label: string;
+}
+
+export interface FashionStatsCountersProps {
+  counters: FashionStatsCounter[];
+  resolvedStyles?: React.CSSProperties;
+}
+
+export function FashionStatsCounters({ counters, resolvedStyles }: FashionStatsCountersProps) {
+  const { ref, inView } = useInView(0.3);
+  const [displayed, setDisplayed] = useState<number[]>(counters.map(() => 0));
+
+  useEffect(() => {
+    if (!inView) return;
+    const duration = 2000;
+    const steps = 60;
+    const interval = duration / steps;
+    let step = 0;
+    const timer = setInterval(() => {
+      step++;
+      const progress = step / steps;
+      setDisplayed(counters.map(c => Math.round(c.value * Math.min(progress, 1))));
+      if (step >= steps) clearInterval(timer);
+    }, interval);
+    return () => clearInterval(timer);
+  }, [inView, counters]);
+
+  const scopedCss = `
+    .fsc-section { padding: 50px 15px; background: #f7f7f7; }
+    .fsc-grid { display: grid; grid-template-columns: repeat(${counters.length}, 1fr); gap: 30px; text-align: center; }
+    .fsc-value { font-family: ${TOKENS.titleFont}; font-size: 48px; font-weight: 700; color: ${TOKENS.titleColor}; line-height: 1; margin-bottom: 8px; }
+    .fsc-label { font-family: ${TOKENS.bodyFont}; font-size: 13px; font-weight: 700; text-transform: uppercase; letter-spacing: 1px; color: ${TOKENS.textColor}; }
+    @media (max-width: 767px) {
+      .fsc-grid { grid-template-columns: repeat(2, 1fr); }
+      .fsc-value { font-size: 36px; }
+    }
+  `;
+
+  return (
+    <section className="fsc-section" ref={ref} style={resolvedStyles}>
+      <ScopedStyles id="stats-counters" css={scopedCss} />
+      <div style={containerStyle}>
+        <div className="fsc-grid">
+          {counters.map((c, i) => (
+            <div key={i}>
+              <div className="fsc-value">{displayed[i]}</div>
+              <div className="fsc-label">{c.label}</div>
+            </div>
+          ))}
+        </div>
+      </div>
+    </section>
+  );
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   16. FASHION SERVICES GRID
+   Icon + title + description cards in a grid.
+   ═══════════════════════════════════════════════════════════════ */
+
+export interface FashionService {
+  icon: string;
+  title: string;
+  description: string;
+}
+
+export interface FashionServicesGridProps {
+  subtitle?: string;
+  title?: string;
+  services: FashionService[];
+  resolvedStyles?: React.CSSProperties;
+}
+
+export function FashionServicesGrid({ subtitle, title, services, resolvedStyles }: FashionServicesGridProps) {
+  const scopedCss = `
+    .fsg-section { padding: 60px 15px; }
+    .fsg-header { text-align: center; margin-bottom: 40px; }
+    .fsg-subtitle { color: ${TOKENS.primaryColor}; text-transform: uppercase; font-weight: 700; font-size: 14px; font-family: ${TOKENS.bodyFont}; margin-bottom: 8px; }
+    .fsg-title { font-family: ${TOKENS.titleFont}; font-weight: 700; font-size: 30px; text-transform: uppercase; color: ${TOKENS.titleColor}; margin: 0; line-height: 1.2; }
+    .fsg-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 30px; }
+    .fsg-card { text-align: center; }
+    .fsg-icon { width: 70px; height: 70px; margin: 0 auto 16px; }
+    .fsg-card-title { font-family: ${TOKENS.titleFont}; font-weight: 700; font-size: 16px; text-transform: uppercase; color: ${TOKENS.titleColor}; margin: 0 0 8px; }
+    .fsg-card-desc { font-family: ${TOKENS.bodyFont}; font-size: 14px; color: ${TOKENS.textColor}; line-height: 1.6; margin: 0; }
+    @media (max-width: 767px) {
+      .fsg-grid { grid-template-columns: repeat(2, 1fr); }
+    }
+  `;
+
+  return (
+    <section className="fsg-section" style={resolvedStyles}>
+      <ScopedStyles id="services-grid" css={scopedCss} />
+      <div style={containerStyle}>
+        {(subtitle || title) && (
+          <div className="fsg-header">
+            {subtitle && <div className="fsg-subtitle">{subtitle}</div>}
+            {title && <h3 className="fsg-title">{title}</h3>}
+          </div>
+        )}
+        <div className="fsg-grid">
+          {services.map((s, i) => (
+            <div key={i} className="fsg-card">
+              <img src={s.icon} alt={s.title} className="fsg-icon" loading="lazy" />
+              <h4 className="fsg-card-title">{s.title}</h4>
+              <p className="fsg-card-desc">{s.description}</p>
+            </div>
+          ))}
+        </div>
+      </div>
+    </section>
+  );
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   17. FASHION GALLERY GRID
+   Simple image gallery, lightbox-style.
+   ═══════════════════════════════════════════════════════════════ */
+
+export interface FashionGalleryGridProps {
+  images: string[];
+  columns?: number;
+  resolvedStyles?: React.CSSProperties;
+}
+
+export function FashionGalleryGrid({ images, columns = 2, resolvedStyles }: FashionGalleryGridProps) {
+  const scopedCss = `
+    .fgg-section { padding: 40px 15px; }
+    .fgg-grid { display: grid; grid-template-columns: repeat(${columns}, 1fr); gap: 20px; }
+    .fgg-img { width: 100%; height: auto; display: block; border-radius: 0; cursor: pointer; transition: opacity 0.3s; }
+    .fgg-img:hover { opacity: 0.85; }
+    @media (max-width: 767px) {
+      .fgg-grid { grid-template-columns: 1fr; }
+    }
+  `;
+
+  return (
+    <section className="fgg-section" style={resolvedStyles}>
+      <ScopedStyles id="gallery-grid" css={scopedCss} />
+      <div style={containerStyle}>
+        <div className="fgg-grid">
+          {images.map((src, i) => (
+            <img key={i} src={src} alt={`Gallery image ${i + 1}`} className="fgg-img" loading="lazy" />
+          ))}
+        </div>
+      </div>
+    </section>
+  );
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   18. FASHION VIDEO SECTION
+   Video thumbnails with play buttons and optional header.
+   ═══════════════════════════════════════════════════════════════ */
+
+export interface FashionVideo {
+  thumbnail: string;
+  youtubeUrl: string;
+  title: string;
+}
+
+export interface FashionVideoSectionProps {
+  subtitle?: string;
+  title?: string;
+  description?: string;
+  videos: FashionVideo[];
+  resolvedStyles?: React.CSSProperties;
+}
+
+export function FashionVideoSection({ subtitle, title, description, videos, resolvedStyles }: FashionVideoSectionProps) {
+  const [playingIdx, setPlayingIdx] = useState<number | null>(null);
+
+  const getEmbedUrl = (url: string) => {
+    const match = url.match(/(?:watch\?v=|youtu\.be\/)([^&?]+)/);
+    return match ? `https://www.youtube.com/embed/${match[1]}?autoplay=1` : url;
+  };
+
+  const scopedCss = `
+    .fvs-section { padding: 60px 15px; }
+    .fvs-header { text-align: center; margin-bottom: 40px; max-width: 60%; margin-left: auto; margin-right: auto; }
+    .fvs-subtitle { color: ${TOKENS.primaryColor}; text-transform: uppercase; font-weight: 700; font-size: 12px; font-family: ${TOKENS.bodyFont}; margin-bottom: 8px; letter-spacing: 2px; }
+    .fvs-title { font-family: ${TOKENS.titleFont}; font-weight: 700; font-size: 30px; text-transform: uppercase; color: ${TOKENS.titleColor}; margin: 0 0 12px; line-height: 1.2; }
+    .fvs-desc { font-family: ${TOKENS.bodyFont}; font-size: 16px; color: ${TOKENS.textColor}; line-height: 1.6; margin: 0; }
+    .fvs-grid { display: grid; grid-template-columns: repeat(${videos.length}, 1fr); gap: 30px; }
+    .fvs-card { position: relative; overflow: hidden; cursor: pointer; }
+    .fvs-thumb { width: 100%; height: auto; display: block; }
+    .fvs-play { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); width: 60px; height: 60px; background: rgba(0,0,0,0.6); border-radius: 50%; display: flex; align-items: center; justify-content: center; transition: background 0.3s; }
+    .fvs-card:hover .fvs-play { background: rgba(0,0,0,0.8); }
+    .fvs-play-arrow { width: 0; height: 0; border-style: solid; border-width: 10px 0 10px 18px; border-color: transparent transparent transparent #fff; margin-left: 4px; }
+    .fvs-card-title { font-family: ${TOKENS.titleFont}; font-weight: 700; font-size: 18px; color: ${TOKENS.titleColor}; margin: 12px 0 4px; }
+    .fvs-show-more { font-family: ${TOKENS.bodyFont}; font-size: 14px; color: ${TOKENS.textColor}; }
+    .fvs-iframe { width: 100%; aspect-ratio: 16/9; border: none; }
+    @media (max-width: 767px) {
+      .fvs-grid { grid-template-columns: 1fr; }
+    }
+  `;
+
+  return (
+    <section className="fvs-section" style={resolvedStyles}>
+      <ScopedStyles id="video-section" css={scopedCss} />
+      <div style={containerStyle}>
+        {(subtitle || title) && (
+          <div className="fvs-header">
+            {subtitle && <div className="fvs-subtitle">{subtitle}</div>}
+            {title && <h3 className="fvs-title">{title}</h3>}
+            {description && <p className="fvs-desc">{description}</p>}
+          </div>
+        )}
+        <div className="fvs-grid">
+          {videos.map((v, i) => (
+            <div key={i}>
+              <div className="fvs-card" onClick={() => setPlayingIdx(i)}>
+                {playingIdx === i ? (
+                  <iframe className="fvs-iframe" src={getEmbedUrl(v.youtubeUrl)} allow="autoplay; encrypted-media" allowFullScreen />
+                ) : (
+                  <>
+                    <img src={v.thumbnail} alt={v.title} className="fvs-thumb" loading="lazy" />
+                    <div className="fvs-play"><div className="fvs-play-arrow" /></div>
+                  </>
+                )}
+              </div>
+              <h4 className="fvs-card-title">{v.title}</h4>
+              <span className="fvs-show-more">Show more</span>
+            </div>
+          ))}
+        </div>
+      </div>
+    </section>
+  );
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   19. FASHION QUOTE SECTION
+   Blockquote with attribution.
+   ═══════════════════════════════════════════════════════════════ */
+
+export interface FashionQuoteSectionProps {
+  subtitle?: string;
+  quote: string;
+  attribution: string;
+  description?: string;
+  credit?: string;
+  resolvedStyles?: React.CSSProperties;
+}
+
+export function FashionQuoteSection({ subtitle, quote, attribution, description, credit, resolvedStyles }: FashionQuoteSectionProps) {
+  const scopedCss = `
+    .fqs-section { padding: 60px 15px; text-align: center; }
+    .fqs-subtitle { color: ${TOKENS.primaryColor}; text-transform: uppercase; font-weight: 700; font-size: 14px; font-family: ${TOKENS.bodyFont}; margin-bottom: 16px; }
+    .fqs-quote { font-family: ${TOKENS.titleFont}; font-weight: 700; font-size: 28px; color: ${TOKENS.titleColor}; line-height: 1.3; margin: 0 auto 8px; max-width: 70%; }
+    .fqs-attribution { font-family: ${TOKENS.bodyFont}; font-size: 14px; color: ${TOKENS.textColor}; margin-bottom: 24px; }
+    .fqs-desc { font-family: ${TOKENS.bodyFont}; font-size: 16px; color: ${TOKENS.textColor}; line-height: 1.8; max-width: 60%; margin: 0 auto 16px; }
+    .fqs-credit { font-family: ${TOKENS.bodyFont}; font-size: 14px; color: ${TOKENS.textColor}; font-style: italic; }
+    @media (max-width: 767px) {
+      .fqs-quote { font-size: 22px; max-width: 90%; }
+      .fqs-desc { max-width: 90%; }
+    }
+  `;
+
+  return (
+    <section className="fqs-section" style={resolvedStyles}>
+      <ScopedStyles id="quote-section" css={scopedCss} />
+      <div style={containerStyle}>
+        {subtitle && <div className="fqs-subtitle">{subtitle}</div>}
+        <blockquote className="fqs-quote">&lsquo;&lsquo;{quote}&rsquo;&rsquo;</blockquote>
+        <p className="fqs-attribution">&mdash; {attribution}</p>
+        {description && <p className="fqs-desc">{description}</p>}
+        {credit && <p className="fqs-credit">{credit}</p>}
+      </div>
+    </section>
+  );
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   20. FASHION TEAM SECTION
+   Team member cards with photos and social links.
+   ═══════════════════════════════════════════════════════════════ */
+
+export interface FashionTeamMember {
+  name: string;
+  role: string;
+  image: string;
+  socials?: string[];
+}
+
+export interface FashionTeamSectionProps {
+  members: FashionTeamMember[];
+  resolvedStyles?: React.CSSProperties;
+}
+
+export function FashionTeamSection({ members, resolvedStyles }: FashionTeamSectionProps) {
+  const socialIcons: Record<string, string> = {
+    facebook: "f",
+    twitter: "\ud835\udd4F",
+    instagram: "\ud83d\udcf7",
+    linkedin: "in",
+  };
+
+  const scopedCss = `
+    .fts-section { padding: 60px 15px; }
+    .fts-grid { display: grid; grid-template-columns: repeat(${members.length}, 1fr); gap: 30px; }
+    .fts-card { text-align: center; }
+    .fts-img { width: 100%; height: auto; display: block; margin-bottom: 20px; }
+    .fts-name { font-family: ${TOKENS.titleFont}; font-weight: 700; font-size: 16px; text-transform: uppercase; color: ${TOKENS.titleColor}; margin: 0 0 4px; }
+    .fts-role { font-family: ${TOKENS.bodyFont}; font-size: 13px; color: ${TOKENS.textColor}; text-transform: uppercase; letter-spacing: 1px; margin: 0 0 12px; }
+    .fts-socials { display: flex; gap: 10px; justify-content: center; }
+    .fts-social-link { width: 36px; height: 36px; border-radius: 50%; background: #f7f7f7; display: flex; align-items: center; justify-content: center; text-decoration: none; color: ${TOKENS.titleColor}; font-size: 14px; font-weight: 700; transition: all 0.3s; }
+    .fts-social-link:hover { background: ${TOKENS.titleColor}; color: #fff; }
+    @media (max-width: 767px) {
+      .fts-grid { grid-template-columns: repeat(2, 1fr); }
+    }
+  `;
+
+  return (
+    <section className="fts-section" style={resolvedStyles}>
+      <ScopedStyles id="team-section" css={scopedCss} />
+      <div style={containerStyle}>
+        <div className="fts-grid">
+          {members.map((m, i) => (
+            <div key={i} className="fts-card">
+              <img src={m.image} alt={m.name} className="fts-img" loading="lazy" />
+              <h4 className="fts-name">{m.name}</h4>
+              <p className="fts-role">{m.role}</p>
+              {m.socials && m.socials.length > 0 && (
+                <div className="fts-socials">
+                  {m.socials.map((s, j) => (
+                    <a key={j} href="#" className="fts-social-link" title={s}>
+                      {socialIcons[s] || s[0]}
+                    </a>
+                  ))}
+                </div>
+              )}
+            </div>
+          ))}
+        </div>
+      </div>
+    </section>
+  );
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   21. FASHION OFFICE LOCATIONS
+   Multi-office contact grid with header.
+   ═══════════════════════════════════════════════════════════════ */
+
+export interface FashionOffice {
+  city: string;
+  address: string;
+  phone: string;
+  email: string;
+}
+
+export interface FashionOfficeLocationsProps {
+  subtitle?: string;
+  title?: string;
+  description?: string;
+  offices: FashionOffice[];
+  resolvedStyles?: React.CSSProperties;
+}
+
+export function FashionOfficeLocations({ subtitle, title, description, offices, resolvedStyles }: FashionOfficeLocationsProps) {
+  const scopedCss = `
+    .fol-section { padding: 60px 15px; }
+    .fol-header { text-align: center; margin-bottom: 40px; max-width: 60%; margin-left: auto; margin-right: auto; }
+    .fol-subtitle { color: ${TOKENS.primaryColor}; text-transform: uppercase; font-weight: 700; font-size: 12px; font-family: ${TOKENS.bodyFont}; margin-bottom: 8px; letter-spacing: 2px; }
+    .fol-title { font-family: ${TOKENS.titleFont}; font-weight: 700; font-size: 30px; text-transform: uppercase; color: ${TOKENS.titleColor}; margin: 0 0 12px; line-height: 1.2; }
+    .fol-desc { font-family: ${TOKENS.bodyFont}; font-size: 16px; color: ${TOKENS.textColor}; line-height: 1.6; margin: 0; }
+    .fol-grid { display: grid; grid-template-columns: repeat(${offices.length}, 1fr); gap: 30px; }
+    .fol-card { text-align: center; }
+    .fol-city { font-family: ${TOKENS.titleFont}; font-weight: 700; font-size: 18px; text-transform: uppercase; color: ${TOKENS.titleColor}; margin: 0 0 12px; }
+    .fol-address { font-family: ${TOKENS.bodyFont}; font-size: 14px; color: ${TOKENS.textColor}; line-height: 1.6; margin: 0 0 12px; white-space: pre-line; }
+    .fol-contact { font-family: ${TOKENS.bodyFont}; font-size: 14px; color: ${TOKENS.textColor}; line-height: 1.8; }
+    .fol-contact strong { color: ${TOKENS.titleColor}; }
+    @media (max-width: 767px) {
+      .fol-grid { grid-template-columns: repeat(2, 1fr); }
+    }
+  `;
+
+  return (
+    <section className="fol-section" style={resolvedStyles}>
+      <ScopedStyles id="office-locations" css={scopedCss} />
+      <div style={containerStyle}>
+        {(subtitle || title) && (
+          <div className="fol-header">
+            {subtitle && <div className="fol-subtitle">{subtitle}</div>}
+            {title && <h3 className="fol-title">{title}</h3>}
+            {description && <p className="fol-desc">{description}</p>}
+          </div>
+        )}
+        <div className="fol-grid">
+          {offices.map((o, i) => (
+            <div key={i} className="fol-card">
+              <h4 className="fol-city">{o.city}</h4>
+              <p className="fol-address">{o.address}</p>
+              <div className="fol-contact">
+                <div><strong>Phone:</strong> {o.phone}</div>
+                <div><strong>Email:</strong> {o.email}</div>
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
+    </section>
+  );
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   22. FASHION STORE VISIT
+   "Visit our store" hero-style section.
+   ═══════════════════════════════════════════════════════════════ */
+
+export interface FashionStoreVisitProps {
+  subtitle?: string;
+  title: string;
+  address: string;
+  buttonText?: string;
+  buttonLink?: string;
+}
+
+export function FashionStoreVisit({ subtitle, title, address, buttonText = "See More About", buttonLink = "#" }: FashionStoreVisitProps) {
+  const storeCtx = useContext(FashionStoreContext);
+  const fixLink = (link: string) => resolveStoreLink(link, storeCtx?.storeSlug);
+
+  const scopedCss = `
+    .fsv-section { padding: 60px 15px; text-align: center; }
+    .fsv-subtitle { color: ${TOKENS.primaryColor}; text-transform: uppercase; font-weight: 700; font-size: 12px; font-family: ${TOKENS.bodyFont}; margin-bottom: 12px; letter-spacing: 2px; }
+    .fsv-title { font-family: ${TOKENS.titleFont}; font-weight: 700; font-size: 36px; text-transform: uppercase; color: ${TOKENS.titleColor}; margin: 0 0 16px; line-height: 1.2; white-space: pre-line; }
+    .fsv-address { font-family: ${TOKENS.bodyFont}; font-size: 16px; color: ${TOKENS.textColor}; line-height: 1.6; margin: 0 0 24px; white-space: pre-line; }
+    .fsv-btn { display: inline-block; padding: 12px 28px; background: ${TOKENS.titleColor}; color: #fff; font-family: ${TOKENS.bodyFont}; font-size: 13px; font-weight: 700; text-transform: uppercase; text-decoration: none; letter-spacing: 0.5px; transition: opacity 0.3s; }
+    .fsv-btn:hover { opacity: 0.85; }
+    @media (max-width: 767px) {
+      .fsv-title { font-size: 26px; }
+    }
+  `;
+
+  return (
+    <section className="fsv-section">
+      <ScopedStyles id="store-visit" css={scopedCss} />
+      <div style={containerStyle}>
+        {subtitle && <div className="fsv-subtitle">{subtitle}</div>}
+        <h2 className="fsv-title">{title}</h2>
+        <p className="fsv-address">{address}</p>
+        <Link href={fixLink(buttonLink)} className="fsv-btn">{buttonText}</Link>
+      </div>
+    </section>
+  );
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   23. FASHION FAQ ACCORDION
+   Expandable FAQ items.
+   ═══════════════════════════════════════════════════════════════ */
+
+export interface FashionFaqItem {
+  question: string;
+  answer: string;
+}
+
+export interface FashionFaqAccordionProps {
+  subtitle?: string;
+  title?: string;
+  items: FashionFaqItem[];
+}
+
+export function FashionFaqAccordion({ subtitle, title, items }: FashionFaqAccordionProps) {
+  const [openIdx, setOpenIdx] = useState<number | null>(null);
+
+  const scopedCss = `
+    .ffa-section { padding: 60px 15px; }
+    .ffa-header { margin-bottom: 30px; }
+    .ffa-subtitle { color: ${TOKENS.primaryColor}; text-transform: uppercase; font-weight: 700; font-size: 12px; font-family: ${TOKENS.bodyFont}; margin-bottom: 8px; letter-spacing: 2px; }
+    .ffa-title { font-family: ${TOKENS.titleFont}; font-weight: 700; font-size: 30px; text-transform: uppercase; color: ${TOKENS.titleColor}; margin: 0; line-height: 1.2; }
+    .ffa-item { border-bottom: 1px solid #e0e0e0; }
+    .ffa-question { width: 100%; display: flex; justify-content: space-between; align-items: center; padding: 18px 0; background: none; border: none; cursor: pointer; text-align: left; font-family: ${TOKENS.bodyFont}; font-size: 16px; font-weight: 700; color: ${TOKENS.titleColor}; }
+    .ffa-arrow { font-size: 18px; transition: transform 0.3s; color: ${TOKENS.textColor}; }
+    .ffa-arrow-open { transform: rotate(180deg); }
+    .ffa-answer { padding: 0 0 18px; font-family: ${TOKENS.bodyFont}; font-size: 15px; color: ${TOKENS.textColor}; line-height: 1.8; white-space: pre-line; }
+  `;
+
+  return (
+    <section className="ffa-section">
+      <ScopedStyles id="faq-accordion" css={scopedCss} />
+      <div style={containerStyle}>
+        {(subtitle || title) && (
+          <div className="ffa-header">
+            {subtitle && <div className="ffa-subtitle">{subtitle}</div>}
+            {title && <h3 className="ffa-title">{title}</h3>}
+          </div>
+        )}
+        {items.map((item, i) => (
+          <div key={i} className="ffa-item">
+            <button className="ffa-question" onClick={() => setOpenIdx(openIdx === i ? null : i)}>
+              <span>{item.question}</span>
+              <span className={`ffa-arrow ${openIdx === i ? "ffa-arrow-open" : ""}`}>&#9660;</span>
+            </button>
+            {openIdx === i && <div className="ffa-answer">{item.answer}</div>}
+          </div>
+        ))}
+      </div>
+    </section>
+  );
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   24. FASHION CONTACT FORM
+   Contact form section with fields.
+   ═══════════════════════════════════════════════════════════════ */
+
+export interface FashionContactFormProps {
+  subtitle?: string;
+  title?: string;
+  fields?: string[];
+}
+
+export function FashionContactForm({ subtitle, title, fields = ["name", "email", "phone", "company", "message"] }: FashionContactFormProps) {
+  const scopedCss = `
+    .fcf-section { padding: 60px 15px; }
+    .fcf-header { margin-bottom: 30px; }
+    .fcf-subtitle { color: ${TOKENS.primaryColor}; text-transform: uppercase; font-weight: 700; font-size: 12px; font-family: ${TOKENS.bodyFont}; margin-bottom: 8px; letter-spacing: 2px; }
+    .fcf-title { font-family: ${TOKENS.titleFont}; font-weight: 700; font-size: 30px; text-transform: uppercase; color: ${TOKENS.titleColor}; margin: 0; line-height: 1.2; }
+    .fcf-form { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+    .fcf-full { grid-column: 1 / -1; }
+    .fcf-input { width: 100%; padding: 14px 16px; font-family: ${TOKENS.bodyFont}; font-size: 15px; border: 1px solid #e0e0e0; background: #fff; color: ${TOKENS.titleColor}; outline: none; transition: border-color 0.3s; box-sizing: border-box; }
+    .fcf-input:focus { border-color: ${TOKENS.titleColor}; }
+    .fcf-textarea { min-height: 150px; resize: vertical; }
+    .fcf-submit { display: inline-block; padding: 14px 32px; background: ${TOKENS.titleColor}; color: #fff; font-family: ${TOKENS.bodyFont}; font-size: 13px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; border: none; cursor: pointer; transition: opacity 0.3s; }
+    .fcf-submit:hover { opacity: 0.85; }
+    @media (max-width: 767px) {
+      .fcf-form { grid-template-columns: 1fr; }
+    }
+  `;
+
+  const fieldLabels: Record<string, string> = {
+    name: "Your Name",
+    email: "Your Email",
+    phone: "Phone Number",
+    company: "Company",
+    message: "Your Message",
+  };
+
+  return (
+    <section className="fcf-section">
+      <ScopedStyles id="contact-form" css={scopedCss} />
+      <div style={containerStyle}>
+        {(subtitle || title) && (
+          <div className="fcf-header">
+            {subtitle && <div className="fcf-subtitle">{subtitle}</div>}
+            {title && <h3 className="fcf-title">{title}</h3>}
+          </div>
+        )}
+        <form className="fcf-form" onSubmit={(e) => e.preventDefault()}>
+          {fields.map((field) => (
+            field === "message" ? (
+              <textarea key={field} className="fcf-input fcf-textarea fcf-full" placeholder={fieldLabels[field] || field} />
+            ) : (
+              <input key={field} type={field === "email" ? "email" : "text"} className="fcf-input" placeholder={fieldLabels[field] || field} />
+            )
+          ))}
+          <div className="fcf-full">
+            <button type="submit" className="fcf-submit">Send Message</button>
+          </div>
+        </form>
+      </div>
+    </section>
   );
 }

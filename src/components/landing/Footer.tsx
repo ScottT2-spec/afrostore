@@ -5,34 +5,32 @@ import Link from "next/link";
 
 const footerLinks = {
   Product: [
-    { name: "Ecommerce Store", href: "#" },
-    { name: "Landing Pages", href: "#" },
-    { name: "Website Builder", href: "#" },
-    { name: "AI Assistant", href: "#" },
+    { name: "Ecommerce Store", href: "#ecommerce" },
+    { name: "Landing Pages", href: "#landing-pages" },
+    { name: "Website Builder", href: "#website-builder" },
+    { name: "AI Assistant", href: "#ai-assistant" },
     { name: "Templates", href: "#templates" },
-    { name: "Plugins", href: "#plugins" },
+    { name: "Pricing", href: "#pricing" },
   ],
   Payments: [
-    { name: "Monnify", href: "#" },
-    { name: "Paystack", href: "#" },
-    { name: "Flutterwave", href: "#" },
-    { name: "Bank Transfer", href: "#" },
-    { name: "Mobile Money", href: "#" },
-    { name: "USSD", href: "#" },
+    { name: "Monnify", href: "https://monnify.com", external: true },
+    { name: "Paystack", href: "https://paystack.com", external: true },
+    { name: "Flutterwave", href: "https://flutterwave.com", external: true },
+    { name: "Bank Transfer", href: "#pricing" },
+    { name: "Mobile Money", href: "#pricing" },
+    { name: "USSD", href: "#pricing" },
   ],
   Company: [
-    { name: "About", href: "#" },
-    { name: "Blog", href: "#" },
-    { name: "Careers", href: "#" },
-    { name: "Contact", href: "#" },
-    { name: "Partners", href: "#" },
+    { name: "About Us", href: "#how-it-works" },
+    { name: "How It Works", href: "#how-it-works" },
+    { name: "Testimonials", href: "#testimonials" },
+    { name: "Contact Us", href: "mailto:support@prokip.com" },
   ],
   Support: [
-    { name: "Help Center", href: "#" },
-    { name: "Documentation", href: "#" },
-    { name: "Community", href: "#" },
-    { name: "Status", href: "#" },
-    { name: "API", href: "#" },
+    { name: "Help Center", href: "mailto:support@prokip.com" },
+    { name: "Get Started", href: "/auth/signup" },
+    { name: "Login", href: "/auth/login" },
+    { name: "Showcase", href: "#showcase" },
   ],
 };
 
@@ -54,6 +52,25 @@ export default function Footer() {
             <p className="text-sm leading-relaxed max-w-xs">
               The simplest, fastest, most conversion-focused ecommerce platform for African businesses. From idea to selling in 5 minutes.
             </p>
+            {/* Social links */}
+            <div className="flex items-center gap-3 mt-4">
+              {[
+                { name: "Twitter", href: "https://twitter.com/prokiptech", icon: "𝕏" },
+                { name: "Instagram", href: "https://instagram.com/prokiptech", icon: "📸" },
+                { name: "LinkedIn", href: "https://linkedin.com/company/prokip", icon: "in" },
+              ].map((social) => (
+                <a
+                  key={social.name}
+                  href={social.href}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="h-8 w-8 rounded-lg bg-surface-800 hover:bg-surface-700 flex items-center justify-center text-xs text-surface-400 hover:text-white transition-colors"
+                  title={social.name}
+                >
+                  {social.icon}
+                </a>
+              ))}
+            </div>
           </div>
 
           {/* Links */}
@@ -65,12 +82,23 @@ export default function Footer() {
               <ul className="space-y-2.5">
                 {links.map((link) => (
                   <li key={link.name}>
-                    <Link
-                      href={link.href}
-                      className="text-sm text-surface-500 hover:text-white transition-colors"
-                    >
-                      {link.name}
-                    </Link>
+                    {"external" in link && link.external ? (
+                      <a
+                        href={link.href}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="text-sm text-surface-500 hover:text-white transition-colors"
+                      >
+                        {link.name}
+                      </a>
+                    ) : (
+                      <Link
+                        href={link.href}
+                        className="text-sm text-surface-500 hover:text-white transition-colors"
+                      >
+                        {link.name}
+                      </Link>
+                    )}
                   </li>
                 ))}
               </ul>
@@ -81,26 +109,20 @@ export default function Footer() {
         {/* Bottom */}
         <div className="mt-12 pt-8 border-t border-surface-800 flex flex-col sm:flex-row items-center justify-between gap-4">
           <p className="text-xs text-surface-600">
-            &copy; {new Date().getFullYear()} AfroStore. All rights reserved.
+            &copy; {new Date().getFullYear()} AfroStore by Prokip. All rights reserved.
           </p>
           <div className="flex items-center gap-6">
             <Link
-              href="#"
+              href="/privacy"
               className="text-xs text-surface-600 hover:text-surface-400 transition-colors"
             >
               Privacy Policy
             </Link>
             <Link
-              href="#"
+              href="/terms"
               className="text-xs text-surface-600 hover:text-surface-400 transition-colors"
             >
               Terms of Service
-            </Link>
-            <Link
-              href="#"
-              className="text-xs text-surface-600 hover:text-surface-400 transition-colors"
-            >
-              Cookie Policy
             </Link>
           </div>
         </div>

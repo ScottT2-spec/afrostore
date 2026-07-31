@@ -7,27 +7,16 @@ import { useParams, useRouter } from "next/navigation";
 import Link from "next/link";
 import { RenderBlocks, type BuilderBlock } from "@/components/storefront/BlockRenderer";
 import { RenderTemplateBlocks, type TemplateBlock } from "@/components/storefront/TemplateBlockRenderer";
-import { FASHION_TEMPLATE_PRESET } from "@/lib/templates/presets/fashion-preset";
-import { FASHION_COLORED_PRESET } from "@/lib/templates/presets/fashion-colored-preset";
-import { HANDMADE_BAGS_PRESET } from "@/lib/templates/presets/handmade-bags-preset";
-import { T_SHIRTS_PRINTS_PRESET } from "@/lib/templates/presets/t-shirts-prints-preset";
-import { ELECTRONICS_TEMPLATE_PRESET } from "@/lib/templates/presets/electronics-preset";
-import { BAKERY_TEMPLATE_PRESET } from "@/lib/templates/presets/bakery-preset";
-import { COSMETICS_TEMPLATE_PRESET } from "@/lib/templates/presets/cosmetics-preset";
-import { GROCERY_TEMPLATE_PRESET } from "@/lib/templates/presets/grocery-preset";
-import { HEALTH_TEMPLATE_PRESET } from "@/lib/templates/presets/health-preset";
-import { INTERIOR_DECOR_PRESET, INTERIOR_RETAIL_PRESET } from "@/lib/templates/presets/interior-preset";
-import { KIDS_TEMPLATE_PRESET } from "@/lib/templates/presets/kids-preset";
-import { MAKEUP_TEMPLATE_PRESET } from "@/lib/templates/presets/makeup-preset";
-import { PERFUMES_TEMPLATE_PRESET } from "@/lib/templates/presets/perfumes-preset";
+import { TEMPLATE_PRESET_MAP } from "@/lib/templates/template-preset-map";
 import { FashionStoreContext } from "@/components/storefront/FashionTemplateBlocks";
 import { ElectronicsStoreContext } from "@/components/storefront/ElectronicsTemplateBlocks";
 import { BakeryStoreContext } from "@/components/storefront/BakeryTemplateBlocks";
 import { CosmeticsStoreContext } from "@/components/storefront/CosmeticsTemplateBlocks";
 import { GroceryStoreContext } from "@/components/storefront/GroceryTemplateBlocks";
 import { HealthStoreContext, HealthHeader, HealthFooterFull } from "@/components/storefront/HealthTemplateBlocks";
-import { InteriorStoreContext } from "@/components/storefront/InteriorDesignTemplateBlocks";
+import { InteriorStoreContext, InteriorHeader, InteriorFooter, InteriorFontLoader } from "@/components/storefront/InteriorDesignTemplateBlocks";
 import { KidsStoreContext, KidsHeader, KidsFooterFull } from "@/components/storefront/KidsTemplateBlocks";
+import { ToysStoreContext, ToysFontLoader } from "@/components/storefront/ToysTemplateBlocks";
 import { MakeupStoreContext } from "@/components/storefront/MakeupTemplateBlocks";
 import { PerfumesStoreContext } from "@/components/storefront/PerfumesTemplateBlocks";
 import { PerfumesFontLoader, PerfumesFooter, PerfumesHeader } from "@/components/storefront/PerfumesTemplateBlocks";
@@ -36,33 +25,16 @@ import { GardenHeader, GardenFooter } from "@/components/storefront/GardenStoreC
 import { TShirtsPrintsFooter, TShirtsPrintsHeader } from "@/components/storefront/TShirtsPrintsStoreChrome";
 import { RetailHeader, RetailFooter } from "@/components/storefront/RetailTemplateBlocks";
 
-/* ─── Template preset map ─── */
-const TEMPLATE_PRESET_MAP: Record<string, TemplateBlock[]> = {
-  fashion: FASHION_TEMPLATE_PRESET,
-  "fashion-colored": FASHION_COLORED_PRESET,
-  "handmade-bags": HANDMADE_BAGS_PRESET,
-  "t-shirts-prints": T_SHIRTS_PRINTS_PRESET,
-  electronics: ELECTRONICS_TEMPLATE_PRESET,
-  "electronics-accessories": ELECTRONICS_TEMPLATE_PRESET,
-  hardware: ELECTRONICS_TEMPLATE_PRESET,
-  tools: ELECTRONICS_TEMPLATE_PRESET,
-  "sweets-bakery": BAKERY_TEMPLATE_PRESET,
-  cosmetics: COSMETICS_TEMPLATE_PRESET,
-  grocery: GROCERY_TEMPLATE_PRESET,
-  vegetables: GROCERY_TEMPLATE_PRESET,
-  pills: HEALTH_TEMPLATE_PRESET,
-  decor: INTERIOR_DECOR_PRESET,
-  retail: INTERIOR_RETAIL_PRESET,
-  kids: KIDS_TEMPLATE_PRESET,
-  toys: KIDS_TEMPLATE_PRESET,
-  makeup: MAKEUP_TEMPLATE_PRESET,
-  perfumes: PERFUMES_TEMPLATE_PRESET,
-};
+/* ─── Template preset map (shared module) ─── */
 import { getLinkedPageHref, parsePageContent, type PageSettings } from "@/lib/page-content";
 import { ThemeProvider, type ThemeData } from "@/components/storefront/ThemeProvider";
 import { useWishlist } from "@/hooks/useWishlist";
 import { applyPageCustomization, buildPageBackgroundStyle, buildThemeDataWithCustomization, filterVisiblePages, getResolvedPageSettings, normalizeSiteCustomization, type SiteCustomizationDocument } from "@/lib/site-customization";
 import { VegetableFooter, VegetableHeader } from "@/components/storefront/VegetableStoreChrome";
+import { LandingGadgetContext, LandingGadgetFontLoader } from "@/components/storefront/LandingGadgetBlocks";
+import { AegisLandingContext, AegisLandingFontLoader } from "@/components/storefront/AegisLandingBlocks";
+import { ProkipAgentLandingContext, ProkipAgentFontLoader } from "@/components/storefront/ProkipAgentLandingBlocks";
+import { ProkipBookingLandingContext, ProkipBookingFontLoader } from "@/components/storefront/ProkipBookingLandingBlocks";
 import { VegetableHomePage } from "@/components/storefront/VegetableTemplatePages";
 
 /* ───────── Types ───────── */
@@ -254,14 +226,29 @@ function TemplateStoreContextProvider({ templateSlug, products, blogs, categorie
   if (slug === "decor" || slug === "retail") {
     return <InteriorStoreContext.Provider value={value}>{children}</InteriorStoreContext.Provider>;
   }
-  if (slug === "kids" || slug === "toys") {
+  if (slug === "kids") {
     return <KidsStoreContext.Provider value={value}>{children}</KidsStoreContext.Provider>;
+  }
+  if (slug === "toys") {
+    return <ToysStoreContext.Provider value={value}>{children}</ToysStoreContext.Provider>;
   }
   if (slug === "makeup") {
     return <MakeupStoreContext.Provider value={value}>{children}</MakeupStoreContext.Provider>;
   }
   if (slug === "perfumes") {
     return <PerfumesStoreContext.Provider value={value}>{children}</PerfumesStoreContext.Provider>;
+  }
+  if (slug === "landing-gadget") {
+    return <LandingGadgetContext.Provider value={{ storeSlug: storeSlug, products, currency, addToCart: addToCart as any }}>{children}</LandingGadgetContext.Provider>;
+  }
+  if (slug === "aegis" || slug === "aegis-landing") {
+    return <AegisLandingContext.Provider value={{ storeSlug: storeSlug }}>{children}</AegisLandingContext.Provider>;
+  }
+  if (slug === "prokip-agent") {
+    return <ProkipAgentLandingContext.Provider value={{ storeSlug: storeSlug }}>{children}</ProkipAgentLandingContext.Provider>;
+  }
+  if (slug === "prokip-booking") {
+    return <ProkipBookingLandingContext.Provider value={{ storeSlug: storeSlug }}>{children}</ProkipBookingLandingContext.Provider>;
   }
   // Default: fashion family
   return <FashionStoreContext.Provider value={value}>{children}</FashionStoreContext.Provider>;
@@ -445,16 +432,65 @@ export default function StorePage() {
     'fashionFooter', 'bakeryFooter', 'interiorFooter',
     'groceryFooter', 'healthFooterFull', 'healthFooter',
     'electronicsFooter', 'makeupFooter',
+    // Note: jumia header/footer are NOT filtered — they're rendered as part of the block content
   ]);
-  const homeBlocks: BuilderBlock[] = homeContent.blocks.filter((block) => !CHROME_BLOCK_TYPES.has(block.type));
-  const hasHomeContent = homeBlocks.length > 0;
+  let homeBlocks: BuilderBlock[] = homeContent.blocks.filter((block) => !CHROME_BLOCK_TYPES.has(block.type));
+  // If saved blocks are from a different template family, ignore them and use preset
+  const TEMPLATE_BLOCK_PREFIXES: Record<string, string> = {
+    tools: "tools",
+    hardware: "hardwareHome",
+    "landing-gadget": "gadget",
+    "aegis": "aegis",
+    "aegis-landing": "aegis",
+    "prokip-agent": "prokipAgent",
+    "prokip-booking": "prokipBooking",
+  };
+  const expectedPrefix = data.templateSlug ? TEMPLATE_BLOCK_PREFIXES[data.templateSlug] : undefined;
+  // Filter out stale blocks from other templates when a prefix is enforced
+  if (expectedPrefix && homeBlocks.length > 0) {
+    const filtered = homeBlocks.filter((b) => b.type.startsWith(expectedPrefix));
+    if (filtered.length > 0) {
+      homeBlocks = filtered;
+    }
+  }
+  // For template-prefixed stores, merge saved blocks with preset so missing sections still render
+  const templatePresetForMerge = data.templateSlug ? TEMPLATE_PRESET_MAP[data.templateSlug] : undefined;
+  if (expectedPrefix && homeBlocks.length > 0 && templatePresetForMerge) {
+    const savedIds = new Set(homeBlocks.map((b) => b.id));
+    const savedTypes = new Set(homeBlocks.map((b) => b.type));
+    const missingBlocks = templatePresetForMerge
+      .filter((pb) => !savedIds.has(pb.id) && !savedTypes.has(pb.type))
+      .map((pb) => ({ id: pb.id, type: pb.type, props: pb.props || {} }));
+    if (missingBlocks.length > 0) {
+      // Reconstruct full block order: use preset order, replacing with saved versions where available
+      const mergedBlocks: BuilderBlock[] = [];
+      for (const pb of templatePresetForMerge) {
+        const saved = homeBlocks.find((b) => b.id === pb.id || b.type === pb.type);
+        mergedBlocks.push(saved || { id: pb.id, type: pb.type, props: pb.props || {} });
+      }
+      // Append any extra saved blocks not in preset
+      for (const sb of homeBlocks) {
+        if (!mergedBlocks.some((b) => b.id === sb.id)) {
+          mergedBlocks.push(sb);
+        }
+      }
+      homeBlocks = mergedBlocks;
+    }
+  }
+  const savedBlocksMatchTemplate = !expectedPrefix || homeBlocks.length === 0 || homeBlocks.some((b) => b.type.startsWith(expectedPrefix));
+  const hasHomeContent = homeBlocks.length > 0 && savedBlocksMatchTemplate;
   const homeHasProductGrid = homeBlocks.some((b) => b.type === "productGrid");
   const isTShirtsPrintsTemplate = data.templateSlug === "t-shirts-prints" || slug === "t-shirts-prints" || store.slug === "t-shirts-prints";
-  const isFashionTemplate = data.templateSlug === "fashion" || data.templateSlug === "fashion-colored" || data.templateSlug === "handmade-bags" || data.templateSlug === "t-shirts-prints" || homeBlocks.some((b) => b.type.startsWith("fashion"));
-  const isKidsTemplate = data.templateSlug === "kids" || data.templateSlug === "toys" || homeBlocks.some((b) => b.type.startsWith("kids"));
+  const isFashionTemplate = data.templateSlug === "fashion" || data.templateSlug === "fashion-colored" || data.templateSlug === "handmade-bags" || data.templateSlug === "t-shirts-prints" || data.templateSlug === "sweets-bakery" || data.templateSlug === "electronics" || data.templateSlug === "electronics-accessories" || data.templateSlug === "hardware" || data.templateSlug === "tools" || data.templateSlug === "makeup" || data.templateSlug === "grocery" || homeBlocks.some((b) => b.type.startsWith("fashion")) || homeBlocks.some((b) => b.type.startsWith("bakery")) || homeBlocks.some((b) => b.type.startsWith("electronics")) || homeBlocks.some((b) => b.type.startsWith("makeup")) || homeBlocks.some((b) => b.type.startsWith("grocery"));
+  const isKidsTemplate = data.templateSlug === "kids" || homeBlocks.some((b) => b.type.startsWith("kids"));
+  const isToysTemplate = data.templateSlug === "toys" || homeBlocks.some((b) => b.type.startsWith("toys"));
   const isHealthTemplate = data.templateSlug === "pills" || homeBlocks.some((b) => b.type.startsWith("health"));
   const isPerfumesTemplate = data.templateSlug === "perfumes" || homeBlocks.some((b) => b.type.startsWith("perfumes"));
   const isRetailTemplate = data.templateSlug === "retail";
+  const isDecorTemplate = data.templateSlug === "decor" || data.templateSlug === "interior" || data.templateSlug === "interior-design" || data.templateSlug === "home-decor" || homeBlocks.some((b) => b.type.startsWith("interior"));
+  const isJumiaTemplate = homeBlocks.some((b) => b.type.startsWith("jumia"));
+  const isElectronicsTemplate = data.templateSlug === "electronics" || data.templateSlug === "electronics-accessories" || data.templateSlug === "hardware" || data.templateSlug === "tools" || homeBlocks.some((b) => b.type.startsWith("electronics"));
+  const isAiTemplate = data.templateSlug === "ai" || homeBlocks.some((b) => b.type.startsWith("ai"));
   const templatePreset = data.templateSlug ? TEMPLATE_PRESET_MAP[data.templateSlug] : undefined;
 
   // Build navigation items dynamically from actual pages in database
@@ -469,6 +505,112 @@ export default function StorePage() {
     label: page.title,
     href: `/store/${slug}/${page.slug}`,
   }));
+
+  if (data.templateSlug === "aegis" || data.templateSlug === "aegis-landing") {
+    const aegisBlocks = homeBlocks.length > 0 ? homeBlocks : (templatePreset || []);
+    return (
+      <ThemeProvider theme={resolvedTheme}>
+        <div className="min-h-screen" style={{ background: "#f9f9fb", color: "#1a1c1d" }}>
+          <AegisLandingFontLoader />
+          <TemplateStoreContextProvider
+            templateSlug={data.templateSlug}
+            products={products}
+            blogs={data.blogs || []}
+            categories={categories}
+            currency={currency}
+            storeSlug={slug}
+            socialLinks={socialLinksArray}
+            addToCart={(pid, qty) => { const x = products.find(p => p.id === pid); if (x) addToCart(x, qty); }}
+            toggleWishlist={toggleWishlist}
+            isWishlisted={isWishlisted}
+            onQuickView={(pid) => { const x = products.find(p => p.id === pid); if (x) { setSelectedProduct(x); setSelectedVariantId(null); setQty(1); } }}
+          >
+            <RenderTemplateBlocks blocks={aegisBlocks as TemplateBlock[]} />
+          </TemplateStoreContextProvider>
+        </div>
+      </ThemeProvider>
+    );
+  }
+
+  if (data.templateSlug === "prokip-booking") {
+    const bookingBlocks = homeBlocks.length > 0 ? homeBlocks : (templatePreset || []);
+    return (
+      <ThemeProvider theme={resolvedTheme}>
+        <div className="prokip-booking min-h-screen" style={{ background: "#f8fafc", color: "#0f172a" }}>
+          <ProkipBookingFontLoader />
+          <TemplateStoreContextProvider
+            templateSlug={data.templateSlug}
+            products={products}
+            blogs={data.blogs || []}
+            categories={categories}
+            currency={currency}
+            storeSlug={slug}
+            socialLinks={socialLinksArray}
+            addToCart={(pid, qty) => { const x = products.find(p => p.id === pid); if (x) addToCart(x, qty); }}
+            toggleWishlist={toggleWishlist}
+            isWishlisted={isWishlisted}
+            onQuickView={(pid) => { const x = products.find(p => p.id === pid); if (x) { setSelectedProduct(x); setSelectedVariantId(null); setQty(1); } }}
+          >
+            <RenderTemplateBlocks blocks={bookingBlocks as TemplateBlock[]} />
+          </TemplateStoreContextProvider>
+        </div>
+      </ThemeProvider>
+    );
+  }
+
+  if (data.templateSlug === "prokip-agent") {
+    const prokipBlocks = homeBlocks.length > 0 ? homeBlocks : (templatePreset || []);
+    return (
+      <ThemeProvider theme={resolvedTheme}>
+        <div className="min-h-screen" style={{ background: "#0a1628", color: "#ffffff" }}>
+          <ProkipAgentFontLoader />
+          <TemplateStoreContextProvider
+            templateSlug={data.templateSlug}
+            products={products}
+            blogs={data.blogs || []}
+            categories={categories}
+            currency={currency}
+            storeSlug={slug}
+            socialLinks={socialLinksArray}
+            addToCart={(pid, qty) => { const x = products.find(p => p.id === pid); if (x) addToCart(x, qty); }}
+            toggleWishlist={toggleWishlist}
+            isWishlisted={isWishlisted}
+            onQuickView={(pid) => { const x = products.find(p => p.id === pid); if (x) { setSelectedProduct(x); setSelectedVariantId(null); setQty(1); } }}
+          >
+            <RenderTemplateBlocks blocks={prokipBlocks as TemplateBlock[]} />
+          </TemplateStoreContextProvider>
+        </div>
+      </ThemeProvider>
+    );
+  }
+
+  if (data.templateSlug === "landing-gadget") {
+    // Use homeBlocks which already has merge logic applied (fills missing blocks from preset)
+    const gadgetBlocks = homeBlocks.length > 0 ? homeBlocks : (templatePreset || []);
+
+    return (
+      <ThemeProvider theme={resolvedTheme}>
+        <div className="min-h-screen bg-white">
+          <LandingGadgetFontLoader />
+          <TemplateStoreContextProvider
+            templateSlug="landing-gadget"
+            products={products}
+            blogs={data.blogs || []}
+            categories={categories}
+            currency={currency}
+            storeSlug={slug}
+            socialLinks={socialLinksArray}
+            addToCart={(pid, qty) => { const x = products.find(p => p.id === pid); if (x) addToCart(x, qty); }}
+            toggleWishlist={toggleWishlist}
+            isWishlisted={isWishlisted}
+            onQuickView={(pid) => { const x = products.find(p => p.id === pid); if (x) { setSelectedProduct(x); setSelectedVariantId(null); setQty(1); } }}
+          >
+            <RenderTemplateBlocks blocks={gadgetBlocks as TemplateBlock[]} />
+          </TemplateStoreContextProvider>
+        </div>
+      </ThemeProvider>
+    );
+  }
 
   if (data.templateSlug === "vegetables") {
     const vegetableNavItems = [
@@ -573,7 +715,16 @@ export default function StorePage() {
     <ThemeProvider theme={resolvedTheme}>
     <div className="min-h-screen bg-white">
       {/* ─── TEMPLATE HEADERS ─── */}
-      {isRetailTemplate ? (
+      {isDecorTemplate ? (
+        <>
+          <InteriorFontLoader />
+          <InteriorHeader
+            storeName={store.name}
+            storeSlug={slug}
+            logo={store.logo}
+          />
+        </>
+      ) : isRetailTemplate ? (
         <RetailHeader
           storeName={store.name}
           storeSlug={slug}
@@ -610,6 +761,13 @@ export default function StorePage() {
           onSearchChange={setSearchQuery}
           onSearch={handleSearch}
         />
+      ) : isToysTemplate ? (
+        <FashionHeader
+          storeName={store.name}
+          storeSlug={slug}
+          logo={store.logo}
+          isLanding={false}
+        />
       ) : isKidsTemplate ? (
         <KidsHeader
           storeName={store.name}
@@ -634,6 +792,9 @@ export default function StorePage() {
           cartCount={cartCount}
           wishlistCount={wishlistCount}
         />
+      ) : isAiTemplate ? (
+        /* AI template — minimal/no chrome header, the blocks handle it */
+        null
       ) : isFashionTemplate ? (
         <FashionHeader
           storeName={store.name}
@@ -786,7 +947,14 @@ export default function StorePage() {
       )}
 
       {/* ─── HOME PAGE CONTENT ─────────────────────────────────── */}
-      {hasHomeContent ? (
+      {isAiTemplate && homeBlocks.length > 0 ? (
+        /* AI template blocks — use RenderTemplateBlocks */
+        <div style={{ background: "#F1F1F1" }}>
+          <TemplateStoreContextProvider templateSlug={data.templateSlug || "ai"} products={products} blogs={data.blogs || []} categories={categories} currency={currency} storeSlug={slug} socialLinks={socialLinksArray} addToCart={(pid,qty)=>{const x=products.find(p=>p.id===pid);if(x)addToCart(x,qty);}} toggleWishlist={toggleWishlist} isWishlisted={isWishlisted} onQuickView={(pid)=>{const x=products.find(p=>p.id===pid);if(x){setSelectedProduct(x);setSelectedVariantId(null);setQty(1);}}}>
+            <RenderTemplateBlocks blocks={homeBlocks as unknown as TemplateBlock[]} />
+          </TemplateStoreContextProvider>
+        </div>
+      ) : hasHomeContent ? (
         /* Builder blocks Home page — render template blocks */
         <div style={buildPageBackgroundStyle(homePageSettings)}>
           <TemplateStoreContextProvider templateSlug={data.templateSlug} products={products} blogs={data.blogs || []} categories={categories} currency={currency} storeSlug={slug} socialLinks={socialLinksArray} addToCart={(pid,qty)=>{const x=products.find(p=>p.id===pid);if(x)addToCart(x,qty);}} toggleWishlist={toggleWishlist} isWishlisted={isWishlisted} onQuickView={(pid)=>{const x=products.find(p=>p.id===pid);if(x){setSelectedProduct(x);setSelectedVariantId(null);setQty(1);}}}>
@@ -820,6 +988,11 @@ export default function StorePage() {
             </div>
           )}
         </div>
+      ) : isJumiaTemplate && homeBlocks.length > 0 ? (
+        /* AI-built Jumia marketplace layout */
+        <div>
+          <RenderBlocks blocks={homeBlocks} storeSlug={slug} products={products} currency={currency} addToCart={(p) => addToCart(p as unknown as Product)} isWishlisted={isWishlisted} toggleWishlist={toggleWishlist} addedToCart={addedToCart} />
+        </div>
       ) : homeBlocks.length > 0 ? (
         /* Fallback: render blocks even if hasHomeContent is false but blocks exist */
         <div style={buildPageBackgroundStyle(homePageSettings)}>
@@ -849,7 +1022,9 @@ export default function StorePage() {
       )}
 
       {/* Footer */}
-      {isRetailTemplate ? (
+      {isDecorTemplate ? (
+        <InteriorFooter storeSlug={slug} />
+      ) : isRetailTemplate ? (
         <RetailFooter
           storeName={store.name}
           storeSlug={slug}
@@ -862,6 +1037,12 @@ export default function StorePage() {
           storeSlug={slug}
           logo={store.logo}
           socialLinks={socialLinksArray}
+        />
+      ) : isToysTemplate ? (
+        <FashionFooter
+          storeName={store.name}
+          storeSlug={slug}
+          description={store.description ?? undefined}
         />
       ) : isKidsTemplate ? (
         <KidsFooterFull

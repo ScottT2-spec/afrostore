@@ -6,7 +6,18 @@ import { TSHIRTS_PRINTS_ABOUT_PAGE_BLOCKS, TSHIRTS_PRINTS_CONTACT_PAGE_BLOCKS, T
 import { VEGETABLE_HOME_PAGE_BLOCKS, VEGETABLE_MENU_PAGE_BLOCKS, VEGETABLE_RECIPE_PAGE_BLOCKS, VEGETABLE_ABOUT_PAGE_BLOCKS, VEGETABLE_CONTACT_PAGE_BLOCKS, VEGETABLE_RESERVATION_PAGE_BLOCKS } from "./presets/vegetables-page-presets";
 import { PERFUMES_HOME_PAGE_BLOCKS, PERFUMES_ABOUT_PAGE_BLOCKS, PERFUMES_CONTACT_PAGE_BLOCKS, PERFUMES_FRAGRANCES_PAGE_BLOCKS, PERFUMES_JOURNAL_PAGE_BLOCKS, PERFUMES_REVIEWS_PAGE_BLOCKS } from "./presets/perfumes-page-presets";
 import { RETAIL_ABOUT_BLOCKS, RETAIL_CONTACT_BLOCKS, RETAIL_PROJECTS_BLOCKS, RETAIL_OUR_STORY_BLOCKS, RETAIL_REVIEWS_BLOCKS, RETAIL_PROJECT_DETAIL_BLOCKS } from "./presets/retail-pages";
-import { KIDS_ABOUT_PAGE_BLOCKS, KIDS_CONTACT_PAGE_BLOCKS, KIDS_BLOG_PAGE_BLOCKS } from "./presets/kids-pages-preset";
+import { FASHION_ABOUT_PAGE_BLOCKS, FASHION_CONTACT_PAGE_BLOCKS, FASHION_BLOG_PAGE_BLOCKS, FASHION_SHOP_PAGE_BLOCKS } from "./presets/fashion-page-presets";
+import { FASHION_COLORED_ABOUT_PAGE_BLOCKS, FASHION_COLORED_CONTACT_PAGE_BLOCKS, FASHION_COLORED_BLOG_PAGE_BLOCKS, FASHION_COLORED_SHOP_PAGE_BLOCKS } from "./presets/fashion-colored-page-presets";
+import { BAKERY_ABOUT_PAGE_BLOCKS, BAKERY_CONTACT_PAGE_BLOCKS, BAKERY_BLOG_PAGE_BLOCKS, BAKERY_SHOP_PAGE_BLOCKS } from "./presets/bakery-page-presets";
+import { HARDWARE_ABOUT_PAGE_BLOCKS, HARDWARE_CONTACT_PAGE_BLOCKS, HARDWARE_BLOG_PAGE_BLOCKS } from "./presets/hardware-page-presets";
+import { TOOLS_ABOUT_PAGE_BLOCKS, TOOLS_CONTACT_PAGE_BLOCKS, TOOLS_BLOG_PAGE_BLOCKS } from "./presets/tools-page-presets";
+import { ELECTRONICS_ABOUT_PAGE_BLOCKS, ELECTRONICS_CONTACT_PAGE_BLOCKS, ELECTRONICS_BLOG_PAGE_BLOCKS, ELECTRONICS_SHOP_PAGE_BLOCKS } from "./presets/electronics-page-presets";
+import { DECOR_ABOUT_PAGE_BLOCKS, DECOR_CONTACT_PAGE_BLOCKS, DECOR_BLOG_PAGE_BLOCKS, DECOR_SHOP_PAGE_BLOCKS } from "./presets/decor-page-presets";
+import { ACCESSORIES_ABOUT_PAGE_BLOCKS, ACCESSORIES_CONTACT_PAGE_BLOCKS, ACCESSORIES_BLOG_PAGE_BLOCKS, ACCESSORIES_SHOP_PAGE_BLOCKS, ACCESSORIES_FAQS_PAGE_BLOCKS } from "./presets/accessories-page-presets";
+import { KIDS_ABOUT_PAGE_BLOCKS, KIDS_CONTACT_PAGE_BLOCKS, KIDS_BLOG_PAGE_BLOCKS, KIDS_SHOP_PAGE_BLOCKS } from "./presets/kids-page-presets";
+import { TOYS_ABOUT_PAGE_BLOCKS, TOYS_CONTACT_PAGE_BLOCKS, TOYS_BLOG_PAGE_BLOCKS, TOYS_SHOP_PAGE_BLOCKS, TOYS_FAQS_PAGE_BLOCKS } from "./presets/toys-page-presets";
+import { MAKEUP_ABOUT_PAGE_BLOCKS, MAKEUP_CONTACT_PAGE_BLOCKS, MAKEUP_BLOG_PAGE_BLOCKS, MAKEUP_SHOP_PAGE_BLOCKS } from "./presets/makeup-page-presets";
+import { GROCERY_ABOUT_PAGE_BLOCKS, GROCERY_CONTACT_PAGE_BLOCKS, GROCERY_BLOG_PAGE_BLOCKS, GROCERY_SHOP_PAGE_BLOCKS } from "./presets/grocery-page-presets";
 
 /**
  * Template-specific page definitions.
@@ -20,6 +31,15 @@ const KIDS_PAGES: PageDef[] = [
   { title: "About", slug: "about", type: "CUSTOM", position: 10 },
   { title: "Contact", slug: "contact", type: "CUSTOM", position: 11 },
   { title: "Blog", slug: "blog", type: "CUSTOM", position: 12 },
+  { title: "Shop", slug: "shop", type: "CUSTOM", position: 13 },
+];
+
+const TOYS_PAGES: PageDef[] = [
+  { title: "About Us", slug: "about", type: "CUSTOM", position: 10 },
+  { title: "Contact Us", slug: "contact", type: "CUSTOM", position: 11 },
+  { title: "Blog", slug: "blog", type: "CUSTOM", position: 12 },
+  { title: "Shop", slug: "shop", type: "CUSTOM", position: 13 },
+  { title: "FAQs", slug: "faqs", type: "CUSTOM", position: 14 },
 ];
 
 const PERFUMES_PAGES: PageDef[] = [
@@ -45,11 +65,32 @@ const COSMETICS_PAGES: PageDef[] = [
 ];
 
 const FASHION_PAGES: PageDef[] = [
-  { title: "Blog", slug: "blog", type: "CUSTOM", position: 10 },
+  { title: "About Us", slug: "about", type: "CUSTOM", position: 10 },
+  { title: "Contact Us", slug: "contact", type: "CUSTOM", position: 11 },
+  { title: "Blog", slug: "blog", type: "CUSTOM", position: 12 },
+  { title: "Shop", slug: "shop", type: "CUSTOM", position: 13 },
 ];
 
 const ELECTRONICS_PAGES: PageDef[] = [
-  { title: "Blog", slug: "blog", type: "CUSTOM", position: 10 },
+  { title: "About Us", slug: "about", type: "CUSTOM", position: 10 },
+  { title: "Contact Us", slug: "contact", type: "CUSTOM", position: 11 },
+  { title: "Blog", slug: "blog", type: "CUSTOM", position: 12 },
+  { title: "Shop", slug: "shop", type: "CUSTOM", position: 13 },
+];
+
+const ACCESSORIES_PAGES: PageDef[] = [
+  { title: "About Us", slug: "about", type: "CUSTOM", position: 10 },
+  { title: "Contact Us", slug: "contact", type: "CUSTOM", position: 11 },
+  { title: "Blog", slug: "blog", type: "CUSTOM", position: 12 },
+  { title: "Shop", slug: "shop", type: "CUSTOM", position: 13 },
+  { title: "FAQs", slug: "faqs", type: "CUSTOM", position: 14 },
+];
+
+const DECOR_PAGES: PageDef[] = [
+  { title: "About Us", slug: "about", type: "CUSTOM", position: 10 },
+  { title: "Contact Us", slug: "contact", type: "CUSTOM", position: 11 },
+  { title: "Blog", slug: "blog", type: "CUSTOM", position: 12 },
+  { title: "Shop", slug: "shop", type: "CUSTOM", position: 13 },
 ];
 
 const HEALTH_PAGES: PageDef[] = [
@@ -61,7 +102,17 @@ const HEALTH_PAGES: PageDef[] = [
 ];
 
 const MAKEUP_PAGES: PageDef[] = [
-  { title: "Blog", slug: "blog", type: "CUSTOM", position: 10 },
+  { title: "About Us", slug: "about", type: "CUSTOM", position: 10 },
+  { title: "Contact Us", slug: "contact", type: "CUSTOM", position: 11 },
+  { title: "Blog", slug: "blog", type: "CUSTOM", position: 12 },
+  { title: "Shop", slug: "shop", type: "CUSTOM", position: 13 },
+];
+
+const GROCERY_PAGES: PageDef[] = [
+  { title: "About Us", slug: "about", type: "CUSTOM", position: 10 },
+  { title: "Contact Us", slug: "contact", type: "CUSTOM", position: 11 },
+  { title: "Blog", slug: "blog", type: "CUSTOM", position: 12 },
+  { title: "Shop", slug: "shop", type: "CUSTOM", position: 13 },
 ];
 
 const TSHIRTS_PRINTS_PAGES: PageDef[] = [
@@ -93,28 +144,61 @@ const RETAIL_PAGES: PageDef[] = [
 /** Map of template slug → pages to ensure */
 const TEMPLATE_PAGE_MAP: Record<string, PageDef[]> = {
   kids: KIDS_PAGES,
+  toys: TOYS_PAGES,
   perfumes: PERFUMES_PAGES,
   "handmade-bags": HANDMADE_BAGS_PAGES,
   cosmetics: COSMETICS_PAGES,
   fashion: FASHION_PAGES,
   "fashion-colored": FASHION_PAGES,
   electronics: ELECTRONICS_PAGES,
-  "electronics-accessories": ELECTRONICS_PAGES,
+  "electronics-accessories": ACCESSORIES_PAGES,
   health: HEALTH_PAGES,
   pills: HEALTH_PAGES,
   makeup: MAKEUP_PAGES,
   "t-shirts-prints": TSHIRTS_PRINTS_PAGES,
+  "sweets-bakery": FASHION_PAGES,
+  hardware: ELECTRONICS_PAGES,
+  tools: ELECTRONICS_PAGES,
+  grocery: GROCERY_PAGES,
   vegetables: VEGETABLE_PAGES,
+
+  // your local version
   retail: RETAIL_PAGES,
-  decor: RETAIL_PAGES,
+
+  // from main
+  decor: DECOR_PAGES,
+  interior: DECOR_PAGES,
+  "interior-design": DECOR_PAGES,
+  "home-decor": DECOR_PAGES,
 };
 
+
 /** Map of template slug → default page block content (keyed by page slug) */
-const TEMPLATE_PAGE_CONTENT_MAP: Record<string, Record<string, unknown[]>> = {
-  kids: {
-    about: KIDS_ABOUT_PAGE_BLOCKS,
-    contact: KIDS_CONTACT_PAGE_BLOCKS,
-    blog: KIDS_BLOG_PAGE_BLOCKS,
+export const TEMPLATE_PAGE_CONTENT_MAP: Record<string, Record<string, unknown[]>> = {
+  fashion: {
+    about: FASHION_ABOUT_PAGE_BLOCKS,
+    contact: FASHION_CONTACT_PAGE_BLOCKS,
+    blog: FASHION_BLOG_PAGE_BLOCKS,
+    shop: FASHION_SHOP_PAGE_BLOCKS,
+  },
+  "fashion-colored": {
+    about: FASHION_COLORED_ABOUT_PAGE_BLOCKS,
+    contact: FASHION_COLORED_CONTACT_PAGE_BLOCKS,
+    blog: FASHION_COLORED_BLOG_PAGE_BLOCKS,
+    shop: FASHION_COLORED_SHOP_PAGE_BLOCKS,
+  },
+  electronics: {
+    about: ELECTRONICS_ABOUT_PAGE_BLOCKS,
+    contact: ELECTRONICS_CONTACT_PAGE_BLOCKS,
+    blog: ELECTRONICS_BLOG_PAGE_BLOCKS,
+    shop: ELECTRONICS_SHOP_PAGE_BLOCKS,
+  },
+  "electronics-accessories": {
+    about: ACCESSORIES_ABOUT_PAGE_BLOCKS,
+    contact: ACCESSORIES_CONTACT_PAGE_BLOCKS,
+    blog: ACCESSORIES_BLOG_PAGE_BLOCKS,
+    shop: ACCESSORIES_SHOP_PAGE_BLOCKS,
+    faqs: ACCESSORIES_FAQS_PAGE_BLOCKS,
   },
   "handmade-bags": HANDMADE_BAGS_PAGE_BLOCKS,
   health: HEALTH_PAGE_BLOCKS,
@@ -128,6 +212,22 @@ const TEMPLATE_PAGE_CONTENT_MAP: Record<string, Record<string, unknown[]>> = {
     "about-us": TSHIRTS_PRINTS_ABOUT_PAGE_BLOCKS,
     "contact-us": TSHIRTS_PRINTS_CONTACT_PAGE_BLOCKS,
     "blog": TSHIRTS_PRINTS_BLOG_PAGE_BLOCKS,
+  },
+  hardware: {
+    about: HARDWARE_ABOUT_PAGE_BLOCKS,
+    contact: HARDWARE_CONTACT_PAGE_BLOCKS,
+    blog: HARDWARE_BLOG_PAGE_BLOCKS,
+  },
+  tools: {
+    about: TOOLS_ABOUT_PAGE_BLOCKS,
+    contact: TOOLS_CONTACT_PAGE_BLOCKS,
+    blog: TOOLS_BLOG_PAGE_BLOCKS,
+  },
+  "sweets-bakery": {
+    about: BAKERY_ABOUT_PAGE_BLOCKS,
+    contact: BAKERY_CONTACT_PAGE_BLOCKS,
+    blog: BAKERY_BLOG_PAGE_BLOCKS,
+    shop: BAKERY_SHOP_PAGE_BLOCKS,
   },
   vegetables: {
     home: VEGETABLE_HOME_PAGE_BLOCKS,
@@ -145,6 +245,7 @@ const TEMPLATE_PAGE_CONTENT_MAP: Record<string, Record<string, unknown[]>> = {
     journal: PERFUMES_JOURNAL_PAGE_BLOCKS,
     reviews: PERFUMES_REVIEWS_PAGE_BLOCKS,
   },
+
   retail: {
     about: RETAIL_ABOUT_BLOCKS,
     contact: RETAIL_CONTACT_BLOCKS,
@@ -156,16 +257,54 @@ const TEMPLATE_PAGE_CONTENT_MAP: Record<string, Record<string, unknown[]>> = {
     "project-adopt-the-pace-of-nature": RETAIL_PROJECT_DETAIL_BLOCKS["project-adopt-the-pace-of-nature"],
     "project-go-along-with-nature": RETAIL_PROJECT_DETAIL_BLOCKS["project-go-along-with-nature"],
   },
+  kids: {
+    about: KIDS_ABOUT_PAGE_BLOCKS,
+    contact: KIDS_CONTACT_PAGE_BLOCKS,
+    blog: KIDS_BLOG_PAGE_BLOCKS,
+    shop: KIDS_SHOP_PAGE_BLOCKS,
+  },
+  toys: {
+    about: TOYS_ABOUT_PAGE_BLOCKS,
+    contact: TOYS_CONTACT_PAGE_BLOCKS,
+    blog: TOYS_BLOG_PAGE_BLOCKS,
+    shop: TOYS_SHOP_PAGE_BLOCKS,
+    faqs: TOYS_FAQS_PAGE_BLOCKS,
+  },
+  makeup: {
+    about: MAKEUP_ABOUT_PAGE_BLOCKS,
+    contact: MAKEUP_CONTACT_PAGE_BLOCKS,
+    blog: MAKEUP_BLOG_PAGE_BLOCKS,
+    shop: MAKEUP_SHOP_PAGE_BLOCKS,
+  },
+  grocery: {
+    about: GROCERY_ABOUT_PAGE_BLOCKS,
+    contact: GROCERY_CONTACT_PAGE_BLOCKS,
+    blog: GROCERY_BLOG_PAGE_BLOCKS,
+    shop: GROCERY_SHOP_PAGE_BLOCKS,
+  },
   decor: {
-    about: RETAIL_ABOUT_BLOCKS,
-    contact: RETAIL_CONTACT_BLOCKS,
-    projects: RETAIL_PROJECTS_BLOCKS,
-    "our-story": RETAIL_OUR_STORY_BLOCKS,
-    reviews: RETAIL_REVIEWS_BLOCKS,
-    "project-look-deep-into-nature": RETAIL_PROJECT_DETAIL_BLOCKS["project-look-deep-into-nature"],
-    "project-just-living-is-not-enough": RETAIL_PROJECT_DETAIL_BLOCKS["project-just-living-is-not-enough"],
-    "project-adopt-the-pace-of-nature": RETAIL_PROJECT_DETAIL_BLOCKS["project-adopt-the-pace-of-nature"],
-    "project-go-along-with-nature": RETAIL_PROJECT_DETAIL_BLOCKS["project-go-along-with-nature"],
+    about: DECOR_ABOUT_PAGE_BLOCKS,
+    contact: DECOR_CONTACT_PAGE_BLOCKS,
+    blog: DECOR_BLOG_PAGE_BLOCKS,
+    shop: DECOR_SHOP_PAGE_BLOCKS,
+  },
+  interior: {
+    about: DECOR_ABOUT_PAGE_BLOCKS,
+    contact: DECOR_CONTACT_PAGE_BLOCKS,
+    blog: DECOR_BLOG_PAGE_BLOCKS,
+    shop: DECOR_SHOP_PAGE_BLOCKS,
+  },
+  "interior-design": {
+    about: DECOR_ABOUT_PAGE_BLOCKS,
+    contact: DECOR_CONTACT_PAGE_BLOCKS,
+    blog: DECOR_BLOG_PAGE_BLOCKS,
+    shop: DECOR_SHOP_PAGE_BLOCKS,
+  },
+  "home-decor": {
+    about: DECOR_ABOUT_PAGE_BLOCKS,
+    contact: DECOR_CONTACT_PAGE_BLOCKS,
+    blog: DECOR_BLOG_PAGE_BLOCKS,
+    shop: DECOR_SHOP_PAGE_BLOCKS,
   },
 };
 

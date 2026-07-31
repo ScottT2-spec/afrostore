@@ -612,6 +612,406 @@ export function GroceryBestSellers({ products: propProducts, columns = 5, maxPro
 }
 
 /* ═══════════════════════════════════════════════════════════════
+   ABOUT HERO
+   ═══════════════════════════════════════════════════════════════ */
+
+export function GroceryAboutHero({
+  subtitle = "About Us",
+  title = "Our Story",
+  bodyText = [] as string[],
+  images = [] as string[],
+  ctaText = "Learn More",
+  ctaLink = "#",
+}: {
+  subtitle?: string;
+  title?: string;
+  bodyText?: string[];
+  images?: string[];
+  ctaText?: string;
+  ctaLink?: string;
+}) {
+  return (
+    <>
+      <ScopedStyles id="gc-about-hero" css={`
+        .gc-about-hero { padding: 60px 0; }
+        .gc-about-hero-inner { display: grid; grid-template-columns: 1fr 1fr; gap: 50px; align-items: center; }
+        .gc-about-hero-subtitle { font-family: ${TOKENS.bodyFont}; font-size: 13px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.15em; color: ${TOKENS.primaryColor}; margin-bottom: 14px; }
+        .gc-about-hero-title { font-family: ${TOKENS.titleFont}; font-size: 42px; font-weight: 700; line-height: 1.15; color: ${TOKENS.titleColor}; margin: 0 0 24px; }
+        .gc-about-hero-body p { font-family: ${TOKENS.bodyFont}; font-size: 15px; line-height: 1.85; color: ${TOKENS.textColor}; margin: 0 0 16px; }
+        .gc-about-hero-cta { display: inline-block; font-family: ${TOKENS.bodyFont}; font-size: 13px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.1em; color: #fff; background: ${TOKENS.primaryColor}; padding: 14px 32px; border-radius: ${TOKENS.borderRadius}; text-decoration: none; margin-top: 10px; transition: opacity 0.2s; }
+        .gc-about-hero-cta:hover { opacity: 0.85; }
+        .gc-about-hero-images { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+        .gc-about-hero-images img { width: 100%; height: 300px; object-fit: cover; border-radius: 4px; }
+        @media (max-width: 768px) {
+          .gc-about-hero-inner { grid-template-columns: 1fr; }
+          .gc-about-hero-title { font-size: 30px; }
+        }
+      `} />
+      <section className="gc-about-hero">
+        <div style={containerStyle}>
+          <div className="gc-about-hero-inner">
+            <div>
+              <p className="gc-about-hero-subtitle">{subtitle}</p>
+              <h1 className="gc-about-hero-title">{title}</h1>
+              <div className="gc-about-hero-body">
+                {bodyText.map((text, i) => <p key={i}>{text}</p>)}
+              </div>
+              {ctaText && <a href={ctaLink} className="gc-about-hero-cta">{ctaText}</a>}
+            </div>
+            <div className="gc-about-hero-images">
+              {images.map((img, i) => (
+                <img key={i} src={safeSrc(img)} alt={`About ${i + 1}`} onError={onImgError} />
+              ))}
+            </div>
+          </div>
+        </div>
+      </section>
+    </>
+  );
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   TEXT SECTION
+   ═══════════════════════════════════════════════════════════════ */
+
+export function GroceryTextSection({
+  sectionTitle = { subtitle: "", title: "" },
+  bodyText = [] as string[],
+  backgroundColor = "transparent",
+}: {
+  sectionTitle?: { subtitle?: string; title?: string };
+  bodyText?: string[];
+  backgroundColor?: string;
+}) {
+  return (
+    <>
+      <ScopedStyles id="gc-text-section" css={`
+        .gc-text-section { padding: 60px 0; }
+        .gc-text-section-inner { display: grid; grid-template-columns: 0.9fr 1.1fr; gap: 50px; }
+        .gc-text-section-subtitle { font-family: ${TOKENS.bodyFont}; font-size: 13px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.15em; color: ${TOKENS.primaryColor}; margin-bottom: 14px; }
+        .gc-text-section-title { font-family: ${TOKENS.titleFont}; font-size: 34px; font-weight: 700; line-height: 1.2; color: ${TOKENS.titleColor}; margin: 0; }
+        .gc-text-section-body p { font-family: ${TOKENS.bodyFont}; font-size: 15px; line-height: 1.85; color: ${TOKENS.textColor}; margin: 0 0 16px; }
+        @media (max-width: 768px) {
+          .gc-text-section-inner { grid-template-columns: 1fr; }
+        }
+      `} />
+      <section className="gc-text-section" style={{ backgroundColor }}>
+        <div style={containerStyle}>
+          <div className="gc-text-section-inner">
+            <div>
+              {sectionTitle.subtitle && <p className="gc-text-section-subtitle">{sectionTitle.subtitle}</p>}
+              <h2 className="gc-text-section-title">{sectionTitle.title}</h2>
+            </div>
+            <div className="gc-text-section-body">
+              {bodyText.map((text, i) => <p key={i}>{text}</p>)}
+            </div>
+          </div>
+        </div>
+      </section>
+    </>
+  );
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   TEAM SECTION
+   ═══════════════════════════════════════════════════════════════ */
+
+export function GroceryTeamSection({
+  sectionTitle = { subtitle: "", title: "" },
+  team = [] as { name: string; role: string; photoUrl: string }[],
+}: {
+  sectionTitle?: { subtitle?: string; title?: string };
+  team?: { name: string; role: string; photoUrl: string }[];
+}) {
+  return (
+    <>
+      <ScopedStyles id="gc-team-section" css={`
+        .gc-team-section { padding: 60px 0; }
+        .gc-team-header { text-align: center; margin-bottom: 40px; }
+        .gc-team-subtitle { font-family: ${TOKENS.bodyFont}; font-size: 13px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.15em; color: ${TOKENS.primaryColor}; margin-bottom: 14px; }
+        .gc-team-title { font-family: ${TOKENS.titleFont}; font-size: 34px; font-weight: 700; color: ${TOKENS.titleColor}; margin: 0; }
+        .gc-team-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 30px; }
+        .gc-team-card { text-align: center; }
+        .gc-team-card img { width: 100%; aspect-ratio: 1; object-fit: cover; border-radius: 4px; margin-bottom: 16px; }
+        .gc-team-name { font-family: ${TOKENS.titleFont}; font-size: 18px; font-weight: 700; color: ${TOKENS.titleColor}; margin: 0 0 4px; }
+        .gc-team-role { font-family: ${TOKENS.bodyFont}; font-size: 14px; color: ${TOKENS.textColor}; margin: 0; }
+        @media (max-width: 768px) {
+          .gc-team-grid { grid-template-columns: repeat(2, 1fr); }
+        }
+        @media (max-width: 480px) {
+          .gc-team-grid { grid-template-columns: 1fr; }
+        }
+      `} />
+      <section className="gc-team-section">
+        <div style={containerStyle}>
+          <div className="gc-team-header">
+            {sectionTitle.subtitle && <p className="gc-team-subtitle">{sectionTitle.subtitle}</p>}
+            <h2 className="gc-team-title">{sectionTitle.title}</h2>
+          </div>
+          <div className="gc-team-grid">
+            {team.map((member, i) => (
+              <div key={i} className="gc-team-card">
+                <img src={safeSrc(member.photoUrl)} alt={member.name} onError={onImgError} />
+                <h3 className="gc-team-name">{member.name}</h3>
+                <p className="gc-team-role">{member.role}</p>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+    </>
+  );
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   FAQ SECTION
+   ═══════════════════════════════════════════════════════════════ */
+
+function GroceryFaqItem({ question, answer }: { question: string; answer: string }) {
+  const [open, setOpen] = useState(false);
+  return (
+    <div className="gc-faq-item" style={{ borderBottom: "1px solid #e8e8e8" }}>
+      <button
+        className="gc-faq-question"
+        onClick={() => setOpen(!open)}
+        style={{
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "space-between",
+          width: "100%",
+          background: "none",
+          border: "none",
+          padding: "18px 0",
+          cursor: "pointer",
+          fontFamily: TOKENS.titleFont,
+          fontSize: "16px",
+          fontWeight: 600,
+          color: TOKENS.titleColor,
+          textAlign: "left",
+        }}
+      >
+        {question}
+        <span style={{ fontSize: "20px", lineHeight: 1, marginLeft: "16px", transition: "transform 0.2s", transform: open ? "rotate(45deg)" : "none" }}>+</span>
+      </button>
+      {open && (
+        <div
+          className="gc-faq-answer"
+          style={{
+            fontFamily: TOKENS.bodyFont,
+            fontSize: "14px",
+            lineHeight: "1.85",
+            color: TOKENS.textColor,
+            padding: "0 0 18px",
+          }}
+        >
+          {answer}
+        </div>
+      )}
+    </div>
+  );
+}
+
+export function GroceryFaqSection({
+  sectionTitle = { subtitle: "", title: "" },
+  faqs = [] as { question: string; answer: string }[],
+}: {
+  sectionTitle?: { subtitle?: string; title?: string };
+  faqs?: { question: string; answer: string }[];
+}) {
+  return (
+    <>
+      <ScopedStyles id="gc-faq-section" css={`
+        .gc-faq-section { padding: 60px 0; }
+        .gc-faq-header { margin-bottom: 30px; }
+        .gc-faq-subtitle { font-family: ${TOKENS.bodyFont}; font-size: 13px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.15em; color: ${TOKENS.primaryColor}; margin-bottom: 14px; }
+        .gc-faq-title { font-family: ${TOKENS.titleFont}; font-size: 34px; font-weight: 700; color: ${TOKENS.titleColor}; margin: 0; }
+      `} />
+      <section className="gc-faq-section">
+        <div style={containerStyle}>
+          <div className="gc-faq-header">
+            {sectionTitle.subtitle && <p className="gc-faq-subtitle">{sectionTitle.subtitle}</p>}
+            <h2 className="gc-faq-title">{sectionTitle.title}</h2>
+          </div>
+          <div>
+            {faqs.map((faq, i) => (
+              <GroceryFaqItem key={i} question={faq.question} answer={faq.answer} />
+            ))}
+          </div>
+        </div>
+      </section>
+    </>
+  );
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   CONTACT HERO
+   ═══════════════════════════════════════════════════════════════ */
+
+export function GroceryContactHero({
+  subtitle = "Our Stores",
+  title = "Visit Our Store",
+  address = "",
+  phone = "",
+  email = "",
+  hours = "",
+}: {
+  subtitle?: string;
+  title?: string;
+  address?: string;
+  phone?: string;
+  email?: string;
+  hours?: string;
+}) {
+  return (
+    <>
+      <ScopedStyles id="gc-contact-hero" css={`
+        .gc-contact-hero { padding: 60px 0; background: #f9f9f9; }
+        .gc-contact-hero-subtitle { font-family: ${TOKENS.bodyFont}; font-size: 13px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.15em; color: ${TOKENS.primaryColor}; margin-bottom: 14px; text-align: center; }
+        .gc-contact-hero-title { font-family: ${TOKENS.titleFont}; font-size: 42px; font-weight: 700; color: ${TOKENS.titleColor}; margin: 0 0 30px; text-align: center; line-height: 1.15; }
+        .gc-contact-info-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 30px; max-width: 800px; margin: 0 auto; }
+        .gc-contact-info-item { text-align: center; }
+        .gc-contact-info-label { font-family: ${TOKENS.titleFont}; font-size: 14px; font-weight: 700; text-transform: uppercase; color: ${TOKENS.titleColor}; margin-bottom: 6px; }
+        .gc-contact-info-value { font-family: ${TOKENS.bodyFont}; font-size: 14px; color: ${TOKENS.textColor}; line-height: 1.7; }
+      `} />
+      <section className="gc-contact-hero">
+        <div style={containerStyle}>
+          <p className="gc-contact-hero-subtitle">{subtitle}</p>
+          <h1 className="gc-contact-hero-title">{title}</h1>
+          <div className="gc-contact-info-grid">
+            {address && (
+              <div className="gc-contact-info-item">
+                <p className="gc-contact-info-label">Address</p>
+                <p className="gc-contact-info-value">{address}</p>
+              </div>
+            )}
+            {phone && (
+              <div className="gc-contact-info-item">
+                <p className="gc-contact-info-label">Phone</p>
+                <p className="gc-contact-info-value">{phone}</p>
+              </div>
+            )}
+            {email && (
+              <div className="gc-contact-info-item">
+                <p className="gc-contact-info-label">Email</p>
+                <p className="gc-contact-info-value">{email}</p>
+              </div>
+            )}
+            {hours && (
+              <div className="gc-contact-info-item">
+                <p className="gc-contact-info-label">Hours</p>
+                <p className="gc-contact-info-value">{hours}</p>
+              </div>
+            )}
+          </div>
+        </div>
+      </section>
+    </>
+  );
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   CONTACT FORM
+   ═══════════════════════════════════════════════════════════════ */
+
+export function GroceryContactForm({
+  title = "Contact Us",
+}: {
+  title?: string;
+}) {
+  return (
+    <>
+      <ScopedStyles id="gc-contact-form" css={`
+        .gc-contact-form { padding: 60px 0; }
+        .gc-contact-form-title { font-family: ${TOKENS.titleFont}; font-size: 34px; font-weight: 700; color: ${TOKENS.titleColor}; margin: 0 0 30px; }
+        .gc-contact-form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-bottom: 20px; }
+        .gc-contact-form input, .gc-contact-form textarea { font-family: ${TOKENS.bodyFont}; font-size: 14px; border: 1px solid #e0e0e0; padding: 14px 18px; width: 100%; box-sizing: border-box; outline: none; transition: border-color 0.2s; background: #fff; color: ${TOKENS.titleColor}; }
+        .gc-contact-form input:focus, .gc-contact-form textarea:focus { border-color: ${TOKENS.primaryColor}; }
+        .gc-contact-form textarea { min-height: 160px; resize: vertical; grid-column: 1 / -1; }
+        .gc-contact-form-submit { font-family: ${TOKENS.bodyFont}; font-size: 13px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.1em; color: #fff; background: ${TOKENS.primaryColor}; border: none; padding: 14px 36px; cursor: pointer; transition: opacity 0.2s; }
+        .gc-contact-form-submit:hover { opacity: 0.85; }
+        @media (max-width: 600px) {
+          .gc-contact-form-grid { grid-template-columns: 1fr; }
+        }
+      `} />
+      <section className="gc-contact-form">
+        <div style={containerStyle}>
+          <h2 className="gc-contact-form-title">{title}</h2>
+          <form onSubmit={(e) => e.preventDefault()}>
+            <div className="gc-contact-form-grid">
+              <input type="text" placeholder="Your name *" />
+              <input type="email" placeholder="Your email *" />
+              <input type="tel" placeholder="Phone number" />
+              <input type="text" placeholder="Company name" />
+              <textarea placeholder="Your message *" />
+            </div>
+            <button type="submit" className="gc-contact-form-submit">Send Message</button>
+          </form>
+        </div>
+      </section>
+    </>
+  );
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   BLOG GRID
+   ═══════════════════════════════════════════════════════════════ */
+
+export function GroceryBlogGrid({
+  sectionTitle = "Blog",
+  posts = [] as { id: number; title: string; slug: string; excerpt: string; image: string; category: string; author: string; date: string }[],
+}: {
+  sectionTitle?: string;
+  posts?: { id: number; title: string; slug: string; excerpt: string; image: string; category: string; author: string; date: string }[];
+}) {
+  return (
+    <>
+      <ScopedStyles id="gc-blog-grid" css={`
+        .gc-blog-grid { padding: 60px 0; }
+        .gc-blog-grid-title { font-family: ${TOKENS.titleFont}; font-size: 34px; font-weight: 700; color: ${TOKENS.titleColor}; text-align: center; margin: 0 0 40px; }
+        .gc-blog-posts { display: grid; grid-template-columns: repeat(3, 1fr); gap: 30px; }
+        .gc-blog-card { background: #fff; overflow: hidden; }
+        .gc-blog-card-img-wrap { position: relative; overflow: hidden; }
+        .gc-blog-card-img-wrap img { width: 100%; height: 240px; object-fit: cover; display: block; transition: transform 0.3s; }
+        .gc-blog-card:hover img { transform: scale(1.05); }
+        .gc-blog-card-date { position: absolute; top: 16px; left: 16px; background: ${TOKENS.primaryColor}; color: #fff; font-family: ${TOKENS.bodyFont}; font-size: 12px; font-weight: 600; padding: 6px 12px; text-transform: uppercase; }
+        .gc-blog-card-body { padding: 20px 0; }
+        .gc-blog-card-category { font-family: ${TOKENS.bodyFont}; font-size: 12px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.1em; color: ${TOKENS.primaryColor}; margin-bottom: 8px; }
+        .gc-blog-card-title { font-family: ${TOKENS.titleFont}; font-size: 18px; font-weight: 700; color: ${TOKENS.titleColor}; margin: 0 0 10px; line-height: 1.3; }
+        .gc-blog-card-meta { font-family: ${TOKENS.bodyFont}; font-size: 13px; color: ${TOKENS.textColor}; margin-bottom: 10px; }
+        .gc-blog-card-excerpt { font-family: ${TOKENS.bodyFont}; font-size: 14px; line-height: 1.7; color: ${TOKENS.textColor}; }
+        @media (max-width: 900px) {
+          .gc-blog-posts { grid-template-columns: repeat(2, 1fr); }
+        }
+        @media (max-width: 600px) {
+          .gc-blog-posts { grid-template-columns: 1fr; }
+        }
+      `} />
+      <section className="gc-blog-grid">
+        <div style={containerStyle}>
+          <h2 className="gc-blog-grid-title">{sectionTitle}</h2>
+          <div className="gc-blog-posts">
+            {posts.map((post) => (
+              <article key={post.id} className="gc-blog-card">
+                <div className="gc-blog-card-img-wrap">
+                  <img src={safeSrc(post.image)} alt={post.title} onError={onImgError} />
+                  <span className="gc-blog-card-date">{post.date}</span>
+                </div>
+                <div className="gc-blog-card-body">
+                  <p className="gc-blog-card-category">{post.category}</p>
+                  <h3 className="gc-blog-card-title">{post.title}</h3>
+                  <p className="gc-blog-card-meta">By {post.author}</p>
+                  <p className="gc-blog-card-excerpt">{post.excerpt}</p>
+                </div>
+              </article>
+            ))}
+          </div>
+        </div>
+      </section>
+    </>
+  );
+}
+
+/* ═══════════════════════════════════════════════════════════════
    FOOTER
    ═══════════════════════════════════════════════════════════════ */
 
