@@ -124,9 +124,11 @@ interface OrderConfirmationEmailData {
   currency: string;
   paymentMethod: string;
   deliveryAddress?: {
-    address?: string;
+    line1?: string;
     city?: string;
     state?: string;
+    country?: string;
+    deliveryInstructions?: string;
   };
 }
 
@@ -166,7 +168,7 @@ export async function sendOrderConfirmationEmail(
     .join("");
 
   const addressText = data.deliveryAddress
-    ? [data.deliveryAddress.address, data.deliveryAddress.city, data.deliveryAddress.state]
+    ? [data.deliveryAddress.line1, data.deliveryAddress.city, data.deliveryAddress.state, data.deliveryAddress.country]
         .filter(Boolean)
         .join(", ")
     : "Not provided";
