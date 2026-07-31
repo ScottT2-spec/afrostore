@@ -2,6 +2,7 @@
 import Link from "next/link";
 import { resolveStoreLink } from "@/lib/template-link-utils";
 import { useState, useEffect, createContext, useContext, useRef } from "react";
+import { useRouter } from "next/navigation"; // ADDED LINE
 import { onImgError } from "./image-fallback";
 
 /* ═══════════════════════════════════════════════════════════════
@@ -75,12 +76,74 @@ export function ProkipAgentModal({
   submitText = "JOIN OUR TEAM NOW",
 }: ProkipAgentModalProps) {
   const [open, setOpen] = useState(false);
+  const [formData, setFormData] = useState({
+    fullName: "",
+    email: "",
+    phone: "",
+  });
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const [success, setSuccess] = useState(false);
+  const router = useRouter(); // Initialize router
+  const { storeSlug } = useContext(ProkipAgentCtx); // Get storeSlug from context
 
   useEffect(() => {
     const handler = () => setOpen(true);
     window.addEventListener("open-application-modal", handler);
     return () => window.removeEventListener("open-application-modal", handler);
   }, []);
+
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setFormData({ ...formData, [e.target.name]: e.target.value });
+  };
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setLoading(true);
+    setError(null);
+    setSuccess(false);
+
+    try {
+      // Use storeSlug from context for the API endpoint
+      const apiEndpoint = `/api/sites/${storeSlug || 'default_site'}/crm/contacts`; 
+
+      // Split fullName into firstName and lastName
+      const [firstName, ...lastNameParts] = formData.fullName.split(' ').filter(Boolean);
+      const lastName = lastNameParts.join(' ');
+
+      const response = await fetch(apiEndpoint, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          firstName: firstName || '', // Ensure it's never undefined
+          lastName: lastName || '',   // Ensure it's never undefined
+          email: formData.email,
+          phone: `${fields.find(f => f.name === 'phone')?.prefix || ''}${formData.phone}`,
+        }),
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.message || "Failed to submit form");
+      }
+
+      setSuccess(true);
+      setTimeout(() => {
+        setOpen(false);
+        if (onSubmitRedirect) {
+          router.push(onSubmitRedirect);
+        }
+      }, 1500);
+
+    } catch (err: any) {
+      console.error("Form submission error:", err);
+      setError(err.message || "An unexpected error occurred.");
+    } finally {
+      setLoading(false);
+    }
+  };
 
   const css = `
     .pa-modal-overlay { position: fixed; inset: 0; z-index: 50; display: flex; align-items: center; justify-content: center; padding: 16px; background: ${T.navy950}cc; backdrop-filter: blur(4px); overflow-y: auto; }
