@@ -84,6 +84,14 @@ export function ProkipAgentModal({
     email: "",
     phone: "",
   });
+  const [detectedSlug, setDetectedSlug] = useState<string | undefined>(storeSlug);
+  useEffect(() => {
+    if (typeof window !== 'undefined' && !storeSlug) {
+      // Try to infer slug from /store/<slug>/... URL paths
+      const m = window.location.pathname.match(/\/store\/([^\/]+)/);
+      if (m?.[1]) setDetectedSlug(m[1]);
+    }
+  }, [storeSlug]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState(false);
@@ -114,8 +122,11 @@ export function ProkipAgentModal({
     setSuccess(false);
 
     try {
-      // Use storeSlug from context for the API endpoint
-      const apiEndpoint = `/api/sites/${storeSlug || 'default_site'}/crm/contacts`; 
+      // Prefer public, slug-based endpoint (no auth). Fallback to siteId path if provided explicitly.
+      const slug = detectedSlug || storeSlug;
+      const apiEndpoint = slug
+        ? `/api/public/sites/${slug}/crm/contacts`
+        : `/api/sites/${storeSlug || 'default_site'}/crm/contacts`; 
 
       // Split fullName into firstName and lastName
       const [firstName, ...lastNameParts] = formData.fullName.split(' ').filter(Boolean);
