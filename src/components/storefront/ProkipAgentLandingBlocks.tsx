@@ -90,6 +90,13 @@ export function ProkipAgentModal({
   const router = useRouter(); // Initialize router
   // const { storeSlug } = useContext(ProkipAgentCtx); // REMOVED: Get storeSlug from context
 
+  // Warn if storeSlug is missing so submissions won't 404 silently
+  useEffect(() => {
+    if (!storeSlug) {
+      setError('This form is not configured yet. Missing store identifier.');
+    }
+  }, [storeSlug]);
+
   useEffect(() => {
     const handler = () => setOpen(true);
     window.addEventListener("open-application-modal", handler);
@@ -177,21 +184,49 @@ export function ProkipAgentModal({
         <button className="pa-modal-close" onClick={() => setOpen(false)}>✕</button>
         <h3 className="pa-modal-title">{title}</h3>
         <div style={{ textAlign: "center" }}><span className="pa-modal-badge">{badge}</span></div>
-        <form className="pa-modal-form" onSubmit={(e) => { e.preventDefault(); setOpen(false); }}>
+        <form className="pa-modal-form" onSubmit={handleSubmit}>
+          {error && (
+            <div style={{background:'#3b0d0d', border:'1px solid #ef444433', color:'#fecaca', padding:'12px 16px', borderRadius:'12px'}}>
+              {error}
+            </div>
+          )}
+          {success && (
+            <div style={{background:'#0b3b1b', border:'1px solid #22c55e33', color:'#bbf7d0', padding:'12px 16px', borderRadius:'12px'}}>
+              Application submitted successfully.
+            </div>
+          )}
           {fields.map((f) => (
             <div key={f.name}>
               <label className="pa-modal-label">{f.label}</label>
               {f.prefix ? (
                 <div className="pa-modal-phone-wrap">
                   <span className="pa-modal-prefix">{f.prefix}</span>
-                  <input type={f.type} placeholder={f.placeholder} required className="pa-modal-phone-input" />
+                  <input
+                    name={f.name}
+                    type={f.type}
+                    placeholder={f.placeholder}
+                    required
+                    className="pa-modal-phone-input"
+                    value={(formData as any)[f.name] || ''}
+                    onChange={handleChange}
+                  />
                 </div>
               ) : (
-                <input type={f.type} placeholder={f.placeholder} required className="pa-modal-input" />
+                <input
+                  name={f.name}
+                  type={f.type}
+                  placeholder={f.placeholder}
+                  required
+                  className="pa-modal-input"
+                  value={(formData as any)[f.name] || ''}
+                  onChange={handleChange}
+                />
               )}
             </div>
           ))}
-          <button type="submit" className="pa-modal-submit">{submitText} ✈</button>
+          <button type="submit" className="pa-modal-submit" disabled={loading || !storeSlug}>
+            {loading ? 'Submitting…' : submitText} ✈
+          </button>
         </form>
       </div>
     </div>
