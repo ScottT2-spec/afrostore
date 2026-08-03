@@ -5,7 +5,7 @@ import { COSMETICS_TERMS_BLOCKS, COSMETICS_SHOP_BLOCKS, COSMETICS_BLOG_BLOCKS } 
 import { TSHIRTS_PRINTS_ABOUT_PAGE_BLOCKS, TSHIRTS_PRINTS_CONTACT_PAGE_BLOCKS, TSHIRTS_PRINTS_BLOG_PAGE_BLOCKS } from "./presets/t-shirts-prints-page-presets";
 import { VEGETABLE_HOME_PAGE_BLOCKS, VEGETABLE_MENU_PAGE_BLOCKS, VEGETABLE_RECIPE_PAGE_BLOCKS, VEGETABLE_ABOUT_PAGE_BLOCKS, VEGETABLE_CONTACT_PAGE_BLOCKS, VEGETABLE_RESERVATION_PAGE_BLOCKS } from "./presets/vegetables-page-presets";
 import { PERFUMES_HOME_PAGE_BLOCKS, PERFUMES_ABOUT_PAGE_BLOCKS, PERFUMES_CONTACT_PAGE_BLOCKS, PERFUMES_FRAGRANCES_PAGE_BLOCKS, PERFUMES_JOURNAL_PAGE_BLOCKS, PERFUMES_REVIEWS_PAGE_BLOCKS } from "./presets/perfumes-page-presets";
-import { RETAIL_ABOUT_BLOCKS, RETAIL_CONTACT_BLOCKS, RETAIL_OUR_STORY_BLOCKS, RETAIL_REVIEWS_BLOCKS } from "./presets/retail-pages";
+import { RETAIL_ABOUT_BLOCKS, RETAIL_CONTACT_BLOCKS, RETAIL_OUR_STORY_BLOCKS, RETAIL_REVIEWS_BLOCKS } from "./presets/retail-pages"; // projects removed
 import { FASHION_ABOUT_PAGE_BLOCKS, FASHION_CONTACT_PAGE_BLOCKS, FASHION_BLOG_PAGE_BLOCKS, FASHION_SHOP_PAGE_BLOCKS } from "./presets/fashion-page-presets";
 import { FASHION_COLORED_ABOUT_PAGE_BLOCKS, FASHION_COLORED_CONTACT_PAGE_BLOCKS, FASHION_COLORED_BLOG_PAGE_BLOCKS, FASHION_COLORED_SHOP_PAGE_BLOCKS } from "./presets/fashion-colored-page-presets";
 import { BAKERY_ABOUT_PAGE_BLOCKS, BAKERY_CONTACT_PAGE_BLOCKS, BAKERY_BLOG_PAGE_BLOCKS, BAKERY_SHOP_PAGE_BLOCKS } from "./presets/bakery-page-presets";
@@ -251,13 +251,8 @@ export const TEMPLATE_PAGE_CONTENT_MAP: Record<string, Record<string, unknown[]>
   retail: {
     about: RETAIL_ABOUT_BLOCKS,
     contact: RETAIL_CONTACT_BLOCKS,
-    projects: RETAIL_PROJECTS_BLOCKS,
     "our-story": RETAIL_OUR_STORY_BLOCKS,
     reviews: RETAIL_REVIEWS_BLOCKS,
-    "project-look-deep-into-nature": RETAIL_PROJECT_DETAIL_BLOCKS["project-look-deep-into-nature"],
-    "project-just-living-is-not-enough": RETAIL_PROJECT_DETAIL_BLOCKS["project-just-living-is-not-enough"],
-    "project-adopt-the-pace-of-nature": RETAIL_PROJECT_DETAIL_BLOCKS["project-adopt-the-pace-of-nature"],
-    "project-go-along-with-nature": RETAIL_PROJECT_DETAIL_BLOCKS["project-go-along-with-nature"],
   },
   kids: {
     about: KIDS_ABOUT_PAGE_BLOCKS,
