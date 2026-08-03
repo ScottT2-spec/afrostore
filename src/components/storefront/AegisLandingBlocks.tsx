@@ -3,6 +3,7 @@ import Link from "next/link";
 import { resolveStoreLink } from "@/lib/template-link-utils";
 import { createContext, useContext } from "react";
 import { onImgError } from "./image-fallback";
+import { InlineEditableText } from "@/components/storefront/InlineEditableText";
 
 /* ═══════════════════════════════════════════════════════════════
    AEGIS LANDING PAGE TEMPLATE BLOCKS
@@ -52,6 +53,38 @@ function S({ id, css }: { id: string; css: string }) {
 }
 const ctr: React.CSSProperties = { maxWidth: "1280px", margin: "0 auto", padding: "0 32px", boxSizing: "border-box" as const };
 
+function EditableCopy({
+  blockId,
+  isEditor = false,
+  field,
+  fieldPath,
+  value,
+  as = "div",
+  className,
+  style,
+  multiline = false,
+}: {
+  blockId?: string;
+  isEditor?: boolean;
+  field?: string;
+  fieldPath?: string;
+  value: string;
+  as?: "div" | "p" | "span" | "h1" | "h2" | "h3" | "h4" | "h5" | "h6";
+  className?: string;
+  style?: React.CSSProperties;
+  multiline?: boolean;
+}) {
+  const Tag = as;
+  if (!isEditor) {
+    return (
+      <Tag className={className} style={style}>
+        {value}
+      </Tag>
+    );
+  }
+  return <InlineEditableText nodeId={blockId} field={field} fieldPath={fieldPath} value={value} isEditor={isEditor} as={as} className={className} style={style} multiline={multiline} />;
+}
+
 /* ═══════════════════════════════════════════════════════════════
    1. HEADER
    ═══════════════════════════════════════════════════════════════ */
@@ -62,6 +95,8 @@ export interface AegisHeaderProps {
   portalLink?: string;
   ctaText?: string;
   ctaLink?: string;
+  blockId?: string;
+  isEditor?: boolean;
 }
 
 export function AegisHeader({
@@ -71,6 +106,8 @@ export function AegisHeader({
   portalLink = "#",
   ctaText = "Donate",
   ctaLink = "#",
+  blockId,
+  isEditor = false,
 }: AegisHeaderProps) {
   const fix = useFix();
   const css = `
@@ -92,13 +129,13 @@ export function AegisHeader({
     <nav className="aegis-nav">
       <S id="header" css={css} />
       <div className="aegis-nav-inner">
-        <Link href={fix("/")} className="aegis-brand">{brandName}</Link>
+        {isEditor ? <EditableCopy blockId={blockId} isEditor field="brandName" value={brandName} as="span" className="aegis-brand" /> : <Link href={fix("/")} className="aegis-brand">{brandName}</Link>}
         <div className="aegis-links">
-          {navLinks.map((l, i) => <Link key={i} href={fix(l.href)} className={`aegis-link ${l.active ? "aegis-link-active" : ""}`}>{l.label}</Link>)}
+          {navLinks.map((l, i) => isEditor ? <EditableCopy key={i} blockId={blockId} isEditor fieldPath={`navLinks.${i}.label`} value={l.label} as="span" className={`aegis-link ${l.active ? "aegis-link-active" : ""}`} /> : <Link key={i} href={fix(l.href)} className={`aegis-link ${l.active ? "aegis-link-active" : ""}`}>{l.label}</Link>)}
         </div>
         <div className="aegis-nav-right">
-          <Link href={fix(portalLink)} className="aegis-portal">{portalText}</Link>
-          <Link href={fix(ctaLink)} className="aegis-donate">{ctaText}</Link>
+          {isEditor ? <EditableCopy blockId={blockId} isEditor field="portalText" value={portalText} as="span" className="aegis-portal" /> : <Link href={fix(portalLink)} className="aegis-portal">{portalText}</Link>}
+          {isEditor ? <EditableCopy blockId={blockId} isEditor field="ctaText" value={ctaText} as="span" className="aegis-donate" /> : <Link href={fix(ctaLink)} className="aegis-donate">{ctaText}</Link>}
         </div>
       </div>
     </nav>
@@ -119,6 +156,8 @@ export interface AegisHeroProps {
   secondaryButtonLink?: string;
   backgroundImage?: string;
   stats?: AegisHeroStat[];
+  blockId?: string;
+  isEditor?: boolean;
 }
 
 export function AegisHero({
@@ -131,6 +170,8 @@ export function AegisHero({
   secondaryButtonLink = "#",
   backgroundImage = "",
   stats = [],
+  blockId,
+  isEditor = false,
 }: AegisHeroProps) {
   const fix = useFix();
   const statStyles: Record<string, { bg: string; textColor: string; labelColor: string }> = {
@@ -175,11 +216,12 @@ export function AegisHero({
       <div style={{ ...ctr, width: "100%", padding: "96px 32px" }}>
         <div className="aegis-hero-grid">
           <div className="aegis-hero-text">
-            <h1 className="aegis-hero-h1">{titleLine1}<br /><em>{titleLine2}</em></h1>
-            {description && <p className="aegis-hero-desc">{description}</p>}
+            <EditableCopy blockId={blockId} isEditor={isEditor} field="titleLine1" value={titleLine1} as="h1" className="aegis-hero-h1" />
+            <EditableCopy blockId={blockId} isEditor={isEditor} field="titleLine2" value={titleLine2} as="span" style={{ fontStyle: "italic" }} />
+            {description && <EditableCopy blockId={blockId} isEditor={isEditor} field="description" value={description} as="p" multiline className="aegis-hero-desc" />}
             <div className="aegis-hero-btns">
-              <Link href={fix(primaryButtonLink)} className="aegis-hero-btn aegis-hero-btn-pri">{primaryButtonText} →</Link>
-              {secondaryButtonText && <Link href={fix(secondaryButtonLink)} className="aegis-hero-btn aegis-hero-btn-sec">{secondaryButtonText}</Link>}
+              {isEditor ? <EditableCopy blockId={blockId} isEditor field="primaryButtonText" value={primaryButtonText} as="span" className="aegis-hero-btn aegis-hero-btn-pri" /> : <Link href={fix(primaryButtonLink)} className="aegis-hero-btn aegis-hero-btn-pri">{primaryButtonText} →</Link>}
+              {secondaryButtonText && (isEditor ? <EditableCopy blockId={blockId} isEditor field="secondaryButtonText" value={secondaryButtonText} as="span" className="aegis-hero-btn aegis-hero-btn-sec" /> : <Link href={fix(secondaryButtonLink)} className="aegis-hero-btn aegis-hero-btn-sec">{secondaryButtonText}</Link>)}
             </div>
           </div>
           {stats.length > 0 && (
@@ -188,8 +230,8 @@ export function AegisHero({
                 const st = statStyles[s.style || "light"];
                 return (
                   <div key={i} className="aegis-stat" style={{ background: st.bg }}>
-                    <p className="aegis-stat-val" style={{ color: st.textColor }}>{s.value}</p>
-                    <p className="aegis-stat-label" style={{ color: st.labelColor }}>{s.label}</p>
+                    <EditableCopy blockId={blockId} isEditor={isEditor} fieldPath={`stats.${i}.value`} value={s.value} as="p" className="aegis-stat-val" style={{ color: st.textColor }} />
+                    <EditableCopy blockId={blockId} isEditor={isEditor} fieldPath={`stats.${i}.label`} value={s.label} as="p" className="aegis-stat-label" style={{ color: st.labelColor }} />
                   </div>
                 );
               })}
@@ -212,6 +254,8 @@ export interface AegisServicesProps {
   linkText?: string;
   linkHref?: string;
   cards?: AegisServiceCard[];
+  blockId?: string;
+  isEditor?: boolean;
 }
 
 export function AegisServices({
@@ -221,6 +265,8 @@ export function AegisServices({
   linkText = "Explore our medical protocols",
   linkHref = "#",
   cards = [],
+  blockId,
+  isEditor = false,
 }: AegisServicesProps) {
   const fix = useFix();
   const css = `
@@ -250,17 +296,17 @@ export function AegisServices({
       <div style={ctr}>
         <div className="aegis-svc-layout">
           <div className="aegis-svc-left">
-            {subtitle && <p className="aegis-svc-sub">{subtitle}</p>}
-            <h2 className="aegis-svc-title">{title}</h2>
-            {description && <p className="aegis-svc-desc">{description}</p>}
-            {linkText && <Link href={fix(linkHref)} className="aegis-svc-link">{linkText} →</Link>}
+            {subtitle && <EditableCopy blockId={blockId} isEditor={isEditor} field="subtitle" value={subtitle} as="p" className="aegis-svc-sub" />}
+            <EditableCopy blockId={blockId} isEditor={isEditor} field="title" value={title} as="h2" multiline className="aegis-svc-title" />
+            {description && <EditableCopy blockId={blockId} isEditor={isEditor} field="description" value={description} as="p" multiline className="aegis-svc-desc" />}
+            {linkText && (isEditor ? <EditableCopy blockId={blockId} isEditor field="linkText" value={linkText} as="span" className="aegis-svc-link" /> : <Link href={fix(linkHref)} className="aegis-svc-link">{linkText} →</Link>)}
           </div>
           <div className="aegis-svc-right">
             {cards.map((c, i) => (
               <div key={i} className={`aegis-card ${i % 2 === 0 ? "aegis-card-light" : "aegis-card-dim"}`}>
                 <span className={`material-symbols-outlined aegis-card-icon ${c.accent ? "aegis-card-icon-accent" : "aegis-card-icon-primary"}`}>{c.icon}</span>
-                <h3 className="aegis-card-title">{c.title}</h3>
-                <p className="aegis-card-desc">{c.description}</p>
+                <EditableCopy blockId={blockId} isEditor={isEditor} fieldPath={`cards.${i}.title`} value={c.title} as="h3" className="aegis-card-title" />
+                <EditableCopy blockId={blockId} isEditor={isEditor} fieldPath={`cards.${i}.description`} value={c.description} as="p" multiline className="aegis-card-desc" />
               </div>
             ))}
           </div>
@@ -283,6 +329,8 @@ export interface AegisStoriesProps {
   testimonialName?: string;
   testimonialRole?: string;
   testimonialAvatar?: string;
+  blockId?: string;
+  isEditor?: boolean;
 }
 
 export function AegisStories({
@@ -295,6 +343,8 @@ export function AegisStories({
   testimonialName = "",
   testimonialRole = "",
   testimonialAvatar = "",
+  blockId,
+  isEditor = false,
 }: AegisStoriesProps) {
   const css = `
     .aegis-stories { background: ${C.surfaceLow}; padding: 128px 0; }
@@ -324,7 +374,7 @@ export function AegisStories({
       <S id="stories" css={css} />
       <div style={ctr}>
         <div className="aegis-stories-header">
-          <h2 className="aegis-stories-h2">{sectionTitle}</h2>
+          <EditableCopy blockId={blockId} isEditor={isEditor} field="sectionTitle" value={sectionTitle} as="h2" className="aegis-stories-h2" />
           <div className="aegis-stories-bar" />
         </div>
         <div className="aegis-stories-grid">
@@ -332,19 +382,19 @@ export function AegisStories({
             {storyImage && <img src={storyImage} alt="Story" onError={(e) => onImgError(e, "story")} />}
             <div className="aegis-story-overlay" />
             <div className="aegis-story-text">
-              <span className="aegis-story-badge">{storyBadge}</span>
-              <h4 className="aegis-story-quote">{storyQuote}</h4>
-              <p className="aegis-story-author">{storyAuthor}</p>
+              <EditableCopy blockId={blockId} isEditor={isEditor} field="storyBadge" value={storyBadge} as="span" className="aegis-story-badge" />
+              <EditableCopy blockId={blockId} isEditor={isEditor} field="storyQuote" value={storyQuote} as="h4" className="aegis-story-quote" />
+              <EditableCopy blockId={blockId} isEditor={isEditor} field="storyAuthor" value={storyAuthor} as="p" className="aegis-story-author" />
             </div>
           </div>
           <div className="aegis-testimonial">
             <span className="material-symbols-outlined aegis-testimonial-icon">format_quote</span>
-            <p className="aegis-testimonial-text">{testimonialQuote}</p>
+            <EditableCopy blockId={blockId} isEditor={isEditor} field="testimonialQuote" value={testimonialQuote} as="p" multiline className="aegis-testimonial-text" />
             <div className="aegis-testimonial-author">
               {testimonialAvatar && <img src={testimonialAvatar} alt={testimonialName} className="aegis-testimonial-avatar" onError={(e) => onImgError(e, "avatar")} />}
               <div>
-                <p className="aegis-testimonial-name">{testimonialName}</p>
-                <p className="aegis-testimonial-role">{testimonialRole}</p>
+                <EditableCopy blockId={blockId} isEditor={isEditor} field="testimonialName" value={testimonialName} as="p" className="aegis-testimonial-name" />
+                <EditableCopy blockId={blockId} isEditor={isEditor} field="testimonialRole" value={testimonialRole} as="p" className="aegis-testimonial-role" />
               </div>
             </div>
           </div>
@@ -364,6 +414,8 @@ export interface AegisCTAProps {
   primaryButtonLink?: string;
   secondaryButtonText?: string;
   secondaryButtonLink?: string;
+  blockId?: string;
+  isEditor?: boolean;
 }
 
 export function AegisCTA({
@@ -373,6 +425,8 @@ export function AegisCTA({
   primaryButtonLink = "#",
   secondaryButtonText = "Speak with a Specialist",
   secondaryButtonLink = "#",
+  blockId,
+  isEditor = false,
 }: AegisCTAProps) {
   const fix = useFix();
   const css = `
@@ -398,11 +452,11 @@ export function AegisCTA({
         <div className="aegis-cta-orb1" />
         <div className="aegis-cta-orb2" />
         <div className="aegis-cta-inner">
-          <h2 className="aegis-cta-h2">{title}</h2>
-          {description && <p className="aegis-cta-desc">{description}</p>}
+          <EditableCopy blockId={blockId} isEditor={isEditor} field="title" value={title} as="h2" className="aegis-cta-h2" />
+          {description && <EditableCopy blockId={blockId} isEditor={isEditor} field="description" value={description} as="p" multiline className="aegis-cta-desc" />}
           <div className="aegis-cta-btns">
-            <Link href={fix(primaryButtonLink)} className="aegis-cta-btn aegis-cta-btn-light">{primaryButtonText}</Link>
-            {secondaryButtonText && <Link href={fix(secondaryButtonLink)} className="aegis-cta-btn aegis-cta-btn-sec">{secondaryButtonText}</Link>}
+            {isEditor ? <EditableCopy blockId={blockId} isEditor field="primaryButtonText" value={primaryButtonText} as="span" className="aegis-cta-btn aegis-cta-btn-light" /> : <Link href={fix(primaryButtonLink)} className="aegis-cta-btn aegis-cta-btn-light">{primaryButtonText}</Link>}
+            {secondaryButtonText && (isEditor ? <EditableCopy blockId={blockId} isEditor field="secondaryButtonText" value={secondaryButtonText} as="span" className="aegis-cta-btn aegis-cta-btn-sec" /> : <Link href={fix(secondaryButtonLink)} className="aegis-cta-btn aegis-cta-btn-sec">{secondaryButtonText}</Link>)}
           </div>
         </div>
       </div>
@@ -420,6 +474,8 @@ export interface AegisFooterProps {
   columns?: AegisFooterColumn[];
   socialIcons?: Array<{ icon: string; href: string }>;
   copyright?: string;
+  blockId?: string;
+  isEditor?: boolean;
 }
 
 export function AegisFooter({
@@ -428,6 +484,8 @@ export function AegisFooter({
   columns = [],
   socialIcons = [],
   copyright = "© 2024 Aegis Health.",
+  blockId,
+  isEditor = false,
 }: AegisFooterProps) {
   const fix = useFix();
   const css = `
@@ -451,24 +509,24 @@ export function AegisFooter({
       <div style={ctr}>
         <div className="aegis-footer-grid">
           <div>
-            <h3 className="aegis-footer-brand">{brandName}</h3>
-            <p className="aegis-footer-tagline">{tagline}</p>
+            <EditableCopy blockId={blockId} isEditor={isEditor} field="brandName" value={brandName} as="h3" className="aegis-footer-brand" />
+            <EditableCopy blockId={blockId} isEditor={isEditor} field="tagline" value={tagline} as="p" multiline className="aegis-footer-tagline" />
           </div>
           {columns.map((col, i) => (
             <div key={i}>
-              <h4 className="aegis-footer-col-title">{col.title}</h4>
+              <EditableCopy blockId={blockId} isEditor={isEditor} fieldPath={`columns.${i}.title`} value={col.title} as="h4" className="aegis-footer-col-title" />
               <nav className="aegis-footer-links">
-                {col.links.map((l, j) => <Link key={j} href={fix(l.href)} className="aegis-footer-link">{l.label}</Link>)}
+                {col.links.map((l, j) => isEditor ? <EditableCopy key={j} blockId={blockId} isEditor fieldPath={`columns.${i}.links.${j}.label`} value={l.label} as="span" className="aegis-footer-link" /> : <Link key={j} href={fix(l.href)} className="aegis-footer-link">{l.label}</Link>)}
               </nav>
             </div>
           ))}
           {columns.length < 3 && (
             <div>
-              <h4 className="aegis-footer-col-title">Connect</h4>
+              <EditableCopy blockId={blockId} isEditor={isEditor} field="connectTitle" value="Connect" as="h4" className="aegis-footer-col-title" />
               <div className="aegis-footer-social">
                 {socialIcons.map((s, i) => <a key={i} href={s.href} className="aegis-footer-social-btn"><span className="material-symbols-outlined" style={{ fontSize: 20 }}>{s.icon}</span></a>)}
               </div>
-              <p className="aegis-footer-copy">{copyright}</p>
+              <EditableCopy blockId={blockId} isEditor={isEditor} field="copyright" value={copyright} as="p" className="aegis-footer-copy" />
             </div>
           )}
         </div>

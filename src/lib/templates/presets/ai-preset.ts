@@ -1,16 +1,16 @@
-import type { TemplateBlock } from "@/components/storefront/TemplateBlockRenderer";
+import type { EditorNode } from "@/lib/visual-editor/node-tree";
 
 /**
  * AI Template Preset
  * Allbirds-inspired modern e-commerce layout.
  * Full-bleed imagery, clean typography, editorial feel.
  */
-export const AI_TEMPLATE_PRESET: TemplateBlock[] = [
+export const AI_TEMPLATE_PRESET: EditorNode[] = [
   /* ── 1. Announcement Bar ──────────────────────────────── */
   {
     id: "ai-announcement",
     type: "aiAnnouncementBar",
-    props: {
+    settings: {
       messages: [
         "Free Shipping on Orders Over $75",
         "New Collection Just Dropped — Shop Now",
@@ -27,7 +27,7 @@ export const AI_TEMPLATE_PRESET: TemplateBlock[] = [
   {
     id: "ai-hero",
     type: "aiHeroVideo",
-    props: {
+    settings: {
       backgroundImage: "https://images.unsplash.com/photo-1441986300917-64674bd600d8?w=1920&h=1080&fit=crop",
       backgroundVideo: "",
       buttons: [
@@ -44,7 +44,7 @@ export const AI_TEMPLATE_PRESET: TemplateBlock[] = [
   {
     id: "ai-categories",
     type: "aiCategoryRow",
-    props: {
+    settings: {
       cards: [
         {
           title: "New Arrivals",
@@ -88,7 +88,7 @@ export const AI_TEMPLATE_PRESET: TemplateBlock[] = [
   {
     id: "ai-featured-carousel",
     type: "aiLargeProductCarousel",
-    props: {
+    settings: {
       tabs: [
         {
           label: "Bestsellers",
@@ -154,7 +154,7 @@ export const AI_TEMPLATE_PRESET: TemplateBlock[] = [
   {
     id: "ai-promo-tiles",
     type: "aiPromoTiles",
-    props: {
+    settings: {
       tiles: [
         {
           title: "New Arrivals",
@@ -188,7 +188,7 @@ export const AI_TEMPLATE_PRESET: TemplateBlock[] = [
   {
     id: "ai-product-carousel",
     type: "aiProductCarousel",
-    props: {
+    settings: {
       tabs: [
         {
           label: "Sale",
@@ -280,8 +280,8 @@ export const AI_TEMPLATE_PRESET: TemplateBlock[] = [
   {
     id: "ai-value-props",
     type: "aiValueProps",
-    props: {
-      props: [
+    settings: {
+      settings: [
         {
           title: "Wear All Day Comfort",
           description: "Lightweight, bouncy, and wildly comfortable. Our products make any outing feel effortless. Slip in, lace up, or slide them on and enjoy the support.",
@@ -302,7 +302,7 @@ export const AI_TEMPLATE_PRESET: TemplateBlock[] = [
   {
     id: "ai-footer",
     type: "aiFooter",
-    props: {
+    settings: {
       showNewsletter: true,
       newsletterHeading: "Subscribe to our emails",
       columns: [

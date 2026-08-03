@@ -7,6 +7,8 @@ import { importTemplateToSite } from "@/lib/templates/importer";
 import { buildSmartAiBlocks, buildBlockContentPrompt } from "@/lib/ai-block-content-generator";
 import { getIndustrySampleData, DEFAULT_SAMPLE_DATA } from "@/lib/ai-sample-data";
 import { AIFailover, AICapability } from "@/lib/failover";
+import { buildTemplatePageContent } from "@/lib/templates/template-tree";
+import type { Prisma } from "@/generated/prisma";
 
 // GET /api/workspaces/[workspaceId]/sites — list sites in workspace
 export async function GET(req: NextRequest, { params }: { params: Promise<{ workspaceId: string }> }) {
@@ -206,7 +208,7 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ wor
             type: "HOME",
             isPublished: true,
             template: "ai",
-            content: { blocks: aiBlocks as unknown as Record<string, unknown>[], settings: {} },
+            content: buildTemplatePageContent(aiBlocks as unknown as Record<string, unknown>[], {}) as unknown as Prisma.InputJsonValue,
             metaTitle: `${storeName} — ${bizType.charAt(0).toUpperCase() + bizType.slice(1)}`,
             metaDescription: description || `${storeName} — your trusted ${bizType} destination.`,
           },
@@ -238,7 +240,6 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ wor
               stock: prod.stock,
               isFeatured: prod.isFeatured,
               status: "ACTIVE",
-              isPublished: true,
               tags: [],
             },
           });
@@ -282,7 +283,7 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ wor
               type: pg.type,
               isPublished: true,
               position: pg.position,
-              content: { blocks: [], settings: {} },
+              content: buildTemplatePageContent([], {}) as unknown as Prisma.InputJsonValue,
               metaTitle: pg.metaTitle,
               metaDescription: pg.metaDescription,
             },

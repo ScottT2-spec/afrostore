@@ -1,53 +1,73 @@
-import type { TemplateBlock } from "@/components/storefront/TemplateBlockRenderer";
+import type { EditorNode } from "@/lib/visual-editor/node-tree";
 
 /**
  * Interior Design / Decor Template Preset
  * Recreates the WoodMart Decor demo layout with editable blocks.
  */
-export const INTERIOR_DECOR_PRESET: TemplateBlock[] = [
+export const INTERIOR_DECOR_PRESET: EditorNode[] = [
   {
     id: "interior-hero",
     type: "interiorHeroSlider",
-    props: {
-      autoplaySpeed: 5000,
-      slides: [
+          settings: {
+        autoplaySpeed: 5000
+      },
+      elements: [
         {
-          titleLine1: "Ball-Shaped Table",
-          titleLine2: "Night Lamp.",
-          subtitle: "$250.00",
-          buttonText: "Go To Shop",
-          buttonLink: "/shop",
-          image: "https://woodmart.xtemos.com/wp-content/uploads/2018/09/decor-slide-4-right-img.jpg",
+          id: "interior-hero-slide-1",
+          type: "slide",
+          settings:           {
+            "titleLine1": "Ball-Shaped Table",
+            "titleLine2": "Night Lamp.",
+            "subtitle": "$250.00",
+            "buttonText": "Go To Shop",
+            "buttonLink": "/shop",
+            "image": "https://woodmart.xtemos.com/wp-content/uploads/2018/09/decor-slide-4-right-img.jpg"
+          },
+          elements: [],
         },
         {
-          titleLine1: "Home Flower Plant",
-          titleLine2: "Glass Vase.",
-          subtitle: "$286.00",
-          buttonText: "Go To Shop",
-          buttonLink: "/shop",
-          image: "https://woodmart.xtemos.com/wp-content/uploads/2018/09/decor-slide-3-right-img.jpg",
+          id: "interior-hero-slide-2",
+          type: "slide",
+          settings:           {
+            "titleLine1": "Home Flower Plant",
+            "titleLine2": "Glass Vase.",
+            "subtitle": "$286.00",
+            "buttonText": "Go To Shop",
+            "buttonLink": "/shop",
+            "image": "https://woodmart.xtemos.com/wp-content/uploads/2018/09/decor-slide-3-right-img.jpg"
+          },
+          elements: [],
         },
         {
-          titleLine1: "Modern Nordic",
-          titleLine2: "Minimalist Cattle.",
-          buttonText: "Go To Shop",
-          buttonLink: "/shop",
-          image: "https://woodmart.xtemos.com/wp-content/uploads/2018/09/decor-slide-2-right-img.jpg",
+          id: "interior-hero-slide-3",
+          type: "slide",
+          settings:           {
+            "titleLine1": "Modern Nordic",
+            "titleLine2": "Minimalist Cattle.",
+            "buttonText": "Go To Shop",
+            "buttonLink": "/shop",
+            "image": "https://woodmart.xtemos.com/wp-content/uploads/2018/09/decor-slide-2-right-img.jpg"
+          },
+          elements: [],
         },
         {
-          titleLine1: "Two Bowls Marble",
-          titleLine2: "and Brass.",
-          buttonText: "Go To Shop",
-          buttonLink: "/shop",
-          image: "https://woodmart.xtemos.com/wp-content/uploads/2018/09/decor-slide-1-right-img.jpg",
-        },
+          id: "interior-hero-slide-4",
+          type: "slide",
+          settings:           {
+            "titleLine1": "Two Bowls Marble",
+            "titleLine2": "and Brass.",
+            "buttonText": "Go To Shop",
+            "buttonLink": "/shop",
+            "image": "https://woodmart.xtemos.com/wp-content/uploads/2018/09/decor-slide-1-right-img.jpg"
+          },
+          elements: [],
+        }
       ],
-    },
   },
   {
     id: "interior-categories",
     type: "interiorCategoryGrid",
-    props: {
+    settings: {
       sectionTitle: "TOP CATEGORIES",
       columns: 5,
       categories: [
@@ -62,7 +82,7 @@ export const INTERIOR_DECOR_PRESET: TemplateBlock[] = [
   {
     id: "interior-promos",
     type: "interiorPromoBanners",
-    props: {
+    settings: {
       variant: "garden",
       banners: [
         {
@@ -92,7 +112,7 @@ export const INTERIOR_DECOR_PRESET: TemplateBlock[] = [
   {
     id: "interior-featured",
     type: "interiorProductGrid",
-    props: {
+    settings: {
       columns: 5,
       maxProducts: 10,
       sectionTitle: "Featured Products",
@@ -102,7 +122,7 @@ export const INTERIOR_DECOR_PRESET: TemplateBlock[] = [
   {
     id: "interior-info",
     type: "interiorInfoBoxes",
-    props: {
+    settings: {
       items: [
         { icon: "🏠", title: "Home Modern Decoration Decals.", description: "But I must explain to you how all this mistaken idea of denouncing pleasure and praising pain was born." },
         { icon: "✨", title: "New Decoration Solutions for Home.", description: "Supported neglected met she therefore unwilling discovery remainder." },
@@ -112,7 +132,7 @@ export const INTERIOR_DECOR_PRESET: TemplateBlock[] = [
   {
     id: "interior-blog",
     type: "interiorBlogPosts",
-    props: {
+    settings: {
       columns: 4,
       sectionTitle: "OUR BLOG",
       posts: [],
@@ -121,7 +141,7 @@ export const INTERIOR_DECOR_PRESET: TemplateBlock[] = [
   {
     id: "interior-cta",
     type: "interiorCta",
-    props: {
+    settings: {
       title: "Summer 25% discount on all last year\u2019s products home decor",
       buttonText: "To Shop",
       buttonLink: "/shop",
@@ -130,7 +150,7 @@ export const INTERIOR_DECOR_PRESET: TemplateBlock[] = [
   },
   {
     id: "interior-footer", type: "interiorFooter",
-    props: {
+    settings: {
       logoUrl: "",
       logoAlt: "Store Logo",
       description: "Discover a curated collection of modern furniture designed to bring comfort and elegance into your home.",
@@ -155,11 +175,11 @@ export const INTERIOR_DECOR_PRESET: TemplateBlock[] = [
  * Interior Design / Retail Template Preset
  * Recreates the WoodMart Retail demo layout with editable blocks.
  */
-export const INTERIOR_RETAIL_PRESET: TemplateBlock[] = [
+export const INTERIOR_RETAIL_PRESET: EditorNode[] = [
   {
     id: "garden-hero",
     type: "gardenHeroBanner",
-    props: {
+    settings: {
       heading: "Crafted with Care for Memorable Moments",
       subheading: "From timeless pieces to modern accents, create a home that celebrates your unique story.",
       ctaText: "SHOP NOW",
@@ -174,7 +194,7 @@ export const INTERIOR_RETAIL_PRESET: TemplateBlock[] = [
   {
     id: "garden-categories",
     type: "gardenCategoryBanner",
-    props: {
+    settings: {
       banners: [
         {
           title: "Explore Indoor",
@@ -194,7 +214,7 @@ export const INTERIOR_RETAIL_PRESET: TemplateBlock[] = [
   {
     id: "garden-discount",
     type: "gardenDiscountBanner",
-    props: {
+    settings: {
       title: "20% OFF On Your First Order",
       ctaText: "SHOP NOW",
       ctaLink: "/shop",
@@ -204,7 +224,7 @@ export const INTERIOR_RETAIL_PRESET: TemplateBlock[] = [
   {
     id: "garden-new-arrivals",
     type: "gardenNewArrivals",
-    props: {
+    settings: {
       sectionTitle: "New Arrivals",
       viewAllText: "EXPLORE ALL PRODUCTS",
       viewAllLink: "/shop",
@@ -215,7 +235,7 @@ export const INTERIOR_RETAIL_PRESET: TemplateBlock[] = [
   {
     id: "garden-features",
     type: "gardenFeatures",
-    props: {
+    settings: {
       features: [
         {
           icon: "✨",
@@ -238,7 +258,7 @@ export const INTERIOR_RETAIL_PRESET: TemplateBlock[] = [
   {
     id: "garden-testimonials",
     type: "gardenTestimonials",
-    props: {
+    settings: {
       sectionTitle: "What Our Customers Say",
       testimonials: [
         { name: "Sarah M.", text: "The quality of the garden decor is outstanding. Every piece feels unique and well-crafted.", rating: 5 },

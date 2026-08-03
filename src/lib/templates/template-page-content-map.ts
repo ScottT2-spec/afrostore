@@ -4,6 +4,7 @@
  * into client components (builder preview, etc.).
  */
 
+import type { EditorNode } from "@/lib/visual-editor/node-tree";
 import { HANDMADE_BAGS_PAGE_BLOCKS } from "./presets/handmade-bags-pages";
 import { HEALTH_PAGE_BLOCKS } from "./presets/health-pages";
 import { COSMETICS_TERMS_BLOCKS, COSMETICS_SHOP_BLOCKS, COSMETICS_BLOG_BLOCKS } from "./presets/cosmetics-pages-preset";
@@ -22,7 +23,7 @@ import { TOYS_ABOUT_PAGE_BLOCKS, TOYS_CONTACT_PAGE_BLOCKS, TOYS_BLOG_PAGE_BLOCKS
 import { MAKEUP_ABOUT_PAGE_BLOCKS, MAKEUP_CONTACT_PAGE_BLOCKS, MAKEUP_BLOG_PAGE_BLOCKS, MAKEUP_SHOP_PAGE_BLOCKS } from "./presets/makeup-page-presets";
 import { GROCERY_ABOUT_PAGE_BLOCKS, GROCERY_CONTACT_PAGE_BLOCKS, GROCERY_BLOG_PAGE_BLOCKS, GROCERY_SHOP_PAGE_BLOCKS } from "./presets/grocery-page-presets";
 
-export const TEMPLATE_PAGE_CONTENT_MAP: Record<string, Record<string, unknown[]>> = {
+export const TEMPLATE_PAGE_CONTENT_MAP: Record<string, Record<string, EditorNode[]>> = {
   fashion: {
     about: FASHION_ABOUT_PAGE_BLOCKS,
     contact: FASHION_CONTACT_PAGE_BLOCKS,

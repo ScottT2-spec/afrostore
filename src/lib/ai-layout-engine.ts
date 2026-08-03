@@ -47,7 +47,7 @@ interface LayoutContext {
   storeSlug: string;
   industry: string;
   images: ReturnType<typeof getRandomIndustryImages>;
-  content: AIContent;
+  content: Partial<AIContent>;
 }
 
 // ─── Block Builders ─────────────────────────────────────────
@@ -659,7 +659,7 @@ function validateAndFixSections(sections: string[], industry: string): string[] 
  * Otherwise pick a random layout variant for the detected industry.
  */
 export function buildDynamicHomePage(
-  content: AIContent,
+  content: Partial<AIContent>,
   storeName: string,
   storeSlug: string,
   industry: string,

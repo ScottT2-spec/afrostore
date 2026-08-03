@@ -1,14 +1,14 @@
-import type { TemplateBlock } from "@/components/storefront/TemplateBlockRenderer";
+import type { EditorNode } from "@/lib/visual-editor/node-tree";
 
 /**
  * Health & Supplements (Pills) Template Preset
  * Recreates the WoodMart Health/Pills demo layout with editable blocks.
  */
-export const HEALTH_TEMPLATE_PRESET: TemplateBlock[] = [
+export const HEALTH_TEMPLATE_PRESET: EditorNode[] = [
   {
     id: "health-hero",
     type: "healthHero",
-    props: {
+    settings: {
       title: "Feel Healthy and Energetic With Our Vitamins",
       subtitle: "SHOP BY NEED",
       buttonText: "Bestsellers",
@@ -18,7 +18,7 @@ export const HEALTH_TEMPLATE_PRESET: TemplateBlock[] = [
   {
     id: "health-marquee",
     type: "healthMarquee",
-    props: {
+    settings: {
       items: ["Free Shipping from $30!", "Lots of vitamins and supplements", "First purchase with a 10% discount, use promo code: WDPILLS23"],
       speed: 10,
     },
@@ -26,7 +26,7 @@ export const HEALTH_TEMPLATE_PRESET: TemplateBlock[] = [
   {
     id: "health-promos",
     type: "healthPromoBanners",
-    props: {
+    settings: {
       banners: [
         {
           image: "https://woodmart.xtemos.com/wp-content/uploads/2023/06/pills-banner-1.jpg",
@@ -51,7 +51,7 @@ export const HEALTH_TEMPLATE_PRESET: TemplateBlock[] = [
   {
     id: "health-categories",
     type: "healthCategoryCards",
-    props: {
+    settings: {
       sectionTitle: "Popular Categories",
       columns: 4,
       categories: [
@@ -69,7 +69,7 @@ export const HEALTH_TEMPLATE_PRESET: TemplateBlock[] = [
   {
     id: "health-bestsellers",
     type: "healthProductGrid",
-    props: {
+    settings: {
       columns: 4,
       maxProducts: 8,
       sectionTitle: "Bestsellers",
@@ -79,7 +79,7 @@ export const HEALTH_TEMPLATE_PRESET: TemplateBlock[] = [
   {
     id: "health-features",
     type: "healthFeatureSection",
-    props: {
+    settings: {
       title: "Effective Vitamins For Your Health",
       subtitle: "Supplements And Ingredients You Can Trust",
       features: [
@@ -92,7 +92,7 @@ export const HEALTH_TEMPLATE_PRESET: TemplateBlock[] = [
   {
     id: "health-testimonials",
     type: "healthTestimonials",
-    props: {
+    settings: {
       title: "What Our Customers Say",
       trustpilotRating: "4.9",
       reviewCount: "Based on 374 reviews",
@@ -105,7 +105,7 @@ export const HEALTH_TEMPLATE_PRESET: TemplateBlock[] = [
   {
     id: "health-blog",
     type: "healthBlogPosts",
-    props: {
+    settings: {
       columns: 3,
       sectionTitle: "RECENT POSTS",
       posts: [],
@@ -114,7 +114,7 @@ export const HEALTH_TEMPLATE_PRESET: TemplateBlock[] = [
   {
     id: "health-brands",
     type: "healthBrandMarquee",
-    props: {
+    settings: {
       speed: 70,
       reverse: false,
     },
@@ -122,7 +122,7 @@ export const HEALTH_TEMPLATE_PRESET: TemplateBlock[] = [
   {
     id: "health-newsletter",
     type: "healthNewsletter",
-    props: {
+    settings: {
       title: "Insider Access",
       subtitle: "Learn All Ingredients In Our Guide.",
       backgroundColor: "#2d6a4f",
@@ -130,7 +130,7 @@ export const HEALTH_TEMPLATE_PRESET: TemplateBlock[] = [
   },
   {
     id: "health-footer", type: "healthFooterFull",
-    props: {
+    settings: {
       description: "Your trusted source for vitamins, supplements, and wellness products. Naturally better.",
       contact: {
         address: "123 Wellness Ave, Portland, OR 97201",

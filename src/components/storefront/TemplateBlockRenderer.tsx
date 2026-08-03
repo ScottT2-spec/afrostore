@@ -1017,3 +1017,13 @@ export type {
   FashionMarqueeProps,
   FashionCoverBannersProps,
 };
+
+// Editor shims: allow inline editor to query/edit context without coupling storefront to editor internals
+export function isRegisteredTemplateBlock(_key: string) {
+  // All blocks rendered via map are considered registered in this runtime
+  return true;
+}
+export function useTemplateBlockEditContext() {
+  // Minimal no-op context for runtime outside the editor route
+  return { editing: false, setEditing: () => {}, selectedNodeId: null as string | null, setSelectedNodeId: () => {} };
+}

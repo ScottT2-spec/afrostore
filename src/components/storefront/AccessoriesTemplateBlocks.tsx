@@ -3,6 +3,7 @@ import Link from "next/link";
 import { resolveStoreLink } from "@/lib/template-link-utils";
 import { useState, useEffect, useRef, useContext, createContext } from "react";
 import { safeSrc, onImgError } from "./image-fallback";
+import { InlineEditableText } from "@/components/storefront/InlineEditableText";
 
 /* ═══════════════════════════════════════════════════════════════
    ACCESSORIES TEMPLATE BLOCKS
@@ -48,9 +49,9 @@ export const AccessoriesStoreContext = createContext<AccessoriesStoreContextData
    Two-column layout: text + images grid + testimonial
    ═══════════════════════════════════════════════════════════════ */
 export interface AccessoriesAboutHeroTestimonial { text: string; avatar: string; name: string; company: string; }
-export interface AccessoriesAboutHeroProps { subtitle?: string; title: string; description: string; images: string[]; testimonial: AccessoriesAboutHeroTestimonial; }
+export interface AccessoriesAboutHeroProps { subtitle?: string; title: string; description: string; images?: string[]; testimonial?: AccessoriesAboutHeroTestimonial; }
 
-export function AccessoriesAboutHero({ subtitle, title, description, images, testimonial }: AccessoriesAboutHeroProps) {
+export function AccessoriesAboutHero({ subtitle, title, description, images = [], testimonial = { text: "", avatar: "", name: "", company: "" } }: AccessoriesAboutHeroProps) {
   const css = `
     .aah-section { padding: 60px 15px; }
     .aah-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 40px; align-items: start; }
@@ -79,9 +80,9 @@ export function AccessoriesAboutHero({ subtitle, title, description, images, tes
       <div style={{ maxWidth: TOKENS.containerWidth, margin: "0 auto", padding: "0 15px" }}>
         <div className="aah-grid">
           <div className="aah-left">
-            {subtitle && <div className="aah-sub">{subtitle}</div>}
-            <h2 className="aah-title">{title}</h2>
-            <p className="aah-desc">{description}</p>
+            {subtitle && <InlineEditableText as="div" field="subtitle" value={subtitle} isEditor={true} className="aah-sub" />}
+            <InlineEditableText as="h2" field="title" value={title} isEditor={true} className="aah-title" />
+            <InlineEditableText as="p" field="description" value={description} isEditor={true} multiline className="aah-desc" />
             <div className="aah-images">
               {images.slice(0, 2).map((src, i) => (
                 <img key={i} src={safeSrc(src)} alt={`About ${i + 1}`} className="aah-img" loading="lazy" onError={onImgError} />
@@ -90,12 +91,12 @@ export function AccessoriesAboutHero({ subtitle, title, description, images, tes
           </div>
           <div className="aah-right">
             <div className="aah-testimonial">
-              <p className="aah-tq">{testimonial.text}</p>
+              <InlineEditableText as="p" field="testimonial.text" value={testimonial.text} isEditor={true} multiline className="aah-tq" />
               <div className="aah-tauthor">
                 <img src={safeSrc(testimonial.avatar)} alt={testimonial.name} className="aah-tavatar" onError={onImgError} />
                 <div>
-                  <h4 className="aah-tname">{testimonial.name}</h4>
-                  <p className="aah-tcompany">{testimonial.company}</p>
+                  <InlineEditableText as="h4" field="testimonial.name" value={testimonial.name} isEditor={true} className="aah-tname" />
+                  <InlineEditableText as="p" field="testimonial.company" value={testimonial.company} isEditor={true} className="aah-tcompany" />
                 </div>
               </div>
             </div>
@@ -113,9 +114,9 @@ export function AccessoriesAboutHero({ subtitle, title, description, images, tes
    ACCESSORIES TEAM SECTION
    ═══════════════════════════════════════════════════════════════ */
 export interface AccessoriesTeamMember { name: string; role: string; image: string; socials?: string[]; }
-export interface AccessoriesTeamSectionProps { subtitle?: string; title?: string; description?: string; members: AccessoriesTeamMember[]; }
+export interface AccessoriesTeamSectionProps { subtitle?: string; title?: string; description?: string; members?: AccessoriesTeamMember[]; }
 
-export function AccessoriesTeamSection({ subtitle, title, description, members }: AccessoriesTeamSectionProps) {
+export function AccessoriesTeamSection({ subtitle, title, description, members = [] }: AccessoriesTeamSectionProps) {
   const ic: Record<string, string> = { facebook: "f", twitter: "\uD835\uDD4F", instagram: "\uD83D\uDCF7", linkedin: "in" };
   const css = `
     .ats-section { padding: 60px 15px; }
@@ -139,17 +140,17 @@ export function AccessoriesTeamSection({ subtitle, title, description, members }
       <div style={{ maxWidth: TOKENS.containerWidth, margin: "0 auto", padding: "0 15px" }}>
         {(subtitle || title) && (
           <div className="ats-header">
-            {subtitle && <div className="ats-sub">{subtitle}</div>}
-            {title && <h3 className="ats-title">{title}</h3>}
-            {description && <p className="ats-desc">{description}</p>}
+            {subtitle && <InlineEditableText as="div" field="subtitle" value={subtitle} isEditor={true} className="ats-sub" />}
+            {title && <InlineEditableText as="h3" field="title" value={title} isEditor={true} className="ats-title" />}
+            {description && <InlineEditableText as="p" field="description" value={description} isEditor={true} multiline className="ats-desc" />}
           </div>
         )}
         <div className="ats-grid">
           {members.map((m, i) => (
             <div key={i} className="ats-card">
               <img src={safeSrc(m.image)} alt={m.name} className="ats-img" loading="lazy" onError={onImgError} />
-              <h4 className="ats-name">{m.name}</h4>
-              <p className="ats-role">{m.role}</p>
+              <InlineEditableText as="h4" field={`members.${i}.name`} value={m.name} isEditor={true} className="ats-name" />
+              <InlineEditableText as="p" field={`members.${i}.role`} value={m.role} isEditor={true} className="ats-role" />
               {m.socials && m.socials.length > 0 && (
                 <div className="ats-soc">
                   {m.socials.map((s, j) => <a key={j} href="#" className="ats-sl" title={s}>{ic[s] || s[0]}</a>)}
@@ -170,7 +171,7 @@ export function AccessoriesTeamSection({ subtitle, title, description, members }
 export interface AccessoriesInfobox { icon: string; title: string; description: string; }
 export interface AccessoriesStrategySectionProps { subtitle?: string; title?: string; paragraphs?: string[]; infoboxes: AccessoriesInfobox[]; }
 
-export function AccessoriesStrategySection({ subtitle, title, paragraphs = [], infoboxes }: AccessoriesStrategySectionProps) {
+export function AccessoriesStrategySection({ subtitle, title, paragraphs = [], infoboxes = [] }: AccessoriesStrategySectionProps) {
   const css = `
     .ass-section { padding: 60px 15px; }
     .ass-sub { color: ${TOKENS.primaryColor}; text-transform: uppercase; font-weight: 600; font-size: 12px; font-family: ${TOKENS.bodyFont}; margin-bottom: 12px; letter-spacing: 2px; }
@@ -187,15 +188,15 @@ export function AccessoriesStrategySection({ subtitle, title, paragraphs = [], i
     <section className="ass-section">
       <style dangerouslySetInnerHTML={{ __html: css }} />
       <div style={{ maxWidth: TOKENS.containerWidth, margin: "0 auto", padding: "0 15px" }}>
-        {subtitle && <div className="ass-sub">{subtitle}</div>}
-        {title && <h3 className="ass-title">{title}</h3>}
-        {paragraphs.map((p, i) => <p key={i} className="ass-p">{p}</p>)}
+        {subtitle && <InlineEditableText as="div" field="subtitle" value={subtitle} isEditor={true} className="ass-sub" />}
+        {title && <InlineEditableText as="h3" field="title" value={title} isEditor={true} className="ass-title" />}
+        {paragraphs.map((p, i) => <InlineEditableText key={i} as="p" field={`paragraphs.${i}`} value={p} isEditor={true} multiline className="ass-p" />)}
         <div className="ass-boxes">
           {infoboxes.map((b, i) => (
             <div key={i} className="ass-box">
               <img src={safeSrc(b.icon)} alt={b.title} className="ass-icon" loading="lazy" onError={onImgError} />
-              <h4 className="ass-bt">{b.title}</h4>
-              <p className="ass-bd">{b.description}</p>
+              <InlineEditableText as="h4" field={`infoboxes.${i}.title`} value={b.title} isEditor={true} className="ass-bt" />
+              <InlineEditableText as="p" field={`infoboxes.${i}.description`} value={b.description} isEditor={true} multiline className="ass-bd" />
             </div>
           ))}
         </div>
@@ -226,16 +227,18 @@ export function AccessoriesCommunityCta({ title, description, tabs = [] }: Acces
     <section className="acc-section">
       <style dangerouslySetInnerHTML={{ __html: css }} />
       <div style={{ maxWidth: TOKENS.containerWidth, margin: "0 auto", padding: "0 15px" }}>
-        <h3 className="acc-title">{title}</h3>
-        <p className="acc-desc">{description}</p>
+        <InlineEditableText as="h3" field="title" value={title} isEditor={true} className="acc-title" />
+        <InlineEditableText as="p" field="description" value={description} isEditor={true} multiline className="acc-desc" />
         {tabs.length > 0 && (
           <div className="acc-tabs">
             {tabs.map((t, i) => (
-              <button key={i} className={`acc-tab ${activeTab === i ? "acc-tab-active" : ""}`} onClick={() => setActiveTab(i)}>{t}</button>
+              <button key={i} className={`acc-tab ${activeTab === i ? "acc-tab-active" : ""}`} onClick={() => setActiveTab(i)}>
+                <InlineEditableText as="span" field={`tabs.${i}`} value={t} isEditor={true} selectNodeOnFocus={false} />
+              </button>
             ))}
           </div>
         )}
-        <button className="acc-submit">Submit Now</button>
+        <button className="acc-submit"><InlineEditableText as="span" field="buttonText" value="Submit Now" isEditor={true} selectNodeOnFocus={false} /></button>
       </div>
     </section>
   );
@@ -262,10 +265,10 @@ export function AccessoriesStoreVisit({ subtitle, title, address, buttonText = "
     <section className="asv-section">
       <style dangerouslySetInnerHTML={{ __html: css }} />
       <div style={{ maxWidth: TOKENS.containerWidth, margin: "0 auto", padding: "0 15px" }}>
-        {subtitle && <div className="asv-sub">{subtitle}</div>}
-        <h2 className="asv-title">{title}</h2>
-        <p className="asv-addr">{address}</p>
-        <Link href={fixLink(buttonLink)} className="asv-btn">{buttonText}</Link>
+        {subtitle && <InlineEditableText as="div" field="subtitle" value={subtitle} isEditor={true} className="asv-sub" />}
+        <InlineEditableText as="h2" field="title" value={title} isEditor={true} className="asv-title" />
+        <InlineEditableText as="p" field="address" value={address} isEditor={true} multiline className="asv-addr" />
+        <Link href={fixLink(buttonLink)} className="asv-btn"><InlineEditableText as="span" field="buttonText" value={buttonText} isEditor={true} selectNodeOnFocus={false} /></Link>
       </div>
     </section>
   );
@@ -275,9 +278,9 @@ export function AccessoriesStoreVisit({ subtitle, title, address, buttonText = "
    ACCESSORIES FAQ ACCORDION
    ═══════════════════════════════════════════════════════════════ */
 export interface AccessoriesFaqItem { question: string; answer: string; }
-export interface AccessoriesFaqAccordionProps { subtitle?: string; title?: string; items: AccessoriesFaqItem[]; }
+export interface AccessoriesFaqAccordionProps { subtitle?: string; title?: string; items?: AccessoriesFaqItem[]; }
 
-export function AccessoriesFaqAccordion({ subtitle, title, items }: AccessoriesFaqAccordionProps) {
+export function AccessoriesFaqAccordion({ subtitle, title, items = [] }: AccessoriesFaqAccordionProps) {
   const [oi, setOi] = useState<number | null>(null);
   const css = `
     .afa-section { padding: 60px 15px; }
@@ -296,17 +299,17 @@ export function AccessoriesFaqAccordion({ subtitle, title, items }: AccessoriesF
       <div style={{ maxWidth: TOKENS.containerWidth, margin: "0 auto", padding: "0 15px" }}>
         {(subtitle || title) && (
           <div className="afa-header">
-            {subtitle && <div className="afa-sub">{subtitle}</div>}
-            {title && <h3 className="afa-title">{title}</h3>}
+            {subtitle && <InlineEditableText as="div" field="subtitle" value={subtitle} isEditor={true} className="afa-sub" />}
+            {title && <InlineEditableText as="h3" field="title" value={title} isEditor={true} className="afa-title" />}
           </div>
         )}
         {items.map((item, i) => (
           <div key={i} className="afa-item">
             <button className="afa-q" onClick={() => setOi(oi === i ? null : i)}>
-              <span>{item.question}</span>
+              <InlineEditableText as="span" field={`items.${i}.question`} value={item.question} isEditor={true} selectNodeOnFocus={false} />
               <span className={`afa-arr ${oi === i ? "afa-arr-o" : ""}`}>&#9660;</span>
             </button>
-            {oi === i && <div className="afa-ans">{item.answer}</div>}
+            {oi === i && <InlineEditableText as="div" field={`items.${i}.answer`} value={item.answer} isEditor={true} multiline className="afa-ans" />}
           </div>
         ))}
       </div>
@@ -341,8 +344,8 @@ export function AccessoriesContactForm({ subtitle, title, fields = ["name", "ema
       <div style={{ maxWidth: TOKENS.containerWidth, margin: "0 auto", padding: "0 15px" }}>
         {(subtitle || title) && (
           <div className="acf-header">
-            {subtitle && <div className="acf-sub">{subtitle}</div>}
-            {title && <h3 className="acf-title">{title}</h3>}
+            {subtitle && <InlineEditableText as="div" field="subtitle" value={subtitle} isEditor={true} className="acf-sub" />}
+            {title && <InlineEditableText as="h3" field="title" value={title} isEditor={true} className="acf-title" />}
           </div>
         )}
         <form className="acf-form" onSubmit={(e) => e.preventDefault()}>
@@ -383,9 +386,9 @@ export function AccessoriesBlogHeader({ title, backgroundImage }: AccessoriesBlo
    ACCESSORIES BLOG POSTS
    ═══════════════════════════════════════════════════════════════ */
 export interface AccessoriesBlogPost { title: string; date: string; category: string; author: string; excerpt: string; image: string; link: string; }
-export interface AccessoriesBlogPostsProps { posts: AccessoriesBlogPost[]; columns?: number; }
+export interface AccessoriesBlogPostsProps { posts?: AccessoriesBlogPost[]; columns?: number; }
 
-export function AccessoriesBlogPosts({ posts, columns = 2 }: AccessoriesBlogPostsProps) {
+export function AccessoriesBlogPosts({ posts = [], columns = 2 }: AccessoriesBlogPostsProps) {
   const css = `
     .abp-section { padding: 60px 15px; }
     .abp-grid { display: grid; grid-template-columns: repeat(${columns}, 1fr); gap: 30px; }
@@ -503,9 +506,9 @@ export function AccessoriesFaqsHeader({ title, description, contactButtonText = 
     <section className="afh-section">
       <style dangerouslySetInnerHTML={{ __html: css }} />
       <div style={{ maxWidth: TOKENS.containerWidth, margin: "0 auto", padding: "0 15px" }}>
-        <h2 className="afh-title">{title}</h2>
-        <p className="afh-desc">{description}</p>
-        <button className="afh-btn">{contactButtonText}</button>
+        <InlineEditableText as="h2" field="title" value={title} isEditor={true} className="afh-title" />
+        <InlineEditableText as="p" field="description" value={description} isEditor={true} multiline className="afh-desc" />
+        <button className="afh-btn"><InlineEditableText as="span" field="contactButtonText" value={contactButtonText} isEditor={true} selectNodeOnFocus={false} /></button>
       </div>
     </section>
   );
@@ -520,6 +523,11 @@ export interface AccessoriesFaqsContactInfoProps { formFields?: string[]; contac
 
 export function AccessoriesFaqsContactInfo({ formFields = ["name", "email", "phone", "company", "message"], contactInfo, footerText }: AccessoriesFaqsContactInfoProps) {
   const labels: Record<string, string> = { name: "Your Name", email: "Your Email", phone: "Phone Number", company: "Company", message: "Your Message" };
+  const safeContactInfo = {
+    ...contactInfo,
+    phones: Array.isArray(contactInfo?.phones) ? contactInfo.phones : [],
+    emails: Array.isArray(contactInfo?.emails) ? contactInfo.emails : [],
+  };
   const css = `
     .afci-section { padding: 30px 15px 60px; }
     .afci-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 40px; }
@@ -555,15 +563,15 @@ export function AccessoriesFaqsContactInfo({ formFields = ["name", "email", "pho
             <h3 className="afci-right-title">CONTACT INFORMATION</h3>
             <div className="afci-info-block">
               <img src="https://woodmart.xtemos.com/accessories/wp-content/uploads/sites/7/2022/07/placeholder.svg" alt="Address" className="afci-icon" onError={onImgError} />
-              <div className="afci-info-text">{contactInfo.address}</div>
+              <InlineEditableText as="div" field="contactInfo.address" value={safeContactInfo.address} isEditor={true} multiline className="afci-info-text" />
             </div>
             <div className="afci-info-block">
               <img src="https://woodmart.xtemos.com/accessories/wp-content/uploads/sites/7/2022/07/smartphone.svg" alt="Phone" className="afci-icon" onError={onImgError} />
-              <div className="afci-info-text">{contactInfo.phones.join("\n")}</div>
+              <InlineEditableText as="div" field="contactInfo.phones" value={safeContactInfo.phones.join("\n")} isEditor={true} multiline className="afci-info-text" />
             </div>
             <div className="afci-info-block">
               <img src="https://woodmart.xtemos.com/accessories/wp-content/uploads/sites/7/2022/07/paper-plane.svg" alt="Email" className="afci-icon" onError={onImgError} />
-              <div className="afci-info-text">{contactInfo.emails.map((e, i) => <span key={i}><a href={`mailto:${e}`}>{e}</a>{i < contactInfo.emails.length - 1 ? "\n" : ""}</span>)}</div>
+              <div className="afci-info-text">{safeContactInfo.emails.map((e, i) => <span key={i}><a href={`mailto:${e}`}>{e}</a>{i < safeContactInfo.emails.length - 1 ? "\n" : ""}</span>)}</div>
             </div>
             {footerText && <p className="afci-footer">{footerText}</p>}
           </div>
@@ -578,9 +586,9 @@ export function AccessoriesFaqsContactInfo({ formFields = ["name", "email", "pho
    FAQ section with category heading
    ═══════════════════════════════════════════════════════════════ */
 export interface AccessoriesCategorizedFaqItem { question: string; answer: string; }
-export interface AccessoriesCategorizedFaqProps { category: string; items: AccessoriesCategorizedFaqItem[]; }
+export interface AccessoriesCategorizedFaqProps { category: string; items?: AccessoriesCategorizedFaqItem[]; }
 
-export function AccessoriesCategorizedFaq({ category, items }: AccessoriesCategorizedFaqProps) {
+export function AccessoriesCategorizedFaq({ category, items = [] }: AccessoriesCategorizedFaqProps) {
   const [oi, setOi] = useState<number | null>(null);
   const css = `
     .acfq-section { padding: 30px 15px; }
@@ -595,14 +603,14 @@ export function AccessoriesCategorizedFaq({ category, items }: AccessoriesCatego
     <section className="acfq-section">
       <style dangerouslySetInnerHTML={{ __html: css }} />
       <div style={{ maxWidth: TOKENS.containerWidth, margin: "0 auto", padding: "0 15px" }}>
-        <h3 className="acfq-cat">{category}</h3>
+        <InlineEditableText as="h3" field="category" value={category} isEditor={true} className="acfq-cat" />
         {items.map((item, i) => (
           <div key={i} className="acfq-item">
             <button className="acfq-q" onClick={() => setOi(oi === i ? null : i)}>
-              <span>{item.question}</span>
+              <InlineEditableText as="span" field={`items.${i}.question`} value={item.question} isEditor={true} selectNodeOnFocus={false} />
               <span className={`acfq-arr ${oi === i ? "acfq-arr-o" : ""}`}>&#9660;</span>
             </button>
-            {oi === i && <div className="acfq-ans">{item.answer}</div>}
+            {oi === i && <InlineEditableText as="div" field={`items.${i}.answer`} value={item.answer} isEditor={true} multiline className="acfq-ans" />}
           </div>
         ))}
       </div>

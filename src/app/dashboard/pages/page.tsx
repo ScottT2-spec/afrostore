@@ -9,6 +9,7 @@ import Link from "next/link";
 import { useAIPrefill } from "@/hooks/useAIPrefill";
 import AIPrefillBanner from "@/components/dashboard/AIPrefillBanner";
 import { useRouter } from "next/navigation";
+import { buildTemplatePageContent } from "@/lib/templates/template-tree";
 
 interface PageItem {
   id: string;
@@ -65,7 +66,7 @@ export default function PagesPage() {
     setCreating(true);
     const slug = newTitle.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "");
     const res = await api.post<PageItem>(`/api/sites/${currentStore.id}/pages`, {
-      title: newTitle, slug, type: newType, content: [], isPublished: false,
+      title: newTitle, slug, type: newType, content: buildTemplatePageContent([], {}), isPublished: false,
     });
     if (res.success && res.data) {
       setPages((prev) => [res.data!, ...prev]);

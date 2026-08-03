@@ -1,13 +1,13 @@
-import type { TemplateBlock } from "@/components/storefront/TemplateBlockRenderer";
+import type { EditorNode } from "@/lib/visual-editor/node-tree";
 
 const IMG = "https://woodmart.xtemos.com/wp-content/uploads";
 
-export const LANDING_GADGET_PRESET: TemplateBlock[] = [
+export const LANDING_GADGET_PRESET: EditorNode[] = [
   /* ── 1. Hero ──────────────────────────────────────────────── */
   {
     id: "gadget-hero",
     type: "gadgetHero",
-    props: {
+    settings: {
       titleLine1: "Inspiration Of",
       titleLine2: "Beauty In Simplicity.",
       description: "Authorities in our business will tell in no uncertain terms that Lorem Ipsum is that huge, huge no no to forswear forever. Not so fast, I'd say, there are some redeeming factors in favor of greeking text.",
@@ -24,7 +24,7 @@ export const LANDING_GADGET_PRESET: TemplateBlock[] = [
   {
     id: "gadget-stats",
     type: "gadgetStatsBar",
-    props: {
+    settings: {
       items: [
         { number: "48", title: "Hours Life", description: "It's unreal, uncanny, makes you wonder if something is wrong, it." },
         { number: "2X", title: "More Powerful", description: "Usually, we prefer the real thing, wine without sulfur based pres." },
@@ -37,7 +37,7 @@ export const LANDING_GADGET_PRESET: TemplateBlock[] = [
   {
     id: "gadget-sound",
     type: "gadgetFeatureSplit",
-    props: {
+    settings: {
       title: "2 stereo speakers for\nfull immersion.",
       description: "You begin with a text, you sculpt information, you chisel away what's not needed, you come to the point, make things clear, add value, you're a content person, you like words.",
       image: `${IMG}/2018/11/landing-pixel-sound-img-opt.png`,
@@ -57,7 +57,7 @@ export const LANDING_GADGET_PRESET: TemplateBlock[] = [
   {
     id: "gadget-display",
     type: "gadgetFeatureSplit",
-    props: {
+    settings: {
       title: "Colors and contrast\nall in the P-OLED display.",
       description: "But worse, what if the fish doesn't fit in the can, the foot's to big for the boot that's not so bad. To short sentences, to many headings, images too large for the proposed design.",
       image: `${IMG}/2018/11/landing-pixel-display-opt.jpg`,
@@ -75,7 +75,7 @@ export const LANDING_GADGET_PRESET: TemplateBlock[] = [
   {
     id: "gadget-waterproof",
     type: "gadgetDarkFeature",
-    props: {
+    settings: {
       title: "The body is made of\nwaterproof materials.",
       description: "When it's about controlling hundreds of articles, product pages for web shops, or user profiles in social networks, all of them potentially with different sizes, formats, rules for.",
       buttonText: "View More",
@@ -88,7 +88,7 @@ export const LANDING_GADGET_PRESET: TemplateBlock[] = [
   {
     id: "gadget-photos-1",
     type: "gadgetPhotoGallery",
-    props: {
+    settings: {
       title: "Point your camera\nfind products online.",
       description: "Using test items of real content and data in designs will help, but there's no guarantee that every oddity will be found and corrected.",
       images: [
@@ -105,7 +105,7 @@ export const LANDING_GADGET_PRESET: TemplateBlock[] = [
   {
     id: "gadget-photos-2",
     type: "gadgetPhotoGallery",
-    props: {
+    settings: {
       title: "More power,\nmore impressions.",
       description: "Design is no afterthought, far from it, but it comes in a deserved second. Anyway, you still use Lorem Ipsum and rightly so, as it will always have a place in the web workers.",
       images: [
@@ -122,7 +122,7 @@ export const LANDING_GADGET_PRESET: TemplateBlock[] = [
   {
     id: "gadget-camera-dark",
     type: "gadgetCameraDark",
-    props: {
+    settings: {
       title: "You'll never want\nto use your flash again.",
       description: "Just fill up a page with draft copy about the client's business and they will actually read it and comment on it.",
       stats: [
@@ -140,7 +140,7 @@ export const LANDING_GADGET_PRESET: TemplateBlock[] = [
   {
     id: "gadget-security",
     type: "gadgetSecurity",
-    props: {
+    settings: {
       sectionTitle: "Security and protection against thieves.",
       items: [
         { icon: `${IMG}/2018/11/landing-pixel-sequrity-fingerprint-1.svg`, title: "Unlock Fingerprint", description: "Presently it defines a new ipsum provider plugin service that allows for pluggable ipsum." },
@@ -154,7 +154,7 @@ export const LANDING_GADGET_PRESET: TemplateBlock[] = [
   {
     id: "gadget-security-image",
     type: "gadgetFullWidthImage",
-    props: {
+    settings: {
       image: `${IMG}/2018/11/landing-pixel-sequrity-opt-1.jpg`,
       alt: "Security feature showcase",
     },
@@ -164,7 +164,7 @@ export const LANDING_GADGET_PRESET: TemplateBlock[] = [
   {
     id: "gadget-camera-optics",
     type: "gadgetCameraOptics",
-    props: {
+    settings: {
       sectionTitle: "Powerful optics and advanced technology in camera.",
       productImage: `${IMG}/2018/11/pixel-3-xl-360-1-opt.jpg`,
       leftSpecs: [
@@ -184,7 +184,7 @@ export const LANDING_GADGET_PRESET: TemplateBlock[] = [
   {
     id: "gadget-products",
     type: "gadgetProductsShowcase",
-    props: {
+    settings: {
       products: [
         { name: "Pixel 3", category: "Landing Pixel", price: "$649.00", image: `${IMG}/2018/11/pixel-3-beige-opt.jpg`, link: "#" },
         { name: "Pixel 3 XL", category: "Landing Pixel", price: "$849.00", image: `${IMG}/2018/11/pixel-3-xl-gray-opt.jpg`, link: "#" },
@@ -199,7 +199,7 @@ export const LANDING_GADGET_PRESET: TemplateBlock[] = [
   {
     id: "gadget-newsletter",
     type: "gadgetNewsletter",
-    props: {
+    settings: {
       title: "Subscribe us.",
       description: "A client that's unhappy for a reason is a problem, a client that's unhappy though he or her can't quite put a finger on it is worse.",
       backgroundImage: `${IMG}/2018/11/landing-pixel-subscribe-bg-opt.jpg`,
@@ -211,7 +211,7 @@ export const LANDING_GADGET_PRESET: TemplateBlock[] = [
   {
     id: "gadget-footer",
     type: "gadgetFooter",
-    props: {
+    settings: {
       links: [
         { label: "Privacy Policy", href: "#" },
         { label: "Returns", href: "#" },

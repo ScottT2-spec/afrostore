@@ -1,4 +1,4 @@
-import type { TemplateBlock } from "@/components/storefront/TemplateBlockRenderer";
+import type { EditorNode } from "@/lib/visual-editor/node-tree";
 
 /**
  * T-Shirts & Prints Template Page Presets
@@ -6,11 +6,11 @@ import type { TemplateBlock } from "@/components/storefront/TemplateBlockRendere
  * Content extracted verbatim from page components - no placeholders
  */
 
-export const TSHIRTS_PRINTS_ABOUT_PAGE_BLOCKS: TemplateBlock[] = [
+export const TSHIRTS_PRINTS_ABOUT_PAGE_BLOCKS: EditorNode[] = [
   {
     id: "tshirt-about-hero",
     type: "tshirtAboutHero",
-    props: {
+    settings: {
       subtitle: "About us",
       title: "Welcome to Print Studio",
       description: "Your go-to destination for high-quality custom prints! Since 2016, we've been transforming t-shirts, sweatshirts, and mugs into unique works of art whether for businesses, special events, or personal expressions.",
@@ -19,7 +19,7 @@ export const TSHIRTS_PRINTS_ABOUT_PAGE_BLOCKS: TemplateBlock[] = [
   {
     id: "tshirt-about-features",
     type: "tshirtFeatureCards",
-    props: {
+    settings: {
       columns: 2,
       features: [
         {
@@ -44,7 +44,7 @@ export const TSHIRTS_PRINTS_ABOUT_PAGE_BLOCKS: TemplateBlock[] = [
   {
     id: "tshirt-about-images",
     type: "tshirtImageCallout",
-    props: {
+    settings: {
       images: [
         "https://woodmart.xtemos.com/t-shirts-prints/wp-content/uploads/sites/24/2025/02/ps-right-custom-design.jpg",
         "https://woodmart.xtemos.com/t-shirts-prints/wp-content/uploads/sites/24/2025/06/ps-top-image-bg-1-min.jpg",
@@ -58,7 +58,7 @@ export const TSHIRTS_PRINTS_ABOUT_PAGE_BLOCKS: TemplateBlock[] = [
   {
     id: "tshirt-about-contact-form",
     type: "tshirtContactFormSection",
-    props: {
+    settings: {
       subtitle: "We are open for your questions",
       title: "We Are Open for Your Questions!",
       description: "Feel free to communicate with us",
@@ -70,7 +70,7 @@ export const TSHIRTS_PRINTS_ABOUT_PAGE_BLOCKS: TemplateBlock[] = [
   {
     id: "tshirt-about-contact-info",
     type: "tshirtContactInfo",
-    props: {
+    settings: {
       title: "Contact Information",
       address: "1060 Cudahy Pl, San Diego",
       phone: "(686) 492-1041",
@@ -87,7 +87,7 @@ export const TSHIRTS_PRINTS_ABOUT_PAGE_BLOCKS: TemplateBlock[] = [
   {
     id: "tshirt-about-why-choose",
     type: "tshirtFeatureCards",
-    props: {
+    settings: {
       columns: 2,
       features: [
         {
@@ -111,11 +111,11 @@ export const TSHIRTS_PRINTS_ABOUT_PAGE_BLOCKS: TemplateBlock[] = [
   },
 ];
 
-export const TSHIRTS_PRINTS_CONTACT_PAGE_BLOCKS: TemplateBlock[] = [
+export const TSHIRTS_PRINTS_CONTACT_PAGE_BLOCKS: EditorNode[] = [
   {
     id: "tshirt-contact-hero",
     type: "tshirtContactHero",
-    props: {
+    settings: {
       subtitle: "Contact us",
       title: "Ready to start something together? Get in touch.",
       contactInfo: {
@@ -129,7 +129,7 @@ export const TSHIRTS_PRINTS_CONTACT_PAGE_BLOCKS: TemplateBlock[] = [
   {
     id: "tshirt-contact-form",
     type: "tshirtContactFormSection",
-    props: {
+    settings: {
       subtitle: "",
       title: "",
       description: "",
@@ -140,11 +140,11 @@ export const TSHIRTS_PRINTS_CONTACT_PAGE_BLOCKS: TemplateBlock[] = [
   },
 ];
 
-export const TSHIRTS_PRINTS_SHOP_PAGE_BLOCKS: TemplateBlock[] = [
+export const TSHIRTS_PRINTS_SHOP_PAGE_BLOCKS: EditorNode[] = [
   {
     id: "tshirt-shop-hero",
     type: "tshirtAboutHero",
-    props: {
+    settings: {
       subtitle: "Shop",
       title: "All Products",
       description: "Discover our collection of custom t-shirts, sweatshirts, and mugs with unique designs.",
@@ -153,7 +153,7 @@ export const TSHIRTS_PRINTS_SHOP_PAGE_BLOCKS: TemplateBlock[] = [
   {
     id: "tshirt-shop-categories",
     type: "fashionCategoryCards",
-    props: {
+    settings: {
       sectionTitle: {
         subtitle: "EXPLORE",
         title: "Shop by Category",
@@ -169,7 +169,7 @@ export const TSHIRTS_PRINTS_SHOP_PAGE_BLOCKS: TemplateBlock[] = [
   {
     id: "tshirt-shop-products",
     type: "fashionProductGrid",
-    props: {
+    settings: {
       columns: 4,
       maxProducts: 12,
       filter: "all",
@@ -180,11 +180,11 @@ export const TSHIRTS_PRINTS_SHOP_PAGE_BLOCKS: TemplateBlock[] = [
   },
 ];
 
-export const TSHIRTS_PRINTS_BLOG_PAGE_BLOCKS: TemplateBlock[] = [
+export const TSHIRTS_PRINTS_BLOG_PAGE_BLOCKS: EditorNode[] = [
   {
     id: "tshirt-blog-hero",
     type: "tshirtAboutHero",
-    props: {
+    settings: {
       subtitle: "Blog",
       title: "Latest Articles",
       description: "Browse the latest T-Shirts & Prints posts for styling tips, design ideas, and practical guides.",
@@ -193,7 +193,7 @@ export const TSHIRTS_PRINTS_BLOG_PAGE_BLOCKS: TemplateBlock[] = [
   {
     id: "tshirt-blog-posts",
     type: "tshirtBlogPosts",
-    props: {
+    settings: {
       columns: 2,
       storeSlug: "",
       posts: [
@@ -281,7 +281,7 @@ export const TSHIRTS_PRINTS_BLOG_PAGE_BLOCKS: TemplateBlock[] = [
   {
     id: "tshirt-blog-cta",
     type: "tshirtImageCallout",
-    props: {
+    settings: {
       images: [],
       calloutTitle: "You can create custom design",
       calloutDescription: "The price of a T-shirt with an individual design depends on the circulation, the number of images on one product, their size, and the printing method. brand, material and order urgency.",
@@ -292,7 +292,7 @@ export const TSHIRTS_PRINTS_BLOG_PAGE_BLOCKS: TemplateBlock[] = [
   {
     id: "tshirt-blog-contact-form",
     type: "tshirtContactFormSection",
-    props: {
+    settings: {
       subtitle: "",
       title: "We Are Open for Your Questions!",
       description: "Feel free to communicate with us",
@@ -304,7 +304,7 @@ export const TSHIRTS_PRINTS_BLOG_PAGE_BLOCKS: TemplateBlock[] = [
   {
     id: "tshirt-blog-contact-info",
     type: "tshirtContactInfo",
-    props: {
+    settings: {
       title: "Contact Information",
       address: "1060 Cudahy Pl, San Diego",
       phone: "(686) 492-1041",

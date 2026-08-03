@@ -5,6 +5,20 @@ import { ProkipSite } from "@/types";
 
 type Params = { params: Promise<{ siteId: string }> };
 
+function getThemeConfig(theme: Awaited<ReturnType<typeof prisma.siteTheme.findFirst>> | null) {
+  const config = (theme?.customConfig as Record<string, any> | null) || {};
+  return {
+    name: typeof config.name === "string" ? config.name : "Default Theme",
+    colors: {
+      primary: typeof config?.colors?.primary === "string" ? config.colors.primary : "#3b82f6",
+      secondary: typeof config?.colors?.secondary === "string" ? config.colors.secondary : "#8b5cf6",
+      accent: typeof config?.colors?.accent === "string" ? config.colors.accent : "#f59e0b",
+    },
+    fontFamily: typeof config?.fonts?.heading === "string" ? config.fonts.heading : "Inter",
+    raw: config,
+  };
+}
+
 // GET /api/prokip-sites/:siteId
 export async function GET(req: NextRequest, { params }: Params) {
   const { siteId } = await params;
@@ -27,6 +41,7 @@ export async function GET(req: NextRequest, { params }: Params) {
     const theme = await prisma.siteTheme.findFirst({
       where: { siteId },
     });
+    const themeConfig = getThemeConfig(theme);
 
     // Convert to ProkipSite format
     const prokipSite: ProkipSite = {
@@ -38,11 +53,11 @@ export async function GET(req: NextRequest, { params }: Params) {
       logoUrl: site.logo ?? undefined,
       theme: {
         id: theme?.id || "default",
-        name: theme?.name || "Default Theme",
+        name: themeConfig.name,
         designSystem: {
           colors: {
-            primary: theme?.primaryColor || "#3b82f6",
-            secondary: theme?.secondaryColor || "#8b5cf6",
+            primary: themeConfig.colors.primary,
+            secondary: themeConfig.colors.secondary,
             accent: "#f59e0b",
             background: "#ffffff",
             text: "#1f2937",
@@ -50,8 +65,8 @@ export async function GET(req: NextRequest, { params }: Params) {
             border: "#e5e7eb",
           },
           fonts: {
-            heading: theme?.fontFamily || "Inter",
-            body: theme?.fontFamily || "Inter",
+            heading: themeConfig.fontFamily,
+            body: themeConfig.fontFamily,
           },
           typography: {},
           borderRadius: "md",
@@ -122,20 +137,36 @@ export async function PUT(req: NextRequest, { params }: Params) {
       await prisma.siteTheme.update({
         where: { id: theme.id },
         data: {
-          primaryColor: prokipSite.theme.designSystem.colors.primary,
-          secondaryColor: prokipSite.theme.designSystem.colors.secondary,
-          fontFamily: prokipSite.theme.designSystem.fonts.heading,
+          customConfig: {
+            ...(theme.customConfig as Record<string, any> | null || {}),
+            name: prokipSite.theme.name,
+            colors: {
+              primary: prokipSite.theme.designSystem.colors.primary,
+              secondary: prokipSite.theme.designSystem.colors.secondary,
+            },
+            fonts: {
+              heading: prokipSite.theme.designSystem.fonts.heading,
+              body: prokipSite.theme.designSystem.fonts.body,
+            },
+          },
         },
       });
     } else {
       await prisma.siteTheme.create({
         data: {
           siteId,
-          name: prokipSite.theme.name,
-          primaryColor: prokipSite.theme.designSystem.colors.primary,
-          secondaryColor: prokipSite.theme.designSystem.colors.secondary,
-          fontFamily: prokipSite.theme.designSystem.fonts.heading,
-          layout: "modern",
+          themeId: "default",
+          customConfig: {
+            name: prokipSite.theme.name,
+            colors: {
+              primary: prokipSite.theme.designSystem.colors.primary,
+              secondary: prokipSite.theme.designSystem.colors.secondary,
+            },
+            fonts: {
+              heading: prokipSite.theme.designSystem.fonts.heading,
+              body: prokipSite.theme.designSystem.fonts.body,
+            },
+          },
         },
       });
     }
@@ -224,21 +255,36 @@ export async function POST(req: NextRequest, { params }: Params) {
       await prisma.siteTheme.update({
         where: { id: existingTheme.id },
         data: {
-          name: prokipSite.theme.name,
-          primaryColor: prokipSite.theme.designSystem.colors.primary,
-          secondaryColor: prokipSite.theme.designSystem.colors.secondary,
-          fontFamily: prokipSite.theme.designSystem.fonts.heading,
+          customConfig: {
+            ...(existingTheme.customConfig as Record<string, any> | null || {}),
+            name: prokipSite.theme.name,
+            colors: {
+              primary: prokipSite.theme.designSystem.colors.primary,
+              secondary: prokipSite.theme.designSystem.colors.secondary,
+            },
+            fonts: {
+              heading: prokipSite.theme.designSystem.fonts.heading,
+              body: prokipSite.theme.designSystem.fonts.body,
+            },
+          },
         },
       });
     } else {
       await prisma.siteTheme.create({
         data: {
           siteId,
-          name: prokipSite.theme.name,
-          primaryColor: prokipSite.theme.designSystem.colors.primary,
-          secondaryColor: prokipSite.theme.designSystem.colors.secondary,
-          fontFamily: prokipSite.theme.designSystem.fonts.heading,
-          layout: "modern",
+          themeId: "default",
+          customConfig: {
+            name: prokipSite.theme.name,
+            colors: {
+              primary: prokipSite.theme.designSystem.colors.primary,
+              secondary: prokipSite.theme.designSystem.colors.secondary,
+            },
+            fonts: {
+              heading: prokipSite.theme.designSystem.fonts.heading,
+              body: prokipSite.theme.designSystem.fonts.body,
+            },
+          },
         },
       });
     }
@@ -251,13 +297,20 @@ export async function POST(req: NextRequest, { params }: Params) {
         });
 
         if (!existingPage) {
+          const typeMap: Record<string, "HOME" | "ABOUT" | "CONTACT" | "CUSTOM" | "FAQ"> = {
+            home: "HOME",
+            about: "ABOUT",
+            contact: "CONTACT",
+            faq: "FAQ",
+          };
+          const pageType = typeMap[page.slug.toLowerCase()] || "CUSTOM";
           await prisma.page.create({
             data: {
               id: page.id,
               siteId,
               title: page.name,
               slug: page.slug,
-              type: page.name.toUpperCase() as "HOME" | "SHOP" | "ABOUT" | "CONTACT" | "BLOG" | "CUSTOM",
+              type: pageType,
               content: {},
               isPublished: true,
             },

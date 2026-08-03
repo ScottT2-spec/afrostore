@@ -1,4 +1,4 @@
-import type { TemplateBlock } from "@/components/storefront/TemplateBlockRenderer";
+import type { EditorNode } from "@/lib/visual-editor/node-tree";
 
 /**
  * Tools Template Page Presets
@@ -12,11 +12,11 @@ import type { TemplateBlock } from "@/components/storefront/TemplateBlockRendere
    Source: https://woodmart.xtemos.com/about-us/demo/tools/
    ═══════════════════════════════════════════════════════════════ */
 
-export const TOOLS_ABOUT_PAGE_BLOCKS: TemplateBlock[] = [
+export const TOOLS_ABOUT_PAGE_BLOCKS: EditorNode[] = [
   {
     id: "tl-about-hero",
     type: "hardwareSectionTitle",
-    props: {
+    settings: {
       subtitle: "XTEMOS IS A CREATIVE DESIGN AGENCY",
       title: "Our success and company history.",
       description: "A wonderful serenity has taken possession of my entire soul, like these sweet mornings of spring which I enjoy with my whole heart.",
@@ -27,7 +27,7 @@ export const TOOLS_ABOUT_PAGE_BLOCKS: TemplateBlock[] = [
   {
     id: "tl-about-hero-ctas",
     type: "hardwareAboutContent",
-    props: {
+    settings: {
       buttons: [
         { text: "SEE PROJECTS", link: "/portfolio" },
         { text: "VIEW MORE", link: "#" },
@@ -37,7 +37,7 @@ export const TOOLS_ABOUT_PAGE_BLOCKS: TemplateBlock[] = [
   {
     id: "tl-about-story",
     type: "hardwareAboutContent",
-    props: {
+    settings: {
       subtitle: "WOODMART - BEST ECOMMERCE THEME 2021/22",
       title: "About Our Online Store",
       paragraphs: [
@@ -53,7 +53,7 @@ export const TOOLS_ABOUT_PAGE_BLOCKS: TemplateBlock[] = [
   {
     id: "tl-about-stats",
     type: "hardwareStatsCounters",
-    props: {
+    settings: {
       counters: [
         { value: 0, label: "SATISFIED CLIENTS" },
         { value: 0, label: "FINISHED PROJECTS" },
@@ -67,7 +67,7 @@ export const TOOLS_ABOUT_PAGE_BLOCKS: TemplateBlock[] = [
   {
     id: "tl-about-convert",
     type: "hardwareAboutContent",
-    props: {
+    settings: {
       subtitle: "WOODMART - BEST ECOMMERCE THEME 2021/22",
       title: "We convert your idea Into a reality.",
       paragraphs: [
@@ -82,7 +82,7 @@ export const TOOLS_ABOUT_PAGE_BLOCKS: TemplateBlock[] = [
   {
     id: "tl-about-services",
     type: "hardwareServicesGrid",
-    props: {
+    settings: {
       subtitle: "WOODMART - BEST ECOMMERCE THEME 2021/22",
       title: "Let\u2019s Get Creative!",
       services: [
@@ -96,7 +96,7 @@ export const TOOLS_ABOUT_PAGE_BLOCKS: TemplateBlock[] = [
   {
     id: "tl-about-gallery",
     type: "hardwareGalleryGrid",
-    props: {
+    settings: {
       images: [
         "https://woodmart.xtemos.com/wp-content/uploads/2017/03/about-us-gallery-photo-2.jpg",
         "https://woodmart.xtemos.com/wp-content/uploads/2017/03/about-us-gallery-photo-1.jpg",
@@ -106,7 +106,7 @@ export const TOOLS_ABOUT_PAGE_BLOCKS: TemplateBlock[] = [
   {
     id: "tl-about-presentation",
     type: "hardwareVideoSection",
-    props: {
+    settings: {
       subtitle: "XTEMOS IS A CREATIVE DESIGN AGENCY",
       title: "Our Presentation",
       description: "I am so happy, my dear friend, so absorbed in the exquisite sense of mere tranquil existence, that I neglect my talents. I should be incapable of drawing a single.",
@@ -119,7 +119,7 @@ export const TOOLS_ABOUT_PAGE_BLOCKS: TemplateBlock[] = [
   {
     id: "tl-about-quote",
     type: "hardwareQuoteSection",
-    props: {
+    settings: {
       subtitle: "WOODMART - BEST ECOMMERCE THEME 2021/22",
       quote: "Excellence is not a skill it\u2019s an attitude",
       attribution: "Ralph Marston",
@@ -130,7 +130,7 @@ export const TOOLS_ABOUT_PAGE_BLOCKS: TemplateBlock[] = [
   {
     id: "tl-about-team",
     type: "hardwareTeamSection",
-    props: {
+    settings: {
       members: [
         { name: "MARK JANCE", role: "CEO / FOUNDER", image: "https://woodmart.xtemos.com/wp-content/uploads/2017/01/team26.jpg", socials: ["facebook", "twitter", "instagram", "linkedin"] },
         { name: "MARK JANCE", role: "CEO / FOUNDER", image: "https://woodmart.xtemos.com/wp-content/uploads/2017/01/team19.jpg", socials: ["facebook", "twitter", "instagram", "linkedin"] },
@@ -142,7 +142,7 @@ export const TOOLS_ABOUT_PAGE_BLOCKS: TemplateBlock[] = [
   {
     id: "tl-about-offices",
     type: "hardwareOfficeLocations",
-    props: {
+    settings: {
       subtitle: "GET IN TOUCH WITH US",
       title: "Get Connected",
       description: "I am so happy, my dear friend, so absorbed in the exquisite sense of mere tranquil existence, that I neglect my talents. I should be incapable of drawing a single.",
@@ -157,7 +157,7 @@ export const TOOLS_ABOUT_PAGE_BLOCKS: TemplateBlock[] = [
   {
     id: "tl-about-news",
     type: "hardwareCoverBanners",
-    props: {
+    settings: {
       banners: [
         { image: "https://woodmart.xtemos.com/wp-content/uploads/2017/03/banner-news.jpg", title: "It is a fact that a reader will be distracted.", description: "Ullamcorper vehicula at ultrices sed interdum et malesuada", buttonText: "Read more", link: "#" },
         { image: "https://woodmart.xtemos.com/wp-content/uploads/2017/03/banner-news-3.jpg", title: "By the readable content of a page when looking.", description: "Patibus elementum a dictum ipiscing parturient donec eros.", buttonText: "Read more", link: "#" },
@@ -172,11 +172,11 @@ export const TOOLS_ABOUT_PAGE_BLOCKS: TemplateBlock[] = [
    Source: https://woodmart.xtemos.com/contact-us/demo/tools/
    ═══════════════════════════════════════════════════════════════ */
 
-export const TOOLS_CONTACT_PAGE_BLOCKS: TemplateBlock[] = [
+export const TOOLS_CONTACT_PAGE_BLOCKS: EditorNode[] = [
   {
     id: "tl-contact-store-visit",
     type: "hardwareStoreVisit",
-    props: {
+    settings: {
       subtitle: "OUR STORES",
       title: "VISIT OUR NEW\nSTORE IN NEW YORK",
       address: "294 Bay Meadows Ave.\nBay Shore, NY 11706",
@@ -187,7 +187,7 @@ export const TOOLS_CONTACT_PAGE_BLOCKS: TemplateBlock[] = [
   {
     id: "tl-contact-faq",
     type: "hardwareFaqAccordion",
-    props: {
+    settings: {
       subtitle: "INFORMATION QUESTIONS",
       title: "FREQUENTLY ASKED QUESTIONS",
       items: [
@@ -217,7 +217,7 @@ export const TOOLS_CONTACT_PAGE_BLOCKS: TemplateBlock[] = [
   {
     id: "tl-contact-form",
     type: "hardwareContactForm",
-    props: {
+    settings: {
       subtitle: "INFORMATION ABOUT US",
       title: "CONTACT US FOR ANY QUESTIONS",
       fields: ["name", "email", "phone", "company", "message"],
@@ -231,11 +231,11 @@ export const TOOLS_CONTACT_PAGE_BLOCKS: TemplateBlock[] = [
    Source: https://woodmart.xtemos.com/blog/demo/tools/
    ═══════════════════════════════════════════════════════════════ */
 
-export const TOOLS_BLOG_PAGE_BLOCKS: TemplateBlock[] = [
+export const TOOLS_BLOG_PAGE_BLOCKS: EditorNode[] = [
   {
     id: "tl-blog-hero",
     type: "hardwareSectionTitle",
-    props: {
+    settings: {
       title: "Woodmart Blog",
       align: "center",
       titleSize: "48px",
@@ -244,7 +244,7 @@ export const TOOLS_BLOG_PAGE_BLOCKS: TemplateBlock[] = [
   {
     id: "tl-blog-posts",
     type: "hardwareBlogPosts",
-    props: {
+    settings: {
       columns: 2,
       posts: [
         { title: "Seating collection inspiration by modern", image: "https://woodmart.xtemos.com/wp-content/uploads/2016/07/blog-grid-9.jpg", date: "July 23", author: "S. Rogers", categories: ["Design trends", "Furniture"], excerpt: "Ac haca ullamcorper donec ante habi tasse donec imperdiet eturpis varius per a augue magna hac. Nec hac et vestibulum duis a tinci..." },

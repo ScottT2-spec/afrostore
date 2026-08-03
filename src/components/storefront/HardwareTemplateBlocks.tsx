@@ -4,6 +4,7 @@ import { resolveStoreLink } from "@/lib/template-link-utils";
 import { useState, useRef, useEffect, useContext } from "react";
 import { onImgError } from "./image-fallback";
 import { ElectronicsStoreContext } from "./ElectronicsTemplateBlocks";
+import { InlineEditableText } from "@/components/storefront/InlineEditableText";
 
 /* ═══════════════════════════════════════════════════════════════
    HARDWARE TEMPLATE SUB-PAGE BLOCKS
@@ -64,9 +65,9 @@ export function HardwareSectionTitle({ subtitle, title, description, align = "ce
     <>
       <ScopedStyles id="section-title" css={css} />
       <div className="hw-stitle">
-        {subtitle && <div className="hw-stitle-sub">{subtitle}</div>}
-        <h2 className="hw-stitle-main">{title}</h2>
-        {description && <p className="hw-stitle-desc">{description}</p>}
+        {subtitle && <InlineEditableText as="div" field="subtitle" value={subtitle} isEditor={true} className="hw-stitle-sub" />}
+        <InlineEditableText as="h2" field="title" value={title} isEditor={true} className="hw-stitle-main" />
+        {description && <InlineEditableText as="p" field="description" value={description} isEditor={true} multiline className="hw-stitle-desc" />}
       </div>
     </>
   );
@@ -100,12 +101,12 @@ export function HardwareAboutContent({ subtitle, title, paragraphs = [], buttons
     <div style={containerStyle}>
       <ScopedStyles id="about" css={css} />
       <div className="hw-about">
-        {subtitle && <div className="hw-about-sub">{subtitle}</div>}
-        {title && <h4 className="hw-about-title">{title}</h4>}
-        {paragraphs.map((p, i) => <p key={i} className="hw-about-text">{p}</p>)}
+        {subtitle && <InlineEditableText as="div" field="subtitle" value={subtitle} isEditor={true} className="hw-about-sub" />}
+        {title && <InlineEditableText as="h4" field="title" value={title} isEditor={true} className="hw-about-title" />}
+        {paragraphs.map((p, i) => <InlineEditableText key={i} as="p" field={`paragraphs.${i}`} value={p} isEditor={true} multiline className="hw-about-text" />)}
         {buttons.length > 0 && (
           <div className="hw-about-btns">
-            {buttons.map((btn, i) => <Link key={i} href={resolveStoreLink(btn.link, storeSlug)} className="hw-about-btn">{btn.text}</Link>)}
+            {buttons.map((btn, i) => <Link key={i} href={resolveStoreLink(btn.link, storeSlug)} className="hw-about-btn"><InlineEditableText as="span" field={`buttons.${i}.text`} value={btn.text} isEditor={true} selectNodeOnFocus={false} /></Link>)}
           </div>
         )}
         {credit && <div className="hw-about-credit">{credit}</div>}
@@ -174,8 +175,8 @@ export function HardwareServicesGrid({ subtitle, title, services = [] }: Hardwar
           {services.map((s, i) => (
             <div key={i} className="hw-svc">
               <div className="hw-svc-icon"><img src={s.icon} alt={s.title} onError={(e) => onImgError(e, s.title)} /></div>
-              <h4 className="hw-svc-title">{s.title}</h4>
-              <p className="hw-svc-desc">{s.description}</p>
+              <InlineEditableText as="h4" field={`services.${i}.title`} value={s.title} isEditor={true} className="hw-svc-title" />
+              <InlineEditableText as="p" field={`services.${i}.description`} value={s.description} isEditor={true} multiline className="hw-svc-desc" />
             </div>
           ))}
         </div>
@@ -274,10 +275,10 @@ export function HardwareQuoteSection({ subtitle, quote, attribution, description
     <>
       <ScopedStyles id="quote" css={css} />
       <div className="hw-quote">
-        {subtitle && <div className="hw-quote-sub">{subtitle}</div>}
-        {quote && <h4 className="hw-quote-text">&ldquo;{quote}&rdquo;{attribution && ` — ${attribution}`}</h4>}
-        {description && <p className="hw-quote-desc">{description}</p>}
-        {credit && <div className="hw-quote-credit">{credit}</div>}
+        {subtitle && <InlineEditableText as="div" field="subtitle" value={subtitle} isEditor={true} className="hw-quote-sub" />}
+        {quote && <InlineEditableText as="h4" field="quote" value={`“${quote}”${attribution ? ` — ${attribution}` : ""}`} isEditor={true} className="hw-quote-text" />}
+        {description && <InlineEditableText as="p" field="description" value={description} isEditor={true} multiline className="hw-quote-desc" />}
+        {credit && <InlineEditableText as="div" field="credit" value={credit} isEditor={true} className="hw-quote-credit" />}
       </div>
     </>
   );
@@ -307,8 +308,8 @@ export function HardwareTeamSection({ members = [] }: HardwareTeamSectionProps) 
         {members.map((m, i) => (
           <div key={i} className="hw-team-m">
             <img className="hw-team-img" src={m.image} alt={m.name} onError={(e) => onImgError(e, m.name)} />
-            <h4 className="hw-team-name">{m.name}</h4>
-            <div className="hw-team-role">{m.role}</div>
+            <InlineEditableText as="h4" field={`members.${i}.name`} value={m.name} isEditor={true} className="hw-team-name" />
+            <InlineEditableText as="div" field={`members.${i}.role`} value={m.role} isEditor={true} className="hw-team-role" />
           </div>
         ))}
       </div>
@@ -346,8 +347,8 @@ export function HardwareOfficeLocations({ subtitle, title, description, offices 
         <div className="hw-offices-grid">
           {offices.map((o, i) => (
             <div key={i} className="hw-office">
-              <h4 className="hw-office-city">{o.city}</h4>
-              <p className="hw-office-addr">{o.address}</p>
+              <InlineEditableText as="h4" field={`offices.${i}.city`} value={o.city} isEditor={true} className="hw-office-city" />
+              <InlineEditableText as="p" field={`offices.${i}.address`} value={o.address} isEditor={true} multiline className="hw-office-addr" />
               <div className="hw-office-contact"><strong>Phone:</strong> {o.phone}<br /><strong>Email:</strong> {o.email}</div>
             </div>
           ))}
@@ -386,9 +387,9 @@ export function HardwareCoverBanners({ banners = [] }: HardwareCoverBannersProps
           <Link key={i} href={resolveStoreLink(b.link, storeSlug)} className="hw-cover">
             <img src={b.image} alt={b.title} onError={(e) => onImgError(e, b.title)} />
             <div className="hw-cover-ov">
-              <h4 className="hw-cover-title">{b.title}</h4>
-              <p className="hw-cover-desc">{b.description}</p>
-              <span className="hw-cover-link">{b.buttonText}</span>
+              <InlineEditableText as="h4" field={`banners.${i}.title`} value={b.title} isEditor={true} className="hw-cover-title" />
+              <InlineEditableText as="p" field={`banners.${i}.description`} value={b.description} isEditor={true} multiline className="hw-cover-desc" />
+              <InlineEditableText as="span" field={`banners.${i}.buttonText`} value={b.buttonText} isEditor={true} className="hw-cover-link" selectNodeOnFocus={false} />
             </div>
           </Link>
         ))}
@@ -422,10 +423,10 @@ export function HardwareStoreVisit({ subtitle, title, address, buttonText, butto
     <>
       <ScopedStyles id="visit" css={css} />
       <div className="hw-visit">
-        {subtitle && <div className="hw-visit-sub">{subtitle}</div>}
-        {title && <h4 className="hw-visit-title">{title}</h4>}
-        {address && <p className="hw-visit-addr">{address}</p>}
-        {buttonText && <Link href={resolveStoreLink(buttonLink, storeSlug)} className="hw-visit-btn">{buttonText}</Link>}
+        {subtitle && <InlineEditableText as="div" field="subtitle" value={subtitle} isEditor={true} className="hw-visit-sub" />}
+        {title && <InlineEditableText as="h4" field="title" value={title} isEditor={true} className="hw-visit-title" />}
+        {address && <InlineEditableText as="p" field="address" value={address} isEditor={true} multiline className="hw-visit-addr" />}
+        {buttonText && <Link href={resolveStoreLink(buttonLink, storeSlug)} className="hw-visit-btn"><InlineEditableText as="span" field="buttonText" value={buttonText} isEditor={true} selectNodeOnFocus={false} /></Link>}
       </div>
     </>
   );
@@ -459,10 +460,10 @@ export function HardwareFaqAccordion({ subtitle, title, items = [] }: HardwareFa
         {items.map((item, i) => (
           <div key={i} className="hw-faq-item">
             <div className="hw-faq-q" onClick={() => setOpenIndex(openIndex === i ? null : i)}>
-              <span>{item.question}</span>
+              <InlineEditableText as="span" field={`items.${i}.question`} value={item.question} isEditor={true} selectNodeOnFocus={false} />
               <span className="hw-faq-toggle" style={{ transform: openIndex === i ? "rotate(45deg)" : "none" }}>+</span>
             </div>
-            {openIndex === i && <div className="hw-faq-a">{item.answer}</div>}
+            {openIndex === i && <InlineEditableText as="div" field={`items.${i}.answer`} value={item.answer} isEditor={true} multiline className="hw-faq-a" />}
           </div>
         ))}
       </div>
@@ -500,7 +501,7 @@ export function HardwareContactForm({ subtitle, title, fields = ["name", "email"
         {fields.includes("phone") && <input type="tel" placeholder="Phone Number" />}
         {fields.includes("company") && <input type="text" placeholder="Company" />}
         {fields.includes("message") && <textarea placeholder="Your Message" />}
-        <button className="hw-cform-btn">{buttonText}</button>
+        <button className="hw-cform-btn"><InlineEditableText as="span" field="buttonText" value={buttonText} isEditor={true} selectNodeOnFocus={false} /></button>
       </div>
     </div>
   );
@@ -540,9 +541,9 @@ export function HardwareBlogPosts({ sectionTitle, sectionSubtitle, columns = 3, 
             <img className="hw-blog-img" src={p.image} alt={p.title} onError={(e) => onImgError(e, p.title)} />
             <div className="hw-blog-body">
               {p.categories && <div className="hw-blog-cats">{p.categories.join(", ")}</div>}
-              <h4 className="hw-blog-title">{p.title}</h4>
+              <InlineEditableText as="h4" field={`posts.${i}.title`} value={p.title} isEditor={true} className="hw-blog-title" />
               <div className="hw-blog-meta">{p.date} • by {p.author}</div>
-              {p.excerpt && <p className="hw-blog-excerpt">{p.excerpt}</p>}
+              {p.excerpt && <InlineEditableText as="p" field={`posts.${i}.excerpt`} value={p.excerpt} isEditor={true} multiline className="hw-blog-excerpt" />}
             </div>
           </div>
         ))}

@@ -1,10 +1,10 @@
-import type { TemplateBlock } from "@/components/storefront/TemplateBlockRenderer";
+import type { EditorNode } from "@/lib/visual-editor/node-tree";
 
-export const PROKIP_BOOKING_PRESET: TemplateBlock[] = [
+export const PROKIP_BOOKING_PRESET: EditorNode[] = [
   {
     id: "pb-hero",
     type: "prokipBookingHero",
-    props: {
+    settings: {
       badge: "Africa's #1 Business software",
       titleLine1: "Trust Is Good.",
       titleHighlight: "Clear Records",
@@ -18,7 +18,7 @@ export const PROKIP_BOOKING_PRESET: TemplateBlock[] = [
   {
     id: "pb-problem",
     type: "prokipBookingProblemSection",
-    props: {
+    settings: {
       title: "The Problem Is Not Always Low Sales.",
       titleHighlight: "It Is Poor Visibility.",
       intro: "Many business owners cannot leave their business for long because they are not fully sure what will happen when they are not there. Staff may be working. Sales may be happening. Customers may be buying",
@@ -43,7 +43,7 @@ export const PROKIP_BOOKING_PRESET: TemplateBlock[] = [
   {
     id: "pb-solution",
     type: "prokipBookingSolution",
-    props: {
+    settings: {
       title: "Prokip Helps You See",
       titleHighlight: "What Is Really Happening",
       description: "Prokip is an all-in-one business management system that helps you bring sales, inventory, expenses, accounting, staff activities, customers, suppliers, and reports into one connected system.",
@@ -63,7 +63,7 @@ export const PROKIP_BOOKING_PRESET: TemplateBlock[] = [
   {
     id: "pb-demo-details",
     type: "prokipBookingDemoDetails",
-    props: {
+    settings: {
       title: "What You Will See During Your Free Demo",
       description: "Your demo is focused on your business, your challenges, and your growth goals. Whether you run a shop, supermarket, pharmacy, restaurant, wholesale business, distribution company, manufacturing business, service business, school, hotel, or multi-branch operation, the demo will be tailored to your business.",
       listHeading: "We will show you how Prokip can help you:",
@@ -82,7 +82,7 @@ export const PROKIP_BOOKING_PRESET: TemplateBlock[] = [
   {
     id: "pb-testimonials",
     type: "prokipBookingTestimonials",
-    props: {
+    settings: {
       badge: "Success Stories",
       title: "Hear From Business Owners",
       subtitle: "See how real businesses across Africa use Prokip to take control of their operations and grow confidently.",
@@ -96,7 +96,7 @@ export const PROKIP_BOOKING_PRESET: TemplateBlock[] = [
   {
     id: "pb-process",
     type: "prokipBookingProcess",
-    props: {
+    settings: {
       title: "How Your Free Demo Will Go",
       subtitle: "Your Prokip demo is a personalized session focused on your business, not a general software presentation.",
       steps: [
@@ -111,7 +111,7 @@ export const PROKIP_BOOKING_PRESET: TemplateBlock[] = [
   {
     id: "pb-booking-form",
     type: "prokipBookingForm",
-    props: {
+    settings: {
       title: "Book Your Free",
       titleHighlight: "Personalized Demo",
       subtitle: "Free today. No obligation. Tailored to your business.",
@@ -154,6 +154,6 @@ export const PROKIP_BOOKING_PRESET: TemplateBlock[] = [
   {
     id: "pb-footer",
     type: "prokipBookingFooter",
-    props: {},
+    settings: {},
   },
 ];

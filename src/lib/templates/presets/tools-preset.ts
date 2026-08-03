@@ -1,4 +1,4 @@
-import type { TemplateBlock } from "@/components/storefront/TemplateBlockRenderer";
+import type { EditorNode } from "@/lib/visual-editor/node-tree";
 
 /**
  * Tools Template Homepage Preset
@@ -7,11 +7,11 @@ import type { TemplateBlock } from "@/components/storefront/TemplateBlockRendere
 
 const IMG = "https://woodmart.xtemos.com/wp-content/uploads";
 
-export const TOOLS_TEMPLATE_PRESET: TemplateBlock[] = [
+export const TOOLS_TEMPLATE_PRESET: EditorNode[] = [
   {
     id: "tools-grid-banners",
     type: "toolsGridBanners",
-    props: {
+    settings: {
       banners: [
         { image: `${IMG}/2020/06/wood-tools-grid-banner-1-opt.jpg`, label: "SPECIAL OFFER", title: "Garden Care\nMachines and Tools", description: "To short sentences, to many headings, images too large for the proposed design.", buttonText: "Read more", buttonLink: "#", size: "large" },
         { image: `${IMG}/2020/06/wood-tools-grid-banner-2-opt.jpg`, label: "PROTECTIVE SUITS", title: "Think About Your Safety", buttonText: "Shop now", buttonLink: "#", size: "medium" },
@@ -23,7 +23,7 @@ export const TOOLS_TEMPLATE_PRESET: TemplateBlock[] = [
   {
     id: "tools-features",
     type: "toolsFeatureIcons",
-    props: {
+    settings: {
       features: [
         { icon: `${IMG}/2020/06/svg-wood-tools-payment-1.svg`, title: "Online Payment", description: "Even if your less into design and more into content strategy." },
         { icon: `${IMG}/2020/06/svg-wood-tools-support-1.svg`, title: "Support 24/7", description: "Find some redeeming value with, wait for it, dummy copy, no less." },
@@ -33,7 +33,7 @@ export const TOOLS_TEMPLATE_PRESET: TemplateBlock[] = [
   {
     id: "tools-bestsellers",
     type: "toolsProductGrid",
-    props: {
+    settings: {
       sectionTitle: "Bestseller Product",
       sectionDescription: "A client that\u2019s unhappy for a reason is a problem, a client.",
       sectionButtonText: "Show All products",
@@ -45,7 +45,7 @@ export const TOOLS_TEMPLATE_PRESET: TemplateBlock[] = [
   {
     id: "tools-chainsaw-feature",
     type: "toolsFeatureSection",
-    props: {
+    settings: {
       backgroundImage: `${IMG}/2020/06/wood-tools-img-saw-1-opt.jpg`,
       label: "NEW CHAIN SAW",
       title: "Powerful Saw X-700",
@@ -63,7 +63,7 @@ export const TOOLS_TEMPLATE_PRESET: TemplateBlock[] = [
   {
     id: "tools-delivery-banner",
     type: "toolsDeliveryBanner",
-    props: {
+    settings: {
       image: `${IMG}/2020/06/wood-tools-grid-banner-5.jpg`,
       label: "SPECIAL OFFER",
       title: "Free Delivery from $300",
@@ -73,7 +73,7 @@ export const TOOLS_TEMPLATE_PRESET: TemplateBlock[] = [
   {
     id: "tools-related-products",
     type: "toolsProductGrid",
-    props: {
+    settings: {
       sectionTitle: "Related Products",
       sectionDescription: "Accept that it\u2019s sometimes okay to focus just on the content.",
       sectionButtonText: "Show All products",
@@ -85,6 +85,6 @@ export const TOOLS_TEMPLATE_PRESET: TemplateBlock[] = [
   {
     id: "tools-prefooter",
     type: "toolsPreFooter",
-    props: {},
+    settings: {},
   },
 ];

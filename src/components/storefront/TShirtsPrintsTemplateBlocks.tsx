@@ -2,6 +2,8 @@
 import { useState, useEffect, useRef, useCallback, createContext, useContext } from "react";
 import Link from "next/link";
 import { resolveStoreLink } from "@/lib/template-link-utils";
+import { normalizeSocialLinks } from "@/components/storefront/prop-normalizers";
+import { InlineEditableText } from "@/components/storefront/InlineEditableText";
 
 /* ═══════════════════════════════════════════════════════════════
    T-SHIRTS & PRINTS TEMPLATE BLOCKS
@@ -95,9 +97,9 @@ export function TShirtAboutHero({ subtitle, title, description }: TShirtAboutHer
       <ScopedStyles id="tshirt-about-hero" css={scopedCss} />
       <div className="tah-grid">
         <div>
-          <p className="tah-subtitle">{subtitle}</p>
-          <h1 className="tah-title">{title}</h1>
-          <p className="tah-description">{description}</p>
+          <InlineEditableText as="p" field="subtitle" value={subtitle} isEditor={true} className="tah-subtitle" />
+          <InlineEditableText as="h1" field="title" value={title} isEditor={true} className="tah-title" />
+          <InlineEditableText as="p" field="description" value={description} isEditor={true} multiline className="tah-description" />
         </div>
       </div>
     </section>
@@ -114,11 +116,11 @@ export interface TShirtFeatureCard {
 }
 
 export interface TShirtFeatureCardsProps {
-  features: TShirtFeatureCard[];
+  features?: TShirtFeatureCard[];
   columns?: number;
 }
 
-export function TShirtFeatureCards({ features, columns = 2 }: TShirtFeatureCardsProps) {
+export function TShirtFeatureCards({ features = [], columns = 2 }: TShirtFeatureCardsProps) {
   const scopedCss = `
     .tfc-grid { 
       display: grid; gap: 16px; margin-top: 32px;
@@ -146,8 +148,8 @@ export function TShirtFeatureCards({ features, columns = 2 }: TShirtFeatureCards
       <ScopedStyles id="tshirt-feature-cards" css={scopedCss} />
       {features.map((feature, index) => (
         <div key={index} className="tfc-card">
-          <p className="tfc-title">{feature.title}</p>
-          <p className="tfc-description">{feature.description}</p>
+          <InlineEditableText as="p" field={`features.${index}.title`} value={feature.title} isEditor={true} className="tfc-title" />
+          <InlineEditableText as="p" field={`features.${index}.description`} value={feature.description} isEditor={true} multiline className="tfc-description" />
         </div>
       ))}
     </div>
@@ -159,14 +161,14 @@ export function TShirtFeatureCards({ features, columns = 2 }: TShirtFeatureCards
    ═══════════════════════════════════════════════════════════════ */
 
 export interface TShirtImageCalloutProps {
-  images: string[];
+  images?: string[];
   calloutTitle: string;
   calloutDescription: string;
   buttonText: string;
   buttonLink: string;
 }
 
-export function TShirtImageCallout({ images, calloutTitle, calloutDescription, buttonText, buttonLink }: TShirtImageCalloutProps) {
+export function TShirtImageCallout({ images = [], calloutTitle, calloutDescription, buttonText, buttonLink }: TShirtImageCalloutProps) {
   const storeCtx = useContext(TShirtsPrintsStoreContext);
   const scopedCss = `
     .tic-grid { display: grid; gap: 16px; }
@@ -208,10 +210,10 @@ export function TShirtImageCallout({ images, calloutTitle, calloutDescription, b
         <img key={index} src={image} alt="" className="tic-image" />
       ))}
       <div className="tic-callout">
-        <p className="tic-callout-title">{calloutTitle}</p>
-        <p className="tic-callout-desc">{calloutDescription}</p>
+        <InlineEditableText as="p" field="calloutTitle" value={calloutTitle} isEditor={true} className="tic-callout-title" />
+        <InlineEditableText as="p" field="calloutDescription" value={calloutDescription} isEditor={true} multiline className="tic-callout-desc" />
         <Link href={resolveStoreLink(buttonLink, storeCtx?.storeSlug)} className="tic-button">
-          {buttonText}
+          <InlineEditableText as="span" field="buttonText" value={buttonText} isEditor={true} selectNodeOnFocus={false} />
         </Link>
       </div>
     </div>
@@ -344,12 +346,12 @@ export interface TShirtBlogPost {
 }
 
 export interface TShirtBlogPostsProps {
-  posts: TShirtBlogPost[];
+  posts?: TShirtBlogPost[];
   columns?: number;
   storeSlug?: string;
 }
 
-export function TShirtBlogPosts({ posts, columns = 2, storeSlug = "" }: TShirtBlogPostsProps) {
+export function TShirtBlogPosts({ posts = [], columns = 2, storeSlug = "" }: TShirtBlogPostsProps) {
   const scopedCss = `
     .tbp-section { padding: 40px 0; }
     .tbp-grid { display: grid; gap: 32px; max-width: 1320px; margin: 0 auto; }
@@ -443,6 +445,7 @@ export interface TShirtContactInfoProps {
 }
 
 export function TShirtContactInfo({ title, address, phone, email, workingHours, socialLinks = [], description }: TShirtContactInfoProps) {
+  const safeSocialLinks = normalizeSocialLinks(socialLinks);
   const scopedCss = `
     .tci-section { padding: 64px 16px; }
     .tci-grid { display: grid; gap: 40px; max-width: 960px; margin: 0 auto; }
@@ -509,9 +512,9 @@ export function TShirtContactInfo({ title, address, phone, email, workingHours, 
             {workingHours && <p><span className="tci-info-label">Working Hours:</span> {workingHours}</p>}
           </div>
           {description && <p className="tci-description">{description}</p>}
-          {socialLinks.length > 0 && (
+          {safeSocialLinks.length > 0 && (
             <div className="tci-social">
-              {socialLinks.map((social, index) => (
+              {safeSocialLinks.map((social, index) => (
                 <a key={index} href={social.url} target="_blank" rel="noopener noreferrer" className="tci-social-link">
                   {social.platform}
                 </a>

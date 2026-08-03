@@ -1,40 +1,44 @@
-import type { TemplateBlock } from "@/components/storefront/TemplateBlockRenderer";
+import type { EditorNode } from "@/lib/visual-editor/node-tree";
 
 /**
  * Handmade Bags template preset — WoodMart "Handmade Bags" demo.
  * Warm leather brown primary (#c27843), artisanal/boutique aesthetic.
  * Marquee banners, large category text, cover banners, bordered products.
  */
-export const HANDMADE_BAGS_PRESET: TemplateBlock[] = [
+export const HANDMADE_BAGS_PRESET: EditorNode[] = [
   /* ── 1. Hero Slider ───────────────────────────────────────── */
   {
     id: "hb-hero",
     type: "fashionHeroSlider",
-    props: {
-      slides: [
-        {
-          subtitle: "",
-          titleLine1: "Handmade Leather",
-          titleLine2: "Bags for Every Journey",
-          description: "",
-          buttonText: "Shop now",
-          buttonLink: "/shop",
-          colorScheme: "dark",
-          textPosition: "center",
-          backgroundImage:
-            "https://images.unsplash.com/photo-1548036328-c9fa89d128fa?w=1920&h=800&fit=crop",
-        },
-      ],
-      minHeight: "600px",
+          settings: {
+        minHeight: "600px",
       autoplaySpeed: 0,
-    },
+      },
+      elements: [
+        {
+          id: "hb-hero-slide-1",
+          type: "slide",
+          settings:           {
+            "subtitle": "",
+            "titleLine1": "Handmade Leather",
+            "titleLine2": "Bags for Every Journey",
+            "description": "",
+            "buttonText": "Shop now",
+            "buttonLink": "/shop",
+            "colorScheme": "dark",
+            "textPosition": "center",
+            "backgroundImage": "https://images.unsplash.com/photo-1548036328-c9fa89d128fa?w=1920&h=800&fit=crop"
+          },
+          elements: [],
+        }
+      ],
   },
 
   /* ── 2. Marquee Bar (announcements) ───────────────────────── */
   {
     id: "hb-marquee-1",
     type: "fashionMarquee",
-    props: {
+    settings: {
       items: [
         { text: "Free delivery on orders over $200.00", icon: "✦" },
         { text: "Production time is 5 days", icon: "✦" },
@@ -57,7 +61,7 @@ export const HANDMADE_BAGS_PRESET: TemplateBlock[] = [
   {
     id: "hb-categories",
     type: "fashionCategoryCards",
-    props: {
+    settings: {
       columns: 4,
       categories: [
         {
@@ -97,7 +101,7 @@ export const HANDMADE_BAGS_PRESET: TemplateBlock[] = [
   {
     id: "hb-products-1",
     type: "fashionProductGrid",
-    props: {
+    settings: {
       filter: "featured",
       columns: 4,
       products: [],
@@ -117,7 +121,7 @@ export const HANDMADE_BAGS_PRESET: TemplateBlock[] = [
   {
     id: "hb-cover-banners",
     type: "fashionCoverBanners",
-    props: {
+    settings: {
       columns: 3,
       height: "580px",
       marginBottom: "60px",
@@ -157,7 +161,7 @@ export const HANDMADE_BAGS_PRESET: TemplateBlock[] = [
   {
     id: "hb-marquee-2",
     type: "fashionMarquee",
-    props: {
+    settings: {
       items: [
         { text: "Free delivery on orders over $200.00", icon: "✦" },
         { text: "Production time is 5 days", icon: "✦" },
@@ -179,7 +183,7 @@ export const HANDMADE_BAGS_PRESET: TemplateBlock[] = [
   {
     id: "hb-products-2",
     type: "fashionProductGrid",
-    props: {
+    settings: {
       filter: "all",
       columns: 4,
       products: [],
@@ -199,7 +203,7 @@ export const HANDMADE_BAGS_PRESET: TemplateBlock[] = [
   {
     id: "hb-blog",
     type: "fashionBlogPosts",
-    props: {
+    settings: {
       maxPosts: 3,
       sectionTitle: {
         subtitle: "",
@@ -213,7 +217,7 @@ export const HANDMADE_BAGS_PRESET: TemplateBlock[] = [
   {
     id: "hb-newsletter",
     type: "fashionNewsletter",
-    props: {
+    settings: {
       subtitle: "",
       title: "Subscribe to Our Newsletter",
       description:

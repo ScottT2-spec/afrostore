@@ -1,4 +1,4 @@
-import type { TemplateBlock } from "@/components/storefront/TemplateBlockRenderer";
+import type { EditorNode } from "@/lib/visual-editor/node-tree";
 
 /**
  * Vegetables Template Page Presets
@@ -6,11 +6,11 @@ import type { TemplateBlock } from "@/components/storefront/TemplateBlockRendere
  * Content extracted verbatim from VegetableTemplatePages components - no placeholders
  */
 
-export const VEGETABLE_HOME_PAGE_BLOCKS: TemplateBlock[] = [
+export const VEGETABLE_HOME_PAGE_BLOCKS: EditorNode[] = [
   {
     id: "vegetable-hero",
     type: "vegetableHero",
-    props: {
+    settings: {
       subtitle: "Good Place. Good Food.",
       title: "A really good place to eat in the city.",
       description: "Fresh produce, warm hospitality, and a refined dining room come together in a calm, elegant home page inspired by the reference deli layout.",
@@ -27,7 +27,7 @@ export const VEGETABLE_HOME_PAGE_BLOCKS: TemplateBlock[] = [
   {
     id: "vegetable-features",
     type: "vegetableFeatures",
-    props: {
+    settings: {
       subtitle: "Discover the Atmosphere",
       title: "Discover the good atmosphere of the restaurant.",
       description: "Natural materials, quiet textures, and a fresh seasonal menu create a dining room that feels easy to return to.",
@@ -53,7 +53,7 @@ export const VEGETABLE_HOME_PAGE_BLOCKS: TemplateBlock[] = [
   {
     id: "vegetable-menu",
     type: "vegetableMenu",
-    props: {
+    settings: {
       subtitle: "Our Menu",
       title: "Get relaxed. Eat.",
       description: "Seasonal plates and signature dishes presented in a warm, easy-to-scan layout that stays elegant on mobile and desktop.",
@@ -69,11 +69,11 @@ export const VEGETABLE_HOME_PAGE_BLOCKS: TemplateBlock[] = [
   },
 ];
 
-export const VEGETABLE_MENU_PAGE_BLOCKS: TemplateBlock[] = [
+export const VEGETABLE_MENU_PAGE_BLOCKS: EditorNode[] = [
   {
     id: "vegetable-menu-sections",
     type: "vegetableMenuSections",
-    props: {
+    settings: {
       sections: [
         {
           title: "Starters",
@@ -108,11 +108,11 @@ export const VEGETABLE_MENU_PAGE_BLOCKS: TemplateBlock[] = [
   },
 ];
 
-export const VEGETABLE_RECIPE_PAGE_BLOCKS: TemplateBlock[] = [
+export const VEGETABLE_RECIPE_PAGE_BLOCKS: EditorNode[] = [
   {
     id: "vegetable-recipe-grid",
     type: "vegetableRecipeGrid",
-    props: {
+    settings: {
       subtitle: "Recipe Notes",
       title: "Simple, beautiful recipes from the same seasonal kitchen.",
       description: "A curated grid of recipes, organized by category and designed to feel light, editorial, and easy to scan on every screen size.",
@@ -131,11 +131,11 @@ export const VEGETABLE_RECIPE_PAGE_BLOCKS: TemplateBlock[] = [
   },
 ];
 
-export const VEGETABLE_ABOUT_PAGE_BLOCKS: TemplateBlock[] = [
+export const VEGETABLE_ABOUT_PAGE_BLOCKS: EditorNode[] = [
   {
     id: "vegetable-about-hero",
     type: "vegetableAboutHero",
-    props: {
+    settings: {
       subtitle: "About Us",
       title: "A seasonal kitchen shaped by the field, the fire, and the table.",
       description: "{storeName} brings a calm, elegant restaurant experience to produce-led cooking. We source closely, plate simply, and serve food that feels both nourishing and special.",
@@ -154,7 +154,7 @@ export const VEGETABLE_ABOUT_PAGE_BLOCKS: TemplateBlock[] = [
   {
     id: "vegetable-team",
     type: "vegetableTeam",
-    props: {
+    settings: {
       subtitle: "The Team",
       title: "People who care about the plate.",
       description: "A compact team of chefs, hosts, and managers focused on consistency, flavor, and hospitality.",
@@ -167,11 +167,11 @@ export const VEGETABLE_ABOUT_PAGE_BLOCKS: TemplateBlock[] = [
   },
 ];
 
-export const VEGETABLE_CONTACT_PAGE_BLOCKS: TemplateBlock[] = [
+export const VEGETABLE_CONTACT_PAGE_BLOCKS: EditorNode[] = [
   {
     id: "vegetable-contact",
     type: "vegetableContact",
-    props: {
+    settings: {
       subtitle: "Contact Us",
       title: "Reach the restaurant team, book a table, or plan a private dinner.",
       description: "This layout mirrors the reference contact page with a location block, telephone reservations, a booking form, and a map.",
@@ -189,11 +189,11 @@ export const VEGETABLE_CONTACT_PAGE_BLOCKS: TemplateBlock[] = [
   },
 ];
 
-export const VEGETABLE_RESERVATION_PAGE_BLOCKS: TemplateBlock[] = [
+export const VEGETABLE_RESERVATION_PAGE_BLOCKS: EditorNode[] = [
   {
     id: "vegetable-reservation",
     type: "vegetableReservation",
-    props: {
+    settings: {
       subtitle: "Reservations",
       title: "Book your table online now.",
       description: "Fill in the details below and our team will follow up to confirm your reservation.",

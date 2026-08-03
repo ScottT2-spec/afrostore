@@ -1,6 +1,7 @@
 "use client";
 import { useState } from "react";
 import Link from "next/link";
+import { normalizeSocialLinks } from "@/components/storefront/prop-normalizers";
 
 /* ═══════════════════════════════════════════════════════════════
    GARDEN STORE HEADER + FOOTER
@@ -252,6 +253,7 @@ export function GardenFooter({
     @media (max-width: 900px) { .gf-grid { grid-template-columns: 1fr 1fr; } }
     @media (max-width: 600px) { .gf-grid { grid-template-columns: 1fr; } .gf-bottom { flex-direction: column; text-align: center; } }
   `;
+  const safeSocialLinks = normalizeSocialLinks(socialLinks);
 
   const socialIcons: Record<string, string> = {
     facebook: "f", instagram: "📷", twitter: "𝕏", tiktok: "♪", youtube: "▶",
@@ -274,9 +276,9 @@ export function GardenFooter({
             <p className="gf-desc">
               {description || "Discover a curated collection of home and garden décor designed to bring warmth, elegance, and nature into your spaces."}
             </p>
-            {socialLinks.length > 0 && (
+            {safeSocialLinks.length > 0 && (
               <div className="gf-social">
-                {socialLinks.map((s, i) => (
+                {safeSocialLinks.map((s, i) => (
                   <a key={i} href={s.url} target="_blank" rel="noopener noreferrer" aria-label={s.platform}>
                     {socialIcons[s.platform] || "●"}
                   </a>

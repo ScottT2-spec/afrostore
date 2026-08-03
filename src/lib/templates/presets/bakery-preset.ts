@@ -1,53 +1,68 @@
-import type { TemplateBlock } from "@/components/storefront/TemplateBlockRenderer";
+import type { EditorNode } from "@/lib/visual-editor/node-tree";
 
 /**
  * Bakery (Sweets Bakery) Template Preset
  * Recreates the WoodMart Sweets Bakery demo layout with editable blocks.
  */
-export const BAKERY_TEMPLATE_PRESET: TemplateBlock[] = [
+export const BAKERY_TEMPLATE_PRESET: EditorNode[] = [
   {
     id: "bakery-hero",
     type: "bakeryHeroSlider",
-    props: {
-      autoplaySpeed: 5000,
-      slides: [
+          settings: {
+        autoplaySpeed: 5000
+      },
+      elements: [
         {
-          subtitle: "Crispy and Delicate",
-          titleLine1: "BELGIAN",
-          titleLine2: "WAFFLES",
-          buttonText: "See Collection",
-          buttonLink: "/shop",
-          backgroundImage: "https://woodmart.xtemos.com/wp-content/uploads/2024/02/sweets-bakery-slide-bg-1.jpg",
-          productImage: "https://woodmart.xtemos.com/wp-content/uploads/2024/02/sweets-bakery-slide-img-1.png",
-          smallImage: "https://woodmart.xtemos.com/wp-content/uploads/2024/02/sweets-bakery-slide-img-s-1.png",
+          id: "bakery-hero-slide-1",
+          type: "slide",
+          settings:           {
+            "subtitle": "Crispy and Delicate",
+            "titleLine1": "BELGIAN",
+            "titleLine2": "WAFFLES",
+            "buttonText": "See Collection",
+            "buttonLink": "/shop",
+            "backgroundImage": "https://woodmart.xtemos.com/wp-content/uploads/2024/02/sweets-bakery-slide-bg-1.jpg",
+            "productImage": "https://woodmart.xtemos.com/wp-content/uploads/2024/02/sweets-bakery-slide-img-1.png",
+            "smallImage": "https://woodmart.xtemos.com/wp-content/uploads/2024/02/sweets-bakery-slide-img-s-1.png"
+          },
+          elements: [],
         },
         {
-          subtitle: "A Tasty and Light Dessert",
-          titleLine1: "ALMOND",
-          titleLine2: "MAFFINS",
-          buttonText: "See Collection",
-          buttonLink: "/shop",
-          backgroundImage: "https://woodmart.xtemos.com/wp-content/uploads/2024/02/sweets-bakery-slide-bg-2.jpg",
-          productImage: "https://woodmart.xtemos.com/wp-content/uploads/2024/02/sweets-bakery-slide-img-2.png",
-          smallImage: "https://woodmart.xtemos.com/wp-content/uploads/2024/02/sweets-bakery-slide-img-s-2.png",
+          id: "bakery-hero-slide-2",
+          type: "slide",
+          settings:           {
+            "subtitle": "A Tasty and Light Dessert",
+            "titleLine1": "ALMOND",
+            "titleLine2": "MAFFINS",
+            "buttonText": "See Collection",
+            "buttonLink": "/shop",
+            "backgroundImage": "https://woodmart.xtemos.com/wp-content/uploads/2024/02/sweets-bakery-slide-bg-2.jpg",
+            "productImage": "https://woodmart.xtemos.com/wp-content/uploads/2024/02/sweets-bakery-slide-img-2.png",
+            "smallImage": "https://woodmart.xtemos.com/wp-content/uploads/2024/02/sweets-bakery-slide-img-s-2.png"
+          },
+          elements: [],
         },
         {
-          subtitle: "It Is Worth Tasting",
-          titleLine1: "SWEET",
-          titleLine2: "DONUTS",
-          buttonText: "See Collection",
-          buttonLink: "/shop",
-          backgroundImage: "https://woodmart.xtemos.com/wp-content/uploads/2024/02/sweets-bakery-slide-bg-3.jpg",
-          productImage: "https://woodmart.xtemos.com/wp-content/uploads/2024/02/sweets-bakery-slide-img-3.png",
-          smallImage: "https://woodmart.xtemos.com/wp-content/uploads/2024/02/sweets-bakery-slide-img-s-3.png",
-        },
+          id: "bakery-hero-slide-3",
+          type: "slide",
+          settings:           {
+            "subtitle": "It Is Worth Tasting",
+            "titleLine1": "SWEET",
+            "titleLine2": "DONUTS",
+            "buttonText": "See Collection",
+            "buttonLink": "/shop",
+            "backgroundImage": "https://woodmart.xtemos.com/wp-content/uploads/2024/02/sweets-bakery-slide-bg-3.jpg",
+            "productImage": "https://woodmart.xtemos.com/wp-content/uploads/2024/02/sweets-bakery-slide-img-3.png",
+            "smallImage": "https://woodmart.xtemos.com/wp-content/uploads/2024/02/sweets-bakery-slide-img-s-3.png"
+          },
+          elements: [],
+        }
       ],
-    },
   },
   {
     id: "bakery-categories",
     type: "bakeryCategoryInfoBoxes",
-    props: {
+    settings: {
       sectionTitle: "Our Fine Home-Made Chocolate",
       sectionSubtitle: "Sweets Bakery",
       items: [
@@ -78,7 +93,7 @@ export const BAKERY_TEMPLATE_PRESET: TemplateBlock[] = [
   {
     id: "bakery-handmade",
     type: "bakeryHandmade",
-    props: {
+    settings: {
       subtitle: "Sweets Bakery",
       title: "Handmade Cakes\nFor Your Every Taste",
       description: "Anyway, you still use Lorem Ipsum and rightly so, as it will always have a place in the web workers toolbox.",
@@ -90,7 +105,7 @@ export const BAKERY_TEMPLATE_PRESET: TemplateBlock[] = [
   {
     id: "bakery-products",
     type: "bakeryProductGrid",
-    props: {
+    settings: {
       columns: 3,
       maxProducts: 6,
       sectionTitle: "Featured Products",
@@ -102,7 +117,7 @@ export const BAKERY_TEMPLATE_PRESET: TemplateBlock[] = [
   {
     id: "bakery-process",
     type: "bakeryProcess",
-    props: {
+    settings: {
       sectionTitle: "How We Made Donuts",
       sectionSubtitle: "We Love What We Do",
       image: "https://woodmart.xtemos.com/wp-content/uploads/2019/07/bakery-donuts-img-opt.png",
@@ -133,7 +148,7 @@ export const BAKERY_TEMPLATE_PRESET: TemplateBlock[] = [
   {
     id: "bakery-blog",
     type: "bakeryBlogPosts",
-    props: {
+    settings: {
       columns: 4,
       sectionTitle: "Our New Articles",
       sectionSubtitle: "Sweets Bakery",
@@ -143,7 +158,7 @@ export const BAKERY_TEMPLATE_PRESET: TemplateBlock[] = [
   {
     id: "bakery-cta",
     type: "bakeryCta",
-    props: {
+    settings: {
       title: "Do You Like the Theme?",
       subtitle: "Share With Your Friends!",
       buttonText: "Buy Now",
@@ -153,7 +168,7 @@ export const BAKERY_TEMPLATE_PRESET: TemplateBlock[] = [
   },
   {
     id: "bakery-footer", type: "bakeryFooter",
-    props: {
+    settings: {
       logoUrl: "",
       logoAlt: "Store Logo",
       description: "Discover a curated collection of modern furniture designed to bring comfort and elegance into your home.",

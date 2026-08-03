@@ -1,11 +1,42 @@
 "use client";
 
 import React, { createContext, useContext, useState, useEffect } from "react";
+import { InlineEditableText } from "@/components/storefront/InlineEditableText";
+import { useTemplateBlockEditContext } from "@/components/storefront/TemplateBlockRenderer";
 
 /* ─── Context ─── */
 interface ProkipBookingCtxValue { storeSlug: string }
 const ProkipBookingCtx = createContext<ProkipBookingCtxValue>({ storeSlug: "" });
 export { ProkipBookingCtx as ProkipBookingLandingContext };
+
+function EditableCopy({
+  field,
+  fieldPath,
+  value,
+  as = "div",
+  className,
+  style,
+  multiline = false,
+}: {
+  field?: string;
+  fieldPath?: string;
+  value: string;
+  as?: "div" | "p" | "span" | "h1" | "h2" | "h3" | "h4" | "h5" | "h6";
+  className?: string;
+  style?: React.CSSProperties;
+  multiline?: boolean;
+}) {
+  const { blockId, isEditor } = useTemplateBlockEditContext();
+  const Tag = as;
+  if (!isEditor) {
+    return (
+      <Tag className={className} style={style}>
+        {value}
+      </Tag>
+    );
+  }
+  return <InlineEditableText nodeId={blockId} field={field} fieldPath={fieldPath} value={value} isEditor={isEditor} as={as} className={className} style={style} multiline={multiline} />;
+}
 
 /* ─── Font Loader ─── */
 export function ProkipBookingFontLoader() {
@@ -83,17 +114,17 @@ export function ProkipBookingHero({
         <div className="absolute -bottom-24 -left-24 w-96 h-96 bg-[#FFB800]/10 rounded-full blur-[100px] opacity-50" />
       </div>
       <div className="max-w-4xl mx-auto text-center relative z-10">
-        <div className="inline-block px-3 py-1 bg-[#FFB800]/20 text-[#FFB800] border border-[#FFB800]/30 text-xs font-bold tracking-widest uppercase rounded-full mb-6">{badge}</div>
+        <div className="inline-block px-3 py-1 bg-[#FFB800]/20 text-[#FFB800] border border-[#FFB800]/30 text-xs font-bold tracking-widest uppercase rounded-full mb-6"><EditableCopy field="badge" value={badge} as="span" /></div>
         <h1 className="text-4xl sm:text-5xl lg:text-7xl font-black tracking-tight mb-6 leading-[0.95] text-white">
-          {titleLine1} <br className="hidden sm:block" />
-          <span className="text-[#FFB800]">{titleHighlight}</span> <br className="hidden sm:block" /> {titleLine3}
+          <EditableCopy field="titleLine1" value={titleLine1} as="span" /> <br className="hidden sm:block" />
+          <span className="text-[#FFB800]"><EditableCopy field="titleHighlight" value={titleHighlight} as="span" className="text-[#FFB800]" /></span> <br className="hidden sm:block" /> <EditableCopy field="titleLine3" value={titleLine3} as="span" />
         </h1>
-        <p className="text-lg sm:text-xl text-slate-300 mb-10 max-w-2xl mx-auto leading-relaxed">{subtitle}</p>
+        <EditableCopy field="subtitle" value={subtitle} as="p" multiline className="text-lg sm:text-xl text-slate-300 mb-10 max-w-2xl mx-auto leading-relaxed" />
         <div className="relative bg-slate-800 rounded-2xl p-2 sm:p-4 overflow-hidden shadow-2xl mx-auto max-w-4xl aspect-video group cursor-pointer border border-slate-700 mb-12">
           <iframe className="w-full h-full relative z-10 rounded-xl" src={`https://www.youtube.com/embed/${videoId}?si=VaQ3U0g7XoRO7fUn&autoplay=0&rel=0`} title={videoTitle} allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowFullScreen />
         </div>
         <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
-          <ProkipBtn size="lg" onClick={scrollToForm} className="w-full sm:w-auto font-bold uppercase tracking-wide">{ctaText}<IconArrowRight /></ProkipBtn>
+          <ProkipBtn size="lg" onClick={scrollToForm} className="w-full sm:w-auto font-bold uppercase tracking-wide"><EditableCopy field="ctaText" value={ctaText} as="span" /> <IconArrowRight /></ProkipBtn>
         </div>
       </div>
     </section>
@@ -150,28 +181,25 @@ export function ProkipBookingProblemSection({
     <section className="py-20 px-4 sm:px-6 lg:px-8 bg-slate-50">
       <div className="max-w-7xl mx-auto">
         <div className="text-center max-w-3xl mx-auto mb-16">
-          <h2 className="text-3xl md:text-5xl font-black text-slate-900 mb-6 tracking-tight leading-[1]">
-            {title} <br /><span className="text-red-500">{titleHighlight}</span>
-          </h2>
-          <p className="text-lg text-slate-600 leading-relaxed mb-8">
-            {intro} <strong className="font-black text-[#021127] bg-[#FFB800] px-2 py-0.5 rounded shadow-sm inline-block rotate-[-2deg]">but...</strong>
-          </p>
+          <EditableCopy field="title" value={title} as="h2" className="text-3xl md:text-5xl font-black text-slate-900 mb-6 tracking-tight leading-[1]" />
+          <EditableCopy field="titleHighlight" value={titleHighlight} as="span" className="text-red-500" />
+          <EditableCopy field="intro" value={intro} as="p" multiline className="text-lg text-slate-600 leading-relaxed mb-8" />
           <div className="bg-white p-6 rounded-2xl shadow-[-10px_0_30px_-10px_rgba(0,0,0,0.05)] border border-slate-100 text-slate-700 font-bold text-lg">
-            {quotes.map((q, i) => <React.Fragment key={i}>{q}{i < quotes.length - 1 && <br />}</React.Fragment>)}
+            {quotes.map((q, i) => <React.Fragment key={i}><EditableCopy fieldPath={`quotes.${i}`} value={q} as="span" />{i < quotes.length - 1 && <br />}</React.Fragment>)}
           </div>
         </div>
         <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
           {problems.map((p, i) => (
             <div key={i} className="bg-white p-6 rounded-xl border border-slate-100 shadow-sm flex items-start gap-4">
               <div className="p-3 bg-red-50 rounded-lg shrink-0">{PROBLEM_ICONS[p.icon] || <IconAlertCircle />}</div>
-              <p className="font-medium text-slate-800 self-center">{p.title}</p>
+              <EditableCopy fieldPath={`problems.${i}.title`} value={p.title} as="p" className="font-medium text-slate-800 self-center" />
             </div>
           ))}
         </div>
         <div className="mt-12 text-center max-w-2xl mx-auto">
-          <p className="text-lg text-slate-600 mb-8">{outro}</p>
+          <EditableCopy field="outro" value={outro} as="p" multiline className="text-lg text-slate-600 mb-8" />
           <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
-            <ProkipBtn size="lg" onClick={scrollToForm} className="w-full sm:w-auto font-bold uppercase tracking-wide">{ctaText}<IconArrowRight /></ProkipBtn>
+            <ProkipBtn size="lg" onClick={scrollToForm} className="w-full sm:w-auto font-bold uppercase tracking-wide"><EditableCopy field="ctaText" value={ctaText} as="span" /> <IconArrowRight /></ProkipBtn>
           </div>
         </div>
       </div>
@@ -212,20 +240,19 @@ export function ProkipBookingSolution({
     <section className="py-20 px-4 sm:px-6 lg:px-8 bg-white">
       <div className="max-w-7xl mx-auto flex flex-col lg:flex-row items-center gap-12 lg:gap-20">
         <div className="lg:w-1/2">
-          <h2 className="text-3xl md:text-4xl font-bold text-slate-900 mb-6 tracking-tight">
-            {title} <br /><span className="text-[#021127]">{titleHighlight}</span>
-          </h2>
-          <p className="text-lg text-slate-600 mb-8 leading-relaxed">{description}</p>
+          <EditableCopy field="title" value={title} as="h2" className="text-3xl md:text-4xl font-bold text-slate-900 mb-6 tracking-tight" />
+          <EditableCopy field="titleHighlight" value={titleHighlight} as="span" className="text-[#021127]" />
+          <EditableCopy field="description" value={description} as="p" multiline className="text-lg text-slate-600 mb-8 leading-relaxed" />
           <div className="space-y-4">
-            <p className="font-semibold text-slate-900 text-lg">{featuresLabel}</p>
+            <EditableCopy field="featuresLabel" value={featuresLabel} as="p" className="font-semibold text-slate-900 text-lg" />
             <ul className="grid sm:grid-cols-2 gap-3">
               {features.map((f, i) => (
-                <li key={i} className="flex items-start gap-3"><IconCheck /><span className="text-slate-700">{f}</span></li>
+                <li key={i} className="flex items-start gap-3"><IconCheck /><span className="text-slate-700"><EditableCopy fieldPath={`features.${i}`} value={f} as="span" /></span></li>
               ))}
             </ul>
           </div>
           <div className="mt-10 p-6 bg-[#021127] border border-slate-800 rounded-xl text-white shadow-sm">
-            <p className="text-lg font-bold">{callout}</p>
+            <EditableCopy field="callout" value={callout} as="p" className="text-lg font-bold" />
           </div>
         </div>
         <div className="lg:w-1/2 w-full">
@@ -236,16 +263,16 @@ export function ProkipBookingSolution({
                 <div className="w-3 h-3 rounded-full bg-amber-400" />
                 <div className="w-3 h-3 rounded-full bg-green-400" />
               </div>
-              <div className="mx-auto bg-white text-xs text-slate-400 px-3 py-1 rounded-md border border-slate-200 w-1/2 text-center truncate">{dashboardUrl}</div>
+              <EditableCopy field="dashboardUrl" value={dashboardUrl} as="div" className="mx-auto bg-white text-xs text-slate-400 px-3 py-1 rounded-md border border-slate-200 w-1/2 text-center truncate" />
             </div>
             <div className="p-6 md:p-8">
               <div className="flex justify-between items-center mb-8">
-                <div><h3 className="font-semibold text-lg text-slate-800">Sales Overview</h3><p className="text-sm text-slate-500">Today&apos;s activities</p></div>
+                <div><EditableCopy field="dashboardTitle" value="Sales Overview" as="h3" className="font-semibold text-lg text-slate-800" /><EditableCopy field="dashboardSubtitle" value="Today's activities" as="p" className="text-sm text-slate-500" /></div>
                 <div className="h-8 w-24 bg-[#FFB800] rounded-md opacity-20" />
               </div>
               <div className="grid grid-cols-2 gap-4 mb-6">
-                <div className="bg-white p-4 rounded-xl border border-slate-100 shadow-sm"><p className="text-sm text-slate-500 mb-1">Total Sales</p><p className="text-2xl font-bold text-slate-800">{dashboardStats.totalSales}</p></div>
-                <div className="bg-white p-4 rounded-xl border border-slate-100 shadow-sm"><p className="text-sm text-slate-500 mb-1">Items Sold</p><p className="text-2xl font-bold text-slate-800">{dashboardStats.itemsSold}</p></div>
+                <div className="bg-white p-4 rounded-xl border border-slate-100 shadow-sm"><EditableCopy field="dashboardTotalSalesLabel" value="Total Sales" as="p" className="text-sm text-slate-500 mb-1" /><EditableCopy fieldPath="dashboardStats.totalSales" value={dashboardStats.totalSales} as="p" className="text-2xl font-bold text-slate-800" /></div>
+                <div className="bg-white p-4 rounded-xl border border-slate-100 shadow-sm"><EditableCopy field="dashboardItemsSoldLabel" value="Items Sold" as="p" className="text-sm text-slate-500 mb-1" /><EditableCopy fieldPath="dashboardStats.itemsSold" value={dashboardStats.itemsSold} as="p" className="text-2xl font-bold text-slate-800" /></div>
               </div>
               <div className="space-y-3">
                 <div className="h-10 bg-slate-200 rounded-md w-full animate-pulse" />
@@ -289,11 +316,11 @@ export function ProkipBookingDemoDetails({
     <section className="py-20 px-4 sm:px-6 lg:px-8 bg-slate-50 border-t border-slate-100">
       <div className="max-w-4xl mx-auto">
         <div className="text-center mb-16">
-          <h2 className="text-3xl md:text-5xl font-black text-slate-900 mb-6 tracking-tight">{title}</h2>
-          <p className="text-lg text-slate-600 leading-relaxed">{description}</p>
+          <EditableCopy field="title" value={title} as="h2" className="text-3xl md:text-5xl font-black text-slate-900 mb-6 tracking-tight" />
+          <EditableCopy field="description" value={description} as="p" multiline className="text-lg text-slate-600 leading-relaxed" />
         </div>
         <div className="bg-white p-8 md:p-10 rounded-2xl shadow-[-20px_0_40px_-20px_rgba(0,0,0,0.05)] border border-slate-100">
-          <h3 className="text-xl font-bold text-slate-900 mb-6 border-b border-slate-100 pb-4">{listHeading}</h3>
+          <EditableCopy field="listHeading" value={listHeading} as="h3" className="text-xl font-bold text-slate-900 mb-6 border-b border-slate-100 pb-4" />
           <ul className="grid sm:grid-cols-2 gap-x-8 gap-y-4">
             {benefits.map((b, i) => (
               <li key={i} className="flex items-start gap-3">
@@ -335,9 +362,9 @@ export function ProkipBookingTestimonials({
   return (
     <section className="py-20 px-4 sm:px-6 lg:px-8 bg-slate-50 border-t border-slate-200">
       <div className="max-w-7xl mx-auto text-center">
-        <div className="inline-block px-3 py-1 bg-[#FFB800]/20 text-[#021127] border border-[#FFB800]/30 text-xs font-bold tracking-widest uppercase rounded-full mb-6">{badge}</div>
-        <h2 className="text-3xl md:text-5xl font-black text-slate-900 mb-4 tracking-tight">{title}</h2>
-        <p className="text-lg text-slate-600 mb-12 max-w-2xl mx-auto">{subtitle}</p>
+        <div className="inline-block px-3 py-1 bg-[#FFB800]/20 text-[#021127] border border-[#FFB800]/30 text-xs font-bold tracking-widest uppercase rounded-full mb-6"><EditableCopy field="badge" value={badge} as="span" /></div>
+        <EditableCopy field="title" value={title} as="h2" className="text-3xl md:text-5xl font-black text-slate-900 mb-4 tracking-tight" />
+        <EditableCopy field="subtitle" value={subtitle} as="p" multiline className="text-lg text-slate-600 mb-12 max-w-2xl mx-auto" />
         <div className="grid md:grid-cols-2 gap-8 max-w-5xl mx-auto mb-12">
           {testimonials.map((t, i) => (
             <div key={i} className="relative rounded-2xl overflow-hidden shadow-[-20px_0_40px_-20px_rgba(0,0,0,0.05)] border border-slate-200 bg-white aspect-video p-2">
@@ -346,7 +373,7 @@ export function ProkipBookingTestimonials({
           ))}
         </div>
         <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
-          <ProkipBtn size="lg" onClick={scrollToForm} className="w-full sm:w-auto font-bold">{ctaText}<IconArrowRight /></ProkipBtn>
+          <ProkipBtn size="lg" onClick={scrollToForm} className="w-full sm:w-auto font-bold"><EditableCopy field="ctaText" value={ctaText} as="span" /> <IconArrowRight /></ProkipBtn>
         </div>
       </div>
     </section>
@@ -378,8 +405,8 @@ export function ProkipBookingProcess({
     <section className="py-20 px-4 sm:px-6 lg:px-8 bg-white">
       <div className="max-w-5xl mx-auto">
         <div className="text-center mb-16">
-          <h2 className="text-3xl md:text-5xl font-black text-slate-900 mb-6 tracking-tight">{title}</h2>
-          <p className="text-lg text-slate-600 max-w-2xl mx-auto">{subtitle}</p>
+          <EditableCopy field="title" value={title} as="h2" className="text-3xl md:text-5xl font-black text-slate-900 mb-6 tracking-tight" />
+          <EditableCopy field="subtitle" value={subtitle} as="p" className="text-lg text-slate-600 max-w-2xl mx-auto" />
         </div>
         <div className="space-y-8 relative before:absolute before:inset-0 before:ml-5 before:-translate-x-px md:before:mx-auto md:before:translate-x-0 before:h-full before:w-0.5 before:bg-gradient-to-b before:from-transparent before:via-slate-200 before:to-transparent">
           {steps.map((step, i) => (
@@ -388,8 +415,8 @@ export function ProkipBookingProcess({
                 {step.num}
               </div>
               <div className="w-[calc(100%-4rem)] md:w-[calc(50%-2.5rem)] bg-slate-50 p-6 rounded-2xl border border-slate-100 shadow-sm">
-                <h4 className="font-bold text-lg text-slate-900 mb-2">{step.title}</h4>
-                <p className="text-slate-600 text-sm leading-relaxed">{step.desc}</p>
+                <EditableCopy fieldPath={`steps.${i}.title`} value={step.title} as="h4" className="font-bold text-lg text-slate-900 mb-2" />
+                <EditableCopy fieldPath={`steps.${i}.desc`} value={step.desc} as="p" multiline className="text-slate-600 text-sm leading-relaxed" />
               </div>
             </div>
           ))}
@@ -511,14 +538,13 @@ export function ProkipBookingForm({
       <div className="max-w-6xl mx-auto flex flex-col lg:flex-row gap-16 lg:items-start">
         {/* Left column */}
         <div className="lg:w-5/12 pt-8">
-          <h2 className="text-4xl font-black mb-6 text-white tracking-tight leading-[0.95]">
-            {title} <br /><span className="text-[#FFB800]">{titleHighlight}</span>
-          </h2>
-          <p className="text-lg text-slate-300 mb-10 leading-relaxed">{subtitle}</p>
+          <EditableCopy field="title" value={title} as="h2" className="text-4xl font-black mb-6 text-white tracking-tight leading-[0.95]" />
+          <EditableCopy field="titleHighlight" value={titleHighlight} as="span" className="text-[#FFB800] block" />
+          <EditableCopy field="subtitle" value={subtitle} as="p" className="text-lg text-slate-300 mb-10 leading-relaxed" />
           <div className="mt-8">
             <div className="bg-[#FFB800]/10 border border-[#FFB800]/20 rounded-xl p-6">
-              <h3 className="font-bold text-[#FFB800] mb-2 text-lg">{trustLine}</h3>
-              <p className="text-slate-300 font-medium text-sm leading-relaxed">{trustSubline}</p>
+              <EditableCopy field="trustLine" value={trustLine} as="h3" className="font-bold text-[#FFB800] mb-2 text-lg" />
+              <EditableCopy field="trustSubline" value={trustSubline} as="p" className="text-slate-300 font-medium text-sm leading-relaxed" />
             </div>
           </div>
         </div>
@@ -540,47 +566,45 @@ export function ProkipBookingForm({
                   <div className="absolute inset-0 bg-green-400 opacity-20 rounded-full animate-ping" style={{ animationDuration: "3s" }} />
                   <IconCheckCircle2 />
                 </div>
-                <h3 className="text-3xl font-black text-slate-900 mb-3 tracking-tight">You&apos;re all set!</h3>
-                <p className="text-slate-600 mb-8 max-w-sm mx-auto text-sm leading-relaxed">
-                  We&apos;ve received your request. A calendar invitation and confirmation details have been sent to <span className="font-bold text-slate-800">{email}</span>.
-                </p>
+                <EditableCopy field="successTitle" value="You're all set!" as="h3" className="text-3xl font-black text-slate-900 mb-3 tracking-tight" />
+                <EditableCopy field="successBody" value="We've received your request. A calendar invitation and confirmation details have been sent to you." as="p" multiline className="text-slate-600 mb-8 max-w-sm mx-auto text-sm leading-relaxed" />
                 <div className="bg-slate-50 border border-slate-200 rounded-2xl p-6 w-full max-w-md mx-auto mb-8 text-left shadow-sm">
-                  <h4 className="text-xs font-bold uppercase tracking-wider text-slate-400 mb-4">Your Session Details</h4>
+                  <EditableCopy field="sessionTitle" value="Your Session Details" as="h4" className="text-xs font-bold uppercase tracking-wider text-slate-400 mb-4" />
                   <div className="space-y-4">
                     <div className="flex items-start gap-4">
                       <div className="w-10 h-10 bg-white rounded-xl shadow-sm border border-slate-100 flex items-center justify-center shrink-0"><IconCalendar className="w-5 h-5 text-[#021127]" /></div>
-                      <div className="flex-1"><p className="text-[10px] uppercase font-bold tracking-wider text-slate-400 mb-0.5">Date</p><p className="text-sm font-bold text-slate-900">{selectedDate}</p></div>
+                      <div className="flex-1"><EditableCopy field="dateLabel" value="Date" as="p" className="text-[10px] uppercase font-bold tracking-wider text-slate-400 mb-0.5" /><EditableCopy fieldPath="selectedDate" value={selectedDate} as="p" className="text-sm font-bold text-slate-900" /></div>
                     </div>
                     <div className="h-px w-full bg-slate-200/60" />
                     <div className="flex items-start gap-4">
                       <div className="w-10 h-10 bg-white rounded-xl shadow-sm border border-slate-100 flex items-center justify-center shrink-0"><IconClock className="w-5 h-5 text-[#021127]" /></div>
-                      <div className="flex-1"><p className="text-[10px] uppercase font-bold tracking-wider text-slate-400 mb-0.5">Time</p><p className="text-sm font-bold text-slate-900">{selectedTime}</p></div>
+                      <div className="flex-1"><EditableCopy field="timeLabel" value="Time" as="p" className="text-[10px] uppercase font-bold tracking-wider text-slate-400 mb-0.5" /><EditableCopy fieldPath="selectedTime" value={selectedTime} as="p" className="text-sm font-bold text-slate-900" /></div>
                     </div>
                   </div>
                 </div>
-                <ProkipBtn variant="outline" onClick={resetForm} className="font-bold rounded-xl px-8 border-slate-300 text-slate-700 hover:bg-slate-50">Book another demo</ProkipBtn>
+                <ProkipBtn variant="outline" onClick={resetForm} className="font-bold rounded-xl px-8 border-slate-300 text-slate-700 hover:bg-slate-50"><EditableCopy field="resetText" value="Book another demo" as="span" /></ProkipBtn>
               </div>
             ) : (
               <form id="prokip-demo-form" onSubmit={handleSubmit} className="relative">
                 {/* Step 1 */}
                 <div className={`space-y-6 transition-all duration-500 ${step === 1 ? "block prokip-fade-in" : "hidden"}`}>
                   <div className="mb-2">
-                    <h3 className="text-xl font-bold text-slate-900">About Your Business</h3>
-                    <p className="text-sm text-slate-500 mt-1">Let&apos;s get to know you better so we can tailor the demo.</p>
+                    <EditableCopy field="stepOneTitle" value="About Your Business" as="h3" className="text-xl font-bold text-slate-900" />
+                    <EditableCopy field="stepOneSubtitle" value="Let's get to know you better so we can tailor the demo." as="p" className="text-sm text-slate-500 mt-1" />
                   </div>
                   <div className="grid sm:grid-cols-2 gap-5">
                     <div className="flex flex-col">
-                      <label className="text-[10px] font-black uppercase text-slate-400 ml-1 mb-1 tracking-wider">Full Name *</label>
+                      <EditableCopy field="fullNameLabel" value="Full Name *" as="span" className="text-[10px] font-black uppercase text-slate-400 ml-1 mb-1 tracking-wider" />
                       <input required type="text" value={fullName} onChange={e => setFullName(e.target.value)} className="bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-[#021127] focus:ring-1 focus:ring-[#021127] transition-all" placeholder="John Doe" />
                     </div>
                     <div className="flex flex-col">
-                      <label className="text-[10px] font-black uppercase text-slate-400 ml-1 mb-1 tracking-wider">Business Name *</label>
+                      <EditableCopy field="businessNameLabel" value="Business Name *" as="span" className="text-[10px] font-black uppercase text-slate-400 ml-1 mb-1 tracking-wider" />
                       <input required type="text" value={businessName} onChange={e => setBusinessName(e.target.value)} className="bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-[#021127] focus:ring-1 focus:ring-[#021127] transition-all" placeholder="Acme Corp" />
                     </div>
                   </div>
                   <div className="grid sm:grid-cols-2 gap-5">
                     <div className="flex flex-col relative">
-                      <label className="text-[10px] font-black uppercase text-slate-400 ml-1 mb-1 tracking-wider">Phone Number *</label>
+                      <EditableCopy field="phoneLabel" value="Phone Number *" as="span" className="text-[10px] font-black uppercase text-slate-400 ml-1 mb-1 tracking-wider" />
                       <div className="relative flex rounded-xl border border-slate-200 bg-slate-50 focus-within:border-[#021127] focus-within:ring-1 focus-within:ring-[#021127] transition-all">
                         <button type="button" onClick={() => setIsCountryDropdownOpen(!isCountryDropdownOpen)} className="flex items-center gap-1.5 px-3 border-r border-slate-200 hover:bg-slate-100 transition-colors rounded-l-xl text-sm font-semibold text-slate-700 shrink-0">
                           <span>{currentCountry.flag}</span><span>{currentCountry.code}</span><IconChevronDown className="w-3.5 h-3.5 text-slate-400" />
@@ -599,13 +623,13 @@ export function ProkipBookingForm({
                       </div>
                     </div>
                     <div className="flex flex-col">
-                      <label className="text-[10px] font-black uppercase text-slate-400 ml-1 mb-1 tracking-wider">Email Address *</label>
+                      <EditableCopy field="emailLabel" value="Email Address *" as="span" className="text-[10px] font-black uppercase text-slate-400 ml-1 mb-1 tracking-wider" />
                       <input required type="email" value={email} onChange={e => setEmail(e.target.value)} className="bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-[#021127] focus:ring-1 focus:ring-[#021127] transition-all" placeholder="john@example.com" />
                     </div>
                   </div>
                   <div className="grid sm:grid-cols-2 gap-5">
                     <div className="flex flex-col">
-                      <label className="text-[10px] font-black uppercase text-slate-400 ml-1 mb-1 tracking-wider">Type of Business *</label>
+                      <EditableCopy field="businessTypeLabel" value="Type of Business *" as="span" className="text-[10px] font-black uppercase text-slate-400 ml-1 mb-1 tracking-wider" />
                       <div className="relative">
                         <select required value={businessType} onChange={e => setBusinessType(e.target.value)} className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 pr-10 text-sm focus:outline-none focus:border-[#021127] focus:ring-1 focus:ring-[#021127] transition-all text-slate-700">
                           <option value="">Select industry...</option>
@@ -615,7 +639,7 @@ export function ProkipBookingForm({
                       </div>
                     </div>
                     <div className="flex flex-col">
-                      <label className="text-[10px] font-black uppercase text-slate-400 ml-1 mb-1 tracking-wider">Locations *</label>
+                      <EditableCopy field="locationsLabel" value="Locations *" as="span" className="text-[10px] font-black uppercase text-slate-400 ml-1 mb-1 tracking-wider" />
                       <div className="relative">
                         <select required value={locations} onChange={e => setLocations(e.target.value)} className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 pr-10 text-sm focus:outline-none focus:border-[#021127] focus:ring-1 focus:ring-[#021127] transition-all text-slate-700">
                           <option value="">Select size...</option>
@@ -627,7 +651,7 @@ export function ProkipBookingForm({
                   </div>
                   <div className="pt-4">
                     <button type="button" onClick={handleNextStep} className="w-full flex items-center justify-center gap-2 bg-slate-900 hover:bg-slate-800 text-white font-bold py-4 rounded-xl shadow-md mt-2 transition-all">
-                      Continue to Schedule <svg className="w-5 h-5" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M5 12h14M12 5l7 7-7 7"/></svg>
+                      <EditableCopy field="continueText" value="Continue to Schedule" as="span" /> <svg className="w-5 h-5" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M5 12h14M12 5l7 7-7 7"/></svg>
                     </button>
                   </div>
                 </div>
@@ -635,18 +659,18 @@ export function ProkipBookingForm({
                 {/* Step 2 */}
                 <div className={`space-y-6 transition-all duration-500 ${step === 2 ? "block prokip-fade-in" : "hidden"}`}>
                   <div className="flex items-center gap-3 mb-2">
-                    <button type="button" onClick={() => setStep(1)} className="w-8 h-8 flex items-center justify-center rounded-full bg-slate-100 hover:bg-slate-200 text-slate-600 transition-colors" aria-label="Go back"><IconArrowLeft /></button>
-                    <div><h3 className="text-xl font-bold text-slate-900">Your Goals &amp; Availability</h3><p className="text-sm text-slate-500">Tell us what you want to fix, and when to meet.</p></div>
+                  <button type="button" onClick={() => setStep(1)} className="w-8 h-8 flex items-center justify-center rounded-full bg-slate-100 hover:bg-slate-200 text-slate-600 transition-colors" aria-label="Go back"><IconArrowLeft /></button>
+                    <div><EditableCopy field="stepTwoTitle" value="Your Goals & Availability" as="h3" className="text-xl font-bold text-slate-900" /><EditableCopy field="stepTwoSubtitle" value="Tell us what you want to fix, and when to meet." as="p" className="text-sm text-slate-500" /></div>
                   </div>
                   <div className="flex flex-col">
-                    <label className="text-[10px] font-black uppercase text-slate-400 ml-1 mb-1 tracking-wider">What is your biggest challenge right now? *</label>
+                    <EditableCopy field="challengeLabel" value="What is your biggest challenge right now? *" as="span" className="text-[10px] font-black uppercase text-slate-400 ml-1 mb-1 tracking-wider" />
                     <textarea required value={challenge} onChange={e => setChallenge(e.target.value)} className="bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-[#021127] focus:ring-1 focus:ring-[#021127] transition-all resize-none" rows={3} placeholder="e.g. Employee theft, manual records, tracking stock across branches..." />
                   </div>
 
                   {/* Date picker */}
                   <div className="pt-2 border-t border-slate-100">
                     <div className="mb-4 flex items-center justify-between">
-                      <div><h4 className="text-sm font-bold text-slate-800">Select a Date *</h4><p className="text-xs text-slate-500">Pick a day that works best for you.</p></div>
+                      <div><EditableCopy field="dateTitle" value="Select a Date *" as="h4" className="text-sm font-bold text-slate-800" /><EditableCopy field="dateSubtitle" value="Pick a day that works best for you." as="p" className="text-xs text-slate-500" /></div>
                       <IconCalendar className="w-5 h-5 text-slate-300" />
                     </div>
                     <div className="flex flex-wrap gap-2 mb-4">
@@ -679,7 +703,7 @@ export function ProkipBookingForm({
                     {/* Time slots */}
                     <div className={`transition-all duration-300 overflow-hidden ${selectedDate ? "opacity-100 max-h-[400px]" : "opacity-50 max-h-0 pointer-events-none grayscale"}`}>
                       <div className="mb-4 mt-2 flex items-center justify-between">
-                        <div><h4 className="text-sm font-bold text-slate-800">Select a Time *</h4><p className="text-xs text-slate-500">Available slots for the selected date.</p></div>
+                        <div><EditableCopy field="timeTitle" value="Select a Time *" as="h4" className="text-sm font-bold text-slate-800" /><EditableCopy field="timeSubtitle" value="Available slots for the selected date." as="p" className="text-xs text-slate-500" /></div>
                         <IconClock className="w-5 h-5 text-slate-300" />
                       </div>
                       <div className="grid grid-cols-3 gap-3">
@@ -699,11 +723,11 @@ export function ProkipBookingForm({
                   <div className="pt-6">
                     <button type="submit" disabled={!selectedDate || !selectedTime || !challenge}
                       className="w-full flex items-center justify-center gap-2 bg-[#FFB800] hover:bg-[#E5A600] text-[#021127] font-bold py-4 rounded-xl shadow-lg shadow-[#FFB800]/20 transition-all disabled:opacity-50 disabled:cursor-not-allowed">
-                      {!challenge ? "Enter your biggest challenge" : !selectedDate ? "Select Preferred Date first" : !selectedTime ? "Select Available Time Slot" : "Show Me How to Run My Business"}
+                      <EditableCopy field="submitText" value={!challenge ? "Enter your biggest challenge" : !selectedDate ? "Select Preferred Date first" : !selectedTime ? "Select Available Time Slot" : "Show Me How to Run My Business"} as="span" />
                       {challenge && selectedDate && selectedTime && <IconCheckCircle2 className="w-5 h-5" />}
                     </button>
                     <div className="text-center mt-4">
-                      <p className="text-[10px] text-slate-400 uppercase font-bold tracking-widest">Trusted by 30,000+ Users in 80+ Regions</p>
+                      <EditableCopy field="trustBadge" value="Trusted by 30,000+ Users in 80+ Regions" as="p" className="text-[10px] text-slate-400 uppercase font-bold tracking-widest" />
                     </div>
                   </div>
                 </div>
@@ -713,14 +737,14 @@ export function ProkipBookingForm({
 
           {/* Why section */}
           <div className="mt-8 bg-slate-800/50 rounded-2xl p-6 sm:p-8 border border-slate-700">
-            <h3 className="font-bold text-xl text-white mb-6 text-center">Why Business Owners Book a Prokip Demo</h3>
+            <EditableCopy field="whyTitle" value="Why Business Owners Book a Prokip Demo" as="h3" className="font-bold text-xl text-white mb-6 text-center" />
             <ul className="grid sm:grid-cols-2 gap-4">
               {whyReasons.map((reason, i) => (
                 <li key={i} className="flex items-start gap-3">
                   <div className="mt-1 flex-shrink-0 w-5 h-5 rounded-full bg-[#FFB800]/20 flex items-center justify-center">
                     <span className="text-[#FFB800] font-black text-xs">✓</span>
                   </div>
-                  <span className="text-slate-300 font-medium text-sm leading-relaxed">{reason}</span>
+                  <span className="text-slate-300 font-medium text-sm leading-relaxed"><EditableCopy fieldPath={`whyReasons.${i}`} value={reason} as="span" /></span>
                 </li>
               ))}
             </ul>
