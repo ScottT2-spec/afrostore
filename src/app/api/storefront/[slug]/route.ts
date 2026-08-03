@@ -5,6 +5,7 @@ import { buildThemeDataWithCustomization, loadSiteCustomizationSafely } from "@/
 import { mergeStoredTemplatePages } from "@/lib/templates/site-instance";
 import { ensurePerfumePages } from "@/lib/templates/perfume-pages";
 import { ensureVegetablePages } from "@/lib/templates/vegetable-pages";
+import { buildTemplatePageContent } from "@/lib/templates/template-tree";
 import type { Prisma } from "@/generated/prisma";
 import type { PageType } from "@/generated/prisma";
 
@@ -39,8 +40,8 @@ function appendKidsPages(
   pages: Array<{ id: string; title: string; slug: string; type: PageType; content: Prisma.JsonValue | null; template: string | null }>
 ) {
   const kidsPages = [
-    { id: "kids-about-us", title: "About Us", slug: "about-us", type: "CUSTOM" as PageType, content: { blocks: [], settings: {} } as Prisma.JsonObject, template: "kids" },
-    { id: "kids-contact-us", title: "Contact Us", slug: "contact-us", type: "CUSTOM" as PageType, content: { blocks: [], settings: {} } as Prisma.JsonObject, template: "kids" },
+    { id: "kids-about-us", title: "About Us", slug: "about-us", type: "CUSTOM" as PageType, content: buildTemplatePageContent([], {}) as unknown as Prisma.JsonObject, template: "kids" },
+    { id: "kids-contact-us", title: "Contact Us", slug: "contact-us", type: "CUSTOM" as PageType, content: buildTemplatePageContent([], {}) as unknown as Prisma.JsonObject, template: "kids" },
   ] satisfies Array<{ id: string; title: string; slug: string; type: PageType; content: Prisma.JsonObject; template: string }>;
 
   const knownSlugs = new Set(pages.map((page) => page.slug));
@@ -335,10 +336,8 @@ export async function GET(req: NextRequest, { params }: Params) {
       activeTemplate?.pages
     ).map((page) => ({
       ...page,
-      // Ensure content is always in object format { blocks: [], settings: {} }
-      // Template content comes as array, convert to object format
       content: Array.isArray(page.content)
-        ? { blocks: page.content, settings: {} }
+        ? buildTemplatePageContent(page.content, {})
         : page.content,
     }));
 

@@ -1,9 +1,9 @@
 "use client";
 
 import { useEditorStore } from "@/lib/visual-editor/store";
-import { useSelectedElement } from "@/lib/visual-editor/store";
+import { useSelectedElement, useSelectedElementPath } from "@/lib/visual-editor/store";
 import { TabType } from "@/lib/visual-editor/types";
-import { Settings, Palette, Sliders } from "lucide-react";
+import { Settings, Palette, Sliders, ChevronRight } from "lucide-react";
 import ContentPanel from "@/components/visual-editor/panels/ContentPanel";
 import StylePanel from "@/components/visual-editor/panels/StylePanel";
 import AdvancedPanel from "@/components/visual-editor/panels/AdvancedPanel";
@@ -11,6 +11,7 @@ import AdvancedPanel from "@/components/visual-editor/panels/AdvancedPanel";
 export default function RightSidebar() {
   const { selectedElementId, activeTab, setActiveTab, updateElement } = useEditorStore();
   const selectedElement = useSelectedElement();
+  const selectedPath = useSelectedElementPath();
 
   const handleUpdate = (updates: any) => {
     if (selectedElementId) {
@@ -40,6 +41,22 @@ export default function RightSidebar() {
     <aside className="w-80 bg-white dark:bg-gray-900 border-l border-gray-200 dark:border-gray-700 flex flex-col h-full">
       {/* Element Header */}
       <div className="p-4 border-b border-gray-200 dark:border-gray-700">
+        {selectedPath.length > 0 && (
+          <div className="mb-3 flex flex-wrap items-center gap-1 text-[11px] text-gray-500 dark:text-gray-400">
+            {selectedPath.map((node, index) => (
+              <span key={node.id} className="flex items-center gap-1">
+                <button
+                  type="button"
+                  onClick={() => useEditorStore.getState().setSelectedElementId(node.id)}
+                  className="rounded px-1.5 py-0.5 hover:bg-gray-100 dark:hover:bg-gray-800 hover:text-gray-700 dark:hover:text-gray-200"
+                >
+                  {node.name || node.type}
+                </button>
+                {index < selectedPath.length - 1 && <ChevronRight className="h-3 w-3 text-gray-400" />}
+              </span>
+            ))}
+          </div>
+        )}
         <h3 className="text-sm font-semibold text-gray-900 dark:text-white capitalize">
           {selectedElement.name}
         </h3>

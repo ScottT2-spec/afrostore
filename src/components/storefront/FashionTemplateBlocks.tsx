@@ -5,6 +5,11 @@ import { resolveStoreLink, resolveFooterLink } from "@/lib/template-link-utils";
 import { toggleCompare as toggleCompareItem } from "@/lib/compare-utils";
 import { safeSrc, onImgError } from "./image-fallback";
 import { useNewsletterSubscribe } from "@/hooks/useNewsletterSubscribe";
+import { useEditorStore } from "@/lib/visual-editor/store";
+import type { EditorNode } from "@/lib/visual-editor/node-tree";
+import { resolveNodeStyles } from "@/lib/visual-editor/node-tree";
+import { normalizeSocialLinks, normalizeTextArray, resolveNestedNodeText, toDisplayText } from "@/components/storefront/prop-normalizers";
+import { InlineEditableText } from "@/components/storefront/InlineEditableText";
 
 /* ═══════════════════════════════════════════════════════════════
    FASHION TEMPLATE BLOCKS
@@ -51,6 +56,33 @@ function ScopedStyles({ id, css }: { id: string; css: string }) {
   return <style data-fashion-block={id} dangerouslySetInnerHTML={{ __html: css }} />;
 }
 
+function selectEditorNode(nodeId: string) {
+  useEditorStore.getState().setSelectedElementId(nodeId);
+}
+
+function getNodeText(node: EditorNode, keys: string[], fallback = ""): string {
+  return resolveNestedNodeText(node, keys, fallback);
+}
+
+function normalizeBlogDate(date: unknown): { day: string; month: string } | null {
+  if (!date) return null;
+  if (typeof date === "object" && date !== null) {
+    const maybeDate = date as { day?: unknown; month?: unknown };
+    const day = typeof maybeDate.day === "string" || typeof maybeDate.day === "number" ? String(maybeDate.day) : "";
+    const month = typeof maybeDate.month === "string" || typeof maybeDate.month === "number" ? String(maybeDate.month) : "";
+    return day || month ? { day, month } : null;
+  }
+  if (typeof date === "string") {
+    const parts = date.trim().split(/\s+/).filter(Boolean);
+    if (parts.length === 0) return null;
+    const [first, second] = parts;
+    if (/^\d+$/.test(first || "")) return { day: first, month: second || "" };
+    if (/^\d+$/.test(second || "")) return { day: second, month: first || "" };
+    return { day: first, month: second || "" };
+  }
+  return null;
+}
+
 /* ─── useInView HOOK ────────────────────────────────────────── */
 function useInView(threshold = 0.1) {
   const ref = useRef<HTMLDivElement>(null);
@@ -88,14 +120,31 @@ export interface FashionHeroSliderProps {
   slides: FashionHeroSlide[];
   autoplaySpeed?: number;
   minHeight?: string;
+  elements?: EditorNode[];
+  isEditor?: boolean;
+  blockId?: string;
 }
 
-export function FashionHeroSlider({ slides, autoplaySpeed = 5000, minHeight = "560px" }: FashionHeroSliderProps) {
+export function FashionHeroSlider({ slides = [], autoplaySpeed = 5000, minHeight = "560px", elements = [], isEditor = false }: FashionHeroSliderProps) {
   const storeCtx = useContext(FashionStoreContext);
   const fixLink = (link: string) => resolveStoreLink(link, storeCtx?.storeSlug);
   const [current, setCurrent] = useState(0);
   const [isTransitioning, setIsTransitioning] = useState(false);
   const timerRef = useRef<ReturnType<typeof setInterval> | null>(null);
+  const slidesFromNodes = elements.length > 0
+    ? elements.map((node) => ({
+        subtitle: getNodeText(node, ["subtitle"], ""),
+        titleLine1: getNodeText(node, ["titleLine1", "title"], "Title"),
+        titleLine2: getNodeText(node, ["titleLine2"], ""),
+        description: getNodeText(node, ["description", "text"], ""),
+        buttonText: getNodeText(node, ["buttonText"], "Shop Now"),
+        buttonLink: getNodeText(node, ["buttonLink", "link", "href"], "#"),
+        backgroundImage: getNodeText(node, ["backgroundImage", "imageUrl"], ""),
+        textPosition: ((node.settings?.textPosition as FashionHeroSlide["textPosition"]) || "center"),
+        colorScheme: ((node.settings?.colorScheme as FashionHeroSlide["colorScheme"]) || "dark"),
+      }))
+    : [];
+  const activeSlides = slidesFromNodes.length > 0 ? slidesFromNodes : slides;
 
   const goTo = useCallback((idx: number) => {
     if (isTransitioning) return;
@@ -105,12 +154,12 @@ export function FashionHeroSlider({ slides, autoplaySpeed = 5000, minHeight = "5
   }, [isTransitioning]);
 
   useEffect(() => {
-    if (slides.length <= 1) return;
+    if (activeSlides.length <= 1 || isEditor) return;
     timerRef.current = setInterval(() => {
-      setCurrent(prev => (prev + 1) % slides.length);
+      setCurrent(prev => (prev + 1) % activeSlides.length);
     }, autoplaySpeed);
     return () => { if (timerRef.current) clearInterval(timerRef.current); };
-  }, [slides.length, autoplaySpeed]);
+  }, [activeSlides.length, autoplaySpeed, isEditor]);
 
   const scopedCss = `
     .fh-slider { position: relative; width: 100%; overflow: hidden; background: #f9f9f9; }
@@ -170,19 +219,124 @@ export function FashionHeroSlider({ slides, autoplaySpeed = 5000, minHeight = "5
     }
   `;
 
+  if (isEditor) {
+    return (
+      <div className="fh-slider" style={{ minHeight, position: "relative" }}>
+        <ScopedStyles id="hero-slider" css={scopedCss} />
+        <div style={{ display: "grid", gap: "18px" }}>
+          {activeSlides.map((slide, i) => {
+            const node = elements[i];
+            const nodeId = node?.id;
+            const scheme = slide.colorScheme || "dark";
+            const align = slide.textPosition || "center";
+            return (
+              <div
+                key={nodeId || i}
+                data-editor-node-id={nodeId}
+                onClick={(e) => {
+                  if (!nodeId) return;
+                  e.stopPropagation();
+                  selectEditorNode(nodeId);
+                }}
+                style={{
+                  position: "relative",
+                  outline: nodeId ? "1px dashed rgba(37, 99, 235, 0.35)" : "1px solid rgba(0,0,0,0.08)",
+                  outlineOffset: "4px",
+                  borderRadius: "12px",
+                  overflow: "hidden",
+                  background: "#fff",
+                }}
+              >
+                <div className="fh-slide-bg" style={{ backgroundImage: `url(${slide.backgroundImage})`, minHeight }} />
+                <div className="fh-slide-content">
+                  <div style={{ ...containerStyle, textAlign: align as React.CSSProperties["textAlign"] }}>
+                    <div style={{ maxWidth: align === "center" ? "65%" : "50%", margin: align === "center" ? "0 auto" : align === "right" ? "0 0 0 auto" : "0", padding: "40px 0" }}>
+                      <InlineEditableText
+                        nodeId={nodeId}
+                        field="subtitle"
+                        value={slide.subtitle}
+                        isEditor={isEditor}
+                        as="div"
+                        className="fh-subtitle"
+                        style={{ color: slide.colorScheme === "light" ? "#fff" : undefined }}
+                      />
+                      <InlineEditableText
+                        nodeId={nodeId}
+                        field="titleLine1"
+                        value={slide.titleLine1}
+                        isEditor={isEditor}
+                        as="div"
+                        className={`fh-title fh-title-${scheme}`}
+                      />
+                      <InlineEditableText
+                        nodeId={nodeId}
+                        field="titleLine2"
+                        value={slide.titleLine2}
+                        isEditor={isEditor}
+                        as="div"
+                        className={`fh-title fh-title-${scheme}`}
+                      />
+                      <InlineEditableText
+                        nodeId={nodeId}
+                        field="description"
+                        value={slide.description}
+                        isEditor={isEditor}
+                        as="div"
+                        className={`fh-desc fh-desc-${scheme}`}
+                        multiline
+                        style={{ marginLeft: align === "center" ? "auto" : undefined, marginRight: align === "center" ? "auto" : undefined }}
+                      />
+                      <div style={{ display: "inline-block" }}>
+                        {isEditor ? (
+                          <InlineEditableText
+                            nodeId={nodeId}
+                            field="buttonText"
+                            value={slide.buttonText}
+                            isEditor
+                            as="span"
+                            className="fh-btn"
+                            title="Edit button label"
+                          />
+                        ) : (
+                          <Link href={fixLink(slide.buttonLink)} className="fh-btn">
+                            {slide.buttonText}
+                          </Link>
+                        )}
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            );
+          })}
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="fh-slider" style={{ minHeight }}>
       <ScopedStyles id="hero-slider" css={scopedCss} />
-      {slides.map((slide, i) => {
+      {(isEditor ? activeSlides : activeSlides).map((slide, i) => {
         const scheme = slide.colorScheme || "dark";
         const align = slide.textPosition || "center";
         return (
-          <div key={i} className={`fh-slide ${i === current ? "fh-active" : ""}`}>
+          <div
+            key={i}
+            className={`fh-slide ${!isEditor && i === current ? "fh-active" : isEditor ? "fh-active" : ""}`}
+            data-editor-node-id={elements[i]?.id}
+            onClick={(e) => {
+              if (!isEditor || !elements[i]) return;
+              e.stopPropagation();
+              selectEditorNode(elements[i].id);
+            }}
+            style={isEditor && elements[i] ? { outline: "1px dashed rgba(37, 99, 235, 0.35)", outlineOffset: "4px" } : undefined}
+          >
             <div className="fh-slide-bg" style={{ backgroundImage: `url(${slide.backgroundImage})` }} />
             <div className="fh-slide-content">
               <div style={{ ...containerStyle, textAlign: align as React.CSSProperties["textAlign"] }}>
                 <div style={{ maxWidth: align === "center" ? "65%" : "50%", margin: align === "center" ? "0 auto" : align === "right" ? "0 0 0 auto" : "0", padding: "40px 0" }}>
-                  {i === current && (
+                  {(!isEditor && i === current) || isEditor ? (
                     <>
                       <div className="fh-subtitle fh-anim-in" style={{ animationDelay: "0.2s" }}>{slide.subtitle}</div>
                       <div className={`fh-title fh-title-${scheme} fh-anim-in`} style={{ animationDelay: "0.3s" }}>{slide.titleLine1}</div>
@@ -192,16 +346,16 @@ export function FashionHeroSlider({ slides, autoplaySpeed = 5000, minHeight = "5
                         <Link href={fixLink(slide.buttonLink)} className="fh-btn">{slide.buttonText}</Link>
                       </div>
                     </>
-                  )}
+                  ) : null}
                 </div>
               </div>
             </div>
           </div>
         );
       })}
-      {slides.length > 1 && (
+      {!isEditor && activeSlides.length > 1 && (
         <div className="fh-dots">
-          {slides.map((_, i) => (
+          {activeSlides.map((_, i) => (
             <button key={i} className={`fh-dot ${i === current ? "fh-dot-active" : ""}`} onClick={() => goTo(i)} aria-label={`Slide ${i + 1}`} />
           ))}
         </div>
@@ -227,9 +381,10 @@ export interface FashionPromoBannersProps {
   banners: FashionPromoBanner[];
 }
 
-export function FashionPromoBanners({ banners }: FashionPromoBannersProps) {
+export function FashionPromoBanners({ banners = [] }: FashionPromoBannersProps) {
   const storeCtx = useContext(FashionStoreContext);
   const fixLink = (link: string) => resolveStoreLink(link, storeCtx?.storeSlug);
+  const safeBanners = Array.isArray(banners) ? banners : [];
   const scopedCss = `
     .fp-banners { display: grid; grid-template-columns: repeat(3, 1fr); gap: 30px; margin-bottom: 80px; }
     .fp-banner { position: relative; overflow: hidden; cursor: pointer; }
@@ -277,7 +432,7 @@ export function FashionPromoBanners({ banners }: FashionPromoBannersProps) {
     <div style={containerStyle}>
       <ScopedStyles id="promo-banners" css={scopedCss} />
       <div className="fp-banners">
-        {banners.map((b, i) => {
+        {safeBanners.map((b, i) => {
           const justify = b.textAlign === "right" ? "flex-end" : b.textAlign === "left" ? "flex-start" : "center";
           return (
             <div key={i} className="fp-banner">
@@ -312,9 +467,11 @@ export interface FashionSectionTitleProps {
   maxWidth?: string;
   titleColor?: "primary" | "white";
   resolvedStyles?: React.CSSProperties;
+  blockId?: string;
+  isEditor?: boolean;
 }
 
-export function FashionSectionTitle({ subtitle, title, description, align = "center", maxWidth = "40%", titleColor = "primary", resolvedStyles }: FashionSectionTitleProps) {
+export function FashionSectionTitle({ subtitle, title, description, align = "center", maxWidth = "40%", titleColor = "primary", resolvedStyles, blockId, isEditor = false }: FashionSectionTitleProps) {
   const scopedCss = `
     .fst-wrapper { margin-bottom: 25px; }
     .fst-subtitle {
@@ -352,9 +509,35 @@ export function FashionSectionTitle({ subtitle, title, description, align = "cen
     <div className="fst-wrapper" style={wrapperStyle}>
       <ScopedStyles id="section-title" css={scopedCss} />
       <div className="fst-inner" style={{ maxWidth, margin: align === "center" ? "0 auto" : undefined, display: "inline-block", width: "100%" }}>
-        {subtitle && <div className="fst-subtitle">{subtitle}</div>}
-        <h4 className={`fst-title fst-title-${titleColor}`}>{title}</h4>
-        {description && <p className={`fst-desc ${titleColor === "white" ? "fst-desc-light" : ""}`}>{description}</p>}
+        {subtitle && (
+          <InlineEditableText
+            nodeId={blockId}
+            field="subtitle"
+            value={subtitle}
+            isEditor={isEditor}
+            as="div"
+            className="fst-subtitle"
+          />
+        )}
+        <InlineEditableText
+          nodeId={blockId}
+          field="title"
+          value={title}
+          isEditor={isEditor}
+          as="h4"
+          className={`fst-title fst-title-${titleColor}`}
+        />
+        {description && (
+          <InlineEditableText
+            nodeId={blockId}
+            field="description"
+            value={description}
+            isEditor={isEditor}
+            as="p"
+            className={`fst-desc ${titleColor === "white" ? "fst-desc-light" : ""}`}
+            multiline
+          />
+        )}
       </div>
     </div>
   );
@@ -450,9 +633,11 @@ export interface FashionProductGridProps {
   maxProducts?: number;
   filter?: "featured" | "bestseller" | "new-arrival" | "sale" | "all";
   filterTag?: string;
+  blockId?: string;
+  isEditor?: boolean;
 }
 
-export function FashionProductGrid({ products: propProducts, columns = 4, showCategory = true, showHoverImage = true, sectionTitle, marginBottom = "60px", maxProducts = 8, filter, filterTag }: FashionProductGridProps) {
+export function FashionProductGrid({ products: propProducts, columns = 4, showCategory = true, showHoverImage = true, sectionTitle, marginBottom = "60px", maxProducts = 8, filter, filterTag, blockId, isEditor = false }: FashionProductGridProps) {
   const storeCtx = useContext(FashionStoreContext);
   const [, setCompareState] = useState(false);
 
@@ -579,13 +764,14 @@ export function FashionProductGrid({ products: propProducts, columns = 4, showCa
   `;
 
   // Fix broken links — ensure they point to proper product pages
-  const resolveProductLink = (link: string, productName: string) => {
-    if (link && link.startsWith("/store/")) return link;
+  const resolveProductLink = (link: unknown, productName: string) => {
+    const normalized = typeof link === "string" ? link : link == null ? "" : String(link);
+    if (normalized.startsWith("/store/")) return normalized;
     if (storeCtx?.storeSlug) {
       const slug = productName.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/(^-|-$)/g, "");
       return `/store/${storeCtx.storeSlug}/product/${slug}`;
     }
-    return resolveStoreLink(link, storeCtx?.storeSlug);
+    return resolveStoreLink(normalized, storeCtx?.storeSlug);
   };
 
   if (products.length === 0) {
@@ -610,13 +796,16 @@ export function FashionProductGrid({ products: propProducts, columns = 4, showCa
           subtitle={sectionTitle.subtitle}
           title={sectionTitle.title}
           description={sectionTitle.description}
+          blockId={blockId}
+          isEditor={isEditor}
         />
       )}
       <div className="fpg-grid">
-        {products.map((p) => {
+        {products.map((p, index) => {
           const productLink = resolveProductLink(p.link, p.name);
+          const itemKey = `${String(p.id || p.name || "fashion-product")}-${index}`;
           return (
-          <div key={p.id} className="fpg-card">
+          <div key={itemKey} className="fpg-card">
             <div className="fpg-thumb">
               <Link href={productLink}>
                 <img src={p.image || safeSrc(null, p.name)} alt={p.name} className="fpg-img fpg-main-img" loading="lazy" onError={(e) => onImgError(e, p.name)} />
@@ -637,9 +826,9 @@ export function FashionProductGrid({ products: propProducts, columns = 4, showCa
               )}
             </div>
             <h3 className="fpg-name"><Link href={productLink}>{p.name}</Link></h3>
-            {showCategory && p.category && (
+              {showCategory && p.category && (
               <div className="fpg-cat">
-                <Link href={resolveStoreLink(p.categoryLink, storeCtx?.storeSlug)}>{p.category}</Link>
+                <Link href={resolveStoreLink(p.categoryLink, storeCtx?.storeSlug)}>{toDisplayText(p.category, "")}</Link>
               </div>
             )}
             <div className="fpg-price">
@@ -706,19 +895,22 @@ export interface FashionCategoryCardsProps {
   columns?: number;
   sectionTitle?: { subtitle?: string; title: string; description?: string };
   marginBottom?: string;
+  blockId?: string;
+  isEditor?: boolean;
 }
 
-export function FashionCategoryCards({ categories, columns = 4, sectionTitle, marginBottom = "50px" }: FashionCategoryCardsProps) {
+export function FashionCategoryCards({ categories = [], columns = 4, sectionTitle, marginBottom = "50px", blockId, isEditor = false }: FashionCategoryCardsProps) {
   const storeCtx = useContext(FashionStoreContext);
 
   // Resolve category links to proper store URLs
-  const resolveCatLink = (link: string, catName: string) => {
-    if (link && link.startsWith("/store/")) return link;
+  const resolveCatLink = (link: unknown, catName: string) => {
+    const normalized = typeof link === "string" ? link : link == null ? "" : String(link);
+    if (normalized.startsWith("/store/")) return normalized;
     if (storeCtx?.storeSlug) {
       const catSlug = catName.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/(^-|-$)/g, "");
       return `/store/${storeCtx.storeSlug}/shop?category=${catSlug}`;
     }
-    return resolveStoreLink(link, storeCtx?.storeSlug);
+    return resolveStoreLink(normalized, storeCtx?.storeSlug);
   };
   const scopedCss = `
     .fcc-section { margin-bottom: ${marginBottom}; }
@@ -762,6 +954,8 @@ export function FashionCategoryCards({ categories, columns = 4, sectionTitle, ma
           subtitle={sectionTitle.subtitle}
           title={sectionTitle.title}
           description={sectionTitle.description}
+          blockId={blockId}
+          isEditor={isEditor}
         />
       )}
       <div className="fcc-grid">
@@ -800,10 +994,23 @@ export interface FashionTestimonialsProps {
   title?: string;
   backgroundImage: string;
   testimonials: FashionTestimonial[];
+  elements?: EditorNode[];
+  isEditor?: boolean;
 }
 
-export function FashionTestimonials({ title = "CUSTOMERS REVIEWS", backgroundImage, testimonials }: FashionTestimonialsProps) {
+export function FashionTestimonials({ title = "CUSTOMERS REVIEWS", backgroundImage, testimonials = [], elements = [], isEditor = false }: FashionTestimonialsProps) {
   const [current, setCurrent] = useState(0);
+  const testimonialsFromNodes = elements.length > 0
+    ? elements.map((node) => ({
+        ...(node?.settings && typeof node.settings === "object" ? {} : {}),
+        avatar: getNodeText(node, ["avatar", "imageUrl"], ""),
+        text: getNodeText(node, ["text", "quote"], ""),
+        name: getNodeText(node, ["name"], ""),
+        role: getNodeText(node, ["role", "subtitle"], ""),
+        rating: Number((node?.settings && typeof node.settings === "object" ? (node.settings as Record<string, unknown>).rating : undefined) || 5),
+      }))
+    : [];
+  const activeTestimonials = testimonialsFromNodes.length > 0 ? testimonialsFromNodes : (Array.isArray(testimonials) ? testimonials : []);
 
   const scopedCss = `
     .ft-section { 
@@ -869,7 +1076,7 @@ export function FashionTestimonials({ title = "CUSTOMERS REVIEWS", backgroundIma
     ));
   };
 
-  const t = testimonials[current];
+  const t = activeTestimonials[current];
   if (!t) return null;
 
   return (
@@ -883,23 +1090,57 @@ export function FashionTestimonials({ title = "CUSTOMERS REVIEWS", backgroundIma
             <path d="M4.583 17.321C3.553 16.227 3 15 3 13.011c0-3.5 2.457-6.637 6.03-8.188l.893 1.378c-3.335 1.804-3.987 4.145-4.247 5.621.537-.278 1.24-.375 1.929-.311 1.804.167 3.226 1.648 3.226 3.489a3.5 3.5 0 01-3.5 3.5c-1.073 0-2.099-.49-2.748-1.179zm10 0C13.553 16.227 13 15 13 13.011c0-3.5 2.457-6.637 6.03-8.188l.893 1.378c-3.335 1.804-3.987 4.145-4.247 5.621.537-.278 1.24-.375 1.929-.311 1.804.167 3.226 1.648 3.226 3.489a3.5 3.5 0 01-3.5 3.5c-1.073 0-2.099-.49-2.748-1.179z"/>
           </svg>
         </div>
-        <div className="ft-carousel">
-          <img src={t.avatar} alt={t.name} className="ft-avatar" />
-          <div className="ft-stars">{renderStars(t.rating)}</div>
-          <p className="ft-text">{t.text}</p>
-          <p className="ft-author">
-            {t.name}
-            <span className="ft-role">{t.role}</span>
-          </p>
+        <div className={`ft-carousel ${isEditor ? "max-w-none" : ""}`}>
+          {isEditor ? (
+            <div className="grid gap-4 md:grid-cols-2">
+              {activeTestimonials.map((item, i) => {
+                const node = elements[i];
+                return (
+                  <div
+                    key={i}
+                    data-editor-node-id={node?.id}
+                    onClick={(e) => {
+                      if (!node) return;
+                      e.stopPropagation();
+                      selectEditorNode(node.id);
+                    }}
+                    style={{
+                      outline: node ? "1px dashed rgba(255,255,255,0.35)" : undefined,
+                      outlineOffset: "4px",
+                      padding: "12px",
+                    }}
+                  >
+                    <img src={item.avatar} alt={item.name} className="ft-avatar" />
+                    <div className="ft-stars">{renderStars(item.rating)}</div>
+                    <p className="ft-text">{item.text}</p>
+                    <p className="ft-author">
+                      {item.name}
+                      <span className="ft-role">{item.role}</span>
+                    </p>
+                  </div>
+                );
+              })}
+            </div>
+          ) : (
+            <>
+              <img src={t.avatar} alt={t.name} className="ft-avatar" />
+              <div className="ft-stars">{renderStars(t.rating)}</div>
+              <p className="ft-text">{t.text}</p>
+              <p className="ft-author">
+                {t.name}
+                <span className="ft-role">{t.role}</span>
+              </p>
+            </>
+          )}
         </div>
-        {testimonials.length > 1 && (
+        {!isEditor && activeTestimonials.length > 1 && (
           <>
             <div className="ft-nav">
-              <button className="ft-nav-btn" onClick={() => setCurrent((current - 1 + testimonials.length) % testimonials.length)} aria-label="Previous">‹</button>
-              <button className="ft-nav-btn" onClick={() => setCurrent((current + 1) % testimonials.length)} aria-label="Next">›</button>
+              <button className="ft-nav-btn" onClick={() => setCurrent((current - 1 + activeTestimonials.length) % activeTestimonials.length)} aria-label="Previous">‹</button>
+              <button className="ft-nav-btn" onClick={() => setCurrent((current + 1) % activeTestimonials.length)} aria-label="Next">›</button>
             </div>
             <div className="ft-dots">
-              {testimonials.map((_, i) => (
+              {activeTestimonials.map((_, i) => (
                 <button key={i} className={`ft-tdot ${i === current ? "ft-tdot-active" : ""}`} onClick={() => setCurrent(i)} aria-label={`Testimonial ${i + 1}`} />
               ))}
             </div>
@@ -932,18 +1173,21 @@ export interface FashionBlogPostsProps {
   columns?: number;
   sectionTitle?: { subtitle?: string; title: string; description?: string };
   marginBottom?: string;
+  blockId?: string;
+  isEditor?: boolean;
 }
 
-export function FashionBlogPosts({ posts: propPosts, columns = 2, sectionTitle, marginBottom = "30px" }: FashionBlogPostsProps) {
+export function FashionBlogPosts({ posts: propPosts, columns = 2, sectionTitle, marginBottom = "30px", blockId, isEditor = false }: FashionBlogPostsProps) {
   const storeCtx = useContext(FashionStoreContext);
 
   // Resolve blog post links to proper store URLs
-  const resolveBlogLink = (link: string, slug: string) => {
+  const resolveBlogLink = (link: unknown, slug: string) => {
+    const normalized = typeof link === "string" ? link : link == null ? "" : String(link);
     // If link is already a proper store URL, return it
-    if (link && link.startsWith("/store/")) return link;
+    if (normalized.startsWith("/store/")) return normalized;
     // If link is a relative blog path (e.g., /blog/slug), convert to store-scoped URL
-    if (link && link.startsWith("/blog/")) {
-      const blogSlug = link.replace("/blog/", "");
+    if (normalized.startsWith("/blog/")) {
+      const blogSlug = normalized.replace("/blog/", "");
       if (storeCtx?.storeSlug) {
         return `/store/${storeCtx.storeSlug}/blog/${blogSlug}`;
       }
@@ -953,7 +1197,7 @@ export function FashionBlogPosts({ posts: propPosts, columns = 2, sectionTitle, 
       return `/store/${storeCtx.storeSlug}/blog/${slug}`;
     }
     // Fallback to the original link or empty string
-    return link || "";
+    return normalized || "";
   };
 
   // Convert real store blogs to FashionBlogPost format (same pattern as product grid)
@@ -1050,25 +1294,29 @@ export function FashionBlogPosts({ posts: propPosts, columns = 2, sectionTitle, 
           subtitle={sectionTitle.subtitle}
           title={sectionTitle.title}
           description={sectionTitle.description}
+          blockId={blockId}
+          isEditor={isEditor}
         />
       )}
       <div className="fbp-grid">
         {posts.map((p, i) => {
-          // Use the already-resolved link from the post object
-          const fullLink = p.link || "";
+          const normalizedDate = normalizeBlogDate((p as any).date);
+          const rawLink = typeof p.link === "string" ? p.link : "";
+          const rawSlug = typeof (p as any).slug === "string" ? (p as any).slug : "";
+          const fullLink = resolveBlogLink(rawLink, rawSlug);
           const hasValidLink = fullLink && fullLink !== "#" && fullLink !== "/store/${storeCtx?.storeSlug}/blog/";
           const authorName = p.author?.name || "Author";
           const authorAvatar = p.author?.avatar;
-          const categories = p.categories && Array.isArray(p.categories) ? p.categories : [];
+          const categories = normalizeTextArray(p.categories, []);
           
           return (
             <Link key={i} href={fullLink} className="fbp-card" style={{ textDecoration: "none", color: "inherit" }}>
               <div className="fbp-img-wrap">
                 <img src={p.image} alt={p.title} className="fbp-img" loading="lazy" />
-                {p.date && p.date.day && p.date.month && (
+                {normalizedDate && (
                   <div className="fbp-date-badge">
-                    <span className="fbp-date-day">{p.date.day}</span>
-                    <span className="fbp-date-month">{p.date.month}</span>
+                    <span className="fbp-date-day">{normalizedDate.day}</span>
+                    <span className="fbp-date-month">{normalizedDate.month}</span>
                   </div>
                 )}
               </div>
@@ -1076,7 +1324,7 @@ export function FashionBlogPosts({ posts: propPosts, columns = 2, sectionTitle, 
                 {categories.length > 0 && (
                   <div className="fbp-cats">
                     {categories.map((c, ci) => (
-                      <span key={ci} className="fbp-cat">{c}</span>
+                      <span key={ci} className="fbp-cat">{toDisplayText(c, "")}</span>
                     ))}
                   </div>
                 )}
@@ -1126,17 +1374,19 @@ export function FashionNewsletter({
   buttonText = "Sign up",
   socialLinks = [],
   onSubmit,
-}: FashionNewsletterProps) {
+  blockId,
+  isEditor = false,
+}: FashionNewsletterProps & { blockId?: string; isEditor?: boolean }) {
   const [email, setEmail] = useState("");
   const storeCtx = useContext(FashionStoreContext);
   const { subscribe, status: nlStatus } = useNewsletterSubscribe(storeCtx?.storeSlug || "");
 
   // Merge: prefer real social links from store context over preset placeholders
   const resolvedSocialLinks = (() => {
-    const ctxLinks = storeCtx?.socialLinks;
-    if (ctxLinks && ctxLinks.length > 0) return ctxLinks;
+    const ctxLinks = Array.isArray(storeCtx?.socialLinks) ? storeCtx.socialLinks : [];
+    if (ctxLinks.length > 0) return ctxLinks;
     // Filter out placeholder links (href="#")
-    return socialLinks.filter(s => s.url && s.url !== "#");
+    return normalizeSocialLinks(socialLinks).filter((s) => s.url && s.url !== "#");
   })();
 
   const handleSubmit = (e: React.FormEvent) => {
@@ -1202,7 +1452,14 @@ export function FashionNewsletter({
     <div style={containerStyle}>
       <ScopedStyles id="newsletter" css={scopedCss} />
       <div className="fn-section">
-        <FashionSectionTitle subtitle={subtitle} title={title} description={description} maxWidth="70%" />
+        <FashionSectionTitle
+          subtitle={subtitle}
+          title={title}
+          description={description}
+          maxWidth="70%"
+          blockId={blockId}
+          isEditor={isEditor}
+        />
         {nlStatus === "success" ? (
           <p style={{ fontFamily: TOKENS.bodyFont, fontSize: "16px", color: TOKENS.primaryColor, marginTop: "20px" }}>Thanks for subscribing! 🎉</p>
         ) : (
@@ -1262,7 +1519,9 @@ export function FashionFeatures({
   sectionTitle,
   columns = 3,
   marginBottom = "50px",
-}: FashionFeaturesProps) {
+  blockId,
+  isEditor = false,
+}: FashionFeaturesProps & { blockId?: string; isEditor?: boolean }) {
   const storeCtx = useContext(FashionStoreContext);
   const scopedCss = `
     .ff-features { margin-bottom: ${marginBottom}; }
@@ -1304,7 +1563,13 @@ export function FashionFeatures({
     <div className="ff-features">
       <ScopedStyles id="features" css={scopedCss} />
       {sectionTitle?.title && (
-        <FashionSectionTitle subtitle={sectionTitle.subtitle} title={sectionTitle.title} description={sectionTitle.description} />
+        <FashionSectionTitle
+          subtitle={sectionTitle.subtitle}
+          title={sectionTitle.title}
+          description={sectionTitle.description}
+          blockId={blockId}
+          isEditor={isEditor}
+        />
       )}
       <div className="ff-features-grid">
         {features.map((f, i) => (
@@ -1356,7 +1621,9 @@ export function FashionInstagram({
   instagramUrl = "https://www.instagram.com/",
   buttonText = "FOLLOW US ON INSTAGRAM",
   marginBottom = "0px",
-}: FashionInstagramProps) {
+  blockId,
+  isEditor = false,
+}: FashionInstagramProps & { blockId?: string; isEditor?: boolean }) {
   const scopedCss = `
     .fi-insta { margin-bottom: ${marginBottom}; }
     .fi-btn-wrap { text-align: center; margin-bottom: 25px; }
@@ -1408,7 +1675,13 @@ export function FashionInstagram({
     <div className="fi-insta">
       <ScopedStyles id="instagram" css={scopedCss} />
       {sectionTitle?.title && (
-        <FashionSectionTitle subtitle={sectionTitle.subtitle} title={sectionTitle.title} description={sectionTitle.description} />
+        <FashionSectionTitle
+          subtitle={sectionTitle.subtitle}
+          title={sectionTitle.title}
+          description={sectionTitle.description}
+          blockId={blockId}
+          isEditor={isEditor}
+        />
       )}
       {buttonText && (
         <div className="fi-btn-wrap">
@@ -1999,9 +2272,11 @@ export interface FashionAboutContentProps {
   buttons?: FashionAboutContentButton[];
   credit?: string;
   resolvedStyles?: React.CSSProperties;
+  elements?: EditorNode[];
+  isEditor?: boolean;
 }
 
-export function FashionAboutContent({ layout, subtitle, title, paragraphs = [], buttons = [], credit, resolvedStyles }: FashionAboutContentProps) {
+export function FashionAboutContent({ layout, subtitle, title, paragraphs = [], buttons = [], credit, resolvedStyles, elements = [], isEditor = false }: FashionAboutContentProps) {
   const storeCtx = useContext(FashionStoreContext);
   const fixLink = (link: string) => resolveStoreLink(link, storeCtx?.storeSlug);
   const scopedCss = `
@@ -2018,16 +2293,54 @@ export function FashionAboutContent({ layout, subtitle, title, paragraphs = [], 
     .fac-btn-secondary:hover { background: ${TOKENS.titleColor}; color: #fff; }
     .fac-ctas-center { text-align: center; padding: 20px 15px 40px; }
   `;
+  const contentNodes = elements.length > 0 ? elements : [];
+  const subtitleNode = contentNodes.find((node) => node.type === "subtitle" || node.type === "heading");
+  const titleNode = contentNodes.find((node) => node.type === "title" || node.type === "heading");
+  const paragraphNodes = contentNodes.filter((node) => node.type === "paragraph" || node.type === "text" || node.type === "bodyText");
+  const buttonNodes = contentNodes.filter((node) => node.type === "button");
+  const creditNode = contentNodes.find((node) => node.type === "credit");
+  const renderParagraphs = paragraphNodes.length > 0 ? paragraphNodes : paragraphs.map((text, index) => ({
+    id: `para-${index}`,
+    type: "paragraph",
+    settings: { text },
+    elements: [],
+  }));
+  const renderButtons = buttonNodes.length > 0 ? buttonNodes : buttons.map((btn, index) => ({
+    id: `btn-${index}`,
+    type: "button",
+    settings: { text: btn.text, link: btn.link },
+    elements: [],
+  }));
+  const resolvedSubtitle = subtitleNode ? getNodeText(subtitleNode, ["subtitle", "text", "title"], subtitle || "") : subtitle;
+  const resolvedTitle = titleNode ? getNodeText(titleNode, ["title", "text"], title || "") : title;
+  const resolvedCredit = creditNode ? getNodeText(creditNode, ["credit", "text"], credit || "") : credit;
 
   if (layout === "ctas-only") {
     return (
       <div className="fac-ctas-center" style={resolvedStyles}>
         <ScopedStyles id="about-content" css={scopedCss} />
         <div className="fac-buttons" style={{ justifyContent: "center" }}>
-          {buttons.map((btn, i) => (
-            <Link key={i} href={fixLink(btn.link)} className={`fac-btn ${i === 0 ? "fac-btn-primary" : "fac-btn-secondary"}`}>
-              {btn.text}
-            </Link>
+          {renderButtons.map((btn: any, i) => (
+            isEditor ? (
+              <InlineEditableText
+                key={btn.id || i}
+                nodeId={btn.id}
+                field="text"
+                value={(btn.settings?.text as string) || (btn.text as string)}
+                isEditor
+                as="span"
+                className={`fac-btn ${i === 0 ? "fac-btn-primary" : "fac-btn-secondary"}`}
+                title="Edit button label"
+              />
+            ) : (
+              <Link
+                key={btn.id || i}
+                href={fixLink((btn.settings?.link as string) || (btn.link as string) || "#")}
+                className={`fac-btn ${i === 0 ? "fac-btn-primary" : "fac-btn-secondary"}`}
+              >
+                {(btn.settings?.text as string) || (btn.text as string)}
+              </Link>
+            )
           ))}
         </div>
       </div>
@@ -2038,18 +2351,72 @@ export function FashionAboutContent({ layout, subtitle, title, paragraphs = [], 
     <section className="fac-section" style={resolvedStyles}>
       <ScopedStyles id="about-content" css={scopedCss} />
       <div style={containerStyle}>
-        {subtitle && <div className="fac-subtitle">{subtitle}</div>}
-        {title && <h3 className="fac-title">{title}</h3>}
-        {paragraphs.map((p, i) => (
-          <p key={i} className="fac-paragraph">{p}</p>
+        {resolvedSubtitle && (
+          <InlineEditableText
+            nodeId={subtitleNode?.id}
+            field="subtitle"
+            value={resolvedSubtitle}
+            isEditor={isEditor}
+            as="div"
+            className="fac-subtitle"
+          />
+        )}
+        {resolvedTitle && (
+          <InlineEditableText
+            nodeId={titleNode?.id}
+            field="title"
+            value={resolvedTitle}
+            isEditor={isEditor}
+            as="h3"
+            className="fac-title"
+          />
+        )}
+        {renderParagraphs.map((p: any, i) => (
+          <InlineEditableText
+            key={p.id || i}
+            nodeId={p.id}
+            field="text"
+            value={(p.settings?.text as string) || (p.text as string) || p}
+            isEditor={isEditor}
+            as="p"
+            className="fac-paragraph"
+            multiline
+          />
         ))}
-        {credit && <p className="fac-credit">{credit}</p>}
-        {buttons.length > 0 && (
+        {resolvedCredit && (
+          <InlineEditableText
+            nodeId={creditNode?.id}
+            field="credit"
+            value={resolvedCredit}
+            isEditor={isEditor}
+            as="p"
+            className="fac-credit"
+            multiline
+          />
+        )}
+        {renderButtons.length > 0 && (
           <div className="fac-buttons">
-            {buttons.map((btn, i) => (
-              <Link key={i} href={fixLink(btn.link)} className={`fac-btn ${i === 0 ? "fac-btn-primary" : "fac-btn-secondary"}`}>
-                {btn.text}
-              </Link>
+            {renderButtons.map((btn: any, i) => (
+              isEditor ? (
+                <InlineEditableText
+                  key={btn.id || i}
+                  nodeId={btn.id}
+                  field="text"
+                  value={(btn.settings?.text as string) || (btn.text as string)}
+                  isEditor
+                  as="span"
+                  className={`fac-btn ${i === 0 ? "fac-btn-primary" : "fac-btn-secondary"}`}
+                  title="Edit button label"
+                />
+              ) : (
+                <Link
+                  key={btn.id || i}
+                  href={fixLink((btn.settings?.link as string) || (btn.link as string) || "#")}
+                  className={`fac-btn ${i === 0 ? "fac-btn-primary" : "fac-btn-secondary"}`}
+                >
+                  {(btn.settings?.text as string) || (btn.text as string)}
+                </Link>
+              )
             ))}
           </div>
         )}
@@ -2073,7 +2440,7 @@ export interface FashionStatsCountersProps {
   resolvedStyles?: React.CSSProperties;
 }
 
-export function FashionStatsCounters({ counters, resolvedStyles }: FashionStatsCountersProps) {
+export function FashionStatsCounters({ counters = [], resolvedStyles }: FashionStatsCountersProps) {
   const { ref, inView } = useInView(0.3);
   const [displayed, setDisplayed] = useState<number[]>(counters.map(() => 0));
 
@@ -2138,7 +2505,7 @@ export interface FashionServicesGridProps {
   resolvedStyles?: React.CSSProperties;
 }
 
-export function FashionServicesGrid({ subtitle, title, services, resolvedStyles }: FashionServicesGridProps) {
+export function FashionServicesGrid({ subtitle, title, services = [], resolvedStyles }: FashionServicesGridProps) {
   const scopedCss = `
     .fsg-section { padding: 60px 15px; }
     .fsg-header { text-align: center; margin-bottom: 40px; }
@@ -2189,7 +2556,7 @@ export interface FashionGalleryGridProps {
   resolvedStyles?: React.CSSProperties;
 }
 
-export function FashionGalleryGrid({ images, columns = 2, resolvedStyles }: FashionGalleryGridProps) {
+export function FashionGalleryGrid({ images = [], columns = 2, resolvedStyles }: FashionGalleryGridProps) {
   const scopedCss = `
     .fgg-section { padding: 40px 15px; }
     .fgg-grid { display: grid; grid-template-columns: repeat(${columns}, 1fr); gap: 20px; }
@@ -2233,7 +2600,7 @@ export interface FashionVideoSectionProps {
   resolvedStyles?: React.CSSProperties;
 }
 
-export function FashionVideoSection({ subtitle, title, description, videos, resolvedStyles }: FashionVideoSectionProps) {
+export function FashionVideoSection({ subtitle, title, description, videos = [], resolvedStyles }: FashionVideoSectionProps) {
   const [playingIdx, setPlayingIdx] = useState<number | null>(null);
 
   const getEmbedUrl = (url: string) => {
@@ -2354,7 +2721,7 @@ export interface FashionTeamSectionProps {
   resolvedStyles?: React.CSSProperties;
 }
 
-export function FashionTeamSection({ members, resolvedStyles }: FashionTeamSectionProps) {
+export function FashionTeamSection({ members = [], resolvedStyles }: FashionTeamSectionProps) {
   const socialIcons: Record<string, string> = {
     facebook: "f",
     twitter: "\ud835\udd4F",
@@ -2389,7 +2756,7 @@ export function FashionTeamSection({ members, resolvedStyles }: FashionTeamSecti
               <p className="fts-role">{m.role}</p>
               {m.socials && m.socials.length > 0 && (
                 <div className="fts-socials">
-                  {m.socials.map((s, j) => (
+                  {normalizeTextArray(m.socials, []).map((s, j) => (
                     <a key={j} href="#" className="fts-social-link" title={s}>
                       {socialIcons[s] || s[0]}
                     </a>
@@ -2424,7 +2791,7 @@ export interface FashionOfficeLocationsProps {
   resolvedStyles?: React.CSSProperties;
 }
 
-export function FashionOfficeLocations({ subtitle, title, description, offices, resolvedStyles }: FashionOfficeLocationsProps) {
+export function FashionOfficeLocations({ subtitle, title, description, offices = [], resolvedStyles }: FashionOfficeLocationsProps) {
   const scopedCss = `
     .fol-section { padding: 60px 15px; }
     .fol-header { text-align: center; margin-bottom: 40px; max-width: 60%; margin-left: auto; margin-right: auto; }
@@ -2528,7 +2895,7 @@ export interface FashionFaqAccordionProps {
   items: FashionFaqItem[];
 }
 
-export function FashionFaqAccordion({ subtitle, title, items }: FashionFaqAccordionProps) {
+export function FashionFaqAccordion({ subtitle, title, items = [] }: FashionFaqAccordionProps) {
   const [openIdx, setOpenIdx] = useState<number | null>(null);
 
   const scopedCss = `

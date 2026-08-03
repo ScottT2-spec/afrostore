@@ -14,8 +14,8 @@ import { InteriorFontLoader, InteriorHeader, InteriorFooter, InteriorStoreContex
 import { AccessoriesFontLoader, AccessoriesStoreContext } from "@/components/storefront/AccessoriesTemplateBlocks";
 import { TShirtsPrintsFooter, TShirtsPrintsHeader } from "@/components/storefront/TShirtsPrintsStoreChrome";
 import { TShirtsPrintsFontLoader } from "@/components/storefront/TShirtsPrintsTemplateBlocks";
-import { parsePageContent, getLinkedPageHref } from "@/lib/page-content";
-import { mergeBespokeTemplateBlocks } from "@/lib/templates/bespoke-page-content";
+import { getLinkedPageHref } from "@/lib/page-content";
+import { resolveLivePageContent } from "@/lib/templates/bespoke-page-content";
 import { ThemeProvider, type ThemeData } from "@/components/storefront/ThemeProvider";
 import { useWishlist } from "@/hooks/useWishlist";
 import { applyPageCustomization, buildPageBackgroundStyle, buildThemeDataWithCustomization, filterVisiblePages, getResolvedPageSettings, normalizeSiteCustomization, type SiteCustomizationDocument } from "@/lib/site-customization";
@@ -208,8 +208,19 @@ export default function StorefrontPage() {
   const currency = store.currency || "NGN";
   const whatsappNumber = settings?.whatsappNumber || socialLinks?.whatsapp;
   const resolvedPage = applyPageCustomization(page, draftCustomization);
-  const parsedContent = parsePageContent(resolvedPage.content);
-  const resolvedPageSettings = getResolvedPageSettings(resolvedPage, parsedContent.settings, draftCustomization);
+  const resolvedContent = resolveLivePageContent(
+    data.templateSlug,
+    pageSlug,
+    resolvedPage.content,
+    {
+      pageSlug,
+      pageTitle: resolvedPage.title,
+      pageType: resolvedPage.type,
+      templateSlug: data.templateSlug,
+    },
+  );
+  const pageNodeStyles = resolvedContent.css ? <style data-live-node-styles dangerouslySetInnerHTML={{ __html: resolvedContent.css }} /> : null;
+  const resolvedPageSettings = getResolvedPageSettings(resolvedPage, resolvedContent.settings, draftCustomization);
   // Filter out chrome blocks (header/footer) from editable content - they're rendered via conditional rendering based on template
   const CHROME_BLOCK_TYPES = new Set([
     'perfumesHeader', 'perfumesFooter',
@@ -223,11 +234,9 @@ export default function StorefrontPage() {
     'toysFooter',
   ]);
   // Use parsed blocks if available; only fall back to template-specific page presets if original content was truly empty
-  const parsedBlocks = parsedContent.blocks.filter((block) => !CHROME_BLOCK_TYPES.has(block.type));
-  const hasOriginalBlocks = parsedContent.blocks.length > 0;
-  const blocks: BuilderBlock[] = hasOriginalBlocks
-    ? parsedBlocks
-    : (mergeBespokeTemplateBlocks(data.templateSlug, pageSlug, resolvedPage.content, { pageSlug: pageSlug as string, pageTitle: resolvedPage.title, pageType: resolvedPage.type, templateSlug: data.templateSlug }) as unknown as BuilderBlock[]);
+  const parsedBlocks = resolvedContent.blocks.filter((block) => !CHROME_BLOCK_TYPES.has(block.type));
+  const hasOriginalBlocks = resolvedContent.blocks.length > 0;
+  const blocks: BuilderBlock[] = parsedBlocks;
   const visiblePages = filterVisiblePages(data.pages, draftCustomization);
   const customizedPages = visiblePages.map((item) => applyPageCustomization(item, draftCustomization));
 
@@ -276,6 +285,7 @@ export default function StorefrontPage() {
             isLanding={false}
           />
           <main style={buildPageBackgroundStyle(resolvedPageSettings)}>
+            {pageNodeStyles}
             <RenderTemplateBlocks blocks={blocks as TemplateBlock[]} />
           </main>
           <FashionFooter
@@ -293,6 +303,7 @@ export default function StorefrontPage() {
       products: (products || []).map((p: any) => ({
         id: p.id, name: p.name, slug: p.slug, price: p.price ?? 0, compareAtPrice: p.compareAtPrice,
         currency: currency, inStock: p.inStock ?? true, isFeatured: p.isFeatured ?? false, tags: p.tags ?? [],
+        image: p.image ?? p.images?.[0]?.url ?? "",
         images: p.images ?? [], category: p.category,
       })),
       currency,
@@ -303,6 +314,7 @@ export default function StorefrontPage() {
         <AccessoriesStoreContext.Provider value={accCtx}>
           <AccessoriesFontLoader />
           <main style={buildPageBackgroundStyle(resolvedPageSettings)}>
+            {pageNodeStyles}
             <RenderTemplateBlocks blocks={blocks as TemplateBlock[]} />
           </main>
         </AccessoriesStoreContext.Provider>
@@ -315,6 +327,7 @@ export default function StorefrontPage() {
       products: (products || []).map((p: any) => ({
         id: p.id, name: p.name, slug: p.slug, price: p.price ?? 0, compareAtPrice: p.compareAtPrice,
         currency: currency, inStock: p.inStock ?? true, isFeatured: p.isFeatured ?? false, tags: p.tags ?? [],
+        image: p.image ?? p.images?.[0]?.url ?? "",
         images: p.images ?? [], category: p.category,
       })),
       blogs: (blogs || []).map((b: any) => ({
@@ -329,6 +342,7 @@ export default function StorefrontPage() {
         <ElectronicsStoreContext.Provider value={elecCtx}>
           <ElectronicsFontLoader />
           <main style={buildPageBackgroundStyle(resolvedPageSettings)}>
+            {pageNodeStyles}
             <RenderTemplateBlocks blocks={blocks as TemplateBlock[]} />
           </main>
           <ElectronicsFooter storeSlug={slug} />
@@ -342,6 +356,7 @@ export default function StorefrontPage() {
       products: (products || []).map((p: any) => ({
         id: p.id, name: p.name, slug: p.slug, price: p.price ?? 0, compareAtPrice: p.compareAtPrice,
         currency: currency, inStock: p.inStock ?? true, isFeatured: p.isFeatured ?? false, tags: p.tags ?? [],
+        image: p.image ?? p.images?.[0]?.url ?? "",
         images: p.images ?? [], category: p.category,
       })),
       currency,
@@ -357,6 +372,7 @@ export default function StorefrontPage() {
             logo={store.logo}
           />
           <main style={buildPageBackgroundStyle(resolvedPageSettings)}>
+            {pageNodeStyles}
             <RenderTemplateBlocks blocks={blocks as TemplateBlock[]} />
           </main>
           <InteriorFooter storeSlug={slug} />
@@ -372,6 +388,7 @@ export default function StorefrontPage() {
           <TShirtsPrintsFontLoader />
           <TShirtsPrintsHeader storeName={store.name} storeSlug={slug} logo={store.logo} />
           <main style={buildPageBackgroundStyle(resolvedPageSettings)}>
+            {pageNodeStyles}
             <RenderTemplateBlocks blocks={blocks} />
           </main>
           <TShirtsPrintsFooter
@@ -395,6 +412,7 @@ export default function StorefrontPage() {
       products: (products || []).map((p: any) => ({
         id: p.id, name: p.name, slug: p.slug, price: p.price ?? 0, compareAtPrice: p.compareAtPrice,
         currency, inStock: p.inStock ?? true, isFeatured: p.isFeatured ?? false, tags: p.tags ?? [],
+        image: p.image ?? p.images?.[0]?.url ?? "",
         images: p.images ?? [], category: p.category,
       })),
       currency,
@@ -411,10 +429,11 @@ export default function StorefrontPage() {
             isLanding={false}
           />
           <main style={buildPageBackgroundStyle(resolvedPageSettings)}>
+            {pageNodeStyles}
             <RenderTemplateBlocks blocks={blocks as TemplateBlock[]} />
           </main>
           <ToysFooter
-            storeName={store.name}
+            logoUrl={store.logo || undefined}
             storeSlug={slug}
             description={store.description ?? undefined}
           />
@@ -437,6 +456,7 @@ export default function StorefrontPage() {
             wishlistCount={wishlistCount}
           />
           <main>
+            {pageNodeStyles}
             <div className="mx-auto max-w-6xl px-4 py-16 sm:px-6">
               <div className="mb-6">
                 <p className="text-xs font-bold uppercase tracking-[0.35em] text-[#f5857c]">Page</p>
@@ -479,6 +499,7 @@ export default function StorefrontPage() {
       return (
         <main className="px-4 py-16">
           <div className="mx-auto max-w-4xl">
+            {pageNodeStyles}
             <RenderTemplateBlocks blocks={blocks} />
           </div>
         </main>
@@ -529,6 +550,7 @@ export default function StorefrontPage() {
             wishlistCount={0}
           />
           <main style={buildPageBackgroundStyle(resolvedPageSettings)}>
+            {pageNodeStyles}
             <RenderBlocks
               blocks={blocks}
               storeSlug={slug}
@@ -580,6 +602,7 @@ export default function StorefrontPage() {
           <HealthFontLoader />
           <HealthHeader storeName={store.name} storeSlug={slug} logo={store.logo} />
           <main style={buildPageBackgroundStyle(resolvedPageSettings)}>
+            {pageNodeStyles}
             <RenderTemplateBlocks blocks={blocks} />
           </main>
           <HealthFooterFull
@@ -619,7 +642,7 @@ export default function StorefrontPage() {
     let retailBlocks = blocks;
     if (pageSlug.startsWith("project-") && RETAIL_PROJECT_DETAIL_BLOCKS[pageSlug]) {
       // If page has no content or empty content, use the preset blocks
-      if (!hasOriginalBlocks || parsedContent.blocks.length === 0) {
+      if (!hasOriginalBlocks) {
         retailBlocks = RETAIL_PROJECT_DETAIL_BLOCKS[pageSlug] as unknown as BuilderBlock[];
       }
     }
@@ -629,6 +652,7 @@ export default function StorefrontPage() {
         <div className="min-h-screen bg-white">
           <RetailHeader storeName={store.name} storeSlug={slug} logo={store.logo} isLanding={false} />
           <main style={buildPageBackgroundStyle(resolvedPageSettings)}>
+            {pageNodeStyles}
             <RenderBlocks
               blocks={retailBlocks}
               storeSlug={slug}
@@ -673,6 +697,7 @@ export default function StorefrontPage() {
             reservationHref={`/store/${slug}/reservation`}
           />
           <main style={buildPageBackgroundStyle(resolvedPageSettings)}>
+            {pageNodeStyles}
             <RenderTemplateBlocks blocks={blocks} />
           </main>
           <VegetableFooter

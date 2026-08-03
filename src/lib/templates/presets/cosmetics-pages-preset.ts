@@ -1,4 +1,4 @@
-import type { TemplateBlock } from "@/components/storefront/TemplateBlockRenderer";
+import type { EditorNode } from "@/lib/visual-editor/node-tree";
 
 /**
  * Cosmetics Template — Page-specific block presets
@@ -10,11 +10,11 @@ import type { TemplateBlock } from "@/components/storefront/TemplateBlockRendere
    BESTSELLER PAGE
    ═══════════════════════════════════════════════════════════════ */
 
-export const COSMETICS_BESTSELLER_BLOCKS: TemplateBlock[] = [
+export const COSMETICS_BESTSELLER_BLOCKS: EditorNode[] = [
   {
     id: "cosmetics-bestseller-title",
     type: "cosmeticsSectionTitle",
-    props: {
+    settings: {
       subtitle: "",
       title: "Bestsellers",
       description:
@@ -26,7 +26,7 @@ export const COSMETICS_BESTSELLER_BLOCKS: TemplateBlock[] = [
   {
     id: "cosmetics-bestseller-products",
     type: "cosmeticsProductGrid",
-    props: {
+    settings: {
       columns: 4,
       maxProducts: 12,
       filter: "bestseller",
@@ -42,11 +42,11 @@ export const COSMETICS_BESTSELLER_BLOCKS: TemplateBlock[] = [
    NEW-IN PAGE
    ═══════════════════════════════════════════════════════════════ */
 
-export const COSMETICS_NEW_IN_BLOCKS: TemplateBlock[] = [
+export const COSMETICS_NEW_IN_BLOCKS: EditorNode[] = [
   {
     id: "cosmetics-newin-title",
     type: "cosmeticsSectionTitle",
-    props: {
+    settings: {
       subtitle: "NEW ARRIVALS",
       title: "Just Arrived",
       description:
@@ -58,7 +58,7 @@ export const COSMETICS_NEW_IN_BLOCKS: TemplateBlock[] = [
   {
     id: "cosmetics-newin-countdown",
     type: "cosmeticsCountdownBanner",
-    props: {
+    settings: {
       title: "Limited Time Offer",
       description:
         "Shop our newest arrivals before they sell out. New products added weekly.",
@@ -72,7 +72,7 @@ export const COSMETICS_NEW_IN_BLOCKS: TemplateBlock[] = [
   {
     id: "cosmetics-newin-products",
     type: "cosmeticsProductGrid",
-    props: {
+    settings: {
       columns: 4,
       maxProducts: 12,
       filter: "newest",
@@ -86,7 +86,7 @@ export const COSMETICS_NEW_IN_BLOCKS: TemplateBlock[] = [
   {
     id: "cosmetics-newin-newsletter",
     type: "cosmeticsNewsletter",
-    props: {
+    settings: {
       backgroundImage: "",
       title: "Stay Updated",
       description:
@@ -100,11 +100,11 @@ export const COSMETICS_NEW_IN_BLOCKS: TemplateBlock[] = [
    SKINCARE PAGE
    ═══════════════════════════════════════════════════════════════ */
 
-export const COSMETICS_SKINCARE_BLOCKS: TemplateBlock[] = [
+export const COSMETICS_SKINCARE_BLOCKS: EditorNode[] = [
   {
     id: "cosmetics-skincare-hero",
     type: "cosmeticsDiscovery",
-    props: {
+    settings: {
       title: "Premium Skincare Collection",
       description:
         "Discover our curated selection of skincare products designed to nourish, protect, and rejuvenate your skin. From cleansers to serums, find everything you need for your daily routine.",
@@ -123,7 +123,7 @@ export const COSMETICS_SKINCARE_BLOCKS: TemplateBlock[] = [
   {
     id: "cosmetics-skincare-benefits",
     type: "cosmeticsInfoBoxes",
-    props: {
+    settings: {
       sectionTitle: { title: "WHY CHOOSE OUR SKINCARE?" },
       boxes: [
         {
@@ -160,7 +160,7 @@ export const COSMETICS_SKINCARE_BLOCKS: TemplateBlock[] = [
   {
     id: "cosmetics-skincare-products",
     type: "cosmeticsProductGrid",
-    props: {
+    settings: {
       columns: 4,
       maxProducts: 12,
       filter: "all",
@@ -180,31 +180,36 @@ export const COSMETICS_SKINCARE_BLOCKS: TemplateBlock[] = [
    TERMS PAGE
    ═══════════════════════════════════════════════════════════════ */
 
-export const COSMETICS_TERMS_BLOCKS: TemplateBlock[] = [
+export const COSMETICS_TERMS_BLOCKS: EditorNode[] = [
   {
     id: "cosmetics-terms-hero",
     type: "cosmeticsHeroSlider",
-    props: {
-      slides: [
-        {
-          subtitle: "LEGAL",
-          titleLine1: "Terms and",
-          titleLine2: "Conditions",
-          description: "Please read our terms and conditions carefully before using our services.",
-          buttonLink: "",
-          buttonText: "",
-          secondButtonLink: "",
-          secondButtonText: "",
-        },
-      ],
-      minHeight: "400px",
+          settings: {
+        minHeight: "400px",
       autoplaySpeed: 0,
-    },
+      },
+      elements: [
+        {
+          id: "cosmetics-terms-hero-slide-1",
+          type: "slide",
+          settings:           {
+            "subtitle": "LEGAL",
+            "titleLine1": "Terms and",
+            "titleLine2": "Conditions",
+            "description": "Please read our terms and conditions carefully before using our services.",
+            "buttonLink": "",
+            "buttonText": "",
+            "secondButtonLink": "",
+            "secondButtonText": ""
+          },
+          elements: [],
+        }
+      ],
   },
   {
     id: "cosmetics-terms-content",
     type: "cosmeticsInfoBoxes",
-    props: {
+    settings: {
       sectionTitle: {
         title: "TERMS AND CONDITIONS",
       },
@@ -272,11 +277,11 @@ export const COSMETICS_TERMS_BLOCKS: TemplateBlock[] = [
    SHOP PAGE
    ═══════════════════════════════════════════════════════════════ */
 
-export const COSMETICS_SHOP_BLOCKS: TemplateBlock[] = [
+export const COSMETICS_SHOP_BLOCKS: EditorNode[] = [
   {
     id: "cosmetics-shop-header",
     type: "cosmeticsShopPageHeader",
-    props: {
+    settings: {
       title: "Shop",
       allLabel: "All",
       subtitle: "Browse all products at {store name}",
@@ -296,11 +301,11 @@ export const COSMETICS_SHOP_BLOCKS: TemplateBlock[] = [
    BLOG PAGE
    ═══════════════════════════════════════════════════════════════ */
 
-export const COSMETICS_BLOG_BLOCKS: TemplateBlock[] = [
+export const COSMETICS_BLOG_BLOCKS: EditorNode[] = [
   {
     id: "cosmetics-blog-header",
     type: "cosmeticsBlogPageHeader",
-    props: {
+    settings: {
       title: "Blog",
       allLabel: "All",
       subtitle: "Latest news and updates from {site name}",

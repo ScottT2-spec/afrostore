@@ -1,61 +1,76 @@
-import type { TemplateBlock } from "@/components/storefront/TemplateBlockRenderer";
+import type { EditorNode } from "@/lib/visual-editor/node-tree";
 
 /**
  * Fashion Template Preset
  * Default block layout + content that recreates the WoodMart Fashion demo.
  * Every value is a placeholder — users swap in their own content.
  */
-export const FASHION_TEMPLATE_PRESET: TemplateBlock[] = [
+export const FASHION_TEMPLATE_PRESET: EditorNode[] = [
   /* ── 1. Hero Slider ───────────────────────────────────── */
   {
     id: "fashion-hero",
     type: "fashionHeroSlider",
-    props: {
-      autoplaySpeed: 5000,
-      minHeight: "560px",
-      slides: [
+          settings: {
+        autoplaySpeed: 5000,
+      minHeight: "560px"
+      },
+      elements: [
         {
-          subtitle: "YOUR FAVOURITE STORE",
-          titleLine1: "Blondes with minimalistic",
-          titleLine2: "tendencies to vintage",
-          description: "Discover our latest collection of handpicked fashion essentials designed for the modern wardrobe.",
-          buttonText: "SHOP NOW",
-          buttonLink: "/shop",
-          backgroundImage: "https://images.unsplash.com/photo-1558618666-fcd25c85f82e?w=1200&h=800&fit=crop",
-          textPosition: "center",
-          colorScheme: "dark",
+          id: "fashion-hero-slide-1",
+          type: "slide",
+          settings:           {
+            "subtitle": "YOUR FAVOURITE STORE",
+            "titleLine1": "Blondes with minimalistic",
+            "titleLine2": "tendencies to vintage",
+            "description": "Discover our latest collection of handpicked fashion essentials designed for the modern wardrobe.",
+            "buttonText": "SHOP NOW",
+            "buttonLink": "/shop",
+            "backgroundImage": "https://images.unsplash.com/photo-1558618666-fcd25c85f82e?w=1200&h=800&fit=crop",
+            "textPosition": "center",
+            "colorScheme": "dark"
+          },
+          elements: [],
         },
         {
-          subtitle: "NEW ARRIVALS",
-          titleLine1: "Fashionable fit trend style",
-          titleLine2: "best sport man wear",
-          description: "Explore trending styles curated for every occasion. Quality meets affordability.",
-          buttonText: "SHOP NOW",
-          buttonLink: "/shop",
-          backgroundImage: "https://images.unsplash.com/photo-1490481651871-ab68de25d43d?w=1200&h=800&fit=crop",
-          textPosition: "center",
-          colorScheme: "dark",
+          id: "fashion-hero-slide-2",
+          type: "slide",
+          settings:           {
+            "subtitle": "NEW ARRIVALS",
+            "titleLine1": "Fashionable fit trend style",
+            "titleLine2": "best sport man wear",
+            "description": "Explore trending styles curated for every occasion. Quality meets affordability.",
+            "buttonText": "SHOP NOW",
+            "buttonLink": "/shop",
+            "backgroundImage": "https://images.unsplash.com/photo-1490481651871-ab68de25d43d?w=1200&h=800&fit=crop",
+            "textPosition": "center",
+            "colorScheme": "dark"
+          },
+          elements: [],
         },
         {
-          subtitle: "SEASON COLLECTION",
-          titleLine1: "Elegant and timeless",
-          titleLine2: "pieces for every mood",
-          description: "From casual wear to evening elegance — find your perfect look in our new collection.",
-          buttonText: "SHOP NOW",
-          buttonLink: "/shop",
-          backgroundImage: "https://images.unsplash.com/photo-1445205170230-053b83016050?w=1200&h=800&fit=crop",
-          textPosition: "center",
-          colorScheme: "light",
-        },
+          id: "fashion-hero-slide-3",
+          type: "slide",
+          settings:           {
+            "subtitle": "SEASON COLLECTION",
+            "titleLine1": "Elegant and timeless",
+            "titleLine2": "pieces for every mood",
+            "description": "From casual wear to evening elegance — find your perfect look in our new collection.",
+            "buttonText": "SHOP NOW",
+            "buttonLink": "/shop",
+            "backgroundImage": "https://images.unsplash.com/photo-1445205170230-053b83016050?w=1200&h=800&fit=crop",
+            "textPosition": "center",
+            "colorScheme": "light"
+          },
+          elements: [],
+        }
       ],
-    },
   },
 
   /* ── 2. Promo Banners ─────────────────────────────────── */
   {
     id: "fashion-promos",
     type: "fashionPromoBanners",
-    props: {
+    settings: {
       banners: [
         {
           image: "https://images.unsplash.com/photo-1483985988355-763728e1935b?w=400&h=267&fit=crop",
@@ -89,7 +104,7 @@ export const FASHION_TEMPLATE_PRESET: TemplateBlock[] = [
   {
     id: "fashion-featured",
     type: "fashionProductGrid",
-    props: {
+    settings: {
       columns: 4,
       showCategory: true,
       showHoverImage: true,
@@ -109,7 +124,7 @@ export const FASHION_TEMPLATE_PRESET: TemplateBlock[] = [
   {
     id: "fashion-categories",
     type: "fashionCategoryCards",
-    props: {
+    settings: {
       columns: 4,
       marginBottom: "50px",
       sectionTitle: {
@@ -130,7 +145,7 @@ export const FASHION_TEMPLATE_PRESET: TemplateBlock[] = [
   {
     id: "fashion-bestsellers",
     type: "fashionProductGrid",
-    props: {
+    settings: {
       columns: 4,
       showCategory: true,
       showHoverImage: true,
@@ -150,7 +165,7 @@ export const FASHION_TEMPLATE_PRESET: TemplateBlock[] = [
   {
     id: "fashion-testimonials",
     type: "fashionTestimonials",
-    props: {
+    settings: {
       title: "CUSTOMERS REVIEWS",
       backgroundImage: "https://images.unsplash.com/photo-1441984904996-e0b6ba687e04?w=1400&h=600&fit=crop",
       testimonials: [
@@ -183,7 +198,7 @@ export const FASHION_TEMPLATE_PRESET: TemplateBlock[] = [
   {
     id: "fashion-blog",
     type: "fashionBlogPosts",
-    props: {
+    settings: {
       columns: 2,
       marginBottom: "30px",
       sectionTitle: {
@@ -199,7 +214,7 @@ export const FASHION_TEMPLATE_PRESET: TemplateBlock[] = [
   {
     id: "fashion-newsletter",
     type: "fashionNewsletter",
-    props: {
+    settings: {
       subtitle: "STAY CONNECTED",
       title: "REGISTER FOR OUR NEWSLETTER",
       description: "Sign up for all the news about our last arrivals and get exclusive early access to sales.",
@@ -217,7 +232,7 @@ export const FASHION_TEMPLATE_PRESET: TemplateBlock[] = [
   {
     id: "fashion-footer",
     type: "fashionFooter",
-    props: {
+    settings: {
       logoUrl: "",
       logoAlt: "Store Logo",
       description:

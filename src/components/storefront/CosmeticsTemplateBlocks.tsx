@@ -5,7 +5,9 @@ import { resolveStoreLink, resolveFooterLink } from "@/lib/template-link-utils";
 import { toggleCompare as toggleCompareItem } from "@/lib/compare-utils";
 import { useState, useEffect, useRef, useCallback, createContext, useContext } from "react";
 import { safeSrc, onImgError } from "./image-fallback";
+import { normalizeSocialLinks, toDisplayText } from "@/components/storefront/prop-normalizers";
 import { useNewsletterSubscribe } from "@/hooks/useNewsletterSubscribe";
+import { InlineEditableText } from "@/components/storefront/InlineEditableText";
 
 /* ═══════════════════════════════════════════════════════════════
    COSMETICS TEMPLATE BLOCKS
@@ -50,6 +52,25 @@ const containerStyle: React.CSSProperties = {
 /* ─── SCOPED STYLE INJECTOR ─────────────────────────────────── */
 function ScopedStyles({ id, css }: { id: string; css: string }) {
   return <style data-cosmetics-block={id} dangerouslySetInnerHTML={{ __html: css }} />;
+}
+
+function normalizeBlogDate(date: unknown): { day: string; month: string } | null {
+  if (!date) return null;
+  if (typeof date === "object" && date !== null) {
+    const maybeDate = date as { day?: unknown; month?: unknown };
+    const day = typeof maybeDate.day === "string" || typeof maybeDate.day === "number" ? String(maybeDate.day) : "";
+    const month = typeof maybeDate.month === "string" || typeof maybeDate.month === "number" ? String(maybeDate.month) : "";
+    return day || month ? { day, month } : null;
+  }
+  if (typeof date === "string") {
+    const parts = date.trim().split(/\s+/).filter(Boolean);
+    if (parts.length === 0) return null;
+    const [first, second] = parts;
+    if (/^\d+$/.test(first || "")) return { day: first, month: second || "" };
+    if (/^\d+$/.test(second || "")) return { day: second, month: first || "" };
+    return { day: first, month: second || "" };
+  }
+  return null;
 }
 
 /* ─── useInView HOOK ────────────────────────────────────────── */
@@ -126,14 +147,14 @@ export interface CosmeticsHeroSlide {
 }
 
 export interface CosmeticsHeroSliderProps {
-  slides: CosmeticsHeroSlide[];
+  slides?: CosmeticsHeroSlide[];
   autoplaySpeed?: number;
   minHeight?: string;
   resolvedStyles?: React.CSSProperties;
   resolvedClasses?: string;
 }
 
-export function CosmeticsHeroSlider({ slides, autoplaySpeed = 5000, minHeight = "560px", resolvedStyles, resolvedClasses }: CosmeticsHeroSliderProps) {
+export function CosmeticsHeroSlider({ slides = [], autoplaySpeed = 5000, minHeight = "560px", resolvedStyles, resolvedClasses }: CosmeticsHeroSliderProps) {
   const storeCtx = useContext(CosmeticsStoreContext);
   const fixLink = (link: string) => resolveStoreLink(link, storeCtx?.storeSlug);
   const [current, setCurrent] = useState(0);
@@ -288,12 +309,13 @@ export interface CosmeticsPromoBanner {
 }
 
 export interface CosmeticsPromoBannersProps {
-  banners: CosmeticsPromoBanner[];
+  banners?: CosmeticsPromoBanner[];
 }
 
-export function CosmeticsPromoBanners({ banners }: CosmeticsPromoBannersProps) {
+export function CosmeticsPromoBanners({ banners = [] }: CosmeticsPromoBannersProps) {
   const storeCtx = useContext(CosmeticsStoreContext);
   const fixLink = (link: string) => resolveStoreLink(link, storeCtx?.storeSlug);
+  const safeBanners = Array.isArray(banners) ? banners : [];
 
   const scopedCss = `
     .cp-banners { display: grid; grid-template-columns: repeat(3, 1fr); gap: 30px; margin-bottom: 60px; }
@@ -342,7 +364,7 @@ export function CosmeticsPromoBanners({ banners }: CosmeticsPromoBannersProps) {
     <div style={containerStyle}>
       <ScopedStyles id="promo-banners" css={scopedCss} />
       <div className="cp-banners">
-        {banners.map((b, i) => (
+        {safeBanners.map((b, i) => (
           <div key={i} className="cp-banner">
             <div className="cp-banner-img-wrap">
               <img src={b.image} alt={b.title} className="cp-banner-img" loading="lazy"  onError={(e) => onImgError(e, b.title)} />
@@ -373,9 +395,11 @@ export interface CosmeticsSectionTitleProps {
   align?: "left" | "center" | "right";
   maxWidth?: string;
   titleColor?: "primary" | "dark";
+  blockId?: string;
+  isEditor?: boolean;
 }
 
-export function CosmeticsSectionTitle({ subtitle, title, description, buttonText, buttonLink, align = "center", maxWidth = "50%", titleColor = "dark" }: CosmeticsSectionTitleProps) {
+export function CosmeticsSectionTitle({ subtitle, title, description, buttonText, buttonLink, align = "center", maxWidth = "50%", titleColor = "dark", blockId, isEditor = false }: CosmeticsSectionTitleProps) {
   const storeCtx = useContext(CosmeticsStoreContext);
   const fixLink = (link: string) => resolveStoreLink(link, storeCtx?.storeSlug);
 
@@ -414,11 +438,15 @@ export function CosmeticsSectionTitle({ subtitle, title, description, buttonText
     <div className="cst-wrap" style={{ textAlign: align }}>
       <ScopedStyles id="section-title" css={scopedCss} />
       <div style={{ maxWidth, margin: align === "center" ? "0 auto" : undefined }}>
-        {subtitle && <div className="cst-subtitle">{subtitle}</div>}
-        <h2 className={`cst-title cst-title-${titleColor}`}>{title}</h2>
-        {description && <p className="cst-desc">{description}</p>}
+        {subtitle && <InlineEditableText nodeId={blockId} field="subtitle" value={subtitle} isEditor={isEditor} as="div" className="cst-subtitle" />}
+        <InlineEditableText nodeId={blockId} field="title" value={title} isEditor={isEditor} as="h2" className={`cst-title cst-title-${titleColor}`} />
+        {description && <InlineEditableText nodeId={blockId} field="description" value={description} isEditor={isEditor} as="p" multiline className="cst-desc" />}
         {buttonText && (
-          <Link href={fixLink(buttonLink || "#")} className="cst-btn">{buttonText}</Link>
+          isEditor ? (
+            <InlineEditableText nodeId={blockId} field="buttonText" value={buttonText} isEditor={isEditor} as="span" className="cst-btn" />
+          ) : (
+            <Link href={fixLink(buttonLink || "#")} className="cst-btn">{buttonText}</Link>
+          )
         )}
       </div>
     </div>
@@ -555,13 +583,14 @@ export function CosmeticsProductGrid({ products: propProducts, columns = 4, show
     @media (max-width: 767px) { .cpg-grid { grid-template-columns: repeat(2, 1fr); gap: 10px; } }
   `;
 
-  const resolveLink = (link: string, productName: string) => {
-    if (link && link.startsWith("/store/")) return link;
+  const resolveLink = (link: unknown, productName: string) => {
+    const normalized = typeof link === "string" ? link : link == null ? "" : String(link);
+    if (normalized.startsWith("/store/")) return normalized;
     if (storeCtx?.storeSlug) {
       const slug = productName.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/(^-|-$)/g, "");
       return `/store/${storeCtx.storeSlug}/product/${slug}`;
     }
-    return resolveStoreLink(link, storeCtx?.storeSlug);
+    return resolveStoreLink(normalized, storeCtx?.storeSlug);
   };
 
   if (products.length === 0) {
@@ -606,7 +635,7 @@ export function CosmeticsProductGrid({ products: propProducts, columns = 4, show
               </div>
               <h3 className="cpg-name"><Link href={productLink}>{p.name}</Link></h3>
               {showCategory && p.category && (
-                <div className="cpg-cat"><Link href={resolveStoreLink(p.categoryLink, storeCtx?.storeSlug)}>{p.category}</Link></div>
+                <div className="cpg-cat"><Link href={resolveStoreLink(p.categoryLink, storeCtx?.storeSlug)}>{toDisplayText(p.category, "")}</Link></div>
               )}
               <div className="cpg-price">
                 {p.salePrice && <span className="cpg-price-old">{p.price}</span>}
@@ -632,20 +661,21 @@ export interface CosmeticsCategoryCard {
 }
 
 export interface CosmeticsCategoryCardsProps {
-  categories: CosmeticsCategoryCard[];
+  categories?: CosmeticsCategoryCard[];
   sectionTitle?: { subtitle?: string; title: string; description?: string };
   marginBottom?: string;
 }
 
-export function CosmeticsCategoryCards({ categories, sectionTitle, marginBottom = "60px" }: CosmeticsCategoryCardsProps) {
+export function CosmeticsCategoryCards({ categories = [], sectionTitle, marginBottom = "60px" }: CosmeticsCategoryCardsProps) {
   const storeCtx = useContext(CosmeticsStoreContext);
-  const resolveLink = (link: string, catName: string) => {
-    if (link && link.startsWith("/store/")) return link;
+  const resolveLink = (link: unknown, catName: string) => {
+    const normalized = typeof link === "string" ? link : link == null ? "" : String(link);
+    if (normalized.startsWith("/store/")) return normalized;
     if (storeCtx?.storeSlug) {
       const catSlug = catName.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/(^-|-$)/g, "");
       return `/store/${storeCtx.storeSlug}/shop?category=${catSlug}`;
     }
-    return resolveStoreLink(link, storeCtx?.storeSlug);
+    return resolveStoreLink(normalized, storeCtx?.storeSlug);
   };
 
   const scopedCss = `
@@ -730,7 +760,7 @@ export interface CosmeticsDiscoveryProps {
   image: string;
   title: string;
   description: string;
-  features: CosmeticsDiscoveryFeature[];
+  features?: CosmeticsDiscoveryFeature[];
   buttonText?: string;
   buttonLink?: string;
   secondButtonText?: string;
@@ -738,7 +768,7 @@ export interface CosmeticsDiscoveryProps {
   marginBottom?: string;
 }
 
-export function CosmeticsDiscovery({ image, title, description, features, buttonText = "SHOP NOW", buttonLink, secondButtonText = "READ MORE", secondButtonLink, marginBottom = "60px" }: CosmeticsDiscoveryProps) {
+export function CosmeticsDiscovery({ image, title, description, features = [], buttonText = "SHOP NOW", buttonLink, secondButtonText = "READ MORE", secondButtonLink, marginBottom = "60px" }: CosmeticsDiscoveryProps) {
   const storeCtx = useContext(CosmeticsStoreContext);
   const fixLink = (link?: string) => resolveStoreLink(link || "#", storeCtx?.storeSlug);
   const { ref, inView } = useInView();
@@ -975,7 +1005,7 @@ export interface CosmeticsInfoBoxesProps {
   marginBottom?: string;
 }
 
-export function CosmeticsInfoBoxes({ sectionTitle, boxes, marginBottom = "60px" }: CosmeticsInfoBoxesProps) {
+export function CosmeticsInfoBoxes({ sectionTitle, boxes = [], marginBottom = "60px" }: CosmeticsInfoBoxesProps) {
   const { ref, inView } = useInView();
 
   const onImgError = (e: React.SyntheticEvent<HTMLImageElement>, boxTitle?: string) => {
@@ -1057,13 +1087,13 @@ export interface CosmeticsBlogPost {
 }
 
 export interface CosmeticsBlogPostsProps {
-  posts: CosmeticsBlogPost[];
+  posts?: CosmeticsBlogPost[];
   columns?: number;
   sectionTitle?: { subtitle?: string; title: string; description?: string };
   marginBottom?: string;
 }
 
-export function CosmeticsBlogPosts({ posts: propPosts, columns = 2, sectionTitle, marginBottom = "60px" }: CosmeticsBlogPostsProps) {
+export function CosmeticsBlogPosts({ posts: propPosts = [], columns = 2, sectionTitle, marginBottom = "60px" }: CosmeticsBlogPostsProps) {
   const storeCtx = useContext(CosmeticsStoreContext);
 
   const posts: CosmeticsBlogPost[] = (() => {
@@ -1142,14 +1172,18 @@ export function CosmeticsBlogPosts({ posts: propPosts, columns = 2, sectionTitle
         <CosmeticsSectionTitle subtitle={sectionTitle.subtitle} title={sectionTitle.title} description={sectionTitle.description} />
       )}
       <div className="cbp-grid">
-        {posts.map((p, i) => (
+        {posts.map((p, i) => {
+          const normalizedDate = normalizeBlogDate((p as any).date);
+          return (
           <article key={i} className="cbp-card">
             <div className="cbp-img-wrap">
               <img src={p.image} alt={p.title} className="cbp-img" loading="lazy"  onError={(e) => onImgError(e, p.title)} />
-              <div className="cbp-date-badge">
-                <span className="cbp-date-day">{p.date.day}</span>
-                <span className="cbp-date-month">{p.date.month}</span>
-              </div>
+              {normalizedDate && (
+                <div className="cbp-date-badge">
+                  <span className="cbp-date-day">{normalizedDate.day}</span>
+                  <span className="cbp-date-month">{normalizedDate.month}</span>
+                </div>
+              )}
               <Link href={resolveStoreLink(p.link, storeCtx?.storeSlug)} style={{ position: "absolute", inset: 0, zIndex: 3 }} aria-label={p.title} />
             </div>
             <div className="cbp-content">
@@ -1168,7 +1202,7 @@ export function CosmeticsBlogPosts({ posts: propPosts, columns = 2, sectionTitle
               <Link href={p.link} className="cbp-read-more">Continue reading</Link>
             </div>
           </article>
-        ))}
+        )})}
       </div>
     </div>
   );
@@ -1186,11 +1220,11 @@ export interface CosmeticsInstagramItem {
 }
 
 export interface CosmeticsInstagramProps {
-  items: CosmeticsInstagramItem[];
+  items?: CosmeticsInstagramItem[];
   marginBottom?: string;
 }
 
-export function CosmeticsInstagram({ items, marginBottom = "0px" }: CosmeticsInstagramProps) {
+export function CosmeticsInstagram({ items = [], marginBottom = "0px" }: CosmeticsInstagramProps) {
   const scopedCss = `
     .ci-section { margin-bottom: ${marginBottom}; }
     .ci-grid { display: grid; grid-template-columns: repeat(6, 1fr); gap: 0; }
@@ -1590,6 +1624,7 @@ export function CosmeticsFooter({
   const socialIcons: Record<string, string> = {
     facebook: "f", twitter: "𝕏", instagram: "📷", youtube: "▶", tiktok: "♪",
   };
+  const safeSocialLinks = normalizeSocialLinks(socialLinks);
 
   return (
     <footer className="cf-footer">
@@ -1606,7 +1641,7 @@ export function CosmeticsFooter({
             <Link href={resolveStoreLink("/", resolvedSlug)} className="cf-logo-text">{storeName}</Link>
             <p className="cf-text">{description}</p>
             <div className="cf-social">
-              {socialLinks.map((s, i) => (
+              {safeSocialLinks.map((s, i) => (
                 <a key={i} href={s.url} className="cf-social-icon" target="_blank" rel="noopener noreferrer" aria-label={s.platform}>
                   {socialIcons[s.platform] || s.platform[0]?.toUpperCase()}
                 </a>

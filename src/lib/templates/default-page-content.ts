@@ -1,6 +1,8 @@
-import { blockDefaults, type BuilderBlock, type BlockType } from "@/lib/builder/types";
+import { type BuilderBlock as PageBlock } from "@/components/storefront/BlockRenderer";
 import { parsePageContent, pickRicherPageDocument, serializePageContent, type PageContentDocument } from "@/lib/page-content";
 import { isBespokeTemplateSlug } from "@/lib/templates/bespoke-template-slugs";
+
+type BuilderBlock = PageBlock;
 
 export interface DefaultPageContentContext {
   pageSlug: string;
@@ -524,24 +526,19 @@ function slugToLabel(slug: string) {
     .join(" ");
 }
 
-function createBlock<T extends BlockType>(type: T, overrides: Record<string, unknown> = {}): BuilderBlock {
+function createBlock(type: string, overrides: Record<string, unknown> = {}): BuilderBlock {
   return {
     id: crypto.randomUUID(),
     type,
-    props: {
-      ...blockDefaults[type](),
-      ...overrides,
-    },
+    props: { ...overrides },
   };
 }
 
 function createRawBlock(type: string, overrides: Record<string, unknown> = {}): BuilderBlock {
   return {
     id: crypto.randomUUID(),
-    type: type as BlockType,
-    props: {
-      ...overrides,
-    },
+    type,
+    props: { ...overrides },
   };
 }
 
@@ -550,8 +547,8 @@ function createColumnsBlock(left: string, right: string): BuilderBlock {
     columns: 2,
     gap: 5,
     children: [
-      { id: crypto.randomUUID(), type: "text", props: { ...blockDefaults.text(), text: left } },
-      { id: crypto.randomUUID(), type: "text", props: { ...blockDefaults.text(), text: right } },
+      { id: crypto.randomUUID(), type: "text", props: { text: left } },
+      { id: crypto.randomUUID(), type: "text", props: { text: right } },
     ],
   });
 }
@@ -1016,7 +1013,7 @@ export function buildDefaultPageContent(context: DefaultPageContentContext): Pag
 }
 
 export function ensurePageContentDocument(content: unknown, context: DefaultPageContentContext): PageContentDocument {
-  const parsed = parsePageContent(content, context.templateSlug, context.pageSlug);
+  const parsed = parsePageContent(content);
 
   if (context.templateSlug && isBespokeTemplateSlug(context.templateSlug)) {
     return parsed;

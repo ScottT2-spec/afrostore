@@ -75,7 +75,7 @@ export async function POST(req: NextRequest, { params }: Params) {
       after: mediaItem,
     });
 
-    return success({ url: mediaItem.url, ...mediaItem }, 201);
+    return success({ ...mediaItem, url: mediaItem.url }, 201);
   } catch (err) {
     console.error("Upload media error:", err);
     return error("Internal server error", 500);

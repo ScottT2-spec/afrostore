@@ -79,7 +79,15 @@ export default function VisualEditor({
   // Handle save
   const handleSave = async () => {
     console.log("VisualEditor handleSave called - isDirty:", isDirty);
-    if (!isDirty) {
+
+    const activeElement = typeof document !== "undefined" ? document.activeElement as HTMLElement | null : null;
+    if (activeElement && activeElement !== document.body) {
+      activeElement.blur?.();
+    }
+
+    const latestPageStructure = useEditorStore.getState().pageStructure;
+
+    if (!useEditorStore.getState().isDirty) {
       console.log("Not saving - not dirty");
       return;
     }
@@ -88,10 +96,10 @@ export default function VisualEditor({
     setSaving(true);
     setSaveStatus("saving");
     
-    console.log("Calling onSave with pageStructure:", pageStructure);
+    console.log("Calling onSave with pageStructure:", latestPageStructure);
     
     try {
-      await onSave(pageStructure);
+      await onSave(latestPageStructure);
       markSaved();
       setSaveStatus("saved");
       console.log("Save successful");
@@ -131,6 +139,12 @@ export default function VisualEditor({
   // Handle keyboard shortcuts
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
+      const activeElement = typeof document !== "undefined" ? document.activeElement as HTMLElement | null : null;
+      const isInlineEditableActive = Boolean(activeElement?.closest?.('[contenteditable="true"], [data-inline-field], [data-inline-editable="true"]'));
+      if (isInlineEditableActive) {
+        return;
+      }
+
       // Cmd/Ctrl + Z - Undo
       if ((e.metaKey || e.ctrlKey) && e.key === "z" && !e.shiftKey) {
         e.preventDefault();

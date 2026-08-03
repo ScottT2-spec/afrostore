@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import React, { createElement, useCallback, useEffect, useLayoutEffect, useRef, useState, type CSSProperties } from "react";
 import { useEditorStore } from "@/lib/visual-editor/store";
 import { DeviceType } from "@/lib/visual-editor/types";
 import { Plus } from "lucide-react";
@@ -21,14 +21,20 @@ import {
   verticalListSortingStrategy,
 } from "@dnd-kit/sortable";
 import ContextMenu from "./ContextMenu";
-import { RenderTemplateBlocks, ALL_TEMPLATE_BLOCKS } from "@/components/storefront/TemplateBlockRenderer";
+import { RenderTemplateBlocks, isRegisteredTemplateBlock } from "@/components/storefront/TemplateBlockRenderer";
 import type { TemplateBlock } from "@/components/storefront/TemplateBlockRenderer";
 import { createElementFromWidget } from "@/lib/visual-editor/widgets";
 import MediaLibrary from "./MediaLibrary";
+import { buildScopedNodeCss, resolveNodeStyles } from "@/lib/visual-editor/node-tree";
+import { isChildFragmentType } from "@/lib/templates/template-tree";
 
 const findElementById = (elements: any[], id: string): any | null => {
   for (const element of elements) {
     if (element.id === id) return element;
+    if (Array.isArray(element.elements) && element.elements.length > 0) {
+      const found = findElementById(element.elements, id);
+      if (found) return found;
+    }
     if (Array.isArray(element.children) && element.children.length > 0) {
       const found = findElementById(element.children, id);
       if (found) return found;
@@ -43,13 +49,47 @@ const findElementById = (elements: any[], id: string): any | null => {
 
 const getElementTextValue = (element: any, fallback: string) => {
   const content = element?.content || {};
+  const settings = element?.settings || {};
   return (
     content.text ??
     content.content ??
-    element?.settings?.text ??
-    element?.settings?.content ??
+    settings.text ??
+    settings.content ??
     fallback
   );
+};
+
+const INLINE_EDITABLE_SELECTOR = '[contenteditable="true"], [data-inline-field], [data-inline-editable="true"]';
+
+const isInlineEditableTarget = (target: EventTarget | null) => {
+  if (!target) return false;
+  if (target instanceof Element) {
+    return Boolean(target.closest(INLINE_EDITABLE_SELECTOR));
+  }
+  if (target instanceof Node) {
+    const parent = target.parentElement;
+    return Boolean(parent?.closest(INLINE_EDITABLE_SELECTOR));
+  }
+  return false;
+};
+
+export const buildEditorCanvasCss = (elements: any[]): string => {
+  const css: string[] = [];
+
+  const walk = (nodes: any[]) => {
+    for (const node of nodes) {
+      if (!node?.id) continue;
+      css.push(buildScopedNodeCss(node));
+      const customCss = typeof node?.settings?.customCss === "string" ? node.settings.customCss.trim() : "";
+      if (customCss) css.push(customCss);
+      if (Array.isArray(node.elements) && node.elements.length > 0) walk(node.elements);
+      if (Array.isArray(node.children) && node.children.length > 0) walk(node.children);
+      if (Array.isArray(node.columns) && node.columns.length > 0) walk(node.columns);
+    }
+  };
+
+  walk(elements || []);
+  return css.filter(Boolean).join("\n");
 };
 
 const updateElementTextValue = (elementId: string, nextText: string) => {
@@ -74,6 +114,9 @@ const updateElementTextValue = (elementId: string, nextText: string) => {
           },
         };
       }
+      if (Array.isArray(el.elements)) {
+        return { ...el, elements: updateInTree(el.elements) };
+      }
       if (Array.isArray(el.children)) {
         return { ...el, children: updateInTree(el.children) };
       }
@@ -93,127 +136,139 @@ const updateElementTextValue = (elementId: string, nextText: string) => {
   });
 };
 
+type CanvasEditableTag = "div" | "p" | "span" | "h1" | "h2" | "h3" | "h4" | "h5" | "h6" | "button";
+
+function CanvasInlineEditableText({
+  as = "div",
+  value,
+  className,
+  style,
+  multiline = false,
+  selectNodeOnFocus = true,
+  onSelectNode,
+  onBeginEdit,
+  onCommit,
+  onCancel,
+}: {
+  as?: CanvasEditableTag;
+  value: string;
+  className?: string;
+  style?: CSSProperties;
+  multiline?: boolean;
+  selectNodeOnFocus?: boolean;
+  onSelectNode?: () => void;
+  onBeginEdit?: () => void;
+  onCommit: (nextText: string) => void;
+  onCancel: () => void;
+}) {
+  const ref = useRef<HTMLElement | null>(null);
+  const focusedRef = useRef(false);
+  const commitBaselineRef = useRef(value ?? "");
+  const selectFrameRef = useRef<number | null>(null);
+  const cancelCommitRef = useRef(false);
+  const normalizedValue = value ?? "";
+
+  useLayoutEffect(() => {
+    if (focusedRef.current || !ref.current) return;
+    const currentText = ref.current.textContent ?? "";
+    if (currentText !== normalizedValue) {
+      ref.current.textContent = normalizedValue;
+    }
+  }, [normalizedValue]);
+
+  useEffect(() => {
+    return () => {
+      if (selectFrameRef.current != null) {
+        cancelAnimationFrame(selectFrameRef.current);
+      }
+    };
+  }, []);
+
+  const handleFocus = useCallback(() => {
+    focusedRef.current = true;
+    cancelCommitRef.current = false;
+    commitBaselineRef.current = normalizedValue;
+    onBeginEdit?.();
+
+    if (!selectNodeOnFocus || !onSelectNode) return;
+    if (selectFrameRef.current != null) {
+      cancelAnimationFrame(selectFrameRef.current);
+    }
+    selectFrameRef.current = requestAnimationFrame(() => {
+      onSelectNode();
+      selectFrameRef.current = null;
+    });
+  }, [normalizedValue, onBeginEdit, onSelectNode, selectNodeOnFocus]);
+
+  const handleBlur = useCallback((event: React.FocusEvent<HTMLElement>) => {
+    focusedRef.current = false;
+    if (selectFrameRef.current != null) {
+      cancelAnimationFrame(selectFrameRef.current);
+      selectFrameRef.current = null;
+    }
+
+    const nextText = (event.currentTarget.innerText || event.currentTarget.textContent || "").replace(/\u00a0/g, " ");
+    if (cancelCommitRef.current) {
+      cancelCommitRef.current = false;
+      onCancel();
+      return;
+    }
+
+    if (nextText !== commitBaselineRef.current) {
+      onCommit(nextText);
+    }
+    onCancel();
+  }, [onCancel, onCommit]);
+
+  const stopPropagation = useCallback((event: React.SyntheticEvent<HTMLElement>) => {
+    event.stopPropagation();
+  }, []);
+
+  return createElement(
+    as,
+    {
+      ref: ref as any,
+      contentEditable: true,
+      suppressContentEditableWarning: true,
+      spellCheck: false,
+      "data-inline-editable": "true",
+      "data-inline-field": "true",
+      className,
+      style: { ...style, outline: "none" },
+      onPointerDownCapture: stopPropagation,
+      onKeyDownCapture: stopPropagation,
+      onMouseDownCapture: stopPropagation,
+      onMouseDown: stopPropagation,
+      onClickCapture: stopPropagation,
+      onClick: stopPropagation,
+      onFocus: handleFocus,
+      onBlur: handleBlur,
+      onInput: stopPropagation,
+      onKeyDown: (event: React.KeyboardEvent<HTMLElement>) => {
+        if (event.key === "Escape") {
+          event.preventDefault();
+          cancelCommitRef.current = true;
+          (event.currentTarget as HTMLElement).blur();
+          return;
+        }
+
+        if (!multiline && event.key === "Enter") {
+          event.preventDefault();
+          (event.currentTarget as HTMLElement).blur();
+        }
+      },
+      tabIndex: 0,
+    },
+    null
+  );
+}
+
 const buildEditorInlineStyles = (element: any): Record<string, any> => {
-  const styles = element?.styles || {};
-  const typography = styles.typography || {};
-  const colors = styles.colors || {};
-  const spacing = styles.spacing || {};
-  const border = styles.border || {};
-  const background = styles.background || {};
-  const effects = styles.effects || {};
-  const position = styles.position || {};
-
-  const resolved: Record<string, any> = {};
-
-  if (typography.fontFamily) resolved.fontFamily = typography.fontFamily;
-  if (typography.fontSize) resolved.fontSize = typography.fontSize;
-  if (typography.fontWeight) resolved.fontWeight = typography.fontWeight;
-  if (typography.lineHeight) resolved.lineHeight = typography.lineHeight;
-  if (typography.letterSpacing) resolved.letterSpacing = typography.letterSpacing;
-  if (typography.textAlign) resolved.textAlign = typography.textAlign;
-  if (typography.textTransform) resolved.textTransform = typography.textTransform;
-  if (typography.color) resolved.color = typography.color;
-
-  if (colors.background) resolved.backgroundColor = colors.background;
-  if (colors.text) resolved.color = colors.text;
-  if (colors.border) resolved.borderColor = colors.border;
-
-  if (spacing.top || spacing.right || spacing.bottom || spacing.left) {
-    resolved.padding = `${spacing.top || "0"} ${spacing.right || "0"} ${spacing.bottom || "0"} ${spacing.left || "0"}`;
-  }
-
-  if (border.width) resolved.borderWidth = border.width;
-  if (border.style) resolved.borderStyle = border.style;
-  if (border.color) resolved.borderColor = border.color;
-  if (border.radius) resolved.borderRadius = border.radius;
-
-  if (background.image) resolved.backgroundImage = `url(${background.image})`;
-  if (background.position) resolved.backgroundPosition = background.position;
-  if (background.size) resolved.backgroundSize = background.size;
-  if (background.repeat) resolved.backgroundRepeat = background.repeat;
-
-  if (effects.boxShadow) resolved.boxShadow = effects.boxShadow;
-  if (typeof effects.opacity === "number") resolved.opacity = effects.opacity;
-  const filterParts: string[] = [];
-  if (typeof effects.blur === "number") filterParts.push(`blur(${effects.blur}px)`);
-  if (typeof effects.brightness === "number") filterParts.push(`brightness(${effects.brightness})`);
-  if (typeof effects.contrast === "number") filterParts.push(`contrast(${effects.contrast})`);
-  if (typeof effects.saturate === "number") filterParts.push(`saturate(${effects.saturate})`);
-  if (typeof effects.grayscale === "number") filterParts.push(`grayscale(${effects.grayscale})`);
-  if (typeof effects.sepia === "number") filterParts.push(`sepia(${effects.sepia})`);
-  if (typeof effects.hueRotate === "number") filterParts.push(`hue-rotate(${effects.hueRotate}deg)`);
-  if (filterParts.length > 0) resolved.filter = filterParts.join(" ");
-
-  if (position.type) resolved.position = position.type;
-  if (position.top) resolved.top = position.top;
-  if (position.right) resolved.right = position.right;
-  if (position.bottom) resolved.bottom = position.bottom;
-  if (position.left) resolved.left = position.left;
-  if (typeof position.zIndex === "number") resolved.zIndex = position.zIndex;
-
-  return resolved;
-};
-
-const buildEditorTemplateStyleOverrides = (element: any): Record<string, any> => {
-  const styles = element?.styles || {};
-  const typography = styles.typography || {};
-  const colors = styles.colors || {};
-  const spacing = styles.spacing || {};
-  const border = styles.border || {};
-  const background = styles.background || {};
-  const effects = styles.effects || {};
-  const position = styles.position || {};
-
-  const overrides: Record<string, any> = {};
-
-  if (background.color || colors.background) overrides.backgroundColor = background.color || colors.background;
-  if (background.gradient) overrides.backgroundGradient = background.gradient;
-  if (background.image) overrides.backgroundImage = background.image;
-  if (background.type) overrides.backgroundType = background.type;
-  if (background.video) overrides.backgroundVideo = background.video;
-  if (background.overlay) overrides.backgroundOverlay = background.overlay;
-  if (typeof background.overlayOpacity === "number") overrides.backgroundOverlayOpacity = background.overlayOpacity;
-  if (background.position) overrides.backgroundPosition = background.position;
-  if (background.size) overrides.backgroundSize = background.size;
-  if (background.repeat) overrides.backgroundRepeat = background.repeat;
-
-  if (colors.text) overrides.textColor = colors.text;
-  if (typography.color) overrides.textColor = typography.color;
-  if (typography.fontFamily) overrides.fontFamily = typography.fontFamily;
-  if (typography.fontSize) overrides.fontSize = typography.fontSize;
-  if (typography.fontWeight) overrides.fontWeight = typography.fontWeight;
-  if (typography.lineHeight) overrides.lineHeight = typography.lineHeight;
-  if (typography.letterSpacing) overrides.letterSpacing = typography.letterSpacing;
-  if (typography.textAlign) overrides.textAlign = typography.textAlign;
-  if (typography.textTransform) overrides.textTransform = typography.textTransform;
-
-  if (spacing.top) overrides.paddingTop = spacing.top;
-  if (spacing.right) overrides.paddingRight = spacing.right;
-  if (spacing.bottom) overrides.paddingBottom = spacing.bottom;
-  if (spacing.left) overrides.paddingLeft = spacing.left;
-
-  if (border.width) overrides.borderWidth = border.width;
-  if (border.style) overrides.borderStyle = border.style;
-  if (border.color) overrides.borderColor = border.color;
-  if (border.radius) overrides.borderRadius = border.radius;
-
-  if (effects.boxShadow) overrides.boxShadow = effects.boxShadow;
-  if (typeof effects.opacity === "number") overrides.opacity = effects.opacity;
-  if (typeof position.zIndex === "number") overrides.zIndex = position.zIndex;
-  if (position.type) overrides.position = position.type;
-  if (position.top) overrides.top = position.top;
-  if (position.right) overrides.right = position.right;
-  if (position.bottom) overrides.bottom = position.bottom;
-  if (position.left) overrides.left = position.left;
-  if (typeof element?.settings?.customCss === "string" && element.settings.customCss.trim()) {
-    overrides.customCss = element.settings.customCss;
-  }
-
-  return overrides;
+  return resolveNodeStyles(element?.settings || {}) as Record<string, any>;
 };
 
 export default function EditorCanvas() {
-  const { pageStructure, device, selectedElementId, setSelectedElementId, moveElement, updateElement, siteId } = useEditorStore();
+  const { pageStructure, device, selectedElementId, hoveredElementId, setSelectedElementId, setHoveredElementId, moveElement, updateElement, siteId } = useEditorStore();
   const [activeId, setActiveId] = useState<string | null>(null);
   const [contextMenu, setContextMenu] = useState<{ elementId: string; position: { x: number; y: number } } | null>(null);
   const [editingElementId, setEditingElementId] = useState<string | null>(null);
@@ -350,6 +405,18 @@ export default function EditorCanvas() {
     }
   };
 
+  const resolveSelectableIdFromTarget = (target: EventTarget | null): string | null => {
+    if (!(target instanceof HTMLElement)) return null;
+    const selectable = target.closest("[data-editor-node-id], [data-editor-block-id], [data-element-id]");
+    if (!selectable) return null;
+    return (
+      selectable.getAttribute("data-editor-node-id") ||
+      selectable.getAttribute("data-editor-block-id") ||
+      selectable.getAttribute("data-element-id") ||
+      null
+    );
+  };
+
   const handleContextMenu = (e: React.MouseEvent, elementId: string) => {
     e.preventDefault();
     e.stopPropagation();
@@ -370,11 +437,26 @@ export default function EditorCanvas() {
     if (!element) return;
 
     const selected = selectedElementId ? findElementById(pageStructure.elements, selectedElementId) : null;
-    const canNest = selected && (Array.isArray(selected.children) || Array.isArray(selected.columns));
+    const canNest = selected && (Array.isArray(selected.elements) || Array.isArray(selected.children) || Array.isArray(selected.columns));
     const parentId = canNest ? selected.id : null;
 
     useEditorStore.getState().addElement(element, parentId);
   };
+
+  const handleCanvasPointerMove = (e: React.PointerEvent) => {
+    const nextHoveredId = resolveSelectableIdFromTarget(e.target);
+    if (nextHoveredId !== hoveredElementId) {
+      setHoveredElementId(nextHoveredId);
+    }
+  };
+
+  const handleCanvasPointerLeave = () => {
+    if (hoveredElementId) {
+      setHoveredElementId(null);
+    }
+  };
+
+  const editorNodeCss = buildEditorCanvasCss(pageStructure.elements);
 
   return (
     <main className="flex-1 bg-gray-100 dark:bg-gray-800 overflow-auto flex items-start justify-center p-6">
@@ -385,9 +467,14 @@ export default function EditorCanvas() {
           maxWidth: "100%",
         }}
         onClick={handleCanvasClick}
+        onPointerMove={handleCanvasPointerMove}
+        onPointerLeave={handleCanvasPointerLeave}
         onDragOver={(e) => e.preventDefault()}
         onDrop={handleCanvasDrop}
       >
+        {editorNodeCss && (
+          <style data-editor-node-styles dangerouslySetInnerHTML={{ __html: editorNodeCss }} />
+        )}
         {/* Empty State */}
         {pageStructure.elements.length === 0 ? (
           <div className="flex flex-col items-center justify-center min-h-[600px] p-12 border-2 border-dashed border-gray-300 dark:border-gray-700 m-4 rounded-lg">
@@ -449,12 +536,11 @@ export default function EditorCanvas() {
                   <SortableElementRenderer
                     key={element.id}
                     element={element}
+                    depth={0}
                     isSelected={selectedElementId === element.id}
-                    onSelect={() => {
-                      console.log("SortableElementRenderer onSelect - element.id:", element.id);
-                      setSelectedElementId(element.id);
-                      console.log("setSelectedElementId called with:", element.id);
-                      console.log("selectedElementId after set:", selectedElementId);
+                    onSelect={(target) => {
+                      const selectableId = resolveSelectableIdFromTarget(target ?? null) || element.id;
+                      setSelectedElementId(selectableId);
                     }}
                     onContextMenu={handleContextMenu}
                     editingElementId={editingElementId}
@@ -501,6 +587,7 @@ export default function EditorCanvas() {
 
 function SortableElementRenderer({
   element,
+  depth,
   isSelected,
   onSelect,
   onContextMenu,
@@ -515,8 +602,9 @@ function SortableElementRenderer({
   onSelectElement,
 }: {
   element: any;
+  depth: number;
   isSelected: boolean;
-  onSelect: () => void;
+  onSelect: (target?: EventTarget | null) => void;
   onContextMenu: (e: React.MouseEvent, elementId: string) => void;
   editingElementId: string | null;
   editingValue: string;
@@ -544,9 +632,10 @@ function SortableElementRenderer({
   };
 
   return (
-    <div ref={setNodeRef} style={style}>
+    <div ref={setNodeRef} style={style} data-editor-node-id={element.id} className={`editor-node-${element.id}`}>
       <ElementRenderer
         element={element}
+        depth={depth}
         isSelected={isSelected}
         onSelect={onSelect}
         onContextMenu={onContextMenu}
@@ -569,6 +658,7 @@ function SortableElementRenderer({
 
 function ElementRenderer({
   element,
+  depth,
   isSelected,
   onSelect,
   onContextMenu,
@@ -586,8 +676,9 @@ function ElementRenderer({
   onSelectElement,
 }: {
   element: any;
+  depth: number;
   isSelected: boolean;
-  onSelect: () => void;
+  onSelect: (target?: EventTarget | null) => void;
   onContextMenu?: (e: React.MouseEvent, elementId: string) => void;
   dragAttributes?: any;
   dragListeners?: any;
@@ -603,46 +694,55 @@ function ElementRenderer({
   onSelectElement: (id: string | null) => void;
 }) {
   const editorInlineStyles = buildEditorInlineStyles(element);
-  const templateStyleOverrides = buildEditorTemplateStyleOverrides(element);
-  const customCss = typeof element?.settings?.customCss === "string" ? element.settings.customCss : "";
+  const styles = editorInlineStyles as Record<string, any>;
+  const isTopLevelNode = depth === 0;
+  const isHovered = useEditorStore((state) => state.hoveredElementId === element.id);
+  const isInlineEditing = editingElementId === element.id;
+  const selectionChromeClass = isSelected
+    ? isTopLevelNode
+      ? isInlineEditing
+        ? "border-blue-500 ring-1 ring-blue-400/40 ring-offset-0 bg-transparent"
+        : "border-blue-500 ring-2 ring-blue-500 ring-offset-2 bg-blue-50/30 dark:bg-blue-900/20"
+      : isInlineEditing
+        ? "border-emerald-500 ring-1 ring-emerald-400/40 ring-offset-0 bg-transparent"
+        : "border-emerald-500 ring-2 ring-emerald-500 ring-offset-2 bg-emerald-50/25 dark:bg-emerald-900/15"
+    : isTopLevelNode
+      ? "border-transparent hover:border-blue-300 hover:ring-2 hover:ring-blue-300/70 hover:ring-offset-1"
+      : "border-transparent hover:border-emerald-300 hover:ring-1 hover:ring-emerald-300/70 hover:ring-offset-1";
+  const hoveredChromeClass = isHovered && !isSelected
+    ? isTopLevelNode
+      ? "border-blue-300 ring-2 ring-blue-300/70 ring-offset-1"
+      : "border-emerald-300 ring-1 ring-emerald-300/70 ring-offset-1"
+    : "";
 
   const renderElementContent = () => {
     const content = element.content || {};
-    const styles = element.styles || {};
 
     switch (element.type) {
       case "heading": {
         const level = content.level || "h2";
         const headingStyles = {
-          color: styles.typography?.color,
-          fontSize: styles.typography?.fontSize,
-          fontWeight: styles.typography?.fontWeight,
-          textAlign: styles.typography?.textAlign,
-          marginBottom: styles.spacing?.bottom,
+          color: styles.color,
+          fontSize: styles.fontSize,
+          fontWeight: styles.fontWeight,
+          textAlign: styles.textAlign,
+          marginBottom: styles.marginBottom,
         };
         
         const HeadingTag = level === "h1" ? "h1" : level === "h2" ? "h2" : level === "h3" ? "h3" : level === "h4" ? "h4" : level === "h5" ? "h5" : "h6";
         const headingText = getElementTextValue(element, "Heading");
         
         return (
-          <HeadingTag 
+          <CanvasInlineEditableText
+            as={HeadingTag}
+            value={headingText}
+            onSelectNode={() => onSelectElement(element.id)}
+            onBeginEdit={() => onInlineEdit(element.id, headingText)}
+            onCommit={(nextText) => updateElementTextValue(element.id, nextText)}
+            onCancel={onSaveInlineEdit}
+            className="cursor-text outline-none"
             style={{ ...headingStyles, ...editorInlineStyles }}
-            contentEditable
-            suppressContentEditableWarning
-            spellCheck={false}
-            onFocus={() => onInlineEdit(element.id, headingText)}
-            onInput={(e) => updateElementTextValue(element.id, (e.currentTarget.textContent || "").trimEnd())}
-            onBlur={onSaveInlineEdit}
-            onKeyDown={(e) => {
-              if (e.key === "Escape") {
-                e.preventDefault();
-                onCancelInlineEdit();
-              }
-            }}
-            className={`cursor-text hover:bg-blue-50 dark:hover:bg-blue-900/20 rounded px-1 outline-none ${editingElementId === element.id ? "ring-2 ring-blue-500 bg-blue-50/40" : ""}`}
-          >
-            {headingText}
-          </HeadingTag>
+          />
         );
       }
 
@@ -650,30 +750,23 @@ function ElementRenderer({
       case "paragraph": {
         const paragraphText = getElementTextValue(element, "Paragraph text goes here...");
         return (
-          <div
+          <CanvasInlineEditableText
+            as="div"
+            value={paragraphText}
+            onSelectNode={() => onSelectElement(element.id)}
+            onBeginEdit={() => onInlineEdit(element.id, paragraphText)}
+            onCommit={(nextText) => updateElementTextValue(element.id, nextText)}
+            onCancel={onSaveInlineEdit}
+            multiline
+            className="cursor-text outline-none whitespace-pre-wrap"
             style={{
               ...editorInlineStyles,
-              color: styles.typography?.color,
-              fontSize: styles.typography?.fontSize,
-              lineHeight: styles.typography?.lineHeight,
-              textAlign: styles.typography?.textAlign,
+              color: styles.color,
+              fontSize: styles.fontSize,
+              lineHeight: styles.lineHeight,
+              textAlign: styles.textAlign,
             }}
-            contentEditable
-            suppressContentEditableWarning
-            spellCheck={false}
-            onFocus={() => onInlineEdit(element.id, paragraphText)}
-            onInput={(e) => updateElementTextValue(element.id, e.currentTarget.textContent || "")}
-            onBlur={onSaveInlineEdit}
-            onKeyDown={(e) => {
-              if (e.key === "Escape") {
-                e.preventDefault();
-                onCancelInlineEdit();
-              }
-            }}
-            className={`cursor-text hover:bg-blue-50 dark:hover:bg-blue-900/20 rounded px-1 outline-none whitespace-pre-wrap ${editingElementId === element.id ? "ring-2 ring-blue-500 bg-blue-50/40" : ""}`}
-          >
-            {paragraphText}
-          </div>
+          />
         );
       }
 
@@ -684,37 +777,29 @@ function ElementRenderer({
             type="button"
             style={{
               ...editorInlineStyles,
-              backgroundColor: styles.colors?.background,
-              color: styles.colors?.text,
-              padding: styles.spacing?.top ? `${styles.spacing.top} ${styles.spacing.right} ${styles.spacing.bottom} ${styles.spacing.left}` : "12px 24px",
-              borderRadius: styles.border?.radius,
-              border: `${styles.border?.width || "1px"} ${styles.border?.style || "solid"} ${styles.border?.color || "transparent"}`,
-              fontSize: styles.typography?.fontSize,
-              fontWeight: styles.typography?.fontWeight,
+              backgroundColor: styles.backgroundColor,
+              color: styles.color,
+              paddingTop: styles.paddingTop,
+              paddingRight: styles.paddingRight || "24px",
+              paddingBottom: styles.paddingBottom,
+              paddingLeft: styles.paddingLeft || "24px",
+              borderRadius: styles.borderRadius,
+              border: `${styles.borderWidth || "1px"} ${styles.borderStyle || "solid"} ${styles.borderColor || "transparent"}`,
+              fontSize: styles.fontSize,
+              fontWeight: styles.fontWeight,
             }}
-            className={`cursor-text hover:bg-blue-50 dark:hover:bg-blue-900/20 rounded px-1 outline-none ${editingElementId === element.id ? "ring-2 ring-blue-500 bg-blue-50/40" : ""}`}
+            className="cursor-text outline-none"
           >
-            <span
-              contentEditable
-              suppressContentEditableWarning
-              spellCheck={false}
-              onFocus={() => onInlineEdit(element.id, buttonText)}
-              onInput={(e) => updateElementTextValue(element.id, e.currentTarget.textContent || "")}
-              onBlur={onSaveInlineEdit}
-              onKeyDown={(e) => {
-                if (e.key === "Escape") {
-                  e.preventDefault();
-                  onCancelInlineEdit();
-                }
-                if (e.key === "Enter") {
-                  e.preventDefault();
-                  onSaveInlineEdit();
-                }
-              }}
+            <CanvasInlineEditableText
+              as="span"
+              value={buttonText}
+              onSelectNode={() => onSelectElement(element.id)}
+              onBeginEdit={() => onInlineEdit(element.id, buttonText)}
+              onCommit={(nextText) => updateElementTextValue(element.id, nextText)}
+              onCancel={onSaveInlineEdit}
+              selectNodeOnFocus={false}
               className="outline-none"
-            >
-              {buttonText}
-            </span>
+            />
           </button>
         );
       }
@@ -728,8 +813,8 @@ function ElementRenderer({
               style={{
                 width: "100%",
                 height: "auto",
-                borderRadius: styles.border?.radius,
-                boxShadow: styles.effects?.boxShadow,
+                borderRadius: styles.borderRadius,
+                boxShadow: styles.boxShadow,
               }}
               className="cursor-pointer"
               onClick={() => onImageReplace(element.id)}
@@ -747,9 +832,12 @@ function ElementRenderer({
         return (
           <hr
             style={{
-              borderColor: styles.colors?.border || "#e5e5e5",
-              borderWidth: styles.border?.width || "1px",
-              margin: `${styles.spacing?.top || "16px"} 0 ${styles.spacing?.bottom || "16px"}`,
+              borderColor: styles.borderColor || "#e5e5e5",
+              borderWidth: styles.borderWidth || "1px",
+              marginTop: styles.marginTop || "16px",
+              marginRight: "0",
+              marginBottom: styles.marginBottom || "16px",
+              marginLeft: "0",
             }}
           />
         );
@@ -767,19 +855,27 @@ function ElementRenderer({
       case "container":
         return (
           <div
+            data-editor-node-id={element.id}
+            className={`editor-node-${element.id} ${selectionChromeClass}`}
             style={{
               ...editorInlineStyles,
-              backgroundColor: styles.colors?.background || "#ffffff",
-              padding: `${styles.spacing?.top || "60px"} ${styles.spacing?.right || "0"} ${styles.spacing?.bottom || "60px"} ${styles.spacing?.left || "0"}`,
-              margin: `${styles.spacing?.marginTop || "0"} ${styles.spacing?.marginRight || "0"} ${styles.spacing?.marginBottom || "0"} ${styles.spacing?.marginLeft || "0"}`,
-              borderRadius: styles.border?.radius,
+              backgroundColor: styles.backgroundColor || "#ffffff",
+              paddingTop: styles.paddingTop || "60px",
+              paddingRight: styles.paddingRight || "0",
+              paddingBottom: styles.paddingBottom || "60px",
+              paddingLeft: styles.paddingLeft || "0",
+              marginTop: styles.marginTop || "0",
+              marginRight: styles.marginRight || "0",
+              marginBottom: styles.marginBottom || "0",
+              marginLeft: styles.marginLeft || "0",
+              borderRadius: styles.borderRadius,
             }}
           >
-            {customCss && <style dangerouslySetInnerHTML={{ __html: customCss }} />}
-            {element.children?.map((child: any) => (
+            {(element.elements || element.children)?.map((child: any) => (
               <ElementRenderer
                 key={child.id}
                 element={child}
+                depth={depth + 1}
                 isSelected={selectedElementId === child.id}
                 onSelect={() => onSelectElement(child.id)}
                 onContextMenu={onContextMenu}
@@ -800,17 +896,22 @@ function ElementRenderer({
       case "column":
         return (
           <div
+            data-editor-node-id={element.id}
+            className={`editor-node-${element.id} ${selectionChromeClass}`}
             style={{
               ...editorInlineStyles,
               width: `${element.width || 100}%`,
-              padding: `${styles.spacing?.top || "0"} ${styles.spacing?.right || "12px"} ${styles.spacing?.bottom || "0"} ${styles.spacing?.left || "12px"}`,
+              paddingTop: styles.paddingTop || "0",
+              paddingRight: styles.paddingRight || "12px",
+              paddingBottom: styles.paddingBottom || "0",
+              paddingLeft: styles.paddingLeft || "12px",
             }}
           >
-            {customCss && <style dangerouslySetInnerHTML={{ __html: customCss }} />}
-            {element.children?.map((child: any) => (
+            {(element.elements || element.children)?.map((child: any) => (
               <ElementRenderer
                 key={child.id}
                 element={child}
+                depth={depth + 1}
                 isSelected={selectedElementId === child.id}
                 onSelect={() => onSelectElement(child.id)}
                 onContextMenu={onContextMenu}
@@ -833,17 +934,21 @@ function ElementRenderer({
         const templateBlock: TemplateBlock = {
           id: element.id,
           type: content.blockType || element.type,
-          props: content.props || {},
-          styleOverrides: templateStyleOverrides,
+          settings: element.settings || {},
+          props: element.settings || {},
+          styleOverrides: element.settings || {},
+          elements: element.elements || [],
         };
         return (
           <div 
-            className={`w-full relative group transition-all ${isSelected ? 'ring-2 ring-blue-500 ring-offset-2 bg-blue-50/30' : 'hover:ring-2 hover:ring-blue-300 hover:ring-offset-1'}`}
+            className={`w-full relative group transition-all editor-node-${element.id} ${selectionChromeClass}`}
             data-element-id={element.id}
+            data-editor-node-id={element.id}
             style={editorInlineStyles}
             onClickCapture={(e) => {
+              if (isInlineEditableTarget(e.target)) return;
               e.stopPropagation();
-              onSelect();
+              onSelect(e.target);
             }}
             onContextMenu={(e) => {
               e.preventDefault();
@@ -853,7 +958,6 @@ function ElementRenderer({
               }
             }}
           >
-            {customCss && <style dangerouslySetInnerHTML={{ __html: customCss }} />}
             <RenderTemplateBlocks blocks={[templateBlock]} isEditor={true} />
             {isSelected && (
               <>
@@ -885,16 +989,18 @@ function ElementRenderer({
         const templateBlockDirect: TemplateBlock = {
           id: element.id,
           type: element.type,
-          props: content.props || {},
-          styleOverrides: templateStyleOverrides,
+          props: element.settings || {},
+          elements: element.elements || [],
         };
         return (
           <div 
-            className={`w-full relative group transition-all ${isSelected ? 'ring-2 ring-blue-500 ring-offset-2 bg-blue-50/30' : 'hover:ring-2 hover:ring-blue-300 hover:ring-offset-1'}`}
-            data-element-id={element.id}
+            className={`w-full relative group transition-all editor-node-${element.id} ${selectionChromeClass}`}
+              data-element-id={element.id}
+            data-editor-node-id={element.id}
             onClickCapture={(e) => {
+              if (isInlineEditableTarget(e.target)) return;
               e.stopPropagation();
-              onSelect();
+              onSelect(e.target);
             }}
             onContextMenu={(e) => {
               e.preventDefault();
@@ -916,27 +1022,28 @@ function ElementRenderer({
           </div>
         );
 
-      // Dynamic fallback: if the type exists in ALL_TEMPLATE_BLOCKS, render it
+      // Dynamic fallback: if the type is a registered top-level template block, render it
       default:
-        if (ALL_TEMPLATE_BLOCKS[element.type]) {
-          const dynamicTemplateBlock: TemplateBlock = {
-            id: element.id,
-            type: element.type,
-            props: content.props || content || {},
-            styleOverrides: templateStyleOverrides,
-          };
+        if (isRegisteredTemplateBlock(element.type)) {
+            const dynamicTemplateBlock: TemplateBlock = {
+              id: element.id,
+              type: element.type,
+              settings: element.settings || {},
+              props: element.settings || {},
+              styleOverrides: element.settings || {},
+              elements: element.elements || [],
+            };
           
           return (
             <div 
-              className={`w-full relative group transition-all ${isSelected ? 'ring-2 ring-blue-500 ring-offset-2 bg-blue-50/30' : 'hover:ring-2 hover:ring-blue-300 hover:ring-offset-1'}`}
+              className={`w-full relative group transition-all editor-node-${element.id} ${selectionChromeClass}`}
               data-element-id={element.id}
+              data-editor-node-id={element.id}
               style={editorInlineStyles}
               onClickCapture={(e) => {
-                console.log("Template block onClickCapture - element.id:", element.id, "element.type:", element.type);
-                console.log("Calling onSelect...");
+                if (isInlineEditableTarget(e.target)) return;
                 e.stopPropagation();
-                onSelect();
-                console.log("onSelect called");
+                onSelect(e.target);
               }}
               onContextMenu={(e) => {
                 e.preventDefault();
@@ -945,8 +1052,7 @@ function ElementRenderer({
                   onContextMenu(e, element.id);
                 }
               }}
-            >
-              {customCss && <style dangerouslySetInnerHTML={{ __html: customCss }} />}
+          >
               <RenderTemplateBlocks blocks={[dynamicTemplateBlock]} isEditor={true} />
               {isSelected && (
                 <>
@@ -958,6 +1064,9 @@ function ElementRenderer({
               )}
             </div>
           );
+        }
+        if (isChildFragmentType(element.type)) {
+          return null;
         }
         // Fallback for unknown types - try to render content as JSON
         return (
@@ -972,14 +1081,18 @@ function ElementRenderer({
 
   return (
     <div
-      className={`group relative border-2 transition-colors ${
-        isSelected
-          ? "border-blue-500 bg-blue-50 dark:bg-blue-900/20"
-          : "border-transparent hover:border-gray-300 dark:hover:border-gray-600"
-      } ${isDragging ? "cursor-grabbing" : "cursor-grab"}`}
+      className={`group relative border-2 transition-colors editor-node-${element.id} ${
+        selectionChromeClass
+      } ${hoveredChromeClass} ${isDragging ? "cursor-grabbing" : "cursor-grab"}`}
       onClick={(e) => {
         e.stopPropagation();
-        onSelect();
+        onSelect(e.target);
+      }}
+      onMouseEnter={() => useEditorStore.getState().setHoveredElementId(element.id)}
+      onMouseLeave={() => {
+        if (useEditorStore.getState().hoveredElementId === element.id) {
+          useEditorStore.getState().setHoveredElementId(null);
+        }
       }}
       onContextMenu={(e) => {
         e.preventDefault();
@@ -989,6 +1102,7 @@ function ElementRenderer({
         }
       }}
       data-element-id={element.id}
+      data-editor-node-id={element.id}
       {...dragAttributes}
       {...dragListeners}
     >
@@ -1002,11 +1116,12 @@ function ElementRenderer({
         {renderElementContent()}
       </div>
 
-      {/* Render children if any (for nested elements) */}
-      {(element.children || element.columns)?.map((child: any) => (
+      {/* Render children only for generic builder nodes; template blocks render their own nested content */}
+      {!isRegisteredTemplateBlock(element.type) && element.type !== "template-block" && !isChildFragmentType(element.type) && (element.elements || element.children || element.columns)?.map((child: any) => (
         <ElementRenderer
           key={child.id}
           element={child}
+          depth={depth + 1}
           isSelected={selectedElementId === child.id}
           onSelect={() => onSelectElement(child.id)}
           onContextMenu={onContextMenu}

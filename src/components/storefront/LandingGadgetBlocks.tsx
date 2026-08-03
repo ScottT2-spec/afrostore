@@ -1,9 +1,12 @@
 "use client";
+import React from "react";
 import Link from "next/link";
 import { resolveStoreLink } from "@/lib/template-link-utils";
 import { useState, useEffect, createContext, useContext } from "react";
 import { safeSrc, onImgError } from "./image-fallback";
 import { useNewsletterSubscribe } from "@/hooks/useNewsletterSubscribe";
+import { normalizeSocialLinks, toDisplayText } from "@/components/storefront/prop-normalizers";
+import { InlineEditableText } from "@/components/storefront/InlineEditableText";
 
 /* ═══════════════════════════════════════════════════════════════
    LANDING GADGET TEMPLATE BLOCKS
@@ -35,13 +38,59 @@ const GadgetCtx = createContext<GadgetContextData>({});
 export function useGadgetCtx() { return useContext(GadgetCtx); }
 export { GadgetCtx as LandingGadgetContext };
 
+function EditableCopy({
+  blockId,
+  isEditor = false,
+  field,
+  fieldPath,
+  value,
+  as = "div",
+  className,
+  style,
+  multiline = false,
+}: {
+  blockId?: string;
+  isEditor?: boolean;
+  field?: string;
+  fieldPath?: string;
+  value: string;
+  as?: "div" | "p" | "span" | "h1" | "h2" | "h3" | "h4" | "h5" | "h6";
+  className?: string;
+  style?: React.CSSProperties;
+  multiline?: boolean;
+}) {
+  const Tag = as;
+
+  if (!isEditor) {
+    return (
+      <Tag className={className} style={style}>
+        {value}
+      </Tag>
+    );
+  }
+
+  return (
+    <InlineEditableText
+      nodeId={blockId}
+      field={field}
+      fieldPath={fieldPath}
+      value={value}
+      isEditor={isEditor}
+      as={as}
+      className={className}
+      style={style}
+      multiline={multiline}
+    />
+  );
+}
+
 /* ─── Google Fonts loader ──────────────────────────────────── */
 
 export function LandingGadgetFontLoader() {
   return (
-    <style jsx global>{`
+    <style dangerouslySetInnerHTML={{ __html: `
       @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Poppins:wght@300;400;500;600;700;800&display=swap');
-    `}</style>
+    `}} />
   );
 }
 
@@ -61,6 +110,10 @@ interface HeroProps {
   secondaryButtonLink?: string;
   productImage?: string;
   backgroundImage?: string;
+  backgroundColor?: string;
+  textColor?: string;
+  blockId?: string;
+  isEditor?: boolean;
 }
 
 export function LandingGadgetHero({
@@ -73,12 +126,18 @@ export function LandingGadgetHero({
   secondaryButtonLink = "#",
   productImage = "https://woodmart.xtemos.com/wp-content/uploads/2018/11/landing-pixel-slider-phone-opt.png",
   backgroundImage = "https://woodmart.xtemos.com/wp-content/uploads/2018/11/landing-pixel-slider-bg-opt.jpg",
+  backgroundColor,
+  textColor,
+  blockId,
+  isEditor = false,
 }: HeroProps) {
   const { storeSlug } = useGadgetCtx();
+  const heroTextColor = textColor || "#fff";
   return (
     <section
       style={{
         backgroundImage: `url(${safeSrc(backgroundImage)})`,
+        backgroundColor: backgroundColor || undefined,
         backgroundSize: "cover",
         backgroundPosition: "center top",
         border: `${TOKENS.borderWidth} solid ${TOKENS.borderColor}`,
@@ -89,22 +148,20 @@ export function LandingGadgetHero({
       <div style={{ maxWidth: 1200, margin: "0 auto", padding: "0 30px", display: "flex", flexWrap: "wrap", alignItems: "center" }}>
         {/* Text side */}
         <div style={{ flex: "1 1 50%", minWidth: 280, paddingRight: 40, paddingBottom: 60 }}>
-          <h4 style={{ fontFamily: "'Poppins', sans-serif", fontSize: 16, fontWeight: 400, color: "#fff", opacity: 0.7, marginBottom: 8, letterSpacing: 1 }}>
-            {titleLine1}
-          </h4>
-          <h1 style={{ fontFamily: "'Poppins', sans-serif", fontSize: 52, fontWeight: 700, lineHeight: 1.19, color: "#fff", margin: "0 0 24px" }}>
-            {titleLine2}
-          </h1>
-          <p style={{ fontFamily: "'Inter', sans-serif", fontSize: 16, lineHeight: 1.625, color: "rgba(255,255,255,0.7)", maxWidth: 420, marginBottom: 32 }}>
-            {description}
-          </p>
+          <EditableCopy blockId={blockId} isEditor={isEditor} field="titleLine1" value={titleLine1} as="h4" style={{ fontFamily: "'Poppins', sans-serif", fontSize: 16, fontWeight: 400, color: heroTextColor, opacity: 0.7, marginBottom: 8, letterSpacing: 1 }} />
+          <EditableCopy blockId={blockId} isEditor={isEditor} field="titleLine2" value={titleLine2} as="h1" style={{ fontFamily: "'Poppins', sans-serif", fontSize: 52, fontWeight: 700, lineHeight: 1.19, color: heroTextColor, margin: "0 0 24px", whiteSpace: "pre-line" }} />
+          <EditableCopy blockId={blockId} isEditor={isEditor} field="description" value={description} as="p" multiline style={{ fontFamily: "'Inter', sans-serif", fontSize: 16, lineHeight: 1.625, color: heroTextColor, opacity: 0.7, maxWidth: 420, marginBottom: 32 }} />
           <div style={{ display: "flex", gap: 12, flexWrap: "wrap" }}>
-            <Link href={resolveStoreLink(primaryButtonLink, storeSlug)} style={{ display: "inline-block", padding: "12px 28px", backgroundColor: TOKENS.primaryColor, color: "#fff", borderRadius: 4, fontFamily: "'Poppins', sans-serif", fontWeight: 600, fontSize: 14, textDecoration: "none", transition: "opacity .2s" }}>
-              {primaryButtonText}
-            </Link>
-            <Link href={resolveStoreLink(secondaryButtonLink, storeSlug)} style={{ display: "inline-block", padding: "12px 28px", backgroundColor: "transparent", color: "#333", border: "2px solid #dadada", borderRadius: 4, fontFamily: "'Poppins', sans-serif", fontWeight: 600, fontSize: 14, textDecoration: "none" }}>
-              {secondaryButtonText}
-            </Link>
+            {isEditor ? (
+              <EditableCopy blockId={blockId} isEditor field="primaryButtonText" value={primaryButtonText} as="span" style={{ display: "inline-block", padding: "12px 28px", backgroundColor: TOKENS.primaryColor, color: heroTextColor, borderRadius: 4, fontFamily: "'Poppins', sans-serif", fontWeight: 600, fontSize: 14, textDecoration: "none", transition: "opacity .2s" }} />
+            ) : (
+              <Link href={resolveStoreLink(primaryButtonLink, storeSlug)} style={{ display: "inline-block", padding: "12px 28px", backgroundColor: TOKENS.primaryColor, color: heroTextColor, borderRadius: 4, fontFamily: "'Poppins', sans-serif", fontWeight: 600, fontSize: 14, textDecoration: "none", transition: "opacity .2s" }}>{primaryButtonText}</Link>
+            )}
+            {isEditor ? (
+              <EditableCopy blockId={blockId} isEditor field="secondaryButtonText" value={secondaryButtonText} as="span" style={{ display: "inline-block", padding: "12px 28px", backgroundColor: "transparent", color: heroTextColor, border: `2px solid ${heroTextColor}`, borderRadius: 4, fontFamily: "'Poppins', sans-serif", fontWeight: 600, fontSize: 14, textDecoration: "none" }} />
+            ) : (
+              <Link href={resolveStoreLink(secondaryButtonLink, storeSlug)} style={{ display: "inline-block", padding: "12px 28px", backgroundColor: "transparent", color: heroTextColor, border: `2px solid ${heroTextColor}`, borderRadius: 4, fontFamily: "'Poppins', sans-serif", fontWeight: 600, fontSize: 14, textDecoration: "none" }}>{secondaryButtonText}</Link>
+            )}
           </div>
         </div>
         {/* Product image side */}
@@ -131,6 +188,8 @@ interface StatItem {
 
 interface StatsBarProps {
   items?: StatItem[];
+  blockId?: string;
+  isEditor?: boolean;
 }
 
 export function LandingGadgetStatsBar({
@@ -139,21 +198,17 @@ export function LandingGadgetStatsBar({
     { number: "2X", title: "More Powerful", description: "Usually, we prefer the real thing, wine without sulfur based pres." },
     { number: "12.2", title: "MP Camera", description: "Real butter, not margarine, and so we'd like our layouts designs." },
   ],
+  blockId,
+  isEditor = false,
 }: StatsBarProps) {
   return (
     <section style={{ backgroundColor: TOKENS.bgGray, border: `0 ${TOKENS.borderWidth} solid ${TOKENS.borderColor}`, borderLeft: `${TOKENS.borderWidth} solid ${TOKENS.borderColor}`, borderRight: `${TOKENS.borderWidth} solid ${TOKENS.borderColor}`, padding: "40px 0 0" }}>
       <div style={{ maxWidth: 1200, margin: "0 auto", padding: "0 30px", display: "flex", flexWrap: "wrap", justifyContent: "center", gap: 30 }}>
         {items.map((item, i) => (
           <div key={i} style={{ flex: "1 1 280px", maxWidth: 360, textAlign: "center", padding: "0 13%", marginBottom: 80 }}>
-            <div style={{ fontFamily: "'Poppins', sans-serif", fontSize: 48, fontWeight: 700, color: TOKENS.accentColor, lineHeight: 1.1 }}>
-              {item.number}
-            </div>
-            <h4 style={{ fontFamily: "'Poppins', sans-serif", fontSize: 18, fontWeight: 600, color: TOKENS.titleColor, margin: "8px 0 12px" }}>
-              {item.title}
-            </h4>
-            <p style={{ fontFamily: "'Inter', sans-serif", fontSize: 14, lineHeight: 1.7, color: TOKENS.textColor }}>
-              {item.description}
-            </p>
+            <EditableCopy blockId={blockId} isEditor={isEditor} fieldPath={`items.${i}.number`} value={item.number} as="div" style={{ fontFamily: "'Poppins', sans-serif", fontSize: 48, fontWeight: 700, color: TOKENS.accentColor, lineHeight: 1.1 }} />
+            <EditableCopy blockId={blockId} isEditor={isEditor} fieldPath={`items.${i}.title`} value={item.title} as="h4" style={{ fontFamily: "'Poppins', sans-serif", fontSize: 18, fontWeight: 600, color: TOKENS.titleColor, margin: "8px 0 12px" }} />
+            <EditableCopy blockId={blockId} isEditor={isEditor} fieldPath={`items.${i}.description`} value={item.description} as="p" multiline style={{ fontFamily: "'Inter', sans-serif", fontSize: 14, lineHeight: 1.7, color: TOKENS.textColor }} />
           </div>
         ))}
       </div>
@@ -188,6 +243,8 @@ interface FeatureSplitProps {
   titleColor?: string;
   bordered?: boolean;
   parallax?: boolean;
+  blockId?: string;
+  isEditor?: boolean;
 }
 
 export function LandingGadgetFeatureSplit({
@@ -205,6 +262,8 @@ export function LandingGadgetFeatureSplit({
   titleColor: propTitleColor,
   bordered = true,
   parallax = false,
+  blockId,
+  isEditor = false,
 }: FeatureSplitProps) {
   const { storeSlug } = useGadgetCtx();
   const finalTextColor = propTextColor || TOKENS.textColor;
@@ -212,35 +271,23 @@ export function LandingGadgetFeatureSplit({
 
   const textContent = (
     <div style={{ flex: "1 1 50%", minWidth: 280, padding: "40px 30px" }}>
-      <h2 style={{ fontFamily: "'Poppins', sans-serif", fontSize: 44, fontWeight: 700, lineHeight: 1.23, color: finalTitleColor, margin: "0 0 20px", whiteSpace: "pre-line" }}>
-        {title}
-      </h2>
-      <p style={{ fontFamily: "'Inter', sans-serif", fontSize: 16, lineHeight: 1.625, color: finalTextColor, maxWidth: 480, marginBottom: specs.length > 0 ? 30 : 24 }}>
-        {description}
-      </p>
+      <EditableCopy blockId={blockId} isEditor={isEditor} field="title" value={title} as="h2" multiline style={{ fontFamily: "'Poppins', sans-serif", fontSize: 44, fontWeight: 700, lineHeight: 1.23, color: finalTitleColor, margin: "0 0 20px", whiteSpace: "pre-line" }} />
+      <EditableCopy blockId={blockId} isEditor={isEditor} field="description" value={description} as="p" multiline style={{ fontFamily: "'Inter', sans-serif", fontSize: 16, lineHeight: 1.625, color: finalTextColor, maxWidth: 480, marginBottom: specs.length > 0 ? 30 : 24 }} />
       {specs.length > 0 && (
         <div style={{ display: "flex", flexWrap: "wrap", gap: 20, marginBottom: 30 }}>
           {specs.map((s, i) => (
             <div key={i} style={{ flex: "1 1 180px", maxWidth: 220 }}>
               {s.icon && <img src={safeSrc(s.icon)} alt={s.title} onError={onImgError} style={{ width: 40, height: 40, marginBottom: 10 }} />}
-              <h5 style={{ fontFamily: "'Poppins', sans-serif", fontSize: 15, fontWeight: 600, color: finalTitleColor, marginBottom: 4 }}>{s.title}</h5>
-              <p style={{ fontFamily: "'Inter', sans-serif", fontSize: 13, color: finalTextColor, lineHeight: 1.5 }}>{s.description}</p>
+              <EditableCopy blockId={blockId} isEditor={isEditor} fieldPath={`specs.${i}.title`} value={s.title} as="h5" style={{ fontFamily: "'Poppins', sans-serif", fontSize: 15, fontWeight: 600, color: finalTitleColor, marginBottom: 4 }} />
+              <EditableCopy blockId={blockId} isEditor={isEditor} fieldPath={`specs.${i}.description`} value={s.description} as="p" multiline style={{ fontFamily: "'Inter', sans-serif", fontSize: 13, color: finalTextColor, lineHeight: 1.5 }} />
             </div>
           ))}
         </div>
       )}
       {(primaryButtonText || secondaryButtonText) && (
         <div style={{ display: "flex", gap: 12, flexWrap: "wrap" }}>
-          {primaryButtonText && (
-            <Link href={resolveStoreLink(primaryButtonLink, storeSlug)} style={{ display: "inline-block", padding: "12px 28px", backgroundColor: TOKENS.primaryColor, color: "#fff", borderRadius: 4, fontFamily: "'Poppins', sans-serif", fontWeight: 600, fontSize: 14, textDecoration: "none" }}>
-              {primaryButtonText}
-            </Link>
-          )}
-          {secondaryButtonText && (
-            <Link href={resolveStoreLink(secondaryButtonLink, storeSlug)} style={{ display: "inline-block", padding: "12px 28px", backgroundColor: "transparent", color: finalTitleColor, border: "2px solid currentColor", borderRadius: 4, fontFamily: "'Poppins', sans-serif", fontWeight: 600, fontSize: 14, textDecoration: "none" }}>
-              {secondaryButtonText}
-            </Link>
-          )}
+          {primaryButtonText && (isEditor ? <EditableCopy blockId={blockId} isEditor field="primaryButtonText" value={primaryButtonText} as="span" style={{ display: "inline-block", padding: "12px 28px", backgroundColor: TOKENS.primaryColor, color: "#fff", borderRadius: 4, fontFamily: "'Poppins', sans-serif", fontWeight: 600, fontSize: 14, textDecoration: "none" }} /> : <Link href={resolveStoreLink(primaryButtonLink, storeSlug)} style={{ display: "inline-block", padding: "12px 28px", backgroundColor: TOKENS.primaryColor, color: "#fff", borderRadius: 4, fontFamily: "'Poppins', sans-serif", fontWeight: 600, fontSize: 14, textDecoration: "none" }}>{primaryButtonText}</Link>)}
+          {secondaryButtonText && (isEditor ? <EditableCopy blockId={blockId} isEditor field="secondaryButtonText" value={secondaryButtonText} as="span" style={{ display: "inline-block", padding: "12px 28px", backgroundColor: "transparent", color: finalTitleColor, border: "2px solid currentColor", borderRadius: 4, fontFamily: "'Poppins', sans-serif", fontWeight: 600, fontSize: 14, textDecoration: "none" }} /> : <Link href={resolveStoreLink(secondaryButtonLink, storeSlug)} style={{ display: "inline-block", padding: "12px 28px", backgroundColor: "transparent", color: finalTitleColor, border: "2px solid currentColor", borderRadius: 4, fontFamily: "'Poppins', sans-serif", fontWeight: 600, fontSize: 14, textDecoration: "none" }}>{secondaryButtonText}</Link>)}
         </div>
       )}
     </div>
@@ -279,6 +326,8 @@ interface DarkFeatureProps {
   buttonLink?: string;
   backgroundImage?: string;
   overlayImage?: string;
+  blockId?: string;
+  isEditor?: boolean;
 }
 
 export function LandingGadgetDarkFeature({
@@ -288,6 +337,8 @@ export function LandingGadgetDarkFeature({
   buttonLink = "#",
   backgroundImage = "https://woodmart.xtemos.com/wp-content/uploads/2018/11/landing-pixel-bg-woterproof-opt.jpg",
   overlayImage = "https://woodmart.xtemos.com/wp-content/uploads/2018/11/landing-pixel-woterproof-opt.png",
+  blockId,
+  isEditor = false,
 }: DarkFeatureProps) {
   const { storeSlug } = useGadgetCtx();
   return (
@@ -301,15 +352,9 @@ export function LandingGadgetDarkFeature({
     }}>
       <div style={{ maxWidth: 1200, margin: "0 auto", padding: "0 30px", display: "flex", flexWrap: "wrap", alignItems: "center" }}>
         <div style={{ flex: "1 1 40%", minWidth: 280, padding: "80px 0" }}>
-          <h2 style={{ fontFamily: "'Poppins', sans-serif", fontSize: 44, fontWeight: 700, lineHeight: 1.23, color: "#fff", margin: "0 0 20px", whiteSpace: "pre-line" }}>
-            {title}
-          </h2>
-          <p style={{ fontFamily: "'Inter', sans-serif", fontSize: 16, lineHeight: 1.625, color: "rgba(255,255,255,0.7)", maxWidth: 480, marginBottom: 24 }}>
-            {description}
-          </p>
-          <Link href={resolveStoreLink(buttonLink, storeSlug)} style={{ display: "inline-block", padding: "12px 28px", backgroundColor: "transparent", color: "#fff", border: "2px solid #fff", borderRadius: 4, fontFamily: "'Poppins', sans-serif", fontWeight: 600, fontSize: 14, textDecoration: "none" }}>
-            {buttonText}
-          </Link>
+          <EditableCopy blockId={blockId} isEditor={isEditor} field="title" value={title} as="h2" multiline style={{ fontFamily: "'Poppins', sans-serif", fontSize: 44, fontWeight: 700, lineHeight: 1.23, color: "#fff", margin: "0 0 20px", whiteSpace: "pre-line" }} />
+          <EditableCopy blockId={blockId} isEditor={isEditor} field="description" value={description} as="p" multiline style={{ fontFamily: "'Inter', sans-serif", fontSize: 16, lineHeight: 1.625, color: "rgba(255,255,255,0.7)", maxWidth: 480, marginBottom: 24 }} />
+          {isEditor ? <EditableCopy blockId={blockId} isEditor field="buttonText" value={buttonText} as="span" style={{ display: "inline-block", padding: "12px 28px", backgroundColor: "transparent", color: "#fff", border: "2px solid #fff", borderRadius: 4, fontFamily: "'Poppins', sans-serif", fontWeight: 600, fontSize: 14, textDecoration: "none" }} /> : <Link href={resolveStoreLink(buttonLink, storeSlug)} style={{ display: "inline-block", padding: "12px 28px", backgroundColor: "transparent", color: "#fff", border: "2px solid #fff", borderRadius: 4, fontFamily: "'Poppins', sans-serif", fontWeight: 600, fontSize: 14, textDecoration: "none" }}>{buttonText}</Link>}
         </div>
         <div style={{ flex: "1 1 50%", minWidth: 280, textAlign: "center" }}>
           <img src={safeSrc(overlayImage)} alt="Feature" onError={onImgError} style={{ maxWidth: "100%", height: "auto" }} />
@@ -333,6 +378,8 @@ interface PhotoGalleryProps {
   secondaryButtonText?: string;
   secondaryButtonLink?: string;
   imagePosition?: "left" | "right";
+  blockId?: string;
+  isEditor?: boolean;
 }
 
 export function LandingGadgetPhotoGallery({
@@ -347,6 +394,8 @@ export function LandingGadgetPhotoGallery({
   secondaryButtonText = "View More",
   secondaryButtonLink = "#",
   imagePosition = "left",
+  blockId,
+  isEditor = false,
 }: PhotoGalleryProps) {
   const { storeSlug } = useGadgetCtx();
 
@@ -362,23 +411,11 @@ export function LandingGadgetPhotoGallery({
 
   const text = (
     <div style={{ flex: "1 1 50%", minWidth: 280, padding: "40px 30px" }}>
-      <h2 style={{ fontFamily: "'Poppins', sans-serif", fontSize: 44, fontWeight: 700, lineHeight: 1.23, color: TOKENS.titleColor, margin: "0 0 20px", whiteSpace: "pre-line" }}>
-        {title}
-      </h2>
-      <p style={{ fontFamily: "'Inter', sans-serif", fontSize: 16, lineHeight: 1.625, color: TOKENS.textColor, maxWidth: 480, marginBottom: 24 }}>
-        {description}
-      </p>
+      <EditableCopy blockId={blockId} isEditor={isEditor} field="title" value={title} as="h2" multiline style={{ fontFamily: "'Poppins', sans-serif", fontSize: 44, fontWeight: 700, lineHeight: 1.23, color: TOKENS.titleColor, margin: "0 0 20px", whiteSpace: "pre-line" }} />
+      <EditableCopy blockId={blockId} isEditor={isEditor} field="description" value={description} as="p" multiline style={{ fontFamily: "'Inter', sans-serif", fontSize: 16, lineHeight: 1.625, color: TOKENS.textColor, maxWidth: 480, marginBottom: 24 }} />
       <div style={{ display: "flex", gap: 12, flexWrap: "wrap" }}>
-        {primaryButtonText && (
-          <Link href={resolveStoreLink(primaryButtonLink, storeSlug)} style={{ display: "inline-block", padding: "12px 28px", backgroundColor: TOKENS.primaryColor, color: "#fff", borderRadius: 4, fontFamily: "'Poppins', sans-serif", fontWeight: 600, fontSize: 14, textDecoration: "none" }}>
-            {primaryButtonText}
-          </Link>
-        )}
-        {secondaryButtonText && (
-          <Link href={resolveStoreLink(secondaryButtonLink, storeSlug)} style={{ display: "inline-block", padding: "12px 28px", backgroundColor: "transparent", color: TOKENS.titleColor, border: "2px solid currentColor", borderRadius: 4, fontFamily: "'Poppins', sans-serif", fontWeight: 600, fontSize: 14, textDecoration: "none" }}>
-            {secondaryButtonText}
-          </Link>
-        )}
+        {primaryButtonText && (isEditor ? <EditableCopy blockId={blockId} isEditor field="primaryButtonText" value={primaryButtonText} as="span" style={{ display: "inline-block", padding: "12px 28px", backgroundColor: TOKENS.primaryColor, color: "#fff", borderRadius: 4, fontFamily: "'Poppins', sans-serif", fontWeight: 600, fontSize: 14, textDecoration: "none" }} /> : <Link href={resolveStoreLink(primaryButtonLink, storeSlug)} style={{ display: "inline-block", padding: "12px 28px", backgroundColor: TOKENS.primaryColor, color: "#fff", borderRadius: 4, fontFamily: "'Poppins', sans-serif", fontWeight: 600, fontSize: 14, textDecoration: "none" }}>{primaryButtonText}</Link>)}
+        {secondaryButtonText && (isEditor ? <EditableCopy blockId={blockId} isEditor field="secondaryButtonText" value={secondaryButtonText} as="span" style={{ display: "inline-block", padding: "12px 28px", backgroundColor: "transparent", color: TOKENS.titleColor, border: "2px solid currentColor", borderRadius: 4, fontFamily: "'Poppins', sans-serif", fontWeight: 600, fontSize: 14, textDecoration: "none" }} /> : <Link href={resolveStoreLink(secondaryButtonLink, storeSlug)} style={{ display: "inline-block", padding: "12px 28px", backgroundColor: "transparent", color: TOKENS.titleColor, border: "2px solid currentColor", borderRadius: 4, fontFamily: "'Poppins', sans-serif", fontWeight: 600, fontSize: 14, textDecoration: "none" }}>{secondaryButtonText}</Link>)}
       </div>
     </div>
   );
@@ -409,6 +446,8 @@ interface CameraDarkProps {
   stats?: CameraStatItem[];
   backgroundImage?: string;
   overlayImage?: string;
+  blockId?: string;
+  isEditor?: boolean;
 }
 
 export function LandingGadgetCameraDark({
@@ -422,6 +461,8 @@ export function LandingGadgetCameraDark({
   ],
   backgroundImage = "https://woodmart.xtemos.com/wp-content/uploads/2018/11/landing-pixel-camera-bg-opt.jpg",
   overlayImage = "https://woodmart.xtemos.com/wp-content/uploads/2018/11/landing-pixel-camera-opt.png",
+  blockId,
+  isEditor = false,
 }: CameraDarkProps) {
   return (
     <section style={{
@@ -437,18 +478,14 @@ export function LandingGadgetCameraDark({
           <img src={safeSrc(overlayImage)} alt="Camera" onError={onImgError} style={{ maxWidth: "90%", height: "auto" }} />
         </div>
         <div style={{ flex: "1 1 50%", minWidth: 280, padding: "80px 0" }}>
-          <h2 style={{ fontFamily: "'Poppins', sans-serif", fontSize: 44, fontWeight: 700, lineHeight: 1.23, color: "#fff", margin: "0 0 20px", whiteSpace: "pre-line" }}>
-            {title}
-          </h2>
-          <p style={{ fontFamily: "'Inter', sans-serif", fontSize: 16, lineHeight: 1.625, color: "rgba(255,255,255,0.7)", maxWidth: 480, marginBottom: 30 }}>
-            {description}
-          </p>
+          <EditableCopy blockId={blockId} isEditor={isEditor} field="title" value={title} as="h2" multiline style={{ fontFamily: "'Poppins', sans-serif", fontSize: 44, fontWeight: 700, lineHeight: 1.23, color: "#fff", margin: "0 0 20px", whiteSpace: "pre-line" }} />
+          <EditableCopy blockId={blockId} isEditor={isEditor} field="description" value={description} as="p" multiline style={{ fontFamily: "'Inter', sans-serif", fontSize: 16, lineHeight: 1.625, color: "rgba(255,255,255,0.7)", maxWidth: 480, marginBottom: 30 }} />
           <div style={{ display: "grid", gridTemplateColumns: "repeat(2, 1fr)", gap: 30 }}>
             {stats.map((s, i) => (
               <div key={i}>
-                <div style={{ fontFamily: "'Poppins', sans-serif", fontSize: 28, fontWeight: 700, color: "#fff", lineHeight: 1.2 }}>{s.value}</div>
-                <h5 style={{ fontFamily: "'Poppins', sans-serif", fontSize: 15, fontWeight: 600, color: "#fff", margin: "6px 0 4px" }}>{s.label}</h5>
-                <p style={{ fontFamily: "'Inter', sans-serif", fontSize: 13, color: "rgba(255,255,255,0.6)", lineHeight: 1.5 }}>{s.description}</p>
+                <EditableCopy blockId={blockId} isEditor={isEditor} fieldPath={`stats.${i}.value`} value={s.value} as="div" style={{ fontFamily: "'Poppins', sans-serif", fontSize: 28, fontWeight: 700, color: "#fff", lineHeight: 1.2 }} />
+                <EditableCopy blockId={blockId} isEditor={isEditor} fieldPath={`stats.${i}.label`} value={s.label} as="h5" style={{ fontFamily: "'Poppins', sans-serif", fontSize: 15, fontWeight: 600, color: "#fff", margin: "6px 0 4px" }} />
+                <EditableCopy blockId={blockId} isEditor={isEditor} fieldPath={`stats.${i}.description`} value={s.description} as="p" multiline style={{ fontFamily: "'Inter', sans-serif", fontSize: 13, color: "rgba(255,255,255,0.6)", lineHeight: 1.5 }} />
               </div>
             ))}
           </div>
@@ -472,6 +509,8 @@ interface SecurityItem {
 interface SecurityProps {
   sectionTitle?: string;
   items?: SecurityItem[];
+  blockId?: string;
+  isEditor?: boolean;
 }
 
 export function LandingGadgetSecurity({
@@ -481,23 +520,19 @@ export function LandingGadgetSecurity({
     { icon: "https://woodmart.xtemos.com/wp-content/uploads/2018/11/landing-pixel-sequrity-web-1.svg", title: "Web Locking", description: "Optionally available are extracts from a speech, corporate nonsense, and a randomised." },
     { icon: "https://woodmart.xtemos.com/wp-content/uploads/2018/11/landing-pixel-sequrity-os-shild-1.svg", title: "OS Secure", description: "Try telling a client to ignore draft copy however, and you're up to something you can't win." },
   ],
+  blockId,
+  isEditor = false,
 }: SecurityProps) {
   return (
     <section style={{ padding: "80px 0 40px" }}>
       <div style={{ maxWidth: 1200, margin: "0 auto", padding: "0 30px" }}>
-        <h2 style={{ fontFamily: "'Poppins', sans-serif", fontSize: 44, fontWeight: 700, lineHeight: 1.23, color: TOKENS.titleColor, textAlign: "center", margin: "0 0 50px" }}>
-          {sectionTitle}
-        </h2>
+        <EditableCopy blockId={blockId} isEditor={isEditor} field="sectionTitle" value={sectionTitle} as="h2" style={{ fontFamily: "'Poppins', sans-serif", fontSize: 44, fontWeight: 700, lineHeight: 1.23, color: TOKENS.titleColor, textAlign: "center", margin: "0 0 50px" }} />
         <div style={{ display: "flex", flexWrap: "wrap", justifyContent: "center", gap: 40 }}>
           {items.map((item, i) => (
             <div key={i} style={{ flex: "1 1 280px", maxWidth: 340, textAlign: "center" }}>
               <img src={safeSrc(item.icon)} alt={item.title} onError={onImgError} style={{ width: 80, height: 80, marginBottom: 20 }} />
-              <h4 style={{ fontFamily: "'Poppins', sans-serif", fontSize: 18, fontWeight: 600, color: TOKENS.titleColor, marginBottom: 10 }}>
-                {item.title}
-              </h4>
-              <p style={{ fontFamily: "'Inter', sans-serif", fontSize: 14, lineHeight: 1.7, color: TOKENS.textColor }}>
-                {item.description}
-              </p>
+              <EditableCopy blockId={blockId} isEditor={isEditor} fieldPath={`items.${i}.title`} value={item.title} as="h4" style={{ fontFamily: "'Poppins', sans-serif", fontSize: 18, fontWeight: 600, color: TOKENS.titleColor, marginBottom: 10 }} />
+              <EditableCopy blockId={blockId} isEditor={isEditor} fieldPath={`items.${i}.description`} value={item.description} as="p" multiline style={{ fontFamily: "'Inter', sans-serif", fontSize: 14, lineHeight: 1.7, color: TOKENS.textColor }} />
             </div>
           ))}
         </div>
@@ -522,6 +557,8 @@ interface CameraOpticsProps {
   productImage?: string;
   leftSpecs?: OpticsSpec[];
   rightSpecs?: OpticsSpec[];
+  blockId?: string;
+  isEditor?: boolean;
 }
 
 export function LandingGadgetCameraOptics({
@@ -537,6 +574,8 @@ export function LandingGadgetCameraOptics({
     { icon: "https://woodmart.xtemos.com/wp-content/uploads/2018/11/landing-pixel-camera-5.svg", value: "2 LED", label: "Smart Flash" },
     { icon: "https://woodmart.xtemos.com/wp-content/uploads/2018/11/landing-pixel-camera-6.svg", value: "2 Laser", label: "Smart Flash" },
   ],
+  blockId,
+  isEditor = false,
 }: CameraOpticsProps) {
   return (
     <section style={{
@@ -546,17 +585,15 @@ export function LandingGadgetCameraOptics({
       padding: "80px 0 40px",
     }}>
       <div style={{ maxWidth: 1200, margin: "0 auto", padding: "0 30px" }}>
-        <h2 style={{ fontFamily: "'Poppins', sans-serif", fontSize: 44, fontWeight: 700, lineHeight: 1.23, color: TOKENS.titleColor, textAlign: "center", margin: "0 0 50px" }}>
-          {sectionTitle}
-        </h2>
+        <EditableCopy blockId={blockId} isEditor={isEditor} field="sectionTitle" value={sectionTitle} as="h2" style={{ fontFamily: "'Poppins', sans-serif", fontSize: 44, fontWeight: 700, lineHeight: 1.23, color: TOKENS.titleColor, textAlign: "center", margin: "0 0 50px" }} />
         <div style={{ display: "flex", flexWrap: "wrap", alignItems: "center", justifyContent: "center" }}>
           {/* Left specs */}
           <div style={{ flex: "1 1 200px", maxWidth: 260, display: "flex", flexDirection: "column", gap: 30 }}>
             {leftSpecs.map((s, i) => (
               <div key={i} style={{ textAlign: "center" }}>
                 <img src={safeSrc(s.icon)} alt={s.value} onError={onImgError} style={{ width: 48, height: 48, marginBottom: 8 }} />
-                <div style={{ fontFamily: "'Poppins', sans-serif", fontSize: 18, fontWeight: 700, color: TOKENS.titleColor }}>{s.value}</div>
-                <div style={{ fontFamily: "'Inter', sans-serif", fontSize: 13, color: TOKENS.textColor }}>{s.label}</div>
+                <EditableCopy blockId={blockId} isEditor={isEditor} fieldPath={`leftSpecs.${i}.value`} value={s.value} as="div" style={{ fontFamily: "'Poppins', sans-serif", fontSize: 18, fontWeight: 700, color: TOKENS.titleColor }} />
+                <EditableCopy blockId={blockId} isEditor={isEditor} fieldPath={`leftSpecs.${i}.label`} value={s.label} as="div" style={{ fontFamily: "'Inter', sans-serif", fontSize: 13, color: TOKENS.textColor }} />
               </div>
             ))}
           </div>
@@ -569,8 +606,8 @@ export function LandingGadgetCameraOptics({
             {rightSpecs.map((s, i) => (
               <div key={i} style={{ textAlign: "center" }}>
                 <img src={safeSrc(s.icon)} alt={s.value} onError={onImgError} style={{ width: 48, height: 48, marginBottom: 8 }} />
-                <div style={{ fontFamily: "'Poppins', sans-serif", fontSize: 18, fontWeight: 700, color: TOKENS.titleColor }}>{s.value}</div>
-                <div style={{ fontFamily: "'Inter', sans-serif", fontSize: 13, color: TOKENS.textColor }}>{s.label}</div>
+                <EditableCopy blockId={blockId} isEditor={isEditor} fieldPath={`rightSpecs.${i}.value`} value={s.value} as="div" style={{ fontFamily: "'Poppins', sans-serif", fontSize: 18, fontWeight: 700, color: TOKENS.titleColor }} />
+                <EditableCopy blockId={blockId} isEditor={isEditor} fieldPath={`rightSpecs.${i}.label`} value={s.label} as="div" style={{ fontFamily: "'Inter', sans-serif", fontSize: 13, color: TOKENS.textColor }} />
               </div>
             ))}
           </div>
@@ -599,6 +636,8 @@ interface ProductsShowcaseProps {
   bannerTitle?: string;
   bannerButtonText?: string;
   bannerButtonLink?: string;
+  blockId?: string;
+  isEditor?: boolean;
 }
 
 export function LandingGadgetProductsShowcase({
@@ -610,6 +649,8 @@ export function LandingGadgetProductsShowcase({
   bannerTitle = "Accessories",
   bannerButtonText = "View More",
   bannerButtonLink = "#",
+  blockId,
+  isEditor = false,
 }: ProductsShowcaseProps) {
   const { storeSlug } = useGadgetCtx();
   return (
@@ -622,9 +663,9 @@ export function LandingGadgetProductsShowcase({
           <div key={i} style={{ flex: "1 1 25%", minWidth: 220, backgroundColor: TOKENS.bgDarkGray, marginBottom: 14, borderLeft: `7px solid ${TOKENS.borderColor}`, borderRight: `7px solid ${TOKENS.borderColor}`, padding: 20 }}>
             <Link href={resolveStoreLink(p.link || "#", storeSlug)} style={{ textDecoration: "none" }}>
               <img src={safeSrc(p.image)} alt={p.name} onError={onImgError} style={{ width: "100%", height: "auto", marginBottom: 12 }} />
-              <h3 style={{ fontFamily: "'Poppins', sans-serif", fontSize: 16, fontWeight: 600, color: TOKENS.titleColor, margin: "0 0 4px" }}>{p.name}</h3>
-              {p.category && <p style={{ fontFamily: "'Inter', sans-serif", fontSize: 12, color: TOKENS.textColor, margin: "0 0 8px" }}>{p.category}</p>}
-              <div style={{ fontFamily: "'Poppins', sans-serif", fontSize: 16, fontWeight: 700, color: TOKENS.primaryColor }}>{p.price}</div>
+              <EditableCopy blockId={blockId} isEditor={isEditor} fieldPath={`products.${i}.name`} value={p.name} as="h3" style={{ fontFamily: "'Poppins', sans-serif", fontSize: 16, fontWeight: 600, color: TOKENS.titleColor, margin: "0 0 4px" }} />
+              {p.category && <EditableCopy blockId={blockId} isEditor={isEditor} fieldPath={`products.${i}.category`} value={toDisplayText(p.category, "")} as="p" style={{ fontFamily: "'Inter', sans-serif", fontSize: 12, color: TOKENS.textColor, margin: "0 0 8px" }} />}
+              <EditableCopy blockId={blockId} isEditor={isEditor} fieldPath={`products.${i}.price`} value={p.price} as="div" style={{ fontFamily: "'Poppins', sans-serif", fontSize: 16, fontWeight: 700, color: TOKENS.primaryColor }} />
             </Link>
           </div>
         ))}
@@ -633,8 +674,8 @@ export function LandingGadgetProductsShowcase({
           <Link href={resolveStoreLink(bannerButtonLink, storeSlug)} style={{ display: "block", textDecoration: "none" }}>
             <img src={safeSrc(bannerImage)} alt={bannerTitle} onError={onImgError} style={{ width: "100%", height: "100%", objectFit: "cover" }} />
             <div style={{ position: "absolute", bottom: 30, left: 30 }}>
-              <h3 style={{ fontFamily: "'Poppins', sans-serif", fontSize: 28, fontWeight: 700, color: "#222", margin: "0 0 10px" }}>{bannerTitle}</h3>
-              <span style={{ fontFamily: "'Poppins', sans-serif", fontSize: 14, fontWeight: 600, color: TOKENS.primaryColor, textDecoration: "underline" }}>{bannerButtonText}</span>
+              <EditableCopy blockId={blockId} isEditor={isEditor} field="bannerTitle" value={bannerTitle} as="h3" style={{ fontFamily: "'Poppins', sans-serif", fontSize: 28, fontWeight: 700, color: "#222", margin: "0 0 10px" }} />
+              {isEditor ? <EditableCopy blockId={blockId} isEditor field="bannerButtonText" value={bannerButtonText} as="span" style={{ fontFamily: "'Poppins', sans-serif", fontSize: 14, fontWeight: 600, color: TOKENS.primaryColor, textDecoration: "underline" }} /> : <span style={{ fontFamily: "'Poppins', sans-serif", fontSize: 14, fontWeight: 600, color: TOKENS.primaryColor, textDecoration: "underline" }}>{bannerButtonText}</span>}
             </div>
           </Link>
         </div>
@@ -653,6 +694,8 @@ interface NewsletterProps {
   description?: string;
   backgroundImage?: string;
   buttonText?: string;
+  blockId?: string;
+  isEditor?: boolean;
 }
 
 export function LandingGadgetNewsletter({
@@ -660,9 +703,17 @@ export function LandingGadgetNewsletter({
   description = "A client that's unhappy for a reason is a problem, a client that's unhappy though he or her can't quite put a finger on it is worse. That's not so bad, there's dummy copy.",
   backgroundImage = "https://woodmart.xtemos.com/wp-content/uploads/2018/11/landing-pixel-subscribe-bg-opt.jpg",
   buttonText = "Subscribe",
+  blockId,
+  isEditor = false,
 }: NewsletterProps) {
   const { storeSlug } = useGadgetCtx();
-  const { email, setEmail, loading, success, error, handleSubmit } = useNewsletterSubscribe(storeSlug);
+  const [email, setEmail] = useState("");
+  const { subscribe, status, errorMsg } = useNewsletterSubscribe(storeSlug || "");
+
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    subscribe(email).then(() => setEmail(""));
+  };
 
   return (
     <section style={{
@@ -674,12 +725,8 @@ export function LandingGadgetNewsletter({
       padding: "60px 0",
     }}>
       <div style={{ maxWidth: 600, margin: "0 auto", padding: "0 30px", textAlign: "center" }}>
-        <h2 style={{ fontFamily: "'Poppins', sans-serif", fontSize: 44, fontWeight: 700, lineHeight: 1.23, color: "#fff", margin: "0 0 16px" }}>
-          {title}
-        </h2>
-        <p style={{ fontFamily: "'Inter', sans-serif", fontSize: 16, lineHeight: 1.625, color: "rgba(255,255,255,0.7)", marginBottom: 30 }}>
-          {description}
-        </p>
+        <EditableCopy blockId={blockId} isEditor={isEditor} field="title" value={title} as="h2" style={{ fontFamily: "'Poppins', sans-serif", fontSize: 44, fontWeight: 700, lineHeight: 1.23, color: "#fff", margin: "0 0 16px" }} />
+        <EditableCopy blockId={blockId} isEditor={isEditor} field="description" value={description} as="p" multiline style={{ fontFamily: "'Inter', sans-serif", fontSize: 16, lineHeight: 1.625, color: "rgba(255,255,255,0.7)", marginBottom: 30 }} />
         <form onSubmit={handleSubmit} style={{ display: "flex", gap: 0, maxWidth: 440, margin: "0 auto" }}>
           <input
             type="email"
@@ -697,26 +744,10 @@ export function LandingGadgetNewsletter({
               outline: "none",
             }}
           />
-          <button
-            type="submit"
-            disabled={loading}
-            style={{
-              padding: "14px 24px",
-              backgroundColor: TOKENS.primaryColor,
-              color: "#fff",
-              border: "none",
-              borderRadius: "0 4px 4px 0",
-              fontFamily: "'Poppins', sans-serif",
-              fontWeight: 600,
-              fontSize: 14,
-              cursor: loading ? "wait" : "pointer",
-            }}
-          >
-            {loading ? "..." : buttonText}
-          </button>
+          {isEditor ? <EditableCopy blockId={blockId} isEditor field="buttonText" value={buttonText} as="span" style={{ padding: "14px 24px", backgroundColor: TOKENS.primaryColor, color: "#fff", border: "none", borderRadius: "0 4px 4px 0", fontFamily: "'Poppins', sans-serif", fontWeight: 600, fontSize: 14, cursor: "text" }} /> : <button type="submit" disabled={status === "loading"} style={{ padding: "14px 24px", backgroundColor: TOKENS.primaryColor, color: "#fff", border: "none", borderRadius: "0 4px 4px 0", fontFamily: "'Poppins', sans-serif", fontWeight: 600, fontSize: 14, cursor: status === "loading" ? "wait" : "pointer" }}>{status === "loading" ? "..." : buttonText}</button>}
         </form>
-        {success && <p style={{ color: "#4caf50", marginTop: 10, fontSize: 14 }}>Subscribed!</p>}
-        {error && <p style={{ color: "#ff5252", marginTop: 10, fontSize: 14 }}>{error}</p>}
+        {status === "success" && <p style={{ color: "#4caf50", marginTop: 10, fontSize: 14 }}>Subscribed!</p>}
+        {status === "error" && <p style={{ color: "#ff5252", marginTop: 10, fontSize: 14 }}>{errorMsg}</p>}
       </div>
     </section>
   );
@@ -738,6 +769,8 @@ interface FooterProps {
   copyright?: string;
   brandName?: string;
   socialLinks?: { platform: string; url: string }[];
+  blockId?: string;
+  isEditor?: boolean;
 }
 
 export function LandingGadgetFooter({
@@ -753,28 +786,39 @@ export function LandingGadgetFooter({
   copyright = "2024 PREMIUM E-COMMERCE SOLUTIONS.",
   brandName = "STORE",
   socialLinks = [],
+  blockId,
+  isEditor = false,
 }: FooterProps) {
   const { storeSlug } = useGadgetCtx();
+  const safeSocialLinks = normalizeSocialLinks(socialLinks);
   return (
     <footer style={{ backgroundColor: "#1a1a1a", padding: "50px 0 30px" }}>
       <div style={{ maxWidth: 1200, margin: "0 auto", padding: "0 30px", textAlign: "center" }}>
         {logo && <img src={safeSrc(logo)} alt="Logo" onError={onImgError} style={{ height: 30, marginBottom: 24 }} />}
         <nav style={{ display: "flex", flexWrap: "wrap", justifyContent: "center", gap: 20, marginBottom: 24 }}>
           {links.map((l, i) => (
-            <Link key={i} href={resolveStoreLink(l.href, storeSlug)} style={{ fontFamily: "'Inter', sans-serif", fontSize: 13, color: "rgba(255,255,255,0.6)", textDecoration: "none" }}>
-              {l.label}
-            </Link>
+            <React.Fragment key={i}>
+              {isEditor ? (
+                <EditableCopy blockId={blockId} isEditor fieldPath={`links.${i}.label`} value={l.label} as="span" style={{ fontFamily: "'Inter', sans-serif", fontSize: 13, color: "rgba(255,255,255,0.6)", textDecoration: "none" }} />
+              ) : (
+                <Link href={resolveStoreLink(l.href, storeSlug)} style={{ fontFamily: "'Inter', sans-serif", fontSize: 13, color: "rgba(255,255,255,0.6)", textDecoration: "none" }}>{l.label}</Link>
+              )}
+            </React.Fragment>
           ))}
         </nav>
         <p style={{ fontFamily: "'Inter', sans-serif", fontSize: 12, color: "rgba(255,255,255,0.4)", margin: "0 0 20px" }}>
-          <strong style={{ color: "rgba(255,255,255,0.7)" }}>{brandName}</strong> {copyright}
+          <strong style={{ color: "rgba(255,255,255,0.7)" }}>{isEditor ? <EditableCopy blockId={blockId} isEditor field="brandName" value={brandName} as="span" /> : brandName}</strong> {isEditor ? <EditableCopy blockId={blockId} isEditor field="copyright" value={copyright} as="span" /> : copyright}
         </p>
-        {socialLinks.length > 0 && (
+        {safeSocialLinks.length > 0 && (
           <div style={{ display: "flex", justifyContent: "center", gap: 16 }}>
-            {socialLinks.map((s, i) => (
-              <a key={i} href={s.url} target="_blank" rel="noopener noreferrer" style={{ color: "rgba(255,255,255,0.5)", fontSize: 18, textDecoration: "none" }}>
-                {s.platform}
-              </a>
+            {safeSocialLinks.map((s, i) => (
+              <React.Fragment key={i}>
+                {isEditor ? (
+                  <EditableCopy blockId={blockId} isEditor fieldPath={`socialLinks.${i}.platform`} value={s.platform} as="span" style={{ color: "rgba(255,255,255,0.5)", fontSize: 18, textDecoration: "none" }} />
+                ) : (
+                  <a href={s.url} target="_blank" rel="noopener noreferrer" style={{ color: "rgba(255,255,255,0.5)", fontSize: 18, textDecoration: "none" }}>{s.platform}</a>
+                )}
+              </React.Fragment>
             ))}
           </div>
         )}

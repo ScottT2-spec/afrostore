@@ -4,6 +4,8 @@ import { resolveStoreLink } from "@/lib/template-link-utils";
 import { useState, useRef, useEffect, useContext, createContext } from "react";
 import { safeSrc, onImgError } from "./image-fallback";
 import { ElectronicsStoreContext } from "./ElectronicsTemplateBlocks";
+import { toDisplayText } from "@/components/storefront/prop-normalizers";
+import { InlineEditableText } from "@/components/storefront/InlineEditableText";
 
 /* ═══════════════════════════════════════════════════════════════
    TOOLS TEMPLATE HOMEPAGE BLOCKS
@@ -70,7 +72,7 @@ export interface ToolsGridBannersProps {
   banners?: ToolsBannerItem[];
 }
 
-export function ToolsGridBanners({ banners }: ToolsGridBannersProps) {
+export function ToolsGridBanners({ banners = [] }: ToolsGridBannersProps) {
   const storeSlug = useStoreSlug();
   const defaultBanners: ToolsBannerItem[] = [
     { image: `${IMG}/2020/06/wood-tools-grid-banner-1-opt.jpg`, label: "SPECIAL OFFER", title: "Garden Care\nMachines and Tools", description: "To short sentences, to many headings, images too large for the proposed design.", buttonText: "Read more", buttonLink: "#", size: "large" },
@@ -78,7 +80,7 @@ export function ToolsGridBanners({ banners }: ToolsGridBannersProps) {
     { image: `${IMG}/2020/06/wood-tools-grid-banner-3-opt.jpg`, label: "NEW ITEMS", title: "Circular Saw", buttonText: "Shop now", buttonLink: "#", size: "small" },
     { image: `${IMG}/2020/06/wood-tools-grid-banner-4-opt.jpg`, label: "VACUUM CLEANERS", title: "Clean in the work area", description: "It\u2019s like saying you\u2019re a bad designer, use less bold text, don\u2019t use italics in every.", size: "medium" },
   ];
-  const items = banners || defaultBanners;
+  const items = Array.isArray(banners) ? banners : defaultBanners;
   const css = `
     .tl-grid { display: grid; grid-template-columns: 1fr 1fr; grid-template-rows: auto auto; gap: 10px; margin-bottom: 40px; }
     .tl-banner { position: relative; overflow: hidden; min-height: 280px; }
@@ -101,10 +103,10 @@ export function ToolsGridBanners({ banners }: ToolsGridBannersProps) {
           <div key={i} className={`tl-banner ${b.size === "large" ? "tl-large" : ""}`}>
             <img src={b.image} alt={b.title} onError={(e) => onImgError(e, b.title)} />
             <div className="tl-banner-ov">
-              <div className="tl-banner-label">{b.label}</div>
-              <h3 className="tl-banner-title">{b.title}</h3>
-              {b.description && <p className="tl-banner-desc">{b.description}</p>}
-              {b.buttonText && <div><Link href={resolveStoreLink(b.buttonLink || "#", storeSlug)} className="tl-banner-btn">{b.buttonText}</Link></div>}
+              <InlineEditableText as="div" field={`banners.${i}.label`} value={b.label} isEditor={true} className="tl-banner-label" />
+              <InlineEditableText as="h3" field={`banners.${i}.title`} value={b.title} isEditor={true} className="tl-banner-title" />
+              {b.description && <InlineEditableText as="p" field={`banners.${i}.description`} value={b.description} isEditor={true} multiline className="tl-banner-desc" />}
+              {b.buttonText && <div><Link href={resolveStoreLink(b.buttonLink || "#", storeSlug)} className="tl-banner-btn"><InlineEditableText as="span" field={`banners.${i}.buttonText`} value={b.buttonText} isEditor={true} selectNodeOnFocus={false} /></Link></div>}
             </div>
           </div>
         ))}
@@ -121,12 +123,12 @@ export interface ToolsFeatureIconsProps {
   features?: { icon: string; title: string; description: string }[];
 }
 
-export function ToolsFeatureIcons({ features }: ToolsFeatureIconsProps) {
+export function ToolsFeatureIcons({ features = [] }: ToolsFeatureIconsProps) {
   const defaultFeatures = [
     { icon: `${IMG}/2020/06/svg-wood-tools-payment-1.svg`, title: "Online Payment", description: "Even if your less into design and more into content strategy." },
     { icon: `${IMG}/2020/06/svg-wood-tools-support-1.svg`, title: "Support 24/7", description: "Find some redeeming value with, wait for it, dummy copy, no less." },
   ];
-  const items = features || defaultFeatures;
+  const items = Array.isArray(features) ? features : defaultFeatures;
   const css = `
     .tl-features { display: flex; gap: 40px; padding: 30px 0; margin-bottom: 30px; border-top: 1px solid #eee; border-bottom: 1px solid #eee; }
     .tl-feature { display: flex; align-items: center; gap: 15px; }
@@ -144,8 +146,8 @@ export function ToolsFeatureIcons({ features }: ToolsFeatureIconsProps) {
           <div key={i} className="tl-feature">
             <div className="tl-feature-icon"><img src={f.icon} alt={f.title} onError={(e) => onImgError(e, f.title)} /></div>
             <div>
-              <h4 className="tl-feature-title">{f.title}</h4>
-              <p className="tl-feature-desc">{f.description}</p>
+              <InlineEditableText as="h4" field={`features.${i}.title`} value={f.title} isEditor={true} className="tl-feature-title" />
+              <InlineEditableText as="p" field={`features.${i}.description`} value={f.description} isEditor={true} multiline className="tl-feature-desc" />
             </div>
           </div>
         ))}
@@ -179,10 +181,10 @@ export function ToolsSectionTitle({ title, description, buttonText, buttonLink, 
       <ScopedStyles id="stitle" css={css} />
       <div className="tl-stitle" style={{ textAlign: align }}>
         <div>
-          <h3 className="tl-stitle-main">{title}</h3>
-          {description && <p className="tl-stitle-desc">{description}</p>}
+          <InlineEditableText as="h3" field="title" value={title} isEditor={true} className="tl-stitle-main" />
+          {description && <InlineEditableText as="p" field="description" value={description} isEditor={true} multiline className="tl-stitle-desc" />}
         </div>
-        {buttonText && <Link href={resolveStoreLink(buttonLink || "#", storeSlug)} className="tl-stitle-link">{buttonText} →</Link>}
+        {buttonText && <Link href={resolveStoreLink(buttonLink || "#", storeSlug)} className="tl-stitle-link"><InlineEditableText as="span" field="buttonText" value={buttonText} isEditor={true} selectNodeOnFocus={false} /> →</Link>}
       </div>
     </div>
   );
@@ -263,7 +265,7 @@ export function ToolsProductGrid({
               {p.hoverImage && <img className="tl-prod-hover" src={p.hoverImage} alt={p.name} onError={(e) => onImgError(e, p.name)} style={{ width: "100%", height: "auto" }} />}
             </div>
             <div className="tl-prod-info">
-              {p.category && <div className="tl-prod-cat">{p.category}</div>}
+              {p.category && <div className="tl-prod-cat">{toDisplayText(p.category, "")}</div>}
               <h4 className="tl-prod-name"><Link href={resolveStoreLink(`/product/${p.slug}`, storeSlug)}>{p.name}</Link></h4>
               <div className="tl-prod-price">${p.price}</div>
               <button className="tl-prod-btn" onClick={() => ctx?.addToCart?.(String(p.id))}>Add to cart</button>

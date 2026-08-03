@@ -1,17 +1,17 @@
-import type { TemplateBlock } from "@/components/storefront/TemplateBlockRenderer";
+import type { EditorNode } from "@/lib/visual-editor/node-tree";
 
-export const PERFUMES_FRAGRANCES_PRESET: TemplateBlock[] = [
+export const PERFUMES_FRAGRANCES_PRESET: EditorNode[] = [
   {
     id: "perfumes-fragrances-hero",
     type: "perfumesPageHero",
-    props: {
+    settings: {
       title: "Fragrances",
     },
   },
   {
     id: "perfumes-collections-grid",
     type: "perfumesCollectionsGrid",
-    props: {
+    settings: {
       collections: [
         { name: "Étheria", slug: "etheria", description: "A collection of light, almost weightless fragrances. Airy florals, sheer musks, and fresh morning dew evoke purity and clarity." },
         { name: "Celeste Aura", slug: "celeste-aura", description: "Elegant fragrances blending vibrant citrus, shimmering aldehydes, and refined light woods creating an aura of inner glow." },

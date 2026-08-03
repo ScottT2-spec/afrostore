@@ -4,10 +4,11 @@ import { RenderTemplateBlocks, type TemplateBlock } from "@/components/storefron
 import { RetailHeader, RetailFooter } from "@/components/storefront/RetailTemplateBlocks";
 import { ThemeProvider, type ThemeData } from "@/components/storefront/ThemeProvider";
 import { applyPageCustomization, buildPageBackgroundStyle, filterVisiblePages, getResolvedPageSettings, normalizeSiteCustomization } from "@/lib/site-customization";
-import { parsePageContent } from "@/lib/page-content";
 import { RenderBlocks, type BuilderBlock } from "@/components/storefront/BlockRenderer";
 import { RETAIL_PROJECTS_BLOCKS } from "@/lib/templates/presets/retail-pages";
 import { serializeProductsForClient } from "@/lib/serialize-products";
+import { buildTemplatePageContent } from "@/lib/templates/template-tree";
+import { resolveLivePageContent } from "@/lib/templates/bespoke-page-content";
 
 type Props = {
   params: Promise<{ slug: string }>;
@@ -58,7 +59,7 @@ async function getStoreData(slug: string) {
           title: "Projects",
           slug: "projects",
           type: "CUSTOM",
-          content: [],
+          content: buildTemplatePageContent([], {}) as any,
           isPublished: true,
           position: 11,
         },
@@ -113,14 +114,22 @@ export default async function ProjectsPage({ params }: Props) {
   
   // Use custom blocks if available, otherwise use preset
   let pageContent;
-  const parsedProjects = projectsPage?.content ? parsePageContent(projectsPage.content) : null;
-  if (parsedProjects && parsedProjects.blocks.length > 0) {
-    pageContent = parsedProjects;
+  const resolvedProjects = projectsPage?.content
+    ? resolveLivePageContent(activeTemplateSlug, projectsPage.slug, projectsPage.content, {
+        pageSlug: projectsPage.slug,
+        pageTitle: projectsPage.title,
+        pageType: projectsPage.type,
+        templateSlug: activeTemplateSlug,
+      })
+    : null;
+  const projectsNodeCss = resolvedProjects?.css || "";
+  if (resolvedProjects && resolvedProjects.blocks.length > 0) {
+    pageContent = { blocks: resolvedProjects.blocks, settings: resolvedProjects.settings };
   } else {
     pageContent = { blocks: RETAIL_PROJECTS_BLOCKS, settings: {} };
   }
 
-  const pageSettings = projectsPage ? getResolvedPageSettings(projectsPage, pageContent.settings, customization) : {};
+  const pageSettings = projectsPage ? getResolvedPageSettings(projectsPage, resolvedProjects?.settings || pageContent.settings, customization) : {};
   const themeData: ThemeData = {
     id: "retail-projects-page",
     name: "Retail Projects Page",
@@ -136,13 +145,17 @@ export default async function ProjectsPage({ params }: Props) {
     },
   };
 
-  const retailBlocks = (projectsPage?.content ? pageContent.blocks : RETAIL_PROJECTS_BLOCKS) as BuilderBlock[];
+  const retailBlocks = (resolvedProjects?.blocks?.length ? resolvedProjects.blocks : RETAIL_PROJECTS_BLOCKS) as BuilderBlock[];
 
   // Transform blog data into project items format for ProjectsBlock
   const projectItems = (store.blogs || []).map(blog => ({
     id: blog.id,
     title: blog.title,
-    description: blog.excerpt || blog.content?.text?.substring(0, 200) + "..." || "",
+    description:
+      blog.excerpt ||
+      (typeof blog.content === "object" && blog.content && "text" in blog.content
+        ? `${String((blog.content as any).text).substring(0, 200)}...`
+        : ""),
     image: blog.coverImage || "https://images.unsplash.com/photo-1616046229478-9901c5536a45?w=800&h=600&fit=crop",
     link: `/blog/${blog.slug}`,
   }));
@@ -161,13 +174,14 @@ export default async function ProjectsPage({ params }: Props) {
     return block;
   });
 
-  return (
-    <ThemeProvider theme={themeData}>
-      <RetailHeader storeName={store.name} storeSlug={store.slug || slug} logo={store.logo} isLanding={false} />
-      <div style={buildPageBackgroundStyle(pageSettings)}>
-        <RenderBlocks blocks={dynamicBlocks} storeSlug={slug} products={serializedProducts} />
-      </div>
-      <RetailFooter storeName={store.name} storeSlug={store.slug || slug} logo={store.logo} description={store.description ?? undefined} />
-    </ThemeProvider>
+    return (
+      <ThemeProvider theme={themeData}>
+        <RetailHeader storeName={store.name} storeSlug={store.slug || slug} logo={store.logo} isLanding={false} />
+        <div style={buildPageBackgroundStyle(pageSettings)}>
+          {projectsNodeCss && <style data-live-node-styles dangerouslySetInnerHTML={{ __html: projectsNodeCss }} />}
+          <RenderBlocks blocks={dynamicBlocks} storeSlug={slug} products={serializedProducts} />
+        </div>
+        <RetailFooter storeName={store.name} storeSlug={store.slug || slug} logo={store.logo} description={store.description ?? undefined} />
+      </ThemeProvider>
   );
 }

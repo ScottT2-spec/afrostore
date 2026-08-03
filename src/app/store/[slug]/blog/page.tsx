@@ -41,8 +41,8 @@ import { FashionFontLoader } from "@/components/storefront/FashionTemplateBlocks
 import { BlogPageClient } from "@/components/storefront/BlogPageClient";
 
 import { buildPageBackgroundStyle } from "@/lib/site-customization";
-import { parsePageContent } from "@/lib/page-content";
 import { mergeBespokeTemplateBlocks } from "@/lib/templates/bespoke-page-content";
+import { resolveLivePageContent } from "@/lib/templates/bespoke-page-content";
 import { ensureTemplatePages } from "@/lib/templates/template-pages";
 
 type Props = {
@@ -56,6 +56,7 @@ async function getStoreData(slug: string) {
       OR: [{ slug }, { subdomain: slug }, { customDomain: slug }],
     },
     include: {
+      customizations: true,
       templates: {
         where: { isActive: true },
         include: { template: true },
@@ -105,34 +106,34 @@ export default async function BlogPage({ params }: Props) {
 
   if (!blogPage) notFound();
 
-  // Parse page content and merge with template presets
-  const parsedContent = blogPage.content ? parsePageContent(blogPage.content) : null;
-  let blocks: TemplateBlock[] = [];
-
-  if (parsedContent && parsedContent.blocks.length > 0) {
-    blocks = parsedContent.blocks;
-  } else {
-    // Use template presets if no custom blocks
-    const presetBlocks = mergeBespokeTemplateBlocks(templateSlug || "", "blog", []);
-    blocks = presetBlocks;
-  }
+  // Resolve the saved content first; if the page is an override document,
+  // materialize the saved tree from the bespoke preset resolver.
+  const resolvedPage = resolveLivePageContent(templateSlug || "", "blog", blogPage.content, {
+    pageSlug: "blog",
+    pageTitle: blogPage.title,
+    pageType: blogPage.type,
+    templateSlug,
+  });
+  const pageNodeStyles = resolvedPage.css ? <style data-live-node-styles dangerouslySetInnerHTML={{ __html: resolvedPage.css }} /> : null;
+  let blocks: TemplateBlock[] = resolvedPage.blocks.length > 0 ? resolvedPage.blocks : mergeBespokeTemplateBlocks(templateSlug || "", "blog", []);
 
   // Remove hardcoded posts from blog blocks to use context data instead
   blocks = blocks.map(block => {
-    if (block.type === 'fashionBlogPosts' && block.props.posts) {
-      return { ...block, props: { ...block.props, posts: [] } };
+    const props = block.props ?? {};
+    if (block.type === 'fashionBlogPosts' && props.posts) {
+      return { ...block, props: { ...props, posts: [] } };
     }
-    if (block.type === 'healthBlogPosts' && block.props.posts) {
-      return { ...block, props: { ...block.props, posts: [] } };
+    if (block.type === 'healthBlogPosts' && props.posts) {
+      return { ...block, props: { ...props, posts: [] } };
     }
-    if (block.type === 'kidsBlogPosts' && block.props.posts) {
-      return { ...block, props: { ...block.props, posts: [] } };
+    if (block.type === 'kidsBlogPosts' && props.posts) {
+      return { ...block, props: { ...props, posts: [] } };
     }
     return block;
   });
 
   const customization = (store.customizations as any) || null;
-  const pageSettings = parsedContent?.settings || {};
+  const pageSettings = resolvedPage.settings || {};
 
   const isTShirtsPrintsTemplate =
     templateSlug === "t-shirts-prints" ||
@@ -208,7 +209,7 @@ const isKidsTemplate =
       author: blog.author,
       category: blog.category,
       tags: blog.tags || [],
-      publishedAt: blog.publishedAt?.toISOString(),
+      publishedAt: blog.publishedAt ? blog.publishedAt.toISOString() : null,
       createdAt: blog.createdAt.toISOString(),
     }));
 
@@ -223,6 +224,7 @@ const isKidsTemplate =
           <div className="min-h-screen bg-white" style={{ fontFamily: "'Lato', Arial, sans-serif" }}>
             <HandmadeBagsHeader storeName={store.name} storeSlug={slug} logo={store.logo} />
             <main style={buildPageBackgroundStyle(pageSettings)}>
+              {pageNodeStyles}
               <RenderTemplateBlocks blocks={blocks} />
             </main>
             <HandmadeBagsFooter
@@ -250,6 +252,7 @@ const isKidsTemplate =
           isLanding={false}
         />
         <main style={buildPageBackgroundStyle(pageSettings)}>
+          {pageNodeStyles}
           <RenderTemplateBlocks blocks={blocks} />
         </main>
         <FashionFooter
@@ -273,7 +276,7 @@ const isKidsTemplate =
       author: blog.author,
       category: blog.category,
       tags: blog.tags || [],
-      publishedAt: blog.publishedAt?.toISOString(),
+      publishedAt: blog.publishedAt ? blog.publishedAt.toISOString() : null,
       createdAt: blog.createdAt.toISOString(),
     }));
 
@@ -289,6 +292,7 @@ const isKidsTemplate =
           <div className="min-h-screen bg-white">
             <RetailHeader storeName={store.name} storeSlug={slug} logo={store.logo} isLanding={false} />
             <main style={buildPageBackgroundStyle(pageSettings)}>
+              {pageNodeStyles}
               <RenderTemplateBlocks blocks={blocks} />
             </main>
             <RetailFooter
@@ -314,7 +318,7 @@ const isKidsTemplate =
       author: blog.author,
       category: blog.category,
       tags: blog.tags || [],
-      publishedAt: blog.publishedAt?.toISOString(),
+      publishedAt: blog.publishedAt ? blog.publishedAt.toISOString() : null,
       createdAt: blog.createdAt.toISOString(),
     }));
 
@@ -331,6 +335,7 @@ const isKidsTemplate =
             <KidsFontLoader />
             <KidsHeader storeName={store.name} storeSlug={slug} logo={store.logo} />
             <main style={buildPageBackgroundStyle(pageSettings)}>
+              {pageNodeStyles}
               <RenderTemplateBlocks blocks={blocks} />
             </main>
             <KidsFooterFull
@@ -357,7 +362,7 @@ const isKidsTemplate =
       author: blog.author,
       category: blog.category,
       tags: blog.tags || [],
-      publishedAt: blog.publishedAt?.toISOString(),
+      publishedAt: blog.publishedAt ? blog.publishedAt.toISOString() : null,
       createdAt: blog.createdAt.toISOString(),
     }));
 
@@ -374,6 +379,7 @@ const isKidsTemplate =
             <HealthFontLoader />
             <HealthHeader storeName={store.name} storeSlug={slug} logo={store.logo} />
             <main style={buildPageBackgroundStyle(pageSettings)}>
+              {pageNodeStyles}
               <RenderTemplateBlocks blocks={blocks} />
             </main>
             <HealthFooterFull
@@ -399,7 +405,7 @@ const isKidsTemplate =
     author: blog.author,
     category: blog.category,
     tags: blog.tags || [],
-    publishedAt: blog.publishedAt?.toISOString(),
+    publishedAt: blog.publishedAt ? blog.publishedAt.toISOString() : null,
     createdAt: blog.createdAt.toISOString(),
   }));
 
@@ -428,6 +434,7 @@ if (isTShirtsPrintsTemplate) {
           />
 
           <main style={buildPageBackgroundStyle(pageSettings)}>
+            {pageNodeStyles}
             <RenderTemplateBlocks blocks={blocks} />
           </main>
 
@@ -449,6 +456,7 @@ if (isTShirtsPrintsTemplate) {
       <ThemeProvider theme={themeData}>
         <ElectronicsFontLoader />
         <main style={buildPageBackgroundStyle(pageSettings)}>
+          {pageNodeStyles}
           <RenderTemplateBlocks blocks={blocks} />
         </main>
         <ElectronicsFooter storeSlug={slug} />
@@ -462,6 +470,7 @@ if (isTShirtsPrintsTemplate) {
       <ThemeProvider theme={themeData}>
         <AccessoriesFontLoader />
         <main style={buildPageBackgroundStyle(pageSettings)}>
+          {pageNodeStyles}
           <RenderTemplateBlocks blocks={blocks} />
         </main>
       </ThemeProvider>
@@ -479,6 +488,7 @@ if (isTShirtsPrintsTemplate) {
           logo={store.logo}
         />
         <main style={buildPageBackgroundStyle(pageSettings)}>
+          {pageNodeStyles}
           <RenderTemplateBlocks blocks={blocks} />
         </main>
         <InteriorFooter storeSlug={slug} />
@@ -491,17 +501,18 @@ if (isTShirtsPrintsTemplate) {
 
   if (isGroceryTemplate) {
     return (
-      <ThemeProvider theme={themeData}>
-        <GroceryFontLoader />
-        <FashionHeader
-          storeName={store.name}
-          storeSlug={slug}
-          logo={store.logo}
-          isLanding={false}
-        />
+    <ThemeProvider theme={themeData}>
+      <GroceryFontLoader />
+      <FashionHeader
+        storeName={store.name}
+        storeSlug={slug}
+        logo={store.logo}
+        isLanding={false}
+      />
         <main style={buildPageBackgroundStyle(pageSettings)}>
-          <RenderTemplateBlocks blocks={blocks} />
-        </main>
+        {pageNodeStyles}
+        <RenderTemplateBlocks blocks={blocks} />
+      </main>
         <FashionFooter
           storeName={store.name}
           storeSlug={slug}
@@ -516,17 +527,18 @@ if (isTShirtsPrintsTemplate) {
 
   if (isMakeupTemplate) {
     return (
-      <ThemeProvider theme={themeData}>
-        <MakeupFontLoader />
-        <FashionHeader
-          storeName={store.name}
-          storeSlug={slug}
-          logo={store.logo}
-          isLanding={false}
-        />
+    <ThemeProvider theme={themeData}>
+      <MakeupFontLoader />
+      <FashionHeader
+        storeName={store.name}
+        storeSlug={slug}
+        logo={store.logo}
+        isLanding={false}
+      />
         <main style={buildPageBackgroundStyle(pageSettings)}>
-          <RenderTemplateBlocks blocks={blocks} />
-        </main>
+        {pageNodeStyles}
+        <RenderTemplateBlocks blocks={blocks} />
+      </main>
         <FashionFooter
           storeName={store.name}
           storeSlug={slug}
@@ -541,17 +553,18 @@ if (isTShirtsPrintsTemplate) {
 
   if (isToysTemplate) {
     return (
-      <ThemeProvider theme={themeData}>
-        <ToysFontLoader />
-        <FashionHeader
-          storeName={store.name}
-          storeSlug={slug}
-          logo={store.logo}
-          isLanding={false}
-        />
+    <ThemeProvider theme={themeData}>
+      <ToysFontLoader />
+      <FashionHeader
+        storeName={store.name}
+        storeSlug={slug}
+        logo={store.logo}
+        isLanding={false}
+      />
         <main style={buildPageBackgroundStyle(pageSettings)}>
-          <RenderTemplateBlocks blocks={blocks} />
-        </main>
+        {pageNodeStyles}
+        <RenderTemplateBlocks blocks={blocks} />
+      </main>
         <FashionFooter
           storeName={store.name}
           storeSlug={slug}
@@ -566,6 +579,7 @@ if (isTShirtsPrintsTemplate) {
   return (
     <ThemeProvider theme={themeData}>
       <main style={buildPageBackgroundStyle(pageSettings)}>
+        {pageNodeStyles}
         <RenderTemplateBlocks blocks={blocks} />
       </main>
     </ThemeProvider>

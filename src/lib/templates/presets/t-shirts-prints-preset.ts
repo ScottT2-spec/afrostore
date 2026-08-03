@@ -1,33 +1,38 @@
-import type { TemplateBlock } from "@/components/storefront/TemplateBlockRenderer";
+import type { EditorNode } from "@/lib/visual-editor/node-tree";
 
 /**
  * T-Shirts & Prints template preset — WoodMart "T-Shirts Prints" demo.
  * Extracted from the actual reference site: https://woodmart.xtemos.com/t-shirts-prints/
  * Contains only content from the T-Shirts & Prints template, no cross-template components.
  */
-export const T_SHIRTS_PRINTS_PRESET: TemplateBlock[] = [
+export const T_SHIRTS_PRINTS_PRESET: EditorNode[] = [
   {
     id: "tshirts-hero",
     type: "fashionHeroSlider",
-    props: {
-      autoplaySpeed: 5000,
-      minHeight: "560px",
-      slides: [
+          settings: {
+        autoplaySpeed: 5000,
+      minHeight: "560px"
+      },
+      elements: [
         {
-          title: "Unique Prints",
-          subtitle: "Express Yourself",
-          description: "Stand out with our collection of artistically designed t-shirts featuring unique prints and artwork.",
-          buttonText: "Shop Now",
-          buttonLink: "/shop",
-          backgroundImage: "https://woodmart.xtemos.com/t-shirts/wp-content/uploads/sites/29/2023/05/banner-1.jpg",
-        },
+          id: "tshirts-hero-slide-1",
+          type: "slide",
+          settings:           {
+            "title": "Unique Prints",
+            "subtitle": "Express Yourself",
+            "description": "Stand out with our collection of artistically designed t-shirts featuring unique prints and artwork.",
+            "buttonText": "Shop Now",
+            "buttonLink": "/shop",
+            "backgroundImage": "https://woodmart.xtemos.com/t-shirts/wp-content/uploads/sites/29/2023/05/banner-1.jpg"
+          },
+          elements: [],
+        }
       ],
-    },
   },
   {
     id: "tshirts-categories",
     type: "fashionCategoryCards",
-    props: {
+    settings: {
       sectionTitle: {
         subtitle: "EXPLORE",
         title: "Shop by Category",
@@ -43,7 +48,7 @@ export const T_SHIRTS_PRINTS_PRESET: TemplateBlock[] = [
   {
     id: "tshirts-featured",
     type: "fashionProductGrid",
-    props: {
+    settings: {
       columns: 4,
       maxProducts: 8,
       filter: "featured",
@@ -56,7 +61,7 @@ export const T_SHIRTS_PRINTS_PRESET: TemplateBlock[] = [
   {
     id: "tshirts-blog",
     type: "fashionBlogPosts",
-    props: {
+    settings: {
       columns: 3,
       sectionTitle: {
         title: "Latest Articles",

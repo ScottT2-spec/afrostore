@@ -1,4 +1,4 @@
-import type { TemplateBlock } from "@/components/storefront/TemplateBlockRenderer";
+import type { EditorNode } from "@/lib/visual-editor/node-tree";
 
 /**
  * Bakery (Sweets Bakery) Template Page Presets
@@ -12,11 +12,11 @@ import type { TemplateBlock } from "@/components/storefront/TemplateBlockRendere
    Source: https://woodmart.xtemos.com/about-us/demo/sweets-bakery/
    ═══════════════════════════════════════════════════════════════ */
 
-export const BAKERY_ABOUT_PAGE_BLOCKS: TemplateBlock[] = [
+export const BAKERY_ABOUT_PAGE_BLOCKS: EditorNode[] = [
   {
     id: "bk-about-hero",
     type: "bakerySectionTitle",
-    props: {
+    settings: {
       subtitle: "Xtemos Is A Creative Design Agency",
       title: "Our success and company history.",
       description: "A wonderful serenity has taken possession of my entire soul, like these sweet mornings of spring which I enjoy with my whole heart.",
@@ -27,7 +27,7 @@ export const BAKERY_ABOUT_PAGE_BLOCKS: TemplateBlock[] = [
   {
     id: "bk-about-hero-ctas",
     type: "bakeryAboutContent",
-    props: {
+    settings: {
       buttons: [
         { text: "SEE PROJECTS", link: "/portfolio" },
         { text: "VIEW MORE", link: "#" },
@@ -37,7 +37,7 @@ export const BAKERY_ABOUT_PAGE_BLOCKS: TemplateBlock[] = [
   {
     id: "bk-about-story",
     type: "bakeryAboutContent",
-    props: {
+    settings: {
       subtitle: "WOODMART - BEST ECOMMERCE THEME 2021/22",
       title: "About Our Online Store",
       paragraphs: [
@@ -53,7 +53,7 @@ export const BAKERY_ABOUT_PAGE_BLOCKS: TemplateBlock[] = [
   {
     id: "bk-about-stats",
     type: "bakeryStatsCounters",
-    props: {
+    settings: {
       counters: [
         { value: 0, label: "SATISFIED CLIENTS" },
         { value: 0, label: "FINISHED PROJECTS" },
@@ -67,7 +67,7 @@ export const BAKERY_ABOUT_PAGE_BLOCKS: TemplateBlock[] = [
   {
     id: "bk-about-convert",
     type: "bakeryAboutContent",
-    props: {
+    settings: {
       subtitle: "WOODMART - BEST ECOMMERCE THEME 2021/22",
       title: "We convert your idea Into a reality.",
       paragraphs: [
@@ -82,7 +82,7 @@ export const BAKERY_ABOUT_PAGE_BLOCKS: TemplateBlock[] = [
   {
     id: "bk-about-services",
     type: "bakeryServicesGrid",
-    props: {
+    settings: {
       subtitle: "WOODMART - BEST ECOMMERCE THEME 2021/22",
       title: "Let\u2019s Get Creative!",
       services: [
@@ -112,7 +112,7 @@ export const BAKERY_ABOUT_PAGE_BLOCKS: TemplateBlock[] = [
   {
     id: "bk-about-gallery",
     type: "bakeryGalleryGrid",
-    props: {
+    settings: {
       images: [
         "https://woodmart.xtemos.com/wp-content/uploads/2017/03/about-us-gallery-photo-2.jpg",
         "https://woodmart.xtemos.com/wp-content/uploads/2017/03/about-us-gallery-photo-1.jpg",
@@ -122,7 +122,7 @@ export const BAKERY_ABOUT_PAGE_BLOCKS: TemplateBlock[] = [
   {
     id: "bk-about-presentation",
     type: "bakeryVideoSection",
-    props: {
+    settings: {
       subtitle: "Xtemos Is A Creative Design Agency",
       title: "Our Presentation",
       description: "I am so happy, my dear friend, so absorbed in the exquisite sense of mere tranquil existence, that I neglect my talents. I should be incapable of drawing a single.",
@@ -143,7 +143,7 @@ export const BAKERY_ABOUT_PAGE_BLOCKS: TemplateBlock[] = [
   {
     id: "bk-about-quote",
     type: "bakeryQuoteSection",
-    props: {
+    settings: {
       subtitle: "WOODMART - BEST ECOMMERCE THEME 2021/22",
       quote: "Excellence is not a skill it\u2019s an attitude",
       attribution: "Ralph Marston",
@@ -154,7 +154,7 @@ export const BAKERY_ABOUT_PAGE_BLOCKS: TemplateBlock[] = [
   {
     id: "bk-about-team",
     type: "bakeryTeamSection",
-    props: {
+    settings: {
       members: [
         {
           name: "MARK JANCE",
@@ -186,7 +186,7 @@ export const BAKERY_ABOUT_PAGE_BLOCKS: TemplateBlock[] = [
   {
     id: "bk-about-offices",
     type: "bakeryOfficeLocations",
-    props: {
+    settings: {
       subtitle: "GET IN TOUCH WITH US",
       title: "Get Connected",
       description: "I am so happy, my dear friend, so absorbed in the exquisite sense of mere tranquil existence, that I neglect my talents. I should be incapable of drawing a single.",
@@ -221,7 +221,7 @@ export const BAKERY_ABOUT_PAGE_BLOCKS: TemplateBlock[] = [
   {
     id: "bk-about-news",
     type: "bakeryCoverBanners",
-    props: {
+    settings: {
       banners: [
         {
           image: "https://woodmart.xtemos.com/wp-content/uploads/2017/03/banner-news.jpg",
@@ -254,11 +254,11 @@ export const BAKERY_ABOUT_PAGE_BLOCKS: TemplateBlock[] = [
    Source: https://woodmart.xtemos.com/contact-us/demo/sweets-bakery/
    ═══════════════════════════════════════════════════════════════ */
 
-export const BAKERY_CONTACT_PAGE_BLOCKS: TemplateBlock[] = [
+export const BAKERY_CONTACT_PAGE_BLOCKS: EditorNode[] = [
   {
     id: "bk-contact-store-visit",
     type: "bakeryStoreVisit",
-    props: {
+    settings: {
       subtitle: "OUR STORES",
       title: "VISIT OUR NEW\nSTORE IN NEW YORK",
       address: "294 Bay Meadows Ave.\nBay Shore, NY 11706",
@@ -269,7 +269,7 @@ export const BAKERY_CONTACT_PAGE_BLOCKS: TemplateBlock[] = [
   {
     id: "bk-contact-faq",
     type: "bakeryFaqAccordion",
-    props: {
+    settings: {
       subtitle: "INFORMATION QUESTIONS",
       title: "FREQUENTLY ASKED QUESTIONS",
       items: [
@@ -299,7 +299,7 @@ export const BAKERY_CONTACT_PAGE_BLOCKS: TemplateBlock[] = [
   {
     id: "bk-contact-form",
     type: "bakeryContactForm",
-    props: {
+    settings: {
       subtitle: "INFORMATION ABOUT US",
       title: "CONTACT US FOR ANY QUESTIONS",
       fields: ["name", "email", "phone", "company", "message"],
@@ -313,11 +313,11 @@ export const BAKERY_CONTACT_PAGE_BLOCKS: TemplateBlock[] = [
    Source: https://woodmart.xtemos.com/blog/demo/sweets-bakery/
    ═══════════════════════════════════════════════════════════════ */
 
-export const BAKERY_BLOG_PAGE_BLOCKS: TemplateBlock[] = [
+export const BAKERY_BLOG_PAGE_BLOCKS: EditorNode[] = [
   {
     id: "bk-blog-hero",
     type: "bakerySectionTitle",
-    props: {
+    settings: {
       subtitle: "Sweets Bakery",
       title: "Woodmart Blog",
       align: "center",
@@ -327,7 +327,7 @@ export const BAKERY_BLOG_PAGE_BLOCKS: TemplateBlock[] = [
   {
     id: "bk-blog-posts",
     type: "bakeryBlogPosts",
-    props: {
+    settings: {
       columns: 2,
       sectionTitle: "",
       sectionSubtitle: "",
@@ -373,11 +373,11 @@ export const BAKERY_BLOG_PAGE_BLOCKS: TemplateBlock[] = [
    Source: https://woodmart.xtemos.com/shop/demo/sweets-bakery/
    ═══════════════════════════════════════════════════════════════ */
 
-export const BAKERY_SHOP_PAGE_BLOCKS: TemplateBlock[] = [
+export const BAKERY_SHOP_PAGE_BLOCKS: EditorNode[] = [
   {
     id: "bk-shop-hero",
     type: "bakerySectionTitle",
-    props: {
+    settings: {
       subtitle: "Sweets Bakery",
       title: "Shop",
       align: "center",
@@ -387,7 +387,7 @@ export const BAKERY_SHOP_PAGE_BLOCKS: TemplateBlock[] = [
   {
     id: "bk-shop-categories",
     type: "bakeryCategoryInfoBoxes",
-    props: {
+    settings: {
       sectionTitle: "Shop by Category",
       sectionSubtitle: "Sweets Bakery",
       items: [
@@ -418,7 +418,7 @@ export const BAKERY_SHOP_PAGE_BLOCKS: TemplateBlock[] = [
   {
     id: "bk-shop-products",
     type: "bakeryProductGrid",
-    props: {
+    settings: {
       columns: 3,
       maxProducts: 12,
       sectionTitle: "All Products",

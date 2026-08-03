@@ -1,18 +1,21 @@
 "use client";
 
-import { updateNestedValueAtPath } from "@/lib/visual-editor/style-utils";
-
 interface StylePanelProps {
   element: any;
   onUpdate: (updates: any) => void;
 }
 
 export default function StylePanel({ element, onUpdate }: StylePanelProps) {
-  const updateStyle = (path: string, value: any) => {
-    console.log("StylePanel updateStyle - path:", path, "value:", value);
-    const styles = updateNestedValueAtPath(element.styles, path, value);
-    console.log("StylePanel calling onUpdate with styles:", styles);
-    onUpdate({ styles });
+  const settings = element.settings || {};
+
+  const updateSetting = (key: string, value: any) => {
+    console.log("StylePanel updateSetting - key:", key, "value:", value);
+    onUpdate({
+      settings: {
+        ...settings,
+        [key]: value,
+      },
+    });
   };
 
   return (
@@ -28,8 +31,8 @@ export default function StylePanel({ element, onUpdate }: StylePanelProps) {
             <label className="block text-[10px] text-gray-500 dark:text-gray-400 mb-1">Font Size</label>
             <input
               type="text"
-              value={element.styles?.typography?.fontSize || "16px"}
-              onChange={(e) => updateStyle('typography.fontSize', e.target.value)}
+              value={settings.fontSize || "16px"}
+              onChange={(e) => updateSetting("fontSize", e.target.value)}
               className="w-full px-2 py-1.5 text-xs border border-gray-300 dark:border-gray-600 rounded bg-white dark:bg-gray-800 text-gray-900 dark:text-white"
               placeholder="16px"
             />
@@ -37,8 +40,8 @@ export default function StylePanel({ element, onUpdate }: StylePanelProps) {
           <div>
             <label className="block text-[10px] text-gray-500 dark:text-gray-400 mb-1">Font Weight</label>
             <select
-              value={element.styles?.typography?.fontWeight || "400"}
-              onChange={(e) => updateStyle('typography.fontWeight', e.target.value)}
+              value={settings.fontWeight || "400"}
+              onChange={(e) => updateSetting("fontWeight", e.target.value)}
               className="w-full px-2 py-1.5 text-xs border border-gray-300 dark:border-gray-600 rounded bg-white dark:bg-gray-800 text-gray-900 dark:text-white"
             >
               <option value="300">300</option>
@@ -53,8 +56,8 @@ export default function StylePanel({ element, onUpdate }: StylePanelProps) {
             <label className="block text-[10px] text-gray-500 dark:text-gray-400 mb-1">Line Height</label>
             <input
               type="text"
-              value={element.styles?.typography?.lineHeight || "1.5"}
-              onChange={(e) => updateStyle('typography.lineHeight', e.target.value)}
+              value={settings.lineHeight || "1.5"}
+              onChange={(e) => updateSetting("lineHeight", e.target.value)}
               className="w-full px-2 py-1.5 text-xs border border-gray-300 dark:border-gray-600 rounded bg-white dark:bg-gray-800 text-gray-900 dark:text-white"
               placeholder="1.5"
             />
@@ -62,8 +65,8 @@ export default function StylePanel({ element, onUpdate }: StylePanelProps) {
           <div>
             <label className="block text-[10px] text-gray-500 dark:text-gray-400 mb-1">Text Align</label>
             <select
-              value={element.styles?.typography?.textAlign || "left"}
-              onChange={(e) => updateStyle('typography.textAlign', e.target.value)}
+              value={settings.textAlign || "left"}
+              onChange={(e) => updateSetting("textAlign", e.target.value)}
               className="w-full px-2 py-1.5 text-xs border border-gray-300 dark:border-gray-600 rounded bg-white dark:bg-gray-800 text-gray-900 dark:text-white"
             >
               <option value="left">Left</option>
@@ -79,14 +82,14 @@ export default function StylePanel({ element, onUpdate }: StylePanelProps) {
           <div className="flex items-center gap-2">
             <input
               type="color"
-              value={element.styles?.typography?.color || "#171717"}
-              onChange={(e) => updateStyle('typography.color', e.target.value)}
+              value={settings.textColor || "#171717"}
+              onChange={(e) => updateSetting("textColor", e.target.value)}
               className="h-8 w-8 rounded border border-gray-300 dark:border-gray-600 cursor-pointer"
             />
             <input
               type="text"
-              value={element.styles?.typography?.color || "#171717"}
-              onChange={(e) => updateStyle('typography.color', e.target.value)}
+              value={settings.textColor || "#171717"}
+              onChange={(e) => updateSetting("textColor", e.target.value)}
               className="flex-1 px-2 py-1.5 text-xs border border-gray-300 dark:border-gray-600 rounded bg-white dark:bg-gray-800 text-gray-900 dark:text-white"
             />
           </div>
@@ -104,14 +107,14 @@ export default function StylePanel({ element, onUpdate }: StylePanelProps) {
           <div className="flex items-center gap-2">
             <input
               type="color"
-              value={element.styles?.colors?.background || "transparent"}
-              onChange={(e) => updateStyle('colors.background', e.target.value)}
+              value={settings.backgroundColor || "#ffffff"}
+              onChange={(e) => updateSetting("backgroundColor", e.target.value)}
               className="h-8 w-8 rounded border border-gray-300 dark:border-gray-600 cursor-pointer"
             />
             <input
               type="text"
-              value={element.styles?.colors?.background || "transparent"}
-              onChange={(e) => updateStyle('colors.background', e.target.value)}
+              value={settings.backgroundColor || ""}
+              onChange={(e) => updateSetting("backgroundColor", e.target.value)}
               className="flex-1 px-2 py-1.5 text-xs border border-gray-300 dark:border-gray-600 rounded bg-white dark:bg-gray-800 text-gray-900 dark:text-white"
             />
           </div>
@@ -122,14 +125,14 @@ export default function StylePanel({ element, onUpdate }: StylePanelProps) {
           <div className="flex items-center gap-2">
             <input
               type="color"
-              value={element.styles?.colors?.border || "#e5e5e5"}
-              onChange={(e) => updateStyle('colors.border', e.target.value)}
+              value={settings.borderColor || "#e5e5e5"}
+              onChange={(e) => updateSetting("borderColor", e.target.value)}
               className="h-8 w-8 rounded border border-gray-300 dark:border-gray-600 cursor-pointer"
             />
             <input
               type="text"
-              value={element.styles?.colors?.border || "#e5e5e5"}
-              onChange={(e) => updateStyle('colors.border', e.target.value)}
+              value={settings.borderColor || "#e5e5e5"}
+              onChange={(e) => updateSetting("borderColor", e.target.value)}
               className="flex-1 px-2 py-1.5 text-xs border border-gray-300 dark:border-gray-600 rounded bg-white dark:bg-gray-800 text-gray-900 dark:text-white"
             />
           </div>
@@ -147,8 +150,8 @@ export default function StylePanel({ element, onUpdate }: StylePanelProps) {
             <label className="block text-[10px] text-gray-500 dark:text-gray-400 mb-1">Padding Top</label>
             <input
               type="text"
-              value={element.styles?.spacing?.top || "0"}
-              onChange={(e) => updateStyle('spacing.top', e.target.value)}
+              value={settings.paddingTop || "0"}
+              onChange={(e) => updateSetting("paddingTop", e.target.value)}
               className="w-full px-2 py-1.5 text-xs border border-gray-300 dark:border-gray-600 rounded bg-white dark:bg-gray-800 text-gray-900 dark:text-white"
               placeholder="0"
             />
@@ -157,8 +160,8 @@ export default function StylePanel({ element, onUpdate }: StylePanelProps) {
             <label className="block text-[10px] text-gray-500 dark:text-gray-400 mb-1">Padding Bottom</label>
             <input
               type="text"
-              value={element.styles?.spacing?.bottom || "0"}
-              onChange={(e) => updateStyle('spacing.bottom', e.target.value)}
+              value={settings.paddingBottom || "0"}
+              onChange={(e) => updateSetting("paddingBottom", e.target.value)}
               className="w-full px-2 py-1.5 text-xs border border-gray-300 dark:border-gray-600 rounded bg-white dark:bg-gray-800 text-gray-900 dark:text-white"
               placeholder="0"
             />
@@ -167,8 +170,8 @@ export default function StylePanel({ element, onUpdate }: StylePanelProps) {
             <label className="block text-[10px] text-gray-500 dark:text-gray-400 mb-1">Padding Left</label>
             <input
               type="text"
-              value={element.styles?.spacing?.left || "0"}
-              onChange={(e) => updateStyle('spacing.left', e.target.value)}
+              value={settings.paddingLeft || "0"}
+              onChange={(e) => updateSetting("paddingLeft", e.target.value)}
               className="w-full px-2 py-1.5 text-xs border border-gray-300 dark:border-gray-600 rounded bg-white dark:bg-gray-800 text-gray-900 dark:text-white"
               placeholder="0"
             />
@@ -177,8 +180,8 @@ export default function StylePanel({ element, onUpdate }: StylePanelProps) {
             <label className="block text-[10px] text-gray-500 dark:text-gray-400 mb-1">Padding Right</label>
             <input
               type="text"
-              value={element.styles?.spacing?.right || "0"}
-              onChange={(e) => updateStyle('spacing.right', e.target.value)}
+              value={settings.paddingRight || "0"}
+              onChange={(e) => updateSetting("paddingRight", e.target.value)}
               className="w-full px-2 py-1.5 text-xs border border-gray-300 dark:border-gray-600 rounded bg-white dark:bg-gray-800 text-gray-900 dark:text-white"
               placeholder="0"
             />
@@ -197,8 +200,8 @@ export default function StylePanel({ element, onUpdate }: StylePanelProps) {
             <label className="block text-[10px] text-gray-500 dark:text-gray-400 mb-1">Border Width</label>
             <input
               type="text"
-              value={element.styles?.border?.width || "0"}
-              onChange={(e) => updateStyle('border.width', e.target.value)}
+              value={settings.borderWidth || "0"}
+              onChange={(e) => updateSetting("borderWidth", e.target.value)}
               className="w-full px-2 py-1.5 text-xs border border-gray-300 dark:border-gray-600 rounded bg-white dark:bg-gray-800 text-gray-900 dark:text-white"
               placeholder="1px"
             />
@@ -207,8 +210,8 @@ export default function StylePanel({ element, onUpdate }: StylePanelProps) {
             <label className="block text-[10px] text-gray-500 dark:text-gray-400 mb-1">Border Radius</label>
             <input
               type="text"
-              value={element.styles?.border?.radius || "0"}
-              onChange={(e) => updateStyle('border.radius', e.target.value)}
+              value={settings.borderRadius || "0"}
+              onChange={(e) => updateSetting("borderRadius", e.target.value)}
               className="w-full px-2 py-1.5 text-xs border border-gray-300 dark:border-gray-600 rounded bg-white dark:bg-gray-800 text-gray-900 dark:text-white"
               placeholder="0"
             />
@@ -218,8 +221,8 @@ export default function StylePanel({ element, onUpdate }: StylePanelProps) {
         <div>
           <label className="block text-[10px] text-gray-500 dark:text-gray-400 mb-1">Border Style</label>
           <select
-            value={element.styles?.border?.style || "solid"}
-            onChange={(e) => updateStyle('border.style', e.target.value)}
+            value={settings.borderStyle || "solid"}
+            onChange={(e) => updateSetting("borderStyle", e.target.value)}
             className="w-full px-2 py-1.5 text-xs border border-gray-300 dark:border-gray-600 rounded bg-white dark:bg-gray-800 text-gray-900 dark:text-white"
           >
             <option value="solid">Solid</option>

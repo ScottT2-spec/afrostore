@@ -1,17 +1,17 @@
-import type { TemplateBlock } from "@/components/storefront/TemplateBlockRenderer";
+import type { EditorNode } from "@/lib/visual-editor/node-tree";
 
-export const PERFUMES_JOURNAL_PRESET: TemplateBlock[] = [
+export const PERFUMES_JOURNAL_PRESET: EditorNode[] = [
   {
     id: "perfumes-journal-hero",
     type: "perfumesPageHero",
-    props: {
+    settings: {
       title: "Journal",
     },
   },
   {
     id: "perfumes-journal-grid",
     type: "perfumesJournalGrid",
-    props: {
+    settings: {
       columns: 3,
     },
   },

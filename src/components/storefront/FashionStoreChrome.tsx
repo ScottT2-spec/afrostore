@@ -2,6 +2,7 @@
 import { useState } from "react";
 import Link from "next/link";
 import { resolveStoreLink } from "@/lib/template-link-utils";
+import { normalizeSocialLinks } from "@/components/storefront/prop-normalizers";
 
 /* ═══════════════════════════════════════════════════════════════
    FASHION STORE HEADER + FOOTER
@@ -163,6 +164,7 @@ export function FashionHeader({
   const socialIcons: Record<string, string> = {
     facebook: "f", twitter: "𝕏", instagram: "📷", youtube: "▶", tiktok: "♪",
   };
+  const safeSocialLinks = normalizeSocialLinks(socialLinks);
 
   return (
     <div className="fsh-header">
@@ -171,7 +173,7 @@ export function FashionHeader({
       <div className="fsh-topbar">
         <div className="fsh-topbar-inner">
           <div className="fsh-topbar-social">
-            {socialLinks.map((s, i) => (
+            {safeSocialLinks.map((s, i) => (
               <a key={i} href={s.url} target="_blank" rel="noopener noreferrer" aria-label={s.platform}>
                 {socialIcons[s.platform] || s.platform[0]?.toUpperCase()}
               </a>
@@ -381,6 +383,7 @@ export function FashionFooter({
   const socialIcons: Record<string, string> = {
     facebook: "f", twitter: "𝕏", instagram: "📷", youtube: "▶", tiktok: "♪",
   };
+  const safeSocialLinks = normalizeSocialLinks(socialLinks);
 
   return (
     <footer className="fsf-footer">
@@ -391,7 +394,7 @@ export function FashionFooter({
           <Link href={`/store/${storeSlug}`} className="fsf-logo-text">{storeName}</Link>
           <p className="fsf-text">{description || "Your one-stop destination for the latest fashion trends and timeless style essentials."}</p>
           <div className="fsf-social">
-            {socialLinks.map((s, i) => (
+            {safeSocialLinks.map((s, i) => (
               <a key={i} href={s.url} className="fsf-social-icon" target="_blank" rel="noopener noreferrer" aria-label={s.platform}>
                 {socialIcons[s.platform] || s.platform[0]?.toUpperCase()}
               </a>

@@ -3,6 +3,7 @@ import { useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { resolveStoreLink, resolveFooterLink } from "@/lib/template-link-utils";
+import { normalizeSocialLinks } from "@/components/storefront/prop-normalizers";
 
 /* ═══════════════════════════════════════════════════════════════
    HANDMADE BAGS STORE HEADER + FOOTER
@@ -131,6 +132,7 @@ export function HandmadeBagsHeader({
       .hbh-topbar-text { font-size: 11px; }
     }
   `;
+  const safeSocialLinks = normalizeSocialLinks(socialLinks);
 
   return (
     <div className="hbh-header">
@@ -287,6 +289,7 @@ export function HandmadeBagsFooter({
   const socialIcons: Record<string, string> = {
     facebook: "f", twitter: "𝕏", instagram: "📷", youtube: "▶", tiktok: "♪",
   };
+  const safeSocialLinks = normalizeSocialLinks(socialLinks);
 
   return (
     <footer className="hbf-footer">
@@ -297,7 +300,7 @@ export function HandmadeBagsFooter({
           <Link href={resolveStoreLink("/", storeSlug)} className="hbf-logo-text">{storeName}</Link>
           <p className="hbf-text">{description || "Handcrafted leather goods made with passion and precision. Every bag tells a story of artisan excellence."}</p>
           <div className="hbf-social">
-            {socialLinks.map((s, i) => (
+            {safeSocialLinks.map((s, i) => (
               <a key={i} href={s.url} className="hbf-social-icon" target="_blank" rel="noopener noreferrer" aria-label={s.platform}>
                 {socialIcons[s.platform] || s.platform[0]?.toUpperCase()}
               </a>

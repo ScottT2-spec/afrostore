@@ -6,6 +6,8 @@ import { toggleCompare as toggleCompareItem } from "@/lib/compare-utils";
 import { useState, useEffect, useRef, useCallback, createContext, useContext } from "react";
 import { safeSrc, onImgError, kidsProductImage, kidsBlogImage } from "./image-fallback";
 import { useNewsletterSubscribe } from "@/hooks/useNewsletterSubscribe";
+import { toDisplayText } from "@/components/storefront/prop-normalizers";
+import { InlineEditableText } from "@/components/storefront/InlineEditableText";
 
 /* ═══════════════════════════════════════════════════════════════
    KIDS TEMPLATE BLOCKS
@@ -52,6 +54,25 @@ const containerStyle: React.CSSProperties = {
 /* ─── SCOPED STYLE INJECTOR ─────────────────────────────────── */
 function ScopedStyles({ id, css }: { id: string; css: string }) {
   return <style data-kids-block={id} dangerouslySetInnerHTML={{ __html: css }} />;
+}
+
+function normalizeBlogDate(date: unknown): { day: string; month: string } | null {
+  if (!date) return null;
+  if (typeof date === "object" && date !== null) {
+    const maybeDate = date as { day?: unknown; month?: unknown };
+    const day = typeof maybeDate.day === "string" || typeof maybeDate.day === "number" ? String(maybeDate.day) : "";
+    const month = typeof maybeDate.month === "string" || typeof maybeDate.month === "number" ? String(maybeDate.month) : "";
+    return day || month ? { day, month } : null;
+  }
+  if (typeof date === "string") {
+    const parts = date.trim().split(/\s+/).filter(Boolean);
+    if (parts.length === 0) return null;
+    const [first, second] = parts;
+    if (/^\d+$/.test(first || "")) return { day: first, month: second || "" };
+    if (/^\d+$/.test(second || "")) return { day: second, month: first || "" };
+    return { day: first, month: second || "" };
+  }
+  return null;
 }
 
 /* ─── useInView HOOK ────────────────────────────────────────── */
@@ -162,12 +183,12 @@ export interface KidsHeroSlide {
 }
 
 export interface KidsHeroSliderProps {
-  slides: KidsHeroSlide[];
+  slides?: KidsHeroSlide[];
   autoplaySpeed?: number;
   minHeight?: string;
 }
 
-export function KidsHeroSlider({ slides, autoplaySpeed = 5000, minHeight = "1020px" }: KidsHeroSliderProps) {
+export function KidsHeroSlider({ slides = [], autoplaySpeed = 5000, minHeight = "1020px" }: KidsHeroSliderProps) {
   const storeCtx = useContext(KidsStoreContext);
   const fixLink = (link: string) => resolveStoreLink(link, storeCtx?.storeSlug);
   const [current, setCurrent] = useState(0);
@@ -297,9 +318,11 @@ export interface KidsSectionTitleProps {
   align?: "left" | "center";
   marginBottom?: string;
   size?: "default" | "large";
+  blockId?: string;
+  isEditor?: boolean;
 }
 
-export function KidsSectionTitle({ subtitle, title, align = "center", marginBottom = "30px", size = "default" }: KidsSectionTitleProps) {
+export function KidsSectionTitle({ subtitle, title, align = "center", marginBottom = "30px", size = "default", blockId, isEditor = false }: KidsSectionTitleProps) {
   const fontSize = size === "large" ? "42px" : "28px";
 
   const scopedCss = `
@@ -320,8 +343,8 @@ export function KidsSectionTitle({ subtitle, title, align = "center", marginBott
   return (
     <div className="kst-wrap" style={{ textAlign: align }}>
       <ScopedStyles id="section-title" css={scopedCss} />
-      {subtitle && <div className="kst-subtitle">{subtitle}</div>}
-      <h2 className="kst-title">{title}</h2>
+      {subtitle && <InlineEditableText nodeId={blockId} field="subtitle" value={subtitle} isEditor={isEditor} as="div" className="kst-subtitle" />}
+      <InlineEditableText nodeId={blockId} field="title" value={title} isEditor={isEditor} as="h2" className="kst-title" />
     </div>
   );
 }
@@ -340,20 +363,21 @@ export interface KidsCategoryCard {
 }
 
 export interface KidsCategoryCardsProps {
-  categories: KidsCategoryCard[];
+  categories?: KidsCategoryCard[];
   sectionTitle?: { subtitle?: string; title: string };
   marginBottom?: string;
 }
 
-export function KidsCategoryCards({ categories, sectionTitle, marginBottom = "60px" }: KidsCategoryCardsProps) {
+export function KidsCategoryCards({ categories = [], sectionTitle, marginBottom = "60px" }: KidsCategoryCardsProps) {
   const storeCtx = useContext(KidsStoreContext);
-  const fixLink = (link: string, name: string) => {
-    if (link && link.startsWith("/store/")) return link;
+  const fixLink = (link: unknown, name: string) => {
+    const normalized = typeof link === "string" ? link : link == null ? "" : String(link);
+    if (normalized.startsWith("/store/")) return normalized;
     if (storeCtx?.storeSlug) {
       const slug = name.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/(^-|-$)/g, "");
       return `/store/${storeCtx.storeSlug}/shop?category=${slug}`;
     }
-    return resolveStoreLink(link, storeCtx?.storeSlug);
+    return resolveStoreLink(normalized, storeCtx?.storeSlug);
   };
 
   const scopedCss = `
@@ -460,13 +484,14 @@ export function KidsProductGrid({ products: propProducts, columns = 4, showCateg
     }));
   })();
 
-  const resolveLink = (link: string, name: string) => {
-    if (link && link.startsWith("/store/")) return link;
+  const resolveLink = (link: unknown, name: string) => {
+    const normalized = typeof link === "string" ? link : link == null ? "" : String(link);
+    if (normalized.startsWith("/store/")) return normalized;
     if (storeCtx?.storeSlug) {
       const slug = name.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/(^-|-$)/g, "");
       return `/store/${storeCtx.storeSlug}/product/${slug}`;
     }
-    return resolveStoreLink(link, storeCtx?.storeSlug);
+    return resolveStoreLink(normalized, storeCtx?.storeSlug);
   };
 
   const scopedCss = `
@@ -578,7 +603,7 @@ export function KidsProductGrid({ products: propProducts, columns = 4, showCateg
                 </div>
               )}
               {showCategory && p.category && (
-                <div className="kpg-cat"><Link href={resolveStoreLink(p.categoryLink || "#", storeCtx?.storeSlug)}>{p.category}</Link></div>
+                <div className="kpg-cat"><Link href={resolveStoreLink(p.categoryLink || "#", storeCtx?.storeSlug)}>{toDisplayText(p.category, "")}</Link></div>
               )}
               <h3 className="kpg-name"><Link href={pLink}>{p.name}</Link></h3>
               <div className="kpg-price">
@@ -610,7 +635,7 @@ export interface KidsBundlePromoProps {
   marginBottom?: string;
 }
 
-export function KidsBundlePromo({ subtitle = "Buy bundle and get a 25% discount", title, description, buttonText = "Buy bundle now", buttonLink, productImages, backgroundColor, marginBottom = "60px" }: KidsBundlePromoProps) {
+export function KidsBundlePromo({ subtitle = "Buy bundle and get a 25% discount", title, description, buttonText = "Buy bundle now", buttonLink, productImages = [], backgroundColor, marginBottom = "60px" }: KidsBundlePromoProps) {
   const storeCtx = useContext(KidsStoreContext);
   const fixLink = (link?: string) => resolveStoreLink(link || "#", storeCtx?.storeSlug);
   const { ref, inView } = useInView();
@@ -699,13 +724,13 @@ export interface KidsBlogPost {
 }
 
 export interface KidsBlogPostsProps {
-  posts: KidsBlogPost[];
+  posts?: KidsBlogPost[];
   columns?: number;
   sectionTitle?: { subtitle?: string; title: string };
   marginBottom?: string;
 }
 
-export function KidsBlogPosts({ posts: propPosts, columns = 3, sectionTitle, marginBottom = "60px" }: KidsBlogPostsProps) {
+export function KidsBlogPosts({ posts: propPosts = [], columns = 3, sectionTitle, marginBottom = "60px" }: KidsBlogPostsProps) {
   const storeCtx = useContext(KidsStoreContext);
 
   const posts: KidsBlogPost[] = (() => {
@@ -783,14 +808,18 @@ export function KidsBlogPosts({ posts: propPosts, columns = 3, sectionTitle, mar
       <ScopedStyles id="blog-posts" css={scopedCss} />
       {sectionTitle && <KidsSectionTitle subtitle={sectionTitle.subtitle} title={sectionTitle.title} />}
       <div className="kbp2-grid">
-        {posts.map((p, i) => (
+        {posts.map((p, i) => {
+          const normalizedDate = normalizeBlogDate((p as any).date);
+          return (
           <article key={i} className="kbp2-card">
             <div className="kbp2-img-wrap">
               <img src={p.image} alt={p.title} className="kbp2-img" loading="lazy"  onError={(e) => onImgError(e, p.title)} />
-              <div className="kbp2-date-badge">
-                <span className="kbp2-date-day">{p.date.day}</span>
-                <span className="kbp2-date-month">{p.date.month}</span>
-              </div>
+              {normalizedDate && (
+                <div className="kbp2-date-badge">
+                  <span className="kbp2-date-day">{normalizedDate.day}</span>
+                  <span className="kbp2-date-month">{normalizedDate.month}</span>
+                </div>
+              )}
               <Link href={resolveStoreLink(p.link, storeCtx?.storeSlug)} className="kbp2-link" aria-label={p.title} />
             </div>
             <div className="kbp2-content">
@@ -806,7 +835,7 @@ export function KidsBlogPosts({ posts: propPosts, columns = 3, sectionTitle, mar
               <p className="kbp2-excerpt">{p.excerpt}</p>
             </div>
           </article>
-        ))}
+        )})}
       </div>
     </div>
   );
@@ -825,12 +854,12 @@ export interface KidsInstagramItem {
 }
 
 export interface KidsInstagramProps {
-  items: KidsInstagramItem[];
+  items?: KidsInstagramItem[];
   sectionTitle?: { subtitle?: string; title: string };
   marginBottom?: string;
 }
 
-export function KidsInstagram({ items, sectionTitle, marginBottom = "60px" }: KidsInstagramProps) {
+export function KidsInstagram({ items = [], sectionTitle, marginBottom = "60px" }: KidsInstagramProps) {
   const scopedCss = `
     .ki-section { margin-bottom: ${marginBottom}; }
     .ki-grid { display: grid; grid-template-columns: repeat(5, 1fr); gap: 15px; }
@@ -1156,7 +1185,7 @@ export function KidsFooterFull({
   const base = resolvedSlug ? `/store/${resolvedSlug}` : "/";
   const exactKids = templateSlug === "kids";
 
-  const activeSocials = socialLinks.filter(s => s.url && s.url !== "#");
+  const activeSocials = Array.isArray(socialLinks) ? socialLinks.filter(s => s.url && s.url !== "#") : [];
 
   const socialIcons: Record<string, string> = {
     facebook: "f", twitter: "𝕏", instagram: "📷", youtube: "▶", tiktok: "♪", whatsapp: "💬",

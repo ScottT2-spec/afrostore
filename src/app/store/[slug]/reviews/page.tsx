@@ -16,6 +16,7 @@ import { TShirtsPrintsHeader, TShirtsPrintsFooter } from "@/components/storefron
 import { PerfumesHeader, PerfumesFooter } from "@/components/storefront/PerfumesStoreChrome";
 import { PerfumesStoreContext } from "@/components/storefront/PerfumesTemplateBlocks";
 import { PERFUMES_REVIEWS_PAGE_BLOCKS } from "@/lib/templates/presets/perfumes-page-presets";
+import { resolveLivePageContent } from "@/lib/templates/bespoke-page-content";
 
 interface ReviewProduct {
   name: string;
@@ -201,14 +202,17 @@ export default function StoreReviewsPage() {
       storeSlug: slug,
       socialLinks: socialLinksArray,
     };
-    const blocks = pageData?.content?.blocks && pageData.content.blocks.length > 0 
-      ? pageData.content.blocks 
-      : PERFUMES_REVIEWS_PAGE_BLOCKS;
+    const resolvedPage = pageData?.content
+      ? resolveLivePageContent("perfumes", "reviews", pageData.content)
+      : null;
+    const pageNodeCss = resolvedPage?.css || "";
+    const blocks = resolvedPage?.blocks.length ? resolvedPage.blocks : PERFUMES_REVIEWS_PAGE_BLOCKS;
 
     return (
       <div style={{ minHeight: "100vh", background: "#fff" }}>
         <PerfumesHeader storeName={store?.name || "Store"} storeSlug={slug} logo={store?.logo} />
         <PerfumesStoreContext.Provider value={ctxValue}>
+          {pageNodeCss && <style data-live-node-styles dangerouslySetInnerHTML={{ __html: pageNodeCss }} />}
           <RenderTemplateBlocks blocks={blocks} />
         </PerfumesStoreContext.Provider>
         <PerfumesFooter storeName={store?.name || "Store"} storeSlug={slug} logo={store?.logo} description={storeData?.store?.description} socialLinks={socialLinksArray} />

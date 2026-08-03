@@ -5,6 +5,7 @@ import { useParams, useRouter } from "next/navigation";
 import VisualEditor from "@/components/visual-editor/VisualEditor";
 import { api } from "@/lib/api-client";
 import { PageStructure } from "@/lib/visual-editor/types"
+import { migrateLegacyPageContentToEditorTree } from "@/lib/visual-editor/node-tree";
 
 export default function EditorPage() {
   const params = useParams();
@@ -52,262 +53,23 @@ export default function EditorPage() {
   };
 
   const convertToEditorStructure = (pageContent: any): PageStructure => {
-    // Convert existing page content to the new editor structure
-    // Handle both old block-based content and new editor structure
+    const migrated = migrateLegacyPageContentToEditorTree(pageContent);
+    const migratedSettings = migrated.settings || {};
 
-    console.log("convertToEditorStructure - pageContent:", pageContent);
-
-    let elements: any[] = [];
-
-    const mapStyleOverridesToEditorStyles = (styleOverrides: Record<string, any> | undefined) => {
-      if (!styleOverrides || typeof styleOverrides !== "object") {
-        // Return empty but properly structured styles object
-        return {
-          typography: {},
-          colors: {},
-          spacing: {},
-          border: {},
-          background: {},
-          effects: {},
-          position: {},
-        };
-      }
-
-      return {
-        typography: {
-          color: styleOverrides.textColor,
-          fontFamily: styleOverrides.fontFamily,
-          fontSize: styleOverrides.fontSize,
-          fontWeight: styleOverrides.fontWeight,
-          lineHeight: styleOverrides.lineHeight,
-          letterSpacing: styleOverrides.letterSpacing,
-          textAlign: styleOverrides.textAlign,
-          textTransform: styleOverrides.textTransform,
-        },
-        colors: {
-          background: styleOverrides.backgroundColor,
-          text: styleOverrides.textColor,
-          border: styleOverrides.borderColor,
-        },
-        spacing: {
-          top: styleOverrides.paddingTop,
-          right: styleOverrides.paddingRight,
-          bottom: styleOverrides.paddingBottom,
-          left: styleOverrides.paddingLeft,
-        },
-        border: {
-          width: styleOverrides.borderWidth,
-          style: styleOverrides.borderStyle,
-          color: styleOverrides.borderColor,
-          radius: styleOverrides.borderRadius,
-        },
-        background: {
-          type: styleOverrides.backgroundType,
-          color: styleOverrides.backgroundColor,
-          gradient: styleOverrides.backgroundGradient,
-          image: styleOverrides.backgroundImage,
-          video: styleOverrides.backgroundVideo,
-          overlay: styleOverrides.backgroundOverlay,
-          overlayOpacity: styleOverrides.backgroundOverlayOpacity,
-          position: styleOverrides.backgroundPosition,
-          size: styleOverrides.backgroundSize,
-          repeat: styleOverrides.backgroundRepeat,
-        },
-        effects: {
-          boxShadow: styleOverrides.boxShadow,
-          opacity: typeof styleOverrides.opacity === "number"
-            ? styleOverrides.opacity
-            : typeof styleOverrides.hoverOpacity === "string"
-              ? Number(styleOverrides.hoverOpacity)
-              : undefined,
-        },
-        position: {
-          type: styleOverrides.position,
-          top: styleOverrides.top,
-          right: styleOverrides.right,
-          bottom: styleOverrides.bottom,
-          left: styleOverrides.left,
-          zIndex: styleOverrides.zIndex,
-        },
-      };
-    };
-
-    const elementToBlock = (element: any) => {
-      const props = element.content?.props
-        ? element.content.props
-        : element.content && typeof element.content === "object"
-          ? { ...element.content }
-          : {};
-
-      // Ensure element has properly structured styles
-      const elementStyles = element.styles || mapStyleOverridesToEditorStyles(element.styleOverrides);
-
-      const styleOverrides = (element.styleOverrides || element.styles)
-        ? {
-            ...(element.styleOverrides || {}),
-            ...(element.styles
-              ? {
-                  textColor: element.styles.typography?.color || element.styles.colors?.text,
-                  backgroundColor: element.styles.colors?.background,
-                  backgroundType: element.styles.background?.type,
-                  backgroundGradient: element.styles.background?.gradient,
-                  backgroundImage: element.styles.background?.image,
-                  backgroundVideo: element.styles.background?.video,
-                  backgroundOverlay: element.styles.background?.overlay,
-                  backgroundOverlayOpacity: element.styles.background?.overlayOpacity,
-                  backgroundPosition: element.styles.background?.position,
-                  backgroundSize: element.styles.background?.size,
-                  backgroundRepeat: element.styles.background?.repeat,
-                  fontFamily: element.styles.typography?.fontFamily,
-                  fontSize: element.styles.typography?.fontSize,
-                  fontWeight: element.styles.typography?.fontWeight,
-                  lineHeight: element.styles.typography?.lineHeight,
-                  letterSpacing: element.styles.typography?.letterSpacing,
-                  textAlign: element.styles.typography?.textAlign,
-                  textTransform: element.styles.typography?.textTransform,
-                  paddingTop: element.styles.spacing?.top,
-                  paddingRight: element.styles.spacing?.right,
-                  paddingBottom: element.styles.spacing?.bottom,
-                  paddingLeft: element.styles.spacing?.left,
-                  borderWidth: element.styles.border?.width,
-                  borderStyle: element.styles.border?.style,
-                  borderColor: element.styles.border?.color,
-                  borderRadius: element.styles.border?.radius,
-                  boxShadow: element.styles.effects?.boxShadow,
-                  opacity: element.styles.effects?.opacity,
-                  position: element.styles.position?.type,
-                  top: element.styles.position?.top,
-                  right: element.styles.position?.right,
-                  bottom: element.styles.position?.bottom,
-                  left: element.styles.position?.left,
-                  zIndex: element.styles.position?.zIndex,
-                  customCss: element.settings?.customCss,
-                }
-              : {}),
-          }
-        : undefined;
-
-      return {
-        id: element.id,
-        type: element.type,
-        props,
-        styles: elementStyles,
-        settings: element.settings || {},
-        ...(styleOverrides ? { styleOverrides } : {}),
-      };
-    };
-
-    if (pageContent?.blocks && Array.isArray(pageContent.blocks)) {
-      // Convert old block-based content to new element structure
-      console.log("Converting blocks array:", pageContent.blocks);
-      elements = pageContent.blocks.map((block: any, index: number) => {
-        // Handle template blocks with props (like aegisHeader, aegisHero, etc.)
-        if (block.props) {
-          console.log("Found template block with props:", block.type, "props:", block.props);
-          return {
-            id: block.id || `block-${index}`,
-            type: block.type, // Keep original type (aegisHeader, aegisHero, etc.)
-            parentId: null,
-            order: index,
-            visible: true,
-            locked: false,
-            name: block.type || "Block",
-            content: {
-              props: block.props,
-            },
-            settings: {
-              customCss: (block as any).styleOverrides?.customCss || "",
-            },
-            styles: mapStyleOverridesToEditorStyles((block as any).styleOverrides),
-          };
-        }
-
-        // Standard block conversion
-        return {
-          id: block.id || `block-${index}`,
-          type: block.type || "section",
-          parentId: null,
-          order: index,
-          visible: true,
-          locked: false,
-          name: block.name || block.type || "Block",
-          content: block.content || {},
-          settings: block.settings || {},
-          styles: mapStyleOverridesToEditorStyles((block as any).styleOverrides || block.styles),
-        };
-      });
-    } else if (pageContent?.elements && Array.isArray(pageContent.elements)) {
-      // Already in new format
-      console.log("Already in new format with elements");
-      elements = pageContent.elements;
-    } else if (Array.isArray(pageContent)) {
-      // Content is directly an array
-      console.log("Content is directly an array:", pageContent);
-      elements = pageContent.map((block: any, index: number) => {
-        if (block.props) {
-          console.log("Found template block with props in array:", block.type);
-          return {
-            id: block.id || `block-${index}`,
-            type: block.type, // Keep original type
-            parentId: null,
-            order: index,
-            visible: true,
-            locked: false,
-            name: block.type || "Block",
-            content: {
-              props: block.props,
-            },
-            settings: {
-              customCss: (block as any).styleOverrides?.customCss || "",
-            },
-            styles: mapStyleOverridesToEditorStyles((block as any).styleOverrides),
-          };
-        }
-        return {
-          id: block.id || `block-${index}`,
-          type: block.type || "section",
-          parentId: null,
-          order: index,
-          visible: true,
-          locked: false,
-          name: block.name || block.type || "Block",
-          content: block.content || {},
-          settings: block.settings || {},
-          styles: mapStyleOverridesToEditorStyles((block as any).styleOverrides || block.styles),
-        };
-      });
-    } else if (pageContent) {
-      // Try to convert raw content to a section
-      console.log("Converting raw content to section");
-      elements = [{
-        id: "section-1",
-        type: "section",
-        parentId: null,
-        order: 0,
-        visible: true,
-        locked: false,
-        name: "Main Content",
-        content: pageContent,
-        settings: {},
-        styles: {},
-      }];
-    }
-
-    console.log("Final elements:", elements);
-    
     return {
       id: pageData?.id || pageId,
       title: pageData?.title || "Untitled Page",
       slug: pageData?.slug || "untitled",
-      elements: elements,
+      elements: migrated.elements,
       settings: {
-        layout: "default",
-        hideTitle: false,
-        customCss: "",
-        customJs: "",
-        padding: { top: "0", right: "0", bottom: "0", left: "0" },
-        margin: { top: "0", right: "0", bottom: "0", left: "0" },
-        backgroundColor: "#ffffff",
+        layout: (migratedSettings.layout as PageStructure["settings"]["layout"]) || "default",
+        hideTitle: typeof migratedSettings.hideTitle === "boolean" ? migratedSettings.hideTitle : false,
+        customCss: typeof migratedSettings.customCss === "string" ? migratedSettings.customCss : "",
+        customJs: typeof migratedSettings.customJs === "string" ? migratedSettings.customJs : "",
+        padding: (migratedSettings.padding as PageStructure["settings"]["padding"]) || { top: "0", right: "0", bottom: "0", left: "0" },
+        margin: (migratedSettings.margin as PageStructure["settings"]["margin"]) || { top: "0", right: "0", bottom: "0", left: "0" },
+        backgroundColor: typeof migratedSettings.backgroundColor === "string" ? migratedSettings.backgroundColor : "#ffffff",
+        backgroundImage: typeof migratedSettings.backgroundImage === "string" ? migratedSettings.backgroundImage : undefined,
       },
       meta: {
         title: pageData?.metaTitle || pageData?.title || "",
@@ -324,72 +86,13 @@ export default function EditorPage() {
     console.log("siteData:", siteData);
     console.log("pageId:", pageId);
     
-    // Convert editor structure back to your page content format
-    const editorElementToBlock = (element: any): any => {
-      console.log("Converting element to block:", element.id, element.type);
-      console.log("Element styles:", element.styles);
-      
-      const styleOverrides = {
-        ...(element.styles?.typography?.color || element.styles?.colors?.text ? { textColor: element.styles.typography?.color || element.styles.colors?.text } : {}),
-        ...(element.styles?.colors?.background ? { backgroundColor: element.styles.colors.background } : {}),
-        ...(element.styles?.background?.type ? { backgroundType: element.styles.background.type } : {}),
-        ...(element.styles?.background?.gradient ? { backgroundGradient: element.styles.background.gradient } : {}),
-        ...(element.styles?.background?.image ? { backgroundImage: element.styles.background.image } : {}),
-        ...(element.styles?.background?.video ? { backgroundVideo: element.styles.background.video } : {}),
-        ...(element.styles?.background?.overlay ? { backgroundOverlay: element.styles.background.overlay } : {}),
-        ...(typeof element.styles?.background?.overlayOpacity === "number" ? { backgroundOverlayOpacity: element.styles.background.overlayOpacity } : {}),
-        ...(element.styles?.background?.position ? { backgroundPosition: element.styles.background.position } : {}),
-        ...(element.styles?.background?.size ? { backgroundSize: element.styles.background.size } : {}),
-        ...(element.styles?.background?.repeat ? { backgroundRepeat: element.styles.background.repeat } : {}),
-        ...(element.styles?.typography?.fontFamily ? { fontFamily: element.styles.typography.fontFamily } : {}),
-        ...(element.styles?.typography?.fontSize ? { fontSize: element.styles.typography.fontSize } : {}),
-        ...(element.styles?.typography?.fontWeight ? { fontWeight: element.styles.typography.fontWeight } : {}),
-        ...(element.styles?.typography?.lineHeight ? { lineHeight: element.styles.typography.lineHeight } : {}),
-        ...(element.styles?.typography?.letterSpacing ? { letterSpacing: element.styles.typography.letterSpacing } : {}),
-        ...(element.styles?.typography?.textAlign ? { textAlign: element.styles.typography.textAlign } : {}),
-        ...(element.styles?.typography?.textTransform ? { textTransform: element.styles.typography.textTransform } : {}),
-        ...(element.styles?.spacing?.top ? { paddingTop: element.styles.spacing.top } : {}),
-        ...(element.styles?.spacing?.right ? { paddingRight: element.styles.spacing.right } : {}),
-        ...(element.styles?.spacing?.bottom ? { paddingBottom: element.styles.spacing.bottom } : {}),
-        ...(element.styles?.spacing?.left ? { paddingLeft: element.styles.spacing.left } : {}),
-        ...(element.styles?.border?.width ? { borderWidth: element.styles.border.width } : {}),
-        ...(element.styles?.border?.style ? { borderStyle: element.styles.border.style } : {}),
-        ...(element.styles?.border?.color ? { borderColor: element.styles.border.color } : {}),
-        ...(element.styles?.border?.radius ? { borderRadius: element.styles.border.radius } : {}),
-        ...(element.styles?.effects?.boxShadow ? { boxShadow: element.styles.effects.boxShadow } : {}),
-        ...(typeof element.styles?.effects?.opacity === "number" ? { opacity: element.styles.effects.opacity } : {}),
-        ...(element.styles?.position?.type ? { position: element.styles.position.type } : {}),
-        ...(element.styles?.position?.top ? { top: element.styles.position.top } : {}),
-        ...(element.styles?.position?.right ? { right: element.styles.position.right } : {}),
-        ...(element.styles?.position?.bottom ? { bottom: element.styles.position.bottom } : {}),
-        ...(element.styles?.position?.left ? { left: element.styles.position.left } : {}),
-        ...(typeof element.styles?.position?.zIndex === "number" ? { zIndex: element.styles.position.zIndex } : {}),
-        ...(element.settings?.customCss ? { customCss: element.settings.customCss } : {}),
-      };
-
-      console.log("Generated styleOverrides:", styleOverrides);
-
-      return {
-        id: element.id,
-        type: element.type,
-        props: element.content?.props
-          ? element.content.props
-          : element.content && typeof element.content === "object"
-            ? { ...element.content }
-            : {},
-        styleOverrides,
-      };
-    };
-
     const pageContent = {
-      blocks: content.elements.map(editorElementToBlock),
-      settings: {
-        customCss: content.settings.customCss,
-      },
+      elements: content.elements,
+      settings: content.settings,
     };
 
     console.log("pageContent to save:", pageContent);
-    console.log("First block styleOverrides:", pageContent.blocks[0]?.styleOverrides);
+    console.log("First element:", pageContent.elements[0]);
 
     try {
       const savePath = siteData?.id

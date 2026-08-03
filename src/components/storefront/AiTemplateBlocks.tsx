@@ -4,6 +4,8 @@ import Link from "next/link";
 import { resolveStoreLink, resolveFooterLink } from "@/lib/template-link-utils";
 import { safeSrc, onImgError } from "./image-fallback";
 import { useNewsletterSubscribe } from "@/hooks/useNewsletterSubscribe";
+import { normalizeObjectArray, normalizeSocialLinks } from "@/components/storefront/prop-normalizers";
+import { InlineEditableText } from "@/components/storefront/InlineEditableText";
 
 /* ═══════════════════════════════════════════════════════════════
    AI TEMPLATE BLOCKS
@@ -360,16 +362,18 @@ export interface AiLargeProductItem {
 }
 
 export interface AiLargeProductCarouselProps {
-  tabs: Array<{ label: string; products: AiLargeProductItem[] }>;
+  tabs?: Array<{ label: string; products: AiLargeProductItem[] }>;
   dotsBackground?: string;
 }
 
-export function AiLargeProductCarousel({ tabs, dotsBackground = TOKENS.naturalWhite }: AiLargeProductCarouselProps) {
+export function AiLargeProductCarousel({ tabs = [], dotsBackground = TOKENS.naturalWhite }: AiLargeProductCarouselProps) {
   const fixLink = useFixLink();
   const { ref, inView } = useInView();
   const [activeTab, setActiveTab] = useState(0);
   const [activeProduct, setActiveProduct] = useState(0);
-  const products = tabs[activeTab]?.products || [];
+  type LargeProductTab = NonNullable<AiLargeProductCarouselProps["tabs"]>[number];
+  const normalizedTabs = normalizeObjectArray<LargeProductTab>(tabs, []);
+  const products = normalizedTabs[activeTab]?.products || [];
   const product = products[activeProduct];
 
   const scopedCss = `
@@ -413,7 +417,7 @@ export function AiLargeProductCarousel({ tabs, dotsBackground = TOKENS.naturalWh
 
       {/* Tabs */}
       <div style={{ display: "flex", justifyContent: "center", gap: "40px", marginBottom: "32px", position: "relative", zIndex: 2 }}>
-        {tabs.map((tab, i) => (
+        {normalizedTabs.map((tab, i) => (
           <button
             key={i}
             className={`ai-lpc-tab ${i === activeTab ? "active" : ""}`}
@@ -513,7 +517,7 @@ export function AiLargeProductCarousel({ tabs, dotsBackground = TOKENS.naturalWh
 
         {/* Dot indicators */}
         <div style={{ display: "flex", justifyContent: "center", gap: "8px", marginTop: "20px", position: "relative", zIndex: 2 }}>
-          {products.map((_, i) => (
+          {products.map((_: AiLargeProductItem, i: number) => (
             <button
               key={i}
               onClick={() => setActiveProduct(i)}
@@ -623,15 +627,17 @@ export interface AiProductCardData {
 }
 
 export interface AiProductCarouselProps {
-  tabs: Array<{ label: string; products: AiProductCardData[] }>;
+  tabs?: Array<{ label: string; products: AiProductCardData[] }>;
 }
 
-export function AiProductCarousel({ tabs }: AiProductCarouselProps) {
+export function AiProductCarousel({ tabs = [] }: AiProductCarouselProps) {
   const fixLink = useFixLink();
   const { ref, inView } = useInView();
   const [activeTab, setActiveTab] = useState(0);
   const scrollRef = useRef<HTMLDivElement>(null);
-  const products = tabs[activeTab]?.products || [];
+  type ProductTab = NonNullable<AiProductCarouselProps["tabs"]>[number];
+  const normalizedTabs = normalizeObjectArray<ProductTab>(tabs, []);
+  const products = normalizedTabs[activeTab]?.products || [];
 
   const scopedCss = `
     .ai-pc-card { position: relative; display: flex; flex-direction: column; border-radius: ${TOKENS.radiusMd}; background: white; overflow: hidden; min-width: 260px; max-width: 320px; flex-shrink: 0; transition: all 0.3s ease; }
@@ -664,7 +670,7 @@ export function AiProductCarousel({ tabs }: AiProductCarouselProps) {
       {/* Tabs */}
       <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", padding: `0 20px`, marginBottom: "24px" }}>
         <div style={{ display: "flex", gap: "20px", overflowX: "auto" }}>
-          {tabs.map((tab, i) => (
+          {normalizedTabs.map((tab, i) => (
             <button
               key={i}
               onClick={() => setActiveTab(i)}
@@ -691,7 +697,7 @@ export function AiProductCarousel({ tabs }: AiProductCarouselProps) {
 
       {/* Cards scroll */}
       <div ref={scrollRef} className="ai-pc-scroll">
-        {products.map((p, i) => (
+        {products.map((p: AiProductCardData, i: number) => (
           <div key={i} className="ai-pc-card">
             {/* Badge */}
             {p.badge && <div className="ai-pc-badge">{p.badge}</div>}
@@ -718,7 +724,7 @@ export function AiProductCarousel({ tabs }: AiProductCarouselProps) {
               <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginTop: "4px" }}>
                 {/* Swatches */}
                 <div style={{ display: "flex", gap: "6px", alignItems: "center" }}>
-                  {(p.swatches || []).map((sw, si) => (
+                  {(p.swatches || []).map((sw: { color: string; label: string }, si: number) => (
                     <span key={si} className={`ai-pc-swatch ${si === 0 ? "active" : ""}`} style={{ backgroundColor: sw.color }} title={sw.label} />
                   ))}
                 </div>
@@ -930,6 +936,7 @@ export function AiFooter({
   const { subscribe, status } = useNewsletterSubscribe(storeCtx?.storeSlug || "");
   const [email, setEmail] = useState("");
   const handleSubscribe = () => { subscribe(email); };
+  const safeSocialLinks = normalizeSocialLinks(socialLinks);
   const [expandedCol, setExpandedCol] = useState<number | null>(null);
 
   const scopedCss = `
@@ -1000,9 +1007,9 @@ export function AiFooter({
 
         {/* Social + copyright */}
         <div style={{ borderTop: "1px solid rgba(255,255,255,0.1)", paddingTop: "20px", display: "flex", justifyContent: "space-between", alignItems: "center", flexWrap: "wrap", gap: "16px" }}>
-          {socialLinks && socialLinks.length > 0 && (
+          {safeSocialLinks.length > 0 && (
             <div style={{ display: "flex", gap: "16px" }}>
-              {socialLinks.map((s, i) => (
+              {safeSocialLinks.map((s, i) => (
                 <a key={i} href={s.url} target="_blank" rel="noopener noreferrer" style={{ color: "rgba(255,255,255,0.5)", fontSize: "13px" }}>{s.platform}</a>
               ))}
             </div>

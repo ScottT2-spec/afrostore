@@ -1,9 +1,11 @@
 "use client";
 
+import { use } from "react";
 import { useEffect, useState } from "react";
 import { ShopPageContent } from "@/components/storefront/ShopPageContent";
 
-export default function TestShopRenderPage({ params }: { params: { slug: string } }) {
+export default function TestShopRenderPage({ params }: { params: Promise<{ slug: string }> }) {
+  const resolvedParams = use(params);
   const [storeData, setStoreData] = useState<any>(null);
   const [loading, setLoading] = useState(true);
 
@@ -11,7 +13,7 @@ export default function TestShopRenderPage({ params }: { params: { slug: string 
     async function loadData() {
       try {
         // Fetch storefront data
-        const res = await fetch(`/api/storefront/${params.slug}`);
+        const res = await fetch(`/api/storefront/${resolvedParams.slug}`);
         const json = await res.json();
         
         if (json.success && json.data) {
@@ -24,7 +26,7 @@ export default function TestShopRenderPage({ params }: { params: { slug: string 
       }
     }
     loadData();
-  }, [params.slug]);
+  }, [resolvedParams.slug]);
 
   if (loading) {
     return <div className="min-h-screen flex items-center justify-center">Loading...</div>;
@@ -34,9 +36,9 @@ export default function TestShopRenderPage({ params }: { params: { slug: string 
     return <div className="min-h-screen flex items-center justify-center">Failed to load</div>;
   }
 
-  return (
-    <ShopPageContent
-      storeSlug={params.slug}
+    return (
+      <ShopPageContent
+      storeSlug={resolvedParams.slug}
       storeData={storeData}
     />
   );

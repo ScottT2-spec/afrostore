@@ -58,20 +58,21 @@ export const FashionPageRenderer: React.FC<FashionPageRendererProps> = ({
   // Render individual block based on type
   const renderBlock = (sec: FashionSection) => {
     const { type, props } = sec;
+    const isEditor = mode === "edit";
 
     switch (type) {
       case 'fashionHeroSlider':
-        return <FashionHeroSlider slides={props.slides as any || []} autoplaySpeed={props.autoplaySpeed} minHeight={props.minHeight} />;
+        return <FashionHeroSlider slides={props.slides as any || []} autoplaySpeed={props.autoplaySpeed} minHeight={props.minHeight} isEditor={isEditor} blockId={sec.id} />;
       case 'fashionCategoryCards':
-        return <FashionCategoryCards categories={props.categories as any || []} sectionTitle={props.sectionTitle} />;
+        return <FashionCategoryCards categories={props.categories as any || []} sectionTitle={props.sectionTitle} blockId={sec.id} isEditor={isEditor} />;
       case 'fashionProductGrid':
-        return <FashionProductGrid {...props} />;
+        return <FashionProductGrid {...props} blockId={sec.id} isEditor={isEditor} />;
       case 'fashionPromoBanners':
         return <FashionPromoBanners banners={props.banners as any || []} />;
       case 'fashionBlogPosts':
-        return <FashionBlogPosts posts={props.posts as any || []} columns={props.columns} sectionTitle={props.sectionTitle} />;
+        return <FashionBlogPosts posts={props.posts as any || []} columns={props.columns} sectionTitle={props.sectionTitle} blockId={sec.id} isEditor={isEditor} />;
       case 'fashionNewsletter':
-        return <FashionNewsletter {...props} />;
+        return <FashionNewsletter {...props} blockId={sec.id} isEditor={isEditor} />;
       default:
         return <div className="p-8 text-center text-gray-500">Unknown block type: {type}</div>;
     }

@@ -3,8 +3,8 @@ import { RenderBlocks, type BuilderBlock } from "@/components/storefront/BlockRe
 import { RetailHeader, RetailFooter } from "@/components/storefront/RetailTemplateBlocks";
 import { ThemeProvider, type ThemeData } from "@/components/storefront/ThemeProvider";
 import { buildPageBackgroundStyle } from "@/lib/site-customization";
-import { parsePageContent } from "@/lib/page-content";
 import { RETAIL_PROJECT_DETAIL_BLOCKS } from "@/lib/templates/presets/retail-pages";
+import { resolveLivePageContent } from "@/lib/templates/bespoke-page-content";
 
 interface Props {
   params: Promise<{
@@ -97,23 +97,23 @@ export default async function ProjectDetailPage({ params }: Props) {
   // The projectSlug already includes the project- prefix (e.g., project-look-deep-into-nature)
   const projectPage = store.pages?.find((p: any) => p.slug === projectSlug);
 
-  let pageContent = { blocks: DEFAULT_PROJECT_DETAIL_BLOCKS, settings: {} };
-
-  // Use preset blocks if available for this project slug, otherwise use default fallback
-  if (RETAIL_PROJECT_DETAIL_BLOCKS[projectSlug]) {
-    pageContent = { blocks: RETAIL_PROJECT_DETAIL_BLOCKS[projectSlug], settings: {} };
-  }
-
-  // If page exists in DB and has content, use that instead of preset
-  if (projectPage?.content) {
-    const parsed = parsePageContent(projectPage.content as any);
-    if (parsed.blocks && parsed.blocks.length > 0) {
-      pageContent = parsed;
-    }
-  }
+  const resolvedPage = projectPage?.content
+    ? resolveLivePageContent("retail", projectSlug, projectPage.content, {
+        pageSlug: projectSlug,
+        pageTitle: projectPage.title,
+        pageType: projectPage.type,
+        templateSlug: activeTemplateSlug,
+      })
+    : null;
+  const pageContent = resolvedPage?.blocks.length
+    ? { blocks: resolvedPage.blocks, settings: resolvedPage.settings }
+    : RETAIL_PROJECT_DETAIL_BLOCKS[projectSlug]
+      ? { blocks: RETAIL_PROJECT_DETAIL_BLOCKS[projectSlug], settings: {} }
+      : { blocks: DEFAULT_PROJECT_DETAIL_BLOCKS, settings: {} };
 
   const themeData: ThemeData = {} as any;
   const pageSettings = {} as any;
+  const projectNodeCss = resolvedPage?.css || "";
 
   const projectBlocks = pageContent.blocks as BuilderBlock[];
 
@@ -121,6 +121,7 @@ export default async function ProjectDetailPage({ params }: Props) {
     <ThemeProvider theme={themeData}>
       <RetailHeader storeName={store.name} storeSlug={store.slug || slug} logo={store.logo} isLanding={false} />
       <div style={buildPageBackgroundStyle(pageSettings)}>
+        {projectNodeCss && <style data-live-node-styles dangerouslySetInnerHTML={{ __html: projectNodeCss }} />}
         <RenderBlocks blocks={projectBlocks} storeSlug={slug} products={serializedProducts} />
       </div>
       <RetailFooter storeName={store.name} storeSlug={store.slug || slug} logo={store.logo} description={store.description ?? undefined} />

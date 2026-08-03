@@ -1,67 +1,76 @@
-import type { TemplateBlock } from "@/components/storefront/TemplateBlockRenderer";
+import type { EditorNode } from "@/lib/visual-editor/node-tree";
 
 /**
  * Fashion Colored template preset — WoodMart "Fashion Colored" demo.
  * Green primary (#52bd72), parallax hero, collection banners, product grids,
  * category carousel, features section, Instagram gallery, and footer.
  */
-export const FASHION_COLORED_PRESET: TemplateBlock[] = [
+export const FASHION_COLORED_PRESET: EditorNode[] = [
   /* ── 1. Hero Slider ───────────────────────────────────────── */
   {
     id: "fc-hero",
     type: "fashionHeroSlider",
-    props: {
-      slides: [
-        {
-          subtitle: "",
-          titleLine1: "COLOR",
-          titleLine2: "",
-          description:
-            "Convallis interdum purus adipiscing dis parturient posuere ac a quam a eleifend montes parturient posuere curae tempor.",
-          buttonText: "Read More",
-          buttonLink: "/shop",
-          colorScheme: "light",
-          textPosition: "center",
-          backgroundImage:
-            "https://images.unsplash.com/photo-1558171813-4c088753af8f?w=1920&h=800&fit=crop",
-        },
-        {
-          subtitle: "",
-          titleLine1: "DENIM",
-          titleLine2: "",
-          description:
-            "Convallis interdum purus adipiscing dis parturient posuere ac a quam a eleifend montes parturient posuere curae tempor.",
-          buttonText: "Read More",
-          buttonLink: "/shop",
-          colorScheme: "light",
-          textPosition: "center",
-          backgroundImage:
-            "https://images.unsplash.com/photo-1445205170230-053b83016050?w=1920&h=800&fit=crop",
-        },
-        {
-          subtitle: "",
-          titleLine1: "SALES",
-          titleLine2: "",
-          description:
-            "Convallis interdum purus adipiscing dis parturient posuere ac a quam a eleifend montes parturient posuere curae tempor.",
-          buttonText: "Read More",
-          buttonLink: "/shop",
-          colorScheme: "light",
-          textPosition: "center",
-          backgroundImage:
-            "https://images.unsplash.com/photo-1490481651871-ab68de25d43d?w=1920&h=800&fit=crop",
-        },
-      ],
-      minHeight: "560px",
+          settings: {
+        minHeight: "560px",
       autoplaySpeed: 18000,
-    },
+      },
+      elements: [
+        {
+          id: "fc-hero-slide-1",
+          type: "slide",
+          settings:           {
+            "subtitle": "",
+            "titleLine1": "COLOR",
+            "titleLine2": "",
+            "description": "Convallis interdum purus adipiscing dis parturient posuere ac a quam a eleifend montes parturient posuere curae tempor.",
+            "buttonText": "Read More",
+            "buttonLink": "/shop",
+            "colorScheme": "light",
+            "textPosition": "center",
+            "backgroundImage": "https://images.unsplash.com/photo-1558171813-4c088753af8f?w=1920&h=800&fit=crop"
+          },
+          elements: [],
+        },
+        {
+          id: "fc-hero-slide-2",
+          type: "slide",
+          settings:           {
+            "subtitle": "",
+            "titleLine1": "DENIM",
+            "titleLine2": "",
+            "description": "Convallis interdum purus adipiscing dis parturient posuere ac a quam a eleifend montes parturient posuere curae tempor.",
+            "buttonText": "Read More",
+            "buttonLink": "/shop",
+            "colorScheme": "light",
+            "textPosition": "center",
+            "backgroundImage": "https://images.unsplash.com/photo-1445205170230-053b83016050?w=1920&h=800&fit=crop"
+          },
+          elements: [],
+        },
+        {
+          id: "fc-hero-slide-3",
+          type: "slide",
+          settings:           {
+            "subtitle": "",
+            "titleLine1": "SALES",
+            "titleLine2": "",
+            "description": "Convallis interdum purus adipiscing dis parturient posuere ac a quam a eleifend montes parturient posuere curae tempor.",
+            "buttonText": "Read More",
+            "buttonLink": "/shop",
+            "colorScheme": "light",
+            "textPosition": "center",
+            "backgroundImage": "https://images.unsplash.com/photo-1490481651871-ab68de25d43d?w=1920&h=800&fit=crop"
+          },
+          elements: [],
+        }
+      ],
   },
 
   /* ── 2. Promo Banners (3 Collection Banners) ──────────────── */
   {
     id: "fc-promos",
     type: "fashionPromoBanners",
-    props: {
+    settings: {
       banners: [
         {
           image:
@@ -98,7 +107,7 @@ export const FASHION_COLORED_PRESET: TemplateBlock[] = [
   {
     id: "fc-latest-products",
     type: "fashionProductGrid",
-    props: {
+    settings: {
       filter: "featured",
       columns: 3,
       products: [],
@@ -118,7 +127,7 @@ export const FASHION_COLORED_PRESET: TemplateBlock[] = [
   {
     id: "fc-categories",
     type: "fashionCategoryCards",
-    props: {
+    settings: {
       columns: 4,
       categories: [
         {
@@ -163,7 +172,7 @@ export const FASHION_COLORED_PRESET: TemplateBlock[] = [
   {
     id: "fc-more-products",
     type: "fashionProductGrid",
-    props: {
+    settings: {
       filter: "all",
       columns: 4,
       products: [],
@@ -183,7 +192,7 @@ export const FASHION_COLORED_PRESET: TemplateBlock[] = [
   {
     id: "fc-features",
     type: "fashionFeatures",
-    props: {
+    settings: {
       sectionTitle: {
         subtitle: "SEE OUR COLLECTION",
         title: "HOW WE WORK",
@@ -225,7 +234,7 @@ export const FASHION_COLORED_PRESET: TemplateBlock[] = [
   {
     id: "fc-instagram",
     type: "fashionInstagram",
-    props: {
+    settings: {
       sectionTitle: {
         subtitle: "SEE OUR COLLECTION",
         title: "FOLLOW US ON INSTAGRAM",
@@ -275,7 +284,7 @@ export const FASHION_COLORED_PRESET: TemplateBlock[] = [
   {
     id: "fc-footer",
     type: "fashionFooter",
-    props: {
+    settings: {
       logoUrl: "",
       logoAlt: "Store Logo",
       description:

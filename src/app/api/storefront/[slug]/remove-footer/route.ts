@@ -9,6 +9,16 @@ type Params = { params: Promise<{ slug: string }> };
 export async function POST(req: NextRequest, { params }: Params) {
   const { slug } = await params;
 
+  const removeBlockTypeFromNodes = (nodes: any[], type: string): any[] =>
+    nodes
+      .filter((node) => node?.type !== type)
+      .map((node) => {
+        if (Array.isArray(node?.elements)) {
+          return { ...node, elements: removeBlockTypeFromNodes(node.elements, type) };
+        }
+        return node;
+      });
+
   try {
     const store = await prisma.site.findFirst({
       where: {
@@ -35,9 +45,34 @@ export async function POST(req: NextRequest, { params }: Params) {
     }
 
     const content = homePage.content as any;
+    if (content && Array.isArray(content.elements)) {
+      const filteredElements = removeBlockTypeFromNodes(content.elements, "fashionFooter");
+
+      if (filteredElements.length !== content.elements.length) {
+        await prisma.page.update({
+          where: { id: homePage.id },
+          data: {
+            content: {
+              ...content,
+              elements: filteredElements,
+            },
+          },
+        });
+
+        return success({
+          message: "Footer block removed from homepage",
+          removedCount: content.elements.length - filteredElements.length,
+        });
+      }
+
+      return success({
+        message: "No footer blocks found in homepage content",
+      });
+    }
+
     if (content && content.blocks && Array.isArray(content.blocks)) {
       const filteredBlocks = content.blocks.filter((block: any) => block.type !== "fashionFooter");
-      
+
       if (filteredBlocks.length !== content.blocks.length) {
         await prisma.page.update({
           where: { id: homePage.id },
@@ -48,19 +83,19 @@ export async function POST(req: NextRequest, { params }: Params) {
             },
           },
         });
-        
+
         return success({
           message: "Footer block removed from homepage",
           removedCount: content.blocks.length - filteredBlocks.length,
         });
-      } else {
-        return success({
-          message: "No footer blocks found in homepage content",
-        });
       }
-    } else {
-      return error("Homepage content is not in expected format", 400);
+
+      return success({
+        message: "No footer blocks found in homepage content",
+      });
     }
+
+    return error("Homepage content is not in expected format", 400);
   } catch (err) {
     console.error("Remove footer error:", err);
     return error("Internal server error", 500);

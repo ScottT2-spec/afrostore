@@ -2,6 +2,7 @@ import { NextRequest } from "next/server";
 import { prisma } from "@/lib/db";
 import { success, error } from "@/lib/api-helpers";
 import { ensureVegetablePages } from "@/lib/templates/vegetable-pages";
+import { buildTemplatePageContent } from "@/lib/templates/template-tree";
 
 type Params = { params: Promise<{ slug: string }> };
 
@@ -61,7 +62,7 @@ export async function POST(req: NextRequest, { params }: Params) {
           title: "About Us",
           slug: "about",
           type: "CUSTOM",
-          content: [],
+          content: buildTemplatePageContent([], {}) as any,
           isPublished: true,
           position: 10,
         },
@@ -77,7 +78,7 @@ export async function POST(req: NextRequest, { params }: Params) {
           title: "Our Story",
           slug: "our-story",
           type: "CUSTOM",
-          content: [],
+          content: buildTemplatePageContent([], {}) as any,
           isPublished: true,
           position: 11,
         },
@@ -93,7 +94,7 @@ export async function POST(req: NextRequest, { params }: Params) {
           title: "Contact Us",
           slug: "contact",
           type: "CUSTOM",
-          content: [],
+          content: buildTemplatePageContent([], {}) as any,
           isPublished: true,
           position: 12,
         },
@@ -109,7 +110,7 @@ export async function POST(req: NextRequest, { params }: Params) {
           title: "Reviews",
           slug: "reviews",
           type: "CUSTOM",
-          content: [],
+          content: buildTemplatePageContent([], {}) as any,
           isPublished: true,
           position: 13,
         },

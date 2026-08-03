@@ -7,6 +7,7 @@ import { useDraggable, useDroppable, DndContext, closestCenter, DragEndEvent } f
 import { getSectionStyle, resolveOpacity } from "@/components/storefront/block-style";
 import { ALL_TEMPLATE_BLOCKS } from "@/components/storefront/TemplateBlockRenderer";
 import { resolveStoreLink } from "@/lib/template-link-utils";
+import { normalizeStorefrontTemplateProps, toDisplayText } from "@/components/storefront/prop-normalizers";
 import {
   FashionFontLoader as FashionFontLoaderDirect,
   FashionStoreContext,
@@ -26,6 +27,8 @@ import { MakeupFontLoader } from "@/components/storefront/MakeupTemplateBlocks";
 import { PerfumesFontLoader } from "@/components/storefront/PerfumesTemplateBlocks";
 import { AiFontLoader } from "@/components/storefront/AiTemplateBlocks";
 
+const loggedMissingBlockKeys = new Set<string>();
+
 function getTemplateFontLoader(type: string): React.ComponentType {
   if (type.startsWith("ai")) return AiFontLoader;
   if (type.startsWith("electronics")) return ElectronicsFontLoader;
@@ -43,13 +46,24 @@ function getTemplateFontLoader(type: string): React.ComponentType {
   return FashionFontLoaderDirect;
 }
 
+function getBlockListKey(block: BuilderBlock | undefined, index: number, scope: string): string {
+  if (block?.id) return block.id;
+  const fallbackKey = `${scope}-${index}`;
+  if (!loggedMissingBlockKeys.has(fallbackKey)) {
+    loggedMissingBlockKeys.add(fallbackKey);
+    console.warn(`[BlockRenderer] Missing block id for ${scope}[${index}]; using fallback key "${fallbackKey}"`);
+  }
+  return fallbackKey;
+}
+
 /* ─── TYPES ─────────────────────────────────────────────────── */
 
 export interface BuilderBlock {
   id: string;
   type: string;
-  props: Record<string, unknown>;
+  props?: Record<string, unknown>;
   styleOverrides?: Record<string, unknown>;
+  elements?: BuilderBlock[];
 }
 
 /* ─── ANIMATION HOOK ────────────────────────────────────────── */
@@ -439,7 +453,7 @@ function getProductGradient(id: string): string {
 function ProductGridBlock({ props }: { props: Record<string, unknown> }) {
   const limit = (props.limit as number) || 6;
   const cols = (props.columns as number) || 3;
-  const categoryFilter = (props.category as string) || "";
+  const categoryFilter = toDisplayText(props.category, "");
   const { products, currency, slug, addToCart, isWishlisted, toggleWishlist, addedToCart } = useContext(StoreContext);
 
   // Filter products by category if specified, then limit
@@ -1706,6 +1720,8 @@ function DroppableBlockList({ children, isEditorMode }: { children: React.ReactN
 /* ─── PUBLIC API ────────────────────────────────────────────── */
 
 export function PublicBlockRenderer({ block }: { block: BuilderBlock; isEditorMode?: boolean }) {
+  const normalizedProps = normalizeStorefrontTemplateProps((block.props || {}) as Record<string, unknown>);
+
   // Check if it's a template block (fashion, electronics, bakery, cosmetics, etc.)
   const TemplateComponent = ALL_TEMPLATE_BLOCKS[block.type];
   if (TemplateComponent) {
@@ -1713,13 +1729,13 @@ export function PublicBlockRenderer({ block }: { block: BuilderBlock; isEditorMo
     return (
       <>
         <FontLoader />
-        <TemplateComponent {...(block.props as Record<string, unknown>)} />
+        <TemplateComponent {...normalizedProps} elements={block.elements || []} />
       </>
     );
   }
   const Renderer = renderers[block.type];
   if (!Renderer) return null;
-  return <Renderer props={block.props} />;
+  return <Renderer props={normalizedProps} />;
 }
 
 export function RenderBlocks({ blocks, storeSlug, products, currency, addToCart, isWishlisted, toggleWishlist, addedToCart, isEditorMode = false, pageId, blockCount, dataSource, wrapBlock }: {
@@ -1760,11 +1776,20 @@ export function RenderBlocks({ blocks, storeSlug, products, currency, addToCart,
       <DroppableBlockList isEditorMode={isEditorMode}>
         <div className="space-y-8">
           {blocks.map((block, index) => {
-            const node = <PublicBlockRenderer key={block.id} block={block} isEditorMode={isEditorMode} />;
+            const listKey = getBlockListKey(block, index, "editor-block");
+            const node = <PublicBlockRenderer block={block} isEditorMode={isEditorMode} />;
             const wrappedNode = wrapBlock ? wrapBlock(block, node, index) : node;
-            return (
-              <DraggableBlock key={block.id} block={block} isEditorMode={isEditorMode}>
+            const scopedNode = (
+              <div
+                data-editor-node-id={block.id}
+                className={`editor-node-${block.id}`}
+              >
                 {wrappedNode}
+              </div>
+            );
+            return (
+              <DraggableBlock key={listKey} block={block} isEditorMode={isEditorMode}>
+                {scopedNode}
               </DraggableBlock>
             );
           })}
@@ -1772,16 +1797,22 @@ export function RenderBlocks({ blocks, storeSlug, products, currency, addToCart,
       </DroppableBlockList>
     </DndContext>
   ) : (
-    <div className="space-y-8">
-      {blocks.map((block, index) => {
-        const node = <PublicBlockRenderer key={block.id} block={block} isEditorMode={isEditorMode} />;
-        if (wrapBlock) {
-          return <div key={block.id}>{wrapBlock(block, node, index)}</div>;
-        }
-        return node;
-      })}
-    </div>
-  );
+      <div className="space-y-8">
+        {blocks.map((block, index) => {
+          const listKey = getBlockListKey(block, index, "live-block");
+          const node = <PublicBlockRenderer block={block} isEditorMode={isEditorMode} />;
+          const scopedNode = (
+            <div
+              data-editor-node-id={block.id}
+              className={`editor-node-${block.id}`}
+            >
+              {wrapBlock ? wrapBlock(block, node, index) : node}
+            </div>
+          );
+          return <div key={listKey}>{scopedNode}</div>;
+        })}
+      </div>
+    );
   const hasFashionBlocks = blocks.some((b) => b.type.startsWith("fashion"));
   const hasElectronicsBlocks = blocks.some((b) => b.type.startsWith("electronics") || b.type.startsWith("tools") || b.type.startsWith("hardware"));
   const hasInteriorBlocks = blocks.some((b) => b.type.startsWith("interior"));

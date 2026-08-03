@@ -1,54 +1,69 @@
-import type { TemplateBlock } from "@/components/storefront/TemplateBlockRenderer";
+import type { EditorNode } from "@/lib/visual-editor/node-tree";
 
 /**
  * Cosmetics Template Preset
  * Recreates the WoodMart Cosmetics demo layout with editable blocks.
  */
-export const COSMETICS_TEMPLATE_PRESET: TemplateBlock[] = [
+export const COSMETICS_TEMPLATE_PRESET: EditorNode[] = [
   {
     id: "cosmetics-hero",
     type: "cosmeticsHeroSlider",
-    props: {
-      autoplaySpeed: 5000,
-      minHeight: "560px",
-      slides: [
+          settings: {
+        autoplaySpeed: 5000,
+      minHeight: "560px"
+      },
+      elements: [
         {
-          subtitle: "Commodo",
-          titleLine1: "The Best Natural",
-          titleLine2: "& Organic Mascara.",
-          description: "There are many variations of passages of Lorem Ipsum available, but the majority have suffered alteration in some form.",
-          buttonText: "View More",
-          buttonLink: "/shop",
-          secondButtonText: "Read more",
-          secondButtonLink: "/about",
+          id: "cosmetics-hero-slide-1",
+          type: "slide",
+          settings:           {
+            "subtitle": "Commodo",
+            "titleLine1": "The Best Natural",
+            "titleLine2": "& Organic Mascara.",
+            "description": "There are many variations of passages of Lorem Ipsum available, but the majority have suffered alteration in some form.",
+            "buttonText": "View More",
+            "buttonLink": "/shop",
+            "secondButtonText": "Read more",
+            "secondButtonLink": "/about"
+          },
+          elements: [],
         },
         {
-          subtitle: "Montesa.",
-          titleLine1: "Fix your look",
-          titleLine2: "Organic Skincare.",
-          description: "There are many variations of passages of Lorem Ipsum available, but the majority have suffered altera.",
-          buttonText: "View More",
-          buttonLink: "/shop",
-          secondButtonText: "Read more",
-          secondButtonLink: "/about",
+          id: "cosmetics-hero-slide-2",
+          type: "slide",
+          settings:           {
+            "subtitle": "Montesa.",
+            "titleLine1": "Fix your look",
+            "titleLine2": "Organic Skincare.",
+            "description": "There are many variations of passages of Lorem Ipsum available, but the majority have suffered altera.",
+            "buttonText": "View More",
+            "buttonLink": "/shop",
+            "secondButtonText": "Read more",
+            "secondButtonLink": "/about"
+          },
+          elements: [],
         },
         {
-          subtitle: "Commodo integer",
-          titleLine1: "PROFESSIONAL",
-          titleLine2: "SKINCARE",
-          description: "There are many variations of passages of Lorem Ipsum available, but the majority have suffered alteration.",
-          buttonText: "View More",
-          buttonLink: "/shop",
-          secondButtonText: "Read more",
-          secondButtonLink: "/about",
-        },
+          id: "cosmetics-hero-slide-3",
+          type: "slide",
+          settings:           {
+            "subtitle": "Commodo integer",
+            "titleLine1": "PROFESSIONAL",
+            "titleLine2": "SKINCARE",
+            "description": "There are many variations of passages of Lorem Ipsum available, but the majority have suffered alteration.",
+            "buttonText": "View More",
+            "buttonLink": "/shop",
+            "secondButtonText": "Read more",
+            "secondButtonLink": "/about"
+          },
+          elements: [],
+        }
       ],
-    },
   },
   {
     id: "cosmetics-promos",
     type: "cosmeticsPromoBanners",
-    props: {
+    settings: {
       banners: [
         {
           image: "https://woodmart.xtemos.com/wp-content/uploads/2024/02/cosmetics-promo-1.jpg",
@@ -70,7 +85,7 @@ export const COSMETICS_TEMPLATE_PRESET: TemplateBlock[] = [
   {
     id: "cosmetics-featured",
     type: "cosmeticsProductGrid",
-    props: {
+    settings: {
       columns: 4,
       maxProducts: 8,
       filter: "featured",
@@ -85,7 +100,7 @@ export const COSMETICS_TEMPLATE_PRESET: TemplateBlock[] = [
   {
     id: "cosmetics-categories",
     type: "cosmeticsCategoryCards",
-    props: {
+    settings: {
       sectionTitle: {
         title: "SHOP BY CATEGORY",
       },
@@ -101,7 +116,7 @@ export const COSMETICS_TEMPLATE_PRESET: TemplateBlock[] = [
   {
     id: "cosmetics-discovery",
     type: "cosmeticsDiscovery",
-    props: {
+    settings: {
       title: "Discover a beautiful you with our new Makeup Essentials",
       description: "There are many variations of passages of Lorem Ipsum available, but the majority have suffered alteration in some form, by injected humour.",
       image: "https://woodmart.xtemos.com/wp-content/uploads/2024/02/cosmetics-discovery.jpg",
@@ -119,7 +134,7 @@ export const COSMETICS_TEMPLATE_PRESET: TemplateBlock[] = [
   {
     id: "cosmetics-bestsellers",
     type: "cosmeticsProductGrid",
-    props: {
+    settings: {
       columns: 4,
       maxProducts: 8,
       filter: "bestseller",
@@ -133,7 +148,7 @@ export const COSMETICS_TEMPLATE_PRESET: TemplateBlock[] = [
   {
     id: "cosmetics-countdown",
     type: "cosmeticsCountdownBanner",
-    props: {
+    settings: {
       title: "Vehicula fermentum",
       description: "The generated Lorem Ipsum is therefore always free from repetition humour.",
       image: "https://woodmart.xtemos.com/wp-content/uploads/2024/02/cosmetics-countdown.jpg",
@@ -146,7 +161,7 @@ export const COSMETICS_TEMPLATE_PRESET: TemplateBlock[] = [
   {
     id: "cosmetics-info",
     type: "cosmeticsInfoBoxes",
-    props: {
+    settings: {
       sectionTitle: { title: "WHY CHOOSE US" },
       boxes: [
         { image: "", number: "01", title: "Malesuada adipiscing", description: "Even if your less into design and more into content" },
@@ -159,7 +174,7 @@ export const COSMETICS_TEMPLATE_PRESET: TemplateBlock[] = [
   {
     id: "cosmetics-blog",
     type: "cosmeticsBlogPosts",
-    props: {
+    settings: {
       columns: 2,
       sectionTitle: {
         subtitle: "OUR BLOG",
@@ -171,7 +186,7 @@ export const COSMETICS_TEMPLATE_PRESET: TemplateBlock[] = [
   {
     id: "cosmetics-newsletter",
     type: "cosmeticsNewsletter",
-    props: {
+    settings: {
       backgroundImage: "https://woodmart.xtemos.com/wp-content/uploads/2017/01/newsletter-wood-3.jpg",
       title: "JOIN OUR NEWSLETTER",
       description: "Will be used in accordance with our Privacy Policy",

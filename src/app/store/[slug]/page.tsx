@@ -24,9 +24,11 @@ import { FashionHeader, FashionFooter, type NavItem } from "@/components/storefr
 import { GardenHeader, GardenFooter } from "@/components/storefront/GardenStoreChrome";
 import { TShirtsPrintsFooter, TShirtsPrintsHeader } from "@/components/storefront/TShirtsPrintsStoreChrome";
 import { RetailHeader, RetailFooter } from "@/components/storefront/RetailTemplateBlocks";
+import { buildTemplatePageContent } from "@/lib/templates/template-tree";
 
 /* ─── Template preset map (shared module) ─── */
-import { getLinkedPageHref, parsePageContent, type PageSettings } from "@/lib/page-content";
+import { getLinkedPageHref, type PageSettings } from "@/lib/page-content";
+import { resolveLivePageContent } from "@/lib/templates/bespoke-page-content";
 import { ThemeProvider, type ThemeData } from "@/components/storefront/ThemeProvider";
 import { useWishlist } from "@/hooks/useWishlist";
 import { applyPageCustomization, buildPageBackgroundStyle, buildThemeDataWithCustomization, filterVisiblePages, getResolvedPageSettings, normalizeSiteCustomization, type SiteCustomizationDocument } from "@/lib/site-customization";
@@ -418,9 +420,30 @@ export default function StorePage() {
   const visiblePages = filterVisiblePages(data.pages, draftCustomization);
   const customizedPages = visiblePages.map((page) => applyPageCustomization(page, draftCustomization));
   const homePage = customizedPages.find((p) => p.type === "HOME") || customizedPages.find((p) => p.type === "LANDING");
-  const homeContent: { blocks: BuilderBlock[]; settings: PageSettings } = homePage
-    ? parsePageContent(homePage.content)
-    : { blocks: [], settings: {} };
+  const homeContent = homePage
+    ? resolveLivePageContent(
+        data.templateSlug,
+        homePage.slug,
+        homePage.content,
+        {
+          pageSlug: homePage.slug,
+          pageTitle: homePage.title,
+          pageType: homePage.type,
+          templateSlug: data.templateSlug,
+        },
+      )
+    : resolveLivePageContent(
+        data.templateSlug,
+        "home",
+        buildTemplatePageContent([], {}),
+        {
+          pageSlug: "home",
+          pageTitle: store.name,
+          pageType: "HOME",
+          templateSlug: data.templateSlug,
+        },
+      );
+  const homeNodeCss = homeContent.css || "";
   const homePageSettings = homePage ? getResolvedPageSettings(homePage, homeContent.settings, draftCustomization) : {};
   // Filter out chrome blocks (header/footer) from editable content - they're rendered via conditional rendering based on template
   const CHROME_BLOCK_TYPES = new Set([
@@ -434,51 +457,8 @@ export default function StorePage() {
     'electronicsFooter', 'makeupFooter',
     // Note: jumia header/footer are NOT filtered — they're rendered as part of the block content
   ]);
-  let homeBlocks: BuilderBlock[] = homeContent.blocks.filter((block) => !CHROME_BLOCK_TYPES.has(block.type));
-  // If saved blocks are from a different template family, ignore them and use preset
-  const TEMPLATE_BLOCK_PREFIXES: Record<string, string> = {
-    tools: "tools",
-    hardware: "hardwareHome",
-    "landing-gadget": "gadget",
-    "aegis": "aegis",
-    "aegis-landing": "aegis",
-    "prokip-agent": "prokipAgent",
-    "prokip-booking": "prokipBooking",
-  };
-  const expectedPrefix = data.templateSlug ? TEMPLATE_BLOCK_PREFIXES[data.templateSlug] : undefined;
-  // Filter out stale blocks from other templates when a prefix is enforced
-  if (expectedPrefix && homeBlocks.length > 0) {
-    const filtered = homeBlocks.filter((b) => b.type.startsWith(expectedPrefix));
-    if (filtered.length > 0) {
-      homeBlocks = filtered;
-    }
-  }
-  // For template-prefixed stores, merge saved blocks with preset so missing sections still render
-  const templatePresetForMerge = data.templateSlug ? TEMPLATE_PRESET_MAP[data.templateSlug] : undefined;
-  if (expectedPrefix && homeBlocks.length > 0 && templatePresetForMerge) {
-    const savedIds = new Set(homeBlocks.map((b) => b.id));
-    const savedTypes = new Set(homeBlocks.map((b) => b.type));
-    const missingBlocks = templatePresetForMerge
-      .filter((pb) => !savedIds.has(pb.id) && !savedTypes.has(pb.type))
-      .map((pb) => ({ id: pb.id, type: pb.type, props: pb.props || {} }));
-    if (missingBlocks.length > 0) {
-      // Reconstruct full block order: use preset order, replacing with saved versions where available
-      const mergedBlocks: BuilderBlock[] = [];
-      for (const pb of templatePresetForMerge) {
-        const saved = homeBlocks.find((b) => b.id === pb.id || b.type === pb.type);
-        mergedBlocks.push(saved || { id: pb.id, type: pb.type, props: pb.props || {} });
-      }
-      // Append any extra saved blocks not in preset
-      for (const sb of homeBlocks) {
-        if (!mergedBlocks.some((b) => b.id === sb.id)) {
-          mergedBlocks.push(sb);
-        }
-      }
-      homeBlocks = mergedBlocks;
-    }
-  }
-  const savedBlocksMatchTemplate = !expectedPrefix || homeBlocks.length === 0 || homeBlocks.some((b) => b.type.startsWith(expectedPrefix));
-  const hasHomeContent = homeBlocks.length > 0 && savedBlocksMatchTemplate;
+  const homeBlocks: BuilderBlock[] = homeContent.blocks.filter((block) => !CHROME_BLOCK_TYPES.has(block.type));
+  const hasHomeContent = homeBlocks.length > 0;
   const homeHasProductGrid = homeBlocks.some((b) => b.type === "productGrid");
   const isTShirtsPrintsTemplate = data.templateSlug === "t-shirts-prints" || slug === "t-shirts-prints" || store.slug === "t-shirts-prints";
   const isFashionTemplate = data.templateSlug === "fashion" || data.templateSlug === "fashion-colored" || data.templateSlug === "handmade-bags" || data.templateSlug === "t-shirts-prints" || data.templateSlug === "sweets-bakery" || data.templateSlug === "electronics" || data.templateSlug === "electronics-accessories" || data.templateSlug === "hardware" || data.templateSlug === "tools" || data.templateSlug === "makeup" || data.templateSlug === "grocery" || homeBlocks.some((b) => b.type.startsWith("fashion")) || homeBlocks.some((b) => b.type.startsWith("bakery")) || homeBlocks.some((b) => b.type.startsWith("electronics")) || homeBlocks.some((b) => b.type.startsWith("makeup")) || homeBlocks.some((b) => b.type.startsWith("grocery"));
@@ -525,6 +505,7 @@ export default function StorePage() {
             isWishlisted={isWishlisted}
             onQuickView={(pid) => { const x = products.find(p => p.id === pid); if (x) { setSelectedProduct(x); setSelectedVariantId(null); setQty(1); } }}
           >
+            {homeNodeCss && <style data-live-node-styles dangerouslySetInnerHTML={{ __html: homeNodeCss }} />}
             <RenderTemplateBlocks blocks={aegisBlocks as TemplateBlock[]} />
           </TemplateStoreContextProvider>
         </div>
@@ -551,6 +532,7 @@ export default function StorePage() {
             isWishlisted={isWishlisted}
             onQuickView={(pid) => { const x = products.find(p => p.id === pid); if (x) { setSelectedProduct(x); setSelectedVariantId(null); setQty(1); } }}
           >
+            {homeNodeCss && <style data-live-node-styles dangerouslySetInnerHTML={{ __html: homeNodeCss }} />}
             <RenderTemplateBlocks blocks={bookingBlocks as TemplateBlock[]} />
           </TemplateStoreContextProvider>
         </div>
@@ -577,6 +559,7 @@ export default function StorePage() {
             isWishlisted={isWishlisted}
             onQuickView={(pid) => { const x = products.find(p => p.id === pid); if (x) { setSelectedProduct(x); setSelectedVariantId(null); setQty(1); } }}
           >
+            {homeNodeCss && <style data-live-node-styles dangerouslySetInnerHTML={{ __html: homeNodeCss }} />}
             <RenderTemplateBlocks blocks={prokipBlocks as TemplateBlock[]} />
           </TemplateStoreContextProvider>
         </div>
@@ -605,6 +588,7 @@ export default function StorePage() {
             isWishlisted={isWishlisted}
             onQuickView={(pid) => { const x = products.find(p => p.id === pid); if (x) { setSelectedProduct(x); setSelectedVariantId(null); setQty(1); } }}
           >
+            {homeNodeCss && <style data-live-node-styles dangerouslySetInnerHTML={{ __html: homeNodeCss }} />}
             <RenderTemplateBlocks blocks={gadgetBlocks as TemplateBlock[]} />
           </TemplateStoreContextProvider>
         </div>
@@ -620,10 +604,8 @@ export default function StorePage() {
       { label: "About", href: `/store/${slug}/about` },
       { label: "Contact", href: `/store/${slug}/contact` },
     ];
-    // Use block-based rendering for vegetables home page to enable editor persistence
-    const homeBlocks = homePage?.content && typeof homePage.content === "object" && "blocks" in homePage.content
-      ? (homePage.content as { blocks: unknown[] }).blocks
-      : [];
+    // Use the parsed page document so tree-shaped page content renders correctly.
+    const homeBlocks = homeContent.blocks;
 
     return (
       <ThemeProvider theme={resolvedTheme}>
@@ -637,6 +619,7 @@ export default function StorePage() {
           />
 
           <main style={buildPageBackgroundStyle(homePageSettings)}>
+            {homeNodeCss && <style data-live-node-styles dangerouslySetInnerHTML={{ __html: homeNodeCss }} />}
             {homeBlocks.length > 0 ? (
               <RenderTemplateBlocks blocks={homeBlocks as TemplateBlock[]} />
             ) : (
@@ -669,6 +652,7 @@ export default function StorePage() {
   }
 
   if (data.templateSlug === "perfumes") {
+    const perfumeBlocks = homeBlocks.length > 0 ? homeBlocks : (templatePreset || []);
     return (
       <ThemeProvider theme={resolvedTheme}>
         <div className="min-h-screen bg-[#f6f0eb] text-[#241f24]">
@@ -704,7 +688,8 @@ export default function StorePage() {
               }
             }}
           >
-            <RenderTemplateBlocks blocks={templatePreset || []} />
+            {homeNodeCss && <style data-live-node-styles dangerouslySetInnerHTML={{ __html: homeNodeCss }} />}
+            <RenderTemplateBlocks blocks={perfumeBlocks as TemplateBlock[]} />
           </TemplateStoreContextProvider>
         </div>
       </ThemeProvider>
@@ -958,7 +943,8 @@ export default function StorePage() {
         /* Builder blocks Home page — render template blocks */
         <div style={buildPageBackgroundStyle(homePageSettings)}>
           <TemplateStoreContextProvider templateSlug={data.templateSlug} products={products} blogs={data.blogs || []} categories={categories} currency={currency} storeSlug={slug} socialLinks={socialLinksArray} addToCart={(pid,qty)=>{const x=products.find(p=>p.id===pid);if(x)addToCart(x,qty);}} toggleWishlist={toggleWishlist} isWishlisted={isWishlisted} onQuickView={(pid)=>{const x=products.find(p=>p.id===pid);if(x){setSelectedProduct(x);setSelectedVariantId(null);setQty(1);}}}>
-          <RenderBlocks blocks={homeBlocks} storeSlug={slug} products={products} currency={currency} addToCart={(p) => addToCart(p as unknown as Product)} isWishlisted={isWishlisted} toggleWishlist={toggleWishlist} addedToCart={addedToCart} />
+            {homeNodeCss && <style data-live-node-styles dangerouslySetInnerHTML={{ __html: homeNodeCss }} />}
+            <RenderBlocks blocks={homeBlocks} storeSlug={slug} products={products} currency={currency} addToCart={(p) => addToCart(p as unknown as Product)} isWishlisted={isWishlisted} toggleWishlist={toggleWishlist} addedToCart={addedToCart} />
           </TemplateStoreContextProvider>
           {!isLanding && products.length > 0 && !homeHasProductGrid && (
             <div className="text-center py-10">
@@ -975,6 +961,7 @@ export default function StorePage() {
         /* Template with editable block preset */
         <div>
           <TemplateStoreContextProvider templateSlug={data.templateSlug} products={products} blogs={data.blogs || []} categories={categories} currency={currency} storeSlug={slug} socialLinks={socialLinksArray} addToCart={(pid,qty)=>{const x=products.find(p=>p.id===pid);if(x)addToCart(x,qty);}} toggleWishlist={toggleWishlist} isWishlisted={isWishlisted} onQuickView={(pid)=>{const x=products.find(p=>p.id===pid);if(x){setSelectedProduct(x);setSelectedVariantId(null);setQty(1);}}}>
+            {homeNodeCss && <style data-live-node-styles dangerouslySetInnerHTML={{ __html: homeNodeCss }} />}
             <RenderTemplateBlocks blocks={templatePreset} />
           </TemplateStoreContextProvider>
           {!isLanding && products.length > 0 && (
@@ -996,6 +983,7 @@ export default function StorePage() {
       ) : homeBlocks.length > 0 ? (
         /* Fallback: render blocks even if hasHomeContent is false but blocks exist */
         <div style={buildPageBackgroundStyle(homePageSettings)}>
+          {homeNodeCss && <style data-live-node-styles dangerouslySetInnerHTML={{ __html: homeNodeCss }} />}
           <RenderBlocks blocks={homeBlocks} storeSlug={slug} products={products} currency={currency} addToCart={(p) => addToCart(p as unknown as Product)} isWishlisted={isWishlisted} toggleWishlist={toggleWishlist} addedToCart={addedToCart} />
         </div>
       ) : (

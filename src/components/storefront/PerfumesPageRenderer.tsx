@@ -59,10 +59,11 @@ export const PerfumesPageRenderer: React.FC<PerfumesPageRendererProps> = ({
   // Render individual block based on type
   const renderBlock = (sec: PerfumesSection) => {
     const { type, props } = sec;
+    const isEditor = mode === "edit";
 
     switch (type) {
       case 'perfumesHeroSlider':
-        return <PerfumesHeroSlider slides={props.slides as any || []} autoplaySpeed={props.autoplaySpeed} minHeight={props.minHeight} />;
+        return <PerfumesHeroSlider slides={props.slides as any || []} autoplaySpeed={props.autoplaySpeed} minHeight={props.minHeight} isEditor={isEditor} />;
       case 'perfumesProductGrid':
         return <PerfumesProductGrid {...props} />;
       case 'perfumesOlfactoryTags':

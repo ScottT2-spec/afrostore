@@ -1,4 +1,5 @@
 import { prisma } from "@/lib/db";
+import { buildTemplatePageContent } from "@/lib/templates/template-tree";
 
 export const PERFUME_TEMPLATE_PAGE_DEFS = [
   { title: "Fragrances", slug: "fragrances", type: "CUSTOM", position: 9 },
@@ -29,7 +30,7 @@ export async function ensurePerfumePages(siteId: string) {
         title: page.title,
         slug: page.slug,
         type: page.type,
-        content: { blocks: [], settings: {} },
+        content: buildTemplatePageContent([], {}) as any,
         isPublished: true,
         position: page.position,
       },

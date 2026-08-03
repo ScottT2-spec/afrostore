@@ -1,10 +1,10 @@
-import type { TemplateBlock } from "@/components/storefront/TemplateBlockRenderer";
+import type { EditorNode } from "@/lib/visual-editor/node-tree";
 
-export const PROKIP_AGENT_PRESET: TemplateBlock[] = [
+export const PROKIP_AGENT_PRESET: EditorNode[] = [
   {
     id: "pa-modal",
     type: "prokipAgentModal",
-    props: {
+    settings: {
       title: "Enter your correct details to join Prokip Sales Agent Team",
       badge: "Nigeria Agent",
       fields: [
@@ -18,7 +18,7 @@ export const PROKIP_AGENT_PRESET: TemplateBlock[] = [
   {
     id: "pa-banner",
     type: "prokipAgentTopBanner",
-    props: {
+    settings: {
       attentionText: "Attention!",
       message: '<strong>Please read this entire page carefully before you register.</strong> This opportunity requires serious commitment. If you cannot read and understand the full page, please do not sign up.',
     },
@@ -26,7 +26,7 @@ export const PROKIP_AGENT_PRESET: TemplateBlock[] = [
   {
     id: "pa-hero",
     type: "prokipAgentHero",
-    props: {
+    settings: {
       badge: "Become Our Next Success Story",
       titleStart: "Earn 6-figures And More Monthly As a",
       titleHighlight: "Prokip Sales Agent",
@@ -38,7 +38,7 @@ export const PROKIP_AGENT_PRESET: TemplateBlock[] = [
   {
     id: "pa-intro",
     type: "prokipAgentIntro",
-    props: {
+    settings: {
       subtitle: "A Unique Opportunity",
       title: "Dear friend, if you're looking for a way to make more money this year, this could be the most important message you'll read today.",
       description: "Right now, our company, Prokip, is offering a unique opportunity for individuals like you to join us as a sales agent. All you have to do is help business owners use our software to grow their businesses.",
@@ -57,7 +57,7 @@ export const PROKIP_AGENT_PRESET: TemplateBlock[] = [
   {
     id: "pa-about",
     type: "prokipAgentAbout",
-    props: {
+    settings: {
       title: "Now, What's Prokip All About?",
       description: "Prokip is a powerful business management software that helps business owners simplify their operations and manage their money better.",
       description2: "Prokip is redefining how businesses manage their operations with an all-in-one platform that integrates:",
@@ -79,7 +79,7 @@ export const PROKIP_AGENT_PRESET: TemplateBlock[] = [
   {
     id: "pa-benefits",
     type: "prokipAgentBenefits",
-    props: {
+    settings: {
       title: "What Will You Gain?",
       subtitle: "Joining Prokip isn't just a job—it's a launchpad for your career.",
       benefits: [
@@ -94,7 +94,7 @@ export const PROKIP_AGENT_PRESET: TemplateBlock[] = [
   {
     id: "pa-media",
     type: "prokipAgentMedia",
-    props: {
+    settings: {
       teamsTitle: "We Have Team All Over Africa",
       teamsSubtitle: "Below are some of our team in different countries.",
       teams: [
@@ -116,7 +116,7 @@ export const PROKIP_AGENT_PRESET: TemplateBlock[] = [
   {
     id: "pa-support",
     type: "prokipAgentSupport",
-    props: {
+    settings: {
       supportTitle: "How Can Prokip Support You As A Sales Agent?",
       supportSubtitle: "As a sales agent, Prokip will support you every step of the way. Here is how we intend to do so:",
       supportCards: [
@@ -166,7 +166,7 @@ export const PROKIP_AGENT_PRESET: TemplateBlock[] = [
   {
     id: "pa-conversion",
     type: "prokipAgentConversion",
-    props: {
+    settings: {
       title: "What Are You Waiting For?",
       description: "If you are serious about making more money that allows you to do what you really want to do with your life —",
       checkmarks: [
@@ -182,7 +182,7 @@ export const PROKIP_AGENT_PRESET: TemplateBlock[] = [
   {
     id: "pa-footer",
     type: "prokipAgentFooter",
-    props: {
+    settings: {
       brandName: "Prokip",
       brandAccent: ".",
       disclaimers: [

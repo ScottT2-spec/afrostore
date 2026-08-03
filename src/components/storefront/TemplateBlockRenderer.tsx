@@ -1,6 +1,6 @@
 "use client";
 
-import type { CSSProperties } from "react";
+import React, { createContext, useContext, type CSSProperties } from "react";
 import {
   FashionFontLoader,
   FashionHeroSlider,
@@ -29,6 +29,7 @@ import {
   FashionContactForm,
 } from "@/components/storefront/FashionTemplateBlocks";
 import { resolveSectionStyleOverrides } from "@/components/storefront/block-style";
+import { normalizeStorefrontTemplateProps } from "@/components/storefront/prop-normalizers";
 import { TShirtsPrintsHeader, TShirtsPrintsFooter } from "@/components/storefront/TShirtsPrintsStoreChrome";
 import {
   TShirtAboutHero,
@@ -433,14 +434,25 @@ import {
   JumiaBottomNav,
   JumiaSpacer,
 } from "@/components/storefront/JumiaTemplateBlocks";
+import { isChildFragmentType } from "@/lib/templates/template-tree";
+
+export const TemplateBlockEditContext = createContext<{ blockId?: string; isEditor?: boolean }>({});
+
+export function useTemplateBlockEditContext() {
+  return useContext(TemplateBlockEditContext);
+}
+
+const loggedMissingTemplateBlockKeys = new Set<string>();
 
 /* ─── TYPES ─────────────────────────────────────────────────── */
 
 export interface TemplateBlock {
   id: string;
   type: string;
-  props: Record<string, unknown>;
+  props?: Record<string, unknown>;
+  settings?: Record<string, unknown>;
   styleOverrides?: Record<string, unknown>;
+  elements?: TemplateBlock[];
 }
 
 /* ─── BLOCK TYPE MAP ────────────────────────────────────────── */
@@ -709,8 +721,10 @@ const TOYS_BLOCKS: Record<string, BlockComponent> = {
 const GADGET_BLOCKS: Record<string, BlockComponent> = {
   gadgetFontLoader: LandingGadgetFontLoader as unknown as BlockComponent,
   gadgetHero: LandingGadgetHero as unknown as BlockComponent,
+  landingGadgetHero: LandingGadgetHero as unknown as BlockComponent,
   gadgetStatsBar: LandingGadgetStatsBar as unknown as BlockComponent,
   gadgetFeatureSplit: LandingGadgetFeatureSplit as unknown as BlockComponent,
+  landingGadgetFeatures: LandingGadgetFeatureSplit as unknown as BlockComponent,
   gadgetDarkFeature: LandingGadgetDarkFeature as unknown as BlockComponent,
   gadgetPhotoGallery: LandingGadgetPhotoGallery as unknown as BlockComponent,
   gadgetCameraDark: LandingGadgetCameraDark as unknown as BlockComponent,
@@ -890,6 +904,132 @@ const ALL_TEMPLATE_BLOCKS: Record<string, BlockComponent> = {
   ...PROKIP_BOOKING_BLOCKS,
 };
 
+export const REGISTERED_TEMPLATE_BLOCK_TYPES = new Set(Object.keys(ALL_TEMPLATE_BLOCKS));
+
+const CHILD_COLLECTION_PROP_MAP: Array<[RegExp, string]> = [
+  [/linkcolumns?$/i, "linkColumns"],
+  [/sociallinks?$/i, "socialLinks"],
+  [/slides?$/i, "slides"],
+  [/features?$/i, "features"],
+  [/banners?$/i, "banners"],
+  [/categories?$/i, "categories"],
+  [/testimonials?$/i, "testimonials"],
+  [/products?$/i, "products"],
+  [/items?$/i, "items"],
+  [/tabs?$/i, "tabs"],
+  [/posts?$/i, "posts"],
+  [/links?$/i, "links"],
+  [/buttons?$/i, "buttons"],
+  [/reviews?$/i, "reviews"],
+  [/steps?$/i, "steps"],
+  [/images?$/i, "images"],
+  [/faqs?$/i, "faqs"],
+  [/team(members?)?$/i, "team"],
+  [/members?$/i, "members"],
+  [/services?$/i, "services"],
+  [/brands?$/i, "brands"],
+  [/counters?$/i, "counters"],
+  [/boxes?$/i, "boxes"],
+  [/paragraphs?$/i, "paragraphs"],
+  [/videos?$/i, "videos"],
+  [/offices?$/i, "offices"],
+  [/ingredients?$/i, "ingredients"],
+  [/experts?$/i, "experts"],
+  [/swatches?$/i, "swatches"],
+  [/variants?$/i, "variants"],
+  [/infoboxes?$/i, "infoboxes"],
+  [/catitems?$/i, "catItems"],
+  [/faqitems?$/i, "faqItems"],
+  [/teamitems?$/i, "teamItems"],
+  [/featureitems?$/i, "featureItems"],
+  [/postitems?$/i, "postItems"],
+  [/recentposts?$/i, "recentPosts"],
+  [/menuitems?$/i, "menuItems"],
+  [/navitems?$/i, "navItems"],
+  [/navpages?$/i, "navPages"],
+];
+
+function isRegisteredTemplateBlock(type: string): boolean {
+  return REGISTERED_TEMPLATE_BLOCK_TYPES.has(type);
+}
+
+function inferChildCollectionPropKey(type: string): string | null {
+  const compactType = type.replace(/[^a-zA-Z0-9]/g, "");
+  for (const [pattern, propKey] of CHILD_COLLECTION_PROP_MAP) {
+    if (pattern.test(compactType)) {
+      return propKey;
+    }
+  }
+  return null;
+}
+
+function buildChildTemplateProps(children: TemplateBlock[]): Record<string, unknown> {
+  const groupedChildren = new Map<string, TemplateBlock[]>();
+
+  for (const child of children) {
+    const propKey = inferChildCollectionPropKey(child.type);
+    if (!propKey) continue;
+    const bucket = groupedChildren.get(propKey) || [];
+    bucket.push(child);
+    groupedChildren.set(propKey, bucket);
+  }
+
+  const props: Record<string, unknown> = {};
+  for (const [propKey, items] of groupedChildren.entries()) {
+    props[propKey] = items.map((item) => buildTemplateArrayItemProps(item));
+  }
+  return props;
+}
+
+function buildTemplateArrayItemProps(block: TemplateBlock): Record<string, unknown> {
+  const props = {
+    ...normalizeStorefrontTemplateProps((block.settings || block.props || {}) as Record<string, unknown>),
+  };
+
+  const childBlocks = Array.isArray(block.elements) ? block.elements : [];
+  const childProps = buildChildTemplateProps(childBlocks);
+
+  return {
+    ...props,
+    ...childProps,
+  };
+}
+
+function buildTemplateNodeLike(block: TemplateBlock): { id: string; type: string; settings: Record<string, unknown>; elements: Array<{ id: string; type: string; settings: Record<string, unknown>; elements: unknown[] }> } {
+  const childBlocks = Array.isArray(block.elements) ? block.elements : [];
+  return {
+    id: block.id,
+    type: block.type,
+    settings: buildTemplateArrayItemProps(block),
+    elements: childBlocks.map((child) => buildTemplateNodeLike(child)),
+  };
+}
+
+function buildTemplateBlockComponentProps(block: TemplateBlock): Record<string, unknown> {
+  const props = {
+    ...normalizeStorefrontTemplateProps((block.settings || block.props || {}) as Record<string, unknown>),
+  };
+
+  const childBlocks = Array.isArray(block.elements) ? block.elements : [];
+  const childProps = buildChildTemplateProps(childBlocks);
+
+  return {
+    ...props,
+    ...childProps,
+    elements: childBlocks.map((child) => buildTemplateNodeLike(child)),
+  };
+}
+
+function getTemplateBlockListKey(block: TemplateBlock | undefined, index: number, scope: string): string {
+  if (block?.id) return block.id;
+  const fallbackKey = `${scope}-${index}`;
+  if (!loggedMissingTemplateBlockKeys.has(fallbackKey)) {
+    loggedMissingTemplateBlockKeys.add(fallbackKey);
+    console.warn(`[TemplateBlockRenderer] Missing block id for ${scope}[${index}]; using fallback key "${fallbackKey}"`);
+  }
+  return fallbackKey;
+}
+
 /* ─── FONT LOADER MAP ──────────────────────────────────────── */
 
 const FONT_LOADERS: Record<string, React.ComponentType> = {
@@ -916,8 +1056,9 @@ const FONT_LOADERS: Record<string, React.ComponentType> = {
 /** Detect which template family a block set belongs to */
 function detectTemplateFamily(blocks: TemplateBlock[]): string {
   for (const b of blocks) {
-    const t = b.type;
+    const t = b.type.toLowerCase();
     if (t.startsWith("aegis")) return "aegis-landing";
+    if (t.startsWith("landinggadget")) return "landing-gadget";
     if (t.startsWith("gadget")) return "landing-gadget";
     if (t.startsWith("ai")) return "ai";
     if (t.startsWith("jumia")) return "jumia";
@@ -932,7 +1073,7 @@ function detectTemplateFamily(blocks: TemplateBlock[]): string {
     if (t.startsWith("kids")) return "kids";
     if (t.startsWith("makeup")) return "makeup";
     if (t.startsWith("perfumes")) return "perfumes";
-    if (t.startsWith("tShirtsPrints")) return "t-shirts-prints";
+    if (t.startsWith("tshirtsprints")) return "t-shirts-prints";
     if (t.startsWith("fashion")) return "fashion";
   }
   return "fashion";
@@ -1052,15 +1193,11 @@ ${mediaTargets} {
 /* ─── SINGLE BLOCK RENDERER ────────────────────────────────── */
 
 function RenderTemplateBlock({ block, isEditor = false }: { block: TemplateBlock; isEditor?: boolean }) {
-  const Component = ALL_TEMPLATE_BLOCKS[block.type];
+  const Component = isRegisteredTemplateBlock(block.type) ? ALL_TEMPLATE_BLOCKS[block.type] : null;
 
   if (!Component) {
-    if (process.env.NODE_ENV === "development") {
-      return (
-        <div style={{ padding: 20, background: "#fff3cd", border: "1px solid #ffc107", margin: "10px 0", fontFamily: "monospace", fontSize: 13 }}>
-          Unknown template block type: <strong>{block.type}</strong>
-        </div>
-      );
+    if (process.env.NODE_ENV === "development" && !isChildFragmentType(block.type)) {
+      console.warn(`Unknown template block type: ${block.type}`);
     }
     return null;
   }
@@ -1075,27 +1212,31 @@ function RenderTemplateBlock({ block, isEditor = false }: { block: TemplateBlock
 
   // Forward resolved styles to the component so it can merge them with its own styles
   const componentProps = {
-    ...block.props,
+    ...buildTemplateBlockComponentProps(block),
     resolvedStyles: styles,
     resolvedClasses: classes,
+    blockId: block.id,
     isEditor,
   };
 
   return (
     <div
       data-editor-block-id={block.id}
-      className={`builder-block-wrapper ${classes}`.trim()}
+      data-editor-node-id={block.id}
+      className={`builder-block-wrapper editor-node-${block.id} ${classes}`.trim()}
       style={styles}
-    >
-      {(customCss || blockCss) && (
-        <style
+      >
+        {(customCss || blockCss) && (
+          <style
           dangerouslySetInnerHTML={{
             __html: `${customCss ? `${customCss}\n` : ""}${blockCss}`,
           }}
         />
       )}
       {overlayStyles && <div style={overlayStyles} />}
-      <Component {...componentProps} />
+      <TemplateBlockEditContext.Provider value={{ blockId: block.id, isEditor }}>
+        <Component {...componentProps} />
+      </TemplateBlockEditContext.Provider>
     </div>
   );
 }
@@ -1116,8 +1257,8 @@ export function RenderTemplateBlocks({ blocks, isEditor = false }: RenderTemplat
   return (
     <div className={`${family}-template`} data-editor-mode={isEditor}>
       <FontLoader />
-      {blocks.map((block) => (
-        <RenderTemplateBlock key={block.id} block={block} isEditor={isEditor} />
+      {blocks.map((block, index) => (
+        <RenderTemplateBlock key={getTemplateBlockListKey(block, index, "template-block")} block={block} isEditor={isEditor} />
       ))}
     </div>
   );
@@ -1126,6 +1267,7 @@ export function RenderTemplateBlocks({ blocks, isEditor = false }: RenderTemplat
 /* ─── EXPORTS ───────────────────────────────────────────────── */
 
 export { FASHION_BLOCKS, ALL_TEMPLATE_BLOCKS, RenderTemplateBlock };
+export { isRegisteredTemplateBlock };
 export type {
   FashionHeroSliderProps,
   FashionPromoBannersProps,

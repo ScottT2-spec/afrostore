@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { useMemo, useState } from "react";
 import { Menu, X } from "lucide-react";
+import { normalizeSocialLinks } from "@/components/storefront/prop-normalizers";
 
 type NavItem = {
   label: string;
@@ -109,6 +110,7 @@ export function VegetableHeader({ storeName, storeSlug, logo, navItems, reservat
 
 export function VegetableFooter({ storeName, storeSlug, logo, description, navItems, socialLinks = [] }: FooterProps) {
   const footerNav = navItems.filter((item) => ["Home", "Menu", "About", "Contact"].includes(item.label));
+  const safeSocialLinks = normalizeSocialLinks(socialLinks);
 
   return (
     <footer className="border-t border-[#ddd5c8] bg-[#f8f3ea] text-[#243226]">
@@ -142,7 +144,7 @@ export function VegetableFooter({ storeName, storeSlug, logo, description, navIt
         <div>
           <h3 className="text-xs font-semibold uppercase tracking-[0.3em] text-[#7a846f]">Follow</h3>
           <div className="mt-5 flex flex-wrap gap-3">
-            {socialLinks.length > 0 ? socialLinks.map((item) => (
+            {safeSocialLinks.length > 0 ? safeSocialLinks.map((item) => (
               <a key={`${item.platform}-${item.url}`} href={item.url} target="_blank" rel="noreferrer" className="group">
                 <SocialIcon platform={item.platform} />
               </a>

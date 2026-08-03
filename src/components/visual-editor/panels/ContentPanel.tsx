@@ -1,6 +1,7 @@
 "use client";
 
-import { ElementType } from "@/lib/visual-editor/types";
+import { isRegisteredTemplateBlock } from "@/components/storefront/TemplateBlockRenderer";
+import { isChildFragmentType } from "@/lib/templates/template-tree";
 
 interface ContentPanelProps {
   element: any;
@@ -14,6 +15,20 @@ const labelize = (value: string) =>
     .replace(/([a-z0-9])([A-Z])/g, "$1 $2")
     .replace(/[_-]+/g, " ")
     .replace(/\b\w/g, (letter) => letter.toUpperCase());
+
+const describeItem = (value: any, index: number): string => {
+  if (value == null) return `Item ${index + 1}`;
+  if (typeof value === "string") return value.slice(0, 40) || `Item ${index + 1}`;
+  if (typeof value === "number" || typeof value === "boolean") return String(value);
+  if (Array.isArray(value)) return `Array (${value.length})`;
+  if (typeof value === "object") {
+    const candidate = value.question || value.title || value.name || value.label || value.subtitle || value.text;
+    if (typeof candidate === "string" && candidate.trim()) return candidate.trim().slice(0, 60);
+    const keys = Object.keys(value);
+    return keys.length > 0 ? `${labelize(keys[0])}` : `Item ${index + 1}`;
+  }
+  return `Item ${index + 1}`;
+};
 
 const cloneValue = (value: any): any => {
   if (Array.isArray(value)) return value.map(cloneValue);
@@ -62,6 +77,31 @@ const updateValueAtPath = (root: any, path: PropPath, value: any): any => {
   return nextRoot;
 };
 
+const isEditorNodeLike = (value: any): boolean => {
+  return Boolean(
+    value &&
+      typeof value === "object" &&
+      typeof value.id === "string" &&
+      typeof value.type === "string"
+  );
+};
+
+const getNodeLabel = (node: any, index: number): string => {
+  if (!node || typeof node !== "object") return `Node ${index + 1}`;
+  const candidate =
+    node.title ||
+    node.name ||
+    node.label ||
+    node.subtitle ||
+    node.text ||
+    node.content?.title ||
+    node.content?.text ||
+    node.settings?.title ||
+    node.settings?.text;
+  if (typeof candidate === "string" && candidate.trim()) return candidate.trim().slice(0, 60);
+  return `${labelize(String(node.type || "node"))} ${index + 1}`;
+};
+
 function TemplatePropEditor({
   label,
   value,
@@ -94,7 +134,7 @@ function TemplatePropEditor({
             <div key={`${label}-${index}`} className="space-y-2 rounded-md bg-gray-50 dark:bg-gray-800/60 p-3">
               <div className="flex items-center justify-between gap-2">
                 <div className="text-xs font-medium text-gray-700 dark:text-gray-300">
-                  Item {index + 1}
+                  {describeItem(item, index)}
                 </div>
                 <button
                   type="button"
@@ -126,6 +166,17 @@ function TemplatePropEditor({
   }
 
   if (value && typeof value === "object") {
+    if (isEditorNodeLike(value)) {
+      return (
+        <TemplateNodeEditor
+          node={value}
+          path={path}
+          onChange={onChange}
+          depth={depth}
+        />
+      );
+    }
+
     const entries = Object.entries(value);
 
     return (
@@ -199,6 +250,104 @@ function TemplatePropEditor({
   );
 }
 
+function TemplateNodeEditor({
+  node,
+  path,
+  onChange,
+  depth = 0,
+}: {
+  node: any;
+  path: PropPath;
+  onChange: (path: PropPath, value: any) => void;
+  depth?: number;
+}) {
+  const wrapperClass = depth > 0 ? "pl-3 border-l border-gray-200 dark:border-gray-700" : "";
+  const childSettings = node?.settings && typeof node.settings === "object" ? Object.entries(node.settings) : [];
+  const childContent = node?.content && typeof node.content === "object" ? Object.entries(node.content) : [];
+  const childElements = Array.isArray(node?.elements) ? node.elements : [];
+
+  return (
+    <details open={depth === 0} className={`rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 ${wrapperClass}`}>
+      <summary className="cursor-pointer list-none px-3 py-2 text-xs font-medium text-gray-900 dark:text-white flex items-center justify-between gap-3">
+        <span className="flex items-center gap-2 min-w-0">
+          <span className="truncate">{getNodeLabel(node, 0)}</span>
+          <span className="text-gray-500 dark:text-gray-400">Node</span>
+        </span>
+        <span className="text-gray-500 dark:text-gray-400">{labelize(String(node?.type || "node"))}</span>
+      </summary>
+      <div className="px-3 pb-3 space-y-3">
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+          <div className="space-y-1.5">
+            <label className="block text-xs font-medium text-gray-700 dark:text-gray-300">Node ID</label>
+            <input
+              type="text"
+              value={node?.id || ""}
+              onChange={(e) => onChange([...path, "id"], e.target.value)}
+              className="w-full px-3 py-2 text-sm border border-gray-300 dark:border-gray-600 rounded-lg bg-gray-50 dark:bg-gray-800 text-gray-700 dark:text-gray-200"
+            />
+          </div>
+          <div className="space-y-1.5">
+            <label className="block text-xs font-medium text-gray-700 dark:text-gray-300">Node Type</label>
+            <input
+              type="text"
+              value={node?.type || ""}
+              onChange={(e) => onChange([...path, "type"], e.target.value)}
+              className="w-full px-3 py-2 text-sm border border-gray-300 dark:border-gray-600 rounded-lg bg-gray-50 dark:bg-gray-800 text-gray-700 dark:text-gray-200"
+            />
+          </div>
+        </div>
+
+        {childSettings.length > 0 && (
+          <div className="space-y-3 pt-1">
+            <div className="text-xs font-medium text-gray-900 dark:text-white">Settings</div>
+            {childSettings.map(([key, value]) => (
+              <TemplatePropEditor
+                key={`settings.${key}`}
+                label={key}
+                value={value}
+                path={[...path, "settings", key]}
+                onChange={onChange}
+                depth={depth + 1}
+              />
+            ))}
+          </div>
+        )}
+
+        {childContent.length > 0 && (
+          <div className="space-y-3 pt-1 border-t border-gray-200 dark:border-gray-700">
+            <div className="text-xs font-medium text-gray-900 dark:text-white">Content</div>
+            {childContent.map(([key, value]) => (
+              <TemplatePropEditor
+                key={`content.${key}`}
+                label={key}
+                value={value}
+                path={[...path, "content", key]}
+                onChange={onChange}
+                depth={depth + 1}
+              />
+            ))}
+          </div>
+        )}
+
+        {childElements.length > 0 && (
+          <div className="space-y-3 pt-1 border-t border-gray-200 dark:border-gray-700">
+            <div className="text-xs font-medium text-gray-900 dark:text-white">Children</div>
+            {childElements.map((child: any, index: number) => (
+              <TemplateNodeEditor
+                key={child?.id || `${node?.id || "node"}-${index}`}
+                node={child}
+                path={[...path, "elements", index]}
+                onChange={onChange}
+                depth={depth + 1}
+              />
+            ))}
+          </div>
+        )}
+      </div>
+    </details>
+  );
+}
+
 function keyHintFromLabel(label: string) {
   const normalized = label.toLowerCase();
   if (normalized.includes("url") || normalized.includes("src") || normalized.includes("href")) return "https://";
@@ -206,6 +355,11 @@ function keyHintFromLabel(label: string) {
 }
 
 export default function ContentPanel({ element, onUpdate }: ContentPanelProps) {
+  const isTemplateNode =
+    isRegisteredTemplateBlock(element.type) ||
+    isChildFragmentType(element.type) ||
+    element.type === "template-block";
+
   const updateSetting = (key: string, value: any) => {
     onUpdate({
       settings: {
@@ -240,9 +394,9 @@ export default function ContentPanel({ element, onUpdate }: ContentPanelProps) {
     });
   };
 
-  // Check if this is a template block
-  const isTemplateBlock = element.content?.props && typeof element.content.props === 'object';
-  const props = element.content?.props || {};
+  const settingsEntries = element?.settings && typeof element.settings === "object" ? Object.entries(element.settings) : [];
+  const contentEntries = element?.content && typeof element.content === "object" ? Object.entries(element.content) : [];
+  const childElements = Array.isArray(element?.elements) ? element.elements : [];
 
   return (
     <div className="space-y-6">
@@ -457,41 +611,83 @@ export default function ContentPanel({ element, onUpdate }: ContentPanelProps) {
       )}
 
       {/* Template block props editor */}
-      {isTemplateBlock && (
+      {isTemplateNode && (
         <div className="space-y-4">
           <div className="text-xs font-medium text-gray-900 dark:text-white mb-3">
-            Block Properties ({Object.keys(props).length} properties)
+            Template Settings ({settingsEntries.length} properties)
           </div>
-          {Object.keys(props).length === 0 ? (
+          {settingsEntries.length === 0 ? (
             <div className="text-xs text-gray-500 dark:text-gray-400">
-              This block has no editable properties yet.
+              This template node has no settings yet.
             </div>
           ) : (
             <div className="space-y-3">
-              {Object.entries(props).map(([key, value]) => (
+              {settingsEntries.map(([key, value]) => (
                 <TemplatePropEditor
                   key={key}
                   label={key}
                   value={value}
-                  path={["props", key]}
+                  path={[key]}
                   onChange={(path, nextValue) => {
-                    const nextProps = updateValueAtPath(element.content?.props || {}, path.slice(1), nextValue);
+                    const nextSettings = updateValueAtPath(element.settings || {}, path, nextValue);
                     onUpdate({
-                      content: {
-                        ...element.content,
-                        props: nextProps,
-                      },
+                      settings: nextSettings,
                     });
                   }}
                 />
               ))}
             </div>
           )}
+          {contentEntries.length > 0 && (
+            <div className="space-y-3 pt-2 border-t border-gray-200 dark:border-gray-700">
+              <div className="text-xs font-medium text-gray-900 dark:text-white">
+                Template Content ({contentEntries.length} properties)
+              </div>
+              <div className="space-y-3">
+                {contentEntries.map(([key, value]) => (
+                  <TemplatePropEditor
+                    key={key}
+                    label={key}
+                    value={value}
+                    path={[key]}
+                    onChange={(path, nextValue) => {
+                      const nextContent = updateValueAtPath(element.content || {}, path, nextValue);
+                      onUpdate({
+                        content: nextContent,
+                      });
+                    }}
+                  />
+                ))}
+              </div>
+            </div>
+          )}
+          {childElements.length > 0 && (
+            <div className="space-y-3 pt-2 border-t border-gray-200 dark:border-gray-700">
+              <div className="text-xs font-medium text-gray-900 dark:text-white">
+                Children ({childElements.length} nodes)
+              </div>
+              <div className="space-y-3">
+                {childElements.map((child: any, index: number) => (
+                  <TemplateNodeEditor
+                    key={child?.id || `${element?.id || "node"}-${index}`}
+                    node={child}
+                    path={["elements", index]}
+                    onChange={(path, nextValue) => {
+                      const nextElements = updateValueAtPath(element.elements || [], path, nextValue);
+                      onUpdate({
+                        elements: nextElements,
+                      });
+                    }}
+                  />
+                ))}
+              </div>
+            </div>
+          )}
         </div>
       )}
 
       {/* Default content for other types */}
-      {!["heading", "paragraph", "text", "button", "image"].includes(element.type) && !isTemplateBlock && (
+      {!["heading", "paragraph", "text", "button", "image"].includes(element.type) && !isTemplateNode && (
         <div className="text-center py-8">
           <p className="text-xs text-gray-500 dark:text-gray-400">
             Content settings for {element.type} coming soon...

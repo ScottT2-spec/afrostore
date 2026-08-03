@@ -5,6 +5,10 @@ import { resolveStoreLink } from "@/lib/template-link-utils";
 import { useState, useEffect, useRef, useCallback, createContext, useContext } from "react";
 import { useRouter } from "next/navigation";
 import { safeSrc, onImgError } from "./image-fallback";
+import { useEditorStore } from "@/lib/visual-editor/store";
+import type { EditorNode } from "@/lib/visual-editor/node-tree";
+import { normalizeSocialLinks, resolveNestedNodeText } from "@/components/storefront/prop-normalizers";
+import { InlineEditableText } from "@/components/storefront/InlineEditableText";
 
 /* ═══════════════════════════════════════════════════════════════
    PERFUMES TEMPLATE BLOCKS
@@ -135,6 +139,14 @@ const PERFUME_COLLECTIONS = {
     { name: "Elysian Bloom", slug: "elysian-bloom" },
   ],
 };
+
+function selectEditorNode(nodeId: string) {
+  useEditorStore.getState().setSelectedElementId(nodeId);
+}
+
+function getNodeText(node: EditorNode, keys: string[], fallback = ""): string {
+  return resolveNestedNodeText(node, keys, fallback);
+}
 
 function usePerfumeCollections(storeCtx: PerfumesStoreContextData | null, categoryOverrides?: PerfumeCategoryData[]) {
   const overrideCategories = (categoryOverrides || storeCtx?.categories || []).map((category) => ({
@@ -443,23 +455,38 @@ export interface PerfumesHeroSliderProps {
   slides: PerfumesHeroSlide[];
   autoplaySpeed?: number;
   minHeight?: string;
+  elements?: EditorNode[];
+  isEditor?: boolean;
 }
 
-export function PerfumesHeroSlider({ slides, autoplaySpeed = 6000, minHeight = "100vh" }: PerfumesHeroSliderProps) {
+export function PerfumesHeroSlider({ slides = [], autoplaySpeed = 6000, minHeight = "100vh", elements = [], isEditor = false }: PerfumesHeroSliderProps) {
   const storeCtx = useContext(PerfumesStoreContext);
   const fixLink = (link: string) => resolveStoreLink(link, storeCtx?.storeSlug);
   const [current, setCurrent] = useState(0);
   const timerRef = useRef<ReturnType<typeof setInterval> | null>(null);
+  const slidesFromNodes = elements.length > 0 ? elements.map((node) => {
+    const settings = node?.settings && typeof node.settings === "object" ? (node.settings as Record<string, unknown>) : {};
+    return {
+      title: getNodeText(node, ["title"], "Title"),
+      bottleImage: getNodeText(node, ["bottleImage", "image", "imageUrl"], ""),
+      backgroundImage: getNodeText(node, ["backgroundImage", "background", "imageUrl"], ""),
+      backgroundColor: getNodeText(node, ["backgroundColor"], "#000"),
+      buttonText: getNodeText(node, ["buttonText"], "Shop Now"),
+      buttonLink: getNodeText(node, ["buttonLink", "link", "href"], "#"),
+      buttonStyle: settings.buttonStyle === "black" ? "black" : "primary",
+    };
+  }) : [];
+  const activeSlides = slidesFromNodes.length > 0 ? slidesFromNodes : slides;
 
   const goTo = useCallback((idx: number) => { setCurrent(idx); }, []);
 
   useEffect(() => {
-    if (slides.length <= 1) return;
+    if (activeSlides.length <= 1) return;
     timerRef.current = setInterval(() => {
-      setCurrent(prev => (prev + 1) % slides.length);
+      setCurrent(prev => (prev + 1) % activeSlides.length);
     }, autoplaySpeed);
     return () => { if (timerRef.current) clearInterval(timerRef.current); };
-  }, [slides.length, autoplaySpeed]);
+  }, [activeSlides.length, autoplaySpeed]);
 
   const scopedCss = `
     .ph-slider { position: relative; width: 100%; overflow: hidden; }
@@ -539,7 +566,52 @@ export function PerfumesHeroSlider({ slides, autoplaySpeed = 6000, minHeight = "
   return (
     <div className="ph-slider" style={{ minHeight }}>
       <ScopedStyles id="hero-slider" css={scopedCss} />
-      {slides.map((slide, i) => (
+      {isEditor && activeSlides.length > 0 ? (
+        <div style={{ maxWidth: TOKENS.containerWidth, margin: "0 auto", padding: "40px 15px", display: "grid", gap: 20 }}>
+          {activeSlides.map((slide, i) => {
+            const node = elements[i];
+            return (
+              <div
+                key={node?.id || i}
+                data-editor-node-id={node?.id}
+                onClick={(e) => {
+                  if (!node?.id) return;
+                  e.stopPropagation();
+                  selectEditorNode(node.id);
+                }}
+                style={{
+                  border: "1px dashed rgba(37, 99, 235, 0.28)",
+                  padding: 24,
+                  background: slide.backgroundColor,
+                  color: "#fff",
+                  display: "grid",
+                  gap: 12,
+                  cursor: node?.id ? "pointer" : "default",
+                }}
+              >
+                <div style={{ fontSize: 12, letterSpacing: "0.1em", textTransform: "uppercase", opacity: 0.7 }}>Slide {i + 1}</div>
+                <InlineEditableText
+                  nodeId={node?.id}
+                  field="title"
+                  value={slide.title || "Title"}
+                  isEditor={isEditor}
+                  as="div"
+                  style={{ fontFamily: TOKENS.titleFont, fontSize: 28, lineHeight: 1.2 }}
+                />
+                {slide.bottleImage && <div style={{ fontFamily: TOKENS.bodyFont, opacity: 0.85 }}>Bottle image: {slide.bottleImage}</div>}
+                <InlineEditableText
+                  nodeId={node?.id}
+                  field="buttonText"
+                  value={slide.buttonText || "Shop Now"}
+                  isEditor={isEditor}
+                  as="div"
+                  style={{ fontFamily: TOKENS.bodyFont, opacity: 0.85 }}
+                />
+              </div>
+            );
+          })}
+        </div>
+      ) : activeSlides.map((slide, i) => (
         <div key={i} className={`ph-slide ${i === current ? "ph-active" : ""}`}>
           <div className="ph-slide-bg" style={{
             backgroundColor: slide.backgroundColor,
@@ -549,23 +621,27 @@ export function PerfumesHeroSlider({ slides, autoplaySpeed = 6000, minHeight = "
             {i === current && (
               <>
                 <img src={slide.bottleImage} alt="" className="ph-bottle ph-anim-in" style={{ animationDelay: "0.15s" }}  onError={(e) => onImgError(e, "fallback")} />
-                <h2 className="ph-title ph-anim-in" style={{ animationDelay: "0.25s" }}>{slide.title}</h2>
+                <InlineEditableText nodeId={elements[i]?.id} field="title" value={slide.title} isEditor={isEditor} as="h2" className="ph-title ph-anim-in" style={{ animationDelay: "0.25s" }} />
                 <div className="ph-anim-in" style={{ animationDelay: "0.35s" }}>
-                  <Link href={fixLink(slide.buttonLink)} className={slide.buttonStyle === "black" ? "ph-btn-black" : "ph-btn-primary"}>{slide.buttonText}</Link>
+                  {isEditor ? (
+                    <InlineEditableText nodeId={elements[i]?.id} field="buttonText" value={slide.buttonText} isEditor={isEditor} as="span" className={slide.buttonStyle === "black" ? "ph-btn-black" : "ph-btn-primary"} />
+                  ) : (
+                    <Link href={fixLink(slide.buttonLink)} className={slide.buttonStyle === "black" ? "ph-btn-black" : "ph-btn-primary"}>{slide.buttonText}</Link>
+                  )}
                 </div>
               </>
             )}
           </div>
         </div>
       ))}
-      {slides.length > 1 && (
+      {activeSlides.length > 1 && !isEditor && (
         <>
           <div className="ph-arrows">
-            <button className="ph-arrow" onClick={() => goTo((current - 1 + slides.length) % slides.length)} aria-label="Previous">←</button>
-            <button className="ph-arrow" onClick={() => goTo((current + 1) % slides.length)} aria-label="Next">→</button>
+            <button className="ph-arrow" onClick={() => goTo((current - 1 + activeSlides.length) % activeSlides.length)} aria-label="Previous">←</button>
+            <button className="ph-arrow" onClick={() => goTo((current + 1) % activeSlides.length)} aria-label="Next">→</button>
           </div>
           <div className="ph-nav">
-            {slides.map((_, i) => (
+            {activeSlides.map((_, i) => (
               <button key={i} className={`ph-nav-item ${i === current ? "ph-nav-active" : ""}`} onClick={() => goTo(i)}>
                 {String(i + 1).padStart(2, "0")}
               </button>
@@ -585,15 +661,24 @@ export interface PerfumesSectionTitleProps {
   title: string;
   align?: "left" | "center";
   marginBottom?: string;
+  blockId?: string;
+  isEditor?: boolean;
 }
 
-export function PerfumesSectionTitle({ title, align = "left", marginBottom = "30px" }: PerfumesSectionTitleProps) {
+export function PerfumesSectionTitle({ title, align = "left", marginBottom = "30px", blockId, isEditor = false }: PerfumesSectionTitleProps) {
   return (
     <div style={{ textAlign: align, marginBottom }}>
-      <h2 style={{
-        fontFamily: TOKENS.titleFont, fontWeight: 600, fontSize: "48px",
-        lineHeight: 1.2, color: TOKENS.titleColor, margin: 0,
-      }}>{title}</h2>
+      <InlineEditableText
+        nodeId={blockId}
+        field="title"
+        value={title}
+        isEditor={isEditor}
+        as="h2"
+        style={{
+          fontFamily: TOKENS.titleFont, fontWeight: 600, fontSize: "48px",
+          lineHeight: 1.2, color: TOKENS.titleColor, margin: 0,
+        }}
+      />
     </div>
   );
 }
@@ -611,9 +696,11 @@ export interface PerfumesProductGridProps {
   maxProducts?: number;
   filter?: "featured" | "bestseller" | "new-arrival" | "sale" | "all";
   filterTag?: string;
+  blockId?: string;
+  isEditor?: boolean;
 }
 
-export function PerfumesProductGrid({ products: propProducts, columns = 3, sectionTitle, marginBottom = "120px", maxProducts = 6, filter, filterTag }: PerfumesProductGridProps) {
+export function PerfumesProductGrid({ products: propProducts, columns = 3, sectionTitle, marginBottom = "120px", maxProducts = 6, filter, filterTag, blockId, isEditor = false }: PerfumesProductGridProps) {
   const storeCtx = useContext(PerfumesStoreContext);
 
   const products: PerfumesProduct[] = (() => {
@@ -651,13 +738,14 @@ export function PerfumesProductGrid({ products: propProducts, columns = 3, secti
     }));
   })();
 
-  const resolveLink = (link: string, name: string) => {
-    if (link && link.startsWith("/store/")) return link;
+  const resolveLink = (link: unknown, name: string) => {
+    const normalized = typeof link === "string" ? link : link == null ? "" : String(link);
+    if (normalized.startsWith("/store/")) return normalized;
     if (storeCtx?.storeSlug) {
       const slug = name.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/(^-|-$)/g, "");
       return `/store/${storeCtx.storeSlug}/product/${slug}`;
     }
-    return resolveStoreLink(link, storeCtx?.storeSlug);
+    return resolveStoreLink(normalized, storeCtx?.storeSlug);
   };
 
   const scopedCss = `
@@ -744,12 +832,13 @@ export function PerfumesProductGrid({ products: propProducts, columns = 3, secti
   return (
     <div className="ppg-section" style={containerStyle}>
       <ScopedStyles id="product-grid" css={scopedCss} />
-      {sectionTitle && <PerfumesSectionTitle title={sectionTitle} />}
+      {sectionTitle && <PerfumesSectionTitle title={sectionTitle} blockId={blockId} isEditor={isEditor} />}
       <div className="ppg-grid">
-        {products.map((p) => {
+        {products.map((p, index) => {
           const pLink = resolveLink(p.link, p.name);
+          const key = `${p.id || p.name || "perfume"}-${index}`;
           return (
-            <div key={p.id} className="ppg-card">
+            <div key={key} className="ppg-card">
               <div className="ppg-thumb">
                 <Link href={pLink}>
                   <img src={p.image || safeSrc(null, p.name)} alt={p.name} className="ppg-img ppg-main-img" loading="lazy" onError={(e) => onImgError(e, p.name)} />
@@ -793,7 +882,7 @@ export interface PerfumesOlfactoryTagsProps {
   marginBottom?: string;
 }
 
-export function PerfumesOlfactoryTags({ title = "Shop by Olfactory Family", tags, marginBottom = "120px" }: PerfumesOlfactoryTagsProps) {
+export function PerfumesOlfactoryTags({ title = "Shop by Olfactory Family", tags = [], marginBottom = "120px" }: PerfumesOlfactoryTagsProps) {
   const storeCtx = useContext(PerfumesStoreContext);
   const fixLink = (link: string) => resolveStoreLink(link, storeCtx?.storeSlug);
 
@@ -839,7 +928,7 @@ export interface PerfumesMarqueeProps {
   marginBottom?: string;
 }
 
-export function PerfumesMarquee({ items, speed = "45s", marginBottom = "120px" }: PerfumesMarqueeProps) {
+export function PerfumesMarquee({ items = [], speed = "45s", marginBottom = "120px" }: PerfumesMarqueeProps) {
   const scopedCss = `
     .pm-section { margin-bottom: ${marginBottom}; overflow: hidden; }
     .pm-track {
@@ -898,13 +987,14 @@ export interface PerfumesFeaturedBanner {
 }
 
 export interface PerfumesFeaturedBannersProps {
-  banners: PerfumesFeaturedBanner[];
+  banners?: PerfumesFeaturedBanner[];
   marginBottom?: string;
 }
 
-export function PerfumesFeaturedBanners({ banners, marginBottom = "120px" }: PerfumesFeaturedBannersProps) {
+export function PerfumesFeaturedBanners({ banners = [], marginBottom = "120px" }: PerfumesFeaturedBannersProps) {
   const storeCtx = useContext(PerfumesStoreContext);
   const fixLink = (link: string) => resolveStoreLink(link, storeCtx?.storeSlug);
+  const safeBanners = Array.isArray(banners) ? banners : [];
 
   const scopedCss = `
     .pfb-section { margin-bottom: ${marginBottom}; }
@@ -960,7 +1050,7 @@ export function PerfumesFeaturedBanners({ banners, marginBottom = "120px" }: Per
     <div className="pfb-section" style={containerStyle}>
       <ScopedStyles id="featured-banners" css={scopedCss} />
       <div className="pfb-grid">
-        {banners.map((b, i) => (
+        {safeBanners.map((b, i) => (
           <div key={i} className="pfb-card" style={{ backgroundImage: `url(${b.backgroundImage})` }}>
             <div className="pfb-overlay" />
             <div className="pfb-content">
@@ -989,14 +1079,14 @@ export interface PerfumesTab {
 
 export interface PerfumesTabbedProductsProps {
   title?: string;
-  tabs: PerfumesTab[];
+  tabs?: PerfumesTab[];
   products?: PerfumesProduct[];
   columns?: number;
   maxProducts?: number;
   marginBottom?: string;
 }
 
-export function PerfumesTabbedProducts({ title, tabs, products, columns = 3, maxProducts = 6, marginBottom = "120px" }: PerfumesTabbedProductsProps) {
+export function PerfumesTabbedProducts({ title, tabs = [], products, columns = 3, maxProducts = 6, marginBottom = "120px" }: PerfumesTabbedProductsProps) {
   const [activeTab, setActiveTab] = useState(0);
 
   const scopedCss = `
@@ -1060,15 +1150,16 @@ export interface PerfumesCollectionBanner {
 }
 
 export interface PerfumesCollectionBannersProps {
-  banners: PerfumesCollectionBanner[];
+  banners?: PerfumesCollectionBanner[];
   sectionTitle?: string;
   marginBottom?: string;
 }
 
-export function PerfumesCollectionBanners({ banners, sectionTitle, marginBottom = "120px" }: PerfumesCollectionBannersProps) {
+export function PerfumesCollectionBanners({ banners = [], sectionTitle, marginBottom = "120px" }: PerfumesCollectionBannersProps) {
   const storeCtx = useContext(PerfumesStoreContext);
   const fixLink = (link: string) => resolveStoreLink(link, storeCtx?.storeSlug);
   const { ref, inView } = useInView();
+  const safeBanners = Array.isArray(banners) ? banners : [];
 
   const scopedCss = `
     .pcb-section { margin-bottom: ${marginBottom}; }
@@ -1117,7 +1208,7 @@ export function PerfumesCollectionBanners({ banners, sectionTitle, marginBottom 
       <ScopedStyles id="collection-banners" css={scopedCss} />
       {sectionTitle && <PerfumesSectionTitle title={sectionTitle} />}
       <div className="pcb-grid">
-        {banners.map((b, i) => (
+        {safeBanners.map((b, i) => (
           <div key={i} className={`pcb-card pcb-animate ${inView ? "pcb-visible" : ""}`} style={{ transitionDelay: `${i * 0.15}s` }}>
             <img src={b.image} alt={b.title} className="pcb-bg-img" loading="lazy"  onError={(e) => onImgError(e, b.title)} />
             <div className="pcb-overlay" />
@@ -1144,7 +1235,7 @@ export interface PerfumesBlogPost {
   title: string;
   excerpt: string;
   date: string;
-  categories: string[];
+  categories?: string[];
   link: string;
 }
 
@@ -1153,9 +1244,11 @@ export interface PerfumesBlogArticlesProps {
   sectionTitle?: string;
   columns?: number;
   marginBottom?: string;
+  blockId?: string;
+  isEditor?: boolean;
 }
 
-export function PerfumesBlogArticles({ posts: propPosts, sectionTitle = "Journal Articles", columns = 5, marginBottom = "100px" }: PerfumesBlogArticlesProps) {
+export function PerfumesBlogArticles({ posts: propPosts = [], sectionTitle = "Journal Articles", columns = 5, marginBottom = "100px", blockId, isEditor = false }: PerfumesBlogArticlesProps) {
   const storeCtx = useContext(PerfumesStoreContext);
 
   const posts: PerfumesBlogPost[] = (() => {
@@ -1208,23 +1301,27 @@ export function PerfumesBlogArticles({ posts: propPosts, sectionTitle = "Journal
   return (
     <div className="pba-section" style={containerStyle}>
       <ScopedStyles id="blog-articles" css={scopedCss} />
-      {sectionTitle && <PerfumesSectionTitle title={sectionTitle} />}
+      {sectionTitle && <PerfumesSectionTitle title={sectionTitle} blockId={blockId} isEditor={isEditor} />}
       <div className="pba-grid">
-        {posts.map((p, i) => (
-          <article key={i} className="pba-card">
-            <div className="pba-img-wrap">
-              <img src={p.image} alt={p.title} className="pba-img" loading="lazy"  onError={(e) => onImgError(e, p.title)} />
-              <Link href={resolveStoreLink(p.link, storeCtx?.storeSlug)} className="pba-link" aria-label={p.title} />
-            </div>
-            <div className="pba-cats">
-              {p.categories.map((c, ci) => (
-                <span key={ci} className="pba-cat">{c}</span>
-              ))}
-            </div>
-            <h3 className="pba-title"><Link href={p.link}>{p.title}</Link></h3>
-            <div className="pba-date">{p.date}</div>
-          </article>
-        ))}
+        {posts.map((p, i) => {
+          const safeLink = resolveStoreLink((p as any).link, storeCtx?.storeSlug);
+          const categories = Array.isArray((p as any).categories) ? (p as any).categories : [];
+          return (
+            <article key={(p as any).id || i} className="pba-card">
+              <div className="pba-img-wrap">
+                <img src={p.image} alt={p.title} className="pba-img" loading="lazy"  onError={(e) => onImgError(e, p.title)} />
+                <Link href={safeLink} className="pba-link" aria-label={p.title} />
+              </div>
+              <div className="pba-cats">
+                {categories.map((c: any, ci: number) => (
+                  <span key={ci} className="pba-cat">{c}</span>
+                ))}
+              </div>
+              <h3 className="pba-title"><Link href={safeLink}>{p.title}</Link></h3>
+              <div className="pba-date">{p.date}</div>
+            </article>
+          );
+        })}
       </div>
     </div>
   );
@@ -1248,7 +1345,7 @@ export interface PerfumesInstagramProps {
   marginBottom?: string;
 }
 
-export function PerfumesInstagram({ handle = "@xtemos.studio", handleLink = "https://www.instagram.com/", items, marginBottom = "0" }: PerfumesInstagramProps) {
+export function PerfumesInstagram({ handle = "@xtemos.studio", handleLink = "https://www.instagram.com/", items = [], marginBottom = "0" }: PerfumesInstagramProps) {
   const scopedCss = `
     .pi-section { margin-bottom: ${marginBottom}; }
     .pi-layout { display: flex; gap: 30px; align-items: center; }
@@ -1497,8 +1594,17 @@ export interface PerfumesAboutWelcomeProps {
   title?: string;
   text?: string;
   image?: string;
+  elements?: EditorNode[];
+  isEditor?: boolean;
+  blockId?: string;
 }
-export function PerfumesAboutWelcome({ title = "Welcome to Our Fragrances", text = "", image = `${IMG_BASE}/2025/11/prf-about-us-1.jpg` }: PerfumesAboutWelcomeProps) {
+export function PerfumesAboutWelcome({ title = "Welcome to Our Fragrances", text = "", image = `${IMG_BASE}/2025/11/prf-about-us-1.jpg`, elements = [], isEditor = false, blockId }: PerfumesAboutWelcomeProps) {
+  const titleNode = elements.find((node) => node.type === "title" || node.type === "heading");
+  const textNode = elements.find((node) => node.type === "paragraph" || node.type === "text" || node.type === "bodyText");
+  const imageNode = elements.find((node) => node.type === "image");
+  const resolvedTitle = titleNode ? getNodeText(titleNode, ["title", "text"], title || "") : title;
+  const resolvedText = textNode ? getNodeText(textNode, ["text", "content", "paragraph"], text || "") : text;
+  const resolvedImage = imageNode ? getNodeText(imageNode, ["src", "image", "imageUrl"], image || "") : image;
   const css = `
     .pa-welcome { max-width: ${TOKENS.containerWidth}; margin: 0 auto; padding: 80px 15px 60px; display: grid; grid-template-columns: 1fr 1fr; gap: 60px; align-items: center; }
     .pa-welcome-title { font-family: ${TOKENS.titleFont}; font-size: 42px; font-weight: 400; color: ${TOKENS.primaryColor}; margin: 0 0 25px; line-height: 1.2; }
@@ -1512,10 +1618,21 @@ export function PerfumesAboutWelcome({ title = "Welcome to Our Fragrances", text
       <ScopedStyles id="about-welcome" css={css} />
       <div className="pa-welcome">
         <div>
-          <h1 className="pa-welcome-title">{title}</h1>
-          <p className="pa-welcome-text">{text}</p>
+          <InlineEditableText nodeId={titleNode?.id || blockId} field="title" value={resolvedTitle} isEditor={isEditor} as="h1" className="pa-welcome-title" />
+          <InlineEditableText nodeId={textNode?.id || blockId} field="text" value={resolvedText} isEditor={isEditor} as="p" multiline className="pa-welcome-text" />
         </div>
-        <img src={image} alt="About us" className="pa-welcome-img" />
+        <img
+          src={resolvedImage}
+          alt="About us"
+          className="pa-welcome-img"
+          data-editor-node-id={imageNode?.id}
+          onClick={(e) => {
+            if (!isEditor || !imageNode?.id) return;
+            e.stopPropagation();
+            selectEditorNode(imageNode.id);
+          }}
+          style={isEditor && imageNode ? { outline: "1px dashed rgba(37, 99, 235, 0.25)", outlineOffset: "4px" } : undefined}
+        />
       </div>
     </div>
   );
@@ -1553,9 +1670,17 @@ export interface PerfumesAboutStoryProps {
   title?: string;
   text?: string;
   faqItems?: Array<{ q: string; a: string }>;
+  elements?: EditorNode[];
+  isEditor?: boolean;
+  blockId?: string;
 }
-export function PerfumesAboutStory({ title = "Our Story", text = "", faqItems = [] }: PerfumesAboutStoryProps) {
+export function PerfumesAboutStory({ title = "Our Story", text = "", faqItems = [], elements = [], isEditor = false, blockId }: PerfumesAboutStoryProps) {
   const [openFaq, setOpenFaq] = useState<number | null>(null);
+  const titleNode = elements.find((node) => node.type === "title" || node.type === "heading");
+  const textNode = elements.find((node) => node.type === "paragraph" || node.type === "text" || node.type === "bodyText");
+  const faqNodes = elements.filter((node) => node.type === "faq" || node.type === "accordionItem" || node.type === "question");
+  const resolvedTitle = titleNode ? getNodeText(titleNode, ["title", "text"], title || "") : title;
+  const resolvedText = textNode ? getNodeText(textNode, ["text", "content", "paragraph"], text || "") : text;
   const css = `
     .pa-story { max-width: ${TOKENS.containerWidth}; margin: 0 auto; padding: 0 15px 80px; display: grid; grid-template-columns: 1fr 1fr; gap: 60px; }
     .pa-story-title { font-family: ${TOKENS.titleFont}; font-size: 42px; font-weight: 400; color: ${TOKENS.primaryColor}; margin: 0 0 25px; }
@@ -1575,17 +1700,33 @@ export function PerfumesAboutStory({ title = "Our Story", text = "", faqItems = 
       <ScopedStyles id="about-story" css={css} />
       <div className="pa-story">
         <div>
-          <h2 className="pa-story-title">{title}</h2>
-          <p className="pa-story-text">{text}</p>
+          <InlineEditableText nodeId={titleNode?.id || blockId} field="title" value={resolvedTitle} isEditor={isEditor} as="h2" className="pa-story-title" />
+          <InlineEditableText nodeId={textNode?.id || blockId} field="text" value={resolvedText} isEditor={isEditor} as="p" multiline className="pa-story-text" />
         </div>
         <div className="pa-faq">
-          {faqItems.map((item, i) => (
-            <div key={i} className="pa-faq-item">
-              <div className="pa-faq-q" onClick={() => setOpenFaq(openFaq === i ? null : i)}>
-                {item.q}
+          {(faqNodes.length > 0 ? faqNodes.map((node, i) => ({
+            q: getNodeText(node, ["question", "title", "text"], faqItems[i]?.q || "Question"),
+            a: getNodeText(node, ["answer", "content", "text"], faqItems[i]?.a || "Answer"),
+            id: node.id,
+          })) : faqItems.map((item, i) => ({ ...item, id: `faq-${i}` }))).map((item, i) => (
+            <div key={item.id || i} className="pa-faq-item">
+              <div
+                className="pa-faq-q"
+                data-editor-node-id={item.id}
+                onClick={(e) => {
+                  if (isEditor && item.id && !item.id.startsWith("faq-")) {
+                    e.stopPropagation();
+                    selectEditorNode(item.id);
+                    return;
+                  }
+                  setOpenFaq(openFaq === i ? null : i);
+                }}
+                style={isEditor && item.id && !item.id.startsWith("faq-") ? { outline: "1px dashed rgba(37, 99, 235, 0.28)", outlineOffset: "4px" } : undefined}
+              >
+                <InlineEditableText nodeId={item.id || blockId} field="question" value={item.q} isEditor={isEditor} as="span" />
                 <span className={`pa-faq-toggle ${openFaq === i ? "pa-open" : ""}`}>+</span>
               </div>
-              {openFaq === i && <p className="pa-faq-a">{item.a}</p>}
+              {openFaq === i && <InlineEditableText nodeId={item.id || blockId} field="answer" value={item.a} isEditor={isEditor} as="p" multiline className="pa-faq-a" />}
             </div>
           ))}
         </div>
@@ -1633,8 +1774,10 @@ export function PerfumesWhyChooseUs({ title = "Why Choose Us?", items = [] }: Pe
 /* ─── CONTACT: HERO ─────────────────────────────────────────── */
 export interface PerfumesContactHeroProps {
   title?: string;
+  blockId?: string;
+  isEditor?: boolean;
 }
-export function PerfumesContactHero({ title = "Contact Us" }: PerfumesContactHeroProps) {
+export function PerfumesContactHero({ title = "Contact Us", blockId, isEditor = false }: PerfumesContactHeroProps) {
   const css = `
     .pc-hero { max-width: ${TOKENS.containerWidth}; margin: 0 auto; padding: 80px 15px 60px; text-align: center; }
     .pc-title { font-family: ${TOKENS.titleFont}; font-size: 52px; font-weight: 400; color: ${TOKENS.primaryColor}; margin: 0 0 50px; letter-spacing: -1px; }
@@ -1643,7 +1786,7 @@ export function PerfumesContactHero({ title = "Contact Us" }: PerfumesContactHer
   return (
     <div>
       <ScopedStyles id="contact-hero" css={css} />
-      <div className="pc-hero"><h1 className="pc-title">{title}</h1></div>
+      <div className="pc-hero"><InlineEditableText nodeId={blockId} field="title" value={title} isEditor={isEditor} as="h1" className="pc-title" /></div>
     </div>
   );
 }
@@ -1676,7 +1819,7 @@ export function PerfumesContactInfo({ items = [] }: PerfumesContactInfoProps) {
             <h3 className="pc-info-label">{item.label}</h3>
             {item.type === "social" ? (
               <div className="pc-social-row">
-                {socialLinks.length > 0 ? socialLinks.map((s, si) => (
+                {normalizeSocialLinks(socialLinks).length > 0 ? normalizeSocialLinks(socialLinks).map((s, si) => (
                   <a key={si} href={s.url} className="pc-social-icon" target="_blank" rel="noopener noreferrer">{socialIcons[s.platform] || s.platform[0]?.toUpperCase()}</a>
                 )) : (<><a href="#" className="pc-social-icon">f</a><a href="#" className="pc-social-icon">𝕏</a><a href="#" className="pc-social-icon">📷</a><a href="#" className="pc-social-icon">▶</a></>)}
               </div>
@@ -1694,8 +1837,10 @@ export function PerfumesContactInfo({ items = [] }: PerfumesContactInfoProps) {
 export interface PerfumesContactFormProps {
   title?: string;
   description?: string;
+  blockId?: string;
+  isEditor?: boolean;
 }
-export function PerfumesContactForm({ title = "Get In Touch", description = "" }: PerfumesContactFormProps) {
+export function PerfumesContactForm({ title = "Get In Touch", description = "", blockId, isEditor = false }: PerfumesContactFormProps) {
   const [form, setForm] = useState({ firstName: "", lastName: "", email: "", message: "" });
   const [submitted, setSubmitted] = useState(false);
   const css = `
@@ -1719,8 +1864,8 @@ export function PerfumesContactForm({ title = "Get In Touch", description = "" }
       <ScopedStyles id="contact-form" css={css} />
       <div className="pc-form-section">
         <div>
-          <h2 className="pc-form-title">{title}</h2>
-          <p className="pc-form-desc">{description}</p>
+          <InlineEditableText nodeId={blockId} field="title" value={title} isEditor={isEditor} as="h2" className="pc-form-title" />
+          <InlineEditableText nodeId={blockId} field="description" value={description} isEditor={isEditor} as="p" multiline className="pc-form-desc" />
         </div>
         <div>
           {submitted ? (
@@ -1782,8 +1927,10 @@ export function PerfumesBrandedStores({ title = "Our Branded Stores", stores = [
 export interface PerfumesPageHeroProps {
   title?: string;
   subtitle?: string;
+  blockId?: string;
+  isEditor?: boolean;
 }
-export function PerfumesPageHero({ title = "Fragrances", subtitle }: PerfumesPageHeroProps) {
+export function PerfumesPageHero({ title = "Fragrances", subtitle, blockId, isEditor = false }: PerfumesPageHeroProps) {
   const css = `
     .pfr-hero { max-width: ${TOKENS.containerWidth}; margin: 0 auto; padding: 80px 15px 60px; text-align: center; }
     .pfr-hero-title { font-family: ${TOKENS.titleFont}; font-size: 52px; font-weight: 400; color: ${TOKENS.primaryColor}; margin: 0 0 15px; letter-spacing: -1px; }
@@ -1795,8 +1942,8 @@ export function PerfumesPageHero({ title = "Fragrances", subtitle }: PerfumesPag
     <div>
       <ScopedStyles id="page-hero" css={css} />
       <div className="pfr-hero">
-        <h1 className="pfr-hero-title">{title}</h1>
-        {subtitle && <p className="pfr-hero-subtitle">{subtitle}</p>}
+        <InlineEditableText nodeId={blockId} field="title" value={title} isEditor={isEditor} as="h1" className="pfr-hero-title" />
+        {subtitle && <InlineEditableText nodeId={blockId} field="subtitle" value={subtitle} isEditor={isEditor} as="p" className="pfr-hero-subtitle" />}
       </div>
     </div>
   );
@@ -1935,8 +2082,10 @@ export function PerfumesJournalGrid({ columns = 3 }: PerfumesJournalGridProps) {
 /* ─── REVIEWS: HERO ─────────────────────────────────────────── */
 export interface PerfumesReviewsHeroProps {
   title?: string;
+  blockId?: string;
+  isEditor?: boolean;
 }
-export function PerfumesReviewsHero({ title = "Reviews" }: PerfumesReviewsHeroProps) {
+export function PerfumesReviewsHero({ title = "Reviews", blockId, isEditor = false }: PerfumesReviewsHeroProps) {
   const css = `
     .pr-hero { max-width: ${TOKENS.containerWidth}; margin: 0 auto; padding: 80px 15px 60px; text-align: center; }
     .pr-hero-title { font-family: ${TOKENS.titleFont}; font-size: 52px; font-weight: 400; color: ${TOKENS.primaryColor}; margin: 0; letter-spacing: -1px; }
@@ -1946,7 +2095,7 @@ export function PerfumesReviewsHero({ title = "Reviews" }: PerfumesReviewsHeroPr
     <div>
       <ScopedStyles id="reviews-hero" css={css} />
       <div className="pr-hero">
-        <h1 className="pr-hero-title">{title}</h1>
+        <InlineEditableText nodeId={blockId} field="title" value={title} isEditor={isEditor} as="h1" className="pr-hero-title" />
       </div>
     </div>
   );

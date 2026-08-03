@@ -1,4 +1,4 @@
-import type { TemplateBlock } from "@/components/storefront/TemplateBlockRenderer";
+import type { EditorNode } from "@/lib/visual-editor/node-tree";
 import { FASHION_TEMPLATE_PRESET } from "./presets/fashion-preset";
 import { FASHION_COLORED_PRESET } from "./presets/fashion-colored-preset";
 import { HANDMADE_BAGS_PRESET } from "./presets/handmade-bags-preset";
@@ -21,7 +21,7 @@ import { HARDWARE_TEMPLATE_PRESET } from "./presets/hardware-preset";
 import { PROKIP_AGENT_PRESET } from "./presets/prokip-agent-preset";
 import { PROKIP_BOOKING_PRESET } from "./presets/prokip-booking-preset";
 
-export const TEMPLATE_PRESET_MAP: Record<string, TemplateBlock[]> = {
+export const TEMPLATE_PRESET_MAP: Record<string, EditorNode[]> = {
   fashion: FASHION_TEMPLATE_PRESET,
   "fashion-colored": FASHION_COLORED_PRESET,
   "handmade-bags": HANDMADE_BAGS_PRESET,

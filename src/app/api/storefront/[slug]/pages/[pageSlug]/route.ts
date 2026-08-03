@@ -6,6 +6,7 @@ import { mergeStoredTemplatePages } from "@/lib/templates/site-instance";
 import { ensurePerfumePages } from "@/lib/templates/perfume-pages";
 import { ensureVegetablePages } from "@/lib/templates/vegetable-pages";
 import { ensureTemplatePages } from "@/lib/templates/template-pages";
+import { buildTemplatePageContent } from "@/lib/templates/template-tree";
 import { RETAIL_PROJECT_DETAIL_BLOCKS } from "@/lib/templates/presets/retail-pages";
 import type { PageType, Prisma } from "@/generated/prisma";
 
@@ -36,8 +37,7 @@ function buildKidsSyntheticPage(pageSlug: string): {
       slug: "about",
       type: "CUSTOM" as PageType,
       template: "kids",
-      content: {
-        blocks: [
+      content: buildTemplatePageContent([
           {
             id: "kids-about-announcement",
             type: "kidsAnnouncementBar",
@@ -137,9 +137,7 @@ function buildKidsSyntheticPage(pageSlug: string): {
               storeSlug: "kids",
             },
           },
-        ],
-        settings: {}
-      },
+        ], {}) as any,
       metaTitle: "About Us",
       metaDescription: "About the Kids collection",
     };
@@ -152,8 +150,7 @@ function buildKidsSyntheticPage(pageSlug: string): {
       slug: "contact",
       type: "CUSTOM" as PageType,
       template: "kids",
-      content: {
-        blocks: [
+      content: buildTemplatePageContent([
           {
             id: "kids-contact-announcement",
             type: "kidsAnnouncementBar",
@@ -228,9 +225,7 @@ function buildKidsSyntheticPage(pageSlug: string): {
               storeSlug: "kids",
             },
           },
-        ],
-        settings: {}
-      },
+        ], {}) as any,
       metaTitle: "Contact Us",
       metaDescription: "Get in touch with the Kids collection",
     };
@@ -243,8 +238,7 @@ function buildKidsSyntheticPage(pageSlug: string): {
       slug: "blog",
       type: "CUSTOM" as PageType,
       template: "kids",
-      content: {
-        blocks: [
+      content: buildTemplatePageContent([
           {
             id: "kids-blog-announcement",
             type: "kidsAnnouncementBar",
@@ -281,9 +275,7 @@ function buildKidsSyntheticPage(pageSlug: string): {
               storeSlug: "kids",
             },
           },
-        ],
-        settings: {}
-      },
+        ], {}) as any,
       metaTitle: "Blog",
       metaDescription: "Latest tips and stories for parents",
     };
@@ -323,7 +315,7 @@ function buildCosmeticsSyntheticPage(pageSlug: string): {
     slug: pageSlug,
     type: pageDef.type,
     template: "cosmetics",
-    content: { blocks: [], settings: {} },
+    content: buildTemplatePageContent([], {}) as any,
     metaTitle: pageDef.title,
     metaDescription: pageDef.metaDescription,
   };
@@ -346,7 +338,7 @@ function buildTShirtsSyntheticPage(pageSlug: string): {
       slug: "about-us",
       type: "CUSTOM" as PageType,
       template: "t-shirts-prints",
-      content: { blocks: [], settings: {} },
+      content: buildTemplatePageContent([], {}) as any,
       metaTitle: "About Us",
       metaDescription: "About the T-Shirts & Prints studio",
     };
@@ -359,7 +351,7 @@ function buildTShirtsSyntheticPage(pageSlug: string): {
       slug: "contact-us",
       type: "CUSTOM" as PageType,
       template: "t-shirts-prints",
-      content: { blocks: [], settings: {} },
+      content: buildTemplatePageContent([], {}) as any,
       metaTitle: "Contact Us",
       metaDescription: "Contact the T-Shirts & Prints studio",
     };
@@ -396,7 +388,7 @@ function buildHandmadeBagsSyntheticPage(pageSlug: string): {
     slug: pageSlug,
     type: pageDef.type,
     template: "handmade-bags",
-    content: { blocks: [], settings: {} },
+    content: buildTemplatePageContent([], {}) as any,
     metaTitle: pageDef.title,
     metaDescription: pageDef.metaDescription,
   };
@@ -427,7 +419,7 @@ function buildRetailSyntheticPage(pageSlug: string): {
       slug: pageSlug,
       type: "CUSTOM" as PageType,
       template: "retail",
-      content: { blocks: presetBlocks, settings: {} },
+      content: ({ blocks: presetBlocks, settings: {} } as unknown) as Prisma.JsonValue,
       metaTitle: title,
       metaDescription: `Project details for ${title}`,
     };
@@ -451,7 +443,7 @@ function buildRetailSyntheticPage(pageSlug: string): {
     slug: pageSlug,
     type: pageDef.type,
     template: "retail",
-    content: { blocks: [], settings: {} },
+    content: buildTemplatePageContent([], {}) as any,
     metaTitle: pageDef.title,
     metaDescription: pageDef.metaDescription,
   };
@@ -620,23 +612,13 @@ export async function GET(_req: NextRequest, { params }: Params) {
     const fallbackPage = mergedPages.find((item) => item.slug === pageSlug) || mergedPages[0];
     if (!fallbackPage) return notFound("Page not found");
 
-    // Normalize content structure - handle both array and object with blocks property
+    // Preserve nested editor trees and template block documents as-is.
+    // Only wrap bare arrays so the page component can still parse them safely.
     let normalizedContent = fallbackPage.content;
-    if (normalizedContent && typeof normalizedContent === 'object' && !Array.isArray(normalizedContent)) {
-      // Content is an object - check if it has blocks property
-      if (normalizedContent.blocks && Array.isArray(normalizedContent.blocks)) {
-        // Already has blocks property, use as-is
-        normalizedContent = normalizedContent;
-      } else {
-        // Object without blocks property - wrap in blocks structure
-        normalizedContent = { blocks: [], settings: normalizedContent.settings || {} };
-      }
-    } else if (Array.isArray(normalizedContent)) {
-      // Content is a direct array - wrap in blocks structure
-      normalizedContent = { blocks: normalizedContent, settings: {} };
-    } else {
-      // Invalid content - use empty structure
-      normalizedContent = { blocks: [], settings: {} };
+    if (Array.isArray(normalizedContent)) {
+      normalizedContent = { elements: normalizedContent, settings: {} };
+    } else if (!normalizedContent || typeof normalizedContent !== "object") {
+      normalizedContent = { elements: [], settings: {} };
     }
 
     // Update fallbackPage with normalized content

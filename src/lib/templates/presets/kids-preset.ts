@@ -1,14 +1,14 @@
-import type { TemplateBlock } from "@/components/storefront/TemplateBlockRenderer";
+import type { EditorNode } from "@/lib/visual-editor/node-tree";
 
 /**
  * Kids Template Preset
  * Recreates the WoodMart Kids demo layout with editable blocks.
  */
-export const KIDS_TEMPLATE_PRESET: TemplateBlock[] = [
+export const KIDS_TEMPLATE_PRESET: EditorNode[] = [
   {
     id: "kids-announcement",
     type: "kidsAnnouncementBar",
-    props: {
+    settings: {
       text: "Sign up for our newsletter to get 30% off for the week!",
       link: "#newsletter",
     },
@@ -16,33 +16,43 @@ export const KIDS_TEMPLATE_PRESET: TemplateBlock[] = [
   {
     id: "kids-hero",
     type: "kidsHeroSlider",
-    props: {
-      autoplaySpeed: 5000,
-      minHeight: "1020px",
-      slides: [
+          settings: {
+        autoplaySpeed: 5000,
+      minHeight: "1020px"
+      },
+      elements: [
         {
-          title: "Made for Little Moments That Matter",
-          description: "Timeless children's fashion crafted with premium fabrics, playful details, and lasting comfort for every stage of childhood.",
-          buttonText: "Discover More",
-          buttonLink: "/shop",
-          backgroundImage: "/uploads/kids_images/Kids-heroback.webp",
-          colorScheme: "dark",
+          id: "kids-hero-slide-1",
+          type: "slide",
+          settings:           {
+            "title": "Made for Little Moments That Matter",
+            "description": "Timeless children's fashion crafted with premium fabrics, playful details, and lasting comfort for every stage of childhood.",
+            "buttonText": "Discover More",
+            "buttonLink": "/shop",
+            "backgroundImage": "/uploads/kids_images/Kids-heroback.webp",
+            "colorScheme": "dark"
+          },
+          elements: [],
         },
         {
-          title: "Everyday Comfort, Everyday Joy",
-          description: "Explore charming collections of clothing and essentials designed to keep little ones happy, comfortable, and ready for every adventure.",
-          buttonText: "View Collection",
-          buttonLink: "/shop",
-          backgroundImage: "/uploads/kids_images/About.webp",
-          colorScheme: "dark",
-}
+          id: "kids-hero-slide-2",
+          type: "slide",
+          settings:           {
+            "title": "Everyday Comfort, Everyday Joy",
+            "description": "Explore charming collections of clothing and essentials designed to keep little ones happy, comfortable, and ready for every adventure.",
+            "buttonText": "View Collection",
+            "buttonLink": "/shop",
+            "backgroundImage": "/uploads/kids_images/About.webp",
+            "colorScheme": "dark"
+          },
+          elements: [],
+        }
       ],
-    },
   },
   {
     id: "kids-categories",
     type: "kidsCategoryCards",
-    props: {
+    settings: {
       sectionTitle: {
         subtitle: "Toys and accessories",
         title: "Shop by category",
@@ -60,7 +70,7 @@ export const KIDS_TEMPLATE_PRESET: TemplateBlock[] = [
   {
     id: "kids-featured",
     type: "kidsProductGrid",
-    props: {
+    settings: {
       columns: 4,
       maxProducts: 8,
       filter: "featured",
@@ -74,7 +84,7 @@ export const KIDS_TEMPLATE_PRESET: TemplateBlock[] = [
   {
     id: "kids-bundle",
     type: "kidsBundlePromo",
-    props: {
+    settings: {
       subtitle: "Buy bundle and get a 30% discount",
       title: "Warm and Comfortable clothes set for your baby",
       description: "Buy this set and save 30%. Discounts and promotions are seasonal.",
@@ -91,7 +101,7 @@ export const KIDS_TEMPLATE_PRESET: TemplateBlock[] = [
   {
     id: "kids-popular",
     type: "kidsProductGrid",
-    props: {
+    settings: {
       columns: 4,
       maxProducts: 8,
       filter: "bestseller",
@@ -104,7 +114,7 @@ export const KIDS_TEMPLATE_PRESET: TemplateBlock[] = [
   {
     id: "kids-blog",
     type: "kidsBlogPosts",
-    props: {
+    settings: {
       columns: 3,
       sectionTitle: {
         title: "Our Articles",
@@ -115,7 +125,7 @@ export const KIDS_TEMPLATE_PRESET: TemplateBlock[] = [
   {
     id: "kids-instagram",
     type: "kidsInstagram",
-    props: {
+    settings: {
       sectionTitle: {
         title: "@Prokip_kids Our instagram",
       },
@@ -125,7 +135,7 @@ export const KIDS_TEMPLATE_PRESET: TemplateBlock[] = [
   {
     id: "kids-newsletter",
     type: "kidsNewsletter",
-    props: {
+    settings: {
       title: "Join our mailing list to receive any latest updates and promotions",
       buttonText: "Subscribe",
       backgroundColor: "#faf8f5",

@@ -1,4 +1,4 @@
-import type { TemplateBlock } from "@/components/storefront/TemplateBlockRenderer";
+import type { EditorNode } from "@/lib/visual-editor/node-tree";
 
 /**
  * Health (Pills) template — default page block content.
@@ -7,11 +7,11 @@ import type { TemplateBlock } from "@/components/storefront/TemplateBlockRendere
  */
 
 /* ── ABOUT PAGE ─────────────────────────────────────────────── */
-export const HEALTH_ABOUT_BLOCKS: TemplateBlock[] = [
+export const HEALTH_ABOUT_BLOCKS: EditorNode[] = [
   {
     id: "health-about-page",
     type: "healthAboutPage",
-    props: {
+    settings: {
       heroTitle: "About Us",
       heroSubtitle: "Our mission is to make you healthy and happy, for this we use only natural and high-quality ingredients necessary to achieve an extraordinary effect.",
       heroImage: "https://woodmart.xtemos.com/pills/wp-content/uploads/sites/15/2023/08/w-pas-first-screen.jpg",
@@ -39,11 +39,11 @@ export const HEALTH_ABOUT_BLOCKS: TemplateBlock[] = [
 ];
 
 /* ── CONTACT PAGE ───────────────────────────────────────────── */
-export const HEALTH_CONTACT_BLOCKS: TemplateBlock[] = [
+export const HEALTH_CONTACT_BLOCKS: EditorNode[] = [
   {
     id: "health-contact-page",
     type: "healthContactPage",
-    props: {
+    settings: {
       heroTitle: "Contact Us",
       heroSubtitle: "Have a question about our products or need help with your order? We're here to help you on your wellness journey.",
       address: "123 Wellness Ave, Portland, OR 97201",
@@ -65,11 +65,11 @@ export const HEALTH_CONTACT_BLOCKS: TemplateBlock[] = [
 ];
 
 /* ── BLOG PAGE ──────────────────────────────────────────────── */
-export const HEALTH_BLOG_BLOCKS: TemplateBlock[] = [
+export const HEALTH_BLOG_BLOCKS: EditorNode[] = [
   {
     id: "health-blog-page",
     type: "healthBlogPage",
-    props: {
+    settings: {
       heroTitle: "Health & Wellness Blog",
       heroSubtitle: "Expert advice on vitamins, supplements, and building a healthier lifestyle.",
       featuredPost: {
@@ -94,11 +94,11 @@ export const HEALTH_BLOG_BLOCKS: TemplateBlock[] = [
 ];
 
 /* ── INGREDIENTS PAGE ───────────────────────────────────────── */
-export const HEALTH_INGREDIENTS_BLOCKS: TemplateBlock[] = [
+export const HEALTH_INGREDIENTS_BLOCKS: EditorNode[] = [
   {
     id: "health-ingredients-page",
     type: "healthIngredientsPage",
-    props: {
+    settings: {
       heroTitle: "Our Ingredients",
       heroSubtitle: "Transparency is at the heart of everything we do. Learn about the natural ingredients behind our supplements.",
       introTitle: "What Goes Into Our Products",
@@ -122,11 +122,11 @@ export const HEALTH_INGREDIENTS_BLOCKS: TemplateBlock[] = [
 ];
 
 /* ── MEDICAL EXPERTS PAGE ─────────────────────────────────────── */
-export const HEALTH_MEDICAL_EXPERTS_BLOCKS: TemplateBlock[] = [
+export const HEALTH_MEDICAL_EXPERTS_BLOCKS: EditorNode[] = [
   {
     id: "health-medical-experts-page",
     type: "healthMedicalExpertsPage",
-    props: {
+    settings: {
       heroTitle: "Medical Experts",
       heroSubtitle: "Meet the professionals behind our formulations",
       heroImage: "https://woodmart.xtemos.com/pills/wp-content/uploads/sites/15/2023/08/w-pas-first-screen.jpg",
@@ -147,7 +147,7 @@ export const HEALTH_MEDICAL_EXPERTS_BLOCKS: TemplateBlock[] = [
 ];
 
 /** Map slug → default blocks for health template pages */
-export const HEALTH_PAGE_BLOCKS: Record<string, TemplateBlock[]> = {
+export const HEALTH_PAGE_BLOCKS: Record<string, EditorNode[]> = {
   about: HEALTH_ABOUT_BLOCKS,
   contact: HEALTH_CONTACT_BLOCKS,
   blog: HEALTH_BLOG_BLOCKS,

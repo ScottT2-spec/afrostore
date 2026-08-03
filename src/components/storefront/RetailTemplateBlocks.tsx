@@ -2,6 +2,8 @@
 import { useState } from "react";
 import Link from "next/link";
 import { resolveStoreLink, resolveFooterLink } from "@/lib/template-link-utils";
+import { normalizeSocialLinks } from "@/components/storefront/prop-normalizers";
+import { InlineEditableText } from "@/components/storefront/InlineEditableText";
 
 /* ═══════════════════════════════════════════════════════════════
    RETAIL TEMPLATE BLOCKS
@@ -243,7 +245,7 @@ export function RetailFooter({
           <Link href={resolveStoreLink("/", storeSlug)} className="rf-logo-text">{storeName}</Link>
           <p className="rf-text">{description || "Handcrafted leather goods made with passion and precision. Every bag tells a story of artisan excellence."}</p>
           <div className="rf-social">
-            {socialLinks.map((s, i) => (
+            {normalizeSocialLinks(socialLinks).map((s, i) => (
               <a key={i} href={s.url} className="rf-social-icon" target="_blank" rel="noopener noreferrer" aria-label={s.platform}>
                 {socialIcons[s.platform] || s.platform[0]?.toUpperCase()}
               </a>

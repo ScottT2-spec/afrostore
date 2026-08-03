@@ -2,6 +2,8 @@ import "dotenv/config";
 import { prisma } from "@/lib/db";
 import { ensureTemplatePages } from "./template-pages";
 import { PERFUMES_HOME_PAGE_BLOCKS } from "./presets/perfumes-page-presets";
+import { buildTemplatePageContent } from "@/lib/templates/template-tree";
+import { parsePageContent } from "@/lib/page-content";
 
 /**
  * Seed perfumes template pages with real block content
@@ -38,8 +40,8 @@ async function seedPerfumesPages() {
   for (const site of sites) {
     console.log(`\n📝 Processing site: ${site.name} (${site.slug})`);
 
-    // Seed pages with force update to ensure content is applied
-    await ensureTemplatePages(site.id, "perfumes", true);
+    // Seed pages without overwriting any existing non-empty page content.
+    await ensureTemplatePages(site.id, "perfumes");
 
     // Seed home page with blocks
     const homePage = await prisma.page.findFirst({
@@ -50,7 +52,7 @@ async function seedPerfumesPages() {
       await prisma.page.update({
         where: { id: homePage.id },
         data: {
-          content: { blocks: PERFUMES_HOME_PAGE_BLOCKS },
+          content: buildTemplatePageContent(PERFUMES_HOME_PAGE_BLOCKS as any, {}) as any,
         },
       });
       console.log(`  ✓ Home page seeded with ${PERFUMES_HOME_PAGE_BLOCKS.length} blocks`);
@@ -64,8 +66,8 @@ async function seedPerfumesPages() {
 
     console.log(`  Pages for ${site.name}:`);
     for (const page of pages) {
-      const hasContent = page.content && typeof page.content === "object" && "blocks" in page.content && Array.isArray((page.content as any).blocks);
-      const blockCount = hasContent ? (page.content as any).blocks.length : 0;
+      const parsed = parsePageContent(page.content);
+      const blockCount = parsed.elements?.length || parsed.blocks.length || 0;
       console.log(`    ✓ ${page.title} (${page.slug}) - ${blockCount} blocks`);
     }
   }

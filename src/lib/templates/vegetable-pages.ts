@@ -1,4 +1,5 @@
 import { prisma } from "@/lib/db";
+import { buildTemplatePageContent } from "@/lib/templates/template-tree";
 
 export const VEGETABLE_TEMPLATE_PAGE_DEFS = [
   { title: "Menu", slug: "menu", type: "CUSTOM", position: 10 },
@@ -37,7 +38,7 @@ export async function ensureVegetablePages(siteId: string) {
         title: page.title,
         slug: page.slug,
         type: page.type,
-        content: [],
+        content: buildTemplatePageContent([], {}) as any,
         isPublished: true,
         position: page.position,
       },

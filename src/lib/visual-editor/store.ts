@@ -13,6 +13,7 @@ import {
 } from "./types";
 
 interface EditorStore extends EditorState {
+  history: HistoryState;
   // Actions
   setPageStructure: (structure: PageStructure) => void;
   setSelectedElementId: (id: string | null) => void;
@@ -51,6 +52,36 @@ interface EditorStore extends EditorState {
 }
 
 const MAX_HISTORY = 50;
+
+const getNestedChildren = (element: any): any[] | null => {
+  if (Array.isArray(element?.elements)) return element.elements;
+  if (Array.isArray(element?.children)) return element.children;
+  if (Array.isArray(element?.columns)) return element.columns;
+  return null;
+};
+
+const setNestedChildren = (element: any, children: any[]) => {
+  if (Array.isArray(element?.elements)) return { ...element, elements: children };
+  if (Array.isArray(element?.children)) return { ...element, children };
+  if (Array.isArray(element?.columns)) return { ...element, columns: children };
+  return { ...element, elements: children };
+};
+
+const findElementPath = (elements: Element[], targetId: string, trail: Element[] = []): Element[] | null => {
+  for (const el of elements) {
+    const nextTrail = [...trail, el];
+    if (el.id === targetId) {
+      return nextTrail;
+    }
+
+    const nested = getNestedChildren(el);
+    if (nested) {
+      const found = findElementPath(nested as Element[], targetId, nextTrail);
+      if (found) return found;
+    }
+  }
+  return null;
+};
 
 const createEmptyPageStructure = (pageId: string): PageStructure => ({
   id: pageId,
@@ -141,11 +172,11 @@ export const useEditorStore = create<EditorStore>()(
       const newElements = [...pageStructure.elements];
       
       if (parentId) {
-        // Add to the matching parent, supporting both children and columns trees.
         const addToParent = (elements: Element[]): Element[] => {
           return elements.map(el => {
             if (el.id === parentId) {
-              if ((el as any).columns) {
+              const nestedChildren = getNestedChildren(el);
+              if (Array.isArray((el as any).columns)) {
                 if (element.type === "column") {
                   const columns = [...((el as any).columns || [])];
                   if (typeof index === "number") {
@@ -189,20 +220,17 @@ export const useEditorStore = create<EditorStore>()(
                 return { ...el, columns };
               }
 
-              const children = (el as any).children || [];
-              const newChildren = [...children];
+              const newChildren = [...(nestedChildren || [])];
               if (typeof index === "number") {
                 newChildren.splice(index, 0, element);
               } else {
                 newChildren.push(element);
               }
-              return { ...el, children: newChildren };
+              return setNestedChildren(el, newChildren);
             }
-            if ((el as any).children) {
-              return { ...el, children: addToParent((el as any).children) };
-            }
-            if ((el as any).columns) {
-              return { ...el, columns: addToParent((el as any).columns) };
+            const nested = getNestedChildren(el);
+            if (nested) {
+              return setNestedChildren(el, addToParent(nested as Element[]));
             }
             return el;
           });
@@ -257,11 +285,9 @@ export const useEditorStore = create<EditorStore>()(
           if (el.id === id) {
             return deepMerge(el, updates);
           }
-          if ((el as any).children) {
-            return { ...el, children: updateInTree((el as any).children) };
-          }
-          if ((el as any).columns) {
-            return { ...el, columns: updateInTree((el as any).columns) };
+          const nested = getNestedChildren(el);
+          if (nested) {
+            return setNestedChildren(el, updateInTree(nested as Element[]));
           }
           return el;
         });
@@ -286,11 +312,9 @@ export const useEditorStore = create<EditorStore>()(
           if (el.id === id) return false;
           return true;
         }).map(el => {
-          if ((el as any).children) {
-            return { ...el, children: deleteFromTree((el as any).children) };
-          }
-          if ((el as any).columns) {
-            return { ...el, columns: deleteFromTree((el as any).columns) };
+          const nested = getNestedChildren(el);
+          if (nested) {
+            return setNestedChildren(el, deleteFromTree(nested as Element[]));
           }
           return el;
         });
@@ -316,12 +340,9 @@ export const useEditorStore = create<EditorStore>()(
           if (el.id === id) {
             return JSON.parse(JSON.stringify(el));
           }
-          if ((el as any).children) {
-            const found = findAndClone((el as any).children);
-            if (found) return found;
-          }
-          if ((el as any).columns) {
-            const found = findAndClone((el as any).columns);
+          const nested = getNestedChildren(el);
+          if (nested) {
+            const found = findAndClone(nested as Element[]);
             if (found) return found;
           }
         }
@@ -349,11 +370,9 @@ export const useEditorStore = create<EditorStore>()(
           }
           return true;
         }).map(el => {
-          if ((el as any).children) {
-            return { ...el, children: removeFromTree((el as any).children) };
-          }
-          if ((el as any).columns) {
-            return { ...el, columns: removeFromTree((el as any).columns) };
+          const nested = getNestedChildren(el);
+          if (nested) {
+            return setNestedChildren(el, removeFromTree(nested as Element[]));
           }
           return el;
         });
@@ -398,20 +417,18 @@ export const useEditorStore = create<EditorStore>()(
               columns[0] = { ...targetColumn, children };
               return { ...el, columns };
             }
-            const children = (el as any).children || [];
-            const newChildren = [...children];
+            const nestedChildren = getNestedChildren(el) || [];
+            const newChildren = [...nestedChildren];
             if (typeof newIndex === "number") {
               newChildren.splice(newIndex, 0, movedElement!);
             } else {
               newChildren.push(movedElement!);
             }
-            return { ...el, children: newChildren };
+            return setNestedChildren(el, newChildren);
           }
-          if ((el as any).children) {
-            return { ...el, children: addToTree((el as any).children) };
-          }
-          if ((el as any).columns) {
-            return { ...el, columns: addToTree((el as any).columns) };
+          const nested = getNestedChildren(el);
+          if (nested) {
+            return setNestedChildren(el, addToTree(nested as Element[]));
           }
           return el;
         });
@@ -575,8 +592,9 @@ export const useSelectedElement = () => {
   const findElement = (elements: Element[]): Element | null => {
     for (const el of elements) {
       if (el.id === selectedElementId) return el;
-      if ((el as any).children) {
-        const found = findElement((el as any).children);
+      const nested = getNestedChildren(el);
+      if (nested) {
+        const found = findElement(nested as Element[]);
         if (found) return found;
       }
     }
@@ -584,6 +602,13 @@ export const useSelectedElement = () => {
   };
   
   return findElement(pageStructure.elements);
+};
+
+export const useSelectedElementPath = () => {
+  const { pageStructure, selectedElementId } = useEditorStore();
+
+  if (!selectedElementId) return [];
+  return findElementPath(pageStructure.elements, selectedElementId) || [];
 };
 
 export const useElementById = (id: string | null) => {
@@ -594,8 +619,9 @@ export const useElementById = (id: string | null) => {
   const findElement = (elements: Element[]): Element | null => {
     for (const el of elements) {
       if (el.id === id) return el;
-      if ((el as any).children) {
-        const found = findElement((el as any).children);
+      const nested = getNestedChildren(el);
+      if (nested) {
+        const found = findElement(nested as Element[]);
         if (found) return found;
       }
     }

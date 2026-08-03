@@ -1,67 +1,82 @@
-import type { TemplateBlock } from "@/components/storefront/TemplateBlockRenderer";
+import type { EditorNode } from "@/lib/visual-editor/node-tree";
 
 /**
  * Electronics Template Preset
  * Default block layout + content that recreates the WoodMart Electronics demo.
  * Every value is a placeholder — merchants swap in their own content.
  */
-export const ELECTRONICS_TEMPLATE_PRESET: TemplateBlock[] = [
+export const ELECTRONICS_TEMPLATE_PRESET: EditorNode[] = [
   /* ── 1. Hero Slider ───────────────────────────────────── */
   {
     id: "electronics-hero",
     type: "electronicsHeroSlider",
-    props: {
-      autoplaySpeed: 5000,
-      minHeight: "500px",
-      slides: [
+          settings: {
+        autoplaySpeed: 5000,
+      minHeight: "500px"
+      },
+      elements: [
         {
-          subtitle: "TOP SMARTPHONES",
-          titleLine1: "PERFORMANCE",
-          titleLine2: "WONDERFUL",
-          description: "A ornare aliquam laoreet adipiscing vestibul integer malesuada ullamcorper suspeid.",
-          buttonText: "Buy Now",
-          buttonLink: "/shop",
-          backgroundImage: "https://woodmart.xtemos.com/wp-content/uploads/2021/06/w-electronic-slide-1.jpg",
-          backgroundColor: "#f2f2f2",
-          backgroundFit: "cover",
-          textPosition: "left",
-          colorScheme: "dark",
+          id: "electronics-hero-slide-1",
+          type: "slide",
+          settings:           {
+            "subtitle": "TOP SMARTPHONES",
+            "titleLine1": "PERFORMANCE",
+            "titleLine2": "WONDERFUL",
+            "description": "A ornare aliquam laoreet adipiscing vestibul integer malesuada ullamcorper suspeid.",
+            "buttonText": "Buy Now",
+            "buttonLink": "/shop",
+            "backgroundImage": "https://woodmart.xtemos.com/wp-content/uploads/2021/06/w-electronic-slide-1.jpg",
+            "backgroundColor": "#f2f2f2",
+            "backgroundFit": "cover",
+            "textPosition": "left",
+            "colorScheme": "dark"
+          },
+          elements: [],
         },
         {
-          subtitle: "SMART WATCHES",
-          titleLine1: "HEALTH CARE",
-          titleLine2: "MONITOR",
-          description: "A ornare aliquam laoreet adipiscing vestibul integer malesuada ullamcorper suspeid.",
-          buttonText: "Buy Now",
-          buttonLink: "/shop",
-          backgroundImage: "https://woodmart.xtemos.com/wp-content/uploads/2017/01/accessories_large.jpg",
-          backgroundColor: "#f2f2f2",
-          backgroundFit: "contain",
-          textPosition: "left",
-          colorScheme: "dark",
+          id: "electronics-hero-slide-2",
+          type: "slide",
+          settings:           {
+            "subtitle": "SMART WATCHES",
+            "titleLine1": "HEALTH CARE",
+            "titleLine2": "MONITOR",
+            "description": "A ornare aliquam laoreet adipiscing vestibul integer malesuada ullamcorper suspeid.",
+            "buttonText": "Buy Now",
+            "buttonLink": "/shop",
+            "backgroundImage": "https://woodmart.xtemos.com/wp-content/uploads/2017/01/accessories_large.jpg",
+            "backgroundColor": "#f2f2f2",
+            "backgroundFit": "contain",
+            "textPosition": "left",
+            "colorScheme": "dark"
+          },
+          elements: [],
         },
         {
-          subtitle: "APPLE INNOVATION",
-          titleLine1: "HIGHER LEVEL",
-          titleLine2: "SMARTPHONE",
-          description: "A ornare aliquam laoreet adipiscing vestibul integer malesuada ullamcorper suspeid.",
-          buttonText: "Buy Now",
-          buttonLink: "/shop",
-          backgroundImage: "https://woodmart.xtemos.com/wp-content/uploads/2017/01/hero_large.jpg",
-          backgroundColor: "#000000",
-          backgroundFit: "contain",
-          textPosition: "left",
-          colorScheme: "light",
-        },
+          id: "electronics-hero-slide-3",
+          type: "slide",
+          settings:           {
+            "subtitle": "APPLE INNOVATION",
+            "titleLine1": "HIGHER LEVEL",
+            "titleLine2": "SMARTPHONE",
+            "description": "A ornare aliquam laoreet adipiscing vestibul integer malesuada ullamcorper suspeid.",
+            "buttonText": "Buy Now",
+            "buttonLink": "/shop",
+            "backgroundImage": "https://woodmart.xtemos.com/wp-content/uploads/2017/01/hero_large.jpg",
+            "backgroundColor": "#000000",
+            "backgroundFit": "contain",
+            "textPosition": "left",
+            "colorScheme": "light"
+          },
+          elements: [],
+        }
       ],
-    },
   },
 
   /* ── 2. Promo Banners ─────────────────────────────────── */
   {
     id: "electronics-promos",
     type: "electronicsPromoBanners",
-    props: {
+    settings: {
       banners: [
         {
           image: "https://woodmart.xtemos.com/wp-content/uploads/2022/06/electro-banner10.jpg",
@@ -89,7 +104,7 @@ export const ELECTRONICS_TEMPLATE_PRESET: TemplateBlock[] = [
   {
     id: "electronics-products-1",
     type: "electronicsProductTabs",
-    props: {
+    settings: {
       sectionTitle: "ELECTRONICS",
       tabs: [
         { label: "New", filter: "new" },
@@ -105,7 +120,7 @@ export const ELECTRONICS_TEMPLATE_PRESET: TemplateBlock[] = [
   {
     id: "electronics-banner-grid",
     type: "electronicsBannerGrid",
-    props: {
+    settings: {
       banners: [
         {
           image: "https://woodmart.xtemos.com/wp-content/uploads/2022/06/electro-banner1-2.jpg",
@@ -143,7 +158,7 @@ export const ELECTRONICS_TEMPLATE_PRESET: TemplateBlock[] = [
   {
     id: "electronics-hot-deals",
     type: "electronicsHotDeals",
-    props: {
+    settings: {
       sectionTitle: "TODAY HOT DEALS",
       buttonText: "View All Deals",
       buttonLink: "/shop",
@@ -158,7 +173,7 @@ export const ELECTRONICS_TEMPLATE_PRESET: TemplateBlock[] = [
   {
     id: "electronics-side-banner",
     type: "electronicsSideBanner",
-    props: {
+    settings: {
       bannerImage: "https://woodmart.xtemos.com/wp-content/uploads/2022/06/electro-banner1-32.jpg",
       bannerSubtitle: "Hich Tech News",
       bannerTitle: "Google Smart Home 2024",
@@ -180,7 +195,7 @@ export const ELECTRONICS_TEMPLATE_PRESET: TemplateBlock[] = [
   {
     id: "electronics-gaming-cta",
     type: "electronicsGamingCTA",
-    props: {
+    settings: {
       backgroundImage: "https://woodmart.xtemos.com/wp-content/uploads/2022/06/electro-dualshok.jpg",
       subtitle: "GAMING COLLECTION",
       title: "Sony Playstation 4 Dualshok Controller",
@@ -196,7 +211,7 @@ export const ELECTRONICS_TEMPLATE_PRESET: TemplateBlock[] = [
   {
     id: "electronics-blog",
     type: "electronicsBlogPosts",
-    props: {
+    settings: {
       sectionTitle: "INNOVATIVE GADGETS",
       columns: 3,
       posts: [
@@ -235,7 +250,7 @@ export const ELECTRONICS_TEMPLATE_PRESET: TemplateBlock[] = [
   {
     id: "electronics-partners",
     type: "electronicsPartners",
-    props: {
+    settings: {
       sectionTitle: "OUR PARTNERS",
       videoUrl: "https://www.youtube.com/watch?v=XHOmBV4js_E",
       videoThumbnail: "https://woodmart.xtemos.com/wp-content/uploads/2022/06/electro-video.jpg",
@@ -255,7 +270,7 @@ export const ELECTRONICS_TEMPLATE_PRESET: TemplateBlock[] = [
   {
     id: "electronics-footer",
     type: "electronicsFooter",
-    props: {
+    settings: {
       logoUrl: "",
       logoAlt: "Store Logo",
       description: "Discover a curated collection of modern furniture designed to bring comfort and elegance into your home.",

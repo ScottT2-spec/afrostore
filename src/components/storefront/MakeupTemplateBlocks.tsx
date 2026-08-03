@@ -5,6 +5,8 @@ import { resolveStoreLink, resolveFooterLink } from "@/lib/template-link-utils";
 import { toggleCompare as toggleCompareItem } from "@/lib/compare-utils";
 import { useState, useEffect, useRef, useCallback, createContext, useContext } from "react";
 import { safeSrc, onImgError } from "./image-fallback";
+import { toDisplayText } from "@/components/storefront/prop-normalizers";
+import { InlineEditableText } from "@/components/storefront/InlineEditableText";
 
 /* ═══════════════════════════════════════════════════════════════
    MAKEUP TEMPLATE BLOCKS
@@ -123,13 +125,13 @@ export interface MakeupHeroSlide {
 }
 
 export interface MakeupHeroSliderProps {
-  slides: MakeupHeroSlide[];
+  slides?: MakeupHeroSlide[];
   autoplaySpeed?: number;
   minHeight?: string;
   marqueeText?: string;
 }
 
-export function MakeupHeroSlider({ slides, autoplaySpeed = 5000, minHeight = "500px", marqueeText = "Free Shipping On Orders Over $100" }: MakeupHeroSliderProps) {
+export function MakeupHeroSlider({ slides = [], autoplaySpeed = 5000, minHeight = "500px", marqueeText = "Free Shipping On Orders Over $100" }: MakeupHeroSliderProps) {
   const storeCtx = useContext(MakeupStoreContext);
   const fixLink = (link: string) => resolveStoreLink(link, storeCtx?.storeSlug);
   const [current, setCurrent] = useState(0);
@@ -279,19 +281,20 @@ export interface MakeupSidebarCategory {
 }
 
 export interface MakeupCategorySidebarProps {
-  categories: MakeupSidebarCategory[];
+  categories?: MakeupSidebarCategory[];
   marginBottom?: string;
 }
 
-export function MakeupCategorySidebar({ categories, marginBottom = "80px" }: MakeupCategorySidebarProps) {
+export function MakeupCategorySidebar({ categories = [], marginBottom = "80px" }: MakeupCategorySidebarProps) {
   const storeCtx = useContext(MakeupStoreContext);
-  const fixLink = (link: string, name: string) => {
-    if (link && link.startsWith("/store/")) return link;
+  const fixLink = (link: unknown, name: string) => {
+    const normalized = typeof link === "string" ? link : link == null ? "" : String(link);
+    if (normalized.startsWith("/store/")) return normalized;
     if (storeCtx?.storeSlug) {
       const slug = name.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/(^-|-$)/g, "");
       return `/store/${storeCtx.storeSlug}/shop?category=${slug}`;
     }
-    return resolveStoreLink(link, storeCtx?.storeSlug);
+    return resolveStoreLink(normalized, storeCtx?.storeSlug);
   };
 
   const scopedCss = `
@@ -510,13 +513,14 @@ export function MakeupProductGrid({ products: propProducts, columns = 4, showCat
     @media (max-width: 767px) { .mpg-grid { grid-template-columns: repeat(2, 1fr); gap: 10px; } }
   `;
 
-  const resolveLink = (link: string, productName: string) => {
-    if (link && link.startsWith("/store/")) return link;
+  const resolveLink = (link: unknown, productName: string) => {
+    const normalized = typeof link === "string" ? link : link == null ? "" : String(link);
+    if (normalized.startsWith("/store/")) return normalized;
     if (storeCtx?.storeSlug) {
       const slug = productName.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/(^-|-$)/g, "");
       return `/store/${storeCtx.storeSlug}/product/${slug}`;
     }
-    return resolveStoreLink(link, storeCtx?.storeSlug);
+    return resolveStoreLink(normalized, storeCtx?.storeSlug);
   };
 
   if (products.length === 0) {
@@ -557,7 +561,7 @@ export function MakeupProductGrid({ products: propProducts, columns = 4, showCat
               </div>
               <h3 className="mpg-name"><Link href={productLink}>{p.name}</Link></h3>
               {showCategory && p.category && (
-                <div className="mpg-cat"><Link href={resolveStoreLink(p.categoryLink || "#", storeCtx?.storeSlug)}>{p.category}</Link></div>
+                <div className="mpg-cat"><Link href={resolveStoreLink(p.categoryLink || "#", storeCtx?.storeSlug)}>{toDisplayText(p.category, "")}</Link></div>
               )}
               <div className="mpg-price">
                 {p.salePrice && <span className="mpg-price-old">{p.price}</span>}
@@ -590,15 +594,16 @@ export interface MakeupProductTypeCardsProps {
   marginBottom?: string;
 }
 
-export function MakeupProductTypeCards({ cards, sectionTitle, marginBottom = "80px" }: MakeupProductTypeCardsProps) {
+export function MakeupProductTypeCards({ cards = [], sectionTitle, marginBottom = "80px" }: MakeupProductTypeCardsProps) {
   const storeCtx = useContext(MakeupStoreContext);
-  const fixLink = (link: string, name: string) => {
-    if (link && link.startsWith("/store/")) return link;
+  const fixLink = (link: unknown, name: string) => {
+    const normalized = typeof link === "string" ? link : link == null ? "" : String(link);
+    if (normalized.startsWith("/store/")) return normalized;
     if (storeCtx?.storeSlug) {
       const slug = name.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/(^-|-$)/g, "");
       return `/store/${storeCtx.storeSlug}/shop?category=${slug}`;
     }
-    return resolveStoreLink(link, storeCtx?.storeSlug);
+    return resolveStoreLink(normalized, storeCtx?.storeSlug);
   };
 
   const scopedCss = `
@@ -807,7 +812,7 @@ export interface MakeupPromoBannerCardsProps {
   marginBottom?: string;
 }
 
-export function MakeupPromoBannerCards({ cards, marginBottom = "80px" }: MakeupPromoBannerCardsProps) {
+export function MakeupPromoBannerCards({ cards = [], marginBottom = "80px" }: MakeupPromoBannerCardsProps) {
   const storeCtx = useContext(MakeupStoreContext);
   const fixLink = (link: string) => resolveStoreLink(link, storeCtx?.storeSlug);
 
@@ -875,7 +880,7 @@ export interface MakeupVideoBlogProps {
   marginBottom?: string;
 }
 
-export function MakeupVideoBlog({ videos, sectionTitle, marginBottom = "80px" }: MakeupVideoBlogProps) {
+export function MakeupVideoBlog({ videos = [], sectionTitle, marginBottom = "80px" }: MakeupVideoBlogProps) {
   const [activeVideo, setActiveVideo] = useState<string | null>(null);
 
   const scopedCss = `
@@ -957,12 +962,12 @@ export interface MakeupBlogPost {
 }
 
 export interface MakeupBlogPostsProps {
-  posts: MakeupBlogPost[];
+  posts?: MakeupBlogPost[];
   sectionTitle?: { title: string };
   marginBottom?: string;
 }
 
-export function MakeupBlogPosts({ posts: propPosts, sectionTitle, marginBottom = "80px" }: MakeupBlogPostsProps) {
+export function MakeupBlogPosts({ posts: propPosts = [], sectionTitle, marginBottom = "80px" }: MakeupBlogPostsProps) {
   const storeCtx = useContext(MakeupStoreContext);
 
   const posts: MakeupBlogPost[] = (() => {
@@ -1035,7 +1040,7 @@ export interface MakeupBrandsCarouselProps {
   resolvedStyles?: React.CSSProperties;
 }
 
-export function MakeupBrandsCarousel({ brands, marginBottom = "80px", resolvedStyles }: MakeupBrandsCarouselProps) {
+export function MakeupBrandsCarousel({ brands = [], marginBottom = "80px", resolvedStyles }: MakeupBrandsCarouselProps) {
   const storeCtx = useContext(MakeupStoreContext);
   const scopedCss = `
     .mbr-section { margin-bottom: ${marginBottom}; overflow: hidden; }
@@ -1089,7 +1094,7 @@ export interface MakeupAboutHeroProps {
   resolvedStyles?: React.CSSProperties;
 }
 
-export function MakeupAboutHero({ subtitle, title, bodyText, images, ctaText, ctaLink, resolvedStyles }: MakeupAboutHeroProps) {
+export function MakeupAboutHero({ subtitle, title, bodyText = [], images = [], ctaText, ctaLink, resolvedStyles }: MakeupAboutHeroProps) {
   const storeCtx = useContext(MakeupStoreContext);
   const fixLink = (link?: string) => resolveStoreLink(link || "#", storeCtx?.storeSlug);
 
@@ -1171,7 +1176,7 @@ export interface MakeupTextSectionProps {
   resolvedStyles?: React.CSSProperties;
 }
 
-export function MakeupTextSection({ sectionTitle, bodyText, backgroundColor = "transparent", resolvedStyles }: MakeupTextSectionProps) {
+export function MakeupTextSection({ sectionTitle, bodyText = [], backgroundColor = "transparent", resolvedStyles }: MakeupTextSectionProps) {
   const scopedCss = `
     .mk-text-section { padding: 60px 0; }
     .mk-text-grid { display: flex; gap: 50px; }
@@ -1234,7 +1239,7 @@ export interface MakeupTeamSectionProps {
   resolvedStyles?: React.CSSProperties;
 }
 
-export function MakeupTeamSection({ sectionTitle, team, resolvedStyles }: MakeupTeamSectionProps) {
+export function MakeupTeamSection({ sectionTitle, team = [], resolvedStyles }: MakeupTeamSectionProps) {
   const scopedCss = `
     .mk-team { padding: 60px 0; }
     .mk-team-header { text-align: center; margin-bottom: 40px; }
@@ -1302,7 +1307,7 @@ export interface MakeupFaqSectionProps {
   faqs: MakeupFaqItem[];
 }
 
-export function MakeupFaqSection({ sectionTitle, faqs }: MakeupFaqSectionProps) {
+export function MakeupFaqSection({ sectionTitle, faqs = [] }: MakeupFaqSectionProps) {
   const [openIndex, setOpenIndex] = useState<number | null>(null);
 
   const toggle = (i: number) => {
@@ -1391,7 +1396,7 @@ export interface MakeupContactHeroProps {
   hours?: string;
 }
 
-export function MakeupContactHero({ subtitle, title, address, phone, email, hours }: MakeupContactHeroProps) {
+export function MakeupContactHero({ subtitle, title, address, phone, email, hours = "" }: MakeupContactHeroProps) {
   const scopedCss = `
     .mk-contact-hero { padding: 60px 0; }
     .mk-contact-hero-header { text-align: center; margin-bottom: 40px; }
@@ -1566,10 +1571,10 @@ export interface MakeupBlogGridPost {
 
 export interface MakeupBlogGridProps {
   sectionTitle?: string;
-  posts: MakeupBlogGridPost[];
+  posts?: MakeupBlogGridPost[];
 }
 
-export function MakeupBlogGrid({ sectionTitle, posts: propPosts }: MakeupBlogGridProps) {
+export function MakeupBlogGrid({ sectionTitle, posts: propPosts = [] }: MakeupBlogGridProps) {
   const storeCtx = useContext(MakeupStoreContext);
 
   const posts: MakeupBlogGridPost[] = (() => {

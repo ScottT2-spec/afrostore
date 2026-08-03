@@ -6,14 +6,14 @@ import { RetailHeader, RetailFooter } from "@/components/storefront/RetailTempla
 import { HandmadeBagsHeader, HandmadeBagsFooter } from "@/components/storefront/HandmadeBagsStoreChrome";
 import { ThemeProvider, type ThemeData } from "@/components/storefront/ThemeProvider";
 import { applyPageCustomization, buildPageBackgroundStyle, filterVisiblePages, getResolvedPageSettings, normalizeSiteCustomization, type SiteCustomizationDocument } from "@/lib/site-customization";
-import { parsePageContent } from "@/lib/page-content";
 import { RenderBlocks, type BuilderBlock } from "@/components/storefront/BlockRenderer";
-import { HANDMADE_BAGS_PRESET } from "@/lib/templates/presets/handmade-bags-preset";
 import { RETAIL_ABOUT_BLOCKS } from "@/lib/templates/presets/retail-pages";
 import { serializeProductsForClient } from "@/lib/serialize-products";
+import { resolveLivePageContent } from "@/lib/templates/bespoke-page-content";
 import { KidsFontLoader, KidsFooterFull, KidsHeader } from "@/components/storefront/KidsTemplateBlocks";
 import PerfumesAboutPage from "./perfumes-about";
 import { HealthFontLoader, HealthHeader, HealthFooterFull } from "@/components/storefront/HealthTemplateBlocks";
+import { buildTemplatePageContent } from "@/lib/templates/template-tree";
 
 type Props = {
   params: Promise<{ slug: string }>;
@@ -196,7 +196,7 @@ async function getStoreData(slug: string) {
           title: "About Us",
           slug: "about",
           type: "CUSTOM",
-          content: [],
+          content: buildTemplatePageContent([], {}) as any,
           isPublished: true,
           position: 10,
         },
@@ -262,17 +262,25 @@ export default async function AboutPage({ params }: Props) {
   
   // Use custom blocks if available, otherwise use preset
   let pageContent;
-  const parsedAbout = aboutPage?.content ? parsePageContent(aboutPage.content) : null;
+  const resolvedAbout = aboutPage?.content
+    ? resolveLivePageContent(activeTemplateSlug, aboutPage.slug, aboutPage.content, {
+        pageSlug: aboutPage.slug,
+        pageTitle: aboutPage.title,
+        pageType: aboutPage.type,
+        templateSlug: activeTemplateSlug,
+      })
+    : null;
+  const aboutNodeCss = resolvedAbout?.css || "";
   console.log('[AboutPage] aboutPage.content:', aboutPage?.content);
-  console.log('[AboutPage] parsedAbout:', parsedAbout);
-  console.log('[AboutPage] First block styleOverrides:', parsedAbout?.blocks[0]?.styleOverrides);
-  if (parsedAbout && parsedAbout.blocks.length > 0) {
-    pageContent = parsedAbout;
+  console.log('[AboutPage] parsedAbout:', resolvedAbout);
+  console.log('[AboutPage] First block styleOverrides:', resolvedAbout?.blocks[0]?.styleOverrides);
+  if (resolvedAbout && resolvedAbout.blocks.length > 0) {
+    pageContent = { blocks: resolvedAbout.blocks, settings: resolvedAbout.settings };
   } else {
     pageContent = { blocks: ABOUT_PAGE_BLOCKS, settings: {} };
   }
 
-  const pageSettings = aboutPage ? getResolvedPageSettings(aboutPage, pageContent.settings, customization) : {};
+  const pageSettings = aboutPage ? getResolvedPageSettings(aboutPage, resolvedAbout?.settings || pageContent.settings, customization) : {};
   const themeData: ThemeData = {
     id: "kids-about-page",
     name: "Kids About Page",
@@ -295,14 +303,16 @@ export default async function AboutPage({ params }: Props) {
     store.name?.toLowerCase().includes("kids");
 
   if (isKidsTemplate) {
-    const parsedAbout = aboutPage?.content ? parsePageContent(aboutPage.content) : null;
-    const hasBlocks = parsedAbout && parsedAbout.blocks.length > 0;
+    const hasBlocks = resolvedAbout && resolvedAbout.blocks.length > 0;
 
     return (
       <div className="min-h-screen bg-[#fffdf7] text-[#242424]">
         <KidsFontLoader />
         {hasBlocks ? (
-          <RenderTemplateBlocks blocks={parsedAbout.blocks as TemplateBlock[]} />
+          <>
+            {aboutNodeCss && <style data-live-node-styles dangerouslySetInnerHTML={{ __html: aboutNodeCss }} />}
+            <RenderTemplateBlocks blocks={resolvedAbout.blocks as TemplateBlock[]} />
+          </>
         ) : (
           <>
             <KidsHeader
@@ -442,23 +452,14 @@ export default async function AboutPage({ params }: Props) {
 
   if (isHealthTemplate) {
     // Use block-based rendering for Health About page to enable editor persistence
-    const aboutPage = store.pages?.[0];
-    const parsedContent = aboutPage?.content ? parsePageContent(aboutPage.content) : null;
-    let blocks: TemplateBlock[] = [];
-    
-    if (parsedContent && parsedContent.blocks.length > 0) {
-      blocks = parsedContent.blocks;
-    } else {
-      // Use template presets if no custom blocks
-      const presetBlocks = mergeBespokeTemplateBlocks(activeTemplateSlug || "", "about", []);
-      blocks = presetBlocks;
-    }
+    const blocks: TemplateBlock[] = resolvedAbout && resolvedAbout.blocks.length > 0 ? (resolvedAbout.blocks as TemplateBlock[]) : [];
 
     return (
       <div className="min-h-screen bg-white text-[#333]" style={{ fontFamily: "'Cabin', Arial, sans-serif" }}>
         <HealthFontLoader />
         <HealthHeader storeName={store.name} storeSlug={slug} logo={store.logo} />
         <main>
+          {aboutNodeCss && <style data-live-node-styles dangerouslySetInnerHTML={{ __html: aboutNodeCss }} />}
           <RenderTemplateBlocks blocks={blocks} />
         </main>
         <HealthFooterFull 
@@ -479,11 +480,12 @@ export default async function AboutPage({ params }: Props) {
   // ─── RETAIL ABOUT ───
   const isRetailTemplate = activeTemplateSlug === "retail" || activeTemplateSlug === "decor";
   if (isRetailTemplate) {
-    const retailBlocks = (aboutPage?.content ? pageContent.blocks : RETAIL_ABOUT_BLOCKS) as BuilderBlock[];
+    const retailBlocks = (resolvedAbout?.blocks?.length ? resolvedAbout.blocks : RETAIL_ABOUT_BLOCKS) as BuilderBlock[];
     return (
       <ThemeProvider theme={themeData}>
         <RetailHeader storeName={store.name} storeSlug={store.slug || slug} logo={store.logo} isLanding={false} />
         <div style={buildPageBackgroundStyle(pageSettings)}>
+          {aboutNodeCss && <style data-live-node-styles dangerouslySetInnerHTML={{ __html: aboutNodeCss }} />}
           <RenderBlocks blocks={retailBlocks} storeSlug={slug} products={serializedProducts} />
         </div>
         <RetailFooter storeName={store.name} storeSlug={store.slug || slug} logo={store.logo} description={store.description ?? undefined} />
@@ -500,7 +502,8 @@ export default async function AboutPage({ params }: Props) {
         isLanding={false}
       />
       <div style={buildPageBackgroundStyle(pageSettings)}>
-        {parsedAbout && parsedAbout.blocks.length > 0 ? (
+        {aboutNodeCss && <style data-live-node-styles dangerouslySetInnerHTML={{ __html: aboutNodeCss }} />}
+        {resolvedAbout && resolvedAbout.blocks.length > 0 ? (
           <RenderBlocks blocks={pageContent.blocks as BuilderBlock[]} storeSlug={slug} products={serializedProducts} />
         ) : (
           <RenderTemplateBlocks blocks={ABOUT_PAGE_BLOCKS} />

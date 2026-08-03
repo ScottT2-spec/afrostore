@@ -232,7 +232,7 @@ export interface PageStructure {
   id: string;
   title: string;
   slug: string;
-  elements: Element[];
+  elements: any[];
   settings: PageSettings;
   meta: PageMeta;
   createdAt: string;

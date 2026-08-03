@@ -1,32 +1,17 @@
 // Compatibility layer for old builder types
 // This provides backward compatibility for existing code that still uses the old builder system
 
-export type BlockType = 
-  | "hero"
-  | "features"
-  | "products"
-  | "testimonials"
-  | "cta"
-  | "about"
-  | "contact"
-  | "gallery"
-  | "video"
-  | "text"
-  | "image"
-  | "divider"
-  | "spacer"
-  | "social"
-  | "map"
-  | "form"
-  | "html"
-  | "custom";
+export type BlockType = string;
 
 export interface BuilderBlock {
   id: string;
   type: BlockType;
-  order: number;
+  order?: number;
+  props?: Record<string, any>;
   content?: Record<string, any>;
   styles?: Record<string, any>;
+  styleOverrides?: Record<string, any>;
+  elements?: BuilderBlock[];
   visible?: boolean;
 }
 

@@ -5,11 +5,9 @@ import { RenderTemplateBlocks, type TemplateBlock } from "@/components/storefron
 import { RetailHeader, RetailFooter } from "@/components/storefront/RetailTemplateBlocks";
 import { ThemeProvider, type ThemeData } from "@/components/storefront/ThemeProvider";
 import { applyPageCustomization, buildPageBackgroundStyle, filterVisiblePages, getResolvedPageSettings, normalizeSiteCustomization, type SiteCustomizationDocument } from "@/lib/site-customization";
-import { parsePageContent } from "@/lib/page-content";
 import { RenderBlocks, type BuilderBlock } from "@/components/storefront/BlockRenderer";
 import { serializeProductsForClient } from "@/lib/serialize-products";
 import { RETAIL_CONTACT_BLOCKS } from "@/lib/templates/presets/retail-pages";
-import { mergeBespokeTemplateBlocks } from "@/lib/templates/bespoke-page-content";
 import { VegetableContactPage } from "@/components/storefront/VegetableTemplatePages";
 import { VegetableFooter, VegetableHeader } from "@/components/storefront/VegetableStoreChrome";
 import { KidsFontLoader, KidsFooterFull, KidsHeader } from "@/components/storefront/KidsTemplateBlocks";
@@ -17,6 +15,8 @@ import PerfumesContactPage from "./perfumes-contact";
 import { HealthHeader, HealthFooterFull, HealthFontLoader } from "@/components/storefront/HealthTemplateBlocks";
 import { GardenHeader, GardenFooter } from "@/components/storefront/GardenStoreChrome";
 import { HandmadeBagsHeader, HandmadeBagsFooter } from "@/components/storefront/HandmadeBagsStoreChrome";
+import { resolveLivePageContent } from "@/lib/templates/bespoke-page-content";
+import { buildTemplatePageContent } from "@/lib/templates/template-tree";
 
 type Props = {
   params: Promise<{ slug: string }>;
@@ -175,7 +175,7 @@ async function getStoreData(slug: string) {
           title: "Contact Us",
           slug: "contact",
           type: "CUSTOM",
-          content: [],
+          content: buildTemplatePageContent([], {}) as any,
           isPublished: true,
           position: 12,
         },
@@ -241,14 +241,22 @@ export default async function ContactPage({ params }: Props) {
   
   // Use custom blocks if available, otherwise use preset
   let pageContent;
-  const parsedContact = contactPage?.content ? parsePageContent(contactPage.content) : null;
-  if (parsedContact && parsedContact.blocks.length > 0) {
-    pageContent = parsedContact;
+  const resolvedContact = contactPage?.content
+    ? resolveLivePageContent(activeTemplateSlug, contactPage.slug, contactPage.content, {
+        pageSlug: contactPage.slug,
+        pageTitle: contactPage.title,
+        pageType: contactPage.type,
+        templateSlug: activeTemplateSlug,
+      })
+    : null;
+  const contactNodeCss = resolvedContact?.css || "";
+  if (resolvedContact && resolvedContact.blocks.length > 0) {
+    pageContent = { blocks: resolvedContact.blocks, settings: resolvedContact.settings };
   } else {
     pageContent = { blocks: CONTACT_PAGE_BLOCKS, settings: {} };
   }
 
-  const pageSettings = contactPage ? getResolvedPageSettings(contactPage, pageContent.settings, customization) : {};
+  const pageSettings = contactPage ? getResolvedPageSettings(contactPage, resolvedContact?.settings || pageContent.settings, customization) : {};
   const themeData: ThemeData = {
     id: "kids-contact-page",
     name: "Kids Contact Page",
@@ -271,8 +279,7 @@ export default async function ContactPage({ params }: Props) {
     store.name?.toLowerCase().includes("kids");
 
   if (isKidsTemplate) {
-    const parsedContact = contactPage?.content ? parsePageContent(contactPage.content) : null;
-    const hasBlocks = parsedContact && parsedContact.blocks.length > 0;
+    const hasBlocks = resolvedContact && resolvedContact.blocks.length > 0;
     const kidsSocialLinks: Array<{ platform: string; url: string }> = [
       ...(store.socialLinks?.facebook ? [{ platform: "facebook", url: store.socialLinks.facebook }] : []),
       ...(store.socialLinks?.instagram ? [{ platform: "instagram", url: store.socialLinks.instagram }] : []),
@@ -285,7 +292,10 @@ export default async function ContactPage({ params }: Props) {
       <div className="min-h-screen bg-[#fffef8] text-[#3b3344]">
         <KidsFontLoader />
         {hasBlocks ? (
-          <RenderTemplateBlocks blocks={parsedContact.blocks as TemplateBlock[]} />
+          <>
+            {contactNodeCss && <style data-live-node-styles dangerouslySetInnerHTML={{ __html: contactNodeCss }} />}
+            <RenderTemplateBlocks blocks={resolvedContact.blocks as TemplateBlock[]} />
+          </>
         ) : (
           <>
             <KidsHeader
@@ -419,23 +429,14 @@ export default async function ContactPage({ params }: Props) {
 
   if (isHealthTemplate) {
     // Use block-based rendering for Health Contact page to enable editor persistence
-    const contactPage = store.pages?.[0];
-    const parsedContent = contactPage?.content ? parsePageContent(contactPage.content) : null;
-    let blocks: TemplateBlock[] = [];
-    
-    if (parsedContent && parsedContent.blocks.length > 0) {
-      blocks = parsedContent.blocks;
-    } else {
-      // Use template presets if no custom blocks
-      const presetBlocks = mergeBespokeTemplateBlocks(activeTemplateSlug || "", "contact", []);
-      blocks = presetBlocks;
-    }
+    const blocks: TemplateBlock[] = resolvedContact && resolvedContact.blocks.length > 0 ? (resolvedContact.blocks as TemplateBlock[]) : [];
 
     return (
       <div className="min-h-screen bg-white text-[#333]" style={{ fontFamily: "'Cabin', Arial, sans-serif" }}>
         <HealthFontLoader />
         <HealthHeader storeName={store.name} storeSlug={slug} logo={store.logo} />
         <main>
+          {contactNodeCss && <style data-live-node-styles dangerouslySetInnerHTML={{ __html: contactNodeCss }} />}
           <RenderTemplateBlocks blocks={blocks} />
         </main>
         <HealthFooterFull 
@@ -499,11 +500,12 @@ export default async function ContactPage({ params }: Props) {
   // ─── RETAIL / DECOR CONTACT ───
   const isRetailTemplate = activeTemplateSlug === "retail" || activeTemplateSlug === "decor";
   if (isRetailTemplate) {
-    const retailBlocks = (contactPage?.content ? pageContent.blocks : RETAIL_CONTACT_BLOCKS) as BuilderBlock[];
+    const retailBlocks = (resolvedContact?.blocks?.length ? resolvedContact.blocks : RETAIL_CONTACT_BLOCKS) as BuilderBlock[];
     return (
       <ThemeProvider theme={themeData}>
         <RetailHeader storeName={store.name} storeSlug={store.slug || slug} logo={store.logo} isLanding={false} />
         <div style={buildPageBackgroundStyle(pageSettings)}>
+          {contactNodeCss && <style data-live-node-styles dangerouslySetInnerHTML={{ __html: contactNodeCss }} />}
           <RenderBlocks blocks={retailBlocks} storeSlug={slug} products={serializedProducts} />
         </div>
         <RetailFooter storeName={store.name} storeSlug={store.slug || slug} logo={store.logo} description={store.description ?? undefined} />
@@ -520,7 +522,8 @@ export default async function ContactPage({ params }: Props) {
         isLanding={false}
       />
       <div style={buildPageBackgroundStyle(pageSettings)}>
-        {parsedContact && parsedContact.blocks.length > 0 ? (
+        {contactNodeCss && <style data-live-node-styles dangerouslySetInnerHTML={{ __html: contactNodeCss }} />}
+        {resolvedContact && resolvedContact.blocks.length > 0 ? (
           <RenderBlocks blocks={pageContent.blocks as BuilderBlock[]} storeSlug={slug} products={serializedProducts} />
         ) : (
           <RenderTemplateBlocks blocks={CONTACT_PAGE_BLOCKS} />

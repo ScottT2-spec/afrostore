@@ -1,5 +1,8 @@
 import type { TemplateBlock } from "@/components/storefront/TemplateBlockRenderer";
 import { buildDefaultPageContent, type DefaultPageContentContext } from "@/lib/templates/default-page-content";
+import { parsePageContent, type PageSettings } from "@/lib/page-content";
+import { buildEditorNodeTreeCss, type EditorNode } from "@/lib/visual-editor/node-tree";
+import { templateBlocksToEditorTree } from "@/lib/templates/template-tree";
 import { FASHION_TEMPLATE_PRESET } from "@/lib/templates/presets/fashion-preset";
 import { FASHION_COLORED_PRESET } from "@/lib/templates/presets/fashion-colored-preset";
 import { HANDMADE_BAGS_PRESET } from "@/lib/templates/presets/handmade-bags-preset";
@@ -438,6 +441,47 @@ export function mergeBespokePageContent(templateSlug?: string | null, pageSlug?:
   };
 }
 
+export interface ResolvedLivePageContent {
+  blocks: TemplateBlock[];
+  elements: EditorNode[];
+  settings: PageSettings;
+  css: string;
+}
+
+/**
+ * Resolve a live storefront page from the stored document.
+ * This prefers the saved editor tree when present, and only falls back to
+ * the bespoke template preset resolver when the saved document is an override
+ * document that needs to be materialized.
+ */
+export function resolveLivePageContent(
+  templateSlug?: string | null,
+  pageSlug?: string | null,
+  content?: unknown,
+  context?: Partial<DefaultPageContentContext>,
+): ResolvedLivePageContent {
+  const parsed = parsePageContent(content);
+  const parsedElements = Array.isArray(parsed.elements) ? parsed.elements : [];
+  if (parsedElements.length > 0 || parsed.blocks.length > 0) {
+    const elements = parsedElements.length > 0 ? parsedElements : templateBlocksToEditorTree(parsed.blocks);
+    return {
+      blocks: parsed.blocks,
+      elements,
+      settings: parsed.settings || {},
+      css: buildEditorNodeTreeCss(elements),
+    };
+  }
+
+  const mergedBlocks = mergeBespokeTemplateBlocks(templateSlug, pageSlug, content, context);
+  const elements = templateBlocksToEditorTree(mergedBlocks);
+  return {
+    blocks: mergedBlocks,
+    elements,
+    settings: parsed.settings || {},
+    css: buildEditorNodeTreeCss(elements),
+  };
+}
+
 export function diffBlocks(defaultBlocks: TemplateBlock[], currentBlocks: TemplateBlock[]): BespokeOverrides {
   const result: BespokeOverrides = {};
   const currentById = new Map(currentBlocks.map((block) => [block.id, block]));
@@ -473,8 +517,9 @@ export function pruneOverrides(defaultBlocks: TemplateBlock[], overrides: Bespok
 
     const nextSection: Record<string, unknown> = {};
     for (const [propPath, value] of Object.entries(sectionOverrides)) {
-      const defaultValue = getPath(defaultBlock.props, propPath);
-      if (typeof defaultValue === "undefined" && !(propPath in defaultBlock.props)) {
+      const defaultProps = defaultBlock.props || {};
+      const defaultValue = getPath(defaultProps, propPath);
+      if (typeof defaultValue === "undefined" && !(propPath in defaultProps)) {
         console.warn(`[BespokePageContent] Ignoring stale override path "${sectionId}.${propPath}".`);
         continue;
       }
@@ -504,7 +549,7 @@ export function applyOverridesToBlocks(defaultBlocks: TemplateBlock[], overrides
     }
 
     for (const [propPath, value] of Object.entries(sectionOverrides)) {
-      const set = setPath(block.props as Record<string, unknown>, propPath, value);
+      const set = setPath((block.props || {}) as Record<string, unknown>, propPath, value);
       if (!set) {
         console.warn(`[BespokePageContent] Ignoring stale override path "${sectionId}.${propPath}" in ${templateSlug}.`);
       }

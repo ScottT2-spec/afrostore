@@ -3,8 +3,12 @@ import { FashionFooter } from "./FashionTemplateBlocks";
 import Link from "next/link";
 import { resolveStoreLink, resolveFooterLink } from "@/lib/template-link-utils";
 import { useState, useEffect, useRef, createContext, useContext } from "react";
+import type { EditorNode } from "@/lib/visual-editor/node-tree";
+import { useEditorStore } from "@/lib/visual-editor/store";
 import { safeSrc, onImgError } from "./image-fallback";
 import { useNewsletterSubscribe } from "@/hooks/useNewsletterSubscribe";
+import { normalizeTextArray, resolveNestedNodeText, toDisplayText } from "@/components/storefront/prop-normalizers";
+import { InlineEditableText } from "@/components/storefront/InlineEditableText";
 
 /* ═══════════════════════════════════════════════════════════════
    FOOD GROCERY TEMPLATE BLOCKS
@@ -54,6 +58,10 @@ const containerStyle: React.CSSProperties = {
 /* ─── SCOPED STYLE INJECTOR ─────────────────────────────────── */
 function ScopedStyles({ id, css }: { id: string; css: string }) {
   return <style data-grocery-block={id} dangerouslySetInnerHTML={{ __html: css }} />;
+}
+
+function getNodeText(node: EditorNode, keys: string[], fallback = ""): string {
+  return resolveNestedNodeText(node, keys, fallback);
 }
 
 /* ═══════════════════════════════════════════════════════════════
@@ -114,9 +122,11 @@ export interface GroceryHeroSlide {
 export interface GroceryHeroSliderProps {
   slides?: GroceryHeroSlide[];
   autoplaySpeed?: number;
+  elements?: EditorNode[];
+  isEditor?: boolean;
 }
 
-export function GroceryHeroSlider({ slides, autoplaySpeed = 5000 }: GroceryHeroSliderProps) {
+export function GroceryHeroSlider({ slides = [], autoplaySpeed = 5000, elements = [], isEditor = false }: GroceryHeroSliderProps) {
   const storeCtx = useContext(GroceryStoreContext);
   const fixLink = (link: string) => resolveStoreLink(link, storeCtx?.storeSlug);
 
@@ -156,7 +166,20 @@ export function GroceryHeroSlider({ slides, autoplaySpeed = 5000 }: GroceryHeroS
     },
   ];
 
-  const items = slides || defaultSlides;
+  const slidesFromNodes = elements.length > 0
+    ? elements.map((node) => ({
+        label: getNodeText(node, ["label", "subtitle"], ""),
+        titleLine1: getNodeText(node, ["titleLine1", "title"], "Title"),
+        titleLine2: getNodeText(node, ["titleLine2"], ""),
+        description: getNodeText(node, ["description", "text"], ""),
+        buttonText: getNodeText(node, ["buttonText"], "Shop Now"),
+        buttonLink: getNodeText(node, ["buttonLink", "link", "href"], "#"),
+        backgroundColor: getNodeText(node, ["backgroundColor"], "#ffffff"),
+        productImage: getNodeText(node, ["productImage", "imageUrl", "image"], ""),
+        backgroundImage: getNodeText(node, ["backgroundImage"], ""),
+      }))
+    : [];
+  const items = slidesFromNodes.length > 0 ? slidesFromNodes : (slides.length > 0 ? slides : defaultSlides);
   const [current, setCurrent] = useState(0);
 
   useEffect(() => {
@@ -185,6 +208,82 @@ export function GroceryHeroSlider({ slides, autoplaySpeed = 5000 }: GroceryHeroS
     @media (max-width: 1199px) { .gc-slide-title { font-size: 36px; line-height: 46px; } }
     @media (max-width: 767px) { .gc-slide-title { font-size: 32px; line-height: 42px; } .gc-slide-img { display: none; } .gc-slider { min-height: 400px; } .gc-slide-inner { padding: 0 20px; } }
   `;
+
+  if (isEditor && elements.length > 0) {
+    return (
+      <div className="gc-slider">
+        <ScopedStyles id="hero-slider" css={css} />
+        {items.map((slide, i) => (
+          <div
+            key={elements[i]?.id || i}
+            data-editor-node-id={elements[i]?.id}
+            className={`gc-slide ${i === current ? "gc-active" : ""}`}
+            style={{ position: "relative", outline: elements[i] ? "1px dashed rgba(37, 99, 235, 0.35)" : undefined, outlineOffset: "4px" }}
+            onClick={(e) => {
+              const nodeId = elements[i]?.id;
+              if (!nodeId) return;
+              e.stopPropagation();
+              useEditorStore.getState().setSelectedElementId(nodeId);
+            }}
+          >
+            <div className="gc-slide-bg" style={{ backgroundColor: slide.backgroundColor, backgroundImage: slide.backgroundImage ? `url(${slide.backgroundImage})` : undefined }} />
+            <div className="gc-slide-inner">
+              <div className="gc-slide-text">
+                {slide.label && (
+                  <InlineEditableText
+                    nodeId={elements[i]?.id}
+                    field="label"
+                    value={slide.label}
+                    isEditor
+                    as="div"
+                    className="gc-slide-label"
+                  />
+                )}
+                <InlineEditableText
+                  nodeId={elements[i]?.id}
+                  field="titleLine1"
+                  value={slide.titleLine1}
+                  isEditor
+                  as="h2"
+                  className="gc-slide-title"
+                />
+                <InlineEditableText
+                  nodeId={elements[i]?.id}
+                  field="titleLine2"
+                  value={slide.titleLine2}
+                  isEditor
+                  as="h2"
+                  className="gc-slide-title"
+                />
+                {slide.description && (
+                  <InlineEditableText
+                    nodeId={elements[i]?.id}
+                    field="description"
+                    value={slide.description}
+                    isEditor
+                    as="p"
+                    className="gc-slide-desc"
+                    multiline
+                  />
+                )}
+                <InlineEditableText
+                  nodeId={elements[i]?.id}
+                  field="buttonText"
+                  value={slide.buttonText}
+                  isEditor
+                  as="span"
+                  className="gc-slide-btn"
+                />
+              </div>
+              <div className="gc-slide-img">
+                <img src={slide.productImage} alt={slide.titleLine1}  onError={(e) => onImgError(e, slide.titleLine1)} />
+              </div>
+            </div>
+          </div>
+        ))}
+      </div>
+    );
+  }
 
   return (
     <div className="gc-slider">
@@ -228,16 +327,25 @@ export interface GroceryFeatureItem {
 
 export interface GroceryFeaturesBarProps {
   features?: GroceryFeatureItem[];
+  elements?: EditorNode[];
+  isEditor?: boolean;
 }
 
-export function GroceryFeaturesBar({ features }: GroceryFeaturesBarProps) {
+export function GroceryFeaturesBar({ features = [], elements = [] }: GroceryFeaturesBarProps) {
   const defaultFeatures: GroceryFeatureItem[] = [
     { icon: `${IMG}/2020/06/svg-wood-food-market-1.svg`, title: "Best Quality", description: "Best quality products for you" },
     { icon: `${IMG}/2020/06/svg-wood-food-market-2.svg`, title: "Online Payment", description: "Secure online payment methods" },
     { icon: `${IMG}/2020/06/svg-wood-food-market-3.svg`, title: "Fast Delivery", description: "Fast delivery to your door" },
   ];
 
-  const items = features || defaultFeatures;
+  const featuresFromNodes = elements.length > 0
+    ? elements.map((node) => ({
+        icon: getNodeText(node, ["icon", "image", "iconUrl"], ""),
+        title: getNodeText(node, ["title", "name"], ""),
+        description: getNodeText(node, ["description", "text"], ""),
+      }))
+    : [];
+  const items = featuresFromNodes.length > 0 ? featuresFromNodes : (features.length > 0 ? features : defaultFeatures);
 
   const css = `
     .gc-features { background: #fff; padding: 40px 0; border-bottom: 1px solid #e6e6e6; }
@@ -280,13 +388,33 @@ export interface GrocerySectionTitleProps {
   title: string;
   align?: "left" | "center" | "right";
   after?: React.ReactNode;
+  blockId?: string;
+  isEditor?: boolean;
 }
 
-export function GrocerySectionTitle({ subtitle, title, align = "center", after }: GrocerySectionTitleProps) {
+export function GrocerySectionTitle({ subtitle, title, align = "center", after, blockId, isEditor = false }: GrocerySectionTitleProps) {
   return (
     <div style={{ ...containerStyle, textAlign: align, marginBottom: "30px" }}>
-      {subtitle && <div style={{ fontFamily: TOKENS.bodyFont, fontSize: "14px", fontWeight: 500, color: TOKENS.primaryColor, textTransform: "uppercase" as const, letterSpacing: "2px", marginBottom: "5px" }}>{subtitle}</div>}
-      <h4 style={{ fontFamily: TOKENS.titleFont, fontWeight: 500, fontSize: "30px", lineHeight: "1.3", color: TOKENS.titleColor, margin: "0 0 5px", textTransform: "uppercase" as const }}>{title}</h4>
+      {subtitle && (
+        <InlineEditableText
+          nodeId={blockId}
+          field="subtitle"
+          value={subtitle}
+          isEditor={isEditor}
+          as="div"
+          className="gc-section-subtitle"
+          style={{ fontFamily: TOKENS.bodyFont, fontSize: "14px", fontWeight: 500, color: TOKENS.primaryColor, textTransform: "uppercase", letterSpacing: "2px", marginBottom: "5px" }}
+        />
+      )}
+      <InlineEditableText
+        nodeId={blockId}
+        field="title"
+        value={title}
+        isEditor={isEditor}
+        as="h4"
+        className="gc-section-title"
+        style={{ fontFamily: TOKENS.titleFont, fontWeight: 500, fontSize: "30px", lineHeight: "1.3", color: TOKENS.titleColor, margin: "0 0 5px", textTransform: "uppercase" }}
+      />
       {after}
     </div>
   );
@@ -304,6 +432,8 @@ export interface GroceryProductGridProps {
   marginBottom?: string;
   maxProducts?: number;
   tabs?: string[];
+  blockId?: string;
+  isEditor?: boolean;
 }
 
 export function GroceryProductGrid({
@@ -314,6 +444,8 @@ export function GroceryProductGrid({
   marginBottom = "60px",
   maxProducts = 10,
   tabs,
+  blockId,
+  isEditor = false,
 }: GroceryProductGridProps) {
   const storeCtx = useContext(GroceryStoreContext);
   const fixLink = (slug: string) => {
@@ -321,7 +453,8 @@ export function GroceryProductGrid({
     return `#`;
   };
 
-  const defaultTabs = tabs || ["New", "Featured", "Top sellers"];
+  const defaultTabs = normalizeTextArray(tabs, ["New", "Featured", "Top sellers"]);
+  const visibleTabs = Array.isArray(defaultTabs) ? defaultTabs : [];
   const [activeTab, setActiveTab] = useState(0);
 
   const defaultProducts: GroceryProduct[] = [
@@ -370,11 +503,18 @@ export function GroceryProductGrid({
     <div className="gc-products">
       <ScopedStyles id="products" css={css} />
       <div style={containerStyle}>
-        {sectionTitle && <GrocerySectionTitle subtitle={sectionSubtitle} title={sectionTitle} />}
-        {defaultTabs.length > 0 && (
+        {sectionTitle && (
+          <GrocerySectionTitle
+            subtitle={sectionSubtitle}
+            title={sectionTitle}
+            blockId={blockId}
+            isEditor={isEditor}
+          />
+        )}
+        {visibleTabs.length > 0 && (
           <div className="gc-tabs">
-            {defaultTabs.map((tab, i) => (
-              <button key={i} className={`gc-tab ${i === activeTab ? "gc-active" : ""}`} onClick={() => setActiveTab(i)}>{tab}</button>
+            {visibleTabs.map((tab, i) => (
+              <button key={`${tab}-${i}`} className={`gc-tab ${i === activeTab ? "gc-active" : ""}`} onClick={() => setActiveTab(i)}>{tab}</button>
             ))}
           </div>
         )}
@@ -386,7 +526,7 @@ export function GroceryProductGrid({
                 <img className="gc-prod-img" src={p.image || safeSrc(null, p.name)} alt={p.name} onError={(e) => onImgError(e, p.name)} />
               </div>
               <div className="gc-prod-info">
-                <div className="gc-prod-cat">{p.category}</div>
+                <div className="gc-prod-cat">{toDisplayText(p.category, "")}</div>
                 <h3 className="gc-prod-name"><Link href={fixLink(p.slug)}>{p.name}</Link></h3>
                 <div className="gc-prod-stars">{"★".repeat(p.rating || 5)}{"☆".repeat(5 - (p.rating || 5))}</div>
                 <div className="gc-prod-price">
@@ -417,16 +557,27 @@ export interface GroceryPromoBanner {
 
 export interface GroceryPromoBannersProps {
   banners?: GroceryPromoBanner[];
+  elements?: EditorNode[];
+  isEditor?: boolean;
 }
 
-export function GroceryPromoBanners({ banners }: GroceryPromoBannersProps) {
+export function GroceryPromoBanners({ banners = [], elements = [] }: GroceryPromoBannersProps) {
   const storeCtx = useContext(GroceryStoreContext);
   const defaultBanners: GroceryPromoBanner[] = [
     { subtitle: "NEW PRODUCTS", title: "Roar Ice Cream", image: `${IMG}/2020/06/wood-food-market-ban-1-opt.jpg`, buttonText: "Shop Now" },
     { subtitle: "VEGAN FOOD", title: "Organic Rice", image: `${IMG}/2020/06/wood-food-market-ban-2-opt.jpg`, buttonText: "Shop Now" },
   ];
 
-  const items = banners || defaultBanners;
+  const bannersFromNodes = elements.length > 0
+    ? elements.map((node) => ({
+        subtitle: getNodeText(node, ["subtitle", "label"], ""),
+        title: getNodeText(node, ["title", "name"], ""),
+        image: getNodeText(node, ["image", "imageUrl", "backgroundImage"], ""),
+        buttonText: getNodeText(node, ["buttonText"], ""),
+        buttonLink: getNodeText(node, ["buttonLink", "link", "href"], "#"),
+      }))
+    : [];
+  const items = bannersFromNodes.length > 0 ? bannersFromNodes : (banners.length > 0 ? banners : defaultBanners);
 
   const css = `
     .gc-banners { display: grid; grid-template-columns: repeat(2, 1fr); gap: 20px; margin-bottom: 60px; }
@@ -474,9 +625,12 @@ export interface GroceryCategoryGridProps {
   sectionTitle?: string;
   categories?: GroceryCategory[];
   columns?: number;
+  elements?: EditorNode[];
+  blockId?: string;
+  isEditor?: boolean;
 }
 
-export function GroceryCategoryGrid({ sectionTitle = "POPULAR CATEGORIES", categories, columns = 4 }: GroceryCategoryGridProps) {
+export function GroceryCategoryGrid({ sectionTitle = "POPULAR CATEGORIES", categories = [], columns = 4, elements = [], blockId, isEditor = false }: GroceryCategoryGridProps) {
   const defaultCategories: GroceryCategory[] = [
     { name: "Fresh Food", image: `${IMG}/2020/06/wood-food-market-category-1.jpg` },
     { name: "Bakery", image: `${IMG}/2020/06/wood-food-market-category-2.jpg` },
@@ -484,7 +638,14 @@ export function GroceryCategoryGrid({ sectionTitle = "POPULAR CATEGORIES", categ
     { name: "Drinks", image: `${IMG}/2020/06/wood-food-market-category-4.jpg` },
   ];
 
-  const items = categories || defaultCategories;
+  const categoriesFromNodes = elements.length > 0
+    ? elements.map((node) => ({
+        name: getNodeText(node, ["name", "title", "label"], ""),
+        image: getNodeText(node, ["image", "imageUrl"], ""),
+        link: getNodeText(node, ["link", "href", "buttonLink"], "#"),
+      }))
+    : [];
+  const items = categoriesFromNodes.length > 0 ? categoriesFromNodes : (categories.length > 0 ? categories : defaultCategories);
 
   const css = `
     .gc-cats-grid { display: grid; gap: 20px; margin-bottom: 60px; }
@@ -498,7 +659,7 @@ export function GroceryCategoryGrid({ sectionTitle = "POPULAR CATEGORIES", categ
 
   return (
     <div style={containerStyle}>
-      <GrocerySectionTitle title={sectionTitle} />
+      <GrocerySectionTitle title={sectionTitle} blockId={blockId} isEditor={isEditor} />
       <ScopedStyles id="cats" css={css} />
       <div className="gc-cats-grid" style={{ gridTemplateColumns: `repeat(${columns}, 1fr)` }}>
         {items.map((cat, i) => (
@@ -523,6 +684,8 @@ export interface GroceryNewsletterProps {
   description?: string;
   buttonText?: string;
   backgroundColor?: string;
+  blockId?: string;
+  isEditor?: boolean;
 }
 
 export function GroceryNewsletter({
@@ -530,6 +693,8 @@ export function GroceryNewsletter({
   description = "Be the first to learn about our latest trends and get exclusive offers.",
   buttonText = "Sign up",
   backgroundColor = TOKENS.primaryColor,
+  blockId,
+  isEditor = false,
 }: GroceryNewsletterProps) {
   const [email, setEmail] = useState("");
   const storeCtx = useContext(GroceryStoreContext);
@@ -556,15 +721,41 @@ export function GroceryNewsletter({
       <div style={containerStyle}>
         <div className="gc-newsletter-inner">
           <div className="gc-newsletter-text">
-            <h4 className="gc-newsletter-title">{title}</h4>
-            <p className="gc-newsletter-desc">{description}</p>
+            <InlineEditableText
+              nodeId={blockId}
+              field="title"
+              value={title}
+              isEditor={isEditor}
+              as="h4"
+              className="gc-newsletter-title"
+            />
+            <InlineEditableText
+              nodeId={blockId}
+              field="description"
+              value={description}
+              isEditor={isEditor}
+              as="p"
+              className="gc-newsletter-desc"
+              multiline
+            />
           </div>
           {nlStatus === "success" ? (
             <div className="gc-newsletter-success">✓ Thank you for subscribing!</div>
           ) : (
             <form className="gc-newsletter-form" onSubmit={(e) => { e.preventDefault(); subscribe(email).then(() => setEmail("")); }}>
               <input className="gc-newsletter-input" type="email" placeholder="Your email address" value={email} onChange={e => setEmail(e.target.value)} required />
-              <button className="gc-newsletter-btn" type="submit" disabled={nlStatus === "loading"}>{nlStatus === "loading" ? "Signing up..." : buttonText}</button>
+              {isEditor ? (
+                <InlineEditableText
+                  nodeId={blockId}
+                  field="buttonText"
+                  value={buttonText}
+                  isEditor
+                  as="span"
+                  className="gc-newsletter-btn"
+                />
+              ) : (
+                <button className="gc-newsletter-btn" type="submit" disabled={nlStatus === "loading"}>{nlStatus === "loading" ? "Signing up..." : buttonText}</button>
+              )}
             </form>
           )}
         </div>
@@ -577,7 +768,7 @@ export function GroceryNewsletter({
    8. SECOND PRODUCT ROW (Best Sellers)
    ═══════════════════════════════════════════════════════════════ */
 
-export function GroceryBestSellers({ products: propProducts, columns = 5, maxProducts = 10 }: { products?: GroceryProduct[]; columns?: number; maxProducts?: number }) {
+export function GroceryBestSellers({ products: propProducts, columns = 5, maxProducts = 10, blockId, isEditor = false }: { products?: GroceryProduct[]; columns?: number; maxProducts?: number; blockId?: string; isEditor?: boolean }) {
   const storeCtx = useContext(GroceryStoreContext);
   const fixLink = (slug: string) => {
     if (storeCtx?.storeSlug) return `/store/${storeCtx.storeSlug}/product/${slug}`;
@@ -607,6 +798,8 @@ export function GroceryBestSellers({ products: propProducts, columns = 5, maxPro
       tabs={["New", "Featured", "Top sellers"]}
       marginBottom="60px"
       maxProducts={maxProducts}
+      blockId={blockId}
+      isEditor={isEditor}
     />
   );
 }
@@ -622,6 +815,8 @@ export function GroceryAboutHero({
   images = [] as string[],
   ctaText = "Learn More",
   ctaLink = "#",
+  blockId,
+  isEditor = false,
 }: {
   subtitle?: string;
   title?: string;
@@ -629,6 +824,8 @@ export function GroceryAboutHero({
   images?: string[];
   ctaText?: string;
   ctaLink?: string;
+  blockId?: string;
+  isEditor?: boolean;
 }) {
   return (
     <>
@@ -651,12 +848,39 @@ export function GroceryAboutHero({
         <div style={containerStyle}>
           <div className="gc-about-hero-inner">
             <div>
-              <p className="gc-about-hero-subtitle">{subtitle}</p>
-              <h1 className="gc-about-hero-title">{title}</h1>
+              <InlineEditableText
+                nodeId={blockId}
+                field="subtitle"
+                value={subtitle}
+                isEditor={isEditor}
+                as="p"
+                className="gc-about-hero-subtitle"
+              />
+              <InlineEditableText
+                nodeId={blockId}
+                field="title"
+                value={title}
+                isEditor={isEditor}
+                as="h1"
+                className="gc-about-hero-title"
+              />
               <div className="gc-about-hero-body">
                 {bodyText.map((text, i) => <p key={i}>{text}</p>)}
               </div>
-              {ctaText && <a href={ctaLink} className="gc-about-hero-cta">{ctaText}</a>}
+              {ctaText && (
+                isEditor ? (
+                  <InlineEditableText
+                    nodeId={blockId}
+                    field="ctaText"
+                    value={ctaText}
+                    isEditor
+                    as="span"
+                    className="gc-about-hero-cta"
+                  />
+                ) : (
+                  <a href={ctaLink} className="gc-about-hero-cta">{ctaText}</a>
+                )
+              )}
             </div>
             <div className="gc-about-hero-images">
               {images.map((img, i) => (
@@ -678,10 +902,14 @@ export function GroceryTextSection({
   sectionTitle = { subtitle: "", title: "" },
   bodyText = [] as string[],
   backgroundColor = "transparent",
+  blockId,
+  isEditor = false,
 }: {
   sectionTitle?: { subtitle?: string; title?: string };
   bodyText?: string[];
   backgroundColor?: string;
+  blockId?: string;
+  isEditor?: boolean;
 }) {
   return (
     <>
@@ -699,8 +927,24 @@ export function GroceryTextSection({
         <div style={containerStyle}>
           <div className="gc-text-section-inner">
             <div>
-              {sectionTitle.subtitle && <p className="gc-text-section-subtitle">{sectionTitle.subtitle}</p>}
-              <h2 className="gc-text-section-title">{sectionTitle.title}</h2>
+              {sectionTitle.subtitle && (
+                <InlineEditableText
+                  nodeId={blockId}
+                  field="subtitle"
+                  value={sectionTitle.subtitle}
+                  isEditor={isEditor}
+                  as="p"
+                  className="gc-text-section-subtitle"
+                />
+              )}
+              <InlineEditableText
+                nodeId={blockId}
+                field="title"
+                value={sectionTitle.title ?? ""}
+                isEditor={isEditor}
+                as="h2"
+                className="gc-text-section-title"
+              />
             </div>
             <div className="gc-text-section-body">
               {bodyText.map((text, i) => <p key={i}>{text}</p>)}
@@ -854,6 +1098,8 @@ export function GroceryContactHero({
   phone = "",
   email = "",
   hours = "",
+  blockId,
+  isEditor = false,
 }: {
   subtitle?: string;
   title?: string;
@@ -861,6 +1107,8 @@ export function GroceryContactHero({
   phone?: string;
   email?: string;
   hours?: string;
+  blockId?: string;
+  isEditor?: boolean;
 }) {
   return (
     <>
@@ -875,8 +1123,22 @@ export function GroceryContactHero({
       `} />
       <section className="gc-contact-hero">
         <div style={containerStyle}>
-          <p className="gc-contact-hero-subtitle">{subtitle}</p>
-          <h1 className="gc-contact-hero-title">{title}</h1>
+          <InlineEditableText
+            nodeId={blockId}
+            field="subtitle"
+            value={subtitle}
+            isEditor={isEditor}
+            as="p"
+            className="gc-contact-hero-subtitle"
+          />
+          <InlineEditableText
+            nodeId={blockId}
+            field="title"
+            value={title}
+            isEditor={isEditor}
+            as="h1"
+            className="gc-contact-hero-title"
+          />
           <div className="gc-contact-info-grid">
             {address && (
               <div className="gc-contact-info-item">
@@ -959,9 +1221,13 @@ export function GroceryContactForm({
 export function GroceryBlogGrid({
   sectionTitle = "Blog",
   posts = [] as { id: number; title: string; slug: string; excerpt: string; image: string; category: string; author: string; date: string }[],
+  blockId,
+  isEditor = false,
 }: {
   sectionTitle?: string;
   posts?: { id: number; title: string; slug: string; excerpt: string; image: string; category: string; author: string; date: string }[];
+  blockId?: string;
+  isEditor?: boolean;
 }) {
   return (
     <>
@@ -988,7 +1254,14 @@ export function GroceryBlogGrid({
       `} />
       <section className="gc-blog-grid">
         <div style={containerStyle}>
-          <h2 className="gc-blog-grid-title">{sectionTitle}</h2>
+          <InlineEditableText
+            nodeId={blockId}
+            field="sectionTitle"
+            value={sectionTitle}
+            isEditor={isEditor}
+            as="h2"
+            className="gc-blog-grid-title"
+          />
           <div className="gc-blog-posts">
             {posts.map((post) => (
               <article key={post.id} className="gc-blog-card">

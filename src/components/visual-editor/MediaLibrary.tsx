@@ -26,6 +26,15 @@ interface MediaLibraryProps {
   allowMultiple?: boolean;
 }
 
+interface MediaLibraryResponse {
+  success?: boolean;
+  items?: MediaItem[];
+  folders?: string[];
+  pagination?: {
+    total?: number;
+  };
+}
+
 export default function MediaLibrary({
   isOpen,
   onClose,
@@ -62,7 +71,7 @@ export default function MediaLibrary({
         limit: "30",
       });
 
-      const res = await api.get(`/api/sites/${siteId}/media?${params}`);
+      const res = (await api.get(`/api/sites/${siteId}/media?${params}`)) as MediaLibraryResponse;
       if (res.success) {
         setItems(res.items || []);
         setFolders(res.folders || ["/"]);

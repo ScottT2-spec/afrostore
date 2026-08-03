@@ -1,10 +1,10 @@
-import type { TemplateBlock } from "@/components/storefront/TemplateBlockRenderer";
+import type { EditorNode } from "@/lib/visual-editor/node-tree";
 
-export const AEGIS_LANDING_PRESET: TemplateBlock[] = [
+export const AEGIS_LANDING_PRESET: EditorNode[] = [
   {
     id: "aegis-header",
     type: "aegisHeader",
-    props: {
+    settings: {
       brandName: "Aegis Health",
       navLinks: [
         { label: "Our Mission", href: "#", active: true },
@@ -20,7 +20,7 @@ export const AEGIS_LANDING_PRESET: TemplateBlock[] = [
   {
     id: "aegis-hero",
     type: "aegisHero",
-    props: {
+    settings: {
       titleLine1: "Living Beyond,",
       titleLine2: "Living Well.",
       description: "We empower lives through innovative HIV/AIDS care, advocacy, and community support. Together, we build a future defined by health, not diagnosis.",
@@ -40,7 +40,7 @@ export const AEGIS_LANDING_PRESET: TemplateBlock[] = [
   {
     id: "aegis-services",
     type: "aegisServices",
-    props: {
+    settings: {
       subtitle: "Our Approach",
       title: "Innovative Care,\nPersonalized Journeys",
       description: "Healthcare is never one-size-fits-all. We combine cutting-edge biomedical research with a deeply human touch to ensure every individual thrives.",
@@ -57,7 +57,7 @@ export const AEGIS_LANDING_PRESET: TemplateBlock[] = [
   {
     id: "aegis-stories",
     type: "aegisStories",
-    props: {
+    settings: {
       sectionTitle: "Stories of Resilience",
       storyImage: "https://images.unsplash.com/photo-1573497019940-1c28c88b4f3e?w=900&h=500&fit=crop",
       storyBadge: "Advocate Story",
@@ -72,7 +72,7 @@ export const AEGIS_LANDING_PRESET: TemplateBlock[] = [
   {
     id: "aegis-cta",
     type: "aegisCTA",
-    props: {
+    settings: {
       title: "Take the first step towards clarity.",
       description: "Confidential, free, and compassionate testing is available at all our partner clinics. No appointment necessary for initial screening.",
       primaryButtonText: "Find a Clinic Near You",
@@ -84,7 +84,7 @@ export const AEGIS_LANDING_PRESET: TemplateBlock[] = [
   {
     id: "aegis-footer",
     type: "aegisFooter",
-    props: {
+    settings: {
       brandName: "Aegis Health",
       tagline: "Dedicated to a world where health is a right, and every life is celebrated.",
       columns: [

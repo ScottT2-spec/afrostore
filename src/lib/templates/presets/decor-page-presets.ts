@@ -1,4 +1,4 @@
-import type { TemplateBlock } from "@/components/storefront/TemplateBlockRenderer";
+import type { EditorNode } from "@/lib/visual-editor/node-tree";
 
 /**
  * Decor (Interior) Template Page Presets
@@ -6,14 +6,14 @@ import type { TemplateBlock } from "@/components/storefront/TemplateBlockRendere
  * https://woodmart.xtemos.com/demo-decor/demo/decor/
  */
 
-export const DECOR_ABOUT_PAGE_BLOCKS: TemplateBlock[] = [
-  { id: "decor-about-hero", type: "interiorAboutContent", props: {
+export const DECOR_ABOUT_PAGE_BLOCKS: EditorNode[] = [
+  { id: "decor-about-hero", type: "interiorAboutContent", settings: {
     layout: "text-with-heading", subtitle: "XTEMOS IS A CREATIVE DESIGN AGENCY",
     title: "Our success and company history.",
     paragraphs: ["A wonderful serenity has taken possession of my entire soul, like these sweet mornings of spring which I enjoy with my whole heart."],
     buttons: [{ text: "SEE PROJECTS", link: "/portfolio" }, { text: "VIEW MORE", link: "#" }],
   }},
-  { id: "decor-about-story", type: "interiorAboutContent", props: {
+  { id: "decor-about-story", type: "interiorAboutContent", settings: {
     layout: "text-with-heading", subtitle: "WOODMART - BEST ECOMMERCE THEME 2021/22", title: "About Our Online Store",
     paragraphs: [
       "Risus suspendisse a orci penatibus a felis suscipit consectetur vestibulum sodales dui cum ultricies lacus interdum. Per suspendisse adipiscing a suspendisse auctor nibh a et at curae condimentum suspendisse enim a eu scelerisque.",
@@ -24,18 +24,18 @@ export const DECOR_ABOUT_PAGE_BLOCKS: TemplateBlock[] = [
     ],
     credit: "Developed by Xtemos Studio @ 2022.",
   }},
-  { id: "decor-about-stats", type: "interiorStatsCounters", props: { counters: [
+  { id: "decor-about-stats", type: "interiorStatsCounters", settings: { counters: [
     { value: 0, label: "SATISFIED CLIENTS" }, { value: 0, label: "FINISHED PROJECTS" },
     { value: 0, label: "TEAM MEMBERS" }, { value: 0, label: "OFFICES" },
     { value: 0, label: "SATISFIED CLIENTS" }, { value: 0, label: "DESIGN WORKS" },
   ]}},
-  { id: "decor-about-convert", type: "interiorAboutContent", props: {
+  { id: "decor-about-convert", type: "interiorAboutContent", settings: {
     layout: "text-with-heading", subtitle: "WOODMART - BEST ECOMMERCE THEME 2021/22",
     title: "We convert your idea Into a reality.",
     paragraphs: ["One morning, when Gregor Samsa woke from troubled dreams, he found himself transformed in his bed into a horrible vermin. He lay on his armour-like back, and if he lifted his head a little he could see his brown belly, slightly domed and divided by arches into stiff His room, a proper human room although a little too smalls."],
     buttons: [{ text: "SEE PROJECTS", link: "/portfolio" }, { text: "VIEW MORE", link: "#" }],
   }},
-  { id: "decor-about-services", type: "interiorServicesGrid", props: {
+  { id: "decor-about-services", type: "interiorServicesGrid", settings: {
     subtitle: "WOODMART - BEST ECOMMERCE THEME 2021/22", title: "Let\u2019s Get Creative!",
     services: [
       { icon: "https://woodmart.xtemos.com/wp-content/uploads/2017/03/ruler-transparent-70x70.png", title: "GRAPHIC DESIGN", description: "Curabitur lacinia tristique velit ut laoreet." },
@@ -44,11 +44,11 @@ export const DECOR_ABOUT_PAGE_BLOCKS: TemplateBlock[] = [
       { icon: "https://woodmart.xtemos.com/wp-content/uploads/2017/03/ruler-2-transparent-70x70.png", title: "PHOTOGRAPHY", description: "The point of using Lorem Ipsum is that it has it." },
     ],
   }},
-  { id: "decor-about-gallery", type: "interiorGalleryGrid", props: { images: [
+  { id: "decor-about-gallery", type: "interiorGalleryGrid", settings: { images: [
     "https://woodmart.xtemos.com/wp-content/uploads/2017/03/about-us-gallery-photo-2.jpg",
     "https://woodmart.xtemos.com/wp-content/uploads/2017/03/about-us-gallery-photo-1.jpg",
   ]}},
-  { id: "decor-about-presentation", type: "interiorVideoSection", props: {
+  { id: "decor-about-presentation", type: "interiorVideoSection", settings: {
     subtitle: "XTEMOS IS A CREATIVE DESIGN AGENCY", title: "Our Presentation",
     description: "I am so happy, my dear friend, so absorbed in the exquisite sense of mere tranquil existence, that I neglect my talents. I should be incapable of drawing a single.",
     videos: [
@@ -56,19 +56,19 @@ export const DECOR_ABOUT_PAGE_BLOCKS: TemplateBlock[] = [
       { thumbnail: "https://woodmart.xtemos.com/wp-content/uploads/2017/03/video-placeholder-2.jpg", youtubeUrl: "http://www.youtube.com/watch?v=TJ1SDXbij8Y", title: "Design & development process demonstration" },
     ],
   }},
-  { id: "decor-about-quote", type: "interiorQuoteSection", props: {
+  { id: "decor-about-quote", type: "interiorQuoteSection", settings: {
     subtitle: "WOODMART - BEST ECOMMERCE THEME 2021/22",
     quote: "Excellence is not a skill it\u2019s an attitude", attribution: "Ralph Marston",
     description: "A wonderful serenity has taken possession of my entire soul, like these sweet mornings of spring which I enjoy with my whole heart. I am alone, and feel the charm of existence in this spot, which was created for the bliss of souls like mine.",
     credit: "Developed by Xtemos Studio @ 2022.",
   }},
-  { id: "decor-about-team", type: "interiorTeamSection", props: { members: [
+  { id: "decor-about-team", type: "interiorTeamSection", settings: { members: [
     { name: "MARK JANCE", role: "CEO / FOUNDER", image: "https://woodmart.xtemos.com/wp-content/uploads/2017/01/team26.jpg", socials: ["facebook", "twitter", "instagram", "linkedin"] },
     { name: "MARK JANCE", role: "CEO / FOUNDER", image: "https://woodmart.xtemos.com/wp-content/uploads/2017/01/team19.jpg", socials: ["facebook", "twitter", "instagram", "linkedin"] },
     { name: "MARK JANCE", role: "CEO / FOUNDER", image: "https://woodmart.xtemos.com/wp-content/uploads/2017/01/team24.jpg", socials: ["facebook", "twitter", "instagram", "linkedin"] },
     { name: "MARK JANCE", role: "CEO / FOUNDER", image: "https://woodmart.xtemos.com/wp-content/uploads/2017/01/team21.jpg", socials: ["facebook", "twitter", "instagram", "linkedin"] },
   ]}},
-  { id: "decor-about-offices", type: "interiorOfficeLocations", props: {
+  { id: "decor-about-offices", type: "interiorOfficeLocations", settings: {
     subtitle: "GET IN TOUCH WITH US", title: "Get Connected",
     description: "I am so happy, my dear friend, so absorbed in the exquisite sense of mere tranquil existence, that I neglect my talents. I should be incapable of drawing a single.",
     offices: [
@@ -78,22 +78,22 @@ export const DECOR_ABOUT_PAGE_BLOCKS: TemplateBlock[] = [
       { city: "NORWAY", address: "113 New Avenue, Roadway,\n67 Brewer St, London, United Kingdom", phone: "+23 954 355 255", email: "xtemos@gmail.com" },
     ],
   }},
-  { id: "decor-about-news", type: "interiorPromoBanners", props: { banners: [
+  { id: "decor-about-news", type: "interiorPromoBanners", settings: { banners: [
     { image: "https://woodmart.xtemos.com/wp-content/uploads/2017/03/banner-news.jpg", subtitle: "", title: "It is a fact that a reader will be distracted.", description: "Ullamcorper vehicula at ultrices sed interdum et malesuada", buttonText: "Read more", link: "#" },
     { image: "https://woodmart.xtemos.com/wp-content/uploads/2017/03/banner-news-3.jpg", subtitle: "", title: "By the readable content of a page when looking.", description: "Patibus elementum a dictum ipiscing parturient donec eros.", buttonText: "Read more", link: "#" },
     { image: "https://woodmart.xtemos.com/wp-content/uploads/2017/03/banner-news-2.jpg", subtitle: "", title: "The point of using Lorem Ipsum is that it has.", description: "Ullamcorper vehicula at ultrices sed interdum ullamcorper .", buttonText: "Read more", link: "#" },
   ]}},
-  { id: "decor-about-share", type: "interiorCta", props: {
+  { id: "decor-about-share", type: "interiorCta", settings: {
     subtitle: "CURABITUR ALIQUET QUAM POSUERE", title: "Do You Like the Theme? Share With Your Friends!",
   }},
 ];
 
-export const DECOR_CONTACT_PAGE_BLOCKS: TemplateBlock[] = [
-  { id: "decor-contact-store", type: "interiorStoreVisit", props: {
+export const DECOR_CONTACT_PAGE_BLOCKS: EditorNode[] = [
+  { id: "decor-contact-store", type: "interiorStoreVisit", settings: {
     subtitle: "OUR STORES", title: "VISIT OUR NEW\nSTORE IN NEW YORK",
     address: "294 Bay Meadows Ave.\nBay Shore, NY 11706", buttonText: "See More About", buttonLink: "#",
   }},
-  { id: "decor-contact-faq", type: "interiorFaqAccordion", props: {
+  { id: "decor-contact-faq", type: "interiorFaqAccordion", settings: {
     subtitle: "INFORMATION QUESTIONS", title: "FREQUENTLY ASKED QUESTIONS",
     items: [
       { question: "Will I receive the same product that I see in the picture?", answer: "Consectetur cras scelerisque dis nec mi vestibulum ullamcorper turpis enim natoque tempus a malesuada suspendisse iaculis adipiscing himenaeos tincidunt. Tellus pharetra dis nostra urna a scelerisque id parturient ullamcorper ullamcorper class ad consectetur tristique et.\n\nHendrerit mollis facilisi odio a montes scelerisque a scelerisque justo a praesent conubia aenean mi tempor." },
@@ -103,18 +103,18 @@ export const DECOR_CONTACT_PAGE_BLOCKS: TemplateBlock[] = [
       { question: "Where can I ship my order?", answer: "Ut bibendum a adipiscing purus massa a facilisi congue parturient condimentum urna donec per adipiscing cursus nisl nam tristique parturient id.\n\nAliquam quam at et in ipsum at venenatis a eget dignissim aliquam tincidunt ultrices lacus ad consectetur imperdiet sem suspendisse ante a dapibus potenti. Eu parturient parturient magnis tempus molestie augue quam vulputate hac facilisis est nisl pretium a cursus." },
     ],
   }},
-  { id: "decor-contact-form", type: "interiorContactForm", props: {
+  { id: "decor-contact-form", type: "interiorContactForm", settings: {
     subtitle: "INFORMATION ABOUT US", title: "CONTACT US FOR ANY QUESTIONS",
     fields: ["name", "email", "phone", "company", "message"],
   }},
-  { id: "decor-contact-share", type: "interiorCta", props: {
+  { id: "decor-contact-share", type: "interiorCta", settings: {
     subtitle: "CURABITUR ALIQUET QUAM POSUERE", title: "Do You Like the Theme? Share With Your Friends!",
   }},
 ];
 
-export const DECOR_BLOG_PAGE_BLOCKS: TemplateBlock[] = [
-  { id: "decor-blog-title", type: "interiorSectionTitle", props: { title: "Woodmart Blog" } },
-  { id: "decor-blog-posts", type: "interiorBlogPosts", props: {
+export const DECOR_BLOG_PAGE_BLOCKS: EditorNode[] = [
+  { id: "decor-blog-title", type: "interiorSectionTitle", settings: { title: "Woodmart Blog" } },
+  { id: "decor-blog-posts", type: "interiorBlogPosts", settings: {
     sectionTitle: "", columns: 2,
     posts: [
       { title: "Seating collection inspiration by modern", date: "23 Jul", category: "Design trends, Furniture", author: "S. Rogers", excerpt: "Ac haca ullamcorper donec ante habi tasse donec imperdiet eturpis varius per a augue magna hac. Nec ...", image: "https://woodmart.xtemos.com/wp-content/uploads/2016/07/blog-grid-9.jpg", link: "#" },
@@ -126,7 +126,7 @@ export const DECOR_BLOG_PAGE_BLOCKS: TemplateBlock[] = [
   }},
 ];
 
-export const DECOR_SHOP_PAGE_BLOCKS: TemplateBlock[] = [
-  { id: "decor-shop-title", type: "interiorSectionTitle", props: { title: "Shop" } },
-  { id: "decor-shop-products", type: "interiorProductGrid", props: { columns: 4, maxProducts: 12 } },
+export const DECOR_SHOP_PAGE_BLOCKS: EditorNode[] = [
+  { id: "decor-shop-title", type: "interiorSectionTitle", settings: { title: "Shop" } },
+  { id: "decor-shop-products", type: "interiorProductGrid", settings: { columns: 4, maxProducts: 12 } },
 ];

@@ -13,6 +13,8 @@ import { HARDWARE_ABOUT_PAGE_BLOCKS, HARDWARE_CONTACT_PAGE_BLOCKS, HARDWARE_BLOG
 import { TOOLS_ABOUT_PAGE_BLOCKS, TOOLS_CONTACT_PAGE_BLOCKS, TOOLS_BLOG_PAGE_BLOCKS } from "./presets/tools-page-presets";
 import { ELECTRONICS_ABOUT_PAGE_BLOCKS, ELECTRONICS_CONTACT_PAGE_BLOCKS, ELECTRONICS_BLOG_PAGE_BLOCKS, ELECTRONICS_SHOP_PAGE_BLOCKS } from "./presets/electronics-page-presets";
 import { DECOR_ABOUT_PAGE_BLOCKS, DECOR_CONTACT_PAGE_BLOCKS, DECOR_BLOG_PAGE_BLOCKS, DECOR_SHOP_PAGE_BLOCKS } from "./presets/decor-page-presets";
+import { parsePageContent } from "@/lib/page-content";
+import { buildTemplatePageContent } from "./template-tree";
 import { ACCESSORIES_ABOUT_PAGE_BLOCKS, ACCESSORIES_CONTACT_PAGE_BLOCKS, ACCESSORIES_BLOG_PAGE_BLOCKS, ACCESSORIES_SHOP_PAGE_BLOCKS, ACCESSORIES_FAQS_PAGE_BLOCKS } from "./presets/accessories-page-presets";
 import { KIDS_ABOUT_PAGE_BLOCKS, KIDS_CONTACT_PAGE_BLOCKS, KIDS_BLOG_PAGE_BLOCKS, KIDS_SHOP_PAGE_BLOCKS } from "./presets/kids-page-presets";
 import { TOYS_ABOUT_PAGE_BLOCKS, TOYS_CONTACT_PAGE_BLOCKS, TOYS_BLOG_PAGE_BLOCKS, TOYS_SHOP_PAGE_BLOCKS, TOYS_FAQS_PAGE_BLOCKS } from "./presets/toys-page-presets";
@@ -322,6 +324,7 @@ export async function ensureTemplatePages(siteId: string, templateSlug: string, 
 
   for (const page of pages) {
     const defaultContent = contentMap[page.slug] || [];
+    const normalizedContent = buildTemplatePageContent(defaultContent);
     const existing = await prisma.page.findUnique({
       where: { siteId_slug: { siteId, slug: page.slug } },
       select: { content: true },
@@ -329,16 +332,17 @@ export async function ensureTemplatePages(siteId: string, templateSlug: string, 
 
     if (existing) {
       // If page exists but has empty content, seed the default blocks
-      const hasContent = Array.isArray(existing.content)
-        ? (existing.content as unknown[]).length > 0
-        : existing.content && typeof existing.content === "object" && Array.isArray((existing.content as any).blocks)
-          ? ((existing.content as any).blocks as unknown[]).length > 0
-          : false;
+      const parsedContent = parsePageContent(existing.content);
+      const parsedElements = Array.isArray(parsedContent.elements) ? parsedContent.elements : [];
+      const hasContent =
+        parsedElements.length > 0 ||
+        parsedContent.blocks.length > 0 ||
+        Object.keys(parsedContent.settings || {}).length > 0;
 
-      if ((!hasContent && defaultContent.length > 0) || forceUpdate) {
+      if (!hasContent && defaultContent.length > 0) {
         await prisma.page.update({
           where: { siteId_slug: { siteId, slug: page.slug } },
-          data: { content: { blocks: defaultContent } as any },
+          data: { content: normalizedContent as any },
         });
       }
     } else {
@@ -347,8 +351,8 @@ export async function ensureTemplatePages(siteId: string, templateSlug: string, 
           siteId,
           title: page.title,
           slug: page.slug,
-          type: page.type,
-          content: { blocks: defaultContent } as any,
+          type: page.type as any,
+          content: normalizedContent as any,
           isPublished: true,
           position: page.position,
         },

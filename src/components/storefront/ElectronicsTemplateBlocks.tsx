@@ -5,6 +5,10 @@ import { resolveStoreLink, resolveFooterLink } from "@/lib/template-link-utils";
 import { toggleCompare as toggleCompareItem } from "@/lib/compare-utils";
 import { useState, useEffect, useRef, useCallback, createContext, useContext, useMemo } from "react";
 import { safeSrc, onImgError } from "./image-fallback";
+import { useEditorStore } from "@/lib/visual-editor/store";
+import type { EditorNode } from "@/lib/visual-editor/node-tree";
+import { normalizeObjectArray, resolveNestedNodeText, toDisplayText } from "@/components/storefront/prop-normalizers";
+import { InlineEditableText } from "@/components/storefront/InlineEditableText";
 
 /* ═══════════════════════════════════════════════════════════════
    ELECTRONICS TEMPLATE BLOCKS
@@ -101,6 +105,37 @@ function useCurrencySymbol() {
   return currencySymbols[currency] || currency;
 }
 
+function selectEditorNode(nodeId: string) {
+  useEditorStore.getState().setSelectedElementId(nodeId);
+}
+
+function getNodeText(node: EditorNode, keys: string[], fallback = ""): string {
+  return resolveNestedNodeText(node, keys, fallback);
+}
+
+function normalizeBlogDate(date: unknown): { day: string; month: string } | null {
+  if (!date) return null;
+  if (typeof date === "object" && date !== null) {
+    const maybeDate = date as { day?: unknown; month?: unknown };
+    const day = typeof maybeDate.day === "string" || typeof maybeDate.day === "number" ? String(maybeDate.day) : "";
+    const month = typeof maybeDate.month === "string" || typeof maybeDate.month === "number" ? String(maybeDate.month) : "";
+    return day || month ? { day, month } : null;
+  }
+  if (typeof date === "string") {
+    const parts = date.trim().split(/\s+/).filter(Boolean);
+    if (parts.length === 0) return null;
+    const [first, second] = parts;
+    if (/^\d+$/.test(first || "")) {
+      return { day: first, month: second || "" };
+    }
+    if (/^\d+$/.test(second || "")) {
+      return { day: second, month: first || "" };
+    }
+    return { day: first, month: second || "" };
+  }
+  return null;
+}
+
 function useFixLink() {
   const ctx = useContext(ElectronicsStoreContext);
   return (link: string) => resolveStoreLink(link, ctx?.storeSlug);
@@ -114,9 +149,11 @@ export interface ElectronicsSectionTitleProps {
   title: string;
   align?: "left" | "center" | "right";
   showLine?: boolean;
+  blockId?: string;
+  isEditor?: boolean;
 }
 
-export function ElectronicsSectionTitle({ title, align = "center", showLine = true }: ElectronicsSectionTitleProps) {
+export function ElectronicsSectionTitle({ title, align = "center", showLine = true, blockId, isEditor = false }: ElectronicsSectionTitleProps) {
   const scopedCss = `
     .est-wrapper { margin-bottom: 25px; text-align: ${align}; }
     .est-title {
@@ -136,9 +173,14 @@ export function ElectronicsSectionTitle({ title, align = "center", showLine = tr
   return (
     <div className="est-wrapper">
       <ScopedStyles id="section-title" css={scopedCss} />
-      <h4 className={`est-title ${showLine ? "est-lined" : ""} ${align !== "center" ? `est-${align}` : ""}`}>
-        {title}
-      </h4>
+      <InlineEditableText
+        nodeId={blockId}
+        field="title"
+        value={title}
+        isEditor={isEditor}
+        as="h4"
+        className={`est-title ${showLine ? "est-lined" : ""} ${align !== "center" ? `est-${align}` : ""}`}
+      />
     </div>
   );
 }
@@ -165,13 +207,38 @@ export interface ElectronicsHeroSliderProps {
   slides: ElectronicsHeroSlide[];
   autoplaySpeed?: number;
   minHeight?: string;
+  elements?: EditorNode[];
+  isEditor?: boolean;
+  blockId?: string;
 }
 
-export function ElectronicsHeroSlider({ slides, autoplaySpeed = 5000, minHeight = "500px" }: ElectronicsHeroSliderProps) {
+export function ElectronicsHeroSlider({ slides, autoplaySpeed = 5000, minHeight = "500px", elements = [], isEditor = false }: ElectronicsHeroSliderProps) {
   const fixLink = useFixLink();
   const [current, setCurrent] = useState(0);
   const [isTransitioning, setIsTransitioning] = useState(false);
   const timerRef = useRef<ReturnType<typeof setInterval> | null>(null);
+
+  const slidesFromNodes = elements.length > 0 ? elements.map((node) => {
+    const settings = node?.settings && typeof node.settings === "object" ? (node.settings as Record<string, unknown>) : {};
+    return {
+      subtitle: getNodeText(node, ["subtitle"], ""),
+      titleLine1: getNodeText(node, ["titleLine1", "title"], "Title"),
+      titleLine2: getNodeText(node, ["titleLine2"], ""),
+      description: getNodeText(node, ["description", "text"], ""),
+      buttonText: getNodeText(node, ["buttonText"], "Shop Now"),
+      buttonLink: getNodeText(node, ["buttonLink", "link", "href"], "#"),
+      backgroundImage: getNodeText(node, ["backgroundImage", "imageUrl"], ""),
+      backgroundColor: typeof settings.backgroundColor === "string"
+        ? settings.backgroundColor
+        : undefined,
+      backgroundFit: settings.backgroundFit === "contain" ? "contain" : "cover",
+      textPosition: settings.textPosition === "center" || settings.textPosition === "right"
+        ? settings.textPosition as "center" | "right"
+        : "left",
+      colorScheme: settings.colorScheme === "light" ? "light" : "dark",
+    };
+  }) : [];
+  const activeSlides = slidesFromNodes.length > 0 ? slidesFromNodes : slides;
 
   const goTo = useCallback((idx: number) => {
     if (isTransitioning) return;
@@ -181,12 +248,12 @@ export function ElectronicsHeroSlider({ slides, autoplaySpeed = 5000, minHeight 
   }, [isTransitioning]);
 
   useEffect(() => {
-    if (slides.length <= 1) return;
+    if (activeSlides.length <= 1) return;
     timerRef.current = setInterval(() => {
-      setCurrent(prev => (prev + 1) % slides.length);
+      setCurrent(prev => (prev + 1) % activeSlides.length);
     }, autoplaySpeed);
     return () => { if (timerRef.current) clearInterval(timerRef.current); };
-  }, [slides.length, autoplaySpeed]);
+  }, [activeSlides.length, autoplaySpeed]);
 
   const scopedCss = `
     .ehs-slider { position: relative; width: 100%; overflow: hidden; background: #f2f2f2; }
@@ -258,7 +325,87 @@ export function ElectronicsHeroSlider({ slides, autoplaySpeed = 5000, minHeight 
   return (
     <div className="ehs-slider" style={{ minHeight }}>
       <ScopedStyles id="ehs-hero" css={scopedCss} />
-      {slides.map((slide, i) => {
+      {isEditor && activeSlides.length > 0 ? (
+        <div style={{ ...containerStyle, paddingTop: 32, paddingBottom: 32 }}>
+          <div style={{ display: "grid", gap: 20 }}>
+            {activeSlides.map((slide, i) => {
+              const node = elements[i];
+              const selectableId = node?.id;
+              return (
+                <div
+                  key={selectableId || i}
+                  data-editor-node-id={selectableId}
+                  onClick={(e) => {
+                    if (!selectableId) return;
+                    e.stopPropagation();
+                    selectEditorNode(selectableId);
+                  }}
+                  style={{
+                    position: "relative",
+                    border: "1px dashed rgba(37, 99, 235, 0.28)",
+                    background: slide.backgroundColor || "#f5f5f5",
+                    padding: 24,
+                    minHeight: 180,
+                    cursor: selectableId ? "pointer" : "default",
+                    display: "grid",
+                    gap: 10,
+                  }}
+                >
+                  <div style={{ opacity: 0.65, fontSize: 12, textTransform: "uppercase", letterSpacing: "0.08em" }}>
+                    Slide {i + 1}
+                  </div>
+                  <InlineEditableText
+                    nodeId={node?.id}
+                    field="subtitle"
+                    value={slide.subtitle || "Subtitle"}
+                    isEditor={isEditor}
+                    as="div"
+                    className="font-[inherit]"
+                    style={{ fontFamily: TOKENS.bodyFont, fontWeight: 700 }}
+                  />
+                  <InlineEditableText
+                    nodeId={node?.id}
+                    field="titleLine1"
+                    value={slide.titleLine1 || "Title line 1"}
+                    isEditor={isEditor}
+                    as="div"
+                    className="font-[inherit]"
+                    style={{ fontFamily: TOKENS.titleFont, fontSize: 28, lineHeight: 1.2 }}
+                  />
+                  <InlineEditableText
+                    nodeId={node?.id}
+                    field="titleLine2"
+                    value={slide.titleLine2 || ""}
+                    isEditor={isEditor}
+                    as="div"
+                    className="font-[inherit]"
+                    style={{ fontFamily: TOKENS.titleFont, fontSize: 28, lineHeight: 1.2 }}
+                  />
+                  <InlineEditableText
+                    nodeId={node?.id}
+                    field="description"
+                    value={slide.description || "Description text"}
+                    isEditor={isEditor}
+                    as="div"
+                    multiline
+                    className="font-[inherit]"
+                    style={{ maxWidth: 720, color: TOKENS.textColor }}
+                  />
+                  <InlineEditableText
+                    nodeId={node?.id}
+                    field="buttonText"
+                    value={slide.buttonText || "Button"}
+                    isEditor={isEditor}
+                    as="div"
+                    className="font-[inherit]"
+                    style={{ fontWeight: 700, textDecoration: "underline" }}
+                  />
+                </div>
+              );
+            })}
+          </div>
+        </div>
+      ) : activeSlides.map((slide, i) => {
         const scheme = slide.colorScheme || "dark";
         const align = slide.textPosition || "left";
         return (
@@ -269,12 +416,52 @@ export function ElectronicsHeroSlider({ slides, autoplaySpeed = 5000, minHeight 
                 <div style={{ maxWidth: align === "center" ? "65%" : "50%", margin: align === "center" ? "0 auto" : align === "right" ? "0 0 0 auto" : "0", padding: "40px 0" }}>
                   {i === current && (
                     <>
-                      <div className={`ehs-subtitle ${scheme === "light" ? "ehs-subtitle-light" : ""} ehs-anim-in`} style={{ animationDelay: "0.2s" }}>{slide.subtitle}</div>
-                      <div className={`ehs-title ehs-title-${scheme} ehs-anim-in`} style={{ animationDelay: "0.3s" }}>{slide.titleLine1}</div>
-                      <div className={`ehs-title ehs-title-${scheme} ehs-anim-in`} style={{ animationDelay: "0.4s" }}>{slide.titleLine2}</div>
-                      <div className={`ehs-desc ehs-desc-${scheme} ehs-anim-in`} style={{ animationDelay: "0.5s" }}>{slide.description}</div>
+                      <InlineEditableText
+                        nodeId={elements[i]?.id}
+                        field="subtitle"
+                        value={slide.subtitle}
+                        isEditor={isEditor}
+                        as="div"
+                        className={`ehs-subtitle ${scheme === "light" ? "ehs-subtitle-light" : ""} ehs-anim-in`}
+                        style={{ animationDelay: "0.2s" }}
+                      />
+                      <InlineEditableText
+                        nodeId={elements[i]?.id}
+                        field="titleLine1"
+                        value={slide.titleLine1}
+                        isEditor={isEditor}
+                        as="div"
+                        className={`ehs-title ehs-title-${scheme} ehs-anim-in`}
+                        style={{ animationDelay: "0.3s" }}
+                      />
+                      <InlineEditableText
+                        nodeId={elements[i]?.id}
+                        field="titleLine2"
+                        value={slide.titleLine2}
+                        isEditor={isEditor}
+                        as="div"
+                        className={`ehs-title ehs-title-${scheme} ehs-anim-in`}
+                        style={{ animationDelay: "0.4s" }}
+                      />
+                      <InlineEditableText
+                        nodeId={elements[i]?.id}
+                        field="description"
+                        value={slide.description}
+                        isEditor={isEditor}
+                        as="div"
+                        multiline
+                        className={`ehs-desc ehs-desc-${scheme} ehs-anim-in`}
+                        style={{ animationDelay: "0.5s" }}
+                      />
                       <div className="ehs-anim-in" style={{ animationDelay: "0.6s" }}>
-                        <Link href={fixLink(slide.buttonLink)} className="ehs-btn">{slide.buttonText}</Link>
+                        <InlineEditableText
+                          nodeId={elements[i]?.id}
+                          field="buttonText"
+                          value={slide.buttonText}
+                          isEditor={isEditor}
+                          as="span"
+                          className="ehs-btn"
+                        />
                       </div>
                     </>
                   )}
@@ -284,12 +471,12 @@ export function ElectronicsHeroSlider({ slides, autoplaySpeed = 5000, minHeight 
           </div>
         );
       })}
-      {slides.length > 1 && (
+      {activeSlides.length > 1 && !isEditor && (
         <>
-          <button className="ehs-nav ehs-nav-prev" onClick={() => goTo((current - 1 + slides.length) % slides.length)} aria-label="Previous">‹</button>
-          <button className="ehs-nav ehs-nav-next" onClick={() => goTo((current + 1) % slides.length)} aria-label="Next">›</button>
+          <button className="ehs-nav ehs-nav-prev" onClick={() => goTo((current - 1 + activeSlides.length) % activeSlides.length)} aria-label="Previous">‹</button>
+          <button className="ehs-nav ehs-nav-next" onClick={() => goTo((current + 1) % activeSlides.length)} aria-label="Next">›</button>
           <div className="ehs-dots">
-            {slides.map((_, i) => (
+            {activeSlides.map((_, i) => (
               <button key={i} className={`ehs-dot ${i === current ? "ehs-dot-active" : ""}`} onClick={() => goTo(i)} aria-label={`Slide ${i + 1}`} />
             ))}
           </div>
@@ -314,11 +501,12 @@ export interface ElectronicsPromoBanner {
 }
 
 export interface ElectronicsPromoBannersProps {
-  banners: ElectronicsPromoBanner[];
+  banners?: ElectronicsPromoBanner[];
 }
 
-export function ElectronicsPromoBanners({ banners }: ElectronicsPromoBannersProps) {
+export function ElectronicsPromoBanners({ banners = [] }: ElectronicsPromoBannersProps) {
   const fixLink = useFixLink();
+  const safeBanners = Array.isArray(banners) ? banners : [];
   const scopedCss = `
     .epb-section { padding: 30px 0; }
     .epb-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 30px; }
@@ -359,7 +547,7 @@ export function ElectronicsPromoBanners({ banners }: ElectronicsPromoBannersProp
       <ScopedStyles id="epb-banners" css={scopedCss} />
       <div className="epb-section">
         <div className="epb-grid">
-          {banners.map((b, i) => {
+          {safeBanners.map((b, i) => {
             const scheme = b.colorScheme || "dark";
             return (
               <div key={i} className={`epb-card epb-card-${scheme}`}>
@@ -386,17 +574,19 @@ export function ElectronicsPromoBanners({ banners }: ElectronicsPromoBannersProp
 
 export interface ElectronicsProductTabsProps {
   sectionTitle?: string;
-  tabs: Array<{ label: string; filter: string }>;
+  tabs?: Array<{ label: string; filter: string }>;
   columns?: number;
   maxProducts?: number;
 }
 
-export function ElectronicsProductTabs({ sectionTitle = "ELECTRONICS", tabs, columns = 4, maxProducts = 8 }: ElectronicsProductTabsProps) {
+export function ElectronicsProductTabs({ sectionTitle = "ELECTRONICS", tabs = [], columns = 4, maxProducts = 8 }: ElectronicsProductTabsProps) {
   const storeCtx = useContext(ElectronicsStoreContext);
   const [, setCompareState] = useState(false);
   const sym = useCurrencySymbol();
   const [activeTab, setActiveTab] = useState(0);
   const [page, setPage] = useState(0);
+  const safeTabs = Array.isArray(tabs) ? tabs : [];
+  const normalizedTabs = normalizeObjectArray<NonNullable<ElectronicsProductTabsProps["tabs"]>[number]>(safeTabs, []);
 
   const getFilteredProducts = (filter: string) => {
     if (!storeCtx?.products?.length) return [];
@@ -414,7 +604,7 @@ export function ElectronicsProductTabs({ sectionTitle = "ELECTRONICS", tabs, col
     return prods;
   };
 
-  const filteredProducts = getFilteredProducts(tabs[activeTab]?.filter || "all");
+  const filteredProducts = getFilteredProducts(normalizedTabs[activeTab]?.filter || "all");
   const totalPages = Math.ceil(filteredProducts.length / maxProducts);
   const displayProducts = filteredProducts.slice(page * maxProducts, (page + 1) * maxProducts);
 
@@ -490,7 +680,7 @@ export function ElectronicsProductTabs({ sectionTitle = "ELECTRONICS", tabs, col
         <div className="ept-header">
           <ElectronicsSectionTitle title={sectionTitle} showLine={true} />
           <div className="ept-tabs">
-            {tabs.map((tab, i) => (
+            {normalizedTabs.map((tab, i) => (
               <button key={i} className={`ept-tab ${i === activeTab ? "ept-tab-active" : ""}`} onClick={() => { setActiveTab(i); setPage(0); }}>
                 {tab.label}
               </button>
@@ -521,7 +711,7 @@ export function ElectronicsProductTabs({ sectionTitle = "ELECTRONICS", tabs, col
                       </div>
                     </div>
                     <div className="ept-info">
-                      {p.category && <div className="ept-cat">{p.category.name}</div>}
+                      {p.category && <div className="ept-cat">{toDisplayText(p.category, "")}</div>}
                       <h3 className="ept-name"><Link href={productLink}>{p.name}</Link></h3>
                       <div className="ept-price">
                         {p.compareAtPrice && <span className="ept-price-old">{sym}{p.compareAtPrice.toLocaleString()}</span>}
@@ -565,11 +755,12 @@ export interface ElectronicsBannerGridItem {
 }
 
 export interface ElectronicsBannerGridProps {
-  banners: ElectronicsBannerGridItem[];
+  banners?: ElectronicsBannerGridItem[];
 }
 
-export function ElectronicsBannerGrid({ banners }: ElectronicsBannerGridProps) {
+export function ElectronicsBannerGrid({ banners = [] }: ElectronicsBannerGridProps) {
   const fixLink = useFixLink();
+  const safeBanners = Array.isArray(banners) ? banners : [];
   // Expected: 4 banners in asymmetric grid: leftTall(4/12), middleTop(5/12), middleBottom(5/12), rightTall(3/12)
   const scopedCss = `
     .ebg-section { padding: 30px 0; }
@@ -619,7 +810,7 @@ export function ElectronicsBannerGrid({ banners }: ElectronicsBannerGridProps) {
       <ScopedStyles id="ebg-grid" css={scopedCss} />
       <div className="ebg-section">
         <div className="ebg-grid">
-          {banners.slice(0, 4).map((b, i) => {
+          {safeBanners.slice(0, 4).map((b, i) => {
             const scheme = b.colorScheme || "dark";
             return (
               <div key={i} className={`ebg-item ebg-item-${i}`}>
@@ -1024,9 +1215,11 @@ export interface ElectronicsBlogPostsProps {
   sectionTitle?: string;
   posts?: ElectronicsBlogPost[];
   columns?: number;
+  blockId?: string;
+  isEditor?: boolean;
 }
 
-export function ElectronicsBlogPosts({ sectionTitle = "INNOVATIVE GADGETS", posts: propPosts, columns = 3 }: ElectronicsBlogPostsProps) {
+export function ElectronicsBlogPosts({ sectionTitle = "INNOVATIVE GADGETS", posts: propPosts, columns = 3, blockId, isEditor = false }: ElectronicsBlogPostsProps) {
   const storeCtx = useContext(ElectronicsStoreContext);
   const [scroll, setScroll] = useState(0);
 
@@ -1094,25 +1287,29 @@ export function ElectronicsBlogPosts({ sectionTitle = "INNOVATIVE GADGETS", post
     <div style={containerStyle}>
       <ScopedStyles id="ebp-blog" css={scopedCss} />
       <div className="ebp-section">
-        <ElectronicsSectionTitle title={sectionTitle} />
+        <ElectronicsSectionTitle title={sectionTitle} blockId={blockId} isEditor={isEditor} />
         <div className="ebp-grid">
-          {displayPosts.map((p, i) => (
+          {displayPosts.map((p, i) => {
+            const normalizedDate = normalizeBlogDate((p as any).date);
+            return (
             <article key={i} className="ebp-card">
               <div className="ebp-img-wrap">
                 <img src={p.image} alt={p.title} className="ebp-img" loading="lazy"  onError={(e) => onImgError(e, p.title)} />
-                <div className="ebp-date-badge">
-                  <span className="ebp-date-day">{p.date.day}</span>
-                  <span className="ebp-date-month">{p.date.month}</span>
-                </div>
+                {normalizedDate && (
+                  <div className="ebp-date-badge">
+                    <span className="ebp-date-day">{normalizedDate.day}</span>
+                    <span className="ebp-date-month">{normalizedDate.month}</span>
+                  </div>
+                )}
                 <Link href={resolveStoreLink(p.link, storeCtx?.storeSlug)} style={{ position: "absolute", inset: 0, zIndex: 3 }} aria-label={p.title} />
               </div>
               <div className="ebp-content">
-                <span className="ebp-cat">{p.category}</span>
-                <h3 className="ebp-title"><Link href={p.link}>{p.title}</Link></h3>
+                <span className="ebp-cat">{toDisplayText(p.category, "")}</span>
+                <h3 className="ebp-title"><Link href={resolveStoreLink(p.link, storeCtx?.storeSlug)}>{p.title}</Link></h3>
                 <div className="ebp-meta">By {p.author}</div>
               </div>
             </article>
-          ))}
+          )})}
         </div>
         {posts.length > columns && (
           <div className="ebp-nav">
@@ -1146,9 +1343,10 @@ export function ElectronicsPartners({
   sectionTitle = "OUR PARTNERS",
   videoUrl = "https://www.youtube.com/watch?v=dQw4w9WgXcQ",
   videoThumbnail,
-  logos,
+  logos = [],
 }: ElectronicsPartnersProps) {
   const [playing, setPlaying] = useState(false);
+  const safeLogos = Array.isArray(logos) ? logos : [];
 
   const embedUrl = (() => {
     if (!videoUrl) return "";
@@ -1206,7 +1404,7 @@ export function ElectronicsPartners({
             )}
           </div>
           <div className="epr-logos">
-            {logos.map((logo, i) => (
+            {safeLogos.map((logo, i) => (
               <div key={i} className="epr-logo">
                 {logo.linkUrl ? (
                   <a href={logo.linkUrl} target="_blank" rel="noopener noreferrer" aria-label={logo.name}>
@@ -1250,11 +1448,28 @@ export interface ElectronicsAboutContentProps {
   paragraphs?: string[];
   buttons?: ElectronicsAboutContentButton[];
   credit?: string;
+  elements?: EditorNode[];
+  isEditor?: boolean;
+  blockId?: string;
 }
 
-export function ElectronicsAboutContent({ layout, subtitle, title, paragraphs = [], buttons = [], credit }: ElectronicsAboutContentProps) {
+export function ElectronicsAboutContent({ layout, subtitle, title, paragraphs = [], buttons = [], credit, elements = [], isEditor = false, blockId }: ElectronicsAboutContentProps) {
   const storeCtx = useContext(ElectronicsStoreContext);
   const fixLink = (link: string) => resolveStoreLink(link, storeCtx?.storeSlug);
+  const subtitleNode = elements.find((node) => node.type === "subtitle" || node.type === "heading");
+  const titleNode = elements.find((node) => node.type === "title" || node.type === "heading");
+  const paragraphNodes = elements.filter((node) => node.type === "paragraph" || node.type === "text" || node.type === "bodyText");
+  const buttonNodes = elements.filter((node) => node.type === "button");
+  const creditNode = elements.find((node) => node.type === "credit");
+  const resolvedSubtitle = subtitleNode ? getNodeText(subtitleNode, ["subtitle", "text", "title"], subtitle || "") : subtitle;
+  const resolvedTitle = titleNode ? getNodeText(titleNode, ["title", "text"], title || "") : title;
+  const resolvedParagraphs = paragraphNodes.length > 0 ? paragraphNodes.map((node) => getNodeText(node, ["text", "content", "paragraph"], "")) : paragraphs;
+  const resolvedButtons = buttonNodes.length > 0 ? buttonNodes.map((node) => ({
+    id: node.id,
+    text: getNodeText(node, ["text", "label", "title"], "Button"),
+    link: getNodeText(node, ["link", "href", "url"], "#"),
+  })) : buttons.map((btn, index) => ({ id: `btn-${index}`, ...btn }));
+  const resolvedCredit = creditNode ? getNodeText(creditNode, ["credit", "text"], credit || "") : credit;
   const scopedCss = `
     .eac-section { padding: 40px 15px; }
     .eac-subtitle { color: ${TOKENS.primaryColor}; text-transform: uppercase; font-weight: 600; font-size: 14px; font-family: ${TOKENS.bodyFont}; margin-bottom: 8px; }
@@ -1276,8 +1491,19 @@ export function ElectronicsAboutContent({ layout, subtitle, title, paragraphs = 
       <div className="eac-ctas-center">
         <style dangerouslySetInnerHTML={{ __html: scopedCss }} />
         <div className="eac-buttons" style={{ justifyContent: "center" }}>
-          {buttons.map((btn, i) => (
-            <Link key={i} href={fixLink(btn.link)} className={`eac-btn ${i === 0 ? "eac-btn-primary" : "eac-btn-secondary"}`}>
+          {resolvedButtons.map((btn, i) => (
+            <Link
+              key={btn.id || i}
+              href={fixLink(btn.link)}
+              className={`eac-btn ${i === 0 ? "eac-btn-primary" : "eac-btn-secondary"}`}
+              data-editor-node-id={btn.id}
+              onClick={(e) => {
+                if (!isEditor || !btn.id) return;
+                e.stopPropagation();
+                selectEditorNode(btn.id);
+              }}
+              style={isEditor && btn.id ? { outline: "1px dashed rgba(37, 99, 235, 0.35)", outlineOffset: "4px" } : undefined}
+            >
               {btn.text}
             </Link>
           ))}
@@ -1290,16 +1516,70 @@ export function ElectronicsAboutContent({ layout, subtitle, title, paragraphs = 
     <section className="eac-section">
       <style dangerouslySetInnerHTML={{ __html: scopedCss }} />
       <div style={containerSt}>
-        {subtitle && <div className="eac-subtitle">{subtitle}</div>}
-        {title && <h3 className="eac-title">{title}</h3>}
-        {paragraphs.map((p, i) => <p key={i} className="eac-paragraph">{p}</p>)}
-        {credit && <p className="eac-credit">{credit}</p>}
-        {buttons.length > 0 && (
+        {resolvedSubtitle && (
+          <InlineEditableText
+            nodeId={subtitleNode?.id || blockId}
+            field="subtitle"
+            value={resolvedSubtitle}
+            isEditor={isEditor}
+            as="div"
+            className="eac-subtitle"
+          />
+        )}
+        {resolvedTitle && (
+          <InlineEditableText
+            nodeId={titleNode?.id || blockId}
+            field="title"
+            value={resolvedTitle}
+            isEditor={isEditor}
+            as="h3"
+            className="eac-title"
+          />
+        )}
+        {resolvedParagraphs.map((p, i) => (
+          <InlineEditableText
+            key={paragraphNodes[i]?.id || i}
+            nodeId={paragraphNodes[i]?.id || blockId}
+            field={`paragraphs.${i}`}
+            value={p}
+            isEditor={isEditor}
+            as="p"
+            multiline
+            className="eac-paragraph"
+          />
+        ))}
+        {resolvedCredit && (
+          <InlineEditableText
+            nodeId={creditNode?.id || blockId}
+            field="credit"
+            value={resolvedCredit}
+            isEditor={isEditor}
+            as="p"
+            className="eac-credit"
+          />
+        )}
+        {resolvedButtons.length > 0 && (
           <div className="eac-buttons">
-            {buttons.map((btn, i) => (
-              <Link key={i} href={fixLink(btn.link)} className={`eac-btn ${i === 0 ? "eac-btn-primary" : "eac-btn-secondary"}`}>
-                {btn.text}
-              </Link>
+            {resolvedButtons.map((btn, i) => (
+              isEditor ? (
+                <InlineEditableText
+                  key={btn.id || i}
+                  nodeId={btn.id || blockId}
+                  field="text"
+                  value={btn.text}
+                  isEditor={isEditor}
+                  as="span"
+                  className={`eac-btn ${i === 0 ? "eac-btn-primary" : "eac-btn-secondary"}`}
+                />
+              ) : (
+                <Link
+                  key={btn.id || i}
+                  href={fixLink(btn.link)}
+                  className={`eac-btn ${i === 0 ? "eac-btn-primary" : "eac-btn-secondary"}`}
+                >
+                  {btn.text}
+                </Link>
+              )
             ))}
           </div>
         )}
@@ -1561,7 +1841,7 @@ export function ElectronicsOfficeLocations({ subtitle, title, description, offic
 
 export interface ElectronicsStoreVisitProps { subtitle?: string; title: string; address: string; buttonText?: string; buttonLink?: string; }
 
-export function ElectronicsStoreVisit({ subtitle, title, address, buttonText = "See More About", buttonLink = "#" }: ElectronicsStoreVisitProps) {
+export function ElectronicsStoreVisit({ subtitle, title, address, buttonText = "See More About", buttonLink = "#" , blockId, isEditor = false }: ElectronicsStoreVisitProps & { blockId?: string; isEditor?: boolean }) {
   const storeCtx = useContext(ElectronicsStoreContext);
   const fixLink = (link: string) => resolveStoreLink(link, storeCtx?.storeSlug);
   const scopedCss = `
@@ -1577,10 +1857,14 @@ export function ElectronicsStoreVisit({ subtitle, title, address, buttonText = "
     <section className="esv-section">
       <style dangerouslySetInnerHTML={{ __html: scopedCss }} />
       <div style={{ maxWidth: TOKENS.containerWidth, margin: "0 auto", padding: "0 15px" }}>
-        {subtitle && <div className="esv-subtitle">{subtitle}</div>}
-        <h2 className="esv-title">{title}</h2>
-        <p className="esv-address">{address}</p>
-        <Link href={fixLink(buttonLink)} className="esv-btn">{buttonText}</Link>
+        {subtitle && <InlineEditableText nodeId={blockId} field="subtitle" value={subtitle} isEditor={isEditor} as="div" className="esv-subtitle" />}
+        <InlineEditableText nodeId={blockId} field="title" value={title} isEditor={isEditor} as="h2" className="esv-title" />
+        <InlineEditableText nodeId={blockId} field="address" value={address} isEditor={isEditor} as="p" multiline className="esv-address" />
+        {isEditor ? (
+          <InlineEditableText nodeId={blockId} field="buttonText" value={buttonText} isEditor={isEditor} as="span" className="esv-btn" />
+        ) : (
+          <Link href={fixLink(buttonLink)} className="esv-btn">{buttonText}</Link>
+        )}
       </div>
     </section>
   );
@@ -1591,10 +1875,16 @@ export function ElectronicsStoreVisit({ subtitle, title, address, buttonText = "
    ═══════════════════════════════════════════════════════════════ */
 
 export interface ElectronicsFaqItem { question: string; answer: string; }
-export interface ElectronicsFaqAccordionProps { subtitle?: string; title?: string; items: ElectronicsFaqItem[]; }
+export interface ElectronicsFaqAccordionProps { subtitle?: string; title?: string; items: ElectronicsFaqItem[]; elements?: EditorNode[]; isEditor?: boolean; blockId?: string; }
 
-export function ElectronicsFaqAccordion({ subtitle, title, items }: ElectronicsFaqAccordionProps) {
+export function ElectronicsFaqAccordion({ subtitle, title, items, elements = [], isEditor = false, blockId }: ElectronicsFaqAccordionProps) {
   const [openIdx, setOpenIdx] = useState<number | null>(null);
+  const itemsFromNodes = elements.length > 0 ? elements.map((node) => ({
+    id: node.id,
+    question: getNodeText(node, ["question", "title"], ""),
+    answer: getNodeText(node, ["answer", "text", "content"], ""),
+  })) : [];
+  const activeItems = itemsFromNodes.length > 0 ? itemsFromNodes : items;
   const scopedCss = `
     .efa-section { padding: 60px 15px; }
     .efa-header { margin-bottom: 30px; }
@@ -1610,8 +1900,8 @@ export function ElectronicsFaqAccordion({ subtitle, title, items }: ElectronicsF
     <section className="efa-section">
       <style dangerouslySetInnerHTML={{ __html: scopedCss }} />
       <div style={{ maxWidth: TOKENS.containerWidth, margin: "0 auto", padding: "0 15px" }}>
-        {(subtitle || title) && <div className="efa-header">{subtitle && <div className="efa-subtitle">{subtitle}</div>}{title && <h3 className="efa-title">{title}</h3>}</div>}
-        {items.map((item, i) => <div key={i} className="efa-item"><button className="efa-question" onClick={() => setOpenIdx(openIdx === i ? null : i)}><span>{item.question}</span><span className={`efa-arrow ${openIdx === i ? "efa-arrow-open" : ""}`}>&#9660;</span></button>{openIdx === i && <div className="efa-answer">{item.answer}</div>}</div>)}
+        {(subtitle || title) && <div className="efa-header">{subtitle && <InlineEditableText nodeId={blockId} field="subtitle" value={subtitle} isEditor={isEditor} as="div" className="efa-subtitle" />}{title && <InlineEditableText nodeId={blockId} field="title" value={title} isEditor={isEditor} as="h3" className="efa-title" />}</div>}
+        {activeItems.map((item, i) => <div key={(item as any).id || i} className="efa-item"><button className="efa-question" onClick={() => setOpenIdx(openIdx === i ? null : i)}><InlineEditableText nodeId={(item as any).id || blockId} field="question" value={item.question} isEditor={isEditor} as="span" /><span className={`efa-arrow ${openIdx === i ? "efa-arrow-open" : ""}`}>&#9660;</span></button>{openIdx === i && <InlineEditableText nodeId={(item as any).id || blockId} field="answer" value={item.answer} isEditor={isEditor} as="div" multiline className="efa-answer" />}</div>)}
       </div>
     </section>
   );
@@ -1621,9 +1911,9 @@ export function ElectronicsFaqAccordion({ subtitle, title, items }: ElectronicsF
    ELECTRONICS CONTACT FORM
    ═══════════════════════════════════════════════════════════════ */
 
-export interface ElectronicsContactFormProps { subtitle?: string; title?: string; fields?: string[]; }
+export interface ElectronicsContactFormProps { subtitle?: string; title?: string; fields?: string[]; blockId?: string; isEditor?: boolean; }
 
-export function ElectronicsContactForm({ subtitle, title, fields = ["name", "email", "phone", "company", "message"] }: ElectronicsContactFormProps) {
+export function ElectronicsContactForm({ subtitle, title, fields = ["name", "email", "phone", "company", "message"], blockId, isEditor = false }: ElectronicsContactFormProps) {
   const labels: Record<string, string> = { name: "Your Name", email: "Your Email", phone: "Phone Number", company: "Company", message: "Your Message" };
   const scopedCss = `
     .ecf-section { padding: 60px 15px; }
@@ -1643,7 +1933,7 @@ export function ElectronicsContactForm({ subtitle, title, fields = ["name", "ema
     <section className="ecf-section">
       <style dangerouslySetInnerHTML={{ __html: scopedCss }} />
       <div style={{ maxWidth: TOKENS.containerWidth, margin: "0 auto", padding: "0 15px" }}>
-        {(subtitle || title) && <div className="ecf-header">{subtitle && <div className="ecf-subtitle">{subtitle}</div>}{title && <h3 className="ecf-title">{title}</h3>}</div>}
+        {(subtitle || title) && <div className="ecf-header">{subtitle && <InlineEditableText nodeId={blockId} field="subtitle" value={subtitle} isEditor={isEditor} as="div" className="ecf-subtitle" />}{title && <InlineEditableText nodeId={blockId} field="title" value={title} isEditor={isEditor} as="h3" className="ecf-title" />}</div>}
         <form className="ecf-form" onSubmit={(e) => e.preventDefault()}>
           {fields.map((f) => f === "message" ? <textarea key={f} className="ecf-input ecf-textarea ecf-full" placeholder={labels[f] || f} /> : <input key={f} type={f === "email" ? "email" : "text"} className="ecf-input" placeholder={labels[f] || f} />)}
           <div className="ecf-full"><button type="submit" className="ecf-submit">Send Message</button></div>

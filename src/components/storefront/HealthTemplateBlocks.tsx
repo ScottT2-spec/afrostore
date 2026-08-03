@@ -6,6 +6,8 @@ import { HealthContactForm } from "./HealthContactForm";
 import { useState, useEffect, useRef, useCallback, createContext, useContext } from "react";
 import { safeSrc, onImgError } from "./image-fallback";
 import { useNewsletterSubscribe } from "@/hooks/useNewsletterSubscribe";
+import { toDisplayText } from "@/components/storefront/prop-normalizers";
+import { InlineEditableText } from "@/components/storefront/InlineEditableText";
 
 /* ═══════════════════════════════════════════════════════════════
    HEALTH (PILLS & SUPPLEMENTS) TEMPLATE BLOCKS
@@ -151,9 +153,9 @@ export function HealthHero({
       <div className="hh-hero-bg" style={{ backgroundImage: `url(${backgroundImage})` }} />
       <div style={containerStyle}>
         <div className="hh-hero-content">
-          <h1 className="hh-hero-title">{title}</h1>
-          <p className="hh-hero-sub">{subtitle}</p>
-          <Link href={fixLink(buttonLink)} className="hh-hero-btn">{buttonText}</Link>
+          <InlineEditableText as="h1" field="title" value={title} isEditor={true} className="hh-hero-title" />
+          <InlineEditableText as="p" field="subtitle" value={subtitle} isEditor={true} multiline className="hh-hero-sub" />
+          <Link href={fixLink(buttonLink)} className="hh-hero-btn"><InlineEditableText as="span" field="buttonText" value={buttonText} isEditor={true} selectNodeOnFocus={false} /></Link>
         </div>
       </div>
     </div>
@@ -212,7 +214,7 @@ export interface HealthPromoBannersProps {
   banners?: HealthPromoBanner[];
 }
 
-export function HealthPromoBanners({ banners }: HealthPromoBannersProps) {
+export function HealthPromoBanners({ banners = [] }: HealthPromoBannersProps) {
   const storeCtx = useContext(HealthStoreContext);
   const fixLink = (link: string) => resolveStoreLink(link, storeCtx?.storeSlug);
 
@@ -222,7 +224,7 @@ export function HealthPromoBanners({ banners }: HealthPromoBannersProps) {
     { image: `${IMG}/2024/03/w-pas-dropdown-banner-capsule.jpg`, title: "Capsules for Skin", description: "Supports an optimal sleep cycle", buttonLink: "#", colorScheme: "dark", height: "200px" },
   ];
 
-  const items = banners || defaultBanners;
+  const items = Array.isArray(banners) ? banners : defaultBanners;
 
   const css = `
     .hh-banners { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 50px; }
@@ -279,9 +281,9 @@ export function HealthSectionTitle({ subtitle, title, description, align = "cent
   return (
     <div style={{ ...containerStyle, textAlign: align, marginBottom: "30px" }}>
       <div style={{ maxWidth, margin: align === "center" ? "0 auto" : "0" }}>
-        {subtitle && <div style={{ fontFamily: TOKENS.bodyFont, fontSize: "14px", color: TOKENS.textColor, textTransform: "uppercase", letterSpacing: "1px", marginBottom: "8px" }}>{subtitle}</div>}
-        <h4 style={{ fontFamily: TOKENS.titleFont, fontWeight: 500, fontSize: titleSize, lineHeight: "1.3", color: TOKENS.titleColor, margin: "0 0 10px" }}>{title}</h4>
-        {description && <p style={{ fontFamily: TOKENS.bodyFont, fontSize: "16px", lineHeight: "26px", color: TOKENS.textColor, margin: 0 }}>{description}</p>}
+        {subtitle && <InlineEditableText as="div" field="subtitle" value={subtitle} isEditor={true} style={{ fontFamily: TOKENS.bodyFont, fontSize: "14px", color: TOKENS.textColor, textTransform: "uppercase", letterSpacing: "1px", marginBottom: "8px" }} />}
+        <InlineEditableText as="h4" field="title" value={title} isEditor={true} style={{ fontFamily: TOKENS.titleFont, fontWeight: 500, fontSize: titleSize, lineHeight: "1.3", color: TOKENS.titleColor, margin: "0 0 10px" }} />
+        {description && <InlineEditableText as="p" field="description" value={description} isEditor={true} multiline style={{ fontFamily: TOKENS.bodyFont, fontSize: "16px", lineHeight: "26px", color: TOKENS.textColor, margin: 0 }} />}
       </div>
     </div>
   );
@@ -304,7 +306,7 @@ export interface HealthCategoryCardsProps {
   marginBottom?: string;
 }
 
-export function HealthCategoryCards({ categories, columns = 4, sectionTitle = "Popular Categories", marginBottom = "80px" }: HealthCategoryCardsProps) {
+export function HealthCategoryCards({ categories = [], columns = 4, sectionTitle = "Popular Categories", marginBottom = "80px" }: HealthCategoryCardsProps) {
   const storeCtx = useContext(HealthStoreContext);
   const fixLink = (link?: string) => resolveStoreLink(link || "#", storeCtx?.storeSlug);
 
@@ -318,7 +320,7 @@ export function HealthCategoryCards({ categories, columns = 4, sectionTitle = "P
     { name: "Skin", image: `${IMG}/2023/08/w-pas-skin.jpg` },
     { name: "Sleep", image: `${IMG}/2023/08/w-pas-sleep.jpg` },
   ];
-  const items = categories || defaultCats;
+  const items = Array.isArray(categories) ? categories : defaultCats;
 
   const css = `
     .hh-cats { display: grid; gap: 20px; }
@@ -341,7 +343,7 @@ export function HealthCategoryCards({ categories, columns = 4, sectionTitle = "P
           <div key={i} className="hh-cat">
             <img className="hh-cat-img" src={cat.image} alt={cat.name}  onError={(e) => onImgError(e, cat.name)} />
             <div className="hh-cat-overlay" />
-            <h3 className="hh-cat-name">{cat.name}</h3>
+            <InlineEditableText as="h3" field={`categories.${i}.name`} value={cat.name} isEditor={true} className="hh-cat-name" />
             <Link href={fixLink(cat.link)} className="hh-cat-link" aria-label={cat.name} />
           </div>
         ))}
@@ -428,8 +430,8 @@ export function HealthProductGrid({
               )}
             </div>
             <div className="hh-prod-info">
-              {showCategory && <div className="hh-prod-cat">{p.category}</div>}
-              <h3 className="hh-prod-name"><Link href={fixLink(p.slug)}>{p.name}</Link></h3>
+              {showCategory && <div className="hh-prod-cat">{toDisplayText(p.category, "")}</div>}
+              <h3 className="hh-prod-name"><Link href={fixLink(p.slug)}><InlineEditableText as="span" field={`products.${p.id}.name`} value={p.name} isEditor={true} selectNodeOnFocus={false} /></Link></h3>
               <div className="hh-prod-stars">{renderStars(p.rating)}</div>
               <div className="hh-prod-price">${p.price}</div>
               <button className="hh-prod-btn" onClick={() => storeCtx?.addToCart?.(String(p.id))}>Add to cart</button>
@@ -464,8 +466,8 @@ export function HealthVideoSection({
         <source src={videoSrc} type="video/mp4" />
       </video>
       <div style={{ position: "absolute", inset: 0, background: "rgba(0,0,0,0.3)", display: "flex", alignItems: "center", justifyContent: "center", flexDirection: "column", padding: "40px", textAlign: "center" }}>
-        <h4 style={{ fontFamily: TOKENS.titleFont, fontWeight: 500, fontSize: "52px", lineHeight: "62px", color: "#fff", maxWidth: "535px", margin: "0 0 20px" }}>{title}</h4>
-        <p style={{ fontFamily: TOKENS.bodyFont, fontSize: "22px", lineHeight: "32px", color: "rgba(255,255,255,0.85)", maxWidth: "625px", margin: 0 }}>{subtitle}</p>
+        <InlineEditableText as="h4" field="title" value={title} isEditor={true} style={{ fontFamily: TOKENS.titleFont, fontWeight: 500, fontSize: "52px", lineHeight: "62px", color: "#fff", maxWidth: "535px", margin: "0 0 20px" }} />
+        <InlineEditableText as="p" field="subtitle" value={subtitle} isEditor={true} multiline style={{ fontFamily: TOKENS.bodyFont, fontSize: "22px", lineHeight: "32px", color: "rgba(255,255,255,0.85)", maxWidth: "625px", margin: 0 }} />
       </div>
     </div>
   );
@@ -530,8 +532,8 @@ export function HealthFeatureSection({
       <ScopedStyles id="features" css={css} />
       <div className="hh-feat">
         <div className="hh-feat-left">
-          <h4 className="hh-feat-title">{title}</h4>
-          <p className="hh-feat-desc">{subtitle}</p>
+          <InlineEditableText as="h4" field="title" value={title} isEditor={true} className="hh-feat-title" />
+          <InlineEditableText as="p" field="subtitle" value={subtitle} isEditor={true} multiline className="hh-feat-desc" />
           <div className="hh-feat-help">
             <img className="hh-feat-avatars" src={helpAvatars} alt="Support team"  onError={(e) => onImgError(e, "fallback")} />
             <div>
@@ -545,8 +547,8 @@ export function HealthFeatureSection({
             <div key={i} className="hh-feat-item">
               <img className="hh-feat-icon" src={f.icon} alt={f.title}  onError={(e) => onImgError(e, f.title)} />
               <div>
-                <h5 className="hh-feat-item-title">{f.title}</h5>
-                {f.description && <p className="hh-feat-item-desc">{f.description}</p>}
+                <InlineEditableText as="h5" field={`features.${i}.title`} value={f.title} isEditor={true} className="hh-feat-item-title" />
+                {f.description && <InlineEditableText as="p" field={`features.${i}.description`} value={f.description} isEditor={true} multiline className="hh-feat-item-desc" />}
               </div>
             </div>
           ))}
@@ -611,10 +613,10 @@ export function HealthTestimonials({
           {items.slice(0, 6).map((t, i) => (
             <div key={i} className="hh-testim-card">
               <div className="hh-testim-stars">{"★".repeat(t.rating || 5)}</div>
-              <p className="hh-testim-text">{t.text}</p>
+              <InlineEditableText as="p" field={`testimonials.${i}.text`} value={t.text} isEditor={true} multiline className="hh-testim-text" />
               <div className="hh-testim-author">
                 <img className="hh-testim-avatar" src={t.image} alt={t.name}  onError={(e) => onImgError(e, t.name)} />
-                <span className="hh-testim-name">{t.name}</span>
+                <InlineEditableText as="span" field={`testimonials.${i}.name`} value={t.name} isEditor={true} selectNodeOnFocus={false} className="hh-testim-name" />
               </div>
             </div>
           ))}
@@ -644,14 +646,14 @@ export interface HealthBlogPostsProps {
   marginBottom?: string;
 }
 
-export function HealthBlogPosts({ posts, columns = 3, sectionTitle, marginBottom = "60px" }: HealthBlogPostsProps) {
+export function HealthBlogPosts({ posts = [], columns = 3, sectionTitle, marginBottom = "60px" }: HealthBlogPostsProps) {
   const defaultPosts: HealthBlogPost[] = [
     { title: "What is fiber and why is it important for health?", image: `${IMG}/2023/09/w-pas-blog-1-400x247.jpg`, date: "September 5, 2023", author: "Admin", category: "Health" },
     { title: "5 ways to celebrate your mom on Mother's Day", image: `${IMG}/2023/09/w-pas-blog-2-400x247.jpg`, date: "September 4, 2023", author: "Admin", category: "Health" },
     { title: "Syncing Up for an Integrated Brain", image: `${IMG}/2023/09/w-pas-blog-3-400x247.jpg`, date: "September 4, 2023", author: "Admin", category: "Health" },
   ];
 
-  const items = posts || defaultPosts;
+  const items = Array.isArray(posts) ? posts : defaultPosts;
 
   const css = `
     .hh-blog-grid { display: grid; gap: 20px; }
@@ -680,7 +682,7 @@ export function HealthBlogPosts({ posts, columns = 3, sectionTitle, marginBottom
             </div>
             <div className="hh-blog-content">
               {post.category && <span className="hh-blog-cat">{post.category}</span>}
-              <h3 className="hh-blog-title">{post.title}</h3>
+              <InlineEditableText as="h3" field={`posts.${i}.title`} value={post.title} isEditor={true} className="hh-blog-title" />
               <div className="hh-blog-meta">by {post.author || "Admin"}</div>
             </div>
           </div>
@@ -726,8 +728,8 @@ export function HealthNewsletter({
     <div style={containerStyle}>
       <ScopedStyles id="newsletter" css={css} />
       <div className="hh-newsletter">
-        <h4 className="hh-nl-title">{title}</h4>
-        <p className="hh-nl-sub">{subtitle}</p>
+        <InlineEditableText as="h4" field="title" value={title} isEditor={true} className="hh-nl-title" />
+        <InlineEditableText as="p" field="subtitle" value={subtitle} isEditor={true} multiline className="hh-nl-sub" />
         {nlStatus === "success" ? (
           <p style={{ fontFamily: TOKENS.bodyFont, fontSize: "16px", color: TOKENS.primaryColor, marginTop: "20px" }}>Thanks for subscribing! 🎉</p>
         ) : (
@@ -935,7 +937,7 @@ export function HealthFooterFull({
   const storeCtx = useContext(HealthStoreContext);
   const slug = storeSlugProp || storeCtx?.storeSlug;
   const base = slug ? `/store/${slug}` : "/";
-  const activeSocials = socialLinks.filter(s => s.url && s.url !== "#");
+  const activeSocials = Array.isArray(socialLinks) ? socialLinks.filter(s => s.url && s.url !== "#") : [];
   const socialIcons: Record<string, string> = { facebook: "f", twitter: "𝕏", instagram: "📷", youtube: "▶", tiktok: "♪", whatsapp: "💬" };
 
   const css = `

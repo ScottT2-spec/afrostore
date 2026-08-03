@@ -1,48 +1,63 @@
-import type { TemplateBlock } from "@/components/storefront/TemplateBlockRenderer";
+import type { EditorNode } from "@/lib/visual-editor/node-tree";
 
 /**
  * Perfumes Template Preset
  * Recreates the WoodMart Perfumes demo layout with editable blocks.
  */
-export const PERFUMES_TEMPLATE_PRESET: TemplateBlock[] = [
+export const PERFUMES_TEMPLATE_PRESET: EditorNode[] = [
   {
     id: "perfumes-hero",
     type: "perfumesHeroSlider",
-    props: {
-      autoplaySpeed: 6000,
-      minHeight: "100vh",
-      slides: [
+          settings: {
+        autoplaySpeed: 6000,
+      minHeight: "100vh"
+      },
+      elements: [
         {
-          title: "Opus Essence",
-          bottleImage: "https://woodmart.xtemos.com/wp-content/uploads/2024/11/perfumes-slide-bottle-1.png",
-          backgroundColor: "#1a1a2e",
-          buttonText: "Buy now",
-          buttonLink: "/shop",
-          buttonStyle: "primary",
+          id: "perfumes-hero-slide-1",
+          type: "slide",
+          settings:           {
+            "title": "Opus Essence",
+            "bottleImage": "https://woodmart.xtemos.com/wp-content/uploads/2024/11/perfumes-slide-bottle-1.png",
+            "backgroundColor": "#1a1a2e",
+            "buttonText": "Buy now",
+            "buttonLink": "/shop",
+            "buttonStyle": "primary"
+          },
+          elements: [],
         },
         {
-          title: "New Fragrance in the Opus Essence",
-          bottleImage: "https://woodmart.xtemos.com/wp-content/uploads/2024/11/perfumes-slide-bottle-2.png",
-          backgroundColor: "#2d1b4e",
-          buttonText: "Buy now",
-          buttonLink: "/shop",
-          buttonStyle: "primary",
+          id: "perfumes-hero-slide-2",
+          type: "slide",
+          settings:           {
+            "title": "New Fragrance in the Opus Essence",
+            "bottleImage": "https://woodmart.xtemos.com/wp-content/uploads/2024/11/perfumes-slide-bottle-2.png",
+            "backgroundColor": "#2d1b4e",
+            "buttonText": "Buy now",
+            "buttonLink": "/shop",
+            "buttonStyle": "primary"
+          },
+          elements: [],
         },
         {
-          title: "Deep Fragrance With a Refined Intensity",
-          bottleImage: "https://woodmart.xtemos.com/wp-content/uploads/2024/11/perfumes-slide-bottle-3.png",
-          backgroundColor: "#0d1b2a",
-          buttonText: "Buy now",
-          buttonLink: "/shop",
-          buttonStyle: "black",
-        },
+          id: "perfumes-hero-slide-3",
+          type: "slide",
+          settings:           {
+            "title": "Deep Fragrance With a Refined Intensity",
+            "bottleImage": "https://woodmart.xtemos.com/wp-content/uploads/2024/11/perfumes-slide-bottle-3.png",
+            "backgroundColor": "#0d1b2a",
+            "buttonText": "Buy now",
+            "buttonLink": "/shop",
+            "buttonStyle": "black"
+          },
+          elements: [],
+        }
       ],
-    },
   },
   {
     id: "perfumes-new-in",
     type: "perfumesProductGrid",
-    props: {
+    settings: {
       columns: 3,
       maxProducts: 6,
       sectionTitle: "New In",
@@ -53,7 +68,7 @@ export const PERFUMES_TEMPLATE_PRESET: TemplateBlock[] = [
   {
     id: "perfumes-olfactory",
     type: "perfumesOlfactoryTags",
-    props: {
+    settings: {
       title: "Shop by Olfactory Family",
       tags: [
         { name: "Floral", link: "/shop" },
@@ -69,7 +84,7 @@ export const PERFUMES_TEMPLATE_PRESET: TemplateBlock[] = [
   {
     id: "perfumes-marquee",
     type: "perfumesMarquee",
-    props: {
+    settings: {
       items: ["Ember Glow", "Golden Veil", "Midnight Azure", "Nocturne Essence", "\u00c9theria"],
       speed: "45s",
     },
@@ -77,7 +92,7 @@ export const PERFUMES_TEMPLATE_PRESET: TemplateBlock[] = [
   {
     id: "perfumes-featured-banners",
     type: "perfumesFeaturedBanners",
-    props: {
+    settings: {
       banners: [
         {
           title: "Light Fragrance with a Silky Touch",
@@ -99,7 +114,7 @@ export const PERFUMES_TEMPLATE_PRESET: TemplateBlock[] = [
   {
     id: "perfumes-tabbed",
     type: "perfumesTabbedProducts",
-    props: {
+    settings: {
       title: "Promotional Offers",
       tabs: [
         { label: "All" },
@@ -114,7 +129,7 @@ export const PERFUMES_TEMPLATE_PRESET: TemplateBlock[] = [
   {
     id: "perfumes-collection-banners",
     type: "perfumesCollectionBanners",
-    props: {
+    settings: {
       sectionTitle: "Velours Noir SALE Collection",
       banners: [
         {
@@ -128,7 +143,7 @@ export const PERFUMES_TEMPLATE_PRESET: TemplateBlock[] = [
   {
     id: "perfumes-blog",
     type: "perfumesBlogArticles",
-    props: {
+    settings: {
       sectionTitle: "Journal Articles",
       columns: 5,
       posts: [],
@@ -137,7 +152,7 @@ export const PERFUMES_TEMPLATE_PRESET: TemplateBlock[] = [
   {
     id: "perfumes-instagram",
     type: "perfumesInstagram",
-    props: {
+    settings: {
       handle: "@xtemos.studio",
       handleLink: "https://www.instagram.com/",
       items: [],
@@ -145,7 +160,7 @@ export const PERFUMES_TEMPLATE_PRESET: TemplateBlock[] = [
   },
   {
     id: "perfumes-footer", type: "perfumesFooter",
-    props: {
+    settings: {
       storeName: "Perfumes",
       storeSlug: "perfumes",
       description: "Discover a curated collection of modern fragrances designed to hold memory, emotion, and identity in every bottle.",

@@ -11,24 +11,32 @@
  * - null/undefined/empty → fallback
  */
 
+const coerceLink = (link: unknown): string => {
+  if (typeof link === "string") return link;
+  if (typeof link === "number" || typeof link === "boolean") return String(link);
+  return "";
+};
+
 /** Resolve any link to a proper store-scoped path */
-export function resolveStoreLink(link: string | null | undefined, storeSlug: string | null | undefined): string {
+export function resolveStoreLink(link: unknown, storeSlug: string | null | undefined): string {
+  const normalized = coerceLink(link).trim();
+
   // External links pass through
-  if (link && (link.startsWith("http://") || link.startsWith("https://"))) return link;
+  if (normalized && (normalized.startsWith("http://") || normalized.startsWith("https://"))) return normalized;
 
   // Already resolved store links pass through
-  if (link && link.startsWith("/store/")) return link;
+  if (normalized && normalized.startsWith("/store/")) return normalized;
 
   // No store slug — can't resolve, return as-is or "#"
-  if (!storeSlug) return link || "#";
+  if (!storeSlug) return normalized || "#";
 
   const base = `/store/${storeSlug}`;
 
   // Null, empty, or "#" → shop page
-  if (!link || link === "#") return `${base}/shop`;
+   if (!normalized || normalized === "#") return `${base}/shop`;
 
   // Strip leading slash for uniform handling
-  const clean = link.startsWith("/") ? link.slice(1) : link;
+  const clean = normalized.startsWith("/") ? normalized.slice(1) : normalized;
 
   // Known route mappings
   const routeMap: Record<string, string> = {
@@ -70,16 +78,18 @@ export function resolveStoreLink(link: string | null | undefined, storeSlug: str
   // Any other relative path — prefix with store base
   if (!clean.startsWith("/")) return `${base}/${clean}`;
 
-  return `${base}${link}`;
+  return `${base}${normalized}`;
 }
 
 /** Resolve footer link URLs intelligently based on label text */
-export function resolveFooterLink(url: string | null | undefined, label: string, storeSlug: string | null | undefined): string {
+export function resolveFooterLink(url: unknown, label: string, storeSlug: string | null | undefined): string {
+  const normalized = coerceLink(url).trim();
+
   // External or already resolved
-  if (url && (url.startsWith("http://") || url.startsWith("https://") || url.startsWith("/store/"))) return url;
+  if (normalized && (normalized.startsWith("http://") || normalized.startsWith("https://") || normalized.startsWith("/store/"))) return normalized;
 
   // If url is valid (not "#" or empty), resolve normally
-  if (url && url !== "#") return resolveStoreLink(url, storeSlug);
+  if (normalized && normalized !== "#") return resolveStoreLink(normalized, storeSlug);
 
   // url is "#" or empty — try to infer from label
   if (!storeSlug) return "#";
