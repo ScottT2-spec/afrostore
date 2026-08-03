@@ -1,10 +1,11 @@
 import { prisma } from "@/lib/db";
 import { HANDMADE_BAGS_PAGE_BLOCKS } from "./presets/handmade-bags-pages";
 import { HEALTH_PAGE_BLOCKS } from "./presets/health-pages";
-import { COSMETICS_TERMS_BLOCKS, COSMETICS_SHOP_BLOCKS, COSMETICS_BLOG_BLOCKS, COSMETICS_ABOUT_BLOCKS, COSMETICS_CONTACT_BLOCKS } from "./presets/cosmetics-pages-preset";
+import { COSMETICS_TERMS_BLOCKS, COSMETICS_SHOP_BLOCKS, COSMETICS_BLOG_BLOCKS } from "./presets/cosmetics-pages-preset";
 import { TSHIRTS_PRINTS_ABOUT_PAGE_BLOCKS, TSHIRTS_PRINTS_CONTACT_PAGE_BLOCKS, TSHIRTS_PRINTS_BLOG_PAGE_BLOCKS } from "./presets/t-shirts-prints-page-presets";
 import { VEGETABLE_HOME_PAGE_BLOCKS, VEGETABLE_MENU_PAGE_BLOCKS, VEGETABLE_RECIPE_PAGE_BLOCKS, VEGETABLE_ABOUT_PAGE_BLOCKS, VEGETABLE_CONTACT_PAGE_BLOCKS, VEGETABLE_RESERVATION_PAGE_BLOCKS } from "./presets/vegetables-page-presets";
 import { PERFUMES_HOME_PAGE_BLOCKS, PERFUMES_ABOUT_PAGE_BLOCKS, PERFUMES_CONTACT_PAGE_BLOCKS, PERFUMES_FRAGRANCES_PAGE_BLOCKS, PERFUMES_JOURNAL_PAGE_BLOCKS, PERFUMES_REVIEWS_PAGE_BLOCKS } from "./presets/perfumes-page-presets";
+import { RETAIL_ABOUT_BLOCKS, RETAIL_CONTACT_BLOCKS, RETAIL_PROJECTS_BLOCKS, RETAIL_OUR_STORY_BLOCKS, RETAIL_REVIEWS_BLOCKS, RETAIL_PROJECT_DETAIL_BLOCKS } from "./presets/retail-pages";
 import { FASHION_ABOUT_PAGE_BLOCKS, FASHION_CONTACT_PAGE_BLOCKS, FASHION_BLOG_PAGE_BLOCKS, FASHION_SHOP_PAGE_BLOCKS } from "./presets/fashion-page-presets";
 import { FASHION_COLORED_ABOUT_PAGE_BLOCKS, FASHION_COLORED_CONTACT_PAGE_BLOCKS, FASHION_COLORED_BLOG_PAGE_BLOCKS, FASHION_COLORED_SHOP_PAGE_BLOCKS } from "./presets/fashion-colored-page-presets";
 import { BAKERY_ABOUT_PAGE_BLOCKS, BAKERY_CONTACT_PAGE_BLOCKS, BAKERY_BLOG_PAGE_BLOCKS, BAKERY_SHOP_PAGE_BLOCKS } from "./presets/bakery-page-presets";
@@ -12,8 +13,10 @@ import { HARDWARE_ABOUT_PAGE_BLOCKS, HARDWARE_CONTACT_PAGE_BLOCKS, HARDWARE_BLOG
 import { TOOLS_ABOUT_PAGE_BLOCKS, TOOLS_CONTACT_PAGE_BLOCKS, TOOLS_BLOG_PAGE_BLOCKS } from "./presets/tools-page-presets";
 import { ELECTRONICS_ABOUT_PAGE_BLOCKS, ELECTRONICS_CONTACT_PAGE_BLOCKS, ELECTRONICS_BLOG_PAGE_BLOCKS, ELECTRONICS_SHOP_PAGE_BLOCKS } from "./presets/electronics-page-presets";
 import { DECOR_ABOUT_PAGE_BLOCKS, DECOR_CONTACT_PAGE_BLOCKS, DECOR_BLOG_PAGE_BLOCKS, DECOR_SHOP_PAGE_BLOCKS } from "./presets/decor-page-presets";
+import { parsePageContent } from "@/lib/page-content";
+import { buildTemplatePageContent } from "./template-tree";
 import { ACCESSORIES_ABOUT_PAGE_BLOCKS, ACCESSORIES_CONTACT_PAGE_BLOCKS, ACCESSORIES_BLOG_PAGE_BLOCKS, ACCESSORIES_SHOP_PAGE_BLOCKS, ACCESSORIES_FAQS_PAGE_BLOCKS } from "./presets/accessories-page-presets";
-import { KIDS_ABOUT_PAGE_BLOCKS, KIDS_CONTACT_PAGE_BLOCKS, KIDS_BLOG_PAGE_BLOCKS } from "./presets/kids-pages-preset";
+import { KIDS_ABOUT_PAGE_BLOCKS, KIDS_CONTACT_PAGE_BLOCKS, KIDS_BLOG_PAGE_BLOCKS, KIDS_SHOP_PAGE_BLOCKS } from "./presets/kids-page-presets";
 import { TOYS_ABOUT_PAGE_BLOCKS, TOYS_CONTACT_PAGE_BLOCKS, TOYS_BLOG_PAGE_BLOCKS, TOYS_SHOP_PAGE_BLOCKS, TOYS_FAQS_PAGE_BLOCKS } from "./presets/toys-page-presets";
 import { MAKEUP_ABOUT_PAGE_BLOCKS, MAKEUP_CONTACT_PAGE_BLOCKS, MAKEUP_BLOG_PAGE_BLOCKS, MAKEUP_SHOP_PAGE_BLOCKS } from "./presets/makeup-page-presets";
 import { GROCERY_ABOUT_PAGE_BLOCKS, GROCERY_CONTACT_PAGE_BLOCKS, GROCERY_BLOG_PAGE_BLOCKS, GROCERY_SHOP_PAGE_BLOCKS } from "./presets/grocery-page-presets";
@@ -30,6 +33,7 @@ const KIDS_PAGES: PageDef[] = [
   { title: "About", slug: "about", type: "CUSTOM", position: 10 },
   { title: "Contact", slug: "contact", type: "CUSTOM", position: 11 },
   { title: "Blog", slug: "blog", type: "CUSTOM", position: 12 },
+  { title: "Shop", slug: "shop", type: "CUSTOM", position: 13 },
 ];
 
 const TOYS_PAGES: PageDef[] = [
@@ -60,8 +64,6 @@ const COSMETICS_PAGES: PageDef[] = [
   { title: "Shop", slug: "shop", type: "CUSTOM", position: 10 },
   { title: "Blog", slug: "blog", type: "CUSTOM", position: 11 },
   { title: "Terms", slug: "terms", type: "CUSTOM", position: 12 },
-  { title: "About Us", slug: "about", type: "CUSTOM", position: 13 },
-  { title: "Contact Us", slug: "contact", type: "CUSTOM", position: 14 },
 ];
 
 const FASHION_PAGES: PageDef[] = [
@@ -98,6 +100,7 @@ const HEALTH_PAGES: PageDef[] = [
   { title: "Contact Us", slug: "contact", type: "CUSTOM", position: 11 },
   { title: "Blog", slug: "blog", type: "CUSTOM", position: 12 },
   { title: "Ingredients", slug: "ingredients", type: "CUSTOM", position: 13 },
+  { title: "Medical Experts", slug: "medical-experts", type: "CUSTOM", position: 14 },
 ];
 
 const MAKEUP_PAGES: PageDef[] = [
@@ -128,6 +131,18 @@ const VEGETABLE_PAGES: PageDef[] = [
   { title: "Reservation", slug: "reservation", type: "CUSTOM", position: 14 },
 ];
 
+const RETAIL_PAGES: PageDef[] = [
+  { title: "About Us", slug: "about", type: "CUSTOM", position: 10 },
+  { title: "Contact Us", slug: "contact", type: "CUSTOM", position: 11 },
+  { title: "Projects", slug: "projects", type: "CUSTOM", position: 12 },
+  { title: "Our Story", slug: "our-story", type: "CUSTOM", position: 13 },
+  { title: "Reviews", slug: "reviews", type: "CUSTOM", position: 14 },
+  { title: "Look Deep Into Nature", slug: "project-look-deep-into-nature", type: "CUSTOM", position: 15 },
+  { title: "Just Living Is Not Enough", slug: "project-just-living-is-not-enough", type: "CUSTOM", position: 16 },
+  { title: "Adopt the pace of Nature", slug: "project-adopt-the-pace-of-nature", type: "CUSTOM", position: 17 },
+  { title: "Go Along With the Nature", slug: "project-go-along-with-nature", type: "CUSTOM", position: 18 },
+];
+
 /** Map of template slug → pages to ensure */
 const TEMPLATE_PAGE_MAP: Record<string, PageDef[]> = {
   kids: KIDS_PAGES,
@@ -148,12 +163,17 @@ const TEMPLATE_PAGE_MAP: Record<string, PageDef[]> = {
   tools: ELECTRONICS_PAGES,
   grocery: GROCERY_PAGES,
   vegetables: VEGETABLE_PAGES,
+
+  // your local version
+  retail: RETAIL_PAGES,
+
+  // from main
   decor: DECOR_PAGES,
-  retail: DECOR_PAGES,
   interior: DECOR_PAGES,
   "interior-design": DECOR_PAGES,
   "home-decor": DECOR_PAGES,
 };
+
 
 /** Map of template slug → default page block content (keyed by page slug) */
 export const TEMPLATE_PAGE_CONTENT_MAP: Record<string, Record<string, unknown[]>> = {
@@ -188,9 +208,7 @@ export const TEMPLATE_PAGE_CONTENT_MAP: Record<string, Record<string, unknown[]>
   cosmetics: {
     shop: COSMETICS_SHOP_BLOCKS,
     blog: COSMETICS_BLOG_BLOCKS,
-    terms: COSMETICS_TERMS_BLOCKS,
-    about: COSMETICS_ABOUT_BLOCKS,
-    contact: COSMETICS_CONTACT_BLOCKS,
+    terms: COSMETICS_TERMS_BLOCKS
   },
   "t-shirts-prints": {
     "about-us": TSHIRTS_PRINTS_ABOUT_PAGE_BLOCKS,
@@ -229,10 +247,23 @@ export const TEMPLATE_PAGE_CONTENT_MAP: Record<string, Record<string, unknown[]>
     journal: PERFUMES_JOURNAL_PAGE_BLOCKS,
     reviews: PERFUMES_REVIEWS_PAGE_BLOCKS,
   },
+
+  retail: {
+    about: RETAIL_ABOUT_BLOCKS,
+    contact: RETAIL_CONTACT_BLOCKS,
+    projects: RETAIL_PROJECTS_BLOCKS,
+    "our-story": RETAIL_OUR_STORY_BLOCKS,
+    reviews: RETAIL_REVIEWS_BLOCKS,
+    "project-look-deep-into-nature": RETAIL_PROJECT_DETAIL_BLOCKS["project-look-deep-into-nature"],
+    "project-just-living-is-not-enough": RETAIL_PROJECT_DETAIL_BLOCKS["project-just-living-is-not-enough"],
+    "project-adopt-the-pace-of-nature": RETAIL_PROJECT_DETAIL_BLOCKS["project-adopt-the-pace-of-nature"],
+    "project-go-along-with-nature": RETAIL_PROJECT_DETAIL_BLOCKS["project-go-along-with-nature"],
+  },
   kids: {
     about: KIDS_ABOUT_PAGE_BLOCKS,
     contact: KIDS_CONTACT_PAGE_BLOCKS,
     blog: KIDS_BLOG_PAGE_BLOCKS,
+    shop: KIDS_SHOP_PAGE_BLOCKS,
   },
   toys: {
     about: TOYS_ABOUT_PAGE_BLOCKS,
@@ -254,12 +285,6 @@ export const TEMPLATE_PAGE_CONTENT_MAP: Record<string, Record<string, unknown[]>
     shop: GROCERY_SHOP_PAGE_BLOCKS,
   },
   decor: {
-    about: DECOR_ABOUT_PAGE_BLOCKS,
-    contact: DECOR_CONTACT_PAGE_BLOCKS,
-    blog: DECOR_BLOG_PAGE_BLOCKS,
-    shop: DECOR_SHOP_PAGE_BLOCKS,
-  },
-  retail: {
     about: DECOR_ABOUT_PAGE_BLOCKS,
     contact: DECOR_CONTACT_PAGE_BLOCKS,
     blog: DECOR_BLOG_PAGE_BLOCKS,
@@ -299,6 +324,7 @@ export async function ensureTemplatePages(siteId: string, templateSlug: string, 
 
   for (const page of pages) {
     const defaultContent = contentMap[page.slug] || [];
+    const normalizedContent = buildTemplatePageContent(defaultContent);
     const existing = await prisma.page.findUnique({
       where: { siteId_slug: { siteId, slug: page.slug } },
       select: { content: true },
@@ -306,16 +332,17 @@ export async function ensureTemplatePages(siteId: string, templateSlug: string, 
 
     if (existing) {
       // If page exists but has empty content, seed the default blocks
-      const hasContent = Array.isArray(existing.content)
-        ? (existing.content as unknown[]).length > 0
-        : existing.content && typeof existing.content === "object" && Array.isArray((existing.content as any).blocks)
-          ? ((existing.content as any).blocks as unknown[]).length > 0
-          : false;
+      const parsedContent = parsePageContent(existing.content);
+      const parsedElements = Array.isArray(parsedContent.elements) ? parsedContent.elements : [];
+      const hasContent =
+        parsedElements.length > 0 ||
+        parsedContent.blocks.length > 0 ||
+        Object.keys(parsedContent.settings || {}).length > 0;
 
-      if ((!hasContent && defaultContent.length > 0) || forceUpdate) {
+      if (!hasContent && defaultContent.length > 0) {
         await prisma.page.update({
           where: { siteId_slug: { siteId, slug: page.slug } },
-          data: { content: { blocks: defaultContent } as any },
+          data: { content: normalizedContent as any },
         });
       }
     } else {
@@ -325,7 +352,7 @@ export async function ensureTemplatePages(siteId: string, templateSlug: string, 
           title: page.title,
           slug: page.slug,
           type: page.type as any,
-          content: { blocks: defaultContent } as any,
+          content: normalizedContent as any,
           isPublished: true,
           position: page.position,
         },

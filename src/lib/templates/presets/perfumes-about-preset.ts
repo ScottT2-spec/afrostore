@@ -1,12 +1,12 @@
-import type { TemplateBlock } from "@/components/storefront/TemplateBlockRenderer";
+import type { EditorNode } from "@/lib/visual-editor/node-tree";
 
 const IMG = "https://woodmart.xtemos.com/perfumes/wp-content/uploads/sites/32/2025/11";
 
-export const PERFUMES_ABOUT_PRESET: TemplateBlock[] = [
+export const PERFUMES_ABOUT_PRESET: EditorNode[] = [
   {
     id: "perfumes-about-welcome",
     type: "perfumesAboutWelcome",
-    props: {
+    settings: {
       title: "Welcome to Our Fragrances",
       text: "At our Fragrances, we believe that scent is more than just an aroma — it's an experience. Inspired by the richness of nature, we craft sophisticated fragrances that bring warmth, elegance, and personality to every moment. Our carefully curated collections blend the finest natural ingredients, creating timeless scents that leave a lasting impression.",
       image: `${IMG}/prf-about-us-1.jpg`,
@@ -15,14 +15,14 @@ export const PERFUMES_ABOUT_PRESET: TemplateBlock[] = [
   {
     id: "perfumes-about-marquee",
     type: "perfumesAboutMarquee",
-    props: {
+    settings: {
       items: ["Ethereal", "Sensory", "Signature"],
     },
   },
   {
     id: "perfumes-about-story",
     type: "perfumesAboutStory",
-    props: {
+    settings: {
       title: "Our Story",
       text: "The journey of our Fragrances began in a small family workshop in Provence, France. Founded by master perfumer Louis Beaumont in 1987, our brand was born from a passion for nature's raw beauty and the art of perfumery. Inspired by the rich scents of wood, earth, and blooming florals, Louis spent years perfecting his craft, blending rare ingredients to create signature fragrances. What started as a modest venture quickly grew into an internationally recognized brand, known for its commitment to quality, sustainability, and innovation. Today, our Fragrances continues this legacy, offering exquisite scents that transport you to a world of timeless elegance.",
       faqItems: [
@@ -37,7 +37,7 @@ export const PERFUMES_ABOUT_PRESET: TemplateBlock[] = [
   {
     id: "perfumes-about-why",
     type: "perfumesWhyChooseUs",
-    props: {
+    settings: {
       title: "Why Choose Us?",
       items: [
         { icon: `${IMG}/prf-infobox-1.svg`, title: "Natural Ingredients", desc: "We use responsibly sourced, high-quality natural ingredients for an authentic experience." },

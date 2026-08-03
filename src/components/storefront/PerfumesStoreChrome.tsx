@@ -3,6 +3,7 @@ import { useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { resolveStoreLink } from "@/lib/template-link-utils";
+import { normalizeSocialLinks } from "@/components/storefront/prop-normalizers";
 
 const T = {
   primary: "#242424",
@@ -196,6 +197,7 @@ export function PerfumesFooter({ storeName, storeSlug, logo, description, social
   `;
 
   const socialIcons: Record<string, string> = { facebook: "f", twitter: "𝕏", instagram: "📷", youtube: "▶", tiktok: "♪" };
+  const safeSocialLinks = normalizeSocialLinks(socialLinks);
   const instagramImages = [
     "https://woodmart.xtemos.com/perfumes/wp-content/uploads/sites/32/2025/11/prf-inst-1-300x300.jpg",
     "https://woodmart.xtemos.com/perfumes/wp-content/uploads/sites/32/2025/11/prf-inst-2-300x300.jpg",
@@ -220,7 +222,7 @@ export function PerfumesFooter({ storeName, storeSlug, logo, description, social
             <Link href={resolveStoreLink("/", storeSlug)} className="pff-logo-text">{storeName}</Link>
             <p className="pff-text">{description || "Discover a curated collection of luxurious fragrances crafted to bring elegance and personality to every moment."}</p>
             <div className="pff-social">
-              {socialLinks.length > 0 ? socialLinks.map((s, i) => (
+              {safeSocialLinks.length > 0 ? safeSocialLinks.map((s, i) => (
                 <a key={i} href={s.url} className="pff-social-icon" target="_blank" rel="noopener noreferrer" aria-label={s.platform}>{socialIcons[s.platform] || s.platform[0]?.toUpperCase()}</a>
               )) : (<><a href="#" className="pff-social-icon">f</a><a href="#" className="pff-social-icon">𝕏</a><a href="#" className="pff-social-icon">📷</a><a href="#" className="pff-social-icon">▶</a></>)}
             </div>

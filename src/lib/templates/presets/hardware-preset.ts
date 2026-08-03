@@ -1,4 +1,4 @@
-import type { TemplateBlock } from "@/components/storefront/TemplateBlockRenderer";
+import type { EditorNode } from "@/lib/visual-editor/node-tree";
 
 /**
  * Hardware Template Homepage Preset
@@ -6,51 +6,66 @@ import type { TemplateBlock } from "@/components/storefront/TemplateBlockRendere
  * Source: https://woodmart.xtemos.com/demo-hardware/?opt=hardware
  * Every section from the demo is represented here.
  */
-export const HARDWARE_TEMPLATE_PRESET: TemplateBlock[] = [
+export const HARDWARE_TEMPLATE_PRESET: EditorNode[] = [
   /* ── 1. Hero Slider ───────────────────────────────────── */
   {
     id: "hw-hero",
     type: "hardwareHomeHeroSlider",
-    props: {
-      autoplaySpeed: 5000,
-      slides: [
+          settings: {
+        autoplaySpeed: 5000
+      },
+      elements: [
         {
-          subtitleTop: "Asus Rog",
-          title: "MAXIMUS IX",
-          description: "Many desktop publishing packages and web page editors now use lorem ipsum as their default model text, and a search for lorem ipsum.",
-          buttonText: "Shop now",
-          buttonLink: "/shop",
-          price: "$499.00",
-          backgroundImage: "https://woodmart.xtemos.com/wp-content/uploads/2024/02/hardware-black-slide-1.jpg.webp",
+          id: "hw-hero-slide-1",
+          type: "slide",
+          settings:           {
+            "subtitleTop": "Asus Rog",
+            "title": "MAXIMUS IX",
+            "description": "Many desktop publishing packages and web page editors now use lorem ipsum as their default model text, and a search for lorem ipsum.",
+            "buttonText": "Shop now",
+            "buttonLink": "/shop",
+            "price": "$499.00",
+            "backgroundImage": "https://woodmart.xtemos.com/wp-content/uploads/2024/02/hardware-black-slide-1.jpg.webp"
+          },
+          elements: [],
         },
         {
-          subtitleTop: "Tensor Cores",
-          title: "NVIDIA TITAN V",
-          description: "Many desktop publishing packages and web page editors now use lorem ipsum as their default model text, and a search for lorem ipsum.",
-          buttonText: "Shop now",
-          buttonLink: "/shop",
-          secondaryButtonText: "View more",
-          secondaryButtonLink: "#",
-          backgroundImage: "https://woodmart.xtemos.com/wp-content/uploads/2024/02/hardware-black-slide-2.jpg.webp",
+          id: "hw-hero-slide-2",
+          type: "slide",
+          settings:           {
+            "subtitleTop": "Tensor Cores",
+            "title": "NVIDIA TITAN V",
+            "description": "Many desktop publishing packages and web page editors now use lorem ipsum as their default model text, and a search for lorem ipsum.",
+            "buttonText": "Shop now",
+            "buttonLink": "/shop",
+            "secondaryButtonText": "View more",
+            "secondaryButtonLink": "#",
+            "backgroundImage": "https://woodmart.xtemos.com/wp-content/uploads/2024/02/hardware-black-slide-2.jpg.webp"
+          },
+          elements: [],
         },
         {
-          subtitleTop: "ATX Mid-Tower",
-          title: "NZXT H440 CASE",
-          description: "Many desktop publishing packages and web page editors now use lorem ipsum as their default model text, and a search for lorem ipsum.",
-          buttonText: "Shop now",
-          buttonLink: "/shop",
-          price: "$299.00",
-          backgroundImage: "https://woodmart.xtemos.com/wp-content/uploads/2024/02/hardware-black-slide-3.jpg.webp",
-        },
+          id: "hw-hero-slide-3",
+          type: "slide",
+          settings:           {
+            "subtitleTop": "ATX Mid-Tower",
+            "title": "NZXT H440 CASE",
+            "description": "Many desktop publishing packages and web page editors now use lorem ipsum as their default model text, and a search for lorem ipsum.",
+            "buttonText": "Shop now",
+            "buttonLink": "/shop",
+            "price": "$299.00",
+            "backgroundImage": "https://woodmart.xtemos.com/wp-content/uploads/2024/02/hardware-black-slide-3.jpg.webp"
+          },
+          elements: [],
+        }
       ],
-    },
   },
 
   /* ── 2. Category Grid ─────────────────────────────────── */
   {
     id: "hw-categories",
     type: "hardwareHomeCategoryGrid",
-    props: {
+    settings: {
       categories: [
         { name: "Clocks", productCount: 12, image: "https://woodmart.xtemos.com/wp-content/uploads/2018/10/black-electronics-category-2-opt.jpg.webp", link: "/shop" },
         { name: "Lighting", productCount: 17, image: "https://woodmart.xtemos.com/wp-content/uploads/2018/10/black-electronics-category-5-opt.jpg.webp", link: "/shop" },
@@ -66,7 +81,7 @@ export const HARDWARE_TEMPLATE_PRESET: TemplateBlock[] = [
   {
     id: "hw-featured",
     type: "hardwareHomeFeaturedProducts",
-    props: {
+    settings: {
       sectionSubtitle: "The Takeover Is Complete",
       sectionTitle: "FEATURED PRODUCTS",
       sectionDescription: "There are many variations of passages of Lorem Ipsum available, but the majority have suffered alteration in some form, by injected.",
@@ -79,7 +94,7 @@ export const HARDWARE_TEMPLATE_PRESET: TemplateBlock[] = [
   {
     id: "hw-build-pc",
     type: "hardwareHomeBuildPC",
-    props: {
+    settings: {
       progressPercent: 0,
       subtitle: "Build Your",
       title: "NEW PC",
@@ -107,7 +122,7 @@ export const HARDWARE_TEMPLATE_PRESET: TemplateBlock[] = [
   {
     id: "hw-pricing",
     type: "hardwareHomePricingTable",
-    props: {
+    settings: {
       subtitle: "Play Like The Pros",
       title: "READY PC BUILDS",
       description: "There are many variations of passages of Lorem Ipsum available, but the majority have suffered alteration in some form, by injected.",
@@ -153,7 +168,7 @@ export const HARDWARE_TEMPLATE_PRESET: TemplateBlock[] = [
   {
     id: "hw-gear-up",
     type: "hardwareHomeGearUpCTA",
-    props: {
+    settings: {
       subtitle: "Gear Up",
       title: "THROW DOWN",
       description: "There are many variations of passages of Lorem Ipsum available, but the majority have suffered alteration in some form, by injected humour, or randomised words which don't look even slightly believable. If you are going to use a passage.",
@@ -170,7 +185,7 @@ export const HARDWARE_TEMPLATE_PRESET: TemplateBlock[] = [
   {
     id: "hw-custom-desktops",
     type: "hardwareHomeCustomDesktops",
-    props: {
+    settings: {
       subtitle: "Light On The Wallet",
       title: "CUSTOM DESKTOPS",
       description: "There are many variations of passages of Lorem Ipsum available, but the majority have suffered alteration in some form, by injected.",
@@ -207,7 +222,7 @@ export const HARDWARE_TEMPLATE_PRESET: TemplateBlock[] = [
   {
     id: "hw-gallery",
     type: "hardwareHomeGamingGallery",
-    props: {
+    settings: {
       subtitle: "Heavy On Power",
       title: "GAMING SETUP",
       description: "There are many variations of passages of Lorem Ipsum available, but the majority have suffered alteration in some form, by injected.",
@@ -228,7 +243,7 @@ export const HARDWARE_TEMPLATE_PRESET: TemplateBlock[] = [
   {
     id: "hw-testimonial",
     type: "hardwareHomeTestimonial",
-    props: {
+    settings: {
       subtitle: "POWER AND BEAUTY",
       title: "IN ONE CASE",
       description: "There are many variations of passages of Lorem Ipsum available, but the majority have suffered alteration in some form, by injected humour, or randomised words which don't look even.",
@@ -247,7 +262,7 @@ export const HARDWARE_TEMPLATE_PRESET: TemplateBlock[] = [
   {
     id: "hw-blog",
     type: "hardwareHomeLatestEvents",
-    props: {
+    settings: {
       subtitle: "Find Out Our",
       title: "LATEST EVENTS",
       description: "There are many variations of passages of Lorem Ipsum available, but the majority have suffered alteration in some form, by injected.",
@@ -301,7 +316,7 @@ export const HARDWARE_TEMPLATE_PRESET: TemplateBlock[] = [
   {
     id: "hw-newsletter",
     type: "hardwareHomeNewsletter",
-    props: {
+    settings: {
       subtitle: "CURABITUR ALIQUET QUAM POSUERE",
       title: "DO YOU LIKE THE THEME? SHARE WITH YOUR FRIENDS!",
       privacyText: "Will be used in accordance with our Privacy Policy",

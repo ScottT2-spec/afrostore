@@ -11,6 +11,7 @@ import { HandmadeBagsHeader, HandmadeBagsFooter } from "@/components/storefront/
 import { CosmeticsHeader, CosmeticsFooter } from "@/components/storefront/CosmeticsTemplateBlocks";
 import { KidsFontLoader, KidsFooterFull, KidsHeader } from "@/components/storefront/KidsTemplateBlocks";
 import { PerfumesFontLoader, PerfumesFooter, PerfumesHeader } from "@/components/storefront/PerfumesTemplateBlocks";
+import { HealthHeader, HealthFooterFull } from "@/components/storefront/HealthTemplateBlocks";
 import { TShirtsPrintsFooter, TShirtsPrintsHeader } from "@/components/storefront/TShirtsPrintsStoreChrome";
 
 /* ───────── Types ───────── */

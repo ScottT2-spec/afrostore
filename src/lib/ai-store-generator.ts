@@ -290,6 +290,7 @@ function buildHomePage(data: Record<string, any>, storeName: string, storeSlug: 
 
   // Inject AI-generated content into the template blocks
   for (const block of templateBlocks) {
+    const props = (block.props ||= {});
     switch (block.type) {
       case "aiAnnouncementBar": {
         // Use AI-generated features as marquee messages
@@ -297,12 +298,12 @@ function buildHomePage(data: Record<string, any>, storeName: string, storeSlug: 
           brand.tagline || `Welcome to ${storeName}`,
           ...(features.slice(0, 3).map((f: any) => f.title || f.desc)),
         ].filter(Boolean);
-        if (messages.length > 0) block.props.messages = messages;
+        if (messages.length > 0) props.messages = messages;
         break;
       }
       case "aiHeroVideo": {
         // Update hero buttons with store-specific links
-        block.props.buttons = [
+        props.buttons = [
           { text: brand.ctaText || "Shop Now", link: `/store/${storeSlug}/shop`, style: "primary" },
           { text: "Learn More", link: `/store/${storeSlug}/about`, style: "primary" },
         ];
@@ -310,7 +311,7 @@ function buildHomePage(data: Record<string, any>, storeName: string, storeSlug: 
       }
       case "aiCategoryRow": {
         // Update category card links to store-specific paths
-        for (const card of block.props.cards) {
+        for (const card of props.cards || []) {
           for (const btn of card.buttons) {
             if (btn.link.startsWith("/collections")) {
               btn.link = `/store/${storeSlug}/shop`;
@@ -321,7 +322,7 @@ function buildHomePage(data: Record<string, any>, storeName: string, storeSlug: 
       }
       case "aiLargeProductCarousel": {
         // Update product links
-        for (const tab of block.props.tabs) {
+        for (const tab of props.tabs || []) {
           for (const product of tab.products) {
             if (product.mensLink) product.mensLink = `/store/${storeSlug}/shop`;
             if (product.womensLink) product.womensLink = `/store/${storeSlug}/shop`;
@@ -332,7 +333,7 @@ function buildHomePage(data: Record<string, any>, storeName: string, storeSlug: 
       }
       case "aiPromoTiles": {
         // Update tile links
-        for (const tile of block.props.tiles) {
+        for (const tile of props.tiles || []) {
           for (const btn of tile.buttons) {
             if (btn.link.startsWith("/collections")) {
               btn.link = `/store/${storeSlug}/shop`;
@@ -343,7 +344,7 @@ function buildHomePage(data: Record<string, any>, storeName: string, storeSlug: 
       }
       case "aiProductCarousel": {
         // Update product card links
-        for (const tab of block.props.tabs) {
+        for (const tab of props.tabs || []) {
           for (const product of tab.products) {
             if (product.link) product.link = `/store/${storeSlug}/shop`;
           }
@@ -353,7 +354,7 @@ function buildHomePage(data: Record<string, any>, storeName: string, storeSlug: 
       case "aiValueProps": {
         // Inject AI-generated features into value props
         if (features.length >= 3) {
-          block.props.props = features.slice(0, 3).map((f: any) => ({
+          props.props = features.slice(0, 3).map((f: any) => ({
             title: f.title,
             description: f.desc,
           }));
@@ -362,8 +363,8 @@ function buildHomePage(data: Record<string, any>, storeName: string, storeSlug: 
       }
       case "aiFooter": {
         // Update footer links and copyright
-        block.props.copyrightText = `© ${new Date().getFullYear()} ${storeName}. All rights reserved.`;
-        for (const col of block.props.columns) {
+        props.copyrightText = `© ${new Date().getFullYear()} ${storeName}. All rights reserved.`;
+        for (const col of props.columns || []) {
           for (const link of col.links) {
             if (link.link.startsWith("/collections") || link.link === "/gift-cards") {
               link.link = `/store/${storeSlug}/shop`;

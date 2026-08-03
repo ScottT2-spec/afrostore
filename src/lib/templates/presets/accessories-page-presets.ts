@@ -1,4 +1,4 @@
-import type { TemplateBlock } from "@/components/storefront/TemplateBlockRenderer";
+import type { EditorNode } from "@/lib/visual-editor/node-tree";
 
 /**
  * Electronics Accessories Template Page Presets
@@ -6,8 +6,8 @@ import type { TemplateBlock } from "@/components/storefront/TemplateBlockRendere
  * https://woodmart.xtemos.com/accessories/
  */
 
-export const ACCESSORIES_ABOUT_PAGE_BLOCKS: TemplateBlock[] = [
-  { id: "acc-about-hero", type: "accessoriesAboutHero", props: {
+export const ACCESSORIES_ABOUT_PAGE_BLOCKS: EditorNode[] = [
+  { id: "acc-about-hero", type: "accessoriesAboutHero", settings: {
     subtitle: "Some words about us",
     title: "We Help Everyone Enjoy Amazing Products",
     description: "If the copy becomes distracting in the design then you are doing something wrong or they are discussing copy changes. It might be a bit annoying but you could tell them that that discussion would be best suited.",
@@ -23,7 +23,7 @@ export const ACCESSORIES_ABOUT_PAGE_BLOCKS: TemplateBlock[] = [
       company: "BARONE LLC",
     },
   }},
-  { id: "acc-about-team", type: "accessoriesTeamSection", props: {
+  { id: "acc-about-team", type: "accessoriesTeamSection", settings: {
     subtitle: "Words about us",
     title: "Our Team",
     description: "Convallis ullamcorper aliquet ultrices orci cum vestibulum lobortis erat",
@@ -34,7 +34,7 @@ export const ACCESSORIES_ABOUT_PAGE_BLOCKS: TemplateBlock[] = [
       { name: "Darlene Robertson", role: "Social Media Specialist", image: "https://woodmart.xtemos.com/accessories/wp-content/uploads/sites/7/2022/08/acs-ab-us-team-4-1.jpg", socials: ["facebook", "twitter", "instagram"] },
     ],
   }},
-  { id: "acc-about-strategy", type: "accessoriesStrategySection", props: {
+  { id: "acc-about-strategy", type: "accessoriesStrategySection", settings: {
     subtitle: "Buyers trust us",
     title: "Our Strategy Is To Provide Our Customers With Quality Products",
     paragraphs: [
@@ -47,22 +47,22 @@ export const ACCESSORIES_ABOUT_PAGE_BLOCKS: TemplateBlock[] = [
       { icon: "https://woodmart.xtemos.com/accessories/wp-content/uploads/sites/7/2022/04/accessories-infobox-3.svg", title: "Free Return", description: "True enough, but that\u2019s not all that it takes to get things back on track out there for a text." },
     ],
   }},
-  { id: "acc-about-community", type: "accessoriesCommunityCta", props: {
+  { id: "acc-about-community", type: "accessoriesCommunityCta", settings: {
     title: "Join Our Community",
     description: "Chances are there wasn\u2019t collaboration, communication, and checkpoints, there wasn\u2019t a process agreed upon or specified with the granularity required. It\u2019s content strategy gone awry right from the start. Forswearing the use of Lorem Ipsum wouldn\u2019t have helped won\u2019t help now it\u2019s like saying you\u2019re a bad designer.",
     tabs: ["Web Designer", "Administrator", "Store Manager", "CEO"],
   }},
 ];
 
-export const ACCESSORIES_CONTACT_PAGE_BLOCKS: TemplateBlock[] = [
-  { id: "acc-contact-store", type: "accessoriesStoreVisit", props: {
+export const ACCESSORIES_CONTACT_PAGE_BLOCKS: EditorNode[] = [
+  { id: "acc-contact-store", type: "accessoriesStoreVisit", settings: {
     subtitle: "Our stores",
     title: "Visit Our New\nStore in New York",
     address: "294 Bay Meadows Ave.\nBay Shore, NY 11706",
     buttonText: "See More About",
     buttonLink: "#",
   }},
-  { id: "acc-contact-faq", type: "accessoriesFaqAccordion", props: {
+  { id: "acc-contact-faq", type: "accessoriesFaqAccordion", settings: {
     subtitle: "Information questions",
     title: "Frequently Asked Questions",
     items: [
@@ -73,19 +73,19 @@ export const ACCESSORIES_CONTACT_PAGE_BLOCKS: TemplateBlock[] = [
       { question: "Where can I ship my order?", answer: "Ut bibendum a adipiscing purus massa a facilisi congue parturient condimentum urna donec per adipiscing cursus nisl nam tristique parturient id.\n\nAliquam quam at et in ipsum at venenatis a eget dignissim aliquam tincidunt ultrices lacus ad consectetur imperdiet sem suspendisse ante a dapibus potenti. Eu parturient parturient magnis tempus molestie augue quam vulputate hac facilisis est nisl pretium a cursus." },
     ],
   }},
-  { id: "acc-contact-form", type: "accessoriesContactForm", props: {
+  { id: "acc-contact-form", type: "accessoriesContactForm", settings: {
     subtitle: "Information About Us",
     title: "Contact Us for Any Questions",
     fields: ["name", "email", "phone", "company", "message"],
   }},
 ];
 
-export const ACCESSORIES_BLOG_PAGE_BLOCKS: TemplateBlock[] = [
-  { id: "acc-blog-header", type: "accessoriesBlogHeader", props: {
+export const ACCESSORIES_BLOG_PAGE_BLOCKS: EditorNode[] = [
+  { id: "acc-blog-header", type: "accessoriesBlogHeader", settings: {
     title: "Blog",
     backgroundImage: "https://woodmart.xtemos.com/accessories/wp-content/uploads/sites/7/2022/04/accessories-page-title.jpg",
   }},
-  { id: "acc-blog-posts", type: "accessoriesBlogPosts", props: {
+  { id: "acc-blog-posts", type: "accessoriesBlogPosts", settings: {
     columns: 2,
     posts: [
       { title: "Exploring Atlanta\u2019s modern homes", date: "22 Apr", category: "Decoration", author: "Mr. Mackay", excerpt: "Vivamus enim sagittis aptent hac mi dui a per aptent suspendisse cras odio bibendum augue rhoncus laoreet dui praesent sodales sod...", image: "https://woodmart.xtemos.com/accessories/wp-content/uploads/sites/7/2022/01/accessories-blog-img-1-1024x633.jpg", link: "#" },
@@ -98,21 +98,21 @@ export const ACCESSORIES_BLOG_PAGE_BLOCKS: TemplateBlock[] = [
   }},
 ];
 
-export const ACCESSORIES_SHOP_PAGE_BLOCKS: TemplateBlock[] = [
-  { id: "acc-shop-header", type: "accessoriesBlogHeader", props: {
+export const ACCESSORIES_SHOP_PAGE_BLOCKS: EditorNode[] = [
+  { id: "acc-shop-header", type: "accessoriesBlogHeader", settings: {
     title: "Shop",
     backgroundImage: "https://woodmart.xtemos.com/accessories/wp-content/uploads/sites/7/2022/04/accessories-page-title.jpg",
   }},
-  { id: "acc-shop-products", type: "accessoriesProductGrid", props: { columns: 4, maxProducts: 12 } },
+  { id: "acc-shop-products", type: "accessoriesProductGrid", settings: { columns: 4, maxProducts: 12 } },
 ];
 
-export const ACCESSORIES_FAQS_PAGE_BLOCKS: TemplateBlock[] = [
-  { id: "acc-faqs-header", type: "accessoriesFaqsHeader", props: {
+export const ACCESSORIES_FAQS_PAGE_BLOCKS: EditorNode[] = [
+  { id: "acc-faqs-header", type: "accessoriesFaqsHeader", settings: {
     title: "Questions & Answers",
     description: "Write us an e-mail via the form, or just send us an e-mail directly at.",
     contactButtonText: "CONTACT US",
   }},
-  { id: "acc-faqs-contact-info", type: "accessoriesFaqsContactInfo", props: {
+  { id: "acc-faqs-contact-info", type: "accessoriesFaqsContactInfo", settings: {
     formFields: ["name", "email", "phone", "company", "message"],
     contactInfo: {
       address: "50 East 52nd Street\nBrooklyn, NY 10022\nUnited States",
@@ -121,7 +121,7 @@ export const ACCESSORIES_FAQS_PAGE_BLOCKS: TemplateBlock[] = [
     },
     footerText: "Do you have questions about how we can help your company? Send us an email and we\u2019ll get in touch shortly.",
   }},
-  { id: "acc-faqs-shopping", type: "accessoriesCategorizedFaq", props: {
+  { id: "acc-faqs-shopping", type: "accessoriesCategorizedFaq", settings: {
     category: "Shopping Information",
     items: [
       { question: "Delivery charges for orders from the Online Shop", answer: "Torquent posuere vel id sagittis urna placerat ridiculus odio vestibulum donec tristique a nisl eros conubia condimentum nunc quisque nibh adipiscing habitasse parturient suspendisse proin a pharetra commodo leo tincidunt lobortis lacinia sem parturient dapibus.\n\nAd vivamus nullam scelerisque a neque suspendisse consectetur fringilla a suspendisse proin senectus lobortis lacinia sem parturient dapibus ad aliquet maecenas dis neque." },
@@ -132,7 +132,7 @@ export const ACCESSORIES_FAQS_PAGE_BLOCKS: TemplateBlock[] = [
       { question: "How long do I have to return an order?", answer: "Ad vivamus nullam scelerisque a neque suspendisse consectetur fringilla a suspendisse proin senectus lobortis lacinia sem parturient dapibus ad aliquet maecenas dis neque.\n\nTorquent posuere vel id sagittis urna placerat ridiculus odio vestibulum donec tristique a nisl eros conubia condimentum nunc quisque nibh adipiscing habitasse parturient suspendisse proin a pharetra commodo leo tincidunt lobortis lacinia sem parturient dapibus." },
     ],
   }},
-  { id: "acc-faqs-payment", type: "accessoriesCategorizedFaq", props: {
+  { id: "acc-faqs-payment", type: "accessoriesCategorizedFaq", settings: {
     category: "Payment Information",
     items: [
       { question: "How is the recipient reimbursed?", answer: "Ad vivamus nullam scelerisque a neque suspendisse consectetur fringilla a suspendisse proin senectus lobortis lacinia sem parturient dapibus ad aliquet maecenas dis neque.\n\nTorquent posuere vel id sagittis urna placerat ridiculus odio vestibulum donec tristique a nisl eros conubia condimentum nunc quisque nibh adipiscing habitasse parturient suspendisse proin a pharetra commodo leo tincidunt lobortis lacinia sem parturient dapibus." },
@@ -143,7 +143,7 @@ export const ACCESSORIES_FAQS_PAGE_BLOCKS: TemplateBlock[] = [
       { question: "Will you restock items indicated as \u201cout of stock?\u201d", answer: "Torquent posuere vel id sagittis urna placerat ridiculus odio vestibulum donec tristique a nisl eros conubia condimentum nunc quisque nibh adipiscing habitasse parturient suspendisse proin a pharetra commodo leo tincidunt lobortis lacinia sem parturient dapibus.\n\nAd vivamus nullam scelerisque a neque suspendisse consectetur fringilla a suspendisse proin senectus lobortis lacinia sem parturient dapibus ad aliquet maecenas dis neque." },
     ],
   }},
-  { id: "acc-faqs-orders", type: "accessoriesCategorizedFaq", props: {
+  { id: "acc-faqs-orders", type: "accessoriesCategorizedFaq", settings: {
     category: "Orders and Returns",
     items: [
       { question: "Delivery charges for orders from the Online Shop?", answer: "Torquent posuere vel id sagittis urna placerat ridiculus odio vestibulum donec tristique a nisl eros conubia condimentum nunc quisque nibh adipiscing habitasse parturient suspendisse proin a pharetra commodo leo tincidunt lobortis lacinia sem parturient dapibus.\n\nAd vivamus nullam scelerisque a neque suspendisse consectetur fringilla a suspendisse proin senectus lobortis lacinia sem parturient dapibus ad aliquet maecenas dis neque." },

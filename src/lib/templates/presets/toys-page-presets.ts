@@ -1,4 +1,4 @@
-import type { TemplateBlock } from "@/components/storefront/TemplateBlockRenderer";
+import type { EditorNode } from "@/lib/visual-editor/node-tree";
 
 /**
  * Toys Template Page Presets
@@ -12,11 +12,11 @@ import type { TemplateBlock } from "@/components/storefront/TemplateBlockRendere
    Source: https://woodmart.xtemos.com/about-us/demo/toys/
    ═══════════════════════════════════════════════════════════════ */
 
-export const TOYS_ABOUT_PAGE_BLOCKS: TemplateBlock[] = [
+export const TOYS_ABOUT_PAGE_BLOCKS: EditorNode[] = [
   {
     id: "toys-about-announcement",
     type: "kidsAnnouncementBar",
-    props: {
+    settings: {
       text: "Free shipping on all orders over $50!",
       link: "#shop",
       backgroundColor: "#f5857c",
@@ -25,7 +25,7 @@ export const TOYS_ABOUT_PAGE_BLOCKS: TemplateBlock[] = [
   {
     id: "toys-about-header",
     type: "kidsHeader",
-    props: {
+    settings: {
       storeName: "Toys Store",
       storeSlug: "toys-store",
     },
@@ -33,7 +33,7 @@ export const TOYS_ABOUT_PAGE_BLOCKS: TemplateBlock[] = [
   {
     id: "toys-about-hero",
     type: "kidsAboutHero",
-    props: {
+    settings: {
       subtitle: "Xtemos is a creative design agency",
       title: "Our success and company history.",
       bodyText: [
@@ -50,7 +50,7 @@ export const TOYS_ABOUT_PAGE_BLOCKS: TemplateBlock[] = [
   {
     id: "toys-about-story",
     type: "kidsTextSection",
-    props: {
+    settings: {
       sectionTitle: {
         subtitle: "Woodmart - Best Ecommerce Theme 2021/22",
         title: "About Our Online Store",
@@ -68,7 +68,7 @@ export const TOYS_ABOUT_PAGE_BLOCKS: TemplateBlock[] = [
   {
     id: "toys-about-convert",
     type: "kidsTextSection",
-    props: {
+    settings: {
       sectionTitle: {
         subtitle: "Woodmart - Best Ecommerce Theme 2021/22",
         title: "We convert your idea Into a reality.",
@@ -82,7 +82,7 @@ export const TOYS_ABOUT_PAGE_BLOCKS: TemplateBlock[] = [
   {
     id: "toys-about-creative",
     type: "kidsTextSection",
-    props: {
+    settings: {
       sectionTitle: {
         subtitle: "Woodmart - Best Ecommerce Theme 2021/22",
         title: "Let\u2019s Get Creative!",
@@ -99,7 +99,7 @@ export const TOYS_ABOUT_PAGE_BLOCKS: TemplateBlock[] = [
   {
     id: "toys-about-presentation",
     type: "kidsTextSection",
-    props: {
+    settings: {
       sectionTitle: {
         subtitle: "Xtemos is a creative design agency",
         title: "Our Presentation",
@@ -113,7 +113,7 @@ export const TOYS_ABOUT_PAGE_BLOCKS: TemplateBlock[] = [
   {
     id: "toys-about-quote",
     type: "kidsTextSection",
-    props: {
+    settings: {
       sectionTitle: {
         subtitle: "Woodmart - Best Ecommerce Theme 2021/22",
         title: "\u2018\u2018Excellence is not a skill it\u2019s an attitude\u2019\u2019 - Ralph Marston",
@@ -127,7 +127,7 @@ export const TOYS_ABOUT_PAGE_BLOCKS: TemplateBlock[] = [
   {
     id: "toys-about-team",
     type: "kidsTeamSection",
-    props: {
+    settings: {
       sectionTitle: {
         subtitle: "",
         title: "",
@@ -159,7 +159,7 @@ export const TOYS_ABOUT_PAGE_BLOCKS: TemplateBlock[] = [
   {
     id: "toys-about-footer",
     type: "kidsFooter",
-    props: {
+    settings: {
       storeName: "Toys Store",
       storeSlug: "toys-store",
     },
@@ -171,11 +171,11 @@ export const TOYS_ABOUT_PAGE_BLOCKS: TemplateBlock[] = [
    Source: https://woodmart.xtemos.com/contact-us/demo/toys/
    ═══════════════════════════════════════════════════════════════ */
 
-export const TOYS_CONTACT_PAGE_BLOCKS: TemplateBlock[] = [
+export const TOYS_CONTACT_PAGE_BLOCKS: EditorNode[] = [
   {
     id: "toys-contact-announcement",
     type: "kidsAnnouncementBar",
-    props: {
+    settings: {
       text: "Free shipping on all orders over $50!",
       link: "#shop",
       backgroundColor: "#f5857c",
@@ -184,7 +184,7 @@ export const TOYS_CONTACT_PAGE_BLOCKS: TemplateBlock[] = [
   {
     id: "toys-contact-header",
     type: "kidsHeader",
-    props: {
+    settings: {
       storeName: "Toys Store",
       storeSlug: "toys-store",
     },
@@ -192,7 +192,7 @@ export const TOYS_CONTACT_PAGE_BLOCKS: TemplateBlock[] = [
   {
     id: "toys-contact-hero",
     type: "kidsContactHero",
-    props: {
+    settings: {
       address: "294 Bay Meadows Ave. Bay Shore, NY 11706",
       showMapLink: true,
     },
@@ -200,7 +200,7 @@ export const TOYS_CONTACT_PAGE_BLOCKS: TemplateBlock[] = [
   {
     id: "toys-contact-faq",
     type: "kidsFaqSection",
-    props: {
+    settings: {
       sectionTitle: {
         subtitle: "Information Questions",
         title: "Frequently Asked Questions",
@@ -233,14 +233,14 @@ export const TOYS_CONTACT_PAGE_BLOCKS: TemplateBlock[] = [
   {
     id: "toys-contact-form",
     type: "kidsContactForm",
-    props: {
+    settings: {
       title: "Contact Us for Any Questions",
     },
   },
   {
     id: "toys-contact-footer",
     type: "kidsFooter",
-    props: {
+    settings: {
       storeName: "Toys Store",
       storeSlug: "toys-store",
     },
@@ -252,11 +252,11 @@ export const TOYS_CONTACT_PAGE_BLOCKS: TemplateBlock[] = [
    Source: https://woodmart.xtemos.com/blog/demo/toys/
    ═══════════════════════════════════════════════════════════════ */
 
-export const TOYS_BLOG_PAGE_BLOCKS: TemplateBlock[] = [
+export const TOYS_BLOG_PAGE_BLOCKS: EditorNode[] = [
   {
     id: "toys-blog-announcement",
     type: "kidsAnnouncementBar",
-    props: {
+    settings: {
       text: "Free shipping on all orders over $50!",
       link: "#shop",
       backgroundColor: "#f5857c",
@@ -265,7 +265,7 @@ export const TOYS_BLOG_PAGE_BLOCKS: TemplateBlock[] = [
   {
     id: "toys-blog-header",
     type: "kidsHeader",
-    props: {
+    settings: {
       storeName: "Toys Store",
       storeSlug: "toys-store",
     },
@@ -273,7 +273,7 @@ export const TOYS_BLOG_PAGE_BLOCKS: TemplateBlock[] = [
   {
     id: "toys-blog-hero",
     type: "kidsAboutHero",
-    props: {
+    settings: {
       subtitle: "Toys Blog",
       title: "Woodmart Blog",
       bodyText: [
@@ -287,7 +287,7 @@ export const TOYS_BLOG_PAGE_BLOCKS: TemplateBlock[] = [
   {
     id: "toys-blog-grid",
     type: "kidsBlogPosts",
-    props: {
+    settings: {
       columns: 3,
       sectionTitle: {
         title: "Latest Articles",
@@ -359,7 +359,7 @@ export const TOYS_BLOG_PAGE_BLOCKS: TemplateBlock[] = [
   {
     id: "toys-blog-footer",
     type: "kidsFooter",
-    props: {
+    settings: {
       storeName: "Toys Store",
       storeSlug: "toys-store",
     },
@@ -371,11 +371,11 @@ export const TOYS_BLOG_PAGE_BLOCKS: TemplateBlock[] = [
    Source: https://woodmart.xtemos.com/shop/demo/toys/
    ═══════════════════════════════════════════════════════════════ */
 
-export const TOYS_SHOP_PAGE_BLOCKS: TemplateBlock[] = [
+export const TOYS_SHOP_PAGE_BLOCKS: EditorNode[] = [
   {
     id: "toys-shop-announcement",
     type: "kidsAnnouncementBar",
-    props: {
+    settings: {
       text: "Free shipping on all orders over $50!",
       link: "#shop",
       backgroundColor: "#f5857c",
@@ -384,7 +384,7 @@ export const TOYS_SHOP_PAGE_BLOCKS: TemplateBlock[] = [
   {
     id: "toys-shop-header",
     type: "kidsHeader",
-    props: {
+    settings: {
       storeName: "Toys Store",
       storeSlug: "toys-store",
     },
@@ -392,7 +392,7 @@ export const TOYS_SHOP_PAGE_BLOCKS: TemplateBlock[] = [
   {
     id: "toys-shop-hero",
     type: "kidsAboutHero",
-    props: {
+    settings: {
       subtitle: "Toys Shop",
       title: "Shop",
       bodyText: [
@@ -406,7 +406,7 @@ export const TOYS_SHOP_PAGE_BLOCKS: TemplateBlock[] = [
   {
     id: "toys-shop-categories",
     type: "kidsCategoryCards",
-    props: {
+    settings: {
       sectionTitle: {
         subtitle: "Explore",
         title: "Shop by category",
@@ -454,7 +454,7 @@ export const TOYS_SHOP_PAGE_BLOCKS: TemplateBlock[] = [
   {
     id: "toys-shop-grid",
     type: "kidsProductGrid",
-    props: {
+    settings: {
       columns: 4,
       maxProducts: 12,
       filter: "all",
@@ -466,7 +466,7 @@ export const TOYS_SHOP_PAGE_BLOCKS: TemplateBlock[] = [
   {
     id: "toys-shop-footer",
     type: "kidsFooter",
-    props: {
+    settings: {
       storeName: "Toys Store",
       storeSlug: "toys-store",
     },
@@ -478,11 +478,11 @@ export const TOYS_SHOP_PAGE_BLOCKS: TemplateBlock[] = [
    Source: https://woodmart.xtemos.com/faqs/demo/toys/
    ═══════════════════════════════════════════════════════════════ */
 
-export const TOYS_FAQS_PAGE_BLOCKS: TemplateBlock[] = [
+export const TOYS_FAQS_PAGE_BLOCKS: EditorNode[] = [
   {
     id: "toys-faqs-announcement",
     type: "kidsAnnouncementBar",
-    props: {
+    settings: {
       text: "Free shipping on all orders over $50!",
       link: "#shop",
       backgroundColor: "#f5857c",
@@ -491,7 +491,7 @@ export const TOYS_FAQS_PAGE_BLOCKS: TemplateBlock[] = [
   {
     id: "toys-faqs-header",
     type: "kidsHeader",
-    props: {
+    settings: {
       storeName: "Toys Store",
       storeSlug: "toys-store",
     },
@@ -499,7 +499,7 @@ export const TOYS_FAQS_PAGE_BLOCKS: TemplateBlock[] = [
   {
     id: "toys-faqs-hero",
     type: "kidsAboutHero",
-    props: {
+    settings: {
       subtitle: "Help Center",
       title: "FAQs",
       bodyText: [],
@@ -511,7 +511,7 @@ export const TOYS_FAQS_PAGE_BLOCKS: TemplateBlock[] = [
   {
     id: "toys-faqs-shopping",
     type: "kidsFaqSection",
-    props: {
+    settings: {
       sectionTitle: {
         subtitle: "",
         title: "Shopping Information",
@@ -544,7 +544,7 @@ export const TOYS_FAQS_PAGE_BLOCKS: TemplateBlock[] = [
   {
     id: "toys-faqs-payment",
     type: "kidsFaqSection",
-    props: {
+    settings: {
       sectionTitle: {
         subtitle: "",
         title: "Payment Information",
@@ -577,7 +577,7 @@ export const TOYS_FAQS_PAGE_BLOCKS: TemplateBlock[] = [
   {
     id: "toys-faqs-footer",
     type: "kidsFooter",
-    props: {
+    settings: {
       storeName: "Toys Store",
       storeSlug: "toys-store",
     },

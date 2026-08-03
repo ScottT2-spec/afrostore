@@ -1,4 +1,4 @@
-import type { TemplateBlock } from "@/components/storefront/TemplateBlockRenderer";
+import type { EditorNode } from "@/lib/visual-editor/node-tree";
 
 /**
  * Kids Template Page Presets
@@ -6,11 +6,11 @@ import type { TemplateBlock } from "@/components/storefront/TemplateBlockRendere
  * Content extracted verbatim from page components - no placeholders
  */
 
-export const KIDS_ABOUT_PAGE_BLOCKS: TemplateBlock[] = [
+export const KIDS_ABOUT_PAGE_BLOCKS: EditorNode[] = [
   {
     id: "kids-about-announcement",
     type: "kidsAnnouncementBar",
-    props: {
+    settings: {
       text: "Sign up for our newsletter to get 30% off for the week!",
       link: "#newsletter",
       backgroundColor: "#10c349",
@@ -19,7 +19,7 @@ export const KIDS_ABOUT_PAGE_BLOCKS: TemplateBlock[] = [
   {
     id: "kids-about-header",
     type: "kidsHeader",
-    props: {
+    settings: {
       storeName: "Kids Store",
       storeSlug: "kids-store",
     },
@@ -27,7 +27,7 @@ export const KIDS_ABOUT_PAGE_BLOCKS: TemplateBlock[] = [
   {
     id: "kids-about-hero",
     type: "kidsAboutHero",
-    props: {
+    settings: {
       subtitle: "About Us",
       title: "Discover Favorites for Every Little One",
       bodyText: [
@@ -45,7 +45,7 @@ export const KIDS_ABOUT_PAGE_BLOCKS: TemplateBlock[] = [
   {
     id: "kids-about-team",
     type: "kidsTeamSection",
-    props: {
+    settings: {
       sectionTitle: {
         subtitle: "",
         title: "",
@@ -61,7 +61,7 @@ export const KIDS_ABOUT_PAGE_BLOCKS: TemplateBlock[] = [
   {
     id: "kids-about-how-we-work",
     type: "kidsTextSection",
-    props: {
+    settings: {
       sectionTitle: {
         subtitle: "Why Parents Choose Us",
         title: "What we Do",
@@ -76,7 +76,7 @@ export const KIDS_ABOUT_PAGE_BLOCKS: TemplateBlock[] = [
   {
     id: "kids-about-faq",
     type: "kidsFaqSection",
-    props: {
+    settings: {
       sectionTitle: {
         subtitle: "What You'll Find",
         title: "Baby Love",
@@ -101,18 +101,18 @@ export const KIDS_ABOUT_PAGE_BLOCKS: TemplateBlock[] = [
   {
     id: "kids-about-footer",
     type: "kidsFooter",
-    props: {
+    settings: {
       storeName: "Kids Store",
       storeSlug: "kids-store",
     },
   },
 ];
 
-export const KIDS_CONTACT_PAGE_BLOCKS: TemplateBlock[] = [
+export const KIDS_CONTACT_PAGE_BLOCKS: EditorNode[] = [
   {
     id: "kids-contact-announcement",
     type: "kidsAnnouncementBar",
-    props: {
+    settings: {
       text: "Sign up for our newsletter to get 20% off for the week!",
       link: "#newsletter",
       backgroundColor: "#39a454",
@@ -121,7 +121,7 @@ export const KIDS_CONTACT_PAGE_BLOCKS: TemplateBlock[] = [
   {
     id: "kids-contact-header",
     type: "kidsHeader",
-    props: {
+    settings: {
       storeName: "Kids Store",
       storeSlug: "kids-store",
     },
@@ -129,7 +129,7 @@ export const KIDS_CONTACT_PAGE_BLOCKS: TemplateBlock[] = [
   {
     id: "kids-contact-hero",
     type: "kidsContactHero",
-    props: {
+    settings: {
       address: "413 Waystreet Road, North Carolina, United States",
       showMapLink: true,
     },
@@ -137,7 +137,7 @@ export const KIDS_CONTACT_PAGE_BLOCKS: TemplateBlock[] = [
   {
     id: "kids-contact-info",
     type: "kidsContactInfo",
-    props: {
+    settings: {
       phone: "(097) 330-1233",
       hours: "9:00am - 5:00pm",
       days: "Monday - Friday",
@@ -153,14 +153,14 @@ export const KIDS_CONTACT_PAGE_BLOCKS: TemplateBlock[] = [
   {
     id: "kids-contact-form",
     type: "kidsContactForm",
-    props: {
+    settings: {
       title: "Get in touch",
     },
   },
   {
     id: "kids-contact-hours",
     type: "kidsOpeningHours",
-    props: {
+    settings: {
       title: "Monday - Friday",
       hours: [
         { label: "Hours", value: "9:00am - 5:00pm" },
@@ -178,18 +178,18 @@ export const KIDS_CONTACT_PAGE_BLOCKS: TemplateBlock[] = [
   {
     id: "kids-contact-footer",
     type: "kidsFooter",
-    props: {
+    settings: {
       storeName: "Kids Store",
       storeSlug: "kids-store",
     },
   },
 ];
 
-export const KIDS_BLOG_PAGE_BLOCKS: TemplateBlock[] = [
+export const KIDS_BLOG_PAGE_BLOCKS: EditorNode[] = [
   {
     id: "kids-blog-announcement",
     type: "kidsAnnouncementBar",
-    props: {
+    settings: {
       text: "Sign up for our newsletter to get 45% off for the week!",
       link: "#newsletter",
       backgroundColor: "#73a97b",
@@ -198,7 +198,7 @@ export const KIDS_BLOG_PAGE_BLOCKS: TemplateBlock[] = [
   {
     id: "kids-blog-header",
     type: "kidsHeader",
-    props: {
+    settings: {
       storeName: "Kids Store",
       storeSlug: "kids-store",
     },
@@ -206,7 +206,7 @@ export const KIDS_BLOG_PAGE_BLOCKS: TemplateBlock[] = [
   {
     id: "kids-blog-grid",
     type: "kidsBlogPosts",
-    props: {
+    settings: {
       columns: 3,
       sectionTitle: {
         title: "Latest Articles",
@@ -217,18 +217,18 @@ export const KIDS_BLOG_PAGE_BLOCKS: TemplateBlock[] = [
   {
     id: "kids-blog-footer",
     type: "kidsFooter",
-    props: {
+    settings: {
       storeName: "Kids Store",
       storeSlug: "kids-store",
     },
   },
 ];
 
-export const KIDS_SHOP_PAGE_BLOCKS: TemplateBlock[] = [
+export const KIDS_SHOP_PAGE_BLOCKS: EditorNode[] = [
   {
     id: "kids-shop-announcement",
     type: "kidsAnnouncementBar",
-    props: {
+    settings: {
       text: "Sign up for our newsletter to get 30% off for the week!",
       link: "#newsletter",
       backgroundColor: "#d0d85f",
@@ -237,7 +237,7 @@ export const KIDS_SHOP_PAGE_BLOCKS: TemplateBlock[] = [
   {
     id: "kids-shop-header",
     type: "kidsHeader",
-    props: {
+    settings: {
       storeName: "Kids Store",
       storeSlug: "kids-store",
     },
@@ -245,7 +245,7 @@ export const KIDS_SHOP_PAGE_BLOCKS: TemplateBlock[] = [
   {
     id: "kids-shop-hero",
     type: "kidsAboutHero",
-    props: {
+    settings: {
       subtitle: "Kids Shop",
       title: "All Products",
       bodyText: [
@@ -259,7 +259,7 @@ export const KIDS_SHOP_PAGE_BLOCKS: TemplateBlock[] = [
   {
     id: "kids-shop-categories",
     type: "kidsCategoryCards",
-    props: {
+    settings: {
       sectionTitle: {
         subtitle: "Shop",
         title: "Shop by category",
@@ -277,7 +277,7 @@ export const KIDS_SHOP_PAGE_BLOCKS: TemplateBlock[] = [
   {
     id: "kids-shop-grid",
     type: "kidsProductGrid",
-    props: {
+    settings: {
       columns: 4,
       maxProducts: 12,
       filter: "all",
@@ -289,7 +289,7 @@ export const KIDS_SHOP_PAGE_BLOCKS: TemplateBlock[] = [
   {
     id: "kids-shop-footer",
     type: "kidsFooter",
-    props: {
+    settings: {
       storeName: "Kids Store",
       storeSlug: "kids-store",
     },

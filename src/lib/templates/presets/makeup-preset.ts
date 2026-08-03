@@ -1,49 +1,64 @@
-import type { TemplateBlock } from "@/components/storefront/TemplateBlockRenderer";
+import type { EditorNode } from "@/lib/visual-editor/node-tree";
 
 /**
  * Makeup Template Preset
  * Recreates the WoodMart Makeup demo layout with editable blocks.
  */
-export const MAKEUP_TEMPLATE_PRESET: TemplateBlock[] = [
+export const MAKEUP_TEMPLATE_PRESET: EditorNode[] = [
   {
     id: "makeup-hero",
     type: "makeupHeroSlider",
-    props: {
-      autoplaySpeed: 5000,
+          settings: {
+        autoplaySpeed: 5000,
       minHeight: "500px",
-      marqueeText: "Free Shipping On Orders Over $100",
-      slides: [
+      marqueeText: "Free Shipping On Orders Over $100"
+      },
+      elements: [
         {
-          title: "Eye Patches With Chamomile Extract",
-          description: "In particular, this pack comes with two different size patches to fit various types of blemishes. Perfect for a targeted application.",
-          buttonText: "Shop Now",
-          buttonLink: "/shop",
-          backgroundImage: "https://woodmart.xtemos.com/wp-content/uploads/2024/04/makeup-slide-1.jpg",
-          colorScheme: "dark",
+          id: "makeup-hero-slide-1",
+          type: "slide",
+          settings:           {
+            "title": "Eye Patches With Chamomile Extract",
+            "description": "In particular, this pack comes with two different size patches to fit various types of blemishes. Perfect for a targeted application.",
+            "buttonText": "Shop Now",
+            "buttonLink": "/shop",
+            "backgroundImage": "https://woodmart.xtemos.com/wp-content/uploads/2024/04/makeup-slide-1.jpg",
+            "colorScheme": "dark"
+          },
+          elements: [],
         },
         {
-          title: "Best Cleansing Oil for Oily Skin",
-          description: "Perfect for a targeted application, you just need to take a patch, apply it directly to the blemish.",
-          buttonText: "Shop Now",
-          buttonLink: "/shop",
-          backgroundImage: "https://woodmart.xtemos.com/wp-content/uploads/2024/04/makeup-slide-2.jpg",
-          colorScheme: "dark",
+          id: "makeup-hero-slide-2",
+          type: "slide",
+          settings:           {
+            "title": "Best Cleansing Oil for Oily Skin",
+            "description": "Perfect for a targeted application, you just need to take a patch, apply it directly to the blemish.",
+            "buttonText": "Shop Now",
+            "buttonLink": "/shop",
+            "backgroundImage": "https://woodmart.xtemos.com/wp-content/uploads/2024/04/makeup-slide-2.jpg",
+            "colorScheme": "dark"
+          },
+          elements: [],
         },
         {
-          title: "New Sunscreen for The Body and Face",
-          description: "In particular, this pack comes with two different size patches to fit various.",
-          buttonText: "Shop Now",
-          buttonLink: "/shop",
-          backgroundImage: "https://woodmart.xtemos.com/wp-content/uploads/2024/04/makeup-slide-3.jpg",
-          colorScheme: "light",
-        },
+          id: "makeup-hero-slide-3",
+          type: "slide",
+          settings:           {
+            "title": "New Sunscreen for The Body and Face",
+            "description": "In particular, this pack comes with two different size patches to fit various.",
+            "buttonText": "Shop Now",
+            "buttonLink": "/shop",
+            "backgroundImage": "https://woodmart.xtemos.com/wp-content/uploads/2024/04/makeup-slide-3.jpg",
+            "colorScheme": "light"
+          },
+          elements: [],
+        }
       ],
-    },
   },
   {
     id: "makeup-sidebar-cats",
     type: "makeupCategorySidebar",
-    props: {
+    settings: {
       categories: [
         { name: "Blemish control cleanser", icon: "💧", link: "/shop" },
         { name: "Protective moisturizing", icon: "🛡️", link: "/shop" },
@@ -55,7 +70,7 @@ export const MAKEUP_TEMPLATE_PRESET: TemplateBlock[] = [
   {
     id: "makeup-recently-viewed",
     type: "makeupProductGrid",
-    props: {
+    settings: {
       columns: 4,
       maxProducts: 8,
       sectionTitle: { title: "Recently Viewed" },
@@ -65,7 +80,7 @@ export const MAKEUP_TEMPLATE_PRESET: TemplateBlock[] = [
   {
     id: "makeup-bestsellers",
     type: "makeupProductGrid",
-    props: {
+    settings: {
       columns: 4,
       maxProducts: 8,
       sectionTitle: { title: "Week Bestsellers", buttonText: "More products", buttonLink: "/shop" },
@@ -76,7 +91,7 @@ export const MAKEUP_TEMPLATE_PRESET: TemplateBlock[] = [
   {
     id: "makeup-product-types",
     type: "makeupProductTypeCards",
-    props: {
+    settings: {
       sectionTitle: { title: "Popular Product Types" },
       cards: [
         { name: "Cleansers", image: "https://images.unsplash.com/photo-1556228578-8c89e6adf883?w=300&h=400&fit=crop", link: "/shop", productCount: 12 },
@@ -90,7 +105,7 @@ export const MAKEUP_TEMPLATE_PRESET: TemplateBlock[] = [
   {
     id: "makeup-before-after",
     type: "makeupBeforeAfter",
-    props: {
+    settings: {
       title: "Cosmetics, created using modern technologies",
       description: "Cosmetics, created using modern technologies, are aimed at the health and beauty of the skin.",
       beforeImage: "https://woodmart.xtemos.com/wp-content/uploads/2024/04/makeup-before.jpg",
@@ -103,7 +118,7 @@ export const MAKEUP_TEMPLATE_PRESET: TemplateBlock[] = [
   {
     id: "makeup-promo-banners",
     type: "makeupPromoBannerCards",
-    props: {
+    settings: {
       cards: [
         {
           title: "In addition to diminishing the visibility of blemishes",
@@ -127,7 +142,7 @@ export const MAKEUP_TEMPLATE_PRESET: TemplateBlock[] = [
   {
     id: "makeup-videos",
     type: "makeupVideoBlog",
-    props: {
+    settings: {
       sectionTitle: { title: "Latest Videos on Channel" },
       videos: [],
     },
@@ -135,7 +150,7 @@ export const MAKEUP_TEMPLATE_PRESET: TemplateBlock[] = [
   {
     id: "makeup-blog",
     type: "makeupBlogPosts",
-    props: {
+    settings: {
       sectionTitle: { title: "Recent Articles" },
       posts: [],
     },
@@ -143,13 +158,13 @@ export const MAKEUP_TEMPLATE_PRESET: TemplateBlock[] = [
   {
     id: "makeup-brands",
     type: "makeupBrandsCarousel",
-    props: {
+    settings: {
       brands: [],
     },
   },
   {
     id: "makeup-footer", type: "makeupFooter",
-    props: {
+    settings: {
       logoUrl: "",
       logoAlt: "Store Logo",
       description: "Discover a curated collection of modern furniture designed to bring comfort and elegance into your home.",

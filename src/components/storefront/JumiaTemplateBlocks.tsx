@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useRef, useCallback, createContext, useContext } from "react";
 import Link from "next/link";
+import { InlineEditableText } from "@/components/storefront/InlineEditableText";
 import {
   ChevronLeft,
   ChevronRight,
@@ -366,11 +367,11 @@ export function JumiaHeroBanner({ slides = [], storeSlug = "" }: JumiaHeroBanner
               ) : (
                 <div className="w-full h-full flex items-center p-6" style={{ background: slide.bgColor || "var(--j-primary)" }}>
                   <div className="flex-1">
-                    <p className="text-[10px] font-bold tracking-[3px] mb-1 opacity-80" style={{ color: slide.textColor }}>LIMITED TIME</p>
-                    <h2 className="text-2xl sm:text-3xl font-extrabold leading-tight mb-1" style={{ color: slide.textColor }}>{slide.title}</h2>
-                    <p className="text-xs opacity-80 mb-3" style={{ color: slide.textColor }}>{slide.subtitle}</p>
+                    <InlineEditableText as="p" field={`slides.${i}.limitedText`} value="LIMITED TIME" isEditor={true} className="text-[10px] font-bold tracking-[3px] mb-1 opacity-80" style={{ color: slide.textColor }} />
+                    <InlineEditableText as="h2" field={`slides.${i}.title`} value={slide.title || ""} isEditor={true} className="text-2xl sm:text-3xl font-extrabold leading-tight mb-1" style={{ color: slide.textColor }} />
+                    <InlineEditableText as="p" field={`slides.${i}.subtitle`} value={slide.subtitle || ""} isEditor={true} multiline className="text-xs opacity-80 mb-3" style={{ color: slide.textColor }} />
                     <button className="bg-white text-[var(--j-dark)] font-bold text-[11px] px-5 py-2 rounded-full hover:bg-gray-100 transition-colors shadow-lg">
-                      {slide.cta || "SHOP NOW"} →
+                      <InlineEditableText as="span" field={`slides.${i}.cta`} value={slide.cta || "SHOP NOW"} isEditor={true} selectNodeOnFocus={false} /> →
                     </button>
                   </div>
                   {/* Decorative circles */}
@@ -429,7 +430,7 @@ export function JumiaCategoryIconBar({ items = [], categories = [], storeSlug = 
                     <Grid3X3 className="w-5 h-5 text-[var(--j-muted)] opacity-50" />
                   )}
                 </div>
-                <span className="text-[9px] font-medium text-[var(--j-text)] text-center line-clamp-1 w-full">{item.label}</span>
+                <InlineEditableText as="span" field={`categories.${i}.label`} value={item.label} isEditor={true} selectNodeOnFocus={false} className="text-[9px] font-medium text-[var(--j-text)] text-center line-clamp-1 w-full" />
               </Link>
             ))}
           </div>
@@ -478,7 +479,7 @@ export function JumiaFlashDeals({ title = "Flash Sales", products = [], storeSlu
           <div className="bg-[var(--j-primary)] px-3 py-2 flex items-center justify-between">
             <div className="flex items-center gap-2">
               <Zap className="h-4 w-4 text-white fill-white" />
-              <span className="text-sm font-bold text-white">{title}</span>
+              <InlineEditableText as="span" field="title" value={title || ""} isEditor={true} selectNodeOnFocus={false} className="text-sm font-bold text-white" />
             </div>
             <div className="flex items-center gap-1">
               <span className="text-[10px] text-white/80 mr-1">Time Left:</span>
@@ -563,7 +564,7 @@ export function JumiaSectionTitle({ title = "", link, storeSlug = "" }: { title?
     <div className="jumia-block bg-[var(--j-bg)]">
       <div className="px-3 pt-2">
         <div className="bg-white rounded-t-xl px-3 py-2.5 flex items-center justify-between">
-          <h2 className="text-sm font-bold text-[var(--j-dark)]">{title}</h2>
+          <InlineEditableText as="h2" field="title" value={title || ""} isEditor={true} className="text-sm font-bold text-[var(--j-dark)]" />
           {link && (
             <Link href={link} className="text-[var(--j-primary)] text-xs font-bold flex items-center gap-0.5">
               SEE ALL <ArrowRight className="h-3 w-3" />
@@ -602,7 +603,7 @@ export function JumiaProductGrid({
         <div className="bg-white rounded-xl overflow-hidden">
           {title && (
             <div className="px-3 py-2.5 flex items-center justify-between border-b border-[var(--j-border)]">
-              <h2 className="text-sm font-bold text-[var(--j-dark)]">{title}</h2>
+              <InlineEditableText as="h2" field="title" value={title || ""} isEditor={true} className="text-sm font-bold text-[var(--j-dark)]" />
               {showSeeAll && (
                 <Link href={seeAllLink || `/store/${storeSlug}/shop`} className="text-[var(--j-primary)] text-xs font-bold flex items-center gap-0.5">
                   SEE ALL <ArrowRight className="h-3 w-3" />
@@ -701,7 +702,7 @@ export function JumiaBrandStoreRow({
         <div className="bg-white rounded-xl overflow-hidden">
           <div className="px-3 py-2.5 flex items-center justify-between border-b border-[var(--j-border)]">
             <div className="flex items-center gap-1.5">
-              <h2 className="text-sm font-bold text-[var(--j-dark)]">{brandName}</h2>
+              <InlineEditableText as="h2" field="brandName" value={brandName} isEditor={true} className="text-sm font-bold text-[var(--j-dark)]" />
               <BadgeCheck className="h-3.5 w-3.5 text-[var(--j-blue)]" />
               {subtitle && <span className="text-[var(--j-primary)] text-xs">| {subtitle}</span>}
             </div>
@@ -816,7 +817,7 @@ export function JumiaOfficialStores({ title = "Official Stores", brands = [], st
       <div className="px-3 pt-2">
         <div className="bg-white rounded-xl overflow-hidden">
           <div className="px-3 py-2.5 flex items-center justify-between border-b border-[var(--j-border)]">
-            <h2 className="text-sm font-bold text-[var(--j-dark)]">{title}</h2>
+              <InlineEditableText as="h2" field="title" value={title} isEditor={true} className="text-sm font-bold text-[var(--j-dark)]" />
           </div>
           <div className="grid grid-cols-3 gap-0 divide-x divide-y divide-[var(--j-border)]">
             {defaultBrands.slice(0, 6).map((brand, i) => (

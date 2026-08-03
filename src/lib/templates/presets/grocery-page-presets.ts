@@ -1,4 +1,4 @@
-import type { TemplateBlock } from "@/components/storefront/TemplateBlockRenderer";
+import type { EditorNode } from "@/lib/visual-editor/node-tree";
 
 /**
  * Grocery Template Page Presets
@@ -12,11 +12,11 @@ import type { TemplateBlock } from "@/components/storefront/TemplateBlockRendere
    Source: https://woodmart.xtemos.com/about-us/demo/grocery/
    ═══════════════════════════════════════════════════════════════ */
 
-export const GROCERY_ABOUT_PAGE_BLOCKS: TemplateBlock[] = [
+export const GROCERY_ABOUT_PAGE_BLOCKS: EditorNode[] = [
   {
     id: "grocery-about-hero",
     type: "groceryAboutHero",
-    props: {
+    settings: {
       subtitle: "Xtemos is a creative design agency",
       title: "Our success and company history.",
       bodyText: [
@@ -33,7 +33,7 @@ export const GROCERY_ABOUT_PAGE_BLOCKS: TemplateBlock[] = [
   {
     id: "grocery-about-story",
     type: "groceryTextSection",
-    props: {
+    settings: {
       sectionTitle: {
         subtitle: "Woodmart - Best Ecommerce Theme 2021/22",
         title: "About Our Online Store",
@@ -51,7 +51,7 @@ export const GROCERY_ABOUT_PAGE_BLOCKS: TemplateBlock[] = [
   {
     id: "grocery-about-convert",
     type: "groceryTextSection",
-    props: {
+    settings: {
       sectionTitle: {
         subtitle: "Woodmart - Best Ecommerce Theme 2021/22",
         title: "We convert your idea Into a reality.",
@@ -65,7 +65,7 @@ export const GROCERY_ABOUT_PAGE_BLOCKS: TemplateBlock[] = [
   {
     id: "grocery-about-team",
     type: "groceryTeamSection",
-    props: {
+    settings: {
       sectionTitle: {
         subtitle: "The Team",
         title: "Our Creative Team",
@@ -81,7 +81,7 @@ export const GROCERY_ABOUT_PAGE_BLOCKS: TemplateBlock[] = [
   {
     id: "grocery-about-newsletter",
     type: "groceryNewsletter",
-    props: {
+    settings: {
       title: "Hey you, sign up and connect to Woodmart!",
       subtitle: "Be the first to learn about our latest trends and get exclusive offers",
     },
@@ -89,7 +89,7 @@ export const GROCERY_ABOUT_PAGE_BLOCKS: TemplateBlock[] = [
   {
     id: "grocery-about-footer",
     type: "groceryFooter",
-    props: {},
+    settings: {},
   },
 ];
 
@@ -98,11 +98,11 @@ export const GROCERY_ABOUT_PAGE_BLOCKS: TemplateBlock[] = [
    Source: https://woodmart.xtemos.com/contact-us/demo/grocery/
    ═══════════════════════════════════════════════════════════════ */
 
-export const GROCERY_CONTACT_PAGE_BLOCKS: TemplateBlock[] = [
+export const GROCERY_CONTACT_PAGE_BLOCKS: EditorNode[] = [
   {
     id: "grocery-contact-hero",
     type: "groceryContactHero",
-    props: {
+    settings: {
       subtitle: "Our Stores",
       title: "Visit Our New Store In New York",
       address: "294 Bay Meadows Ave. Bay Shore, NY 11706",
@@ -111,7 +111,7 @@ export const GROCERY_CONTACT_PAGE_BLOCKS: TemplateBlock[] = [
   {
     id: "grocery-contact-faq",
     type: "groceryFaqSection",
-    props: {
+    settings: {
       sectionTitle: {
         subtitle: "Information Questions",
         title: "Frequently Asked Questions",
@@ -143,14 +143,14 @@ export const GROCERY_CONTACT_PAGE_BLOCKS: TemplateBlock[] = [
   {
     id: "grocery-contact-form",
     type: "groceryContactForm",
-    props: {
+    settings: {
       title: "Contact Us For Any Questions",
     },
   },
   {
     id: "grocery-contact-footer",
     type: "groceryFooter",
-    props: {},
+    settings: {},
   },
 ];
 
@@ -159,11 +159,11 @@ export const GROCERY_CONTACT_PAGE_BLOCKS: TemplateBlock[] = [
    Source: https://woodmart.xtemos.com/blog/demo/grocery/
    ═══════════════════════════════════════════════════════════════ */
 
-export const GROCERY_BLOG_PAGE_BLOCKS: TemplateBlock[] = [
+export const GROCERY_BLOG_PAGE_BLOCKS: EditorNode[] = [
   {
     id: "grocery-blog-grid",
     type: "groceryBlogGrid",
-    props: {
+    settings: {
       sectionTitle: "Woodmart Blog",
       posts: [
         {
@@ -232,7 +232,7 @@ export const GROCERY_BLOG_PAGE_BLOCKS: TemplateBlock[] = [
   {
     id: "grocery-blog-newsletter",
     type: "groceryNewsletter",
-    props: {
+    settings: {
       title: "Hey you, sign up and connect to Woodmart!",
       subtitle: "Be the first to learn about our latest trends and get exclusive offers",
     },
@@ -240,7 +240,7 @@ export const GROCERY_BLOG_PAGE_BLOCKS: TemplateBlock[] = [
   {
     id: "grocery-blog-footer",
     type: "groceryFooter",
-    props: {},
+    settings: {},
   },
 ];
 
@@ -249,11 +249,11 @@ export const GROCERY_BLOG_PAGE_BLOCKS: TemplateBlock[] = [
    Source: https://woodmart.xtemos.com/shop/demo/grocery/
    ═══════════════════════════════════════════════════════════════ */
 
-export const GROCERY_SHOP_PAGE_BLOCKS: TemplateBlock[] = [
+export const GROCERY_SHOP_PAGE_BLOCKS: EditorNode[] = [
   {
     id: "grocery-shop-title",
     type: "grocerySectionTitle",
-    props: {
+    settings: {
       subtitle: "",
       title: "Shop",
       align: "center",
@@ -262,7 +262,7 @@ export const GROCERY_SHOP_PAGE_BLOCKS: TemplateBlock[] = [
   {
     id: "grocery-shop-categories",
     type: "groceryCategoryGrid",
-    props: {
+    settings: {
       sectionTitle: "Popular Categories",
       categories: [
         { name: "Fruits", slug: "fruits", image: "https://woodmart.xtemos.com/wp-content/uploads/2020/07/grocery-cat-1.jpg", productCount: 12 },
@@ -276,7 +276,7 @@ export const GROCERY_SHOP_PAGE_BLOCKS: TemplateBlock[] = [
   {
     id: "grocery-shop-products",
     type: "groceryProductGrid",
-    props: {
+    settings: {
       columns: 4,
       maxProducts: 12,
       filter: "all",
@@ -288,7 +288,7 @@ export const GROCERY_SHOP_PAGE_BLOCKS: TemplateBlock[] = [
   {
     id: "grocery-shop-newsletter",
     type: "groceryNewsletter",
-    props: {
+    settings: {
       title: "Hey you, sign up and connect to Woodmart!",
       subtitle: "Be the first to learn about our latest trends and get exclusive offers",
     },
@@ -296,6 +296,6 @@ export const GROCERY_SHOP_PAGE_BLOCKS: TemplateBlock[] = [
   {
     id: "grocery-shop-footer",
     type: "groceryFooter",
-    props: {},
+    settings: {},
   },
 ];

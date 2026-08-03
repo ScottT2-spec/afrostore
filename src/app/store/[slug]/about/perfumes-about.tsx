@@ -5,6 +5,7 @@ import { PerfumesHeader, PerfumesFooter } from "@/components/storefront/Perfumes
 import { RenderTemplateBlocks } from "@/components/storefront/TemplateBlockRenderer";
 import { PerfumesStoreContext } from "@/components/storefront/PerfumesTemplateBlocks";
 import { PERFUMES_ABOUT_PAGE_BLOCKS } from "@/lib/templates/presets/perfumes-page-presets";
+import { resolveLivePageContent } from "@/lib/templates/bespoke-page-content";
 
 export default function PerfumesAboutPage() {
   const params = useParams();
@@ -45,15 +46,17 @@ export default function PerfumesAboutPage() {
     socialLinks: socialLinksArray,
   };
 
-  // Use blocks from database if available, otherwise use preset
-  const blocks = pageData?.content?.blocks && pageData.content.blocks.length > 0 
-    ? pageData.content.blocks 
-    : PERFUMES_ABOUT_PAGE_BLOCKS;
+  const resolvedPage = pageData?.content
+    ? resolveLivePageContent("perfumes", "about", pageData.content)
+    : null;
+  const blocks = resolvedPage?.blocks.length ? resolvedPage.blocks : PERFUMES_ABOUT_PAGE_BLOCKS;
+  const pageNodeCss = resolvedPage?.css || "";
 
   return (
-    <div style={{ minHeight: "100vh", background: "#fff" }}>
+      <div style={{ minHeight: "100vh", background: "#fff" }}>
       <PerfumesHeader storeName={store.name} storeSlug={slug} logo={store.logo} />
       <PerfumesStoreContext.Provider value={ctxValue}>
+        {pageNodeCss && <style data-live-node-styles dangerouslySetInnerHTML={{ __html: pageNodeCss }} />}
         <RenderTemplateBlocks blocks={blocks} />
       </PerfumesStoreContext.Provider>
       <PerfumesFooter storeName={store.name} storeSlug={slug} logo={store.logo} description={store.description} socialLinks={socialLinksArray} />

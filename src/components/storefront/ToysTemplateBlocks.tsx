@@ -5,6 +5,8 @@ import { resolveStoreLink } from "@/lib/template-link-utils";
 import { useState, useEffect, createContext, useContext } from "react";
 import { safeSrc, onImgError } from "./image-fallback";
 import { useNewsletterSubscribe } from "@/hooks/useNewsletterSubscribe";
+import { normalizeTextArray, toDisplayText } from "@/components/storefront/prop-normalizers";
+import { InlineEditableText } from "@/components/storefront/InlineEditableText";
 
 /* ═══════════════════════════════════════════════════════════════
    TOYS TEMPLATE BLOCKS
@@ -71,7 +73,7 @@ export interface ToysHeroSliderProps {
   slides?: ToysHeroSlide[]; autoplaySpeed?: number;
 }
 
-export function ToysHeroSlider({ slides, autoplaySpeed = 5000 }: ToysHeroSliderProps) {
+export function ToysHeroSlider({ slides = [], autoplaySpeed = 5000 }: ToysHeroSliderProps) {
   const storeCtx = useContext(ToysStoreContext);
   const fixLink = (link: string) => resolveStoreLink(link, storeCtx?.storeSlug);
 
@@ -117,9 +119,9 @@ export function ToysHeroSlider({ slides, autoplaySpeed = 5000 }: ToysHeroSliderP
           <div className="ty-slide-bg" style={{ backgroundColor: slide.backgroundColor, backgroundImage: slide.backgroundImage ? `url(${slide.backgroundImage})` : undefined }} />
           <div className="ty-slide-inner">
             <div className="ty-slide-text">
-              <h2 className="ty-slide-title">{slide.titleLine1}<br />{slide.titleLine2}</h2>
-              {slide.description && <p className="ty-slide-desc">{slide.description}</p>}
-              <Link href={fixLink(slide.buttonLink)} className="ty-slide-btn">{slide.buttonText}</Link>
+              <InlineEditableText as="h2" field={`slides.${i}.titleLine1`} value={slide.titleLine1} isEditor={true} className="ty-slide-title" />
+              <InlineEditableText as="p" field={`slides.${i}.description`} value={slide.description || ""} isEditor={true} multiline className="ty-slide-desc" />
+              <Link href={fixLink(slide.buttonLink)} className="ty-slide-btn"><InlineEditableText as="span" field={`slides.${i}.buttonText`} value={slide.buttonText} isEditor={true} selectNodeOnFocus={false} /></Link>
             </div>
             <div className="ty-slide-img">
               <img src={slide.productImage} alt={slide.titleLine1} onError={(e) => onImgError(e, slide.titleLine1)} />
@@ -147,7 +149,7 @@ export interface ToysBannerCardsProps {
   cards?: ToysBannerCard[];
 }
 
-export function ToysBannerCards({ cards }: ToysBannerCardsProps) {
+export function ToysBannerCards({ cards = [] }: ToysBannerCardsProps) {
   const storeCtx = useContext(ToysStoreContext);
   const defaultCards: ToysBannerCard[] = [
     { label: "Disney", title: "Soft Toys.", image: `${IMG}/2018/10/v-toy-banner-img-1-opt.jpg`, link: "#" },
@@ -175,8 +177,8 @@ export function ToysBannerCards({ cards }: ToysBannerCardsProps) {
           <Link key={i} href={resolveStoreLink(b.link, storeCtx?.storeSlug)} className="ty-banner">
             <img className="ty-banner-img" src={b.image} alt={b.title} onError={(e) => onImgError(e, b.title)} />
             <div className="ty-banner-content">
-              <div className="ty-banner-label">{b.label}</div>
-              <h4 className="ty-banner-title">{b.title}</h4>
+              <InlineEditableText as="div" field={`cards.${i}.label`} value={b.label} isEditor={true} className="ty-banner-label" />
+              <InlineEditableText as="h4" field={`cards.${i}.title`} value={b.title} isEditor={true} className="ty-banner-title" />
             </div>
           </Link>
         ))}
@@ -221,9 +223,9 @@ export function ToysVideoWelcome({
           <div className="ty-video-play" />
         </a>
         <div>
-          <div className="ty-welcome-sub">{subtitle}</div>
-          <h3 className="ty-welcome-title">{title}</h3>
-          <p className="ty-welcome-desc">{description}</p>
+        <InlineEditableText as="div" field="subtitle" value={subtitle} isEditor={true} className="ty-welcome-sub" />
+        <InlineEditableText as="h3" field="title" value={title} isEditor={true} className="ty-welcome-title" />
+        <InlineEditableText as="p" field="description" value={description} isEditor={true} multiline className="ty-welcome-desc" />
         </div>
       </div>
     </div>
@@ -241,7 +243,7 @@ export interface ToysFeaturesBarProps {
   features?: ToysFeature[];
 }
 
-export function ToysFeaturesBar({ features }: ToysFeaturesBarProps) {
+export function ToysFeaturesBar({ features = [] }: ToysFeaturesBarProps) {
   const defaultFeatures: ToysFeature[] = [
     { icon: `${IMG}/2018/02/v-toy-shape-1.svg`, title: "Free Shipping", description: "It is a long established fact that a reader will be." },
     { icon: `${IMG}/2018/02/v-toy-shape-2.svg`, title: "Support 24", description: "Various versions have evolved over." },
@@ -364,7 +366,8 @@ export function ToysProductGrid({
 }: ToysProductGridProps) {
   const storeCtx = useContext(ToysStoreContext);
   const fixLink = (slug: string) => storeCtx?.storeSlug ? `/store/${storeCtx.storeSlug}/product/${slug}` : "#";
-  const defaultTabs = tabs || [];
+  const defaultTabs = normalizeTextArray(tabs, []);
+  const visibleTabs = Array.isArray(defaultTabs) ? defaultTabs : [];
   const [activeTab, setActiveTab] = useState(0);
 
   const defaultProducts: ToysProduct[] = [
@@ -407,9 +410,9 @@ export function ToysProductGrid({
       <ScopedStyles id="products" css={css} />
       <div style={containerStyle}>
         {sectionTitle && <ToysSectionTitle subtitle={sectionSubtitle} title={sectionTitle} description={sectionDescription} />}
-        {defaultTabs.length > 0 && (
+        {visibleTabs.length > 0 && (
           <div className="ty-tabs">
-            {defaultTabs.map((tab, i) => <button key={i} className={`ty-tab ${i === activeTab ? "ty-active" : ""}`} onClick={() => setActiveTab(i)}>{tab}</button>)}
+            {visibleTabs.map((tab, i) => <button key={i} className={`ty-tab ${i === activeTab ? "ty-active" : ""}`} onClick={() => setActiveTab(i)}>{tab}</button>)}
           </div>
         )}
         <div className="ty-prod-grid" style={{ gridTemplateColumns: `repeat(${columns}, 1fr)` }}>
@@ -420,7 +423,7 @@ export function ToysProductGrid({
               </div>
               <div className="ty-prod-info">
                 <h3 className="ty-prod-name"><Link href={fixLink(p.slug)}>{p.name}</Link></h3>
-                <div className="ty-prod-cat">{p.category}</div>
+                <div className="ty-prod-cat">{toDisplayText(p.category, "")}</div>
                 <div className="ty-prod-price">${p.price}</div>
                 <button className="ty-prod-btn" onClick={() => storeCtx?.addToCart?.(String(p.id))}>Add to cart</button>
               </div>

@@ -7,6 +7,8 @@ import { getLinkedPageTemplate } from "@/lib/page-content";
 import { mergeStoredTemplatePages } from "@/lib/templates/site-instance";
 import { ensureVegetablePages } from "@/lib/templates/vegetable-pages";
 import { ensureTemplatePages } from "@/lib/templates/template-pages";
+import { buildTemplatePageContent } from "@/lib/templates/template-tree";
+import { parsePageContent } from "@/lib/page-content";
 import { mergeBespokeTemplateBlocks } from "@/lib/templates/bespoke-page-content";
 import type { Prisma } from "@/generated/prisma";
 
@@ -102,7 +104,13 @@ export async function POST(req: NextRequest, { params }: Params) {
 
     // If content is not provided, seed it with default blocks
     let content = parsed.data.content;
-    if (!content || (typeof content === 'object' && !content.blocks)) {
+    const parsedContent = parsePageContent(content);
+    const hasTreeContent =
+      (Array.isArray(parsedContent.elements) && parsedContent.elements.length > 0) ||
+      parsedContent.blocks.length > 0 ||
+      Object.keys(parsedContent.settings || {}).length > 0;
+
+    if (!hasTreeContent) {
       const defaultBlocks = mergeBespokeTemplateBlocks(
         templateSlug,
         slug,
@@ -114,7 +122,7 @@ export async function POST(req: NextRequest, { params }: Params) {
           templateSlug
         }
       );
-      content = { blocks: defaultBlocks };
+      content = buildTemplatePageContent(defaultBlocks, {});
     }
 
     const page = await prisma.page.create({

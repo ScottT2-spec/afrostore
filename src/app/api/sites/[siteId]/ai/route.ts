@@ -54,7 +54,6 @@ export async function POST(req: NextRequest, { params }: Params) {
 
     const response = await chatWithAI({
       siteId,
-      userId: ctx.user!.id,
       message: message.trim(),
       images: validImages,
       conversationHistory: history,

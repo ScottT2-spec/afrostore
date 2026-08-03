@@ -297,10 +297,11 @@ export function buildSmartAiBlocks(input: SmartBlockInput): TemplateBlock[] {
   const ai = aiContent || {};
 
   for (const block of blocks) {
+    const props = (block.props ||= {});
     switch (block.type) {
       case "aiAnnouncementBar": {
         const msgs = ai.announcement as string[] | undefined;
-        block.props.messages = msgs && msgs.length > 0
+        props.messages = msgs && msgs.length > 0
           ? msgs
           : [
               `Welcome to ${storeName}`,
@@ -312,10 +313,10 @@ export function buildSmartAiBlocks(input: SmartBlockInput): TemplateBlock[] {
       }
 
       case "aiHeroVideo": {
-        block.props.backgroundImage = images.hero;
-        block.props.backgroundVideo = "";
+        props.backgroundImage = images.hero;
+        props.backgroundVideo = "";
         const heroButtons = ai.heroButtons as Array<{ text: string; link: string }> | undefined;
-        block.props.buttons = heroButtons
+        props.buttons = heroButtons
           ? heroButtons.map((b) => ({ text: b.text, link: `/store/${storeSlug}${b.link}`, style: "primary" }))
           : [
               { text: "Browse", link: `/store/${storeSlug}/shop`, style: "primary" },
@@ -333,7 +334,7 @@ export function buildSmartAiBlocks(input: SmartBlockInput): TemplateBlock[] {
           { title: "Trending", buttonLabels: ["See More"] },
         ]).slice(0, 4);
 
-        block.props.cards = cards.map((c, i) => ({
+        props.cards = cards.map((c, i) => ({
           title: c.title,
           image: images.categories[i % images.categories.length],
           overlayOpacity: 15,
@@ -359,7 +360,7 @@ export function buildSmartAiBlocks(input: SmartBlockInput): TemplateBlock[] {
           { title: "Featured Item 5", description: "Customer favorite", price: "$69", compareAtPrice: "$100" },
         ]).slice(0, 5);
 
-        block.props.tabs = [{
+        props.tabs = [{
           label: tabLabel,
           products: products.map((p, i) => ({
             title: p.title,
@@ -382,7 +383,7 @@ export function buildSmartAiBlocks(input: SmartBlockInput): TemplateBlock[] {
           { title: "Special Offers" },
         ];
 
-        block.props.tiles = promoTitles.slice(0, 3).map((p, i) => ({
+        props.tiles = promoTitles.slice(0, 3).map((p, i) => ({
           title: p.title,
           image: images.promos[i % images.promos.length],
           buttons: [
@@ -410,7 +411,7 @@ export function buildSmartAiBlocks(input: SmartBlockInput): TemplateBlock[] {
           { name: "Item 8", colorway: "Classic", price: "$62", compareAtPrice: "$125", badge: "POPULAR" },
         ]).slice(0, 8);
 
-        block.props.tabs = [{
+        props.tabs = [{
           label: tabLabel,
           products: productCards.map((p, i) => ({
             name: p.name,
@@ -428,7 +429,7 @@ export function buildSmartAiBlocks(input: SmartBlockInput): TemplateBlock[] {
 
       case "aiValueProps": {
         const vps = ai.valueProps as Array<{ title: string; description: string }> | undefined;
-        block.props.props = vps || [
+        props.props = vps || [
           { title: "Quality First", description: `We deliver the best in ${businessType}. Every product and service meets our high standards.` },
           { title: "Trusted by Thousands", description: "Join our growing community of satisfied customers who keep coming back." },
           { title: "Expert Support", description: "Our team is here to help you every step of the way. Reach out anytime." },
@@ -437,21 +438,21 @@ export function buildSmartAiBlocks(input: SmartBlockInput): TemplateBlock[] {
       }
 
       case "aiFooter": {
-        block.props.copyrightText = `© ${new Date().getFullYear()} ${storeName}. All rights reserved.`;
+        props.copyrightText = `© ${new Date().getFullYear()} ${storeName}. All rights reserved.`;
         const footerCols = ai.footerColumns as Array<{
           title: string; links: Array<{ text: string; link: string }>;
         }> | undefined;
 
         if (footerCols) {
-          block.props.columns = footerCols.map((col) => ({
+          props.columns = footerCols.map((col) => ({
             title: col.title,
             links: col.links.map((l) => ({
               text: l.text,
-              link: l.link.startsWith("/store") ? l.link : `/store/${storeSlug}${l.link}`,
+              link: typeof l.link === "string" && l.link.startsWith("/store") ? l.link : `/store/${storeSlug}${String(l.link || "")}`,
             })),
           }));
         } else {
-          block.props.columns = [
+          props.columns = [
             { title: "Help", links: [
               { text: "Contact Us", link: `/store/${storeSlug}/contact` },
               { text: "FAQ", link: `/store/${storeSlug}/faq` },

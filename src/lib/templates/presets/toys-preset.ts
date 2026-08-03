@@ -1,24 +1,66 @@
-import type { TemplateBlock } from "@/components/storefront/TemplateBlockRenderer";
+import type { EditorNode } from "@/lib/visual-editor/node-tree";
 
 const IMG = "https://woodmart.xtemos.com/wp-content/uploads";
 
-export const TOYS_TEMPLATE_PRESET: TemplateBlock[] = [
+export const TOYS_TEMPLATE_PRESET: EditorNode[] = [
   {
     id: "toys-hero",
     type: "toysHeroSlider",
-    props: {
-      slides: [
-        { titleLine1: "Guardian", titleLine2: "Of The Galaxy.", description: "Official Marvel movie action figures.", buttonText: "SHOP NOW", buttonLink: "#", backgroundColor: "#1a1a2e", productImage: `${IMG}/2021/06/v-toy-sl-3.png`, backgroundImage: `${IMG}/2018/10/v-toy-sl3-bg-1-opt.jpg` },
-        { titleLine1: "Star Wars", titleLine2: "Toy Figures.", description: "There are many variations of passages.", buttonText: "SHOP NOW", buttonLink: "#", backgroundColor: "#0f3460", productImage: `${IMG}/2021/06/v-toy-sl-1.png`, backgroundImage: `${IMG}/2018/10/v-toy-sl-bg-1-opt.jpg` },
-        { titleLine1: "Toy Story", titleLine2: "Action Figures.", description: "There are many variations of passages.", buttonText: "SHOP NOW", buttonLink: "#", backgroundColor: "#e94560", productImage: `${IMG}/2021/06/w-toys-slider-3.png`, backgroundImage: `${IMG}/2018/02/v-toy-sl2-bg.jpg` },
+          settings: {
+        autoplaySpeed: 5000,
+      },
+      elements: [
+        {
+          id: "toys-hero-slide-1",
+          type: "slide",
+          settings:           {
+            "titleLine1": "Guardian",
+            "titleLine2": "Of The Galaxy.",
+            "description": "Official Marvel movie action figures.",
+            "buttonText": "SHOP NOW",
+            "buttonLink": "#",
+            "backgroundColor": "#1a1a2e",
+            "productImage": "https://woodmart.xtemos.com/wp-content/uploads/2021/06/v-toy-sl-3.png",
+            "backgroundImage": "https://woodmart.xtemos.com/wp-content/uploads/2018/10/v-toy-sl3-bg-1-opt.jpg"
+          },
+          elements: [],
+        },
+        {
+          id: "toys-hero-slide-2",
+          type: "slide",
+          settings:           {
+            "titleLine1": "Star Wars",
+            "titleLine2": "Toy Figures.",
+            "description": "There are many variations of passages.",
+            "buttonText": "SHOP NOW",
+            "buttonLink": "#",
+            "backgroundColor": "#0f3460",
+            "productImage": "https://woodmart.xtemos.com/wp-content/uploads/2021/06/v-toy-sl-1.png",
+            "backgroundImage": "https://woodmart.xtemos.com/wp-content/uploads/2018/10/v-toy-sl-bg-1-opt.jpg"
+          },
+          elements: [],
+        },
+        {
+          id: "toys-hero-slide-3",
+          type: "slide",
+          settings:           {
+            "titleLine1": "Toy Story",
+            "titleLine2": "Action Figures.",
+            "description": "There are many variations of passages.",
+            "buttonText": "SHOP NOW",
+            "buttonLink": "#",
+            "backgroundColor": "#e94560",
+            "productImage": "https://woodmart.xtemos.com/wp-content/uploads/2021/06/w-toys-slider-3.png",
+            "backgroundImage": "https://woodmart.xtemos.com/wp-content/uploads/2018/02/v-toy-sl2-bg.jpg"
+          },
+          elements: [],
+        }
       ],
-      autoplaySpeed: 5000,
-    },
   },
   {
     id: "toys-banners",
     type: "toysBannerCards",
-    props: {
+    settings: {
       cards: [
         { label: "Disney", title: "Soft Toys.", image: `${IMG}/2018/10/v-toy-banner-img-1-opt.jpg`, link: "#" },
         { label: "Movies", title: "Hector Toy.", image: `${IMG}/2018/10/v-toy-banner-img-2-opt.jpg`, link: "#" },
@@ -29,7 +71,7 @@ export const TOYS_TEMPLATE_PRESET: TemplateBlock[] = [
   {
     id: "toys-video-welcome",
     type: "toysVideoWelcome",
-    props: {
+    settings: {
       videoThumbnail: `${IMG}/2018/10/v-toy-video-img-opt.jpg`,
       videoUrl: "https://www.youtube.com/watch?v=XHOmBV4js_E",
       subtitle: "Curabitur aliquet quam",
@@ -40,7 +82,7 @@ export const TOYS_TEMPLATE_PRESET: TemplateBlock[] = [
   {
     id: "toys-features",
     type: "toysFeaturesBar",
-    props: {
+    settings: {
       features: [
         { icon: `${IMG}/2018/02/v-toy-shape-1.svg`, title: "Free Shipping", description: "It is a long established fact that a reader will be." },
         { icon: `${IMG}/2018/02/v-toy-shape-2.svg`, title: "Support 24", description: "Various versions have evolved over." },
@@ -51,7 +93,7 @@ export const TOYS_TEMPLATE_PRESET: TemplateBlock[] = [
   {
     id: "toys-age-categories",
     type: "toysAgeCategories",
-    props: {
+    settings: {
       subtitle: "Choose your category",
       title: "Kids' Toys by Age",
       categories: [
@@ -66,7 +108,7 @@ export const TOYS_TEMPLATE_PRESET: TemplateBlock[] = [
   {
     id: "toys-best-selling",
     type: "toysProductGrid",
-    props: {
+    settings: {
       sectionSubtitle: "Our most popular",
       sectionTitle: "Best Selling Toys",
       sectionDescription: "There are many variations of passages of lorem ipsum available.",
@@ -78,7 +120,7 @@ export const TOYS_TEMPLATE_PRESET: TemplateBlock[] = [
   {
     id: "toys-limited-offer",
     type: "toysLimitedOffer",
-    props: {
+    settings: {
       subtitle: "Don't miss your chance",
       title: "Limited Time Offer",
       description: "There are many variations of passages of lorem ipsum available, but the majority have suffered alteration in some form, by injected humour, or randomised words which don't look even slightly believable. If you are going to use a passage of lorem ipsum, you need to be sure.",
@@ -90,7 +132,7 @@ export const TOYS_TEMPLATE_PRESET: TemplateBlock[] = [
   {
     id: "toys-reviews",
     type: "toysTestimonials",
-    props: {
+    settings: {
       subtitle: "Check our latest",
       title: "Customer Reviews",
       testimonials: [
@@ -103,7 +145,7 @@ export const TOYS_TEMPLATE_PRESET: TemplateBlock[] = [
   {
     id: "toys-featured",
     type: "toysProductGrid",
-    props: {
+    settings: {
       sectionSubtitle: "Our most popular",
       sectionTitle: "Featured Store Items",
       sectionDescription: "There are many variations of passages of lorem ipsum available.",
@@ -115,7 +157,7 @@ export const TOYS_TEMPLATE_PRESET: TemplateBlock[] = [
   {
     id: "toys-newsletter",
     type: "toysNewsletter",
-    props: {
+    settings: {
       title: "Join our mailing list to receive any latest updates and promotions",
     },
   },

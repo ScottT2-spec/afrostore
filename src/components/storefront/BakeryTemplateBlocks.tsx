@@ -4,6 +4,7 @@ import Link from "next/link";
 import { resolveStoreLink, resolveFooterLink } from "@/lib/template-link-utils";
 import { useState, useEffect, useRef, useCallback, createContext, useContext } from "react";
 import { safeSrc, onImgError } from "./image-fallback";
+import { InlineEditableText } from "@/components/storefront/InlineEditableText";
 
 /* ═══════════════════════════════════════════════════════════════
    BAKERY (SWEETS BAKERY) TEMPLATE BLOCKS
@@ -133,7 +134,7 @@ export interface BakeryHeroSliderProps {
   autoplaySpeed?: number;
 }
 
-export function BakeryHeroSlider({ slides, autoplaySpeed = 5000 }: BakeryHeroSliderProps) {
+export function BakeryHeroSlider({ slides = [], autoplaySpeed = 5000 }: BakeryHeroSliderProps) {
   const storeCtx = useContext(BakeryStoreContext);
   const fixLink = (link: string) => resolveStoreLink(link, storeCtx?.storeSlug);
 
@@ -211,9 +212,9 @@ export function BakeryHeroSlider({ slides, autoplaySpeed = 5000 }: BakeryHeroSli
           <div style={containerStyle}>
             <div className="bk-slide-inner">
               <div className="bk-slide-text">
-                <div className="bk-slide-subtitle">{slide.subtitle}</div>
-                <h2 className="bk-slide-title">{slide.titleLine1}<br />{slide.titleLine2}</h2>
-                <Link href={fixLink(slide.buttonLink)} className="bk-slide-btn">{slide.buttonText}</Link>
+                <InlineEditableText as="div" field={`slides.${i}.subtitle`} value={slide.subtitle} isEditor={true} className="bk-slide-subtitle" />
+                <InlineEditableText as="h2" field={`slides.${i}.titleLine1`} value={slide.titleLine1} isEditor={true} className="bk-slide-title" />
+                <Link href={fixLink(slide.buttonLink)} className="bk-slide-btn"><InlineEditableText as="span" field={`slides.${i}.buttonText`} value={slide.buttonText} isEditor={true} selectNodeOnFocus={false} /></Link>
               </div>
               <div className="bk-slide-img">
                 <img src={slide.productImage} alt={slide.titleLine1}  onError={(e) => onImgError(e, slide.titleLine1)} />
@@ -250,9 +251,9 @@ export function BakerySectionTitle({ subtitle, title, description, align = "cent
   return (
     <div style={{ ...containerStyle, textAlign: align, marginBottom: "30px" }}>
       <div style={{ maxWidth, margin: align === "center" ? "0 auto" : "0" }}>
-        {subtitle && <div style={{ fontFamily: TOKENS.scriptFont, fontSize: "30px", color: TOKENS.primaryColor, marginBottom: "5px" }}>{subtitle}</div>}
-        <h4 style={{ fontFamily: TOKENS.titleFont, fontWeight: 600, fontSize: titleSize, lineHeight: "1.3", color: TOKENS.titleColor, margin: "0 0 10px" }}>{title}</h4>
-        {description && <p style={{ fontFamily: TOKENS.bodyFont, fontSize: "16px", lineHeight: "26px", color: TOKENS.textColor, margin: 0 }}>{description}</p>}
+        {subtitle && <InlineEditableText as="div" field="subtitle" value={subtitle} isEditor={true} style={{ fontFamily: TOKENS.scriptFont, fontSize: "30px", color: TOKENS.primaryColor, marginBottom: "5px" }} />}
+        <InlineEditableText as="h4" field="title" value={title} isEditor={true} style={{ fontFamily: TOKENS.titleFont, fontWeight: 600, fontSize: titleSize, lineHeight: "1.3", color: TOKENS.titleColor, margin: "0 0 10px" }} />
+        {description && <InlineEditableText as="p" field="description" value={description} isEditor={true} multiline style={{ fontFamily: TOKENS.bodyFont, fontSize: "16px", lineHeight: "26px", color: TOKENS.textColor, margin: 0 }} />}
       </div>
     </div>
   );
@@ -276,7 +277,7 @@ export interface BakeryCategoryInfoBoxesProps {
   items?: BakeryCategoryInfoBox[];
 }
 
-export function BakeryCategoryInfoBoxes({ sectionTitle = "Our Fine Home-Made Chocolate", sectionSubtitle = "Sweets Bakery", items }: BakeryCategoryInfoBoxesProps) {
+export function BakeryCategoryInfoBoxes({ sectionTitle = "Our Fine Home-Made Chocolate", sectionSubtitle = "Sweets Bakery", items = [] }: BakeryCategoryInfoBoxesProps) {
   const storeCtx = useContext(BakeryStoreContext);
   const defaultItems: BakeryCategoryInfoBox[] = [
     { icon: `${IMG}/2019/07/svg-bakery-infobox-1.svg`, title: "Cupcakes", description: "There are some redeeming factors in favor of greeking text", buttonText: "Learn More" },
@@ -306,9 +307,9 @@ export function BakeryCategoryInfoBoxes({ sectionTitle = "Our Fine Home-Made Cho
         {boxes.map((box, i) => (
           <div key={i} className="bk-catbox">
             <div className="bk-catbox-icon"><img src={box.icon} alt={box.title}  onError={(e) => onImgError(e, box.title)} /></div>
-            <h4 className="bk-catbox-title">{box.title}</h4>
-            <p className="bk-catbox-desc">{box.description}</p>
-            {box.buttonText && <Link href={resolveStoreLink(box.buttonLink || "#", storeCtx?.storeSlug)} className="bk-catbox-btn">{box.buttonText} →</Link>}
+            <InlineEditableText as="h4" field={`items.${i}.title`} value={box.title} isEditor={true} className="bk-catbox-title" />
+            <InlineEditableText as="p" field={`items.${i}.description`} value={box.description} isEditor={true} multiline className="bk-catbox-desc" />
+            {box.buttonText && <Link href={resolveStoreLink(box.buttonLink || "#", storeCtx?.storeSlug)} className="bk-catbox-btn"><InlineEditableText as="span" field={`items.${i}.buttonText`} value={box.buttonText} isEditor={true} selectNodeOnFocus={false} /> →</Link>}
           </div>
         ))}
       </div>
@@ -357,10 +358,10 @@ export function BakeryHandmade({
       <div className="bk-handmade">
         <div className="bk-handmade-img"><img src={image} alt="Handmade Cakes"  onError={(e) => onImgError(e, "fallback")} /></div>
         <div className="bk-handmade-content">
-          <div className="bk-handmade-subtitle">{subtitle}</div>
-          <h4 className="bk-handmade-title">{title}</h4>
-          <p className="bk-handmade-desc">{description}</p>
-          <Link href={resolveStoreLink(buttonLink, storeCtx?.storeSlug)} className="bk-handmade-btn">{buttonText}</Link>
+          <InlineEditableText as="div" field="subtitle" value={subtitle} isEditor={true} className="bk-handmade-subtitle" />
+          <InlineEditableText as="h4" field="title" value={title} isEditor={true} className="bk-handmade-title" />
+          <InlineEditableText as="p" field="description" value={description} isEditor={true} multiline className="bk-handmade-desc" />
+          <Link href={resolveStoreLink(buttonLink, storeCtx?.storeSlug)} className="bk-handmade-btn"><InlineEditableText as="span" field="buttonText" value={buttonText} isEditor={true} selectNodeOnFocus={false} /></Link>
         </div>
       </div>
     </div>
@@ -542,7 +543,7 @@ export interface BakeryBlogPostsProps {
   marginBottom?: string;
 }
 
-export function BakeryBlogPosts({ posts, columns = 4, sectionTitle = "Our New Articles", sectionSubtitle = "Sweets Bakery", marginBottom = "80px" }: BakeryBlogPostsProps) {
+export function BakeryBlogPosts({ posts = [], columns = 4, sectionTitle = "Our New Articles", sectionSubtitle = "Sweets Bakery", marginBottom = "80px" }: BakeryBlogPostsProps) {
   const defaultPosts: BakeryBlogPost[] = [
     { title: "Seating collection inspiration by modern", image: `${IMG}/2019/07/bakery-blog-img-1.jpg`, date: "July 15, 2019", author: "Admin" },
     { title: "Green interior design inspiration", image: `${IMG}/2019/07/bakery-blog-img-2.jpg`, date: "July 15, 2019", author: "Admin" },

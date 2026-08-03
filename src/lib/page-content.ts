@@ -1,4 +1,7 @@
-import type { BuilderBlock } from "@/components/storefront/BlockRenderer";
+import type { BuilderBlock as StorefrontBuilderBlock } from "@/components/storefront/BlockRenderer";
+import type { EditorNode } from "@/lib/visual-editor/node-tree";
+import { buildEditorNodeTreeCss } from "@/lib/visual-editor/node-tree";
+import { templateBlocksToEditorTree } from "@/lib/templates/template-tree";
 
 export interface PageSettings {
   backgroundColor?: string | null;
@@ -12,8 +15,17 @@ export interface PageSettings {
 }
 
 export interface PageContentDocument {
-  blocks: BuilderBlock[];
+  blocks: StorefrontBuilderBlock[];
+  elements?: EditorNode[];
   settings: PageSettings;
+}
+
+export interface BuilderBlock {
+  id: string;
+  type: string;
+  props?: Record<string, unknown>;
+  styleOverrides?: Record<string, unknown>;
+  elements?: BuilderBlock[];
 }
 
 const EMPTY_PAGE_CONTENT: PageContentDocument = {
@@ -21,8 +33,34 @@ const EMPTY_PAGE_CONTENT: PageContentDocument = {
   settings: {},
 };
 
+const isPlainObject = (value: unknown): value is Record<string, unknown> => {
+  return Boolean(value) && typeof value === "object" && !Array.isArray(value);
+};
+
 function normalizeBlocks(value: unknown): BuilderBlock[] {
-  return Array.isArray(value) ? (value as BuilderBlock[]) : [];
+  if (!Array.isArray(value)) return [];
+  return value as BuilderBlock[];
+}
+
+function normalizeElements(value: unknown): EditorNode[] | undefined {
+  if (!Array.isArray(value)) return undefined;
+  return value as EditorNode[];
+}
+
+function normalizeElementsFromBlocks(value: unknown): EditorNode[] | undefined {
+  if (!Array.isArray(value)) return undefined;
+  const nodes = templateBlocksToEditorTree(value);
+  return nodes.length > 0 ? nodes : undefined;
+}
+
+function editorNodeToBlock(node: EditorNode): BuilderBlock {
+  return {
+    id: node.id,
+    type: node.type,
+    props: { ...node.settings },
+    styleOverrides: { ...node.settings },
+    elements: (node.elements || []).map(editorNodeToBlock),
+  };
 }
 
 function normalizeSettings(value: unknown): PageSettings {
@@ -51,7 +89,11 @@ function normalizeSettings(value: unknown): PageSettings {
 
 export function parsePageContent(content: unknown): PageContentDocument {
   if (Array.isArray(content)) {
-    return { ...EMPTY_PAGE_CONTENT, blocks: normalizeBlocks(content) };
+    return {
+      ...EMPTY_PAGE_CONTENT,
+      blocks: normalizeBlocks(content),
+      elements: normalizeElementsFromBlocks(content),
+    };
   }
 
   if (!content || typeof content !== "object") {
@@ -60,15 +102,43 @@ export function parsePageContent(content: unknown): PageContentDocument {
 
   const raw = content as Record<string, unknown>;
   const settings = normalizeSettings(raw.settings || raw.pageSettings || raw.background || raw.pageBackground);
+  const nestedContent = isPlainObject(raw.content) ? raw.content : undefined;
+  const elements = normalizeElements(raw.elements || nestedContent?.elements);
+
+  if (Array.isArray(elements) && elements.length > 0) {
+    return { blocks: elements.map(editorNodeToBlock), elements, settings };
+  }
 
   if (Array.isArray(raw.blocks)) {
-    return { blocks: normalizeBlocks(raw.blocks), settings };
+    return {
+      blocks: normalizeBlocks(raw.blocks),
+      elements: normalizeElementsFromBlocks(raw.blocks),
+      settings,
+    };
   }
 
   return { ...EMPTY_PAGE_CONTENT, settings };
 }
 
+export function buildPageContentNodeCss(content: unknown): string {
+  const parsed = parsePageContent(content);
+  const elements =
+    Array.isArray(parsed.elements) && parsed.elements.length > 0
+      ? parsed.elements
+      : normalizeElementsFromBlocks(parsed.blocks) || [];
+  if (elements.length === 0) return "";
+  return buildEditorNodeTreeCss(elements);
+}
+
 export function serializePageContent(document: PageContentDocument): Record<string, unknown> {
+  if (Array.isArray(document.elements) && document.elements.length > 0) {
+    return {
+      elements: document.elements,
+      blocks: Array.isArray(document.blocks) && document.blocks.length > 0 ? document.blocks : document.elements.map(editorNodeToBlock),
+      settings: document.settings || {},
+    };
+  }
+
   return {
     blocks: document.blocks,
     settings: document.settings || {},

@@ -2,7 +2,7 @@ import { FASHION_TEMPLATE_PRESET } from './presets/fashion-preset';
 import type { FashionSection } from '@/components/storefront/FashionPageRenderer';
 
 /**
- * Converts TemplateBlock[] to FashionSection[] format
+ * Converts EditorNode[] to FashionSection[] format
  * This is the seeding function that converts the hardcoded preset into database-ready sections
  */
 export function seedFashionPageSections(): FashionSection[] {
@@ -10,7 +10,7 @@ export function seedFashionPageSections(): FashionSection[] {
     id: block.id,
     type: block.type,
     order: index + 1,
-    props: block.props,
+    props: block.settings,
     styleOverrides: {},
   }));
 }

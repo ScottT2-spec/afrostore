@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { useState, useMemo } from "react";
 import { ArrowRight, Clock3, Star } from "lucide-react";
+import { InlineEditableText } from "@/components/storefront/InlineEditableText";
 
 /* ═══════════════════════════════════════════════════════════════
    VEGETABLE TEMPLATE BLOCKS
@@ -46,16 +47,16 @@ export function VegetableHero({
       <div className="mx-auto max-w-6xl">
         <div className="grid gap-10 lg:grid-cols-[1.05fr_0.95fr] lg:items-center">
           <div>
-            <p className="text-[11px] font-semibold uppercase tracking-[0.45em] text-[#8f7756]">{subtitle}</p>
-            <h1 className="mt-4 max-w-2xl font-serif text-5xl tracking-tight text-[#2a241a] sm:text-6xl">{title}</h1>
-            <p className="mt-6 max-w-xl text-base leading-8 text-[#63584b]">{description}</p>
+            <InlineEditableText as="p" field="subtitle" value={subtitle} isEditor={true} className="text-[11px] font-semibold uppercase tracking-[0.45em] text-[#8f7756]" />
+            <InlineEditableText as="h1" field="title" value={title} isEditor={true} className="mt-4 max-w-2xl font-serif text-5xl tracking-tight text-[#2a241a] sm:text-6xl" />
+            <InlineEditableText as="p" field="description" value={description} isEditor={true} multiline className="mt-6 max-w-xl text-base leading-8 text-[#63584b]" />
             <div className="mt-8 flex flex-wrap items-center gap-3">
               <Link href={primaryButtonLink} className="inline-flex items-center rounded-full bg-[#2a241a] px-6 py-3 text-xs font-semibold uppercase tracking-[0.2em] text-white transition-colors hover:bg-[#6f8f56]">
-                {primaryButtonText}
+                <InlineEditableText as="span" field="primaryButtonText" value={primaryButtonText} isEditor={true} selectNodeOnFocus={false} />
               </Link>
               {secondaryButtonText && secondaryButtonLink && (
                 <Link href={secondaryButtonLink} className="inline-flex items-center rounded-full border border-[#d7c8b6] px-6 py-3 text-xs font-semibold uppercase tracking-[0.2em] text-[#5d5143] transition-colors hover:border-[#9db27d] hover:text-[#33412e]">
-                  {secondaryButtonText}
+                  <InlineEditableText as="span" field="secondaryButtonText" value={secondaryButtonText} isEditor={true} selectNodeOnFocus={false} />
                 </Link>
               )}
             </div>

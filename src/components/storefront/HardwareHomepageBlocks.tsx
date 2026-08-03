@@ -51,6 +51,25 @@ function useSym() {
   return m[ctx?.currency || "USD"] || ctx?.currency || "$";
 }
 
+function normalizeBlogDate(date: unknown): { day: string; month: string } | null {
+  if (!date) return null;
+  if (typeof date === "object" && date !== null) {
+    const maybeDate = date as { day?: unknown; month?: unknown };
+    const day = typeof maybeDate.day === "string" || typeof maybeDate.day === "number" ? String(maybeDate.day) : "";
+    const month = typeof maybeDate.month === "string" || typeof maybeDate.month === "number" ? String(maybeDate.month) : "";
+    return day || month ? { day, month } : null;
+  }
+  if (typeof date === "string") {
+    const parts = date.trim().split(/\s+/).filter(Boolean);
+    if (parts.length === 0) return null;
+    const [first, second] = parts;
+    if (/^\d+$/.test(first || "")) return { day: first, month: second || "" };
+    if (/^\d+$/.test(second || "")) return { day: second, month: first || "" };
+    return { day: first, month: second || "" };
+  }
+  return null;
+}
+
 /* ═══════════════════════════════════════════════════════════════
    1. HARDWARE HERO SLIDER
    ═══════════════════════════════════════════════════════════════ */
@@ -72,7 +91,7 @@ export interface HwHeroSliderProps {
   autoplaySpeed?: number;
 }
 
-export function HardwareHomeHeroSlider({ slides, autoplaySpeed = 5000 }: HwHeroSliderProps) {
+export function HardwareHomeHeroSlider({ slides = [], autoplaySpeed = 5000 }: HwHeroSliderProps) {
   const fix = useFix();
   const [cur, setCur] = useState(0);
   const timerRef = useRef<ReturnType<typeof setInterval> | null>(null);
@@ -167,7 +186,7 @@ export interface HwCategoryGridProps {
   categories: HwCategory[];
 }
 
-export function HardwareHomeCategoryGrid({ categories }: HwCategoryGridProps) {
+export function HardwareHomeCategoryGrid({ categories = [] }: HwCategoryGridProps) {
   const fix = useFix();
   const css = `
     .hwcg-section { padding: 50px 0; background: ${T.bgDarker}; }
@@ -832,14 +851,18 @@ export function HardwareHomeLatestEvents({
           {description && <p className="hwle-desc">{description}</p>}
         </div>
         <div className="hwle-grid">
-          {posts.map((p, i) => (
+          {posts.map((p, i) => {
+            const normalizedDate = normalizeBlogDate((p as any).date);
+            return (
             <article key={i} className="hwle-card">
               <div className="hwle-img-wrap">
                 <img src={p.image} alt={p.title} className="hwle-img" loading="lazy" onError={(e) => onImgError(e, p.title)} />
-                <div className="hwle-date">
-                  <span className="hwle-date-day">{p.date.day}</span>
-                  <span className="hwle-date-month">{p.date.month}</span>
-                </div>
+                {normalizedDate && (
+                  <div className="hwle-date">
+                    <span className="hwle-date-day">{normalizedDate.day}</span>
+                    <span className="hwle-date-month">{normalizedDate.month}</span>
+                  </div>
+                )}
               </div>
               <div className="hwle-body">
                 <div className="hwle-cats">{p.categories.join(", ")}</div>
@@ -849,7 +872,7 @@ export function HardwareHomeLatestEvents({
                 <Link href={resolveStoreLink(p.link, ctx?.storeSlug)} className="hwle-read">Continue reading</Link>
               </div>
             </article>
-          ))}
+          );})}
         </div>
       </div>
     </div>

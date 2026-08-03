@@ -1,52 +1,67 @@
-import type { TemplateBlock } from "@/components/storefront/TemplateBlockRenderer";
+import type { EditorNode } from "@/lib/visual-editor/node-tree";
 
 /**
  * Grocery Template Preset
  * Recreates the WoodMart Grocery demo layout with editable blocks.
  */
-export const GROCERY_TEMPLATE_PRESET: TemplateBlock[] = [
+export const GROCERY_TEMPLATE_PRESET: EditorNode[] = [
   {
     id: "grocery-hero",
     type: "groceryHeroSlider",
-    props: {
-      autoplaySpeed: 5000,
-      slides: [
+          settings: {
+        autoplaySpeed: 5000
+      },
+      elements: [
         {
-          label: "WEEKLY DISCOUNTS",
-          titleLine1: "-30% Discount Products",
-          titleLine2: "On Barilla",
-          description: "Chances are there wasn\u2019t collaboration, communication there wasn\u2019t a process agreed upon or specified with.",
-          buttonText: "Read more",
-          buttonLink: "/shop",
-          backgroundColor: "#fdf3e7",
-          productImage: "https://woodmart.xtemos.com/wp-content/uploads/2020/06/grocery-slide-1-product.png",
+          id: "grocery-hero-slide-1",
+          type: "slide",
+          settings:           {
+            "label": "WEEKLY DISCOUNTS",
+            "titleLine1": "-30% Discount Products",
+            "titleLine2": "On Barilla",
+            "description": "Chances are there wasn’t collaboration, communication there wasn’t a process agreed upon or specified with.",
+            "buttonText": "Read more",
+            "buttonLink": "/shop",
+            "backgroundColor": "#fdf3e7",
+            "productImage": "https://woodmart.xtemos.com/wp-content/uploads/2020/06/grocery-slide-1-product.png"
+          },
+          elements: [],
         },
         {
-          label: "NEW SAUCES RANGE",
-          titleLine1: "Korean Style",
-          titleLine2: "Barbecue Sauce",
-          buttonText: "Read more",
-          buttonLink: "/shop",
-          backgroundColor: "#e8f5e9",
-          productImage: "https://woodmart.xtemos.com/wp-content/uploads/2020/06/grocery-slide-2-product.png",
+          id: "grocery-hero-slide-2",
+          type: "slide",
+          settings:           {
+            "label": "NEW SAUCES RANGE",
+            "titleLine1": "Korean Style",
+            "titleLine2": "Barbecue Sauce",
+            "buttonText": "Read more",
+            "buttonLink": "/shop",
+            "backgroundColor": "#e8f5e9",
+            "productImage": "https://woodmart.xtemos.com/wp-content/uploads/2020/06/grocery-slide-2-product.png"
+          },
+          elements: [],
         },
         {
-          label: "FRUITS PREMIUM DRINK",
-          titleLine1: "Best Juice Is",
-          titleLine2: "For Drink For You",
-          description: "It\u2019s like saying you\u2019re a bad designer, use less bold text, don\u2019t use italics in every other paragraph.",
-          buttonText: "Read more",
-          buttonLink: "/shop",
-          backgroundColor: "#fff3e0",
-          productImage: "https://woodmart.xtemos.com/wp-content/uploads/2020/06/grocery-slide-3-product.png",
-        },
+          id: "grocery-hero-slide-3",
+          type: "slide",
+          settings:           {
+            "label": "FRUITS PREMIUM DRINK",
+            "titleLine1": "Best Juice Is",
+            "titleLine2": "For Drink For You",
+            "description": "It’s like saying you’re a bad designer, use less bold text, don’t use italics in every other paragraph.",
+            "buttonText": "Read more",
+            "buttonLink": "/shop",
+            "backgroundColor": "#fff3e0",
+            "productImage": "https://woodmart.xtemos.com/wp-content/uploads/2020/06/grocery-slide-3-product.png"
+          },
+          elements: [],
+        }
       ],
-    },
   },
   {
     id: "grocery-features",
     type: "groceryFeaturesBar",
-    props: {
+    settings: {
       features: [
         { icon: "⭐", title: "Best Quality", description: "It\u2019s content strategy gone awry right from the start are wasn\u2019t." },
         { icon: "💳", title: "Online Payment", description: "Forswearing the use of Lorem Ipsum wouldn\u2019t have helped." },
@@ -57,7 +72,7 @@ export const GROCERY_TEMPLATE_PRESET: TemplateBlock[] = [
   {
     id: "grocery-products",
     type: "groceryProductGrid",
-    props: {
+    settings: {
       columns: 5,
       maxProducts: 10,
       sectionTitle: "SALE PRODUCTS",
@@ -68,7 +83,7 @@ export const GROCERY_TEMPLATE_PRESET: TemplateBlock[] = [
   {
     id: "grocery-promos",
     type: "groceryPromoBanners",
-    props: {
+    settings: {
       banners: [
         {
           subtitle: "WEEKLY DISCOUNTS",
@@ -90,7 +105,7 @@ export const GROCERY_TEMPLATE_PRESET: TemplateBlock[] = [
   {
     id: "grocery-categories",
     type: "groceryCategoryGrid",
-    props: {
+    settings: {
       sectionTitle: "POPULAR CATEGORIES",
       columns: 4,
       categories: [
@@ -104,7 +119,7 @@ export const GROCERY_TEMPLATE_PRESET: TemplateBlock[] = [
   {
     id: "grocery-bestsellers",
     type: "groceryBestSellers",
-    props: {
+    settings: {
       columns: 5,
       maxProducts: 10,
       products: [],
@@ -113,7 +128,7 @@ export const GROCERY_TEMPLATE_PRESET: TemplateBlock[] = [
   {
     id: "grocery-newsletter",
     type: "groceryNewsletter",
-    props: {
+    settings: {
       title: "Join our newsletter!",
       description: "Will be used in accordance with our Privacy Policy",
       buttonText: "Subscribe",
@@ -122,7 +137,7 @@ export const GROCERY_TEMPLATE_PRESET: TemplateBlock[] = [
   },
   {
     id: "grocery-footer", type: "groceryFooter",
-    props: {
+    settings: {
       logoUrl: "",
       logoAlt: "Store Logo",
       description: "Discover a curated collection of modern furniture designed to bring comfort and elegance into your home.",

@@ -1,17 +1,17 @@
-import type { TemplateBlock } from "@/components/storefront/TemplateBlockRenderer";
+import type { EditorNode } from "@/lib/visual-editor/node-tree";
 
-export const PERFUMES_CONTACT_PRESET: TemplateBlock[] = [
+export const PERFUMES_CONTACT_PRESET: EditorNode[] = [
   {
     id: "perfumes-contact-hero",
     type: "perfumesContactHero",
-    props: {
+    settings: {
       title: "Contact Us",
     },
   },
   {
     id: "perfumes-contact-info",
     type: "perfumesContactInfo",
-    props: {
+    settings: {
       items: [
         { label: "Our Address", value: "123 Perfume Lane, Paris, France" },
         { label: "Phone Number", value: "+33 1 23 45 67 89" },
@@ -23,7 +23,7 @@ export const PERFUMES_CONTACT_PRESET: TemplateBlock[] = [
   {
     id: "perfumes-contact-form",
     type: "perfumesContactForm",
-    props: {
+    settings: {
       title: "Get In Touch",
       description: "We'd love to hear from you! Whether you have a question, need assistance, or simply want to learn more about our fragrances, reach out to us. Fill in the form below, and we'll get back to you as soon as possible.",
     },
@@ -31,7 +31,7 @@ export const PERFUMES_CONTACT_PRESET: TemplateBlock[] = [
   {
     id: "perfumes-branded-stores",
     type: "perfumesBrandedStores",
-    props: {
+    settings: {
       title: "Our Branded Stores",
       stores: [
         { name: "Paris Store", phone: "+33 1 23 45 67 89", address: "1 Bd Saint-Germain, 75005 Paris" },

@@ -8,7 +8,7 @@ export const KIDS_ABOUT_PAGE_BLOCKS = [
   {
     id: "kids-about-announcement",
     type: "kidsAnnouncementBar",
-    props: {
+    settings: {
       text: "Sign up for our newsletter to get 30% off for the week!",
       link: "#newsletter",
       backgroundColor: "#10c349",
@@ -17,7 +17,7 @@ export const KIDS_ABOUT_PAGE_BLOCKS = [
   {
     id: "kids-about-header",
     type: "kidsHeader",
-    props: {
+    settings: {
       storeName: "Kids Store",
       storeSlug: "kids",
     },
@@ -25,7 +25,7 @@ export const KIDS_ABOUT_PAGE_BLOCKS = [
   {
     id: "kids-about-hero",
     type: "kidsAboutHero",
-    props: {
+    settings: {
       subtitle: "About Us",
       title: "Discover Favorites for Every Little One",
       bodyText: [
@@ -43,7 +43,7 @@ export const KIDS_ABOUT_PAGE_BLOCKS = [
   {
     id: "kids-about-team",
     type: "kidsTeamSection",
-    props: {
+    settings: {
       sectionTitle: {
         subtitle: "",
         title: "",
@@ -59,7 +59,7 @@ export const KIDS_ABOUT_PAGE_BLOCKS = [
   {
     id: "kids-about-how-we-work",
     type: "kidsTextSection",
-    props: {
+    settings: {
       sectionTitle: {
         subtitle: "Why Parents Choose Us",
         title: "What we Do",
@@ -74,7 +74,7 @@ export const KIDS_ABOUT_PAGE_BLOCKS = [
   {
     id: "kids-about-faq",
     type: "kidsFaqSection",
-    props: {
+    settings: {
       sectionTitle: {
         subtitle: "What You'll Find",
         title: "Baby Love",
@@ -99,7 +99,7 @@ export const KIDS_ABOUT_PAGE_BLOCKS = [
   {
     id: "kids-about-footer",
     type: "kidsFooterFull",
-    props: {
+    settings: {
       storeName: "Kids Store",
       storeSlug: "kids",
     },
@@ -110,7 +110,7 @@ export const KIDS_CONTACT_PAGE_BLOCKS = [
   {
     id: "kids-contact-announcement",
     type: "kidsAnnouncementBar",
-    props: {
+    settings: {
       text: "Sign up for our newsletter to get 20% off for the week!",
       link: "#newsletter",
       backgroundColor: "#39a454",
@@ -119,7 +119,7 @@ export const KIDS_CONTACT_PAGE_BLOCKS = [
   {
     id: "kids-contact-header",
     type: "kidsHeader",
-    props: {
+    settings: {
       storeName: "Kids Store",
       storeSlug: "kids",
     },
@@ -127,7 +127,7 @@ export const KIDS_CONTACT_PAGE_BLOCKS = [
   {
     id: "kids-contact-hero",
     type: "kidsContactHero",
-    props: {
+    settings: {
       address: "413 Waystreet Road, North Carolina, United States",
       showMapLink: true,
     },
@@ -135,7 +135,7 @@ export const KIDS_CONTACT_PAGE_BLOCKS = [
   {
     id: "kids-contact-info",
     type: "kidsContactInfo",
-    props: {
+    settings: {
       phone: "(097) 330-1233",
       hours: "9:00am - 5:00pm",
       days: "Monday - Friday",
@@ -151,14 +151,14 @@ export const KIDS_CONTACT_PAGE_BLOCKS = [
   {
     id: "kids-contact-form",
     type: "kidsContactForm",
-    props: {
+    settings: {
       title: "Get in touch",
     },
   },
   {
     id: "kids-contact-hours",
     type: "kidsOpeningHours",
-    props: {
+    settings: {
       title: "Monday - Friday",
       hours: [
         { label: "Hours", value: "9:00am - 5:00pm" },
@@ -176,7 +176,7 @@ export const KIDS_CONTACT_PAGE_BLOCKS = [
   {
     id: "kids-contact-footer",
     type: "kidsFooterFull",
-    props: {
+    settings: {
       storeName: "Kids Store",
       storeSlug: "kids",
     },
@@ -187,7 +187,7 @@ export const KIDS_BLOG_PAGE_BLOCKS = [
   {
     id: "kids-blog-announcement",
     type: "kidsAnnouncementBar",
-    props: {
+    settings: {
       text: "Sign up for our newsletter to get 45% off for the week!",
       link: "#newsletter",
       backgroundColor: "#73a97b",
@@ -196,7 +196,7 @@ export const KIDS_BLOG_PAGE_BLOCKS = [
   {
     id: "kids-blog-header",
     type: "kidsHeader",
-    props: {
+    settings: {
       storeName: "Kids Store",
       storeSlug: "kids",
     },
@@ -204,7 +204,7 @@ export const KIDS_BLOG_PAGE_BLOCKS = [
   {
     id: "kids-blog-grid",
     type: "kidsBlogPosts",
-    props: {
+    settings: {
       columns: 3,
       sectionTitle: {
         title: "Latest Articles",
@@ -215,7 +215,7 @@ export const KIDS_BLOG_PAGE_BLOCKS = [
   {
     id: "kids-blog-footer",
     type: "kidsFooterFull",
-    props: {
+    settings: {
       storeName: "Kids Store",
       storeSlug: "kids",
     },

@@ -1,4 +1,4 @@
-import type { TemplateBlock } from "@/components/storefront/TemplateBlockRenderer";
+import type { EditorNode } from "@/lib/visual-editor/node-tree";
 
 /**
  * Fashion Template Page Presets
@@ -12,11 +12,11 @@ import type { TemplateBlock } from "@/components/storefront/TemplateBlockRendere
    Source: https://woodmart.xtemos.com/about-us/demo/fashion/
    ═══════════════════════════════════════════════════════════════ */
 
-export const FASHION_ABOUT_PAGE_BLOCKS: TemplateBlock[] = [
+export const FASHION_ABOUT_PAGE_BLOCKS: EditorNode[] = [
   {
     id: "fashion-about-hero",
     type: "fashionSectionTitle",
-    props: {
+    settings: {
       subtitle: "XTEMOS IS A CREATIVE DESIGN AGENCY",
       title: "Our success and company history.",
       description: "A wonderful serenity has taken possession of my entire soul, like these sweet mornings of spring which I enjoy with my whole heart.",
@@ -28,7 +28,7 @@ export const FASHION_ABOUT_PAGE_BLOCKS: TemplateBlock[] = [
   {
     id: "fashion-about-hero-ctas",
     type: "fashionAboutContent",
-    props: {
+    settings: {
       layout: "ctas-only",
       buttons: [
         { text: "SEE PROJECTS", link: "/portfolio" },
@@ -39,7 +39,7 @@ export const FASHION_ABOUT_PAGE_BLOCKS: TemplateBlock[] = [
   {
     id: "fashion-about-story",
     type: "fashionAboutContent",
-    props: {
+    settings: {
       layout: "text-with-heading",
       subtitle: "WOODMART - BEST ECOMMERCE THEME 2021/22",
       title: "About Our Online Store",
@@ -56,7 +56,7 @@ export const FASHION_ABOUT_PAGE_BLOCKS: TemplateBlock[] = [
   {
     id: "fashion-about-stats",
     type: "fashionStatsCounters",
-    props: {
+    settings: {
       counters: [
         { value: 0, label: "SATISFIED CLIENTS" },
         { value: 0, label: "FINISHED PROJECTS" },
@@ -70,7 +70,7 @@ export const FASHION_ABOUT_PAGE_BLOCKS: TemplateBlock[] = [
   {
     id: "fashion-about-convert",
     type: "fashionAboutContent",
-    props: {
+    settings: {
       layout: "text-with-heading",
       subtitle: "WOODMART - BEST ECOMMERCE THEME 2021/22",
       title: "We convert your idea Into a reality.",
@@ -86,7 +86,7 @@ export const FASHION_ABOUT_PAGE_BLOCKS: TemplateBlock[] = [
   {
     id: "fashion-about-services",
     type: "fashionServicesGrid",
-    props: {
+    settings: {
       subtitle: "WOODMART - BEST ECOMMERCE THEME 2021/22",
       title: "Let\u2019s Get Creative!",
       services: [
@@ -116,7 +116,7 @@ export const FASHION_ABOUT_PAGE_BLOCKS: TemplateBlock[] = [
   {
     id: "fashion-about-gallery",
     type: "fashionGalleryGrid",
-    props: {
+    settings: {
       images: [
         "https://woodmart.xtemos.com/wp-content/uploads/2017/03/about-us-gallery-photo-2.jpg",
         "https://woodmart.xtemos.com/wp-content/uploads/2017/03/about-us-gallery-photo-1.jpg",
@@ -126,7 +126,7 @@ export const FASHION_ABOUT_PAGE_BLOCKS: TemplateBlock[] = [
   {
     id: "fashion-about-presentation",
     type: "fashionVideoSection",
-    props: {
+    settings: {
       subtitle: "XTEMOS IS A CREATIVE DESIGN AGENCY",
       title: "Our Presentation",
       description: "I am so happy, my dear friend, so absorbed in the exquisite sense of mere tranquil existence, that I neglect my talents. I should be incapable of drawing a single.",
@@ -147,7 +147,7 @@ export const FASHION_ABOUT_PAGE_BLOCKS: TemplateBlock[] = [
   {
     id: "fashion-about-quote",
     type: "fashionQuoteSection",
-    props: {
+    settings: {
       subtitle: "WOODMART - BEST ECOMMERCE THEME 2021/22",
       quote: "Excellence is not a skill it\u2019s an attitude",
       attribution: "Ralph Marston",
@@ -158,7 +158,7 @@ export const FASHION_ABOUT_PAGE_BLOCKS: TemplateBlock[] = [
   {
     id: "fashion-about-team",
     type: "fashionTeamSection",
-    props: {
+    settings: {
       members: [
         {
           name: "MARK JANCE",
@@ -190,7 +190,7 @@ export const FASHION_ABOUT_PAGE_BLOCKS: TemplateBlock[] = [
   {
     id: "fashion-about-offices",
     type: "fashionOfficeLocations",
-    props: {
+    settings: {
       subtitle: "GET IN TOUCH WITH US",
       title: "Get Connected",
       description: "I am so happy, my dear friend, so absorbed in the exquisite sense of mere tranquil existence, that I neglect my talents. I should be incapable of drawing a single.",
@@ -225,7 +225,7 @@ export const FASHION_ABOUT_PAGE_BLOCKS: TemplateBlock[] = [
   {
     id: "fashion-about-news",
     type: "fashionCoverBanners",
-    props: {
+    settings: {
       banners: [
         {
           image: "https://woodmart.xtemos.com/wp-content/uploads/2017/03/banner-news.jpg",
@@ -258,11 +258,11 @@ export const FASHION_ABOUT_PAGE_BLOCKS: TemplateBlock[] = [
    Source: https://woodmart.xtemos.com/contact-us/demo/fashion/
    ═══════════════════════════════════════════════════════════════ */
 
-export const FASHION_CONTACT_PAGE_BLOCKS: TemplateBlock[] = [
+export const FASHION_CONTACT_PAGE_BLOCKS: EditorNode[] = [
   {
     id: "fashion-contact-store",
     type: "fashionStoreVisit",
-    props: {
+    settings: {
       subtitle: "OUR STORES",
       title: "VISIT OUR NEW\nSTORE IN NEW YORK",
       address: "294 Bay Meadows Ave.\nBay Shore, NY 11706",
@@ -273,7 +273,7 @@ export const FASHION_CONTACT_PAGE_BLOCKS: TemplateBlock[] = [
   {
     id: "fashion-contact-faq",
     type: "fashionFaqAccordion",
-    props: {
+    settings: {
       subtitle: "INFORMATION QUESTIONS",
       title: "FREQUENTLY ASKED QUESTIONS",
       items: [
@@ -303,7 +303,7 @@ export const FASHION_CONTACT_PAGE_BLOCKS: TemplateBlock[] = [
   {
     id: "fashion-contact-form",
     type: "fashionContactForm",
-    props: {
+    settings: {
       subtitle: "INFORMATION ABOUT US",
       title: "CONTACT US FOR ANY QUESTIONS",
       fields: ["name", "email", "phone", "company", "message"],
@@ -312,7 +312,7 @@ export const FASHION_CONTACT_PAGE_BLOCKS: TemplateBlock[] = [
   {
     id: "fashion-contact-newsletter",
     type: "fashionNewsletter",
-    props: {
+    settings: {
       subtitle: "TO WOODMART",
       title: "REGISTER FOR OUR NEWSLETTER",
       description: "Sign up for all the news about our last arrivals and get an exclusive early access shopping.",
@@ -331,11 +331,11 @@ export const FASHION_CONTACT_PAGE_BLOCKS: TemplateBlock[] = [
    Source: https://woodmart.xtemos.com/blog/demo/fashion/
    ═══════════════════════════════════════════════════════════════ */
 
-export const FASHION_BLOG_PAGE_BLOCKS: TemplateBlock[] = [
+export const FASHION_BLOG_PAGE_BLOCKS: EditorNode[] = [
   {
     id: "fashion-blog-title",
     type: "fashionSectionTitle",
-    props: {
+    settings: {
       title: "Woodmart Blog",
       align: "left",
       maxWidth: "100%",
@@ -344,7 +344,7 @@ export const FASHION_BLOG_PAGE_BLOCKS: TemplateBlock[] = [
   {
     id: "fashion-blog-posts",
     type: "fashionBlogPosts",
-    props: {
+    settings: {
       columns: 2,
       sectionTitle: {},
       posts: [
@@ -413,11 +413,11 @@ export const FASHION_BLOG_PAGE_BLOCKS: TemplateBlock[] = [
    Source: https://woodmart.xtemos.com/shop/demo/fashion/
    ═══════════════════════════════════════════════════════════════ */
 
-export const FASHION_SHOP_PAGE_BLOCKS: TemplateBlock[] = [
+export const FASHION_SHOP_PAGE_BLOCKS: EditorNode[] = [
   {
     id: "fashion-shop-title",
     type: "fashionSectionTitle",
-    props: {
+    settings: {
       title: "Shop",
       align: "left",
       maxWidth: "100%",
@@ -426,7 +426,7 @@ export const FASHION_SHOP_PAGE_BLOCKS: TemplateBlock[] = [
   {
     id: "fashion-shop-products",
     type: "fashionProductGrid",
-    props: {
+    settings: {
       columns: 4,
       maxProducts: 12,
       filter: "all",

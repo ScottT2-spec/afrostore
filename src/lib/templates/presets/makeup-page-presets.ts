@@ -1,4 +1,4 @@
-import type { TemplateBlock } from "@/components/storefront/TemplateBlockRenderer";
+import type { EditorNode } from "@/lib/visual-editor/node-tree";
 
 /**
  * Makeup Template Page Presets
@@ -24,11 +24,11 @@ const MAKEUP_BRANDS = [
    Source: https://woodmart.xtemos.com/makeup/about-us/
    ═══════════════════════════════════════════════════════════════ */
 
-export const MAKEUP_ABOUT_PAGE_BLOCKS: TemplateBlock[] = [
+export const MAKEUP_ABOUT_PAGE_BLOCKS: EditorNode[] = [
   {
     id: "makeup-about-hero",
     type: "makeupAboutHero",
-    props: {
+    settings: {
       subtitle: "Care to Beauty",
       title: "A Complete Assortment of Cosmetics, At the Touch of a Finger.",
       bodyText: [
@@ -45,7 +45,7 @@ export const MAKEUP_ABOUT_PAGE_BLOCKS: TemplateBlock[] = [
   {
     id: "makeup-about-story",
     type: "makeupTextSection",
-    props: {
+    settings: {
       sectionTitle: {
         subtitle: "Care to Beauty",
         title: "About Our Store",
@@ -61,7 +61,7 @@ export const MAKEUP_ABOUT_PAGE_BLOCKS: TemplateBlock[] = [
   {
     id: "makeup-about-team",
     type: "makeupTeamSection",
-    props: {
+    settings: {
       sectionTitle: {
         subtitle: "The Team",
         title: "Meet The Team",
@@ -77,7 +77,7 @@ export const MAKEUP_ABOUT_PAGE_BLOCKS: TemplateBlock[] = [
   {
     id: "makeup-about-brands",
     type: "makeupBrandsCarousel",
-    props: {
+    settings: {
       brands: MAKEUP_BRANDS,
       marginBottom: "60px",
     },
@@ -85,7 +85,7 @@ export const MAKEUP_ABOUT_PAGE_BLOCKS: TemplateBlock[] = [
   {
     id: "makeup-about-special",
     type: "makeupTextSection",
-    props: {
+    settings: {
       sectionTitle: {
         subtitle: "Beauty Tips",
         title: "Makeup for special events: shine uniquely!",
@@ -100,7 +100,7 @@ export const MAKEUP_ABOUT_PAGE_BLOCKS: TemplateBlock[] = [
   {
     id: "makeup-about-footer",
     type: "makeupFooter",
-    props: {},
+    settings: {},
   },
 ];
 
@@ -109,11 +109,11 @@ export const MAKEUP_ABOUT_PAGE_BLOCKS: TemplateBlock[] = [
    Source: https://woodmart.xtemos.com/makeup/contact-us/
    ═══════════════════════════════════════════════════════════════ */
 
-export const MAKEUP_CONTACT_PAGE_BLOCKS: TemplateBlock[] = [
+export const MAKEUP_CONTACT_PAGE_BLOCKS: EditorNode[] = [
   {
     id: "makeup-contact-hero",
     type: "makeupContactHero",
-    props: {
+    settings: {
       title: "Contact us",
       address: "2116 W McCormick St, Wichita, KS 67213, USA",
       phone: "(316) 389-7041",
@@ -124,14 +124,14 @@ export const MAKEUP_CONTACT_PAGE_BLOCKS: TemplateBlock[] = [
   {
     id: "makeup-contact-form",
     type: "makeupContactForm",
-    props: {
+    settings: {
       title: "Send Us a Message",
     },
   },
   {
     id: "makeup-contact-brands",
     type: "makeupBrandsCarousel",
-    props: {
+    settings: {
       brands: MAKEUP_BRANDS,
       marginBottom: "60px",
     },
@@ -139,7 +139,7 @@ export const MAKEUP_CONTACT_PAGE_BLOCKS: TemplateBlock[] = [
   {
     id: "makeup-contact-special",
     type: "makeupTextSection",
-    props: {
+    settings: {
       sectionTitle: {
         subtitle: "Beauty Tips",
         title: "Makeup for special events: shine uniquely!",
@@ -154,7 +154,7 @@ export const MAKEUP_CONTACT_PAGE_BLOCKS: TemplateBlock[] = [
   {
     id: "makeup-contact-footer",
     type: "makeupFooter",
-    props: {},
+    settings: {},
   },
 ];
 
@@ -163,11 +163,11 @@ export const MAKEUP_CONTACT_PAGE_BLOCKS: TemplateBlock[] = [
    Source: https://woodmart.xtemos.com/makeup/blog/
    ═══════════════════════════════════════════════════════════════ */
 
-export const MAKEUP_BLOG_PAGE_BLOCKS: TemplateBlock[] = [
+export const MAKEUP_BLOG_PAGE_BLOCKS: EditorNode[] = [
   {
     id: "makeup-blog-grid",
     type: "makeupBlogGrid",
-    props: {
+    settings: {
       sectionTitle: "Latest Articles",
       posts: [
         {
@@ -236,7 +236,7 @@ export const MAKEUP_BLOG_PAGE_BLOCKS: TemplateBlock[] = [
   {
     id: "makeup-blog-footer",
     type: "makeupFooter",
-    props: {},
+    settings: {},
   },
 ];
 
@@ -245,11 +245,11 @@ export const MAKEUP_BLOG_PAGE_BLOCKS: TemplateBlock[] = [
    Source: https://woodmart.xtemos.com/makeup/shop/
    ═══════════════════════════════════════════════════════════════ */
 
-export const MAKEUP_SHOP_PAGE_BLOCKS: TemplateBlock[] = [
+export const MAKEUP_SHOP_PAGE_BLOCKS: EditorNode[] = [
   {
     id: "makeup-shop-categories",
     type: "makeupCategorySidebar",
-    props: {
+    settings: {
       categories: [
         {
           name: "Body",
@@ -283,7 +283,7 @@ export const MAKEUP_SHOP_PAGE_BLOCKS: TemplateBlock[] = [
   {
     id: "makeup-shop-products",
     type: "makeupProductGrid",
-    props: {
+    settings: {
       columns: 4,
       maxProducts: 12,
       showCategory: true,
@@ -297,6 +297,6 @@ export const MAKEUP_SHOP_PAGE_BLOCKS: TemplateBlock[] = [
   {
     id: "makeup-shop-footer",
     type: "makeupFooter",
-    props: {},
+    settings: {},
   },
 ];

@@ -1,5 +1,6 @@
 import { prisma } from "@/lib/db";
 import { TEMPLATES } from "@/lib/templates/catalog";
+import type { EditorNode } from "@/lib/visual-editor/node-tree";
 import { FASHION_TEMPLATE_PRESET } from "@/lib/templates/presets/fashion-preset";
 import { FASHION_COLORED_PRESET } from "@/lib/templates/presets/fashion-colored-preset";
 import { HANDMADE_BAGS_PRESET } from "@/lib/templates/presets/handmade-bags-preset";
@@ -22,11 +23,11 @@ import { PROKIP_AGENT_PRESET } from "@/lib/templates/presets/prokip-agent-preset
 import { PROKIP_BOOKING_PRESET } from "@/lib/templates/presets/prokip-booking-preset";
 import { FASHION_SAMPLE_PRODUCTS } from "@/lib/templates/presets/fashion-sample-products";
 import { FASHION_SAMPLE_BLOGS } from "@/lib/templates/presets/fashion-sample-blogs";
-import { KIDS_SAMPLE_BLOGS } from "@/lib/templates/presets/kids-sample-blogs";
-import { COSMETICS_SAMPLE_BLOGS } from "@/lib/templates/presets/cosmetics-sample-blogs";
 import { TEMPLATE_SAMPLE_DATA } from "@/lib/templates/presets/template-sample-data";
 import { ensureVegetablePages } from "@/lib/templates/vegetable-pages";
 import { ensureTemplatePages } from "@/lib/templates/template-pages";
+import { buildTemplatePageContent } from "@/lib/templates/template-tree";
+import { parsePageContent } from "@/lib/page-content";
 
 /**
  * Import a template into a site by:
@@ -109,12 +110,13 @@ export async function importTemplateToSite(
     await ensureVegetablePages(siteId);
   }
 
-  // Ensure template-specific pages exist in DB for the page editor
+  // Ensure template-specific pages exist in DB for the page editor.
+  // Content is now preserved once a page has any saved tree content.
   await ensureTemplatePages(siteId, catalogEntry.slug);
 
   // Build blocks for the HOME page
   // For templates with editable block presets, use those instead of htmlEmbed
-  const TEMPLATE_PRESETS: Record<string, typeof FASHION_TEMPLATE_PRESET> = {
+  const TEMPLATE_PRESETS: Record<string, EditorNode[]> = {
     fashion: FASHION_TEMPLATE_PRESET,
     "fashion-colored": FASHION_COLORED_PRESET,
     "handmade-bags": HANDMADE_BAGS_PRESET,
@@ -143,7 +145,7 @@ export async function importTemplateToSite(
   };
 
   const preset = TEMPLATE_PRESETS[catalogEntry.slug];
-  const homeBlocks = preset
+  const homeBlocks: Array<EditorNode | { id: string; type: string; props: Record<string, unknown> }> = preset
     ? preset
     : [
         {
@@ -157,7 +159,7 @@ export async function importTemplateToSite(
         },
       ];
 
-  const homeContent = JSON.parse(JSON.stringify({ blocks: homeBlocks, settings: {} }));
+  const homeContent = buildTemplatePageContent(homeBlocks, {});
 
   // Create or update the HOME page
   const existingHome = await prisma.page.findFirst({
@@ -167,18 +169,17 @@ export async function importTemplateToSite(
   let homePage;
   if (existingHome) {
     // Only update if the page has no content yet
-    const existingContent = existingHome.content as Record<string, unknown> | null;
-    const existingBlocks = Array.isArray(existingContent)
-      ? existingContent
-      : Array.isArray((existingContent as Record<string, unknown>)?.blocks)
-        ? (existingContent as Record<string, unknown>).blocks
-        : [];
+    const existingDocument = parsePageContent(existingHome.content);
+    const hasContent =
+      (Array.isArray(existingDocument.elements) && existingDocument.elements.length > 0) ||
+      existingDocument.blocks.length > 0 ||
+      Object.keys(existingDocument.settings || {}).length > 0;
 
-    if (!Array.isArray(existingBlocks) || (existingBlocks as unknown[]).length === 0) {
+    if (!hasContent) {
       homePage = await prisma.page.update({
         where: { id: existingHome.id },
         data: {
-          content: homeContent,
+          content: homeContent as any,
           isPublished: true,
         },
       });
@@ -187,16 +188,16 @@ export async function importTemplateToSite(
     }
   } else {
     homePage = await prisma.page.create({
-      data: {
-        siteId,
-        title: "Home",
-        slug: "home",
-        type: "HOME",
-        content: homeContent,
-        isPublished: true,
-        position: 0,
-      },
-    });
+        data: {
+          siteId,
+          title: "Home",
+          slug: "home",
+          type: "HOME",
+          content: homeContent as any,
+          isPublished: true,
+          position: 0,
+        },
+      });
   }
 
   // ── Seed sample data (categories, products, blogs) ──────────
@@ -283,13 +284,7 @@ export async function importTemplateToSite(
   }
 
   // ── Blogs ───────────────────────────────────────────────────
-  const blogsToSeed = isFashionFamily
-    ? FASHION_SAMPLE_BLOGS
-    : slug === "kids"
-    ? KIDS_SAMPLE_BLOGS
-    : slug === "cosmetics"
-    ? COSMETICS_SAMPLE_BLOGS
-    : (templateData?.blogs || []);
+  const blogsToSeed = isFashionFamily ? FASHION_SAMPLE_BLOGS : (templateData?.blogs || []);
   if (blogsToSeed.length > 0) {
     const existingBlogCount = await prisma.blog.count({ where: { siteId } });
     if (existingBlogCount === 0) {
