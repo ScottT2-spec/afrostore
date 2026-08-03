@@ -83,9 +83,25 @@ export async function initializeFlutterwavePayment(params: {
   return data.data as { link: string };
 }
 
+// Use when you already have Flutterwave's own numeric transaction ID
+// (e.g. from a webhook payload's `data.id`).
 export async function verifyFlutterwaveTransaction(transactionId: string, secretKey: string) {
   const res = await fetch(
     `https://api.flutterwave.com/v3/transactions/${transactionId}/verify`,
+    { headers: { Authorization: `Bearer ${secretKey}` } }
+  );
+  const data = await res.json();
+  return data;
+}
+
+// Use when you only have OUR reference (tx_ref) — e.g. the manual/fallback
+// verification path after redirect, before any webhook has arrived.
+// Flutterwave's /transactions/{id}/verify endpoint requires THEIR numeric
+// transaction id, not tx_ref, so calling it with our reference silently
+// fails. This endpoint is the correct one for verifying by tx_ref.
+export async function verifyFlutterwaveTransactionByReference(txRef: string, secretKey: string) {
+  const res = await fetch(
+    `https://api.flutterwave.com/v3/transactions/verify_by_reference?tx_ref=${encodeURIComponent(txRef)}`,
     { headers: { Authorization: `Bearer ${secretKey}` } }
   );
   const data = await res.json();
