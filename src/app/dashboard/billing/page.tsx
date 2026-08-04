@@ -34,6 +34,7 @@ interface BillingStatus {
   planEndDate: string | null;
   isActive: boolean;
   hasSubscription: boolean;
+  webhookConfigured: boolean;
 }
 
 interface Workspace {
@@ -212,6 +213,11 @@ export default function BillingPage() {
         {error && (
           <div className="bg-red-50 border border-red-200 text-red-800 rounded-xl p-4 text-sm">
             {error}
+          </div>
+        )}
+        {billingStatus && !billingStatus.webhookConfigured && (
+          <div className="bg-amber-50 border border-amber-200 text-amber-800 rounded-xl p-4 text-sm">
+            Payment webhook isn&apos;t configured on this server, so subscription renewals may not be tracked automatically. Contact support if your plan status looks out of date.
           </div>
         )}
 

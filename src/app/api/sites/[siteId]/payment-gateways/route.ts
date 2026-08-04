@@ -3,6 +3,7 @@ import { prisma } from "@/lib/db";
 import { getStoreContext, success, error, validationError, logAudit } from "@/lib/api-helpers";
 import { setupPaymentGatewaySchema } from "@/lib/validators";
 import { unauthorized } from "@/lib/auth";
+import { getMonnifyAccessToken } from "@/lib/payments";
 
 type Params = { params: Promise<{ siteId: string }> };
 
@@ -45,12 +46,37 @@ export async function POST(req: NextRequest, { params }: Params) {
   const parsed = setupPaymentGatewaySchema.safeParse(body);
   if (!parsed.success) return validationError(parsed.error.flatten().fieldErrors);
 
+  // Copy-pasted keys very commonly carry a trailing space/newline, which silently
+  // breaks Basic-auth style credentials (Monnify) — strip whitespace defensively.
+  parsed.data.publicKey = parsed.data.publicKey.trim();
+  parsed.data.secretKey = parsed.data.secretKey.trim();
+  if (parsed.data.webhookSecret) parsed.data.webhookSecret = parsed.data.webhookSecret.trim();
+  if (parsed.data.config && typeof parsed.data.config === "object") {
+    const cfg = parsed.data.config as Record<string, unknown>;
+    if (typeof cfg.contractCode === "string") cfg.contractCode = cfg.contractCode.trim();
+    if (typeof cfg.baseUrl === "string") cfg.baseUrl = cfg.baseUrl.trim();
+  }
+
   // Monnify requires a contract code to initialize transactions — checkout
   // will fail later without it, so catch it here instead of at checkout time.
   if (parsed.data.provider === "MONNIFY") {
-    const contractCode = (parsed.data.config as Record<string, unknown> | undefined)?.contractCode;
+    const cfg = (parsed.data.config as Record<string, unknown> | undefined) || {};
+    const contractCode = cfg.contractCode;
     if (!contractCode || typeof contractCode !== "string" || !contractCode.trim()) {
       return validationError({ config: ["Monnify contract code is required"] });
+    }
+
+    // Verify the key pair actually authenticates with Monnify before saving —
+    // a mismatched/incorrect public+secret key pair otherwise only surfaces
+    // at a customer's checkout as an opaque 401.
+    const baseUrl = (typeof cfg.baseUrl === "string" && cfg.baseUrl.trim()) || "https://api.monnify.com";
+    try {
+      await getMonnifyAccessToken(parsed.data.publicKey, parsed.data.secretKey, baseUrl);
+    } catch (authErr: any) {
+      return error(
+        `Could not verify Monnify credentials: ${authErr.message || "authentication failed"}. Double-check your API key and secret key.`,
+        422
+      );
     }
   }
 
