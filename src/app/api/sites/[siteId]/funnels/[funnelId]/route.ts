@@ -15,7 +15,13 @@ export async function GET(req: NextRequest, { params }: Params) {
   const funnel = await prisma.funnel.findFirst({
     where: { id: funnelId, siteId },
     include: {
-      steps: { orderBy: { position: "asc" } },
+      steps: {
+        orderBy: { position: "asc" },
+        include: {
+          page: { select: { id: true, title: true, slug: true, type: true } },
+          form: { select: { id: true, name: true, slug: true } },
+        },
+      },
     },
   });
 

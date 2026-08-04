@@ -811,6 +811,7 @@ model Page {
   updatedAt       DateTime @updatedAt
   abTests         ABTest[]
   site            Site     @relation(fields: [siteId], references: [id], onDelete: Cascade)
+  funnelSteps     FunnelStep[]
 
   @@unique([siteId, slug])
   @@index([siteId])
@@ -859,6 +860,7 @@ model Form {
   updatedAt        DateTime         @updatedAt
   submissions      FormSubmission[]
   site             Site             @relation(fields: [siteId], references: [id], onDelete: Cascade)
+  funnelSteps      FunnelStep[]
 
   @@unique([siteId, slug])
   @@index([siteId])
@@ -866,18 +868,22 @@ model Form {
 }
 
 model FormSubmission {
-  id        String   @id @default(cuid())
-  formId    String
-  data      Json
-  ip        String?
-  userAgent String?
-  source    String?
-  isRead    Boolean  @default(false)
-  createdAt DateTime @default(now())
-  form      Form     @relation(fields: [formId], references: [id], onDelete: Cascade)
+  id            String      @id @default(cuid())
+  formId        String
+  data          Json
+  ip            String?
+  userAgent     String?
+  source        String?
+  funnelStepId  String?
+  crmContactId  String?
+  isRead        Boolean     @default(false)
+  createdAt     DateTime    @default(now())
+  form          Form        @relation(fields: [formId], references: [id], onDelete: Cascade)
+  crmContact    CrmContact? @relation(fields: [crmContactId], references: [id], onDelete: SetNull)
 
   @@index([formId])
   @@index([formId, createdAt])
+  @@index([crmContactId])
   @@map("form_submissions")
 }
 
@@ -923,6 +929,8 @@ model FunnelStep {
   name            String
   type            FunnelStepType @default(LANDING)
   pageContent     Json?
+  pageId          String?
+  formId          String?
   position        Int            @default(0)
   settings        Json?
   conversionCount Int            @default(0)
@@ -930,8 +938,12 @@ model FunnelStep {
   createdAt       DateTime       @default(now())
   updatedAt       DateTime       @updatedAt
   funnel          Funnel         @relation(fields: [funnelId], references: [id], onDelete: Cascade)
+  page            Page?          @relation(fields: [pageId], references: [id], onDelete: SetNull)
+  form            Form?          @relation(fields: [formId], references: [id], onDelete: SetNull)
 
   @@index([funnelId])
+  @@index([pageId])
+  @@index([formId])
   @@map("funnel_steps")
 }
 
@@ -954,6 +966,7 @@ model CrmContact {
   activities      CrmActivity[]
   site            Site             @relation(fields: [siteId], references: [id], onDelete: Cascade)
   emailRecipients EmailRecipient[]
+  formSubmissions FormSubmission[]
 
   @@unique([siteId, email])
   @@index([siteId])
