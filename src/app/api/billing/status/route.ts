@@ -38,5 +38,6 @@ export async function GET(req: NextRequest) {
     planEndDate: workspace.planEndDate,
     isActive: isActive || workspace.plan === "FREE",
     hasSubscription: !!workspace.paystackSubscriptionCode,
+    webhookConfigured: !!process.env.PAYSTACK_WEBHOOK_SECRET,
   });
 }
