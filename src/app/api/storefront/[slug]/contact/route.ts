@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/db";
+import { upsertLeadContact } from "@/lib/crm";
 
 type Params = { params: Promise<{ slug: string }> };
 
@@ -58,7 +59,7 @@ export async function POST(req: NextRequest, { params }: Params) {
     }
 
     // Save the message
-    await prisma.contactMessage.create({
+    const contactMessage = await prisma.contactMessage.create({
       data: {
         siteId: site.id,
         name: name.slice(0, 200),
@@ -67,6 +68,30 @@ export async function POST(req: NextRequest, { params }: Params) {
         message: message.slice(0, 5000),
       },
     });
+
+    // Every contact-form submission is a lead worth tracking — feed it into
+    // the CRM pipeline too (same helper the newsletter/form/funnel routes use).
+    // This is wrapped separately so a CRM hiccup never turns an otherwise-
+    // successful "message received" into a failure for the visitor.
+    try {
+      const [firstName, ...rest] = name.trim().split(/\s+/);
+      await upsertLeadContact({
+        siteId: site.id,
+        email,
+        firstName,
+        lastName: rest.join(" ") || undefined,
+        source: "contact_form",
+        tags: ["contact-form"],
+        scoreDelta: 5,
+        customFields: subject ? { subject } : undefined,
+        activity: {
+          type: "contact_form_submitted",
+          details: { contactMessageId: contactMessage.id, subject },
+        },
+      });
+    } catch (crmErr) {
+      console.error("Contact form -> CRM upsert error:", crmErr);
+    }
 
     return NextResponse.json({ success: true });
   } catch (err) {

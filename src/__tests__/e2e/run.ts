@@ -28,6 +28,7 @@ import { customerAndCatalogTests } from './customers.e2e';
 import { storefrontTests } from './storefront.e2e';
 import { dashboardTests } from './dashboard.e2e';
 import { paymentTests } from './payments.e2e';
+import { leadFunnelTests } from './lead-funnel.e2e';
 
 const BASE_URL = process.env.TEST_BASE_URL || 'http://localhost:3000';
 const args = process.argv.slice(2);
@@ -65,6 +66,7 @@ async function main() {
     storefront: storefrontTests,
     dashboard: dashboardTests,
     payments: paymentTests,
+    leadFunnel: leadFunnelTests,
   };
 
   if (suiteFilter) {

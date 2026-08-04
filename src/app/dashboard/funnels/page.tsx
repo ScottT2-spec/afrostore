@@ -73,6 +73,20 @@ export default function FunnelsPage() {
   const [addingStep, setAddingStep] = useState(false);
   const [newStepName, setNewStepName] = useState("");
   const [newStepType, setNewStepType] = useState("LANDING");
+  const [newStepFormId, setNewStepFormId] = useState("");
+  const [newStepPageId, setNewStepPageId] = useState("");
+
+  // Destinations available to link a step to — fetched once, used by the step-add picker
+  const [availableForms, setAvailableForms] = useState<{ id: string; name: string }[]>([]);
+  const [availablePages, setAvailablePages] = useState<{ id: string; title: string }[]>([]);
+
+  useEffect(() => {
+    if (!currentStore) return;
+    api.get<{ forms: { id: string; name: string }[] }>(`/api/sites/${currentStore.id}/forms?limit=100`)
+      .then((res) => { if (res.success && res.data) setAvailableForms(res.data.forms || []); });
+    api.get<{ pages: { id: string; title: string }[] }>(`/api/sites/${currentStore.id}/pages?limit=100`)
+      .then((res) => { if (res.success && res.data) setAvailablePages(res.data.pages || []); });
+  }, [currentStore]);
 
   const fetchFunnels = useCallback(async () => {
     if (!currentStore) return;
@@ -148,10 +162,14 @@ export default function FunnelsPage() {
     const res = await api.post(`/api/sites/${currentStore.id}/funnels/${funnelId}/steps`, {
       name: newStepName.trim(),
       type: newStepType,
+      formId: newStepType === "LEAD_FORM" && newStepFormId ? newStepFormId : undefined,
+      pageId: newStepType === "LANDING" && newStepPageId ? newStepPageId : undefined,
     });
     if (res.success) {
       setNewStepName("");
       setNewStepType("LANDING");
+      setNewStepFormId("");
+      setNewStepPageId("");
       setAddingStep(false);
       // Refresh funnel
       const updated = await api.get<FunnelItem>(`/api/sites/${currentStore.id}/funnels/${funnelId}`);
@@ -335,13 +353,33 @@ export default function FunnelsPage() {
                     {/* Add step */}
                     <div className="flex justify-center mt-4">
                       {addingStep && expandedId === funnel.id ? (
-                        <div className="flex items-center gap-2 w-full max-w-lg">
-                          <input value={newStepName} onChange={(e) => setNewStepName(e.target.value)} placeholder="Step name..." className="input-field py-2 text-sm flex-1" autoFocus />
-                          <select value={newStepType} onChange={(e) => setNewStepType(e.target.value)} className="input-field py-2 text-sm w-36">
-                            {Object.entries(stepTypeLabels).map(([k, v]) => <option key={k} value={k}>{v}</option>)}
-                          </select>
-                          <button onClick={() => addStep(funnel.id)} disabled={!newStepName.trim()} className="btn-primary text-xs py-2 px-3">Add</button>
-                          <button onClick={() => { setAddingStep(false); setNewStepName(""); }} className="btn-secondary text-xs py-2 px-3">Cancel</button>
+                        <div className="flex flex-col gap-2 w-full max-w-lg">
+                          <div className="flex items-center gap-2">
+                            <input value={newStepName} onChange={(e) => setNewStepName(e.target.value)} placeholder="Step name..." className="input-field py-2 text-sm flex-1" autoFocus />
+                            <select
+                              value={newStepType}
+                              onChange={(e) => { setNewStepType(e.target.value); setNewStepFormId(""); setNewStepPageId(""); }}
+                              className="input-field py-2 text-sm w-36"
+                            >
+                              {Object.entries(stepTypeLabels).map(([k, v]) => <option key={k} value={k}>{v}</option>)}
+                            </select>
+                          </div>
+                          {newStepType === "LEAD_FORM" && (
+                            <select value={newStepFormId} onChange={(e) => setNewStepFormId(e.target.value)} className="input-field py-2 text-sm w-full">
+                              <option value="">No form linked (add one later)</option>
+                              {availableForms.map((f) => <option key={f.id} value={f.id}>{f.name}</option>)}
+                            </select>
+                          )}
+                          {newStepType === "LANDING" && (
+                            <select value={newStepPageId} onChange={(e) => setNewStepPageId(e.target.value)} className="input-field py-2 text-sm w-full">
+                              <option value="">No page linked (add one later)</option>
+                              {availablePages.map((p) => <option key={p.id} value={p.id}>{p.title}</option>)}
+                            </select>
+                          )}
+                          <div className="flex items-center gap-2">
+                            <button onClick={() => addStep(funnel.id)} disabled={!newStepName.trim()} className="btn-primary text-xs py-2 px-3">Add</button>
+                            <button onClick={() => { setAddingStep(false); setNewStepName(""); setNewStepFormId(""); setNewStepPageId(""); }} className="btn-secondary text-xs py-2 px-3">Cancel</button>
+                          </div>
                         </div>
                       ) : (
                         <button onClick={() => setAddingStep(true)} className="text-xs text-brand-600 hover:text-brand-700 font-medium flex items-center gap-1">
