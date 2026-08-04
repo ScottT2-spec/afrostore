@@ -239,7 +239,12 @@ export default function CheckoutPage() {
       localStorage.removeItem(cartKey);
       setCart([]);
       setOrderSuccess({ orderNumber: order.orderNumber, orderId: order.id });
-      setOrderError("Order placed but payment initialization failed. Please contact the store to complete payment.");
+      const reason = typeof payJson.error === "string" ? payJson.error : null;
+      setOrderError(
+        reason
+          ? `Order placed, but payment could not be started: ${reason}. Please contact the store to complete payment.`
+          : "Order placed but payment initialization failed. Please contact the store to complete payment."
+      );
       setPlacing(false);
     } catch (err) {
       setOrderError("Something went wrong. Please try again.");

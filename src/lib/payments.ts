@@ -121,7 +121,9 @@ export async function getMonnifyAccessToken(apiKey: string, secretKey: string, b
     headers: { Authorization: `Basic ${credentials}` },
   });
   const data = await res.json();
-  if (!data.requestSuccessful) throw new Error("Monnify auth failed");
+  if (!data.requestSuccessful) {
+    throw new Error(data.responseMessage || `Monnify authentication failed (HTTP ${res.status}). Check your API key and secret key.`);
+  }
   return data.responseBody.accessToken as string;
 }
 
