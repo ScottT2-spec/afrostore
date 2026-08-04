@@ -18,14 +18,22 @@ export async function GET(req: NextRequest, { params }: Params) {
       provider: true,
       isEnabled: true,
       publicKey: true,
-      // secretKey intentionally excluded
+      // secretKey intentionally excluded — never sent to the client
+      webhookSecret: true, // fetched only to derive a boolean below, not returned raw
       config: true,
       createdAt: true,
       updatedAt: true,
     },
   });
 
-  return success(gateways);
+  // Never leak the actual secret values to the client — just whether they're set,
+  // so the settings UI can show "configured" state and prompt for missing ones.
+  const safeGateways = gateways.map((gw: (typeof gateways)[number]) => {
+    const { webhookSecret, ...rest } = gw;
+    return { ...rest, hasWebhookSecret: !!webhookSecret };
+  });
+
+  return success(safeGateways);
 }
 
 export async function POST(req: NextRequest, { params }: Params) {
@@ -36,6 +44,15 @@ export async function POST(req: NextRequest, { params }: Params) {
   const body = await req.json();
   const parsed = setupPaymentGatewaySchema.safeParse(body);
   if (!parsed.success) return validationError(parsed.error.flatten().fieldErrors);
+
+  // Monnify requires a contract code to initialize transactions — checkout
+  // will fail later without it, so catch it here instead of at checkout time.
+  if (parsed.data.provider === "MONNIFY") {
+    const contractCode = (parsed.data.config as Record<string, unknown> | undefined)?.contractCode;
+    if (!contractCode || typeof contractCode !== "string" || !contractCode.trim()) {
+      return validationError({ config: ["Monnify contract code is required"] });
+    }
+  }
 
   const gateway = await prisma.paymentGateway.upsert({
     where: { siteId_provider: { siteId, provider: parsed.data.provider } },

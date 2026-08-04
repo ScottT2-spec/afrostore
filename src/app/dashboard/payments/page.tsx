@@ -15,6 +15,8 @@ interface Gateway {
   provider: string;
   isEnabled: boolean;
   publicKey?: string;
+  hasWebhookSecret?: boolean;
+  config?: { contractCode?: string; baseUrl?: string } | null;
 }
 
 const providerInfo: Record<string, { name: string; desc: string; color: string }> = {
@@ -32,6 +34,9 @@ export default function PaymentsPage() {
   const [setupProvider, setSetupProvider] = useState<string | null>(null);
   const [publicKey, setPublicKey] = useState("");
   const [secretKey, setSecretKey] = useState("");
+  const [webhookSecret, setWebhookSecret] = useState("");
+  const [contractCode, setContractCode] = useState("");
+  const [baseUrl, setBaseUrl] = useState("");
   const [saving, setSaving] = useState(false);
   const [setupError, setSetupError] = useState("");
 
@@ -44,20 +49,52 @@ export default function PaymentsPage() {
     })();
   }, [currentStore]);
 
+  const resetForm = () => {
+    setSetupProvider(null);
+    setPublicKey("");
+    setSecretKey("");
+    setWebhookSecret("");
+    setContractCode("");
+    setBaseUrl("");
+    setSetupError("");
+  };
+
+  const openSetup = (provider: string) => {
+    const gw = gateways.find((g) => g.provider === provider);
+    setSetupProvider(provider);
+    setPublicKey(gw?.publicKey || "");
+    setSecretKey(""); // never prefilled — write-only, backend never returns it
+    setWebhookSecret(""); // write-only — leave blank unless the user wants to change it
+    setContractCode(gw?.config?.contractCode || "");
+    setBaseUrl(gw?.config?.baseUrl || "");
+    setSetupError("");
+  };
+
   const handleSetup = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!currentStore || !setupProvider) return;
+
+    if (setupProvider === "MONNIFY" && !contractCode.trim()) {
+      setSetupError("Contract code is required for Monnify");
+      return;
+    }
+
     setSaving(true);
     setSetupError("");
-    const res = await api.post(`/api/sites/${currentStore.id}/payment-gateways`, {
-      provider: setupProvider,
-      publicKey,
-      secretKey,
-    });
+
+    const gw = gateways.find((g) => g.provider === setupProvider);
+    const body: Record<string, unknown> = { provider: setupProvider, publicKey, secretKey };
+    // Only send webhookSecret if the user actually typed a new one — otherwise
+    // keep whatever is already saved (don't overwrite it with an empty value).
+    if (webhookSecret.trim()) body.webhookSecret = webhookSecret;
+    else if (gw?.hasWebhookSecret) body.webhookSecret = undefined;
+    if (setupProvider === "MONNIFY") {
+      body.config = { contractCode: contractCode.trim(), baseUrl: baseUrl.trim() || undefined };
+    }
+
+    const res = await api.post(`/api/sites/${currentStore.id}/payment-gateways`, body);
     if (res.success) {
-      setSetupProvider(null);
-      setPublicKey("");
-      setSecretKey("");
+      resetForm();
       // Refresh
       const r = await api.get<Gateway[]>(`/api/sites/${currentStore.id}/payment-gateways`);
       if (r.success && r.data) setGateways(Array.isArray(r.data) ? r.data : []);
@@ -75,6 +112,9 @@ export default function PaymentsPage() {
       setSetupProvider(d.provider);
       if (d.publicKey) setPublicKey(d.publicKey);
       if (d.secretKey) setSecretKey(d.secretKey);
+      if (d.webhookSecret) setWebhookSecret(d.webhookSecret);
+      if (d.contractCode) setContractCode(d.contractCode);
+      if (d.baseUrl) setBaseUrl(d.baseUrl);
     }
   }, [prefillData, isFromAI]);
 
@@ -109,24 +149,39 @@ export default function PaymentsPage() {
                 </div>
                 <div className="flex items-center gap-3">
                   {connected ? (
-                    <span className="inline-flex items-center gap-1.5 rounded-full bg-green-50 border border-green-200 px-3 py-1 text-xs font-semibold text-green-700">
-                      <CheckCircle2 className="h-3.5 w-3.5" /> Connected
-                    </span>
+                    <>
+                      <span className="inline-flex items-center gap-1.5 rounded-full bg-green-50 border border-green-200 px-3 py-1 text-xs font-semibold text-green-700">
+                        <CheckCircle2 className="h-3.5 w-3.5" /> Connected
+                      </span>
+                      <button onClick={() => openSetup(provider)} className="btn-secondary text-xs py-2 px-4">
+                        Edit
+                      </button>
+                    </>
                   ) : (
-                    <button onClick={() => setSetupProvider(provider)} className="btn-primary text-xs py-2 px-4">
+                    <button onClick={() => openSetup(provider)} className="btn-primary text-xs py-2 px-4">
                       Connect <ArrowRight className="h-3.5 w-3.5" />
                     </button>
                   )}
                 </div>
               </div>
+              {connected && provider === "MONNIFY" && !gw?.config?.contractCode && (
+                <p className="mt-3 text-xs text-amber-600">
+                  Contract code missing — checkout will fail until this is set. Click Edit to add it.
+                </p>
+              )}
+              {connected && !gw?.hasWebhookSecret && (
+                <p className="mt-3 text-xs text-amber-600">
+                  No webhook secret set — payment confirmations may be delayed or missed. Click Edit to add one.
+                </p>
+              )}
             </div>
           );
         })}
 
         {/* Setup Modal */}
         {setupProvider && (
-          <div className="fixed inset-0 bg-black/40 z-50 flex items-center justify-center p-4" onClick={() => setSetupProvider(null)}>
-            <div className="bg-white rounded-2xl w-full max-w-md p-6 shadow-2xl" onClick={(e) => e.stopPropagation()}>
+          <div className="fixed inset-0 bg-black/40 z-50 flex items-center justify-center p-4" onClick={resetForm}>
+            <div className="bg-white rounded-2xl w-full max-w-md p-6 shadow-2xl max-h-[90vh] overflow-y-auto" onClick={(e) => e.stopPropagation()}>
               <h2 className="text-lg font-bold text-surface-900 mb-1">Connect {providerInfo[setupProvider].name}</h2>
               <p className="text-xs text-surface-500 mb-6">Enter your API keys from {providerInfo[setupProvider].name} dashboard.</p>
               <form onSubmit={handleSetup} className="space-y-4">
@@ -139,10 +194,42 @@ export default function PaymentsPage() {
                   <label className="block text-sm font-medium text-surface-700 mb-1">Secret Key</label>
                   <input type="password" value={secretKey} onChange={(e) => setSecretKey(e.target.value)} className="input-field" required />
                 </div>
+
+                {setupProvider === "MONNIFY" && (
+                  <>
+                    <div>
+                      <label className="block text-sm font-medium text-surface-700 mb-1">Contract Code</label>
+                      <input value={contractCode} onChange={(e) => setContractCode(e.target.value)} className="input-field" required />
+                      <p className="mt-1 text-[11px] text-surface-400">Required by Monnify to initialize transactions.</p>
+                    </div>
+                    <div>
+                      <label className="block text-sm font-medium text-surface-700 mb-1">Base URL <span className="text-surface-400 font-normal">(optional)</span></label>
+                      <input value={baseUrl} onChange={(e) => setBaseUrl(e.target.value)} placeholder="https://api.monnify.com" className="input-field" />
+                      <p className="mt-1 text-[11px] text-surface-400">Leave blank to use Monnify's live API. Use the sandbox URL for testing.</p>
+                    </div>
+                  </>
+                )}
+
+                <div>
+                  <label className="block text-sm font-medium text-surface-700 mb-1">
+                    Webhook Secret {gateways.find((g) => g.provider === setupProvider)?.hasWebhookSecret && <span className="text-surface-400 font-normal">(already set — leave blank to keep it)</span>}
+                  </label>
+                  <input
+                    type="password"
+                    value={webhookSecret}
+                    onChange={(e) => setWebhookSecret(e.target.value)}
+                    className="input-field"
+                    placeholder={gateways.find((g) => g.provider === setupProvider)?.hasWebhookSecret ? "••••••••" : ""}
+                  />
+                  <p className="mt-1 text-[11px] text-surface-400">
+                    From your {providerInfo[setupProvider].name} dashboard's webhook settings. Needed so we can trust and process payment confirmation events.
+                  </p>
+                </div>
+
                 <div className="flex justify-end gap-3 pt-2">
-                  <button type="button" onClick={() => setSetupProvider(null)} className="btn-secondary text-sm py-2 px-4">Cancel</button>
+                  <button type="button" onClick={resetForm} className="btn-secondary text-sm py-2 px-4">Cancel</button>
                   <button type="submit" disabled={saving} className="btn-primary text-sm py-2 px-4">
-                    {saving ? <Loader2 className="h-4 w-4 animate-spin" /> : <><Shield className="h-4 w-4" /> Connect</>}
+                    {saving ? <Loader2 className="h-4 w-4 animate-spin" /> : <><Shield className="h-4 w-4" /> {gateways.find((g) => g.provider === setupProvider)?.isEnabled ? "Save" : "Connect"}</>}
                   </button>
                 </div>
               </form>

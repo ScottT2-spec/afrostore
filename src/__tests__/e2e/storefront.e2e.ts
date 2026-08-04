@@ -158,8 +158,14 @@ export function storefrontTests() {
       productId = product.id;
     });
 
-    it('should create checkout/order from storefront', async () => {
-      const res = await POST(`/api/sites/${(store as any).id}/checkout`, {
+    it('should place an order from the storefront (order creation, not payment init)', async () => {
+      // This is the actual storefront order-creation contract used by the
+      // checkout page — POST /api/sites/:id/orders. The payment-initialization
+      // endpoint (POST /api/sites/:id/checkout expects {orderId, provider,
+      // callbackUrl} once an order exists) is covered separately in
+      // payments.e2e.ts, along with webhook verification and the
+      // PENDING -> PAID -> CONFIRMED order transition.
+      const res = await POST(`/api/sites/${(store as any).id}/orders`, {
         email: 'shopper@example.com',
         firstName: 'Kemi',
         lastName: 'Adekunle',
@@ -174,12 +180,9 @@ export function storefrontTests() {
         paymentMethod: 'bank_transfer',
       });
 
-      // Checkout may or may not require auth depending on store settings
-      if (res.ok) {
-        const data = res.body.data as any;
-        if (!data.orderNumber && !data.id) throw new Error('Checkout should return order info');
-      }
-      // If it requires auth, that's also valid for some store configs
+      expectSuccess(res, 201);
+      const data = res.body.data as any;
+      if (!data.orderNumber && !data.id) throw new Error('Order creation should return order info');
     });
   });
 }

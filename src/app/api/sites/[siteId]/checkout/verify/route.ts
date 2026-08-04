@@ -3,7 +3,7 @@ import { prisma } from "@/lib/db";
 import { success, error } from "@/lib/api-helpers";
 import {
   verifyPaystackTransaction,
-  verifyFlutterwaveTransaction,
+  verifyFlutterwaveTransactionByReference,
   verifyMonnifyTransaction,
   getMonnifyAccessToken,
   processPaymentConfirmation,
@@ -62,9 +62,9 @@ export async function POST(req: NextRequest, { params }: Params) {
         providerStatus = "FAILED";
       }
     } else if (provider === "FLUTTERWAVE") {
-      // Flutterwave verify needs the transaction ID, which comes from the external ref or metadata
-      // Try using the tx_ref (our reference) to look up via the provider
-      const result = await verifyFlutterwaveTransaction(reference, transaction.gateway.secretKey!);
+      // We only have our own reference (tx_ref) at this point, so verify
+      // by reference rather than Flutterwave's numeric transaction id.
+      const result = await verifyFlutterwaveTransactionByReference(reference, transaction.gateway.secretKey!);
       if (result.status === "success" && result.data?.status === "successful") {
         providerStatus = "SUCCESS";
         method = `Flutterwave (${result.data.payment_type || "card"})`;
