@@ -4,6 +4,7 @@ import { prisma } from "@/lib/db";
 import { success, error, generateSubdomain } from "@/lib/api-helpers";
 import { slugify } from "@/lib/utils";
 import { importTemplateToSite } from "@/lib/templates/importer";
+import { provisionDefaultLandingFunnel } from "@/lib/landing-funnel";
 import { buildSmartAiBlocks, buildBlockContentPrompt } from "@/lib/ai-block-content-generator";
 import { getIndustrySampleData, DEFAULT_SAMPLE_DATA } from "@/lib/ai-sample-data";
 import { AIFailover, AICapability } from "@/lib/failover";
@@ -333,7 +334,19 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ wor
       }
     }
 
-    return success({ ...site, templateResult }, 201);
+    // ── Landing-page sites get a working lead funnel out of the box ──
+    let funnelResult: unknown = null;
+    if (siteType === "LANDING_PAGE") {
+      try {
+        const { funnel } = await provisionDefaultLandingFunnel(site.id, site.name);
+        funnelResult = { id: funnel.id, name: funnel.name };
+      } catch (funnelErr) {
+        console.error("Default landing funnel provisioning error:", funnelErr);
+        // Non-fatal — site is still created, user can add a funnel manually
+      }
+    }
+
+    return success({ ...site, templateResult, funnelResult }, 201);
   } catch (err) {
     console.error("Create site error:", err);
     return error(err instanceof Error ? err.message : "Internal server error", 500);

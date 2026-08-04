@@ -21,6 +21,7 @@ export type BlockType =
   | "trustBadges"
   | "stats"
   | "newsletter"
+  | "leadCaptureForm"
   | "banner"
   | "imageText"
   | "gallery"
@@ -184,6 +185,13 @@ export const blockDefaults: Record<BlockType, () => Record<string, unknown>> = {
   newsletter: () => ({
     title: "Stay Updated",
     subtitle: "Subscribe to get the latest offers and updates.",
+    bgColor: "surface",
+  }),
+  leadCaptureForm: () => ({
+    title: "Get instant access",
+    subtitle: "Enter your details below and we'll send it right over.",
+    buttonText: "Get Access",
+    successMessage: "Thanks! Check your inbox shortly.",
     bgColor: "surface",
   }),
   banner: () => ({
@@ -409,6 +417,7 @@ export const blockPalette: PaletteItem[] = [
   { type: "team", label: "Team", icon: "users", category: "social" },
   { type: "stats", label: "Stats Counter", icon: "trending-up", category: "marketing" },
   { type: "newsletter", label: "Newsletter", icon: "send", category: "marketing" },
+  { type: "leadCaptureForm", label: "Lead Capture Form", icon: "inbox", category: "marketing" },
   { type: "trustBadges", label: "Trust Badges", icon: "shield", category: "marketing" },
   { type: "brands", label: "Brand Logos", icon: "globe", category: "marketing" },
   // Fashion Template Blocks

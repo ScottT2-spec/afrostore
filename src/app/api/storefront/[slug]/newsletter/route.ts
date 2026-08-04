@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/db";
 import { sendNewsletterWelcomeEmail } from "@/lib/email";
+import { upsertLeadContact } from "@/lib/crm";
 
 type Params = { params: Promise<{ slug: string }> };
 
@@ -30,31 +31,22 @@ export async function POST(req: NextRequest, { params }: Params) {
       );
     }
 
-    // Check if already subscribed before upserting
-    const existing = await prisma.crmContact.findUnique({
-      where: { siteId_email: { siteId: site.id, email } },
+    const existingContact = await prisma.crmContact.findUnique({
+      where: { siteId_email: { siteId: site.id, email: email.trim().toLowerCase() } },
       select: { tags: true },
     });
-    const isNew = !existing || !existing.tags.includes("newsletter");
+    const isNewSubscriber = !existingContact || !existingContact.tags.includes("newsletter");
 
-    // Upsert into CrmContact with source "newsletter"
-    await prisma.crmContact.upsert({
-      where: { siteId_email: { siteId: site.id, email } },
-      create: {
-        siteId: site.id,
-        email,
-        source: "newsletter",
-        tags: ["newsletter"],
-      },
-      update: {
-        // If they already exist, just make sure "newsletter" tag is present
-        tags: { push: "newsletter" },
-        lastActivityAt: new Date(),
-      },
+    await upsertLeadContact({
+      siteId: site.id,
+      email,
+      source: "newsletter",
+      tags: ["newsletter"],
+      activity: { type: "newsletter_signup" },
     });
 
     // Send welcome email only to new subscribers (non-blocking)
-    if (isNew) {
+    if (isNewSubscriber) {
       const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || `https://${slug}.prokip.com`;
       sendNewsletterWelcomeEmail({
         to: email,

@@ -967,9 +967,37 @@ function StatsBlock({ props }: { props: Record<string, unknown> }) {
 
 /* ── Newsletter ──────────────────────────────────────────────── */
 function NewsletterBlock({ props }: { props: Record<string, unknown> }) {
+  const storeSlug = useContext(StoreSlugContext);
+  const [email, setEmail] = useState("");
   const [submitted, setSubmitted] = useState(false);
+  const [sending, setSending] = useState(false);
+  const [error, setError] = useState("");
   const bg = (props.bgColor as string) || "surface";
   const isDark = bg === "dark" || bg === "brand";
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!storeSlug) { setSubmitted(true); return; } // fallback for preview
+    setSending(true);
+    setError("");
+    try {
+      const res = await fetch(`/api/storefront/${storeSlug}/newsletter`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email }),
+      });
+      const json = await res.json();
+      if (json.success) {
+        setSubmitted(true);
+      } else {
+        setError(json.error || "Failed to subscribe. Please try again.");
+      }
+    } catch {
+      setError("Network error. Please try again.");
+    }
+    setSending(false);
+  };
+
   return (
     <AnimateIn>
       <div className={`rounded-3xl py-12 px-6 sm:px-10 text-center ${
@@ -988,19 +1016,111 @@ function NewsletterBlock({ props }: { props: Record<string, unknown> }) {
             <CheckCircle2 className="h-5 w-5" /> You&apos;re subscribed!
           </div>
         ) : (
-          <form onSubmit={(e) => { e.preventDefault(); setSubmitted(true); }} className="flex flex-col sm:flex-row gap-3 max-w-md mx-auto">
+          <form onSubmit={handleSubmit} className="flex flex-col sm:flex-row gap-3 max-w-md mx-auto">
             <input
               type="email"
               required
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
               placeholder="Enter your email"
               className="flex-1 rounded-xl border border-surface-200 bg-white px-4 py-3 text-sm placeholder:text-surface-400 focus:outline-none focus:ring-2 focus:ring-brand-500"
             />
-            <button type="submit" className={`rounded-xl font-bold py-3 px-6 text-sm transition-all hover:-translate-y-0.5 ${
+            <button type="submit" disabled={sending} className={`rounded-xl font-bold py-3 px-6 text-sm transition-all hover:-translate-y-0.5 disabled:opacity-60 ${
               isDark ? "bg-white text-surface-900 shadow-lg" : "bg-brand-600 text-white shadow-lg shadow-brand-600/25"
             }`}>
-              Subscribe
+              {sending ? "..." : "Subscribe"}
             </button>
           </form>
+        )}
+        {error && (
+          <p className={`mt-3 text-xs font-medium ${isDark ? "text-red-300" : "text-red-600"}`}>{error}</p>
+        )}
+      </div>
+    </AnimateIn>
+  );
+}
+
+/* ── Lead Capture / Lead Magnet ─────────────────────────────── */
+function LeadCaptureFormBlock({ props }: { props: Record<string, unknown> }) {
+  const storeSlug = useContext(StoreSlugContext);
+  const [values, setValues] = useState({ firstName: "", email: "" });
+  const [submitted, setSubmitted] = useState(false);
+  const [sending, setSending] = useState(false);
+  const [error, setError] = useState("");
+  const bg = (props.bgColor as string) || "surface";
+  const isDark = bg === "dark" || bg === "brand";
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!storeSlug) { setSubmitted(true); return; } // fallback for preview
+    setSending(true);
+    setError("");
+    try {
+      const res = await fetch(`/api/public/sites/${storeSlug}/crm/contacts`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          firstName: values.firstName,
+          email: values.email,
+          source: "landing",
+          tags: ["lead-magnet"],
+        }),
+      });
+      const json = await res.json();
+      if (json.success) {
+        setSubmitted(true);
+      } else {
+        setError(json.error || "Failed to submit. Please try again.");
+      }
+    } catch {
+      setError("Network error. Please try again.");
+    }
+    setSending(false);
+  };
+
+  return (
+    <AnimateIn>
+      <div className={`rounded-3xl py-12 px-6 sm:px-10 text-center ${
+        bg === "brand" ? "bg-gradient-to-br from-brand-600 to-brand-800" :
+        bg === "dark" ? "bg-gradient-to-br from-surface-900 to-surface-950" :
+        "bg-surface-50 border border-surface-100"
+      }`}>
+        <h3 className={`text-xl sm:text-2xl font-display font-extrabold mb-2 ${isDark ? "text-white" : "text-surface-900"}`}>
+          {(props.title as string) || "Get instant access"}
+        </h3>
+        <p className={`text-sm mb-6 max-w-md mx-auto ${isDark ? "text-white/60" : "text-surface-500"}`}>
+          {(props.subtitle as string) || "Enter your details below and we'll send it right over."}
+        </p>
+        {submitted ? (
+          <div className={`flex items-center justify-center gap-2 text-sm font-semibold ${isDark ? "text-accent-400" : "text-brand-600"}`}>
+            <CheckCircle2 className="h-5 w-5" /> {(props.successMessage as string) || "Thanks! Check your inbox shortly."}
+          </div>
+        ) : (
+          <form onSubmit={handleSubmit} className="flex flex-col gap-3 max-w-md mx-auto">
+            <input
+              type="text"
+              value={values.firstName}
+              onChange={(e) => setValues((p) => ({ ...p, firstName: e.target.value }))}
+              placeholder="Your name"
+              className="w-full rounded-xl border border-surface-200 bg-white px-4 py-3 text-sm placeholder:text-surface-400 focus:outline-none focus:ring-2 focus:ring-brand-500"
+            />
+            <input
+              type="email"
+              required
+              value={values.email}
+              onChange={(e) => setValues((p) => ({ ...p, email: e.target.value }))}
+              placeholder="Your email"
+              className="w-full rounded-xl border border-surface-200 bg-white px-4 py-3 text-sm placeholder:text-surface-400 focus:outline-none focus:ring-2 focus:ring-brand-500"
+            />
+            <button type="submit" disabled={sending} className={`rounded-xl font-bold py-3 px-6 text-sm transition-all hover:-translate-y-0.5 disabled:opacity-60 ${
+              isDark ? "bg-white text-surface-900 shadow-lg" : "bg-brand-600 text-white shadow-lg shadow-brand-600/25"
+            }`}>
+              {sending ? "..." : (props.buttonText as string) || "Get Access"}
+            </button>
+          </form>
+        )}
+        {error && (
+          <p className={`mt-3 text-xs font-medium ${isDark ? "text-red-300" : "text-red-600"}`}>{error}</p>
         )}
       </div>
     </AnimateIn>
@@ -1565,6 +1685,7 @@ const renderers: Record<string, React.FC<{ props: Record<string, unknown> }>> = 
   contactInfo: ContactInfoBlock,
   stats: StatsBlock,
   newsletter: NewsletterBlock,
+  leadCaptureForm: LeadCaptureFormBlock,
   video: VideoBlock,
   countdown: CountdownBlock,
   trustBadges: TrustBadgesBlock,
