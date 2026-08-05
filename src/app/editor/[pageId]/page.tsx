@@ -82,24 +82,15 @@ export default function EditorPage() {
   };
 
   const handleSave = async (content: PageStructure): Promise<void> => {
-    console.log("handleSave called with content:", content);
-    console.log("siteData:", siteData);
-    console.log("pageId:", pageId);
-    
     const pageContent = {
       elements: content.elements,
       settings: content.settings,
     };
 
-    console.log("pageContent to save:", pageContent);
-    console.log("First element:", pageContent.elements[0]);
-
     try {
       const savePath = siteData?.id
         ? `/api/sites/${siteData.id}/pages/${pageId}`
         : `/api/pages/${pageId}`;
-
-      console.log("savePath:", savePath);
 
       const res = await api.patch(savePath, {
         content: pageContent,
@@ -108,8 +99,6 @@ export default function EditorPage() {
         metaTitle: content.meta.title,
         metaDescription: content.meta.description,
       });
-
-      console.log("API response:", res);
 
       if (!res.success) {
         throw new Error(res.error || "Failed to save page");
