@@ -76,6 +76,8 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ wor
     socialLinks,
     phone,
     businessType = "general",
+    country,
+    currency,
     // Step 5: Auto-generate (handled after creation)
     // Step 6: Payment (handled after creation)
     // Step 7: Domain
@@ -88,6 +90,18 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ wor
 
     if (!["ECOMMERCE", "WEBSITE", "LANDING_PAGE"].includes(siteType)) {
       return error("Invalid site type. Must be ECOMMERCE, WEBSITE, or LANDING_PAGE", 422);
+    }
+
+    // The wizard doesn't currently ask merchants for a country/currency, so
+    // fall back to the admin-configured platform defaults rather than the
+    // schema's hardcoded NG/NGN. An explicit value from the client (if the
+    // UI adds this step later) always wins.
+    let resolvedCountry = country;
+    let resolvedCurrency = currency;
+    if (!resolvedCountry || !resolvedCurrency) {
+      const platformDefaults = await prisma.platformSettings.findUnique({ where: { id: "platform" } });
+      resolvedCountry = resolvedCountry || platformDefaults?.defaultCountry || "NG";
+      resolvedCurrency = resolvedCurrency || platformDefaults?.defaultCurrency || "NGN";
     }
 
   // Generate unique slug & subdomain
@@ -122,6 +136,8 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ wor
       businessType,
       industry: industry || null,
       customDomain: customDomain || null,
+      country: resolvedCountry,
+      currency: resolvedCurrency,
       settings: {
         create: {
           whatsappNumber: phone || null,
