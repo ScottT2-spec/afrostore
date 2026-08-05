@@ -36,7 +36,7 @@ export default function AdminLayout({
   if (loading) {
     return (
       <div className="min-h-screen bg-surface-50 flex items-center justify-center">
-        <div className="animate-spin h-12 w-10 border-4 border-accent-500 border-t-transparent rounded-full" />
+        <div className="animate-spin h-12 w-12 border-4 border-accent-500 border-t-transparent rounded-full" />
       </div>
     );
   }
