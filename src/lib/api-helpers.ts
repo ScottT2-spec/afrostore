@@ -8,6 +8,7 @@ import { slugify, generateId } from "./utils";
  */
 function serializeDecimals(obj: unknown): unknown {
   if (obj === null || obj === undefined) return obj;
+  if (obj instanceof Date) return obj;
   if (typeof obj === 'object' && obj !== null && 'toNumber' in obj && typeof (obj as any).toNumber === 'function') {
     return (obj as any).toNumber();
   }
