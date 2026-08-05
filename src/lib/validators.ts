@@ -21,8 +21,8 @@ export const createStoreSchema = z.object({
   name: z.string().min(1, "Store name is required").max(100),
   description: z.string().max(500).optional(),
   businessType: z.string().default("general"),
-  country: z.string().default("NG"),
-  currency: z.string().default("NGN"),
+  country: z.string().optional(),
+  currency: z.string().optional(),
   themeId: z.string().optional(),
   logo: z.string().url().optional(),
 });
