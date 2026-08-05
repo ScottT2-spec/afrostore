@@ -191,6 +191,30 @@ model SiteMember {
   @@map("site_members")
 }
 
+model PlatformSettings {
+  id                       String   @id
+  siteName                 String   @default("AfroStore")
+  siteUrl                  String   @default("https://afrostore.app")
+  supportEmail             String   @default("support@afrostore.app")
+  defaultCurrency          String   @default("NGN")
+  defaultCountry           String   @default("NG")
+  maintenanceMode          Boolean  @default(false)
+  allowSignups             Boolean  @default(true)
+  requireEmailVerification Boolean  @default(false)
+  maxStoresPerUser         Int      @default(5)
+  platformFeePercent       Decimal  @default(2.5) @db.Decimal(5, 2)
+  smtpHost                 String?
+  smtpPort                 String   @default("587")
+  smtpUser                 String?
+  smtpPass                 String?
+  sendFromEmail            String?
+  sendFromName             String   @default("AfroStore")
+  updatedAt                DateTime @updatedAt
+  updatedById              String?
+
+  @@map("platform_settings")
+}
+
 model SiteSettings {
   id                 String  @id @default(cuid())
   siteId             String  @unique
