@@ -5,7 +5,7 @@ import type { EditorNode } from "@/lib/visual-editor/node-tree";
  * 
  * These replicate the hardcoded page content as editable BuilderBlocks
  * so store owners can customise them through the page builder.
- * Theme: Home & Garden Decor (WoodMart Retail demo style)
+ * Theme: Home & Garden Decor (Prokip LTD Retail demo style)
  */
 
 /* ═══════════════════════════════════════════════════════════════

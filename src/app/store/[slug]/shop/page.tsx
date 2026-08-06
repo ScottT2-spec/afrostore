@@ -351,7 +351,7 @@ export default function ShopPage() {
             <div className="mb-8 grid grid-cols-2 gap-4 md:grid-cols-4">
               <Link href={`/store/${slug}/shop?category=apparel`} className="group">
                 <div className="relative overflow-hidden rounded-[28px] bg-gray-100 aspect-square">
-                  <img src="https://woodmart.xtemos.com/t-shirts-prints/wp-content/uploads/sites/24/2025/02/ps-color-t-shirt.svg" alt="Apparel" className="w-full h-full object-cover p-8" />
+                  <img src="/prokip-logo.png" alt="Apparel" className="w-full h-full object-cover p-8" />
                   <div className="absolute inset-0 flex items-center justify-center bg-black/0 group-hover:bg-black/10 transition">
                     <span className="text-sm font-semibold text-[#111]">Apparel</span>
                   </div>
@@ -359,7 +359,7 @@ export default function ShopPage() {
               </Link>
               <Link href={`/store/${slug}/shop?category=home-living`} className="group">
                 <div className="relative overflow-hidden rounded-[28px] bg-gray-100 aspect-square">
-                  <img src="https://woodmart.xtemos.com/t-shirts-prints/wp-content/uploads/sites/24/2025/02/ps-color-tote-bag.svg" alt="Home & Living" className="w-full h-full object-cover p-8" />
+                  <img src="/prokip-logo.png" alt="Home & Living" className="w-full h-full object-cover p-8" />
                   <div className="absolute inset-0 flex items-center justify-center bg-black/0 group-hover:bg-black/10 transition">
                     <span className="text-sm font-semibold text-[#111]">Home & Living</span>
                   </div>
@@ -367,7 +367,7 @@ export default function ShopPage() {
               </Link>
               <Link href={`/store/${slug}/shop?category=stickers`} className="group">
                 <div className="relative overflow-hidden rounded-[28px] bg-gray-100 aspect-square">
-                  <img src="https://woodmart.xtemos.com/t-shirts-prints/wp-content/uploads/sites/24/2025/02/ps-color-sticker.svg" alt="Stickers" className="w-full h-full object-cover p-8" />
+                  <img src="/prokip-logo.png" alt="Stickers" className="w-full h-full object-cover p-8" />
                   <div className="absolute inset-0 flex items-center justify-center bg-black/0 group-hover:bg-black/10 transition">
                     <span className="text-sm font-semibold text-[#111]">Stickers</span>
                   </div>
@@ -375,7 +375,7 @@ export default function ShopPage() {
               </Link>
               <Link href={`/store/${slug}/shop?category=wall-art`} className="group">
                 <div className="relative overflow-hidden rounded-[28px] bg-gray-100 aspect-square">
-                  <img src="https://woodmart.xtemos.com/t-shirts-prints/wp-content/uploads/sites/24/2025/02/ps-color-poster.svg" alt="Wall Art" className="w-full h-full object-cover p-8" />
+                  <img src="/prokip-logo.png" alt="Wall Art" className="w-full h-full object-cover p-8" />
                   <div className="absolute inset-0 flex items-center justify-center bg-black/0 group-hover:bg-black/10 transition">
                     <span className="text-sm font-semibold text-[#111]">Wall Art</span>
                   </div>
@@ -853,7 +853,7 @@ export default function ShopPage() {
           storeSlug={slug}
           logo={store.logo}
           templateSlug="kids"
-          description={store.description || "Bright, playful kids fashion and gifts with a premium WoodMart-inspired finish."}
+          description={store.description || "Bright, playful kids fashion and gifts with a premium Prokip LTD-inspired finish."}
         />
       </div>
     );

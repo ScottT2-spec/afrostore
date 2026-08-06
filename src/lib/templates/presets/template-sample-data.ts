@@ -281,12 +281,12 @@ const MAKEUP: TemplateSampleData = {
 
 const PERFUMES: TemplateSampleData = {
   categories: [
-    { name: "Étheria", slug: "etheria", description: "A collection of light, almost weightless fragrances created for those who cherish softness and brightness.", image: "https://woodmart.xtemos.com/perfumes/wp-content/uploads/sites/32/2025/11/prf-collection-opus-essence.jpg", position: 0 },
-    { name: "Celeste Aura", slug: "celeste-aura", description: "Elegant fragrances that blend vibrant citrus notes and shimmering aldehydes.", image: "https://woodmart.xtemos.com/perfumes/wp-content/uploads/sites/32/2025/11/prf-collection-opus-essence.jpg", position: 1 },
-    { name: "Opus Essence", slug: "opus-essence", description: "A collection of delicate, weightless fragrances that capture the essence of air and light.", image: "https://woodmart.xtemos.com/perfumes/wp-content/uploads/sites/32/2025/11/prf-collection-opus-essence.jpg", position: 2 },
-    { name: "Velours Noir", slug: "velours-noir", description: "Dark, rich, velvety fragrances that reveal passion and magnetism.", image: "https://woodmart.xtemos.com/perfumes/wp-content/uploads/sites/32/2025/11/prf-collection-opus-essence.jpg", position: 3 },
-    { name: "Nocturne Essence", slug: "nocturne-essence", description: "Soft, intimate, warm fragrances that envelop the senses.", image: "https://woodmart.xtemos.com/perfumes/wp-content/uploads/sites/32/2025/11/prf-collection-opus-essence.jpg", position: 4 },
-    { name: "Elysian Bloom", slug: "elysian-bloom", description: "A luminous fragrance collection with a fresh, inviting personality.", image: "https://woodmart.xtemos.com/perfumes/wp-content/uploads/sites/32/2025/11/prf-collection-opus-essence.jpg", position: 5 },
+    { name: "Étheria", slug: "etheria", description: "A collection of light, almost weightless fragrances created for those who cherish softness and brightness.", image: "/prokip-logo.png", position: 0 },
+    { name: "Celeste Aura", slug: "celeste-aura", description: "Elegant fragrances that blend vibrant citrus notes and shimmering aldehydes.", image: "/prokip-logo.png", position: 1 },
+    { name: "Opus Essence", slug: "opus-essence", description: "A collection of delicate, weightless fragrances that capture the essence of air and light.", image: "/prokip-logo.png", position: 2 },
+    { name: "Velours Noir", slug: "velours-noir", description: "Dark, rich, velvety fragrances that reveal passion and magnetism.", image: "/prokip-logo.png", position: 3 },
+    { name: "Nocturne Essence", slug: "nocturne-essence", description: "Soft, intimate, warm fragrances that envelop the senses.", image: "/prokip-logo.png", position: 4 },
+    { name: "Elysian Bloom", slug: "elysian-bloom", description: "A luminous fragrance collection with a fresh, inviting personality.", image: "/prokip-logo.png", position: 5 },
   ],
   products: [
     { name: "Amber Bloom 100ml", slug: "amber-bloom-100ml", description: "A radiant fragrance with a warm amber finish and delicate floral lift.", price: 250, stock: 15, isFeatured: true, tags: ["featured", "bestseller", "etheria"], position: 1, category: "etheria", images: ["https://images.unsplash.com/photo-1541643600914-78b084683601?w=600&h=700&fit=crop"] },

@@ -11,7 +11,7 @@ import { InlineEditableText } from "@/components/storefront/InlineEditableText";
 
 /* ═══════════════════════════════════════════════════════════════
    KIDS TEMPLATE BLOCKS
-   Pixel-perfect replicas of WoodMart Kids template sections.
+   Pixel-perfect replicas of Prokip LTD Kids template sections.
    All styling inline — no external CSS dependencies.
    ═══════════════════════════════════════════════════════════════ */
 
@@ -31,7 +31,7 @@ const TOKENS = {
   bodyFont: "'Quicksand', Arial, Helvetica, sans-serif",
 };
 
-const IMG_BASE = "https://woodmart.xtemos.com/kids/wp-content/uploads/sites/13/2023/05";
+const IMG_BASE = "/uploads/1782850966159-157829bd8a3b567e981c1399.png";
 
 /* ─── FONT LOADER ───────────────────────────────────────────── */
 export function KidsFontLoader() {
@@ -692,7 +692,7 @@ export function KidsBundlePromo({ subtitle = "Buy bundle and get a 25% discount"
           <h2 className="kbp-title">{title}</h2>
           {description && <p className="kbp-desc">{description}</p>}
           <Link href={fixLink(buttonLink)} className="kbp-btn">
-            <img src={`${IMG_BASE}/bundle.svg`} alt="" className="kbp-btn-icon"  onError={(e) => onImgError(e, "fallback")} />
+            <img src="/uploads/1782850966159-157829bd8a3b567e981c1399.png" alt="" className="kbp-btn-icon"  onError={(e) => onImgError(e, "fallback")} />
             {buttonText}
           </Link>
         </div>
@@ -969,7 +969,7 @@ export function KidsNewsletter({ title = "Join our mailing list to receive any l
 
 /* ═══════════════════════════════════════════════════════════════
    KIDS HEADER
-   Full WoodMart Kids-style header with:
+   Full Prokip LTD Kids-style header with:
    Left: About Us · Contact Us · Blog
    Center: Logo
    Right-center: Shop · Gifts
@@ -1155,7 +1155,7 @@ export function KidsHeader({
 }
 
 /* ═══════════════════════════════════════════════════════════════
-   KIDS FOOTER (Custom WoodMart Kids-style)
+   KIDS FOOTER (Custom Prokip LTD Kids-style)
    Playful, warm footer with proper store links
    ═══════════════════════════════════════════════════════════════ */
 
@@ -1304,7 +1304,7 @@ export function KidsFooterFull({
           <Link href={base}>{copyrightText || `Built by Prokip Afrostore© ${new Date().getFullYear()} Kids Themes.`}</Link>
         </small>
         <div className="kf-payments">
-          <img src="https://woodmart.xtemos.com/wp-content/uploads/2018/08/payment.png" alt="Payment methods" loading="lazy" />
+          <img src="/prokip-logo.png" alt="Payment methods" loading="lazy" />
         </div>
       </div>
     </footer>
@@ -1567,7 +1567,7 @@ export interface KidsOpeningHoursProps {
 export function KidsOpeningHours({ 
   title = "Monday - Friday",
   hours = [],
-  infoText = "Based on WoodMart theme 2025 WooCommerce Themes.",
+  infoText = "Based on Prokip LTD theme 2025 WooCommerce Themes.",
   links = [],
   storeSlug = ""
 }: KidsOpeningHoursProps) {

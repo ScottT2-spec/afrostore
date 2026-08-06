@@ -7,7 +7,7 @@ import { InlineEditableText } from "@/components/storefront/InlineEditableText";
 
 /* ═══════════════════════════════════════════════════════════════
    RETAIL TEMPLATE BLOCKS
-   Home & Garden Decor style - matching WoodMart Retail demo
+   Home & Garden Decor style - matching Prokip LTD Retail demo
    All styling inline — no external CSS dependencies.
    ═══════════════════════════════════════════════════════════════ */
 

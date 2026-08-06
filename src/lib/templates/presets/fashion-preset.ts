@@ -2,7 +2,7 @@ import type { EditorNode } from "@/lib/visual-editor/node-tree";
 
 /**
  * Fashion Template Preset
- * Default block layout + content that recreates the WoodMart Fashion demo.
+ * Default block layout + content that recreates the Prokip LTD Fashion demo.
  * Every value is a placeholder — users swap in their own content.
  */
 export const FASHION_TEMPLATE_PRESET: EditorNode[] = [

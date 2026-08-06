@@ -2,7 +2,7 @@ import type { EditorNode } from "@/lib/visual-editor/node-tree";
 
 /**
  * Cosmetics Template Preset
- * Recreates the WoodMart Cosmetics demo layout with editable blocks.
+ * Recreates the Prokip LTD Cosmetics demo layout with editable blocks.
  */
 export const COSMETICS_TEMPLATE_PRESET: EditorNode[] = [
   {
@@ -66,14 +66,14 @@ export const COSMETICS_TEMPLATE_PRESET: EditorNode[] = [
     settings: {
       banners: [
         {
-          image: "https://woodmart.xtemos.com/wp-content/uploads/2024/02/cosmetics-promo-1.jpg",
+          image: "/prokip-logo.png",
           title: "REVITALIZING\nFACE MASKS",
           description: "It is a long established fact that a reader will be distracted by the readable content of a page when looking at its layout.",
           buttonText: "SHOP NOW",
           buttonLink: "/shop",
         },
         {
-          image: "https://woodmart.xtemos.com/wp-content/uploads/2024/02/cosmetics-promo-2.jpg",
+          image: "/prokip-logo.png",
           title: "SERUMS & OILS",
           description: "There are many variations of passages of Lorem Ipsum available, but the majority have suffered alteration in some form.",
           buttonText: "SHOP NOW",
@@ -119,7 +119,7 @@ export const COSMETICS_TEMPLATE_PRESET: EditorNode[] = [
     settings: {
       title: "Discover a beautiful you with our new Makeup Essentials",
       description: "There are many variations of passages of Lorem Ipsum available, but the majority have suffered alteration in some form, by injected humour.",
-      image: "https://woodmart.xtemos.com/wp-content/uploads/2024/02/cosmetics-discovery.jpg",
+      image: "/prokip-logo.png",
       features: [
         { icon: "✨", titleLine1: "Lasting", titleLine2: "Formulas" },
         { icon: "🛡️", titleLine1: "Face skin", titleLine2: "Protection" },
@@ -151,7 +151,7 @@ export const COSMETICS_TEMPLATE_PRESET: EditorNode[] = [
     settings: {
       title: "Vehicula fermentum",
       description: "The generated Lorem Ipsum is therefore always free from repetition humour.",
-      image: "https://woodmart.xtemos.com/wp-content/uploads/2024/02/cosmetics-countdown.jpg",
+      image: "/prokip-logo.png",
       buttonText: "SHOP NOW",
       buttonLink: "/shop",
       secondButtonText: "READ MORE",
@@ -187,7 +187,7 @@ export const COSMETICS_TEMPLATE_PRESET: EditorNode[] = [
     id: "cosmetics-newsletter",
     type: "cosmeticsNewsletter",
     settings: {
-      backgroundImage: "https://woodmart.xtemos.com/wp-content/uploads/2017/01/newsletter-wood-3.jpg",
+      backgroundImage: "/prokip-logo.png",
       title: "JOIN OUR NEWSLETTER",
       description: "Will be used in accordance with our Privacy Policy",
       buttonText: "Sign up",

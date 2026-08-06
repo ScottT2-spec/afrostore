@@ -2,10 +2,10 @@ import type { EditorNode } from "@/lib/visual-editor/node-tree";
 
 /**
  * Tools Template Homepage Preset
- * Verbatim from: https://woodmart.xtemos.com/demo-tools/demo/tools/
+ * Verbatim from: https://prokip.xtemos.com/demo-tools/demo/tools/
  */
 
-const IMG = "https://woodmart.xtemos.com/wp-content/uploads";
+const IMG = "https://prokip.xtemos.com/wp-content/uploads";
 
 export const TOOLS_TEMPLATE_PRESET: EditorNode[] = [
   {

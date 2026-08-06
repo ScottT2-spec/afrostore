@@ -2,7 +2,7 @@ import type { EditorNode } from "@/lib/visual-editor/node-tree";
 
 /**
  * Bakery (Sweets Bakery) Template Preset
- * Recreates the WoodMart Sweets Bakery demo layout with editable blocks.
+ * Recreates the Prokip LTD Sweets Bakery demo layout with editable blocks.
  */
 export const BAKERY_TEMPLATE_PRESET: EditorNode[] = [
   {
@@ -21,9 +21,9 @@ export const BAKERY_TEMPLATE_PRESET: EditorNode[] = [
             "titleLine2": "WAFFLES",
             "buttonText": "See Collection",
             "buttonLink": "/shop",
-            "backgroundImage": "https://woodmart.xtemos.com/wp-content/uploads/2024/02/sweets-bakery-slide-bg-1.jpg",
-            "productImage": "https://woodmart.xtemos.com/wp-content/uploads/2024/02/sweets-bakery-slide-img-1.png",
-            "smallImage": "https://woodmart.xtemos.com/wp-content/uploads/2024/02/sweets-bakery-slide-img-s-1.png"
+            "backgroundImage": "/prokip-logo.png",
+            "productImage": "/prokip-logo.png",
+            "smallImage": "/prokip-logo.png"
           },
           elements: [],
         },
@@ -36,9 +36,9 @@ export const BAKERY_TEMPLATE_PRESET: EditorNode[] = [
             "titleLine2": "MAFFINS",
             "buttonText": "See Collection",
             "buttonLink": "/shop",
-            "backgroundImage": "https://woodmart.xtemos.com/wp-content/uploads/2024/02/sweets-bakery-slide-bg-2.jpg",
-            "productImage": "https://woodmart.xtemos.com/wp-content/uploads/2024/02/sweets-bakery-slide-img-2.png",
-            "smallImage": "https://woodmart.xtemos.com/wp-content/uploads/2024/02/sweets-bakery-slide-img-s-2.png"
+            "backgroundImage": "/prokip-logo.png",
+            "productImage": "/prokip-logo.png",
+            "smallImage": "/prokip-logo.png"
           },
           elements: [],
         },
@@ -51,9 +51,9 @@ export const BAKERY_TEMPLATE_PRESET: EditorNode[] = [
             "titleLine2": "DONUTS",
             "buttonText": "See Collection",
             "buttonLink": "/shop",
-            "backgroundImage": "https://woodmart.xtemos.com/wp-content/uploads/2024/02/sweets-bakery-slide-bg-3.jpg",
-            "productImage": "https://woodmart.xtemos.com/wp-content/uploads/2024/02/sweets-bakery-slide-img-3.png",
-            "smallImage": "https://woodmart.xtemos.com/wp-content/uploads/2024/02/sweets-bakery-slide-img-s-3.png"
+            "backgroundImage": "/prokip-logo.png",
+            "productImage": "/prokip-logo.png",
+            "smallImage": "/prokip-logo.png"
           },
           elements: [],
         }
@@ -67,21 +67,21 @@ export const BAKERY_TEMPLATE_PRESET: EditorNode[] = [
       sectionSubtitle: "Sweets Bakery",
       items: [
         {
-          icon: "https://woodmart.xtemos.com/wp-content/uploads/2019/07/svg-bakery-infobox-1.svg",
+          icon: "/prokip-logo.png",
           title: "Cupcakes",
           description: "There are some redeeming factors in favor of greeking text",
           buttonText: "Shop Now",
           buttonLink: "/shop",
         },
         {
-          icon: "https://woodmart.xtemos.com/wp-content/uploads/2019/07/svg-bakery-infobox-2.svg",
+          icon: "/prokip-logo.png",
           title: "Macaroons",
           description: "Merely the symptom of a worse problem to consideration",
           buttonText: "Shop Now",
           buttonLink: "/shop",
         },
         {
-          icon: "https://woodmart.xtemos.com/wp-content/uploads/2019/07/svg-bakery-infobox-3.svg",
+          icon: "/prokip-logo.png",
           title: "Cakes",
           description: "You sculpt information, you chisel away what\u2019s not needed",
           buttonText: "Shop Now",
@@ -97,7 +97,7 @@ export const BAKERY_TEMPLATE_PRESET: EditorNode[] = [
       subtitle: "Sweets Bakery",
       title: "Handmade Cakes\nFor Your Every Taste",
       description: "Anyway, you still use Lorem Ipsum and rightly so, as it will always have a place in the web workers toolbox.",
-      image: "https://woodmart.xtemos.com/wp-content/uploads/2019/07/bakery-cyan-cake-opt.jpg",
+      image: "/prokip-logo.png",
       buttonText: "See Collection",
       buttonLink: "/shop",
     },
@@ -110,7 +110,7 @@ export const BAKERY_TEMPLATE_PRESET: EditorNode[] = [
       maxProducts: 6,
       sectionTitle: "Featured Products",
       sectionSubtitle: "Sweet Accessories",
-      backgroundImage: "https://woodmart.xtemos.com/wp-content/uploads/2019/07/bakery-product-bg-opt.jpg",
+      backgroundImage: "/prokip-logo.png",
       products: [],
     },
   },
@@ -120,25 +120,25 @@ export const BAKERY_TEMPLATE_PRESET: EditorNode[] = [
     settings: {
       sectionTitle: "How We Made Donuts",
       sectionSubtitle: "We Love What We Do",
-      image: "https://woodmart.xtemos.com/wp-content/uploads/2019/07/bakery-donuts-img-opt.png",
+      image: "/prokip-logo.png",
       steps: [
         {
-          icon: "https://woodmart.xtemos.com/wp-content/uploads/2019/07/svg-bakery-infobox-4.svg",
+          icon: "/prokip-logo.png",
           title: "1. Ingredients",
           description: "Chances are there wasn\u2019t collaboration, communication.",
         },
         {
-          icon: "https://woodmart.xtemos.com/wp-content/uploads/2019/07/svg-bakery-infobox-5.svg",
+          icon: "/prokip-logo.png",
           title: "2. Stuffing",
           description: "There wasn\u2019t a process agreed upon or specified with.",
         },
         {
-          icon: "https://woodmart.xtemos.com/wp-content/uploads/2019/07/svg-bakery-infobox-6.svg",
+          icon: "/prokip-logo.png",
           title: "3. Cooking",
           description: "But that\u2019s not all that it takes to get things back on track.",
         },
         {
-          icon: "https://woodmart.xtemos.com/wp-content/uploads/2019/07/svg-bakery-infobox-7.svg",
+          icon: "/prokip-logo.png",
           title: "4. Dish Ready",
           description: "The villagers are out there with a vengeance to get that.",
         },
@@ -163,7 +163,7 @@ export const BAKERY_TEMPLATE_PRESET: EditorNode[] = [
       subtitle: "Share With Your Friends!",
       buttonText: "Buy Now",
       buttonLink: "/shop",
-      backgroundImage: "https://woodmart.xtemos.com/wp-content/uploads/2019/07/bakery-bg-2-opt.png",
+      backgroundImage: "/prokip-logo.png",
     },
   },
   {
@@ -184,7 +184,7 @@ export const BAKERY_TEMPLATE_PRESET: EditorNode[] = [
         { title: "FOOTER MENU", links: [{ label: "Instagram profile", url: "#" }, { label: "New Collection", url: "#" }, { label: "Contact Us", url: "#" }, { label: "Latest News", url: "#" }, { label: "Our Sitemap", url: "#" }] },
       ],
       copyrightText: "",
-      paymentIconsUrl: "https://woodmart.xtemos.com/wp-content/uploads/2018/08/payment.png",
+      paymentIconsUrl: "/prokip-logo.png",
     },
   },
 ];

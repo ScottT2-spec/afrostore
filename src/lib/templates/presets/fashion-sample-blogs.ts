@@ -1,7 +1,7 @@
 /**
  * Fashion Template — Sample Blog Posts
  * Created as real Blog records when merchant picks the Fashion template.
- * Matches the original WoodMart Fashion template blog posts.
+ * Matches the original Prokip LTD Fashion template blog posts.
  */
 
 export interface SampleBlog {

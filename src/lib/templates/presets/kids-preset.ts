@@ -2,7 +2,7 @@ import type { EditorNode } from "@/lib/visual-editor/node-tree";
 
 /**
  * Kids Template Preset
- * Recreates the WoodMart Kids demo layout with editable blocks.
+ * Recreates the Prokip LTD Kids demo layout with editable blocks.
  */
 export const KIDS_TEMPLATE_PRESET: EditorNode[] = [
   {

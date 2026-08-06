@@ -7,7 +7,7 @@ import { InlineEditableText } from "@/components/storefront/InlineEditableText";
 
 /* ═══════════════════════════════════════════════════════════════
    ACCESSORIES TEMPLATE BLOCKS
-   Pixel-perfect replicas of WoodMart Accessories template sections.
+   Pixel-perfect replicas of Prokip LTD Accessories template sections.
    All styling via scoped CSS — no external CSS dependencies.
    ═══════════════════════════════════════════════════════════════ */
 
@@ -562,15 +562,15 @@ export function AccessoriesFaqsContactInfo({ formFields = ["name", "email", "pho
           <div>
             <h3 className="afci-right-title">CONTACT INFORMATION</h3>
             <div className="afci-info-block">
-              <img src="https://woodmart.xtemos.com/accessories/wp-content/uploads/sites/7/2022/07/placeholder.svg" alt="Address" className="afci-icon" onError={onImgError} />
+              <img src="/prokip-logo.png" alt="Address" className="afci-icon" onError={onImgError} />
               <InlineEditableText as="div" field="contactInfo.address" value={safeContactInfo.address} isEditor={true} multiline className="afci-info-text" />
             </div>
             <div className="afci-info-block">
-              <img src="https://woodmart.xtemos.com/accessories/wp-content/uploads/sites/7/2022/07/smartphone.svg" alt="Phone" className="afci-icon" onError={onImgError} />
+              <img src="/prokip-logo.png" alt="Phone" className="afci-icon" onError={onImgError} />
               <InlineEditableText as="div" field="contactInfo.phones" value={safeContactInfo.phones.join("\n")} isEditor={true} multiline className="afci-info-text" />
             </div>
             <div className="afci-info-block">
-              <img src="https://woodmart.xtemos.com/accessories/wp-content/uploads/sites/7/2022/07/paper-plane.svg" alt="Email" className="afci-icon" onError={onImgError} />
+              <img src="/prokip-logo.png" alt="Email" className="afci-icon" onError={onImgError} />
               <div className="afci-info-text">{safeContactInfo.emails.map((e, i) => <span key={i}><a href={`mailto:${e}`}>{e}</a>{i < safeContactInfo.emails.length - 1 ? "\n" : ""}</span>)}</div>
             </div>
             {footerText && <p className="afci-footer">{footerText}</p>}

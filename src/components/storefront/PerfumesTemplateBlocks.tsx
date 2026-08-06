@@ -12,7 +12,7 @@ import { InlineEditableText } from "@/components/storefront/InlineEditableText";
 
 /* ═══════════════════════════════════════════════════════════════
    PERFUMES TEMPLATE BLOCKS
-   Pixel-perfect replicas of WoodMart Perfumes template sections.
+   Pixel-perfect replicas of Prokip LTD Perfumes template sections.
    All styling inline — no external CSS dependencies.
    ═══════════════════════════════════════════════════════════════ */
 
@@ -33,7 +33,7 @@ const TOKENS = {
   bodyFont: "'Inter', Arial, Helvetica, sans-serif",
 };
 
-const IMG_BASE = "https://woodmart.xtemos.com/perfumes/wp-content/uploads/sites/32";
+const IMG_BASE = "/uploads/1782849639264-432053c21c9d1d34c04e23a3.png";
 
 /* ─── FONT LOADER ───────────────────────────────────────────── */
 export function PerfumesFontLoader() {
@@ -353,7 +353,7 @@ export function PerfumesHeader({ storeName, storeSlug, logo, categories, cartCou
                         ))}
                       </div>
                     </div>
-                    <div className="phx-dropdown-feature" style={{ backgroundImage: "url(https://woodmart.xtemos.com/perfumes/wp-content/uploads/sites/32/2025/11/prf-collection-opus-essence.jpg)" }}>
+                    <div className="phx-dropdown-feature" style={{ backgroundImage: "url(/prokip-logo.png)" }}>
                       <div className="phx-dropdown-feature-content">
                         <h3>Opus Essence</h3>
                         <p>A collection of delicate, weightless fragrances that capture the essence of air and light. Soft florals, sheer musks, and dewy accords.</p>
@@ -953,7 +953,7 @@ export function PerfumesMarquee({ items = [], speed = "45s", marginBottom = "120
     @media (max-width: 767px) { .pm-item { font-size: 36px; } }
   `;
 
-  const sepImg = `${IMG_BASE}/2025/11/prf-marquee-figure.svg`;
+  const sepImg = "/uploads/1782849639264-432053c21c9d1d34c04e23a3.png";
 
   return (
     <div className="pm-section">
@@ -1572,7 +1572,7 @@ export function PerfumesFooter({ storeName, storeSlug, logo, description }: Perf
         <div className="pfx-bottom">
           <p className="pfx-copy">{storeName} © {new Date().getFullYear()}. All Rights Reserved.</p>
           <img
-            src="https://woodmart.xtemos.com/perfumes/wp-content/uploads/sites/32/2025/11/ps-mtds.png.webp"
+            src="/prokip-logo.png"
             alt="Payment methods"
             className="pfx-payments"
           />
@@ -1598,7 +1598,7 @@ export interface PerfumesAboutWelcomeProps {
   isEditor?: boolean;
   blockId?: string;
 }
-export function PerfumesAboutWelcome({ title = "Welcome to Our Fragrances", text = "", image = `${IMG_BASE}/2025/11/prf-about-us-1.jpg`, elements = [], isEditor = false, blockId }: PerfumesAboutWelcomeProps) {
+export function PerfumesAboutWelcome({ title = "Welcome to Our Fragrances", text = "", image = "/uploads/1782849639264-432053c21c9d1d34c04e23a3.png", elements = [], isEditor = false, blockId }: PerfumesAboutWelcomeProps) {
   const titleNode = elements.find((node) => node.type === "title" || node.type === "heading");
   const textNode = elements.find((node) => node.type === "paragraph" || node.type === "text" || node.type === "bodyText");
   const imageNode = elements.find((node) => node.type === "image");
@@ -2042,7 +2042,7 @@ export function PerfumesJournalGrid({ columns = 3 }: PerfumesJournalGridProps) {
   const storeCtx = useContext(PerfumesStoreContext);
   const blogs = storeCtx?.blogs || [];
   const storeSlug = storeCtx?.storeSlug || "";
-  const placeholders = Array.from({ length: 6 }, (_, i) => `${IMG_BASE}/2025/11/prf-blog-${i + 1}-588x598.jpg`);
+  const placeholders = Array.from({ length: 6 }, () => "/uploads/1782849639264-432053c21c9d1d34c04e23a3.png");
   const formatDate = (d: string) => new Date(d).toLocaleDateString("en-US", { day: "2-digit", month: "short", year: "numeric" });
 
   const css = `

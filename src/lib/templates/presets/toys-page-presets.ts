@@ -2,14 +2,14 @@ import type { EditorNode } from "@/lib/visual-editor/node-tree";
 
 /**
  * Toys Template Page Presets
- * Content extracted verbatim from the WoodMart Toys demo sub-pages.
- * Source: https://woodmart.xtemos.com/demo-toys/demo/toys/
+ * Content extracted verbatim from the Prokip LTD Toys demo sub-pages.
+ * Source: https://prokip.xtemos.com/demo-toys/demo/toys/
  * Uses kids block types (toys template shares kids block components).
  */
 
 /* ═══════════════════════════════════════════════════════════════
    ABOUT US PAGE
-   Source: https://woodmart.xtemos.com/about-us/demo/toys/
+   Source: https://prokip.xtemos.com/about-us/demo/toys/
    ═══════════════════════════════════════════════════════════════ */
 
 export const TOYS_ABOUT_PAGE_BLOCKS: EditorNode[] = [
@@ -40,8 +40,8 @@ export const TOYS_ABOUT_PAGE_BLOCKS: EditorNode[] = [
         "A wonderful serenity has taken possession of my entire soul, like these sweet mornings of spring which I enjoy with my whole heart.",
       ],
       images: [
-        "https://woodmart.xtemos.com/wp-content/uploads/2017/03/about-us-gallery-photo-2.jpg",
-        "https://woodmart.xtemos.com/wp-content/uploads/2017/03/about-us-gallery-photo-1.jpg",
+        "/prokip-logo.png",
+        "/prokip-logo.png",
       ],
       calloutText: "",
       calloutLabel: "",
@@ -52,7 +52,7 @@ export const TOYS_ABOUT_PAGE_BLOCKS: EditorNode[] = [
     type: "kidsTextSection",
     settings: {
       sectionTitle: {
-        subtitle: "Woodmart - Best Ecommerce Theme 2021/22",
+        subtitle: "Prokip LTD - Best Ecommerce Theme 2021/22",
         title: "About Our Online Store",
       },
       bodyText: [
@@ -70,7 +70,7 @@ export const TOYS_ABOUT_PAGE_BLOCKS: EditorNode[] = [
     type: "kidsTextSection",
     settings: {
       sectionTitle: {
-        subtitle: "Woodmart - Best Ecommerce Theme 2021/22",
+        subtitle: "Prokip LTD - Best Ecommerce Theme 2021/22",
         title: "We convert your idea Into a reality.",
       },
       bodyText: [
@@ -84,7 +84,7 @@ export const TOYS_ABOUT_PAGE_BLOCKS: EditorNode[] = [
     type: "kidsTextSection",
     settings: {
       sectionTitle: {
-        subtitle: "Woodmart - Best Ecommerce Theme 2021/22",
+        subtitle: "Prokip LTD - Best Ecommerce Theme 2021/22",
         title: "Let\u2019s Get Creative!",
       },
       bodyText: [
@@ -115,7 +115,7 @@ export const TOYS_ABOUT_PAGE_BLOCKS: EditorNode[] = [
     type: "kidsTextSection",
     settings: {
       sectionTitle: {
-        subtitle: "Woodmart - Best Ecommerce Theme 2021/22",
+        subtitle: "Prokip LTD - Best Ecommerce Theme 2021/22",
         title: "\u2018\u2018Excellence is not a skill it\u2019s an attitude\u2019\u2019 - Ralph Marston",
       },
       bodyText: [
@@ -136,22 +136,22 @@ export const TOYS_ABOUT_PAGE_BLOCKS: EditorNode[] = [
         {
           name: "Mark Jance",
           role: "CEO / Founder",
-          photoUrl: "https://woodmart.xtemos.com/wp-content/uploads/2017/01/team26.jpg",
+          photoUrl: "/prokip-logo.png",
         },
         {
           name: "Mark Jance",
           role: "CEO / Founder",
-          photoUrl: "https://woodmart.xtemos.com/wp-content/uploads/2017/01/team19.jpg",
+          photoUrl: "/prokip-logo.png",
         },
         {
           name: "Mark Jance",
           role: "CEO / Founder",
-          photoUrl: "https://woodmart.xtemos.com/wp-content/uploads/2017/01/team24.jpg",
+          photoUrl: "/prokip-logo.png",
         },
         {
           name: "Mark Jance",
           role: "CEO / Founder",
-          photoUrl: "https://woodmart.xtemos.com/wp-content/uploads/2017/01/team21.jpg",
+          photoUrl: "/prokip-logo.png",
         },
       ],
     },
@@ -168,7 +168,7 @@ export const TOYS_ABOUT_PAGE_BLOCKS: EditorNode[] = [
 
 /* ═══════════════════════════════════════════════════════════════
    CONTACT US PAGE
-   Source: https://woodmart.xtemos.com/contact-us/demo/toys/
+   Source: https://prokip.xtemos.com/contact-us/demo/toys/
    ═══════════════════════════════════════════════════════════════ */
 
 export const TOYS_CONTACT_PAGE_BLOCKS: EditorNode[] = [
@@ -249,7 +249,7 @@ export const TOYS_CONTACT_PAGE_BLOCKS: EditorNode[] = [
 
 /* ═══════════════════════════════════════════════════════════════
    BLOG PAGE
-   Source: https://woodmart.xtemos.com/blog/demo/toys/
+   Source: https://prokip.xtemos.com/blog/demo/toys/
    ═══════════════════════════════════════════════════════════════ */
 
 export const TOYS_BLOG_PAGE_BLOCKS: EditorNode[] = [
@@ -275,7 +275,7 @@ export const TOYS_BLOG_PAGE_BLOCKS: EditorNode[] = [
     type: "kidsAboutHero",
     settings: {
       subtitle: "Toys Blog",
-      title: "Woodmart Blog",
+      title: "Prokip LTD Blog",
       bodyText: [
         "Browse the latest Toys demo posts for styling tips, playful gift ideas, and practical guides for parents.",
       ],
@@ -298,7 +298,7 @@ export const TOYS_BLOG_PAGE_BLOCKS: EditorNode[] = [
           title: "Seating collection inspiration by modern",
           slug: "seating-collection-inspiration",
           excerpt: "Ac haca ullamcorper donec ante habi tasse donec imperdiet eturpis varius per a augue magna hac. Nec hac et vestibulum duis a tinci...",
-          image: "https://woodmart.xtemos.com/wp-content/uploads/2016/07/blog-grid-9.jpg",
+          image: "/prokip-logo.png",
           category: "Design trends",
           author: "S. Rogers",
           date: "Jul 23",
@@ -308,7 +308,7 @@ export const TOYS_BLOG_PAGE_BLOCKS: EditorNode[] = [
           title: "Minimalist design furniture 2026",
           slug: "minimalist-design-furniture-2016",
           excerpt: "Discover the ultimate blend of aesthetics, innovation, and functionality. We have curated five iconic European design houses that ...",
-          image: "https://woodmart.xtemos.com/wp-content/uploads/2016/07/blog-grid-1.jpg",
+          image: "/prokip-logo.png",
           category: "Design trends",
           author: "S. Rogers",
           date: "Jul 23",
@@ -318,7 +318,7 @@ export const TOYS_BLOG_PAGE_BLOCKS: EditorNode[] = [
           title: "Green interior design inspiration",
           slug: "green-interior-design-inspiration",
           excerpt: "Modern Atlanta homes impress with a harmony of light, space, and eco-materials. Each project reflects the unique character of its ...",
-          image: "https://woodmart.xtemos.com/wp-content/uploads/2016/07/blog-grid-7.jpg",
+          image: "/prokip-logo.png",
           category: "Design trends",
           author: "S. Rogers",
           date: "Jul 23",
@@ -328,7 +328,7 @@ export const TOYS_BLOG_PAGE_BLOCKS: EditorNode[] = [
           title: "Reinterprets the classic bookshelf",
           slug: "reinterprets-the-classic-bookshelf",
           excerpt: "Aliquet parturient scele risque scele risque nibh pretium parturient suspendisse platea sapien torquent feugiat parturient hac ame...",
-          image: "https://woodmart.xtemos.com/wp-content/uploads/2016/07/blog-grid-3.jpg",
+          image: "/prokip-logo.png",
           category: "Design trends",
           author: "S. Rogers",
           date: "Jul 23",
@@ -338,7 +338,7 @@ export const TOYS_BLOG_PAGE_BLOCKS: EditorNode[] = [
           title: "Creative water features and exterior",
           slug: "creative-water-features-and-exterior",
           excerpt: "Adipiscing hac imperdiet id blandit varius scelerisque at sagittis libero dui dis volutpat vehicula mus sed ut. Lacinia dui rutrum...",
-          image: "https://woodmart.xtemos.com/wp-content/uploads/2016/07/blog-grid-13.jpg",
+          image: "/prokip-logo.png",
           category: "Design trends",
           author: "S. Rogers",
           date: "Jul 23",
@@ -348,7 +348,7 @@ export const TOYS_BLOG_PAGE_BLOCKS: EditorNode[] = [
           title: "Sweet seat: functional seat for IT folks",
           slug: "sweet-seat-multifunctional-seat-for-it-folks",
           excerpt: "Discover a world of digital art and modern design at our annual exhibition. Explore unique projects from international creators. T...",
-          image: "https://woodmart.xtemos.com/wp-content/uploads/2016/07/blog-grid-11.jpg",
+          image: "/prokip-logo.png",
           category: "Design trends",
           author: "S. Rogers",
           date: "Jul 23",
@@ -368,7 +368,7 @@ export const TOYS_BLOG_PAGE_BLOCKS: EditorNode[] = [
 
 /* ═══════════════════════════════════════════════════════════════
    SHOP PAGE
-   Source: https://woodmart.xtemos.com/shop/demo/toys/
+   Source: https://prokip.xtemos.com/shop/demo/toys/
    ═══════════════════════════════════════════════════════════════ */
 
 export const TOYS_SHOP_PAGE_BLOCKS: EditorNode[] = [
@@ -414,37 +414,37 @@ export const TOYS_SHOP_PAGE_BLOCKS: EditorNode[] = [
       categories: [
         {
           name: "Plush Toys",
-          image: "https://woodmart.xtemos.com/wp-content/uploads/2018/10/v-toy-banner-img-1-opt.jpg",
+          image: "/prokip-logo.png",
           productCount: 12,
           link: "/shop",
         },
         {
           name: "Action Figures",
-          image: "https://woodmart.xtemos.com/wp-content/uploads/2018/10/v-toy-banner-img-2-opt.jpg",
+          image: "/prokip-logo.png",
           productCount: 8,
           link: "/shop",
         },
         {
           name: "Building Toys",
-          image: "https://woodmart.xtemos.com/wp-content/uploads/2018/10/v-toy-banner-img-3-opt.jpg",
+          image: "/prokip-logo.png",
           productCount: 15,
           link: "/shop",
         },
         {
           name: "Clocks",
-          image: "https://woodmart.xtemos.com/wp-content/uploads/2016/07/blog-grid-9.jpg",
+          image: "/prokip-logo.png",
           productCount: 12,
           link: "/shop",
         },
         {
           name: "Lighting",
-          image: "https://woodmart.xtemos.com/wp-content/uploads/2016/07/blog-grid-1.jpg",
+          image: "/prokip-logo.png",
           productCount: 17,
           link: "/shop",
         },
         {
           name: "Accessories",
-          image: "https://woodmart.xtemos.com/wp-content/uploads/2016/07/blog-grid-7.jpg",
+          image: "/prokip-logo.png",
           productCount: 12,
           link: "/shop",
         },
@@ -475,7 +475,7 @@ export const TOYS_SHOP_PAGE_BLOCKS: EditorNode[] = [
 
 /* ═══════════════════════════════════════════════════════════════
    FAQS PAGE
-   Source: https://woodmart.xtemos.com/faqs/demo/toys/
+   Source: https://prokip.xtemos.com/faqs/demo/toys/
    ═══════════════════════════════════════════════════════════════ */
 
 export const TOYS_FAQS_PAGE_BLOCKS: EditorNode[] = [

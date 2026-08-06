@@ -3,7 +3,7 @@ import { prisma } from "@/lib/db";
 
 /**
  * Add sample blog posts to handmade-bags sites to populate Journal grid
- * Based on woodmart.xtemos.com/handmade/blog/ reference content
+ * Based on prokip.xtemos.com/handmade/blog/ reference content
  */
 
 const SAMPLE_BLOGS = [
@@ -12,7 +12,7 @@ const SAMPLE_BLOGS = [
     slug: "art-of-leather-craftsmanship",
     excerpt: "Discover the meticulous process behind creating premium leather bags, from selecting the finest hides to hand-stitching each piece.",
     content: "Leather craftsmanship is an ancient art that requires patience, skill, and dedication. Our artisans spend years mastering techniques passed down through generations...",
-    coverImage: "https://woodmart.xtemos.com/handmade/wp-content/uploads/sites/35/2025/11/handmade-blog-1-588x598.jpg",
+    coverImage: "/prokip-logo.png",
     author: "Master Artisan",
     category: "Craftsmanship",
   },
@@ -21,7 +21,7 @@ const SAMPLE_BLOGS = [
     slug: "choosing-perfect-leather-bag",
     excerpt: "A comprehensive guide to selecting the right leather bag for your lifestyle, considering durability, style, and functionality.",
     content: "When investing in a leather bag, it's important to consider how you'll use it daily. Different leathers serve different purposes...",
-    coverImage: "https://woodmart.xtemos.com/handmade/wp-content/uploads/sites/35/2025/11/handmade-blog-2-588x598.jpg",
+    coverImage: "/prokip-logo.png",
     author: "Style Expert",
     category: "Guide",
   },
@@ -30,7 +30,7 @@ const SAMPLE_BLOGS = [
     slug: "caring-for-leather-goods",
     excerpt: "Essential tips and techniques to maintain the beauty and longevity of your leather bags and accessories.",
     content: "Proper care can extend the life of your leather goods by decades. Regular conditioning, proper storage, and gentle cleaning are key...",
-    coverImage: "https://woodmart.xtemos.com/handmade/wp-content/uploads/sites/35/2025/11/handmade-blog-3-588x598.jpg",
+    coverImage: "/prokip-logo.png",
     author: "Care Specialist",
     category: "Care",
   },
@@ -39,7 +39,7 @@ const SAMPLE_BLOGS = [
     slug: "sustainable-fashion-leather",
     excerpt: "Exploring the environmental benefits of choosing quality leather goods over fast fashion alternatives.",
     content: "Investment pieces made from genuine leather last longer and reduce the environmental impact of frequent replacements...",
-    coverImage: "https://woodmart.xtemos.com/handmade/wp-content/uploads/sites/35/2025/11/handmade-blog-4-588x598.jpg",
+    coverImage: "/prokip-logo.png",
     author: "Sustainability Expert",
     category: "Sustainability",
   },

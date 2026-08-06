@@ -8,7 +8,7 @@ import { InlineEditableText } from "@/components/storefront/InlineEditableText";
 
 /* ═══════════════════════════════════════════════════════════════
    INTERIOR DESIGN (RETAIL) TEMPLATE BLOCKS
-   Pixel-perfect replicas of WoodMart Retail template sections.
+   Pixel-perfect replicas of Prokip LTD Retail template sections.
    All styling inline — no external CSS dependencies.
    ═══════════════════════════════════════════════════════════════ */
 
@@ -30,7 +30,7 @@ const TOKENS = {
   bodyFont: "'Cabin', Arial, Helvetica, sans-serif",
 };
 
-const IMG = "https://woodmart.xtemos.com/wp-content/uploads";
+const IMG = "https://prokip.xtemos.com/wp-content/uploads";
 
 /* ─── FONT LOADER ───────────────────────────────────────────── */
 export function InteriorFontLoader() {
@@ -961,7 +961,7 @@ export function InteriorFooterFull({
       </div>
       <div className="if-bottom">
         <small><Link href={base}>{copyrightText || `© ${new Date().getFullYear()} ${storeName}. All rights reserved.`}</Link></small>
-        <img src="https://woodmart.xtemos.com/wp-content/uploads/2018/08/payment.png" alt="Payment methods" style={{ height: "21px" }} loading="lazy" />
+        <img src="/prokip-logo.png" alt="Payment methods" style={{ height: "21px" }} loading="lazy" />
       </div>
     </footer>
   );

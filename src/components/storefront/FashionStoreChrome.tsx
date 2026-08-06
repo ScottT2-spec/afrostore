@@ -6,7 +6,7 @@ import { normalizeSocialLinks } from "@/components/storefront/prop-normalizers";
 
 /* ═══════════════════════════════════════════════════════════════
    FASHION STORE HEADER + FOOTER
-   Pixel-perfect WoodMart Fashion template chrome.
+   Pixel-perfect Prokip LTD Fashion template chrome.
    ═══════════════════════════════════════════════════════════════ */
 
 const T = {
@@ -228,7 +228,7 @@ export function FashionHeader({
       {/* Desktop Nav */}
       <nav className="fsh-nav">
         <div className="fsh-nav-inner">
-          {/* Categories dropdown toggle — WoodMart style */}
+          {/* Categories dropdown toggle — Prokip LTD style */}
           {!isLanding && categories.length > 0 && (
             <div className="fsh-cat-wrap">
               <button

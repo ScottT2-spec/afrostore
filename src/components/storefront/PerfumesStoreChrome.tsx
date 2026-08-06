@@ -199,12 +199,12 @@ export function PerfumesFooter({ storeName, storeSlug, logo, description, social
   const socialIcons: Record<string, string> = { facebook: "f", twitter: "𝕏", instagram: "📷", youtube: "▶", tiktok: "♪" };
   const safeSocialLinks = normalizeSocialLinks(socialLinks);
   const instagramImages = [
-    "https://woodmart.xtemos.com/perfumes/wp-content/uploads/sites/32/2025/11/prf-inst-1-300x300.jpg",
-    "https://woodmart.xtemos.com/perfumes/wp-content/uploads/sites/32/2025/11/prf-inst-2-300x300.jpg",
-    "https://woodmart.xtemos.com/perfumes/wp-content/uploads/sites/32/2025/11/prf-inst-3-300x300.jpg",
-    "https://woodmart.xtemos.com/perfumes/wp-content/uploads/sites/32/2025/11/prf-inst-4-300x300.jpg",
-    "https://woodmart.xtemos.com/perfumes/wp-content/uploads/sites/32/2025/11/prf-inst-5-300x300.jpg",
-    "https://woodmart.xtemos.com/perfumes/wp-content/uploads/sites/32/2025/11/prf-inst-6-300x300.jpg",
+    "/prokip-logo.png",
+    "/prokip-logo.png",
+    "/prokip-logo.png",
+    "/prokip-logo.png",
+    "/prokip-logo.png",
+    "/prokip-logo.png",
   ];
 
   return (

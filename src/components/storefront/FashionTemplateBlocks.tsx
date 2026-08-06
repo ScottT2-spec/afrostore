@@ -13,7 +13,7 @@ import { InlineEditableText } from "@/components/storefront/InlineEditableText";
 
 /* ═══════════════════════════════════════════════════════════════
    FASHION TEMPLATE BLOCKS
-   Pixel-perfect replicas of WoodMart Fashion template sections.
+   Pixel-perfect replicas of Prokip LTD Fashion template sections.
    All styling inline — no external CSS dependencies.
    ═══════════════════════════════════════════════════════════════ */
 
@@ -1368,7 +1368,7 @@ export interface FashionNewsletterProps {
 }
 
 export function FashionNewsletter({
-  subtitle = "TO WOODMART",
+  subtitle = "TO PROKIP",
   title = "REGISTER FOR OUR NEWSLETTER",
   description = "Sign up for all the news about our last arrivals and get an exclusive early access shopping.",
   buttonText = "Sign up",
@@ -1492,7 +1492,7 @@ export function FashionNewsletter({
 /* ═══════════════════════════════════════════════════════════════
    9. FASHION FEATURES (HOW WE WORK)
    Numbered feature boxes (01, 02, 03) with title, description, and CTA.
-   Matches WoodMart "How We Work" section from fashion-colored template.
+   Matches Prokip LTD "How We Work" section from fashion-colored template.
    ═══════════════════════════════════════════════════════════════ */
 
 export interface FashionFeatureItem {
@@ -1594,7 +1594,7 @@ export function FashionFeatures({
 /* ═══════════════════════════════════════════════════════════════
    10. FASHION INSTAGRAM GALLERY
    Grid of images with hover overlay showing likes/comments.
-   Matches WoodMart "PROKIP ON INSTAGRAM" from fashion-colored.
+   Matches Prokip LTD "PROKIP ON INSTAGRAM" from fashion-colored.
    ═══════════════════════════════════════════════════════════════ */
 
 export interface FashionInstaImage {
@@ -1711,7 +1711,7 @@ export function FashionInstagram({
 
 /* ═══════════════════════════════════════════════════════════════
    11. FASHION MARQUEE
-   Infinite scrolling text banner, matching WoodMart marquee element.
+   Infinite scrolling text banner, matching Prokip LTD marquee element.
    Used in handmade-bags template for announcements/info bars.
    ═══════════════════════════════════════════════════════════════ */
 
@@ -1898,7 +1898,7 @@ export function FashionCoverBanners({
 
 /* ═══════════════════════════════════════════════════════════════
    13. FASHION FOOTER
-   Matches WoodMart Fashion footer: 5-column main footer + copyright bar.
+   Matches Prokip LTD Fashion footer: 5-column main footer + copyright bar.
    Light-on-dark color scheme with collapsible columns on mobile.
    ═══════════════════════════════════════════════════════════════ */
 

@@ -1,6 +1,6 @@
 import type { EditorNode } from "@/lib/visual-editor/node-tree";
 
-const IMG = "https://woodmart.xtemos.com/wp-content/uploads";
+const IMG = "https://prokip.xtemos.com/wp-content/uploads";
 
 export const TOYS_TEMPLATE_PRESET: EditorNode[] = [
   {
@@ -20,8 +20,8 @@ export const TOYS_TEMPLATE_PRESET: EditorNode[] = [
             "buttonText": "SHOP NOW",
             "buttonLink": "#",
             "backgroundColor": "#1a1a2e",
-            "productImage": "https://woodmart.xtemos.com/wp-content/uploads/2021/06/v-toy-sl-3.png",
-            "backgroundImage": "https://woodmart.xtemos.com/wp-content/uploads/2018/10/v-toy-sl3-bg-1-opt.jpg"
+            "productImage": "/prokip-logo.png",
+            "backgroundImage": "/prokip-logo.png"
           },
           elements: [],
         },
@@ -35,8 +35,8 @@ export const TOYS_TEMPLATE_PRESET: EditorNode[] = [
             "buttonText": "SHOP NOW",
             "buttonLink": "#",
             "backgroundColor": "#0f3460",
-            "productImage": "https://woodmart.xtemos.com/wp-content/uploads/2021/06/v-toy-sl-1.png",
-            "backgroundImage": "https://woodmart.xtemos.com/wp-content/uploads/2018/10/v-toy-sl-bg-1-opt.jpg"
+            "productImage": "/prokip-logo.png",
+            "backgroundImage": "/prokip-logo.png"
           },
           elements: [],
         },
@@ -50,8 +50,8 @@ export const TOYS_TEMPLATE_PRESET: EditorNode[] = [
             "buttonText": "SHOP NOW",
             "buttonLink": "#",
             "backgroundColor": "#e94560",
-            "productImage": "https://woodmart.xtemos.com/wp-content/uploads/2021/06/w-toys-slider-3.png",
-            "backgroundImage": "https://woodmart.xtemos.com/wp-content/uploads/2018/02/v-toy-sl2-bg.jpg"
+            "productImage": "/prokip-logo.png",
+            "backgroundImage": "/prokip-logo.png"
           },
           elements: [],
         }

@@ -13,7 +13,7 @@ const SAMPLE_PRODUCTS = [
     price: 125,
     compareAtPrice: 150,
     categorySlug: "etheria",
-    images: ["https://woodmart.xtemos.com/perfumes/wp-content/uploads/sites/32/2025/11/prf-product-1-430x491.jpg"],
+    images: ["/prokip-logo.png"],
   },
   {
     name: "Etheria White Musk",
@@ -22,7 +22,7 @@ const SAMPLE_PRODUCTS = [
     price: 95,
     compareAtPrice: 110,
     categorySlug: "etheria",
-    images: ["https://woodmart.xtemos.com/perfumes/wp-content/uploads/sites/32/2025/11/prf-product-2-430x491.jpg"],
+    images: ["/prokip-logo.png"],
   },
   {
     name: "Celeste Aura Citrus",
@@ -31,7 +31,7 @@ const SAMPLE_PRODUCTS = [
     price: 135,
     compareAtPrice: 160,
     categorySlug: "celeste-aura",
-    images: ["https://woodmart.xtemos.com/perfumes/wp-content/uploads/sites/32/2025/11/prf-product-3-430x491.jpg"],
+    images: ["/prokip-logo.png"],
   },
   {
     name: "Opus Essence Amber",
@@ -40,7 +40,7 @@ const SAMPLE_PRODUCTS = [
     price: 175,
     compareAtPrice: 200,
     categorySlug: "opus-essence",
-    images: ["https://woodmart.xtemos.com/perfumes/wp-content/uploads/sites/32/2025/11/prf-product-4-430x491.jpg"],
+    images: ["/prokip-logo.png"],
   },
   {
     name: "Opus Essence Oud",
@@ -49,7 +49,7 @@ const SAMPLE_PRODUCTS = [
     price: 225,
     compareAtPrice: 250,
     categorySlug: "opus-essence",
-    images: ["https://woodmart.xtemos.com/perfumes/wp-content/uploads/sites/32/2025/11/prf-product-5-430x491.jpg"],
+    images: ["/prokip-logo.png"],
   },
   {
     name: "Velours Noir Leather",
@@ -58,7 +58,7 @@ const SAMPLE_PRODUCTS = [
     price: 195,
     compareAtPrice: 220,
     categorySlug: "velours-noir",
-    images: ["https://woodmart.xtemos.com/perfumes/wp-content/uploads/sites/32/2025/11/prf-product-6-430x491.jpg"],
+    images: ["/prokip-logo.png"],
   },
   {
     name: "Nocturne Essence Night",
@@ -67,7 +67,7 @@ const SAMPLE_PRODUCTS = [
     price: 145,
     compareAtPrice: 170,
     categorySlug: "nocturne-essence",
-    images: ["https://woodmart.xtemos.com/perfumes/wp-content/uploads/sites/32/2025/11/prf-product-7-430x491.jpg"],
+    images: ["/prokip-logo.png"],
   },
   {
     name: "Elysian Bloom Green",
@@ -76,7 +76,7 @@ const SAMPLE_PRODUCTS = [
     price: 115,
     compareAtPrice: 135,
     categorySlug: "elysian-bloom",
-    images: ["https://woodmart.xtemos.com/perfumes/wp-content/uploads/sites/32/2025/11/prf-product-8-430x491.jpg"],
+    images: ["/prokip-logo.png"],
   },
 ];
 

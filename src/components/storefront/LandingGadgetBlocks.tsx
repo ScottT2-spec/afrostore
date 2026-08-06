@@ -10,7 +10,7 @@ import { InlineEditableText } from "@/components/storefront/InlineEditableText";
 
 /* ═══════════════════════════════════════════════════════════════
    LANDING GADGET TEMPLATE BLOCKS
-   Pixel-perfect replicas of WoodMart Landing Gadget demo.
+   Pixel-perfect replicas of Prokip LTD Landing Gadget demo.
    ═══════════════════════════════════════════════════════════════ */
 
 const TOKENS = {
@@ -124,8 +124,8 @@ export function LandingGadgetHero({
   primaryButtonLink = "#",
   secondaryButtonText = "View More",
   secondaryButtonLink = "#",
-  productImage = "https://woodmart.xtemos.com/wp-content/uploads/2018/11/landing-pixel-slider-phone-opt.png",
-  backgroundImage = "https://woodmart.xtemos.com/wp-content/uploads/2018/11/landing-pixel-slider-bg-opt.jpg",
+  productImage = "/prokip-logo.png",
+  backgroundImage = "/prokip-logo.png",
   backgroundColor,
   textColor,
   blockId,
@@ -335,8 +335,8 @@ export function LandingGadgetDarkFeature({
   description = "When it's about controlling hundreds of articles, product pages for web shops, or user profiles in social networks, all of them potentially with different sizes, formats, rules for.",
   buttonText = "View More",
   buttonLink = "#",
-  backgroundImage = "https://woodmart.xtemos.com/wp-content/uploads/2018/11/landing-pixel-bg-woterproof-opt.jpg",
-  overlayImage = "https://woodmart.xtemos.com/wp-content/uploads/2018/11/landing-pixel-woterproof-opt.png",
+  backgroundImage = "/prokip-logo.png",
+  overlayImage = "/prokip-logo.png",
   blockId,
   isEditor = false,
 }: DarkFeatureProps) {
@@ -386,8 +386,8 @@ export function LandingGadgetPhotoGallery({
   title = "Point your camera\nfind products online.",
   description = "Using test items of real content and data in designs will help, but there's no guarantee that every oddity will be found and corrected.",
   images = [
-    "https://woodmart.xtemos.com/wp-content/uploads/2018/11/landing-pixel-photo-1-opt.jpg",
-    "https://woodmart.xtemos.com/wp-content/uploads/2018/11/landing-pixel-photo-2-opt-.jpg",
+    "/prokip-logo.png",
+    "/prokip-logo.png",
   ],
   primaryButtonText = "To Shop",
   primaryButtonLink = "#",
@@ -459,8 +459,8 @@ export function LandingGadgetCameraDark({
     { value: "240 FPS", label: "Frame Frequency", description: "A eu a et parturient platea lobo." },
     { value: "0.5 Ro", label: "Video Recording", description: "Pellentesque interdum odio." },
   ],
-  backgroundImage = "https://woodmart.xtemos.com/wp-content/uploads/2018/11/landing-pixel-camera-bg-opt.jpg",
-  overlayImage = "https://woodmart.xtemos.com/wp-content/uploads/2018/11/landing-pixel-camera-opt.png",
+  backgroundImage = "/prokip-logo.png",
+  overlayImage = "/prokip-logo.png",
   blockId,
   isEditor = false,
 }: CameraDarkProps) {
@@ -516,9 +516,9 @@ interface SecurityProps {
 export function LandingGadgetSecurity({
   sectionTitle = "Security and protection against thieves.",
   items = [
-    { icon: "https://woodmart.xtemos.com/wp-content/uploads/2018/11/landing-pixel-sequrity-fingerprint-1.svg", title: "Unlock Fingerprint", description: "Presently it defines a new ipsum provider plugin service that allows for pluggable ipsum." },
-    { icon: "https://woodmart.xtemos.com/wp-content/uploads/2018/11/landing-pixel-sequrity-web-1.svg", title: "Web Locking", description: "Optionally available are extracts from a speech, corporate nonsense, and a randomised." },
-    { icon: "https://woodmart.xtemos.com/wp-content/uploads/2018/11/landing-pixel-sequrity-os-shild-1.svg", title: "OS Secure", description: "Try telling a client to ignore draft copy however, and you're up to something you can't win." },
+    { icon: "/prokip-logo.png", title: "Unlock Fingerprint", description: "Presently it defines a new ipsum provider plugin service that allows for pluggable ipsum." },
+    { icon: "/prokip-logo.png", title: "Web Locking", description: "Optionally available are extracts from a speech, corporate nonsense, and a randomised." },
+    { icon: "/prokip-logo.png", title: "OS Secure", description: "Try telling a client to ignore draft copy however, and you're up to something you can't win." },
   ],
   blockId,
   isEditor = false,
@@ -563,16 +563,16 @@ interface CameraOpticsProps {
 
 export function LandingGadgetCameraOptics({
   sectionTitle = "Powerful optics and advanced technology in camera.",
-  productImage = "https://woodmart.xtemos.com/wp-content/uploads/2018/11/pixel-3-xl-360-1-opt.jpg",
+  productImage = "/prokip-logo.png",
   leftSpecs = [
-    { icon: "https://woodmart.xtemos.com/wp-content/uploads/2018/11/landing-pixel-camera-1.svg", value: "12.2 MP", label: "Camera" },
-    { icon: "https://woodmart.xtemos.com/wp-content/uploads/2018/11/landing-pixel-camera-2.svg", value: "1.4 μm", label: "Pixel Size" },
-    { icon: "https://woodmart.xtemos.com/wp-content/uploads/2018/11/landing-pixel-camera-3.svg", value: "f/1.8", label: "Aperture" },
+    { icon: "/prokip-logo.png", value: "12.2 MP", label: "Camera" },
+    { icon: "/prokip-logo.png", value: "1.4 μm", label: "Pixel Size" },
+    { icon: "/prokip-logo.png", value: "f/1.8", label: "Aperture" },
   ],
   rightSpecs = [
-    { icon: "https://woodmart.xtemos.com/wp-content/uploads/2018/11/landing-pixel-camera-4.svg", value: "6x Zoom", label: "Sapphire Lenses" },
-    { icon: "https://woodmart.xtemos.com/wp-content/uploads/2018/11/landing-pixel-camera-5.svg", value: "2 LED", label: "Smart Flash" },
-    { icon: "https://woodmart.xtemos.com/wp-content/uploads/2018/11/landing-pixel-camera-6.svg", value: "2 Laser", label: "Smart Flash" },
+    { icon: "/prokip-logo.png", value: "6x Zoom", label: "Sapphire Lenses" },
+    { icon: "/prokip-logo.png", value: "2 LED", label: "Smart Flash" },
+    { icon: "/prokip-logo.png", value: "2 Laser", label: "Smart Flash" },
   ],
   blockId,
   isEditor = false,
@@ -642,10 +642,10 @@ interface ProductsShowcaseProps {
 
 export function LandingGadgetProductsShowcase({
   products = [
-    { name: "Pixel 3", category: "Landing Pixel", price: "$649.00", image: "https://woodmart.xtemos.com/wp-content/uploads/2018/11/pixel-3-beige-opt.jpg", link: "#" },
-    { name: "Pixel 3 XL", category: "Landing Pixel", price: "$849.00", image: "https://woodmart.xtemos.com/wp-content/uploads/2018/11/pixel-3-xl-gray-opt.jpg", link: "#" },
+    { name: "Pixel 3", category: "Landing Pixel", price: "$649.00", image: "/prokip-logo.png", link: "#" },
+    { name: "Pixel 3 XL", category: "Landing Pixel", price: "$849.00", image: "/prokip-logo.png", link: "#" },
   ],
-  bannerImage = "https://woodmart.xtemos.com/wp-content/uploads/2018/11/landing-pixel-accessories-banner-opt-1.jpg",
+  bannerImage = "/prokip-logo.png",
   bannerTitle = "Accessories",
   bannerButtonText = "View More",
   bannerButtonLink = "#",
@@ -701,7 +701,7 @@ interface NewsletterProps {
 export function LandingGadgetNewsletter({
   title = "Subscribe us.",
   description = "A client that's unhappy for a reason is a problem, a client that's unhappy though he or her can't quite put a finger on it is worse. That's not so bad, there's dummy copy.",
-  backgroundImage = "https://woodmart.xtemos.com/wp-content/uploads/2018/11/landing-pixel-subscribe-bg-opt.jpg",
+  backgroundImage = "/prokip-logo.png",
   buttonText = "Subscribe",
   blockId,
   isEditor = false,
@@ -774,7 +774,7 @@ interface FooterProps {
 }
 
 export function LandingGadgetFooter({
-  logo = "https://woodmart.xtemos.com/wp-content/uploads/2018/08/wood-logo-dark.svg",
+  logo = "/prokip-logo.png",
   links = [
     { label: "Privacy Policy", href: "#" },
     { label: "Returns", href: "#" },
@@ -838,7 +838,7 @@ interface FullWidthImageProps {
 }
 
 export function LandingGadgetFullWidthImage({
-  image = "https://woodmart.xtemos.com/wp-content/uploads/2018/11/landing-pixel-sequrity-opt-1.jpg",
+  image = "/prokip-logo.png",
   alt = "Full width banner",
 }: FullWidthImageProps) {
   return (

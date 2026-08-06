@@ -20,7 +20,7 @@ export const PERFUMES_HOME_PAGE_BLOCKS: EditorNode[] = [
           type: "slide",
           settings:           {
             "title": "Opus Essence",
-            "bottleImage": "https://woodmart.xtemos.com/wp-content/uploads/2024/11/perfumes-slide-bottle-1.png",
+            "bottleImage": "/prokip-logo.png",
             "backgroundColor": "#1a1a2e",
             "buttonText": "Buy now",
             "buttonLink": "/shop",
@@ -33,7 +33,7 @@ export const PERFUMES_HOME_PAGE_BLOCKS: EditorNode[] = [
           type: "slide",
           settings:           {
             "title": "New Fragrance in the Opus Essence",
-            "bottleImage": "https://woodmart.xtemos.com/wp-content/uploads/2024/11/perfumes-slide-bottle-2.png",
+            "bottleImage": "/prokip-logo.png",
             "backgroundColor": "#2d1b4e",
             "buttonText": "Buy now",
             "buttonLink": "/shop",
@@ -46,7 +46,7 @@ export const PERFUMES_HOME_PAGE_BLOCKS: EditorNode[] = [
           type: "slide",
           settings:           {
             "title": "Deep Fragrance With a Refined Intensity",
-            "bottleImage": "https://woodmart.xtemos.com/wp-content/uploads/2024/11/perfumes-slide-bottle-3.png",
+            "bottleImage": "/prokip-logo.png",
             "backgroundColor": "#0d1b2a",
             "buttonText": "Buy now",
             "buttonLink": "/shop",
@@ -100,14 +100,14 @@ export const PERFUMES_HOME_PAGE_BLOCKS: EditorNode[] = [
           title: "Light Fragrance with a Silky Touch",
           subtitle: "A collection of delicate, weightless fragrances",
           description: "A collection of delicate, weightless fragrances that capture the essence of air and light. Soft florals, sheer musks, and gentle citruses.",
-          backgroundImage: "https://woodmart.xtemos.com/wp-content/uploads/2024/11/perfumes-banner-1.jpg",
+          backgroundImage: "/prokip-logo.png",
           link: "/shop",
         },
         {
           title: "Deep Fragrance With a Refined Intensity",
           subtitle: "A collection of fresh, luminous scents",
           description: "A collection of fresh, luminous scents inspired by the mystery of nightfall. Crisp citruses, airy florals, and cool musks.",
-          backgroundImage: "https://woodmart.xtemos.com/wp-content/uploads/2024/11/perfumes-banner-2.jpg",
+          backgroundImage: "/prokip-logo.png",
           link: "/shop",
         },
       ],
@@ -136,7 +136,7 @@ export const PERFUMES_HOME_PAGE_BLOCKS: EditorNode[] = [
       banners: [
         {
           title: "Get up to 20% off",
-          image: "https://woodmart.xtemos.com/wp-content/uploads/2024/11/perfumes-collection-1.jpg",
+          image: "/prokip-logo.png",
           link: "/shop",
         },
       ],
@@ -178,7 +178,7 @@ export const PERFUMES_ABOUT_PAGE_BLOCKS: EditorNode[] = [
     settings: {
       title: "Welcome to Our Fragrances",
       text: "At our Fragrances, we believe that scent is more than just an aroma — it's an experience. Inspired by the richness of nature, we craft sophisticated fragrances that bring warmth, elegance, and personality to every moment. Our carefully curated collections blend the finest natural ingredients, creating timeless scents that leave a lasting impression.",
-      image: "https://woodmart.xtemos.com/perfumes/wp-content/uploads/sites/32/2025/11/prf-about-us-1.jpg",
+      image: "/prokip-logo.png",
     },
   },
   {
@@ -209,10 +209,10 @@ export const PERFUMES_ABOUT_PAGE_BLOCKS: EditorNode[] = [
     settings: {
       title: "Why Choose Us?",
       items: [
-        { icon: "https://woodmart.xtemos.com/perfumes/wp-content/uploads/sites/32/2025/11/prf-infobox-1.svg", title: "Natural Ingredients", desc: "We use responsibly sourced, high-quality natural ingredients for an authentic experience." },
-        { icon: "https://woodmart.xtemos.com/perfumes/wp-content/uploads/sites/32/2025/11/prf-infobox-2.svg", title: "Artisanal Craftsmanship", desc: "Each fragrance is carefully developed by expert perfumers with a deep passion for artistry." },
-        { icon: "https://woodmart.xtemos.com/perfumes/wp-content/uploads/sites/32/2025/11/prf-infobox-3.svg", title: "Sustainable & Ethical", desc: "We are committed to sustainability, using eco-friendly packaging and ingredients." },
-        { icon: "https://woodmart.xtemos.com/perfumes/wp-content/uploads/sites/32/2025/11/prf-infobox-4.svg", title: "Luxury Experience", desc: "From elegant bottles to exquisite scents, every fragrance is designed to offer a journey." },
+        { icon: "/prokip-logo.png", title: "Natural Ingredients", desc: "We use responsibly sourced, high-quality natural ingredients for an authentic experience." },
+        { icon: "/prokip-logo.png", title: "Artisanal Craftsmanship", desc: "Each fragrance is carefully developed by expert perfumers with a deep passion for artistry." },
+        { icon: "/prokip-logo.png", title: "Sustainable & Ethical", desc: "We are committed to sustainability, using eco-friendly packaging and ingredients." },
+        { icon: "/prokip-logo.png", title: "Luxury Experience", desc: "From elegant bottles to exquisite scents, every fragrance is designed to offer a journey." },
       ],
     },
   },
@@ -267,7 +267,7 @@ export const PERFUMES_FRAGRANCES_PAGE_BLOCKS: EditorNode[] = [
     settings: {
       title: "Fragrances",
       subtitle: "Discover Our Collections",
-      backgroundImage: "https://woodmart.xtemos.com/perfumes/wp-content/uploads/sites/32/2025/11/prf-collection-opus-essence.jpg",
+      backgroundImage: "/prokip-logo.png",
     },
   },
   {
@@ -280,37 +280,37 @@ export const PERFUMES_FRAGRANCES_PAGE_BLOCKS: EditorNode[] = [
           name: "Étheria", 
           slug: "etheria", 
           description: "A collection of delicate, weightless fragrances that capture the essence of air and light. Soft florals, sheer musks, and dewy accords.",
-          image: "https://woodmart.xtemos.com/perfumes/wp-content/uploads/sites/32/2025/11/prf-collection-etheria.jpg"
+          image: "/prokip-logo.png"
         },
         { 
           name: "Celeste Aura", 
           slug: "celeste-aura", 
           description: "Elegant fragrances blending vibrant citrus, shimmering aldehydes, and refined light woods creating an aura of inner glow.",
-          image: "https://woodmart.xtemos.com/perfumes/wp-content/uploads/sites/32/2025/11/prf-collection-celeste-aura.jpg"
+          image: "/prokip-logo.png"
         },
         { 
           name: "Opus Essence", 
           slug: "opus-essence", 
           description: "Rich, complex compositions. Deep florals, precious woods, and warm ambers create a multidimensional fragrance experience.",
-          image: "https://woodmart.xtemos.com/perfumes/wp-content/uploads/sites/32/2025/11/prf-collection-opus-essence.jpg"
+          image: "/prokip-logo.png"
         },
         { 
           name: "Velours Noir", 
           slug: "velours-noir", 
           description: "Dark, velvety fragrances with depth and mystery. Smoky oud, leather accords, and black vanilla.",
-          image: "https://woodmart.xtemos.com/perfumes/wp-content/uploads/sites/32/2025/11/prf-collection-velours-noir.jpg"
+          image: "/prokip-logo.png"
         },
         { 
           name: "Nocturne Essence", 
           slug: "nocturne-essence", 
           description: "Fragrances inspired by nightfall. Cool musks, aromatic herbs, and dark spices capture twilight elegance.",
-          image: "https://woodmart.xtemos.com/perfumes/wp-content/uploads/sites/32/2025/11/prf-collection-nocturne-essence.jpg"
+          image: "/prokip-logo.png"
         },
         { 
           name: "Elysian Bloom", 
           slug: "elysian-bloom", 
           description: "Fresh, green fragrances celebrating nature. Dewy petals, crisp leaves, and earthy vetiver.",
-          image: "https://woodmart.xtemos.com/perfumes/wp-content/uploads/sites/32/2025/11/prf-collection-elysian-bloom.jpg"
+          image: "/prokip-logo.png"
         },
       ],
     },
@@ -333,7 +333,7 @@ export const PERFUMES_JOURNAL_PAGE_BLOCKS: EditorNode[] = [
     settings: {
       title: "Journal",
       subtitle: "Explore Our Stories",
-      backgroundImage: "https://woodmart.xtemos.com/perfumes/wp-content/uploads/sites/32/2025/11/prf-blog-3-588x598.jpg",
+      backgroundImage: "/prokip-logo.png",
     },
   },
   {

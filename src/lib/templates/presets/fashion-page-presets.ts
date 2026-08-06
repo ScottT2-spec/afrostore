@@ -2,14 +2,14 @@ import type { EditorNode } from "@/lib/visual-editor/node-tree";
 
 /**
  * Fashion Template Page Presets
- * Using block types with EXACT content from the WoodMart Fashion demo
- * Source: https://woodmart.xtemos.com/demo-fashion/demo/fashion/
+ * Using block types with EXACT content from the Prokip LTD Fashion demo
+ * Source: https://prokip.xtemos.com/demo-fashion/demo/fashion/
  * Content extracted verbatim — no placeholders
  */
 
 /* ═══════════════════════════════════════════════════════════════
    ABOUT US PAGE
-   Source: https://woodmart.xtemos.com/about-us/demo/fashion/
+   Source: https://prokip.xtemos.com/about-us/demo/fashion/
    ═══════════════════════════════════════════════════════════════ */
 
 export const FASHION_ABOUT_PAGE_BLOCKS: EditorNode[] = [
@@ -41,7 +41,7 @@ export const FASHION_ABOUT_PAGE_BLOCKS: EditorNode[] = [
     type: "fashionAboutContent",
     settings: {
       layout: "text-with-heading",
-      subtitle: "WOODMART - BEST ECOMMERCE THEME 2021/22",
+      subtitle: "PROKIP - BEST ECOMMERCE THEME 2021/22",
       title: "About Our Online Store",
       paragraphs: [
         "Risus suspendisse a orci penatibus a felis suscipit consectetur vestibulum sodales dui cum ultricies lacus interdum. Per suspendisse adipiscing a suspendisse auctor nibh a et at curae condimentum suspendisse enim a eu scelerisque.",
@@ -72,7 +72,7 @@ export const FASHION_ABOUT_PAGE_BLOCKS: EditorNode[] = [
     type: "fashionAboutContent",
     settings: {
       layout: "text-with-heading",
-      subtitle: "WOODMART - BEST ECOMMERCE THEME 2021/22",
+      subtitle: "PROKIP - BEST ECOMMERCE THEME 2021/22",
       title: "We convert your idea Into a reality.",
       paragraphs: [
         "One morning, when Gregor Samsa woke from troubled dreams, he found himself transformed in his bed into a horrible vermin. He lay on his armour-like back, and if he lifted his head a little he could see his brown belly, slightly domed and divided by arches into stiff His room, a proper human room although a little too smalls.",
@@ -87,26 +87,26 @@ export const FASHION_ABOUT_PAGE_BLOCKS: EditorNode[] = [
     id: "fashion-about-services",
     type: "fashionServicesGrid",
     settings: {
-      subtitle: "WOODMART - BEST ECOMMERCE THEME 2021/22",
+      subtitle: "PROKIP - BEST ECOMMERCE THEME 2021/22",
       title: "Let\u2019s Get Creative!",
       services: [
         {
-          icon: "https://woodmart.xtemos.com/wp-content/uploads/2017/03/ruler-transparent-70x70.png",
+          icon: "/prokip-logo.png",
           title: "GRAPHIC DESIGN",
           description: "Curabitur lacinia tristique velit ut laoreet.",
         },
         {
-          icon: "https://woodmart.xtemos.com/wp-content/uploads/2017/03/pen-transparent-70x70.png",
+          icon: "/prokip-logo.png",
           title: "WEB DESIGN",
           description: "By the readable content of a page when its layout.",
         },
         {
-          icon: "https://woodmart.xtemos.com/wp-content/uploads/2017/03/paint-palette-transparent-70x70.png",
+          icon: "/prokip-logo.png",
           title: "BRANDING",
           description: "Fact that a reader will be distracted.",
         },
         {
-          icon: "https://woodmart.xtemos.com/wp-content/uploads/2017/03/ruler-2-transparent-70x70.png",
+          icon: "/prokip-logo.png",
           title: "PHOTOGRAPHY",
           description: "The point of using Lorem Ipsum is that it has it.",
         },
@@ -118,8 +118,8 @@ export const FASHION_ABOUT_PAGE_BLOCKS: EditorNode[] = [
     type: "fashionGalleryGrid",
     settings: {
       images: [
-        "https://woodmart.xtemos.com/wp-content/uploads/2017/03/about-us-gallery-photo-2.jpg",
-        "https://woodmart.xtemos.com/wp-content/uploads/2017/03/about-us-gallery-photo-1.jpg",
+        "/prokip-logo.png",
+        "/prokip-logo.png",
       ],
     },
   },
@@ -132,12 +132,12 @@ export const FASHION_ABOUT_PAGE_BLOCKS: EditorNode[] = [
       description: "I am so happy, my dear friend, so absorbed in the exquisite sense of mere tranquil existence, that I neglect my talents. I should be incapable of drawing a single.",
       videos: [
         {
-          thumbnail: "https://woodmart.xtemos.com/wp-content/uploads/2017/03/video-placeholder-1.jpg",
+          thumbnail: "/prokip-logo.png",
           youtubeUrl: "http://www.youtube.com/watch?v=TJ1SDXbij8Y",
           title: "Our company history and facts",
         },
         {
-          thumbnail: "https://woodmart.xtemos.com/wp-content/uploads/2017/03/video-placeholder-2.jpg",
+          thumbnail: "/prokip-logo.png",
           youtubeUrl: "http://www.youtube.com/watch?v=TJ1SDXbij8Y",
           title: "Design & development process demonstration",
         },
@@ -148,7 +148,7 @@ export const FASHION_ABOUT_PAGE_BLOCKS: EditorNode[] = [
     id: "fashion-about-quote",
     type: "fashionQuoteSection",
     settings: {
-      subtitle: "WOODMART - BEST ECOMMERCE THEME 2021/22",
+      subtitle: "PROKIP - BEST ECOMMERCE THEME 2021/22",
       quote: "Excellence is not a skill it\u2019s an attitude",
       attribution: "Ralph Marston",
       description: "A wonderful serenity has taken possession of my entire soul, like these sweet mornings of spring which I enjoy with my whole heart. I am alone, and feel the charm of existence in this spot, which was created for the bliss of souls like mine.",
@@ -163,25 +163,25 @@ export const FASHION_ABOUT_PAGE_BLOCKS: EditorNode[] = [
         {
           name: "MARK JANCE",
           role: "CEO / FOUNDER",
-          image: "https://woodmart.xtemos.com/wp-content/uploads/2017/01/team26.jpg",
+          image: "/prokip-logo.png",
           socials: ["facebook", "twitter", "instagram", "linkedin"],
         },
         {
           name: "MARK JANCE",
           role: "CEO / FOUNDER",
-          image: "https://woodmart.xtemos.com/wp-content/uploads/2017/01/team19.jpg",
+          image: "/prokip-logo.png",
           socials: ["facebook", "twitter", "instagram", "linkedin"],
         },
         {
           name: "MARK JANCE",
           role: "CEO / FOUNDER",
-          image: "https://woodmart.xtemos.com/wp-content/uploads/2017/01/team24.jpg",
+          image: "/prokip-logo.png",
           socials: ["facebook", "twitter", "instagram", "linkedin"],
         },
         {
           name: "MARK JANCE",
           role: "CEO / FOUNDER",
-          image: "https://woodmart.xtemos.com/wp-content/uploads/2017/01/team21.jpg",
+          image: "/prokip-logo.png",
           socials: ["facebook", "twitter", "instagram", "linkedin"],
         },
       ],
@@ -228,21 +228,21 @@ export const FASHION_ABOUT_PAGE_BLOCKS: EditorNode[] = [
     settings: {
       banners: [
         {
-          image: "https://woodmart.xtemos.com/wp-content/uploads/2017/03/banner-news.jpg",
+          image: "/prokip-logo.png",
           title: "It is a fact that a reader will be distracted.",
           description: "Ullamcorper vehicula at ultrices sed interdum et malesuada",
           buttonText: "Read more",
           link: "#",
         },
         {
-          image: "https://woodmart.xtemos.com/wp-content/uploads/2017/03/banner-news-3.jpg",
+          image: "/prokip-logo.png",
           title: "By the readable content of a page when looking.",
           description: "Patibus elementum a dictum ipiscing parturient donec eros.",
           buttonText: "Read more",
           link: "#",
         },
         {
-          image: "https://woodmart.xtemos.com/wp-content/uploads/2017/03/banner-news-2.jpg",
+          image: "/prokip-logo.png",
           title: "The point of using Lorem Ipsum is that it has.",
           description: "Ullamcorper vehicula at ultrices sed interdum ullamcorper .",
           buttonText: "Read more",
@@ -255,7 +255,7 @@ export const FASHION_ABOUT_PAGE_BLOCKS: EditorNode[] = [
 
 /* ═══════════════════════════════════════════════════════════════
    CONTACT US PAGE
-   Source: https://woodmart.xtemos.com/contact-us/demo/fashion/
+   Source: https://prokip.xtemos.com/contact-us/demo/fashion/
    ═══════════════════════════════════════════════════════════════ */
 
 export const FASHION_CONTACT_PAGE_BLOCKS: EditorNode[] = [
@@ -313,11 +313,11 @@ export const FASHION_CONTACT_PAGE_BLOCKS: EditorNode[] = [
     id: "fashion-contact-newsletter",
     type: "fashionNewsletter",
     settings: {
-      subtitle: "TO WOODMART",
+      subtitle: "TO PROKIP",
       title: "REGISTER FOR OUR NEWSLETTER",
       description: "Sign up for all the news about our last arrivals and get an exclusive early access shopping.",
       socialLinks: [
-        { platform: "Facebook", url: "https://www.facebook.com/woodmart.xtemos" },
+        { platform: "Facebook", url: "https://www.facebook.com/prokip.xtemos" },
         { platform: "Twitter", url: "https://x.com/xtemos_studio" },
         { platform: "Instagram", url: "https://www.instagram.com/xtemos.studio/" },
         { platform: "YouTube", url: "https://www.youtube.com/channel/UCu3loFwqqOQ9z-YTcnplK8w" },
@@ -328,7 +328,7 @@ export const FASHION_CONTACT_PAGE_BLOCKS: EditorNode[] = [
 
 /* ═══════════════════════════════════════════════════════════════
    BLOG PAGE
-   Source: https://woodmart.xtemos.com/blog/demo/fashion/
+   Source: https://prokip.xtemos.com/blog/demo/fashion/
    ═══════════════════════════════════════════════════════════════ */
 
 export const FASHION_BLOG_PAGE_BLOCKS: EditorNode[] = [
@@ -336,7 +336,7 @@ export const FASHION_BLOG_PAGE_BLOCKS: EditorNode[] = [
     id: "fashion-blog-title",
     type: "fashionSectionTitle",
     settings: {
-      title: "Woodmart Blog",
+      title: "Prokip LTD Blog",
       align: "left",
       maxWidth: "100%",
     },
@@ -353,9 +353,9 @@ export const FASHION_BLOG_PAGE_BLOCKS: EditorNode[] = [
           date: "23 Jul",
           categories: ["Design trends", "Furniture"],
           author: "S. Rogers",
-          authorAvatar: "https://woodmart.xtemos.com/wp-content/uploads/2018/10/avatar-home.jpg",
+          authorAvatar: "/prokip-logo.png",
           excerpt: "Ac haca ullamcorper donec ante habi tasse donec imperdiet eturpis varius per a augue magna hac. Nec ...",
-          image: "https://woodmart.xtemos.com/wp-content/uploads/2016/07/blog-grid-9.jpg",
+          image: "/prokip-logo.png",
           link: "#",
           commentCount: 6,
         },
@@ -364,9 +364,9 @@ export const FASHION_BLOG_PAGE_BLOCKS: EditorNode[] = [
           date: "23 Jul",
           categories: ["Design trends", "Furniture"],
           author: "S. Rogers",
-          authorAvatar: "https://woodmart.xtemos.com/wp-content/uploads/2018/10/avatar-home.jpg",
+          authorAvatar: "/prokip-logo.png",
           excerpt: "Discover the ultimate blend of aesthetics, innovation, and functionality. We have curated five iconi...",
-          image: "https://woodmart.xtemos.com/wp-content/uploads/2016/07/blog-grid-1.jpg",
+          image: "/prokip-logo.png",
           link: "#",
           commentCount: 6,
         },
@@ -375,9 +375,9 @@ export const FASHION_BLOG_PAGE_BLOCKS: EditorNode[] = [
           date: "23 Jul",
           categories: ["Design trends", "Hand made"],
           author: "S. Rogers",
-          authorAvatar: "https://woodmart.xtemos.com/wp-content/uploads/2018/10/avatar-home.jpg",
+          authorAvatar: "/prokip-logo.png",
           excerpt: "Modern Atlanta homes impress with a harmony of light, space, and eco-materials. Each project reflect...",
-          image: "https://woodmart.xtemos.com/wp-content/uploads/2016/07/blog-grid-7.jpg",
+          image: "/prokip-logo.png",
           link: "#",
           commentCount: 0,
         },
@@ -386,9 +386,9 @@ export const FASHION_BLOG_PAGE_BLOCKS: EditorNode[] = [
           date: "23 Jul",
           categories: ["Design trends", "Inspiration"],
           author: "S. Rogers",
-          authorAvatar: "https://woodmart.xtemos.com/wp-content/uploads/2018/10/avatar-home.jpg",
+          authorAvatar: "/prokip-logo.png",
           excerpt: "Aliquet parturient scele risque scele risque nibh pretium parturient suspendisse platea sapien torqu...",
-          image: "https://woodmart.xtemos.com/wp-content/uploads/2016/07/blog-grid-3.jpg",
+          image: "/prokip-logo.png",
           link: "#",
           commentCount: 2,
         },
@@ -397,9 +397,9 @@ export const FASHION_BLOG_PAGE_BLOCKS: EditorNode[] = [
           date: "23 Jul",
           categories: ["Design trends", "Inspiration"],
           author: "S. Rogers",
-          authorAvatar: "https://woodmart.xtemos.com/wp-content/uploads/2018/10/avatar-home.jpg",
+          authorAvatar: "/prokip-logo.png",
           excerpt: "Aliquet parturient scele risque scele risque nibh pretium parturient suspendisse platea sapien torqu...",
-          image: "https://woodmart.xtemos.com/wp-content/uploads/2016/07/blog-grid-13.jpg",
+          image: "/prokip-logo.png",
           link: "#",
           commentCount: 0,
         },
@@ -410,7 +410,7 @@ export const FASHION_BLOG_PAGE_BLOCKS: EditorNode[] = [
 
 /* ═══════════════════════════════════════════════════════════════
    SHOP PAGE
-   Source: https://woodmart.xtemos.com/shop/demo/fashion/
+   Source: https://prokip.xtemos.com/shop/demo/fashion/
    ═══════════════════════════════════════════════════════════════ */
 
 export const FASHION_SHOP_PAGE_BLOCKS: EditorNode[] = [

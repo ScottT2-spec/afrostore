@@ -2,7 +2,7 @@ import type { EditorNode } from "@/lib/visual-editor/node-tree";
 
 /**
  * Interior Design / Decor Template Preset
- * Recreates the WoodMart Decor demo layout with editable blocks.
+ * Recreates the Prokip LTD Decor demo layout with editable blocks.
  */
 export const INTERIOR_DECOR_PRESET: EditorNode[] = [
   {
@@ -21,7 +21,7 @@ export const INTERIOR_DECOR_PRESET: EditorNode[] = [
             "subtitle": "$250.00",
             "buttonText": "Go To Shop",
             "buttonLink": "/shop",
-            "image": "https://woodmart.xtemos.com/wp-content/uploads/2018/09/decor-slide-4-right-img.jpg"
+            "image": "/prokip-logo.png"
           },
           elements: [],
         },
@@ -34,7 +34,7 @@ export const INTERIOR_DECOR_PRESET: EditorNode[] = [
             "subtitle": "$286.00",
             "buttonText": "Go To Shop",
             "buttonLink": "/shop",
-            "image": "https://woodmart.xtemos.com/wp-content/uploads/2018/09/decor-slide-3-right-img.jpg"
+            "image": "/prokip-logo.png"
           },
           elements: [],
         },
@@ -46,7 +46,7 @@ export const INTERIOR_DECOR_PRESET: EditorNode[] = [
             "titleLine2": "Minimalist Cattle.",
             "buttonText": "Go To Shop",
             "buttonLink": "/shop",
-            "image": "https://woodmart.xtemos.com/wp-content/uploads/2018/09/decor-slide-2-right-img.jpg"
+            "image": "/prokip-logo.png"
           },
           elements: [],
         },
@@ -58,7 +58,7 @@ export const INTERIOR_DECOR_PRESET: EditorNode[] = [
             "titleLine2": "and Brass.",
             "buttonText": "Go To Shop",
             "buttonLink": "/shop",
-            "image": "https://woodmart.xtemos.com/wp-content/uploads/2018/09/decor-slide-1-right-img.jpg"
+            "image": "/prokip-logo.png"
           },
           elements: [],
         }
@@ -71,11 +71,11 @@ export const INTERIOR_DECOR_PRESET: EditorNode[] = [
       sectionTitle: "TOP CATEGORIES",
       columns: 5,
       categories: [
-        { name: "Home Decor", icon: "https://woodmart.xtemos.com/wp-content/uploads/2018/09/decor-category-plant.svg", image: "", link: "/shop" },
-        { name: "Celing Decor", icon: "https://woodmart.xtemos.com/wp-content/uploads/2018/09/decor-category-lamp.svg", image: "", link: "/shop" },
-        { name: "Wall Decor", icon: "https://woodmart.xtemos.com/wp-content/uploads/2018/09/decor-category-art.svg", image: "", link: "/shop" },
-        { name: "Vase Decor", icon: "https://woodmart.xtemos.com/wp-content/uploads/2018/09/decor-category-vase.svg", image: "", link: "/shop" },
-        { name: "Holiday Decor", icon: "https://woodmart.xtemos.com/wp-content/uploads/2018/09/decor-category-baloons.svg", image: "", link: "/shop" },
+        { name: "Home Decor", icon: "/prokip-logo.png", image: "", link: "/shop" },
+        { name: "Celing Decor", icon: "/prokip-logo.png", image: "", link: "/shop" },
+        { name: "Wall Decor", icon: "/prokip-logo.png", image: "", link: "/shop" },
+        { name: "Vase Decor", icon: "/prokip-logo.png", image: "", link: "/shop" },
+        { name: "Holiday Decor", icon: "/prokip-logo.png", image: "", link: "/shop" },
       ],
     },
   },
@@ -88,21 +88,21 @@ export const INTERIOR_DECOR_PRESET: EditorNode[] = [
         {
           title: "New Arrivals In Decorations.",
           subtitle: "View More",
-          image: "https://woodmart.xtemos.com/wp-content/uploads/2018/09/decor-banner-1.jpg",
+          image: "/prokip-logo.png",
           buttonText: "View More",
           buttonLink: "/shop",
         },
         {
           title: "Decorative Wall Elements.",
           subtitle: "View More",
-          image: "https://woodmart.xtemos.com/wp-content/uploads/2018/09/decor-banner-2.jpg",
+          image: "/prokip-logo.png",
           buttonText: "View More",
           buttonLink: "/shop",
         },
         {
           title: "Decorations For New Novel.",
           subtitle: "View More",
-          image: "https://woodmart.xtemos.com/wp-content/uploads/2018/09/decor-banner-3.jpg",
+          image: "/prokip-logo.png",
           buttonText: "View More",
           buttonLink: "/shop",
         },
@@ -166,14 +166,14 @@ export const INTERIOR_DECOR_PRESET: EditorNode[] = [
         { title: "FOOTER MENU", links: [{ label: "Instagram profile", url: "#" }, { label: "New Collection", url: "#" }, { label: "Contact Us", url: "#" }, { label: "Latest News", url: "#" }, { label: "Our Sitemap", url: "#" }] },
       ],
       copyrightText: "",
-      paymentIconsUrl: "https://woodmart.xtemos.com/wp-content/uploads/2018/08/payment.png",
+      paymentIconsUrl: "/prokip-logo.png",
     },
   },
 ];
 
 /**
  * Interior Design / Retail Template Preset
- * Recreates the WoodMart Retail demo layout with editable blocks.
+ * Recreates the Prokip LTD Retail demo layout with editable blocks.
  */
 export const INTERIOR_RETAIL_PRESET: EditorNode[] = [
   {

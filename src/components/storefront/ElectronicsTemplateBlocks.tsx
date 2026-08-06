@@ -12,7 +12,7 @@ import { InlineEditableText } from "@/components/storefront/InlineEditableText";
 
 /* ═══════════════════════════════════════════════════════════════
    ELECTRONICS TEMPLATE BLOCKS
-   Pixel-perfect replicas of WoodMart Electronics template sections.
+   Pixel-perfect replicas of Prokip LTD Electronics template sections.
    All styling via scoped CSS — no external CSS dependencies.
    ═══════════════════════════════════════════════════════════════ */
 

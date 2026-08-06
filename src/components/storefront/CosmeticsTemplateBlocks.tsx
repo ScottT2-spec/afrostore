@@ -11,7 +11,7 @@ import { InlineEditableText } from "@/components/storefront/InlineEditableText";
 
 /* ═══════════════════════════════════════════════════════════════
    COSMETICS TEMPLATE BLOCKS
-   Pixel-perfect replicas of WoodMart Cosmetics template sections.
+   Pixel-perfect replicas of Prokip LTD Cosmetics template sections.
    All styling inline — no external CSS dependencies.
    ═══════════════════════════════════════════════════════════════ */
 
@@ -1281,7 +1281,7 @@ export interface CosmeticsNewsletterProps {
 }
 
 export function CosmeticsNewsletter({
-  backgroundImage = "https://woodmart.xtemos.com/wp-content/uploads/2017/01/newsletter-wood-3.jpg",
+  backgroundImage = "/prokip-logo.png",
   subtitle = "Subscribe",
   title = "SIGN UP FOR OUR NEWSLETTER",
   description = "Get the latest updates on new products and upcoming sales.",
@@ -1374,7 +1374,7 @@ export function CosmeticsNewsletter({
 
 /* ═══════════════════════════════════════════════════════════════
    COSMETICS HEADER
-   Clean and minimal header matching WoodMart Cosmetics demo.
+   Clean and minimal header matching Prokip LTD Cosmetics demo.
    ═══════════════════════════════════════════════════════════════ */
 
 export interface CosmeticsHeaderProps {
@@ -1546,7 +1546,7 @@ export function CosmeticsHeader({
 
 /* ═══════════════════════════════════════════════════════════════
    COSMETICS FOOTER
-   Matching WoodMart Cosmetics demo footer exactly.
+   Matching Prokip LTD Cosmetics demo footer exactly.
    ═══════════════════════════════════════════════════════════════ */
 
 export interface CosmeticsFooterProps {

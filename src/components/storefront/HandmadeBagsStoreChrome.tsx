@@ -7,7 +7,7 @@ import { normalizeSocialLinks } from "@/components/storefront/prop-normalizers";
 
 /* ═══════════════════════════════════════════════════════════════
    HANDMADE BAGS STORE HEADER + FOOTER
-   Matching WoodMart Handmade Bags demo exactly.
+   Matching Prokip LTD Handmade Bags demo exactly.
    Primary color: #c27843 (warm leather brown)
    ═══════════════════════════════════════════════════════════════ */
 
@@ -248,7 +248,7 @@ export function HandmadeBagsHeader({
 
 /* ═══════════════════════════════════════════════════════════════
    HANDMADE BAGS FOOTER
-   Matching WoodMart Handmade Bags demo footer exactly.
+   Matching Prokip LTD Handmade Bags demo footer exactly.
    ═══════════════════════════════════════════════════════════════ */
 
 interface HandmadeBagsFooterProps {

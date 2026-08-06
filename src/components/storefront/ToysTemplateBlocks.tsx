@@ -10,7 +10,7 @@ import { InlineEditableText } from "@/components/storefront/InlineEditableText";
 
 /* ═══════════════════════════════════════════════════════════════
    TOYS TEMPLATE BLOCKS
-   Pixel-perfect replicas of WoodMart Toys demo sections.
+   Pixel-perfect replicas of Prokip LTD Toys demo sections.
    ═══════════════════════════════════════════════════════════════ */
 
 const TOKENS = {
@@ -26,7 +26,7 @@ const TOKENS = {
   bodyFont: "'Open Sans', Arial, Helvetica, sans-serif",
 };
 
-const IMG = "https://woodmart.xtemos.com/wp-content/uploads";
+const IMG = "https://prokip.xtemos.com/wp-content/uploads";
 
 export function ToysFontLoader() {
   return (

@@ -11,7 +11,7 @@ import { InlineEditableText } from "@/components/storefront/InlineEditableText";
 
 /* ═══════════════════════════════════════════════════════════════
    HEALTH (PILLS & SUPPLEMENTS) TEMPLATE BLOCKS
-   Pixel-perfect replicas of WoodMart Pills template sections.
+   Pixel-perfect replicas of Prokip LTD Pills template sections.
    All styling inline — no external CSS dependencies.
    ═══════════════════════════════════════════════════════════════ */
 
@@ -33,7 +33,7 @@ const TOKENS = {
   bgLight: "#f7f7f7",
 };
 
-const IMG = "https://woodmart.xtemos.com/pills/wp-content/uploads/sites/15";
+const IMG = "/uploads/1782916258406-43258fa3f9d229c5dd6fad61.png";
 
 /* ─── FONT LOADER ───────────────────────────────────────────── */
 export function HealthFontLoader() {
@@ -703,7 +703,7 @@ export interface HealthNewsletterProps {
 }
 
 export function HealthNewsletter({
-  title = "Sign Up And Connect to WoodMart",
+  title = "Sign Up And Connect to Prokip LTD",
   subtitle = "The best vitamins and supplements are made from natural ingredients using modern technologies aimed at improving personal and mental health.",
   backgroundColor = TOKENS.bgLight,
 }: HealthNewsletterProps) {
@@ -780,7 +780,7 @@ export function HealthBrandMarquee({ speed = 70, reverse = false }: HealthBrandM
 
 /* ═══════════════════════════════════════════════════════════════
    HEALTH HEADER
-   Clean, modern health/wellness header matching WoodMart Pills.
+   Clean, modern health/wellness header matching Prokip LTD Pills.
    Left: Shop · About Us
    Middle: Business name + Logo
    Right: Blog · Contact Us · Wishlist · Register · Cart
@@ -911,7 +911,7 @@ export function HealthHeader({
 }
 
 /* ═══════════════════════════════════════════════════════════════
-   HEALTH FOOTER (Custom WoodMart Pills-style)
+   HEALTH FOOTER (Custom Prokip LTD Pills-style)
    Clean, calm wellness footer with proper store links
    ═══════════════════════════════════════════════════════════════ */
 
@@ -1168,7 +1168,7 @@ export function HealthAboutPage({
           <div className="hh-about-team-grid">
             {teamItems.map((m, i) => (
               <div key={i} className="hh-about-team-card">
-                <img className="hh-about-team-img" src={m.image || `${IMG}/2023/08/w-pas-customer-${(i % 6) + 1}.jpg`} alt={m.name} onError={(e) => onImgError(e, m.name)} />
+                <img className="hh-about-team-img" src={m.image || "/uploads/1782916258406-43258fa3f9d229c5dd6fad61.png"} alt={m.name} onError={(e) => onImgError(e, m.name)} />
                 <h5 className="hh-about-team-name">{m.name}</h5>
                 <div className="hh-about-team-role">{m.role}</div>
               </div>

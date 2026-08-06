@@ -1,7 +1,7 @@
 /**
  * Handmade Bags Template — Sample Blog Posts
  * Created as real Blog records when merchant picks the Handmade Bags template.
- * Matches the original WoodMart Handmade Bags template blog posts.
+ * Matches the original Prokip LTD Handmade Bags template blog posts.
  */
 
 export interface SampleBlog {

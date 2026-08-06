@@ -1,5 +1,5 @@
 /**
- * Create blog posts in DB from Woodmart reference for handmade-bags sites
+ * Create blog posts in DB from Prokip LTD reference for handmade-bags sites
  * 
  * Run: npx tsx scripts/create-blog-posts-from-reference.ts
  */
@@ -14,8 +14,8 @@ if (!url) {
 const adapter = new PrismaPg(url);
 const prisma = new PrismaClient({ adapter });
 
-// Blog posts from Woodmart reference
-const WOODMART_BLOG_POSTS = [
+// Blog posts from Prokip LTD reference
+const PROKIP_BLOG_POSTS = [
   {
     title: "Minimalist Japanese-inspired Leather Goods",
     slug: "minimalist-japanese-inspired-leather-goods",
@@ -69,7 +69,7 @@ const WOODMART_BLOG_POSTS = [
 ];
 
 async function main() {
-  console.log("🔍 Creating Blog Posts from Woodmart Reference\n");
+  console.log("🔍 Creating Blog Posts from Prokip LTD Reference\n");
 
   const sites = await prisma.site.findMany({
     where: {
@@ -97,7 +97,7 @@ async function main() {
     
     let createdCount = 0;
     
-    for (const postData of WOODMART_BLOG_POSTS) {
+    for (const postData of PROKIP_BLOG_POSTS) {
       if (existingSlugs.has(postData.slug)) {
         console.log(`   ⊘ ${postData.slug}: Already exists`);
         continue;

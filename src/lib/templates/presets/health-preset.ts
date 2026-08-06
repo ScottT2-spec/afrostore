@@ -2,7 +2,7 @@ import type { EditorNode } from "@/lib/visual-editor/node-tree";
 
 /**
  * Health & Supplements (Pills) Template Preset
- * Recreates the WoodMart Health/Pills demo layout with editable blocks.
+ * Recreates the Prokip LTD Health/Pills demo layout with editable blocks.
  */
 export const HEALTH_TEMPLATE_PRESET: EditorNode[] = [
   {
@@ -29,7 +29,7 @@ export const HEALTH_TEMPLATE_PRESET: EditorNode[] = [
     settings: {
       banners: [
         {
-          image: "https://woodmart.xtemos.com/wp-content/uploads/2023/06/pills-banner-1.jpg",
+          image: "/prokip-logo.png",
           subtitle: "Bundles",
           title: "Sleep Easy Gummies",
           description: "Supports an optimal sleep cycle",
@@ -38,7 +38,7 @@ export const HEALTH_TEMPLATE_PRESET: EditorNode[] = [
           colorScheme: "dark",
         },
         {
-          image: "https://woodmart.xtemos.com/wp-content/uploads/2023/06/pills-banner-2.jpg",
+          image: "/prokip-logo.png",
           subtitle: "SHOP BY SUPPLEMENTS",
           title: "Capsules for Skin",
           buttonText: "Contact With Expert",

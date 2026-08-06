@@ -10,7 +10,7 @@ import { InlineEditableText } from "@/components/storefront/InlineEditableText";
 
 /* ═══════════════════════════════════════════════════════════════
    MAKEUP TEMPLATE BLOCKS
-   Pixel-perfect replicas of WoodMart Makeup template sections.
+   Pixel-perfect replicas of Prokip LTD Makeup template sections.
    All styling inline — no external CSS dependencies.
    ═══════════════════════════════════════════════════════════════ */
 
@@ -30,7 +30,7 @@ const TOKENS = {
   bodyFont: "'Inter', Arial, Helvetica, sans-serif",
 };
 
-const IMG_BASE = "https://woodmart.xtemos.com/makeup/wp-content/uploads/sites/22/2024/10";
+const IMG_BASE = "https://prokip.xtemos.com/makeup/wp-content/uploads/sites/22/2024/10";
 
 /* ─── FONT LOADER ───────────────────────────────────────────── */
 export function MakeupFontLoader() {
