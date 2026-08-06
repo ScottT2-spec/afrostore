@@ -149,7 +149,31 @@ export default function EditorPage() {
     );
   }
 
-  const initialContent = convertToEditorStructure(pageData?.content || {});
+  let initialContent: PageStructure;
+  try {
+    initialContent = convertToEditorStructure(pageData?.content || {});
+  } catch (err) {
+    console.error("Error converting page content for editor:", err);
+    return (
+      <div className="flex min-h-screen items-center justify-center p-6">
+        <div className="max-w-md w-full">
+          <div className="rounded-lg border border-red-200 bg-red-50 p-6">
+            <h2 className="text-lg font-semibold text-red-900 mb-2">This page can&apos;t be opened in the editor yet</h2>
+            <p className="text-red-700 mb-4">
+              {err instanceof Error ? err.message : "Its saved content isn't in a format the editor understands."}
+            </p>
+            <button
+              type="button"
+              onClick={handleBack}
+              className="inline-flex items-center gap-2 px-4 py-2 bg-red-600 hover:bg-red-700 text-white text-sm font-medium rounded-lg transition-colors"
+            >
+              Go Back
+            </button>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <VisualEditor
