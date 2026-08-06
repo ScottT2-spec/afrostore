@@ -2,8 +2,8 @@ import type { EditorNode } from "@/lib/visual-editor/node-tree";
 
 /**
  * Electronics Accessories Template Page Presets
- * Content extracted from WoodMart Accessories demo:
- * https://woodmart.xtemos.com/accessories/
+ * Content extracted from Prokip LTD Accessories demo:
+ * https://prokip.xtemos.com/accessories/
  */
 
 export const ACCESSORIES_ABOUT_PAGE_BLOCKS: EditorNode[] = [
@@ -12,13 +12,13 @@ export const ACCESSORIES_ABOUT_PAGE_BLOCKS: EditorNode[] = [
     title: "We Help Everyone Enjoy Amazing Products",
     description: "If the copy becomes distracting in the design then you are doing something wrong or they are discussing copy changes. It might be a bit annoying but you could tell them that that discussion would be best suited.",
     images: [
-      "https://woodmart.xtemos.com/accessories/wp-content/uploads/sites/7/2022/08/acs-ab-us-img-1.jpg",
-      "https://woodmart.xtemos.com/accessories/wp-content/uploads/sites/7/2022/08/acs-ab-us-img-2.jpg",
-      "https://woodmart.xtemos.com/accessories/wp-content/uploads/sites/7/2022/08/acs-ab-us-img-3.jpg",
+      "/prokip-logo.png",
+      "/prokip-logo.png",
+      "/prokip-logo.png",
     ],
     testimonial: {
       text: "Websites in professional use templating systems. Commercial publishing platforms and content management systems ensure that you can show.",
-      avatar: "https://woodmart.xtemos.com/accessories/wp-content/uploads/sites/7/2022/08/acs-ab-us-img-avatar-65x65.png",
+      avatar: "/prokip-logo.png",
       name: "Brooklyn Simmons",
       company: "BARONE LLC",
     },
@@ -28,10 +28,10 @@ export const ACCESSORIES_ABOUT_PAGE_BLOCKS: EditorNode[] = [
     title: "Our Team",
     description: "Convallis ullamcorper aliquet ultrices orci cum vestibulum lobortis erat",
     members: [
-      { name: "Jane Cooper", role: "President of Sales", image: "https://woodmart.xtemos.com/accessories/wp-content/uploads/sites/7/2022/08/acs-ab-us-team-1-1.jpg", socials: ["facebook", "twitter"] },
-      { name: "Jacob Jones", role: "Sales Analyst", image: "https://woodmart.xtemos.com/accessories/wp-content/uploads/sites/7/2022/08/acs-ab-us-team-2-1.jpg", socials: ["facebook", "twitter", "instagram"] },
-      { name: "Kristin Watson", role: "Market Development", image: "https://woodmart.xtemos.com/accessories/wp-content/uploads/sites/7/2022/08/acs-ab-us-team-3-1.jpg", socials: ["facebook", "twitter"] },
-      { name: "Darlene Robertson", role: "Social Media Specialist", image: "https://woodmart.xtemos.com/accessories/wp-content/uploads/sites/7/2022/08/acs-ab-us-team-4-1.jpg", socials: ["facebook", "twitter", "instagram"] },
+      { name: "Jane Cooper", role: "President of Sales", image: "/prokip-logo.png", socials: ["facebook", "twitter"] },
+      { name: "Jacob Jones", role: "Sales Analyst", image: "/prokip-logo.png", socials: ["facebook", "twitter", "instagram"] },
+      { name: "Kristin Watson", role: "Market Development", image: "/prokip-logo.png", socials: ["facebook", "twitter"] },
+      { name: "Darlene Robertson", role: "Social Media Specialist", image: "/prokip-logo.png", socials: ["facebook", "twitter", "instagram"] },
     ],
   }},
   { id: "acc-about-strategy", type: "accessoriesStrategySection", settings: {
@@ -42,9 +42,9 @@ export const ACCESSORIES_ABOUT_PAGE_BLOCKS: EditorNode[] = [
       "Then the question arises: where\u2019s the content? Not there yet? That\u2019s not so bad, there\u2019s dummy copy to the rescue. But worse, what if the fish doesn\u2019t fit in the can, the foot\u2019s to big for the boot? Or to small? To short sentences, to many headings, images too large for the proposed design, or too small, or they fit in but it looks iffy for reasons the folks in the meeting can\u2019t quite tell right now, but they\u2019re unhappy, somehow. A client that\u2019s unhappy for a reason is a problem, a client that\u2019s unhappy though.",
     ],
     infoboxes: [
-      { icon: "https://woodmart.xtemos.com/accessories/wp-content/uploads/sites/7/2022/04/accessories-infobox-1.svg", title: "Fast Delivery", description: "Chances are there wasn\u2019t collaboration and checkpoints, there wasn\u2019t a process." },
-      { icon: "https://woodmart.xtemos.com/accessories/wp-content/uploads/sites/7/2022/04/accessories-infobox-2.svg", title: "Best Quality", description: "It\u2019s content strategy gone awry right from the start. Forswearing the use of Lorem Ipsum." },
-      { icon: "https://woodmart.xtemos.com/accessories/wp-content/uploads/sites/7/2022/04/accessories-infobox-3.svg", title: "Free Return", description: "True enough, but that\u2019s not all that it takes to get things back on track out there for a text." },
+      { icon: "/prokip-logo.png", title: "Fast Delivery", description: "Chances are there wasn\u2019t collaboration and checkpoints, there wasn\u2019t a process." },
+      { icon: "/prokip-logo.png", title: "Best Quality", description: "It\u2019s content strategy gone awry right from the start. Forswearing the use of Lorem Ipsum." },
+      { icon: "/prokip-logo.png", title: "Free Return", description: "True enough, but that\u2019s not all that it takes to get things back on track out there for a text." },
     ],
   }},
   { id: "acc-about-community", type: "accessoriesCommunityCta", settings: {
@@ -83,17 +83,17 @@ export const ACCESSORIES_CONTACT_PAGE_BLOCKS: EditorNode[] = [
 export const ACCESSORIES_BLOG_PAGE_BLOCKS: EditorNode[] = [
   { id: "acc-blog-header", type: "accessoriesBlogHeader", settings: {
     title: "Blog",
-    backgroundImage: "https://woodmart.xtemos.com/accessories/wp-content/uploads/sites/7/2022/04/accessories-page-title.jpg",
+    backgroundImage: "/prokip-logo.png",
   }},
   { id: "acc-blog-posts", type: "accessoriesBlogPosts", settings: {
     columns: 2,
     posts: [
-      { title: "Exploring Atlanta\u2019s modern homes", date: "22 Apr", category: "Decoration", author: "Mr. Mackay", excerpt: "Vivamus enim sagittis aptent hac mi dui a per aptent suspendisse cras odio bibendum augue rhoncus laoreet dui praesent sodales sod...", image: "https://woodmart.xtemos.com/accessories/wp-content/uploads/sites/7/2022/01/accessories-blog-img-1-1024x633.jpg", link: "#" },
-      { title: "Green interior design inspiration", date: "22 Apr", category: "Inspiration", author: "Mr. Mackay", excerpt: "A sed a risusat luctus esta anibh rhoncus hendrerit blandit nam rutrum sitmiad hac. Cras a vestibulum a varius adipiscing ut digni...", image: "https://woodmart.xtemos.com/accessories/wp-content/uploads/sites/7/2022/04/accessories-blog-img-2-1024x633.jpg", link: "#" },
-      { title: "Collar brings back coffee brewing ritual", date: "22 Apr", category: "Furniture", author: "Mr. Mackay", excerpt: "Adipiscing hac imperdiet id blandit varius scelerisque at sagittis libero dui dis volutpat vehicula mus sed ut. Lacinia dui rutrum...", image: "https://woodmart.xtemos.com/accessories/wp-content/uploads/sites/7/2022/04/accessories-blog-img-3-1024x633.jpg", link: "#" },
-      { title: "Reinterprets the classic bookshelf", date: "22 Apr", category: "Design trends", author: "Mr. Mackay", excerpt: "Aliquet parturient scele risque scele risque nibh pretium parturient suspendisse platea sapien torqu...", image: "https://woodmart.xtemos.com/accessories/wp-content/uploads/sites/7/2022/04/accessories-blog-img-4-1024x633.jpg", link: "#" },
-      { title: "Creative water features and exterior", date: "22 Apr", category: "Decoration", author: "Mr. Mackay", excerpt: "Ac haca ullamcorper donec ante habi tasse donec imperdiet eturpis varius per a augue magna hac. Nec hac et vestibulum duis a tinci...", image: "https://woodmart.xtemos.com/accessories/wp-content/uploads/sites/7/2022/04/accessories-blog-img-5-1024x633.jpg", link: "#" },
-      { title: "Minimalist Japanese-inspired furniture", date: "22 Apr", category: "Inspiration", author: "Mr. Mackay", excerpt: "A sed a risusat luctus esta anibh rhoncus hendrerit blandit nam rutrum sitmiad hac...", image: "https://woodmart.xtemos.com/accessories/wp-content/uploads/sites/7/2022/04/accessories-blog-img-6-1024x633.jpg", link: "#" },
+      { title: "Exploring Atlanta\u2019s modern homes", date: "22 Apr", category: "Decoration", author: "Mr. Mackay", excerpt: "Vivamus enim sagittis aptent hac mi dui a per aptent suspendisse cras odio bibendum augue rhoncus laoreet dui praesent sodales sod...", image: "/prokip-logo.png", link: "#" },
+      { title: "Green interior design inspiration", date: "22 Apr", category: "Inspiration", author: "Mr. Mackay", excerpt: "A sed a risusat luctus esta anibh rhoncus hendrerit blandit nam rutrum sitmiad hac. Cras a vestibulum a varius adipiscing ut digni...", image: "/prokip-logo.png", link: "#" },
+      { title: "Collar brings back coffee brewing ritual", date: "22 Apr", category: "Furniture", author: "Mr. Mackay", excerpt: "Adipiscing hac imperdiet id blandit varius scelerisque at sagittis libero dui dis volutpat vehicula mus sed ut. Lacinia dui rutrum...", image: "/prokip-logo.png", link: "#" },
+      { title: "Reinterprets the classic bookshelf", date: "22 Apr", category: "Design trends", author: "Mr. Mackay", excerpt: "Aliquet parturient scele risque scele risque nibh pretium parturient suspendisse platea sapien torqu...", image: "/prokip-logo.png", link: "#" },
+      { title: "Creative water features and exterior", date: "22 Apr", category: "Decoration", author: "Mr. Mackay", excerpt: "Ac haca ullamcorper donec ante habi tasse donec imperdiet eturpis varius per a augue magna hac. Nec hac et vestibulum duis a tinci...", image: "/prokip-logo.png", link: "#" },
+      { title: "Minimalist Japanese-inspired furniture", date: "22 Apr", category: "Inspiration", author: "Mr. Mackay", excerpt: "A sed a risusat luctus esta anibh rhoncus hendrerit blandit nam rutrum sitmiad hac...", image: "/prokip-logo.png", link: "#" },
     ],
   }},
 ];
@@ -101,7 +101,7 @@ export const ACCESSORIES_BLOG_PAGE_BLOCKS: EditorNode[] = [
 export const ACCESSORIES_SHOP_PAGE_BLOCKS: EditorNode[] = [
   { id: "acc-shop-header", type: "accessoriesBlogHeader", settings: {
     title: "Shop",
-    backgroundImage: "https://woodmart.xtemos.com/accessories/wp-content/uploads/sites/7/2022/04/accessories-page-title.jpg",
+    backgroundImage: "/prokip-logo.png",
   }},
   { id: "acc-shop-products", type: "accessoriesProductGrid", settings: { columns: 4, maxProducts: 12 } },
 ];

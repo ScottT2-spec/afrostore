@@ -1,4 +1,4 @@
-import type { TemplateBlock } from "@/components/storefront/TemplateBlockRenderer";
+import type { EditorNode } from "@/lib/visual-editor/node-tree";
 
 /**
  * Cosmetics Template — Page-specific block presets
@@ -10,11 +10,11 @@ import type { TemplateBlock } from "@/components/storefront/TemplateBlockRendere
    BESTSELLER PAGE
    ═══════════════════════════════════════════════════════════════ */
 
-export const COSMETICS_BESTSELLER_BLOCKS: TemplateBlock[] = [
+export const COSMETICS_BESTSELLER_BLOCKS: EditorNode[] = [
   {
     id: "cosmetics-bestseller-title",
     type: "cosmeticsSectionTitle",
-    props: {
+    settings: {
       subtitle: "",
       title: "Bestsellers",
       description:
@@ -26,7 +26,7 @@ export const COSMETICS_BESTSELLER_BLOCKS: TemplateBlock[] = [
   {
     id: "cosmetics-bestseller-products",
     type: "cosmeticsProductGrid",
-    props: {
+    settings: {
       columns: 4,
       maxProducts: 12,
       filter: "bestseller",
@@ -42,11 +42,11 @@ export const COSMETICS_BESTSELLER_BLOCKS: TemplateBlock[] = [
    NEW-IN PAGE
    ═══════════════════════════════════════════════════════════════ */
 
-export const COSMETICS_NEW_IN_BLOCKS: TemplateBlock[] = [
+export const COSMETICS_NEW_IN_BLOCKS: EditorNode[] = [
   {
     id: "cosmetics-newin-title",
     type: "cosmeticsSectionTitle",
-    props: {
+    settings: {
       subtitle: "NEW ARRIVALS",
       title: "Just Arrived",
       description:
@@ -58,7 +58,7 @@ export const COSMETICS_NEW_IN_BLOCKS: TemplateBlock[] = [
   {
     id: "cosmetics-newin-countdown",
     type: "cosmeticsCountdownBanner",
-    props: {
+    settings: {
       title: "Limited Time Offer",
       description:
         "Shop our newest arrivals before they sell out. New products added weekly.",
@@ -72,7 +72,7 @@ export const COSMETICS_NEW_IN_BLOCKS: TemplateBlock[] = [
   {
     id: "cosmetics-newin-products",
     type: "cosmeticsProductGrid",
-    props: {
+    settings: {
       columns: 4,
       maxProducts: 12,
       filter: "newest",
@@ -86,7 +86,7 @@ export const COSMETICS_NEW_IN_BLOCKS: TemplateBlock[] = [
   {
     id: "cosmetics-newin-newsletter",
     type: "cosmeticsNewsletter",
-    props: {
+    settings: {
       backgroundImage: "",
       title: "Stay Updated",
       description:
@@ -100,11 +100,11 @@ export const COSMETICS_NEW_IN_BLOCKS: TemplateBlock[] = [
    SKINCARE PAGE
    ═══════════════════════════════════════════════════════════════ */
 
-export const COSMETICS_SKINCARE_BLOCKS: TemplateBlock[] = [
+export const COSMETICS_SKINCARE_BLOCKS: EditorNode[] = [
   {
     id: "cosmetics-skincare-hero",
     type: "cosmeticsDiscovery",
-    props: {
+    settings: {
       title: "Premium Skincare Collection",
       description:
         "Discover our curated selection of skincare products designed to nourish, protect, and rejuvenate your skin. From cleansers to serums, find everything you need for your daily routine.",
@@ -123,7 +123,7 @@ export const COSMETICS_SKINCARE_BLOCKS: TemplateBlock[] = [
   {
     id: "cosmetics-skincare-benefits",
     type: "cosmeticsInfoBoxes",
-    props: {
+    settings: {
       sectionTitle: { title: "WHY CHOOSE OUR SKINCARE?" },
       boxes: [
         {
@@ -160,7 +160,7 @@ export const COSMETICS_SKINCARE_BLOCKS: TemplateBlock[] = [
   {
     id: "cosmetics-skincare-products",
     type: "cosmeticsProductGrid",
-    props: {
+    settings: {
       columns: 4,
       maxProducts: 12,
       filter: "all",
@@ -180,31 +180,36 @@ export const COSMETICS_SKINCARE_BLOCKS: TemplateBlock[] = [
    TERMS PAGE
    ═══════════════════════════════════════════════════════════════ */
 
-export const COSMETICS_TERMS_BLOCKS: TemplateBlock[] = [
+export const COSMETICS_TERMS_BLOCKS: EditorNode[] = [
   {
     id: "cosmetics-terms-hero",
     type: "cosmeticsHeroSlider",
-    props: {
-      slides: [
-        {
-          subtitle: "LEGAL",
-          titleLine1: "Terms and",
-          titleLine2: "Conditions",
-          description: "Please read our terms and conditions carefully before using our services.",
-          buttonLink: "",
-          buttonText: "",
-          secondButtonLink: "",
-          secondButtonText: "",
-        },
-      ],
-      minHeight: "400px",
+          settings: {
+        minHeight: "400px",
       autoplaySpeed: 0,
-    },
+      },
+      elements: [
+        {
+          id: "cosmetics-terms-hero-slide-1",
+          type: "slide",
+          settings:           {
+            "subtitle": "LEGAL",
+            "titleLine1": "Terms and",
+            "titleLine2": "Conditions",
+            "description": "Please read our terms and conditions carefully before using our services.",
+            "buttonLink": "",
+            "buttonText": "",
+            "secondButtonLink": "",
+            "secondButtonText": ""
+          },
+          elements: [],
+        }
+      ],
   },
   {
     id: "cosmetics-terms-content",
     type: "cosmeticsInfoBoxes",
-    props: {
+    settings: {
       sectionTitle: {
         title: "TERMS AND CONDITIONS",
       },
@@ -272,11 +277,11 @@ export const COSMETICS_TERMS_BLOCKS: TemplateBlock[] = [
    SHOP PAGE
    ═══════════════════════════════════════════════════════════════ */
 
-export const COSMETICS_SHOP_BLOCKS: TemplateBlock[] = [
+export const COSMETICS_SHOP_BLOCKS: EditorNode[] = [
   {
     id: "cosmetics-shop-header",
     type: "cosmeticsShopPageHeader",
-    props: {
+    settings: {
       title: "Shop",
       allLabel: "All",
       subtitle: "Browse all products at {store name}",
@@ -296,27 +301,16 @@ export const COSMETICS_SHOP_BLOCKS: TemplateBlock[] = [
    BLOG PAGE
    ═══════════════════════════════════════════════════════════════ */
 
-export const COSMETICS_BLOG_BLOCKS: TemplateBlock[] = [
+export const COSMETICS_BLOG_BLOCKS: EditorNode[] = [
   {
-    id: "cosmetics-blog-title",
-    type: "cosmeticsSectionTitle",
-    props: {
-      subtitle: "",
+    id: "cosmetics-blog-header",
+    type: "cosmeticsBlogPageHeader",
+    settings: {
       title: "Blog",
-      description: "Latest news and updates from our store",
-      align: "center",
-      maxWidth: "60%",
-    },
-  },
-  {
-    id: "cosmetics-blog-posts",
-    type: "cosmeticsBlogPosts",
-    props: {
-      maxPosts: 9,
-      columns: 3,
-      showExcerpt: true,
-      showDate: true,
-      sectionTitle: {},
+      allLabel: "All",
+      subtitle: "Latest news and updates from {site name}",
+      emptyState: "No blog posts found",
+      searchPlaceholder: "Search blog posts...",
     },
   },
 ];
@@ -325,14 +319,15 @@ export const COSMETICS_BLOG_BLOCKS: TemplateBlock[] = [
    ABOUT PAGE
    ═══════════════════════════════════════════════════════════════ */
 
-export const COSMETICS_ABOUT_BLOCKS: TemplateBlock[] = [
+export const COSMETICS_ABOUT_BLOCKS: EditorNode[] = [
   {
     id: "cosmetics-about-hero",
     type: "cosmeticsSectionTitle",
-    props: {
+    settings: {
       subtitle: "BEAUTY & COSMETICS",
       title: "Our success and company history.",
-      description: "A wonderful serenity has taken possession of my entire soul, like these sweet mornings of spring which I enjoy with my whole heart.",
+      description:
+        "A wonderful serenity has taken possession of my entire soul, like these sweet mornings of spring which I enjoy with my whole heart.",
       align: "center",
       maxWidth: "60%",
       marginBottom: "0px",
@@ -341,7 +336,7 @@ export const COSMETICS_ABOUT_BLOCKS: TemplateBlock[] = [
   {
     id: "cosmetics-about-story",
     type: "fashionAboutContent",
-    props: {
+    settings: {
       layout: "text-with-heading",
       subtitle: "PREMIUM BEAUTY SINCE 2020",
       title: "About Our Online Store",
@@ -357,7 +352,7 @@ export const COSMETICS_ABOUT_BLOCKS: TemplateBlock[] = [
   {
     id: "cosmetics-about-stats",
     type: "fashionStatsCounters",
-    props: {
+    settings: {
       counters: [
         { value: 15000, label: "SATISFIED CLIENTS" },
         { value: 850, label: "FINISHED PROJECTS" },
@@ -369,7 +364,7 @@ export const COSMETICS_ABOUT_BLOCKS: TemplateBlock[] = [
   {
     id: "cosmetics-about-convert",
     type: "fashionAboutContent",
-    props: {
+    settings: {
       layout: "text-with-heading",
       subtitle: "BEAUTY INNOVATION",
       title: "We convert your idea into a reality.",
@@ -385,7 +380,7 @@ export const COSMETICS_ABOUT_BLOCKS: TemplateBlock[] = [
   {
     id: "cosmetics-about-services",
     type: "fashionServicesGrid",
-    props: {
+    settings: {
       subtitle: "WHAT WE OFFER",
       title: "Our Expertise",
       services: [
@@ -415,7 +410,7 @@ export const COSMETICS_ABOUT_BLOCKS: TemplateBlock[] = [
   {
     id: "cosmetics-about-team",
     type: "fashionTeamSection",
-    props: {
+    settings: {
       members: [
         {
           name: "SARAH JOHNSON",
@@ -447,10 +442,11 @@ export const COSMETICS_ABOUT_BLOCKS: TemplateBlock[] = [
   {
     id: "cosmetics-about-offices",
     type: "fashionOfficeLocations",
-    props: {
+    settings: {
       subtitle: "GET IN TOUCH WITH US",
       title: "Our Locations",
-      description: "Visit us at any of our locations worldwide. Our beauty consultants are ready to help you find the perfect products.",
+      description:
+        "Visit us at any of our locations worldwide. Our beauty consultants are ready to help you find the perfect products.",
       offices: [
         {
           city: "NEW YORK",
@@ -479,11 +475,11 @@ export const COSMETICS_ABOUT_BLOCKS: TemplateBlock[] = [
    CONTACT PAGE
    ═══════════════════════════════════════════════════════════════ */
 
-export const COSMETICS_CONTACT_BLOCKS: TemplateBlock[] = [
+export const COSMETICS_CONTACT_BLOCKS: EditorNode[] = [
   {
     id: "cosmetics-contact-store",
     type: "fashionStoreVisit",
-    props: {
+    settings: {
       subtitle: "OUR STORES",
       title: "VISIT OUR NEW\nSTORE IN NEW YORK",
       address: "294 Bay Meadows Ave.\nBay Shore, NY 11706",
@@ -494,29 +490,34 @@ export const COSMETICS_CONTACT_BLOCKS: TemplateBlock[] = [
   {
     id: "cosmetics-contact-faq",
     type: "fashionFaqAccordion",
-    props: {
+    settings: {
       subtitle: "INFORMATION QUESTIONS",
       title: "FREQUENTLY ASKED QUESTIONS",
       items: [
         {
           question: "Will I receive the same product that I see in the picture?",
-          answer: "Yes, all product images on our site accurately represent the items you will receive. We use high-quality photography to showcase our cosmetics and skincare products. Minor variations in color may occur due to screen settings.",
+          answer:
+            "Yes, all product images on our site accurately represent the items you will receive. We use high-quality photography to showcase our cosmetics and skincare products. Minor variations in color may occur due to screen settings.",
         },
         {
           question: "Where can I view my sales receipt?",
-          answer: "You can view your sales receipt by logging into your account and navigating to 'Order History'. Each order has a detailed receipt that you can view online or download as a PDF for your records.",
+          answer:
+            "You can view your sales receipt by logging into your account and navigating to 'Order History'. Each order has a detailed receipt that you can view online or download as a PDF for your records.",
         },
         {
           question: "How can I return an item?",
-          answer: "We accept returns within 30 days of delivery for unopened items in their original packaging. To initiate a return, go to 'My Orders', select the order, and click 'Request Return'. You'll receive a prepaid shipping label via email.",
+          answer:
+            "We accept returns within 30 days of delivery for unopened items in their original packaging. To initiate a return, go to 'My Orders', select the order, and click 'Request Return'. You'll receive a prepaid shipping label via email.",
         },
         {
           question: "Are your products cruelty-free?",
-          answer: "Yes, we are committed to cruelty-free beauty. None of our products are tested on animals, and we work exclusively with brands that share our ethical values. Look for the cruelty-free badge on each product page.",
+          answer:
+            "Yes, we are committed to cruelty-free beauty. None of our products are tested on animals, and we work exclusively with brands that share our ethical values. Look for the cruelty-free badge on each product page.",
         },
         {
           question: "Where can I ship my order?",
-          answer: "We currently ship to over 50 countries worldwide. Shipping costs and delivery times vary by destination. You can check available shipping options and estimated delivery dates at checkout before placing your order.",
+          answer:
+            "We currently ship to over 50 countries worldwide. Shipping costs and delivery times vary by destination. You can check available shipping options and estimated delivery dates at checkout before placing your order.",
         },
       ],
     },
@@ -524,7 +525,7 @@ export const COSMETICS_CONTACT_BLOCKS: TemplateBlock[] = [
   {
     id: "cosmetics-contact-form",
     type: "fashionContactForm",
-    props: {
+    settings: {
       subtitle: "REACH OUT TO US",
       title: "CONTACT US FOR ANY QUESTIONS",
       fields: ["name", "email", "phone", "company", "message"],
@@ -533,10 +534,11 @@ export const COSMETICS_CONTACT_BLOCKS: TemplateBlock[] = [
   {
     id: "cosmetics-contact-newsletter",
     type: "cosmeticsNewsletter",
-    props: {
+    settings: {
       backgroundImage: "",
       title: "Stay Updated",
-      description: "Subscribe to our newsletter and be the first to know about new arrivals, exclusive offers, and beauty tips.",
+      description:
+        "Subscribe to our newsletter and be the first to know about new arrivals, exclusive offers, and beauty tips.",
       buttonText: "Subscribe",
     },
   },

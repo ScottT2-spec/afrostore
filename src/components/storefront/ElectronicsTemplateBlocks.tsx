@@ -3,7 +3,7 @@ import { FashionFooter } from "./FashionTemplateBlocks";
 import Link from "next/link";
 import { resolveStoreLink, resolveFooterLink } from "@/lib/template-link-utils";
 import { toggleCompare as toggleCompareItem } from "@/lib/compare-utils";
-import { useState, useEffect, useRef, useCallback, createContext, useContext } from "react";
+import { useState, useEffect, useRef, useCallback, createContext, useContext, useMemo } from "react";
 import { safeSrc, onImgError } from "./image-fallback";
 import { useEditorStore } from "@/lib/visual-editor/store";
 import type { EditorNode } from "@/lib/visual-editor/node-tree";
@@ -12,7 +12,7 @@ import { InlineEditableText } from "@/components/storefront/InlineEditableText";
 
 /* ═══════════════════════════════════════════════════════════════
    ELECTRONICS TEMPLATE BLOCKS
-   Pixel-perfect replicas of WoodMart Electronics template sections.
+   Pixel-perfect replicas of Prokip LTD Electronics template sections.
    All styling via scoped CSS — no external CSS dependencies.
    ═══════════════════════════════════════════════════════════════ */
 
@@ -873,7 +873,7 @@ export function ElectronicsHotDeals({
   })();
 
   // Countdown timer
-  const endDate = dealEndDate || new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString();
+  const endDate = useMemo(() => dealEndDate || new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString(), [dealEndDate]);
   const [timeLeft, setTimeLeft] = useState({ days: 0, hours: 0, min: 0, sec: 0 });
   useEffect(() => {
     const tick = () => {

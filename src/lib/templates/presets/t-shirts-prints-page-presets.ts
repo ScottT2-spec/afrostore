@@ -46,8 +46,8 @@ export const TSHIRTS_PRINTS_ABOUT_PAGE_BLOCKS: EditorNode[] = [
     type: "tshirtImageCallout",
     settings: {
       images: [
-        "https://woodmart.xtemos.com/t-shirts-prints/wp-content/uploads/sites/24/2025/02/ps-right-custom-design.jpg",
-        "https://woodmart.xtemos.com/t-shirts-prints/wp-content/uploads/sites/24/2025/06/ps-top-image-bg-1-min.jpg",
+        "/prokip-logo.png",
+        "/prokip-logo.png",
       ],
       calloutTitle: "You can create custom design",
       calloutDescription: "The price of a T-shirt with an individual design depends on the circulation, the number of images on one product, their size, and the printing method. brand, material and order urgency.",
@@ -159,10 +159,10 @@ export const TSHIRTS_PRINTS_SHOP_PAGE_BLOCKS: EditorNode[] = [
         title: "Shop by Category",
       },
       categories: [
-        { name: "T-Shirts", image: "https://woodmart.xtemos.com/t-shirts/wp-content/uploads/sites/29/2023/05/cat-1.jpg", link: "/shop" },
-        { name: "Hoodies", image: "https://woodmart.xtemos.com/t-shirts/wp-content/uploads/sites/29/2023/05/cat-2.jpg", link: "/shop" },
-        { name: "Sweatshirts", image: "https://woodmart.xtemos.com/t-shirts/wp-content/uploads/sites/29/2023/05/cat-3.jpg", link: "/shop" },
-        { name: "Accessories", image: "https://woodmart.xtemos.com/t-shirts/wp-content/uploads/sites/29/2023/05/cat-4.jpg", link: "/shop" },
+        { name: "T-Shirts", image: "/prokip-logo.png", link: "/shop" },
+        { name: "Hoodies", image: "/prokip-logo.png", link: "/shop" },
+        { name: "Sweatshirts", image: "/prokip-logo.png", link: "/shop" },
+        { name: "Accessories", image: "/prokip-logo.png", link: "/shop" },
       ],
     },
   },
@@ -208,7 +208,7 @@ export const TSHIRTS_PRINTS_BLOG_PAGE_BLOCKS: EditorNode[] = [
           postedDate: "February 13, 2025",
           author: "Mr. Mackay",
           category: "Prints",
-          image: "https://woodmart.xtemos.com/t-shirts-prints/wp-content/uploads/sites/24/2025/02/ps-right-custom-design.jpg",
+          image: "/prokip-logo.png",
         },
         {
           id: "tshirts-blog-2",
@@ -221,7 +221,7 @@ export const TSHIRTS_PRINTS_BLOG_PAGE_BLOCKS: EditorNode[] = [
           postedDate: "January 30, 2025",
           author: "Mr. Mackay",
           category: "Prints",
-          image: "https://woodmart.xtemos.com/t-shirts-prints/wp-content/uploads/sites/24/2025/02/ps-top-image-bg-1-min.jpg",
+          image: "/prokip-logo.png",
         },
         {
           id: "tshirts-blog-3",
@@ -234,7 +234,7 @@ export const TSHIRTS_PRINTS_BLOG_PAGE_BLOCKS: EditorNode[] = [
           postedDate: "January 27, 2025",
           author: "Mr. Mackay",
           category: "Prints",
-          image: "https://woodmart.xtemos.com/t-shirts-prints/wp-content/uploads/sites/24/2025/02/ps-right-custom-design.jpg",
+          image: "/prokip-logo.png",
         },
         {
           id: "tshirts-blog-4",
@@ -247,7 +247,7 @@ export const TSHIRTS_PRINTS_BLOG_PAGE_BLOCKS: EditorNode[] = [
           postedDate: "January 23, 2025",
           author: "Mr. Mackay",
           category: "Prints",
-          image: "https://woodmart.xtemos.com/t-shirts-prints/wp-content/uploads/sites/24/2025/02/ps-top-image-bg-1-min.jpg",
+          image: "/prokip-logo.png",
         },
         {
           id: "tshirts-blog-5",
@@ -260,7 +260,7 @@ export const TSHIRTS_PRINTS_BLOG_PAGE_BLOCKS: EditorNode[] = [
           postedDate: "January 16, 2025",
           author: "Mr. Mackay",
           category: "Prints",
-          image: "https://woodmart.xtemos.com/t-shirts-prints/wp-content/uploads/sites/24/2025/02/ps-right-custom-design.jpg",
+          image: "/prokip-logo.png",
         },
         {
           id: "tshirts-blog-6",
@@ -273,7 +273,7 @@ export const TSHIRTS_PRINTS_BLOG_PAGE_BLOCKS: EditorNode[] = [
           postedDate: "January 9, 2025",
           author: "Mr. Mackay",
           category: "Prints",
-          image: "https://woodmart.xtemos.com/t-shirts-prints/wp-content/uploads/sites/24/2025/02/ps-top-image-bg-1-min.jpg",
+          image: "/prokip-logo.png",
         },
       ],
     },

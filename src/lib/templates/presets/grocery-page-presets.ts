@@ -2,14 +2,14 @@ import type { EditorNode } from "@/lib/visual-editor/node-tree";
 
 /**
  * Grocery Template Page Presets
- * Content extracted verbatim from the WoodMart Grocery demo sub-pages.
- * Source: https://woodmart.xtemos.com/demo-grocery/demo/grocery/
+ * Content extracted verbatim from the Prokip LTD Grocery demo sub-pages.
+ * Source: https://prokip.xtemos.com/demo-grocery/demo/grocery/
  * Uses grocery block types registered in GroceryTemplateBlocks.tsx.
  */
 
 /* ═══════════════════════════════════════════════════════════════
    ABOUT US PAGE
-   Source: https://woodmart.xtemos.com/about-us/demo/grocery/
+   Source: https://prokip.xtemos.com/about-us/demo/grocery/
    ═══════════════════════════════════════════════════════════════ */
 
 export const GROCERY_ABOUT_PAGE_BLOCKS: EditorNode[] = [
@@ -23,8 +23,8 @@ export const GROCERY_ABOUT_PAGE_BLOCKS: EditorNode[] = [
         "A wonderful serenity has taken possession of my entire soul, like these sweet mornings of spring which I enjoy with my whole heart.",
       ],
       images: [
-        "https://woodmart.xtemos.com/wp-content/uploads/2017/03/about-us-gallery-photo-2.jpg",
-        "https://woodmart.xtemos.com/wp-content/uploads/2017/03/about-us-gallery-photo-1.jpg",
+        "/prokip-logo.png",
+        "/prokip-logo.png",
       ],
       ctaText: "Learn More",
       ctaLink: "#",
@@ -35,7 +35,7 @@ export const GROCERY_ABOUT_PAGE_BLOCKS: EditorNode[] = [
     type: "groceryTextSection",
     settings: {
       sectionTitle: {
-        subtitle: "Woodmart - Best Ecommerce Theme 2021/22",
+        subtitle: "Prokip LTD - Best Ecommerce Theme 2021/22",
         title: "About Our Online Store",
       },
       bodyText: [
@@ -53,7 +53,7 @@ export const GROCERY_ABOUT_PAGE_BLOCKS: EditorNode[] = [
     type: "groceryTextSection",
     settings: {
       sectionTitle: {
-        subtitle: "Woodmart - Best Ecommerce Theme 2021/22",
+        subtitle: "Prokip LTD - Best Ecommerce Theme 2021/22",
         title: "We convert your idea Into a reality.",
       },
       bodyText: [
@@ -71,10 +71,10 @@ export const GROCERY_ABOUT_PAGE_BLOCKS: EditorNode[] = [
         title: "Our Creative Team",
       },
       team: [
-        { name: "Mark Jance", role: "CEO / Founder", photoUrl: "https://woodmart.xtemos.com/wp-content/uploads/2017/01/team26.jpg" },
-        { name: "Mark Jance", role: "CEO / Founder", photoUrl: "https://woodmart.xtemos.com/wp-content/uploads/2017/01/team19.jpg" },
-        { name: "Mark Jance", role: "CEO / Founder", photoUrl: "https://woodmart.xtemos.com/wp-content/uploads/2017/01/team24.jpg" },
-        { name: "Mark Jance", role: "CEO / Founder", photoUrl: "https://woodmart.xtemos.com/wp-content/uploads/2017/01/team21.jpg" },
+        { name: "Mark Jance", role: "CEO / Founder", photoUrl: "/prokip-logo.png" },
+        { name: "Mark Jance", role: "CEO / Founder", photoUrl: "/prokip-logo.png" },
+        { name: "Mark Jance", role: "CEO / Founder", photoUrl: "/prokip-logo.png" },
+        { name: "Mark Jance", role: "CEO / Founder", photoUrl: "/prokip-logo.png" },
       ],
     },
   },
@@ -82,7 +82,7 @@ export const GROCERY_ABOUT_PAGE_BLOCKS: EditorNode[] = [
     id: "grocery-about-newsletter",
     type: "groceryNewsletter",
     settings: {
-      title: "Hey you, sign up and connect to Woodmart!",
+      title: "Hey you, sign up and connect to Prokip LTD!",
       subtitle: "Be the first to learn about our latest trends and get exclusive offers",
     },
   },
@@ -95,7 +95,7 @@ export const GROCERY_ABOUT_PAGE_BLOCKS: EditorNode[] = [
 
 /* ═══════════════════════════════════════════════════════════════
    CONTACT US PAGE
-   Source: https://woodmart.xtemos.com/contact-us/demo/grocery/
+   Source: https://prokip.xtemos.com/contact-us/demo/grocery/
    ═══════════════════════════════════════════════════════════════ */
 
 export const GROCERY_CONTACT_PAGE_BLOCKS: EditorNode[] = [
@@ -156,7 +156,7 @@ export const GROCERY_CONTACT_PAGE_BLOCKS: EditorNode[] = [
 
 /* ═══════════════════════════════════════════════════════════════
    BLOG PAGE
-   Source: https://woodmart.xtemos.com/blog/demo/grocery/
+   Source: https://prokip.xtemos.com/blog/demo/grocery/
    ═══════════════════════════════════════════════════════════════ */
 
 export const GROCERY_BLOG_PAGE_BLOCKS: EditorNode[] = [
@@ -164,13 +164,13 @@ export const GROCERY_BLOG_PAGE_BLOCKS: EditorNode[] = [
     id: "grocery-blog-grid",
     type: "groceryBlogGrid",
     settings: {
-      sectionTitle: "Woodmart Blog",
+      sectionTitle: "Prokip LTD Blog",
       posts: [
         {
           id: 1,
           title: "Seating collection inspiration by modern",
           slug: "seating-collection-inspiration",
-          image: "https://woodmart.xtemos.com/wp-content/uploads/2016/07/blog-grid-9.jpg",
+          image: "/prokip-logo.png",
           category: "Design trends",
           author: "S. Rogers",
           date: "Jul 23",
@@ -180,7 +180,7 @@ export const GROCERY_BLOG_PAGE_BLOCKS: EditorNode[] = [
           id: 2,
           title: "Minimalist design furniture 2026",
           slug: "minimalist-design-furniture",
-          image: "https://woodmart.xtemos.com/wp-content/uploads/2016/07/blog-grid-1.jpg",
+          image: "/prokip-logo.png",
           category: "Design trends",
           author: "S. Rogers",
           date: "Jul 23",
@@ -190,7 +190,7 @@ export const GROCERY_BLOG_PAGE_BLOCKS: EditorNode[] = [
           id: 3,
           title: "Green interior design inspiration",
           slug: "green-interior-design",
-          image: "https://woodmart.xtemos.com/wp-content/uploads/2016/07/blog-grid-7.jpg",
+          image: "/prokip-logo.png",
           category: "Design trends",
           author: "S. Rogers",
           date: "Jul 23",
@@ -200,7 +200,7 @@ export const GROCERY_BLOG_PAGE_BLOCKS: EditorNode[] = [
           id: 4,
           title: "Reinterprets the classic bookshelf",
           slug: "reinterprets-classic-bookshelf",
-          image: "https://woodmart.xtemos.com/wp-content/uploads/2016/07/blog-grid-3.jpg",
+          image: "/prokip-logo.png",
           category: "Design trends",
           author: "S. Rogers",
           date: "Jul 23",
@@ -210,7 +210,7 @@ export const GROCERY_BLOG_PAGE_BLOCKS: EditorNode[] = [
           id: 5,
           title: "Creative water features and exterior",
           slug: "creative-water-features",
-          image: "https://woodmart.xtemos.com/wp-content/uploads/2016/07/blog-grid-13.jpg",
+          image: "/prokip-logo.png",
           category: "Design trends",
           author: "S. Rogers",
           date: "Jul 23",
@@ -220,7 +220,7 @@ export const GROCERY_BLOG_PAGE_BLOCKS: EditorNode[] = [
           id: 6,
           title: "Sweet seat: functional seat for IT folks",
           slug: "sweet-seat-functional",
-          image: "https://woodmart.xtemos.com/wp-content/uploads/2016/07/blog-grid-11.jpg",
+          image: "/prokip-logo.png",
           category: "Design trends",
           author: "S. Rogers",
           date: "Jul 23",
@@ -233,7 +233,7 @@ export const GROCERY_BLOG_PAGE_BLOCKS: EditorNode[] = [
     id: "grocery-blog-newsletter",
     type: "groceryNewsletter",
     settings: {
-      title: "Hey you, sign up and connect to Woodmart!",
+      title: "Hey you, sign up and connect to Prokip LTD!",
       subtitle: "Be the first to learn about our latest trends and get exclusive offers",
     },
   },
@@ -246,7 +246,7 @@ export const GROCERY_BLOG_PAGE_BLOCKS: EditorNode[] = [
 
 /* ═══════════════════════════════════════════════════════════════
    SHOP PAGE
-   Source: https://woodmart.xtemos.com/shop/demo/grocery/
+   Source: https://prokip.xtemos.com/shop/demo/grocery/
    ═══════════════════════════════════════════════════════════════ */
 
 export const GROCERY_SHOP_PAGE_BLOCKS: EditorNode[] = [
@@ -265,10 +265,10 @@ export const GROCERY_SHOP_PAGE_BLOCKS: EditorNode[] = [
     settings: {
       sectionTitle: "Popular Categories",
       categories: [
-        { name: "Fruits", slug: "fruits", image: "https://woodmart.xtemos.com/wp-content/uploads/2020/07/grocery-cat-1.jpg", productCount: 12 },
-        { name: "Vegetables", slug: "vegetables", image: "https://woodmart.xtemos.com/wp-content/uploads/2020/07/grocery-cat-2.jpg", productCount: 15 },
-        { name: "Dairy", slug: "dairy", image: "https://woodmart.xtemos.com/wp-content/uploads/2020/07/grocery-cat-3.jpg", productCount: 8 },
-        { name: "Bakery", slug: "bakery", image: "https://woodmart.xtemos.com/wp-content/uploads/2020/07/grocery-cat-4.jpg", productCount: 10 },
+        { name: "Fruits", slug: "fruits", image: "/prokip-logo.png", productCount: 12 },
+        { name: "Vegetables", slug: "vegetables", image: "/prokip-logo.png", productCount: 15 },
+        { name: "Dairy", slug: "dairy", image: "/prokip-logo.png", productCount: 8 },
+        { name: "Bakery", slug: "bakery", image: "/prokip-logo.png", productCount: 10 },
       ],
       columns: 4,
     },
@@ -289,7 +289,7 @@ export const GROCERY_SHOP_PAGE_BLOCKS: EditorNode[] = [
     id: "grocery-shop-newsletter",
     type: "groceryNewsletter",
     settings: {
-      title: "Hey you, sign up and connect to Woodmart!",
+      title: "Hey you, sign up and connect to Prokip LTD!",
       subtitle: "Be the first to learn about our latest trends and get exclusive offers",
     },
   },

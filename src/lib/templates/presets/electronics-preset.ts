@@ -2,7 +2,7 @@ import type { EditorNode } from "@/lib/visual-editor/node-tree";
 
 /**
  * Electronics Template Preset
- * Default block layout + content that recreates the WoodMart Electronics demo.
+ * Default block layout + content that recreates the Prokip LTD Electronics demo.
  * Every value is a placeholder — merchants swap in their own content.
  */
 export const ELECTRONICS_TEMPLATE_PRESET: EditorNode[] = [
@@ -25,7 +25,7 @@ export const ELECTRONICS_TEMPLATE_PRESET: EditorNode[] = [
             "description": "A ornare aliquam laoreet adipiscing vestibul integer malesuada ullamcorper suspeid.",
             "buttonText": "Buy Now",
             "buttonLink": "/shop",
-            "backgroundImage": "https://woodmart.xtemos.com/wp-content/uploads/2021/06/w-electronic-slide-1.jpg",
+            "backgroundImage": "/prokip-logo.png",
             "backgroundColor": "#f2f2f2",
             "backgroundFit": "cover",
             "textPosition": "left",
@@ -43,7 +43,7 @@ export const ELECTRONICS_TEMPLATE_PRESET: EditorNode[] = [
             "description": "A ornare aliquam laoreet adipiscing vestibul integer malesuada ullamcorper suspeid.",
             "buttonText": "Buy Now",
             "buttonLink": "/shop",
-            "backgroundImage": "https://woodmart.xtemos.com/wp-content/uploads/2017/01/accessories_large.jpg",
+            "backgroundImage": "/prokip-logo.png",
             "backgroundColor": "#f2f2f2",
             "backgroundFit": "contain",
             "textPosition": "left",
@@ -61,7 +61,7 @@ export const ELECTRONICS_TEMPLATE_PRESET: EditorNode[] = [
             "description": "A ornare aliquam laoreet adipiscing vestibul integer malesuada ullamcorper suspeid.",
             "buttonText": "Buy Now",
             "buttonLink": "/shop",
-            "backgroundImage": "https://woodmart.xtemos.com/wp-content/uploads/2017/01/hero_large.jpg",
+            "backgroundImage": "/prokip-logo.png",
             "backgroundColor": "#000000",
             "backgroundFit": "contain",
             "textPosition": "left",
@@ -79,7 +79,7 @@ export const ELECTRONICS_TEMPLATE_PRESET: EditorNode[] = [
     settings: {
       banners: [
         {
-          image: "https://woodmart.xtemos.com/wp-content/uploads/2022/06/electro-banner10.jpg",
+          image: "/prokip-logo.png",
           subtitle: "NEW TECHNOLOGIES",
           title: "WEBCAMS 2024",
           description: "Auctor litora ultrices suscipit\nmalesuada nunc a netus",
@@ -88,7 +88,7 @@ export const ELECTRONICS_TEMPLATE_PRESET: EditorNode[] = [
           colorScheme: "dark",
         },
         {
-          image: "https://woodmart.xtemos.com/wp-content/uploads/2022/06/electro-banner11.jpg",
+          image: "/prokip-logo.png",
           subtitle: "APPLE ACCESSORIES",
           title: "LEATHER CASES",
           description: "Condimentum curabitur vestibulum\ndapibus porttitor adipiscing",
@@ -123,7 +123,7 @@ export const ELECTRONICS_TEMPLATE_PRESET: EditorNode[] = [
     settings: {
       banners: [
         {
-          image: "https://woodmart.xtemos.com/wp-content/uploads/2022/06/electro-banner1-2.jpg",
+          image: "/prokip-logo.png",
           subtitle: "Hich Tech News",
           title: "Monster Beats\nHeadphones",
           buttonText: "Read More",
@@ -131,19 +131,19 @@ export const ELECTRONICS_TEMPLATE_PRESET: EditorNode[] = [
           colorScheme: "light",
         },
         {
-          image: "https://woodmart.xtemos.com/wp-content/uploads/2022/06/electro-banner3-1.jpg",
+          image: "/prokip-logo.png",
           subtitle: "Play The Dream",
           title: "Apple iPhone 7\nColor Red",
           colorScheme: "light",
         },
         {
-          image: "https://woodmart.xtemos.com/wp-content/uploads/2022/06/electro-banner3.jpg",
+          image: "/prokip-logo.png",
           subtitle: "Minimalism Design",
           title: "Music Makes\nFeel Better",
           colorScheme: "light",
         },
         {
-          image: "https://woodmart.xtemos.com/wp-content/uploads/2022/06/electro-banner.jpg",
+          image: "/prokip-logo.png",
           subtitle: "Health & Fit",
           title: "Apple iWatch Nike Edition",
           buttonText: "Watch Demo",
@@ -162,7 +162,7 @@ export const ELECTRONICS_TEMPLATE_PRESET: EditorNode[] = [
       sectionTitle: "TODAY HOT DEALS",
       buttonText: "View All Deals",
       buttonLink: "/shop",
-      backgroundImage: "https://woodmart.xtemos.com/wp-content/uploads/2022/06/bg-electro.jpg",
+      backgroundImage: "/prokip-logo.png",
       maxProducts: 6,
       columns: 3,
       filter: "sale",
@@ -174,7 +174,7 @@ export const ELECTRONICS_TEMPLATE_PRESET: EditorNode[] = [
     id: "electronics-side-banner",
     type: "electronicsSideBanner",
     settings: {
-      bannerImage: "https://woodmart.xtemos.com/wp-content/uploads/2022/06/electro-banner1-32.jpg",
+      bannerImage: "/prokip-logo.png",
       bannerSubtitle: "Hich Tech News",
       bannerTitle: "Google Smart Home 2024",
       bannerButtonText: "Read More",
@@ -196,14 +196,14 @@ export const ELECTRONICS_TEMPLATE_PRESET: EditorNode[] = [
     id: "electronics-gaming-cta",
     type: "electronicsGamingCTA",
     settings: {
-      backgroundImage: "https://woodmart.xtemos.com/wp-content/uploads/2022/06/electro-dualshok.jpg",
+      backgroundImage: "/prokip-logo.png",
       subtitle: "GAMING COLLECTION",
       title: "Sony Playstation 4 Dualshok Controller",
       primaryButtonText: "Buy Now",
       primaryButtonLink: "/shop",
       secondaryButtonText: "Read More",
       secondaryButtonLink: "/shop",
-      productImage: "https://woodmart.xtemos.com/wp-content/uploads/2022/06/dualshok.png",
+      productImage: "/prokip-logo.png",
     },
   },
 
@@ -216,7 +216,7 @@ export const ELECTRONICS_TEMPLATE_PRESET: EditorNode[] = [
       columns: 3,
       posts: [
         {
-          image: "https://woodmart.xtemos.com/wp-content/uploads/2022/06/electro-blog1.jpg",
+          image: "/prokip-logo.png",
           title: "Collar brings back coffee brewing ritual",
           excerpt: "",
           date: { day: "23", month: "Jul", year: "2016" },
@@ -225,7 +225,7 @@ export const ELECTRONICS_TEMPLATE_PRESET: EditorNode[] = [
           link: "#",
         },
         {
-          image: "https://woodmart.xtemos.com/wp-content/uploads/2022/06/electro-blog2.jpg",
+          image: "/prokip-logo.png",
           title: "Exterior ideas: 10 colored garden seats",
           excerpt: "",
           date: { day: "23", month: "Jul", year: "2016" },
@@ -234,7 +234,7 @@ export const ELECTRONICS_TEMPLATE_PRESET: EditorNode[] = [
           link: "#",
         },
         {
-          image: "https://woodmart.xtemos.com/wp-content/uploads/2022/06/electro-blog3.jpg",
+          image: "/prokip-logo.png",
           title: "Exploring Atlanta\u2019s modern homes",
           excerpt: "",
           date: { day: "23", month: "Jul", year: "2016" },
@@ -253,17 +253,17 @@ export const ELECTRONICS_TEMPLATE_PRESET: EditorNode[] = [
     settings: {
       sectionTitle: "OUR PARTNERS",
       videoUrl: "https://www.youtube.com/watch?v=XHOmBV4js_E",
-      videoThumbnail: "https://woodmart.xtemos.com/wp-content/uploads/2022/06/electro-video.jpg",
+      videoThumbnail: "/prokip-logo.png",
       logos: [
-        { name: "Vitra", logoUrl: "https://woodmart.xtemos.com/wp-content/uploads/2016/09/brand-witra.png", linkUrl: "#" },
-        { name: "Rosenthal", logoUrl: "https://woodmart.xtemos.com/wp-content/uploads/2016/09/brand-Rosenthal.png", linkUrl: "#" },
-        { name: "PackIt", logoUrl: "https://woodmart.xtemos.com/wp-content/uploads/2016/09/brand-PackIt.png", linkUrl: "#" },
-        { name: "Niche", logoUrl: "https://woodmart.xtemos.com/wp-content/uploads/2017/01/nichemodern.png", linkUrl: "#" },
-        { name: "Magisso", logoUrl: "https://woodmart.xtemos.com/wp-content/uploads/2016/09/brand-Magisso.png", linkUrl: "#" },
-        { name: "Louis Poulsen", logoUrl: "https://woodmart.xtemos.com/wp-content/uploads/2016/09/brand-Louis-Poulsen.png", linkUrl: "#" },
-        { name: "Joseph Joseph", logoUrl: "https://woodmart.xtemos.com/wp-content/uploads/2016/09/brand-Joseph-Joseph.png", linkUrl: "#" },
-        { name: "Hay", logoUrl: "https://woodmart.xtemos.com/wp-content/uploads/2016/09/brand-hay.png", linkUrl: "#" },
-        { name: "PackIt", logoUrl: "https://woodmart.xtemos.com/wp-content/uploads/2016/09/brand-PackIt.png", linkUrl: "#" },
+        { name: "Vitra", logoUrl: "/prokip-logo.png", linkUrl: "#" },
+        { name: "Rosenthal", logoUrl: "/prokip-logo.png", linkUrl: "#" },
+        { name: "PackIt", logoUrl: "/prokip-logo.png", linkUrl: "#" },
+        { name: "Niche", logoUrl: "/prokip-logo.png", linkUrl: "#" },
+        { name: "Magisso", logoUrl: "/prokip-logo.png", linkUrl: "#" },
+        { name: "Louis Poulsen", logoUrl: "/prokip-logo.png", linkUrl: "#" },
+        { name: "Joseph Joseph", logoUrl: "/prokip-logo.png", linkUrl: "#" },
+        { name: "Hay", logoUrl: "/prokip-logo.png", linkUrl: "#" },
+        { name: "PackIt", logoUrl: "/prokip-logo.png", linkUrl: "#" },
       ],
     },
   },
@@ -286,7 +286,7 @@ export const ELECTRONICS_TEMPLATE_PRESET: EditorNode[] = [
         { title: "FOOTER MENU", links: [{ label: "Instagram profile", url: "#" }, { label: "New Collection", url: "#" }, { label: "Contact Us", url: "#" }, { label: "Latest News", url: "#" }, { label: "Our Sitemap", url: "#" }] },
       ],
       copyrightText: "",
-      paymentIconsUrl: "https://woodmart.xtemos.com/wp-content/uploads/2018/08/payment.png",
+      paymentIconsUrl: "/prokip-logo.png",
     },
   },
 ];

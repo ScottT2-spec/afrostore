@@ -2,10 +2,9 @@ import { prisma } from "@/lib/db";
 import Link from "next/link";
 import { notFound, redirect } from "next/navigation";
 import { RenderTemplateBlocks, type TemplateBlock } from "@/components/storefront/TemplateBlockRenderer";
-import { HandmadeBagsHeader, HandmadeBagsFooter } from "@/components/storefront/HandmadeBagsStoreChrome";
+import { RetailHeader, RetailFooter } from "@/components/storefront/RetailTemplateBlocks";
 import { ThemeProvider, type ThemeData } from "@/components/storefront/ThemeProvider";
 import { applyPageCustomization, buildPageBackgroundStyle, filterVisiblePages, getResolvedPageSettings, normalizeSiteCustomization, type SiteCustomizationDocument } from "@/lib/site-customization";
-import { parsePageContent } from "@/lib/page-content";
 import { RenderBlocks, type BuilderBlock } from "@/components/storefront/BlockRenderer";
 import { serializeProductsForClient } from "@/lib/serialize-products";
 import { RETAIL_CONTACT_BLOCKS } from "@/lib/templates/presets/retail-pages";
@@ -13,10 +12,12 @@ import { VegetableContactPage } from "@/components/storefront/VegetableTemplateP
 import { VegetableFooter, VegetableHeader } from "@/components/storefront/VegetableStoreChrome";
 import { KidsFontLoader, KidsFooterFull, KidsHeader } from "@/components/storefront/KidsTemplateBlocks";
 import PerfumesContactPage from "./perfumes-contact";
-import { HealthHeader, HealthFooterFull } from "@/components/storefront/HealthTemplateBlocks";
+import { HealthHeader, HealthFooterFull, HealthFontLoader } from "@/components/storefront/HealthTemplateBlocks";
 import { CosmeticsFontLoader, CosmeticsHeader, CosmeticsFooter } from "@/components/storefront/CosmeticsTemplateBlocks";
-import { COSMETICS_CONTACT_BLOCKS } from "@/lib/templates/presets/cosmetics-pages-preset";
 import { GardenHeader, GardenFooter } from "@/components/storefront/GardenStoreChrome";
+import { HandmadeBagsHeader, HandmadeBagsFooter } from "@/components/storefront/HandmadeBagsStoreChrome";
+import { resolveLivePageContent } from "@/lib/templates/bespoke-page-content";
+import { buildTemplatePageContent } from "@/lib/templates/template-tree";
 
 type Props = {
   params: Promise<{ slug: string }>;
@@ -175,7 +176,7 @@ async function getStoreData(slug: string) {
           title: "Contact Us",
           slug: "contact",
           type: "CUSTOM",
-          content: [],
+          content: buildTemplatePageContent([], {}) as any,
           isPublished: true,
           position: 12,
         },
@@ -241,14 +242,22 @@ export default async function ContactPage({ params }: Props) {
   
   // Use custom blocks if available, otherwise use preset
   let pageContent;
-  const parsedContact = contactPage?.content ? parsePageContent(contactPage.content) : null;
-  if (parsedContact && parsedContact.blocks.length > 0) {
-    pageContent = parsedContact;
+  const resolvedContact = contactPage?.content
+    ? resolveLivePageContent(activeTemplateSlug, contactPage.slug, contactPage.content, {
+        pageSlug: contactPage.slug,
+        pageTitle: contactPage.title,
+        pageType: contactPage.type,
+        templateSlug: activeTemplateSlug,
+      })
+    : null;
+  const contactNodeCss = resolvedContact?.css || "";
+  if (resolvedContact && resolvedContact.blocks.length > 0) {
+    pageContent = { blocks: resolvedContact.blocks, settings: resolvedContact.settings };
   } else {
     pageContent = { blocks: CONTACT_PAGE_BLOCKS, settings: {} };
   }
 
-  const pageSettings = contactPage ? getResolvedPageSettings(contactPage, pageContent.settings, customization) : {};
+  const pageSettings = contactPage ? getResolvedPageSettings(contactPage, resolvedContact?.settings || pageContent.settings, customization) : {};
   const themeData: ThemeData = {
     id: "kids-contact-page",
     name: "Kids Contact Page",
@@ -271,8 +280,7 @@ export default async function ContactPage({ params }: Props) {
     store.name?.toLowerCase().includes("kids");
 
   if (isKidsTemplate) {
-    const parsedContact = contactPage?.content ? parsePageContent(contactPage.content) : null;
-    const hasBlocks = parsedContact && parsedContact.blocks.length > 0;
+    const hasBlocks = resolvedContact && resolvedContact.blocks.length > 0;
     const kidsSocialLinks: Array<{ platform: string; url: string }> = [
       ...(store.socialLinks?.facebook ? [{ platform: "facebook", url: store.socialLinks.facebook }] : []),
       ...(store.socialLinks?.instagram ? [{ platform: "instagram", url: store.socialLinks.instagram }] : []),
@@ -285,7 +293,10 @@ export default async function ContactPage({ params }: Props) {
       <div className="min-h-screen bg-[#fffef8] text-[#3b3344]">
         <KidsFontLoader />
         {hasBlocks ? (
-          <RenderTemplateBlocks blocks={parsedContact.blocks as TemplateBlock[]} />
+          <>
+            {contactNodeCss && <style data-live-node-styles dangerouslySetInnerHTML={{ __html: contactNodeCss }} />}
+            <RenderTemplateBlocks blocks={resolvedContact.blocks as TemplateBlock[]} />
+          </>
         ) : (
           <>
             <KidsHeader
@@ -368,7 +379,7 @@ export default async function ContactPage({ params }: Props) {
                     </div>
                     <div className="mt-8 rounded-[28px] bg-[#fff7df] p-5">
                       <p className="text-sm leading-7 text-[#6d6277]">
-                        © 2025 All rights reserved.
+                        Based on Prokip LTD theme 2025 WooCommerce Themes.
                       </p>
                       <div className="mt-4 flex flex-wrap gap-3">
                         <Link href={`/store/${slug}/blog`} className="rounded-full bg-white px-5 py-2 text-sm font-semibold text-[#3b3344] transition hover:text-[#f5857c]">
@@ -398,7 +409,7 @@ export default async function ContactPage({ params }: Props) {
               storeSlug={slug}
               logo={store.logo}
               templateSlug="kids"
-              description={store.description || "Playful kidswear, gifts, and accessories with a bright, premium finish."}
+              description={store.description || "Playful kidswear, gifts, and accessories with a bright, premium Prokip LTD-inspired finish."}
               socialLinks={kidsSocialLinks}
             />
           </>
@@ -409,67 +420,61 @@ export default async function ContactPage({ params }: Props) {
 
   // ─── HEALTH / PILLS CONTACT US ───
   const isHealthTemplate =
-    activeTemplateSlug === "pills" || slug === "pills" || store.slug === "pills" ||
+    activeTemplateSlug === "health" ||
+    activeTemplateSlug === "pills" ||
+    slug === "health" ||
+    slug === "pills" ||
+    store.slug === "health" ||
+    store.slug === "pills" ||
     store.name?.toLowerCase().includes("pill") || store.name?.toLowerCase().includes("supplement") || store.name?.toLowerCase().includes("health");
 
   if (isHealthTemplate) {
+    // Use block-based rendering for Health Contact page to enable editor persistence
+    const blocks: TemplateBlock[] = resolvedContact && resolvedContact.blocks.length > 0 ? (resolvedContact.blocks as TemplateBlock[]) : [];
+
     return (
       <div className="min-h-screen bg-white text-[#333]" style={{ fontFamily: "'Cabin', Arial, sans-serif" }}>
-        <link href="https://fonts.googleapis.com/css2?family=Geologica:wght@400;500;600;700;800&family=Cabin:wght@400;500;600;700&display=swap" rel="stylesheet" />
+        <HealthFontLoader />
         <HealthHeader storeName={store.name} storeSlug={slug} logo={store.logo} />
         <main>
-          <section style={{ background: "linear-gradient(135deg, #f0f5f2 0%, #fff 50%, #f7f7f7 100%)" }}>
-            <div style={{ maxWidth: "1222px", margin: "0 auto", padding: "60px 15px 80px", textAlign: "center" }}>
-              <h1 style={{ fontFamily: "'Geologica', sans-serif", fontSize: "48px", fontWeight: 700, color: "#333", marginBottom: "24px" }}>Contact Us</h1>
-            </div>
-          </section>
-          <section style={{ maxWidth: "1222px", margin: "0 auto", padding: "60px 15px" }}>
-            <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(260px, 1fr))", gap: "30px", marginBottom: "60px" }}>
-              <div style={{ background: "#f7f7f7", borderRadius: "15px", padding: "32px" }}>
-                <h3 style={{ fontFamily: "'Geologica', sans-serif", fontSize: "18px", fontWeight: 700, color: "#333", marginBottom: "16px" }}>Address</h3>
-                <p style={{ fontSize: "14px", lineHeight: "1.8", color: "#777" }}>1901 Thornridge Cir. Shiloh, Hawaii 81063</p>
-                <p style={{ fontSize: "14px", lineHeight: "1.8", color: "#777", marginTop: "12px" }}>Monday – Tuesday 10.00am – 4.00pm (By Appointment Only)<br/>Wednesday – Saturday, 10.00am – 4.00pm<br/>Sunday, Closed</p>
-              </div>
-              <div style={{ background: "#f7f7f7", borderRadius: "15px", padding: "32px" }}>
-                <h3 style={{ fontFamily: "'Geologica', sans-serif", fontSize: "18px", fontWeight: 700, color: "#333", marginBottom: "16px" }}>Phone</h3>
-                <p style={{ fontSize: "16px", color: "rgb(136,173,153)", fontWeight: 600 }}>(956) 238-7908</p>
-              </div>
-              <div style={{ background: "#f7f7f7", borderRadius: "15px", padding: "32px" }}>
-                <h3 style={{ fontFamily: "'Geologica', sans-serif", fontSize: "18px", fontWeight: 700, color: "#333", marginBottom: "16px" }}>Email</h3>
-                <p style={{ fontSize: "16px", color: "rgb(136,173,153)", fontWeight: 600 }}>hello@store.com</p>
-              </div>
-            </div>
-            <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "40px" }}>
-              <div>
-                <h2 style={{ fontFamily: "'Geologica', sans-serif", fontSize: "28px", fontWeight: 700, color: "#333", marginBottom: "24px" }}>Get in Touch</h2>
-                <form onSubmit={(e) => e.preventDefault()} style={{ display: "flex", flexDirection: "column", gap: "16px" }}>
-                  <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "16px" }}>
-                    <input type="text" placeholder="Your Name *" required style={{ border: "2px solid #e8e8e8", borderRadius: "10px", padding: "14px 16px", fontSize: "14px", fontFamily: "'Cabin', sans-serif", outline: "none" }} />
-                    <input type="email" placeholder="Your Email *" required style={{ border: "2px solid #e8e8e8", borderRadius: "10px", padding: "14px 16px", fontSize: "14px", fontFamily: "'Cabin', sans-serif", outline: "none" }} />
-                  </div>
-                  <input type="text" placeholder="Subject" style={{ border: "2px solid #e8e8e8", borderRadius: "10px", padding: "14px 16px", fontSize: "14px", fontFamily: "'Cabin', sans-serif", outline: "none" }} />
-                  <textarea placeholder="Your Message" rows={5} style={{ border: "2px solid #e8e8e8", borderRadius: "10px", padding: "14px 16px", fontSize: "14px", fontFamily: "'Cabin', sans-serif", outline: "none", resize: "vertical" }} />
-                  <button type="submit" style={{ background: "rgb(136,173,153)", color: "#fff", border: "none", borderRadius: "10px", padding: "14px 28px", fontSize: "15px", fontWeight: 700, cursor: "pointer", alignSelf: "flex-start", fontFamily: "'Cabin', sans-serif" }}>Send Message</button>
-                </form>
-              </div>
-              <div style={{ background: "#f0f5f2", borderRadius: "15px", padding: "40px", display: "flex", flexDirection: "column", justifyContent: "center" }}>
-                <p style={{ fontSize: "14px", color: "#777", marginBottom: "8px" }}>Need help choosing?</p>
-                <p style={{ fontFamily: "'Geologica', sans-serif", fontSize: "20px", fontWeight: 700, color: "#333", marginBottom: "16px" }}>Contact With Expert</p>
-                <div style={{ display: "flex", alignItems: "center", gap: "12px", marginBottom: "24px" }}>
-                  <span style={{ fontSize: "14px", color: "rgb(136,173,153)", fontWeight: 600 }}>📍 1901 Thornridge Cir. Shiloh, Hawaii 81063</span>
-                </div>
-                <div style={{ background: "#fff", borderRadius: "12px", padding: "20px", display: "flex", alignItems: "center", gap: "16px" }}>
-                  <div>
-                    <p style={{ fontWeight: 700, color: "#333", fontSize: "15px" }}>Rated 4.9</p>
-                    <p style={{ fontSize: "13px", color: "#777" }}>Based on 374 reviews</p>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </section>
+          {contactNodeCss && <style data-live-node-styles dangerouslySetInnerHTML={{ __html: contactNodeCss }} />}
+          <RenderTemplateBlocks blocks={blocks} />
         </main>
-        <HealthFooterFull storeName={store.name} storeSlug={slug} logo={store.logo} description={store.description || "Your trusted source for vitamins, supplements, and wellness products."} contact={{ address: "1901 Thornridge Cir. Shiloh, Hawaii 81063", phone: "(956) 238-7908", email: "hello@store.com" }} />
+        <HealthFooterFull 
+          storeName={store.name} 
+          storeSlug={slug} 
+          logo={store.logo} 
+          description={store.description || "Your trusted source for vitamins, supplements, and wellness products."} 
+          contact={{ 
+            address: (store as any).address || "123 Wellness Ave, Portland, OR 97201", 
+            phone: (store as any).phone || "(503) 555-0123", 
+            email: (store as any).email || "hello@store.com" 
+          }} 
+        />
       </div>
+    );
+  }
+
+  const isCosmeticsTemplate =
+    activeTemplateSlug === "cosmetics" ||
+    slug === "stacj" ||
+    slug?.toLowerCase().includes("cosmetics") ||
+    slug?.toLowerCase().includes("stacj") ||
+    store.name?.toLowerCase().includes("cosmetics") ||
+    store.name?.toLowerCase().includes("stacj");
+
+  if (isCosmeticsTemplate) {
+    const cosmeticsBlocks: TemplateBlock[] = resolvedContact && resolvedContact.blocks.length > 0 ? (resolvedContact.blocks as TemplateBlock[]) : [];
+
+    return (
+      <ThemeProvider theme={themeData}>
+        <CosmeticsFontLoader />
+        <CosmeticsHeader storeName={store.name} storeSlug={slug} logo={store.logo} />
+        <main style={buildPageBackgroundStyle(pageSettings)}>
+          <RenderTemplateBlocks blocks={cosmeticsBlocks} />
+        </main>
+        <CosmeticsFooter storeName={store.name} storeSlug={slug} logo={store.logo} description={store.description ?? undefined} />
+      </ThemeProvider>
     );
   }
 
@@ -516,40 +521,18 @@ export default async function ContactPage({ params }: Props) {
     return <PerfumesContactPage />;
   }
 
-  // ─── COSMETICS CONTACT ───
-  const isCosmeticsTemplate =
-    activeTemplateSlug === "cosmetics" ||
-    slug === "stacj" ||
-    slug?.toLowerCase().includes("cosmetics") ||
-    slug?.toLowerCase().includes("stacj") ||
-    store.name?.toLowerCase().includes("cosmetics") ||
-    store.name?.toLowerCase().includes("stacj");
-
-  if (isCosmeticsTemplate) {
-    const cosmeticsBlocks = (parsedContact && parsedContact.blocks.length > 0 ? parsedContact.blocks : COSMETICS_CONTACT_BLOCKS) as TemplateBlock[];
-    return (
-      <ThemeProvider theme={themeData}>
-        <CosmeticsFontLoader />
-        <CosmeticsHeader storeName={store.name} storeSlug={slug} logo={store.logo} />
-        <main style={buildPageBackgroundStyle(pageSettings)}>
-          <RenderTemplateBlocks blocks={cosmeticsBlocks} />
-        </main>
-        <CosmeticsFooter storeName={store.name} storeSlug={slug} logo={store.logo} description={store.description ?? undefined} />
-      </ThemeProvider>
-    );
-  }
-
   // ─── RETAIL / DECOR CONTACT ───
   const isRetailTemplate = activeTemplateSlug === "retail" || activeTemplateSlug === "decor";
   if (isRetailTemplate) {
-    const retailBlocks = (contactPage?.content ? pageContent.blocks : RETAIL_CONTACT_BLOCKS) as BuilderBlock[];
+    const retailBlocks = (resolvedContact?.blocks?.length ? resolvedContact.blocks : RETAIL_CONTACT_BLOCKS) as BuilderBlock[];
     return (
       <ThemeProvider theme={themeData}>
-        <HandmadeBagsHeader storeName={store.name} storeSlug={store.slug || slug} logo={store.logo} isLanding={false} />
+        <RetailHeader storeName={store.name} storeSlug={store.slug || slug} logo={store.logo} isLanding={false} />
         <div style={buildPageBackgroundStyle(pageSettings)}>
+          {contactNodeCss && <style data-live-node-styles dangerouslySetInnerHTML={{ __html: contactNodeCss }} />}
           <RenderBlocks blocks={retailBlocks} storeSlug={slug} products={serializedProducts} />
         </div>
-        <HandmadeBagsFooter storeName={store.name} storeSlug={store.slug || slug} logo={store.logo} description={store.description ?? undefined} />
+        <RetailFooter storeName={store.name} storeSlug={store.slug || slug} logo={store.logo} description={store.description ?? undefined} />
       </ThemeProvider>
     );
   }
@@ -563,7 +546,8 @@ export default async function ContactPage({ params }: Props) {
         isLanding={false}
       />
       <div style={buildPageBackgroundStyle(pageSettings)}>
-        {parsedContact && parsedContact.blocks.length > 0 ? (
+        {contactNodeCss && <style data-live-node-styles dangerouslySetInnerHTML={{ __html: contactNodeCss }} />}
+        {resolvedContact && resolvedContact.blocks.length > 0 ? (
           <RenderBlocks blocks={pageContent.blocks as BuilderBlock[]} storeSlug={slug} products={serializedProducts} />
         ) : (
           <RenderTemplateBlocks blocks={CONTACT_PAGE_BLOCKS} />

@@ -1,6 +1,6 @@
 "use client";
-import { ArrowLeft, Loader2 } from "lucide-react";
-import { BadgeCheck, ImageIcon, ShoppingBag, Star } from "@/components/icons/FilledIcons";
+import { Loader2 } from "lucide-react";
+import { BadgeCheck, ImageIcon, Star } from "@/components/icons/FilledIcons";
 
 import { useState, useEffect, useCallback } from "react";
 import { useParams } from "next/navigation";

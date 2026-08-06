@@ -9,8 +9,8 @@ import { FashionFooter } from "./FashionTemplateBlocks";
 
 /* ═══════════════════════════════════════════════════════════════
    HARDWARE HOMEPAGE BLOCKS
-   Dark-themed homepage blocks matching WoodMart Hardware demo.
-   Source: https://woodmart.xtemos.com/demo-hardware/?opt=hardware
+   Dark-themed homepage blocks matching Prokip LTD Hardware demo.
+   Source: https://prokip.xtemos.com/demo-hardware/?opt=hardware
    ═══════════════════════════════════════════════════════════════ */
 
 /* ─── DESIGN TOKENS (DARK THEME) ────────────────────────────── */

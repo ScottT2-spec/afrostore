@@ -4,11 +4,11 @@ import Link from "next/link";
 import { resolveStoreLink, resolveFooterLink } from "@/lib/template-link-utils";
 import { useState, useEffect, useRef, createContext, useContext } from "react";
 import { safeSrc, onImgError } from "./image-fallback";
-import { useCustomerAuth } from "@/hooks/useCustomerAuth";
+import { InlineEditableText } from "@/components/storefront/InlineEditableText";
 
 /* ═══════════════════════════════════════════════════════════════
    INTERIOR DESIGN (RETAIL) TEMPLATE BLOCKS
-   Pixel-perfect replicas of WoodMart Retail template sections.
+   Pixel-perfect replicas of Prokip LTD Retail template sections.
    All styling inline — no external CSS dependencies.
    ═══════════════════════════════════════════════════════════════ */
 
@@ -30,7 +30,7 @@ const TOKENS = {
   bodyFont: "'Cabin', Arial, Helvetica, sans-serif",
 };
 
-const IMG = "https://woodmart.xtemos.com/wp-content/uploads";
+const IMG = "https://prokip.xtemos.com/wp-content/uploads";
 
 /* ─── FONT LOADER ───────────────────────────────────────────── */
 export function InteriorFontLoader() {
@@ -66,7 +66,7 @@ export interface InteriorProduct {
   comparePrice?: string;
   image: string;
   hoverImage?: string;
-  category: string;
+  category: string | { id: string; name: string; slug: string };
   rating?: number;
   badge?: string;
   tags?: string[];
@@ -110,7 +110,7 @@ export interface InteriorHeroSliderProps {
   autoplaySpeed?: number;
 }
 
-export function InteriorHeroSlider({ slides, autoplaySpeed = 5000 }: InteriorHeroSliderProps) {
+export function InteriorHeroSlider({ slides = [], autoplaySpeed = 5000 }: InteriorHeroSliderProps) {
   const storeCtx = useContext(InteriorStoreContext);
   const fixLink = (link: string) => resolveStoreLink(link, storeCtx?.storeSlug);
 
@@ -182,10 +182,10 @@ export function InteriorHeroSlider({ slides, autoplaySpeed = 5000 }: InteriorHer
         <div key={i} className={`id-slide ${i === current ? "id-active" : ""}`}>
           <div className="id-slide-inner">
             <div className="id-slide-text">
-              {slide.subtitle && <div className="id-slide-subtitle">{slide.subtitle}</div>}
-              <h2 className="id-slide-title">{slide.titleLine1}{slide.titleLine2 && <><br />{slide.titleLine2}</>}</h2>
-              {slide.description && <p className="id-slide-desc">{slide.description}</p>}
-              <Link href={fixLink(slide.buttonLink)} className="id-slide-btn">{slide.buttonText}</Link>
+              {slide.subtitle && <InlineEditableText as="div" field={`slides.${i}.subtitle`} value={slide.subtitle} isEditor={true} className="id-slide-subtitle" />}
+              <InlineEditableText as="h2" field={`slides.${i}.titleLine1`} value={slide.titleLine1} isEditor={true} className="id-slide-title" />
+              {slide.description && <InlineEditableText as="p" field={`slides.${i}.description`} value={slide.description} isEditor={true} multiline className="id-slide-desc" />}
+              <Link href={fixLink(slide.buttonLink)} className="id-slide-btn"><InlineEditableText as="span" field={`slides.${i}.buttonText`} value={slide.buttonText} isEditor={true} selectNodeOnFocus={false} /></Link>
             </div>
             <div className="id-slide-img">
               <img src={slide.image} alt={slide.titleLine1}  onError={(e) => onImgError(e, slide.titleLine1)} />
@@ -220,7 +220,7 @@ export interface InteriorSectionTitleProps {
 export function InteriorSectionTitle({ title, align = "center", after }: InteriorSectionTitleProps) {
   return (
     <div style={{ ...containerStyle, textAlign: align, marginBottom: "30px" }}>
-      <h4 style={{ fontFamily: TOKENS.titleFont, fontWeight: 600, fontSize: "22px", lineHeight: "1.3", color: TOKENS.titleColor, margin: "0 0 5px", textTransform: "uppercase" as const, letterSpacing: "1px" }}>{title}</h4>
+      <InlineEditableText as="h4" field="title" value={title} isEditor={true} style={{ fontFamily: TOKENS.titleFont, fontWeight: 600, fontSize: "22px", lineHeight: "1.3", color: TOKENS.titleColor, margin: "0 0 5px", textTransform: "uppercase" as const, letterSpacing: "1px" }} />
       {after}
     </div>
   );
@@ -243,7 +243,7 @@ export interface InteriorCategoryGridProps {
   columns?: number;
 }
 
-export function InteriorCategoryGrid({ sectionTitle = "TOP CATEGORIES", categories, columns = 6 }: InteriorCategoryGridProps) {
+export function InteriorCategoryGrid({ sectionTitle = "TOP CATEGORIES", categories = [], columns = 6 }: InteriorCategoryGridProps) {
   const defaultCategories: InteriorCategory[] = [
     { name: "Lighting", image: `${IMG}/2018/10/retail-category-1-opt.jpg`, icon: `${IMG}/2025/05/wd-light-bulb.svg` },
     { name: "Clocks", image: `${IMG}/2018/10/retail-category-2-opt.jpg`, icon: `${IMG}/2025/05/wd-clock.svg` },
@@ -359,7 +359,7 @@ export function InteriorProductGrid({
                 <img className="id-prod-img" src={p.image || safeSrc(null, p.name)} alt={p.name} onError={(e) => onImgError(e, p.name)} />
               </div>
               <div className="id-prod-info">
-                <div className="id-prod-cat">{p.category}</div>
+                <div className="id-prod-cat">{typeof p.category === 'string' ? p.category : p.category?.name || ''}</div>
                 <h3 className="id-prod-name"><Link href={fixLink(p.slug)}>{p.name}</Link></h3>
                 <div className="id-prod-stars">{"★".repeat(p.rating || 5)}{"☆".repeat(5 - (p.rating || 5))}</div>
                 <div className="id-prod-price">
@@ -390,7 +390,7 @@ export interface InteriorInfoBoxesProps {
   items?: InteriorInfoBox[];
 }
 
-export function InteriorInfoBoxes({ items }: InteriorInfoBoxesProps) {
+export function InteriorInfoBoxes({ items = [] }: InteriorInfoBoxesProps) {
   const defaultItems: InteriorInfoBox[] = [
     { icon: `${IMG}/2018/08/retail-free-shipping.svg`, title: "Home Delivery.", description: "The European languages." },
     { icon: `${IMG}/2018/08/retail-payment.svg`, title: "Order As a Gift.", description: "Donec odio etiam sceles." },
@@ -476,7 +476,7 @@ export interface InteriorPromoBannersProps {
   variant?: "garden" | "furniture";
 }
 
-export function InteriorPromoBanners({ banners, variant = "garden" }: InteriorPromoBannersProps) {
+export function InteriorPromoBanners({ banners = [], variant = "garden" }: InteriorPromoBannersProps) {
   const storeCtx = useContext(InteriorStoreContext);
   const gardenBanners: InteriorPromoBanner[] = [
     { subtitle: "Scelerisque fusce", title: "New Arrival of\nModern Garden Gloves.", image: `${IMG}/2018/10/retail-garden-banner-1-1-opt.jpg`, buttonText: "Shop Now" },
@@ -526,7 +526,7 @@ export function InteriorPromoBanners({ banners, variant = "garden" }: InteriorPr
    8. FURNITURE CATEGORIES
    ═══════════════════════════════════════════════════════════════ */
 
-export function InteriorFurnitureCategories({ categories, columns = 6 }: { categories?: InteriorCategory[]; columns?: number }) {
+export function InteriorFurnitureCategories({ categories = [], columns = 6 }: { categories?: InteriorCategory[]; columns?: number }) {
   const defaultCategories: InteriorCategory[] = [
     { name: "Decore", image: `${IMG}/2018/10/retail-category-7-opt.jpg` },
     { name: "Jewelry", image: `${IMG}/2018/10/retail-category-8-opt-1.jpg` },
@@ -584,7 +584,7 @@ export interface InteriorBlogPostsProps {
   sectionTitle?: string;
 }
 
-export function InteriorBlogPosts({ posts, columns = 4, sectionTitle = "OUR BLOG" }: InteriorBlogPostsProps) {
+export function InteriorBlogPosts({ posts = [], columns = 4, sectionTitle = "OUR BLOG" }: InteriorBlogPostsProps) {
   const defaultPosts: InteriorBlogPost[] = [
     { title: "Furniture that explores wood as a material", image: `${IMG}/2018/10/retail-blog-img-1-opt.jpg`, date: "October 18, 2018" },
     { title: "The big design: Wall likes pictures", image: `${IMG}/2018/10/retail-blog-img-2-opt.jpg`, date: "October 18, 2018" },
@@ -639,7 +639,7 @@ export interface InteriorBrandsBarProps {
   brands?: { name: string; logo: string; link?: string }[];
 }
 
-export function InteriorBrandsBar({ brands }: InteriorBrandsBarProps) {
+export function InteriorBrandsBar({ brands = [] }: InteriorBrandsBarProps) {
   const defaultBrands = [
     { name: "Alessi", logo: `${IMG}/2016/09/brand-alessi.png` },
     { name: "Eva Solo", logo: `${IMG}/2016/09/brand-Eva-Solo.png` },
@@ -738,7 +738,6 @@ export function InteriorHeader({
   const [mobileOpen, setMobileOpen] = useState(false);
   const [searchOpen, setSearchOpen] = useState(false);
   const [searchVal, setSearchVal] = useState(searchQuery);
-  const { customer, isLoggedIn } = useCustomerAuth(storeSlug);
   const base = `/store/${storeSlug}`;
 
   const handleSearch = (e: React.FormEvent) => {
@@ -820,9 +819,7 @@ export function InteriorHeader({
               <Link href={`${base}/order-tracking`}>Track Order</Link>
               <Link href={`${base}/shop`}>Help</Link>
               <span className="ih-sep" />
-              {isLoggedIn
-                ? <Link href={`${base}/my-account`}>My Account</Link>
-                : <Link href={`${base}/login`}>Login / Register</Link>}
+              <Link href={`${base}/my-account`}>Login / Register</Link>
             </div>
             <button onClick={() => setSearchOpen(true)} aria-label="Search" style={{ background: "none", border: "none", cursor: "pointer", color: TOKENS.titleColor, padding: "4px" }}>{searchSvg}</button>
             <Link href={`${base}/cart`} className="ih-cart-btn">
@@ -844,9 +841,7 @@ export function InteriorHeader({
           <Link href={`${base}/shop`} onClick={() => setMobileOpen(false)}>Contact</Link>
           <Link href={`${base}/order-tracking`} onClick={() => setMobileOpen(false)}>Track Order</Link>
           <Link href={`${base}/shop`} onClick={() => setMobileOpen(false)}>Help</Link>
-          {isLoggedIn
-            ? <Link href={`${base}/my-account`} onClick={() => setMobileOpen(false)}>My Account ({customer?.name?.split(" ")[0]})</Link>
-            : <Link href={`${base}/login`} onClick={() => setMobileOpen(false)}>Login / Register</Link>}
+          <Link href={`${base}/my-account`} onClick={() => setMobileOpen(false)}>Login / Register</Link>
           <Link href={`${base}/wishlist`} onClick={() => setMobileOpen(false)}>Wishlist</Link>
         </div>
       </header>
@@ -892,7 +887,7 @@ export function InteriorFooterFull({
   const storeCtx = useContext(InteriorStoreContext);
   const slug = storeSlugProp || storeCtx?.storeSlug;
   const base = slug ? `/store/${slug}` : "/";
-  const activeSocials = socialLinks.filter(s => s.url && s.url !== "#");
+  const activeSocials = Array.isArray(socialLinks) ? socialLinks.filter(s => s.url && s.url !== "#") : [];
   const socialIcons: Record<string, string> = { facebook: "f", twitter: "𝕏", instagram: "📷", youtube: "▶", tiktok: "♪" };
 
   const css = `
@@ -956,7 +951,7 @@ export function InteriorFooterFull({
         <div>
           <h4 className="if-col-title">Account</h4>
           <ul className="if-links">
-            <li><Link href={`${base}/login`}>Login / Register</Link></li>
+            <li><Link href={`${base}/my-account`}>Login / Register</Link></li>
             <li><Link href={`${base}/wishlist`}>Wishlist</Link></li>
             <li><Link href={`${base}/cart`}>Cart</Link></li>
             <li><Link href={`${base}/compare`}>Compare</Link></li>
@@ -966,7 +961,7 @@ export function InteriorFooterFull({
       </div>
       <div className="if-bottom">
         <small><Link href={base}>{copyrightText || `© ${new Date().getFullYear()} ${storeName}. All rights reserved.`}</Link></small>
-        <img src="https://woodmart.xtemos.com/wp-content/uploads/2018/08/payment.png" alt="Payment methods" style={{ height: "21px" }} loading="lazy" />
+        <img src="/prokip-logo.png" alt="Payment methods" style={{ height: "21px" }} loading="lazy" />
       </div>
     </footer>
   );
@@ -1238,7 +1233,7 @@ export function GardenNewArrivals({
                 <img className="gd-prod-img" src={p.image || safeSrc(null, p.name)} alt={p.name} onError={(e) => onImgError(e, p.name)} />
               </div>
               <div className="gd-prod-info">
-                <div className="gd-prod-cat">{p.category}</div>
+                <div className="gd-prod-cat">{typeof p.category === 'string' ? p.category : p.category?.name || ''}</div>
                 <h3 className="gd-prod-name"><Link href={fixLink(p.slug)}>{p.name}</Link></h3>
                 <div className="gd-prod-stars">{"★".repeat(p.rating || 5)}{"☆".repeat(5 - (p.rating || 5))}</div>
                 <div className="gd-prod-price">
@@ -1560,7 +1555,7 @@ export function InteriorAboutContent({ layout, subtitle, title, paragraphs = [],
    ═══════════════════════════════════════════════════════════════ */
 export interface InteriorStatsCounter { value: number; label: string; }
 export interface InteriorStatsCountersProps { counters: InteriorStatsCounter[]; }
-export function InteriorStatsCounters({ counters }: InteriorStatsCountersProps) {
+export function InteriorStatsCounters({ counters = [] }: InteriorStatsCountersProps) {
   const ref = useRef<HTMLDivElement>(null);
   const [inView, setInView] = useState(false);
   const [displayed, setDisplayed] = useState<number[]>(counters.map(() => 0));
@@ -1575,7 +1570,7 @@ export function InteriorStatsCounters({ counters }: InteriorStatsCountersProps) 
    ═══════════════════════════════════════════════════════════════ */
 export interface InteriorService { icon: string; title: string; description: string; }
 export interface InteriorServicesGridProps { subtitle?: string; title?: string; services: InteriorService[]; }
-export function InteriorServicesGrid({ subtitle, title, services }: InteriorServicesGridProps) {
+export function InteriorServicesGrid({ subtitle, title, services = [] }: InteriorServicesGridProps) {
   const css = `.isg-section{padding:60px 15px}.isg-header{text-align:center;margin-bottom:40px}.isg-subtitle{color:${TOKENS.primaryColor};text-transform:uppercase;font-weight:600;font-size:14px;font-family:${TOKENS.bodyFont};margin-bottom:8px}.isg-title{font-family:${TOKENS.titleFont};font-weight:600;font-size:28px;text-transform:uppercase;color:${TOKENS.titleColor};margin:0;line-height:1.3}.isg-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:30px}.isg-card{text-align:center}.isg-icon{width:70px;height:70px;margin:0 auto 16px}.isg-ct{font-family:${TOKENS.titleFont};font-weight:600;font-size:15px;text-transform:uppercase;color:${TOKENS.titleColor};margin:0 0 8px}.isg-cd{font-family:${TOKENS.bodyFont};font-size:14px;color:${TOKENS.textColor};line-height:1.6;margin:0}@media(max-width:767px){.isg-grid{grid-template-columns:repeat(2,1fr)}}`;
   return (<section className="isg-section"><style dangerouslySetInnerHTML={{ __html: css }} /><div style={{ maxWidth: TOKENS.containerWidth, margin: "0 auto", padding: "0 15px" }}>{(subtitle || title) && <div className="isg-header">{subtitle && <div className="isg-subtitle">{subtitle}</div>}{title && <h3 className="isg-title">{title}</h3>}</div>}<div className="isg-grid">{services.map((s, i) => <div key={i} className="isg-card"><img src={s.icon} alt={s.title} className="isg-icon" loading="lazy" /><h4 className="isg-ct">{s.title}</h4><p className="isg-cd">{s.description}</p></div>)}</div></div></section>);
 }
@@ -1583,8 +1578,8 @@ export function InteriorServicesGrid({ subtitle, title, services }: InteriorServ
 /* ═══════════════════════════════════════════════════════════════
    INTERIOR GALLERY GRID
    ═══════════════════════════════════════════════════════════════ */
-export interface InteriorGalleryGridProps { images: string[]; columns?: number; }
-export function InteriorGalleryGrid({ images, columns = 2 }: InteriorGalleryGridProps) {
+export interface InteriorGalleryGridProps { images?: string[]; columns?: number; }
+export function InteriorGalleryGrid({ images = [], columns = 2 }: InteriorGalleryGridProps) {
   const css = `.igg-section{padding:40px 15px}.igg-grid{display:grid;grid-template-columns:repeat(${columns},1fr);gap:20px}.igg-img{width:100%;height:auto;display:block;transition:opacity 0.3s}.igg-img:hover{opacity:0.85}@media(max-width:767px){.igg-grid{grid-template-columns:1fr}}`;
   return (<section className="igg-section"><style dangerouslySetInnerHTML={{ __html: css }} /><div style={{ maxWidth: TOKENS.containerWidth, margin: "0 auto", padding: "0 15px" }}><div className="igg-grid">{images.map((src, i) => <img key={i} src={src} alt={`Gallery ${i + 1}`} className="igg-img" loading="lazy" />)}</div></div></section>);
 }
@@ -1594,7 +1589,7 @@ export function InteriorGalleryGrid({ images, columns = 2 }: InteriorGalleryGrid
    ═══════════════════════════════════════════════════════════════ */
 export interface InteriorVideo { thumbnail: string; youtubeUrl: string; title: string; }
 export interface InteriorVideoSectionProps { subtitle?: string; title?: string; description?: string; videos: InteriorVideo[]; }
-export function InteriorVideoSection({ subtitle, title, description, videos }: InteriorVideoSectionProps) {
+export function InteriorVideoSection({ subtitle, title, description, videos = [] }: InteriorVideoSectionProps) {
   const [pi, setPi] = useState<number | null>(null);
   const ge = (u: string) => { const m = u.match(/(?:watch\?v=|youtu\.be\/)([^&?]+)/); return m ? `https://www.youtube.com/embed/${m[1]}?autoplay=1` : u; };
   const css = `.ivs-section{padding:60px 15px}.ivs-header{text-align:center;margin-bottom:40px;max-width:60%;margin-left:auto;margin-right:auto}.ivs-sub{color:${TOKENS.primaryColor};text-transform:uppercase;font-weight:600;font-size:12px;font-family:${TOKENS.bodyFont};margin-bottom:8px;letter-spacing:2px}.ivs-title{font-family:${TOKENS.titleFont};font-weight:600;font-size:28px;text-transform:uppercase;color:${TOKENS.titleColor};margin:0 0 12px;line-height:1.3}.ivs-desc{font-family:${TOKENS.bodyFont};font-size:15px;color:${TOKENS.textColor};line-height:1.6;margin:0}.ivs-grid{display:grid;grid-template-columns:repeat(${videos.length},1fr);gap:30px}.ivs-card{position:relative;overflow:hidden;cursor:pointer}.ivs-thumb{width:100%;height:auto;display:block}.ivs-play{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);width:60px;height:60px;background:rgba(0,0,0,0.6);border-radius:50%;display:flex;align-items:center;justify-content:center}.ivs-arrow{width:0;height:0;border-style:solid;border-width:10px 0 10px 18px;border-color:transparent transparent transparent #fff;margin-left:4px}.ivs-ct{font-family:${TOKENS.titleFont};font-weight:600;font-size:17px;color:${TOKENS.titleColor};margin:12px 0 4px}.ivs-iframe{width:100%;aspect-ratio:16/9;border:none}@media(max-width:767px){.ivs-grid{grid-template-columns:1fr}}`;
@@ -1615,7 +1610,7 @@ export function InteriorQuoteSection({ subtitle, quote, attribution, description
    ═══════════════════════════════════════════════════════════════ */
 export interface InteriorTeamMember { name: string; role: string; image: string; socials?: string[]; }
 export interface InteriorTeamSectionProps { members: InteriorTeamMember[]; }
-export function InteriorTeamSection({ members }: InteriorTeamSectionProps) {
+export function InteriorTeamSection({ members = [] }: InteriorTeamSectionProps) {
   const ic: Record<string, string> = { facebook: "f", twitter: "\ud835\udd4F", instagram: "\ud83d\udcf7", linkedin: "in" };
   const css = `.its-section{padding:60px 15px}.its-grid{display:grid;grid-template-columns:repeat(${members.length},1fr);gap:30px}.its-card{text-align:center}.its-img{width:100%;height:auto;display:block;margin-bottom:20px}.its-name{font-family:${TOKENS.titleFont};font-weight:600;font-size:15px;text-transform:uppercase;color:${TOKENS.titleColor};margin:0 0 4px}.its-role{font-family:${TOKENS.bodyFont};font-size:13px;color:${TOKENS.textColor};text-transform:uppercase;letter-spacing:1px;margin:0 0 12px}.its-soc{display:flex;gap:10px;justify-content:center}.its-sl{width:36px;height:36px;border-radius:50%;background:#f7f7f7;display:flex;align-items:center;justify-content:center;text-decoration:none;color:${TOKENS.titleColor};font-size:14px;font-weight:700;transition:all 0.3s}.its-sl:hover{background:${TOKENS.titleColor};color:#fff}@media(max-width:767px){.its-grid{grid-template-columns:repeat(2,1fr)}}`;
   return (<section className="its-section"><style dangerouslySetInnerHTML={{ __html: css }} /><div style={{ maxWidth: TOKENS.containerWidth, margin: "0 auto", padding: "0 15px" }}><div className="its-grid">{members.map((m, i) => <div key={i} className="its-card"><img src={m.image} alt={m.name} className="its-img" loading="lazy" /><h4 className="its-name">{m.name}</h4><p className="its-role">{m.role}</p>{m.socials && m.socials.length > 0 && <div className="its-soc">{m.socials.map((s, j) => <a key={j} href="#" className="its-sl" title={s}>{ic[s] || s[0]}</a>)}</div>}</div>)}</div></div></section>);
@@ -1626,7 +1621,7 @@ export function InteriorTeamSection({ members }: InteriorTeamSectionProps) {
    ═══════════════════════════════════════════════════════════════ */
 export interface InteriorOffice { city: string; address: string; phone: string; email: string; }
 export interface InteriorOfficeLocationsProps { subtitle?: string; title?: string; description?: string; offices: InteriorOffice[]; }
-export function InteriorOfficeLocations({ subtitle, title, description, offices }: InteriorOfficeLocationsProps) {
+export function InteriorOfficeLocations({ subtitle, title, description, offices = [] }: InteriorOfficeLocationsProps) {
   const css = `.iol-section{padding:60px 15px}.iol-header{text-align:center;margin-bottom:40px;max-width:60%;margin-left:auto;margin-right:auto}.iol-sub{color:${TOKENS.primaryColor};text-transform:uppercase;font-weight:600;font-size:12px;font-family:${TOKENS.bodyFont};margin-bottom:8px;letter-spacing:2px}.iol-title{font-family:${TOKENS.titleFont};font-weight:600;font-size:28px;text-transform:uppercase;color:${TOKENS.titleColor};margin:0 0 12px;line-height:1.3}.iol-desc{font-family:${TOKENS.bodyFont};font-size:15px;color:${TOKENS.textColor};line-height:1.6;margin:0}.iol-grid{display:grid;grid-template-columns:repeat(${offices.length},1fr);gap:30px}.iol-card{text-align:center}.iol-city{font-family:${TOKENS.titleFont};font-weight:600;font-size:17px;text-transform:uppercase;color:${TOKENS.titleColor};margin:0 0 12px}.iol-addr{font-family:${TOKENS.bodyFont};font-size:14px;color:${TOKENS.textColor};line-height:1.6;margin:0 0 12px;white-space:pre-line}.iol-ct{font-family:${TOKENS.bodyFont};font-size:14px;color:${TOKENS.textColor};line-height:1.8}.iol-ct strong{color:${TOKENS.titleColor}}@media(max-width:767px){.iol-grid{grid-template-columns:repeat(2,1fr)}}`;
   return (<section className="iol-section"><style dangerouslySetInnerHTML={{ __html: css }} /><div style={{ maxWidth: TOKENS.containerWidth, margin: "0 auto", padding: "0 15px" }}>{(subtitle || title) && <div className="iol-header">{subtitle && <div className="iol-sub">{subtitle}</div>}{title && <h3 className="iol-title">{title}</h3>}{description && <p className="iol-desc">{description}</p>}</div>}<div className="iol-grid">{offices.map((o, i) => <div key={i} className="iol-card"><h4 className="iol-city">{o.city}</h4><p className="iol-addr">{o.address}</p><div className="iol-ct"><div><strong>Phone:</strong> {o.phone}</div><div><strong>Email:</strong> {o.email}</div></div></div>)}</div></div></section>);
 }
@@ -1646,8 +1641,8 @@ export function InteriorStoreVisit({ subtitle, title, address, buttonText = "See
    INTERIOR FAQ ACCORDION
    ═══════════════════════════════════════════════════════════════ */
 export interface InteriorFaqItem { question: string; answer: string; }
-export interface InteriorFaqAccordionProps { subtitle?: string; title?: string; items: InteriorFaqItem[]; }
-export function InteriorFaqAccordion({ subtitle, title, items }: InteriorFaqAccordionProps) {
+export interface InteriorFaqAccordionProps { subtitle?: string; title?: string; items?: InteriorFaqItem[]; }
+export function InteriorFaqAccordion({ subtitle, title, items = [] }: InteriorFaqAccordionProps) {
   const [oi, setOi] = useState<number | null>(null);
   const css = `.ifa-section{padding:60px 15px}.ifa-header{margin-bottom:30px}.ifa-sub{color:${TOKENS.primaryColor};text-transform:uppercase;font-weight:600;font-size:12px;font-family:${TOKENS.bodyFont};margin-bottom:8px;letter-spacing:2px}.ifa-title{font-family:${TOKENS.titleFont};font-weight:600;font-size:28px;text-transform:uppercase;color:${TOKENS.titleColor};margin:0;line-height:1.3}.ifa-item{border-bottom:1px solid #e0e0e0}.ifa-q{width:100%;display:flex;justify-content:space-between;align-items:center;padding:18px 0;background:none;border:none;cursor:pointer;text-align:left;font-family:${TOKENS.bodyFont};font-size:15px;font-weight:700;color:${TOKENS.titleColor}}.ifa-arr{font-size:18px;transition:transform 0.3s;color:${TOKENS.textColor}}.ifa-arr-o{transform:rotate(180deg)}.ifa-ans{padding:0 0 18px;font-family:${TOKENS.bodyFont};font-size:14px;color:${TOKENS.textColor};line-height:1.8;white-space:pre-line}`;
   return (<section className="ifa-section"><style dangerouslySetInnerHTML={{ __html: css }} /><div style={{ maxWidth: TOKENS.containerWidth, margin: "0 auto", padding: "0 15px" }}>{(subtitle || title) && <div className="ifa-header">{subtitle && <div className="ifa-sub">{subtitle}</div>}{title && <h3 className="ifa-title">{title}</h3>}</div>}{items.map((item, i) => <div key={i} className="ifa-item"><button className="ifa-q" onClick={() => setOi(oi === i ? null : i)}><span>{item.question}</span><span className={`ifa-arr ${oi === i ? "ifa-arr-o" : ""}`}>&#9660;</span></button>{oi === i && <div className="ifa-ans">{item.answer}</div>}</div>)}</div></section>);

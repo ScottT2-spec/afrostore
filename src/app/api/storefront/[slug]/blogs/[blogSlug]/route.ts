@@ -17,7 +17,12 @@ export async function GET(_req: NextRequest, { params }: Params) {
         status: "ACTIVE",
         OR: [{ slug }, { subdomain: slug }, { customDomain: slug }],
       },
-      select: { id: true, name: true, slug: true, logo: true },
+      include: {
+        templates: {
+          where: { isActive: true },
+          include: { template: { select: { slug: true } } },
+        },
+      },
     });
 
     if (!site) {
@@ -60,10 +65,12 @@ export async function GET(_req: NextRequest, { params }: Params) {
       });
     }
 
+    const templateSlug = site.templates?.[0]?.template?.slug || null;
+
     return json({
       success: true,
       data: {
-        site: { id: site.id, name: site.name, slug: site.slug, logo: site.logo },
+        site: { id: site.id, name: site.name, slug: site.slug, logo: site.logo, templateSlug },
         blog: {
           id: blog.id,
           title: blog.title,

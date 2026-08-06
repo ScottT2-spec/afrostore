@@ -2,14 +2,14 @@ import type { EditorNode } from "@/lib/visual-editor/node-tree";
 
 /**
  * Hardware Template Page Presets
- * Content extracted verbatim from the WoodMart Hardware demo sub-pages.
- * Source: https://woodmart.xtemos.com/demo-hardware/?opt=hardware
+ * Content extracted verbatim from the Prokip LTD Hardware demo sub-pages.
+ * Source: https://prokip.xtemos.com/demo-hardware/?opt=hardware
  * Uses ONLY hardware* block types — independent from electronics blocks.
  */
 
 /* ═══════════════════════════════════════════════════════════════
    ABOUT US PAGE
-   Source: https://woodmart.xtemos.com/about-us/demo/hardware/
+   Source: https://prokip.xtemos.com/about-us/demo/hardware/
    ═══════════════════════════════════════════════════════════════ */
 
 export const HARDWARE_ABOUT_PAGE_BLOCKS: EditorNode[] = [
@@ -38,7 +38,7 @@ export const HARDWARE_ABOUT_PAGE_BLOCKS: EditorNode[] = [
     id: "hw-about-story",
     type: "hardwareAboutContent",
     settings: {
-      subtitle: "WOODMART - BEST ECOMMERCE THEME 2021/22",
+      subtitle: "PROKIP - BEST ECOMMERCE THEME 2021/22",
       title: "About Our Online Store",
       paragraphs: [
         "Risus suspendisse a orci penatibus a felis suscipit consectetur vestibulum sodales dui cum ultricies lacus interdum. Per suspendisse adipiscing a suspendisse auctor nibh a et at curae condimentum suspendisse enim a eu scelerisque.",
@@ -68,7 +68,7 @@ export const HARDWARE_ABOUT_PAGE_BLOCKS: EditorNode[] = [
     id: "hw-about-convert",
     type: "hardwareAboutContent",
     settings: {
-      subtitle: "WOODMART - BEST ECOMMERCE THEME 2021/22",
+      subtitle: "PROKIP - BEST ECOMMERCE THEME 2021/22",
       title: "We convert your idea Into a reality.",
       paragraphs: [
         "One morning, when Gregor Samsa woke from troubled dreams, he found himself transformed in his bed into a horrible vermin. He lay on his armour-like back, and if he lifted his head a little he could see his brown belly, slightly domed and divided by arches into stiff His room, a proper human room although a little too smalls.",
@@ -83,26 +83,26 @@ export const HARDWARE_ABOUT_PAGE_BLOCKS: EditorNode[] = [
     id: "hw-about-services",
     type: "hardwareServicesGrid",
     settings: {
-      subtitle: "WOODMART - BEST ECOMMERCE THEME 2021/22",
+      subtitle: "PROKIP - BEST ECOMMERCE THEME 2021/22",
       title: "Let\u2019s Get Creative!",
       services: [
         {
-          icon: "https://woodmart.xtemos.com/wp-content/uploads/2017/03/ruler-transparent-70x70.png",
+          icon: "/prokip-logo.png",
           title: "GRAPHIC DESIGN",
           description: "Curabitur lacinia tristique velit ut laoreet.",
         },
         {
-          icon: "https://woodmart.xtemos.com/wp-content/uploads/2017/03/pen-transparent-70x70.png",
+          icon: "/prokip-logo.png",
           title: "WEB DESIGN",
           description: "By the readable content of a page when its layout.",
         },
         {
-          icon: "https://woodmart.xtemos.com/wp-content/uploads/2017/03/paint-palette-transparent-70x70.png",
+          icon: "/prokip-logo.png",
           title: "BRANDING",
           description: "Fact that a reader will be distracted.",
         },
         {
-          icon: "https://woodmart.xtemos.com/wp-content/uploads/2017/03/ruler-2-transparent-70x70.png",
+          icon: "/prokip-logo.png",
           title: "PHOTOGRAPHY",
           description: "The point of using Lorem Ipsum is that it has it.",
         },
@@ -114,8 +114,8 @@ export const HARDWARE_ABOUT_PAGE_BLOCKS: EditorNode[] = [
     type: "hardwareGalleryGrid",
     settings: {
       images: [
-        "https://woodmart.xtemos.com/wp-content/uploads/2017/03/about-us-gallery-photo-2.jpg",
-        "https://woodmart.xtemos.com/wp-content/uploads/2017/03/about-us-gallery-photo-1.jpg",
+        "/prokip-logo.png",
+        "/prokip-logo.png",
       ],
     },
   },
@@ -128,12 +128,12 @@ export const HARDWARE_ABOUT_PAGE_BLOCKS: EditorNode[] = [
       description: "I am so happy, my dear friend, so absorbed in the exquisite sense of mere tranquil existence, that I neglect my talents. I should be incapable of drawing a single.",
       videos: [
         {
-          thumbnail: "https://woodmart.xtemos.com/wp-content/uploads/2017/03/video-placeholder-1.jpg",
+          thumbnail: "/prokip-logo.png",
           youtubeUrl: "http://www.youtube.com/watch?v=TJ1SDXbij8Y",
           title: "Our company history and facts",
         },
         {
-          thumbnail: "https://woodmart.xtemos.com/wp-content/uploads/2017/03/video-placeholder-2.jpg",
+          thumbnail: "/prokip-logo.png",
           youtubeUrl: "http://www.youtube.com/watch?v=TJ1SDXbij8Y",
           title: "Design & development process demonstration",
         },
@@ -144,7 +144,7 @@ export const HARDWARE_ABOUT_PAGE_BLOCKS: EditorNode[] = [
     id: "hw-about-quote",
     type: "hardwareQuoteSection",
     settings: {
-      subtitle: "WOODMART - BEST ECOMMERCE THEME 2021/22",
+      subtitle: "PROKIP - BEST ECOMMERCE THEME 2021/22",
       quote: "Excellence is not a skill it\u2019s an attitude",
       attribution: "Ralph Marston",
       description: "A wonderful serenity has taken possession of my entire soul, like these sweet mornings of spring which I enjoy with my whole heart. I am alone, and feel the charm of existence in this spot, which was created for the bliss of souls like mine.",
@@ -156,10 +156,10 @@ export const HARDWARE_ABOUT_PAGE_BLOCKS: EditorNode[] = [
     type: "hardwareTeamSection",
     settings: {
       members: [
-        { name: "MARK JANCE", role: "CEO / FOUNDER", image: "https://woodmart.xtemos.com/wp-content/uploads/2017/01/team26.jpg", socials: ["facebook", "twitter", "instagram", "linkedin"] },
-        { name: "MARK JANCE", role: "CEO / FOUNDER", image: "https://woodmart.xtemos.com/wp-content/uploads/2017/01/team19.jpg", socials: ["facebook", "twitter", "instagram", "linkedin"] },
-        { name: "MARK JANCE", role: "CEO / FOUNDER", image: "https://woodmart.xtemos.com/wp-content/uploads/2017/01/team24.jpg", socials: ["facebook", "twitter", "instagram", "linkedin"] },
-        { name: "MARK JANCE", role: "CEO / FOUNDER", image: "https://woodmart.xtemos.com/wp-content/uploads/2017/01/team21.jpg", socials: ["facebook", "twitter", "instagram", "linkedin"] },
+        { name: "MARK JANCE", role: "CEO / FOUNDER", image: "/prokip-logo.png", socials: ["facebook", "twitter", "instagram", "linkedin"] },
+        { name: "MARK JANCE", role: "CEO / FOUNDER", image: "/prokip-logo.png", socials: ["facebook", "twitter", "instagram", "linkedin"] },
+        { name: "MARK JANCE", role: "CEO / FOUNDER", image: "/prokip-logo.png", socials: ["facebook", "twitter", "instagram", "linkedin"] },
+        { name: "MARK JANCE", role: "CEO / FOUNDER", image: "/prokip-logo.png", socials: ["facebook", "twitter", "instagram", "linkedin"] },
       ],
     },
   },
@@ -183,9 +183,9 @@ export const HARDWARE_ABOUT_PAGE_BLOCKS: EditorNode[] = [
     type: "hardwareCoverBanners",
     settings: {
       banners: [
-        { image: "https://woodmart.xtemos.com/wp-content/uploads/2017/03/banner-news.jpg", title: "It is a fact that a reader will be distracted.", description: "Ullamcorper vehicula at ultrices sed interdum et malesuada", buttonText: "Read more", link: "#" },
-        { image: "https://woodmart.xtemos.com/wp-content/uploads/2017/03/banner-news-3.jpg", title: "By the readable content of a page when looking.", description: "Patibus elementum a dictum ipiscing parturient donec eros.", buttonText: "Read more", link: "#" },
-        { image: "https://woodmart.xtemos.com/wp-content/uploads/2017/03/banner-news-2.jpg", title: "The point of using Lorem Ipsum is that it has.", description: "Ullamcorper vehicula at ultrices sed interdum ullamcorper .", buttonText: "Read more", link: "#" },
+        { image: "/prokip-logo.png", title: "It is a fact that a reader will be distracted.", description: "Ullamcorper vehicula at ultrices sed interdum et malesuada", buttonText: "Read more", link: "#" },
+        { image: "/prokip-logo.png", title: "By the readable content of a page when looking.", description: "Patibus elementum a dictum ipiscing parturient donec eros.", buttonText: "Read more", link: "#" },
+        { image: "/prokip-logo.png", title: "The point of using Lorem Ipsum is that it has.", description: "Ullamcorper vehicula at ultrices sed interdum ullamcorper .", buttonText: "Read more", link: "#" },
       ],
     },
   },
@@ -193,7 +193,7 @@ export const HARDWARE_ABOUT_PAGE_BLOCKS: EditorNode[] = [
 
 /* ═══════════════════════════════════════════════════════════════
    CONTACT US PAGE
-   Source: https://woodmart.xtemos.com/contact-us/demo/hardware/
+   Source: https://prokip.xtemos.com/contact-us/demo/hardware/
    ═══════════════════════════════════════════════════════════════ */
 
 export const HARDWARE_CONTACT_PAGE_BLOCKS: EditorNode[] = [
@@ -252,7 +252,7 @@ export const HARDWARE_CONTACT_PAGE_BLOCKS: EditorNode[] = [
 
 /* ═══════════════════════════════════════════════════════════════
    BLOG PAGE
-   Source: https://woodmart.xtemos.com/blog/demo/hardware/
+   Source: https://prokip.xtemos.com/blog/demo/hardware/
    ═══════════════════════════════════════════════════════════════ */
 
 export const HARDWARE_BLOG_PAGE_BLOCKS: EditorNode[] = [
@@ -260,7 +260,7 @@ export const HARDWARE_BLOG_PAGE_BLOCKS: EditorNode[] = [
     id: "hw-blog-hero",
     type: "hardwareSectionTitle",
     settings: {
-      title: "Woodmart Blog",
+      title: "Prokip LTD Blog",
       align: "center",
       titleSize: "48px",
     },
@@ -273,7 +273,7 @@ export const HARDWARE_BLOG_PAGE_BLOCKS: EditorNode[] = [
       posts: [
         {
           title: "Seating collection inspiration by modern",
-          image: "https://woodmart.xtemos.com/wp-content/uploads/2016/07/blog-grid-9.jpg",
+          image: "/prokip-logo.png",
           date: "July 23",
           author: "S. Rogers",
           categories: ["Design trends", "Furniture"],
@@ -281,7 +281,7 @@ export const HARDWARE_BLOG_PAGE_BLOCKS: EditorNode[] = [
         },
         {
           title: "Minimalist design furniture 2026",
-          image: "https://woodmart.xtemos.com/wp-content/uploads/2016/07/blog-grid-1.jpg",
+          image: "/prokip-logo.png",
           date: "July 23",
           author: "S. Rogers",
           categories: ["Design trends", "Furniture"],
@@ -289,7 +289,7 @@ export const HARDWARE_BLOG_PAGE_BLOCKS: EditorNode[] = [
         },
         {
           title: "Green interior design inspiration",
-          image: "https://woodmart.xtemos.com/wp-content/uploads/2016/07/blog-grid-7.jpg",
+          image: "/prokip-logo.png",
           date: "July 23",
           author: "S. Rogers",
           categories: ["Design trends", "Hand made"],
@@ -297,7 +297,7 @@ export const HARDWARE_BLOG_PAGE_BLOCKS: EditorNode[] = [
         },
         {
           title: "Reinterprets the classic bookshelf",
-          image: "https://woodmart.xtemos.com/wp-content/uploads/2016/07/blog-grid-3.jpg",
+          image: "/prokip-logo.png",
           date: "July 23",
           author: "S. Rogers",
           categories: ["Design trends", "Inspiration"],
@@ -305,7 +305,7 @@ export const HARDWARE_BLOG_PAGE_BLOCKS: EditorNode[] = [
         },
         {
           title: "Creative water features and exterior",
-          image: "https://woodmart.xtemos.com/wp-content/uploads/2016/07/blog-grid-13.jpg",
+          image: "/prokip-logo.png",
           date: "July 23",
           author: "S. Rogers",
           categories: ["Design trends", "Inspiration"],
@@ -313,7 +313,7 @@ export const HARDWARE_BLOG_PAGE_BLOCKS: EditorNode[] = [
         },
         {
           title: "Sweet seat: functional seat for IT folks",
-          image: "https://woodmart.xtemos.com/wp-content/uploads/2016/07/blog-grid-11.jpg",
+          image: "/prokip-logo.png",
           date: "July 23",
           author: "S. Rogers",
           categories: ["Design trends", "Hand made"],

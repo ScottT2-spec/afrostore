@@ -232,7 +232,7 @@ export default function StorefrontPageDiagnostic() {
           storeSlug={slug}
           logo={data.store.logo}
           templateSlug="kids"
-          description={data.store.description || "Playful kidswear, gifts, and accessories with a premium finish."}
+          description={data.store.description || "Playful kidswear, gifts, and accessories with a premium Prokip LTD-inspired finish."}
         />
       </div>
     </ThemeProvider>

@@ -4,6 +4,7 @@
  *
  * Run: npx tsx scripts/backfill-handmade-bags-pages.ts
  */
+import "dotenv/config";
 import { PrismaClient } from "../src/generated/prisma";
 import { PrismaPg } from "@prisma/adapter-pg";
 import {
@@ -11,9 +12,14 @@ import {
   HANDMADE_BAGS_CONTACT_BLOCKS,
   HANDMADE_BAGS_OUR_STORY_BLOCKS,
   HANDMADE_BAGS_REVIEWS_BLOCKS,
+  HANDMADE_BAGS_BLOG_BLOCKS,
 } from "../src/lib/templates/presets/handmade-bags-pages";
 
-const adapter = new PrismaPg(process.env.DATABASE_URL!);
+const url = process.env.DATABASE_URL;
+if (!url) {
+  throw new Error("DATABASE_URL environment variable is not set");
+}
+const adapter = new PrismaPg(url);
 const prisma = new PrismaClient({ adapter });
 
 const PAGE_BLOCKS: Record<string, unknown[]> = {
@@ -21,6 +27,7 @@ const PAGE_BLOCKS: Record<string, unknown[]> = {
   contact: HANDMADE_BAGS_CONTACT_BLOCKS,
   "our-story": HANDMADE_BAGS_OUR_STORY_BLOCKS,
   reviews: HANDMADE_BAGS_REVIEWS_BLOCKS,
+  blog: HANDMADE_BAGS_BLOG_BLOCKS,
 };
 
 async function main() {
@@ -53,12 +60,12 @@ async function main() {
         await prisma.page.create({
           data: {
             siteId: site.id,
-            title: pageSlug === "our-story" ? "Our Story" : pageSlug === "about" ? "About Us" : pageSlug === "contact" ? "Contact Us" : "Reviews",
+            title: pageSlug === "our-story" ? "Our Story" : pageSlug === "about" ? "About Us" : pageSlug === "contact" ? "Contact Us" : pageSlug === "blog" ? "Blog" : "Reviews",
             slug: pageSlug,
             type: "CUSTOM",
             content: blocks as any,
             isPublished: true,
-            position: pageSlug === "about" ? 10 : pageSlug === "contact" ? 11 : pageSlug === "our-story" ? 12 : 14,
+            position: pageSlug === "about" ? 10 : pageSlug === "contact" ? 11 : pageSlug === "our-story" ? 12 : pageSlug === "blog" ? 13 : 14,
           },
         });
         console.log(`  ✓ Created ${pageSlug} with blocks`);

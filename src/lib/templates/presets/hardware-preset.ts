@@ -2,8 +2,8 @@ import type { EditorNode } from "@/lib/visual-editor/node-tree";
 
 /**
  * Hardware Template Homepage Preset
- * Dark-themed gaming/PC hardware homepage matching WoodMart Hardware demo.
- * Source: https://woodmart.xtemos.com/demo-hardware/?opt=hardware
+ * Dark-themed gaming/PC hardware homepage matching Prokip LTD Hardware demo.
+ * Source: https://prokip.xtemos.com/demo-hardware/?opt=hardware
  * Every section from the demo is represented here.
  */
 export const HARDWARE_TEMPLATE_PRESET: EditorNode[] = [
@@ -25,7 +25,7 @@ export const HARDWARE_TEMPLATE_PRESET: EditorNode[] = [
             "buttonText": "Shop now",
             "buttonLink": "/shop",
             "price": "$499.00",
-            "backgroundImage": "https://woodmart.xtemos.com/wp-content/uploads/2024/02/hardware-black-slide-1.jpg.webp"
+            "backgroundImage": "/prokip-logo.png"
           },
           elements: [],
         },
@@ -40,7 +40,7 @@ export const HARDWARE_TEMPLATE_PRESET: EditorNode[] = [
             "buttonLink": "/shop",
             "secondaryButtonText": "View more",
             "secondaryButtonLink": "#",
-            "backgroundImage": "https://woodmart.xtemos.com/wp-content/uploads/2024/02/hardware-black-slide-2.jpg.webp"
+            "backgroundImage": "/prokip-logo.png"
           },
           elements: [],
         },
@@ -54,7 +54,7 @@ export const HARDWARE_TEMPLATE_PRESET: EditorNode[] = [
             "buttonText": "Shop now",
             "buttonLink": "/shop",
             "price": "$299.00",
-            "backgroundImage": "https://woodmart.xtemos.com/wp-content/uploads/2024/02/hardware-black-slide-3.jpg.webp"
+            "backgroundImage": "/prokip-logo.png"
           },
           elements: [],
         }
@@ -67,12 +67,12 @@ export const HARDWARE_TEMPLATE_PRESET: EditorNode[] = [
     type: "hardwareHomeCategoryGrid",
     settings: {
       categories: [
-        { name: "Clocks", productCount: 12, image: "https://woodmart.xtemos.com/wp-content/uploads/2018/10/black-electronics-category-2-opt.jpg.webp", link: "/shop" },
-        { name: "Lighting", productCount: 17, image: "https://woodmart.xtemos.com/wp-content/uploads/2018/10/black-electronics-category-5-opt.jpg.webp", link: "/shop" },
-        { name: "Furniture", productCount: 33, image: "https://woodmart.xtemos.com/wp-content/uploads/2018/10/black-electronics-category-4-opt.jpg.webp", link: "/shop" },
-        { name: "Accessories", productCount: 12, image: "https://woodmart.xtemos.com/wp-content/uploads/2018/10/black-electronics-category-6-opt.jpg.webp", link: "/shop" },
-        { name: "Cooking", productCount: 12, image: "https://woodmart.xtemos.com/wp-content/uploads/2018/10/black-electronics-category-1-opt.jpg.webp", link: "/shop" },
-        { name: "Toys", productCount: 12, image: "https://woodmart.xtemos.com/wp-content/uploads/2018/10/black-electronics-category-3-opt.jpg.webp", link: "/shop" },
+        { name: "Clocks", productCount: 12, image: "/prokip-logo.png", link: "/shop" },
+        { name: "Lighting", productCount: 17, image: "/prokip-logo.png", link: "/shop" },
+        { name: "Furniture", productCount: 33, image: "/prokip-logo.png", link: "/shop" },
+        { name: "Accessories", productCount: 12, image: "/prokip-logo.png", link: "/shop" },
+        { name: "Cooking", productCount: 12, image: "/prokip-logo.png", link: "/shop" },
+        { name: "Toys", productCount: 12, image: "/prokip-logo.png", link: "/shop" },
       ],
     },
   },
@@ -101,12 +101,12 @@ export const HARDWARE_TEMPLATE_PRESET: EditorNode[] = [
       description: "There are many variations of passages of Lorem Ipsum available, but the majority have suffered alteration in some form, by injected humour, or randomised.",
       specs: [
         {
-          icon: "https://woodmart.xtemos.com/wp-content/uploads/2018/03/black-electronics-vcard.svg",
+          icon: "/prokip-logo.png",
           title: "10+ inch GPU",
           description: "Mauris blandit aliquet",
         },
         {
-          icon: "https://woodmart.xtemos.com/wp-content/uploads/2018/03/black-electronics-ram.svg",
+          icon: "/prokip-logo.png",
           title: "8 RAM SLOTS",
           description: "Cras ultricies ligula sed",
         },
@@ -176,7 +176,7 @@ export const HARDWARE_TEMPLATE_PRESET: EditorNode[] = [
       primaryButtonLink: "#",
       secondaryButtonText: "GO TO SHOP",
       secondaryButtonLink: "/shop",
-      image: "https://woodmart.xtemos.com/wp-content/uploads/2018/10/black-electronics-costume-mod-opt.jpg.webp",
+      image: "/prokip-logo.png",
       videoUrl: "http://www.youtube.com/watch?v=XHOmBV4js_E",
     },
   },
@@ -192,25 +192,25 @@ export const HARDWARE_TEMPLATE_PRESET: EditorNode[] = [
       desktops: [
         {
           name: "SkyTech Omega",
-          image: "https://woodmart.xtemos.com/wp-content/uploads/2018/03/black-electronics-pc-r-14.png",
+          image: "/prokip-logo.png",
           specs: ["GeForce GTX 1060", "Intel Core i5 7500", "16GB DDR4", "240GB SSD + 1TB HDD", "Windows 10"],
           link: "#",
         },
         {
           name: "Ava Lumos",
-          image: "https://woodmart.xtemos.com/wp-content/uploads/2018/03/black-electronics-pc-r-24.png.webp",
+          image: "/prokip-logo.png",
           specs: ["GeForce GTX 1070Ti", "Intel Core i5 7700k", "32GB DDR4", "480GB SSD + 2TB HDD", "Windows 10"],
           link: "#",
         },
         {
           name: "Iron Conqueror",
-          image: "https://woodmart.xtemos.com/wp-content/uploads/2018/03/black-electronics-pc-r-34.png.webp",
+          image: "/prokip-logo.png",
           specs: ["GeForce GTX 1080Ti", "Intel Core i7 8700k", "64GB DDR4", "480GB SSD + 2TB HDD", "Windows 10"],
           link: "#",
         },
         {
           name: "Maingear Rush",
-          image: "https://woodmart.xtemos.com/wp-content/uploads/2018/03/black-electronics-pc-r-44.png.webp",
+          image: "/prokip-logo.png",
           specs: ["Radeon RX Vega", "AMD Ryzen 7 1800x", "32GB DDR4", "480GB SSD + 2TB HDD", "Windows 10"],
           link: "#",
         },
@@ -227,14 +227,14 @@ export const HARDWARE_TEMPLATE_PRESET: EditorNode[] = [
       title: "GAMING SETUP",
       description: "There are many variations of passages of Lorem Ipsum available, but the majority have suffered alteration in some form, by injected.",
       images: [
-        "https://woodmart.xtemos.com/wp-content/uploads/2018/10/black-electronics-gallary-8-opt-480x339.jpg",
-        "https://woodmart.xtemos.com/wp-content/uploads/2018/10/black-electronics-gallary-1-opt-1-480x339.jpg",
-        "https://woodmart.xtemos.com/wp-content/uploads/2018/10/black-electronics-gallary-2-opt-480x339.jpg",
-        "https://woodmart.xtemos.com/wp-content/uploads/2018/10/black-electronics-gallary-3-opt-480x339.jpg",
-        "https://woodmart.xtemos.com/wp-content/uploads/2018/10/black-electronics-gallary-4-opt-480x339.jpg",
-        "https://woodmart.xtemos.com/wp-content/uploads/2018/10/black-electronics-gallary-5-opt-480x339.jpg",
-        "https://woodmart.xtemos.com/wp-content/uploads/2018/10/black-electronics-gallary-6-opt-480x339.jpg",
-        "https://woodmart.xtemos.com/wp-content/uploads/2018/10/black-electronics-gallary-7-opt-480x339.jpg",
+        "/prokip-logo.png",
+        "/prokip-logo.png",
+        "/prokip-logo.png",
+        "/prokip-logo.png",
+        "/prokip-logo.png",
+        "/prokip-logo.png",
+        "/prokip-logo.png",
+        "/prokip-logo.png",
       ],
     },
   },
@@ -249,11 +249,11 @@ export const HARDWARE_TEMPLATE_PRESET: EditorNode[] = [
       description: "There are many variations of passages of Lorem Ipsum available, but the majority have suffered alteration in some form, by injected humour, or randomised words which don't look even.",
       quote: "It is a long established fact that a reader will be distracted by the readable content of a page when looking.",
       author: "Kate Abrams",
-      signatureImage: "https://woodmart.xtemos.com/wp-content/uploads/2018/10/black-electronics-autograph-opt.png.webp",
+      signatureImage: "/prokip-logo.png",
       avatarImages: [
-        "https://woodmart.xtemos.com/wp-content/uploads/2018/10/black-electronics-testimon-3-opt.jpg.webp",
-        "https://woodmart.xtemos.com/wp-content/uploads/2018/10/black-electronics-testimon-1-opt.jpg.webp",
-        "https://woodmart.xtemos.com/wp-content/uploads/2018/10/black-electronics-testimon-2-opt.jpg.webp",
+        "/prokip-logo.png",
+        "/prokip-logo.png",
+        "/prokip-logo.png",
       ],
     },
   },
@@ -269,7 +269,7 @@ export const HARDWARE_TEMPLATE_PRESET: EditorNode[] = [
       columns: 4,
       posts: [
         {
-          image: "https://woodmart.xtemos.com/wp-content/uploads/2018/10/black-electronics-blog-1-opt.jpg.webp",
+          image: "/prokip-logo.png",
           title: "Reinterprets the classic bookshelf",
           excerpt: "Aliquet parturient scele risque scele risque nibh pretium parturient suspendisse platea sapien torquent feugiat parturient hac ame...",
           date: { day: "23", month: "Jul" },
@@ -279,7 +279,7 @@ export const HARDWARE_TEMPLATE_PRESET: EditorNode[] = [
           comments: 2,
         },
         {
-          image: "https://woodmart.xtemos.com/wp-content/uploads/2018/10/black-electronics-blog-2-opt.jpg.webp",
+          image: "/prokip-logo.png",
           title: "Minimalist design furniture 2026",
           excerpt: "Discover the ultimate blend of aesthetics, innovation, and functionality. We have curated five iconic European design houses that ...",
           date: { day: "23", month: "Jul" },
@@ -289,7 +289,7 @@ export const HARDWARE_TEMPLATE_PRESET: EditorNode[] = [
           comments: 6,
         },
         {
-          image: "https://woodmart.xtemos.com/wp-content/uploads/2018/10/black-electronics-blog-3-opt.jpg.webp",
+          image: "/prokip-logo.png",
           title: "Green interior design inspiration",
           excerpt: "Modern Atlanta homes impress with a harmony of light, space, and eco-materials. Each project reflects the unique character of its ...",
           date: { day: "23", month: "Jul" },
@@ -299,7 +299,7 @@ export const HARDWARE_TEMPLATE_PRESET: EditorNode[] = [
           comments: 0,
         },
         {
-          image: "https://woodmart.xtemos.com/wp-content/uploads/2018/10/black-electronics-blog-4-opt.jpg.webp",
+          image: "/prokip-logo.png",
           title: "Collar brings back coffee brewing ritual",
           excerpt: "Aliquet parturient scele risque scele risque nibh pretium parturient suspendisse platea sapien torquent feugiat parturient hac ame...",
           date: { day: "23", month: "Jul" },

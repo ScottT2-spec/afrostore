@@ -8,7 +8,7 @@ import { InlineEditableText } from "@/components/storefront/InlineEditableText";
 
 /* ═══════════════════════════════════════════════════════════════
    BAKERY (SWEETS BAKERY) TEMPLATE BLOCKS
-   Pixel-perfect replicas of WoodMart Sweets Bakery template sections.
+   Pixel-perfect replicas of Prokip LTD Sweets Bakery template sections.
    All styling inline — no external CSS dependencies.
    ═══════════════════════════════════════════════════════════════ */
 
@@ -34,7 +34,7 @@ const TOKENS = {
   bodyFont: "'Jost', Arial, Helvetica, sans-serif",
 };
 
-const IMG = "https://woodmart.xtemos.com/wp-content/uploads";
+const IMG = "https://prokip.xtemos.com/wp-content/uploads";
 
 /* ─── FONT LOADER ───────────────────────────────────────────── */
 export function BakeryFontLoader() {

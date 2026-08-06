@@ -2,19 +2,18 @@ import { prisma } from "@/lib/db";
 import { notFound, redirect } from "next/navigation";
 import Link from "next/link";
 import { RenderTemplateBlocks, type TemplateBlock } from "@/components/storefront/TemplateBlockRenderer";
+import { RetailHeader, RetailFooter } from "@/components/storefront/RetailTemplateBlocks";
 import { HandmadeBagsHeader, HandmadeBagsFooter } from "@/components/storefront/HandmadeBagsStoreChrome";
 import { ThemeProvider, type ThemeData } from "@/components/storefront/ThemeProvider";
 import { applyPageCustomization, buildPageBackgroundStyle, filterVisiblePages, getResolvedPageSettings, normalizeSiteCustomization, type SiteCustomizationDocument } from "@/lib/site-customization";
-import { parsePageContent } from "@/lib/page-content";
 import { RenderBlocks, type BuilderBlock } from "@/components/storefront/BlockRenderer";
-import { HANDMADE_BAGS_PRESET } from "@/lib/templates/presets/handmade-bags-preset";
 import { RETAIL_ABOUT_BLOCKS } from "@/lib/templates/presets/retail-pages";
 import { serializeProductsForClient } from "@/lib/serialize-products";
+import { resolveLivePageContent } from "@/lib/templates/bespoke-page-content";
 import { KidsFontLoader, KidsFooterFull, KidsHeader } from "@/components/storefront/KidsTemplateBlocks";
 import PerfumesAboutPage from "./perfumes-about";
 import { HealthFontLoader, HealthHeader, HealthFooterFull } from "@/components/storefront/HealthTemplateBlocks";
-import { CosmeticsFontLoader, CosmeticsHeader, CosmeticsFooter } from "@/components/storefront/CosmeticsTemplateBlocks";
-import { COSMETICS_ABOUT_BLOCKS } from "@/lib/templates/presets/cosmetics-pages-preset";
+import { buildTemplatePageContent } from "@/lib/templates/template-tree";
 
 type Props = {
   params: Promise<{ slug: string }>;
@@ -197,7 +196,7 @@ async function getStoreData(slug: string) {
           title: "About Us",
           slug: "about",
           type: "CUSTOM",
-          content: [],
+          content: buildTemplatePageContent([], {}) as any,
           isPublished: true,
           position: 10,
         },
@@ -263,14 +262,25 @@ export default async function AboutPage({ params }: Props) {
   
   // Use custom blocks if available, otherwise use preset
   let pageContent;
-  const parsedAbout = aboutPage?.content ? parsePageContent(aboutPage.content) : null;
-  if (parsedAbout && parsedAbout.blocks.length > 0) {
-    pageContent = parsedAbout;
+  const resolvedAbout = aboutPage?.content
+    ? resolveLivePageContent(activeTemplateSlug, aboutPage.slug, aboutPage.content, {
+        pageSlug: aboutPage.slug,
+        pageTitle: aboutPage.title,
+        pageType: aboutPage.type,
+        templateSlug: activeTemplateSlug,
+      })
+    : null;
+  const aboutNodeCss = resolvedAbout?.css || "";
+  console.log('[AboutPage] aboutPage.content:', aboutPage?.content);
+  console.log('[AboutPage] parsedAbout:', resolvedAbout);
+  console.log('[AboutPage] First block styleOverrides:', resolvedAbout?.blocks[0]?.styleOverrides);
+  if (resolvedAbout && resolvedAbout.blocks.length > 0) {
+    pageContent = { blocks: resolvedAbout.blocks, settings: resolvedAbout.settings };
   } else {
     pageContent = { blocks: ABOUT_PAGE_BLOCKS, settings: {} };
   }
 
-  const pageSettings = aboutPage ? getResolvedPageSettings(aboutPage, pageContent.settings, customization) : {};
+  const pageSettings = aboutPage ? getResolvedPageSettings(aboutPage, resolvedAbout?.settings || pageContent.settings, customization) : {};
   const themeData: ThemeData = {
     id: "kids-about-page",
     name: "Kids About Page",
@@ -293,14 +303,16 @@ export default async function AboutPage({ params }: Props) {
     store.name?.toLowerCase().includes("kids");
 
   if (isKidsTemplate) {
-    const parsedAbout = aboutPage?.content ? parsePageContent(aboutPage.content) : null;
-    const hasBlocks = parsedAbout && parsedAbout.blocks.length > 0;
+    const hasBlocks = resolvedAbout && resolvedAbout.blocks.length > 0;
 
     return (
       <div className="min-h-screen bg-[#fffdf7] text-[#242424]">
         <KidsFontLoader />
         {hasBlocks ? (
-          <RenderTemplateBlocks blocks={parsedAbout.blocks as TemplateBlock[]} />
+          <>
+            {aboutNodeCss && <style data-live-node-styles dangerouslySetInnerHTML={{ __html: aboutNodeCss }} />}
+            <RenderTemplateBlocks blocks={resolvedAbout.blocks as TemplateBlock[]} />
+          </>
         ) : (
           <>
             <KidsHeader
@@ -403,7 +415,7 @@ export default async function AboutPage({ params }: Props) {
               storeSlug={slug}
               templateSlug="kids"
               logo={store.logo}
-              description={store.description || "Playful kidswear, gifts, and accessories with a premium finish."}
+              description={store.description || "Playful kidswear, gifts, and accessories with a premium Prokip LTD-inspired finish."}
               contact={{
                 address: "913 Wyandotte St, Kansas City, MO 64105",
                 phone: "(064) 332-1233",
@@ -428,119 +440,55 @@ export default async function AboutPage({ params }: Props) {
 
   // ─── HEALTH / PILLS ABOUT US ───
   const isHealthTemplate =
+    activeTemplateSlug === "health" ||
     activeTemplateSlug === "pills" ||
+    slug === "health" ||
     slug === "pills" ||
+    store.slug === "health" ||
     store.slug === "pills" ||
     store.name?.toLowerCase().includes("pill") ||
     store.name?.toLowerCase().includes("supplement") ||
     store.name?.toLowerCase().includes("health");
 
   if (isHealthTemplate) {
+    // Use block-based rendering for Health About page to enable editor persistence
+    const blocks: TemplateBlock[] = resolvedAbout && resolvedAbout.blocks.length > 0 ? (resolvedAbout.blocks as TemplateBlock[]) : [];
+
     return (
       <div className="min-h-screen bg-white text-[#333]" style={{ fontFamily: "'Cabin', Arial, sans-serif" }}>
-        <link href="https://fonts.googleapis.com/css2?family=Geologica:wght@400;500;600;700;800&family=Cabin:wght@400;500;600;700&display=swap" rel="stylesheet" />
+        <HealthFontLoader />
         <HealthHeader storeName={store.name} storeSlug={slug} logo={store.logo} />
         <main>
-          {/* Hero */}
-          <section style={{ background: "linear-gradient(135deg, #f0f5f2 0%, #fff 50%, #f7f7f7 100%)" }}>
-            <div style={{ maxWidth: "1222px", margin: "0 auto", padding: "60px 15px 80px", textAlign: "center" }}>
-              <h1 style={{ fontFamily: "'Geologica', sans-serif", fontSize: "48px", fontWeight: 700, color: "#333", marginBottom: "24px" }}>About Us</h1>
-              <h2 style={{ fontFamily: "'Geologica', sans-serif", fontSize: "28px", fontWeight: 600, color: "#333", maxWidth: "700px", margin: "0 auto 20px" }}>
-                Our Company&apos;s Goal Is to Make You Healthy
-              </h2>
-              <p style={{ fontSize: "16px", lineHeight: "1.8", color: "#777", maxWidth: "720px", margin: "0 auto 30px" }}>
-                The best vitamins and supplements are often backed by scientific research and manufactured by reputable companies. They can play a valuable role in filling nutritional gaps and supporting optimal health when used as part.
-              </p>
-            </div>
-          </section>
-
-          {/* Video placeholder */}
-          <section style={{ maxWidth: "1222px", margin: "-40px auto 0", padding: "0 15px 60px", position: "relative", zIndex: 1 }}>
-            <div style={{ borderRadius: "15px", overflow: "hidden", boxShadow: "0 16px 48px rgba(0,0,0,0.08)" }}>
-              <img src="https://woodmart.xtemos.com/pills/wp-content/uploads/sites/15/2023/09/w-pas-video-placehollder.jpg" alt="About video" style={{ width: "100%", display: "block" }} />
-            </div>
-          </section>
-
-          {/* Company Values */}
-          <section style={{ maxWidth: "1222px", margin: "0 auto", padding: "60px 15px" }}>
-            <h2 style={{ fontFamily: "'Geologica', sans-serif", fontSize: "32px", fontWeight: 700, color: "#333", textAlign: "center", marginBottom: "48px" }}>Company Values</h2>
-            <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(280px, 1fr))", gap: "30px" }}>
-              {[
-                { title: "Focus on the Consumer", text: "Anyway, you still use Lorem Ipsum and rightly so, as it will always have a place in the web workers toolbox, as things happen, not always the way you like it, not always in the preferred order." },
-                { title: "Maintain the Highest Standards", text: "No typography, no colors, no layout, no styles, all those things that convey the important signals that go beyond the mere textual, hierarchies of information, weight, emphasis." },
-                { title: "Continuous Improvement", text: "That's not so bad, there's dummy copy to the rescue. But worse, what if the fish doesn't fit in the can, the foot's too big for the boot? Or too small?" },
-                { title: "Consumer Confidence", text: "The best vitamins and supplements are often backed by scientific research and manufactured by reputable companies. They can play a valuable role in filling nutritional gaps." },
-              ].map((v) => (
-                <div key={v.title} style={{ background: "#f7f7f7", borderRadius: "15px", padding: "32px" }}>
-                  <h3 style={{ fontFamily: "'Geologica', sans-serif", fontSize: "18px", fontWeight: 700, color: "#333", marginBottom: "12px" }}>{v.title}</h3>
-                  <p style={{ fontSize: "14px", lineHeight: "1.8", color: "#777" }}>{v.text}</p>
-                </div>
-              ))}
-            </div>
-          </section>
-
-          {/* FAQ */}
-          <section style={{ background: "#f7f7f7" }}>
-            <div style={{ maxWidth: "1222px", margin: "0 auto", padding: "60px 15px" }}>
-              <h2 style={{ fontFamily: "'Geologica', sans-serif", fontSize: "32px", fontWeight: 700, color: "#333", textAlign: "center", marginBottom: "48px" }}>Frequently Asked Questions</h2>
-              <div style={{ maxWidth: "800px", margin: "0 auto", display: "flex", flexDirection: "column", gap: "16px" }}>
-                {[
-                  ["How does my subscription work?", "A seemingly elegant design can quickly begin to bloat with unexpected content or break under the weight of actual activity. Fake data can ensure a nice looking layout but it doesn't reflect what a living, breathing application must endure. Real data does."],
-                  ["How do I edit what's in my plan?", "Websites in professional use templating systems. Commercial publishing platforms and content management systems ensure that you can show different text, different data using the same template."],
-                  ["Can I change my next delivery date?", "A seemingly elegant design can quickly begin to bloat with unexpected content or break under the weight of actual activity. Fake data can ensure a nice looking layout but it doesn't reflect what a living, breathing application must endure."],
-                  ["It's been a while since I took the quiz. Can I get a new recommendation?", "Websites in professional use templating systems. Commercial publishing platforms and content management systems ensure that you can show different text, different data using the same template."],
-                  ["My order hasn't arrived yet. Where is it?", "If the copy becomes distracting in the design then you are doing something wrong or they are discussing copy changes. It might be a bit annoying but you could tell them that that discussion would be best suited for another time."],
-                  ["Do you deliver on public holidays?", "A seemingly elegant design can quickly begin to bloat with unexpected content or break under the weight of actual activity. Fake data can ensure a nice looking layout but it doesn't reflect what a living, breathing application must endure."],
-                  ["Is next-day delivery available on all orders?", "If the copy becomes distracting in the design then you are doing something wrong or they are discussing copy changes. It might be a bit annoying but you could tell them that that discussion would be best suited for another time."],
-                ].map(([q, a]) => (
-                  <details key={q} style={{ background: "#fff", borderRadius: "12px", padding: "20px 24px", cursor: "pointer" }}>
-                    <summary style={{ fontFamily: "'Geologica', sans-serif", fontWeight: 600, fontSize: "15px", color: "#333", listStyle: "none" }}>{q}</summary>
-                    <p style={{ marginTop: "12px", fontSize: "14px", lineHeight: "1.8", color: "#777" }}>{a}</p>
-                  </details>
-                ))}
-              </div>
-            </div>
-          </section>
+          {aboutNodeCss && <style data-live-node-styles dangerouslySetInnerHTML={{ __html: aboutNodeCss }} />}
+          <RenderTemplateBlocks blocks={blocks} />
         </main>
-        <HealthFooterFull storeName={store.name} storeSlug={slug} logo={store.logo} description={store.description || "Your trusted source for vitamins, supplements, and wellness products."} contact={{ address: "1901 Thornridge Cir. Shiloh, Hawaii 81063", phone: "(956) 238-7908", email: "hello@store.com" }} />
+        <HealthFooterFull 
+          storeName={store.name} 
+          storeSlug={slug} 
+          logo={store.logo} 
+          description={store.description || "Your trusted source for vitamins, supplements, and wellness products."} 
+          contact={{ 
+            address: (store as any).address || "123 Wellness Ave, Portland, OR 97201", 
+            phone: (store as any).phone || "(503) 555-0123", 
+            email: (store as any).email || "hello@store.com" 
+          }} 
+        />
       </div>
     );
   }
 
-  // ─── COSMETICS ABOUT ───
-  const isCosmeticsTemplate =
-    activeTemplateSlug === "cosmetics" ||
-    slug === "stacj" ||
-    slug?.toLowerCase().includes("cosmetics") ||
-    slug?.toLowerCase().includes("stacj") ||
-    store.name?.toLowerCase().includes("cosmetics") ||
-    store.name?.toLowerCase().includes("stacj");
-
-  if (isCosmeticsTemplate) {
-    const cosmeticsBlocks = (parsedAbout && parsedAbout.blocks.length > 0 ? parsedAbout.blocks : COSMETICS_ABOUT_BLOCKS) as TemplateBlock[];
-    return (
-      <ThemeProvider theme={themeData}>
-        <CosmeticsFontLoader />
-        <CosmeticsHeader storeName={store.name} storeSlug={slug} logo={store.logo} />
-        <main style={buildPageBackgroundStyle(pageSettings)}>
-          <RenderTemplateBlocks blocks={cosmeticsBlocks} />
-        </main>
-        <CosmeticsFooter storeName={store.name} storeSlug={slug} logo={store.logo} description={store.description ?? undefined} />
-      </ThemeProvider>
-    );
-  }
-
   // ─── RETAIL ABOUT ───
-  const isRetailTemplate = activeTemplateSlug === "retail";
+  const isRetailTemplate = activeTemplateSlug === "retail" || activeTemplateSlug === "decor";
   if (isRetailTemplate) {
-    const retailBlocks = (aboutPage?.content ? pageContent.blocks : RETAIL_ABOUT_BLOCKS) as BuilderBlock[];
+    const retailBlocks = (resolvedAbout?.blocks?.length ? resolvedAbout.blocks : RETAIL_ABOUT_BLOCKS) as BuilderBlock[];
     return (
       <ThemeProvider theme={themeData}>
-        <HandmadeBagsHeader storeName={store.name} storeSlug={store.slug || slug} logo={store.logo} isLanding={false} />
+        <RetailHeader storeName={store.name} storeSlug={store.slug || slug} logo={store.logo} isLanding={false} />
         <div style={buildPageBackgroundStyle(pageSettings)}>
+          {aboutNodeCss && <style data-live-node-styles dangerouslySetInnerHTML={{ __html: aboutNodeCss }} />}
           <RenderBlocks blocks={retailBlocks} storeSlug={slug} products={serializedProducts} />
         </div>
-        <HandmadeBagsFooter storeName={store.name} storeSlug={store.slug || slug} logo={store.logo} description={store.description ?? undefined} />
+        <RetailFooter storeName={store.name} storeSlug={store.slug || slug} logo={store.logo} description={store.description ?? undefined} />
       </ThemeProvider>
     );
   }
@@ -554,7 +502,8 @@ export default async function AboutPage({ params }: Props) {
         isLanding={false}
       />
       <div style={buildPageBackgroundStyle(pageSettings)}>
-        {parsedAbout && parsedAbout.blocks.length > 0 ? (
+        {aboutNodeCss && <style data-live-node-styles dangerouslySetInnerHTML={{ __html: aboutNodeCss }} />}
+        {resolvedAbout && resolvedAbout.blocks.length > 0 ? (
           <RenderBlocks blocks={pageContent.blocks as BuilderBlock[]} storeSlug={slug} products={serializedProducts} />
         ) : (
           <RenderTemplateBlocks blocks={ABOUT_PAGE_BLOCKS} />

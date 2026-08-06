@@ -2,7 +2,7 @@ import type { EditorNode } from "@/lib/visual-editor/node-tree";
 
 /**
  * Cosmetics Template Preset
- * Recreates the WoodMart Cosmetics demo layout with editable blocks.
+ * Recreates the Prokip LTD Cosmetics demo layout with editable blocks.
  */
 export const COSMETICS_TEMPLATE_PRESET: EditorNode[] = [
   {
@@ -66,14 +66,14 @@ export const COSMETICS_TEMPLATE_PRESET: EditorNode[] = [
     settings: {
       banners: [
         {
-          image: "https://woodmart.xtemos.com/wp-content/uploads/2024/02/cosmetics-promo-1.jpg",
+          image: "/prokip-logo.png",
           title: "REVITALIZING\nFACE MASKS",
           description: "It is a long established fact that a reader will be distracted by the readable content of a page when looking at its layout.",
           buttonText: "SHOP NOW",
           buttonLink: "/shop",
         },
         {
-          image: "https://woodmart.xtemos.com/wp-content/uploads/2024/02/cosmetics-promo-2.jpg",
+          image: "/prokip-logo.png",
           title: "SERUMS & OILS",
           description: "There are many variations of passages of Lorem Ipsum available, but the majority have suffered alteration in some form.",
           buttonText: "SHOP NOW",
@@ -119,7 +119,7 @@ export const COSMETICS_TEMPLATE_PRESET: EditorNode[] = [
     settings: {
       title: "Discover a beautiful you with our new Makeup Essentials",
       description: "There are many variations of passages of Lorem Ipsum available, but the majority have suffered alteration in some form, by injected humour.",
-      image: "https://woodmart.xtemos.com/wp-content/uploads/2024/02/cosmetics-discovery.jpg",
+      image: "/prokip-logo.png",
       features: [
         { icon: "✨", titleLine1: "Lasting", titleLine2: "Formulas" },
         { icon: "🛡️", titleLine1: "Face skin", titleLine2: "Protection" },
@@ -151,7 +151,7 @@ export const COSMETICS_TEMPLATE_PRESET: EditorNode[] = [
     settings: {
       title: "Vehicula fermentum",
       description: "The generated Lorem Ipsum is therefore always free from repetition humour.",
-      image: "https://woodmart.xtemos.com/wp-content/uploads/2024/02/cosmetics-countdown.jpg",
+      image: "/prokip-logo.png",
       buttonText: "SHOP NOW",
       buttonLink: "/shop",
       secondButtonText: "READ MORE",
@@ -180,35 +180,14 @@ export const COSMETICS_TEMPLATE_PRESET: EditorNode[] = [
         subtitle: "OUR BLOG",
         title: "LATEST NEWS",
       },
-      posts: [
-        {
-          image: "https://images.unsplash.com/photo-1596462502278-27bfdc403348?w=600&h=400&fit=crop",
-          title: "5 Skincare Mistakes You're Probably Making",
-          excerpt: "From skipping sunscreen to over-exfoliating, these common skincare habits could be doing more harm than good. Here's how to fix them for glowing, healthy skin.",
-          date: { day: "28", month: "Jul" },
-          categories: ["Skincare"],
-          author: { name: "Scott Antwi" },
-          link: "/blog",
-          commentCount: 9,
-        },
-        {
-          image: "https://images.unsplash.com/photo-1522335789203-aabd1fc54bc9?w=600&h=400&fit=crop",
-          title: "The Ultimate Guide to Building a Makeup Collection",
-          excerpt: "Whether you're a beginner or a beauty lover, having the right essentials makes all the difference. Here's everything you need to build your perfect kit.",
-          date: { day: "24", month: "Jul" },
-          categories: ["Beauty Tips"],
-          author: { name: "Scott Antwi" },
-          link: "/blog",
-          commentCount: 15,
-        },
-      ],
+      posts: [],
     },
   },
   {
     id: "cosmetics-newsletter",
     type: "cosmeticsNewsletter",
     settings: {
-      backgroundImage: "https://woodmart.xtemos.com/wp-content/uploads/2017/01/newsletter-wood-3.jpg",
+      backgroundImage: "/prokip-logo.png",
       title: "JOIN OUR NEWSLETTER",
       description: "Will be used in accordance with our Privacy Policy",
       buttonText: "Sign up",

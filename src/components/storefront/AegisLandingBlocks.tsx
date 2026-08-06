@@ -1,7 +1,7 @@
 "use client";
 import Link from "next/link";
 import { resolveStoreLink } from "@/lib/template-link-utils";
-import { createContext, useContext, useState } from "react";
+import { createContext, useContext } from "react";
 import { onImgError } from "./image-fallback";
 import { InlineEditableText } from "@/components/storefront/InlineEditableText";
 
@@ -414,11 +414,6 @@ export interface AegisCTAProps {
   primaryButtonLink?: string;
   secondaryButtonText?: string;
   secondaryButtonLink?: string;
-  /** Show an inline email capture form (feeds the site's CRM as a lead). Defaults to true — this is a landing page. */
-  showLeadForm?: boolean;
-  leadFormButtonText?: string;
-  leadFormSuccessMessage?: string;
-  storeSlug?: string;
   blockId?: string;
   isEditor?: boolean;
 }
@@ -430,38 +425,10 @@ export function AegisCTA({
   primaryButtonLink = "#",
   secondaryButtonText = "Speak with a Specialist",
   secondaryButtonLink = "#",
-  showLeadForm = true,
-  leadFormButtonText = "Notify Me",
-  leadFormSuccessMessage = "Thanks! We'll be in touch shortly.",
-  storeSlug,
   blockId,
   isEditor = false,
 }: AegisCTAProps) {
   const fix = useFix();
-  const [email, setEmail] = useState("");
-  const [sending, setSending] = useState(false);
-  const [submitted, setSubmitted] = useState(false);
-  const [formError, setFormError] = useState("");
-
-  const handleLeadSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!storeSlug) { setSubmitted(true); return; } // editor/preview fallback — no real site to submit to
-    setSending(true);
-    setFormError("");
-    try {
-      const res = await fetch(`/api/public/sites/${storeSlug}/crm/contacts`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email, source: "landing", tags: ["aegis-cta"] }),
-      });
-      const json = await res.json();
-      if (json.success) setSubmitted(true);
-      else setFormError(json.error || "Something went wrong. Please try again.");
-    } catch {
-      setFormError("Network error. Please try again.");
-    }
-    setSending(false);
-  };
   const css = `
     .aegis-cta { padding: 96px 32px; }
     .aegis-cta-card { max-width: 960px; margin: 0 auto; background: ${C.primary}; border-radius: 24px; padding: 80px; text-align: center; position: relative; overflow: hidden; }
@@ -476,13 +443,6 @@ export function AegisCTA({
     .aegis-cta-btn-light:hover { background: ${C.primaryFixed}; }
     .aegis-cta-btn-sec { background: ${C.secondary}; color: #fff; box-shadow: 0 20px 40px ${C.secondary}33; }
     .aegis-cta-btn-sec:hover { filter: brightness(0.9); }
-    .aegis-cta-form { display: flex; flex-wrap: wrap; justify-content: center; gap: 12px; width: 100%; max-width: 440px; }
-    .aegis-cta-input { flex: 1; min-width: 220px; border-radius: 8px; border: none; padding: 14px 18px; font-family: ${C.bodyFont}; font-size: 0.95rem; }
-    .aegis-cta-form-btn { border-radius: 8px; padding: 14px 28px; font-family: ${C.bodyFont}; font-weight: 700; font-size: 0.95rem; background: #fff; color: ${C.primary}; border: none; cursor: pointer; transition: all 0.2s; }
-    .aegis-cta-form-btn:hover { background: ${C.primaryFixed}; }
-    .aegis-cta-form-btn:disabled { opacity: 0.6; cursor: not-allowed; }
-    .aegis-cta-form-error { color: #fecaca; font-family: ${C.bodyFont}; font-size: 0.85rem; margin: 0; }
-    .aegis-cta-form-success { color: #fff; font-family: ${C.bodyFont}; font-weight: 600; font-size: 1rem; }
     @media (max-width: 768px) { .aegis-cta-card { padding: 48px 24px; } }
   `;
   return (
@@ -494,26 +454,6 @@ export function AegisCTA({
         <div className="aegis-cta-inner">
           <EditableCopy blockId={blockId} isEditor={isEditor} field="title" value={title} as="h2" className="aegis-cta-h2" />
           {description && <EditableCopy blockId={blockId} isEditor={isEditor} field="description" value={description} as="p" multiline className="aegis-cta-desc" />}
-          {showLeadForm && (
-            submitted ? (
-              <p className="aegis-cta-form-success">{leadFormSuccessMessage}</p>
-            ) : (
-              <form onSubmit={handleLeadSubmit} className="aegis-cta-form">
-                <input
-                  type="email"
-                  required
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                  placeholder="Your email address"
-                  className="aegis-cta-input"
-                />
-                <button type="submit" disabled={sending} className="aegis-cta-form-btn">
-                  {sending ? "..." : leadFormButtonText}
-                </button>
-                {formError && <p className="aegis-cta-form-error">{formError}</p>}
-              </form>
-            )
-          )}
           <div className="aegis-cta-btns">
             {isEditor ? <EditableCopy blockId={blockId} isEditor field="primaryButtonText" value={primaryButtonText} as="span" className="aegis-cta-btn aegis-cta-btn-light" /> : <Link href={fix(primaryButtonLink)} className="aegis-cta-btn aegis-cta-btn-light">{primaryButtonText}</Link>}
             {secondaryButtonText && (isEditor ? <EditableCopy blockId={blockId} isEditor field="secondaryButtonText" value={secondaryButtonText} as="span" className="aegis-cta-btn aegis-cta-btn-sec" /> : <Link href={fix(secondaryButtonLink)} className="aegis-cta-btn aegis-cta-btn-sec">{secondaryButtonText}</Link>)}

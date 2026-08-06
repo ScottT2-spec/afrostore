@@ -2,7 +2,7 @@ import type { EditorNode } from "@/lib/visual-editor/node-tree";
 
 /**
  * Perfumes Template Preset
- * Recreates the WoodMart Perfumes demo layout with editable blocks.
+ * Recreates the Prokip LTD Perfumes demo layout with editable blocks.
  */
 export const PERFUMES_TEMPLATE_PRESET: EditorNode[] = [
   {
@@ -18,7 +18,7 @@ export const PERFUMES_TEMPLATE_PRESET: EditorNode[] = [
           type: "slide",
           settings:           {
             "title": "Opus Essence",
-            "bottleImage": "https://woodmart.xtemos.com/wp-content/uploads/2024/11/perfumes-slide-bottle-1.png",
+            "bottleImage": "/prokip-logo.png",
             "backgroundColor": "#1a1a2e",
             "buttonText": "Buy now",
             "buttonLink": "/shop",
@@ -31,7 +31,7 @@ export const PERFUMES_TEMPLATE_PRESET: EditorNode[] = [
           type: "slide",
           settings:           {
             "title": "New Fragrance in the Opus Essence",
-            "bottleImage": "https://woodmart.xtemos.com/wp-content/uploads/2024/11/perfumes-slide-bottle-2.png",
+            "bottleImage": "/prokip-logo.png",
             "backgroundColor": "#2d1b4e",
             "buttonText": "Buy now",
             "buttonLink": "/shop",
@@ -44,7 +44,7 @@ export const PERFUMES_TEMPLATE_PRESET: EditorNode[] = [
           type: "slide",
           settings:           {
             "title": "Deep Fragrance With a Refined Intensity",
-            "bottleImage": "https://woodmart.xtemos.com/wp-content/uploads/2024/11/perfumes-slide-bottle-3.png",
+            "bottleImage": "/prokip-logo.png",
             "backgroundColor": "#0d1b2a",
             "buttonText": "Buy now",
             "buttonLink": "/shop",
@@ -98,14 +98,14 @@ export const PERFUMES_TEMPLATE_PRESET: EditorNode[] = [
           title: "Light Fragrance with a Silky Touch",
           subtitle: "A collection of delicate, weightless fragrances",
           description: "A collection of delicate, weightless fragrances that capture the essence of air and light. Soft florals, sheer musks, and gentle citruses.",
-          backgroundImage: "https://woodmart.xtemos.com/wp-content/uploads/2024/11/perfumes-banner-1.jpg",
+          backgroundImage: "/prokip-logo.png",
           link: "/shop",
         },
         {
           title: "Deep Fragrance With a Refined Intensity",
           subtitle: "A collection of fresh, luminous scents",
           description: "A collection of fresh, luminous scents inspired by the mystery of nightfall. Crisp citruses, airy florals, and cool musks.",
-          backgroundImage: "https://woodmart.xtemos.com/wp-content/uploads/2024/11/perfumes-banner-2.jpg",
+          backgroundImage: "/prokip-logo.png",
           link: "/shop",
         },
       ],
@@ -134,7 +134,7 @@ export const PERFUMES_TEMPLATE_PRESET: EditorNode[] = [
       banners: [
         {
           title: "Get up to 20% off",
-          image: "https://woodmart.xtemos.com/wp-content/uploads/2024/11/perfumes-collection-1.jpg",
+          image: "/prokip-logo.png",
           link: "/shop",
         },
       ],
