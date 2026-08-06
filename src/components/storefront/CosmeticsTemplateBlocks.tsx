@@ -2,6 +2,7 @@
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { resolveStoreLink, resolveFooterLink } from "@/lib/template-link-utils";
+import { normalizeTextArray } from "@/components/storefront/prop-normalizers";
 import { toggleCompare as toggleCompareItem } from "@/lib/compare-utils";
 import { useState, useEffect, useRef, useCallback, createContext, useContext } from "react";
 import { safeSrc, onImgError } from "./image-fallback";
@@ -1214,14 +1215,14 @@ export function CosmeticsBlogPosts({ posts: propPosts = [], columns = 2, section
             </div>
             <div className="cbp-content">
               <div className="cbp-cats">
-                {p.categories.map((c, ci) => (
+                {normalizeTextArray(p.categories, []).map((c, ci) => (
                   <span key={ci} className="cbp-cat">{c}</span>
                 ))}
               </div>
               <h3 className="cbp-title"><Link href={p.link}>{p.title}</Link></h3>
               <div className="cbp-meta">
-                {p.author.avatar && <img src={p.author.avatar} alt={p.author.name} className="cbp-meta-avatar"  onError={(e) => onImgError(e, p.author.name)} />}
-                <span>Posted by <strong>{p.author.name}</strong></span>
+                {p.author?.avatar && <img src={p.author.avatar} alt={p.author?.name || "Author"} className="cbp-meta-avatar"  onError={(e) => onImgError(e, p.author?.name || "Author")} />}
+                <span>Posted by <strong>{p.author?.name || "Author"}</strong></span>
                 {p.commentCount !== undefined && <span>💬 {p.commentCount}</span>}
               </div>
               <p className="cbp-excerpt">{p.excerpt}</p>

@@ -2,6 +2,7 @@
 import { FashionFooter } from "./FashionTemplateBlocks";
 import Link from "next/link";
 import { resolveStoreLink, resolveFooterLink } from "@/lib/template-link-utils";
+import { normalizeTextArray } from "@/components/storefront/prop-normalizers";
 import { toggleCompare as toggleCompareItem } from "@/lib/compare-utils";
 import { useState, useEffect, useRef, useCallback, createContext, useContext } from "react";
 import { safeSrc, onImgError, kidsProductImage, kidsBlogImage } from "./image-fallback";
@@ -824,12 +825,12 @@ export function KidsBlogPosts({ posts: propPosts = [], columns = 3, sectionTitle
             </div>
             <div className="kbp2-content">
               <div className="kbp2-cats">
-                {p.categories.map((c, ci) => <span key={ci} className="kbp2-cat">{c}</span>)}
+                {normalizeTextArray(p.categories, []).map((c, ci) => <span key={ci} className="kbp2-cat">{c}</span>)}
               </div>
               <h3 className="kbp2-title"><Link href={p.link}>{p.title}</Link></h3>
               <div className="kbp2-meta">
-                {p.author.avatar && <img src={p.author.avatar} alt={p.author.name} className="kbp2-avatar"  onError={(e) => onImgError(e, p.author.name)} />}
-                <span>By <strong>{p.author.name}</strong></span>
+                {p.author?.avatar && <img src={p.author.avatar} alt={p.author?.name || "Author"} className="kbp2-avatar"  onError={(e) => onImgError(e, p.author?.name || "Author")} />}
+                <span>By <strong>{p.author?.name || "Author"}</strong></span>
                 {p.commentCount !== undefined && <span>💬 {p.commentCount}</span>}
               </div>
               <p className="kbp2-excerpt">{p.excerpt}</p>
