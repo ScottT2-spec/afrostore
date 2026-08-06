@@ -914,8 +914,12 @@ export function JumiaFooter({ storeName = "Store", storeSlug = "" }: { storeName
           <div>
             <h4 className="text-[10px] font-bold mb-3 tracking-wider text-gray-400">USEFUL LINKS</h4>
             <ul className="space-y-2">
-              {["Track Order", "Shipping Info", "Return Policy"].map((link, i) => (
-                <li key={i}><Link href={`/store/${storeSlug}`} className="text-[11px] text-gray-400 hover:text-white">{link}</Link></li>
+              {[
+                { label: "Track Order", href: `/store/${storeSlug}/order-tracking` },
+                { label: "Shipping Info", href: `/store/${storeSlug}` },
+                { label: "Return Policy", href: `/store/${storeSlug}` },
+              ].map((link, i) => (
+                <li key={i}><Link href={link.href} className="text-[11px] text-gray-400 hover:text-white">{link.label}</Link></li>
               ))}
             </ul>
           </div>
