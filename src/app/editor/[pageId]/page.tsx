@@ -16,6 +16,7 @@ export default function EditorPage() {
   const [error, setError] = useState("");
   const [pageData, setPageData] = useState<any>(null);
   const [siteData, setSiteData] = useState<{ id: string } | null>(null);
+  const [isPublished, setIsPublished] = useState(false);
 
   useEffect(() => {
     loadPageData();
@@ -35,6 +36,7 @@ export default function EditorPage() {
 
       const page = pageRes.data as any;
       setPageData(page);
+      setIsPublished(page.isPublished || false);
 
       // Fetch site data
       if (page.siteId) {
@@ -98,6 +100,7 @@ export default function EditorPage() {
         slug: content.slug,
         metaTitle: content.meta.title,
         metaDescription: content.meta.description,
+        isPublished: isPublished,
       });
 
       if (!res.success) {
@@ -106,6 +109,24 @@ export default function EditorPage() {
     } catch (err) {
       console.error("Error saving page:", err);
       throw err;
+    }
+  };
+
+  const handlePublishToggle = async () => {
+    const newValue = !isPublished;
+    const savePath = siteData?.id
+      ? `/api/sites/${siteData.id}/pages/${pageId}`
+      : `/api/pages/${pageId}`;
+
+    try {
+      const res = await api.patch(savePath, { isPublished: newValue });
+      if (!res.success) {
+        throw new Error(res.error || "Failed to update publish status");
+      }
+      setIsPublished(newValue);
+    } catch (err) {
+      console.error("Error toggling publish status:", err);
+      alert("Failed to update publish status. Please try again.");
     }
   };
 
@@ -183,6 +204,8 @@ export default function EditorPage() {
       onSave={handleSave}
       onBack={handleBack}
       pageTitle={pageData?.title || "Visual Editor"}
+      isPublished={isPublished}
+      onPublishChange={handlePublishToggle}
     />
   );
 }

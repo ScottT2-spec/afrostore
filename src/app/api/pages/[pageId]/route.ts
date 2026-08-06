@@ -53,16 +53,23 @@ export async function PATCH(req: NextRequest, { params }: Params) {
   const body = await req.json();
 
   try {
+    const updateData: any = {
+      content: body.content,
+      title: body.title,
+      slug: body.slug,
+      metaTitle: body.metaTitle,
+      metaDescription: body.metaDescription,
+      updatedAt: new Date(),
+    };
+
+    // Allow publishing/unpublishing pages
+    if (body.isPublished !== undefined) {
+      updateData.isPublished = body.isPublished;
+    }
+
     const updatedPage = await prisma.page.update({
       where: { id: pageId },
-      data: {
-        content: body.content,
-        title: body.title,
-        slug: body.slug,
-        metaTitle: body.metaTitle,
-        metaDescription: body.metaDescription,
-        updatedAt: new Date(),
-      },
+      data: updateData,
     });
 
     if ((updatedPage as any).siteId) {

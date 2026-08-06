@@ -36,6 +36,8 @@ interface VisualEditorProps {
   onSave: (content: any) => Promise<void>;
   onBack: () => void;
   pageTitle?: string;
+  isPublished?: boolean;
+  onPublishChange?: () => void;
 }
 
 export default function VisualEditor({
@@ -44,7 +46,9 @@ export default function VisualEditor({
   initialContent,
   onSave,
   onBack,
-  pageTitle = "Visual Editor"
+  pageTitle = "Visual Editor",
+  isPublished = false,
+  onPublishChange
 }: VisualEditorProps) {
   const [isSaving, setIsSaving] = useState(false);
   const [saveStatus, setSaveStatus] = useState<"idle" | "saving" | "saved" | "error">("idle");
@@ -200,6 +204,8 @@ export default function VisualEditor({
         onNavigatorToggle={() => setNavigatorOpen(!isNavigatorOpen)}
         darkMode={darkMode}
         onDarkModeToggle={() => setDarkMode(!darkMode)}
+        isPublished={isPublished}
+        onPublishToggle={() => onPublishChange?.()}
       />
 
       {/* Main Editor Area */}

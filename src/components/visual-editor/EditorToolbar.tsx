@@ -13,7 +13,9 @@ import {
   Moon,
   Sun,
   Loader2,
-  Check
+  Check,
+  Globe,
+  EyeOff
 } from "lucide-react";
 
 interface EditorToolbarProps {
@@ -33,6 +35,8 @@ interface EditorToolbarProps {
   onNavigatorToggle: () => void;
   darkMode: boolean;
   onDarkModeToggle: () => void;
+  isPublished: boolean;
+  onPublishToggle: () => void;
 }
 
 export default function EditorToolbar({
@@ -51,7 +55,9 @@ export default function EditorToolbar({
   isNavigatorOpen,
   onNavigatorToggle,
   darkMode,
-  onDarkModeToggle
+  onDarkModeToggle,
+  isPublished,
+  onPublishToggle
 }: EditorToolbarProps) {
   return (
     <header className="h-14 bg-white dark:bg-gray-900 border-b border-gray-200 dark:border-gray-700 flex items-center justify-between px-4 flex-shrink-0 z-50">
@@ -169,6 +175,19 @@ export default function EditorToolbar({
 
       {/* Right Section - Save */}
       <div className="flex items-center gap-2">
+        <button
+          type="button"
+          onClick={onPublishToggle}
+          className={`inline-flex items-center gap-2 px-3 py-2 text-sm font-semibold rounded-lg transition-colors border ${
+            isPublished
+              ? "bg-green-50 dark:bg-green-900/30 text-green-700 dark:text-green-400 border-green-200 dark:border-green-800 hover:bg-green-100 dark:hover:bg-green-900/50"
+              : "bg-gray-50 dark:bg-gray-800 text-gray-600 dark:text-gray-400 border-gray-200 dark:border-gray-700 hover:bg-gray-100 dark:hover:bg-gray-700"
+          }`}
+          title={isPublished ? "Page is live — click to unpublish" : "Page is unpublished — click to publish"}
+        >
+          {isPublished ? <Globe className="h-3.5 w-3.5" /> : <EyeOff className="h-3.5 w-3.5" />}
+          {isPublished ? "Published" : "Unpublished"}
+        </button>
         <button
           type="button"
           onClick={onSave}
