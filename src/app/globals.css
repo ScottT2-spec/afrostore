@@ -1,5 +1,10 @@
 @import "tailwindcss";
 
+/* Tailwind v4 defaults dark: to prefers-color-scheme only.
+   This opts back into class-based dark mode so a toggled
+   .dark ancestor (e.g. the editor's dark mode button) works. */
+@custom-variant dark (&:where(.dark, .dark *));
+
 @theme {
   /* Navy — Prokip P3 brand palette */
   --color-brand-50: #f0f4fa;
