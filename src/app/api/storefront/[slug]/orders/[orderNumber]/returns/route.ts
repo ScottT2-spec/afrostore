@@ -1,14 +1,19 @@
 import { NextRequest, NextResponse } from "next/server";
 import { z } from "zod";
 import { prisma } from "@/lib/db";
+import { getAuthCustomer } from "@/lib/customer-auth";
 
 type Params = { params: Promise<{ slug: string; orderNumber: string }> };
 
 // Return requests are a more consequential action than read-only order
-// tracking (they can end in a refund), so — unlike GET /orders/:orderNumber,
-// which only needs the order number — creating one requires the order's
-// email to match, as proof the requester actually placed the order.
-async function resolveOwnedOrder(slug: string, orderNumber: string, email: string) {
+// tracking (they can end in a refund), so ownership must be proven one of
+// two ways:
+//  1. Strong: a logged-in customer session (Bearer token / cookie) whose
+//     id matches order.customerId — or, for guest orders with no
+//     customerId, whose account email matches the order's email.
+//  2. Fallback (no session): the order's email supplied in the request,
+//     for guests using the public order-tracking lookup.
+async function resolveOwnedOrder(req: NextRequest, slug: string, orderNumber: string, bodyEmail?: string) {
   const site = await prisma.site.findUnique({ where: { slug } });
   if (!site) return { error: "Store not found", status: 404 as const };
 
@@ -18,21 +23,29 @@ async function resolveOwnedOrder(slug: string, orderNumber: string, email: strin
   });
   if (!order) return { error: "Order not found. Please check the order number and try again.", status: 404 as const };
 
-  if (!order.email || order.email.toLowerCase() !== email.trim().toLowerCase()) {
-    return { error: "That email doesn't match the one used on this order.", status: 403 as const };
+  const authCustomer = await getAuthCustomer(req);
+  if (authCustomer) {
+    const owns = order.customerId ? order.customerId === authCustomer.id : order.email?.toLowerCase() === authCustomer.email.toLowerCase();
+    if (owns) return { site, order, verifiedEmail: authCustomer.email };
+    return { error: "This order isn't associated with your account.", status: 403 as const };
   }
 
-  return { site, order };
+  if (!bodyEmail) return { error: "Email is required", status: 400 as const };
+  if (!order.email || order.email.toLowerCase() !== bodyEmail.trim().toLowerCase()) {
+    return { error: "That email doesn't match the one used on this order.", status: 403 as const };
+  }
+  return { site, order, verifiedEmail: bodyEmail.trim() };
 }
 
 // GET /api/storefront/:slug/orders/:orderNumber/returns?email=...
 // Public: check whether a return already exists for this order.
+// If the request carries a valid customer session, that's used instead of
+// the email query param — the session is the stronger proof of ownership.
 export async function GET(req: NextRequest, { params }: Params) {
   const { slug, orderNumber } = await params;
-  const email = new URL(req.url).searchParams.get("email") || "";
-  if (!email) return NextResponse.json({ success: false, error: "Email is required" }, { status: 400 });
+  const email = new URL(req.url).searchParams.get("email") || undefined;
 
-  const resolved = await resolveOwnedOrder(slug, orderNumber, email);
+  const resolved = await resolveOwnedOrder(req, slug, orderNumber, email);
   if ("error" in resolved) return NextResponse.json({ success: false, error: resolved.error }, { status: resolved.status });
 
   const existing = await prisma.return.findFirst({
@@ -45,6 +58,7 @@ export async function GET(req: NextRequest, { params }: Params) {
     data: {
       orderId: resolved.order.id,
       orderStatus: resolved.order.status,
+      verifiedEmail: resolved.verifiedEmail,
       items: resolved.order.items.map((i) => ({ id: i.id, name: i.name, variantName: i.variantName, quantity: i.quantity, image: i.image })),
       existingReturn: existing
         ? {
@@ -62,7 +76,7 @@ export async function GET(req: NextRequest, { params }: Params) {
 }
 
 const requestReturnSchema = z.object({
-  email: z.string().email(),
+  email: z.string().email().optional(), // optional when an authenticated customer session is present
   reason: z.string().min(1, "Please tell us why you'd like to return this").max(2000),
   notes: z.string().max(2000).optional(),
   items: z.array(z.object({ id: z.string(), quantity: z.number().int().min(1) })).min(1, "Select at least one item"),
@@ -71,7 +85,7 @@ const requestReturnSchema = z.object({
 const ACTIVE_STATUSES = ["REQUESTED", "APPROVED", "RECEIVED"];
 
 // POST /api/storefront/:slug/orders/:orderNumber/returns
-// Public (email-verified): customer requests a return on their own order.
+// Public (email- or session-verified): customer requests a return on their own order.
 export async function POST(req: NextRequest, { params }: Params) {
   const { slug, orderNumber } = await params;
 
@@ -87,7 +101,7 @@ export async function POST(req: NextRequest, { params }: Params) {
     return NextResponse.json({ success: false, error: parsed.error.issues[0]?.message || "Invalid request" }, { status: 422 });
   }
 
-  const resolved = await resolveOwnedOrder(slug, orderNumber, parsed.data.email);
+  const resolved = await resolveOwnedOrder(req, slug, orderNumber, parsed.data.email);
   if ("error" in resolved) return NextResponse.json({ success: false, error: resolved.error }, { status: resolved.status });
 
   const { site, order } = resolved;
