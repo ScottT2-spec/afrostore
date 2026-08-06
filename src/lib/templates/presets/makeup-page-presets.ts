@@ -2,12 +2,12 @@ import type { EditorNode } from "@/lib/visual-editor/node-tree";
 
 /**
  * Makeup Template Page Presets
- * Content extracted verbatim from the WoodMart Makeup demo sub-pages.
- * Source: https://woodmart.xtemos.com/makeup/
+ * Content extracted verbatim from the Prokip LTD Makeup demo sub-pages.
+ * Source: https://prokip.xtemos.com/makeup/
  * Uses makeup block types registered in MakeupTemplateBlocks.tsx.
  */
 
-const IMG_BASE = "https://woodmart.xtemos.com/makeup/wp-content/uploads/sites/22/2024/10";
+const IMG_BASE = "https://prokip.xtemos.com/makeup/wp-content/uploads/sites/22/2024/10";
 
 const MAKEUP_BRANDS = [
   { name: "Caudalie", logo: `${IMG_BASE}/c2-brand-1.png`, link: "/shop?filter_brand=caudalie" },
@@ -21,7 +21,7 @@ const MAKEUP_BRANDS = [
 
 /* ═══════════════════════════════════════════════════════════════
    ABOUT US PAGE
-   Source: https://woodmart.xtemos.com/makeup/about-us/
+   Source: https://prokip.xtemos.com/makeup/about-us/
    ═══════════════════════════════════════════════════════════════ */
 
 export const MAKEUP_ABOUT_PAGE_BLOCKS: EditorNode[] = [
@@ -67,10 +67,10 @@ export const MAKEUP_ABOUT_PAGE_BLOCKS: EditorNode[] = [
         title: "Meet The Team",
       },
       team: [
-        { name: "Mark Jance", role: "CEO / Founder", photoUrl: "https://woodmart.xtemos.com/wp-content/uploads/2017/01/team26.jpg" },
-        { name: "Everly Quinn", role: "Creative Director", photoUrl: "https://woodmart.xtemos.com/wp-content/uploads/2017/01/team19.jpg" },
-        { name: "Anna Watson", role: "Marketing Lead", photoUrl: "https://woodmart.xtemos.com/wp-content/uploads/2017/01/team24.jpg" },
-        { name: "Oliver James", role: "Product Manager", photoUrl: "https://woodmart.xtemos.com/wp-content/uploads/2017/01/team21.jpg" },
+        { name: "Mark Jance", role: "CEO / Founder", photoUrl: "/prokip-logo.png" },
+        { name: "Everly Quinn", role: "Creative Director", photoUrl: "/prokip-logo.png" },
+        { name: "Anna Watson", role: "Marketing Lead", photoUrl: "/prokip-logo.png" },
+        { name: "Oliver James", role: "Product Manager", photoUrl: "/prokip-logo.png" },
       ],
     },
   },
@@ -106,7 +106,7 @@ export const MAKEUP_ABOUT_PAGE_BLOCKS: EditorNode[] = [
 
 /* ═══════════════════════════════════════════════════════════════
    CONTACT US PAGE
-   Source: https://woodmart.xtemos.com/makeup/contact-us/
+   Source: https://prokip.xtemos.com/makeup/contact-us/
    ═══════════════════════════════════════════════════════════════ */
 
 export const MAKEUP_CONTACT_PAGE_BLOCKS: EditorNode[] = [
@@ -160,7 +160,7 @@ export const MAKEUP_CONTACT_PAGE_BLOCKS: EditorNode[] = [
 
 /* ═══════════════════════════════════════════════════════════════
    BLOG PAGE
-   Source: https://woodmart.xtemos.com/makeup/blog/
+   Source: https://prokip.xtemos.com/makeup/blog/
    ═══════════════════════════════════════════════════════════════ */
 
 export const MAKEUP_BLOG_PAGE_BLOCKS: EditorNode[] = [
@@ -242,7 +242,7 @@ export const MAKEUP_BLOG_PAGE_BLOCKS: EditorNode[] = [
 
 /* ═══════════════════════════════════════════════════════════════
    SHOP PAGE
-   Source: https://woodmart.xtemos.com/makeup/shop/
+   Source: https://prokip.xtemos.com/makeup/shop/
    ═══════════════════════════════════════════════════════════════ */
 
 export const MAKEUP_SHOP_PAGE_BLOCKS: EditorNode[] = [

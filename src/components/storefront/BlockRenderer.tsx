@@ -1,11 +1,13 @@
 "use client";
-import { ArrowRight, ChevronDown, ChevronUp, Loader2 } from "lucide-react";
+import { ArrowRight, ChevronDown, ChevronUp, Loader2, GripVertical } from "lucide-react";
 import { Award, CheckCircle2, Clock, CreditCard, Eye, Globe, Headphones, Heart, Lock, Mail, MapPin, MessageCircle, Package, Palette, Phone, Play, RefreshCw, Rocket, Send, Shield, ShoppingBag, ShoppingCart, Sparkles, Star, Target, ThumbsUp, TrendingUp, Truck, Users, Zap } from "@/components/icons/FilledIcons";
 
 import { useState, useEffect, useMemo, useRef, createContext, useContext } from "react";
-import { resolveNodeStyles } from "@/lib/visual-editor/node-tree";
+import { useDraggable, useDroppable, DndContext, closestCenter, DragEndEvent } from "@dnd-kit/core";
 import { getSectionStyle, resolveOpacity } from "@/components/storefront/block-style";
 import { ALL_TEMPLATE_BLOCKS } from "@/components/storefront/TemplateBlockRenderer";
+import { resolveStoreLink } from "@/lib/template-link-utils";
+import { normalizeStorefrontTemplateProps, toDisplayText } from "@/components/storefront/prop-normalizers";
 import {
   FashionFontLoader as FashionFontLoaderDirect,
   FashionStoreContext,
@@ -25,6 +27,8 @@ import { MakeupFontLoader } from "@/components/storefront/MakeupTemplateBlocks";
 import { PerfumesFontLoader } from "@/components/storefront/PerfumesTemplateBlocks";
 import { AiFontLoader } from "@/components/storefront/AiTemplateBlocks";
 
+const loggedMissingBlockKeys = new Set<string>();
+
 function getTemplateFontLoader(type: string): React.ComponentType {
   if (type.startsWith("ai")) return AiFontLoader;
   if (type.startsWith("electronics")) return ElectronicsFontLoader;
@@ -42,13 +46,23 @@ function getTemplateFontLoader(type: string): React.ComponentType {
   return FashionFontLoaderDirect;
 }
 
+function getBlockListKey(block: BuilderBlock | undefined, index: number, scope: string): string {
+  if (block?.id) return block.id;
+  const fallbackKey = `${scope}-${index}`;
+  if (!loggedMissingBlockKeys.has(fallbackKey)) {
+    loggedMissingBlockKeys.add(fallbackKey);
+    console.warn(`[BlockRenderer] Missing block id for ${scope}[${index}]; using fallback key "${fallbackKey}"`);
+  }
+  return fallbackKey;
+}
+
 /* ─── TYPES ─────────────────────────────────────────────────── */
 
 export interface BuilderBlock {
   id: string;
   type: string;
-  props: Record<string, unknown>;
-  /** Nested children, used by generic layout blocks (section/column/container/grid/flex) produced by the visual editor. */
+  props?: Record<string, unknown>;
+  styleOverrides?: Record<string, unknown>;
   elements?: BuilderBlock[];
 }
 
@@ -439,7 +453,7 @@ function getProductGradient(id: string): string {
 function ProductGridBlock({ props }: { props: Record<string, unknown> }) {
   const limit = (props.limit as number) || 6;
   const cols = (props.columns as number) || 3;
-  const categoryFilter = (props.category as string) || "";
+  const categoryFilter = toDisplayText(props.category, "");
   const { products, currency, slug, addToCart, isWishlisted, toggleWishlist, addedToCart } = useContext(StoreContext);
 
   // Filter products by category if specified, then limit
@@ -970,37 +984,9 @@ function StatsBlock({ props }: { props: Record<string, unknown> }) {
 
 /* ── Newsletter ──────────────────────────────────────────────── */
 function NewsletterBlock({ props }: { props: Record<string, unknown> }) {
-  const storeSlug = useContext(StoreSlugContext);
-  const [email, setEmail] = useState("");
   const [submitted, setSubmitted] = useState(false);
-  const [sending, setSending] = useState(false);
-  const [error, setError] = useState("");
   const bg = (props.bgColor as string) || "surface";
   const isDark = bg === "dark" || bg === "brand";
-
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!storeSlug) { setSubmitted(true); return; } // fallback for preview
-    setSending(true);
-    setError("");
-    try {
-      const res = await fetch(`/api/storefront/${storeSlug}/newsletter`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email }),
-      });
-      const json = await res.json();
-      if (json.success) {
-        setSubmitted(true);
-      } else {
-        setError(json.error || "Failed to subscribe. Please try again.");
-      }
-    } catch {
-      setError("Network error. Please try again.");
-    }
-    setSending(false);
-  };
-
   return (
     <AnimateIn>
       <div className={`rounded-3xl py-12 px-6 sm:px-10 text-center ${
@@ -1019,111 +1005,19 @@ function NewsletterBlock({ props }: { props: Record<string, unknown> }) {
             <CheckCircle2 className="h-5 w-5" /> You&apos;re subscribed!
           </div>
         ) : (
-          <form onSubmit={handleSubmit} className="flex flex-col sm:flex-row gap-3 max-w-md mx-auto">
+          <form onSubmit={(e) => { e.preventDefault(); setSubmitted(true); }} className="flex flex-col sm:flex-row gap-3 max-w-md mx-auto">
             <input
               type="email"
               required
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
               placeholder="Enter your email"
               className="flex-1 rounded-xl border border-surface-200 bg-white px-4 py-3 text-sm placeholder:text-surface-400 focus:outline-none focus:ring-2 focus:ring-brand-500"
             />
-            <button type="submit" disabled={sending} className={`rounded-xl font-bold py-3 px-6 text-sm transition-all hover:-translate-y-0.5 disabled:opacity-60 ${
+            <button type="submit" className={`rounded-xl font-bold py-3 px-6 text-sm transition-all hover:-translate-y-0.5 ${
               isDark ? "bg-white text-surface-900 shadow-lg" : "bg-brand-600 text-white shadow-lg shadow-brand-600/25"
             }`}>
-              {sending ? "..." : "Subscribe"}
+              Subscribe
             </button>
           </form>
-        )}
-        {error && (
-          <p className={`mt-3 text-xs font-medium ${isDark ? "text-red-300" : "text-red-600"}`}>{error}</p>
-        )}
-      </div>
-    </AnimateIn>
-  );
-}
-
-/* ── Lead Capture / Lead Magnet ─────────────────────────────── */
-function LeadCaptureFormBlock({ props }: { props: Record<string, unknown> }) {
-  const storeSlug = useContext(StoreSlugContext);
-  const [values, setValues] = useState({ firstName: "", email: "" });
-  const [submitted, setSubmitted] = useState(false);
-  const [sending, setSending] = useState(false);
-  const [error, setError] = useState("");
-  const bg = (props.bgColor as string) || "surface";
-  const isDark = bg === "dark" || bg === "brand";
-
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!storeSlug) { setSubmitted(true); return; } // fallback for preview
-    setSending(true);
-    setError("");
-    try {
-      const res = await fetch(`/api/public/sites/${storeSlug}/crm/contacts`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          firstName: values.firstName,
-          email: values.email,
-          source: "landing",
-          tags: ["lead-magnet"],
-        }),
-      });
-      const json = await res.json();
-      if (json.success) {
-        setSubmitted(true);
-      } else {
-        setError(json.error || "Failed to submit. Please try again.");
-      }
-    } catch {
-      setError("Network error. Please try again.");
-    }
-    setSending(false);
-  };
-
-  return (
-    <AnimateIn>
-      <div className={`rounded-3xl py-12 px-6 sm:px-10 text-center ${
-        bg === "brand" ? "bg-gradient-to-br from-brand-600 to-brand-800" :
-        bg === "dark" ? "bg-gradient-to-br from-surface-900 to-surface-950" :
-        "bg-surface-50 border border-surface-100"
-      }`}>
-        <h3 className={`text-xl sm:text-2xl font-display font-extrabold mb-2 ${isDark ? "text-white" : "text-surface-900"}`}>
-          {(props.title as string) || "Get instant access"}
-        </h3>
-        <p className={`text-sm mb-6 max-w-md mx-auto ${isDark ? "text-white/60" : "text-surface-500"}`}>
-          {(props.subtitle as string) || "Enter your details below and we'll send it right over."}
-        </p>
-        {submitted ? (
-          <div className={`flex items-center justify-center gap-2 text-sm font-semibold ${isDark ? "text-accent-400" : "text-brand-600"}`}>
-            <CheckCircle2 className="h-5 w-5" /> {(props.successMessage as string) || "Thanks! Check your inbox shortly."}
-          </div>
-        ) : (
-          <form onSubmit={handleSubmit} className="flex flex-col gap-3 max-w-md mx-auto">
-            <input
-              type="text"
-              value={values.firstName}
-              onChange={(e) => setValues((p) => ({ ...p, firstName: e.target.value }))}
-              placeholder="Your name"
-              className="w-full rounded-xl border border-surface-200 bg-white px-4 py-3 text-sm placeholder:text-surface-400 focus:outline-none focus:ring-2 focus:ring-brand-500"
-            />
-            <input
-              type="email"
-              required
-              value={values.email}
-              onChange={(e) => setValues((p) => ({ ...p, email: e.target.value }))}
-              placeholder="Your email"
-              className="w-full rounded-xl border border-surface-200 bg-white px-4 py-3 text-sm placeholder:text-surface-400 focus:outline-none focus:ring-2 focus:ring-brand-500"
-            />
-            <button type="submit" disabled={sending} className={`rounded-xl font-bold py-3 px-6 text-sm transition-all hover:-translate-y-0.5 disabled:opacity-60 ${
-              isDark ? "bg-white text-surface-900 shadow-lg" : "bg-brand-600 text-white shadow-lg shadow-brand-600/25"
-            }`}>
-              {sending ? "..." : (props.buttonText as string) || "Get Access"}
-            </button>
-          </form>
-        )}
-        {error && (
-          <p className={`mt-3 text-xs font-medium ${isDark ? "text-red-300" : "text-red-600"}`}>{error}</p>
         )}
       </div>
     </AnimateIn>
@@ -1354,6 +1248,41 @@ function GalleryBlock({ props }: { props: Record<string, unknown> }) {
           {images.map((img, i) => (
             <div key={i} className={`rounded-2xl overflow-hidden ${i === 0 ? "col-span-2 row-span-2" : ""}`}>
               <img src={img.src} alt={img.alt || ""} className="w-full h-full object-cover hover:scale-105 transition-transform duration-500" />
+            </div>
+          ))}
+        </div>
+      </div>
+    </AnimateIn>
+  );
+}
+
+/* ── Projects ─────────────────────────────────────────────────── */
+function ProjectsBlock({ props }: { props: Record<string, unknown> }) {
+  const storeSlug = useContext(StoreSlugContext);
+  const items = (props.items as Array<{ id: string; title: string; description: string; image: string; link: string }>) || [];
+  const columns = (props.columns as number) || 2;
+  const gridClass = { 1: "grid-cols-1", 2: "grid-cols-1 md:grid-cols-2", 3: "grid-cols-1 md:grid-cols-3" }[Math.min(columns, 3) as 1 | 2 | 3] || "grid-cols-1 md:grid-cols-2";
+  
+  if (items.length === 0) return null;
+  
+  return (
+    <AnimateIn>
+      <div>
+        {(props.title as string) && (
+          <h3 className="text-2xl sm:text-3xl font-display font-extrabold text-surface-900 mb-8 text-center">{props.title as string}</h3>
+        )}
+        <div className={`grid gap-8 ${gridClass}`}>
+          {items.map((item, i) => (
+            <div key={item.id || i} className="group">
+              <div className="relative rounded-2xl overflow-hidden mb-4 aspect-[4/3]">
+                <img src={item.image} alt={item.title} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
+              </div>
+              <h4 className="text-xl font-bold text-surface-900 mb-2">{item.title}</h4>
+              <p className="text-surface-500 mb-4 line-clamp-3">{item.description}</p>
+              <a href={resolveStoreLink(item.link, storeSlug)} className="inline-flex items-center text-sm font-semibold text-brand-600 hover:text-brand-700 transition-colors">
+                Continue Reading
+                <ArrowRight className="ml-2 h-4 w-4" />
+              </a>
             </div>
           ))}
         </div>
@@ -1651,66 +1580,7 @@ function HtmlEmbedBlock({ props }: { props: Record<string, unknown> }) {
    RENDERER MAP
    ═══════════════════════════════════════════════════════════════ */
 
-/* ── Generic Visual Editor Elements ─────────────────────────
-   Renderers for the visual editor's own primitive widget types
-   (src/lib/visual-editor/widgets.ts). These read the flat settings
-   object the editor produces (same object as `props`/`styleOverrides`)
-   and reuse resolveNodeStyles for CSS, since that's the same mapping
-   the editor's own preview canvas relies on. */
-
-function GenericParagraphBlock({ props }: { props: Record<string, unknown> }) {
-  const style = resolveNodeStyles(props);
-  const align = typeof props.align === "string" ? props.align : undefined;
-  return (
-    <p style={{ ...style, textAlign: (align as React.CSSProperties["textAlign"]) || style.textAlign }}>
-      {typeof props.content === "string" ? props.content : ""}
-    </p>
-  );
-}
-
-function GenericIconBlock({ props }: { props: Record<string, unknown> }) {
-  const name = typeof props.name === "string" ? props.name : "star";
-  const Icon = iconMap[name] || Star;
-  const size = typeof props.size === "string" || typeof props.size === "number" ? Number(props.size) : 24;
-  const color = typeof props.color === "string" ? props.color : undefined;
-  return <Icon size={size} color={color} />;
-}
-
-/** Layout/container types that recurse into their children rather than rendering flat content. */
-const GENERIC_LAYOUT_TYPES = new Set(["section", "column", "container", "grid", "flex"]);
-
-function GenericLayoutBlock({ block, isEditorMode }: { block: BuilderBlock; isEditorMode?: boolean }) {
-  const style = resolveNodeStyles(block.props);
-  const children = block.elements || [];
-  const layoutStyle: React.CSSProperties = { ...style };
-
-  if (block.type === "grid") {
-    layoutStyle.display = layoutStyle.display || "grid";
-    const columns = typeof block.props.columns === "number" ? block.props.columns : 3;
-    layoutStyle.gridTemplateColumns = layoutStyle.gridTemplateColumns || `repeat(${columns}, 1fr)`;
-    layoutStyle.gap = layoutStyle.gap || (typeof block.props.gap === "string" ? `${block.props.gap}px` : "24px");
-  } else if (block.type === "flex" || block.type === "column") {
-    layoutStyle.display = layoutStyle.display || "flex";
-    layoutStyle.flexDirection = layoutStyle.flexDirection || (typeof block.props.direction === "string" ? (block.props.direction as React.CSSProperties["flexDirection"]) : block.type === "column" ? "column" : "row");
-    layoutStyle.gap = layoutStyle.gap || (typeof block.props.gap === "string" ? `${block.props.gap}px` : "16px");
-  } else if (block.type === "container") {
-    layoutStyle.maxWidth = layoutStyle.maxWidth || (typeof block.props.maxWidth === "string" || typeof block.props.maxWidth === "number" ? `${block.props.maxWidth}px` : "1200px");
-    layoutStyle.marginLeft = layoutStyle.marginLeft || "auto";
-    layoutStyle.marginRight = layoutStyle.marginRight || "auto";
-  }
-
-  return (
-    <div style={layoutStyle}>
-      {children.map((child) => (
-        <PublicBlockRenderer key={child.id} block={child} isEditorMode={isEditorMode} />
-      ))}
-    </div>
-  );
-}
-
 const renderers: Record<string, React.FC<{ props: Record<string, unknown> }>> = {
-  paragraph: GenericParagraphBlock,
-  icon: GenericIconBlock,
   heading: HeadingBlock,
   text: TextBlock,
   image: ImageBlock,
@@ -1736,7 +1606,7 @@ const renderers: Record<string, React.FC<{ props: Record<string, unknown> }>> = 
   opening_hours: ContactInfoBlock,
   lookbook: GalleryBlock,
   promotions: BannerBlock,
-  projects: GalleryBlock,
+  projects: ProjectsBlock,
   portfolio: GalleryBlock,
   service_cards: FeaturesBlock,
   services: FeaturesBlock,
@@ -1747,7 +1617,6 @@ const renderers: Record<string, React.FC<{ props: Record<string, unknown> }>> = 
   contactInfo: ContactInfoBlock,
   stats: StatsBlock,
   newsletter: NewsletterBlock,
-  leadCaptureForm: LeadCaptureFormBlock,
   video: VideoBlock,
   countdown: CountdownBlock,
   trustBadges: TrustBadgesBlock,
@@ -1806,13 +1675,53 @@ interface StoreContextData {
 const StoreContext = createContext<StoreContextData>({ slug: "", products: [], currency: "NGN" });
 const StoreSlugContext = createContext<string>("");
 
+/* ─── DRAG AND DROP COMPONENTS ───────────────────────────────── */
+
+function DraggableBlock({ block, children, isEditorMode }: { block: BuilderBlock; children: React.ReactNode; isEditorMode?: boolean }) {
+  const { attributes, listeners, setNodeRef, transform, isDragging } = useDraggable({
+    id: block.id,
+    disabled: !isEditorMode,
+  });
+
+  const style = transform ? {
+    transform: `translate3d(${transform.x}px, ${transform.y}px, 0)`,
+    opacity: isDragging ? 0.5 : 1,
+  } : undefined;
+
+  return (
+    <div
+      ref={setNodeRef}
+      style={style}
+      className={`relative ${isEditorMode ? 'group' : ''}`}
+    >
+      {isEditorMode && (
+        <div
+          {...attributes}
+          {...listeners}
+          className="absolute left-0 top-1/2 -translate-y-1/2 -translate-x-full pr-2 cursor-grab active:cursor-grabbing opacity-0 group-hover:opacity-100 transition-opacity z-10"
+        >
+          <GripVertical className="h-5 w-5 text-surface-400 hover:text-surface-600" />
+        </div>
+      )}
+      {children}
+    </div>
+  );
+}
+
+function DroppableBlockList({ children, isEditorMode }: { children: React.ReactNode; isEditorMode?: boolean }) {
+  const { setNodeRef } = useDroppable({
+    id: "block-list",
+    disabled: !isEditorMode,
+  });
+
+  return <div ref={setNodeRef}>{children}</div>;
+}
+
 /* ─── PUBLIC API ────────────────────────────────────────────── */
 
-export function PublicBlockRenderer({ block, isEditorMode }: { block: BuilderBlock; isEditorMode?: boolean }) {
-  // Generic layout/container blocks from the visual editor recurse into their children
-  if (GENERIC_LAYOUT_TYPES.has(block.type)) {
-    return <GenericLayoutBlock block={block} isEditorMode={isEditorMode} />;
-  }
+export function PublicBlockRenderer({ block }: { block: BuilderBlock; isEditorMode?: boolean }) {
+  const normalizedProps = normalizeStorefrontTemplateProps((block.props || {}) as Record<string, unknown>);
+
   // Check if it's a template block (fashion, electronics, bakery, cosmetics, etc.)
   const TemplateComponent = ALL_TEMPLATE_BLOCKS[block.type];
   if (TemplateComponent) {
@@ -1820,13 +1729,13 @@ export function PublicBlockRenderer({ block, isEditorMode }: { block: BuilderBlo
     return (
       <>
         <FontLoader />
-        <TemplateComponent {...(block.props as Record<string, unknown>)} />
+        <TemplateComponent {...normalizedProps} elements={block.elements || []} />
       </>
     );
   }
   const Renderer = renderers[block.type];
   if (!Renderer) return null;
-  return <Renderer props={block.props} />;
+  return <Renderer props={normalizedProps} />;
 }
 
 export function RenderBlocks({ blocks, storeSlug, products, currency, addToCart, isWishlisted, toggleWishlist, addedToCart, isEditorMode = false, pageId, blockCount, dataSource, wrapBlock }: {
@@ -1844,17 +1753,66 @@ export function RenderBlocks({ blocks, storeSlug, products, currency, addToCart,
   dataSource?: string;
   wrapBlock?: (block: BuilderBlock, content: React.ReactNode, index: number) => React.ReactNode;
 }) {
-  const content = (
-    <div className={isEditorMode ? "" : "space-y-8"}>
-      {blocks.map((block, index) => {
-        const node = <PublicBlockRenderer key={block.id} block={block} isEditorMode={isEditorMode} />;
-        if (wrapBlock) {
-          return <div key={block.id}>{wrapBlock(block, node, index)}</div>;
-        }
-        return node;
-      })}
-    </div>
-  );
+  const handleDragEnd = (event: DragEndEvent) => {
+    const { active, over } = event;
+    if (!over || active.id === over.id) return;
+
+    const oldIndex = blocks.findIndex((b) => b.id === active.id);
+    const newIndex = blocks.findIndex((b) => b.id === over.id);
+
+    if (oldIndex === -1 || newIndex === -1) return;
+
+    // Send reorder message to parent
+    window.parent.postMessage({
+      type: "builder-block-reorder",
+      blockId: active.id as string,
+      oldIndex,
+      newIndex,
+    }, "*");
+  };
+
+  const content = isEditorMode ? (
+    <DndContext collisionDetection={closestCenter} onDragEnd={handleDragEnd}>
+      <DroppableBlockList isEditorMode={isEditorMode}>
+        <div className="space-y-8">
+          {blocks.map((block, index) => {
+            const listKey = getBlockListKey(block, index, "editor-block");
+            const node = <PublicBlockRenderer block={block} isEditorMode={isEditorMode} />;
+            const wrappedNode = wrapBlock ? wrapBlock(block, node, index) : node;
+            const scopedNode = (
+              <div
+                data-editor-node-id={block.id}
+                className={`editor-node-${block.id}`}
+              >
+                {wrappedNode}
+              </div>
+            );
+            return (
+              <DraggableBlock key={listKey} block={block} isEditorMode={isEditorMode}>
+                {scopedNode}
+              </DraggableBlock>
+            );
+          })}
+        </div>
+      </DroppableBlockList>
+    </DndContext>
+  ) : (
+      <div className="space-y-8">
+        {blocks.map((block, index) => {
+          const listKey = getBlockListKey(block, index, "live-block");
+          const node = <PublicBlockRenderer block={block} isEditorMode={isEditorMode} />;
+          const scopedNode = (
+            <div
+              data-editor-node-id={block.id}
+              className={`editor-node-${block.id}`}
+            >
+              {wrapBlock ? wrapBlock(block, node, index) : node}
+            </div>
+          );
+          return <div key={listKey}>{scopedNode}</div>;
+        })}
+      </div>
+    );
   const hasFashionBlocks = blocks.some((b) => b.type.startsWith("fashion"));
   const hasElectronicsBlocks = blocks.some((b) => b.type.startsWith("electronics") || b.type.startsWith("tools") || b.type.startsWith("hardware"));
   const hasInteriorBlocks = blocks.some((b) => b.type.startsWith("interior"));

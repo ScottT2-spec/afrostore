@@ -1,7 +1,7 @@
 import type { EditorNode } from "@/lib/visual-editor/node-tree";
 
 /**
- * Fashion Colored template preset — WoodMart "Fashion Colored" demo.
+ * Fashion Colored template preset — Prokip LTD "Fashion Colored" demo.
  * Green primary (#52bd72), parallax hero, collection banners, product grids,
  * category carousel, features section, Instagram gallery, and footer.
  */

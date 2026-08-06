@@ -1,6 +1,6 @@
 import type { EditorNode } from "@/lib/visual-editor/node-tree";
 
-const IMG = "https://woodmart.xtemos.com/perfumes/wp-content/uploads/sites/32/2025/11";
+const IMG = "https://prokip.xtemos.com/perfumes/wp-content/uploads/sites/32/2025/11";
 
 export const PERFUMES_ABOUT_PRESET: EditorNode[] = [
   {

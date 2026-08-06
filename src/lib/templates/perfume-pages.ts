@@ -4,8 +4,8 @@ import { buildTemplatePageContent } from "@/lib/templates/template-tree";
 export const PERFUME_TEMPLATE_PAGE_DEFS = [
   { title: "Fragrances", slug: "fragrances", type: "CUSTOM", position: 9 },
   { title: "Journal", slug: "journal", type: "CUSTOM", position: 10 },
-  { title: "About Us", slug: "about-us", type: "ABOUT", position: 11 },
-  { title: "Contact Us", slug: "contact-us", type: "CONTACT", position: 12 },
+  { title: "About Us", slug: "about", type: "CUSTOM", position: 11 },
+  { title: "Contact Us", slug: "contact", type: "CUSTOM", position: 12 },
 ] as const;
 
 export type PerfumePageSlug = (typeof PERFUME_TEMPLATE_PAGE_DEFS)[number]["slug"];

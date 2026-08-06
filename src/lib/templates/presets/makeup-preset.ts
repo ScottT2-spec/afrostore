@@ -2,7 +2,7 @@ import type { EditorNode } from "@/lib/visual-editor/node-tree";
 
 /**
  * Makeup Template Preset
- * Recreates the WoodMart Makeup demo layout with editable blocks.
+ * Recreates the Prokip LTD Makeup demo layout with editable blocks.
  */
 export const MAKEUP_TEMPLATE_PRESET: EditorNode[] = [
   {
@@ -22,7 +22,7 @@ export const MAKEUP_TEMPLATE_PRESET: EditorNode[] = [
             "description": "In particular, this pack comes with two different size patches to fit various types of blemishes. Perfect for a targeted application.",
             "buttonText": "Shop Now",
             "buttonLink": "/shop",
-            "backgroundImage": "https://woodmart.xtemos.com/wp-content/uploads/2024/04/makeup-slide-1.jpg",
+            "backgroundImage": "/prokip-logo.png",
             "colorScheme": "dark"
           },
           elements: [],
@@ -35,7 +35,7 @@ export const MAKEUP_TEMPLATE_PRESET: EditorNode[] = [
             "description": "Perfect for a targeted application, you just need to take a patch, apply it directly to the blemish.",
             "buttonText": "Shop Now",
             "buttonLink": "/shop",
-            "backgroundImage": "https://woodmart.xtemos.com/wp-content/uploads/2024/04/makeup-slide-2.jpg",
+            "backgroundImage": "/prokip-logo.png",
             "colorScheme": "dark"
           },
           elements: [],
@@ -48,7 +48,7 @@ export const MAKEUP_TEMPLATE_PRESET: EditorNode[] = [
             "description": "In particular, this pack comes with two different size patches to fit various.",
             "buttonText": "Shop Now",
             "buttonLink": "/shop",
-            "backgroundImage": "https://woodmart.xtemos.com/wp-content/uploads/2024/04/makeup-slide-3.jpg",
+            "backgroundImage": "/prokip-logo.png",
             "colorScheme": "light"
           },
           elements: [],
@@ -108,8 +108,8 @@ export const MAKEUP_TEMPLATE_PRESET: EditorNode[] = [
     settings: {
       title: "Cosmetics, created using modern technologies",
       description: "Cosmetics, created using modern technologies, are aimed at the health and beauty of the skin.",
-      beforeImage: "https://woodmart.xtemos.com/wp-content/uploads/2024/04/makeup-before.jpg",
-      afterImage: "https://woodmart.xtemos.com/wp-content/uploads/2024/04/makeup-after.jpg",
+      beforeImage: "/prokip-logo.png",
+      afterImage: "/prokip-logo.png",
       buttonText: "Shop Now",
       buttonLink: "/shop",
       backgroundColor: "#bedbe1",
@@ -123,7 +123,7 @@ export const MAKEUP_TEMPLATE_PRESET: EditorNode[] = [
         {
           title: "In addition to diminishing the visibility of blemishes",
           description: "Blemish control cleanser",
-          backgroundImage: "https://woodmart.xtemos.com/wp-content/uploads/2024/04/makeup-promo-1.jpg",
+          backgroundImage: "/prokip-logo.png",
           titleColor: "#fff",
           descColor: "#ddd",
           link: "/shop",
@@ -131,7 +131,7 @@ export const MAKEUP_TEMPLATE_PRESET: EditorNode[] = [
         {
           title: "Protective moisturizing flow for lips and cheeks",
           description: "Lip tint of an intense pink-beige shade",
-          backgroundImage: "https://woodmart.xtemos.com/wp-content/uploads/2024/04/makeup-promo-2.jpg",
+          backgroundImage: "/prokip-logo.png",
           titleColor: "#333",
           descColor: "#666",
           link: "/shop",
@@ -180,7 +180,7 @@ export const MAKEUP_TEMPLATE_PRESET: EditorNode[] = [
         { title: "FOOTER MENU", links: [{ label: "Instagram profile", url: "#" }, { label: "New Collection", url: "#" }, { label: "Contact Us", url: "#" }, { label: "Latest News", url: "#" }, { label: "Our Sitemap", url: "#" }] },
       ],
       copyrightText: "",
-      paymentIconsUrl: "https://woodmart.xtemos.com/wp-content/uploads/2018/08/payment.png",
+      paymentIconsUrl: "/prokip-logo.png",
     },
   },
 ];

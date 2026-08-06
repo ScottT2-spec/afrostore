@@ -1,212 +1,109 @@
 #!/usr/bin/env node
 
 /**
- * Surgical Template Rebranding Script
- * 
- * This script performs clean branding changes from Woodmart → Prokip Ltd
- * while preserving all technical infrastructure (CSS classes, fonts, paths).
- * 
- * RULES:
- * - Replace visible branding only (WoodMart → Prokip Ltd, woodmart → prokip in text)
- * - Update URLs to https://prokip.africa/
- * - DO NOT touch CSS class names (woodmart-*, wd-*)
- * - DO NOT touch font references or core asset paths
- * - Preserve all WordPress/WooCommerce infrastructure
+ * Workspace-wide Prokip rebrand pass.
+ *
+ * This script rewrites Prokip LTD branding to Prokip / Prokip LTD and replaces
+ * Prokip LTD-hosted image URLs with local assets from /public/uploads.
  */
 
 const fs = require('fs');
 const path = require('path');
 
-const TEMPLATE_DIRS = [
-  '/Users/mav/Documents/afrostore/extracted-templates',
-  '/Users/mav/Documents/afrostore/public/templates'
+const ROOT_DIR = '/Users/mav/Documents/afrostore';
+const TEXT_EXTENSIONS = new Set(['.html', '.htm', '.js', '.ts', '.tsx', '.json', '.md', '.sql', '.mjs', '.css']);
+const SKIP_DIRS = new Set(['.git', 'node_modules', '.next', 'dist', 'build', 'coverage']);
+
+const IMAGE_REPLACEMENTS = [
+  { test: /\/fashion\//, file: '/uploads/1782841159287-49176ad23c5f1c7a3a6a2e4e.png' },
+  { test: /\/electronics\//, file: '/uploads/1782841298863-b277095b6594bf28a22c5e8d.png' },
+  { test: /\/beauty\/perfumes|\/perfumes\//, file: '/uploads/1782849639264-432053c21c9d1d34c04e23a3.png' },
+  { test: /\/beauty\/cosmetics|\/beauty\/makeup|\/makeup\//, file: '/uploads/1782849669734-a7cf8d8eb60a10d9e83d5664.png' },
+  { test: /\/children\//, file: '/uploads/1782850966159-157829bd8a3b567e981c1399.png' },
+  { test: /\/bakery\//, file: '/uploads/1782851081335-ef40430c481abd51406e0f40.png' },
+  { test: /\/health\//, file: '/uploads/1782916258406-43258fa3f9d229c5dd6fad61.png' },
+  { test: /landing-gadget/, file: '/uploads/1782919584004-fc162ee8b1c27ced2dddb993.png' },
+  { test: /\/interior-design\//, file: '/uploads/1782920940731-b8b92506ae654da5cbf60c4d.png' },
+  { test: /\/artsy\//, file: '/uploads/1782920972332-3d32725712386a80d8040c1d.png' },
+  { test: /\/beverage\//, file: '/uploads/1782921884158-f67979853394e4544d31e418.png' },
 ];
 
-// Surgical replacements - ONLY visible branding and URLs
-const REPLACEMENTS = [
-  // Visible branding - case sensitive to avoid breaking CSS classes
-  {
-    pattern: /WoodMart/g,
-    replacement: 'Prokip Ltd',
-    description: 'Visible WoodMart brand name'
-  },
-  {
-    pattern: /Woodmart/g,
-    replacement: 'Prokip Ltd',
-    description: 'Visible Woodmart brand name (capitalized)'
-  },
-  // Replace woodmart with prokip ONLY in visible text contexts
-  // We'll use context-aware replacements below
-  {
-    pattern: /woodmart\.xtemos\.com/g,
-    replacement: 'prokip.africa',
-    description: 'Domain URLs'
-  },
-  {
-    pattern: /https:\/\/woodmart\.xtemos\.com/g,
-    replacement: 'https://prokip.africa',
-    description: 'Full URLs'
-  },
-  {
-    pattern: /http:\/\/woodmart\.xtemos\.com/g,
-    replacement: 'https://prokip.africa',
-    description: 'HTTP URLs to HTTPS'
-  },
-  // Xtemos branding
-  {
-    pattern: /Xtemos/g,
-    replacement: 'Prokip Ltd',
-    description: 'Xtemos company name'
-  },
-  {
-    pattern: /xtemos\.com/g,
-    replacement: 'prokip.africa',
-    description: 'Xtemos domain'
-  },
-  // Demo references
-  {
-    pattern: /WoodMart Demos/g,
-    replacement: 'Prokip Ltd Demos',
-    description: 'Demo titles'
-  },
-  // Footer copyright
-  {
-    pattern: /WoodMart\. (\d{4}) created by Prokip Ltd\./g,
-    replacement: 'Prokip Ltd. $1',
-    description: 'Footer copyright'
-  },
-  // Schema.org JSON-LD - update URLs but keep structure
-  {
-    pattern: /"url":"https:\/\/woodmart\.xtemos\.com\/[^"]+"/g,
-    replacement: (match) => match.replace('woodmart.xtemos.com', 'prokip.africa'),
-    description: 'Schema.org URLs'
-  },
-];
-
-// Context-aware replacements for "woodmart" → "prokip" in visible text
-// This avoids breaking CSS classes and font references
-const CONTEXTUAL_REPLACEMENTS = [
-  // Replace in title tags and meta tags
-  {
-    pattern: /(<title>.*?)(woodmart)(.*?<\/title>)/gis,
-    replacement: '$1prokip$3',
-    description: 'Title tags'
-  },
-  {
-    pattern: /(meta name="description" content=".*?)(woodmart)(.*?")/gis,
-    replacement: '$1prokip$3',
-    description: 'Meta descriptions'
-  },
-  {
-    pattern: /(meta property="og:title" content=".*?)(woodmart)(.*?")/gis,
-    replacement: '$1prokip$3',
-    description: 'OG titles'
-  },
-  // Replace in visible text content (not in URLs or CSS)
-  {
-    pattern: /(>)([^<]*)(woodmart)([^<]*)(<)/g,
-    replacement: (match, p1, p2, p3, p4, p5) => {
-      // Skip if it looks like a URL or CSS class
-      if (p2.includes('http') || p2.includes('url') || p2.includes('href') || 
-          p2.includes('src') || p2.includes('class') || p2.includes('font')) {
-        return match;
-      }
-      return p1 + p2 + 'prokip' + p4 + p5;
-    },
-    description: 'Visible text content'
-  },
-];
-
-function processFile(filePath) {
-  console.log(`Processing: ${filePath}`);
-  
-  let content = fs.readFileSync(filePath, 'utf8');
-  let modified = false;
-  
-  // Apply standard replacements
-  for (const { pattern, replacement, description } of REPLACEMENTS) {
-    const originalContent = content;
-    content = content.replace(pattern, replacement);
-    if (content !== originalContent) {
-      console.log(`  ✓ Applied: ${description}`);
-      modified = true;
+function chooseLocalImage(filePath) {
+  for (const entry of IMAGE_REPLACEMENTS) {
+    if (entry.test.test(filePath)) {
+      return entry.file;
     }
   }
-  
-  // Apply contextual replacements
-  for (const { pattern, replacement, description } of CONTEXTUAL_REPLACEMENTS) {
-    const originalContent = content;
-    content = content.replace(pattern, replacement);
-    if (content !== originalContent) {
-      console.log(`  ✓ Applied: ${description}`);
-      modified = true;
-    }
-  }
-  
-  if (modified) {
-    fs.writeFileSync(filePath, content, 'utf8');
-    console.log(`  ✅ File updated`);
-  } else {
-    console.log(`  ℹ️  No changes needed`);
-  }
-  
-  return modified;
+  return '/prokip-logo.png';
 }
 
-function processDirectory(dir) {
-  console.log(`\n📁 Processing directory: ${dir}`);
-  
+function isImageUrl(url) {
+  return /\.(png|jpe?g|webp|svg|gif)(?:[?#].*)?$/i.test(url);
+}
+
+function replaceprokipImageUrls(content, filePath) {
+  const imageUrlPattern = /(?:https?:\/\/|\/\/)?(?:prokip|prokip)\.xtemos\.com[^"'`\s)]+?\.(?:png|jpe?g|webp|svg|gif)(?:\?[^"'`\s)]*)?/gi;
+  return content.replace(imageUrlPattern, () => chooseLocalImage(filePath));
+}
+
+function replaceBrandText(content) {
+  return content
+    .replace(/\bprokip\b/g, 'Prokip LTD')
+    .replace(/\bprokip\b/g, 'Prokip LTD')
+    .replace(/\bprokip\b/g, 'PROKIP')
+    .replace(/\bprokip\b/g, 'prokip');
+}
+
+function processFile(filePath) {
+  const original = fs.readFileSync(filePath, 'utf8');
+  const updated = replaceBrandText(replaceprokipImageUrls(original, filePath));
+
+  if (updated !== original) {
+    fs.writeFileSync(filePath, updated, 'utf8');
+    console.log(`updated ${filePath}`);
+    return true;
+  }
+
+  return false;
+}
+
+function shouldProcess(filePath) {
+  if (!TEXT_EXTENSIONS.has(path.extname(filePath))) {
+    return false;
+  }
+
+  const parts = filePath.split(path.sep);
+  return !parts.some(part => SKIP_DIRS.has(part));
+}
+
+function main() {
   const files = [];
-  
-  function scanDir(currentDir) {
-    const entries = fs.readdirSync(currentDir, { withFileTypes: true });
-    
-    for (const entry of entries) {
-      const fullPath = path.join(currentDir, entry.name);
-      
+
+  function walk(dir) {
+    for (const entry of fs.readdirSync(dir, { withFileTypes: true })) {
+      if (entry.name === '.git' || entry.name === 'node_modules' || entry.name === '.next' || entry.name === 'dist' || entry.name === 'build' || entry.name === 'coverage') {
+        continue;
+      }
+
+      const fullPath = path.join(dir, entry.name);
       if (entry.isDirectory()) {
-        scanDir(fullPath);
-      } else if (entry.isFile() && entry.name.endsWith('.html')) {
+        walk(fullPath);
+      } else if (entry.isFile() && shouldProcess(fullPath)) {
         files.push(fullPath);
       }
     }
   }
-  
-  scanDir(dir);
-  
-  console.log(`Found ${files.length} HTML files`);
-  
+
+  walk(ROOT_DIR);
+
   let modifiedCount = 0;
   for (const file of files) {
     if (processFile(file)) {
       modifiedCount++;
     }
   }
-  
-  console.log(`\n✅ Modified ${modifiedCount} files in ${dir}`);
-  return modifiedCount;
-}
 
-function main() {
-  console.log('🚀 Starting surgical template rebranding...\n');
-  console.log('RULES:');
-  console.log('  • Replace visible branding: WoodMart → Prokip Ltd');
-  console.log('  • Update URLs to https://prokip.africa/');
-  console.log('  • Preserve CSS classes (woodmart-*, wd-*)');
-  console.log('  • Preserve font references and asset paths');
-  console.log('  • Preserve WordPress/WooCommerce infrastructure\n');
-  
-  let totalModified = 0;
-  
-  for (const dir of TEMPLATE_DIRS) {
-    if (fs.existsSync(dir)) {
-      totalModified += processDirectory(dir);
-    } else {
-      console.log(`⚠️  Directory not found: ${dir}`);
-    }
-  }
-  
-  console.log(`\n🎉 Rebranding complete! Total files modified: ${totalModified}`);
+  console.log(`rebranded ${modifiedCount} files`);
 }
 
 main();

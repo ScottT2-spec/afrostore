@@ -1,6 +1,6 @@
 import type { EditorNode } from "@/lib/visual-editor/node-tree";
 
-const IMG = "https://woodmart.xtemos.com/wp-content/uploads";
+const IMG = "/uploads/1782919584004-fc162ee8b1c27ced2dddb993.png";
 
 export const LANDING_GADGET_PRESET: EditorNode[] = [
   /* ── 1. Hero ──────────────────────────────────────────────── */
@@ -15,8 +15,8 @@ export const LANDING_GADGET_PRESET: EditorNode[] = [
       primaryButtonLink: "#",
       secondaryButtonText: "View More",
       secondaryButtonLink: "#",
-      productImage: `${IMG}/2018/11/landing-pixel-slider-phone-opt.png`,
-      backgroundImage: `${IMG}/2018/11/landing-pixel-slider-bg-opt.jpg`,
+      productImage: "/uploads/1782919584004-fc162ee8b1c27ced2dddb993.png",
+      backgroundImage: "/uploads/1782919584004-fc162ee8b1c27ced2dddb993.png",
     },
   },
 
@@ -40,13 +40,13 @@ export const LANDING_GADGET_PRESET: EditorNode[] = [
     settings: {
       title: "2 stereo speakers for\nfull immersion.",
       description: "You begin with a text, you sculpt information, you chisel away what's not needed, you come to the point, make things clear, add value, you're a content person, you like words.",
-      image: `${IMG}/2018/11/landing-pixel-sound-img-opt.png`,
+      image: "/uploads/1782919584004-fc162ee8b1c27ced2dddb993.png",
       imagePosition: "right",
       specs: [
-        { icon: `${IMG}/2018/11/landing-pixel-cpu.svg`, title: "Snapdragon 835", description: "Even your less into design." },
-        { icon: `${IMG}/2018/11/landing-pixel-ram.svg`, title: "4gb RAM", description: "More content strategy." },
-        { icon: `${IMG}/2018/11/landing-pixel-flash.svg`, title: "64/12gb", description: "Many desktop now." },
-        { icon: `${IMG}/2018/11/landing-pixel-battary.svg`, title: "3520 Mah", description: "Usually prefer the real." },
+        { icon: "/uploads/1782919584004-fc162ee8b1c27ced2dddb993.png", title: "Snapdragon 835", description: "Even your less into design." },
+        { icon: "/uploads/1782919584004-fc162ee8b1c27ced2dddb993.png", title: "4gb RAM", description: "More content strategy." },
+        { icon: "/uploads/1782919584004-fc162ee8b1c27ced2dddb993.png", title: "64/12gb", description: "Many desktop now." },
+        { icon: "/uploads/1782919584004-fc162ee8b1c27ced2dddb993.png", title: "3520 Mah", description: "Usually prefer the real." },
       ],
       primaryButtonText: "To Shop",
       secondaryButtonText: "View More",
@@ -60,7 +60,7 @@ export const LANDING_GADGET_PRESET: EditorNode[] = [
     settings: {
       title: "Colors and contrast\nall in the P-OLED display.",
       description: "But worse, what if the fish doesn't fit in the can, the foot's to big for the boot that's not so bad. To short sentences, to many headings, images too large for the proposed design.",
-      image: `${IMG}/2018/11/landing-pixel-display-opt.jpg`,
+      image: "/uploads/1782919584004-fc162ee8b1c27ced2dddb993.png",
       imagePosition: "left",
       specs: [
         { title: "18:9", description: "Screen Ratio — To short sentences shows." },
@@ -79,8 +79,8 @@ export const LANDING_GADGET_PRESET: EditorNode[] = [
       title: "The body is made of\nwaterproof materials.",
       description: "When it's about controlling hundreds of articles, product pages for web shops, or user profiles in social networks, all of them potentially with different sizes, formats, rules for.",
       buttonText: "View More",
-      backgroundImage: `${IMG}/2018/11/landing-pixel-bg-woterproof-opt.jpg`,
-      overlayImage: `${IMG}/2018/11/landing-pixel-woterproof-opt.png`,
+      backgroundImage: "/uploads/1782919584004-fc162ee8b1c27ced2dddb993.png",
+      overlayImage: "/uploads/1782919584004-fc162ee8b1c27ced2dddb993.png",
     },
   },
 
@@ -92,8 +92,8 @@ export const LANDING_GADGET_PRESET: EditorNode[] = [
       title: "Point your camera\nfind products online.",
       description: "Using test items of real content and data in designs will help, but there's no guarantee that every oddity will be found and corrected.",
       images: [
-        `${IMG}/2018/11/landing-pixel-photo-1-opt.jpg`,
-        `${IMG}/2018/11/landing-pixel-photo-2-opt-.jpg`,
+        "/uploads/1782919584004-fc162ee8b1c27ced2dddb993.png",
+        "/uploads/1782919584004-fc162ee8b1c27ced2dddb993.png",
       ],
       primaryButtonText: "To Shop",
       secondaryButtonText: "View More",
@@ -109,8 +109,8 @@ export const LANDING_GADGET_PRESET: EditorNode[] = [
       title: "More power,\nmore impressions.",
       description: "Design is no afterthought, far from it, but it comes in a deserved second. Anyway, you still use Lorem Ipsum and rightly so, as it will always have a place in the web workers.",
       images: [
-        `${IMG}/2018/11/landing-pixel-photo-3-opt.jpg`,
-        `${IMG}/2018/11/landing-pixel-photo-4-opt.jpg`,
+        "/uploads/1782919584004-fc162ee8b1c27ced2dddb993.png",
+        "/uploads/1782919584004-fc162ee8b1c27ced2dddb993.png",
       ],
       primaryButtonText: "Buy now",
       secondaryButtonText: "View More",
@@ -131,8 +131,8 @@ export const LANDING_GADGET_PRESET: EditorNode[] = [
         { value: "240 FPS", label: "Frame Frequency", description: "A eu a et parturient platea lobo." },
         { value: "0.5 Ro", label: "Video Recording", description: "Pellentesque interdum odio." },
       ],
-      backgroundImage: `${IMG}/2018/11/landing-pixel-camera-bg-opt.jpg`,
-      overlayImage: `${IMG}/2018/11/landing-pixel-camera-opt.png`,
+      backgroundImage: "/uploads/1782919584004-fc162ee8b1c27ced2dddb993.png",
+      overlayImage: "/uploads/1782919584004-fc162ee8b1c27ced2dddb993.png",
     },
   },
 
@@ -143,9 +143,9 @@ export const LANDING_GADGET_PRESET: EditorNode[] = [
     settings: {
       sectionTitle: "Security and protection against thieves.",
       items: [
-        { icon: `${IMG}/2018/11/landing-pixel-sequrity-fingerprint-1.svg`, title: "Unlock Fingerprint", description: "Presently it defines a new ipsum provider plugin service that allows for pluggable ipsum." },
-        { icon: `${IMG}/2018/11/landing-pixel-sequrity-web-1.svg`, title: "Web Locking", description: "Optionally available are extracts from a speech, corporate nonsense, and a randomised." },
-        { icon: `${IMG}/2018/11/landing-pixel-sequrity-os-shild-1.svg`, title: "OS Secure", description: "Try telling a client to ignore draft copy however, and you're up to something you can't win." },
+        { icon: "/uploads/1782919584004-fc162ee8b1c27ced2dddb993.png", title: "Unlock Fingerprint", description: "Presently it defines a new ipsum provider plugin service that allows for pluggable ipsum." },
+        { icon: "/uploads/1782919584004-fc162ee8b1c27ced2dddb993.png", title: "Web Locking", description: "Optionally available are extracts from a speech, corporate nonsense, and a randomised." },
+        { icon: "/uploads/1782919584004-fc162ee8b1c27ced2dddb993.png", title: "OS Secure", description: "Try telling a client to ignore draft copy however, and you're up to something you can't win." },
       ],
     },
   },
@@ -155,7 +155,7 @@ export const LANDING_GADGET_PRESET: EditorNode[] = [
     id: "gadget-security-image",
     type: "gadgetFullWidthImage",
     settings: {
-      image: `${IMG}/2018/11/landing-pixel-sequrity-opt-1.jpg`,
+      image: "/uploads/1782919584004-fc162ee8b1c27ced2dddb993.png",
       alt: "Security feature showcase",
     },
   },
@@ -166,16 +166,16 @@ export const LANDING_GADGET_PRESET: EditorNode[] = [
     type: "gadgetCameraOptics",
     settings: {
       sectionTitle: "Powerful optics and advanced technology in camera.",
-      productImage: `${IMG}/2018/11/pixel-3-xl-360-1-opt.jpg`,
+      productImage: "/uploads/1782919584004-fc162ee8b1c27ced2dddb993.png",
       leftSpecs: [
-        { icon: `${IMG}/2018/11/landing-pixel-camera-1.svg`, value: "12.2 MP", label: "Camera" },
-        { icon: `${IMG}/2018/11/landing-pixel-camera-2.svg`, value: "1.4 μm", label: "Pixel Size" },
-        { icon: `${IMG}/2018/11/landing-pixel-camera-3.svg`, value: "f/1.8", label: "Aperture" },
+        { icon: "/uploads/1782919584004-fc162ee8b1c27ced2dddb993.png", value: "12.2 MP", label: "Camera" },
+        { icon: "/uploads/1782919584004-fc162ee8b1c27ced2dddb993.png", value: "1.4 μm", label: "Pixel Size" },
+        { icon: "/uploads/1782919584004-fc162ee8b1c27ced2dddb993.png", value: "f/1.8", label: "Aperture" },
       ],
       rightSpecs: [
-        { icon: `${IMG}/2018/11/landing-pixel-camera-4.svg`, value: "6x Zoom", label: "Sapphire Lenses" },
-        { icon: `${IMG}/2018/11/landing-pixel-camera-5.svg`, value: "2 LED", label: "Smart Flash" },
-        { icon: `${IMG}/2018/11/landing-pixel-camera-6.svg`, value: "2 Laser", label: "Smart Flash" },
+        { icon: "/uploads/1782919584004-fc162ee8b1c27ced2dddb993.png", value: "6x Zoom", label: "Sapphire Lenses" },
+        { icon: "/uploads/1782919584004-fc162ee8b1c27ced2dddb993.png", value: "2 LED", label: "Smart Flash" },
+        { icon: "/uploads/1782919584004-fc162ee8b1c27ced2dddb993.png", value: "2 Laser", label: "Smart Flash" },
       ],
     },
   },
@@ -186,10 +186,10 @@ export const LANDING_GADGET_PRESET: EditorNode[] = [
     type: "gadgetProductsShowcase",
     settings: {
       products: [
-        { name: "Pixel 3", category: "Landing Pixel", price: "$649.00", image: `${IMG}/2018/11/pixel-3-beige-opt.jpg`, link: "#" },
-        { name: "Pixel 3 XL", category: "Landing Pixel", price: "$849.00", image: `${IMG}/2018/11/pixel-3-xl-gray-opt.jpg`, link: "#" },
+        { name: "Pixel 3", category: "Landing Pixel", price: "$649.00", image: "/uploads/1782919584004-fc162ee8b1c27ced2dddb993.png", link: "#" },
+        { name: "Pixel 3 XL", category: "Landing Pixel", price: "$849.00", image: "/uploads/1782919584004-fc162ee8b1c27ced2dddb993.png", link: "#" },
       ],
-      bannerImage: `${IMG}/2018/11/landing-pixel-accessories-banner-opt-1.jpg`,
+      bannerImage: "/uploads/1782919584004-fc162ee8b1c27ced2dddb993.png",
       bannerTitle: "Accessories",
       bannerButtonText: "View More",
     },
@@ -202,7 +202,7 @@ export const LANDING_GADGET_PRESET: EditorNode[] = [
     settings: {
       title: "Subscribe us.",
       description: "A client that's unhappy for a reason is a problem, a client that's unhappy though he or her can't quite put a finger on it is worse.",
-      backgroundImage: `${IMG}/2018/11/landing-pixel-subscribe-bg-opt.jpg`,
+      backgroundImage: "/uploads/1782919584004-fc162ee8b1c27ced2dddb993.png",
       buttonText: "Subscribe",
     },
   },

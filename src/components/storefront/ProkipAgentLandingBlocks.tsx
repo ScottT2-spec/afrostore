@@ -2,8 +2,10 @@
 import Link from "next/link";
 import { resolveStoreLink } from "@/lib/template-link-utils";
 import { useState, useEffect, createContext, useContext, useRef } from "react";
-import { useRouter } from "next/navigation"; // ADDED LINE
 import { onImgError } from "./image-fallback";
+import { InlineEditableText } from "@/components/storefront/InlineEditableText";
+import { useTemplateBlockEditContext } from "@/components/storefront/TemplateBlockRenderer";
+import { stripHtml } from "@/lib/rag/utils/normalize";
 
 /* ═══════════════════════════════════════════════════════════════
    PROKIP SALES AGENT LANDING PAGE TEMPLATE
@@ -46,12 +48,41 @@ function S({ id, css }: { id: string; css: string }) {
 }
 const ctr: React.CSSProperties = { maxWidth: "1280px", margin: "0 auto", padding: "0 24px", boxSizing: "border-box" as const, width: "100%" };
 
-function CTAButton({ text, onClick, className = "" }: { text: string; onClick?: () => void; className?: string }) {
+function CTAButton({ text, onClick, className = "" }: { text: React.ReactNode; onClick?: () => void; className?: string }) {
   return (
     <button onClick={onClick} className={`pa-cta-btn ${className}`}>
       {text} <span className="pa-cta-arrow">→</span>
     </button>
   );
+}
+
+function EditableCopy({
+  field,
+  fieldPath,
+  value,
+  as = "div",
+  className,
+  style,
+  multiline = false,
+}: {
+  field?: string;
+  fieldPath?: string;
+  value: string;
+  as?: "div" | "p" | "span" | "h1" | "h2" | "h3" | "h4" | "h5" | "h6";
+  className?: string;
+  style?: React.CSSProperties;
+  multiline?: boolean;
+}) {
+  const { blockId, isEditor } = useTemplateBlockEditContext();
+  const Tag = as;
+  if (!isEditor) {
+    return (
+      <Tag className={className} style={style}>
+        {value}
+      </Tag>
+    );
+  }
+  return <InlineEditableText nodeId={blockId} field={field} fieldPath={fieldPath} value={value} isEditor={isEditor} as={as} className={className} style={style} multiline={multiline} />;
 }
 
 /* ═══════════════════════════════════════════════════════════════
@@ -63,7 +94,6 @@ export interface ProkipAgentModalProps {
   fields?: Array<{ name: string; label: string; type: string; placeholder: string; prefix?: string }>;
   submitText?: string;
   onSubmitRedirect?: string;
-  storeSlug?: string; // ADDED LINE
 }
 
 export function ProkipAgentModal({
@@ -75,96 +105,14 @@ export function ProkipAgentModal({
     { name: "phone", label: "Phone Number", type: "tel", placeholder: "801 234 5678", prefix: "+234" },
   ],
   submitText = "JOIN OUR TEAM NOW",
-  onSubmitRedirect,
-  storeSlug,
 }: ProkipAgentModalProps) {
   const [open, setOpen] = useState(false);
-  const [formData, setFormData] = useState({
-    fullName: "",
-    email: "",
-    phone: "",
-  });
-  const [detectedSlug, setDetectedSlug] = useState<string | undefined>(storeSlug);
-  useEffect(() => {
-    if (typeof window !== 'undefined' && !storeSlug) {
-      // Try to infer slug from /store/<slug>/... URL paths
-      const m = window.location.pathname.match(/\/store\/([^\/]+)/);
-      if (m?.[1]) setDetectedSlug(m[1]);
-    }
-  }, [storeSlug]);
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
-  const [success, setSuccess] = useState(false);
-  const router = useRouter(); // Initialize router
-  // const { storeSlug } = useContext(ProkipAgentCtx); // REMOVED: Get storeSlug from context
-
-  // Warn if storeSlug is missing so submissions won't 404 silently
-  useEffect(() => {
-    if (!storeSlug) {
-      setError('This form is not configured yet. Missing store identifier.');
-    }
-  }, [storeSlug]);
 
   useEffect(() => {
     const handler = () => setOpen(true);
     window.addEventListener("open-application-modal", handler);
     return () => window.removeEventListener("open-application-modal", handler);
   }, []);
-
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setFormData({ ...formData, [e.target.name]: e.target.value });
-  };
-
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setLoading(true);
-    setError(null);
-    setSuccess(false);
-
-    try {
-      // Prefer public, slug-based endpoint (no auth). Fallback to siteId path if provided explicitly.
-      const slug = detectedSlug || storeSlug;
-      const apiEndpoint = slug
-        ? `/api/public/sites/${slug}/crm/contacts`
-        : `/api/sites/${storeSlug || 'default_site'}/crm/contacts`; 
-
-      // Split fullName into firstName and lastName
-      const [firstName, ...lastNameParts] = formData.fullName.split(' ').filter(Boolean);
-      const lastName = lastNameParts.join(' ');
-
-      const response = await fetch(apiEndpoint, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          firstName: firstName || '', // Ensure it's never undefined
-          lastName: lastName || '',   // Ensure it's never undefined
-          email: formData.email,
-          phone: `${fields.find(f => f.name === 'phone')?.prefix || ''}${formData.phone}`,
-        }),
-      });
-
-      if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.message || "Failed to submit form");
-      }
-
-      setSuccess(true);
-      setTimeout(() => {
-        setOpen(false);
-        if (onSubmitRedirect) {
-          router.push(onSubmitRedirect);
-        }
-      }, 1500);
-
-    } catch (err: any) {
-      console.error("Form submission error:", err);
-      setError(err.message || "An unexpected error occurred.");
-    } finally {
-      setLoading(false);
-    }
-  };
 
   const css = `
     .pa-modal-overlay { position: fixed; inset: 0; z-index: 50; display: flex; align-items: center; justify-content: center; padding: 16px; background: ${T.navy950}cc; backdrop-filter: blur(4px); overflow-y: auto; }
@@ -193,51 +141,23 @@ export function ProkipAgentModal({
       <S id="modal" css={css} />
       <div className="pa-modal">
         <button className="pa-modal-close" onClick={() => setOpen(false)}>✕</button>
-        <h3 className="pa-modal-title">{title}</h3>
-        <div style={{ textAlign: "center" }}><span className="pa-modal-badge">{badge}</span></div>
-        <form className="pa-modal-form" onSubmit={handleSubmit}>
-          {error && (
-            <div style={{background:'#3b0d0d', border:'1px solid #ef444433', color:'#fecaca', padding:'12px 16px', borderRadius:'12px'}}>
-              {error}
-            </div>
-          )}
-          {success && (
-            <div style={{background:'#0b3b1b', border:'1px solid #22c55e33', color:'#bbf7d0', padding:'12px 16px', borderRadius:'12px'}}>
-              Application submitted successfully.
-            </div>
-          )}
-          {fields.map((f) => (
+        <h3 className="pa-modal-title"><EditableCopy field="title" value={title} as="span" className="pa-modal-title" /></h3>
+        <div style={{ textAlign: "center" }}><span className="pa-modal-badge"><EditableCopy field="badge" value={badge} as="span" className="pa-modal-badge" /></span></div>
+        <form className="pa-modal-form" onSubmit={(e) => { e.preventDefault(); setOpen(false); }}>
+          {fields.map((f, idx) => (
             <div key={f.name}>
-              <label className="pa-modal-label">{f.label}</label>
+              <label className="pa-modal-label"><EditableCopy fieldPath={`fields.${idx}.label`} value={f.label} as="span" className="pa-modal-label" /></label>
               {f.prefix ? (
                 <div className="pa-modal-phone-wrap">
-                  <span className="pa-modal-prefix">{f.prefix}</span>
-                  <input
-                    name={f.name}
-                    type={f.type}
-                    placeholder={f.placeholder}
-                    required
-                    className="pa-modal-phone-input"
-                    value={(formData as any)[f.name] || ''}
-                    onChange={handleChange}
-                  />
+                  <span className="pa-modal-prefix"><EditableCopy fieldPath={`fields.${idx}.prefix`} value={f.prefix} as="span" className="pa-modal-prefix" /></span>
+                  <input type={f.type} placeholder={f.placeholder} required className="pa-modal-phone-input" />
                 </div>
               ) : (
-                <input
-                  name={f.name}
-                  type={f.type}
-                  placeholder={f.placeholder}
-                  required
-                  className="pa-modal-input"
-                  value={(formData as any)[f.name] || ''}
-                  onChange={handleChange}
-                />
+                <input type={f.type} placeholder={f.placeholder} required className="pa-modal-input" />
               )}
             </div>
           ))}
-          <button type="submit" className="pa-modal-submit" disabled={loading || !storeSlug}>
-            {loading ? 'Submitting…' : submitText} ✈
-          </button>
+          <button type="submit" className="pa-modal-submit"><EditableCopy field="submitText" value={submitText} as="span" className="pa-modal-submit" /> ✈</button>
         </form>
       </div>
     </div>
@@ -281,9 +201,9 @@ export function ProkipAgentTopBanner({
   return (
     <div className={`pa-banner ${hidden ? "pa-banner-hidden" : ""}`}>
       <S id="banner" css={css} />
-      <div className="pa-banner-inner">
-        <div className="pa-banner-warn">{attentionText}</div>
-        <p className="pa-banner-text" dangerouslySetInnerHTML={{ __html: message }} />
+        <div className="pa-banner-inner">
+        <div className="pa-banner-warn"><EditableCopy field="attentionText" value={attentionText} as="span" className="pa-banner-warn" /></div>
+        <EditableCopy field="message" value={stripHtml(message)} as="p" multiline className="pa-banner-text" />
       </div>
     </div>
   );
@@ -332,15 +252,15 @@ export function ProkipAgentHero({
       <S id="hero" css={css} />
       <div style={ctr}>
         <div className="pa-hero-center">
-          <span className="pa-hero-badge">{badge}</span>
-          <h1 className="pa-hero-h1">{titleStart} <span className="pa-hero-hl">{titleHighlight}</span></h1>
-          <p className="pa-hero-desc" dangerouslySetInnerHTML={{ __html: description }} />
+          <span className="pa-hero-badge"><EditableCopy field="badge" value={badge} as="span" className="pa-hero-badge" /></span>
+          <h1 className="pa-hero-h1"><EditableCopy field="titleStart" value={titleStart} as="span" className="pa-hero-h1" /> <span className="pa-hero-hl"><EditableCopy field="titleHighlight" value={titleHighlight} as="span" className="pa-hero-hl" /></span></h1>
+          <EditableCopy field="description" value={stripHtml(description)} as="p" multiline className="pa-hero-desc" />
           {videoUrl && (
             <div className="pa-hero-video">
               <iframe src={videoUrl} title="Hero Video" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerPolicy="strict-origin-when-cross-origin" allowFullScreen />
             </div>
           )}
-          <div className="pa-hero-cta-wrap"><CTAButton text={ctaText} onClick={openModal} /></div>
+          <div className="pa-hero-cta-wrap"><CTAButton text={<EditableCopy field="ctaText" value={ctaText} as="span" />} onClick={openModal} /></div>
         </div>
       </div>
     </section>
@@ -396,24 +316,24 @@ export function ProkipAgentIntro({
     <section className="pa-intro">
       <S id="intro" css={css} />
       <div style={ctr}>
-        <div className="pa-intro-top">
-          <div className="pa-intro-sub">{subtitle}</div>
-          <h2 className="pa-intro-h2">{title}</h2>
-          <p className="pa-intro-desc">{description}</p>
-          {calloutText && <div className="pa-intro-callout"><p>{calloutText}</p></div>}
+          <div className="pa-intro-top">
+          <div className="pa-intro-sub"><EditableCopy field="subtitle" value={subtitle} as="span" className="pa-intro-sub" /></div>
+          <EditableCopy field="title" value={title} as="h2" className="pa-intro-h2" />
+          <EditableCopy field="description" value={description} as="p" multiline className="pa-intro-desc" />
+          {calloutText && <div className="pa-intro-callout"><EditableCopy field="calloutText" value={calloutText} as="p" multiline /></div>}
         </div>
         {tasks.length > 0 && (
           <div className="pa-tasks-section">
             <div className="pa-tasks-header">
-              <h2 className="pa-tasks-h2">{tasksTitle}</h2>
-              <p className="pa-tasks-sub">{tasksSubtitle}</p>
+              <EditableCopy field="tasksTitle" value={tasksTitle} as="h2" className="pa-tasks-h2" />
+              <EditableCopy field="tasksSubtitle" value={tasksSubtitle} as="p" multiline className="pa-tasks-sub" />
             </div>
             <div className="pa-tasks-grid">
               {tasks.map((t, i) => (
                 <div key={i} className="pa-task-card">
                   <div className="pa-task-icon">{t.icon}</div>
-                  <h3 className="pa-task-title">{t.title}</h3>
-                  <p className="pa-task-desc">{t.description}</p>
+                  <EditableCopy fieldPath={`tasks.${i}.title`} value={t.title} as="h3" className="pa-task-title" />
+                  <EditableCopy fieldPath={`tasks.${i}.description`} value={t.description} as="p" multiline className="pa-task-desc" />
                 </div>
               ))}
             </div>
@@ -487,28 +407,28 @@ export function ProkipAgentAbout({
       <div style={ctr}>
         <div className="pa-about-grid">
           <div>
-            <h2 className="pa-about-h2">{title}</h2>
-            <p className="pa-about-p">{description}</p>
-            <p className="pa-about-p">{description2}</p>
+            <EditableCopy field="title" value={title} as="h2" className="pa-about-h2" />
+            <EditableCopy field="description" value={description} as="p" multiline className="pa-about-p" />
+            <EditableCopy field="description2" value={description2} as="p" multiline className="pa-about-p" />
             <ul className="pa-about-features">
-              {features.map((f, i) => <li key={i} className="pa-about-feat">{f}</li>)}
+              {features.map((f, i) => <li key={i} className="pa-about-feat"><EditableCopy fieldPath={`features.${i}`} value={f} as="span" className="pa-about-feat" /></li>)}
             </ul>
-            <p className="pa-about-quote">{highlightQuote}</p>
+            <EditableCopy field="highlightQuote" value={highlightQuote} as="p" multiline className="pa-about-quote" />
           </div>
           <div className="pa-about-card">
-            <h3 className="pa-about-card-h3">{cardTitle}</h3>
-            <p className="pa-about-card-p" dangerouslySetInnerHTML={{ __html: cardDescription }} />
-            <p className="pa-about-card-p">{cardDescription2}</p>
-            <h4 className="pa-duties-title">{dutiesTitle}</h4>
+            <EditableCopy field="cardTitle" value={cardTitle} as="h3" className="pa-about-card-h3" />
+            <EditableCopy field="cardDescription" value={stripHtml(cardDescription)} as="p" multiline className="pa-about-card-p" />
+            <EditableCopy field="cardDescription2" value={cardDescription2} as="p" multiline className="pa-about-card-p" />
+            <EditableCopy field="dutiesTitle" value={dutiesTitle} as="h4" className="pa-duties-title" />
             <ul className="pa-duties">
               {duties.map((d, i) => (
                 <li key={i} className="pa-duty">
                   <div className="pa-duty-num">{i + 1}</div>
-                  <span>{d}</span>
+                  <EditableCopy fieldPath={`duties.${i}`} value={d} as="span" />
                 </li>
               ))}
             </ul>
-            <CTAButton text={ctaText} onClick={openModal} />
+            <CTAButton text={<EditableCopy field="ctaText" value={ctaText} as="span" />} onClick={openModal} />
           </div>
         </div>
       </div>
@@ -553,16 +473,16 @@ export function ProkipAgentBenefits({
       <S id="benefits" css={css} />
       <div style={ctr}>
         <div className="pa-benefits-header">
-          <h2 className="pa-benefits-h2">{title}</h2>
-          <p className="pa-benefits-sub">{subtitle}</p>
+          <EditableCopy field="title" value={title} as="h2" className="pa-benefits-h2" />
+          <EditableCopy field="subtitle" value={subtitle} as="p" className="pa-benefits-sub" />
         </div>
         <div className="pa-benefits-grid">
           {benefits.map((b, i) => (
             <div key={i} className="pa-benefit-card">
               <div className="pa-benefit-icon">{b.icon}</div>
-              <h3 className="pa-benefit-title">{b.title}</h3>
+              <EditableCopy fieldPath={`benefits.${i}.title`} value={b.title} as="h3" className="pa-benefit-title" />
               <ul className="pa-benefit-items">
-                {b.items.map((item, j) => <li key={j} className="pa-benefit-item">{item}</li>)}
+                {b.items.map((item, j) => <li key={j} className="pa-benefit-item"><EditableCopy fieldPath={`benefits.${i}.items.${j}`} value={item} as="span" /></li>)}
               </ul>
             </div>
           ))}
@@ -617,20 +537,20 @@ export function ProkipAgentMedia({
       <S id="media" css={css} />
       <div style={ctr}>
         <div className="pa-media-header">
-          <h2 className="pa-media-h2">{teamsTitle}</h2>
-          <p className="pa-media-sub">{teamsSubtitle}</p>
+          <EditableCopy field="teamsTitle" value={teamsTitle} as="h2" className="pa-media-h2" />
+          <EditableCopy field="teamsSubtitle" value={teamsSubtitle} as="p" className="pa-media-sub" />
         </div>
         <div className="pa-teams-grid">
           {teams.map((t, i) => (
             <div key={i} className="pa-team-card">
               <div style={{ overflow: "hidden" }}><img src={t.imageUrl} alt={t.country} className="pa-team-img" loading="lazy" onError={(e) => onImgError(e, t.country)} /></div>
-              <div className="pa-team-name">{t.country}</div>
+              <div className="pa-team-name"><EditableCopy fieldPath={`teams.${i}.country`} value={t.country} as="span" className="pa-team-name" /></div>
             </div>
           ))}
         </div>
         {videos.length > 0 && (
           <>
-            <div className="pa-media-header"><h2 className="pa-media-h2">{videosTitle}</h2></div>
+            <div className="pa-media-header"><EditableCopy field="videosTitle" value={videosTitle} as="h2" className="pa-media-h2" /></div>
             <div className="pa-videos-grid">
               {videos.map((v, i) => (
                 <div key={i} className="pa-video">
@@ -640,7 +560,7 @@ export function ProkipAgentMedia({
             </div>
           </>
         )}
-        <div className="pa-media-cta"><CTAButton text={ctaText} onClick={openModal} /></div>
+          <div className="pa-media-cta"><CTAButton text={<EditableCopy field="ctaText" value={ctaText} as="span" />} onClick={openModal} /></div>
       </div>
     </section>
   );
@@ -723,8 +643,8 @@ export function ProkipAgentSupport({
       <S id="support" css={css} />
       <div style={ctr}>
         <div className="pa-support-header">
-          <h2 className="pa-support-h2">{supportTitle}</h2>
-          <p className="pa-support-sub">{supportSubtitle}</p>
+          <EditableCopy field="supportTitle" value={supportTitle} as="h2" className="pa-support-h2" />
+          <EditableCopy field="supportSubtitle" value={supportSubtitle} as="p" className="pa-support-sub" />
         </div>
         {supportCards.length > 0 && (
           <div className="pa-support-grid">
@@ -732,7 +652,7 @@ export function ProkipAgentSupport({
               <div key={i} className="pa-support-card">
                 <div className="pa-support-card-head">
                   <div className="pa-support-num">{c.number}</div>
-                  <h3 className="pa-support-card-title">{c.title}</h3>
+                  <EditableCopy fieldPath={`supportCards.${i}.title`} value={c.title} as="h3" className="pa-support-card-title" />
                 </div>
                 <ul className="pa-support-items">
                   {c.items.map((item, j) => {
@@ -741,14 +661,14 @@ export function ProkipAgentSupport({
                     return (
                       <li key={j} className="pa-support-item">
                         <div>
-                          {txt}
+                          <EditableCopy fieldPath={`supportCards.${i}.items.${j}.text`} value={txt} as="span" />
                           {subs && <div className="pa-support-subitems">{subs.map((s, k) => <div key={k}>- {s}</div>)}</div>}
                         </div>
                       </li>
                     );
                   })}
                 </ul>
-                {c.footer && <div className="pa-support-footer"><p>{c.footer}</p></div>}
+                {c.footer && <div className="pa-support-footer"><EditableCopy fieldPath={`supportCards.${i}.footer`} value={c.footer} as="p" /></div>}
               </div>
             ))}
           </div>
@@ -757,21 +677,21 @@ export function ProkipAgentSupport({
           <div className="pa-qual-glow" />
           <div className="pa-qual-grid">
             <div>
-              <span className="pa-qual-badge">{qualBadge}</span>
-              <h2 className="pa-qual-h2">{qualTitle}</h2>
-              <p className="pa-qual-desc">{qualDescription}</p>
-              <h3 className="pa-qual-looking-h3">{lookingForTitle}</h3>
+              <span className="pa-qual-badge"><EditableCopy field="qualBadge" value={qualBadge} as="span" className="pa-qual-badge" /></span>
+              <EditableCopy field="qualTitle" value={qualTitle} as="h2" className="pa-qual-h2" />
+              <EditableCopy field="qualDescription" value={qualDescription} as="p" className="pa-qual-desc" />
+              <EditableCopy field="lookingForTitle" value={lookingForTitle} as="h3" className="pa-qual-looking-h3" />
               <ul className="pa-qual-looking-list">
-                {lookingFor.map((l, i) => <li key={i} className="pa-qual-looking-item">{l}</li>)}
+                {lookingFor.map((l, i) => <li key={i} className="pa-qual-looking-item"><EditableCopy fieldPath={`lookingFor.${i}`} value={l} as="span" /></li>)}
               </ul>
             </div>
             <div className="pa-qual-right">
-              <h3 className="pa-qual-right-h3">{opportunityTitle}</h3>
-              <p className="pa-qual-right-sub">{opportunitySubtitle}</p>
+              <EditableCopy field="opportunityTitle" value={opportunityTitle} as="h3" className="pa-qual-right-h3" />
+              <EditableCopy field="opportunitySubtitle" value={opportunitySubtitle} as="p" className="pa-qual-right-sub" />
               <ul className="pa-qual-opp-list">
-                {opportunityItems.map((item, i) => <li key={i} className="pa-qual-opp-item">{item}</li>)}
+                {opportunityItems.map((item, i) => <li key={i} className="pa-qual-opp-item"><EditableCopy fieldPath={`opportunityItems.${i}`} value={item} as="span" /></li>)}
               </ul>
-              <CTAButton text={ctaText} onClick={openModal} />
+              <CTAButton text={<EditableCopy field="ctaText" value={ctaText} as="span" />} onClick={openModal} />
             </div>
           </div>
         </div>
@@ -821,13 +741,13 @@ export function ProkipAgentConversion({
       <S id="conversion" css={css} />
       <div style={ctr}>
         <div className="pa-conversion-inner">
-          <h2 className="pa-conversion-h2">{title}</h2>
-          <p className="pa-conversion-desc">{description}</p>
+          <EditableCopy field="title" value={title} as="h2" className="pa-conversion-h2" />
+          <EditableCopy field="description" value={description} as="p" multiline className="pa-conversion-desc" />
           <ul className="pa-conversion-checks">
-            {checkmarks.map((c, i) => <li key={i} className="pa-conversion-check">{c}</li>)}
+            {checkmarks.map((c, i) => <li key={i} className="pa-conversion-check"><EditableCopy fieldPath={`checkmarks.${i}`} value={c} as="span" /></li>)}
           </ul>
-          <p className="pa-conversion-urgency">{urgencyText}</p>
-          <div className="pa-conversion-cta-wrap"><CTAButton text={ctaText} onClick={openModal} /></div>
+          <EditableCopy field="urgencyText" value={urgencyText} as="p" multiline className="pa-conversion-urgency" />
+          <div className="pa-conversion-cta-wrap"><CTAButton text={<EditableCopy field="ctaText" value={ctaText} as="span" />} onClick={openModal} /></div>
         </div>
       </div>
     </section>
@@ -870,12 +790,12 @@ export function ProkipAgentFooter({
       <S id="footer" css={css} />
       <div style={ctr}>
         <div className="pa-footer-inner">
-          <div className="pa-footer-brand">{brandName}<span className="pa-footer-brand-accent">{brandAccent}</span></div>
+          <div className="pa-footer-brand"><EditableCopy field="brandName" value={brandName} as="span" className="pa-footer-brand" /><span className="pa-footer-brand-accent"><EditableCopy field="brandAccent" value={brandAccent} as="span" className="pa-footer-brand-accent" /></span></div>
           <div className="pa-footer-disclaimers">
-            {disclaimers.map((d, i) => <p key={i} className="pa-footer-disclaimer">{d}</p>)}
+            {disclaimers.map((d, i) => <p key={i} className="pa-footer-disclaimer"><EditableCopy fieldPath={`disclaimers.${i}`} value={d} as="span" className="pa-footer-disclaimer" /></p>)}
           </div>
           <div className="pa-footer-bottom">
-            <p className="pa-footer-copy">{copyright}</p>
+            <EditableCopy field="copyright" value={copyright} as="p" className="pa-footer-copy" />
             <button className="pa-footer-top-btn" onClick={() => window.scrollTo({ top: 0, behavior: "smooth" })}>Scroll to Top ↑</button>
           </div>
         </div>

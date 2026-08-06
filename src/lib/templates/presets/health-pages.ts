@@ -1,4 +1,4 @@
-import type { TemplateBlock } from "@/components/storefront/TemplateBlockRenderer";
+import type { EditorNode } from "@/lib/visual-editor/node-tree";
 
 /**
  * Health (Pills) template — default page block content.
@@ -7,17 +7,17 @@ import type { TemplateBlock } from "@/components/storefront/TemplateBlockRendere
  */
 
 /* ── ABOUT PAGE ─────────────────────────────────────────────── */
-export const HEALTH_ABOUT_BLOCKS: TemplateBlock[] = [
+export const HEALTH_ABOUT_BLOCKS: EditorNode[] = [
   {
     id: "health-about-page",
     type: "healthAboutPage",
-    props: {
+    settings: {
       heroTitle: "About Us",
       heroSubtitle: "Our mission is to make you healthy and happy, for this we use only natural and high-quality ingredients necessary to achieve an extraordinary effect.",
-      heroImage: "https://woodmart.xtemos.com/pills/wp-content/uploads/sites/15/2023/08/w-pas-first-screen.jpg",
+      heroImage: "/prokip-logo.png",
       storyTitle: "Our Story",
       storyText: "We started with a simple belief: everyone deserves access to clean, effective supplements. Our team of nutritionists and wellness experts carefully selects every ingredient, ensuring that each product meets the highest standards of quality and purity. From sourcing to formulation, we prioritize transparency and trust.",
-      storyImage: "https://woodmart.xtemos.com/pills/wp-content/uploads/sites/15/2023/08/w-pas-iron-72x72.jpg",
+      storyImage: "/prokip-logo.png",
       missionTitle: "Our Mission",
       missionText: "Help customers build healthy routines without confusion or hype. We believe in science-backed formulas, honest labeling, and supplements that actually work.",
       features: [
@@ -29,21 +29,21 @@ export const HEALTH_ABOUT_BLOCKS: TemplateBlock[] = [
       teamTitle: "Medical Experts",
       teamSubtitle: "Meet the professionals behind our formulations",
       team: [
-        { name: "Dr. Sarah Mitchell", role: "Chief Nutritionist", image: "https://woodmart.xtemos.com/pills/wp-content/uploads/sites/15/2023/08/w-pas-customer-1.jpg" },
-        { name: "Dr. James Carter", role: "Formulation Specialist", image: "https://woodmart.xtemos.com/pills/wp-content/uploads/sites/15/2023/08/w-pas-customer-2.jpg" },
-        { name: "Emily Rodriguez", role: "Wellness Advisor", image: "https://woodmart.xtemos.com/pills/wp-content/uploads/sites/15/2023/08/w-pas-customer-3.jpg" },
-        { name: "Dr. Michael Chen", role: "Quality Assurance", image: "https://woodmart.xtemos.com/pills/wp-content/uploads/sites/15/2023/08/w-pas-customer-4.jpg" },
+        { name: "Dr. Sarah Mitchell", role: "Chief Nutritionist", image: "/prokip-logo.png" },
+        { name: "Dr. James Carter", role: "Formulation Specialist", image: "/prokip-logo.png" },
+        { name: "Emily Rodriguez", role: "Wellness Advisor", image: "/prokip-logo.png" },
+        { name: "Dr. Michael Chen", role: "Quality Assurance", image: "/prokip-logo.png" },
       ],
     },
   },
 ];
 
 /* ── CONTACT PAGE ───────────────────────────────────────────── */
-export const HEALTH_CONTACT_BLOCKS: TemplateBlock[] = [
+export const HEALTH_CONTACT_BLOCKS: EditorNode[] = [
   {
     id: "health-contact-page",
     type: "healthContactPage",
-    props: {
+    settings: {
       heroTitle: "Contact Us",
       heroSubtitle: "Have a question about our products or need help with your order? We're here to help you on your wellness journey.",
       address: "123 Wellness Ave, Portland, OR 97201",
@@ -65,28 +65,28 @@ export const HEALTH_CONTACT_BLOCKS: TemplateBlock[] = [
 ];
 
 /* ── BLOG PAGE ──────────────────────────────────────────────── */
-export const HEALTH_BLOG_BLOCKS: TemplateBlock[] = [
+export const HEALTH_BLOG_BLOCKS: EditorNode[] = [
   {
     id: "health-blog-page",
     type: "healthBlogPage",
-    props: {
+    settings: {
       heroTitle: "Health & Wellness Blog",
       heroSubtitle: "Expert advice on vitamins, supplements, and building a healthier lifestyle.",
       featuredPost: {
         title: "What is fiber and why is it important for health?",
-        image: "https://woodmart.xtemos.com/pills/wp-content/uploads/sites/15/2023/09/w-pas-blog-1.jpg",
+        image: "/prokip-logo.png",
         date: "September 5, 2023",
         author: "Wellness Team",
         excerpt: "Fiber is one of the most underrated nutrients. Learn how it supports digestion, heart health, and sustained energy throughout the day.",
         category: "Nutrition",
       },
       posts: [
-        { title: "5 ways to celebrate your mom on Mother's Day", image: "https://woodmart.xtemos.com/pills/wp-content/uploads/sites/15/2023/09/w-pas-blog-2-400x247.jpg", date: "September 4, 2023", author: "Admin", category: "Motivation", excerpt: "Simple, meaningful gestures that go beyond flowers and cards." },
-        { title: "Syncing Up for an Integrated Brain", image: "https://woodmart.xtemos.com/pills/wp-content/uploads/sites/15/2023/09/w-pas-blog-3-400x247.jpg", date: "September 4, 2023", author: "Admin", category: "Health", excerpt: "How sleep, nutrition, and movement work together for cognitive clarity." },
-        { title: "The Complete Guide to Vitamin D", image: "https://woodmart.xtemos.com/pills/wp-content/uploads/sites/15/2023/08/w-pas-ev-60-softgel-1.jpg", date: "August 28, 2023", author: "Dr. Sarah M.", category: "Vitamins", excerpt: "Why vitamin D matters, how much you need, and the best ways to get it." },
-        { title: "Understanding Melatonin and Sleep Quality", image: "https://woodmart.xtemos.com/pills/wp-content/uploads/sites/15/2023/08/w-pas-sl-30-capsules-1.jpg", date: "August 20, 2023", author: "Wellness Team", category: "Sleep", excerpt: "A closer look at how melatonin supplements can support your natural sleep cycle." },
-        { title: "Top 5 Supplements for Hair Health", image: "https://woodmart.xtemos.com/pills/wp-content/uploads/sites/15/2023/08/w-pas-hr-60-capsules-1.jpg", date: "August 15, 2023", author: "Admin", category: "Hair", excerpt: "From biotin to collagen — the supplements that actually support healthy hair growth." },
-        { title: "Allergy Season: Natural Relief Options", image: "https://woodmart.xtemos.com/pills/wp-content/uploads/sites/15/2023/08/w-pas-ar-30-tablets-1.jpg", date: "August 10, 2023", author: "Admin", category: "Health", excerpt: "Explore natural approaches to managing seasonal allergies alongside traditional treatments." },
+        { title: "5 ways to celebrate your mom on Mother's Day", image: "/prokip-logo.png", date: "September 4, 2023", author: "Admin", category: "Motivation", excerpt: "Simple, meaningful gestures that go beyond flowers and cards." },
+        { title: "Syncing Up for an Integrated Brain", image: "/prokip-logo.png", date: "September 4, 2023", author: "Admin", category: "Health", excerpt: "How sleep, nutrition, and movement work together for cognitive clarity." },
+        { title: "The Complete Guide to Vitamin D", image: "/prokip-logo.png", date: "August 28, 2023", author: "Dr. Sarah M.", category: "Vitamins", excerpt: "Why vitamin D matters, how much you need, and the best ways to get it." },
+        { title: "Understanding Melatonin and Sleep Quality", image: "/prokip-logo.png", date: "August 20, 2023", author: "Wellness Team", category: "Sleep", excerpt: "A closer look at how melatonin supplements can support your natural sleep cycle." },
+        { title: "Top 5 Supplements for Hair Health", image: "/prokip-logo.png", date: "August 15, 2023", author: "Admin", category: "Hair", excerpt: "From biotin to collagen — the supplements that actually support healthy hair growth." },
+        { title: "Allergy Season: Natural Relief Options", image: "/prokip-logo.png", date: "August 10, 2023", author: "Admin", category: "Health", excerpt: "Explore natural approaches to managing seasonal allergies alongside traditional treatments." },
       ],
       categories: ["All", "Health", "Nutrition", "Vitamins", "Sleep", "Motivation"],
     },
@@ -94,11 +94,11 @@ export const HEALTH_BLOG_BLOCKS: TemplateBlock[] = [
 ];
 
 /* ── INGREDIENTS PAGE ───────────────────────────────────────── */
-export const HEALTH_INGREDIENTS_BLOCKS: TemplateBlock[] = [
+export const HEALTH_INGREDIENTS_BLOCKS: EditorNode[] = [
   {
     id: "health-ingredients-page",
     type: "healthIngredientsPage",
-    props: {
+    settings: {
       heroTitle: "Our Ingredients",
       heroSubtitle: "Transparency is at the heart of everything we do. Learn about the natural ingredients behind our supplements.",
       introTitle: "What Goes Into Our Products",
@@ -121,10 +121,36 @@ export const HEALTH_INGREDIENTS_BLOCKS: TemplateBlock[] = [
   },
 ];
 
+/* ── MEDICAL EXPERTS PAGE ─────────────────────────────────────── */
+export const HEALTH_MEDICAL_EXPERTS_BLOCKS: EditorNode[] = [
+  {
+    id: "health-medical-experts-page",
+    type: "healthMedicalExpertsPage",
+    settings: {
+      heroTitle: "Medical Experts",
+      heroSubtitle: "Meet the professionals behind our formulations",
+      heroImage: "/prokip-logo.png",
+      introTitle: "Our Team of Professionals",
+      introText: "Our formulations are developed by a team of certified nutritionists, doctors, and wellness experts who are passionate about helping you achieve your health goals.",
+      experts: [
+        { name: "Dr. Sarah Mitchell", role: "Chief Nutritionist", image: "/prokip-logo.png", bio: "PhD in Nutritional Science with 15+ years of experience in dietary supplement research and development." },
+        { name: "Dr. James Carter", role: "Formulation Specialist", image: "/prokip-logo.png", bio: "Board-certified pharmacist specializing in bioavailability and nutrient absorption optimization." },
+        { name: "Emily Rodriguez", role: "Wellness Advisor", image: "/prokip-logo.png", bio: "Certified holistic health coach focused on integrative wellness approaches and lifestyle medicine." },
+        { name: "Dr. Michael Chen", role: "Quality Assurance", image: "/prokip-logo.png", bio: "Expert in GMP compliance and third-party testing protocols ensuring product purity and safety." },
+      ],
+      ctaTitle: "Need Help Choosing?",
+      ctaText: "Our team is here to help you find the right supplements for your needs.",
+      ctaButtonText: "Contact Us",
+      ctaButtonLink: "/contact",
+    },
+  },
+];
+
 /** Map slug → default blocks for health template pages */
-export const HEALTH_PAGE_BLOCKS: Record<string, TemplateBlock[]> = {
+export const HEALTH_PAGE_BLOCKS: Record<string, EditorNode[]> = {
   about: HEALTH_ABOUT_BLOCKS,
   contact: HEALTH_CONTACT_BLOCKS,
   blog: HEALTH_BLOG_BLOCKS,
   ingredients: HEALTH_INGREDIENTS_BLOCKS,
+  "medical-experts": HEALTH_MEDICAL_EXPERTS_BLOCKS,
 };

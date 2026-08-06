@@ -1,7 +1,7 @@
 import type { EditorNode } from "@/lib/visual-editor/node-tree";
 
 /**
- * Handmade Bags template preset — WoodMart "Handmade Bags" demo.
+ * Handmade Bags template preset — Prokip LTD "Handmade Bags" demo.
  * Warm leather brown primary (#c27843), artisanal/boutique aesthetic.
  * Marquee banners, large category text, cover banners, bordered products.
  */

@@ -61,14 +61,14 @@ Home page (home):
     "props": {
       "banners": [
         {
-          "image": "https://woodmart.xtemos.com/wp-content/uploads/2024/02/cosmetics-promo-1.jpg",
+          "image": "/prokip-logo.png",
           "title": "REVITALIZING\nFACE MASKS",
           "buttonLink": "/shop",
           "buttonText": "SHOP NOW",
           "description": "It is a long established fact that a reader will be distracted by the readable content of a page when looking at its layout."
         },
         {
-          "image": "https://woodmart.xtemos.com/wp-content/uploads/2024/02/cosmetics-promo-2.jpg",
+          "image": "/prokip-logo.png",
           "title": "SERUMS & OILS",
           "buttonLink": "/shop",
           "buttonText": "SHOP NOW",
@@ -137,7 +137,7 @@ Home page (home):
     "id": "cosmetics-discovery",
     "type": "cosmeticsDiscovery",
     "props": {
-      "image": "https://woodmart.xtemos.com/wp-content/uploads/2024/02/cosmetics-discovery.jpg",
+      "image": "/prokip-logo.png",
       "title": "Discover a beautiful you with our new Makeup Essentials",
       "features": [
         {
@@ -181,7 +181,7 @@ Home page (home):
     "id": "cosmetics-countdown",
     "type": "cosmeticsCountdownBanner",
     "props": {
-      "image": "https://woodmart.xtemos.com/wp-content/uploads/2024/02/cosmetics-countdown.jpg",
+      "image": "/prokip-logo.png",
       "title": "Vehicula fermentum",
       "buttonLink": "/shop",
       "buttonText": "SHOP NOW",
@@ -244,7 +244,7 @@ Home page (home):
       "title": "JOIN OUR NEWSLETTER",
       "buttonText": "Sign up",
       "description": "Will be used in accordance with our Privacy Policy",
-      "backgroundImage": "https://woodmart.xtemos.com/wp-content/uploads/2017/01/newsletter-wood-3.jpg"
+      "backgroundImage": "/prokip-logo.png"
     }
   }
 ]
@@ -393,14 +393,14 @@ Home page (home):
       "props": {
         "banners": [
           {
-            "image": "https://woodmart.xtemos.com/wp-content/uploads/2024/02/cosmetics-promo-1.jpg",
+            "image": "/prokip-logo.png",
             "title": "REVITALIZING\nFACE MASKS",
             "buttonLink": "/shop",
             "buttonText": "SHOP NOW",
             "description": "It is a long established fact that a reader will be distracted by the readable content of a page when looking at its layout."
           },
           {
-            "image": "https://woodmart.xtemos.com/wp-content/uploads/2024/02/cosmetics-promo-2.jpg",
+            "image": "/prokip-logo.png",
             "title": "SERUMS & OILS",
             "buttonLink": "/shop",
             "buttonText": "SHOP NOW",
@@ -469,7 +469,7 @@ Home page (home):
       "id": "cosmetics-discovery",
       "type": "cosmeticsDiscovery",
       "props": {
-        "image": "https://woodmart.xtemos.com/wp-content/uploads/2024/02/cosmetics-discovery.jpg",
+        "image": "/prokip-logo.png",
         "title": "Discover a beautiful you with our new Makeup Essentials",
         "features": [
           {
@@ -513,7 +513,7 @@ Home page (home):
       "id": "cosmetics-countdown",
       "type": "cosmeticsCountdownBanner",
       "props": {
-        "image": "https://woodmart.xtemos.com/wp-content/uploads/2024/02/cosmetics-countdown.jpg",
+        "image": "/prokip-logo.png",
         "title": "Vehicula fermentum",
         "buttonLink": "/shop",
         "buttonText": "SHOP NOW",
@@ -578,7 +578,7 @@ Home page (home):
         "buttonText": "Sign up",
         "description": "Will be used in accordance with our Privacy Policy",
         "backgroundColor": "#551111",
-        "backgroundImage": "https://woodmart.xtemos.com/wp-content/uploads/2017/01/newsletter-wood-3.jpg"
+        "backgroundImage": "/prokip-logo.png"
       }
     }
   ]
@@ -729,14 +729,14 @@ Home page (home):
     "props": {
       "banners": [
         {
-          "image": "https://woodmart.xtemos.com/wp-content/uploads/2024/02/cosmetics-promo-1.jpg",
+          "image": "/prokip-logo.png",
           "title": "REVITALIZING\nFACE MASKS",
           "buttonLink": "/shop",
           "buttonText": "SHOP NOW",
           "description": "It is a long established fact that a reader will be distracted by the readable content of a page when looking at its layout."
         },
         {
-          "image": "https://woodmart.xtemos.com/wp-content/uploads/2024/02/cosmetics-promo-2.jpg",
+          "image": "/prokip-logo.png",
           "title": "SERUMS & OILS",
           "buttonLink": "/shop",
           "buttonText": "SHOP NOW",
@@ -805,7 +805,7 @@ Home page (home):
     "id": "cosmetics-discovery",
     "type": "cosmeticsDiscovery",
     "props": {
-      "image": "https://woodmart.xtemos.com/wp-content/uploads/2024/02/cosmetics-discovery.jpg",
+      "image": "/prokip-logo.png",
       "title": "Discover a beautiful you with our new Makeup Essentials",
       "features": [
         {
@@ -849,7 +849,7 @@ Home page (home):
     "id": "cosmetics-countdown",
     "type": "cosmeticsCountdownBanner",
     "props": {
-      "image": "https://woodmart.xtemos.com/wp-content/uploads/2024/02/cosmetics-countdown.jpg",
+      "image": "/prokip-logo.png",
       "title": "Vehicula fermentum",
       "buttonLink": "/shop",
       "buttonText": "SHOP NOW",
@@ -912,7 +912,7 @@ Home page (home):
       "title": "JOIN OUR NEWSLETTER",
       "buttonText": "Sign up",
       "description": "Will be used in accordance with our Privacy Policy",
-      "backgroundImage": "https://woodmart.xtemos.com/wp-content/uploads/2017/01/newsletter-wood-3.jpg"
+      "backgroundImage": "/prokip-logo.png"
     }
   }
 ]
@@ -1061,14 +1061,14 @@ Home page (home):
       "props": {
         "banners": [
           {
-            "image": "https://woodmart.xtemos.com/wp-content/uploads/2024/02/cosmetics-promo-1.jpg",
+            "image": "/prokip-logo.png",
             "title": "REVITALIZING\nFACE MASKS",
             "buttonLink": "/shop",
             "buttonText": "SHOP NOW",
             "description": "It is a long established fact that a reader will be distracted by the readable content of a page when looking at its layout."
           },
           {
-            "image": "https://woodmart.xtemos.com/wp-content/uploads/2024/02/cosmetics-promo-2.jpg",
+            "image": "/prokip-logo.png",
             "title": "SERUMS & OILS",
             "buttonLink": "/shop",
             "buttonText": "SHOP NOW",
@@ -1137,7 +1137,7 @@ Home page (home):
       "id": "cosmetics-discovery",
       "type": "cosmeticsDiscovery",
       "props": {
-        "image": "https://woodmart.xtemos.com/wp-content/uploads/2024/02/cosmetics-discovery.jpg",
+        "image": "/prokip-logo.png",
         "title": "Discover a beautiful you with our new Makeup Essentials",
         "features": [
           {
@@ -1181,7 +1181,7 @@ Home page (home):
       "id": "cosmetics-countdown",
       "type": "cosmeticsCountdownBanner",
       "props": {
-        "image": "https://woodmart.xtemos.com/wp-content/uploads/2024/02/cosmetics-countdown.jpg",
+        "image": "/prokip-logo.png",
         "title": "Vehicula fermentum",
         "buttonLink": "/shop",
         "buttonText": "SHOP NOW",
@@ -1244,7 +1244,7 @@ Home page (home):
         "title": "JOIN OUR NEWSLETTER",
         "buttonText": "Sign up",
         "description": "Will be used in accordance with our Privacy Policy",
-        "backgroundImage": "https://woodmart.xtemos.com/wp-content/uploads/2017/01/newsletter-wood-3.jpg"
+        "backgroundImage": "/prokip-logo.png"
       }
     }
   ],
@@ -1309,14 +1309,14 @@ Home page (home):
       "props": {
         "banners": [
           {
-            "image": "https://woodmart.xtemos.com/wp-content/uploads/2024/02/cosmetics-promo-1.jpg",
+            "image": "/prokip-logo.png",
             "title": "REVITALIZING\nFACE MASKS",
             "buttonLink": "/shop",
             "buttonText": "SHOP NOW",
             "description": "It is a long established fact that a reader will be distracted by the readable content of a page when looking at its layout."
           },
           {
-            "image": "https://woodmart.xtemos.com/wp-content/uploads/2024/02/cosmetics-promo-2.jpg",
+            "image": "/prokip-logo.png",
             "title": "SERUMS & OILS",
             "buttonLink": "/shop",
             "buttonText": "SHOP NOW",
@@ -1385,7 +1385,7 @@ Home page (home):
       "id": "cosmetics-discovery",
       "type": "cosmeticsDiscovery",
       "props": {
-        "image": "https://woodmart.xtemos.com/wp-content/uploads/2024/02/cosmetics-discovery.jpg",
+        "image": "/prokip-logo.png",
         "title": "Discover a beautiful you with our new Makeup Essentials",
         "features": [
           {
@@ -1429,7 +1429,7 @@ Home page (home):
       "id": "cosmetics-countdown",
       "type": "cosmeticsCountdownBanner",
       "props": {
-        "image": "https://woodmart.xtemos.com/wp-content/uploads/2024/02/cosmetics-countdown.jpg",
+        "image": "/prokip-logo.png",
         "title": "Vehicula fermentum",
         "buttonLink": "/shop",
         "buttonText": "SHOP NOW",
@@ -1492,7 +1492,7 @@ Home page (home):
         "title": "JOIN OUR NEWSLETTER",
         "buttonText": "Sign up",
         "description": "Will be used in accordance with our Privacy Policy",
-        "backgroundImage": "https://woodmart.xtemos.com/wp-content/uploads/2017/01/newsletter-wood-3.jpg"
+        "backgroundImage": "/prokip-logo.png"
       }
     }
   ],

@@ -1,6 +1,6 @@
 "use client";
 
-import { useParams } from "next/navigation";
+import React, { createContext, useContext, type CSSProperties } from "react";
 import {
   FashionFontLoader,
   FashionHeroSlider,
@@ -29,6 +29,7 @@ import {
   FashionContactForm,
 } from "@/components/storefront/FashionTemplateBlocks";
 import { resolveSectionStyleOverrides } from "@/components/storefront/block-style";
+import { normalizeStorefrontTemplateProps } from "@/components/storefront/prop-normalizers";
 import { TShirtsPrintsHeader, TShirtsPrintsFooter } from "@/components/storefront/TShirtsPrintsStoreChrome";
 import {
   TShirtAboutHero,
@@ -197,6 +198,7 @@ import {
   HealthContactPage,
   HealthBlogPage,
   HealthIngredientsPage,
+  HealthMedicalExpertsPage,
 } from "@/components/storefront/HealthTemplateBlocks";
 import {
   InteriorFontLoader,
@@ -432,14 +434,25 @@ import {
   JumiaBottomNav,
   JumiaSpacer,
 } from "@/components/storefront/JumiaTemplateBlocks";
+import { isChildFragmentType } from "@/lib/templates/template-tree";
+
+export const TemplateBlockEditContext = createContext<{ blockId?: string; isEditor?: boolean }>({});
+
+export function useTemplateBlockEditContext() {
+  return useContext(TemplateBlockEditContext);
+}
+
+const loggedMissingTemplateBlockKeys = new Set<string>();
 
 /* ─── TYPES ─────────────────────────────────────────────────── */
 
 export interface TemplateBlock {
   id: string;
   type: string;
-  props: Record<string, unknown>;
+  props?: Record<string, unknown>;
+  settings?: Record<string, unknown>;
   styleOverrides?: Record<string, unknown>;
+  elements?: TemplateBlock[];
 }
 
 /* ─── BLOCK TYPE MAP ────────────────────────────────────────── */
@@ -615,6 +628,7 @@ const HEALTH_BLOCKS: Record<string, BlockComponent> = {
   healthContactPage: HealthContactPage as unknown as BlockComponent,
   healthBlogPage: HealthBlogPage as unknown as BlockComponent,
   healthIngredientsPage: HealthIngredientsPage as unknown as BlockComponent,
+  healthMedicalExpertsPage: HealthMedicalExpertsPage as unknown as BlockComponent,
 };
 
 const INTERIOR_BLOCKS: Record<string, BlockComponent> = {
@@ -707,8 +721,10 @@ const TOYS_BLOCKS: Record<string, BlockComponent> = {
 const GADGET_BLOCKS: Record<string, BlockComponent> = {
   gadgetFontLoader: LandingGadgetFontLoader as unknown as BlockComponent,
   gadgetHero: LandingGadgetHero as unknown as BlockComponent,
+  landingGadgetHero: LandingGadgetHero as unknown as BlockComponent,
   gadgetStatsBar: LandingGadgetStatsBar as unknown as BlockComponent,
   gadgetFeatureSplit: LandingGadgetFeatureSplit as unknown as BlockComponent,
+  landingGadgetFeatures: LandingGadgetFeatureSplit as unknown as BlockComponent,
   gadgetDarkFeature: LandingGadgetDarkFeature as unknown as BlockComponent,
   gadgetPhotoGallery: LandingGadgetPhotoGallery as unknown as BlockComponent,
   gadgetCameraDark: LandingGadgetCameraDark as unknown as BlockComponent,
@@ -888,6 +904,132 @@ const ALL_TEMPLATE_BLOCKS: Record<string, BlockComponent> = {
   ...PROKIP_BOOKING_BLOCKS,
 };
 
+export const REGISTERED_TEMPLATE_BLOCK_TYPES = new Set(Object.keys(ALL_TEMPLATE_BLOCKS));
+
+const CHILD_COLLECTION_PROP_MAP: Array<[RegExp, string]> = [
+  [/linkcolumns?$/i, "linkColumns"],
+  [/sociallinks?$/i, "socialLinks"],
+  [/slides?$/i, "slides"],
+  [/features?$/i, "features"],
+  [/banners?$/i, "banners"],
+  [/categories?$/i, "categories"],
+  [/testimonials?$/i, "testimonials"],
+  [/products?$/i, "products"],
+  [/items?$/i, "items"],
+  [/tabs?$/i, "tabs"],
+  [/posts?$/i, "posts"],
+  [/links?$/i, "links"],
+  [/buttons?$/i, "buttons"],
+  [/reviews?$/i, "reviews"],
+  [/steps?$/i, "steps"],
+  [/images?$/i, "images"],
+  [/faqs?$/i, "faqs"],
+  [/team(members?)?$/i, "team"],
+  [/members?$/i, "members"],
+  [/services?$/i, "services"],
+  [/brands?$/i, "brands"],
+  [/counters?$/i, "counters"],
+  [/boxes?$/i, "boxes"],
+  [/paragraphs?$/i, "paragraphs"],
+  [/videos?$/i, "videos"],
+  [/offices?$/i, "offices"],
+  [/ingredients?$/i, "ingredients"],
+  [/experts?$/i, "experts"],
+  [/swatches?$/i, "swatches"],
+  [/variants?$/i, "variants"],
+  [/infoboxes?$/i, "infoboxes"],
+  [/catitems?$/i, "catItems"],
+  [/faqitems?$/i, "faqItems"],
+  [/teamitems?$/i, "teamItems"],
+  [/featureitems?$/i, "featureItems"],
+  [/postitems?$/i, "postItems"],
+  [/recentposts?$/i, "recentPosts"],
+  [/menuitems?$/i, "menuItems"],
+  [/navitems?$/i, "navItems"],
+  [/navpages?$/i, "navPages"],
+];
+
+function isRegisteredTemplateBlock(type: string): boolean {
+  return REGISTERED_TEMPLATE_BLOCK_TYPES.has(type);
+}
+
+function inferChildCollectionPropKey(type: string): string | null {
+  const compactType = type.replace(/[^a-zA-Z0-9]/g, "");
+  for (const [pattern, propKey] of CHILD_COLLECTION_PROP_MAP) {
+    if (pattern.test(compactType)) {
+      return propKey;
+    }
+  }
+  return null;
+}
+
+function buildChildTemplateProps(children: TemplateBlock[]): Record<string, unknown> {
+  const groupedChildren = new Map<string, TemplateBlock[]>();
+
+  for (const child of children) {
+    const propKey = inferChildCollectionPropKey(child.type);
+    if (!propKey) continue;
+    const bucket = groupedChildren.get(propKey) || [];
+    bucket.push(child);
+    groupedChildren.set(propKey, bucket);
+  }
+
+  const props: Record<string, unknown> = {};
+  for (const [propKey, items] of groupedChildren.entries()) {
+    props[propKey] = items.map((item) => buildTemplateArrayItemProps(item));
+  }
+  return props;
+}
+
+function buildTemplateArrayItemProps(block: TemplateBlock): Record<string, unknown> {
+  const props = {
+    ...normalizeStorefrontTemplateProps((block.settings || block.props || {}) as Record<string, unknown>),
+  };
+
+  const childBlocks = Array.isArray(block.elements) ? block.elements : [];
+  const childProps = buildChildTemplateProps(childBlocks);
+
+  return {
+    ...props,
+    ...childProps,
+  };
+}
+
+function buildTemplateNodeLike(block: TemplateBlock): { id: string; type: string; settings: Record<string, unknown>; elements: Array<{ id: string; type: string; settings: Record<string, unknown>; elements: unknown[] }> } {
+  const childBlocks = Array.isArray(block.elements) ? block.elements : [];
+  return {
+    id: block.id,
+    type: block.type,
+    settings: buildTemplateArrayItemProps(block),
+    elements: childBlocks.map((child) => buildTemplateNodeLike(child)),
+  };
+}
+
+function buildTemplateBlockComponentProps(block: TemplateBlock): Record<string, unknown> {
+  const props = {
+    ...normalizeStorefrontTemplateProps((block.settings || block.props || {}) as Record<string, unknown>),
+  };
+
+  const childBlocks = Array.isArray(block.elements) ? block.elements : [];
+  const childProps = buildChildTemplateProps(childBlocks);
+
+  return {
+    ...props,
+    ...childProps,
+    elements: childBlocks.map((child) => buildTemplateNodeLike(child)),
+  };
+}
+
+function getTemplateBlockListKey(block: TemplateBlock | undefined, index: number, scope: string): string {
+  if (block?.id) return block.id;
+  const fallbackKey = `${scope}-${index}`;
+  if (!loggedMissingTemplateBlockKeys.has(fallbackKey)) {
+    loggedMissingTemplateBlockKeys.add(fallbackKey);
+    console.warn(`[TemplateBlockRenderer] Missing block id for ${scope}[${index}]; using fallback key "${fallbackKey}"`);
+  }
+  return fallbackKey;
+}
+
 /* ─── FONT LOADER MAP ──────────────────────────────────────── */
 
 const FONT_LOADERS: Record<string, React.ComponentType> = {
@@ -914,8 +1056,9 @@ const FONT_LOADERS: Record<string, React.ComponentType> = {
 /** Detect which template family a block set belongs to */
 function detectTemplateFamily(blocks: TemplateBlock[]): string {
   for (const b of blocks) {
-    const t = b.type;
+    const t = b.type.toLowerCase();
     if (t.startsWith("aegis")) return "aegis-landing";
+    if (t.startsWith("landinggadget")) return "landing-gadget";
     if (t.startsWith("gadget")) return "landing-gadget";
     if (t.startsWith("ai")) return "ai";
     if (t.startsWith("jumia")) return "jumia";
@@ -930,47 +1073,170 @@ function detectTemplateFamily(blocks: TemplateBlock[]): string {
     if (t.startsWith("kids")) return "kids";
     if (t.startsWith("makeup")) return "makeup";
     if (t.startsWith("perfumes")) return "perfumes";
-    if (t.startsWith("tShirtsPrints")) return "t-shirts-prints";
+    if (t.startsWith("tshirtsprints")) return "t-shirts-prints";
     if (t.startsWith("fashion")) return "fashion";
   }
   return "fashion";
 }
 
+function buildEditorOverrideCss(blockId: string, styles: CSSProperties, hoverCss = ""): string {
+  const scope = `[data-editor-block-id="${blockId}"]`;
+  const root = `${scope} > *`;
+  const textTargets = `${scope} :is(h1, h2, h3, h4, h5, h6, p, span, a, button, li, label, strong, em, small)`;
+  const mediaTargets = `${scope} :is(img, video, svg)`;
+  const css: string[] = [];
+
+  if (
+    styles.backgroundColor ||
+    styles.paddingTop ||
+    styles.paddingRight ||
+    styles.paddingBottom ||
+    styles.paddingLeft ||
+    styles.marginTop ||
+    styles.marginRight ||
+    styles.marginBottom ||
+    styles.marginLeft ||
+    styles.borderRadius ||
+    styles.borderWidth ||
+    styles.borderStyle ||
+    styles.borderColor ||
+    styles.boxShadow ||
+    styles.position ||
+    typeof styles.zIndex === "number" ||
+    typeof styles.opacity === "number" ||
+    styles.maxWidth ||
+    styles.minWidth ||
+    styles.display ||
+    styles.justifyContent ||
+    styles.alignItems ||
+    styles.flexDirection ||
+    styles.flexWrap ||
+    styles.gap
+  ) {
+    css.push(`
+${scope} {
+  ${styles.position ? `position: ${styles.position} !important;` : ""}
+  ${typeof styles.zIndex === "number" ? `z-index: ${styles.zIndex} !important;` : ""}
+  ${typeof styles.opacity === "number" ? `opacity: ${styles.opacity} !important;` : ""}
+  ${styles.maxWidth ? `max-width: ${styles.maxWidth} !important;` : ""}
+  ${styles.minWidth ? `min-width: ${styles.minWidth} !important;` : ""}
+  ${styles.display ? `display: ${styles.display} !important;` : ""}
+  ${styles.justifyContent ? `justify-content: ${styles.justifyContent} !important;` : ""}
+  ${styles.alignItems ? `align-items: ${styles.alignItems} !important;` : ""}
+  ${styles.flexDirection ? `flex-direction: ${styles.flexDirection} !important;` : ""}
+  ${styles.flexWrap ? `flex-wrap: ${styles.flexWrap} !important;` : ""}
+  ${styles.gap ? `gap: ${styles.gap} !important;` : ""}
+}
+
+${root} {
+  ${styles.backgroundColor ? `background-color: ${styles.backgroundColor} !important;` : ""}
+  ${styles.paddingTop ? `padding-top: ${styles.paddingTop} !important;` : ""}
+  ${styles.paddingRight ? `padding-right: ${styles.paddingRight} !important;` : ""}
+  ${styles.paddingBottom ? `padding-bottom: ${styles.paddingBottom} !important;` : ""}
+  ${styles.paddingLeft ? `padding-left: ${styles.paddingLeft} !important;` : ""}
+  ${styles.marginTop ? `margin-top: ${styles.marginTop} !important;` : ""}
+  ${styles.marginRight ? `margin-right: ${styles.marginRight} !important;` : ""}
+  ${styles.marginBottom ? `margin-bottom: ${styles.marginBottom} !important;` : ""}
+  ${styles.marginLeft ? `margin-left: ${styles.marginLeft} !important;` : ""}
+  ${styles.borderRadius ? `border-radius: ${styles.borderRadius} !important;` : ""}
+  ${styles.boxShadow ? `box-shadow: ${styles.boxShadow} !important;` : ""}
+  ${styles.borderWidth ? `border-width: ${styles.borderWidth} !important;` : ""}
+  ${styles.borderStyle ? `border-style: ${styles.borderStyle} !important;` : ""}
+  ${styles.borderColor ? `border-color: ${styles.borderColor} !important;` : ""}
+}`);
+  }
+
+  if (
+    styles.color ||
+    styles.fontFamily ||
+    styles.fontSize ||
+    styles.fontWeight ||
+    styles.lineHeight ||
+    styles.letterSpacing ||
+    styles.textAlign ||
+    styles.textTransform ||
+    styles.textDecoration
+  ) {
+    css.push(`
+${textTargets} {
+  ${styles.color ? `color: ${styles.color} !important;` : ""}
+  ${styles.fontFamily ? `font-family: ${styles.fontFamily} !important;` : ""}
+  ${styles.fontSize ? `font-size: ${styles.fontSize} !important;` : ""}
+  ${styles.fontWeight ? `font-weight: ${styles.fontWeight} !important;` : ""}
+  ${styles.lineHeight ? `line-height: ${styles.lineHeight} !important;` : ""}
+  ${styles.letterSpacing ? `letter-spacing: ${styles.letterSpacing} !important;` : ""}
+  ${styles.textAlign ? `text-align: ${styles.textAlign} !important;` : ""}
+  ${styles.textTransform ? `text-transform: ${styles.textTransform} !important;` : ""}
+  ${styles.textDecoration ? `text-decoration: ${styles.textDecoration} !important;` : ""}
+}`);
+  }
+
+  if (styles.backgroundColor || styles.borderColor || styles.borderWidth || styles.borderStyle || styles.borderRadius || styles.boxShadow || typeof styles.opacity === "number") {
+    css.push(`
+${mediaTargets} {
+  ${styles.borderRadius ? `border-radius: ${styles.borderRadius} !important;` : ""}
+  ${styles.boxShadow ? `box-shadow: ${styles.boxShadow} !important;` : ""}
+  ${styles.borderWidth ? `border-width: ${styles.borderWidth} !important;` : ""}
+  ${styles.borderStyle ? `border-style: ${styles.borderStyle} !important;` : ""}
+  ${styles.borderColor ? `border-color: ${styles.borderColor} !important;` : ""}
+  ${typeof styles.opacity === "number" ? `opacity: ${styles.opacity} !important;` : ""}
+}`);
+  }
+
+  if (hoverCss) {
+    css.push(hoverCss);
+  }
+
+  return css.join("\n");
+}
+
 /* ─── SINGLE BLOCK RENDERER ────────────────────────────────── */
 
-function RenderTemplateBlock({ block, storeSlug }: { block: TemplateBlock; storeSlug?: string }) {
-  const Component = ALL_TEMPLATE_BLOCKS[block.type];
+function RenderTemplateBlock({ block, isEditor = false }: { block: TemplateBlock; isEditor?: boolean }) {
+  const Component = isRegisteredTemplateBlock(block.type) ? ALL_TEMPLATE_BLOCKS[block.type] : null;
 
   if (!Component) {
-    if (process.env.NODE_ENV === "development") {
-      return (
-        <div style={{ padding: 20, background: "#fff3cd", border: "1px solid #ffc107", margin: "10px 0", fontFamily: "monospace", fontSize: 13 }}>
-          Unknown template block type: <strong>{block.type}</strong>
-        </div>
-      );
+    if (process.env.NODE_ENV === "development" && !isChildFragmentType(block.type)) {
+      console.warn(`Unknown template block type: ${block.type}`);
     }
     return null;
   }
 
   // Resolve style overrides using the universal resolver
-  const { styles, classes, overlayStyles } = resolveSectionStyleOverrides(
+  const { styles, classes, overlayStyles, hoverCss } = resolveSectionStyleOverrides(
     block.styleOverrides,
     block.type
   );
+  const customCss = typeof block.styleOverrides?.customCss === "string" ? block.styleOverrides.customCss.trim() : "";
+  const blockCss = buildEditorOverrideCss(block.id, styles, hoverCss);
 
   // Forward resolved styles to the component so it can merge them with its own styles
-  // Override storeSlug with the real slug from the URL so nav links work correctly
   const componentProps = {
-    ...block.props,
-    storeSlug: storeSlug, // Explicitly pass the storeSlug to the component
+    ...buildTemplateBlockComponentProps(block),
     resolvedStyles: styles,
     resolvedClasses: classes,
+    blockId: block.id,
+    isEditor,
   };
 
   return (
-    <div style={styles} className={classes}>
+    <div
+      data-editor-block-id={block.id}
+      data-editor-node-id={block.id}
+      className={`builder-block-wrapper editor-node-${block.id} ${classes}`.trim()}
+      style={styles}
+      >
+        {(customCss || blockCss) && (
+          <style
+          dangerouslySetInnerHTML={{
+            __html: `${customCss ? `${customCss}\n` : ""}${blockCss}`,
+          }}
+        />
+      )}
       {overlayStyles && <div style={overlayStyles} />}
-      <Component {...componentProps} />
+      <TemplateBlockEditContext.Provider value={{ blockId: block.id, isEditor }}>
+        <Component {...componentProps} />
+      </TemplateBlockEditContext.Provider>
     </div>
   );
 }
@@ -981,19 +1247,18 @@ export interface RenderTemplateBlocksProps {
   blocks: TemplateBlock[];
   /** Pass real products to product grid blocks */
   products?: Array<Record<string, unknown>>;
+  /** Enable editor mode - prevents navigation and makes elements selectable */
+  isEditor?: boolean;
 }
 
-export function RenderTemplateBlocks({ blocks }: RenderTemplateBlocksProps) {
+export function RenderTemplateBlocks({ blocks, isEditor = false }: RenderTemplateBlocksProps) {
   const family = detectTemplateFamily(blocks);
   const FontLoader = FONT_LOADERS[family] || FashionFontLoader;
-  // Extract real store slug from URL so block nav links work correctly
-  const params = useParams();
-  const storeSlug = params?.slug as string | undefined;
   return (
-    <div className={`${family}-template`}>
+    <div className={`${family}-template`} data-editor-mode={isEditor}>
       <FontLoader />
-      {blocks.map((block) => (
-        <RenderTemplateBlock key={block.id} block={block} storeSlug={storeSlug} />
+      {blocks.map((block, index) => (
+        <RenderTemplateBlock key={getTemplateBlockListKey(block, index, "template-block")} block={block} isEditor={isEditor} />
       ))}
     </div>
   );
@@ -1001,7 +1266,8 @@ export function RenderTemplateBlocks({ blocks }: RenderTemplateBlocksProps) {
 
 /* ─── EXPORTS ───────────────────────────────────────────────── */
 
-export { FASHION_BLOCKS, ALL_TEMPLATE_BLOCKS };
+export { FASHION_BLOCKS, ALL_TEMPLATE_BLOCKS, RenderTemplateBlock };
+export { isRegisteredTemplateBlock };
 export type {
   FashionHeroSliderProps,
   FashionPromoBannersProps,
@@ -1017,13 +1283,3 @@ export type {
   FashionMarqueeProps,
   FashionCoverBannersProps,
 };
-
-// Editor shims: allow inline editor to query/edit context without coupling storefront to editor internals
-export function isRegisteredTemplateBlock(_key: string) {
-  // All blocks rendered via map are considered registered in this runtime
-  return true;
-}
-export function useTemplateBlockEditContext() {
-  // Minimal no-op context for runtime outside the editor route
-  return { editing: false, setEditing: () => {}, selectedNodeId: null as string | null, setSelectedNodeId: () => {} };
-}

@@ -6,6 +6,8 @@ import { mergeStoredTemplatePages } from "@/lib/templates/site-instance";
 import { ensurePerfumePages } from "@/lib/templates/perfume-pages";
 import { ensureVegetablePages } from "@/lib/templates/vegetable-pages";
 import { ensureTemplatePages } from "@/lib/templates/template-pages";
+import { buildTemplatePageContent } from "@/lib/templates/template-tree";
+import { RETAIL_PROJECT_DETAIL_BLOCKS } from "@/lib/templates/presets/retail-pages";
 import type { PageType, Prisma } from "@/generated/prisma";
 
 type Params = { params: Promise<{ slug: string; pageSlug: string }> };
@@ -28,29 +30,254 @@ function buildKidsSyntheticPage(pageSlug: string): {
   metaTitle: string;
   metaDescription: string;
 } | null {
-  if (pageSlug === "about-us") {
+  if (pageSlug === "about") {
     return {
-      id: "kids-about-us",
+      id: "kids-about",
       title: "About Us",
-      slug: "about-us",
+      slug: "about",
       type: "CUSTOM" as PageType,
       template: "kids",
-      content: { blocks: [], settings: {} },
+      content: buildTemplatePageContent([
+          {
+            id: "kids-about-announcement",
+            type: "kidsAnnouncementBar",
+            props: {
+              text: "Sign up for our newsletter to get 30% off for the week!",
+              link: "#newsletter",
+              backgroundColor: "#10c349",
+            },
+          },
+          {
+            id: "kids-about-header",
+            type: "kidsHeader",
+            props: {
+              storeName: "Kids Store",
+              storeSlug: "kids",
+            },
+          },
+          {
+            id: "kids-about-hero",
+            type: "kidsAboutHero",
+            props: {
+              subtitle: "About Us",
+              title: "Discover Favorites for Every Little One",
+              bodyText: [
+                "Our shelves are filled with carefully selected clothing, toys, and accessories that make every day a little brighter. From newborn essentials to playful finds, every item is chosen for its quality, comfort, and lasting value.",
+                "Whether you're shopping for your own child or searching for the perfect gift, you'll find something special for every stage of childhood.",
+              ],
+              images: [
+                "/uploads/kids_images/About.webp",
+                "/uploads/kids_images/Bblogz.webp",
+              ],
+              calloutText: "We handpick every item for its quality, safety, and playful charm, ensuring every collection meets the needs of modern parents and curious little explorers.",
+              calloutLabel: "Meet the team",
+            },
+          },
+          {
+            id: "kids-about-team",
+            type: "kidsTeamSection",
+            props: {
+              sectionTitle: {
+                subtitle: "",
+                title: "",
+              },
+              team: [
+                { name: "Sally Coulibaly", role: "Director" },
+                { name: "Rebecca Davina", role: "Marketing strategist" },
+                { name: "Jarelle Fateh", role: "Product designer" },
+                { name: "Khalisto Arielle", role: "CEO" },
+              ],
+            },
+          },
+          {
+            id: "kids-about-how-we-work",
+            type: "kidsTextSection",
+            props: {
+              sectionTitle: {
+                subtitle: "Why Parents Choose Us",
+                title: "What we Do",
+              },
+              bodyText: [
+                "We carefully select every product with children and parents in mind, focusing on quality, comfort, and everyday practicality. From trendy outfits and educational toys to must-have accessories, each item is chosen to bring happiness, value, and confidence to every purchase.",
+                "Our goal is to create a simple and enjoyable shopping experience from start to finish. With thoughtfully curated collections, trusted products, and friendly service, we help families find everything their little ones need in one convenient place.",
+              ],
+              backgroundColor: "#faf8f5",
+            },
+          },
+          {
+            id: "kids-about-faq",
+            type: "kidsFaqSection",
+            props: {
+              sectionTitle: {
+                subtitle: "What You'll Find",
+                title: "Baby Love",
+              },
+              subtitle: "Discover a carefully curated collection of children's clothing, toys, accessories, and everyday essentials designed to make growing up more fun.",
+              faqs: [
+                {
+                  question: "Are your products safe for children?",
+                  answer: "Yes. We carefully source products from trusted manufacturers that meet recognized safety and quality standards, giving parents confidence with every purchase.",
+                },
+                {
+                  question: "How long does shipping take?",
+                  answer: "Most orders are processed quickly and shipped within a few business days. Delivery times may vary depending on your location and the shipping option you choose.",
+                },
+                {
+                  question: "What's the best size to buy for a baby shower gift?",
+                  answer: "A great choice is 3–6 months or 6–12 months, as babies often outgrow newborn sizes very quickly. These sizes give parents something practical for the months ahead while ensuring your gift gets plenty of use.",
+                },
+              ],
+            },
+          },
+          {
+            id: "kids-about-footer",
+            type: "kidsFooterFull",
+            props: {
+              storeName: "Kids Store",
+              storeSlug: "kids",
+            },
+          },
+        ], {}) as any,
       metaTitle: "About Us",
       metaDescription: "About the Kids collection",
     };
   }
 
-  if (pageSlug === "contact-us") {
+  if (pageSlug === "contact") {
     return {
-      id: "kids-contact-us",
+      id: "kids-contact",
       title: "Contact Us",
-      slug: "contact-us",
+      slug: "contact",
       type: "CUSTOM" as PageType,
       template: "kids",
-      content: { blocks: [], settings: {} },
+      content: buildTemplatePageContent([
+          {
+            id: "kids-contact-announcement",
+            type: "kidsAnnouncementBar",
+            props: {
+              text: "Sign up for our newsletter to get 20% off for the week!",
+              link: "#newsletter",
+              backgroundColor: "#39a454",
+            },
+          },
+          {
+            id: "kids-contact-header",
+            type: "kidsHeader",
+            props: {
+              storeName: "Kids Store",
+              storeSlug: "kids",
+            },
+          },
+          {
+            id: "kids-contact-hero",
+            type: "kidsContactHero",
+            props: {
+              address: "413 Waystreet Road, North Carolina, United States",
+              showMapLink: true,
+            },
+          },
+          {
+            id: "kids-contact-info",
+            type: "kidsContactInfo",
+            props: {
+              phone: "(097) 330-1233",
+              hours: "9:00am - 5:00pm",
+              days: "Monday - Friday",
+              socialLinks: {
+                facebook: "#",
+                twitter: "#",
+                instagram: "#",
+                youtube: "#",
+              },
+              showMapLink: true,
+            },
+          },
+          {
+            id: "kids-contact-form",
+            type: "kidsContactForm",
+            props: {
+              title: "Get in touch",
+            },
+          },
+          {
+            id: "kids-contact-hours",
+            type: "kidsOpeningHours",
+            props: {
+              title: "Monday - Friday",
+              hours: [
+                { label: "Hours", value: "9:00am - 5:00pm" },
+                { label: "Support", value: "(064) 332-1233" },
+                { label: "Address", value: "North Carolina, MO" },
+              ],
+              infoText: "Technology made for Good. Prokip Africa.",
+              links: [
+                { label: "Visit the blog", href: "/blog" },
+                { label: "Shop the collection", href: "/shop" },
+              ],
+              storeSlug: "kids",
+            },
+          },
+          {
+            id: "kids-contact-footer",
+            type: "kidsFooterFull",
+            props: {
+              storeName: "Kids Store",
+              storeSlug: "kids",
+            },
+          },
+        ], {}) as any,
       metaTitle: "Contact Us",
       metaDescription: "Get in touch with the Kids collection",
+    };
+  }
+
+  if (pageSlug === "blog") {
+    return {
+      id: "kids-blog",
+      title: "Blog",
+      slug: "blog",
+      type: "CUSTOM" as PageType,
+      template: "kids",
+      content: buildTemplatePageContent([
+          {
+            id: "kids-blog-announcement",
+            type: "kidsAnnouncementBar",
+            props: {
+              text: "Sign up for our newsletter to get 45% off for the week!",
+              link: "#newsletter",
+              backgroundColor: "#73a97b",
+            },
+          },
+          {
+            id: "kids-blog-header",
+            type: "kidsHeader",
+            props: {
+              storeName: "Kids Store",
+              storeSlug: "kids",
+            },
+          },
+          {
+            id: "kids-blog-grid",
+            type: "kidsBlogPosts",
+            props: {
+              columns: 3,
+              sectionTitle: {
+                title: "Latest Articles",
+              },
+              posts: [],
+            },
+          },
+          {
+            id: "kids-blog-footer",
+            type: "kidsFooterFull",
+            props: {
+              storeName: "Kids Store",
+              storeSlug: "kids",
+            },
+          },
+        ], {}) as any,
+      metaTitle: "Blog",
+      metaDescription: "Latest tips and stories for parents",
     };
   }
 
@@ -88,7 +315,7 @@ function buildCosmeticsSyntheticPage(pageSlug: string): {
     slug: pageSlug,
     type: pageDef.type,
     template: "cosmetics",
-    content: { blocks: [], settings: {} },
+    content: buildTemplatePageContent([], {}) as any,
     metaTitle: pageDef.title,
     metaDescription: pageDef.metaDescription,
   };
@@ -111,7 +338,7 @@ function buildTShirtsSyntheticPage(pageSlug: string): {
       slug: "about-us",
       type: "CUSTOM" as PageType,
       template: "t-shirts-prints",
-      content: { blocks: [], settings: {} },
+      content: buildTemplatePageContent([], {}) as any,
       metaTitle: "About Us",
       metaDescription: "About the T-Shirts & Prints studio",
     };
@@ -124,13 +351,102 @@ function buildTShirtsSyntheticPage(pageSlug: string): {
       slug: "contact-us",
       type: "CUSTOM" as PageType,
       template: "t-shirts-prints",
-      content: { blocks: [], settings: {} },
+      content: buildTemplatePageContent([], {}) as any,
       metaTitle: "Contact Us",
       metaDescription: "Contact the T-Shirts & Prints studio",
     };
   }
 
   return null;
+}
+
+function buildHandmadeBagsSyntheticPage(pageSlug: string): {
+  id: string;
+  title: string;
+  slug: string;
+  type: PageType;
+  template: string;
+  content: Prisma.JsonValue;
+  metaTitle: string;
+  metaDescription: string;
+} | null {
+  const handmadeBagsPages: Record<string, { title: string; type: PageType; metaDescription: string }> = {
+    "home": { title: "Home", type: "HOME" as PageType, metaDescription: "Welcome to our handcrafted leather goods store" },
+    "about": { title: "About Us", type: "CUSTOM" as PageType, metaDescription: "About our handcrafted leather goods" },
+    "contact": { title: "Contact Us", type: "CUSTOM" as PageType, metaDescription: "Get in touch with us" },
+    "our-story": { title: "Our Story", type: "CUSTOM" as PageType, metaDescription: "Our journey in leather craftsmanship" },
+    "reviews": { title: "Reviews", type: "CUSTOM" as PageType, metaDescription: "Customer reviews and testimonials" },
+    "blog": { title: "Blog", type: "CUSTOM" as PageType, metaDescription: "Latest stories from our workshop" },
+  };
+
+  const pageDef = handmadeBagsPages[pageSlug];
+  if (!pageDef) return null;
+
+  return {
+    id: `handmade-bags-${pageSlug}`,
+    title: pageDef.title,
+    slug: pageSlug,
+    type: pageDef.type,
+    template: "handmade-bags",
+    content: buildTemplatePageContent([], {}) as any,
+    metaTitle: pageDef.title,
+    metaDescription: pageDef.metaDescription,
+  };
+}
+
+function buildRetailSyntheticPage(pageSlug: string): {
+  id: string;
+  title: string;
+  slug: string;
+  type: PageType;
+  template: string;
+  content: Prisma.JsonValue;
+  metaTitle: string;
+  metaDescription: string;
+} | null {
+  // For project detail pages, use the preset blocks from RETAIL_PROJECT_DETAIL_BLOCKS
+  if (pageSlug.startsWith("project-") && RETAIL_PROJECT_DETAIL_BLOCKS[pageSlug]) {
+    const presetBlocks = RETAIL_PROJECT_DETAIL_BLOCKS[pageSlug];
+    const title = pageSlug
+      .replace("project-", "")
+      .split("-")
+      .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
+      .join(" ");
+
+    return {
+      id: `retail-${pageSlug}`,
+      title: title,
+      slug: pageSlug,
+      type: "CUSTOM" as PageType,
+      template: "retail",
+      content: ({ blocks: presetBlocks, settings: {} } as unknown) as Prisma.JsonValue,
+      metaTitle: title,
+      metaDescription: `Project details for ${title}`,
+    };
+  }
+
+  // For other Retail pages, return basic synthetic pages
+  const retailPages: Record<string, { title: string; type: PageType; metaDescription: string }> = {
+    "about": { title: "About Us", type: "CUSTOM" as PageType, metaDescription: "About our retail store" },
+    "contact": { title: "Contact Us", type: "CUSTOM" as PageType, metaDescription: "Get in touch with us" },
+    "projects": { title: "Projects", type: "CUSTOM" as PageType, metaDescription: "Our latest projects" },
+    "our-story": { title: "Our Story", type: "CUSTOM" as PageType, metaDescription: "Our journey" },
+    "reviews": { title: "Reviews", type: "CUSTOM" as PageType, metaDescription: "Customer reviews" },
+  };
+
+  const pageDef = retailPages[pageSlug];
+  if (!pageDef) return null;
+
+  return {
+    id: `retail-${pageSlug}`,
+    title: pageDef.title,
+    slug: pageSlug,
+    type: pageDef.type,
+    template: "retail",
+    content: buildTemplatePageContent([], {}) as any,
+    metaTitle: pageDef.title,
+    metaDescription: pageDef.metaDescription,
+  };
 }
 
 // GET /api/storefront/:slug/pages/:pageSlug — public page content + full store context
@@ -287,10 +603,26 @@ export async function GET(_req: NextRequest, { params }: Params) {
           ? buildTShirtsSyntheticPage(pageSlug)
         : templateSlug === "cosmetics" || templateSlug === "makeup" || slug === "cosmetics" || site.slug === "cosmetics" || site.name?.toLowerCase().includes("cosmetics") || site.name?.toLowerCase().includes("makeup")
           ? buildCosmeticsSyntheticPage(pageSlug)
+        : templateSlug === "handmade-bags" || slug === "handmade-bags" || site.slug === "handmade-bags" || site.name?.toLowerCase().includes("handmade") || site.name?.toLowerCase().includes("leather")
+          ? buildHandmadeBagsSyntheticPage(pageSlug)
+        : templateSlug === "retail" || templateSlug === "decor" || slug === "retail" || slug === "decor" || site.slug === "retail" || site.slug === "decor" || site.name?.toLowerCase().includes("retail") || site.name?.toLowerCase().includes("decor")
+          ? buildRetailSyntheticPage(pageSlug)
           : null;
     const mergedPages = mergeStoredTemplatePages(page ? [page] : syntheticPage ? [syntheticPage] : [], activeTemplate?.pages);
     const fallbackPage = mergedPages.find((item) => item.slug === pageSlug) || mergedPages[0];
     if (!fallbackPage) return notFound("Page not found");
+
+    // Preserve nested editor trees and template block documents as-is.
+    // Only wrap bare arrays so the page component can still parse them safely.
+    let normalizedContent = fallbackPage.content;
+    if (Array.isArray(normalizedContent)) {
+      normalizedContent = { elements: normalizedContent, settings: {} };
+    } else if (!normalizedContent || typeof normalizedContent !== "object") {
+      normalizedContent = { elements: [], settings: {} };
+    }
+
+    // Update fallbackPage with normalized content
+    fallbackPage.content = normalizedContent;
 
     const publicProducts = products.map((p) => ({
       id: p.id,
@@ -368,7 +700,7 @@ export async function GET(_req: NextRequest, { params }: Params) {
 
     const publicPages = mergeStoredTemplatePages(allPages, activeTemplate?.pages);
 
-    return success({
+    const response = success({
       store: {
         id: site.id,
         name: site.name,
@@ -394,6 +726,13 @@ export async function GET(_req: NextRequest, { params }: Params) {
       customization: resolvedCustomization,
       theme: resolvedTheme,
     });
+
+    // Add cache headers to prevent browser caching
+    response.headers.set('Cache-Control', 'no-store, no-cache, must-revalidate, private');
+    response.headers.set('Pragma', 'no-cache');
+    response.headers.set('Expires', '0');
+
+    return response;
   } catch (err) {
     console.error("Storefront page fetch error:", err);
     return NextResponse.json({ success: false, error: "Internal server error" }, { status: 500 });

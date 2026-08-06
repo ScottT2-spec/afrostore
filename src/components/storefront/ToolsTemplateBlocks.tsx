@@ -9,7 +9,7 @@ import { InlineEditableText } from "@/components/storefront/InlineEditableText";
 
 /* ═══════════════════════════════════════════════════════════════
    TOOLS TEMPLATE HOMEPAGE BLOCKS
-   Pixel-perfect replicas of WoodMart Tools demo homepage.
+   Pixel-perfect replicas of Prokip LTD Tools demo homepage.
    Uses ElectronicsStoreContext for store slug resolution.
    ═══════════════════════════════════════════════════════════════ */
 
@@ -23,7 +23,7 @@ const TOKENS = {
   bodyFont: "'Roboto', Arial, sans-serif",
 };
 
-const IMG = "https://woodmart.xtemos.com/wp-content/uploads";
+const IMG = "https://prokip.xtemos.com/wp-content/uploads";
 
 const containerStyle: React.CSSProperties = {
   maxWidth: TOKENS.containerWidth,

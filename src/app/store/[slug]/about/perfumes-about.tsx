@@ -23,7 +23,7 @@ export default function PerfumesAboutPage() {
       .then(([storeRes, pageRes]) => {
         if (!cancelled) {
           if (storeRes?.success && storeRes?.data) setData(storeRes.data);
-          if (pageRes?.success && pageRes?.data) setPageData(pageRes.data);
+          if (pageRes?.success && pageRes?.data) setPageData(pageRes.data.page);
           else if (!cancelled) setPageData(null);
         }
       })

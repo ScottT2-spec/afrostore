@@ -4,6 +4,7 @@ import { getStoreContext, success, error, validationError, ensureUniqueSlug, log
 import { updatePageSchema } from "@/lib/validators";
 import { unauthorized } from "@/lib/auth";
 import { findStoredTemplatePage } from "@/lib/templates/site-instance";
+import { revalidatePath } from "next/cache";
 import type { Prisma } from "@/generated/prisma";
 
 type Params = { params: Promise<{ siteId: string; pageId: string }> };
@@ -30,18 +31,30 @@ export async function GET(req: NextRequest, { params }: Params) {
 // PATCH /api/sites/:siteId/pages/:pageId
 export async function PATCH(req: NextRequest, { params }: Params) {
   const { siteId, pageId } = await params;
+  console.log("PATCH /api/sites/:siteId/pages/:pageId - siteId:", siteId, "pageId:", pageId);
+  
   const ctx = await getStoreContext(req, siteId);
   if (ctx.error) return ctx.user ? error(ctx.error, 403) : unauthorized();
 
   try {
     const body = await req.json();
+    console.log("Request body:", body);
+    
     const parsed = updatePageSchema.safeParse(body);
-    if (!parsed.success) return validationError(parsed.error.flatten().fieldErrors);
+    if (!parsed.success) {
+      console.log("Validation error:", parsed.error.flatten().fieldErrors);
+      return validationError(parsed.error.flatten().fieldErrors);
+    }
 
-    const existing = await prisma.page.findFirst({ where: { id: pageId, siteId } });
+    const existing = await prisma.page.findFirst({ 
+      where: { id: pageId, siteId },
+      include: { site: { select: { slug: true } } }
+    });
     if (!existing) return error("Page not found", 404);
 
     const updateData: Record<string, unknown> = { ...parsed.data };
+    console.log("updateData:", updateData);
+    console.log("updateData.content:", JSON.stringify(updateData.content, null, 2));
 
     // If title is changing, regenerate slug
     if (parsed.data.title && parsed.data.title !== existing.title) {
@@ -52,6 +65,20 @@ export async function PATCH(req: NextRequest, { params }: Params) {
       where: { id: pageId },
       data: updateData as Prisma.PageUpdateInput,
     });
+
+    console.log("Page updated successfully:", page.id);
+    console.log("Updated page content:", JSON.stringify(page.content, null, 2));
+
+    // Revalidate all relevant paths to clear Next.js cache
+    revalidatePath(`/store/${existing.site.slug}/${page.slug}`);
+    revalidatePath(`/store/${existing.site.slug}`);
+    revalidatePath(`/store/${existing.site.slug}/pages/${page.slug}`);
+    
+    // Also revalidate the API route that fetches page data
+    revalidatePath(`/api/storefront/${existing.site.slug}/pages/${page.slug}`);
+    revalidatePath(`/api/storefront/${existing.site.slug}`);
+
+    console.log("Paths revalidated");
 
     await logAudit({
       siteId,
@@ -77,10 +104,17 @@ export async function DELETE(req: NextRequest, { params }: Params) {
   if (ctx.error) return ctx.user ? error(ctx.error, 403) : unauthorized();
 
   try {
-    const existing = await prisma.page.findFirst({ where: { id: pageId, siteId } });
+    const existing = await prisma.page.findFirst({ 
+      where: { id: pageId, siteId },
+      include: { site: { select: { slug: true } } }
+    });
     if (!existing) return error("Page not found", 404);
 
     await prisma.page.delete({ where: { id: pageId } });
+
+    // Revalidate the store page path to clear Next.js cache
+    revalidatePath(`/store/${existing.site.slug}/${existing.slug}`);
+    revalidatePath(`/store/${existing.site.slug}`);
 
     await logAudit({
       siteId,

@@ -2,7 +2,7 @@ import type { EditorNode } from "@/lib/visual-editor/node-tree";
 
 /**
  * Grocery Template Preset
- * Recreates the WoodMart Grocery demo layout with editable blocks.
+ * Recreates the Prokip LTD Grocery demo layout with editable blocks.
  */
 export const GROCERY_TEMPLATE_PRESET: EditorNode[] = [
   {
@@ -23,7 +23,7 @@ export const GROCERY_TEMPLATE_PRESET: EditorNode[] = [
             "buttonText": "Read more",
             "buttonLink": "/shop",
             "backgroundColor": "#fdf3e7",
-            "productImage": "https://woodmart.xtemos.com/wp-content/uploads/2020/06/grocery-slide-1-product.png"
+            "productImage": "/prokip-logo.png"
           },
           elements: [],
         },
@@ -37,7 +37,7 @@ export const GROCERY_TEMPLATE_PRESET: EditorNode[] = [
             "buttonText": "Read more",
             "buttonLink": "/shop",
             "backgroundColor": "#e8f5e9",
-            "productImage": "https://woodmart.xtemos.com/wp-content/uploads/2020/06/grocery-slide-2-product.png"
+            "productImage": "/prokip-logo.png"
           },
           elements: [],
         },
@@ -52,7 +52,7 @@ export const GROCERY_TEMPLATE_PRESET: EditorNode[] = [
             "buttonText": "Read more",
             "buttonLink": "/shop",
             "backgroundColor": "#fff3e0",
-            "productImage": "https://woodmart.xtemos.com/wp-content/uploads/2020/06/grocery-slide-3-product.png"
+            "productImage": "/prokip-logo.png"
           },
           elements: [],
         }
@@ -88,14 +88,14 @@ export const GROCERY_TEMPLATE_PRESET: EditorNode[] = [
         {
           subtitle: "WEEKLY DISCOUNTS",
           title: "Using dummy content or fake information",
-          image: "https://woodmart.xtemos.com/wp-content/uploads/2020/06/grocery-banner-1.jpg",
+          image: "/prokip-logo.png",
           buttonText: "Read more",
           buttonLink: "/shop",
         },
         {
           subtitle: "NEW PRODUCTS",
           title: "Products with elegant design can quickly begin to bloat",
-          image: "https://woodmart.xtemos.com/wp-content/uploads/2020/06/grocery-banner-2.jpg",
+          image: "/prokip-logo.png",
           buttonText: "Read more",
           buttonLink: "/shop",
         },
@@ -153,7 +153,7 @@ export const GROCERY_TEMPLATE_PRESET: EditorNode[] = [
         { title: "FOOTER MENU", links: [{ label: "Instagram profile", url: "#" }, { label: "New Collection", url: "#" }, { label: "Contact Us", url: "#" }, { label: "Latest News", url: "#" }, { label: "Our Sitemap", url: "#" }] },
       ],
       copyrightText: "",
-      paymentIconsUrl: "https://woodmart.xtemos.com/wp-content/uploads/2018/08/payment.png",
+      paymentIconsUrl: "/prokip-logo.png",
     },
   },
 ];

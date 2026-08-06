@@ -12,6 +12,7 @@ import {
   FashionBlogPosts,
   FashionNewsletter,
 } from './FashionTemplateBlocks';
+import { buildScopedStyleCss, resolveSectionStyleOverrides } from "@/components/storefront/block-style";
 
 // Section type matching the Prokip reference
 export interface FashionSection {
@@ -48,27 +49,6 @@ export const FashionPageRenderer: React.FC<FashionPageRendererProps> = ({
   copiedStyleSectionId = null,
 }) => {
   const [contextMenu, setContextMenu] = useState<{ x: number; y: number; sectionId: string } | null>(null);
-
-  // Use the new universal style resolver
-  const { resolveSectionStyleOverrides } = require("@/components/storefront/block-style");
-
-  // Compile section style properties using the new resolver
-  const getSectionStyles = (sec: FashionSection): React.CSSProperties => {
-    const { styles } = resolveSectionStyleOverrides(sec.styleOverrides, sec.type);
-    return styles;
-  };
-
-  // Get responsive visibility classes
-  const getSectionClasses = (sec: FashionSection): string => {
-    const { classes } = resolveSectionStyleOverrides(sec.styleOverrides, sec.type);
-    return classes;
-  };
-
-  // Get background overlay styles
-  const getSectionOverlayStyles = (sec: FashionSection): React.CSSProperties | null => {
-    const { overlayStyles } = resolveSectionStyleOverrides(sec.styleOverrides, sec.type);
-    return overlayStyles;
-  };
 
   // Helper to safely get style override values
   const getOverride = <T,>(overrides: Record<string, unknown> | undefined, key: string, defaultValue: T): T => {
@@ -108,9 +88,8 @@ export const FashionPageRenderer: React.FC<FashionPageRendererProps> = ({
           .map((sec) => {
             const isSelected = selectedSectionId === sec.id;
             const overrides = sec.styleOverrides || {};
-            const sectionStyles = getSectionStyles(sec);
-            const sectionClasses = getSectionClasses(sec);
-            const overlayStyles = getSectionOverlayStyles(sec);
+            const { styles: sectionStyles, classes: sectionClasses, overlayStyles, hoverCss } = resolveSectionStyleOverrides(sec.styleOverrides, sec.type);
+            const sectionCss = buildScopedStyleCss(`[data-section-id="${sec.id}"]`, sectionStyles, hoverCss);
 
             // Hover effects mapping
             const hoverScale = getOverride<string>(overrides, 'hoverScale', '');
@@ -137,6 +116,7 @@ export const FashionPageRenderer: React.FC<FashionPageRendererProps> = ({
             return (
               <motion.div
                 key={sec.id}
+                data-section-id={sec.id}
                 style={sectionStyles}
                 {...motionProps}
                 onClick={(e) => {
@@ -159,7 +139,8 @@ export const FashionPageRenderer: React.FC<FashionPageRendererProps> = ({
                 className={`relative group transition-all duration-200 ${sectionClasses} ${
                   mode === 'edit' ? 'cursor-pointer hover:ring-2 hover:ring-indigo-500 hover:ring-offset-1' : ''
                 } ${isSelected && mode === 'edit' ? 'ring-2 ring-indigo-600 ring-offset-2 z-10' : ''}`}
-              >
+                >
+                {sectionCss && <style dangerouslySetInnerHTML={{ __html: sectionCss }} />}
                 {/* Active Section Label for Builder Canvas */}
                 {isSelected && mode === 'edit' && (
                   <div className="absolute top-0 left-4 -translate-y-1/2 bg-indigo-600 text-white text-[10px] uppercase tracking-wider font-bold px-2 py-0.5 rounded shadow z-20 flex items-center gap-1">
@@ -176,7 +157,7 @@ export const FashionPageRenderer: React.FC<FashionPageRendererProps> = ({
                   />
                 )}
 
-                <div className="relative z-10 w-full">
+                <div className="section-content relative z-10 w-full">
                   {/* Individual block rendering */}
                   {renderBlock(sec)}
                 </div>

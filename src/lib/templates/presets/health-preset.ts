@@ -2,7 +2,7 @@ import type { EditorNode } from "@/lib/visual-editor/node-tree";
 
 /**
  * Health & Supplements (Pills) Template Preset
- * Recreates the WoodMart Health/Pills demo layout with editable blocks.
+ * Recreates the Prokip LTD Health/Pills demo layout with editable blocks.
  */
 export const HEALTH_TEMPLATE_PRESET: EditorNode[] = [
   {
@@ -29,7 +29,7 @@ export const HEALTH_TEMPLATE_PRESET: EditorNode[] = [
     settings: {
       banners: [
         {
-          image: "https://woodmart.xtemos.com/wp-content/uploads/2023/06/pills-banner-1.jpg",
+          image: "/prokip-logo.png",
           subtitle: "Bundles",
           title: "Sleep Easy Gummies",
           description: "Supports an optimal sleep cycle",
@@ -38,7 +38,7 @@ export const HEALTH_TEMPLATE_PRESET: EditorNode[] = [
           colorScheme: "dark",
         },
         {
-          image: "https://woodmart.xtemos.com/wp-content/uploads/2023/06/pills-banner-2.jpg",
+          image: "/prokip-logo.png",
           subtitle: "SHOP BY SUPPLEMENTS",
           title: "Capsules for Skin",
           buttonText: "Contact With Expert",
@@ -94,8 +94,6 @@ export const HEALTH_TEMPLATE_PRESET: EditorNode[] = [
     type: "healthTestimonials",
     settings: {
       title: "What Our Customers Say",
-      trustpilotRating: "4.9",
-      reviewCount: "Based on 374 reviews",
       testimonials: [
         { name: "Sarah M.", image: "", text: "The best vitamins and supplements are made from natural ingredients using modern technologies aimed at improving personal health.", rating: 5 },
         { name: "James K.", image: "", text: "Our vitamins and supplements are designed to provide essential nutrients that may be lacking in our diet.", rating: 5 },

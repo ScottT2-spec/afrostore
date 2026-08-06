@@ -12,7 +12,7 @@ import { InlineEditableText } from "@/components/storefront/InlineEditableText";
 
 /* ═══════════════════════════════════════════════════════════════
    FOOD GROCERY TEMPLATE BLOCKS
-   Pixel-perfect replicas of WoodMart Food Market template sections.
+   Pixel-perfect replicas of Prokip LTD Food Market template sections.
    All styling inline — no external CSS dependencies.
    ═══════════════════════════════════════════════════════════════ */
 
@@ -35,7 +35,7 @@ const TOKENS = {
   altFont: "'Lato', Arial, Helvetica, sans-serif",
 };
 
-const IMG = "https://woodmart.xtemos.com/wp-content/uploads";
+const IMG = "https://prokip.xtemos.com/wp-content/uploads";
 
 /* ─── FONT LOADER ───────────────────────────────────────────── */
 export function GroceryFontLoader() {
@@ -689,7 +689,7 @@ export interface GroceryNewsletterProps {
 }
 
 export function GroceryNewsletter({
-  title = "HEY YOU, SIGN UP AND CONNECT TO WOODMART!",
+  title = "HEY YOU, SIGN UP AND CONNECT TO PROKIP!",
   description = "Be the first to learn about our latest trends and get exclusive offers.",
   buttonText = "Sign up",
   backgroundColor = TOKENS.primaryColor,

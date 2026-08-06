@@ -1,4 +1,4 @@
-import type { TemplateBlock } from "@/components/storefront/TemplateBlockRenderer";
+import type { EditorNode } from "@/lib/visual-editor/node-tree";
 
 /**
  * Handmade Bags template — default page block content.
@@ -7,34 +7,37 @@ import type { TemplateBlock } from "@/components/storefront/TemplateBlockRendere
  */
 
 /* ── ABOUT PAGE ─────────────────────────────────────────────── */
-export const HANDMADE_BAGS_ABOUT_BLOCKS: TemplateBlock[] = [
+export const HANDMADE_BAGS_ABOUT_BLOCKS: EditorNode[] = [
   {
     id: "about-hero",
     type: "fashionHeroSlider",
-    props: {
-      slides: [
-        {
-          subtitle: "ABOUT US",
-          titleLine1: "Handcrafted",
-          titleLine2: "Excellence",
-          description:
-            "Discover the artistry behind our premium leather goods and the passionate artisans who bring them to life.",
-          buttonText: "Shop Collection",
-          buttonLink: "/shop",
-          colorScheme: "dark",
-          textPosition: "center",
-          backgroundImage:
-            "https://images.unsplash.com/photo-1553062407-98eeb64c6a62?w=1920&h=900&fit=crop",
-        },
-      ],
-      minHeight: "550px",
+          settings: {
+        minHeight: "550px",
       autoplaySpeed: 0,
-    },
+      },
+      elements: [
+        {
+          id: "about-hero-slide-1",
+          type: "slide",
+          settings:           {
+            "subtitle": "ABOUT US",
+            "titleLine1": "Handcrafted",
+            "titleLine2": "Excellence",
+            "description": "Discover the artistry behind our premium leather goods and the passionate artisans who bring them to life.",
+            "buttonText": "Shop Collection",
+            "buttonLink": "/shop",
+            "colorScheme": "dark",
+            "textPosition": "center",
+            "backgroundImage": "https://images.unsplash.com/photo-1553062407-98eeb64c6a62?w=1920&h=900&fit=crop"
+          },
+          elements: [],
+        }
+      ],
   },
   {
     id: "about-marquee",
     type: "fashionMarquee",
-    props: {
+    settings: {
       items: [
         { text: "Handcrafted with Love", icon: "✦" },
         { text: "Premium Leather", icon: "✦" },
@@ -55,7 +58,7 @@ export const HANDMADE_BAGS_ABOUT_BLOCKS: TemplateBlock[] = [
   {
     id: "about-intro",
     type: "fashionSectionTitle",
-    props: {
+    settings: {
       subtitle: "WHO WE ARE",
       title: "A Legacy of Craftsmanship",
       description:
@@ -68,7 +71,7 @@ export const HANDMADE_BAGS_ABOUT_BLOCKS: TemplateBlock[] = [
   {
     id: "about-image-section",
     type: "fashionCoverBanners",
-    props: {
+    settings: {
       columns: 2,
       height: "500px",
       marginBottom: "70px",
@@ -97,7 +100,7 @@ export const HANDMADE_BAGS_ABOUT_BLOCKS: TemplateBlock[] = [
   {
     id: "about-mission",
     type: "fashionSectionTitle",
-    props: {
+    settings: {
       subtitle: "OUR MISSION",
       title: "Creating Timeless Pieces",
       description:
@@ -110,7 +113,7 @@ export const HANDMADE_BAGS_ABOUT_BLOCKS: TemplateBlock[] = [
   {
     id: "about-values",
     type: "fashionFeatures",
-    props: {
+    settings: {
       columns: 3,
       marginBottom: "70px",
       features: [
@@ -144,7 +147,7 @@ export const HANDMADE_BAGS_ABOUT_BLOCKS: TemplateBlock[] = [
   {
     id: "about-cta",
     type: "fashionNewsletter",
-    props: {
+    settings: {
       subtitle: "",
       title: "Join Our Journey",
       description:
@@ -157,34 +160,37 @@ export const HANDMADE_BAGS_ABOUT_BLOCKS: TemplateBlock[] = [
 ];
 
 /* ── CONTACT PAGE ───────────────────────────────────────────── */
-export const HANDMADE_BAGS_CONTACT_BLOCKS: TemplateBlock[] = [
+export const HANDMADE_BAGS_CONTACT_BLOCKS: EditorNode[] = [
   {
     id: "contact-hero",
     type: "fashionHeroSlider",
-    props: {
-      slides: [
-        {
-          subtitle: "CONTACT US",
-          titleLine1: "Get in",
-          titleLine2: "Touch",
-          description:
-            "We'd love to hear from you. Whether you have a question about our products, need assistance with an order, or just want to say hello.",
-          buttonText: "Shop Collection",
-          buttonLink: "/shop",
-          colorScheme: "dark",
-          textPosition: "center",
-          backgroundImage:
-            "https://images.unsplash.com/photo-1497366216548-37526070297c?w=1920&h=900&fit=crop",
-        },
-      ],
-      minHeight: "550px",
+          settings: {
+        minHeight: "550px",
       autoplaySpeed: 0,
-    },
+      },
+      elements: [
+        {
+          id: "contact-hero-slide-1",
+          type: "slide",
+          settings:           {
+            "subtitle": "CONTACT US",
+            "titleLine1": "Get in",
+            "titleLine2": "Touch",
+            "description": "We'd love to hear from you. Whether you have a question about our products, need assistance with an order, or just want to say hello.",
+            "buttonText": "Shop Collection",
+            "buttonLink": "/shop",
+            "colorScheme": "dark",
+            "textPosition": "center",
+            "backgroundImage": "https://images.unsplash.com/photo-1497366216548-37526070297c?w=1920&h=900&fit=crop"
+          },
+          elements: [],
+        }
+      ],
   },
   {
     id: "contact-marquee",
     type: "fashionMarquee",
-    props: {
+    settings: {
       items: [
         { text: "24/7 Support", icon: "✦" },
         { text: "Fast Response", icon: "✦" },
@@ -205,7 +211,7 @@ export const HANDMADE_BAGS_CONTACT_BLOCKS: TemplateBlock[] = [
   {
     id: "contact-intro",
     type: "fashionSectionTitle",
-    props: {
+    settings: {
       subtitle: "REACH OUT",
       title: "We're Here to Help",
       description:
@@ -218,7 +224,7 @@ export const HANDMADE_BAGS_CONTACT_BLOCKS: TemplateBlock[] = [
   {
     id: "contact-info",
     type: "fashionFeatures",
-    props: {
+    settings: {
       columns: 3,
       marginBottom: "70px",
       features: [
@@ -252,7 +258,7 @@ export const HANDMADE_BAGS_CONTACT_BLOCKS: TemplateBlock[] = [
   {
     id: "contact-form-section",
     type: "fashionSectionTitle",
-    props: {
+    settings: {
       subtitle: "SEND A MESSAGE",
       title: "We'd Love to Hear From You",
       description:
@@ -265,7 +271,7 @@ export const HANDMADE_BAGS_CONTACT_BLOCKS: TemplateBlock[] = [
   {
     id: "contact-cta",
     type: "fashionNewsletter",
-    props: {
+    settings: {
       subtitle: "QUICK RESPONSE",
       title: "Need Immediate Assistance?",
       description:
@@ -278,34 +284,37 @@ export const HANDMADE_BAGS_CONTACT_BLOCKS: TemplateBlock[] = [
 ];
 
 /* ── OUR STORY PAGE ─────────────────────────────────────────── */
-export const HANDMADE_BAGS_OUR_STORY_BLOCKS: TemplateBlock[] = [
+export const HANDMADE_BAGS_OUR_STORY_BLOCKS: EditorNode[] = [
   {
     id: "story-hero",
     type: "fashionHeroSlider",
-    props: {
-      slides: [
-        {
-          subtitle: "OUR STORY",
-          titleLine1: "From Workshop",
-          titleLine2: "To World-Class",
-          description:
-            "A journey of passion, dedication, and the pursuit of excellence in leather craftsmanship.",
-          buttonText: "Explore Collection",
-          buttonLink: "/shop",
-          colorScheme: "dark",
-          textPosition: "center",
-          backgroundImage:
-            "https://images.unsplash.com/photo-1441984904996-e0b6ba687e04?w=1920&h=900&fit=crop",
-        },
-      ],
-      minHeight: "550px",
+          settings: {
+        minHeight: "550px",
       autoplaySpeed: 0,
-    },
+      },
+      elements: [
+        {
+          id: "story-hero-slide-1",
+          type: "slide",
+          settings:           {
+            "subtitle": "OUR STORY",
+            "titleLine1": "From Workshop",
+            "titleLine2": "To World-Class",
+            "description": "A journey of passion, dedication, and the pursuit of excellence in leather craftsmanship.",
+            "buttonText": "Explore Collection",
+            "buttonLink": "/shop",
+            "colorScheme": "dark",
+            "textPosition": "center",
+            "backgroundImage": "https://images.unsplash.com/photo-1441984904996-e0b6ba687e04?w=1920&h=900&fit=crop"
+          },
+          elements: [],
+        }
+      ],
   },
   {
     id: "story-marquee",
     type: "fashionMarquee",
-    props: {
+    settings: {
       items: [
         { text: "Founded 2008", icon: "✦" },
         { text: "30+ Countries", icon: "✦" },
@@ -326,7 +335,7 @@ export const HANDMADE_BAGS_OUR_STORY_BLOCKS: TemplateBlock[] = [
   {
     id: "story-intro",
     type: "fashionSectionTitle",
-    props: {
+    settings: {
       subtitle: "THE BEGINNING",
       title: "A Dream in a Small Workshop",
       description:
@@ -339,7 +348,7 @@ export const HANDMADE_BAGS_OUR_STORY_BLOCKS: TemplateBlock[] = [
   {
     id: "story-timeline",
     type: "fashionSectionTitle",
-    props: {
+    settings: {
       subtitle: "OUR JOURNEY",
       title: "Milestones That Shaped Us",
       description:
@@ -352,7 +361,7 @@ export const HANDMADE_BAGS_OUR_STORY_BLOCKS: TemplateBlock[] = [
   {
     id: "story-timeline-banners",
     type: "fashionCoverBanners",
-    props: {
+    settings: {
       columns: 3,
       height: "450px",
       marginBottom: "70px",
@@ -390,7 +399,7 @@ export const HANDMADE_BAGS_OUR_STORY_BLOCKS: TemplateBlock[] = [
   {
     id: "story-philosophy",
     type: "fashionSectionTitle",
-    props: {
+    settings: {
       subtitle: "OUR PHILOSOPHY",
       title: "Craftsmanship With Purpose",
       description:
@@ -403,7 +412,7 @@ export const HANDMADE_BAGS_OUR_STORY_BLOCKS: TemplateBlock[] = [
   {
     id: "story-values",
     type: "fashionFeatures",
-    props: {
+    settings: {
       columns: 2,
       marginBottom: "70px",
       features: [
@@ -429,7 +438,7 @@ export const HANDMADE_BAGS_OUR_STORY_BLOCKS: TemplateBlock[] = [
   {
     id: "story-cta",
     type: "fashionNewsletter",
-    props: {
+    settings: {
       subtitle: "",
       title: "Be Part of Our Story",
       description:
@@ -442,34 +451,37 @@ export const HANDMADE_BAGS_OUR_STORY_BLOCKS: TemplateBlock[] = [
 ];
 
 /* ── REVIEWS PAGE ───────────────────────────────────────────── */
-export const HANDMADE_BAGS_REVIEWS_BLOCKS: TemplateBlock[] = [
+export const HANDMADE_BAGS_REVIEWS_BLOCKS: EditorNode[] = [
   {
     id: "reviews-hero",
     type: "fashionHeroSlider",
-    props: {
-      slides: [
-        {
-          subtitle: "TESTIMONIALS",
-          titleLine1: "Customer",
-          titleLine2: "Reviews",
-          description:
-            "See what our customers are saying about their handcrafted leather pieces.",
-          buttonText: "Shop Collection",
-          buttonLink: "/shop",
-          colorScheme: "dark",
-          textPosition: "center",
-          backgroundImage:
-            "https://images.unsplash.com/photo-1548036328-c9fa89d128fa?w=1920&h=900&fit=crop",
-        },
-      ],
-      minHeight: "550px",
+          settings: {
+        minHeight: "550px",
       autoplaySpeed: 0,
-    },
+      },
+      elements: [
+        {
+          id: "reviews-hero-slide-1",
+          type: "slide",
+          settings:           {
+            "subtitle": "TESTIMONIALS",
+            "titleLine1": "Customer",
+            "titleLine2": "Reviews",
+            "description": "See what our customers are saying about their handcrafted leather pieces.",
+            "buttonText": "Shop Collection",
+            "buttonLink": "/shop",
+            "colorScheme": "dark",
+            "textPosition": "center",
+            "backgroundImage": "https://images.unsplash.com/photo-1548036328-c9fa89d128fa?w=1920&h=900&fit=crop"
+          },
+          elements: [],
+        }
+      ],
   },
   {
     id: "reviews-marquee",
     type: "fashionMarquee",
-    props: {
+    settings: {
       items: [
         { text: "⭐⭐⭐⭐⭐", icon: "" },
         { text: "Quality Craftsmanship", icon: "✦" },
@@ -492,7 +504,7 @@ export const HANDMADE_BAGS_REVIEWS_BLOCKS: TemplateBlock[] = [
   {
     id: "reviews-intro",
     type: "fashionSectionTitle",
-    props: {
+    settings: {
       subtitle: "WHAT THEY SAY",
       title: "Customer Reviews",
       description:
@@ -505,7 +517,7 @@ export const HANDMADE_BAGS_REVIEWS_BLOCKS: TemplateBlock[] = [
   {
     id: "reviews-cta",
     type: "fashionNewsletter",
-    props: {
+    settings: {
       subtitle: "",
       title: "Love Our Products?",
       description:
@@ -517,10 +529,146 @@ export const HANDMADE_BAGS_REVIEWS_BLOCKS: TemplateBlock[] = [
   },
 ];
 
+/* ── BLOG PAGE ─────────────────────────────────────────────── */
+export const HANDMADE_BAGS_BLOG_BLOCKS: EditorNode[] = [
+  {
+    id: "blog-hero",
+    type: "fashionHeroSlider",
+          settings: {
+        minHeight: "550px",
+      autoplaySpeed: 0,
+      },
+      elements: [
+        {
+          id: "blog-hero-slide-1",
+          type: "slide",
+          settings:           {
+            "subtitle": "OUR JOURNAL",
+            "titleLine1": "Leather",
+            "titleLine2": "Stories",
+            "description": "Discover the artistry, craftsmanship, and stories behind our handcrafted leather goods.",
+            "buttonText": "Explore Collection",
+            "buttonLink": "/shop",
+            "colorScheme": "dark",
+            "textPosition": "center",
+            "backgroundImage": "https://images.unsplash.com/photo-1596462502278-27bfdc403348?w=1920&h=900&fit=crop"
+          },
+          elements: [],
+        }
+      ],
+  },
+  {
+    id: "blog-intro",
+    type: "fashionSectionTitle",
+    settings: {
+      subtitle: "LATEST STORIES",
+      title: "From Our Workshop",
+      description:
+        "Explore our collection of articles about leather craftsmanship, care tips, style inspiration, and the stories behind our handcrafted pieces.",
+      align: "center",
+      maxWidth: "65%",
+      marginBottom: "60px",
+    },
+  },
+  {
+    id: "blog-posts",
+    type: "fashionBlogPosts",
+    settings: {
+      sectionTitle: {
+        subtitle: "",
+        title: "Recent Articles",
+        description: "",
+      },
+      columns: 2,
+      posts: [
+        {
+          id: "handmade-blog-1",
+          title: "Minimalist Japanese-inspired Leather Goods",
+          slug: "minimalist-japanese-inspired-leather-goods",
+          excerpt:
+            "Discover how Japanese minimalism influences our leather craftsmanship. Clean lines, functional design, and exceptional quality meet traditional artistry.",
+          image: "https://images.unsplash.com/photo-1553062407-98eeb64c6a62?w=800&h=600&fit=crop",
+          date: { day: "22", month: "Jun" },
+          categories: ["Home Decor"],
+          author: { name: "S. Rogers", avatar: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=100&h=100&fit=crop&crop=face" },
+          link: "/blog/minimalist-japanese-inspired-leather-goods",
+          commentCount: 0,
+        },
+        {
+          id: "handmade-blog-2",
+          title: "New Leather Care Essentials from Our Workshop",
+          slug: "new-leather-care-essentials-from-our-workshop",
+          excerpt:
+            "Introducing our latest collection of leather care products. From conditioners to protectors, everything you need to maintain your handcrafted pieces.",
+          image: "https://images.unsplash.com/photo-1548036328-c9fa89d128fa?w=800&h=600&fit=crop",
+          date: { day: "16", month: "Jun" },
+          categories: ["Design trends"],
+          author: { name: "S. Rogers", avatar: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=100&h=100&fit=crop&crop=face" },
+          link: "/blog/new-leather-care-essentials-from-our-workshop",
+          commentCount: 0,
+        },
+        {
+          id: "handmade-blog-3",
+          title: "The Big Design: Wall Likes Pictures",
+          slug: "the-big-design-wall-likes-pictures",
+          excerpt:
+            "How to display your leather bags as art in your home. Creative styling tips for showcasing your collection while keeping pieces protected and accessible.",
+          image: "https://images.unsplash.com/photo-1594223274512-ad4803739b7c?w=800&h=600&fit=crop",
+          date: { day: "16", month: "Jun" },
+          categories: ["Home Decor"],
+          author: { name: "S. Rogers", avatar: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=100&h=100&fit=crop&crop=face" },
+          link: "/blog/the-big-design-wall-likes-pictures",
+          commentCount: 0,
+        },
+        {
+          id: "handmade-blog-4",
+          title: "Sweet Seat: Functional Leather for Everyday",
+          slug: "sweet-seat-functional-leather-for-everyday",
+          excerpt:
+            "Practical leather goods designed for daily use. Discover our collection of functional pieces that combine durability with elegant design for modern lifestyles.",
+          image: "https://images.unsplash.com/photo-1560472355-536de3962603?w=800&h=600&fit=crop",
+          date: { day: "14", month: "Jun" },
+          categories: ["Decoration"],
+          author: { name: "S. Rogers", avatar: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=100&h=100&fit=crop&crop=face" },
+          link: "/blog/sweet-seat-functional-leather-for-everyday",
+          commentCount: 0,
+        },
+        {
+          id: "handmade-blog-5",
+          title: "Creative Leather Features and Exterior Design",
+          slug: "creative-leather-features-and-exterior-design",
+          excerpt:
+            "Exploring innovative leather treatments and exterior finishes. From natural patinas to protective coatings, learn about the techniques that make our pieces unique.",
+          image: "https://images.unsplash.com/photo-1473188588951-1d4f0e31f5e0?w=800&h=600&fit=crop",
+          date: { day: "14", month: "Jun" },
+          categories: ["Decoration"],
+          author: { name: "S. Rogers", avatar: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=100&h=100&fit=crop&crop=face" },
+          link: "/blog/creative-leather-features-and-exterior-design",
+          commentCount: 0,
+        },
+      ],
+    },
+  },
+  {
+    id: "blog-cta",
+    type: "fashionNewsletter",
+    settings: {
+      subtitle: "",
+      title: "Stay Connected",
+      description:
+        "Subscribe to our newsletter for the latest stories, leather care tips, and exclusive updates from our workshop.",
+      buttonText: "Subscribe",
+      backgroundColor: "#c27843",
+      socialLinks: [],
+    },
+  },
+];
+
 /** Map slug → default blocks for handbag template pages */
-export const HANDMADE_BAGS_PAGE_BLOCKS: Record<string, TemplateBlock[]> = {
+export const HANDMADE_BAGS_PAGE_BLOCKS: Record<string, EditorNode[]> = {
   about: HANDMADE_BAGS_ABOUT_BLOCKS,
   contact: HANDMADE_BAGS_CONTACT_BLOCKS,
   "our-story": HANDMADE_BAGS_OUR_STORY_BLOCKS,
   reviews: HANDMADE_BAGS_REVIEWS_BLOCKS,
+  blog: HANDMADE_BAGS_BLOG_BLOCKS,
 };

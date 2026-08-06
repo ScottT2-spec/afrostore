@@ -118,43 +118,6 @@ const SORT_LABELS: Record<SortOption, string> = {
   "name-asc": "Name: A → Z",
 };
 
-/* ───────── Shared chrome: fonts + design tokens ─────────
-   "Adire" system — the same indigo / marigold / chalk palette used on
-   checkout, so the browse → cart → pay journey reads as one product. */
-function ShopChrome() {
-  return (
-    <>
-      <link rel="preconnect" href="https://fonts.googleapis.com" />
-      <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
-      <link
-        rel="stylesheet"
-        href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,600;9..144,700;9..144,900&family=Space+Mono:wght@400;700&family=Inter:wght@400;500;600;700&display=swap"
-      />
-      <style>{`
-        :root {
-          --co-ink: #14132f;
-          --co-indigo: #2f2a7a;
-          --co-indigo-deep: #1e1a57;
-          --co-indigo-soft: #edecf9;
-          --co-indigo-ring: rgba(47,42,122,0.14);
-          --co-marigold: #e8a33d;
-          --co-marigold-deep: #c97f1e;
-          --co-marigold-soft: #fbeed9;
-          --co-chalk: #f5f4f9;
-          --co-paper: #ffffff;
-          --co-coral: #e15241;
-          --co-coral-soft: #fdeceb;
-          --co-green: #1f9d63;
-          --co-line: #e4e2ed;
-        }
-        .co-font-display { font-family: 'Fraunces', Georgia, serif; }
-        .co-font-mono { font-family: 'Space Mono', ui-monospace, SFMono-Regular, monospace; font-variant-numeric: tabular-nums; }
-        .co-font-body { font-family: 'Inter', system-ui, sans-serif; }
-      `}</style>
-    </>
-  );
-}
-
 /* ───────── Component ───────── */
 
 export default function ShopPage() {
@@ -326,11 +289,10 @@ export default function ShopPage() {
   /* ── Loading ── */
   if (loading && !storeData) {
     return (
-      <div className="min-h-screen bg-[var(--co-chalk)] co-font-body flex items-center justify-center">
-        <ShopChrome />
+      <div className="min-h-screen bg-white flex items-center justify-center">
         <div className="text-center">
-          <Loader2 className="h-10 w-10 animate-spin text-[var(--co-indigo)] mx-auto mb-4" />
-          <p className="text-surface-500 text-sm">Loading shop…</p>
+          <Loader2 className="h-10 w-10 animate-spin text-brand-600 mx-auto mb-4" />
+          <p className="text-surface-500 text-sm">Loading shop...</p>
         </div>
       </div>
     );
@@ -338,11 +300,10 @@ export default function ShopPage() {
 
   if (error || !storeData) {
     return (
-      <div className="min-h-screen bg-[var(--co-chalk)] co-font-body flex items-center justify-center">
-        <ShopChrome />
+      <div className="min-h-screen bg-white flex items-center justify-center">
         <div className="text-center max-w-md px-4">
           <ShoppingBag className="h-12 w-12 text-surface-300 mx-auto mb-4" />
-          <h1 className="co-font-display text-2xl font-bold text-[var(--co-ink)] mb-2">Store not found</h1>
+          <h1 className="text-2xl font-bold text-surface-900 mb-2">Store not found</h1>
           <p className="text-surface-500">{error}</p>
         </div>
       </div>
@@ -390,7 +351,7 @@ export default function ShopPage() {
             <div className="mb-8 grid grid-cols-2 gap-4 md:grid-cols-4">
               <Link href={`/store/${slug}/shop?category=apparel`} className="group">
                 <div className="relative overflow-hidden rounded-[28px] bg-gray-100 aspect-square">
-                  <img src="https://woodmart.xtemos.com/t-shirts-prints/wp-content/uploads/sites/24/2025/02/ps-color-t-shirt.svg" alt="Apparel" className="w-full h-full object-cover p-8" />
+                  <img src="/prokip-logo.png" alt="Apparel" className="w-full h-full object-cover p-8" />
                   <div className="absolute inset-0 flex items-center justify-center bg-black/0 group-hover:bg-black/10 transition">
                     <span className="text-sm font-semibold text-[#111]">Apparel</span>
                   </div>
@@ -398,7 +359,7 @@ export default function ShopPage() {
               </Link>
               <Link href={`/store/${slug}/shop?category=home-living`} className="group">
                 <div className="relative overflow-hidden rounded-[28px] bg-gray-100 aspect-square">
-                  <img src="https://woodmart.xtemos.com/t-shirts-prints/wp-content/uploads/sites/24/2025/02/ps-color-tote-bag.svg" alt="Home & Living" className="w-full h-full object-cover p-8" />
+                  <img src="/prokip-logo.png" alt="Home & Living" className="w-full h-full object-cover p-8" />
                   <div className="absolute inset-0 flex items-center justify-center bg-black/0 group-hover:bg-black/10 transition">
                     <span className="text-sm font-semibold text-[#111]">Home & Living</span>
                   </div>
@@ -406,7 +367,7 @@ export default function ShopPage() {
               </Link>
               <Link href={`/store/${slug}/shop?category=stickers`} className="group">
                 <div className="relative overflow-hidden rounded-[28px] bg-gray-100 aspect-square">
-                  <img src="https://woodmart.xtemos.com/t-shirts-prints/wp-content/uploads/sites/24/2025/02/ps-color-sticker.svg" alt="Stickers" className="w-full h-full object-cover p-8" />
+                  <img src="/prokip-logo.png" alt="Stickers" className="w-full h-full object-cover p-8" />
                   <div className="absolute inset-0 flex items-center justify-center bg-black/0 group-hover:bg-black/10 transition">
                     <span className="text-sm font-semibold text-[#111]">Stickers</span>
                   </div>
@@ -414,7 +375,7 @@ export default function ShopPage() {
               </Link>
               <Link href={`/store/${slug}/shop?category=wall-art`} className="group">
                 <div className="relative overflow-hidden rounded-[28px] bg-gray-100 aspect-square">
-                  <img src="https://woodmart.xtemos.com/t-shirts-prints/wp-content/uploads/sites/24/2025/02/ps-color-poster.svg" alt="Wall Art" className="w-full h-full object-cover p-8" />
+                  <img src="/prokip-logo.png" alt="Wall Art" className="w-full h-full object-cover p-8" />
                   <div className="absolute inset-0 flex items-center justify-center bg-black/0 group-hover:bg-black/10 transition">
                     <span className="text-sm font-semibold text-[#111]">Wall Art</span>
                   </div>
@@ -892,7 +853,7 @@ export default function ShopPage() {
           storeSlug={slug}
           logo={store.logo}
           templateSlug="kids"
-          description={store.description || "Bright, playful kids fashion and gifts with a premium finish."}
+          description={store.description || "Bright, playful kids fashion and gifts with a premium Prokip LTD-inspired finish."}
         />
       </div>
     );
@@ -1179,8 +1140,7 @@ export default function ShopPage() {
 
   return (
     <ThemeProvider theme={storeData.theme}>
-    <div className="min-h-screen bg-[var(--co-chalk)] co-font-body">
-      <ShopChrome />
+    <div className="min-h-screen bg-surface-50">
       {/* ── Nav ── */}
       {isTShirtsPrintsTemplate ? (
         <TShirtsPrintsHeader
@@ -1210,7 +1170,7 @@ export default function ShopPage() {
           isLanding={false}
         />
       ) : (
-      <header className="sticky top-0 z-40 bg-white border-b border-[var(--co-line)] themed-header">
+      <header className="sticky top-0 z-40 bg-white border-b border-surface-200 shadow-sm themed-header">
         <div className="max-w-6xl mx-auto flex h-16 items-center justify-between px-4 sm:px-6">
           <div className="flex items-center gap-4">
             <button onClick={() => setMobileMenu(!mobileMenu)} className="sm:hidden p-2 -ml-2 text-surface-600">
@@ -1220,34 +1180,34 @@ export default function ShopPage() {
               {store.logo ? (
                 <img src={store.logo} alt={store.name} className="h-9 w-9 rounded-xl object-cover" />
               ) : (
-                <div className="h-9 w-9 rounded-xl bg-[var(--co-indigo)] flex items-center justify-center">
+                <div className="h-9 w-9 rounded-xl bg-gradient-to-br from-purple-500 to-pink-500 flex items-center justify-center">
                   <ShoppingBag className="h-5 w-5 text-white" />
                 </div>
               )}
-              <span className="co-font-display text-lg font-bold text-[var(--co-ink)]">{store.name}</span>
+              <span className="font-display text-lg font-bold text-surface-900">{store.name}</span>
             </Link>
           </div>
 
           <nav className="hidden sm:flex items-center gap-6">
-            <Link href={`/store/${slug}`} className="text-sm font-medium text-surface-600 hover:text-[var(--co-indigo)] transition-colors">Home</Link>
-            <Link href={`/store/${slug}/shop`} className="text-sm font-semibold text-[var(--co-indigo)] transition-colors">Shop</Link>
-            <Link href={`/store/${slug}/reviews`} className="text-sm font-medium text-surface-600 hover:text-[var(--co-indigo)] transition-colors">Reviews</Link>
+            <Link href={`/store/${slug}`} className="text-sm font-medium text-surface-600 hover:text-surface-900 transition-colors">Home</Link>
+            <Link href={`/store/${slug}/shop`} className="text-sm font-medium text-brand-700 transition-colors">Shop</Link>
+            <Link href={`/store/${slug}/reviews`} className="text-sm font-medium text-surface-600 hover:text-surface-900 transition-colors">Reviews</Link>
             {navPages.slice(0, 4).map((page) => (
-              <Link key={page.id} href={`/store/${slug}/${page.slug}`} className="text-sm font-medium text-surface-600 hover:text-[var(--co-indigo)] transition-colors">{page.title}</Link>
+              <Link key={page.id} href={`/store/${slug}/${page.slug}`} className="text-sm font-medium text-surface-600 hover:text-surface-900 transition-colors">{page.title}</Link>
             ))}
           </nav>
 
           <div className="flex items-center gap-3">
-            <Link href={`/store/${slug}/wishlist`} className="relative p-2 text-surface-600 hover:bg-[var(--co-indigo-soft)] hover:text-[var(--co-indigo)] rounded-lg hidden sm:flex">
+            <Link href={`/store/${slug}/wishlist`} className="relative p-2 text-surface-600 hover:bg-surface-50 rounded-lg hidden sm:flex">
               <Heart className="h-5 w-5" />
               {wishlistCount > 0 && (
-                <span className="absolute -top-0.5 -right-0.5 h-5 w-5 rounded-full bg-[var(--co-coral)] text-white text-[10px] font-bold flex items-center justify-center">{wishlistCount}</span>
+                <span className="absolute -top-0.5 -right-0.5 h-5 w-5 rounded-full bg-red-500 text-white text-[10px] font-bold flex items-center justify-center">{wishlistCount}</span>
               )}
             </Link>
-            <Link href={`/store/${slug}/cart`} className="relative p-2 text-surface-600 hover:bg-[var(--co-indigo-soft)] hover:text-[var(--co-indigo)] rounded-lg">
+            <Link href={`/store/${slug}/cart`} className="relative p-2 text-surface-600 hover:bg-surface-50 rounded-lg">
               <ShoppingCart className="h-5 w-5" />
               {cartCount > 0 && (
-                <span className="absolute -top-0.5 -right-0.5 h-5 w-5 rounded-full bg-[var(--co-indigo)] text-white text-[10px] font-bold flex items-center justify-center">{cartCount}</span>
+                <span className="absolute -top-0.5 -right-0.5 h-5 w-5 rounded-full bg-brand-600 text-white text-[10px] font-bold flex items-center justify-center">{cartCount}</span>
               )}
             </Link>
           </div>
@@ -1255,9 +1215,9 @@ export default function ShopPage() {
 
         {/* Mobile menu */}
         {mobileMenu && (
-          <div className="sm:hidden bg-white border-t border-[var(--co-line)] px-4 py-4 space-y-2">
+          <div className="sm:hidden bg-white border-t border-surface-200 px-4 py-4 space-y-2">
             <Link href={`/store/${slug}`} onClick={() => setMobileMenu(false)} className="block text-sm font-medium text-surface-600 py-2">Home</Link>
-            <Link href={`/store/${slug}/shop`} onClick={() => setMobileMenu(false)} className="block text-sm font-bold text-[var(--co-indigo)] py-2">Shop</Link>
+            <Link href={`/store/${slug}/shop`} onClick={() => setMobileMenu(false)} className="block text-sm font-bold text-brand-700 py-2">Shop</Link>
             <Link href={`/store/${slug}/reviews`} onClick={() => setMobileMenu(false)} className="block text-sm font-medium text-surface-600 py-2">Reviews</Link>
             {navPages.map((page) => (
               <Link key={page.id} href={`/store/${slug}/${page.slug}`} onClick={() => setMobileMenu(false)} className="block text-sm font-medium text-surface-600 py-2">{page.title}</Link>
@@ -1270,9 +1230,9 @@ export default function ShopPage() {
       {/* ── Breadcrumb ── */}
       <div className="max-w-6xl mx-auto px-4 sm:px-6 pt-6">
         <div className="flex items-center gap-2 text-sm text-surface-400">
-          <Link href={`/store/${slug}`} className="hover:text-[var(--co-indigo)] transition-colors">{store.name}</Link>
+          <Link href={`/store/${slug}`} className="hover:text-surface-600 transition-colors">{store.name}</Link>
           <ChevronRight className="h-3.5 w-3.5" />
-          <span className="text-[var(--co-ink)] font-medium">
+          <span className="text-surface-900 font-medium">
             {activeCategoryName || "All Products"}
           </span>
         </div>
@@ -1280,7 +1240,7 @@ export default function ShopPage() {
 
       {/* ── Page Header ── */}
       <div className="max-w-6xl mx-auto px-4 sm:px-6 pt-4 pb-6">
-        <h1 className="co-font-display text-2xl sm:text-3xl font-bold text-[var(--co-ink)]">
+        <h1 className="font-display text-2xl sm:text-3xl font-extrabold text-surface-900">
           {activeCategoryName || "All Products"}
         </h1>
         <p className="text-surface-500 text-sm mt-1">
@@ -1302,7 +1262,7 @@ export default function ShopPage() {
               }}
               className="mb-6"
             >
-              <div className="flex items-center gap-2 rounded-xl border border-[var(--co-line)] bg-white px-3 py-2.5">
+              <div className="flex items-center gap-2 rounded-xl border border-surface-200 bg-white px-3 py-2.5">
                 <Search className="h-4 w-4 text-surface-400" />
                 <input
                   type="text"
@@ -1321,11 +1281,11 @@ export default function ShopPage() {
                 <button
                   onClick={() => handleCategoryChange("")}
                   className={`w-full text-left rounded-xl px-3 py-2.5 text-sm font-medium transition-colors ${
-                    !selectedCategory ? "bg-[var(--co-indigo)] text-white" : "text-surface-600 hover:bg-[var(--co-indigo-soft)] hover:text-[var(--co-indigo)]"
+                    !selectedCategory ? "bg-surface-900 text-white" : "text-surface-600 hover:bg-surface-100"
                   }`}
                 >
                   All Products
-                  <span className="ml-auto float-right text-xs opacity-70">{pagination.total || "—"}</span>
+                  <span className="ml-auto float-right text-xs opacity-60">{pagination.total || "—"}</span>
                 </button>
                 {categories
                   .filter((c) => c._count.products > 0)
@@ -1334,11 +1294,11 @@ export default function ShopPage() {
                       key={cat.id}
                       onClick={() => handleCategoryChange(cat.slug)}
                       className={`w-full text-left rounded-xl px-3 py-2.5 text-sm font-medium transition-colors ${
-                        selectedCategory === cat.slug ? "bg-[var(--co-indigo)] text-white" : "text-surface-600 hover:bg-[var(--co-indigo-soft)] hover:text-[var(--co-indigo)]"
+                        selectedCategory === cat.slug ? "bg-surface-900 text-white" : "text-surface-600 hover:bg-surface-100"
                       }`}
                     >
                       {cat.name}
-                      <span className="ml-auto float-right text-xs opacity-70">{cat._count.products}</span>
+                      <span className="ml-auto float-right text-xs opacity-60">{cat._count.products}</span>
                     </button>
                   ))}
               </div>
@@ -1347,7 +1307,7 @@ export default function ShopPage() {
             {hasFilters && (
               <button
                 onClick={clearFilters}
-                className="mt-4 w-full text-center text-sm font-medium text-[var(--co-coral)] hover:text-[#b8392a] py-2"
+                className="mt-4 w-full text-center text-sm font-medium text-red-600 hover:text-red-700 py-2"
               >
                 Clear all filters
               </button>
@@ -1366,7 +1326,7 @@ export default function ShopPage() {
                 }}
                 className="lg:hidden flex-1"
               >
-                <div className="flex items-center gap-2 rounded-xl border border-[var(--co-line)] bg-white px-3 py-2.5">
+                <div className="flex items-center gap-2 rounded-xl border border-surface-200 bg-white px-3 py-2.5">
                   <Search className="h-4 w-4 text-surface-400" />
                   <input
                     type="text"
@@ -1381,18 +1341,18 @@ export default function ShopPage() {
               {/* Mobile filter toggle */}
               <button
                 onClick={() => setMobileFilters(!mobileFilters)}
-                className="lg:hidden flex items-center gap-2 rounded-xl border border-[var(--co-line)] bg-white px-3 py-2.5 text-sm font-medium text-surface-600"
+                className="lg:hidden flex items-center gap-2 rounded-xl border border-surface-200 bg-white px-3 py-2.5 text-sm font-medium text-surface-600"
               >
                 <SlidersHorizontal className="h-4 w-4" />
                 Filter
-                {selectedCategory && <span className="h-2 w-2 rounded-full bg-[var(--co-indigo)]" />}
+                {selectedCategory && <span className="h-2 w-2 rounded-full bg-brand-600" />}
               </button>
 
               {/* Sort */}
               <div className="relative ml-auto">
                 <button
                   onClick={() => setShowSortMenu(!showSortMenu)}
-                  className="flex items-center gap-2 rounded-xl border border-[var(--co-line)] bg-white px-3 py-2.5 text-sm font-medium text-surface-600 hover:border-[var(--co-indigo)] transition-colors"
+                  className="flex items-center gap-2 rounded-xl border border-surface-200 bg-white px-3 py-2.5 text-sm font-medium text-surface-600 hover:border-surface-300 transition-colors"
                 >
                   <ArrowUpDown className="h-4 w-4" />
                   <span className="hidden sm:inline">{SORT_LABELS[sort]}</span>
@@ -1400,12 +1360,12 @@ export default function ShopPage() {
                 {showSortMenu && (
                   <>
                     <div className="fixed inset-0 z-10" onClick={() => setShowSortMenu(false)} />
-                    <div className="absolute right-0 top-full mt-2 w-48 bg-white rounded-xl border border-[var(--co-line)] shadow-xl z-20 py-1">
+                    <div className="absolute right-0 top-full mt-2 w-48 bg-white rounded-xl border border-surface-200 shadow-xl z-20 py-1">
                       {(Object.entries(SORT_LABELS) as [SortOption, string][]).map(([key, label]) => (
                         <button
                           key={key}
                           onClick={() => { setSort(key); setShowSortMenu(false); }}
-                          className={`w-full text-left px-4 py-2.5 text-sm transition-colors ${sort === key ? "bg-[var(--co-indigo-soft)] text-[var(--co-indigo)] font-semibold" : "text-surface-600 hover:bg-surface-50"}`}
+                          className={`w-full text-left px-4 py-2.5 text-sm transition-colors ${sort === key ? "bg-surface-50 text-brand-700 font-semibold" : "text-surface-600 hover:bg-surface-50"}`}
                         >
                           {label}
                         </button>
@@ -1418,13 +1378,13 @@ export default function ShopPage() {
 
             {/* Mobile category chips */}
             {mobileFilters && (
-              <div className="lg:hidden mb-6 rounded-2xl border border-[var(--co-line)] bg-white p-4">
+              <div className="lg:hidden mb-6 rounded-2xl border border-surface-200 bg-white p-4">
                 <h3 className="text-xs font-bold text-surface-500 uppercase tracking-wider mb-3">Categories</h3>
                 <div className="flex flex-wrap gap-2">
                   <button
                     onClick={() => handleCategoryChange("")}
                     className={`rounded-full px-3 py-1.5 text-xs font-medium transition-colors ${
-                      !selectedCategory ? "bg-[var(--co-indigo)] text-white" : "bg-[var(--co-chalk)] text-surface-600"
+                      !selectedCategory ? "bg-surface-900 text-white" : "bg-surface-100 text-surface-600"
                     }`}
                   >
                     All
@@ -1436,7 +1396,7 @@ export default function ShopPage() {
                         key={cat.id}
                         onClick={() => handleCategoryChange(cat.slug)}
                         className={`rounded-full px-3 py-1.5 text-xs font-medium transition-colors ${
-                          selectedCategory === cat.slug ? "bg-[var(--co-indigo)] text-white" : "bg-[var(--co-chalk)] text-surface-600"
+                          selectedCategory === cat.slug ? "bg-surface-900 text-white" : "bg-surface-100 text-surface-600"
                         }`}
                       >
                         {cat.name} ({cat._count.products})
@@ -1444,7 +1404,7 @@ export default function ShopPage() {
                     ))}
                 </div>
                 {hasFilters && (
-                  <button onClick={clearFilters} className="mt-3 text-sm font-medium text-[var(--co-coral)]">
+                  <button onClick={clearFilters} className="mt-3 text-sm font-medium text-red-600">
                     Clear filters
                   </button>
                 )}
@@ -1455,9 +1415,9 @@ export default function ShopPage() {
             {hasFilters && (
               <div className="flex flex-wrap items-center gap-2 mb-6">
                 {activeCategoryName && (
-                  <span className="inline-flex items-center gap-1.5 rounded-full bg-[var(--co-indigo-soft)] text-[var(--co-indigo)] px-3 py-1.5 text-xs font-medium">
+                  <span className="inline-flex items-center gap-1.5 rounded-full bg-brand-50 text-brand-700 px-3 py-1.5 text-xs font-medium">
                     {activeCategoryName}
-                    <button onClick={() => handleCategoryChange("")} className="hover:text-[var(--co-indigo-deep)]">
+                    <button onClick={() => handleCategoryChange("")} className="hover:text-brand-900">
                       <X className="h-3 w-3" />
                     </button>
                   </span>
@@ -1465,7 +1425,7 @@ export default function ShopPage() {
                 {searchQuery && (
                   <span className="inline-flex items-center gap-1.5 rounded-full bg-surface-100 text-surface-700 px-3 py-1.5 text-xs font-medium">
                     &ldquo;{searchQuery}&rdquo;
-                    <button onClick={() => { setSearchQuery(""); setSearchInput(""); updateParams(selectedCategory, ""); }} className="hover:text-[var(--co-ink)]">
+                    <button onClick={() => { setSearchQuery(""); setSearchInput(""); updateParams(selectedCategory, ""); }} className="hover:text-surface-900">
                       <X className="h-3 w-3" />
                     </button>
                   </span>
@@ -1476,22 +1436,22 @@ export default function ShopPage() {
             {/* Loading overlay for filter changes */}
             {loading && storeData && (
               <div className="flex items-center justify-center py-20">
-                <Loader2 className="h-8 w-8 animate-spin text-[var(--co-indigo)]" />
+                <Loader2 className="h-8 w-8 animate-spin text-brand-600" />
               </div>
             )}
 
             {/* Empty state */}
             {!loading && sortedProducts.length === 0 && (
-              <div className="text-center py-20 bg-white rounded-2xl border border-[var(--co-line)]">
+              <div className="text-center py-20 bg-white rounded-2xl border border-surface-100">
                 <ShoppingBag className="h-12 w-12 text-surface-300 mx-auto mb-4" />
-                <h3 className="co-font-display text-lg font-bold text-[var(--co-ink)] mb-2">No products found</h3>
+                <h3 className="text-lg font-bold text-surface-900 mb-2">No products found</h3>
                 <p className="text-sm text-surface-500 mb-6">
                   {hasFilters
                     ? "Try adjusting your filters or search terms."
                     : "This store hasn't added any products yet."}
                 </p>
                 {hasFilters && (
-                  <button onClick={clearFilters} className="inline-flex items-center gap-2 rounded-xl bg-[var(--co-indigo)] text-white px-5 py-2.5 text-sm font-semibold hover:bg-[var(--co-indigo-deep)] transition-colors">
+                  <button onClick={clearFilters} className="inline-flex items-center gap-2 rounded-xl bg-surface-900 text-white px-5 py-2.5 text-sm font-semibold hover:bg-surface-800 transition-colors">
                     Clear filters
                   </button>
                 )}
@@ -1525,34 +1485,34 @@ export default function ShopPage() {
                               </div>
                             )}
                             {product.isFeatured && (
-                              <div className="absolute top-3 left-3 rounded-full px-2.5 py-0.5 text-[10px] font-bold text-white bg-[var(--co-indigo)]">Featured</div>
+                              <div className="absolute top-3 left-3 rounded-full px-2.5 py-0.5 text-[10px] font-bold text-white bg-brand-600">Featured</div>
                             )}
                             {!product.inStock && (
-                              <div className="absolute top-3 left-3 rounded-full px-2.5 py-0.5 text-[10px] font-bold text-white bg-[var(--co-coral)]">Sold Out</div>
+                              <div className="absolute top-3 left-3 rounded-full px-2.5 py-0.5 text-[10px] font-bold text-white bg-red-500">Sold Out</div>
                             )}
                             {discount > 0 && (
-                              <div className="absolute top-3 left-3 rounded-full bg-[var(--co-marigold)] px-2 py-0.5 text-[10px] font-bold text-white z-10">-{discount}%</div>
+                              <div className="absolute top-3 left-3 rounded-full bg-red-500 px-2 py-0.5 text-[10px] font-bold text-white z-10">-{discount}%</div>
                             )}
                             {/* Always-visible wishlist + cart icons */}
                             <div className="absolute top-3 right-3 flex items-center gap-1.5 z-10">
                               <button
                                 onClick={(e) => { e.preventDefault(); e.stopPropagation(); toggleWishlist(product.id); }}
-                                className={`h-8 w-8 rounded-full bg-white/90 backdrop-blur-sm flex items-center justify-center transition-all hover:bg-white hover:scale-110 shadow-sm ${isWishlisted(product.id) ? "ring-1 ring-[var(--co-coral)]" : ""}`}
+                                className={`h-8 w-8 rounded-full bg-white/90 backdrop-blur-sm flex items-center justify-center transition-all hover:bg-white hover:scale-110 shadow-sm ${isWishlisted(product.id) ? "ring-1 ring-red-200" : ""}`}
                               >
-                                <Heart className={`h-4 w-4 ${isWishlisted(product.id) ? "fill-[var(--co-coral)] text-[var(--co-coral)]" : "text-surface-500"}`} />
+                                <Heart className={`h-4 w-4 ${isWishlisted(product.id) ? "fill-red-500 text-red-500" : "text-surface-500"}`} />
                               </button>
                               <button
                                 onClick={(e) => { e.preventDefault(); e.stopPropagation(); if (product.inStock) addToCart(product); }}
                                 disabled={!product.inStock}
                                 className={`h-8 w-8 rounded-full backdrop-blur-sm flex items-center justify-center transition-all hover:scale-110 shadow-sm disabled:opacity-40 ${
-                                  justAdded ? "bg-[var(--co-green)] text-white" : "bg-white/90 text-surface-500 hover:bg-white"
+                                  justAdded ? "bg-green-500 text-white" : "bg-white/90 text-surface-500 hover:bg-white"
                                 }`}
                               >
                                 {justAdded ? <CheckCircle2 className="h-4 w-4" /> : <ShoppingCart className="h-4 w-4" />}
                               </button>
                               <button
                                 onClick={(e) => { e.preventDefault(); e.stopPropagation(); toggleCompare(product); }}
-                                className={`h-8 w-8 rounded-full backdrop-blur-sm flex items-center justify-center transition-all hover:scale-110 shadow-sm ${compareList.includes(product.id) ? "bg-[var(--co-indigo)] text-white ring-1 ring-[var(--co-indigo-soft)]" : "bg-white/90 text-surface-500 hover:bg-white"}`}
+                                className={`h-8 w-8 rounded-full backdrop-blur-sm flex items-center justify-center transition-all hover:scale-110 shadow-sm ${compareList.includes(product.id) ? "bg-brand-600 text-white ring-1 ring-brand-300" : "bg-white/90 text-surface-500 hover:bg-white"}`}
                                 title={compareList.includes(product.id) ? "Remove from compare" : "Add to compare"}
                               >
                                 <SlidersHorizontal className="h-4 w-4" />
@@ -1562,21 +1522,21 @@ export default function ShopPage() {
                           </div>
                         </Link>
                         <Link href={`/store/${slug}/product/${product.slug}`}>
-                          <h3 className="text-sm font-semibold text-[var(--co-ink)] group-hover:text-[var(--co-indigo)] transition-colors line-clamp-1">{product.name}</h3>
+                          <h3 className="text-sm font-semibold text-surface-900 group-hover:text-brand-600 transition-colors line-clamp-1">{product.name}</h3>
                         </Link>
                         {product.category && (
                           <p className="text-[10px] text-surface-400 mt-0.5">{product.category.name}</p>
                         )}
                         {product.reviewCount > 0 && (
                           <div className="flex items-center gap-1 mt-1">
-                            <Star className="h-3 w-3 fill-[var(--co-marigold)] text-[var(--co-marigold)]" />
+                            <Star className="h-3 w-3 fill-yellow-400 text-yellow-400" />
                             <span className="text-[10px] text-surface-400">({product.reviewCount})</span>
                           </div>
                         )}
                         <div className="flex items-center gap-2 mt-1.5">
-                          <span className="co-font-mono text-base font-bold text-[var(--co-ink)]">{formatCurrency(Number(product.price), currency)}</span>
+                          <span className="text-base font-bold text-surface-900">{formatCurrency(Number(product.price), currency)}</span>
                           {product.compareAtPrice && (
-                            <span className="co-font-mono text-xs text-surface-400 line-through">{formatCurrency(Number(product.compareAtPrice), currency)}</span>
+                            <span className="text-xs text-surface-400 line-through">{formatCurrency(Number(product.compareAtPrice), currency)}</span>
                           )}
                         </div>
                       </div>
@@ -1590,7 +1550,7 @@ export default function ShopPage() {
                     <button
                       onClick={() => fetchProducts(pagination.page + 1, true)}
                       disabled={loadingMore}
-                      className="inline-flex items-center gap-2 rounded-2xl bg-[var(--co-indigo)] text-white px-8 py-3.5 text-sm font-bold hover:bg-[var(--co-indigo-deep)] transition-all shadow-lg disabled:opacity-50"
+                      className="inline-flex items-center gap-2 rounded-2xl bg-surface-900 text-white px-8 py-3.5 text-sm font-bold hover:bg-surface-800 transition-all shadow-lg disabled:opacity-50"
                     >
                       {loadingMore ? (
                         <><Loader2 className="h-4 w-4 animate-spin" /> Loading...</>
@@ -1627,20 +1587,20 @@ export default function ShopPage() {
           description={store.description}
         />
       ) : (
-      <footer className="bg-[var(--co-ink)] text-surface-400 py-10 themed-footer">
+      <footer className="bg-surface-900 text-surface-400 py-10 themed-footer">
         <div className="max-w-6xl mx-auto px-4 sm:px-6 flex flex-col sm:flex-row items-center justify-between gap-4 text-xs">
           <div className="flex items-center gap-2">
             {store.logo ? (
               <img src={store.logo} alt={store.name} className="h-7 w-7 rounded-lg object-cover" />
             ) : (
-              <div className="h-7 w-7 rounded-lg bg-[var(--co-indigo)] flex items-center justify-center">
+              <div className="h-7 w-7 rounded-lg bg-gradient-to-br from-purple-500 to-pink-500 flex items-center justify-center">
                 <ShoppingBag className="h-3.5 w-3.5 text-white" />
               </div>
             )}
-            <span className="co-font-display font-bold text-white">{store.name}</span>
+            <span className="font-display font-bold text-white">{store.name}</span>
           </div>
           <span className="flex items-center gap-1">
-            &copy; {new Date().getFullYear()} {store.name}. Powered by <span className="font-semibold text-[var(--co-marigold)]">AfroStore</span>
+            &copy; {new Date().getFullYear()} {store.name}. Powered by <span className="font-semibold text-brand-400">AfroStore</span>
           </span>
         </div>
       </footer>
@@ -1648,17 +1608,17 @@ export default function ShopPage() {
 
       {/* ── Compare floating bar ── */}
       {compareList.length > 0 && (
-        <div className="fixed bottom-16 sm:bottom-6 left-1/2 -translate-x-1/2 z-50 bg-[var(--co-ink)] text-white rounded-full px-5 py-2.5 shadow-xl flex items-center gap-3 text-sm">
+        <div className="fixed bottom-16 sm:bottom-6 left-1/2 -translate-x-1/2 z-50 bg-surface-900 text-white rounded-full px-5 py-2.5 shadow-xl flex items-center gap-3 text-sm">
           <SlidersHorizontal className="h-4 w-4" />
           <span>{compareList.length} item{compareList.length > 1 ? "s" : ""} selected</span>
-          <Link href={`/store/${slug}/compare`} className="bg-[var(--co-marigold)] text-[var(--co-ink)] px-3 py-1 rounded-full text-xs font-semibold hover:bg-[var(--co-marigold-deep)] hover:text-white transition-colors">Compare</Link>
+          <Link href={`/store/${slug}/compare`} className="bg-white text-surface-900 px-3 py-1 rounded-full text-xs font-semibold hover:bg-surface-100 transition-colors">Compare</Link>
           <button onClick={() => { setCompareList([]); localStorage.removeItem(compareKey); }} className="text-surface-400 hover:text-white ml-1"><X className="h-4 w-4" /></button>
         </div>
       )}
       {/* ── Mobile cart bar ── */}
       {cartCount > 0 && (
-        <div className="fixed bottom-0 left-0 right-0 z-40 bg-white border-t border-[var(--co-line)] shadow-2xl px-4 py-3 sm:hidden">
-          <Link href={`/store/${slug}/cart`} className="w-full py-3.5 text-sm font-semibold flex items-center justify-center gap-2 rounded-xl bg-[var(--co-indigo)] text-white hover:bg-[var(--co-indigo-deep)] transition-colors">
+        <div className="fixed bottom-0 left-0 right-0 z-40 bg-white border-t border-surface-200 shadow-2xl px-4 py-3 sm:hidden">
+          <Link href={`/store/${slug}/cart`} className="btn-primary w-full py-3.5 text-sm flex items-center justify-center gap-2">
             <ShoppingCart className="h-4 w-4" />
             View Cart ({cartCount})
           </Link>

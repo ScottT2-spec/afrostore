@@ -3,11 +3,11 @@ import { useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { resolveStoreLink, resolveFooterLink } from "@/lib/template-link-utils";
-import { useCustomerAuth } from "@/hooks/useCustomerAuth";
+import { normalizeSocialLinks } from "@/components/storefront/prop-normalizers";
 
 /* ═══════════════════════════════════════════════════════════════
    HANDMADE BAGS STORE HEADER + FOOTER
-   Matching WoodMart Handmade Bags demo exactly.
+   Matching Prokip LTD Handmade Bags demo exactly.
    Primary color: #c27843 (warm leather brown)
    ═══════════════════════════════════════════════════════════════ */
 
@@ -74,7 +74,6 @@ export function HandmadeBagsHeader({
   const [showSearch, setShowSearch] = useState(false);
   const router = useRouter();
   const [localSearchQuery, setLocalSearchQuery] = useState("");
-  const { customer, isLoggedIn } = useCustomerAuth(storeSlug);
 
   const handleSearch = (query: string) => {
     if (query.trim()) {
@@ -133,6 +132,7 @@ export function HandmadeBagsHeader({
       .hbh-topbar-text { font-size: 11px; }
     }
   `;
+  const safeSocialLinks = normalizeSocialLinks(socialLinks);
 
   return (
     <div className="hbh-header">
@@ -208,11 +208,9 @@ export function HandmadeBagsHeader({
                 {!isLanding && <Link href={resolveStoreLink("/shop?category=men", storeSlug)} className="hbh-nav-link">Men</Link>}
                 {!isLanding && <Link href={resolveStoreLink("/blog", storeSlug)} className="hbh-nav-link">Blog</Link>}
                 <Link href={resolveStoreLink("/about", storeSlug)} className="hbh-nav-link">About Us</Link>
+                {!isLanding && <Link href={resolveStoreLink("/projects", storeSlug)} className="hbh-nav-link">Projects</Link>}
                 {!isLanding && <Link href={resolveStoreLink("/contact", storeSlug)} className="hbh-nav-link">Contact Us</Link>}
-                {!isLanding && (isLoggedIn
-                  ? <Link href={resolveStoreLink("/my-account", storeSlug)} className="hbh-nav-link">My Account</Link>
-                  : <Link href={resolveStoreLink("/login", storeSlug)} className="hbh-nav-link">Login / Register</Link>
-                )}
+                {!isLanding && <Link href={resolveStoreLink("/my-account", storeSlug)} className="hbh-nav-link">Login / Register</Link>}
               </>
             )}
           </div>
@@ -238,11 +236,9 @@ export function HandmadeBagsHeader({
             {!isLanding && <Link href={resolveStoreLink("/shop?category=men", storeSlug)} onClick={() => setMobileMenu(false)}>Men</Link>}
             {!isLanding && <Link href={resolveStoreLink("/blog", storeSlug)} onClick={() => setMobileMenu(false)}>Blog</Link>}
             <Link href={resolveStoreLink("/about", storeSlug)} onClick={() => setMobileMenu(false)}>About Us</Link>
+            {!isLanding && <Link href={resolveStoreLink("/projects", storeSlug)} onClick={() => setMobileMenu(false)}>Projects</Link>}
             {!isLanding && <Link href={resolveStoreLink("/contact", storeSlug)} onClick={() => setMobileMenu(false)}>Contact Us</Link>}
-            {!isLanding && (isLoggedIn
-              ? <Link href={resolveStoreLink("/my-account", storeSlug)} onClick={() => setMobileMenu(false)}>My Account ({customer?.name?.split(" ")[0]})</Link>
-              : <Link href={resolveStoreLink("/login", storeSlug)} onClick={() => setMobileMenu(false)}>Login / Register</Link>
-            )}
+            {!isLanding && <Link href={resolveStoreLink("/my-account", storeSlug)} onClick={() => setMobileMenu(false)}>Login / Register</Link>}
           </>
         )}
       </div>
@@ -252,7 +248,7 @@ export function HandmadeBagsHeader({
 
 /* ═══════════════════════════════════════════════════════════════
    HANDMADE BAGS FOOTER
-   Matching WoodMart Handmade Bags demo footer exactly.
+   Matching Prokip LTD Handmade Bags demo footer exactly.
    ═══════════════════════════════════════════════════════════════ */
 
 interface HandmadeBagsFooterProps {
@@ -293,6 +289,7 @@ export function HandmadeBagsFooter({
   const socialIcons: Record<string, string> = {
     facebook: "f", twitter: "𝕏", instagram: "📷", youtube: "▶", tiktok: "♪",
   };
+  const safeSocialLinks = normalizeSocialLinks(socialLinks);
 
   return (
     <footer className="hbf-footer">
@@ -303,7 +300,7 @@ export function HandmadeBagsFooter({
           <Link href={resolveStoreLink("/", storeSlug)} className="hbf-logo-text">{storeName}</Link>
           <p className="hbf-text">{description || "Handcrafted leather goods made with passion and precision. Every bag tells a story of artisan excellence."}</p>
           <div className="hbf-social">
-            {socialLinks.map((s, i) => (
+            {safeSocialLinks.map((s, i) => (
               <a key={i} href={s.url} className="hbf-social-icon" target="_blank" rel="noopener noreferrer" aria-label={s.platform}>
                 {socialIcons[s.platform] || s.platform[0]?.toUpperCase()}
               </a>
@@ -328,6 +325,7 @@ export function HandmadeBagsFooter({
           <ul className="hbf-links">
             <li><Link href={resolveStoreLink("/blog", storeSlug)}>Blog</Link></li>
             <li><Link href={resolveStoreLink("/about", storeSlug)}>About Us</Link></li>
+            <li><Link href={resolveStoreLink("/projects", storeSlug)}>Projects</Link></li>
             <li><Link href={resolveStoreLink("/our-story", storeSlug)}>Our Story</Link></li>
             <li><Link href={resolveStoreLink("/contact", storeSlug)}>Contact Us</Link></li>
             <li><Link href={resolveStoreLink("/reviews", storeSlug)}>Reviews</Link></li>

@@ -2,8 +2,8 @@ import type { EditorNode } from "@/lib/visual-editor/node-tree";
 
 /**
  * Decor (Interior) Template Page Presets
- * Content extracted from WoodMart Decor demo:
- * https://woodmart.xtemos.com/demo-decor/demo/decor/
+ * Content extracted from Prokip LTD Decor demo:
+ * https://prokip.xtemos.com/demo-decor/demo/decor/
  */
 
 export const DECOR_ABOUT_PAGE_BLOCKS: EditorNode[] = [
@@ -14,7 +14,7 @@ export const DECOR_ABOUT_PAGE_BLOCKS: EditorNode[] = [
     buttons: [{ text: "SEE PROJECTS", link: "/portfolio" }, { text: "VIEW MORE", link: "#" }],
   }},
   { id: "decor-about-story", type: "interiorAboutContent", settings: {
-    layout: "text-with-heading", subtitle: "WOODMART - BEST ECOMMERCE THEME 2021/22", title: "About Our Online Store",
+    layout: "text-with-heading", subtitle: "PROKIP - BEST ECOMMERCE THEME 2021/22", title: "About Our Online Store",
     paragraphs: [
       "Risus suspendisse a orci penatibus a felis suscipit consectetur vestibulum sodales dui cum ultricies lacus interdum. Per suspendisse adipiscing a suspendisse auctor nibh a et at curae condimentum suspendisse enim a eu scelerisque.",
       "One morning, when Gregor Samsa woke from troubled dreams, he found himself transformed in his bed into a horrible vermin. He lay on his armour-like back, and if he lifted his head a little he could see his brown belly, slightly domed and divided by arches into stiff.",
@@ -30,43 +30,43 @@ export const DECOR_ABOUT_PAGE_BLOCKS: EditorNode[] = [
     { value: 0, label: "SATISFIED CLIENTS" }, { value: 0, label: "DESIGN WORKS" },
   ]}},
   { id: "decor-about-convert", type: "interiorAboutContent", settings: {
-    layout: "text-with-heading", subtitle: "WOODMART - BEST ECOMMERCE THEME 2021/22",
+    layout: "text-with-heading", subtitle: "PROKIP - BEST ECOMMERCE THEME 2021/22",
     title: "We convert your idea Into a reality.",
     paragraphs: ["One morning, when Gregor Samsa woke from troubled dreams, he found himself transformed in his bed into a horrible vermin. He lay on his armour-like back, and if he lifted his head a little he could see his brown belly, slightly domed and divided by arches into stiff His room, a proper human room although a little too smalls."],
     buttons: [{ text: "SEE PROJECTS", link: "/portfolio" }, { text: "VIEW MORE", link: "#" }],
   }},
   { id: "decor-about-services", type: "interiorServicesGrid", settings: {
-    subtitle: "WOODMART - BEST ECOMMERCE THEME 2021/22", title: "Let\u2019s Get Creative!",
+    subtitle: "PROKIP - BEST ECOMMERCE THEME 2021/22", title: "Let\u2019s Get Creative!",
     services: [
-      { icon: "https://woodmart.xtemos.com/wp-content/uploads/2017/03/ruler-transparent-70x70.png", title: "GRAPHIC DESIGN", description: "Curabitur lacinia tristique velit ut laoreet." },
-      { icon: "https://woodmart.xtemos.com/wp-content/uploads/2017/03/pen-transparent-70x70.png", title: "WEB DESIGN", description: "By the readable content of a page when its layout." },
-      { icon: "https://woodmart.xtemos.com/wp-content/uploads/2017/03/paint-palette-transparent-70x70.png", title: "BRANDING", description: "Fact that a reader will be distracted." },
-      { icon: "https://woodmart.xtemos.com/wp-content/uploads/2017/03/ruler-2-transparent-70x70.png", title: "PHOTOGRAPHY", description: "The point of using Lorem Ipsum is that it has it." },
+      { icon: "/prokip-logo.png", title: "GRAPHIC DESIGN", description: "Curabitur lacinia tristique velit ut laoreet." },
+      { icon: "/prokip-logo.png", title: "WEB DESIGN", description: "By the readable content of a page when its layout." },
+      { icon: "/prokip-logo.png", title: "BRANDING", description: "Fact that a reader will be distracted." },
+      { icon: "/prokip-logo.png", title: "PHOTOGRAPHY", description: "The point of using Lorem Ipsum is that it has it." },
     ],
   }},
   { id: "decor-about-gallery", type: "interiorGalleryGrid", settings: { images: [
-    "https://woodmart.xtemos.com/wp-content/uploads/2017/03/about-us-gallery-photo-2.jpg",
-    "https://woodmart.xtemos.com/wp-content/uploads/2017/03/about-us-gallery-photo-1.jpg",
+    "/prokip-logo.png",
+    "/prokip-logo.png",
   ]}},
   { id: "decor-about-presentation", type: "interiorVideoSection", settings: {
     subtitle: "XTEMOS IS A CREATIVE DESIGN AGENCY", title: "Our Presentation",
     description: "I am so happy, my dear friend, so absorbed in the exquisite sense of mere tranquil existence, that I neglect my talents. I should be incapable of drawing a single.",
     videos: [
-      { thumbnail: "https://woodmart.xtemos.com/wp-content/uploads/2017/03/video-placeholder-1.jpg", youtubeUrl: "http://www.youtube.com/watch?v=TJ1SDXbij8Y", title: "Our company history and facts" },
-      { thumbnail: "https://woodmart.xtemos.com/wp-content/uploads/2017/03/video-placeholder-2.jpg", youtubeUrl: "http://www.youtube.com/watch?v=TJ1SDXbij8Y", title: "Design & development process demonstration" },
+      { thumbnail: "/prokip-logo.png", youtubeUrl: "http://www.youtube.com/watch?v=TJ1SDXbij8Y", title: "Our company history and facts" },
+      { thumbnail: "/prokip-logo.png", youtubeUrl: "http://www.youtube.com/watch?v=TJ1SDXbij8Y", title: "Design & development process demonstration" },
     ],
   }},
   { id: "decor-about-quote", type: "interiorQuoteSection", settings: {
-    subtitle: "WOODMART - BEST ECOMMERCE THEME 2021/22",
+    subtitle: "PROKIP - BEST ECOMMERCE THEME 2021/22",
     quote: "Excellence is not a skill it\u2019s an attitude", attribution: "Ralph Marston",
     description: "A wonderful serenity has taken possession of my entire soul, like these sweet mornings of spring which I enjoy with my whole heart. I am alone, and feel the charm of existence in this spot, which was created for the bliss of souls like mine.",
     credit: "Developed by Xtemos Studio @ 2022.",
   }},
   { id: "decor-about-team", type: "interiorTeamSection", settings: { members: [
-    { name: "MARK JANCE", role: "CEO / FOUNDER", image: "https://woodmart.xtemos.com/wp-content/uploads/2017/01/team26.jpg", socials: ["facebook", "twitter", "instagram", "linkedin"] },
-    { name: "MARK JANCE", role: "CEO / FOUNDER", image: "https://woodmart.xtemos.com/wp-content/uploads/2017/01/team19.jpg", socials: ["facebook", "twitter", "instagram", "linkedin"] },
-    { name: "MARK JANCE", role: "CEO / FOUNDER", image: "https://woodmart.xtemos.com/wp-content/uploads/2017/01/team24.jpg", socials: ["facebook", "twitter", "instagram", "linkedin"] },
-    { name: "MARK JANCE", role: "CEO / FOUNDER", image: "https://woodmart.xtemos.com/wp-content/uploads/2017/01/team21.jpg", socials: ["facebook", "twitter", "instagram", "linkedin"] },
+    { name: "MARK JANCE", role: "CEO / FOUNDER", image: "/prokip-logo.png", socials: ["facebook", "twitter", "instagram", "linkedin"] },
+    { name: "MARK JANCE", role: "CEO / FOUNDER", image: "/prokip-logo.png", socials: ["facebook", "twitter", "instagram", "linkedin"] },
+    { name: "MARK JANCE", role: "CEO / FOUNDER", image: "/prokip-logo.png", socials: ["facebook", "twitter", "instagram", "linkedin"] },
+    { name: "MARK JANCE", role: "CEO / FOUNDER", image: "/prokip-logo.png", socials: ["facebook", "twitter", "instagram", "linkedin"] },
   ]}},
   { id: "decor-about-offices", type: "interiorOfficeLocations", settings: {
     subtitle: "GET IN TOUCH WITH US", title: "Get Connected",
@@ -79,9 +79,9 @@ export const DECOR_ABOUT_PAGE_BLOCKS: EditorNode[] = [
     ],
   }},
   { id: "decor-about-news", type: "interiorPromoBanners", settings: { banners: [
-    { image: "https://woodmart.xtemos.com/wp-content/uploads/2017/03/banner-news.jpg", subtitle: "", title: "It is a fact that a reader will be distracted.", description: "Ullamcorper vehicula at ultrices sed interdum et malesuada", buttonText: "Read more", link: "#" },
-    { image: "https://woodmart.xtemos.com/wp-content/uploads/2017/03/banner-news-3.jpg", subtitle: "", title: "By the readable content of a page when looking.", description: "Patibus elementum a dictum ipiscing parturient donec eros.", buttonText: "Read more", link: "#" },
-    { image: "https://woodmart.xtemos.com/wp-content/uploads/2017/03/banner-news-2.jpg", subtitle: "", title: "The point of using Lorem Ipsum is that it has.", description: "Ullamcorper vehicula at ultrices sed interdum ullamcorper .", buttonText: "Read more", link: "#" },
+    { image: "/prokip-logo.png", subtitle: "", title: "It is a fact that a reader will be distracted.", description: "Ullamcorper vehicula at ultrices sed interdum et malesuada", buttonText: "Read more", link: "#" },
+    { image: "/prokip-logo.png", subtitle: "", title: "By the readable content of a page when looking.", description: "Patibus elementum a dictum ipiscing parturient donec eros.", buttonText: "Read more", link: "#" },
+    { image: "/prokip-logo.png", subtitle: "", title: "The point of using Lorem Ipsum is that it has.", description: "Ullamcorper vehicula at ultrices sed interdum ullamcorper .", buttonText: "Read more", link: "#" },
   ]}},
   { id: "decor-about-share", type: "interiorCta", settings: {
     subtitle: "CURABITUR ALIQUET QUAM POSUERE", title: "Do You Like the Theme? Share With Your Friends!",
@@ -113,15 +113,15 @@ export const DECOR_CONTACT_PAGE_BLOCKS: EditorNode[] = [
 ];
 
 export const DECOR_BLOG_PAGE_BLOCKS: EditorNode[] = [
-  { id: "decor-blog-title", type: "interiorSectionTitle", settings: { title: "Woodmart Blog" } },
+  { id: "decor-blog-title", type: "interiorSectionTitle", settings: { title: "Prokip LTD Blog" } },
   { id: "decor-blog-posts", type: "interiorBlogPosts", settings: {
     sectionTitle: "", columns: 2,
     posts: [
-      { title: "Seating collection inspiration by modern", date: "23 Jul", category: "Design trends, Furniture", author: "S. Rogers", excerpt: "Ac haca ullamcorper donec ante habi tasse donec imperdiet eturpis varius per a augue magna hac. Nec ...", image: "https://woodmart.xtemos.com/wp-content/uploads/2016/07/blog-grid-9.jpg", link: "#" },
-      { title: "Minimalist design furniture 2026", date: "23 Jul", category: "Design trends, Furniture", author: "S. Rogers", excerpt: "Discover the ultimate blend of aesthetics, innovation, and functionality. We have curated five iconi...", image: "https://woodmart.xtemos.com/wp-content/uploads/2016/07/blog-grid-1.jpg", link: "#" },
-      { title: "Green interior design inspiration", date: "23 Jul", category: "Design trends, Hand made", author: "S. Rogers", excerpt: "Modern Atlanta homes impress with a harmony of light, space, and eco-materials. Each project reflect...", image: "https://woodmart.xtemos.com/wp-content/uploads/2016/07/blog-grid-7.jpg", link: "#" },
-      { title: "Reinterprets the classic bookshelf", date: "23 Jul", category: "Design trends, Inspiration", author: "S. Rogers", excerpt: "Aliquet parturient scele risque scele risque nibh pretium parturient suspendisse platea sapien torqu...", image: "https://woodmart.xtemos.com/wp-content/uploads/2016/07/blog-grid-3.jpg", link: "#" },
-      { title: "Creative water features and exterior", date: "23 Jul", category: "Design trends, Inspiration", author: "S. Rogers", excerpt: "Aliquet parturient scele risque scele risque nibh pretium parturient suspendisse platea sapien torqu...", image: "https://woodmart.xtemos.com/wp-content/uploads/2016/07/blog-grid-13.jpg", link: "#" },
+      { title: "Seating collection inspiration by modern", date: "23 Jul", category: "Design trends, Furniture", author: "S. Rogers", excerpt: "Ac haca ullamcorper donec ante habi tasse donec imperdiet eturpis varius per a augue magna hac. Nec ...", image: "/prokip-logo.png", link: "#" },
+      { title: "Minimalist design furniture 2026", date: "23 Jul", category: "Design trends, Furniture", author: "S. Rogers", excerpt: "Discover the ultimate blend of aesthetics, innovation, and functionality. We have curated five iconi...", image: "/prokip-logo.png", link: "#" },
+      { title: "Green interior design inspiration", date: "23 Jul", category: "Design trends, Hand made", author: "S. Rogers", excerpt: "Modern Atlanta homes impress with a harmony of light, space, and eco-materials. Each project reflect...", image: "/prokip-logo.png", link: "#" },
+      { title: "Reinterprets the classic bookshelf", date: "23 Jul", category: "Design trends, Inspiration", author: "S. Rogers", excerpt: "Aliquet parturient scele risque scele risque nibh pretium parturient suspendisse platea sapien torqu...", image: "/prokip-logo.png", link: "#" },
+      { title: "Creative water features and exterior", date: "23 Jul", category: "Design trends, Inspiration", author: "S. Rogers", excerpt: "Aliquet parturient scele risque scele risque nibh pretium parturient suspendisse platea sapien torqu...", image: "/prokip-logo.png", link: "#" },
     ],
   }},
 ];

@@ -7,7 +7,7 @@ import { InlineEditableText } from "@/components/storefront/InlineEditableText";
 
 /* ═══════════════════════════════════════════════════════════════
    T-SHIRTS & PRINTS TEMPLATE BLOCKS
-   Pixel-perfect replicas of WoodMart T-Shirts & Prints template sections.
+   Pixel-perfect replicas of Prokip LTD T-Shirts & Prints template sections.
    All styling inline — no external CSS dependencies.
    ═══════════════════════════════════════════════════════════════ */
 
