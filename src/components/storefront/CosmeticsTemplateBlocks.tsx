@@ -1281,7 +1281,7 @@ export function CosmeticsInstagram({ items = [], marginBottom = "0px" }: Cosmeti
           <div key={i} className="ci-item">
             <img src={item.image} alt={`Instagram ${i + 1}`} className="ci-img" loading="lazy"  onError={(e) => onImgError(e, `Instagram ${i + 1}`)} />
             <div className="ci-overlay">
-              <span className="ci-stat">❤ {item.likes.toLocaleString()}</span>
+              <span className="ci-stat">❤ {(item.likes ?? 0).toLocaleString()}</span>
               <span className="ci-stat">💬 {item.comments}</span>
             </div>
             <a href={item.link} className="ci-link" target="_blank" rel="noopener noreferrer" aria-label={`Instagram post ${i + 1}`} />

@@ -891,7 +891,7 @@ export function KidsInstagram({ items = [], sectionTitle, marginBottom = "60px" 
           <div key={i} className="ki-item">
             <img src={item.image} alt={`Instagram ${i + 1}`} className="ki-img" loading="lazy"  onError={(e) => onImgError(e, `Instagram ${i + 1}`)} />
             <div className="ki-overlay">
-              <span className="ki-stat">❤ {item.likes.toLocaleString()}</span>
+              <span className="ki-stat">❤ {(item.likes ?? 0).toLocaleString()}</span>
               <span className="ki-stat">💬 {item.comments}</span>
             </div>
             <a href={item.link} className="ki-link" target="_blank" rel="noopener noreferrer" aria-label={`Instagram post ${i + 1}`} />
