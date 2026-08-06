@@ -138,6 +138,9 @@ export function VegetableFooter({ storeName, storeSlug, logo, description, navIt
                 {item.label}
               </Link>
             ))}
+            <Link href={`/store/${storeSlug}/order-tracking`} className="transition-colors hover:text-[#6b8d49]">
+              Track Order
+            </Link>
           </div>
         </div>
 

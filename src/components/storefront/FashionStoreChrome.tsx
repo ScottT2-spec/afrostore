@@ -408,6 +408,7 @@ export function FashionFooter({
           <ul className="fsf-links">
             <li><Link href={`/store/${storeSlug}`}>Home</Link></li>
             <li><Link href={`/store/${storeSlug}/shop`}>Shop</Link></li>
+            <li><Link href={`/store/${storeSlug}/order-tracking`}>Track Order</Link></li>
             <li><Link href={`/store/${storeSlug}/reviews`}>Reviews</Link></li>
             {navPages.slice(0, 4).map((p) => (
               <li key={p.id}><Link href={`/store/${storeSlug}/${p.slug}`}>{p.title}</Link></li>

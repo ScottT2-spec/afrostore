@@ -1192,6 +1192,7 @@ export default function ShopPage() {
             <Link href={`/store/${slug}`} className="text-sm font-medium text-surface-600 hover:text-surface-900 transition-colors">Home</Link>
             <Link href={`/store/${slug}/shop`} className="text-sm font-medium text-brand-700 transition-colors">Shop</Link>
             <Link href={`/store/${slug}/reviews`} className="text-sm font-medium text-surface-600 hover:text-surface-900 transition-colors">Reviews</Link>
+            <Link href={`/store/${slug}/order-tracking`} className="text-sm font-medium text-surface-600 hover:text-surface-900 transition-colors">Track Order</Link>
             {navPages.slice(0, 4).map((page) => (
               <Link key={page.id} href={`/store/${slug}/${page.slug}`} className="text-sm font-medium text-surface-600 hover:text-surface-900 transition-colors">{page.title}</Link>
             ))}
@@ -1219,6 +1220,7 @@ export default function ShopPage() {
             <Link href={`/store/${slug}`} onClick={() => setMobileMenu(false)} className="block text-sm font-medium text-surface-600 py-2">Home</Link>
             <Link href={`/store/${slug}/shop`} onClick={() => setMobileMenu(false)} className="block text-sm font-bold text-brand-700 py-2">Shop</Link>
             <Link href={`/store/${slug}/reviews`} onClick={() => setMobileMenu(false)} className="block text-sm font-medium text-surface-600 py-2">Reviews</Link>
+            <Link href={`/store/${slug}/order-tracking`} onClick={() => setMobileMenu(false)} className="block text-sm font-medium text-surface-600 py-2">Track Order</Link>
             {navPages.map((page) => (
               <Link key={page.id} href={`/store/${slug}/${page.slug}`} onClick={() => setMobileMenu(false)} className="block text-sm font-medium text-surface-600 py-2">{page.title}</Link>
             ))}

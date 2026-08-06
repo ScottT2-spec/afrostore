@@ -274,6 +274,7 @@ export function RetailFooter({
             <li><Link href={resolveStoreLink("/our-story", storeSlug)}>Our Story</Link></li>
             <li><Link href={resolveStoreLink("/contact", storeSlug)}>Contact Us</Link></li>
             <li><Link href={resolveStoreLink("/reviews", storeSlug)}>Reviews</Link></li>
+            <li><Link href={resolveStoreLink("/order-tracking", storeSlug)}>Track Order</Link></li>
           </ul>
         </div>
 
