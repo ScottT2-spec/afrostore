@@ -1658,19 +1658,6 @@ function HtmlEmbedBlock({ props }: { props: Record<string, unknown> }) {
    and reuse resolveNodeStyles for CSS, since that's the same mapping
    the editor's own preview canvas relies on. */
 
-function GenericHeadingBlock({ props }: { props: Record<string, unknown> }) {
-  const requestedLevel = typeof props.level === "string" ? props.level : "h2";
-  const validLevels = ["h1", "h2", "h3", "h4", "h5", "h6"] as const;
-  const Tag = (validLevels.includes(requestedLevel as typeof validLevels[number]) ? requestedLevel : "h2") as typeof validLevels[number];
-  const style = resolveNodeStyles(props);
-  const align = typeof props.align === "string" ? props.align : undefined;
-  return (
-    <Tag style={{ ...style, textAlign: (align as React.CSSProperties["textAlign"]) || style.textAlign }}>
-      {typeof props.text === "string" ? props.text : "Heading"}
-    </Tag>
-  );
-}
-
 function GenericParagraphBlock({ props }: { props: Record<string, unknown> }) {
   const style = resolveNodeStyles(props);
   const align = typeof props.align === "string" ? props.align : undefined;
@@ -1681,107 +1668,12 @@ function GenericParagraphBlock({ props }: { props: Record<string, unknown> }) {
   );
 }
 
-function GenericButtonBlock({ props }: { props: Record<string, unknown> }) {
-  const style = resolveNodeStyles(props);
-  const align = typeof props.align === "string" ? props.align : "left";
-  const fullWidth = props.fullWidth === true;
-  const justify = align === "center" ? "center" : align === "right" ? "flex-end" : "flex-start";
-  return (
-    <div style={{ display: "flex", justifyContent: justify, width: "100%" }}>
-      <a
-        href={typeof props.link === "string" && props.link ? props.link : "#"}
-        style={{
-          ...style,
-          display: "inline-block",
-          width: fullWidth ? "100%" : undefined,
-          textAlign: "center",
-          textDecoration: "none",
-          cursor: "pointer",
-        }}
-      >
-        {typeof props.text === "string" ? props.text : "Click Me"}
-      </a>
-    </div>
-  );
-}
-
-function GenericImageBlock({ props }: { props: Record<string, unknown> }) {
-  const style = resolveNodeStyles(props);
-  const src = typeof props.src === "string" ? props.src : "";
-  if (!src) return null;
-  return (
-    // eslint-disable-next-line @next/next/no-img-element
-    <img
-      src={src}
-      alt={typeof props.alt === "string" ? props.alt : ""}
-      style={{ ...style, maxWidth: "100%", height: "auto" }}
-    />
-  );
-}
-
 function GenericIconBlock({ props }: { props: Record<string, unknown> }) {
   const name = typeof props.name === "string" ? props.name : "star";
   const Icon = iconMap[name] || Star;
   const size = typeof props.size === "string" || typeof props.size === "number" ? Number(props.size) : 24;
   const color = typeof props.color === "string" ? props.color : undefined;
   return <Icon size={size} color={color} />;
-}
-
-function GenericDividerBlock({ props }: { props: Record<string, unknown> }) {
-  const style = resolveNodeStyles(props);
-  const thickness = typeof props.thickness === "string" || typeof props.thickness === "number" ? `${props.thickness}px` : "1px";
-  const widthPct = typeof props.width === "string" || typeof props.width === "number" ? `${props.width}%` : "100%";
-  return (
-    <hr
-      style={{
-        ...style,
-        borderTopWidth: thickness,
-        borderTopStyle: (typeof props.style === "string" ? props.style : "solid") as React.CSSProperties["borderTopStyle"],
-        borderTopColor: typeof props.color === "string" ? props.color : "#e5e5e5",
-        width: widthPct,
-        margin: style.margin || "0 auto",
-      }}
-    />
-  );
-}
-
-function GenericSpacerBlock({ props }: { props: Record<string, unknown> }) {
-  const height = typeof props.height === "string" || typeof props.height === "number" ? `${props.height}px` : "40px";
-  return <div style={{ height }} />;
-}
-
-function GenericVideoBlock({ props }: { props: Record<string, unknown> }) {
-  const style = resolveNodeStyles(props);
-  const src = typeof props.src === "string" ? props.src : "";
-  if (!src) return null;
-  return (
-    <video
-      src={src}
-      poster={typeof props.poster === "string" ? props.poster : undefined}
-      autoPlay={props.autoplay === true}
-      loop={props.loop === true}
-      muted={props.muted === true}
-      controls={props.controls !== false}
-      style={{ ...style, width: "100%", aspectRatio: typeof props.aspectRatio === "string" ? props.aspectRatio : "16/9" }}
-    />
-  );
-}
-
-function GenericGalleryBlock({ props }: { props: Record<string, unknown> }) {
-  const images = Array.isArray(props.images) ? (props.images as Array<{ src?: string; alt?: string } | string>) : [];
-  const columns = typeof props.columns === "number" ? props.columns : 3;
-  if (images.length === 0) return null;
-  return (
-    <div style={{ display: "grid", gridTemplateColumns: `repeat(${columns}, 1fr)`, gap: typeof props.gap === "string" ? `${props.gap}px` : "16px" }}>
-      {images.map((img, i) => {
-        const src = typeof img === "string" ? img : img.src;
-        const alt = typeof img === "string" ? "" : img.alt || "";
-        if (!src) return null;
-        // eslint-disable-next-line @next/next/no-img-element
-        return <img key={i} src={src} alt={alt} style={{ width: "100%", height: "auto", borderRadius: 8 }} />;
-      })}
-    </div>
-  );
 }
 
 /** Layout/container types that recurse into their children rather than rendering flat content. */
@@ -1817,16 +1709,8 @@ function GenericLayoutBlock({ block, isEditorMode }: { block: BuilderBlock; isEd
 }
 
 const renderers: Record<string, React.FC<{ props: Record<string, unknown> }>> = {
-  heading: GenericHeadingBlock,
   paragraph: GenericParagraphBlock,
-  text: GenericParagraphBlock,
-  button: GenericButtonBlock,
-  image: GenericImageBlock,
   icon: GenericIconBlock,
-  divider: GenericDividerBlock,
-  spacer: GenericSpacerBlock,
-  video: GenericVideoBlock,
-  gallery: GenericGalleryBlock,
   heading: HeadingBlock,
   text: TextBlock,
   image: ImageBlock,
