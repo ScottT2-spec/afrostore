@@ -1,6 +1,6 @@
 "use client";
 import { ChevronRight, Loader2, Search } from "lucide-react";
-import { CheckCircle2, Package, ShoppingBag, Truck } from "@/components/icons/FilledIcons";
+import { CheckCircle2, Package, ShoppingBag, Truck, Undo2 } from "@/components/icons/FilledIcons";
 import { useState, useEffect } from "react";
 import { useParams, useSearchParams } from "next/navigation";
 import Link from "next/link";
@@ -35,6 +35,262 @@ function getStatusIcon(status: string) {
     case "shipped": case "in_transit": return Truck;
     default: return Package;
   }
+}
+
+/* ───────── Return request ───────── */
+
+interface ReturnableItem { id: string; name: string; variantName: string | null; quantity: number; image: string | null }
+interface ExistingReturn {
+  id: string; status: string; reason: string;
+  refundAmount: number | null; refundMethod: string | null;
+  createdAt: string; resolvedAt: string | null;
+}
+
+const RETURN_REASONS = [
+  "Item arrived damaged",
+  "Wrong item received",
+  "Item doesn't match description",
+  "No longer needed",
+  "Changed my mind",
+  "Other",
+];
+
+const returnStatusCopy: Record<string, { label: string; color: string; bg: string }> = {
+  REQUESTED: { label: "Return requested", color: "#2f2a7a", bg: "#edecf9" },
+  APPROVED: { label: "Return approved", color: "#1f9d63", bg: "#e7f6ee" },
+  REJECTED: { label: "Return declined", color: "#e15241", bg: "#fdeceb" },
+  RECEIVED: { label: "Item received", color: "#c97f1e", bg: "#fbeed9" },
+  REFUNDED: { label: "Refunded", color: "#1f9d63", bg: "#e7f6ee" },
+  CLOSED: { label: "Closed", color: "#6b7280", bg: "#f3f4f6" },
+};
+
+function ReturnRequestSection({ slug, orderNumber, currency }: { slug: string; orderNumber: string; currency: string }) {
+  const [stage, setStage] = useState<"closed" | "email" | "form" | "success">("closed");
+  const [email, setEmail] = useState("");
+  const [checking, setChecking] = useState(false);
+  const [checkError, setCheckError] = useState("");
+  const [items, setItems] = useState<ReturnableItem[]>([]);
+  const [existing, setExisting] = useState<ExistingReturn | null>(null);
+  const [selected, setSelected] = useState<Record<string, number>>({});
+  const [reason, setReason] = useState(RETURN_REASONS[0]);
+  const [notes, setNotes] = useState("");
+  const [submitting, setSubmitting] = useState(false);
+  const [submitError, setSubmitError] = useState("");
+
+  const checkEligibility = async () => {
+    if (!email.trim()) return;
+    setChecking(true);
+    setCheckError("");
+    try {
+      const res = await fetch(`/api/storefront/${slug}/orders/${encodeURIComponent(orderNumber)}/returns?email=${encodeURIComponent(email.trim())}`);
+      const json = await res.json();
+      if (!json.success) {
+        setCheckError(json.error || "Couldn't verify that email against this order.");
+        setChecking(false);
+        return;
+      }
+      if (json.data.existingReturn) {
+        setExisting(json.data.existingReturn);
+        setStage("form");
+      } else {
+        setItems(json.data.items || []);
+        setSelected(Object.fromEntries((json.data.items || []).map((i: ReturnableItem) => [i.id, i.quantity])));
+        setExisting(null);
+        setStage("form");
+      }
+    } catch {
+      setCheckError("Something went wrong. Please try again.");
+    }
+    setChecking(false);
+  };
+
+  const toggleItem = (id: string, maxQty: number) => {
+    setSelected((prev) => {
+      const next = { ...prev };
+      if (id in next) delete next[id];
+      else next[id] = maxQty;
+      return next;
+    });
+  };
+
+  const submitReturn = async () => {
+    const chosen = Object.entries(selected).map(([id, quantity]) => ({ id, quantity }));
+    if (chosen.length === 0) { setSubmitError("Select at least one item to return."); return; }
+    setSubmitting(true);
+    setSubmitError("");
+    try {
+      const res = await fetch(`/api/storefront/${slug}/orders/${encodeURIComponent(orderNumber)}/returns`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email: email.trim(), reason, notes: notes.trim() || undefined, items: chosen }),
+      });
+      const json = await res.json();
+      if (!json.success) {
+        setSubmitError(json.error || "Failed to submit return request.");
+        setSubmitting(false);
+        return;
+      }
+      setStage("success");
+    } catch {
+      setSubmitError("Something went wrong. Please try again.");
+    }
+    setSubmitting(false);
+  };
+
+  if (stage === "closed") {
+    return (
+      <div className="bg-white rounded-xl border border-gray-200 p-6 flex items-center justify-between gap-4 flex-wrap">
+        <div>
+          <h3 className="font-semibold text-gray-900">Need to return something?</h3>
+          <p className="text-xs text-gray-500 mt-0.5">Request a return or refund for this order.</p>
+        </div>
+        <button
+          onClick={() => setStage("email")}
+          className="flex items-center gap-2 rounded-lg px-4 py-2.5 text-sm font-semibold text-white transition-colors"
+          style={{ background: "#2f2a7a" }}
+        >
+          <Undo2 className="h-4 w-4" /> Request a Return
+        </button>
+      </div>
+    );
+  }
+
+  return (
+    <div className="bg-white rounded-xl border border-gray-200 p-6">
+      <h3 className="font-semibold text-gray-900 mb-1">Request a Return</h3>
+      <p className="text-xs text-gray-500 mb-5">We just need to confirm this order is yours.</p>
+
+      {stage === "email" && (
+        <div className="space-y-3">
+          <div>
+            <label className="block text-xs font-medium text-gray-600 mb-1.5">Email used on this order</label>
+            <input
+              type="email"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              onKeyDown={(e) => e.key === "Enter" && checkEligibility()}
+              placeholder="you@example.com"
+              className="w-full px-4 py-2.5 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:outline-none"
+              style={{ borderColor: checkError ? "#e15241" : undefined }}
+              autoFocus
+            />
+            {checkError && <p className="mt-1.5 text-xs" style={{ color: "#e15241" }}>{checkError}</p>}
+          </div>
+          <button
+            onClick={checkEligibility}
+            disabled={checking || !email.trim()}
+            className="flex items-center gap-2 rounded-lg px-4 py-2.5 text-sm font-semibold text-white transition-colors disabled:opacity-50"
+            style={{ background: "#2f2a7a" }}
+          >
+            {checking ? <Loader2 className="h-4 w-4 animate-spin" /> : null}
+            Continue
+          </button>
+        </div>
+      )}
+
+      {stage === "form" && existing && (
+        <div className="rounded-xl p-4" style={{ background: returnStatusCopy[existing.status]?.bg || "#f3f4f6" }}>
+          <span
+            className="inline-flex items-center rounded-full px-2.5 py-1 text-xs font-semibold"
+            style={{ color: returnStatusCopy[existing.status]?.color, background: "white" }}
+          >
+            {returnStatusCopy[existing.status]?.label || existing.status}
+          </span>
+          <p className="text-sm text-gray-700 mt-3">{existing.reason}</p>
+          {existing.refundAmount !== null && (
+            <p className="text-sm font-semibold text-gray-900 mt-2">
+              Refund: {formatCurrency(existing.refundAmount, currency)}{existing.refundMethod ? ` · ${existing.refundMethod}` : ""}
+            </p>
+          )}
+          <p className="text-xs text-gray-500 mt-2">Requested {new Date(existing.createdAt).toLocaleDateString()}</p>
+        </div>
+      )}
+
+      {stage === "form" && !existing && (
+        <div className="space-y-5">
+          <div>
+            <label className="block text-xs font-medium text-gray-600 mb-2">Which items?</label>
+            <div className="space-y-2">
+              {items.map((item) => (
+                <label key={item.id} className="flex items-center gap-3 rounded-lg border border-gray-200 p-3 cursor-pointer hover:bg-gray-50">
+                  <input
+                    type="checkbox"
+                    checked={item.id in selected}
+                    onChange={() => toggleItem(item.id, item.quantity)}
+                    className="h-4 w-4"
+                    style={{ accentColor: "#2f2a7a" }}
+                  />
+                  <div className="w-10 h-10 rounded-lg bg-gray-100 overflow-hidden flex-shrink-0">
+                    {item.image ? <img src={item.image} alt={item.name} className="w-full h-full object-cover" /> : null}
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <p className="text-sm font-medium text-gray-900 truncate">{item.name}</p>
+                    {item.variantName && <p className="text-xs text-gray-500">{item.variantName}</p>}
+                  </div>
+                  {item.id in selected && item.quantity > 1 && (
+                    <select
+                      value={selected[item.id]}
+                      onChange={(e) => setSelected((prev) => ({ ...prev, [item.id]: Number(e.target.value) }))}
+                      onClick={(e) => e.stopPropagation()}
+                      className="text-xs border border-gray-200 rounded-md px-2 py-1"
+                    >
+                      {Array.from({ length: item.quantity }, (_, i) => i + 1).map((n) => (
+                        <option key={n} value={n}>{n}</option>
+                      ))}
+                    </select>
+                  )}
+                </label>
+              ))}
+            </div>
+          </div>
+
+          <div>
+            <label className="block text-xs font-medium text-gray-600 mb-1.5">Reason</label>
+            <select
+              value={reason}
+              onChange={(e) => setReason(e.target.value)}
+              className="w-full px-4 py-2.5 border border-gray-300 rounded-lg text-sm focus:outline-none"
+            >
+              {RETURN_REASONS.map((r) => <option key={r} value={r}>{r}</option>)}
+            </select>
+          </div>
+
+          <div>
+            <label className="block text-xs font-medium text-gray-600 mb-1.5">Anything else? (optional)</label>
+            <textarea
+              value={notes}
+              onChange={(e) => setNotes(e.target.value)}
+              rows={3}
+              placeholder="Add any details that will help the store process your return faster."
+              className="w-full px-4 py-2.5 border border-gray-300 rounded-lg text-sm focus:outline-none resize-none"
+            />
+          </div>
+
+          {submitError && <p className="text-xs" style={{ color: "#e15241" }}>{submitError}</p>}
+
+          <button
+            onClick={submitReturn}
+            disabled={submitting}
+            className="flex items-center gap-2 rounded-lg px-5 py-2.5 text-sm font-semibold text-white transition-colors disabled:opacity-50"
+            style={{ background: "#2f2a7a" }}
+          >
+            {submitting ? <Loader2 className="h-4 w-4 animate-spin" /> : <Undo2 className="h-4 w-4" />}
+            Submit Return Request
+          </button>
+        </div>
+      )}
+
+      {stage === "success" && (
+        <div className="text-center py-4">
+          <div className="mx-auto mb-3 flex h-12 w-12 items-center justify-center rounded-full" style={{ background: "#e7f6ee" }}>
+            <CheckCircle2 className="h-6 w-6" style={{ color: "#1f9d63" }} />
+          </div>
+          <h4 className="font-semibold text-gray-900">Return requested</h4>
+          <p className="text-sm text-gray-500 mt-1">The store will review your request and get back to you.</p>
+        </div>
+      )}
+    </div>
+  );
 }
 
 export default function OrderTrackingPage() {
@@ -209,6 +465,8 @@ export default function OrderTrackingPage() {
                 </div>
               </div>
             )}
+
+            <ReturnRequestSection slug={slug} orderNumber={order.orderNumber} currency={order.currency} />
           </div>
         )}
 
