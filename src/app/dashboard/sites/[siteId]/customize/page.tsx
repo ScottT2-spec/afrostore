@@ -257,7 +257,7 @@ export default function SiteCustomizePage({ params }: { params: Promise<{ siteId
             <p className="text-sm text-surface-500">Use the page builder to customize wording, add sections, and swap images inside each page.</p>
             <div className="mt-4 space-y-2">
               {homePage && (
-                <Link href={`/builder/${homePage.id}`} className="flex items-center justify-between rounded-xl border border-surface-200 px-4 py-3 text-sm font-medium text-surface-700 hover:bg-surface-50">
+                <Link href={`/editor/${homePage.id}`} className="flex items-center justify-between rounded-xl border border-surface-200 px-4 py-3 text-sm font-medium text-surface-700 hover:bg-surface-50">
                   <span className="inline-flex items-center gap-2"><Pencil className="h-4 w-4 text-brand-600" /> Customize homepage</span>
                   <span className="text-xs text-surface-400">{homePage.slug}</span>
                 </Link>
@@ -305,7 +305,7 @@ export default function SiteCustomizePage({ params }: { params: Promise<{ siteId
               </div>
               <p className="mt-3 text-xs text-surface-500">Click customize to change wording, swap images, or add sections in the visual builder.</p>
               <div className="mt-4 flex items-center gap-2">
-                <Link href={`/builder/${page.id}`} className="inline-flex flex-1 items-center justify-center gap-2 rounded-lg bg-brand-600 px-3 py-2 text-xs font-semibold text-white hover:bg-brand-700">
+                <Link href={`/editor/${page.id}`} className="inline-flex flex-1 items-center justify-center gap-2 rounded-lg bg-brand-600 px-3 py-2 text-xs font-semibold text-white hover:bg-brand-700">
                   Customize page <Pencil className="h-3.5 w-3.5" />
                 </Link>
                 <Link href={`/store/${site.slug}/${page.slug}`} target="_blank" className="inline-flex items-center justify-center rounded-lg border border-surface-200 px-3 py-2 text-xs font-semibold text-surface-600 hover:bg-surface-50">

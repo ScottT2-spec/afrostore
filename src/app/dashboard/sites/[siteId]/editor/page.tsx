@@ -499,7 +499,7 @@ export default function SiteEditorPage({ params }: { params: Promise<{ siteId: s
                           <button onClick={() => deletePage(page.id)} className="rounded-lg border border-surface-200 px-2 py-1 text-[11px] text-red-600">
                             <Trash2 className="h-3 w-3" />
                           </button>
-                          <Link href={`/builder/${page.id}`} className="rounded-lg border border-brand-200 px-2 py-1 text-[11px] text-brand-700">
+                          <Link href={`/editor/${page.id}`} className="rounded-lg border border-brand-200 px-2 py-1 text-[11px] text-brand-700">
                             Builder
                           </Link>
                         </div>
@@ -529,7 +529,7 @@ export default function SiteEditorPage({ params }: { params: Promise<{ siteId: s
                         <p className="text-sm font-semibold text-surface-900">{block.type}</p>
                         <p className="text-[11px] text-surface-500">Section {index + 1}</p>
                       </div>
-                      <Link href={`/builder/${selectedPage.id}`} className="text-[11px] font-semibold text-brand-700">
+                      <Link href={`/editor/${selectedPage.id}`} className="text-[11px] font-semibold text-brand-700">
                         Edit
                       </Link>
                     </div>

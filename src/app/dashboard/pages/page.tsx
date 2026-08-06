@@ -215,7 +215,7 @@ export default function PagesPage() {
                 </div>
                 <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
                   <Link
-                    href={`/builder/${page.id}`}
+                    href={`/editor/${page.id}`}
                     className="flex items-center gap-1.5 rounded-lg bg-brand-600 text-white px-3 py-1.5 text-xs font-semibold hover:bg-brand-700 transition-colors"
                     title="Customize page design, sections, and content"
                   >
