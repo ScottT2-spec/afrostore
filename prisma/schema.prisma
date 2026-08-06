@@ -20,7 +20,14 @@ model User {
   role             UserRole          @default(MERCHANT)
   createdAt        DateTime          @default(now())
   updatedAt        DateTime          @updatedAt
-  accounts         Account[]
+  resetToken             String?   @unique
+  resetTokenExpiry       DateTime?
+  emailVerifyToken       String?   @unique
+  emailVerifyTokenExpiry DateTime?
+  isBanned               Boolean   @default(false)
+  bannedAt               DateTime?
+  bannedReason           String?
+  accounts               Account[]
   notifications    Notification[]
   sessions         Session[]
   siteMembers      SiteMember[]
@@ -74,7 +81,13 @@ model Workspace {
   name      String
   slug      String            @unique
   logo      String?
-  plan      WorkspacePlan     @default(FREE)
+  plan                    WorkspacePlan     @default(FREE)
+  planPeriod              String?
+  planStartDate           DateTime?
+  planEndDate             DateTime?
+  paystackCustomerCode    String?
+  paystackSubscriptionCode String?
+  paystackPlanCode        String?
   status    WorkspaceStatus   @default(ACTIVE)
   createdAt DateTime          @default(now())
   updatedAt DateTime          @updatedAt
@@ -176,6 +189,30 @@ model SiteMember {
 
   @@unique([siteId, userId])
   @@map("site_members")
+}
+
+model PlatformSettings {
+  id                       String   @id
+  siteName                 String   @default("AfroStore")
+  siteUrl                  String   @default("https://afrostore.app")
+  supportEmail             String   @default("support@afrostore.app")
+  defaultCurrency          String   @default("NGN")
+  defaultCountry           String   @default("NG")
+  maintenanceMode          Boolean  @default(false)
+  allowSignups             Boolean  @default(true)
+  requireEmailVerification Boolean  @default(false)
+  maxStoresPerUser         Int      @default(5)
+  platformFeePercent       Decimal  @default(2.5) @db.Decimal(5, 2)
+  smtpHost                 String?
+  smtpPort                 String   @default("587")
+  smtpUser                 String?
+  smtpPass                 String?
+  sendFromEmail            String?
+  sendFromName             String   @default("AfroStore")
+  updatedAt                DateTime @updatedAt
+  updatedById              String?
+
+  @@map("platform_settings")
 }
 
 model SiteSettings {
@@ -491,6 +528,7 @@ model Customer {
   firstName          String
   lastName           String
   phone              String?
+  passwordHash       String?
   address            Json?
   tags               String[]
   note               String?
@@ -797,6 +835,7 @@ model Page {
   updatedAt       DateTime @updatedAt
   abTests         ABTest[]
   site            Site     @relation(fields: [siteId], references: [id], onDelete: Cascade)
+  funnelSteps     FunnelStep[]
 
   @@unique([siteId, slug])
   @@index([siteId])
@@ -845,6 +884,7 @@ model Form {
   updatedAt        DateTime         @updatedAt
   submissions      FormSubmission[]
   site             Site             @relation(fields: [siteId], references: [id], onDelete: Cascade)
+  funnelSteps      FunnelStep[]
 
   @@unique([siteId, slug])
   @@index([siteId])
@@ -852,18 +892,22 @@ model Form {
 }
 
 model FormSubmission {
-  id        String   @id @default(cuid())
-  formId    String
-  data      Json
-  ip        String?
-  userAgent String?
-  source    String?
-  isRead    Boolean  @default(false)
-  createdAt DateTime @default(now())
-  form      Form     @relation(fields: [formId], references: [id], onDelete: Cascade)
+  id            String      @id @default(cuid())
+  formId        String
+  data          Json
+  ip            String?
+  userAgent     String?
+  source        String?
+  funnelStepId  String?
+  crmContactId  String?
+  isRead        Boolean     @default(false)
+  createdAt     DateTime    @default(now())
+  form          Form        @relation(fields: [formId], references: [id], onDelete: Cascade)
+  crmContact    CrmContact? @relation(fields: [crmContactId], references: [id], onDelete: SetNull)
 
   @@index([formId])
   @@index([formId, createdAt])
+  @@index([crmContactId])
   @@map("form_submissions")
 }
 
@@ -909,6 +953,8 @@ model FunnelStep {
   name            String
   type            FunnelStepType @default(LANDING)
   pageContent     Json?
+  pageId          String?
+  formId          String?
   position        Int            @default(0)
   settings        Json?
   conversionCount Int            @default(0)
@@ -916,8 +962,12 @@ model FunnelStep {
   createdAt       DateTime       @default(now())
   updatedAt       DateTime       @updatedAt
   funnel          Funnel         @relation(fields: [funnelId], references: [id], onDelete: Cascade)
+  page            Page?          @relation(fields: [pageId], references: [id], onDelete: SetNull)
+  form            Form?          @relation(fields: [formId], references: [id], onDelete: SetNull)
 
   @@index([funnelId])
+  @@index([pageId])
+  @@index([formId])
   @@map("funnel_steps")
 }
 
@@ -940,6 +990,7 @@ model CrmContact {
   activities      CrmActivity[]
   site            Site             @relation(fields: [siteId], references: [id], onDelete: Cascade)
   emailRecipients EmailRecipient[]
+  formSubmissions FormSubmission[]
 
   @@unique([siteId, email])
   @@index([siteId])

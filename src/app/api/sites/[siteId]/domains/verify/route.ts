@@ -18,7 +18,7 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ sit
   if (!user) return error("Unauthorized", 401);
   const { siteId } = await params;
 
-  const site = await prisma.site.findFirst({ where: { id: siteId, workspace: { members: { some: { userId: user.id } } } } });
+  const site = await prisma.site.findFirst({ where: { id: siteId, workspace: { OR: [{ ownerId: user.id }, { members: { some: { userId: user.id } } }] } } });
   if (!site) return error("Site not found", 404);
 
   const body = await req.json();

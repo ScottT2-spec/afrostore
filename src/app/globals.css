@@ -160,6 +160,56 @@
     font-family: var(--theme-font-heading);
   }
 
+  /*
+   * Theme font overrides — when the editor sets a custom font, these rules
+   * use higher specificity + !important to beat template-hardcoded font-family.
+   * The .theme-has-body-font / .theme-has-heading-font classes are only added
+   * by ThemeProvider when custom fonts are actually set.
+   */
+  .theme-root.theme-has-body-font,
+  .theme-root.theme-has-body-font p,
+  .theme-root.theme-has-body-font span,
+  .theme-root.theme-has-body-font a,
+  .theme-root.theme-has-body-font li,
+  .theme-root.theme-has-body-font td,
+  .theme-root.theme-has-body-font th,
+  .theme-root.theme-has-body-font div,
+  .theme-root.theme-has-body-font input,
+  .theme-root.theme-has-body-font textarea,
+  .theme-root.theme-has-body-font select,
+  .theme-root.theme-has-body-font button,
+  .theme-root.theme-has-body-font label,
+  .theme-root.theme-has-body-font section,
+  .theme-root.theme-has-body-font article,
+  .theme-root.theme-has-body-font footer,
+  .theme-root.theme-has-body-font header,
+  .theme-root.theme-has-body-font nav {
+    font-family: var(--theme-font-body) !important;
+  }
+
+  .theme-root.theme-has-heading-font h1,
+  .theme-root.theme-has-heading-font h2,
+  .theme-root.theme-has-heading-font h3,
+  .theme-root.theme-has-heading-font h4,
+  .theme-root.theme-has-heading-font h5,
+  .theme-root.theme-has-heading-font h6,
+  .theme-root.theme-has-heading-font .font-display {
+    font-family: var(--theme-font-heading) !important;
+  }
+
+  /* Override template <style> blocks that hardcode titleFont on custom classes.
+     These use higher specificity to beat template font-family rules. */
+  .theme-root.theme-has-heading-font [class*="-title"],
+  .theme-root.theme-has-heading-font [class*="-heading"],
+  .theme-root.theme-has-heading-font [class*="-headline"],
+  .theme-root.theme-has-heading-font [class*="Title"],
+  .theme-root.theme-has-heading-font [class*="Heading"],
+  .theme-root.theme-has-heading-font [class*="hero-title"],
+  .theme-root.theme-has-heading-font [class*="banner-title"],
+  .theme-root.theme-has-heading-font [class*="section-title"] {
+    font-family: var(--theme-font-heading) !important;
+  }
+
   /* Theme-aware footer */
   .theme-root footer.themed-footer {
     background-color: var(--theme-footer-bg);
@@ -242,3 +292,10 @@
 ::-webkit-scrollbar-track { background: transparent; }
 ::-webkit-scrollbar-thumb { background: #d4d4d4; border-radius: 3px; }
 ::-webkit-scrollbar-thumb:hover { background: #a3a3a3; }
+
+/* Sidebar nav — always-visible thin scrollbar */
+.sidebar-nav { scrollbar-width: thin; scrollbar-color: #d1d5db transparent; }
+.sidebar-nav::-webkit-scrollbar { width: 4px; }
+.sidebar-nav::-webkit-scrollbar-track { background: transparent; }
+.sidebar-nav::-webkit-scrollbar-thumb { background: #d1d5db; border-radius: 9999px; }
+.sidebar-nav:hover::-webkit-scrollbar-thumb { background: #9ca3af; }

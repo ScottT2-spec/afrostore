@@ -11,7 +11,7 @@ import { TEMPLATE_PRESET_MAP } from "@/lib/templates/template-preset-map";
 import { FashionStoreContext } from "@/components/storefront/FashionTemplateBlocks";
 import { ElectronicsStoreContext } from "@/components/storefront/ElectronicsTemplateBlocks";
 import { BakeryStoreContext } from "@/components/storefront/BakeryTemplateBlocks";
-import { CosmeticsStoreContext } from "@/components/storefront/CosmeticsTemplateBlocks";
+import { CosmeticsStoreContext, CosmeticsFontLoader, CosmeticsHeader, CosmeticsFooter } from "@/components/storefront/CosmeticsTemplateBlocks";
 import { GroceryStoreContext } from "@/components/storefront/GroceryTemplateBlocks";
 import { HealthStoreContext, HealthHeader, HealthFooterFull } from "@/components/storefront/HealthTemplateBlocks";
 import { InteriorStoreContext, InteriorHeader, InteriorFooter, InteriorFontLoader } from "@/components/storefront/InteriorDesignTemplateBlocks";
@@ -466,6 +466,7 @@ export default function StorePage() {
   const isToysTemplate = data.templateSlug === "toys" || homeBlocks.some((b) => b.type.startsWith("toys"));
   const isHealthTemplate = data.templateSlug === "pills" || homeBlocks.some((b) => b.type.startsWith("health"));
   const isPerfumesTemplate = data.templateSlug === "perfumes" || homeBlocks.some((b) => b.type.startsWith("perfumes"));
+  const isCosmeticsTemplate = data.templateSlug === "cosmetics" || slug === "stacj" || slug?.toLowerCase().includes("cosmetics") || slug?.toLowerCase().includes("stacj") || store.name?.toLowerCase().includes("cosmetics") || store.name?.toLowerCase().includes("stacj") || homeBlocks.some((b) => b.type.startsWith("cosmetics"));
   const isRetailTemplate = data.templateSlug === "retail";
   const isDecorTemplate = data.templateSlug === "decor" || data.templateSlug === "interior" || data.templateSlug === "interior-design" || data.templateSlug === "home-decor" || homeBlocks.some((b) => b.type.startsWith("interior"));
   const isJumiaTemplate = homeBlocks.some((b) => b.type.startsWith("jumia"));
@@ -1046,6 +1047,13 @@ export default function StorePage() {
           storeSlug={slug}
           logo={store.logo}
           description={store.description}
+        />
+      ) : isCosmeticsTemplate ? (
+        <CosmeticsFooter
+          storeName={store.name}
+          storeSlug={slug}
+          logo={store.logo}
+          description={store.description ?? undefined}
         />
       ) : isHealthTemplate ? (
         <HealthFooterFull

@@ -15,6 +15,9 @@ import {
   COSMETICS_NEW_IN_BLOCKS,
   COSMETICS_SKINCARE_BLOCKS,
   COSMETICS_TERMS_BLOCKS,
+  COSMETICS_ABOUT_BLOCKS,
+  COSMETICS_CONTACT_BLOCKS,
+  COSMETICS_BLOG_BLOCKS,
 } from "@/lib/templates/presets/cosmetics-pages-preset";
 import { GROCERY_TEMPLATE_PRESET } from "@/lib/templates/presets/grocery-preset";
 import { HEALTH_TEMPLATE_PRESET } from "@/lib/templates/presets/health-preset";
@@ -130,6 +133,9 @@ const BESPOKE_PAGE_PRESETS: Record<string, Record<string, TemplateBlock[]>> = {
     "new-in": COSMETICS_NEW_IN_BLOCKS,
     skincare: COSMETICS_SKINCARE_BLOCKS,
     terms: COSMETICS_TERMS_BLOCKS,
+    about: COSMETICS_ABOUT_BLOCKS,
+    contact: COSMETICS_CONTACT_BLOCKS,
+    blog: COSMETICS_BLOG_BLOCKS,
   },
   "t-shirts-prints": {
     "about-us": TSHIRTS_PRINTS_ABOUT_PAGE_BLOCKS,

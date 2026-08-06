@@ -42,6 +42,16 @@ export async function POST(req: NextRequest) {
 
     const { name, description, businessType, country, currency, logo } = parsed.data;
 
+    // Fall back to the platform-wide defaults (set by admins) for any store
+    // that doesn't explicitly choose a country/currency at creation time.
+    let resolvedCountry = country;
+    let resolvedCurrency = currency;
+    if (!resolvedCountry || !resolvedCurrency) {
+      const platformDefaults = await prisma.platformSettings.findUnique({ where: { id: "platform" } });
+      resolvedCountry = resolvedCountry || platformDefaults?.defaultCountry || "NG";
+      resolvedCurrency = resolvedCurrency || platformDefaults?.defaultCurrency || "NGN";
+    }
+
     // Check store limit based on plan (simplified)
     const storeCount = await prisma.site.count({ where: { workspace: { ownerId: user.id } } });
     if (storeCount >= 10) {
@@ -83,8 +93,8 @@ export async function POST(req: NextRequest) {
         description,
         subdomain: finalSubdomain,
         businessType,
-        country,
-        currency,
+        country: resolvedCountry,
+        currency: resolvedCurrency,
         logo: logo || undefined,
         settings: {
           create: {

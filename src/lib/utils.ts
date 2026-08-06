@@ -66,3 +66,16 @@ export function timeAgo(date: Date): string {
 export function generateId(): string {
   return Math.random().toString(36).substring(2, 15);
 }
+
+/** Safe date formatting — returns fallback instead of "Invalid Date" */
+export function formatDate(value: string | number | Date | null | undefined, fallback = "—"): string {
+  if (!value) return fallback;
+  const d = new Date(value);
+  return isNaN(d.getTime()) ? fallback : d.toLocaleDateString();
+}
+
+export function formatDateTime(value: string | number | Date | null | undefined, fallback = "—"): string {
+  if (!value) return fallback;
+  const d = new Date(value);
+  return isNaN(d.getTime()) ? fallback : d.toLocaleString();
+}

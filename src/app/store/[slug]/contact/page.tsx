@@ -13,6 +13,7 @@ import { VegetableFooter, VegetableHeader } from "@/components/storefront/Vegeta
 import { KidsFontLoader, KidsFooterFull, KidsHeader } from "@/components/storefront/KidsTemplateBlocks";
 import PerfumesContactPage from "./perfumes-contact";
 import { HealthHeader, HealthFooterFull, HealthFontLoader } from "@/components/storefront/HealthTemplateBlocks";
+import { CosmeticsFontLoader, CosmeticsHeader, CosmeticsFooter } from "@/components/storefront/CosmeticsTemplateBlocks";
 import { GardenHeader, GardenFooter } from "@/components/storefront/GardenStoreChrome";
 import { HandmadeBagsHeader, HandmadeBagsFooter } from "@/components/storefront/HandmadeBagsStoreChrome";
 import { resolveLivePageContent } from "@/lib/templates/bespoke-page-content";
@@ -451,6 +452,29 @@ export default async function ContactPage({ params }: Props) {
           }} 
         />
       </div>
+    );
+  }
+
+  const isCosmeticsTemplate =
+    activeTemplateSlug === "cosmetics" ||
+    slug === "stacj" ||
+    slug?.toLowerCase().includes("cosmetics") ||
+    slug?.toLowerCase().includes("stacj") ||
+    store.name?.toLowerCase().includes("cosmetics") ||
+    store.name?.toLowerCase().includes("stacj");
+
+  if (isCosmeticsTemplate) {
+    const cosmeticsBlocks: TemplateBlock[] = resolvedContact && resolvedContact.blocks.length > 0 ? (resolvedContact.blocks as TemplateBlock[]) : [];
+
+    return (
+      <ThemeProvider theme={themeData}>
+        <CosmeticsFontLoader />
+        <CosmeticsHeader storeName={store.name} storeSlug={slug} logo={store.logo} />
+        <main style={buildPageBackgroundStyle(pageSettings)}>
+          <RenderTemplateBlocks blocks={cosmeticsBlocks} />
+        </main>
+        <CosmeticsFooter storeName={store.name} storeSlug={slug} logo={store.logo} description={store.description ?? undefined} />
+      </ThemeProvider>
     );
   }
 

@@ -206,10 +206,15 @@ export function buildThemeDataWithCustomization(theme: ThemeData | null, customi
   const themeConfig = theme.config || {};
   const themeSettings = customization?.themeSettings || {};
   const colors = deepMerge(asRecord(themeConfig.colors), asRecord(themeSettings.colors));
-  const fonts = deepMerge(asRecord(themeConfig.fonts), asRecord(themeSettings.typography ? {
+  const fontsFromTypography = themeSettings.typography ? {
     heading: themeSettings.typography.headingFont,
     body: themeSettings.typography.bodyFont,
-  } : {}));
+  } : {};
+  const fontsFromSettings = themeSettings.fonts ? {
+    heading: themeSettings.fonts.heading,
+    body: themeSettings.fonts.body,
+  } : {};
+  const fonts = deepMerge(asRecord(themeConfig.fonts), deepMerge(asRecord(fontsFromTypography), asRecord(fontsFromSettings)));
   const layout = deepMerge(asRecord(themeConfig.layout), asRecord(themeSettings.layout));
 
   return {
@@ -387,6 +392,32 @@ export function buildCustomizationBridgeScript(customization: SiteCustomizationD
     set("--afro-font-heading", typography.headingFont ? ("'" + typography.headingFont + "', system-ui, sans-serif") : "");
     set("--afro-font-body", typography.bodyFont ? ("'" + typography.bodyFont + "', system-ui, sans-serif") : "");
     set("--afro-font-button", typography.buttonFont ? ("'" + typography.buttonFont + "', system-ui, sans-serif") : "");
+
+    // Also set --theme-font-* variables so globals.css rules work
+    set("--theme-font-heading", typography.headingFont ? ("'" + typography.headingFont + "', system-ui, sans-serif") : "");
+    set("--theme-font-body", typography.bodyFont ? ("'" + typography.bodyFont + "', system-ui, sans-serif") : "");
+
+    // Toggle marker classes for high-specificity CSS overrides
+    var themeRoot = document.querySelector(".theme-root");
+    if (themeRoot) {
+      if (typography.bodyFont) { themeRoot.classList.add("theme-has-body-font"); } else { themeRoot.classList.remove("theme-has-body-font"); }
+      if (typography.headingFont) { themeRoot.classList.add("theme-has-heading-font"); } else { themeRoot.classList.remove("theme-has-heading-font"); }
+    }
+
+    // Load Google Fonts for custom font picks
+    var fontsToLoad = [];
+    if (typography.headingFont) fontsToLoad.push(typography.headingFont);
+    if (typography.bodyFont) fontsToLoad.push(typography.bodyFont);
+    fontsToLoad.forEach(function(fontName) {
+      var encoded = fontName.replace(/ /g, "+");
+      var href = "https://fonts.googleapis.com/css2?family=" + encoded + ":wght@300;400;500;600;700;800&display=swap";
+      if (!document.querySelector('link[href="' + href + '"]')) {
+        var link = document.createElement("link");
+        link.rel = "stylesheet";
+        link.href = href;
+        document.head.appendChild(link);
+      }
+    });
     set("--afro-radius", layout.radius);
     set("--afro-spacing-scale", layout.spacingScale);
 

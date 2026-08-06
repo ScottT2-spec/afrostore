@@ -1,8 +1,9 @@
-import { NextRequest } from "next/server";
+import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/db";
 import { verifyPassword, createToken } from "@/lib/auth";
 import { loginSchema } from "@/lib/validators";
 import { success, error, validationError } from "@/lib/api-helpers";
+import { rateLimit } from "@/lib/rate-limit";
 
 export async function POST(req: NextRequest) {
   try {
@@ -15,6 +16,11 @@ export async function POST(req: NextRequest) {
 
     const { email, password } = parsed.data;
 
+    const rl = rateLimit(`login:${email}`, 5, 15 * 60 * 1000);
+    if (!rl.allowed) {
+      return NextResponse.json({ error: "Too many attempts. Please try again later." }, { status: 429 });
+    }
+
     const user = await prisma.user.findUnique({ where: { email } });
     if (!user || !user.passwordHash) {
       return error("Invalid email or password", 401);
@@ -23,6 +29,10 @@ export async function POST(req: NextRequest) {
     const valid = await verifyPassword(password, user.passwordHash);
     if (!valid) {
       return error("Invalid email or password", 401);
+    }
+
+    if (user.isBanned) {
+      return error("Your account has been suspended. Contact support for assistance.", 403);
     }
 
     const token = await createToken(user.id);

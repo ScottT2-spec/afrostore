@@ -57,6 +57,7 @@ export async function POST(req: NextRequest, { params }: Params) {
     });
 
     let paymentUrl: string;
+    const fallbackCallback = `${req.headers.get("origin")}/checkout?status=pending&order=${order.orderNumber}&ref=${reference}`;
 
     if (provider === "PAYSTACK") {
       const result = await initializePaystackPayment({
@@ -64,7 +65,7 @@ export async function POST(req: NextRequest, { params }: Params) {
         email: order.email,
         amount: Math.round(amountNum * 100), // kobo
         reference,
-        callbackUrl: callbackUrl || `${req.headers.get("origin")}/checkout/verify`,
+        callbackUrl: callbackUrl || fallbackCallback,
       });
       paymentUrl = result.authorization_url;
     } else if (provider === "FLUTTERWAVE") {
@@ -74,7 +75,7 @@ export async function POST(req: NextRequest, { params }: Params) {
         currency: order.currency,
         email: order.email,
         reference,
-        redirectUrl: callbackUrl || `${req.headers.get("origin")}/checkout/verify`,
+        redirectUrl: callbackUrl || fallbackCallback,
         customerName: order.customer
           ? `${order.customer.firstName} ${order.customer.lastName}`
           : order.email,
@@ -102,7 +103,7 @@ export async function POST(req: NextRequest, { params }: Params) {
         reference,
         description: `Order ${order.orderNumber}`,
         contractCode,
-        redirectUrl: callbackUrl || `${req.headers.get("origin")}/checkout/verify`,
+        redirectUrl: callbackUrl || fallbackCallback,
       });
       paymentUrl = result.checkoutUrl;
     } else {

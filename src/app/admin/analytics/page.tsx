@@ -83,7 +83,7 @@ export default function AdminAnalyticsPage() {
               <ResponsiveContainer width="100%" height="100%">
                 <AreaChart data={chart.data}>
                   <CartesianGrid strokeDasharray="3 3" />
-                  <XAxis dataKey="date" tick={{ fontSize: 11 }} />
+                  <XAxis dataKey="date" tick={{ fontSize: 11 }} interval={chart.data.length > 6 ? Math.ceil(chart.data.length / 6) - 1 : 0} minTickGap={20} />
                   <YAxis tick={{ fontSize: 11 }} tickFormatter={chart.format || undefined} />
                   <Tooltip formatter={(value) => [chart.format ? chart.format(Number(value)) : value, chart.label]} />
                   <Area type="monotone" dataKey={chart.dataKey} stroke="#1E293B" fill="#1E293B" fillOpacity={0.1} />

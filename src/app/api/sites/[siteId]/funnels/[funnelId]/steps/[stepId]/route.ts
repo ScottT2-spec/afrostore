@@ -23,9 +23,21 @@ export async function PATCH(req: NextRequest, { params }: Params) {
     const parsed = updateFunnelStepSchema.safeParse(body);
     if (!parsed.success) return validationError(parsed.error.flatten().fieldErrors);
 
-    const { settings, ...rest } = parsed.data;
+    const { settings, pageId, formId, ...rest } = parsed.data;
+
+    if (pageId) {
+      const page = await prisma.page.findFirst({ where: { id: pageId, siteId } });
+      if (!page) return error("Linked page not found on this site", 422);
+    }
+    if (formId) {
+      const linkedForm = await prisma.form.findFirst({ where: { id: formId, siteId } });
+      if (!linkedForm) return error("Linked form not found on this site", 422);
+    }
+
     const data: Record<string, unknown> = { ...rest };
     if (settings !== undefined) data.settings = settings ? (settings as any) : null;
+    if (pageId !== undefined) data.pageId = pageId || null;
+    if (formId !== undefined) data.formId = formId || null;
 
     const step = await prisma.funnelStep.update({
       where: { id: stepId },

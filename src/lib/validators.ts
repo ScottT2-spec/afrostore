@@ -21,8 +21,8 @@ export const createStoreSchema = z.object({
   name: z.string().min(1, "Store name is required").max(100),
   description: z.string().max(500).optional(),
   businessType: z.string().default("general"),
-  country: z.string().default("NG"),
-  currency: z.string().default("NGN"),
+  country: z.string().optional(),
+  currency: z.string().optional(),
   themeId: z.string().optional(),
   logo: z.string().url().optional(),
 });
@@ -527,6 +527,8 @@ export const funnelStepSchema = z.object({
   name: z.string().min(1).max(200),
   type: z.enum(["LANDING", "LEAD_FORM", "THANK_YOU", "CHECKOUT", "UPSELL", "DOWNSELL", "CONFIRMATION", "WEBINAR", "VIDEO"]).default("LANDING"),
   pageContent: z.any().optional(),
+  pageId: z.string().optional().nullable(),
+  formId: z.string().optional().nullable(),
   position: z.number().int().min(0).default(0),
   settings: z.object({
     redirectUrl: z.string().url().optional(),
@@ -555,6 +557,8 @@ export const updateFunnelStepSchema = z.object({
   name: z.string().min(1).max(200).optional(),
   type: z.enum(["LANDING", "LEAD_FORM", "THANK_YOU", "CHECKOUT", "UPSELL", "DOWNSELL", "CONFIRMATION", "WEBINAR", "VIDEO"]).optional(),
   pageContent: z.any().optional(),
+  pageId: z.string().optional().nullable(),
+  formId: z.string().optional().nullable(),
   position: z.number().int().min(0).optional(),
   settings: z.object({
     redirectUrl: z.string().url().optional(),

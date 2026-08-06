@@ -58,6 +58,19 @@ export async function POST(req: NextRequest, { params }: Params) {
 
     const { steps, ...funnelData } = parsed.data;
 
+    if (steps && steps.length > 0) {
+      const pageIds = steps.map((s) => s.pageId).filter((v): v is string => !!v);
+      const formIds = steps.map((s) => s.formId).filter((v): v is string => !!v);
+      if (pageIds.length > 0) {
+        const validPages = await prisma.page.count({ where: { id: { in: pageIds }, siteId } });
+        if (validPages !== new Set(pageIds).size) return error("One or more linked pages were not found on this site", 422);
+      }
+      if (formIds.length > 0) {
+        const validForms = await prisma.form.count({ where: { id: { in: formIds }, siteId } });
+        if (validForms !== new Set(formIds).size) return error("One or more linked forms were not found on this site", 422);
+      }
+    }
+
     const funnel = await prisma.funnel.create({
       data: {
         siteId,
@@ -68,6 +81,8 @@ export async function POST(req: NextRequest, { params }: Params) {
                 name: step.name,
                 type: step.type,
                 pageContent: step.pageContent as any,
+                pageId: step.pageId || undefined,
+                formId: step.formId || undefined,
                 position: step.position ?? idx,
                 settings: step.settings ? (step.settings as any) : undefined,
               })),

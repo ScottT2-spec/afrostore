@@ -83,6 +83,31 @@ export async function initializeFlutterwavePayment(params: {
   return data.data as { link: string };
 }
 
+// Use when you already have Flutterwave's own numeric transaction ID
+// (e.g. from a webhook payload's `data.id`).
+export async function verifyFlutterwaveTransaction(transactionId: string, secretKey: string) {
+  const res = await fetch(
+    `https://api.flutterwave.com/v3/transactions/${transactionId}/verify`,
+    { headers: { Authorization: `Bearer ${secretKey}` } }
+  );
+  const data = await res.json();
+  return data;
+}
+
+// Use when you only have OUR reference (tx_ref) — e.g. the manual/fallback
+// verification path after redirect, before any webhook has arrived.
+// Flutterwave's /transactions/{id}/verify endpoint requires THEIR numeric
+// transaction id, not tx_ref, so calling it with our reference silently
+// fails. This endpoint is the correct one for verifying by tx_ref.
+export async function verifyFlutterwaveTransactionByReference(txRef: string, secretKey: string) {
+  const res = await fetch(
+    `https://api.flutterwave.com/v3/transactions/verify_by_reference?tx_ref=${encodeURIComponent(txRef)}`,
+    { headers: { Authorization: `Bearer ${secretKey}` } }
+  );
+  const data = await res.json();
+  return data;
+}
+
 export function verifyFlutterwaveWebhook(signature: string, secret: string): boolean {
   return signature === secret;
 }
@@ -96,7 +121,9 @@ export async function getMonnifyAccessToken(apiKey: string, secretKey: string, b
     headers: { Authorization: `Basic ${credentials}` },
   });
   const data = await res.json();
-  if (!data.requestSuccessful) throw new Error("Monnify auth failed");
+  if (!data.requestSuccessful) {
+    throw new Error(data.responseMessage || `Monnify authentication failed (HTTP ${res.status}). Check your API key and secret key.`);
+  }
   return data.responseBody.accessToken as string;
 }
 
@@ -135,6 +162,15 @@ export async function initializeMonnifyPayment(params: {
   return data.responseBody as { transactionReference: string; checkoutUrl: string };
 }
 
+export async function verifyMonnifyTransaction(reference: string, accessToken: string, baseUrl: string) {
+  const res = await fetch(
+    `${baseUrl}/api/v2/merchant/transactions/query?paymentReference=${encodeURIComponent(reference)}`,
+    { headers: { Authorization: `Bearer ${accessToken}` } }
+  );
+  const data = await res.json();
+  return data;
+}
+
 export function verifyMonnifyWebhook(body: string, signature: string, secret: string): boolean {
   const hash = crypto.createHmac("sha512", secret).update(body).digest("hex");
   return hash === signature;
@@ -162,43 +198,60 @@ export async function processPaymentConfirmation(params: {
     return transaction; // Already processed
   }
 
-  const updated = await prisma.paymentTransaction.update({
-    where: { id: transaction.id },
-    data: {
-      status: params.status,
-      method: params.method,
-      externalRef: params.externalRef,
-      metadata: params.metadata as any,
-      paidAt: params.status === "SUCCESS" ? new Date() : undefined,
-    },
+  // Use a Prisma transaction with atomic where clause to prevent race conditions
+  const result = await prisma.$transaction(async (tx) => {
+    // Atomically update only if status is still PENDING
+    const updateResult = await tx.paymentTransaction.updateMany({
+      where: { id: transaction.id, status: "PENDING" },
+      data: {
+        status: params.status,
+        method: params.method,
+        externalRef: params.externalRef,
+        metadata: params.metadata as any,
+        paidAt: params.status === "SUCCESS" ? new Date() : undefined,
+      },
+    });
+
+    // If no rows updated, another process already handled it
+    if (updateResult.count === 0) {
+      return null;
+    }
+
+    // Update order payment status
+    if (transaction.orderId) {
+      if (params.status === "SUCCESS") {
+        await tx.order.update({
+          where: { id: transaction.orderId },
+          data: {
+            paymentStatus: "PAID",
+            status: "CONFIRMED",
+            paidAt: new Date(),
+          },
+        });
+
+        await tx.orderTimeline.create({
+          data: {
+            orderId: transaction.orderId,
+            status: "CONFIRMED",
+            note: `Payment confirmed via ${params.method || "unknown"}`,
+          },
+        });
+      } else {
+        await tx.order.update({
+          where: { id: transaction.orderId },
+          data: { paymentStatus: "FAILED" },
+        });
+      }
+    }
+
+    // Return the updated transaction
+    return tx.paymentTransaction.findUnique({ where: { id: transaction.id } });
   });
 
-  // Update order payment status
-  if (transaction.orderId) {
-    if (params.status === "SUCCESS") {
-      await prisma.order.update({
-        where: { id: transaction.orderId },
-        data: {
-          paymentStatus: "PAID",
-          status: "CONFIRMED",
-          paidAt: new Date(),
-        },
-      });
-
-      await prisma.orderTimeline.create({
-        data: {
-          orderId: transaction.orderId,
-          status: "CONFIRMED",
-          note: `Payment confirmed via ${params.method || "unknown"}`,
-        },
-      });
-    } else {
-      await prisma.order.update({
-        where: { id: transaction.orderId },
-        data: { paymentStatus: "FAILED" },
-      });
-    }
+  if (!result) {
+    // Race condition: already processed by another request
+    return prisma.paymentTransaction.findUnique({ where: { id: transaction.id } });
   }
 
-  return updated;
+  return result;
 }

@@ -1,6 +1,6 @@
 "use client";
 import { ChevronLeft, ChevronRight } from "lucide-react";
-import { BarChart3, LayoutDashboard, LogOut, Palette, Puzzle, Settings, ShoppingBag, Store, Users } from "@/components/icons/FilledIcons";
+import { BarChart3, LayoutDashboard, LogOut, Palette, Puzzle, Settings, Shield, ShoppingBag, Store, Users } from "@/components/icons/FilledIcons";
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
@@ -14,6 +14,7 @@ const navigation = [
   { name: "Themes", href: "/admin/themes", icon: Palette },
   { name: "Plugins", href: "/admin/plugins", icon: Puzzle },
   { name: "Analytics", href: "/admin/analytics", icon: BarChart3 },
+  { name: "Audit Logs", href: "/admin/audit-logs", icon: Shield },
   { name: "Settings", href: "/admin/settings", icon: Settings },
 ];
 

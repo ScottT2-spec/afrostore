@@ -1,6 +1,6 @@
 "use client";
 
-import React from "react";
+import React, { useEffect } from "react";
 
 /* ───────── Theme Config Types ───────── */
 
@@ -124,12 +124,36 @@ export function ThemeProvider({ theme, children }: ThemeProviderProps) {
   if (fonts?.heading) themeVars["--theme-font-heading"] = `'${fonts.heading}', system-ui, sans-serif`;
   if (fonts?.body) themeVars["--theme-font-body"] = `'${fonts.body}', system-ui, sans-serif`;
 
+  // Load Google Fonts dynamically
+  useEffect(() => {
+    const fontsToLoad = new Set<string>();
+    if (fonts?.heading) fontsToLoad.add(fonts.heading);
+    if (fonts?.body) fontsToLoad.add(fonts.body);
+
+    fontsToLoad.forEach((fontName) => {
+      const encoded = fontName.replace(/ /g, "+");
+      const href = `https://fonts.googleapis.com/css2?family=${encoded}:wght@300;400;500;600;700;800&display=swap`;
+      if (!document.querySelector(`link[href="${href}"]`)) {
+        const link = document.createElement("link");
+        link.rel = "stylesheet";
+        link.href = href;
+        document.head.appendChild(link);
+      }
+    });
+  }, [fonts?.heading, fonts?.body]);
+
   // Layout
   if (layout?.maxWidth) themeVars["--theme-max-width"] = layout.maxWidth;
   if (layout?.productColumns) themeVars["--theme-product-columns"] = String(layout.productColumns);
 
+  // Add marker classes when custom fonts are set — globals.css uses these
+  // for high-specificity overrides that beat template-hardcoded fonts
+  const classNames = ["theme-root"];
+  if (fonts?.body) classNames.push("theme-has-body-font");
+  if (fonts?.heading) classNames.push("theme-has-heading-font");
+
   return (
-    <div className="theme-root" style={themeVars as React.CSSProperties}>
+    <div className={classNames.join(" ")} style={themeVars as React.CSSProperties}>
       {children}
     </div>
   );

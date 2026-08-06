@@ -163,11 +163,7 @@ const TEMPLATE_PAGE_MAP: Record<string, PageDef[]> = {
   tools: ELECTRONICS_PAGES,
   grocery: GROCERY_PAGES,
   vegetables: VEGETABLE_PAGES,
-
-  // your local version
   retail: RETAIL_PAGES,
-
-  // from main
   decor: DECOR_PAGES,
   interior: DECOR_PAGES,
   "interior-design": DECOR_PAGES,

@@ -1096,8 +1096,34 @@ export interface CosmeticsBlogPostsProps {
 export function CosmeticsBlogPosts({ posts: propPosts = [], columns = 2, sectionTitle, marginBottom = "60px" }: CosmeticsBlogPostsProps) {
   const storeCtx = useContext(CosmeticsStoreContext);
 
+    const blogBase = storeCtx?.storeSlug ? `/store/${storeCtx.storeSlug}/blog` : "/blog";
+  const SAMPLE_COSMETICS_BLOGS: CosmeticsBlogPost[] = [
+    {
+      image: "https://images.unsplash.com/photo-1596462502278-27bfdc403348?w=600&h=400&fit=crop",
+      title: "5 Skincare Mistakes You're Probably Making",
+      excerpt: "From skipping sunscreen to over-exfoliating, these common skincare habits could be doing more harm than good. Here's how to fix them for glowing, healthy skin.",
+      date: { day: "28", month: "Jul" },
+      categories: ["Skincare"],
+      author: { name: "Scott Antwi" },
+      link: `${blogBase}/5-skincare-mistakes-youre-probably-making`,
+      commentCount: 9,
+    },
+    {
+      image: "https://images.unsplash.com/photo-1522335789203-aabd1fc54bc9?w=600&h=400&fit=crop",
+      title: "The Ultimate Guide to Building a Makeup Collection",
+      excerpt: "Whether you're a beginner or a beauty lover, having the right essentials makes all the difference. Here's everything you need to build your perfect kit.",
+      date: { day: "24", month: "Jul" },
+      categories: ["Beauty Tips"],
+      author: { name: "Scott Antwi" },
+      link: `${blogBase}/the-ultimate-guide-to-building-a-makeup-collection`,
+      commentCount: 15,
+    },
+  ];
+
   const posts: CosmeticsBlogPost[] = (() => {
-    if (!storeCtx || !storeCtx.blogs || storeCtx.blogs.length === 0) return propPosts || [];
+    if (!storeCtx || !storeCtx.blogs || storeCtx.blogs.length === 0) {
+      return (propPosts && propPosts.length > 0) ? propPosts : SAMPLE_COSMETICS_BLOGS;
+    }
 
     return storeCtx.blogs.slice(0, columns * 2).map((b) => {
       const pubDate = b.publishedAt ? new Date(b.publishedAt) : new Date(b.createdAt);

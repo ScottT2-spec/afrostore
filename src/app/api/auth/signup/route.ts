@@ -1,11 +1,20 @@
-import { NextRequest } from "next/server";
+import { NextRequest, NextResponse } from "next/server";
+import crypto from "crypto";
 import { prisma } from "@/lib/db";
 import { hashPassword, createToken } from "@/lib/auth";
 import { signupSchema } from "@/lib/validators";
 import { success, error, validationError } from "@/lib/api-helpers";
+import { sendVerificationEmail } from "@/lib/email";
+import { rateLimit } from "@/lib/rate-limit";
 
 export async function POST(req: NextRequest) {
   try {
+    const ip = req.headers.get("x-forwarded-for") || req.headers.get("x-real-ip") || "unknown";
+    const rl = rateLimit(`signup:${ip}`, 3, 15 * 60 * 1000);
+    if (!rl.allowed) {
+      return NextResponse.json({ error: "Too many attempts. Please try again later." }, { status: 429 });
+    }
+
     const body = await req.json();
     const parsed = signupSchema.safeParse(body);
 
@@ -33,6 +42,34 @@ export async function POST(req: NextRequest) {
         createdAt: true,
       },
     });
+
+    // Generate email verification token
+    const emailVerifyToken = crypto.randomBytes(32).toString("hex");
+    const emailVerifyTokenExpiry = new Date(Date.now() + 24 * 60 * 60 * 1000);
+
+    await prisma.user.update({
+      where: { id: user.id },
+      data: { emailVerifyToken, emailVerifyTokenExpiry },
+    });
+
+    // Build verify link and send email
+    const baseUrl =
+      process.env.NEXT_PUBLIC_BASE_URL ||
+      `https://${req.headers.get("host")}`;
+    const verifyLink = `${baseUrl}/auth/verify-email?token=${emailVerifyToken}`;
+
+    const emailResult = await sendVerificationEmail({
+      to: user.email,
+      name: user.firstName,
+      verifyLink,
+    });
+
+    if (!emailResult.success) {
+      console.error(
+        `Verification email failed for ${email}:`,
+        emailResult.error
+      );
+    }
 
     const token = await createToken(user.id);
 

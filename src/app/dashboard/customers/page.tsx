@@ -17,6 +17,7 @@ interface Customer {
   totalOrders: number;
   totalSpent: number;
   createdAt: string;
+  source?: "customer" | "newsletter";
 }
 
 interface CustomersResponse {
@@ -31,11 +32,12 @@ export default function CustomersPage() {
   const [total, setTotal] = useState(0);
   const [page, setPage] = useState(1);
   const [search, setSearch] = useState("");
+  const [filter, setFilter] = useState<"all" | "customers" | "newsletter">("all");
 
   const fetchCustomers = useCallback(async () => {
     if (!currentStore) return;
     setLoading(true);
-    const params = new URLSearchParams({ page: page.toString(), limit: "20" });
+    const params = new URLSearchParams({ page: page.toString(), limit: "20", filter });
     if (search) params.set("search", search);
     const res = await api.get<CustomersResponse>(`/api/sites/${currentStore.id}/customers?${params}`);
     if (res.success && res.data) {
@@ -43,7 +45,7 @@ export default function CustomersPage() {
       setTotal(res.data.pagination.total);
     }
     setLoading(false);
-  }, [currentStore, page, search]);
+  }, [currentStore, page, search, filter]);
 
   useEffect(() => { fetchCustomers(); }, [fetchCustomers]);
 
@@ -51,8 +53,29 @@ export default function CustomersPage() {
 
   return (
     <>
-      <DashboardHeader title="Customers" subtitle={`${total} customers`} />
+      <DashboardHeader title="Customers" subtitle={`${total} ${filter === "newsletter" ? "subscribers" : filter === "customers" ? "customers" : "people"}`} />
       <div className="p-6 space-y-4">
+        {/* Filter tabs */}
+        <div className="flex items-center gap-1 rounded-xl bg-surface-100 p-1 w-fit">
+          {([
+            { key: "all", label: "All" },
+            { key: "customers", label: "Customers" },
+            { key: "newsletter", label: "Newsletter" },
+          ] as const).map((tab) => (
+            <button
+              key={tab.key}
+              onClick={() => { setFilter(tab.key); setPage(1); }}
+              className={`px-4 py-1.5 rounded-lg text-xs font-semibold transition-colors ${
+                filter === tab.key
+                  ? "bg-white text-surface-900 shadow-sm"
+                  : "text-surface-500 hover:text-surface-700"
+              }`}
+            >
+              {tab.label}
+            </button>
+          ))}
+        </div>
+
         <div className="flex items-center gap-2 rounded-xl border border-surface-200 bg-white px-3 py-2 max-w-md">
           <Search className="h-4 w-4 text-surface-400" />
           <input
@@ -69,8 +92,14 @@ export default function CustomersPage() {
         ) : customers.length === 0 ? (
           <div className="rounded-2xl border border-surface-200 bg-white p-12 text-center">
             <Users className="h-12 w-12 text-surface-300 mx-auto mb-4" />
-            <h3 className="text-lg font-bold text-surface-900 mb-2">No customers yet</h3>
-            <p className="text-sm text-surface-500">Customers are created when they place orders.</p>
+            <h3 className="text-lg font-bold text-surface-900 mb-2">
+              {filter === "newsletter" ? "No subscribers yet" : "No customers yet"}
+            </h3>
+            <p className="text-sm text-surface-500">
+              {filter === "newsletter"
+                ? "Subscribers appear here when visitors sign up via the newsletter block."
+                : "Customers are created when they place orders."}
+            </p>
           </div>
         ) : (
           <div className="rounded-2xl border border-surface-200 bg-white overflow-hidden">
@@ -78,7 +107,7 @@ export default function CustomersPage() {
               <thead>
                 <tr className="bg-surface-50 border-b border-surface-200">
                   <th className="px-6 py-3 text-left text-[10px] font-semibold uppercase tracking-wider text-surface-400">Customer</th>
-                  <th className="px-6 py-3 text-left text-[10px] font-semibold uppercase tracking-wider text-surface-400 hidden md:table-cell">Contact</th>
+                  <th className="px-6 py-3 text-left text-[10px] font-semibold uppercase tracking-wider text-surface-400">Contact</th>
                   <th className="px-6 py-3 text-center text-[10px] font-semibold uppercase tracking-wider text-surface-400">Orders</th>
                   <th className="px-6 py-3 text-right text-[10px] font-semibold uppercase tracking-wider text-surface-400">Total Spent</th>
                 </tr>
@@ -93,11 +122,16 @@ export default function CustomersPage() {
                         </div>
                         <div>
                           <div className="text-sm font-semibold text-surface-900">{c.firstName} {c.lastName}</div>
-                          <div className="text-[10px] text-surface-500">Since {new Date(c.createdAt).toLocaleDateString()}</div>
+                          <div className="flex items-center gap-1.5 text-[10px] text-surface-500">
+                            Since {new Date(c.createdAt).toLocaleDateString()}
+                            {c.source === "newsletter" && (
+                              <span className="inline-flex items-center rounded-full bg-blue-50 px-1.5 py-0.5 text-[9px] font-semibold text-blue-600">Newsletter</span>
+                            )}
+                          </div>
                         </div>
                       </div>
                     </td>
-                    <td className="px-6 py-3.5 hidden md:table-cell">
+                    <td className="px-6 py-3.5">
                       <div className="flex items-center gap-1.5 text-xs text-surface-500"><Mail className="h-3 w-3" />{c.email}</div>
                       {c.phone && <div className="flex items-center gap-1.5 text-xs text-surface-500 mt-0.5"><Phone className="h-3 w-3" />{c.phone}</div>}
                     </td>

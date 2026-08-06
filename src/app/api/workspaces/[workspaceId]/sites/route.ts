@@ -4,6 +4,7 @@ import { prisma } from "@/lib/db";
 import { success, error, generateSubdomain } from "@/lib/api-helpers";
 import { slugify } from "@/lib/utils";
 import { importTemplateToSite } from "@/lib/templates/importer";
+import { provisionDefaultLandingFunnel } from "@/lib/landing-funnel";
 import { buildSmartAiBlocks, buildBlockContentPrompt } from "@/lib/ai-block-content-generator";
 import { getIndustrySampleData, DEFAULT_SAMPLE_DATA } from "@/lib/ai-sample-data";
 import { AIFailover, AICapability } from "@/lib/failover";
@@ -75,6 +76,8 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ wor
     socialLinks,
     phone,
     businessType = "general",
+    country,
+    currency,
     // Step 5: Auto-generate (handled after creation)
     // Step 6: Payment (handled after creation)
     // Step 7: Domain
@@ -101,7 +104,19 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ wor
       return error("A site with this name already exists in this workspace. Please choose a different name.", 409);
     }
 
-  // Generate unique slug & subdomain (only check within the same workspace)
+    // The wizard doesn't currently ask merchants for a country/currency, so
+    // fall back to the admin-configured platform defaults rather than the
+    // schema's hardcoded NG/NGN. An explicit value from the client (if the
+    // UI adds this step later) always wins.
+    let resolvedCountry = country;
+    let resolvedCurrency = currency;
+    if (!resolvedCountry || !resolvedCurrency) {
+      const platformDefaults = await prisma.platformSettings.findUnique({ where: { id: "platform" } });
+      resolvedCountry = resolvedCountry || platformDefaults?.defaultCountry || "NG";
+      resolvedCurrency = resolvedCurrency || platformDefaults?.defaultCurrency || "NGN";
+    }
+
+  // Generate unique slug & subdomain
     let slug = slugify(name.trim());
     let counter = 0;
     while (true) {
@@ -133,6 +148,8 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ wor
       businessType,
       industry: industry || null,
       customDomain: customDomain || null,
+      country: resolvedCountry,
+      currency: resolvedCurrency,
       settings: {
         create: {
           whatsappNumber: phone || null,
@@ -346,7 +363,19 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ wor
       }
     }
 
-    return success({ ...site, templateResult }, 201);
+    // ── Landing-page sites get a working lead funnel out of the box ──
+    let funnelResult: unknown = null;
+    if (siteType === "LANDING_PAGE") {
+      try {
+        const { funnel } = await provisionDefaultLandingFunnel(site.id, site.name);
+        funnelResult = { id: funnel.id, name: funnel.name };
+      } catch (funnelErr) {
+        console.error("Default landing funnel provisioning error:", funnelErr);
+        // Non-fatal — site is still created, user can add a funnel manually
+      }
+    }
+
+    return success({ ...site, templateResult, funnelResult }, 201);
   } catch (err) {
     console.error("Create site error:", err);
     return error(err instanceof Error ? err.message : "Internal server error", 500);

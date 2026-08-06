@@ -321,7 +321,7 @@ export async function GET(req: NextRequest, { params }: Params) {
                 },
               },
             }
-          : null,
+          : { id: "default", name: "Default", slug: "default", config: {} },
         resolvedCustomization
       );
     } catch (themeError) {

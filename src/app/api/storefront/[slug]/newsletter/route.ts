@@ -1,5 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/db";
+import { sendNewsletterWelcomeEmail } from "@/lib/email";
+import { upsertLeadContact } from "@/lib/crm";
 
 type Params = { params: Promise<{ slug: string }> };
 
@@ -19,7 +21,7 @@ export async function POST(req: NextRequest, { params }: Params) {
 
     const site = await prisma.site.findFirst({
       where: { slug, status: "ACTIVE" },
-      select: { id: true },
+      select: { id: true, name: true },
     });
 
     if (!site) {
@@ -29,21 +31,29 @@ export async function POST(req: NextRequest, { params }: Params) {
       );
     }
 
-    // Upsert into CrmContact with source "newsletter"
-    await prisma.crmContact.upsert({
-      where: { siteId_email: { siteId: site.id, email } },
-      create: {
-        siteId: site.id,
-        email,
-        source: "newsletter",
-        tags: ["newsletter"],
-      },
-      update: {
-        // If they already exist, just make sure "newsletter" tag is present
-        tags: { push: "newsletter" },
-        lastActivityAt: new Date(),
-      },
+    const existingContact = await prisma.crmContact.findUnique({
+      where: { siteId_email: { siteId: site.id, email: email.trim().toLowerCase() } },
+      select: { tags: true },
     });
+    const isNewSubscriber = !existingContact || !existingContact.tags.includes("newsletter");
+
+    await upsertLeadContact({
+      siteId: site.id,
+      email,
+      source: "newsletter",
+      tags: ["newsletter"],
+      activity: { type: "newsletter_signup" },
+    });
+
+    // Send welcome email only to new subscribers (non-blocking)
+    if (isNewSubscriber) {
+      const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || `https://${slug}.prokip.com`;
+      sendNewsletterWelcomeEmail({
+        to: email,
+        storeName: site.name || slug,
+        storeUrl: `${baseUrl}/store/${slug}`,
+      }).catch((err) => console.error("Newsletter welcome email error:", err));
+    }
 
     return NextResponse.json({ success: true });
   } catch (error) {

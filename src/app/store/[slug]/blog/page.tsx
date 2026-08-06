@@ -31,6 +31,7 @@ import {
   InteriorFooter,
 } from "@/components/storefront/InteriorDesignTemplateBlocks";
 import { AccessoriesFontLoader } from "@/components/storefront/AccessoriesTemplateBlocks";
+import { CosmeticsFontLoader, CosmeticsHeader, CosmeticsFooter } from "@/components/storefront/CosmeticsTemplateBlocks";
 import { ToysFontLoader } from "@/components/storefront/ToysTemplateBlocks";
 import { MakeupFontLoader } from "@/components/storefront/MakeupTemplateBlocks";
 import { GroceryFontLoader } from "@/components/storefront/GroceryTemplateBlocks";
@@ -570,6 +571,27 @@ if (isTShirtsPrintsTemplate) {
           storeSlug={slug}
           description={store.description ?? undefined}
         />
+      </ThemeProvider>
+    );
+  }
+
+  const isCosmeticsTemplate =
+    data.templateSlug === "cosmetics" ||
+    slug === "stacj" ||
+    slug?.toLowerCase().includes("cosmetics") ||
+    slug?.toLowerCase().includes("stacj") ||
+    store.name?.toLowerCase().includes("cosmetics") ||
+    store.name?.toLowerCase().includes("stacj");
+
+  if (isCosmeticsTemplate) {
+    return (
+      <ThemeProvider theme={themeData}>
+        <CosmeticsFontLoader />
+        <CosmeticsHeader storeName={store.name} storeSlug={slug} logo={store.logo} />
+        <main style={buildPageBackgroundStyle(pageSettings)}>
+          <RenderTemplateBlocks blocks={blocks} />
+        </main>
+        <CosmeticsFooter storeName={store.name} storeSlug={slug} logo={store.logo} description={store.description ?? undefined} />
       </ThemeProvider>
     );
   }
