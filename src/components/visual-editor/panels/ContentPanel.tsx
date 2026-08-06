@@ -398,6 +398,13 @@ export default function ContentPanel({ element, onUpdate }: ContentPanelProps) {
   const contentEntries = element?.content && typeof element.content === "object" ? Object.entries(element.content) : [];
   const childElements = Array.isArray(element?.elements) ? element.elements : [];
 
+  // Types with a hand-built, purpose-specific editor above; everything
+  // else falls back to the generic key/value editor driven by whatever
+  // is actually in element.settings/content, instead of a dead end.
+  const hasCustomEditor = ["heading", "paragraph", "text", "button", "image"].includes(element.type);
+  const hasGenericEntries = settingsEntries.length > 0 || contentEntries.length > 0 || childElements.length > 0;
+  const showGenericEditor = !hasCustomEditor && (isTemplateNode || hasGenericEntries);
+
   return (
     <div className="space-y-6">
       {/* Heading-specific content */}
@@ -610,15 +617,16 @@ export default function ContentPanel({ element, onUpdate }: ContentPanelProps) {
         </div>
       )}
 
-      {/* Template block props editor */}
-      {isTemplateNode && (
+      {/* Generic settings editor - covers template blocks and any
+          widget type without a hand-built panel above */}
+      {showGenericEditor && (
         <div className="space-y-4">
           <div className="text-xs font-medium text-gray-900 dark:text-white mb-3">
-            Template Settings ({settingsEntries.length} properties)
+            {isTemplateNode ? `Template Settings (${settingsEntries.length} properties)` : "Settings"}
           </div>
           {settingsEntries.length === 0 ? (
             <div className="text-xs text-gray-500 dark:text-gray-400">
-              This template node has no settings yet.
+              {isTemplateNode ? "This template node has no settings yet." : "No settings for this element."}
             </div>
           ) : (
             <div className="space-y-3">
@@ -641,7 +649,7 @@ export default function ContentPanel({ element, onUpdate }: ContentPanelProps) {
           {contentEntries.length > 0 && (
             <div className="space-y-3 pt-2 border-t border-gray-200 dark:border-gray-700">
               <div className="text-xs font-medium text-gray-900 dark:text-white">
-                Template Content ({contentEntries.length} properties)
+                {isTemplateNode ? `Template Content (${contentEntries.length} properties)` : "Content"}
               </div>
               <div className="space-y-3">
                 {contentEntries.map(([key, value]) => (
@@ -686,8 +694,9 @@ export default function ContentPanel({ element, onUpdate }: ContentPanelProps) {
         </div>
       )}
 
-      {/* Default content for other types */}
-      {!["heading", "paragraph", "text", "button", "image"].includes(element.type) && !isTemplateNode && (
+      {/* Fallback - only for elements with no custom panel and no
+          settings/content/children to drive a generic editor either */}
+      {!hasCustomEditor && !showGenericEditor && (
         <div className="text-center py-8">
           <p className="text-xs text-gray-500 dark:text-gray-400">
             Content settings for {element.type} coming soon...
