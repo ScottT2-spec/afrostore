@@ -76,6 +76,41 @@ function ReturnRequestSection({ slug, orderNumber, currency }: { slug: string; o
   const [notes, setNotes] = useState("");
   const [submitting, setSubmitting] = useState(false);
   const [submitError, setSubmitError] = useState("");
+  const [sessionVerified, setSessionVerified] = useState(false);
+
+  const authHeaders = (): Record<string, string> => {
+    if (typeof window === "undefined") return {};
+    const token = localStorage.getItem(`afrostore_customer_token_${slug}`);
+    return token ? { Authorization: `Bearer ${token}` } : {};
+  };
+
+  // If the shopper is logged in on this browser, their session alone proves
+  // ownership — skip straight to the item picker instead of asking for email.
+  useEffect(() => {
+    const headers = authHeaders();
+    if (!headers.Authorization) return;
+    (async () => {
+      setChecking(true);
+      try {
+        const res = await fetch(`/api/storefront/${slug}/orders/${encodeURIComponent(orderNumber)}/returns`, { headers });
+        const json = await res.json();
+        if (json.success) {
+          setSessionVerified(true);
+          if (json.data.existingReturn) {
+            setExisting(json.data.existingReturn);
+          } else {
+            setItems(json.data.items || []);
+            setSelected(Object.fromEntries((json.data.items || []).map((i: ReturnableItem) => [i.id, i.quantity])));
+          }
+          setStage("form");
+        }
+      } catch {
+        /* fall back to manual flow */
+      }
+      setChecking(false);
+    })();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [slug, orderNumber]);
 
   const checkEligibility = async () => {
     if (!email.trim()) return;
@@ -121,8 +156,8 @@ function ReturnRequestSection({ slug, orderNumber, currency }: { slug: string; o
     try {
       const res = await fetch(`/api/storefront/${slug}/orders/${encodeURIComponent(orderNumber)}/returns`, {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email: email.trim(), reason, notes: notes.trim() || undefined, items: chosen }),
+        headers: { "Content-Type": "application/json", ...authHeaders() },
+        body: JSON.stringify({ email: sessionVerified ? undefined : email.trim(), reason, notes: notes.trim() || undefined, items: chosen }),
       });
       const json = await res.json();
       if (!json.success) {
