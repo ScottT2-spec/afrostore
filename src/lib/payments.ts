@@ -1,5 +1,6 @@
 import { prisma } from "./db";
 import crypto from "crypto";
+import { runAutomationsForTrigger } from "./automations";
 
 // ─── PAYSTACK ───────────────────────────────────────────────
 
@@ -199,6 +200,7 @@ export async function processPaymentConfirmation(params: {
   }
 
   // Use a Prisma transaction with atomic where clause to prevent race conditions
+  type PaidOrderInfo = { id: string; siteId: string; email: string; phone: string | null; total: unknown; currency: string };
   const result = await prisma.$transaction(async (tx) => {
     // Atomically update only if status is still PENDING
     const updateResult = await tx.paymentTransaction.updateMany({
@@ -214,13 +216,14 @@ export async function processPaymentConfirmation(params: {
 
     // If no rows updated, another process already handled it
     if (updateResult.count === 0) {
-      return null;
+      return { transaction: null, paidOrder: null as PaidOrderInfo | null };
     }
 
     // Update order payment status
+    let paidOrder: PaidOrderInfo | null = null;
     if (transaction.orderId) {
       if (params.status === "SUCCESS") {
-        await tx.order.update({
+        const updatedOrder = await tx.order.update({
           where: { id: transaction.orderId },
           data: {
             paymentStatus: "PAID",
@@ -236,6 +239,15 @@ export async function processPaymentConfirmation(params: {
             note: `Payment confirmed via ${params.method || "unknown"}`,
           },
         });
+
+        paidOrder = {
+          id: updatedOrder.id,
+          siteId: updatedOrder.siteId,
+          email: updatedOrder.email,
+          phone: updatedOrder.phone,
+          total: updatedOrder.total,
+          currency: updatedOrder.currency,
+        };
       } else {
         await tx.order.update({
           where: { id: transaction.orderId },
@@ -244,14 +256,29 @@ export async function processPaymentConfirmation(params: {
       }
     }
 
-    // Return the updated transaction
-    return tx.paymentTransaction.findUnique({ where: { id: transaction.id } });
+    // Return the updated transaction alongside the paid-order info (if any)
+    // so automations can be fired once the transaction has committed.
+    const updatedTxn = await tx.paymentTransaction.findUnique({ where: { id: transaction.id } });
+    return { transaction: updatedTxn, paidOrder };
   });
 
-  if (!result) {
+  if (!result || !result.transaction) {
     // Race condition: already processed by another request
     return prisma.paymentTransaction.findUnique({ where: { id: transaction.id } });
   }
 
-  return result;
+  // Fire "payment_success" automations after the transaction has committed
+  // (fire-and-forget — never block the webhook response on this).
+  if (result.paidOrder) {
+    const order = result.paidOrder;
+    runAutomationsForTrigger(order.siteId, "payment_success", {
+      recipientEmail: order.email,
+      recipientPhone: order.phone ?? undefined,
+      subject: `Payment received for order`,
+      message: `Payment of ${order.currency} ${order.total} was confirmed via ${params.method || "unknown"}.`,
+      data: { orderId: order.id, email: order.email, phone: order.phone, total: Number(order.total), currency: order.currency, method: params.method },
+    }).catch((err) => console.error("Automation trigger (payment_success) error:", err));
+  }
+
+  return result.transaction;
 }

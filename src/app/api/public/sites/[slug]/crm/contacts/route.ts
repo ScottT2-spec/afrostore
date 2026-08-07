@@ -2,6 +2,7 @@ import { NextRequest } from "next/server";
 import { prisma } from "@/lib/db";
 import { success, error, validationError } from "@/lib/api-helpers";
 import { upsertLeadContact } from "@/lib/crm";
+import { runAutomationsForTrigger } from "@/lib/automations";
 import { z } from "zod";
 
 // Lightweight public schema for landing page lead submissions
@@ -73,6 +74,22 @@ export async function POST(req: NextRequest, { params }: Params) {
         data: { conversionCount: { increment: 1 } },
       });
     }
+
+    // Fire "new_lead" for brand-new contacts, "form_submission" for every
+    // submission (repeat submitters included) — fire-and-forget.
+    const automationCtx = {
+      recipientEmail: contact.email,
+      recipientPhone: contact.phone || undefined,
+      recipientName: [contact.firstName, contact.lastName].filter(Boolean).join(" ") || undefined,
+      crmContactId: contact.id,
+      subject: `New submission from ${site.name}`,
+      message: `A ${source} form was submitted by ${contact.email}.`,
+      data: { contactId: contact.id, email: contact.email, phone: contact.phone, source, funnelStepId: parsed.data.funnelStepId },
+    };
+    if (isNewContact) {
+      runAutomationsForTrigger(site.id, "new_lead", automationCtx).catch((err) => console.error("Automation trigger (new_lead) error:", err));
+    }
+    runAutomationsForTrigger(site.id, "form_submission", automationCtx).catch((err) => console.error("Automation trigger (form_submission) error:", err));
 
     return success({ ...contact, isNewContact }, 201);
   } catch (e) {
