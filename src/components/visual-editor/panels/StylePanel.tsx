@@ -18,6 +18,27 @@ export default function StylePanel({ element, onUpdate }: StylePanelProps) {
     });
   };
 
+  // Border needs width + style + color together to render at all in CSS.
+  // Touching any one of them while the others are unset/zero would silently
+  // produce no visible border, so fill in sane defaults for the others.
+  const updateBorderSetting = (key: "borderColor" | "borderWidth" | "borderStyle", value: any) => {
+    const next = { ...settings, [key]: value };
+    const hasNoWidth = !next.borderWidth || next.borderWidth === "0" || next.borderWidth === "0px";
+    const hasNoStyle = !next.borderStyle || next.borderStyle === "none";
+
+    if (key === "borderStyle" && value === "none") {
+      onUpdate({ settings: next });
+      return;
+    }
+
+    if (key === "borderColor" || key === "borderWidth" || key === "borderStyle") {
+      if (hasNoWidth) next.borderWidth = "1px";
+      if (hasNoStyle) next.borderStyle = "solid";
+    }
+
+    onUpdate({ settings: next });
+  };
+
   return (
     <div className="space-y-6">
       {/* Typography */}
@@ -126,13 +147,13 @@ export default function StylePanel({ element, onUpdate }: StylePanelProps) {
             <input
               type="color"
               value={settings.borderColor || "#e5e5e5"}
-              onChange={(e) => updateSetting("borderColor", e.target.value)}
+              onChange={(e) => updateBorderSetting("borderColor", e.target.value)}
               className="h-8 w-8 rounded border border-gray-300 dark:border-gray-600 cursor-pointer"
             />
             <input
               type="text"
               value={settings.borderColor || "#e5e5e5"}
-              onChange={(e) => updateSetting("borderColor", e.target.value)}
+              onChange={(e) => updateBorderSetting("borderColor", e.target.value)}
               className="flex-1 px-2 py-1.5 text-xs border border-gray-300 dark:border-gray-600 rounded bg-white dark:bg-gray-800 text-gray-900 dark:text-white"
             />
           </div>
@@ -201,7 +222,7 @@ export default function StylePanel({ element, onUpdate }: StylePanelProps) {
             <input
               type="text"
               value={settings.borderWidth || "0"}
-              onChange={(e) => updateSetting("borderWidth", e.target.value)}
+              onChange={(e) => updateBorderSetting("borderWidth", e.target.value)}
               className="w-full px-2 py-1.5 text-xs border border-gray-300 dark:border-gray-600 rounded bg-white dark:bg-gray-800 text-gray-900 dark:text-white"
               placeholder="1px"
             />
@@ -222,7 +243,7 @@ export default function StylePanel({ element, onUpdate }: StylePanelProps) {
           <label className="block text-[10px] text-gray-500 dark:text-gray-400 mb-1">Border Style</label>
           <select
             value={settings.borderStyle || "solid"}
-            onChange={(e) => updateSetting("borderStyle", e.target.value)}
+            onChange={(e) => updateBorderSetting("borderStyle", e.target.value)}
             className="w-full px-2 py-1.5 text-xs border border-gray-300 dark:border-gray-600 rounded bg-white dark:bg-gray-800 text-gray-900 dark:text-white"
           >
             <option value="solid">Solid</option>
