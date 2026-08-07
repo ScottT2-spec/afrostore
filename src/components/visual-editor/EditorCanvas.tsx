@@ -4,6 +4,7 @@ import React, { createElement, useCallback, useEffect, useLayoutEffect, useRef, 
 import { useEditorStore } from "@/lib/visual-editor/store";
 import { DeviceType } from "@/lib/visual-editor/types";
 import { Plus } from "lucide-react";
+import * as LucideIcons from "lucide-react";
 import {
   DndContext,
   closestCenter,
@@ -46,6 +47,37 @@ const findElementById = (elements: any[], id: string): any | null => {
   }
   return null;
 };
+
+// Resolve a lucide-react icon component from a loosely-formatted name
+// (e.g. "star", "shopping-bag", "ShoppingBag" all resolve correctly).
+// Falls back to a generic circle so an unrecognized name still shows
+// something instead of rendering nothing.
+const getLucideIcon = (name?: string): React.ComponentType<any> => {
+  const fallback = (LucideIcons as any).Circle;
+  if (!name) return fallback;
+  const pascal = name
+    .split(/[-_\s]+/)
+    .filter(Boolean)
+    .map((part) => part.charAt(0).toUpperCase() + part.slice(1))
+    .join("");
+  return (LucideIcons as any)[pascal] || fallback;
+};
+
+const SOCIAL_ICON_NAMES: Record<string, string> = {
+  facebook: "Facebook",
+  twitter: "Twitter",
+  x: "Twitter",
+  instagram: "Instagram",
+  linkedin: "Linkedin",
+  youtube: "Youtube",
+  whatsapp: "MessageCircle",
+  tiktok: "Music2",
+  pinterest: "Image",
+  email: "Mail",
+};
+
+const getSocialIcon = (platform?: string): React.ComponentType<any> =>
+  getLucideIcon(SOCIAL_ICON_NAMES[(platform || "").toLowerCase()] || platform);
 
 const getElementTextValue = (element: any, fallback: string) => {
   const content = element?.content || {};
@@ -266,6 +298,136 @@ function CanvasInlineEditableText({
 const buildEditorInlineStyles = (element: any): Record<string, any> => {
   return resolveNodeStyles(element?.settings || {}) as Record<string, any>;
 };
+
+// Simple image carousel for the "slider" widget. Kept self-contained
+// (own index state) rather than lifted into the editor store, since
+// slide position is transient UI state, not page content.
+function SliderWidget({
+  images,
+  showArrows,
+  showDots,
+  style,
+}: {
+  images: any[];
+  showArrows: boolean;
+  showDots: boolean;
+  style?: CSSProperties;
+}) {
+  const [index, setIndex] = useState(0);
+  const safeImages = Array.isArray(images) ? images : [];
+
+  if (safeImages.length === 0) {
+    return (
+      <div style={style} className="flex flex-col items-center justify-center gap-2 text-gray-400 border border-dashed border-gray-300 rounded-lg py-10">
+        {createElement(getLucideIcon("ChevronLeftCircle"), { className: "h-6 w-6" })}
+        <span className="text-xs">No slides yet — add images in Settings</span>
+      </div>
+    );
+  }
+
+  const clampedIndex = Math.min(index, safeImages.length - 1);
+  const current = safeImages[clampedIndex];
+  const currentSrc = typeof current === "string" ? current : current?.src || "";
+
+  return (
+    <div style={style} className="relative rounded-lg overflow-hidden bg-gray-100 aspect-[16/9]">
+      <img src={currentSrc} alt={`Slide ${clampedIndex + 1}`} className="w-full h-full object-cover" />
+      {showArrows && safeImages.length > 1 && (
+        <>
+          <button
+            type="button"
+            onClick={(e) => { e.stopPropagation(); setIndex((i) => (i - 1 + safeImages.length) % safeImages.length); }}
+            className="absolute left-2 top-1/2 -translate-y-1/2 h-8 w-8 rounded-full bg-white/90 flex items-center justify-center shadow"
+          >
+            {createElement(getLucideIcon("ChevronLeft"), { className: "h-4 w-4" })}
+          </button>
+          <button
+            type="button"
+            onClick={(e) => { e.stopPropagation(); setIndex((i) => (i + 1) % safeImages.length); }}
+            className="absolute right-2 top-1/2 -translate-y-1/2 h-8 w-8 rounded-full bg-white/90 flex items-center justify-center shadow"
+          >
+            {createElement(getLucideIcon("ChevronRight"), { className: "h-4 w-4" })}
+          </button>
+        </>
+      )}
+      {showDots && safeImages.length > 1 && (
+        <div className="absolute bottom-2 left-1/2 -translate-x-1/2 flex gap-1.5">
+          {safeImages.map((_, i) => (
+            <button
+              key={i}
+              type="button"
+              onClick={(e) => { e.stopPropagation(); setIndex(i); }}
+              className={`h-1.5 rounded-full transition-all ${i === clampedIndex ? "w-4 bg-white" : "w-1.5 bg-white/60"}`}
+            />
+          ))}
+        </div>
+      )}
+    </div>
+  );
+}
+
+// Live countdown for the "countdown" widget. Recomputes the remaining
+// time every second on the client; renders a static placeholder if no
+// target date has been set yet so it never shows garbage like "NaN".
+function CountdownWidget({ content, style }: { content: any; style?: CSSProperties }) {
+  const targetDate: string = content?.endDate || "";
+  const [remaining, setRemaining] = useState<{ days: number; hours: number; minutes: number; seconds: number } | null>(null);
+
+  useEffect(() => {
+    if (!targetDate) {
+      setRemaining(null);
+      return;
+    }
+    const target = new Date(targetDate).getTime();
+    if (Number.isNaN(target)) {
+      setRemaining(null);
+      return;
+    }
+
+    const tick = () => {
+      const diff = Math.max(0, target - Date.now());
+      setRemaining({
+        days: Math.floor(diff / (1000 * 60 * 60 * 24)),
+        hours: Math.floor((diff / (1000 * 60 * 60)) % 24),
+        minutes: Math.floor((diff / (1000 * 60)) % 60),
+        seconds: Math.floor((diff / 1000) % 60),
+      });
+    };
+
+    tick();
+    const interval = setInterval(tick, 1000);
+    return () => clearInterval(interval);
+  }, [targetDate]);
+
+  const units: [string, number][] = remaining
+    ? [
+        ...(content?.showDays !== false ? [["Days", remaining.days] as [string, number]] : []),
+        ...(content?.showHours !== false ? [["Hours", remaining.hours] as [string, number]] : []),
+        ...(content?.showMinutes !== false ? [["Min", remaining.minutes] as [string, number]] : []),
+        ...(content?.showSeconds !== false ? [["Sec", remaining.seconds] as [string, number]] : []),
+      ]
+    : [];
+
+  return (
+    <div style={style} className="text-center space-y-3">
+      {content?.title && <div className="text-sm font-semibold text-gray-900">{content.title}</div>}
+      {!remaining ? (
+        <div className="text-xs text-gray-400 border border-dashed border-gray-300 rounded-lg py-6">
+          Set a target date in Settings to start the countdown
+        </div>
+      ) : (
+        <div className="flex items-center justify-center gap-3">
+          {units.map(([label, value]) => (
+            <div key={label} className="flex flex-col items-center min-w-[52px] rounded-lg bg-gray-900 text-white py-2.5">
+              <span className="text-lg font-bold tabular-nums">{String(value).padStart(2, "0")}</span>
+              <span className="text-[10px] uppercase tracking-wide text-gray-300">{label}</span>
+            </div>
+          ))}
+        </div>
+      )}
+    </div>
+  );
+}
 
 export default function EditorCanvas() {
   const { pageStructure, device, selectedElementId, hoveredElementId, setSelectedElementId, setHoveredElementId, moveElement, updateElement, siteId } = useEditorStore();
@@ -929,7 +1091,538 @@ function ElementRenderer({
           </div>
         );
 
-      case "template-block":
+      case "grid": {
+        const gridChildren = element.elements || element.children || [];
+        const columns = Number(content.columns) || 3;
+        return (
+          <div
+            data-editor-node-id={element.id}
+            className={`editor-node-${element.id} ${selectionChromeClass}`}
+            style={{
+              ...editorInlineStyles,
+              display: "grid",
+              gridTemplateColumns: `repeat(${columns}, 1fr)`,
+              gap: `${content.gap || "24"}px`,
+              minHeight: gridChildren.length ? undefined : "80px",
+            }}
+          >
+            {gridChildren.length === 0 && (
+              <div className="col-span-full flex items-center justify-center text-xs text-gray-400 border border-dashed border-gray-300 rounded-lg py-6">
+                Empty grid — drag widgets here
+              </div>
+            )}
+            {gridChildren.map((child: any) => (
+              <ElementRenderer
+                key={child.id}
+                element={child}
+                depth={depth + 1}
+                isSelected={selectedElementId === child.id}
+                onSelect={() => onSelectElement(child.id)}
+                onContextMenu={onContextMenu}
+                editingElementId={editingElementId}
+                editingValue={editingValue}
+                onInlineEdit={onInlineEdit}
+                onSaveInlineEdit={onSaveInlineEdit}
+                onCancelInlineEdit={onCancelInlineEdit}
+                onImageReplace={onImageReplace}
+                onEditingValueChange={onEditingValueChange}
+                selectedElementId={selectedElementId}
+                onSelectElement={onSelectElement}
+              />
+            ))}
+          </div>
+        );
+      }
+
+      case "flex": {
+        const flexChildren = element.elements || element.children || [];
+        return (
+          <div
+            data-editor-node-id={element.id}
+            className={`editor-node-${element.id} ${selectionChromeClass}`}
+            style={{
+              ...editorInlineStyles,
+              display: "flex",
+              flexDirection: content.direction === "column" ? "column" : "row",
+              justifyContent: content.justify || "flex-start",
+              alignItems: content.align || "center",
+              flexWrap: content.wrap || "nowrap",
+              gap: `${content.gap || "16"}px`,
+              minHeight: flexChildren.length ? undefined : "80px",
+            }}
+          >
+            {flexChildren.length === 0 && (
+              <div className="flex items-center justify-center text-xs text-gray-400 border border-dashed border-gray-300 rounded-lg py-6 w-full">
+                Empty flex container — drag widgets here
+              </div>
+            )}
+            {flexChildren.map((child: any) => (
+              <ElementRenderer
+                key={child.id}
+                element={child}
+                depth={depth + 1}
+                isSelected={selectedElementId === child.id}
+                onSelect={() => onSelectElement(child.id)}
+                onContextMenu={onContextMenu}
+                editingElementId={editingElementId}
+                editingValue={editingValue}
+                onInlineEdit={onInlineEdit}
+                onSaveInlineEdit={onSaveInlineEdit}
+                onCancelInlineEdit={onCancelInlineEdit}
+                onImageReplace={onImageReplace}
+                onEditingValueChange={onEditingValueChange}
+                selectedElementId={selectedElementId}
+                onSelectElement={onSelectElement}
+              />
+            ))}
+          </div>
+        );
+      }
+
+      case "video": {
+        const videoSrc: string = content.src || "";
+        const isYouTube = /youtube\.com|youtu\.be/.test(videoSrc);
+        const isVimeo = /vimeo\.com/.test(videoSrc);
+        const toEmbedUrl = (url: string) => {
+          if (isYouTube) {
+            const idMatch = url.match(/(?:v=|youtu\.be\/|embed\/)([a-zA-Z0-9_-]{6,})/);
+            return idMatch ? `https://www.youtube.com/embed/${idMatch[1]}` : url;
+          }
+          if (isVimeo) {
+            const idMatch = url.match(/vimeo\.com\/(\d+)/);
+            return idMatch ? `https://player.vimeo.com/video/${idMatch[1]}` : url;
+          }
+          return url;
+        };
+        return (
+          <div style={{ ...editorInlineStyles, aspectRatio: content.aspectRatio || "16/9", position: "relative" }} className="w-full bg-gray-900 rounded-lg overflow-hidden">
+            {!videoSrc ? (
+              <div className="absolute inset-0 flex flex-col items-center justify-center text-gray-400 gap-2">
+                {createElement(getLucideIcon("Video"), { className: "h-8 w-8" })}
+                <span className="text-xs">No video source set — add one in Settings</span>
+              </div>
+            ) : isYouTube || isVimeo ? (
+              <iframe
+                src={toEmbedUrl(videoSrc)}
+                className="absolute inset-0 w-full h-full"
+                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                allowFullScreen
+              />
+            ) : (
+              <video
+                src={videoSrc}
+                poster={content.poster || undefined}
+                autoPlay={!!content.autoplay}
+                loop={!!content.loop}
+                muted={!!content.muted}
+                controls={content.controls !== false}
+                className="absolute inset-0 w-full h-full object-cover"
+              />
+            )}
+          </div>
+        );
+      }
+
+      case "gallery": {
+        const galleryImages: any[] = Array.isArray(content.images) ? content.images : [];
+        const galleryColumns = Number(content.columns) || 3;
+        return (
+          <div style={editorInlineStyles}>
+            {galleryImages.length === 0 ? (
+              <div className="flex flex-col items-center justify-center gap-2 text-gray-400 border border-dashed border-gray-300 rounded-lg py-10">
+                {createElement(getLucideIcon("Images"), { className: "h-6 w-6" })}
+                <span className="text-xs">No images yet — add some in Settings</span>
+              </div>
+            ) : (
+              <div style={{ display: "grid", gridTemplateColumns: `repeat(${galleryColumns}, 1fr)`, gap: `${content.gap || "16"}px` }}>
+                {galleryImages.map((img: any, i: number) => (
+                  <img
+                    key={i}
+                    src={typeof img === "string" ? img : img?.src || ""}
+                    alt={typeof img === "string" ? `Gallery image ${i + 1}` : img?.alt || `Gallery image ${i + 1}`}
+                    className="w-full h-full object-cover rounded-lg aspect-square"
+                  />
+                ))}
+              </div>
+            )}
+          </div>
+        );
+      }
+
+      case "slider": {
+        const sliderImages: any[] = Array.isArray(content.images) ? content.images : [];
+        return (
+          <SliderWidget
+            images={sliderImages}
+            showArrows={content.showArrows !== false}
+            showDots={content.showDots !== false}
+            style={editorInlineStyles}
+          />
+        );
+      }
+
+      case "form": {
+        const formChildren = element.elements || element.children || [];
+        return (
+          <form
+            data-editor-node-id={element.id}
+            className={`editor-node-${element.id} ${selectionChromeClass} space-y-4`}
+            style={editorInlineStyles}
+            onSubmit={(e) => e.preventDefault()}
+          >
+            {formChildren.length === 0 ? (
+              <div className="text-xs text-gray-400 border border-dashed border-gray-300 rounded-lg py-6 text-center">
+                Empty form — drag Input, Text Area, or Select widgets here
+              </div>
+            ) : (
+              formChildren.map((child: any) => (
+                <ElementRenderer
+                  key={child.id}
+                  element={child}
+                  depth={depth + 1}
+                  isSelected={selectedElementId === child.id}
+                  onSelect={() => onSelectElement(child.id)}
+                  onContextMenu={onContextMenu}
+                  editingElementId={editingElementId}
+                  editingValue={editingValue}
+                  onInlineEdit={onInlineEdit}
+                  onSaveInlineEdit={onSaveInlineEdit}
+                  onCancelInlineEdit={onCancelInlineEdit}
+                  onImageReplace={onImageReplace}
+                  onEditingValueChange={onEditingValueChange}
+                  selectedElementId={selectedElementId}
+                  onSelectElement={onSelectElement}
+                />
+              ))
+            )}
+            <button
+              type="submit"
+              className="rounded-lg bg-gray-900 text-white text-sm font-medium px-5 py-2.5"
+            >
+              {content.submitText || "Submit"}
+            </button>
+          </form>
+        );
+      }
+
+      case "input":
+        return (
+          <div style={editorInlineStyles} className="space-y-1.5">
+            {content.label && <label className="block text-sm font-medium text-gray-700">{content.label}{content.required && <span className="text-red-500"> *</span>}</label>}
+            <input
+              type={content.type || "text"}
+              placeholder={content.placeholder || ""}
+              disabled
+              className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm bg-white text-gray-500"
+            />
+          </div>
+        );
+
+      case "textarea":
+        return (
+          <div style={editorInlineStyles} className="space-y-1.5">
+            {content.label && <label className="block text-sm font-medium text-gray-700">{content.label}{content.required && <span className="text-red-500"> *</span>}</label>}
+            <textarea
+              placeholder={content.placeholder || ""}
+              rows={Number(content.rows) || 4}
+              disabled
+              className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm bg-white text-gray-500 resize-none"
+            />
+          </div>
+        );
+
+      case "select": {
+        const selectOptions: any[] = Array.isArray(content.options) ? content.options : [];
+        return (
+          <div style={editorInlineStyles} className="space-y-1.5">
+            {content.label && <label className="block text-sm font-medium text-gray-700">{content.label}{content.required && <span className="text-red-500"> *</span>}</label>}
+            <select disabled className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm bg-white text-gray-500">
+              {selectOptions.length === 0 ? (
+                <option>No options set</option>
+              ) : (
+                selectOptions.map((opt: any, i: number) => (
+                  <option key={i} value={opt?.value ?? ""}>{opt?.label ?? String(opt)}</option>
+                ))
+              )}
+            </select>
+          </div>
+        );
+      }
+
+      case "product":
+        return (
+          <div style={editorInlineStyles} className="w-full max-w-[220px] rounded-xl border border-gray-200 overflow-hidden bg-white">
+            {content.showImage !== false && (
+              <div className="aspect-square bg-gray-100 flex items-center justify-center text-gray-300">
+                {createElement(getLucideIcon("ShoppingBag"), { className: "h-8 w-8" })}
+              </div>
+            )}
+            <div className="p-3 space-y-1">
+              <div className="text-sm font-medium text-gray-900">{content.productId ? "Selected product" : "No product selected"}</div>
+              {content.showPrice !== false && <div className="text-sm text-gray-500">$0.00</div>}
+              {content.showAddToCart !== false && (
+                <button type="button" className="mt-2 w-full rounded-lg bg-gray-900 text-white text-xs font-medium py-2">Add to cart</button>
+              )}
+              {!content.productId && <div className="text-[11px] text-amber-600">Pick a product in Settings</div>}
+            </div>
+          </div>
+        );
+
+      case "products": {
+        const productColumns = Number(content.columns) || 4;
+        const productCount = Math.max(1, Number(content.limit) || 8);
+        return (
+          <div style={editorInlineStyles}>
+            <div style={{ display: "grid", gridTemplateColumns: `repeat(${productColumns}, 1fr)`, gap: "16px" }}>
+              {Array.from({ length: Math.min(productCount, productColumns * 2) }).map((_, i) => (
+                <div key={i} className="rounded-xl border border-gray-200 overflow-hidden bg-white">
+                  <div className="aspect-square bg-gray-100 flex items-center justify-center text-gray-300">
+                    {createElement(getLucideIcon("ShoppingBag"), { className: "h-6 w-6" })}
+                  </div>
+                  <div className="p-2.5 space-y-1">
+                    <div className="text-xs font-medium text-gray-900">Product name</div>
+                    {content.showPrice !== false && <div className="text-xs text-gray-500">$0.00</div>}
+                  </div>
+                </div>
+              ))}
+            </div>
+            <div className="text-[11px] text-gray-400 mt-2">Live products load automatically on the storefront{content.category ? ` from "${content.category}"` : ""}.</div>
+          </div>
+        );
+      }
+
+      case "cart":
+        return (
+          <div style={editorInlineStyles} className="w-full max-w-xs rounded-xl border border-gray-200 bg-white p-4 space-y-3">
+            <div className="flex items-center gap-2 text-sm font-semibold text-gray-900">
+              {createElement(getLucideIcon("ShoppingCart"), { className: "h-4 w-4" })}
+              Your cart
+            </div>
+            {content.showItems !== false && (
+              <div className="text-xs text-gray-400 border-t border-b border-gray-100 py-3">Cart items appear here on the live storefront</div>
+            )}
+            {content.showTotal !== false && (
+              <div className="flex justify-between text-sm font-medium text-gray-900">
+                <span>Total</span>
+                <span>$0.00</span>
+              </div>
+            )}
+            {content.showCheckout !== false && (
+              <button type="button" className="w-full rounded-lg bg-gray-900 text-white text-xs font-medium py-2.5">Checkout</button>
+            )}
+          </div>
+        );
+
+      case "social-share": {
+        const sharePlatforms: string[] = Array.isArray(content.platforms) ? content.platforms : [];
+        return (
+          <div style={editorInlineStyles} className="flex items-center gap-2">
+            {sharePlatforms.length === 0 && <span className="text-xs text-gray-400">No platforms selected</span>}
+            {sharePlatforms.map((platform: string, i: number) => {
+              const Icon = getSocialIcon(platform);
+              return (
+                <span key={i} className="h-9 w-9 rounded-full border border-gray-200 flex items-center justify-center text-gray-600" title={platform}>
+                  <Icon className="h-4 w-4" />
+                </span>
+              );
+            })}
+          </div>
+        );
+      }
+
+      case "social-follow": {
+        const followPlatforms: any[] = Array.isArray(content.platforms) ? content.platforms : [];
+        return (
+          <div style={editorInlineStyles} className="flex items-center gap-2">
+            {followPlatforms.length === 0 && <span className="text-xs text-gray-400">No social links set</span>}
+            {followPlatforms.map((p: any, i: number) => {
+              const Icon = getSocialIcon(p?.name);
+              return (
+                <span key={i} className="h-9 w-9 rounded-full border border-gray-200 flex items-center justify-center text-gray-600" title={p?.name || ""}>
+                  <Icon className="h-4 w-4" />
+                </span>
+              );
+            })}
+          </div>
+        );
+      }
+
+      case "testimonial": {
+        const testimonialText = getElementTextValue(element, content.text || "This is a testimonial from a satisfied customer.");
+        const rating = Math.max(0, Math.min(5, Number(content.rating) || 0));
+        return (
+          <div style={editorInlineStyles} className="rounded-xl border border-gray-200 bg-white p-5 max-w-md space-y-3">
+            {rating > 0 && (
+              <div className="flex gap-0.5 text-amber-400">
+                {Array.from({ length: 5 }).map((_, i) => (
+                  <span key={i}>{createElement(getLucideIcon("Star"), { className: "h-3.5 w-3.5", fill: i < rating ? "currentColor" : "none" })}</span>
+                ))}
+              </div>
+            )}
+            <CanvasInlineEditableText
+              as="p"
+              value={testimonialText}
+              onSelectNode={() => onSelectElement(element.id)}
+              onBeginEdit={() => onInlineEdit(element.id, testimonialText)}
+              onCommit={(nextText) => updateElementTextValue(element.id, nextText)}
+              onCancel={onSaveInlineEdit}
+              multiline
+              className="cursor-text outline-none text-sm text-gray-700 whitespace-pre-wrap"
+            />
+            <div className="flex items-center gap-2 pt-1">
+              {content.avatar ? (
+                <img src={content.avatar} alt={content.name || ""} className="h-8 w-8 rounded-full object-cover" />
+              ) : (
+                <div className="h-8 w-8 rounded-full bg-gray-200 flex items-center justify-center text-xs font-medium text-gray-600">
+                  {(content.name || "?").charAt(0)}
+                </div>
+              )}
+              <div>
+                <div className="text-xs font-semibold text-gray-900">{content.name || "Customer Name"}</div>
+                <div className="text-[11px] text-gray-500">{content.role || "Customer Role"}</div>
+              </div>
+            </div>
+          </div>
+        );
+      }
+
+      case "reviews": {
+        const reviewLimit = Math.max(1, Math.min(Number(content.limit) || 6, 4));
+        return (
+          <div style={editorInlineStyles} className="space-y-3">
+            {Array.from({ length: reviewLimit }).map((_, i) => (
+              <div key={i} className="rounded-lg border border-gray-200 p-3 space-y-1.5">
+                {content.showRating !== false && (
+                  <div className="flex gap-0.5 text-amber-400">
+                    {Array.from({ length: 5 }).map((_, j) => (
+                      <span key={j}>{createElement(getLucideIcon("Star"), { className: "h-3 w-3", fill: "currentColor" })}</span>
+                    ))}
+                  </div>
+                )}
+                <div className="text-xs text-gray-500">Reviews load automatically on the storefront{content.productId ? " for this product" : ""}.</div>
+              </div>
+            ))}
+          </div>
+        );
+      }
+
+      case "countdown":
+        return <CountdownWidget content={content} style={editorInlineStyles} />;
+
+      case "cta": {
+        const ctaHeading = getElementTextValue(element, content.heading || "Take Action Now");
+        return (
+          <div
+            style={{
+              ...editorInlineStyles,
+              backgroundColor: content.backgroundColor || "#2563eb",
+              color: content.textColor || "#ffffff",
+            }}
+            className="rounded-xl px-8 py-10 text-center space-y-3"
+          >
+            <CanvasInlineEditableText
+              as="h3"
+              value={ctaHeading}
+              onSelectNode={() => onSelectElement(element.id)}
+              onBeginEdit={() => onInlineEdit(element.id, ctaHeading)}
+              onCommit={(nextText) => updateElementTextValue(element.id, nextText)}
+              onCancel={onSaveInlineEdit}
+              className="cursor-text outline-none text-2xl font-bold"
+            />
+            {content.description && <p className="opacity-90 text-sm max-w-lg mx-auto">{content.description}</p>}
+            <button
+              type="button"
+              className="inline-flex mt-2 rounded-lg bg-white px-6 py-2.5 text-sm font-semibold"
+              style={{ color: content.backgroundColor || "#2563eb" }}
+            >
+              {content.buttonText || "Get Started"}
+            </button>
+          </div>
+        );
+      }
+
+      case "progress-bar": {
+        const progressValue = Math.max(0, Math.min(100, Number(content.value) || 0));
+        return (
+          <div style={editorInlineStyles} className="space-y-1.5">
+            {content.showLabel !== false && (
+              <div className="flex justify-between text-xs font-medium text-gray-600">
+                <span>Progress</span>
+                <span>{progressValue}%</span>
+              </div>
+            )}
+            <div className="w-full rounded-full bg-gray-100" style={{ height: `${content.height || 8}px` }}>
+              <div
+                className="rounded-full transition-all"
+                style={{ width: `${progressValue}%`, height: "100%", backgroundColor: content.color || "#2563eb" }}
+              />
+            </div>
+          </div>
+        );
+      }
+
+      case "embed": {
+        const embedCode: string = content.code || "";
+        if (!embedCode) {
+          return (
+            <div style={editorInlineStyles} className="flex flex-col items-center justify-center gap-2 text-gray-400 border border-dashed border-gray-300 rounded-lg py-10">
+              {createElement(getLucideIcon("Code2"), { className: "h-6 w-6" })}
+              <span className="text-xs">No embed code set — add it in Settings</span>
+            </div>
+          );
+        }
+        const isUrl = /^https?:\/\//.test(embedCode.trim());
+        return (
+          <div style={editorInlineStyles} className="w-full rounded-lg overflow-hidden border border-gray-200">
+            {isUrl ? (
+              <iframe src={embedCode} className="w-full" style={{ height: "400px", border: "none" }} />
+            ) : (
+              <iframe srcDoc={embedCode} className="w-full" style={{ height: "400px", border: "none" }} sandbox="allow-scripts allow-same-origin" />
+            )}
+          </div>
+        );
+      }
+
+      case "html": {
+        const htmlCode: string = content.code || "";
+        return (
+          <div
+            style={editorInlineStyles}
+            className={htmlCode ? "" : "flex flex-col items-center justify-center gap-2 text-gray-400 border border-dashed border-gray-300 rounded-lg py-10"}
+          >
+            {htmlCode ? (
+              <div dangerouslySetInnerHTML={{ __html: htmlCode }} />
+            ) : (
+              <>
+                {createElement(getLucideIcon("Code"), { className: "h-6 w-6" })}
+                <span className="text-xs">No HTML added yet</span>
+              </>
+            )}
+          </div>
+        );
+      }
+
+      case "shortcode":
+        return (
+          <div style={editorInlineStyles} className="inline-flex items-center gap-2 rounded-lg bg-gray-100 border border-gray-200 px-3 py-2 font-mono text-xs text-gray-600">
+            {createElement(getLucideIcon("Brackets"), { className: "h-3.5 w-3.5" })}
+            {content.code || "[shortcode]"}
+          </div>
+        );
+
+      case "icon": {
+        const IconComponent = getLucideIcon(content.name);
+        return (
+          <div style={editorInlineStyles}>
+            <IconComponent
+              size={Number(content.size) || 24}
+              color={content.color || "#171717"}
+            />
+          </div>
+        );
+      }
+
+
         // Render template blocks using the RenderTemplateBlock
         const templateBlock: TemplateBlock = {
           id: element.id,
