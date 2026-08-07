@@ -992,6 +992,8 @@ model CrmContact {
   activities      CrmActivity[]
   site            Site             @relation(fields: [siteId], references: [id], onDelete: Cascade)
   emailRecipients EmailRecipient[]
+  smsRecipients      SmsRecipient[]
+  whatsappRecipients WhatsAppRecipient[]
   formSubmissions FormSubmission[]
 
   @@unique([siteId, email])
@@ -1025,12 +1027,15 @@ model EmailCampaign {
   contentHtml  String?
   status       CampaignStatus    @default(DRAFT)
   type         EmailCampaignType @default(BROADCAST)
+  audienceType String            @default("ALL_CONTACTS") // ALL_CONTACTS | TAG
+  audienceTag  String?
   scheduledAt  DateTime?
   sentAt       DateTime?
   totalSent    Int               @default(0)
   totalOpened  Int               @default(0)
   totalClicked Int               @default(0)
   totalBounced Int               @default(0)
+  lastError    String?
   createdAt    DateTime          @default(now())
   updatedAt    DateTime          @updatedAt
   site         Site              @relation(fields: [siteId], references: [id], onDelete: Cascade)
@@ -1047,6 +1052,7 @@ model EmailRecipient {
   contactId  String?
   email      String
   status     String        @default("pending")
+  error      String?
   sentAt     DateTime?
   openedAt   DateTime?
   clickedAt  DateTime?
@@ -1065,36 +1071,81 @@ model SmsCampaign {
   name           String
   message        String
   status         CampaignStatus @default(DRAFT)
+  audienceType   String         @default("ALL_CONTACTS") // ALL_CONTACTS | TAG
+  audienceTag    String?
   scheduledAt    DateTime?
   sentAt         DateTime?
   totalSent      Int            @default(0)
   totalDelivered Int            @default(0)
+  lastError      String?
   createdAt      DateTime       @default(now())
   updatedAt      DateTime       @updatedAt
   site           Site           @relation(fields: [siteId], references: [id], onDelete: Cascade)
+  recipients     SmsRecipient[]
 
   @@index([siteId])
   @@map("sms_campaigns")
 }
 
+model SmsRecipient {
+  id          String       @id @default(cuid())
+  campaignId  String
+  contactId   String?
+  phone       String
+  status      String       @default("pending")
+  error       String?
+  sentAt      DateTime?
+  deliveredAt DateTime?
+  createdAt   DateTime     @default(now())
+  campaign    SmsCampaign  @relation(fields: [campaignId], references: [id], onDelete: Cascade)
+  contact     CrmContact?  @relation(fields: [contactId], references: [id])
+
+  @@index([campaignId])
+  @@index([phone])
+  @@map("sms_recipients")
+}
+
 model WhatsAppCampaign {
-  id             String         @id @default(cuid())
+  id             String              @id @default(cuid())
   siteId         String
   name           String
   message        String
   mediaUrl       String?
-  status         CampaignStatus @default(DRAFT)
+  status         CampaignStatus      @default(DRAFT)
+  audienceType   String              @default("ALL_CONTACTS") // ALL_CONTACTS | TAG
+  audienceTag    String?
   scheduledAt    DateTime?
   sentAt         DateTime?
-  totalSent      Int            @default(0)
-  totalDelivered Int            @default(0)
-  totalRead      Int            @default(0)
-  createdAt      DateTime       @default(now())
-  updatedAt      DateTime       @updatedAt
-  site           Site           @relation(fields: [siteId], references: [id], onDelete: Cascade)
+  totalSent      Int                 @default(0)
+  totalDelivered Int                 @default(0)
+  totalRead      Int                 @default(0)
+  lastError      String?
+  createdAt      DateTime            @default(now())
+  updatedAt      DateTime            @updatedAt
+  site           Site                @relation(fields: [siteId], references: [id], onDelete: Cascade)
+  recipients     WhatsAppRecipient[]
 
   @@index([siteId])
   @@map("whatsapp_campaigns")
+}
+
+model WhatsAppRecipient {
+  id          String            @id @default(cuid())
+  campaignId  String
+  contactId   String?
+  phone       String
+  status      String            @default("pending")
+  error       String?
+  sentAt      DateTime?
+  deliveredAt DateTime?
+  readAt      DateTime?
+  createdAt   DateTime          @default(now())
+  campaign    WhatsAppCampaign  @relation(fields: [campaignId], references: [id], onDelete: Cascade)
+  contact     CrmContact?       @relation(fields: [contactId], references: [id])
+
+  @@index([campaignId])
+  @@index([phone])
+  @@map("whatsapp_recipients")
 }
 
 model ABTest {
