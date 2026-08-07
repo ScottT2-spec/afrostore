@@ -235,6 +235,10 @@ export default function CheckoutPage() {
   const [paymentMethod, setPaymentMethod] = useState("PAYSTACK");
   const [couponCode, setCouponCode] = useState("");
   const [couponApplied, setCouponApplied] = useState(false);
+  const [couponValidating, setCouponValidating] = useState(false);
+  const [couponError, setCouponError] = useState("");
+  const [couponDiscount, setCouponDiscount] = useState(0);
+  const [couponFreeShipping, setCouponFreeShipping] = useState(false);
 
   // Validation
   const [touched, setTouched] = useState<Record<string, boolean>>({});
@@ -306,8 +310,37 @@ export default function CheckoutPage() {
   const subtotal = cart.reduce((s, i) => s + Number(i.product.price) * i.quantity, 0);
   const zone = deliveryZones.find((z) => z.id === selectedZone);
   const zoneFreeAbove = zone?.freeAbove ? Number(zone.freeAbove) : null;
-  const deliveryFee = zone ? (zoneFreeAbove && subtotal >= zoneFreeAbove ? 0 : Number(zone.fee)) : 0;
-  const total = subtotal + deliveryFee;
+  const baseDeliveryFee = zone ? (zoneFreeAbove && subtotal >= zoneFreeAbove ? 0 : Number(zone.fee)) : 0;
+  const deliveryFee = couponApplied && couponFreeShipping ? 0 : baseDeliveryFee;
+  const appliedDiscount = couponApplied ? Math.min(couponDiscount, subtotal) : 0;
+  const total = Math.max(0, subtotal + deliveryFee - appliedDiscount);
+
+  const applyCoupon = async () => {
+    const code = couponCode.trim();
+    if (!code) return;
+    if (!storeSlug) { setCouponError("Store information missing. Go back to the store and try again."); return; }
+
+    setCouponValidating(true);
+    setCouponError("");
+    setCouponApplied(false);
+    try {
+      const res = await fetch(`/api/storefront/${storeSlug}/coupons/validate?code=${encodeURIComponent(code)}&subtotal=${subtotal}`);
+      const json = await res.json();
+      if (!json.success) {
+        setCouponError(json.error || "This discount code isn't valid");
+        setCouponDiscount(0);
+        setCouponFreeShipping(false);
+        return;
+      }
+      setCouponDiscount(json.data.discountAmount || 0);
+      setCouponFreeShipping(!!json.data.freeShipping);
+      setCouponApplied(true);
+    } catch {
+      setCouponError("Couldn't validate this code right now. Please try again.");
+    } finally {
+      setCouponValidating(false);
+    }
+  };
 
   const handlePlaceOrder = async () => {
     if (!siteId) { setOrderError("Store information missing. Go back to the store and try again."); return; }
@@ -708,20 +741,28 @@ export default function CheckoutPage() {
                       type="text"
                       placeholder="Discount code"
                       value={couponCode}
-                      onChange={(e) => { setCouponCode(e.target.value.toUpperCase()); setCouponApplied(false); }}
+                      onChange={(e) => { setCouponCode(e.target.value.toUpperCase()); setCouponApplied(false); setCouponError(""); }}
+                      onKeyDown={(e) => { if (e.key === "Enter") { e.preventDefault(); applyCoupon(); } }}
                       className="co-font-mono flex-1 bg-transparent text-sm uppercase tracking-wide focus:outline-none"
                     />
                   </div>
                   <button
-                    onClick={() => { if (couponCode.trim()) setCouponApplied(true); }}
-                    className="rounded-xl border border-[var(--co-line)] bg-white px-4 text-sm font-semibold text-[var(--co-ink)] transition-colors hover:border-[var(--co-indigo)] hover:text-[var(--co-indigo)]"
+                    onClick={applyCoupon}
+                    disabled={couponValidating || !couponCode.trim()}
+                    className="rounded-xl border border-[var(--co-line)] bg-white px-4 text-sm font-semibold text-[var(--co-ink)] transition-colors hover:border-[var(--co-indigo)] hover:text-[var(--co-indigo)] disabled:cursor-not-allowed disabled:opacity-60"
                   >
-                    Apply
+                    {couponValidating ? <Loader2 className="h-4 w-4 animate-spin" /> : "Apply"}
                   </button>
                 </div>
                 {couponApplied && couponCode && (
                   <p className="-mt-3 mb-4 flex items-center gap-1 text-xs text-[var(--co-green)]">
-                    <Check className="h-3 w-3" /> Code saved — we&apos;ll validate it when you place the order.
+                    <Check className="h-3 w-3" />
+                    {couponFreeShipping ? "Free shipping applied" : `Discount applied: -${formatCurrency(couponDiscount, currency)}`}
+                  </p>
+                )}
+                {couponError && (
+                  <p className="-mt-3 mb-4 flex items-center gap-1 text-xs text-red-600">
+                    <AlertCircle className="h-3 w-3" /> {couponError}
                   </p>
                 )}
 
@@ -730,6 +771,12 @@ export default function CheckoutPage() {
                     <span>Subtotal · {cart.reduce((s, i) => s + i.quantity, 0)} items</span>
                     <span className="co-font-mono">{formatCurrency(subtotal, currency)}</span>
                   </div>
+                  {couponApplied && appliedDiscount > 0 && (
+                    <div className="flex justify-between text-sm text-[var(--co-green)]">
+                      <span>Discount ({couponCode})</span>
+                      <span className="co-font-mono">-{formatCurrency(appliedDiscount, currency)}</span>
+                    </div>
+                  )}
                   <div className="flex justify-between text-sm text-surface-500">
                     <span>Delivery</span>
                     <span className="co-font-mono">
