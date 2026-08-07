@@ -1623,6 +1623,7 @@ function ElementRenderer({
       }
 
 
+      case "template-block": {
         // Render template blocks using the RenderTemplateBlock
         const templateBlock: TemplateBlock = {
           id: element.id,
@@ -1662,6 +1663,7 @@ function ElementRenderer({
             )}
           </div>
         );
+      }
 
       // Handle template block types directly (aegisHeader, aegisHero, etc.)
       case "aegisHeader":
