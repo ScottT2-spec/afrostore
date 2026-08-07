@@ -1,11 +1,12 @@
 "use client";
 import { Check, ChevronDown, ChevronRight, Loader2, Plus, X } from "lucide-react";
-import { BadgeCheck, CreditCard, Heart, ImageIcon, MessageCircle, Minus, Pencil, Share2, Shield, ShoppingBag, ShoppingCart, Star, Truck } from "@/components/icons/FilledIcons";
+import { BadgeCheck, Clock, CreditCard, Heart, ImageIcon, MessageCircle, Minus, Pencil, Share2, Shield, ShoppingBag, ShoppingCart, Star, Truck, Zap } from "@/components/icons/FilledIcons";
 
 import { useState, useEffect, useCallback } from "react";
 import { useParams } from "next/navigation";
 import Link from "next/link";
 import { useWishlist } from "@/hooks/useWishlist";
+import FlashSaleCountdown from "@/components/storefront/FlashSaleCountdown";
 
 interface ProductImage { id: string; url: string; alt?: string }
 interface Variant { id: string; name: string; price: number; stock: number; inStock: boolean; options: Record<string, string> | null }
@@ -20,6 +21,7 @@ interface ProductData {
     tags: string[]; images: ProductImage[]; variants: Variant[];
     category?: { id: string; name: string; slug: string };
     metaTitle?: string; metaDescription?: string;
+    flashSale?: { id: string; name: string; salePrice: number; endsAt: string } | null;
   };
   reviews: {
     items: Review[];
@@ -90,7 +92,13 @@ export default function ProductDetailPage() {
   const activeVariant = product.variants.find((v) => v.id === selectedVariant);
   const displayPrice = activeVariant ? activeVariant.price : product.price;
   const isInStock = activeVariant ? activeVariant.inStock : product.inStock;
-  const discount = product.compareAtPrice && product.compareAtPrice > displayPrice
+  // Flash sale pricing is computed against the base product price server-side;
+  // only show it when no variant with its own price is selected, so we never
+  // display a discount that doesn't match what checkout will actually charge.
+  const activeFlashSale = product.flashSale && displayPrice === Number(product.price) ? product.flashSale : null;
+  const discount = activeFlashSale
+    ? Math.round(((Number(product.price) - activeFlashSale.salePrice) / Number(product.price)) * 100)
+    : product.compareAtPrice && product.compareAtPrice > displayPrice
     ? Math.round(((Number(product.compareAtPrice) - displayPrice) / Number(product.compareAtPrice)) * 100)
     : 0;
 
@@ -106,7 +114,7 @@ export default function ProductDetailPage() {
         variantId: selectedVariant || null,
         name: product.name,
         variant: activeVariant?.name || null,
-        price: displayPrice,
+        price: activeFlashSale ? activeFlashSale.salePrice : displayPrice,
         image: images[0]?.url,
         quantity,
       });
@@ -217,14 +225,29 @@ export default function ProductDetailPage() {
               )}
 
               <div className="flex items-baseline gap-3 mt-4">
-                <span className="text-3xl font-bold text-surface-900">{formatPrice(displayPrice, currency)}</span>
-                {discount > 0 && (
+                <span className={`text-3xl font-bold ${activeFlashSale ? "text-amber-600" : "text-surface-900"}`}>
+                  {formatPrice(activeFlashSale ? activeFlashSale.salePrice : displayPrice, currency)}
+                </span>
+                {activeFlashSale ? (
+                  <>
+                    <span className="text-lg text-surface-400 line-through">{formatPrice(Number(product.price), currency)}</span>
+                    <span className="flex items-center gap-1 text-sm font-bold text-white bg-amber-500 px-2 py-0.5 rounded-lg">
+                      <Zap className="h-3.5 w-3.5 fill-white" />-{discount}%
+                    </span>
+                  </>
+                ) : discount > 0 && (
                   <>
                     <span className="text-lg text-surface-400 line-through">{formatPrice(Number(product.compareAtPrice), currency)}</span>
                     <span className="text-sm font-bold text-red-600 bg-red-50 px-2 py-0.5 rounded-lg">-{discount}%</span>
                   </>
                 )}
               </div>
+              {activeFlashSale && (
+                <div className="flex items-center gap-1.5 mt-2 text-sm font-semibold text-amber-600">
+                  <Clock className="h-4 w-4" />
+                  {activeFlashSale.name} — <FlashSaleCountdown endsAt={activeFlashSale.endsAt} />
+                </div>
+              )}
             </div>
 
             {/* Stock Status */}

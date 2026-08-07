@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/db";
+import { getBestActiveFlashSales } from "@/lib/flash-sales";
 
 type Params = { params: Promise<{ slug: string; productSlug: string }> };
 
@@ -148,6 +149,7 @@ export async function GET(req: NextRequest, { params }: Params) {
 
     // Clean output — hide cost price, sensitive fields
     const showStock = site.settings?.showStockCount ?? false;
+    const [activeSale] = [...(await getBestActiveFlashSales(site.id, [{ id: product.id, price: Number(product.price) }])).values()];
     const publicProduct = {
       id: product.id,
       name: product.name,
@@ -170,6 +172,9 @@ export async function GET(req: NextRequest, { params }: Params) {
         inStock: v.stock > 0,
       })),
       category: product.category,
+      flashSale: activeSale
+        ? { id: activeSale.saleId, name: activeSale.saleName, salePrice: activeSale.salePrice, endsAt: activeSale.endsAt.toISOString() }
+        : null,
     };
 
     return success({

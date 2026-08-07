@@ -6,6 +6,7 @@ import { mergeStoredTemplatePages } from "@/lib/templates/site-instance";
 import { ensurePerfumePages } from "@/lib/templates/perfume-pages";
 import { ensureVegetablePages } from "@/lib/templates/vegetable-pages";
 import { buildTemplatePageContent } from "@/lib/templates/template-tree";
+import { getBestActiveFlashSales } from "@/lib/flash-sales";
 import type { Prisma } from "@/generated/prisma";
 import type { PageType } from "@/generated/prisma";
 
@@ -245,31 +246,42 @@ export async function GET(req: NextRequest, { params }: Params) {
     const resolvedCustomization = customization;
 
     // Clean product output — strip cost price and other merchant-only fields
-    const publicProducts = products.map((p) => ({
-      id: p.id,
-      name: p.name,
-      slug: p.slug,
-      description: p.description,
-      price: p.price,
-      compareAtPrice: p.compareAtPrice,
-      currency: p.currency,
-      stock: settings?.showStockCount ? p.stock : undefined,
-      inStock: p.stock > 0,
-      isFeatured: p.isFeatured,
-      tags: p.tags,
-      images: p.images,
-      category: p.category,
-      variants: (p.variants || []).map((v: any) => ({
-        id: v.id,
-        name: v.name,
-        price: v.price ? Number(v.price) : null,
-        stock: v.stock,
-        inStock: v.stock > 0,
-        options: v.options,
-        image: v.image,
-      })),
-      reviewCount: p._count.reviews,
-    }));
+    const activeFlashSales = await getBestActiveFlashSales(
+      site.id,
+      products.map((p) => ({ id: p.id, price: Number(p.price) }))
+    );
+
+    const publicProducts = products.map((p) => {
+      const sale = activeFlashSales.get(p.id);
+      return {
+        id: p.id,
+        name: p.name,
+        slug: p.slug,
+        description: p.description,
+        price: p.price,
+        compareAtPrice: p.compareAtPrice,
+        currency: p.currency,
+        stock: settings?.showStockCount ? p.stock : undefined,
+        inStock: p.stock > 0,
+        isFeatured: p.isFeatured,
+        tags: p.tags,
+        images: p.images,
+        category: p.category,
+        variants: (p.variants || []).map((v: any) => ({
+          id: v.id,
+          name: v.name,
+          price: v.price ? Number(v.price) : null,
+          stock: v.stock,
+          inStock: v.stock > 0,
+          options: v.options,
+          image: v.image,
+        })),
+        reviewCount: p._count.reviews,
+        flashSale: sale
+          ? { id: sale.saleId, name: sale.saleName, salePrice: sale.salePrice, endsAt: sale.endsAt.toISOString() }
+          : null,
+      };
+    });
 
     const templateThemeConfig = activeTemplate?.themeConfig as unknown as
       | {
