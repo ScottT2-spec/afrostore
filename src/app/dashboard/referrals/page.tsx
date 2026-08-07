@@ -140,8 +140,8 @@ export default function ReferralsPage() {
   };
 
   const copyLink = (code: string) => {
-    const domain = currentStore?.customDomain || `${currentStore?.subdomain}.afrostore.com`;
-    navigator.clipboard.writeText(`https://${domain}?ref=${code}`);
+    const origin = typeof window !== "undefined" ? window.location.origin : "";
+    navigator.clipboard.writeText(`${origin}/store/${currentStore?.slug}?ref=${code}`);
     setCopiedCode(code);
     setTimeout(() => setCopiedCode(null), 2000);
   };

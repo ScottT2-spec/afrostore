@@ -99,6 +99,12 @@ const NIGERIA_STATES = [
   "Taraba", "Yobe", "Zamfara", "FCT (Abuja)",
 ];
 
+function getCookie(name: string): string | null {
+  if (typeof document === "undefined") return null;
+  const match = document.cookie.match(new RegExp(`(?:^|; )${name}=([^;]*)`));
+  return match ? decodeURIComponent(match[1]) : null;
+}
+
 /* ───────── Shared chrome: fonts + design tokens ───────── */
 /* "Adire" system — named after the indigo-resist-dyed cloth of Yorubaland:
    deep indigo + dye-pot marigold on undyed-cotton chalk, with a receipt/
@@ -352,6 +358,18 @@ export default function CheckoutPage() {
       }
 
       const order = orderJson.data;
+
+      // Attribute this order to an affiliate referral, if the customer
+      // arrived via a tracked ?ref= link earlier in this browser session.
+      const refId = getCookie("afro_ref_id");
+      const refCode = getCookie("afro_ref_code");
+      if (refId || refCode) {
+        fetch(`/api/sites/${siteId}/referrals/track`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ referralId: refId || undefined, affiliateCode: refCode || undefined, orderId: order.id }),
+        }).catch(() => { /* non-critical - never block checkout over referral attribution */ });
+      }
 
       // 2. If pay on delivery, we're done
       if (paymentMethod === "COD") {
