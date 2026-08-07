@@ -1,11 +1,12 @@
 "use client";
 import { ChevronLeft, ChevronRight, Loader2, X } from "lucide-react";
-import { ArrowUpDown, CheckCircle2, Heart, ImageIcon, Menu, Search, ShoppingBag, ShoppingCart, SlidersHorizontal, Star } from "@/components/icons/FilledIcons";
+import { ArrowUpDown, CheckCircle2, Heart, ImageIcon, Menu, Search, ShoppingBag, ShoppingCart, SlidersHorizontal, Star, Zap } from "@/components/icons/FilledIcons";
 
 import { useState, useEffect, useCallback } from "react";
 import { useParams, useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
 import { ThemeProvider, type ThemeData } from "@/components/storefront/ThemeProvider";
+import FlashSaleCountdown from "@/components/storefront/FlashSaleCountdown";
 import { useWishlist } from "@/hooks/useWishlist";
 import { HandmadeBagsHeader, HandmadeBagsFooter } from "@/components/storefront/HandmadeBagsStoreChrome";
 import { CosmeticsHeader, CosmeticsFooter } from "@/components/storefront/CosmeticsTemplateBlocks";
@@ -43,6 +44,7 @@ interface Product {
   images: ProductImage[];
   category?: ProductCategory;
   reviewCount: number;
+  flashSale?: { id: string; name: string; salePrice: number; endsAt: string } | null;
 }
 
 interface StoreCategory {
@@ -249,7 +251,7 @@ export default function ShopPage() {
       if (existing) {
         return prev.map((i) => (i.productId === product.id ? { ...i, quantity: i.quantity + 1 } : i));
       }
-      return [...prev, { productId: product.id, quantity: 1, product }];
+      return [...prev, { productId: product.id, quantity: 1, product: product.flashSale ? { ...product, price: product.flashSale.salePrice } : product }];
     });
     setAddedToCart(product.id);
     setTimeout(() => setAddedToCart(null), 1500);
@@ -1470,6 +1472,9 @@ export default function ShopPage() {
                       ? Math.round(((Number(product.compareAtPrice) - Number(product.price)) / Number(product.compareAtPrice)) * 100)
                       : 0;
                     const justAdded = addedToCart === product.id;
+                    const flashDiscount = product.flashSale
+                      ? Math.round(((Number(product.price) - product.flashSale.salePrice) / Number(product.price)) * 100)
+                      : 0;
 
                     return (
                       <div key={product.id} className="group">
@@ -1492,7 +1497,11 @@ export default function ShopPage() {
                             {!product.inStock && (
                               <div className="absolute top-3 left-3 rounded-full px-2.5 py-0.5 text-[10px] font-bold text-white bg-red-500">Sold Out</div>
                             )}
-                            {discount > 0 && (
+                            {product.flashSale ? (
+                              <div className="absolute top-3 left-3 flex items-center gap-1 rounded-full bg-amber-500 px-2 py-0.5 text-[10px] font-bold text-white z-10">
+                                <Zap className="h-3 w-3 fill-white" />-{flashDiscount}%
+                              </div>
+                            ) : discount > 0 && (
                               <div className="absolute top-3 left-3 rounded-full bg-red-500 px-2 py-0.5 text-[10px] font-bold text-white z-10">-{discount}%</div>
                             )}
                             {/* Always-visible wishlist + cart icons */}
@@ -1536,11 +1545,23 @@ export default function ShopPage() {
                           </div>
                         )}
                         <div className="flex items-center gap-2 mt-1.5">
-                          <span className="text-base font-bold text-surface-900">{formatCurrency(Number(product.price), currency)}</span>
-                          {product.compareAtPrice && (
-                            <span className="text-xs text-surface-400 line-through">{formatCurrency(Number(product.compareAtPrice), currency)}</span>
+                          {product.flashSale ? (
+                            <>
+                              <span className="text-base font-bold text-amber-600">{formatCurrency(product.flashSale.salePrice, currency)}</span>
+                              <span className="text-xs text-surface-400 line-through">{formatCurrency(Number(product.price), currency)}</span>
+                            </>
+                          ) : (
+                            <>
+                              <span className="text-base font-bold text-surface-900">{formatCurrency(Number(product.price), currency)}</span>
+                              {product.compareAtPrice && (
+                                <span className="text-xs text-surface-400 line-through">{formatCurrency(Number(product.compareAtPrice), currency)}</span>
+                              )}
+                            </>
                           )}
                         </div>
+                        {product.flashSale && (
+                          <FlashSaleCountdown endsAt={product.flashSale.endsAt} className="text-[10px] font-medium text-amber-600 mt-0.5 block" />
+                        )}
                       </div>
                     );
                   })}

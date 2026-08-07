@@ -4,6 +4,7 @@ import { getStoreContext, success, error, validationError, generateOrderNumber, 
 import { createOrderSchema } from "@/lib/validators";
 import { unauthorized } from "@/lib/auth";
 import { sendOrderConfirmationEmail } from "@/lib/email";
+import { getBestActiveFlashSales, applyDiscount } from "@/lib/flash-sales";
 
 
 type Params = { params: Promise<{ siteId: string }> };
@@ -83,6 +84,15 @@ export async function POST(req: NextRequest, { params }: Params) {
     const productMap = new Map(products.map((p) => [p.id, p]));
     let subtotal = 0;
 
+    // Look up active flash sales for these products once, up front — discount
+    // math itself is reapplied per line item below so it respects variant
+    // pricing, but which sale (and its rate) applies is decided here.
+    const activeFlashSales = await getBestActiveFlashSales(
+      siteId,
+      products.map((p) => ({ id: p.id, price: Number(p.price) }))
+    );
+    const appliedFlashSaleIds = new Set<string>();
+
     const orderItems = items.map((item) => {
       const product = productMap.get(item.productId);
       if (!product) throw new Error(`Product ${item.productId} not found`);
@@ -102,6 +112,16 @@ export async function POST(req: NextRequest, { params }: Params) {
         throw new Error(`Insufficient stock for ${product.name}`);
       }
 
+      let originalPrice: number | undefined;
+      let flashSaleId: string | undefined;
+      const sale = activeFlashSales.get(item.productId);
+      if (sale) {
+        originalPrice = price;
+        price = applyDiscount(price, sale.discountType, sale.discountValue);
+        flashSaleId = sale.saleId;
+        appliedFlashSaleIds.add(sale.saleId);
+      }
+
       const lineTotal = price * item.quantity;
       subtotal += lineTotal;
 
@@ -111,6 +131,8 @@ export async function POST(req: NextRequest, { params }: Params) {
         name: product.name,
         variantName,
         price,
+        originalPrice,
+        flashSaleId,
         quantity: item.quantity,
         total: lineTotal,
         image: undefined as string | undefined,
@@ -227,6 +249,14 @@ export async function POST(req: NextRequest, { params }: Params) {
       if (couponId) {
         await tx.coupon.update({
           where: { id: couponId },
+          data: { usedCount: { increment: 1 } },
+        });
+      }
+
+      // Update flash sale usage
+      for (const saleId of appliedFlashSaleIds) {
+        await tx.flashSale.update({
+          where: { id: saleId },
           data: { usedCount: { increment: 1 } },
         });
       }
