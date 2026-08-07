@@ -1149,23 +1149,39 @@ model WhatsAppRecipient {
 }
 
 model ABTest {
-  id              String       @id @default(cuid())
+  id              String        @id @default(cuid())
   siteId          String
   pageId          String?
   name            String
-  status          ABTestStatus @default(DRAFT)
+  status          ABTestStatus  @default(DRAFT)
   variants        Json
   winnerVariantId String?
-  totalViews      Int          @default(0)
+  totalViews      Int           @default(0)
   startsAt        DateTime?
   endsAt          DateTime?
-  createdAt       DateTime     @default(now())
-  updatedAt       DateTime     @updatedAt
-  page            Page?        @relation(fields: [pageId], references: [id])
-  site            Site         @relation(fields: [siteId], references: [id], onDelete: Cascade)
+  createdAt       DateTime      @default(now())
+  updatedAt       DateTime      @updatedAt
+  page            Page?         @relation(fields: [pageId], references: [id])
+  site            Site          @relation(fields: [siteId], references: [id], onDelete: Cascade)
+  stats           ABTestStat[]
 
   @@index([siteId])
   @@map("ab_tests")
+}
+
+// Per-variant performance counters for an ABTest. One row per (testId, variantId).
+model ABTestStat {
+  id          String   @id @default(cuid())
+  testId      String
+  variantId   String
+  views       Int      @default(0)
+  conversions Int      @default(0)
+  updatedAt   DateTime @updatedAt
+  test        ABTest   @relation(fields: [testId], references: [id], onDelete: Cascade)
+
+  @@unique([testId, variantId])
+  @@index([testId])
+  @@map("ab_test_stats")
 }
 
 model Automation {
