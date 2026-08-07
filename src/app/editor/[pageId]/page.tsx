@@ -131,9 +131,9 @@ export default function EditorPage() {
   };
 
   const handleBack = () => {
-    // Navigate back to the site pages list
+    // Navigate back to the site's pages list
     if (siteData) {
-      router.push(`/dashboard/sites/${siteData.id}/pages`);
+      router.push(`/dashboard/sites/${siteData.id}/editor`);
     } else {
       router.push("/dashboard");
     }

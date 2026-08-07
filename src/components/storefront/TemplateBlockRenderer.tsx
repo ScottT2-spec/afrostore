@@ -1241,6 +1241,58 @@ function RenderTemplateBlock({ block, isEditor = false }: { block: TemplateBlock
   );
 }
 
+/* ─── PER-BLOCK ERROR BOUNDARY ──────────────────────────────────
+   A single unguarded field in one block (bad/missing data from an
+   editor edit) must not take down the entire live page. Isolating
+   each block means the rest of the page still renders if one
+   block throws - in editor mode it shows exactly which block and
+   error, so it's fixable instead of an opaque blank storefront. */
+export class TemplateBlockErrorBoundary extends React.Component<
+  { blockType: string; blockId: string; isEditor: boolean; children: React.ReactNode },
+  { error: Error | null }
+> {
+  constructor(props: { blockType: string; blockId: string; isEditor: boolean; children: React.ReactNode }) {
+    super(props);
+    this.state = { error: null };
+  }
+
+  static getDerivedStateFromError(error: Error) {
+    return { error };
+  }
+
+  componentDidCatch(error: Error, info: React.ErrorInfo) {
+    console.error(`Template block "${this.props.blockType}" (${this.props.blockId}) crashed:`, error, info);
+  }
+
+  render() {
+    if (this.state.error) {
+      if (this.props.isEditor) {
+        return (
+          <div
+            data-editor-node-id={this.props.blockId}
+            style={{
+              margin: "8px",
+              padding: "16px",
+              borderRadius: "8px",
+              border: "1px dashed #ef4444",
+              background: "#fef2f2",
+              color: "#991b1b",
+              fontSize: "13px",
+              fontFamily: "monospace",
+            }}
+          >
+            <strong>"{this.props.blockType}" failed to render:</strong> {this.state.error.message}
+          </div>
+        );
+      }
+      // Live storefront: fail silently and just skip this one block
+      // rather than showing an error to shoppers.
+      return null;
+    }
+    return this.props.children;
+  }
+}
+
 /* ─── MAIN RENDERER ─────────────────────────────────────────── */
 
 export interface RenderTemplateBlocksProps {
@@ -1258,7 +1310,14 @@ export function RenderTemplateBlocks({ blocks, isEditor = false }: RenderTemplat
     <div className={`${family}-template`} data-editor-mode={isEditor}>
       <FontLoader />
       {blocks.map((block, index) => (
-        <RenderTemplateBlock key={getTemplateBlockListKey(block, index, "template-block")} block={block} isEditor={isEditor} />
+        <TemplateBlockErrorBoundary
+          key={getTemplateBlockListKey(block, index, "template-block")}
+          blockType={block.type}
+          blockId={block.id}
+          isEditor={isEditor}
+        >
+          <RenderTemplateBlock block={block} isEditor={isEditor} />
+        </TemplateBlockErrorBoundary>
       ))}
     </div>
   );

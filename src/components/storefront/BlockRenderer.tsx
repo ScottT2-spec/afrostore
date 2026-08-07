@@ -5,7 +5,7 @@ import { Award, CheckCircle2, Clock, CreditCard, Eye, Globe, Headphones, Heart, 
 import { useState, useEffect, useMemo, useRef, createContext, useContext } from "react";
 import { useDraggable, useDroppable, DndContext, closestCenter, DragEndEvent } from "@dnd-kit/core";
 import { getSectionStyle, resolveOpacity } from "@/components/storefront/block-style";
-import { ALL_TEMPLATE_BLOCKS } from "@/components/storefront/TemplateBlockRenderer";
+import { ALL_TEMPLATE_BLOCKS, TemplateBlockErrorBoundary } from "@/components/storefront/TemplateBlockRenderer";
 import { resolveStoreLink } from "@/lib/template-link-utils";
 import { normalizeStorefrontTemplateProps, toDisplayText } from "@/components/storefront/prop-normalizers";
 import {
@@ -1777,7 +1777,11 @@ export function RenderBlocks({ blocks, storeSlug, products, currency, addToCart,
         <div className="space-y-8">
           {blocks.map((block, index) => {
             const listKey = getBlockListKey(block, index, "editor-block");
-            const node = <PublicBlockRenderer block={block} isEditorMode={isEditorMode} />;
+            const node = (
+              <TemplateBlockErrorBoundary blockType={block.type} blockId={block.id} isEditor={isEditorMode}>
+                <PublicBlockRenderer block={block} isEditorMode={isEditorMode} />
+              </TemplateBlockErrorBoundary>
+            );
             const wrappedNode = wrapBlock ? wrapBlock(block, node, index) : node;
             const scopedNode = (
               <div
@@ -1800,7 +1804,11 @@ export function RenderBlocks({ blocks, storeSlug, products, currency, addToCart,
       <div className="space-y-8">
         {blocks.map((block, index) => {
           const listKey = getBlockListKey(block, index, "live-block");
-          const node = <PublicBlockRenderer block={block} isEditorMode={isEditorMode} />;
+          const node = (
+            <TemplateBlockErrorBoundary blockType={block.type} blockId={block.id} isEditor={isEditorMode}>
+              <PublicBlockRenderer block={block} isEditorMode={isEditorMode} />
+            </TemplateBlockErrorBoundary>
+          );
           const scopedNode = (
             <div
               data-editor-node-id={block.id}
