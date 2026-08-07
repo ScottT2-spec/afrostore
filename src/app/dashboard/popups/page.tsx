@@ -6,8 +6,16 @@ import { useState, useEffect, useCallback } from "react";
 import { useSite } from "@/context/StoreContext";
 import { api } from "@/lib/api-client";
 
+interface PopupContent {
+  headline?: string; body?: string; imageUrl?: string;
+  buttonText?: string; buttonLink?: string;
+  backgroundColor?: string; textColor?: string; buttonColor?: string;
+  countdownMinutes?: number;
+}
+
 interface PopupItem {
   id: string; name: string; type: string;
+  content: PopupContent | null;
   trigger: { type: string; config?: Record<string, unknown> } | null;
   displayRules: { pages?: string[]; frequency?: string; devices?: string[] } | null;
   isActive: boolean; views: number; conversions: number; createdAt: string;
@@ -30,6 +38,16 @@ export default function PopupsPage() {
   const [triggerType, setTriggerType] = useState("page_load");
   const [frequency, setFrequency] = useState("session");
   const [devices, setDevices] = useState<string[]>(["desktop", "mobile", "tablet"]);
+  const [delaySeconds, setDelaySeconds] = useState(0);
+  const [headline, setHeadline] = useState("");
+  const [bodyText, setBodyText] = useState("");
+  const [imageUrl, setImageUrl] = useState("");
+  const [buttonText, setButtonText] = useState("");
+  const [buttonLink, setButtonLink] = useState("");
+  const [backgroundColor, setBackgroundColor] = useState("#ffffff");
+  const [textColor, setTextColor] = useState("#111111");
+  const [buttonColor, setButtonColor] = useState("#111111");
+  const [countdownMinutes, setCountdownMinutes] = useState(15);
 
   const fetchPopups = useCallback(async () => {
     if (!currentStore) return;
@@ -41,18 +59,45 @@ export default function PopupsPage() {
 
   useEffect(() => { fetchPopups(); }, [fetchPopups]);
 
-  const resetForm = () => { setName(""); setType("MODAL"); setTriggerType("page_load"); setFrequency("session"); setDevices(["desktop", "mobile", "tablet"]); setEditingId(null); };
+  const resetForm = () => {
+    setName(""); setType("MODAL"); setTriggerType("page_load"); setFrequency("session");
+    setDevices(["desktop", "mobile", "tablet"]); setDelaySeconds(0);
+    setHeadline(""); setBodyText(""); setImageUrl(""); setButtonText(""); setButtonLink("");
+    setBackgroundColor("#ffffff"); setTextColor("#111111"); setButtonColor("#111111"); setCountdownMinutes(15);
+    setEditingId(null);
+  };
 
   const openEdit = (p: PopupItem) => {
     setName(p.name); setType(p.type); setTriggerType(p.trigger?.type || "page_load");
     setFrequency(p.displayRules?.frequency || "session"); setDevices(p.displayRules?.devices || ["desktop", "mobile", "tablet"]);
+    setDelaySeconds((p.trigger?.config?.delaySeconds as number) || 0);
+    setHeadline(p.content?.headline || ""); setBodyText(p.content?.body || ""); setImageUrl(p.content?.imageUrl || "");
+    setButtonText(p.content?.buttonText || ""); setButtonLink(p.content?.buttonLink || "");
+    setBackgroundColor(p.content?.backgroundColor || "#ffffff"); setTextColor(p.content?.textColor || "#111111");
+    setButtonColor(p.content?.buttonColor || "#111111"); setCountdownMinutes(p.content?.countdownMinutes || 15);
     setEditingId(p.id); setShowEditor(true);
   };
 
   const savePopup = async () => {
     if (!currentStore || !name.trim()) return;
     setSaving(true);
-    const payload = { name: name.trim(), type, trigger: { type: triggerType }, displayRules: { frequency, devices } };
+    const payload = {
+      name: name.trim(),
+      type,
+      trigger: { type: triggerType, config: { delaySeconds } },
+      displayRules: { frequency, devices },
+      content: {
+        headline: headline.trim() || undefined,
+        body: bodyText.trim() || undefined,
+        imageUrl: imageUrl.trim() || undefined,
+        buttonText: buttonText.trim() || undefined,
+        buttonLink: buttonLink.trim() || undefined,
+        backgroundColor,
+        textColor,
+        buttonColor,
+        ...(type === "COUNTDOWN" ? { countdownMinutes } : {}),
+      },
+    };
     if (editingId) await api.patch(`/api/sites/${currentStore.id}/popups/${editingId}`, payload);
     else await api.post(`/api/sites/${currentStore.id}/popups`, payload);
     setShowEditor(false); resetForm(); setSaving(false); fetchPopups();
