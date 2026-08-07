@@ -10,19 +10,27 @@ interface ApiResponse<T = unknown> {
 class ApiClient {
   private token: string | null = null;
 
-  setToken(token: string | null) {
+  setToken(token: string | null, persist: boolean = true) {
     this.token = token;
+    if (typeof window === "undefined") return;
     if (token) {
-      if (typeof window !== "undefined") localStorage.setItem("token", token);
+      if (persist) {
+        localStorage.setItem("token", token);
+        sessionStorage.removeItem("token");
+      } else {
+        sessionStorage.setItem("token", token);
+        localStorage.removeItem("token");
+      }
     } else {
-      if (typeof window !== "undefined") localStorage.removeItem("token");
+      localStorage.removeItem("token");
+      sessionStorage.removeItem("token");
     }
   }
 
   getToken(): string | null {
     if (this.token) return this.token;
     if (typeof window !== "undefined") {
-      this.token = localStorage.getItem("token");
+      this.token = localStorage.getItem("token") || sessionStorage.getItem("token");
     }
     return this.token;
   }

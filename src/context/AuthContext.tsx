@@ -18,7 +18,7 @@ interface User {
 interface AuthContextType {
   user: User | null;
   loading: boolean;
-  login: (email: string, password: string) => Promise<{ success: boolean; error?: string }>;
+  login: (email: string, password: string, rememberMe?: boolean) => Promise<{ success: boolean; error?: string }>;
   signup: (data: {
     email: string;
     password: string;
@@ -56,13 +56,14 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     fetchUser();
   }, [fetchUser]);
 
-  const login = async (email: string, password: string) => {
+  const login = async (email: string, password: string, rememberMe: boolean = true) => {
     const res = await api.post<{ token: string; user: User }>("/api/auth/login", {
       email,
       password,
+      rememberMe,
     });
     if (res.success && res.data) {
-      api.setToken(res.data.token);
+      api.setToken(res.data.token, rememberMe);
       setUser(res.data.user);
       return { success: true };
     }

@@ -14,7 +14,7 @@ export async function POST(req: NextRequest) {
       return validationError(parsed.error.flatten().fieldErrors);
     }
 
-    const { email, password } = parsed.data;
+    const { email, password, rememberMe } = parsed.data;
 
     const rl = rateLimit(`login:${email}`, 5, 15 * 60 * 1000);
     if (!rl.allowed) {
@@ -35,7 +35,7 @@ export async function POST(req: NextRequest) {
       return error("Your account has been suspended. Contact support for assistance.", 403);
     }
 
-    const token = await createToken(user.id);
+    const token = await createToken(user.id, rememberMe ? "30d" : "1d");
 
     const response = success({
       user: {
@@ -46,13 +46,16 @@ export async function POST(req: NextRequest) {
         role: user.role,
       },
       token,
+      rememberMe: !!rememberMe,
     });
 
     response.cookies.set("token", token, {
       httpOnly: true,
       secure: process.env.NODE_ENV === "production",
       sameSite: "lax",
-      maxAge: 60 * 60 * 24 * 7,
+      // Persistent cookie when remembered; omitting maxAge makes it a
+      // browser-session cookie that clears when the browser closes.
+      ...(rememberMe ? { maxAge: 60 * 60 * 24 * 30 } : {}),
       path: "/",
     });
 

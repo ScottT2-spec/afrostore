@@ -18,11 +18,11 @@ export async function verifyPassword(
   return bcrypt.compare(password, hash);
 }
 
-export async function createToken(userId: string): Promise<string> {
+export async function createToken(userId: string, expiresIn: string = "7d"): Promise<string> {
   return new SignJWT({ userId })
     .setProtectedHeader({ alg: "HS256" })
     .setIssuedAt()
-    .setExpirationTime("7d")
+    .setExpirationTime(expiresIn)
     .sign(JWT_SECRET);
 }
 

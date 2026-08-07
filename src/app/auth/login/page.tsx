@@ -22,7 +22,7 @@ export default function LoginPage() {
     setError("");
     setSubmitting(true);
 
-    const result = await login(email, password);
+    const result = await login(email, password, rememberMe);
     if (result.success) {
       const token = localStorage.getItem("token");
       if (token) {
