@@ -4,6 +4,7 @@ import { CheckCircle2, Heart, Menu, MessageCircle, Minus, Phone, Search, Shield,
 
 import { useState, useEffect, useMemo, useRef } from "react";
 import { useParams, useRouter, useSearchParams } from "next/navigation";
+import { injectPixels, trackEvent } from "@/lib/storefront-analytics";
 import Link from "next/link";
 import { RenderBlocks, type BuilderBlock } from "@/components/storefront/BlockRenderer";
 import { RenderTemplateBlocks, type TemplateBlock } from "@/components/storefront/TemplateBlockRenderer";
@@ -306,6 +307,8 @@ export default function StorePage() {
         if (json.success && json.data) {
           setData(json.data);
           setDraftCustomization(normalizeSiteCustomization(json.data.customization || null));
+          injectPixels(json.data.store || {});
+          trackEvent(slug, "page_view");
         } else {
           setError(json.error || "Store not found");
         }
