@@ -5,20 +5,37 @@ export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));
 }
 
+const CURRENCY_SYMBOLS: Record<string, string> = {
+  NGN: "₦",
+  KES: "KSh",
+  GHS: "GH₵",
+  ZAR: "R",
+  USD: "$",
+  GBP: "£",
+  EUR: "€",
+};
+
+const CURRENCY_NAMES: Record<string, string> = {
+  NGN: "Nigerian Naira",
+  KES: "Kenyan Shilling",
+  GHS: "Ghanaian Cedi",
+  ZAR: "South African Rand",
+  USD: "US Dollar",
+  GBP: "British Pound",
+  EUR: "Euro",
+};
+
+export const CURRENCY_OPTIONS = Object.keys(CURRENCY_SYMBOLS).map((code) => ({
+  code,
+  name: CURRENCY_NAMES[code],
+  symbol: CURRENCY_SYMBOLS[code],
+}));
+
 export function formatCurrency(
   amount: number,
   currency: string = "NGN"
 ): string {
-  const symbols: Record<string, string> = {
-    NGN: "₦",
-    KES: "KSh",
-    GHS: "GH₵",
-    ZAR: "R",
-    USD: "$",
-    GBP: "£",
-    EUR: "€",
-  };
-  const symbol = symbols[currency] || currency;
+  const symbol = CURRENCY_SYMBOLS[currency] || currency;
   return `${symbol}${amount.toLocaleString("en-NG", { minimumFractionDigits: 0, maximumFractionDigits: 2 })}`;
 }
 

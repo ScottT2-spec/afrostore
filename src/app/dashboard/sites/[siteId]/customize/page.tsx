@@ -6,6 +6,7 @@ import { use, useEffect, useMemo, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { api } from "@/lib/api-client";
+import { CURRENCY_OPTIONS } from "@/lib/utils";
 import { SingleImageUpload } from "@/components/dashboard/ImageUpload";
 
 interface SiteRecord {
@@ -213,7 +214,13 @@ export default function SiteCustomizePage({ params }: { params: Promise<{ siteId
             </div>
             <div>
               <label className="mb-1 block text-sm font-medium text-surface-700">Currency</label>
-              <input value={form.currency} onChange={(e) => setForm((prev) => ({ ...prev, currency: e.target.value }))} className="input-field w-full" />
+              <select value={form.currency} onChange={(e) => setForm((prev) => ({ ...prev, currency: e.target.value }))} className="input-field w-full">
+                {CURRENCY_OPTIONS.map((c) => (
+                  <option key={c.code} value={c.code}>
+                    {c.name} ({c.symbol})
+                  </option>
+                ))}
+              </select>
             </div>
             <div>
               <label className="mb-1 block text-sm font-medium text-surface-700">Custom domain</label>

@@ -20,6 +20,7 @@ import {
   Image as ImageIcon,
 } from "lucide-react";
 import { api } from "@/lib/api-client";
+import { CURRENCY_OPTIONS } from "@/lib/utils";
 import { SingleImageUpload } from "@/components/dashboard/ImageUpload";
 import {
   applyPageCustomization,
@@ -107,13 +108,15 @@ function Field({
   type = "text",
   rows = 3,
   placeholder,
+  options,
 }: {
   label: string;
   value: string;
   onChange: (value: string) => void;
-  type?: "text" | "textarea" | "color";
+  type?: "text" | "textarea" | "color" | "select";
   rows?: number;
   placeholder?: string;
+  options?: { value: string; label: string }[];
 }) {
   return (
     <label className="space-y-1.5 block">
@@ -133,6 +136,18 @@ function Field({
           onChange={(event) => onChange(event.target.value)}
           className="h-10 w-full rounded-xl border border-surface-200 bg-white p-1"
         />
+      ) : type === "select" ? (
+        <select
+          value={value}
+          onChange={(event) => onChange(event.target.value)}
+          className="input-field w-full rounded-xl border border-surface-200 bg-white px-3 py-2 text-sm"
+        >
+          {(options || []).map((opt) => (
+            <option key={opt.value} value={opt.value}>
+              {opt.label}
+            </option>
+          ))}
+        </select>
       ) : (
         <input
           value={value}
@@ -661,7 +676,13 @@ export default function SiteEditorPage({ params }: { params: Promise<{ siteId: s
               <Field label="Description" type="textarea" value={siteDraft.description} onChange={(value) => setSiteDraft((prev) => ({ ...prev, description: value }))} rows={4} />
               <div className="grid grid-cols-2 gap-3">
                 <Field label="Business type" value={siteDraft.businessType} onChange={(value) => setSiteDraft((prev) => ({ ...prev, businessType: value }))} />
-                <Field label="Currency" value={siteDraft.currency} onChange={(value) => setSiteDraft((prev) => ({ ...prev, currency: value }))} />
+                <Field
+                  label="Currency"
+                  type="select"
+                  value={siteDraft.currency}
+                  onChange={(value) => setSiteDraft((prev) => ({ ...prev, currency: value }))}
+                  options={CURRENCY_OPTIONS.map((c) => ({ value: c.code, label: `${c.name} (${c.symbol})` }))}
+                />
               </div>
               <Field label="Custom domain" value={siteDraft.customDomain} onChange={(value) => setSiteDraft((prev) => ({ ...prev, customDomain: value }))} placeholder="yourdomain.com" />
               <Field label="WhatsApp number" value={siteDraft.whatsappNumber} onChange={(value) => setSiteDraft((prev) => ({ ...prev, whatsappNumber: value }))} placeholder="+234..." />
