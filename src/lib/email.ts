@@ -393,6 +393,37 @@ This link expires in 30 minutes. If you didn't request this, you can safely igno
   }
 }
 
+// ─── Generic raw send (used by campaign sending) ──────────────────
+
+interface RawEmailData {
+  to: string;
+  from: string; // "Name <email@domain>"
+  subject: string;
+  html: string;
+  text?: string;
+}
+
+export async function sendRawEmail(data: RawEmailData): Promise<{ success: boolean; error?: string }> {
+  try {
+    const command = new SendEmailCommand({
+      Source: data.from,
+      Destination: { ToAddresses: [data.to] },
+      Message: {
+        Subject: { Data: data.subject, Charset: "UTF-8" },
+        Body: {
+          Html: { Data: data.html, Charset: "UTF-8" },
+          ...(data.text ? { Text: { Data: data.text, Charset: "UTF-8" } } : {}),
+        },
+      },
+    });
+    await ses.send(command);
+    return { success: true };
+  } catch (error) {
+    console.error("Raw email send failed:", error);
+    return { success: false, error: error instanceof Error ? error.message : "Unknown error" };
+  }
+}
+
 // ─── Newsletter Welcome Email ─────────────────────────────────────
 
 interface NewsletterWelcomeData {

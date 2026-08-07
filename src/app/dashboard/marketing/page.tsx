@@ -11,18 +11,21 @@ import { api } from "@/lib/api-client";
 interface EmailCampaign {
   id: string; name: string; subject: string; fromName: string | null; fromEmail: string | null;
   status: string; type: string; scheduledAt: string | null; sentAt: string | null;
+  audienceType?: string; audienceTag?: string | null; lastError?: string | null;
   totalSent: number; totalOpened: number; totalClicked: number; totalBounced: number;
   createdAt: string; _count?: { recipients: number };
 }
 
 interface SmsCampaign {
   id: string; name: string; message: string; status: string;
+  audienceType?: string; audienceTag?: string | null; lastError?: string | null;
   scheduledAt: string | null; sentAt: string | null;
   totalSent: number; totalDelivered: number; createdAt: string;
 }
 
 interface WhatsAppCampaign {
   id: string; name: string; message: string; mediaUrl: string | null; status: string;
+  audienceType?: string; audienceTag?: string | null; lastError?: string | null;
   scheduledAt: string | null; sentAt: string | null;
   totalSent: number; totalDelivered: number; totalRead: number; createdAt: string;
 }
@@ -73,6 +76,9 @@ export default function MarketingPage() {
   const [fromName, setFromName] = useState("");
   const [fromEmail, setFromEmail] = useState("");
   const [mediaUrl, setMediaUrl] = useState("");
+  const [audienceType, setAudienceType] = useState<"ALL_CONTACTS" | "TAG">("ALL_CONTACTS");
+  const [audienceTag, setAudienceTag] = useState("");
+  const [sendingId, setSendingId] = useState<string | null>(null);
 
   // Fetchers
   const fetchEmail = useCallback(async () => {
@@ -110,6 +116,7 @@ export default function MarketingPage() {
   const resetForm = () => {
     setName(""); setSubject(""); setMessage(""); setContentHtml("");
     setFromName(""); setFromEmail(""); setMediaUrl(""); setEditingId(null);
+    setAudienceType("ALL_CONTACTS"); setAudienceTag("");
   };
 
   const openCreate = () => { resetForm(); setShowEditor(true); };
@@ -121,15 +128,18 @@ export default function MarketingPage() {
       const d = res.data;
       setName(d.name); setSubject(d.subject); setFromName(d.fromName || ""); setFromEmail(d.fromEmail || "");
       setContentHtml((d as any).contentHtml || ""); setEditingId(d.id); setShowEditor(true);
+      setAudienceType((d.audienceType as "ALL_CONTACTS" | "TAG") || "ALL_CONTACTS"); setAudienceTag(d.audienceTag || "");
     }
   };
 
   const openEditSms = (c: SmsCampaign) => {
     setName(c.name); setMessage(c.message); setEditingId(c.id); setShowEditor(true);
+    setAudienceType((c.audienceType as "ALL_CONTACTS" | "TAG") || "ALL_CONTACTS"); setAudienceTag(c.audienceTag || "");
   };
 
   const openEditWa = (c: WhatsAppCampaign) => {
     setName(c.name); setMessage(c.message); setMediaUrl(c.mediaUrl || ""); setEditingId(c.id); setShowEditor(true);
+    setAudienceType((c.audienceType as "ALL_CONTACTS" | "TAG") || "ALL_CONTACTS"); setAudienceTag(c.audienceTag || "");
   };
 
   const saveCampaign = async () => {
@@ -137,17 +147,18 @@ export default function MarketingPage() {
     setSaving(true);
 
     const endpoint = `/api/sites/${currentStore.id}/campaigns/${tab}`;
+    const audience = { audienceType, audienceTag: audienceType === "TAG" ? audienceTag.trim() || undefined : undefined };
 
     if (tab === "email") {
-      const payload = { name: name.trim(), subject: subject.trim() || name.trim(), fromName: fromName.trim() || undefined, fromEmail: fromEmail.trim() || undefined, contentHtml: contentHtml || undefined };
+      const payload = { name: name.trim(), subject: subject.trim() || name.trim(), fromName: fromName.trim() || undefined, fromEmail: fromEmail.trim() || undefined, contentHtml: contentHtml || undefined, ...audience };
       if (editingId) await api.patch(`${endpoint}/${editingId}`, payload);
       else await api.post(endpoint, payload);
     } else if (tab === "sms") {
-      const payload = { name: name.trim(), message: message.trim() };
+      const payload = { name: name.trim(), message: message.trim(), ...audience };
       if (editingId) await api.patch(`${endpoint}/${editingId}`, payload);
       else await api.post(endpoint, payload);
     } else {
-      const payload = { name: name.trim(), message: message.trim(), mediaUrl: mediaUrl.trim() || null };
+      const payload = { name: name.trim(), message: message.trim(), mediaUrl: mediaUrl.trim() || null, ...audience };
       if (editingId) await api.patch(`${endpoint}/${editingId}`, payload);
       else await api.post(endpoint, payload);
     }
@@ -171,6 +182,18 @@ export default function MarketingPage() {
   const changeStatus = async (id: string, newStatus: string) => {
     if (!currentStore) return;
     await api.patch(`/api/sites/${currentStore.id}/campaigns/${tab}/${id}`, { status: newStatus });
+    if (tab === "email") fetchEmail();
+    else if (tab === "sms") fetchSms();
+    else fetchWa();
+  };
+
+  const sendNow = async (id: string) => {
+    if (!currentStore) return;
+    if (!confirm(`Send this ${tab} campaign now? This can't be undone.`)) return;
+    setSendingId(id);
+    const res = await api.post(`/api/sites/${currentStore.id}/campaigns/${tab}/${id}/send`, {});
+    setSendingId(null);
+    if (!res.success) alert(res.error || "Failed to send campaign");
     if (tab === "email") fetchEmail();
     else if (tab === "sms") fetchSms();
     else fetchWa();
@@ -260,6 +283,19 @@ export default function MarketingPage() {
               <input value={mediaUrl} onChange={(e) => setMediaUrl(e.target.value)} placeholder="https://image-or-video-url..." className="input-field py-2.5 w-full" />
             </div>
           )}
+          <div>
+            <label className="block text-sm font-medium text-surface-700 mb-1">Audience</label>
+            <div className="flex items-center gap-3">
+              <select value={audienceType} onChange={(e) => setAudienceType(e.target.value as "ALL_CONTACTS" | "TAG")} className="input-field py-2.5 w-48">
+                <option value="ALL_CONTACTS">All CRM contacts</option>
+                <option value="TAG">Contacts tagged...</option>
+              </select>
+              {audienceType === "TAG" && (
+                <input value={audienceTag} onChange={(e) => setAudienceTag(e.target.value)} placeholder="e.g. vip" className="input-field py-2.5 flex-1" />
+              )}
+            </div>
+            <p className="text-xs text-surface-400 mt-1">Recipients are pulled from your CRM contacts at send time.</p>
+          </div>
           <div className="flex items-center gap-3 pt-2">
             <button onClick={saveCampaign} disabled={saving || !name.trim() || (tab !== "email" && !message.trim())} className="btn-primary text-sm py-2.5 px-6">
               {saving ? <Loader2 className="h-4 w-4 animate-spin" /> : editingId ? "Update" : "Create"}
@@ -289,7 +325,7 @@ export default function MarketingPage() {
                     {c.totalSent > 0 && <span><BarChart3 className="h-3 w-3 inline" /> {(c.totalOpened/c.totalSent*100).toFixed(1)}% open</span>}
                   </div>
                 </div>
-                <CampaignActions id={c.id} status={c.status} onEdit={() => openEditEmail(c)} onDelete={() => deleteCampaign(c.id)} onStatusChange={(s) => changeStatus(c.id, s)} deleting={deleteId === c.id} />
+                <CampaignActions id={c.id} status={c.status} lastError={c.lastError} onEdit={() => openEditEmail(c)} onDelete={() => deleteCampaign(c.id)} onStatusChange={(s) => changeStatus(c.id, s)} onSend={() => sendNow(c.id)} deleting={deleteId === c.id} sending={sendingId === c.id} />
               </div>
             ))}
           </div>
@@ -313,7 +349,7 @@ export default function MarketingPage() {
                     <span><CheckCircle2 className="h-3 w-3 inline" /> {c.totalDelivered} delivered</span>
                   </div>
                 </div>
-                <CampaignActions id={c.id} status={c.status} onEdit={() => openEditSms(c)} onDelete={() => deleteCampaign(c.id)} onStatusChange={(s) => changeStatus(c.id, s)} deleting={deleteId === c.id} />
+                <CampaignActions id={c.id} status={c.status} lastError={c.lastError} onEdit={() => openEditSms(c)} onDelete={() => deleteCampaign(c.id)} onStatusChange={(s) => changeStatus(c.id, s)} onSend={() => sendNow(c.id)} deleting={deleteId === c.id} sending={sendingId === c.id} />
               </div>
             ))}
           </div>
@@ -339,7 +375,7 @@ export default function MarketingPage() {
                     {c.mediaUrl && <span><ImageIcon className="h-3 w-3 inline" /> media</span>}
                   </div>
                 </div>
-                <CampaignActions id={c.id} status={c.status} onEdit={() => openEditWa(c)} onDelete={() => deleteCampaign(c.id)} onStatusChange={(s) => changeStatus(c.id, s)} deleting={deleteId === c.id} />
+                <CampaignActions id={c.id} status={c.status} lastError={c.lastError} onEdit={() => openEditWa(c)} onDelete={() => deleteCampaign(c.id)} onStatusChange={(s) => changeStatus(c.id, s)} onSend={() => sendNow(c.id)} deleting={deleteId === c.id} sending={sendingId === c.id} />
               </div>
             ))}
           </div>
@@ -362,22 +398,33 @@ function EmptyState({ icon: Icon, label, onCreate }: { icon: typeof Mail; label:
   );
 }
 
-function CampaignActions({ id, status, onEdit, onDelete, onStatusChange, deleting }: {
-  id: string; status: string; onEdit: () => void; onDelete: () => void;
-  onStatusChange: (s: string) => void; deleting: boolean;
+function CampaignActions({ id, status, lastError, onEdit, onDelete, onStatusChange, onSend, deleting, sending }: {
+  id: string; status: string; lastError?: string | null; onEdit: () => void; onDelete: () => void;
+  onStatusChange: (s: string) => void; onSend: () => void; deleting: boolean; sending: boolean;
 }) {
+  const canSend = ["DRAFT", "SCHEDULED", "PAUSED"].includes(status);
   return (
-    <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
-      <select value={status} onChange={(e) => onStatusChange(e.target.value)} className="text-xs border border-surface-200 rounded-lg px-2 py-1.5 bg-white">
-        <option value="DRAFT">Draft</option>
-        <option value="SCHEDULED">Scheduled</option>
-        <option value="PAUSED">Paused</option>
-        <option value="CANCELLED">Cancelled</option>
-      </select>
-      <button onClick={onEdit} className="p-2 rounded-lg hover:bg-surface-100 text-surface-400 hover:text-surface-700 transition-colors"><Pencil className="h-4 w-4" /></button>
-      <button onClick={onDelete} disabled={deleting} className="p-2 rounded-lg hover:bg-accent-50 text-surface-400 hover:text-accent-600 transition-colors">
-        {deleting ? <Loader2 className="h-4 w-4 animate-spin" /> : <Trash2 className="h-4 w-4" />}
-      </button>
+    <div className="flex flex-col items-end gap-1">
+      <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+        {canSend && (
+          <button onClick={onSend} disabled={sending} title="Send now" className="p-2 rounded-lg hover:bg-brand-50 text-surface-400 hover:text-brand-600 transition-colors">
+            {sending ? <Loader2 className="h-4 w-4 animate-spin" /> : <Send className="h-4 w-4" />}
+          </button>
+        )}
+        <select value={status} onChange={(e) => onStatusChange(e.target.value)} className="text-xs border border-surface-200 rounded-lg px-2 py-1.5 bg-white">
+          <option value="DRAFT">Draft</option>
+          <option value="SCHEDULED">Scheduled</option>
+          <option value="PAUSED">Paused</option>
+          <option value="CANCELLED">Cancelled</option>
+        </select>
+        <button onClick={onEdit} className="p-2 rounded-lg hover:bg-surface-100 text-surface-400 hover:text-surface-700 transition-colors"><Pencil className="h-4 w-4" /></button>
+        <button onClick={onDelete} disabled={deleting} className="p-2 rounded-lg hover:bg-accent-50 text-surface-400 hover:text-accent-600 transition-colors">
+          {deleting ? <Loader2 className="h-4 w-4 animate-spin" /> : <Trash2 className="h-4 w-4" />}
+        </button>
+      </div>
+      {lastError && (
+        <p className="text-[10px] text-accent-600 flex items-center gap-1 max-w-[220px] text-right"><AlertTriangle className="h-3 w-3 flex-shrink-0" /> {lastError}</p>
+      )}
     </div>
   );
 }

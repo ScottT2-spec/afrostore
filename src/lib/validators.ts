@@ -465,6 +465,8 @@ export const createEmailCampaignSchema = z.object({
   content: z.any().optional(),
   contentHtml: z.string().optional(),
   type: z.enum(["BROADCAST", "AUTOMATED", "TRANSACTIONAL"]).default("BROADCAST"),
+  audienceType: z.enum(["ALL_CONTACTS", "TAG"]).default("ALL_CONTACTS"),
+  audienceTag: z.string().max(100).optional().nullable(),
   scheduledAt: z.string().datetime().optional().nullable(),
 });
 
@@ -477,6 +479,8 @@ export const updateEmailCampaignSchema = z.object({
   contentHtml: z.string().optional().nullable(),
   status: z.enum(["DRAFT", "SCHEDULED", "SENDING", "SENT", "PAUSED", "CANCELLED"]).optional(),
   type: z.enum(["BROADCAST", "AUTOMATED", "TRANSACTIONAL"]).optional(),
+  audienceType: z.enum(["ALL_CONTACTS", "TAG"]).optional(),
+  audienceTag: z.string().max(100).optional().nullable(),
   scheduledAt: z.string().datetime().optional().nullable(),
 });
 
@@ -485,6 +489,8 @@ export const updateEmailCampaignSchema = z.object({
 export const createSmsCampaignSchema = z.object({
   name: z.string().min(1, "Campaign name is required").max(200),
   message: z.string().min(1, "Message is required").max(1600),
+  audienceType: z.enum(["ALL_CONTACTS", "TAG"]).default("ALL_CONTACTS"),
+  audienceTag: z.string().max(100).optional().nullable(),
   scheduledAt: z.string().datetime().optional().nullable(),
 });
 
@@ -492,6 +498,8 @@ export const updateSmsCampaignSchema = z.object({
   name: z.string().min(1).max(200).optional(),
   message: z.string().min(1).max(1600).optional(),
   status: z.enum(["DRAFT", "SCHEDULED", "SENDING", "SENT", "PAUSED", "CANCELLED"]).optional(),
+  audienceType: z.enum(["ALL_CONTACTS", "TAG"]).optional(),
+  audienceTag: z.string().max(100).optional().nullable(),
   scheduledAt: z.string().datetime().optional().nullable(),
 });
 
@@ -501,6 +509,8 @@ export const createWhatsAppCampaignSchema = z.object({
   name: z.string().min(1, "Campaign name is required").max(200),
   message: z.string().min(1, "Message is required").max(4096),
   mediaUrl: z.string().url().optional().nullable(),
+  audienceType: z.enum(["ALL_CONTACTS", "TAG"]).default("ALL_CONTACTS"),
+  audienceTag: z.string().max(100).optional().nullable(),
   scheduledAt: z.string().datetime().optional().nullable(),
 });
 
@@ -509,6 +519,8 @@ export const updateWhatsAppCampaignSchema = z.object({
   message: z.string().min(1).max(4096).optional(),
   mediaUrl: z.string().url().optional().nullable(),
   status: z.enum(["DRAFT", "SCHEDULED", "SENDING", "SENT", "PAUSED", "CANCELLED"]).optional(),
+  audienceType: z.enum(["ALL_CONTACTS", "TAG"]).optional(),
+  audienceTag: z.string().max(100).optional().nullable(),
   scheduledAt: z.string().datetime().optional().nullable(),
 });
 
