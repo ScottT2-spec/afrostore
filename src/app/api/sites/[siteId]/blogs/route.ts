@@ -4,6 +4,7 @@ import { getStoreContext, success, error, validationError, logAudit } from "@/li
 import { createBlogSchema } from "@/lib/validators";
 import { unauthorized } from "@/lib/auth";
 import { slugify } from "@/lib/utils";
+import { sanitizeHtml } from "@/lib/sanitize";
 
 type Params = { params: Promise<{ siteId: string }> };
 
@@ -92,6 +93,7 @@ export async function POST(req: NextRequest, { params }: Params) {
     const slug = await ensureUniqueBlogSlug(parsed.data.title, siteId);
 
     const { publishedAt, ...rest } = parsed.data;
+    if (rest.contentHtml) rest.contentHtml = sanitizeHtml(rest.contentHtml);
     const blog = await prisma.blog.create({
       data: {
         siteId,

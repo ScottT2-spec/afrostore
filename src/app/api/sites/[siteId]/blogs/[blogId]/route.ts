@@ -3,6 +3,7 @@ import { prisma } from "@/lib/db";
 import { getStoreContext, success, error, validationError, logAudit } from "@/lib/api-helpers";
 import { updateBlogSchema } from "@/lib/validators";
 import { unauthorized } from "@/lib/auth";
+import { sanitizeHtml } from "@/lib/sanitize";
 
 type Params = { params: Promise<{ siteId: string; blogId: string }> };
 
@@ -38,6 +39,7 @@ export async function PATCH(req: NextRequest, { params }: Params) {
 
     // Auto-set publishedAt when publishing for the first time
     const data: Record<string, unknown> = { ...rest };
+    if (typeof data.contentHtml === "string") data.contentHtml = sanitizeHtml(data.contentHtml);
     if (publishedAt !== undefined) {
       data.publishedAt = publishedAt ? new Date(publishedAt) : null;
     } else if (parsed.data.status === "PUBLISHED" && !existing.publishedAt) {
