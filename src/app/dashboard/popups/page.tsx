@@ -180,10 +180,10 @@ export default function PopupsPage() {
                     <span><BarChart3 className="h-3 w-3 inline" /> {rate}%</span>
                   </div>
                 </div>
-                <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
-                  <button onClick={() => toggleActive(p)} className="p-2 rounded-lg hover:bg-surface-100 text-surface-400 hover:text-surface-700">{p.isActive ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}</button>
-                  <button onClick={() => openEdit(p)} className="p-2 rounded-lg hover:bg-surface-100 text-surface-400 hover:text-surface-700"><Pencil className="h-4 w-4" /></button>
-                  <button onClick={() => deletePopup(p.id)} disabled={deleteId === p.id} className="p-2 rounded-lg hover:bg-accent-50 text-surface-400 hover:text-accent-600">
+                <div className="flex items-center gap-1 flex-shrink-0">
+                  <button onClick={() => toggleActive(p)} title={p.isActive ? "Deactivate" : "Activate"} className="p-2 rounded-lg hover:bg-surface-100 active:bg-surface-200 text-surface-500 hover:text-surface-700">{p.isActive ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}</button>
+                  <button onClick={() => openEdit(p)} title="Edit" className="p-2 rounded-lg hover:bg-surface-100 active:bg-surface-200 text-surface-500 hover:text-surface-700"><Pencil className="h-4 w-4" /></button>
+                  <button onClick={() => deletePopup(p.id)} disabled={deleteId === p.id} title="Delete" className="p-2 rounded-lg hover:bg-accent-50 active:bg-accent-100 text-surface-500 hover:text-accent-600">
                     {deleteId === p.id ? <Loader2 className="h-4 w-4 animate-spin" /> : <Trash2 className="h-4 w-4" />}
                   </button>
                 </div>
