@@ -107,3 +107,43 @@ export async function convertReferral(tx: TxClient, siteId: string, orderId: str
     },
   });
 }
+
+/**
+ * Reverse a commission for an order that's being cancelled or refunded
+ * after it was already converted. Idempotent — guarded by an atomic
+ * status transition, so calling this twice is a no-op.
+ *
+ * Reuses the REJECTED status to mean "voided" here (there's no separate
+ * CANCELLED value on ReferralStatus). If the affiliate was already paid
+ * out for this commission, totalEarnings can go below paidEarnings —
+ * that's a real debt the merchant would need to handle manually; this
+ * doesn't attempt to claw back money already paid out.
+ */
+export async function reverseReferral(tx: TxClient, siteId: string, orderId: string) {
+  const referral = await tx.referral.findUnique({
+    where: { orderId },
+    include: { affiliate: { include: { program: true } } },
+  });
+  if (!referral) return;
+  if (referral.affiliate.program.siteId !== siteId) return;
+  if (referral.status !== "CONVERTED" && referral.status !== "APPROVED") return;
+
+  const wasApproved = referral.status === "APPROVED";
+  const commission = referral.commissionAmount;
+
+  const guarded = await tx.referral.updateMany({
+    where: { id: referral.id, status: referral.status },
+    data: { status: "REJECTED" },
+  });
+  if (guarded.count === 0) return; // already reversed or changed concurrently
+
+  await tx.affiliate.update({
+    where: { id: referral.affiliateId },
+    data: {
+      totalOrders: { decrement: 1 },
+      ...(wasApproved
+        ? { totalEarnings: { decrement: commission } }
+        : { pendingEarnings: { decrement: commission } }),
+    },
+  });
+}

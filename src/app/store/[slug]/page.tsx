@@ -3,7 +3,7 @@ import { ArrowRight, Loader2, Plus, X } from "lucide-react";
 import { CheckCircle2, Heart, Menu, MessageCircle, Minus, Phone, Search, Shield, ShoppingBag, ShoppingCart, Star, Truck } from "@/components/icons/FilledIcons";
 
 import { useState, useEffect, useMemo, useRef } from "react";
-import { useParams, useRouter, useSearchParams } from "next/navigation";
+import { useParams, useRouter } from "next/navigation";
 import { injectPixels, trackEvent } from "@/lib/storefront-analytics";
 import Link from "next/link";
 import { RenderBlocks, type BuilderBlock } from "@/components/storefront/BlockRenderer";
@@ -332,29 +332,6 @@ export default function StorePage() {
     fetchStore();
     return () => { cancelled = true; };
   }, [slug]);
-
-  // Track affiliate referral clicks: if ?ref=CODE is present, record the
-  // click server-side and remember it in a cookie so checkout can attribute
-  // the eventual order to this affiliate.
-  const searchParams = useSearchParams();
-  useEffect(() => {
-    const refCode = searchParams?.get("ref");
-    const siteId = data?.store?.id;
-    if (!refCode || !siteId) return;
-    // Don't double-track if we already recorded a click for this code
-    if (typeof document !== "undefined" && document.cookie.includes(`afro_ref_code=${refCode}`)) return;
-
-    fetch(`/api/sites/${siteId}/referrals/track?ref=${encodeURIComponent(refCode)}`)
-      .then((res) => res.json())
-      .then((json) => {
-        if (!json.success || !json.data) return;
-        const { referralId, affiliateCode, cookieDays } = json.data;
-        const maxAge = (cookieDays || 30) * 24 * 60 * 60;
-        document.cookie = `afro_ref_code=${affiliateCode}; max-age=${maxAge}; path=/`;
-        document.cookie = `afro_ref_id=${referralId}; max-age=${maxAge}; path=/`;
-      })
-      .catch(() => { /* non-critical - never block the storefront over tracking */ });
-  }, [searchParams, data?.store?.id]);
 
   useEffect(() => {
     const handler = (event: MessageEvent) => {

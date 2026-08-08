@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { prisma } from "@/lib/db";
 import StorefrontPopups from "@/components/storefront/StorefrontPopups";
+import ReferralTracker from "@/components/storefront/ReferralTracker";
 import { resolveStoreBaseUrlFromHeaders } from "@/lib/site-url";
 
 type Props = {
@@ -22,6 +23,7 @@ async function resolveStore(slug: string) {
       ],
     },
     select: {
+      id: true,
       name: true,
       slug: true,
       description: true,
@@ -112,6 +114,7 @@ export default async function StoreLayout({ params, children }: Props) {
       )}
       {children}
       {store && <StorefrontPopups slug={slug} />}
+      {store && <ReferralTracker siteId={store.id} />}
     </>
   );
 }

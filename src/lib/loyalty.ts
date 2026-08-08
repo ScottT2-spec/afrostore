@@ -178,6 +178,57 @@ export async function manualAdjustPoints(siteId: string, customerId: string, act
   });
 }
 
+/**
+ * Reverse points earned/redeemed for an order that's being cancelled or
+ * refunded after payment succeeded. Idempotent — a "reversal" ledger entry
+ * marks it done, so calling this twice for the same order is a no-op.
+ *
+ * Earned points are only clawed back up to whatever is still in the
+ * member's available balance — if the customer already spent those points
+ * elsewhere, we don't push their balance negative. Redeemed points (the
+ * discount they used on this order) are always refunded in full, since the
+ * order that discount paid for never actually completed.
+ */
+export async function reverseOrderPoints(tx: TxClient, siteId: string, customerId: string, orderId: string) {
+  const program = await tx.loyaltyProgram.findUnique({ where: { siteId } });
+  if (!program) return;
+  const member = await tx.loyaltyMember.findUnique({
+    where: { programId_customerId: { programId: program.id, customerId } },
+  });
+  if (!member) return;
+
+  const alreadyReversed = await tx.loyaltyTransaction.findFirst({ where: { memberId: member.id, orderId, type: "reversal" } });
+  if (alreadyReversed) return;
+
+  const earnTx = await tx.loyaltyTransaction.findFirst({ where: { memberId: member.id, orderId, type: "earn" } });
+  const redeemTx = await tx.loyaltyTransaction.findFirst({ where: { memberId: member.id, orderId, type: "redeem" } });
+
+  if (earnTx && earnTx.points > 0) {
+    const fresh = await tx.loyaltyMember.findUniqueOrThrow({ where: { id: member.id } });
+    const clawback = Math.min(earnTx.points, fresh.availablePoints);
+    if (clawback > 0) {
+      await tx.loyaltyMember.update({
+        where: { id: member.id },
+        data: { availablePoints: { decrement: clawback }, totalPoints: { decrement: clawback } },
+      });
+    }
+    await tx.loyaltyTransaction.create({
+      data: { memberId: member.id, type: "reversal", points: -clawback, description: "Order cancelled/refunded — points reversed", orderId },
+    });
+  }
+
+  if (redeemTx) {
+    const refund = -redeemTx.points; // redeemTx.points was stored negative
+    await tx.loyaltyMember.update({
+      where: { id: member.id },
+      data: { availablePoints: { increment: refund }, redeemedPoints: { decrement: refund } },
+    });
+    await tx.loyaltyTransaction.create({
+      data: { memberId: member.id, type: "reversal", points: refund, description: "Order cancelled/refunded — redeemed points refunded", orderId },
+    });
+  }
+}
+
 /** Award points for an approved review. Idempotent per review via the caller's guarded update. */
 export async function awardReviewPoints(siteId: string, customerId: string, reviewId: string) {
   const program = await prisma.loyaltyProgram.findUnique({ where: { siteId } });

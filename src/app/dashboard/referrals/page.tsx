@@ -67,6 +67,7 @@ export default function ReferralsPage() {
   const [payoutNote, setPayoutNote] = useState("");
   const [payoutSaving, setPayoutSaving] = useState(false);
   const [payoutError, setPayoutError] = useState<string | null>(null);
+  const [copiedSignupLink, setCopiedSignupLink] = useState(false);
 
   // Settings form
   const [settings, setSettings] = useState({
@@ -275,6 +276,26 @@ export default function ReferralsPage() {
               >
                 <Settings className="h-3.5 w-3.5" />
                 Settings
+              </button>
+            </div>
+
+            {/* Public signup link — customers can apply to become an affiliate themselves */}
+            <div className="rounded-2xl border border-brand-100 bg-brand-50 p-4 flex items-center justify-between gap-4 flex-wrap">
+              <div>
+                <p className="text-sm font-medium text-surface-900">Let customers apply themselves</p>
+                <p className="text-xs text-surface-500 mt-0.5">Share this link — applicants show up here as Pending for you to approve.</p>
+              </div>
+              <button
+                onClick={() => {
+                  const origin = typeof window !== "undefined" ? window.location.origin : "";
+                  navigator.clipboard.writeText(`${origin}/store/${currentStore?.slug}/affiliate`);
+                  setCopiedSignupLink(true);
+                  setTimeout(() => setCopiedSignupLink(false), 2000);
+                }}
+                className="text-xs font-semibold text-brand-700 bg-white border border-brand-200 rounded-lg px-3 py-2 hover:bg-brand-100 flex items-center gap-1.5 shrink-0"
+              >
+                {copiedSignupLink ? <Check className="h-3.5 w-3.5 text-green-500" /> : <Copy className="h-3.5 w-3.5" />}
+                {copiedSignupLink ? "Copied" : "Copy signup link"}
               </button>
             </div>
 

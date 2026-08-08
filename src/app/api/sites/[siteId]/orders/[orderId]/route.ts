@@ -3,8 +3,8 @@ import { prisma } from "@/lib/db";
 import { getStoreContext, success, error, validationError, logAudit } from "@/lib/api-helpers";
 import { updateOrderStatusSchema } from "@/lib/validators";
 import { unauthorized } from "@/lib/auth";
-import { awardOrderPoints, finalizeOrderRedemption } from "@/lib/loyalty";
-import { convertReferral } from "@/lib/referrals";
+import { awardOrderPoints, finalizeOrderRedemption, reverseOrderPoints } from "@/lib/loyalty";
+import { convertReferral, reverseReferral } from "@/lib/referrals";
 
 type Params = { params: Promise<{ siteId: string; orderId: string }> };
 
@@ -56,9 +56,11 @@ export async function PATCH(req: NextRequest, { params }: Params) {
     if (existing.paymentMethod === "PAY_ON_DELIVERY" && existing.paymentStatus !== "PAID") {
       markCodAsPaid = true;
     }
-  } else if (parsed.data.status === "CANCELLED") {
-    updateData.cancelledAt = new Date();
-    updateData.cancelReason = parsed.data.note;
+  } else if (parsed.data.status === "CANCELLED" || parsed.data.status === "REFUNDED") {
+    if (parsed.data.status === "CANCELLED") {
+      updateData.cancelledAt = new Date();
+      updateData.cancelReason = parsed.data.note;
+    }
 
     // Restore stock
     const items = await prisma.orderItem.findMany({ where: { orderId } });
@@ -109,6 +111,25 @@ export async function PATCH(req: NextRequest, { params }: Params) {
         await convertReferral(tx, siteId, updated.id, Number(updated.total));
       } catch (err) {
         console.error("Referral conversion error for COD order", updated.id, err);
+      }
+    }
+
+    // Cancelling/refunding an order that had already been paid means any
+    // points earned/redeemed or commission converted for it need to be
+    // undone — otherwise a customer keeps points, and an affiliate keeps
+    // commission, for a sale that didn't actually happen.
+    if ((parsed.data.status === "CANCELLED" || parsed.data.status === "REFUNDED") && existing.paymentStatus === "PAID") {
+      if (updated.customerId) {
+        try {
+          await reverseOrderPoints(tx, siteId, updated.customerId, updated.id);
+        } catch (err) {
+          console.error("Loyalty reversal error for order", updated.id, err);
+        }
+      }
+      try {
+        await reverseReferral(tx, siteId, updated.id);
+      } catch (err) {
+        console.error("Referral reversal error for order", updated.id, err);
       }
     }
 
