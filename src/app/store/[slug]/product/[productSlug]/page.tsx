@@ -6,6 +6,7 @@ import { useState, useEffect, useCallback } from "react";
 import { useParams } from "next/navigation";
 import Link from "next/link";
 import { useWishlist } from "@/hooks/useWishlist";
+import { trackEvent } from "@/lib/storefront-analytics";
 import FlashSaleCountdown from "@/components/storefront/FlashSaleCountdown";
 
 interface ProductImage { id: string; url: string; alt?: string }
@@ -63,7 +64,10 @@ export default function ProductDetailPage() {
     fetch(`/api/storefront/${slug}/products/${productSlug}`)
       .then((r) => r.json())
       .then((res) => {
-        if (res.success) setData(res.data);
+        if (res.success) {
+          setData(res.data);
+          trackEvent(slug, "product_view", { productId: res.data?.product?.id });
+        }
         else setError(res.error || "Product not found");
         setLoading(false);
       })
@@ -120,6 +124,7 @@ export default function ProductDetailPage() {
       });
     }
     localStorage.setItem(`cart_${store.id}`, JSON.stringify(cart));
+    trackEvent(slug, "add_to_cart", { productId: product.id, metadata: { quantity, value: (activeFlashSale ? activeFlashSale.salePrice : displayPrice) * quantity, currency } });
     setAddedToCart(true);
     setTimeout(() => setAddedToCart(false), 2000);
   };

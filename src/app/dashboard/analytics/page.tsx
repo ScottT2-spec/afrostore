@@ -105,6 +105,57 @@ export default function AnalyticsPage() {
                   <p className="text-sm text-surface-500">No page view data yet.</p>
                 )}
               </div>
+
+              {/* Top Products */}
+              <div className="rounded-2xl border border-surface-200 bg-white p-6">
+                <h3 className="text-base font-bold text-surface-900 mb-4">Top Products</h3>
+                {data?.topProducts && data.topProducts.length > 0 ? (
+                  <div className="space-y-3">
+                    {data.topProducts.slice(0, 5).map((p) => (
+                      <div key={p.productId} className="flex items-center justify-between">
+                        <span className="text-sm text-surface-700 truncate">{p.name}</span>
+                        <span className="text-xs font-semibold text-surface-500">{p.views} views</span>
+                      </div>
+                    ))}
+                  </div>
+                ) : (
+                  <p className="text-sm text-surface-500">No product view data yet.</p>
+                )}
+              </div>
+
+              {/* Devices */}
+              <div className="rounded-2xl border border-surface-200 bg-white p-6">
+                <h3 className="text-base font-bold text-surface-900 mb-4">Devices</h3>
+                {data?.deviceBreakdown && data.deviceBreakdown.length > 0 ? (
+                  <div className="space-y-3">
+                    {data.deviceBreakdown.sort((a, b) => b.count - a.count).map((d) => (
+                      <div key={d.device} className="flex items-center justify-between">
+                        <span className="text-sm text-surface-700 capitalize">{d.device}</span>
+                        <span className="text-xs font-semibold text-surface-500">{d.count}</span>
+                      </div>
+                    ))}
+                  </div>
+                ) : (
+                  <p className="text-sm text-surface-500">No device data yet.</p>
+                )}
+              </div>
+
+              {/* Traffic Sources */}
+              <div className="rounded-2xl border border-surface-200 bg-white p-6">
+                <h3 className="text-base font-bold text-surface-900 mb-4">Traffic Sources</h3>
+                {data?.sourceBreakdown && data.sourceBreakdown.length > 0 ? (
+                  <div className="space-y-3">
+                    {data.sourceBreakdown.sort((a, b) => b.count - a.count).slice(0, 5).map((s) => (
+                      <div key={s.source} className="flex items-center justify-between">
+                        <span className="text-sm text-surface-700 capitalize truncate">{s.source}</span>
+                        <span className="text-xs font-semibold text-surface-500">{s.count}</span>
+                      </div>
+                    ))}
+                  </div>
+                ) : (
+                  <p className="text-sm text-surface-500">No traffic source data yet.</p>
+                )}
+              </div>
             </div>
           </>
         )}
