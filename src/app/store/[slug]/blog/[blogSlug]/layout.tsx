@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { prisma } from "@/lib/db";
+import { resolveStoreBaseUrlFromHeaders } from "@/lib/site-url";
 import { HandmadeBagsHeader, HandmadeBagsFooter } from "@/components/storefront/HandmadeBagsStoreChrome";
 import { TShirtsPrintsHeader, TShirtsPrintsFooter } from "@/components/storefront/TShirtsPrintsStoreChrome";
 import { ThemeProvider, type ThemeData } from "@/components/storefront/ThemeProvider";
@@ -28,7 +29,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 
   const title = blog.metaTitle || blog.title;
   const description = blog.metaDescription || blog.excerpt || `Read "${blog.title}" on ${site.name}`;
-  const storeUrl = site.customDomain ? `https://${site.customDomain}` : `https://afrostore.shop/store/${site.slug}`;
+  const storeUrl = await resolveStoreBaseUrlFromHeaders(site);
   const blogUrl = `${storeUrl}/blog/${blogSlug}`;
 
   return {

@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { prisma } from "@/lib/db";
+import { resolveStoreBaseUrlFromHeaders } from "@/lib/site-url";
 
 type Props = {
   params: Promise<{ slug: string; productSlug: string }>;
@@ -31,7 +32,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
     : product.description
     ? product.description.slice(0, 160)
     : `Buy ${product.name} for ${currency} ${price.toFixed(2)} at ${site.name}`;
-  const storeUrl = site.customDomain ? `https://${site.customDomain}` : `https://afrostore.shop/store/${site.slug}`;
+  const storeUrl = await resolveStoreBaseUrlFromHeaders(site);
   const productUrl = `${storeUrl}/product/${productSlug}`;
   const ogImage = product.images[0]?.url;
 

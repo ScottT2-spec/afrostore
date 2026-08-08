@@ -1,5 +1,6 @@
 import { NextRequest } from "next/server";
 import { prisma } from "@/lib/db";
+import { resolveStoreBaseUrl } from "@/lib/site-url";
 
 type Params = { params: Promise<{ slug: string }> };
 
@@ -9,7 +10,7 @@ function escapeXml(s: string) {
 
 // GET /store/:slug/sitemap.xml — public, no auth.
 // Rewritten from the store's real domain/subdomain root ("/sitemap.xml") by middleware.
-export async function GET(_req: NextRequest, { params }: Params) {
+export async function GET(req: NextRequest, { params }: Params) {
   const { slug } = await params;
 
   const site = await prisma.site.findFirst({
@@ -21,7 +22,7 @@ export async function GET(_req: NextRequest, { params }: Params) {
     return new Response("Site not found", { status: 404 });
   }
 
-  const baseUrl = site.customDomain ? `https://${site.customDomain}` : `https://afrostore.shop/store/${site.slug}`;
+  const baseUrl = resolveStoreBaseUrl(req, site);
 
   const [pages, products, blogs] = await Promise.all([
     prisma.page.findMany({
