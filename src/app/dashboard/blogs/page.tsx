@@ -5,6 +5,7 @@ import { Archive, Calendar, ExternalLink, Eye, EyeOff, FileText, Image as ImageI
 import { useState, useEffect, useCallback } from "react";
 import { useSite } from "@/context/StoreContext";
 import { api } from "@/lib/api-client";
+import { SingleImageUpload } from "@/components/dashboard/ImageUpload";
 
 interface BlogItem {
   id: string;
@@ -251,16 +252,11 @@ export default function BlogsPage() {
 
             <div className="space-y-4">
               <div>
-                <label className="block text-sm font-medium text-surface-700 mb-1">Cover Image URL</label>
-                <input
-                  value={coverImage}
-                  onChange={(e) => setCoverImage(e.target.value)}
-                  placeholder="https://..."
-                  className="input-field py-2.5 w-full"
+                <SingleImageUpload
+                  label="Cover Image"
+                  image={coverImage || null}
+                  onChange={(url) => setCoverImage(url || "")}
                 />
-                {coverImage && (
-                  <img src={coverImage} alt="Cover" className="mt-2 rounded-xl h-32 w-full object-cover" />
-                )}
               </div>
 
               <div className="grid grid-cols-2 gap-3">
