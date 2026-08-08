@@ -3,6 +3,7 @@ import { prisma } from "@/lib/db";
 import { getStoreContext, success, error, validationError, logAudit } from "@/lib/api-helpers";
 import { createCrmContactSchema } from "@/lib/validators";
 import { unauthorized } from "@/lib/auth";
+import { runAutomationsForTrigger } from "@/lib/automations";
 
 type Params = { params: Promise<{ siteId: string }> };
 
@@ -111,6 +112,17 @@ export async function POST(req: NextRequest, { params }: Params) {
       entityId: contact.id,
       after: contact,
     });
+
+    // Fire "new_lead" automations (fire-and-forget)
+    runAutomationsForTrigger(siteId, "new_lead", {
+      recipientEmail: contact.email,
+      recipientPhone: contact.phone ?? undefined,
+      recipientName: [contact.firstName, contact.lastName].filter(Boolean).join(" ") || undefined,
+      crmContactId: contact.id,
+      subject: `New lead: ${contact.email}`,
+      message: `A new lead was captured from ${contact.source || "manual"}.`,
+      data: { contactId: contact.id, email: contact.email, phone: contact.phone, source: contact.source },
+    }).catch((err) => console.error("Automation trigger (new_lead) error:", err));
 
     return success(contact, 201);
   } catch (err) {

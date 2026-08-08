@@ -5,6 +5,7 @@ import { createOrderSchema } from "@/lib/validators";
 import { unauthorized } from "@/lib/auth";
 import { sendOrderConfirmationEmail } from "@/lib/email";
 import { getBestActiveFlashSales, applyDiscount } from "@/lib/flash-sales";
+import { runAutomationsForTrigger } from "@/lib/automations";
 
 
 type Params = { params: Promise<{ siteId: string }> };
@@ -294,6 +295,16 @@ export async function POST(req: NextRequest, { params }: Params) {
       paymentMethod,
       deliveryAddress: deliveryAddress as { address?: string; city?: string; state?: string },
     }).catch((err) => console.error("Order confirmation email error:", err));
+
+    // Fire "new_order" automations (fire-and-forget — never block checkout)
+    runAutomationsForTrigger(siteId, "new_order", {
+      recipientEmail: email,
+      recipientPhone: phone,
+      recipientName: `${firstName} ${lastName}`,
+      subject: `New order ${order.orderNumber}`,
+      message: `Order ${order.orderNumber} was placed for ${site.currency} ${total}.`,
+      data: { orderId: order.id, orderNumber: order.orderNumber, email, phone, total, currency: site.currency },
+    }).catch((err) => console.error("Automation trigger (new_order) error:", err));
 
     return success(order, 201);
   } catch (err: any) {

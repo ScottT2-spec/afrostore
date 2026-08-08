@@ -149,21 +149,27 @@ export default function MarketingPage() {
     const endpoint = `/api/sites/${currentStore.id}/campaigns/${tab}`;
     const audience = { audienceType, audienceTag: audienceType === "TAG" ? audienceTag.trim() || undefined : undefined };
 
+    let res;
     if (tab === "email") {
       const payload = { name: name.trim(), subject: subject.trim() || name.trim(), fromName: fromName.trim() || undefined, fromEmail: fromEmail.trim() || undefined, contentHtml: contentHtml || undefined, ...audience };
-      if (editingId) await api.patch(`${endpoint}/${editingId}`, payload);
-      else await api.post(endpoint, payload);
+      res = editingId ? await api.patch(`${endpoint}/${editingId}`, payload) : await api.post(endpoint, payload);
     } else if (tab === "sms") {
       const payload = { name: name.trim(), message: message.trim(), ...audience };
-      if (editingId) await api.patch(`${endpoint}/${editingId}`, payload);
-      else await api.post(endpoint, payload);
+      res = editingId ? await api.patch(`${endpoint}/${editingId}`, payload) : await api.post(endpoint, payload);
     } else {
       const payload = { name: name.trim(), message: message.trim(), mediaUrl: mediaUrl.trim() || null, ...audience };
-      if (editingId) await api.patch(`${endpoint}/${editingId}`, payload);
-      else await api.post(endpoint, payload);
+      res = editingId ? await api.patch(`${endpoint}/${editingId}`, payload) : await api.post(endpoint, payload);
     }
 
-    setShowEditor(false); resetForm(); setSaving(false);
+    setSaving(false);
+
+    if (!res.success) {
+      const fieldErrors = res.details && typeof res.details === "object" ? Object.values(res.details as Record<string, string[]>).flat().join(" ") : "";
+      alert(res.error ? `${res.error}${fieldErrors ? `: ${fieldErrors}` : ""}` : "Failed to save campaign");
+      return; // keep the editor open with the entered data so nothing is lost
+    }
+
+    setShowEditor(false); resetForm();
     if (tab === "email") fetchEmail();
     else if (tab === "sms") fetchSms();
     else fetchWa();
@@ -405,7 +411,7 @@ function CampaignActions({ id, status, lastError, onEdit, onDelete, onStatusChan
   const canSend = ["DRAFT", "SCHEDULED", "PAUSED"].includes(status);
   return (
     <div className="flex flex-col items-end gap-1">
-      <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+      <div className="flex items-center gap-1 opacity-100 md:opacity-0 md:group-hover:opacity-100 transition-opacity">
         {canSend && (
           <button onClick={onSend} disabled={sending} title="Send now" className="p-2 rounded-lg hover:bg-brand-50 text-surface-400 hover:text-brand-600 transition-colors">
             {sending ? <Loader2 className="h-4 w-4 animate-spin" /> : <Send className="h-4 w-4" />}

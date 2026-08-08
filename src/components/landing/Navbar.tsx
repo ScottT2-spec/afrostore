@@ -10,15 +10,15 @@ const navigation = [
     name: "Products",
     href: "#products",
     children: [
-      { name: "Ecommerce Store", href: "#ecommerce" },
-      { name: "Landing Pages", href: "#landing-pages" },
-      { name: "Website Builder", href: "#website-builder" },
-      { name: "AI Assistant", href: "#ai-assistant" },
+      { name: "Ecommerce Store", href: "#products" },
+      { name: "Landing Pages", href: "#products" },
+      { name: "Website Builder", href: "#products" },
+      { name: "AI Assistant", href: "#products" },
     ],
   },
-  { name: "Templates", href: "#templates" },
+  { name: "Templates", href: "/templates" },
   { name: "Pricing", href: "#pricing" },
-  { name: "Plugins", href: "#plugins" },
+  { name: "Plugins", href: "/dashboard/plugins" },
 ];
 
 export default function Navbar() {

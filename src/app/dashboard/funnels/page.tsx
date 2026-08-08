@@ -63,6 +63,8 @@ export default function FunnelsPage() {
   const [editingFunnel, setEditingFunnel] = useState<FunnelItem | null>(null);
   const [saving, setSaving] = useState(false);
   const [deleteId, setDeleteId] = useState<string | null>(null);
+  const [saveError, setSaveError] = useState<string | null>(null);
+  const [stepError, setStepError] = useState<string | null>(null);
 
   // Form
   const [funnelName, setFunnelName] = useState("");
@@ -105,6 +107,7 @@ export default function FunnelsPage() {
     setFunnelName("");
     setFunnelDesc("");
     setEditingFunnel(null);
+    setSaveError(null);
     setShowEditor(true);
   };
 
@@ -112,20 +115,25 @@ export default function FunnelsPage() {
     setFunnelName(funnel.name);
     setFunnelDesc(funnel.description || "");
     setEditingFunnel(funnel);
+    setSaveError(null);
     setShowEditor(true);
   };
 
   const saveFunnel = async () => {
     if (!currentStore || !funnelName.trim()) return;
     setSaving(true);
+    setSaveError(null);
     const payload = { name: funnelName.trim(), description: funnelDesc.trim() || undefined };
 
-    if (editingFunnel) {
-      const res = await api.patch(`/api/sites/${currentStore.id}/funnels/${editingFunnel.id}`, payload);
-      if (res.success) { await fetchFunnels(); setShowEditor(false); }
+    const res = editingFunnel
+      ? await api.patch(`/api/sites/${currentStore.id}/funnels/${editingFunnel.id}`, payload)
+      : await api.post(`/api/sites/${currentStore.id}/funnels`, payload);
+
+    if (res.success) {
+      await fetchFunnels();
+      setShowEditor(false);
     } else {
-      const res = await api.post(`/api/sites/${currentStore.id}/funnels`, payload);
-      if (res.success) { await fetchFunnels(); setShowEditor(false); }
+      setSaveError(res.error || "Failed to save funnel. Please try again.");
     }
     setSaving(false);
   };
@@ -159,6 +167,7 @@ export default function FunnelsPage() {
 
   const addStep = async (funnelId: string) => {
     if (!currentStore || !newStepName.trim()) return;
+    setStepError(null);
     const res = await api.post(`/api/sites/${currentStore.id}/funnels/${funnelId}/steps`, {
       name: newStepName.trim(),
       type: newStepType,
@@ -176,6 +185,8 @@ export default function FunnelsPage() {
       if (updated.success && updated.data) {
         setFunnels((prev) => prev.map((f) => (f.id === funnelId ? { ...f, steps: (updated.data as FunnelItem).steps } : f)));
       }
+    } else {
+      setStepError(res.error || "Failed to add step. Please try again.");
     }
   };
 
@@ -237,6 +248,9 @@ export default function FunnelsPage() {
           </div>
           {!editingFunnel && (
             <p className="text-xs text-surface-500">A default funnel template (Landing → Lead Form → Thank You) will be created. You can customize steps after.</p>
+          )}
+          {saveError && (
+            <p className="text-sm text-accent-600 bg-accent-50 border border-accent-100 rounded-lg px-3 py-2">{saveError}</p>
           )}
           <div className="flex items-center gap-3 pt-2">
             <button onClick={saveFunnel} disabled={saving || !funnelName.trim()} className="btn-primary text-sm py-2.5 px-6">
@@ -354,6 +368,9 @@ export default function FunnelsPage() {
                     <div className="flex justify-center mt-4">
                       {addingStep && expandedId === funnel.id ? (
                         <div className="flex flex-col gap-2 w-full max-w-lg">
+                          {stepError && (
+                            <p className="text-sm text-accent-600 bg-accent-50 border border-accent-100 rounded-lg px-3 py-2">{stepError}</p>
+                          )}
                           <div className="flex items-center gap-2">
                             <input value={newStepName} onChange={(e) => setNewStepName(e.target.value)} placeholder="Step name..." className="input-field py-2 text-sm flex-1" autoFocus />
                             <select
@@ -378,11 +395,11 @@ export default function FunnelsPage() {
                           )}
                           <div className="flex items-center gap-2">
                             <button onClick={() => addStep(funnel.id)} disabled={!newStepName.trim()} className="btn-primary text-xs py-2 px-3">Add</button>
-                            <button onClick={() => { setAddingStep(false); setNewStepName(""); setNewStepFormId(""); setNewStepPageId(""); }} className="btn-secondary text-xs py-2 px-3">Cancel</button>
+                            <button onClick={() => { setAddingStep(false); setNewStepName(""); setNewStepFormId(""); setNewStepPageId(""); setStepError(null); }} className="btn-secondary text-xs py-2 px-3">Cancel</button>
                           </div>
                         </div>
                       ) : (
-                        <button onClick={() => setAddingStep(true)} className="text-xs text-brand-600 hover:text-brand-700 font-medium flex items-center gap-1">
+                        <button onClick={() => { setAddingStep(true); setStepError(null); }} className="text-xs text-brand-600 hover:text-brand-700 font-medium flex items-center gap-1">
                           <Plus className="h-3.5 w-3.5" /> Add Step
                         </button>
                       )}
