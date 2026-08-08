@@ -20,7 +20,7 @@ export async function POST(req: NextRequest, { params }: Params) {
     const parsed = createFunnelStepSchema.safeParse(body);
     if (!parsed.success) return validationError(parsed.error.flatten().fieldErrors);
 
-    const { settings, pageId, formId, ...rest } = parsed.data;
+    const { settings, pageId, formId, position: _ignoredPosition, ...rest } = parsed.data;
 
     if (pageId) {
       const page = await prisma.page.findFirst({ where: { id: pageId, siteId } });
@@ -31,12 +31,16 @@ export async function POST(req: NextRequest, { params }: Params) {
       if (!linkedForm) return error("Linked form not found on this site", 422);
     }
 
-    // Auto-position at end if not specified
-    const maxPos = await prisma.funnelStep.aggregate({
-      where: { funnelId },
-      _max: { position: true },
-    });
-    const position = parsed.data.position ?? ((maxPos._max.position ?? -1) + 1);
+    // Auto-position at end unless the caller explicitly requested a specific position.
+    const requestedPosition = typeof body.position === "number" ? body.position : undefined;
+    let position = requestedPosition;
+    if (position === undefined) {
+      const maxPos = await prisma.funnelStep.aggregate({
+        where: { funnelId },
+        _max: { position: true },
+      });
+      position = (maxPos._max.position ?? -1) + 1;
+    }
 
     const step = await prisma.funnelStep.create({
       data: {
