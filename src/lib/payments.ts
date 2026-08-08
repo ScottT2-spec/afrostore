@@ -2,6 +2,7 @@ import { prisma } from "./db";
 import crypto from "crypto";
 import { runAutomationsForTrigger } from "./automations";
 import { awardOrderPoints, finalizeOrderRedemption } from "./loyalty";
+import { convertReferral } from "./referrals";
 
 // ─── PAYSTACK ───────────────────────────────────────────────
 
@@ -255,6 +256,15 @@ export async function processPaymentConfirmation(params: {
             // Never let a loyalty hiccup roll back a confirmed payment.
             console.error("Loyalty processing error for order", updatedOrder.id, loyaltyErr);
           }
+        }
+
+        // Referral/affiliate: credit commission only now that payment has
+        // actually succeeded. No-op if this order was never attributed to
+        // a referral. Idempotent — safe under webhook retries.
+        try {
+          await convertReferral(tx, updatedOrder.siteId, updatedOrder.id, Number(updatedOrder.total));
+        } catch (referralErr) {
+          console.error("Referral conversion error for order", updatedOrder.id, referralErr);
         }
 
         paidOrder = {

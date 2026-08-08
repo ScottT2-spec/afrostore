@@ -3,6 +3,8 @@ import { prisma } from "@/lib/db";
 import { getStoreContext, success, error, validationError, logAudit } from "@/lib/api-helpers";
 import { updateOrderStatusSchema } from "@/lib/validators";
 import { unauthorized } from "@/lib/auth";
+import { awardOrderPoints, finalizeOrderRedemption } from "@/lib/loyalty";
+import { convertReferral } from "@/lib/referrals";
 
 type Params = { params: Promise<{ siteId: string; orderId: string }> };
 
@@ -40,12 +42,20 @@ export async function PATCH(req: NextRequest, { params }: Params) {
   if (!existing) return error("Order not found", 404);
 
   const updateData: Record<string, unknown> = { status: parsed.data.status };
+  let markCodAsPaid = false;
 
   if (parsed.data.status === "SHIPPED") {
     updateData.shippedAt = new Date();
     if (parsed.data.trackingNumber) updateData.trackingNumber = parsed.data.trackingNumber;
   } else if (parsed.data.status === "DELIVERED") {
     updateData.deliveredAt = new Date();
+    // Cash-on-delivery orders never go through the online payment webhook
+    // flow, so DELIVERED is the closest real-world signal that payment was
+    // actually collected. Mark it paid here so loyalty/referral hooks (which
+    // are keyed off paymentStatus: PAID) fire for COD orders too.
+    if (existing.paymentMethod === "PAY_ON_DELIVERY" && existing.paymentStatus !== "PAID") {
+      markCodAsPaid = true;
+    }
   } else if (parsed.data.status === "CANCELLED") {
     updateData.cancelledAt = new Date();
     updateData.cancelReason = parsed.data.note;
@@ -62,10 +72,47 @@ export async function PATCH(req: NextRequest, { params }: Params) {
     }
   }
 
-  const order = await prisma.order.update({
-    where: { id: orderId },
-    data: updateData,
-    include: { items: true, customer: true, timeline: true },
+  const order = await prisma.$transaction(async (tx) => {
+    // Status fields always apply, regardless of the payment-status race below.
+    await tx.order.update({ where: { id: orderId }, data: updateData });
+
+    // Atomic guard: if we're marking this COD order paid, only flip
+    // paymentStatus if it's still not-paid, so a concurrent duplicate
+    // request can't fire the loyalty/referral hooks twice for the same
+    // order. Decoupled from the status update above so losing this race
+    // never causes the DELIVERED/shipped status change to be dropped.
+    if (markCodAsPaid) {
+      const guarded = await tx.order.updateMany({
+        where: { id: orderId, paymentStatus: { not: "PAID" } },
+        data: { paymentStatus: "PAID", paidAt: new Date() },
+      });
+      if (guarded.count === 0) markCodAsPaid = false; // lost the race, don't double-fire hooks
+    }
+
+    const updated = await tx.order.findUniqueOrThrow({
+      where: { id: orderId },
+      include: { items: true, customer: true, timeline: true },
+    });
+
+    if (markCodAsPaid) {
+      if (updated.customerId) {
+        try {
+          await awardOrderPoints(tx, siteId, updated.customerId, Number(updated.total), updated.id);
+          if (updated.loyaltyPointsRedeemed > 0) {
+            await finalizeOrderRedemption(tx, siteId, updated.customerId, updated.loyaltyPointsRedeemed, updated.id);
+          }
+        } catch (err) {
+          console.error("Loyalty processing error for COD order", updated.id, err);
+        }
+      }
+      try {
+        await convertReferral(tx, siteId, updated.id, Number(updated.total));
+      } catch (err) {
+        console.error("Referral conversion error for COD order", updated.id, err);
+      }
+    }
+
+    return updated;
   });
 
   // Add timeline entry

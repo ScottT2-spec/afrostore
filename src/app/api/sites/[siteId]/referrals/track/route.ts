@@ -1,6 +1,7 @@
 import { NextRequest } from "next/server";
 import { prisma } from "@/lib/db";
 import { success, error } from "@/lib/api-helpers";
+import { attributeOrderToReferral } from "@/lib/referrals";
 
 type Params = { params: Promise<{ siteId: string }> };
 
@@ -47,7 +48,12 @@ export async function GET(req: NextRequest, { params }: Params) {
   });
 }
 
-// POST /api/sites/:siteId/referrals/track — convert referral (called on order completion)
+// POST /api/sites/:siteId/referrals/track — attribute an order to a referral
+// (called right after order creation, before payment). This only links the
+// order to the referral — it does NOT award commission. Commission is only
+// credited once payment actually succeeds, via convertReferral in
+// src/lib/payments.ts, so an abandoned or failed checkout never pays an
+// affiliate for a sale that didn't happen.
 export async function POST(req: NextRequest, { params }: Params) {
   const { siteId } = await params;
   const body = await req.json();
@@ -56,74 +62,10 @@ export async function POST(req: NextRequest, { params }: Params) {
   if (!orderId) return error("orderId is required");
   if (!referralId && !affiliateCode) return error("referralId or affiliateCode is required");
 
-  // Find the affiliate
-  let affiliate;
-  if (affiliateCode) {
-    affiliate = await prisma.affiliate.findUnique({
-      where: { code: affiliateCode },
-      include: { program: true },
-    });
-  } else if (referralId) {
-    const referral = await prisma.referral.findUnique({
-      where: { id: referralId },
-      include: { affiliate: { include: { program: true } } },
-    });
-    affiliate = referral?.affiliate;
-  }
-
-  if (!affiliate || affiliate.program.siteId !== siteId) {
-    return error("Invalid referral", 404);
-  }
-
-  // Get the order
   const order = await prisma.order.findUnique({ where: { id: orderId } });
   if (!order || order.siteId !== siteId) return error("Order not found", 404);
 
-  // Calculate commission
-  const orderTotal = Number(order.total);
-  const commission = affiliate.program.commissionType === "PERCENTAGE"
-    ? (orderTotal * affiliate.program.commissionValue) / 100
-    : affiliate.program.commissionValue;
+  await attributeOrderToReferral(siteId, orderId, { referralId, affiliateCode });
 
-  const status = affiliate.program.autoApprove ? "APPROVED" : "CONVERTED";
-
-  // Update or create referral
-  if (referralId) {
-    await prisma.referral.update({
-      where: { id: referralId },
-      data: {
-        orderId,
-        status,
-        commissionAmount: commission,
-        convertedAt: new Date(),
-        ...(status === "APPROVED" ? { approvedAt: new Date() } : {}),
-      },
-    });
-  } else {
-    await prisma.referral.create({
-      data: {
-        affiliateId: affiliate.id,
-        orderId,
-        status,
-        commissionAmount: commission,
-        convertedAt: new Date(),
-        ...(status === "APPROVED" ? { approvedAt: new Date() } : {}),
-      },
-    });
-  }
-
-  // Update affiliate stats
-  const earningsUpdate = status === "APPROVED"
-    ? { totalEarnings: { increment: commission }, pendingEarnings: affiliate.pendingEarnings }
-    : { pendingEarnings: { increment: commission } };
-
-  await prisma.affiliate.update({
-    where: { id: affiliate.id },
-    data: {
-      totalOrders: { increment: 1 },
-      ...earningsUpdate,
-    },
-  });
-
-  return success({ converted: true, commission, status });
+  return success({ attributed: true });
 }
