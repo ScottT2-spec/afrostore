@@ -10,6 +10,30 @@ function generateReferralCode(): string {
   return code;
 }
 
+// GET /api/storefront/:slug/referrals/signup — public program info for the signup page
+// (commission rate only; nothing sensitive).
+export async function GET(req: NextRequest, { params }: Params) {
+  const { slug } = await params;
+  const site = await prisma.site.findUnique({ where: { slug }, select: { id: true, name: true } });
+  if (!site) return NextResponse.json({ success: false, error: "Store not found" }, { status: 404 });
+
+  const program = await prisma.referralProgram.findUnique({
+    where: { siteId: site.id },
+    select: { enabled: true, commissionType: true, commissionValue: true, welcomeMessage: true },
+  });
+
+  return NextResponse.json({
+    success: true,
+    data: {
+      storeName: site.name,
+      enabled: program?.enabled ?? false,
+      commissionType: program?.commissionType ?? "PERCENTAGE",
+      commissionValue: program?.commissionValue ?? 0,
+      welcomeMessage: program?.welcomeMessage ?? null,
+    },
+  });
+}
+
 // POST /api/storefront/:slug/referrals/signup — public self-serve affiliate application.
 // New affiliates always start PENDING regardless of the program's autoApprove
 // setting — that flag governs commission approval, not who's allowed to become
