@@ -1,6 +1,6 @@
 import { NextRequest } from "next/server";
 import { prisma } from "@/lib/db";
-import { getStoreContext, success, error, validationError, logAudit } from "@/lib/api-helpers";
+import { getStoreContext, success, error, validationError, logAudit, serverError } from "@/lib/api-helpers";
 import { createFunnelSchema } from "@/lib/validators";
 import { unauthorized } from "@/lib/auth";
 
@@ -112,7 +112,6 @@ export async function POST(req: NextRequest, { params }: Params) {
 
     return success(funnel, 201);
   } catch (err) {
-    console.error("Create funnel error:", err);
-    return error("Internal server error", 500);
+    return serverError(err, "Create funnel error");
   }
 }

@@ -1,6 +1,6 @@
 import { NextRequest } from "next/server";
 import { prisma } from "@/lib/db";
-import { getStoreContext, success, error, validationError } from "@/lib/api-helpers";
+import { getStoreContext, success, error, validationError, serverError } from "@/lib/api-helpers";
 import { createFunnelStepSchema } from "@/lib/validators";
 import { unauthorized } from "@/lib/auth";
 
@@ -55,8 +55,7 @@ export async function POST(req: NextRequest, { params }: Params) {
 
     return success(step, 201);
   } catch (err) {
-    console.error("Add funnel step error:", err);
-    return error("Internal server error", 500);
+    return serverError(err, "Add funnel step error");
   }
 }
 
@@ -92,7 +91,6 @@ export async function PATCH(req: NextRequest, { params }: Params) {
 
     return success({ steps });
   } catch (err) {
-    console.error("Reorder funnel steps error:", err);
-    return error("Internal server error", 500);
+    return serverError(err, "Reorder funnel steps error");
   }
 }

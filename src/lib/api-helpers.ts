@@ -38,6 +38,25 @@ export function validationError(errors: unknown) {
   );
 }
 
+/**
+ * Use in API route catch blocks instead of a hardcoded "Internal server error"
+ * string. Logs the full error server-side and returns the real message (plus
+ * the Prisma error code when present, e.g. P2021 = table does not exist) so
+ * the client-side error display actually shows what broke instead of a dead end.
+ */
+export function serverError(err: unknown, context?: string) {
+  if (context) console.error(`${context}:`, err);
+  else console.error(err);
+
+  const message = err instanceof Error ? err.message : String(err);
+  const code = typeof err === "object" && err !== null && "code" in err ? (err as { code?: string }).code : undefined;
+
+  return NextResponse.json(
+    { success: false, error: message || "Internal server error", code },
+    { status: 500 }
+  );
+}
+
 // Get authenticated user + verify site ownership/membership
 export async function getSiteContext(req: NextRequest, siteId: string) {
   const user = await getAuthUser(req);
