@@ -200,6 +200,7 @@ export async function POST(req: NextRequest, { params }: Params) {
     }, 201);
   } catch (err) {
     console.error("Form submission error:", err);
-    return json({ success: false, error: "Failed to submit form" }, 500);
+    const message = err instanceof Error ? err.message : "Failed to submit form";
+    return json({ success: false, error: message }, 500);
   }
 }
