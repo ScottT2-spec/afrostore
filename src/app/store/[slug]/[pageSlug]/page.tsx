@@ -18,6 +18,7 @@ import { getLinkedPageHref } from "@/lib/page-content";
 import { resolveLivePageContent } from "@/lib/templates/bespoke-page-content";
 import { ThemeProvider, type ThemeData } from "@/components/storefront/ThemeProvider";
 import { useWishlist } from "@/hooks/useWishlist";
+import { useABTestVariant, applyABTestOverrides } from "@/hooks/useABTestVariant";
 import { applyPageCustomization, buildPageBackgroundStyle, buildThemeDataWithCustomization, filterVisiblePages, getResolvedPageSettings, normalizeSiteCustomization, type SiteCustomizationDocument } from "@/lib/site-customization";
 import { VegetableAboutPage, VegetableContactPage, VegetableMenuPage, VegetableRecipePage, VegetableReservationPage } from "@/components/storefront/VegetableTemplatePages";
 import { VegetableFooter, VegetableHeader } from "@/components/storefront/VegetableStoreChrome";
@@ -119,6 +120,11 @@ export default function StorefrontPage() {
   });
 
   const { isWishlisted, toggleWishlist, wishlistCount } = useWishlist(data?.store?.id || "");
+
+  // A/B testing: if this page has a running test, assign this visitor a
+  // variant and record a view (same mechanism as the homepage). Assignment
+  // is reused across visits via localStorage.
+  const abTestAssignment = useABTestVariant(slug, data?.page?.id);
 
   useEffect(() => {
     (async () => {
@@ -234,7 +240,10 @@ export default function StorefrontPage() {
     'toysFooter',
   ]);
   // Use parsed blocks if available; only fall back to template-specific page presets if original content was truly empty
-  const parsedBlocks = resolvedContent.blocks.filter((block) => !CHROME_BLOCK_TYPES.has(block.type));
+  const parsedBlocks = applyABTestOverrides(
+    resolvedContent.blocks.filter((block) => !CHROME_BLOCK_TYPES.has(block.type)),
+    abTestAssignment.content
+  );
   const hasOriginalBlocks = resolvedContent.blocks.length > 0;
   const blocks: BuilderBlock[] = parsedBlocks;
   const visiblePages = filterVisiblePages(data.pages, draftCustomization);
