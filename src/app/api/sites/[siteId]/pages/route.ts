@@ -66,6 +66,8 @@ export async function GET(req: NextRequest, { params }: Params) {
         template: true,
         isPublished: true,
         position: true,
+        metaTitle: true,
+        metaDescription: true,
         createdAt: true,
       },
       orderBy: [{ position: "asc" }, { createdAt: "desc" }],

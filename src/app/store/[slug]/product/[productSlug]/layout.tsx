@@ -18,14 +18,17 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 
   const product = await prisma.product.findFirst({
     where: { siteId: site.id, slug: productSlug, status: "ACTIVE" },
-    select: { name: true, description: true, price: true, currency: true, images: { select: { url: true, alt: true }, take: 1, orderBy: { position: "asc" } } },
+    select: { name: true, description: true, price: true, currency: true, metaTitle: true, metaDescription: true, images: { select: { url: true, alt: true }, take: 1, orderBy: { position: "asc" } } },
   });
 
   if (!product) return { title: `Product Not Found | ${site.name}` };
 
   const currency = product.currency || site.currency || "USD";
   const price = Number(product.price);
-  const description = product.description
+  const title = product.metaTitle || product.name;
+  const description = product.metaDescription
+    ? product.metaDescription.slice(0, 160)
+    : product.description
     ? product.description.slice(0, 160)
     : `Buy ${product.name} for ${currency} ${price.toFixed(2)} at ${site.name}`;
   const storeUrl = site.customDomain ? `https://${site.customDomain}` : `https://afrostore.shop/store/${site.slug}`;
@@ -33,19 +36,19 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const ogImage = product.images[0]?.url;
 
   return {
-    title: product.name,
+    title,
     description,
     openGraph: {
       type: "website",
       siteName: site.name,
-      title: `${product.name} | ${site.name}`,
+      title: `${title} | ${site.name}`,
       description,
       url: productUrl,
-      ...(ogImage ? { images: [{ url: ogImage, width: 800, height: 800, alt: product.images[0]?.alt || product.name }] } : {}),
+      ...(ogImage ? { images: [{ url: ogImage, width: 800, height: 800, alt: product.images[0]?.alt || title }] } : {}),
     },
     twitter: {
       card: ogImage ? "summary_large_image" : "summary",
-      title: `${product.name} | ${site.name}`,
+      title: `${title} | ${site.name}`,
       description,
       ...(ogImage ? { images: [ogImage] } : {}),
     },

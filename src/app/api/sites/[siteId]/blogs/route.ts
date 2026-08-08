@@ -59,6 +59,8 @@ export async function GET(req: NextRequest, { params }: Params) {
         category: true,
         tags: true,
         status: true,
+        metaTitle: true,
+        metaDescription: true,
         publishedAt: true,
         createdAt: true,
         updatedAt: true,

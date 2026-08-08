@@ -21,31 +21,32 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 
   const blog = await prisma.blog.findFirst({
     where: { siteId: site.id, slug: blogSlug, status: "PUBLISHED" },
-    select: { title: true, excerpt: true, coverImage: true, author: true, category: true, publishedAt: true },
+    select: { title: true, excerpt: true, coverImage: true, author: true, category: true, publishedAt: true, metaTitle: true, metaDescription: true },
   });
 
   if (!blog) return { title: `Article Not Found | ${site.name}` };
 
-  const description = blog.excerpt || `Read "${blog.title}" on ${site.name}`;
+  const title = blog.metaTitle || blog.title;
+  const description = blog.metaDescription || blog.excerpt || `Read "${blog.title}" on ${site.name}`;
   const storeUrl = site.customDomain ? `https://${site.customDomain}` : `https://afrostore.shop/store/${site.slug}`;
   const blogUrl = `${storeUrl}/blog/${blogSlug}`;
 
   return {
-    title: blog.title,
+    title,
     description,
     openGraph: {
       type: "article",
       siteName: site.name,
-      title: blog.title,
+      title,
       description,
       url: blogUrl,
       ...(blog.publishedAt ? { publishedTime: blog.publishedAt.toISOString() } : {}),
       ...(blog.author ? { authors: [blog.author] } : {}),
-      ...(blog.coverImage ? { images: [{ url: blog.coverImage, width: 1200, height: 630, alt: blog.title }] } : {}),
+      ...(blog.coverImage ? { images: [{ url: blog.coverImage, width: 1200, height: 630, alt: title }] } : {}),
     },
     twitter: {
       card: blog.coverImage ? "summary_large_image" : "summary",
-      title: blog.title,
+      title,
       description,
       ...(blog.coverImage ? { images: [blog.coverImage] } : {}),
     },
