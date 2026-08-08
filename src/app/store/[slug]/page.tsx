@@ -4,6 +4,7 @@ import { CheckCircle2, Heart, Menu, MessageCircle, Minus, Phone, Search, Shield,
 
 import { useState, useEffect, useMemo, useRef } from "react";
 import { useParams, useRouter, useSearchParams } from "next/navigation";
+import { injectPixels, trackEvent } from "@/lib/storefront-analytics";
 import Link from "next/link";
 import { RenderBlocks, type BuilderBlock } from "@/components/storefront/BlockRenderer";
 import { RenderTemplateBlocks, type TemplateBlock } from "@/components/storefront/TemplateBlockRenderer";
@@ -31,6 +32,7 @@ import { getLinkedPageHref, type PageSettings } from "@/lib/page-content";
 import { resolveLivePageContent } from "@/lib/templates/bespoke-page-content";
 import { ThemeProvider, type ThemeData } from "@/components/storefront/ThemeProvider";
 import { useWishlist } from "@/hooks/useWishlist";
+import { useABTestVariant, applyABTestOverrides, trackABTestConversion } from "@/hooks/useABTestVariant";
 import { applyPageCustomization, buildPageBackgroundStyle, buildThemeDataWithCustomization, filterVisiblePages, getResolvedPageSettings, normalizeSiteCustomization, type SiteCustomizationDocument } from "@/lib/site-customization";
 import { VegetableFooter, VegetableHeader } from "@/components/storefront/VegetableStoreChrome";
 import { LandingGadgetContext, LandingGadgetFontLoader } from "@/components/storefront/LandingGadgetBlocks";
@@ -294,6 +296,15 @@ export default function StorePage() {
   const [addedToCart, setAddedToCart] = useState<string | null>(null);
   const { isWishlisted, toggleWishlist, wishlistCount } = useWishlist(data?.store?.id || "");
 
+  // A/B testing: if the home/landing page has a running test, assign this visitor
+  // a variant and record a view. Assignment is reused across visits via localStorage.
+  const homePageIdCandidate = useMemo(() => {
+    if (!data?.pages) return undefined;
+    const home = data.pages.find((p) => p.type === "HOME") || data.pages.find((p) => p.type === "LANDING");
+    return home?.id;
+  }, [data]);
+  const abTestAssignment = useABTestVariant(slug, homePageIdCandidate);
+
   useEffect(() => {
     let cancelled = false;
 
@@ -306,6 +317,8 @@ export default function StorePage() {
         if (json.success && json.data) {
           setData(json.data);
           setDraftCustomization(normalizeSiteCustomization(json.data.customization || null));
+          injectPixels(json.data.store || {});
+          trackEvent(slug, "page_view");
         } else {
           setError(json.error || "Store not found");
         }
@@ -480,7 +493,10 @@ export default function StorePage() {
     'electronicsFooter', 'makeupFooter',
     // Note: jumia header/footer are NOT filtered — they're rendered as part of the block content
   ]);
-  const homeBlocks: BuilderBlock[] = homeContent.blocks.filter((block) => !CHROME_BLOCK_TYPES.has(block.type));
+  const homeBlocks: BuilderBlock[] = applyABTestOverrides(
+    homeContent.blocks.filter((block) => !CHROME_BLOCK_TYPES.has(block.type)),
+    abTestAssignment.content
+  );
   const hasHomeContent = homeBlocks.length > 0;
   const homeHasProductGrid = homeBlocks.some((b) => b.type === "productGrid");
   const isTShirtsPrintsTemplate = data.templateSlug === "t-shirts-prints" || slug === "t-shirts-prints" || store.slug === "t-shirts-prints";

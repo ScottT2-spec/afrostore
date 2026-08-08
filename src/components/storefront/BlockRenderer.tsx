@@ -8,6 +8,7 @@ import { getSectionStyle, resolveOpacity } from "@/components/storefront/block-s
 import { ALL_TEMPLATE_BLOCKS, TemplateBlockErrorBoundary } from "@/components/storefront/TemplateBlockRenderer";
 import { resolveStoreLink } from "@/lib/template-link-utils";
 import { normalizeStorefrontTemplateProps, toDisplayText } from "@/components/storefront/prop-normalizers";
+import { trackEvent } from "@/lib/storefront-analytics";
 import {
   FashionFontLoader as FashionFontLoaderDirect,
   FashionStoreContext,
@@ -832,6 +833,7 @@ function ContactFormBlock({ props }: { props: Record<string, unknown> }) {
       const json = await res.json();
       if (json.success) {
         setSubmitted(true);
+        trackEvent(storeSlug, "lead", { metadata: { source: "contact_form" } });
       } else {
         setError(json.error || "Failed to send. Please try again.");
       }
@@ -877,7 +879,7 @@ function ContactFormBlock({ props }: { props: Record<string, unknown> }) {
 }
 
 /* ── Contact Info ────────────────────────────────────────────── */
-function getContactHref(icon: string, value: string): string | null {
+function getContactHref(icon: string, value: string, whatsappMessage?: string): string | null {
   const v = value.trim();
   if (icon === "mail" || v.includes("@")) return `mailto:${v}`;
   if (icon === "phone" || icon === "tel") {
@@ -886,14 +888,17 @@ function getContactHref(icon: string, value: string): string | null {
   }
   if (icon === "message" || icon === "whatsapp") {
     const num = v.replace(/[^0-9+]/g, "");
-    return num ? `https://wa.me/${num.replace("+", "")}` : null;
+    if (!num) return null;
+    const base = `https://wa.me/${num.replace("+", "")}`;
+    return whatsappMessage ? `${base}?text=${encodeURIComponent(whatsappMessage)}` : base;
   }
   if (v.startsWith("http://") || v.startsWith("https://")) return v;
   return null;
 }
 
 function ContactInfoBlock({ props }: { props: Record<string, unknown> }) {
-  const items = (props.items as Array<{ icon: string; title: string; value: string; href?: string }>) || [];
+  const storeSlug = useContext(StoreSlugContext);
+  const items = (props.items as Array<{ icon: string; title: string; value: string; href?: string; whatsappMessage?: string }>) || [];
   const hours = props.hours as string;
   return (
     <AnimateIn>
@@ -906,7 +911,8 @@ function ContactInfoBlock({ props }: { props: Record<string, unknown> }) {
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
           {items.map((item, i) => {
             const Icon = iconMap[item.icon] || Mail;
-            const href = item.href || getContactHref(item.icon, item.value);
+            const isWhatsapp = item.icon === "message" || item.icon === "whatsapp";
+            const href = item.href || getContactHref(item.icon, item.value, isWhatsapp ? item.whatsappMessage : undefined);
             const content = (
               <>
                 <div className="h-10 w-10 rounded-xl bg-brand-50 flex items-center justify-center flex-shrink-0">
@@ -920,6 +926,7 @@ function ContactInfoBlock({ props }: { props: Record<string, unknown> }) {
             );
             return href ? (
               <a key={i} href={href} target={href.startsWith("http") ? "_blank" : undefined} rel={href.startsWith("http") ? "noopener noreferrer" : undefined}
+                onClick={() => { if (isWhatsapp && storeSlug) trackEvent(storeSlug, "whatsapp_click"); }}
                 className="flex items-start gap-4 rounded-2xl border border-surface-100 bg-white p-5 hover:shadow-md hover:border-brand-200 transition-all cursor-pointer">
                 {content}
               </a>
@@ -984,9 +991,38 @@ function StatsBlock({ props }: { props: Record<string, unknown> }) {
 
 /* ── Newsletter ──────────────────────────────────────────────── */
 function NewsletterBlock({ props }: { props: Record<string, unknown> }) {
+  const storeSlug = useContext(StoreSlugContext);
+  const [email, setEmail] = useState("");
   const [submitted, setSubmitted] = useState(false);
+  const [sending, setSending] = useState(false);
+  const [formError, setFormError] = useState("");
   const bg = (props.bgColor as string) || "surface";
   const isDark = bg === "dark" || bg === "brand";
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!storeSlug) { setSubmitted(true); return; } // fallback for preview
+    setSending(true);
+    setFormError("");
+    try {
+      const res = await fetch(`/api/storefront/${storeSlug}/newsletter`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email }),
+      });
+      const json = await res.json();
+      if (json.success) {
+        setSubmitted(true);
+        trackEvent(storeSlug, "lead", { metadata: { source: "newsletter" } });
+      } else {
+        setFormError(json.error || "Failed to subscribe. Please try again.");
+      }
+    } catch {
+      setFormError("Network error. Please try again.");
+    }
+    setSending(false);
+  };
+
   return (
     <AnimateIn>
       <div className={`rounded-3xl py-12 px-6 sm:px-10 text-center ${
@@ -1005,19 +1041,24 @@ function NewsletterBlock({ props }: { props: Record<string, unknown> }) {
             <CheckCircle2 className="h-5 w-5" /> You&apos;re subscribed!
           </div>
         ) : (
-          <form onSubmit={(e) => { e.preventDefault(); setSubmitted(true); }} className="flex flex-col sm:flex-row gap-3 max-w-md mx-auto">
+          <form onSubmit={handleSubmit} className="flex flex-col sm:flex-row gap-3 max-w-md mx-auto">
             <input
               type="email"
               required
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
               placeholder="Enter your email"
               className="flex-1 rounded-xl border border-surface-200 bg-white px-4 py-3 text-sm placeholder:text-surface-400 focus:outline-none focus:ring-2 focus:ring-brand-500"
             />
-            <button type="submit" className={`rounded-xl font-bold py-3 px-6 text-sm transition-all hover:-translate-y-0.5 ${
+            <button type="submit" disabled={sending} className={`rounded-xl font-bold py-3 px-6 text-sm transition-all hover:-translate-y-0.5 disabled:opacity-60 ${
               isDark ? "bg-white text-surface-900 shadow-lg" : "bg-brand-600 text-white shadow-lg shadow-brand-600/25"
             }`}>
-              Subscribe
+              {sending ? "..." : "Subscribe"}
             </button>
           </form>
+        )}
+        {formError && (
+          <p className={`mt-3 text-xs font-medium ${isDark ? "text-red-300" : "text-red-600"}`}>{formError}</p>
         )}
       </div>
     </AnimateIn>

@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { prisma } from "@/lib/db";
+import StorefrontPopups from "@/components/storefront/StorefrontPopups";
 
 type Props = {
   params: Promise<{ slug: string }>;
@@ -113,6 +114,7 @@ export default async function StoreLayout({ params, children }: Props) {
         />
       )}
       {children}
+      {store && <StorefrontPopups slug={slug} />}
     </>
   );
 }

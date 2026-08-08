@@ -1,6 +1,6 @@
 "use client";
 import { Loader2, Plus } from "lucide-react";
-import { Activity, BarChart3, CheckCircle2, Eye, MousePointerClick, Pause, Pencil, Play, Trash2, Trophy } from "@/components/icons/FilledIcons";
+import { Activity, BarChart3, CheckCircle2, Eye, MousePointerClick, Pause, Pencil, Play, Trash2, Trophy, ChevronDown, ChevronUp } from "@/components/icons/FilledIcons";
 
 import { useState, useEffect, useCallback } from "react";
 import { useSite } from "@/context/StoreContext";
@@ -12,6 +12,12 @@ interface ABTestItem {
   page: { id: string; title: string; slug: string } | null;
   variants: Variant[]; winnerVariantId: string | null;
   startsAt: string | null; endsAt: string | null; createdAt: string;
+}
+interface VariantResult extends Variant { views: number; conversions: number; conversionRate: number; }
+interface TestStats {
+  testId: string; status: string; winnerVariantId: string | null;
+  totalViews: number; totalConversions: number; leadingVariantId: string | null;
+  variants: VariantResult[];
 }
 
 const statusStyles: Record<string, string> = {
@@ -32,6 +38,11 @@ export default function ABTestsPage() {
   const [variants, setVariants] = useState<Array<{ id: string; name: string; weight: number }>>([
     { id: "a", name: "Variant A", weight: 50 }, { id: "b", name: "Variant B", weight: 50 },
   ]);
+
+  const [expandedId, setExpandedId] = useState<string | null>(null);
+  const [stats, setStats] = useState<Record<string, TestStats>>({});
+  const [statsLoading, setStatsLoading] = useState<string | null>(null);
+  const [decidingWinner, setDecidingWinner] = useState<string | null>(null);
 
   const fetchTests = useCallback(async () => {
     if (!currentStore) return;
@@ -76,6 +87,28 @@ export default function ABTestsPage() {
   const addVariant = () => {
     const letter = String.fromCharCode(97 + variants.length);
     setVariants((v) => [...v, { id: letter, name: `Variant ${letter.toUpperCase()}`, weight: Math.floor(100 / (variants.length + 1)) }]);
+  };
+
+  const loadStats = useCallback(async (testId: string) => {
+    if (!currentStore) return;
+    setStatsLoading(testId);
+    const res = await api.get<TestStats>(`/api/sites/${currentStore.id}/ab-tests/${testId}/stats`);
+    if (res.success && res.data) setStats((prev) => ({ ...prev, [testId]: res.data as TestStats }));
+    setStatsLoading(null);
+  }, [currentStore]);
+
+  const toggleResults = (testId: string) => {
+    if (expandedId === testId) { setExpandedId(null); return; }
+    setExpandedId(testId);
+    loadStats(testId);
+  };
+
+  const declareWinner = async (testId: string, variantId: string) => {
+    if (!currentStore) return;
+    setDecidingWinner(variantId);
+    await api.patch(`/api/sites/${currentStore.id}/ab-tests/${testId}`, { winnerVariantId: variantId, status: "COMPLETED" });
+    await Promise.all([fetchTests(), loadStats(testId)]);
+    setDecidingWinner(null);
   };
 
   if (!currentStore) return <div className="p-6 flex items-center justify-center min-h-[50vh]"><Loader2 className="h-8 w-8 animate-spin text-brand-600" /></div>;
@@ -124,30 +157,89 @@ export default function ABTestsPage() {
         <div className="rounded-2xl border border-surface-200 bg-white overflow-hidden divide-y divide-surface-100">
           {tests.map((t) => {
             const winner = t.winnerVariantId ? t.variants.find((v) => v.id === t.winnerVariantId) : null;
+            const isExpanded = expandedId === t.id;
+            const testStats = stats[t.id];
+            const maxRate = testStats ? Math.max(0.0001, ...testStats.variants.map((v) => v.conversionRate)) : 0;
             return (
-              <div key={t.id} className="flex items-center gap-4 px-5 py-4 hover:bg-surface-50 group">
-                <div className="h-10 w-10 rounded-xl bg-indigo-50 flex items-center justify-center flex-shrink-0"><Activity className="h-5 w-5 text-indigo-600" /></div>
-                <div className="flex-1 min-w-0">
-                  <div className="flex items-center gap-2">
-                    <h3 className="text-sm font-semibold text-surface-900">{t.name}</h3>
-                    <span className={`text-[10px] font-semibold px-2 py-0.5 rounded-full ${statusStyles[t.status] || "bg-surface-100 text-surface-500"}`}>{t.status}</span>
-                    {winner && <span className="text-[10px] font-semibold px-2 py-0.5 rounded-full bg-amber-50 text-amber-700 flex items-center gap-0.5"><Trophy className="h-3 w-3" /> {winner.name}</span>}
+              <div key={t.id}>
+                <div className="flex items-center gap-4 px-5 py-4 hover:bg-surface-50">
+                  <div className="h-10 w-10 rounded-xl bg-indigo-50 flex items-center justify-center flex-shrink-0"><Activity className="h-5 w-5 text-indigo-600" /></div>
+                  <div className="flex-1 min-w-0">
+                    <div className="flex items-center gap-2">
+                      <h3 className="text-sm font-semibold text-surface-900">{t.name}</h3>
+                      <span className={`text-[10px] font-semibold px-2 py-0.5 rounded-full ${statusStyles[t.status] || "bg-surface-100 text-surface-500"}`}>{t.status}</span>
+                      {winner && <span className="text-[10px] font-semibold px-2 py-0.5 rounded-full bg-amber-50 text-amber-700 flex items-center gap-0.5"><Trophy className="h-3 w-3" /> {winner.name}</span>}
+                    </div>
+                    <div className="flex items-center gap-2 text-xs text-surface-400 mt-0.5">
+                      <span>{t.variants.length} variants</span>
+                      {t.page && <span>· Page: {t.page.title}</span>}
+                      <span>· {t.variants.map((v) => `${v.name} (${v.weight}%)`).join(" vs ")}</span>
+                    </div>
                   </div>
-                  <div className="flex items-center gap-2 text-xs text-surface-400 mt-0.5">
-                    <span>{t.variants.length} variants</span>
-                    {t.page && <span>· Page: {t.page.title}</span>}
-                    <span>· {t.variants.map((v) => `${v.name} (${v.weight}%)`).join(" vs ")}</span>
+                  <div className="flex items-center gap-1">
+                    <button onClick={() => toggleResults(t.id)} className="p-2 rounded-lg hover:bg-indigo-50 text-surface-400 hover:text-indigo-600" title="View results">
+                      <BarChart3 className="h-4 w-4" />
+                    </button>
+                    {t.status === "DRAFT" && <button onClick={() => changeStatus(t.id, "RUNNING")} className="p-2 rounded-lg hover:bg-green-50 text-surface-400 hover:text-green-600" title="Start"><Play className="h-4 w-4" /></button>}
+                    {t.status === "RUNNING" && <button onClick={() => changeStatus(t.id, "PAUSED")} className="p-2 rounded-lg hover:bg-amber-50 text-surface-400 hover:text-amber-600" title="Pause"><Pause className="h-4 w-4" /></button>}
+                    {t.status === "PAUSED" && <button onClick={() => changeStatus(t.id, "RUNNING")} className="p-2 rounded-lg hover:bg-green-50 text-surface-400 hover:text-green-600" title="Resume"><Play className="h-4 w-4" /></button>}
+                    <button onClick={() => openEdit(t)} className="p-2 rounded-lg hover:bg-surface-100 text-surface-400 hover:text-surface-700" title="Edit"><Pencil className="h-4 w-4" /></button>
+                    <button onClick={() => deleteTest(t.id)} disabled={deleteId === t.id} className="p-2 rounded-lg hover:bg-accent-50 text-surface-400 hover:text-accent-600" title="Delete">
+                      {deleteId === t.id ? <Loader2 className="h-4 w-4 animate-spin" /> : <Trash2 className="h-4 w-4" />}
+                    </button>
+                    <button onClick={() => toggleResults(t.id)} className="p-2 rounded-lg hover:bg-surface-100 text-surface-400 hover:text-surface-700">
+                      {isExpanded ? <ChevronUp className="h-4 w-4" /> : <ChevronDown className="h-4 w-4" />}
+                    </button>
                   </div>
                 </div>
-                <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
-                  {t.status === "DRAFT" && <button onClick={() => changeStatus(t.id, "RUNNING")} className="p-2 rounded-lg hover:bg-green-50 text-surface-400 hover:text-green-600"><Play className="h-4 w-4" /></button>}
-                  {t.status === "RUNNING" && <button onClick={() => changeStatus(t.id, "PAUSED")} className="p-2 rounded-lg hover:bg-amber-50 text-surface-400 hover:text-amber-600"><Pause className="h-4 w-4" /></button>}
-                  {t.status === "PAUSED" && <button onClick={() => changeStatus(t.id, "RUNNING")} className="p-2 rounded-lg hover:bg-green-50 text-surface-400 hover:text-green-600"><Play className="h-4 w-4" /></button>}
-                  <button onClick={() => openEdit(t)} className="p-2 rounded-lg hover:bg-surface-100 text-surface-400 hover:text-surface-700"><Pencil className="h-4 w-4" /></button>
-                  <button onClick={() => deleteTest(t.id)} disabled={deleteId === t.id} className="p-2 rounded-lg hover:bg-accent-50 text-surface-400 hover:text-accent-600">
-                    {deleteId === t.id ? <Loader2 className="h-4 w-4 animate-spin" /> : <Trash2 className="h-4 w-4" />}
-                  </button>
-                </div>
+
+                {isExpanded && (
+                  <div className="px-5 pb-5 bg-surface-50/50">
+                    {statsLoading === t.id || !testStats ? (
+                      <div className="flex items-center justify-center py-8"><Loader2 className="h-5 w-5 animate-spin text-brand-600" /></div>
+                    ) : testStats.totalViews === 0 ? (
+                      <p className="text-xs text-surface-400 py-4">
+                        No traffic recorded yet. {t.status === "RUNNING" ? "This test is live — results will appear once visitors reach the page." : "Start the test to begin collecting results."}
+                      </p>
+                    ) : (
+                      <div className="space-y-3 pt-2">
+                        {testStats.variants.map((v) => {
+                          const isLeader = testStats.leadingVariantId === v.id && testStats.totalViews > 0;
+                          const isWinner = testStats.winnerVariantId === v.id;
+                          return (
+                            <div key={v.id} className="rounded-xl border border-surface-200 bg-white p-3">
+                              <div className="flex items-center justify-between mb-2">
+                                <div className="flex items-center gap-2 text-sm font-semibold text-surface-900">
+                                  {v.name}
+                                  {isWinner && <span className="text-[10px] font-semibold px-1.5 py-0.5 rounded-full bg-amber-50 text-amber-700 flex items-center gap-0.5"><Trophy className="h-3 w-3" /> Winner</span>}
+                                  {!isWinner && isLeader && <span className="text-[10px] font-semibold px-1.5 py-0.5 rounded-full bg-green-50 text-green-700">Leading</span>}
+                                </div>
+                                {!testStats.winnerVariantId && t.status !== "DRAFT" && (
+                                  <button
+                                    onClick={() => declareWinner(t.id, v.id)}
+                                    disabled={decidingWinner === v.id}
+                                    className="text-xs font-medium text-brand-600 hover:text-brand-700 flex items-center gap-1 disabled:opacity-50"
+                                  >
+                                    {decidingWinner === v.id ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <CheckCircle2 className="h-3.5 w-3.5" />} Declare winner
+                                  </button>
+                                )}
+                              </div>
+                              <div className="flex items-center gap-4 text-xs text-surface-500 mb-2">
+                                <span className="flex items-center gap-1"><Eye className="h-3.5 w-3.5" /> {v.views} views</span>
+                                <span className="flex items-center gap-1"><MousePointerClick className="h-3.5 w-3.5" /> {v.conversions} conversions</span>
+                                <span className="font-semibold text-surface-700">{(v.conversionRate * 100).toFixed(1)}%</span>
+                              </div>
+                              <div className="h-1.5 rounded-full bg-surface-100 overflow-hidden">
+                                <div className={`h-full rounded-full ${isLeader ? "bg-green-500" : "bg-surface-300"}`} style={{ width: `${Math.max(2, (v.conversionRate / maxRate) * 100)}%` }} />
+                              </div>
+                            </div>
+                          );
+                        })}
+                        <p className="text-[11px] text-surface-400 pt-1">{testStats.totalViews} total views · {testStats.totalConversions} total conversions</p>
+                      </div>
+                    )}
+                  </div>
+                )}
               </div>
             );
           })}

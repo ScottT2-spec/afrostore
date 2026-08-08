@@ -24,6 +24,8 @@ import { useState, useEffect } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { motion, useReducedMotion } from "framer-motion";
+import { trackEvent } from "@/lib/storefront-analytics";
+import { trackABTestConversion } from "@/hooks/useABTestVariant";
 
 /* ───────── Types ───────── */
 
@@ -410,6 +412,8 @@ export default function CheckoutPage() {
         localStorage.removeItem(cartKey);
         setCart([]);
         setOrderSuccess({ orderNumber: order.orderNumber, orderId: order.id });
+        if (storeSlug) trackEvent(storeSlug, "purchase", { orderId: order.id, metadata: { value: total, currency } });
+        trackABTestConversion(storeSlug);
         setPlacing(false);
         return;
       }
@@ -443,6 +447,7 @@ export default function CheckoutPage() {
       localStorage.removeItem(cartKey);
       setCart([]);
       setOrderSuccess({ orderNumber: order.orderNumber, orderId: order.id });
+      trackABTestConversion(storeSlug);
       const reason = typeof payJson.error === "string" ? payJson.error : null;
       setOrderError(
         reason
@@ -482,6 +487,8 @@ export default function CheckoutPage() {
         .then((json) => {
           if (json.success && json.data?.status === "SUCCESS") {
             setOrderSuccess({ orderNumber: orderNum, orderId: json.data.orderId || "" });
+            if (storeSlug) trackEvent(storeSlug, "purchase", { orderId: json.data.orderId, metadata: { value: json.data.amount, currency } });
+            trackABTestConversion(storeSlug);
           } else if (json.success && json.data?.status === "PENDING") {
             // Webhook may still be processing
             setOrderSuccess({ orderNumber: orderNum, orderId: "" });

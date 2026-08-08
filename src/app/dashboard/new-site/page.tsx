@@ -93,6 +93,15 @@ export default function NewSitePage() {
     services: draft?.businessDetails.services || '',
     targetAudience: draft?.businessDetails.targetAudience || '',
   });
+  const [landingConfig, setLandingConfig] = useState({
+    leadCaptureEnabled: true,
+    whatsappCta: '',
+    countdownEnabled: false,
+    countdownDate: '',
+    paymentLink: '',
+    eventRegistrationEnabled: false,
+    eventDate: '',
+  });
   const [branding, setBranding] = useState({
     primary: '#1B2B4B',
     secondary: '#111827',
@@ -269,6 +278,7 @@ export default function NewSitePage() {
           products: businessInfo.products.split(',').map(item => item.trim()).filter(Boolean),
           services: businessInfo.services.split(',').map(item => item.trim()).filter(Boolean),
           targetAudience: businessInfo.targetAudience,
+          landingPageConfig: siteType === 'LANDING_PAGE' ? landingConfig : undefined,
           branding: {
             logo: businessInfo.logo || undefined,
             colors: {
@@ -523,8 +533,10 @@ export default function NewSitePage() {
         {/* Step 4: Business Information */}
         {step === 4 && (
           <div className="fade-in">
-            <h1 className="text-2xl font-bold text-gray-900 mb-2">Tell us about your business</h1>
-            <p className="text-gray-500 mb-8">This information will appear on your site</p>
+            <h1 className="text-2xl font-bold text-gray-900 mb-2">
+              {siteType === 'LANDING_PAGE' ? 'Tell us about your campaign' : 'Tell us about your business'}
+            </h1>
+            <p className="text-gray-500 mb-8">This information will appear on your {siteType === 'LANDING_PAGE' ? 'page' : 'site'}</p>
             <div className="space-y-5">
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1.5">Business Name *</label>
@@ -547,36 +559,51 @@ export default function NewSitePage() {
                 />
               </div>
               <div className="grid sm:grid-cols-3 gap-4">
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1.5">Products</label>
-                  <input
-                    type="text"
-                    value={businessInfo.products}
-                    onChange={e => setBusinessInfo(prev => ({ ...prev, products: e.target.value }))}
-                    className="w-full px-4 py-3 border border-gray-200 rounded-lg focus:ring-2 focus:ring-gray-900 outline-none"
-                    placeholder="dresses, shoes"
-                  />
-                </div>
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1.5">Services</label>
-                  <input
-                    type="text"
-                    value={businessInfo.services}
-                    onChange={e => setBusinessInfo(prev => ({ ...prev, services: e.target.value }))}
-                    className="w-full px-4 py-3 border border-gray-200 rounded-lg focus:ring-2 focus:ring-gray-900 outline-none"
-                    placeholder="delivery, styling"
-                  />
-                </div>
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1.5">Target Audience</label>
-                  <input
-                    type="text"
-                    value={businessInfo.targetAudience}
-                    onChange={e => setBusinessInfo(prev => ({ ...prev, targetAudience: e.target.value }))}
-                    className="w-full px-4 py-3 border border-gray-200 rounded-lg focus:ring-2 focus:ring-gray-900 outline-none"
-                    placeholder="families, founders"
-                  />
-                </div>
+                {siteType === 'LANDING_PAGE' ? (
+                  <div className="sm:col-span-3">
+                    <label className="block text-sm font-medium text-gray-700 mb-1.5">Target Audience</label>
+                    <input
+                      type="text"
+                      value={businessInfo.targetAudience}
+                      onChange={e => setBusinessInfo(prev => ({ ...prev, targetAudience: e.target.value }))}
+                      className="w-full px-4 py-3 border border-gray-200 rounded-lg focus:ring-2 focus:ring-gray-900 outline-none"
+                      placeholder="Who is this campaign for?"
+                    />
+                  </div>
+                ) : (
+                  <>
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-1.5">Products</label>
+                      <input
+                        type="text"
+                        value={businessInfo.products}
+                        onChange={e => setBusinessInfo(prev => ({ ...prev, products: e.target.value }))}
+                        className="w-full px-4 py-3 border border-gray-200 rounded-lg focus:ring-2 focus:ring-gray-900 outline-none"
+                        placeholder="dresses, shoes"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-1.5">Services</label>
+                      <input
+                        type="text"
+                        value={businessInfo.services}
+                        onChange={e => setBusinessInfo(prev => ({ ...prev, services: e.target.value }))}
+                        className="w-full px-4 py-3 border border-gray-200 rounded-lg focus:ring-2 focus:ring-gray-900 outline-none"
+                        placeholder="delivery, styling"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-1.5">Target Audience</label>
+                      <input
+                        type="text"
+                        value={businessInfo.targetAudience}
+                        onChange={e => setBusinessInfo(prev => ({ ...prev, targetAudience: e.target.value }))}
+                        className="w-full px-4 py-3 border border-gray-200 rounded-lg focus:ring-2 focus:ring-gray-900 outline-none"
+                        placeholder="families, founders"
+                      />
+                    </div>
+                  </>
+                )}
               </div>
               <div className="grid sm:grid-cols-2 gap-4">
                 <div>
@@ -610,6 +637,81 @@ export default function NewSitePage() {
                   placeholder="Lagos, Nigeria"
                 />
               </div>
+
+              {siteType === 'LANDING_PAGE' && (
+                <div className="border border-purple-100 bg-purple-50/50 rounded-lg p-4 space-y-4">
+                  <h3 className="text-sm font-semibold text-gray-900">Campaign details</h3>
+
+                  <label className="flex items-center justify-between gap-3 cursor-pointer">
+                    <span className="text-sm text-gray-700">Collect leads with a capture form</span>
+                    <input
+                      type="checkbox"
+                      checked={landingConfig.leadCaptureEnabled}
+                      onChange={e => setLandingConfig(prev => ({ ...prev, leadCaptureEnabled: e.target.checked }))}
+                      className="h-4 w-4 rounded border-gray-300"
+                    />
+                  </label>
+
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1.5">WhatsApp CTA number</label>
+                    <input
+                      type="tel"
+                      value={landingConfig.whatsappCta}
+                      onChange={e => setLandingConfig(prev => ({ ...prev, whatsappCta: e.target.value }))}
+                      className="w-full px-4 py-3 border border-gray-200 rounded-lg focus:ring-2 focus:ring-gray-900 outline-none"
+                      placeholder="+234 800 000 0000"
+                    />
+                  </div>
+
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1.5">Payment link (optional)</label>
+                    <input
+                      type="url"
+                      value={landingConfig.paymentLink}
+                      onChange={e => setLandingConfig(prev => ({ ...prev, paymentLink: e.target.value }))}
+                      className="w-full px-4 py-3 border border-gray-200 rounded-lg focus:ring-2 focus:ring-gray-900 outline-none"
+                      placeholder="Paystack/Flutterwave payment link"
+                    />
+                    <p className="text-xs text-gray-500 mt-1">A single link for one-off payments — not a full store checkout.</p>
+                  </div>
+
+                  <label className="flex items-center justify-between gap-3 cursor-pointer">
+                    <span className="text-sm text-gray-700">Add a countdown timer</span>
+                    <input
+                      type="checkbox"
+                      checked={landingConfig.countdownEnabled}
+                      onChange={e => setLandingConfig(prev => ({ ...prev, countdownEnabled: e.target.checked }))}
+                      className="h-4 w-4 rounded border-gray-300"
+                    />
+                  </label>
+                  {landingConfig.countdownEnabled && (
+                    <input
+                      type="datetime-local"
+                      value={landingConfig.countdownDate}
+                      onChange={e => setLandingConfig(prev => ({ ...prev, countdownDate: e.target.value }))}
+                      className="w-full px-4 py-3 border border-gray-200 rounded-lg focus:ring-2 focus:ring-gray-900 outline-none"
+                    />
+                  )}
+
+                  <label className="flex items-center justify-between gap-3 cursor-pointer">
+                    <span className="text-sm text-gray-700">This is for an event or webinar</span>
+                    <input
+                      type="checkbox"
+                      checked={landingConfig.eventRegistrationEnabled}
+                      onChange={e => setLandingConfig(prev => ({ ...prev, eventRegistrationEnabled: e.target.checked }))}
+                      className="h-4 w-4 rounded border-gray-300"
+                    />
+                  </label>
+                  {landingConfig.eventRegistrationEnabled && (
+                    <input
+                      type="datetime-local"
+                      value={landingConfig.eventDate}
+                      onChange={e => setLandingConfig(prev => ({ ...prev, eventDate: e.target.value }))}
+                      className="w-full px-4 py-3 border border-gray-200 rounded-lg focus:ring-2 focus:ring-gray-900 outline-none"
+                    />
+                  )}
+                </div>
+              )}
 
               {/* Social Links (collapsible) */}
               <details className="border border-gray-100 rounded-lg">
