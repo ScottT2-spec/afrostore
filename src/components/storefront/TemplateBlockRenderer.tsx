@@ -906,6 +906,61 @@ const ALL_TEMPLATE_BLOCKS: Record<string, BlockComponent> = {
 
 export const REGISTERED_TEMPLATE_BLOCK_TYPES = new Set(Object.keys(ALL_TEMPLATE_BLOCKS));
 
+// Some registries have alias keys pointing at the exact same component
+// (e.g. "gadgetHero" and "landingGadgetHero" both render LandingGadgetHero,
+// kept for backward compatibility with older saved pages). Collapse those
+// down to one canonical key per unique component so the section picker
+// doesn't show visually identical entries twice.
+function dedupeBlocksByComponent(blocks: Record<string, BlockComponent>): string[] {
+  const seen = new Set<BlockComponent>();
+  const result: string[] = [];
+  for (const [key, component] of Object.entries(blocks)) {
+    if (seen.has(component)) continue;
+    seen.add(component);
+    result.push(key);
+  }
+  return result;
+}
+
+// Theme -> block type keys, sourced from the real per-theme registries
+// above (not inferred from naming patterns, which aren't consistent
+// enough - e.g. "landingGadgetHero" vs "fashionHeroSlider" don't split
+// the same way). Used to build the editor's "Add Section" library
+// scoped to whichever theme a site is actually using.
+export const THEME_BLOCK_GROUPS: Record<string, { label: string; types: string[] }> = {
+  fashion: { label: "Fashion", types: dedupeBlocksByComponent(FASHION_BLOCKS) },
+  electronics: { label: "Electronics", types: dedupeBlocksByComponent(ELECTRONICS_BLOCKS) },
+  hardware: { label: "Hardware", types: dedupeBlocksByComponent(HARDWARE_BLOCKS) },
+  tools: { label: "Tools & Home", types: dedupeBlocksByComponent(TOOLS_HOME_BLOCKS) },
+  bakery: { label: "Bakery", types: dedupeBlocksByComponent(BAKERY_BLOCKS) },
+  cosmetics: { label: "Cosmetics", types: dedupeBlocksByComponent(COSMETICS_BLOCKS) },
+  grocery: { label: "Grocery", types: dedupeBlocksByComponent(GROCERY_BLOCKS) },
+  health: { label: "Health", types: dedupeBlocksByComponent(HEALTH_BLOCKS) },
+  interior: { label: "Interior Design", types: dedupeBlocksByComponent(INTERIOR_BLOCKS) },
+  kids: { label: "Kids", types: dedupeBlocksByComponent(KIDS_BLOCKS) },
+  toys: { label: "Toys", types: dedupeBlocksByComponent(TOYS_BLOCKS) },
+  makeup: { label: "Makeup", types: dedupeBlocksByComponent(MAKEUP_BLOCKS) },
+  perfumes: { label: "Perfumes", types: dedupeBlocksByComponent(PERFUMES_BLOCKS) },
+  tshirts: { label: "T-Shirts & Prints", types: dedupeBlocksByComponent(TSHIRTS_BLOCKS) },
+  vegetable: { label: "Vegetable & Produce", types: dedupeBlocksByComponent(VEGETABLE_BLOCKS) },
+  jumia: { label: "Marketplace", types: dedupeBlocksByComponent(JUMIA_BLOCKS) },
+  ai: { label: "AI", types: dedupeBlocksByComponent(AI_BLOCKS) },
+  gadget: { label: "Landing Page", types: dedupeBlocksByComponent(GADGET_BLOCKS) },
+  aegis: { label: "Aegis", types: dedupeBlocksByComponent(AEGIS_BLOCKS) },
+  prokipAgent: { label: "Prokip Agent", types: dedupeBlocksByComponent(PROKIP_AGENT_BLOCKS) },
+  prokipBooking: { label: "Prokip Booking", types: dedupeBlocksByComponent(PROKIP_BOOKING_BLOCKS) },
+};
+
+// Reverse lookup: given a block type already on a page, which theme
+// group does it belong to? Used to auto-detect a site's theme from
+// its existing content rather than trusting metadata that may not
+// have ever been wired to the actual rendered blocks.
+export const BLOCK_TYPE_TO_THEME: Record<string, string> = Object.fromEntries(
+  Object.entries(THEME_BLOCK_GROUPS).flatMap(([themeKey, group]) =>
+    group.types.map((type) => [type, themeKey])
+  )
+);
+
 const CHILD_COLLECTION_PROP_MAP: Array<[RegExp, string]> = [
   [/linkcolumns?$/i, "linkColumns"],
   [/sociallinks?$/i, "socialLinks"],

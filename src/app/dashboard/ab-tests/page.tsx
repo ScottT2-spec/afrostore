@@ -42,6 +42,7 @@ export default function ABTestsPage() {
   const [expandedId, setExpandedId] = useState<string | null>(null);
   const [stats, setStats] = useState<Record<string, TestStats>>({});
   const [statsLoading, setStatsLoading] = useState<string | null>(null);
+  const [statsError, setStatsError] = useState<Record<string, string>>({});
   const [decidingWinner, setDecidingWinner] = useState<string | null>(null);
 
   const fetchTests = useCallback(async () => {
@@ -92,8 +93,13 @@ export default function ABTestsPage() {
   const loadStats = useCallback(async (testId: string) => {
     if (!currentStore) return;
     setStatsLoading(testId);
+    setStatsError((prev) => { const next = { ...prev }; delete next[testId]; return next; });
     const res = await api.get<TestStats>(`/api/sites/${currentStore.id}/ab-tests/${testId}/stats`);
-    if (res.success && res.data) setStats((prev) => ({ ...prev, [testId]: res.data as TestStats }));
+    if (res.success && res.data) {
+      setStats((prev) => ({ ...prev, [testId]: res.data as TestStats }));
+    } else {
+      setStatsError((prev) => ({ ...prev, [testId]: res.error || "Couldn't load results" }));
+    }
     setStatsLoading(null);
   }, [currentStore]);
 
@@ -195,7 +201,14 @@ export default function ABTestsPage() {
 
                 {isExpanded && (
                   <div className="px-5 pb-5 bg-surface-50/50">
-                    {statsLoading === t.id || !testStats ? (
+                    {statsLoading === t.id ? (
+                      <div className="flex items-center justify-center py-8"><Loader2 className="h-5 w-5 animate-spin text-brand-600" /></div>
+                    ) : statsError[t.id] ? (
+                      <div className="flex items-center justify-between py-4 px-1">
+                        <p className="text-xs text-accent-600">Couldn't load results: {statsError[t.id]}</p>
+                        <button onClick={() => loadStats(t.id)} className="text-xs font-medium text-brand-600 hover:text-brand-700">Retry</button>
+                      </div>
+                    ) : !testStats ? (
                       <div className="flex items-center justify-center py-8"><Loader2 className="h-5 w-5 animate-spin text-brand-600" /></div>
                     ) : testStats.totalViews === 0 ? (
                       <p className="text-xs text-surface-400 py-4">
