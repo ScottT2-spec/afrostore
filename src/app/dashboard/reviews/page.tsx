@@ -19,44 +19,87 @@ interface Review {
   product?: { id: string; name: string; slug: string };
 }
 
+interface Pagination {
+  page: number;
+  limit: number;
+  total: number;
+  pages: number;
+}
+
+const PAGE_SIZE = 20;
+
 export default function ReviewsPage() {
   const { currentStore } = useSite();
-  const [reviews, setReviews] = useState<Review[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [filter, setFilter] = useState<"all" | "pending" | "approved">("all");
 
-  const fetchReviews = useCallback(async () => {
+  // The header cards always reflect the store's true totals, independent of
+  // whatever filter/page the list below is currently showing.
+  const [overallTotal, setOverallTotal] = useState(0);
+  const [overallAvgRating, setOverallAvgRating] = useState(0);
+  const [pendingTotal, setPendingTotal] = useState(0);
+
+  const [reviews, setReviews] = useState<Review[]>([]);
+  const [pagination, setPagination] = useState<Pagination>({ page: 1, limit: PAGE_SIZE, total: 0, pages: 1 });
+  const [filter, setFilter] = useState<"all" | "pending" | "approved">("all");
+  const [loading, setLoading] = useState(true);
+  const [loadingMore, setLoadingMore] = useState(false);
+
+  const fetchSummary = useCallback(async () => {
     if (!currentStore) return;
-    setLoading(true);
-    const res = await api.get<any>(`/api/sites/${currentStore.id}/reviews`);
-    if (res.success && res.data) {
-      setReviews(Array.isArray(res.data) ? res.data : res.data.reviews || []);
+    const [allRes, pendingRes] = await Promise.all([
+      api.get<any>(`/api/sites/${currentStore.id}/reviews?limit=1`),
+      api.get<any>(`/api/sites/${currentStore.id}/reviews?isApproved=false&limit=1`),
+    ]);
+    if (allRes.success && allRes.data) {
+      setOverallTotal(allRes.data.stats.totalCount);
+      setOverallAvgRating(allRes.data.stats.averageRating);
     }
-    setLoading(false);
+    if (pendingRes.success && pendingRes.data) {
+      setPendingTotal(pendingRes.data.pagination.total);
+    }
   }, [currentStore]);
 
-  useEffect(() => { fetchReviews(); }, [fetchReviews]);
+  const fetchReviews = useCallback(async (targetPage: number, reset: boolean) => {
+    if (!currentStore) return;
+    if (reset) setLoading(true); else setLoadingMore(true);
+
+    const params = new URLSearchParams({ page: String(targetPage), limit: String(PAGE_SIZE) });
+    if (filter === "pending") params.set("isApproved", "false");
+    if (filter === "approved") params.set("isApproved", "true");
+
+    const res = await api.get<any>(`/api/sites/${currentStore.id}/reviews?${params.toString()}`);
+    if (res.success && res.data) {
+      setReviews((prev) => (reset ? res.data.reviews : [...prev, ...res.data.reviews]));
+      setPagination(res.data.pagination);
+    }
+    setLoading(false);
+    setLoadingMore(false);
+  }, [currentStore, filter]);
+
+  useEffect(() => { fetchReviews(1, true); }, [fetchReviews]);
+  useEffect(() => { fetchSummary(); }, [fetchSummary]);
 
   const updateReview = async (id: string, data: Partial<Review>) => {
     if (!currentStore) return;
     await api.patch(`/api/sites/${currentStore.id}/reviews/${id}`, data);
-    setReviews((prev) => prev.map((r) => r.id === id ? { ...r, ...data } : r));
+    if ((filter === "pending" && data.isApproved) || (filter === "approved" && data.isApproved === false)) {
+      // No longer matches the active filter — drop it from the visible list.
+      setReviews((prev) => prev.filter((r) => r.id !== id));
+      setPagination((p) => ({ ...p, total: Math.max(0, p.total - 1) }));
+    } else {
+      setReviews((prev) => prev.map((r) => (r.id === id ? { ...r, ...data } : r)));
+    }
+    fetchSummary();
   };
 
   const deleteReview = async (id: string) => {
     if (!currentStore || !confirm("Delete this review?")) return;
     await api.delete(`/api/sites/${currentStore.id}/reviews/${id}`);
     setReviews((prev) => prev.filter((r) => r.id !== id));
+    setPagination((p) => ({ ...p, total: Math.max(0, p.total - 1) }));
+    fetchSummary();
   };
 
-  const filtered = reviews.filter((r) => {
-    if (filter === "pending") return !r.isApproved;
-    if (filter === "approved") return r.isApproved;
-    return true;
-  });
-
-  const avgRating = reviews.length > 0 ? (reviews.reduce((s, r) => s + r.rating, 0) / reviews.length).toFixed(1) : "0";
-  const pendingCount = reviews.filter((r) => !r.isApproved).length;
+  const hasMore = reviews.length < pagination.total;
 
   return (
     <div className="p-6 space-y-6">
@@ -67,22 +110,22 @@ export default function ReviewsPage() {
         </div>
       </div>
 
-      {/* Stats */}
+      {/* Stats — always reflect the store's true totals, not just what's loaded below */}
       <div className="grid grid-cols-3 gap-4">
         <div className="rounded-2xl border border-surface-200 bg-white p-4">
           <p className="text-xs font-semibold text-surface-500 uppercase">Total Reviews</p>
-          <p className="text-2xl font-bold text-surface-900 mt-1">{reviews.length}</p>
+          <p className="text-2xl font-bold text-surface-900 mt-1">{overallTotal}</p>
         </div>
         <div className="rounded-2xl border border-surface-200 bg-white p-4">
           <p className="text-xs font-semibold text-surface-500 uppercase">Average Rating</p>
           <div className="flex items-center gap-2 mt-1">
-            <p className="text-2xl font-bold text-surface-900">{avgRating}</p>
+            <p className="text-2xl font-bold text-surface-900">{overallAvgRating ? overallAvgRating.toFixed(1) : "0.0"}</p>
             <Star className="h-5 w-5 text-accent-400 fill-accent-400" />
           </div>
         </div>
         <div className="rounded-2xl border border-surface-200 bg-white p-4">
           <p className="text-xs font-semibold text-surface-500 uppercase">Pending</p>
-          <p className="text-2xl font-bold text-surface-900 mt-1">{pendingCount}</p>
+          <p className="text-2xl font-bold text-surface-900 mt-1">{pendingTotal}</p>
         </div>
       </div>
 
@@ -95,11 +138,16 @@ export default function ReviewsPage() {
             {f === "all" ? "All" : f === "pending" ? "Pending" : "Approved"}
           </button>
         ))}
+        {!loading && pagination.total > 0 && (
+          <span className="text-xs text-surface-400 ml-1">
+            {reviews.length} of {pagination.total}
+          </span>
+        )}
       </div>
 
       {loading ? (
         <div className="flex items-center justify-center py-20"><Loader2 className="h-8 w-8 animate-spin text-brand-600" /></div>
-      ) : filtered.length === 0 ? (
+      ) : reviews.length === 0 ? (
         <div className="rounded-2xl border border-surface-200 bg-white text-center py-16 px-6">
           <div className="h-14 w-14 rounded-2xl bg-surface-50 flex items-center justify-center mx-auto mb-4">
             <MessageCircle className="h-7 w-7 text-surface-300" />
@@ -111,7 +159,7 @@ export default function ReviewsPage() {
         </div>
       ) : (
         <div className="space-y-3">
-          {filtered.map((review) => (
+          {reviews.map((review) => (
             <div key={review.id} className={`rounded-2xl border bg-white p-5 transition-colors ${review.isApproved ? "border-surface-200" : "border-accent-200 bg-accent-50/30"}`}>
               <div className="flex items-start justify-between gap-4">
                 <div className="flex-1">
@@ -164,6 +212,19 @@ export default function ReviewsPage() {
               </div>
             </div>
           ))}
+
+          {hasMore && (
+            <div className="text-center pt-2">
+              <button
+                onClick={() => fetchReviews(pagination.page + 1, false)}
+                disabled={loadingMore}
+                className="inline-flex items-center gap-2 rounded-xl border border-surface-200 bg-white px-5 py-2.5 text-sm font-semibold text-surface-700 hover:bg-surface-50 transition-colors disabled:opacity-50"
+              >
+                {loadingMore ? <Loader2 className="h-4 w-4 animate-spin" /> : null}
+                Load more ({pagination.total - reviews.length} remaining)
+              </button>
+            </div>
+          )}
         </div>
       )}
     </div>
