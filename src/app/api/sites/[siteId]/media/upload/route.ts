@@ -2,12 +2,31 @@ import { NextRequest } from "next/server";
 import { prisma } from "@/lib/db";
 import { getStoreContext, success, error, logAudit } from "@/lib/api-helpers";
 import { unauthorized } from "@/lib/auth";
-import { writeFile, mkdir } from "fs/promises";
-import { join } from "path";
-import { existsSync } from "fs";
+import { getSupabaseAdmin, STORAGE_BUCKET, getPublicUrl } from "@/lib/supabase";
+import crypto from "crypto";
+import path from "path";
 
 type Params = { params: Promise<{ siteId: string }> };
 
+const MAX_SIZE_BYTES = 8 * 1024 * 1024; // 8MB — stays under typical serverless request-body limits
+const ALLOWED_MIME_PREFIXES = ["image/", "video/", "audio/", "application/pdf"];
+
+function detectType(mimeType: string): "IMAGE" | "VIDEO" | "AUDIO" | "DOCUMENT" {
+  if (mimeType.startsWith("image/")) return "IMAGE";
+  if (mimeType.startsWith("video/")) return "VIDEO";
+  if (mimeType.startsWith("audio/")) return "AUDIO";
+  return "DOCUMENT";
+}
+
+function generateFileName(siteId: string, originalName: string): string {
+  const ext = path.extname(originalName).toLowerCase() || "";
+  const hash = crypto.randomBytes(10).toString("hex");
+  return `${siteId}/${Date.now()}-${hash}${ext}`;
+}
+
+// POST /api/sites/:siteId/media/upload — real file upload, backed by Supabase
+// Storage (previously wrote to the local filesystem, which does not persist
+// or serve files on Vercel's ephemeral/read-only serverless filesystem).
 export async function POST(req: NextRequest, { params }: Params) {
   const { siteId } = await params;
   const ctx = await getStoreContext(req, siteId);
@@ -15,67 +34,47 @@ export async function POST(req: NextRequest, { params }: Params) {
 
   try {
     const formData = await req.formData();
-    const file = formData.get("file") as File;
-    const name = formData.get("name") as string;
-    const folder = formData.get("folder") as string || "/";
+    const file = formData.get("file") as File | null;
+    const name = (formData.get("name") as string) || file?.name || "Untitled";
+    const folder = (formData.get("folder") as string) || "/";
 
-    if (!file) {
-      return error("No file provided", 400);
+    if (!file) return error("No file provided", 400);
+    if (file.size > MAX_SIZE_BYTES) {
+      return error(`File too large (${(file.size / 1024 / 1024).toFixed(1)}MB). Max ${MAX_SIZE_BYTES / 1024 / 1024}MB.`, 400);
+    }
+    if (!ALLOWED_MIME_PREFIXES.some((p) => file.type.startsWith(p))) {
+      return error(`Unsupported file type: ${file.type || "unknown"}`, 400);
     }
 
-    // Create uploads directory if it doesn't exist
-    const uploadsDir = join(process.cwd(), "public", "uploads", siteId);
-    if (!existsSync(uploadsDir)) {
-      await mkdir(uploadsDir, { recursive: true });
+    const objectPath = generateFileName(siteId, file.name);
+    const buffer = Buffer.from(await file.arrayBuffer());
+
+    let supabase;
+    try {
+      supabase = getSupabaseAdmin();
+    } catch {
+      return error("File storage is not configured on this platform (missing Supabase credentials). Contact support.", 503);
     }
 
-    // Generate unique filename
-    const timestamp = Date.now();
-    const extension = file.name.split(".").pop();
-    const filename = `${timestamp}-${file.name.replace(/\.[^/.]+$/, "")}.${extension}`;
-    const filepath = join(uploadsDir, filename);
+    const { error: uploadError } = await supabase.storage
+      .from(STORAGE_BUCKET)
+      .upload(objectPath, buffer, { contentType: file.type, cacheControl: "31536000", upsert: false });
 
-    // Save file to disk
-    const bytes = await file.arrayBuffer();
-    const buffer = Buffer.from(bytes);
-    await writeFile(filepath, buffer);
-
-    // Get image dimensions if it's an image
-    let width: number | undefined;
-    let height: number | undefined;
-    if (file.type.startsWith("image/")) {
-      // For now, we'll need to use a library like sharp to get dimensions
-      // This is a placeholder - you'd need to install sharp and use it
-      // const metadata = await sharp(buffer).metadata();
-      // width = metadata.width;
-      // height = metadata.height;
+    if (uploadError) {
+      console.error("Supabase media upload error:", uploadError);
+      return error(`Upload failed: ${uploadError.message}`, 500);
     }
 
-    // Create media item record
+    const url = getPublicUrl(objectPath);
+    const type = detectType(file.type);
+
     const mediaItem = await prisma.mediaItem.create({
-      data: {
-        siteId,
-        name: name || file.name,
-        url: `/uploads/${siteId}/${filename}`,
-        type: file.type.startsWith("image/") ? "IMAGE" : "DOCUMENT",
-        mimeType: file.type,
-        size: file.size,
-        width,
-        height,
-        folder,
-      },
+      data: { siteId, name, url, type, mimeType: file.type, size: file.size, folder },
     });
 
-    await logAudit({
-      siteId,
-      userId: ctx.user!.id,
-      action: "CREATE",
-      entity: "media_item",
-      entityId: mediaItem.id,
-      after: mediaItem,
-    });
+    await logAudit({ siteId, userId: ctx.user!.id, action: "CREATE", entity: "media_item", entityId: mediaItem.id, after: mediaItem });
 
-    return success({ ...mediaItem, url: mediaItem.url }, 201);
+    return success(mediaItem, 201);
   } catch (err) {
     console.error("Upload media error:", err);
     return error("Internal server error", 500);

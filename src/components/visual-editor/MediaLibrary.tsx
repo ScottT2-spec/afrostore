@@ -99,25 +99,16 @@ export default function MediaLibrary({
         formData.append("folder", selectedFolder);
         formData.append("type", file.type.startsWith("image/") ? "IMAGE" : "DOCUMENT");
 
-        // Upload to your storage service (you'll need to implement this endpoint)
+        // Upload to Supabase Storage — this also creates the MediaItem DB
+        // record server-side, so no follow-up POST is needed here.
         const uploadRes = await fetch(`/api/sites/${siteId}/media/upload`, {
           method: "POST",
           body: formData,
         });
 
-        if (uploadRes.ok) {
-          const uploaded = await uploadRes.json();
-          if (uploaded.success) {
-            // Create media item record
-            await api.post(`/api/sites/${siteId}/media`, {
-              name: file.name,
-              url: uploaded.url,
-              type: file.type.startsWith("image/") ? "IMAGE" : "DOCUMENT",
-              mimeType: file.type,
-              size: file.size,
-              folder: selectedFolder,
-            });
-          }
+        if (!uploadRes.ok) {
+          const errJson = await uploadRes.json().catch(() => ({}));
+          console.error("Media upload failed:", errJson.error || uploadRes.statusText);
         }
       } catch (err) {
         console.error("Error uploading file:", err);
