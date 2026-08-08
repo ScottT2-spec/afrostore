@@ -7,6 +7,7 @@ import { sendOrderConfirmationEmail } from "@/lib/email";
 import { getBestActiveFlashSales, applyDiscount } from "@/lib/flash-sales";
 import { runAutomationsForTrigger } from "@/lib/automations";
 import { validateRedemption } from "@/lib/loyalty";
+import { createSiteNotification } from "@/lib/notifications";
 
 
 type Params = { params: Promise<{ siteId: string }> };
@@ -217,8 +218,10 @@ export async function POST(req: NextRequest, { params }: Params) {
 
     // Create order (with retry on unlikely order number collision)
     let attempts = 0;
+    const lowStockHits: Array<{ id: string; name: string; stock: number; lowStockAlert: number }> = [];
     const createOrder = async (): Promise<any> => {
       attempts++;
+      lowStockHits.length = 0; // reset in case of retry, so we don't double-report
       try {
         return await prisma.$transaction(async (tx) => {
       const ord = await tx.order.create({
@@ -255,10 +258,17 @@ export async function POST(req: NextRequest, { params }: Params) {
       for (const item of items) {
         const product = productMap.get(item.productId)!;
         if (product.trackInventory) {
-          await tx.product.update({
+          const updated = await tx.product.update({
             where: { id: item.productId },
             data: { stock: { decrement: item.quantity } },
+            select: { id: true, name: true, stock: true, lowStockAlert: true },
           });
+          // Only flag when this order tipped stock at/under the threshold —
+          // avoids re-notifying on every subsequent order once already low.
+          const stockBefore = updated.stock + item.quantity;
+          if (updated.stock <= updated.lowStockAlert && stockBefore > updated.lowStockAlert) {
+            lowStockHits.push(updated);
+          }
         }
       }
 
@@ -321,6 +331,26 @@ export async function POST(req: NextRequest, { params }: Params) {
       paymentMethod,
       deliveryAddress: deliveryAddress as { address?: string; city?: string; state?: string },
     }).catch((err) => console.error("Order confirmation email error:", err));
+
+    // Notify the merchant dashboard of the new order (fire-and-forget)
+    createSiteNotification({
+      siteId,
+      type: "ORDER",
+      title: `New order ${order.orderNumber}`,
+      message: `${firstName} ${lastName} placed an order for ${site.currency} ${finalTotal.toFixed(2)}.`,
+      data: { orderId: order.id, orderNumber: order.orderNumber, total: finalTotal, currency: site.currency },
+    });
+
+    // Notify on any product that just crossed its low-stock threshold
+    for (const p of lowStockHits) {
+      createSiteNotification({
+        siteId,
+        type: "LOW_STOCK",
+        title: `Low stock: ${p.name}`,
+        message: `Only ${p.stock} left in stock (threshold: ${p.lowStockAlert}).`,
+        data: { productId: p.id, stock: p.stock, lowStockAlert: p.lowStockAlert },
+      });
+    }
 
     // Fire "new_order" automations (fire-and-forget — never block checkout)
     runAutomationsForTrigger(siteId, "new_order", {

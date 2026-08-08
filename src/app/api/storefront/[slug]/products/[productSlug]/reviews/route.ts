@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/db";
 import { z } from "zod";
+import { createSiteNotification } from "@/lib/notifications";
 
 type Params = { params: Promise<{ slug: string; productSlug: string }> };
 
@@ -31,11 +32,11 @@ async function resolveStoreAndProduct(slug: string, productSlug: string) {
 
   const product = await prisma.product.findFirst({
     where: { siteId: site.id, slug: productSlug, status: "ACTIVE" },
-    select: { id: true },
+    select: { id: true, name: true },
   });
   if (!product) return null;
 
-  return { siteId: site.id, productId: product.id };
+  return { siteId: site.id, productId: product.id, productName: product.name };
 }
 
 // ── GET: paginated approved reviews + stats ──
@@ -207,6 +208,15 @@ export async function POST(req: NextRequest, { params }: Params) {
         isApproved: true,
         createdAt: true,
       },
+    });
+
+    // Notify the merchant dashboard (fire-and-forget)
+    createSiteNotification({
+      siteId: resolved.siteId,
+      type: "REVIEW",
+      title: `New review on ${resolved.productName}`,
+      message: `${review.rating}★ from ${review.name}${review.title ? ` — "${review.title}"` : ""}`,
+      data: { reviewId: review.id, productId: resolved.productId, rating: review.rating },
     });
 
     return json({ success: true, data: review }, 201);

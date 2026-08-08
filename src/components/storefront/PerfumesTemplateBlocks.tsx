@@ -1841,8 +1841,11 @@ export interface PerfumesContactFormProps {
   isEditor?: boolean;
 }
 export function PerfumesContactForm({ title = "Get In Touch", description = "", blockId, isEditor = false }: PerfumesContactFormProps) {
+  const storeCtx = useContext(PerfumesStoreContext);
   const [form, setForm] = useState({ firstName: "", lastName: "", email: "", message: "" });
   const [submitted, setSubmitted] = useState(false);
+  const [sending, setSending] = useState(false);
+  const [error, setError] = useState("");
   const css = `
     .pc-form-section { max-width: ${TOKENS.containerWidth}; margin: 0 auto; padding: 0 15px 80px; display: grid; grid-template-columns: 1fr 1fr; gap: 60px; align-items: flex-start; }
     .pc-form-title { font-family: ${TOKENS.titleFont}; font-size: 36px; font-weight: 400; color: ${TOKENS.primaryColor}; margin: 0 0 10px; }
@@ -1856,9 +1859,37 @@ export function PerfumesContactForm({ title = "Get In Touch", description = "", 
     .pc-submit { padding: 14px 40px; background: ${TOKENS.primaryColor}; color: #fff; border: none; font-family: ${TOKENS.bodyFont}; font-size: 13px; font-weight: 500; text-transform: uppercase; letter-spacing: 1.5px; cursor: pointer; transition: background 0.2s; align-self: flex-start; }
     .pc-submit:hover { background: ${TOKENS.accentColor}; }
     .pc-success { font-family: ${TOKENS.bodyFont}; font-size: 15px; color: #16a34a; font-weight: 500; }
+    .pc-error { font-family: ${TOKENS.bodyFont}; font-size: 13px; color: #dc2626; margin: -4px 0 0; }
+    .pc-submit:disabled { opacity: 0.6; cursor: not-allowed; }
     @media (max-width: 1024px) { .pc-form-section { grid-template-columns: 1fr; } }
     @media (max-width: 767px) { .pc-form-row { grid-template-columns: 1fr; } }
   `;
+  const submit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (isEditor || !storeCtx?.storeSlug) { setSubmitted(true); return; } // preview/editor fallback
+    setSending(true);
+    setError("");
+    try {
+      const res = await fetch(`/api/storefront/${storeCtx.storeSlug}/contact`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          name: `${form.firstName} ${form.lastName}`.trim(),
+          email: form.email,
+          message: form.message,
+        }),
+      });
+      const json = await res.json();
+      if (json.success) {
+        setSubmitted(true);
+      } else {
+        setError(json.error || "Failed to send. Please try again.");
+      }
+    } catch {
+      setError("Network error. Please try again.");
+    }
+    setSending(false);
+  };
   return (
     <div>
       <ScopedStyles id="contact-form" css={css} />
@@ -1871,14 +1902,15 @@ export function PerfumesContactForm({ title = "Get In Touch", description = "", 
           {submitted ? (
             <p className="pc-success">Thank you for your message! We&apos;ll get back to you soon.</p>
           ) : (
-            <form className="pc-form" onSubmit={e => { e.preventDefault(); setSubmitted(true); }}>
+            <form className="pc-form" onSubmit={submit}>
               <div className="pc-form-row">
                 <input className="pc-input" placeholder="First name" value={form.firstName} onChange={e => setForm({ ...form, firstName: e.target.value })} required />
                 <input className="pc-input" placeholder="Last name" value={form.lastName} onChange={e => setForm({ ...form, lastName: e.target.value })} required />
               </div>
               <input className="pc-input" type="email" placeholder="Email" value={form.email} onChange={e => setForm({ ...form, email: e.target.value })} required />
               <textarea className="pc-textarea" placeholder="Your Message" value={form.message} onChange={e => setForm({ ...form, message: e.target.value })} required />
-              <button type="submit" className="pc-submit">Send Message</button>
+              {error && <p className="pc-error">{error}</p>}
+              <button type="submit" className="pc-submit" disabled={sending}>{sending ? "Sending..." : "Send Message"}</button>
             </form>
           )}
         </div>

@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/db";
 import { upsertLeadContact } from "@/lib/crm";
+import { createSiteNotification } from "@/lib/notifications";
 
 type Params = { params: Promise<{ slug: string }> };
 
@@ -67,6 +68,15 @@ export async function POST(req: NextRequest, { params }: Params) {
         subject: subject ? subject.slice(0, 500) : null,
         message: message.slice(0, 5000),
       },
+    });
+
+    // Notify the merchant dashboard (fire-and-forget)
+    createSiteNotification({
+      siteId: site.id,
+      type: "MESSAGE",
+      title: `New message from ${contactMessage.name}`,
+      message: subject ? `${subject}: ${message.slice(0, 140)}` : message.slice(0, 140),
+      data: { contactMessageId: contactMessage.id, email: contactMessage.email },
     });
 
     // Every contact-form submission is a lead worth tracking — feed it into

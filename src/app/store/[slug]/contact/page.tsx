@@ -10,7 +10,7 @@ import { serializeProductsForClient } from "@/lib/serialize-products";
 import { RETAIL_CONTACT_BLOCKS } from "@/lib/templates/presets/retail-pages";
 import { VegetableContactPage } from "@/components/storefront/VegetableTemplatePages";
 import { VegetableFooter, VegetableHeader } from "@/components/storefront/VegetableStoreChrome";
-import { KidsFontLoader, KidsFooterFull, KidsHeader } from "@/components/storefront/KidsTemplateBlocks";
+import { KidsFontLoader, KidsFooterFull, KidsHeader, KidsContactForm } from "@/components/storefront/KidsTemplateBlocks";
 import PerfumesContactPage from "./perfumes-contact";
 import { HealthHeader, HealthFooterFull, HealthFontLoader } from "@/components/storefront/HealthTemplateBlocks";
 import { CosmeticsFontLoader, CosmeticsHeader, CosmeticsFooter } from "@/components/storefront/CosmeticsTemplateBlocks";
@@ -343,17 +343,7 @@ export default async function ContactPage({ params }: Props) {
                       <p className="text-xs font-bold uppercase tracking-[0.35em] text-[#f5857c]">Get in touch</p>
                       <h2 className="mt-2 font-serif text-3xl text-[#3b3344]">Get in touch</h2>
                     </div>
-                    <form className="grid gap-4">
-                      <div className="grid gap-4 sm:grid-cols-2">
-                        <input className="rounded-2xl border border-[#ece4da] bg-[#fffdf8] px-4 py-3 text-sm outline-none transition focus:border-[#f5857c]" placeholder="Your name" />
-                        <input className="rounded-2xl border border-[#ece4da] bg-[#fffdf8] px-4 py-3 text-sm outline-none transition focus:border-[#f5857c]" placeholder="Email address" />
-                      </div>
-                      <input className="rounded-2xl border border-[#ece4da] bg-[#fffdf8] px-4 py-3 text-sm outline-none transition focus:border-[#f5857c]" placeholder="Subject" />
-                      <textarea className="min-h-[160px] rounded-[24px] border border-[#ece4da] bg-[#fffdf8] px-4 py-3 text-sm outline-none transition focus:border-[#f5857c]" placeholder="How can we help?" />
-                      <button type="button" className="inline-flex items-center justify-center rounded-full bg-[#f5857c] px-6 py-3 text-sm font-semibold text-white transition hover:bg-[#ef7067]">
-                        Send message
-                      </button>
-                    </form>
+                    <KidsContactForm storeSlug={slug} />
                   </div>
                 </div>
               </section>
