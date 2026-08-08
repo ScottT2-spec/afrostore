@@ -13,6 +13,10 @@ interface FunnelStep {
   position: number;
   conversionCount: number;
   viewCount: number;
+  pageId?: string | null;
+  formId?: string | null;
+  page?: { id: string; title: string } | null;
+  form?: { id: string; name: string } | null;
 }
 
 interface FunnelItem {
@@ -77,6 +81,14 @@ export default function FunnelsPage() {
   const [newStepType, setNewStepType] = useState("LANDING");
   const [newStepFormId, setNewStepFormId] = useState("");
   const [newStepPageId, setNewStepPageId] = useState("");
+
+  // Editing an existing step (link/relink a page or form, rename, change type)
+  const [editingStep, setEditingStep] = useState<{ funnelId: string; stepId: string } | null>(null);
+  const [editStepName, setEditStepName] = useState("");
+  const [editStepType, setEditStepType] = useState("LANDING");
+  const [editStepFormId, setEditStepFormId] = useState("");
+  const [editStepPageId, setEditStepPageId] = useState("");
+  const [savingStep, setSavingStep] = useState(false);
 
   // Destinations available to link a step to — fetched once, used by the step-add picker
   const [availableForms, setAvailableForms] = useState<{ id: string; name: string }[]>([]);
@@ -188,6 +200,36 @@ export default function FunnelsPage() {
     } else {
       setStepError(res.error || "Failed to add step. Please try again.");
     }
+  };
+
+  const openEditStep = (funnelId: string, step: FunnelStep) => {
+    setEditingStep({ funnelId, stepId: step.id });
+    setEditStepName(step.name);
+    setEditStepType(step.type);
+    setEditStepFormId(step.formId || "");
+    setEditStepPageId(step.pageId || "");
+    setStepError(null);
+  };
+
+  const saveStepEdit = async () => {
+    if (!currentStore || !editingStep || !editStepName.trim()) return;
+    setSavingStep(true);
+    const res = await api.patch(`/api/sites/${currentStore.id}/funnels/${editingStep.funnelId}/steps/${editingStep.stepId}`, {
+      name: editStepName.trim(),
+      type: editStepType,
+      formId: editStepType === "LEAD_FORM" ? (editStepFormId || null) : undefined,
+      pageId: editStepType === "LANDING" ? (editStepPageId || null) : undefined,
+    });
+    if (res.success) {
+      const updated = await api.get<FunnelItem>(`/api/sites/${currentStore.id}/funnels/${editingStep.funnelId}`);
+      if (updated.success && updated.data) {
+        setFunnels((prev) => prev.map((f) => (f.id === editingStep.funnelId ? { ...f, steps: (updated.data as FunnelItem).steps } : f)));
+      }
+      setEditingStep(null);
+    } else {
+      setStepError(res.error || "Failed to update step. Please try again.");
+    }
+    setSavingStep(false);
   };
 
   const deleteStep = async (funnelId: string, stepId: string) => {
@@ -332,28 +374,79 @@ export default function FunnelsPage() {
                     <div className="flex flex-col items-center gap-1">
                       {funnel.steps.map((step, idx) => {
                         const rate = step.viewCount > 0 ? Math.round((step.conversionCount / step.viewCount) * 100) : 0;
+                        const isEditingThisStep = editingStep?.funnelId === funnel.id && editingStep?.stepId === step.id;
+                        const linkedLabel = step.type === "LANDING" ? step.page?.title : step.type === "LEAD_FORM" ? step.form?.name : null;
                         return (
                           <div key={step.id} className="w-full max-w-lg">
-                            <div className="flex items-center gap-3 rounded-xl border border-surface-200 bg-white p-4 group/step">
-                              <div className="text-xs font-bold text-surface-300 w-6 text-center">{idx + 1}</div>
-                              <div className={`text-[10px] font-semibold px-2 py-0.5 rounded-full ${stepTypeColors[step.type] || "bg-surface-100 text-surface-600"}`}>
-                                {stepTypeLabels[step.type] || step.type}
+                            {isEditingThisStep ? (
+                              <div className="flex flex-col gap-2 rounded-xl border border-brand-200 bg-white p-4">
+                                {stepError && (
+                                  <p className="text-sm text-accent-600 bg-accent-50 border border-accent-100 rounded-lg px-3 py-2">{stepError}</p>
+                                )}
+                                <div className="flex items-center gap-2">
+                                  <input value={editStepName} onChange={(e) => setEditStepName(e.target.value)} placeholder="Step name..." className="input-field py-2 text-sm flex-1" autoFocus />
+                                  <select
+                                    value={editStepType}
+                                    onChange={(e) => { setEditStepType(e.target.value); setEditStepFormId(""); setEditStepPageId(""); }}
+                                    className="input-field py-2 text-sm w-36"
+                                  >
+                                    {Object.entries(stepTypeLabels).map(([k, v]) => <option key={k} value={k}>{v}</option>)}
+                                  </select>
+                                </div>
+                                {editStepType === "LEAD_FORM" && (
+                                  <select value={editStepFormId} onChange={(e) => setEditStepFormId(e.target.value)} className="input-field py-2 text-sm w-full">
+                                    <option value="">No form linked</option>
+                                    {availableForms.map((f) => <option key={f.id} value={f.id}>{f.name}</option>)}
+                                  </select>
+                                )}
+                                {editStepType === "LANDING" && (
+                                  <select value={editStepPageId} onChange={(e) => setEditStepPageId(e.target.value)} className="input-field py-2 text-sm w-full">
+                                    <option value="">No page linked</option>
+                                    {availablePages.map((p) => <option key={p.id} value={p.id}>{p.title}</option>)}
+                                  </select>
+                                )}
+                                <div className="flex items-center gap-2">
+                                  <button onClick={saveStepEdit} disabled={savingStep || !editStepName.trim()} className="btn-primary text-xs py-2 px-3">
+                                    {savingStep ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : "Save"}
+                                  </button>
+                                  <button onClick={() => { setEditingStep(null); setStepError(null); }} className="btn-secondary text-xs py-2 px-3">Cancel</button>
+                                </div>
                               </div>
-                              <div className="flex-1 min-w-0">
-                                <span className="text-sm font-medium text-surface-900">{step.name}</span>
+                            ) : (
+                              <div className="flex items-center gap-3 rounded-xl border border-surface-200 bg-white p-4">
+                                <div className="text-xs font-bold text-surface-300 w-6 text-center">{idx + 1}</div>
+                                <div className={`text-[10px] font-semibold px-2 py-0.5 rounded-full ${stepTypeColors[step.type] || "bg-surface-100 text-surface-600"}`}>
+                                  {stepTypeLabels[step.type] || step.type}
+                                </div>
+                                <div className="flex-1 min-w-0">
+                                  <div className="text-sm font-medium text-surface-900">{step.name}</div>
+                                  {(step.type === "LANDING" || step.type === "LEAD_FORM") && (
+                                    <div className={`text-[11px] ${linkedLabel ? "text-surface-400" : "text-amber-600"}`}>
+                                      {linkedLabel ? `Linked: ${linkedLabel}` : "Not linked yet"}
+                                    </div>
+                                  )}
+                                </div>
+                                <div className="flex items-center gap-3 text-xs text-surface-400">
+                                  <span>{step.viewCount} views</span>
+                                  <span>{step.conversionCount} conv.</span>
+                                  {step.viewCount > 0 && <span className="font-semibold text-surface-700">{rate}%</span>}
+                                </div>
+                                <button
+                                  onClick={() => openEditStep(funnel.id, step)}
+                                  className="p-1.5 rounded hover:bg-surface-100 text-surface-400 hover:text-surface-700"
+                                  title="Edit step"
+                                >
+                                  <Pencil className="h-3.5 w-3.5" />
+                                </button>
+                                <button
+                                  onClick={() => deleteStep(funnel.id, step.id)}
+                                  className="p-1.5 rounded hover:bg-accent-50 text-surface-400 hover:text-accent-600"
+                                  title="Delete step"
+                                >
+                                  <Trash2 className="h-3.5 w-3.5" />
+                                </button>
                               </div>
-                              <div className="flex items-center gap-3 text-xs text-surface-400">
-                                <span>{step.viewCount} views</span>
-                                <span>{step.conversionCount} conv.</span>
-                                {step.viewCount > 0 && <span className="font-semibold text-surface-700">{rate}%</span>}
-                              </div>
-                              <button
-                                onClick={() => deleteStep(funnel.id, step.id)}
-                                className="p-1 rounded hover:bg-accent-50 text-surface-300 hover:text-accent-600 opacity-0 group-hover/step:opacity-100 transition-all"
-                              >
-                                <Trash2 className="h-3.5 w-3.5" />
-                              </button>
-                            </div>
+                            )}
                             {idx < funnel.steps.length - 1 && (
                               <div className="flex justify-center py-1">
                                 <ArrowDown className="h-4 w-4 text-surface-300" />
