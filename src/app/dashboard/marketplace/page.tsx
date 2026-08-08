@@ -15,6 +15,7 @@ interface MarketplaceItem {
 
 const typeIcons: Record<string, typeof Store> = { THEME: Palette, PLUGIN: Puzzle, TEMPLATE: FileText, FUNNEL: Filter, AUTOMATION: Zap };
 const typeColors: Record<string, string> = { THEME: "bg-blue-50 text-blue-600", PLUGIN: "bg-green-50 text-green-600", TEMPLATE: "bg-purple-50 text-purple-600", FUNNEL: "bg-amber-50 text-amber-600", AUTOMATION: "bg-red-50 text-red-600" };
+const statusColors: Record<string, string> = { PENDING: "bg-amber-50 text-amber-700", APPROVED: "bg-green-50 text-green-700", REJECTED: "bg-red-50 text-red-700", SUSPENDED: "bg-surface-100 text-surface-500" };
 
 export default function MarketplacePage() {
   const { currentStore } = useSite();
@@ -22,8 +23,10 @@ export default function MarketplacePage() {
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState("");
   const [typeFilter, setTypeFilter] = useState("");
+  const [tab, setTab] = useState<"browse" | "mine">("browse");
   const [showPublish, setShowPublish] = useState(false);
   const [saving, setSaving] = useState(false);
+  const [deleteId, setDeleteId] = useState<string | null>(null);
 
   const [pubName, setPubName] = useState("");
   const [pubType, setPubType] = useState("THEME");
@@ -37,21 +40,36 @@ export default function MarketplacePage() {
     const params = new URLSearchParams();
     if (search) params.set("search", search);
     if (typeFilter) params.set("type", typeFilter);
+    if (tab === "mine") params.set("mine", "true");
     const res = await api.get<{ items: MarketplaceItem[] }>(`/api/sites/${currentStore.id}/marketplace?${params}`);
     if (res.success && res.data) setItems(res.data.items || []);
     setLoading(false);
-  }, [currentStore, search, typeFilter]);
+  }, [currentStore, search, typeFilter, tab]);
 
   useEffect(() => { fetchItems(); }, [fetchItems]);
 
   const publishItem = async () => {
     if (!currentStore || !pubName.trim()) return;
     setSaving(true);
-    await api.post(`/api/sites/${currentStore.id}/marketplace`, {
+    const res = await api.post(`/api/sites/${currentStore.id}/marketplace`, {
       name: pubName.trim(), type: pubType, description: pubDescription.trim() || undefined,
       price: parseFloat(pubPrice) || 0, category: pubCategory.trim() || undefined,
     });
-    setShowPublish(false); setPubName(""); setPubDescription(""); setPubPrice("0"); setPubCategory(""); setSaving(false); fetchItems();
+    setSaving(false);
+    if (!res.success) { alert(res.error || "Failed to submit"); return; }
+    setShowPublish(false); setPubName(""); setPubDescription(""); setPubPrice("0"); setPubCategory("");
+    alert("Submitted for review. It won't appear in the public marketplace until it's approved — check the \"My submissions\" tab for its status.");
+    setTab("mine");
+    fetchItems();
+  };
+
+  const deleteItem = async (id: string) => {
+    if (!currentStore || !confirm("Delete this submission?")) return;
+    setDeleteId(id);
+    const res = await api.delete(`/api/sites/${currentStore.id}/marketplace/${id}`);
+    setDeleteId(null);
+    if (!res.success) { alert(res.error || "Failed to delete"); return; }
+    setItems((p) => p.filter((i) => i.id !== id));
   };
 
   if (!currentStore) return <div className="p-6 flex items-center justify-center min-h-[50vh]"><Loader2 className="h-8 w-8 animate-spin text-brand-600" /></div>;
@@ -61,6 +79,11 @@ export default function MarketplacePage() {
       <div className="flex items-center justify-between">
         <div><h1 className="text-2xl font-bold text-surface-900 font-display">Marketplace</h1><p className="text-sm text-surface-500 mt-1">Browse and publish themes, plugins, templates, and more</p></div>
         <button onClick={() => setShowPublish(true)} className="btn-primary text-sm py-2.5 px-4"><Plus className="h-4 w-4" /> Publish</button>
+      </div>
+
+      <div className="flex items-center gap-2 border-b border-surface-200">
+        <button onClick={() => setTab("browse")} className={`text-sm font-medium px-3 py-2 border-b-2 -mb-px transition-colors ${tab === "browse" ? "border-brand-600 text-brand-700" : "border-transparent text-surface-500"}`}>Browse</button>
+        <button onClick={() => setTab("mine")} className={`text-sm font-medium px-3 py-2 border-b-2 -mb-px transition-colors ${tab === "mine" ? "border-brand-600 text-brand-700" : "border-transparent text-surface-500"}`}>My Submissions</button>
       </div>
 
       {/* Filters */}
@@ -103,8 +126,8 @@ export default function MarketplacePage() {
       : items.length === 0 ? (
         <div className="rounded-2xl border border-surface-200 bg-white text-center py-16 px-6">
           <div className="h-14 w-14 rounded-2xl bg-surface-50 flex items-center justify-center mx-auto mb-4"><Store className="h-7 w-7 text-surface-300" /></div>
-          <h3 className="text-base font-bold text-surface-900 mb-1">No marketplace items{typeFilter ? ` of type "${typeFilter}"` : ""}</h3>
-          <p className="text-sm text-surface-500 mb-5">Publish your first theme, plugin, or template.</p>
+          <h3 className="text-base font-bold text-surface-900 mb-1">{tab === "mine" ? "You haven't submitted anything yet" : `No marketplace items${typeFilter ? ` of type "${typeFilter}"` : ""}`}</h3>
+          <p className="text-sm text-surface-500 mb-5">{tab === "mine" ? "Publish a theme, plugin, or template to see it here." : "Publish your first theme, plugin, or template."}</p>
         </div>
       ) : (
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
@@ -117,8 +140,9 @@ export default function MarketplacePage() {
                   {item.thumbnail ? <img src={item.thumbnail} alt="" className="w-full h-full object-cover" /> : <Icon className="h-12 w-12 text-surface-200" />}
                 </div>
                 <div className="p-4">
-                  <div className="flex items-center gap-2 mb-1">
+                  <div className="flex items-center gap-2 mb-1 flex-wrap">
                     <span className={`text-[10px] font-semibold px-2 py-0.5 rounded-full ${color}`}>{item.type}</span>
+                    {tab === "mine" && <span className={`text-[10px] font-semibold px-2 py-0.5 rounded-full ${statusColors[item.status] || "bg-surface-100 text-surface-500"}`}>{item.status}</span>}
                     {parseFloat(item.price) === 0 && <span className="text-[10px] font-semibold px-2 py-0.5 rounded-full bg-green-50 text-green-700">Free</span>}
                   </div>
                   <h3 className="text-sm font-bold text-surface-900 truncate">{item.name}</h3>
@@ -130,6 +154,15 @@ export default function MarketplacePage() {
                     </div>
                     {parseFloat(item.price) > 0 && <span className="text-sm font-bold text-brand-600">₦{parseFloat(item.price).toLocaleString()}</span>}
                   </div>
+                  {tab === "mine" && (
+                    <button
+                      onClick={() => deleteItem(item.id)}
+                      disabled={deleteId === item.id}
+                      className="mt-3 w-full flex items-center justify-center gap-1.5 rounded-lg border border-surface-200 text-surface-500 hover:text-accent-600 hover:border-accent-200 px-3 py-1.5 text-xs font-medium transition-colors"
+                    >
+                      {deleteId === item.id ? <Loader2 className="h-3 w-3 animate-spin" /> : <><Trash2 className="h-3 w-3" /> Delete</>}
+                    </button>
+                  )}
                 </div>
               </div>
             );

@@ -16,17 +16,18 @@ export async function GET(req: NextRequest, { params }: Params) {
   const type = url.searchParams.get("type");
   const category = url.searchParams.get("category");
   const search = url.searchParams.get("search");
+  const mine = url.searchParams.get("mine") === "true";
   const page = parseInt(url.searchParams.get("page") || "1");
   const limit = Math.min(parseInt(url.searchParams.get("limit") || "20"), 100);
 
-  const where: Record<string, unknown> = { status: "APPROVED" };
+  const where: Record<string, unknown> = mine ? { authorId: ctx.user!.id } : { status: "APPROVED" };
   if (type) where.type = type;
   if (category) where.category = category;
   if (search) where.name = { contains: search, mode: "insensitive" };
 
   const [items, total] = await Promise.all([
     prisma.marketplaceItem.findMany({
-      where: where as any, orderBy: { downloads: "desc" },
+      where: where as any, orderBy: mine ? { createdAt: "desc" } : { downloads: "desc" },
       skip: (page - 1) * limit, take: limit,
       include: { theme: { select: { id: true, name: true, slug: true, thumbnail: true } }, plugin: { select: { id: true, name: true, slug: true, icon: true } } },
     }),
