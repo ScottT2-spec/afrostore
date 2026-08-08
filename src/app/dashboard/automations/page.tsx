@@ -37,6 +37,52 @@ const actionIcons: Record<string, typeof Zap> = {
   ai_response: Bot, webhook: Globe, delay: Timer,
 };
 
+// Actions with a working backend today. The rest render a "coming soon"
+// notice instead of fields, so the editor doesn't imply they'll do
+// something they can't yet.
+const IMPLEMENTED_ACTIONS = new Set(["send_email", "send_sms", "send_whatsapp", "add_crm_tag", "webhook", "create_task"]);
+
+type FieldDef = { key: string; label: string; type: "text" | "textarea" | "url"; placeholder?: string; helper?: string; required?: boolean };
+
+const actionFields: Record<string, FieldDef[]> = {
+  send_email: [
+    { key: "to", label: "Send to", type: "text", placeholder: "Leave blank to email the customer", helper: "Defaults to the customer's email from the order/lead." },
+    { key: "subject", label: "Subject", type: "text", placeholder: "e.g. Thanks for your order, {{firstName}}!" },
+    { key: "body", label: "Message", type: "textarea", placeholder: "Write the email body here…" },
+  ],
+  send_sms: [
+    { key: "to", label: "Send to", type: "text", placeholder: "Leave blank to text the customer", helper: "Defaults to the customer's phone number." },
+    { key: "message", label: "Message", type: "textarea", placeholder: "Keep it short — SMS has a character limit." },
+  ],
+  send_whatsapp: [
+    { key: "to", label: "Send to", type: "text", placeholder: "Leave blank to message the customer", helper: "Defaults to the customer's phone number." },
+    { key: "message", label: "Message", type: "textarea", placeholder: "Write your WhatsApp message here…" },
+    { key: "mediaUrl", label: "Attach image/media URL (optional)", type: "url", placeholder: "https://…" },
+  ],
+  add_crm_tag: [
+    { key: "tag", label: "Tag to add", type: "text", placeholder: "e.g. vip-customer", required: true },
+  ],
+  create_task: [
+    { key: "title", label: "Task title", type: "text", placeholder: "e.g. Follow up with new lead" },
+  ],
+  webhook: [
+    { key: "url", label: "Webhook URL", type: "url", placeholder: "https://your-service.com/webhook", required: true, helper: "We'll POST the trigger data as JSON to this URL." },
+  ],
+};
+
+// Merge fields available to interpolate into text fields, per trigger type
+// (matches the `data` shape each trigger passes into the engine).
+const triggerVariables: Record<string, string[]> = {
+  new_order: ["orderNumber", "email", "phone", "total", "currency"],
+  payment_success: ["orderId", "email", "phone", "total", "currency", "method"],
+  new_lead: ["email", "phone", "source"],
+  form_submission: ["email", "phone", "source"],
+  abandoned_cart: ["email", "phone", "total"],
+  product_purchase: ["orderNumber", "email", "total"],
+  visitor_activity: ["email"],
+  schedule: [],
+};
+
 export default function AutomationsPage() {
   const { currentStore } = useSite();
   const [automations, setAutomations] = useState<AutomationItem[]>([]);
@@ -53,7 +99,7 @@ export default function AutomationsPage() {
   const [name, setName] = useState("");
   const [description, setDescription] = useState("");
   const [triggerType, setTriggerType] = useState("new_order");
-  const [actions, setActions] = useState<Array<{ type: string }>>([{ type: "send_email" }]);
+  const [actions, setActions] = useState<Array<{ type: string; config: Record<string, string> }>>([{ type: "send_email", config: {} }]);
 
   const fetchAutomations = useCallback(async () => {
     if (!currentStore) return;
@@ -65,18 +111,27 @@ export default function AutomationsPage() {
 
   useEffect(() => { fetchAutomations(); }, [fetchAutomations]);
 
-  const resetForm = () => { setName(""); setDescription(""); setTriggerType("new_order"); setActions([{ type: "send_email" }]); setEditingId(null); };
+  const resetForm = () => { setName(""); setDescription(""); setTriggerType("new_order"); setActions([{ type: "send_email", config: {} }]); setEditingId(null); };
   const openCreate = () => { resetForm(); setShowEditor(true); };
 
   const openEdit = (a: AutomationItem) => {
     setName(a.name); setDescription(a.description || ""); setTriggerType(a.trigger.type);
-    setActions(a.actions.map((act) => ({ type: act.type }))); setEditingId(a.id); setShowEditor(true);
+    setActions(a.actions.map((act) => ({ type: act.type, config: Object.fromEntries(Object.entries(act.config || {}).map(([k, v]) => [k, String(v ?? "")])) })));
+    setEditingId(a.id); setShowEditor(true);
   };
 
   const saveAutomation = async () => {
     if (!currentStore || !name.trim()) return;
     setSaving(true);
-    const payload = { name: name.trim(), description: description.trim() || undefined, trigger: { type: triggerType }, actions: actions.map((a) => ({ type: a.type })) };
+    const payload = {
+      name: name.trim(),
+      description: description.trim() || undefined,
+      trigger: { type: triggerType },
+      actions: actions.map((a) => ({
+        type: a.type,
+        config: Object.fromEntries(Object.entries(a.config).filter(([, v]) => v.trim() !== "")),
+      })),
+    };
     if (editingId) await api.patch(`/api/sites/${currentStore.id}/automations/${editingId}`, payload);
     else await api.post(`/api/sites/${currentStore.id}/automations`, payload);
     setShowEditor(false); resetForm(); setSaving(false); fetchAutomations();
@@ -128,18 +183,85 @@ export default function AutomationsPage() {
               {Object.entries(triggerLabels).map(([k, v]) => <option key={k} value={k}>{v}</option>)}
             </select>
           </div>
+
           <div>
             <label className="block text-sm font-medium text-surface-700 mb-2">Do these actions</label>
-            {actions.map((act, idx) => (
-              <div key={idx} className="flex items-center gap-2 mb-2">
-                <span className="text-xs font-bold text-surface-400 w-5">{idx + 1}.</span>
-                <select value={act.type} onChange={(e) => { const a = [...actions]; a[idx] = { type: e.target.value }; setActions(a); }} className="input-field py-2 text-sm flex-1">
-                  {Object.entries(actionLabels).map(([k, v]) => <option key={k} value={k}>{v}</option>)}
-                </select>
-                {actions.length > 1 && <button onClick={() => setActions((a) => a.filter((_, i) => i !== idx))} className="text-surface-400 hover:text-accent-600"><Trash2 className="h-4 w-4" /></button>}
-              </div>
-            ))}
-            <button onClick={() => setActions((a) => [...a, { type: "send_email" }])} className="text-xs text-brand-600 hover:text-brand-700 font-medium"><Plus className="h-3.5 w-3.5 inline" /> Add Action</button>
+            <div className="space-y-3">
+              {actions.map((act, idx) => {
+                const ActionIcon = actionIcons[act.type] || Zap;
+                const fields = actionFields[act.type] || [];
+                const implemented = IMPLEMENTED_ACTIONS.has(act.type);
+                return (
+                  <div key={idx} className="rounded-xl border border-surface-200 bg-surface-50/60 overflow-hidden">
+                    <div className="flex items-center gap-2.5 px-3.5 py-3 bg-white border-b border-surface-100">
+                      <span className="h-6 w-6 rounded-full bg-brand-50 text-brand-700 text-xs font-bold flex items-center justify-center flex-shrink-0">{idx + 1}</span>
+                      <ActionIcon className="h-4 w-4 text-surface-400 flex-shrink-0" />
+                      <select
+                        value={act.type}
+                        onChange={(e) => { const a = [...actions]; a[idx] = { type: e.target.value, config: {} }; setActions(a); }}
+                        className="input-field py-2 text-sm flex-1"
+                      >
+                        {Object.entries(actionLabels).map(([k, v]) => <option key={k} value={k}>{v}</option>)}
+                      </select>
+                      {actions.length > 1 && (
+                        <button onClick={() => setActions((a) => a.filter((_, i) => i !== idx))} className="p-1.5 rounded-lg text-surface-400 hover:text-accent-600 hover:bg-accent-50 flex-shrink-0">
+                          <Trash2 className="h-4 w-4" />
+                        </button>
+                      )}
+                    </div>
+
+                    {!implemented ? (
+                      <div className="px-3.5 py-3 flex items-center gap-2">
+                        <span className="text-[10px] font-semibold px-2 py-0.5 rounded-full bg-amber-50 text-amber-700">Coming soon</span>
+                        <p className="text-xs text-surface-500">This action can be selected but isn't wired up to actually run yet.</p>
+                      </div>
+                    ) : (
+                      <div className="px-3.5 py-3.5 space-y-3">
+                        {fields.map((f) => (
+                          <div key={f.key}>
+                            <label className="block text-xs font-medium text-surface-600 mb-1">
+                              {f.label}{f.required && <span className="text-accent-600"> *</span>}
+                            </label>
+                            {f.type === "textarea" ? (
+                              <textarea
+                                value={act.config[f.key] || ""}
+                                onChange={(e) => { const a = [...actions]; a[idx] = { ...act, config: { ...act.config, [f.key]: e.target.value } }; setActions(a); }}
+                                placeholder={f.placeholder}
+                                rows={3}
+                                className="input-field py-2 text-sm w-full resize-none"
+                              />
+                            ) : (
+                              <input
+                                type={f.type === "url" ? "url" : "text"}
+                                value={act.config[f.key] || ""}
+                                onChange={(e) => { const a = [...actions]; a[idx] = { ...act, config: { ...act.config, [f.key]: e.target.value } }; setActions(a); }}
+                                placeholder={f.placeholder}
+                                className="input-field py-2 text-sm w-full"
+                              />
+                            )}
+                            {f.helper && <p className="text-[11px] text-surface-400 mt-1">{f.helper}</p>}
+                          </div>
+                        ))}
+
+                        {(act.type === "send_email" || act.type === "send_sms" || act.type === "send_whatsapp") && (triggerVariables[triggerType]?.length ?? 0) > 0 && (
+                          <div className="pt-1">
+                            <p className="text-[11px] font-medium text-surface-400 mb-1.5">Insert a variable into your message:</p>
+                            <div className="flex flex-wrap gap-1.5">
+                              {triggerVariables[triggerType].map((v) => (
+                                <code key={v} className="text-[11px] px-2 py-1 rounded-md bg-surface-100 text-surface-600 font-mono">{`{{${v}}}`}</code>
+                              ))}
+                            </div>
+                          </div>
+                        )}
+                      </div>
+                    )}
+                  </div>
+                );
+              })}
+            </div>
+            <button onClick={() => setActions((a) => [...a, { type: "send_email", config: {} }])} className="text-xs text-brand-600 hover:text-brand-700 font-medium mt-3">
+              <Plus className="h-3.5 w-3.5 inline" /> Add Action
+            </button>
           </div>
           <div className="flex items-center gap-3 pt-2">
             <button onClick={saveAutomation} disabled={saving || !name.trim()} className="btn-primary text-sm py-2.5 px-6">{saving ? <Loader2 className="h-4 w-4 animate-spin" /> : editingId ? "Update" : "Create"}</button>
@@ -174,7 +296,15 @@ export default function AutomationsPage() {
                     <div className="flex items-center gap-2 text-xs text-surface-400 mt-0.5">
                       <span className="flex items-center gap-1"><TriggerIcon className="h-3 w-3" /> {triggerLabels[a.trigger.type]}</span>
                       <span>→</span>
-                      {a.actions.map((act, i) => { const AI = actionIcons[act.type] || Zap; return <span key={i} className="flex items-center gap-1"><AI className="h-3 w-3" /> {actionLabels[act.type]}</span>; })}
+                      {a.actions.map((act, i) => {
+                        const AI = actionIcons[act.type] || Zap;
+                        const notReady = !IMPLEMENTED_ACTIONS.has(act.type);
+                        return (
+                          <span key={i} className={`flex items-center gap-1 ${notReady ? "text-amber-600" : ""}`}>
+                            <AI className="h-3 w-3" /> {actionLabels[act.type]}{notReady && <span className="text-[9px] font-semibold">(soon)</span>}
+                          </span>
+                        );
+                      })}
                       <span className="ml-2">· {a.triggerCount} runs</span>
                     </div>
                   </div>
