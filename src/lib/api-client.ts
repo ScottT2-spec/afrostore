@@ -40,8 +40,9 @@ class ApiClient {
     options: RequestInit = {}
   ): Promise<ApiResponse<T>> {
     const token = this.getToken();
+    const isFormData = typeof FormData !== "undefined" && options.body instanceof FormData;
     const headers: Record<string, string> = {
-      "Content-Type": "application/json",
+      ...(isFormData ? {} : { "Content-Type": "application/json" }),
       ...(options.headers as Record<string, string>),
     };
     if (token) headers["Authorization"] = `Bearer ${token}`;
@@ -81,6 +82,13 @@ class ApiClient {
       method: "POST",
       body: JSON.stringify(body),
     });
+  }
+
+  /** For multipart/form-data uploads — the browser sets the correct
+   * multipart boundary itself; request() detects FormData and skips the
+   * JSON Content-Type header automatically. */
+  postForm<T>(path: string, formData: FormData) {
+    return this.request<T>(path, { method: "POST", body: formData });
   }
 
   patch<T>(path: string, body: unknown) {
