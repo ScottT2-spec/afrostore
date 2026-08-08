@@ -120,6 +120,7 @@ interface OrderConfirmationEmailData {
   subtotal: number;
   deliveryFee: number;
   discount: number;
+  tax?: number;
   total: number;
   currency: string;
   paymentMethod: string;
@@ -223,6 +224,10 @@ export async function sendOrderConfirmationEmail(
             ${data.discount > 0 ? `<tr>
               <td style="color:#16A34A;font-size:14px;padding:4px 0;">Discount</td>
               <td style="color:#16A34A;font-size:14px;padding:4px 0;text-align:right;">-${fmtCurrency(data.discount, data.currency)}</td>
+            </tr>` : ""}
+            ${data.tax && data.tax > 0 ? `<tr>
+              <td style="color:#475569;font-size:14px;padding:4px 0;">Tax</td>
+              <td style="color:#1B2B4B;font-size:14px;padding:4px 0;text-align:right;">${fmtCurrency(data.tax, data.currency)}</td>
             </tr>` : ""}
             <tr>
               <td style="color:#1B2B4B;font-size:18px;font-weight:700;padding:12px 0 0;border-top:2px solid #E2E8F0;">Total</td>

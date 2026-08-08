@@ -182,7 +182,14 @@ export async function POST(req: NextRequest, { params }: Params) {
       }
     }
 
-    const total = subtotal + deliveryFee - discount;
+    // Tax — apply the site's default active tax rule to the discounted subtotal.
+    // (Delivery fee is not taxed here; adjust if your jurisdiction requires otherwise.)
+    const defaultTax = await prisma.taxRule.findFirst({ where: { siteId, isDefault: true, isActive: true } });
+    const taxRate = defaultTax ? Number(defaultTax.rate) : 0;
+    const taxableAmount = Math.max(subtotal - discount, 0);
+    const tax = taxRate > 0 ? Math.round(taxableAmount * (taxRate / 100) * 100) / 100 : 0;
+
+    const total = subtotal + deliveryFee - discount + tax;
 
     // Find or create customer
     let customer = await prisma.customer.findUnique({
@@ -227,6 +234,7 @@ export async function POST(req: NextRequest, { params }: Params) {
           discount,
           loyaltyDiscount,
           loyaltyPointsRedeemed,
+          tax,
           total: finalTotal,
           currency: site.currency,
           couponId,
@@ -307,6 +315,7 @@ export async function POST(req: NextRequest, { params }: Params) {
       subtotal,
       deliveryFee,
       discount: discount + loyaltyDiscount,
+      tax,
       total: finalTotal,
       currency: site.currency,
       paymentMethod,
