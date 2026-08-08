@@ -1,6 +1,6 @@
 "use client";
 import { ChevronDown, ChevronRight, Loader2, Plus } from "lucide-react";
-import { Archive, ArrowDown, BarChart3, Eye, EyeOff, Filter, Layers, MousePointerClick, Pause, Pencil, Play, Search, Trash2 } from "@/components/icons/FilledIcons";
+import { Archive, ArrowDown, BarChart3, Copy, Eye, EyeOff, ExternalLink, Filter, Layers, MousePointerClick, Pause, Pencil, Play, Search, Trash2 } from "@/components/icons/FilledIcons";
 
 import { useState, useEffect, useCallback } from "react";
 import { useSite } from "@/context/StoreContext";
@@ -89,6 +89,7 @@ export default function FunnelsPage() {
   const [editStepFormId, setEditStepFormId] = useState("");
   const [editStepPageId, setEditStepPageId] = useState("");
   const [savingStep, setSavingStep] = useState(false);
+  const [copiedId, setCopiedId] = useState<string | null>(null);
 
   // Destinations available to link a step to — fetched once, used by the step-add picker
   const [availableForms, setAvailableForms] = useState<{ id: string; name: string }[]>([]);
@@ -199,6 +200,24 @@ export default function FunnelsPage() {
       }
     } else {
       setStepError(res.error || "Failed to add step. Please try again.");
+    }
+  };
+
+  const funnelLink = (funnelId: string) => {
+    if (typeof window === "undefined" || !currentStore) return "";
+    return `${window.location.origin}/store/${currentStore.slug}/f/${funnelId}`;
+  };
+
+  const copyFunnelLink = async (funnelId: string) => {
+    const link = funnelLink(funnelId);
+    if (!link) return;
+    try {
+      await navigator.clipboard.writeText(link);
+      setCopiedId(funnelId);
+      setTimeout(() => setCopiedId((id) => (id === funnelId ? null : id)), 2000);
+    } catch {
+      // Clipboard API unavailable — fall back to opening it so they can copy manually
+      window.open(link, "_blank");
     }
   };
 
@@ -349,6 +368,23 @@ export default function FunnelsPage() {
                   </div>
 
                   <div className="flex items-center gap-1">
+                    <a
+                      href={funnelLink(funnel.id)}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="p-2 rounded-lg hover:bg-surface-100 text-surface-400 hover:text-surface-700 transition-colors"
+                      title="Preview live funnel"
+                    >
+                      <ExternalLink className="h-4 w-4" />
+                    </a>
+                    <button
+                      onClick={() => copyFunnelLink(funnel.id)}
+                      className="p-2 rounded-lg hover:bg-surface-100 text-surface-400 hover:text-surface-700 transition-colors"
+                      title="Copy funnel link"
+                    >
+                      <Copy className="h-4 w-4" />
+                    </button>
+                    {copiedId === funnel.id && <span className="text-[11px] text-green-600 font-medium px-1">Copied!</span>}
                     <select
                       value={funnel.status}
                       onChange={(e) => changeStatus(funnel, e.target.value)}
