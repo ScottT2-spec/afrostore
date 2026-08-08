@@ -37,6 +37,12 @@ export default function LoyaltyPage() {
   const [loading, setLoading] = useState(true);
   const [showSettings, setShowSettings] = useState(false);
   const [saving, setSaving] = useState(false);
+  const [adjustMember, setAdjustMember] = useState<LoyaltyMember | null>(null);
+  const [adjustAction, setAdjustAction] = useState<"earn" | "redeem">("earn");
+  const [adjustPoints, setAdjustPoints] = useState("");
+  const [adjustDesc, setAdjustDesc] = useState("");
+  const [adjustSaving, setAdjustSaving] = useState(false);
+  const [adjustError, setAdjustError] = useState<string | null>(null);
 
   const currency = currentStore?.currency || "NGN";
   const symbol = currency === "NGN" ? "₦" : currency === "GHS" ? "₵" : currency;
@@ -86,6 +92,36 @@ export default function LoyaltyPage() {
     setSaving(false);
     setShowSettings(false);
     if (isFromAI) { clearPrefill(); router.push("/dashboard/ai"); }
+  };
+
+  const openAdjust = (member: LoyaltyMember, action: "earn" | "redeem") => {
+    setAdjustMember(member);
+    setAdjustAction(action);
+    setAdjustPoints("");
+    setAdjustDesc("");
+    setAdjustError(null);
+  };
+
+  const saveAdjustment = async () => {
+    if (!currentStore || !adjustMember) return;
+    const pointsNum = parseInt(adjustPoints, 10);
+    if (!pointsNum || pointsNum <= 0) { setAdjustError("Enter a valid number of points"); return; }
+
+    setAdjustSaving(true);
+    setAdjustError(null);
+    const res = await api.post(`/api/sites/${currentStore.id}/loyalty/members`, {
+      customerId: adjustMember.customer.id,
+      action: adjustAction,
+      points: pointsNum,
+      description: adjustDesc.trim() || undefined,
+    });
+    if (res.success) {
+      await load();
+      setAdjustMember(null);
+    } else {
+      setAdjustError(res.error || "Failed to adjust points");
+    }
+    setAdjustSaving(false);
   };
 
   if (loading) return (
@@ -174,9 +210,11 @@ export default function LoyaltyPage() {
 
             {/* Members table */}
             <div className="rounded-2xl border border-surface-200 bg-white">
-              <div className="p-6 pb-4">
-                <h3 className="text-base font-bold text-surface-900">Members</h3>
-                <p className="text-xs text-surface-500 mt-0.5">{members.length} member{members.length !== 1 ? "s" : ""}</p>
+              <div className="p-6 pb-4 flex items-center justify-between">
+                <div>
+                  <h3 className="text-base font-bold text-surface-900">Members</h3>
+                  <p className="text-xs text-surface-500 mt-0.5">{members.length} member{members.length !== 1 ? "s" : ""}</p>
+                </div>
               </div>
               {members.length === 0 ? (
                 <div className="px-6 pb-8 text-center text-sm text-surface-400">No loyalty members yet. Customers join automatically on their first purchase.</div>
@@ -190,6 +228,7 @@ export default function LoyaltyPage() {
                         <th className="px-6 py-3 text-right text-[10px] font-semibold uppercase tracking-wider text-surface-400">Total Points</th>
                         <th className="px-6 py-3 text-right text-[10px] font-semibold uppercase tracking-wider text-surface-400">Available</th>
                         <th className="px-6 py-3 text-right text-[10px] font-semibold uppercase tracking-wider text-surface-400">Redeemed</th>
+                        <th className="px-6 py-3 text-right text-[10px] font-semibold uppercase tracking-wider text-surface-400">Actions</th>
                       </tr>
                     </thead>
                     <tbody className="divide-y divide-surface-100">
@@ -214,6 +253,12 @@ export default function LoyaltyPage() {
                           <td className="px-6 py-3.5 text-right text-sm font-semibold text-surface-900">{m.totalPoints.toLocaleString()}</td>
                           <td className="px-6 py-3.5 text-right text-sm text-surface-700">{m.availablePoints.toLocaleString()}</td>
                           <td className="px-6 py-3.5 text-right text-sm text-surface-500">{m.redeemedPoints.toLocaleString()}</td>
+                          <td className="px-6 py-3.5 text-right">
+                            <div className="flex items-center justify-end gap-2">
+                              <button onClick={() => openAdjust(m, "earn")} className="text-xs font-medium text-brand-600 hover:text-brand-700">+ Add</button>
+                              <button onClick={() => openAdjust(m, "redeem")} className="text-xs font-medium text-surface-500 hover:text-surface-700">− Deduct</button>
+                            </div>
+                          </td>
                         </tr>
                       ))}
                     </tbody>
@@ -224,6 +269,53 @@ export default function LoyaltyPage() {
           </>
         )}
       </div>
+
+      {/* Adjust Points Modal */}
+      {adjustMember && (
+        <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4" onClick={() => setAdjustMember(null)}>
+          <div className="bg-white rounded-2xl max-w-sm w-full p-6" onClick={(e) => e.stopPropagation()}>
+            <div className="flex items-center justify-between mb-4">
+              <h3 className="text-base font-bold text-surface-900">
+                {adjustAction === "earn" ? "Add points to" : "Deduct points from"} {adjustMember.customer.firstName}
+              </h3>
+              <button onClick={() => setAdjustMember(null)} className="text-surface-400 hover:text-surface-600"><X className="h-5 w-5" /></button>
+            </div>
+            <p className="text-xs text-surface-500 mb-4">Available balance: {adjustMember.availablePoints.toLocaleString()} points</p>
+            <div className="space-y-3">
+              <div>
+                <label className="block text-xs font-medium text-surface-600 mb-1">Points</label>
+                <input
+                  type="number"
+                  min={1}
+                  value={adjustPoints}
+                  onChange={(e) => setAdjustPoints(e.target.value)}
+                  className="w-full rounded-xl border border-surface-200 px-3 py-2 text-sm"
+                  placeholder="e.g. 100"
+                />
+              </div>
+              <div>
+                <label className="block text-xs font-medium text-surface-600 mb-1">Reason (optional)</label>
+                <input
+                  type="text"
+                  value={adjustDesc}
+                  onChange={(e) => setAdjustDesc(e.target.value)}
+                  className="w-full rounded-xl border border-surface-200 px-3 py-2 text-sm"
+                  placeholder="e.g. Customer service goodwill"
+                />
+              </div>
+              {adjustError && (
+                <p className="text-sm text-accent-600 bg-accent-50 border border-accent-100 rounded-lg px-3 py-2">{adjustError}</p>
+              )}
+              <div className="flex items-center gap-3 pt-1">
+                <button onClick={saveAdjustment} disabled={adjustSaving || !adjustPoints} className="btn-primary text-sm py-2.5 px-6">
+                  {adjustSaving ? <Loader2 className="h-4 w-4 animate-spin" /> : adjustAction === "earn" ? "Add Points" : "Deduct Points"}
+                </button>
+                <button onClick={() => setAdjustMember(null)} className="btn-secondary text-sm py-2.5 px-4">Cancel</button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* Settings Modal */}
       {showSettings && (

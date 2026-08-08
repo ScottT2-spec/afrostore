@@ -6,6 +6,7 @@ import { unauthorized } from "@/lib/auth";
 import { sendOrderConfirmationEmail } from "@/lib/email";
 import { getBestActiveFlashSales, applyDiscount } from "@/lib/flash-sales";
 import { runAutomationsForTrigger } from "@/lib/automations";
+import { validateRedemption } from "@/lib/loyalty";
 
 
 type Params = { params: Promise<{ siteId: string }> };
@@ -73,7 +74,7 @@ export async function POST(req: NextRequest, { params }: Params) {
     const parsed = createOrderSchema.safeParse(body);
     if (!parsed.success) return validationError(parsed.error.flatten().fieldErrors);
 
-    const { items, deliveryAddress, deliveryZoneId, paymentMethod, couponCode, email, phone, firstName, lastName, note } = parsed.data;
+    const { items, deliveryAddress, deliveryZoneId, paymentMethod, couponCode, email, phone, firstName, lastName, note, redeemPoints } = parsed.data;
 
     // Resolve products and calculate prices
     const productIds = items.map((i) => i.productId);
@@ -193,6 +194,20 @@ export async function POST(req: NextRequest, { params }: Params) {
       });
     }
 
+    // Loyalty points redemption — priced into the order now, balance is only
+    // actually deducted once payment succeeds (see finalizeOrderRedemption).
+    let loyaltyDiscount = 0;
+    let loyaltyPointsRedeemed = 0;
+    if (redeemPoints && redeemPoints > 0) {
+      const check = await validateRedemption(siteId, customer.id, redeemPoints);
+      if (!check.ok) return error(check.message, 400);
+      // Never let points discount an order below zero.
+      loyaltyDiscount = Math.min(check.discount, subtotal + deliveryFee - discount);
+      loyaltyPointsRedeemed = redeemPoints;
+    }
+
+    const finalTotal = Math.max(0, total - loyaltyDiscount);
+
     // Create order (with retry on unlikely order number collision)
     let attempts = 0;
     const createOrder = async (): Promise<any> => {
@@ -210,7 +225,9 @@ export async function POST(req: NextRequest, { params }: Params) {
           subtotal,
           deliveryFee,
           discount,
-          total,
+          loyaltyDiscount,
+          loyaltyPointsRedeemed,
+          total: finalTotal,
           currency: site.currency,
           couponId,
           note,
@@ -242,7 +259,7 @@ export async function POST(req: NextRequest, { params }: Params) {
         where: { id: customer!.id },
         data: {
           totalOrders: { increment: 1 },
-          totalSpent: { increment: total },
+          totalSpent: { increment: finalTotal },
         },
       });
 
@@ -289,8 +306,8 @@ export async function POST(req: NextRequest, { params }: Params) {
       items: orderItems,
       subtotal,
       deliveryFee,
-      discount,
-      total,
+      discount: discount + loyaltyDiscount,
+      total: finalTotal,
       currency: site.currency,
       paymentMethod,
       deliveryAddress: deliveryAddress as { address?: string; city?: string; state?: string },
@@ -302,8 +319,8 @@ export async function POST(req: NextRequest, { params }: Params) {
       recipientPhone: phone,
       recipientName: `${firstName} ${lastName}`,
       subject: `New order ${order.orderNumber}`,
-      message: `Order ${order.orderNumber} was placed for ${site.currency} ${total}.`,
-      data: { orderId: order.id, orderNumber: order.orderNumber, email, phone, total, currency: site.currency },
+      message: `Order ${order.orderNumber} was placed for ${site.currency} ${finalTotal}.`,
+      data: { orderId: order.id, orderNumber: order.orderNumber, email, phone, total: finalTotal, currency: site.currency },
     }).catch((err) => console.error("Automation trigger (new_order) error:", err));
 
     return success(order, 201);

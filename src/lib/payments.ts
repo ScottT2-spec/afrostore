@@ -1,6 +1,7 @@
 import { prisma } from "./db";
 import crypto from "crypto";
 import { runAutomationsForTrigger } from "./automations";
+import { awardOrderPoints, finalizeOrderRedemption } from "./loyalty";
 
 // ─── PAYSTACK ───────────────────────────────────────────────
 
@@ -239,6 +240,22 @@ export async function processPaymentConfirmation(params: {
             note: `Payment confirmed via ${params.method || "unknown"}`,
           },
         });
+
+        // Loyalty: award points for the purchase and finalize any points
+        // redemption that was priced into this order at checkout. Both are
+        // no-ops if the site has no loyalty program, it's disabled, or the
+        // order has no linked customer (guest checkout).
+        if (updatedOrder.customerId) {
+          try {
+            await awardOrderPoints(tx, updatedOrder.siteId, updatedOrder.customerId, Number(updatedOrder.total), updatedOrder.id);
+            if (updatedOrder.loyaltyPointsRedeemed > 0) {
+              await finalizeOrderRedemption(tx, updatedOrder.siteId, updatedOrder.customerId, updatedOrder.loyaltyPointsRedeemed, updatedOrder.id);
+            }
+          } catch (loyaltyErr) {
+            // Never let a loyalty hiccup roll back a confirmed payment.
+            console.error("Loyalty processing error for order", updatedOrder.id, loyaltyErr);
+          }
+        }
 
         paidOrder = {
           id: updatedOrder.id,

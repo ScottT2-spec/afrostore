@@ -97,6 +97,7 @@ export const createOrderSchema = z.object({
   paymentMethod: z.string(),
   couponCode: z.string().optional(),
   note: z.string().optional(),
+  redeemPoints: z.number().int().nonnegative().optional(),
 });
 
 export const updateOrderStatusSchema = z.object({
