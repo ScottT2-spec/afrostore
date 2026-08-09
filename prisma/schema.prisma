@@ -1288,6 +1288,7 @@ model MarketplaceItem {
   rating       Decimal             @default(0) @db.Decimal(3, 2)
   reviewCount  Int                 @default(0)
   status       MarketplaceStatus   @default(PENDING)
+  rejectionReason String?
   revenueShare Decimal             @default(70) @db.Decimal(5, 2)
   category     String?
   tags         String[]

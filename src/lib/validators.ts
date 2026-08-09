@@ -741,9 +741,13 @@ export const updateMarketplaceItemSchema = z.object({
   description: z.string().max(5000).optional().nullable(),
   price: z.number().min(0).optional(),
   thumbnail: z.string().url().optional().nullable(),
-  status: z.enum(["PENDING", "APPROVED", "REJECTED", "SUSPENDED"]).optional(),
   category: z.string().max(100).optional().nullable(),
   tags: z.array(z.string()).optional(),
+});
+
+export const adminReviewMarketplaceItemSchema = z.object({
+  status: z.enum(["PENDING", "APPROVED", "REJECTED", "SUSPENDED"]),
+  rejectionReason: z.string().max(1000).optional().nullable(),
 });
 
 // ─── ANALYTICS ──────────────────────────────────────────────

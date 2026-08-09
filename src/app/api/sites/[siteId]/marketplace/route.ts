@@ -54,8 +54,23 @@ export async function POST(req: NextRequest, { params }: Params) {
     const parsed = createMarketplaceItemSchema.safeParse(body);
     if (!parsed.success) return validationError(parsed.error.flatten().fieldErrors);
 
+    // Only THEME listings are supported for now — Plugin/Template/Funnel/Automation
+    // have no merchant-facing creation flow yet, so there'd be nothing to install.
+    if (parsed.data.type !== "THEME") {
+      return error("Only theme listings can be published right now. Other types are coming soon.", 400);
+    }
+    if (!parsed.data.themeId) {
+      return error("themeId is required — select one of your own themes to publish", 400);
+    }
+    const theme = await prisma.theme.findUnique({ where: { id: parsed.data.themeId } });
+    if (!theme || theme.authorId !== ctx.user!.id) {
+      return error("You can only publish a theme you created yourself", 403);
+    }
+    const dup = await prisma.marketplaceItem.findFirst({ where: { themeId: parsed.data.themeId, status: { in: ["PENDING", "APPROVED"] } } });
+    if (dup) return error("This theme has already been submitted to the marketplace", 409);
+
     const item = await prisma.marketplaceItem.create({
-      data: { ...parsed.data, authorId: ctx.user!.id, authorName: `${ctx.user!.firstName} ${ctx.user!.lastName}`.trim() || ctx.user!.email, tags: parsed.data.tags || [] },
+      data: { ...parsed.data, authorId: ctx.user!.id, authorName: `${ctx.user!.firstName} ${ctx.user!.lastName}`.trim() || ctx.user!.email, tags: parsed.data.tags || [], thumbnail: parsed.data.thumbnail || theme.thumbnail || undefined },
     });
 
     await logAudit({ siteId, userId: ctx.user!.id, action: "CREATE", entity: "marketplace_item", entityId: item.id, after: item });
