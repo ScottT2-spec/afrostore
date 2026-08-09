@@ -253,7 +253,7 @@ export default function MediaPage() {
                   ) : (
                     <Icon className="h-10 w-10 text-surface-300" />
                   )}
-                  <div className="absolute inset-0 bg-black/0 group-hover:bg-black/30 transition-colors flex items-center justify-center gap-1 opacity-0 group-hover:opacity-100">
+                  <div className="absolute inset-0 bg-black/0 group-hover:bg-black/30 transition-colors flex items-center justify-center gap-1 sm:opacity-0 sm:group-hover:opacity-100">
                     <button onClick={() => startEdit(item)} className="p-2 bg-white rounded-lg shadow-sm hover:bg-surface-50"><Pencil className="h-4 w-4 text-surface-700" /></button>
                     <button onClick={() => deleteItem(item.id)} disabled={deleteId === item.id} className="p-2 bg-white rounded-lg shadow-sm hover:bg-red-50">
                       {deleteId === item.id ? <Loader2 className="h-4 w-4 animate-spin" /> : <Trash2 className="h-4 w-4 text-red-600" />}
@@ -288,7 +288,7 @@ export default function MediaPage() {
                     <span>{item.folder || "/"}</span>
                   </div>
                 </div>
-                <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                <div className="flex items-center gap-1 sm:opacity-0 sm:group-hover:opacity-100 transition-opacity">
                   <button onClick={() => startEdit(item)} className="p-2 rounded-lg hover:bg-surface-100 text-surface-400"><Pencil className="h-4 w-4" /></button>
                   <button onClick={() => deleteItem(item.id)} disabled={deleteId === item.id} className="p-2 rounded-lg hover:bg-red-50 text-surface-400 hover:text-red-600">
                     {deleteId === item.id ? <Loader2 className="h-4 w-4 animate-spin" /> : <Trash2 className="h-4 w-4" />}

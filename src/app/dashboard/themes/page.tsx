@@ -122,7 +122,7 @@ export default function ThemesPage() {
                         href={theme.preview}
                         target="_blank"
                         rel="noopener noreferrer"
-                        className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center"
+                        className="absolute inset-0 bg-black/50 sm:opacity-0 sm:group-hover:opacity-100 transition-opacity flex items-center justify-center"
                       >
                         <span className="inline-flex items-center gap-2 bg-white text-surface-900 px-4 py-2 rounded-lg text-sm font-semibold shadow-lg">
                           <Eye className="h-4 w-4" /> Live Preview
