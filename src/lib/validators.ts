@@ -125,6 +125,20 @@ export const createCustomerSchema = z.object({
   note: z.string().optional(),
 });
 
+export const updateCustomerSchema = z.object({
+  firstName: z.string().min(1).optional(),
+  lastName: z.string().min(1).optional(),
+  phone: z.string().optional().nullable(),
+  address: z.object({
+    line1: z.string(),
+    city: z.string(),
+    state: z.string(),
+    country: z.string(),
+  }).optional().nullable(),
+  tags: z.array(z.string()).optional(),
+  note: z.string().optional().nullable(),
+});
+
 // ─── CATEGORIES ─────────────────────────────────────────────
 
 export const createCategorySchema = z.object({
