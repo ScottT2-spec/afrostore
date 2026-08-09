@@ -16,24 +16,38 @@ export async function GET(req: NextRequest, { params }: Params) {
     const thirtyDaysAgo = new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000);
     const sixtyDaysAgo = new Date(now.getTime() - 60 * 24 * 60 * 60 * 1000);
 
+    // "Orders" reflects real order volume — every order that wasn't
+    // cancelled/refunded, regardless of payment stage (a merchant needs to
+    // see pending-payment orders too, that's operationally useful). "Total
+    // Revenue" is stricter: money actually collected, so it only counts
+    // orders that are paid AND weren't later cancelled/refunded. These are
+    // deliberately two different filters, not one shared query — the
+    // previous version counted every order ever placed (including unpaid,
+    // pending, and cancelled ones) as "revenue", which meaningfully
+    // overstates what the merchant actually made.
+    const notVoided = { status: { notIn: ["CANCELLED", "REFUNDED"] } } as const;
+    const paidAndNotVoided = { paymentStatus: "PAID", ...notVoided } as const;
+
     // Current period aggregates
     const [
-      currentOrders,
-      previousOrders,
+      currentOrderCountResult,
+      previousOrderCountResult,
+      currentRevenueResult,
+      previousRevenueResult,
       totalCustomers,
       previousCustomers,
       totalProducts,
       recentOrders,
     ] = await Promise.all([
+      prisma.order.count({ where: { siteId, createdAt: { gte: thirtyDaysAgo }, ...notVoided } }),
+      prisma.order.count({ where: { siteId, createdAt: { gte: sixtyDaysAgo, lt: thirtyDaysAgo }, ...notVoided } }),
       prisma.order.aggregate({
-        where: { siteId, createdAt: { gte: thirtyDaysAgo } },
+        where: { siteId, createdAt: { gte: thirtyDaysAgo }, ...paidAndNotVoided },
         _sum: { total: true },
-        _count: true,
       }),
       prisma.order.aggregate({
-        where: { siteId, createdAt: { gte: sixtyDaysAgo, lt: thirtyDaysAgo } },
+        where: { siteId, createdAt: { gte: sixtyDaysAgo, lt: thirtyDaysAgo }, ...paidAndNotVoided },
         _sum: { total: true },
-        _count: true,
       }),
       prisma.customer.count({ where: { siteId, createdAt: { gte: thirtyDaysAgo } } }),
       prisma.customer.count({ where: { siteId, createdAt: { gte: sixtyDaysAgo, lt: thirtyDaysAgo } } }),
@@ -49,11 +63,12 @@ export async function GET(req: NextRequest, { params }: Params) {
       }),
     ]);
 
-    // Top products by sales
+    // Top products by sales — counts any non-cancelled/refunded order (this
+    // is a demand/popularity signal, not an accounting figure).
     const topProducts = await prisma.orderItem.groupBy({
       by: ["productId"],
       where: {
-        order: { siteId, createdAt: { gte: thirtyDaysAgo } },
+        order: { siteId, createdAt: { gte: thirtyDaysAgo }, ...notVoided },
         productId: { not: null },
       },
       _sum: { quantity: true, total: true },
@@ -74,7 +89,9 @@ export async function GET(req: NextRequest, { params }: Params) {
       totalRevenue: p._sum.total || 0,
     }));
 
-    // Revenue over time (last 30 days)
+    // Revenue over time (last 30 days) — same PAID + not-voided definition
+    // as the headline revenue figure above, so the trend chart and the
+    // stat card can never disagree with each other.
     const revenueByDay = await prisma.$queryRawUnsafe<
       { date: string; revenue: number; orders: number }[]
     >(
@@ -83,6 +100,7 @@ export async function GET(req: NextRequest, { params }: Params) {
               COUNT(*)::int as orders
        FROM orders 
        WHERE "siteId" = $1 AND "createdAt" >= $2
+         AND "paymentStatus" = 'PAID' AND status NOT IN ('CANCELLED', 'REFUNDED')
        GROUP BY DATE("createdAt") 
        ORDER BY date ASC`,
       siteId,
@@ -90,14 +108,14 @@ export async function GET(req: NextRequest, { params }: Params) {
     );
 
     // Calculate percentage changes
-    const currentRevenue = Number(currentOrders._sum.total || 0);
-    const previousRevenue = Number(previousOrders._sum.total || 0);
+    const currentRevenue = Number(currentRevenueResult._sum.total || 0);
+    const previousRevenue = Number(previousRevenueResult._sum.total || 0);
     const revenueChange = previousRevenue > 0
       ? ((currentRevenue - previousRevenue) / previousRevenue) * 100
       : currentRevenue > 0 ? 100 : 0;
 
-    const currentOrderCount = currentOrders._count;
-    const previousOrderCount = previousOrders._count;
+    const currentOrderCount = currentOrderCountResult;
+    const previousOrderCount = previousOrderCountResult;
     const ordersChange = previousOrderCount > 0
       ? ((currentOrderCount - previousOrderCount) / previousOrderCount) * 100
       : currentOrderCount > 0 ? 100 : 0;
