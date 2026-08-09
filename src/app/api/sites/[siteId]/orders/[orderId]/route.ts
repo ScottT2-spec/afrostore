@@ -1,8 +1,10 @@
 import { NextRequest } from "next/server";
 import { prisma } from "@/lib/db";
-import { getStoreContext, success, error, validationError, logAudit } from "@/lib/api-helpers";
+import { getStoreContext, success, error, validationError, logAudit , requireRole } from "@/lib/api-helpers";
 import { updateOrderStatusSchema } from "@/lib/validators";
 import { unauthorized } from "@/lib/auth";
+import { awardOrderPoints, finalizeOrderRedemption, reverseOrderPoints } from "@/lib/loyalty";
+import { convertReferral, reverseReferral } from "@/lib/referrals";
 
 type Params = { params: Promise<{ siteId: string; orderId: string }> };
 
@@ -31,6 +33,8 @@ export async function PATCH(req: NextRequest, { params }: Params) {
   const { siteId, orderId } = await params;
   const ctx = await getStoreContext(req, siteId);
   if (ctx.error) return ctx.user ? error(ctx.error, 403) : unauthorized();
+  const roleErr = requireRole(ctx, "STAFF");
+  if (roleErr) return roleErr;
 
   const body = await req.json();
   const parsed = updateOrderStatusSchema.safeParse(body);
@@ -40,15 +44,25 @@ export async function PATCH(req: NextRequest, { params }: Params) {
   if (!existing) return error("Order not found", 404);
 
   const updateData: Record<string, unknown> = { status: parsed.data.status };
+  let markCodAsPaid = false;
 
   if (parsed.data.status === "SHIPPED") {
     updateData.shippedAt = new Date();
     if (parsed.data.trackingNumber) updateData.trackingNumber = parsed.data.trackingNumber;
   } else if (parsed.data.status === "DELIVERED") {
     updateData.deliveredAt = new Date();
-  } else if (parsed.data.status === "CANCELLED") {
-    updateData.cancelledAt = new Date();
-    updateData.cancelReason = parsed.data.note;
+    // Cash-on-delivery orders never go through the online payment webhook
+    // flow, so DELIVERED is the closest real-world signal that payment was
+    // actually collected. Mark it paid here so loyalty/referral hooks (which
+    // are keyed off paymentStatus: PAID) fire for COD orders too.
+    if (existing.paymentMethod === "PAY_ON_DELIVERY" && existing.paymentStatus !== "PAID") {
+      markCodAsPaid = true;
+    }
+  } else if (parsed.data.status === "CANCELLED" || parsed.data.status === "REFUNDED") {
+    if (parsed.data.status === "CANCELLED") {
+      updateData.cancelledAt = new Date();
+      updateData.cancelReason = parsed.data.note;
+    }
 
     // Restore stock
     const items = await prisma.orderItem.findMany({ where: { orderId } });
@@ -62,10 +76,66 @@ export async function PATCH(req: NextRequest, { params }: Params) {
     }
   }
 
-  const order = await prisma.order.update({
-    where: { id: orderId },
-    data: updateData,
-    include: { items: true, customer: true, timeline: true },
+  const order = await prisma.$transaction(async (tx) => {
+    // Status fields always apply, regardless of the payment-status race below.
+    await tx.order.update({ where: { id: orderId }, data: updateData });
+
+    // Atomic guard: if we're marking this COD order paid, only flip
+    // paymentStatus if it's still not-paid, so a concurrent duplicate
+    // request can't fire the loyalty/referral hooks twice for the same
+    // order. Decoupled from the status update above so losing this race
+    // never causes the DELIVERED/shipped status change to be dropped.
+    if (markCodAsPaid) {
+      const guarded = await tx.order.updateMany({
+        where: { id: orderId, paymentStatus: { not: "PAID" } },
+        data: { paymentStatus: "PAID", paidAt: new Date() },
+      });
+      if (guarded.count === 0) markCodAsPaid = false; // lost the race, don't double-fire hooks
+    }
+
+    const updated = await tx.order.findUniqueOrThrow({
+      where: { id: orderId },
+      include: { items: true, customer: true, timeline: true },
+    });
+
+    if (markCodAsPaid) {
+      if (updated.customerId) {
+        try {
+          await awardOrderPoints(tx, siteId, updated.customerId, Number(updated.total), updated.id);
+          if (updated.loyaltyPointsRedeemed > 0) {
+            await finalizeOrderRedemption(tx, siteId, updated.customerId, updated.loyaltyPointsRedeemed, updated.id);
+          }
+        } catch (err) {
+          console.error("Loyalty processing error for COD order", updated.id, err);
+        }
+      }
+      try {
+        await convertReferral(tx, siteId, updated.id, Number(updated.total));
+      } catch (err) {
+        console.error("Referral conversion error for COD order", updated.id, err);
+      }
+    }
+
+    // Cancelling/refunding an order that had already been paid means any
+    // points earned/redeemed or commission converted for it need to be
+    // undone — otherwise a customer keeps points, and an affiliate keeps
+    // commission, for a sale that didn't actually happen.
+    if ((parsed.data.status === "CANCELLED" || parsed.data.status === "REFUNDED") && existing.paymentStatus === "PAID") {
+      if (updated.customerId) {
+        try {
+          await reverseOrderPoints(tx, siteId, updated.customerId, updated.id);
+        } catch (err) {
+          console.error("Loyalty reversal error for order", updated.id, err);
+        }
+      }
+      try {
+        await reverseReferral(tx, siteId, updated.id);
+      } catch (err) {
+        console.error("Referral reversal error for order", updated.id, err);
+      }
+    }
+
+    return updated;
   });
 
   // Add timeline entry

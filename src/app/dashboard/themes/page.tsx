@@ -1,6 +1,6 @@
 "use client";
 import { Loader2 } from "lucide-react";
-import { CheckCircle2, ExternalLink, Eye, Palette } from "@/components/icons/FilledIcons";
+import { ExternalLink, Eye, Palette, Info } from "@/components/icons/FilledIcons";
 
 import { useState, useEffect } from "react";
 import DashboardHeader from "@/components/dashboard/DashboardHeader";
@@ -20,7 +20,6 @@ export default function ThemesPage() {
   const { prefillData, clearPrefill, isFromAI } = useAIPrefill("theme");
   const [data, setData] = useState<ThemesData | null>(null);
   const [loading, setLoading] = useState(true);
-  const [installing, setInstalling] = useState<string | null>(null);
   const [activeCategory, setActiveCategory] = useState("All");
 
   const fetchThemes = async () => {
@@ -32,25 +31,26 @@ export default function ThemesPage() {
 
   useEffect(() => { fetchThemes(); }, [currentStore]);
 
-  const installTheme = async (themeId: string) => {
-    if (!currentStore) return;
-    setInstalling(themeId);
-    await api.post(`/api/sites/${currentStore.id}/themes`, { themeId, activate: true });
-    await fetchThemes();
-    setInstalling(null);
-  };
-
-  const activeThemeId = data?.activeThemeId;
-
   const filteredThemes = data?.themes.filter((t) =>
     activeCategory === "All" ? true : t.category === activeCategory
   ) || [];
 
   return (
     <>
-      <DashboardHeader title="Themes" subtitle="Choose a template for your store" />
+      <DashboardHeader title="Themes" subtitle="Browse upcoming templates for your store" />
       <div className="p-6">
         {isFromAI && <AIPrefillBanner entityType="theme" onDiscard={() => clearPrefill()} />}
+
+        <div className="mb-6 flex items-start gap-3 rounded-2xl border border-brand-200 bg-brand-50 p-4">
+          <Info className="h-5 w-5 flex-shrink-0 text-brand-600 mt-0.5" />
+          <div className="text-sm text-brand-800">
+            <p className="font-semibold mb-0.5">Theme marketplace coming soon</p>
+            <p className="text-brand-700">
+              These are previews of upcoming themes — activating one doesn&apos;t change your live store yet.
+              Your store&apos;s current look comes from the template you picked when you created it.
+            </p>
+          </div>
+        </div>
 
         {/* Category filter */}
         <div className="flex flex-wrap gap-2 mb-6">
@@ -82,7 +82,6 @@ export default function ThemesPage() {
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {filteredThemes.map((theme) => {
-              const isActive = activeThemeId === theme.id;
               return (
                 <div key={theme.id} className="rounded-2xl border border-surface-200 bg-white overflow-hidden hover:shadow-lg transition-all group">
                   {/* Theme preview area */}
@@ -122,7 +121,7 @@ export default function ThemesPage() {
                         href={theme.preview}
                         target="_blank"
                         rel="noopener noreferrer"
-                        className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center"
+                        className="absolute inset-0 bg-black/50 sm:opacity-0 sm:group-hover:opacity-100 transition-opacity flex items-center justify-center"
                       >
                         <span className="inline-flex items-center gap-2 bg-white text-surface-900 px-4 py-2 rounded-lg text-sm font-semibold shadow-lg">
                           <Eye className="h-4 w-4" /> Live Preview
@@ -173,19 +172,9 @@ export default function ThemesPage() {
 
                     {/* Actions */}
                     <div className="flex items-center gap-2">
-                      {isActive ? (
-                        <span className="inline-flex items-center gap-1.5 text-xs font-semibold text-green-700 flex-1">
-                          <CheckCircle2 className="h-3.5 w-3.5" /> Active
-                        </span>
-                      ) : (
-                        <button
-                          onClick={() => installTheme(theme.id)}
-                          disabled={installing === theme.id}
-                          className="btn-primary text-xs py-1.5 px-3 flex-1"
-                        >
-                          {installing === theme.id ? <Loader2 className="h-3.5 w-3.5 animate-spin mx-auto" /> : "Activate"}
-                        </button>
-                      )}
+                      <span className="inline-flex items-center gap-1.5 text-xs font-semibold text-surface-400 flex-1">
+                        Coming soon
+                      </span>
                       {theme.preview && (
                         <a
                           href={theme.preview}

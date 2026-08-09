@@ -1,6 +1,8 @@
 import type { Metadata } from "next";
 import { prisma } from "@/lib/db";
 import StorefrontPopups from "@/components/storefront/StorefrontPopups";
+import ReferralTracker from "@/components/storefront/ReferralTracker";
+import { resolveStoreBaseUrlFromHeaders } from "@/lib/site-url";
 
 type Props = {
   params: Promise<{ slug: string }>;
@@ -21,6 +23,7 @@ async function resolveStore(slug: string) {
       ],
     },
     select: {
+      id: true,
       name: true,
       slug: true,
       description: true,
@@ -48,9 +51,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const description =
     store.description ||
     `Shop at ${store.name} — discover amazing products and deals.`;
-  const storeUrl = store.customDomain
-    ? `https://${store.customDomain}`
-    : `https://afrostore.shop/store/${store.slug}`;
+  const storeUrl = await resolveStoreBaseUrlFromHeaders(store);
 
   // Use cover image → logo → fallback for OG image
   const ogImage = store.coverImage || store.logo || undefined;
@@ -98,9 +99,7 @@ export default async function StoreLayout({ params, children }: Props) {
         "@type": "Store",
         name: store.name,
         description: store.description || `Shop at ${store.name}`,
-        url: store.customDomain
-          ? `https://${store.customDomain}`
-          : `https://afrostore.shop/store/${store.slug}`,
+        url: await resolveStoreBaseUrlFromHeaders(store),
         ...(store.logo ? { logo: store.logo, image: store.coverImage || store.logo } : {}),
       }
     : null;
@@ -115,6 +114,7 @@ export default async function StoreLayout({ params, children }: Props) {
       )}
       {children}
       {store && <StorefrontPopups slug={slug} />}
+      {store && <ReferralTracker siteId={store.id} />}
     </>
   );
 }

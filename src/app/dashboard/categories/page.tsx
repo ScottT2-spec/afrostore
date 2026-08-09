@@ -231,7 +231,7 @@ function CategoryRow({ category: cat, depth, children, allCategories, onEdit, on
           <h3 className="text-sm font-semibold text-surface-900">{cat.name}</h3>
           <p className="text-xs text-surface-400">/{cat.slug} · {productCount} product{productCount !== 1 ? "s" : ""}</p>
         </div>
-        <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+        <div className="flex items-center gap-1 sm:opacity-0 sm:group-hover:opacity-100 transition-opacity">
           <button onClick={() => onEdit(cat)} className="p-2 rounded-lg hover:bg-surface-100 text-surface-400 hover:text-surface-700">
             <Pencil className="h-3.5 w-3.5" />
           </button>

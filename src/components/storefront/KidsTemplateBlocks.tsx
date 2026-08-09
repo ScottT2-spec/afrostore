@@ -1527,26 +1527,112 @@ export function KidsContactInfo({
 /* ─── KIDS CONTACT FORM ─────────────────────────────────────────── */
 export interface KidsContactFormProps {
   title?: string;
+  storeSlug?: string;
 }
 
-export function KidsContactForm({ title = "Get in touch" }: KidsContactFormProps) {
+export function KidsContactForm({ title = "Get in touch", storeSlug }: KidsContactFormProps) {
+  const storeCtx = useContext(KidsStoreContext);
+  // Prefer an explicitly-passed slug, then context, then fall back to
+  // parsing it out of the URL (/store/{slug}/...) — the block-rendering
+  // path doesn't currently thread storeSlug through props or context.
+  const resolvedSlug =
+    storeSlug ||
+    storeCtx?.storeSlug ||
+    (typeof window !== "undefined" ? window.location.pathname.split("/")[2] : "");
+
+  const [form, setForm] = useState({ name: "", email: "", subject: "", message: "" });
+  const [status, setStatus] = useState<"idle" | "sending" | "success" | "error">("idle");
+  const [errorMsg, setErrorMsg] = useState("");
+
+  const submit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!resolvedSlug) {
+      setStatus("error");
+      setErrorMsg("Unable to determine store — please try again from the live site.");
+      return;
+    }
+    setStatus("sending");
+    setErrorMsg("");
+    try {
+      const res = await fetch(`/api/storefront/${resolvedSlug}/contact`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(form),
+      });
+      const json = await res.json();
+      if (json.success) {
+        setStatus("success");
+        setForm({ name: "", email: "", subject: "", message: "" });
+      } else {
+        setStatus("error");
+        setErrorMsg(json.error || "Failed to send. Please try again.");
+      }
+    } catch {
+      setStatus("error");
+      setErrorMsg("Network error. Please try again.");
+    }
+  };
+
   return (
     <div className="rounded-[34px] bg-white p-6 shadow-[0_30px_70px_rgba(59,51,68,0.08)] sm:p-8">
       <div className="mb-6">
         <p className="text-xs font-bold uppercase tracking-[0.35em] text-[#f5857c]">{title}</p>
         <h2 className="mt-2 font-serif text-3xl text-[#3b3344]">{title}</h2>
       </div>
-      <form className="grid gap-4">
-        <div className="grid gap-4 sm:grid-cols-2">
-          <input className="rounded-2xl border border-[#ece4da] bg-[#fffdf8] px-4 py-3 text-sm outline-none transition focus:border-[#f5857c]" placeholder="Your name" />
-          <input className="rounded-2xl border border-[#ece4da] bg-[#fffdf8] px-4 py-3 text-sm outline-none transition focus:border-[#f5857c]" placeholder="Email address" />
+      {status === "success" ? (
+        <div className="grid gap-2 py-6 text-center">
+          <p className="text-lg font-semibold text-[#3b3344]">Message sent!</p>
+          <p className="text-sm text-[#6d6277]">We&apos;ll get back to you soon.</p>
+          <button
+            type="button"
+            onClick={() => setStatus("idle")}
+            className="mt-2 text-sm font-semibold text-[#f5857c] hover:underline"
+          >
+            Send another message
+          </button>
         </div>
-        <input className="rounded-2xl border border-[#ece4da] bg-[#fffdf8] px-4 py-3 text-sm outline-none transition focus:border-[#f5857c]" placeholder="Subject" />
-        <textarea className="min-h-[160px] rounded-[24px] border border-[#ece4da] bg-[#fffdf8] px-4 py-3 text-sm outline-none transition focus:border-[#f5857c]" placeholder="How can we help?" />
-        <button type="button" className="inline-flex items-center justify-center rounded-full bg-[#f5857c] px-6 py-3 text-sm font-semibold text-white transition hover:bg-[#ef7067]">
-          Send message
-        </button>
-      </form>
+      ) : (
+        <form className="grid gap-4" onSubmit={submit}>
+          <div className="grid gap-4 sm:grid-cols-2">
+            <input
+              className="rounded-2xl border border-[#ece4da] bg-[#fffdf8] px-4 py-3 text-sm outline-none transition focus:border-[#f5857c]"
+              placeholder="Your name"
+              required
+              value={form.name}
+              onChange={(e) => setForm((f) => ({ ...f, name: e.target.value }))}
+            />
+            <input
+              className="rounded-2xl border border-[#ece4da] bg-[#fffdf8] px-4 py-3 text-sm outline-none transition focus:border-[#f5857c]"
+              placeholder="Email address"
+              type="email"
+              required
+              value={form.email}
+              onChange={(e) => setForm((f) => ({ ...f, email: e.target.value }))}
+            />
+          </div>
+          <input
+            className="rounded-2xl border border-[#ece4da] bg-[#fffdf8] px-4 py-3 text-sm outline-none transition focus:border-[#f5857c]"
+            placeholder="Subject"
+            value={form.subject}
+            onChange={(e) => setForm((f) => ({ ...f, subject: e.target.value }))}
+          />
+          <textarea
+            className="min-h-[160px] rounded-[24px] border border-[#ece4da] bg-[#fffdf8] px-4 py-3 text-sm outline-none transition focus:border-[#f5857c]"
+            placeholder="How can we help?"
+            required
+            value={form.message}
+            onChange={(e) => setForm((f) => ({ ...f, message: e.target.value }))}
+          />
+          {status === "error" && <p className="text-sm font-medium text-red-500">{errorMsg}</p>}
+          <button
+            type="submit"
+            disabled={status === "sending"}
+            className="inline-flex items-center justify-center rounded-full bg-[#f5857c] px-6 py-3 text-sm font-semibold text-white transition hover:bg-[#ef7067] disabled:opacity-60"
+          >
+            {status === "sending" ? "Sending..." : "Send message"}
+          </button>
+        </form>
+      )}
     </div>
   );
 }
@@ -1610,3 +1696,4 @@ export function KidsFooter(props: React.ComponentProps<typeof FashionFooter>) {
   const storeCtx = useContext(KidsStoreContext);
   return <FashionFooter {...props} storeSlug={storeCtx?.storeSlug} />;
 }
+

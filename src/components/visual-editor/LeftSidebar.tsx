@@ -9,13 +9,30 @@ import {
   Search,
   ChevronDown,
   ChevronRight,
-  X
+  X,
+  LayoutTemplate,
+  Loader2,
+  Plus
 } from "lucide-react";
 import { elementCategories, categoryLabels, widgetDefinitions, createElementFromWidget } from "@/lib/visual-editor/widgets";
 import { ElementCategory, ElementType } from "@/lib/visual-editor/types";
 import { api } from "@/lib/api-client";
+import { THEME_BLOCK_GROUPS, BLOCK_TYPE_TO_THEME } from "@/components/storefront/TemplateBlockRenderer";
 
-type SidebarPanel = "widgets" | "page-settings" | "global-settings";
+type SidebarPanel = "widgets" | "sections" | "page-settings" | "global-settings";
+
+// "kidsBlogPosts" -> "Blog Posts", "fashionHeroSlider" -> "Hero Slider".
+// Purely cosmetic (label generation for the picker), so a best-effort
+// split is fine here even though it isn't reliable enough to use for
+// the actual theme-matching logic above.
+function humanizeBlockType(type: string, themeKey: string): string {
+  const withoutPrefix = type.toLowerCase().startsWith(themeKey.toLowerCase())
+    ? type.slice(themeKey.length)
+    : type;
+  const spaced = withoutPrefix.replace(/([a-z0-9])([A-Z])/g, "$1 $2");
+  const label = spaced.charAt(0).toUpperCase() + spaced.slice(1);
+  return label.trim() || type;
+}
 
 export default function LeftSidebar() {
   const router = useRouter();
@@ -26,7 +43,69 @@ export default function LeftSidebar() {
   );
   const [pages, setPages] = useState<Array<{ id: string; title: string; slug: string; type?: string; isPublished?: boolean; position?: number }>>([]);
   const [loadingPages, setLoadingPages] = useState(false);
-  const { siteId, pageId } = useEditorStore();
+  const [addingSectionType, setAddingSectionType] = useState<string | null>(null);
+  const [expandedThemeGroups, setExpandedThemeGroups] = useState<Set<string>>(new Set());
+  const { siteId, pageId, pageStructure } = useEditorStore();
+
+  // Detect which theme this site is actually using by looking at the
+  // block types already present on the current page, rather than
+  // trusting metadata that was never guaranteed to match the rendered
+  // blocks. Falls back to null (shows every theme) if this page is
+  // empty or built entirely from basic widgets.
+  const detectedThemeKey = useMemo(() => {
+    const findThemeInNodes = (nodes: any[] | undefined): string | null => {
+      if (!Array.isArray(nodes)) return null;
+      for (const node of nodes) {
+        if (!node) continue;
+        const theme = BLOCK_TYPE_TO_THEME[node.type];
+        if (theme) return theme;
+        const nested =
+          findThemeInNodes(node.elements) ||
+          findThemeInNodes(node.children) ||
+          findThemeInNodes(node.columns);
+        if (nested) return nested;
+      }
+      return null;
+    };
+    return findThemeInNodes(pageStructure?.elements);
+  }, [pageStructure?.elements]);
+
+  const toggleThemeGroup = (key: string) => {
+    setExpandedThemeGroups((prev) => {
+      const next = new Set(prev);
+      if (next.has(key)) next.delete(key);
+      else next.add(key);
+      return next;
+    });
+  };
+
+  const handleAddSection = async (blockType: string) => {
+    if (addingSectionType) return;
+    setAddingSectionType(blockType);
+    try {
+      const res = await api.get<{ found: boolean; settings: any; content: any }>(`/api/template-blocks/${blockType}/example`);
+      const settings = res.success && res.data ? res.data.settings || {} : {};
+      const content = res.success && res.data ? res.data.content || {} : {};
+
+      const themeKey = BLOCK_TYPE_TO_THEME[blockType] || "";
+      const newElement: any = {
+        id: crypto.randomUUID(),
+        type: blockType,
+        parentId: null,
+        order: 0,
+        visible: true,
+        locked: false,
+        name: humanizeBlockType(blockType, themeKey),
+        settings,
+        content,
+        styles: {},
+        responsiveStyles: {},
+      };
+      useEditorStore.getState().addElement(newElement);
+    } finally {
+      setAddingSectionType(null);
+    }
+  };
 
   const toggleCategory = (category: ElementCategory) => {
     setExpandedCategories(prev => {
@@ -86,6 +165,18 @@ export default function LeftSidebar() {
         >
           <LayoutGrid className="h-4 w-4" />
           Add Element
+        </button>
+        <button
+          type="button"
+          onClick={() => setActivePanel("sections")}
+          className={`flex-1 min-w-max px-4 py-3 text-xs font-semibold transition-colors flex items-center justify-center gap-2 ${
+            activePanel === "sections" 
+              ? "text-blue-600 dark:text-blue-400 border-b-2 border-blue-600 dark:border-blue-400 bg-blue-50 dark:bg-blue-900/20" 
+              : "text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300"
+          }`}
+        >
+          <LayoutTemplate className="h-4 w-4" />
+          Sections
         </button>
         <button
           type="button"

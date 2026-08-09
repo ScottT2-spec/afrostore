@@ -32,7 +32,11 @@ interface DashboardData {
   topProducts: Array<{
     id: string;
     name: string;
-    _count: { orderItems: number };
+    slug: string;
+    price: number;
+    images: Array<{ url: string }>;
+    totalSold: number;
+    totalRevenue: number;
   }>;
 }
 
@@ -140,6 +144,12 @@ export default function DashboardPage() {
       />
 
       <div className="p-6 space-y-6">
+        {error && (
+          <div className="rounded-xl border border-accent-200 bg-accent-50 text-accent-700 text-sm px-4 py-3">
+            Couldn&apos;t load your dashboard stats: {error}
+          </div>
+        )}
+
         {/* View Store Banner */}
         <div className="rounded-2xl border border-brand-200 bg-gradient-to-r from-brand-50 to-accent-50 p-4 flex flex-col sm:flex-row items-center justify-between gap-3">
           <div className="flex items-center gap-3">
@@ -321,6 +331,45 @@ export default function DashboardPage() {
             </Link>
           </div>
         </div>
+
+        {/* Top Products */}
+        {!loading && topProducts.length > 0 && (
+          <div className="rounded-2xl border border-surface-200 bg-white">
+            <div className="flex items-center justify-between p-6 pb-4">
+              <div>
+                <h3 className="text-base font-bold text-surface-900">Top Products</h3>
+                <p className="text-xs text-surface-500 mt-0.5">Best sellers, last 30 days</p>
+              </div>
+              <Link
+                href="/dashboard/products"
+                className="text-xs font-semibold text-brand-600 hover:text-brand-700 flex items-center gap-1"
+              >
+                View all <ArrowRight className="h-3.5 w-3.5" />
+              </Link>
+            </div>
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4 p-6 pt-0">
+              {topProducts.map((product) => (
+                <Link
+                  key={product.id}
+                  href={`/dashboard/products/${product.id}`}
+                  className="rounded-xl border border-surface-100 hover:border-brand-200 hover:shadow-sm transition-all p-3"
+                >
+                  <div className="aspect-square rounded-lg bg-surface-50 overflow-hidden mb-2.5">
+                    {product.images?.[0]?.url ? (
+                      <img src={product.images[0].url} alt={product.name} className="w-full h-full object-cover" />
+                    ) : (
+                      <div className="w-full h-full flex items-center justify-center">
+                        <Package className="h-6 w-6 text-surface-300" />
+                      </div>
+                    )}
+                  </div>
+                  <p className="text-xs font-semibold text-surface-900 truncate">{product.name}</p>
+                  <p className="text-[10px] text-surface-500 mt-0.5">{product.totalSold} sold · {formatCurrency(product.totalRevenue, currency)}</p>
+                </Link>
+              ))}
+            </div>
+          </div>
+        )}
       </div>
     </>
   );

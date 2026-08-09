@@ -6,6 +6,25 @@ import { prisma } from "@/lib/db";
 import { logAudit } from "@/lib/api-helpers";
 import type { MCPToolDef } from "../types";
 
+/**
+ * MCP tools run with no permission gate of their own by default — the
+ * chat route itself only checks minimum STAFF to use the assistant at
+ * all. That's not enough for team management specifically: STAFF must
+ * not be able to add/remove members or promote someone to ADMIN via
+ * the AI, only an actual site ADMIN or the OWNER should. Checked here
+ * directly (not just relying on the outer route gate) so this stays
+ * correct even if the assistant's own access model changes later.
+ */
+async function callerIsAdminOrOwner(siteId: string, userId: string): Promise<boolean> {
+  const site = await prisma.site.findUnique({
+    where: { id: siteId },
+    include: { workspace: true, members: { where: { userId } } },
+  });
+  if (!site) return false;
+  if (site.workspace.ownerId === userId) return true;
+  return site.members.some((m) => m.role === "ADMIN");
+}
+
 // ─── STORE SETTINGS ─────────────────────────────────────────
 
 const getSettings: MCPToolDef = {
@@ -432,6 +451,10 @@ const addMember: MCPToolDef = {
   mutates: true,
   requiresVerification: true,
   execute: async (params, ctx) => {
+    if (!(await callerIsAdminOrOwner(ctx.siteId, ctx.userId))) {
+      return { action: "error", message: "Only store admins and the owner can add team members.", errorCode: "FORBIDDEN" };
+    }
+
     const user = await prisma.user.findUnique({ where: { email: params.email as string } });
     if (!user) {
       return { action: "error", message: `No user found with email ${params.email}. They need to sign up first.`, errorCode: "NOT_FOUND" };
@@ -472,6 +495,10 @@ const removeMember: MCPToolDef = {
   mutates: true,
   requiresVerification: false,
   execute: async (params, ctx) => {
+    if (!(await callerIsAdminOrOwner(ctx.siteId, ctx.userId))) {
+      return { action: "error", message: "Only store admins and the owner can remove team members.", errorCode: "FORBIDDEN" };
+    }
+
     const member = await prisma.siteMember.findFirst({
       where: { id: params.member_id as string, siteId: ctx.siteId },
       include: { user: { select: { firstName: true, lastName: true, email: true } } },

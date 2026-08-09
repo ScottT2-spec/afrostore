@@ -5,6 +5,7 @@ import { Archive, Calendar, ExternalLink, Eye, EyeOff, FileText, Image as ImageI
 import { useState, useEffect, useCallback } from "react";
 import { useSite } from "@/context/StoreContext";
 import { api } from "@/lib/api-client";
+import { SingleImageUpload } from "@/components/dashboard/ImageUpload";
 
 interface BlogItem {
   id: string;
@@ -106,6 +107,8 @@ export default function BlogsPage() {
       setStatus(b.status === "ARCHIVED" ? "DRAFT" : b.status);
       setEditingBlog(b);
       setShowEditor(true);
+    } else {
+      alert(res.error || "Failed to load blog post");
     }
   };
 
@@ -125,30 +128,24 @@ export default function BlogsPage() {
       status,
     };
 
-    if (editingBlog) {
-      const res = await api.patch<BlogItem>(`/api/sites/${currentStore.id}/blogs/${editingBlog.id}`, payload);
-      if (res.success) {
-        await fetchBlogs();
-        setShowEditor(false);
-        resetForm();
-      }
-    } else {
-      const res = await api.post<BlogItem>(`/api/sites/${currentStore.id}/blogs`, payload);
-      if (res.success) {
-        await fetchBlogs();
-        setShowEditor(false);
-        resetForm();
-      }
-    }
+    const res = editingBlog
+      ? await api.patch<BlogItem>(`/api/sites/${currentStore.id}/blogs/${editingBlog.id}`, payload)
+      : await api.post<BlogItem>(`/api/sites/${currentStore.id}/blogs`, payload);
+
     setSaving(false);
+    if (!res.success) { alert(res.error || "Failed to save blog post"); return; }
+    await fetchBlogs();
+    setShowEditor(false);
+    resetForm();
   };
 
   const deleteBlog = async (id: string) => {
     if (!currentStore || !confirm("Delete this blog post? This cannot be undone.")) return;
     setDeleteId(id);
-    await api.delete(`/api/sites/${currentStore.id}/blogs/${id}`);
-    setBlogs((prev) => prev.filter((b) => b.id !== id));
+    const res = await api.delete(`/api/sites/${currentStore.id}/blogs/${id}`);
     setDeleteId(null);
+    if (!res.success) { alert(res.error || "Failed to delete blog post"); return; }
+    setBlogs((prev) => prev.filter((b) => b.id !== id));
   };
 
   const togglePublish = async (blog: BlogItem) => {
@@ -161,6 +158,8 @@ export default function BlogsPage() {
           b.id === blog.id ? { ...b, status: newStatus, publishedAt: newStatus === "PUBLISHED" ? new Date().toISOString() : b.publishedAt } : b
         )
       );
+    } else {
+      alert(res.error || "Failed to update status");
     }
   };
 
@@ -253,16 +252,11 @@ export default function BlogsPage() {
 
             <div className="space-y-4">
               <div>
-                <label className="block text-sm font-medium text-surface-700 mb-1">Cover Image URL</label>
-                <input
-                  value={coverImage}
-                  onChange={(e) => setCoverImage(e.target.value)}
-                  placeholder="https://..."
-                  className="input-field py-2.5 w-full"
+                <SingleImageUpload
+                  label="Cover Image"
+                  image={coverImage || null}
+                  onChange={(url) => setCoverImage(url || "")}
                 />
-                {coverImage && (
-                  <img src={coverImage} alt="Cover" className="mt-2 rounded-xl h-32 w-full object-cover" />
-                )}
               </div>
 
               <div className="grid grid-cols-2 gap-3">
@@ -389,7 +383,7 @@ export default function BlogsPage() {
                   </div>
 
                   {/* Actions */}
-                  <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                  <div className="flex items-center gap-1 opacity-100 md:opacity-0 md:group-hover:opacity-100 transition-opacity">
                     <button
                       onClick={() => openEdit(blog)}
                       className="flex items-center gap-1.5 rounded-lg bg-brand-600 text-white px-3 py-1.5 text-xs font-semibold hover:bg-brand-700 transition-colors"

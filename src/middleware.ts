@@ -18,8 +18,6 @@ const BYPASS_PREFIXES = [
   "/static/",
   "/js/",
   "/favicon",
-  "/robots.txt",
-  "/sitemap",
   "/manifest",
   "/uploads/",
   // App pages (not store pages)

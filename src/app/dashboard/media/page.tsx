@@ -1,8 +1,8 @@
 "use client";
 import { Check, Loader2, Plus, X } from "lucide-react";
-import { FileText, Film, FolderOpen, Grid, Image as ImageIcon, List, Music, Pencil, Search, Trash2 } from "@/components/icons/FilledIcons";
+import { FileText, Film, FolderOpen, Grid, Image as ImageIcon, List, Music, Pencil, Search, Trash2, Upload, Link2, AlertTriangle } from "@/components/icons/FilledIcons";
 
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useRef } from "react";
 import { useSite } from "@/context/StoreContext";
 import { api } from "@/lib/api-client";
 
@@ -32,11 +32,16 @@ export default function MediaPage() {
   const [folderFilter, setFolderFilter] = useState("");
   const [viewMode, setViewMode] = useState<"grid" | "list">("grid");
   const [showUpload, setShowUpload] = useState(false);
+  const [uploadMode, setUploadMode] = useState<"file" | "url">("file");
   const [saving, setSaving] = useState(false);
   const [deleteId, setDeleteId] = useState<string | null>(null);
   const [editingItem, setEditingItem] = useState<MediaItem | null>(null);
   const [editName, setEditName] = useState("");
   const [editAlt, setEditAlt] = useState("");
+  const [dragActive, setDragActive] = useState(false);
+  const [uploadingCount, setUploadingCount] = useState(0);
+  const [uploadErrors, setUploadErrors] = useState<string[]>([]);
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   // Upload form
   const [uploadName, setUploadName] = useState("");
@@ -63,6 +68,40 @@ export default function MediaPage() {
     setSaving(true);
     await api.post(`/api/sites/${currentStore.id}/media`, { name: uploadName.trim(), url: uploadUrl.trim(), type: uploadType, folder: uploadFolder || "/" });
     setShowUpload(false); setUploadName(""); setUploadUrl(""); setUploadType("IMAGE"); setUploadFolder("/"); setSaving(false); fetchMedia();
+  };
+
+  const uploadFiles = async (files: FileList | File[]) => {
+    if (!currentStore) return;
+    const fileArray = Array.from(files);
+    if (fileArray.length === 0) return;
+    setUploadingCount(fileArray.length);
+    setUploadErrors([]);
+    const errors: string[] = [];
+
+    for (const file of fileArray) {
+      const formData = new FormData();
+      formData.append("file", file);
+      formData.append("name", file.name);
+      formData.append("folder", uploadFolder || "/");
+      const res = await api.postForm<MediaItem>(`/api/sites/${currentStore.id}/media/upload`, formData);
+      if (!res.success) errors.push(`${file.name}: ${res.error || "Upload failed"}`);
+      setUploadingCount((c) => c - 1);
+    }
+
+    if (errors.length > 0) setUploadErrors(errors);
+    else setShowUpload(false);
+    fetchMedia();
+  };
+
+  const handleFileInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (e.target.files) uploadFiles(e.target.files);
+    e.target.value = ""; // allow re-selecting the same file
+  };
+
+  const handleDrop = (e: React.DragEvent) => {
+    e.preventDefault();
+    setDragActive(false);
+    if (e.dataTransfer.files?.length) uploadFiles(e.dataTransfer.files);
   };
 
   const deleteItem = async (id: string) => {
@@ -114,20 +153,67 @@ export default function MediaPage() {
       {/* Upload form */}
       {showUpload && (
         <div className="rounded-2xl border border-surface-200 bg-white p-6 space-y-4">
-          <h3 className="text-lg font-bold text-surface-900">Add Media</h3>
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-            <div><label className="block text-sm font-medium text-surface-700 mb-1">Name *</label><input value={uploadName} onChange={(e) => setUploadName(e.target.value)} className="input-field py-2.5 w-full" autoFocus /></div>
-            <div><label className="block text-sm font-medium text-surface-700 mb-1">URL *</label><input value={uploadUrl} onChange={(e) => setUploadUrl(e.target.value)} className="input-field py-2.5 w-full" placeholder="https://..." /></div>
-            <div><label className="block text-sm font-medium text-surface-700 mb-1">Type</label>
-              <select value={uploadType} onChange={(e) => setUploadType(e.target.value)} className="input-field py-2.5 w-full">
-                <option value="IMAGE">Image</option><option value="VIDEO">Video</option><option value="DOCUMENT">Document</option><option value="AUDIO">Audio</option>
-              </select></div>
-            <div><label className="block text-sm font-medium text-surface-700 mb-1">Folder</label><input value={uploadFolder} onChange={(e) => setUploadFolder(e.target.value)} className="input-field py-2.5 w-full" placeholder="/" /></div>
+          <div className="flex items-center justify-between">
+            <h3 className="text-lg font-bold text-surface-900">Add Media</h3>
+            <div className="flex items-center border border-surface-200 rounded-lg overflow-hidden text-xs font-medium">
+              <button onClick={() => setUploadMode("file")} className={`px-3 py-1.5 flex items-center gap-1 ${uploadMode === "file" ? "bg-brand-50 text-brand-600" : "text-surface-500"}`}><Upload className="h-3.5 w-3.5" /> Upload</button>
+              <button onClick={() => setUploadMode("url")} className={`px-3 py-1.5 flex items-center gap-1 ${uploadMode === "url" ? "bg-brand-50 text-brand-600" : "text-surface-500"}`}><Link2 className="h-3.5 w-3.5" /> From URL</button>
+            </div>
           </div>
-          <div className="flex gap-3">
-            <button onClick={uploadItem} disabled={saving || !uploadName.trim() || !uploadUrl.trim()} className="btn-primary text-sm py-2.5 px-6">{saving ? <Loader2 className="h-4 w-4 animate-spin" /> : "Add"}</button>
-            <button onClick={() => setShowUpload(false)} className="btn-secondary text-sm py-2.5 px-4">Cancel</button>
-          </div>
+
+          {uploadMode === "file" ? (
+            <div>
+              <div>
+                <label className="block text-sm font-medium text-surface-700 mb-1">Folder <span className="text-surface-400 font-normal">(optional)</span></label>
+                <input value={uploadFolder} onChange={(e) => setUploadFolder(e.target.value)} className="input-field py-2.5 w-full mb-3" placeholder="/" />
+              </div>
+              <div
+                onDragOver={(e) => { e.preventDefault(); setDragActive(true); }}
+                onDragLeave={() => setDragActive(false)}
+                onDrop={handleDrop}
+                onClick={() => fileInputRef.current?.click()}
+                className={`rounded-xl border-2 border-dashed p-10 text-center cursor-pointer transition-colors ${dragActive ? "border-brand-500 bg-brand-50" : "border-surface-200 hover:border-brand-300 hover:bg-surface-50"}`}
+              >
+                <input ref={fileInputRef} type="file" multiple accept="image/*,video/*,audio/*,application/pdf" onChange={handleFileInputChange} className="hidden" />
+                {uploadingCount > 0 ? (
+                  <div className="flex flex-col items-center gap-2">
+                    <Loader2 className="h-8 w-8 animate-spin text-brand-600" />
+                    <p className="text-sm text-surface-500">Uploading {uploadingCount} file{uploadingCount > 1 ? "s" : ""}...</p>
+                  </div>
+                ) : (
+                  <div className="flex flex-col items-center gap-2">
+                    <Upload className="h-8 w-8 text-surface-300" />
+                    <p className="text-sm font-medium text-surface-700">Drag & drop files here, or click to browse</p>
+                    <p className="text-xs text-surface-400">Images, video, audio, PDF — up to 8MB each</p>
+                  </div>
+                )}
+              </div>
+              {uploadErrors.length > 0 && (
+                <div className="mt-3 rounded-lg bg-accent-50 border border-accent-200 p-3 space-y-1">
+                  {uploadErrors.map((e, i) => (
+                    <p key={i} className="text-xs text-accent-700 flex items-start gap-1.5"><AlertTriangle className="h-3.5 w-3.5 flex-shrink-0 mt-0.5" /> {e}</p>
+                  ))}
+                </div>
+              )}
+              <button onClick={() => { setShowUpload(false); setUploadErrors([]); }} className="btn-secondary text-sm py-2.5 px-4 mt-4">Close</button>
+            </div>
+          ) : (
+            <>
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div><label className="block text-sm font-medium text-surface-700 mb-1">Name *</label><input value={uploadName} onChange={(e) => setUploadName(e.target.value)} className="input-field py-2.5 w-full" autoFocus /></div>
+                <div><label className="block text-sm font-medium text-surface-700 mb-1">URL *</label><input value={uploadUrl} onChange={(e) => setUploadUrl(e.target.value)} className="input-field py-2.5 w-full" placeholder="https://..." /></div>
+                <div><label className="block text-sm font-medium text-surface-700 mb-1">Type</label>
+                  <select value={uploadType} onChange={(e) => setUploadType(e.target.value)} className="input-field py-2.5 w-full">
+                    <option value="IMAGE">Image</option><option value="VIDEO">Video</option><option value="DOCUMENT">Document</option><option value="AUDIO">Audio</option>
+                  </select></div>
+                <div><label className="block text-sm font-medium text-surface-700 mb-1">Folder</label><input value={uploadFolder} onChange={(e) => setUploadFolder(e.target.value)} className="input-field py-2.5 w-full" placeholder="/" /></div>
+              </div>
+              <div className="flex gap-3">
+                <button onClick={uploadItem} disabled={saving || !uploadName.trim() || !uploadUrl.trim()} className="btn-primary text-sm py-2.5 px-6">{saving ? <Loader2 className="h-4 w-4 animate-spin" /> : "Add"}</button>
+                <button onClick={() => setShowUpload(false)} className="btn-secondary text-sm py-2.5 px-4">Cancel</button>
+              </div>
+            </>
+          )}
         </div>
       )}
 
@@ -167,7 +253,7 @@ export default function MediaPage() {
                   ) : (
                     <Icon className="h-10 w-10 text-surface-300" />
                   )}
-                  <div className="absolute inset-0 bg-black/0 group-hover:bg-black/30 transition-colors flex items-center justify-center gap-1 opacity-0 group-hover:opacity-100">
+                  <div className="absolute inset-0 bg-black/0 group-hover:bg-black/30 transition-colors flex items-center justify-center gap-1 sm:opacity-0 sm:group-hover:opacity-100">
                     <button onClick={() => startEdit(item)} className="p-2 bg-white rounded-lg shadow-sm hover:bg-surface-50"><Pencil className="h-4 w-4 text-surface-700" /></button>
                     <button onClick={() => deleteItem(item.id)} disabled={deleteId === item.id} className="p-2 bg-white rounded-lg shadow-sm hover:bg-red-50">
                       {deleteId === item.id ? <Loader2 className="h-4 w-4 animate-spin" /> : <Trash2 className="h-4 w-4 text-red-600" />}
@@ -202,7 +288,7 @@ export default function MediaPage() {
                     <span>{item.folder || "/"}</span>
                   </div>
                 </div>
-                <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                <div className="flex items-center gap-1 sm:opacity-0 sm:group-hover:opacity-100 transition-opacity">
                   <button onClick={() => startEdit(item)} className="p-2 rounded-lg hover:bg-surface-100 text-surface-400"><Pencil className="h-4 w-4" /></button>
                   <button onClick={() => deleteItem(item.id)} disabled={deleteId === item.id} className="p-2 rounded-lg hover:bg-red-50 text-surface-400 hover:text-red-600">
                     {deleteId === item.id ? <Loader2 className="h-4 w-4 animate-spin" /> : <Trash2 className="h-4 w-4" />}

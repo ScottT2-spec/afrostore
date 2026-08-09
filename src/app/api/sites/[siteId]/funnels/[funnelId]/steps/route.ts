@@ -1,6 +1,6 @@
 import { NextRequest } from "next/server";
 import { prisma } from "@/lib/db";
-import { getStoreContext, success, error, validationError } from "@/lib/api-helpers";
+import { getStoreContext, success, error, validationError, serverError , requireRole } from "@/lib/api-helpers";
 import { createFunnelStepSchema } from "@/lib/validators";
 import { unauthorized } from "@/lib/auth";
 
@@ -11,6 +11,8 @@ export async function POST(req: NextRequest, { params }: Params) {
   const { siteId, funnelId } = await params;
   const ctx = await getStoreContext(req, siteId);
   if (ctx.error) return ctx.user ? error(ctx.error, 403) : unauthorized();
+  const roleErr = requireRole(ctx, "STAFF");
+  if (roleErr) return roleErr;
 
   const funnel = await prisma.funnel.findFirst({ where: { id: funnelId, siteId } });
   if (!funnel) return error("Funnel not found", 404);
@@ -20,7 +22,7 @@ export async function POST(req: NextRequest, { params }: Params) {
     const parsed = createFunnelStepSchema.safeParse(body);
     if (!parsed.success) return validationError(parsed.error.flatten().fieldErrors);
 
-    const { settings, pageId, formId, ...rest } = parsed.data;
+    const { settings, pageId, formId, position: _ignoredPosition, ...rest } = parsed.data;
 
     if (pageId) {
       const page = await prisma.page.findFirst({ where: { id: pageId, siteId } });
@@ -31,12 +33,16 @@ export async function POST(req: NextRequest, { params }: Params) {
       if (!linkedForm) return error("Linked form not found on this site", 422);
     }
 
-    // Auto-position at end if not specified
-    const maxPos = await prisma.funnelStep.aggregate({
-      where: { funnelId },
-      _max: { position: true },
-    });
-    const position = parsed.data.position ?? ((maxPos._max.position ?? -1) + 1);
+    // Auto-position at end unless the caller explicitly requested a specific position.
+    const requestedPosition = typeof body.position === "number" ? body.position : undefined;
+    let position = requestedPosition;
+    if (position === undefined) {
+      const maxPos = await prisma.funnelStep.aggregate({
+        where: { funnelId },
+        _max: { position: true },
+      });
+      position = (maxPos._max.position ?? -1) + 1;
+    }
 
     const step = await prisma.funnelStep.create({
       data: {
@@ -51,8 +57,7 @@ export async function POST(req: NextRequest, { params }: Params) {
 
     return success(step, 201);
   } catch (err) {
-    console.error("Add funnel step error:", err);
-    return error("Internal server error", 500);
+    return serverError(err, "Add funnel step error");
   }
 }
 
@@ -61,6 +66,8 @@ export async function PATCH(req: NextRequest, { params }: Params) {
   const { siteId, funnelId } = await params;
   const ctx = await getStoreContext(req, siteId);
   if (ctx.error) return ctx.user ? error(ctx.error, 403) : unauthorized();
+  const roleErr = requireRole(ctx, "STAFF");
+  if (roleErr) return roleErr;
 
   const funnel = await prisma.funnel.findFirst({ where: { id: funnelId, siteId } });
   if (!funnel) return error("Funnel not found", 404);
@@ -88,7 +95,6 @@ export async function PATCH(req: NextRequest, { params }: Params) {
 
     return success({ steps });
   } catch (err) {
-    console.error("Reorder funnel steps error:", err);
-    return error("Internal server error", 500);
+    return serverError(err, "Reorder funnel steps error");
   }
 }

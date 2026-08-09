@@ -97,6 +97,7 @@ export const createOrderSchema = z.object({
   paymentMethod: z.string(),
   couponCode: z.string().optional(),
   note: z.string().optional(),
+  redeemPoints: z.number().int().nonnegative().optional(),
 });
 
 export const updateOrderStatusSchema = z.object({
@@ -122,6 +123,20 @@ export const createCustomerSchema = z.object({
   }).optional(),
   tags: z.array(z.string()).default([]),
   note: z.string().optional(),
+});
+
+export const updateCustomerSchema = z.object({
+  firstName: z.string().min(1).optional(),
+  lastName: z.string().min(1).optional(),
+  phone: z.string().optional().nullable(),
+  address: z.object({
+    line1: z.string(),
+    city: z.string(),
+    state: z.string(),
+    country: z.string(),
+  }).optional().nullable(),
+  tags: z.array(z.string()).optional(),
+  note: z.string().optional().nullable(),
 });
 
 // ─── CATEGORIES ─────────────────────────────────────────────
@@ -740,9 +755,13 @@ export const updateMarketplaceItemSchema = z.object({
   description: z.string().max(5000).optional().nullable(),
   price: z.number().min(0).optional(),
   thumbnail: z.string().url().optional().nullable(),
-  status: z.enum(["PENDING", "APPROVED", "REJECTED", "SUSPENDED"]).optional(),
   category: z.string().max(100).optional().nullable(),
   tags: z.array(z.string()).optional(),
+});
+
+export const adminReviewMarketplaceItemSchema = z.object({
+  status: z.enum(["PENDING", "APPROVED", "REJECTED", "SUSPENDED"]),
+  rejectionReason: z.string().max(1000).optional().nullable(),
 });
 
 // ─── ANALYTICS ──────────────────────────────────────────────

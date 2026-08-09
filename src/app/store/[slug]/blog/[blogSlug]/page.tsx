@@ -6,6 +6,7 @@ import Link from "next/link";
 import { ArrowLeft, Calendar, Loader2, Tag, User } from "lucide-react";
 import { HandmadeBagsHeader, HandmadeBagsFooter } from "@/components/storefront/HandmadeBagsStoreChrome";
 import { KidsHeader, KidsFooterFull, KidsFontLoader } from "@/components/storefront/KidsTemplateBlocks";
+import { sanitizeHtml } from "@/lib/sanitize";
 
 interface BlogPost {
   id: string;
@@ -107,7 +108,7 @@ export default function StoreBlogPostPage() {
   // Render blog content: prefer contentHtml, fallback to plain content with line breaks
   const renderContent = () => {
     if (blog.contentHtml) {
-      return <div dangerouslySetInnerHTML={{ __html: blog.contentHtml }} />;
+      return <div dangerouslySetInnerHTML={{ __html: sanitizeHtml(blog.contentHtml) }} />;
     }
     if (blog.content) {
       // Defensive: ensure content is a string before calling split

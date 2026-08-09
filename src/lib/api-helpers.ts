@@ -38,6 +38,25 @@ export function validationError(errors: unknown) {
   );
 }
 
+/**
+ * Use in API route catch blocks instead of a hardcoded "Internal server error"
+ * string. Logs the full error server-side and returns the real message (plus
+ * the Prisma error code when present, e.g. P2021 = table does not exist) so
+ * the client-side error display actually shows what broke instead of a dead end.
+ */
+export function serverError(err: unknown, context?: string) {
+  if (context) console.error(`${context}:`, err);
+  else console.error(err);
+
+  const message = err instanceof Error ? err.message : String(err);
+  const code = typeof err === "object" && err !== null && "code" in err ? (err as { code?: string }).code : undefined;
+
+  return NextResponse.json(
+    { success: false, error: message || "Internal server error", code },
+    { status: 500 }
+  );
+}
+
 // Get authenticated user + verify site ownership/membership
 export async function getSiteContext(req: NextRequest, siteId: string) {
   const user = await getAuthUser(req);
@@ -64,6 +83,45 @@ export async function getSiteContext(req: NextRequest, siteId: string) {
 
 // Backward compat alias
 export const getStoreContext = getSiteContext;
+
+/**
+ * Effective role of the caller on a site, as returned by getSiteContext.
+ * OWNER and platform ADMIN/SUPER_ADMIN always outrank any SiteMember row.
+ * Higher index = more privileged.
+ */
+const ROLE_RANK = { VIEWER: 0, STAFF: 1, ADMIN: 2, OWNER: 3 } as const;
+export type EffectiveRole = keyof typeof ROLE_RANK;
+
+export function getEffectiveRole(
+  ctx: Awaited<ReturnType<typeof getSiteContext>>
+): EffectiveRole | null {
+  if (!ctx.site || !ctx.user) return null;
+  if (ctx.site.workspace.ownerId === ctx.user.id) return "OWNER";
+  if (ctx.user.role === "ADMIN" || ctx.user.role === "SUPER_ADMIN") return "OWNER"; // platform admin, treat as full access
+  const member = ctx.site.members.find((m) => m.userId === ctx.user!.id);
+  return member?.role ?? null;
+}
+
+/**
+ * Enforce a minimum role for a route. getSiteContext/getStoreContext only
+ * proves site membership — it does NOT check the member's role (STAFF vs
+ * VIEWER vs ADMIN), so any route handling something sensitive (payment
+ * credentials, site settings, financials) must call this explicitly.
+ *
+ * Returns an error() response to short-circuit with if the caller doesn't
+ * meet the bar, or null if they're cleared to proceed.
+ */
+export function requireRole(
+  ctx: Awaited<ReturnType<typeof getSiteContext>>,
+  minRole: EffectiveRole
+) {
+  const role = getEffectiveRole(ctx);
+  if (!role || ROLE_RANK[role] < ROLE_RANK[minRole]) {
+    return error(`This action requires ${minRole === "ADMIN" ? "an admin" : minRole.toLowerCase()} role or higher`, 403);
+  }
+  return null;
+}
+
 
 /**
  * Generate a collision-resistant order number.

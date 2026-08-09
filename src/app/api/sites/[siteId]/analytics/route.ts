@@ -6,6 +6,8 @@ import { unauthorized } from "@/lib/auth";
 
 type Params = { params: Promise<{ siteId: string }> };
 
+const PERIOD_DAYS: Record<string, number> = { "7d": 7, "30d": 30, "90d": 90 };
+
 // GET /api/sites/:siteId/analytics
 export async function GET(req: NextRequest, { params }: Params) {
   const { siteId } = await params;
@@ -14,52 +16,76 @@ export async function GET(req: NextRequest, { params }: Params) {
 
   const url = new URL(req.url);
   const event = url.searchParams.get("event");
-  const startDate = url.searchParams.get("startDate");
-  const endDate = url.searchParams.get("endDate");
+  const period = url.searchParams.get("period");
   const groupBy = url.searchParams.get("groupBy") || "day"; // day | week | month
   const page = parseInt(url.searchParams.get("page") || "1");
   const limit = Math.min(parseInt(url.searchParams.get("limit") || "50"), 100);
   const skip = (page - 1) * limit;
 
+  // "period=30d" (used by the dashboard) takes precedence over explicit
+  // startDate/endDate if both are somehow given.
+  const startDate = url.searchParams.get("startDate");
+  const endDate = url.searchParams.get("endDate");
+  const periodDays = period ? PERIOD_DAYS[period] : undefined;
+  const rangeStart = periodDays
+    ? new Date(Date.now() - periodDays * 24 * 60 * 60 * 1000)
+    : startDate
+    ? new Date(startDate)
+    : new Date(Date.now() - 30 * 24 * 60 * 60 * 1000);
+  const rangeEnd = endDate ? new Date(endDate) : undefined;
+
   try {
     const where: Record<string, unknown> = { siteId };
     if (event) where.event = event;
-    if (startDate || endDate) {
-      where.createdAt = {};
-      if (startDate) (where.createdAt as Record<string, unknown>).gte = new Date(startDate);
-      if (endDate) (where.createdAt as Record<string, unknown>).lte = new Date(endDate);
-    }
+    where.createdAt = { gte: rangeStart, ...(rangeEnd ? { lte: rangeEnd } : {}) };
 
-    // Get events with pagination
     const [events, total] = await Promise.all([
-      prisma.analyticsEvent.findMany({
-        where: where as any,
-        orderBy: { createdAt: "desc" },
-        skip,
-        take: limit,
-      }),
+      prisma.analyticsEvent.findMany({ where: where as any, orderBy: { createdAt: "desc" }, skip, take: limit }),
       prisma.analyticsEvent.count({ where: where as any }),
     ]);
 
-    // Aggregated metrics
-    const defaultStart = new Date(Date.now() - 30 * 24 * 60 * 60 * 1000);
-    const metricsWhere: Record<string, unknown> = {
-      siteId,
-      createdAt: {
-        gte: startDate ? new Date(startDate) : defaultStart,
-        ...(endDate ? { lte: new Date(endDate) } : {}),
-      },
-    };
+    const metricsWhere = { siteId, createdAt: { gte: rangeStart, ...(rangeEnd ? { lte: rangeEnd } : {}) } };
 
-    const [pageViews, addToCart, checkoutStarts, purchases] = await Promise.all([
+    const [
+      pageViews, addToCart, checkoutStarts, purchaseEvents, uniqueSessions,
+      pageGroups, deviceGroups, sourceGroups, productViewGroups,
+    ] = await Promise.all([
       prisma.analyticsEvent.count({ where: { ...metricsWhere, event: "page_view" } as any }),
       prisma.analyticsEvent.count({ where: { ...metricsWhere, event: "add_to_cart" } as any }),
       prisma.analyticsEvent.count({ where: { ...metricsWhere, event: "checkout" } as any }),
-      prisma.analyticsEvent.count({ where: { ...metricsWhere, event: "purchase" } as any }),
+      prisma.analyticsEvent.findMany({ where: { ...metricsWhere, event: "purchase" } as any, select: { metadata: true } }),
+      prisma.analyticsEvent.findMany({ where: { ...metricsWhere, sessionId: { not: null } } as any, select: { sessionId: true }, distinct: ["sessionId"] }),
+      prisma.analyticsEvent.groupBy({ by: ["page"], where: { ...metricsWhere, event: "page_view", page: { not: null } } as any, _count: { _all: true }, orderBy: { _count: { page: "desc" } }, take: 10 } as any),
+      prisma.analyticsEvent.groupBy({ by: ["device"], where: { ...metricsWhere, device: { not: null } } as any, _count: { _all: true } } as any),
+      prisma.analyticsEvent.groupBy({ by: ["source"], where: { ...metricsWhere, source: { not: null } } as any, _count: { _all: true } } as any),
+      prisma.analyticsEvent.groupBy({ by: ["productId"], where: { ...metricsWhere, event: "product_view", productId: { not: null } } as any, _count: { _all: true }, orderBy: { _count: { productId: "desc" } }, take: 10 } as any),
     ]);
 
+    const purchases = purchaseEvents.length;
+    const revenue = purchaseEvents.reduce((sum: number, e: { metadata: unknown }) => {
+      const meta = e.metadata as Record<string, unknown> | null;
+      const value = meta && typeof meta.value === "number" ? meta.value : 0;
+      return sum + value;
+    }, 0);
+    const uniqueVisitors = uniqueSessions.length;
     const conversionRate = pageViews > 0 ? Math.round((purchases / pageViews) * 10000) / 100 : 0;
     const cartRate = pageViews > 0 ? Math.round((addToCart / pageViews) * 10000) / 100 : 0;
+
+    const topPages = (pageGroups as any[]).map((g) => ({ page: g.page as string, views: g._count._all as number }));
+    const deviceBreakdown = (deviceGroups as any[]).map((g) => ({ device: g.device as string, count: g._count._all as number }));
+    const sourceBreakdown = (sourceGroups as any[]).map((g) => ({ source: g.source as string, count: g._count._all as number }));
+
+    let topProducts: { productId: string; name: string; views: number }[] = [];
+    const productIds = (productViewGroups as any[]).map((g) => g.productId as string);
+    if (productIds.length > 0) {
+      const products = await prisma.product.findMany({ where: { id: { in: productIds } }, select: { id: true, name: true } });
+      const nameById = new Map(products.map((p: { id: string; name: string }) => [p.id, p.name]));
+      topProducts = (productViewGroups as any[]).map((g) => ({
+        productId: g.productId as string,
+        name: (nameById.get(g.productId as string) as string | undefined) || "Unknown product",
+        views: g._count._all as number,
+      }));
+    }
 
     // Group by time period
     let dateTrunc: string;
@@ -72,19 +98,24 @@ export async function GET(req: NextRequest, { params }: Params) {
     >(
       `SELECT DATE_TRUNC($1, "createdAt")::date as date, event, COUNT(*)::int as count
        FROM analytics_events
-       WHERE "siteId" = $2 AND "createdAt" >= $3 ${endDate ? 'AND "createdAt" <= $4' : ""}
+       WHERE "siteId" = $2 AND "createdAt" >= $3 ${rangeEnd ? 'AND "createdAt" <= $4' : ""}
        GROUP BY DATE_TRUNC($1, "createdAt")::date, event
        ORDER BY date ASC`,
       dateTrunc,
       siteId,
-      startDate ? new Date(startDate) : defaultStart,
-      ...(endDate ? [new Date(endDate)] : [])
+      rangeStart,
+      ...(rangeEnd ? [rangeEnd] : [])
     );
 
     return success({
       events,
       pagination: { page, limit, total, pages: Math.ceil(total / limit) },
-      metrics: { pageViews, addToCart, checkoutStarts, purchases, conversionRate, cartRate },
+      summary: { pageViews, uniqueVisitors, addToCarts: addToCart, purchases, conversionRate, revenue },
+      metrics: { pageViews, addToCart, checkoutStarts, purchases, conversionRate, cartRate }, // kept for any other existing consumers
+      topPages,
+      topProducts,
+      deviceBreakdown,
+      sourceBreakdown,
       timeline,
     });
   } catch (err) {

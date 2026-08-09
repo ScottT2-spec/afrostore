@@ -1,12 +1,18 @@
 "use client";
-import { Loader2, Plus } from "lucide-react";
+import { Loader2, Plus, X } from "lucide-react";
 import { Activity, BarChart3, CheckCircle2, Eye, MousePointerClick, Pause, Pencil, Play, Trash2, Trophy, ChevronDown, ChevronUp } from "@/components/icons/FilledIcons";
 
 import { useState, useEffect, useCallback } from "react";
 import { useSite } from "@/context/StoreContext";
 import { api } from "@/lib/api-client";
+import { parsePageContent } from "@/lib/page-content";
 
-interface Variant { id: string; name: string; content?: unknown; weight: number; }
+interface Variant {
+  id: string;
+  name: string;
+  content?: { blockOverrides?: Record<string, Record<string, unknown>> } | null;
+  weight: number;
+}
 interface ABTestItem {
   id: string; name: string; status: string; pageId: string | null;
   page: { id: string; title: string; slug: string } | null;
@@ -35,13 +41,53 @@ export default function ABTestsPage() {
   const [deleteId, setDeleteId] = useState<string | null>(null);
 
   const [name, setName] = useState("");
-  const [variants, setVariants] = useState<Array<{ id: string; name: string; weight: number }>>([
+  const [pageId, setPageId] = useState<string>("");
+  const [variants, setVariants] = useState<Array<{ id: string; name: string; weight: number; content?: { blockOverrides?: Record<string, Record<string, unknown>> } }>>([
     { id: "a", name: "Variant A", weight: 50 }, { id: "b", name: "Variant B", weight: 50 },
   ]);
+
+  const [sitePages, setSitePages] = useState<Array<{ id: string; title: string; slug: string }>>([]);
+  const [pageBlocks, setPageBlocks] = useState<Array<{ id: string; type: string }>>([]);
+  const [loadingBlocks, setLoadingBlocks] = useState(false);
+
+  // Per-variant "add an override" draft: which block + which field/value.
+  const [overrideDraft, setOverrideDraft] = useState<Record<string, { blockId: string; field: string; value: string }>>({});
+
+  const fetchSitePages = useCallback(async () => {
+    if (!currentStore) return;
+    const res = await api.get<{ pages: Array<{ id: string; title: string; slug: string }> }>(`/api/sites/${currentStore.id}/pages?limit=100`);
+    if (res.success && res.data) setSitePages(res.data.pages || []);
+  }, [currentStore]);
+
+  useEffect(() => { fetchSitePages(); }, [fetchSitePages]);
+
+  const loadPageBlocks = useCallback(async (targetPageId: string) => {
+    if (!currentStore || !targetPageId) { setPageBlocks([]); return; }
+    setLoadingBlocks(true);
+    const res = await api.get<{ content: unknown }>(`/api/sites/${currentStore.id}/pages/${targetPageId}`);
+    if (res.success && res.data) {
+      try {
+        const parsed = parsePageContent((res.data as any).content);
+        const blocks = (parsed.blocks || []).filter((b: any) => b?.id).map((b: any) => ({ id: b.id as string, type: (b.type as string) || "block" }));
+        setPageBlocks(blocks);
+      } catch {
+        setPageBlocks([]);
+      }
+    } else {
+      setPageBlocks([]);
+    }
+    setLoadingBlocks(false);
+  }, [currentStore]);
+
+  useEffect(() => {
+    if (pageId) loadPageBlocks(pageId);
+    else setPageBlocks([]);
+  }, [pageId, loadPageBlocks]);
 
   const [expandedId, setExpandedId] = useState<string | null>(null);
   const [stats, setStats] = useState<Record<string, TestStats>>({});
   const [statsLoading, setStatsLoading] = useState<string | null>(null);
+  const [statsError, setStatsError] = useState<Record<string, string>>({});
   const [decidingWinner, setDecidingWinner] = useState<string | null>(null);
 
   const fetchTests = useCallback(async () => {
@@ -55,18 +101,22 @@ export default function ABTestsPage() {
   useEffect(() => { fetchTests(); }, [fetchTests]);
 
   const resetForm = () => {
-    setName(""); setVariants([{ id: "a", name: "Variant A", weight: 50 }, { id: "b", name: "Variant B", weight: 50 }]); setEditingId(null);
+    setName(""); setPageId(""); setPageBlocks([]); setOverrideDraft({});
+    setVariants([{ id: "a", name: "Variant A", weight: 50 }, { id: "b", name: "Variant B", weight: 50 }]);
+    setEditingId(null);
   };
 
   const openEdit = (t: ABTestItem) => {
-    setName(t.name); setVariants(t.variants.map((v) => ({ id: v.id, name: v.name, weight: v.weight })));
+    setName(t.name);
+    setPageId(t.pageId || "");
+    setVariants(t.variants.map((v) => ({ id: v.id, name: v.name, weight: v.weight, content: v.content || undefined })));
     setEditingId(t.id); setShowEditor(true);
   };
 
   const saveTest = async () => {
-    if (!currentStore || !name.trim() || variants.length < 2) return;
+    if (!currentStore || !name.trim() || !pageId || variants.length < 2) return;
     setSaving(true);
-    const payload = { name: name.trim(), variants };
+    const payload = { name: name.trim(), pageId: pageId || null, variants };
     if (editingId) await api.patch(`/api/sites/${currentStore.id}/ab-tests/${editingId}`, payload);
     else await api.post(`/api/sites/${currentStore.id}/ab-tests`, payload);
     setShowEditor(false); resetForm(); setSaving(false); fetchTests();
@@ -92,8 +142,13 @@ export default function ABTestsPage() {
   const loadStats = useCallback(async (testId: string) => {
     if (!currentStore) return;
     setStatsLoading(testId);
+    setStatsError((prev) => { const next = { ...prev }; delete next[testId]; return next; });
     const res = await api.get<TestStats>(`/api/sites/${currentStore.id}/ab-tests/${testId}/stats`);
-    if (res.success && res.data) setStats((prev) => ({ ...prev, [testId]: res.data as TestStats }));
+    if (res.success && res.data) {
+      setStats((prev) => ({ ...prev, [testId]: res.data as TestStats }));
+    } else {
+      setStatsError((prev) => ({ ...prev, [testId]: res.error || "Couldn't load results" }));
+    }
     setStatsLoading(null);
   }, [currentStore]);
 
@@ -111,6 +166,39 @@ export default function ABTestsPage() {
     setDecidingWinner(null);
   };
 
+  const setOverrideDraftField = (variantId: string, field: "blockId" | "field" | "value", value: string) => {
+    setOverrideDraft((prev) => {
+      const current = prev[variantId] || { blockId: "", field: "", value: "" };
+      return { ...prev, [variantId]: { ...current, [field]: value } };
+    });
+  };
+
+  const addOverride = (variantId: string) => {
+    const draft = overrideDraft[variantId];
+    if (!draft?.blockId || !draft.field.trim()) return;
+    setVariants((prev) => prev.map((v) => {
+      if (v.id !== variantId) return v;
+      const blockOverrides = { ...(v.content?.blockOverrides || {}) };
+      blockOverrides[draft.blockId] = { ...(blockOverrides[draft.blockId] || {}), [draft.field.trim()]: draft.value };
+      return { ...v, content: { blockOverrides } };
+    }));
+    setOverrideDraft((prev) => ({ ...prev, [variantId]: { blockId: draft.blockId, field: "", value: "" } }));
+  };
+
+  const removeOverride = (variantId: string, blockId: string, field: string) => {
+    setVariants((prev) => prev.map((v) => {
+      if (v.id !== variantId) return v;
+      const blockOverrides = { ...(v.content?.blockOverrides || {}) };
+      if (blockOverrides[blockId]) {
+        const fields = { ...blockOverrides[blockId] };
+        delete fields[field];
+        if (Object.keys(fields).length === 0) delete blockOverrides[blockId];
+        else blockOverrides[blockId] = fields;
+      }
+      return { ...v, content: { blockOverrides } };
+    }));
+  };
+
   if (!currentStore) return <div className="p-6 flex items-center justify-center min-h-[50vh]"><Loader2 className="h-8 w-8 animate-spin text-brand-600" /></div>;
 
   return (
@@ -125,21 +213,86 @@ export default function ABTestsPage() {
           <h3 className="text-lg font-bold text-surface-900">{editingId ? "Edit" : "New"} A/B Test</h3>
           <div><label className="block text-sm font-medium text-surface-700 mb-1">Test Name *</label><input value={name} onChange={(e) => setName(e.target.value)} className="input-field py-2.5 w-full" placeholder="Homepage Hero Test" autoFocus /></div>
           <div>
+            <label className="block text-sm font-medium text-surface-700 mb-1">Page *</label>
+            <select value={pageId} onChange={(e) => setPageId(e.target.value)} className="input-field py-2.5 w-full">
+              <option value="">Select a page…</option>
+              {sitePages.map((p) => <option key={p.id} value={p.id}>{p.title}</option>)}
+            </select>
+            <p className="text-xs text-surface-400 mt-1">A test only runs on the page it's linked to — visitors are split when they land here.</p>
+          </div>
+          <div>
             <label className="block text-sm font-medium text-surface-700 mb-2">Variants</label>
-            {variants.map((v, idx) => (
-              <div key={idx} className="flex items-center gap-3 mb-2">
-                <input value={v.name} onChange={(e) => { const vs = [...variants]; vs[idx] = { ...vs[idx], name: e.target.value }; setVariants(vs); }} className="input-field py-2 text-sm flex-1" placeholder="Variant name" />
-                <div className="flex items-center gap-1">
-                  <input type="number" value={v.weight} min={0} max={100} onChange={(e) => { const vs = [...variants]; vs[idx] = { ...vs[idx], weight: parseInt(e.target.value) || 0 }; setVariants(vs); }} className="input-field py-2 text-sm w-20 text-center" />
-                  <span className="text-xs text-surface-400">%</span>
+            {variants.map((v, idx) => {
+              const overrides = v.content?.blockOverrides || {};
+              const overrideEntries = Object.entries(overrides).flatMap(([blockId, fields]) =>
+                Object.entries(fields).map(([field, value]) => ({ blockId, field, value }))
+              );
+              const draft = overrideDraft[v.id] || { blockId: "", field: "", value: "" };
+              return (
+                <div key={v.id} className="rounded-xl border border-surface-200 p-3 mb-2 space-y-2">
+                  <div className="flex items-center gap-3">
+                    <input value={v.name} onChange={(e) => { const vs = [...variants]; vs[idx] = { ...vs[idx], name: e.target.value }; setVariants(vs); }} className="input-field py-2 text-sm flex-1" placeholder="Variant name" />
+                    <div className="flex items-center gap-1">
+                      <input type="number" value={v.weight} min={0} max={100} onChange={(e) => { const vs = [...variants]; vs[idx] = { ...vs[idx], weight: parseInt(e.target.value) || 0 }; setVariants(vs); }} className="input-field py-2 text-sm w-20 text-center" />
+                      <span className="text-xs text-surface-400">%</span>
+                    </div>
+                    {variants.length > 2 && <button onClick={() => setVariants((v) => v.filter((_, i) => i !== idx))} className="text-surface-400 hover:text-accent-600"><Trash2 className="h-4 w-4" /></button>}
+                  </div>
+
+                  {idx === 0 ? (
+                    <p className="text-[11px] text-surface-400">Control — shows the page exactly as it is now, no changes needed.</p>
+                  ) : !pageId ? (
+                    <p className="text-[11px] text-surface-400">Select a page above to change what this variant shows.</p>
+                  ) : (
+                    <div className="space-y-1.5">
+                      {overrideEntries.length > 0 && (
+                        <div className="space-y-1">
+                          {overrideEntries.map(({ blockId, field, value }) => {
+                            const block = pageBlocks.find((b) => b.id === blockId);
+                            return (
+                              <div key={`${blockId}-${field}`} className="flex items-center gap-2 text-xs bg-surface-50 rounded-lg px-2 py-1.5">
+                                <span className="font-medium text-surface-700">{block?.type || "block"}</span>
+                                <span className="text-surface-400">·</span>
+                                <span className="text-surface-600">{field} = "{String(value)}"</span>
+                                <button onClick={() => removeOverride(v.id, blockId, field)} className="ml-auto text-surface-400 hover:text-accent-600"><X className="h-3 w-3" /></button>
+                              </div>
+                            );
+                          })}
+                        </div>
+                      )}
+                      <div className="flex items-center gap-1.5">
+                        <select
+                          value={draft.blockId}
+                          onChange={(e) => setOverrideDraftField(v.id, "blockId", e.target.value)}
+                          className="input-field py-1.5 text-xs flex-1"
+                          disabled={loadingBlocks}
+                        >
+                          <option value="">{loadingBlocks ? "Loading blocks…" : "Choose a block…"}</option>
+                          {pageBlocks.map((b) => <option key={b.id} value={b.id}>{b.type}</option>)}
+                        </select>
+                        <input
+                          value={draft.field}
+                          onChange={(e) => setOverrideDraftField(v.id, "field", e.target.value)}
+                          placeholder="field (e.g. heading)"
+                          className="input-field py-1.5 text-xs w-32"
+                        />
+                        <input
+                          value={draft.value}
+                          onChange={(e) => setOverrideDraftField(v.id, "value", e.target.value)}
+                          placeholder="new value"
+                          className="input-field py-1.5 text-xs w-32"
+                        />
+                        <button onClick={() => addOverride(v.id)} disabled={!draft.blockId || !draft.field.trim()} className="text-xs font-medium text-brand-600 hover:text-brand-700 disabled:opacity-40 whitespace-nowrap">Add</button>
+                      </div>
+                    </div>
+                  )}
                 </div>
-                {variants.length > 2 && <button onClick={() => setVariants((v) => v.filter((_, i) => i !== idx))} className="text-surface-400 hover:text-accent-600"><Trash2 className="h-4 w-4" /></button>}
-              </div>
-            ))}
+              );
+            })}
             <button onClick={addVariant} className="text-xs text-brand-600 hover:text-brand-700 font-medium mt-1"><Plus className="h-3.5 w-3.5 inline" /> Add Variant</button>
           </div>
           <div className="flex items-center gap-3 pt-2">
-            <button onClick={saveTest} disabled={saving || !name.trim() || variants.length < 2} className="btn-primary text-sm py-2.5 px-6">{saving ? <Loader2 className="h-4 w-4 animate-spin" /> : editingId ? "Update" : "Create"}</button>
+            <button onClick={saveTest} disabled={saving || !name.trim() || !pageId || variants.length < 2} className="btn-primary text-sm py-2.5 px-6">{saving ? <Loader2 className="h-4 w-4 animate-spin" /> : editingId ? "Update" : "Create"}</button>
             <button onClick={() => { setShowEditor(false); resetForm(); }} className="btn-secondary text-sm py-2.5 px-4">Cancel</button>
           </div>
         </div>
@@ -195,7 +348,14 @@ export default function ABTestsPage() {
 
                 {isExpanded && (
                   <div className="px-5 pb-5 bg-surface-50/50">
-                    {statsLoading === t.id || !testStats ? (
+                    {statsLoading === t.id ? (
+                      <div className="flex items-center justify-center py-8"><Loader2 className="h-5 w-5 animate-spin text-brand-600" /></div>
+                    ) : statsError[t.id] ? (
+                      <div className="flex items-center justify-between py-4 px-1">
+                        <p className="text-xs text-accent-600">Couldn't load results: {statsError[t.id]}</p>
+                        <button onClick={() => loadStats(t.id)} className="text-xs font-medium text-brand-600 hover:text-brand-700">Retry</button>
+                      </div>
+                    ) : !testStats ? (
                       <div className="flex items-center justify-center py-8"><Loader2 className="h-5 w-5 animate-spin text-brand-600" /></div>
                     ) : testStats.totalViews === 0 ? (
                       <p className="text-xs text-surface-400 py-4">

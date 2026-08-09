@@ -13,7 +13,7 @@ export async function POST(req: NextRequest, { params }: Params) {
   try {
     const site = await prisma.site.findFirst({
       where: { status: "ACTIVE", OR: [{ slug }, { subdomain: slug }, { customDomain: slug }] },
-      select: { id: true },
+      select: { id: true, slug: true, subdomain: true, customDomain: true },
     });
     if (!site) return error("Site not found", 404);
 
@@ -34,6 +34,31 @@ export async function POST(req: NextRequest, { params }: Params) {
     const browser = /edg/i.test(ua) ? "Edge" : /chrome/i.test(ua) ? "Chrome" : /firefox/i.test(ua) ? "Firefox" : /safari/i.test(ua) ? "Safari" : "Other";
     const os = /android/i.test(ua) ? "Android" : /iphone|ipad|ios/i.test(ua) ? "iOS" : /windows/i.test(ua) ? "Windows" : /mac os/i.test(ua) ? "macOS" : "Other";
 
+    // Derive traffic source from the Referer header when the client didn't
+    // explicitly pass one — categorize common platforms, otherwise use the
+    // referring hostname, or "direct" if there's no referrer at all.
+    let source = parsed.data.source;
+    if (!source) {
+      const referer = req.headers.get("referer") || "";
+      if (!referer) source = "direct";
+      else {
+        try {
+          const host = new URL(referer).hostname.replace(/^www\./, "");
+          const ownHosts = [site.subdomain ? `${site.subdomain}.afrostore.com` : null, site.customDomain, "afrostore.com"].filter(Boolean);
+          if (ownHosts.includes(host)) source = "direct"; // internal navigation, not a real referral
+          else if (host.includes("google")) source = "google";
+          else if (host.includes("facebook") || host.includes("fb.com")) source = "facebook";
+          else if (host.includes("instagram")) source = "instagram";
+          else if (host.includes("tiktok")) source = "tiktok";
+          else if (host.includes("whatsapp")) source = "whatsapp";
+          else if (host.includes("twitter") || host.includes("x.com")) source = "twitter";
+          else source = host;
+        } catch {
+          source = "direct";
+        }
+      }
+    }
+
     await prisma.analyticsEvent.create({
       data: {
         siteId: site.id,
@@ -42,7 +67,7 @@ export async function POST(req: NextRequest, { params }: Params) {
         productId: parsed.data.productId,
         orderId: parsed.data.orderId,
         sessionId: parsed.data.sessionId,
-        source: parsed.data.source,
+        source,
         device: parsed.data.device || device,
         country: parsed.data.country,
         city: parsed.data.city,

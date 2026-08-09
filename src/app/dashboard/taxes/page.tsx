@@ -47,20 +47,27 @@ export default function TaxesPage() {
     if (!currentStore || !name.trim() || !rate) return;
     setSaving(true);
     const payload = { name: name.trim(), rate: parseFloat(rate), country: country.trim() || null, state: state.trim() || null, isDefault };
-    if (editingId) await api.patch(`/api/sites/${currentStore.id}/taxes/${editingId}`, payload);
-    else await api.post(`/api/sites/${currentStore.id}/taxes`, payload);
-    setShowEditor(false); resetForm(); setSaving(false); fetchRules();
+    const res = editingId
+      ? await api.patch(`/api/sites/${currentStore.id}/taxes/${editingId}`, payload)
+      : await api.post(`/api/sites/${currentStore.id}/taxes`, payload);
+    setSaving(false);
+    if (!res.success) { alert(res.error || "Failed to save tax rule"); return; }
+    setShowEditor(false); resetForm(); fetchRules();
   };
 
   const deleteRule = async (id: string) => {
     if (!currentStore || !confirm("Delete this tax rule?")) return;
-    setDeleteId(id); await api.delete(`/api/sites/${currentStore.id}/taxes/${id}`);
-    setRules((p) => p.filter((r) => r.id !== id)); setDeleteId(null);
+    setDeleteId(id);
+    const res = await api.delete(`/api/sites/${currentStore.id}/taxes/${id}`);
+    setDeleteId(null);
+    if (!res.success) { alert(res.error || "Failed to delete tax rule"); return; }
+    setRules((p) => p.filter((r) => r.id !== id));
   };
 
   const toggleActive = async (r: TaxRule) => {
     if (!currentStore) return;
-    await api.patch(`/api/sites/${currentStore.id}/taxes/${r.id}`, { isActive: !r.isActive });
+    const res = await api.patch(`/api/sites/${currentStore.id}/taxes/${r.id}`, { isActive: !r.isActive });
+    if (!res.success) { alert(res.error || "Failed to update tax rule"); return; }
     setRules((p) => p.map((x) => (x.id === r.id ? { ...x, isActive: !x.isActive } : x)));
   };
 
@@ -117,7 +124,7 @@ export default function TaxesPage() {
                   {r.country && <span>Country: {r.country}</span>}{r.state && <span> · State: {r.state}</span>}{!r.country && !r.state && <span>All regions</span>}
                 </div>
               </div>
-              <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+              <div className="flex items-center gap-1 opacity-100 md:opacity-0 md:group-hover:opacity-100 transition-opacity">
                 <button onClick={() => toggleActive(r)} className="p-2 rounded-lg hover:bg-surface-100 text-surface-400 hover:text-surface-700">
                   {r.isActive ? <ToggleRight className="h-4 w-4 text-green-600" /> : <ToggleLeft className="h-4 w-4" />}
                 </button>

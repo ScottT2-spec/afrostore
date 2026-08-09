@@ -1,6 +1,6 @@
 import { NextRequest } from "next/server";
 import { prisma } from "@/lib/db";
-import { getStoreContext, success, error, validationError, logAudit } from "@/lib/api-helpers";
+import { getStoreContext, success, error, validationError, logAudit, requireRole } from "@/lib/api-helpers";
 import { setupPaymentGatewaySchema } from "@/lib/validators";
 import { unauthorized } from "@/lib/auth";
 import { getMonnifyAccessToken } from "@/lib/payments";
@@ -41,6 +41,10 @@ export async function POST(req: NextRequest, { params }: Params) {
   const { siteId } = await params;
   const ctx = await getStoreContext(req, siteId);
   if (ctx.error) return ctx.user ? error(ctx.error, 403) : unauthorized();
+  // Payment credentials are the single most sensitive thing a site has —
+  // only admins and the owner may set or change them.
+  const roleErr = requireRole(ctx, "ADMIN");
+  if (roleErr) return roleErr;
 
   const body = await req.json();
   const parsed = setupPaymentGatewaySchema.safeParse(body);

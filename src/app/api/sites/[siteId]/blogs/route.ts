@@ -1,9 +1,10 @@
 import { NextRequest } from "next/server";
 import { prisma } from "@/lib/db";
-import { getStoreContext, success, error, validationError, logAudit } from "@/lib/api-helpers";
+import { getStoreContext, success, error, validationError, logAudit , requireRole } from "@/lib/api-helpers";
 import { createBlogSchema } from "@/lib/validators";
 import { unauthorized } from "@/lib/auth";
 import { slugify } from "@/lib/utils";
+import { sanitizeHtml } from "@/lib/sanitize";
 
 type Params = { params: Promise<{ siteId: string }> };
 
@@ -59,6 +60,8 @@ export async function GET(req: NextRequest, { params }: Params) {
         category: true,
         tags: true,
         status: true,
+        metaTitle: true,
+        metaDescription: true,
         publishedAt: true,
         createdAt: true,
         updatedAt: true,
@@ -81,6 +84,8 @@ export async function POST(req: NextRequest, { params }: Params) {
   const { siteId } = await params;
   const ctx = await getStoreContext(req, siteId);
   if (ctx.error) return ctx.user ? error(ctx.error, 403) : unauthorized();
+  const roleErr = requireRole(ctx, "STAFF");
+  if (roleErr) return roleErr;
 
   try {
     const body = await req.json();
@@ -90,6 +95,7 @@ export async function POST(req: NextRequest, { params }: Params) {
     const slug = await ensureUniqueBlogSlug(parsed.data.title, siteId);
 
     const { publishedAt, ...rest } = parsed.data;
+    if (rest.contentHtml) rest.contentHtml = sanitizeHtml(rest.contentHtml);
     const blog = await prisma.blog.create({
       data: {
         siteId,

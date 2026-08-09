@@ -4,7 +4,7 @@
   "private": true,
   "scripts": {
     "dev": "next dev",
-    "build": "prisma generate && next build",
+    "build": "prisma generate && prisma migrate deploy && next build",
     "postinstall": "prisma generate",
     "migrate:deploy": "prisma migrate deploy",
     "start": "next start",
@@ -28,6 +28,7 @@
     "clsx": "^2.1.1",
     "framer-motion": "^12.40.0",
     "inngest": "^4.13.0",
+    "isomorphic-dompurify": "^3.22.0",
     "jose": "^6.2.3",
     "jsdom": "^29.1.1",
     "lucide-react": "^1.17.0",

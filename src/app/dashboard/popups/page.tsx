@@ -145,6 +145,33 @@ export default function PopupsPage() {
               </div>
             </div>
           </div>
+
+          <div className="border-t border-surface-200 pt-4">
+            <h4 className="text-sm font-bold text-surface-900 mb-3">Content</h4>
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <div className="sm:col-span-2"><label className="block text-sm font-medium text-surface-700 mb-1">Headline</label>
+                <input value={headline} onChange={(e) => setHeadline(e.target.value)} placeholder="Get 20% off your first order" className="input-field py-2.5 w-full" /></div>
+              <div className="sm:col-span-2"><label className="block text-sm font-medium text-surface-700 mb-1">Body text</label>
+                <textarea value={bodyText} onChange={(e) => setBodyText(e.target.value)} placeholder="Sign up for our newsletter and save on your next purchase." rows={2} className="input-field py-2.5 w-full" /></div>
+              <div><label className="block text-sm font-medium text-surface-700 mb-1">Image URL</label>
+                <input value={imageUrl} onChange={(e) => setImageUrl(e.target.value)} placeholder="https://..." className="input-field py-2.5 w-full" /></div>
+              {type === "COUNTDOWN" && (
+                <div><label className="block text-sm font-medium text-surface-700 mb-1">Countdown minutes</label>
+                  <input type="number" min={1} value={countdownMinutes} onChange={(e) => setCountdownMinutes(Number(e.target.value) || 1)} className="input-field py-2.5 w-full" /></div>
+              )}
+              <div><label className="block text-sm font-medium text-surface-700 mb-1">Button text</label>
+                <input value={buttonText} onChange={(e) => setButtonText(e.target.value)} placeholder="Shop Now" className="input-field py-2.5 w-full" /></div>
+              <div><label className="block text-sm font-medium text-surface-700 mb-1">Button link</label>
+                <input value={buttonLink} onChange={(e) => setButtonLink(e.target.value)} placeholder="/shop" className="input-field py-2.5 w-full" /></div>
+              <div><label className="block text-sm font-medium text-surface-700 mb-1">Background color</label>
+                <div className="flex items-center gap-2"><input type="color" value={backgroundColor} onChange={(e) => setBackgroundColor(e.target.value)} className="h-10 w-14 rounded-lg border border-surface-200" /><input value={backgroundColor} onChange={(e) => setBackgroundColor(e.target.value)} className="input-field py-2.5 w-full" /></div></div>
+              <div><label className="block text-sm font-medium text-surface-700 mb-1">Text color</label>
+                <div className="flex items-center gap-2"><input type="color" value={textColor} onChange={(e) => setTextColor(e.target.value)} className="h-10 w-14 rounded-lg border border-surface-200" /><input value={textColor} onChange={(e) => setTextColor(e.target.value)} className="input-field py-2.5 w-full" /></div></div>
+              <div><label className="block text-sm font-medium text-surface-700 mb-1">Button color</label>
+                <div className="flex items-center gap-2"><input type="color" value={buttonColor} onChange={(e) => setButtonColor(e.target.value)} className="h-10 w-14 rounded-lg border border-surface-200" /><input value={buttonColor} onChange={(e) => setButtonColor(e.target.value)} className="input-field py-2.5 w-full" /></div></div>
+            </div>
+          </div>
+
           <div className="flex items-center gap-3 pt-2">
             <button onClick={savePopup} disabled={saving || !name.trim()} className="btn-primary text-sm py-2.5 px-6">{saving ? <Loader2 className="h-4 w-4 animate-spin" /> : editingId ? "Update" : "Create"}</button>
             <button onClick={() => { setShowEditor(false); resetForm(); }} className="btn-secondary text-sm py-2.5 px-4">Cancel</button>
@@ -180,10 +207,10 @@ export default function PopupsPage() {
                     <span><BarChart3 className="h-3 w-3 inline" /> {rate}%</span>
                   </div>
                 </div>
-                <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
-                  <button onClick={() => toggleActive(p)} className="p-2 rounded-lg hover:bg-surface-100 text-surface-400 hover:text-surface-700">{p.isActive ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}</button>
-                  <button onClick={() => openEdit(p)} className="p-2 rounded-lg hover:bg-surface-100 text-surface-400 hover:text-surface-700"><Pencil className="h-4 w-4" /></button>
-                  <button onClick={() => deletePopup(p.id)} disabled={deleteId === p.id} className="p-2 rounded-lg hover:bg-accent-50 text-surface-400 hover:text-accent-600">
+                <div className="flex items-center gap-1 flex-shrink-0">
+                  <button onClick={() => toggleActive(p)} title={p.isActive ? "Deactivate" : "Activate"} className="p-2 rounded-lg hover:bg-surface-100 active:bg-surface-200 text-surface-500 hover:text-surface-700">{p.isActive ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}</button>
+                  <button onClick={() => openEdit(p)} title="Edit" className="p-2 rounded-lg hover:bg-surface-100 active:bg-surface-200 text-surface-500 hover:text-surface-700"><Pencil className="h-4 w-4" /></button>
+                  <button onClick={() => deletePopup(p.id)} disabled={deleteId === p.id} title="Delete" className="p-2 rounded-lg hover:bg-accent-50 active:bg-accent-100 text-surface-500 hover:text-accent-600">
                     {deleteId === p.id ? <Loader2 className="h-4 w-4 animate-spin" /> : <Trash2 className="h-4 w-4" />}
                   </button>
                 </div>

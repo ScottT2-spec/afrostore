@@ -4,6 +4,7 @@ import { Crown, Eye, Mail, Settings, Shield, Trash2, UserPlus } from "@/componen
 
 import { useState, useEffect, useCallback } from "react";
 import { useSite } from "@/context/StoreContext";
+import { useAuth } from "@/context/AuthContext";
 import { api } from "@/lib/api-client";
 import { useAIPrefill } from "@/hooks/useAIPrefill";
 import AIPrefillBanner from "@/components/dashboard/AIPrefillBanner";
@@ -25,9 +26,11 @@ const roleConfig: Record<string, { label: string; color: string; icon: React.Ele
 
 export default function TeamPage() {
   const { currentStore } = useSite();
+  const { user } = useAuth();
   const router = useRouter();
   const { prefillData, clearPrefill, isFromAI } = useAIPrefill("member");
   const [members, setMembers] = useState<Member[]>([]);
+  const [myRole, setMyRole] = useState<"OWNER" | "ADMIN" | "STAFF" | "VIEWER" | null>(null);
   const [loading, setLoading] = useState(true);
   const [showInvite, setShowInvite] = useState(false);
   const [inviteEmail, setInviteEmail] = useState("");
@@ -35,27 +38,43 @@ export default function TeamPage() {
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState("");
 
+  // Only admins and the owner can manage the team. This mirrors the backend
+  // check in /api/sites/:siteId/members (which is the real enforcement) —
+  // hiding these controls for everyone else isn't just cosmetic, it stops a
+  // Staff/Viewer account from seeing controls that would just 403 anyway,
+  // and from a Staff account being able to reach the invite form via the AI
+  // assistant prefill (the AI chat route only requires STAFF minimum).
+  const canManageTeam = myRole === "OWNER" || myRole === "ADMIN";
+
   const fetchMembers = useCallback(async () => {
-    if (!currentStore) return;
+    if (!currentStore || !user) return;
     setLoading(true);
     const res = await api.get<any>(`/api/sites/${currentStore.id}/members`);
     if (res.success && res.data) {
-      setMembers(Array.isArray(res.data) ? res.data : res.data.members || []);
+      const membersList = Array.isArray(res.data) ? res.data : res.data.members || [];
+      setMembers(membersList);
+      const ownerId = Array.isArray(res.data) ? null : res.data.owner?.id;
+      if (user.id === ownerId) {
+        setMyRole("OWNER");
+      } else {
+        const mine = membersList.find((m: Member) => m.user.id === user.id);
+        setMyRole(mine?.role ?? null);
+      }
     }
     setLoading(false);
-  }, [currentStore]);
+  }, [currentStore, user]);
 
   useEffect(() => { fetchMembers(); }, [fetchMembers]);
 
-  // AI prefill — auto-open invite form
+  // AI prefill — auto-open invite form (admins/owner only, see canManageTeam)
   useEffect(() => {
-    if (prefillData && isFromAI) {
+    if (prefillData && isFromAI && canManageTeam) {
       const d = prefillData as any;
       setInviteEmail(d.email || "");
       setInviteRole(d.role || "STAFF");
       setShowInvite(true);
     }
-  }, [prefillData, isFromAI]);
+  }, [prefillData, isFromAI, canManageTeam]);
 
   const inviteMember = async () => {
     if (!currentStore || !inviteEmail.trim()) return;
@@ -75,14 +94,22 @@ export default function TeamPage() {
 
   const updateRole = async (memberId: string, role: string) => {
     if (!currentStore) return;
-    await api.patch(`/api/sites/${currentStore.id}/members/${memberId}`, { role });
-    setMembers((prev) => prev.map((m) => m.id === memberId ? { ...m, role: role as Member["role"] } : m));
+    const res = await api.patch(`/api/sites/${currentStore.id}/members/${memberId}`, { role });
+    if (res.success) {
+      setMembers((prev) => prev.map((m) => m.id === memberId ? { ...m, role: role as Member["role"] } : m));
+    } else {
+      alert(res.error || "Failed to update role. Please try again.");
+    }
   };
 
   const removeMember = async (memberId: string, name: string) => {
     if (!currentStore || !confirm(`Remove ${name} from the team?`)) return;
-    await api.delete(`/api/sites/${currentStore.id}/members/${memberId}`);
-    setMembers((prev) => prev.filter((m) => m.id !== memberId));
+    const res = await api.delete(`/api/sites/${currentStore.id}/members/${memberId}`);
+    if (res.success) {
+      setMembers((prev) => prev.filter((m) => m.id !== memberId));
+    } else {
+      alert(res.error || "Failed to remove member. Please try again.");
+    }
   };
 
   return (
@@ -93,13 +120,15 @@ export default function TeamPage() {
           <h1 className="text-2xl font-bold text-surface-900 font-display">Team</h1>
           <p className="text-sm text-surface-500 mt-1">Manage who has access to your store</p>
         </div>
-        <button onClick={() => setShowInvite(true)} className="btn-primary text-sm py-2.5 px-4">
-          <UserPlus className="h-4 w-4" /> Add Member
-        </button>
+        {canManageTeam && (
+          <button onClick={() => setShowInvite(true)} className="btn-primary text-sm py-2.5 px-4">
+            <UserPlus className="h-4 w-4" /> Add Member
+          </button>
+        )}
       </div>
 
       {/* Invite form */}
-      {showInvite && (
+      {showInvite && canManageTeam && (
         <div className="rounded-2xl border border-surface-200 bg-white p-5">
           <h3 className="text-sm font-bold text-surface-900 mb-3">Add Team Member</h3>
           <p className="text-xs text-surface-500 mb-3">The person must already have an AfroStore account.</p>
@@ -165,9 +194,11 @@ export default function TeamPage() {
           </div>
           <h3 className="text-base font-bold text-surface-900 mb-1">No team members</h3>
           <p className="text-sm text-surface-500 mb-5">Add team members to help manage your store.</p>
-          <button onClick={() => setShowInvite(true)} className="btn-primary text-sm py-2.5 px-5">
-            <UserPlus className="h-4 w-4" /> Add First Member
-          </button>
+          {canManageTeam && (
+            <button onClick={() => setShowInvite(true)} className="btn-primary text-sm py-2.5 px-5">
+              <UserPlus className="h-4 w-4" /> Add First Member
+            </button>
+          )}
         </div>
       ) : (
         <div className="rounded-2xl border border-surface-200 bg-white overflow-hidden">
@@ -196,8 +227,8 @@ export default function TeamPage() {
                     </div>
                     <p className="text-xs text-surface-400 truncate">{member.user.email} · Joined {new Date(member.createdAt).toLocaleDateString()}</p>
                   </div>
-                  {!isOwner && (
-                    <div className="flex items-center gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                  {!isOwner && canManageTeam && (
+                    <div className="flex items-center gap-2 sm:opacity-0 sm:group-hover:opacity-100 transition-opacity">
                       <select
                         value={member.role}
                         onChange={(e) => updateRole(member.id, e.target.value)}

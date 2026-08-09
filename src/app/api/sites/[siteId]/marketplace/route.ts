@@ -1,6 +1,6 @@
 import { NextRequest } from "next/server";
 import { prisma } from "@/lib/db";
-import { getStoreContext, success, error, validationError, logAudit } from "@/lib/api-helpers";
+import { getStoreContext, success, error, validationError, logAudit , requireRole } from "@/lib/api-helpers";
 import { createMarketplaceItemSchema } from "@/lib/validators";
 import { unauthorized } from "@/lib/auth";
 
@@ -16,17 +16,18 @@ export async function GET(req: NextRequest, { params }: Params) {
   const type = url.searchParams.get("type");
   const category = url.searchParams.get("category");
   const search = url.searchParams.get("search");
+  const mine = url.searchParams.get("mine") === "true";
   const page = parseInt(url.searchParams.get("page") || "1");
   const limit = Math.min(parseInt(url.searchParams.get("limit") || "20"), 100);
 
-  const where: Record<string, unknown> = { status: "APPROVED" };
+  const where: Record<string, unknown> = mine ? { authorId: ctx.user!.id } : { status: "APPROVED" };
   if (type) where.type = type;
   if (category) where.category = category;
   if (search) where.name = { contains: search, mode: "insensitive" };
 
   const [items, total] = await Promise.all([
     prisma.marketplaceItem.findMany({
-      where: where as any, orderBy: { downloads: "desc" },
+      where: where as any, orderBy: mine ? { createdAt: "desc" } : { downloads: "desc" },
       skip: (page - 1) * limit, take: limit,
       include: { theme: { select: { id: true, name: true, slug: true, thumbnail: true } }, plugin: { select: { id: true, name: true, slug: true, icon: true } } },
     }),
@@ -47,14 +48,31 @@ export async function POST(req: NextRequest, { params }: Params) {
   const { siteId } = await params;
   const ctx = await getStoreContext(req, siteId);
   if (ctx.error) return ctx.user ? error(ctx.error, 403) : unauthorized();
+  const roleErr = requireRole(ctx, "STAFF");
+  if (roleErr) return roleErr;
 
   try {
     const body = await req.json();
     const parsed = createMarketplaceItemSchema.safeParse(body);
     if (!parsed.success) return validationError(parsed.error.flatten().fieldErrors);
 
+    // Only THEME listings are supported for now — Plugin/Template/Funnel/Automation
+    // have no merchant-facing creation flow yet, so there'd be nothing to install.
+    if (parsed.data.type !== "THEME") {
+      return error("Only theme listings can be published right now. Other types are coming soon.", 400);
+    }
+    if (!parsed.data.themeId) {
+      return error("themeId is required — select one of your own themes to publish", 400);
+    }
+    const theme = await prisma.theme.findUnique({ where: { id: parsed.data.themeId } });
+    if (!theme || theme.authorId !== ctx.user!.id) {
+      return error("You can only publish a theme you created yourself", 403);
+    }
+    const dup = await prisma.marketplaceItem.findFirst({ where: { themeId: parsed.data.themeId, status: { in: ["PENDING", "APPROVED"] } } });
+    if (dup) return error("This theme has already been submitted to the marketplace", 409);
+
     const item = await prisma.marketplaceItem.create({
-      data: { ...parsed.data, authorId: ctx.user!.id, authorName: `${ctx.user!.firstName} ${ctx.user!.lastName}`.trim() || ctx.user!.email, tags: parsed.data.tags || [] },
+      data: { ...parsed.data, authorId: ctx.user!.id, authorName: `${ctx.user!.firstName} ${ctx.user!.lastName}`.trim() || ctx.user!.email, tags: parsed.data.tags || [], thumbnail: parsed.data.thumbnail || theme.thumbnail || undefined },
     });
 
     await logAudit({ siteId, userId: ctx.user!.id, action: "CREATE", entity: "marketplace_item", entityId: item.id, after: item });

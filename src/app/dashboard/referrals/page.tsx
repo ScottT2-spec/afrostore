@@ -61,6 +61,13 @@ export default function ReferralsPage() {
   const [customers, setCustomers] = useState<Customer[]>([]);
   const [selectedCustomer, setSelectedCustomer] = useState("");
   const [addingAffiliate, setAddingAffiliate] = useState(false);
+  const [payoutAffiliate, setPayoutAffiliate] = useState<AffiliateData | null>(null);
+  const [payoutAmount, setPayoutAmount] = useState("");
+  const [payoutReference, setPayoutReference] = useState("");
+  const [payoutNote, setPayoutNote] = useState("");
+  const [payoutSaving, setPayoutSaving] = useState(false);
+  const [payoutError, setPayoutError] = useState<string | null>(null);
+  const [copiedSignupLink, setCopiedSignupLink] = useState(false);
 
   // Settings form
   const [settings, setSettings] = useState({
@@ -137,6 +144,36 @@ export default function ReferralsPage() {
     if (!currentStore) return;
     await api.patch(`/api/sites/${currentStore.id}/referrals/affiliates/${affiliateId}`, { status });
     await loadProgram();
+  };
+
+  const openPayout = (aff: AffiliateData) => {
+    setPayoutAffiliate(aff);
+    setPayoutAmount(String(Math.max(0, aff.totalEarnings - aff.paidEarnings)));
+    setPayoutReference("");
+    setPayoutNote("");
+    setPayoutError(null);
+  };
+
+  const savePayout = async () => {
+    if (!currentStore || !payoutAffiliate) return;
+    const amountNum = parseFloat(payoutAmount);
+    if (!amountNum || amountNum <= 0) { setPayoutError("Enter a valid amount"); return; }
+
+    setPayoutSaving(true);
+    setPayoutError(null);
+    const res = await api.post(`/api/sites/${currentStore.id}/referrals/payouts`, {
+      affiliateId: payoutAffiliate.id,
+      amount: amountNum,
+      reference: payoutReference.trim() || undefined,
+      note: payoutNote.trim() || undefined,
+    });
+    if (res.success) {
+      await loadProgram();
+      setPayoutAffiliate(null);
+    } else {
+      setPayoutError(res.error || "Failed to record payout");
+    }
+    setPayoutSaving(false);
   };
 
   const copyLink = (code: string) => {
@@ -242,6 +279,26 @@ export default function ReferralsPage() {
               </button>
             </div>
 
+            {/* Public signup link — customers can apply to become an affiliate themselves */}
+            <div className="rounded-2xl border border-brand-100 bg-brand-50 p-4 flex items-center justify-between gap-4 flex-wrap">
+              <div>
+                <p className="text-sm font-medium text-surface-900">Let customers apply themselves</p>
+                <p className="text-xs text-surface-500 mt-0.5">Share this link — applicants show up here as Pending for you to approve.</p>
+              </div>
+              <button
+                onClick={() => {
+                  const origin = typeof window !== "undefined" ? window.location.origin : "";
+                  navigator.clipboard.writeText(`${origin}/store/${currentStore?.slug}/affiliate`);
+                  setCopiedSignupLink(true);
+                  setTimeout(() => setCopiedSignupLink(false), 2000);
+                }}
+                className="text-xs font-semibold text-brand-700 bg-white border border-brand-200 rounded-lg px-3 py-2 hover:bg-brand-100 flex items-center gap-1.5 shrink-0"
+              >
+                {copiedSignupLink ? <Check className="h-3.5 w-3.5 text-green-500" /> : <Copy className="h-3.5 w-3.5" />}
+                {copiedSignupLink ? "Copied" : "Copy signup link"}
+              </button>
+            </div>
+
             {/* Stats */}
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
               {stats.map((stat) => {
@@ -303,6 +360,7 @@ export default function ReferralsPage() {
                         <th className="px-6 py-3 text-right text-[10px] font-semibold uppercase tracking-wider text-surface-400">Clicks</th>
                         <th className="px-6 py-3 text-right text-[10px] font-semibold uppercase tracking-wider text-surface-400">Orders</th>
                         <th className="px-6 py-3 text-right text-[10px] font-semibold uppercase tracking-wider text-surface-400">Earned</th>
+                        <th className="px-6 py-3 text-right text-[10px] font-semibold uppercase tracking-wider text-surface-400">Owed</th>
                         <th className="px-6 py-3 text-center text-[10px] font-semibold uppercase tracking-wider text-surface-400">Actions</th>
                       </tr>
                     </thead>
@@ -336,8 +394,17 @@ export default function ReferralsPage() {
                           <td className="px-6 py-3.5 text-right text-sm text-surface-700">{aff.totalClicks}</td>
                           <td className="px-6 py-3.5 text-right text-sm text-surface-700">{aff.totalOrders}</td>
                           <td className="px-6 py-3.5 text-right text-sm font-semibold text-surface-900">{symbol}{aff.totalEarnings.toLocaleString()}</td>
+                          <td className="px-6 py-3.5 text-right text-sm font-semibold text-brand-700">{symbol}{Math.max(0, aff.totalEarnings - aff.paidEarnings).toLocaleString()}</td>
                           <td className="px-6 py-3.5 text-center">
                             <div className="flex items-center justify-center gap-1">
+                              {aff.totalEarnings - aff.paidEarnings > 0 && (
+                                <button
+                                  onClick={() => openPayout(aff)}
+                                  className="text-[10px] font-semibold text-brand-600 hover:text-brand-700 px-2 py-1 rounded hover:bg-brand-50"
+                                >
+                                  Pay out
+                                </button>
+                              )}
                               {aff.status === "PENDING" && (
                                 <button
                                   onClick={() => updateAffiliateStatus(aff.id, "APPROVED")}
@@ -526,6 +593,66 @@ export default function ReferralsPage() {
               >
                 {addingAffiliate ? <Loader2 className="h-4 w-4 animate-spin" /> : "Add as Affiliate"}
               </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Payout Modal */}
+      {payoutAffiliate && (
+        <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4" onClick={() => setPayoutAffiliate(null)}>
+          <div className="bg-white rounded-2xl max-w-sm w-full p-6" onClick={(e) => e.stopPropagation()}>
+            <div className="flex items-center justify-between mb-4">
+              <h2 className="text-lg font-bold text-surface-900 font-display">
+                Pay {payoutAffiliate.customer.firstName} {payoutAffiliate.customer.lastName}
+              </h2>
+              <button onClick={() => setPayoutAffiliate(null)} className="text-surface-400 hover:text-surface-600">
+                <X className="h-5 w-5" />
+              </button>
+            </div>
+            <p className="text-xs text-surface-500 mb-4">
+              Owed: {symbol}{Math.max(0, payoutAffiliate.totalEarnings - payoutAffiliate.paidEarnings).toLocaleString()}. Recording a payout here just logs that you paid them outside the platform (e.g. bank transfer) — it doesn't send money.
+            </p>
+            <div className="space-y-3">
+              <div>
+                <label className="block text-xs font-semibold text-surface-600 mb-1.5">Amount ({symbol})</label>
+                <input
+                  type="number"
+                  min={0}
+                  step="0.01"
+                  value={payoutAmount}
+                  onChange={(e) => setPayoutAmount(e.target.value)}
+                  className="w-full rounded-xl border border-surface-200 px-3 py-2 text-sm focus:border-brand-500 focus:ring-brand-500"
+                />
+              </div>
+              <div>
+                <label className="block text-xs font-semibold text-surface-600 mb-1.5">Reference (optional)</label>
+                <input
+                  type="text"
+                  value={payoutReference}
+                  onChange={(e) => setPayoutReference(e.target.value)}
+                  placeholder="e.g. bank transfer ref"
+                  className="w-full rounded-xl border border-surface-200 px-3 py-2 text-sm focus:border-brand-500 focus:ring-brand-500"
+                />
+              </div>
+              <div>
+                <label className="block text-xs font-semibold text-surface-600 mb-1.5">Note (optional)</label>
+                <input
+                  type="text"
+                  value={payoutNote}
+                  onChange={(e) => setPayoutNote(e.target.value)}
+                  className="w-full rounded-xl border border-surface-200 px-3 py-2 text-sm focus:border-brand-500 focus:ring-brand-500"
+                />
+              </div>
+              {payoutError && (
+                <p className="text-sm text-accent-600 bg-accent-50 border border-accent-100 rounded-lg px-3 py-2">{payoutError}</p>
+              )}
+              <div className="flex items-center gap-3 pt-1">
+                <button onClick={savePayout} disabled={payoutSaving || !payoutAmount} className="btn-primary text-sm py-2.5 px-6">
+                  {payoutSaving ? <Loader2 className="h-4 w-4 animate-spin" /> : "Record Payout"}
+                </button>
+                <button onClick={() => setPayoutAffiliate(null)} className="btn-secondary text-sm py-2.5 px-4">Cancel</button>
+              </div>
             </div>
           </div>
         </div>

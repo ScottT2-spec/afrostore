@@ -6,6 +6,8 @@ import { unauthorized } from "@/lib/auth";
 import { sendOrderConfirmationEmail } from "@/lib/email";
 import { getBestActiveFlashSales, applyDiscount } from "@/lib/flash-sales";
 import { runAutomationsForTrigger } from "@/lib/automations";
+import { validateRedemption } from "@/lib/loyalty";
+import { createSiteNotification } from "@/lib/notifications";
 
 
 type Params = { params: Promise<{ siteId: string }> };
@@ -73,7 +75,7 @@ export async function POST(req: NextRequest, { params }: Params) {
     const parsed = createOrderSchema.safeParse(body);
     if (!parsed.success) return validationError(parsed.error.flatten().fieldErrors);
 
-    const { items, deliveryAddress, deliveryZoneId, paymentMethod, couponCode, email, phone, firstName, lastName, note } = parsed.data;
+    const { items, deliveryAddress, deliveryZoneId, paymentMethod, couponCode, email, phone, firstName, lastName, note, redeemPoints } = parsed.data;
 
     // Resolve products and calculate prices
     const productIds = items.map((i) => i.productId);
@@ -181,7 +183,14 @@ export async function POST(req: NextRequest, { params }: Params) {
       }
     }
 
-    const total = subtotal + deliveryFee - discount;
+    // Tax — apply the site's default active tax rule to the discounted subtotal.
+    // (Delivery fee is not taxed here; adjust if your jurisdiction requires otherwise.)
+    const defaultTax = await prisma.taxRule.findFirst({ where: { siteId, isDefault: true, isActive: true } });
+    const taxRate = defaultTax ? Number(defaultTax.rate) : 0;
+    const taxableAmount = Math.max(subtotal - discount, 0);
+    const tax = taxRate > 0 ? Math.round(taxableAmount * (taxRate / 100) * 100) / 100 : 0;
+
+    const total = subtotal + deliveryFee - discount + tax;
 
     // Find or create customer
     let customer = await prisma.customer.findUnique({
@@ -193,10 +202,26 @@ export async function POST(req: NextRequest, { params }: Params) {
       });
     }
 
+    // Loyalty points redemption — priced into the order now, balance is only
+    // actually deducted once payment succeeds (see finalizeOrderRedemption).
+    let loyaltyDiscount = 0;
+    let loyaltyPointsRedeemed = 0;
+    if (redeemPoints && redeemPoints > 0) {
+      const check = await validateRedemption(siteId, customer.id, redeemPoints);
+      if (!check.ok) return error(check.message, 400);
+      // Never let points discount an order below zero.
+      loyaltyDiscount = Math.min(check.discount, subtotal + deliveryFee - discount);
+      loyaltyPointsRedeemed = redeemPoints;
+    }
+
+    const finalTotal = Math.max(0, total - loyaltyDiscount);
+
     // Create order (with retry on unlikely order number collision)
     let attempts = 0;
+    const lowStockHits: Array<{ id: string; name: string; stock: number; lowStockAlert: number }> = [];
     const createOrder = async (): Promise<any> => {
       attempts++;
+      lowStockHits.length = 0; // reset in case of retry, so we don't double-report
       try {
         return await prisma.$transaction(async (tx) => {
       const ord = await tx.order.create({
@@ -210,7 +235,10 @@ export async function POST(req: NextRequest, { params }: Params) {
           subtotal,
           deliveryFee,
           discount,
-          total,
+          loyaltyDiscount,
+          loyaltyPointsRedeemed,
+          tax,
+          total: finalTotal,
           currency: site.currency,
           couponId,
           note,
@@ -230,10 +258,17 @@ export async function POST(req: NextRequest, { params }: Params) {
       for (const item of items) {
         const product = productMap.get(item.productId)!;
         if (product.trackInventory) {
-          await tx.product.update({
+          const updated = await tx.product.update({
             where: { id: item.productId },
             data: { stock: { decrement: item.quantity } },
+            select: { id: true, name: true, stock: true, lowStockAlert: true },
           });
+          // Only flag when this order tipped stock at/under the threshold —
+          // avoids re-notifying on every subsequent order once already low.
+          const stockBefore = updated.stock + item.quantity;
+          if (updated.stock <= updated.lowStockAlert && stockBefore > updated.lowStockAlert) {
+            lowStockHits.push(updated);
+          }
         }
       }
 
@@ -242,7 +277,7 @@ export async function POST(req: NextRequest, { params }: Params) {
         where: { id: customer!.id },
         data: {
           totalOrders: { increment: 1 },
-          totalSpent: { increment: total },
+          totalSpent: { increment: finalTotal },
         },
       });
 
@@ -289,12 +324,33 @@ export async function POST(req: NextRequest, { params }: Params) {
       items: orderItems,
       subtotal,
       deliveryFee,
-      discount,
-      total,
+      discount: discount + loyaltyDiscount,
+      tax,
+      total: finalTotal,
       currency: site.currency,
       paymentMethod,
       deliveryAddress: deliveryAddress as { address?: string; city?: string; state?: string },
     }).catch((err) => console.error("Order confirmation email error:", err));
+
+    // Notify the merchant dashboard of the new order (fire-and-forget)
+    createSiteNotification({
+      siteId,
+      type: "ORDER",
+      title: `New order ${order.orderNumber}`,
+      message: `${firstName} ${lastName} placed an order for ${site.currency} ${finalTotal.toFixed(2)}.`,
+      data: { orderId: order.id, orderNumber: order.orderNumber, total: finalTotal, currency: site.currency },
+    });
+
+    // Notify on any product that just crossed its low-stock threshold
+    for (const p of lowStockHits) {
+      createSiteNotification({
+        siteId,
+        type: "LOW_STOCK",
+        title: `Low stock: ${p.name}`,
+        message: `Only ${p.stock} left in stock (threshold: ${p.lowStockAlert}).`,
+        data: { productId: p.id, stock: p.stock, lowStockAlert: p.lowStockAlert },
+      });
+    }
 
     // Fire "new_order" automations (fire-and-forget — never block checkout)
     runAutomationsForTrigger(siteId, "new_order", {
@@ -302,8 +358,8 @@ export async function POST(req: NextRequest, { params }: Params) {
       recipientPhone: phone,
       recipientName: `${firstName} ${lastName}`,
       subject: `New order ${order.orderNumber}`,
-      message: `Order ${order.orderNumber} was placed for ${site.currency} ${total}.`,
-      data: { orderId: order.id, orderNumber: order.orderNumber, email, phone, total, currency: site.currency },
+      message: `Order ${order.orderNumber} was placed for ${site.currency} ${finalTotal}.`,
+      data: { orderId: order.id, orderNumber: order.orderNumber, email, phone, total: finalTotal, currency: site.currency },
     }).catch((err) => console.error("Automation trigger (new_order) error:", err));
 
     return success(order, 201);
