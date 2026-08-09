@@ -5,6 +5,7 @@ import { AlertTriangle, BarChart3, CheckCircle2, Package, Pencil, Save, Search, 
 import { useState, useEffect, useCallback } from "react";
 import { useSite } from "@/context/StoreContext";
 import { api } from "@/lib/api-client";
+import { formatCurrency } from "@/lib/utils";
 
 interface InventoryProduct {
   id: string; name: string; slug: string; sku: string | null;
@@ -52,6 +53,8 @@ export default function InventoryPage() {
   };
 
   if (!currentStore) return <div className="p-6 flex items-center justify-center min-h-[50vh]"><Loader2 className="h-8 w-8 animate-spin text-brand-600" /></div>;
+
+  const currency = currentStore.currency || "NGN";
 
   const statCards = [
     { label: "Total Tracked", value: summary.totalTracked, icon: Package, color: "bg-blue-50 text-blue-600", filterKey: "" },
@@ -144,7 +147,7 @@ export default function InventoryPage() {
                       : isLow ? <span className="text-[10px] font-semibold px-2 py-0.5 rounded-full bg-amber-50 text-amber-700">Low Stock</span>
                       : <span className="text-[10px] font-semibold px-2 py-0.5 rounded-full bg-green-50 text-green-700">In Stock</span>}
                     </td>
-                    <td className="px-5 py-3 text-right font-semibold text-surface-900">${parseFloat(p.price).toFixed(2)}</td>
+                    <td className="px-5 py-3 text-right font-semibold text-surface-900">{formatCurrency(parseFloat(p.price), currency)}</td>
                   </tr>
                 );
               })}

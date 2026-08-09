@@ -18,8 +18,10 @@ export async function GET(req: NextRequest, { params }: Params) {
 
   const where: Record<string, unknown> = { siteId, trackInventory: true };
   if (search) where.name = { contains: search, mode: "insensitive" };
-  if (filter === "low_stock") where.stock = { gt: 0, lte: prisma.product.fields?.lowStockAlert ? undefined : 5 };
   if (filter === "out_of_stock") where.stock = { lte: 0 };
+  // Note: "low_stock" can't be expressed as a single Prisma `where` clause
+  // since it compares two columns (stock <= lowStockAlert) — handled with
+  // an in-memory filter in the branch below instead.
 
   // For low_stock, we need raw where with column comparison
   let products;
@@ -80,10 +82,12 @@ export async function PATCH(req: NextRequest, { params }: Params) {
 
     const results = [];
     for (const u of updates) {
+      if (typeof u.stock !== "number" || !Number.isFinite(u.stock)) continue;
+      const safeStock = Math.max(0, Math.trunc(u.stock));
       const product = await prisma.product.findFirst({ where: { id: u.productId, siteId } });
       if (!product) continue;
-      const updated = await prisma.product.update({ where: { id: u.productId }, data: { stock: u.stock } });
-      results.push({ productId: u.productId, name: product.name, oldStock: product.stock, newStock: u.stock });
+      await prisma.product.update({ where: { id: u.productId }, data: { stock: safeStock } });
+      results.push({ productId: u.productId, name: product.name, oldStock: product.stock, newStock: safeStock });
     }
 
     await logAudit({ siteId, userId: ctx.user!.id, action: "UPDATE", entity: "inventory_bulk", entityId: "bulk", after: { updates: results } });
