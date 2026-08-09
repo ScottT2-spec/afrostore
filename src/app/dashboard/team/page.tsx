@@ -75,14 +75,22 @@ export default function TeamPage() {
 
   const updateRole = async (memberId: string, role: string) => {
     if (!currentStore) return;
-    await api.patch(`/api/sites/${currentStore.id}/members/${memberId}`, { role });
-    setMembers((prev) => prev.map((m) => m.id === memberId ? { ...m, role: role as Member["role"] } : m));
+    const res = await api.patch(`/api/sites/${currentStore.id}/members/${memberId}`, { role });
+    if (res.success) {
+      setMembers((prev) => prev.map((m) => m.id === memberId ? { ...m, role: role as Member["role"] } : m));
+    } else {
+      alert(res.error || "Failed to update role. Please try again.");
+    }
   };
 
   const removeMember = async (memberId: string, name: string) => {
     if (!currentStore || !confirm(`Remove ${name} from the team?`)) return;
-    await api.delete(`/api/sites/${currentStore.id}/members/${memberId}`);
-    setMembers((prev) => prev.filter((m) => m.id !== memberId));
+    const res = await api.delete(`/api/sites/${currentStore.id}/members/${memberId}`);
+    if (res.success) {
+      setMembers((prev) => prev.filter((m) => m.id !== memberId));
+    } else {
+      alert(res.error || "Failed to remove member. Please try again.");
+    }
   };
 
   return (

@@ -85,6 +85,45 @@ export async function getSiteContext(req: NextRequest, siteId: string) {
 export const getStoreContext = getSiteContext;
 
 /**
+ * Effective role of the caller on a site, as returned by getSiteContext.
+ * OWNER and platform ADMIN/SUPER_ADMIN always outrank any SiteMember row.
+ * Higher index = more privileged.
+ */
+const ROLE_RANK = { VIEWER: 0, STAFF: 1, ADMIN: 2, OWNER: 3 } as const;
+export type EffectiveRole = keyof typeof ROLE_RANK;
+
+export function getEffectiveRole(
+  ctx: Awaited<ReturnType<typeof getSiteContext>>
+): EffectiveRole | null {
+  if (!ctx.site || !ctx.user) return null;
+  if (ctx.site.workspace.ownerId === ctx.user.id) return "OWNER";
+  if (ctx.user.role === "ADMIN" || ctx.user.role === "SUPER_ADMIN") return "OWNER"; // platform admin, treat as full access
+  const member = ctx.site.members.find((m) => m.userId === ctx.user!.id);
+  return member?.role ?? null;
+}
+
+/**
+ * Enforce a minimum role for a route. getSiteContext/getStoreContext only
+ * proves site membership — it does NOT check the member's role (STAFF vs
+ * VIEWER vs ADMIN), so any route handling something sensitive (payment
+ * credentials, site settings, financials) must call this explicitly.
+ *
+ * Returns an error() response to short-circuit with if the caller doesn't
+ * meet the bar, or null if they're cleared to proceed.
+ */
+export function requireRole(
+  ctx: Awaited<ReturnType<typeof getSiteContext>>,
+  minRole: EffectiveRole
+) {
+  const role = getEffectiveRole(ctx);
+  if (!role || ROLE_RANK[role] < ROLE_RANK[minRole]) {
+    return error(`This action requires ${minRole === "ADMIN" ? "an admin" : minRole.toLowerCase()} role or higher`, 403);
+  }
+  return null;
+}
+
+
+/**
  * Generate a collision-resistant order number.
  * Format: AF-{timestamp36}-{random4}  →  e.g. "AF-LZ4K8W-9F3A"
  * 
