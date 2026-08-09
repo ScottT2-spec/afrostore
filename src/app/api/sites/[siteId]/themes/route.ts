@@ -58,6 +58,20 @@ export async function GET(req: NextRequest, { params }: Params) {
 }
 
 // POST /api/sites/:siteId/themes — install/activate a theme
+//
+// NOTE: The theme marketplace's colors/fonts are not currently wired to
+// any live storefront rendering — the actual visual template a store uses
+// is a separate system (Template/SiteTemplate, set at store creation and
+// not editable afterward). Making "activate" a real, visible action for
+// every existing template would mean reworking the color system across
+// ~20 hardcoded template files — out of scope for a quick fix, and too
+// risky to rush right before a production launch.
+//
+// So this is intentionally disabled for now rather than left to silently
+// "succeed" while doing nothing visible on the live site. The original
+// working implementation (upsert SiteTheme, deactivate others, increment
+// install count) is preserved in git history on this file for whenever
+// theme application is actually built.
 export async function POST(req: NextRequest, { params }: Params) {
   const { siteId } = await params;
   const ctx = await getStoreContext(req, siteId);
@@ -65,52 +79,8 @@ export async function POST(req: NextRequest, { params }: Params) {
   const roleErr = requireRole(ctx, "STAFF");
   if (roleErr) return roleErr;
 
-  try {
-    const body = await req.json();
-    const { themeId, activate, customConfig } = body as {
-      themeId: string;
-      activate?: boolean;
-      customConfig?: Record<string, unknown>;
-    };
-
-    if (!themeId) return error("themeId is required", 400);
-
-    const theme = await prisma.theme.findUnique({ where: { id: themeId } });
-    if (!theme || !theme.isActive) return error("Theme not found", 404);
-
-    // Upsert store theme
-    const storeTheme = await prisma.siteTheme.upsert({
-      where: { siteId_themeId: { siteId, themeId } },
-      create: {
-        siteId,
-        themeId,
-        isActive: activate !== false,
-        customConfig: customConfig ? (customConfig as any) : undefined,
-      },
-      update: {
-        isActive: activate !== false,
-        customConfig: customConfig !== undefined ? (customConfig as any) : undefined,
-      },
-      include: { theme: true },
-    });
-
-    // If activating, deactivate all other themes
-    if (activate !== false) {
-      await prisma.siteTheme.updateMany({
-        where: { siteId, themeId: { not: themeId } },
-        data: { isActive: false },
-      });
-
-      // Increment install count if this is a new install
-      await prisma.theme.update({
-        where: { id: themeId },
-        data: { installs: { increment: 1 } },
-      });
-    }
-
-    return success(storeTheme, 201);
-  } catch (err) {
-    console.error("Themes POST error:", err);
-    return error("Internal server error", 500);
-  }
+  return error(
+    "Theme activation isn't available yet — your store's look is controlled by its template, which the theme marketplace doesn't affect yet. This is coming soon.",
+    503
+  );
 }
