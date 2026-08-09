@@ -1,6 +1,6 @@
 import { NextRequest } from "next/server";
 import { prisma } from "@/lib/db";
-import { getStoreContext, success, error, validationError, ensureUniqueSlug, logAudit } from "@/lib/api-helpers";
+import { getStoreContext, success, error, validationError, ensureUniqueSlug, logAudit , requireRole } from "@/lib/api-helpers";
 import { updatePageSchema } from "@/lib/validators";
 import { unauthorized } from "@/lib/auth";
 import { findStoredTemplatePage } from "@/lib/templates/site-instance";
@@ -35,6 +35,8 @@ export async function PATCH(req: NextRequest, { params }: Params) {
   
   const ctx = await getStoreContext(req, siteId);
   if (ctx.error) return ctx.user ? error(ctx.error, 403) : unauthorized();
+  const roleErr = requireRole(ctx, "STAFF");
+  if (roleErr) return roleErr;
 
   try {
     const body = await req.json();
@@ -102,6 +104,8 @@ export async function DELETE(req: NextRequest, { params }: Params) {
   const { siteId, pageId } = await params;
   const ctx = await getStoreContext(req, siteId);
   if (ctx.error) return ctx.user ? error(ctx.error, 403) : unauthorized();
+  const roleErr = requireRole(ctx, "STAFF");
+  if (roleErr) return roleErr;
 
   try {
     const existing = await prisma.page.findFirst({ 

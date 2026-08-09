@@ -1,6 +1,6 @@
 import { NextRequest } from "next/server";
 import { prisma } from "@/lib/db";
-import { getStoreContext, success, error, validationError, serverError } from "@/lib/api-helpers";
+import { getStoreContext, success, error, validationError, serverError , requireRole } from "@/lib/api-helpers";
 import { updateFunnelStepSchema } from "@/lib/validators";
 import { unauthorized } from "@/lib/auth";
 
@@ -11,6 +11,8 @@ export async function PATCH(req: NextRequest, { params }: Params) {
   const { siteId, funnelId, stepId } = await params;
   const ctx = await getStoreContext(req, siteId);
   if (ctx.error) return ctx.user ? error(ctx.error, 403) : unauthorized();
+  const roleErr = requireRole(ctx, "STAFF");
+  if (roleErr) return roleErr;
 
   const funnel = await prisma.funnel.findFirst({ where: { id: funnelId, siteId } });
   if (!funnel) return error("Funnel not found", 404);
@@ -55,6 +57,8 @@ export async function DELETE(req: NextRequest, { params }: Params) {
   const { siteId, funnelId, stepId } = await params;
   const ctx = await getStoreContext(req, siteId);
   if (ctx.error) return ctx.user ? error(ctx.error, 403) : unauthorized();
+  const roleErr = requireRole(ctx, "STAFF");
+  if (roleErr) return roleErr;
 
   const funnel = await prisma.funnel.findFirst({ where: { id: funnelId, siteId } });
   if (!funnel) return error("Funnel not found", 404);

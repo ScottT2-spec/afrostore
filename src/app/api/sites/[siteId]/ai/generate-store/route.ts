@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { getStoreContext, success, error } from "@/lib/api-helpers";
+import { getStoreContext, success, error , requireRole } from "@/lib/api-helpers";
 import { unauthorized } from "@/lib/auth";
 import { generateStore } from "@/lib/ai-store-generator";
 
@@ -14,6 +14,8 @@ export async function POST(req: NextRequest, { params }: Params) {
   const { siteId } = await params;
   const ctx = await getStoreContext(req, siteId);
   if (ctx.error) return ctx.user ? error(ctx.error, 403) : unauthorized();
+  const roleErr = requireRole(ctx, "STAFF");
+  if (roleErr) return roleErr;
 
   try {
     const body = await req.json().catch(() => ({}));

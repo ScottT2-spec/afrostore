@@ -1,5 +1,5 @@
 import { NextRequest } from "next/server";
-import { getStoreContext, success, error } from "@/lib/api-helpers";
+import { getStoreContext, success, error , requireRole } from "@/lib/api-helpers";
 import { unauthorized } from "@/lib/auth";
 import { prisma } from "@/lib/db";
 
@@ -39,6 +39,8 @@ export async function PATCH(req: NextRequest, { params }: Params) {
   const { siteId } = await params;
   const ctx = await getStoreContext(req, siteId);
   if (ctx.error) return ctx.user ? error(ctx.error, 403) : unauthorized();
+  const roleErr = requireRole(ctx, "STAFF");
+  if (roleErr) return roleErr;
 
   const body = await req.json();
   const { ids, isRead } = body;
@@ -60,6 +62,8 @@ export async function DELETE(req: NextRequest, { params }: Params) {
   const { siteId } = await params;
   const ctx = await getStoreContext(req, siteId);
   if (ctx.error) return ctx.user ? error(ctx.error, 403) : unauthorized();
+  const roleErr = requireRole(ctx, "STAFF");
+  if (roleErr) return roleErr;
 
   const url = new URL(req.url);
   const id = url.searchParams.get("id");

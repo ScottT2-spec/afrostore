@@ -1,6 +1,6 @@
 import { NextRequest } from "next/server";
 import { prisma } from "@/lib/db";
-import { error, getSiteContext, success } from "@/lib/api-helpers";
+import { error, getSiteContext, success , requireRole } from "@/lib/api-helpers";
 import { unauthorized } from "@/lib/auth";
 import type { Prisma } from "@/generated/prisma";
 import {
@@ -39,6 +39,8 @@ export async function PATCH(req: NextRequest, { params }: Params) {
   const { siteId } = await params;
   const ctx = await getSiteContext(req, siteId);
   if (ctx.error) return ctx.user ? error(ctx.error, 403) : unauthorized();
+  const roleErr = requireRole(ctx, "STAFF");
+  if (roleErr) return roleErr;
 
   const body = (await req.json()) as Partial<SiteCustomizationDocument> & { note?: string };
   const existing = normalizeSiteCustomization(
@@ -120,6 +122,8 @@ export async function DELETE(req: NextRequest, { params }: Params) {
   const { siteId } = await params;
   const ctx = await getSiteContext(req, siteId);
   if (ctx.error) return ctx.user ? error(ctx.error, 403) : unauthorized();
+  const roleErr = requireRole(ctx, "STAFF");
+  if (roleErr) return roleErr;
 
   const existing = await loadSiteCustomizationSafely(prisma.siteCustomization.findUnique({ where: { siteId } }));
   if (!existing) {

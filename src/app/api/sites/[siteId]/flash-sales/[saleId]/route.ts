@@ -1,6 +1,6 @@
 import { NextRequest } from "next/server";
 import { prisma } from "@/lib/db";
-import { getStoreContext, success, error } from "@/lib/api-helpers";
+import { getStoreContext, success, error , requireRole } from "@/lib/api-helpers";
 import { unauthorized } from "@/lib/auth";
 
 type Params = { params: Promise<{ siteId: string; saleId: string }> };
@@ -27,6 +27,8 @@ export async function PATCH(req: NextRequest, { params }: Params) {
   const { siteId, saleId } = await params;
   const ctx = await getStoreContext(req, siteId);
   if (ctx.error) return ctx.user ? error(ctx.error, 403) : unauthorized();
+  const roleErr = requireRole(ctx, "STAFF");
+  if (roleErr) return roleErr;
 
   const existing = await prisma.flashSale.findUnique({ where: { id: saleId } });
   if (!existing || existing.siteId !== siteId) return error("Flash sale not found", 404);
@@ -68,6 +70,8 @@ export async function DELETE(req: NextRequest, { params }: Params) {
   const { siteId, saleId } = await params;
   const ctx = await getStoreContext(req, siteId);
   if (ctx.error) return ctx.user ? error(ctx.error, 403) : unauthorized();
+  const roleErr = requireRole(ctx, "STAFF");
+  if (roleErr) return roleErr;
 
   const existing = await prisma.flashSale.findUnique({ where: { id: saleId } });
   if (!existing || existing.siteId !== siteId) return error("Flash sale not found", 404);

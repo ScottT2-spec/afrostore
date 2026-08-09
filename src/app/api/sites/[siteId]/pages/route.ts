@@ -1,6 +1,6 @@
 import { NextRequest } from "next/server";
 import { prisma } from "@/lib/db";
-import { getStoreContext, success, error, validationError, ensureUniqueSlug, logAudit } from "@/lib/api-helpers";
+import { getStoreContext, success, error, validationError, ensureUniqueSlug, logAudit , requireRole } from "@/lib/api-helpers";
 import { createPageSchema } from "@/lib/validators";
 import { unauthorized } from "@/lib/auth";
 import { getLinkedPageTemplate } from "@/lib/page-content";
@@ -88,6 +88,8 @@ export async function POST(req: NextRequest, { params }: Params) {
   const { siteId } = await params;
   const ctx = await getStoreContext(req, siteId);
   if (ctx.error) return ctx.user ? error(ctx.error, 403) : unauthorized();
+  const roleErr = requireRole(ctx, "STAFF");
+  if (roleErr) return roleErr;
 
   try {
     const body = await req.json();

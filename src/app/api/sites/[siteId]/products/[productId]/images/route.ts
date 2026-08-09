@@ -1,6 +1,6 @@
 import { NextRequest } from "next/server";
 import { prisma } from "@/lib/db";
-import { getStoreContext, success, error, validationError, logAudit } from "@/lib/api-helpers";
+import { getStoreContext, success, error, validationError, logAudit , requireRole } from "@/lib/api-helpers";
 import { createProductImageSchema } from "@/lib/validators";
 import { unauthorized } from "@/lib/auth";
 
@@ -22,6 +22,8 @@ export async function POST(req: NextRequest, { params }: Params) {
   const { siteId, productId } = await params;
   const ctx = await getStoreContext(req, siteId);
   if (ctx.error) return ctx.user ? error(ctx.error, 403) : unauthorized();
+  const roleErr = requireRole(ctx, "STAFF");
+  if (roleErr) return roleErr;
 
   const product = await prisma.product.findFirst({ where: { id: productId, siteId } });
   if (!product) return error("Product not found", 404);
@@ -42,6 +44,8 @@ export async function PATCH(req: NextRequest, { params }: Params) {
   const { siteId, productId } = await params;
   const ctx = await getStoreContext(req, siteId);
   if (ctx.error) return ctx.user ? error(ctx.error, 403) : unauthorized();
+  const roleErr = requireRole(ctx, "STAFF");
+  if (roleErr) return roleErr;
 
   const product = await prisma.product.findFirst({ where: { id: productId, siteId } });
   if (!product) return error("Product not found", 404);

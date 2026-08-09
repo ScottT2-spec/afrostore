@@ -58,6 +58,8 @@ export async function DELETE(req: NextRequest, { params }: Params) {
   const { siteId } = await params;
   const ctx = await getStoreContext(req, siteId);
   if (ctx.error) return ctx.user ? error(ctx.error, 403) : unauthorized();
+  const roleErr = requireRole(ctx, "ADMIN");
+  if (roleErr) return roleErr;
 
   if (ctx.site!.workspace.ownerId !== ctx.user!.id) {
     return error("Only the store owner can delete it", 403);
