@@ -23,12 +23,25 @@ export async function GET(req: NextRequest, { params }: Params) {
   const customers = await prisma.customer.findMany({
     where: { siteId },
     orderBy: { totalSpent: "desc" },
-    select: { email: true, firstName: true, lastName: true, phone: true, tags: true, totalOrders: true, totalSpent: true, createdAt: true },
+    select: { id: true, email: true, firstName: true, lastName: true, phone: true, tags: true, totalOrders: true, totalSpent: true, createdAt: true },
   });
 
-  let rows = customers.map((c: { email: string; firstName: string; lastName: string; phone: string | null; tags: string[]; totalOrders: number; totalSpent: { toString(): string }; createdAt: Date }) => ({
+  // Same correctness rule as the list/detail endpoints: exported spend must
+  // reflect money actually received, not the cached counter.
+  const notVoided = { status: { notIn: ["CANCELLED", "REFUNDED"] } } as const;
+  const customerIds = customers.map((c: { id: string }) => c.id);
+  const [spendByCustomer, orderCountByCustomer] = customerIds.length > 0
+    ? await Promise.all([
+        prisma.order.groupBy({ by: ["customerId"], where: { customerId: { in: customerIds }, paymentStatus: "PAID", ...notVoided } as any, _sum: { total: true } }),
+        prisma.order.groupBy({ by: ["customerId"], where: { customerId: { in: customerIds }, ...notVoided } as any, _count: { _all: true } }),
+      ])
+    : [[], []];
+  const spendMap = new Map((spendByCustomer as any[]).map((r) => [r.customerId, Number(r._sum.total || 0)]));
+  const orderCountMap = new Map((orderCountByCustomer as any[]).map((r) => [r.customerId, r._count._all as number]));
+
+  let rows = customers.map((c: { id: string; email: string; firstName: string; lastName: string; phone: string | null; tags: string[]; totalOrders: number; totalSpent: unknown; createdAt: Date }) => ({
     email: c.email, firstName: c.firstName, lastName: c.lastName, phone: c.phone || "",
-    tags: c.tags.join("; "), totalOrders: c.totalOrders, totalSpent: c.totalSpent.toString(),
+    tags: c.tags.join("; "), totalOrders: orderCountMap.get(c.id) ?? 0, totalSpent: String(spendMap.get(c.id) ?? 0),
     source: "customer", createdAt: c.createdAt.toISOString(),
   }));
 

@@ -85,7 +85,36 @@ export async function GET(req: NextRequest, { params }: Params) {
     prisma.customer.count({ where: where as any }),
   ]);
 
-  const enriched = customers.map((c) => ({ ...c, source: "customer" as const }));
+  // Displayed spend/order-count must always reflect reality, not whatever
+  // the cached counters happen to hold — compute both live from Order for
+  // just this page of customers. "Spent" = paid AND not cancelled/refunded
+  // (money actually received). "Orders" = not cancelled/refunded (real
+  // order volume, regardless of payment stage).
+  const customerIds = customers.map((c: { id: string }) => c.id);
+  const notVoided = { status: { notIn: ["CANCELLED", "REFUNDED"] } } as const;
+  const [spendByCustomer, orderCountByCustomer] = customerIds.length > 0
+    ? await Promise.all([
+        prisma.order.groupBy({
+          by: ["customerId"],
+          where: { customerId: { in: customerIds }, paymentStatus: "PAID", ...notVoided } as any,
+          _sum: { total: true },
+        }),
+        prisma.order.groupBy({
+          by: ["customerId"],
+          where: { customerId: { in: customerIds }, ...notVoided } as any,
+          _count: { _all: true },
+        }),
+      ])
+    : [[], []];
+  const spendMap = new Map((spendByCustomer as any[]).map((r) => [r.customerId, Number(r._sum.total || 0)]));
+  const orderCountMap = new Map((orderCountByCustomer as any[]).map((r) => [r.customerId, r._count._all as number]));
+
+  const enriched = customers.map((c: { id: string }) => ({
+    ...c,
+    totalSpent: spendMap.get(c.id) ?? 0,
+    totalOrders: orderCountMap.get(c.id) ?? 0,
+    source: "customer" as const,
+  }));
 
   if (filter === "customers") {
     return success({
