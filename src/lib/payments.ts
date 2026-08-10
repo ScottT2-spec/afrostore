@@ -123,9 +123,17 @@ export function verifyFlutterwaveWebhook(signature: string, secret: string): boo
 
 // ─── MONNIFY ────────────────────────────────────────────────
 
+// Normalizes a common Monnify setup mistake: pasting the base URL with a
+// trailing /api (e.g. "https://sandbox.monnify.com/api"). We append our own
+// /api/v1/... path everywhere we call Monnify, so a trailing /api here would
+// double up (".../api/api/v1/...") and every request would fail auth.
+export function normalizeMonnifyBaseUrl(url: string): string {
+  return url.trim().replace(/\/+$/, "").replace(/\/api$/i, "");
+}
+
 export async function getMonnifyAccessToken(apiKey: string, secretKey: string, baseUrl: string) {
   const credentials = Buffer.from(`${apiKey}:${secretKey}`).toString("base64");
-  const res = await fetch(`${baseUrl}/api/v1/auth/login`, {
+  const res = await fetch(`${normalizeMonnifyBaseUrl(baseUrl)}/api/v1/auth/login`, {
     method: "POST",
     headers: { Authorization: `Basic ${credentials}` },
   });
@@ -148,7 +156,7 @@ export async function initializeMonnifyPayment(params: {
   redirectUrl: string;
   paymentMethods?: string[];
 }) {
-  const res = await fetch(`${params.baseUrl}/api/v1/merchant/transactions/init-transaction`, {
+  const res = await fetch(`${normalizeMonnifyBaseUrl(params.baseUrl)}/api/v1/merchant/transactions/init-transaction`, {
     method: "POST",
     headers: {
       Authorization: `Bearer ${params.accessToken}`,
@@ -173,7 +181,7 @@ export async function initializeMonnifyPayment(params: {
 
 export async function verifyMonnifyTransaction(reference: string, accessToken: string, baseUrl: string) {
   const res = await fetch(
-    `${baseUrl}/api/v2/merchant/transactions/query?paymentReference=${encodeURIComponent(reference)}`,
+    `${normalizeMonnifyBaseUrl(baseUrl)}/api/v2/merchant/transactions/query?paymentReference=${encodeURIComponent(reference)}`,
     { headers: { Authorization: `Bearer ${accessToken}` } }
   );
   const data = await res.json();

@@ -207,7 +207,7 @@ export default function PaymentsPage() {
                     <div>
                       <label className="block text-sm font-medium text-surface-700 mb-1">Base URL <span className="text-surface-400 font-normal">(optional)</span></label>
                       <input value={baseUrl} onChange={(e) => setBaseUrl(e.target.value)} placeholder="https://api.monnify.com" className="input-field" />
-                      <p className="mt-1 text-[11px] text-surface-400">Leave blank to use Monnify's live API. Use the sandbox URL for testing.</p>
+                      <p className="mt-1 text-[11px] text-surface-400">Leave blank to use Monnify's live API. Use the sandbox URL for testing — just the domain, e.g. https://sandbox.monnify.com (no trailing /api).</p>
                     </div>
                   </>
                 )}
