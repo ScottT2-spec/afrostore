@@ -448,17 +448,17 @@ export default function CustomersPage() {
                     </div>
 
                     {editMode ? (
-                      <div className="space-y-3">
+                      <div key="edit" className="space-y-3">
                         <div className="grid grid-cols-2 gap-3">
-                          <input value={editFirstName} onChange={(e) => setEditFirstName(e.target.value)} placeholder="First name" className="input-field py-2 text-sm" />
-                          <input value={editLastName} onChange={(e) => setEditLastName(e.target.value)} placeholder="Last name" className="input-field py-2 text-sm" />
+                          <input value={editFirstName} onChange={(e) => setEditFirstName(e.target.value)} placeholder="First name" autoComplete="off" autoCorrect="off" spellCheck={false} className="input-field py-2 text-sm" />
+                          <input value={editLastName} onChange={(e) => setEditLastName(e.target.value)} placeholder="Last name" autoComplete="off" autoCorrect="off" spellCheck={false} className="input-field py-2 text-sm" />
                         </div>
-                        <input value={editPhone} onChange={(e) => setEditPhone(e.target.value)} placeholder="Phone" className="input-field py-2 text-sm w-full" />
-                        <input value={editTags} onChange={(e) => setEditTags(e.target.value)} placeholder="Tags, comma separated (e.g. vip, wholesale)" className="input-field py-2 text-sm w-full" />
-                        <textarea value={editNote} onChange={(e) => setEditNote(e.target.value)} placeholder="Internal note..." rows={3} className="input-field py-2 text-sm w-full resize-none" />
+                        <input value={editPhone} onChange={(e) => setEditPhone(e.target.value)} placeholder="Phone" autoComplete="off" className="input-field py-2 text-sm w-full" />
+                        <input value={editTags} onChange={(e) => setEditTags(e.target.value)} placeholder="Tags, comma separated (e.g. vip, wholesale)" autoComplete="off" autoCorrect="off" spellCheck={false} className="input-field py-2 text-sm w-full" />
+                        <textarea value={editNote} onChange={(e) => setEditNote(e.target.value)} placeholder="Internal note..." rows={3} autoComplete="off" className="input-field py-2 text-sm w-full resize-none" />
                       </div>
                     ) : (
-                      <div className="space-y-3">
+                      <div key="view" className="space-y-3">
                         <div className="flex items-center gap-2 text-sm text-surface-700"><Mail className="h-4 w-4 text-surface-400" /> {detail.email}</div>
                         {detail.phone && <div className="flex items-center gap-2 text-sm text-surface-700"><Phone className="h-4 w-4 text-surface-400" /> {detail.phone}</div>}
                         {detail.address?.city && (
@@ -537,11 +537,11 @@ export default function CustomersPage() {
             <div className="space-y-3">
               {addError && <div className="rounded-lg bg-accent-50 border border-accent-200 px-3 py-2 text-xs text-accent-700">{addError}</div>}
               <div className="grid grid-cols-2 gap-3">
-                <input value={addFirstName} onChange={(e) => setAddFirstName(e.target.value)} placeholder="First name" className="input-field py-2.5 text-sm" autoFocus />
-                <input value={addLastName} onChange={(e) => setAddLastName(e.target.value)} placeholder="Last name" className="input-field py-2.5 text-sm" />
+                <input value={addFirstName} onChange={(e) => setAddFirstName(e.target.value)} placeholder="First name" autoComplete="off" autoCorrect="off" spellCheck={false} className="input-field py-2.5 text-sm" autoFocus />
+                <input value={addLastName} onChange={(e) => setAddLastName(e.target.value)} placeholder="Last name" autoComplete="off" autoCorrect="off" spellCheck={false} className="input-field py-2.5 text-sm" />
               </div>
-              <input value={addEmail} onChange={(e) => setAddEmail(e.target.value)} type="email" placeholder="Email address" className="input-field py-2.5 text-sm w-full" />
-              <input value={addPhone} onChange={(e) => setAddPhone(e.target.value)} placeholder="Phone (optional)" className="input-field py-2.5 text-sm w-full" />
+              <input value={addEmail} onChange={(e) => setAddEmail(e.target.value)} type="email" placeholder="Email address" autoComplete="off" className="input-field py-2.5 text-sm w-full" />
+              <input value={addPhone} onChange={(e) => setAddPhone(e.target.value)} placeholder="Phone (optional)" autoComplete="off" className="input-field py-2.5 text-sm w-full" />
             </div>
             <div className="flex gap-3 mt-5">
               <button onClick={addCustomer} disabled={addSaving || !addEmail.trim() || !addFirstName.trim() || !addLastName.trim()} className="btn-primary text-sm py-2.5 px-6 flex-1">
