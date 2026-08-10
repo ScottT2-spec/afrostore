@@ -2,14 +2,29 @@ import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/db";
 import { sendAbandonedCartReminder } from "@/lib/abandoned-cart";
 
-// Keep each cron invocation bounded so it can't run long enough to hit a
-// serverless function timeout, even with tens of thousands of businesses
-// on the platform generating carts concurrently - the cron just runs
-// frequently (see vercel.json) and works through the backlog incrementally.
-const BATCH_SIZE = 50;
+// Vercel Cron target (see vercel.json) — runs once daily at 03:00 UTC.
+//
+// NOTE: this used to be scheduled every 15 minutes, but Vercel's Hobby
+// plan only allows a cron to fire once per day — anything more frequent
+// gets the whole deployment rejected at build time (same issue as the
+// send-campaigns cron before it was fixed). Once daily is what Hobby
+// allows; upgrading to Pro would let this run more often for tighter
+// reminder timing.
+//
+// FIRST_REMINDER_AFTER_MS/SECOND_REMINDER_AFTER_MS below are MINIMUM idle
+// thresholds, not exact schedules, so a daily run still works correctly —
+// it just means a cart can wait anywhere from 1 to ~25 hours for its first
+// reminder instead of a tight ~1 hour window. BATCH_SIZE keeps a single
+// invocation well under the function timeout even with a full day's worth
+// of carts to catch up on.
+const BATCH_SIZE = 200;
 const FIRST_REMINDER_AFTER_MS = 60 * 60 * 1000; // 1 hour of inactivity
 const SECOND_REMINDER_AFTER_MS = 23 * 60 * 60 * 1000; // ~24h after the first
 const EXPIRE_AFTER_MS = 14 * 24 * 60 * 60 * 1000; // 14 days, never recovered
+
+// Give this run extra headroom since it only fires once a day and may have
+// a larger backlog to work through than a frequent-cron design would.
+export const maxDuration = 60;
 
 const siteSelect = { name: true, slug: true, customDomain: true, currency: true, status: true } as const;
 

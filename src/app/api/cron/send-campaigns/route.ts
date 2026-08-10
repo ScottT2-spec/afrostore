@@ -3,7 +3,9 @@ import { prisma } from "@/lib/db";
 import { sendEmailCampaign, sendSmsCampaign, sendWhatsAppCampaign } from "@/lib/campaign-sender";
 
 /**
- * Vercel Cron target (see vercel.json) — runs every 5 minutes.
+ * Vercel Cron target (see vercel.json) — runs once daily (Hobby plan cron
+ * limit). Was every 5 minutes originally; that got the deployment rejected
+ * by Vercel, same class of issue as the abandoned-carts cron.
  * Finds SCHEDULED campaigns of all three types whose scheduledAt has passed
  * and dispatches them. Each individual send is independently claimed
  * (status DRAFT/SCHEDULED/PAUSED -> SENDING) inside campaign-sender.ts, so
