@@ -9,17 +9,12 @@ import Link from "next/link";
 import { RenderBlocks, type BuilderBlock } from "@/components/storefront/BlockRenderer";
 import { RenderTemplateBlocks, type TemplateBlock } from "@/components/storefront/TemplateBlockRenderer";
 import { TEMPLATE_PRESET_MAP } from "@/lib/templates/template-preset-map";
-import { FashionStoreContext } from "@/components/storefront/FashionTemplateBlocks";
-import { ElectronicsStoreContext } from "@/components/storefront/ElectronicsTemplateBlocks";
-import { BakeryStoreContext } from "@/components/storefront/BakeryTemplateBlocks";
-import { CosmeticsStoreContext, CosmeticsFontLoader, CosmeticsHeader, CosmeticsFooter } from "@/components/storefront/CosmeticsTemplateBlocks";
-import { GroceryStoreContext } from "@/components/storefront/GroceryTemplateBlocks";
-import { HealthStoreContext, HealthHeader, HealthFooterFull } from "@/components/storefront/HealthTemplateBlocks";
-import { InteriorStoreContext, InteriorHeader, InteriorFooter, InteriorFontLoader } from "@/components/storefront/InteriorDesignTemplateBlocks";
-import { KidsStoreContext, KidsHeader, KidsFooterFull } from "@/components/storefront/KidsTemplateBlocks";
-import { ToysStoreContext, ToysFontLoader } from "@/components/storefront/ToysTemplateBlocks";
-import { MakeupStoreContext } from "@/components/storefront/MakeupTemplateBlocks";
-import { PerfumesStoreContext } from "@/components/storefront/PerfumesTemplateBlocks";
+import { CosmeticsFontLoader, CosmeticsHeader, CosmeticsFooter } from "@/components/storefront/CosmeticsTemplateBlocks";
+import { HealthHeader, HealthFooterFull } from "@/components/storefront/HealthTemplateBlocks";
+import { InteriorHeader, InteriorFooter, InteriorFontLoader } from "@/components/storefront/InteriorDesignTemplateBlocks";
+import { KidsHeader, KidsFooterFull } from "@/components/storefront/KidsTemplateBlocks";
+import { ToysFontLoader } from "@/components/storefront/ToysTemplateBlocks";
+import { TemplateStoreContextProvider } from "@/components/storefront/TemplateStoreContextProvider";
 import { PerfumesFontLoader, PerfumesFooter, PerfumesHeader } from "@/components/storefront/PerfumesTemplateBlocks";
 import { FashionHeader, FashionFooter, type NavItem } from "@/components/storefront/FashionStoreChrome";
 import { GardenHeader, GardenFooter } from "@/components/storefront/GardenStoreChrome";
@@ -189,73 +184,6 @@ function getWhatsAppLink(phone: string | undefined, cart: CartItem[], currency: 
   const total = cart.reduce((s, i) => s + Number(i.product.price) * i.quantity, 0);
   msg += `\nTotal: ${formatCurrency(total, currency)}`;
   return `https://wa.me/${num.replace("+", "")}?text=${encodeURIComponent(msg)}`;
-}
-
-/* ───────── Template Store Context Provider ───────── */
-
-/** Maps any template slug to the correct StoreContext provider */
-function TemplateStoreContextProvider({ templateSlug, products, blogs, categories, currency, storeSlug, socialLinks, addToCart, toggleWishlist, isWishlisted, onQuickView, children }: {
-  templateSlug: string | null;
-  products: any[];
-  blogs: any[];
-  categories?: Array<{ id: string; name: string; slug: string; description?: string | null; image?: string | null }>;
-  currency: string;
-  storeSlug: string;
-  socialLinks?: Array<{ platform: string; url: string }>;
-  addToCart?: (productId: string, quantity?: number) => void;
-  toggleWishlist?: (productId: string) => void;
-  isWishlisted?: (productId: string) => boolean;
-  onQuickView?: (productId: string) => void;
-  children: React.ReactNode;
-}) {
-  const value = { products, blogs, categories, currency, storeSlug, socialLinks , addToCart, toggleWishlist, isWishlisted, onQuickView };
-
-  // Determine which context to use based on template slug or block prefix
-  const slug = templateSlug || "";
-  if (slug === "electronics" || slug === "electronics-accessories" || slug === "hardware" || slug === "tools") {
-    return <ElectronicsStoreContext.Provider value={value}>{children}</ElectronicsStoreContext.Provider>;
-  }
-  if (slug === "sweets-bakery") {
-    return <BakeryStoreContext.Provider value={value}>{children}</BakeryStoreContext.Provider>;
-  }
-  if (slug === "cosmetics") {
-    return <CosmeticsStoreContext.Provider value={value}>{children}</CosmeticsStoreContext.Provider>;
-  }
-  if (slug === "grocery" || slug === "vegetables") {
-    return <GroceryStoreContext.Provider value={value}>{children}</GroceryStoreContext.Provider>;
-  }
-  if (slug === "pills") {
-    return <HealthStoreContext.Provider value={value}>{children}</HealthStoreContext.Provider>;
-  }
-  if (slug === "decor" || slug === "retail") {
-    return <InteriorStoreContext.Provider value={value}>{children}</InteriorStoreContext.Provider>;
-  }
-  if (slug === "kids") {
-    return <KidsStoreContext.Provider value={value}>{children}</KidsStoreContext.Provider>;
-  }
-  if (slug === "toys") {
-    return <ToysStoreContext.Provider value={value}>{children}</ToysStoreContext.Provider>;
-  }
-  if (slug === "makeup") {
-    return <MakeupStoreContext.Provider value={value}>{children}</MakeupStoreContext.Provider>;
-  }
-  if (slug === "perfumes") {
-    return <PerfumesStoreContext.Provider value={value}>{children}</PerfumesStoreContext.Provider>;
-  }
-  if (slug === "landing-gadget") {
-    return <LandingGadgetContext.Provider value={{ storeSlug: storeSlug, products, currency, addToCart: addToCart as any }}>{children}</LandingGadgetContext.Provider>;
-  }
-  if (slug === "aegis" || slug === "aegis-landing") {
-    return <AegisLandingContext.Provider value={{ storeSlug: storeSlug }}>{children}</AegisLandingContext.Provider>;
-  }
-  if (slug === "prokip-agent") {
-    return <ProkipAgentLandingContext.Provider value={{ storeSlug: storeSlug }}>{children}</ProkipAgentLandingContext.Provider>;
-  }
-  if (slug === "prokip-booking") {
-    return <ProkipBookingLandingContext.Provider value={{ storeSlug: storeSlug }}>{children}</ProkipBookingLandingContext.Provider>;
-  }
-  // Default: fashion family
-  return <FashionStoreContext.Provider value={value}>{children}</FashionStoreContext.Provider>;
 }
 
 /* ───────── Component ───────── */

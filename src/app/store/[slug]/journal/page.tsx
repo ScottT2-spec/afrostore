@@ -6,6 +6,7 @@ import { RenderTemplateBlocks } from "@/components/storefront/TemplateBlockRende
 import { PerfumesStoreContext } from "@/components/storefront/PerfumesTemplateBlocks";
 import { PERFUMES_JOURNAL_PAGE_BLOCKS } from "@/lib/templates/presets/perfumes-page-presets";
 import { resolveLivePageContent } from "@/lib/templates/bespoke-page-content";
+import { useWishlist } from "@/hooks/useWishlist";
 
 export default function PerfumesJournalPage() {
   const params = useParams();
@@ -38,12 +39,38 @@ export default function PerfumesJournalPage() {
   const { store } = data;
   const socialLinksArray = Object.entries(data.socialLinks || {}).filter(([, url]) => url).map(([p, u]) => ({ platform: p, url: u as string }));
 
+  const { isWishlisted, toggleWishlist } = useWishlist(store.id);
+
+  const addToCart = (productId: string, quantity: number = 1) => {
+    const product = (data.products || []).find((p: any) => p.id === productId);
+    if (!product) return;
+    const cart = JSON.parse(localStorage.getItem(`cart_${store.id}`) || "[]");
+    const existing = cart.find((item: any) => item.productId === productId && !item.variantId);
+    if (existing) {
+      existing.quantity += quantity;
+    } else {
+      cart.push({
+        productId,
+        variantId: null,
+        name: product.name,
+        variant: null,
+        price: product.price,
+        image: product.images?.[0]?.url,
+        quantity,
+      });
+    }
+    localStorage.setItem(`cart_${store.id}`, JSON.stringify(cart));
+  };
+
   const ctxValue = {
     products: data.products || [],
     blogs: data.blogs || [],
     currency: store.currency || "USD",
     storeSlug: slug,
     socialLinks: socialLinksArray,
+    addToCart,
+    toggleWishlist,
+    isWishlisted,
   };
 
   const resolvedPage = pageData?.content

@@ -2,6 +2,7 @@ import { prisma } from "@/lib/db";
 import Link from "next/link";
 import { notFound, redirect } from "next/navigation";
 import { RenderTemplateBlocks, type TemplateBlock } from "@/components/storefront/TemplateBlockRenderer";
+import InteractiveTemplateBlocks from "@/components/storefront/InteractiveTemplateBlocks";
 import { RetailHeader, RetailFooter } from "@/components/storefront/RetailTemplateBlocks";
 import { ThemeProvider, type ThemeData } from "@/components/storefront/ThemeProvider";
 import { applyPageCustomization, buildPageBackgroundStyle, filterVisiblePages, getResolvedPageSettings, normalizeSiteCustomization, type SiteCustomizationDocument } from "@/lib/site-customization";
@@ -295,7 +296,7 @@ export default async function ContactPage({ params }: Props) {
         {hasBlocks ? (
           <>
             {contactNodeCss && <style data-live-node-styles dangerouslySetInnerHTML={{ __html: contactNodeCss }} />}
-            <RenderTemplateBlocks blocks={resolvedContact.blocks as TemplateBlock[]} />
+            <InteractiveTemplateBlocks templateSlug={activeTemplateSlug} blocks={resolvedContact.blocks as TemplateBlock[]} products={serializedProducts} blogs={blogs} currency={store.currency} storeId={store.id} storeSlug={slug} />
           </>
         ) : (
           <>
@@ -428,7 +429,7 @@ export default async function ContactPage({ params }: Props) {
         <HealthHeader storeName={store.name} storeSlug={slug} logo={store.logo} />
         <main>
           {contactNodeCss && <style data-live-node-styles dangerouslySetInnerHTML={{ __html: contactNodeCss }} />}
-          <RenderTemplateBlocks blocks={blocks} />
+          <InteractiveTemplateBlocks templateSlug={activeTemplateSlug} blocks={blocks} products={serializedProducts} blogs={blogs} currency={store.currency} storeId={store.id} storeSlug={slug} />
         </main>
         <HealthFooterFull 
           storeName={store.name} 
@@ -461,7 +462,7 @@ export default async function ContactPage({ params }: Props) {
         <CosmeticsFontLoader />
         <CosmeticsHeader storeName={store.name} storeSlug={slug} logo={store.logo} />
         <main style={buildPageBackgroundStyle(pageSettings)}>
-          <RenderTemplateBlocks blocks={cosmeticsBlocks} />
+          <InteractiveTemplateBlocks templateSlug={activeTemplateSlug} blocks={cosmeticsBlocks} products={serializedProducts} blogs={blogs} currency={store.currency} storeId={store.id} storeSlug={slug} />
         </main>
         <CosmeticsFooter storeName={store.name} storeSlug={slug} logo={store.logo} description={store.description ?? undefined} />
       </ThemeProvider>
@@ -540,7 +541,7 @@ export default async function ContactPage({ params }: Props) {
         {resolvedContact && resolvedContact.blocks.length > 0 ? (
           <RenderBlocks blocks={pageContent.blocks as BuilderBlock[]} storeSlug={slug} products={serializedProducts} />
         ) : (
-          <RenderTemplateBlocks blocks={CONTACT_PAGE_BLOCKS} />
+          <InteractiveTemplateBlocks templateSlug={activeTemplateSlug} blocks={CONTACT_PAGE_BLOCKS} products={serializedProducts} blogs={blogs} currency={store.currency} storeId={store.id} storeSlug={slug} />
         )}
       </div>
       <HandmadeBagsFooter

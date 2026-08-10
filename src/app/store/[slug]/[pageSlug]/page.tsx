@@ -22,10 +22,11 @@ import { useABTestVariant, applyABTestOverrides } from "@/hooks/useABTestVariant
 import { applyPageCustomization, buildPageBackgroundStyle, buildThemeDataWithCustomization, filterVisiblePages, getResolvedPageSettings, normalizeSiteCustomization, type SiteCustomizationDocument } from "@/lib/site-customization";
 import { VegetableAboutPage, VegetableContactPage, VegetableMenuPage, VegetableRecipePage, VegetableReservationPage } from "@/components/storefront/VegetableTemplatePages";
 import { VegetableFooter, VegetableHeader } from "@/components/storefront/VegetableStoreChrome";
+import { GroceryStoreContext } from "@/components/storefront/GroceryTemplateBlocks";
 import { KidsFontLoader, KidsFooterFull, KidsHeader } from "@/components/storefront/KidsTemplateBlocks";
 import { ToysFontLoader, ToysFooter, ToysStoreContext } from "@/components/storefront/ToysTemplateBlocks";
-import { PerfumesFontLoader, PerfumesFooter, PerfumesHeader } from "@/components/storefront/PerfumesTemplateBlocks";
-import { HealthFontLoader, HealthHeader, HealthFooterFull } from "@/components/storefront/HealthTemplateBlocks";
+import { PerfumesFontLoader, PerfumesFooter, PerfumesHeader, PerfumesStoreContext } from "@/components/storefront/PerfumesTemplateBlocks";
+import { HealthFontLoader, HealthHeader, HealthFooterFull, HealthStoreContext } from "@/components/storefront/HealthTemplateBlocks";
 import { CosmeticsFontLoader, CosmeticsHeader, CosmeticsFooter } from "@/components/storefront/CosmeticsTemplateBlocks";
 import { RetailHeader, RetailFooter } from "@/components/storefront/RetailTemplateBlocks";
 import { RETAIL_PROJECT_DETAIL_BLOCKS } from "@/lib/templates/presets/retail-pages";
@@ -177,6 +178,13 @@ export default function StorefrontPage() {
     setTimeout(() => setAddedToCart(null), 1500);
   }, []);
 
+  // Template-context product-grid blocks call addToCart with just a productId
+  // (they don't have the full product object) — adapt to the id-based signature.
+  const addToCartById = useCallback((productId: string) => {
+    const product = (data?.products || []).find((p: any) => p.id === productId);
+    if (product) addToCart(product as unknown as StoreProduct);
+  }, [data, addToCart]);
+
   const cartCount = cart.reduce((s, i) => s + i.quantity, 0);
 
   /* ── Loading ── */
@@ -282,6 +290,7 @@ export default function StorefrontPage() {
       })),
       currency,
       storeSlug: slug,
+      addToCart: addToCartById, toggleWishlist, isWishlisted,
     };
     return (
       <ThemeProvider theme={resolvedTheme}>
@@ -317,6 +326,7 @@ export default function StorefrontPage() {
       })),
       currency,
       storeSlug: slug,
+      addToCart: addToCartById, toggleWishlist, isWishlisted,
     };
     return (
       <ThemeProvider theme={resolvedTheme}>
@@ -345,6 +355,7 @@ export default function StorefrontPage() {
       })),
       currency,
       storeSlug: slug,
+      addToCart: addToCartById, toggleWishlist, isWishlisted,
     };
     return (
       <ThemeProvider theme={resolvedTheme}>
@@ -370,6 +381,7 @@ export default function StorefrontPage() {
       })),
       currency,
       storeSlug: slug,
+      addToCart: addToCartById, toggleWishlist, isWishlisted,
     };
     return (
       <ThemeProvider theme={resolvedTheme}>
@@ -426,6 +438,7 @@ export default function StorefrontPage() {
       })),
       currency,
       storeSlug: slug,
+      addToCart: addToCartById, toggleWishlist, isWishlisted,
     };
     return (
       <ThemeProvider theme={resolvedTheme}>
@@ -517,6 +530,7 @@ export default function StorefrontPage() {
 
     return (
       <ThemeProvider theme={resolvedTheme}>
+        <PerfumesStoreContext.Provider value={{ products, blogs, categories, currency, storeSlug: slug, addToCart: addToCartById, toggleWishlist, isWishlisted }}>
         <div className="min-h-screen bg-[#f6f0eb] text-[#241f24]">
           <PerfumesFontLoader />
           <PerfumesHeader
@@ -535,6 +549,7 @@ export default function StorefrontPage() {
             description={store.description || "Discover a curated collection of modern fragrances designed to hold memory, emotion, and identity in every bottle."}
           />
         </div>
+        </PerfumesStoreContext.Provider>
       </ThemeProvider>
     );
   }
@@ -607,6 +622,7 @@ export default function StorefrontPage() {
     // Use block-based rendering for all Health pages to enable editor persistence
     return (
       <ThemeProvider theme={resolvedTheme}>
+        <HealthStoreContext.Provider value={{ storeSlug: slug, addToCart: addToCartById, toggleWishlist, isWishlisted }}>
         <div className="min-h-screen bg-white text-[#333]" style={{ fontFamily: "'Cabin', Arial, sans-serif" }}>
           <HealthFontLoader />
           <HealthHeader storeName={store.name} storeSlug={slug} logo={store.logo} />
@@ -631,6 +647,7 @@ export default function StorefrontPage() {
             ]}
           />
         </div>
+        </HealthStoreContext.Provider>
       </ThemeProvider>
     );
   }
@@ -697,6 +714,7 @@ export default function StorefrontPage() {
     // Use block-based rendering for all vegetables pages to enable editor persistence
     return (
       <ThemeProvider theme={resolvedTheme}>
+        <GroceryStoreContext.Provider value={{ storeSlug: slug, addToCart: addToCartById, toggleWishlist, isWishlisted }}>
         <div className="min-h-screen bg-[#fffdf7] text-[#243226]">
           <VegetableHeader
             storeName={store.name}
@@ -718,6 +736,7 @@ export default function StorefrontPage() {
             socialLinks={vegetableSocialLinks}
           />
         </div>
+        </GroceryStoreContext.Provider>
       </ThemeProvider>
     );
   }

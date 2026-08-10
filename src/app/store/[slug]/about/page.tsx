@@ -2,6 +2,7 @@ import { prisma } from "@/lib/db";
 import { notFound, redirect } from "next/navigation";
 import Link from "next/link";
 import { RenderTemplateBlocks, type TemplateBlock } from "@/components/storefront/TemplateBlockRenderer";
+import InteractiveTemplateBlocks from "@/components/storefront/InteractiveTemplateBlocks";
 import { RetailHeader, RetailFooter } from "@/components/storefront/RetailTemplateBlocks";
 import { HandmadeBagsHeader, HandmadeBagsFooter } from "@/components/storefront/HandmadeBagsStoreChrome";
 import { ThemeProvider, type ThemeData } from "@/components/storefront/ThemeProvider";
@@ -311,7 +312,7 @@ export default async function AboutPage({ params }: Props) {
         {hasBlocks ? (
           <>
             {aboutNodeCss && <style data-live-node-styles dangerouslySetInnerHTML={{ __html: aboutNodeCss }} />}
-            <RenderTemplateBlocks blocks={resolvedAbout.blocks as TemplateBlock[]} />
+            <InteractiveTemplateBlocks templateSlug={activeTemplateSlug} blocks={resolvedAbout.blocks as TemplateBlock[]} products={serializedProducts} blogs={blogs} currency={store.currency} storeId={store.id} storeSlug={slug} />
           </>
         ) : (
           <>
@@ -460,7 +461,7 @@ export default async function AboutPage({ params }: Props) {
         <HealthHeader storeName={store.name} storeSlug={slug} logo={store.logo} />
         <main>
           {aboutNodeCss && <style data-live-node-styles dangerouslySetInnerHTML={{ __html: aboutNodeCss }} />}
-          <RenderTemplateBlocks blocks={blocks} />
+          <InteractiveTemplateBlocks templateSlug={activeTemplateSlug} blocks={blocks} products={serializedProducts} blogs={blogs} currency={store.currency} storeId={store.id} storeSlug={slug} />
         </main>
         <HealthFooterFull 
           storeName={store.name} 
@@ -506,7 +507,7 @@ export default async function AboutPage({ params }: Props) {
         {resolvedAbout && resolvedAbout.blocks.length > 0 ? (
           <RenderBlocks blocks={pageContent.blocks as BuilderBlock[]} storeSlug={slug} products={serializedProducts} />
         ) : (
-          <RenderTemplateBlocks blocks={ABOUT_PAGE_BLOCKS} />
+          <InteractiveTemplateBlocks templateSlug={activeTemplateSlug} blocks={ABOUT_PAGE_BLOCKS} products={serializedProducts} blogs={blogs} currency={store.currency} storeId={store.id} storeSlug={slug} />
         )}
       </div>
       <HandmadeBagsFooter

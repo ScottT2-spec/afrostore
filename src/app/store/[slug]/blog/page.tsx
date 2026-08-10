@@ -1,6 +1,7 @@
 import { prisma } from "@/lib/db";
 import { notFound } from "next/navigation";
 import { RenderTemplateBlocks, type TemplateBlock } from "@/components/storefront/TemplateBlockRenderer";
+import InteractiveTemplateBlocks from "@/components/storefront/InteractiveTemplateBlocks";
 import { TShirtsPrintsFooter, TShirtsPrintsHeader } from "@/components/storefront/TShirtsPrintsStoreChrome";
 import { FashionHeader, FashionFooter } from "@/components/storefront/FashionStoreChrome";
 import { ElectronicsFontLoader, ElectronicsFooter } from "@/components/storefront/ElectronicsTemplateBlocks";
@@ -217,6 +218,7 @@ const isKidsTemplate =
     return (
       <ThemeProvider theme={themeData}>
         <BlogPageClient
+          storeId={store.id}
           storeSlug={slug}
           blogs={formattedBlogs}
           currency={store.currency || "NGN"}
@@ -254,7 +256,7 @@ const isKidsTemplate =
         />
         <main style={buildPageBackgroundStyle(pageSettings)}>
           {pageNodeStyles}
-          <RenderTemplateBlocks blocks={blocks} />
+          <InteractiveTemplateBlocks templateSlug={templateSlug} blocks={blocks} products={[]} blogs={[]} currency={store.currency || "NGN"} storeId={store.id} storeSlug={slug} />
         </main>
         <FashionFooter
           storeName={store.name}
@@ -284,6 +286,7 @@ const isKidsTemplate =
     return (
       <ThemeProvider theme={themeData}>
         <BlogPageClient
+          storeId={store.id}
           storeSlug={slug}
           blogs={formattedBlogs}
           currency={store.currency || "NGN"}
@@ -326,6 +329,7 @@ const isKidsTemplate =
     return (
       <ThemeProvider theme={themeData}>
         <BlogPageClient
+          storeId={store.id}
           storeSlug={slug}
           blogs={formattedBlogs}
           currency={store.currency || "NGN"}
@@ -370,6 +374,7 @@ const isKidsTemplate =
     return (
       <ThemeProvider theme={themeData}>
         <BlogPageClient
+          storeId={store.id}
           storeSlug={slug}
           blogs={formattedBlogs}
           currency={store.currency || "NGN"}
@@ -416,6 +421,7 @@ if (isTShirtsPrintsTemplate) {
   return (
     <ThemeProvider theme={themeData}>
       <BlogPageClient
+        storeId={store.id}
         storeSlug={slug}
         blogs={formattedBlogs}
         currency={store.currency || "NGN"}
@@ -458,7 +464,7 @@ if (isTShirtsPrintsTemplate) {
         <ElectronicsFontLoader />
         <main style={buildPageBackgroundStyle(pageSettings)}>
           {pageNodeStyles}
-          <RenderTemplateBlocks blocks={blocks} />
+          <InteractiveTemplateBlocks templateSlug={templateSlug} blocks={blocks} products={[]} blogs={formattedBlogs} currency={store.currency || "NGN"} storeId={store.id} storeSlug={slug} />
         </main>
         <ElectronicsFooter storeSlug={slug} />
       </ThemeProvider>
@@ -472,7 +478,7 @@ if (isTShirtsPrintsTemplate) {
         <AccessoriesFontLoader />
         <main style={buildPageBackgroundStyle(pageSettings)}>
           {pageNodeStyles}
-          <RenderTemplateBlocks blocks={blocks} />
+          <InteractiveTemplateBlocks templateSlug={templateSlug} blocks={blocks} products={[]} blogs={formattedBlogs} currency={store.currency || "NGN"} storeId={store.id} storeSlug={slug} />
         </main>
       </ThemeProvider>
     );
@@ -490,7 +496,7 @@ if (isTShirtsPrintsTemplate) {
         />
         <main style={buildPageBackgroundStyle(pageSettings)}>
           {pageNodeStyles}
-          <RenderTemplateBlocks blocks={blocks} />
+          <InteractiveTemplateBlocks templateSlug={templateSlug} blocks={blocks} products={[]} blogs={formattedBlogs} currency={store.currency || "NGN"} storeId={store.id} storeSlug={slug} />
         </main>
         <InteriorFooter storeSlug={slug} />
       </ThemeProvider>
@@ -512,7 +518,7 @@ if (isTShirtsPrintsTemplate) {
       />
         <main style={buildPageBackgroundStyle(pageSettings)}>
         {pageNodeStyles}
-        <RenderTemplateBlocks blocks={blocks} />
+        <InteractiveTemplateBlocks templateSlug={templateSlug} blocks={blocks} products={[]} blogs={formattedBlogs} currency={store.currency || "NGN"} storeId={store.id} storeSlug={slug} />
       </main>
         <FashionFooter
           storeName={store.name}
@@ -538,7 +544,7 @@ if (isTShirtsPrintsTemplate) {
       />
         <main style={buildPageBackgroundStyle(pageSettings)}>
         {pageNodeStyles}
-        <RenderTemplateBlocks blocks={blocks} />
+        <InteractiveTemplateBlocks templateSlug={templateSlug} blocks={blocks} products={[]} blogs={formattedBlogs} currency={store.currency || "NGN"} storeId={store.id} storeSlug={slug} />
       </main>
         <FashionFooter
           storeName={store.name}
@@ -564,7 +570,7 @@ if (isTShirtsPrintsTemplate) {
       />
         <main style={buildPageBackgroundStyle(pageSettings)}>
         {pageNodeStyles}
-        <RenderTemplateBlocks blocks={blocks} />
+        <InteractiveTemplateBlocks templateSlug={templateSlug} blocks={blocks} products={[]} blogs={formattedBlogs} currency={store.currency || "NGN"} storeId={store.id} storeSlug={slug} />
       </main>
         <FashionFooter
           storeName={store.name}
@@ -589,7 +595,7 @@ if (isTShirtsPrintsTemplate) {
         <CosmeticsFontLoader />
         <CosmeticsHeader storeName={store.name} storeSlug={slug} logo={store.logo} />
         <main style={buildPageBackgroundStyle(pageSettings)}>
-          <RenderTemplateBlocks blocks={blocks} />
+          <InteractiveTemplateBlocks templateSlug={templateSlug} blocks={blocks} products={[]} blogs={formattedBlogs} currency={store.currency || "NGN"} storeId={store.id} storeSlug={slug} />
         </main>
         <CosmeticsFooter storeName={store.name} storeSlug={slug} logo={store.logo} description={store.description ?? undefined} />
       </ThemeProvider>
@@ -602,7 +608,7 @@ if (isTShirtsPrintsTemplate) {
     <ThemeProvider theme={themeData}>
       <main style={buildPageBackgroundStyle(pageSettings)}>
         {pageNodeStyles}
-        <RenderTemplateBlocks blocks={blocks} />
+        <InteractiveTemplateBlocks templateSlug={templateSlug} blocks={blocks} products={[]} blogs={formattedBlogs} currency={store.currency || "NGN"} storeId={store.id} storeSlug={slug} />
       </main>
     </ThemeProvider>
   );

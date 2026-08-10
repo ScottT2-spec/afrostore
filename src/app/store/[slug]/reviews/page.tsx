@@ -17,6 +17,7 @@ import { PerfumesHeader, PerfumesFooter } from "@/components/storefront/Perfumes
 import { PerfumesStoreContext } from "@/components/storefront/PerfumesTemplateBlocks";
 import { PERFUMES_REVIEWS_PAGE_BLOCKS } from "@/lib/templates/presets/perfumes-page-presets";
 import { resolveLivePageContent } from "@/lib/templates/bespoke-page-content";
+import { useWishlist } from "@/hooks/useWishlist";
 
 interface ReviewProduct {
   name: string;
@@ -74,6 +75,7 @@ export default function StoreReviewsPage() {
   const [themeData, setThemeData] = useState<ThemeData | null>(null);
   const [pageData, setPageData] = useState<any>(null);
   const [storeData, setStoreData] = useState<any>(null);
+  const { isWishlisted, toggleWishlist } = useWishlist(store?.id || "");
   const isKidsTemplate = slug === "kids";
   const isHealthTemplate = slug === "pills" || store?.slug === "pills" || store?.name?.toLowerCase().includes("pill") || store?.name?.toLowerCase().includes("supplement") || store?.name?.toLowerCase().includes("health");
   const isTShirtsPrintsTemplate = slug === "huty" || store?.slug === "huty" || store?.name?.toLowerCase().includes("t-shirts") || store?.name?.toLowerCase().includes("prints");
@@ -195,12 +197,35 @@ export default function StoreReviewsPage() {
   // ─── PERFUMES REVIEWS ───
   if (isPerfumesTemplate) {
     const socialLinksArray = Object.entries(storeData?.socialLinks || {}).filter(([, url]: any) => url).map(([p, u]: any) => ({ platform: p, url: u as string }));
+    const addToCart = (productId: string, quantity: number = 1) => {
+      const product = (storeData?.products || []).find((p: any) => p.id === productId);
+      if (!product || !store) return;
+      const cart = JSON.parse(localStorage.getItem(`cart_${store.id}`) || "[]");
+      const existing = cart.find((item: any) => item.productId === productId && !item.variantId);
+      if (existing) {
+        existing.quantity += quantity;
+      } else {
+        cart.push({
+          productId,
+          variantId: null,
+          name: product.name,
+          variant: null,
+          price: product.price,
+          image: product.images?.[0]?.url,
+          quantity,
+        });
+      }
+      localStorage.setItem(`cart_${store.id}`, JSON.stringify(cart));
+    };
     const ctxValue = {
       products: storeData?.products || [],
       blogs: storeData?.blogs || [],
       currency: storeData?.store?.currency || "USD",
       storeSlug: slug,
       socialLinks: socialLinksArray,
+      addToCart,
+      toggleWishlist,
+      isWishlisted,
     };
     const resolvedPage = pageData?.content
       ? resolveLivePageContent("perfumes", "reviews", pageData.content)
