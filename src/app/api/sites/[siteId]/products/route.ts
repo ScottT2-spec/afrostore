@@ -87,7 +87,10 @@ export async function POST(req: NextRequest, { params }: Params) {
           create: images.map((img, i) => ({ url: img.url, alt: img.alt, position: i })),
         },
         variants: {
-          create: variants.map((v, i) => ({ ...v, options: v.options as any, image: v.image || null, position: i })),
+          create: variants.map((v, i) => {
+            const { id: _ignoredId, ...rest } = v;
+            return { ...rest, options: rest.options as any, image: rest.image || null, position: i };
+          }),
         },
       },
       include: {

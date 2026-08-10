@@ -62,6 +62,7 @@ export const createProductSchema = z.object({
     alt: z.string().optional(),
   })).default([]),
   variants: z.array(z.object({
+    id: z.string().optional(),
     name: z.string(),
     sku: z.string().optional(),
     price: z.number().positive().optional(),

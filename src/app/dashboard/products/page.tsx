@@ -69,8 +69,12 @@ export default function ProductsPage() {
 
   const handleDelete = async (id: string) => {
     if (!currentStore || !confirm("Delete this product?")) return;
-    await api.delete(`/api/sites/${currentStore.id}/products/${id}`);
-    fetchProducts();
+    const res = await api.delete(`/api/sites/${currentStore.id}/products/${id}`);
+    if (res.success) {
+      fetchProducts();
+    } else {
+      alert(res.error || "Failed to delete product. Please try again.");
+    }
   };
 
   const currency = currentStore?.currency || "NGN";

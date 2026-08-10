@@ -103,17 +103,28 @@ export async function POST(req: NextRequest, { params }: Params) {
 
       let price = Number(product.price);
       let variantName: string | undefined;
+      let variant: (typeof product.variants)[number] | undefined;
 
       if (item.variantId) {
-        const variant = product.variants.find((v) => v.id === item.variantId);
+        variant = product.variants.find((v) => v.id === item.variantId);
         if (!variant) throw new Error(`Variant ${item.variantId} not found`);
         if (variant.price) price = Number(variant.price);
         variantName = variant.name;
       }
 
-      // Check stock
-      if (product.trackInventory && product.stock < item.quantity) {
-        throw new Error(`Insufficient stock for ${product.name}`);
+      // Check stock — a variant product tracks stock per variant, not on
+      // the parent product, so the check (and the decrement below) must
+      // look at variant.stock when an item has a variantId. Previously this
+      // always checked product.stock even for variant orders, meaning
+      // variant-level stock was never actually enforced or decremented at
+      // all — a merchant could set one variant to 0 in stock and customers
+      // could still buy it indefinitely as long as some other variant kept
+      // the parent product's own stock count above zero.
+      if (product.trackInventory) {
+        const availableStock = variant ? variant.stock : product.stock;
+        if (availableStock < item.quantity) {
+          throw new Error(`Insufficient stock for ${product.name}${variantName ? ` (${variantName})` : ""}`);
+        }
       }
 
       let originalPrice: number | undefined;
@@ -255,21 +266,50 @@ export async function POST(req: NextRequest, { params }: Params) {
         include: { items: true, customer: true },
       });
 
-      // Update stock
+      // Update stock — atomically, guarded by the current stock still being
+      // enough. The earlier pre-transaction check (above) is only a
+      // fast-fail for the common case; it reads a snapshot taken before this
+      // transaction started, so on its own it doesn't prevent two concurrent
+      // checkouts for the last unit of something both succeeding. This
+      // updateMany is the real guard: it only decrements if stock is still
+      // sufficient at the moment of commit, and if not, the whole order
+      // transaction throws and rolls back rather than allowing stock to go
+      // negative. Decrements variant stock for variant items, product stock
+      // otherwise — matching the check above.
       for (const item of items) {
         const product = productMap.get(item.productId)!;
-        if (product.trackInventory) {
-          const updated = await tx.product.update({
-            where: { id: item.productId },
+        if (!product.trackInventory) continue;
+
+        if (item.variantId) {
+          const guarded = await tx.productVariant.updateMany({
+            where: { id: item.variantId, stock: { gte: item.quantity } },
             data: { stock: { decrement: item.quantity } },
-            select: { id: true, name: true, stock: true, lowStockAlert: true },
           });
-          // Only flag when this order tipped stock at/under the threshold —
-          // avoids re-notifying on every subsequent order once already low.
-          const stockBefore = updated.stock + item.quantity;
-          if (updated.stock <= updated.lowStockAlert && stockBefore > updated.lowStockAlert) {
-            lowStockHits.push(updated);
+          if (guarded.count === 0) {
+            const variant = product.variants.find((v) => v.id === item.variantId);
+            throw new Error(`Insufficient stock for ${product.name}${variant ? ` (${variant.name})` : ""}`);
           }
+        } else {
+          const guarded = await tx.product.updateMany({
+            where: { id: item.productId, stock: { gte: item.quantity } },
+            data: { stock: { decrement: item.quantity } },
+          });
+          if (guarded.count === 0) {
+            throw new Error(`Insufficient stock for ${product.name}`);
+          }
+        }
+
+        const updated = await tx.product.findUniqueOrThrow({
+          where: { id: item.productId },
+          select: { id: true, name: true, stock: true, lowStockAlert: true },
+        });
+        // Only flag when this order tipped stock at/under the threshold —
+        // avoids re-notifying on every subsequent order once already low.
+        // (Uses the parent product's own stock/threshold either way — low
+        // stock alerts aren't currently tracked per-variant.)
+        const stockBefore = updated.stock + (item.variantId ? 0 : item.quantity);
+        if (updated.stock <= updated.lowStockAlert && stockBefore > updated.lowStockAlert) {
+          lowStockHits.push(updated);
         }
       }
 

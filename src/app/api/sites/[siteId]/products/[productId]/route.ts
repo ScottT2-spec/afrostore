@@ -60,10 +60,30 @@ export async function PATCH(req: NextRequest, { params }: Params) {
     }
 
     if (variants) {
-      await tx.productVariant.deleteMany({ where: { productId } });
-      await tx.productVariant.createMany({
-        data: variants.map((v, i) => ({ productId, ...v, options: v.options as any, image: v.image || null, position: i })),
-      });
+      // Upsert by id instead of delete-all-then-recreate. Deleting and
+      // recreating gave every variant a brand new id on every single save —
+      // any OrderItem that referenced the old variant id (a customer's past
+      // purchase of that specific size/color) would lose that reference the
+      // very next time the merchant edited the product, even for an
+      // unrelated change like the description.
+      const existingVariants = await tx.productVariant.findMany({ where: { productId }, select: { id: true } });
+      const existingIds = new Set(existingVariants.map((v) => v.id));
+      const incomingIds = new Set(variants.filter((v) => v.id).map((v) => v.id!));
+
+      const toDelete = [...existingIds].filter((id) => !incomingIds.has(id));
+      if (toDelete.length > 0) {
+        await tx.productVariant.deleteMany({ where: { id: { in: toDelete } } });
+      }
+
+      for (let i = 0; i < variants.length; i++) {
+        const { id, ...v } = variants[i];
+        const variantData = { ...v, options: v.options as any, image: v.image || null, position: i };
+        if (id && existingIds.has(id)) {
+          await tx.productVariant.update({ where: { id }, data: variantData });
+        } else {
+          await tx.productVariant.create({ data: { productId, ...variantData } });
+        }
+      }
     }
 
     return tx.product.update({
