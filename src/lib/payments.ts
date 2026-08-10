@@ -242,6 +242,20 @@ export async function processPaymentConfirmation(params: {
           },
         });
 
+        // Customer lifetime spend should only ever reflect money actually
+        // received — increment here (payment confirmed), not at order
+        // creation, so "no order is money received unless actually paid."
+        if (updatedOrder.customerId) {
+          try {
+            await tx.customer.update({
+              where: { id: updatedOrder.customerId },
+              data: { totalSpent: { increment: Number(updatedOrder.total) } },
+            });
+          } catch (custErr) {
+            console.error("Customer totalSpent update error for order", updatedOrder.id, custErr);
+          }
+        }
+
         // Loyalty: award points for the purchase and finalize any points
         // redemption that was priced into this order at checkout. Both are
         // no-ops if the site has no loyalty program, it's disabled, or the

@@ -272,13 +272,14 @@ export async function POST(req: NextRequest, { params }: Params) {
         }
       }
 
-      // Update customer stats
+      // Order count reflects real activity (operational volume) — a
+      // pending-payment order still counts as "an order". Lifetime spend
+      // is different: it must only reflect money actually received, so
+      // that's incremented separately at payment confirmation time
+      // (processPaymentConfirmation / COD-delivered), not here.
       await tx.customer.update({
         where: { id: customer!.id },
-        data: {
-          totalOrders: { increment: 1 },
-          totalSpent: { increment: finalTotal },
-        },
+        data: { totalOrders: { increment: 1 } },
       });
 
       // Update coupon usage

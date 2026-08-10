@@ -101,6 +101,16 @@ export async function PATCH(req: NextRequest, { params }: Params) {
     if (markCodAsPaid) {
       if (updated.customerId) {
         try {
+          await tx.customer.update({
+            where: { id: updated.customerId },
+            data: { totalSpent: { increment: Number(updated.total) } },
+          });
+        } catch (err) {
+          console.error("Customer totalSpent update error for COD order", updated.id, err);
+        }
+      }
+      if (updated.customerId) {
+        try {
           await awardOrderPoints(tx, siteId, updated.customerId, Number(updated.total), updated.id);
           if (updated.loyaltyPointsRedeemed > 0) {
             await finalizeOrderRedemption(tx, siteId, updated.customerId, updated.loyaltyPointsRedeemed, updated.id);
@@ -119,8 +129,20 @@ export async function PATCH(req: NextRequest, { params }: Params) {
     // Cancelling/refunding an order that had already been paid means any
     // points earned/redeemed or commission converted for it need to be
     // undone — otherwise a customer keeps points, and an affiliate keeps
-    // commission, for a sale that didn't actually happen.
+    // commission, for a sale that didn't actually happen. Same logic for
+    // lifetime spend: money that's being refunded/voided is no longer
+    // "received", so it must come back out of totalSpent too.
     if ((parsed.data.status === "CANCELLED" || parsed.data.status === "REFUNDED") && existing.paymentStatus === "PAID") {
+      if (updated.customerId) {
+        try {
+          await tx.customer.update({
+            where: { id: updated.customerId },
+            data: { totalSpent: { decrement: Number(updated.total) } },
+          });
+        } catch (err) {
+          console.error("Customer totalSpent reversal error for order", updated.id, err);
+        }
+      }
       if (updated.customerId) {
         try {
           await reverseOrderPoints(tx, siteId, updated.customerId, updated.id);

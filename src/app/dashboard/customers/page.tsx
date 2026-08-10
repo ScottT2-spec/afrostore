@@ -227,7 +227,7 @@ export default function CustomersPage() {
             </div>
           </div>
           <div className="rounded-2xl border border-surface-200 bg-white p-5">
-            <div className="flex items-center gap-2 text-surface-500 text-xs font-medium mb-2"><DollarSign className="h-3.5 w-3.5 text-emerald-600" /> Page Revenue</div>
+            <div className="flex items-center gap-2 text-surface-500 text-xs font-medium mb-2"><DollarSign className="h-3.5 w-3.5 text-emerald-600" /> Revenue Collected</div>
             <div className="text-2xl font-bold text-surface-900 font-display">{formatCurrency(totalSpentSum, currency)}</div>
           </div>
           <div className="rounded-2xl border border-surface-200 bg-white p-5">
@@ -394,9 +394,9 @@ export default function CustomersPage() {
               <>
                 {/* Header */}
                 <div className="relative bg-gradient-to-br from-brand-600 to-brand-800 px-6 pt-6 pb-16 text-white">
-                  <button onClick={closeDetail} className="absolute top-5 right-5 p-1.5 rounded-lg hover:bg-white/10 transition-colors"><X className="h-5 w-5" /></button>
-                  <div className="absolute -right-8 -top-8 h-40 w-40 rounded-full bg-white/5" />
-                  <div className="absolute right-16 top-10 h-16 w-16 rounded-full bg-accent-400/20" />
+                  <button onClick={closeDetail} type="button" className="absolute top-5 right-5 z-10 p-1.5 rounded-lg hover:bg-white/10 transition-colors"><X className="h-5 w-5" /></button>
+                  <div className="absolute -right-8 -top-8 h-40 w-40 rounded-full bg-white/5 pointer-events-none" />
+                  <div className="absolute right-16 top-10 h-16 w-16 rounded-full bg-accent-400/20 pointer-events-none" />
                   <div className="relative flex items-center gap-4">
                     <div className={`h-16 w-16 rounded-2xl bg-gradient-to-br ${avatarGradient(detail.email)} flex items-center justify-center text-white text-xl font-bold shadow-lg ring-4 ring-white/20`}>
                       {detail.firstName[0]}{detail.lastName[0]}
@@ -416,7 +416,7 @@ export default function CustomersPage() {
                 </div>
 
                 {/* Stat cards floating over header */}
-                <div className="px-6 -mt-10 relative">
+                <div className="px-6 -mt-10">
                   <div className="grid grid-cols-3 gap-3">
                     <div className="rounded-xl bg-white border border-surface-200 shadow-sm p-3 text-center">
                       <div className="text-lg font-bold text-surface-900 font-display">{detail._count.orders}</div>
@@ -439,7 +439,7 @@ export default function CustomersPage() {
                     <div className="flex items-center justify-between mb-4">
                       <h3 className="text-sm font-bold text-surface-900">Profile</h3>
                       {!editMode ? (
-                        <button onClick={() => setEditMode(true)} className="text-xs text-brand-600 hover:text-brand-700 font-medium flex items-center gap-1"><Edit3 className="h-3.5 w-3.5" /> Edit</button>
+                        <button onClick={() => setEditMode(true)} type="button" className="relative z-10 text-xs text-brand-600 hover:text-brand-700 font-medium flex items-center gap-1"><Edit3 className="h-3.5 w-3.5" /> Edit</button>
                       ) : (
                         <button onClick={saveEdit} disabled={saving} className="text-xs text-emerald-600 hover:text-emerald-700 font-medium flex items-center gap-1">
                           {saving ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Save className="h-3.5 w-3.5" />} Save

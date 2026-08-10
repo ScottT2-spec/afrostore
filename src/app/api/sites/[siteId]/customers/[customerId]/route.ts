@@ -31,7 +31,20 @@ export async function GET(req: NextRequest, { params }: Params) {
   });
   if (!customer) return error("Customer not found", 404);
 
-  return success(customer);
+  // Same correctness rule as the list endpoint: displayed lifetime spend
+  // must reflect money actually received (paid, not cancelled/refunded),
+  // not the cached counter.
+  const notVoided = { status: { notIn: ["CANCELLED", "REFUNDED"] } } as const;
+  const [spendAgg, orderCountAgg] = await Promise.all([
+    prisma.order.aggregate({ where: { customerId, paymentStatus: "PAID", ...notVoided } as any, _sum: { total: true } }),
+    prisma.order.count({ where: { customerId, ...notVoided } as any }),
+  ]);
+
+  return success({
+    ...customer,
+    totalSpent: Number(spendAgg._sum.total || 0),
+    totalOrders: orderCountAgg,
+  });
 }
 
 // PATCH /api/sites/:siteId/customers/:customerId
