@@ -1,10 +1,11 @@
 "use client";
 import { Loader2, Plus } from "lucide-react";
-import { ExternalLink, Globe, GripVertical, Image as ImageIcon, Package, Pencil, Search, Tag, Trash2 } from "@/components/icons/FilledIcons";
+import { Globe, GripVertical, Package, Pencil, Search, Tag, Trash2 } from "@/components/icons/FilledIcons";
 
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useRef } from "react";
 import { useSite } from "@/context/StoreContext";
 import { api } from "@/lib/api-client";
+import { SingleImageUpload } from "@/components/dashboard/ImageUpload";
 
 interface BrandItem {
   id: string;
@@ -33,9 +34,14 @@ export default function BrandsPage() {
 
   // Form
   const [name, setName] = useState("");
-  const [logo, setLogo] = useState("");
+  const [logo, setLogo] = useState<string | null>(null);
   const [description, setDescription] = useState("");
   const [website, setWebsite] = useState("");
+
+  // Drag-to-reorder
+  const [reordering, setReordering] = useState(false);
+  const dragIndex = useRef<number | null>(null);
+  const [dragOverIndex, setDragOverIndex] = useState<number | null>(null);
 
   const fetchBrands = useCallback(async () => {
     if (!currentStore) return;
@@ -53,7 +59,7 @@ export default function BrandsPage() {
 
   const resetForm = () => {
     setName("");
-    setLogo("");
+    setLogo(null);
     setDescription("");
     setWebsite("");
     setEditingBrand(null);
@@ -67,7 +73,7 @@ export default function BrandsPage() {
 
   const openEdit = (brand: BrandItem) => {
     setName(brand.name);
-    setLogo(brand.logo || "");
+    setLogo(brand.logo || null);
     setDescription(brand.description || "");
     setWebsite(brand.website || "");
     setEditingBrand(brand);
@@ -81,7 +87,7 @@ export default function BrandsPage() {
 
     const payload = {
       name: name.trim(),
-      logo: logo.trim() || null,
+      logo: logo || null,
       description: description.trim() || undefined,
       website: website.trim() || null,
     };
@@ -117,6 +123,37 @@ export default function BrandsPage() {
     setDeleteId(null);
   };
 
+  // ─── Drag-to-reorder ───────────────────────────────────────
+
+  const handleDragStart = (index: number) => {
+    dragIndex.current = index;
+  };
+
+  const handleDragOver = (e: React.DragEvent, index: number) => {
+    e.preventDefault();
+    if (dragOverIndex !== index) setDragOverIndex(index);
+  };
+
+  const handleDrop = async (index: number) => {
+    const from = dragIndex.current;
+    dragIndex.current = null;
+    setDragOverIndex(null);
+    if (from === null || from === index || !currentStore) return;
+
+    const reordered = [...brands];
+    const [moved] = reordered.splice(from, 1);
+    reordered.splice(index, 0, moved);
+    setBrands(reordered); // optimistic
+
+    setReordering(true);
+    const res = await api.patch<{ brands: BrandItem[] }>(`/api/sites/${currentStore.id}/brands/reorder`, {
+      order: reordered.map((b) => b.id),
+    });
+    if (res.success && res.data) setBrands(res.data.brands);
+    else fetchBrands(); // revert to server truth on failure
+    setReordering(false);
+  };
+
   if (!currentStore) {
     return (
       <div className="p-6 flex items-center justify-center min-h-[50vh]">
@@ -140,14 +177,21 @@ export default function BrandsPage() {
 
       {/* Search */}
       {brands.length > 0 && !showEditor && (
-        <div className="relative max-w-md">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-surface-400" />
-          <input
-            value={search}
-            onChange={(e) => setSearch(e.target.value)}
-            placeholder="Search brands..."
-            className="input-field pl-10 py-2.5 w-full"
-          />
+        <div className="flex items-center gap-3 flex-wrap">
+          <div className="relative max-w-md flex-1 min-w-[200px]">
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-surface-400" />
+            <input
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
+              placeholder="Search brands..."
+              className="input-field pl-10 py-2.5 w-full"
+            />
+          </div>
+          {!search && brands.length > 1 && (
+            <p className="text-xs text-surface-400 flex items-center gap-1">
+              <GripVertical className="h-3.5 w-3.5" /> Drag to reorder
+            </p>
+          )}
         </div>
       )}
 
@@ -175,22 +219,13 @@ export default function BrandsPage() {
               <label className="block text-sm font-medium text-surface-700 mb-1">Website</label>
               <input value={website} onChange={(e) => setWebsite(e.target.value)} placeholder="https://brand.com" className="input-field py-2.5 w-full" />
             </div>
-            <div>
-              <label className="block text-sm font-medium text-surface-700 mb-1">Logo URL</label>
-              <input value={logo} onChange={(e) => setLogo(e.target.value)} placeholder="https://..." className="input-field py-2.5 w-full" />
-            </div>
-            <div>
+            <div className="sm:col-span-2">
               <label className="block text-sm font-medium text-surface-700 mb-1">Description</label>
               <input value={description} onChange={(e) => setDescription(e.target.value)} placeholder="Brief description..." className="input-field py-2.5 w-full" />
             </div>
           </div>
 
-          {logo && (
-            <div className="flex items-center gap-3">
-              <img src={logo} alt="Logo preview" className="h-12 w-12 rounded-xl object-contain border border-surface-200" />
-              <span className="text-xs text-surface-400">Logo preview</span>
-            </div>
-          )}
+          <SingleImageUpload image={logo} onChange={setLogo} label="Logo" compact />
 
           <div className="flex items-center gap-3 pt-2">
             <button onClick={saveBrand} disabled={saving || !name.trim()} className="btn-primary text-sm py-2.5 px-6">
@@ -218,10 +253,27 @@ export default function BrandsPage() {
           </button>
         </div>
       ) : !showEditor && (
-        <div className="rounded-2xl border border-surface-200 bg-white overflow-hidden">
+        <div className={`rounded-2xl border border-surface-200 bg-white overflow-hidden ${reordering ? "opacity-60 pointer-events-none" : ""}`}>
           <div className="divide-y divide-surface-100">
-            {brands.map((brand) => (
-              <div key={brand.id} className="flex items-center gap-4 px-5 py-4 hover:bg-surface-50 transition-colors group">
+            {brands.map((brand, index) => (
+              <div
+                key={brand.id}
+                draggable={!search}
+                onDragStart={() => handleDragStart(index)}
+                onDragOver={(e) => handleDragOver(e, index)}
+                onDrop={() => handleDrop(index)}
+                onDragEnd={() => setDragOverIndex(null)}
+                className={`flex items-center gap-3 px-5 py-4 hover:bg-surface-50 transition-colors group ${
+                  dragOverIndex === index ? "bg-brand-50" : ""
+                }`}
+              >
+                {/* Drag handle */}
+                {!search && (
+                  <div className="cursor-grab active:cursor-grabbing text-surface-300 hover:text-surface-500 flex-shrink-0" title="Drag to reorder">
+                    <GripVertical className="h-4 w-4" />
+                  </div>
+                )}
+
                 {/* Logo */}
                 <div className="h-12 w-12 rounded-xl bg-surface-100 flex items-center justify-center flex-shrink-0 overflow-hidden border border-surface-200">
                   {brand.logo ? (
@@ -246,7 +298,7 @@ export default function BrandsPage() {
                 </div>
 
                 {/* Actions */}
-                <div className="flex items-center gap-1 sm:opacity-0 sm:group-hover:opacity-100 transition-opacity">
+                <div className="flex items-center gap-1">
                   {brand.website && (
                     <a href={brand.website} target="_blank" rel="noopener noreferrer" className="p-2 rounded-lg hover:bg-surface-100 text-surface-400 hover:text-surface-700 transition-colors" title="Visit website">
                       <Globe className="h-4 w-4" />

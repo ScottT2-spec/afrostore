@@ -15,6 +15,7 @@ export async function GET(req: NextRequest, { params }: Params) {
   const url = new URL(req.url);
   const status = url.searchParams.get("status");
   const category = url.searchParams.get("category");
+  const brand = url.searchParams.get("brand");
   const search = url.searchParams.get("search");
   const page = parseInt(url.searchParams.get("page") || "1");
   const limit = Math.min(parseInt(url.searchParams.get("limit") || "20"), 100);
@@ -23,6 +24,7 @@ export async function GET(req: NextRequest, { params }: Params) {
   const where: Record<string, unknown> = { siteId };
   if (status) where.status = status;
   if (category) where.categoryId = category;
+  if (brand) where.brandId = brand;
   if (search) {
     where.OR = [
       { name: { contains: search, mode: "insensitive" } },
@@ -38,6 +40,7 @@ export async function GET(req: NextRequest, { params }: Params) {
         images: { orderBy: { position: "asc" } },
         variants: { orderBy: { position: "asc" } },
         category: { select: { id: true, name: true, slug: true } },
+        brand: { select: { id: true, name: true, slug: true, logo: true } },
         _count: { select: { reviews: true, orderItems: true } },
       },
       orderBy: { createdAt: "desc" },
@@ -91,6 +94,7 @@ export async function POST(req: NextRequest, { params }: Params) {
         images: true,
         variants: true,
         category: { select: { id: true, name: true } },
+        brand: { select: { id: true, name: true } },
       },
     });
 

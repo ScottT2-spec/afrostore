@@ -43,6 +43,13 @@ interface Category {
   children?: Category[];
 }
 
+interface Brand {
+  id: string;
+  name: string;
+  slug: string;
+  logo: string | null;
+}
+
 interface ProductData {
   id?: string;
   name: string;
@@ -55,6 +62,7 @@ interface ProductData {
   trackInventory: boolean;
   lowStockAlert?: number;
   categoryId?: string | null;
+  brandId?: string | null;
   status: string;
   isFeatured: boolean;
   tags: string[];
@@ -175,6 +183,10 @@ export default function ProductForm({ productId }: ProductFormProps) {
   // Categories
   const [categories, setCategories] = useState<Category[]>([]);
 
+  // Brands
+  const [brands, setBrands] = useState<Brand[]>([]);
+  const [brandId, setBrandId] = useState("");
+
   const currency = currentStore?.currency || "NGN";
 
   // ─── Load categories ───────────────────────────────────────
@@ -186,6 +198,15 @@ export default function ProductForm({ productId }: ProductFormProps) {
         const cats = Array.isArray(res.data) ? res.data : (res.data as any).categories || [];
         setCategories(cats);
       }
+    });
+  }, [currentStore]);
+
+  // ─── Load brands ────────────────────────────────────────────
+
+  useEffect(() => {
+    if (!currentStore) return;
+    api.get<{ brands: Brand[] }>(`/api/sites/${currentStore.id}/brands`).then((res) => {
+      if (res.success && res.data) setBrands(res.data.brands || []);
     });
   }, [currentStore]);
 
@@ -207,6 +228,7 @@ export default function ProductForm({ productId }: ProductFormProps) {
         setTrackInventory(p.trackInventory);
         setLowStockAlert(String(p.lowStockAlert || 5));
         setCategoryId(p.categoryId || "");
+        setBrandId(p.brandId || "");
         setStatus(p.status);
         setIsFeatured(p.isFeatured);
         setTags(p.tags || []);
@@ -401,6 +423,7 @@ export default function ProductForm({ productId }: ProductFormProps) {
       trackInventory,
       lowStockAlert: parseInt(lowStockAlert) || 5,
       categoryId: categoryId || null,
+      brandId: brandId || null,
       status,
       isFeatured,
       tags,
@@ -650,6 +673,21 @@ export default function ProductForm({ productId }: ProductFormProps) {
                         {categories.map((cat) => (
                           <option key={cat.id} value={cat.id}>
                             {cat.name}
+                          </option>
+                        ))}
+                      </select>
+                    </div>
+                    <div>
+                      <label className="block text-sm font-medium text-surface-700 mb-1">Brand</label>
+                      <select
+                        value={brandId}
+                        onChange={(e) => setBrandId(e.target.value)}
+                        className="input-field"
+                      >
+                        <option value="">No brand</option>
+                        {brands.map((b) => (
+                          <option key={b.id} value={b.id}>
+                            {b.name}
                           </option>
                         ))}
                       </select>

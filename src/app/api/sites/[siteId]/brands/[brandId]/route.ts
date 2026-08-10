@@ -1,6 +1,6 @@
 import { NextRequest } from "next/server";
 import { prisma } from "@/lib/db";
-import { getStoreContext, success, error, validationError, logAudit , requireRole } from "@/lib/api-helpers";
+import { getStoreContext, success, error, validationError, logAudit, requireRole, serverError } from "@/lib/api-helpers";
 import { updateBrandSchema } from "@/lib/validators";
 import { unauthorized } from "@/lib/auth";
 
@@ -62,8 +62,7 @@ export async function PATCH(req: NextRequest, { params }: Params) {
 
     return success(brand);
   } catch (err) {
-    console.error("Update brand error:", err);
-    return error("Internal server error", 500);
+    return serverError(err, "Update brand error");
   }
 }
 

@@ -51,6 +51,7 @@ export const createProductSchema = z.object({
   stock: z.number().int().min(0).default(0),
   trackInventory: z.boolean().default(true),
   categoryId: z.string().optional().nullable(),
+  brandId: z.string().optional().nullable(),
   status: z.enum(["ACTIVE", "DRAFT", "ARCHIVED"]).default("DRAFT"),
   isFeatured: z.boolean().default(false),
   tags: z.array(z.string()).default([]),

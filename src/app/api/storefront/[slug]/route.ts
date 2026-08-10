@@ -83,6 +83,7 @@ export async function GET(req: NextRequest, { params }: Params) {
     const limit = Math.min(parseInt(url.searchParams.get("limit") || "20"), 100);
     const skip = (page - 1) * limit;
     const categorySlug = url.searchParams.get("category");
+    const brandSlug = url.searchParams.get("brand");
     const search = url.searchParams.get("search");
     const featured = url.searchParams.get("featured");
 
@@ -98,6 +99,14 @@ export async function GET(req: NextRequest, { params }: Params) {
         select: { id: true },
       });
       if (category) productWhere.categoryId = category.id;
+    }
+
+    if (brandSlug) {
+      const brand = await prisma.brand.findFirst({
+        where: { siteId: site.id, slug: brandSlug },
+        select: { id: true },
+      });
+      if (brand) productWhere.brandId = brand.id;
     }
 
     if (search) {
@@ -118,6 +127,7 @@ export async function GET(req: NextRequest, { params }: Params) {
       products,
       productTotal,
       categories,
+      brands,
       deliveryZones,
       pages,
       activeTheme,
@@ -156,6 +166,7 @@ export async function GET(req: NextRequest, { params }: Params) {
         include: {
           images: { orderBy: { position: "asc" }, take: 3 },
           category: { select: { id: true, name: true, slug: true } },
+          brand: { select: { id: true, name: true, slug: true, logo: true } },
           variants: {
             select: { id: true, name: true, price: true, stock: true, options: true, image: true },
             orderBy: { position: "asc" },
@@ -182,6 +193,19 @@ export async function GET(req: NextRequest, { params }: Params) {
           _count: { select: { products: { where: { status: "ACTIVE" } } } },
         },
         orderBy: { position: "asc" },
+      }),
+
+      prisma.brand.findMany({
+        where: { siteId: site.id },
+        select: {
+          id: true,
+          name: true,
+          slug: true,
+          logo: true,
+          description: true,
+          _count: { select: { products: { where: { status: "ACTIVE" } } } },
+        },
+        orderBy: [{ position: "asc" }, { name: "asc" }],
       }),
 
       prisma.deliveryZone.findMany({
@@ -267,6 +291,7 @@ export async function GET(req: NextRequest, { params }: Params) {
         tags: p.tags,
         images: p.images,
         category: p.category,
+        brand: p.brand,
         variants: (p.variants || []).map((v: any) => ({
           id: v.id,
           name: v.name,
@@ -380,6 +405,7 @@ export async function GET(req: NextRequest, { params }: Params) {
       products: publicProducts,
       pagination: { page, limit, total: productTotal, pages: Math.ceil(productTotal / limit) },
       categories,
+      brands,
       deliveryZones,
       pages: publicPages,
       templateSlug: activeTemplate?.template?.slug || null,

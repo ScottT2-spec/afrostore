@@ -1,6 +1,6 @@
 import { NextRequest } from "next/server";
 import { prisma } from "@/lib/db";
-import { getStoreContext, success, error, validationError, logAudit , requireRole } from "@/lib/api-helpers";
+import { getStoreContext, success, error, validationError, logAudit, requireRole, serverError } from "@/lib/api-helpers";
 import { createBrandSchema } from "@/lib/validators";
 import { unauthorized } from "@/lib/auth";
 import { slugify, generateId } from "@/lib/utils";
@@ -79,7 +79,6 @@ export async function POST(req: NextRequest, { params }: Params) {
 
     return success(brand, 201);
   } catch (err) {
-    console.error("Create brand error:", err);
-    return error("Internal server error", 500);
+    return serverError(err, "Create brand error");
   }
 }

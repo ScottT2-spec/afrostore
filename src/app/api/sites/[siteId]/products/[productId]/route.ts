@@ -18,6 +18,7 @@ export async function GET(req: NextRequest, { params }: Params) {
       images: { orderBy: { position: "asc" } },
       variants: { orderBy: { position: "asc" } },
       category: true,
+      brand: true,
       reviews: { orderBy: { createdAt: "desc" }, take: 10 },
       _count: { select: { reviews: true, orderItems: true } },
     },
@@ -68,7 +69,7 @@ export async function PATCH(req: NextRequest, { params }: Params) {
     return tx.product.update({
       where: { id: productId },
       data,
-      include: { images: true, variants: true, category: true },
+      include: { images: true, variants: true, category: true, brand: true },
     });
   });
 
