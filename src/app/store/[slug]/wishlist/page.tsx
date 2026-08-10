@@ -87,33 +87,17 @@ export default function WishlistPage() {
 
   const addToCart = (product: Product) => {
     if (!store) return;
-    const cartKey = `cart_${store.id}`;
+    // Single source of truth: afrostore_cart_${slug}, same key/shape every
+    // other storefront page uses.
+    const cartKey = `afrostore_cart_${slug}`;
     const cart = JSON.parse(localStorage.getItem(cartKey) || "[]");
     const existing = cart.find((item: any) => item.productId === product.id);
     if (existing) {
       existing.quantity += 1;
     } else {
-      cart.push({
-        productId: product.id,
-        variantId: null,
-        name: product.name,
-        variant: null,
-        price: product.price,
-        image: product.images[0]?.url || null,
-        quantity: 1,
-      });
+      cart.push({ productId: product.id, quantity: 1, product });
     }
     localStorage.setItem(cartKey, JSON.stringify(cart));
-    // Also update the store-scoped cart used by the store page
-    const storeCartKey = `afrostore_cart_${slug}`;
-    const afroCart = JSON.parse(localStorage.getItem(storeCartKey) || "[]");
-    const existingAfro = afroCart.find((item: any) => item.productId === product.id);
-    if (existingAfro) {
-      existingAfro.quantity += 1;
-    } else {
-      afroCart.push({ productId: product.id, quantity: 1, product });
-    }
-    localStorage.setItem(storeCartKey, JSON.stringify(afroCart));
     localStorage.setItem("afrostore_cart_active_slug", slug as string);
 
     setAddedToCart(product.id);

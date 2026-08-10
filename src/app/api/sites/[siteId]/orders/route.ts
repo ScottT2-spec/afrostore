@@ -8,6 +8,7 @@ import { getBestActiveFlashSales, applyDiscount } from "@/lib/flash-sales";
 import { runAutomationsForTrigger } from "@/lib/automations";
 import { validateRedemption } from "@/lib/loyalty";
 import { createSiteNotification } from "@/lib/notifications";
+import { markAbandonedCartsRecovered } from "@/lib/abandoned-cart";
 
 
 type Params = { params: Promise<{ siteId: string }> };
@@ -352,6 +353,11 @@ export async function POST(req: NextRequest, { params }: Params) {
         data: { productId: p.id, stock: p.stock, lowStockAlert: p.lowStockAlert },
       });
     }
+
+    // Mark any matching abandoned cart as recovered (fire-and-forget - never block checkout)
+    markAbandonedCartsRecovered(siteId, { email, phone }, order.id).catch((err) =>
+      console.error("markAbandonedCartsRecovered error:", err)
+    );
 
     // Fire "new_order" automations (fire-and-forget — never block checkout)
     runAutomationsForTrigger(siteId, "new_order", {

@@ -47,29 +47,51 @@ export async function GET(req: NextRequest, { params }: Params) {
   });
 }
 
-// POST — record an abandoned cart (called from storefront)
+// POST — record/update an abandoned cart (called from the storefront while
+// a visitor has items in their cart; public endpoint, no auth - same trust
+// model as other storefront tracking calls).
 export async function POST(req: NextRequest, { params }: Params) {
   const { siteId } = await params;
   const body = await req.json();
   const { email, phone, sessionId, items, totalAmount, currency, customerId } = body;
 
   if (!items || !Array.isArray(items) || items.length === 0) return error("Cart items required");
+  if (items.length > 200) return error("Too many cart items");
   if (!email && !phone && !sessionId) return error("At least email, phone, or sessionId required");
 
-  // Check for existing active cart with same identifier
+  const site = await prisma.site.findFirst({ where: { id: siteId, status: "ACTIVE" }, select: { id: true } });
+  if (!site) return error("Store not found", 404);
+
+  // Match on ANY identifier we have, not just one - a visitor typically
+  // starts anonymous (sessionId only) and only becomes reachable (email/
+  // phone) once they reach checkout. Without an OR match here, that later
+  // call with email/phone would create a duplicate record instead of
+  // upgrading the original session's cart with contact info.
+  const identifiers = [
+    sessionId ? { sessionId } : null,
+    email ? { email } : null,
+    phone ? { phone } : null,
+  ].filter((x): x is { sessionId: string } | { email: string } | { phone: string } => x !== null);
+
   const existing = await prisma.abandonedCart.findFirst({
-    where: {
-      siteId,
-      status: "ACTIVE",
-      ...(email ? { email } : sessionId ? { sessionId } : { phone }),
-    },
+    where: { siteId, status: "ACTIVE", OR: identifiers },
+    orderBy: { updatedAt: "desc" },
   });
 
   if (existing) {
-    // Update existing cart
     const updated = await prisma.abandonedCart.update({
       where: { id: existing.id },
-      data: { items, totalAmount: totalAmount || 0, currency: currency || "NGN" },
+      data: {
+        items,
+        totalAmount: totalAmount || 0,
+        currency: currency || "NGN",
+        // Upgrade with any newly-known identity - never null out what we
+        // already had.
+        ...(email ? { email } : {}),
+        ...(phone ? { phone } : {}),
+        ...(customerId ? { customerId } : {}),
+        ...(sessionId && !existing.sessionId ? { sessionId } : {}),
+      },
     });
     return success(updated);
   }

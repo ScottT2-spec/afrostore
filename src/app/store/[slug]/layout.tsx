@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { prisma } from "@/lib/db";
 import StorefrontPopups from "@/components/storefront/StorefrontPopups";
 import ReferralTracker from "@/components/storefront/ReferralTracker";
+import AbandonedCartTracker from "@/components/storefront/AbandonedCartTracker";
 import { resolveStoreBaseUrlFromHeaders } from "@/lib/site-url";
 
 type Props = {
@@ -115,6 +116,7 @@ export default async function StoreLayout({ params, children }: Props) {
       {children}
       {store && <StorefrontPopups slug={slug} />}
       {store && <ReferralTracker siteId={store.id} />}
+      {store && <AbandonedCartTracker slug={slug} siteId={store.id} />}
     </>
   );
 }

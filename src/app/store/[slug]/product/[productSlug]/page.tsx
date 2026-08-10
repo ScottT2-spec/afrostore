@@ -107,23 +107,27 @@ export default function ProductDetailPage() {
     : 0;
 
   const handleAddToCart = () => {
-    // Store in localStorage cart
-    const cart = JSON.parse(localStorage.getItem(`cart_${store.id}`) || "[]");
-    const existing = cart.find((item: any) => item.productId === product.id && item.variantId === (selectedVariant || null));
+    // Store in localStorage cart - must use the same key AND item shape as
+    // every other storefront page (shop, homepage, cart, checkout), which
+    // all read/write `afrostore_cart_${slug}` with a nested `product` object.
+    // This page previously wrote to a different key (`cart_${store.id}`)
+    // with a flat shape, so anything added here silently never appeared
+    // in the cart icon, cart page, or checkout - a real lost-sale bug.
+    const cartKey = `afrostore_cart_${slug}`;
+    const cart = JSON.parse(localStorage.getItem(cartKey) || "[]");
+    const existing = cart.find((item: any) => item.productId === product.id && (item.variantId || null) === (selectedVariant || null));
     if (existing) {
       existing.quantity += quantity;
     } else {
       cart.push({
         productId: product.id,
         variantId: selectedVariant || null,
-        name: product.name,
-        variant: activeVariant?.name || null,
-        price: activeFlashSale ? activeFlashSale.salePrice : displayPrice,
-        image: images[0]?.url,
         quantity,
+        product: activeFlashSale ? { ...product, price: activeFlashSale.salePrice } : { ...product, price: displayPrice },
       });
     }
-    localStorage.setItem(`cart_${store.id}`, JSON.stringify(cart));
+    localStorage.setItem(cartKey, JSON.stringify(cart));
+    localStorage.setItem("afrostore_cart_active_slug", slug);
     trackEvent(slug, "add_to_cart", { productId: product.id, metadata: { quantity, value: (activeFlashSale ? activeFlashSale.salePrice : displayPrice) * quantity, currency } });
     setAddedToCart(true);
     setTimeout(() => setAddedToCart(false), 2000);

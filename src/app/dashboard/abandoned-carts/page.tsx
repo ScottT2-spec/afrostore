@@ -39,17 +39,21 @@ export default function AbandonedCartsPage() {
 
   useEffect(() => { load(); }, [load]);
 
+  const [remindingId, setRemindingId] = useState<string | null>(null);
+  const [remindError, setRemindError] = useState<string | null>(null);
+
   const sendReminder = async (cart: AbandonedCart) => {
-    if (!currentStore) return;
-    // Mark as reminded
-    await api.patch(`/api/sites/${currentStore.id}/abandoned-carts/${cart.id}`, { status: "REMINDED" });
-    // Open WhatsApp with recovery message if phone available
-    const contact = cart.phone || cart.customer?.phone;
-    if (contact) {
-      const items = (cart.items as CartItem[]).map((i) => `• ${i.name} x${i.quantity}`).join("\n");
-      const text = `Hi${cart.customer ? ` ${cart.customer.firstName}` : ""}! 👋\n\nYou left some items in your cart at ${currentStore.name}:\n\n${items}\n\nTotal: ${symbol}${cart.totalAmount.toLocaleString()}\n\nComplete your order now! We'd hate for you to miss out. 🛍️`;
-      window.open(`https://wa.me/${contact.replace(/[^0-9]/g, "")}?text=${encodeURIComponent(text)}`, "_blank");
+    if (!currentStore || remindingId) return;
+    setRemindingId(cart.id);
+    setRemindError(null);
+    const res = await api.post<{ cart: AbandonedCart; results: { channel: string; success: boolean; error?: string }[] }>(
+      `/api/sites/${currentStore.id}/abandoned-carts/${cart.id}/remind`,
+      {}
+    );
+    if (!res.success) {
+      setRemindError(res.error || "Failed to send reminder");
     }
+    setRemindingId(null);
     await load();
   };
 
@@ -103,6 +107,12 @@ export default function AbandonedCartsPage() {
         )}
 
         {/* Carts list */}
+        {remindError && (
+          <div className="rounded-xl border border-red-200 bg-red-50 text-red-700 text-sm px-4 py-3 mb-4 flex items-center justify-between">
+            <span>Couldn't send reminder: {remindError}</span>
+            <button onClick={() => setRemindError(null)} className="text-red-400 hover:text-red-600 text-xs font-semibold">Dismiss</button>
+          </div>
+        )}
         {carts.length === 0 ? (
           <div className="rounded-2xl border border-surface-200 bg-white p-12 text-center">
             <ShoppingCart className="h-12 w-12 text-surface-200 mx-auto mb-4" />
@@ -155,8 +165,13 @@ export default function AbandonedCartsPage() {
                         <td className="px-6 py-3.5 text-center">
                           <div className="flex items-center justify-center gap-1">
                             {cart.status !== "RECOVERED" && (
-                              <button onClick={() => sendReminder(cart)} className="text-[10px] font-semibold text-green-600 hover:text-green-700 px-2 py-1 rounded hover:bg-green-50 flex items-center gap-1" title="Send WhatsApp reminder">
-                                <MessageCircle className="h-3 w-3" /> Remind
+                              <button
+                                onClick={() => sendReminder(cart)}
+                                disabled={remindingId === cart.id || (!cart.email && !cart.phone && !cart.customer?.email && !cart.customer?.phone)}
+                                className="text-[10px] font-semibold text-green-600 hover:text-green-700 px-2 py-1 rounded hover:bg-green-50 flex items-center gap-1 disabled:opacity-40 disabled:cursor-not-allowed"
+                                title={!cart.email && !cart.phone ? "No email or phone on file to send to" : "Send a real email/WhatsApp reminder"}
+                              >
+                                {remindingId === cart.id ? <Loader2 className="h-3 w-3 animate-spin" /> : <MessageCircle className="h-3 w-3" />} Remind
                               </button>
                             )}
                             <button onClick={() => deleteCart(cart.id)} className="p-1 text-surface-400 hover:text-red-500">

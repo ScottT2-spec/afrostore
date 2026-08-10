@@ -26,6 +26,7 @@ import { useRouter } from "next/navigation";
 import { motion, useReducedMotion } from "framer-motion";
 import { trackEvent } from "@/lib/storefront-analytics";
 import { trackABTestConversion } from "@/hooks/useABTestVariant";
+import { useAbandonedCartTracking } from "@/hooks/useAbandonedCartTracking";
 
 /* ───────── Types ───────── */
 
@@ -229,6 +230,16 @@ export default function CheckoutPage() {
   const [lastName, setLastName] = useState("");
   const [email, setEmail] = useState("");
   const [phone, setPhone] = useState("");
+
+  // Debounce email/phone before reporting them to abandoned-cart tracking -
+  // no need to hit the API on every keystroke, just once typing settles.
+  const [debouncedContact, setDebouncedContact] = useState({ email: "", phone: "" });
+  useEffect(() => {
+    const t = setTimeout(() => setDebouncedContact({ email, phone }), 1200);
+    return () => clearTimeout(t);
+  }, [email, phone]);
+  useAbandonedCartTracking(storeSlug, siteId, debouncedContact);
+
   const [address, setAddress] = useState("");
   const [city, setCity] = useState("");
   const [state, setState] = useState("");
