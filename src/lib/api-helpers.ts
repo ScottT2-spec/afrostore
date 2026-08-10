@@ -149,7 +149,8 @@ export function generateSubdomain(name: string): string {
 export async function ensureUniqueSlug(
   name: string,
   siteId: string,
-  model: "product" | "category" | "page"
+  model: "product" | "category" | "page",
+  excludeId?: string
 ): Promise<string> {
   let slug = slugify(name);
   let counter = 0;
@@ -159,17 +160,23 @@ export async function ensureUniqueSlug(
     let exists: unknown;
 
     if (model === "product") {
-      exists = await prisma.product.findUnique({
-        where: { siteId_slug: { siteId, slug: candidate } },
-      });
+      exists = excludeId
+        ? await prisma.product.findFirst({ where: { siteId, slug: candidate, id: { not: excludeId } } })
+        : await prisma.product.findUnique({
+            where: { siteId_slug: { siteId, slug: candidate } },
+          });
     } else if (model === "category") {
-      exists = await prisma.category.findUnique({
-        where: { siteId_slug: { siteId, slug: candidate } },
-      });
+      exists = excludeId
+        ? await prisma.category.findFirst({ where: { siteId, slug: candidate, id: { not: excludeId } } })
+        : await prisma.category.findUnique({
+            where: { siteId_slug: { siteId, slug: candidate } },
+          });
     } else {
-      exists = await prisma.page.findUnique({
-        where: { siteId_slug: { siteId, slug: candidate } },
-      });
+      exists = excludeId
+        ? await prisma.page.findFirst({ where: { siteId, slug: candidate, id: { not: excludeId } } })
+        : await prisma.page.findUnique({
+            where: { siteId_slug: { siteId, slug: candidate } },
+          });
     }
 
     if (!exists) return candidate;
