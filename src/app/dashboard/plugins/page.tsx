@@ -156,6 +156,18 @@ export default function PluginsPage() {
       <DashboardHeader title="Plugins" subtitle="Extend your store with powerful add-ons" />
 
       {isFromAI && <div className="px-6 pt-4"><AIPrefillBanner entityType="plugin" onDiscard={() => clearPrefill()} /></div>}
+
+      <div className="px-6 pt-4">
+        <div className="flex items-start gap-3 rounded-2xl border border-amber-200 bg-amber-50 px-4 py-3">
+          <Clock className="h-5 w-5 text-amber-600 flex-shrink-0 mt-0.5" />
+          <div>
+            <p className="text-sm font-semibold text-amber-900">Coming soon</p>
+            <p className="text-xs text-amber-700 mt-0.5">
+              You can install and configure plugins, but they don&apos;t run on your live store yet — notifications, delivery fee rules, and other plugin actions aren&apos;t active. We&apos;re working on turning them on.
+            </p>
+          </div>
+        </div>
+      </div>
       <div className="flex min-h-[calc(100vh-4rem)]">
         {/* Sidebar filters */}
         <div className="hidden lg:block w-56 border-r border-surface-100 bg-white p-4 space-y-1">
