@@ -7,15 +7,16 @@ export async function POST(req: NextRequest) {
     const body = await req.text();
     const signature = req.headers.get("x-paystack-signature") || "";
 
-    // Find the gateway to get the webhook secret
-    // We check all Paystack gateways since webhook URL is shared
+    // Paystack signs webhooks with your API secret key — there is no
+    // separate "webhook secret" concept on their side. secretKey is a
+    // required field, so this is always available once a gateway is enabled.
     const gateways = await prisma.paymentGateway.findMany({
-      where: { provider: "PAYSTACK", isEnabled: true, webhookSecret: { not: null } },
+      where: { provider: "PAYSTACK", isEnabled: true },
     });
 
     let verified = false;
     for (const gw of gateways) {
-      if (gw.webhookSecret && verifyPaystackWebhook(body, signature, gw.webhookSecret)) {
+      if (gw.secretKey && verifyPaystackWebhook(body, signature, gw.secretKey)) {
         verified = true;
         break;
       }

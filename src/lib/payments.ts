@@ -35,8 +35,11 @@ export async function initializePaystackPayment(params: {
 }
 
 export function verifyPaystackWebhook(body: string, signature: string, secret: string): boolean {
+  if (!signature) return false;
   const hash = crypto.createHmac("sha512", secret).update(body).digest("hex");
-  return hash === signature;
+  const a = Buffer.from(hash);
+  const b = Buffer.from(signature);
+  return a.length === b.length && crypto.timingSafeEqual(a, b);
 }
 
 export async function verifyPaystackTransaction(reference: string, secretKey: string) {
@@ -112,7 +115,10 @@ export async function verifyFlutterwaveTransactionByReference(txRef: string, sec
 }
 
 export function verifyFlutterwaveWebhook(signature: string, secret: string): boolean {
-  return signature === secret;
+  if (!signature) return false;
+  const a = Buffer.from(signature);
+  const b = Buffer.from(secret);
+  return a.length === b.length && crypto.timingSafeEqual(a, b);
 }
 
 // ─── MONNIFY ────────────────────────────────────────────────
@@ -175,8 +181,11 @@ export async function verifyMonnifyTransaction(reference: string, accessToken: s
 }
 
 export function verifyMonnifyWebhook(body: string, signature: string, secret: string): boolean {
+  if (!signature) return false;
   const hash = crypto.createHmac("sha512", secret).update(body).digest("hex");
-  return hash === signature;
+  const a = Buffer.from(hash);
+  const b = Buffer.from(signature);
+  return a.length === b.length && crypto.timingSafeEqual(a, b);
 }
 
 // ─── COMMON: Process webhook payment confirmation ───────────

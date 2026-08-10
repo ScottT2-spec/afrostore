@@ -19,7 +19,7 @@ export async function GET(req: NextRequest, { params }: Params) {
       provider: true,
       isEnabled: true,
       publicKey: true,
-      // secretKey intentionally excluded — never sent to the client
+      secretKey: true, // fetched only to derive hasWebhookSecret below — stripped before response
       webhookSecret: true, // fetched only to derive a boolean below, not returned raw
       config: true,
       createdAt: true,
@@ -27,11 +27,15 @@ export async function GET(req: NextRequest, { params }: Params) {
     },
   });
 
-  // Never leak the actual secret values to the client — just whether they're set,
-  // so the settings UI can show "configured" state and prompt for missing ones.
+  // Never leak the actual secret values to the client — just whether webhook
+  // verification is actually configured, so the settings UI can prompt for
+  // anything missing. Paystack and Monnify sign webhooks with the same
+  // secretKey already required to connect, so it's ready as soon as the
+  // gateway is enabled. Flutterwave uses a genuinely separate secret hash.
   const safeGateways = gateways.map((gw: (typeof gateways)[number]) => {
-    const { webhookSecret, ...rest } = gw;
-    return { ...rest, hasWebhookSecret: !!webhookSecret };
+    const hasWebhookSecret = gw.provider === "FLUTTERWAVE" ? !!gw.webhookSecret : !!gw.secretKey;
+    const { webhookSecret, secretKey, ...rest } = gw;
+    return { ...rest, hasWebhookSecret };
   });
 
   return success(safeGateways);
