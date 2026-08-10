@@ -417,7 +417,7 @@ export default function ProductForm({ productId }: ProductFormProps) {
       description: description.trim() || undefined,
       price: parseFloat(price),
       compareAtPrice: compareAtPrice ? parseFloat(compareAtPrice) : null,
-      costPrice: null,
+      costPrice: costPrice ? parseFloat(costPrice) : null,
       sku: sku || undefined,
       stock: parseInt(stock) || 0,
       trackInventory,
@@ -433,6 +433,7 @@ export default function ProductForm({ productId }: ProductFormProps) {
       variants:
         productType === "variable"
           ? variants.map((v) => ({
+              id: v.id || undefined,
               name: v.name,
               sku: v.sku || undefined,
               price: v.price ? parseFloat(v.price) : undefined,
@@ -655,6 +656,23 @@ export default function ProductForm({ productId }: ProductFormProps) {
                       </p>
                     </div>
                     {/* Cost price removed */}
+                    <div>
+                      <label className="block text-sm font-medium text-surface-700 mb-1">
+                        Cost Price ({currency})
+                      </label>
+                      <input
+                        type="number"
+                        value={costPrice}
+                        onChange={(e) => setCostPrice(e.target.value)}
+                        className="input-field"
+                        placeholder="0.00"
+                        min="0"
+                        step="0.01"
+                      />
+                      <p className="text-[10px] text-surface-400 mt-1">
+                        What this costs you — used for profit tracking, never shown to customers
+                      </p>
+                    </div>
                   </div>
                 </div>
 
