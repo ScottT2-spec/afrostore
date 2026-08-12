@@ -123,12 +123,35 @@ export function verifyFlutterwaveWebhook(signature: string, secret: string): boo
 
 // ─── MONNIFY ────────────────────────────────────────────────
 
-// Normalizes a common Monnify setup mistake: pasting the base URL with a
-// trailing /api (e.g. "https://sandbox.monnify.com/api"). We append our own
-// /api/v1/... path everywhere we call Monnify, so a trailing /api here would
-// double up (".../api/api/v1/...") and every request would fail auth.
+// Normalizes common Monnify Base URL setup mistakes:
+//  - a trailing /api (e.g. "https://sandbox.monnify.com/api") — we append
+//    our own /api/v1/... path everywhere we call Monnify, so a trailing
+//    /api here would double up (".../api/api/v1/...") and break auth
+//  - surrounding quotes left over from pasting a line straight out of an
+//    .env file (e.g. MONNIFY_BASE_URL="https://sandbox.monnify.com")
+//  - invisible characters (zero-width space, BOM, smart quotes) that
+//    don't show up visually but make the URL parser reject the string
+// Throws a clear, specific error if the result still isn't a valid URL,
+// instead of letting fetch() fail with an opaque "Failed to parse URL".
 export function normalizeMonnifyBaseUrl(url: string): string {
-  return url.trim().replace(/\/+$/, "").replace(/\/api$/i, "");
+  let cleaned = url
+    .trim()
+    .replace(/^['"]+|['"]+$/g, "") // strip surrounding quotes
+    .replace(/[\u200B-\u200D\uFEFF]/g, "") // zero-width space/joiner/BOM
+    .replace(/[\u2018\u2019]/g, "'").replace(/[\u201C\u201D]/g, '"') // smart quotes
+    .replace(/^['"]+|['"]+$/g, "") // strip quotes again in case they were smart quotes
+    .trim()
+    .replace(/\/+$/, "")
+    .replace(/\/api$/i, "");
+
+  if (!/^https?:\/\//i.test(cleaned)) cleaned = `https://${cleaned}`;
+
+  try {
+    new URL(cleaned);
+  } catch {
+    throw new Error(`"${url}" isn't a valid URL. Use just the domain, e.g. https://sandbox.monnify.com`);
+  }
+  return cleaned;
 }
 
 export async function getMonnifyAccessToken(apiKey: string, secretKey: string, baseUrl: string) {
