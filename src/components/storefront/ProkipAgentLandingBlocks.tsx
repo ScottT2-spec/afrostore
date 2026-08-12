@@ -106,13 +106,52 @@ export function ProkipAgentModal({
   ],
   submitText = "JOIN OUR TEAM NOW",
 }: ProkipAgentModalProps) {
+  const storeSlug = useContext(ProkipAgentCtx).storeSlug;
   const [open, setOpen] = useState(false);
+  const [values, setValues] = useState<Record<string, string>>({});
+  const [submitting, setSubmitting] = useState(false);
+  const [submitError, setSubmitError] = useState("");
+  const [submitted, setSubmitted] = useState(false);
 
   useEffect(() => {
-    const handler = () => setOpen(true);
+    const handler = () => { setOpen(true); setSubmitted(false); setSubmitError(""); };
     window.addEventListener("open-application-modal", handler);
     return () => window.removeEventListener("open-application-modal", handler);
   }, []);
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!storeSlug) { setSubmitError("This form isn't connected to a store yet."); return; }
+    const fullNameField = fields.find((f) => /name/i.test(f.name))?.name || "fullName";
+    const emailField = fields.find((f) => f.type === "email")?.name || "email";
+    const phoneField = fields.find((f) => f.type === "tel")?.name || "phone";
+    const phonePrefix = fields.find((f) => f.name === phoneField)?.prefix || "";
+    const [firstName, ...rest] = (values[fullNameField] || "").trim().split(/\s+/).filter(Boolean);
+
+    setSubmitting(true);
+    setSubmitError("");
+    try {
+      const res = await fetch(`/api/public/sites/${storeSlug}/crm/contacts`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          firstName: firstName || "",
+          lastName: rest.join(" "),
+          email: values[emailField] || "",
+          phone: `${phonePrefix}${values[phoneField] || ""}`,
+          source: "landing",
+          tags: ["agent-application"],
+        }),
+      });
+      const json = await res.json();
+      if (!json.success) throw new Error(json.error || "Failed to submit. Please try again.");
+      setSubmitted(true);
+    } catch (err: any) {
+      setSubmitError(err.message || "Something went wrong. Please try again.");
+    } finally {
+      setSubmitting(false);
+    }
+  };
 
   const css = `
     .pa-modal-overlay { position: fixed; inset: 0; z-index: 50; display: flex; align-items: center; justify-content: center; padding: 16px; background: ${T.navy950}cc; backdrop-filter: blur(4px); overflow-y: auto; }
@@ -143,22 +182,47 @@ export function ProkipAgentModal({
         <button className="pa-modal-close" onClick={() => setOpen(false)}>✕</button>
         <h3 className="pa-modal-title"><EditableCopy field="title" value={title} as="span" className="pa-modal-title" /></h3>
         <div style={{ textAlign: "center" }}><span className="pa-modal-badge"><EditableCopy field="badge" value={badge} as="span" className="pa-modal-badge" /></span></div>
-        <form className="pa-modal-form" onSubmit={(e) => { e.preventDefault(); setOpen(false); }}>
-          {fields.map((f, idx) => (
-            <div key={f.name}>
-              <label className="pa-modal-label"><EditableCopy fieldPath={`fields.${idx}.label`} value={f.label} as="span" className="pa-modal-label" /></label>
-              {f.prefix ? (
-                <div className="pa-modal-phone-wrap">
-                  <span className="pa-modal-prefix"><EditableCopy fieldPath={`fields.${idx}.prefix`} value={f.prefix} as="span" className="pa-modal-prefix" /></span>
-                  <input type={f.type} placeholder={f.placeholder} required className="pa-modal-phone-input" />
-                </div>
-              ) : (
-                <input type={f.type} placeholder={f.placeholder} required className="pa-modal-input" />
-              )}
-            </div>
-          ))}
-          <button type="submit" className="pa-modal-submit"><EditableCopy field="submitText" value={submitText} as="span" className="pa-modal-submit" /> ✈</button>
-        </form>
+        {submitted ? (
+          <div style={{ marginTop: 40, textAlign: "center", color: T.brand400, fontFamily: T.bodyFont, fontWeight: 600 }}>
+            Thanks! Your application has been received.
+          </div>
+        ) : (
+          <form className="pa-modal-form" onSubmit={handleSubmit}>
+            {submitError && (
+              <p style={{ color: "#f87171", fontSize: "0.875rem", textAlign: "center", margin: 0 }}>{submitError}</p>
+            )}
+            {fields.map((f, idx) => (
+              <div key={f.name}>
+                <label className="pa-modal-label"><EditableCopy fieldPath={`fields.${idx}.label`} value={f.label} as="span" className="pa-modal-label" /></label>
+                {f.prefix ? (
+                  <div className="pa-modal-phone-wrap">
+                    <span className="pa-modal-prefix"><EditableCopy fieldPath={`fields.${idx}.prefix`} value={f.prefix} as="span" className="pa-modal-prefix" /></span>
+                    <input
+                      type={f.type}
+                      placeholder={f.placeholder}
+                      required
+                      className="pa-modal-phone-input"
+                      value={values[f.name] || ""}
+                      onChange={(e) => setValues((prev) => ({ ...prev, [f.name]: e.target.value }))}
+                    />
+                  </div>
+                ) : (
+                  <input
+                    type={f.type}
+                    placeholder={f.placeholder}
+                    required
+                    className="pa-modal-input"
+                    value={values[f.name] || ""}
+                    onChange={(e) => setValues((prev) => ({ ...prev, [f.name]: e.target.value }))}
+                  />
+                )}
+              </div>
+            ))}
+            <button type="submit" disabled={submitting} className="pa-modal-submit">
+              <EditableCopy field="submitText" value={submitting ? "Submitting..." : submitText} as="span" className="pa-modal-submit" /> ✈
+            </button>
+          </form>
+        )}
       </div>
     </div>
   );

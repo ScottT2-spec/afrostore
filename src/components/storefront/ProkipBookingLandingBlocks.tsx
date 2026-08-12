@@ -482,7 +482,10 @@ export function ProkipBookingForm({
     "They want to expand without losing control.",
   ],
 }: ProkipBookingFormProps) {
+  const storeSlug = useContext(ProkipBookingCtx).storeSlug;
   const [submitted, setSubmitted] = useState(false);
+  const [submitting, setSubmitting] = useState(false);
+  const [submitError, setSubmitError] = useState("");
   const [step, setStep] = useState(1);
   const [fullName, setFullName] = useState("");
   const [businessName, setBusinessName] = useState("");
@@ -524,7 +527,42 @@ export function ProkipBookingForm({
     setUpcomingDates(list);
   }, []);
 
-  const handleSubmit = (e: React.FormEvent) => { e.preventDefault(); setSubmitted(true); };
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!storeSlug) { setSubmitError("This form isn't connected to a store yet."); return; }
+    setSubmitting(true);
+    setSubmitError("");
+    try {
+      const [firstName, ...rest] = fullName.trim().split(/\s+/).filter(Boolean);
+      const res = await fetch(`/api/public/sites/${storeSlug}/crm/contacts`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          firstName: firstName || "",
+          lastName: rest.join(" "),
+          email,
+          phone: `${countryCode}${phoneNo}`,
+          company: businessName,
+          source: "landing",
+          tags: ["demo-booking"],
+          customFields: {
+            businessType,
+            locations,
+            challenge,
+            preferredDate: selectedDate,
+            preferredTime: selectedTime,
+          },
+        }),
+      });
+      const json = await res.json();
+      if (!json.success) throw new Error(json.error || "Failed to submit. Please try again.");
+      setSubmitted(true);
+    } catch (err: any) {
+      setSubmitError(err.message || "Something went wrong. Please try again.");
+    } finally {
+      setSubmitting(false);
+    }
+  };
   const handleNextStep = (e: React.MouseEvent) => {
     e.preventDefault();
     if (fullName && businessName && phoneNo && email && businessType && locations) { setStep(2); }
@@ -721,10 +759,13 @@ export function ProkipBookingForm({
 
                   {/* Submit */}
                   <div className="pt-6">
-                    <button type="submit" disabled={!selectedDate || !selectedTime || !challenge}
+                    {submitError && (
+                      <p className="mb-3 text-center text-sm font-medium text-red-500">{submitError}</p>
+                    )}
+                    <button type="submit" disabled={!selectedDate || !selectedTime || !challenge || submitting}
                       className="w-full flex items-center justify-center gap-2 bg-[#FFB800] hover:bg-[#E5A600] text-[#021127] font-bold py-4 rounded-xl shadow-lg shadow-[#FFB800]/20 transition-all disabled:opacity-50 disabled:cursor-not-allowed">
-                      <EditableCopy field="submitText" value={!challenge ? "Enter your biggest challenge" : !selectedDate ? "Select Preferred Date first" : !selectedTime ? "Select Available Time Slot" : "Show Me How to Run My Business"} as="span" />
-                      {challenge && selectedDate && selectedTime && <IconCheckCircle2 className="w-5 h-5" />}
+                      <EditableCopy field="submitText" value={submitting ? "Booking your demo..." : !challenge ? "Enter your biggest challenge" : !selectedDate ? "Select Preferred Date first" : !selectedTime ? "Select Available Time Slot" : "Show Me How to Run My Business"} as="span" />
+                      {challenge && selectedDate && selectedTime && !submitting && <IconCheckCircle2 className="w-5 h-5" />}
                     </button>
                     <div className="text-center mt-4">
                       <EditableCopy field="trustBadge" value="Trusted by 30,000+ Users in 80+ Regions" as="p" className="text-[10px] text-slate-400 uppercase font-bold tracking-widest" />
