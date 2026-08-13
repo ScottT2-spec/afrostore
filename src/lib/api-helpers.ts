@@ -62,10 +62,19 @@ export async function getSiteContext(req: NextRequest, siteId: string) {
   const user = await getAuthUser(req);
   if (!user) return { user: null, site: null, error: "Unauthorized" };
 
-  const site = await prisma.site.findUnique({
-    where: { id: siteId },
-    include: { members: true, workspace: true },
-  });
+  // Guarded for the same reason as getAuthUser: an unguarded DB call here
+  // ran outside every route's own try/catch, so a DB failure crashed the
+  // route with an uncaught exception instead of a JSON error response.
+  let site;
+  try {
+    site = await prisma.site.findUnique({
+      where: { id: siteId },
+      include: { members: true, workspace: true },
+    });
+  } catch (err) {
+    console.error("getSiteContext: failed to look up site", err);
+    return { user, site: null, error: "Internal server error" };
+  }
 
   if (!site) return { user, site: null, error: "Site not found" };
 
