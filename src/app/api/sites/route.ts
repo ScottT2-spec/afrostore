@@ -2,7 +2,7 @@ import { NextRequest } from "next/server";
 import { prisma } from "@/lib/db";
 import { getAuthUser, unauthorized } from "@/lib/auth";
 import { createStoreSchema } from "@/lib/validators";
-import { success, error, validationError, generateSubdomain, logAudit } from "@/lib/api-helpers";
+import { success, error, validationError, logAudit, createSiteWithUniqueSlug } from "@/lib/api-helpers";
 import { slugify } from "@/lib/utils";
 
 // GET /api/sites — list user's stores
@@ -58,21 +58,6 @@ export async function POST(req: NextRequest) {
       return error("Store limit reached for your plan", 403);
     }
 
-    const baseSlug = slugify(name);
-    const subdomain = generateSubdomain(name);
-
-    // Ensure unique slug
-    const existingSlug = await prisma.site.findFirst({ where: { slug: baseSlug } });
-    const slug = existingSlug
-      ? `${baseSlug}-${Math.random().toString(36).slice(2, 6)}`
-      : baseSlug;
-
-    // Ensure unique subdomain
-    const existingSubdomain = await prisma.site.findUnique({ where: { subdomain } });
-    const finalSubdomain = existingSubdomain
-      ? `${subdomain}-${Math.random().toString(36).slice(2, 6)}`
-      : subdomain;
-
     // Find or create a default workspace for this user
     let workspace = await prisma.workspace.findFirst({ where: { ownerId: user.id } });
     if (!workspace) {
@@ -85,30 +70,40 @@ export async function POST(req: NextRequest) {
       });
     }
 
-    const store = await prisma.site.create({
-      data: {
-        workspaceId: workspace.id,
-        name,
-        slug,
-        description,
-        subdomain: finalSubdomain,
-        businessType,
-        country: resolvedCountry,
-        currency: resolvedCurrency,
-        logo: logo || undefined,
-        settings: {
-          create: {
-            allowGuestCheckout: true,
-            payOnDelivery: true,
-            bankTransfer: true,
-            whatsappOrdering: true,
-          },
-        },
-        socialLinks: { create: {} },
-        members: {
-          create: { userId: user.id, role: "OWNER" },
+    // Creates the site with a retry-on-collision loop instead of a
+    // check-then-create — a plain existence check followed by a separate
+    // create has a real race window (two requests checking at the same
+    // moment) and, since Site.slug is globally unique, could also fail if
+    // the "available" candidate turns out to already be taken by a site
+    // that was created between the check and the create. The subdomain is
+    // derived from the same candidate slug on each attempt so it stays in
+    // sync and also gets a fresh value on retry (both columns are unique).
+    const store = await createSiteWithUniqueSlug<any>(name, (slug) => ({
+      workspaceId: workspace!.id,
+      name,
+      slug,
+      description,
+      subdomain: slug.slice(0, 30),
+      businessType,
+      country: resolvedCountry,
+      currency: resolvedCurrency,
+      logo: logo || undefined,
+      settings: {
+        create: {
+          allowGuestCheckout: true,
+          payOnDelivery: true,
+          bankTransfer: true,
+          whatsappOrdering: true,
         },
       },
+      socialLinks: { create: {} },
+      members: {
+        create: { userId: user.id, role: "OWNER" },
+      },
+    }));
+
+    const storeWithRelations = await prisma.site.findUniqueOrThrow({
+      where: { id: store.id },
       include: {
         settings: true,
         _count: { select: { products: true, orders: true } },
@@ -116,15 +111,15 @@ export async function POST(req: NextRequest) {
     });
 
     await logAudit({
-      siteId: store.id,
+      siteId: storeWithRelations.id,
       userId: user.id,
       action: "CREATE",
       entity: "store",
-      entityId: store.id,
-      after: store,
+      entityId: storeWithRelations.id,
+      after: storeWithRelations,
     });
 
-    return success(store, 201);
+    return success(storeWithRelations, 201);
   } catch (err) {
     console.error("Create store error:", err);
     return error("Internal server error", 500);

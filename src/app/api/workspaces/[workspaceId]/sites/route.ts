@@ -1,8 +1,7 @@
 import { NextRequest } from "next/server";
 import { getAuthUser, unauthorized } from "@/lib/auth";
 import { prisma } from "@/lib/db";
-import { success, error, generateSubdomain } from "@/lib/api-helpers";
-import { slugify } from "@/lib/utils";
+import { success, error, createSiteWithUniqueSlug } from "@/lib/api-helpers";
 import { importTemplateToSite } from "@/lib/templates/importer";
 import { provisionDefaultLandingFunnel } from "@/lib/landing-funnel";
 import { buildSmartAiBlocks, buildBlockContentPrompt } from "@/lib/ai-block-content-generator";
@@ -116,32 +115,18 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ wor
       resolvedCurrency = resolvedCurrency || platformDefaults?.defaultCurrency || "NGN";
     }
 
-  // Generate unique slug & subdomain
-    let slug = slugify(name.trim());
-    let counter = 0;
-    while (true) {
-      const candidate = counter === 0 ? slug : `${slug}-${counter}`;
-      const existing = await prisma.site.findFirst({ where: { workspaceId, slug: candidate } });
-      if (!existing) { slug = candidate; break; }
-      counter++;
-    }
-
-    let subdomain = generateSubdomain(name.trim());
-    counter = 0;
-    while (true) {
-      const candidate = counter === 0 ? subdomain : `${subdomain}-${counter}`;
-      const existing = await prisma.site.findFirst({ where: { workspaceId, subdomain: candidate } });
-      if (!existing) { subdomain = candidate; break; }
-      counter++;
-    }
-
-  // Create site with settings and social links
-    const site = await prisma.site.create({
-      data: {
+  // Create site with settings and social links. Uses a retry-on-collision
+  // loop instead of "check then create" — Site.slug and Site.subdomain are
+  // both globally unique (not scoped per-workspace), so a candidate that
+  // looks free within this workspace can still collide with a site in a
+  // different workspace, and a plain check-then-create also has a race
+  // window between two concurrent requests. Both failure modes previously
+  // surfaced as a raw, unhandled Prisma unique-constraint crash.
+    const site = await createSiteWithUniqueSlug<any>(name.trim(), (slug) => ({
       workspaceId,
       name: name.trim(),
       slug,
-      subdomain,
+      subdomain: slug.slice(0, 30),
       description: description || null,
       logo: logo || null,
       siteType,
@@ -168,12 +153,16 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ wor
           youtube: socialLinks.youtube || null,
         },
       } : undefined,
-    },
-      include: {
-        settings: true,
-        socialLinks: true,
-      },
+    }));
+
+    // Re-fetch with the relations the original create's `include` provided —
+    // createSiteWithUniqueSlug's create call doesn't take an include, since
+    // it may retry the create itself on a collision.
+    const siteWithRelations = await prisma.site.findUniqueOrThrow({
+      where: { id: site.id },
+      include: { settings: true, socialLinks: true },
     });
+    Object.assign(site, siteWithRelations);
 
     // Theme packages always provide their own pages and site data.
     // No default page synthesis is allowed in the import flow.
