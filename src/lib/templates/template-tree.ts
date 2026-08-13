@@ -72,6 +72,26 @@ export function templateBlockToEditorNode(block: TemplateBlock): EditorNode {
     return block;
   }
 
+  // Modern template presets declare a clean, already-correct `settings` object
+  // (with intentionally nested arrays-of-objects like `testimonials`, `steps`,
+  // `problems`, `navLinks`) and no ambiguous legacy `props` field. Those must
+  // be preserved exactly as authored — do NOT route them through the legacy
+  // heuristic migration below, which aggressively pulls any array-of-objects
+  // out of settings and turns it into synthetic child elements. That heuristic
+  // exists for genuinely ambiguous old data; it silently destroys well-formed
+  // modern presets (e.g. prokip-booking's testimonials/steps/problems arrays
+  // would vanish from settings on every save/reload round-trip).
+  if (isPlainObject(block.settings) && !isPlainObject((block as unknown as { props?: unknown }).props)) {
+    return {
+      id: block.id || createId(),
+      type: block.type,
+      settings: { ...block.settings },
+      elements: Array.isArray(block.elements)
+        ? block.elements.map((child) => templateBlockToEditorNode(child as TemplateBlock))
+        : [],
+    };
+  }
+
   const legacyNode = normalizeEditorNode({
     id: block.id || createId(),
     type: block.type,
