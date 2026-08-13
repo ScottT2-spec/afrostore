@@ -106,7 +106,11 @@ export function ProkipBookingHero({
   videoId = "npOn8HIb0Yo",
   videoTitle = "How Prokip helped us track sales, stock, and prevent employees theft",
 }: ProkipBookingHeroProps) {
-  const scrollToForm = () => { document.getElementById("prokip-booking-form")?.scrollIntoView({ behavior: "smooth" }); };
+  const scrollToForm = () => {
+    const el = document.getElementById("prokip-booking-form");
+    if (el) { el.scrollIntoView({ behavior: "smooth" }); return; }
+    console.warn("[ProkipBooking] Demo form section not found on this page — the \"Book a Demo Form\" block needs to be added to this page for this button to work.");
+  };
 
   return (
     <section className="bg-[#021127] text-white pt-24 pb-20 px-4 sm:px-6 lg:px-8 relative overflow-hidden">
@@ -175,7 +179,11 @@ export function ProkipBookingProblemSection({
   outro = "Without clear records, it becomes difficult to know who is responsible, where money is going, and whether the business is truly growing. That uncertainty is stressful. It can also be expensive.",
   ctaText = "Book your free demo",
 }: ProkipBookingProblemSectionProps) {
-  const scrollToForm = () => { document.getElementById("prokip-booking-form")?.scrollIntoView({ behavior: "smooth" }); };
+  const scrollToForm = () => {
+    const el = document.getElementById("prokip-booking-form");
+    if (el) { el.scrollIntoView({ behavior: "smooth" }); return; }
+    console.warn("[ProkipBooking] Demo form section not found on this page — the \"Book a Demo Form\" block needs to be added to this page for this button to work.");
+  };
 
   return (
     <section className="py-20 px-4 sm:px-6 lg:px-8 bg-slate-50">
@@ -357,7 +365,11 @@ export function ProkipBookingTestimonials({
   ],
   ctaText = "Book a demo",
 }: ProkipBookingTestimonialsProps) {
-  const scrollToForm = () => { document.getElementById("prokip-booking-form")?.scrollIntoView({ behavior: "smooth" }); };
+  const scrollToForm = () => {
+    const el = document.getElementById("prokip-booking-form");
+    if (el) { el.scrollIntoView({ behavior: "smooth" }); return; }
+    console.warn("[ProkipBooking] Demo form section not found on this page — the \"Book a Demo Form\" block needs to be added to this page for this button to work.");
+  };
 
   return (
     <section className="py-20 px-4 sm:px-6 lg:px-8 bg-slate-50 border-t border-slate-200">
