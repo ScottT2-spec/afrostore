@@ -654,6 +654,18 @@ export default function StorePage() {
             logo={store.logo}
           />
         </>
+      ) : isCosmeticsTemplate ? (
+        <CosmeticsHeader
+          storeName={store.name}
+          storeSlug={slug}
+          logo={store.logo}
+          cartCount={cartCount}
+          wishlistCount={wishlistCount}
+          searchQuery={searchQuery}
+          onSearchChange={setSearchQuery}
+          onSearch={handleSearch}
+          isLanding={isLanding}
+        />
       ) : isRetailTemplate ? (
         <RetailHeader
           storeName={store.name}
@@ -957,6 +969,15 @@ export default function StorePage() {
       {/* Footer */}
       {isDecorTemplate ? (
         <InteriorFooter storeSlug={slug} />
+      ) : isCosmeticsTemplate ? (
+        <CosmeticsFooter
+          storeName={store.name}
+          logo={store.logo}
+          description={store.description}
+          navPages={navPages}
+          storeSlug={slug}
+          socialLinks={socialLinksArray}
+        />
       ) : isRetailTemplate ? (
         <RetailFooter
           storeName={store.name}
