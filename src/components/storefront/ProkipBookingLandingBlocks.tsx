@@ -189,8 +189,10 @@ export function ProkipBookingProblemSection({
     <section className="py-20 px-4 sm:px-6 lg:px-8 bg-slate-50">
       <div className="max-w-7xl mx-auto">
         <div className="text-center max-w-3xl mx-auto mb-16">
-          <EditableCopy field="title" value={title} as="h2" className="text-3xl md:text-5xl font-black text-slate-900 mb-6 tracking-tight leading-[1]" />
-          <EditableCopy field="titleHighlight" value={titleHighlight} as="span" className="text-red-500" />
+          <h2 className="text-3xl md:text-5xl font-black text-slate-900 mb-6 tracking-tight leading-[1]">
+            <EditableCopy field="title" value={title} as="span" /> <br />
+            <EditableCopy field="titleHighlight" value={titleHighlight} as="span" className="text-red-500" />
+          </h2>
           <EditableCopy field="intro" value={intro} as="p" multiline className="text-lg text-slate-600 leading-relaxed mb-8" />
           <div className="bg-white p-6 rounded-2xl shadow-[-10px_0_30px_-10px_rgba(0,0,0,0.05)] border border-slate-100 text-slate-700 font-bold text-lg">
             {quotes.map((q, i) => <React.Fragment key={i}><EditableCopy fieldPath={`quotes.${i}`} value={q} as="span" />{i < quotes.length - 1 && <br />}</React.Fragment>)}
@@ -248,8 +250,10 @@ export function ProkipBookingSolution({
     <section className="py-20 px-4 sm:px-6 lg:px-8 bg-white">
       <div className="max-w-7xl mx-auto flex flex-col lg:flex-row items-center gap-12 lg:gap-20">
         <div className="lg:w-1/2">
-          <EditableCopy field="title" value={title} as="h2" className="text-3xl md:text-4xl font-bold text-slate-900 mb-6 tracking-tight" />
-          <EditableCopy field="titleHighlight" value={titleHighlight} as="span" className="text-[#021127]" />
+          <h2 className="text-3xl md:text-4xl font-bold text-slate-900 mb-6 tracking-tight">
+            <EditableCopy field="title" value={title} as="span" /> <br />
+            <EditableCopy field="titleHighlight" value={titleHighlight} as="span" className="text-[#021127]" />
+          </h2>
           <EditableCopy field="description" value={description} as="p" multiline className="text-lg text-slate-600 mb-8 leading-relaxed" />
           <div className="space-y-4">
             <EditableCopy field="featuresLabel" value={featuresLabel} as="p" className="font-semibold text-slate-900 text-lg" />
@@ -588,8 +592,10 @@ export function ProkipBookingForm({
       <div className="max-w-6xl mx-auto flex flex-col lg:flex-row gap-16 lg:items-start">
         {/* Left column */}
         <div className="lg:w-5/12 pt-8">
-          <EditableCopy field="title" value={title} as="h2" className="text-4xl font-black mb-6 text-white tracking-tight leading-[0.95]" />
-          <EditableCopy field="titleHighlight" value={titleHighlight} as="span" className="text-[#FFB800] block" />
+          <h2 className="text-4xl font-black mb-6 text-white tracking-tight leading-[0.95]">
+            <EditableCopy field="title" value={title} as="span" /> <br />
+            <EditableCopy field="titleHighlight" value={titleHighlight} as="span" className="text-[#FFB800]" />
+          </h2>
           <EditableCopy field="subtitle" value={subtitle} as="p" className="text-lg text-slate-300 mb-10 leading-relaxed" />
           <div className="mt-8">
             <div className="bg-[#FFB800]/10 border border-[#FFB800]/20 rounded-xl p-6">
