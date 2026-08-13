@@ -29,7 +29,7 @@ export const HEALTH_TEMPLATE_PRESET: EditorNode[] = [
     settings: {
       banners: [
         {
-          image: "/prokip-logo.png",
+          image: "https://images.unsplash.com/photo-1596462502278-27bfdc403348?w=800&q=80&auto=format&fit=crop",
           subtitle: "Bundles",
           title: "Sleep Easy Gummies",
           description: "Supports an optimal sleep cycle",
@@ -38,7 +38,7 @@ export const HEALTH_TEMPLATE_PRESET: EditorNode[] = [
           colorScheme: "dark",
         },
         {
-          image: "/prokip-logo.png",
+          image: "https://images.unsplash.com/photo-1580870069867-74c57ee1bb07?w=800&q=80&auto=format&fit=crop",
           subtitle: "SHOP BY SUPPLEMENTS",
           title: "Capsules for Skin",
           buttonText: "Contact With Expert",

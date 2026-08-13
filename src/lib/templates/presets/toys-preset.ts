@@ -20,8 +20,8 @@ export const TOYS_TEMPLATE_PRESET: EditorNode[] = [
             "buttonText": "SHOP NOW",
             "buttonLink": "#",
             "backgroundColor": "#1a1a2e",
-            "productImage": "/prokip-logo.png",
-            "backgroundImage": "/prokip-logo.png"
+            "productImage": "https://images.unsplash.com/photo-1596461404969-9ae70f2830c1?w=800&q=80&auto=format&fit=crop",
+            "backgroundImage": "https://images.unsplash.com/photo-1515488042361-ee00e0ddd4e4?w=800&q=80&auto=format&fit=crop"
           },
           elements: [],
         },
@@ -35,8 +35,8 @@ export const TOYS_TEMPLATE_PRESET: EditorNode[] = [
             "buttonText": "SHOP NOW",
             "buttonLink": "#",
             "backgroundColor": "#0f3460",
-            "productImage": "/prokip-logo.png",
-            "backgroundImage": "/prokip-logo.png"
+            "productImage": "https://images.unsplash.com/photo-1599623560574-39d485900c95?w=800&q=80&auto=format&fit=crop",
+            "backgroundImage": "https://images.unsplash.com/photo-1545558014-8692077e9b5c?w=800&q=80&auto=format&fit=crop"
           },
           elements: [],
         },
@@ -50,8 +50,8 @@ export const TOYS_TEMPLATE_PRESET: EditorNode[] = [
             "buttonText": "SHOP NOW",
             "buttonLink": "#",
             "backgroundColor": "#e94560",
-            "productImage": "/prokip-logo.png",
-            "backgroundImage": "/prokip-logo.png"
+            "productImage": "https://images.unsplash.com/photo-1484820540004-14229fe36ca4?w=800&q=80&auto=format&fit=crop",
+            "backgroundImage": "https://images.unsplash.com/photo-1541692641319-981cc79ee10a?w=800&q=80&auto=format&fit=crop"
           },
           elements: [],
         }

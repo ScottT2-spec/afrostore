@@ -22,7 +22,7 @@ export const MAKEUP_TEMPLATE_PRESET: EditorNode[] = [
             "description": "In particular, this pack comes with two different size patches to fit various types of blemishes. Perfect for a targeted application.",
             "buttonText": "Shop Now",
             "buttonLink": "/shop",
-            "backgroundImage": "/prokip-logo.png",
+            "backgroundImage": "https://images.unsplash.com/photo-1596462502278-27bfdc403348?w=800&q=80&auto=format&fit=crop",
             "colorScheme": "dark"
           },
           elements: [],
@@ -35,7 +35,7 @@ export const MAKEUP_TEMPLATE_PRESET: EditorNode[] = [
             "description": "Perfect for a targeted application, you just need to take a patch, apply it directly to the blemish.",
             "buttonText": "Shop Now",
             "buttonLink": "/shop",
-            "backgroundImage": "/prokip-logo.png",
+            "backgroundImage": "https://images.unsplash.com/photo-1580870069867-74c57ee1bb07?w=800&q=80&auto=format&fit=crop",
             "colorScheme": "dark"
           },
           elements: [],
@@ -48,7 +48,7 @@ export const MAKEUP_TEMPLATE_PRESET: EditorNode[] = [
             "description": "In particular, this pack comes with two different size patches to fit various.",
             "buttonText": "Shop Now",
             "buttonLink": "/shop",
-            "backgroundImage": "/prokip-logo.png",
+            "backgroundImage": "https://images.unsplash.com/photo-1512496015851-a90fb38ba796?w=800&q=80&auto=format&fit=crop",
             "colorScheme": "light"
           },
           elements: [],
@@ -108,8 +108,8 @@ export const MAKEUP_TEMPLATE_PRESET: EditorNode[] = [
     settings: {
       title: "Cosmetics, created using modern technologies",
       description: "Cosmetics, created using modern technologies, are aimed at the health and beauty of the skin.",
-      beforeImage: "/prokip-logo.png",
-      afterImage: "/prokip-logo.png",
+      beforeImage: "https://images.unsplash.com/photo-1522335789203-aabd1fc54bc9?w=800&q=80&auto=format&fit=crop",
+      afterImage: "https://images.unsplash.com/photo-1631730486572-226d1f595b68?w=800&q=80&auto=format&fit=crop",
       buttonText: "Shop Now",
       buttonLink: "/shop",
       backgroundColor: "#bedbe1",
@@ -123,7 +123,7 @@ export const MAKEUP_TEMPLATE_PRESET: EditorNode[] = [
         {
           title: "In addition to diminishing the visibility of blemishes",
           description: "Blemish control cleanser",
-          backgroundImage: "/prokip-logo.png",
+          backgroundImage: "https://images.unsplash.com/photo-1629198688000-71f23e745b6e?w=800&q=80&auto=format&fit=crop",
           titleColor: "#fff",
           descColor: "#ddd",
           link: "/shop",
@@ -131,7 +131,7 @@ export const MAKEUP_TEMPLATE_PRESET: EditorNode[] = [
         {
           title: "Protective moisturizing flow for lips and cheeks",
           description: "Lip tint of an intense pink-beige shade",
-          backgroundImage: "/prokip-logo.png",
+          backgroundImage: "https://images.unsplash.com/photo-1612817288484-6f916006741a?w=800&q=80&auto=format&fit=crop",
           titleColor: "#333",
           descColor: "#666",
           link: "/shop",
@@ -180,7 +180,7 @@ export const MAKEUP_TEMPLATE_PRESET: EditorNode[] = [
         { title: "FOOTER MENU", links: [{ label: "Instagram profile", url: "#" }, { label: "New Collection", url: "#" }, { label: "Contact Us", url: "#" }, { label: "Latest News", url: "#" }, { label: "Our Sitemap", url: "#" }] },
       ],
       copyrightText: "",
-      paymentIconsUrl: "/prokip-logo.png",
+      paymentIconsUrl: "https://images.unsplash.com/photo-1608979048467-6194dabc6a3d?w=800&q=80&auto=format&fit=crop",
     },
   },
 ];

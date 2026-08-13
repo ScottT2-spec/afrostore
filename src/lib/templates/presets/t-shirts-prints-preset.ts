@@ -23,7 +23,7 @@ export const T_SHIRTS_PRINTS_PRESET: EditorNode[] = [
             "description": "Stand out with our collection of artistically designed t-shirts featuring unique prints and artwork.",
             "buttonText": "Shop Now",
             "buttonLink": "/shop",
-            "backgroundImage": "/prokip-logo.png"
+            "backgroundImage": "https://images.unsplash.com/photo-1515886657613-9f3515b0c78f?w=800&q=80&auto=format&fit=crop"
           },
           elements: [],
         }
@@ -38,10 +38,10 @@ export const T_SHIRTS_PRINTS_PRESET: EditorNode[] = [
         title: "Shop by Category",
       },
       categories: [
-        { name: "T-Shirts", image: "/prokip-logo.png", link: "/shop" },
-        { name: "Hoodies", image: "/prokip-logo.png", link: "/shop" },
-        { name: "Sweatshirts", image: "/prokip-logo.png", link: "/shop" },
-        { name: "Accessories", image: "/prokip-logo.png", link: "/shop" },
+        { name: "T-Shirts", image: "https://images.unsplash.com/photo-1558769132-cb1aea458c5e?w=800&q=80&auto=format&fit=crop", link: "/shop" },
+        { name: "Hoodies", image: "https://images.unsplash.com/photo-1483985988355-763728e1935b?w=800&q=80&auto=format&fit=crop", link: "/shop" },
+        { name: "Sweatshirts", image: "https://images.unsplash.com/photo-1529139574466-a303027c1d8b?w=800&q=80&auto=format&fit=crop", link: "/shop" },
+        { name: "Accessories", image: "https://images.unsplash.com/photo-1603189343302-e603f7add05a?w=800&q=80&auto=format&fit=crop", link: "/shop" },
       ],
     },
   },

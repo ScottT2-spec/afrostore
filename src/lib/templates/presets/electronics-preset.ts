@@ -25,7 +25,7 @@ export const ELECTRONICS_TEMPLATE_PRESET: EditorNode[] = [
             "description": "A ornare aliquam laoreet adipiscing vestibul integer malesuada ullamcorper suspeid.",
             "buttonText": "Buy Now",
             "buttonLink": "/shop",
-            "backgroundImage": "/prokip-logo.png",
+            "backgroundImage": "https://images.unsplash.com/photo-1609081219090-a6d81d3085bf?w=800&q=80&auto=format&fit=crop",
             "backgroundColor": "#f2f2f2",
             "backgroundFit": "cover",
             "textPosition": "left",
@@ -43,7 +43,7 @@ export const ELECTRONICS_TEMPLATE_PRESET: EditorNode[] = [
             "description": "A ornare aliquam laoreet adipiscing vestibul integer malesuada ullamcorper suspeid.",
             "buttonText": "Buy Now",
             "buttonLink": "/shop",
-            "backgroundImage": "/prokip-logo.png",
+            "backgroundImage": "https://images.unsplash.com/photo-1615655406736-b37c4fabf923?w=800&q=80&auto=format&fit=crop",
             "backgroundColor": "#f2f2f2",
             "backgroundFit": "contain",
             "textPosition": "left",
@@ -61,7 +61,7 @@ export const ELECTRONICS_TEMPLATE_PRESET: EditorNode[] = [
             "description": "A ornare aliquam laoreet adipiscing vestibul integer malesuada ullamcorper suspeid.",
             "buttonText": "Buy Now",
             "buttonLink": "/shop",
-            "backgroundImage": "/prokip-logo.png",
+            "backgroundImage": "https://images.unsplash.com/photo-1595303526913-c7037797ebe7?w=800&q=80&auto=format&fit=crop",
             "backgroundColor": "#000000",
             "backgroundFit": "contain",
             "textPosition": "left",
@@ -79,7 +79,7 @@ export const ELECTRONICS_TEMPLATE_PRESET: EditorNode[] = [
     settings: {
       banners: [
         {
-          image: "/prokip-logo.png",
+          image: "https://images.unsplash.com/photo-1636115305669-9096bffe87fd?w=800&q=80&auto=format&fit=crop",
           subtitle: "NEW TECHNOLOGIES",
           title: "WEBCAMS 2024",
           description: "Auctor litora ultrices suscipit\nmalesuada nunc a netus",
@@ -88,7 +88,7 @@ export const ELECTRONICS_TEMPLATE_PRESET: EditorNode[] = [
           colorScheme: "dark",
         },
         {
-          image: "/prokip-logo.png",
+          image: "https://images.unsplash.com/photo-1468495244123-6c6c332eeece?w=800&q=80&auto=format&fit=crop",
           subtitle: "APPLE ACCESSORIES",
           title: "LEATHER CASES",
           description: "Condimentum curabitur vestibulum\ndapibus porttitor adipiscing",
@@ -123,7 +123,7 @@ export const ELECTRONICS_TEMPLATE_PRESET: EditorNode[] = [
     settings: {
       banners: [
         {
-          image: "/prokip-logo.png",
+          image: "https://images.unsplash.com/photo-1491933382434-500287f9b54b?w=800&q=80&auto=format&fit=crop",
           subtitle: "Hich Tech News",
           title: "Monster Beats\nHeadphones",
           buttonText: "Read More",
@@ -131,19 +131,19 @@ export const ELECTRONICS_TEMPLATE_PRESET: EditorNode[] = [
           colorScheme: "light",
         },
         {
-          image: "/prokip-logo.png",
+          image: "https://images.unsplash.com/photo-1620783770629-122b7f187703?w=800&q=80&auto=format&fit=crop",
           subtitle: "Play The Dream",
           title: "Apple iPhone 7\nColor Red",
           colorScheme: "light",
         },
         {
-          image: "/prokip-logo.png",
+          image: "https://images.unsplash.com/photo-1515940175183-6798529cb860?w=800&q=80&auto=format&fit=crop",
           subtitle: "Minimalism Design",
           title: "Music Makes\nFeel Better",
           colorScheme: "light",
         },
         {
-          image: "/prokip-logo.png",
+          image: "https://images.unsplash.com/photo-1643536768014-0756fa85ca4f?w=800&q=80&auto=format&fit=crop",
           subtitle: "Health & Fit",
           title: "Apple iWatch Nike Edition",
           buttonText: "Watch Demo",
@@ -162,7 +162,7 @@ export const ELECTRONICS_TEMPLATE_PRESET: EditorNode[] = [
       sectionTitle: "TODAY HOT DEALS",
       buttonText: "View All Deals",
       buttonLink: "/shop",
-      backgroundImage: "/prokip-logo.png",
+      backgroundImage: "https://images.unsplash.com/photo-1515940279136-2f419eea8051?w=800&q=80&auto=format&fit=crop",
       maxProducts: 6,
       columns: 3,
       filter: "sale",
@@ -174,7 +174,7 @@ export const ELECTRONICS_TEMPLATE_PRESET: EditorNode[] = [
     id: "electronics-side-banner",
     type: "electronicsSideBanner",
     settings: {
-      bannerImage: "/prokip-logo.png",
+      bannerImage: "https://images.unsplash.com/photo-1526738549149-8e07eca6c147?w=800&q=80&auto=format&fit=crop",
       bannerSubtitle: "Hich Tech News",
       bannerTitle: "Google Smart Home 2024",
       bannerButtonText: "Read More",
@@ -196,14 +196,14 @@ export const ELECTRONICS_TEMPLATE_PRESET: EditorNode[] = [
     id: "electronics-gaming-cta",
     type: "electronicsGamingCTA",
     settings: {
-      backgroundImage: "/prokip-logo.png",
+      backgroundImage: "https://images.unsplash.com/photo-1547479117-da9abbff3fa0?w=800&q=80&auto=format&fit=crop",
       subtitle: "GAMING COLLECTION",
       title: "Sony Playstation 4 Dualshok Controller",
       primaryButtonText: "Buy Now",
       primaryButtonLink: "/shop",
       secondaryButtonText: "Read More",
       secondaryButtonLink: "/shop",
-      productImage: "/prokip-logo.png",
+      productImage: "https://images.unsplash.com/photo-1609081219090-a6d81d3085bf?w=800&q=80&auto=format&fit=crop",
     },
   },
 
@@ -216,7 +216,7 @@ export const ELECTRONICS_TEMPLATE_PRESET: EditorNode[] = [
       columns: 3,
       posts: [
         {
-          image: "/prokip-logo.png",
+          image: "https://images.unsplash.com/photo-1615655406736-b37c4fabf923?w=800&q=80&auto=format&fit=crop",
           title: "Collar brings back coffee brewing ritual",
           excerpt: "",
           date: { day: "23", month: "Jul", year: "2016" },
@@ -225,7 +225,7 @@ export const ELECTRONICS_TEMPLATE_PRESET: EditorNode[] = [
           link: "#",
         },
         {
-          image: "/prokip-logo.png",
+          image: "https://images.unsplash.com/photo-1595303526913-c7037797ebe7?w=800&q=80&auto=format&fit=crop",
           title: "Exterior ideas: 10 colored garden seats",
           excerpt: "",
           date: { day: "23", month: "Jul", year: "2016" },
@@ -234,7 +234,7 @@ export const ELECTRONICS_TEMPLATE_PRESET: EditorNode[] = [
           link: "#",
         },
         {
-          image: "/prokip-logo.png",
+          image: "https://images.unsplash.com/photo-1636115305669-9096bffe87fd?w=800&q=80&auto=format&fit=crop",
           title: "Exploring Atlanta\u2019s modern homes",
           excerpt: "",
           date: { day: "23", month: "Jul", year: "2016" },
@@ -253,7 +253,7 @@ export const ELECTRONICS_TEMPLATE_PRESET: EditorNode[] = [
     settings: {
       sectionTitle: "OUR PARTNERS",
       videoUrl: "https://www.youtube.com/watch?v=XHOmBV4js_E",
-      videoThumbnail: "/prokip-logo.png",
+      videoThumbnail: "https://images.unsplash.com/photo-1468495244123-6c6c332eeece?w=800&q=80&auto=format&fit=crop",
       logos: [
         { name: "Vitra", logoUrl: "/prokip-logo.png", linkUrl: "#" },
         { name: "Rosenthal", logoUrl: "/prokip-logo.png", linkUrl: "#" },
@@ -286,7 +286,7 @@ export const ELECTRONICS_TEMPLATE_PRESET: EditorNode[] = [
         { title: "FOOTER MENU", links: [{ label: "Instagram profile", url: "#" }, { label: "New Collection", url: "#" }, { label: "Contact Us", url: "#" }, { label: "Latest News", url: "#" }, { label: "Our Sitemap", url: "#" }] },
       ],
       copyrightText: "",
-      paymentIconsUrl: "/prokip-logo.png",
+      paymentIconsUrl: "https://images.unsplash.com/photo-1491933382434-500287f9b54b?w=800&q=80&auto=format&fit=crop",
     },
   },
 ];

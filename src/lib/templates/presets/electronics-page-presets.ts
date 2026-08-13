@@ -39,22 +39,22 @@ export const ELECTRONICS_ABOUT_PAGE_BLOCKS: EditorNode[] = [
   { id: "elec-about-services", type: "electronicsServicesGrid", settings: {
     subtitle: "PROKIP - BEST ECOMMERCE THEME 2021/22", title: "Let\u2019s Get Creative!",
     services: [
-      { icon: "/prokip-logo.png", title: "GRAPHIC DESIGN", description: "Curabitur lacinia tristique velit ut laoreet." },
-      { icon: "/prokip-logo.png", title: "WEB DESIGN", description: "By the readable content of a page when its layout." },
-      { icon: "/prokip-logo.png", title: "BRANDING", description: "Fact that a reader will be distracted." },
-      { icon: "/prokip-logo.png", title: "PHOTOGRAPHY", description: "The point of using Lorem Ipsum is that it has it." },
+      { icon: "https://images.unsplash.com/photo-1609081219090-a6d81d3085bf?w=800&q=80&auto=format&fit=crop", title: "GRAPHIC DESIGN", description: "Curabitur lacinia tristique velit ut laoreet." },
+      { icon: "https://images.unsplash.com/photo-1615655406736-b37c4fabf923?w=800&q=80&auto=format&fit=crop", title: "WEB DESIGN", description: "By the readable content of a page when its layout." },
+      { icon: "https://images.unsplash.com/photo-1595303526913-c7037797ebe7?w=800&q=80&auto=format&fit=crop", title: "BRANDING", description: "Fact that a reader will be distracted." },
+      { icon: "https://images.unsplash.com/photo-1636115305669-9096bffe87fd?w=800&q=80&auto=format&fit=crop", title: "PHOTOGRAPHY", description: "The point of using Lorem Ipsum is that it has it." },
     ],
   }},
   { id: "elec-about-gallery", type: "electronicsGalleryGrid", settings: { images: [
-    "/prokip-logo.png",
-    "/prokip-logo.png",
+    "https://images.unsplash.com/photo-1609081219090-a6d81d3085bf?w=800&q=80&auto=format&fit=crop",
+    "https://images.unsplash.com/photo-1615655406736-b37c4fabf923?w=800&q=80&auto=format&fit=crop",
   ]}},
   { id: "elec-about-presentation", type: "electronicsVideoSection", settings: {
     subtitle: "XTEMOS IS A CREATIVE DESIGN AGENCY", title: "Our Presentation",
     description: "I am so happy, my dear friend, so absorbed in the exquisite sense of mere tranquil existence, that I neglect my talents. I should be incapable of drawing a single.",
     videos: [
-      { thumbnail: "/prokip-logo.png", youtubeUrl: "http://www.youtube.com/watch?v=TJ1SDXbij8Y", title: "Our company history and facts" },
-      { thumbnail: "/prokip-logo.png", youtubeUrl: "http://www.youtube.com/watch?v=TJ1SDXbij8Y", title: "Design & development process demonstration" },
+      { thumbnail: "https://images.unsplash.com/photo-1468495244123-6c6c332eeece?w=800&q=80&auto=format&fit=crop", youtubeUrl: "http://www.youtube.com/watch?v=TJ1SDXbij8Y", title: "Our company history and facts" },
+      { thumbnail: "https://images.unsplash.com/photo-1491933382434-500287f9b54b?w=800&q=80&auto=format&fit=crop", youtubeUrl: "http://www.youtube.com/watch?v=TJ1SDXbij8Y", title: "Design & development process demonstration" },
     ],
   }},
   { id: "elec-about-quote", type: "electronicsQuoteSection", settings: {
@@ -64,10 +64,10 @@ export const ELECTRONICS_ABOUT_PAGE_BLOCKS: EditorNode[] = [
     credit: "Developed by Xtemos Studio @ 2022.",
   }},
   { id: "elec-about-team", type: "electronicsTeamSection", settings: { members: [
-    { name: "MARK JANCE", role: "CEO / FOUNDER", image: "/prokip-logo.png", socials: ["facebook", "twitter", "instagram", "linkedin"] },
-    { name: "MARK JANCE", role: "CEO / FOUNDER", image: "/prokip-logo.png", socials: ["facebook", "twitter", "instagram", "linkedin"] },
-    { name: "MARK JANCE", role: "CEO / FOUNDER", image: "/prokip-logo.png", socials: ["facebook", "twitter", "instagram", "linkedin"] },
-    { name: "MARK JANCE", role: "CEO / FOUNDER", image: "/prokip-logo.png", socials: ["facebook", "twitter", "instagram", "linkedin"] },
+    { name: "MARK JANCE", role: "CEO / FOUNDER", image: "https://images.unsplash.com/photo-1620783770629-122b7f187703?w=800&q=80&auto=format&fit=crop", socials: ["facebook", "twitter", "instagram", "linkedin"] },
+    { name: "MARK JANCE", role: "CEO / FOUNDER", image: "https://images.unsplash.com/photo-1515940175183-6798529cb860?w=800&q=80&auto=format&fit=crop", socials: ["facebook", "twitter", "instagram", "linkedin"] },
+    { name: "MARK JANCE", role: "CEO / FOUNDER", image: "https://images.unsplash.com/photo-1643536768014-0756fa85ca4f?w=800&q=80&auto=format&fit=crop", socials: ["facebook", "twitter", "instagram", "linkedin"] },
+    { name: "MARK JANCE", role: "CEO / FOUNDER", image: "https://images.unsplash.com/photo-1515940279136-2f419eea8051?w=800&q=80&auto=format&fit=crop", socials: ["facebook", "twitter", "instagram", "linkedin"] },
   ]}},
   { id: "elec-about-offices", type: "electronicsOfficeLocations", settings: {
     subtitle: "GET IN TOUCH WITH US", title: "Get Connected",
@@ -80,9 +80,9 @@ export const ELECTRONICS_ABOUT_PAGE_BLOCKS: EditorNode[] = [
     ],
   }},
   { id: "elec-about-news", type: "electronicsPromoBanners", settings: { banners: [
-    { image: "/prokip-logo.png", subtitle: "", title: "It is a fact that a reader will be distracted.", description: "Ullamcorper vehicula at ultrices sed interdum et malesuada", buttonText: "Read more", link: "#" },
-    { image: "/prokip-logo.png", subtitle: "", title: "By the readable content of a page when looking.", description: "Patibus elementum a dictum ipiscing parturient donec eros.", buttonText: "Read more", link: "#" },
-    { image: "/prokip-logo.png", subtitle: "", title: "The point of using Lorem Ipsum is that it has.", description: "Ullamcorper vehicula at ultrices sed interdum ullamcorper .", buttonText: "Read more", link: "#" },
+    { image: "https://images.unsplash.com/photo-1526738549149-8e07eca6c147?w=800&q=80&auto=format&fit=crop", subtitle: "", title: "It is a fact that a reader will be distracted.", description: "Ullamcorper vehicula at ultrices sed interdum et malesuada", buttonText: "Read more", link: "#" },
+    { image: "https://images.unsplash.com/photo-1547479117-da9abbff3fa0?w=800&q=80&auto=format&fit=crop", subtitle: "", title: "By the readable content of a page when looking.", description: "Patibus elementum a dictum ipiscing parturient donec eros.", buttonText: "Read more", link: "#" },
+    { image: "https://images.unsplash.com/photo-1609081219090-a6d81d3085bf?w=800&q=80&auto=format&fit=crop", subtitle: "", title: "The point of using Lorem Ipsum is that it has.", description: "Ullamcorper vehicula at ultrices sed interdum ullamcorper .", buttonText: "Read more", link: "#" },
   ]}},
 ];
 
@@ -106,15 +106,15 @@ export const ELECTRONICS_CONTACT_PAGE_BLOCKS: EditorNode[] = [
     fields: ["name", "email", "phone", "company", "message"],
   }},
   { id: "elec-contact-partners", type: "electronicsPartners", settings: { logos: [
-    { name: "Alessi", image: "/prokip-logo.png", url: "#" },
-    { name: "Eva Solo", image: "/prokip-logo.png", url: "#" },
-    { name: "Flos", image: "/prokip-logo.png", url: "#" },
-    { name: "Hay", image: "/prokip-logo.png", url: "#" },
-    { name: "Joseph Joseph", image: "/prokip-logo.png", url: "#" },
-    { name: "KL\u00d6BER", image: "/prokip-logo.png", url: "#" },
-    { name: "Louis Poulsen", image: "/prokip-logo.png", url: "#" },
-    { name: "Magisso", image: "/prokip-logo.png", url: "#" },
-    { name: "Niche", image: "/prokip-logo.png", url: "#" },
+    { name: "Alessi", image: "https://images.unsplash.com/photo-1615655406736-b37c4fabf923?w=800&q=80&auto=format&fit=crop", url: "#" },
+    { name: "Eva Solo", image: "https://images.unsplash.com/photo-1595303526913-c7037797ebe7?w=800&q=80&auto=format&fit=crop", url: "#" },
+    { name: "Flos", image: "https://images.unsplash.com/photo-1636115305669-9096bffe87fd?w=800&q=80&auto=format&fit=crop", url: "#" },
+    { name: "Hay", image: "https://images.unsplash.com/photo-1468495244123-6c6c332eeece?w=800&q=80&auto=format&fit=crop", url: "#" },
+    { name: "Joseph Joseph", image: "https://images.unsplash.com/photo-1491933382434-500287f9b54b?w=800&q=80&auto=format&fit=crop", url: "#" },
+    { name: "KL\u00d6BER", image: "https://images.unsplash.com/photo-1620783770629-122b7f187703?w=800&q=80&auto=format&fit=crop", url: "#" },
+    { name: "Louis Poulsen", image: "https://images.unsplash.com/photo-1515940175183-6798529cb860?w=800&q=80&auto=format&fit=crop", url: "#" },
+    { name: "Magisso", image: "https://images.unsplash.com/photo-1643536768014-0756fa85ca4f?w=800&q=80&auto=format&fit=crop", url: "#" },
+    { name: "Niche", image: "https://images.unsplash.com/photo-1515940279136-2f419eea8051?w=800&q=80&auto=format&fit=crop", url: "#" },
   ]}},
 ];
 
@@ -123,11 +123,11 @@ export const ELECTRONICS_BLOG_PAGE_BLOCKS: EditorNode[] = [
   { id: "elec-blog-posts", type: "electronicsBlogPosts", settings: {
     sectionTitle: "", columns: 2,
     posts: [
-      { title: "Seating collection inspiration by modern", date: "23 Jul", category: "Design trends, Furniture", author: "S. Rogers", excerpt: "Ac haca ullamcorper donec ante habi tasse donec imperdiet eturpis varius per a augue magna hac. Nec hac et vestibulum duis a tinci...", image: "/prokip-logo.png", link: "#" },
-      { title: "Minimalist design furniture 2026", date: "23 Jul", category: "Design trends, Furniture", author: "S. Rogers", excerpt: "Discover the ultimate blend of aesthetics, innovation, and functionality. We have curated five iconi...", image: "/prokip-logo.png", link: "#" },
-      { title: "Green interior design inspiration", date: "23 Jul", category: "Design trends, Hand made", author: "S. Rogers", excerpt: "Modern Atlanta homes impress with a harmony of light, space, and eco-materials. Each project reflect...", image: "/prokip-logo.png", link: "#" },
-      { title: "Reinterprets the classic bookshelf", date: "23 Jul", category: "Design trends, Inspiration", author: "S. Rogers", excerpt: "Aliquet parturient scele risque scele risque nibh pretium parturient suspendisse platea sapien torqu...", image: "/prokip-logo.png", link: "#" },
-      { title: "Creative water features and exterior", date: "23 Jul", category: "Design trends, Inspiration", author: "S. Rogers", excerpt: "Aliquet parturient scele risque scele risque nibh pretium parturient suspendisse platea sapien torqu...", image: "/prokip-logo.png", link: "#" },
+      { title: "Seating collection inspiration by modern", date: "23 Jul", category: "Design trends, Furniture", author: "S. Rogers", excerpt: "Ac haca ullamcorper donec ante habi tasse donec imperdiet eturpis varius per a augue magna hac. Nec hac et vestibulum duis a tinci...", image: "https://images.unsplash.com/photo-1526738549149-8e07eca6c147?w=800&q=80&auto=format&fit=crop", link: "#" },
+      { title: "Minimalist design furniture 2026", date: "23 Jul", category: "Design trends, Furniture", author: "S. Rogers", excerpt: "Discover the ultimate blend of aesthetics, innovation, and functionality. We have curated five iconi...", image: "https://images.unsplash.com/photo-1547479117-da9abbff3fa0?w=800&q=80&auto=format&fit=crop", link: "#" },
+      { title: "Green interior design inspiration", date: "23 Jul", category: "Design trends, Hand made", author: "S. Rogers", excerpt: "Modern Atlanta homes impress with a harmony of light, space, and eco-materials. Each project reflect...", image: "https://images.unsplash.com/photo-1609081219090-a6d81d3085bf?w=800&q=80&auto=format&fit=crop", link: "#" },
+      { title: "Reinterprets the classic bookshelf", date: "23 Jul", category: "Design trends, Inspiration", author: "S. Rogers", excerpt: "Aliquet parturient scele risque scele risque nibh pretium parturient suspendisse platea sapien torqu...", image: "https://images.unsplash.com/photo-1615655406736-b37c4fabf923?w=800&q=80&auto=format&fit=crop", link: "#" },
+      { title: "Creative water features and exterior", date: "23 Jul", category: "Design trends, Inspiration", author: "S. Rogers", excerpt: "Aliquet parturient scele risque scele risque nibh pretium parturient suspendisse platea sapien torqu...", image: "https://images.unsplash.com/photo-1595303526913-c7037797ebe7?w=800&q=80&auto=format&fit=crop", link: "#" },
     ],
   }},
 ];

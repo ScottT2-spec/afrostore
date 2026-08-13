@@ -281,12 +281,12 @@ const MAKEUP: TemplateSampleData = {
 
 const PERFUMES: TemplateSampleData = {
   categories: [
-    { name: "Étheria", slug: "etheria", description: "A collection of light, almost weightless fragrances created for those who cherish softness and brightness.", image: "/prokip-logo.png", position: 0 },
-    { name: "Celeste Aura", slug: "celeste-aura", description: "Elegant fragrances that blend vibrant citrus notes and shimmering aldehydes.", image: "/prokip-logo.png", position: 1 },
-    { name: "Opus Essence", slug: "opus-essence", description: "A collection of delicate, weightless fragrances that capture the essence of air and light.", image: "/prokip-logo.png", position: 2 },
-    { name: "Velours Noir", slug: "velours-noir", description: "Dark, rich, velvety fragrances that reveal passion and magnetism.", image: "/prokip-logo.png", position: 3 },
-    { name: "Nocturne Essence", slug: "nocturne-essence", description: "Soft, intimate, warm fragrances that envelop the senses.", image: "/prokip-logo.png", position: 4 },
-    { name: "Elysian Bloom", slug: "elysian-bloom", description: "A luminous fragrance collection with a fresh, inviting personality.", image: "/prokip-logo.png", position: 5 },
+    { name: "Étheria", slug: "etheria", description: "A collection of light, almost weightless fragrances created for those who cherish softness and brightness.", image: "https://images.unsplash.com/photo-1523293182086-7651a899d37f?w=800&q=80&auto=format&fit=crop", position: 0 },
+    { name: "Celeste Aura", slug: "celeste-aura", description: "Elegant fragrances that blend vibrant citrus notes and shimmering aldehydes.", image: "https://images.unsplash.com/photo-1541643600914-78b084683601?w=800&q=80&auto=format&fit=crop", position: 1 },
+    { name: "Opus Essence", slug: "opus-essence", description: "A collection of delicate, weightless fragrances that capture the essence of air and light.", image: "https://images.unsplash.com/photo-1594035910387-fea47794261f?w=800&q=80&auto=format&fit=crop", position: 2 },
+    { name: "Velours Noir", slug: "velours-noir", description: "Dark, rich, velvety fragrances that reveal passion and magnetism.", image: "https://images.unsplash.com/photo-1458538977777-0549b2370168?w=800&q=80&auto=format&fit=crop", position: 3 },
+    { name: "Nocturne Essence", slug: "nocturne-essence", description: "Soft, intimate, warm fragrances that envelop the senses.", image: "https://images.unsplash.com/photo-1587017539504-67cfbddac569?w=800&q=80&auto=format&fit=crop", position: 4 },
+    { name: "Elysian Bloom", slug: "elysian-bloom", description: "A luminous fragrance collection with a fresh, inviting personality.", image: "https://images.unsplash.com/photo-1615634260167-c8cdede054de?w=800&q=80&auto=format&fit=crop", position: 5 },
   ],
   products: [
     { name: "Amber Bloom 100ml", slug: "amber-bloom-100ml", description: "A radiant fragrance with a warm amber finish and delicate floral lift.", price: 250, stock: 15, isFeatured: true, tags: ["featured", "bestseller", "etheria"], position: 1, category: "etheria", images: ["https://images.unsplash.com/photo-1541643600914-78b084683601?w=600&h=700&fit=crop"] },

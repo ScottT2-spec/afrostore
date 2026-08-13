@@ -38,22 +38,22 @@ export const DECOR_ABOUT_PAGE_BLOCKS: EditorNode[] = [
   { id: "decor-about-services", type: "interiorServicesGrid", settings: {
     subtitle: "PROKIP - BEST ECOMMERCE THEME 2021/22", title: "Let\u2019s Get Creative!",
     services: [
-      { icon: "/prokip-logo.png", title: "GRAPHIC DESIGN", description: "Curabitur lacinia tristique velit ut laoreet." },
-      { icon: "/prokip-logo.png", title: "WEB DESIGN", description: "By the readable content of a page when its layout." },
-      { icon: "/prokip-logo.png", title: "BRANDING", description: "Fact that a reader will be distracted." },
-      { icon: "/prokip-logo.png", title: "PHOTOGRAPHY", description: "The point of using Lorem Ipsum is that it has it." },
+      { icon: "https://images.unsplash.com/photo-1618221195710-dd6b41faaea6?w=800&q=80&auto=format&fit=crop", title: "GRAPHIC DESIGN", description: "Curabitur lacinia tristique velit ut laoreet." },
+      { icon: "https://images.unsplash.com/photo-1618220179428-22790b461013?w=800&q=80&auto=format&fit=crop", title: "WEB DESIGN", description: "By the readable content of a page when its layout." },
+      { icon: "https://images.unsplash.com/photo-1586023492125-27b2c045efd7?w=800&q=80&auto=format&fit=crop", title: "BRANDING", description: "Fact that a reader will be distracted." },
+      { icon: "https://images.unsplash.com/photo-1616046229478-9901c5536a45?w=800&q=80&auto=format&fit=crop", title: "PHOTOGRAPHY", description: "The point of using Lorem Ipsum is that it has it." },
     ],
   }},
   { id: "decor-about-gallery", type: "interiorGalleryGrid", settings: { images: [
-    "/prokip-logo.png",
-    "/prokip-logo.png",
+    "https://images.unsplash.com/photo-1618221195710-dd6b41faaea6?w=800&q=80&auto=format&fit=crop",
+    "https://images.unsplash.com/photo-1618220179428-22790b461013?w=800&q=80&auto=format&fit=crop",
   ]}},
   { id: "decor-about-presentation", type: "interiorVideoSection", settings: {
     subtitle: "XTEMOS IS A CREATIVE DESIGN AGENCY", title: "Our Presentation",
     description: "I am so happy, my dear friend, so absorbed in the exquisite sense of mere tranquil existence, that I neglect my talents. I should be incapable of drawing a single.",
     videos: [
-      { thumbnail: "/prokip-logo.png", youtubeUrl: "http://www.youtube.com/watch?v=TJ1SDXbij8Y", title: "Our company history and facts" },
-      { thumbnail: "/prokip-logo.png", youtubeUrl: "http://www.youtube.com/watch?v=TJ1SDXbij8Y", title: "Design & development process demonstration" },
+      { thumbnail: "https://images.unsplash.com/photo-1583847268964-b28dc8f51f92?w=800&q=80&auto=format&fit=crop", youtubeUrl: "http://www.youtube.com/watch?v=TJ1SDXbij8Y", title: "Our company history and facts" },
+      { thumbnail: "https://images.unsplash.com/photo-1616047006789-b7af5afb8c20?w=800&q=80&auto=format&fit=crop", youtubeUrl: "http://www.youtube.com/watch?v=TJ1SDXbij8Y", title: "Design & development process demonstration" },
     ],
   }},
   { id: "decor-about-quote", type: "interiorQuoteSection", settings: {
@@ -63,10 +63,10 @@ export const DECOR_ABOUT_PAGE_BLOCKS: EditorNode[] = [
     credit: "Developed by Xtemos Studio @ 2022.",
   }},
   { id: "decor-about-team", type: "interiorTeamSection", settings: { members: [
-    { name: "MARK JANCE", role: "CEO / FOUNDER", image: "/prokip-logo.png", socials: ["facebook", "twitter", "instagram", "linkedin"] },
-    { name: "MARK JANCE", role: "CEO / FOUNDER", image: "/prokip-logo.png", socials: ["facebook", "twitter", "instagram", "linkedin"] },
-    { name: "MARK JANCE", role: "CEO / FOUNDER", image: "/prokip-logo.png", socials: ["facebook", "twitter", "instagram", "linkedin"] },
-    { name: "MARK JANCE", role: "CEO / FOUNDER", image: "/prokip-logo.png", socials: ["facebook", "twitter", "instagram", "linkedin"] },
+    { name: "MARK JANCE", role: "CEO / FOUNDER", image: "https://images.unsplash.com/photo-1667312939978-64cf31718a6e?w=800&q=80&auto=format&fit=crop", socials: ["facebook", "twitter", "instagram", "linkedin"] },
+    { name: "MARK JANCE", role: "CEO / FOUNDER", image: "https://images.unsplash.com/photo-1615873968403-89e068629265?w=800&q=80&auto=format&fit=crop", socials: ["facebook", "twitter", "instagram", "linkedin"] },
+    { name: "MARK JANCE", role: "CEO / FOUNDER", image: "https://images.unsplash.com/photo-1622372738946-62e02505feb3?w=800&q=80&auto=format&fit=crop", socials: ["facebook", "twitter", "instagram", "linkedin"] },
+    { name: "MARK JANCE", role: "CEO / FOUNDER", image: "https://images.unsplash.com/photo-1616486338812-3dadae4b4ace?w=800&q=80&auto=format&fit=crop", socials: ["facebook", "twitter", "instagram", "linkedin"] },
   ]}},
   { id: "decor-about-offices", type: "interiorOfficeLocations", settings: {
     subtitle: "GET IN TOUCH WITH US", title: "Get Connected",
@@ -79,9 +79,9 @@ export const DECOR_ABOUT_PAGE_BLOCKS: EditorNode[] = [
     ],
   }},
   { id: "decor-about-news", type: "interiorPromoBanners", settings: { banners: [
-    { image: "/prokip-logo.png", subtitle: "", title: "It is a fact that a reader will be distracted.", description: "Ullamcorper vehicula at ultrices sed interdum et malesuada", buttonText: "Read more", link: "#" },
-    { image: "/prokip-logo.png", subtitle: "", title: "By the readable content of a page when looking.", description: "Patibus elementum a dictum ipiscing parturient donec eros.", buttonText: "Read more", link: "#" },
-    { image: "/prokip-logo.png", subtitle: "", title: "The point of using Lorem Ipsum is that it has.", description: "Ullamcorper vehicula at ultrices sed interdum ullamcorper .", buttonText: "Read more", link: "#" },
+    { image: "https://images.unsplash.com/photo-1618221195710-dd6b41faaea6?w=800&q=80&auto=format&fit=crop", subtitle: "", title: "It is a fact that a reader will be distracted.", description: "Ullamcorper vehicula at ultrices sed interdum et malesuada", buttonText: "Read more", link: "#" },
+    { image: "https://images.unsplash.com/photo-1618220179428-22790b461013?w=800&q=80&auto=format&fit=crop", subtitle: "", title: "By the readable content of a page when looking.", description: "Patibus elementum a dictum ipiscing parturient donec eros.", buttonText: "Read more", link: "#" },
+    { image: "https://images.unsplash.com/photo-1586023492125-27b2c045efd7?w=800&q=80&auto=format&fit=crop", subtitle: "", title: "The point of using Lorem Ipsum is that it has.", description: "Ullamcorper vehicula at ultrices sed interdum ullamcorper .", buttonText: "Read more", link: "#" },
   ]}},
   { id: "decor-about-share", type: "interiorCta", settings: {
     subtitle: "CURABITUR ALIQUET QUAM POSUERE", title: "Do You Like the Theme? Share With Your Friends!",
@@ -117,11 +117,11 @@ export const DECOR_BLOG_PAGE_BLOCKS: EditorNode[] = [
   { id: "decor-blog-posts", type: "interiorBlogPosts", settings: {
     sectionTitle: "", columns: 2,
     posts: [
-      { title: "Seating collection inspiration by modern", date: "23 Jul", category: "Design trends, Furniture", author: "S. Rogers", excerpt: "Ac haca ullamcorper donec ante habi tasse donec imperdiet eturpis varius per a augue magna hac. Nec ...", image: "/prokip-logo.png", link: "#" },
-      { title: "Minimalist design furniture 2026", date: "23 Jul", category: "Design trends, Furniture", author: "S. Rogers", excerpt: "Discover the ultimate blend of aesthetics, innovation, and functionality. We have curated five iconi...", image: "/prokip-logo.png", link: "#" },
-      { title: "Green interior design inspiration", date: "23 Jul", category: "Design trends, Hand made", author: "S. Rogers", excerpt: "Modern Atlanta homes impress with a harmony of light, space, and eco-materials. Each project reflect...", image: "/prokip-logo.png", link: "#" },
-      { title: "Reinterprets the classic bookshelf", date: "23 Jul", category: "Design trends, Inspiration", author: "S. Rogers", excerpt: "Aliquet parturient scele risque scele risque nibh pretium parturient suspendisse platea sapien torqu...", image: "/prokip-logo.png", link: "#" },
-      { title: "Creative water features and exterior", date: "23 Jul", category: "Design trends, Inspiration", author: "S. Rogers", excerpt: "Aliquet parturient scele risque scele risque nibh pretium parturient suspendisse platea sapien torqu...", image: "/prokip-logo.png", link: "#" },
+      { title: "Seating collection inspiration by modern", date: "23 Jul", category: "Design trends, Furniture", author: "S. Rogers", excerpt: "Ac haca ullamcorper donec ante habi tasse donec imperdiet eturpis varius per a augue magna hac. Nec ...", image: "https://images.unsplash.com/photo-1616046229478-9901c5536a45?w=800&q=80&auto=format&fit=crop", link: "#" },
+      { title: "Minimalist design furniture 2026", date: "23 Jul", category: "Design trends, Furniture", author: "S. Rogers", excerpt: "Discover the ultimate blend of aesthetics, innovation, and functionality. We have curated five iconi...", image: "https://images.unsplash.com/photo-1583847268964-b28dc8f51f92?w=800&q=80&auto=format&fit=crop", link: "#" },
+      { title: "Green interior design inspiration", date: "23 Jul", category: "Design trends, Hand made", author: "S. Rogers", excerpt: "Modern Atlanta homes impress with a harmony of light, space, and eco-materials. Each project reflect...", image: "https://images.unsplash.com/photo-1616047006789-b7af5afb8c20?w=800&q=80&auto=format&fit=crop", link: "#" },
+      { title: "Reinterprets the classic bookshelf", date: "23 Jul", category: "Design trends, Inspiration", author: "S. Rogers", excerpt: "Aliquet parturient scele risque scele risque nibh pretium parturient suspendisse platea sapien torqu...", image: "https://images.unsplash.com/photo-1667312939978-64cf31718a6e?w=800&q=80&auto=format&fit=crop", link: "#" },
+      { title: "Creative water features and exterior", date: "23 Jul", category: "Design trends, Inspiration", author: "S. Rogers", excerpt: "Aliquet parturient scele risque scele risque nibh pretium parturient suspendisse platea sapien torqu...", image: "https://images.unsplash.com/photo-1615873968403-89e068629265?w=800&q=80&auto=format&fit=crop", link: "#" },
     ],
   }},
 ];

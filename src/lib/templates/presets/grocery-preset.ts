@@ -23,7 +23,7 @@ export const GROCERY_TEMPLATE_PRESET: EditorNode[] = [
             "buttonText": "Read more",
             "buttonLink": "/shop",
             "backgroundColor": "#fdf3e7",
-            "productImage": "/prokip-logo.png"
+            "productImage": "https://images.unsplash.com/photo-1579113800032-c38bd7635818?w=800&q=80&auto=format&fit=crop"
           },
           elements: [],
         },
@@ -37,7 +37,7 @@ export const GROCERY_TEMPLATE_PRESET: EditorNode[] = [
             "buttonText": "Read more",
             "buttonLink": "/shop",
             "backgroundColor": "#e8f5e9",
-            "productImage": "/prokip-logo.png"
+            "productImage": "https://images.unsplash.com/photo-1597362925123-77861d3fbac7?w=800&q=80&auto=format&fit=crop"
           },
           elements: [],
         },
@@ -52,7 +52,7 @@ export const GROCERY_TEMPLATE_PRESET: EditorNode[] = [
             "buttonText": "Read more",
             "buttonLink": "/shop",
             "backgroundColor": "#fff3e0",
-            "productImage": "/prokip-logo.png"
+            "productImage": "https://images.unsplash.com/photo-1590779033100-9f60a05a013d?w=800&q=80&auto=format&fit=crop"
           },
           elements: [],
         }
@@ -88,14 +88,14 @@ export const GROCERY_TEMPLATE_PRESET: EditorNode[] = [
         {
           subtitle: "WEEKLY DISCOUNTS",
           title: "Using dummy content or fake information",
-          image: "/prokip-logo.png",
+          image: "https://images.unsplash.com/photo-1610348725531-843dff563e2c?w=800&q=80&auto=format&fit=crop",
           buttonText: "Read more",
           buttonLink: "/shop",
         },
         {
           subtitle: "NEW PRODUCTS",
           title: "Products with elegant design can quickly begin to bloat",
-          image: "/prokip-logo.png",
+          image: "https://images.unsplash.com/photo-1566385101042-1a0aa0c1268c?w=800&q=80&auto=format&fit=crop",
           buttonText: "Read more",
           buttonLink: "/shop",
         },
@@ -153,7 +153,7 @@ export const GROCERY_TEMPLATE_PRESET: EditorNode[] = [
         { title: "FOOTER MENU", links: [{ label: "Instagram profile", url: "#" }, { label: "New Collection", url: "#" }, { label: "Contact Us", url: "#" }, { label: "Latest News", url: "#" }, { label: "Our Sitemap", url: "#" }] },
       ],
       copyrightText: "",
-      paymentIconsUrl: "/prokip-logo.png",
+      paymentIconsUrl: "https://images.unsplash.com/photo-1542838132-92c53300491e?w=800&q=80&auto=format&fit=crop",
     },
   },
 ];

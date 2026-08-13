@@ -46,8 +46,8 @@ export const TSHIRTS_PRINTS_ABOUT_PAGE_BLOCKS: EditorNode[] = [
     type: "tshirtImageCallout",
     settings: {
       images: [
-        "/prokip-logo.png",
-        "/prokip-logo.png",
+        "https://images.unsplash.com/photo-1515886657613-9f3515b0c78f?w=800&q=80&auto=format&fit=crop",
+        "https://images.unsplash.com/photo-1558769132-cb1aea458c5e?w=800&q=80&auto=format&fit=crop",
       ],
       calloutTitle: "You can create custom design",
       calloutDescription: "The price of a T-shirt with an individual design depends on the circulation, the number of images on one product, their size, and the printing method. brand, material and order urgency.",
@@ -159,10 +159,10 @@ export const TSHIRTS_PRINTS_SHOP_PAGE_BLOCKS: EditorNode[] = [
         title: "Shop by Category",
       },
       categories: [
-        { name: "T-Shirts", image: "/prokip-logo.png", link: "/shop" },
-        { name: "Hoodies", image: "/prokip-logo.png", link: "/shop" },
-        { name: "Sweatshirts", image: "/prokip-logo.png", link: "/shop" },
-        { name: "Accessories", image: "/prokip-logo.png", link: "/shop" },
+        { name: "T-Shirts", image: "https://images.unsplash.com/photo-1515886657613-9f3515b0c78f?w=800&q=80&auto=format&fit=crop", link: "/shop" },
+        { name: "Hoodies", image: "https://images.unsplash.com/photo-1558769132-cb1aea458c5e?w=800&q=80&auto=format&fit=crop", link: "/shop" },
+        { name: "Sweatshirts", image: "https://images.unsplash.com/photo-1483985988355-763728e1935b?w=800&q=80&auto=format&fit=crop", link: "/shop" },
+        { name: "Accessories", image: "https://images.unsplash.com/photo-1529139574466-a303027c1d8b?w=800&q=80&auto=format&fit=crop", link: "/shop" },
       ],
     },
   },
@@ -208,7 +208,7 @@ export const TSHIRTS_PRINTS_BLOG_PAGE_BLOCKS: EditorNode[] = [
           postedDate: "February 13, 2025",
           author: "Mr. Mackay",
           category: "Prints",
-          image: "/prokip-logo.png",
+          image: "https://images.unsplash.com/photo-1603189343302-e603f7add05a?w=800&q=80&auto=format&fit=crop",
         },
         {
           id: "tshirts-blog-2",
@@ -221,7 +221,7 @@ export const TSHIRTS_PRINTS_BLOG_PAGE_BLOCKS: EditorNode[] = [
           postedDate: "January 30, 2025",
           author: "Mr. Mackay",
           category: "Prints",
-          image: "/prokip-logo.png",
+          image: "https://images.unsplash.com/photo-1532453288672-3a27e9be9efd?w=800&q=80&auto=format&fit=crop",
         },
         {
           id: "tshirts-blog-3",
@@ -234,7 +234,7 @@ export const TSHIRTS_PRINTS_BLOG_PAGE_BLOCKS: EditorNode[] = [
           postedDate: "January 27, 2025",
           author: "Mr. Mackay",
           category: "Prints",
-          image: "/prokip-logo.png",
+          image: "https://images.unsplash.com/photo-1441984904996-e0b6ba687e04?w=800&q=80&auto=format&fit=crop",
         },
         {
           id: "tshirts-blog-4",
@@ -247,7 +247,7 @@ export const TSHIRTS_PRINTS_BLOG_PAGE_BLOCKS: EditorNode[] = [
           postedDate: "January 23, 2025",
           author: "Mr. Mackay",
           category: "Prints",
-          image: "/prokip-logo.png",
+          image: "https://images.unsplash.com/photo-1591047139829-d91aecb6caea?w=800&q=80&auto=format&fit=crop",
         },
         {
           id: "tshirts-blog-5",
@@ -260,7 +260,7 @@ export const TSHIRTS_PRINTS_BLOG_PAGE_BLOCKS: EditorNode[] = [
           postedDate: "January 16, 2025",
           author: "Mr. Mackay",
           category: "Prints",
-          image: "/prokip-logo.png",
+          image: "https://images.unsplash.com/photo-1490481651871-ab68de25d43d?w=800&q=80&auto=format&fit=crop",
         },
         {
           id: "tshirts-blog-6",
@@ -273,7 +273,7 @@ export const TSHIRTS_PRINTS_BLOG_PAGE_BLOCKS: EditorNode[] = [
           postedDate: "January 9, 2025",
           author: "Mr. Mackay",
           category: "Prints",
-          image: "/prokip-logo.png",
+          image: "https://images.unsplash.com/photo-1562157873-818bc0726f68?w=800&q=80&auto=format&fit=crop",
         },
       ],
     },

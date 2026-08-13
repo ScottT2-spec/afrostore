@@ -20,7 +20,7 @@ export const PERFUMES_HOME_PAGE_BLOCKS: EditorNode[] = [
           type: "slide",
           settings:           {
             "title": "Opus Essence",
-            "bottleImage": "/prokip-logo.png",
+            "bottleImage": "https://images.unsplash.com/photo-1523293182086-7651a899d37f?w=800&q=80&auto=format&fit=crop",
             "backgroundColor": "#1a1a2e",
             "buttonText": "Buy now",
             "buttonLink": "/shop",
@@ -33,7 +33,7 @@ export const PERFUMES_HOME_PAGE_BLOCKS: EditorNode[] = [
           type: "slide",
           settings:           {
             "title": "New Fragrance in the Opus Essence",
-            "bottleImage": "/prokip-logo.png",
+            "bottleImage": "https://images.unsplash.com/photo-1541643600914-78b084683601?w=800&q=80&auto=format&fit=crop",
             "backgroundColor": "#2d1b4e",
             "buttonText": "Buy now",
             "buttonLink": "/shop",
@@ -46,7 +46,7 @@ export const PERFUMES_HOME_PAGE_BLOCKS: EditorNode[] = [
           type: "slide",
           settings:           {
             "title": "Deep Fragrance With a Refined Intensity",
-            "bottleImage": "/prokip-logo.png",
+            "bottleImage": "https://images.unsplash.com/photo-1594035910387-fea47794261f?w=800&q=80&auto=format&fit=crop",
             "backgroundColor": "#0d1b2a",
             "buttonText": "Buy now",
             "buttonLink": "/shop",
@@ -100,14 +100,14 @@ export const PERFUMES_HOME_PAGE_BLOCKS: EditorNode[] = [
           title: "Light Fragrance with a Silky Touch",
           subtitle: "A collection of delicate, weightless fragrances",
           description: "A collection of delicate, weightless fragrances that capture the essence of air and light. Soft florals, sheer musks, and gentle citruses.",
-          backgroundImage: "/prokip-logo.png",
+          backgroundImage: "https://images.unsplash.com/photo-1458538977777-0549b2370168?w=800&q=80&auto=format&fit=crop",
           link: "/shop",
         },
         {
           title: "Deep Fragrance With a Refined Intensity",
           subtitle: "A collection of fresh, luminous scents",
           description: "A collection of fresh, luminous scents inspired by the mystery of nightfall. Crisp citruses, airy florals, and cool musks.",
-          backgroundImage: "/prokip-logo.png",
+          backgroundImage: "https://images.unsplash.com/photo-1587017539504-67cfbddac569?w=800&q=80&auto=format&fit=crop",
           link: "/shop",
         },
       ],
@@ -136,7 +136,7 @@ export const PERFUMES_HOME_PAGE_BLOCKS: EditorNode[] = [
       banners: [
         {
           title: "Get up to 20% off",
-          image: "/prokip-logo.png",
+          image: "https://images.unsplash.com/photo-1615634260167-c8cdede054de?w=800&q=80&auto=format&fit=crop",
           link: "/shop",
         },
       ],
@@ -178,7 +178,7 @@ export const PERFUMES_ABOUT_PAGE_BLOCKS: EditorNode[] = [
     settings: {
       title: "Welcome to Our Fragrances",
       text: "At our Fragrances, we believe that scent is more than just an aroma — it's an experience. Inspired by the richness of nature, we craft sophisticated fragrances that bring warmth, elegance, and personality to every moment. Our carefully curated collections blend the finest natural ingredients, creating timeless scents that leave a lasting impression.",
-      image: "/prokip-logo.png",
+      image: "https://images.unsplash.com/photo-1610461888750-10bfc601b874?w=800&q=80&auto=format&fit=crop",
     },
   },
   {
@@ -209,10 +209,10 @@ export const PERFUMES_ABOUT_PAGE_BLOCKS: EditorNode[] = [
     settings: {
       title: "Why Choose Us?",
       items: [
-        { icon: "/prokip-logo.png", title: "Natural Ingredients", desc: "We use responsibly sourced, high-quality natural ingredients for an authentic experience." },
-        { icon: "/prokip-logo.png", title: "Artisanal Craftsmanship", desc: "Each fragrance is carefully developed by expert perfumers with a deep passion for artistry." },
-        { icon: "/prokip-logo.png", title: "Sustainable & Ethical", desc: "We are committed to sustainability, using eco-friendly packaging and ingredients." },
-        { icon: "/prokip-logo.png", title: "Luxury Experience", desc: "From elegant bottles to exquisite scents, every fragrance is designed to offer a journey." },
+        { icon: "https://images.unsplash.com/photo-1622618991746-fe6004db3a47?w=800&q=80&auto=format&fit=crop", title: "Natural Ingredients", desc: "We use responsibly sourced, high-quality natural ingredients for an authentic experience." },
+        { icon: "https://images.unsplash.com/photo-1547887537-6158d64c35b3?w=800&q=80&auto=format&fit=crop", title: "Artisanal Craftsmanship", desc: "Each fragrance is carefully developed by expert perfumers with a deep passion for artistry." },
+        { icon: "https://images.unsplash.com/photo-1543422655-ac1c6ca993ed?w=800&q=80&auto=format&fit=crop", title: "Sustainable & Ethical", desc: "We are committed to sustainability, using eco-friendly packaging and ingredients." },
+        { icon: "https://images.unsplash.com/photo-1595425959632-34f2822322ce?w=800&q=80&auto=format&fit=crop", title: "Luxury Experience", desc: "From elegant bottles to exquisite scents, every fragrance is designed to offer a journey." },
       ],
     },
   },
@@ -267,7 +267,7 @@ export const PERFUMES_FRAGRANCES_PAGE_BLOCKS: EditorNode[] = [
     settings: {
       title: "Fragrances",
       subtitle: "Discover Our Collections",
-      backgroundImage: "/prokip-logo.png",
+      backgroundImage: "https://images.unsplash.com/photo-1523293182086-7651a899d37f?w=800&q=80&auto=format&fit=crop",
     },
   },
   {
@@ -280,37 +280,37 @@ export const PERFUMES_FRAGRANCES_PAGE_BLOCKS: EditorNode[] = [
           name: "Étheria", 
           slug: "etheria", 
           description: "A collection of delicate, weightless fragrances that capture the essence of air and light. Soft florals, sheer musks, and dewy accords.",
-          image: "/prokip-logo.png"
+          image: "https://images.unsplash.com/photo-1541643600914-78b084683601?w=800&q=80&auto=format&fit=crop"
         },
         { 
           name: "Celeste Aura", 
           slug: "celeste-aura", 
           description: "Elegant fragrances blending vibrant citrus, shimmering aldehydes, and refined light woods creating an aura of inner glow.",
-          image: "/prokip-logo.png"
+          image: "https://images.unsplash.com/photo-1594035910387-fea47794261f?w=800&q=80&auto=format&fit=crop"
         },
         { 
           name: "Opus Essence", 
           slug: "opus-essence", 
           description: "Rich, complex compositions. Deep florals, precious woods, and warm ambers create a multidimensional fragrance experience.",
-          image: "/prokip-logo.png"
+          image: "https://images.unsplash.com/photo-1458538977777-0549b2370168?w=800&q=80&auto=format&fit=crop"
         },
         { 
           name: "Velours Noir", 
           slug: "velours-noir", 
           description: "Dark, velvety fragrances with depth and mystery. Smoky oud, leather accords, and black vanilla.",
-          image: "/prokip-logo.png"
+          image: "https://images.unsplash.com/photo-1587017539504-67cfbddac569?w=800&q=80&auto=format&fit=crop"
         },
         { 
           name: "Nocturne Essence", 
           slug: "nocturne-essence", 
           description: "Fragrances inspired by nightfall. Cool musks, aromatic herbs, and dark spices capture twilight elegance.",
-          image: "/prokip-logo.png"
+          image: "https://images.unsplash.com/photo-1615634260167-c8cdede054de?w=800&q=80&auto=format&fit=crop"
         },
         { 
           name: "Elysian Bloom", 
           slug: "elysian-bloom", 
           description: "Fresh, green fragrances celebrating nature. Dewy petals, crisp leaves, and earthy vetiver.",
-          image: "/prokip-logo.png"
+          image: "https://images.unsplash.com/photo-1610461888750-10bfc601b874?w=800&q=80&auto=format&fit=crop"
         },
       ],
     },
@@ -333,7 +333,7 @@ export const PERFUMES_JOURNAL_PAGE_BLOCKS: EditorNode[] = [
     settings: {
       title: "Journal",
       subtitle: "Explore Our Stories",
-      backgroundImage: "/prokip-logo.png",
+      backgroundImage: "https://images.unsplash.com/photo-1622618991746-fe6004db3a47?w=800&q=80&auto=format&fit=crop",
     },
   },
   {

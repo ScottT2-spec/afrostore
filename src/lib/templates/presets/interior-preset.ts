@@ -21,7 +21,7 @@ export const INTERIOR_DECOR_PRESET: EditorNode[] = [
             "subtitle": "$250.00",
             "buttonText": "Go To Shop",
             "buttonLink": "/shop",
-            "image": "/prokip-logo.png"
+            "image": "https://images.unsplash.com/photo-1618221195710-dd6b41faaea6?w=800&q=80&auto=format&fit=crop"
           },
           elements: [],
         },
@@ -34,7 +34,7 @@ export const INTERIOR_DECOR_PRESET: EditorNode[] = [
             "subtitle": "$286.00",
             "buttonText": "Go To Shop",
             "buttonLink": "/shop",
-            "image": "/prokip-logo.png"
+            "image": "https://images.unsplash.com/photo-1618220179428-22790b461013?w=800&q=80&auto=format&fit=crop"
           },
           elements: [],
         },
@@ -46,7 +46,7 @@ export const INTERIOR_DECOR_PRESET: EditorNode[] = [
             "titleLine2": "Minimalist Cattle.",
             "buttonText": "Go To Shop",
             "buttonLink": "/shop",
-            "image": "/prokip-logo.png"
+            "image": "https://images.unsplash.com/photo-1586023492125-27b2c045efd7?w=800&q=80&auto=format&fit=crop"
           },
           elements: [],
         },
@@ -58,7 +58,7 @@ export const INTERIOR_DECOR_PRESET: EditorNode[] = [
             "titleLine2": "and Brass.",
             "buttonText": "Go To Shop",
             "buttonLink": "/shop",
-            "image": "/prokip-logo.png"
+            "image": "https://images.unsplash.com/photo-1616046229478-9901c5536a45?w=800&q=80&auto=format&fit=crop"
           },
           elements: [],
         }
@@ -71,11 +71,11 @@ export const INTERIOR_DECOR_PRESET: EditorNode[] = [
       sectionTitle: "TOP CATEGORIES",
       columns: 5,
       categories: [
-        { name: "Home Decor", icon: "/prokip-logo.png", image: "", link: "/shop" },
-        { name: "Celing Decor", icon: "/prokip-logo.png", image: "", link: "/shop" },
-        { name: "Wall Decor", icon: "/prokip-logo.png", image: "", link: "/shop" },
-        { name: "Vase Decor", icon: "/prokip-logo.png", image: "", link: "/shop" },
-        { name: "Holiday Decor", icon: "/prokip-logo.png", image: "", link: "/shop" },
+        { name: "Home Decor", icon: "https://images.unsplash.com/photo-1583847268964-b28dc8f51f92?w=800&q=80&auto=format&fit=crop", image: "", link: "/shop" },
+        { name: "Celing Decor", icon: "https://images.unsplash.com/photo-1616047006789-b7af5afb8c20?w=800&q=80&auto=format&fit=crop", image: "", link: "/shop" },
+        { name: "Wall Decor", icon: "https://images.unsplash.com/photo-1667312939978-64cf31718a6e?w=800&q=80&auto=format&fit=crop", image: "", link: "/shop" },
+        { name: "Vase Decor", icon: "https://images.unsplash.com/photo-1615873968403-89e068629265?w=800&q=80&auto=format&fit=crop", image: "", link: "/shop" },
+        { name: "Holiday Decor", icon: "https://images.unsplash.com/photo-1622372738946-62e02505feb3?w=800&q=80&auto=format&fit=crop", image: "", link: "/shop" },
       ],
     },
   },
@@ -88,21 +88,21 @@ export const INTERIOR_DECOR_PRESET: EditorNode[] = [
         {
           title: "New Arrivals In Decorations.",
           subtitle: "View More",
-          image: "/prokip-logo.png",
+          image: "https://images.unsplash.com/photo-1616486338812-3dadae4b4ace?w=800&q=80&auto=format&fit=crop",
           buttonText: "View More",
           buttonLink: "/shop",
         },
         {
           title: "Decorative Wall Elements.",
           subtitle: "View More",
-          image: "/prokip-logo.png",
+          image: "https://images.unsplash.com/photo-1618221195710-dd6b41faaea6?w=800&q=80&auto=format&fit=crop",
           buttonText: "View More",
           buttonLink: "/shop",
         },
         {
           title: "Decorations For New Novel.",
           subtitle: "View More",
-          image: "/prokip-logo.png",
+          image: "https://images.unsplash.com/photo-1618220179428-22790b461013?w=800&q=80&auto=format&fit=crop",
           buttonText: "View More",
           buttonLink: "/shop",
         },
@@ -166,7 +166,7 @@ export const INTERIOR_DECOR_PRESET: EditorNode[] = [
         { title: "FOOTER MENU", links: [{ label: "Instagram profile", url: "#" }, { label: "New Collection", url: "#" }, { label: "Contact Us", url: "#" }, { label: "Latest News", url: "#" }, { label: "Our Sitemap", url: "#" }] },
       ],
       copyrightText: "",
-      paymentIconsUrl: "/prokip-logo.png",
+      paymentIconsUrl: "https://images.unsplash.com/photo-1586023492125-27b2c045efd7?w=800&q=80&auto=format&fit=crop",
     },
   },
 ];

@@ -86,10 +86,10 @@ export const TOOLS_ABOUT_PAGE_BLOCKS: EditorNode[] = [
       subtitle: "PROKIP - BEST ECOMMERCE THEME 2021/22",
       title: "Let\u2019s Get Creative!",
       services: [
-        { icon: "/prokip-logo.png", title: "GRAPHIC DESIGN", description: "Curabitur lacinia tristique velit ut laoreet." },
-        { icon: "/prokip-logo.png", title: "WEB DESIGN", description: "By the readable content of a page when its layout." },
-        { icon: "/prokip-logo.png", title: "BRANDING", description: "Fact that a reader will be distracted." },
-        { icon: "/prokip-logo.png", title: "PHOTOGRAPHY", description: "The point of using Lorem Ipsum is that it has it." },
+        { icon: "https://images.unsplash.com/photo-1609081219090-a6d81d3085bf?w=800&q=80&auto=format&fit=crop", title: "GRAPHIC DESIGN", description: "Curabitur lacinia tristique velit ut laoreet." },
+        { icon: "https://images.unsplash.com/photo-1615655406736-b37c4fabf923?w=800&q=80&auto=format&fit=crop", title: "WEB DESIGN", description: "By the readable content of a page when its layout." },
+        { icon: "https://images.unsplash.com/photo-1595303526913-c7037797ebe7?w=800&q=80&auto=format&fit=crop", title: "BRANDING", description: "Fact that a reader will be distracted." },
+        { icon: "https://images.unsplash.com/photo-1636115305669-9096bffe87fd?w=800&q=80&auto=format&fit=crop", title: "PHOTOGRAPHY", description: "The point of using Lorem Ipsum is that it has it." },
       ],
     },
   },
@@ -98,8 +98,8 @@ export const TOOLS_ABOUT_PAGE_BLOCKS: EditorNode[] = [
     type: "hardwareGalleryGrid",
     settings: {
       images: [
-        "/prokip-logo.png",
-        "/prokip-logo.png",
+        "https://images.unsplash.com/photo-1609081219090-a6d81d3085bf?w=800&q=80&auto=format&fit=crop",
+        "https://images.unsplash.com/photo-1615655406736-b37c4fabf923?w=800&q=80&auto=format&fit=crop",
       ],
     },
   },
@@ -111,8 +111,8 @@ export const TOOLS_ABOUT_PAGE_BLOCKS: EditorNode[] = [
       title: "Our Presentation",
       description: "I am so happy, my dear friend, so absorbed in the exquisite sense of mere tranquil existence, that I neglect my talents. I should be incapable of drawing a single.",
       videos: [
-        { thumbnail: "/prokip-logo.png", youtubeUrl: "http://www.youtube.com/watch?v=TJ1SDXbij8Y", title: "Our company history and facts" },
-        { thumbnail: "/prokip-logo.png", youtubeUrl: "http://www.youtube.com/watch?v=TJ1SDXbij8Y", title: "Design & development process demonstration" },
+        { thumbnail: "https://images.unsplash.com/photo-1468495244123-6c6c332eeece?w=800&q=80&auto=format&fit=crop", youtubeUrl: "http://www.youtube.com/watch?v=TJ1SDXbij8Y", title: "Our company history and facts" },
+        { thumbnail: "https://images.unsplash.com/photo-1491933382434-500287f9b54b?w=800&q=80&auto=format&fit=crop", youtubeUrl: "http://www.youtube.com/watch?v=TJ1SDXbij8Y", title: "Design & development process demonstration" },
       ],
     },
   },
@@ -132,10 +132,10 @@ export const TOOLS_ABOUT_PAGE_BLOCKS: EditorNode[] = [
     type: "hardwareTeamSection",
     settings: {
       members: [
-        { name: "MARK JANCE", role: "CEO / FOUNDER", image: "/prokip-logo.png", socials: ["facebook", "twitter", "instagram", "linkedin"] },
-        { name: "MARK JANCE", role: "CEO / FOUNDER", image: "/prokip-logo.png", socials: ["facebook", "twitter", "instagram", "linkedin"] },
-        { name: "MARK JANCE", role: "CEO / FOUNDER", image: "/prokip-logo.png", socials: ["facebook", "twitter", "instagram", "linkedin"] },
-        { name: "MARK JANCE", role: "CEO / FOUNDER", image: "/prokip-logo.png", socials: ["facebook", "twitter", "instagram", "linkedin"] },
+        { name: "MARK JANCE", role: "CEO / FOUNDER", image: "https://images.unsplash.com/photo-1620783770629-122b7f187703?w=800&q=80&auto=format&fit=crop", socials: ["facebook", "twitter", "instagram", "linkedin"] },
+        { name: "MARK JANCE", role: "CEO / FOUNDER", image: "https://images.unsplash.com/photo-1515940175183-6798529cb860?w=800&q=80&auto=format&fit=crop", socials: ["facebook", "twitter", "instagram", "linkedin"] },
+        { name: "MARK JANCE", role: "CEO / FOUNDER", image: "https://images.unsplash.com/photo-1643536768014-0756fa85ca4f?w=800&q=80&auto=format&fit=crop", socials: ["facebook", "twitter", "instagram", "linkedin"] },
+        { name: "MARK JANCE", role: "CEO / FOUNDER", image: "https://images.unsplash.com/photo-1515940279136-2f419eea8051?w=800&q=80&auto=format&fit=crop", socials: ["facebook", "twitter", "instagram", "linkedin"] },
       ],
     },
   },
@@ -159,9 +159,9 @@ export const TOOLS_ABOUT_PAGE_BLOCKS: EditorNode[] = [
     type: "hardwareCoverBanners",
     settings: {
       banners: [
-        { image: "/prokip-logo.png", title: "It is a fact that a reader will be distracted.", description: "Ullamcorper vehicula at ultrices sed interdum et malesuada", buttonText: "Read more", link: "#" },
-        { image: "/prokip-logo.png", title: "By the readable content of a page when looking.", description: "Patibus elementum a dictum ipiscing parturient donec eros.", buttonText: "Read more", link: "#" },
-        { image: "/prokip-logo.png", title: "The point of using Lorem Ipsum is that it has.", description: "Ullamcorper vehicula at ultrices sed interdum ullamcorper .", buttonText: "Read more", link: "#" },
+        { image: "https://images.unsplash.com/photo-1526738549149-8e07eca6c147?w=800&q=80&auto=format&fit=crop", title: "It is a fact that a reader will be distracted.", description: "Ullamcorper vehicula at ultrices sed interdum et malesuada", buttonText: "Read more", link: "#" },
+        { image: "https://images.unsplash.com/photo-1547479117-da9abbff3fa0?w=800&q=80&auto=format&fit=crop", title: "By the readable content of a page when looking.", description: "Patibus elementum a dictum ipiscing parturient donec eros.", buttonText: "Read more", link: "#" },
+        { image: "https://images.unsplash.com/photo-1609081219090-a6d81d3085bf?w=800&q=80&auto=format&fit=crop", title: "The point of using Lorem Ipsum is that it has.", description: "Ullamcorper vehicula at ultrices sed interdum ullamcorper .", buttonText: "Read more", link: "#" },
       ],
     },
   },
@@ -247,12 +247,12 @@ export const TOOLS_BLOG_PAGE_BLOCKS: EditorNode[] = [
     settings: {
       columns: 2,
       posts: [
-        { title: "Seating collection inspiration by modern", image: "/prokip-logo.png", date: "July 23", author: "S. Rogers", categories: ["Design trends", "Furniture"], excerpt: "Ac haca ullamcorper donec ante habi tasse donec imperdiet eturpis varius per a augue magna hac. Nec hac et vestibulum duis a tinci..." },
-        { title: "Minimalist design furniture 2026", image: "/prokip-logo.png", date: "July 23", author: "S. Rogers", categories: ["Design trends", "Furniture"], excerpt: "Discover the ultimate blend of aesthetics, innovation, and functionality. We have curated five iconic European design houses that..." },
-        { title: "Green interior design inspiration", image: "/prokip-logo.png", date: "July 23", author: "S. Rogers", categories: ["Design trends", "Hand made"], excerpt: "Modern Atlanta homes impress with a harmony of light, space, and eco-materials. Each project reflects the unique character of its..." },
-        { title: "Reinterprets the classic bookshelf", image: "/prokip-logo.png", date: "July 23", author: "S. Rogers", categories: ["Design trends", "Inspiration"], excerpt: "Aliquet parturient scele risque scele risque nibh pretium parturient suspendisse platea sapien torquent feugiat parturient hac ame..." },
-        { title: "Creative water features and exterior", image: "/prokip-logo.png", date: "July 23", author: "S. Rogers", categories: ["Design trends", "Inspiration"], excerpt: "Adipiscing hac imperdiet id blandit varius scelerisque at sagittis libero dui dis volutpat vehicula mus sed ut. Lacinia dui rutrum..." },
-        { title: "Sweet seat: functional seat for IT folks", image: "/prokip-logo.png", date: "July 23", author: "S. Rogers", categories: ["Design trends", "Hand made"], excerpt: "Discover a world of digital art and modern design at our annual exhibition. Explore unique projects from international creators..." },
+        { title: "Seating collection inspiration by modern", image: "https://images.unsplash.com/photo-1615655406736-b37c4fabf923?w=800&q=80&auto=format&fit=crop", date: "July 23", author: "S. Rogers", categories: ["Design trends", "Furniture"], excerpt: "Ac haca ullamcorper donec ante habi tasse donec imperdiet eturpis varius per a augue magna hac. Nec hac et vestibulum duis a tinci..." },
+        { title: "Minimalist design furniture 2026", image: "https://images.unsplash.com/photo-1595303526913-c7037797ebe7?w=800&q=80&auto=format&fit=crop", date: "July 23", author: "S. Rogers", categories: ["Design trends", "Furniture"], excerpt: "Discover the ultimate blend of aesthetics, innovation, and functionality. We have curated five iconic European design houses that..." },
+        { title: "Green interior design inspiration", image: "https://images.unsplash.com/photo-1636115305669-9096bffe87fd?w=800&q=80&auto=format&fit=crop", date: "July 23", author: "S. Rogers", categories: ["Design trends", "Hand made"], excerpt: "Modern Atlanta homes impress with a harmony of light, space, and eco-materials. Each project reflects the unique character of its..." },
+        { title: "Reinterprets the classic bookshelf", image: "https://images.unsplash.com/photo-1468495244123-6c6c332eeece?w=800&q=80&auto=format&fit=crop", date: "July 23", author: "S. Rogers", categories: ["Design trends", "Inspiration"], excerpt: "Aliquet parturient scele risque scele risque nibh pretium parturient suspendisse platea sapien torquent feugiat parturient hac ame..." },
+        { title: "Creative water features and exterior", image: "https://images.unsplash.com/photo-1491933382434-500287f9b54b?w=800&q=80&auto=format&fit=crop", date: "July 23", author: "S. Rogers", categories: ["Design trends", "Inspiration"], excerpt: "Adipiscing hac imperdiet id blandit varius scelerisque at sagittis libero dui dis volutpat vehicula mus sed ut. Lacinia dui rutrum..." },
+        { title: "Sweet seat: functional seat for IT folks", image: "https://images.unsplash.com/photo-1620783770629-122b7f187703?w=800&q=80&auto=format&fit=crop", date: "July 23", author: "S. Rogers", categories: ["Design trends", "Hand made"], excerpt: "Discover a world of digital art and modern design at our annual exhibition. Explore unique projects from international creators..." },
       ],
     },
   },

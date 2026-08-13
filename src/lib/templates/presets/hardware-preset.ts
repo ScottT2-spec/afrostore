@@ -25,7 +25,7 @@ export const HARDWARE_TEMPLATE_PRESET: EditorNode[] = [
             "buttonText": "Shop now",
             "buttonLink": "/shop",
             "price": "$499.00",
-            "backgroundImage": "/prokip-logo.png"
+            "backgroundImage": "https://images.unsplash.com/photo-1609081219090-a6d81d3085bf?w=800&q=80&auto=format&fit=crop"
           },
           elements: [],
         },
@@ -40,7 +40,7 @@ export const HARDWARE_TEMPLATE_PRESET: EditorNode[] = [
             "buttonLink": "/shop",
             "secondaryButtonText": "View more",
             "secondaryButtonLink": "#",
-            "backgroundImage": "/prokip-logo.png"
+            "backgroundImage": "https://images.unsplash.com/photo-1615655406736-b37c4fabf923?w=800&q=80&auto=format&fit=crop"
           },
           elements: [],
         },
@@ -54,7 +54,7 @@ export const HARDWARE_TEMPLATE_PRESET: EditorNode[] = [
             "buttonText": "Shop now",
             "buttonLink": "/shop",
             "price": "$299.00",
-            "backgroundImage": "/prokip-logo.png"
+            "backgroundImage": "https://images.unsplash.com/photo-1595303526913-c7037797ebe7?w=800&q=80&auto=format&fit=crop"
           },
           elements: [],
         }
@@ -67,12 +67,12 @@ export const HARDWARE_TEMPLATE_PRESET: EditorNode[] = [
     type: "hardwareHomeCategoryGrid",
     settings: {
       categories: [
-        { name: "Clocks", productCount: 12, image: "/prokip-logo.png", link: "/shop" },
-        { name: "Lighting", productCount: 17, image: "/prokip-logo.png", link: "/shop" },
-        { name: "Furniture", productCount: 33, image: "/prokip-logo.png", link: "/shop" },
-        { name: "Accessories", productCount: 12, image: "/prokip-logo.png", link: "/shop" },
-        { name: "Cooking", productCount: 12, image: "/prokip-logo.png", link: "/shop" },
-        { name: "Toys", productCount: 12, image: "/prokip-logo.png", link: "/shop" },
+        { name: "Clocks", productCount: 12, image: "https://images.unsplash.com/photo-1636115305669-9096bffe87fd?w=800&q=80&auto=format&fit=crop", link: "/shop" },
+        { name: "Lighting", productCount: 17, image: "https://images.unsplash.com/photo-1468495244123-6c6c332eeece?w=800&q=80&auto=format&fit=crop", link: "/shop" },
+        { name: "Furniture", productCount: 33, image: "https://images.unsplash.com/photo-1491933382434-500287f9b54b?w=800&q=80&auto=format&fit=crop", link: "/shop" },
+        { name: "Accessories", productCount: 12, image: "https://images.unsplash.com/photo-1620783770629-122b7f187703?w=800&q=80&auto=format&fit=crop", link: "/shop" },
+        { name: "Cooking", productCount: 12, image: "https://images.unsplash.com/photo-1515940175183-6798529cb860?w=800&q=80&auto=format&fit=crop", link: "/shop" },
+        { name: "Toys", productCount: 12, image: "https://images.unsplash.com/photo-1643536768014-0756fa85ca4f?w=800&q=80&auto=format&fit=crop", link: "/shop" },
       ],
     },
   },
@@ -101,12 +101,12 @@ export const HARDWARE_TEMPLATE_PRESET: EditorNode[] = [
       description: "There are many variations of passages of Lorem Ipsum available, but the majority have suffered alteration in some form, by injected humour, or randomised.",
       specs: [
         {
-          icon: "/prokip-logo.png",
+          icon: "https://images.unsplash.com/photo-1515940279136-2f419eea8051?w=800&q=80&auto=format&fit=crop",
           title: "10+ inch GPU",
           description: "Mauris blandit aliquet",
         },
         {
-          icon: "/prokip-logo.png",
+          icon: "https://images.unsplash.com/photo-1526738549149-8e07eca6c147?w=800&q=80&auto=format&fit=crop",
           title: "8 RAM SLOTS",
           description: "Cras ultricies ligula sed",
         },
@@ -176,7 +176,7 @@ export const HARDWARE_TEMPLATE_PRESET: EditorNode[] = [
       primaryButtonLink: "#",
       secondaryButtonText: "GO TO SHOP",
       secondaryButtonLink: "/shop",
-      image: "/prokip-logo.png",
+      image: "https://images.unsplash.com/photo-1547479117-da9abbff3fa0?w=800&q=80&auto=format&fit=crop",
       videoUrl: "http://www.youtube.com/watch?v=XHOmBV4js_E",
     },
   },
@@ -192,25 +192,25 @@ export const HARDWARE_TEMPLATE_PRESET: EditorNode[] = [
       desktops: [
         {
           name: "SkyTech Omega",
-          image: "/prokip-logo.png",
+          image: "https://images.unsplash.com/photo-1609081219090-a6d81d3085bf?w=800&q=80&auto=format&fit=crop",
           specs: ["GeForce GTX 1060", "Intel Core i5 7500", "16GB DDR4", "240GB SSD + 1TB HDD", "Windows 10"],
           link: "#",
         },
         {
           name: "Ava Lumos",
-          image: "/prokip-logo.png",
+          image: "https://images.unsplash.com/photo-1615655406736-b37c4fabf923?w=800&q=80&auto=format&fit=crop",
           specs: ["GeForce GTX 1070Ti", "Intel Core i5 7700k", "32GB DDR4", "480GB SSD + 2TB HDD", "Windows 10"],
           link: "#",
         },
         {
           name: "Iron Conqueror",
-          image: "/prokip-logo.png",
+          image: "https://images.unsplash.com/photo-1595303526913-c7037797ebe7?w=800&q=80&auto=format&fit=crop",
           specs: ["GeForce GTX 1080Ti", "Intel Core i7 8700k", "64GB DDR4", "480GB SSD + 2TB HDD", "Windows 10"],
           link: "#",
         },
         {
           name: "Maingear Rush",
-          image: "/prokip-logo.png",
+          image: "https://images.unsplash.com/photo-1636115305669-9096bffe87fd?w=800&q=80&auto=format&fit=crop",
           specs: ["Radeon RX Vega", "AMD Ryzen 7 1800x", "32GB DDR4", "480GB SSD + 2TB HDD", "Windows 10"],
           link: "#",
         },
@@ -227,14 +227,14 @@ export const HARDWARE_TEMPLATE_PRESET: EditorNode[] = [
       title: "GAMING SETUP",
       description: "There are many variations of passages of Lorem Ipsum available, but the majority have suffered alteration in some form, by injected.",
       images: [
-        "/prokip-logo.png",
-        "/prokip-logo.png",
-        "/prokip-logo.png",
-        "/prokip-logo.png",
-        "/prokip-logo.png",
-        "/prokip-logo.png",
-        "/prokip-logo.png",
-        "/prokip-logo.png",
+        "https://images.unsplash.com/photo-1609081219090-a6d81d3085bf?w=800&q=80&auto=format&fit=crop",
+        "https://images.unsplash.com/photo-1615655406736-b37c4fabf923?w=800&q=80&auto=format&fit=crop",
+        "https://images.unsplash.com/photo-1595303526913-c7037797ebe7?w=800&q=80&auto=format&fit=crop",
+        "https://images.unsplash.com/photo-1636115305669-9096bffe87fd?w=800&q=80&auto=format&fit=crop",
+        "https://images.unsplash.com/photo-1468495244123-6c6c332eeece?w=800&q=80&auto=format&fit=crop",
+        "https://images.unsplash.com/photo-1491933382434-500287f9b54b?w=800&q=80&auto=format&fit=crop",
+        "https://images.unsplash.com/photo-1620783770629-122b7f187703?w=800&q=80&auto=format&fit=crop",
+        "https://images.unsplash.com/photo-1515940175183-6798529cb860?w=800&q=80&auto=format&fit=crop",
       ],
     },
   },
@@ -249,11 +249,11 @@ export const HARDWARE_TEMPLATE_PRESET: EditorNode[] = [
       description: "There are many variations of passages of Lorem Ipsum available, but the majority have suffered alteration in some form, by injected humour, or randomised words which don't look even.",
       quote: "It is a long established fact that a reader will be distracted by the readable content of a page when looking.",
       author: "Kate Abrams",
-      signatureImage: "/prokip-logo.png",
+      signatureImage: "https://images.unsplash.com/photo-1468495244123-6c6c332eeece?w=800&q=80&auto=format&fit=crop",
       avatarImages: [
-        "/prokip-logo.png",
-        "/prokip-logo.png",
-        "/prokip-logo.png",
+        "https://images.unsplash.com/photo-1643536768014-0756fa85ca4f?w=800&q=80&auto=format&fit=crop",
+        "https://images.unsplash.com/photo-1515940279136-2f419eea8051?w=800&q=80&auto=format&fit=crop",
+        "https://images.unsplash.com/photo-1526738549149-8e07eca6c147?w=800&q=80&auto=format&fit=crop",
       ],
     },
   },
@@ -269,7 +269,7 @@ export const HARDWARE_TEMPLATE_PRESET: EditorNode[] = [
       columns: 4,
       posts: [
         {
-          image: "/prokip-logo.png",
+          image: "https://images.unsplash.com/photo-1491933382434-500287f9b54b?w=800&q=80&auto=format&fit=crop",
           title: "Reinterprets the classic bookshelf",
           excerpt: "Aliquet parturient scele risque scele risque nibh pretium parturient suspendisse platea sapien torquent feugiat parturient hac ame...",
           date: { day: "23", month: "Jul" },
@@ -279,7 +279,7 @@ export const HARDWARE_TEMPLATE_PRESET: EditorNode[] = [
           comments: 2,
         },
         {
-          image: "/prokip-logo.png",
+          image: "https://images.unsplash.com/photo-1620783770629-122b7f187703?w=800&q=80&auto=format&fit=crop",
           title: "Minimalist design furniture 2026",
           excerpt: "Discover the ultimate blend of aesthetics, innovation, and functionality. We have curated five iconic European design houses that ...",
           date: { day: "23", month: "Jul" },
@@ -289,7 +289,7 @@ export const HARDWARE_TEMPLATE_PRESET: EditorNode[] = [
           comments: 6,
         },
         {
-          image: "/prokip-logo.png",
+          image: "https://images.unsplash.com/photo-1515940175183-6798529cb860?w=800&q=80&auto=format&fit=crop",
           title: "Green interior design inspiration",
           excerpt: "Modern Atlanta homes impress with a harmony of light, space, and eco-materials. Each project reflects the unique character of its ...",
           date: { day: "23", month: "Jul" },
@@ -299,7 +299,7 @@ export const HARDWARE_TEMPLATE_PRESET: EditorNode[] = [
           comments: 0,
         },
         {
-          image: "/prokip-logo.png",
+          image: "https://images.unsplash.com/photo-1643536768014-0756fa85ca4f?w=800&q=80&auto=format&fit=crop",
           title: "Collar brings back coffee brewing ritual",
           excerpt: "Aliquet parturient scele risque scele risque nibh pretium parturient suspendisse platea sapien torquent feugiat parturient hac ame...",
           date: { day: "23", month: "Jul" },

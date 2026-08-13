@@ -66,14 +66,14 @@ export const COSMETICS_TEMPLATE_PRESET: EditorNode[] = [
     settings: {
       banners: [
         {
-          image: "/prokip-logo.png",
+          image: "https://images.unsplash.com/photo-1596462502278-27bfdc403348?w=800&q=80&auto=format&fit=crop",
           title: "REVITALIZING\nFACE MASKS",
           description: "It is a long established fact that a reader will be distracted by the readable content of a page when looking at its layout.",
           buttonText: "SHOP NOW",
           buttonLink: "/shop",
         },
         {
-          image: "/prokip-logo.png",
+          image: "https://images.unsplash.com/photo-1580870069867-74c57ee1bb07?w=800&q=80&auto=format&fit=crop",
           title: "SERUMS & OILS",
           description: "There are many variations of passages of Lorem Ipsum available, but the majority have suffered alteration in some form.",
           buttonText: "SHOP NOW",
@@ -119,7 +119,7 @@ export const COSMETICS_TEMPLATE_PRESET: EditorNode[] = [
     settings: {
       title: "Discover a beautiful you with our new Makeup Essentials",
       description: "There are many variations of passages of Lorem Ipsum available, but the majority have suffered alteration in some form, by injected humour.",
-      image: "/prokip-logo.png",
+      image: "https://images.unsplash.com/photo-1512496015851-a90fb38ba796?w=800&q=80&auto=format&fit=crop",
       features: [
         { icon: "✨", titleLine1: "Lasting", titleLine2: "Formulas" },
         { icon: "🛡️", titleLine1: "Face skin", titleLine2: "Protection" },
@@ -151,7 +151,7 @@ export const COSMETICS_TEMPLATE_PRESET: EditorNode[] = [
     settings: {
       title: "Vehicula fermentum",
       description: "The generated Lorem Ipsum is therefore always free from repetition humour.",
-      image: "/prokip-logo.png",
+      image: "https://images.unsplash.com/photo-1522335789203-aabd1fc54bc9?w=800&q=80&auto=format&fit=crop",
       buttonText: "SHOP NOW",
       buttonLink: "/shop",
       secondButtonText: "READ MORE",
@@ -187,7 +187,7 @@ export const COSMETICS_TEMPLATE_PRESET: EditorNode[] = [
     id: "cosmetics-newsletter",
     type: "cosmeticsNewsletter",
     settings: {
-      backgroundImage: "/prokip-logo.png",
+      backgroundImage: "https://images.unsplash.com/photo-1631730486572-226d1f595b68?w=800&q=80&auto=format&fit=crop",
       title: "JOIN OUR NEWSLETTER",
       description: "Will be used in accordance with our Privacy Policy",
       buttonText: "Sign up",
