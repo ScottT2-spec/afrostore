@@ -67,21 +67,21 @@ export const BAKERY_TEMPLATE_PRESET: EditorNode[] = [
       sectionSubtitle: "Sweets Bakery",
       items: [
         {
-          icon: "https://images.unsplash.com/photo-1599819055803-717bba43890f?w=800&q=80&auto=format&fit=crop",
+          icon: "data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A//www.w3.org/2000/svg%22%20viewBox%3D%220%200%2024%2024%22%20fill%3D%22currentColor%22%3E%3Cpath%20d%3D%22M12%202l2.9%206.26L22%209.27l-5%204.87%201.18%206.88L12%2017.77l-6.18%203.25L7%2014.14%202%209.27l7.1-1.01z%22/%3E%3C/svg%3E",
           title: "Cupcakes",
           description: "There are some redeeming factors in favor of greeking text",
           buttonText: "Shop Now",
           buttonLink: "/shop",
         },
         {
-          icon: "https://images.unsplash.com/photo-1623334044303-241021148842?w=800&q=80&auto=format&fit=crop",
+          icon: "data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A//www.w3.org/2000/svg%22%20viewBox%3D%220%200%2024%2024%22%20fill%3D%22currentColor%22%3E%3Cpath%20d%3D%22M12%202l2.9%206.26L22%209.27l-5%204.87%201.18%206.88L12%2017.77l-6.18%203.25L7%2014.14%202%209.27l7.1-1.01z%22/%3E%3C/svg%3E",
           title: "Macaroons",
           description: "Merely the symptom of a worse problem to consideration",
           buttonText: "Shop Now",
           buttonLink: "/shop",
         },
         {
-          icon: "https://images.unsplash.com/photo-1608198093002-ad4e005484ec?w=800&q=80&auto=format&fit=crop",
+          icon: "data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A//www.w3.org/2000/svg%22%20viewBox%3D%220%200%2024%2024%22%20fill%3D%22currentColor%22%3E%3Cpath%20d%3D%22M12%202l2.9%206.26L22%209.27l-5%204.87%201.18%206.88L12%2017.77l-6.18%203.25L7%2014.14%202%209.27l7.1-1.01z%22/%3E%3C/svg%3E",
           title: "Cakes",
           description: "You sculpt information, you chisel away what\u2019s not needed",
           buttonText: "Shop Now",
@@ -123,22 +123,22 @@ export const BAKERY_TEMPLATE_PRESET: EditorNode[] = [
       image: "https://images.unsplash.com/photo-1583338917451-face2751d8d5?w=800&q=80&auto=format&fit=crop",
       steps: [
         {
-          icon: "https://images.unsplash.com/photo-1534432182912-63863115e106?w=800&q=80&auto=format&fit=crop",
+          icon: "data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A//www.w3.org/2000/svg%22%20viewBox%3D%220%200%2024%2024%22%20fill%3D%22currentColor%22%3E%3Cpath%20d%3D%22M12%202l2.9%206.26L22%209.27l-5%204.87%201.18%206.88L12%2017.77l-6.18%203.25L7%2014.14%202%209.27l7.1-1.01z%22/%3E%3C/svg%3E",
           title: "1. Ingredients",
           description: "Chances are there wasn\u2019t collaboration, communication.",
         },
         {
-          icon: "https://images.unsplash.com/photo-1568254183919-78a4f43a2877?w=800&q=80&auto=format&fit=crop",
+          icon: "data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A//www.w3.org/2000/svg%22%20viewBox%3D%220%200%2024%2024%22%20fill%3D%22currentColor%22%3E%3Cpath%20d%3D%22M12%202l2.9%206.26L22%209.27l-5%204.87%201.18%206.88L12%2017.77l-6.18%203.25L7%2014.14%202%209.27l7.1-1.01z%22/%3E%3C/svg%3E",
           title: "2. Stuffing",
           description: "There wasn\u2019t a process agreed upon or specified with.",
         },
         {
-          icon: "https://images.unsplash.com/photo-1483695028939-5bb13f8648b0?w=800&q=80&auto=format&fit=crop",
+          icon: "data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A//www.w3.org/2000/svg%22%20viewBox%3D%220%200%2024%2024%22%20fill%3D%22currentColor%22%3E%3Cpath%20d%3D%22M12%202l2.9%206.26L22%209.27l-5%204.87%201.18%206.88L12%2017.77l-6.18%203.25L7%2014.14%202%209.27l7.1-1.01z%22/%3E%3C/svg%3E",
           title: "3. Cooking",
           description: "But that\u2019s not all that it takes to get things back on track.",
         },
         {
-          icon: "https://images.unsplash.com/photo-1523294587484-bae6cc870010?w=800&q=80&auto=format&fit=crop",
+          icon: "data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A//www.w3.org/2000/svg%22%20viewBox%3D%220%200%2024%2024%22%20fill%3D%22currentColor%22%3E%3Cpath%20d%3D%22M12%202l2.9%206.26L22%209.27l-5%204.87%201.18%206.88L12%2017.77l-6.18%203.25L7%2014.14%202%209.27l7.1-1.01z%22/%3E%3C/svg%3E",
           title: "4. Dish Ready",
           description: "The villagers are out there with a vengeance to get that.",
         },

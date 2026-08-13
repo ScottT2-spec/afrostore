@@ -38,10 +38,10 @@ export const DECOR_ABOUT_PAGE_BLOCKS: EditorNode[] = [
   { id: "decor-about-services", type: "interiorServicesGrid", settings: {
     subtitle: "PROKIP - BEST ECOMMERCE THEME 2021/22", title: "Let\u2019s Get Creative!",
     services: [
-      { icon: "https://images.unsplash.com/photo-1618221195710-dd6b41faaea6?w=800&q=80&auto=format&fit=crop", title: "GRAPHIC DESIGN", description: "Curabitur lacinia tristique velit ut laoreet." },
-      { icon: "https://images.unsplash.com/photo-1618220179428-22790b461013?w=800&q=80&auto=format&fit=crop", title: "WEB DESIGN", description: "By the readable content of a page when its layout." },
-      { icon: "https://images.unsplash.com/photo-1586023492125-27b2c045efd7?w=800&q=80&auto=format&fit=crop", title: "BRANDING", description: "Fact that a reader will be distracted." },
-      { icon: "https://images.unsplash.com/photo-1616046229478-9901c5536a45?w=800&q=80&auto=format&fit=crop", title: "PHOTOGRAPHY", description: "The point of using Lorem Ipsum is that it has it." },
+      { icon: "data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A//www.w3.org/2000/svg%22%20viewBox%3D%220%200%2024%2024%22%20fill%3D%22currentColor%22%3E%3Cpath%20d%3D%22M12%202l2.9%206.26L22%209.27l-5%204.87%201.18%206.88L12%2017.77l-6.18%203.25L7%2014.14%202%209.27l7.1-1.01z%22/%3E%3C/svg%3E", title: "GRAPHIC DESIGN", description: "Curabitur lacinia tristique velit ut laoreet." },
+      { icon: "data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A//www.w3.org/2000/svg%22%20viewBox%3D%220%200%2024%2024%22%20fill%3D%22currentColor%22%3E%3Cpath%20d%3D%22M12%202l2.9%206.26L22%209.27l-5%204.87%201.18%206.88L12%2017.77l-6.18%203.25L7%2014.14%202%209.27l7.1-1.01z%22/%3E%3C/svg%3E", title: "WEB DESIGN", description: "By the readable content of a page when its layout." },
+      { icon: "data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A//www.w3.org/2000/svg%22%20viewBox%3D%220%200%2024%2024%22%20fill%3D%22currentColor%22%3E%3Cpath%20d%3D%22M12%202l2.9%206.26L22%209.27l-5%204.87%201.18%206.88L12%2017.77l-6.18%203.25L7%2014.14%202%209.27l7.1-1.01z%22/%3E%3C/svg%3E", title: "BRANDING", description: "Fact that a reader will be distracted." },
+      { icon: "data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A//www.w3.org/2000/svg%22%20viewBox%3D%220%200%2024%2024%22%20fill%3D%22currentColor%22%3E%3Cpath%20d%3D%22M12%202l2.9%206.26L22%209.27l-5%204.87%201.18%206.88L12%2017.77l-6.18%203.25L7%2014.14%202%209.27l7.1-1.01z%22/%3E%3C/svg%3E", title: "PHOTOGRAPHY", description: "The point of using Lorem Ipsum is that it has it." },
     ],
   }},
   { id: "decor-about-gallery", type: "interiorGalleryGrid", settings: { images: [
