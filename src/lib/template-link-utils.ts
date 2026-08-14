@@ -27,8 +27,10 @@ export function resolveStoreLink(link: unknown, storeSlug: string | null | undef
   // Already resolved store links pass through
   if (normalized && normalized.startsWith("/store/")) return normalized;
 
-  // No store slug — can't resolve, return as-is or "#"
-  if (!storeSlug) return normalized || "#";
+  // No store slug (e.g. template preview, before a real site exists) —
+  // external links still work, but internal store-relative paths (/shop,
+  // /blog, etc.) have nowhere real to resolve to, so don't navigate at all.
+  if (!storeSlug) return "#";
 
   const base = `/store/${storeSlug}`;
 
