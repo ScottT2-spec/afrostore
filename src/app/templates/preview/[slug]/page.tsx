@@ -12,8 +12,8 @@ import { TShirtsPrintsHeader, TShirtsPrintsFooter } from "@/components/storefron
 import { RetailHeader, RetailFooter } from "@/components/storefront/RetailTemplateBlocks";
 import { HealthHeader, HealthFooterFull } from "@/components/storefront/HealthTemplateBlocks";
 import { InteriorHeader, InteriorFooter, InteriorFontLoader } from "@/components/storefront/InteriorDesignTemplateBlocks";
-import { PerfumesHeader, PerfumesFooter, PerfumesFontLoader } from "@/components/storefront/PerfumesTemplateBlocks";
-import { VegetableHeader, VegetableFooter } from "@/components/storefront/VegetableStoreChrome";
+import { PerfumesHeader, PerfumesFontLoader } from "@/components/storefront/PerfumesTemplateBlocks";
+import { VegetableHeader } from "@/components/storefront/VegetableStoreChrome";
 
 // Slugs that are fully self-contained landing pages — their own blocks
 // already include everything (no separate site-chrome header/footer, same
@@ -25,7 +25,6 @@ const NO_CHROME_SLUGS = new Set(["ai", "landing-gadget", "aegis", "aegis-landing
 // would have.
 function getChrome(slug: string): { Header: React.ComponentType<any>; Footer: React.ComponentType<any>; FontLoader?: React.ComponentType } | null {
   if (NO_CHROME_SLUGS.has(slug)) return null;
-  if (slug === "perfumes") return { Header: PerfumesHeader, Footer: PerfumesFooter, FontLoader: PerfumesFontLoader };
   if (slug === "decor" || slug === "interior" || slug === "interior-design" || slug === "home-decor") {
     return { Header: InteriorHeader, Footer: InteriorFooter, FontLoader: InteriorFontLoader };
   }
@@ -56,6 +55,8 @@ export default function TemplatePreviewPage() {
   const demoStoreName = meta?.name || "Your Store";
   const demoStoreSlug = "preview";
 
+  // Vegetables reuses GROCERY_TEMPLATE_PRESET, which already includes its
+  // own groceryFooter content block — only add the header as chrome here.
   if (slug === "vegetables") {
     const navItems = [
       { label: "Home", href: `/store/${demoStoreSlug}` },
@@ -68,7 +69,20 @@ export default function TemplatePreviewPage() {
       <div className="min-h-screen">
         <VegetableHeader storeName={demoStoreName} storeSlug={demoStoreSlug} logo={null} navItems={navItems} reservationHref={`/store/${demoStoreSlug}/reservation`} />
         <RenderTemplateBlocks blocks={blocks} />
-        <VegetableFooter storeName={demoStoreName} storeSlug={demoStoreSlug} logo={null} navItems={navItems} />
+      </div>
+    );
+  }
+
+  // Perfumes' own preset already includes a `perfumesFooter` content block
+  // (rendered via RenderTemplateBlocks), so only the header needs to be
+  // added as separate chrome — adding a Footer here too would duplicate it,
+  // matching exactly how the live storefront renders this template.
+  if (slug === "perfumes") {
+    return (
+      <div className="min-h-screen">
+        <PerfumesFontLoader />
+        <PerfumesHeader storeName={demoStoreName} storeSlug={demoStoreSlug} logo={null} />
+        <RenderTemplateBlocks blocks={blocks} />
       </div>
     );
   }
