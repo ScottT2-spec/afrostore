@@ -49,6 +49,7 @@ export default function MediaLibrary({
   const [selectedItems, setSelectedItems] = useState<Set<string>>(new Set());
   const [viewMode, setViewMode] = useState<"grid" | "list">("grid");
   const [isUploading, setIsUploading] = useState(false);
+  const [uploadError, setUploadError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
   const [page, setPage] = useState(1);
   const [total, setTotal] = useState(0);
@@ -89,6 +90,8 @@ export default function MediaLibrary({
 
     const files = Array.from(e.target.files);
     setIsUploading(true);
+    setUploadError(null);
+    const failures: string[] = [];
 
     for (const file of files) {
       try {
@@ -109,10 +112,18 @@ export default function MediaLibrary({
         if (!uploadRes.ok) {
           const errJson = await uploadRes.json().catch(() => ({}));
           console.error("Media upload failed:", errJson.error || uploadRes.statusText);
+          failures.push(`${file.name}: ${errJson.error || "upload failed"}`);
         }
       } catch (err) {
         console.error("Error uploading file:", err);
+        failures.push(`${file.name}: upload failed`);
       }
+    }
+
+    if (failures.length > 0) {
+      setUploadError(failures.length === files.length
+        ? `Upload failed. ${failures[0]}`
+        : `${failures.length} of ${files.length} file(s) failed to upload. ${failures[0]}`);
     }
 
     setIsUploading(false);
@@ -161,6 +172,15 @@ export default function MediaLibrary({
             <X className="h-5 w-5 text-gray-500 dark:text-gray-400" />
           </button>
         </div>
+
+        {uploadError && (
+          <div className="px-4 py-2 bg-red-50 dark:bg-red-900/20 border-b border-red-100 dark:border-red-900/40 text-xs text-red-600 dark:text-red-400 flex items-center justify-between gap-3">
+            <span>{uploadError}</span>
+            <button type="button" onClick={() => setUploadError(null)} className="shrink-0 hover:text-red-800 dark:hover:text-red-300">
+              <X className="h-3.5 w-3.5" />
+            </button>
+          </div>
+        )}
 
         {/* Toolbar */}
         <div className="flex items-center gap-4 p-4 border-b border-gray-200 dark:border-gray-700">
