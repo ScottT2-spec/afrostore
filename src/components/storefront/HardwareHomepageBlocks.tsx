@@ -894,6 +894,34 @@ export function HardwareHomeNewsletter({
   title = "DO YOU LIKE THE THEME? SHARE WITH YOUR FRIENDS!",
   privacyText = "Will be used in accordance with our Privacy Policy",
 }: HwNewsletterProps) {
+  const ctx = useContext(ElectronicsStoreContext);
+  const [email, setEmail] = useState("");
+  const [submitted, setSubmitted] = useState(false);
+  const [sending, setSending] = useState(false);
+  const [formError, setFormError] = useState("");
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!ctx?.storeSlug) { setSubmitted(true); return; } // fallback for preview
+    setSending(true);
+    setFormError("");
+    try {
+      const res = await fetch(`/api/storefront/${ctx.storeSlug}/newsletter`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email }),
+      });
+      const json = await res.json();
+      if (json.success) {
+        setSubmitted(true);
+      } else {
+        setFormError(json.error || "Failed to subscribe. Please try again.");
+      }
+    } catch {
+      setFormError("Network error. Please try again.");
+    }
+    setSending(false);
+  };
   const css = `
     .hwnl-section { padding: 60px 0; background: ${T.bg}; text-align: center; border-top: 1px solid ${T.border}; }
     .hwnl-sub { font-family: ${T.bodyFont}; font-size: 12px; color: ${T.textLight}; text-transform: uppercase; letter-spacing: 2px; margin-bottom: 10px; }
@@ -914,10 +942,22 @@ export function HardwareHomeNewsletter({
       <div className="hwnl-section" style={ctr}>
         {subtitle && <div className="hwnl-sub">{subtitle}</div>}
         <h2 className="hwnl-title">{title}</h2>
-        <form className="hwnl-form" onSubmit={e => e.preventDefault()}>
-          <input className="hwnl-input" type="email" placeholder="Your email address" />
-          <button className="hwnl-submit" type="submit">Subscribe</button>
-        </form>
+        {submitted ? (
+          <p style={{ fontFamily: T.bodyFont, color: T.primary, fontWeight: 700, fontSize: 14 }}>You&apos;re subscribed!</p>
+        ) : (
+          <form className="hwnl-form" onSubmit={handleSubmit}>
+            <input
+              className="hwnl-input"
+              type="email"
+              required
+              placeholder="Your email address"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+            />
+            <button className="hwnl-submit" type="submit" disabled={sending}>{sending ? "..." : "Subscribe"}</button>
+          </form>
+        )}
+        {formError && <p style={{ fontFamily: T.bodyFont, color: "#e74c3c", fontSize: 12, marginTop: 8 }}>{formError}</p>}
         {privacyText && <p className="hwnl-privacy">{privacyText}</p>}
       </div>
     </div>
