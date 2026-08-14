@@ -20,7 +20,7 @@ import { api } from "@/lib/api-client";
 import { THEME_BLOCK_GROUPS, BLOCK_TYPE_TO_THEME } from "@/components/storefront/TemplateBlockRenderer";
 import {
   Type, FileText, MousePointer, Image, Star, Minus, MoveVertical,
-  Layout, Columns, Box, Grid3X3, AlignHorizontalJustify,
+  Layout, Columns, Box, Grid3X3, AlignHorizontalJustifyCenter,
   Video, Images, ChevronLeftCircle, FileInput, TextCursorInput, AlignLeft,
   ShoppingBag, ShoppingCart, Share2, UserPlus, MessageCircle,
   Clock, Megaphone, Gauge, Code2, Code, Brackets,
@@ -481,7 +481,7 @@ function getIconForWidget(type: ElementType) {
     column: Columns,
     container: Box,
     grid: Grid3X3,
-    flex: AlignHorizontalJustify,
+    flex: AlignHorizontalJustifyCenter,
     tabs: NotebookTabs,
     accordion: ChevronDown,
     video: Video,
