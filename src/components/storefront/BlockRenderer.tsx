@@ -1818,6 +1818,7 @@ export function RenderBlocks({ blocks, storeSlug, products, currency, addToCart,
         <div className="space-y-8">
           {blocks.map((block, index) => {
             const listKey = getBlockListKey(block, index, "editor-block");
+            const isHidden = (block as any).visible === false;
             const node = (
               <TemplateBlockErrorBoundary blockType={block.type} blockId={block.id} isEditor={isEditorMode}>
                 <PublicBlockRenderer block={block} isEditorMode={isEditorMode} />
@@ -1827,8 +1828,14 @@ export function RenderBlocks({ blocks, storeSlug, products, currency, addToCart,
             const scopedNode = (
               <div
                 data-editor-node-id={block.id}
-                className={`editor-node-${block.id}`}
+                className={`editor-node-${block.id} relative`}
+                style={isHidden ? { opacity: 0.35 } : undefined}
               >
+                {isHidden && (
+                  <div className="absolute top-1 left-1 z-10 pointer-events-none rounded bg-gray-900/80 px-1.5 py-0.5 text-[10px] font-medium text-white">
+                    Hidden — won&apos;t show on the live site
+                  </div>
+                )}
                 {wrappedNode}
               </div>
             );
@@ -1843,7 +1850,7 @@ export function RenderBlocks({ blocks, storeSlug, products, currency, addToCart,
     </DndContext>
   ) : (
       <div className="space-y-8">
-        {blocks.map((block, index) => {
+        {blocks.filter((block) => (block as any).visible !== false).map((block, index) => {
           const listKey = getBlockListKey(block, index, "live-block");
           const node = (
             <TemplateBlockErrorBoundary blockType={block.type} blockId={block.id} isEditor={isEditorMode}>

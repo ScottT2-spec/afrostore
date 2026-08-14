@@ -790,11 +790,16 @@ function SortableElementRenderer({
   const style = {
     transform: transform ? `translate3d(${transform.x}px, ${transform.y}px, 0)` : undefined,
     transition,
-    opacity: isDragging ? 0.5 : 1,
+    opacity: isDragging ? 0.5 : element.visible === false ? 0.35 : 1,
   };
 
   return (
-    <div ref={setNodeRef} style={style} data-editor-node-id={element.id} className={`editor-node-${element.id}`}>
+    <div ref={setNodeRef} style={style} data-editor-node-id={element.id} className={`editor-node-${element.id} relative`}>
+      {element.visible === false && (
+        <div className="absolute top-1 left-1 z-10 pointer-events-none flex items-center gap-1 rounded bg-gray-900/80 px-1.5 py-0.5 text-[10px] font-medium text-white">
+          Hidden — right-click to show
+        </div>
+      )}
       <ElementRenderer
         element={element}
         depth={depth}
@@ -810,8 +815,8 @@ function SortableElementRenderer({
         onEditingValueChange={onEditingValueChange}
         selectedElementId={selectedElementId}
         onSelectElement={onSelectElement}
-        dragAttributes={attributes}
-        dragListeners={listeners}
+        dragAttributes={element.locked ? undefined : attributes}
+        dragListeners={element.locked ? undefined : listeners}
         isDragging={isDragging}
       />
     </div>
