@@ -18,6 +18,14 @@ import { elementCategories, categoryLabels, widgetDefinitions, createElementFrom
 import { ElementCategory, ElementType } from "@/lib/visual-editor/types";
 import { api } from "@/lib/api-client";
 import { THEME_BLOCK_GROUPS, BLOCK_TYPE_TO_THEME } from "@/components/storefront/TemplateBlockRenderer";
+import {
+  Type, FileText, MousePointer, Image, Star, Minus, MoveVertical,
+  Layout, Columns, Box, Grid3X3, AlignHorizontalJustify,
+  Video, Images, ChevronLeftCircle, FileInput, TextCursorInput, AlignLeft,
+  ShoppingBag, ShoppingCart, Share2, UserPlus, MessageCircle,
+  Clock, Megaphone, Gauge, Code2, Code, Brackets,
+  Link, Layers, NotebookTabs,
+} from "lucide-react";
 
 type SidebarPanel = "widgets" | "sections" | "page-settings" | "global-settings";
 
@@ -326,6 +334,67 @@ export default function LeftSidebar() {
           </div>
         )}
 
+        {activePanel === "sections" && (
+          <div className="p-4">
+            <div className="mb-4">
+              <h3 className="text-sm font-semibold text-gray-900 dark:text-white">
+                Sections
+              </h3>
+              <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
+                Pre-built sections matching your store&apos;s theme
+                {detectedThemeKey && THEME_BLOCK_GROUPS[detectedThemeKey] ? ` (${THEME_BLOCK_GROUPS[detectedThemeKey].label})` : ""}.
+              </p>
+            </div>
+            <div className="space-y-2">
+              {Object.entries(THEME_BLOCK_GROUPS)
+                .filter(([, group]) => group.types.length > 0)
+                // Show the detected theme's own sections first, so a
+                // merchant on e.g. a Fashion store isn't stuck scrolling
+                // past 20 unrelated theme groups to find their own.
+                .sort(([keyA], [keyB]) => {
+                  if (keyA === detectedThemeKey) return -1;
+                  if (keyB === detectedThemeKey) return 1;
+                  return 0;
+                })
+                .map(([themeKey, group]) => {
+                  const isExpanded = expandedThemeGroups.has(themeKey) || (themeKey === detectedThemeKey && expandedThemeGroups.size === 0);
+                  return (
+                    <div key={themeKey} className="border border-gray-200 dark:border-gray-700 rounded-lg overflow-hidden">
+                      <button
+                        type="button"
+                        onClick={() => toggleThemeGroup(themeKey)}
+                        className="w-full flex items-center justify-between px-3 py-2.5 text-xs font-semibold text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors"
+                      >
+                        <span>{group.label}{themeKey === detectedThemeKey ? " (your theme)" : ""}</span>
+                        {isExpanded ? <ChevronDown className="h-4 w-4" /> : <ChevronRight className="h-4 w-4" />}
+                      </button>
+                      {isExpanded && (
+                        <div className="p-2 space-y-1.5 bg-gray-50 dark:bg-gray-800/50">
+                          {group.types.map((blockType) => (
+                            <button
+                              key={blockType}
+                              type="button"
+                              disabled={addingSectionType === blockType}
+                              onClick={() => handleAddSection(blockType)}
+                              className="w-full flex items-center justify-between gap-2 px-3 py-2 text-sm text-left rounded-md border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 hover:bg-blue-50 dark:hover:bg-blue-900/20 hover:border-blue-200 dark:hover:border-blue-800 transition-colors disabled:opacity-50"
+                            >
+                              <span className="truncate">{humanizeBlockType(blockType, themeKey)}</span>
+                              {addingSectionType === blockType ? (
+                                <Loader2 className="h-3.5 w-3.5 animate-spin shrink-0" />
+                              ) : (
+                                <Plus className="h-3.5 w-3.5 shrink-0 text-gray-400" />
+                              )}
+                            </button>
+                          ))}
+                        </div>
+                      )}
+                    </div>
+                  );
+                })}
+            </div>
+          </div>
+        )}
+
         {activePanel === "page-settings" && (
           <div className="p-4">
             <div className="mb-4">
@@ -396,18 +465,8 @@ export default function LeftSidebar() {
   );
 }
 
-// Helper function to get icon for widget type
+// Get icon for widget type
 function getIconForWidget(type: ElementType) {
-  // Import all icons at the top and map them properly
-  const { 
-    Type, FileText, MousePointer, Image, Star, Minus, MoveVertical, 
-    Layout, Columns, Box, Grid3X3, AlignHorizontalJustify, 
-    Video, Images, ChevronLeftCircle, FileInput, Input, AlignLeft, ChevronDown,
-    ShoppingBag, ShoppingCart, Share2, UserPlus, MessageCircle, 
-    Clock, Megaphone, ProgressBar, Code2, Code, Brackets,
-    Link, Search, Layers, Tabs, ChevronUp, ArrowUpDown
-  } = require("lucide-react");
-
   const iconMap: any = {
     heading: Type,
     text: FileText,
@@ -423,14 +482,14 @@ function getIconForWidget(type: ElementType) {
     container: Box,
     grid: Grid3X3,
     flex: AlignHorizontalJustify,
-    tabs: Tabs,
+    tabs: NotebookTabs,
     accordion: ChevronDown,
     video: Video,
     gallery: Images,
     slider: ChevronLeftCircle,
     carousel: Images,
     form: FileInput,
-    input: Input,
+    input: TextCursorInput,
     textarea: AlignLeft,
     select: ChevronDown,
     checkbox: Search,
@@ -445,13 +504,13 @@ function getIconForWidget(type: ElementType) {
     reviews: Star,
     countdown: Clock,
     cta: Megaphone,
-    "progress-bar": ProgressBar,
+    "progress-bar": Gauge,
     popup: Layers,
     embed: Code2,
     html: Code,
     shortcode: Brackets,
     widget: Box,
   };
-  
+
   return iconMap[type] || LayoutGrid;
 }
