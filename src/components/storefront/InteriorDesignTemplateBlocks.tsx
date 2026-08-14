@@ -1651,9 +1651,92 @@ export function InteriorFaqAccordion({ subtitle, title, items = [] }: InteriorFa
 /* ═══════════════════════════════════════════════════════════════
    INTERIOR CONTACT FORM
    ═══════════════════════════════════════════════════════════════ */
-export interface InteriorContactFormProps { subtitle?: string; title?: string; fields?: string[]; }
-export function InteriorContactForm({ subtitle, title, fields = ["name", "email", "phone", "company", "message"] }: InteriorContactFormProps) {
+export interface InteriorContactFormProps { subtitle?: string; title?: string; fields?: string[]; storeSlug?: string; }
+export function InteriorContactForm({ subtitle, title, fields = ["name", "email", "phone", "company", "message"], storeSlug }: InteriorContactFormProps) {
+  const storeCtx = useContext(InteriorStoreContext);
+  const resolvedSlug =
+    storeSlug ||
+    storeCtx?.storeSlug ||
+    (typeof window !== "undefined" ? window.location.pathname.split("/")[2] : "");
+
   const labels: Record<string, string> = { name: "Your Name", email: "Your Email", phone: "Phone Number", company: "Company", message: "Your Message" };
-  const css = `.icf-section{padding:60px 15px}.icf-header{margin-bottom:30px}.icf-sub{color:${TOKENS.primaryColor};text-transform:uppercase;font-weight:600;font-size:12px;font-family:${TOKENS.bodyFont};margin-bottom:8px;letter-spacing:2px}.icf-title{font-family:${TOKENS.titleFont};font-weight:600;font-size:28px;text-transform:uppercase;color:${TOKENS.titleColor};margin:0;line-height:1.3}.icf-form{display:grid;grid-template-columns:1fr 1fr;gap:20px}.icf-full{grid-column:1/-1}.icf-input{width:100%;padding:14px 16px;font-family:${TOKENS.bodyFont};font-size:14px;border:1px solid #e0e0e0;background:#fff;color:${TOKENS.titleColor};outline:none;transition:border-color 0.3s;box-sizing:border-box}.icf-input:focus{border-color:${TOKENS.titleColor}}.icf-ta{min-height:150px;resize:vertical}.icf-submit{display:inline-block;padding:14px 32px;background:${TOKENS.titleColor};color:#fff;font-family:${TOKENS.bodyFont};font-size:13px;font-weight:700;text-transform:uppercase;border:none;cursor:pointer;transition:opacity 0.3s}.icf-submit:hover{opacity:0.85}@media(max-width:767px){.icf-form{grid-template-columns:1fr}}`;
-  return (<section className="icf-section"><style dangerouslySetInnerHTML={{ __html: css }} /><div style={{ maxWidth: TOKENS.containerWidth, margin: "0 auto", padding: "0 15px" }}>{(subtitle || title) && <div className="icf-header">{subtitle && <div className="icf-sub">{subtitle}</div>}{title && <h3 className="icf-title">{title}</h3>}</div>}<form className="icf-form" onSubmit={(e) => e.preventDefault()}>{fields.map((f) => f === "message" ? <textarea key={f} className="icf-input icf-ta icf-full" placeholder={labels[f] || f} /> : <input key={f} type={f === "email" ? "email" : "text"} className="icf-input" placeholder={labels[f] || f} />)}<div className="icf-full"><button type="submit" className="icf-submit">Send Message</button></div></form></div></section>);
+  const [form, setForm] = useState<Record<string, string>>({ name: "", email: "", phone: "", company: "", message: "" });
+  const [status, setStatus] = useState<"idle" | "sending" | "success" | "error">("idle");
+  const [errorMsg, setErrorMsg] = useState("");
+
+  const update = (field: string, value: string) => setForm((prev) => ({ ...prev, [field]: value }));
+
+  const submit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!resolvedSlug) {
+      setStatus("error");
+      setErrorMsg("Unable to determine store — please try again from the live site.");
+      return;
+    }
+    setStatus("sending");
+    setErrorMsg("");
+
+    // ContactMessage only has name/email/subject/message columns — fold
+    // phone/company into the message body so nothing typed is silently lost.
+    const extras = [form.phone && `Phone: ${form.phone}`, form.company && `Company: ${form.company}`].filter(Boolean);
+    const fullMessage = extras.length ? `${extras.join(" | ")}\n\n${form.message}` : form.message;
+
+    try {
+      const res = await fetch(`/api/storefront/${resolvedSlug}/contact`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ name: form.name, email: form.email, message: fullMessage }),
+      });
+      const json = await res.json();
+      if (json.success) {
+        setStatus("success");
+        setForm({ name: "", email: "", phone: "", company: "", message: "" });
+      } else {
+        setStatus("error");
+        setErrorMsg(json.error || "Failed to send. Please try again.");
+      }
+    } catch {
+      setStatus("error");
+      setErrorMsg("Network error. Please try again.");
+    }
+  };
+
+  const css = `.icf-section{padding:60px 15px}.icf-header{margin-bottom:30px}.icf-sub{color:${TOKENS.primaryColor};text-transform:uppercase;font-weight:600;font-size:12px;font-family:${TOKENS.bodyFont};margin-bottom:8px;letter-spacing:2px}.icf-title{font-family:${TOKENS.titleFont};font-weight:600;font-size:28px;text-transform:uppercase;color:${TOKENS.titleColor};margin:0;line-height:1.3}.icf-form{display:grid;grid-template-columns:1fr 1fr;gap:20px}.icf-full{grid-column:1/-1}.icf-input{width:100%;padding:14px 16px;font-family:${TOKENS.bodyFont};font-size:14px;border:1px solid #e0e0e0;background:#fff;color:${TOKENS.titleColor};outline:none;transition:border-color 0.3s;box-sizing:border-box}.icf-input:focus{border-color:${TOKENS.titleColor}}.icf-ta{min-height:150px;resize:vertical}.icf-submit{display:inline-block;padding:14px 32px;background:${TOKENS.titleColor};color:#fff;font-family:${TOKENS.bodyFont};font-size:13px;font-weight:700;text-transform:uppercase;border:none;cursor:pointer;transition:opacity 0.3s}.icf-submit:hover{opacity:0.85}.icf-submit:disabled{opacity:0.6;cursor:not-allowed}.icf-msg{padding:14px 16px;margin-bottom:20px;font-family:${TOKENS.bodyFont};font-size:14px;border-radius:2px}.icf-msg-error{background:#fdecea;color:#b3261e}.icf-msg-success{padding:40px 20px;text-align:center}@media(max-width:767px){.icf-form{grid-template-columns:1fr}}`;
+
+  if (status === "success") {
+    return (
+      <section className="icf-section">
+        <style dangerouslySetInnerHTML={{ __html: css }} />
+        <div style={{ maxWidth: TOKENS.containerWidth, margin: "0 auto", padding: "0 15px" }}>
+          <div className="icf-msg icf-msg-success">
+            <p style={{ fontFamily: TOKENS.titleFont, fontSize: 20, marginBottom: 8 }}>Message sent!</p>
+            <p style={{ fontFamily: TOKENS.bodyFont, color: "#777", marginBottom: 16 }}>We&apos;ll get back to you soon.</p>
+            <button type="button" onClick={() => setStatus("idle")} className="icf-submit">Send another message</button>
+          </div>
+        </div>
+      </section>
+    );
+  }
+
+  return (
+    <section className="icf-section">
+      <style dangerouslySetInnerHTML={{ __html: css }} />
+      <div style={{ maxWidth: TOKENS.containerWidth, margin: "0 auto", padding: "0 15px" }}>
+        {(subtitle || title) && <div className="icf-header">{subtitle && <div className="icf-sub">{subtitle}</div>}{title && <h3 className="icf-title">{title}</h3>}</div>}
+        {status === "error" && <div className="icf-msg icf-msg-error">{errorMsg}</div>}
+        <form className="icf-form" onSubmit={submit}>
+          {fields.map((f) =>
+            f === "message" ? (
+              <textarea key={f} required className="icf-input icf-ta icf-full" placeholder={labels[f] || f} value={form[f] || ""} onChange={(e) => update(f, e.target.value)} />
+            ) : (
+              <input key={f} type={f === "email" ? "email" : "text"} required={f === "name" || f === "email"} className="icf-input" placeholder={labels[f] || f} value={form[f] || ""} onChange={(e) => update(f, e.target.value)} />
+            )
+          )}
+          <div className="icf-full">
+            <button type="submit" className="icf-submit" disabled={status === "sending"}>{status === "sending" ? "Sending..." : "Send Message"}</button>
+          </div>
+        </form>
+      </div>
+    </section>
+  );
 }

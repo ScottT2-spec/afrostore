@@ -68,14 +68,14 @@ export const INTERIOR_DECOR_PRESET: EditorNode[] = [
     id: "interior-categories",
     type: "interiorCategoryGrid",
     settings: {
-      sectionTitle: "TOP CATEGORIES",
+      sectionTitle: "SHOP BY CATEGORY",
       columns: 5,
       categories: [
-        { name: "Home Decor", icon: "data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A//www.w3.org/2000/svg%22%20viewBox%3D%220%200%2024%2024%22%20fill%3D%22currentColor%22%3E%3Cpath%20d%3D%22M12%202l2.9%206.26L22%209.27l-5%204.87%201.18%206.88L12%2017.77l-6.18%203.25L7%2014.14%202%209.27l7.1-1.01z%22/%3E%3C/svg%3E", image: "", link: "/shop" },
-        { name: "Celing Decor", icon: "data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A//www.w3.org/2000/svg%22%20viewBox%3D%220%200%2024%2024%22%20fill%3D%22currentColor%22%3E%3Cpath%20d%3D%22M12%202l2.9%206.26L22%209.27l-5%204.87%201.18%206.88L12%2017.77l-6.18%203.25L7%2014.14%202%209.27l7.1-1.01z%22/%3E%3C/svg%3E", image: "", link: "/shop" },
-        { name: "Wall Decor", icon: "data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A//www.w3.org/2000/svg%22%20viewBox%3D%220%200%2024%2024%22%20fill%3D%22currentColor%22%3E%3Cpath%20d%3D%22M12%202l2.9%206.26L22%209.27l-5%204.87%201.18%206.88L12%2017.77l-6.18%203.25L7%2014.14%202%209.27l7.1-1.01z%22/%3E%3C/svg%3E", image: "", link: "/shop" },
-        { name: "Vase Decor", icon: "data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A//www.w3.org/2000/svg%22%20viewBox%3D%220%200%2024%2024%22%20fill%3D%22currentColor%22%3E%3Cpath%20d%3D%22M12%202l2.9%206.26L22%209.27l-5%204.87%201.18%206.88L12%2017.77l-6.18%203.25L7%2014.14%202%209.27l7.1-1.01z%22/%3E%3C/svg%3E", image: "", link: "/shop" },
-        { name: "Holiday Decor", icon: "data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A//www.w3.org/2000/svg%22%20viewBox%3D%220%200%2024%2024%22%20fill%3D%22currentColor%22%3E%3Cpath%20d%3D%22M12%202l2.9%206.26L22%209.27l-5%204.87%201.18%206.88L12%2017.77l-6.18%203.25L7%2014.14%202%209.27l7.1-1.01z%22/%3E%3C/svg%3E", image: "", link: "/shop" },
+        { name: "Lighting", icon: "💡", image: "", link: "/shop?category=lighting" },
+        { name: "Furniture", icon: "🛋️", image: "", link: "/shop?category=furniture" },
+        { name: "Decor", icon: "🏺", image: "", link: "/shop?category=decor" },
+        { name: "Clocks", icon: "🕐", image: "", link: "/shop?category=clocks" },
+        { name: "Kitchen", icon: "🍽️", image: "", link: "/shop?category=kitchen" },
       ],
     },
   },
@@ -124,8 +124,8 @@ export const INTERIOR_DECOR_PRESET: EditorNode[] = [
     type: "interiorInfoBoxes",
     settings: {
       items: [
-        { icon: "🏠", title: "Home Modern Decoration Decals.", description: "But I must explain to you how all this mistaken idea of denouncing pleasure and praising pain was born." },
-        { icon: "✨", title: "New Decoration Solutions for Home.", description: "Supported neglected met she therefore unwilling discovery remainder." },
+        { icon: "🏠", title: "Thoughtfully Made for Modern Homes.", description: "Every piece is chosen for quality craftsmanship and everyday comfort." },
+        { icon: "✨", title: "New Arrivals Every Month.", description: "Fresh decor and furniture pieces added regularly — there's always something new to discover." },
       ],
     },
   },
@@ -142,8 +142,8 @@ export const INTERIOR_DECOR_PRESET: EditorNode[] = [
     id: "interior-cta",
     type: "interiorCta",
     settings: {
-      title: "Summer 25% discount on all last year\u2019s products home decor",
-      buttonText: "To Shop",
+      title: "New season, new pieces for your home",
+      buttonText: "Shop Now",
       buttonLink: "/shop",
       backgroundColor: "#f5f0eb",
     },
@@ -155,18 +155,14 @@ export const INTERIOR_DECOR_PRESET: EditorNode[] = [
       logoAlt: "Store Logo",
       description: "Discover a curated collection of modern furniture designed to bring comfort and elegance into your home.",
       contact: {
-        address: "451 Wall Street, UK, London",
-        phone: "(064) 332-1233",
-        fax: "(099) 453-1357",
+        address: "Update this with your store's real address",
+        phone: "Update with your phone number",
       },
       recentPosts: [],
       linkColumns: [
-        { title: "OUR STORES", links: [{ label: "New York", url: "#" }, { label: "London SF", url: "#" }, { label: "Edinburgh", url: "#" }, { label: "Los Angeles", url: "#" }, { label: "Chicago", url: "#" }, { label: "Las Vegas", url: "#" }] },
-        { title: "USEFUL LINKS", links: [{ label: "Privacy Policy", url: "#" }, { label: "Returns", url: "#" }, { label: "Terms & Conditions", url: "#" }, { label: "Contact Us", url: "#" }, { label: "Latest News", url: "#" }, { label: "Our Sitemap", url: "#" }] },
-        { title: "FOOTER MENU", links: [{ label: "Instagram profile", url: "#" }, { label: "New Collection", url: "#" }, { label: "Contact Us", url: "#" }, { label: "Latest News", url: "#" }, { label: "Our Sitemap", url: "#" }] },
+        { title: "SHOP", links: [{ label: "All Products", url: "/shop" }, { label: "About Us", url: "/about" }, { label: "Contact Us", url: "/contact" }, { label: "Blog", url: "/blog" }] },
       ],
       copyrightText: "",
-      paymentIconsUrl: "https://images.unsplash.com/photo-1586023492125-27b2c045efd7?w=800&q=80&auto=format&fit=crop",
     },
   },
 ];
@@ -184,7 +180,7 @@ export const INTERIOR_RETAIL_PRESET: EditorNode[] = [
       subheading: "From timeless pieces to modern accents, create a home that celebrates your unique story.",
       ctaText: "SHOP NOW",
       ctaLink: "/shop",
-      image: "https://websitedemos.net/home-garden-decor-02/wp-content/uploads/sites/1034/2025/11/heroimage-1.png",
+      image: "https://images.unsplash.com/photo-1585320806297-9794b3e4eeae?w=1200&q=80&auto=format&fit=crop",
       exploreBtns: [
         { label: "Explore Indoor", link: "/shop?category=home-decor" },
         { label: "Explore Outdoor", link: "/shop?category=garden-decor" },
