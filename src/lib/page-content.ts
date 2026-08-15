@@ -71,11 +71,27 @@ function getEditorNodeChildren(node: EditorNode): EditorNode[] {
 }
 
 function editorNodeToBlock(node: EditorNode): BuilderBlock {
+  // The editor writes to two different places depending on which UI path
+  // made the edit: the 5 hand-built content editors (heading/paragraph/
+  // text/button/image) write to both node.settings and node.content
+  // together, but the generic key/value editor used for every other
+  // widget type (icon, cta, social-share, etc. — anything without a
+  // purpose-built editor) writes only to node.content, or to
+  // node.content.props for a few fields. editorNodeToBlock previously
+  // only read node.settings, so edits made through the generic editor —
+  // the only editing path available for the majority of widget types —
+  // never made it into what actually renders live.
+  const anyNode = node as any;
+  const merged = {
+    ...(node.settings || {}),
+    ...(anyNode.content || {}),
+    ...(anyNode.content?.props || {}),
+  };
   return {
     id: node.id,
     type: node.type,
-    props: { ...node.settings },
-    styleOverrides: { ...node.settings },
+    props: merged,
+    styleOverrides: merged,
     elements: getEditorNodeChildren(node).map(editorNodeToBlock),
   };
 }

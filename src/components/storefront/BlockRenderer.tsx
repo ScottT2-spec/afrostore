@@ -1,5 +1,6 @@
 "use client";
-import { ArrowRight, ChevronDown, ChevronUp, Loader2, GripVertical } from "lucide-react";
+import { ArrowRight, ChevronDown, ChevronUp, Loader2, GripVertical, Facebook, Twitter, Instagram, Linkedin, Youtube, Share2, icons as lucideIcons } from "lucide-react";
+import { sanitizeHtml } from "@/lib/sanitize";
 import { Award, CheckCircle2, Clock, CreditCard, Eye, Globe, Headphones, Heart, Lock, Mail, MapPin, MessageCircle, Package, Palette, Phone, Play, RefreshCw, Rocket, Send, Shield, ShoppingBag, ShoppingCart, Sparkles, Star, Target, ThumbsUp, TrendingUp, Truck, Users, Zap } from "@/components/icons/FilledIcons";
 
 import { useState, useEffect, useMemo, useRef, createContext, useContext } from "react";
@@ -191,7 +192,7 @@ function ButtonBlock({ props }: { props: Record<string, unknown> }) {
     <AnimateIn>
       <div style={{ textAlign: (props.align as React.CSSProperties["textAlign"]) || "left" }}>
         <a
-          href={(props.href as string) || "#"}
+          href={(props.href as string) || (props.link as string) || "#"}
           className={`inline-flex items-center justify-center gap-2 rounded-2xl font-bold transition-all duration-300 ${variantStyles[variant] || variantStyles.primary} ${sizeStyles[size] || sizeStyles.md}`}
         >
           {(props.text as string) || "Button"}
@@ -1618,6 +1619,180 @@ function HtmlEmbedBlock({ props }: { props: Record<string, unknown> }) {
 }
 
 /* ═══════════════════════════════════════════════════════════════
+   NEWLY WIRED WIDGET TYPES — previously had zero live renderer
+   ═══════════════════════════════════════════════════════════════ */
+
+/* ── Icon ────────────────────────────────────────────────────── */
+function IconBlock({ props }: { props: Record<string, unknown> }) {
+  const rawName = ((props.name as string) || "star").trim();
+  const pascalName = rawName.charAt(0).toUpperCase() + rawName.slice(1).replace(/-([a-z])/g, (_, c) => c.toUpperCase());
+  const LucideIcon = (lucideIcons as Record<string, React.ComponentType<any>>)[pascalName] || Star;
+  const size = Number(props.size) || 24;
+  return (
+    <AnimateIn>
+      <LucideIcon size={size} color={(props.color as string) || "#171717"} />
+    </AnimateIn>
+  );
+}
+
+/* ── Progress Bar ────────────────────────────────────────────── */
+function ProgressBarBlock({ props }: { props: Record<string, unknown> }) {
+  const value = Math.max(0, Math.min(100, Number(props.value) || 0));
+  const height = `${Number(props.height) || 8}px`;
+  const color = (props.color as string) || "#2563eb";
+  return (
+    <AnimateIn>
+      <div className="w-full">
+        {props.showLabel !== false && <div className="text-xs font-medium text-surface-500 mb-1.5">{value}%</div>}
+        <div className="w-full rounded-full bg-surface-100" style={{ height }}>
+          <div className="rounded-full transition-all" style={{ width: `${value}%`, height, backgroundColor: color }} />
+        </div>
+      </div>
+    </AnimateIn>
+  );
+}
+
+/* ── Call to Action ──────────────────────────────────────────── */
+function CtaBlock({ props }: { props: Record<string, unknown> }) {
+  return (
+    <AnimateIn>
+      <div
+        className="rounded-2xl px-6 py-12 sm:py-16 text-center"
+        style={{ backgroundColor: (props.backgroundColor as string) || "#2563eb", color: (props.textColor as string) || "#ffffff" }}
+      >
+        <h2 className="text-2xl sm:text-3xl font-display font-extrabold mb-3">{(props.heading as string) || "Take Action Now"}</h2>
+        {props.description ? <p className="opacity-90 max-w-xl mx-auto mb-6">{props.description as string}</p> : null}
+        <a
+          href={(props.buttonLink as string) || "#"}
+          className="inline-flex items-center gap-2 rounded-xl bg-white px-6 py-3 font-bold"
+          style={{ color: (props.backgroundColor as string) || "#2563eb" }}
+        >
+          {(props.buttonText as string) || "Get Started"} <ArrowRight className="h-4 w-4" />
+        </a>
+      </div>
+    </AnimateIn>
+  );
+}
+
+/* ── Social Share ────────────────────────────────────────────── */
+function SocialShareBlock({ props }: { props: Record<string, unknown> }) {
+  const platforms = (Array.isArray(props.platforms) ? props.platforms : ["facebook", "twitter", "linkedin", "whatsapp"]) as string[];
+  const iconMap: Record<string, React.ComponentType<any>> = { facebook: Facebook, twitter: Twitter, linkedin: Linkedin, whatsapp: Share2, instagram: Instagram, youtube: Youtube };
+  return (
+    <AnimateIn>
+      <div className="flex items-center gap-3">
+        {platforms.map((p) => {
+          const Icon = iconMap[p] || Share2;
+          return (
+            <span key={p} className="h-9 w-9 rounded-full bg-surface-100 flex items-center justify-center text-surface-700">
+              <Icon className="h-4 w-4" />
+            </span>
+          );
+        })}
+      </div>
+    </AnimateIn>
+  );
+}
+
+/* ── Social Follow ───────────────────────────────────────────── */
+function SocialFollowBlock({ props }: { props: Record<string, unknown> }) {
+  const platforms = (Array.isArray(props.platforms) ? props.platforms : []) as Array<{ name: string; url: string }>;
+  const iconMap: Record<string, React.ComponentType<any>> = { facebook: Facebook, twitter: Twitter, linkedin: Linkedin, instagram: Instagram, youtube: Youtube };
+  return (
+    <AnimateIn>
+      <div className="flex items-center gap-3">
+        {platforms.filter((p) => p?.url).map((p) => {
+          const Icon = iconMap[p.name] || Share2;
+          return (
+            <a key={p.name} href={p.url} target="_blank" rel="noopener noreferrer" className="h-9 w-9 rounded-full bg-surface-100 hover:bg-surface-200 flex items-center justify-center text-surface-700">
+              <Icon className="h-4 w-4" />
+            </a>
+          );
+        })}
+      </div>
+    </AnimateIn>
+  );
+}
+
+/* ── HTML / Embed (raw code widgets — sanitized) ─────────────── */
+function RawHtmlBlock({ props }: { props: Record<string, unknown> }) {
+  const code = (props.code as string) || "";
+  if (!code) return null;
+  return <div dangerouslySetInnerHTML={{ __html: sanitizeHtml(code) }} />;
+}
+
+/* ── Simple Form (input/textarea/select children render inline) ─ */
+function FormFieldBlock({ block }: { block: BuilderBlock }) {
+  const p = block.props || {};
+  if (block.type === "textarea") {
+    return (
+      <div className="mb-4">
+        {p.label ? <label className="block text-sm font-medium text-surface-700 mb-1.5">{p.label as string}</label> : null}
+        <textarea placeholder={(p.placeholder as string) || ""} rows={Number(p.rows) || 4} required={Boolean(p.required)} className="w-full rounded-xl border border-surface-200 px-3.5 py-2.5 text-sm" />
+      </div>
+    );
+  }
+  if (block.type === "select") {
+    const options = (Array.isArray(p.options) ? p.options : []) as Array<{ label: string; value: string }>;
+    return (
+      <div className="mb-4">
+        {p.label ? <label className="block text-sm font-medium text-surface-700 mb-1.5">{p.label as string}</label> : null}
+        <select required={Boolean(p.required)} className="w-full rounded-xl border border-surface-200 px-3.5 py-2.5 text-sm">
+          {options.map((o) => <option key={o.value} value={o.value}>{o.label}</option>)}
+        </select>
+      </div>
+    );
+  }
+  return (
+    <div className="mb-4">
+      {p.label ? <label className="block text-sm font-medium text-surface-700 mb-1.5">{p.label as string}</label> : null}
+      <input type={(p.type as string) || "text"} placeholder={(p.placeholder as string) || ""} required={Boolean(p.required)} className="w-full rounded-xl border border-surface-200 px-3.5 py-2.5 text-sm" />
+    </div>
+  );
+}
+
+function FormBlock({ block }: { block: BuilderBlock }) {
+  const p = block.props || {};
+  const children = block.elements || [];
+  return (
+    <AnimateIn>
+      <form className="max-w-lg mx-auto" onSubmit={(e) => e.preventDefault()}>
+        {children.map((child) =>
+          ["input", "textarea", "select"].includes(child.type)
+            ? <FormFieldBlock key={child.id} block={child} />
+            : <PublicBlockRenderer key={child.id} block={child} />
+        )}
+        <button type="submit" className="w-full rounded-xl bg-brand-600 text-white py-3 font-bold">
+          {(p.submitText as string) || "Submit"}
+        </button>
+      </form>
+    </AnimateIn>
+  );
+}
+
+/* ── Cart summary (static preview — real cart lives in the header/drawer) ── */
+function CartPreviewBlock({ props }: { props: Record<string, unknown> }) {
+  return (
+    <AnimateIn>
+      <div className="rounded-2xl border border-surface-200 p-6 flex items-center gap-3 text-surface-500">
+        <ShoppingCart className="h-5 w-5" />
+        <span className="text-sm">Your cart is available from the header icon at checkout.</span>
+      </div>
+    </AnimateIn>
+  );
+}
+
+function StandaloneInputBlock({ props }: { props: Record<string, unknown> }) {
+  return <FormFieldBlock block={{ id: "standalone", type: "input", props }} />;
+}
+function StandaloneTextareaBlock({ props }: { props: Record<string, unknown> }) {
+  return <FormFieldBlock block={{ id: "standalone", type: "textarea", props }} />;
+}
+function StandaloneSelectBlock({ props }: { props: Record<string, unknown> }) {
+  return <FormFieldBlock block={{ id: "standalone", type: "select", props }} />;
+}
+
+/* ═══════════════════════════════════════════════════════════════
    RENDERER MAP
    ═══════════════════════════════════════════════════════════════ */
 
@@ -1674,6 +1849,24 @@ const renderers: Record<string, React.FC<{ props: Record<string, unknown> }>> = 
   imageBrands: ImageBrandsBlock,
   linkCards: LinkCardsBlock,
   htmlEmbed: HtmlEmbedBlock,
+  // Newly wired widget types (previously had no live renderer at all)
+  icon: IconBlock,
+  "progress-bar": ProgressBarBlock,
+  cta: CtaBlock,
+  "social-share": SocialShareBlock,
+  "social-follow": SocialFollowBlock,
+  html: RawHtmlBlock,
+  embed: RawHtmlBlock,
+  shortcode: RawHtmlBlock,
+  paragraph: TextBlock,
+  products: ProductGridBlock,
+  product: ProductGridBlock,
+  reviews: TestimonialsBlock,
+  cart: CartPreviewBlock,
+  slider: GalleryBlock,
+  input: StandaloneInputBlock,
+  textarea: StandaloneTextareaBlock,
+  select: StandaloneSelectBlock,
 };
 
 /* ─── STORE CONTEXT (for blocks that need store info) ─────── */
@@ -1809,6 +2002,10 @@ export function PublicBlockRenderer({ block }: { block: BuilderBlock; isEditorMo
         ))}
       </div>
     );
+  }
+
+  if (block.type === "form") {
+    return <FormBlock block={block} />;
   }
 
   const Renderer = renderers[block.type];
