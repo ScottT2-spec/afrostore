@@ -66,6 +66,32 @@ export const T_SHIRTS_PRINTS_PRESET: EditorNode[] = [
       sectionTitle: {
         title: "Latest Articles",
       },
+      posts: [
+        {
+          image: "https://images.unsplash.com/photo-1521572163474-6864f9cf17ab?w=500&q=80&auto=format&fit=crop",
+          title: "How to Design a T-Shirt Print That Actually Sells",
+          excerpt: "From bold typography to minimalist line art — here's what makes a print stand out and get worn, not shelved.",
+          date: { day: "12", month: "Oct" },
+          categories: ["Design Tips"],
+          author: { name: "Admin" },
+        },
+        {
+          image: "https://images.unsplash.com/photo-1503341504253-dff4815485f1?w=500&q=80&auto=format&fit=crop",
+          title: "Choosing the Right Fabric for Custom Prints",
+          excerpt: "Cotton, blends, and everything in between — how fabric choice affects print quality, comfort, and durability.",
+          date: { day: "8", month: "Oct" },
+          categories: ["Guides"],
+          author: { name: "Admin" },
+        },
+        {
+          image: "https://images.unsplash.com/photo-1576566588028-4147f3842f27?w=500&q=80&auto=format&fit=crop",
+          title: "5 Streetwear Trends Shaping Custom Apparel This Year",
+          excerpt: "Oversized fits, retro graphics, and bold color-blocking — what's trending in custom tees right now.",
+          date: { day: "3", month: "Oct" },
+          categories: ["Trends"],
+          author: { name: "Admin" },
+        },
+      ],
     },
   },
 ];

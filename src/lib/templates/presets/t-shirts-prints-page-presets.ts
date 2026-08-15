@@ -282,7 +282,10 @@ export const TSHIRTS_PRINTS_BLOG_PAGE_BLOCKS: EditorNode[] = [
     id: "tshirt-blog-cta",
     type: "tshirtImageCallout",
     settings: {
-      images: [],
+      images: [
+        "https://images.unsplash.com/photo-1503341504253-dff4815485f1?w=600&q=80&auto=format&fit=crop",
+        "https://images.unsplash.com/photo-1521572163474-6864f9cf17ab?w=600&q=80&auto=format&fit=crop",
+      ],
       calloutTitle: "You can create custom design",
       calloutDescription: "The price of a T-shirt with an individual design depends on the circulation, the number of images on one product, their size, and the printing method. brand, material and order urgency.",
       buttonText: "Create design",
