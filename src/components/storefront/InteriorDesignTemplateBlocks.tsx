@@ -30,7 +30,6 @@ const TOKENS = {
   bodyFont: "'Cabin', Arial, Helvetica, sans-serif",
 };
 
-const IMG = "https://prokip.xtemos.com/wp-content/uploads";
 
 /* ─── FONT LOADER ───────────────────────────────────────────── */
 export function InteriorFontLoader() {
@@ -121,8 +120,7 @@ export function InteriorHeroSlider({ slides = [], autoplaySpeed = 5000 }: Interi
       description: "Explore our curated collection of modern lighting for your home.",
       buttonText: "Shop Now",
       buttonLink: "#",
-      image: `${IMG}/2018/08/slide-1.jpg`,
-      sideImage: `${IMG}/2018/10/side-product-cutdown-opt.jpg`,
+      image: "https://images.unsplash.com/photo-1543198126-05c19cba69a2?w=800&q=80&auto=format&fit=crop",
     },
     {
       subtitle: "SALE PRODUCTS",
@@ -130,8 +128,7 @@ export function InteriorHeroSlider({ slides = [], autoplaySpeed = 5000 }: Interi
       description: "Elegant floor lamps that blend style with functionality.",
       buttonText: "Shop Now",
       buttonLink: "#",
-      image: `${IMG}/2018/08/slide-2.jpg`,
-      sideImage: `${IMG}/2018/10/side-product-cutdown-2-opt.jpg`,
+      image: "https://images.unsplash.com/photo-1540932239986-30128078f3c5?w=800&q=80&auto=format&fit=crop",
     },
     {
       subtitle: "MOST POPULAR",
@@ -140,7 +137,7 @@ export function InteriorHeroSlider({ slides = [], autoplaySpeed = 5000 }: Interi
       description: "Discover our most popular interior design pieces.",
       buttonText: "Shop Now",
       buttonLink: "#",
-      image: `${IMG}/2018/08/slide-3.jpg`,
+      image: "https://images.unsplash.com/photo-1524758631624-e2822e304c36?w=800&q=80&auto=format&fit=crop",
     },
   ];
 
@@ -245,12 +242,12 @@ export interface InteriorCategoryGridProps {
 
 export function InteriorCategoryGrid({ sectionTitle = "TOP CATEGORIES", categories = [], columns = 6 }: InteriorCategoryGridProps) {
   const defaultCategories: InteriorCategory[] = [
-    { name: "Lighting", image: `${IMG}/2018/10/retail-category-1-opt.jpg`, icon: `${IMG}/2025/05/wd-light-bulb.svg` },
-    { name: "Clocks", image: `${IMG}/2018/10/retail-category-2-opt.jpg`, icon: `${IMG}/2025/05/wd-clock.svg` },
-    { name: "Furniture", image: `${IMG}/2018/10/retail-category-3-opt.jpg`, icon: `${IMG}/2025/05/wd-chair.svg` },
-    { name: "Accessories", image: `${IMG}/2018/10/retail-category-4-opt.jpg`, icon: `${IMG}/2025/05/wd-hand-bag.svg` },
-    { name: "Cooking", image: `${IMG}/2018/10/retail-category-5-opt.jpg`, icon: `${IMG}/2025/05/wd-knives.svg` },
-    { name: "Toys", image: `${IMG}/2018/10/retail-category-6-opt.jpg`, icon: `${IMG}/2025/05/wd-rocking-horse.svg` },
+    { name: "Lighting", image: "https://images.unsplash.com/photo-1543198126-05c19cba69a2?w=400&q=80&auto=format&fit=crop", icon: "data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A//www.w3.org/2000/svg%22%20viewBox%3D%220%200%2024%2024%22%20fill%3D%22none%22%20stroke%3D%22%231a1a2e%22%20stroke-width%3D%221.5%22%3E%3Cpath%20d%3D%22M9%2018h6M10%2022h4M12%202a7%207%200%2000-4%2012.7V17h8v-2.3A7%207%200%200012%202z%22/%3E%3C/svg%3E" },
+    { name: "Clocks", image: "https://images.unsplash.com/photo-1563861826100-9cb868fdbe1c?w=400&q=80&auto=format&fit=crop", icon: "data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A//www.w3.org/2000/svg%22%20viewBox%3D%220%200%2024%2024%22%20fill%3D%22none%22%20stroke%3D%22%231a1a2e%22%20stroke-width%3D%221.5%22%3E%3Ccircle%20cx%3D%2212%22%20cy%3D%2212%22%20r%3D%229%22/%3E%3Cpath%20d%3D%22M12%207v5l3%203%22/%3E%3C/svg%3E" },
+    { name: "Furniture", image: "https://images.unsplash.com/photo-1555041469-a586c61ea9bc?w=400&q=80&auto=format&fit=crop", icon: "data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A//www.w3.org/2000/svg%22%20viewBox%3D%220%200%2024%2024%22%20fill%3D%22none%22%20stroke%3D%22%231a1a2e%22%20stroke-width%3D%221.5%22%3E%3Cpath%20d%3D%22M6%203v11a2%202%200%20002%202h8a2%202%200%20002-2V3M6%2010h12M8%2016v5M16%2016v5%22/%3E%3C/svg%3E" },
+    { name: "Accessories", image: "https://images.unsplash.com/photo-1591561954557-26941169b49e?w=400&q=80&auto=format&fit=crop", icon: "data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A//www.w3.org/2000/svg%22%20viewBox%3D%220%200%2024%2024%22%20fill%3D%22none%22%20stroke%3D%22%231a1a2e%22%20stroke-width%3D%221.5%22%3E%3Crect%20x%3D%224%22%20y%3D%228%22%20width%3D%2216%22%20height%3D%2212%22%20rx%3D%222%22/%3E%3Cpath%20d%3D%22M8%208V6a4%204%200%20018%200v2%22/%3E%3C/svg%3E" },
+    { name: "Cooking", image: "https://images.unsplash.com/photo-1556909114-f6e7ad7d3136?w=400&q=80&auto=format&fit=crop", icon: "data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A//www.w3.org/2000/svg%22%20viewBox%3D%220%200%2024%2024%22%20fill%3D%22none%22%20stroke%3D%22%231a1a2e%22%20stroke-width%3D%221.5%22%3E%3Cpath%20d%3D%22M6%203l12%2012M4%2021l6-2%208-8-4-4-8%208-2%206z%22/%3E%3C/svg%3E" },
+    { name: "Toys", image: "https://images.unsplash.com/photo-1558877385-81a1c7e67d72?w=400&q=80&auto=format&fit=crop", icon: "data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A//www.w3.org/2000/svg%22%20viewBox%3D%220%200%2024%2024%22%20fill%3D%22none%22%20stroke%3D%22%231a1a2e%22%20stroke-width%3D%221.5%22%3E%3Ccircle%20cx%3D%229%22%20cy%3D%226%22%20r%3D%222%22/%3E%3Cpath%20d%3D%22M9%208l4%203%205-2M4%2019c3-4%203-8%208-8M20%2019c-3-2-3-5-3-5%22/%3E%3C/svg%3E" },
   ];
 
   const items = categories.length > 0 ? categories : defaultCategories;
@@ -311,14 +308,14 @@ export function InteriorProductGrid({
   const fixLink = (slug: string) => storeCtx?.storeSlug ? `/store/${storeCtx.storeSlug}/product/${slug}` : "#";
 
   const defaultProducts: InteriorProduct[] = [
-    { id: 1, name: "Dark Headphones", slug: "dark-headphones", price: "154.00", image: `${IMG}/2018/10/retail-product-1-opt-330x340.jpg`, category: "Retail", rating: 5 },
-    { id: 2, name: "Solo Cook Set", slug: "solo-cook-set", price: "215.00", image: `${IMG}/2018/10/retail-product-2-opt-330x340.jpg`, category: "Retail", rating: 5 },
-    { id: 3, name: "Gray Shorts", slug: "gray-shorts", price: "169.00", image: `${IMG}/2018/10/retail-product-3-opt-330x340.jpg`, category: "Retail", rating: 4 },
-    { id: 4, name: "Gold Laptop", slug: "gold-laptop", price: "273.00", image: `${IMG}/2018/10/retail-product-4-opt-330x340.jpg`, category: "Retail", rating: 5 },
-    { id: 5, name: "Kitchen Chair", slug: "kitchen-chair", price: "199.00", image: `${IMG}/2018/10/retail-product-5-opt-330x340.jpg`, category: "Retail", rating: 5 },
-    { id: 6, name: "Smartphone Case", slug: "smartphone-case", price: "149.00", image: `${IMG}/2018/10/retail-product-6-opt-330x340.jpg`, category: "Retail", rating: 5 },
-    { id: 7, name: "Dark Mice", slug: "dark-mice", price: "112.00", image: `${IMG}/2018/10/retail-product-7-opt-330x340.jpg`, category: "Retail", rating: 4 },
-    { id: 8, name: "Red Sneakers", slug: "red-sneakers", price: "155.00", image: `${IMG}/2018/10/retail-product-8-opt-330x340.jpg`, category: "Retail", rating: 5 },
+    { id: 1, name: "Table Lamp", slug: "table-lamp", price: "89.00", image: "https://images.unsplash.com/photo-1543198126-05c19cba69a2?w=400&h=400&fit=crop", category: "Lighting", rating: 5 },
+    { id: 2, name: "Ceramic Vase Set", slug: "ceramic-vase-set", price: "65.00", image: "https://images.unsplash.com/photo-1578500494198-246f612d3b3d?w=400&h=400&fit=crop", category: "Decor", rating: 5 },
+    { id: 3, name: "Wool Throw Blanket", slug: "wool-throw-blanket", price: "78.00", image: "https://images.unsplash.com/photo-1580301762395-83c8f6404e0a?w=400&h=400&fit=crop", category: "Textiles", rating: 4 },
+    { id: 4, name: "Wall Clock", slug: "wall-clock", price: "54.00", image: "https://images.unsplash.com/photo-1563861826100-9cb868fdbe1c?w=400&h=400&fit=crop", category: "Clocks", rating: 5 },
+    { id: 5, name: "Accent Armchair", slug: "accent-armchair", price: "349.00", image: "https://images.unsplash.com/photo-1567538096630-e0c55bd6374c?w=400&h=400&fit=crop", category: "Furniture", rating: 5 },
+    { id: 6, name: "Woven Storage Basket", slug: "woven-storage-basket", price: "42.00", image: "https://images.unsplash.com/photo-1596079890744-c1a0462d0975?w=400&h=400&fit=crop", category: "Accessories", rating: 5 },
+    { id: 7, name: "Marble Cutting Board", slug: "marble-cutting-board", price: "58.00", image: "https://images.unsplash.com/photo-1594736797933-d0501ba2fe65?w=400&h=400&fit=crop", category: "Kitchen", rating: 4 },
+    { id: 8, name: "Rattan Pendant Light", slug: "rattan-pendant-light", price: "112.00", image: "https://images.unsplash.com/photo-1540932239986-30128078f3c5?w=400&h=400&fit=crop", category: "Lighting", rating: 5 },
   ];
 
   const items = (propProducts?.length ? propProducts : storeCtx?.products?.length ? storeCtx.products : defaultProducts).slice(0, maxProducts);
@@ -392,10 +389,10 @@ export interface InteriorInfoBoxesProps {
 
 export function InteriorInfoBoxes({ items = [] }: InteriorInfoBoxesProps) {
   const defaultItems: InteriorInfoBox[] = [
-    { icon: `${IMG}/2018/08/retail-free-shipping.svg`, title: "Home Delivery.", description: "The European languages." },
-    { icon: `${IMG}/2018/08/retail-payment.svg`, title: "Order As a Gift.", description: "Donec odio etiam sceles." },
-    { icon: `${IMG}/2018/08/retail-delivery-man.svg`, title: "High Quality.", description: "Curabitur hac hac maece." },
-    { icon: `${IMG}/2018/08/retail-247.svg`, title: "Buy With Joy.", description: "Ullamcorper magna nec." },
+    { icon: "data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A//www.w3.org/2000/svg%22%20viewBox%3D%220%200%2024%2024%22%20fill%3D%22none%22%20stroke%3D%22%231a1a2e%22%20stroke-width%3D%221.5%22%3E%3Crect%20x%3D%221%22%20y%3D%223%22%20width%3D%2215%22%20height%3D%2213%22/%3E%3Cpath%20d%3D%22M16%208h4l3%203v5h-7V8z%22/%3E%3Ccircle%20cx%3D%225.5%22%20cy%3D%2218.5%22%20r%3D%222.5%22/%3E%3Ccircle%20cx%3D%2218.5%22%20cy%3D%2218.5%22%20r%3D%222.5%22/%3E%3C/svg%3E", title: "Free Home Delivery.", description: "Free shipping on every order, no minimum." },
+    { icon: "data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A//www.w3.org/2000/svg%22%20viewBox%3D%220%200%2024%2024%22%20fill%3D%22none%22%20stroke%3D%22%231a1a2e%22%20stroke-width%3D%221.5%22%3E%3Cpath%20d%3D%22M20%2012v7a1%201%200%2001-1%201H5a1%201%200%2001-1-1v-7M2%207h20v5H2zM12%207v13M12%207c-1.5-3-6-3-6%200s4.5%203%206%200zM12%207c1.5-3%206-3%206%200s-4.5%203-6%200z%22/%3E%3C/svg%3E", title: "Gift Wrapping.", description: "Add a personal touch to any order." },
+    { icon: "data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A//www.w3.org/2000/svg%22%20viewBox%3D%220%200%2024%2024%22%20fill%3D%22none%22%20stroke%3D%22%231a1a2e%22%20stroke-width%3D%221.5%22%3E%3Cpath%20d%3D%22M12%202l8%204v6c0%205-3.5%208.5-8%2010-4.5-1.5-8-5-8-10V6l8-4z%22/%3E%3Cpath%20d%3D%22M9%2012l2%202%204-4%22/%3E%3C/svg%3E", title: "Quality Guarantee.", description: "Every piece is checked before it ships." },
+    { icon: "data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A//www.w3.org/2000/svg%22%20viewBox%3D%220%200%2024%2024%22%20fill%3D%22none%22%20stroke%3D%22%231a1a2e%22%20stroke-width%3D%221.5%22%3E%3Ccircle%20cx%3D%2212%22%20cy%3D%2212%22%20r%3D%229%22/%3E%3Cpath%20d%3D%22M12%207v5l3%203%22/%3E%3C/svg%3E", title: "24/7 Support.", description: "We're here whenever you need us." },
   ];
 
   const boxes = items.length > 0 ? items : defaultItems;
@@ -440,12 +437,12 @@ export function InteriorGardenProducts({ products: propProducts, columns = 4, ma
   const storeCtx = useContext(InteriorStoreContext);
 
   const defaultProducts: InteriorProduct[] = [
-    { id: 21, name: "Transplanting Trowel", slug: "transplanting-trowel", price: "118.00", image: `${IMG}/2018/10/retail-product-13-opt-330x340.jpg`, category: "Best sellers", rating: 5 },
-    { id: 22, name: "Gathering Bag", slug: "gathering-bag", price: "173.00", image: `${IMG}/2018/10/retail-product-14-opt-330x340.jpg`, category: "Best sellers", rating: 5 },
-    { id: 23, name: "Garden Scissors", slug: "garden-scissors", price: "168.00", image: `${IMG}/2018/10/retail-product-15-opt-330x340.jpg`, category: "Best sellers", rating: 4 },
-    { id: 24, name: "Leaf Rake", slug: "leaf-rake", price: "173.00", image: `${IMG}/2018/10/retail-product-16-opt-330x340.jpg`, category: "Best sellers", rating: 5 },
-    { id: 25, name: "Penatibus Nibh", slug: "penatibus-nibh", price: "148.00", image: `${IMG}/2018/10/retail-product-17-opt-330x340.jpg`, category: "Best sellers", rating: 5 },
-    { id: 26, name: "Shovel", slug: "shovel", price: "112.00", image: `${IMG}/2018/10/retail-product-18-opt-330x340.jpg`, category: "Best sellers", rating: 5 },
+    { id: 21, name: "Rattan Plant Stand", slug: "rattan-plant-stand", price: "68.00", image: "https://images.unsplash.com/photo-1602872030219-ad2b9a54315c?w=400&h=400&fit=crop", category: "Best sellers", rating: 5 },
+    { id: 22, name: "Linen Cushion Cover", slug: "linen-cushion-cover", price: "32.00", image: "https://images.unsplash.com/photo-1584100936595-c0654b55a2e6?w=400&h=400&fit=crop", category: "Best sellers", rating: 5 },
+    { id: 23, name: "Brass Candle Holder", slug: "brass-candle-holder", price: "44.00", image: "https://images.unsplash.com/photo-1602872030278-9bb0e57ba871?w=400&h=400&fit=crop", category: "Best sellers", rating: 4 },
+    { id: 24, name: "Wooden Wall Shelf", slug: "wooden-wall-shelf", price: "89.00", image: "https://images.unsplash.com/photo-1595515106969-1ce29566ff1c?w=400&h=400&fit=crop", category: "Best sellers", rating: 5 },
+    { id: 25, name: "Ceramic Table Lamp", slug: "ceramic-table-lamp", price: "96.00", image: "https://images.unsplash.com/photo-1517991104123-1d56a6e81ed9?w=400&h=400&fit=crop", category: "Best sellers", rating: 5 },
+    { id: 26, name: "Handwoven Area Rug", slug: "handwoven-area-rug", price: "215.00", image: "https://images.unsplash.com/photo-1584622781564-1d987f7333c1?w=400&h=400&fit=crop", category: "Best sellers", rating: 5 },
   ];
 
   return (
@@ -479,13 +476,13 @@ export interface InteriorPromoBannersProps {
 export function InteriorPromoBanners({ banners = [], variant = "garden" }: InteriorPromoBannersProps) {
   const storeCtx = useContext(InteriorStoreContext);
   const gardenBanners: InteriorPromoBanner[] = [
-    { subtitle: "Scelerisque fusce", title: "New Arrival of\nModern Garden Gloves.", image: `${IMG}/2018/10/retail-garden-banner-1-1-opt.jpg`, buttonText: "Shop Now" },
-    { subtitle: "A nec augue", title: "Discount 30% Garden Equipment.", image: `${IMG}/2018/10/retail-garden-banner-2-1-opt.jpg`, buttonText: "Shop Now" },
+    { subtitle: "New Arrivals", title: "Fresh Picks for\nYour Garden.", image: "https://images.unsplash.com/photo-1416879595882-3373a0480b5b?w=800&q=80&auto=format&fit=crop", buttonText: "Shop Now" },
+    { subtitle: "Limited Time", title: "30% Off Garden Essentials.", image: "https://images.unsplash.com/photo-1466692476868-aef1dfb1e735?w=800&q=80&auto=format&fit=crop", buttonText: "Shop Now" },
   ];
 
   const furnitureBanners: InteriorPromoBanner[] = [
-    { subtitle: "Mollis tortor", title: "25 Ideas For\nModern Interior", image: `${IMG}/2018/10/retail-furniture-banner-1-2-opt.jpg`, buttonText: "Shop Now" },
-    { subtitle: "Cubilia ultricies", title: "Beds And Sofas\nWith 15% Discount.", image: `${IMG}/2018/10/retail-furniture-banner-2-2-opt.jpg`, buttonText: "Shop Now" },
+    { subtitle: "Style Guide", title: "25 Ideas For\nModern Interiors.", image: "https://images.unsplash.com/photo-1567016432779-094069958ea5?w=800&q=80&auto=format&fit=crop", buttonText: "Shop Now" },
+    { subtitle: "Limited Time", title: "Beds And Sofas\nWith 15% Off.", image: "https://images.unsplash.com/photo-1540574163026-643ea20ade25?w=800&q=80&auto=format&fit=crop", buttonText: "Shop Now" },
   ];
 
   const items = banners || (variant === "furniture" ? furnitureBanners : gardenBanners);
@@ -528,12 +525,12 @@ export function InteriorPromoBanners({ banners = [], variant = "garden" }: Inter
 
 export function InteriorFurnitureCategories({ categories = [], columns = 6 }: { categories?: InteriorCategory[]; columns?: number }) {
   const defaultCategories: InteriorCategory[] = [
-    { name: "Decore", image: `${IMG}/2018/10/retail-category-7-opt.jpg` },
-    { name: "Jewelry", image: `${IMG}/2018/10/retail-category-8-opt-1.jpg` },
-    { name: "Marketplace", image: `${IMG}/2018/10/retail-category-9-opt.jpg` },
-    { name: "Shoes", image: `${IMG}/2018/10/retail-category-10-opt.jpg` },
-    { name: "Electronics", image: `${IMG}/2018/10/retail-category-11-opt.jpg` },
-    { name: "Retail", image: `${IMG}/2018/10/retail-category-12-opt.jpg` },
+    { name: "Decor", image: "https://images.unsplash.com/photo-1616486338812-3dadae4b4ace?w=400&q=80&auto=format&fit=crop" },
+    { name: "Lighting", image: "https://images.unsplash.com/photo-1543198126-05c19cba69a2?w=400&q=80&auto=format&fit=crop" },
+    { name: "Furniture", image: "https://images.unsplash.com/photo-1555041469-a586c61ea9bc?w=400&q=80&auto=format&fit=crop" },
+    { name: "Textiles", image: "https://images.unsplash.com/photo-1580301762395-83c8f6404e0a?w=400&q=80&auto=format&fit=crop" },
+    { name: "Kitchen", image: "https://images.unsplash.com/photo-1556909114-f6e7ad7d3136?w=400&q=80&auto=format&fit=crop" },
+    { name: "Accessories", image: "https://images.unsplash.com/photo-1591561954557-26941169b49e?w=400&q=80&auto=format&fit=crop" },
   ];
 
   return <InteriorCategoryGrid sectionTitle="FURNITURE CATEGORIES" categories={categories || defaultCategories} columns={columns} />;
@@ -545,14 +542,14 @@ export function InteriorFurnitureCategories({ categories = [], columns = 6 }: { 
 
 export function InteriorFurnitureProducts({ products: propProducts, columns = 4, maxProducts = 8 }: { products?: InteriorProduct[]; columns?: number; maxProducts?: number }) {
   const defaultProducts: InteriorProduct[] = [
-    { id: 31, name: "Gray Chair", slug: "gray-chair", price: "189.00", image: `${IMG}/2018/10/retail-product-19-opt-330x340.jpg`, category: "Retail", rating: 5 },
-    { id: 32, name: "Two Pafs", slug: "two-pafs", price: "173.00", image: `${IMG}/2018/10/retail-product-20-opt-330x340.jpg`, category: "Retail", rating: 5 },
-    { id: 33, name: "Gray Chair", slug: "gray-chair-2", price: "175.00", image: `${IMG}/2018/10/retail-product-21-opt-330x340.jpg`, category: "Retail", rating: 4 },
-    { id: 34, name: "Spotight", slug: "spotlight", price: "169.00", image: `${IMG}/2018/10/retail-product-22-opt-330x340.jpg`, category: "Retail", rating: 5 },
-    { id: 35, name: "Wooden Table", slug: "wooden-table", price: "215.00", image: `${IMG}/2018/10/retail-product-23-opt-330x340.jpg`, category: "Retail", rating: 5 },
-    { id: 36, name: "Wood Wardrobes", slug: "wood-wardrobes", price: "273.00", image: `${IMG}/2018/10/retail-product-24-opt-330x340.jpg`, category: "Retail", rating: 5 },
-    { id: 37, name: "Kids Chair", slug: "kids-chair", price: "148.00", image: `${IMG}/2018/10/retail-product-25-opt-330x340.jpg`, category: "Retail", rating: 5 },
-    { id: 38, name: "Table Wood Light", slug: "table-wood-light", price: "199.00", image: `${IMG}/2018/10/retail-product-9-opt-330x340.jpg`, category: "Retail", rating: 5 },
+    { id: 31, name: "Gray Lounge Chair", slug: "gray-lounge-chair", price: "289.00", image: "https://images.unsplash.com/photo-1506439773649-6e0eb8cfb237?w=400&h=400&fit=crop", category: "Furniture", rating: 5 },
+    { id: 32, name: "Oak Coffee Table", slug: "oak-coffee-table", price: "245.00", image: "https://images.unsplash.com/photo-1592078615290-033ee584e267?w=400&h=400&fit=crop", category: "Furniture", rating: 5 },
+    { id: 33, name: "Boucle Armchair", slug: "boucle-armchair", price: "375.00", image: "https://images.unsplash.com/photo-1550254478-ead40cc54513?w=400&h=400&fit=crop", category: "Furniture", rating: 4 },
+    { id: 34, name: "Arc Floor Lamp", slug: "arc-floor-lamp", price: "169.00", image: "https://images.unsplash.com/photo-1524484485831-a92ffc0de03f?w=400&h=400&fit=crop", category: "Lighting", rating: 5 },
+    { id: 35, name: "Walnut Dining Table", slug: "walnut-dining-table", price: "515.00", image: "https://images.unsplash.com/photo-1615066390971-03e4e1c36ddf?w=400&h=400&fit=crop", category: "Furniture", rating: 5 },
+    { id: 36, name: "Wood Wardrobe", slug: "wood-wardrobe", price: "473.00", image: "https://images.unsplash.com/photo-1595428774223-ef52624120d2?w=400&h=400&fit=crop", category: "Furniture", rating: 5 },
+    { id: 37, name: "Rattan Accent Chair", slug: "rattan-accent-chair", price: "248.00", image: "https://images.unsplash.com/photo-1592078615290-033ee584e267?w=400&h=400&fit=crop", category: "Furniture", rating: 5 },
+    { id: 38, name: "Wood Side Table", slug: "wood-side-table", price: "199.00", image: "https://images.unsplash.com/photo-1499933374294-4584851497cc?w=400&h=400&fit=crop", category: "Furniture", rating: 5 },
   ];
 
   return (
@@ -586,10 +583,10 @@ export interface InteriorBlogPostsProps {
 
 export function InteriorBlogPosts({ posts = [], columns = 4, sectionTitle = "OUR BLOG" }: InteriorBlogPostsProps) {
   const defaultPosts: InteriorBlogPost[] = [
-    { title: "Furniture that explores wood as a material", image: `${IMG}/2018/10/retail-blog-img-1-opt.jpg`, date: "October 18, 2018" },
-    { title: "The big design: Wall likes pictures", image: `${IMG}/2018/10/retail-blog-img-2-opt.jpg`, date: "October 18, 2018" },
-    { title: "New home decor from John Doerson", image: `${IMG}/2018/10/retail-blog-img-3-opt.jpg`, date: "October 18, 2018" },
-    { title: "Collar brings back coffee brewing ritual", image: `${IMG}/2018/10/retail-blog-img-4-opt.jpg`, date: "October 18, 2018" },
+    { title: "Furniture that explores wood as a material", image: "https://images.unsplash.com/photo-1567016432779-094069958ea5?w=500&q=80&auto=format&fit=crop", date: "October 18, 2025" },
+    { title: "The big design trend: statement wall art", image: "https://images.unsplash.com/photo-1524758631624-e2822e304c36?w=500&q=80&auto=format&fit=crop", date: "October 12, 2025" },
+    { title: "5 ways to style your living room this season", image: "https://images.unsplash.com/photo-1586023492125-27b2c045efd7?w=500&q=80&auto=format&fit=crop", date: "October 8, 2025" },
+    { title: "Choosing the right lighting for every room", image: "https://images.unsplash.com/photo-1493663284031-b7e3aefcae8e?w=500&q=80&auto=format&fit=crop", date: "October 3, 2025" },
   ];
 
   const items = posts.length > 0 ? posts : defaultPosts;
@@ -641,16 +638,16 @@ export interface InteriorBrandsBarProps {
 
 export function InteriorBrandsBar({ brands = [] }: InteriorBrandsBarProps) {
   const defaultBrands = [
-    { name: "Alessi", logo: `${IMG}/2016/09/brand-alessi.png` },
-    { name: "Eva Solo", logo: `${IMG}/2016/09/brand-Eva-Solo.png` },
-    { name: "Flos", logo: `${IMG}/2016/09/brand-flos.png` },
-    { name: "Hay", logo: `${IMG}/2016/09/brand-hay.png` },
-    { name: "Joseph Joseph", logo: `${IMG}/2016/09/brand-Joseph-Joseph.png` },
-    { name: "Louis Poulsen", logo: `${IMG}/2016/09/brand-Louis-Poulsen.png` },
-    { name: "Magisso", logo: `${IMG}/2016/09/brand-Magisso.png` },
-    { name: "PackIt", logo: `${IMG}/2016/09/brand-PackIt.png` },
-    { name: "Rosenthal", logo: `${IMG}/2016/09/brand-Rosenthal.png` },
-    { name: "Witra", logo: `${IMG}/2016/09/brand-witra.png` },
+    { name: "Alessi", logo: "data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A//www.w3.org/2000/svg%22%20width%3D%22140%22%20height%3D%2236%22%20viewBox%3D%220%200%20140%2036%22%3E%3Ctext%20x%3D%2250%25%22%20y%3D%2250%25%22%20dominant-baseline%3D%22middle%22%20text-anchor%3D%22middle%22%20font-family%3D%22Helvetica%2C%20Arial%2C%20sans-serif%22%20font-size%3D%2216%22%20font-weight%3D%22600%22%20letter-spacing%3D%221%22%20fill%3D%22%231a1a2e%22%3EAlessi%3C/text%3E%3C/svg%3E" },
+    { name: "Eva Solo", logo: "data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A//www.w3.org/2000/svg%22%20width%3D%22140%22%20height%3D%2236%22%20viewBox%3D%220%200%20140%2036%22%3E%3Ctext%20x%3D%2250%25%22%20y%3D%2250%25%22%20dominant-baseline%3D%22middle%22%20text-anchor%3D%22middle%22%20font-family%3D%22Helvetica%2C%20Arial%2C%20sans-serif%22%20font-size%3D%2216%22%20font-weight%3D%22600%22%20letter-spacing%3D%221%22%20fill%3D%22%231a1a2e%22%3EEva%20Solo%3C/text%3E%3C/svg%3E" },
+    { name: "Flos", logo: "data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A//www.w3.org/2000/svg%22%20width%3D%22140%22%20height%3D%2236%22%20viewBox%3D%220%200%20140%2036%22%3E%3Ctext%20x%3D%2250%25%22%20y%3D%2250%25%22%20dominant-baseline%3D%22middle%22%20text-anchor%3D%22middle%22%20font-family%3D%22Helvetica%2C%20Arial%2C%20sans-serif%22%20font-size%3D%2216%22%20font-weight%3D%22600%22%20letter-spacing%3D%221%22%20fill%3D%22%231a1a2e%22%3EFlos%3C/text%3E%3C/svg%3E" },
+    { name: "Hay", logo: "data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A//www.w3.org/2000/svg%22%20width%3D%22140%22%20height%3D%2236%22%20viewBox%3D%220%200%20140%2036%22%3E%3Ctext%20x%3D%2250%25%22%20y%3D%2250%25%22%20dominant-baseline%3D%22middle%22%20text-anchor%3D%22middle%22%20font-family%3D%22Helvetica%2C%20Arial%2C%20sans-serif%22%20font-size%3D%2216%22%20font-weight%3D%22600%22%20letter-spacing%3D%221%22%20fill%3D%22%231a1a2e%22%3EHay%3C/text%3E%3C/svg%3E" },
+    { name: "Joseph Joseph", logo: "data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A//www.w3.org/2000/svg%22%20width%3D%22140%22%20height%3D%2236%22%20viewBox%3D%220%200%20140%2036%22%3E%3Ctext%20x%3D%2250%25%22%20y%3D%2250%25%22%20dominant-baseline%3D%22middle%22%20text-anchor%3D%22middle%22%20font-family%3D%22Helvetica%2C%20Arial%2C%20sans-serif%22%20font-size%3D%2216%22%20font-weight%3D%22600%22%20letter-spacing%3D%221%22%20fill%3D%22%231a1a2e%22%3EJoseph%20Joseph%3C/text%3E%3C/svg%3E" },
+    { name: "Louis Poulsen", logo: "data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A//www.w3.org/2000/svg%22%20width%3D%22140%22%20height%3D%2236%22%20viewBox%3D%220%200%20140%2036%22%3E%3Ctext%20x%3D%2250%25%22%20y%3D%2250%25%22%20dominant-baseline%3D%22middle%22%20text-anchor%3D%22middle%22%20font-family%3D%22Helvetica%2C%20Arial%2C%20sans-serif%22%20font-size%3D%2216%22%20font-weight%3D%22600%22%20letter-spacing%3D%221%22%20fill%3D%22%231a1a2e%22%3ELouis%20Poulsen%3C/text%3E%3C/svg%3E" },
+    { name: "Magisso", logo: "data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A//www.w3.org/2000/svg%22%20width%3D%22140%22%20height%3D%2236%22%20viewBox%3D%220%200%20140%2036%22%3E%3Ctext%20x%3D%2250%25%22%20y%3D%2250%25%22%20dominant-baseline%3D%22middle%22%20text-anchor%3D%22middle%22%20font-family%3D%22Helvetica%2C%20Arial%2C%20sans-serif%22%20font-size%3D%2216%22%20font-weight%3D%22600%22%20letter-spacing%3D%221%22%20fill%3D%22%231a1a2e%22%3EMagisso%3C/text%3E%3C/svg%3E" },
+    { name: "PackIt", logo: "data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A//www.w3.org/2000/svg%22%20width%3D%22140%22%20height%3D%2236%22%20viewBox%3D%220%200%20140%2036%22%3E%3Ctext%20x%3D%2250%25%22%20y%3D%2250%25%22%20dominant-baseline%3D%22middle%22%20text-anchor%3D%22middle%22%20font-family%3D%22Helvetica%2C%20Arial%2C%20sans-serif%22%20font-size%3D%2216%22%20font-weight%3D%22600%22%20letter-spacing%3D%221%22%20fill%3D%22%231a1a2e%22%3EPackIt%3C/text%3E%3C/svg%3E" },
+    { name: "Rosenthal", logo: "data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A//www.w3.org/2000/svg%22%20width%3D%22140%22%20height%3D%2236%22%20viewBox%3D%220%200%20140%2036%22%3E%3Ctext%20x%3D%2250%25%22%20y%3D%2250%25%22%20dominant-baseline%3D%22middle%22%20text-anchor%3D%22middle%22%20font-family%3D%22Helvetica%2C%20Arial%2C%20sans-serif%22%20font-size%3D%2216%22%20font-weight%3D%22600%22%20letter-spacing%3D%221%22%20fill%3D%22%231a1a2e%22%3ERosenthal%3C/text%3E%3C/svg%3E" },
+    { name: "Witra", logo: "data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A//www.w3.org/2000/svg%22%20width%3D%22140%22%20height%3D%2236%22%20viewBox%3D%220%200%20140%2036%22%3E%3Ctext%20x%3D%2250%25%22%20y%3D%2250%25%22%20dominant-baseline%3D%22middle%22%20text-anchor%3D%22middle%22%20font-family%3D%22Helvetica%2C%20Arial%2C%20sans-serif%22%20font-size%3D%2216%22%20font-weight%3D%22600%22%20letter-spacing%3D%221%22%20fill%3D%22%231a1a2e%22%3EWitra%3C/text%3E%3C/svg%3E" },
   ];
 
   const items = brands.length > 0 ? brands : defaultBrands;
@@ -1022,7 +1019,7 @@ export function GardenHeroBanner({
   subheading = "From timeless pieces to modern accents, create a home that celebrates your unique story.",
   ctaText = "SHOP NOW",
   ctaLink = "/shop",
-  image = "https://websitedemos.net/home-garden-decor-02/wp-content/uploads/sites/1034/2025/11/heroimage-1.png",
+  image = "https://images.unsplash.com/photo-1616486338812-3dadae4b4ace?w=800&q=80&auto=format&fit=crop",
   exploreBtns,
 }: GardenHeroBannerProps) {
   const storeCtx = useContext(InteriorStoreContext);
