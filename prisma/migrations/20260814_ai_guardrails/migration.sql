@@ -39,5 +39,3 @@ CREATE TABLE IF NOT EXISTS "ai_platform_usage_daily" (
 );
 
 CREATE UNIQUE INDEX IF NOT EXISTS "ai_platform_usage_daily_date_key" ON "ai_platform_usage_daily"("date");
-
-ALTER TABLE "sites" ADD COLUMN IF NOT EXISTS "aiDailySpendCapUsd" DECIMAL(10,4);

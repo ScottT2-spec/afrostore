@@ -133,7 +133,6 @@ model Site {
   abTests           ABTest[]
   abandonedCarts    AbandonedCart[]
   aiUsageDaily      AiUsageDaily[]
-  aiDailySpendCapUsd Decimal?          @db.Decimal(10, 4)
   analytics         AnalyticsEvent[]
   auditLogs         AuditLog[]
   automations       Automation[]

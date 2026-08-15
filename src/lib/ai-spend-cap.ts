@@ -8,8 +8,9 @@
  * incremented after every successful one.
  *
  * Two independent caps:
- *  - per-site daily cap (Site.aiDailySpendCapUsd, falls back to
- *    AI_DEFAULT_DAILY_SPEND_CAP_USD env var)
+ *  - per-site daily cap: currently a single platform-wide default for all
+ *    sites (AI_DEFAULT_DAILY_SPEND_CAP_USD). A per-site override used to
+ *    live on Site.aiDailySpendCapUsd but was reverted — see note below.
  *  - platform-wide daily cap (AI_PLATFORM_DAILY_SPEND_CAP_USD env var) —
  *    catches the case where many merchants each stay under their own cap
  *    but combined spend is still unsustainable.
@@ -36,13 +37,20 @@ export interface SpendCapCheck {
 export async function checkSpendCap(siteId: string): Promise<SpendCapCheck> {
   const date = todayUtc();
 
-  const [site, siteUsage, platformUsage] = await Promise.all([
-    prisma.site.findUnique({ where: { id: siteId }, select: { aiDailySpendCapUsd: true } }),
+  // NOTE: per-site override (Site.aiDailySpendCapUsd) was reverted —
+  // it broke unrelated Site queries (e.g. store creation) on any
+  // deployment where the migration adding that column hadn't been
+  // applied to the database yet, since Site is queried unrestricted
+  // in many places across the app. Using the env-var default for
+  // every site until that's reintroduced safely (e.g. via a
+  // dedicated settings table instead of a column on the widely-
+  // queried Site model).
+  const [siteUsage, platformUsage] = await Promise.all([
     prisma.aiUsageDaily.findUnique({ where: { siteId_date: { siteId, date } } }),
     prisma.aiPlatformUsageDaily.findUnique({ where: { date } }),
   ]);
 
-  const siteCap = site?.aiDailySpendCapUsd ? Number(site.aiDailySpendCapUsd) : DEFAULT_SITE_DAILY_CAP_USD;
+  const siteCap = DEFAULT_SITE_DAILY_CAP_USD;
   const siteSpent = siteUsage ? Number(siteUsage.costUsd) : 0;
   const platformSpent = platformUsage ? Number(platformUsage.costUsd) : 0;
 
