@@ -8,7 +8,7 @@ import type { EditorNode } from "@/lib/visual-editor/node-tree";
  */
 
 
-const MAKEUP_BRANDS = [
+export const MAKEUP_BRANDS = [
   { name: "Caudalie", logo: "data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A//www.w3.org/2000/svg%22%20width%3D%22160%22%20height%3D%2240%22%20viewBox%3D%220%200%20160%2040%22%3E%3Ctext%20x%3D%2250%25%22%20y%3D%2250%25%22%20dominant-baseline%3D%22middle%22%20text-anchor%3D%22middle%22%20font-family%3D%22Helvetica%2C%20Arial%2C%20sans-serif%22%20font-size%3D%2218%22%20font-weight%3D%22600%22%20letter-spacing%3D%221%22%20fill%3D%22%231a1a2e%22%3ECaudalie%3C/text%3E%3C/svg%3E", link: "/shop?filter_brand=caudalie" },
   { name: "Cerave", logo: "data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A//www.w3.org/2000/svg%22%20width%3D%22160%22%20height%3D%2240%22%20viewBox%3D%220%200%20160%2040%22%3E%3Ctext%20x%3D%2250%25%22%20y%3D%2250%25%22%20dominant-baseline%3D%22middle%22%20text-anchor%3D%22middle%22%20font-family%3D%22Helvetica%2C%20Arial%2C%20sans-serif%22%20font-size%3D%2218%22%20font-weight%3D%22600%22%20letter-spacing%3D%221%22%20fill%3D%22%231a1a2e%22%3ECerave%3C/text%3E%3C/svg%3E", link: "/shop?filter_brand=cerave" },
   { name: "Mizon", logo: "data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A//www.w3.org/2000/svg%22%20width%3D%22160%22%20height%3D%2240%22%20viewBox%3D%220%200%20160%2040%22%3E%3Ctext%20x%3D%2250%25%22%20y%3D%2250%25%22%20dominant-baseline%3D%22middle%22%20text-anchor%3D%22middle%22%20font-family%3D%22Helvetica%2C%20Arial%2C%20sans-serif%22%20font-size%3D%2218%22%20font-weight%3D%22600%22%20letter-spacing%3D%221%22%20fill%3D%22%231a1a2e%22%3EMizon%3C/text%3E%3C/svg%3E", link: "/shop?filter_brand=mizon" },

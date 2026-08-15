@@ -1,4 +1,5 @@
 import type { EditorNode } from "@/lib/visual-editor/node-tree";
+import { MAKEUP_BRANDS } from "./makeup-page-presets";
 
 /**
  * Makeup Template Preset
@@ -144,7 +145,11 @@ export const MAKEUP_TEMPLATE_PRESET: EditorNode[] = [
     type: "makeupVideoBlog",
     settings: {
       sectionTitle: { title: "Latest Videos on Channel" },
-      videos: [],
+      videos: [
+        { thumbnail: "https://images.unsplash.com/photo-1522335789203-aabd1fc54bc9?w=600&h=375&fit=crop", videoUrl: "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerBlazes.mp4" },
+        { thumbnail: "https://images.unsplash.com/photo-1596704017254-9b121068fb31?w=600&h=375&fit=crop", videoUrl: "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerEscapes.mp4" },
+        { thumbnail: "https://images.unsplash.com/photo-1560750588-73207b1ef5b8?w=600&h=375&fit=crop", videoUrl: "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerJoyrides.mp4" },
+      ],
     },
   },
   {
@@ -152,14 +157,18 @@ export const MAKEUP_TEMPLATE_PRESET: EditorNode[] = [
     type: "makeupBlogPosts",
     settings: {
       sectionTitle: { title: "Recent Articles" },
-      posts: [],
+      posts: [
+        { image: "https://images.unsplash.com/photo-1571781926291-c477ebfd024b?w=500&q=80&auto=format&fit=crop", title: "5 skincare habits that actually make a difference", date: "June 12, 2026", commentCount: 8, link: "/blog" },
+        { image: "https://images.unsplash.com/photo-1522337094846-8a8b0b3b6e7b?w=500&q=80&auto=format&fit=crop", title: "How to build a morning routine you'll stick to", date: "May 28, 2026", commentCount: 5, link: "/blog" },
+        { image: "https://images.unsplash.com/photo-1512207736890-6ffe437ca9a8?w=500&q=80&auto=format&fit=crop", title: "Choosing the right SPF for your skin type", date: "May 14, 2026", commentCount: 12, link: "/blog" },
+      ],
     },
   },
   {
     id: "makeup-brands",
     type: "makeupBrandsCarousel",
     settings: {
-      brands: [],
+      brands: MAKEUP_BRANDS,
     },
   },
   {
@@ -167,20 +176,20 @@ export const MAKEUP_TEMPLATE_PRESET: EditorNode[] = [
     settings: {
       logoUrl: "",
       logoAlt: "Store Logo",
-      description: "Discover a curated collection of modern furniture designed to bring comfort and elegance into your home.",
+      description: "Clean, effective skincare and makeup formulated with real results in mind — for every skin tone and skin type.",
       contact: {
-        address: "451 Wall Street, UK, London",
-        phone: "(064) 332-1233",
-        fax: "(099) 453-1357",
+        address: "24 Adeola Odeku Street, Victoria Island, Lagos",
+        phone: "+234 801 234 5678",
+        fax: "hello@store.com",
       },
       recentPosts: [],
       linkColumns: [
-        { title: "OUR STORES", links: [{ label: "New York", url: "#" }, { label: "London SF", url: "#" }, { label: "Edinburgh", url: "#" }, { label: "Los Angeles", url: "#" }, { label: "Chicago", url: "#" }, { label: "Las Vegas", url: "#" }] },
-        { title: "USEFUL LINKS", links: [{ label: "Privacy Policy", url: "#" }, { label: "Returns", url: "#" }, { label: "Terms & Conditions", url: "#" }, { label: "Contact Us", url: "#" }, { label: "Latest News", url: "#" }, { label: "Our Sitemap", url: "#" }] },
-        { title: "FOOTER MENU", links: [{ label: "Instagram profile", url: "#" }, { label: "New Collection", url: "#" }, { label: "Contact Us", url: "#" }, { label: "Latest News", url: "#" }, { label: "Our Sitemap", url: "#" }] },
+        { title: "SHOP", links: [{ label: "Skincare", url: "/shop" }, { label: "Makeup", url: "/shop" }, { label: "Hair Care", url: "/shop" }, { label: "Sunscreen", url: "/shop" }, { label: "Gift Sets", url: "/shop" }] },
+        { title: "CUSTOMER CARE", links: [{ label: "Contact Us", url: "/contact" }, { label: "Shipping & Returns", url: "#" }, { label: "FAQs", url: "#" }, { label: "Track Order", url: "/order-tracking" }] },
+        { title: "COMPANY", links: [{ label: "About Us", url: "/about" }, { label: "Our Brands", url: "#" }, { label: "Blog", url: "/blog" }, { label: "Privacy Policy", url: "#" }] },
       ],
-      copyrightText: "",
-      paymentIconsUrl: "https://images.unsplash.com/photo-1608979048467-6194dabc6a3d?w=800&q=80&auto=format&fit=crop",
+      copyrightText: `© ${new Date().getFullYear()}. All rights reserved.`,
+      paymentIconsUrl: "https://images.unsplash.com/photo-1607863680198-23d4b2565df0?w=800&q=80&auto=format&fit=crop",
     },
   },
 ];
