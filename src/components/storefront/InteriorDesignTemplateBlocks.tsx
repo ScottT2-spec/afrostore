@@ -592,7 +592,7 @@ export function InteriorBlogPosts({ posts = [], columns = 4, sectionTitle = "OUR
     { title: "Collar brings back coffee brewing ritual", image: `${IMG}/2018/10/retail-blog-img-4-opt.jpg`, date: "October 18, 2018" },
   ];
 
-  const items = posts || defaultPosts;
+  const items = posts.length > 0 ? posts : defaultPosts;
 
   const css = `
     .id-blog { margin-bottom: 60px; }
