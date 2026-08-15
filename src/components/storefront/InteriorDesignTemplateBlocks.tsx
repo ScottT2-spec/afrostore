@@ -144,7 +144,7 @@ export function InteriorHeroSlider({ slides = [], autoplaySpeed = 5000 }: Interi
     },
   ];
 
-  const items = slides || defaultSlides;
+  const items = slides.length > 0 ? slides : defaultSlides;
   const [current, setCurrent] = useState(0);
 
   useEffect(() => {
@@ -253,7 +253,7 @@ export function InteriorCategoryGrid({ sectionTitle = "TOP CATEGORIES", categori
     { name: "Toys", image: `${IMG}/2018/10/retail-category-6-opt.jpg`, icon: `${IMG}/2025/05/wd-rocking-horse.svg` },
   ];
 
-  const items = categories || defaultCategories;
+  const items = categories.length > 0 ? categories : defaultCategories;
 
   const css = `
     .id-cats { margin-bottom: 60px; }
@@ -321,7 +321,7 @@ export function InteriorProductGrid({
     { id: 8, name: "Red Sneakers", slug: "red-sneakers", price: "155.00", image: `${IMG}/2018/10/retail-product-8-opt-330x340.jpg`, category: "Retail", rating: 5 },
   ];
 
-  const items = (propProducts || storeCtx?.products || defaultProducts).slice(0, maxProducts);
+  const items = (propProducts?.length ? propProducts : storeCtx?.products?.length ? storeCtx.products : defaultProducts).slice(0, maxProducts);
 
   const css = `
     .id-products { margin-bottom: ${marginBottom}; }
@@ -398,7 +398,7 @@ export function InteriorInfoBoxes({ items = [] }: InteriorInfoBoxesProps) {
     { icon: `${IMG}/2018/08/retail-247.svg`, title: "Buy With Joy.", description: "Ullamcorper magna nec." },
   ];
 
-  const boxes = items || defaultItems;
+  const boxes = items.length > 0 ? items : defaultItems;
 
   const css = `
     .id-infoboxes { margin-bottom: 60px; padding: 40px 0; background: #fff; }
@@ -653,7 +653,7 @@ export function InteriorBrandsBar({ brands = [] }: InteriorBrandsBarProps) {
     { name: "Witra", logo: `${IMG}/2016/09/brand-witra.png` },
   ];
 
-  const items = brands || defaultBrands;
+  const items = brands.length > 0 ? brands : defaultBrands;
 
   const css = `
     .id-brands { padding: 40px 0; margin-bottom: 60px; border-top: 1px solid #eee; border-bottom: 1px solid #eee; }
@@ -1082,7 +1082,7 @@ export interface GardenCategoryBannerProps {
   banners?: Array<{ title: string; subtitle?: string; image: string; link?: string }>;
 }
 
-export function GardenCategoryBanner({ banners }: GardenCategoryBannerProps) {
+export function GardenCategoryBanner({ banners = [] }: GardenCategoryBannerProps) {
   const storeCtx = useContext(InteriorStoreContext);
   const fixLink = (link: string) => resolveStoreLink(link, storeCtx?.storeSlug);
 
@@ -1090,7 +1090,7 @@ export function GardenCategoryBanner({ banners }: GardenCategoryBannerProps) {
     { title: "Explore Indoor", subtitle: "Home Décor Collection", image: "https://images.unsplash.com/photo-1616046229478-9901c5536a45?w=700&h=500&fit=crop", link: "/shop?category=home-decor" },
     { title: "Explore Outdoor", subtitle: "Garden Décor Collection", image: "https://images.unsplash.com/photo-1585320806297-9794b3e4eeae?w=700&h=500&fit=crop", link: "/shop?category=garden-decor" },
   ];
-  const items = banners || defaultBanners;
+  const items = banners.length > 0 ? banners : defaultBanners;
 
   const css = `
     .gd-catbanner { padding: 60px 0; }
@@ -1192,7 +1192,7 @@ export function GardenNewArrivals({
     { id: 108, name: "Herb Garden Kit", slug: "herb-garden-kit", price: "35.00", image: "https://images.unsplash.com/photo-1466692476868-aef1dfb1e735?w=400&h=480&fit=crop", category: "Garden Decor", rating: 5 },
   ];
 
-  const items = (propProducts || storeCtx?.products || defaultProducts).slice(0, maxProducts) as InteriorProduct[];
+  const items = (propProducts?.length ? propProducts : storeCtx?.products?.length ? storeCtx.products : defaultProducts).slice(0, maxProducts) as InteriorProduct[];
 
   const css = `
     .gd-arrivals { padding: 60px 0; }
@@ -1264,13 +1264,13 @@ export interface GardenFeaturesProps {
   features?: GardenFeature[];
 }
 
-export function GardenFeatures({ features }: GardenFeaturesProps) {
+export function GardenFeatures({ features = [] }: GardenFeaturesProps) {
   const defaultFeatures: GardenFeature[] = [
     { icon: "✨", title: "Unique Designs", description: "Every piece in our collection is created with a sense of artistry and purpose." },
     { icon: "🌿", title: "Sustainable Materials", description: "We prioritize eco-friendly and responsibly sourced materials." },
     { icon: "❤️", title: "Crafted with Love", description: "Our artisans bring passion and precision to every product we offer." },
   ];
-  const items = features || defaultFeatures;
+  const items = features.length > 0 ? features : defaultFeatures;
 
   const css = `
     .gd-features { padding: 70px 0; background: ${GD.lightBg}; }
@@ -1315,14 +1315,14 @@ export interface GardenTestimonialsProps {
 
 export function GardenTestimonials({
   sectionTitle = "What Our Customers Say",
-  testimonials,
+  testimonials = [],
 }: GardenTestimonialsProps) {
   const defaultTestimonials: GardenTestimonial[] = [
     { name: "Sarah M.", text: "The quality of the garden decor is outstanding. Every piece feels unique and well-crafted.", rating: 5 },
     { name: "James L.", text: "Transformed my living room with their home decor collection. Absolutely love the natural aesthetic.", rating: 5 },
     { name: "Emily R.", text: "Fast shipping and beautiful packaging. The products exceeded my expectations.", rating: 5 },
   ];
-  const items = testimonials || defaultTestimonials;
+  const items = testimonials.length > 0 ? testimonials : defaultTestimonials;
 
   const css = `
     .gd-testimonials { padding: 70px 0; }
@@ -1367,14 +1367,14 @@ export function GardenAboutPage({
   heading = "About Us",
   text = "We are a passionate home and garden décor brand dedicated to creating spaces that feel alive, warm, and beautifully curated. With a love for nature, craftsmanship, and thoughtful design, we offer pieces that blend indoor comfort with outdoor charm. Our collection is inspired by earthy textures, timeless aesthetics, and the joy of transforming simple spaces into peaceful retreats.",
   image = "https://images.unsplash.com/photo-1616046229478-9901c5536a45?w=800&h=600&fit=crop",
-  values,
+  values = [],
 }: GardenAboutPageProps) {
   const defaultValues = [
     { title: "Our Mission", description: "To bring nature-inspired beauty into every home through sustainable, handcrafted décor." },
     { title: "Quality Promise", description: "Every product is carefully curated and tested to ensure it meets our high standards." },
     { title: "Sustainability", description: "We are committed to eco-friendly practices and responsibly sourced materials." },
   ];
-  const items = values || defaultValues;
+  const items = values.length > 0 ? values : defaultValues;
 
   const css = `
     .gd-about { padding: 70px 0; }
@@ -1503,7 +1503,7 @@ export function GardenProductCategory({
   maxProducts = 12,
 }: GardenProductCategoryProps) {
   const storeCtx = useContext(InteriorStoreContext);
-  const items = (propProducts || storeCtx?.products || []).slice(0, maxProducts) as InteriorProduct[];
+  const items = (propProducts?.length ? propProducts : storeCtx?.products?.length ? storeCtx.products : []).slice(0, maxProducts) as InteriorProduct[];
 
   const css = `
     .gd-cat-page { padding: 50px 0; }
