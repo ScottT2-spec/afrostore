@@ -34,7 +34,7 @@ export const INTERIOR_DECOR_PRESET: EditorNode[] = [
             "subtitle": "$68.00",
             "buttonText": "Go To Shop",
             "buttonLink": "/shop",
-            "image": "https://images.unsplash.com/photo-1602928321679-560bb453f190?w=900&q=80&auto=format&fit=crop"
+            "image": "https://images.unsplash.com/photo-1586023492125-27b2c045efd7?w=900&q=80&auto=format&fit=crop"
           },
           elements: [],
         },
@@ -46,7 +46,7 @@ export const INTERIOR_DECOR_PRESET: EditorNode[] = [
             "titleLine2": "Minimalist Vase.",
             "buttonText": "Go To Shop",
             "buttonLink": "/shop",
-            "image": "https://images.unsplash.com/photo-1578500494198-246f612d3b3d?w=900&q=80&auto=format&fit=crop"
+            "image": "https://images.unsplash.com/photo-1616486338812-3dadae4b4ace?w=900&q=80&auto=format&fit=crop"
           },
           elements: [],
         },
@@ -58,7 +58,7 @@ export const INTERIOR_DECOR_PRESET: EditorNode[] = [
             "titleLine2": "and Brass.",
             "buttonText": "Go To Shop",
             "buttonLink": "/shop",
-            "image": "https://images.unsplash.com/photo-1584589167171-541ce45f1eea?w=900&q=80&auto=format&fit=crop"
+            "image": "https://images.unsplash.com/photo-1586495777744-4413f21062fa?w=900&q=80&auto=format&fit=crop"
           },
           elements: [],
         }
@@ -71,11 +71,11 @@ export const INTERIOR_DECOR_PRESET: EditorNode[] = [
       sectionTitle: "SHOP BY CATEGORY",
       columns: 5,
       categories: [
-        { name: "Lighting", image: "https://images.unsplash.com/photo-1543198126-b0d9dd0355c9?w=400&q=80&auto=format&fit=crop", link: "/shop?category=lighting" },
-        { name: "Furniture", image: "https://images.unsplash.com/photo-1567538096630-e0c55bd6374c?w=400&q=80&auto=format&fit=crop", link: "/shop?category=furniture" },
+        { name: "Lighting", image: "https://images.unsplash.com/photo-1608248597279-f99d160bfcbc?w=400&q=80&auto=format&fit=crop", link: "/shop?category=lighting" },
+        { name: "Furniture", image: "https://images.unsplash.com/photo-1555041469-a586c61ea9bc?w=400&q=80&auto=format&fit=crop", link: "/shop?category=furniture" },
         { name: "Decor", image: "https://images.unsplash.com/photo-1616486338812-3dadae4b4ace?w=400&q=80&auto=format&fit=crop", link: "/shop?category=decor" },
-        { name: "Clocks", image: "https://images.unsplash.com/photo-1495364141860-b0d03eccd065?w=400&q=80&auto=format&fit=crop", link: "/shop?category=clocks" },
-        { name: "Kitchen", image: "https://images.unsplash.com/photo-1556911220-bff31c812dba?w=400&q=80&auto=format&fit=crop", link: "/shop?category=kitchen" },
+        { name: "Clocks", image: "https://images.unsplash.com/photo-1563861826100-9cb868fdbe1c?w=400&q=80&auto=format&fit=crop", link: "/shop?category=clocks" },
+        { name: "Kitchen", image: "https://images.unsplash.com/photo-1556909114-f6e7ad7d3136?w=400&q=80&auto=format&fit=crop", link: "/shop?category=kitchen" },
       ],
     },
   },
@@ -88,19 +88,19 @@ export const INTERIOR_DECOR_PRESET: EditorNode[] = [
         {
           title: "New Arrivals In Decorations.",
           subtitle: "View More",
-          image: "https://images.unsplash.com/photo-1615874959474-d609969a20ed?w=800&q=80&auto=format&fit=crop",
+          image: "https://images.unsplash.com/photo-1570194065650-d99fb4a38c5f?w=800&q=80&auto=format&fit=crop",
           buttonText: "View More",
           buttonLink: "/shop",
         },
         {
           title: "Decorative Wall Elements.",
           subtitle: "View More",
-          image: "https://images.unsplash.com/photo-1615529182904-14819c35db37?w=800&q=80&auto=format&fit=crop",
+          image: "https://images.unsplash.com/photo-1667312939978-64cf31718a6e?w=800&q=80&auto=format&fit=crop",
           buttonText: "View More",
           buttonLink: "/shop",
         },
         {
-          image: "https://images.unsplash.com/photo-1522708323590-d24dbb6b0267?w=800&q=80&auto=format&fit=crop",
+          image: "https://images.unsplash.com/photo-1616047006789-b7af5afb8c20?w=800&q=80&auto=format&fit=crop",
           title: "Cozy Living Room Finds.",
           subtitle: "View More",
           buttonText: "View More",
@@ -201,7 +201,7 @@ export const INTERIOR_RETAIL_PRESET: EditorNode[] = [
         {
           title: "Explore Outdoor",
           subtitle: "Garden Décor Collection",
-          image: "https://images.unsplash.com/photo-1600607687644-c7531e489ece?w=700&h=500&fit=crop",
+          image: "https://images.unsplash.com/photo-1600210492486-724fe5c67fb0?w=700&h=500&fit=crop",
           link: "/shop?category=garden-decor",
         },
       ],
