@@ -29,7 +29,7 @@ const NO_CHROME_SLUGS = new Set(["ai", "landing-gadget", "aegis", "aegis-landing
 // demo props.
 const DUPLICATE_FOOTER_BLOCK_TYPES = new Set([
   "groceryFooter", "perfumesFooter", "electronicsFooter", "bakeryFooter",
-  "fashionFooter", "interiorFooter", "makeupFooter",
+  "fashionFooter", "interiorFooter", "makeupFooter", "healthFooterFull",
 ]);
 
 function stripDuplicateFooterBlocks(blocks: any[]): any[] {
