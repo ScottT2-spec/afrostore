@@ -195,51 +195,79 @@ interface TShirtsPrintsFooterProps {
 }
 
 export function TShirtsPrintsFooter({ storeName, storeSlug, logo, socialLinks = [] }: TShirtsPrintsFooterProps) {
-  const fallbackLinks = [
-    { platform: "facebook", url: "https://www.facebook.com/xtemos.studio" },
-    { platform: "twitter", url: "https://x.com/xtemos_studio" },
-    { platform: "instagram", url: "https://www.instagram.com/xtemos.studio/" },
-    { platform: "youtube", url: "https://www.youtube.com/channel/UCu3loFwqqOQ9z-YTcnplK8w" },
-  ];
-  const links = socialLinks.length > 0 ? socialLinks : fallbackLinks;
+  const activeSocials = socialLinks.filter((s) => s.url && s.url !== "#");
+  const base = `/store/${storeSlug}`;
 
   const css = `
     .tp-footer { border-top: 1px solid #ececec; background: #fff; color: #1d1d1d; }
-    .tp-footer-inner { max-width: 1320px; margin: 0 auto; padding: 28px 16px 18px; display: flex; flex-direction: column; gap: 18px; }
-    .tp-footer-top { display: flex; align-items: center; justify-content: space-between; gap: 18px; width: 100%; }
-    .tp-footer-brand { display: inline-flex; align-items: center; gap: 12px; text-decoration: none; color: #111; min-width: 0; }
-    .tp-footer-logo { width: 202px; max-width: 202px; height: auto; display: block; object-fit: contain; }
-    .tp-footer-name { font-family: "Manrope", Arial, sans-serif; font-size: 15px; font-weight: 700; letter-spacing: 0.02em; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-    .tp-socials { display: flex; align-items: center; gap: 18px; flex-wrap: wrap; justify-content: flex-end; }
+    .tp-footer-main { max-width: 1320px; margin: 0 auto; padding: 48px 16px 32px; display: grid; grid-template-columns: 1.4fr 1fr 1fr 1fr; gap: 32px; }
+    .tp-footer-brand-col p { font-family: "Manrope", Arial, sans-serif; font-size: 14px; line-height: 1.75; color: #6b6b6b; margin: 14px 0 0; }
+    .tp-footer-logo { width: 160px; max-width: 100%; height: auto; display: block; object-fit: contain; }
+    .tp-footer-name { font-family: "Manrope", Arial, sans-serif; font-size: 17px; font-weight: 700; letter-spacing: 0.02em; }
+    .tp-footer-col-title { font-family: "Manrope", Arial, sans-serif; font-size: 13px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.06em; margin: 0 0 16px; }
+    .tp-footer-links { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 10px; }
+    .tp-footer-links a { font-family: "Manrope", Arial, sans-serif; font-size: 14px; color: #6b6b6b; text-decoration: none; transition: color 0.15s ease; }
+    .tp-footer-links a:hover { color: #1d1d1d; }
+    .tp-socials { display: flex; align-items: center; gap: 18px; flex-wrap: wrap; margin-top: 16px; }
     .tp-socials a { color: #1d1d1d; text-decoration: none; font-family: "Manrope", Arial, sans-serif; font-size: 14px; font-weight: 700; transition: color 0.15s ease; }
     .tp-socials a:hover { color: #808080; }
-    .tp-footer-copy { margin: 0; color: #1d1d1d; font-family: "Manrope", Arial, sans-serif; font-size: 14px; line-height: 1.8; text-align: center; }
+    .tp-footer-bottom { border-top: 1px solid #ececec; }
+    .tp-footer-bottom-inner { max-width: 1320px; margin: 0 auto; padding: 18px 16px; }
+    .tp-footer-copy { margin: 0; color: #6b6b6b; font-family: "Manrope", Arial, sans-serif; font-size: 13px; line-height: 1.8; text-align: center; }
     .tp-footer-copy a { color: inherit; text-decoration: none; font-weight: 700; }
-    .tp-footer-copy a:hover { color: #808080; }
-    @media (max-width: 640px) {
-      .tp-footer-top { flex-direction: column; align-items: flex-start; }
-      .tp-socials { justify-content: flex-start; gap: 14px; }
-    }
+    .tp-footer-copy a:hover { color: #1d1d1d; }
+    @media (max-width: 900px) { .tp-footer-main { grid-template-columns: 1fr 1fr; } }
+    @media (max-width: 560px) { .tp-footer-main { grid-template-columns: 1fr; gap: 28px; padding: 36px 16px 24px; } }
   `;
 
   return (
     <footer className="tp-footer">
       <style dangerouslySetInnerHTML={{ __html: css }} />
-      <div className="tp-footer-inner">
-        <div className="tp-footer-top">
-          <Link href={`/store/${storeSlug}`} className="tp-footer-brand" aria-label={storeName}>
+      <div className="tp-footer-main">
+        <div className="tp-footer-brand-col">
+          <Link href={base} className="tp-footer-brand" aria-label={storeName} style={{ display: "inline-flex", textDecoration: "none", color: "#111" }}>
             {logo ? <img src={logo} alt={storeName} className="tp-footer-logo" /> : <span className="tp-footer-name">{storeName}</span>}
           </Link>
-
-          <div className="tp-socials" aria-label="Social links">
-            {links.map((link) => (
-              <a key={`${link.platform}-${link.url}`} href={link.url} target="_blank" rel="noopener noreferrer" aria-label={link.platform}>
-                {socialLabel(link.platform)}
-              </a>
-            ))}
-          </div>
+          <p>Custom apparel and print-on-demand designs made to order — quality prints, fast turnaround.</p>
+          {activeSocials.length > 0 && (
+            <div className="tp-socials" aria-label="Social links">
+              {activeSocials.map((link) => (
+                <a key={`${link.platform}-${link.url}`} href={link.url} target="_blank" rel="noopener noreferrer" aria-label={link.platform}>
+                  {socialLabel(link.platform)}
+                </a>
+              ))}
+            </div>
+          )}
         </div>
-
+        <div>
+          <h4 className="tp-footer-col-title">Shop</h4>
+          <ul className="tp-footer-links">
+            <li><Link href={`${base}/shop`}>All Products</Link></li>
+            <li><Link href={`${base}/wishlist`}>Wishlist</Link></li>
+            <li><Link href={`${base}/cart`}>Cart</Link></li>
+          </ul>
+        </div>
+        <div>
+          <h4 className="tp-footer-col-title">Company</h4>
+          <ul className="tp-footer-links">
+            <li><Link href={`${base}/about`}>About Us</Link></li>
+            <li><Link href={`${base}/contact`}>Contact</Link></li>
+            <li><Link href={`${base}/blog`}>Blog</Link></li>
+          </ul>
+        </div>
+        <div>
+          <h4 className="tp-footer-col-title">Account</h4>
+          <ul className="tp-footer-links">
+            <li><Link href={`${base}/my-account`}>Login / Register</Link></li>
+            <li><Link href={`${base}/order-tracking`}>Track Order</Link></li>
+            <li><Link href={`${base}/reviews`}>Reviews</Link></li>
+          </ul>
+        </div>
+      </div>
+      <div className="tp-footer-bottom">
+        <div className="tp-footer-bottom-inner">
+          <p className="tp-footer-copy"><Link href={base}>© {new Date().getFullYear()} {storeName}. All rights reserved.</Link></p>
+        </div>
       </div>
     </footer>
   );

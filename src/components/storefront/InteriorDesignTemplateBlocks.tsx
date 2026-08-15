@@ -941,10 +941,10 @@ export function InteriorFooterFull({
         <div>
           <h4 className="if-col-title">Company</h4>
           <ul className="if-links">
-            <li><Link href={`${base}/shop`}>Our Story</Link></li>
-            <li><Link href={`${base}/shop`}>Contact</Link></li>
+            <li><Link href={`${base}/about`}>Our Story</Link></li>
+            <li><Link href={`${base}/contact`}>Contact</Link></li>
             <li><Link href={`${base}/order-tracking`}>Track Order</Link></li>
-            <li><Link href={`${base}/shop`}>Help</Link></li>
+            <li><Link href={`${base}/contact`}>Help</Link></li>
             <li><Link href={`${base}/blog`}>Blog</Link></li>
           </ul>
         </div>
@@ -961,19 +961,21 @@ export function InteriorFooterFull({
       </div>
       <div className="if-bottom">
         <small><Link href={base}>{copyrightText || `© ${new Date().getFullYear()} ${storeName}. All rights reserved.`}</Link></small>
-        <img src="/prokip-logo.png" alt="Payment methods" style={{ height: "21px" }} loading="lazy" />
       </div>
     </footer>
   );
 }
 
 /* ═══════════════════════════════════════════════════════════════
-   LEGACY FOOTER (kept for backward compat)
+   FOOTER (alias — InteriorFooterFull is the real, complete footer;
+   InteriorFooter used to be a thin FashionFooter pass-through with
+   no default columns/content, which made Decor pages look like they
+   had no footer at all. Existing call sites just pass storeName/
+   storeSlug/logo, which InteriorFooterFull already accepts.)
    ═══════════════════════════════════════════════════════════════ */
 
-export function InteriorFooter(props: React.ComponentProps<typeof FashionFooter>) {
-  const storeCtx = useContext(InteriorStoreContext);
-  return <FashionFooter {...props} storeSlug={storeCtx?.storeSlug} />;
+export function InteriorFooter(props: InteriorFooterFullProps) {
+  return <InteriorFooterFull {...props} />;
 }
 
 /* ═══════════════════════════════════════════════════════════════
