@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getStoreContext, success, error , requireRole } from "@/lib/api-helpers";
 import { unauthorized } from "@/lib/auth";
-import { chatWithAI, getAIStatus } from "@/lib/ai-service";
+import { chatWithAI, getAIStatus, AIGuardrailError } from "@/lib/ai-service";
 
 export const maxDuration = 60;
 
@@ -63,6 +63,9 @@ export async function POST(req: NextRequest, { params }: Params) {
 
     return success(response);
   } catch (err) {
+    if (err instanceof AIGuardrailError) {
+      return error(err.message, 429);
+    }
     console.error("AI chat error:", err);
     const message = (err as Error).message || "AI service unavailable";
 
