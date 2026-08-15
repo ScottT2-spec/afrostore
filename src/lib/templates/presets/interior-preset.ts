@@ -135,7 +135,12 @@ export const INTERIOR_DECOR_PRESET: EditorNode[] = [
     settings: {
       columns: 4,
       sectionTitle: "OUR BLOG",
-      posts: [],
+      posts: [
+        { title: "5 Ways to Style Your Living Room for Every Season", image: "https://images.unsplash.com/photo-1567016432779-094069958ea5?w=500&q=80&auto=format&fit=crop", date: "October 12, 2025" },
+        { title: "Choosing the Right Furniture for Small Spaces", image: "https://images.unsplash.com/photo-1586023492125-27b2c045efd7?w=500&q=80&auto=format&fit=crop", date: "October 8, 2025" },
+        { title: "Warm Neutrals: This Season's Biggest Decor Trend", image: "https://images.unsplash.com/photo-1524758631624-e2822e304c36?w=500&q=80&auto=format&fit=crop", date: "October 3, 2025" },
+        { title: "How to Mix Textures Without Overdoing It", image: "https://images.unsplash.com/photo-1493663284031-b7e3aefcae8e?w=500&q=80&auto=format&fit=crop", date: "September 28, 2025" },
+      ],
     },
   },
   {
@@ -158,7 +163,10 @@ export const INTERIOR_DECOR_PRESET: EditorNode[] = [
         address: "Update this with your store's real address",
         phone: "Update with your phone number",
       },
-      recentPosts: [],
+      recentPosts: [
+        { title: "5 Ways to Style Your Living Room for Every Season", url: "/blog/5-ways-to-style-your-living-room-for-every-season", date: "October 12, 2025", thumbnail: "https://images.unsplash.com/photo-1567016432779-094069958ea5?w=200&q=80&auto=format&fit=crop" },
+        { title: "Choosing the Right Furniture for Small Spaces", url: "/blog/choosing-the-right-furniture-for-small-spaces", date: "October 8, 2025", thumbnail: "https://images.unsplash.com/photo-1586023492125-27b2c045efd7?w=200&q=80&auto=format&fit=crop" },
+      ],
       linkColumns: [
         { title: "SHOP", links: [{ label: "All Products", url: "/shop" }, { label: "About Us", url: "/about" }, { label: "Contact Us", url: "/contact" }, { label: "Blog", url: "/blog" }] },
       ],
