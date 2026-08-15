@@ -171,7 +171,9 @@ export default function PaymentsPage() {
               )}
               {connected && !gw?.hasWebhookSecret && (
                 <p className="mt-3 text-xs text-amber-600">
-                  No webhook secret set — payment confirmations may be delayed or missed. Click Edit to add one.
+                  {provider === "FLUTTERWAVE"
+                    ? "No webhook secret hash set — payment confirmations may be delayed or missed. Click Edit to add one."
+                    : "Payment confirmations may be delayed until a customer returns to your site after paying. Click Edit and re-save to enable instant confirmation."}
                 </p>
               )}
             </div>
@@ -205,26 +207,33 @@ export default function PaymentsPage() {
                     <div>
                       <label className="block text-sm font-medium text-surface-700 mb-1">Base URL <span className="text-surface-400 font-normal">(optional)</span></label>
                       <input value={baseUrl} onChange={(e) => setBaseUrl(e.target.value)} placeholder="https://api.monnify.com" className="input-field" />
-                      <p className="mt-1 text-[11px] text-surface-400">Leave blank to use Monnify's live API. Use the sandbox URL for testing.</p>
+                      <p className="mt-1 text-[11px] text-surface-400">Leave blank to use Monnify's live API. Use the sandbox URL for testing — just the domain, e.g. https://sandbox.monnify.com (no trailing /api).</p>
                     </div>
                   </>
                 )}
 
-                <div>
-                  <label className="block text-sm font-medium text-surface-700 mb-1">
-                    Webhook Secret {gateways.find((g) => g.provider === setupProvider)?.hasWebhookSecret && <span className="text-surface-400 font-normal">(already set — leave blank to keep it)</span>}
-                  </label>
-                  <input
-                    type="password"
-                    value={webhookSecret}
-                    onChange={(e) => setWebhookSecret(e.target.value)}
-                    className="input-field"
-                    placeholder={gateways.find((g) => g.provider === setupProvider)?.hasWebhookSecret ? "••••••••" : ""}
-                  />
-                  <p className="mt-1 text-[11px] text-surface-400">
-                    From your {providerInfo[setupProvider].name} dashboard's webhook settings. Needed so we can trust and process payment confirmation events.
+                {setupProvider === "FLUTTERWAVE" ? (
+                  <div>
+                    <label className="block text-sm font-medium text-surface-700 mb-1">
+                      Webhook Secret Hash {gateways.find((g) => g.provider === setupProvider)?.hasWebhookSecret && <span className="text-surface-400 font-normal">(already set — leave blank to keep it)</span>}
+                    </label>
+                    <input
+                      type="password"
+                      value={webhookSecret}
+                      onChange={(e) => setWebhookSecret(e.target.value)}
+                      className="input-field"
+                      placeholder={gateways.find((g) => g.provider === setupProvider)?.hasWebhookSecret ? "••••••••" : ""}
+                      required={!gateways.find((g) => g.provider === setupProvider)?.hasWebhookSecret}
+                    />
+                    <p className="mt-1 text-[11px] text-surface-400">
+                      Set this same value as the "Secret Hash" when you add the webhook URL in your Flutterwave dashboard's Settings → Webhooks.
+                    </p>
+                  </div>
+                ) : (
+                  <p className="text-[11px] text-surface-400 bg-surface-50 rounded-lg px-3 py-2">
+                    No separate webhook secret needed — {providerInfo[setupProvider].name} authenticates webhook events using the Secret Key above. Just add this URL as your webhook endpoint in your {providerInfo[setupProvider].name} dashboard.
                   </p>
-                </div>
+                )}
 
                 <div className="flex justify-end gap-3 pt-2">
                   <button type="button" onClick={resetForm} className="btn-secondary text-sm py-2 px-4">Cancel</button>

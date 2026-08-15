@@ -230,7 +230,7 @@ export default function NewSitePage() {
   const canProceed = () => {
     switch (step) {
       case 1: return !!siteType;
-      case 2: return !!industry;
+      case 2: return siteType === 'LANDING_PAGE' || !!industry;
       case 3: return !!launchMethod;
       case 4: return businessInfo.name.trim().length >= 2;
       case 5: return launchMethod === 'blank' || launchMethod === 'quick' || !!selectedTemplateId;
@@ -326,6 +326,11 @@ export default function NewSitePage() {
   };
 
   const handleNext = () => {
+    // Landing pages skip the industry step entirely — straight to launch method
+    if (step === 1 && siteType === 'LANDING_PAGE') {
+      setStep(3);
+      return;
+    }
     // "Build with AI" skips template selection - go straight to create
     if (step === 4 && launchMethod === 'quick') {
       setStep(5);
@@ -919,7 +924,11 @@ export default function NewSitePage() {
         {/* Navigation Buttons */}
         <div className="flex items-center justify-between mt-10 pt-6 border-t border-gray-100">
           <button
-            onClick={() => step > 1 ? setStep(step - 1) : router.back()}
+            onClick={() => {
+              if (step === 3 && siteType === 'LANDING_PAGE') { setStep(1); return; }
+              if (step > 1) { setStep(step - 1); return; }
+              router.back();
+            }}
             className="flex items-center gap-2 px-4 py-2.5 text-gray-600 hover:text-gray-800 transition"
           >
             <ArrowLeft className="w-4 h-4" />

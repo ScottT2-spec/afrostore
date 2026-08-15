@@ -68,21 +68,21 @@ export default function PagesPage() {
     const res = await api.post<PageItem>(`/api/sites/${currentStore.id}/pages`, {
       title: newTitle, slug, type: newType, content: buildTemplatePageContent([], {}), isPublished: false,
     });
-    if (res.success && res.data) {
-      setPages((prev) => [res.data!, ...prev]);
-      setNewTitle("");
-      setShowCreate(false);
-    }
     setCreating(false);
+    if (!res.success) { alert(res.error || "Failed to create page"); return; }
+    setPages((prev) => [res.data!, ...prev]);
+    setNewTitle("");
+    setShowCreate(false);
     if (isFromAI) { clearPrefill(); router.push("/dashboard/ai"); }
   };
 
   const deletePage = async (id: string) => {
     if (!currentStore) return;
     setDeleteId(id);
-    await api.delete(`/api/sites/${currentStore.id}/pages/${id}`);
-    setPages((prev) => prev.filter((p) => p.id !== id));
+    const res = await api.delete(`/api/sites/${currentStore.id}/pages/${id}`);
     setDeleteId(null);
+    if (!res.success) { alert(res.error || "Failed to delete page"); return; }
+    setPages((prev) => prev.filter((p) => p.id !== id));
   };
 
   const regeneratePages = async () => {
@@ -112,6 +112,8 @@ export default function PagesPage() {
     });
     if (res.success) {
       setPages((prev) => prev.map((p) => p.id === page.id ? { ...p, isPublished: !p.isPublished } : p));
+    } else {
+      alert(res.error || "Failed to update page");
     }
   };
 
@@ -222,7 +224,12 @@ export default function PagesPage() {
                     <Pencil className="h-3 w-3" /> Customize
                   </Link>
                   <button
-                    onClick={() => togglePublish(page)}
+                    onClick={() => {
+                      const isOnlyHomeOrLanding = page.isPublished && (page.type === "HOME" || page.type === "LANDING") &&
+                        pages.filter((p) => p.isPublished && (p.type === "HOME" || p.type === "LANDING")).length <= 1;
+                      if (isOnlyHomeOrLanding && !confirm("This is your store's only published home/landing page — unpublishing it will leave your storefront homepage empty. Continue?")) return;
+                      togglePublish(page);
+                    }}
                     className="p-2 rounded-lg hover:bg-surface-100 text-surface-400 hover:text-surface-700 transition-colors"
                     title={page.isPublished ? "Unpublish" : "Publish"}
                   >
@@ -239,7 +246,14 @@ export default function PagesPage() {
                     </Link>
                   )}
                   <button
-                    onClick={() => { if (confirm("Delete this page?")) deletePage(page.id); }}
+                    onClick={() => {
+                      const isOnlyHomeOrLanding = (page.type === "HOME" || page.type === "LANDING") &&
+                        pages.filter((p) => p.type === "HOME" || p.type === "LANDING").length <= 1;
+                      const msg = isOnlyHomeOrLanding
+                        ? "This is your store's only home/landing page — deleting it will leave your storefront homepage empty. Delete anyway?"
+                        : "Delete this page?";
+                      if (confirm(msg)) deletePage(page.id);
+                    }}
                     disabled={deleteId === page.id}
                     className="p-2 rounded-lg hover:bg-accent-50 text-surface-400 hover:text-accent-600 transition-colors"
                   >

@@ -417,6 +417,30 @@ export interface VegetableContactProps {
 
 export function VegetableContact({ subtitle, title, description, address, addressDescription, phone, email, openingHours, storeSlug }: VegetableContactProps) {
   const mapSrc = `https://maps.google.com/maps?q=${encodeURIComponent(address)}&z=14&output=embed`;
+  const [form, setForm] = useState({ name: "", email: "", message: "" });
+  const [status, setStatus] = useState<"idle" | "sending" | "success" | "error">("idle");
+  const [notice, setNotice] = useState("");
+
+  const submit = async (event: React.FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
+    setStatus("sending");
+    setNotice("");
+    try {
+      const response = await fetch(`/api/storefront/${storeSlug}/contact`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ name: form.name, email: form.email, subject: "Website Contact Form", message: form.message }),
+      });
+      const payload = await response.json();
+      if (!response.ok || !payload.success) throw new Error(payload.error || "Unable to send message");
+      setStatus("success");
+      setNotice("Thanks! We'll get back to you shortly.");
+      setForm({ name: "", email: "", message: "" });
+    } catch {
+      setStatus("error");
+      setNotice("Something went wrong. Please try again.");
+    }
+  };
 
   return (
     <div className="bg-[#fff9ef]">
@@ -435,7 +459,7 @@ export function VegetableContact({ subtitle, title, description, address, addres
                 <p className="mt-4 max-w-xl text-sm leading-7 text-[#63584b]">{addressDescription}</p>
                 {(phone || email) && (
                   <div className="mt-8">
-                    <p className="text-[11px] font-semibold uppercase tracking-[0.45em] text-[#8f7756]">Telephone Reservations</p>
+                    <p className="text-[11px] font-semibold uppercase tracking-[0.45em] text-[#8f7756]">Contact</p>
                     <div className="mt-3 space-y-2 text-sm leading-7 text-[#4d4338]">
                       {phone && <p>{phone}</p>}
                       {email && <p>{email}</p>}
@@ -456,18 +480,21 @@ export function VegetableContact({ subtitle, title, description, address, addres
               </div>
             </div>
             <div id="reservation-form" className="rounded-[2rem] border border-[#eadfce] bg-white p-6 shadow-[0_20px_60px_rgba(63,51,31,0.08)] sm:p-8">
-              <p className="text-[11px] font-semibold uppercase tracking-[0.45em] text-[#8f7756]">Reservations</p>
-              <h3 className="mt-4 font-serif text-3xl text-[#2a241a]">Book your table online now.</h3>
-              <p className="mt-3 text-sm leading-7 text-[#63584b]">Send your reservation details here and our team will follow up to confirm.</p>
-              <form className="mt-6 grid gap-4">
+              <p className="text-[11px] font-semibold uppercase tracking-[0.45em] text-[#8f7756]">Get In Touch</p>
+              <h3 className="mt-4 font-serif text-3xl text-[#2a241a]">Send us a message.</h3>
+              <p className="mt-3 text-sm leading-7 text-[#63584b]">Questions about an order, delivery, or our produce? Send it here and our team will follow up.</p>
+              <form onSubmit={submit} className="mt-6 grid gap-4">
                 <div className="grid gap-4 sm:grid-cols-2">
-                  <input placeholder="Your name" className="rounded-2xl border border-[#d9d2c5] bg-[#fcfaf4] px-4 py-3 text-sm outline-none transition-colors focus:border-[#7fa06f]" />
-                  <input type="email" placeholder="Email address" className="rounded-2xl border border-[#d9d2c5] bg-[#fcfaf4] px-4 py-3 text-sm outline-none transition-colors focus:border-[#7fa06f]" />
+                  <input value={form.name} onChange={(e) => setForm((c) => ({ ...c, name: e.target.value }))} placeholder="Your name" required className="rounded-2xl border border-[#d9d2c5] bg-[#fcfaf4] px-4 py-3 text-sm outline-none transition-colors focus:border-[#7fa06f]" />
+                  <input type="email" value={form.email} onChange={(e) => setForm((c) => ({ ...c, email: e.target.value }))} placeholder="Email address" required className="rounded-2xl border border-[#d9d2c5] bg-[#fcfaf4] px-4 py-3 text-sm outline-none transition-colors focus:border-[#7fa06f]" />
                 </div>
-                <textarea placeholder="Your message" rows={7} className="rounded-2xl border border-[#d9d2c5] bg-[#fcfaf4] px-4 py-3 text-sm outline-none transition-colors focus:border-[#7fa06f]" />
-                <button type="button" className="inline-flex items-center rounded-full bg-[#243226] px-6 py-3 text-xs font-semibold uppercase tracking-[0.2em] text-white transition-colors hover:bg-[#6b8d49]">
-                  Send Message
-                </button>
+                <textarea value={form.message} onChange={(e) => setForm((c) => ({ ...c, message: e.target.value }))} placeholder="Your message" required rows={7} className="rounded-2xl border border-[#d9d2c5] bg-[#fcfaf4] px-4 py-3 text-sm outline-none transition-colors focus:border-[#7fa06f]" />
+                <div className="flex flex-wrap items-center gap-3">
+                  <button type="submit" disabled={status === "sending"} className="inline-flex items-center rounded-full bg-[#243226] px-6 py-3 text-xs font-semibold uppercase tracking-[0.2em] text-white transition-colors hover:bg-[#6b8d49] disabled:opacity-50">
+                    {status === "sending" ? "Sending..." : "Send Message"}
+                  </button>
+                  {notice && <span className={`text-sm ${status === "error" ? "text-red-600" : "text-[#52614f]"}`}>{notice}</span>}
+                </div>
               </form>
             </div>
           </div>

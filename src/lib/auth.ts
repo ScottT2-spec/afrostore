@@ -46,21 +46,33 @@ export async function getAuthUser(req: NextRequest) {
   const payload = await verifyToken(token);
   if (!payload) return null;
 
-  const user = await prisma.user.findUnique({
-    where: { id: payload.userId },
-    select: {
-      id: true,
-      email: true,
-      firstName: true,
-      lastName: true,
-      phone: true,
-      avatar: true,
-      role: true,
-      createdAt: true,
-    },
-  });
+  // Prisma calls here previously ran unguarded. If the DB is unreachable or
+  // misconfigured (e.g. DATABASE_URL missing on the deployed environment),
+  // this throws — and since callers invoke getAuthUser outside their own
+  // try/catch, an uncaught throw here crashes the whole route handler.
+  // Next/Vercel then returns its own HTML error page instead of JSON,
+  // which breaks every client-side res.json() call with a
+  // "JSON Parse error: Unrecognized token '<'" (the '<' of <!DOCTYPE html>).
+  try {
+    const user = await prisma.user.findUnique({
+      where: { id: payload.userId },
+      select: {
+        id: true,
+        email: true,
+        firstName: true,
+        lastName: true,
+        phone: true,
+        avatar: true,
+        role: true,
+        createdAt: true,
+      },
+    });
 
-  return user;
+    return user;
+  } catch (err) {
+    console.error("getAuthUser: failed to look up user", err);
+    return null;
+  }
 }
 
 export function unauthorized() {

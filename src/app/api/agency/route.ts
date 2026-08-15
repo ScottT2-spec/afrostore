@@ -1,6 +1,6 @@
 import { NextRequest } from "next/server";
 import { prisma } from "@/lib/db";
-import { success, error } from "@/lib/api-helpers";
+import { success, error, createSiteWithUniqueSlug } from "@/lib/api-helpers";
 import { getAuthUser, unauthorized } from "@/lib/auth";
 
 type Params = Record<string, never>;
@@ -72,15 +72,15 @@ export async function POST(req: NextRequest) {
 
     let site = null;
     if (createSite && siteName) {
-      const siteSlug = (siteName as string).toLowerCase().replace(/[^a-z0-9]+/g, "-").slice(0, 50);
-      const uniqueSuffix = Date.now().toString(36);
-      site = await prisma.site.create({
-        data: {
-          workspaceId: workspace.id, name: siteName, slug: `${siteSlug}-${uniqueSuffix}`,
-          subdomain: `${siteSlug}-${uniqueSuffix}`,
-          siteType: siteType || "ECOMMERCE", currency: "NGN",
-        },
-      });
+      // Uses a retry-on-collision loop instead of a single timestamp-based
+      // suffix with no retry — collision-resistant, but not collision-proof,
+      // and a raw crash here would leave the just-created workspace orphaned
+      // with no site attached.
+      site = await createSiteWithUniqueSlug(siteName as string, (slug) => ({
+        workspaceId: workspace.id, name: siteName, slug,
+        subdomain: slug.slice(0, 30),
+        siteType: siteType || "ECOMMERCE", currency: "NGN",
+      }));
     }
 
     return success({ workspace, site }, 201);

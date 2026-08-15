@@ -14,6 +14,7 @@ import {
 
 interface EditorStore extends EditorState {
   history: HistoryState;
+  clipboardElement: Element | null;
   // Actions
   setPageStructure: (structure: PageStructure) => void;
   setSelectedElementId: (id: string | null) => void;
@@ -30,6 +31,8 @@ interface EditorStore extends EditorState {
   updateElement: (id: string, updates: Partial<Element>) => void;
   deleteElement: (id: string) => void;
   duplicateElement: (id: string) => void;
+  copyElementToClipboard: (id: string) => void;
+  pasteElement: () => void;
   moveElement: (id: string, newParentId: string | null, newIndex: number) => void;
   
   // History actions
@@ -65,6 +68,20 @@ const setNestedChildren = (element: any, children: any[]) => {
   if (Array.isArray(element?.children)) return { ...element, children };
   if (Array.isArray(element?.columns)) return { ...element, columns: children };
   return { ...element, elements: children };
+};
+
+// Deep-clones an element with a fresh id for itself AND every nested child —
+// duplicateElement previously only regenerated the top-level id, so
+// duplicating any container (columns, nested sections) left two elements
+// sharing the same child ids (React key collisions, and updateElement/
+// deleteElement editing whichever occurrence they found first).
+const cloneWithNewIds = (element: Element): Element => {
+  const cloned: any = { ...element, id: crypto.randomUUID() };
+  const children = getNestedChildren(element as any);
+  if (children.length > 0) {
+    return setNestedChildren(cloned, children.map((c: any) => cloneWithNewIds(c))) as Element;
+  }
+  return cloned;
 };
 
 const findElementPath = (elements: Element[], targetId: string, trail: Element[] = []): Element[] | null => {
@@ -128,6 +145,7 @@ const initialState: EditorState = {
 export const useEditorStore = create<EditorStore>()(
   subscribeWithSelector((set, get) => ({
     ...initialState,
+    clipboardElement: null,
     
     setPageStructure: (structure) => {
       set({ pageStructure: structure, isDirty: true });
@@ -351,9 +369,32 @@ export const useEditorStore = create<EditorStore>()(
       
       const cloned = findAndClone(pageStructure.elements);
       if (cloned) {
-        cloned.id = crypto.randomUUID();
-        addElement(cloned);
+        addElement(cloneWithNewIds(cloned));
       }
+    },
+
+    copyElementToClipboard: (id) => {
+      const { pageStructure } = get();
+      const findEl = (elements: Element[]): Element | null => {
+        for (const el of elements) {
+          if (el.id === id) return JSON.parse(JSON.stringify(el));
+          const nested = getNestedChildren(el);
+          if (nested) {
+            const found = findEl(nested as Element[]);
+            if (found) return found;
+          }
+        }
+        return null;
+      };
+      const el = findEl(pageStructure.elements);
+      if (el) set({ clipboardElement: el });
+    },
+
+    pasteElement: () => {
+      const { clipboardElement, addElement, pushHistory } = get();
+      if (!clipboardElement) return;
+      pushHistory();
+      addElement(cloneWithNewIds(clipboardElement));
     },
     
     moveElement: (id, newParentId, newIndex) => {

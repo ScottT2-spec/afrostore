@@ -18,7 +18,7 @@ export const PERFUMES_TEMPLATE_PRESET: EditorNode[] = [
           type: "slide",
           settings:           {
             "title": "Opus Essence",
-            "bottleImage": "/prokip-logo.png",
+            "bottleImage": "https://images.unsplash.com/photo-1523293182086-7651a899d37f?w=800&q=80&auto=format&fit=crop",
             "backgroundColor": "#1a1a2e",
             "buttonText": "Buy now",
             "buttonLink": "/shop",
@@ -31,7 +31,7 @@ export const PERFUMES_TEMPLATE_PRESET: EditorNode[] = [
           type: "slide",
           settings:           {
             "title": "New Fragrance in the Opus Essence",
-            "bottleImage": "/prokip-logo.png",
+            "bottleImage": "https://images.unsplash.com/photo-1541643600914-78b084683601?w=800&q=80&auto=format&fit=crop",
             "backgroundColor": "#2d1b4e",
             "buttonText": "Buy now",
             "buttonLink": "/shop",
@@ -44,7 +44,7 @@ export const PERFUMES_TEMPLATE_PRESET: EditorNode[] = [
           type: "slide",
           settings:           {
             "title": "Deep Fragrance With a Refined Intensity",
-            "bottleImage": "/prokip-logo.png",
+            "bottleImage": "https://images.unsplash.com/photo-1594035910387-fea47794261f?w=800&q=80&auto=format&fit=crop",
             "backgroundColor": "#0d1b2a",
             "buttonText": "Buy now",
             "buttonLink": "/shop",
@@ -98,14 +98,14 @@ export const PERFUMES_TEMPLATE_PRESET: EditorNode[] = [
           title: "Light Fragrance with a Silky Touch",
           subtitle: "A collection of delicate, weightless fragrances",
           description: "A collection of delicate, weightless fragrances that capture the essence of air and light. Soft florals, sheer musks, and gentle citruses.",
-          backgroundImage: "/prokip-logo.png",
+          backgroundImage: "https://images.unsplash.com/photo-1458538977777-0549b2370168?w=800&q=80&auto=format&fit=crop",
           link: "/shop",
         },
         {
           title: "Deep Fragrance With a Refined Intensity",
           subtitle: "A collection of fresh, luminous scents",
           description: "A collection of fresh, luminous scents inspired by the mystery of nightfall. Crisp citruses, airy florals, and cool musks.",
-          backgroundImage: "/prokip-logo.png",
+          backgroundImage: "https://images.unsplash.com/photo-1587017539504-67cfbddac569?w=800&q=80&auto=format&fit=crop",
           link: "/shop",
         },
       ],
@@ -134,7 +134,7 @@ export const PERFUMES_TEMPLATE_PRESET: EditorNode[] = [
       banners: [
         {
           title: "Get up to 20% off",
-          image: "/prokip-logo.png",
+          image: "https://images.unsplash.com/photo-1615634260167-c8cdede054de?w=800&q=80&auto=format&fit=crop",
           link: "/shop",
         },
       ],

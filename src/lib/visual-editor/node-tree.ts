@@ -447,9 +447,18 @@ const convertArrayToChildNodes = (key: string, value: unknown[], parentType: str
 const extractLegacyChildren = (source: unknown, parentType: string): EditorNode[] => {
   if (!isPlainObject(source)) return [];
 
+  // Mirrors getNestedChildren in src/lib/visual-editor/store.ts: a Section
+  // node's real children live under .columns (see createElementFromWidget
+  // in widgets.ts, the actual factory used to create every element), not
+  // .elements. Without checking .columns here, reopening any page that has
+  // a Section with real Column children shows that section as empty in the
+  // editor itself — the data is still safely in the database, but the
+  // editor fails to surface it, and a merchant who then edits and re-saves
+  // could unknowingly overwrite it with nothing.
   const childSources = [
     source.elements,
     source.children,
+    source.columns,
   ];
 
   const children: EditorNode[] = [];
@@ -717,14 +726,27 @@ export function buildScopedNodeCss(node: EditorNode): string {
 export function buildEditorNodeTreeCss(nodes: EditorNode[] | undefined | null): string {
   const css: string[] = [];
 
+  // Same field-name reality as editorNodeToBlock in src/lib/page-content.ts:
+  // sections nest under .columns, columns nest under .children — only
+  // .elements is uniform across every node type. Without checking all
+  // three, CSS for anything inside a Section's columns never gets
+  // generated at all.
+  const getChildren = (node: any): EditorNode[] => {
+    if (Array.isArray(node?.elements)) return node.elements;
+    if (Array.isArray(node?.children)) return node.children;
+    if (Array.isArray(node?.columns)) return node.columns;
+    return [];
+  };
+
   const walk = (items: EditorNode[] | undefined | null) => {
     if (!Array.isArray(items)) return;
 
     for (const node of items) {
       if (!node?.id) continue;
       css.push(buildScopedNodeCss(node));
-      if (Array.isArray(node.elements) && node.elements.length > 0) {
-        walk(node.elements);
+      const children = getChildren(node);
+      if (children.length > 0) {
+        walk(children);
       }
     }
   };

@@ -82,8 +82,6 @@ export default function VisualEditor({
 
   // Handle save
   const handleSave = async () => {
-    console.log("VisualEditor handleSave called - isDirty:", isDirty);
-
     const activeElement = typeof document !== "undefined" ? document.activeElement as HTMLElement | null : null;
     if (activeElement && activeElement !== document.body) {
       activeElement.blur?.();
@@ -92,7 +90,6 @@ export default function VisualEditor({
     const latestPageStructure = useEditorStore.getState().pageStructure;
 
     if (!useEditorStore.getState().isDirty) {
-      console.log("Not saving - not dirty");
       return;
     }
     
@@ -100,13 +97,10 @@ export default function VisualEditor({
     setSaving(true);
     setSaveStatus("saving");
     
-    console.log("Calling onSave with pageStructure:", latestPageStructure);
-    
     try {
       await onSave(latestPageStructure);
       markSaved();
       setSaveStatus("saved");
-      console.log("Save successful");
       setTimeout(() => setSaveStatus("idle"), 2000);
     } catch (error) {
       console.error("Save failed:", error);
@@ -118,27 +112,63 @@ export default function VisualEditor({
     }
   };
 
-  // Auto-save functionality
+  // Auto-save functionality — fires on a fixed 30s cadence from the first
+  // unsaved change, rather than resetting on every keystroke/edit. The
+  // previous version cleared and restarted the timer on every single
+  // pageStructure change, so a merchant actively editing continuously
+  // (very common — typing text, moving elements) could go the entire
+  // session without a single autosave ever completing, since each new
+  // edit kept pushing the 30s mark further out. Closing the tab or losing
+  // the connection mid-session would then lose everything back to the
+  // last manual save.
   useEffect(() => {
-    if (!isDirty) return;
-
-    // Clear previous auto-save timer
-    if (autoSaveRef.current) {
-      clearTimeout(autoSaveRef.current);
+    if (!isDirty) {
+      if (autoSaveRef.current) {
+        clearTimeout(autoSaveRef.current);
+        autoSaveRef.current = null;
+      }
+      return;
     }
+    // Already have a pending autosave scheduled from when this dirty
+    // streak started — don't push it back out on every subsequent edit.
+    if (autoSaveRef.current) return;
 
-    // Set new auto-save timer (30 seconds)
     autoSaveRef.current = setTimeout(() => {
+      autoSaveRef.current = null;
       handleSave();
     }, 30000);
 
-    // Cleanup on unmount
     return () => {
-      if (autoSaveRef.current) {
-        clearTimeout(autoSaveRef.current);
-      }
+      // Only clear on unmount, not on every dependency change — see above.
     };
-  }, [isDirty, pageStructure]);
+  }, [isDirty]);
+
+  useEffect(() => {
+    return () => {
+      if (autoSaveRef.current) clearTimeout(autoSaveRef.current);
+    };
+  }, []);
+
+  // Warn before leaving with unsaved changes — closing the tab, refreshing,
+  // or navigating away by any means other than the in-app Back button
+  // previously gave zero warning and silently discarded unsaved work.
+  useEffect(() => {
+    const handleBeforeUnload = (e: BeforeUnloadEvent) => {
+      if (!useEditorStore.getState().isDirty) return;
+      e.preventDefault();
+      e.returnValue = "";
+    };
+    window.addEventListener("beforeunload", handleBeforeUnload);
+    return () => window.removeEventListener("beforeunload", handleBeforeUnload);
+  }, []);
+
+  const handleBack = () => {
+    if (useEditorStore.getState().isDirty) {
+      const confirmed = window.confirm("You have unsaved changes. Leave without saving?");
+      if (!confirmed) return;
+    }
+    onBack();
+  };
 
   // Handle keyboard shortcuts
   useEffect(() => {
@@ -167,12 +197,6 @@ export default function VisualEditor({
         handleSave();
       }
       
-      // Cmd/Ctrl + E - Finder (placeholder)
-      if ((e.metaKey || e.ctrlKey) && e.key === "e") {
-        e.preventDefault();
-        // TODO: Implement finder
-      }
-      
       // Cmd/Ctrl + I - Navigator
       if ((e.metaKey || e.ctrlKey) && e.key === "i") {
         e.preventDefault();
@@ -189,7 +213,7 @@ export default function VisualEditor({
       {/* Top Toolbar */}
       <EditorToolbar
         pageTitle={pageTitle}
-        onBack={onBack}
+        onBack={handleBack}
         onSave={handleSave}
         isSaving={isSaving}
         saveStatus={saveStatus}

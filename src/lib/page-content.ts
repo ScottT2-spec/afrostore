@@ -53,13 +53,30 @@ function normalizeElementsFromBlocks(value: unknown): EditorNode[] | undefined {
   return nodes.length > 0 ? nodes : undefined;
 }
 
+// Section elements nest their content under `.columns`, column elements
+// under `.children` — only leaf/generic nodes use a plain `.elements`
+// array (see createElementFromWidget in src/lib/visual-editor/widgets.ts,
+// the actual factory that creates every element in the editor). This
+// mirrors getNestedChildren in src/lib/visual-editor/store.ts. Without
+// checking all three, a Section's columns — and everything inside them —
+// silently vanish the moment a page gets converted for live rendering,
+// even though the data was saved correctly; Sections-with-Columns is the
+// single most common structural pattern in any real page.
+function getEditorNodeChildren(node: EditorNode): EditorNode[] {
+  const anyNode = node as any;
+  if (Array.isArray(anyNode.elements)) return anyNode.elements;
+  if (Array.isArray(anyNode.children)) return anyNode.children;
+  if (Array.isArray(anyNode.columns)) return anyNode.columns;
+  return [];
+}
+
 function editorNodeToBlock(node: EditorNode): BuilderBlock {
   return {
     id: node.id,
     type: node.type,
     props: { ...node.settings },
     styleOverrides: { ...node.settings },
-    elements: (node.elements || []).map(editorNodeToBlock),
+    elements: getEditorNodeChildren(node).map(editorNodeToBlock),
   };
 }
 

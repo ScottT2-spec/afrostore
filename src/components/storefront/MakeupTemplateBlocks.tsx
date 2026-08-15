@@ -1481,6 +1481,45 @@ export interface MakeupContactFormProps {
 }
 
 export function MakeupContactForm({ title }: MakeupContactFormProps) {
+  const storeCtx = useContext(MakeupStoreContext);
+  const [form, setForm] = useState({ name: "", email: "", phone: "", company: "", message: "" });
+  const [status, setStatus] = useState<"idle" | "sending" | "success" | "error">("idle");
+  const [errorMsg, setErrorMsg] = useState("");
+
+  const submit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!storeCtx?.storeSlug) {
+      setStatus("error");
+      setErrorMsg("Unable to determine store — please try again from the live site.");
+      return;
+    }
+    setStatus("sending");
+    setErrorMsg("");
+    try {
+      const res = await fetch(`/api/storefront/${storeCtx.storeSlug}/contact`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          name: form.name,
+          email: form.email,
+          subject: form.company ? `From ${form.company}` : undefined,
+          message: form.phone ? `${form.message}\n\nPhone: ${form.phone}` : form.message,
+        }),
+      });
+      const json = await res.json();
+      if (json.success) {
+        setStatus("success");
+        setForm({ name: "", email: "", phone: "", company: "", message: "" });
+      } else {
+        setStatus("error");
+        setErrorMsg(json.error || "Failed to send. Please try again.");
+      }
+    } catch {
+      setStatus("error");
+      setErrorMsg("Network error. Please try again.");
+    }
+  };
+
   const scopedCss = `
     .mk-contact-form { padding: 60px 0; }
     .mk-contact-form-title {
@@ -1512,6 +1551,10 @@ export function MakeupContactForm({ title }: MakeupContactFormProps) {
       font-size: 14px; cursor: pointer; transition: filter 0.3s;
     }
     .mk-contact-form-submit:hover { filter: brightness(0.9); }
+    .mk-contact-form-submit:disabled { opacity: 0.6; cursor: not-allowed; }
+    .mk-contact-form-error { color: #dc2626; font-family: ${TOKENS.bodyFont}; font-size: 13px; margin: -8px 0 16px; }
+    .mk-contact-form-success { text-align: center; padding: 40px 0; }
+    .mk-contact-form-success p { font-family: ${TOKENS.bodyFont}; color: ${TOKENS.titleColor}; }
     @media (max-width: 767px) {
       .mk-contact-form-row { flex-direction: column; }
       .mk-contact-form-title { font-size: 24px; }
@@ -1524,28 +1567,41 @@ export function MakeupContactForm({ title }: MakeupContactFormProps) {
       <div style={containerStyle}>
         {title && <h2 className="mk-contact-form-title">{title}</h2>}
         <div className="mk-contact-form-wrap">
-          <form onSubmit={(e) => e.preventDefault()}>
-            <div className="mk-contact-form-row">
-              <div className="mk-contact-form-field">
-                <input type="text" className="mk-contact-form-input" placeholder="Your Name *" required />
-              </div>
-              <div className="mk-contact-form-field">
-                <input type="email" className="mk-contact-form-input" placeholder="Your Email *" required />
-              </div>
+          {status === "success" ? (
+            <div className="mk-contact-form-success">
+              <p style={{ fontSize: "18px", fontWeight: 600, marginBottom: "8px" }}>Message sent!</p>
+              <p>We&apos;ll get back to you soon.</p>
+              <button type="button" onClick={() => setStatus("idle")} className="mk-contact-form-submit" style={{ marginTop: "20px" }}>
+                Send another message
+              </button>
             </div>
-            <div className="mk-contact-form-row">
-              <div className="mk-contact-form-field">
-                <input type="tel" className="mk-contact-form-input" placeholder="Phone Number" />
+          ) : (
+            <form onSubmit={submit}>
+              <div className="mk-contact-form-row">
+                <div className="mk-contact-form-field">
+                  <input type="text" className="mk-contact-form-input" placeholder="Your Name *" required value={form.name} onChange={(e) => setForm((f) => ({ ...f, name: e.target.value }))} />
+                </div>
+                <div className="mk-contact-form-field">
+                  <input type="email" className="mk-contact-form-input" placeholder="Your Email *" required value={form.email} onChange={(e) => setForm((f) => ({ ...f, email: e.target.value }))} />
+                </div>
               </div>
-              <div className="mk-contact-form-field">
-                <input type="text" className="mk-contact-form-input" placeholder="Company Name" />
+              <div className="mk-contact-form-row">
+                <div className="mk-contact-form-field">
+                  <input type="tel" className="mk-contact-form-input" placeholder="Phone Number" value={form.phone} onChange={(e) => setForm((f) => ({ ...f, phone: e.target.value }))} />
+                </div>
+                <div className="mk-contact-form-field">
+                  <input type="text" className="mk-contact-form-input" placeholder="Company Name" value={form.company} onChange={(e) => setForm((f) => ({ ...f, company: e.target.value }))} />
+                </div>
               </div>
-            </div>
-            <div style={{ marginBottom: "20px" }}>
-              <textarea className="mk-contact-form-textarea" placeholder="Your Message *" required />
-            </div>
-            <button type="submit" className="mk-contact-form-submit">Send Message</button>
-          </form>
+              <div style={{ marginBottom: "20px" }}>
+                <textarea className="mk-contact-form-textarea" placeholder="Your Message *" required value={form.message} onChange={(e) => setForm((f) => ({ ...f, message: e.target.value }))} />
+              </div>
+              {status === "error" && <p className="mk-contact-form-error">{errorMsg}</p>}
+              <button type="submit" className="mk-contact-form-submit" disabled={status === "sending"}>
+                {status === "sending" ? "Sending..." : "Send Message"}
+              </button>
+            </form>
+          )}
         </div>
       </div>
     </div>

@@ -12,13 +12,13 @@ export const ACCESSORIES_ABOUT_PAGE_BLOCKS: EditorNode[] = [
     title: "We Help Everyone Enjoy Amazing Products",
     description: "If the copy becomes distracting in the design then you are doing something wrong or they are discussing copy changes. It might be a bit annoying but you could tell them that that discussion would be best suited.",
     images: [
-      "/prokip-logo.png",
-      "/prokip-logo.png",
-      "/prokip-logo.png",
+      "https://images.unsplash.com/photo-1515886657613-9f3515b0c78f?w=800&q=80&auto=format&fit=crop",
+      "https://images.unsplash.com/photo-1558769132-cb1aea458c5e?w=800&q=80&auto=format&fit=crop",
+      "https://images.unsplash.com/photo-1483985988355-763728e1935b?w=800&q=80&auto=format&fit=crop",
     ],
     testimonial: {
       text: "Websites in professional use templating systems. Commercial publishing platforms and content management systems ensure that you can show.",
-      avatar: "/prokip-logo.png",
+      avatar: "https://images.unsplash.com/photo-1515886657613-9f3515b0c78f?w=800&q=80&auto=format&fit=crop",
       name: "Brooklyn Simmons",
       company: "BARONE LLC",
     },
@@ -28,10 +28,10 @@ export const ACCESSORIES_ABOUT_PAGE_BLOCKS: EditorNode[] = [
     title: "Our Team",
     description: "Convallis ullamcorper aliquet ultrices orci cum vestibulum lobortis erat",
     members: [
-      { name: "Jane Cooper", role: "President of Sales", image: "/prokip-logo.png", socials: ["facebook", "twitter"] },
-      { name: "Jacob Jones", role: "Sales Analyst", image: "/prokip-logo.png", socials: ["facebook", "twitter", "instagram"] },
-      { name: "Kristin Watson", role: "Market Development", image: "/prokip-logo.png", socials: ["facebook", "twitter"] },
-      { name: "Darlene Robertson", role: "Social Media Specialist", image: "/prokip-logo.png", socials: ["facebook", "twitter", "instagram"] },
+      { name: "Jane Cooper", role: "President of Sales", image: "https://images.unsplash.com/photo-1558769132-cb1aea458c5e?w=800&q=80&auto=format&fit=crop", socials: ["facebook", "twitter"] },
+      { name: "Jacob Jones", role: "Sales Analyst", image: "https://images.unsplash.com/photo-1483985988355-763728e1935b?w=800&q=80&auto=format&fit=crop", socials: ["facebook", "twitter", "instagram"] },
+      { name: "Kristin Watson", role: "Market Development", image: "https://images.unsplash.com/photo-1529139574466-a303027c1d8b?w=800&q=80&auto=format&fit=crop", socials: ["facebook", "twitter"] },
+      { name: "Darlene Robertson", role: "Social Media Specialist", image: "https://images.unsplash.com/photo-1603189343302-e603f7add05a?w=800&q=80&auto=format&fit=crop", socials: ["facebook", "twitter", "instagram"] },
     ],
   }},
   { id: "acc-about-strategy", type: "accessoriesStrategySection", settings: {
@@ -42,9 +42,9 @@ export const ACCESSORIES_ABOUT_PAGE_BLOCKS: EditorNode[] = [
       "Then the question arises: where\u2019s the content? Not there yet? That\u2019s not so bad, there\u2019s dummy copy to the rescue. But worse, what if the fish doesn\u2019t fit in the can, the foot\u2019s to big for the boot? Or to small? To short sentences, to many headings, images too large for the proposed design, or too small, or they fit in but it looks iffy for reasons the folks in the meeting can\u2019t quite tell right now, but they\u2019re unhappy, somehow. A client that\u2019s unhappy for a reason is a problem, a client that\u2019s unhappy though.",
     ],
     infoboxes: [
-      { icon: "/prokip-logo.png", title: "Fast Delivery", description: "Chances are there wasn\u2019t collaboration and checkpoints, there wasn\u2019t a process." },
-      { icon: "/prokip-logo.png", title: "Best Quality", description: "It\u2019s content strategy gone awry right from the start. Forswearing the use of Lorem Ipsum." },
-      { icon: "/prokip-logo.png", title: "Free Return", description: "True enough, but that\u2019s not all that it takes to get things back on track out there for a text." },
+      { icon: "data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A//www.w3.org/2000/svg%22%20viewBox%3D%220%200%2024%2024%22%20fill%3D%22currentColor%22%3E%3Cpath%20d%3D%22M12%202l2.9%206.26L22%209.27l-5%204.87%201.18%206.88L12%2017.77l-6.18%203.25L7%2014.14%202%209.27l7.1-1.01z%22/%3E%3C/svg%3E", title: "Fast Delivery", description: "Chances are there wasn\u2019t collaboration and checkpoints, there wasn\u2019t a process." },
+      { icon: "data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A//www.w3.org/2000/svg%22%20viewBox%3D%220%200%2024%2024%22%20fill%3D%22currentColor%22%3E%3Cpath%20d%3D%22M12%202l2.9%206.26L22%209.27l-5%204.87%201.18%206.88L12%2017.77l-6.18%203.25L7%2014.14%202%209.27l7.1-1.01z%22/%3E%3C/svg%3E", title: "Best Quality", description: "It\u2019s content strategy gone awry right from the start. Forswearing the use of Lorem Ipsum." },
+      { icon: "data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A//www.w3.org/2000/svg%22%20viewBox%3D%220%200%2024%2024%22%20fill%3D%22currentColor%22%3E%3Cpath%20d%3D%22M12%202l2.9%206.26L22%209.27l-5%204.87%201.18%206.88L12%2017.77l-6.18%203.25L7%2014.14%202%209.27l7.1-1.01z%22/%3E%3C/svg%3E", title: "Free Return", description: "True enough, but that\u2019s not all that it takes to get things back on track out there for a text." },
     ],
   }},
   { id: "acc-about-community", type: "accessoriesCommunityCta", settings: {
@@ -83,17 +83,17 @@ export const ACCESSORIES_CONTACT_PAGE_BLOCKS: EditorNode[] = [
 export const ACCESSORIES_BLOG_PAGE_BLOCKS: EditorNode[] = [
   { id: "acc-blog-header", type: "accessoriesBlogHeader", settings: {
     title: "Blog",
-    backgroundImage: "/prokip-logo.png",
+    backgroundImage: "https://images.unsplash.com/photo-1490481651871-ab68de25d43d?w=800&q=80&auto=format&fit=crop",
   }},
   { id: "acc-blog-posts", type: "accessoriesBlogPosts", settings: {
     columns: 2,
     posts: [
-      { title: "Exploring Atlanta\u2019s modern homes", date: "22 Apr", category: "Decoration", author: "Mr. Mackay", excerpt: "Vivamus enim sagittis aptent hac mi dui a per aptent suspendisse cras odio bibendum augue rhoncus laoreet dui praesent sodales sod...", image: "/prokip-logo.png", link: "#" },
-      { title: "Green interior design inspiration", date: "22 Apr", category: "Inspiration", author: "Mr. Mackay", excerpt: "A sed a risusat luctus esta anibh rhoncus hendrerit blandit nam rutrum sitmiad hac. Cras a vestibulum a varius adipiscing ut digni...", image: "/prokip-logo.png", link: "#" },
-      { title: "Collar brings back coffee brewing ritual", date: "22 Apr", category: "Furniture", author: "Mr. Mackay", excerpt: "Adipiscing hac imperdiet id blandit varius scelerisque at sagittis libero dui dis volutpat vehicula mus sed ut. Lacinia dui rutrum...", image: "/prokip-logo.png", link: "#" },
-      { title: "Reinterprets the classic bookshelf", date: "22 Apr", category: "Design trends", author: "Mr. Mackay", excerpt: "Aliquet parturient scele risque scele risque nibh pretium parturient suspendisse platea sapien torqu...", image: "/prokip-logo.png", link: "#" },
-      { title: "Creative water features and exterior", date: "22 Apr", category: "Decoration", author: "Mr. Mackay", excerpt: "Ac haca ullamcorper donec ante habi tasse donec imperdiet eturpis varius per a augue magna hac. Nec hac et vestibulum duis a tinci...", image: "/prokip-logo.png", link: "#" },
-      { title: "Minimalist Japanese-inspired furniture", date: "22 Apr", category: "Inspiration", author: "Mr. Mackay", excerpt: "A sed a risusat luctus esta anibh rhoncus hendrerit blandit nam rutrum sitmiad hac...", image: "/prokip-logo.png", link: "#" },
+      { title: "Exploring Atlanta\u2019s modern homes", date: "22 Apr", category: "Decoration", author: "Mr. Mackay", excerpt: "Vivamus enim sagittis aptent hac mi dui a per aptent suspendisse cras odio bibendum augue rhoncus laoreet dui praesent sodales sod...", image: "https://images.unsplash.com/photo-1562157873-818bc0726f68?w=800&q=80&auto=format&fit=crop", link: "#" },
+      { title: "Green interior design inspiration", date: "22 Apr", category: "Inspiration", author: "Mr. Mackay", excerpt: "A sed a risusat luctus esta anibh rhoncus hendrerit blandit nam rutrum sitmiad hac. Cras a vestibulum a varius adipiscing ut digni...", image: "https://images.unsplash.com/photo-1574201635302-388dd92a4c3f?w=800&q=80&auto=format&fit=crop", link: "#" },
+      { title: "Collar brings back coffee brewing ritual", date: "22 Apr", category: "Furniture", author: "Mr. Mackay", excerpt: "Adipiscing hac imperdiet id blandit varius scelerisque at sagittis libero dui dis volutpat vehicula mus sed ut. Lacinia dui rutrum...", image: "https://images.unsplash.com/photo-1574015974293-817f0ebebb74?w=800&q=80&auto=format&fit=crop", link: "#" },
+      { title: "Reinterprets the classic bookshelf", date: "22 Apr", category: "Design trends", author: "Mr. Mackay", excerpt: "Aliquet parturient scele risque scele risque nibh pretium parturient suspendisse platea sapien torqu...", image: "https://images.unsplash.com/photo-1515886657613-9f3515b0c78f?w=800&q=80&auto=format&fit=crop", link: "#" },
+      { title: "Creative water features and exterior", date: "22 Apr", category: "Decoration", author: "Mr. Mackay", excerpt: "Ac haca ullamcorper donec ante habi tasse donec imperdiet eturpis varius per a augue magna hac. Nec hac et vestibulum duis a tinci...", image: "https://images.unsplash.com/photo-1558769132-cb1aea458c5e?w=800&q=80&auto=format&fit=crop", link: "#" },
+      { title: "Minimalist Japanese-inspired furniture", date: "22 Apr", category: "Inspiration", author: "Mr. Mackay", excerpt: "A sed a risusat luctus esta anibh rhoncus hendrerit blandit nam rutrum sitmiad hac...", image: "https://images.unsplash.com/photo-1483985988355-763728e1935b?w=800&q=80&auto=format&fit=crop", link: "#" },
     ],
   }},
 ];
@@ -101,7 +101,7 @@ export const ACCESSORIES_BLOG_PAGE_BLOCKS: EditorNode[] = [
 export const ACCESSORIES_SHOP_PAGE_BLOCKS: EditorNode[] = [
   { id: "acc-shop-header", type: "accessoriesBlogHeader", settings: {
     title: "Shop",
-    backgroundImage: "/prokip-logo.png",
+    backgroundImage: "https://images.unsplash.com/photo-1529139574466-a303027c1d8b?w=800&q=80&auto=format&fit=crop",
   }},
   { id: "acc-shop-products", type: "accessoriesProductGrid", settings: { columns: 4, maxProducts: 12 } },
 ];

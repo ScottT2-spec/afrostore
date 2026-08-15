@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { TEMPLATES, TEMPLATE_CATEGORIES } from "@/lib/templates/catalog";
+import { TEMPLATE_PRESET_MAP } from "@/lib/templates/template-preset-map";
 
 export async function GET(req: NextRequest) {
   const { searchParams } = new URL(req.url);
@@ -49,7 +50,9 @@ export async function GET(req: NextRequest) {
       categoryLabel: t.categoryLabel,
       description: t.description,
       previewImage: t.previewImage,
-      previewUrl: t.file ? `/templates/${t.file}` : `/templates/preview/${t.slug}`,
+      previewUrl: (TEMPLATE_PRESET_MAP[t.slug] || TEMPLATE_PRESET_MAP[`${t.slug}-landing`])
+        ? `/templates/preview/${t.slug}`
+        : t.file ? `/templates/${t.file}` : `/templates/preview/${t.slug}`,
       siteType: t.siteType,
       industries: t.industries,
     })),

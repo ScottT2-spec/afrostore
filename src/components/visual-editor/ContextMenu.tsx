@@ -1,13 +1,12 @@
 "use client";
 
-import { useState, useEffect, useRef } from "react";
+import { useEffect, useRef } from "react";
 import { useEditorStore } from "@/lib/visual-editor/store";
 import { 
   Copy, 
   Trash2, 
   Scissors, 
   Clipboard, 
-  Edit3, 
   Lock, 
   Unlock,
   Eye,
@@ -22,12 +21,32 @@ interface ContextMenuProps {
 
 export default function ContextMenu({ elementId, position, onClose }: ContextMenuProps) {
   const menuRef = useRef<HTMLDivElement>(null);
-  const { 
-    deleteElement, 
-    duplicateElement, 
-    updateElement, 
-    selectedElementId 
+  const {
+    deleteElement,
+    duplicateElement,
+    updateElement,
+    copyElementToClipboard,
+    pasteElement,
+    clipboardElement,
+    pageStructure,
   } = useEditorStore();
+
+  // Find the actual element (not just its id) so Lock/Hide can read current
+  // state and toggle it, instead of always setting a hardcoded value.
+  const findElement = (elements: any[], id: string): any => {
+    for (const el of elements) {
+      if (el.id === id) return el;
+      const nested = el.elements || el.children || el.columns;
+      if (Array.isArray(nested)) {
+        const found = findElement(nested, id);
+        if (found) return found;
+      }
+    }
+    return null;
+  };
+  const currentElement = findElement(pageStructure.elements, elementId);
+  const isLocked = Boolean(currentElement?.locked);
+  const isHidden = currentElement?.visible === false;
 
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
@@ -52,6 +71,7 @@ export default function ContextMenu({ elementId, position, onClose }: ContextMen
   }, [onClose]);
 
   const handleDelete = () => {
+    if (isLocked) return;
     deleteElement(elementId);
     onClose();
   };
@@ -62,36 +82,33 @@ export default function ContextMenu({ elementId, position, onClose }: ContextMen
   };
 
   const handleCopy = () => {
-    // Copy element to clipboard
-    const element = selectedElementId;
-    if (element) {
-      navigator.clipboard.writeText(JSON.stringify(element));
-    }
+    copyElementToClipboard(elementId);
+    onClose();
+  };
+
+  const handleCut = () => {
+    if (isLocked) return;
+    copyElementToClipboard(elementId);
+    deleteElement(elementId);
+    onClose();
+  };
+
+  const handlePaste = () => {
+    pasteElement();
     onClose();
   };
 
   const handleToggleLock = () => {
-    // Toggle lock state - would need to get the element first
-    updateElement(elementId, { locked: true });
+    updateElement(elementId, { locked: !isLocked });
     onClose();
   };
 
   const handleToggleVisibility = () => {
-    // Toggle visibility - would need to get the element first
-    updateElement(elementId, { visible: false });
+    updateElement(elementId, { visible: isHidden ? true : false });
     onClose();
   };
 
   const menuItems = [
-    {
-      icon: Edit3,
-      label: "Edit",
-      action: () => {
-        // Focus on the element for editing
-        onClose();
-      },
-      color: "text-gray-700 dark:text-gray-300",
-    },
     {
       icon: Copy,
       label: "Duplicate",
@@ -101,8 +118,9 @@ export default function ContextMenu({ elementId, position, onClose }: ContextMen
     {
       icon: Scissors,
       label: "Cut",
-      action: handleCopy,
-      color: "text-gray-700 dark:text-gray-300",
+      action: handleCut,
+      disabled: isLocked,
+      color: isLocked ? "text-gray-300 dark:text-gray-600 cursor-not-allowed" : "text-gray-700 dark:text-gray-300",
     },
     {
       icon: Clipboard,
@@ -110,15 +128,21 @@ export default function ContextMenu({ elementId, position, onClose }: ContextMen
       action: handleCopy,
       color: "text-gray-700 dark:text-gray-300",
     },
+    ...(clipboardElement ? [{
+      icon: Clipboard,
+      label: "Paste",
+      action: handlePaste,
+      color: "text-gray-700 dark:text-gray-300",
+    }] : []),
     {
-      icon: Lock,
-      label: "Lock",
+      icon: isLocked ? Unlock : Lock,
+      label: isLocked ? "Unlock" : "Lock",
       action: handleToggleLock,
       color: "text-gray-700 dark:text-gray-300",
     },
     {
-      icon: Eye,
-      label: "Hide",
+      icon: isHidden ? Eye : EyeOff,
+      label: isHidden ? "Show" : "Hide",
       action: handleToggleVisibility,
       color: "text-gray-700 dark:text-gray-300",
     },
@@ -126,7 +150,8 @@ export default function ContextMenu({ elementId, position, onClose }: ContextMen
       icon: Trash2,
       label: "Delete",
       action: handleDelete,
-      color: "text-red-600 dark:text-red-400",
+      disabled: isLocked,
+      color: isLocked ? "text-gray-300 dark:text-gray-600 cursor-not-allowed" : "text-red-600 dark:text-red-400",
       separator: true,
     },
   ];
@@ -148,7 +173,8 @@ export default function ContextMenu({ elementId, position, onClose }: ContextMen
           <button
             type="button"
             onClick={item.action}
-            className={`w-full flex items-center gap-3 px-3 py-2 text-sm hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors ${item.color}`}
+            disabled={item.disabled}
+            className={`w-full flex items-center gap-3 px-3 py-2 text-sm hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors disabled:hover:bg-transparent ${item.color}`}
           >
             <item.icon className="h-4 w-4" />
             <span>{item.label}</span>

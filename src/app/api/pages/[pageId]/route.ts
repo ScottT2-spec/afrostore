@@ -1,6 +1,7 @@
 import { NextRequest } from "next/server";
 import { prisma } from "@/lib/db";
-import { success, error, getStoreContext } from "@/lib/api-helpers";
+import { success, error, getStoreContext, validationError, ensureUniqueSlug, logAudit, requireRole } from "@/lib/api-helpers";
+import { updatePageSchema } from "@/lib/validators";
 import { unauthorized } from "@/lib/auth";
 import { revalidatePath } from "next/cache";
 
@@ -47,24 +48,41 @@ export async function GET(req: NextRequest, { params }: Params) {
   }
 }
 
-// PATCH /api/pages/:pageId - Update page content
+// PATCH /api/pages/:pageId - Update page content (used by the visual editor)
 export async function PATCH(req: NextRequest, { params }: Params) {
   const { pageId } = await params;
-  const body = await req.json();
 
   try {
-    const updateData: any = {
-      content: body.content,
-      title: body.title,
-      slug: body.slug,
-      metaTitle: body.metaTitle,
-      metaDescription: body.metaDescription,
-      updatedAt: new Date(),
-    };
+    // Same reasoning as GET: siteId isn't in the URL, so look the page up
+    // first and verify the caller actually has access to its site — and a
+    // real role, not just membership — before touching anything. This was
+    // previously missing entirely: any unauthenticated request with a
+    // pageId could overwrite any store's page content, title, slug, meta
+    // tags, and publish status with zero login or ownership check at all.
+    const existing = await prisma.page.findUnique({
+      where: { id: pageId },
+      include: { site: { select: { slug: true } } },
+    });
+    if (!existing) return error("Page not found", 404);
 
-    // Allow publishing/unpublishing pages
-    if (body.isPublished !== undefined) {
-      updateData.isPublished = body.isPublished;
+    const ctx = await getStoreContext(req, existing.siteId);
+    if (ctx.error) return ctx.user ? error(ctx.error, 403) : unauthorized();
+    const roleErr = requireRole(ctx, "STAFF");
+    if (roleErr) return roleErr;
+
+    const body = await req.json();
+    const parsed = updatePageSchema.safeParse(body);
+    if (!parsed.success) {
+      return validationError(parsed.error.flatten().fieldErrors);
+    }
+
+    const updateData: Record<string, unknown> = { ...parsed.data };
+
+    // If title is changing, regenerate slug — matching the site-scoped
+    // sibling route's behavior instead of accepting an arbitrary raw slug
+    // straight from the request body.
+    if (parsed.data.title && parsed.data.title !== existing.title) {
+      updateData.slug = await ensureUniqueSlug(parsed.data.title, existing.siteId, "page", pageId);
     }
 
     const updatedPage = await prisma.page.update({
@@ -72,19 +90,23 @@ export async function PATCH(req: NextRequest, { params }: Params) {
       data: updateData,
     });
 
-    if ((updatedPage as any).siteId) {
-      const site = await prisma.site.findUnique({
-        where: { id: (updatedPage as any).siteId },
-        select: { slug: true },
-      });
-      if (site?.slug && updatedPage.slug) {
-        revalidatePath(`/store/${site.slug}/${updatedPage.slug}`);
-        revalidatePath(`/store/${site.slug}`);
-        revalidatePath(`/store/${site.slug}/pages/${updatedPage.slug}`);
-        revalidatePath(`/api/storefront/${site.slug}/pages/${updatedPage.slug}`);
-        revalidatePath(`/api/storefront/${site.slug}`);
-      }
+    if (existing.site.slug && updatedPage.slug) {
+      revalidatePath(`/store/${existing.site.slug}/${updatedPage.slug}`);
+      revalidatePath(`/store/${existing.site.slug}`);
+      revalidatePath(`/store/${existing.site.slug}/pages/${updatedPage.slug}`);
+      revalidatePath(`/api/storefront/${existing.site.slug}/pages/${updatedPage.slug}`);
+      revalidatePath(`/api/storefront/${existing.site.slug}`);
     }
+
+    await logAudit({
+      siteId: existing.siteId,
+      userId: ctx.user!.id,
+      action: "UPDATE",
+      entity: "page",
+      entityId: pageId,
+      before: existing,
+      after: updatedPage,
+    });
 
     return success(updatedPage);
   } catch (err) {

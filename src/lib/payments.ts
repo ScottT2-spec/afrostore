@@ -35,8 +35,11 @@ export async function initializePaystackPayment(params: {
 }
 
 export function verifyPaystackWebhook(body: string, signature: string, secret: string): boolean {
+  if (!signature) return false;
   const hash = crypto.createHmac("sha512", secret).update(body).digest("hex");
-  return hash === signature;
+  const a = Buffer.from(hash);
+  const b = Buffer.from(signature);
+  return a.length === b.length && crypto.timingSafeEqual(a, b);
 }
 
 export async function verifyPaystackTransaction(reference: string, secretKey: string) {
@@ -112,14 +115,48 @@ export async function verifyFlutterwaveTransactionByReference(txRef: string, sec
 }
 
 export function verifyFlutterwaveWebhook(signature: string, secret: string): boolean {
-  return signature === secret;
+  if (!signature) return false;
+  const a = Buffer.from(signature);
+  const b = Buffer.from(secret);
+  return a.length === b.length && crypto.timingSafeEqual(a, b);
 }
 
 // ─── MONNIFY ────────────────────────────────────────────────
 
+// Normalizes common Monnify Base URL setup mistakes:
+//  - a trailing /api (e.g. "https://sandbox.monnify.com/api") — we append
+//    our own /api/v1/... path everywhere we call Monnify, so a trailing
+//    /api here would double up (".../api/api/v1/...") and break auth
+//  - surrounding quotes left over from pasting a line straight out of an
+//    .env file (e.g. MONNIFY_BASE_URL="https://sandbox.monnify.com")
+//  - invisible characters (zero-width space, BOM, smart quotes) that
+//    don't show up visually but make the URL parser reject the string
+// Throws a clear, specific error if the result still isn't a valid URL,
+// instead of letting fetch() fail with an opaque "Failed to parse URL".
+export function normalizeMonnifyBaseUrl(url: string): string {
+  let cleaned = url
+    .trim()
+    .replace(/^['"]+|['"]+$/g, "") // strip surrounding quotes
+    .replace(/[\u200B-\u200D\uFEFF]/g, "") // zero-width space/joiner/BOM
+    .replace(/[\u2018\u2019]/g, "'").replace(/[\u201C\u201D]/g, '"') // smart quotes
+    .replace(/^['"]+|['"]+$/g, "") // strip quotes again in case they were smart quotes
+    .trim()
+    .replace(/\/+$/, "")
+    .replace(/\/api$/i, "");
+
+  if (!/^https?:\/\//i.test(cleaned)) cleaned = `https://${cleaned}`;
+
+  try {
+    new URL(cleaned);
+  } catch {
+    throw new Error(`"${url}" isn't a valid URL. Use just the domain, e.g. https://sandbox.monnify.com`);
+  }
+  return cleaned;
+}
+
 export async function getMonnifyAccessToken(apiKey: string, secretKey: string, baseUrl: string) {
   const credentials = Buffer.from(`${apiKey}:${secretKey}`).toString("base64");
-  const res = await fetch(`${baseUrl}/api/v1/auth/login`, {
+  const res = await fetch(`${normalizeMonnifyBaseUrl(baseUrl)}/api/v1/auth/login`, {
     method: "POST",
     headers: { Authorization: `Basic ${credentials}` },
   });
@@ -142,7 +179,7 @@ export async function initializeMonnifyPayment(params: {
   redirectUrl: string;
   paymentMethods?: string[];
 }) {
-  const res = await fetch(`${params.baseUrl}/api/v1/merchant/transactions/init-transaction`, {
+  const res = await fetch(`${normalizeMonnifyBaseUrl(params.baseUrl)}/api/v1/merchant/transactions/init-transaction`, {
     method: "POST",
     headers: {
       Authorization: `Bearer ${params.accessToken}`,
@@ -167,7 +204,7 @@ export async function initializeMonnifyPayment(params: {
 
 export async function verifyMonnifyTransaction(reference: string, accessToken: string, baseUrl: string) {
   const res = await fetch(
-    `${baseUrl}/api/v2/merchant/transactions/query?paymentReference=${encodeURIComponent(reference)}`,
+    `${normalizeMonnifyBaseUrl(baseUrl)}/api/v2/merchant/transactions/query?paymentReference=${encodeURIComponent(reference)}`,
     { headers: { Authorization: `Bearer ${accessToken}` } }
   );
   const data = await res.json();
@@ -175,8 +212,11 @@ export async function verifyMonnifyTransaction(reference: string, accessToken: s
 }
 
 export function verifyMonnifyWebhook(body: string, signature: string, secret: string): boolean {
+  if (!signature) return false;
   const hash = crypto.createHmac("sha512", secret).update(body).digest("hex");
-  return hash === signature;
+  const a = Buffer.from(hash);
+  const b = Buffer.from(signature);
+  return a.length === b.length && crypto.timingSafeEqual(a, b);
 }
 
 // ─── COMMON: Process webhook payment confirmation ───────────

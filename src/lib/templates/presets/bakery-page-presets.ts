@@ -87,22 +87,22 @@ export const BAKERY_ABOUT_PAGE_BLOCKS: EditorNode[] = [
       title: "Let\u2019s Get Creative!",
       services: [
         {
-          icon: "/prokip-logo.png",
+          icon: "data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A//www.w3.org/2000/svg%22%20viewBox%3D%220%200%2024%2024%22%20fill%3D%22currentColor%22%3E%3Cpath%20d%3D%22M12%202l2.9%206.26L22%209.27l-5%204.87%201.18%206.88L12%2017.77l-6.18%203.25L7%2014.14%202%209.27l7.1-1.01z%22/%3E%3C/svg%3E",
           title: "GRAPHIC DESIGN",
           description: "Curabitur lacinia tristique velit ut laoreet.",
         },
         {
-          icon: "/prokip-logo.png",
+          icon: "data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A//www.w3.org/2000/svg%22%20viewBox%3D%220%200%2024%2024%22%20fill%3D%22currentColor%22%3E%3Cpath%20d%3D%22M12%202l2.9%206.26L22%209.27l-5%204.87%201.18%206.88L12%2017.77l-6.18%203.25L7%2014.14%202%209.27l7.1-1.01z%22/%3E%3C/svg%3E",
           title: "WEB DESIGN",
           description: "By the readable content of a page when its layout.",
         },
         {
-          icon: "/prokip-logo.png",
+          icon: "data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A//www.w3.org/2000/svg%22%20viewBox%3D%220%200%2024%2024%22%20fill%3D%22currentColor%22%3E%3Cpath%20d%3D%22M12%202l2.9%206.26L22%209.27l-5%204.87%201.18%206.88L12%2017.77l-6.18%203.25L7%2014.14%202%209.27l7.1-1.01z%22/%3E%3C/svg%3E",
           title: "BRANDING",
           description: "Fact that a reader will be distracted.",
         },
         {
-          icon: "/prokip-logo.png",
+          icon: "data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A//www.w3.org/2000/svg%22%20viewBox%3D%220%200%2024%2024%22%20fill%3D%22currentColor%22%3E%3Cpath%20d%3D%22M12%202l2.9%206.26L22%209.27l-5%204.87%201.18%206.88L12%2017.77l-6.18%203.25L7%2014.14%202%209.27l7.1-1.01z%22/%3E%3C/svg%3E",
           title: "PHOTOGRAPHY",
           description: "The point of using Lorem Ipsum is that it has it.",
         },
@@ -114,8 +114,8 @@ export const BAKERY_ABOUT_PAGE_BLOCKS: EditorNode[] = [
     type: "bakeryGalleryGrid",
     settings: {
       images: [
-        "/prokip-logo.png",
-        "/prokip-logo.png",
+        "https://images.unsplash.com/photo-1623334044303-241021148842?w=800&q=80&auto=format&fit=crop",
+        "https://images.unsplash.com/photo-1608198093002-ad4e005484ec?w=800&q=80&auto=format&fit=crop",
       ],
     },
   },
@@ -128,12 +128,12 @@ export const BAKERY_ABOUT_PAGE_BLOCKS: EditorNode[] = [
       description: "I am so happy, my dear friend, so absorbed in the exquisite sense of mere tranquil existence, that I neglect my talents. I should be incapable of drawing a single.",
       videos: [
         {
-          thumbnail: "/prokip-logo.png",
+          thumbnail: "https://images.unsplash.com/photo-1583338917451-face2751d8d5?w=800&q=80&auto=format&fit=crop",
           youtubeUrl: "http://www.youtube.com/watch?v=TJ1SDXbij8Y",
           title: "Our company history and facts",
         },
         {
-          thumbnail: "/prokip-logo.png",
+          thumbnail: "https://images.unsplash.com/photo-1534432182912-63863115e106?w=800&q=80&auto=format&fit=crop",
           youtubeUrl: "http://www.youtube.com/watch?v=TJ1SDXbij8Y",
           title: "Design & development process demonstration",
         },
@@ -159,25 +159,25 @@ export const BAKERY_ABOUT_PAGE_BLOCKS: EditorNode[] = [
         {
           name: "MARK JANCE",
           role: "CEO / FOUNDER",
-          image: "/prokip-logo.png",
+          image: "https://images.unsplash.com/photo-1568254183919-78a4f43a2877?w=800&q=80&auto=format&fit=crop",
           socials: ["facebook", "twitter", "instagram", "linkedin"],
         },
         {
           name: "MARK JANCE",
           role: "CEO / FOUNDER",
-          image: "/prokip-logo.png",
+          image: "https://images.unsplash.com/photo-1483695028939-5bb13f8648b0?w=800&q=80&auto=format&fit=crop",
           socials: ["facebook", "twitter", "instagram", "linkedin"],
         },
         {
           name: "MARK JANCE",
           role: "CEO / FOUNDER",
-          image: "/prokip-logo.png",
+          image: "https://images.unsplash.com/photo-1523294587484-bae6cc870010?w=800&q=80&auto=format&fit=crop",
           socials: ["facebook", "twitter", "instagram", "linkedin"],
         },
         {
           name: "MARK JANCE",
           role: "CEO / FOUNDER",
-          image: "/prokip-logo.png",
+          image: "https://images.unsplash.com/photo-1599819055803-717bba43890f?w=800&q=80&auto=format&fit=crop",
           socials: ["facebook", "twitter", "instagram", "linkedin"],
         },
       ],
@@ -224,21 +224,21 @@ export const BAKERY_ABOUT_PAGE_BLOCKS: EditorNode[] = [
     settings: {
       banners: [
         {
-          image: "/prokip-logo.png",
+          image: "https://images.unsplash.com/photo-1623334044303-241021148842?w=800&q=80&auto=format&fit=crop",
           title: "It is a fact that a reader will be distracted.",
           description: "Ullamcorper vehicula at ultrices sed interdum et malesuada",
           buttonText: "Read more",
           link: "#",
         },
         {
-          image: "/prokip-logo.png",
+          image: "https://images.unsplash.com/photo-1608198093002-ad4e005484ec?w=800&q=80&auto=format&fit=crop",
           title: "By the readable content of a page when looking.",
           description: "Patibus elementum a dictum ipiscing parturient donec eros.",
           buttonText: "Read more",
           link: "#",
         },
         {
-          image: "/prokip-logo.png",
+          image: "https://images.unsplash.com/photo-1555507036-ab1f4038808a?w=800&q=80&auto=format&fit=crop",
           title: "The point of using Lorem Ipsum is that it has.",
           description: "Ullamcorper vehicula at ultrices sed interdum ullamcorper .",
           buttonText: "Read more",
@@ -335,31 +335,31 @@ export const BAKERY_BLOG_PAGE_BLOCKS: EditorNode[] = [
       posts: [
         {
           title: "Seating collection inspiration by modern",
-          image: "/prokip-logo.png",
+          image: "https://images.unsplash.com/photo-1563729784474-d77dbb933a9e?w=800&q=80&auto=format&fit=crop",
           date: "July 23",
           author: "S. Rogers",
         },
         {
           title: "Minimalist design furniture 2026",
-          image: "/prokip-logo.png",
+          image: "https://images.unsplash.com/photo-1583338917451-face2751d8d5?w=800&q=80&auto=format&fit=crop",
           date: "July 23",
           author: "S. Rogers",
         },
         {
           title: "Green interior design inspiration",
-          image: "/prokip-logo.png",
+          image: "https://images.unsplash.com/photo-1534432182912-63863115e106?w=800&q=80&auto=format&fit=crop",
           date: "July 23",
           author: "S. Rogers",
         },
         {
           title: "Reinterprets the classic bookshelf",
-          image: "/prokip-logo.png",
+          image: "https://images.unsplash.com/photo-1568254183919-78a4f43a2877?w=800&q=80&auto=format&fit=crop",
           date: "July 23",
           author: "S. Rogers",
         },
         {
           title: "Creative water features and exterior",
-          image: "/prokip-logo.png",
+          image: "https://images.unsplash.com/photo-1483695028939-5bb13f8648b0?w=800&q=80&auto=format&fit=crop",
           date: "July 23",
           author: "S. Rogers",
         },
@@ -392,21 +392,21 @@ export const BAKERY_SHOP_PAGE_BLOCKS: EditorNode[] = [
       sectionSubtitle: "Sweets Bakery",
       items: [
         {
-          icon: "/prokip-logo.png",
+          icon: "data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A//www.w3.org/2000/svg%22%20viewBox%3D%220%200%2024%2024%22%20fill%3D%22currentColor%22%3E%3Cpath%20d%3D%22M12%202l2.9%206.26L22%209.27l-5%204.87%201.18%206.88L12%2017.77l-6.18%203.25L7%2014.14%202%209.27l7.1-1.01z%22/%3E%3C/svg%3E",
           title: "Cupcakes",
           description: "Browse our selection of handmade cupcakes",
           buttonText: "Shop Now",
           buttonLink: "/shop",
         },
         {
-          icon: "/prokip-logo.png",
+          icon: "data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A//www.w3.org/2000/svg%22%20viewBox%3D%220%200%2024%2024%22%20fill%3D%22currentColor%22%3E%3Cpath%20d%3D%22M12%202l2.9%206.26L22%209.27l-5%204.87%201.18%206.88L12%2017.77l-6.18%203.25L7%2014.14%202%209.27l7.1-1.01z%22/%3E%3C/svg%3E",
           title: "Macaroons",
           description: "Discover our delicate French macaroons",
           buttonText: "Shop Now",
           buttonLink: "/shop",
         },
         {
-          icon: "/prokip-logo.png",
+          icon: "data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A//www.w3.org/2000/svg%22%20viewBox%3D%220%200%2024%2024%22%20fill%3D%22currentColor%22%3E%3Cpath%20d%3D%22M12%202l2.9%206.26L22%209.27l-5%204.87%201.18%206.88L12%2017.77l-6.18%203.25L7%2014.14%202%209.27l7.1-1.01z%22/%3E%3C/svg%3E",
           title: "Cakes",
           description: "Explore our custom cake collection",
           buttonText: "Shop Now",

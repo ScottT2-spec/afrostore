@@ -699,8 +699,8 @@ export default function StorefrontPage() {
   if (data.templateSlug === "vegetables") {
     const vegetableNavItems = [
       { label: "Home", href: `/store/${slug}` },
-      { label: "Menu", href: `/store/${slug}/menu` },
-      { label: "Recipe", href: `/store/${slug}/recipe` },
+      { label: "Shop", href: `/store/${slug}/shop` },
+      { label: "Recipes", href: `/store/${slug}/recipe` },
       { label: "About", href: `/store/${slug}/about` },
       { label: "Contact", href: `/store/${slug}/contact` },
     ];
@@ -714,14 +714,14 @@ export default function StorefrontPage() {
     // Use block-based rendering for all vegetables pages to enable editor persistence
     return (
       <ThemeProvider theme={resolvedTheme}>
-        <GroceryStoreContext.Provider value={{ storeSlug: slug, addToCart: addToCartById, toggleWishlist, isWishlisted }}>
+        <GroceryStoreContext.Provider value={{ storeSlug: slug, products: products as any, addToCart: addToCartById, toggleWishlist, isWishlisted }}>
         <div className="min-h-screen bg-[#fffdf7] text-[#243226]">
           <VegetableHeader
             storeName={store.name}
             storeSlug={slug}
             logo={store.logo}
             navItems={vegetableNavItems}
-            reservationHref={`/store/${slug}/reservation`}
+            reservationHref={`/store/${slug}/shop`}
           />
           <main style={buildPageBackgroundStyle(resolvedPageSettings)}>
             {pageNodeStyles}

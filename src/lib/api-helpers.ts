@@ -62,10 +62,19 @@ export async function getSiteContext(req: NextRequest, siteId: string) {
   const user = await getAuthUser(req);
   if (!user) return { user: null, site: null, error: "Unauthorized" };
 
-  const site = await prisma.site.findUnique({
-    where: { id: siteId },
-    include: { members: true, workspace: true },
-  });
+  // Guarded for the same reason as getAuthUser: an unguarded DB call here
+  // ran outside every route's own try/catch, so a DB failure crashed the
+  // route with an uncaught exception instead of a JSON error response.
+  let site;
+  try {
+    site = await prisma.site.findUnique({
+      where: { id: siteId },
+      include: { members: true, workspace: true },
+    });
+  } catch (err) {
+    console.error("getSiteContext: failed to look up site", err);
+    return { user, site: null, error: "Internal server error" };
+  }
 
   if (!site) return { user, site: null, error: "Site not found" };
 
@@ -88,8 +97,28 @@ export const getStoreContext = getSiteContext;
  * Effective role of the caller on a site, as returned by getSiteContext.
  * OWNER and platform ADMIN/SUPER_ADMIN always outrank any SiteMember row.
  * Higher index = more privileged.
+ *
+ * SiteMemberRole (the Prisma enum) actually has 9 values — OWNER, ADMIN,
+ * MANAGER, EDITOR, MARKETER, SUPPORT, DEVELOPER, STAFF, VIEWER — but the
+ * Team page UI only ever assigns ADMIN/STAFF/VIEWER, so the other 5 are
+ * unused today. They're mapped here anyway rather than left out: an
+ * unmapped role must never silently bypass requireRole. Without an entry,
+ * ROLE_RANK[role] is undefined, and `undefined < <number>` is always false
+ * in JS — meaning an unrecognized role would pass every permission check
+ * instead of failing it. MANAGER ranks with ADMIN (broad operational
+ * authority); EDITOR/MARKETER/SUPPORT/DEVELOPER rank with STAFF.
  */
-const ROLE_RANK = { VIEWER: 0, STAFF: 1, ADMIN: 2, OWNER: 3 } as const;
+const ROLE_RANK = {
+  VIEWER: 0,
+  SUPPORT: 1,
+  MARKETER: 1,
+  EDITOR: 1,
+  DEVELOPER: 1,
+  STAFF: 1,
+  MANAGER: 2,
+  ADMIN: 2,
+  OWNER: 3,
+} as const;
 export type EffectiveRole = keyof typeof ROLE_RANK;
 
 export function getEffectiveRole(
@@ -99,7 +128,11 @@ export function getEffectiveRole(
   if (ctx.site.workspace.ownerId === ctx.user.id) return "OWNER";
   if (ctx.user.role === "ADMIN" || ctx.user.role === "SUPER_ADMIN") return "OWNER"; // platform admin, treat as full access
   const member = ctx.site.members.find((m) => m.userId === ctx.user!.id);
-  return member?.role ?? null;
+  if (!member) return null;
+  // Defensive fallback: any role value not in ROLE_RANK (shouldn't happen,
+  // but the enum is broader than what the UI assigns) is treated as the
+  // least-privileged tier rather than silently passing every check.
+  return (member.role in ROLE_RANK ? member.role : "VIEWER") as EffectiveRole;
 }
 
 /**
@@ -144,6 +177,38 @@ export function generateOrderNumber(): string {
 
 export function generateSubdomain(name: string): string {
   return slugify(name).slice(0, 30) || `store-${generateId().slice(0, 6)}`;
+}
+
+/**
+ * Create a Site with a guaranteed-unique slug, retrying on an actual
+ * collision instead of only checking beforehand. Site.slug is a globally
+ * unique column (not scoped per-workspace), and a plain "check if it
+ * exists, then create" has two real failure modes that both crash with a
+ * raw Prisma P2002 error: two requests racing between the check and the
+ * create, and a "unique" candidate slug that turns out to already be
+ * taken by a site in a completely different workspace (easy to miss if
+ * the existence check was scoped to the current workspace instead of
+ * checked globally). buildData receives the candidate slug and returns
+ * the full create payload for that attempt.
+ */
+export async function createSiteWithUniqueSlug<T>(
+  baseName: string,
+  buildData: (slug: string) => Parameters<typeof prisma.site.create>[0]["data"],
+  maxAttempts = 5
+): Promise<T> {
+  const base = slugify(baseName) || `store-${generateId().slice(0, 6)}`;
+  let lastErr: unknown;
+  for (let attempt = 0; attempt < maxAttempts; attempt++) {
+    const candidateSlug = attempt === 0 ? base : `${base}-${Math.random().toString(36).slice(2, 6)}`;
+    try {
+      return (await prisma.site.create({ data: buildData(candidateSlug) })) as T;
+    } catch (err: any) {
+      lastErr = err;
+      if (err?.code === "P2002") continue; // slug or subdomain collision — try a new suffix
+      throw err;
+    }
+  }
+  throw lastErr;
 }
 
 export async function ensureUniqueSlug(

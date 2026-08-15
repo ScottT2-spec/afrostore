@@ -18,10 +18,10 @@ export const INTERIOR_DECOR_PRESET: EditorNode[] = [
           settings:           {
             "titleLine1": "Ball-Shaped Table",
             "titleLine2": "Night Lamp.",
-            "subtitle": "$250.00",
+            "subtitle": "$89.00",
             "buttonText": "Go To Shop",
             "buttonLink": "/shop",
-            "image": "/prokip-logo.png"
+            "image": "https://images.unsplash.com/photo-1507473885765-e6ed057ab6fe?w=900&q=80&auto=format&fit=crop"
           },
           elements: [],
         },
@@ -31,10 +31,10 @@ export const INTERIOR_DECOR_PRESET: EditorNode[] = [
           settings:           {
             "titleLine1": "Home Flower Plant",
             "titleLine2": "Glass Vase.",
-            "subtitle": "$286.00",
+            "subtitle": "$68.00",
             "buttonText": "Go To Shop",
             "buttonLink": "/shop",
-            "image": "/prokip-logo.png"
+            "image": "https://images.unsplash.com/photo-1586023492125-27b2c045efd7?w=900&q=80&auto=format&fit=crop"
           },
           elements: [],
         },
@@ -43,10 +43,10 @@ export const INTERIOR_DECOR_PRESET: EditorNode[] = [
           type: "slide",
           settings:           {
             "titleLine1": "Modern Nordic",
-            "titleLine2": "Minimalist Cattle.",
+            "titleLine2": "Minimalist Vase.",
             "buttonText": "Go To Shop",
             "buttonLink": "/shop",
-            "image": "/prokip-logo.png"
+            "image": "https://images.unsplash.com/photo-1616486338812-3dadae4b4ace?w=900&q=80&auto=format&fit=crop"
           },
           elements: [],
         },
@@ -58,7 +58,7 @@ export const INTERIOR_DECOR_PRESET: EditorNode[] = [
             "titleLine2": "and Brass.",
             "buttonText": "Go To Shop",
             "buttonLink": "/shop",
-            "image": "/prokip-logo.png"
+            "image": "https://images.unsplash.com/photo-1586495777744-4413f21062fa?w=900&q=80&auto=format&fit=crop"
           },
           elements: [],
         }
@@ -68,14 +68,14 @@ export const INTERIOR_DECOR_PRESET: EditorNode[] = [
     id: "interior-categories",
     type: "interiorCategoryGrid",
     settings: {
-      sectionTitle: "TOP CATEGORIES",
+      sectionTitle: "SHOP BY CATEGORY",
       columns: 5,
       categories: [
-        { name: "Home Decor", icon: "/prokip-logo.png", image: "", link: "/shop" },
-        { name: "Celing Decor", icon: "/prokip-logo.png", image: "", link: "/shop" },
-        { name: "Wall Decor", icon: "/prokip-logo.png", image: "", link: "/shop" },
-        { name: "Vase Decor", icon: "/prokip-logo.png", image: "", link: "/shop" },
-        { name: "Holiday Decor", icon: "/prokip-logo.png", image: "", link: "/shop" },
+        { name: "Lighting", image: "https://images.unsplash.com/photo-1608248597279-f99d160bfcbc?w=400&q=80&auto=format&fit=crop", link: "/shop?category=lighting" },
+        { name: "Furniture", image: "https://images.unsplash.com/photo-1555041469-a586c61ea9bc?w=400&q=80&auto=format&fit=crop", link: "/shop?category=furniture" },
+        { name: "Decor", image: "https://images.unsplash.com/photo-1616486338812-3dadae4b4ace?w=400&q=80&auto=format&fit=crop", link: "/shop?category=decor" },
+        { name: "Clocks", image: "https://images.unsplash.com/photo-1563861826100-9cb868fdbe1c?w=400&q=80&auto=format&fit=crop", link: "/shop?category=clocks" },
+        { name: "Kitchen", image: "https://images.unsplash.com/photo-1556909114-f6e7ad7d3136?w=400&q=80&auto=format&fit=crop", link: "/shop?category=kitchen" },
       ],
     },
   },
@@ -88,21 +88,21 @@ export const INTERIOR_DECOR_PRESET: EditorNode[] = [
         {
           title: "New Arrivals In Decorations.",
           subtitle: "View More",
-          image: "/prokip-logo.png",
+          image: "https://images.unsplash.com/photo-1570194065650-d99fb4a38c5f?w=800&q=80&auto=format&fit=crop",
           buttonText: "View More",
           buttonLink: "/shop",
         },
         {
           title: "Decorative Wall Elements.",
           subtitle: "View More",
-          image: "/prokip-logo.png",
+          image: "https://images.unsplash.com/photo-1667312939978-64cf31718a6e?w=800&q=80&auto=format&fit=crop",
           buttonText: "View More",
           buttonLink: "/shop",
         },
         {
-          title: "Decorations For New Novel.",
+          image: "https://images.unsplash.com/photo-1616047006789-b7af5afb8c20?w=800&q=80&auto=format&fit=crop",
+          title: "Cozy Living Room Finds.",
           subtitle: "View More",
-          image: "/prokip-logo.png",
           buttonText: "View More",
           buttonLink: "/shop",
         },
@@ -124,8 +124,8 @@ export const INTERIOR_DECOR_PRESET: EditorNode[] = [
     type: "interiorInfoBoxes",
     settings: {
       items: [
-        { icon: "🏠", title: "Home Modern Decoration Decals.", description: "But I must explain to you how all this mistaken idea of denouncing pleasure and praising pain was born." },
-        { icon: "✨", title: "New Decoration Solutions for Home.", description: "Supported neglected met she therefore unwilling discovery remainder." },
+        { icon: "🏠", title: "Thoughtfully Made for Modern Homes.", description: "Every piece is chosen for quality craftsmanship and everyday comfort." },
+        { icon: "✨", title: "New Arrivals Every Month.", description: "Fresh decor and furniture pieces added regularly — there's always something new to discover." },
       ],
     },
   },
@@ -135,15 +135,20 @@ export const INTERIOR_DECOR_PRESET: EditorNode[] = [
     settings: {
       columns: 4,
       sectionTitle: "OUR BLOG",
-      posts: [],
+      posts: [
+        { title: "5 Ways to Style Your Living Room for Every Season", image: "https://images.unsplash.com/photo-1567016432779-094069958ea5?w=500&q=80&auto=format&fit=crop", date: "October 12, 2025" },
+        { title: "Choosing the Right Furniture for Small Spaces", image: "https://images.unsplash.com/photo-1586023492125-27b2c045efd7?w=500&q=80&auto=format&fit=crop", date: "October 8, 2025" },
+        { title: "Warm Neutrals: This Season's Biggest Decor Trend", image: "https://images.unsplash.com/photo-1524758631624-e2822e304c36?w=500&q=80&auto=format&fit=crop", date: "October 3, 2025" },
+        { title: "How to Mix Textures Without Overdoing It", image: "https://images.unsplash.com/photo-1493663284031-b7e3aefcae8e?w=500&q=80&auto=format&fit=crop", date: "September 28, 2025" },
+      ],
     },
   },
   {
     id: "interior-cta",
     type: "interiorCta",
     settings: {
-      title: "Summer 25% discount on all last year\u2019s products home decor",
-      buttonText: "To Shop",
+      title: "New season, new pieces for your home",
+      buttonText: "Shop Now",
       buttonLink: "/shop",
       backgroundColor: "#f5f0eb",
     },
@@ -151,22 +156,13 @@ export const INTERIOR_DECOR_PRESET: EditorNode[] = [
   {
     id: "interior-footer", type: "interiorFooter",
     settings: {
-      logoUrl: "",
-      logoAlt: "Store Logo",
       description: "Discover a curated collection of modern furniture designed to bring comfort and elegance into your home.",
       contact: {
-        address: "451 Wall Street, UK, London",
-        phone: "(064) 332-1233",
-        fax: "(099) 453-1357",
+        address: "Update this with your store's real address",
+        phone: "Update with your phone number",
+        email: "Update with your contact email",
       },
-      recentPosts: [],
-      linkColumns: [
-        { title: "OUR STORES", links: [{ label: "New York", url: "#" }, { label: "London SF", url: "#" }, { label: "Edinburgh", url: "#" }, { label: "Los Angeles", url: "#" }, { label: "Chicago", url: "#" }, { label: "Las Vegas", url: "#" }] },
-        { title: "USEFUL LINKS", links: [{ label: "Privacy Policy", url: "#" }, { label: "Returns", url: "#" }, { label: "Terms & Conditions", url: "#" }, { label: "Contact Us", url: "#" }, { label: "Latest News", url: "#" }, { label: "Our Sitemap", url: "#" }] },
-        { title: "FOOTER MENU", links: [{ label: "Instagram profile", url: "#" }, { label: "New Collection", url: "#" }, { label: "Contact Us", url: "#" }, { label: "Latest News", url: "#" }, { label: "Our Sitemap", url: "#" }] },
-      ],
       copyrightText: "",
-      paymentIconsUrl: "/prokip-logo.png",
     },
   },
 ];
@@ -184,7 +180,7 @@ export const INTERIOR_RETAIL_PRESET: EditorNode[] = [
       subheading: "From timeless pieces to modern accents, create a home that celebrates your unique story.",
       ctaText: "SHOP NOW",
       ctaLink: "/shop",
-      image: "https://websitedemos.net/home-garden-decor-02/wp-content/uploads/sites/1034/2025/11/heroimage-1.png",
+      image: "https://images.unsplash.com/photo-1585320806297-9794b3e4eeae?w=1200&q=80&auto=format&fit=crop",
       exploreBtns: [
         { label: "Explore Indoor", link: "/shop?category=home-decor" },
         { label: "Explore Outdoor", link: "/shop?category=garden-decor" },
@@ -205,7 +201,7 @@ export const INTERIOR_RETAIL_PRESET: EditorNode[] = [
         {
           title: "Explore Outdoor",
           subtitle: "Garden Décor Collection",
-          image: "https://images.unsplash.com/photo-1585320806297-9794b3e4eeae?w=700&h=500&fit=crop",
+          image: "https://images.unsplash.com/photo-1600210492486-724fe5c67fb0?w=700&h=500&fit=crop",
           link: "/shop?category=garden-decor",
         },
       ],

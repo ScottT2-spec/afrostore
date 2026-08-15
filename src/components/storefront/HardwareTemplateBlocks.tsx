@@ -483,6 +483,45 @@ export interface HardwareContactFormProps {
 }
 
 export function HardwareContactForm({ subtitle, title, fields = ["name", "email", "phone", "company", "message"], buttonText = "Submit" }: HardwareContactFormProps) {
+  const storeSlug = useStoreSlug();
+  const [values, setValues] = useState<Record<string, string>>({});
+  const [submitting, setSubmitting] = useState(false);
+  const [submitted, setSubmitted] = useState(false);
+  const [submitError, setSubmitError] = useState("");
+
+  const handleChange = (field: string, value: string) => setValues((prev) => ({ ...prev, [field]: value }));
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!storeSlug) { setSubmitError("This form isn't connected to a store yet."); return; }
+    setSubmitting(true);
+    setSubmitError("");
+    try {
+      const [firstName, ...rest] = (values.name || "").trim().split(/\s+/).filter(Boolean);
+      const res = await fetch(`/api/public/sites/${storeSlug}/crm/contacts`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          firstName: firstName || "",
+          lastName: rest.join(" "),
+          email: values.email || "",
+          phone: values.phone || "",
+          company: values.company || "",
+          source: "landing",
+          tags: ["contact-form"],
+          customFields: values.message ? { message: values.message } : undefined,
+        }),
+      });
+      const json = await res.json();
+      if (!json.success) throw new Error(json.error || "Failed to submit. Please try again.");
+      setSubmitted(true);
+    } catch (err: any) {
+      setSubmitError(err.message || "Something went wrong. Please try again.");
+    } finally {
+      setSubmitting(false);
+    }
+  };
+
   const css = `
     .hw-cform { padding: 40px 0; max-width: 700px; margin: 0 auto; }
     .hw-cform input, .hw-cform textarea { width: 100%; padding: 12px 15px; margin-bottom: 15px; border: 1px solid #ddd; font-family: ${TOKENS.bodyFont}; font-size: 14px; box-sizing: border-box; outline: none; background: #fff; }
@@ -490,19 +529,29 @@ export function HardwareContactForm({ subtitle, title, fields = ["name", "email"
     .hw-cform textarea { height: 120px; resize: vertical; }
     .hw-cform-btn { display: inline-block; padding: 14px 35px; background: ${TOKENS.primaryColor}; color: #fff; font-family: ${TOKENS.bodyFont}; font-weight: 600; font-size: 14px; text-transform: uppercase; letter-spacing: 1px; border: none; cursor: pointer; transition: background 0.3s; }
     .hw-cform-btn:hover { filter: brightness(0.9); }
+    .hw-cform-btn:disabled { opacity: 0.6; cursor: not-allowed; }
+    .hw-cform-error { color: #e74c3c; font-family: ${TOKENS.bodyFont}; font-size: 13px; margin: 0 0 15px; }
+    .hw-cform-success { color: ${TOKENS.primaryColor}; font-family: ${TOKENS.bodyFont}; font-size: 15px; font-weight: 600; }
   `;
   return (
     <div style={containerStyle}>
       <ScopedStyles id="contact-form" css={css} />
       {(subtitle || title) && <HardwareSectionTitle subtitle={subtitle} title={title || ""} />}
-      <div className="hw-cform">
-        {fields.includes("name") && <input type="text" placeholder="Your Name" />}
-        {fields.includes("email") && <input type="email" placeholder="Your Email" />}
-        {fields.includes("phone") && <input type="tel" placeholder="Phone Number" />}
-        {fields.includes("company") && <input type="text" placeholder="Company" />}
-        {fields.includes("message") && <textarea placeholder="Your Message" />}
-        <button className="hw-cform-btn"><InlineEditableText as="span" field="buttonText" value={buttonText} isEditor={true} selectNodeOnFocus={false} /></button>
-      </div>
+      {submitted ? (
+        <p className="hw-cform-success">Thanks for reaching out — we&apos;ll be in touch shortly.</p>
+      ) : (
+        <form className="hw-cform" onSubmit={handleSubmit}>
+          {submitError && <p className="hw-cform-error">{submitError}</p>}
+          {fields.includes("name") && <input type="text" required placeholder="Your Name" value={values.name || ""} onChange={(e) => handleChange("name", e.target.value)} />}
+          {fields.includes("email") && <input type="email" required placeholder="Your Email" value={values.email || ""} onChange={(e) => handleChange("email", e.target.value)} />}
+          {fields.includes("phone") && <input type="tel" placeholder="Phone Number" value={values.phone || ""} onChange={(e) => handleChange("phone", e.target.value)} />}
+          {fields.includes("company") && <input type="text" placeholder="Company" value={values.company || ""} onChange={(e) => handleChange("company", e.target.value)} />}
+          {fields.includes("message") && <textarea placeholder="Your Message" value={values.message || ""} onChange={(e) => handleChange("message", e.target.value)} />}
+          <button className="hw-cform-btn" type="submit" disabled={submitting}>
+            <InlineEditableText as="span" field="buttonText" value={submitting ? "Sending..." : buttonText} isEditor={true} selectNodeOnFocus={false} />
+          </button>
+        </form>
+      )}
     </div>
   );
 }

@@ -60,8 +60,8 @@ export const TEMPLATES: TemplateMeta[] = [
 
 
   // Interior Design
-  { slug: 'decor', name: 'Decor', category: 'interior-design', categoryLabel: 'Interior Design', description: 'Home decor and interior design store', previewImage: '/prokip-logo.png', file: 'interior-design/decor.html', siteType: 'ECOMMERCE', industries: ['other'] },
-  { slug: 'retail', name: 'Retail', category: 'interior-design', categoryLabel: 'Interior Design', description: 'Retail furniture and home goods store', previewImage: '/prokip-logo.png', file: 'interior-design/retail.html', siteType: 'ECOMMERCE', industries: ['other'] },
+  { slug: 'decor', name: 'Decor', category: 'interior-design', categoryLabel: 'Interior Design', description: 'Home decor and interior design store', previewImage: 'https://images.unsplash.com/photo-1586023492125-27b2c045efd7?w=600&q=80&auto=format&fit=crop', file: 'interior-design/decor.html', siteType: 'ECOMMERCE', industries: ['other'] },
+  { slug: 'retail', name: 'Retail', category: 'interior-design', categoryLabel: 'Interior Design', description: 'Retail furniture and home goods store', previewImage: 'https://images.unsplash.com/photo-1585320806297-9794b3e4eeae?w=600&q=80&auto=format&fit=crop', file: 'interior-design/retail.html', siteType: 'ECOMMERCE', industries: ['other'] },
 
   // Food & Grocery
   { slug: 'grocery', name: 'Grocery', category: 'food-grocery', categoryLabel: 'Grocery', description: 'Online grocery store with fresh produce', previewImage: '/prokip-logo.png', file: 'food-grocery/grocery.html', siteType: 'ECOMMERCE', industries: ['food'] },

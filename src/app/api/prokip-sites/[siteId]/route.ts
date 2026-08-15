@@ -1,6 +1,6 @@
 import { NextRequest } from "next/server";
 import { prisma } from "@/lib/db";
-import { success, error } from "@/lib/api-helpers";
+import { success, error, createSiteWithUniqueSlug } from "@/lib/api-helpers";
 import { ProkipSite } from "@/types";
 
 type Params = { params: Promise<{ siteId: string }> };
@@ -227,23 +227,25 @@ export async function POST(req: NextRequest, { params }: Params) {
         },
       });
     } else {
-      // Create new site
-      await prisma.site.create({
-        data: {
-          id: siteId,
-          workspaceId: prokipSite.workspaceId,
-          name: prokipSite.name,
-          slug: prokipSite.name.toLowerCase().replace(/\s+/g, "-"),
-          description: "",
-          logo: prokipSite.logoUrl,
-          siteType: "ECOMMERCE",
-          subdomain: prokipSite.name.toLowerCase().replace(/\s+/g, "-"),
-          currency: "NGN",
-          country: "NG",
-          businessType: "retail",
-          status: "ACTIVE",
-        },
-      });
+      // Create new site. Uses a retry-on-collision loop instead of using
+      // the transformed name directly as the slug/subdomain with no
+      // uniqueness check at all — any existing site with the same or
+      // similarly-named slug/subdomain would previously crash this sync
+      // with a raw, unhandled Prisma unique-constraint error.
+      await createSiteWithUniqueSlug(prokipSite.name, (slug) => ({
+        id: siteId,
+        workspaceId: prokipSite.workspaceId,
+        name: prokipSite.name,
+        slug,
+        description: "",
+        logo: prokipSite.logoUrl,
+        siteType: "ECOMMERCE",
+        subdomain: slug.slice(0, 30),
+        currency: "NGN",
+        country: "NG",
+        businessType: "retail",
+        status: "ACTIVE",
+      }));
     }
 
     // Create/update theme
