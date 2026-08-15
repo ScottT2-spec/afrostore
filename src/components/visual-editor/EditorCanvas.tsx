@@ -1038,7 +1038,7 @@ function ElementRenderer({
               borderRadius: styles.borderRadius,
             }}
           >
-            {(element.elements || element.children)?.map((child: any) => (
+            {(element.elements || element.children || element.columns)?.map((child: any) => (
               <ElementRenderer
                 key={child.id}
                 element={child}
