@@ -544,8 +544,8 @@ export default function StorePage() {
   if (data.templateSlug === "vegetables") {
     const vegetableNavItems = [
       { label: "Home", href: `/store/${slug}` },
-      { label: "Menu", href: `/store/${slug}/menu` },
-      { label: "Recipe", href: `/store/${slug}/recipe` },
+      { label: "Shop", href: `/store/${slug}/shop` },
+      { label: "Recipes", href: `/store/${slug}/recipe` },
       { label: "About", href: `/store/${slug}/about` },
       { label: "Contact", href: `/store/${slug}/contact` },
     ];
@@ -560,16 +560,30 @@ export default function StorePage() {
             storeSlug={slug}
             logo={store.logo}
             navItems={vegetableNavItems}
-            reservationHref={`/store/${slug}/reservation`}
+            reservationHref={`/store/${slug}/shop`}
           />
 
           <main style={buildPageBackgroundStyle(homePageSettings)}>
             {homeNodeCss && <style data-live-node-styles dangerouslySetInnerHTML={{ __html: homeNodeCss }} />}
-            {homeBlocks.length > 0 ? (
-              <RenderTemplateBlocks blocks={homeBlocks as TemplateBlock[]} />
-            ) : (
-              <VegetableHomePage storeName={store.name} storeSlug={slug} currency={currency} socialLinks={socialLinksArray} />
-            )}
+            <TemplateStoreContextProvider
+              templateSlug="vegetables"
+              products={products}
+              blogs={data.blogs || []}
+              categories={categories}
+              currency={currency}
+              storeSlug={slug}
+              socialLinks={socialLinksArray}
+              addToCart={(pid, qty) => { const x = products.find(p => p.id === pid); if (x) addToCart(x, qty); }}
+              toggleWishlist={toggleWishlist}
+              isWishlisted={isWishlisted}
+              onQuickView={(pid) => { const x = products.find(p => p.id === pid); if (x) { setSelectedProduct(x); setSelectedVariantId(null); setQty(1); } }}
+            >
+              {homeBlocks.length > 0 ? (
+                <RenderTemplateBlocks blocks={homeBlocks as TemplateBlock[]} />
+              ) : (
+                <VegetableHomePage storeName={store.name} storeSlug={slug} currency={currency} socialLinks={socialLinksArray} />
+              )}
+            </TemplateStoreContextProvider>
           </main>
 
           {!isLanding && products.length > 0 && !homeHasProductGrid && (

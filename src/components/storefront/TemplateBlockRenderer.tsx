@@ -841,6 +841,7 @@ const VEGETABLE_BLOCKS: Record<string, BlockComponent> = {
   vegetableTeam: VegetableTeam as unknown as BlockComponent,
   vegetableContact: VegetableContact as unknown as BlockComponent,
   vegetableReservation: VegetableReservation as unknown as BlockComponent,
+  vegetableProductGrid: GroceryProductGrid as unknown as BlockComponent,
 };
 
 const JUMIA_BLOCKS: Record<string, BlockComponent> = {

@@ -76,7 +76,7 @@ export function VegetableHeader({ storeName, storeSlug, logo, navItems, reservat
           </span>
           <span className="hidden flex-col leading-none sm:flex">
             <span className="font-serif text-lg font-semibold tracking-[0.22em] text-[#243226]">{storeName}</span>
-            <span className="text-[10px] uppercase tracking-[0.35em] text-[#7f8b73]">Seasonal Dining</span>
+            <span className="text-[10px] uppercase tracking-[0.35em] text-[#7f8b73]">Farm Fresh Produce</span>
           </span>
         </Link>
 
@@ -84,7 +84,7 @@ export function VegetableHeader({ storeName, storeSlug, logo, navItems, reservat
           href={reservationHref}
           className="inline-flex items-center rounded-full border border-[#243226] bg-[#243226] px-4 py-2.5 text-[12px] font-semibold uppercase tracking-[0.2em] text-white transition-colors hover:bg-[#6b8d49] hover:border-[#6b8d49]"
         >
-          Make Reservation
+          Shop Now
         </Link>
       </div>
 
@@ -109,7 +109,7 @@ export function VegetableHeader({ storeName, storeSlug, logo, navItems, reservat
 }
 
 export function VegetableFooter({ storeName, storeSlug, logo, description, navItems, socialLinks = [] }: FooterProps) {
-  const footerNav = navItems.filter((item) => ["Home", "Menu", "About", "Contact"].includes(item.label));
+  const footerNav = navItems.filter((item) => ["Home", "Shop", "About", "Contact"].includes(item.label));
   const safeSocialLinks = normalizeSocialLinks(socialLinks);
 
   return (
@@ -122,11 +122,11 @@ export function VegetableFooter({ storeName, storeSlug, logo, description, navIt
             </span>
             <span>
               <span className="block font-serif text-2xl tracking-[0.18em]">{storeName}</span>
-              <span className="block text-[10px] uppercase tracking-[0.35em] text-[#7d866f]">Fresh seasonal kitchen</span>
+              <span className="block text-[10px] uppercase tracking-[0.35em] text-[#7d866f]">Farm Fresh Produce</span>
             </span>
           </Link>
           <p className="mt-5 max-w-md text-sm leading-7 text-[#5d6658]">
-            {description || "Seasonal vegetables, elegant plates, and warm hospitality served with a calm, modern restaurant aesthetic."}
+            {description || "Farm-fresh vegetables and organic produce, sourced from local growers and delivered with care."}
           </p>
         </div>
 
@@ -160,7 +160,7 @@ export function VegetableFooter({ storeName, storeSlug, logo, description, navIt
             )}
           </div>
           <p className="mt-5 text-sm leading-7 text-[#5d6658]">
-            {storeName} • a fresh, calm restaurant template for seasonal menus, chef notes, and reservations.
+            {storeName} • fresh, seasonal produce delivered to your door.
           </p>
         </div>
       </div>
