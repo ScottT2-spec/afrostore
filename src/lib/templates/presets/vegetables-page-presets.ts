@@ -67,6 +67,16 @@ export const VEGETABLE_HOME_PAGE_BLOCKS: EditorNode[] = [
       ],
     },
   },
+  {
+    id: "vegetable-product-grid",
+    type: "vegetableProductGrid",
+    settings: {
+      sectionTitle: "Farm-Fresh Picks",
+      sectionSubtitle: "Shop Our Produce",
+      maxProducts: 10,
+      columns: 5,
+    },
+  },
 ];
 
 export const VEGETABLE_MENU_PAGE_BLOCKS: EditorNode[] = [
