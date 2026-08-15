@@ -242,8 +242,7 @@ export default function Sidebar({ onNavigate }: { onNavigate?: () => void } = {}
   return (
     <aside
       className={cn(
-        "left-0 top-0 z-40 h-screen max-h-screen border-r border-gray-200 bg-white transition-all duration-300 flex flex-col overflow-hidden",
-        "lg:fixed lg:block",
+        "h-screen max-h-screen border-r border-gray-200 bg-white transition-all duration-300 flex flex-col overflow-hidden",
         collapsed ? "w-[72px]" : "w-64"
       )}
     >
