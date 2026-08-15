@@ -1,7 +1,7 @@
 "use client";
-import { ArrowRight, ChevronDown, ChevronUp, Loader2, GripVertical, Facebook, Twitter, Instagram, Linkedin, Youtube, Share2, icons as lucideIcons } from "lucide-react";
+import { ArrowRight, ChevronDown, ChevronUp, Loader2, GripVertical, Share2, icons as lucideIcons } from "lucide-react";
 import { sanitizeHtml } from "@/lib/sanitize";
-import { Award, CheckCircle2, Clock, CreditCard, Eye, Globe, Headphones, Heart, Lock, Mail, MapPin, MessageCircle, Package, Palette, Phone, Play, RefreshCw, Rocket, Send, Shield, ShoppingBag, ShoppingCart, Sparkles, Star, Target, ThumbsUp, TrendingUp, Truck, Users, Zap } from "@/components/icons/FilledIcons";
+import { Award, CheckCircle2, Clock, CreditCard, Eye, Globe, Headphones, Heart, Lock, Mail, MapPin, MessageCircle, Package, Palette, Phone, Play, RefreshCw, Rocket, Send, Shield, ShoppingBag, ShoppingCart, Sparkles, Star, Target, ThumbsUp, TrendingUp, Truck, Users, Zap, Facebook, Twitter, Instagram, Linkedin, Youtube } from "@/components/icons/FilledIcons";
 
 import { useState, useEffect, useMemo, useRef, createContext, useContext } from "react";
 import { useDraggable, useDroppable, DndContext, closestCenter, DragEndEvent } from "@dnd-kit/core";
