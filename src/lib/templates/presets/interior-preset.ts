@@ -18,10 +18,10 @@ export const INTERIOR_DECOR_PRESET: EditorNode[] = [
           settings:           {
             "titleLine1": "Ball-Shaped Table",
             "titleLine2": "Night Lamp.",
-            "subtitle": "$250.00",
+            "subtitle": "$89.00",
             "buttonText": "Go To Shop",
             "buttonLink": "/shop",
-            "image": "https://images.unsplash.com/photo-1618221195710-dd6b41faaea6?w=800&q=80&auto=format&fit=crop"
+            "image": "https://images.unsplash.com/photo-1507473885765-e6ed057ab6fe?w=900&q=80&auto=format&fit=crop"
           },
           elements: [],
         },
@@ -31,10 +31,10 @@ export const INTERIOR_DECOR_PRESET: EditorNode[] = [
           settings:           {
             "titleLine1": "Home Flower Plant",
             "titleLine2": "Glass Vase.",
-            "subtitle": "$286.00",
+            "subtitle": "$68.00",
             "buttonText": "Go To Shop",
             "buttonLink": "/shop",
-            "image": "https://images.unsplash.com/photo-1618220179428-22790b461013?w=800&q=80&auto=format&fit=crop"
+            "image": "https://images.unsplash.com/photo-1602928321679-560bb453f190?w=900&q=80&auto=format&fit=crop"
           },
           elements: [],
         },
@@ -43,10 +43,10 @@ export const INTERIOR_DECOR_PRESET: EditorNode[] = [
           type: "slide",
           settings:           {
             "titleLine1": "Modern Nordic",
-            "titleLine2": "Minimalist Cattle.",
+            "titleLine2": "Minimalist Vase.",
             "buttonText": "Go To Shop",
             "buttonLink": "/shop",
-            "image": "https://images.unsplash.com/photo-1586023492125-27b2c045efd7?w=800&q=80&auto=format&fit=crop"
+            "image": "https://images.unsplash.com/photo-1578500494198-246f612d3b3d?w=900&q=80&auto=format&fit=crop"
           },
           elements: [],
         },
@@ -58,7 +58,7 @@ export const INTERIOR_DECOR_PRESET: EditorNode[] = [
             "titleLine2": "and Brass.",
             "buttonText": "Go To Shop",
             "buttonLink": "/shop",
-            "image": "https://images.unsplash.com/photo-1616046229478-9901c5536a45?w=800&q=80&auto=format&fit=crop"
+            "image": "https://images.unsplash.com/photo-1584589167171-541ce45f1eea?w=900&q=80&auto=format&fit=crop"
           },
           elements: [],
         }
@@ -71,11 +71,11 @@ export const INTERIOR_DECOR_PRESET: EditorNode[] = [
       sectionTitle: "SHOP BY CATEGORY",
       columns: 5,
       categories: [
-        { name: "Lighting", icon: "💡", image: "", link: "/shop?category=lighting" },
-        { name: "Furniture", icon: "🛋️", image: "", link: "/shop?category=furniture" },
-        { name: "Decor", icon: "🏺", image: "", link: "/shop?category=decor" },
-        { name: "Clocks", icon: "🕐", image: "", link: "/shop?category=clocks" },
-        { name: "Kitchen", icon: "🍽️", image: "", link: "/shop?category=kitchen" },
+        { name: "Lighting", image: "https://images.unsplash.com/photo-1543198126-b0d9dd0355c9?w=400&q=80&auto=format&fit=crop", link: "/shop?category=lighting" },
+        { name: "Furniture", image: "https://images.unsplash.com/photo-1567538096630-e0c55bd6374c?w=400&q=80&auto=format&fit=crop", link: "/shop?category=furniture" },
+        { name: "Decor", image: "https://images.unsplash.com/photo-1616486338812-3dadae4b4ace?w=400&q=80&auto=format&fit=crop", link: "/shop?category=decor" },
+        { name: "Clocks", image: "https://images.unsplash.com/photo-1495364141860-b0d03eccd065?w=400&q=80&auto=format&fit=crop", link: "/shop?category=clocks" },
+        { name: "Kitchen", image: "https://images.unsplash.com/photo-1556911220-bff31c812dba?w=400&q=80&auto=format&fit=crop", link: "/shop?category=kitchen" },
       ],
     },
   },
@@ -88,21 +88,21 @@ export const INTERIOR_DECOR_PRESET: EditorNode[] = [
         {
           title: "New Arrivals In Decorations.",
           subtitle: "View More",
-          image: "https://images.unsplash.com/photo-1616486338812-3dadae4b4ace?w=800&q=80&auto=format&fit=crop",
+          image: "https://images.unsplash.com/photo-1615874959474-d609969a20ed?w=800&q=80&auto=format&fit=crop",
           buttonText: "View More",
           buttonLink: "/shop",
         },
         {
           title: "Decorative Wall Elements.",
           subtitle: "View More",
-          image: "https://images.unsplash.com/photo-1618221195710-dd6b41faaea6?w=800&q=80&auto=format&fit=crop",
+          image: "https://images.unsplash.com/photo-1615529182904-14819c35db37?w=800&q=80&auto=format&fit=crop",
           buttonText: "View More",
           buttonLink: "/shop",
         },
         {
-          title: "Decorations For New Novel.",
+          image: "https://images.unsplash.com/photo-1522708323590-d24dbb6b0267?w=800&q=80&auto=format&fit=crop",
+          title: "Cozy Living Room Finds.",
           subtitle: "View More",
-          image: "https://images.unsplash.com/photo-1618220179428-22790b461013?w=800&q=80&auto=format&fit=crop",
           buttonText: "View More",
           buttonLink: "/shop",
         },
@@ -156,20 +156,12 @@ export const INTERIOR_DECOR_PRESET: EditorNode[] = [
   {
     id: "interior-footer", type: "interiorFooter",
     settings: {
-      logoUrl: "",
-      logoAlt: "Store Logo",
       description: "Discover a curated collection of modern furniture designed to bring comfort and elegance into your home.",
       contact: {
         address: "Update this with your store's real address",
         phone: "Update with your phone number",
+        email: "Update with your contact email",
       },
-      recentPosts: [
-        { title: "5 Ways to Style Your Living Room for Every Season", url: "/blog/5-ways-to-style-your-living-room-for-every-season", date: "October 12, 2025", thumbnail: "https://images.unsplash.com/photo-1567016432779-094069958ea5?w=200&q=80&auto=format&fit=crop" },
-        { title: "Choosing the Right Furniture for Small Spaces", url: "/blog/choosing-the-right-furniture-for-small-spaces", date: "October 8, 2025", thumbnail: "https://images.unsplash.com/photo-1586023492125-27b2c045efd7?w=200&q=80&auto=format&fit=crop" },
-      ],
-      linkColumns: [
-        { title: "SHOP", links: [{ label: "All Products", url: "/shop" }, { label: "About Us", url: "/about" }, { label: "Contact Us", url: "/contact" }, { label: "Blog", url: "/blog" }] },
-      ],
       copyrightText: "",
     },
   },
@@ -209,7 +201,7 @@ export const INTERIOR_RETAIL_PRESET: EditorNode[] = [
         {
           title: "Explore Outdoor",
           subtitle: "Garden Décor Collection",
-          image: "https://images.unsplash.com/photo-1585320806297-9794b3e4eeae?w=700&h=500&fit=crop",
+          image: "https://images.unsplash.com/photo-1600607687644-c7531e489ece?w=700&h=500&fit=crop",
           link: "/shop?category=garden-decor",
         },
       ],

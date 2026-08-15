@@ -41,8 +41,8 @@ export const DECOR_ABOUT_PAGE_BLOCKS: EditorNode[] = [
     ],
   }},
   { id: "decor-about-gallery", type: "interiorGalleryGrid", settings: { images: [
-    "https://images.unsplash.com/photo-1618221195710-dd6b41faaea6?w=800&q=80&auto=format&fit=crop",
-    "https://images.unsplash.com/photo-1618220179428-22790b461013?w=800&q=80&auto=format&fit=crop",
+    "https://images.unsplash.com/photo-1600210492486-724fe5c67fb0?w=800&q=80&auto=format&fit=crop",
+    "https://images.unsplash.com/photo-1586105251261-72a756497a11?w=800&q=80&auto=format&fit=crop",
   ]}},
   { id: "decor-about-quote", type: "interiorQuoteSection", settings: {
     subtitle: "OUR PHILOSOPHY",
