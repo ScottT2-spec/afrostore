@@ -106,7 +106,11 @@ export const HEALTH_TEMPLATE_PRESET: EditorNode[] = [
     settings: {
       columns: 3,
       sectionTitle: "RECENT POSTS",
-      posts: [],
+      posts: [
+        { title: "What is fiber and why is it important for health?", image: "https://images.unsplash.com/photo-1512621776951-a57141f2eefd?w=500&q=80&auto=format&fit=crop", date: "September 5, 2023", author: "Admin", category: "Health" },
+        { title: "5 easy ways to build a healthier daily routine", image: "https://images.unsplash.com/photo-1540420773420-3366772f4999?w=500&q=80&auto=format&fit=crop", date: "September 4, 2023", author: "Admin", category: "Health" },
+        { title: "Eating for energy: foods that fuel your day", image: "https://images.unsplash.com/photo-1490645935967-10de6ba17061?w=500&q=80&auto=format&fit=crop", date: "September 4, 2023", author: "Admin", category: "Health" },
+      ],
     },
   },
   {
