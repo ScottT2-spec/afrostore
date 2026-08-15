@@ -1774,8 +1774,64 @@ export function PublicBlockRenderer({ block }: { block: BuilderBlock; isEditorMo
       </>
     );
   }
+
+  // Structural wrapper types from the visual page editor (section, column,
+  // container, grid, flex) have no dedicated renderer entry here — they're
+  // generic layout containers, not named content blocks like the ones
+  // above. Without this fallback, PublicBlockRenderer bailed out entirely
+  // for these types before, which meant a page built with the visual
+  // editor's core Section -> Column -> Widget structure rendered as a
+  // completely blank page on the live storefront: not just missing some
+  // content, but rendering nothing at all, since the very first thing
+  // encountered at the top of every such page is a "section" block.
+  const STRUCTURAL_TYPES = new Set(["section", "container", "column", "grid", "flex"]);
+  if (STRUCTURAL_TYPES.has(block.type)) {
+    const style: Record<string, unknown> = {};
+    if (typeof normalizedProps.backgroundColor === "string") style.backgroundColor = normalizedProps.backgroundColor;
+    if (typeof normalizedProps.paddingTop === "string") style.paddingTop = normalizedProps.paddingTop;
+    if (typeof normalizedProps.paddingBottom === "string") style.paddingBottom = normalizedProps.paddingBottom;
+    if (typeof normalizedProps.paddingLeft === "string") style.paddingLeft = normalizedProps.paddingLeft;
+    if (typeof normalizedProps.paddingRight === "string") style.paddingRight = normalizedProps.paddingRight;
+    if (typeof normalizedProps.marginTop === "string") style.marginTop = normalizedProps.marginTop;
+    if (typeof normalizedProps.marginBottom === "string") style.marginBottom = normalizedProps.marginBottom;
+    if (typeof normalizedProps.borderRadius === "string") style.borderRadius = normalizedProps.borderRadius;
+    if (block.type === "column" && typeof (block.props as any)?.width === "string") {
+      style.width = `${(block.props as any).width}%`;
+    }
+    const display = block.type === "grid" ? "grid" : block.type === "flex" || block.type === "column" ? "flex" : undefined;
+    if (display) style.display = display;
+    if (block.type === "flex" || block.type === "column") style.flexDirection = "column";
+
+    return (
+      <div style={style as React.CSSProperties} data-block-id={block.id} data-block-type={block.type}>
+        {(block.elements || []).map((child) => (
+          <PublicBlockRenderer key={child.id} block={child} />
+        ))}
+      </div>
+    );
+  }
+
   const Renderer = renderers[block.type];
-  if (!Renderer) return null;
+  if (!Renderer) {
+    // Unknown/unimplemented widget type (see the widget-type audit — a
+    // number of types the editor can create don't have a matching live
+    // renderer yet: icon, progress-bar, social-share/follow, cta, cart,
+    // form fields, etc.). Rather than silently returning null — which
+    // would also drop any nested children — render nothing for the
+    // widget itself but still recurse into children if it has any, so a
+    // container that merely wraps an unimplemented type doesn't lose
+    // everything inside it too.
+    if (Array.isArray(block.elements) && block.elements.length > 0) {
+      return (
+        <>
+          {block.elements.map((child) => (
+            <PublicBlockRenderer key={child.id} block={child} />
+          ))}
+        </>
+      );
+    }
+    return null;
+  }
   return <Renderer props={normalizedProps} />;
 }
 
