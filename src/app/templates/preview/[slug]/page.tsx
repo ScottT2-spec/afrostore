@@ -77,8 +77,8 @@ export default function TemplatePreviewPage() {
   if (slug === "vegetables") {
     const navItems = [
       { label: "Home", href: `/store/${demoStoreSlug}` },
-      { label: "Menu", href: `/store/${demoStoreSlug}/menu` },
-      { label: "Recipe", href: `/store/${demoStoreSlug}/recipe` },
+      { label: "Shop", href: `/store/${demoStoreSlug}/shop` },
+      { label: "Recipes", href: `/store/${demoStoreSlug}/recipe` },
       { label: "About", href: `/store/${demoStoreSlug}/about` },
       { label: "Contact", href: `/store/${demoStoreSlug}/contact` },
     ];
