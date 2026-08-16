@@ -888,7 +888,7 @@ export function InteriorFooterFull({
   const socialIcons: Record<string, string> = { facebook: "f", twitter: "𝕏", instagram: "📷", youtube: "▶", tiktok: "♪" };
 
   const css = `
-    .if-footer{background:${TOKENS.footerBg};font-family:${TOKENS.bodyFont};color:rgba(255,255,255,.7)}
+    .if-footer{background:#1a1a2e;font-family:${TOKENS.bodyFont};color:rgba(255,255,255,.7)}
     .if-main{max-width:${TOKENS.containerWidth};margin:0 auto;padding:60px 15px 40px;display:grid;grid-template-columns:1.5fr 1fr 1fr 1fr;gap:40px}
     .if-brand p{font-size:14px;line-height:1.8;margin:14px 0}
     .if-social{display:flex;gap:10px;margin-top:14px}
