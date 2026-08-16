@@ -65,6 +65,28 @@ export const INTERIOR_DECOR_PRESET: EditorNode[] = [
       ],
   },
   {
+    id: "interior-banner-top",
+    type: "interiorHeroSlider",
+    settings: {
+      autoplaySpeed: 0,
+      elements: [
+        {
+          id: "interior-banner-slide-1",
+          type: "slide",
+          settings: {
+            titleLine1: "New Season,",
+            titleLine2: "New Look For Your Home.",
+            subtitle: "Explore The Collection",
+            buttonText: "Shop Now",
+            buttonLink: "/shop",
+            image: "https://images.unsplash.com/photo-1596755389378-c31d21fd1273?w=1200&q=80&auto=format&fit=crop",
+          },
+          elements: [],
+        },
+      ],
+    },
+  },
+  {
     id: "interior-categories",
     type: "interiorCategoryGrid",
     settings: {
