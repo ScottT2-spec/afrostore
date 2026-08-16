@@ -228,12 +228,12 @@ export default function Sidebar({ onNavigate }: { onNavigate?: () => void } = {}
         className={cn(
           "flex items-center gap-3 rounded-xl px-3 py-2 text-sm font-medium transition-all duration-200",
           isActive
-            ? "bg-gray-900 text-white"
-            : "text-gray-500 hover:bg-gray-50 hover:text-gray-900",
+            ? "bg-white/10 text-accent-400"
+            : "text-accent-400/80 hover:bg-white/10 hover:text-accent-400",
           collapsed && "justify-center px-2"
         )}
       >
-        <Icon className="h-[18px] w-[18px] flex-shrink-0" />
+        <Icon className={cn("h-[18px] w-[18px] flex-shrink-0", isActive ? "text-white" : "text-gray-400")} />
         {!collapsed && <span>{item.name}</span>}
       </Link>
     );
@@ -242,39 +242,39 @@ export default function Sidebar({ onNavigate }: { onNavigate?: () => void } = {}
   return (
     <aside
       className={cn(
-        "h-screen max-h-screen border-r border-gray-200 bg-white transition-all duration-300 flex flex-col overflow-hidden",
+        "h-screen max-h-screen border-r border-brand-800 bg-brand-600 transition-all duration-300 flex flex-col overflow-hidden",
         collapsed ? "w-[72px]" : "w-64"
       )}
     >
       {/* Logo */}
-      <div className="flex h-14 items-center justify-between px-4 border-b border-gray-100 flex-shrink-0">
+      <div className="flex h-14 items-center justify-between px-4 border-b border-white/10 flex-shrink-0">
         <Link href="/dashboard/workspaces" className="flex items-center min-w-0">
           <img src="/prokip-logo.png" alt="Prokip" className={`${collapsed ? "h-8 w-8" : "h-10 w-10"} flex-shrink-0 object-contain`} />
         </Link>
         <button
           onClick={() => setCollapsed(!collapsed)}
-          className="hidden lg:flex h-7 w-7 items-center justify-center rounded-lg text-gray-400 hover:bg-gray-100 hover:text-gray-600 transition-colors"
+          className="hidden lg:flex h-7 w-7 items-center justify-center rounded-lg text-gray-400 hover:bg-white/10 hover:text-gray-200 transition-colors"
         >
           {collapsed ? <ChevronRight className="h-4 w-4" /> : <ChevronLeft className="h-4 w-4" />}
         </button>
       </div>
 
       {/* Site Switcher */}
-      <div className="px-3 py-2 border-b border-gray-100 relative flex-shrink-0">
+      <div className="px-3 py-2 border-b border-white/10 relative flex-shrink-0">
         <button
           onClick={() => setSiteSwitcherOpen(!siteSwitcherOpen)}
           className={cn(
-            "w-full flex items-center gap-2.5 rounded-xl border border-gray-200 bg-gray-50 p-2.5 transition-colors hover:bg-gray-100",
+            "w-full flex items-center gap-2.5 rounded-xl border border-white/10 bg-white/5 p-2.5 transition-colors hover:bg-white/10",
             collapsed && "justify-center p-2"
           )}
         >
-          <div className="flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-lg bg-gray-900 text-white font-bold text-sm">
+          <div className="flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-lg bg-white/10 text-gray-200 font-bold text-sm">
             {siteName ? siteName.charAt(0).toUpperCase() : "?"}
           </div>
           {!collapsed && (
             <>
               <div className="flex-1 text-left min-w-0">
-                <div className="text-xs font-semibold text-gray-900 truncate">
+                <div className="text-xs font-semibold text-accent-400 truncate">
                   {siteName || "No site selected"}
                 </div>
                 <div className={`text-[10px] font-medium ${typeInfo.color}`}>
@@ -361,12 +361,12 @@ export default function Sidebar({ onNavigate }: { onNavigate?: () => void } = {}
         {navGroups.map((group, gi) => (
           <div key={gi} className={cn(group.label ? "mt-4 first:mt-0" : "")}>
             {group.label && !collapsed && (
-              <div className="px-3 py-1.5 text-[10px] font-bold text-gray-400 uppercase tracking-wider">
+              <div className="px-3 py-1.5 text-[10px] font-bold text-accent-400/70 uppercase tracking-wider">
                 {group.label}
               </div>
             )}
             {collapsed && group.label && (
-              <div className="my-2 mx-2 border-t border-gray-100" />
+              <div className="my-2 mx-2 border-t border-white/10" />
             )}
             <div className="space-y-0.5">
               {group.items.map((item) => renderNavLink(item))}
@@ -376,7 +376,7 @@ export default function Sidebar({ onNavigate }: { onNavigate?: () => void } = {}
       </nav>
 
       {/* Bottom */}
-      <div className="border-t border-gray-100 px-3 py-2 space-y-0.5 flex-shrink-0">
+      <div className="border-t border-white/10 px-3 py-2 space-y-0.5 flex-shrink-0">
         {bottomNav.map((item) => {
           const Icon = item.icon;
           return (
@@ -384,39 +384,39 @@ export default function Sidebar({ onNavigate }: { onNavigate?: () => void } = {}
               key={item.name}
               href={item.href}
               className={cn(
-                "flex items-center gap-3 rounded-xl px-3 py-2 text-sm font-medium text-gray-500 transition-colors hover:bg-gray-50 hover:text-gray-900",
+                "flex items-center gap-3 rounded-xl px-3 py-2 text-sm font-medium text-accent-400 transition-colors hover:bg-white/10 hover:text-accent-300",
                 collapsed && "justify-center px-2"
               )}
             >
-              <Icon className="h-[18px] w-[18px] flex-shrink-0" />
+              <Icon className="h-[18px] w-[18px] flex-shrink-0 text-gray-400" />
               {!collapsed && <span>{item.name}</span>}
             </Link>
           );
         })}
 
         {/* User */}
-        <div className={cn("rounded-xl bg-gray-50 p-2.5 mt-2", collapsed && "text-center")}>
+        <div className={cn("rounded-xl bg-white/5 p-2.5 mt-2", collapsed && "text-center")}>
           {!collapsed && (
             <div className="flex items-center gap-2 mb-2">
-              <div className="h-8 w-8 rounded-full bg-gray-900 flex items-center justify-center text-white text-xs font-bold">
+              <div className="h-8 w-8 rounded-full bg-white/10 flex items-center justify-center text-gray-200 text-xs font-bold">
                 {initials}
               </div>
               <div className="flex-1 min-w-0">
-                <p className="text-xs font-semibold text-gray-900 truncate">
+                <p className="text-xs font-semibold text-accent-400 truncate">
                   {user?.firstName} {user?.lastName}
                 </p>
-                <p className="text-[10px] text-gray-500 truncate">{user?.email}</p>
+                <p className="text-[10px] text-gray-400 truncate">{user?.email}</p>
               </div>
             </div>
           )}
           <button
             onClick={logout}
             className={cn(
-              "flex items-center gap-2 text-sm text-gray-500 hover:text-gray-900 transition-colors",
+              "flex items-center gap-2 text-sm text-accent-400 hover:text-accent-300 transition-colors",
               collapsed ? "mx-auto" : "w-full"
             )}
           >
-            <LogOut className="h-[16px] w-[16px]" />
+            <LogOut className="h-[16px] w-[16px] text-gray-400" />
             {!collapsed && <span>Log out</span>}
           </button>
         </div>
