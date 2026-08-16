@@ -73,7 +73,7 @@ export async function POST(req: NextRequest, { params }: Params) {
   if (existing) {
     return NextResponse.json({
       success: true,
-      data: { status: existing.status, alreadyApplied: true },
+      data: { status: existing.status, alreadyApplied: true, customerId: customer.id },
     });
   }
 
@@ -94,7 +94,7 @@ export async function POST(req: NextRequest, { params }: Params) {
 
     return NextResponse.json({
       success: true,
-      data: { status: affiliate.status, alreadyApplied: false },
+      data: { status: affiliate.status, alreadyApplied: false, customerId: customer.id },
     }, { status: 201 });
   } catch (err: any) {
     // Concurrent duplicate submission — the unique (programId, customerId)

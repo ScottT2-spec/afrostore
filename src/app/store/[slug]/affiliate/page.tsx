@@ -3,6 +3,7 @@ import { useState, useEffect } from "react";
 import { useParams } from "next/navigation";
 import Link from "next/link";
 import { Loader2, CheckCircle2, ArrowLeft, Sparkles, Link2, Wallet, Users } from "lucide-react";
+import { syncWishlistOnIdentify } from "@/hooks/useWishlist";
 
 interface ProgramInfo {
   storeName: string;
@@ -18,6 +19,15 @@ export default function AffiliateSignupPage() {
   const [submitting, setSubmitting] = useState(false);
   const [result, setResult] = useState<{ status: string; alreadyApplied: boolean } | null>(null);
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
+  const [siteId, setSiteId] = useState("");
+
+  useEffect(() => {
+    if (!slug) return;
+    fetch(`/api/storefront/${slug}`)
+      .then((res) => res.json())
+      .then((json) => { if (json?.data?.store?.id) setSiteId(json.data.store.id); })
+      .catch(() => {});
+  }, [slug]);
 
   useEffect(() => {
     if (!slug) return;
@@ -45,6 +55,7 @@ export default function AffiliateSignupPage() {
         setErrorMsg(json.error || "Something went wrong. Please try again.");
       } else {
         setResult(json.data);
+        if (siteId && json.data?.customerId) syncWishlistOnIdentify(siteId, slug, json.data.customerId);
       }
     } catch {
       setErrorMsg("Something went wrong. Please try again.");
