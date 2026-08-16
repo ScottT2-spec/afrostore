@@ -36,7 +36,7 @@ export default function InteractiveTemplateBlocks({
   storeSlug,
   socialLinks,
 }: Props) {
-  const { isWishlisted, toggleWishlist } = useWishlist(storeId);
+  const { isWishlisted, toggleWishlist } = useWishlist(storeId, storeSlug);
 
   const addToCart = (productId: string, quantity: number = 1) => {
     const product = products.find((p: any) => p.id === productId);

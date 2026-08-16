@@ -58,7 +58,7 @@ export default function ProductDetailPage() {
   const [quantity, setQuantity] = useState(1);
   const [addedToCart, setAddedToCart] = useState(false);
   const [wishlistToast, setWishlistToast] = useState<string | null>(null);
-  const { isWishlisted, toggleWishlist } = useWishlist(data?.store?.id || "");
+  const { isWishlisted, toggleWishlist } = useWishlist(data?.store?.id || "", slug);
 
   useEffect(() => {
     fetch(`/api/storefront/${slug}/products/${productSlug}`)

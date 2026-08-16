@@ -222,7 +222,7 @@ export default function StorePage() {
     }
   };
   const [addedToCart, setAddedToCart] = useState<string | null>(null);
-  const { isWishlisted, toggleWishlist, wishlistCount } = useWishlist(data?.store?.id || "");
+  const { isWishlisted, toggleWishlist, wishlistCount } = useWishlist(data?.store?.id || "", slug);
 
   // A/B testing: if the home/landing page has a running test, assign this visitor
   // a variant and record a view. Assignment is reused across visits via localStorage.

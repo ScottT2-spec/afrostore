@@ -173,7 +173,7 @@ export default function ShopPage() {
     });
   }, [compareKey]);
 
-  const { isWishlisted, toggleWishlist, wishlistCount } = useWishlist(storeData?.store?.id || "");
+  const { isWishlisted, toggleWishlist, wishlistCount } = useWishlist(storeData?.store?.id || "", slug);
 
   // Update URL params
   const updateParams = useCallback(

@@ -186,7 +186,7 @@ export function ShopPageContent({
     });
   }, [compareKey]);
 
-  const { isWishlisted, toggleWishlist } = useWishlist(store.id);
+  const { isWishlisted, toggleWishlist } = useWishlist(store.id, store.slug);
 
   const fetchProducts = useCallback(
     async (page: number, append: boolean = false) => {

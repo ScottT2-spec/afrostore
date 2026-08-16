@@ -39,7 +39,7 @@ export default function PerfumesFragrancesPage() {
   const { store } = data;
   const socialLinksArray = Object.entries(data.socialLinks || {}).filter(([, url]) => url).map(([p, u]) => ({ platform: p, url: u as string }));
 
-  const { isWishlisted, toggleWishlist } = useWishlist(store.id);
+  const { isWishlisted, toggleWishlist } = useWishlist(store.id, slug);
 
   const addToCart = (productId: string, quantity: number = 1) => {
     const product = (data.products || []).find((p: any) => p.id === productId);

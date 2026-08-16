@@ -120,7 +120,7 @@ export default function StorefrontPage() {
     return [];
   });
 
-  const { isWishlisted, toggleWishlist, wishlistCount } = useWishlist(data?.store?.id || "");
+  const { isWishlisted, toggleWishlist, wishlistCount } = useWishlist(data?.store?.id || "", slug);
 
   // A/B testing: if this page has a running test, assign this visitor a
   // variant and record a view (same mechanism as the homepage). Assignment

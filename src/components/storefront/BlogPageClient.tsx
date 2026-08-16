@@ -29,7 +29,7 @@ interface BlogPageClientProps {
 }
 
 export function BlogPageClient({ children, storeId, storeSlug, blogs, products = [], currency, socialLinks, template }: BlogPageClientProps) {
-  const { isWishlisted, toggleWishlist } = useWishlist(storeId);
+  const { isWishlisted, toggleWishlist } = useWishlist(storeId, storeSlug);
 
   const addToCart = (productId: string, quantity: number = 1) => {
     const product = products.find((p: any) => p.id === productId);

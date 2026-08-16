@@ -75,7 +75,7 @@ export default function StoreReviewsPage() {
   const [themeData, setThemeData] = useState<ThemeData | null>(null);
   const [pageData, setPageData] = useState<any>(null);
   const [storeData, setStoreData] = useState<any>(null);
-  const { isWishlisted, toggleWishlist } = useWishlist(store?.id || "");
+  const { isWishlisted, toggleWishlist } = useWishlist(store?.id || "", slug);
   const isKidsTemplate = slug === "kids";
   const isHealthTemplate = slug === "pills" || store?.slug === "pills" || store?.name?.toLowerCase().includes("pill") || store?.name?.toLowerCase().includes("supplement") || store?.name?.toLowerCase().includes("health");
   const isTShirtsPrintsTemplate = slug === "huty" || store?.slug === "huty" || store?.name?.toLowerCase().includes("t-shirts") || store?.name?.toLowerCase().includes("prints");

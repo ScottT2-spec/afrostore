@@ -49,7 +49,7 @@ export default function WishlistPage() {
   const [addedToCart, setAddedToCart] = useState<string | null>(null);
 
   const siteId = store?.id || "";
-  const { wishlist, removeFromWishlist, clearWishlist, wishlistCount } = useWishlist(siteId);
+  const { wishlist, removeFromWishlist, clearWishlist, wishlistCount } = useWishlist(siteId, slug);
 
   // Fetch store data
   useEffect(() => {
