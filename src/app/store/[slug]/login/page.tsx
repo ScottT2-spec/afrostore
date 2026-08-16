@@ -1,16 +1,25 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useParams, useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
 import { Loader2 } from "lucide-react";
 import { Lock, ShoppingBag } from "@/components/icons/FilledIcons";
+import { syncWishlistOnIdentify } from "@/hooks/useWishlist";
 
 export default function CustomerLoginPage() {
   const { slug } = useParams() as { slug: string };
   const router = useRouter();
   const searchParams = useSearchParams();
   const redirect = searchParams.get("redirect") || `/store/${slug}/my-account`;
+  const [siteId, setSiteId] = useState("");
+
+  useEffect(() => {
+    fetch(`/api/storefront/${slug}`)
+      .then((res) => res.json())
+      .then((json) => { if (json?.data?.store?.id) setSiteId(json.data.store.id); })
+      .catch(() => {});
+  }, [slug]);
 
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -48,6 +57,7 @@ export default function CustomerLoginPage() {
           phone: json.data.phone || "",
         })
       );
+      if (siteId) syncWishlistOnIdentify(siteId, slug, json.data.id);
 
       router.push(redirect);
     } catch {

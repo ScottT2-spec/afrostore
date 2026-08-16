@@ -21,6 +21,7 @@ interface ProductData {
     inStock: boolean; stock?: number; isFeatured: boolean;
     tags: string[]; images: ProductImage[]; variants: Variant[];
     category?: { id: string; name: string; slug: string };
+    brand?: { id: string; name: string; slug: string; logo?: string | null } | null;
     metaTitle?: string; metaDescription?: string;
     flashSale?: { id: string; name: string; salePrice: number; endsAt: string } | null;
   };
@@ -225,6 +226,12 @@ export default function ProductDetailPage() {
                 <span className="text-xs font-semibold text-brand-600 uppercase tracking-wider">{product.category.name}</span>
               )}
               <h1 className="text-2xl lg:text-3xl font-bold text-surface-900 font-display mt-1">{product.name}</h1>
+              {product.brand && (
+                <Link href={`/store/${slug}/shop?brand=${product.brand.slug}`} className="mt-1.5 inline-flex items-center gap-1.5 text-sm text-surface-500 hover:text-brand-600 transition-colors">
+                  {product.brand.logo && <img src={product.brand.logo} alt="" className="h-4 w-4 rounded-full object-cover" />}
+                  by <span className="font-medium">{product.brand.name}</span>
+                </Link>
+              )}
 
               {reviews.stats.totalCount > 0 && (
                 <div className="flex items-center gap-2 mt-2">

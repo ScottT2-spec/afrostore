@@ -29,8 +29,6 @@ const ecommerceNav: NavGroup[] = [
     label: "Commerce",
     items: [
       { name: "Products", href: "/dashboard/products", icon: Package },
-      { name: "Categories", href: "/dashboard/categories", icon: FolderTree },
-      { name: "Brands", href: "/dashboard/brands", icon: Tag },
       { name: "Orders", href: "/dashboard/orders", icon: ShoppingCart },
       { name: "Customers", href: "/dashboard/customers", icon: Users },
       { name: "Reviews", href: "/dashboard/reviews", icon: Star },
@@ -64,7 +62,6 @@ const ecommerceNav: NavGroup[] = [
     items: [
       { name: "Delivery", href: "/dashboard/delivery", icon: Truck },
       { name: "Payments", href: "/dashboard/payments", icon: CreditCard },
-      { name: "Taxes", href: "/dashboard/taxes", icon: Receipt },
       { name: "Themes", href: "/dashboard/themes", icon: Palette },
       { name: "Plugins", href: "/dashboard/plugins", icon: Puzzle },
       { name: "Domains", href: "/dashboard/domains", icon: Globe },
