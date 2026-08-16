@@ -228,12 +228,12 @@ export default function Sidebar({ onNavigate }: { onNavigate?: () => void } = {}
         className={cn(
           "flex items-center gap-3 rounded-xl px-3 py-2 text-sm font-medium transition-all duration-200",
           isActive
-            ? "bg-gray-900 text-white"
-            : "text-gray-500 hover:bg-gray-50 hover:text-gray-900",
+            ? "bg-white/10 text-accent-400"
+            : "text-accent-400/80 hover:bg-white/10 hover:text-accent-400",
           collapsed && "justify-center px-2"
         )}
       >
-        <Icon className="h-[18px] w-[18px] flex-shrink-0" />
+        <Icon className={cn("h-[18px] w-[18px] flex-shrink-0", isActive ? "text-white" : "text-gray-400")} />
         {!collapsed && <span>{item.name}</span>}
       </Link>
     );
@@ -357,16 +357,16 @@ export default function Sidebar({ onNavigate }: { onNavigate?: () => void } = {}
       </div>
 
       {/* Navigation */}
-      <nav className="flex-1 min-h-0 overflow-y-auto px-3 py-2 sidebar-nav">
+      <nav className="flex-1 min-h-0 overflow-y-auto px-3 py-2 sidebar-nav bg-brand-600">
         {navGroups.map((group, gi) => (
           <div key={gi} className={cn(group.label ? "mt-4 first:mt-0" : "")}>
             {group.label && !collapsed && (
-              <div className="px-3 py-1.5 text-[10px] font-bold text-gray-400 uppercase tracking-wider">
+              <div className="px-3 py-1.5 text-[10px] font-bold text-accent-400/70 uppercase tracking-wider">
                 {group.label}
               </div>
             )}
             {collapsed && group.label && (
-              <div className="my-2 mx-2 border-t border-gray-100" />
+              <div className="my-2 mx-2 border-t border-white/10" />
             )}
             <div className="space-y-0.5">
               {group.items.map((item) => renderNavLink(item))}
@@ -376,7 +376,7 @@ export default function Sidebar({ onNavigate }: { onNavigate?: () => void } = {}
       </nav>
 
       {/* Bottom */}
-      <div className="border-t border-gray-100 px-3 py-2 space-y-0.5 flex-shrink-0">
+      <div className="border-t border-gray-100 bg-white px-3 py-2 space-y-0.5 flex-shrink-0">
         {bottomNav.map((item) => {
           const Icon = item.icon;
           return (
@@ -388,7 +388,7 @@ export default function Sidebar({ onNavigate }: { onNavigate?: () => void } = {}
                 collapsed && "justify-center px-2"
               )}
             >
-              <Icon className="h-[18px] w-[18px] flex-shrink-0" />
+              <Icon className="h-[18px] w-[18px] flex-shrink-0 text-gray-400" />
               {!collapsed && <span>{item.name}</span>}
             </Link>
           );

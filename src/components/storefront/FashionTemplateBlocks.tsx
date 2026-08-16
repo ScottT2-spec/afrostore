@@ -1962,7 +1962,7 @@ export function FashionFooter({
   linkColumns = [],
   copyrightText = `© ${new Date().getFullYear()}. ALL RIGHTS RESERVED.`,
   paymentIconsUrl,
-  backgroundColor = TOKENS.footerBg,
+  backgroundColor = "#1a1a1a",
   storeSlug: storeSlugProp,
 }: FashionFooterProps) {
   const storeCtx = useContext(FashionStoreContext);
