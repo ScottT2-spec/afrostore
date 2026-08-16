@@ -34,7 +34,13 @@ export function BlogPageClient({ children, storeId, storeSlug, blogs, products =
   const addToCart = (productId: string, quantity: number = 1) => {
     const product = products.find((p: any) => p.id === productId);
     if (!product) return;
-    const cartKey = `cart_${storeId}`;
+    // Must match the canonical key/shape used everywhere else —
+    // afrostore_cart_${storeSlug} with a nested `product` object. This
+    // previously wrote to `cart_${storeId}` with a flat shape (the same
+    // bug already fixed once on the product detail page), so anything
+    // added to cart from a blog page's product blocks silently never
+    // appeared in the cart icon, cart page, or checkout.
+    const cartKey = `afrostore_cart_${storeSlug}`;
     const cart = JSON.parse(localStorage.getItem(cartKey) || "[]");
     const existing = cart.find((item: any) => item.productId === productId && !item.variantId);
     if (existing) {
@@ -43,14 +49,12 @@ export function BlogPageClient({ children, storeId, storeSlug, blogs, products =
       cart.push({
         productId,
         variantId: null,
-        name: product.name,
-        variant: null,
-        price: product.price,
-        image: product.images?.[0]?.url || product.image,
         quantity,
+        product,
       });
     }
     localStorage.setItem(cartKey, JSON.stringify(cart));
+    localStorage.setItem("afrostore_cart_active_slug", storeSlug);
   };
 
   const storeContextValue = {

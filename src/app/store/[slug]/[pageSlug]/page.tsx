@@ -403,8 +403,30 @@ export default function StorefrontPage() {
   }
 
   if (isTShirtsPrintsTemplate) {
+    // Product-grid blocks used by this template read FashionStoreContext
+    // (there's no dedicated T-Shirts product-grid component — TShirtsPrintsStoreContext
+    // only carries storeSlug/storeName for decorative blocks, not cart data).
+    // The homepage already treats t-shirts-prints as part of the Fashion family for
+    // this reason; this branch previously provided no context at all, so Add to
+    // Cart / Wishlist on any product-grid block placed on a custom page silently
+    // did nothing.
+    const tshirtsCtx = {
+      products: (products || []).map((p: any) => ({
+        id: p.id, name: p.name, slug: p.slug, price: p.price ?? 0, compareAtPrice: p.compareAtPrice,
+        currency: currency, inStock: p.inStock ?? true, isFeatured: p.isFeatured ?? false, tags: p.tags ?? [],
+        images: p.images ?? [], category: p.category, variants: p.variants,
+      })),
+      blogs: (blogs || []).map((b: any) => ({
+        id: b.id, title: b.title, slug: b.slug, excerpt: b.excerpt, coverImage: b.coverImage,
+        author: b.author, category: b.category, tags: b.tags ?? [], publishedAt: b.publishedAt, createdAt: b.createdAt,
+      })),
+      currency,
+      storeSlug: slug,
+      addToCart: addToCartById, toggleWishlist, isWishlisted,
+    };
     return (
       <ThemeProvider theme={resolvedTheme}>
+        <FashionStoreContext.Provider value={tshirtsCtx}>
         <div className="min-h-screen bg-white text-[#1d1d1d]" style={{ fontFamily: "'Manrope', Arial, sans-serif" }}>
           <TShirtsPrintsFontLoader />
           <TShirtsPrintsHeader storeName={store.name} storeSlug={slug} logo={store.logo} />
@@ -424,6 +446,7 @@ export default function StorefrontPage() {
             ]}
           />
         </div>
+        </FashionStoreContext.Provider>
       </ThemeProvider>
     );
   }
