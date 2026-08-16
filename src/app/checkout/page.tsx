@@ -26,6 +26,7 @@ import { useRouter } from "next/navigation";
 import { motion, useReducedMotion } from "framer-motion";
 import { trackEvent } from "@/lib/storefront-analytics";
 import { trackABTestConversion } from "@/hooks/useABTestVariant";
+import { syncWishlistOnIdentify } from "@/hooks/useWishlist";
 import { useAbandonedCartTracking } from "@/hooks/useAbandonedCartTracking";
 
 /* ───────── Types ───────── */
@@ -404,6 +405,9 @@ export default function CheckoutPage() {
       }
 
       const order = orderJson.data;
+      if (order?.customer?.id && siteId) {
+        syncWishlistOnIdentify(siteId, storeSlug, order.customer.id);
+      }
 
       // Attribute this order to an affiliate referral, if the customer
       // arrived via a tracked ?ref= link earlier in this browser session.

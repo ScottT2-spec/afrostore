@@ -58,6 +58,32 @@ function getLoggedInCustomerId(storeSlug?: string): string | null {
  *   called. Server sync is best-effort and never blocks the local/instant
  *   UI update.
  */
+/**
+ * Push a shopper's locally-stored wishlist to the server once we actually
+ * know who they are — used at checkout, since customerId/email is only
+ * ever established server-side there (this app has no customer login flow
+ * on most storefronts, so "wait until logged in" never fires for guest
+ * checkout, which is the common case). Safe to call even with an empty
+ * local wishlist; best-effort, never throws.
+ */
+export async function syncWishlistOnIdentify(siteId: string, storeSlug: string, customerId: string) {
+  const productIds = readWishlist(siteId);
+  if (productIds.length === 0) return;
+  try {
+    await Promise.all(
+      productIds.map((productId) =>
+        fetch(`/api/storefront/${storeSlug}/wishlists`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ customerId, productId }),
+        }).catch(() => {})
+      )
+    );
+  } catch {
+    // Best-effort — never block checkout on this
+  }
+}
+
 export function useWishlist(siteId: string, storeSlug?: string) {
   const [wishlist, setWishlist] = useState<string[]>([]);
   const customerId = useMemo(() => getLoggedInCustomerId(storeSlug), [storeSlug]);
