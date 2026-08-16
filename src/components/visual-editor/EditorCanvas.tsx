@@ -1689,7 +1689,11 @@ function ElementRenderer({
         const templateBlockDirect: TemplateBlock = {
           id: element.id,
           type: element.type,
-          props: element.settings || {},
+          props: {
+            ...(element.settings || {}),
+            ...(element.content || {}),
+            ...(element.content?.props || {}),
+          },
           elements: element.elements || [],
         };
         return (
@@ -1725,12 +1729,24 @@ function ElementRenderer({
       // Dynamic fallback: if the type is a registered top-level template block, render it
       default:
         if (isRegisteredTemplateBlock(element.type)) {
+            // Same settings/content split as editorNodeToBlock in
+            // src/lib/page-content.ts: handleAddSection (LeftSidebar.tsx)
+            // stores real data in both element.settings and element.content,
+            // but this only read .settings — a section added via the
+            // Sections tab could preview incomplete or wrong right here in
+            // the editor's own canvas even though it would have published
+            // correctly live (that path was already fixed).
+            const mergedBlockProps = {
+              ...(element.settings || {}),
+              ...(element.content || {}),
+              ...(element.content?.props || {}),
+            };
             const dynamicTemplateBlock: TemplateBlock = {
               id: element.id,
               type: element.type,
-              settings: element.settings || {},
-              props: element.settings || {},
-              styleOverrides: element.settings || {},
+              settings: mergedBlockProps,
+              props: mergedBlockProps,
+              styleOverrides: mergedBlockProps,
               elements: element.elements || [],
             };
           
