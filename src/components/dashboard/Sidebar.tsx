@@ -242,39 +242,39 @@ export default function Sidebar({ onNavigate }: { onNavigate?: () => void } = {}
   return (
     <aside
       className={cn(
-        "h-screen max-h-screen border-r border-brand-800 bg-brand-600 transition-all duration-300 flex flex-col overflow-hidden",
+        "h-screen max-h-screen border-r border-gray-200 bg-white transition-all duration-300 flex flex-col overflow-hidden",
         collapsed ? "w-[72px]" : "w-64"
       )}
     >
       {/* Logo */}
-      <div className="flex h-14 items-center justify-between px-4 border-b border-white/10 flex-shrink-0">
+      <div className="flex h-14 items-center justify-between px-4 border-b border-gray-100 flex-shrink-0">
         <Link href="/dashboard/workspaces" className="flex items-center min-w-0">
           <img src="/prokip-logo.png" alt="Prokip" className={`${collapsed ? "h-8 w-8" : "h-10 w-10"} flex-shrink-0 object-contain`} />
         </Link>
         <button
           onClick={() => setCollapsed(!collapsed)}
-          className="hidden lg:flex h-7 w-7 items-center justify-center rounded-lg text-gray-400 hover:bg-white/10 hover:text-gray-200 transition-colors"
+          className="hidden lg:flex h-7 w-7 items-center justify-center rounded-lg text-gray-400 hover:bg-gray-100 hover:text-gray-600 transition-colors"
         >
           {collapsed ? <ChevronRight className="h-4 w-4" /> : <ChevronLeft className="h-4 w-4" />}
         </button>
       </div>
 
       {/* Site Switcher */}
-      <div className="px-3 py-2 border-b border-white/10 relative flex-shrink-0">
+      <div className="px-3 py-2 border-b border-gray-100 relative flex-shrink-0">
         <button
           onClick={() => setSiteSwitcherOpen(!siteSwitcherOpen)}
           className={cn(
-            "w-full flex items-center gap-2.5 rounded-xl border border-white/10 bg-white/5 p-2.5 transition-colors hover:bg-white/10",
+            "w-full flex items-center gap-2.5 rounded-xl border border-gray-200 bg-gray-50 p-2.5 transition-colors hover:bg-gray-100",
             collapsed && "justify-center p-2"
           )}
         >
-          <div className="flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-lg bg-white/10 text-gray-200 font-bold text-sm">
+          <div className="flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-lg bg-gray-900 text-white font-bold text-sm">
             {siteName ? siteName.charAt(0).toUpperCase() : "?"}
           </div>
           {!collapsed && (
             <>
               <div className="flex-1 text-left min-w-0">
-                <div className="text-xs font-semibold text-accent-400 truncate">
+                <div className="text-xs font-semibold text-gray-900 truncate">
                   {siteName || "No site selected"}
                 </div>
                 <div className={`text-[10px] font-medium ${typeInfo.color}`}>
@@ -357,7 +357,7 @@ export default function Sidebar({ onNavigate }: { onNavigate?: () => void } = {}
       </div>
 
       {/* Navigation */}
-      <nav className="flex-1 min-h-0 overflow-y-auto px-3 py-2 sidebar-nav">
+      <nav className="flex-1 min-h-0 overflow-y-auto px-3 py-2 sidebar-nav bg-brand-600">
         {navGroups.map((group, gi) => (
           <div key={gi} className={cn(group.label ? "mt-4 first:mt-0" : "")}>
             {group.label && !collapsed && (
@@ -376,7 +376,7 @@ export default function Sidebar({ onNavigate }: { onNavigate?: () => void } = {}
       </nav>
 
       {/* Bottom */}
-      <div className="border-t border-white/10 px-3 py-2 space-y-0.5 flex-shrink-0">
+      <div className="border-t border-white/10 bg-brand-600 px-3 py-2 space-y-0.5 flex-shrink-0">
         {bottomNav.map((item) => {
           const Icon = item.icon;
           return (
