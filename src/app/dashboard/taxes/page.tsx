@@ -5,6 +5,7 @@ import { Pencil, Receipt, Star, ToggleLeft, ToggleRight, Trash2 } from "@/compon
 import { useState, useEffect, useCallback } from "react";
 import { useSite } from "@/context/StoreContext";
 import { api } from "@/lib/api-client";
+import ProductsSubNav from "@/components/dashboard/ProductsSubNav";
 
 interface TaxRule {
   id: string; name: string; rate: string; country: string | null;
@@ -75,6 +76,7 @@ export default function TaxesPage() {
 
   return (
     <div className="p-6 space-y-6">
+      <ProductsSubNav />
       <div className="flex items-center justify-between">
         <div><h1 className="text-2xl font-bold text-surface-900 font-display">Tax Rules</h1><p className="text-sm text-surface-500 mt-1">Configure tax rates by region</p></div>
         <button onClick={() => { resetForm(); setShowEditor(true); }} className="btn-primary text-sm py-2.5 px-4"><Plus className="h-4 w-4" /> New Tax Rule</button>

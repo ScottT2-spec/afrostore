@@ -6,6 +6,7 @@ import { useState, useEffect, useCallback, useRef } from "react";
 import { useSite } from "@/context/StoreContext";
 import { api } from "@/lib/api-client";
 import { SingleImageUpload } from "@/components/dashboard/ImageUpload";
+import ProductsSubNav from "@/components/dashboard/ProductsSubNav";
 
 interface BrandItem {
   id: string;
@@ -164,6 +165,7 @@ export default function BrandsPage() {
 
   return (
     <div className="p-6 space-y-6">
+      <ProductsSubNav />
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
