@@ -67,6 +67,7 @@ export async function GET(req: NextRequest, { params }: Params) {
           },
         },
         category: { select: { id: true, name: true, slug: true } },
+        brand: { select: { id: true, name: true, slug: true, logo: true } },
       },
     });
 
@@ -172,6 +173,7 @@ export async function GET(req: NextRequest, { params }: Params) {
         inStock: v.stock > 0,
       })),
       category: product.category,
+      brand: product.brand,
       flashSale: activeSale
         ? { id: activeSale.saleId, name: activeSale.saleName, salePrice: activeSale.salePrice, endsAt: activeSale.endsAt.toISOString() }
         : null,

@@ -43,6 +43,7 @@ interface Product {
   tags: string[];
   images: ProductImage[];
   category?: ProductCategory;
+  brand?: { id: string; name: string; slug: string; logo?: string | null } | null;
   reviewCount: number;
   flashSale?: { id: string; name: string; salePrice: number; endsAt: string } | null;
 }
@@ -52,6 +53,14 @@ interface StoreCategory {
   name: string;
   slug: string;
   _count: { products: number };
+}
+
+interface StoreBrand {
+  id: string;
+  name: string;
+  slug: string;
+  logo?: string | null;
+  _count?: { products: number };
 }
 
 interface StoreData {
@@ -135,8 +144,10 @@ export default function ShopPage() {
   const [error, setError] = useState("");
   const [pagination, setPagination] = useState({ page: 1, limit: 24, total: 0, pages: 0 });
   const [categories, setCategories] = useState<StoreCategory[]>([]);
+  const [brands, setBrands] = useState<StoreBrand[]>([]);
 
   const [selectedCategory, setSelectedCategory] = useState(searchParams.get("category") || "");
+  const [selectedBrand, setSelectedBrand] = useState(searchParams.get("brand") || searchParams.get("filter_brand") || "");
   const [searchQuery, setSearchQuery] = useState(searchParams.get("search") || "");
   const [searchInput, setSearchInput] = useState(searchParams.get("search") || "");
   const [sort, setSort] = useState<SortOption>("newest");
@@ -177,14 +188,23 @@ export default function ShopPage() {
 
   // Update URL params
   const updateParams = useCallback(
-    (cat: string, search: string) => {
+    (cat: string, search: string, brand: string = selectedBrand) => {
       const params = new URLSearchParams();
       if (cat) params.set("category", cat);
       if (search) params.set("search", search);
+      if (brand) params.set("brand", brand);
       const qs = params.toString();
       router.replace(`/store/${slug}/shop${qs ? `?${qs}` : ""}`, { scroll: false });
     },
-    [slug, router]
+    [slug, router, selectedBrand]
+  );
+
+  const handleBrandChange = useCallback(
+    (brand: string) => {
+      setSelectedBrand(brand);
+      updateParams(selectedCategory, searchQuery, brand);
+    },
+    [selectedCategory, searchQuery, updateParams]
   );
 
   const fetchProducts = useCallback(
@@ -198,6 +218,7 @@ export default function ShopPage() {
         params.set("limit", "24");
         if (selectedCategory) params.set("category", selectedCategory);
         if (searchQuery) params.set("search", searchQuery);
+        if (selectedBrand) params.set("brand", selectedBrand);
 
         const res = await fetch(`/api/storefront/${slug}?${params.toString()}`);
         const json = await res.json();
@@ -206,6 +227,7 @@ export default function ShopPage() {
           if (!storeData || page === 1) {
             setStoreData(json.data);
             setCategories(json.data.categories);
+            setBrands(json.data.brands || []);
           }
 
           if (append) {
@@ -224,14 +246,14 @@ export default function ShopPage() {
       setLoading(false);
       setLoadingMore(false);
     },
-    [slug, selectedCategory, searchQuery, storeData]
+    [slug, selectedCategory, searchQuery, selectedBrand, storeData]
   );
 
   // Initial load + refetch on filter changes
   useEffect(() => {
     fetchProducts(1);
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [selectedCategory, searchQuery]);
+  }, [selectedCategory, searchQuery, selectedBrand]);
 
   // Save cart to localStorage
   useEffect(() => {
@@ -276,10 +298,11 @@ export default function ShopPage() {
     setSelectedCategory("");
     setSearchQuery("");
     setSearchInput("");
-    updateParams("", "");
+    setSelectedBrand("");
+    updateParams("", "", "");
   };
 
-  const hasFilters = selectedCategory || searchQuery;
+  const hasFilters = selectedCategory || searchQuery || selectedBrand;
   const sortedProducts = sortProducts(products, sort);
   const currency = storeData?.store.currency || "NGN";
 
@@ -1308,6 +1331,38 @@ export default function ShopPage() {
               </div>
             </div>
 
+            {/* Brands */}
+            {brands.length > 0 && (
+              <div className="mt-6">
+                <h3 className="text-xs font-bold text-surface-500 uppercase tracking-wider mb-3">Brands</h3>
+                <div className="space-y-1">
+                  <button
+                    onClick={() => handleBrandChange("")}
+                    className={`w-full text-left rounded-xl px-3 py-2.5 text-sm font-medium transition-colors ${
+                      !selectedBrand ? "bg-surface-900 text-white" : "text-surface-600 hover:bg-surface-100"
+                    }`}
+                  >
+                    All Brands
+                  </button>
+                  {brands
+                    .filter((b) => !b._count || b._count.products > 0)
+                    .map((b) => (
+                      <button
+                        key={b.id}
+                        onClick={() => handleBrandChange(b.slug)}
+                        className={`w-full text-left rounded-xl px-3 py-2.5 text-sm font-medium transition-colors flex items-center gap-2 ${
+                          selectedBrand === b.slug ? "bg-surface-900 text-white" : "text-surface-600 hover:bg-surface-100"
+                        }`}
+                      >
+                        {b.logo && <img src={b.logo} alt="" className="h-4 w-4 rounded-full object-cover flex-shrink-0" />}
+                        <span className="truncate">{b.name}</span>
+                        {b._count && <span className="ml-auto flex-shrink-0 text-xs opacity-60">{b._count.products}</span>}
+                      </button>
+                    ))}
+                </div>
+              </div>
+            )}
+
             {hasFilters && (
               <button
                 onClick={clearFilters}
@@ -1422,6 +1477,14 @@ export default function ShopPage() {
                   <span className="inline-flex items-center gap-1.5 rounded-full bg-brand-50 text-brand-700 px-3 py-1.5 text-xs font-medium">
                     {activeCategoryName}
                     <button onClick={() => handleCategoryChange("")} className="hover:text-brand-900">
+                      <X className="h-3 w-3" />
+                    </button>
+                  </span>
+                )}
+                {selectedBrand && (
+                  <span className="inline-flex items-center gap-1.5 rounded-full bg-brand-50 text-brand-700 px-3 py-1.5 text-xs font-medium">
+                    {brands.find((b) => b.slug === selectedBrand)?.name || selectedBrand}
+                    <button onClick={() => handleBrandChange("")} className="hover:text-brand-900">
                       <X className="h-3 w-3" />
                     </button>
                   </span>
