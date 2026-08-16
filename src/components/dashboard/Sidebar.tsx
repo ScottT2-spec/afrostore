@@ -376,7 +376,7 @@ export default function Sidebar({ onNavigate }: { onNavigate?: () => void } = {}
       </nav>
 
       {/* Bottom */}
-      <div className="border-t border-white/10 bg-brand-600 px-3 py-2 space-y-0.5 flex-shrink-0">
+      <div className="border-t border-gray-100 bg-white px-3 py-2 space-y-0.5 flex-shrink-0">
         {bottomNav.map((item) => {
           const Icon = item.icon;
           return (
@@ -384,7 +384,7 @@ export default function Sidebar({ onNavigate }: { onNavigate?: () => void } = {}
               key={item.name}
               href={item.href}
               className={cn(
-                "flex items-center gap-3 rounded-xl px-3 py-2 text-sm font-medium text-accent-400 transition-colors hover:bg-white/10 hover:text-accent-300",
+                "flex items-center gap-3 rounded-xl px-3 py-2 text-sm font-medium text-gray-500 transition-colors hover:bg-gray-50 hover:text-gray-900",
                 collapsed && "justify-center px-2"
               )}
             >
@@ -395,28 +395,28 @@ export default function Sidebar({ onNavigate }: { onNavigate?: () => void } = {}
         })}
 
         {/* User */}
-        <div className={cn("rounded-xl bg-white/5 p-2.5 mt-2", collapsed && "text-center")}>
+        <div className={cn("rounded-xl bg-gray-50 p-2.5 mt-2", collapsed && "text-center")}>
           {!collapsed && (
             <div className="flex items-center gap-2 mb-2">
-              <div className="h-8 w-8 rounded-full bg-white/10 flex items-center justify-center text-gray-200 text-xs font-bold">
+              <div className="h-8 w-8 rounded-full bg-gray-900 flex items-center justify-center text-white text-xs font-bold">
                 {initials}
               </div>
               <div className="flex-1 min-w-0">
-                <p className="text-xs font-semibold text-accent-400 truncate">
+                <p className="text-xs font-semibold text-gray-900 truncate">
                   {user?.firstName} {user?.lastName}
                 </p>
-                <p className="text-[10px] text-gray-400 truncate">{user?.email}</p>
+                <p className="text-[10px] text-gray-500 truncate">{user?.email}</p>
               </div>
             </div>
           )}
           <button
             onClick={logout}
             className={cn(
-              "flex items-center gap-2 text-sm text-accent-400 hover:text-accent-300 transition-colors",
+              "flex items-center gap-2 text-sm text-gray-500 hover:text-gray-900 transition-colors",
               collapsed ? "mx-auto" : "w-full"
             )}
           >
-            <LogOut className="h-[16px] w-[16px] text-gray-400" />
+            <LogOut className="h-[16px] w-[16px]" />
             {!collapsed && <span>Log out</span>}
           </button>
         </div>
