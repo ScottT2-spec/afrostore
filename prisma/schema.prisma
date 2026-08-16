@@ -383,6 +383,7 @@ model Product {
   wishlists         WishlistItem[]
 
   @@unique([siteId, slug])
+  @@unique([siteId, barcode])
   @@index([siteId])
   @@index([siteId, status])
   @@index([siteId, categoryId])

@@ -29,6 +29,7 @@ export async function GET(req: NextRequest, { params }: Params) {
     where.OR = [
       { name: { contains: search, mode: "insensitive" } },
       { sku: { contains: search, mode: "insensitive" } },
+      { barcode: { contains: search, mode: "insensitive" } },
       { tags: { has: search } },
     ];
   }
@@ -76,6 +77,11 @@ export async function POST(req: NextRequest, { params }: Params) {
       return error("Cost price must be lower than the regular price", 400);
     }
 
+    if (productData.barcode) {
+      const dupe = await prisma.product.findFirst({ where: { siteId, barcode: productData.barcode } });
+      if (dupe) return error(`Barcode "${productData.barcode}" is already used by another product ("${dupe.name}") in this store`, 400);
+    }
+
     const slug = await ensureUniqueSlug(productData.name, siteId, "product");
 
     const product = await prisma.product.create({
@@ -109,6 +115,12 @@ export async function POST(req: NextRequest, { params }: Params) {
 
     return success(product, 201);
   } catch (err) {
+    if (err && typeof err === "object" && "code" in err && err.code === "P2002") {
+      const target = (err as any).meta?.target;
+      if (Array.isArray(target) && target.includes("barcode")) {
+        return error("That barcode is already used by another product in this store", 400);
+      }
+    }
     console.error("Create product error:", err);
     return error("Internal server error", 500);
   }

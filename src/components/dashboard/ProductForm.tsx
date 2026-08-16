@@ -9,6 +9,7 @@ import { api } from "@/lib/api-client";
 import { useAIPrefill } from "@/hooks/useAIPrefill";
 import AIPrefillBanner from "@/components/dashboard/AIPrefillBanner";
 import ImageUpload, { SingleImageUpload } from "@/components/dashboard/ImageUpload";
+import { BarcodePreview } from "@/components/dashboard/BarcodePreview";
 
 // ─── Types ──────────────────────────────────────────────────
 
@@ -58,6 +59,7 @@ interface ProductData {
   compareAtPrice?: number | null;
   costPrice?: number | null;
   sku?: string;
+  barcode?: string | null;
   stock: number;
   trackInventory: boolean;
   lowStockAlert?: number;
@@ -158,6 +160,8 @@ export default function ProductForm({ productId }: ProductFormProps) {
   const [compareAtPrice, setCompareAtPrice] = useState("");
   const [costPrice, setCostPrice] = useState("");
   const [sku, setSku] = useState("");
+  const [barcode, setBarcode] = useState("");
+  const [barcodeError, setBarcodeError] = useState("");
   const [categoryId, setCategoryId] = useState("");
   const [status, setStatus] = useState("ACTIVE");
   const [isFeatured, setIsFeatured] = useState(false);
@@ -224,6 +228,7 @@ export default function ProductForm({ productId }: ProductFormProps) {
         setCompareAtPrice(p.compareAtPrice ? String(p.compareAtPrice) : "");
         setCostPrice(p.costPrice ? String(p.costPrice) : "");
         setSku(p.sku || "");
+        setBarcode(p.barcode || "");
         setStock(String(p.stock));
         setTrackInventory(p.trackInventory);
         setLowStockAlert(String(p.lowStockAlert || 5));
@@ -410,6 +415,7 @@ export default function ProductForm({ productId }: ProductFormProps) {
 
     setSaving(true);
     setError("");
+    setBarcodeError("");
     setSuccessMsg("");
 
     const payload: Record<string, unknown> = {
@@ -419,6 +425,7 @@ export default function ProductForm({ productId }: ProductFormProps) {
       compareAtPrice: compareAtPrice ? parseFloat(compareAtPrice) : null,
       costPrice: costPrice ? parseFloat(costPrice) : null,
       sku: sku || undefined,
+      barcode: barcode.trim() || null,
       stock: parseInt(stock) || 0,
       trackInventory,
       lowStockAlert: parseInt(lowStockAlert) || 5,
@@ -458,6 +465,9 @@ export default function ProductForm({ productId }: ProductFormProps) {
       }
     } else {
       setError(res.error || "Failed to save product");
+      if (res.error?.toLowerCase().includes("barcode")) {
+        setBarcodeError(res.error);
+      }
     }
     setSaving(false);
   };
@@ -718,6 +728,34 @@ export default function ProductForm({ productId }: ProductFormProps) {
                         className="input-field"
                         placeholder="e.g. ANK-MAXI-001"
                       />
+                    </div>
+                    <div>
+                      <label className="block text-sm font-medium text-surface-700 mb-1">Barcode</label>
+                      <div className="flex gap-2">
+                        <input
+                          value={barcode}
+                          onChange={(e) => { setBarcode(e.target.value); setBarcodeError(""); }}
+                          className={`input-field flex-1 ${barcodeError ? "border-accent-400" : ""}`}
+                          placeholder="e.g. 6009880123456"
+                        />
+                        <button
+                          type="button"
+                          onClick={() => {
+                            // Generate a random 12-digit code, Code128-compatible.
+                            // Not a checksum-valid EAN/UPC — for merchants who
+                            // don't have a real manufacturer barcode and just
+                            // want a scannable internal one.
+                            const code = Array.from({ length: 12 }, () => Math.floor(Math.random() * 10)).join("");
+                            setBarcode(code);
+                            setBarcodeError("");
+                          }}
+                          className="btn-secondary text-xs px-3 whitespace-nowrap"
+                        >
+                          Generate
+                        </button>
+                      </div>
+                      {barcodeError && <p className="text-xs text-accent-600 mt-1">{barcodeError}</p>}
+                      <BarcodePreview value={barcode} className="mt-2" />
                     </div>
                   </div>
 

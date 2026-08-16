@@ -48,6 +48,8 @@ export const createProductSchema = z.object({
   compareAtPrice: z.number().positive().optional().nullable(),
   costPrice: z.number().positive().optional().nullable(),
   sku: z.string().optional(),
+  barcode: z.string().trim().min(4, "Barcode must be at least 4 characters").max(64).optional().nullable()
+    .transform((v) => (v === "" ? null : v)),
   stock: z.number().int().min(0).default(0),
   trackInventory: z.boolean().default(true),
   categoryId: z.string().optional().nullable(),

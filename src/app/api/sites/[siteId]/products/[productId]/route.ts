@@ -51,7 +51,14 @@ export async function PATCH(req: NextRequest, { params }: Params) {
     return error("Cost price must be lower than the regular price", 400);
   }
 
-  const product = await prisma.$transaction(async (tx) => {
+  if (data.barcode && data.barcode !== existing.barcode) {
+    const dupe = await prisma.product.findFirst({ where: { siteId, barcode: data.barcode, id: { not: productId } } });
+    if (dupe) return error(`Barcode "${data.barcode}" is already used by another product ("${dupe.name}") in this store`, 400);
+  }
+
+  let product;
+  try {
+    product = await prisma.$transaction(async (tx) => {
     if (images) {
       await tx.productImage.deleteMany({ where: { productId } });
       await tx.productImage.createMany({
@@ -92,6 +99,16 @@ export async function PATCH(req: NextRequest, { params }: Params) {
       include: { images: true, variants: true, category: true, brand: true },
     });
   });
+  } catch (err) {
+    if (err && typeof err === "object" && "code" in err && err.code === "P2002") {
+      const target = (err as any).meta?.target;
+      if (Array.isArray(target) && target.includes("barcode")) {
+        return error("That barcode is already used by another product in this store", 400);
+      }
+    }
+    console.error("Update product error:", err);
+    return error("Internal server error", 500);
+  }
 
   await logAudit({
     siteId, userId: ctx.user!.id,
