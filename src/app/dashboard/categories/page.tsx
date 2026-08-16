@@ -8,6 +8,7 @@ import { api } from "@/lib/api-client";
 import { SingleImageUpload } from "@/components/dashboard/ImageUpload";
 import AIFormBridge from "@/components/dashboard/AIFormBridge";
 import { useAIPrefill } from "@/hooks/useAIPrefill";
+import ProductsSubNav from "@/components/dashboard/ProductsSubNav";
 
 interface Category {
   id: string;
@@ -111,6 +112,7 @@ export default function CategoriesPage() {
 
   return (
     <div className="p-6 space-y-6">
+      <ProductsSubNav />
       <AIFormBridge page="categories" />
       <div className="flex items-center justify-between">
         <div>

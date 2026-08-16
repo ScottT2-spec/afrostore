@@ -9,6 +9,7 @@ import { useSite } from "@/context/StoreContext";
 import { api } from "@/lib/api-client";
 import { formatCurrency } from "@/lib/utils";
 import Link from "next/link";
+import ProductsSubNav from "@/components/dashboard/ProductsSubNav";
 
 interface Product {
   id: string;
@@ -88,6 +89,7 @@ export default function ProductsPage() {
       />
 
       <div className="p-6 space-y-4">
+        <ProductsSubNav />
         {/* Filters */}
         <div className="flex flex-col sm:flex-row items-start sm:items-center gap-3">
           <div className="flex items-center gap-2 rounded-xl border border-surface-200 bg-white px-3 py-2 flex-1 max-w-md">
