@@ -139,7 +139,7 @@ function HeadingBlock({ props }: { props: Record<string, unknown> }) {
 
 /* ── Text ────────────────────────────────────────────────────── */
 function TextBlock({ props }: { props: Record<string, unknown> }) {
-  const text = (props.text as string) || "";
+  const text = (props.text as string) || (props.content as string) || "";
   const paragraphs = text.split(/\n\n+/);
   const dropCap = props.dropCap as boolean;
   return (
@@ -166,13 +166,21 @@ function TextBlock({ props }: { props: Record<string, unknown> }) {
 function ImageBlock({ props }: { props: Record<string, unknown> }) {
   const src = props.src as string;
   if (!src) return null;
+  const img = (
+    <img
+      src={src}
+      alt={(props.alt as string) || ""}
+      className={`w-full object-cover shadow-lg ${roundedClasses[(props.rounded as string) || "2xl"] || roundedClasses["2xl"]}`}
+    />
+  );
+  const link = props.link as string;
   return (
     <AnimateIn>
-      <img
-        src={src}
-        alt={(props.alt as string) || ""}
-        className={`w-full object-cover shadow-lg ${roundedClasses[(props.rounded as string) || "2xl"] || roundedClasses["2xl"]}`}
-      />
+      {link ? (
+        <a href={link} target={props.openInNewTab ? "_blank" : undefined} rel={props.openInNewTab ? "noopener noreferrer" : undefined}>
+          {img}
+        </a>
+      ) : img}
     </AnimateIn>
   );
 }
@@ -1068,7 +1076,7 @@ function NewsletterBlock({ props }: { props: Record<string, unknown> }) {
 
 /* ── Video ───────────────────────────────────────────────────── */
 function VideoBlock({ props }: { props: Record<string, unknown> }) {
-  const url = props.url as string;
+  const url = (props.url as string) || (props.src as string);
   const [playing, setPlaying] = useState(false);
   const embedUrl = useMemo(() => {
     if (!url) return "";
