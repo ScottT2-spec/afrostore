@@ -297,7 +297,7 @@ export default function DashboardHeader({
                 {/* Menu items */}
                 <div className="py-1.5">
                   {[
-                    { icon: User, label: "My Profile", href: "/dashboard/settings" },
+                    { icon: User, label: "My Profile", href: "/dashboard/profile" },
                     { icon: Store, label: "My Stores", href: "/dashboard" },
                     { icon: Settings, label: "Settings", href: "/dashboard/settings" },
                     { icon: CreditCard, label: "Billing", href: "/dashboard/billing" },
