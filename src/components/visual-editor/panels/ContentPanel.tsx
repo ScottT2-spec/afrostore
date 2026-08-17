@@ -208,6 +208,14 @@ function TemplatePropEditor({
 
   const commonInputClass = "w-full px-3 py-2 text-sm border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500";
   const isLongText = typeof value === "string" && (value.includes("\n") || value.length > 80);
+  // A string field whose key name suggests it holds an image URL (avatar,
+  // poster, thumbnail, gallery item url, etc.) — this generic editor is
+  // what drives every widget type without a hand-built content panel
+  // (icon, cta, gallery, testimonial, video, social-follow, and so on),
+  // so without this, image fields anywhere outside the 5 hand-built
+  // editors were text-only, no upload option at all.
+  const isImageField = typeof value !== "boolean" && typeof value !== "number" &&
+    /(^|[_-])(src|image|img|avatar|poster|logo|photo|picture|thumbnail|banner|cover)([_-]|$)/i.test(label);
 
   return (
     <div className={wrapperClass}>
@@ -238,6 +246,21 @@ function TemplatePropEditor({
           rows={4}
           className={`${commonInputClass} resize-none`}
         />
+      ) : isImageField ? (
+        <div className="space-y-2">
+          <SingleImageUpload
+            image={(value as string) || null}
+            onChange={(url) => onChange(path, url || "")}
+            compact
+          />
+          <input
+            type="text"
+            value={value}
+            onChange={(e) => onChange(path, e.target.value)}
+            className={commonInputClass}
+            placeholder="Or paste an image URL"
+          />
+        </div>
       ) : (
         <input
           type="text"
