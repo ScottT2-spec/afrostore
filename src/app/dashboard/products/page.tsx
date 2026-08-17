@@ -1,5 +1,5 @@
 "use client";
-import { Loader2, Plus, X } from "lucide-react";
+import { Loader2, Plus, X, Upload, Download } from "lucide-react";
 import { AlertCircle, CheckCircle2, Clock, Edit, Eye, Grid3X3, ImageIcon, List, MoreHorizontal, Package, Search, Sparkles, Trash2 } from "@/components/icons/FilledIcons";
 
 import { useState, useEffect, useCallback } from "react";
@@ -50,6 +50,11 @@ export default function ProductsPage() {
   const [search, setSearch] = useState("");
   const [statusFilter, setStatusFilter] = useState("");
   const [view, setView] = useState<"grid" | "list">("list");
+  const [exporting, setExporting] = useState(false);
+  const [showImport, setShowImport] = useState(false);
+  const [importing, setImporting] = useState(false);
+  const [importResult, setImportResult] = useState<{ totalRows: number; created: number; updated: number; failed: number; errors: { row: number; name?: string; message?: string }[] } | null>(null);
+  const [importFileError, setImportFileError] = useState("");
   const router = useRouter();
 
   const fetchProducts = useCallback(async () => {
@@ -79,6 +84,49 @@ export default function ProductsPage() {
   };
 
   const currency = currentStore?.currency || "NGN";
+
+  const downloadCsv = async (isTemplate: boolean) => {
+    if (!currentStore) return;
+    setExporting(true);
+    try {
+      const res = await fetch(`/api/sites/${currentStore.id}/products/export${isTemplate ? "?template=1" : ""}`, { credentials: "include" });
+      const blob = await res.blob();
+      const url = window.URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = isTemplate ? "products-import-template.csv" : `products-${new Date().toISOString().slice(0, 10)}.csv`;
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+      window.URL.revokeObjectURL(url);
+    } finally {
+      setExporting(false);
+    }
+  };
+
+  const handleImportFile = async (file: File) => {
+    if (!currentStore) return;
+    setImportFileError("");
+    setImportResult(null);
+    setImporting(true);
+    try {
+      const csv = await file.text();
+      const res = await api.post<{ totalRows: number; created: number; updated: number; failed: number; errors: { row: number; name?: string; message?: string }[] }>(
+        `/api/sites/${currentStore.id}/products/import`,
+        { csv }
+      );
+      if (res.success && res.data) {
+        setImportResult(res.data);
+        fetchProducts();
+      } else {
+        setImportFileError(res.error || "Import failed");
+      }
+    } catch {
+      setImportFileError("Couldn't read that file. Make sure it's a valid CSV.");
+    } finally {
+      setImporting(false);
+    }
+  };
 
   return (
     <>
@@ -116,6 +164,13 @@ export default function ProductsPage() {
             ))}
           </div>
           <div className="flex items-center gap-1 ml-auto">
+            <button onClick={() => downloadCsv(false)} disabled={exporting} className="btn-secondary text-xs py-2 px-3 disabled:opacity-50">
+              {exporting ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Download className="h-3.5 w-3.5" />} Export
+            </button>
+            <button onClick={() => { setShowImport(true); setImportResult(null); setImportFileError(""); }} className="btn-secondary text-xs py-2 px-3">
+              <Upload className="h-3.5 w-3.5" /> Import
+            </button>
+            <div className="w-px h-5 bg-surface-200 mx-1" />
             <button onClick={() => setView("list")} className={`p-2 rounded-lg ${view === "list" ? "bg-surface-100" : ""}`}>
               <List className="h-4 w-4 text-surface-500" />
             </button>
@@ -124,6 +179,73 @@ export default function ProductsPage() {
             </button>
           </div>
         </div>
+
+        {showImport && (
+          <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4" onClick={() => !importing && setShowImport(false)}>
+            <div className="bg-white rounded-2xl max-w-lg w-full p-6 max-h-[85vh] overflow-y-auto" onClick={(e) => e.stopPropagation()}>
+              <div className="flex items-center justify-between mb-4">
+                <h3 className="text-lg font-bold text-surface-900">Import Products</h3>
+                <button onClick={() => !importing && setShowImport(false)} className="p-1 rounded-lg hover:bg-surface-100">
+                  <X className="h-5 w-5 text-surface-400" />
+                </button>
+              </div>
+
+              {!importResult ? (
+                <>
+                  <p className="text-sm text-surface-600 mb-4">
+                    Upload a CSV of products. Rows are matched to existing products by SKU, then Barcode, then exact Name — anything unmatched is created as new. Categories and Brands are created automatically if they don't already exist.
+                  </p>
+                  <button onClick={() => downloadCsv(true)} className="text-xs text-brand-600 hover:text-brand-700 font-medium mb-4">
+                    Download a blank template →
+                  </button>
+                  <label className={`flex flex-col items-center justify-center gap-2 rounded-xl border-2 border-dashed border-surface-300 p-8 cursor-pointer hover:border-brand-400 transition-colors ${importing ? "opacity-50 pointer-events-none" : ""}`}>
+                    {importing ? <Loader2 className="h-8 w-8 animate-spin text-brand-600" /> : <Upload className="h-8 w-8 text-surface-400" />}
+                    <span className="text-sm font-medium text-surface-700">{importing ? "Importing…" : "Click to choose a CSV file"}</span>
+                    <input
+                      type="file"
+                      accept=".csv,text/csv"
+                      className="hidden"
+                      disabled={importing}
+                      onChange={(e) => { const f = e.target.files?.[0]; if (f) handleImportFile(f); e.target.value = ""; }}
+                    />
+                  </label>
+                  {importFileError && <p className="text-sm text-accent-600 mt-3">{importFileError}</p>}
+                </>
+              ) : (
+                <div>
+                  <div className="grid grid-cols-3 gap-3 mb-4">
+                    <div className="rounded-xl bg-green-50 p-3 text-center">
+                      <p className="text-2xl font-bold text-green-700">{importResult.created}</p>
+                      <p className="text-xs text-green-700">Created</p>
+                    </div>
+                    <div className="rounded-xl bg-blue-50 p-3 text-center">
+                      <p className="text-2xl font-bold text-blue-700">{importResult.updated}</p>
+                      <p className="text-xs text-blue-700">Updated</p>
+                    </div>
+                    <div className="rounded-xl bg-accent-50 p-3 text-center">
+                      <p className="text-2xl font-bold text-accent-700">{importResult.failed}</p>
+                      <p className="text-xs text-accent-700">Failed</p>
+                    </div>
+                  </div>
+                  {importResult.errors.length > 0 && (
+                    <div className="rounded-xl border border-surface-200 max-h-56 overflow-y-auto">
+                      {importResult.errors.map((e, i) => (
+                        <div key={i} className={`px-3 py-2 text-xs ${i > 0 ? "border-t border-surface-100" : ""}`}>
+                          <span className="font-semibold text-surface-700">Row {e.row}{e.name ? ` (${e.name})` : ""}:</span>{" "}
+                          <span className="text-accent-600">{e.message}</span>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                  <div className="flex gap-2 mt-4">
+                    <button onClick={() => { setImportResult(null); setImportFileError(""); }} className="btn-secondary text-sm flex-1">Import another file</button>
+                    <button onClick={() => setShowImport(false)} className="btn-primary text-sm flex-1">Done</button>
+                  </div>
+                </div>
+              )}
+            </div>
+          </div>
+        )}
 
         {/* Loading */}
         {loading ? (
