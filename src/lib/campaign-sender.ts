@@ -32,10 +32,31 @@ async function resolveAudience(siteId: string, audienceType: string, audienceTag
   if (audienceType === "TAG" && audienceTag) {
     where.tags = { has: audienceTag };
   }
-  return prisma.crmContact.findMany({
-    where: where as any,
-    select: { id: true, email: true, phone: true },
-  });
+
+  // Tags get applied in two different places in the dashboard — the CRM
+  // (CrmContact) and the Customers list (Customer, i.e. real storefront
+  // buyers) — and those are separate tables with no link between them.
+  // Campaigns need to see both, or tagging a customer from the Customers
+  // page would be invisible to "Contacts tagged..." targeting.
+  const [crmContacts, customers] = await Promise.all([
+    prisma.crmContact.findMany({ where: where as any, select: { id: true, email: true, phone: true } }),
+    prisma.customer.findMany({ where: where as any, select: { id: true, email: true, phone: true } }),
+  ]);
+
+  const byEmail = new Map<string, { id: string | null; email: string; phone: string | null }>();
+  for (const c of crmContacts) {
+    byEmail.set(c.email.toLowerCase(), { id: c.id, email: c.email, phone: c.phone });
+  }
+  for (const c of customers) {
+    const key = c.email.toLowerCase();
+    if (!byEmail.has(key)) {
+      // No matching CrmContact — send by email/phone directly, with no
+      // contactId link (EmailRecipient/SmsRecipient/WhatsAppRecipient all
+      // allow a null contactId for exactly this case).
+      byEmail.set(key, { id: null, email: c.email, phone: c.phone });
+    }
+  }
+  return Array.from(byEmail.values());
 }
 
 // ─── Email ──────────────────────────────────────────────────────
@@ -62,7 +83,7 @@ export async function sendEmailCampaign(campaignId: string): Promise<{ success: 
         const withEmail = contacts.filter((c: { email: string }) => !!c.email);
         if (withEmail.length > 0) {
           await prisma.emailRecipient.createMany({
-            data: withEmail.map((c: { id: string; email: string }) => ({ campaignId, contactId: c.id, email: c.email, status: "pending" })),
+            data: withEmail.map((c: { id: string | null; email: string }) => ({ campaignId, contactId: c.id || undefined, email: c.email, status: "pending" })),
           });
         }
         recipients = await prisma.emailRecipient.findMany({ where: { campaignId, status: "pending" } });
@@ -154,7 +175,7 @@ export async function sendSmsCampaign(campaignId: string): Promise<{ success: bo
         const withPhone = contacts.filter((c: { phone: string | null }) => !!c.phone);
         if (withPhone.length > 0) {
           await prisma.smsRecipient.createMany({
-            data: withPhone.map((c: { id: string; phone: string | null }) => ({ campaignId, contactId: c.id, phone: c.phone as string, status: "pending" })),
+            data: withPhone.map((c: { id: string | null; phone: string | null }) => ({ campaignId, contactId: c.id || undefined, phone: c.phone as string, status: "pending" })),
           });
         }
         recipients = await prisma.smsRecipient.findMany({ where: { campaignId, status: "pending" } });
@@ -241,7 +262,7 @@ export async function sendWhatsAppCampaign(campaignId: string): Promise<{ succes
         const withPhone = contacts.filter((c: { phone: string | null }) => !!c.phone);
         if (withPhone.length > 0) {
           await prisma.whatsAppRecipient.createMany({
-            data: withPhone.map((c: { id: string; phone: string | null }) => ({ campaignId, contactId: c.id, phone: c.phone as string, status: "pending" })),
+            data: withPhone.map((c: { id: string | null; phone: string | null }) => ({ campaignId, contactId: c.id || undefined, phone: c.phone as string, status: "pending" })),
           });
         }
         recipients = await prisma.whatsAppRecipient.findMany({ where: { campaignId, status: "pending" } });
