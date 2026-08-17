@@ -226,8 +226,8 @@ export default function Sidebar({ onNavigate }: { onNavigate?: () => void } = {}
         className={cn(
           "flex items-center gap-3 rounded-xl px-3 py-2 text-sm font-medium transition-all duration-200",
           isActive
-            ? "bg-white/10 text-accent-400"
-            : "text-accent-400/80 hover:bg-white/10 hover:text-accent-400",
+            ? "bg-white/10 text-white"
+            : "text-gray-300 hover:bg-white/10 hover:text-white",
           collapsed && "justify-center px-2"
         )}
       >
@@ -359,7 +359,7 @@ export default function Sidebar({ onNavigate }: { onNavigate?: () => void } = {}
         {navGroups.map((group, gi) => (
           <div key={gi} className={cn(group.label ? "mt-4 first:mt-0" : "")}>
             {group.label && !collapsed && (
-              <div className="px-3 py-1.5 text-[10px] font-bold text-accent-400/70 uppercase tracking-wider">
+              <div className="px-3 py-1.5 text-[10px] font-bold text-gray-400 uppercase tracking-wider">
                 {group.label}
               </div>
             )}
