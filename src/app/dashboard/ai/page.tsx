@@ -497,8 +497,12 @@ export default function AIPage() {
                       )}
                   </div>
                   {msg.role === "user" && (
-                    <div className="h-8 w-8 rounded-full bg-gradient-to-br from-brand-600 to-accent-400 flex items-center justify-center text-white text-[10px] font-bold flex-shrink-0">
-                      {initials}
+                    <div className="h-8 w-8 rounded-full bg-gradient-to-br from-brand-600 to-accent-400 flex items-center justify-center text-white text-[10px] font-bold flex-shrink-0 overflow-hidden">
+                      {user?.avatar ? (
+                        <img src={user.avatar} alt="" className="h-full w-full object-cover" />
+                      ) : (
+                        initials
+                      )}
                     </div>
                   )}
                 </div>

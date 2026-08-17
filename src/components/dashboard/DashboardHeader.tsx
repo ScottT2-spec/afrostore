@@ -268,8 +268,12 @@ export default function DashboardHeader({
               onClick={() => { setShowProfile(!showProfile); setShowNotifications(false); }}
               className="flex items-center gap-2 rounded-xl px-2 py-1.5 hover:bg-surface-50 transition-colors"
             >
-              <div className="h-8 w-8 rounded-full bg-gradient-to-br from-brand-600 to-accent-400 flex items-center justify-center text-white text-xs font-bold">
-                {initials}
+              <div className="h-8 w-8 rounded-full bg-gradient-to-br from-brand-600 to-accent-400 flex items-center justify-center text-white text-xs font-bold overflow-hidden flex-shrink-0">
+                {user?.avatar ? (
+                  <img src={user.avatar} alt="" className="h-full w-full object-cover" />
+                ) : (
+                  initials
+                )}
               </div>
               <ChevronDown className={`h-3.5 w-3.5 text-surface-400 hidden sm:block transition-transform ${showProfile ? "rotate-180" : ""}`} />
             </button>
@@ -280,8 +284,12 @@ export default function DashboardHeader({
                 {/* User info */}
                 <div className="px-4 py-3 border-b border-surface-100">
                   <div className="flex items-center gap-3">
-                    <div className="h-10 w-10 rounded-full bg-gradient-to-br from-brand-600 to-accent-400 flex items-center justify-center text-white text-sm font-bold">
-                      {initials}
+                    <div className="h-10 w-10 rounded-full bg-gradient-to-br from-brand-600 to-accent-400 flex items-center justify-center text-white text-sm font-bold overflow-hidden flex-shrink-0">
+                      {user?.avatar ? (
+                        <img src={user.avatar} alt="" className="h-full w-full object-cover" />
+                      ) : (
+                        initials
+                      )}
                     </div>
                     <div className="min-w-0">
                       <p className="text-sm font-semibold text-surface-900 truncate">

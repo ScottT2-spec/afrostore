@@ -396,8 +396,12 @@ export default function Sidebar({ onNavigate }: { onNavigate?: () => void } = {}
         <div className={cn("rounded-xl bg-gray-50 p-2.5 mt-2", collapsed && "text-center")}>
           {!collapsed && (
             <div className="flex items-center gap-2 mb-2">
-              <div className="h-8 w-8 rounded-full bg-gray-900 flex items-center justify-center text-white text-xs font-bold">
-                {initials}
+              <div className="h-8 w-8 rounded-full bg-gray-900 flex items-center justify-center text-white text-xs font-bold overflow-hidden flex-shrink-0">
+                {user?.avatar ? (
+                  <img src={user.avatar} alt="" className="h-full w-full object-cover" />
+                ) : (
+                  initials
+                )}
               </div>
               <div className="flex-1 min-w-0">
                 <p className="text-xs font-semibold text-gray-900 truncate">
