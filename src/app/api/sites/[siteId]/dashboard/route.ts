@@ -1,6 +1,6 @@
 import { NextRequest } from "next/server";
 import { prisma } from "@/lib/db";
-import { getStoreContext, success, error } from "@/lib/api-helpers";
+import { getStoreContext, success, error, serverError } from "@/lib/api-helpers";
 import { unauthorized } from "@/lib/auth";
 
 type Params = { params: Promise<{ siteId: string }> };
@@ -151,7 +151,6 @@ export async function GET(req: NextRequest, { params }: Params) {
       revenueOverTime: revenueByDay,
     });
   } catch (err) {
-    console.error("Dashboard error:", err);
-    return error("Internal server error", 500);
+    return serverError(err, "Dashboard error");
   }
 }

@@ -73,7 +73,9 @@ export async function getSiteContext(req: NextRequest, siteId: string) {
     });
   } catch (err) {
     console.error("getSiteContext: failed to look up site", err);
-    return { user, site: null, error: "Internal server error" };
+    const message = err instanceof Error ? err.message : String(err);
+    const code = typeof err === "object" && err !== null && "code" in err ? (err as { code?: string }).code : undefined;
+    return { user, site: null, error: `${message}${code ? ` (${code})` : ""}` || "Internal server error" };
   }
 
   if (!site) return { user, site: null, error: "Site not found" };
