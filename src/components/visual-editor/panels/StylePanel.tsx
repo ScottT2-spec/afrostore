@@ -6,6 +6,13 @@ interface StylePanelProps {
 }
 
 export default function StylePanel({ element, onUpdate }: StylePanelProps) {
+  if (!element) {
+    return (
+      <div className="p-4 text-xs text-gray-500 dark:text-gray-400">
+        This item doesn&apos;t have its own style settings — try selecting the section or slide around it instead.
+      </div>
+    );
+  }
   const settings = element.settings || {};
 
   const updateSetting = (key: string, value: any) => {
