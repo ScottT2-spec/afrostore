@@ -299,21 +299,21 @@ export default function MarketingPage() {
           )}
           <div>
             <label className="block text-sm font-medium text-surface-700 mb-1">Audience</label>
-            <div className="flex items-center gap-3">
-              <select value={audienceType} onChange={(e) => setAudienceType(e.target.value as "ALL_CONTACTS" | "TAG")} className="input-field py-2.5 w-48">
+            <div className="flex flex-col sm:flex-row sm:items-center gap-3">
+              <select value={audienceType} onChange={(e) => setAudienceType(e.target.value as "ALL_CONTACTS" | "TAG")} className="input-field py-2.5 w-full sm:w-48 sm:shrink-0">
                 <option value="ALL_CONTACTS">All CRM contacts</option>
                 <option value="TAG">Contacts tagged...</option>
               </select>
               {audienceType === "TAG" && (
                 crmTags.length > 0 ? (
-                  <select value={audienceTag} onChange={(e) => setAudienceTag(e.target.value)} className="input-field py-2.5 flex-1">
+                  <select value={audienceTag} onChange={(e) => setAudienceTag(e.target.value)} className="input-field py-2.5 w-full sm:flex-1">
                     <option value="">Select a tag...</option>
                     {crmTags.map((t) => (
                       <option key={t.tag} value={t.tag}>{t.tag} ({t.count} contact{t.count === 1 ? "" : "s"})</option>
                     ))}
                   </select>
                 ) : (
-                  <p className="text-xs text-surface-400 flex-1">No tags found on any CRM contact yet — tag contacts in the Customers section first.</p>
+                  <p className="text-xs text-surface-400 sm:flex-1">No tags found on any CRM contact yet — tag contacts in the Customers section first.</p>
                 )
               )}
             </div>
