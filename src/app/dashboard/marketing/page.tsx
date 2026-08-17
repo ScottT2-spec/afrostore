@@ -78,6 +78,7 @@ export default function MarketingPage() {
   const [mediaUrl, setMediaUrl] = useState("");
   const [audienceType, setAudienceType] = useState<"ALL_CONTACTS" | "TAG">("ALL_CONTACTS");
   const [audienceTag, setAudienceTag] = useState("");
+  const [crmTags, setCrmTags] = useState<{ tag: string; count: number }[]>([]);
   const [sendingId, setSendingId] = useState<string | null>(null);
 
   // Fetchers
@@ -112,6 +113,13 @@ export default function MarketingPage() {
     else if (tab === "sms") fetchSms();
     else fetchWa();
   }, [tab, fetchEmail, fetchSms, fetchWa]);
+
+  useEffect(() => {
+    if (!currentStore) return;
+    api.get<{ tags: { tag: string; count: number }[] }>(`/api/sites/${currentStore.id}/crm/tags`).then((res) => {
+      if (res.success && res.data) setCrmTags(res.data.tags);
+    });
+  }, [currentStore]);
 
   const resetForm = () => {
     setName(""); setSubject(""); setMessage(""); setContentHtml("");
@@ -297,9 +305,21 @@ export default function MarketingPage() {
                 <option value="TAG">Contacts tagged...</option>
               </select>
               {audienceType === "TAG" && (
-                <input value={audienceTag} onChange={(e) => setAudienceTag(e.target.value)} placeholder="e.g. vip" className="input-field py-2.5 flex-1" />
+                crmTags.length > 0 ? (
+                  <select value={audienceTag} onChange={(e) => setAudienceTag(e.target.value)} className="input-field py-2.5 flex-1">
+                    <option value="">Select a tag...</option>
+                    {crmTags.map((t) => (
+                      <option key={t.tag} value={t.tag}>{t.tag} ({t.count} contact{t.count === 1 ? "" : "s"})</option>
+                    ))}
+                  </select>
+                ) : (
+                  <p className="text-xs text-surface-400 flex-1">No tags found on any CRM contact yet — tag contacts in the Customers section first.</p>
+                )
               )}
             </div>
+            {audienceType === "TAG" && audienceTag && !crmTags.some((t) => t.tag === audienceTag) && (
+              <p className="text-xs text-accent-600 mt-1">No contacts currently have this tag — this campaign would send to 0 people.</p>
+            )}
             <p className="text-xs text-surface-400 mt-1">Recipients are pulled from your CRM contacts at send time.</p>
           </div>
           <div className="flex items-center gap-3 pt-2">
