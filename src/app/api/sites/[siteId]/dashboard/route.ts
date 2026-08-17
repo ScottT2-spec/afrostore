@@ -92,20 +92,32 @@ export async function GET(req: NextRequest, { params }: Params) {
     // Revenue over time (last 30 days) — same PAID + not-voided definition
     // as the headline revenue figure above, so the trend chart and the
     // stat card can never disagree with each other.
-    const revenueByDay = await prisma.$queryRawUnsafe<
-      { date: string; revenue: number; orders: number }[]
-    >(
-      `SELECT DATE("createdAt") as date, 
-              COALESCE(SUM(total), 0)::float as revenue, 
-              COUNT(*)::int as orders
-       FROM orders 
-       WHERE "siteId" = $1 AND "createdAt" >= $2
-         AND "paymentStatus" = 'PAID' AND status NOT IN ('CANCELLED', 'REFUNDED')
-       GROUP BY DATE("createdAt") 
-       ORDER BY date ASC`,
-      siteId,
-      thirtyDaysAgo
-    );
+    //
+    // Isolated in its own try/catch: this raw query is the most fragile
+    // part of this handler (hand-written SQL vs. the type-checked Prisma
+    // calls above it). Previously a failure here — even a minor one —
+    // took down the entire dashboard response, including stats that had
+    // already been computed successfully. Now it degrades to an empty
+    // chart instead of failing the whole page.
+    let revenueByDay: { date: string; revenue: number; orders: number }[] = [];
+    try {
+      revenueByDay = await prisma.$queryRawUnsafe<
+        { date: string; revenue: number; orders: number }[]
+      >(
+        `SELECT DATE("createdAt") as date, 
+                COALESCE(SUM(total), 0)::float as revenue, 
+                COUNT(*)::int as orders
+         FROM orders 
+         WHERE "siteId" = $1 AND "createdAt" >= $2
+           AND "paymentStatus" = 'PAID' AND status NOT IN ('CANCELLED', 'REFUNDED')
+         GROUP BY DATE("createdAt") 
+         ORDER BY date ASC`,
+        siteId,
+        thirtyDaysAgo
+      );
+    } catch (err) {
+      console.error("Dashboard revenueByDay query failed:", err);
+    }
 
     // Calculate percentage changes
     const currentRevenue = Number(currentRevenueResult._sum.total || 0);
