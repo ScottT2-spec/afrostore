@@ -2,6 +2,7 @@
 
 import { isRegisteredTemplateBlock } from "@/components/storefront/TemplateBlockRenderer";
 import { isChildFragmentType } from "@/lib/templates/template-tree";
+import { SingleImageUpload } from "@/components/dashboard/ImageUpload";
 
 interface ContentPanelProps {
   element: any;
@@ -563,19 +564,17 @@ export default function ContentPanel({ element, onUpdate }: ContentPanelProps) {
         <div className="space-y-4">
           <div>
             <label className="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1.5">
-              Image Preview
+              Image
             </label>
-            <div className="relative w-full h-40 bg-gray-100 dark:bg-gray-800 rounded-lg overflow-hidden border border-gray-200 dark:border-gray-700">
-              <img
-                src={element.content?.src || element.settings?.src || "https://via.placeholder.com/400x300"}
-                alt={element.content?.alt || element.settings?.alt || "Image"}
-                className="w-full h-full object-contain"
-              />
-            </div>
+            <SingleImageUpload
+              image={element.content?.src || element.settings?.src || null}
+              onChange={(url) => updateSetting("src", url || "")}
+              label="Upload from your device"
+            />
           </div>
           <div>
             <label htmlFor="image-src" className="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1.5">
-              Image URL
+              Or paste an Image URL
             </label>
             <input
               id="image-src"
