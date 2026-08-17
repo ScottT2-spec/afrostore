@@ -1,6 +1,6 @@
 "use client";
 import { ArrowRight, Loader2, X } from "lucide-react";
-import { CheckCircle2, Clock, Package, Search, ShoppingCart, Truck } from "@/components/icons/FilledIcons";
+import { CheckCircle2, Clock, Package, Plus, Search, ShoppingCart, Truck } from "@/components/icons/FilledIcons";
 
 import { useState, useEffect, useCallback } from "react";
 import DashboardHeader from "@/components/dashboard/DashboardHeader";
@@ -20,11 +20,22 @@ interface Order {
   deliveryFee: number;
   discount: number;
   total: number;
+  amountPaid: number;
   currency: string;
   items: Array<{ id: string; name: string; quantity: number; price: number; total: number; image?: string }>;
   deliveryAddress?: Record<string, string>;
   note?: string;
   createdAt: string;
+}
+
+interface PaymentTxn {
+  id: string;
+  amount: number;
+  method: string | null;
+  status: string;
+  paidAt: string | null;
+  createdAt: string;
+  metadata?: { note?: string; recordedManually?: boolean } | null;
 }
 
 interface OrdersResponse {
@@ -51,6 +62,13 @@ export default function OrdersPage() {
   const [search, setSearch] = useState("");
   const [selectedOrder, setSelectedOrder] = useState<Order | null>(null);
   const [updatingStatus, setUpdatingStatus] = useState(false);
+  const [payments, setPayments] = useState<PaymentTxn[]>([]);
+  const [showRecordPayment, setShowRecordPayment] = useState(false);
+  const [paymentAmount, setPaymentAmount] = useState("");
+  const [paymentMethodInput, setPaymentMethodInput] = useState("Cash");
+  const [paymentNote, setPaymentNote] = useState("");
+  const [recordingPayment, setRecordingPayment] = useState(false);
+  const [paymentError, setPaymentError] = useState("");
 
   const fetchOrders = useCallback(async () => {
     if (!currentStore) return;
@@ -77,6 +95,37 @@ export default function OrdersPage() {
     if (selectedOrder?.id === orderId) {
       setSelectedOrder((prev) => prev ? { ...prev, status } : null);
     }
+  };
+
+  const fetchPayments = useCallback(async (orderId: string) => {
+    if (!currentStore) return;
+    const res = await api.get<{ transactions: PaymentTxn[] }>(`/api/sites/${currentStore.id}/orders/${orderId}/payments`);
+    if (res.success && res.data) setPayments(res.data.transactions);
+  }, [currentStore]);
+
+  useEffect(() => {
+    if (selectedOrder) fetchPayments(selectedOrder.id);
+    else { setPayments([]); setShowRecordPayment(false); }
+  }, [selectedOrder, fetchPayments]);
+
+  const recordPayment = async () => {
+    if (!currentStore || !selectedOrder) return;
+    const amount = parseFloat(paymentAmount);
+    if (!amount || amount <= 0) { setPaymentError("Enter a valid amount"); return; }
+    setRecordingPayment(true);
+    setPaymentError("");
+    const res = await api.post<Order>(`/api/sites/${currentStore.id}/orders/${selectedOrder.id}/payments`, {
+      amount, method: paymentMethodInput, note: paymentNote || undefined,
+    });
+    if (res.success && res.data) {
+      setSelectedOrder(res.data);
+      setPaymentAmount(""); setPaymentNote(""); setShowRecordPayment(false);
+      fetchPayments(selectedOrder.id);
+      fetchOrders();
+    } else {
+      setPaymentError(res.error || "Failed to record payment");
+    }
+    setRecordingPayment(false);
   };
 
   const currency = currentStore?.currency || "NGN";
@@ -230,6 +279,93 @@ export default function OrdersPage() {
                     </div>
                   ))}
                 </div>
+              </div>
+
+              {/* Payments */}
+              <div className="border-t border-surface-200 pt-4">
+                <div className="flex items-center justify-between">
+                  <label className="text-xs font-semibold text-surface-500 uppercase">Payment</label>
+                  {selectedOrder.paymentStatus !== "PAID" && selectedOrder.paymentStatus !== "REFUNDED" && (
+                    <button onClick={() => setShowRecordPayment((v) => !v)} className="text-xs font-medium text-brand-600 hover:text-brand-700 flex items-center gap-1">
+                      <Plus className="h-3 w-3" /> Record Payment
+                    </button>
+                  )}
+                </div>
+
+                <div className="mt-2 flex items-center justify-between text-sm">
+                  <span className="text-surface-500">
+                    {formatCurrency(Number(selectedOrder.amountPaid), currency)} of {formatCurrency(Number(selectedOrder.total), currency)} paid
+                  </span>
+                  <span className={`inline-flex items-center rounded-full px-2.5 py-0.5 text-[10px] font-semibold ${
+                    selectedOrder.paymentStatus === "PAID" ? "bg-green-50 text-green-700" :
+                    selectedOrder.paymentStatus === "PARTIALLY_PAID" ? "bg-yellow-50 text-yellow-700" :
+                    selectedOrder.paymentStatus === "REFUNDED" || selectedOrder.paymentStatus === "PARTIALLY_REFUNDED" ? "bg-surface-100 text-surface-600" :
+                    "bg-accent-50 text-accent-700"
+                  }`}>
+                    {selectedOrder.paymentStatus.replace("_", " ")}
+                  </span>
+                </div>
+
+                {Number(selectedOrder.amountPaid) > 0 && Number(selectedOrder.amountPaid) < Number(selectedOrder.total) && (
+                  <div className="mt-2 h-1.5 rounded-full bg-surface-100 overflow-hidden">
+                    <div className="h-full bg-brand-500" style={{ width: `${Math.min(100, (Number(selectedOrder.amountPaid) / Number(selectedOrder.total)) * 100)}%` }} />
+                  </div>
+                )}
+
+                {payments.length > 0 && (
+                  <div className="mt-3 space-y-1.5">
+                    {payments.map((p) => (
+                      <div key={p.id} className="flex items-center justify-between text-xs bg-surface-50 rounded-lg px-3 py-2">
+                        <div>
+                          <span className="font-medium text-surface-700">{p.method || "Payment"}</span>
+                          <span className="text-surface-400"> · {new Date(p.paidAt || p.createdAt).toLocaleDateString()}</span>
+                          {p.metadata?.note && <p className="text-surface-400 mt-0.5">{p.metadata.note}</p>}
+                        </div>
+                        <span className="font-semibold text-surface-900">{formatCurrency(Number(p.amount), currency)}</span>
+                      </div>
+                    ))}
+                  </div>
+                )}
+
+                {showRecordPayment && (
+                  <div className="mt-3 rounded-xl border border-surface-200 p-3 space-y-2">
+                    <div className="grid grid-cols-2 gap-2">
+                      <div>
+                        <label className="block text-[10px] font-medium text-surface-500 mb-1">Amount</label>
+                        <input
+                          type="number" min="0" step="0.01"
+                          value={paymentAmount}
+                          onChange={(e) => { setPaymentAmount(e.target.value); setPaymentError(""); }}
+                          className="input-field w-full text-sm py-1.5"
+                          placeholder={`Balance: ${(Number(selectedOrder.total) - Number(selectedOrder.amountPaid)).toFixed(2)}`}
+                        />
+                      </div>
+                      <div>
+                        <label className="block text-[10px] font-medium text-surface-500 mb-1">Method</label>
+                        <select value={paymentMethodInput} onChange={(e) => setPaymentMethodInput(e.target.value)} className="input-field w-full text-sm py-1.5">
+                          <option>Cash</option>
+                          <option>Bank Transfer</option>
+                          <option>POS Terminal</option>
+                          <option>Mobile Money</option>
+                          <option>Other</option>
+                        </select>
+                      </div>
+                    </div>
+                    <input
+                      value={paymentNote}
+                      onChange={(e) => setPaymentNote(e.target.value)}
+                      className="input-field w-full text-sm py-1.5"
+                      placeholder="Note (optional)"
+                    />
+                    {paymentError && <p className="text-xs text-accent-600">{paymentError}</p>}
+                    <div className="flex gap-2">
+                      <button onClick={() => setShowRecordPayment(false)} className="btn-secondary text-xs py-1.5 flex-1">Cancel</button>
+                      <button onClick={recordPayment} disabled={recordingPayment} className="btn-primary text-xs py-1.5 flex-1">
+                        {recordingPayment ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : "Save"}
+                      </button>
+                    </div>
+                  </div>
+                )}
               </div>
 
               {/* Totals */}
