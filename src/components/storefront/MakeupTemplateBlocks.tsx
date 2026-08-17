@@ -1703,9 +1703,7 @@ export function MakeupBlogGrid({ sectionTitle, posts: propPosts = [] }: MakeupBl
         {sectionTitle && <h2 className="mk-blog-grid-title">{sectionTitle}</h2>}
         <div className="mk-blog-grid">
           {posts.map((post) => {
-            const postLink = storeCtx?.storeSlug
-              ? `/store/${storeCtx.storeSlug}/blog/${post.slug}`
-              : `/blog/${post.slug}`;
+            const postLink = resolveStoreLink(`/blog/${post.slug}`, storeCtx?.storeSlug);
             return (
               <div key={post.id} className="mk-blog-card">
                 <div className="mk-blog-card-img-wrap">

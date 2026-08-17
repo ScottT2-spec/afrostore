@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { SingleImageUpload } from "@/components/dashboard/ImageUpload";
 
 type Breakpoint = "desktop" | "tablet" | "mobile";
 type Mode = "normal" | "hover";
@@ -249,6 +250,14 @@ export default function AdvancedPanel({ element, onUpdate }: AdvancedPanelProps)
         <div className="grid grid-cols-2 gap-2">
           {renderColorInput("Background Color", "backgroundColor", "#ffffff")}
           {renderTextInput("Background Image", "backgroundImage", "https://...")}
+          <div>
+            <label className="block text-[10px] text-gray-500 dark:text-gray-400 mb-1">Or upload one</label>
+            <SingleImageUpload
+              image={String(getValue("backgroundImage", "")) || null}
+              onChange={(url) => updateSetting("backgroundImage", url || "")}
+              compact
+            />
+          </div>
           {renderTextInput("Background Gradient", "backgroundGradient", "linear-gradient(...)")}
           {renderSelect("Background Size", "backgroundSize", [
             { label: "Auto", value: "auto" },

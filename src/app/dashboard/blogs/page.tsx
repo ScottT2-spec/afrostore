@@ -82,7 +82,7 @@ export default function BlogsPage() {
     setAuthor("");
     setCategory("");
     setTagsInput("");
-    setStatus("DRAFT");
+    setStatus("PUBLISHED");
     setEditingBlog(null);
   };
 
@@ -300,6 +300,11 @@ export default function BlogsPage() {
                   <option value="DRAFT">Draft</option>
                   <option value="PUBLISHED">Publish Now</option>
                 </select>
+                {status === "DRAFT" && (
+                  <p className="mt-1.5 text-xs text-amber-600">
+                    Draft posts aren&apos;t visible on your live site — switch to &quot;Publish Now&quot; when you&apos;re ready for customers to see it.
+                  </p>
+                )}
               </div>
             </div>
           </div>
