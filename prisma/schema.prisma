@@ -133,6 +133,7 @@ model Site {
   abTests           ABTest[]
   abandonedCarts    AbandonedCart[]
   aiUsageDaily      AiUsageDaily[]
+  locations         Location[]
   analytics         AnalyticsEvent[]
   auditLogs         AuditLog[]
   automations       Automation[]
@@ -1590,6 +1591,32 @@ model AiPlatformUsageDaily {
   updatedAt       DateTime @updatedAt
 
   @@map("ai_platform_usage_daily")
+}
+
+// A physical branch/warehouse/pickup point for a store. Phase 1 of
+// multi-location support: just the locations themselves — name, address,
+// which one is the default. Deliberately does NOT yet track stock
+// per-location or move Product.stock's meaning; that needs a real data
+// migration reassigning every existing product's stock to a location,
+// which shouldn't ship without being tested against a live database
+// first. This model is purely additive and safe to deploy on its own.
+model Location {
+  id        String   @id @default(cuid())
+  siteId    String
+  name      String
+  address   String?
+  city      String?
+  state     String?
+  country   String?
+  phone     String?
+  isDefault Boolean  @default(false)
+  isActive  Boolean  @default(true)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  site      Site     @relation(fields: [siteId], references: [id], onDelete: Cascade)
+
+  @@index([siteId])
+  @@map("locations")
 }
 
 enum UserRole {

@@ -35,6 +35,7 @@ const ecommerceNav: NavGroup[] = [
       { name: "Wishlists", href: "/dashboard/wishlists", icon: Heart },
       { name: "Returns", href: "/dashboard/returns", icon: Undo2 },
       { name: "Inventory", href: "/dashboard/inventory", icon: BarChart3 },
+      { name: "Locations", href: "/dashboard/locations", icon: Building2 },
     ],
   },
   {
