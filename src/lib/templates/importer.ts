@@ -172,8 +172,7 @@ export async function importTemplateToSite(
     const existingDocument = parsePageContent(existingHome.content);
     const hasContent =
       (Array.isArray(existingDocument.elements) && existingDocument.elements.length > 0) ||
-      existingDocument.blocks.length > 0 ||
-      Object.keys(existingDocument.settings || {}).length > 0;
+      existingDocument.blocks.length > 0;
 
     if (!hasContent) {
       homePage = await prisma.page.update({
