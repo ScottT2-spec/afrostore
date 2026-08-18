@@ -36,6 +36,9 @@ export default function PagesPage() {
   const [showCreate, setShowCreate] = useState(false);
   const [newTitle, setNewTitle] = useState("");
   const [newType, setNewType] = useState("CUSTOM");
+  const [useAI, setUseAI] = useState(false);
+  const [aiPrompt, setAiPrompt] = useState("");
+  const [aiGenerating, setAiGenerating] = useState(false);
   const [deleteId, setDeleteId] = useState<string | null>(null);
   const [regenerating, setRegenerating] = useState(false);
 
@@ -63,6 +66,25 @@ export default function PagesPage() {
 
   const createPage = async () => {
     if (!currentStore || !newTitle.trim()) return;
+
+    if (useAI) {
+      setAiGenerating(true);
+      const res = await api.post<{ page: { id: string; title: string; slug: string } }>(
+        `/api/sites/${currentStore.id}/ai/generate-page`,
+        { prompt: aiPrompt.trim() || newTitle.trim(), pageType: newType }
+      );
+      setAiGenerating(false);
+      if (!res.success) { alert(res.error || "AI page generation failed"); return; }
+      setShowCreate(false);
+      setNewTitle("");
+      setAiPrompt("");
+      setUseAI(false);
+      await fetchPages();
+      if (res.data?.page?.id) router.push(`/editor/${res.data.page.id}`);
+      if (isFromAI) { clearPrefill(); }
+      return;
+    }
+
     setCreating(true);
     const slug = newTitle.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "");
     const res = await api.post<PageItem>(`/api/sites/${currentStore.id}/pages`, {
@@ -143,7 +165,17 @@ export default function PagesPage() {
       {/* Create form */}
       {showCreate && (
         <div className="rounded-2xl border border-surface-200 bg-white p-5">
-          <h3 className="text-sm font-bold text-surface-900 mb-3">Create New Page</h3>
+          <div className="flex items-center justify-between mb-3">
+            <h3 className="text-sm font-bold text-surface-900">Create New Page</h3>
+            <button
+              onClick={() => setUseAI(!useAI)}
+              className={`inline-flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-xs font-semibold transition-colors ${
+                useAI ? "bg-brand-600 text-white" : "bg-surface-100 text-surface-600 hover:bg-surface-200"
+              }`}
+            >
+              <Sparkles className="h-3.5 w-3.5" /> {useAI ? "AI mode on" : "Build with AI"}
+            </button>
+          </div>
           <div className="flex flex-col sm:flex-row gap-3">
             <input
               value={newTitle}
@@ -151,7 +183,7 @@ export default function PagesPage() {
               placeholder="Page title..."
               className="input-field flex-1 py-2.5"
               autoFocus
-              onKeyDown={(e) => e.key === "Enter" && createPage()}
+              onKeyDown={(e) => e.key === "Enter" && !useAI && createPage()}
             />
             <select
               value={newType}
@@ -165,15 +197,36 @@ export default function PagesPage() {
               <option value="FAQ">FAQ</option>
               <option value="POLICY">Policy</option>
             </select>
-            <div className="flex gap-2">
-              <button onClick={createPage} disabled={creating || !newTitle.trim()} className="btn-primary text-sm py-2.5 px-5">
-                {creating ? <Loader2 className="h-4 w-4 animate-spin" /> : "Create"}
-              </button>
-              <button onClick={() => { setShowCreate(false); setNewTitle(""); }} className="btn-secondary text-sm py-2.5 px-4">
-                Cancel
-              </button>
-            </div>
+            {!useAI && (
+              <div className="flex gap-2">
+                <button onClick={createPage} disabled={creating || !newTitle.trim()} className="btn-primary text-sm py-2.5 px-5">
+                  {creating ? <Loader2 className="h-4 w-4 animate-spin" /> : "Create"}
+                </button>
+                <button onClick={() => { setShowCreate(false); setNewTitle(""); }} className="btn-secondary text-sm py-2.5 px-4">
+                  Cancel
+                </button>
+              </div>
+            )}
           </div>
+          {useAI && (
+            <div className="mt-3 space-y-3">
+              <textarea
+                value={aiPrompt}
+                onChange={(e) => setAiPrompt(e.target.value)}
+                placeholder={`Describe this page, e.g. "A Services page listing our 3 main offerings with pricing and a booking button"`}
+                rows={3}
+                className="input-field w-full py-2.5 resize-none"
+              />
+              <div className="flex gap-2">
+                <button onClick={createPage} disabled={aiGenerating || !newTitle.trim()} className="btn-primary text-sm py-2.5 px-5">
+                  {aiGenerating ? <><Loader2 className="h-4 w-4 animate-spin" /> Generating...</> : <><Sparkles className="h-4 w-4" /> Generate Page</>}
+                </button>
+                <button onClick={() => { setShowCreate(false); setNewTitle(""); setAiPrompt(""); setUseAI(false); }} className="btn-secondary text-sm py-2.5 px-4">
+                  Cancel
+                </button>
+              </div>
+            </div>
+          )}
         </div>
       )}
 

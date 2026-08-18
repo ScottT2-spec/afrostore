@@ -3,6 +3,10 @@ import { prisma } from "@/lib/db";
 import { getStoreContext, success, error, logAudit , requireRole } from "@/lib/api-helpers";
 import { unauthorized } from "@/lib/auth";
 import { chatWithAI } from "@/lib/ai-service";
+import { buildTemplatePageContent } from "@/lib/templates/template-tree";
+import { classifyBusiness } from "@/lib/ai-classify";
+import { searchUnsplashPhotos, isUnsplashConfigured } from "@/lib/unsplash-client";
+import { getIndustryPool } from "@/lib/ai-image-pools";
 import type { BlockType } from "@/lib/builder/types";
 
 export const maxDuration = 120;
@@ -27,7 +31,7 @@ export async function POST(req: NextRequest, { params }: Params) {
     const { prompt, pageType } = await req.json();
     if (!prompt) return error("Prompt is required", 400);
 
-    const site = await prisma.site.findUnique({ where: { id: siteId }, select: { name: true, siteType: true } });
+    const site = await prisma.site.findUnique({ where: { id: siteId }, select: { name: true, siteType: true, businessType: true, description: true } });
     if (!site) return error("Site not found", 404);
 
     const systemPrompt = `You are an expert page builder. Generate a page layout as a JSON array of builder blocks.
@@ -58,7 +62,7 @@ ${pageType ? `Page type: ${pageType}` : ""}
 
 Return ONLY a valid JSON array of blocks. No markdown, no explanation.
 Generate 6-12 blocks for a complete, professional page.
-Use placeholder images from placehold.co.
+For any image src, use the literal placeholder "AI_IMAGE:<short 2-4 word search query describing what should be there>" (e.g. "AI_IMAGE:cozy coffee shop interior") — do NOT invent a real URL, it will be replaced with a real photo automatically.
 
 User request: ${prompt}`;
 
@@ -76,11 +80,51 @@ User request: ${prompt}`;
       return error("AI returned invalid page structure. Try again.", 422);
     }
 
+    // Resolve every "AI_IMAGE:<query>" placeholder to a real photo — Unsplash
+    // search first, falling back to the industry's curated pool so a page
+    // never ends up with a broken image or a gray placehold.co box.
+    let fallbackPool: string[] = [];
+    try {
+      const classification = await classifyBusiness(`${site.businessType || site.siteType} ${site.description || ""} ${prompt}`);
+      fallbackPool = getIndustryPool(classification.industry).showcase;
+    } catch {
+      fallbackPool = getIndustryPool("services").showcase;
+    }
+    let fallbackIdx = 0;
+
+    async function resolveImagePlaceholder(value: string): Promise<string> {
+      const match = /^AI_IMAGE:(.+)$/.exec(value);
+      if (!match) return value;
+      const query = match[1].trim();
+      if (isUnsplashConfigured()) {
+        const results = await searchUnsplashPhotos(query, 1, "landscape");
+        if (results.length > 0) return results[0].url;
+      }
+      const pick = fallbackPool[fallbackIdx % fallbackPool.length];
+      fallbackIdx++;
+      return pick;
+    }
+
+    async function resolveImagesDeep(node: any): Promise<void> {
+      if (!node || typeof node !== "object") return;
+      for (const key of Object.keys(node)) {
+        const val = node[key];
+        if (typeof val === "string" && val.startsWith("AI_IMAGE:")) {
+          node[key] = await resolveImagePlaceholder(val);
+        } else if (Array.isArray(val)) {
+          for (const item of val) await resolveImagesDeep(item);
+        } else if (val && typeof val === "object") {
+          await resolveImagesDeep(val);
+        }
+      }
+    }
+    for (const block of blocks) await resolveImagesDeep(block);
+
     const slug = `ai-${Date.now()}`;
     const page = await prisma.page.create({
       data: {
         siteId, title: `AI Generated: ${prompt.slice(0, 50)}`, slug,
-        content: blocks as any, isPublished: false, metaTitle: prompt.slice(0, 60),
+        content: buildTemplatePageContent(blocks) as any, isPublished: false, metaTitle: prompt.slice(0, 60),
       },
     });
 
