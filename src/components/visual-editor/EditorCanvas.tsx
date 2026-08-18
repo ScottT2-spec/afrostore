@@ -1,7 +1,7 @@
 "use client";
 
 import React, { createElement, useCallback, useEffect, useLayoutEffect, useRef, useState, type CSSProperties } from "react";
-import { useEditorStore } from "@/lib/visual-editor/store";
+import { useEditorStore, getNestedChildren } from "@/lib/visual-editor/store";
 import { DeviceType } from "@/lib/visual-editor/types";
 import { Plus } from "lucide-react";
 import * as LucideIcons from "lucide-react";
@@ -535,16 +535,40 @@ export default function EditorCanvas() {
 
   const handleDragEnd = (event: DragEndEvent) => {
     const { active, over } = event;
-    
-    if (over && active.id !== over.id) {
-      const oldIndex = pageStructure.elements.findIndex((el) => el.id === active.id);
-      const newIndex = pageStructure.elements.findIndex((el) => el.id === over.id);
-      
-      if (oldIndex !== -1 && newIndex !== -1) {
-        moveElement(active.id as string, null, newIndex);
-      }
+    if (!over || active.id === over.id) {
+      setActiveId(null);
+      return;
     }
-    
+
+    // Resolve where an element actually lives in the tree (its parent's id
+    // and its index within that parent's own children list) — needed
+    // because drag targets are no longer only top-level siblings; a widget
+    // can now be dragged within a column, or between columns/sections.
+    // Previously this only ever looked at pageStructure.elements directly,
+    // so dragging anything nested (i.e. virtually everything, since real
+    // content lives inside Section -> Column -> Widget) silently did
+    // nothing: both lookups returned -1 and the move never happened.
+    type Loc = { parentId: string | null; index: number };
+    const findLocation = (elements: Element[], id: string, parentId: string | null = null): Loc | null => {
+      for (let i = 0; i < elements.length; i++) {
+        const el = elements[i] as any;
+        if (el.id === id) return { parentId, index: i };
+        const nested = getNestedChildren(el);
+        if (nested && nested.length > 0) {
+          const found = findLocation(nested, id, el.id);
+          if (found) return found;
+        }
+      }
+      return null;
+    };
+
+    const overLocation = findLocation(pageStructure.elements, over.id as string);
+    if (!overLocation) {
+      setActiveId(null);
+      return;
+    }
+
+    moveElement(active.id as string, overLocation.parentId, overLocation.index);
     setActiveId(null);
   };
 
@@ -1038,25 +1062,30 @@ function ElementRenderer({
               borderRadius: styles.borderRadius,
             }}
           >
-            {(element.elements || element.children || element.columns)?.map((child: any) => (
-              <ElementRenderer
-                key={child.id}
-                element={child}
-                depth={depth + 1}
-                isSelected={selectedElementId === child.id}
-                onSelect={() => onSelectElement(child.id)}
-                onContextMenu={onContextMenu}
-                editingElementId={editingElementId}
-                editingValue={editingValue}
-                onInlineEdit={onInlineEdit}
-                onSaveInlineEdit={onSaveInlineEdit}
-                onCancelInlineEdit={onCancelInlineEdit}
-                onImageReplace={onImageReplace}
-                onEditingValueChange={onEditingValueChange}
-                selectedElementId={selectedElementId}
-                onSelectElement={onSelectElement}
-              />
-            ))}
+            <SortableContext
+              items={(element.elements || element.children || element.columns || []).map((c: any) => c.id)}
+              strategy={verticalListSortingStrategy}
+            >
+              {(element.elements || element.children || element.columns)?.map((child: any) => (
+                <SortableElementRenderer
+                  key={child.id}
+                  element={child}
+                  depth={depth + 1}
+                  isSelected={selectedElementId === child.id}
+                  onSelect={() => onSelectElement(child.id)}
+                  onContextMenu={onContextMenu}
+                  editingElementId={editingElementId}
+                  editingValue={editingValue}
+                  onInlineEdit={onInlineEdit}
+                  onSaveInlineEdit={onSaveInlineEdit}
+                  onCancelInlineEdit={onCancelInlineEdit}
+                  onImageReplace={onImageReplace}
+                  onEditingValueChange={onEditingValueChange}
+                  selectedElementId={selectedElementId}
+                  onSelectElement={onSelectElement}
+                />
+              ))}
+            </SortableContext>
           </div>
         );
 
@@ -1074,25 +1103,30 @@ function ElementRenderer({
               paddingLeft: styles.paddingLeft || "12px",
             }}
           >
-            {(element.elements || element.children)?.map((child: any) => (
-              <ElementRenderer
-                key={child.id}
-                element={child}
-                depth={depth + 1}
-                isSelected={selectedElementId === child.id}
-                onSelect={() => onSelectElement(child.id)}
-                onContextMenu={onContextMenu}
-                editingElementId={editingElementId}
-                editingValue={editingValue}
-                onInlineEdit={onInlineEdit}
-                onSaveInlineEdit={onSaveInlineEdit}
-                onCancelInlineEdit={onCancelInlineEdit}
-                onImageReplace={onImageReplace}
-                onEditingValueChange={onEditingValueChange}
-                selectedElementId={selectedElementId}
-                onSelectElement={onSelectElement}
-              />
-            ))}
+            <SortableContext
+              items={(element.elements || element.children || []).map((c: any) => c.id)}
+              strategy={verticalListSortingStrategy}
+            >
+              {(element.elements || element.children)?.map((child: any) => (
+                <SortableElementRenderer
+                  key={child.id}
+                  element={child}
+                  depth={depth + 1}
+                  isSelected={selectedElementId === child.id}
+                  onSelect={() => onSelectElement(child.id)}
+                  onContextMenu={onContextMenu}
+                  editingElementId={editingElementId}
+                  editingValue={editingValue}
+                  onInlineEdit={onInlineEdit}
+                  onSaveInlineEdit={onSaveInlineEdit}
+                  onCancelInlineEdit={onCancelInlineEdit}
+                  onImageReplace={onImageReplace}
+                  onEditingValueChange={onEditingValueChange}
+                  selectedElementId={selectedElementId}
+                  onSelectElement={onSelectElement}
+                />
+              ))}
+            </SortableContext>
           </div>
         );
 

@@ -56,7 +56,7 @@ interface EditorStore extends EditorState {
 
 const MAX_HISTORY = 50;
 
-const getNestedChildren = (element: any): any[] | null => {
+export const getNestedChildren = (element: any): any[] | null => {
   if (Array.isArray(element?.elements)) return element.elements;
   if (Array.isArray(element?.children)) return element.children;
   if (Array.isArray(element?.columns)) return element.columns;
