@@ -31,6 +31,7 @@ export async function GET(req: NextRequest, { params }: Params) {
     success: true,
     data: {
       enabled: true,
+      isMember: !!member,
       availablePoints: member?.availablePoints ?? 0,
       redemptionRate: Number(program.redemptionRate),
       minRedeemPoints: program.minRedeemPoints,

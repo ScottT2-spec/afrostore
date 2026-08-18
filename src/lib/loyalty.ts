@@ -61,16 +61,40 @@ async function getOrCreateMember(tx: TxClient, program: LoyaltyProgram, customer
 }
 
 /**
+ * Explicit opt-in — this is the only place a LoyaltyMember row gets
+ * created. Welcome points (if configured) are granted here, once, at
+ * signup. Idempotent: joining twice just returns the existing member.
+ */
+export async function joinLoyaltyProgram(siteId: string, customerId: string) {
+  const program = await prisma.loyaltyProgram.findUnique({ where: { siteId } });
+  if (!program || !program.enabled) return { joined: false, reason: "Loyalty program is not active for this store" as const };
+
+  const existing = await prisma.loyaltyMember.findUnique({
+    where: { programId_customerId: { programId: program.id, customerId } },
+  });
+  if (existing) return { joined: true, alreadyMember: true, member: existing };
+
+  const member = await prisma.$transaction(async (tx) => getOrCreateMember(tx, program, customerId));
+  return { joined: true, alreadyMember: false, member };
+}
+
+/**
  * Award points for a completed order. Safe to call from inside the same
  * DB transaction that marks the order paid — idempotency is the caller's
  * responsibility (payments.ts only calls this once per order, guarded by
  * the PENDING -> SUCCESS transition on the payment transaction).
+ *
+ * Only awards to customers who have explicitly joined the program
+ * (a LoyaltyMember row already exists) — this never auto-enrolls anyone.
  */
 export async function awardOrderPoints(tx: TxClient, siteId: string, customerId: string, orderTotal: number, orderId: string) {
   const program = await tx.loyaltyProgram.findUnique({ where: { siteId } });
   if (!program || !program.enabled) return null;
 
-  const member = await getOrCreateMember(tx, program, customerId);
+  const member = await tx.loyaltyMember.findUnique({
+    where: { programId_customerId: { programId: program.id, customerId } },
+  });
+  if (!member) return null; // not a member — no auto-enrollment
 
   const points = calcEarnedPoints(program, orderTotal);
   if (points > 0) {

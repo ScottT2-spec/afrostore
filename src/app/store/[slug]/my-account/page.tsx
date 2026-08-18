@@ -82,11 +82,12 @@ export default function MyAccountPage() {
 
   // Loyalty
   const [loyalty, setLoyalty] = useState<{
-    enabled: boolean; availablePoints: number; totalPoints: number; redeemedPoints: number;
+    enabled: boolean; isMember?: boolean; availablePoints: number; totalPoints: number; redeemedPoints: number;
     tier: string; redemptionRate: number; minRedeemPoints: number;
     transactions: { id: string; type: string; points: number; description: string; createdAt: string }[];
   } | null>(null);
   const [loyaltyLoading, setLoyaltyLoading] = useState(false);
+  const [joining, setJoining] = useState(false);
 
   // Check auth on mount
   useEffect(() => {
@@ -138,6 +139,24 @@ export default function MyAccountPage() {
       .catch(() => {})
       .finally(() => setLoyaltyLoading(false));
   }, [activeTab, authenticated, loyalty, loyaltyLoading, slug]);
+
+  const joinRewards = async () => {
+    setJoining(true);
+    const token = localStorage.getItem(`afrostore_customer_token_${slug}`);
+    try {
+      const res = await fetch(`/api/storefront/${slug}/loyalty/join`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json", ...(token ? { Authorization: `Bearer ${token}` } : {}) },
+        body: "{}",
+      });
+      const json = await res.json();
+      if (json.success) {
+        setLoyalty(null); // force refetch with fresh member state
+      }
+    } finally {
+      setJoining(false);
+    }
+  };
 
   const handleLogout = async () => {
     try {
@@ -356,6 +375,19 @@ export default function MyAccountPage() {
                   <div className="text-center py-12">
                     <Award className="h-12 w-12 text-gray-200 mx-auto mb-3" />
                     <p className="text-gray-500 text-sm">This store doesn't have a rewards program yet.</p>
+                  </div>
+                ) : !loyalty.isMember ? (
+                  <div className="text-center py-12">
+                    <Award className="h-12 w-12 text-gray-300 mx-auto mb-3" />
+                    <p className="text-gray-900 font-semibold mb-1">Join Rewards</p>
+                    <p className="text-gray-500 text-sm mb-5 max-w-xs mx-auto">Earn points on every purchase and redeem them for discounts at checkout. Free to join.</p>
+                    <button
+                      onClick={joinRewards}
+                      disabled={joining}
+                      className="bg-gray-900 text-white text-sm font-medium px-5 py-2.5 rounded-lg hover:bg-gray-800 transition-colors disabled:opacity-50"
+                    >
+                      {joining ? "Joining..." : "Join Rewards"}
+                    </button>
                   </div>
                 ) : (
                   <>
