@@ -6,6 +6,7 @@ import {
   Package,
   ShoppingBag,
   User,
+  Award,
 } from "@/components/icons/FilledIcons";
 import { useState, useEffect } from "react";
 import { useParams, useRouter } from "next/navigation";
@@ -61,7 +62,7 @@ function getStatusColor(status: string): string {
   }
 }
 
-type Tab = "orders" | "wishlist" | "addresses" | "settings";
+type Tab = "orders" | "wishlist" | "addresses" | "loyalty" | "settings";
 
 export default function MyAccountPage() {
   const { slug } = useParams() as { slug: string };
@@ -78,6 +79,14 @@ export default function MyAccountPage() {
   const [editPhone, setEditPhone] = useState("");
   const [saving, setSaving] = useState(false);
   const [saveMsg, setSaveMsg] = useState("");
+
+  // Loyalty
+  const [loyalty, setLoyalty] = useState<{
+    enabled: boolean; availablePoints: number; totalPoints: number; redeemedPoints: number;
+    tier: string; redemptionRate: number; minRedeemPoints: number;
+    transactions: { id: string; type: string; points: number; description: string; createdAt: string }[];
+  } | null>(null);
+  const [loyaltyLoading, setLoyaltyLoading] = useState(false);
 
   // Check auth on mount
   useEffect(() => {
@@ -117,6 +126,18 @@ export default function MyAccountPage() {
 
     checkAuth();
   }, [slug]);
+
+  // Lazy-load loyalty data the first time that tab is opened
+  useEffect(() => {
+    if (activeTab !== "loyalty" || !authenticated || loyalty || loyaltyLoading) return;
+    setLoyaltyLoading(true);
+    const token = localStorage.getItem(`afrostore_customer_token_${slug}`);
+    fetch(`/api/storefront/${slug}/loyalty/me`, { headers: token ? { Authorization: `Bearer ${token}` } : {} })
+      .then((r) => r.json())
+      .then((json) => { if (json.success && json.data) setLoyalty(json.data); })
+      .catch(() => {})
+      .finally(() => setLoyaltyLoading(false));
+  }, [activeTab, authenticated, loyalty, loyaltyLoading, slug]);
 
   const handleLogout = async () => {
     try {
@@ -180,6 +201,7 @@ export default function MyAccountPage() {
     { id: "orders", label: "Orders", icon: Package },
     { id: "wishlist", label: "Wishlist", icon: Heart },
     { id: "addresses", label: "Addresses", icon: MapPin },
+    { id: "loyalty", label: "Rewards", icon: Award },
     { id: "settings", label: "Settings", icon: User },
   ];
 
@@ -322,6 +344,60 @@ export default function MyAccountPage() {
                     order.
                   </p>
                 </div>
+              </div>
+            )}
+
+            {activeTab === "loyalty" && (
+              <div className="bg-white rounded-xl border border-gray-200 p-6">
+                <h2 className="font-semibold text-gray-900 mb-4">Rewards</h2>
+                {loyaltyLoading ? (
+                  <div className="flex justify-center py-12"><Loader2 className="h-6 w-6 animate-spin text-gray-300" /></div>
+                ) : !loyalty || !loyalty.enabled ? (
+                  <div className="text-center py-12">
+                    <Award className="h-12 w-12 text-gray-200 mx-auto mb-3" />
+                    <p className="text-gray-500 text-sm">This store doesn't have a rewards program yet.</p>
+                  </div>
+                ) : (
+                  <>
+                    <div className="grid grid-cols-2 sm:grid-cols-3 gap-3 mb-6">
+                      <div className="rounded-xl bg-gray-900 text-white p-4">
+                        <p className="text-2xl font-bold">{loyalty.availablePoints.toLocaleString()}</p>
+                        <p className="text-xs text-gray-300 mt-1">Available points</p>
+                      </div>
+                      <div className="rounded-xl bg-gray-50 p-4">
+                        <p className="text-2xl font-bold text-gray-900 capitalize">{loyalty.tier}</p>
+                        <p className="text-xs text-gray-500 mt-1">Tier</p>
+                      </div>
+                      <div className="rounded-xl bg-gray-50 p-4 col-span-2 sm:col-span-1">
+                        <p className="text-2xl font-bold text-gray-900">{loyalty.totalPoints.toLocaleString()}</p>
+                        <p className="text-xs text-gray-500 mt-1">Lifetime earned</p>
+                      </div>
+                    </div>
+                    {loyalty.availablePoints < loyalty.minRedeemPoints && loyalty.minRedeemPoints > 0 && (
+                      <p className="text-xs text-gray-500 mb-4">
+                        Earn {loyalty.minRedeemPoints - loyalty.availablePoints} more points to unlock redeeming them at checkout (minimum {loyalty.minRedeemPoints} points).
+                      </p>
+                    )}
+                    <h3 className="text-sm font-semibold text-gray-900 mb-2">Recent activity</h3>
+                    {loyalty.transactions.length === 0 ? (
+                      <p className="text-sm text-gray-500">No activity yet — points show up here as you shop.</p>
+                    ) : (
+                      <div className="divide-y divide-gray-100">
+                        {loyalty.transactions.map((t) => (
+                          <div key={t.id} className="flex items-center justify-between py-2.5">
+                            <div>
+                              <p className="text-sm text-gray-900">{t.description}</p>
+                              <p className="text-xs text-gray-400">{new Date(t.createdAt).toLocaleDateString()}</p>
+                            </div>
+                            <span className={`text-sm font-semibold ${t.points >= 0 ? "text-green-600" : "text-gray-500"}`}>
+                              {t.points >= 0 ? "+" : ""}{t.points.toLocaleString()}
+                            </span>
+                          </div>
+                        ))}
+                      </div>
+                    )}
+                  </>
+                )}
               </div>
             )}
 

@@ -241,6 +241,25 @@ export default function CheckoutPage() {
   }, [email, phone]);
   useAbandonedCartTracking(storeSlug, siteId, debouncedContact);
 
+  // Look up the customer's loyalty balance once their email settles (same
+  // debounce as abandoned-cart tracking) — guest checkout has no session,
+  // so email is the only identity we have at this point.
+  useEffect(() => {
+    if (!storeSlug || !emailValid) { setLoyaltyEnabled(false); setAvailablePoints(0); return; }
+    fetch(`/api/storefront/${storeSlug}/loyalty/lookup?email=${encodeURIComponent(debouncedContact.email)}`)
+      .then((r) => r.json())
+      .then((json) => {
+        if (json.success && json.data) {
+          setLoyaltyEnabled(!!json.data.enabled);
+          setAvailablePoints(json.data.availablePoints || 0);
+          setRedemptionRate(json.data.redemptionRate || 0);
+          setMinRedeemPoints(json.data.minRedeemPoints || 0);
+        }
+      })
+      .catch(() => {});
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [debouncedContact.email, storeSlug]);
+
   const [address, setAddress] = useState("");
   const [city, setCity] = useState("");
   const [state, setState] = useState("");
@@ -253,6 +272,14 @@ export default function CheckoutPage() {
   const [couponError, setCouponError] = useState("");
   const [couponDiscount, setCouponDiscount] = useState(0);
   const [couponFreeShipping, setCouponFreeShipping] = useState(false);
+
+  // Loyalty points redemption
+  const [loyaltyEnabled, setLoyaltyEnabled] = useState(false);
+  const [availablePoints, setAvailablePoints] = useState(0);
+  const [redemptionRate, setRedemptionRate] = useState(0);
+  const [minRedeemPoints, setMinRedeemPoints] = useState(0);
+  const [redeemPoints, setRedeemPoints] = useState(0);
+  const [redeemChecked, setRedeemChecked] = useState(false);
 
   // Validation
   const [touched, setTouched] = useState<Record<string, boolean>>({});
@@ -327,7 +354,8 @@ export default function CheckoutPage() {
   const baseDeliveryFee = zone ? (zoneFreeAbove && subtotal >= zoneFreeAbove ? 0 : Number(zone.fee)) : 0;
   const deliveryFee = couponApplied && couponFreeShipping ? 0 : baseDeliveryFee;
   const appliedDiscount = couponApplied ? Math.min(couponDiscount, subtotal) : 0;
-  const total = Math.max(0, subtotal + deliveryFee - appliedDiscount);
+  const loyaltyDiscount = redeemChecked && redeemPoints > 0 ? Math.round(redeemPoints * redemptionRate * 100) / 100 : 0;
+  const total = Math.max(0, subtotal + deliveryFee - appliedDiscount - loyaltyDiscount);
 
   const applyCoupon = async () => {
     const code = couponCode.trim();
@@ -392,6 +420,7 @@ export default function CheckoutPage() {
           deliveryZoneId: selectedZone || undefined,
           paymentMethod: paymentMethod === "COD" ? "PAY_ON_DELIVERY" : paymentMethod,
           couponCode: couponCode.trim() || undefined,
+          redeemPoints: redeemChecked && redeemPoints > 0 ? redeemPoints : undefined,
           note: deliveryInstructions || undefined,
         }),
       });
@@ -788,6 +817,44 @@ export default function CheckoutPage() {
                   </p>
                 )}
 
+                {loyaltyEnabled && availablePoints >= minRedeemPoints && minRedeemPoints > 0 && (
+                  <div className="mb-4 rounded-xl border border-[var(--co-line)] bg-[var(--co-chalk)] p-3">
+                    <label className="flex items-start gap-2.5 cursor-pointer">
+                      <input
+                        type="checkbox"
+                        checked={redeemChecked}
+                        onChange={(e) => {
+                          setRedeemChecked(e.target.checked);
+                          if (e.target.checked && redeemPoints === 0) setRedeemPoints(Math.min(availablePoints, minRedeemPoints));
+                        }}
+                        className="mt-0.5 h-4 w-4"
+                      />
+                      <div className="flex-1">
+                        <p className="text-sm font-semibold text-[var(--co-ink)]">
+                          Use your points — {availablePoints.toLocaleString()} available
+                        </p>
+                        <p className="text-xs text-surface-500">Worth up to {formatCurrency(availablePoints * redemptionRate, currency)}</p>
+                      </div>
+                    </label>
+                    {redeemChecked && (
+                      <div className="mt-3 flex items-center gap-2">
+                        <input
+                          type="range"
+                          min={minRedeemPoints}
+                          max={availablePoints}
+                          step={1}
+                          value={Math.min(redeemPoints, availablePoints)}
+                          onChange={(e) => setRedeemPoints(Number(e.target.value))}
+                          className="flex-1"
+                        />
+                        <span className="co-font-mono text-xs font-semibold text-[var(--co-ink)] w-28 text-right">
+                          {redeemPoints.toLocaleString()} pts = -{formatCurrency(loyaltyDiscount, currency)}
+                        </span>
+                      </div>
+                    )}
+                  </div>
+                )}
+
                 <div className="space-y-2 border-b border-dashed border-[var(--co-line)] pb-4">
                   <div className="flex justify-between text-sm text-surface-500">
                     <span>Subtotal · {cart.reduce((s, i) => s + i.quantity, 0)} items</span>
@@ -797,6 +864,12 @@ export default function CheckoutPage() {
                     <div className="flex justify-between text-sm text-[var(--co-green)]">
                       <span>Discount ({couponCode})</span>
                       <span className="co-font-mono">-{formatCurrency(appliedDiscount, currency)}</span>
+                    </div>
+                  )}
+                  {redeemChecked && loyaltyDiscount > 0 && (
+                    <div className="flex justify-between text-sm text-[var(--co-green)]">
+                      <span>Points redeemed ({redeemPoints.toLocaleString()} pts)</span>
+                      <span className="co-font-mono">-{formatCurrency(loyaltyDiscount, currency)}</span>
                     </div>
                   )}
                   <div className="flex justify-between text-sm text-surface-500">
