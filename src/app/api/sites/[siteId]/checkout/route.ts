@@ -1,6 +1,6 @@
 import { NextRequest } from "next/server";
 import { prisma } from "@/lib/db";
-import { success, error } from "@/lib/api-helpers";
+import { success, error, serverError } from "@/lib/api-helpers";
 import {
   initializePaystackPayment,
   initializeFlutterwavePayment,
@@ -118,7 +118,6 @@ export async function POST(req: NextRequest, { params }: Params) {
 
     return success({ paymentUrl, reference });
   } catch (err: any) {
-    console.error("Checkout error:", err);
-    return error(err.message || "Payment initialization failed", 500);
+    return serverError(err, "Checkout error");
   }
 }

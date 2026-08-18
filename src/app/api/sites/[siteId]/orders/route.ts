@@ -1,6 +1,6 @@
 import { NextRequest } from "next/server";
 import { prisma } from "@/lib/db";
-import { getStoreContext, success, error, validationError, generateOrderNumber, logAudit } from "@/lib/api-helpers";
+import { getStoreContext, success, error, validationError, generateOrderNumber, logAudit, serverError } from "@/lib/api-helpers";
 import { createOrderSchema } from "@/lib/validators";
 import { unauthorized } from "@/lib/auth";
 import { sendOrderConfirmationEmail } from "@/lib/email";
@@ -415,6 +415,6 @@ export async function POST(req: NextRequest, { params }: Params) {
     if (err.message?.includes("not found") || err.message?.includes("Insufficient")) {
       return error(err.message, 400);
     }
-    return error("Internal server error", 500);
+    return serverError(err, "Create order error");
   }
 }
