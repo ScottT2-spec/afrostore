@@ -14,6 +14,8 @@ export interface IndustryImageSet {
   banner: string[];      // CTA / promo banner backgrounds
 }
 
+import { searchUnsplashPhotos, getUnsplashPhoto, isUnsplashConfigured } from "@/lib/unsplash-client";
+
 const POOLS: Record<string, IndustryImageSet> = {
   fashion: {
     hero: [
@@ -563,6 +565,40 @@ export function getRandomIndustryImages(industry: string): {
     lifestyle: pick(pool.lifestyle),
     showcase: shuffledShowcase,
     banner: pick(pool.banner),
+  };
+}
+
+/**
+ * Same shape as getRandomIndustryImages, but tries live Unsplash search
+ * first (real, unlimited variety, keyed off the actual business description
+ * rather than just a fixed industry bucket) and only falls back to the
+ * static curated pool per-slot if no Unsplash key is configured or a
+ * particular search comes up empty. Never throws.
+ */
+export async function getIndustryImagesAsync(
+  industry: string,
+  businessType: string,
+  showcaseCount: number = 12
+): Promise<{ hero: string; about: string; lifestyle: string; showcase: string[]; banner: string }> {
+  const fallback = getRandomIndustryImages(industry);
+  if (!isUnsplashConfigured()) return fallback;
+
+  const topic = businessType?.trim() || industry;
+
+  const [hero, about, lifestyle, banner, showcaseResults] = await Promise.all([
+    getUnsplashPhoto(`${topic} hero banner`, "landscape"),
+    getUnsplashPhoto(`${topic} lifestyle`, "landscape"),
+    getUnsplashPhoto(`${topic}`, "landscape"),
+    getUnsplashPhoto(`${topic} promotion sale`, "landscape"),
+    searchUnsplashPhotos(`${topic} product`, showcaseCount, "squarish"),
+  ]);
+
+  return {
+    hero: hero || fallback.hero,
+    about: about || fallback.about,
+    lifestyle: lifestyle || fallback.lifestyle,
+    banner: banner || fallback.banner,
+    showcase: showcaseResults.length > 0 ? showcaseResults.map((p) => p.url) : fallback.showcase,
   };
 }
 

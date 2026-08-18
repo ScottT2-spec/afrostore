@@ -15,7 +15,8 @@ import type { AIProviderConfig } from "@/lib/failover";
 import { AICapability } from "@/lib/failover";
 import type { BuilderBlock, BlockType } from "@/lib/builder/types";
 import { AI_TEMPLATE_PRESET } from "@/lib/templates/presets/ai-preset";
-import { detectIndustry, getRandomIndustryImages } from "@/lib/ai-image-pools";
+import { detectIndustry, getRandomIndustryImages, getIndustryImagesAsync } from "@/lib/ai-image-pools";
+import { classifyBusiness } from "@/lib/ai-classify";
 import { buildDynamicHomePage } from "@/lib/ai-layout-engine";
 
 /** Randomized image set for this store generation run */
@@ -769,9 +770,11 @@ export async function generateStore(input: StoreGeneratorInput): Promise<StoreGe
     throw new Error("AI returned invalid content. Please try again.");
   }
 
-  // 3. Detect industry and get randomized images
-  const industry = detectIndustry(input.businessType, input.description);
-  const images = getRandomIndustryImages(industry);
+  // 3. Detect industry (real AI classification, falls back to keywords) and get images
+  const classification = await classifyBusiness(`${input.businessType} ${input.description || ""}`);
+  const pooledIndustries = new Set(["fashion", "electronics", "beauty", "food", "health", "real-estate", "kids", "grocery", "interior", "services"]);
+  const industry = pooledIndustries.has(classification.industry) ? classification.industry : detectIndustry(input.businessType, input.description);
+  const images = await getIndustryImagesAsync(industry, input.businessType);
 
   // 4. Build pages from the generated content with industry-matched images
   const pages: GeneratedPage[] = [

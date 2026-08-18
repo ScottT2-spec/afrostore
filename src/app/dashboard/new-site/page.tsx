@@ -202,24 +202,51 @@ export default function NewSitePage() {
     { keywords: ['portfolio', 'showcase', 'gallery', 'personal', 'cv', 'resume'], siteType: 'WEBSITE', industry: 'other' },
   ];
 
-  const handleGuidedSubmit = () => {
-    const input = guidedInput.toLowerCase();
-    if (input.trim().length < 3) return;
+  const [classifying, setClassifying] = useState(false);
 
+  const classifyGuidedInputLocally = (input: string): { siteType: SiteType; industry: string } => {
+    const lower = input.toLowerCase();
     let bestMatch: { siteType: SiteType; industry: string; score: number } = { siteType: 'ECOMMERCE', industry: 'other', score: 0 };
-
     for (const rule of GUIDED_RULES) {
       let score = 0;
       for (const kw of rule.keywords) {
-        if (input.includes(kw)) score++;
+        if (lower.includes(kw)) score++;
       }
       if (score > bestMatch.score) {
         bestMatch = { siteType: rule.siteType, industry: rule.industry, score };
       }
     }
+    return { siteType: bestMatch.siteType, industry: bestMatch.industry };
+  };
 
-    setSiteType(bestMatch.siteType);
-    setIndustry(bestMatch.industry);
+  const handleGuidedSubmit = async () => {
+    if (guidedInput.trim().length < 3) return;
+    setClassifying(true);
+
+    let result = classifyGuidedInputLocally(guidedInput);
+    let aiName: string | undefined;
+    let aiTagline: string | undefined;
+
+    try {
+      const res = await fetch("/api/ai/classify-onboarding", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ description: guidedInput }),
+      });
+      const json = await res.json();
+      if (json?.success && json.data?.classified) {
+        result = { siteType: json.data.siteType, industry: json.data.industry };
+        aiName = json.data.suggestedName;
+        aiTagline = json.data.suggestedTagline;
+      }
+    } catch {
+      // network error — keep the local keyword-match result
+    }
+
+    setClassifying(false);
+    setSiteType(result.siteType);
+    setIndustry(result.industry);
+    if (aiName) setBusinessInfo((prev) => ({ ...prev, name: prev.name || aiName!, description: prev.description || aiTagline || guidedInput }));
     setLaunchMethod('quick'); // Auto-select "Build with AI"
     setShowGuided(false);
     setGuidedInput('');
@@ -470,11 +497,20 @@ export default function NewSitePage() {
                       />
                       <button
                         onClick={handleGuidedSubmit}
-                        disabled={guidedInput.trim().length < 3}
+                        disabled={guidedInput.trim().length < 3 || classifying}
                         className="w-full mt-4 rounded-xl bg-gradient-to-r from-purple-600 to-blue-600 text-white font-semibold py-3 text-sm hover:from-purple-700 hover:to-blue-700 transition disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
                       >
-                        <Sparkles className="w-4 h-4" />
-                        Find My Best Match
+                        {classifying ? (
+                          <>
+                            <Loader2 className="w-4 h-4 animate-spin" />
+                            Thinking...
+                          </>
+                        ) : (
+                          <>
+                            <Sparkles className="w-4 h-4" />
+                            Find My Best Match
+                          </>
+                        )}
                       </button>
                     </div>
                   </div>

@@ -201,10 +201,15 @@ export function mergeSiteCustomization(base: SiteCustomizationDocument, patch: P
 }
 
 export function buildThemeDataWithCustomization(theme: ThemeData | null, customization: SiteCustomizationDocument | null): ThemeData | null {
-  if (!theme) return null;
-
-  const themeConfig = theme.config || {};
   const themeSettings = customization?.themeSettings || {};
+  // No base Theme is required — a site's own SiteCustomization.themeSettings
+  // (e.g. AI-generated colors/fonts) is enough on its own. Previously this
+  // returned null whenever no Theme was active, which was effectively always
+  // (theme "activation" isn't wired to the live site), so nothing a merchant
+  // or the AI generator set ever actually reached the storefront.
+  if (!theme && Object.keys(themeSettings).length === 0) return null;
+
+  const themeConfig = theme?.config || {};
   const colors = deepMerge(asRecord(themeConfig.colors), asRecord(themeSettings.colors));
   const fontsFromTypography = themeSettings.typography ? {
     heading: themeSettings.typography.headingFont,
@@ -218,7 +223,9 @@ export function buildThemeDataWithCustomization(theme: ThemeData | null, customi
   const layout = deepMerge(asRecord(themeConfig.layout), asRecord(themeSettings.layout));
 
   return {
-    ...theme,
+    id: theme?.id || "custom",
+    name: theme?.name || "Custom",
+    slug: theme?.slug || "custom",
     config: {
       ...themeConfig,
       colors,

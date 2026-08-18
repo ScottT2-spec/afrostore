@@ -33,11 +33,35 @@ export async function POST(req: NextRequest, { params }: Params) {
       currency: site.currency || "NGN",
     });
 
+    // Generate a starter catalog too — an AI-built store with zero products
+    // is a much worse first impression than one with a real, on-theme catalog.
+    let productsCreated = 0;
+    try {
+      const { classifyBusiness } = await import("@/lib/ai-classify");
+      const { generateProducts } = await import("@/lib/ai-product-generator");
+      const businessType = (body.businessType as string) || site.businessType || "general";
+      const description = (body.description as string) || site.description || undefined;
+      const classification = await classifyBusiness(`${businessType} ${description || ""}`);
+      const productResult = await generateProducts({
+        siteId,
+        businessType,
+        businessName: (body.storeName as string) || site.name,
+        description,
+        industry: classification.industry,
+        currency: site.currency || "NGN",
+        count: 12,
+      });
+      productsCreated = productResult.productsCreated;
+    } catch (err) {
+      console.error("AI product generation failed (non-fatal, site pages already generated):", err);
+    }
+
     return success({
       message: "Store pages generated successfully",
       pages: result.pages,
       provider: result.provider,
       model: result.model,
+      productsCreated,
     });
   } catch (err) {
     console.error("AI store generation error:", err);

@@ -120,6 +120,16 @@ export function ThemeProvider({ theme, children }: ThemeProviderProps) {
   if (colors?.buttonText) themeVars["--theme-button-text"] = colors.buttonText;
   if (colors?.saleBadge) themeVars["--theme-sale-badge"] = colors.saleBadge;
 
+  // Also emit the --color-* names the per-template TOKENS objects
+  // (Fashion/Interior/Cosmetics/Grocery/Health/Kids/Makeup/Perfumes) actually
+  // read (var(--color-primary) etc). These were previously never set anywhere,
+  // so every one of those templates' "primary color" fell through to nothing.
+  if (colors?.primary) themeVars["--color-primary"] = colors.primary;
+  if (colors?.accent) themeVars["--color-accent"] = colors.accent;
+  themeVars["--color-background"] = colors?.background || "#ffffff";
+  themeVars["--color-text"] = colors?.text || "#1a1a2e";
+  themeVars["--color-muted-text"] = colors?.text ? hexToRgba(colors.text, 0.65) : "#6b7280";
+
   // Fonts
   if (fonts?.heading) themeVars["--theme-font-heading"] = `'${fonts.heading}', system-ui, sans-serif`;
   if (fonts?.body) themeVars["--theme-font-body"] = `'${fonts.body}', system-ui, sans-serif`;
