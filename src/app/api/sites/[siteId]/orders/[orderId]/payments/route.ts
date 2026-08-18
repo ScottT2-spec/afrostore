@@ -1,6 +1,6 @@
 import { NextRequest } from "next/server";
 import { prisma } from "@/lib/db";
-import { getStoreContext, success, error, logAudit } from "@/lib/api-helpers";
+import { getStoreContext, success, error, logAudit, serverError } from "@/lib/api-helpers";
 import { unauthorized } from "@/lib/auth";
 import { runAutomationsForTrigger } from "@/lib/automations";
 import { awardOrderPoints, finalizeOrderRedemption } from "@/lib/loyalty";
@@ -65,7 +65,8 @@ export async function POST(req: NextRequest, { params }: Params) {
     return error(`That's more than the remaining balance (${remaining.toFixed(2)} ${order.currency}). Record a smaller amount, or adjust the order total first.`, 400);
   }
 
-  const wasFullyPaidAfter = async () => {
+  try {
+    const wasFullyPaidAfter = async () => {
     // Get-or-create the site's single "Manual" gateway row — a bookkeeping
     // record for non-gateway payments, not a real payment processor
     // integration, so it doesn't need API keys.
@@ -102,6 +103,11 @@ export async function POST(req: NextRequest, { params }: Params) {
           paymentStatus: isFullyPaid ? "PAID" : "PARTIALLY_PAID",
           ...(isFullyPaid && order.paymentStatus !== "PAID" ? { paidAt: new Date(), status: order.status === "PENDING" ? "CONFIRMED" : order.status } : {}),
         },
+        // The client replaces its in-memory order with whatever comes back
+        // here (setSelectedOrder(res.data)) and immediately renders
+        // order.items.map(...) — without this include, items is undefined
+        // and that render crashes the whole order-detail panel.
+        include: { items: true },
       });
 
       await tx.orderTimeline.create({
@@ -164,4 +170,7 @@ export async function POST(req: NextRequest, { params }: Params) {
   });
 
   return success(updatedOrder, 201);
+  } catch (err) {
+    return serverError(err, "Record payment error");
+  }
 }
