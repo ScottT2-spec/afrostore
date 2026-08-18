@@ -15,6 +15,7 @@ const updateProfileSchema = z.object({
   lastName: z.string().trim().min(1).max(100).optional(),
   phone: z.string().trim().max(30).nullable().optional(),
   avatar: z.string().trim().url().nullable().optional(),
+  profileDetails: z.record(z.string(), z.string().max(2000).nullable()).optional(),
   currentPassword: z.string().optional(),
   newPassword: z.string().min(8).max(200).optional(),
 });
@@ -29,13 +30,18 @@ export async function PATCH(req: NextRequest) {
     const parsed = updateProfileSchema.safeParse(body);
     if (!parsed.success) return error(parsed.error.issues[0]?.message || "Invalid input", 400);
 
-    const { firstName, lastName, phone, avatar, currentPassword, newPassword } = parsed.data;
+    const { firstName, lastName, phone, avatar, profileDetails, currentPassword, newPassword } = parsed.data;
 
     const data: Record<string, unknown> = {};
     if (firstName !== undefined) data.firstName = firstName;
     if (lastName !== undefined) data.lastName = lastName;
     if (phone !== undefined) data.phone = phone;
     if (avatar !== undefined) data.avatar = avatar;
+    if (profileDetails !== undefined) {
+      const existing = await prisma.user.findUnique({ where: { id: authUser.id }, select: { profileDetails: true } });
+      const merged = { ...((existing?.profileDetails as Record<string, unknown>) || {}), ...profileDetails };
+      data.profileDetails = merged;
+    }
 
     // Password change requires the current password, verified against the stored hash
     if (newPassword) {

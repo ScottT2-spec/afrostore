@@ -11,6 +11,7 @@ interface User {
   lastName: string;
   phone?: string;
   avatar?: string;
+  profileDetails?: Record<string, string | null>;
   role: string;
   createdAt: string;
 }

@@ -63,6 +63,7 @@ export async function getAuthUser(req: NextRequest) {
         lastName: true,
         phone: true,
         avatar: true,
+        profileDetails: true,
         role: true,
         createdAt: true,
       },
