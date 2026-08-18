@@ -30,6 +30,7 @@ export async function GET(req: NextRequest, { params }: Params) {
     success: true,
     data: {
       enabled: true,
+      isMember: !!member,
       availablePoints: member?.availablePoints ?? 0,
       totalPoints: member?.totalPoints ?? 0,
       redeemedPoints: member?.redeemedPoints ?? 0,

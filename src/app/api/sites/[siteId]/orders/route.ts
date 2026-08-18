@@ -6,7 +6,7 @@ import { unauthorized } from "@/lib/auth";
 import { sendOrderConfirmationEmail } from "@/lib/email";
 import { getBestActiveFlashSales, applyDiscount } from "@/lib/flash-sales";
 import { runAutomationsForTrigger } from "@/lib/automations";
-import { validateRedemption } from "@/lib/loyalty";
+import { validateRedemption, joinLoyaltyProgram } from "@/lib/loyalty";
 import { createSiteNotification } from "@/lib/notifications";
 import { markAbandonedCartsRecovered } from "@/lib/abandoned-cart";
 
@@ -76,7 +76,7 @@ export async function POST(req: NextRequest, { params }: Params) {
     const parsed = createOrderSchema.safeParse(body);
     if (!parsed.success) return validationError(parsed.error.flatten().fieldErrors);
 
-    const { items, deliveryAddress, deliveryZoneId, paymentMethod, couponCode, email, phone, firstName, lastName, note, redeemPoints } = parsed.data;
+    const { items, deliveryAddress, deliveryZoneId, paymentMethod, couponCode, email, phone, firstName, lastName, note, redeemPoints, joinLoyalty } = parsed.data;
 
     // Resolve products and calculate prices
     const productIds = items.map((i) => i.productId);
@@ -212,6 +212,11 @@ export async function POST(req: NextRequest, { params }: Params) {
       customer = await prisma.customer.create({
         data: { siteId, email, firstName, lastName, phone },
       });
+    }
+
+    // Explicit opt-in only — never silently enrolled by placing an order.
+    if (joinLoyalty) {
+      try { await joinLoyaltyProgram(siteId, customer.id); } catch (err) { console.error("Loyalty join error:", err); }
     }
 
     // Loyalty points redemption — priced into the order now, balance is only

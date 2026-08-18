@@ -251,6 +251,7 @@ export default function CheckoutPage() {
       .then((json) => {
         if (json.success && json.data) {
           setLoyaltyEnabled(!!json.data.enabled);
+          setIsLoyaltyMember(!!json.data.isMember);
           setAvailablePoints(json.data.availablePoints || 0);
           setRedemptionRate(json.data.redemptionRate || 0);
           setMinRedeemPoints(json.data.minRedeemPoints || 0);
@@ -275,6 +276,8 @@ export default function CheckoutPage() {
 
   // Loyalty points redemption
   const [loyaltyEnabled, setLoyaltyEnabled] = useState(false);
+  const [isLoyaltyMember, setIsLoyaltyMember] = useState(false);
+  const [joinLoyalty, setJoinLoyalty] = useState(false);
   const [availablePoints, setAvailablePoints] = useState(0);
   const [redemptionRate, setRedemptionRate] = useState(0);
   const [minRedeemPoints, setMinRedeemPoints] = useState(0);
@@ -421,6 +424,7 @@ export default function CheckoutPage() {
           paymentMethod: paymentMethod === "COD" ? "PAY_ON_DELIVERY" : paymentMethod,
           couponCode: couponCode.trim() || undefined,
           redeemPoints: redeemChecked && redeemPoints > 0 ? redeemPoints : undefined,
+          joinLoyalty: !isLoyaltyMember && joinLoyalty ? true : undefined,
           note: deliveryInstructions || undefined,
         }),
       });
@@ -817,7 +821,24 @@ export default function CheckoutPage() {
                   </p>
                 )}
 
-                {loyaltyEnabled && availablePoints >= minRedeemPoints && minRedeemPoints > 0 && (
+                {loyaltyEnabled && !isLoyaltyMember && (
+                  <div className="mb-4 rounded-xl border border-[var(--co-line)] bg-[var(--co-chalk)] p-3">
+                    <label className="flex items-start gap-2.5 cursor-pointer">
+                      <input
+                        type="checkbox"
+                        checked={joinLoyalty}
+                        onChange={(e) => setJoinLoyalty(e.target.checked)}
+                        className="mt-0.5 h-4 w-4"
+                      />
+                      <div className="flex-1">
+                        <p className="text-sm font-semibold text-[var(--co-ink)]">Join our rewards program</p>
+                        <p className="text-xs text-surface-500">Start earning points on this order — free to join.</p>
+                      </div>
+                    </label>
+                  </div>
+                )}
+
+                {loyaltyEnabled && isLoyaltyMember && availablePoints >= minRedeemPoints && minRedeemPoints > 0 && (
                   <div className="mb-4 rounded-xl border border-[var(--co-line)] bg-[var(--co-chalk)] p-3">
                     <label className="flex items-start gap-2.5 cursor-pointer">
                       <input

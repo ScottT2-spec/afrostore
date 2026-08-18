@@ -102,6 +102,7 @@ export const createOrderSchema = z.object({
   couponCode: z.string().optional(),
   note: z.string().optional(),
   redeemPoints: z.number().int().nonnegative().optional(),
+  joinLoyalty: z.boolean().optional(),
 });
 
 export const updateOrderStatusSchema = z.object({
