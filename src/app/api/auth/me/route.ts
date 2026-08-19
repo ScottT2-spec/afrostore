@@ -3,11 +3,38 @@ import { getAuthUser, unauthorized, hashPassword, verifyPassword } from "@/lib/a
 import { success, error } from "@/lib/api-helpers";
 import { prisma } from "@/lib/db";
 import { z } from "zod";
+import { encryptField, decryptField, maskValue, isEncrypted } from "@/lib/field-crypto";
+
+// Fields sensitive enough to encrypt at rest and never round-trip to the
+// client in plaintext after the first save — only a masked version
+// (e.g. "••••1234") is ever returned. To change one, the user types a new
+// value; leaving the masked placeholder untouched means "no change".
+const SENSITIVE_DETAIL_FIELDS = new Set([
+  "bankAccountNumber", "bankIdentifierCode", "taxPayerId", "idProofNumber",
+]);
+
+function maskSensitiveDetails(details: Record<string, unknown> | null): Record<string, string> {
+  const out: Record<string, string> = {};
+  for (const [key, value] of Object.entries(details || {})) {
+    if (typeof value !== "string" || !value) continue;
+    if (SENSITIVE_DETAIL_FIELDS.has(key)) {
+      const plain = isEncrypted(value) ? decryptField(value) : value;
+      out[key] = maskValue(plain);
+    } else {
+      out[key] = value;
+    }
+  }
+  return out;
+}
 
 export async function GET(req: NextRequest) {
   const user = await getAuthUser(req);
   if (!user) return unauthorized();
-  return success(user);
+
+  const full = await prisma.user.findUnique({ where: { id: user.id }, select: { profileDetails: true } });
+  const profileDetails = maskSensitiveDetails((full?.profileDetails as Record<string, unknown>) || null);
+
+  return success({ ...user, profileDetails });
 }
 
 const updateProfileSchema = z.object({
@@ -39,7 +66,24 @@ export async function PATCH(req: NextRequest) {
     if (avatar !== undefined) data.avatar = avatar;
     if (profileDetails !== undefined) {
       const existing = await prisma.user.findUnique({ where: { id: authUser.id }, select: { profileDetails: true } });
-      const merged = { ...((existing?.profileDetails as Record<string, unknown>) || {}), ...profileDetails };
+      const existingDetails = (existing?.profileDetails as Record<string, string>) || {};
+      const merged: Record<string, string | null> = { ...existingDetails };
+
+      for (const [key, value] of Object.entries(profileDetails)) {
+        if (value === null || value === undefined) {
+          merged[key] = value;
+          continue;
+        }
+        if (SENSITIVE_DETAIL_FIELDS.has(key)) {
+          // A masked placeholder (starts with the mask dot) sent back
+          // unchanged means "don't update this field" — keep the existing
+          // encrypted value rather than encrypting the mask itself.
+          if (value.startsWith("•")) continue;
+          merged[key] = value ? encryptField(value) : value;
+        } else {
+          merged[key] = value;
+        }
+      }
       data.profileDetails = merged;
     }
 
@@ -73,10 +117,11 @@ export async function PATCH(req: NextRequest) {
         avatar: true,
         role: true,
         createdAt: true,
+        profileDetails: true,
       },
     });
 
-    return success(updated);
+    return success({ ...updated, profileDetails: maskSensitiveDetails(updated.profileDetails as Record<string, unknown>) });
   } catch (err) {
     console.error("PATCH /api/auth/me error:", err);
     return error("Failed to update profile", 500);

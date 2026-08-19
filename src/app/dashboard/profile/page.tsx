@@ -240,8 +240,8 @@ export default function ProfilePage() {
                   <input value={details.idProofName || ""} onChange={(e) => updateDetail("idProofName", e.target.value)} className="input-field" placeholder="e.g. National ID, Passport" />
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-surface-700 mb-1">ID Proof Number</label>
-                  <input value={details.idProofNumber || ""} onChange={(e) => updateDetail("idProofNumber", e.target.value)} className="input-field" />
+                  <label className="block text-sm font-medium text-surface-700 mb-1 flex items-center gap-1"><Lock className="h-3 w-3 text-surface-400" />ID Proof Number</label>
+                  <input value={details.idProofNumber || ""} onChange={(e) => updateDetail("idProofNumber", e.target.value)} className="input-field" placeholder="Enter to add or replace" />
                 </div>
               </div>
             </div>
@@ -269,15 +269,15 @@ export default function ProfilePage() {
                   <input value={details.bankAccountHolderName || ""} onChange={(e) => updateDetail("bankAccountHolderName", e.target.value)} className="input-field" />
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-surface-700 mb-1">Account Number</label>
-                  <input value={details.bankAccountNumber || ""} onChange={(e) => updateDetail("bankAccountNumber", e.target.value)} className="input-field" />
+                  <label className="block text-sm font-medium text-surface-700 mb-1 flex items-center gap-1"><Lock className="h-3 w-3 text-surface-400" />Account Number</label>
+                  <input value={details.bankAccountNumber || ""} onChange={(e) => updateDetail("bankAccountNumber", e.target.value)} className="input-field" placeholder="Enter to add or replace" />
                 </div>
                 <div>
                   <label className="block text-sm font-medium text-surface-700 mb-1">Bank Name</label>
                   <input value={details.bankName || ""} onChange={(e) => updateDetail("bankName", e.target.value)} className="input-field" />
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-surface-700 mb-1">Bank Identifier Code</label>
+                  <label className="block text-sm font-medium text-surface-700 mb-1 flex items-center gap-1"><Lock className="h-3 w-3 text-surface-400" />Bank Identifier Code</label>
                   <input value={details.bankIdentifierCode || ""} onChange={(e) => updateDetail("bankIdentifierCode", e.target.value)} className="input-field" placeholder="e.g. SWIFT/BIC" />
                 </div>
                 <div>
@@ -285,8 +285,8 @@ export default function ProfilePage() {
                   <input value={details.bankBranch || ""} onChange={(e) => updateDetail("bankBranch", e.target.value)} className="input-field" />
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-surface-700 mb-1">Tax Payer ID</label>
-                  <input value={details.taxPayerId || ""} onChange={(e) => updateDetail("taxPayerId", e.target.value)} className="input-field" />
+                  <label className="block text-sm font-medium text-surface-700 mb-1 flex items-center gap-1"><Lock className="h-3 w-3 text-surface-400" />Tax Payer ID</label>
+                  <input value={details.taxPayerId || ""} onChange={(e) => updateDetail("taxPayerId", e.target.value)} className="input-field" placeholder="Enter to add or replace" />
                 </div>
               </div>
             </div>
