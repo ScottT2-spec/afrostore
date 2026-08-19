@@ -176,32 +176,43 @@ export default function DashboardPage() {
           {statCards.map((stat) => {
             const Icon = stat.icon;
             const isUp = stat.trend === "up";
-            const colorMap: Record<string, string> = {
-              brand: "bg-brand-50 text-brand-600",
-              blue: "bg-blue-50 text-blue-600",
-              purple: "bg-purple-50 text-purple-600",
-              accent: "bg-accent-50 text-accent-600",
+            // First card (Revenue) gets the dark "featured" treatment, like
+            // the highlighted metric in the reference dashboard — everything
+            // else is a white card with a colored accent bar instead of an
+            // icon badge, and a much larger, tighter number.
+            const isFeatured = stat.color === "brand";
+            const accentBorder: Record<string, string> = {
+              brand: "",
+              blue: "border-l-blue-500",
+              purple: "border-l-purple-500",
+              accent: "border-l-accent-500",
             };
             return (
               <div
                 key={stat.label}
-                className="rounded-2xl border border-surface-200 bg-white p-5 transition-all hover:shadow-md"
+                className={
+                  isFeatured
+                    ? "rounded-2xl bg-brand-900 p-5 text-white transition-all hover:shadow-lg relative overflow-hidden"
+                    : `rounded-2xl border border-surface-200 border-l-4 ${accentBorder[stat.color]} bg-white p-5 transition-all hover:shadow-md`
+                }
               >
-                <div className="flex items-center justify-between mb-3">
-                  <div className={`flex h-10 w-10 items-center justify-center rounded-xl ${colorMap[stat.color]}`}>
-                    <Icon className="h-5 w-5" />
-                  </div>
+                {isFeatured && (
+                  <Icon className="absolute -right-3 -bottom-3 h-24 w-24 text-white/5" strokeWidth={1} />
+                )}
+                <div className="flex items-center justify-between mb-3 relative">
+                  <span className={`text-[11px] font-bold uppercase tracking-wider ${isFeatured ? "text-white/60" : "text-surface-400"}`}>
+                    {stat.label}
+                  </span>
                   {stat.change && (
-                    <div className={`flex items-center gap-1 text-xs font-semibold ${isUp ? "text-green-600" : "text-accent-600"}`}>
+                    <div className={`flex items-center gap-1 text-xs font-semibold ${isFeatured ? (isUp ? "text-emerald-300" : "text-red-300") : isUp ? "text-green-600" : "text-accent-600"}`}>
                       {isUp ? <TrendingUp className="h-3.5 w-3.5" /> : <TrendingDown className="h-3.5 w-3.5" />}
                       {stat.change}
                     </div>
                   )}
                 </div>
-                <div className="text-3xl font-extrabold text-surface-900 font-display tracking-tight">
-                  {loading ? <div className="h-7 w-24 bg-surface-100 rounded animate-pulse" /> : stat.value}
+                <div className={`text-4xl font-black tracking-tight font-display relative ${isFeatured ? "text-white" : "text-surface-900"}`}>
+                  {loading ? <div className={`h-9 w-24 rounded animate-pulse ${isFeatured ? "bg-white/10" : "bg-surface-100"}`} /> : stat.value}
                 </div>
-                <div className="text-xs text-surface-500 mt-0.5">{stat.label}</div>
               </div>
             );
           })}
