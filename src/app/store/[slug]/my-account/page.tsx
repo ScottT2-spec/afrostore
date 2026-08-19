@@ -9,7 +9,7 @@ import {
   Award,
 } from "@/components/icons/FilledIcons";
 import { useState, useEffect } from "react";
-import { useParams, useRouter } from "next/navigation";
+import { useParams, useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
 
 interface OrderItem {
@@ -68,6 +68,13 @@ export default function MyAccountPage() {
   const { slug } = useParams() as { slug: string };
   const router = useRouter();
   const [activeTab, setActiveTab] = useState<Tab>("orders");
+  const searchParams = useSearchParams();
+  useEffect(() => {
+    const tab = searchParams.get("tab");
+    if (tab === "loyalty" || tab === "orders" || tab === "wishlist" || tab === "addresses" || tab === "settings") {
+      setActiveTab(tab as Tab);
+    }
+  }, [searchParams]);
   const [orders, setOrders] = useState<OrderItem[]>([]);
   const [loading, setLoading] = useState(true);
   const [customer, setCustomer] = useState<CustomerData | null>(null);

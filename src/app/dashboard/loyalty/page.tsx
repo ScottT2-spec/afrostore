@@ -36,6 +36,7 @@ export default function LoyaltyPage() {
   const [stats, setStats] = useState<Stats | null>(null);
   const [loading, setLoading] = useState(true);
   const [showSettings, setShowSettings] = useState(false);
+  const [linkCopied, setLinkCopied] = useState(false);
   const [saving, setSaving] = useState(false);
   const [adjustMember, setAdjustMember] = useState<LoyaltyMember | null>(null);
   const [adjustAction, setAdjustAction] = useState<"earn" | "redeem">("earn");
@@ -162,6 +163,25 @@ export default function LoyaltyPage() {
           </div>
         ) : (
           <>
+            {/* Signup link */}
+            <div className="rounded-2xl border border-surface-200 bg-white p-4 flex items-center justify-between gap-4 flex-wrap">
+              <div>
+                <p className="text-sm font-semibold text-surface-900">Member signup link</p>
+                <p className="text-xs text-surface-500">Share this with customers so they can join and start earning points.</p>
+              </div>
+              <button
+                onClick={() => {
+                  const url = `${window.location.origin}/store/${currentStore?.slug}/my-account?tab=loyalty`;
+                  navigator.clipboard.writeText(url);
+                  setLinkCopied(true);
+                  setTimeout(() => setLinkCopied(false), 2000);
+                }}
+                className="btn-secondary text-sm py-2 px-4 flex-shrink-0"
+              >
+                {linkCopied ? "Copied!" : "Copy Signup Link"}
+              </button>
+            </div>
+
             {/* Program status */}
             <div className="rounded-2xl border border-surface-200 bg-white p-4 flex items-center justify-between">
               <div className="flex items-center gap-3">
