@@ -224,7 +224,7 @@ function StatCard({ icon: Icon, label, value }: { icon: typeof Building2; label:
   return (
     <div className="rounded-xl border border-surface-200 bg-white p-4">
       <div className="flex items-center gap-2 mb-1"><Icon className="h-4 w-4 text-brand-600" /><span className="text-xs text-surface-500">{label}</span></div>
-      <p className="text-2xl font-bold text-surface-900">{value}</p>
+      <p className="text-3xl font-extrabold text-surface-900 tracking-tight">{value}</p>
     </div>
   );
 }

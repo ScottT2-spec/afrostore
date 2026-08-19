@@ -228,11 +228,11 @@ export default function CustomersPage() {
           </div>
           <div className="rounded-2xl border border-surface-200 bg-white p-5">
             <div className="flex items-center gap-2 text-surface-500 text-xs font-medium mb-2"><DollarSign className="h-3.5 w-3.5 text-emerald-600" /> Revenue Collected</div>
-            <div className="text-2xl font-bold text-surface-900 font-display">{formatCurrency(totalSpentSum, currency)}</div>
+            <div className="text-3xl font-extrabold text-surface-900 font-display tracking-tight">{formatCurrency(totalSpentSum, currency)}</div>
           </div>
           <div className="rounded-2xl border border-surface-200 bg-white p-5">
             <div className="flex items-center gap-2 text-surface-500 text-xs font-medium mb-2"><TrendingUp className="h-3.5 w-3.5 text-blue-600" /> Avg Order Value</div>
-            <div className="text-2xl font-bold text-surface-900 font-display">{formatCurrency(avgOrderValue || 0, currency)}</div>
+            <div className="text-3xl font-extrabold text-surface-900 font-display tracking-tight">{formatCurrency(avgOrderValue || 0, currency)}</div>
           </div>
           <div className="rounded-2xl border border-surface-200 bg-gradient-to-br from-accent-400 to-accent-500 p-5 text-white relative overflow-hidden">
             <div className="absolute -right-4 -top-4 h-24 w-24 rounded-full bg-white/10" />

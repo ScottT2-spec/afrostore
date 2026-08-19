@@ -198,7 +198,7 @@ export default function DashboardPage() {
                     </div>
                   )}
                 </div>
-                <div className="text-2xl font-bold text-surface-900 font-display">
+                <div className="text-3xl font-extrabold text-surface-900 font-display tracking-tight">
                   {loading ? <div className="h-7 w-24 bg-surface-100 rounded animate-pulse" /> : stat.value}
                 </div>
                 <div className="text-xs text-surface-500 mt-0.5">{stat.label}</div>

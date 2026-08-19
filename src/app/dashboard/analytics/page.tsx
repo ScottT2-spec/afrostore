@@ -133,7 +133,7 @@ export default function AnalyticsPage() {
                         <Icon className="h-5 w-5" />
                       </div>
                     </div>
-                    <div className="text-2xl font-bold text-surface-900 font-display">{stat.value.toLocaleString()}</div>
+                    <div className="text-3xl font-extrabold text-surface-900 font-display tracking-tight">{stat.value.toLocaleString()}</div>
                     <div className="text-xs text-surface-500 mt-0.5">{stat.label}</div>
                   </div>
                 );

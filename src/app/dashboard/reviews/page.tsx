@@ -114,18 +114,18 @@ export default function ReviewsPage() {
       <div className="grid grid-cols-3 gap-4">
         <div className="rounded-2xl border border-surface-200 bg-white p-4">
           <p className="text-xs font-semibold text-surface-500 uppercase">Total Reviews</p>
-          <p className="text-2xl font-bold text-surface-900 mt-1">{overallTotal}</p>
+          <p className="text-3xl font-extrabold text-surface-900 tracking-tight mt-1">{overallTotal}</p>
         </div>
         <div className="rounded-2xl border border-surface-200 bg-white p-4">
           <p className="text-xs font-semibold text-surface-500 uppercase">Average Rating</p>
           <div className="flex items-center gap-2 mt-1">
-            <p className="text-2xl font-bold text-surface-900">{overallAvgRating ? overallAvgRating.toFixed(1) : "0.0"}</p>
+            <p className="text-3xl font-extrabold text-surface-900 tracking-tight">{overallAvgRating ? overallAvgRating.toFixed(1) : "0.0"}</p>
             <Star className="h-5 w-5 text-accent-400 fill-accent-400" />
           </div>
         </div>
         <div className="rounded-2xl border border-surface-200 bg-white p-4">
           <p className="text-xs font-semibold text-surface-500 uppercase">Pending</p>
-          <p className="text-2xl font-bold text-surface-900 mt-1">{pendingTotal}</p>
+          <p className="text-3xl font-extrabold text-surface-900 tracking-tight mt-1">{pendingTotal}</p>
         </div>
       </div>
 

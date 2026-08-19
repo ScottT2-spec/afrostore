@@ -183,7 +183,7 @@ export default function LoyaltyPage() {
                 return (
                   <div key={s.label} className="rounded-2xl border border-surface-200 bg-white p-5 hover:shadow-md transition-all">
                     <div className={`flex h-10 w-10 items-center justify-center rounded-xl mb-3 ${s.color}`}><Icon className="h-5 w-5" /></div>
-                    <div className="text-2xl font-bold text-surface-900 font-display">{s.value}</div>
+                    <div className="text-3xl font-extrabold text-surface-900 font-display tracking-tight">{s.value}</div>
                     <div className="text-xs text-surface-500 mt-0.5">{s.label}</div>
                   </div>
                 );
