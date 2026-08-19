@@ -308,10 +308,18 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ wor
           });
         }
 
-        // ── Fire AI page generation in background (non-blocking) ──
-        // This will populate About/FAQ/Contact/Policies with real AI content
+        // ── Fire AI page + product generation in background (non-blocking) ──
+        // This will populate About/FAQ/Contact/Policies with real AI content,
+        // and replace the generic static starter catalog above with a real
+        // one tailored to what this merchant actually described selling.
         try {
           const { generateStore } = await import("@/lib/ai-store-generator");
+          const { classifyBusiness } = await import("@/lib/ai-classify");
+          const { generateProducts } = await import("@/lib/ai-product-generator");
+
+          const productsOffered: string[] = Array.isArray(products) ? products.filter(Boolean) : [];
+          const servicesOffered: string[] = Array.isArray(services) ? services.filter(Boolean) : [];
+
           generateStore({
             siteId: site.id,
             storeSlug: storeSlug,
@@ -320,7 +328,48 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ wor
             description: description || undefined,
             country: site.country || "NG",
             currency: siteCurrency,
+            targetAudience: targetAudience || undefined,
+            productsOffered,
+            servicesOffered,
           }).catch((err: unknown) => console.warn("Background AI page generation failed:", err));
+
+          // Only attempt to replace the static catalog if the merchant actually
+          // described specific products/services or a real description — with
+          // nothing to go on, the static industry samples are a perfectly
+          // reasonable starting point and safer than an AI guessing blind.
+          if (productsOffered.length > 0 || servicesOffered.length > 0 || (description && description.trim().length > 10)) {
+            (async () => {
+              try {
+                const classification = await classifyBusiness(`${bizType} ${description || ""}`);
+                const result = await generateProducts({
+                  siteId: site.id,
+                  businessType: bizType,
+                  businessName: storeName,
+                  description: description || undefined,
+                  industry: classification.industry,
+                  currency: siteCurrency,
+                  count: Math.max(sampleData.products.length, 10),
+                  targetAudience: targetAudience || undefined,
+                  productsOffered,
+                  servicesOffered,
+                });
+                if (result.productsCreated > 0) {
+                  // Success — remove the generic static placeholders now that
+                  // real, tailored products exist. Best-effort: if this fails,
+                  // the merchant just ends up with both, not broken.
+                  const staticProductIds = await prisma.product.findMany({
+                    where: { siteId: site.id, slug: { in: sampleData.products.map((p) => p.slug) } },
+                    select: { id: true },
+                  });
+                  if (staticProductIds.length > 0) {
+                    await prisma.product.deleteMany({ where: { id: { in: staticProductIds.map((p) => p.id) } } });
+                  }
+                }
+              } catch (err) {
+                console.warn("Background AI product generation failed, keeping static starter catalog:", err);
+              }
+            })();
+          }
         } catch {
           // Non-fatal — pages exist with empty content, user can edit
         }

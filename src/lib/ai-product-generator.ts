@@ -61,6 +61,9 @@ export interface ProductGeneratorInput {
   industry: string;
   currency: string;
   count?: number; // default 12
+  targetAudience?: string;
+  productsOffered?: string[];
+  servicesOffered?: string[];
 }
 
 export interface ProductGeneratorResult {
@@ -73,23 +76,36 @@ async function generateProductDrafts(input: ProductGeneratorInput): Promise<Gene
   const count = input.count ?? 12;
   const ai = getAI();
 
+  const contextLines = [
+    `Business: ${input.businessName}`,
+    `Type: ${input.businessType}`,
+    input.description ? `Description: ${input.description}` : null,
+    input.targetAudience ? `Target audience: ${input.targetAudience}` : null,
+    input.productsOffered?.length ? `Specific products they actually sell (base the catalog on these, don't invent unrelated ones): ${input.productsOffered.join(", ")}` : null,
+    input.servicesOffered?.length ? `Services they offer (if relevant, reflect these in product framing): ${input.servicesOffered.join(", ")}` : null,
+    `Currency: ${input.currency}`,
+  ].filter(Boolean);
+
   const result = await ai.complete(
     [
       {
         role: "system",
-        content: `You write realistic starter product catalogs for new e-commerce stores. Respond with ONLY a JSON array, no markdown, no commentary. Each item:
+        content: `You write realistic starter product catalogs for new e-commerce stores, the way a senior merchandiser would — specific, appealing, and true to the actual business, never generic filler. Respond with ONLY a JSON array, no markdown, no commentary. Each item:
 {"name":"product name","description":"1-2 sentence sales description","price":number,"compareAtPrice":number or omit,"category":"short category name","tags":["tag1","tag2"]}
 
 Rules:
+- If the business listed specific products/services they sell, the catalog MUST be built from those — don't invent an unrelated assortment.
 - Prices realistic for the currency given, no currency symbol, numbers only.
 - compareAtPrice only when it makes sense as a "was" price (must be higher than price) — omit otherwise, don't add it to every item.
 - 3-5 distinct categories across the set, grouping related products together.
-- Names and descriptions must fit the specific business described — not generic filler.
+- Names must sound like real product names a shopper would see in a real store, not category labels — "Sea Salt Caramel Fudge Brownie" not "Chocolate Dessert Item".
+- Descriptions: concrete and specific (ingredients, materials, dimensions, what makes it good) — never vague adjectives like "high-quality" or "amazing" on their own.
+- ${input.targetAudience ? `Write for ${input.targetAudience} specifically — word choice and framing should speak to that person.` : "Write for the business's likely real customer."}
 - Exactly ${count} products.`,
       },
       {
         role: "user",
-        content: `Business: ${input.businessName}\nType: ${input.businessType}\n${input.description ? `Description: ${input.description}\n` : ""}Currency: ${input.currency}\nGenerate ${count} products.`,
+        content: `${contextLines.join("\n")}\nGenerate ${count} products.`,
       },
     ],
     { maxTokens: 3000, temperature: 0.8 }

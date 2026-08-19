@@ -38,6 +38,10 @@ export interface StoreGeneratorInput {
   description?: string;
   country?: string;
   currency?: string;
+  targetAudience?: string;
+  productsOffered?: string[];
+  servicesOffered?: string[];
+  brandVibe?: string; // e.g. "luxurious", "playful", "minimal" — from brand color/font choices or explicit input
 }
 
 export interface GeneratedPage {
@@ -149,16 +153,26 @@ function buildGenerationPrompt(input: StoreGeneratorInput): string {
   const currency = input.currency || "GHS";
   const country = input.country || "Ghana";
 
-  return `You are a professional ecommerce website content writer for African businesses.
+  const contextLines = [
+    `- Store name: "${input.storeName}"`,
+    `- Business type: ${input.businessType}`,
+    `- Description: ${input.description || "Not provided"}`,
+    `- Country: ${country}`,
+    `- Currency: ${currency}`,
+  ];
+  if (input.targetAudience) contextLines.push(`- Target audience: ${input.targetAudience}`);
+  if (input.productsOffered && input.productsOffered.length > 0) contextLines.push(`- Specific products they sell: ${input.productsOffered.join(", ")}`);
+  if (input.servicesOffered && input.servicesOffered.length > 0) contextLines.push(`- Specific services they offer: ${input.servicesOffered.join(", ")}`);
+  if (input.brandVibe) contextLines.push(`- Brand personality/vibe to match: ${input.brandVibe}`);
+
+  return `You are a senior e-commerce brand strategist and copywriter, the kind agencies pay a lot of money for. You're writing the launch content for a real business, not filling in a template. Every line should sound like it was written by someone who actually understands THIS business — never generic, never interchangeable with a competitor's store.
 
 Generate complete website content for this store:
-- Store name: "${input.storeName}"
-- Business type: ${input.businessType}
-- Description: ${input.description || "Not provided"}
-- Country: ${country}
-- Currency: ${currency}
+${contextLines.join("\n")}
 
 Generate content for these 5 pages as a JSON object. Be specific to this business — no generic placeholder text. Write like a real brand, warm and professional. Tailor to the African market (mention local delivery, local payment methods like bank transfer/Paystack, WhatsApp ordering, etc where relevant).
+${input.targetAudience ? `\nWrite specifically FOR ${input.targetAudience} — word choice, tone, and what you emphasize should all speak to that person, not a generic shopper.` : ""}
+${input.productsOffered?.length || input.servicesOffered?.length ? `\nGround the copy in the ACTUAL products/services listed above — reference them specifically in the hero, FAQ, and features rather than describing the business abstractly.` : ""}
 
 Return ONLY valid JSON with this exact structure:
 {
@@ -249,6 +263,9 @@ Rules:
 - Payment section should reference local payment methods
 - Keep tone warm, confident, and trustworthy
 - NO placeholder brackets like [Your Name] — write real content
+- Ban these overused AI-copywriting clichés entirely, they make copy feel fake: "elevate your", "unlock", "unleash", "seamless", "seamlessly", "in today's world", "look no further", "step into", "journey", "game-changing", "revolutionize", "at the end of the day", "whether you're... or...". If you catch yourself about to write one, rewrite the sentence a completely different way.
+- Prefer concrete, specific, sensory detail over abstract claims. "Hand-stitched in Accra using leather sourced from Kumasi" beats "high-quality craftsmanship". Specificity is what makes a store memorable instead of generic.
+- Every headline should sound like it belongs to THIS business and no one else's — if you could paste it onto a competitor's site unchanged, rewrite it.
 - Return ONLY the JSON, no markdown fences, no explanation`;
 }
 
