@@ -70,7 +70,8 @@ export default function VisualEditor({
     redo,
     setDarkMode,
     markSaved,
-    setSaving
+    setSaving,
+    initialize
   } = useEditorStore();
 
   // Initialize editor with page content
@@ -170,6 +171,14 @@ export default function VisualEditor({
     onBack();
   };
 
+  const handleRevert = () => {
+    if (!window.confirm("Revert all changes back to the last saved version? This can't be undone.")) return;
+    initialize(initialContent && typeof initialContent === "object" && Array.isArray(initialContent.elements)
+      ? initialContent
+      : { elements: [], settings: {} }, siteId);
+    markSaved();
+  };
+
   // Handle keyboard shortcuts
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
@@ -215,6 +224,7 @@ export default function VisualEditor({
         pageTitle={pageTitle}
         onBack={handleBack}
         onSave={handleSave}
+        onRevert={handleRevert}
         isSaving={isSaving}
         saveStatus={saveStatus}
         isDirty={isDirty}

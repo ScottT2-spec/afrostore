@@ -5,6 +5,7 @@ import { useSelectedElement, useSelectedElementPath } from "@/lib/visual-editor/
 import { TabType } from "@/lib/visual-editor/types";
 import { Settings, Palette, Sliders, ChevronRight } from "lucide-react";
 import ContentPanel from "@/components/visual-editor/panels/ContentPanel";
+import { PanelErrorBoundary } from "@/components/visual-editor/PanelErrorBoundary";
 import StylePanel from "@/components/visual-editor/panels/StylePanel";
 import AdvancedPanel from "@/components/visual-editor/panels/AdvancedPanel";
 
@@ -108,13 +109,19 @@ export default function RightSidebar() {
       {/* Tab Content */}
       <div className="flex-1 overflow-y-auto p-4">
         {activeTab === "content" && (
-          <ContentPanel element={selectedElement} onUpdate={handleUpdate} />
+          <PanelErrorBoundary panelName="Content" elementType={selectedElement?.type}>
+            <ContentPanel element={selectedElement} onUpdate={handleUpdate} />
+          </PanelErrorBoundary>
         )}
         {activeTab === "style" && (
-          <StylePanel element={selectedElement} onUpdate={handleUpdate} />
+          <PanelErrorBoundary panelName="Style" elementType={selectedElement?.type}>
+            <StylePanel element={selectedElement} onUpdate={handleUpdate} />
+          </PanelErrorBoundary>
         )}
         {activeTab === "advanced" && (
-          <AdvancedPanel element={selectedElement} onUpdate={handleUpdate} />
+          <PanelErrorBoundary panelName="Advanced" elementType={selectedElement?.type}>
+            <AdvancedPanel element={selectedElement} onUpdate={handleUpdate} />
+          </PanelErrorBoundary>
         )}
       </div>
     </aside>

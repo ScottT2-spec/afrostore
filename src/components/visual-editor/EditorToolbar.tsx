@@ -15,13 +15,15 @@ import {
   Loader2,
   Check,
   Globe,
-  EyeOff
+  EyeOff,
+  RotateCcw
 } from "lucide-react";
 
 interface EditorToolbarProps {
   pageTitle: string;
   onBack: () => void;
   onSave: () => void;
+  onRevert: () => void;
   isSaving: boolean;
   saveStatus: "idle" | "saving" | "saved" | "error";
   isDirty: boolean;
@@ -43,6 +45,7 @@ export default function EditorToolbar({
   pageTitle,
   onBack,
   onSave,
+  onRevert,
   isSaving,
   saveStatus,
   isDirty,
@@ -187,6 +190,16 @@ export default function EditorToolbar({
         >
           {isPublished ? <Globe className="h-3.5 w-3.5" /> : <EyeOff className="h-3.5 w-3.5" />}
           {isPublished ? "Published" : "Unpublished"}
+        </button>
+        <button
+          type="button"
+          onClick={onRevert}
+          disabled={!isDirty}
+          title="Revert all changes back to the last saved version"
+          className="inline-flex items-center gap-1.5 px-3 py-2 text-sm font-medium text-gray-600 dark:text-gray-400 hover:text-red-600 dark:hover:text-red-400 disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
+        >
+          <RotateCcw className="h-3.5 w-3.5" />
+          Revert
         </button>
         <button
           type="button"
