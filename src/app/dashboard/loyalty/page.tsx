@@ -134,10 +134,10 @@ export default function LoyaltyPage() {
   const members = program?.members || [];
 
   const statCards = stats ? [
-    { label: "Total Members", value: stats.totalMembers, icon: Users, color: "bg-brand-50 text-brand-600" },
-    { label: "Points Issued", value: stats.totalPointsIssued.toLocaleString(), icon: Star, color: "bg-amber-50 text-amber-600" },
-    { label: "Points Redeemed", value: stats.totalPointsRedeemed.toLocaleString(), icon: Gift, color: "bg-green-50 text-green-600" },
-    { label: "Reward Value", value: `${symbol}${((stats.totalPointsRedeemed * (program?.redemptionRate || 0.01))).toLocaleString()}`, icon: TrendingUp, color: "bg-purple-50 text-purple-600" },
+    { label: "Total Members", value: stats.totalMembers, icon: Users, border: "border-l-brand-500", featured: false },
+    { label: "Points Issued", value: stats.totalPointsIssued.toLocaleString(), icon: Star, border: "border-l-amber-500", featured: false },
+    { label: "Points Redeemed", value: stats.totalPointsRedeemed.toLocaleString(), icon: Gift, border: "border-l-green-500", featured: false },
+    { label: "Reward Value", value: `${symbol}${((stats.totalPointsRedeemed * (program?.redemptionRate || 0.01))).toLocaleString()}`, icon: TrendingUp, border: "", featured: true },
   ] : [];
 
   return (
@@ -181,10 +181,17 @@ export default function LoyaltyPage() {
               {statCards.map((s) => {
                 const Icon = s.icon;
                 return (
-                  <div key={s.label} className="rounded-2xl border border-surface-200 bg-white p-5 hover:shadow-md transition-all">
-                    <div className={`flex h-10 w-10 items-center justify-center rounded-xl mb-3 ${s.color}`}><Icon className="h-5 w-5" /></div>
-                    <div className="text-3xl font-extrabold text-surface-900 font-display tracking-tight">{s.value}</div>
-                    <div className="text-xs text-surface-500 mt-0.5">{s.label}</div>
+                  <div
+                    key={s.label}
+                    className={
+                      s.featured
+                        ? "rounded-2xl bg-brand-900 p-7 text-white transition-all hover:shadow-lg relative overflow-hidden"
+                        : `rounded-2xl border border-surface-200 border-l-4 ${s.border} bg-white p-7 hover:shadow-md transition-all`
+                    }
+                  >
+                    {s.featured && <Icon className="absolute -right-4 -bottom-4 h-28 w-28 text-white/5" strokeWidth={1} />}
+                    <div className={`text-xs font-bold uppercase tracking-wider mb-4 relative ${s.featured ? "text-white/60" : "text-surface-400"}`}>{s.label}</div>
+                    <div className={`text-5xl font-black tracking-tight font-display relative ${s.featured ? "text-white" : "text-surface-900"}`}>{s.value}</div>
                   </div>
                 );
               })}

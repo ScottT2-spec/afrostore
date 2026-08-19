@@ -98,10 +98,10 @@ export default function AgencyPage() {
       {/* Stats */}
       {stats && (
         <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
-          <StatCard icon={Building2} label="Workspaces" value={stats.totalWorkspaces} />
-          <StatCard icon={Globe} label="Total Sites" value={stats.totalSites} />
-          <StatCard icon={Users} label="Team Members" value={stats.totalMembers} />
-          <StatCard icon={BarChart3} label="Plans" value={Object.keys(stats.planCounts).length} />
+          <StatCard icon={Building2} label="Workspaces" value={stats.totalWorkspaces} featured />
+          <StatCard icon={Globe} label="Total Sites" value={stats.totalSites} border="border-l-blue-500" />
+          <StatCard icon={Users} label="Team Members" value={stats.totalMembers} border="border-l-purple-500" />
+          <StatCard icon={BarChart3} label="Plans" value={Object.keys(stats.planCounts).length} border="border-l-accent-500" />
         </div>
       )}
 
@@ -220,11 +220,20 @@ export default function AgencyPage() {
   );
 }
 
-function StatCard({ icon: Icon, label, value }: { icon: typeof Building2; label: string; value: number }) {
+function StatCard({ icon: Icon, label, value, featured, border }: { icon: typeof Building2; label: string; value: number; featured?: boolean; border?: string }) {
+  if (featured) {
+    return (
+      <div className="rounded-2xl bg-brand-900 p-7 text-white relative overflow-hidden">
+        <Icon className="absolute -right-4 -bottom-4 h-28 w-28 text-white/5" strokeWidth={1} />
+        <div className="text-xs font-bold uppercase tracking-wider text-white/60 relative">{label}</div>
+        <p className="text-5xl font-black tracking-tight mt-4 relative">{value}</p>
+      </div>
+    );
+  }
   return (
-    <div className="rounded-xl border border-surface-200 bg-white p-4">
-      <div className="flex items-center gap-2 mb-1"><Icon className="h-4 w-4 text-brand-600" /><span className="text-xs text-surface-500">{label}</span></div>
-      <p className="text-3xl font-extrabold text-surface-900 tracking-tight">{value}</p>
+    <div className={`rounded-2xl border border-surface-200 border-l-4 ${border || "border-l-brand-500"} bg-white p-7`}>
+      <div className="text-xs font-bold uppercase tracking-wider text-surface-400">{label}</div>
+      <p className="text-5xl font-black text-surface-900 tracking-tight mt-4">{value}</p>
     </div>
   );
 }

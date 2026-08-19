@@ -192,15 +192,15 @@ export default function DashboardPage() {
                 key={stat.label}
                 className={
                   isFeatured
-                    ? "rounded-2xl bg-brand-900 p-5 text-white transition-all hover:shadow-lg relative overflow-hidden"
-                    : `rounded-2xl border border-surface-200 border-l-4 ${accentBorder[stat.color]} bg-white p-5 transition-all hover:shadow-md`
+                    ? "rounded-2xl bg-brand-900 p-7 text-white transition-all hover:shadow-lg relative overflow-hidden"
+                    : `rounded-2xl border border-surface-200 border-l-4 ${accentBorder[stat.color]} bg-white p-7 transition-all hover:shadow-md`
                 }
               >
                 {isFeatured && (
-                  <Icon className="absolute -right-3 -bottom-3 h-24 w-24 text-white/5" strokeWidth={1} />
+                  <Icon className="absolute -right-4 -bottom-4 h-28 w-28 text-white/5" strokeWidth={1} />
                 )}
-                <div className="flex items-center justify-between mb-3 relative">
-                  <span className={`text-[11px] font-bold uppercase tracking-wider ${isFeatured ? "text-white/60" : "text-surface-400"}`}>
+                <div className="flex items-center justify-between mb-4 relative">
+                  <span className={`text-xs font-bold uppercase tracking-wider ${isFeatured ? "text-white/60" : "text-surface-400"}`}>
                     {stat.label}
                   </span>
                   {stat.change && (
@@ -210,8 +210,8 @@ export default function DashboardPage() {
                     </div>
                   )}
                 </div>
-                <div className={`text-4xl font-black tracking-tight font-display relative ${isFeatured ? "text-white" : "text-surface-900"}`}>
-                  {loading ? <div className={`h-9 w-24 rounded animate-pulse ${isFeatured ? "bg-white/10" : "bg-surface-100"}`} /> : stat.value}
+                <div className={`text-5xl font-black tracking-tight font-display relative ${isFeatured ? "text-white" : "text-surface-900"}`}>
+                  {loading ? <div className={`h-11 w-28 rounded animate-pulse ${isFeatured ? "bg-white/10" : "bg-surface-100"}`} /> : stat.value}
                 </div>
               </div>
             );

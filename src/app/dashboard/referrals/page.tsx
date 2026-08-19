@@ -213,11 +213,11 @@ export default function ReferralsPage() {
     { label: "Total Commissions", value: `${symbol}${totalEarnings.toLocaleString()}`, icon: DollarSign, color: "accent" },
   ];
 
-  const colorMap: Record<string, string> = {
-    brand: "bg-brand-50 text-brand-600",
-    blue: "bg-blue-50 text-blue-600",
-    purple: "bg-purple-50 text-purple-600",
-    accent: "bg-accent-50 text-accent-600",
+  const accentBorder: Record<string, string> = {
+    brand: "border-l-brand-500",
+    blue: "border-l-blue-500",
+    purple: "border-l-purple-500",
+    accent: "border-l-accent-500",
   };
 
   const statusColors: Record<string, string> = {
@@ -303,15 +303,25 @@ export default function ReferralsPage() {
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
               {stats.map((stat) => {
                 const Icon = stat.icon;
+                const isFeatured = stat.label === "Total Commissions";
                 return (
-                  <div key={stat.label} className="rounded-2xl border border-surface-200 bg-white p-5 transition-all hover:shadow-md">
-                    <div className="flex items-center justify-between mb-3">
-                      <div className={`flex h-10 w-10 items-center justify-center rounded-xl ${colorMap[stat.color]}`}>
-                        <Icon className="h-5 w-5" />
-                      </div>
+                  <div
+                    key={stat.label}
+                    className={
+                      isFeatured
+                        ? "rounded-2xl bg-brand-900 p-7 text-white transition-all hover:shadow-lg relative overflow-hidden"
+                        : `rounded-2xl border border-surface-200 border-l-4 ${accentBorder[stat.color]} bg-white p-7 transition-all hover:shadow-md`
+                    }
+                  >
+                    {isFeatured && (
+                      <Icon className="absolute -right-4 -bottom-4 h-28 w-28 text-white/5" strokeWidth={1} />
+                    )}
+                    <div className={`text-xs font-bold uppercase tracking-wider mb-4 relative ${isFeatured ? "text-white/60" : "text-surface-400"}`}>
+                      {stat.label}
                     </div>
-                    <div className="text-3xl font-extrabold text-surface-900 font-display tracking-tight">{stat.value}</div>
-                    <div className="text-xs text-surface-500 mt-0.5">{stat.label}</div>
+                    <div className={`text-5xl font-black tracking-tight font-display relative ${isFeatured ? "text-white" : "text-surface-900"}`}>
+                      {stat.value}
+                    </div>
                   </div>
                 );
               })}

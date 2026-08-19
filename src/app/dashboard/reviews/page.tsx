@@ -112,20 +112,21 @@ export default function ReviewsPage() {
 
       {/* Stats — always reflect the store's true totals, not just what's loaded below */}
       <div className="grid grid-cols-3 gap-4">
-        <div className="rounded-2xl border border-surface-200 bg-white p-4">
-          <p className="text-xs font-semibold text-surface-500 uppercase">Total Reviews</p>
-          <p className="text-3xl font-extrabold text-surface-900 tracking-tight mt-1">{overallTotal}</p>
+        <div className="rounded-2xl bg-brand-900 p-7 text-white relative overflow-hidden">
+          <Star className="absolute -right-4 -bottom-4 h-28 w-28 text-white/5" strokeWidth={1} />
+          <p className="text-xs font-bold uppercase tracking-wider text-white/60 relative">Total Reviews</p>
+          <p className="text-5xl font-black tracking-tight mt-4 relative">{overallTotal}</p>
         </div>
-        <div className="rounded-2xl border border-surface-200 bg-white p-4">
-          <p className="text-xs font-semibold text-surface-500 uppercase">Average Rating</p>
-          <div className="flex items-center gap-2 mt-1">
-            <p className="text-3xl font-extrabold text-surface-900 tracking-tight">{overallAvgRating ? overallAvgRating.toFixed(1) : "0.0"}</p>
-            <Star className="h-5 w-5 text-accent-400 fill-accent-400" />
+        <div className="rounded-2xl border border-surface-200 border-l-4 border-l-accent-500 bg-white p-7">
+          <p className="text-xs font-bold uppercase tracking-wider text-surface-400">Average Rating</p>
+          <div className="flex items-center gap-2 mt-4">
+            <p className="text-5xl font-black text-surface-900 tracking-tight">{overallAvgRating ? overallAvgRating.toFixed(1) : "0.0"}</p>
+            <Star className="h-6 w-6 text-accent-400 fill-accent-400" />
           </div>
         </div>
-        <div className="rounded-2xl border border-surface-200 bg-white p-4">
-          <p className="text-xs font-semibold text-surface-500 uppercase">Pending</p>
-          <p className="text-3xl font-extrabold text-surface-900 tracking-tight mt-1">{pendingTotal}</p>
+        <div className="rounded-2xl border border-surface-200 border-l-4 border-l-amber-500 bg-white p-7">
+          <p className="text-xs font-bold uppercase tracking-wider text-surface-400">Pending</p>
+          <p className="text-5xl font-black text-surface-900 tracking-tight mt-4">{pendingTotal}</p>
         </div>
       </div>
 

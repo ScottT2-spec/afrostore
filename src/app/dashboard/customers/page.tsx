@@ -219,27 +219,24 @@ export default function CustomersPage() {
       <div className="p-6 space-y-6">
         {/* Stat strip */}
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-          <div className="rounded-2xl border border-surface-200 bg-gradient-to-br from-brand-600 to-brand-700 p-5 text-white relative overflow-hidden">
-            <div className="absolute -right-4 -top-4 h-24 w-24 rounded-full bg-white/10" />
+          <div className="rounded-2xl bg-brand-900 p-7 text-white relative overflow-hidden">
+            <Users className="absolute -right-4 -bottom-4 h-28 w-28 text-white/5" strokeWidth={1} />
             <div className="relative">
-              <div className="flex items-center gap-2 text-white/70 text-xs font-medium mb-2"><Users className="h-3.5 w-3.5" /> Total People</div>
-              <div className="text-2xl font-bold font-display">{total.toLocaleString()}</div>
+              <div className="text-xs font-bold uppercase tracking-wider text-white/60 mb-4">Total People</div>
+              <div className="text-5xl font-black font-display tracking-tight">{total.toLocaleString()}</div>
             </div>
           </div>
-          <div className="rounded-2xl border border-surface-200 bg-white p-5">
-            <div className="flex items-center gap-2 text-surface-500 text-xs font-medium mb-2"><DollarSign className="h-3.5 w-3.5 text-emerald-600" /> Revenue Collected</div>
-            <div className="text-3xl font-extrabold text-surface-900 font-display tracking-tight">{formatCurrency(totalSpentSum, currency)}</div>
+          <div className="rounded-2xl border border-surface-200 border-l-4 border-l-emerald-500 bg-white p-7">
+            <div className="text-xs font-bold uppercase tracking-wider text-surface-400 mb-4">Revenue Collected</div>
+            <div className="text-5xl font-black text-surface-900 font-display tracking-tight">{formatCurrency(totalSpentSum, currency)}</div>
           </div>
-          <div className="rounded-2xl border border-surface-200 bg-white p-5">
-            <div className="flex items-center gap-2 text-surface-500 text-xs font-medium mb-2"><TrendingUp className="h-3.5 w-3.5 text-blue-600" /> Avg Order Value</div>
-            <div className="text-3xl font-extrabold text-surface-900 font-display tracking-tight">{formatCurrency(avgOrderValue || 0, currency)}</div>
+          <div className="rounded-2xl border border-surface-200 border-l-4 border-l-blue-500 bg-white p-7">
+            <div className="text-xs font-bold uppercase tracking-wider text-surface-400 mb-4">Avg Order Value</div>
+            <div className="text-5xl font-black text-surface-900 font-display tracking-tight">{formatCurrency(avgOrderValue || 0, currency)}</div>
           </div>
-          <div className="rounded-2xl border border-surface-200 bg-gradient-to-br from-accent-400 to-accent-500 p-5 text-white relative overflow-hidden">
-            <div className="absolute -right-4 -top-4 h-24 w-24 rounded-full bg-white/10" />
-            <div className="relative">
-              <div className="flex items-center gap-2 text-white/80 text-xs font-medium mb-2"><Crown className="h-3.5 w-3.5" /> VIP Customers</div>
-              <div className="text-2xl font-bold font-display">{vipCount}</div>
-            </div>
+          <div className="rounded-2xl border border-surface-200 border-l-4 border-l-accent-500 bg-white p-7">
+            <div className="text-xs font-bold uppercase tracking-wider text-surface-400 mb-4">VIP Customers</div>
+            <div className="text-5xl font-black text-surface-900 font-display tracking-tight">{vipCount}</div>
           </div>
         </div>
 

@@ -64,10 +64,10 @@ export default function AbandonedCartsPage() {
   };
 
   const statCards = stats ? [
-    { label: "Total Abandoned", value: stats.total, icon: ShoppingCart, color: "bg-red-50 text-red-600" },
-    { label: "Active Carts", value: stats.active, icon: Clock, color: "bg-amber-50 text-amber-600" },
-    { label: "Recovered", value: `${stats.recovered} (${stats.recoveryRate}%)`, icon: RotateCcw, color: "bg-green-50 text-green-600" },
-    { label: "Lost Revenue", value: `${symbol}${(stats.totalValue - stats.recoveredValue).toLocaleString()}`, icon: DollarSign, color: "bg-purple-50 text-purple-600" },
+    { label: "Total Abandoned", value: stats.total, icon: ShoppingCart, border: "border-l-red-500", featured: false },
+    { label: "Active Carts", value: stats.active, icon: Clock, border: "border-l-amber-500", featured: false },
+    { label: "Recovered", value: `${stats.recovered} (${stats.recoveryRate}%)`, icon: RotateCcw, border: "border-l-green-500", featured: false },
+    { label: "Lost Revenue", value: `${symbol}${(stats.totalValue - stats.recoveredValue).toLocaleString()}`, icon: DollarSign, border: "", featured: true },
   ] : [];
 
   const statusColors: Record<string, string> = {
@@ -94,12 +94,17 @@ export default function AbandonedCartsPage() {
             {statCards.map((s) => {
               const Icon = s.icon;
               return (
-                <div key={s.label} className="rounded-2xl border border-surface-200 bg-white p-5 hover:shadow-md transition-all">
-                  <div className={`flex h-10 w-10 items-center justify-center rounded-xl mb-3 ${s.color}`}>
-                    <Icon className="h-5 w-5" />
-                  </div>
-                  <div className="text-3xl font-extrabold text-surface-900 font-display tracking-tight">{s.value}</div>
-                  <div className="text-xs text-surface-500 mt-0.5">{s.label}</div>
+                <div
+                  key={s.label}
+                  className={
+                    s.featured
+                      ? "rounded-2xl bg-brand-900 p-7 text-white transition-all hover:shadow-lg relative overflow-hidden"
+                      : `rounded-2xl border border-surface-200 border-l-4 ${s.border} bg-white p-7 hover:shadow-md transition-all`
+                  }
+                >
+                  {s.featured && <Icon className="absolute -right-4 -bottom-4 h-28 w-28 text-white/5" strokeWidth={1} />}
+                  <div className={`text-xs font-bold uppercase tracking-wider mb-4 relative ${s.featured ? "text-white/60" : "text-surface-400"}`}>{s.label}</div>
+                  <div className={`text-5xl font-black tracking-tight font-display relative ${s.featured ? "text-white" : "text-surface-900"}`}>{s.value}</div>
                 </div>
               );
             })}
