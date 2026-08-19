@@ -128,9 +128,23 @@ export default function LeftSidebar() {
   };
 
   const handleAddWidget = (type: ElementType) => {
+    const findElementByIdDeep = (elements: any[], id: string): any => {
+      for (const el of elements) {
+        if (el.id === id) return el;
+        const nested = el.elements || el.children || el.columns;
+        if (Array.isArray(nested)) {
+          const found = findElementByIdDeep(nested, id);
+          if (found) return found;
+        }
+      }
+      return null;
+    };
     const newElement = createElementFromWidget(type);
     if (!newElement) return;
-    useEditorStore.getState().addElement(newElement);
+    const { pageStructure, selectedElementId } = useEditorStore.getState();
+    const selected = selectedElementId ? findElementByIdDeep(pageStructure.elements, selectedElementId) : null;
+    const canNest = selected && (Array.isArray((selected as any).elements) || Array.isArray((selected as any).children) || Array.isArray((selected as any).columns));
+    useEditorStore.getState().addElement(newElement, canNest ? selected!.id : null);
   };
 
   useEffect(() => {
