@@ -619,14 +619,28 @@ export default function EditorCanvas() {
     e.preventDefault();
     e.stopPropagation();
 
-    const element = createElementFromWidget(rawType as any);
-    if (!element) return;
+    try {
+      const element = createElementFromWidget(rawType as any);
+      if (!element) {
+        console.error("[EditorCanvas] handleCanvasDrop: createElementFromWidget returned nothing for type", rawType);
+        return;
+      }
 
-    const selected = selectedElementId ? findElementById(pageStructure.elements, selectedElementId) : null;
-    const canNest = selected && (Array.isArray(selected.elements) || Array.isArray(selected.children) || Array.isArray(selected.columns));
-    const parentId = canNest ? selected.id : null;
+      const selected = selectedElementId ? findElementById(pageStructure.elements, selectedElementId) : null;
+      const canNest = selected && (Array.isArray(selected.elements) || Array.isArray(selected.children) || Array.isArray(selected.columns));
+      const parentId = canNest ? selected.id : null;
 
-    useEditorStore.getState().addElement(element, parentId);
+      useEditorStore.getState().addElement(element, parentId);
+      // A dropped widget can land far below the fold (e.g. appended to the
+      // end of a long page) with no other feedback that anything happened
+      // — select it and scroll it into view so the drop is never silent.
+      useEditorStore.getState().setSelectedElementId(element.id);
+      requestAnimationFrame(() => {
+        document.querySelector(`[data-editor-node-id="${element.id}"]`)?.scrollIntoView({ behavior: "smooth", block: "center" });
+      });
+    } catch (err) {
+      console.error("[EditorCanvas] handleCanvasDrop failed:", err);
+    }
   };
 
   const handleCanvasPointerMove = (e: React.PointerEvent) => {
