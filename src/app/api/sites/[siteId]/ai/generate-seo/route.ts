@@ -25,7 +25,7 @@ export async function POST(req: NextRequest, { params }: Params) {
     const results: Array<{ id: string; type: string; name: string; metaTitle: string; metaDescription: string }> = [];
 
     if (target === "product" || target === "all") {
-      const where = targetId ? { id: targetId, siteId } : { siteId, OR: [{ metaTitle: null }, { metaDescription: null }] };
+      const where = targetId ? { id: targetId, siteId } : { siteId, OR: [{ metaTitle: null }, { metaTitle: "" }, { metaDescription: null }, { metaDescription: "" }] };
       const products = await prisma.product.findMany({ where: where as any, select: { id: true, name: true, description: true, tags: true }, take: 20 });
 
       if (products.length > 0) {
@@ -47,7 +47,7 @@ Products: ${JSON.stringify(products.map((p) => ({ id: p.id, name: p.name, desc: 
     }
 
     if (target === "page" || target === "all") {
-      const where = targetId ? { id: targetId, siteId } : { siteId, OR: [{ metaTitle: null }, { metaDescription: null }] };
+      const where = targetId ? { id: targetId, siteId } : { siteId, OR: [{ metaTitle: null }, { metaTitle: "" }, { metaDescription: null }, { metaDescription: "" }] };
       const pages = await prisma.page.findMany({ where: where as any, select: { id: true, title: true, type: true }, take: 20 });
 
       if (pages.length > 0) {
@@ -69,7 +69,7 @@ Pages: ${JSON.stringify(pages.map((p) => ({ id: p.id, title: p.title, type: p.ty
     }
 
     if (target === "blog" || target === "all") {
-      const where = targetId ? { id: targetId, siteId } : { siteId, OR: [{ metaTitle: null }, { metaDescription: null }] };
+      const where = targetId ? { id: targetId, siteId } : { siteId, OR: [{ metaTitle: null }, { metaTitle: "" }, { metaDescription: null }, { metaDescription: "" }] };
       const blogs = await prisma.blog.findMany({ where: where as any, select: { id: true, title: true, excerpt: true }, take: 20 });
 
       if (blogs.length > 0) {
