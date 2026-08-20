@@ -552,15 +552,33 @@ function ReviewsSection({ slug, productSlug, initialReviews }: { slug: string; p
 
   return (
     <section id="reviews" className="mt-16 pt-10 border-t border-surface-100">
-      <div className="flex items-center justify-between mb-8">
+      <div className="flex items-center justify-between mb-4">
         <h2 className="text-xl font-bold text-surface-900 font-display">Customer Reviews</h2>
-        <button
-          onClick={() => { setShowForm(!showForm); setSubmitResult(null); }}
-          className="flex items-center gap-2 rounded-xl bg-brand-600 text-white px-5 py-2.5 text-sm font-bold hover:bg-brand-700 transition-all"
-        >
-          <Pencil className="h-4 w-4" /> Write a Review
-        </button>
+        {showForm && (
+          <button
+            onClick={() => { setShowForm(false); setSubmitResult(null); }}
+            className="text-sm font-medium text-surface-500 hover:text-surface-700"
+          >
+            Cancel
+          </button>
+        )}
       </div>
+
+      {/* Tap a star to start your review — no extra "Write a Review" click needed first */}
+      {!showForm && (
+        <button
+          type="button"
+          onClick={() => setShowForm(true)}
+          className="mb-8 flex items-center gap-3 rounded-2xl border border-surface-200 bg-surface-50 px-5 py-4 w-full text-left hover:border-brand-300 hover:bg-brand-50/40 transition-colors"
+        >
+          <InteractiveStars
+            rating={0}
+            onRate={(r) => { setFormRating(r); setShowForm(true); }}
+            size={24}
+          />
+          <span className="text-sm font-semibold text-surface-700">Tap a star to rate this product</span>
+        </button>
+      )}
 
       {/* Write Review Form */}
       {showForm && (

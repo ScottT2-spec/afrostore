@@ -32,6 +32,7 @@ export interface StoredOnboardingDraft {
     products: string;
     services: string;
     targetAudience: string;
+    currency: string;
   };
   selectedTemplate: StoredOnboardingTemplate | null;
   selectedTemplateId: string | null;

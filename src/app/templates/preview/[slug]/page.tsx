@@ -1,6 +1,7 @@
 "use client";
 
 import { useParams } from "next/navigation";
+import { useState, useEffect } from "react";
 import { TEMPLATE_PRESET_MAP } from "@/lib/templates/template-preset-map";
 import { RenderTemplateBlocks } from "@/components/storefront/TemplateBlockRenderer";
 import { getTemplateBySlug } from "@/lib/templates/catalog";
@@ -56,6 +57,45 @@ function getChrome(slug: string): { Header: React.ComponentType<any>; Footer: Re
   return { Header: FashionHeader, Footer: FashionFooter };
 }
 
+// Links inside the preview point at /store/{demoStoreSlug}/... routes that
+// don't exist yet (there's no real site behind "preview") — clicking Shop,
+// Cart, About, etc previously navigated straight into a 404. This wraps the
+// whole preview in one click-interceptor so every template's header/footer
+// links are handled the same way, without touching each one individually:
+// clicking a preview-store link shows a toast instead of navigating, and
+// external/real links (already resolved elsewhere) still work normally.
+function PreviewLinkGuard({ storeSlug, children }: { storeSlug: string; children: React.ReactNode }) {
+  const [toast, setToast] = useState(false);
+
+  useEffect(() => {
+    if (!toast) return;
+    const t = setTimeout(() => setToast(false), 2600);
+    return () => clearTimeout(t);
+  }, [toast]);
+
+  const handleClick = (e: React.MouseEvent) => {
+    const anchor = (e.target as HTMLElement).closest("a");
+    if (!anchor) return;
+    const href = anchor.getAttribute("href") || "";
+    if (href.startsWith(`/store/${storeSlug}`) || href.startsWith(`/store/${storeSlug}/`) || href === `/store/${storeSlug}`) {
+      e.preventDefault();
+      e.stopPropagation();
+      setToast(true);
+    }
+  };
+
+  return (
+    <div onClickCapture={handleClick} className="relative">
+      {children}
+      {toast && (
+        <div className="fixed bottom-6 left-1/2 -translate-x-1/2 z-[200] rounded-full bg-surface-900 text-white text-sm font-medium px-5 py-2.5 shadow-lg animate-fade-in">
+          This link will work once you create your site
+        </div>
+      )}
+    </div>
+  );
+}
+
 export default function TemplatePreviewPage() {
   const { slug } = useParams<{ slug: string }>();
 
@@ -83,33 +123,39 @@ export default function TemplatePreviewPage() {
       { label: "Contact", href: `/store/${demoStoreSlug}/contact` },
     ];
     return (
-      <div className="min-h-screen">
-        <VegetableHeader storeName={demoStoreName} storeSlug={demoStoreSlug} logo={null} navItems={navItems} reservationHref={`/store/${demoStoreSlug}/reservation`} />
-        <RenderTemplateBlocks blocks={blocks as any} />
-        <VegetableFooter storeName={demoStoreName} storeSlug={demoStoreSlug} logo={null} navItems={navItems} />
-      </div>
+      <PreviewLinkGuard storeSlug={demoStoreSlug}>
+        <div className="min-h-screen">
+          <VegetableHeader storeName={demoStoreName} storeSlug={demoStoreSlug} logo={null} navItems={navItems} reservationHref={`/store/${demoStoreSlug}/reservation`} />
+          <RenderTemplateBlocks blocks={blocks as any} />
+          <VegetableFooter storeName={demoStoreName} storeSlug={demoStoreSlug} logo={null} navItems={navItems} />
+        </div>
+      </PreviewLinkGuard>
     );
   }
 
   if (slug === "perfumes") {
     return (
-      <div className="min-h-screen">
-        <PerfumesFontLoader />
-        <PerfumesHeader storeName={demoStoreName} storeSlug={demoStoreSlug} logo={null} />
-        <RenderTemplateBlocks blocks={blocks as any} />
-        <PerfumesFooter storeName={demoStoreName} storeSlug={demoStoreSlug} logo={null} />
-      </div>
+      <PreviewLinkGuard storeSlug={demoStoreSlug}>
+        <div className="min-h-screen">
+          <PerfumesFontLoader />
+          <PerfumesHeader storeName={demoStoreName} storeSlug={demoStoreSlug} logo={null} />
+          <RenderTemplateBlocks blocks={blocks as any} />
+          <PerfumesFooter storeName={demoStoreName} storeSlug={demoStoreSlug} logo={null} />
+        </div>
+      </PreviewLinkGuard>
     );
   }
 
   const chrome = getChrome(slug);
 
   return (
-    <div className="min-h-screen">
-      {chrome?.FontLoader && <chrome.FontLoader />}
-      {chrome && <chrome.Header storeName={demoStoreName} storeSlug={demoStoreSlug} logo={null} isLanding />}
-      <RenderTemplateBlocks blocks={blocks as any} />
-      {chrome && <chrome.Footer storeName={demoStoreName} storeSlug={demoStoreSlug} logo={null} />}
-    </div>
+    <PreviewLinkGuard storeSlug={demoStoreSlug}>
+      <div className="min-h-screen">
+        {chrome?.FontLoader && <chrome.FontLoader />}
+        {chrome && <chrome.Header storeName={demoStoreName} storeSlug={demoStoreSlug} logo={null} isLanding />}
+        <RenderTemplateBlocks blocks={blocks as any} />
+        {chrome && <chrome.Footer storeName={demoStoreName} storeSlug={demoStoreSlug} logo={null} />}
+      </div>
+    </PreviewLinkGuard>
   );
 }

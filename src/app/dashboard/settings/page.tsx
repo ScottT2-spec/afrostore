@@ -9,6 +9,7 @@ import { useSite } from "@/context/StoreContext";
 import { api } from "@/lib/api-client";
 import { useAIPrefill } from "@/hooks/useAIPrefill";
 import AIPrefillBanner from "@/components/dashboard/AIPrefillBanner";
+import { CURRENCY_OPTIONS } from "@/lib/utils";
 
 export default function SettingsPage() {
   const router = useRouter();
@@ -33,6 +34,7 @@ export default function SettingsPage() {
     metaDescription: "",
     googleAnalyticsId: "",
     facebookPixelId: "",
+    currency: "",
   });
 
   useEffect(() => {
@@ -114,6 +116,17 @@ export default function SettingsPage() {
         <div className="rounded-2xl border border-surface-200 bg-white p-6">
           <h3 className="text-base font-bold text-surface-900 mb-4 flex items-center gap-2"><Store className="h-5 w-5" />Store Info</h3>
           <div className="space-y-4">
+            <div>
+              <label className="block text-sm font-medium text-surface-700 mb-1">Currency</label>
+              <select value={settings.currency} onChange={(e) => update("currency", e.target.value)} className="input-field bg-white">
+                {CURRENCY_OPTIONS.map((c) => (
+                  <option key={c.code} value={c.code}>{c.code} — {c.name} ({c.symbol})</option>
+                ))}
+              </select>
+              <p className="mt-1 text-xs text-surface-400">
+                Changing this only changes how prices are labeled — existing prices are not converted to the new currency's value.
+              </p>
+            </div>
             <div>
               <label className="block text-sm font-medium text-surface-700 mb-1">SEO Title</label>
               <input value={settings.metaTitle} onChange={(e) => update("metaTitle", e.target.value)} className="input-field" placeholder="Your Store Name" />

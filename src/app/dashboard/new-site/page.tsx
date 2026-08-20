@@ -8,6 +8,7 @@ import TemplateSelector from '@/components/templates/TemplateSelector';
 import { clearOnboardingDraft, saveOnboardingDraft } from '@/lib/onboarding-draft';
 import { useOnboardingDraft } from '@/hooks/useOnboardingDraft';
 import { useAuth } from '@/context/AuthContext';
+import { CURRENCY_OPTIONS } from '@/lib/utils';
 
 async function parseResponse<T>(response: Response): Promise<T | null> {
   const text = await response.text();
@@ -77,6 +78,7 @@ export default function NewSitePage() {
   const [launchMethod, setLaunchMethod] = useState<string | null>(templateParam ? 'template' : draft?.launchMethod || null);
   const [selectedTemplate, setSelectedTemplate] = useState<ScoredTemplate | null>(asScoredTemplate(draft?.selectedTemplate));
   const [selectedTemplateId, setSelectedTemplateId] = useState<string | null>(templateParam || draft?.selectedTemplateId || null);
+  const [storeCurrency, setStoreCurrency] = useState(draft?.businessDetails.currency || 'NGN');
   const [businessInfo, setBusinessInfo] = useState({
     name: draft?.businessDetails.name || '',
     description: draft?.businessDetails.description || '',
@@ -158,7 +160,7 @@ export default function NewSitePage() {
       siteType,
       industry,
       launchMethod,
-      businessDetails: { ...businessInfo },
+      businessDetails: { ...businessInfo, currency: storeCurrency },
       selectedTemplate,
       selectedTemplateId,
     }, user.id);
@@ -169,6 +171,7 @@ export default function NewSitePage() {
     industry,
     launchMethod,
     businessInfo,
+    storeCurrency,
     selectedTemplate,
     selectedTemplateId,
   ]);
@@ -301,6 +304,7 @@ export default function NewSitePage() {
           description: businessInfo.description,
           logo: businessInfo.logo || null,
           phone: businessInfo.phone,
+          currency: storeCurrency,
           businessType: industry || 'general',
           products: businessInfo.products.split(',').map(item => item.trim()).filter(Boolean),
           services: businessInfo.services.split(',').map(item => item.trim()).filter(Boolean),
@@ -677,6 +681,19 @@ export default function NewSitePage() {
                   className="w-full px-4 py-3 border border-gray-200 rounded-lg focus:ring-2 focus:ring-gray-900 outline-none"
                   placeholder="Lagos, Nigeria"
                 />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1.5">Currency</label>
+                <select
+                  value={storeCurrency}
+                  onChange={e => setStoreCurrency(e.target.value)}
+                  className="w-full px-4 py-3 border border-gray-200 rounded-lg focus:ring-2 focus:ring-gray-900 outline-none bg-white"
+                >
+                  {CURRENCY_OPTIONS.map(c => (
+                    <option key={c.code} value={c.code}>{c.code} — {c.name} ({c.symbol})</option>
+                  ))}
+                </select>
+                <p className="mt-1 text-xs text-gray-400">All your prices will be shown in this currency.</p>
               </div>
 
               {siteType === 'LANDING_PAGE' && (
