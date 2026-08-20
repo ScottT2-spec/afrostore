@@ -145,6 +145,10 @@ export default function LeftSidebar() {
     const selected = selectedElementId ? findElementByIdDeep(pageStructure.elements, selectedElementId) : null;
     const canNest = selected && (Array.isArray((selected as any).elements) || Array.isArray((selected as any).children) || Array.isArray((selected as any).columns));
     useEditorStore.getState().addElement(newElement, canNest ? selected!.id : null);
+    useEditorStore.getState().setSelectedElementId(newElement.id);
+    requestAnimationFrame(() => {
+      document.querySelector(`[data-editor-node-id="${newElement.id}"]`)?.scrollIntoView({ behavior: "smooth", block: "center" });
+    });
   };
 
   useEffect(() => {
