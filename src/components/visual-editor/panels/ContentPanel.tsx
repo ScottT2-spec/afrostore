@@ -3,6 +3,7 @@
 import { isRegisteredTemplateBlock } from "@/components/storefront/TemplateBlockRenderer";
 import { isChildFragmentType } from "@/lib/templates/template-tree";
 import { SingleImageUpload } from "@/components/dashboard/ImageUpload";
+import LinkPicker from "./LinkPicker";
 
 interface ContentPanelProps {
   element: any;
@@ -216,6 +217,12 @@ function TemplatePropEditor({
   // editors were text-only, no upload option at all.
   const isImageField = typeof value !== "boolean" && typeof value !== "number" &&
     /(^|[_-])(src|image|img|avatar|poster|logo|photo|picture|thumbnail|banner|cover|gallery)s?([_-]|\[|$)/i.test(label);
+  // A string field whose key name suggests it holds a navigation
+  // destination (buttonLink, ctaLink, href, url, destination...) — gets
+  // the same page-picker treatment as the hand-built button/image panels,
+  // instead of a bare text box with no way to browse the site's real pages.
+  const isLinkField = typeof value === "string" && !isImageField &&
+    /(^|[_-])(link|href|url|destination)s?([_-]|\[|$)/i.test(label);
 
   return (
     <div className={wrapperClass}>
@@ -261,6 +268,8 @@ function TemplatePropEditor({
             placeholder="Or paste an image URL"
           />
         </div>
+      ) : isLinkField ? (
+        <LinkPicker value={value as string} onChange={(url) => onChange(path, url)} />
       ) : (
         <input
           type="text"
@@ -530,12 +539,9 @@ export default function ContentPanel({ element, onUpdate }: ContentPanelProps) {
             <label className="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1.5">
               Link URL
             </label>
-            <input
-              type="text"
+            <LinkPicker
               value={element.content?.link || element.settings?.link || ""}
-              onChange={(e) => updateSetting("link", e.target.value)}
-              className="w-full px-3 py-2 text-sm border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
-              placeholder="https://"
+              onChange={(url) => updateSetting("link", url)}
             />
           </div>
           <div>
@@ -626,14 +632,9 @@ export default function ContentPanel({ element, onUpdate }: ContentPanelProps) {
             <label htmlFor="image-link" className="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1.5">
               Link URL
             </label>
-            <input
-              id="image-link"
-              name="image-link"
-              type="text"
+            <LinkPicker
               value={element.content?.link || element.settings?.link || ""}
-              onChange={(e) => updateSetting("link", e.target.value)}
-              className="w-full px-3 py-2 text-sm border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
-              placeholder="https://"
+              onChange={(url) => updateSetting("link", url)}
             />
           </div>
         </div>
