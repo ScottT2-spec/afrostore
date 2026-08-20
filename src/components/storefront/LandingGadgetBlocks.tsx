@@ -155,12 +155,12 @@ export function LandingGadgetHero({
             {isEditor ? (
               <EditableCopy blockId={blockId} isEditor field="primaryButtonText" value={primaryButtonText} as="span" style={{ display: "inline-block", padding: "12px 28px", backgroundColor: TOKENS.primaryColor, color: heroTextColor, borderRadius: 4, fontFamily: "'Poppins', sans-serif", fontWeight: 600, fontSize: 14, textDecoration: "none", transition: "opacity .2s" }} />
             ) : (
-              <Link href={resolveStoreLink(primaryButtonLink, storeSlug)} style={{ display: "inline-block", padding: "12px 28px", backgroundColor: TOKENS.primaryColor, color: heroTextColor, borderRadius: 4, fontFamily: "'Poppins', sans-serif", fontWeight: 600, fontSize: 14, textDecoration: "none", transition: "opacity .2s" }}>{primaryButtonText}</Link>
+              <Link href={resolveStoreLink(primaryButtonLink, storeSlug, true)} style={{ display: "inline-block", padding: "12px 28px", backgroundColor: TOKENS.primaryColor, color: heroTextColor, borderRadius: 4, fontFamily: "'Poppins', sans-serif", fontWeight: 600, fontSize: 14, textDecoration: "none", transition: "opacity .2s" }}>{primaryButtonText}</Link>
             )}
             {isEditor ? (
               <EditableCopy blockId={blockId} isEditor field="secondaryButtonText" value={secondaryButtonText} as="span" style={{ display: "inline-block", padding: "12px 28px", backgroundColor: "transparent", color: heroTextColor, border: `2px solid ${heroTextColor}`, borderRadius: 4, fontFamily: "'Poppins', sans-serif", fontWeight: 600, fontSize: 14, textDecoration: "none" }} />
             ) : (
-              <Link href={resolveStoreLink(secondaryButtonLink, storeSlug)} style={{ display: "inline-block", padding: "12px 28px", backgroundColor: "transparent", color: heroTextColor, border: `2px solid ${heroTextColor}`, borderRadius: 4, fontFamily: "'Poppins', sans-serif", fontWeight: 600, fontSize: 14, textDecoration: "none" }}>{secondaryButtonText}</Link>
+              <Link href={resolveStoreLink(secondaryButtonLink, storeSlug, true)} style={{ display: "inline-block", padding: "12px 28px", backgroundColor: "transparent", color: heroTextColor, border: `2px solid ${heroTextColor}`, borderRadius: 4, fontFamily: "'Poppins', sans-serif", fontWeight: 600, fontSize: 14, textDecoration: "none" }}>{secondaryButtonText}</Link>
             )}
           </div>
         </div>
@@ -286,8 +286,8 @@ export function LandingGadgetFeatureSplit({
       )}
       {(primaryButtonText || secondaryButtonText) && (
         <div style={{ display: "flex", gap: 12, flexWrap: "wrap" }}>
-          {primaryButtonText && (isEditor ? <EditableCopy blockId={blockId} isEditor field="primaryButtonText" value={primaryButtonText} as="span" style={{ display: "inline-block", padding: "12px 28px", backgroundColor: TOKENS.primaryColor, color: "#fff", borderRadius: 4, fontFamily: "'Poppins', sans-serif", fontWeight: 600, fontSize: 14, textDecoration: "none" }} /> : <Link href={resolveStoreLink(primaryButtonLink, storeSlug)} style={{ display: "inline-block", padding: "12px 28px", backgroundColor: TOKENS.primaryColor, color: "#fff", borderRadius: 4, fontFamily: "'Poppins', sans-serif", fontWeight: 600, fontSize: 14, textDecoration: "none" }}>{primaryButtonText}</Link>)}
-          {secondaryButtonText && (isEditor ? <EditableCopy blockId={blockId} isEditor field="secondaryButtonText" value={secondaryButtonText} as="span" style={{ display: "inline-block", padding: "12px 28px", backgroundColor: "transparent", color: finalTitleColor, border: "2px solid currentColor", borderRadius: 4, fontFamily: "'Poppins', sans-serif", fontWeight: 600, fontSize: 14, textDecoration: "none" }} /> : <Link href={resolveStoreLink(secondaryButtonLink, storeSlug)} style={{ display: "inline-block", padding: "12px 28px", backgroundColor: "transparent", color: finalTitleColor, border: "2px solid currentColor", borderRadius: 4, fontFamily: "'Poppins', sans-serif", fontWeight: 600, fontSize: 14, textDecoration: "none" }}>{secondaryButtonText}</Link>)}
+          {primaryButtonText && (isEditor ? <EditableCopy blockId={blockId} isEditor field="primaryButtonText" value={primaryButtonText} as="span" style={{ display: "inline-block", padding: "12px 28px", backgroundColor: TOKENS.primaryColor, color: "#fff", borderRadius: 4, fontFamily: "'Poppins', sans-serif", fontWeight: 600, fontSize: 14, textDecoration: "none" }} /> : <Link href={resolveStoreLink(primaryButtonLink, storeSlug, true)} style={{ display: "inline-block", padding: "12px 28px", backgroundColor: TOKENS.primaryColor, color: "#fff", borderRadius: 4, fontFamily: "'Poppins', sans-serif", fontWeight: 600, fontSize: 14, textDecoration: "none" }}>{primaryButtonText}</Link>)}
+          {secondaryButtonText && (isEditor ? <EditableCopy blockId={blockId} isEditor field="secondaryButtonText" value={secondaryButtonText} as="span" style={{ display: "inline-block", padding: "12px 28px", backgroundColor: "transparent", color: finalTitleColor, border: "2px solid currentColor", borderRadius: 4, fontFamily: "'Poppins', sans-serif", fontWeight: 600, fontSize: 14, textDecoration: "none" }} /> : <Link href={resolveStoreLink(secondaryButtonLink, storeSlug, true)} style={{ display: "inline-block", padding: "12px 28px", backgroundColor: "transparent", color: finalTitleColor, border: "2px solid currentColor", borderRadius: 4, fontFamily: "'Poppins', sans-serif", fontWeight: 600, fontSize: 14, textDecoration: "none" }}>{secondaryButtonText}</Link>)}
         </div>
       )}
     </div>
@@ -354,7 +354,7 @@ export function LandingGadgetDarkFeature({
         <div style={{ flex: "1 1 40%", minWidth: 280, padding: "80px 0" }}>
           <EditableCopy blockId={blockId} isEditor={isEditor} field="title" value={title} as="h2" multiline style={{ fontFamily: "'Poppins', sans-serif", fontSize: 44, fontWeight: 700, lineHeight: 1.23, color: "#fff", margin: "0 0 20px", whiteSpace: "pre-line" }} />
           <EditableCopy blockId={blockId} isEditor={isEditor} field="description" value={description} as="p" multiline style={{ fontFamily: "'Inter', sans-serif", fontSize: 16, lineHeight: 1.625, color: "rgba(255,255,255,0.7)", maxWidth: 480, marginBottom: 24 }} />
-          {isEditor ? <EditableCopy blockId={blockId} isEditor field="buttonText" value={buttonText} as="span" style={{ display: "inline-block", padding: "12px 28px", backgroundColor: "transparent", color: "#fff", border: "2px solid #fff", borderRadius: 4, fontFamily: "'Poppins', sans-serif", fontWeight: 600, fontSize: 14, textDecoration: "none" }} /> : <Link href={resolveStoreLink(buttonLink, storeSlug)} style={{ display: "inline-block", padding: "12px 28px", backgroundColor: "transparent", color: "#fff", border: "2px solid #fff", borderRadius: 4, fontFamily: "'Poppins', sans-serif", fontWeight: 600, fontSize: 14, textDecoration: "none" }}>{buttonText}</Link>}
+          {isEditor ? <EditableCopy blockId={blockId} isEditor field="buttonText" value={buttonText} as="span" style={{ display: "inline-block", padding: "12px 28px", backgroundColor: "transparent", color: "#fff", border: "2px solid #fff", borderRadius: 4, fontFamily: "'Poppins', sans-serif", fontWeight: 600, fontSize: 14, textDecoration: "none" }} /> : <Link href={resolveStoreLink(buttonLink, storeSlug, true)} style={{ display: "inline-block", padding: "12px 28px", backgroundColor: "transparent", color: "#fff", border: "2px solid #fff", borderRadius: 4, fontFamily: "'Poppins', sans-serif", fontWeight: 600, fontSize: 14, textDecoration: "none" }}>{buttonText}</Link>}
         </div>
         <div style={{ flex: "1 1 50%", minWidth: 280, textAlign: "center" }}>
           <img src={safeSrc(overlayImage)} alt="Feature" onError={onImgError} style={{ maxWidth: "100%", height: "auto" }} />
@@ -414,8 +414,8 @@ export function LandingGadgetPhotoGallery({
       <EditableCopy blockId={blockId} isEditor={isEditor} field="title" value={title} as="h2" multiline style={{ fontFamily: "'Poppins', sans-serif", fontSize: 44, fontWeight: 700, lineHeight: 1.23, color: TOKENS.titleColor, margin: "0 0 20px", whiteSpace: "pre-line" }} />
       <EditableCopy blockId={blockId} isEditor={isEditor} field="description" value={description} as="p" multiline style={{ fontFamily: "'Inter', sans-serif", fontSize: 16, lineHeight: 1.625, color: TOKENS.textColor, maxWidth: 480, marginBottom: 24 }} />
       <div style={{ display: "flex", gap: 12, flexWrap: "wrap" }}>
-        {primaryButtonText && (isEditor ? <EditableCopy blockId={blockId} isEditor field="primaryButtonText" value={primaryButtonText} as="span" style={{ display: "inline-block", padding: "12px 28px", backgroundColor: TOKENS.primaryColor, color: "#fff", borderRadius: 4, fontFamily: "'Poppins', sans-serif", fontWeight: 600, fontSize: 14, textDecoration: "none" }} /> : <Link href={resolveStoreLink(primaryButtonLink, storeSlug)} style={{ display: "inline-block", padding: "12px 28px", backgroundColor: TOKENS.primaryColor, color: "#fff", borderRadius: 4, fontFamily: "'Poppins', sans-serif", fontWeight: 600, fontSize: 14, textDecoration: "none" }}>{primaryButtonText}</Link>)}
-        {secondaryButtonText && (isEditor ? <EditableCopy blockId={blockId} isEditor field="secondaryButtonText" value={secondaryButtonText} as="span" style={{ display: "inline-block", padding: "12px 28px", backgroundColor: "transparent", color: TOKENS.titleColor, border: "2px solid currentColor", borderRadius: 4, fontFamily: "'Poppins', sans-serif", fontWeight: 600, fontSize: 14, textDecoration: "none" }} /> : <Link href={resolveStoreLink(secondaryButtonLink, storeSlug)} style={{ display: "inline-block", padding: "12px 28px", backgroundColor: "transparent", color: TOKENS.titleColor, border: "2px solid currentColor", borderRadius: 4, fontFamily: "'Poppins', sans-serif", fontWeight: 600, fontSize: 14, textDecoration: "none" }}>{secondaryButtonText}</Link>)}
+        {primaryButtonText && (isEditor ? <EditableCopy blockId={blockId} isEditor field="primaryButtonText" value={primaryButtonText} as="span" style={{ display: "inline-block", padding: "12px 28px", backgroundColor: TOKENS.primaryColor, color: "#fff", borderRadius: 4, fontFamily: "'Poppins', sans-serif", fontWeight: 600, fontSize: 14, textDecoration: "none" }} /> : <Link href={resolveStoreLink(primaryButtonLink, storeSlug, true)} style={{ display: "inline-block", padding: "12px 28px", backgroundColor: TOKENS.primaryColor, color: "#fff", borderRadius: 4, fontFamily: "'Poppins', sans-serif", fontWeight: 600, fontSize: 14, textDecoration: "none" }}>{primaryButtonText}</Link>)}
+        {secondaryButtonText && (isEditor ? <EditableCopy blockId={blockId} isEditor field="secondaryButtonText" value={secondaryButtonText} as="span" style={{ display: "inline-block", padding: "12px 28px", backgroundColor: "transparent", color: TOKENS.titleColor, border: "2px solid currentColor", borderRadius: 4, fontFamily: "'Poppins', sans-serif", fontWeight: 600, fontSize: 14, textDecoration: "none" }} /> : <Link href={resolveStoreLink(secondaryButtonLink, storeSlug, true)} style={{ display: "inline-block", padding: "12px 28px", backgroundColor: "transparent", color: TOKENS.titleColor, border: "2px solid currentColor", borderRadius: 4, fontFamily: "'Poppins', sans-serif", fontWeight: 600, fontSize: 14, textDecoration: "none" }}>{secondaryButtonText}</Link>)}
       </div>
     </div>
   );
@@ -661,7 +661,7 @@ export function LandingGadgetProductsShowcase({
       <div style={{ maxWidth: 1200, margin: "0 auto", display: "flex", flexWrap: "wrap" }}>
         {products.map((p, i) => (
           <div key={i} style={{ flex: "1 1 25%", minWidth: 220, backgroundColor: TOKENS.bgDarkGray, marginBottom: 14, borderLeft: `7px solid ${TOKENS.borderColor}`, borderRight: `7px solid ${TOKENS.borderColor}`, padding: 20 }}>
-            <Link href={resolveStoreLink(p.link || "#", storeSlug)} style={{ textDecoration: "none" }}>
+            <Link href={resolveStoreLink(p.link || "#", storeSlug, true)} style={{ textDecoration: "none" }}>
               <img src={safeSrc(p.image)} alt={p.name} onError={onImgError} style={{ width: "100%", height: "auto", marginBottom: 12 }} />
               <EditableCopy blockId={blockId} isEditor={isEditor} fieldPath={`products.${i}.name`} value={p.name} as="h3" style={{ fontFamily: "'Poppins', sans-serif", fontSize: 16, fontWeight: 600, color: TOKENS.titleColor, margin: "0 0 4px" }} />
               {p.category && <EditableCopy blockId={blockId} isEditor={isEditor} fieldPath={`products.${i}.category`} value={toDisplayText(p.category, "")} as="p" style={{ fontFamily: "'Inter', sans-serif", fontSize: 12, color: TOKENS.textColor, margin: "0 0 8px" }} />}
@@ -671,7 +671,7 @@ export function LandingGadgetProductsShowcase({
         ))}
         {/* Accessories banner */}
         <div style={{ flex: "1 1 50%", minWidth: 280, position: "relative", overflow: "hidden", marginBottom: 14, borderLeft: `7px solid ${TOKENS.borderColor}`, borderRight: `7px solid ${TOKENS.borderColor}` }}>
-          <Link href={resolveStoreLink(bannerButtonLink, storeSlug)} style={{ display: "block", textDecoration: "none" }}>
+          <Link href={resolveStoreLink(bannerButtonLink, storeSlug, true)} style={{ display: "block", textDecoration: "none" }}>
             <img src={safeSrc(bannerImage)} alt={bannerTitle} onError={onImgError} style={{ width: "100%", height: "100%", objectFit: "cover" }} />
             <div style={{ position: "absolute", bottom: 30, left: 30 }}>
               <EditableCopy blockId={blockId} isEditor={isEditor} field="bannerTitle" value={bannerTitle} as="h3" style={{ fontFamily: "'Poppins', sans-serif", fontSize: 28, fontWeight: 700, color: "#222", margin: "0 0 10px" }} />
@@ -801,7 +801,7 @@ export function LandingGadgetFooter({
               {isEditor ? (
                 <EditableCopy blockId={blockId} isEditor fieldPath={`links.${i}.label`} value={l.label} as="span" style={{ fontFamily: "'Inter', sans-serif", fontSize: 13, color: "rgba(255,255,255,0.6)", textDecoration: "none" }} />
               ) : (
-                <Link href={resolveStoreLink(l.href, storeSlug)} style={{ fontFamily: "'Inter', sans-serif", fontSize: 13, color: "rgba(255,255,255,0.6)", textDecoration: "none" }}>{l.label}</Link>
+                <Link href={resolveStoreLink(l.href, storeSlug, true)} style={{ fontFamily: "'Inter', sans-serif", fontSize: 13, color: "rgba(255,255,255,0.6)", textDecoration: "none" }}>{l.label}</Link>
               )}
             </React.Fragment>
           ))}

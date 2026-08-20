@@ -17,8 +17,13 @@ const coerceLink = (link: unknown): string => {
   return "";
 };
 
-/** Resolve any link to a proper store-scoped path */
-export function resolveStoreLink(link: unknown, storeSlug: string | null | undefined): string {
+/** Resolve any link to a proper store-scoped path.
+ * isLandingOnly: for templates with no real shop/product catalog (Aegis,
+ * Landing Gadget, Prokip Agent, Prokip Booking) — an unresolved "#"
+ * placeholder should stay a no-op instead of defaulting to /shop, since
+ * that page won't have anything meaningful on it for these sites.
+ */
+export function resolveStoreLink(link: unknown, storeSlug: string | null | undefined, isLandingOnly = false): string {
   const normalized = coerceLink(link).trim();
 
   // External links pass through
@@ -34,8 +39,9 @@ export function resolveStoreLink(link: unknown, storeSlug: string | null | undef
 
   const base = `/store/${storeSlug}`;
 
-  // Null, empty, or "#" → shop page
-   if (!normalized || normalized === "#") return `${base}/shop`;
+  // Null, empty, or "#" — landing-only templates stay a no-op; everything
+  // else (real e-commerce templates) defaults to the shop page.
+  if (!normalized || normalized === "#") return isLandingOnly ? "#" : `${base}/shop`;
 
   // Strip leading slash for uniform handling
   const clean = normalized.startsWith("/") ? normalized.slice(1) : normalized;

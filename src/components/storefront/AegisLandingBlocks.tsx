@@ -15,7 +15,7 @@ import { InlineEditableText } from "@/components/storefront/InlineEditableText";
 interface AegisContextData { storeSlug?: string; }
 const AegisCtx = createContext<AegisContextData>({});
 export { AegisCtx as AegisLandingContext };
-function useFix() { const ctx = useContext(AegisCtx); return (l: string) => resolveStoreLink(l, ctx?.storeSlug); }
+function useFix() { const ctx = useContext(AegisCtx); return (l: string) => resolveStoreLink(l, ctx?.storeSlug, true); }
 
 /* ─── Design Tokens ────────────────────────────────────────── */
 const C = {

@@ -35,7 +35,7 @@ const T = {
 interface ProkipAgentCtxData { storeSlug?: string; }
 const ProkipAgentCtx = createContext<ProkipAgentCtxData>({});
 export { ProkipAgentCtx as ProkipAgentLandingContext };
-function useFix() { const ctx = useContext(ProkipAgentCtx); return (l: string) => resolveStoreLink(l, ctx?.storeSlug); }
+function useFix() { const ctx = useContext(ProkipAgentCtx); return (l: string) => resolveStoreLink(l, ctx?.storeSlug, true); }
 
 /* ─── Font Loader ──────────────────────────────────────────── */
 export function ProkipAgentFontLoader() {
