@@ -70,8 +70,7 @@ export default function VisualEditor({
     redo,
     setDarkMode,
     markSaved,
-    setSaving,
-    initialize
+    setSaving
   } = useEditorStore();
 
   // Initialize editor with page content
