@@ -9,6 +9,7 @@ import { clearOnboardingDraft, saveOnboardingDraft } from '@/lib/onboarding-draf
 import { useOnboardingDraft } from '@/hooks/useOnboardingDraft';
 import { useAuth } from '@/context/AuthContext';
 import { CURRENCY_OPTIONS } from '@/lib/utils';
+import { SingleImageUpload } from '@/components/dashboard/ImageUpload';
 
 async function parseResponse<T>(response: Response): Promise<T | null> {
   const text = await response.text();
@@ -591,6 +592,15 @@ export default function NewSitePage() {
                   onChange={e => setBusinessInfo(prev => ({ ...prev, name: e.target.value }))}
                   className="w-full px-4 py-3 border border-gray-200 rounded-lg focus:ring-2 focus:ring-gray-900 outline-none"
                   placeholder="e.g. Prokip Technologies"
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1.5">Logo <span className="text-gray-400 font-normal">(optional)</span></label>
+                <SingleImageUpload
+                  image={businessInfo.logo || null}
+                  onChange={(url) => setBusinessInfo(prev => ({ ...prev, logo: url || "" }))}
+                  label="Upload your logo"
+                  compact
                 />
               </div>
               <div>

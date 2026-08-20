@@ -215,7 +215,7 @@ function TemplatePropEditor({
   // so without this, image fields anywhere outside the 5 hand-built
   // editors were text-only, no upload option at all.
   const isImageField = typeof value !== "boolean" && typeof value !== "number" &&
-    /(^|[_-])(src|image|img|avatar|poster|logo|photo|picture|thumbnail|banner|cover)([_-]|$)/i.test(label);
+    /(^|[_-])(src|image|img|avatar|poster|logo|photo|picture|thumbnail|banner|cover|gallery)s?([_-]|\[|$)/i.test(label);
 
   return (
     <div className={wrapperClass}>
