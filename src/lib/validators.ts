@@ -159,10 +159,14 @@ export const createCouponSchema = z.object({
   code: z.string().min(1).max(50).transform((v) => v.toUpperCase()),
   type: z.enum(["PERCENTAGE", "FIXED", "FREE_SHIPPING"]),
   value: z.number().positive(),
-  minOrderAmount: z.number().positive().optional(),
-  maxUses: z.number().int().positive().optional(),
-  startsAt: z.string().datetime().optional(),
-  expiresAt: z.string().datetime().optional(),
+  // The create-coupon form always sends these three as `null` when left
+  // blank (the normal case for a simple coupon), not omitted — .optional()
+  // alone rejects null, so every coupon without a min order / max uses /
+  // expiry silently failed validation. .nullable() fixes that.
+  minOrderAmount: z.number().positive().nullable().optional(),
+  maxUses: z.number().int().positive().nullable().optional(),
+  startsAt: z.string().datetime().nullable().optional(),
+  expiresAt: z.string().datetime().nullable().optional(),
 });
 
 // ─── DELIVERY ZONES ─────────────────────────────────────────

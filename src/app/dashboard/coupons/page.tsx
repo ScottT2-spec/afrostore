@@ -32,6 +32,7 @@ export default function CouponsPage() {
   const [editingId, setEditingId] = useState<string | null>(null);
   const [saving, setSaving] = useState(false);
   const [copied, setCopied] = useState<string | null>(null);
+  const [formError, setFormError] = useState<string | null>(null);
   const [form, setForm] = useState({
     code: "", type: "PERCENTAGE" as Coupon["type"], value: 10,
     minOrderAmount: "", maxUses: "", expiresAt: "", isActive: true,
@@ -71,6 +72,7 @@ export default function CouponsPage() {
     setForm({ code: "", type: "PERCENTAGE", value: 10, minOrderAmount: "", maxUses: "", expiresAt: "", isActive: true });
     setEditingId(null);
     setShowForm(false);
+    setFormError(null);
   };
 
   const startEdit = (c: Coupon) => {
@@ -95,6 +97,7 @@ export default function CouponsPage() {
   const handleSave = async () => {
     if (!currentStore || !form.code.trim()) return;
     setSaving(true);
+    setFormError(null);
     const body = {
       code: form.code.toUpperCase(),
       type: form.type,
@@ -104,12 +107,19 @@ export default function CouponsPage() {
       expiresAt: form.expiresAt ? new Date(form.expiresAt).toISOString() : null,
       isActive: form.isActive,
     };
-    if (editingId) {
-      await api.patch(`/api/sites/${currentStore.id}/coupons`, { id: editingId, ...body });
-    } else {
-      await api.post(`/api/sites/${currentStore.id}/coupons`, body);
-    }
+    // Previously this never checked res.error, so a failed save (bad
+    // validation, duplicate code, etc.) would still close the form and
+    // refetch — the coupon just silently wasn't there. Now it stays open
+    // and shows what went wrong.
+    const res = editingId
+      ? await api.patch<any>(`/api/sites/${currentStore.id}/coupons`, { id: editingId, ...body })
+      : await api.post<any>(`/api/sites/${currentStore.id}/coupons`, body);
     setSaving(false);
+    if (res.error) {
+      const fieldErrors = res.details && typeof res.details === "object" ? Object.values(res.details as Record<string, string[]>).flat() : [];
+      setFormError(fieldErrors.length ? fieldErrors.join(", ") : res.error);
+      return;
+    }
     if (isAIPrefilled) {
       onSaveComplete(editingId ? "Coupon updated!" : "Coupon created!");
       return;
@@ -158,6 +168,9 @@ export default function CouponsPage() {
       {showForm && (
         <div className="rounded-2xl border border-surface-200 bg-white p-5">
           <h3 className="text-sm font-bold text-surface-900 mb-3">{editingId ? "Edit Coupon" : "New Coupon"}</h3>
+          {formError && (
+            <div className="mb-3 rounded-lg bg-red-50 border border-red-200 px-3 py-2 text-sm text-red-700">{formError}</div>
+          )}
           <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
             <div className="relative">
               <input value={form.code} onChange={(e) => setForm({ ...form, code: e.target.value.toUpperCase() })} placeholder="CODE" className="input-field py-2.5 font-mono uppercase" autoFocus />
