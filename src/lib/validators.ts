@@ -175,8 +175,17 @@ export const createDeliveryZoneSchema = z.object({
   name: z.string().min(1).max(100),
   areas: z.array(z.string()).min(1),
   fee: z.number().min(0),
-  freeAbove: z.number().positive().optional(),
-  estimatedDays: z.string().optional(),
+  freeAbove: z.number().positive().nullable().optional(),
+  estimatedDays: z.string().nullable().optional(),
+});
+
+export const updateDeliveryZoneSchema = z.object({
+  name: z.string().min(1).max(100).optional(),
+  areas: z.array(z.string()).min(1).optional(),
+  fee: z.number().min(0).optional(),
+  freeAbove: z.number().positive().nullable().optional(),
+  estimatedDays: z.string().nullable().optional(),
+  isActive: z.boolean().optional(),
 });
 
 // ─── PAYMENT GATEWAYS ───────────────────────────────────────

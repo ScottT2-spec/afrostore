@@ -93,12 +93,11 @@ export default function DeliveryPage() {
       estimatedDays: form.estimatedDays || null,
       isActive: form.isActive,
     };
-    if (editingId) {
-      await api.patch(`/api/sites/${currentStore.id}/delivery-zones`, { id: editingId, ...body });
-    } else {
-      await api.post(`/api/sites/${currentStore.id}/delivery-zones`, body);
-    }
+    const res = editingId
+      ? await api.patch(`/api/sites/${currentStore.id}/delivery-zones`, { id: editingId, ...body })
+      : await api.post(`/api/sites/${currentStore.id}/delivery-zones`, body);
     setSaving(false);
+    if (!res.success) { alert(res.error || "Failed to save delivery zone"); return; }
     resetForm();
     fetchZones();
     if (isFromAI) { clearPrefill(); router.push("/dashboard/ai"); }
@@ -106,7 +105,8 @@ export default function DeliveryPage() {
 
   const handleDelete = async (id: string) => {
     if (!currentStore || !confirm("Delete this delivery zone?")) return;
-    await api.delete(`/api/sites/${currentStore.id}/delivery-zones?id=${id}`);
+    const res = await api.delete(`/api/sites/${currentStore.id}/delivery-zones?id=${id}`);
+    if (!res.success) { alert(res.error || "Failed to delete delivery zone"); return; }
     setZones((prev) => prev.filter((z) => z.id !== id));
   };
 
