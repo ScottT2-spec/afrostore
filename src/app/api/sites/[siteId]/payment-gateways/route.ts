@@ -1,4 +1,5 @@
 import { NextRequest } from "next/server";
+import { z } from "zod";
 import { prisma } from "@/lib/db";
 import { getStoreContext, success, error, validationError, logAudit, requireRole } from "@/lib/api-helpers";
 import { setupPaymentGatewaySchema } from "@/lib/validators";
@@ -120,4 +121,38 @@ export async function POST(req: NextRequest, { params }: Params) {
     isEnabled: gateway.isEnabled,
     publicKey: gateway.publicKey,
   }, 201);
+}
+
+// PATCH /api/sites/:siteId/payment-gateways — toggle a gateway on/off without touching credentials
+const toggleGatewaySchema = z.object({
+  id: z.string().min(1),
+  isEnabled: z.boolean(),
+});
+
+export async function PATCH(req: NextRequest, { params }: Params) {
+  const { siteId } = await params;
+  const ctx = await getStoreContext(req, siteId);
+  if (ctx.error) return ctx.user ? error(ctx.error, 403) : unauthorized();
+  const roleErr = requireRole(ctx, "ADMIN");
+  if (roleErr) return roleErr;
+
+  const body = await req.json();
+  const parsed = toggleGatewaySchema.safeParse(body);
+  if (!parsed.success) return validationError(parsed.error.flatten().fieldErrors);
+
+  const existing = await prisma.paymentGateway.findFirst({ where: { id: parsed.data.id, siteId } });
+  if (!existing) return error("Payment gateway not found", 404);
+
+  const gateway = await prisma.paymentGateway.update({
+    where: { id: parsed.data.id },
+    data: { isEnabled: parsed.data.isEnabled },
+  });
+
+  await logAudit({
+    siteId, userId: ctx.user!.id,
+    action: "UPDATE", entity: "payment_gateway", entityId: gateway.id,
+    before: { isEnabled: existing.isEnabled }, after: { isEnabled: gateway.isEnabled },
+  });
+
+  return success({ id: gateway.id, provider: gateway.provider, isEnabled: gateway.isEnabled });
 }

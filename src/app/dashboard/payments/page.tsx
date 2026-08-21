@@ -39,6 +39,7 @@ export default function PaymentsPage() {
   const [baseUrl, setBaseUrl] = useState("");
   const [saving, setSaving] = useState(false);
   const [setupError, setSetupError] = useState("");
+  const [togglingId, setTogglingId] = useState<string | null>(null);
 
   useEffect(() => {
     if (!currentStore) return;
@@ -48,6 +49,15 @@ export default function PaymentsPage() {
       setLoading(false);
     })();
   }, [currentStore]);
+
+  const toggleGateway = async (id: string, isEnabled: boolean) => {
+    if (!currentStore) return;
+    setTogglingId(id);
+    const res = await api.patch<{ id: string; isEnabled: boolean }>(`/api/sites/${currentStore.id}/payment-gateways`, { id, isEnabled });
+    setTogglingId(null);
+    if (!res.success) { alert(res.error || "Failed to update gateway"); return; }
+    setGateways((prev) => prev.map((g) => (g.id === id ? { ...g, isEnabled } : g)));
+  };
 
   const resetForm = () => {
     setSetupProvider(null);
@@ -133,11 +143,12 @@ export default function PaymentsPage() {
         {["MONNIFY", "PAYSTACK", "FLUTTERWAVE"].map((provider) => {
           const info = providerInfo[provider];
           const gw = gateways.find((g) => g.provider === provider);
-          const connected = gw?.isEnabled;
+          const configured = !!gw;
+          const enabled = gw?.isEnabled ?? false;
 
           return (
             <div key={provider} className="rounded-2xl border border-surface-200 bg-white p-6">
-              <div className="flex items-center justify-between">
+              <div className="flex items-center justify-between flex-wrap gap-3">
                 <div className="flex items-center gap-4">
                   <div className={`h-12 w-12 rounded-xl bg-gradient-to-br ${info.color} flex items-center justify-center text-white`}>
                     <CreditCard className="h-6 w-6" />
@@ -148,11 +159,21 @@ export default function PaymentsPage() {
                   </div>
                 </div>
                 <div className="flex items-center gap-3">
-                  {connected ? (
+                  {configured ? (
                     <>
-                      <span className="inline-flex items-center gap-1.5 rounded-full bg-green-50 border border-green-200 px-3 py-1 text-xs font-semibold text-green-700">
-                        <CheckCircle2 className="h-3.5 w-3.5" /> Connected
+                      <span className={`inline-flex items-center gap-1.5 rounded-full border px-3 py-1 text-xs font-semibold ${enabled ? "bg-green-50 border-green-200 text-green-700" : "bg-surface-100 border-surface-200 text-surface-500"}`}>
+                        <CheckCircle2 className="h-3.5 w-3.5" /> {enabled ? "Connected" : "Disabled"}
                       </span>
+                      <button
+                        role="switch"
+                        aria-checked={enabled}
+                        onClick={() => toggleGateway(gw!.id, !enabled)}
+                        disabled={togglingId === gw!.id}
+                        title={enabled ? "Disable this gateway" : "Enable this gateway"}
+                        className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors disabled:opacity-50 ${enabled ? "bg-green-600" : "bg-surface-300"}`}
+                      >
+                        <span className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${enabled ? "translate-x-6" : "translate-x-1"}`} />
+                      </button>
                       <button onClick={() => openSetup(provider)} className="btn-secondary text-xs py-2 px-4">
                         Edit
                       </button>
@@ -164,12 +185,17 @@ export default function PaymentsPage() {
                   )}
                 </div>
               </div>
-              {connected && provider === "MONNIFY" && !gw?.config?.contractCode && (
+              {!enabled && configured && (
+                <p className="mt-3 text-xs text-surface-500">
+                  This gateway is disabled — customers won't see it as a payment option at checkout. Your credentials are kept, so you can re-enable it anytime.
+                </p>
+              )}
+              {configured && provider === "MONNIFY" && !gw?.config?.contractCode && (
                 <p className="mt-3 text-xs text-amber-600">
                   Contract code missing — checkout will fail until this is set. Click Edit to add it.
                 </p>
               )}
-              {connected && !gw?.hasWebhookSecret && (
+              {configured && !gw?.hasWebhookSecret && (
                 <p className="mt-3 text-xs text-amber-600">
                   {provider === "FLUTTERWAVE"
                     ? "No webhook secret hash set — payment confirmations may be delayed or missed. Click Edit to add one."
