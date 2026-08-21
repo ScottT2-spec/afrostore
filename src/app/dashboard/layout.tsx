@@ -106,7 +106,7 @@ export default function DashboardLayout({
 }
 
 /** Pages that work without a site selected */
-const NO_SITE_PAGES = ["/dashboard/workspaces", "/dashboard/new-site", "/dashboard/agency", "/dashboard/billing", "/dashboard/settings", "/dashboard/support", "/dashboard/sites"];
+const NO_SITE_PAGES = ["/dashboard/workspaces", "/dashboard/new-site", "/dashboard/agency", "/dashboard/billing", "/dashboard/settings", "/dashboard/support", "/dashboard/sites", "/dashboard/profile"];
 
 function SiteGate({ children }: { children: React.ReactNode }) {
   const { currentStore, loading } = useSite();
