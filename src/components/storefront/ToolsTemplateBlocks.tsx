@@ -23,7 +23,6 @@ const TOKENS = {
   bodyFont: "'Roboto', Arial, sans-serif",
 };
 
-const IMG = "https://prokip.xtemos.com/wp-content/uploads";
 
 const containerStyle: React.CSSProperties = {
   maxWidth: TOKENS.containerWidth,
@@ -75,10 +74,10 @@ export interface ToolsGridBannersProps {
 export function ToolsGridBanners({ banners = [] }: ToolsGridBannersProps) {
   const storeSlug = useStoreSlug();
   const defaultBanners: ToolsBannerItem[] = [
-    { image: `${IMG}/2020/06/wood-tools-grid-banner-1-opt.jpg`, label: "SPECIAL OFFER", title: "Garden Care\nMachines and Tools", description: "To short sentences, to many headings, images too large for the proposed design.", buttonText: "Read more", buttonLink: "#", size: "large" },
-    { image: `${IMG}/2020/06/wood-tools-grid-banner-2-opt.jpg`, label: "PROTECTIVE SUITS", title: "Think About Your Safety", buttonText: "Shop now", buttonLink: "#", size: "medium" },
-    { image: `${IMG}/2020/06/wood-tools-grid-banner-3-opt.jpg`, label: "NEW ITEMS", title: "Circular Saw", buttonText: "Shop now", buttonLink: "#", size: "small" },
-    { image: `${IMG}/2020/06/wood-tools-grid-banner-4-opt.jpg`, label: "VACUUM CLEANERS", title: "Clean in the work area", description: "It\u2019s like saying you\u2019re a bad designer, use less bold text, don\u2019t use italics in every.", size: "medium" },
+    { image: "https://images.unsplash.com/photo-1416879595882-3373a0480b5b?w=700&q=80&auto=format&fit=crop", label: "SPECIAL OFFER", title: "Garden Care\nMachines and Tools", description: "To short sentences, to many headings, images too large for the proposed design.", buttonText: "Read more", buttonLink: "#", size: "large" },
+    { image: "https://images.unsplash.com/photo-1620912189866-1e2019da2b8f?w=700&q=80&auto=format&fit=crop", label: "PROTECTIVE SUITS", title: "Think About Your Safety", buttonText: "Shop now", buttonLink: "#", size: "medium" },
+    { image: "https://images.unsplash.com/photo-1572981779307-38b8cabb2407?w=700&q=80&auto=format&fit=crop", label: "NEW ITEMS", title: "Circular Saw", buttonText: "Shop now", buttonLink: "#", size: "small" },
+    { image: "https://images.unsplash.com/photo-1581147036324-c1c9c3e0e4e5?w=700&q=80&auto=format&fit=crop", label: "VACUUM CLEANERS", title: "Clean in the work area", description: "It\u2019s like saying you\u2019re a bad designer, use less bold text, don\u2019t use italics in every.", size: "medium" },
   ];
   const items = Array.isArray(banners) ? banners : defaultBanners;
   const css = `
@@ -125,8 +124,8 @@ export interface ToolsFeatureIconsProps {
 
 export function ToolsFeatureIcons({ features = [] }: ToolsFeatureIconsProps) {
   const defaultFeatures = [
-    { icon: `${IMG}/2020/06/svg-wood-tools-payment-1.svg`, title: "Online Payment", description: "Even if your less into design and more into content strategy." },
-    { icon: `${IMG}/2020/06/svg-wood-tools-support-1.svg`, title: "Support 24/7", description: "Find some redeeming value with, wait for it, dummy copy, no less." },
+    { icon: "data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A//www.w3.org/2000/svg%22%20viewBox%3D%220%200%2024%2024%22%20fill%3D%22none%22%20stroke%3D%22%231a1a2e%22%20stroke-width%3D%221.5%22%3E%3Crect%20x%3D%222%22%20y%3D%225%22%20width%3D%2220%22%20height%3D%2214%22%20rx%3D%222%22/%3E%3Cpath%20d%3D%22M2%2010h20%22/%3E%3C/svg%3E", title: "Online Payment", description: "Even if your less into design and more into content strategy." },
+    { icon: "data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A//www.w3.org/2000/svg%22%20viewBox%3D%220%200%2024%2024%22%20fill%3D%22none%22%20stroke%3D%22%231a1a2e%22%20stroke-width%3D%221.5%22%3E%3Cpath%20d%3D%22M3%2012a9%209%200%200118%200M3%2012v3a2%202%200%20002%202h1v-6H5a2%202%200%2000-2%202zM21%2012v3a2%202%200%2001-2%202h-1v-6h1a2%202%200%20012%202z%22/%3E%3C/svg%3E", title: "Support 24/7", description: "Find some redeeming value with, wait for it, dummy copy, no less." },
   ];
   const items = Array.isArray(features) ? features : defaultFeatures;
   const css = `
@@ -226,14 +225,14 @@ export function ToolsProductGrid({
   const ctx = useContext(ElectronicsStoreContext);
   const storeSlug = ctx?.storeSlug;
   const defaultProducts: ToolsProduct[] = [
-    { id: 1, name: "Circular SAW M-350", slug: "cercular-saw-m-350", price: "299.00", image: `${IMG}/2020/06/wood-tools-product-2-opt-430x500.jpg`, hoverImage: `${IMG}/2020/06/wood-tools-product-14-opt-430x500.jpg` },
-    { id: 2, name: "Grinding Machine R-130", slug: "grinding-machine-r-130", price: "320.00", image: `${IMG}/2020/06/wood-tools-product-8-opt-430x500.jpg`, hoverImage: `${IMG}/2020/06/wood-tools-product-6-opt-430x500.jpg` },
-    { id: 3, name: "Protective Helmet H-18", slug: "protective-helmet-h-18", price: "369.00", image: `${IMG}/2020/06/wood-tools-product-15-opt-430x500.jpg`, hoverImage: `${IMG}/2020/06/wood-tools-product-16-opt-430x500.jpg` },
-    { id: 4, name: "Polisher P-10", slug: "polisher-p-10", price: "198.00", image: `${IMG}/2020/06/wood-tools-product-7-opt-430x500.jpg`, hoverImage: `${IMG}/2020/06/wood-tools-product-9-opt-430x500.jpg` },
-    { id: 5, name: "Grinding machine SX-325", slug: "grinding-machine-sx-325", price: "180.00", image: `${IMG}/2020/06/wood-tools-product-5-opt-430x500.jpg`, hoverImage: `${IMG}/2020/06/wood-tools-product-8-opt-430x500.jpg` },
-    { id: 6, name: "Protective t-shirt long H-25", slug: "protective-t-shirt-long-h-25", price: "186.00", image: `${IMG}/2020/06/wood-tools-product-17-opt-430x500.jpg`, hoverImage: `${IMG}/2020/06/wood-tools-product-7-opt-430x500.jpg` },
-    { id: 7, name: "Drill R-325", slug: "drill-r-325", price: "300.00", image: `${IMG}/2020/06/wood-tools-product-6-opt-430x500.jpg`, hoverImage: `${IMG}/2020/06/wood-tools-product-10-opt-430x500.jpg` },
-    { id: 8, name: "Protective Boots H-76", slug: "protective-boots-h-76", price: "199.00", image: `${IMG}/2020/06/wood-tools-product-16-opt-430x500.jpg`, hoverImage: `${IMG}/2020/06/wood-tools-product-12-opt-430x500.jpg` },
+    { id: 1, name: "Circular SAW M-350", slug: "cercular-saw-m-350", price: "299.00", image: "https://images.unsplash.com/photo-1572981779307-38b8cabb2407?w=500&h=500&fit=crop", hoverImage: "https://images.unsplash.com/photo-1504148455328-c376907d081c?w=500&h=500&fit=crop" },
+    { id: 2, name: "Grinding Machine R-130", slug: "grinding-machine-r-130", price: "320.00", image: "https://images.unsplash.com/photo-1504148455328-c376907d081c?w=500&h=500&fit=crop", hoverImage: "https://images.unsplash.com/photo-1620912189866-1e2019da2b8f?w=500&h=500&fit=crop" },
+    { id: 3, name: "Protective Helmet H-18", slug: "protective-helmet-h-18", price: "369.00", image: "https://images.unsplash.com/photo-1590756254933-2873d72c893c?w=500&h=500&fit=crop", hoverImage: "https://images.unsplash.com/photo-1609205807107-e8ec2120f9de?w=500&h=500&fit=crop" },
+    { id: 4, name: "Polisher P-10", slug: "polisher-p-10", price: "198.00", image: "https://images.unsplash.com/photo-1590756254933-2873d72c893c?w=500&h=500&fit=crop", hoverImage: "https://images.unsplash.com/photo-1609205807107-e8ec2120f9de?w=500&h=500&fit=crop" },
+    { id: 5, name: "Grinding machine SX-325", slug: "grinding-machine-sx-325", price: "180.00", image: "https://images.unsplash.com/photo-1504148455328-c376907d081c?w=500&h=500&fit=crop", hoverImage: "https://images.unsplash.com/photo-1504148455328-c376907d081c?w=500&h=500&fit=crop" },
+    { id: 6, name: "Protective t-shirt long H-25", slug: "protective-t-shirt-long-h-25", price: "186.00", image: "https://images.unsplash.com/photo-1581092334651-ddf26d9a09d0?w=500&h=500&fit=crop", hoverImage: "https://images.unsplash.com/photo-1590756254933-2873d72c893c?w=500&h=500&fit=crop" },
+    { id: 7, name: "Drill R-325", slug: "drill-r-325", price: "300.00", image: "https://images.unsplash.com/photo-1620912189866-1e2019da2b8f?w=500&h=500&fit=crop", hoverImage: "https://images.unsplash.com/photo-1620912189866-1e2019da2b8f?w=500&h=500&fit=crop" },
+    { id: 8, name: "Protective Boots H-76", slug: "protective-boots-h-76", price: "199.00", image: "https://images.unsplash.com/photo-1609205807107-e8ec2120f9de?w=500&h=500&fit=crop", hoverImage: "https://images.unsplash.com/photo-1572981779307-38b8cabb2407?w=500&h=500&fit=crop" },
   ];
   const items = (propProducts || defaultProducts).slice(0, maxProducts);
   const css = `
@@ -301,22 +300,22 @@ export interface ToolsFeatureSectionProps {
 }
 
 export function ToolsFeatureSection({
-  backgroundImage = `${IMG}/2020/06/wood-tools-img-saw-1-opt.jpg`,
+  backgroundImage = "https://images.unsplash.com/photo-1504148455328-c376907d081c?w=1200&q=80&auto=format&fit=crop",
   label = "NEW CHAIN SAW",
   title = "Powerful Saw X-700",
   description = "Using dummy content or fake information in the Web design process can result in products with unrealistic.",
   buttonText = "View More",
   buttonLink = "#",
-  productImage = `${IMG}/2020/07/wood-tools-img-saw-product-1.jpg`,
-  products,
+  productImage = "https://images.unsplash.com/photo-1572981779307-38b8cabb2407?w=600&q=80&auto=format&fit=crop",
+  products = [],
 }: ToolsFeatureSectionProps) {
   const storeSlug = useStoreSlug();
   const defaultProducts: ToolsChainSawProduct[] = [
-    { name: "Chainsaw X-Cut C85", slug: "chainsaw-chain-x-cut-c85", price: "179.00", image: `${IMG}/2020/06/wood-tools-product-23-opt-430x500.jpg`, description: "A ac scelerisque adipiscing a vel augue vestibulum facilisi id aptent justo sociis neque a inceptos curae." },
-    { name: "Engine motor MS180", slug: "engine-motor-ms180", price: "480.00", image: `${IMG}/2020/06/wood-tools-product-22-opt-430x500.jpg`, description: "A ac scelerisque adipiscing a vel augue vestibulum facilisi id aptent justo sociis neque a inceptos curae." },
-    { name: "SAE 30 Engine Oil", slug: "sae-30-engine-oil", price: "129.00", image: `${IMG}/2020/06/wood-tools-product-21-opt-430x500.jpg`, description: "A ac scelerisque adipiscing a vel augue vestibulum facilisi id aptent justo sociis neque a inceptos curae." },
+    { name: "Chainsaw X-Cut C85", slug: "chainsaw-chain-x-cut-c85", price: "179.00", image: "https://images.unsplash.com/photo-1530124566582-a618bc2615dc?w=500&h=500&fit=crop", description: "A ac scelerisque adipiscing a vel augue vestibulum facilisi id aptent justo sociis neque a inceptos curae." },
+    { name: "Engine motor MS180", slug: "engine-motor-ms180", price: "480.00", image: "https://images.unsplash.com/photo-1609205807107-e8ec2120f9de?w=500&h=500&fit=crop", description: "A ac scelerisque adipiscing a vel augue vestibulum facilisi id aptent justo sociis neque a inceptos curae." },
+    { name: "SAE 30 Engine Oil", slug: "sae-30-engine-oil", price: "129.00", image: "https://images.unsplash.com/photo-1590756254933-2873d72c893c?w=500&h=500&fit=crop", description: "A ac scelerisque adipiscing a vel augue vestibulum facilisi id aptent justo sociis neque a inceptos curae." },
   ];
-  const items = products || defaultProducts;
+  const items = products.length > 0 ? products : defaultProducts;
   const css = `
     .tl-feat { display: flex; margin-bottom: 50px; }
     .tl-feat-hero { flex: 1; position: relative; min-height: 500px; display: flex; align-items: center; }
@@ -382,7 +381,7 @@ export interface ToolsDeliveryBannerProps {
 }
 
 export function ToolsDeliveryBanner({
-  image = `${IMG}/2020/06/wood-tools-grid-banner-5.jpg`,
+  image = "https://images.unsplash.com/photo-1581092334651-ddf26d9a09d0?w=800&q=80&auto=format&fit=crop",
   label = "SPECIAL OFFER",
   title = "Free Delivery from $300",
   description = "To sure calm much most long me mean. Able rent long in do we.",
@@ -421,7 +420,7 @@ export interface ToolsPreFooterProps {
 }
 
 export function ToolsPreFooter({
-  image = `${IMG}/2020/07/wood-tools-img-prefooter-115x90.jpg`,
+  image = "https://images.unsplash.com/photo-1504148455328-c376907d081c?w=200&q=80&auto=format&fit=crop",
   title = "Do you like the theme? Share with your friends!",
   privacyText = "Will be used in accordance with our Privacy Policy",
 }: ToolsPreFooterProps) {

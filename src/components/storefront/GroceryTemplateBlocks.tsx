@@ -35,7 +35,6 @@ const TOKENS = {
   altFont: "'Lato', Arial, Helvetica, sans-serif",
 };
 
-const IMG = "https://prokip.xtemos.com/wp-content/uploads";
 
 /* ─── FONT LOADER ───────────────────────────────────────────── */
 export function GroceryFontLoader() {
@@ -139,8 +138,8 @@ export function GroceryHeroSlider({ slides = [], autoplaySpeed = 5000, elements 
       buttonText: "Shop Now",
       buttonLink: "#",
       backgroundColor: "rgb(42,103,150)",
-      productImage: `${IMG}/2021/06/wood-food-market-slider-1-opt.png`,
-      backgroundImage: `${IMG}/2020/06/wood-food-market-slider-bg-1-opt-1.jpg`,
+      productImage: "https://images.unsplash.com/photo-1542838132-92c53300491e?w=500&q=80&auto=format&fit=crop",
+      backgroundImage: "https://images.unsplash.com/photo-1542838132-92c53300491e?w=1200&q=80&auto=format&fit=crop",
     },
     {
       label: "SPECIAL OFFER",
@@ -150,8 +149,8 @@ export function GroceryHeroSlider({ slides = [], autoplaySpeed = 5000, elements 
       buttonText: "Shop Now",
       buttonLink: "#",
       backgroundColor: "rgb(161,37,37)",
-      productImage: `${IMG}/2022/06/wood-food-market-slider-2-344x394.png`,
-      backgroundImage: `${IMG}/2022/06/wood-food-market-slider-bg-3.jpg`,
+      productImage: "https://images.unsplash.com/photo-1610832958506-aa56368176cf?w=400&q=80&auto=format&fit=crop",
+      backgroundImage: "https://images.unsplash.com/photo-1542838132-92c53300491e?w=1200&q=80&auto=format&fit=crop",
     },
     {
       label: "FRESH & NATURAL",
@@ -161,8 +160,8 @@ export function GroceryHeroSlider({ slides = [], autoplaySpeed = 5000, elements 
       buttonText: "Shop Now",
       buttonLink: "#",
       backgroundColor: "rgb(245,153,70)",
-      productImage: `${IMG}/2021/06/wood-food-market-slider-3-opt.png`,
-      backgroundImage: `${IMG}/2020/06/wood-food-market-slider-bg-3-opt.jpg`,
+      productImage: "https://images.unsplash.com/photo-1607349913338-fca6f7fc42d0?w=500&q=80&auto=format&fit=crop",
+      backgroundImage: "https://images.unsplash.com/photo-1518843875459-f738682238a6?w=1200&q=80&auto=format&fit=crop",
     },
   ];
 
@@ -333,9 +332,9 @@ export interface GroceryFeaturesBarProps {
 
 export function GroceryFeaturesBar({ features = [], elements = [] }: GroceryFeaturesBarProps) {
   const defaultFeatures: GroceryFeatureItem[] = [
-    { icon: `${IMG}/2020/06/svg-wood-food-market-1.svg`, title: "Best Quality", description: "Best quality products for you" },
-    { icon: `${IMG}/2020/06/svg-wood-food-market-2.svg`, title: "Online Payment", description: "Secure online payment methods" },
-    { icon: `${IMG}/2020/06/svg-wood-food-market-3.svg`, title: "Fast Delivery", description: "Fast delivery to your door" },
+    { icon: "data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A//www.w3.org/2000/svg%22%20viewBox%3D%220%200%2024%2024%22%20fill%3D%22none%22%20stroke%3D%22%231a1a2e%22%20stroke-width%3D%221.5%22%3E%3Cpath%20d%3D%22M12%202l8%204v6c0%205-3.5%208.5-8%2010-4.5-1.5-8-5-8-10V6l8-4z%22/%3E%3Cpath%20d%3D%22M9%2012l2%202%204-4%22/%3E%3C/svg%3E", title: "Best Quality", description: "Best quality products for you" },
+    { icon: "data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A//www.w3.org/2000/svg%22%20viewBox%3D%220%200%2024%2024%22%20fill%3D%22none%22%20stroke%3D%22%231a1a2e%22%20stroke-width%3D%221.5%22%3E%3Crect%20x%3D%222%22%20y%3D%225%22%20width%3D%2220%22%20height%3D%2214%22%20rx%3D%222%22/%3E%3Cpath%20d%3D%22M2%2010h20%22/%3E%3C/svg%3E", title: "Online Payment", description: "Secure online payment methods" },
+    { icon: "data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A//www.w3.org/2000/svg%22%20viewBox%3D%220%200%2024%2024%22%20fill%3D%22none%22%20stroke%3D%22%231a1a2e%22%20stroke-width%3D%221.5%22%3E%3Crect%20x%3D%221%22%20y%3D%223%22%20width%3D%2215%22%20height%3D%2213%22/%3E%3Cpath%20d%3D%22M16%208h4l3%203v5h-7V8z%22/%3E%3Ccircle%20cx%3D%225.5%22%20cy%3D%2218.5%22%20r%3D%222.5%22/%3E%3Ccircle%20cx%3D%2218.5%22%20cy%3D%2218.5%22%20r%3D%222.5%22/%3E%3C/svg%3E", title: "Fast Delivery", description: "Fast delivery to your door" },
   ];
 
   const featuresFromNodes = elements.length > 0
@@ -458,16 +457,16 @@ export function GroceryProductGrid({
   const [activeTab, setActiveTab] = useState(0);
 
   const defaultProducts: GroceryProduct[] = [
-    { id: 1, name: "Fusilli Pasta", slug: "fusilli-pasta", price: "139.99", image: `${IMG}/2020/06/w-food-market-product-1-opt-430x484.jpg`, category: "Grocery", rating: 5 },
-    { id: 2, name: "Hot Sopressata", slug: "hot-sopressata", price: "115.00", image: `${IMG}/2020/06/w-food-market-product-2-opt-430x484.jpg`, category: "Grocery", rating: 5 },
-    { id: 3, name: "Dallmayr Prodomo", slug: "dallmayr-prodomo", price: "223.00", image: `${IMG}/2020/06/w-food-market-product-3-opt-430x484.jpg`, category: "Grocery", rating: 4 },
-    { id: 4, name: "Sfizioso", slug: "sfizioso", price: "148.00", image: `${IMG}/2020/06/w-food-market-product-4-opt-430x484.jpg`, category: "Grocery", rating: 5 },
-    { id: 5, name: "Filetto di Pomidoro", slug: "filetto-di-pomidoro", price: "199.99", image: `${IMG}/2020/06/w-food-market-product-5-opt-430x484.jpg`, category: "Grocery", rating: 5 },
-    { id: 6, name: "Bombay Sapphire", slug: "bombay-sapphire", price: "248.00", image: `${IMG}/2020/06/w-food-market-product-6-opt-430x484.jpg`, category: "Grocery", rating: 5 },
-    { id: 7, name: "Barilla Penne Rigate", slug: "barilla-penne-rigate", price: "156.00", image: `${IMG}/2020/06/w-food-market-product-8-opt-430x484.jpg`, category: "Grocery", rating: 4 },
-    { id: 8, name: "Milk Chocolate", slug: "milk-chocolate", price: "118.00", image: `${IMG}/2020/06/w-food-market-product-9-opt-430x484.jpg`, category: "Grocery", rating: 5 },
-    { id: 9, name: "Chili Powder", slug: "chili-powder", price: "123.00", image: `${IMG}/2020/06/w-food-market-product-10-opt-430x484.jpg`, category: "Grocery", rating: 5 },
-    { id: 10, name: "Coffee Mate", slug: "coffee-mate", price: "116.00", image: `${IMG}/2020/06/w-food-market-product-12-opt-430x484.jpg`, category: "Grocery", rating: 5 },
+    { id: 1, name: "Fusilli Pasta", slug: "fusilli-pasta", price: "139.99", image: "https://images.unsplash.com/photo-1551462147-37885acc36f1?w=500&h=500&fit=crop", category: "Grocery", rating: 5 },
+    { id: 2, name: "Hot Sopressata", slug: "hot-sopressata", price: "115.00", image: "https://images.unsplash.com/photo-1601924582970-9238bcb495d9?w=500&h=500&fit=crop", category: "Grocery", rating: 5 },
+    { id: 3, name: "Dallmayr Prodomo", slug: "dallmayr-prodomo", price: "223.00", image: "https://images.unsplash.com/photo-1587734005430-2b592f2b1ffc?w=500&h=500&fit=crop", category: "Grocery", rating: 4 },
+    { id: 4, name: "Sfizioso", slug: "sfizioso", price: "148.00", image: "https://images.unsplash.com/photo-1621939514649-280e2ee25f60?w=500&h=500&fit=crop", category: "Grocery", rating: 5 },
+    { id: 5, name: "Filetto di Pomidoro", slug: "filetto-di-pomidoro", price: "199.99", image: "https://images.unsplash.com/photo-1608897013039-887f21d8c804?w=500&h=500&fit=crop", category: "Grocery", rating: 5 },
+    { id: 6, name: "Bombay Sapphire", slug: "bombay-sapphire", price: "248.00", image: "https://images.unsplash.com/photo-1608885898957-a559228e8749?w=500&h=500&fit=crop", category: "Grocery", rating: 5 },
+    { id: 7, name: "Barilla Penne Rigate", slug: "barilla-penne-rigate", price: "156.00", image: "https://images.unsplash.com/photo-1551462147-37885acc36f1?w=500&h=500&fit=crop", category: "Grocery", rating: 4 },
+    { id: 8, name: "Milk Chocolate", slug: "milk-chocolate", price: "118.00", image: "https://images.unsplash.com/photo-1549007994-cb92caebd54b?w=500&h=500&fit=crop", category: "Grocery", rating: 5 },
+    { id: 9, name: "Chili Powder", slug: "chili-powder", price: "123.00", image: "https://images.unsplash.com/photo-1583454110551-21f2fa2afe61?w=500&h=500&fit=crop", category: "Grocery", rating: 5 },
+    { id: 10, name: "Coffee Mate", slug: "coffee-mate", price: "116.00", image: "https://images.unsplash.com/photo-1522992319-0365e5f11656?w=500&h=500&fit=crop", category: "Grocery", rating: 5 },
   ];
 
   const items = (propProducts || storeCtx?.products || defaultProducts).slice(0, maxProducts);
@@ -564,8 +563,8 @@ export interface GroceryPromoBannersProps {
 export function GroceryPromoBanners({ banners = [], elements = [] }: GroceryPromoBannersProps) {
   const storeCtx = useContext(GroceryStoreContext);
   const defaultBanners: GroceryPromoBanner[] = [
-    { subtitle: "NEW PRODUCTS", title: "Roar Ice Cream", image: `${IMG}/2020/06/wood-food-market-ban-1-opt.jpg`, buttonText: "Shop Now" },
-    { subtitle: "VEGAN FOOD", title: "Organic Rice", image: `${IMG}/2020/06/wood-food-market-ban-2-opt.jpg`, buttonText: "Shop Now" },
+    { subtitle: "NEW PRODUCTS", title: "Roar Ice Cream", image: "https://images.unsplash.com/photo-1497034825429-c343d7c6a68f?w=700&q=80&auto=format&fit=crop", buttonText: "Shop Now" },
+    { subtitle: "VEGAN FOOD", title: "Organic Rice", image: "https://images.unsplash.com/photo-1586201375761-83865001e31c?w=700&q=80&auto=format&fit=crop", buttonText: "Shop Now" },
   ];
 
   const bannersFromNodes = elements.length > 0
@@ -632,10 +631,10 @@ export interface GroceryCategoryGridProps {
 
 export function GroceryCategoryGrid({ sectionTitle = "POPULAR CATEGORIES", categories = [], columns = 4, elements = [], blockId, isEditor = false }: GroceryCategoryGridProps) {
   const defaultCategories: GroceryCategory[] = [
-    { name: "Fresh Food", image: `${IMG}/2020/06/wood-food-market-category-1.jpg` },
-    { name: "Bakery", image: `${IMG}/2020/06/wood-food-market-category-2.jpg` },
-    { name: "Frozen Food", image: `${IMG}/2020/06/wood-food-market-category-3.jpg` },
-    { name: "Drinks", image: `${IMG}/2020/06/wood-food-market-category-4.jpg` },
+    { name: "Fresh Food", image: "https://images.unsplash.com/photo-1610832958506-aa56368176cf?w=400&q=80&auto=format&fit=crop" },
+    { name: "Bakery", image: "https://images.unsplash.com/photo-1509440159596-0249088772ff?w=400&q=80&auto=format&fit=crop" },
+    { name: "Frozen Food", image: "https://images.unsplash.com/photo-1601000938259-9fa0f0a2e00c?w=400&q=80&auto=format&fit=crop" },
+    { name: "Drinks", image: "https://images.unsplash.com/photo-1544145945-f90425340c7e?w=400&q=80&auto=format&fit=crop" },
   ];
 
   const categoriesFromNodes = elements.length > 0
@@ -776,16 +775,16 @@ export function GroceryBestSellers({ products: propProducts, columns = 5, maxPro
   };
 
   const defaultProducts: GroceryProduct[] = [
-    { id: 11, name: "Tonno all'Olio di Oliva", slug: "tonno", price: "113.00", image: `${IMG}/2020/06/w-food-market-product-14-opt-430x484.jpg`, category: "Grocery", rating: 5 },
-    { id: 12, name: "Strolghino", slug: "strolghino", price: "160.95", image: `${IMG}/2020/06/w-food-market-product-17-opt-430x484.jpg`, category: "Grocery", rating: 5 },
-    { id: 13, name: "Filetto di Pomidoro", slug: "filetto-di-pomidoro-2", price: "199.99", image: `${IMG}/2020/06/w-food-market-product-5-opt-430x484.jpg`, category: "Grocery", rating: 5 },
-    { id: 14, name: "Milk Chocolate", slug: "milk-chocolate-2", price: "118.00", image: `${IMG}/2020/06/w-food-market-product-9-opt-430x484.jpg`, category: "Grocery", rating: 5 },
-    { id: 15, name: "Fusilli Pasta", slug: "fusilli-pasta-2", price: "139.99", image: `${IMG}/2020/06/w-food-market-product-1-opt-430x484.jpg`, category: "Grocery", rating: 5 },
-    { id: 16, name: "Tomato Sauce", slug: "tomato-sauce", price: "160.00", image: `${IMG}/2020/06/w-food-market-product-21-opt-430x484.jpg`, category: "Grocery", rating: 4 },
-    { id: 17, name: "Dallmayr Prodomo", slug: "dallmayr-prodomo-2", price: "223.00", image: `${IMG}/2020/06/w-food-market-product-3-opt-430x484.jpg`, category: "Grocery", rating: 5 },
-    { id: 18, name: "Chili Powder", slug: "chili-powder-2", price: "123.00", image: `${IMG}/2020/06/w-food-market-product-10-opt-430x484.jpg`, category: "Grocery", rating: 5 },
-    { id: 19, name: "Hot Sopressata", slug: "hot-sopressata-2", price: "115.00", image: `${IMG}/2020/06/w-food-market-product-2-opt-430x484.jpg`, category: "Grocery", rating: 5 },
-    { id: 20, name: "Coffee Mate", slug: "coffee-mate-2", price: "116.00", image: `${IMG}/2020/06/w-food-market-product-12-opt-430x484.jpg`, category: "Grocery", rating: 5 },
+    { id: 11, name: "Tonno all'Olio di Oliva", slug: "tonno", price: "113.00", image: "https://images.unsplash.com/photo-1580476262798-bddd9f4b7369?w=500&h=500&fit=crop", category: "Grocery", rating: 5 },
+    { id: 12, name: "Strolghino", slug: "strolghino", price: "160.95", image: "https://images.unsplash.com/photo-1601924582970-9238bcb495d9?w=500&h=500&fit=crop", category: "Grocery", rating: 5 },
+    { id: 13, name: "Filetto di Pomidoro", slug: "filetto-di-pomidoro-2", price: "199.99", image: "https://images.unsplash.com/photo-1608897013039-887f21d8c804?w=500&h=500&fit=crop", category: "Grocery", rating: 5 },
+    { id: 14, name: "Milk Chocolate", slug: "milk-chocolate-2", price: "118.00", image: "https://images.unsplash.com/photo-1549007994-cb92caebd54b?w=500&h=500&fit=crop", category: "Grocery", rating: 5 },
+    { id: 15, name: "Fusilli Pasta", slug: "fusilli-pasta-2", price: "139.99", image: "https://images.unsplash.com/photo-1551462147-37885acc36f1?w=500&h=500&fit=crop", category: "Grocery", rating: 5 },
+    { id: 16, name: "Tomato Sauce", slug: "tomato-sauce", price: "160.00", image: "https://images.unsplash.com/photo-1608897013039-887f21d8c804?w=500&h=500&fit=crop", category: "Grocery", rating: 4 },
+    { id: 17, name: "Dallmayr Prodomo", slug: "dallmayr-prodomo-2", price: "223.00", image: "https://images.unsplash.com/photo-1587734005430-2b592f2b1ffc?w=500&h=500&fit=crop", category: "Grocery", rating: 5 },
+    { id: 18, name: "Chili Powder", slug: "chili-powder-2", price: "123.00", image: "https://images.unsplash.com/photo-1583454110551-21f2fa2afe61?w=500&h=500&fit=crop", category: "Grocery", rating: 5 },
+    { id: 19, name: "Hot Sopressata", slug: "hot-sopressata-2", price: "115.00", image: "https://images.unsplash.com/photo-1601924582970-9238bcb495d9?w=500&h=500&fit=crop", category: "Grocery", rating: 5 },
+    { id: 20, name: "Coffee Mate", slug: "coffee-mate-2", price: "116.00", image: "https://images.unsplash.com/photo-1522992319-0365e5f11656?w=500&h=500&fit=crop", category: "Grocery", rating: 5 },
   ];
 
   const items = (propProducts || storeCtx?.products || defaultProducts).slice(0, maxProducts);

@@ -34,7 +34,6 @@ const TOKENS = {
   bodyFont: "'Jost', Arial, Helvetica, sans-serif",
 };
 
-const IMG = "https://prokip.xtemos.com/wp-content/uploads";
 
 /* ─── FONT LOADER ───────────────────────────────────────────── */
 export function BakeryFontLoader() {
@@ -145,9 +144,9 @@ export function BakeryHeroSlider({ slides = [], autoplaySpeed = 5000 }: BakeryHe
       titleLine2: "WAFFLES",
       buttonText: "Read More",
       buttonLink: "#",
-      backgroundImage: `${IMG}/2024/02/sweets-bakery-slide-bg-1.jpg`,
-      productImage: `${IMG}/2024/02/sweets-bakery-slide-img-1.png`,
-      smallImage: `${IMG}/2024/02/sweets-bakery-slide-img-s-1.png`,
+      backgroundImage: "https://images.unsplash.com/photo-1509440159596-0249088772ff?w=1200&q=80&auto=format&fit=crop",
+      productImage: "https://images.unsplash.com/photo-1546039907-7fa05f864c02?w=600&q=80&auto=format&fit=crop",
+      smallImage: "https://images.unsplash.com/photo-1550617931-e17a7b70dce2?w=300&q=80&auto=format&fit=crop",
     },
     {
       subtitle: "A Tasty and Light Dessert",
@@ -155,9 +154,9 @@ export function BakeryHeroSlider({ slides = [], autoplaySpeed = 5000 }: BakeryHe
       titleLine2: "MAFFINS",
       buttonText: "Read More",
       buttonLink: "#",
-      backgroundImage: `${IMG}/2024/02/sweets-bakery-slide-bg-2.jpg`,
-      productImage: `${IMG}/2024/02/sweets-bakery-slide-img-2.png`,
-      smallImage: `${IMG}/2024/02/sweets-bakery-slide-img-s-2.png`,
+      backgroundImage: "https://images.unsplash.com/photo-1517433670267-08bbd4be890f?w=1200&q=80&auto=format&fit=crop",
+      productImage: "https://images.unsplash.com/photo-1587668178277-295251f900ce?w=600&q=80&auto=format&fit=crop",
+      smallImage: "https://images.unsplash.com/photo-1517686469429-8bdb88b9f907?w=300&q=80&auto=format&fit=crop",
     },
     {
       subtitle: "It Is Worth Tasting",
@@ -165,13 +164,13 @@ export function BakeryHeroSlider({ slides = [], autoplaySpeed = 5000 }: BakeryHe
       titleLine2: "",
       buttonText: "Read More",
       buttonLink: "#",
-      backgroundImage: `${IMG}/2024/02/sweets-bakery-slide-bg-3.jpg`,
-      productImage: `${IMG}/2024/02/sweets-bakery-slide-img-3.png`,
-      smallImage: `${IMG}/2024/02/sweets-bakery-slide-img-s-3.png`,
+      backgroundImage: "https://images.unsplash.com/photo-1490474418585-ba9bad8fd0ea?w=1200&q=80&auto=format&fit=crop",
+      productImage: "https://images.unsplash.com/photo-1488477181946-6428a0291777?w=600&q=80&auto=format&fit=crop",
+      smallImage: "https://images.unsplash.com/photo-1571115177098-24ec42ed204d?w=300&q=80&auto=format&fit=crop",
     },
   ];
 
-  const items = slides || defaultSlides;
+  const items = slides.length > 0 ? slides : defaultSlides;
   const [current, setCurrent] = useState(0);
   const timerRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
@@ -280,12 +279,12 @@ export interface BakeryCategoryInfoBoxesProps {
 export function BakeryCategoryInfoBoxes({ sectionTitle = "Our Fine Home-Made Chocolate", sectionSubtitle = "Sweets Bakery", items = [] }: BakeryCategoryInfoBoxesProps) {
   const storeCtx = useContext(BakeryStoreContext);
   const defaultItems: BakeryCategoryInfoBox[] = [
-    { icon: `${IMG}/2019/07/svg-bakery-infobox-1.svg`, title: "Cupcakes", description: "There are some redeeming factors in favor of greeking text", buttonText: "Learn More" },
-    { icon: `${IMG}/2019/07/svg-bakery-infobox-2.svg`, title: "Macaroons", description: "Merely the symptom of a worse problem to consideration", buttonText: "Learn More" },
-    { icon: `${IMG}/2019/07/svg-bakery-infobox-3.svg`, title: "Cakes", description: "You sculpt information, you chisel away what's not needed", buttonText: "Learn More" },
+    { icon: "data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A//www.w3.org/2000/svg%22%20viewBox%3D%220%200%2024%2024%22%20fill%3D%22none%22%20stroke%3D%22%231a1a2e%22%20stroke-width%3D%221.5%22%3E%3Cpath%20d%3D%22M6%2010h12l-1.5%209a2%202%200%2001-2%201.7H9.5a2%202%200%2001-2-1.7L6%2010z%22/%3E%3Cpath%20d%3D%22M8%2010a4%204%200%20118%200%22/%3E%3Ccircle%20cx%3D%2212%22%20cy%3D%224%22%20r%3D%221.5%22/%3E%3C/svg%3E", title: "Cupcakes", description: "Freshly baked every morning with real butter and seasonal fruit.", buttonText: "Learn More" },
+    { icon: "data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A//www.w3.org/2000/svg%22%20viewBox%3D%220%200%2024%2024%22%20fill%3D%22none%22%20stroke%3D%22%231a1a2e%22%20stroke-width%3D%221.5%22%3E%3Cellipse%20cx%3D%2212%22%20cy%3D%228%22%20rx%3D%227%22%20ry%3D%224%22/%3E%3Cellipse%20cx%3D%2212%22%20cy%3D%2216%22%20rx%3D%227%22%20ry%3D%224%22/%3E%3Cpath%20d%3D%22M7%2011c0%201%202%202%205%202s5-1%205-2%22/%3E%3C/svg%3E", title: "Macaroons", description: "Delicate shells with rich, hand-piped fillings in every color.", buttonText: "Learn More" },
+    { icon: "data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A//www.w3.org/2000/svg%22%20viewBox%3D%220%200%2024%2024%22%20fill%3D%22none%22%20stroke%3D%22%231a1a2e%22%20stroke-width%3D%221.5%22%3E%3Cpath%20d%3D%22M4%2021v-7a2%202%200%20012-2h12a2%202%200%20012%202v7M4%2021h16M9%2012V7a3%203%200%20016%200v5M12%204v1%22/%3E%3C/svg%3E", title: "Cakes", description: "Custom celebration cakes made to order, any size, any occasion.", buttonText: "Learn More" },
   ];
 
-  const boxes = items || defaultItems;
+  const boxes = items.length > 0 ? items : defaultItems;
 
   const css = `
     .bk-catbox-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 30px; margin-bottom: 80px; }
@@ -334,7 +333,7 @@ export function BakeryHandmade({
   subtitle = "Sweets Bakery",
   title = "Handmade Cakes\nFor Your Every Taste",
   description = "We bake with love using the finest ingredients for a taste you'll never forget.",
-  image = `${IMG}/2019/07/bakery-cyan-cake-opt.jpg`,
+  image = "https://images.unsplash.com/photo-1464349095431-e9a21285b5f3?w=700&q=80&auto=format&fit=crop",
   buttonText = "Shop Now",
   buttonLink = "#",
 }: BakeryHandmadeProps) {
@@ -389,7 +388,7 @@ export function BakeryProductGrid({
   sectionSubtitle = "Sweets Bakery",
   marginBottom = "80px",
   maxProducts = 6,
-  backgroundImage = `${IMG}/2019/07/bakery-product-bg-opt.jpg`,
+  backgroundImage = "https://images.unsplash.com/photo-1517686469429-8bdb88b9f907?w=1400&q=80&auto=format&fit=crop",
 }: BakeryProductGridProps) {
   const storeCtx = useContext(BakeryStoreContext);
   const fixLink = (slug: string) => {
@@ -398,12 +397,12 @@ export function BakeryProductGrid({
   };
 
   const defaultProducts: BakeryProduct[] = [
-    { id: 1, name: "White Cake", slug: "white-cake", price: "199.00", image: `${IMG}/2019/07/prod-1-opt-430x468.jpg`, category: "Sweets Bakery", rating: 5 },
-    { id: 2, name: "Raspberry Pie", slug: "raspberry-pie", price: "119.00", image: `${IMG}/2019/07/prod-2-opt-430x468.jpg`, category: "Sweets Bakery", rating: 5 },
-    { id: 3, name: "Chocolat Cake", slug: "chocolat-cake", price: "189.00", image: `${IMG}/2019/07/prod-3-opt-430x468.jpg`, category: "Sweets Bakery", rating: 4 },
-    { id: 4, name: "Honey Waffles", slug: "honey-waffles", price: "249.00", image: `${IMG}/2019/07/prod-4-opt-430x468.jpg`, category: "Sweets Bakery", rating: 5 },
-    { id: 5, name: "Muffin Cake", slug: "muffin-cake", price: "199.00", image: `${IMG}/2019/07/prod-5-opt-430x468.jpg`, category: "Sweets Bakery", rating: 5 },
-    { id: 6, name: "Berry Cupcakes", slug: "berry-cupcakes", price: "269.00", image: `${IMG}/2019/07/prod-6-opt-430x468.jpg`, category: "Sweets Bakery", rating: 5 },
+    { id: 1, name: "White Cake", slug: "white-cake", price: "199.00", image: "https://images.unsplash.com/photo-1621303837174-89787a7d4729?w=500&h=500&fit=crop", category: "Sweets Bakery", rating: 5 },
+    { id: 2, name: "Raspberry Pie", slug: "raspberry-pie", price: "119.00", image: "https://images.unsplash.com/photo-1621236378699-8597faf6a176?w=500&h=500&fit=crop", category: "Sweets Bakery", rating: 5 },
+    { id: 3, name: "Chocolat Cake", slug: "chocolat-cake", price: "189.00", image: "https://images.unsplash.com/photo-1606313564200-e75d5e30476c?w=500&h=500&fit=crop", category: "Sweets Bakery", rating: 4 },
+    { id: 4, name: "Honey Waffles", slug: "honey-waffles", price: "249.00", image: "https://images.unsplash.com/photo-1562376552-0d160a2f238d?w=500&h=500&fit=crop", category: "Sweets Bakery", rating: 5 },
+    { id: 5, name: "Muffin Cake", slug: "muffin-cake", price: "199.00", image: "https://images.unsplash.com/photo-1607958996333-41aef7caefaa?w=500&h=500&fit=crop", category: "Sweets Bakery", rating: 5 },
+    { id: 6, name: "Berry Cupcakes", slug: "berry-cupcakes", price: "269.00", image: "https://images.unsplash.com/photo-1614707267537-b85aaf00c4b7?w=500&h=500&fit=crop", category: "Sweets Bakery", rating: 5 },
   ];
 
   const items = (propProducts || storeCtx?.products || defaultProducts).slice(0, maxProducts);
@@ -473,21 +472,21 @@ export interface BakeryProcessProps {
 export function BakeryProcess({
   sectionTitle = "How We Made Donuts",
   sectionSubtitle = "Sweets Bakery",
-  steps,
-  image = `${IMG}/2019/07/bakery-donuts-img-opt.png`,
+  steps = [],
+  image = "https://images.unsplash.com/photo-1551024506-0bccd828d307?w=700&q=80&auto=format&fit=crop",
 }: BakeryProcessProps) {
   const storeCtx = useContext(BakeryStoreContext);
   const defaultSteps: BakeryProcessStep[] = [
-    { icon: `${IMG}/2019/07/svg-bakery-infobox-4.svg`, title: "1. Ingredients", description: "Chances are there wasn't collaboration, communication." },
-    { icon: `${IMG}/2019/07/svg-bakery-infobox-5.svg`, title: "2. Stuffing", description: "Chances are there wasn't collaboration, communication." },
-    { icon: `${IMG}/2019/07/svg-bakery-infobox-6.svg`, title: "3. Cooking", description: "Chances are there wasn't collaboration, communication." },
-    { icon: `${IMG}/2019/07/svg-bakery-infobox-7.svg`, title: "4. Dish Ready", description: "Chances are there wasn't collaboration, communication." },
+    { icon: "data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A//www.w3.org/2000/svg%22%20viewBox%3D%220%200%2024%2024%22%20fill%3D%22none%22%20stroke%3D%22%231a1a2e%22%20stroke-width%3D%221.5%22%3E%3Cpath%20d%3D%22M12%202v20M12%206l-3-2M12%206l3-2M12%2010l-3-2M12%2010l3-2M12%2014l-3-2M12%2014l3-2M12%2018l-3-2M12%2018l3-2%22/%3E%3C/svg%3E", title: "1. Ingredients", description: "We start with real butter, fresh eggs, and quality flour." },
+    { icon: "data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A//www.w3.org/2000/svg%22%20viewBox%3D%220%200%2024%2024%22%20fill%3D%22none%22%20stroke%3D%22%231a1a2e%22%20stroke-width%3D%221.5%22%3E%3Cpath%20d%3D%22M6%203h12l-2%2012a2%202%200%2001-2%201.7h-4a2%202%200%2001-2-1.7L6%203z%22/%3E%3Cpath%20d%3D%22M9%203v3M15%203v3%22/%3E%3Ccircle%20cx%3D%2212%22%20cy%3D%2221%22%20r%3D%221%22/%3E%3C/svg%3E", title: "2. Mixing", description: "Every batch is hand-mixed for the right texture, every time." },
+    { icon: "data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A//www.w3.org/2000/svg%22%20viewBox%3D%220%200%2024%2024%22%20fill%3D%22none%22%20stroke%3D%22%231a1a2e%22%20stroke-width%3D%221.5%22%3E%3Crect%20x%3D%223%22%20y%3D%224%22%20width%3D%2218%22%20height%3D%2217%22%20rx%3D%221%22/%3E%3Crect%20x%3D%226%22%20y%3D%2210%22%20width%3D%2212%22%20height%3D%228%22%20rx%3D%221%22/%3E%3Ccircle%20cx%3D%227%22%20cy%3D%226.5%22%20r%3D%220.8%22/%3E%3Ccircle%20cx%3D%2210%22%20cy%3D%226.5%22%20r%3D%220.8%22/%3E%3C/svg%3E", title: "3. Baking", description: "Baked fresh daily in small batches for the best flavor." },
+    { icon: "data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A//www.w3.org/2000/svg%22%20viewBox%3D%220%200%2024%2024%22%20fill%3D%22none%22%20stroke%3D%22%231a1a2e%22%20stroke-width%3D%221.5%22%3E%3Ccircle%20cx%3D%2212%22%20cy%3D%2212%22%20r%3D%229%22/%3E%3Cpath%20d%3D%22M8%2012l3%203%205-6%22/%3E%3C/svg%3E", title: "4. Ready to Serve", description: "Cooled, decorated, and packaged fresh for you to enjoy." },
   ];
 
-  const items = steps || defaultSteps;
+  const items = steps.length > 0 ? steps : defaultSteps;
 
   const css = `
-    .bk-process { display: flex; align-items: center; gap: 60px; margin-bottom: 80px; padding: 80px 0 60px; background-image: url(${IMG}/2019/07/bakery-bg-2-opt.png); background-position: 0 0; background-repeat: no-repeat; }
+    .bk-process { display: flex; align-items: center; gap: 60px; margin-bottom: 80px; padding: 80px 0 60px; background-image: url(https://images.unsplash.com/photo-1509440159596-0249088772ff?w=1400&q=80&auto=format&fit=crop); background-position: 0 0; background-repeat: no-repeat; }
     .bk-process-img { flex: 0 0 40%; text-align: center; }
     .bk-process-img img { max-width: 100%; height: auto; }
     .bk-process-content { flex: 1; }
@@ -545,13 +544,13 @@ export interface BakeryBlogPostsProps {
 
 export function BakeryBlogPosts({ posts = [], columns = 4, sectionTitle = "Our New Articles", sectionSubtitle = "Sweets Bakery", marginBottom = "80px" }: BakeryBlogPostsProps) {
   const defaultPosts: BakeryBlogPost[] = [
-    { title: "Seating collection inspiration by modern", image: `${IMG}/2019/07/bakery-blog-img-1.jpg`, date: "July 15, 2019", author: "Admin" },
-    { title: "Green interior design inspiration", image: `${IMG}/2019/07/bakery-blog-img-2.jpg`, date: "July 15, 2019", author: "Admin" },
-    { title: "Minimalist design furniture 2026", image: `${IMG}/2019/07/bakery-blog-img-3.jpg`, date: "July 15, 2019", author: "Admin" },
-    { title: "Reinterprets the classic bookshelf", image: `${IMG}/2019/07/bakery-blog-img-4.jpg`, date: "July 15, 2019", author: "Admin" },
+    { title: "5 tips for the perfect sourdough crust", image: "https://images.unsplash.com/photo-1585478259715-4d3a5f47ea7e?w=500&q=80&auto=format&fit=crop", date: "June 12, 2026", author: "Admin" },
+    { title: "How we source our seasonal fruit", image: "https://images.unsplash.com/photo-1587668178277-295251f900ce?w=500&q=80&auto=format&fit=crop", date: "May 28, 2026", author: "Admin" },
+    { title: "Behind the scenes: our early morning bake", image: "https://images.unsplash.com/photo-1509440159596-0249088772ff?w=500&q=80&auto=format&fit=crop", date: "May 14, 2026", author: "Admin" },
+    { title: "Custom cakes: how to order for your event", image: "https://images.unsplash.com/photo-1464349095431-e9a21285b5f3?w=500&q=80&auto=format&fit=crop", date: "May 3, 2026", author: "Admin" },
   ];
 
-  const items = posts || defaultPosts;
+  const items = posts.length > 0 ? posts : defaultPosts;
 
   const css = `
     .bk-blog-grid { display: grid; gap: 20px; }
@@ -604,7 +603,7 @@ export function BakeryCta({
   subtitle = "Sweets Bakery",
   buttonText = "Buy Theme",
   buttonLink = "#",
-  backgroundImage = `${IMG}/2018/01/p-bg-3.jpg`,
+  backgroundImage = "https://images.unsplash.com/photo-1509440159596-0249088772ff?w=1400&q=80&auto=format&fit=crop",
 }: BakeryCtaProps) {
   const storeCtx = useContext(BakeryStoreContext);
   const css = `

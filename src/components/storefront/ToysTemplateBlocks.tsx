@@ -26,7 +26,6 @@ const TOKENS = {
   bodyFont: "'Open Sans', Arial, Helvetica, sans-serif",
 };
 
-const IMG = "https://prokip.xtemos.com/wp-content/uploads";
 
 export function ToysFontLoader() {
   return (
@@ -78,12 +77,12 @@ export function ToysHeroSlider({ slides = [], autoplaySpeed = 5000 }: ToysHeroSl
   const fixLink = (link: string) => resolveStoreLink(link, storeCtx?.storeSlug);
 
   const defaultSlides: ToysHeroSlide[] = [
-    { titleLine1: "Guardian", titleLine2: "Of The Galaxy.", description: "Official Marvel movie action figures.", buttonText: "SHOP NOW", buttonLink: "#", backgroundColor: "#1a1a2e", productImage: `${IMG}/2021/06/v-toy-sl-3.png`, backgroundImage: `${IMG}/2018/10/v-toy-sl3-bg-1-opt.jpg` },
-    { titleLine1: "Star Wars", titleLine2: "Toy Figures.", description: "There are many variations of passages.", buttonText: "SHOP NOW", buttonLink: "#", backgroundColor: "#0f3460", productImage: `${IMG}/2021/06/v-toy-sl-1.png`, backgroundImage: `${IMG}/2018/10/v-toy-sl-bg-1-opt.jpg` },
-    { titleLine1: "Toy Story", titleLine2: "Action Figures.", description: "There are many variations of passages.", buttonText: "SHOP NOW", buttonLink: "#", backgroundColor: "#e94560", productImage: `${IMG}/2021/06/w-toys-slider-3.png`, backgroundImage: `${IMG}/2018/02/v-toy-sl2-bg.jpg` },
+    { titleLine1: "Guardian", titleLine2: "Of The Galaxy.", description: "Official Marvel movie action figures.", buttonText: "SHOP NOW", buttonLink: "#", backgroundColor: "#1a1a2e", productImage: "https://images.unsplash.com/photo-1558877385-81a1c7e67d72?w=500&q=80&auto=format&fit=crop", backgroundImage: "https://images.unsplash.com/photo-1566576912321-d58ddd7a6088?w=1200&q=80&auto=format&fit=crop" },
+    { titleLine1: "Star Wars", titleLine2: "Toy Figures.", description: "There are many variations of passages.", buttonText: "SHOP NOW", buttonLink: "#", backgroundColor: "#0f3460", productImage: "https://images.unsplash.com/photo-1596461404969-9ae70f2830c1?w=500&q=80&auto=format&fit=crop", backgroundImage: "https://images.unsplash.com/photo-1519689680058-324335c77eba?w=1200&q=80&auto=format&fit=crop" },
+    { titleLine1: "Toy Story", titleLine2: "Action Figures.", description: "There are many variations of passages.", buttonText: "SHOP NOW", buttonLink: "#", backgroundColor: "#e94560", productImage: "https://images.unsplash.com/photo-1587654780291-39c9404d746b?w=500&q=80&auto=format&fit=crop", backgroundImage: "https://images.unsplash.com/photo-1516981879613-9f5da904015f?w=1200&q=80&auto=format&fit=crop" },
   ];
 
-  const items = slides || defaultSlides;
+  const items = slides.length > 0 ? slides : defaultSlides;
   const [current, setCurrent] = useState(0);
 
   useEffect(() => {
@@ -152,11 +151,11 @@ export interface ToysBannerCardsProps {
 export function ToysBannerCards({ cards = [] }: ToysBannerCardsProps) {
   const storeCtx = useContext(ToysStoreContext);
   const defaultCards: ToysBannerCard[] = [
-    { label: "Disney", title: "Soft Toys.", image: `${IMG}/2018/10/v-toy-banner-img-1-opt.jpg`, link: "#" },
-    { label: "Movies", title: "Hector Toy.", image: `${IMG}/2018/10/v-toy-banner-img-2-opt.jpg`, link: "#" },
-    { label: "Lego", title: "Big Sale.", image: `${IMG}/2018/10/v-toy-banner-img-3-opt.jpg`, link: "#" },
+    { label: "Disney", title: "Soft Toys.", image: "https://images.unsplash.com/photo-1560859251-d563a49c5e4a?w=700&q=80&auto=format&fit=crop", link: "#" },
+    { label: "Movies", title: "Hector Toy.", image: "https://images.unsplash.com/photo-1587654780291-39c9404d746b?w=700&q=80&auto=format&fit=crop", link: "#" },
+    { label: "Lego", title: "Big Sale.", image: "https://images.unsplash.com/photo-1587377645106-27831bcb94c9?w=700&q=80&auto=format&fit=crop", link: "#" },
   ];
-  const items = cards || defaultCards;
+  const items = cards.length > 0 ? cards : defaultCards;
 
   const css = `
     .ty-banners { display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; margin: 40px auto 50px; }
@@ -196,7 +195,7 @@ export interface ToysVideoWelcomeProps {
 }
 
 export function ToysVideoWelcome({
-  videoThumbnail = `${IMG}/2018/10/v-toy-video-img-opt.jpg`,
+  videoThumbnail = "https://images.unsplash.com/photo-1558877385-81a1c7e67d72?w=800&q=80&auto=format&fit=crop",
   videoUrl = "https://www.youtube.com/watch?v=XHOmBV4js_E",
   subtitle = "Curabitur aliquet quam",
   title = "Welcome to our shop",
@@ -245,11 +244,11 @@ export interface ToysFeaturesBarProps {
 
 export function ToysFeaturesBar({ features = [] }: ToysFeaturesBarProps) {
   const defaultFeatures: ToysFeature[] = [
-    { icon: `${IMG}/2018/02/v-toy-shape-1.svg`, title: "Free Shipping", description: "It is a long established fact that a reader will be." },
-    { icon: `${IMG}/2018/02/v-toy-shape-2.svg`, title: "Support 24", description: "Various versions have evolved over." },
-    { icon: `${IMG}/2018/02/v-toy-shape-3.svg`, title: "Easy Payment", description: "Quisque velit nisi, pretium ut lacinia in." },
+    { icon: "data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A//www.w3.org/2000/svg%22%20viewBox%3D%220%200%2024%2024%22%20fill%3D%22none%22%20stroke%3D%22%231a1a2e%22%20stroke-width%3D%221.5%22%3E%3Crect%20x%3D%221%22%20y%3D%223%22%20width%3D%2215%22%20height%3D%2213%22/%3E%3Cpath%20d%3D%22M16%208h4l3%203v5h-7V8z%22/%3E%3Ccircle%20cx%3D%225.5%22%20cy%3D%2218.5%22%20r%3D%222.5%22/%3E%3Ccircle%20cx%3D%2218.5%22%20cy%3D%2218.5%22%20r%3D%222.5%22/%3E%3C/svg%3E", title: "Free Shipping", description: "It is a long established fact that a reader will be." },
+    { icon: "data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A//www.w3.org/2000/svg%22%20viewBox%3D%220%200%2024%2024%22%20fill%3D%22none%22%20stroke%3D%22%231a1a2e%22%20stroke-width%3D%221.5%22%3E%3Cpath%20d%3D%22M3%2012a9%209%200%200118%200M3%2012v3a2%202%200%20002%202h1v-6H5a2%202%200%2000-2%202zM21%2012v3a2%202%200%2001-2%202h-1v-6h1a2%202%200%20012%202z%22/%3E%3C/svg%3E", title: "Support 24", description: "Various versions have evolved over." },
+    { icon: "data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A//www.w3.org/2000/svg%22%20viewBox%3D%220%200%2024%2024%22%20fill%3D%22none%22%20stroke%3D%22%231a1a2e%22%20stroke-width%3D%221.5%22%3E%3Crect%20x%3D%222%22%20y%3D%225%22%20width%3D%2220%22%20height%3D%2214%22%20rx%3D%222%22/%3E%3Cpath%20d%3D%22M2%2010h20%22/%3E%3C/svg%3E", title: "Easy Payment", description: "Quisque velit nisi, pretium ut lacinia in." },
   ];
-  const items = features || defaultFeatures;
+  const items = features.length > 0 ? features : defaultFeatures;
 
   const css = `
     .ty-features { display: grid; grid-template-columns: repeat(3, 1fr); gap: 30px; margin: 0 auto 60px; text-align: center; }
@@ -290,17 +289,17 @@ export interface ToysAgeCategoriesProps {
 export function ToysAgeCategories({
   subtitle = "Choose your category",
   title = "Kids' Toys by Age",
-  categories,
+  categories = [],
 }: ToysAgeCategoriesProps) {
   const storeCtx = useContext(ToysStoreContext);
   const defaultCategories: ToysAgeCategory[] = [
-    { label: "2 Years Old", image: `${IMG}/2018/02/v-toy-categ-img-circle.png`, link: "#" },
-    { label: "2-5 Year Olds", image: `${IMG}/2018/02/v-toy-categ-img-circle-2.png`, link: "#" },
-    { label: "5-8 Year Olds", image: `${IMG}/2018/02/v-toy-categ-img-circle-3.png`, link: "#" },
-    { label: "8-13 Year Olds", image: `${IMG}/2018/02/v-toy-categ-img-circle-4.png`, link: "#" },
-    { label: "13-16 Year Olds", image: `${IMG}/2018/02/v-toy-categ-img-circle-5.png`, link: "#" },
+    { label: "2 Years Old", image: "https://images.unsplash.com/photo-1519689680058-324335c77eba?w=300&h=300&fit=crop", link: "#" },
+    { label: "2-5 Year Olds", image: "https://images.unsplash.com/photo-1596461404969-9ae70f2830c1?w=300&h=300&fit=crop", link: "#" },
+    { label: "5-8 Year Olds", image: "https://images.unsplash.com/photo-1566576912321-d58ddd7a6088?w=300&h=300&fit=crop", link: "#" },
+    { label: "8-13 Year Olds", image: "https://images.unsplash.com/photo-1560859251-d563a49c5e4a?w=300&h=300&fit=crop", link: "#" },
+    { label: "13-16 Year Olds", image: "https://images.unsplash.com/photo-1516981879613-9f5da904015f?w=300&h=300&fit=crop", link: "#" },
   ];
-  const items = categories || defaultCategories;
+  const items = categories.length > 0 ? categories : defaultCategories;
 
   const css = `
     .ty-age-section { background: ${TOKENS.bgLight}; padding: 60px 0; margin-bottom: 60px; }
@@ -371,14 +370,14 @@ export function ToysProductGrid({
   const [activeTab, setActiveTab] = useState(0);
 
   const defaultProducts: ToysProduct[] = [
-    { id: 1, name: "Accumsan imperdiet nisi", slug: "accumsan-imperdiet", price: "229.00", image: `${IMG}/2018/02/v-toy-product-3-opt-430x516.jpg`, category: "Kids Toys", rating: 5 },
-    { id: 2, name: "Consecter adipiscing auctor", slug: "consecter-adipiscing", price: "209.00", image: `${IMG}/2018/02/v-toy-product-4-opt-430x516.jpg`, category: "Kids Toys", rating: 5 },
-    { id: 3, name: "Convallis tellus dunt", slug: "convallis-tellus", price: "239.00", image: `${IMG}/2018/02/v-toy-product-20-opt-430x516.jpg`, category: "Kids Toys", rating: 5 },
-    { id: 4, name: "Elementum quam ligula", slug: "elementum-quam", price: "249.00", image: `${IMG}/2018/02/v-toy-product-19-opt-430x516.jpg`, category: "Kids Toys", rating: 5 },
-    { id: 5, name: "Libero malesuada justo", slug: "libero-malesuada", price: "249.00", image: `${IMG}/2018/02/v-toy-product-8-opt-430x516.jpg`, category: "Kids Toys", rating: 5 },
-    { id: 6, name: "Porttitor tincidunt sed", slug: "porttitor-tincidunt", price: "189.00", image: `${IMG}/2018/02/v-toy-product-6-opt-430x516.jpg`, category: "Kids Toys", rating: 5 },
-    { id: 7, name: "Praesent sapassa magna", slug: "praesent-sapassa", price: "219.00", image: `${IMG}/2018/02/v-toy-product-2-opt-430x516.jpg`, category: "Kids Toys", rating: 5 },
-    { id: 8, name: "Sollicitudin tempus eget", slug: "sollicitudin-tempus", price: "259.00", image: `${IMG}/2018/02/v-toy-product-18-opt-430x516.jpg`, category: "Kids Toys", rating: 5 },
+    { id: 1, name: "Building Block Set", slug: "building-block-set", price: "229.00", image: "https://images.unsplash.com/photo-1558877385-81a1c7e67d72?w=500&h=500&fit=crop", category: "Kids Toys", rating: 5 },
+    { id: 2, name: "Plush Teddy Bear", slug: "plush-teddy-bear", price: "209.00", image: "https://images.unsplash.com/photo-1587654780291-39c9404d746b?w=500&h=500&fit=crop", category: "Kids Toys", rating: 5 },
+    { id: 3, name: "Remote Control Car", slug: "remote-control-car", price: "239.00", image: "https://images.unsplash.com/photo-1587377645106-27831bcb94c9?w=500&h=500&fit=crop", category: "Kids Toys", rating: 5 },
+    { id: 4, name: "Wooden Puzzle Board", slug: "wooden-puzzle-board", price: "249.00", image: "https://images.unsplash.com/photo-1560859251-d563a49c5e4a?w=500&h=500&fit=crop", category: "Kids Toys", rating: 5 },
+    { id: 5, name: "Action Figure Set", slug: "action-figure-set", price: "249.00", image: "https://images.unsplash.com/photo-1516981879613-9f5da904015f?w=500&h=500&fit=crop", category: "Kids Toys", rating: 5 },
+    { id: 6, name: "Toy Train Set", slug: "toy-train-set", price: "189.00", image: "https://images.unsplash.com/photo-1566576912321-d58ddd7a6088?w=500&h=500&fit=crop", category: "Kids Toys", rating: 5 },
+    { id: 7, name: "Stacking Rings Toy", slug: "stacking-rings-toy", price: "219.00", image: "https://images.unsplash.com/photo-1596461404969-9ae70f2830c1?w=500&h=500&fit=crop", category: "Kids Toys", rating: 5 },
+    { id: 8, name: "Dollhouse Playset", slug: "dollhouse-playset", price: "259.00", image: "https://images.unsplash.com/photo-1519689680058-324335c77eba?w=500&h=500&fit=crop", category: "Kids Toys", rating: 5 },
   ];
 
   const items = (propProducts || storeCtx?.products || defaultProducts).slice(0, maxProducts);
@@ -448,7 +447,7 @@ export function ToysLimitedOffer({
   subtitle = "Don't miss your chance",
   title = "Limited Time Offer",
   description = "There are many variations of passages of lorem ipsum available, but the majority have suffered alteration in some form, by injected humour, or randomised words which don't look even slightly believable. If you are going to use a passage of lorem ipsum, you need to be sure.",
-  productImage = `${IMG}/2018/02/v-toy-product-left.png`,
+  productImage = "https://images.unsplash.com/photo-1558877385-81a1c7e67d72?w=600&q=80&auto=format&fit=crop",
   ctaText = "Buy now",
   ctaLink = "#",
   endDate,
@@ -538,14 +537,14 @@ export interface ToysTestimonialsProps {
 export function ToysTestimonials({
   subtitle = "Check our latest",
   title = "Customer Reviews",
-  testimonials,
+  testimonials = [],
 }: ToysTestimonialsProps) {
   const defaultTestimonials: ToysTestimonial[] = [
-    { text: "There are many variations of passages of Lorem Ipsum available, but the majority have suffered alteration in some form, by injected humour, or randomised words.", avatar: `${IMG}/2018/02/v-toys-testimon-100x100.jpg` },
-    { text: "There are many variations of passages of Lorem Ipsum available, but the majority have suffered alteration in some form, by injected humour, or randomised words.", avatar: `${IMG}/2018/02/v-toy-testimonials-portrait-2-100x100.jpg` },
-    { text: "There are many variations of passages of Lorem Ipsum available, but the majority have suffered alteration in some form, by injected humour, or randomised words.", avatar: `${IMG}/2018/02/v-toy-testimonials-portrait-3-100x100.jpg` },
+    { text: "There are many variations of passages of Lorem Ipsum available, but the majority have suffered alteration in some form, by injected humour, or randomised words.", avatar: "https://images.unsplash.com/photo-1633332755192-727a05c4013d?w=100&h=100&fit=crop" },
+    { text: "There are many variations of passages of Lorem Ipsum available, but the majority have suffered alteration in some form, by injected humour, or randomised words.", avatar: "https://images.unsplash.com/photo-1573497019940-1c28c88b4f3e?w=100&h=100&fit=crop" },
+    { text: "There are many variations of passages of Lorem Ipsum available, but the majority have suffered alteration in some form, by injected humour, or randomised words.", avatar: "https://images.unsplash.com/photo-1607746882042-944635dfe10e?w=100&h=100&fit=crop" },
   ];
-  const items = testimonials || defaultTestimonials;
+  const items = testimonials.length > 0 ? testimonials : defaultTestimonials;
 
   const css = `
     .ty-reviews { margin-bottom: 60px; }

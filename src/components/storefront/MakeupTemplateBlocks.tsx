@@ -30,7 +30,6 @@ const TOKENS = {
   bodyFont: "'Inter', Arial, Helvetica, sans-serif",
 };
 
-const IMG_BASE = "https://prokip.xtemos.com/makeup/wp-content/uploads/sites/22/2024/10";
 
 /* ─── FONT LOADER ───────────────────────────────────────────── */
 export function MakeupFontLoader() {

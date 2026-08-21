@@ -33,7 +33,6 @@ const TOKENS = {
   bgLight: "#f7f7f7",
 };
 
-const IMG = "/uploads/1782916258406-43258fa3f9d229c5dd6fad61.png";
 
 /* ─── FONT LOADER ───────────────────────────────────────────── */
 export function HealthFontLoader() {
@@ -130,7 +129,7 @@ export function HealthHero({
   subtitle = "Our mission is to make you healthy and happy, for this we use only natural and high-quality ingredients necessary to achieve an extraordinary effect.",
   buttonText = "Shop Now",
   buttonLink = "#",
-  backgroundImage = `${IMG}/2023/08/w-pas-first-screen.jpg`,
+  backgroundImage = "https://images.unsplash.com/photo-1584017911766-d451b3d0e843?w=1400&q=80&auto=format&fit=crop",
 }: HealthHeroProps) {
   const storeCtx = useContext(HealthStoreContext);
   const fixLink = (link: string) => resolveStoreLink(link, storeCtx?.storeSlug);
@@ -219,9 +218,9 @@ export function HealthPromoBanners({ banners = [] }: HealthPromoBannersProps) {
   const fixLink = (link: string) => resolveStoreLink(link, storeCtx?.storeSlug);
 
   const defaultBanners: HealthPromoBanner[] = [
-    { image: `${IMG}/2024/03/w-pas-banner-1.jpg`, subtitle: "Save 15%", title: "Bundles", buttonText: "Shop by Need", buttonLink: "#", colorScheme: "light", height: "456px" },
-    { image: `${IMG}/2024/03/w-pas-dropdown-banner-gummy.jpg`, title: "Sleep Easy Gummies", description: "Supports an optimal sleep cycle", buttonLink: "#", colorScheme: "dark", height: "200px" },
-    { image: `${IMG}/2024/03/w-pas-dropdown-banner-capsule.jpg`, title: "Capsules for Skin", description: "Supports an optimal sleep cycle", buttonLink: "#", colorScheme: "dark", height: "200px" },
+    { image: "https://images.unsplash.com/photo-1550572017-edd951b55104?w=700&q=80&auto=format&fit=crop", subtitle: "Save 15%", title: "Bundles", buttonText: "Shop by Need", buttonLink: "#", colorScheme: "light", height: "456px" },
+    { image: "https://images.unsplash.com/photo-1607619056574-7b8d3ee536b2?w=400&q=80&auto=format&fit=crop", title: "Sleep Easy Gummies", description: "Supports an optimal sleep cycle", buttonLink: "#", colorScheme: "dark", height: "200px" },
+    { image: "https://images.unsplash.com/photo-1550572017-edd951b55104?w=400&q=80&auto=format&fit=crop", title: "Capsules for Skin", description: "Supports an optimal sleep cycle", buttonLink: "#", colorScheme: "dark", height: "200px" },
   ];
 
   const items = Array.isArray(banners) ? banners : defaultBanners;
@@ -311,14 +310,14 @@ export function HealthCategoryCards({ categories = [], columns = 4, sectionTitle
   const fixLink = (link?: string) => resolveStoreLink(link || "#", storeCtx?.storeSlug);
 
   const defaultCats: HealthCategoryCard[] = [
-    { name: "Allergy Relief", image: `${IMG}/2023/08/w-pas-category-allergy.jpg` },
-    { name: "Anxiety", image: `${IMG}/2023/08/w-pas-anx.jpg` },
-    { name: "Depression", image: `${IMG}/2023/08/w-pas-depression.jpg` },
-    { name: "Eye & Vision", image: `${IMG}/2023/08/w-pas-eye-vision.jpg` },
-    { name: "Hair", image: `${IMG}/2023/08/w-pas-hair.jpg` },
-    { name: "Pregnancy", image: `${IMG}/2023/08/w-pas-pregnancy.jpg` },
-    { name: "Skin", image: `${IMG}/2023/08/w-pas-skin.jpg` },
-    { name: "Sleep", image: `${IMG}/2023/08/w-pas-sleep.jpg` },
+    { name: "Allergy Relief", image: "https://images.unsplash.com/photo-1584362917165-526a968579e8?w=300&q=80&auto=format&fit=crop" },
+    { name: "Anxiety", image: "https://images.unsplash.com/photo-1611072965169-e2e1a67b6699?w=300&q=80&auto=format&fit=crop" },
+    { name: "Depression", image: "https://images.unsplash.com/photo-1620916566398-39f1143ab7be?w=300&q=80&auto=format&fit=crop" },
+    { name: "Eye & Vision", image: "https://images.unsplash.com/photo-1516574187841-cb9cc2ca948b?w=300&q=80&auto=format&fit=crop" },
+    { name: "Hair", image: "https://images.unsplash.com/photo-1522337360788-8b13dee7a37e?w=300&q=80&auto=format&fit=crop" },
+    { name: "Pregnancy", image: "https://images.unsplash.com/photo-1584582397869-9c2eee7ce1d3?w=300&q=80&auto=format&fit=crop" },
+    { name: "Skin", image: "https://images.unsplash.com/photo-1571781926291-c477ebfd024b?w=300&q=80&auto=format&fit=crop" },
+    { name: "Sleep", image: "https://images.unsplash.com/photo-1541781774459-bb2af2f05b55?w=300&q=80&auto=format&fit=crop" },
   ];
   const items = Array.isArray(categories) ? categories : defaultCats;
 
@@ -384,12 +383,12 @@ export function HealthProductGrid({
   };
 
   const defaultProducts: HealthProduct[] = [
-    { id: 112, name: "Allergy Relief 30 Tablets", slug: "allergy-relief-30-tablets", price: "15.00", image: `${IMG}/2023/08/w-pas-ar-30-tablets-1.jpg`, hoverImage: `${IMG}/2023/08/w-pas-ar-30-tablets-2.jpg`, category: "Allergy Relief", rating: 5, reviewCount: 3 },
-    { id: 246, name: "Depression 60 Tablets", slug: "depression-60-tablets", price: "25.00", image: `${IMG}/2023/08/w-pas-dp-60-tablets-1.jpg`, hoverImage: `${IMG}/2023/08/w-pas-dp-30-tablets-2.jpg`, category: "Depression", rating: 5, reviewCount: 2 },
-    { id: 451, name: "Skin 30 Gummies", slug: "skin-30-gummies", price: "12.00", image: `${IMG}/2023/08/w-pas-sk-30-gummies-1.jpg`, hoverImage: `${IMG}/2023/08/w-pas-sk-30-gummies-2.jpg`, category: "Skin", rating: 4, reviewCount: 1 },
-    { id: 356, name: "Hair 60 Capsules", slug: "hair-60-capsules", price: "25.00", image: `${IMG}/2023/08/w-pas-hr-60-capsules-1.jpg`, hoverImage: `${IMG}/2023/08/w-pas-hr-30-capsules-2.jpg`, category: "Hair", rating: 5, reviewCount: 4 },
-    { id: 493, name: "Sleep 30 Capsules", slug: "sleep-30-capsules", price: "15.00", image: `${IMG}/2023/08/w-pas-sl-30-capsules-1.jpg`, hoverImage: `${IMG}/2023/08/w-pas-sl-30-capsules-2.jpg`, category: "Sleep", rating: 5, reviewCount: 2 },
-    { id: 308, name: "Eye & Vision 60 Softgels", slug: "eye-vision-60-softgels", price: "18.00", image: `${IMG}/2023/08/w-pas-ev-60-softgel-1.jpg`, hoverImage: `${IMG}/2023/08/w-pas-ev-30-softgel-2.jpg`, category: "Eye & Vision", rating: 4, reviewCount: 3 },
+    { id: 112, name: "Allergy Relief 30 Tablets", slug: "allergy-relief-30-tablets", price: "15.00", image: "https://images.unsplash.com/photo-1584308666744-24d5c474f2ae?w=500&h=500&fit=crop", hoverImage: "https://images.unsplash.com/photo-1607619056574-7b8d3ee536b2?w=500&h=500&fit=crop", category: "Allergy Relief", rating: 5, reviewCount: 3 },
+    { id: 246, name: "Depression 60 Tablets", slug: "depression-60-tablets", price: "25.00", image: "https://images.unsplash.com/photo-1587854692152-cbe660dbde88?w=500&h=500&fit=crop", hoverImage: "https://images.unsplash.com/photo-1550572017-edd951b55104?w=500&h=500&fit=crop", category: "Depression", rating: 5, reviewCount: 2 },
+    { id: 451, name: "Skin 30 Gummies", slug: "skin-30-gummies", price: "12.00", image: "https://images.unsplash.com/photo-1607619056574-7b8d3ee536b2?w=500&h=500&fit=crop", hoverImage: "https://images.unsplash.com/photo-1584308666744-24d5c474f2ae?w=500&h=500&fit=crop", category: "Skin", rating: 4, reviewCount: 1 },
+    { id: 356, name: "Hair 60 Capsules", slug: "hair-60-capsules", price: "25.00", image: "https://images.unsplash.com/photo-1550572017-edd951b55104?w=500&h=500&fit=crop", hoverImage: "https://images.unsplash.com/photo-1587854692152-cbe660dbde88?w=500&h=500&fit=crop", category: "Hair", rating: 5, reviewCount: 4 },
+    { id: 493, name: "Sleep 30 Capsules", slug: "sleep-30-capsules", price: "15.00", image: "https://images.unsplash.com/photo-1584362917165-526a968579e8?w=500&h=500&fit=crop", hoverImage: "https://images.unsplash.com/photo-1607619056574-7b8d3ee536b2?w=500&h=500&fit=crop", category: "Sleep", rating: 5, reviewCount: 2 },
+    { id: 308, name: "Eye & Vision 60 Softgels", slug: "eye-vision-60-softgels", price: "18.00", image: "https://images.unsplash.com/photo-1587854692152-cbe660dbde88?w=500&h=500&fit=crop", hoverImage: "https://images.unsplash.com/photo-1584308666744-24d5c474f2ae?w=500&h=500&fit=crop", category: "Eye & Vision", rating: 4, reviewCount: 3 },
   ];
 
   const items = (propProducts || storeCtx?.products || defaultProducts).slice(0, maxProducts);
@@ -455,7 +454,7 @@ export interface HealthVideoSectionProps {
 }
 
 export function HealthVideoSection({
-  videoSrc = `${IMG}/2023/08/w-pas-video-desktop.mp4`,
+  videoSrc = "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerJoyrides.mp4",
   title = "Effective Vitamins For Your Health",
   subtitle = "Our vitamins and supplements are designed to provide essential nutrients that may be lacking in our diet. These products are tested to ensure their safety and quality.",
   height = "660px",
@@ -495,19 +494,19 @@ export interface HealthFeatureSectionProps {
 export function HealthFeatureSection({
   title = "Supplements And Ingredients You Can Trust",
   subtitle = "Need help choosing?",
-  features,
-  image = `${IMG}/2023/08/w-pas-iron-72x72.jpg`,
-  helpAvatars = `${IMG}/2023/08/w-pas-avatars-help-153x42.png`,
+  features = [],
+  image = "https://images.unsplash.com/photo-1584308666744-24d5c474f2ae?w=200&q=80&auto=format&fit=crop",
+  helpAvatars = "",
   helpText = "Need help choosing?",
 }: HealthFeatureSectionProps) {
   const storeCtx = useContext(HealthStoreContext);
   const defaultFeatures: HealthFeatureItem[] = [
-    { icon: `${IMG}/2023/08/w-pas-m-icon-1.svg`, title: "Used In", description: "Chances are, you've probably heard of the nutrient iron before. As a kid, you may remember the not-so-pleasant finger pricks at the doctor's office to check your iron levels." },
-    { icon: `${IMG}/2023/08/w-pas-m-icon-2.svg`, title: "Found In", description: "Chances are, you've probably heard of the nutrient iron before. As a kid, you may remember the not-so-pleasant finger pricks at the doctor's office to check your iron levels." },
-    { icon: `${IMG}/2023/08/w-pas-m-icon-3.svg`, title: "Learn All Ingredients In Our Guide.", description: "" },
+    { icon: "data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A//www.w3.org/2000/svg%22%20viewBox%3D%220%200%2024%2024%22%20fill%3D%22none%22%20stroke%3D%22%231a1a2e%22%20stroke-width%3D%221.5%22%3E%3Cpath%20d%3D%22M12%202l8%204v6c0%205-3.5%208.5-8%2010-4.5-1.5-8-5-8-10V6l8-4z%22/%3E%3Cpath%20d%3D%22M9%2012l2%202%204-4%22/%3E%3C/svg%3E", title: "Used In", description: "Chances are, you've probably heard of the nutrient iron before. As a kid, you may remember the not-so-pleasant finger pricks at the doctor's office to check your iron levels." },
+    { icon: "data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A//www.w3.org/2000/svg%22%20viewBox%3D%220%200%2024%2024%22%20fill%3D%22none%22%20stroke%3D%22%231a1a2e%22%20stroke-width%3D%221.5%22%3E%3Ccircle%20cx%3D%2211%22%20cy%3D%2211%22%20r%3D%227%22/%3E%3Cpath%20d%3D%22M21%2021l-4.35-4.35%22/%3E%3C/svg%3E", title: "Found In", description: "Chances are, you've probably heard of the nutrient iron before. As a kid, you may remember the not-so-pleasant finger pricks at the doctor's office to check your iron levels." },
+    { icon: "data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A//www.w3.org/2000/svg%22%20viewBox%3D%220%200%2024%2024%22%20fill%3D%22none%22%20stroke%3D%22%231a1a2e%22%20stroke-width%3D%221.5%22%3E%3Cpath%20d%3D%22M4%2019.5A2.5%202.5%200%20016.5%2017H20M4%2019.5A2.5%202.5%200%20006.5%2022H20V2H6.5A2.5%202.5%200%20004%204.5v15z%22/%3E%3C/svg%3E", title: "Learn All Ingredients In Our Guide.", description: "" },
   ];
 
-  const items = features || defaultFeatures;
+  const items = features.length > 0 ? features : defaultFeatures;
 
   const css = `
     .hh-feat { background: ${TOKENS.bgLight}; border-radius: ${TOKENS.borderRadius}; padding: 80px 65px; margin-bottom: 80px; display: flex; gap: 60px; align-items: center; }
@@ -576,18 +575,18 @@ export interface HealthTestimonialsProps {
 
 export function HealthTestimonials({
   title = "Feedback From Real Customers",
-  testimonials,
+  testimonials = [],
 }: HealthTestimonialsProps) {
   const defaultTestimonials: HealthTestimonial[] = [
-    { name: "Customer 1", image: `${IMG}/2023/08/w-pas-customer-1.jpg`, text: "The best vitamins and supplements are made from natural ingredients using modern technologies aimed at improving personal and mental health.", rating: 5 },
-    { name: "Customer 2", image: `${IMG}/2023/08/w-pas-customer-2.jpg`, text: "The best vitamins and supplements are made from natural ingredients using modern technologies aimed at improving personal and mental health.", rating: 5 },
-    { name: "Customer 3", image: `${IMG}/2023/08/w-pas-customer-3.jpg`, text: "The best vitamins and supplements are made from natural ingredients using modern technologies aimed at improving personal and mental health.", rating: 5 },
-    { name: "Customer 4", image: `${IMG}/2023/08/w-pas-customer-4.jpg`, text: "The best vitamins and supplements are made from natural ingredients using modern technologies aimed at improving personal and mental health.", rating: 5 },
-    { name: "Customer 5", image: `${IMG}/2023/08/w-pas-customer-5.jpg`, text: "The best vitamins and supplements are made from natural ingredients using modern technologies aimed at improving personal and mental health.", rating: 5 },
-    { name: "Customer 6", image: `${IMG}/2023/08/w-pas-customer-6.jpg`, text: "The best vitamins and supplements are made from natural ingredients using modern technologies aimed at improving personal and mental health.", rating: 5 },
+    { name: "Customer 1", image: "https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?w=200&h=200&fit=crop", text: "The best vitamins and supplements are made from natural ingredients using modern technologies aimed at improving personal and mental health.", rating: 5 },
+    { name: "Customer 2", image: "https://images.unsplash.com/photo-1560250097-0b93528c311a?w=200&h=200&fit=crop", text: "The best vitamins and supplements are made from natural ingredients using modern technologies aimed at improving personal and mental health.", rating: 5 },
+    { name: "Customer 3", image: "https://images.unsplash.com/photo-1580489944761-15a19d654956?w=200&h=200&fit=crop", text: "The best vitamins and supplements are made from natural ingredients using modern technologies aimed at improving personal and mental health.", rating: 5 },
+    { name: "Customer 4", image: "https://images.unsplash.com/photo-1633332755192-727a05c4013d?w=200&h=200&fit=crop", text: "The best vitamins and supplements are made from natural ingredients using modern technologies aimed at improving personal and mental health.", rating: 5 },
+    { name: "Customer 5", image: "https://images.unsplash.com/photo-1607746882042-944635dfe10e?w=200&h=200&fit=crop", text: "The best vitamins and supplements are made from natural ingredients using modern technologies aimed at improving personal and mental health.", rating: 5 },
+    { name: "Customer 6", image: "https://images.unsplash.com/photo-1573497019940-1c28c88b4f3e?w=200&h=200&fit=crop", text: "The best vitamins and supplements are made from natural ingredients using modern technologies aimed at improving personal and mental health.", rating: 5 },
   ];
 
-  const items = testimonials || defaultTestimonials;
+  const items = testimonials.length > 0 ? testimonials : defaultTestimonials;
 
   const css = `
     .hh-testim-section { margin-bottom: 80px; }
@@ -648,9 +647,9 @@ export interface HealthBlogPostsProps {
 
 export function HealthBlogPosts({ posts = [], columns = 3, sectionTitle, marginBottom = "60px" }: HealthBlogPostsProps) {
   const defaultPosts: HealthBlogPost[] = [
-    { title: "What is fiber and why is it important for health?", image: `${IMG}/2023/09/w-pas-blog-1-400x247.jpg`, date: "September 5, 2023", author: "Admin", category: "Health" },
-    { title: "5 ways to celebrate your mom on Mother's Day", image: `${IMG}/2023/09/w-pas-blog-2-400x247.jpg`, date: "September 4, 2023", author: "Admin", category: "Health" },
-    { title: "Syncing Up for an Integrated Brain", image: `${IMG}/2023/09/w-pas-blog-3-400x247.jpg`, date: "September 4, 2023", author: "Admin", category: "Health" },
+    { title: "What is fiber and why is it important for health?", image: "https://images.unsplash.com/photo-1490645935967-10de6ba17061?w=500&q=80&auto=format&fit=crop", date: "September 5, 2023", author: "Admin", category: "Health" },
+    { title: "5 ways to celebrate your mom on Mother's Day", image: "https://images.unsplash.com/photo-1518199266791-5375a83190b7?w=500&q=80&auto=format&fit=crop", date: "September 4, 2023", author: "Admin", category: "Health" },
+    { title: "Syncing Up for an Integrated Brain", image: "https://images.unsplash.com/photo-1506126613408-eca07ce68773?w=500&q=80&auto=format&fit=crop", date: "September 4, 2023", author: "Admin", category: "Health" },
   ];
 
   const items = Array.isArray(posts) ? posts : defaultPosts;
@@ -762,7 +761,7 @@ export function HealthBrandMarquee({ speed = 70, reverse = false }: HealthBrandM
   `;
 
   const brands = [
-    `${IMG}/2023/08/w-pas-logo-color.svg`,
+    "",
   ];
   const doubled = [...brands, ...brands, ...brands, ...brands, ...brands, ...brands];
 
@@ -1057,16 +1056,16 @@ export interface HealthAboutPageProps {
 export function HealthAboutPage({
   heroTitle = "About Us",
   heroSubtitle = "Our mission is to make you healthy and happy, for this we use only natural and high-quality ingredients necessary to achieve an extraordinary effect.",
-  heroImage = `${IMG}/2023/08/w-pas-first-screen.jpg`,
+  heroImage = "https://images.unsplash.com/photo-1584017911766-d451b3d0e843?w=1400&q=80&auto=format&fit=crop",
   storyTitle = "Our Story",
   storyText = "We started with a simple belief: everyone deserves access to clean, effective supplements. Our team of nutritionists and wellness experts carefully selects every ingredient, ensuring that each product meets the highest standards of quality and purity. From sourcing to formulation, we prioritize transparency and trust.",
-  storyImage = `${IMG}/2023/08/w-pas-iron-72x72.jpg`,
+  storyImage = "https://images.unsplash.com/photo-1584308666744-24d5c474f2ae?w=200&q=80&auto=format&fit=crop",
   missionTitle = "Our Mission",
   missionText = "Help customers build healthy routines without confusion or hype. We believe in science-backed formulas, honest labeling, and supplements that actually work.",
-  features,
+  features = [],
   teamTitle = "Medical Experts",
   teamSubtitle = "Meet the professionals behind our formulations",
-  team,
+  team = [],
 }: HealthAboutPageProps) {
   const defaultFeatures: HealthAboutFeature[] = [
     { icon: "🧪", title: "Tested Formulas", description: "Every product is third-party tested for purity, potency, and safety before it reaches you." },
@@ -1076,14 +1075,14 @@ export function HealthAboutPage({
   ];
 
   const defaultTeam: HealthTeamMember[] = [
-    { name: "Dr. Sarah Mitchell", role: "Chief Nutritionist", image: `${IMG}/2023/08/w-pas-customer-1.jpg` },
-    { name: "Dr. James Carter", role: "Formulation Specialist", image: `${IMG}/2023/08/w-pas-customer-2.jpg` },
-    { name: "Emily Rodriguez", role: "Wellness Advisor", image: `${IMG}/2023/08/w-pas-customer-3.jpg` },
-    { name: "Dr. Michael Chen", role: "Quality Assurance", image: `${IMG}/2023/08/w-pas-customer-4.jpg` },
+    { name: "Dr. Sarah Mitchell", role: "Chief Nutritionist", image: "https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?w=200&h=200&fit=crop" },
+    { name: "Dr. James Carter", role: "Formulation Specialist", image: "https://images.unsplash.com/photo-1560250097-0b93528c311a?w=200&h=200&fit=crop" },
+    { name: "Emily Rodriguez", role: "Wellness Advisor", image: "https://images.unsplash.com/photo-1580489944761-15a19d654956?w=200&h=200&fit=crop" },
+    { name: "Dr. Michael Chen", role: "Quality Assurance", image: "https://images.unsplash.com/photo-1633332755192-727a05c4013d?w=200&h=200&fit=crop" },
   ];
 
-  const featureItems = features || defaultFeatures;
-  const teamItems = team || defaultTeam;
+  const featureItems = features.length > 0 ? features : defaultFeatures;
+  const teamItems = team.length > 0 ? team : defaultTeam;
 
   const css = `
     .hh-about-hero { position: relative; min-height: 400px; display: flex; align-items: center; overflow: hidden; background: ${TOKENS.bgLight}; margin-bottom: 80px; }
@@ -1168,7 +1167,7 @@ export function HealthAboutPage({
           <div className="hh-about-team-grid">
             {teamItems.map((m, i) => (
               <div key={i} className="hh-about-team-card">
-                <img className="hh-about-team-img" src={m.image || "/uploads/1782916258406-43258fa3f9d229c5dd6fad61.png"} alt={m.name} onError={(e) => onImgError(e, m.name)} />
+                <img className="hh-about-team-img" src={m.image || "https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?w=200&h=200&fit=crop"} alt={m.name} onError={(e) => onImgError(e, m.name)} />
                 <h5 className="hh-about-team-name">{m.name}</h5>
                 <div className="hh-about-team-role">{m.role}</div>
               </div>
@@ -1213,7 +1212,7 @@ export function HealthContactPage({
   formTitle = "Send Us a Message",
   formSubtitle = "We typically respond within 24 hours",
   faqTitle = "Frequently Asked Questions",
-  faqs,
+  faqs = [],
 }: HealthContactPageProps) {
   const storeCtx = useContext(HealthStoreContext);
   const [openFaq, setOpenFaq] = useState<number | null>(null);
@@ -1226,7 +1225,7 @@ export function HealthContactPage({
     { question: "Do you ship internationally?", answer: "Currently we ship within the US. International shipping is coming soon — subscribe to our newsletter for updates." },
   ];
 
-  const faqItems = faqs || defaultFaqs;
+  const faqItems = faqs.length > 0 ? faqs : defaultFaqs;
 
   const css = `
     .hh-contact-hero { background: ${TOKENS.primaryColor}; padding: 80px 20px; text-align: center; margin-bottom: 60px; }
@@ -1327,12 +1326,12 @@ export function HealthBlogPage({
   heroTitle = "Health & Wellness Blog",
   heroSubtitle = "Expert advice on vitamins, supplements, and building a healthier lifestyle.",
   featuredPost,
-  posts,
-  categories,
+  posts = [],
+  categories = [],
 }: HealthBlogPageProps) {
   const defaultFeatured: HealthBlogPagePost = {
     title: "What is fiber and why is it important for health?",
-    image: `${IMG}/2023/09/w-pas-blog-1.jpg`,
+    image: "https://images.unsplash.com/photo-1490645935967-10de6ba17061?w=800&q=80&auto=format&fit=crop",
     date: "September 5, 2023",
     author: "Wellness Team",
     excerpt: "Fiber is one of the most underrated nutrients. Learn how it supports digestion, heart health, and sustained energy throughout the day.",
@@ -1340,19 +1339,19 @@ export function HealthBlogPage({
   };
 
   const defaultPosts: HealthBlogPagePost[] = [
-    { title: "5 ways to celebrate your mom on Mother's Day", image: `${IMG}/2023/09/w-pas-blog-2-400x247.jpg`, date: "September 4, 2023", author: "Admin", category: "Motivation", excerpt: "Simple, meaningful gestures that go beyond flowers and cards." },
-    { title: "Syncing Up for an Integrated Brain", image: `${IMG}/2023/09/w-pas-blog-3-400x247.jpg`, date: "September 4, 2023", author: "Admin", category: "Health", excerpt: "How sleep, nutrition, and movement work together for cognitive clarity." },
-    { title: "The Complete Guide to Vitamin D", image: `${IMG}/2023/08/w-pas-ev-60-softgel-1.jpg`, date: "August 28, 2023", author: "Dr. Sarah M.", category: "Vitamins", excerpt: "Why vitamin D matters, how much you need, and the best ways to get it." },
-    { title: "Understanding Melatonin and Sleep Quality", image: `${IMG}/2023/08/w-pas-sl-30-capsules-1.jpg`, date: "August 20, 2023", author: "Wellness Team", category: "Sleep", excerpt: "A closer look at how melatonin supplements can support your natural sleep cycle." },
-    { title: "Top 5 Supplements for Hair Health", image: `${IMG}/2023/08/w-pas-hr-60-capsules-1.jpg`, date: "August 15, 2023", author: "Admin", category: "Hair", excerpt: "From biotin to collagen — the supplements that actually support healthy hair growth." },
-    { title: "Allergy Season: Natural Relief Options", image: `${IMG}/2023/08/w-pas-ar-30-tablets-1.jpg`, date: "August 10, 2023", author: "Admin", category: "Health", excerpt: "Explore natural approaches to managing seasonal allergies alongside traditional treatments." },
+    { title: "5 ways to celebrate your mom on Mother's Day", image: "https://images.unsplash.com/photo-1518199266791-5375a83190b7?w=500&q=80&auto=format&fit=crop", date: "September 4, 2023", author: "Admin", category: "Motivation", excerpt: "Simple, meaningful gestures that go beyond flowers and cards." },
+    { title: "Syncing Up for an Integrated Brain", image: "https://images.unsplash.com/photo-1506126613408-eca07ce68773?w=500&q=80&auto=format&fit=crop", date: "September 4, 2023", author: "Admin", category: "Health", excerpt: "How sleep, nutrition, and movement work together for cognitive clarity." },
+    { title: "The Complete Guide to Vitamin D", image: "https://images.unsplash.com/photo-1587854692152-cbe660dbde88?w=500&h=500&fit=crop", date: "August 28, 2023", author: "Dr. Sarah M.", category: "Vitamins", excerpt: "Why vitamin D matters, how much you need, and the best ways to get it." },
+    { title: "Understanding Melatonin and Sleep Quality", image: "https://images.unsplash.com/photo-1584362917165-526a968579e8?w=500&h=500&fit=crop", date: "August 20, 2023", author: "Wellness Team", category: "Sleep", excerpt: "A closer look at how melatonin supplements can support your natural sleep cycle." },
+    { title: "Top 5 Supplements for Hair Health", image: "https://images.unsplash.com/photo-1550572017-edd951b55104?w=500&h=500&fit=crop", date: "August 15, 2023", author: "Admin", category: "Hair", excerpt: "From biotin to collagen — the supplements that actually support healthy hair growth." },
+    { title: "Allergy Season: Natural Relief Options", image: "https://images.unsplash.com/photo-1584308666744-24d5c474f2ae?w=500&h=500&fit=crop", date: "August 10, 2023", author: "Admin", category: "Health", excerpt: "Explore natural approaches to managing seasonal allergies alongside traditional treatments." },
   ];
 
   const defaultCategories = ["All", "Health", "Nutrition", "Vitamins", "Sleep", "Motivation"];
 
   const featured = featuredPost || defaultFeatured;
-  const postItems = posts || defaultPosts;
-  const catItems = categories || defaultCategories;
+  const postItems = posts.length > 0 ? posts : defaultPosts;
+  const catItems = categories.length > 0 ? categories : defaultCategories;
   const [activeCat, setActiveCat] = useState("All");
 
   const filteredPosts = activeCat === "All" ? postItems : postItems.filter(p => p.category === activeCat);
@@ -1473,7 +1472,7 @@ export function HealthIngredientsPage({
   heroSubtitle = "Transparency is at the heart of everything we do. Learn about the natural ingredients behind our supplements.",
   introTitle = "What Goes Into Our Products",
   introText = "Every ingredient is carefully selected for its proven benefits and sourced from trusted suppliers. We never use artificial fillers, synthetic dyes, or unnecessary additives.",
-  ingredients,
+  ingredients = [],
   ctaTitle = "Ready to Start Your Wellness Journey?",
   ctaText = "Explore our full range of supplements made with these trusted ingredients.",
   ctaButtonText = "Shop All Products",
@@ -1493,7 +1492,7 @@ export function HealthIngredientsPage({
     { name: "Zinc Picolinate", icon: "🛡️", description: "Highly absorbable form of zinc supporting immune function, wound healing, and cellular metabolism." },
   ];
 
-  const items = ingredients || defaultIngredients;
+  const items = ingredients.length > 0 ? ingredients : defaultIngredients;
 
   const css = `
     .hh-ingr-hero { background: linear-gradient(135deg, ${TOKENS.primaryColor} 0%, rgb(80,130,100) 100%); padding: 80px 20px; text-align: center; margin-bottom: 60px; }
@@ -1579,10 +1578,10 @@ export interface HealthMedicalExpertsPageProps {
 export function HealthMedicalExpertsPage({
   heroTitle = "Medical Experts",
   heroSubtitle = "Meet the professionals behind our formulations",
-  heroImage = `${IMG}/2023/08/w-pas-first-screen.jpg`,
+  heroImage = "https://images.unsplash.com/photo-1584017911766-d451b3d0e843?w=1400&q=80&auto=format&fit=crop",
   introTitle = "Our Team of Professionals",
   introText = "Our formulations are developed by a team of certified nutritionists, doctors, and wellness experts who are passionate about helping you achieve your health goals.",
-  experts,
+  experts = [],
   ctaTitle = "Need Help Choosing?",
   ctaText = "Our team is here to help you find the right supplements for your needs.",
   ctaButtonText = "Contact Us",
@@ -1592,13 +1591,13 @@ export function HealthMedicalExpertsPage({
   const fixLink = (link: string) => resolveStoreLink(link, storeCtx?.storeSlug);
 
   const defaultExperts: HealthExpert[] = [
-    { name: "Dr. Sarah Mitchell", role: "Chief Nutritionist", image: `${IMG}/2023/08/w-pas-customer-1.jpg`, bio: "PhD in Nutritional Science with 15+ years of experience in dietary supplement research and development." },
-    { name: "Dr. James Carter", role: "Formulation Specialist", image: `${IMG}/2023/08/w-pas-customer-2.jpg`, bio: "Board-certified pharmacist specializing in bioavailability and nutrient absorption optimization." },
-    { name: "Emily Rodriguez", role: "Wellness Advisor", image: `${IMG}/2023/08/w-pas-customer-3.jpg`, bio: "Certified holistic health coach focused on integrative wellness approaches and lifestyle medicine." },
-    { name: "Dr. Michael Chen", role: "Quality Assurance", image: `${IMG}/2023/08/w-pas-customer-4.jpg`, bio: "Expert in GMP compliance and third-party testing protocols ensuring product purity and safety." },
+    { name: "Dr. Sarah Mitchell", role: "Chief Nutritionist", image: "https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?w=200&h=200&fit=crop", bio: "PhD in Nutritional Science with 15+ years of experience in dietary supplement research and development." },
+    { name: "Dr. James Carter", role: "Formulation Specialist", image: "https://images.unsplash.com/photo-1560250097-0b93528c311a?w=200&h=200&fit=crop", bio: "Board-certified pharmacist specializing in bioavailability and nutrient absorption optimization." },
+    { name: "Emily Rodriguez", role: "Wellness Advisor", image: "https://images.unsplash.com/photo-1580489944761-15a19d654956?w=200&h=200&fit=crop", bio: "Certified holistic health coach focused on integrative wellness approaches and lifestyle medicine." },
+    { name: "Dr. Michael Chen", role: "Quality Assurance", image: "https://images.unsplash.com/photo-1633332755192-727a05c4013d?w=200&h=200&fit=crop", bio: "Expert in GMP compliance and third-party testing protocols ensuring product purity and safety." },
   ];
 
-  const items = experts || defaultExperts;
+  const items = experts.length > 0 ? experts : defaultExperts;
 
   const css = `
     .hh-medical-hero { position: relative; min-height: 400px; display: flex; align-items: center; overflow: hidden; background: ${TOKENS.bgLight}; margin-bottom: 80px; }
