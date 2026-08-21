@@ -20,8 +20,8 @@ const coerceLink = (link: unknown): string => {
 /** Resolve any link to a proper store-scoped path.
  * isLandingOnly: for templates with no real shop/product catalog (Aegis,
  * Landing Gadget, Prokip Agent, Prokip Booking) — an unresolved "#"
- * placeholder should stay a no-op instead of defaulting to /shop, since
- * that page won't have anything meaningful on it for these sites.
+ * placeholder goes to the Contact page instead of the shop page, since
+ * the shop page won't have anything meaningful on it for these sites.
  */
 export function resolveStoreLink(link: unknown, storeSlug: string | null | undefined, isLandingOnly = false): string {
   const normalized = coerceLink(link).trim();
@@ -39,9 +39,13 @@ export function resolveStoreLink(link: unknown, storeSlug: string | null | undef
 
   const base = `/store/${storeSlug}`;
 
-  // Null, empty, or "#" — landing-only templates stay a no-op; everything
-  // else (real e-commerce templates) defaults to the shop page.
-  if (!normalized || normalized === "#") return isLandingOnly ? "#" : `${base}/shop`;
+  // Null, empty, or "#" — landing-only templates (no product catalog) send
+  // unset CTAs to the Contact page instead of leaving them dead. Contact
+  // auto-creates itself with real content the first time it's visited
+  // (see src/app/store/[slug]/contact/page.tsx), so this is always a real,
+  // working destination — not a 404 and not a page with nothing on it.
+  // Everything else (real e-commerce templates) still defaults to /shop.
+  if (!normalized || normalized === "#") return isLandingOnly ? `${base}/contact` : `${base}/shop`;
 
   // Strip leading slash for uniform handling
   const clean = normalized.startsWith("/") ? normalized.slice(1) : normalized;
