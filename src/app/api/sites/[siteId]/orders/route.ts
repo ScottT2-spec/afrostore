@@ -87,6 +87,7 @@ export async function POST(req: NextRequest, { params }: Params) {
 
     const productMap = new Map(products.map((p) => [p.id, p]));
     let subtotal = 0;
+    let taxableSubtotal = 0;
 
     // Look up active flash sales for these products once, up front — discount
     // math itself is reapplied per line item below so it respects variant
@@ -139,6 +140,7 @@ export async function POST(req: NextRequest, { params }: Params) {
 
       const lineTotal = price * item.quantity;
       subtotal += lineTotal;
+      if (product.isTaxable) taxableSubtotal += lineTotal;
 
       return {
         productId: product.id,
@@ -195,11 +197,16 @@ export async function POST(req: NextRequest, { params }: Params) {
       }
     }
 
-    // Tax — apply the site's default active tax rule to the discounted subtotal.
-    // (Delivery fee is not taxed here; adjust if your jurisdiction requires otherwise.)
+    // Tax — apply the site's default active tax rule, but only to the
+    // portion of the subtotal that came from taxable products (a product's
+    // "Taxable" toggle lets a merchant exempt specific items, e.g. digital
+    // goods or already-tax-inclusive lines). Any coupon discount is spread
+    // proportionally across taxable vs non-taxable lines so a store-wide
+    // discount doesn't over- or under-tax either side.
     const defaultTax = await prisma.taxRule.findFirst({ where: { siteId, isDefault: true, isActive: true } });
     const taxRate = defaultTax ? Number(defaultTax.rate) : 0;
-    const taxableAmount = Math.max(subtotal - discount, 0);
+    const taxableDiscountShare = subtotal > 0 ? discount * (taxableSubtotal / subtotal) : 0;
+    const taxableAmount = Math.max(taxableSubtotal - taxableDiscountShare, 0);
     const tax = taxRate > 0 ? Math.round(taxableAmount * (taxRate / 100) * 100) / 100 : 0;
 
     const total = subtotal + deliveryFee - discount + tax;
