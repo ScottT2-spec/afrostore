@@ -56,6 +56,7 @@ export const createProductSchema = z.object({
   brandId: z.string().optional().nullable(),
   status: z.enum(["ACTIVE", "DRAFT", "ARCHIVED"]).default("DRAFT"),
   isFeatured: z.boolean().default(false),
+  isTaxable: z.boolean().default(true),
   tags: z.array(z.string()).default([]),
   metaTitle: z.string().optional(),
   metaDescription: z.string().optional(),

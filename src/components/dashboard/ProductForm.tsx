@@ -67,6 +67,7 @@ interface ProductData {
   brandId?: string | null;
   status: string;
   isFeatured: boolean;
+  isTaxable: boolean;
   tags: string[];
   metaTitle?: string;
   metaDescription?: string;
@@ -165,6 +166,7 @@ export default function ProductForm({ productId }: ProductFormProps) {
   const [categoryId, setCategoryId] = useState("");
   const [status, setStatus] = useState("ACTIVE");
   const [isFeatured, setIsFeatured] = useState(false);
+  const [isTaxable, setIsTaxable] = useState(true);
   const [tags, setTags] = useState<string[]>([]);
   const [tagInput, setTagInput] = useState("");
 
@@ -236,6 +238,7 @@ export default function ProductForm({ productId }: ProductFormProps) {
         setBrandId(p.brandId || "");
         setStatus(p.status);
         setIsFeatured(p.isFeatured);
+        if (p.isTaxable !== undefined) setIsTaxable(p.isTaxable);
         setTags(p.tags || []);
         setMetaTitle(p.metaTitle || "");
         setMetaDescription(p.metaDescription || "");
@@ -433,6 +436,7 @@ export default function ProductForm({ productId }: ProductFormProps) {
       brandId: brandId || null,
       status,
       isFeatured,
+      isTaxable,
       tags,
       metaTitle: metaTitle || undefined,
       metaDescription: metaDescription || undefined,
@@ -825,6 +829,25 @@ export default function ProductForm({ productId }: ProductFormProps) {
                       <div>
                         <span className="text-sm font-medium text-surface-700">Featured Product</span>
                         <p className="text-[10px] text-surface-400">Show in featured sections</p>
+                      </div>
+                    </div>
+                    <div className="flex items-center gap-3">
+                      <button
+                        type="button"
+                        onClick={() => setIsTaxable(!isTaxable)}
+                        className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${
+                          isTaxable ? "bg-brand-600" : "bg-surface-300"
+                        }`}
+                      >
+                        <span
+                          className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${
+                            isTaxable ? "translate-x-6" : "translate-x-1"
+                          }`}
+                        />
+                      </button>
+                      <div>
+                        <span className="text-sm font-medium text-surface-700">Taxable</span>
+                        <p className="text-[10px] text-surface-400">Apply the store's tax rate to this product at checkout</p>
                       </div>
                     </div>
                   </div>

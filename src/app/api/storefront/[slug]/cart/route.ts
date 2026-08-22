@@ -24,7 +24,7 @@ export async function POST(req: NextRequest, { params }: Params) {
     const productIds = [...new Set(items.map((i) => i.productId))];
     const products = await prisma.product.findMany({
       where: { id: { in: productIds }, siteId: site.id, status: "ACTIVE" },
-      select: { id: true, name: true, slug: true, price: true, stock: true, trackInventory: true, images: true, currency: true },
+      select: { id: true, name: true, slug: true, price: true, stock: true, trackInventory: true, isTaxable: true, images: true, currency: true },
     });
 
     const productMap = new Map(products.map((p) => [p.id, p]));
@@ -39,6 +39,7 @@ export async function POST(req: NextRequest, { params }: Params) {
     const validatedItems = [];
     const errors = [];
     let subtotal = 0;
+    let taxableSubtotal = 0;
 
     for (const item of items) {
       const product = productMap.get(item.productId);
@@ -61,6 +62,7 @@ export async function POST(req: NextRequest, { params }: Params) {
 
       const lineTotal = price * qty;
       subtotal += lineTotal;
+      if (product.isTaxable) taxableSubtotal += lineTotal;
 
       validatedItems.push({
         productId: product.id, productName: product.name, productSlug: product.slug,
@@ -70,10 +72,10 @@ export async function POST(req: NextRequest, { params }: Params) {
       });
     }
 
-    // Apply tax if default rule exists
+    // Apply tax if default rule exists — only to taxable line items
     const defaultTax = await prisma.taxRule.findFirst({ where: { siteId: site.id, isDefault: true, isActive: true } });
     const taxRate = defaultTax ? parseFloat(defaultTax.rate.toString()) : 0;
-    const taxAmount = subtotal * (taxRate / 100);
+    const taxAmount = taxableSubtotal * (taxRate / 100);
     const total = subtotal + taxAmount;
 
     return NextResponse.json({
