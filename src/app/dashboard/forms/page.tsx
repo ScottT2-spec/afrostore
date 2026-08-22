@@ -62,6 +62,7 @@ export default function FormsPage() {
   const [showEditor, setShowEditor] = useState(false);
   const [editingForm, setEditingForm] = useState<FormItem | null>(null);
   const [saving, setSaving] = useState(false);
+  const [saveError, setSaveError] = useState<string | null>(null);
   const [deleteId, setDeleteId] = useState<string | null>(null);
 
   // Form fields
@@ -98,6 +99,7 @@ export default function FormsPage() {
     setFormName("");
     setFormDesc("");
     setFormFields([]);
+    setSaveError(null);
     setSubmitBtnText("Submit");
     setSuccessMsg("");
     setIsActive(true);
@@ -173,30 +175,38 @@ export default function FormsPage() {
       isActive,
     };
 
+    setSaveError(null);
     if (editingForm) {
       const res = await api.patch(`/api/sites/${currentStore.id}/forms/${editingForm.id}`, payload);
-      setSaving(false);
-      if (!res.success) { alert(res.error || "Failed to save form"); return; }
-      await fetchForms();
-      setShowEditor(false);
-      resetForm();
+      if (res.success) {
+        await fetchForms();
+        setShowEditor(false);
+        resetForm();
+      } else {
+        setSaveError(res.error || "Failed to save changes. Please try again.");
+      }
     } else {
       const res = await api.post(`/api/sites/${currentStore.id}/forms`, payload);
-      setSaving(false);
-      if (!res.success) { alert(res.error || "Failed to create form"); return; }
-      await fetchForms();
-      setShowEditor(false);
-      resetForm();
+      if (res.success) {
+        await fetchForms();
+        setShowEditor(false);
+        resetForm();
+      } else {
+        setSaveError(res.error || "Failed to create form. Please try again.");
+      }
     }
+    setSaving(false);
   };
 
   const deleteForm = async (id: string) => {
     if (!currentStore || !confirm("Delete this form and all its submissions?")) return;
     setDeleteId(id);
     const res = await api.delete(`/api/sites/${currentStore.id}/forms/${id}`);
-    setDeleteId(null);
-    if (!res.success) { alert(res.error || "Failed to delete form"); return; }
-    setForms((prev) => prev.filter((f) => f.id !== id));
+    if (res.success) {
+      setForms((prev) => prev.filter((f) => f.id !== id));
+    } else {
+      alert(res.error || "Failed to delete form. Please try again.");
+    }
     setDeleteId(null);
   };
 
@@ -278,6 +288,12 @@ export default function FormsPage() {
           <h3 className="text-lg font-bold text-surface-900">
             {editingForm ? "Edit Form" : "New Form"}
           </h3>
+
+          {saveError && (
+            <div className="rounded-xl border border-accent-200 bg-accent-50 text-accent-700 text-sm px-4 py-3">
+              {saveError}
+            </div>
+          )}
 
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
             {/* Left: Form settings */}
