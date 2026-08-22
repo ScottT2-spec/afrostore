@@ -175,26 +175,27 @@ export default function FormsPage() {
 
     if (editingForm) {
       const res = await api.patch(`/api/sites/${currentStore.id}/forms/${editingForm.id}`, payload);
-      if (res.success) {
-        await fetchForms();
-        setShowEditor(false);
-        resetForm();
-      }
+      setSaving(false);
+      if (!res.success) { alert(res.error || "Failed to save form"); return; }
+      await fetchForms();
+      setShowEditor(false);
+      resetForm();
     } else {
       const res = await api.post(`/api/sites/${currentStore.id}/forms`, payload);
-      if (res.success) {
-        await fetchForms();
-        setShowEditor(false);
-        resetForm();
-      }
+      setSaving(false);
+      if (!res.success) { alert(res.error || "Failed to create form"); return; }
+      await fetchForms();
+      setShowEditor(false);
+      resetForm();
     }
-    setSaving(false);
   };
 
   const deleteForm = async (id: string) => {
     if (!currentStore || !confirm("Delete this form and all its submissions?")) return;
     setDeleteId(id);
-    await api.delete(`/api/sites/${currentStore.id}/forms/${id}`);
+    const res = await api.delete(`/api/sites/${currentStore.id}/forms/${id}`);
+    setDeleteId(null);
+    if (!res.success) { alert(res.error || "Failed to delete form"); return; }
     setForms((prev) => prev.filter((f) => f.id !== id));
     setDeleteId(null);
   };
