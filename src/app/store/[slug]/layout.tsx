@@ -49,8 +49,14 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
     };
   }
 
-  const title = store.name;
+  const homePage = await prisma.page.findFirst({
+    where: { siteId: store.id, type: "HOME" },
+    select: { metaTitle: true, metaDescription: true },
+  });
+
+  const title = homePage?.metaTitle || store.name;
   const description =
+    homePage?.metaDescription ||
     store.description ||
     `Shop at ${store.name} — discover amazing products and deals.`;
   const storeUrl = await resolveStoreBaseUrlFromHeaders(store);
