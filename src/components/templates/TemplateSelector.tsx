@@ -40,7 +40,7 @@ function TemplateThumb({ src, title }: { src: string; title: string }) {
         }}
         title={title}
         loading="lazy"
-        sandbox="allow-same-origin"
+        sandbox="allow-same-origin allow-scripts"
       />
     </div>
   );

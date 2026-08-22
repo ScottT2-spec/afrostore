@@ -103,7 +103,7 @@ export default function TemplateGallery({
                   className="pointer-events-none absolute left-0 top-0 origin-top-left border-0"
                   style={{ width: "1280px", height: "800px", transform: "scale(0.28)", transformOrigin: "top left" }}
                   loading="lazy"
-                  sandbox="allow-same-origin"
+                  sandbox="allow-same-origin allow-scripts"
                   tabIndex={-1}
                 />
                 <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/60 to-transparent p-4">
