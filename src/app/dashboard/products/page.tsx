@@ -261,6 +261,53 @@ export default function ProductsPage() {
               <Plus className="h-4 w-4" /> Add Product
             </Link>
           </div>
+        ) : view === "grid" ? (
+          /* Product Grid */
+          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4">
+            {products.map((product) => {
+              const sb = statusBadge[product.status] || statusBadge.DRAFT;
+              const StatusIcon = sb.icon;
+              return (
+                <div key={product.id} className="rounded-2xl border border-surface-200 bg-white overflow-hidden hover:shadow-md transition-shadow group">
+                  <div className="aspect-square bg-surface-100 flex items-center justify-center overflow-hidden relative">
+                    {product.images[0] ? (
+                      <img src={product.images[0].url} alt={product.name} className="h-full w-full object-cover" />
+                    ) : (
+                      <ImageIcon className="h-8 w-8 text-surface-400" />
+                    )}
+                    <span className={`absolute top-2 left-2 inline-flex items-center gap-1 rounded-full border px-2 py-0.5 text-[10px] font-semibold bg-white/95 ${sb.color}`}>
+                      <StatusIcon className="h-3 w-3" />{sb.label}
+                    </span>
+                    <div className="absolute top-2 right-2 flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                      <Link href={`/dashboard/products/${product.id}/edit`} className="p-1.5 rounded-lg bg-white/95 text-surface-500 hover:text-brand-600 shadow-sm" title="Edit product">
+                        <Edit className="h-3.5 w-3.5" />
+                      </Link>
+                      <button onClick={() => handleDelete(product.id)} className="p-1.5 rounded-lg bg-white/95 text-surface-500 hover:text-accent-600 shadow-sm" title="Delete product">
+                        <Trash2 className="h-3.5 w-3.5" />
+                      </button>
+                    </div>
+                  </div>
+                  <div className="p-3">
+                    <div className="text-sm font-semibold text-surface-900 truncate">{product.name}</div>
+                    <div className="text-[10px] text-surface-500 mb-2">
+                      {product.category?.name || "Uncategorized"} · {product._count.orderItems} sold
+                    </div>
+                    <div className="flex items-center justify-between">
+                      <div>
+                        <span className="text-sm font-semibold text-surface-900">{formatCurrency(Number(product.price), currency)}</span>
+                        {product.compareAtPrice && (
+                          <span className="text-[10px] text-surface-400 line-through ml-1.5">{formatCurrency(Number(product.compareAtPrice), currency)}</span>
+                        )}
+                      </div>
+                      <span className={`text-xs ${product.stock <= 5 ? "text-accent-600 font-semibold" : "text-surface-500"}`}>
+                        {product.stock} in stock
+                      </span>
+                    </div>
+                  </div>
+                </div>
+              );
+            })}
+          </div>
         ) : (
           /* Product List */
           <div className="rounded-2xl border border-surface-200 bg-white overflow-hidden">
