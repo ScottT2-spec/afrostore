@@ -45,6 +45,17 @@ export async function PATCH(req: NextRequest, { params }: Params) {
 
   const { images, variants, ...data } = parsed.data;
 
+  // z.enum/.default(...) on several createProductSchema fields still inject
+  // their creation-time default even under .partial() when a field is simply
+  // absent from the request body (e.g. the SEO "optimize" flow only ever
+  // sends metaTitle/metaDescription). Without this, ANY partial update that
+  // doesn't explicitly resend these fields would silently reset a live
+  // product's status to DRAFT (pulling it off the storefront), its stock to
+  // 0, clear its tags, and reset trackInventory/isFeatured to their defaults.
+  for (const field of ["status", "stock", "trackInventory", "isFeatured", "tags"] as const) {
+    if (body[field] === undefined) delete (data as Record<string, unknown>)[field];
+  }
+
   // Cost price must be lower than regular price
   const effectivePrice = data.price ?? Number(existing.price);
   if (data.costPrice && data.costPrice >= effectivePrice) {
