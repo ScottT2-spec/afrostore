@@ -1,5 +1,6 @@
 "use client";
 import { Quote, Star } from "@/components/icons/FilledIcons";
+import ProkipLogo from "@/components/ProkipLogo";
 
 import { useEffect, useState } from "react";
 
@@ -51,7 +52,7 @@ const fallbackTestimonials: TestimonialCard[] = [
     name: "Amara Okafor",
     role: "Fashion Seller, Lagos",
     content:
-      "I was selling only through WhatsApp and Instagram DMs. AfroStore gave me a real store in literally 5 minutes. My sales tripled in the first month because customers could finally browse and pay directly.",
+      "I was selling only through WhatsApp and Instagram DMs. Prokip gave me a real store in literally 5 minutes. My sales tripled in the first month because customers could finally browse and pay directly.",
     rating: 5,
     initials: "AO",
     gradient: "from-purple-500 to-pink-500",
@@ -71,7 +72,7 @@ const fallbackTestimonials: TestimonialCard[] = [
     name: "Fatima Hassan",
     role: "Beauty Brand, Nairobi",
     content:
-      "I tried Shopify but it felt so foreign — the payments, the shipping, everything. AfroStore just gets it. M-Pesa integration, local delivery, WhatsApp notifications. It's built for us.",
+      "I tried Shopify but it felt so foreign — the payments, the shipping, everything. Prokip just gets it. M-Pesa integration, local delivery, WhatsApp notifications. It's built for us.",
     rating: 5,
     initials: "FH",
     gradient: "from-rose-500 to-orange-500",
@@ -240,8 +241,8 @@ export default function Testimonials() {
             Real Reviews from{" "}
             <span className="gradient-text">Real Businesses</span>
           </h2>
-          <p className="mt-4 text-lg text-surface-500">
-            Hear from merchants and shoppers across Africa who use AfroStore every day.
+          <p className="mt-4 flex flex-wrap items-center justify-center gap-1.5 text-lg text-surface-500">
+            Hear from merchants and shoppers across Africa who use <ProkipLogo size={22} className="inline-block align-middle" /> every day.
           </p>
         </div>
       </div>

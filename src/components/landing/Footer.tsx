@@ -1,5 +1,6 @@
 "use client";
 import { ShoppingBag } from "@/components/icons/FilledIcons";
+import ProkipLogo from "@/components/ProkipLogo";
 
 import Link from "next/link";
 
@@ -108,8 +109,8 @@ export default function Footer() {
 
         {/* Bottom */}
         <div className="mt-12 pt-8 border-t border-surface-800 flex flex-col sm:flex-row items-center justify-between gap-4">
-          <p className="text-xs text-surface-600">
-            &copy; {new Date().getFullYear()} AfroStore by Prokip. All rights reserved.
+          <p className="flex items-center gap-1.5 text-xs text-surface-600">
+            &copy; {new Date().getFullYear()} <ProkipLogo size={16} /> Prokip. All rights reserved.
           </p>
           <div className="flex items-center gap-6">
             <Link

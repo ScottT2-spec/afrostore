@@ -136,7 +136,7 @@ export default function Hero() {
                   <div className="flex-1 flex justify-center">
                     <div className="flex items-center gap-2 rounded-lg bg-white/10 px-4 py-1 text-xs text-white/50">
                       <Globe className="h-3 w-3" />
-                      yourstore.afrostore.com
+                      yourstore.prokip.com
                     </div>
                   </div>
                 </div>
@@ -313,7 +313,7 @@ export default function Hero() {
                 className="w-full h-full"
                 allow="autoplay; fullscreen; picture-in-picture"
                 allowFullScreen
-                title="AfroStore Demo"
+                title="Prokip Demo"
               />
             </div>
           </div>
