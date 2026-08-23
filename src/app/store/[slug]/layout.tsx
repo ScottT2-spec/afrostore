@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import Script from "next/script";
 import { prisma } from "@/lib/db";
 import StorefrontPopups from "@/components/storefront/StorefrontPopups";
 import ReferralTracker from "@/components/storefront/ReferralTracker";
@@ -34,6 +35,12 @@ async function resolveStore(slug: string) {
       subdomain: true,
       customDomain: true,
       businessType: true,
+      settings: {
+        select: {
+          googleAnalyticsId: true,
+          facebookPixelId: true,
+        },
+      },
     },
   });
 }
@@ -127,6 +134,14 @@ export default async function StoreLayout({ params, children }: Props) {
   const customCss = customization ? buildCustomizationCss(customization) : "";
   const customJs = customization?.customJs?.trim() || "";
 
+  // Google Analytics (GA4) / Facebook Pixel — settings were fully wired
+  // (dashboard field, validated, saved to SiteSettings) but nothing on the
+  // live storefront ever read them back. A merchant could enter and save
+  // both IDs successfully with zero indication that no tracking was
+  // actually happening.
+  const gaId = store?.settings?.googleAnalyticsId?.trim() || "";
+  const fbPixelId = store?.settings?.facebookPixelId?.trim() || "";
+
   return (
     <>
       {jsonLd && (
@@ -134,6 +149,31 @@ export default async function StoreLayout({ params, children }: Props) {
           type="application/ld+json"
           dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
         />
+      )}
+      {gaId && (
+        <>
+          <Script src={`https://www.googletagmanager.com/gtag/js?id=${gaId}`} strategy="afterInteractive" />
+          <Script id="ga4-init" strategy="afterInteractive">
+            {`window.dataLayer = window.dataLayer || [];
+              function gtag(){dataLayer.push(arguments);}
+              gtag('js', new Date());
+              gtag('config', '${gaId}');`}
+          </Script>
+        </>
+      )}
+      {fbPixelId && (
+        <Script id="fb-pixel-init" strategy="afterInteractive">
+          {`!function(f,b,e,v,n,t,s)
+            {if(f.fbq)return;n=f.fbq=function(){n.callMethod?
+            n.callMethod.apply(n,arguments):n.queue.push(arguments)};
+            if(!f._fbq)f._fbq=n;n.push=n;n.loaded=!0;n.version='2.0';
+            n.queue=[];t=b.createElement(e);t.async=!0;
+            t.src=v;s=b.getElementsByTagName(e)[0];
+            s.parentNode.insertBefore(t,s)}(window, document,'script',
+            'https://connect.facebook.net/en_US/fbevents.js');
+            fbq('init', '${fbPixelId}');
+            fbq('track', 'PageView');`}
+        </Script>
       )}
       {customCss && <style data-site-custom-css dangerouslySetInnerHTML={{ __html: customCss }} />}
       {children}
