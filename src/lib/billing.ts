@@ -20,6 +20,26 @@ export const PLAN_DISPLAY_PRICES: Record<string, { monthly: string; yearly: stri
   GROWTH: { monthly: "₦35,000", yearly: "₦350,000" },
 };
 
+// ─── STORE LIMITS ───────────────────────────────────────────
+// How many stores a workspace on each plan may create. FREE uses the
+// platform-wide admin setting (Settings > Platform, default 5) instead of
+// a hardcoded number here, since that's already an existing admin-
+// configurable knob — no separate one needed for the free tier.
+// AGENCY/ENTERPRISE are effectively unlimited (agencies host many client
+// stores by design).
+export const PLAN_STORE_LIMITS: Record<string, number> = {
+  STARTER: 1,
+  BUSINESS: 3,
+  GROWTH: 10,
+  AGENCY: 100,
+  ENTERPRISE: Infinity,
+};
+
+export function getStoreLimitForPlan(plan: string, platformFreeLimit: number): number {
+  if (plan === "FREE") return platformFreeLimit;
+  return PLAN_STORE_LIMITS[plan] ?? platformFreeLimit;
+}
+
 const PAYSTACK_BASE = "https://api.paystack.co";
 
 export async function getOrCreatePaystackPlan(

@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { getAuthUser } from "./auth";
 import { prisma } from "./db";
 import { slugify, generateId } from "./utils";
+import { getStoreLimitForPlan } from "./billing";
 
 /**
  * Recursively convert Prisma Decimal objects to plain numbers in API responses.
@@ -211,6 +212,35 @@ export async function createSiteWithUniqueSlug<T>(
     }
   }
   throw lastErr;
+}
+
+/**
+ * Enforces the real per-plan store limit before a new site is created.
+ * Previously this was checked (or not checked at all — the workspace-scoped
+ * creation route had no check whatsoever) with a flat "storeCount >= 10 for
+ * everyone" placeholder that ignored the workspace's actual plan entirely,
+ * which is how a FREE-plan account ended up with 20+ stores. Call this from
+ * every site-creation route before createSiteWithUniqueSlug.
+ * Returns null if creation is allowed, or an error response to return
+ * directly if the limit has been reached.
+ */
+export async function enforceStoreLimit(workspaceId: string) {
+  const [workspace, platformSettings, storeCount] = await Promise.all([
+    prisma.workspace.findUnique({ where: { id: workspaceId }, select: { plan: true } }),
+    prisma.platformSettings.findUnique({ where: { id: "platform" }, select: { maxStoresPerUser: true } }),
+    prisma.site.count({ where: { workspaceId } }),
+  ]);
+  const plan = workspace?.plan || "FREE";
+  const limit = getStoreLimitForPlan(plan, platformSettings?.maxStoresPerUser ?? 5);
+  if (storeCount >= limit) {
+    return error(
+      plan === "FREE"
+        ? `You've reached the ${limit}-store limit on the Free plan. Upgrade to create more stores.`
+        : `You've reached the ${limit}-store limit on your ${plan} plan. Upgrade for more.`,
+      403
+    );
+  }
+  return null;
 }
 
 export async function ensureUniqueSlug(

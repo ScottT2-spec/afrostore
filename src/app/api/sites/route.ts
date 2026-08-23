@@ -2,7 +2,7 @@ import { NextRequest } from "next/server";
 import { prisma } from "@/lib/db";
 import { getAuthUser, unauthorized } from "@/lib/auth";
 import { createStoreSchema } from "@/lib/validators";
-import { success, error, validationError, logAudit, createSiteWithUniqueSlug } from "@/lib/api-helpers";
+import { success, error, validationError, logAudit, createSiteWithUniqueSlug, enforceStoreLimit } from "@/lib/api-helpers";
 import { slugify } from "@/lib/utils";
 
 // GET /api/sites — list user's stores
@@ -52,12 +52,6 @@ export async function POST(req: NextRequest) {
       resolvedCurrency = resolvedCurrency || platformDefaults?.defaultCurrency || "NGN";
     }
 
-    // Check store limit based on plan (simplified)
-    const storeCount = await prisma.site.count({ where: { workspace: { ownerId: user.id } } });
-    if (storeCount >= 10) {
-      return error("Store limit reached for your plan", 403);
-    }
-
     // Find or create a default workspace for this user
     let workspace = await prisma.workspace.findFirst({ where: { ownerId: user.id } });
     if (!workspace) {
@@ -69,6 +63,12 @@ export async function POST(req: NextRequest) {
         },
       });
     }
+
+    // Real plan-based store limit — was previously a flat "storeCount >= 10
+    // for everyone" placeholder that never looked at the workspace's actual
+    // plan, which is how a FREE-plan account ended up with 20+ stores.
+    const limitError = await enforceStoreLimit(workspace.id);
+    if (limitError) return limitError;
 
     // Creates the site with a retry-on-collision loop instead of a
     // check-then-create — a plain existence check followed by a separate

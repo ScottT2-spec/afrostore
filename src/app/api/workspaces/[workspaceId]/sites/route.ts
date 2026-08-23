@@ -1,7 +1,7 @@
 import { NextRequest } from "next/server";
 import { getAuthUser, unauthorized } from "@/lib/auth";
 import { prisma } from "@/lib/db";
-import { success, error, createSiteWithUniqueSlug } from "@/lib/api-helpers";
+import { success, error, createSiteWithUniqueSlug, enforceStoreLimit } from "@/lib/api-helpers";
 import { importTemplateToSite } from "@/lib/templates/importer";
 import { provisionDefaultLandingFunnel } from "@/lib/landing-funnel";
 import { buildSmartAiBlocks, buildBlockContentPrompt } from "@/lib/ai-block-content-generator";
@@ -52,6 +52,12 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ wor
     });
     const canCreate = isOwner || (member && ["OWNER", "ADMIN", "MANAGER"].includes(member.role));
     if (!canCreate) return error("Not authorized to create sites", 403);
+
+    // This route previously had NO store-limit check at all — a complete
+    // bypass of whatever limit /api/sites enforced, which is very likely
+    // how a FREE-plan account ended up with 20+ stores.
+    const limitError = await enforceStoreLimit(workspaceId);
+    if (limitError) return limitError;
 
     const body = await req.json();
     const {
