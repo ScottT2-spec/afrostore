@@ -177,28 +177,40 @@ export default function PagesPage() {
             </button>
           </div>
           <div className="flex flex-col sm:flex-row gap-3">
-            <input
-              value={newTitle}
-              onChange={(e) => setNewTitle(e.target.value)}
-              placeholder="Page title..."
-              className="input-field flex-1 py-2.5"
-              autoFocus
-              onKeyDown={(e) => e.key === "Enter" && !useAI && createPage()}
-            />
-            <select
-              value={newType}
-              onChange={(e) => setNewType(e.target.value)}
-              className="input-field w-40 py-2.5"
-            >
-              <option value="CUSTOM">Custom</option>
-              <option value="LANDING">Landing</option>
-              <option value="ABOUT">About</option>
-              <option value="CONTACT">Contact</option>
-              <option value="FAQ">FAQ</option>
-              <option value="POLICY">Policy</option>
-            </select>
+            <div className="flex-1 min-w-[220px]">
+              <label htmlFor="new-page-title" className="block text-xs font-semibold text-surface-500 mb-1">
+                Page title
+              </label>
+              <input
+                id="new-page-title"
+                value={newTitle}
+                onChange={(e) => setNewTitle(e.target.value)}
+                placeholder="e.g. About Us, Shipping Policy..."
+                className="input-field w-full py-2.5"
+                autoFocus
+                onKeyDown={(e) => e.key === "Enter" && !useAI && createPage()}
+              />
+            </div>
+            <div className="w-full sm:w-40">
+              <label htmlFor="new-page-type" className="block text-xs font-semibold text-surface-500 mb-1">
+                Page type
+              </label>
+              <select
+                id="new-page-type"
+                value={newType}
+                onChange={(e) => setNewType(e.target.value)}
+                className="input-field w-full py-2.5"
+              >
+                <option value="CUSTOM">Custom</option>
+                <option value="LANDING">Landing</option>
+                <option value="ABOUT">About</option>
+                <option value="CONTACT">Contact</option>
+                <option value="FAQ">FAQ</option>
+                <option value="POLICY">Policy</option>
+              </select>
+            </div>
             {!useAI && (
-              <div className="flex gap-2">
+              <div className="flex gap-2 sm:items-end sm:pb-0 sm:pt-5">
                 <button onClick={createPage} disabled={creating || !newTitle.trim()} className="btn-primary text-sm py-2.5 px-5">
                   {creating ? <Loader2 className="h-4 w-4 animate-spin" /> : "Create"}
                 </button>
