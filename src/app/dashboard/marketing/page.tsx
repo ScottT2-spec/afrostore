@@ -431,7 +431,7 @@ function CampaignActions({ id, status, lastError, onEdit, onDelete, onStatusChan
   const canSend = ["DRAFT", "SCHEDULED", "PAUSED"].includes(status);
   return (
     <div className="flex flex-col items-end gap-1">
-      <div className="flex items-center gap-1 opacity-100 md:opacity-0 md:group-hover:opacity-100 transition-opacity">
+      <div className="flex items-center gap-1 transition-opacity">
         {canSend && (
           <button onClick={onSend} disabled={sending} title="Send now" className="p-2 rounded-lg hover:bg-brand-50 text-surface-400 hover:text-brand-600 transition-colors">
             {sending ? <Loader2 className="h-4 w-4 animate-spin" /> : <Send className="h-4 w-4" />}

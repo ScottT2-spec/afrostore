@@ -228,7 +228,7 @@ export default function TeamPage() {
                     <p className="text-xs text-surface-400 truncate">{member.user.email} · Joined {new Date(member.createdAt).toLocaleDateString()}</p>
                   </div>
                   {!isOwner && canManageTeam && (
-                    <div className="flex items-center gap-2 sm:opacity-0 sm:group-hover:opacity-100 transition-opacity">
+                    <div className="flex items-center gap-2 transition-opacity">
                       <select
                         value={member.role}
                         onChange={(e) => updateRole(member.id, e.target.value)}

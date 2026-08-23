@@ -334,7 +334,7 @@ export default function CrmPage() {
                   </div>
 
                   {/* Actions */}
-                  <div className="flex items-center gap-1 sm:opacity-0 sm:group-hover:opacity-100 transition-opacity">
+                  <div className="flex items-center gap-1 transition-opacity">
                     <select
                       value={contact.status}
                       onChange={(e) => quickStatusChange(contact, e.target.value)}

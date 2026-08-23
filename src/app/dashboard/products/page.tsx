@@ -278,7 +278,7 @@ export default function ProductsPage() {
                     <span className={`absolute top-2 left-2 inline-flex items-center gap-1 rounded-full border px-2 py-0.5 text-[10px] font-semibold bg-white/95 ${sb.color}`}>
                       <StatusIcon className="h-3 w-3" />{sb.label}
                     </span>
-                    <div className="absolute top-2 right-2 flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                    <div className="absolute top-2 right-2 flex items-center gap-1 transition-opacity">
                       <Link href={`/dashboard/products/${product.id}/edit`} className="p-1.5 rounded-lg bg-white/95 text-surface-500 hover:text-brand-600 shadow-sm" title="Edit product">
                         <Edit className="h-3.5 w-3.5" />
                       </Link>

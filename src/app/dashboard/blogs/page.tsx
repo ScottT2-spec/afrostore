@@ -388,7 +388,7 @@ export default function BlogsPage() {
                   </div>
 
                   {/* Actions */}
-                  <div className="flex items-center gap-1 opacity-100 md:opacity-0 md:group-hover:opacity-100 transition-opacity">
+                  <div className="flex items-center gap-1 transition-opacity">
                     <button
                       onClick={() => openEdit(blog)}
                       className="flex items-center gap-1.5 rounded-lg bg-brand-600 text-white px-3 py-1.5 text-xs font-semibold hover:bg-brand-700 transition-colors"

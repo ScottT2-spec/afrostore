@@ -126,7 +126,7 @@ export default function TaxesPage() {
                   {r.country && <span>Country: {r.country}</span>}{r.state && <span> · State: {r.state}</span>}{!r.country && !r.state && <span>All regions</span>}
                 </div>
               </div>
-              <div className="flex items-center gap-1 opacity-100 md:opacity-0 md:group-hover:opacity-100 transition-opacity">
+              <div className="flex items-center gap-1 transition-opacity">
                 <button onClick={() => toggleActive(r)} className="p-2 rounded-lg hover:bg-surface-100 text-surface-400 hover:text-surface-700">
                   {r.isActive ? <ToggleRight className="h-4 w-4 text-green-600" /> : <ToggleLeft className="h-4 w-4" />}
                 </button>
