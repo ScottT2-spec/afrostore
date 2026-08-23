@@ -268,7 +268,7 @@ export default function PagesPage() {
                   </div>
                   <p className="text-xs text-surface-400 mt-0.5">/{page.slug} · Updated {new Date(page.updatedAt).toLocaleDateString()}</p>
                 </div>
-                <div className="flex items-center gap-1 sm:opacity-0 sm:group-hover:opacity-100 transition-opacity">
+                <div className="flex items-center gap-1">
                   <Link
                     href={`/editor/${page.id}`}
                     className="flex items-center gap-1.5 rounded-lg bg-brand-600 text-white px-3 py-1.5 text-xs font-semibold hover:bg-brand-700 transition-colors"
