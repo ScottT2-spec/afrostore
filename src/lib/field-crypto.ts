@@ -7,9 +7,9 @@ import crypto from "crypto";
 //
 // Requires PROFILE_ENCRYPTION_KEY: a 64-character hex string (32 bytes).
 // Generate one with: node -e "console.log(require('crypto').randomBytes(32).toString('hex'))"
-// This must be set in the deployment environment (Vercel env vars) — if
-// it's missing, encryption/decryption fails loudly rather than silently
-// storing plaintext.
+// This must be set in the deployment environment — if it's missing,
+// encryption/decryption fails loudly rather than silently storing
+// plaintext.
 
 const ENC_PREFIX = "enc:v1:";
 
