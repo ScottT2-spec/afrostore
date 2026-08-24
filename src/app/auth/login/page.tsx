@@ -4,6 +4,7 @@ import { useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useAuth } from "@/context/AuthContext";
+import { api } from "@/lib/api-client";
 import { Loader2 } from "lucide-react";
 import { Eye, EyeOff, Mail, Lock } from "@/components/icons/FilledIcons";
 
@@ -24,7 +25,12 @@ export default function LoginPage() {
 
     const result = await login(email, password, rememberMe);
     if (result.success) {
-      const token = localStorage.getItem("token");
+      // Token may be in localStorage (remembered) or sessionStorage
+      // (not remembered) — api.getToken() checks both, a plain
+      // localStorage read here missed the sessionStorage case and
+      // silently fell through to the merchant dashboard for every
+      // admin who didn't tick "Remember me".
+      const token = api.getToken();
       if (token) {
         try {
           const payload = JSON.parse(atob(token.split(".")[1]));
