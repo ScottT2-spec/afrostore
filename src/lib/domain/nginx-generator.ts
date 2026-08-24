@@ -60,9 +60,11 @@ server {
     add_header X-XSS-Protection "1; mode=block" always;
     add_header Referrer-Policy "strict-origin-when-cross-origin" always;
 
-    # Proxy to Next.js
+    # Proxy to Next.js — the Docker Compose service name (nginx and app
+    # are separate containers on the same network; "localhost" here means
+    # the nginx container itself, not the app, and would 502 every time)
     location / {
-        proxy_pass http://localhost:${upstreamPort};
+        proxy_pass http://app:${upstreamPort};
         proxy_http_version 1.1;
         proxy_set_header Upgrade $http_upgrade;
         proxy_set_header Connection 'upgrade';
@@ -77,14 +79,14 @@ server {
 
     # Static assets caching
     location /_next/static/ {
-        proxy_pass http://localhost:${upstreamPort};
+        proxy_pass http://app:${upstreamPort};
         proxy_cache_valid 200 365d;
         add_header Cache-Control "public, max-age=31536000, immutable";
     }
 
     # Favicon and robots
-    location = /favicon.ico { proxy_pass http://localhost:${upstreamPort}; access_log off; log_not_found off; }
-    location = /robots.txt  { proxy_pass http://localhost:${upstreamPort}; access_log off; log_not_found off; }
+    location = /favicon.ico { proxy_pass http://app:${upstreamPort}; access_log off; log_not_found off; }
+    location = /robots.txt  { proxy_pass http://app:${upstreamPort}; access_log off; log_not_found off; }
 }
 `;
 }
@@ -120,7 +122,7 @@ server {
     }
 
     location / {
-        proxy_pass http://localhost:${upstreamPort};
+        proxy_pass http://app:${upstreamPort};
         proxy_http_version 1.1;
         proxy_set_header Upgrade $http_upgrade;
         proxy_set_header Connection 'upgrade';
