@@ -37,12 +37,20 @@ export default function AdminDashboard() {
   if (!stats) return <div className="p-6 text-surface-500">Failed to load stats.</div>;
 
   const cards = [
-    { label: "Total Users", value: stats.totalUsers, icon: Users, color: "bg-blue-50 text-blue-600" },
-    { label: "Total Stores", value: stats.totalStores, icon: Store, color: "bg-purple-50 text-purple-600" },
-    { label: "Total Orders", value: stats.totalOrders, icon: ShoppingCart, color: "bg-green-50 text-green-600" },
-    { label: "Revenue (GMV)", value: `₵${Number(stats.totalRevenue).toLocaleString()}`, icon: DollarSign, color: "bg-amber-50 text-amber-600" },
-    { label: "Active Stores", value: stats.activeStores, icon: Activity, color: "bg-accent-50 text-accent-600" },
+    { label: "Revenue (GMV)", value: `₵${Number(stats.totalRevenue).toLocaleString()}`, icon: DollarSign, color: "brand" },
+    { label: "Total Users", value: stats.totalUsers, icon: Users, color: "blue" },
+    { label: "Total Stores", value: stats.totalStores, icon: Store, color: "purple" },
+    { label: "Total Orders", value: stats.totalOrders, icon: ShoppingCart, color: "accent" },
+    { label: "Active Stores", value: stats.activeStores, icon: Activity, color: "green" },
   ];
+
+  const accentBorder: Record<string, string> = {
+    brand: "",
+    blue: "border-l-blue-500",
+    purple: "border-l-purple-500",
+    accent: "border-l-accent-500",
+    green: "border-l-green-500",
+  };
 
   return (
     <div className="p-6 space-y-6">
@@ -54,15 +62,27 @@ export default function AdminDashboard() {
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4">
         {cards.map((c) => {
           const Icon = c.icon;
+          const isFeatured = c.color === "brand";
           return (
-            <div key={c.label} className="rounded-2xl border border-surface-200 bg-white p-5">
-              <div className="flex items-center justify-between mb-3">
-                <div className={`flex h-10 w-10 items-center justify-center rounded-xl ${c.color}`}>
-                  <Icon className="h-5 w-5" />
-                </div>
+            <div
+              key={c.label}
+              className={
+                isFeatured
+                  ? "rounded-2xl bg-brand-900 p-7 text-white transition-all hover:shadow-lg relative overflow-hidden"
+                  : `rounded-2xl border border-surface-200 border-l-4 ${accentBorder[c.color]} bg-white p-7 transition-all hover:shadow-md`
+              }
+            >
+              {isFeatured && (
+                <Icon className="absolute -right-4 -bottom-4 h-28 w-28 text-white/5" strokeWidth={1} />
+              )}
+              <div className="flex items-center justify-between mb-4 relative">
+                <span className={`text-xs font-bold uppercase tracking-wider ${isFeatured ? "text-white/60" : "text-surface-400"}`}>
+                  {c.label}
+                </span>
               </div>
-              <div className="text-2xl font-bold text-surface-900 font-display">{c.value}</div>
-              <div className="text-xs text-surface-500 mt-0.5">{c.label}</div>
+              <div className={`text-5xl font-black tracking-tight font-display relative ${isFeatured ? "text-white" : "text-surface-900"}`}>
+                {c.value}
+              </div>
             </div>
           );
         })}
