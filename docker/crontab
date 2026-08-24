@@ -1,0 +1,14 @@
+# Replaces vercel.json's "crons" block, which only Vercel's own
+# infrastructure reads — it does nothing on Huawei Cloud or any other
+# host. This calls the app directly by its Docker Compose service name
+# (`app`), so no public URL or extra DNS is needed.
+#
+# Same daily schedule as before. That was a Vercel Hobby-plan cron limit,
+# not a real requirement — safe to run more often (e.g. every 15 min) if
+# you want tighter timing on abandoned-cart reminders; just duplicate the
+# line below with a different schedule.
+#
+# Requires CRON_SECRET to be set in .env, matching what the app expects.
+
+0 0 * * * . /etc/container.env; curl -fsS -X GET http://app:3000/api/cron/send-campaigns -H "Authorization: Bearer $CRON_SECRET" >> /proc/1/fd/1 2>&1
+0 3 * * * . /etc/container.env; curl -fsS -X GET http://app:3000/api/cron/abandoned-carts -H "Authorization: Bearer $CRON_SECRET" >> /proc/1/fd/1 2>&1

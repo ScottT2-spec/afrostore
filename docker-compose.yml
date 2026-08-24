@@ -8,13 +8,15 @@ services:
     restart: unless-stopped
     ports:
       - "3000:3000"
+    # Load every variable from .env instead of a hand-picked subset — the
+    # previous list only forwarded 5 of the ~34 vars in .env.example, so
+    # everything else (Paystack, AI providers, Supabase storage, AWS SES,
+    # PROFILE_ENCRYPTION_KEY, CRON_SECRET...) never reached the container
+    # no matter what was set in .env on the host.
+    env_file:
+      - .env
     environment:
       - NODE_ENV=production
-      - DATABASE_URL=${DATABASE_URL}
-      - JWT_SECRET=${JWT_SECRET}
-      - SERVER_IP=${SERVER_IP}
-      - CNAME_TARGET=${CNAME_TARGET:-cname.afrostore.com}
-      - NEXT_PUBLIC_APP_DOMAIN=${NEXT_PUBLIC_APP_DOMAIN:-afrostore.com}
     networks:
       - afrostore
 
@@ -41,6 +43,28 @@ services:
       - certbot-conf:/etc/letsencrypt
       - certbot-www:/var/www/certbot
     entrypoint: "/bin/sh -c 'trap exit TERM; while :; do certbot renew; sleep 12h & wait $${!}; done;'"
+
+  # Replaces vercel.json's Crons, which do nothing outside Vercel. Runs
+  # inside the same Docker network as `app`, so it calls it directly by
+  # service name instead of needing a public URL. Requires CRON_SECRET to
+  # be set in .env (the app rejects an unauthenticated call to these two
+  # routes if CRON_SECRET is set but not provided).
+  cron:
+    image: alpine:3.20
+    restart: unless-stopped
+    env_file:
+      - .env
+    depends_on:
+      - app
+    volumes:
+      - ./docker/crontab:/etc/crontabs/root:ro
+    # Dump the container's env to a file each job can source before
+    # running — BusyBox crond's environment inheritance for spawned jobs
+    # isn't reliable enough to depend on for something CRON_SECRET-gated,
+    # so each line in ./docker/crontab explicitly sources this first.
+    command: sh -c "apk add --no-cache curl >/dev/null && env > /etc/container.env && crond -f -l 2"
+    networks:
+      - afrostore
 
 volumes:
   certbot-conf:
