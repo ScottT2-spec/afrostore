@@ -9,7 +9,7 @@ export async function GET(req: NextRequest) {
   const siteType = searchParams.get("siteType");
   const search = searchParams.get("q")?.toLowerCase();
 
-  let templates = [...TEMPLATES];
+  let templates = [...TEMPLATES].filter((t) => !t.hidden);
 
   // Filter by site type first
   if (siteType) {

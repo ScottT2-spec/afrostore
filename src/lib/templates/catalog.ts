@@ -12,6 +12,7 @@ export interface TemplateMeta {
   file: string; // relative path under extracted-templates/
   industries: string[]; // matching INDUSTRIES ids from new-site page
   siteType: SiteType; // which site type this template belongs to
+  hidden?: boolean; // excluded from browsable template lists (still fully usable by slug — e.g. mid-work templates not ready to show merchants yet)
 }
 
 export const TEMPLATE_CATEGORIES = [
@@ -74,10 +75,10 @@ export const TEMPLATES: TemplateMeta[] = [
   { slug: 'ai', name: 'AI Modern', category: 'ai', categoryLabel: 'AI Templates', description: 'Clean, modern Allbirds-inspired e-commerce template with full-bleed imagery, editorial layout, and video hero', previewImage: 'https://images.unsplash.com/photo-1441986300917-64674bd600d8?w=400&h=300&fit=crop', file: 'ai/modern.html', siteType: 'ECOMMERCE', industries: ['fashion', 'lifestyle', 'retail'] },
 
   // Landing Pages — Simple
-  { slug: 'landing-gadget', name: 'Gadget Landing', category: 'landing-simple', categoryLabel: 'Simple Landing Page', description: 'Clean product landing page for gadgets and devices', previewImage: '', file: 'sites/landing-gadget/index.html', siteType: 'LANDING_PAGE', industries: ['electronics', 'other'] },
+  { slug: 'landing-gadget', name: 'Gadget Landing', category: 'landing-simple', categoryLabel: 'Simple Landing Page', description: 'Clean product landing page for gadgets and devices', previewImage: '', file: 'sites/landing-gadget/index.html', siteType: 'LANDING_PAGE', industries: ['electronics', 'other'], hidden: true },
 
   // Landing Pages — Health & Medical
-  { slug: 'aegis', name: 'Aegis Health', category: 'landing-health', categoryLabel: 'Health & Medical', description: 'Health and medical landing page with bento stats, service cards, testimonials, and CTA sections', previewImage: '', file: '', siteType: 'LANDING_PAGE', industries: ['health', 'other'] },
+  { slug: 'aegis', name: 'Aegis Health', category: 'landing-health', categoryLabel: 'Health & Medical', description: 'Health and medical landing page with bento stats, service cards, testimonials, and CTA sections', previewImage: '', file: '', siteType: 'LANDING_PAGE', industries: ['health', 'other'], hidden: true },
 
   // Landing Pages — Recruitment
   { slug: 'prokip-agent', name: 'Prokip Sales Agent', category: 'landing-simple', categoryLabel: 'Simple Landing Page', description: 'Dark navy recruitment landing page for sales agent opportunities with video, benefits, and conversion sections', previewImage: '', file: '', siteType: 'LANDING_PAGE', industries: ['other'] },
@@ -91,9 +92,9 @@ export function getTemplateBySlug(slug: string): TemplateMeta | undefined {
 }
 
 export function getTemplatesByCategory(category: string): TemplateMeta[] {
-  return TEMPLATES.filter(t => t.category === category);
+  return TEMPLATES.filter(t => t.category === category && !t.hidden);
 }
 
 export function getTemplatesByIndustry(industry: string): TemplateMeta[] {
-  return TEMPLATES.filter(t => t.industries.includes(industry));
+  return TEMPLATES.filter(t => t.industries.includes(industry) && !t.hidden);
 }
