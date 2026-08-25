@@ -661,8 +661,10 @@ export default function ContentPanel({ element, onUpdate }: ContentPanelProps) {
                   path={[key]}
                   onChange={(path, nextValue) => {
                     const nextSettings = updateValueAtPath(element.settings || {}, path, nextValue);
+                    const nextContent = updateValueAtPath(element.content || {}, path, nextValue);
                     onUpdate({
                       settings: nextSettings,
+                      content: nextContent,
                     });
                   }}
                 />
@@ -683,8 +685,10 @@ export default function ContentPanel({ element, onUpdate }: ContentPanelProps) {
                     path={[key]}
                     onChange={(path, nextValue) => {
                       const nextContent = updateValueAtPath(element.content || {}, path, nextValue);
+                      const nextSettings = updateValueAtPath(element.settings || {}, path, nextValue);
                       onUpdate({
                         content: nextContent,
+                        settings: nextSettings,
                       });
                     }}
                   />
