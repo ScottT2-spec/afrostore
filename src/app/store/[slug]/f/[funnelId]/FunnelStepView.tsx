@@ -175,7 +175,10 @@ function LeadFormStep({
       if (!res.ok || !json.success) {
         throw new Error(json.error || "Something went wrong. Please try again.");
       }
-      trackEvent(siteSlug, "lead", { metadata: { funnelId, funnelStepId: step.id, formId: step.form!.id } });
+      trackEvent(siteSlug, "lead", {
+        metadata: { funnelId, funnelStepId: step.id, formId: step.form!.id },
+        email: step.form!.fields.find((f) => f.type === "email") ? values[step.form!.fields.find((f) => f.type === "email")!.id] : undefined,
+      });
       setSuccess(true);
       setTimeout(onSubmitted, 1200);
     } catch (err: any) {
@@ -204,7 +207,7 @@ function LeadFormStep({
       if (!res.ok || !json.success) {
         throw new Error(json.error || "Something went wrong. Please try again.");
       }
-      trackEvent(siteSlug, "lead", { metadata: { funnelId, funnelStepId: step.id, quickCapture: true } });
+      trackEvent(siteSlug, "lead", { metadata: { funnelId, funnelStepId: step.id, quickCapture: true }, email: quickCapture.email });
       setSuccess(true);
       setTimeout(onSubmitted, 1200);
     } catch (err: any) {

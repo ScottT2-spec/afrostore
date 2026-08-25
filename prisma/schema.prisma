@@ -235,6 +235,9 @@ model SiteSettings {
   googleAnalyticsId  String?
   facebookPixelId    String?
   tiktokPixelId      String?
+  metaAccessToken    String?
+  metaTestEventCode  String?
+  tiktokAccessToken  String?
   customHeadCode     String?
   customBodyCode     String?
   site               Site    @relation(fields: [siteId], references: [id], onDelete: Cascade)

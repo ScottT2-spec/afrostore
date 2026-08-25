@@ -215,6 +215,9 @@ export const updateSettingsSchema = z.object({
   googleAnalyticsId: z.string().optional().nullable(),
   facebookPixelId: z.string().optional().nullable(),
   tiktokPixelId: z.string().optional().nullable(),
+  metaAccessToken: z.string().optional().nullable(),
+  metaTestEventCode: z.string().optional().nullable(),
+  tiktokAccessToken: z.string().optional().nullable(),
 });
 
 // ─── PAGES ──────────────────────────────────────────────────
@@ -787,6 +790,7 @@ export const adminReviewMarketplaceItemSchema = z.object({
 
 export const analyticsEventSchema = z.object({
   event: z.string().min(1, "Event type is required"),
+  eventId: z.string().optional(),
   page: z.string().optional(),
   productId: z.string().optional(),
   orderId: z.string().optional(),
@@ -795,5 +799,7 @@ export const analyticsEventSchema = z.object({
   device: z.string().optional(),
   country: z.string().optional(),
   city: z.string().optional(),
+  email: z.string().optional(),
+  phone: z.string().optional(),
   metadata: z.record(z.string(), z.unknown()).optional(),
 });

@@ -3,6 +3,18 @@ import { prisma } from "@/lib/db";
 import { success, error, validationError } from "@/lib/api-helpers";
 import { analyticsEventSchema } from "@/lib/validators";
 import { rateLimit } from "@/lib/rate-limit";
+import { sendServerConversionEvents } from "@/lib/server-conversions";
+
+// Internal event names that map to a real advertising conversion worth an
+// authoritative server-side call (backstops ad blockers / Safari ITP losing
+// the browser-side pixel fire). Not every event type needs this — a plain
+// page_view or cta_click has no server-side equivalent worth sending.
+const CONVERSION_EVENT_MAP: Record<string, "Lead" | "Purchase" | "Contact"> = {
+  lead: "Lead",
+  form_submit: "Lead",
+  purchase: "Purchase",
+  whatsapp_click: "Contact",
+};
 
 type Params = { params: Promise<{ slug: string }> };
 
@@ -76,6 +88,26 @@ export async function POST(req: NextRequest, { params }: Params) {
         metadata: parsed.data.metadata as any,
       },
     });
+
+    // Authoritative server-side conversion, deduplicated against the
+    // browser pixel call via the shared eventId the client generated.
+    const conversionName = CONVERSION_EVENT_MAP[parsed.data.event];
+    if (conversionName && parsed.data.eventId) {
+      const settings = await prisma.siteSettings.findUnique({
+        where: { siteId: site.id },
+        select: { facebookPixelId: true, metaAccessToken: true, metaTestEventCode: true, tiktokPixelId: true, tiktokAccessToken: true },
+      });
+      if (settings && (settings.metaAccessToken || settings.tiktokAccessToken)) {
+        await sendServerConversionEvents({
+          eventName: conversionName,
+          eventId: parsed.data.eventId,
+          eventSourceUrl: parsed.data.page ? `https://${site.customDomain || `${site.subdomain}.afrostore.com`}${parsed.data.page}` : undefined,
+          user: { email: parsed.data.email, phone: parsed.data.phone, ip, userAgent: ua },
+          customData: parsed.data.metadata,
+          settings,
+        });
+      }
+    }
 
     return success({ tracked: true });
   } catch (err) {

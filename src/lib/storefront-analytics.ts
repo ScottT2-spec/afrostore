@@ -116,20 +116,28 @@ export type ConversionEvent = "page_view" | "add_to_cart" | "form_submit" | "wha
 export function trackEvent(
   siteSlug: string,
   event: ConversionEvent | string,
-  opts: { page?: string; productId?: string; orderId?: string; metadata?: Record<string, unknown> } = {}
+  opts: { page?: string; productId?: string; orderId?: string; metadata?: Record<string, unknown>; email?: string; phone?: string } = {}
 ) {
   if (!siteSlug) return;
+
+  // Shared across the browser pixel call and the server-side Conversions
+  // API call the ingestion endpoint makes, so Meta/TikTok can deduplicate
+  // the same real-world event instead of double-counting it.
+  const eventId = `${event}_${getAnalyticsSessionId()}_${Date.now()}_${Math.random().toString(36).slice(2, 8)}`;
 
   fetch(`/api/public/sites/${siteSlug}/analytics/track`, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({
       event,
+      eventId,
       page: opts.page || (typeof window !== "undefined" ? window.location.pathname : undefined),
       productId: opts.productId,
       orderId: opts.orderId,
       sessionId: getAnalyticsSessionId(),
       metadata: opts.metadata,
+      email: opts.email,
+      phone: opts.phone,
     }),
   }).catch(() => { /* non-critical */ });
 
@@ -137,28 +145,28 @@ export function trackEvent(
     if (typeof window === "undefined") return;
     switch (event) {
       case "purchase":
-        window.fbq?.("track", "Purchase", opts.metadata);
-        window.ttq?.track("CompletePayment", opts.metadata);
+        window.fbq?.("track", "Purchase", opts.metadata, { eventID: eventId });
+        window.ttq?.track("CompletePayment", { ...opts.metadata, event_id: eventId });
         window.gtag?.("event", "purchase", opts.metadata);
         break;
       case "lead":
       case "form_submit":
-        window.fbq?.("track", "Lead", opts.metadata);
-        window.ttq?.track("SubmitForm", opts.metadata);
+        window.fbq?.("track", "Lead", opts.metadata, { eventID: eventId });
+        window.ttq?.track("SubmitForm", { ...opts.metadata, event_id: eventId });
         window.gtag?.("event", "generate_lead", opts.metadata);
         break;
       case "add_to_cart":
-        window.fbq?.("track", "AddToCart", opts.metadata);
-        window.ttq?.track("AddToCart", opts.metadata);
+        window.fbq?.("track", "AddToCart", opts.metadata, { eventID: eventId });
+        window.ttq?.track("AddToCart", { ...opts.metadata, event_id: eventId });
         window.gtag?.("event", "add_to_cart", opts.metadata);
         break;
       case "whatsapp_click":
-        window.fbq?.("trackCustom", "WhatsAppClick", opts.metadata);
+        window.fbq?.("trackCustom", "WhatsAppClick", opts.metadata, { eventID: eventId });
         window.gtag?.("event", "whatsapp_click", opts.metadata);
         break;
       case "cta_click":
-        window.fbq?.("trackCustom", "CTAClick", opts.metadata);
-        window.ttq?.track("ClickButton", opts.metadata);
+        window.fbq?.("trackCustom", "CTAClick", opts.metadata, { eventID: eventId });
+        window.ttq?.track("ClickButton", { ...opts.metadata, event_id: eventId });
         window.gtag?.("event", "cta_click", opts.metadata);
         break;
       default:

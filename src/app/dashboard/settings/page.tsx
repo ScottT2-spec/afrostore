@@ -34,6 +34,10 @@ export default function SettingsPage() {
     metaDescription: "",
     googleAnalyticsId: "",
     facebookPixelId: "",
+    tiktokPixelId: "",
+    metaAccessToken: "",
+    metaTestEventCode: "",
+    tiktokAccessToken: "",
     currency: "",
   });
 
@@ -184,6 +188,27 @@ export default function SettingsPage() {
             <div>
               <label className="block text-sm font-medium text-surface-700 mb-1">Facebook Pixel ID</label>
               <input value={settings.facebookPixelId} onChange={(e) => update("facebookPixelId", e.target.value)} className="input-field" placeholder="1234567890" />
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-surface-700 mb-1">TikTok Pixel ID</label>
+              <input value={settings.tiktokPixelId} onChange={(e) => update("tiktokPixelId", e.target.value)} className="input-field" placeholder="C4A1B2C3D4E5F6G7H8I9" />
+            </div>
+            <div className="pt-2 border-t border-surface-100">
+              <p className="text-xs text-surface-500 mb-3">
+                Optional — adds a server-side backup for Lead/Purchase/Contact events, so ad blockers and browser privacy settings can&apos;t cause a conversion to go unreported. Leave blank to rely on pixel tracking only.
+              </p>
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-surface-700 mb-1">Meta Conversions API Access Token</label>
+              <input type="password" value={settings.metaAccessToken} onChange={(e) => update("metaAccessToken", e.target.value)} className="input-field" placeholder="EAAxxxxxxxxxxxx" />
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-surface-700 mb-1">Meta Test Event Code <span className="text-surface-400 font-normal">(optional, for testing)</span></label>
+              <input value={settings.metaTestEventCode} onChange={(e) => update("metaTestEventCode", e.target.value)} className="input-field" placeholder="TEST12345" />
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-surface-700 mb-1">TikTok Events API Access Token</label>
+              <input type="password" value={settings.tiktokAccessToken} onChange={(e) => update("tiktokAccessToken", e.target.value)} className="input-field" placeholder="xxxxxxxxxxxxxxxx" />
             </div>
           </div>
         </div>
