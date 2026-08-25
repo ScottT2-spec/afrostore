@@ -6,7 +6,8 @@ import { parseVariants, pickVariant } from "@/lib/ab-testing";
 type Params = { params: Promise<{ slug: string }> };
 
 // POST /api/public/sites/:slug/ab-tests/assign — no auth.
-// Body: { pageId: string, existingTestId?: string, existingVariantId?: string }
+// Body: { pageId?: string, funnelStepId?: string, existingTestId?: string, existingVariantId?: string }
+// Exactly one of pageId/funnelStepId identifies what's being tested.
 // If the visitor already has an assignment for the running test (passed back from
 // localStorage by the client), that assignment is reused and no new view is counted.
 // Otherwise a variant is picked by weight and a view is recorded once.
@@ -16,7 +17,8 @@ export async function POST(req: NextRequest, { params }: Params) {
   try {
     const body = await req.json().catch(() => ({}));
     const pageId = typeof body.pageId === "string" ? body.pageId : undefined;
-    if (!pageId) return error("pageId is required", 400);
+    const funnelStepId = typeof body.funnelStepId === "string" ? body.funnelStepId : undefined;
+    if (!pageId && !funnelStepId) return error("pageId or funnelStepId is required", 400);
 
     const site = await prisma.site.findFirst({
       where: { status: "ACTIVE", OR: [{ slug }, { subdomain: slug }, { customDomain: slug }] },
@@ -25,7 +27,7 @@ export async function POST(req: NextRequest, { params }: Params) {
     if (!site) return error("Store not found", 404);
 
     const test = await prisma.aBTest.findFirst({
-      where: { siteId: site.id, pageId, status: "RUNNING" },
+      where: funnelStepId ? { siteId: site.id, funnelStepId, status: "RUNNING" } : { siteId: site.id, pageId, status: "RUNNING" },
     });
     if (!test) return success({ active: false });
 

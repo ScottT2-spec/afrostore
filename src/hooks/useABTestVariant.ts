@@ -8,7 +8,7 @@ interface ABTestAssignment {
   content?: { blockOverrides?: Record<string, Record<string, unknown>> } | null;
 }
 
-const storageKey = (pageId: string) => `ab-assign-${pageId}`;
+const storageKey = (targetId: string) => `ab-assign-${targetId}`;
 
 /**
  * Assigns the current visitor to a running A/B test variant for the given page
@@ -16,15 +16,25 @@ const storageKey = (pageId: string) => `ab-assign-${pageId}`;
  * see the same variant and don't get double-counted as new views.
  */
 export function useABTestVariant(storeSlug: string | undefined, pageId: string | undefined) {
+  return useABTestVariantByTarget(storeSlug, pageId ? { pageId } : undefined);
+}
+
+/** Same as useABTestVariant, but for a funnel step instead of a standalone page. */
+export function useFunnelStepABTestVariant(storeSlug: string | undefined, funnelStepId: string | undefined) {
+  return useABTestVariantByTarget(storeSlug, funnelStepId ? { funnelStepId } : undefined);
+}
+
+function useABTestVariantByTarget(storeSlug: string | undefined, target: { pageId?: string; funnelStepId?: string } | undefined) {
   const [assignment, setAssignment] = useState<ABTestAssignment>({ active: false });
+  const targetId = target?.pageId || target?.funnelStepId;
 
   useEffect(() => {
-    if (!storeSlug || !pageId) return;
+    if (!storeSlug || !targetId) return;
     let cancelled = false;
 
     let existing: ABTestAssignment | null = null;
     try {
-      const raw = window.localStorage.getItem(storageKey(pageId));
+      const raw = window.localStorage.getItem(storageKey(targetId));
       if (raw) existing = JSON.parse(raw);
     } catch {
       existing = null;
@@ -34,7 +44,8 @@ export function useABTestVariant(storeSlug: string | undefined, pageId: string |
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
-        pageId,
+        pageId: target?.pageId,
+        funnelStepId: target?.funnelStepId,
         existingTestId: existing?.testId,
         existingVariantId: existing?.variantId,
       }),
@@ -46,7 +57,7 @@ export function useABTestVariant(storeSlug: string | undefined, pageId: string |
         if (data.active) {
           setAssignment(data);
           try {
-            window.localStorage.setItem(storageKey(pageId), JSON.stringify({ testId: data.testId, variantId: data.variantId }));
+            window.localStorage.setItem(storageKey(targetId), JSON.stringify({ testId: data.testId, variantId: data.variantId }));
           } catch {
             // localStorage unavailable — assignment still works for this page view
           }
@@ -57,7 +68,7 @@ export function useABTestVariant(storeSlug: string | undefined, pageId: string |
       });
 
     return () => { cancelled = true; };
-  }, [storeSlug, pageId]);
+  }, [storeSlug, targetId, target?.pageId, target?.funnelStepId]);
 
   return assignment;
 }

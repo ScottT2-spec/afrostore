@@ -977,6 +977,7 @@ model FunnelStep {
   funnel          Funnel         @relation(fields: [funnelId], references: [id], onDelete: Cascade)
   page            Page?          @relation(fields: [pageId], references: [id], onDelete: SetNull)
   form            Form?          @relation(fields: [formId], references: [id], onDelete: SetNull)
+  abTests         ABTest[]
 
   @@index([funnelId])
   @@index([pageId])
@@ -1163,6 +1164,7 @@ model ABTest {
   id              String        @id @default(cuid())
   siteId          String
   pageId          String?
+  funnelStepId    String?
   name            String
   status          ABTestStatus  @default(DRAFT)
   variants        Json
@@ -1173,10 +1175,12 @@ model ABTest {
   createdAt       DateTime      @default(now())
   updatedAt       DateTime      @updatedAt
   page            Page?         @relation(fields: [pageId], references: [id])
+  funnelStep      FunnelStep?   @relation(fields: [funnelStepId], references: [id], onDelete: Cascade)
   site            Site          @relation(fields: [siteId], references: [id], onDelete: Cascade)
   stats           ABTestStat[]
 
   @@index([siteId])
+  @@index([funnelStepId])
   @@map("ab_tests")
 }
 

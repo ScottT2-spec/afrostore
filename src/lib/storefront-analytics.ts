@@ -107,18 +107,43 @@ export function injectPixels(ids: PixelIds) {
   }
 }
 
-export type ConversionEvent = "page_view" | "add_to_cart" | "form_submit" | "whatsapp_click" | "purchase" | "lead" | "cta_click";
+export type ConversionEvent = "page_view" | "add_to_cart" | "form_submit" | "whatsapp_click" | "instagram_click" | "purchase" | "lead" | "cta_click";
 
 /**
  * Records the event in our own analytics and fires the equivalent event on
  * any configured third-party pixel. Fire-and-forget - never awaited by callers.
  */
+function getUtmParams(): { source?: string; medium?: string; campaign?: string } {
+  if (typeof window === "undefined") return {};
+  const params = new URLSearchParams(window.location.search);
+  const source = params.get("utm_source") || undefined;
+  const medium = params.get("utm_medium") || undefined;
+  const campaign = params.get("utm_campaign") || undefined;
+  if (source || medium || campaign) {
+    // Persist for the rest of the session — UTM params are typically only
+    // present on the very first URL a visitor lands on; later page views
+    // and the eventual conversion need to keep the same attribution.
+    try {
+      sessionStorage.setItem("afro_utm", JSON.stringify({ source, medium, campaign }));
+    } catch { /* ignore */ }
+    return { source, medium, campaign };
+  }
+  try {
+    const stored = sessionStorage.getItem("afro_utm");
+    return stored ? JSON.parse(stored) : {};
+  } catch {
+    return {};
+  }
+}
+
 export function trackEvent(
   siteSlug: string,
   event: ConversionEvent | string,
-  opts: { page?: string; productId?: string; orderId?: string; metadata?: Record<string, unknown>; email?: string; phone?: string } = {}
+  opts: { page?: string; productId?: string; orderId?: string; funnelId?: string; metadata?: Record<string, unknown>; email?: string; phone?: string } = {}
 ) {
   if (!siteSlug) return;
+
+  const utm = getUtmParams();
 
   // Shared across the browser pixel call and the server-side Conversions
   // API call the ingestion endpoint makes, so Meta/TikTok can deduplicate
@@ -134,7 +159,11 @@ export function trackEvent(
       page: opts.page || (typeof window !== "undefined" ? window.location.pathname : undefined),
       productId: opts.productId,
       orderId: opts.orderId,
+      funnelId: opts.funnelId,
       sessionId: getAnalyticsSessionId(),
+      source: utm.source,
+      medium: utm.medium,
+      campaign: utm.campaign,
       metadata: opts.metadata,
       email: opts.email,
       phone: opts.phone,
@@ -163,6 +192,10 @@ export function trackEvent(
       case "whatsapp_click":
         window.fbq?.("trackCustom", "WhatsAppClick", opts.metadata, { eventID: eventId });
         window.gtag?.("event", "whatsapp_click", opts.metadata);
+        break;
+      case "instagram_click":
+        window.fbq?.("trackCustom", "InstagramClick", opts.metadata, { eventID: eventId });
+        window.gtag?.("event", "instagram_click", opts.metadata);
         break;
       case "cta_click":
         window.fbq?.("trackCustom", "CTAClick", opts.metadata, { eventID: eventId });

@@ -14,6 +14,7 @@ const CONVERSION_EVENT_MAP: Record<string, "Lead" | "Purchase" | "Contact"> = {
   form_submit: "Lead",
   purchase: "Purchase",
   whatsapp_click: "Contact",
+  instagram_click: "Contact",
 };
 
 type Params = { params: Promise<{ slug: string }> };
@@ -80,6 +81,9 @@ export async function POST(req: NextRequest, { params }: Params) {
         orderId: parsed.data.orderId,
         sessionId: parsed.data.sessionId,
         source,
+        medium: parsed.data.medium,
+        campaign: parsed.data.campaign,
+        funnelId: parsed.data.funnelId,
         device: parsed.data.device || device,
         country: parsed.data.country,
         city: parsed.data.city,

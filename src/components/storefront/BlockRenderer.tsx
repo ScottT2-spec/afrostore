@@ -1704,6 +1704,7 @@ function SocialShareBlock({ props }: { props: Record<string, unknown> }) {
 
 /* ── Social Follow ───────────────────────────────────────────── */
 function SocialFollowBlock({ props }: { props: Record<string, unknown> }) {
+  const storeSlug = useContext(StoreSlugContext);
   const platforms = (Array.isArray(props.platforms) ? props.platforms : []) as Array<{ name: string; url: string }>;
   const iconMap: Record<string, React.ComponentType<any>> = { facebook: Facebook, twitter: Twitter, linkedin: Linkedin, instagram: Instagram, youtube: Youtube };
   return (
@@ -1712,7 +1713,21 @@ function SocialFollowBlock({ props }: { props: Record<string, unknown> }) {
         {platforms.filter((p) => p?.url).map((p) => {
           const Icon = iconMap[p.name] || Share2;
           return (
-            <a key={p.name} href={p.url} target="_blank" rel="noopener noreferrer" className="h-9 w-9 rounded-full bg-surface-100 hover:bg-surface-200 flex items-center justify-center text-surface-700">
+            <a
+              key={p.name}
+              href={p.url}
+              target="_blank"
+              rel="noopener noreferrer"
+              onClick={() => {
+                if (!storeSlug) return;
+                // Instagram gets its own PRD-named event (INSTAGRAM_CLICK);
+                // every other platform still gets recorded as a generic CTA
+                // click so it isn't invisible to the internal event log.
+                if (p.name === "instagram") trackEvent(storeSlug, "instagram_click", { metadata: { platform: p.name, url: p.url } });
+                else trackEvent(storeSlug, "cta_click", { metadata: { platform: p.name, url: p.url, kind: "social_follow" } });
+              }}
+              className="h-9 w-9 rounded-full bg-surface-100 hover:bg-surface-200 flex items-center justify-center text-surface-700"
+            >
               <Icon className="h-4 w-4" />
             </a>
           );

@@ -4,6 +4,7 @@ import { useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import { RenderBlocks, type BuilderBlock } from "@/components/storefront/BlockRenderer";
 import { injectPixels, trackEvent, type PixelIds } from "@/lib/storefront-analytics";
+import { useFunnelStepABTestVariant, applyABTestOverrides } from "@/hooks/useABTestVariant";
 
 export interface PublicFunnelStep {
   id: string;
@@ -83,7 +84,7 @@ export default function FunnelStepView({ siteSlug, siteName, siteLogo, funnelId,
 
       <main>
         {step.type === "LANDING" && (
-          <LandingStep blocks={step.landingBlocks} storeSlug={siteSlug} onContinue={goToNextStep} isLastStep={step.isLastStep} settings={step.settings} />
+          <LandingStep blocks={step.landingBlocks} storeSlug={siteSlug} funnelStepId={step.id} onContinue={goToNextStep} isLastStep={step.isLastStep} settings={step.settings} />
         )}
         {step.type === "LEAD_FORM" && (
           <LeadFormStep siteSlug={siteSlug} funnelId={funnelId} step={step} onSubmitted={goToNextStep} />
@@ -106,16 +107,21 @@ export default function FunnelStepView({ siteSlug, siteName, siteLogo, funnelId,
 function LandingStep({
   blocks,
   storeSlug,
+  funnelStepId,
   onContinue,
   isLastStep,
   settings,
 }: {
   blocks: BuilderBlock[];
   storeSlug: string;
+  funnelStepId: string;
   onContinue: () => void;
   isLastStep: boolean;
   settings: Record<string, unknown>;
 }) {
+  const abTest = useFunnelStepABTestVariant(storeSlug, funnelStepId);
+  const effectiveBlocks = applyABTestOverrides(blocks, abTest.content);
+
   if (blocks.length === 0) {
     return (
       <div className="max-w-lg mx-auto px-4 py-24 text-center">
@@ -131,7 +137,7 @@ function LandingStep({
   }
   return (
     <div>
-      <RenderBlocks blocks={blocks} storeSlug={storeSlug} />
+      <RenderBlocks blocks={effectiveBlocks} storeSlug={storeSlug} />
       {!isLastStep && (
         <div className="max-w-5xl mx-auto px-4 py-10 text-center">
           <button onClick={onContinue} className="btn-primary px-8 py-3.5 text-base">
