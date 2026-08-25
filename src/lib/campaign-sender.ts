@@ -20,6 +20,7 @@ import { prisma } from "@/lib/db";
 import { sendRawEmail } from "@/lib/email";
 import { sendSms, isSmsConfigured } from "@/lib/sms";
 import { sendWhatsAppMessage, isWhatsAppConfigured } from "@/lib/whatsapp";
+import { rewriteEmailHtmlForTracking, getAppBaseUrl } from "@/lib/email-tracking";
 
 const SEND_DELAY_MS = 120; // stay well under provider rate limits for modest list sizes
 
@@ -102,12 +103,19 @@ export async function sendEmailCampaign(campaignId: string): Promise<{ success: 
     const fromEmail = campaign.fromEmail || process.env.SES_FROM_EMAIL || "noreply@prokip.com";
     const from = `${fromName} <${fromEmail}>`;
     const html = campaign.contentHtml || "";
+    const baseUrl = getAppBaseUrl();
 
     let sent = 0;
     let lastFailureError: string | undefined;
 
     for (const recipient of recipients) {
-      const result = await sendRawEmail({ to: recipient.email, from, subject: campaign.subject, html });
+      // Each recipient gets their own copy of the HTML with a tracking
+      // pixel + click-redirect links keyed to their own EmailRecipient id —
+      // this is what actually populates openedAt/clickedAt and
+      // totalOpened/totalClicked, which existed on the model already but
+      // were never written to anywhere.
+      const trackedHtml = rewriteEmailHtmlForTracking(html, recipient.id, baseUrl);
+      const result = await sendRawEmail({ to: recipient.email, from, subject: campaign.subject, html: trackedHtml });
       if (result.success) {
         sent++;
         await prisma.emailRecipient.update({ where: { id: recipient.id }, data: { status: "sent", sentAt: new Date() } });
