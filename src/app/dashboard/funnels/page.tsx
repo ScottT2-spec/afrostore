@@ -1,6 +1,6 @@
 "use client";
 import { ChevronDown, ChevronRight, Loader2, Plus } from "lucide-react";
-import { Archive, ArrowDown, BarChart3, Copy, Eye, EyeOff, ExternalLink, Filter, Layers, MousePointerClick, Pause, Pencil, Play, Search, Trash2 } from "@/components/icons/FilledIcons";
+import { Archive, ArrowDown, BarChart3, Copy, Eye, EyeOff, ExternalLink, Filter, Layers, Megaphone, MousePointerClick, Pause, Pencil, Play, Search, Trash2 } from "@/components/icons/FilledIcons";
 
 import { useState, useEffect, useCallback } from "react";
 import { useSite } from "@/context/StoreContext";
@@ -208,6 +208,47 @@ export default function FunnelsPage() {
     return `${window.location.origin}/store/${currentStore.slug}/f/${funnelId}`;
   };
 
+  // Ad-link builder — the plain funnelLink() above works fine when pasted
+  // into an ad's destination URL (source still gets picked up from the
+  // referrer), but with no utm_campaign a merchant running several ad
+  // campaigns at the same funnel can't tell them apart in Analytics.
+  const [adLinkFunnelId, setAdLinkFunnelId] = useState<string | null>(null);
+  const [adLinkSource, setAdLinkSource] = useState("facebook");
+  const [adLinkMedium, setAdLinkMedium] = useState("paid");
+  const [adLinkCampaign, setAdLinkCampaign] = useState("");
+  const [adLinkCopied, setAdLinkCopied] = useState(false);
+
+  const buildAdLink = (funnelId: string) => {
+    const base = funnelLink(funnelId);
+    if (!base) return "";
+    const params = new URLSearchParams();
+    if (adLinkSource.trim()) params.set("utm_source", adLinkSource.trim());
+    if (adLinkMedium.trim()) params.set("utm_medium", adLinkMedium.trim());
+    if (adLinkCampaign.trim()) params.set("utm_campaign", adLinkCampaign.trim());
+    const qs = params.toString();
+    return qs ? `${base}?${qs}` : base;
+  };
+
+  const openAdLinkModal = (funnelId: string) => {
+    setAdLinkFunnelId(funnelId);
+    setAdLinkSource("facebook");
+    setAdLinkMedium("paid");
+    setAdLinkCampaign("");
+    setAdLinkCopied(false);
+  };
+
+  const copyAdLink = async () => {
+    if (!adLinkFunnelId) return;
+    const link = buildAdLink(adLinkFunnelId);
+    try {
+      await navigator.clipboard.writeText(link);
+      setAdLinkCopied(true);
+      setTimeout(() => setAdLinkCopied(false), 2000);
+    } catch {
+      window.open(link, "_blank");
+    }
+  };
+
   const copyFunnelLink = async (funnelId: string) => {
     const link = funnelLink(funnelId);
     if (!link) return;
@@ -384,6 +425,13 @@ export default function FunnelsPage() {
                     >
                       <Copy className="h-4 w-4" />
                     </button>
+                    <button
+                      onClick={() => openAdLinkModal(funnel.id)}
+                      className="p-2 rounded-lg hover:bg-surface-100 text-surface-400 hover:text-surface-700 transition-colors"
+                      title="Get ad link (with campaign tracking)"
+                    >
+                      <Megaphone className="h-4 w-4" />
+                    </button>
                     {copiedId === funnel.id && <span className="text-[11px] text-green-600 font-medium px-1">Copied!</span>}
                     <select
                       value={funnel.status}
@@ -538,6 +586,44 @@ export default function FunnelsPage() {
               </div>
             );
           })}
+        </div>
+      )}
+
+      {adLinkFunnelId && (
+        <div className="fixed inset-0 bg-black/40 z-50 flex items-center justify-center p-4" onClick={() => setAdLinkFunnelId(null)}>
+          <div className="bg-white rounded-2xl p-6 w-full max-w-md" onClick={(e) => e.stopPropagation()}>
+            <h3 className="text-lg font-bold text-surface-900 font-display mb-1">Get ad link</h3>
+            <p className="text-sm text-surface-500 mb-4">
+              Paste this into your ad&apos;s destination/website URL field on Facebook, Instagram, or TikTok Ads Manager. It tags every click so this campaign shows up distinctly in Analytics.
+            </p>
+            <div className="space-y-3">
+              <div>
+                <label className="block text-xs font-semibold text-surface-500 uppercase tracking-wider mb-1">Source</label>
+                <select value={adLinkSource} onChange={(e) => setAdLinkSource(e.target.value)} className="input-field py-2 text-sm w-full">
+                  <option value="facebook">Facebook</option>
+                  <option value="instagram">Instagram</option>
+                  <option value="tiktok">TikTok</option>
+                  <option value="google">Google</option>
+                  <option value="whatsapp">WhatsApp</option>
+                </select>
+              </div>
+              <div>
+                <label className="block text-xs font-semibold text-surface-500 uppercase tracking-wider mb-1">Medium</label>
+                <input value={adLinkMedium} onChange={(e) => setAdLinkMedium(e.target.value)} className="input-field py-2 text-sm w-full" placeholder="paid" />
+              </div>
+              <div>
+                <label className="block text-xs font-semibold text-surface-500 uppercase tracking-wider mb-1">Campaign name</label>
+                <input value={adLinkCampaign} onChange={(e) => setAdLinkCampaign(e.target.value)} className="input-field py-2 text-sm w-full" placeholder="e.g. summer-sale" />
+              </div>
+              <div className="rounded-xl bg-surface-50 border border-surface-200 p-3 text-xs text-surface-600 break-all font-mono">
+                {buildAdLink(adLinkFunnelId)}
+              </div>
+            </div>
+            <div className="flex items-center gap-2 mt-5">
+              <button onClick={copyAdLink} className="btn-primary text-sm py-2 px-4 flex-1">{adLinkCopied ? "Copied!" : "Copy link"}</button>
+              <button onClick={() => setAdLinkFunnelId(null)} className="btn-secondary text-sm py-2 px-4">Close</button>
+            </div>
+          </div>
         </div>
       )}
     </div>
