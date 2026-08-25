@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/db";
 import { upsertLeadContact } from "@/lib/crm";
+import { runAutomationsForTrigger } from "@/lib/automations";
 
 type Params = { params: Promise<{ slug: string; formSlug: string }> };
 
@@ -90,7 +91,7 @@ export async function POST(req: NextRequest, { params }: Params) {
         status: "ACTIVE",
         OR: [{ slug }, { subdomain: slug }, { customDomain: slug }],
       },
-      select: { id: true },
+      select: { id: true, name: true },
     });
     if (!site) return json({ success: false, error: "Site not found" }, 404);
 
@@ -145,7 +146,7 @@ export async function POST(req: NextRequest, { params }: Params) {
     const contactFields = extractContactFields(fields, body);
     let crmContactId: string | undefined;
     if (contactFields.email) {
-      const { contact } = await upsertLeadContact({
+      const { contact, isNewContact } = await upsertLeadContact({
         siteId: site.id,
         email: contactFields.email,
         firstName: contactFields.firstName,
@@ -162,6 +163,24 @@ export async function POST(req: NextRequest, { params }: Params) {
         },
       });
       crmContactId = contact.id;
+
+      // Same lead-notification/confirmation trigger the quick-capture funnel
+      // path already fires — previously this, the main linked-form
+      // submission path most funnels actually use, never fired it at all,
+      // so most real lead submissions never notified the merchant.
+      const automationCtx = {
+        recipientEmail: contact.email,
+        recipientPhone: contact.phone || undefined,
+        recipientName: [contact.firstName, contact.lastName].filter(Boolean).join(" ") || undefined,
+        crmContactId: contact.id,
+        subject: `New submission from ${site.name}`,
+        message: `A form submission (${form.name}) was received from ${contact.email}.`,
+        data: { contactId: contact.id, email: contact.email, phone: contact.phone, formId: form.id, formName: form.name, funnelStepId: funnelStep?.id },
+      };
+      if (isNewContact) {
+        runAutomationsForTrigger(site.id, "new_lead", automationCtx).catch((err) => console.error("Automation trigger (new_lead) error:", err));
+      }
+      runAutomationsForTrigger(site.id, "form_submission", automationCtx).catch((err) => console.error("Automation trigger (form_submission) error:", err));
     }
 
     // Save submission
