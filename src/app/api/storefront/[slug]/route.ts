@@ -415,8 +415,9 @@ export async function GET(req: NextRequest, { params }: Params) {
     });
   } catch (err) {
     console.error("Storefront fetch error:", err);
+    const message = err instanceof Error ? err.message : String(err);
     return NextResponse.json(
-      { success: false, error: "Internal server error" },
+      { success: false, error: message, errorType: "server_error" },
       { status: 500 }
     );
   }

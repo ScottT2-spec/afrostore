@@ -195,6 +195,7 @@ export default function StorePage() {
   const [data, setData] = useState<StoreData | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
+  const [isServerError, setIsServerError] = useState(false);
   const [draftCustomization, setDraftCustomization] = useState<SiteCustomizationDocument | null>(null);
   const templateIframeRef = useRef<HTMLIFrameElement>(null);
   const cartKey = `afrostore_cart_${slug}`;
@@ -249,9 +250,13 @@ export default function StorePage() {
           trackEvent(slug, "page_view");
         } else {
           setError(json.error || "Store not found");
+          setIsServerError(json.errorType === "server_error" || res.status >= 500);
         }
-      } catch {
-        if (!cancelled) setError("Failed to load store");
+      } catch (err) {
+        if (!cancelled) {
+          setError(err instanceof Error ? err.message : "Failed to load store");
+          setIsServerError(true);
+        }
       } finally {
         if (!cancelled) setLoading(false);
       }
@@ -329,8 +334,11 @@ export default function StorePage() {
       <div className="min-h-screen bg-white flex items-center justify-center">
         <div className="text-center max-w-md px-4">
           <ShoppingBag className="h-12 w-12 text-surface-300 mx-auto mb-4" />
-          <h1 className="text-2xl font-bold text-surface-900 mb-2">Store not found</h1>
+          <h1 className="text-2xl font-bold text-surface-900 mb-2">{isServerError ? "Something went wrong" : "Store not found"}</h1>
           <p className="text-surface-500">{error || "This store doesn't exist or isn't active yet."}</p>
+          {isServerError && (
+            <p className="text-xs text-surface-400 mt-2">This is a server error, not a missing store — the message above is the actual cause.</p>
+          )}
           <Link href="/" className="mt-6 inline-flex items-center gap-2 text-brand-600 font-semibold text-sm hover:text-brand-700">
             <ArrowRight className="h-4 w-4 rotate-180" /> Go to AfroStore
           </Link>
