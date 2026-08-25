@@ -80,6 +80,7 @@ export async function POST(req: NextRequest, { params }: Params) {
         productId: parsed.data.productId,
         orderId: parsed.data.orderId,
         sessionId: parsed.data.sessionId,
+        visitorId: parsed.data.visitorId,
         source,
         medium: parsed.data.medium,
         campaign: parsed.data.campaign,

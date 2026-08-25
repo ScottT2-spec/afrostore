@@ -23,6 +23,30 @@ declare global {
 }
 
 const SESSION_KEY = "afro_analytics_session";
+const VISITOR_KEY = "afro_analytics_visitor";
+
+/**
+ * A guest who clicks a Facebook/TikTok ad and lands on a page — without
+ * ever filling a form — is still a real visitor worth tracking as one
+ * continuous person, not a series of disconnected single-session blips.
+ * sessionId resets every time the tab/browser session ends; visitorId is
+ * long-lived (localStorage, not sessionStorage) so the same anonymous
+ * guest is recognizable across repeat visits, right up until they convert
+ * and become a named lead.
+ */
+export function getAnalyticsVisitorId(): string {
+  if (typeof window === "undefined") return "";
+  try {
+    let id = localStorage.getItem(VISITOR_KEY);
+    if (!id) {
+      id = `v_${Date.now()}_${Math.random().toString(36).slice(2, 10)}`;
+      localStorage.setItem(VISITOR_KEY, id);
+    }
+    return id;
+  } catch {
+    return "";
+  }
+}
 
 export function getAnalyticsSessionId(): string {
   if (typeof window === "undefined") return "";
@@ -161,6 +185,7 @@ export function trackEvent(
       orderId: opts.orderId,
       funnelId: opts.funnelId,
       sessionId: getAnalyticsSessionId(),
+      visitorId: getAnalyticsVisitorId(),
       source: utm.source,
       medium: utm.medium,
       campaign: utm.campaign,

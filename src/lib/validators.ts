@@ -795,6 +795,7 @@ export const analyticsEventSchema = z.object({
   productId: z.string().optional(),
   orderId: z.string().optional(),
   sessionId: z.string().optional(),
+  visitorId: z.string().optional(),
   source: z.string().optional(),
   device: z.string().optional(),
   country: z.string().optional(),

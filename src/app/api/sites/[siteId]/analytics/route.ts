@@ -47,7 +47,7 @@ export async function GET(req: NextRequest, { params }: Params) {
     const metricsWhere = { siteId, createdAt: { gte: rangeStart, ...(rangeEnd ? { lte: rangeEnd } : {}) } };
 
     const [
-      pageViews, addToCart, checkoutStarts, purchaseEvents, uniqueSessions,
+      pageViews, addToCart, checkoutStarts, purchaseEvents, uniqueSessions, uniqueGuestVisitors,
       pageGroups, deviceGroups, sourceGroups, productViewGroups,
     ] = await Promise.all([
       prisma.analyticsEvent.count({ where: { ...metricsWhere, event: "page_view" } as any }),
@@ -55,6 +55,11 @@ export async function GET(req: NextRequest, { params }: Params) {
       prisma.analyticsEvent.count({ where: { ...metricsWhere, event: "checkout" } as any }),
       prisma.analyticsEvent.findMany({ where: { ...metricsWhere, event: "purchase" } as any, select: { metadata: true } }),
       prisma.analyticsEvent.findMany({ where: { ...metricsWhere, sessionId: { not: null } } as any, select: { sessionId: true }, distinct: ["sessionId"] }),
+      // Distinct visitorId, not sessionId — a guest who clicked an ad, left,
+      // and came back later is one visitor across two sessions. This is
+      // what actually answers "how many different people saw this landing
+      // page", including anyone who never filled a form.
+      prisma.analyticsEvent.findMany({ where: { ...metricsWhere, visitorId: { not: null } } as any, select: { visitorId: true }, distinct: ["visitorId"] }),
       prisma.analyticsEvent.groupBy({ by: ["page"], where: { ...metricsWhere, event: "page_view", page: { not: null } } as any, _count: { _all: true }, orderBy: { _count: { page: "desc" } }, take: 10 } as any),
       prisma.analyticsEvent.groupBy({ by: ["device"], where: { ...metricsWhere, device: { not: null } } as any, _count: { _all: true } } as any),
       prisma.analyticsEvent.groupBy({ by: ["source"], where: { ...metricsWhere, source: { not: null } } as any, _count: { _all: true } } as any),
@@ -68,6 +73,7 @@ export async function GET(req: NextRequest, { params }: Params) {
       return sum + value;
     }, 0);
     const uniqueVisitors = uniqueSessions.length;
+    const uniqueGuests = uniqueGuestVisitors.length;
     const conversionRate = pageViews > 0 ? Math.round((purchases / pageViews) * 10000) / 100 : 0;
     const cartRate = pageViews > 0 ? Math.round((addToCart / pageViews) * 10000) / 100 : 0;
 
@@ -110,7 +116,7 @@ export async function GET(req: NextRequest, { params }: Params) {
     return success({
       events,
       pagination: { page, limit, total, pages: Math.ceil(total / limit) },
-      summary: { pageViews, uniqueVisitors, addToCarts: addToCart, purchases, conversionRate, revenue },
+      summary: { pageViews, uniqueVisitors, uniqueGuests, addToCarts: addToCart, purchases, conversionRate, revenue },
       metrics: { pageViews, addToCart, checkoutStarts, purchases, conversionRate, cartRate }, // kept for any other existing consumers
       topPages,
       topProducts,

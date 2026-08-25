@@ -13,6 +13,7 @@ interface AnalyticsData {
   summary: {
     pageViews: number;
     uniqueVisitors: number;
+    uniqueGuests: number;
     addToCarts: number;
     purchases: number;
     conversionRate: number;
@@ -82,7 +83,10 @@ export default function AnalyticsPage() {
 
   const statCards = [
     { label: "Page Views", value: summary?.pageViews || 0, icon: Eye, color: "blue" },
-    { label: "Unique Visitors", value: summary?.uniqueVisitors || 0, icon: Users, color: "purple" },
+    // Distinct people, not sessions — a guest who clicks an ad, leaves, and
+    // comes back later is still counted once, including anyone who never
+    // filled a form.
+    { label: "Unique Visitors", value: summary?.uniqueGuests || 0, icon: Users, color: "purple" },
     { label: "Add to Carts", value: summary?.addToCarts || 0, icon: ShoppingCart, color: "accent" },
     { label: "Purchases", value: summary?.purchases || 0, icon: MousePointerClick, color: "brand" },
   ];

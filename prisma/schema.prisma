@@ -1326,6 +1326,7 @@ model AnalyticsEvent {
   funnelId   String?
   campaignId String?
   sessionId  String?
+  visitorId  String?
   source     String?
   medium     String?
   campaign   String?
@@ -1341,6 +1342,7 @@ model AnalyticsEvent {
   @@index([siteId, event])
   @@index([siteId, createdAt])
   @@index([sessionId])
+  @@index([visitorId])
   @@index([siteId, funnelId])
   @@index([siteId, campaignId])
   @@map("analytics_events")
