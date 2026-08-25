@@ -15,7 +15,15 @@ export async function GET(req: NextRequest, { params }: Params) {
   if (ctx.error) return ctx.user ? error(ctx.error, 403) : unauthorized();
 
   const [settings, site] = await Promise.all([
-    prisma.siteSettings.findUnique({ where: { siteId } }),
+    prisma.siteSettings.findUnique({
+      where: { siteId },
+      select: {
+        allowGuestCheckout: true, payOnDelivery: true, bankTransfer: true, whatsappOrdering: true,
+        showStockCount: true, lowDataMode: true, offlineMode: true, language: true, whatsappNumber: true,
+        metaTitle: true, metaDescription: true, googleAnalyticsId: true, facebookPixelId: true, tiktokPixelId: true,
+        metaAccessToken: true, metaTestEventCode: true, tiktokAccessToken: true, customHeadCode: true, customBodyCode: true,
+      },
+    }),
     prisma.site.findUnique({ where: { id: siteId }, select: { currency: true, country: true } }),
   ]);
   return success({ ...settings, currency: site?.currency, country: site?.country });
