@@ -19,6 +19,7 @@ import { resolveLivePageContent } from "@/lib/templates/bespoke-page-content";
 import { ThemeProvider, type ThemeData } from "@/components/storefront/ThemeProvider";
 import { useWishlist } from "@/hooks/useWishlist";
 import { useABTestVariant, applyABTestOverrides } from "@/hooks/useABTestVariant";
+import { injectPixels, trackEvent } from "@/lib/storefront-analytics";
 import { applyPageCustomization, buildPageBackgroundStyle, buildThemeDataWithCustomization, filterVisiblePages, getResolvedPageSettings, normalizeSiteCustomization, type SiteCustomizationDocument } from "@/lib/site-customization";
 import { VegetableAboutPage, VegetableContactPage, VegetableMenuPage, VegetableRecipePage, VegetableReservationPage } from "@/components/storefront/VegetableTemplatePages";
 import { VegetableFooter, VegetableHeader } from "@/components/storefront/VegetableStoreChrome";
@@ -137,6 +138,12 @@ export default function StorefrontPage() {
         setDraftCustomization(normalizeSiteCustomization(json.data.customization || null));
         const title = json.data.page.metaTitle || `${json.data.page.title} — ${json.data.store.name}`;
         document.title = title;
+        // Standalone CMS/landing pages are a direct ad destination just like
+        // the homepage, but never called injectPixels/trackEvent — Meta,
+        // TikTok, and GA never loaded here, and no page_view was ever
+        // recorded for a visitor who lands here first.
+        injectPixels(json.data.settings || {});
+        trackEvent(slug, "page_view", { page: `/${pageSlug}`, metadata: { pageId: json.data.page.id } });
       } else {
           setError(json.error || "Page not found");
         }

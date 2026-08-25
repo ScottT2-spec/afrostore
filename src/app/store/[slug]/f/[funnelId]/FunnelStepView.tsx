@@ -3,6 +3,7 @@
 import { useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import { RenderBlocks, type BuilderBlock } from "@/components/storefront/BlockRenderer";
+import { injectPixels, trackEvent, type PixelIds } from "@/lib/storefront-analytics";
 
 export interface PublicFunnelStep {
   id: string;
@@ -30,21 +31,40 @@ interface Props {
   funnelId: string;
   funnelName: string;
   step: PublicFunnelStep;
+  pixelIds: PixelIds;
 }
 
-export default function FunnelStepView({ siteSlug, siteName, siteLogo, funnelId, funnelName, step }: Props) {
+export default function FunnelStepView({ siteSlug, siteName, siteLogo, funnelId, funnelName, step, pixelIds }: Props) {
   const router = useRouter();
   const trackedRef = useRef(false);
 
-  // Track a view for this step exactly once per mount
+  // Every funnel step is a landing destination in its own right (ads point
+  // straight at /f/[funnelId]?step=N), so it needs the same pixel injection
+  // + page_view firing the homepage already gets — previously this page
+  // never called injectPixels/trackEvent at all, so Meta/TikTok/GA never
+  // loaded here and a visitor landing directly on a funnel step was
+  // completely invisible to ad platforms.
   useEffect(() => {
     if (trackedRef.current) return;
     trackedRef.current = true;
+    injectPixels(pixelIds);
+    // Own funnel-step counter (drives the funnel dashboard's view counts)
     fetch(`/api/public/sites/${siteSlug}/funnels/${funnelId}/steps/${step.id}/view`, { method: "POST" }).catch(() => {});
-  }, [siteSlug, funnelId, step.id]);
+    // Central event log + pixel PageView/ViewContent equivalents
+    trackEvent(siteSlug, "page_view", {
+      page: `/f/${funnelId}?step=${step.position}`,
+      metadata: { funnelId, funnelStepId: step.id, funnelStepType: step.type, funnelName },
+    });
+  }, [siteSlug, funnelId, funnelName, step.id, step.position, step.type, pixelIds]);
 
   const goToNextStep = () => {
     if (step.isLastStep) return;
+    // A funnel-step "Continue" click is the CTA event the PRD calls
+    // CTA_CLICK — distinct from the eventual lead/purchase conversion.
+    trackEvent(siteSlug, "cta_click", {
+      page: `/f/${funnelId}?step=${step.position}`,
+      metadata: { funnelId, funnelStepId: step.id },
+    });
     router.push(`/store/${siteSlug}/f/${funnelId}?step=${step.position + 1}`);
   };
 
@@ -68,7 +88,7 @@ export default function FunnelStepView({ siteSlug, siteName, siteLogo, funnelId,
         {step.type === "LEAD_FORM" && (
           <LeadFormStep siteSlug={siteSlug} funnelId={funnelId} step={step} onSubmitted={goToNextStep} />
         )}
-        {step.type === "THANK_YOU" && <ThankYouStep step={step} funnelName={funnelName} />}
+        {step.type === "THANK_YOU" && <ThankYouStep step={step} funnelName={funnelName} siteSlug={siteSlug} funnelId={funnelId} />}
         {!["LANDING", "LEAD_FORM", "THANK_YOU"].includes(step.type) && (
           <div className="max-w-lg mx-auto px-4 py-24 text-center">
             <h1 className="text-2xl font-bold text-surface-900 mb-3">{step.name}</h1>
@@ -155,6 +175,7 @@ function LeadFormStep({
       if (!res.ok || !json.success) {
         throw new Error(json.error || "Something went wrong. Please try again.");
       }
+      trackEvent(siteSlug, "lead", { metadata: { funnelId, funnelStepId: step.id, formId: step.form!.id } });
       setSuccess(true);
       setTimeout(onSubmitted, 1200);
     } catch (err: any) {
@@ -183,6 +204,7 @@ function LeadFormStep({
       if (!res.ok || !json.success) {
         throw new Error(json.error || "Something went wrong. Please try again.");
       }
+      trackEvent(siteSlug, "lead", { metadata: { funnelId, funnelStepId: step.id, quickCapture: true } });
       setSuccess(true);
       setTimeout(onSubmitted, 1200);
     } catch (err: any) {
@@ -269,10 +291,21 @@ function LeadFormStep({
   );
 }
 
-function ThankYouStep({ step, funnelName }: { step: PublicFunnelStep; funnelName: string }) {
+function ThankYouStep({ step, funnelName, siteSlug, funnelId }: { step: PublicFunnelStep; funnelName: string; siteSlug: string; funnelId: string }) {
   const redirectUrl = typeof step.settings.redirectUrl === "string" ? step.settings.redirectUrl : undefined;
   const delaySeconds = typeof step.settings.delaySeconds === "number" ? step.settings.delaySeconds : undefined;
   const buttonText = typeof step.settings.buttonText === "string" ? step.settings.buttonText : "Continue";
+  const trackedRef = useRef(false);
+
+  // THANK_YOU_VIEW — the final confirmation that the funnel's conversion
+  // was actually reached (page_view on this step already fired above, but
+  // recording it distinctly here is what lets the dashboard tell "step was
+  // viewed" apart from "conversion was confirmed").
+  useEffect(() => {
+    if (trackedRef.current) return;
+    trackedRef.current = true;
+    trackEvent(siteSlug, "thank_you_view", { metadata: { funnelId, funnelStepId: step.id, funnelName } });
+  }, [siteSlug, funnelId, step.id, funnelName]);
 
   useEffect(() => {
     if (redirectUrl && delaySeconds !== undefined) {

@@ -107,7 +107,7 @@ export function injectPixels(ids: PixelIds) {
   }
 }
 
-export type ConversionEvent = "page_view" | "add_to_cart" | "form_submit" | "whatsapp_click" | "purchase" | "lead";
+export type ConversionEvent = "page_view" | "add_to_cart" | "form_submit" | "whatsapp_click" | "purchase" | "lead" | "cta_click";
 
 /**
  * Records the event in our own analytics and fires the equivalent event on
@@ -155,6 +155,11 @@ export function trackEvent(
       case "whatsapp_click":
         window.fbq?.("trackCustom", "WhatsAppClick", opts.metadata);
         window.gtag?.("event", "whatsapp_click", opts.metadata);
+        break;
+      case "cta_click":
+        window.fbq?.("trackCustom", "CTAClick", opts.metadata);
+        window.ttq?.track("ClickButton", opts.metadata);
+        window.gtag?.("event", "cta_click", opts.metadata);
         break;
       default:
         break;

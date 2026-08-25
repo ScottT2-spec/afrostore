@@ -17,7 +17,13 @@ export default async function FunnelPage({ params, searchParams }: Props) {
       status: "ACTIVE",
       OR: [{ slug }, { subdomain: slug }, { customDomain: slug }],
     },
-    select: { id: true, slug: true, name: true, logo: true },
+    select: {
+      id: true,
+      slug: true,
+      name: true,
+      logo: true,
+      settings: { select: { googleAnalyticsId: true, facebookPixelId: true, tiktokPixelId: true } },
+    },
   });
   if (!site) return notFound();
 
@@ -85,6 +91,11 @@ export default async function FunnelPage({ params, searchParams }: Props) {
       funnelId={funnel.id}
       funnelName={funnel.name}
       step={publicStep}
+      pixelIds={{
+        googleAnalyticsId: site.settings?.googleAnalyticsId ?? null,
+        facebookPixelId: site.settings?.facebookPixelId ?? null,
+        tiktokPixelId: site.settings?.tiktokPixelId ?? null,
+      }}
     />
   );
 }
