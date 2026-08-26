@@ -179,6 +179,12 @@ export function ProkipBookingProblemSection({
   outro = "Without clear records, it becomes difficult to know who is responsible, where money is going, and whether the business is truly growing. That uncertainty is stressful. It can also be expensive.",
   ctaText = "Book your free demo",
 }: ProkipBookingProblemSectionProps) {
+  // Defensive guard: already-saved pages from before the inline-editor bug
+  // fix (see InlineEditableText.tsx) may still have a corrupted (non-array,
+  // or truncated-to-object) value here. Falling back to an empty array
+  // means the section still renders instead of crashing the whole page.
+  const safeQuotes = Array.isArray(quotes) ? quotes : [];
+  const safeProblems = Array.isArray(problems) ? problems : [];
   const scrollToForm = () => {
     const el = document.getElementById("prokip-booking-form");
     if (el) { el.scrollIntoView({ behavior: "smooth" }); return; }
@@ -195,11 +201,11 @@ export function ProkipBookingProblemSection({
           </h2>
           <EditableCopy field="intro" value={intro} as="p" multiline className="text-lg text-slate-600 leading-relaxed mb-8" />
           <div className="bg-white p-6 rounded-2xl shadow-[-10px_0_30px_-10px_rgba(0,0,0,0.05)] border border-slate-100 text-slate-700 font-bold text-lg">
-            {quotes.map((q, i) => <React.Fragment key={i}><EditableCopy fieldPath={`quotes.${i}`} value={q} as="span" />{i < quotes.length - 1 && <br />}</React.Fragment>)}
+            {safeQuotes.map((q, i) => <React.Fragment key={i}><EditableCopy fieldPath={`quotes.${i}`} value={q} as="span" />{i < safeQuotes.length - 1 && <br />}</React.Fragment>)}
           </div>
         </div>
         <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {problems.map((p, i) => (
+          {safeProblems.map((p, i) => (
             <div key={i} className="bg-white p-6 rounded-xl border border-slate-100 shadow-sm flex items-start gap-4">
               <div className="p-3 bg-red-50 rounded-lg shrink-0">{PROBLEM_ICONS[p.icon] || <IconAlertCircle />}</div>
               <EditableCopy fieldPath={`problems.${i}.title`} value={p.title} as="p" className="font-medium text-slate-800 self-center" />
@@ -324,6 +330,7 @@ export function ProkipBookingDemoDetails({
     "Build a stronger system that allows your business to grow without depending on you 24/7",
   ],
 }: ProkipBookingDemoDetailsProps) {
+  const safeBenefits = Array.isArray(benefits) ? benefits : [];
   return (
     <section className="py-20 px-4 sm:px-6 lg:px-8 bg-slate-50 border-t border-slate-100">
       <div className="max-w-4xl mx-auto">
@@ -334,7 +341,7 @@ export function ProkipBookingDemoDetails({
         <div className="bg-white p-8 md:p-10 rounded-2xl shadow-[-20px_0_40px_-20px_rgba(0,0,0,0.05)] border border-slate-100">
           <EditableCopy field="listHeading" value={listHeading} as="h3" className="text-xl font-bold text-slate-900 mb-6 border-b border-slate-100 pb-4" />
           <ul className="grid sm:grid-cols-2 gap-x-8 gap-y-4">
-            {benefits.map((b, i) => (
+            {safeBenefits.map((b, i) => (
               <li key={i} className="flex items-start gap-3">
                 <div className="mt-1 text-[#021127] font-black">✓</div>
                 <span className="text-slate-700 font-medium text-sm leading-relaxed">{b}</span>
@@ -498,6 +505,13 @@ export function ProkipBookingForm({
     "They want to expand without losing control.",
   ],
 }: ProkipBookingFormProps) {
+  // Same defensive guard as the other two blocks — protects against
+  // already-corrupted saved data from before the inline-editor fix.
+  const safeCountries = Array.isArray(countries) ? countries : [];
+  const safeTimeSlots = Array.isArray(timeSlots) ? timeSlots : [];
+  const safeBusinessTypes = Array.isArray(businessTypes) ? businessTypes : [];
+  const safeLocationOptions = Array.isArray(locationOptions) ? locationOptions : [];
+  const safeWhyReasons = Array.isArray(whyReasons) ? whyReasons : [];
   const storeSlug = useContext(ProkipBookingCtx).storeSlug;
   const [submitted, setSubmitted] = useState(false);
   const [submitting, setSubmitting] = useState(false);
@@ -505,7 +519,7 @@ export function ProkipBookingForm({
   const [step, setStep] = useState(1);
   const [fullName, setFullName] = useState("");
   const [businessName, setBusinessName] = useState("");
-  const [countryCode, setCountryCode] = useState(countries[0]?.code || "+234");
+  const [countryCode, setCountryCode] = useState(safeCountries[0]?.code || "+234");
   const [phoneNo, setPhoneNo] = useState("");
   const [email, setEmail] = useState("");
   const [businessType, setBusinessType] = useState("");
@@ -585,7 +599,7 @@ export function ProkipBookingForm({
     else { (document.getElementById("prokip-demo-form") as HTMLFormElement)?.reportValidity(); }
   };
   const resetForm = () => { setSubmitted(false); setStep(1); setFullName(""); setBusinessName(""); setPhoneNo(""); setEmail(""); setBusinessType(""); setLocations(""); setChallenge(""); setSelectedTime(""); setSelectedDate(""); setShowCustomDate(false); };
-  const currentCountry = countries.find(c => c.code === countryCode) || countries[0];
+  const currentCountry = safeCountries.find(c => c.code === countryCode) || safeCountries[0];
 
   return (
     <section id="prokip-booking-form" className="py-20 px-4 sm:px-6 lg:px-8 bg-[#021127] text-slate-100">
@@ -667,7 +681,7 @@ export function ProkipBookingForm({
                         </button>
                         {isCountryDropdownOpen && (
                           <div className="absolute top-full left-0 mt-2 w-64 bg-white border border-slate-200 rounded-xl shadow-xl z-50 py-2 max-h-60 overflow-y-auto">
-                            {countries.map(c => (
+                            {safeCountries.map(c => (
                               <button key={c.code} type="button" onClick={() => { setCountryCode(c.code); setIsCountryDropdownOpen(false); }} className="w-full flex items-center justify-between px-4 py-2.5 text-sm text-slate-700 hover:bg-slate-50 text-left transition-colors">
                                 <div className="flex items-center gap-3"><span className="text-lg">{c.flag}</span><span className="font-medium">{c.name}</span></div>
                                 <span className="text-xs text-slate-400 font-mono bg-slate-100 px-2 py-1 rounded-md">{c.code}</span>
@@ -689,7 +703,7 @@ export function ProkipBookingForm({
                       <div className="relative">
                         <select required value={businessType} onChange={e => setBusinessType(e.target.value)} className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 pr-10 text-sm focus:outline-none focus:border-[#021127] focus:ring-1 focus:ring-[#021127] transition-all text-slate-700">
                           <option value="">Select industry...</option>
-                          {businessTypes.map(bt => <option key={bt.value} value={bt.value}>{bt.label}</option>)}
+                          {safeBusinessTypes.map(bt => <option key={bt.value} value={bt.value}>{bt.label}</option>)}
                         </select>
                         <IconChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400 pointer-events-none" />
                       </div>
@@ -699,7 +713,7 @@ export function ProkipBookingForm({
                       <div className="relative">
                         <select required value={locations} onChange={e => setLocations(e.target.value)} className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 pr-10 text-sm focus:outline-none focus:border-[#021127] focus:ring-1 focus:ring-[#021127] transition-all text-slate-700">
                           <option value="">Select size...</option>
-                          {locationOptions.map(lo => <option key={lo.value} value={lo.value}>{lo.label}</option>)}
+                          {safeLocationOptions.map(lo => <option key={lo.value} value={lo.value}>{lo.label}</option>)}
                         </select>
                         <IconChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400 pointer-events-none" />
                       </div>
@@ -763,7 +777,7 @@ export function ProkipBookingForm({
                         <IconClock className="w-5 h-5 text-slate-300" />
                       </div>
                       <div className="grid grid-cols-3 gap-3">
-                        {timeSlots.map(time => (
+                        {safeTimeSlots.map(time => (
                           <button key={time} type="button" onClick={() => setSelectedTime(time)}
                             className={`py-3 px-2 rounded-xl border text-sm font-bold transition-all flex items-center justify-center gap-1.5 ${
                               selectedTime === time ? "bg-[#FFB800] text-[#021127] border-[#FFB800] shadow-sm ring-1 ring-[#021127]" : "bg-white text-slate-600 border-slate-200 hover:border-slate-300 hover:bg-slate-50"
@@ -798,7 +812,7 @@ export function ProkipBookingForm({
           <div className="mt-8 bg-slate-800/50 rounded-2xl p-6 sm:p-8 border border-slate-700">
             <EditableCopy field="whyTitle" value="Why Business Owners Book a Prokip Demo" as="h3" className="font-bold text-xl text-white mb-6 text-center" />
             <ul className="grid sm:grid-cols-2 gap-4">
-              {whyReasons.map((reason, i) => (
+              {safeWhyReasons.map((reason, i) => (
                 <li key={i} className="flex items-start gap-3">
                   <div className="mt-1 flex-shrink-0 w-5 h-5 rounded-full bg-[#FFB800]/20 flex items-center justify-center">
                     <span className="text-[#FFB800] font-black text-xs">✓</span>

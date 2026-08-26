@@ -654,20 +654,23 @@ export const useSelectedElementPath = () => {
 
 export const useElementById = (id: string | null) => {
   const { pageStructure } = useEditorStore();
-  
   if (!id) return null;
-  
-  const findElement = (elements: Element[]): Element | null => {
-    for (const el of elements) {
-      if (el.id === id) return el;
-      const nested = getNestedChildren(el);
-      if (nested) {
-        const found = findElement(nested as Element[]);
-        if (found) return found;
-      }
-    }
-    return null;
-  };
-  
-  return findElement(pageStructure.elements);
+  return findElementByIdInTree(pageStructure.elements, id);
 };
+
+// Plain (non-hook) version of the same lookup, callable from outside React
+// render — needed by commitTextUpdate in InlineEditableText.tsx, which
+// must read a node's CURRENT full settings before writing a single field,
+// rather than starting from an empty object (see findElementByIdInTree
+// usage there for why).
+export function findElementByIdInTree(elements: Element[], id: string): Element | null {
+  for (const el of elements) {
+    if (el.id === id) return el;
+    const nested = getNestedChildren(el);
+    if (nested) {
+      const found = findElementByIdInTree(nested as Element[], id);
+      if (found) return found;
+    }
+  }
+  return null;
+}

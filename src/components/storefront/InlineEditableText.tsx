@@ -1,7 +1,7 @@
 "use client";
 
 import React, { createElement, useCallback, useEffect, useLayoutEffect, useRef, type CSSProperties } from "react";
-import { useEditorStore } from "@/lib/visual-editor/store";
+import { useEditorStore, findElementByIdInTree } from "@/lib/visual-editor/store";
 import { useTemplateBlockEditContext } from "@/components/storefront/TemplateBlockRenderer";
 
 type EditableTag = "div" | "p" | "span" | "h1" | "h2" | "h3" | "h4" | "h5" | "h6" | "button";
@@ -39,15 +39,26 @@ function setDeepValue(target: Record<string, unknown>, path: string, value: unkn
       if (!Array.isArray(cursor)) {
         cursor = [];
       }
-      if (cursor[arrayIndex] == null || typeof cursor[arrayIndex] !== "object") {
+      // Clone whatever's already at this index (instead of just checking
+      // "is it non-null" and reusing the same reference) — otherwise the
+      // write at the end of this loop mutates the ORIGINAL nested
+      // array/object in place, corrupting whatever state (e.g. undo
+      // history) still holds a reference to it.
+      const existing = cursor[arrayIndex];
+      if (existing == null || typeof existing !== "object") {
         cursor[arrayIndex] = isNextIndex ? [] : {};
+      } else {
+        cursor[arrayIndex] = Array.isArray(existing) ? [...existing] : { ...existing };
       }
       cursor = cursor[arrayIndex];
       continue;
     }
 
-    if (cursor[part] == null || typeof cursor[part] !== "object") {
+    const existing = cursor[part];
+    if (existing == null || typeof existing !== "object") {
       cursor[part] = isNextIndex ? [] : {};
+    } else {
+      cursor[part] = Array.isArray(existing) ? [...existing] : { ...existing };
     }
     cursor = cursor[part];
   }
@@ -68,8 +79,24 @@ function setDeepValue(target: Record<string, unknown>, path: string, value: unkn
 
 function commitTextUpdate(nodeId: string | undefined, fieldPath: string, nextValue: string) {
   if (!nodeId) return;
-  const settings = setDeepValue({}, fieldPath, nextValue);
-  useEditorStore.getState().updateElement(nodeId, {
+  // BUG THIS FIXES: this used to call setDeepValue({}, fieldPath, nextValue)
+  // — building the update from a *blank* object every time. Editing item 0
+  // of a 4-item array (e.g. "quotes.0") produced settings = { quotes: [x] },
+  // a real but 1-element array. The store's updateElement does a shallow
+  // merge on array-typed fields (replaces, doesn't merge), so that
+  // 1-element array *wholesale replaced* the real 4-item array, silently
+  // destroying items 1-3 on every single edit — and edits made in the
+  // middle of an array (e.g. "quotes.2") produced a sparse array, which is
+  // what eventually surfaces downstream as "x.map is not a function" once
+  // that hole propagates through JSON (de)serialization.
+  // Fix: start from the node's CURRENT full settings, not {}, so the
+  // update always carries the complete, unmodified array with just the
+  // one edited value changed.
+  const state = useEditorStore.getState();
+  const currentElement = findElementByIdInTree(state.pageStructure.elements, nodeId);
+  const currentSettings = (currentElement as any)?.settings || {};
+  const settings = setDeepValue({ ...currentSettings }, fieldPath, nextValue);
+  state.updateElement(nodeId, {
     settings,
   });
 }
