@@ -96,8 +96,25 @@ function commitTextUpdate(nodeId: string | undefined, fieldPath: string, nextVal
   const currentElement = findElementByIdInTree(state.pageStructure.elements, nodeId);
   const currentSettings = (currentElement as any)?.settings || {};
   const settings = setDeepValue({ ...currentSettings }, fieldPath, nextValue);
+
+  // Second bug, same root cause class as the one above (and as
+  // AdvancedPanel.tsx, fixed separately in 38b33003): editorNodeToBlock
+  // merges an element's settings then content, with content winning on a
+  // key collision. This function only ever wrote to settings — so even
+  // with the array-truncation bug above fixed, a fresh edit here could
+  // still be invisible on the live page if content[topLevelKey] held any
+  // value at all (which it does for most elements from the moment
+  // they're created — see createElementFromWidget). Mirror the same
+  // top-level key into content so the two can't drift apart.
+  const currentContent = (currentElement as any)?.content || {};
+  const topLevelKey = fieldPath.split(".")[0];
+  const content = topLevelKey && settings[topLevelKey] !== undefined
+    ? { ...currentContent, [topLevelKey]: settings[topLevelKey] }
+    : currentContent;
+
   state.updateElement(nodeId, {
     settings,
+    content,
   });
 }
 
