@@ -24,6 +24,8 @@ export default function AdvancedPanel({ element, onUpdate }: AdvancedPanelProps)
   const [breakpoint, setBreakpoint] = useState<Breakpoint>("desktop");
   const settings = isPlainObject(element?.settings) ? element.settings : {};
 
+  const content = isPlainObject(element?.content) ? element.content : {};
+
   const hoverKey = (key: string) => `hover${capitalize(key)}`;
 
   const getDeviceSettings = (target: Breakpoint): Record<string, unknown> => {
@@ -50,20 +52,34 @@ export default function AdvancedPanel({ element, onUpdate }: AdvancedPanelProps)
     return fallback;
   };
 
-  const commitTopLevel = (nextSettings: Record<string, unknown>) => {
-    onUpdate({ settings: nextSettings });
+  // Also writes to element.content alongside element.settings — matching
+  // the fix already applied to ContentPanel.tsx (28b056cf). Same root
+  // cause: editorNodeToBlock merges settings then content, later wins on
+  // key collision. This panel only ever wrote settings, so any stale
+  // content[key] left over from elsewhere (template scaffolding, an
+  // earlier edit through a different panel) would silently outrank a
+  // fresh edit made here — e.g. a freshly uploaded Background Image
+  // shows correctly in the editor canvas (which reads settings directly)
+  // but the live storefront (built from the merged props) still shows
+  // the old one, or nothing.
+  const commitTopLevel = (nextSettings: Record<string, unknown>, contentPatch?: Record<string, unknown>) => {
+    onUpdate(contentPatch ? { settings: nextSettings, content: { ...content, ...contentPatch } } : { settings: nextSettings });
   };
 
   const updateSetting = (key: string, value: unknown) => {
     if (key === "customCss" || key === "cssId" || key === "cssClass") {
-      commitTopLevel({
-        ...settings,
-        [key]: value,
-      });
+      commitTopLevel(
+        { ...settings, [key]: value },
+        { [key]: value }
+      );
       return;
     }
 
     if (mode === "hover") {
+      // Hover-specific values live only under a hoverKey-prefixed setting,
+      // never under the plain key editorNodeToBlock merges into props —
+      // no risk of a stale content[key] shadowing these, so no mirror
+      // needed here.
       commitTopLevel({
         ...settings,
         [hoverKey(key)]: value,
@@ -73,17 +89,24 @@ export default function AdvancedPanel({ element, onUpdate }: AdvancedPanelProps)
 
     if (breakpoint === "desktop") {
       const desktopSettings = isPlainObject(settings.desktop) ? settings.desktop : {};
-      commitTopLevel({
-        ...settings,
-        [key]: value,
-        desktop: {
-          ...desktopSettings,
+      commitTopLevel(
+        {
+          ...settings,
           [key]: value,
+          desktop: {
+            ...desktopSettings,
+            [key]: value,
+          },
         },
-      });
+        { [key]: value }
+      );
       return;
     }
 
+    // Tablet/mobile-only values intentionally do NOT mirror into content:
+    // content has no concept of breakpoints, and content[key] feeds the
+    // base/desktop merged props — writing a mobile-only value there would
+    // make it apply everywhere instead of just on mobile.
     const currentDevice = getDeviceSettings(breakpoint);
     commitTopLevel({
       ...settings,
