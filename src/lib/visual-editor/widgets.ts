@@ -697,11 +697,23 @@ export function createElementFromWidget(type: ElementType) {
     baseElement.border = { width: "0", style: "solid", color: "#e5e5e5", radius: "0" };
     baseElement.borderRadius = "0";
     baseElement.boxShadow = "none";
+    // Also set content, matching every other branch here — not because
+    // structural types need it for their own rendering (they don't; the
+    // live renderer's STRUCTURAL_TYPES branch reads settings/props
+    // directly), but so a freshly-created section/container is
+    // consistent with everything else from the moment it's made, rather
+    // than only gaining a content field the first time someone edits it
+    // via a panel. See AdvancedPanel's fix (38b33003) for why a missing
+    // content field is a landmine: editorNodeToBlock merges settings
+    // then content, so anything that starts the two out of sync is one
+    // stray edit away from the same stale-value-wins bug.
+    baseElement.content = { backgroundColor: baseElement.backgroundColor };
   } else if (type === "column") {
     baseElement.width = "100";
     baseElement.gap = "24";
     baseElement.padding = { top: "0", right: "0", bottom: "0", left: "0" };
     baseElement.children = [];
+    baseElement.content = { width: baseElement.width, gap: baseElement.gap };
   } else {
     baseElement.content = { ...widget.defaultSettings };
   }
