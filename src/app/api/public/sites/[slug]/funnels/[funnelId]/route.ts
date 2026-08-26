@@ -14,9 +14,20 @@ export async function GET(_req: NextRequest, { params }: Params) {
         status: "ACTIVE",
         OR: [{ slug }, { subdomain: slug }, { customDomain: slug }],
       },
-      select: { id: true, slug: true, name: true, logo: true },
+      select: { id: true, slug: true, name: true, logo: true, currency: true },
     });
     if (!site) return error("Site not found", 404);
+
+    // Needed so a LANDING step's linked page — if built with one of the
+    // bespoke templates (Prokip Agent, Prokip Booking, Hardware, etc.) —
+    // can be wrapped in TemplateStoreContextProvider the same way the
+    // homepage already is. Without it, storeSlug never reaches those
+    // template's blocks (they read it from Context, not props), and any
+    // form on them fails with "This form isn't connected to a store yet."
+    const activeTemplate = await prisma.siteTemplate.findFirst({
+      where: { siteId: site.id, isActive: true },
+      select: { template: { select: { slug: true } } },
+    });
 
     const funnel = await prisma.funnel.findFirst({
       where: { id: funnelId, siteId: site.id, isActive: true },
@@ -47,7 +58,7 @@ export async function GET(_req: NextRequest, { params }: Params) {
     return success({
       id: funnel.id,
       name: funnel.name,
-      site: { slug: site.slug, name: site.name, logo: site.logo },
+      site: { slug: site.slug, name: site.name, logo: site.logo, currency: site.currency, templateSlug: activeTemplate?.template?.slug || null },
       steps: funnel.steps.map((s) => ({
         id: s.id,
         name: s.name,
@@ -61,6 +72,7 @@ export async function GET(_req: NextRequest, { params }: Params) {
     });
   } catch (err) {
     console.error("Public funnel fetch error:", err);
-    return error("Internal server error", 500);
+    const message = err instanceof Error ? err.message : String(err);
+    return error(message, 500);
   }
 }

@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { RenderBlocks, type BuilderBlock } from "@/components/storefront/BlockRenderer";
 import { injectPixels, trackEvent, type PixelIds } from "@/lib/storefront-analytics";
 import { useFunnelStepABTestVariant, applyABTestOverrides } from "@/hooks/useABTestVariant";
+import { TemplateStoreContextProvider } from "@/components/storefront/TemplateStoreContextProvider";
 
 export interface PublicFunnelStep {
   id: string;
@@ -29,13 +30,15 @@ interface Props {
   siteSlug: string;
   siteName: string;
   siteLogo: string | null;
+  currency: string;
+  templateSlug: string | null;
   funnelId: string;
   funnelName: string;
   step: PublicFunnelStep;
   pixelIds: PixelIds;
 }
 
-export default function FunnelStepView({ siteSlug, siteName, siteLogo, funnelId, funnelName, step, pixelIds }: Props) {
+export default function FunnelStepView({ siteSlug, siteName, siteLogo, currency, templateSlug, funnelId, funnelName, step, pixelIds }: Props) {
   const router = useRouter();
   const trackedRef = useRef(false);
 
@@ -84,7 +87,7 @@ export default function FunnelStepView({ siteSlug, siteName, siteLogo, funnelId,
 
       <main>
         {step.type === "LANDING" && (
-          <LandingStep blocks={step.landingBlocks} storeSlug={siteSlug} funnelStepId={step.id} onContinue={goToNextStep} isLastStep={step.isLastStep} settings={step.settings} />
+          <LandingStep blocks={step.landingBlocks} storeSlug={siteSlug} funnelStepId={step.id} onContinue={goToNextStep} isLastStep={step.isLastStep} settings={step.settings} currency={currency} templateSlug={templateSlug} />
         )}
         {step.type === "LEAD_FORM" && (
           <LeadFormStep siteSlug={siteSlug} funnelId={funnelId} step={step} onSubmitted={goToNextStep} />
@@ -111,6 +114,8 @@ function LandingStep({
   onContinue,
   isLastStep,
   settings,
+  currency,
+  templateSlug,
 }: {
   blocks: BuilderBlock[];
   storeSlug: string;
@@ -118,6 +123,8 @@ function LandingStep({
   onContinue: () => void;
   isLastStep: boolean;
   settings: Record<string, unknown>;
+  currency: string;
+  templateSlug: string | null;
 }) {
   const abTest = useFunnelStepABTestVariant(storeSlug, funnelStepId);
   const effectiveBlocks = applyABTestOverrides(blocks, abTest.content);
@@ -137,7 +144,24 @@ function LandingStep({
   }
   return (
     <div>
-      <RenderBlocks blocks={effectiveBlocks} storeSlug={storeSlug} />
+      {/* Some bespoke templates (Prokip Agent, Prokip Booking, Hardware,
+          etc.) read storeSlug/currency from this Context rather than
+          props — without it, their forms fail with "This form isn't
+          connected to a store yet." even though a real store is linked. */}
+      <TemplateStoreContextProvider
+        templateSlug={templateSlug}
+        products={[]}
+        blogs={[]}
+        currency={currency}
+        storeSlug={storeSlug}
+        socialLinks={[]}
+        addToCart={() => {}}
+        toggleWishlist={() => {}}
+        isWishlisted={() => false}
+        onQuickView={() => {}}
+      >
+        <RenderBlocks blocks={effectiveBlocks} storeSlug={storeSlug} />
+      </TemplateStoreContextProvider>
       {!isLastStep && (
         <div className="max-w-5xl mx-auto px-4 py-10 text-center">
           <button onClick={onContinue} className="btn-primary px-8 py-3.5 text-base">

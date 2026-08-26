@@ -22,10 +22,22 @@ export default async function FunnelPage({ params, searchParams }: Props) {
       slug: true,
       name: true,
       logo: true,
+      currency: true,
       settings: { select: { googleAnalyticsId: true, facebookPixelId: true, tiktokPixelId: true } },
     },
   });
   if (!site) return notFound();
+
+  // Needed so a LANDING step's linked page — if built with a bespoke
+  // template (Prokip Agent, Prokip Booking, Hardware, etc.) — can be
+  // wrapped in TemplateStoreContextProvider the same way the homepage
+  // already is. Without it, storeSlug never reaches those templates'
+  // blocks (they read it from Context, not props), and any form on them
+  // fails with "This form isn't connected to a store yet."
+  const activeTemplate = await prisma.siteTemplate.findFirst({
+    where: { siteId: site.id, isActive: true },
+    select: { template: { select: { slug: true } } },
+  });
 
   const funnel = await prisma.funnel.findFirst({
     where: { id: funnelId, siteId: site.id, isActive: true },
@@ -88,6 +100,8 @@ export default async function FunnelPage({ params, searchParams }: Props) {
       siteSlug={site.slug}
       siteName={site.name}
       siteLogo={site.logo}
+      currency={site.currency}
+      templateSlug={activeTemplate?.template?.slug || null}
       funnelId={funnel.id}
       funnelName={funnel.name}
       step={publicStep}
