@@ -9,10 +9,10 @@ async function main() {
   // 1. Create Admin
   const adminPassword = await hash("Admin@2026", 12);
   const admin = await prisma.user.upsert({
-    where: { email: "admin@afrostore.com" },
+    where: { email: "admin@prokip.africa" },
     update: {},
     create: {
-      email: "admin@afrostore.com",
+      email: "admin@prokip.africa",
       passwordHash: adminPassword,
       firstName: "Afrostore",
       lastName: "Admin",
@@ -24,10 +24,10 @@ async function main() {
   // 2. Create Merchant
   const merchantPassword = await hash("Merchant@2026", 12);
   const merchant = await prisma.user.upsert({
-    where: { email: "merchant@afrostore.com" },
+    where: { email: "merchant@prokip.africa" },
     update: {},
     create: {
-      email: "merchant@afrostore.com",
+      email: "merchant@prokip.africa",
       passwordHash: merchantPassword,
       firstName: "Kwame",
       lastName: "Mensah",
@@ -192,11 +192,11 @@ async function main() {
   console.log("\n🎉 Seed complete!\n");
   console.log("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━");
   console.log("  Admin Login:");
-  console.log("  Email:    admin@afrostore.com");
+  console.log("  Email:    admin@prokip.africa");
   console.log("  Password: Admin@2026");
   console.log("");
   console.log("  Merchant Login:");
-  console.log("  Email:    merchant@afrostore.com");
+  console.log("  Email:    merchant@prokip.africa");
   console.log("  Password: Merchant@2026");
   console.log("  Store:    Kwame Fashion Hub");
   console.log("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━");

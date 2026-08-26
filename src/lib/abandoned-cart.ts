@@ -3,7 +3,7 @@ import { sendRawEmail } from "@/lib/email";
 import { sendWhatsAppMessage, isWhatsAppConfigured } from "@/lib/whatsapp";
 import { formatCurrency } from "@/lib/utils";
 
-const APP_DOMAIN = process.env.NEXT_PUBLIC_APP_DOMAIN || "afrostore.com";
+const APP_DOMAIN = process.env.NEXT_PUBLIC_APP_DOMAIN || "prokip.africa";
 
 export interface CartItemSnapshot { productId: string; name: string; price: number; quantity: number; image?: string | null }
 export interface ReminderSite { name: string; slug: string; customDomain: string | null; currency: string }

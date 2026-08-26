@@ -10,6 +10,8 @@ import { formatCurrency } from "@/lib/utils";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 
+const APP_DOMAIN = process.env.NEXT_PUBLIC_APP_DOMAIN || "prokip.africa";
+
 interface DashboardData {
   stats: {
     totalRevenue: number;
@@ -158,7 +160,7 @@ export default function DashboardPage() {
             </div>
             <div>
               <p className="text-sm font-semibold text-surface-900">Your store is live!</p>
-              <p className="text-xs text-surface-500">{currentStore.subdomain}.afrostore.com</p>
+              <p className="text-xs text-surface-500">{currentStore.subdomain}.{APP_DOMAIN}</p>
             </div>
           </div>
           <Link
@@ -319,7 +321,7 @@ export default function DashboardPage() {
                         You have products but no orders yet. Share your store link!
                       </p>
                       <p className="mt-1 text-[10px] text-surface-400">
-                        {currentStore.subdomain}.afrostore.com
+                        {currentStore.subdomain}.{APP_DOMAIN}
                       </p>
                     </div>
                   </div>

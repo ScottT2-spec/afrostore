@@ -2,8 +2,11 @@ import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/db";
 import { getAuthUser } from "@/lib/auth";
 import dns from "dns";
+import fs from "fs/promises";
+import path from "path";
 import { promisify } from "util";
 import { CNAME_TARGET, SERVER_IP } from "@/lib/domain/domain-manager";
+import { generateNginxHttpOnlyBlock, getNginxConfigFilename } from "@/lib/domain/nginx-generator";
 
 const resolveCname = promisify(dns.resolveCname);
 const resolve4 = promisify(dns.resolve4);
@@ -55,7 +58,7 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ sit
   let txtVerified = false;
   if (domainRecord.verificationToken) {
     try {
-      const txtRecords = await resolveTxt(`_afrostore.${domain}`);
+      const txtRecords = await resolveTxt(`_prokip.${domain}`);
       const flat = txtRecords.flat();
       txtVerified = flat.includes(domainRecord.verificationToken);
     } catch {
@@ -73,6 +76,34 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ sit
         dnsVerified: true,
       },
     });
+
+    // Previously nothing past this point ever happened: DNS could verify
+    // successfully and the DB would say ACTIVE, but no nginx routing or
+    // SSL certificate ever got created for the domain — it would 404 or
+    // show a cert mismatch no matter how "verified" it looked here.
+    //
+    // Write the HTTP-only config now (enables the ACME HTTP-01 challenge
+    // to succeed over plain :80). docker/certbot-provision.sh picks up
+    // any domain config here that doesn't have a cert yet, issues one via
+    // certbot, and upgrades this file to the full SSL block — see that
+    // script for the rest of the flow. NGINX_DOMAINS_DIR must be a volume
+    // shared with the nginx and certbot containers (see docker-compose.yml).
+    const domainsDir = process.env.NGINX_DOMAINS_DIR;
+    if (domainsDir) {
+      try {
+        const filename = getNginxConfigFilename(domain);
+        const config = generateNginxHttpOnlyBlock({ domain, upstreamPort: 3000, includeWww: true });
+        await fs.writeFile(path.join(domainsDir, filename), config, "utf8");
+      } catch (err) {
+        // Don't fail the verification response over this — DNS is
+        // genuinely verified either way, and the provisioning script will
+        // still pick the domain up on its next pass once the file issue
+        // (permissions, missing dir, etc.) is fixed. Just log it.
+        console.error(`Failed to write nginx config for ${domain}:`, err);
+      }
+    } else {
+      console.warn(`NGINX_DOMAINS_DIR not set — skipped writing nginx config for verified domain ${domain}. It will not actually be reachable until this is configured.`);
+    }
   }
 
   return NextResponse.json({

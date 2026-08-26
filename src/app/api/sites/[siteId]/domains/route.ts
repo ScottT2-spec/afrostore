@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/db";
 import { getAuthUser } from "@/lib/auth";
-import { CNAME_TARGET, SERVER_IP } from "@/lib/domain/domain-manager";
+import { CNAME_TARGET, SERVER_IP, APP_DOMAIN } from "@/lib/domain/domain-manager";
 
 function domainError(message: string, status = 400) {
   return NextResponse.json({ success: false, error: message }, { status });
@@ -29,7 +29,7 @@ export async function GET(req: NextRequest, { params }: { params: Promise<{ site
     success: true,
     data: {
       domains,
-      subdomain: `${site.subdomain}.afrostore.com`,
+      subdomain: `${site.subdomain}.${APP_DOMAIN}`,
       dnsInstructions: {
         aRecord: SERVER_IP ? { type: "A", name: "@", value: SERVER_IP, ttl: 3600 } : null,
         cnameRecord: { type: "CNAME", name: "@", value: CNAME_TARGET, ttl: 3600 },
@@ -91,7 +91,7 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ sit
         aRecord: SERVER_IP ? { type: "A", name: "@", value: SERVER_IP, ttl: 3600 } : null,
         cnameRecord: { type: "CNAME", name: "@", value: CNAME_TARGET, ttl: 3600 },
         wwwRecord: { type: "CNAME", name: "www", value: CNAME_TARGET, ttl: 3600 },
-        txtVerification: { type: "TXT", name: "_afrostore", value: verificationToken, ttl: 3600 },
+        txtVerification: { type: "TXT", name: "_prokip", value: verificationToken, ttl: 3600 },
         note: "Add ONE of the following: an A record pointing to our IP, or a CNAME record pointing to our domain. Also add the TXT record for verification.",
       },
     },

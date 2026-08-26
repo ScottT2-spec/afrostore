@@ -17,6 +17,12 @@ services:
       - .env
     environment:
       - NODE_ENV=production
+      # Lets the domain-verify route write a new domain's nginx config the
+      # moment DNS checks out — see docker/certbot-provision.sh for what
+      # picks it up from here (cert issuance + upgrading to the SSL block).
+      - NGINX_DOMAINS_DIR=/etc/nginx/conf.d/domains
+    volumes:
+      - ./nginx/domains:/etc/nginx/conf.d/domains
     networks:
       - afrostore
 
@@ -29,20 +35,38 @@ services:
     volumes:
       - ./nginx/nginx.conf:/etc/nginx/nginx.conf:ro
       - ./nginx/conf.d:/etc/nginx/conf.d:ro
-      - ./nginx/domains:/etc/nginx/conf.d/domains
-      - certbot-conf:/etc/letsencrypt
+      - ./nginx/domains:/etc/nginx/conf.d/domains:ro
+      - certbot-conf:/etc/letsencrypt:ro
       - certbot-www:/var/www/certbot
     depends_on:
       - app
+    # Self-reload every 30s: nginx only reads config files at startup or on
+    # an explicit reload signal. New/changed domain configs land in
+    # ./nginx/domains from the app (new domain) and certbot (SSL upgrade)
+    # containers, neither of which can reach into this one to trigger a
+    # reload directly — polling is the simplest reliable way to pick those
+    # up without wiring cross-container exec/signals. `nginx -s reload` is
+    # graceful: no dropped connections, workers finish in-flight requests.
+    command: >
+      sh -c "nginx -g 'daemon off;' &
+             while :; do sleep 30; nginx -s reload 2>/dev/null; done"
     networks:
       - afrostore
 
   certbot:
     image: certbot/certbot
+    restart: unless-stopped
+    environment:
+      - NGINX_DOMAINS_DIR=/etc/nginx/conf.d/domains
+      - CERTBOT_EMAIL=${CERTBOT_EMAIL:-admin@prokip.africa}
     volumes:
       - certbot-conf:/etc/letsencrypt
       - certbot-www:/var/www/certbot
-    entrypoint: "/bin/sh -c 'trap exit TERM; while :; do certbot renew; sleep 12h & wait $${!}; done;'"
+      - ./nginx/domains:/etc/nginx/conf.d/domains
+      - ./docker/certbot-provision.sh:/usr/local/bin/certbot-provision.sh:ro
+    entrypoint: "/bin/sh /usr/local/bin/certbot-provision.sh"
+    networks:
+      - afrostore
 
   # Replaces vercel.json's Crons, which do nothing outside Vercel. Runs
   # inside the same Docker network as `app`, so it calls it directly by

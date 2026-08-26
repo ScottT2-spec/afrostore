@@ -6,30 +6,30 @@ const prisma = new PrismaClient({ adapter });
 
 async function main() {
   // 1. Create a store for admin
-  const admin = await prisma.user.findUnique({ where: { email: "admin@afrostore.com" } });
+  const admin = await prisma.user.findUnique({ where: { email: "admin@prokip.africa" } });
   if (!admin) throw new Error("Admin not found");
 
   // Create or find a workspace for admin
   const adminWorkspace = await prisma.workspace.upsert({
-    where: { slug: "afrostore-hq" },
+    where: { slug: "prokip-hq" },
     update: {},
     create: {
       ownerId: admin.id,
       name: "AfroStore HQ",
-      slug: "afrostore-hq",
+      slug: "prokip-hq",
       plan: "ENTERPRISE",
     },
   });
 
   const adminStore = await prisma.site.upsert({
-    where: { slug: "afrostore-hq" },
+    where: { slug: "prokip-hq" },
     update: {},
     create: {
       workspaceId: adminWorkspace.id,
       name: "AfroStore HQ",
-      slug: "afrostore-hq",
+      slug: "prokip-hq",
       description: "The official AfroStore headquarters — platform admin store.",
-      subdomain: "afrostore-hq",
+      subdomain: "prokip-hq",
       businessType: "general",
       country: "GH",
       currency: "GHS",

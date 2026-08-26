@@ -4,6 +4,7 @@ import { success, error, validationError } from "@/lib/api-helpers";
 import { analyticsEventSchema } from "@/lib/validators";
 import { rateLimit } from "@/lib/rate-limit";
 import { sendServerConversionEvents } from "@/lib/server-conversions";
+import { APP_DOMAIN } from "@/lib/domain/domain-manager";
 
 // Internal event names that map to a real advertising conversion worth an
 // authoritative server-side call (backstops ad blockers / Safari ITP losing
@@ -57,7 +58,7 @@ export async function POST(req: NextRequest, { params }: Params) {
       else {
         try {
           const host = new URL(referer).hostname.replace(/^www\./, "");
-          const ownHosts = [site.subdomain ? `${site.subdomain}.afrostore.com` : null, site.customDomain, "afrostore.com"].filter(Boolean);
+          const ownHosts = [site.subdomain ? `${site.subdomain}.${APP_DOMAIN}` : null, site.customDomain, APP_DOMAIN].filter(Boolean);
           if (ownHosts.includes(host)) source = "direct"; // internal navigation, not a real referral
           else if (host.includes("google")) source = "google";
           else if (host.includes("facebook") || host.includes("fb.com")) source = "facebook";
@@ -106,7 +107,7 @@ export async function POST(req: NextRequest, { params }: Params) {
         await sendServerConversionEvents({
           eventName: conversionName,
           eventId: parsed.data.eventId,
-          eventSourceUrl: parsed.data.page ? `https://${site.customDomain || `${site.subdomain}.afrostore.com`}${parsed.data.page}` : undefined,
+          eventSourceUrl: parsed.data.page ? `https://${site.customDomain || `${site.subdomain}.${APP_DOMAIN}`}${parsed.data.page}` : undefined,
           user: { email: parsed.data.email, phone: parsed.data.phone, ip, userAgent: ua },
           customData: parsed.data.metadata,
           settings,

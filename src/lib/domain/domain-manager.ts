@@ -15,8 +15,8 @@ const resolve6 = promisify(dns.resolve6);
 // The IP/CNAME that custom domains should point to
 // Override via environment variables for your deployment
 export const SERVER_IP = process.env.SERVER_IP || process.env.NEXT_PUBLIC_SERVER_IP || "";
-export const CNAME_TARGET = process.env.CNAME_TARGET || process.env.NEXT_PUBLIC_CNAME_TARGET || "cname.afrostore.com";
-export const APP_DOMAIN = process.env.NEXT_PUBLIC_APP_DOMAIN || "afrostore.com";
+export const CNAME_TARGET = process.env.CNAME_TARGET || process.env.NEXT_PUBLIC_CNAME_TARGET || "cname.prokip.africa";
+export const APP_DOMAIN = process.env.NEXT_PUBLIC_APP_DOMAIN || "prokip.africa";
 
 export interface DomainConnectionResult {
   success: boolean;
