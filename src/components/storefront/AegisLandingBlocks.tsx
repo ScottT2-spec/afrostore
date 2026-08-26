@@ -131,7 +131,7 @@ export function AegisHeader({
       <div className="aegis-nav-inner">
         {isEditor ? <EditableCopy blockId={blockId} isEditor field="brandName" value={brandName} as="span" className="aegis-brand" /> : <Link href={fix("/")} className="aegis-brand">{brandName}</Link>}
         <div className="aegis-links">
-          {navLinks.map((l, i) => isEditor ? <EditableCopy key={i} blockId={blockId} isEditor fieldPath={`navLinks.${i}.label`} value={l.label} as="span" className={`aegis-link ${l.active ? "aegis-link-active" : ""}`} /> : <Link key={i} href={fix(l.href)} className={`aegis-link ${l.active ? "aegis-link-active" : ""}`}>{l.label}</Link>)}
+          {(Array.isArray(navLinks) ? navLinks : []).map((l, i) => isEditor ? <EditableCopy key={i} blockId={blockId} isEditor fieldPath={`navLinks.${i}.label`} value={l.label} as="span" className={`aegis-link ${l.active ? "aegis-link-active" : ""}`} /> : <Link key={i} href={fix(l.href)} className={`aegis-link ${l.active ? "aegis-link-active" : ""}`}>{l.label}</Link>)}
         </div>
         <div className="aegis-nav-right">
           {isEditor ? <EditableCopy blockId={blockId} isEditor field="portalText" value={portalText} as="span" className="aegis-portal" /> : <Link href={fix(portalLink)} className="aegis-portal">{portalText}</Link>}
@@ -226,7 +226,7 @@ export function AegisHero({
           </div>
           {stats.length > 0 && (
             <div className="aegis-stats-grid">
-              {stats.map((s, i) => {
+              {(Array.isArray(stats) ? stats : []).map((s, i) => {
                 const st = statStyles[s.style || "light"];
                 return (
                   <div key={i} className="aegis-stat" style={{ background: st.bg }}>
@@ -302,7 +302,7 @@ export function AegisServices({
             {linkText && (isEditor ? <EditableCopy blockId={blockId} isEditor field="linkText" value={linkText} as="span" className="aegis-svc-link" /> : <Link href={fix(linkHref)} className="aegis-svc-link">{linkText} →</Link>)}
           </div>
           <div className="aegis-svc-right">
-            {cards.map((c, i) => (
+            {(Array.isArray(cards) ? cards : []).map((c, i) => (
               <div key={i} className={`aegis-card ${i % 2 === 0 ? "aegis-card-light" : "aegis-card-dim"}`}>
                 <span className={`material-symbols-outlined aegis-card-icon ${c.accent ? "aegis-card-icon-accent" : "aegis-card-icon-primary"}`}>{c.icon}</span>
                 <EditableCopy blockId={blockId} isEditor={isEditor} fieldPath={`cards.${i}.title`} value={c.title} as="h3" className="aegis-card-title" />
@@ -572,11 +572,11 @@ export function AegisFooter({
             <EditableCopy blockId={blockId} isEditor={isEditor} field="brandName" value={brandName} as="h3" className="aegis-footer-brand" />
             <EditableCopy blockId={blockId} isEditor={isEditor} field="tagline" value={tagline} as="p" multiline className="aegis-footer-tagline" />
           </div>
-          {columns.map((col, i) => (
+          {(Array.isArray(columns) ? columns : []).map((col, i) => (
             <div key={i}>
               <EditableCopy blockId={blockId} isEditor={isEditor} fieldPath={`columns.${i}.title`} value={col.title} as="h4" className="aegis-footer-col-title" />
               <nav className="aegis-footer-links">
-                {col.links.map((l, j) => isEditor ? <EditableCopy key={j} blockId={blockId} isEditor fieldPath={`columns.${i}.links.${j}.label`} value={l.label} as="span" className="aegis-footer-link" /> : <Link key={j} href={fix(l.href)} className="aegis-footer-link">{l.label}</Link>)}
+                {(Array.isArray(col.links) ? col.links : []).map((l, j) => isEditor ? <EditableCopy key={j} blockId={blockId} isEditor fieldPath={`columns.${i}.links.${j}.label`} value={l.label} as="span" className="aegis-footer-link" /> : <Link key={j} href={fix(l.href)} className="aegis-footer-link">{l.label}</Link>)}
               </nav>
             </div>
           ))}
@@ -584,7 +584,7 @@ export function AegisFooter({
             <div>
               <EditableCopy blockId={blockId} isEditor={isEditor} field="connectTitle" value="Connect" as="h4" className="aegis-footer-col-title" />
               <div className="aegis-footer-social">
-                {socialIcons.map((s, i) => <a key={i} href={s.href} className="aegis-footer-social-btn"><span className="material-symbols-outlined" style={{ fontSize: 20 }}>{s.icon}</span></a>)}
+                {(Array.isArray(socialIcons) ? socialIcons : []).map((s, i) => <a key={i} href={s.href} className="aegis-footer-social-btn"><span className="material-symbols-outlined" style={{ fontSize: 20 }}>{s.icon}</span></a>)}
               </div>
               <EditableCopy blockId={blockId} isEditor={isEditor} field="copyright" value={copyright} as="p" className="aegis-footer-copy" />
             </div>

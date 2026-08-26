@@ -204,7 +204,7 @@ export function LandingGadgetStatsBar({
   return (
     <section style={{ backgroundColor: TOKENS.bgGray, border: `0 ${TOKENS.borderWidth} solid ${TOKENS.borderColor}`, borderLeft: `${TOKENS.borderWidth} solid ${TOKENS.borderColor}`, borderRight: `${TOKENS.borderWidth} solid ${TOKENS.borderColor}`, padding: "40px 0 0" }}>
       <div style={{ maxWidth: 1200, margin: "0 auto", padding: "0 30px", display: "flex", flexWrap: "wrap", justifyContent: "center", gap: 30 }}>
-        {items.map((item, i) => (
+        {(Array.isArray(items) ? items : []).map((item, i) => (
           <div key={i} style={{ flex: "1 1 280px", maxWidth: 360, textAlign: "center", padding: "0 13%", marginBottom: 80 }}>
             <EditableCopy blockId={blockId} isEditor={isEditor} fieldPath={`items.${i}.number`} value={item.number} as="div" style={{ fontFamily: "'Poppins', sans-serif", fontSize: 48, fontWeight: 700, color: TOKENS.accentColor, lineHeight: 1.1 }} />
             <EditableCopy blockId={blockId} isEditor={isEditor} fieldPath={`items.${i}.title`} value={item.title} as="h4" style={{ fontFamily: "'Poppins', sans-serif", fontSize: 18, fontWeight: 600, color: TOKENS.titleColor, margin: "8px 0 12px" }} />
@@ -275,7 +275,7 @@ export function LandingGadgetFeatureSplit({
       <EditableCopy blockId={blockId} isEditor={isEditor} field="description" value={description} as="p" multiline style={{ fontFamily: "'Inter', sans-serif", fontSize: 16, lineHeight: 1.625, color: finalTextColor, maxWidth: 480, marginBottom: specs.length > 0 ? 30 : 24 }} />
       {specs.length > 0 && (
         <div style={{ display: "flex", flexWrap: "wrap", gap: 20, marginBottom: 30 }}>
-          {specs.map((s, i) => (
+          {(Array.isArray(specs) ? specs : []).map((s, i) => (
             <div key={i} style={{ flex: "1 1 180px", maxWidth: 220 }}>
               {s.icon && <img src={safeSrc(s.icon)} alt={s.title} onError={onImgError} style={{ width: 40, height: 40, marginBottom: 10 }} />}
               <EditableCopy blockId={blockId} isEditor={isEditor} fieldPath={`specs.${i}.title`} value={s.title} as="h5" style={{ fontFamily: "'Poppins', sans-serif", fontSize: 15, fontWeight: 600, color: finalTitleColor, marginBottom: 4 }} />
@@ -401,7 +401,7 @@ export function LandingGadgetPhotoGallery({
 
   const gallery = (
     <div style={{ flex: "1 1 50%", minWidth: 280, display: "flex", gap: 10, padding: "0 10px" }}>
-      {images.map((img, i) => (
+      {(Array.isArray(images) ? images : []).map((img, i) => (
         <div key={i} style={{ flex: 1 }}>
           <img src={safeSrc(img)} alt={`Photo ${i + 1}`} onError={onImgError} style={{ width: "100%", height: "auto", borderRadius: 0 }} />
         </div>
@@ -481,7 +481,7 @@ export function LandingGadgetCameraDark({
           <EditableCopy blockId={blockId} isEditor={isEditor} field="title" value={title} as="h2" multiline style={{ fontFamily: "'Poppins', sans-serif", fontSize: 44, fontWeight: 700, lineHeight: 1.23, color: "#fff", margin: "0 0 20px", whiteSpace: "pre-line" }} />
           <EditableCopy blockId={blockId} isEditor={isEditor} field="description" value={description} as="p" multiline style={{ fontFamily: "'Inter', sans-serif", fontSize: 16, lineHeight: 1.625, color: "rgba(255,255,255,0.7)", maxWidth: 480, marginBottom: 30 }} />
           <div style={{ display: "grid", gridTemplateColumns: "repeat(2, 1fr)", gap: 30 }}>
-            {stats.map((s, i) => (
+            {(Array.isArray(stats) ? stats : []).map((s, i) => (
               <div key={i}>
                 <EditableCopy blockId={blockId} isEditor={isEditor} fieldPath={`stats.${i}.value`} value={s.value} as="div" style={{ fontFamily: "'Poppins', sans-serif", fontSize: 28, fontWeight: 700, color: "#fff", lineHeight: 1.2 }} />
                 <EditableCopy blockId={blockId} isEditor={isEditor} fieldPath={`stats.${i}.label`} value={s.label} as="h5" style={{ fontFamily: "'Poppins', sans-serif", fontSize: 15, fontWeight: 600, color: "#fff", margin: "6px 0 4px" }} />
@@ -528,7 +528,7 @@ export function LandingGadgetSecurity({
       <div style={{ maxWidth: 1200, margin: "0 auto", padding: "0 30px" }}>
         <EditableCopy blockId={blockId} isEditor={isEditor} field="sectionTitle" value={sectionTitle} as="h2" style={{ fontFamily: "'Poppins', sans-serif", fontSize: 44, fontWeight: 700, lineHeight: 1.23, color: TOKENS.titleColor, textAlign: "center", margin: "0 0 50px" }} />
         <div style={{ display: "flex", flexWrap: "wrap", justifyContent: "center", gap: 40 }}>
-          {items.map((item, i) => (
+          {(Array.isArray(items) ? items : []).map((item, i) => (
             <div key={i} style={{ flex: "1 1 280px", maxWidth: 340, textAlign: "center" }}>
               <img src={safeSrc(item.icon)} alt={item.title} onError={onImgError} style={{ width: 80, height: 80, marginBottom: 20 }} />
               <EditableCopy blockId={blockId} isEditor={isEditor} fieldPath={`items.${i}.title`} value={item.title} as="h4" style={{ fontFamily: "'Poppins', sans-serif", fontSize: 18, fontWeight: 600, color: TOKENS.titleColor, marginBottom: 10 }} />
@@ -589,7 +589,7 @@ export function LandingGadgetCameraOptics({
         <div style={{ display: "flex", flexWrap: "wrap", alignItems: "center", justifyContent: "center" }}>
           {/* Left specs */}
           <div style={{ flex: "1 1 200px", maxWidth: 260, display: "flex", flexDirection: "column", gap: 30 }}>
-            {leftSpecs.map((s, i) => (
+            {(Array.isArray(leftSpecs) ? leftSpecs : []).map((s, i) => (
               <div key={i} style={{ textAlign: "center" }}>
                 <img src={safeSrc(s.icon)} alt={s.value} onError={onImgError} style={{ width: 48, height: 48, marginBottom: 8 }} />
                 <EditableCopy blockId={blockId} isEditor={isEditor} fieldPath={`leftSpecs.${i}.value`} value={s.value} as="div" style={{ fontFamily: "'Poppins', sans-serif", fontSize: 18, fontWeight: 700, color: TOKENS.titleColor }} />
@@ -603,7 +603,7 @@ export function LandingGadgetCameraOptics({
           </div>
           {/* Right specs */}
           <div style={{ flex: "1 1 200px", maxWidth: 260, display: "flex", flexDirection: "column", gap: 30 }}>
-            {rightSpecs.map((s, i) => (
+            {(Array.isArray(rightSpecs) ? rightSpecs : []).map((s, i) => (
               <div key={i} style={{ textAlign: "center" }}>
                 <img src={safeSrc(s.icon)} alt={s.value} onError={onImgError} style={{ width: 48, height: 48, marginBottom: 8 }} />
                 <EditableCopy blockId={blockId} isEditor={isEditor} fieldPath={`rightSpecs.${i}.value`} value={s.value} as="div" style={{ fontFamily: "'Poppins', sans-serif", fontSize: 18, fontWeight: 700, color: TOKENS.titleColor }} />
@@ -659,7 +659,7 @@ export function LandingGadgetProductsShowcase({
       borderRight: `7px solid ${TOKENS.borderColor}`,
     }}>
       <div style={{ maxWidth: 1200, margin: "0 auto", display: "flex", flexWrap: "wrap" }}>
-        {products.map((p, i) => (
+        {(Array.isArray(products) ? products : []).map((p, i) => (
           <div key={i} style={{ flex: "1 1 25%", minWidth: 220, backgroundColor: TOKENS.bgDarkGray, marginBottom: 14, borderLeft: `7px solid ${TOKENS.borderColor}`, borderRight: `7px solid ${TOKENS.borderColor}`, padding: 20 }}>
             <Link href={resolveStoreLink(p.link || "#", storeSlug, true)} style={{ textDecoration: "none" }}>
               <img src={safeSrc(p.image)} alt={p.name} onError={onImgError} style={{ width: "100%", height: "auto", marginBottom: 12 }} />
@@ -796,7 +796,7 @@ export function LandingGadgetFooter({
       <div style={{ maxWidth: 1200, margin: "0 auto", padding: "0 30px", textAlign: "center" }}>
         {logo && <img src={safeSrc(logo)} alt="Logo" onError={onImgError} style={{ height: 30, marginBottom: 24 }} />}
         <nav style={{ display: "flex", flexWrap: "wrap", justifyContent: "center", gap: 20, marginBottom: 24 }}>
-          {links.map((l, i) => (
+          {(Array.isArray(links) ? links : []).map((l, i) => (
             <React.Fragment key={i}>
               {isEditor ? (
                 <EditableCopy blockId={blockId} isEditor fieldPath={`links.${i}.label`} value={l.label} as="span" style={{ fontFamily: "'Inter', sans-serif", fontSize: 13, color: "rgba(255,255,255,0.6)", textDecoration: "none" }} />

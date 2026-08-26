@@ -191,7 +191,7 @@ export function ProkipAgentModal({
             {submitError && (
               <p style={{ color: "#f87171", fontSize: "0.875rem", textAlign: "center", margin: 0 }}>{submitError}</p>
             )}
-            {fields.map((f, idx) => (
+            {(Array.isArray(fields) ? fields : []).map((f, idx) => (
               <div key={f.name}>
                 <label className="pa-modal-label"><EditableCopy fieldPath={`fields.${idx}.label`} value={f.label} as="span" className="pa-modal-label" /></label>
                 {f.prefix ? (
@@ -393,7 +393,7 @@ export function ProkipAgentIntro({
               <EditableCopy field="tasksSubtitle" value={tasksSubtitle} as="p" multiline className="pa-tasks-sub" />
             </div>
             <div className="pa-tasks-grid">
-              {tasks.map((t, i) => (
+              {(Array.isArray(tasks) ? tasks : []).map((t, i) => (
                 <div key={i} className="pa-task-card">
                   <div className="pa-task-icon">{t.icon}</div>
                   <EditableCopy fieldPath={`tasks.${i}.title`} value={t.title} as="h3" className="pa-task-title" />
@@ -475,7 +475,7 @@ export function ProkipAgentAbout({
             <EditableCopy field="description" value={description} as="p" multiline className="pa-about-p" />
             <EditableCopy field="description2" value={description2} as="p" multiline className="pa-about-p" />
             <ul className="pa-about-features">
-              {features.map((f, i) => <li key={i} className="pa-about-feat"><EditableCopy fieldPath={`features.${i}`} value={f} as="span" className="pa-about-feat" /></li>)}
+              {(Array.isArray(features) ? features : []).map((f, i) => <li key={i} className="pa-about-feat"><EditableCopy fieldPath={`features.${i}`} value={f} as="span" className="pa-about-feat" /></li>)}
             </ul>
             <EditableCopy field="highlightQuote" value={highlightQuote} as="p" multiline className="pa-about-quote" />
           </div>
@@ -485,7 +485,7 @@ export function ProkipAgentAbout({
             <EditableCopy field="cardDescription2" value={cardDescription2} as="p" multiline className="pa-about-card-p" />
             <EditableCopy field="dutiesTitle" value={dutiesTitle} as="h4" className="pa-duties-title" />
             <ul className="pa-duties">
-              {duties.map((d, i) => (
+              {(Array.isArray(duties) ? duties : []).map((d, i) => (
                 <li key={i} className="pa-duty">
                   <div className="pa-duty-num">{i + 1}</div>
                   <EditableCopy fieldPath={`duties.${i}`} value={d} as="span" />
@@ -541,12 +541,12 @@ export function ProkipAgentBenefits({
           <EditableCopy field="subtitle" value={subtitle} as="p" className="pa-benefits-sub" />
         </div>
         <div className="pa-benefits-grid">
-          {benefits.map((b, i) => (
+          {(Array.isArray(benefits) ? benefits : []).map((b, i) => (
             <div key={i} className="pa-benefit-card">
               <div className="pa-benefit-icon">{b.icon}</div>
               <EditableCopy fieldPath={`benefits.${i}.title`} value={b.title} as="h3" className="pa-benefit-title" />
               <ul className="pa-benefit-items">
-                {b.items.map((item, j) => <li key={j} className="pa-benefit-item"><EditableCopy fieldPath={`benefits.${i}.items.${j}`} value={item} as="span" /></li>)}
+                {(Array.isArray(b.items) ? b.items : []).map((item, j) => <li key={j} className="pa-benefit-item"><EditableCopy fieldPath={`benefits.${i}.items.${j}`} value={item} as="span" /></li>)}
               </ul>
             </div>
           ))}
@@ -605,7 +605,7 @@ export function ProkipAgentMedia({
           <EditableCopy field="teamsSubtitle" value={teamsSubtitle} as="p" className="pa-media-sub" />
         </div>
         <div className="pa-teams-grid">
-          {teams.map((t, i) => (
+          {(Array.isArray(teams) ? teams : []).map((t, i) => (
             <div key={i} className="pa-team-card">
               <div style={{ overflow: "hidden" }}><img src={t.imageUrl} alt={t.country} className="pa-team-img" loading="lazy" onError={(e) => onImgError(e, t.country)} /></div>
               <div className="pa-team-name"><EditableCopy fieldPath={`teams.${i}.country`} value={t.country} as="span" className="pa-team-name" /></div>
@@ -616,7 +616,7 @@ export function ProkipAgentMedia({
           <>
             <div className="pa-media-header"><EditableCopy field="videosTitle" value={videosTitle} as="h2" className="pa-media-h2" /></div>
             <div className="pa-videos-grid">
-              {videos.map((v, i) => (
+              {(Array.isArray(videos) ? videos : []).map((v, i) => (
                 <div key={i} className="pa-video">
                   <iframe src={v} title={`Testimonial ${i + 1}`} allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowFullScreen />
                 </div>
@@ -712,21 +712,21 @@ export function ProkipAgentSupport({
         </div>
         {supportCards.length > 0 && (
           <div className="pa-support-grid">
-            {supportCards.map((c, i) => (
+            {(Array.isArray(supportCards) ? supportCards : []).map((c, i) => (
               <div key={i} className="pa-support-card">
                 <div className="pa-support-card-head">
                   <div className="pa-support-num">{c.number}</div>
                   <EditableCopy fieldPath={`supportCards.${i}.title`} value={c.title} as="h3" className="pa-support-card-title" />
                 </div>
                 <ul className="pa-support-items">
-                  {c.items.map((item, j) => {
+                  {(Array.isArray(c.items) ? c.items : []).map((item, j) => {
                     const txt = typeof item === "string" ? item : item.text;
                     const subs = typeof item === "string" ? undefined : item.subitems;
                     return (
                       <li key={j} className="pa-support-item">
                         <div>
                           <EditableCopy fieldPath={`supportCards.${i}.items.${j}.text`} value={txt} as="span" />
-                          {subs && <div className="pa-support-subitems">{subs.map((s, k) => <div key={k}>- {s}</div>)}</div>}
+                          {Array.isArray(subs) && <div className="pa-support-subitems">{subs.map((s, k) => <div key={k}>- {s}</div>)}</div>}
                         </div>
                       </li>
                     );
@@ -746,14 +746,14 @@ export function ProkipAgentSupport({
               <EditableCopy field="qualDescription" value={qualDescription} as="p" className="pa-qual-desc" />
               <EditableCopy field="lookingForTitle" value={lookingForTitle} as="h3" className="pa-qual-looking-h3" />
               <ul className="pa-qual-looking-list">
-                {lookingFor.map((l, i) => <li key={i} className="pa-qual-looking-item"><EditableCopy fieldPath={`lookingFor.${i}`} value={l} as="span" /></li>)}
+                {(Array.isArray(lookingFor) ? lookingFor : []).map((l, i) => <li key={i} className="pa-qual-looking-item"><EditableCopy fieldPath={`lookingFor.${i}`} value={l} as="span" /></li>)}
               </ul>
             </div>
             <div className="pa-qual-right">
               <EditableCopy field="opportunityTitle" value={opportunityTitle} as="h3" className="pa-qual-right-h3" />
               <EditableCopy field="opportunitySubtitle" value={opportunitySubtitle} as="p" className="pa-qual-right-sub" />
               <ul className="pa-qual-opp-list">
-                {opportunityItems.map((item, i) => <li key={i} className="pa-qual-opp-item"><EditableCopy fieldPath={`opportunityItems.${i}`} value={item} as="span" /></li>)}
+                {(Array.isArray(opportunityItems) ? opportunityItems : []).map((item, i) => <li key={i} className="pa-qual-opp-item"><EditableCopy fieldPath={`opportunityItems.${i}`} value={item} as="span" /></li>)}
               </ul>
               <CTAButton text={<EditableCopy field="ctaText" value={ctaText} as="span" />} onClick={openModal} />
             </div>
@@ -808,7 +808,7 @@ export function ProkipAgentConversion({
           <EditableCopy field="title" value={title} as="h2" className="pa-conversion-h2" />
           <EditableCopy field="description" value={description} as="p" multiline className="pa-conversion-desc" />
           <ul className="pa-conversion-checks">
-            {checkmarks.map((c, i) => <li key={i} className="pa-conversion-check"><EditableCopy fieldPath={`checkmarks.${i}`} value={c} as="span" /></li>)}
+            {(Array.isArray(checkmarks) ? checkmarks : []).map((c, i) => <li key={i} className="pa-conversion-check"><EditableCopy fieldPath={`checkmarks.${i}`} value={c} as="span" /></li>)}
           </ul>
           <EditableCopy field="urgencyText" value={urgencyText} as="p" multiline className="pa-conversion-urgency" />
           <div className="pa-conversion-cta-wrap"><CTAButton text={<EditableCopy field="ctaText" value={ctaText} as="span" />} onClick={openModal} /></div>
@@ -856,7 +856,7 @@ export function ProkipAgentFooter({
         <div className="pa-footer-inner">
           <div className="pa-footer-brand"><EditableCopy field="brandName" value={brandName} as="span" className="pa-footer-brand" /><span className="pa-footer-brand-accent"><EditableCopy field="brandAccent" value={brandAccent} as="span" className="pa-footer-brand-accent" /></span></div>
           <div className="pa-footer-disclaimers">
-            {disclaimers.map((d, i) => <p key={i} className="pa-footer-disclaimer"><EditableCopy fieldPath={`disclaimers.${i}`} value={d} as="span" className="pa-footer-disclaimer" /></p>)}
+            {(Array.isArray(disclaimers) ? disclaimers : []).map((d, i) => <p key={i} className="pa-footer-disclaimer"><EditableCopy fieldPath={`disclaimers.${i}`} value={d} as="span" className="pa-footer-disclaimer" /></p>)}
           </div>
           <div className="pa-footer-bottom">
             <EditableCopy field="copyright" value={copyright} as="p" className="pa-footer-copy" />
