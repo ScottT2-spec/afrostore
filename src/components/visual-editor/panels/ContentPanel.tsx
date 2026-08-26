@@ -209,14 +209,6 @@ function TemplatePropEditor({
 
   const commonInputClass = "w-full px-3 py-2 text-sm border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500";
   const isLongText = typeof value === "string" && (value.includes("\n") || value.length > 80);
-  // Field keys in template props are camelCase (backgroundImage, bgImage,
-  // heroImage), not snake_case/kebab-case, so insert a boundary before each
-  // internal capital before testing — otherwise "backgroundImage" never
-  // matches a "preceded by _ or -" boundary and silently falls through to
-  // the plain-text-only branch below, which is why the slider's
-  // "Background Image" field had no upload option while hand-built panels
-  // (which target element.type === "image" directly) did.
-  const wordBoundaryLabel = label.replace(/([a-z0-9])([A-Z])/g, "$1_$2");
   // A string field whose key name suggests it holds an image URL (avatar,
   // poster, thumbnail, gallery item url, etc.) — this generic editor is
   // what drives every widget type without a hand-built content panel
@@ -224,7 +216,7 @@ function TemplatePropEditor({
   // so without this, image fields anywhere outside the 5 hand-built
   // editors were text-only, no upload option at all.
   const isImageField = typeof value !== "boolean" && typeof value !== "number" &&
-    /(^|[_-])(src|image|img|avatar|poster|logo|photo|picture|thumbnail|banner|cover|gallery)s?([_-]|\[|$)/i.test(wordBoundaryLabel);
+    /(^|[_-])(src|image|img|avatar|poster|logo|photo|picture|thumbnail|banner|cover|gallery)s?([_-]|\[|$)/i.test(label);
   // A string field whose key name suggests it holds a navigation
   // destination (buttonLink, ctaLink, href, url, destination...) — gets
   // the same page-picker treatment as the hand-built button/image panels,
