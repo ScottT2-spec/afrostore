@@ -20,6 +20,7 @@ import { ThemeProvider, type ThemeData } from "@/components/storefront/ThemeProv
 import { useWishlist } from "@/hooks/useWishlist";
 import { useABTestVariant, applyABTestOverrides } from "@/hooks/useABTestVariant";
 import { injectPixels, trackEvent } from "@/lib/storefront-analytics";
+import { TemplateStoreContextProvider } from "@/components/storefront/TemplateStoreContextProvider";
 import { applyPageCustomization, buildPageBackgroundStyle, buildThemeDataWithCustomization, filterVisiblePages, getResolvedPageSettings, normalizeSiteCustomization, type SiteCustomizationDocument } from "@/lib/site-customization";
 import { VegetableAboutPage, VegetableContactPage, VegetableMenuPage, VegetableRecipePage, VegetableReservationPage } from "@/components/storefront/VegetableTemplatePages";
 import { VegetableFooter, VegetableHeader } from "@/components/storefront/VegetableStoreChrome";
@@ -885,16 +886,41 @@ export default function StorefrontPage() {
           </div>
         ) : (
           <div className="relative z-10">
-            <RenderBlocks
-              blocks={blocks}
-              storeSlug={slug}
+            {/* Bespoke templates (Prokip Agent, Prokip Booking, Hardware,
+                etc.) that don't match any of the isXTemplate branches above
+                fall through to here — their blocks read storeSlug/currency
+                from TemplateStoreContextProvider's Context, not from the
+                props RenderBlocks already receives below. Without this,
+                any form on such a page fails with "This form isn't
+                connected to a store yet." even though a real store is
+                linked — same root cause as the funnel runtime fix. */}
+            <TemplateStoreContextProvider
+              templateSlug={data.templateSlug}
               products={products}
+              blogs={blogs}
+              categories={categories}
               currency={currency}
-              addToCart={addToCart}
-              isWishlisted={isWishlisted}
+              storeSlug={slug}
+              socialLinks={[
+                ...(socialLinks?.facebook ? [{ platform: "facebook", url: socialLinks.facebook }] : []),
+                ...(socialLinks?.twitter ? [{ platform: "twitter", url: socialLinks.twitter }] : []),
+                ...(socialLinks?.instagram ? [{ platform: "instagram", url: socialLinks.instagram }] : []),
+              ]}
+              addToCart={addToCartById}
               toggleWishlist={toggleWishlist}
-              addedToCart={addedToCart}
-            />
+              isWishlisted={isWishlisted}
+            >
+              <RenderBlocks
+                blocks={blocks}
+                storeSlug={slug}
+                products={products}
+                currency={currency}
+                addToCart={addToCart}
+                isWishlisted={isWishlisted}
+                toggleWishlist={toggleWishlist}
+                addedToCart={addedToCart}
+              />
+            </TemplateStoreContextProvider>
           </div>
         )}
       </main>
