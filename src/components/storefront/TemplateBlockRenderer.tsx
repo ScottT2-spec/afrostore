@@ -1,6 +1,7 @@
 "use client";
 
 import React, { createContext, useContext, type CSSProperties } from "react";
+import { resolveNodeStyles } from "@/lib/visual-editor/node-tree";
 import {
   FashionFontLoader,
   FashionHeroSlider,
@@ -1404,7 +1405,17 @@ export function RenderTemplateBlocks({ blocks, isEditor = false }: RenderTemplat
             data-source-used={block.settings ? "settings" : block.props ? "props" : "none"}
             data-has-settings={!!block.settings}
             data-has-props={!!block.props}
-            style={{ display: "contents" }}
+            // THE FIX: the editor canvas wraps every template block in a
+            // div with this exact computed style (backgroundColor,
+            // backgroundImage, etc. from Advanced-tab settings) — that's
+            // the ONLY reason those fields appeared to work in the editor.
+            // The live storefront never had this wrapper at all, so any
+            // Advanced-tab field a bespoke component doesn't itself read
+            // as a named prop (backgroundImage, for most of these) was
+            // silently invisible live no matter how correctly it saved.
+            // NOTE: must be a real box (not display:contents) or the
+            // background itself would never paint, same bug all over again.
+            style={resolveNodeStyles(block.settings || {}) as CSSProperties}
           >
             <RenderTemplateBlock block={block} isEditor={isEditor} />
           </div>
