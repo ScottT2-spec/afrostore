@@ -6,6 +6,7 @@ export interface EditorNode {
   id: string;
   type: string;
   settings: Record<string, unknown>;
+  content?: Record<string, unknown>;
   elements?: EditorNode[];
 }
 
@@ -520,6 +521,32 @@ const migrateLegacyNode = (node: unknown, fallbackType = "node"): EditorNode => 
 
   const type = typeof node.type === "string" && node.type.trim() ? node.type : fallbackType;
   const id = typeof node.id === "string" && node.id.trim() ? node.id : createId();
+
+  // Prokip Sales Agent ("prokipAgent*") and Prokip Demo Booking
+  // ("prokipBooking*") sections are terminal/leaf content blocks — their
+  // React components (ProkipAgentBenefits, ProkipBookingTestimonials, etc.)
+  // read array fields like benefits/testimonials/steps directly as flat
+  // props, not as a nested children tree.
+  //
+  // BUG THIS FIXES: this function runs on every single page load,
+  // unconditionally, even when content is already in the current format.
+  // Below, for any array-of-*objects* field (e.g. benefits: [{title,
+  // items}, ...]), it converts each object into a synthetic CHILD EDITOR
+  // NODE instead of leaving it as a prop — appendChildArraysFromObject.
+  // The bespoke section component never reads element.elements for this
+  // data, so it just silently loses that field. The very next save then
+  // persists the now-childless version, permanently destroying it — which
+  // is why a section can look complete right after creation but end up
+  // with pieces (or the whole section, if every field was array-shaped)
+  // missing the first time anyone opens the editor and saves, even
+  // without touching that section at all.
+  // Fix: preserve settings/content verbatim for these two templates,
+  // skip the array->children conversion entirely.
+  if (type.startsWith("prokipAgent") || type.startsWith("prokipBooking")) {
+    const settings = isPlainObject(node.settings) ? { ...node.settings } : {};
+    const content = isPlainObject(node.content) ? { ...node.content } : undefined;
+    return { id, type, settings, content, elements: [] };
+  }
   const settings = flattenLegacyNodeSettings(node);
   const elements = extractLegacyChildren(node, type);
   const content = isPlainObject(node.content) ? node.content : undefined;
