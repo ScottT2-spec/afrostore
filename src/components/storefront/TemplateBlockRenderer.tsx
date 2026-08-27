@@ -1341,9 +1341,30 @@ export class TemplateBlockErrorBoundary extends React.Component<
           </div>
         );
       }
-      // Live storefront: fail silently and just skip this one block
-      // rather than showing an error to shoppers.
-      return null;
+      // Live storefront: don't show shoppers a big red developer error box,
+      // but don't go fully silent either — a silent `return null` here was
+      // exactly why a real crash on the live site was invisible to anyone
+      // debugging it. Show a small, low-key marker with the real error
+      // message instead, so it's screenshot-able without looking like a
+      // broken page to a customer.
+      return (
+        <div
+          data-block-error={this.props.blockType}
+          data-block-id={this.props.blockId}
+          style={{
+            margin: "4px",
+            padding: "6px 10px",
+            borderRadius: "6px",
+            border: "1px dashed #d1d5db",
+            background: "#f9fafb",
+            color: "#9ca3af",
+            fontSize: "11px",
+            fontFamily: "monospace",
+          }}
+        >
+          Section unavailable ({this.props.blockType}: {this.state.error.message})
+        </div>
+      );
     }
     return this.props.children;
   }
@@ -1372,7 +1393,21 @@ export function RenderTemplateBlocks({ blocks, isEditor = false }: RenderTemplat
           blockId={block.id}
           isEditor={isEditor}
         >
-          <RenderTemplateBlock block={block} isEditor={isEditor} />
+          {/* Debug marker: which raw field TemplateBlockRenderer actually
+              read from for this block — settings vs props — plus whether
+              each one is even populated. Right-click -> Inspect any block
+              on the live page and check this wrapper's data attributes to
+              see exactly what data source won, instead of guessing without
+              DB/browser access. Doesn't affect layout (display: contents). */}
+          <div
+            data-block-type={block.type}
+            data-source-used={block.settings ? "settings" : block.props ? "props" : "none"}
+            data-has-settings={!!block.settings}
+            data-has-props={!!block.props}
+            style={{ display: "contents" }}
+          >
+            <RenderTemplateBlock block={block} isEditor={isEditor} />
+          </div>
         </TemplateBlockErrorBoundary>
       ))}
     </div>
