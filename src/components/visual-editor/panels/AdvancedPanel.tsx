@@ -224,6 +224,12 @@ export default function AdvancedPanel({ element, onUpdate }: AdvancedPanelProps)
             </button>
           ))}
         </div>
+
+        {breakpoint !== "desktop" && (
+          <div className="mt-2 px-3 py-2 rounded-md bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-800 text-[11px] text-amber-800 dark:text-amber-300">
+            You're editing the <strong>{breakpoint}</strong>-only value. This will <strong>not</strong> show up on Desktop or on the live storefront's default view — switch to <strong>Desktop</strong> above if you want a change (like a Background Image) to actually appear on the live site.
+          </div>
+        )}
       </div>
 
       <div className="space-y-3">
