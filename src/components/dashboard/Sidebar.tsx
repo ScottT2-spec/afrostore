@@ -192,9 +192,9 @@ export default function Sidebar({ onNavigate }: { onNavigate?: () => void } = {}
   const pathname = usePathname();
   const [collapsed, setCollapsed] = useState(false);
   const [siteSwitcherOpen, setSiteSwitcherOpen] = useState(false);
-  const [allSites, setAllSites] = useState<Array<{ id: string; name: string; siteType: string; slug: string }>>([]);
+  const [allSites, setAllSites] = useState<Array<{ id: string; name: string; siteType: string; slug: string; logo?: string | null }>>([]);
   const { user, logout } = useAuth();
-  const { siteId, siteName, siteType, slug, setSiteId } = useSite();
+  const { siteId, siteName, siteType, slug, setSiteId, currentStore } = useSite();
 
   // Fetch all sites for the switcher dropdown
   useEffect(() => {
@@ -266,8 +266,12 @@ export default function Sidebar({ onNavigate }: { onNavigate?: () => void } = {}
             collapsed && "justify-center p-2"
           )}
         >
-          <div className="flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-lg bg-gray-900 text-white font-bold text-sm">
-            {siteName ? siteName.charAt(0).toUpperCase() : "?"}
+          <div className="flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-lg bg-gray-900 text-white font-bold text-sm overflow-hidden">
+            {currentStore?.logo && typeof currentStore.logo === "string" ? (
+              <img src={currentStore.logo} alt="" className="h-full w-full object-cover" />
+            ) : (
+              siteName ? siteName.charAt(0).toUpperCase() : "?"
+            )}
           </div>
           {!collapsed && (
             <>
@@ -310,8 +314,12 @@ export default function Sidebar({ onNavigate }: { onNavigate?: () => void } = {}
                         isActive ? "bg-gray-50" : "hover:bg-gray-50"
                       )}
                     >
-                      <div className="flex h-7 w-7 flex-shrink-0 items-center justify-center rounded-lg bg-gray-900 text-white font-bold text-[10px]">
-                        {site.name.charAt(0).toUpperCase()}
+                      <div className="flex h-7 w-7 flex-shrink-0 items-center justify-center rounded-lg bg-gray-900 text-white font-bold text-[10px] overflow-hidden">
+                        {site.logo ? (
+                          <img src={site.logo} alt="" className="h-full w-full object-cover" />
+                        ) : (
+                          site.name.charAt(0).toUpperCase()
+                        )}
                       </div>
                       <div className="flex-1 min-w-0">
                         <div className="text-xs font-semibold text-gray-900 truncate">{site.name}</div>
