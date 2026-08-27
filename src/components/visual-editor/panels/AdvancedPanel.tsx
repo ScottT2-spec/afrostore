@@ -11,8 +11,6 @@ interface AdvancedPanelProps {
   onUpdate: (updates: any) => void;
 }
 
-const BREAKPOINTS: Breakpoint[] = ["desktop", "tablet", "mobile"];
-
 const isPlainObject = (value: unknown): value is Record<string, unknown> => {
   return Boolean(value) && typeof value === "object" && !Array.isArray(value);
 };
@@ -21,7 +19,12 @@ const capitalize = (value: string) => value.charAt(0).toUpperCase() + value.slic
 
 export default function AdvancedPanel({ element, onUpdate }: AdvancedPanelProps) {
   const [mode, setMode] = useState<Mode>("normal");
-  const [breakpoint, setBreakpoint] = useState<Breakpoint>("desktop");
+  // Removed the Desktop/Tablet/Mobile toggle — it silently made an edit
+  // invisible on the live site unless you happened to be on "Desktop"
+  // when you made it, with no indication that mattered. Every edit here
+  // now always targets the one value that actually shows on the live
+  // storefront, full stop.
+  const breakpoint: Breakpoint = "desktop";
   const settings = isPlainObject(element?.settings) ? element.settings : {};
 
   const content = isPlainObject(element?.content) ? element.content : {};
@@ -87,34 +90,20 @@ export default function AdvancedPanel({ element, onUpdate }: AdvancedPanelProps)
       return;
     }
 
-    if (breakpoint === "desktop") {
-      const desktopSettings = isPlainObject(settings.desktop) ? settings.desktop : {};
-      commitTopLevel(
-        {
-          ...settings,
-          [key]: value,
-          desktop: {
-            ...desktopSettings,
-            [key]: value,
-          },
-        },
-        { [key]: value }
-      );
-      return;
-    }
-
-    // Tablet/mobile-only values intentionally do NOT mirror into content:
-    // content has no concept of breakpoints, and content[key] feeds the
-    // base/desktop merged props — writing a mobile-only value there would
-    // make it apply everywhere instead of just on mobile.
-    const currentDevice = getDeviceSettings(breakpoint);
-    commitTopLevel({
-      ...settings,
-      [breakpoint]: {
-        ...currentDevice,
+    // breakpoint is always "desktop" now (toggle removed) — always mirror
+    // into content, so this always shows on the live site.
+    const desktopSettings = isPlainObject(settings.desktop) ? settings.desktop : {};
+    commitTopLevel(
+      {
+        ...settings,
         [key]: value,
+        desktop: {
+          ...desktopSettings,
+          [key]: value,
+        },
       },
-    });
+      { [key]: value }
+    );
   };
 
   const renderTextInput = (label: string, key: string, placeholder = "") => (
@@ -180,7 +169,7 @@ export default function AdvancedPanel({ element, onUpdate }: AdvancedPanelProps)
     </div>
   );
 
-  const activeScope = mode === "hover" ? `Hover` : `${breakpoint.charAt(0).toUpperCase()}${breakpoint.slice(1)}`;
+  const activeScope = mode === "hover" ? `Hover` : `Live site`;
 
   return (
     <div className="space-y-6">
@@ -207,29 +196,6 @@ export default function AdvancedPanel({ element, onUpdate }: AdvancedPanelProps)
             </button>
           </div>
         </div>
-
-        <div className="flex items-center gap-2 flex-wrap">
-          {BREAKPOINTS.map((item) => (
-            <button
-              key={item}
-              type="button"
-              onClick={() => setBreakpoint(item)}
-              className={`px-3 py-1.5 text-xs font-medium rounded-md border ${
-                breakpoint === item
-                  ? "bg-gray-900 text-white border-gray-900 dark:bg-white dark:text-gray-900 dark:border-white"
-                  : "bg-white text-gray-700 border-gray-200 dark:bg-gray-800 dark:text-gray-300 dark:border-gray-700"
-              }`}
-            >
-              {capitalize(item)}
-            </button>
-          ))}
-        </div>
-
-        {breakpoint !== "desktop" && (
-          <div className="mt-2 px-3 py-2 rounded-md bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-800 text-[11px] text-amber-800 dark:text-amber-300">
-            You're editing the <strong>{breakpoint}</strong>-only value. This will <strong>not</strong> show up on Desktop or on the live storefront's default view — switch to <strong>Desktop</strong> above if you want a change (like a Background Image) to actually appear on the live site.
-          </div>
-        )}
       </div>
 
       <div className="space-y-3">
@@ -392,7 +358,7 @@ export default function AdvancedPanel({ element, onUpdate }: AdvancedPanelProps)
       <div className="space-y-3">
         <h4 className="text-xs font-semibold text-gray-900 dark:text-white uppercase tracking-wider">Responsive Keys</h4>
         <div className="text-[11px] text-gray-500 dark:text-gray-400 leading-5">
-          The active breakpoint is edited in the matching nested object. Desktop values are mirrored into both the base keys and `settings.desktop` so the scoped CSS can resolve immediately.
+          Every edit here is mirrored into both `settings.desktop` and `content`, so it's always reflected on the live site — no device-specific toggle to worry about.
         </div>
       </div>
     </div>
