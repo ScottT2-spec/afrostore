@@ -1,5 +1,5 @@
 /**
- * AfroStore RAG Engine — Public API
+ * Prokip RAG Engine — Public API
  *
  * This is the single entry point for the entire RAG system.
  * Import { RAGService } from '@/lib/rag' and you're done.

@@ -42,14 +42,14 @@ export default function InteractiveTemplateBlocks({
     const product = products.find((p: any) => p.id === productId);
     if (!product) return;
     // Must use the same key AND item shape as every other storefront page
-    // (shop, homepage, product, cart, checkout) — afrostore_cart_${storeSlug}
+    // (shop, homepage, product, cart, checkout) — prokip_cart_${storeSlug}
     // with a nested `product` object. This previously wrote to a different
     // key (`cart_${storeId}`) with a flat shape — the exact same bug that
     // was already found and fixed on the product detail page — so anything
     // added here (any product-grid block on a Server Component page: about,
     // contact, projects, etc) silently never appeared in the cart icon,
     // cart page, or checkout.
-    const cartKey = `afrostore_cart_${storeSlug}`;
+    const cartKey = `prokip_cart_${storeSlug}`;
     const cart = JSON.parse(localStorage.getItem(cartKey) || "[]");
     const existing = cart.find((item: any) => item.productId === productId && !item.variantId);
     if (existing) {
@@ -63,7 +63,7 @@ export default function InteractiveTemplateBlocks({
       });
     }
     localStorage.setItem(cartKey, JSON.stringify(cart));
-    localStorage.setItem("afrostore_cart_active_slug", storeSlug);
+    localStorage.setItem("prokip_cart_active_slug", storeSlug);
   };
 
   return (

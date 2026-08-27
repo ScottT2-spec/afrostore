@@ -1,5 +1,5 @@
 /**
- * AfroStore RAG Engine — Indexing Pipeline
+ * Prokip RAG Engine — Indexing Pipeline
  *
  * Orchestrates the full document indexing flow:
  * 1. Extract content from entity data

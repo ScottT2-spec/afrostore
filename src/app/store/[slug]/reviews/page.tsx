@@ -200,11 +200,11 @@ export default function StoreReviewsPage() {
     const addToCart = (productId: string, quantity: number = 1) => {
       const product = (storeData?.products || []).find((p: any) => p.id === productId);
       if (!product || !store) return;
-      // Canonical key/shape — afrostore_cart_${slug} with a nested `product`
+      // Canonical key/shape — prokip_cart_${slug} with a nested `product`
       // object, matching shop/product/cart/checkout. Previously wrote to
       // `cart_${store.id}` with a flat shape, so items added here silently
       // never showed up in the cart.
-      const cartKey = `afrostore_cart_${slug}`;
+      const cartKey = `prokip_cart_${slug}`;
       const cart = JSON.parse(localStorage.getItem(cartKey) || "[]");
       const existing = cart.find((item: any) => item.productId === productId && !item.variantId);
       if (existing) {
@@ -218,7 +218,7 @@ export default function StoreReviewsPage() {
         });
       }
       localStorage.setItem(cartKey, JSON.stringify(cart));
-      localStorage.setItem("afrostore_cart_active_slug", slug);
+      localStorage.setItem("prokip_cart_active_slug", slug);
     };
     const ctxValue = {
       products: storeData?.products || [],

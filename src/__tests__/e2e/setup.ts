@@ -1,12 +1,12 @@
 /**
- * AfroStore E2E Test Setup
+ * Prokip E2E Test Setup
  *
  * Configures the test environment:
  * - Base URL for API requests
  * - Helper functions for auth, requests, cleanup
  * - Test data factories
  *
- * Requires: A running AfroStore instance with a test database.
+ * Requires: A running Prokip instance with a test database.
  * Set TEST_BASE_URL env var (defaults to http://localhost:3000).
  */
 
@@ -97,7 +97,7 @@ let testUserCounter = 0;
 
 export function generateTestEmail(): string {
   testUserCounter++;
-  return `test_e2e_${Date.now()}_${testUserCounter}@afrostore-test.com`;
+  return `test_e2e_${Date.now()}_${testUserCounter}@prokip-test.com`;
 }
 
 export interface TestUser {

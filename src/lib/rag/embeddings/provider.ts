@@ -1,5 +1,5 @@
 /**
- * AfroStore RAG Engine — Embedding Provider Interface & Factory
+ * Prokip RAG Engine — Embedding Provider Interface & Factory
  */
 
 import type { EmbeddingProvider, RAGConfig } from '../types';

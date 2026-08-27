@@ -1,5 +1,5 @@
 /**
- * AfroStore RAG Engine — LLM Context Builder
+ * Prokip RAG Engine — LLM Context Builder
  *
  * Transforms search results into optimized context for LLM consumption.
  * Handles:

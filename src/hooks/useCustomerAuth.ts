@@ -31,8 +31,8 @@ export function useCustomerAuth(slug: string): UseCustomerAuth {
       return;
     }
 
-    const token = localStorage.getItem(`afrostore_customer_token_${slug}`);
-    const cached = localStorage.getItem(`afrostore_customer_${slug}`);
+    const token = localStorage.getItem(`prokip_customer_token_${slug}`);
+    const cached = localStorage.getItem(`prokip_customer_${slug}`);
 
     // Quick check: if no token at all, not logged in
     if (!token) {
@@ -66,13 +66,13 @@ export function useCustomerAuth(slug: string): UseCustomerAuth {
           setCustomer(info);
           // Update cache
           localStorage.setItem(
-            `afrostore_customer_${slug}`,
+            `prokip_customer_${slug}`,
             JSON.stringify(info)
           );
         } else {
           // Token expired or invalid — clear
-          localStorage.removeItem(`afrostore_customer_token_${slug}`);
-          localStorage.removeItem(`afrostore_customer_${slug}`);
+          localStorage.removeItem(`prokip_customer_token_${slug}`);
+          localStorage.removeItem(`prokip_customer_${slug}`);
           setCustomer(null);
         }
       })
@@ -83,15 +83,15 @@ export function useCustomerAuth(slug: string): UseCustomerAuth {
   }, [slug]);
 
   const logout = () => {
-    const token = localStorage.getItem(`afrostore_customer_token_${slug}`);
+    const token = localStorage.getItem(`prokip_customer_token_${slug}`);
     if (token) {
       fetch(`/api/storefront/${slug}/auth/me`, {
         method: "DELETE",
         headers: { Authorization: `Bearer ${token}` },
       }).catch(() => {});
     }
-    localStorage.removeItem(`afrostore_customer_token_${slug}`);
-    localStorage.removeItem(`afrostore_customer_${slug}`);
+    localStorage.removeItem(`prokip_customer_token_${slug}`);
+    localStorage.removeItem(`prokip_customer_${slug}`);
     setCustomer(null);
   };
 

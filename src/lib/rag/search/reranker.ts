@@ -1,5 +1,5 @@
 /**
- * AfroStore RAG Engine — Search Result Reranker
+ * Prokip RAG Engine — Search Result Reranker
  *
  * Post-retrieval reranking for improved relevance.
  * Supports multiple strategies:

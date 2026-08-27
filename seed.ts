@@ -14,7 +14,7 @@ async function main() {
     create: {
       email: "admin@prokip.africa",
       passwordHash: adminPassword,
-      firstName: "Afrostore",
+      firstName: "Prokip",
       lastName: "Admin",
       role: "ADMIN",
     },

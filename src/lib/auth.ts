@@ -4,7 +4,7 @@ import bcrypt from "bcryptjs";
 import { SignJWT, jwtVerify } from "jose";
 
 const JWT_SECRET = new TextEncoder().encode(
-  process.env.JWT_SECRET || "afrostore-dev-secret-change-in-production"
+  process.env.JWT_SECRET || "prokip-dev-secret-change-in-production"
 );
 
 export async function hashPassword(password: string): Promise<string> {

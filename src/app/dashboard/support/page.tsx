@@ -99,7 +99,7 @@ export default function SupportPage() {
       user?.email ? `Account: ${user.email}` : "",
       currentStore ? `Store: ${currentStore.name} (${currentStore.slug})` : "",
     ].filter(Boolean);
-    return `mailto:support@afrostore.app?subject=${subject}&body=${encodeURIComponent(bodyLines.join("\n"))}`;
+    return `mailto:support@prokip.app?subject=${subject}&body=${encodeURIComponent(bodyLines.join("\n"))}`;
   }, [user, currentStore]);
 
   return (
@@ -126,7 +126,7 @@ export default function SupportPage() {
           </div>
           <div className="flex-1 min-w-0">
             <h3 className="text-sm font-bold text-surface-900 group-hover:text-brand-600 transition-colors">Email Support</h3>
-            <p className="text-xs text-surface-500">support@afrostore.app — opens pre-filled with your account details</p>
+            <p className="text-xs text-surface-500">support@prokip.app — opens pre-filled with your account details</p>
           </div>
         </a>
 

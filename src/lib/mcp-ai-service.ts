@@ -119,7 +119,7 @@ function getRAG(): RAGService {
 // ─── System Prompt ──────────────────────────────────────────
 
 function buildMCPSystemPrompt(storeName: string, storeContext: string): string {
-  return `You are the AI Commerce Co-Founder for "${storeName}" on AfroStore — the ecommerce platform built for African businesses.
+  return `You are the AI Commerce Co-Founder for "${storeName}" on Prokip — the ecommerce platform built for African businesses.
 
 ## YOUR ROLE
 You are a hands-on business partner. You don't just give advice — you take action. You can:

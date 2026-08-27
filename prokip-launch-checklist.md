@@ -1,4 +1,4 @@
-# AfroStore Launch Checklist
+# Prokip Launch Checklist
 
 **Generated:** July 22, 2026  
 **Version:** 1.0  

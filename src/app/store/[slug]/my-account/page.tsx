@@ -101,7 +101,7 @@ export default function MyAccountPage() {
     const checkAuth = async () => {
       try {
         const token = localStorage.getItem(
-          `afrostore_customer_token_${slug}`
+          `prokip_customer_token_${slug}`
         );
         const res = await fetch(`/api/storefront/${slug}/auth/me`, {
           headers: token ? { Authorization: `Bearer ${token}` } : {},
@@ -139,7 +139,7 @@ export default function MyAccountPage() {
   useEffect(() => {
     if (activeTab !== "loyalty" || !authenticated || loyalty || loyaltyLoading) return;
     setLoyaltyLoading(true);
-    const token = localStorage.getItem(`afrostore_customer_token_${slug}`);
+    const token = localStorage.getItem(`prokip_customer_token_${slug}`);
     fetch(`/api/storefront/${slug}/loyalty/me`, { headers: token ? { Authorization: `Bearer ${token}` } : {} })
       .then((r) => r.json())
       .then((json) => { if (json.success && json.data) setLoyalty(json.data); })
@@ -149,7 +149,7 @@ export default function MyAccountPage() {
 
   const joinRewards = async () => {
     setJoining(true);
-    const token = localStorage.getItem(`afrostore_customer_token_${slug}`);
+    const token = localStorage.getItem(`prokip_customer_token_${slug}`);
     try {
       const res = await fetch(`/api/storefront/${slug}/loyalty/join`, {
         method: "POST",
@@ -168,7 +168,7 @@ export default function MyAccountPage() {
   const handleLogout = async () => {
     try {
       const token = localStorage.getItem(
-        `afrostore_customer_token_${slug}`
+        `prokip_customer_token_${slug}`
       );
       await fetch(`/api/storefront/${slug}/auth/me`, {
         method: "DELETE",
@@ -177,8 +177,8 @@ export default function MyAccountPage() {
     } catch {
       /* ignore */
     }
-    localStorage.removeItem(`afrostore_customer_token_${slug}`);
-    localStorage.removeItem(`afrostore_customer_${slug}`);
+    localStorage.removeItem(`prokip_customer_token_${slug}`);
+    localStorage.removeItem(`prokip_customer_${slug}`);
     router.push(`/store/${slug}/login`);
   };
 
@@ -188,7 +188,7 @@ export default function MyAccountPage() {
     setSaveMsg("");
     try {
       localStorage.setItem(
-        `afrostore_customer_${slug}`,
+        `prokip_customer_${slug}`,
         JSON.stringify({
           id: customer?.id,
           name: `${editFirstName} ${editLastName}`,

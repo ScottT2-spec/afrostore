@@ -1,5 +1,5 @@
 /**
- * AfroStore Failover Engine — Public API
+ * Prokip Failover Engine — Public API
  *
  * Two failover systems:
  * 1. PaymentFailover — auto-failover between Paystack, Flutterwave, Monnify
@@ -110,7 +110,7 @@
  *
  *   // Advanced usage with tool calling
  *   const response = await ai.complete([
- *     { role: 'system', content: 'You are AfroStore AI.' },
+ *     { role: 'system', content: 'You are Prokip AI.' },
  *     { role: 'user', content: 'Generate a product description for ankara fabric' },
  *   ], {
  *     maxTokens: 500,

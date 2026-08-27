@@ -1,6 +1,6 @@
 # AI Configuration Guide
 
-AfroStore uses multiple AI providers with automatic failover. If one provider fails or hits rate limits, the system switches to the next one seamlessly.
+Prokip uses multiple AI providers with automatic failover. If one provider fails or hits rate limits, the system switches to the next one seamlessly.
 
 ## Provider Setup
 

@@ -1,5 +1,5 @@
 /**
- * AfroStore Plugin Handlers
+ * Prokip Plugin Handlers
  *
  * Each handler is a pure function that takes HookContext and returns HookResult.
  * Plugins reference these by name in their hook definitions.

@@ -1,5 +1,5 @@
 /**
- * AfroStore RAG Engine — BM25 Search (PostgreSQL Full-Text Search)
+ * Prokip RAG Engine — BM25 Search (PostgreSQL Full-Text Search)
  *
  * Uses PostgreSQL's native tsvector/tsquery with ts_rank_cd (cover density)
  * for BM25-equivalent ranking. This is production-grade:

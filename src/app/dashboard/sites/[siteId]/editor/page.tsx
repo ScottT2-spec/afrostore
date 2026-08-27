@@ -187,7 +187,7 @@ export default function SiteEditorPage({ params }: { params: Promise<{ siteId: s
   const { siteId } = use(params);
   const router = useRouter();
   const iframeRef = useRef<HTMLIFrameElement>(null);
-  const storageKey = `afrostore_site_editor_state:${siteId}`;
+  const storageKey = `prokip_site_editor_state:${siteId}`;
   const persistedEditorState = readPersistedEditorState(storageKey);
 
   const [loading, setLoading] = useState(true);

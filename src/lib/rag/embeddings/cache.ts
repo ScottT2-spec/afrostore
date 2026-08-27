@@ -1,5 +1,5 @@
 /**
- * AfroStore RAG Engine — Embedding Cache
+ * Prokip RAG Engine — Embedding Cache
  *
  * LRU cache with TTL for embeddings. Avoids re-computing embeddings
  * for identical content. Uses content hash as key.

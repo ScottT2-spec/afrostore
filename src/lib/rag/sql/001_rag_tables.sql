@@ -1,5 +1,5 @@
 -- ═══════════════════════════════════════════════════════════════════════════
--- AfroStore RAG Engine — Database Migration
+-- Prokip RAG Engine — Database Migration
 --
 -- Creates the rag_documents table with:
 --   - pgvector for semantic similarity search (HNSW index)
@@ -217,7 +217,7 @@ $$ LANGUAGE plpgsql;
 
 -- ─── COMMENTS ───────────────────────────────────────────────────────────────
 
-COMMENT ON TABLE rag_documents IS 'RAG document store for AfroStore AI search. Supports hybrid BM25+vector search with multi-tenant isolation.';
+COMMENT ON TABLE rag_documents IS 'RAG document store for Prokip AI search. Supports hybrid BM25+vector search with multi-tenant isolation.';
 COMMENT ON COLUMN rag_documents.store_id IS 'Tenant isolation key. Every query MUST filter on this.';
 COMMENT ON COLUMN rag_documents.embedding IS 'Vector embedding from text-embedding-3-small (1536 dimensions). Used for semantic similarity search.';
 COMMENT ON COLUMN rag_documents.tsv IS 'Full-text search vector. Auto-populated by trigger. Used for BM25 keyword search.';

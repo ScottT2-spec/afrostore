@@ -24,9 +24,9 @@ interface PlatformSettings {
 }
 
 const defaults: PlatformSettings = {
-  siteName: "AfroStore",
-  siteUrl: "https://afrostore.app",
-  supportEmail: "support@afrostore.app",
+  siteName: "Prokip",
+  siteUrl: "https://prokip.app",
+  supportEmail: "support@prokip.app",
   defaultCurrency: "NGN",
   defaultCountry: "NG",
   maintenanceMode: false,
@@ -38,7 +38,7 @@ const defaults: PlatformSettings = {
   smtpPort: "587",
   smtpUser: "",
   sendFromEmail: "",
-  sendFromName: "AfroStore",
+  sendFromName: "Prokip",
   smtpPassSet: false,
 };
 
@@ -323,7 +323,7 @@ export default function AdminSettingsPage() {
                 </div>
               </Field>
               <Field label="Send From Email">
-                <input value={settings.sendFromEmail} onChange={(e) => update("sendFromEmail", e.target.value)} placeholder="noreply@afrostore.app" className={fieldClass} />
+                <input value={settings.sendFromEmail} onChange={(e) => update("sendFromEmail", e.target.value)} placeholder="noreply@prokip.app" className={fieldClass} />
               </Field>
               <Field label="Send From Name">
                 <input value={settings.sendFromName} onChange={(e) => update("sendFromName", e.target.value)} className={fieldClass} />

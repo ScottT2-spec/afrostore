@@ -1302,7 +1302,7 @@ export function KidsFooterFull({
       {/* Bottom bar */}
       <div className="kf-bottom">
         <small>
-          <Link href={base}>{copyrightText || `Built by Prokip Afrostore© ${new Date().getFullYear()} Kids Themes.`}</Link>
+          <Link href={base}>{copyrightText || `Built by Prokip Prokip© ${new Date().getFullYear()} Kids Themes.`}</Link>
         </small>
         <div className="kf-payments">
           <img src="/prokip-logo.png" alt="Payment methods" loading="lazy" />

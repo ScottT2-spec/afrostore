@@ -1,5 +1,5 @@
 /**
- * AfroStore AI Service
+ * Prokip AI Service
  *
  * Connects the AI Failover engine + RAG retrieval to power
  * the "Commerce Co-Founder" assistant for each store.
@@ -129,7 +129,7 @@ function getRAGService(): RAGService {
 // ─── System prompt ──────────────────────────────────────
 
 function buildSystemPrompt(storeName: string, storeContext?: string): string {
-  let prompt = `You are the AI Commerce Co-Founder for "${storeName}" on AfroStore — the ecommerce platform built for African businesses.
+  let prompt = `You are the AI Commerce Co-Founder for "${storeName}" on Prokip — the ecommerce platform built for African businesses.
 
 Your role:
 - Help the merchant grow their business

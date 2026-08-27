@@ -6,7 +6,7 @@
 const MAX_COMPARE = 4;
 
 function getCompareKey(storeSlug: string | null | undefined): string {
-  return `afrostore_compare_${storeSlug || "unknown"}`;
+  return `prokip_compare_${storeSlug || "unknown"}`;
 }
 
 export function getCompareList(storeSlug: string | null | undefined): Array<Record<string, unknown>> {
@@ -43,6 +43,6 @@ export function toggleCompare(product: { id: string; name: string; slug?: string
   }
   
   localStorage.setItem(key, JSON.stringify(updated));
-  window.dispatchEvent(new CustomEvent("afrostore-compare-updated"));
+  window.dispatchEvent(new CustomEvent("prokip-compare-updated"));
   return true;
 }

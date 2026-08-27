@@ -5,6 +5,6 @@
 import { Inngest } from "inngest";
 
 export const inngest = new Inngest({
-  id: "afrostore",
+  id: "prokip",
   eventKey: process.env.INNGEST_EVENT_KEY,
 });

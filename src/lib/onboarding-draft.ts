@@ -39,8 +39,8 @@ export interface StoredOnboardingDraft {
   recommendations?: StoredOnboardingTemplate[];
 }
 
-const STORAGE_KEY_PREFIX = "afrostore:onboarding:draft";
-const CHANGE_EVENT = "afrostore:onboarding:draft-changed";
+const STORAGE_KEY_PREFIX = "prokip:onboarding:draft";
+const CHANGE_EVENT = "prokip:onboarding:draft-changed";
 
 const cachedDrafts = new Map<string, { raw: string; parsed: StoredOnboardingDraft | null }>();
 

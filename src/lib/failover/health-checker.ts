@@ -1,5 +1,5 @@
 /**
- * AfroStore Failover Engine — Provider Health Checker
+ * Prokip Failover Engine — Provider Health Checker
  *
  * Periodic health checks for payment gateways and AI providers.
  * Runs in the background and updates provider health status.

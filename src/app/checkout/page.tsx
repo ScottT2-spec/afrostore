@@ -209,9 +209,9 @@ export default function CheckoutPage() {
   // Load cart + store info from localStorage (set by storefront)
   const [activeSlug] = useState(() => {
     if (typeof window === "undefined") return "";
-    return localStorage.getItem("afrostore_cart_active_slug") || "";
+    return localStorage.getItem("prokip_cart_active_slug") || "";
   });
-  const cartKey = activeSlug ? `afrostore_cart_${activeSlug}` : "afrostore_cart";
+  const cartKey = activeSlug ? `prokip_cart_${activeSlug}` : "prokip_cart";
   const [cart, setCart] = useState<CartItem[]>(() => {
     if (typeof window === "undefined") return [];
     try {
@@ -313,11 +313,11 @@ export default function CheckoutPage() {
   useEffect(() => {
     if (typeof window === "undefined") return;
     try {
-      setStoreId(localStorage.getItem("afrostore_siteId") || "");
-      setStoreSlug(localStorage.getItem("afrostore_storeSlug") || "");
-      setStoreName(localStorage.getItem("afrostore_storeName") || "");
-      setCurrency(localStorage.getItem("afrostore_currency") || "NGN");
-      const dz = localStorage.getItem("afrostore_deliveryZones");
+      setStoreId(localStorage.getItem("prokip_siteId") || "");
+      setStoreSlug(localStorage.getItem("prokip_storeSlug") || "");
+      setStoreName(localStorage.getItem("prokip_storeName") || "");
+      setCurrency(localStorage.getItem("prokip_currency") || "NGN");
+      const dz = localStorage.getItem("prokip_deliveryZones");
       if (dz) {
         const zones = JSON.parse(dz);
         setDeliveryZones(zones);

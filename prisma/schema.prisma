@@ -196,9 +196,9 @@ model SiteMember {
 
 model PlatformSettings {
   id                       String   @id
-  siteName                 String   @default("AfroStore")
-  siteUrl                  String   @default("https://afrostore.app")
-  supportEmail             String   @default("support@afrostore.app")
+  siteName                 String   @default("Prokip")
+  siteUrl                  String   @default("https://prokip.africa")
+  supportEmail             String   @default("support@prokip.africa")
   defaultCurrency          String   @default("NGN")
   defaultCountry           String   @default("NG")
   maintenanceMode          Boolean  @default(false)
@@ -211,7 +211,7 @@ model PlatformSettings {
   smtpUser                 String?
   smtpPass                 String?
   sendFromEmail            String?
-  sendFromName             String   @default("AfroStore")
+  sendFromName             String   @default("Prokip")
   updatedAt                DateTime @updatedAt
   updatedById              String?
 

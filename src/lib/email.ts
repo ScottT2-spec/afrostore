@@ -1,5 +1,5 @@
 /**
- * AWS SES Email Service for AfroStore.
+ * AWS SES Email Service for Prokip.
  */
 
 import { SESClient, SendEmailCommand } from "@aws-sdk/client-ses";
@@ -15,7 +15,7 @@ const ses = new SESClient({
 });
 
 const FROM_EMAIL = process.env.SES_FROM_EMAIL || "noreply@prokip.com";
-const FROM_NAME = process.env.SES_FROM_NAME || "AfroStore";
+const FROM_NAME = process.env.SES_FROM_NAME || "Prokip";
 
 // ─── Email Verification ──────────────────────────────────────────
 
@@ -35,13 +35,13 @@ export async function sendVerificationEmail(
 <body style="margin:0;padding:0;background:#F8FAFC;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;">
   <div style="max-width:600px;margin:0 auto;padding:20px;">
     <div style="background:#0F766E;border-radius:16px 16px 0 0;padding:30px;text-align:center;">
-      <h1 style="color:#FFFFFF;margin:0;font-size:24px;">AfroStore</h1>
+      <h1 style="color:#FFFFFF;margin:0;font-size:24px;">Prokip</h1>
       <p style="color:#A7F3D0;margin:8px 0 0;font-size:14px;">Email Verification</p>
     </div>
     <div style="background:#FFFFFF;padding:30px;border:1px solid #E2E8F0;border-top:none;">
       <p style="color:#1B2B4B;font-size:16px;margin:0 0 20px;">Dear <strong>${data.name}</strong>,</p>
       <p style="color:#475569;font-size:14px;line-height:1.6;margin:0 0 20px;">
-        Thank you for creating your AfroStore account! Please verify your email address by clicking the button below:
+        Thank you for creating your Prokip account! Please verify your email address by clicking the button below:
       </p>
       <div style="text-align:center;margin:30px 0;">
         <a href="${data.verifyLink}" style="display:inline-block;background:#0F766E;color:#FFFFFF;padding:14px 32px;border-radius:12px;font-size:15px;font-weight:600;text-decoration:none;">
@@ -57,7 +57,7 @@ export async function sendVerificationEmail(
       </p>
     </div>
     <div style="background:#F1F5F9;border-radius:0 0 16px 16px;padding:20px;text-align:center;border:1px solid #E2E8F0;border-top:none;">
-      <p style="color:#94A3B8;font-size:12px;margin:0;">&copy; ${new Date().getFullYear()} AfroStore by Prokip. All rights reserved.</p>
+      <p style="color:#94A3B8;font-size:12px;margin:0;">&copy; ${new Date().getFullYear()} Prokip by Prokip. All rights reserved.</p>
       <p style="color:#94A3B8;font-size:11px;margin:4px 0 0;">This is an automated message. Do not reply to this email.</p>
     </div>
   </div>
@@ -66,13 +66,13 @@ export async function sendVerificationEmail(
 
   const textBody = `Dear ${data.name},
 
-Thank you for creating your AfroStore account! Please verify your email address by visiting the link below:
+Thank you for creating your Prokip account! Please verify your email address by visiting the link below:
 
 ${data.verifyLink}
 
 This link expires in 24 hours. If you didn't create an account, you can safely ignore this email.
 
-— AfroStore`;
+— Prokip`;
 
   try {
     const command = new SendEmailCommand({
@@ -80,7 +80,7 @@ This link expires in 24 hours. If you didn't create an account, you can safely i
       Destination: { ToAddresses: [data.to] },
       Message: {
         Subject: {
-          Data: "Verify Your Email — AfroStore",
+          Data: "Verify Your Email — Prokip",
           Charset: "UTF-8",
         },
         Body: {
@@ -256,7 +256,7 @@ export async function sendOrderConfirmationEmail(
       </p>
     </div>
     <div style="background:#F1F5F9;border-radius:0 0 16px 16px;padding:20px;text-align:center;border:1px solid #E2E8F0;border-top:none;">
-      <p style="color:#94A3B8;font-size:12px;margin:0;">&copy; ${new Date().getFullYear()} ${data.storeName} — Powered by AfroStore</p>
+      <p style="color:#94A3B8;font-size:12px;margin:0;">&copy; ${new Date().getFullYear()} ${data.storeName} — Powered by Prokip</p>
       <p style="color:#94A3B8;font-size:11px;margin:4px 0 0;">This is an automated message. Do not reply to this email.</p>
     </div>
   </div>
@@ -332,7 +332,7 @@ export async function sendPasswordResetEmail(
 <body style="margin:0;padding:0;background:#F8FAFC;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;">
   <div style="max-width:600px;margin:0 auto;padding:20px;">
     <div style="background:#0F766E;border-radius:16px 16px 0 0;padding:30px;text-align:center;">
-      <h1 style="color:#FFFFFF;margin:0;font-size:24px;">AfroStore</h1>
+      <h1 style="color:#FFFFFF;margin:0;font-size:24px;">Prokip</h1>
       <p style="color:#A7F3D0;margin:8px 0 0;font-size:14px;">Password Reset</p>
     </div>
     <div style="background:#FFFFFF;padding:30px;border:1px solid #E2E8F0;border-top:none;">
@@ -354,7 +354,7 @@ export async function sendPasswordResetEmail(
       </p>
     </div>
     <div style="background:#F1F5F9;border-radius:0 0 16px 16px;padding:20px;text-align:center;border:1px solid #E2E8F0;border-top:none;">
-      <p style="color:#94A3B8;font-size:12px;margin:0;">&copy; ${new Date().getFullYear()} AfroStore by Prokip. All rights reserved.</p>
+      <p style="color:#94A3B8;font-size:12px;margin:0;">&copy; ${new Date().getFullYear()} Prokip by Prokip. All rights reserved.</p>
       <p style="color:#94A3B8;font-size:11px;margin:4px 0 0;">This is an automated message. Do not reply to this email.</p>
     </div>
   </div>
@@ -369,7 +369,7 @@ ${data.resetLink}
 
 This link expires in 30 minutes. If you didn't request this, you can safely ignore this email.
 
-— AfroStore`;
+— Prokip`;
 
   try {
     const command = new SendEmailCommand({
@@ -377,7 +377,7 @@ This link expires in 30 minutes. If you didn't request this, you can safely igno
       Destination: { ToAddresses: [data.to] },
       Message: {
         Subject: {
-          Data: "Reset Your Password — AfroStore",
+          Data: "Reset Your Password — Prokip",
           Charset: "UTF-8",
         },
         Body: {

@@ -154,7 +154,7 @@ export default function ShopPage() {
   const [showSortMenu, setShowSortMenu] = useState(false);
   const [mobileFilters, setMobileFilters] = useState(false);
   const [addedToCart, setAddedToCart] = useState<string | null>(null);
-  const cartKey = `afrostore_cart_${slug}`;
+  const cartKey = `prokip_cart_${slug}`;
   const [cart, setCart] = useState<Array<{ productId: string; quantity: number; product: Product }>>(() => {
     if (typeof window === "undefined") return [];
     try {
@@ -164,7 +164,7 @@ export default function ShopPage() {
     return [];
   });
   const [mobileMenu, setMobileMenu] = useState(false);
-  const compareKey = `afrostore_compare_${slug}`;
+  const compareKey = `prokip_compare_${slug}`;
   const [compareList, setCompareList] = useState<string[]>(() => {
     if (typeof window === "undefined") return [];
     try { const s = localStorage.getItem(compareKey); if (s) { const p = JSON.parse(s); if (Array.isArray(p)) return p.map((x: any) => x.id); } } catch {} return [];
@@ -259,11 +259,11 @@ export default function ShopPage() {
   useEffect(() => {
     if (storeData) {
       localStorage.setItem(cartKey, JSON.stringify(cart));
-      localStorage.setItem("afrostore_cart_active_slug", slug);
-      localStorage.setItem("afrostore_siteId", storeData.store.id);
-      localStorage.setItem("afrostore_storeSlug", storeData.store.slug);
-      localStorage.setItem("afrostore_storeName", storeData.store.name);
-      localStorage.setItem("afrostore_currency", storeData.store.currency);
+      localStorage.setItem("prokip_cart_active_slug", slug);
+      localStorage.setItem("prokip_siteId", storeData.store.id);
+      localStorage.setItem("prokip_storeSlug", storeData.store.slug);
+      localStorage.setItem("prokip_storeName", storeData.store.name);
+      localStorage.setItem("prokip_currency", storeData.store.currency);
     }
   }, [cart, storeData]);
 
@@ -1686,7 +1686,7 @@ export default function ShopPage() {
             <span className="font-display font-bold text-white">{store.name}</span>
           </div>
           <span className="flex items-center gap-1">
-            &copy; {new Date().getFullYear()} {store.name}. Powered by <span className="font-semibold text-brand-400">AfroStore</span>
+            &copy; {new Date().getFullYear()} {store.name}. Powered by <span className="font-semibold text-brand-400">Prokip</span>
           </span>
         </div>
       </footer>

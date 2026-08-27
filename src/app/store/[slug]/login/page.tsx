@@ -47,9 +47,9 @@ export default function CustomerLoginPage() {
       }
 
       // Store token for client-side use (API routes also set httpOnly cookie)
-      localStorage.setItem(`afrostore_customer_token_${slug}`, json.data.token);
+      localStorage.setItem(`prokip_customer_token_${slug}`, json.data.token);
       localStorage.setItem(
-        `afrostore_customer_${slug}`,
+        `prokip_customer_${slug}`,
         JSON.stringify({
           id: json.data.id,
           name: `${json.data.firstName} ${json.data.lastName}`,

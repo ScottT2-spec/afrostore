@@ -1,5 +1,5 @@
 /**
- * AfroStore Failover Engine — Payment Gateway Failover
+ * Prokip Failover Engine — Payment Gateway Failover
  *
  * Automatic failover between Paystack, Flutterwave, and Monnify.
  *

@@ -1,6 +1,6 @@
 #!/usr/bin/env tsx
 /**
- * AfroStore E2E Test Runner
+ * Prokip E2E Test Runner
  *
  * Runs all end-to-end tests against a live server.
  *
@@ -36,7 +36,7 @@ const suiteFilter = args.includes('--suite') ? args[args.indexOf('--suite') + 1]
 
 async function main() {
   console.log('╔══════════════════════════════════════════════════════════╗');
-  console.log('║          AfroStore — End-to-End Test Suite              ║');
+  console.log('║          Prokip — End-to-End Test Suite              ║');
   console.log('╚══════════════════════════════════════════════════════════╝');
   console.log(`\n  Target: ${BASE_URL}`);
   console.log(`  Filter: ${suiteFilter || 'ALL'}`);

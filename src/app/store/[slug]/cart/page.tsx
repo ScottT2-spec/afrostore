@@ -29,7 +29,7 @@ function formatCurrency(amount: number, currency: string = "NGN"): string {
 
 export default function CartPage() {
   const { slug } = useParams() as { slug: string };
-  const cartKey = `afrostore_cart_${slug}`;
+  const cartKey = `prokip_cart_${slug}`;
 
   const [cart, setCart] = useState<CartItem[]>([]);
   const [loaded, setLoaded] = useState(false);
@@ -45,7 +45,7 @@ export default function CartPage() {
   useEffect(() => {
     if (loaded) {
       localStorage.setItem(cartKey, JSON.stringify(cart));
-      localStorage.setItem("afrostore_cart_active_slug", slug);
+      localStorage.setItem("prokip_cart_active_slug", slug);
     }
   }, [cart, loaded, cartKey, slug]);
 

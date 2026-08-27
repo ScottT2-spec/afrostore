@@ -1,5 +1,5 @@
 /**
- * AfroStore RAG Engine — Hybrid Search with Reciprocal Rank Fusion (RRF)
+ * Prokip RAG Engine — Hybrid Search with Reciprocal Rank Fusion (RRF)
  *
  * Combines BM25 (keyword) and vector (semantic) search results
  * using RRF for optimal ranking. This is the core competitive advantage.

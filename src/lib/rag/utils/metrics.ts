@@ -1,5 +1,5 @@
 /**
- * AfroStore RAG Engine — Metrics Collector
+ * Prokip RAG Engine — Metrics Collector
  *
  * In-process metrics for search quality, latency, and throughput.
  * Export to your APM of choice (Datadog, Prometheus, etc.) via getMetrics().

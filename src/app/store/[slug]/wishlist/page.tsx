@@ -87,9 +87,9 @@ export default function WishlistPage() {
 
   const addToCart = (product: Product) => {
     if (!store) return;
-    // Single source of truth: afrostore_cart_${slug}, same key/shape every
+    // Single source of truth: prokip_cart_${slug}, same key/shape every
     // other storefront page uses.
-    const cartKey = `afrostore_cart_${slug}`;
+    const cartKey = `prokip_cart_${slug}`;
     const cart = JSON.parse(localStorage.getItem(cartKey) || "[]");
     const existing = cart.find((item: any) => item.productId === product.id);
     if (existing) {
@@ -98,7 +98,7 @@ export default function WishlistPage() {
       cart.push({ productId: product.id, quantity: 1, product });
     }
     localStorage.setItem(cartKey, JSON.stringify(cart));
-    localStorage.setItem("afrostore_cart_active_slug", slug as string);
+    localStorage.setItem("prokip_cart_active_slug", slug as string);
 
     setAddedToCart(product.id);
     setTimeout(() => setAddedToCart(null), 1500);
@@ -291,7 +291,7 @@ export default function WishlistPage() {
       <footer className="border-t border-surface-100 mt-16">
         <div className="max-w-6xl mx-auto px-4 sm:px-6 py-8 text-center">
           <p className="text-xs text-surface-400">
-            © {new Date().getFullYear()} {store?.name}. Powered by AfroStore.
+            © {new Date().getFullYear()} {store?.name}. Powered by Prokip.
           </p>
         </div>
       </footer>

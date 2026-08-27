@@ -1,5 +1,5 @@
 /**
- * AfroStore Failover Engine — Type Definitions
+ * Prokip Failover Engine — Type Definitions
  *
  * Shared types for payment gateway and AI provider failover.
  */

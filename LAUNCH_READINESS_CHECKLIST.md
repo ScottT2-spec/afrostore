@@ -1,4 +1,4 @@
-# AfroStore Launch Readiness Checklist
+# Prokip Launch Readiness Checklist
 
 **Generated:** July 23, 2026  
 **Focus:** What's working now vs. what's needed for immediate launch  

@@ -15,7 +15,7 @@ async function main() {
     update: {},
     create: {
       ownerId: admin.id,
-      name: "AfroStore HQ",
+      name: "Prokip HQ",
       slug: "prokip-hq",
       plan: "ENTERPRISE",
     },
@@ -26,9 +26,9 @@ async function main() {
     update: {},
     create: {
       workspaceId: adminWorkspace.id,
-      name: "AfroStore HQ",
+      name: "Prokip HQ",
       slug: "prokip-hq",
-      description: "The official AfroStore headquarters — platform admin store.",
+      description: "The official Prokip headquarters — platform admin store.",
       subdomain: "prokip-hq",
       businessType: "general",
       country: "GH",
@@ -122,7 +122,7 @@ async function main() {
   console.log("✅ Customer stats updated");
 
   console.log("\n🎉 Extra seed complete!");
-  console.log("Admin now has 'AfroStore HQ' store");
+  console.log("Admin now has 'Prokip HQ' store");
   console.log("Merchant now has 5 sample orders");
 }
 

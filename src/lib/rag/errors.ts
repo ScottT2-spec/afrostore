@@ -1,5 +1,5 @@
 /**
- * AfroStore RAG Engine — Error Classes
+ * Prokip RAG Engine — Error Classes
  *
  * Typed errors for every failure mode. No generic Error throws.
  */

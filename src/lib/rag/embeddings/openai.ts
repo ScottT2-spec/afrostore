@@ -1,5 +1,5 @@
 /**
- * AfroStore RAG Engine — OpenAI Embedding Provider
+ * Prokip RAG Engine — OpenAI Embedding Provider
  *
  * Production implementation with:
  * - Automatic batching with size limits

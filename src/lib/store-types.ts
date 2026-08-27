@@ -1,5 +1,5 @@
 /**
- * Predefined store/business types for AfroStore.
+ * Predefined store/business types for Prokip.
  * Used in store creation, AI generation, and filtering.
  */
 

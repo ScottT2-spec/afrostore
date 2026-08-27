@@ -64,8 +64,8 @@ interface AIActionContextType {
   clearReturnMessage: () => void;
 }
 
-const STORAGE_KEY = "afrostore_ai_verification";
-const RETURN_MSG_KEY = "afrostore_ai_return_message";
+const STORAGE_KEY = "prokip_ai_verification";
+const RETURN_MSG_KEY = "prokip_ai_return_message";
 const EXPIRY_MS = 5 * 60 * 1000; // 5 minutes
 
 /**

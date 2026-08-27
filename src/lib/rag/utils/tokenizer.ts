@@ -1,5 +1,5 @@
 /**
- * AfroStore RAG Engine — Token Estimation
+ * Prokip RAG Engine — Token Estimation
  *
  * Fast token count estimation without importing tiktoken.
  * Uses the ~4 chars per token heuristic for English text,

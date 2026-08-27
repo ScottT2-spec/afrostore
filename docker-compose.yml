@@ -24,7 +24,7 @@ services:
     volumes:
       - ./nginx/domains:/etc/nginx/conf.d/domains
     networks:
-      - afrostore
+      - prokip
 
   nginx:
     image: nginx:alpine
@@ -51,7 +51,7 @@ services:
       sh -c "nginx -g 'daemon off;' &
              while :; do sleep 30; nginx -s reload 2>/dev/null; done"
     networks:
-      - afrostore
+      - prokip
 
   certbot:
     image: certbot/certbot
@@ -66,7 +66,7 @@ services:
       - ./docker/certbot-provision.sh:/usr/local/bin/certbot-provision.sh:ro
     entrypoint: "/bin/sh /usr/local/bin/certbot-provision.sh"
     networks:
-      - afrostore
+      - prokip
 
   # Replaces vercel.json's Crons, which do nothing outside Vercel. Runs
   # inside the same Docker network as `app`, so it calls it directly by
@@ -88,12 +88,12 @@ services:
     # so each line in ./docker/crontab explicitly sources this first.
     command: sh -c "apk add --no-cache curl >/dev/null && env > /etc/container.env && crond -f -l 2"
     networks:
-      - afrostore
+      - prokip
 
 volumes:
   certbot-conf:
   certbot-www:
 
 networks:
-  afrostore:
+  prokip:
     driver: bridge

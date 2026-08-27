@@ -129,7 +129,7 @@ export async function connectDomain(siteId: string, domain: string): Promise<Dom
   }
 
   // Create Domain record
-  const verificationToken = `afrostore-verify-${siteId.slice(0, 8)}-${Date.now().toString(36)}`;
+  const verificationToken = `prokip-verify-${siteId.slice(0, 8)}-${Date.now().toString(36)}`;
   const domainCount = await prisma.domain.count({ where: { siteId } });
 
   await prisma.domain.create({

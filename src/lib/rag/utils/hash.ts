@@ -1,5 +1,5 @@
 /**
- * AfroStore RAG Engine — Content Hashing
+ * Prokip RAG Engine — Content Hashing
  *
  * Fast, deterministic hashing for content deduplication and change detection.
  * Uses Web Crypto API (available in Node 18+ and all modern runtimes).

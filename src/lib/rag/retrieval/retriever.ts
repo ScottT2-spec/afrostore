@@ -1,5 +1,5 @@
 /**
- * AfroStore RAG Engine — Query Retriever
+ * Prokip RAG Engine — Query Retriever
  *
  * The main orchestrator for retrieval queries. Handles:
  * - Query preprocessing and intent detection

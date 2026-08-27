@@ -1,5 +1,5 @@
 /**
- * AfroStore RAG Engine — Configuration
+ * Prokip RAG Engine — Configuration
  *
  * Sensible production defaults. Override via environment or constructor.
  */

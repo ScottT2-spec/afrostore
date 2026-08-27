@@ -1,5 +1,5 @@
 /**
- * AfroStore Plugin System — Types
+ * Prokip Plugin System — Types
  *
  * WordPress-level plugin architecture adapted for Next.js serverless.
  * Plugins are config-driven with declarative hooks, settings schemas,

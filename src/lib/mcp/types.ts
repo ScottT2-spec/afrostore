@@ -1,5 +1,5 @@
 /**
- * AfroStore MCP — Type Definitions
+ * Prokip MCP — Type Definitions
  *
  * The brain of the merchant AI assistant. Every type, every interface,
  * every contract the MCP system uses.

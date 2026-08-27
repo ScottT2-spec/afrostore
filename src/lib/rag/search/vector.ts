@@ -1,5 +1,5 @@
 /**
- * AfroStore RAG Engine — Vector Similarity Search (pgvector)
+ * Prokip RAG Engine — Vector Similarity Search (pgvector)
  *
  * Cosine similarity search using pgvector extension.
  * Uses HNSW index for fast approximate nearest neighbor search.

@@ -1,5 +1,5 @@
 /**
- * AfroStore RAG Engine — Document Content Extractors
+ * Prokip RAG Engine — Document Content Extractors
  *
  * Each document type has a dedicated extractor that produces
  * optimized searchable text and structured metadata.

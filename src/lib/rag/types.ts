@@ -1,5 +1,5 @@
 /**
- * AfroStore RAG Engine — Type Definitions
+ * Prokip RAG Engine — Type Definitions
  *
  * Production-grade types for the hybrid search and retrieval system.
  * Every interface is strict, every enum is exhaustive.

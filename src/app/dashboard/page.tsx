@@ -91,7 +91,7 @@ export default function DashboardPage() {
   if (!currentStore) {
     return (
       <>
-        <DashboardHeader title="Dashboard" subtitle="Welcome to AfroStore!" />
+        <DashboardHeader title="Dashboard" subtitle="Welcome to Prokip!" />
         <EmptyDashboard />
       </>
     );

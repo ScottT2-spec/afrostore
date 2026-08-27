@@ -3,7 +3,7 @@
 import { useEffect, useRef } from "react";
 import { useCustomerAuth } from "@/hooks/useCustomerAuth";
 
-const SESSION_ID_KEY = "afrostore_session_id";
+const SESSION_ID_KEY = "prokip_session_id";
 const HEARTBEAT_MS = 30_000;
 
 function getOrCreateSessionId(): string {
@@ -25,7 +25,7 @@ function getOrCreateSessionId(): string {
 
 function readCart(slug: string): any[] {
   try {
-    const raw = localStorage.getItem(`afrostore_cart_${slug}`);
+    const raw = localStorage.getItem(`prokip_cart_${slug}`);
     if (!raw) return [];
     const parsed = JSON.parse(raw);
     return Array.isArray(parsed) ? parsed : [];

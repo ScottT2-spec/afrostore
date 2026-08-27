@@ -1,6 +1,6 @@
 import Link from "next/link";
 
-export const metadata = { title: "Terms of Service — AfroStore" };
+export const metadata = { title: "Terms of Service — Prokip" };
 
 export default function TermsPage() {
   return (
@@ -13,27 +13,27 @@ export default function TermsPage() {
         <div className="prose prose-gray max-w-none space-y-6 text-sm leading-relaxed text-gray-600">
           <section>
             <h2 className="text-lg font-semibold text-gray-900 mt-8 mb-3">1. Acceptance of Terms</h2>
-            <p>By accessing or using AfroStore (&quot;the Platform&quot;), operated by Prokip, you agree to be bound by these Terms of Service. If you do not agree to these terms, do not use the Platform.</p>
+            <p>By accessing or using Prokip (&quot;the Platform&quot;), operated by Prokip, you agree to be bound by these Terms of Service. If you do not agree to these terms, do not use the Platform.</p>
           </section>
 
           <section>
             <h2 className="text-lg font-semibold text-gray-900 mt-8 mb-3">2. Account Registration</h2>
-            <p>To use AfroStore, you must create an account with accurate and complete information. You are responsible for maintaining the security of your account credentials. You must be at least 18 years old or the age of majority in your jurisdiction to use the Platform.</p>
+            <p>To use Prokip, you must create an account with accurate and complete information. You are responsible for maintaining the security of your account credentials. You must be at least 18 years old or the age of majority in your jurisdiction to use the Platform.</p>
           </section>
 
           <section>
             <h2 className="text-lg font-semibold text-gray-900 mt-8 mb-3">3. Use of the Platform</h2>
-            <p>AfroStore provides tools to create and manage online stores, websites, and landing pages. You may use the Platform for lawful commercial purposes only. You agree not to use the Platform to sell prohibited items, engage in fraud, or violate any applicable laws.</p>
+            <p>Prokip provides tools to create and manage online stores, websites, and landing pages. You may use the Platform for lawful commercial purposes only. You agree not to use the Platform to sell prohibited items, engage in fraud, or violate any applicable laws.</p>
           </section>
 
           <section>
             <h2 className="text-lg font-semibold text-gray-900 mt-8 mb-3">4. Store Content</h2>
-            <p>You retain ownership of all content you upload to your store (products, images, descriptions). You grant AfroStore a license to host, display, and distribute this content as necessary to operate the Platform. You are solely responsible for ensuring your content does not infringe on third-party rights.</p>
+            <p>You retain ownership of all content you upload to your store (products, images, descriptions). You grant Prokip a license to host, display, and distribute this content as necessary to operate the Platform. You are solely responsible for ensuring your content does not infringe on third-party rights.</p>
           </section>
 
           <section>
             <h2 className="text-lg font-semibold text-gray-900 mt-8 mb-3">5. Payments & Fees</h2>
-            <p>AfroStore may offer free and paid plans. Pricing is displayed on our pricing page. Payment processing fees charged by gateway providers (Paystack, Flutterwave, Monnify) are separate from AfroStore fees. You are responsible for all applicable taxes on your transactions.</p>
+            <p>Prokip may offer free and paid plans. Pricing is displayed on our pricing page. Payment processing fees charged by gateway providers (Paystack, Flutterwave, Monnify) are separate from Prokip fees. You are responsible for all applicable taxes on your transactions.</p>
           </section>
 
           <section>
@@ -43,7 +43,7 @@ export default function TermsPage() {
 
           <section>
             <h2 className="text-lg font-semibold text-gray-900 mt-8 mb-3">7. Intellectual Property</h2>
-            <p>AfroStore&apos;s name, logo, templates, and platform code are proprietary. You may not copy, modify, or redistribute any part of the Platform without written permission. Templates provided are licensed for use on AfroStore only.</p>
+            <p>Prokip&apos;s name, logo, templates, and platform code are proprietary. You may not copy, modify, or redistribute any part of the Platform without written permission. Templates provided are licensed for use on Prokip only.</p>
           </section>
 
           <section>
@@ -53,7 +53,7 @@ export default function TermsPage() {
 
           <section>
             <h2 className="text-lg font-semibold text-gray-900 mt-8 mb-3">9. Limitation of Liability</h2>
-            <p>AfroStore is provided &quot;as is&quot; without warranties of any kind. We are not liable for any indirect, incidental, or consequential damages arising from your use of the Platform. Our total liability shall not exceed the fees you paid in the 12 months preceding the claim.</p>
+            <p>Prokip is provided &quot;as is&quot; without warranties of any kind. We are not liable for any indirect, incidental, or consequential damages arising from your use of the Platform. Our total liability shall not exceed the fees you paid in the 12 months preceding the claim.</p>
           </section>
 
           <section>

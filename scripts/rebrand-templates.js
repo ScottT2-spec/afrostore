@@ -10,7 +10,7 @@
 const fs = require('fs');
 const path = require('path');
 
-const ROOT_DIR = '/Users/mav/Documents/afrostore';
+const ROOT_DIR = '/Users/mav/Documents/prokip';
 const TEXT_EXTENSIONS = new Set(['.html', '.htm', '.js', '.ts', '.tsx', '.json', '.md', '.sql', '.mjs', '.css']);
 const SKIP_DIRS = new Set(['.git', 'node_modules', '.next', 'dist', 'build', 'coverage']);
 

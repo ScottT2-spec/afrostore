@@ -1,5 +1,5 @@
 /**
- * AfroStore MCP — Main Export
+ * Prokip MCP — Main Export
  *
  * The complete Merchant Control Protocol system.
  * 50+ tools covering every merchant dashboard operation.

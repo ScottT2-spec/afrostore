@@ -112,7 +112,7 @@ export default function StorefrontPage() {
   const [addedToCart, setAddedToCart] = useState<string | null>(null);
 
   // Cart state
-  const cartKey = `afrostore_cart_${slug}`;
+  const cartKey = `prokip_cart_${slug}`;
   const [cart, setCart] = useState<Array<{ productId: string; quantity: number; product: StoreProduct }>>(() => {
     if (typeof window === "undefined") return [];
     try {
@@ -169,8 +169,8 @@ export default function StorefrontPage() {
   useEffect(() => {
     if (data) {
       localStorage.setItem(cartKey, JSON.stringify(cart));
-      localStorage.setItem("afrostore_cart_active_slug", slug);
-      localStorage.setItem("afrostore_siteId", data.store.id);
+      localStorage.setItem("prokip_cart_active_slug", slug);
+      localStorage.setItem("prokip_siteId", data.store.id);
     }
   }, [cart, data, cartKey, slug]);
 

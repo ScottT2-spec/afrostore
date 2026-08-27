@@ -27,7 +27,7 @@ function formatCurrency(amount: number, currency: string = "NGN"): string {
 
 export default function ComparePage() {
   const { slug } = useParams() as { slug: string };
-  const compareKey = `afrostore_compare_${slug}`;
+  const compareKey = `prokip_compare_${slug}`;
 
   const [products, setProducts] = useState<CompareProduct[]>([]);
   const [loaded, setLoaded] = useState(false);

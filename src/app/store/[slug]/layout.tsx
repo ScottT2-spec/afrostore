@@ -51,7 +51,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 
   if (!store) {
     return {
-      title: "Store Not Found | AfroStore",
+      title: "Store Not Found | Prokip",
       description: "This store does not exist or is no longer active.",
     };
   }

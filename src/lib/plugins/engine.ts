@@ -1,5 +1,5 @@
 /**
- * AfroStore Plugin Engine
+ * Prokip Plugin Engine
  *
  * The core execution engine. Like WordPress's do_action() and apply_filters().
  *
@@ -271,7 +271,7 @@ export class PluginEngine {
       name: plugin.name as string,
       version: (plugin.version as string) || "1.0.0",
       description: (plugin.description as string) || "",
-      author: (plugin.author as string) || "AfroStore",
+      author: (plugin.author as string) || "Prokip",
       category: (plugin.category as PluginManifest["category"]) || "other",
       isPremium: (plugin.isPremium as boolean) || false,
       tags: [],

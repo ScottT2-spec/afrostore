@@ -331,7 +331,7 @@ export function GardenFooter({
         {/* Bottom bar */}
         <div className="gf-bottom">
           <span className="gf-copy">© {new Date().getFullYear()} {storeName}. All rights reserved.</span>
-          <span className="gf-powered">Powered by <span>AfroStore</span></span>
+          <span className="gf-powered">Powered by <span>Prokip</span></span>
         </div>
       </div>
     </footer>

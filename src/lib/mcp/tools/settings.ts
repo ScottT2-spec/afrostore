@@ -438,7 +438,7 @@ const listMembers: MCPToolDef = {
 
 const addMember: MCPToolDef = {
   name: "add_team_member",
-  description: "Add a team member by email. They must have an AfroStore account. Navigates to team page for review.",
+  description: "Add a team member by email. They must have an Prokip account. Navigates to team page for review.",
   category: "team",
   parameters: {
     type: "object",

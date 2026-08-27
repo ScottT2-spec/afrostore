@@ -31,7 +31,7 @@ export async function POST(req: NextRequest) {
 
     const plugin = await prisma.plugin.create({
       data: {
-        name, slug, description, category, author: author || "AfroStore",
+        name, slug, description, category, author: author || "Prokip",
         version: version || "1.0.0", isPremium: isPremium || false,
         permissions: permissions || [], reviewStatus: "APPROVED",
       },

@@ -1,5 +1,5 @@
 /**
- * AfroStore RAG Engine — Text Normalization
+ * Prokip RAG Engine — Text Normalization
  *
  * Clean, normalize, and prepare text for indexing and search.
  * Handles common African commerce text patterns.

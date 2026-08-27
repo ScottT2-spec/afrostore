@@ -1,5 +1,5 @@
 /**
- * AfroStore RAG Engine — Document Chunker
+ * Prokip RAG Engine — Document Chunker
  *
  * Intelligent text chunking with:
  * - Recursive character splitting with priority separators

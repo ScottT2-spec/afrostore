@@ -1,5 +1,5 @@
 #!/bin/bash
-# AfroStore Deployment Script
+# Prokip Deployment Script
 # Usage: ./scripts/deploy.sh [command]
 # Commands: setup, deploy, ssl-init, ssl-renew, domain-add, domain-remove
 
@@ -21,7 +21,7 @@ err() { echo -e "${RED}[ERROR]${NC} $1"; exit 1; }
 
 # ─── Initial Setup ───────────────────────────────────────────
 setup() {
-    log "Setting up AfroStore..."
+    log "Setting up Prokip..."
 
     # Check Docker
     command -v docker >/dev/null 2>&1 || err "Docker not found. Install Docker first."
@@ -34,11 +34,11 @@ setup() {
     # Create .env if missing
     if [ ! -f "$APP_DIR/.env" ]; then
         cat > "$APP_DIR/.env" << 'EOF'
-DATABASE_URL=postgresql://user:password@db:5432/afrostore
+DATABASE_URL=postgresql://user:password@db:5432/prokip
 JWT_SECRET=change-me-to-a-random-string
 SERVER_IP=YOUR_SERVER_IP
-CNAME_TARGET=cname.afrostore.com
-NEXT_PUBLIC_APP_DOMAIN=afrostore.com
+CNAME_TARGET=cname.prokip.africa
+NEXT_PUBLIC_APP_DOMAIN=prokip.africa
 EOF
         warn "Created .env file — edit it with your actual values!"
     fi
@@ -48,7 +48,7 @@ EOF
 
 # ─── Deploy / Update ─────────────────────────────────────────
 deploy() {
-    log "Deploying AfroStore..."
+    log "Deploying Prokip..."
     cd "$APP_DIR"
 
     # Pull latest
@@ -154,7 +154,7 @@ EOF
     $COMPOSE run --rm certbot certonly \
         --webroot \
         --webroot-path=/var/www/certbot \
-        --email admin@afrostore.com \
+        --email admin@prokip.africa \
         --agree-tos \
         --no-eff-email \
         -d $DOMAIN \

@@ -80,7 +80,7 @@ function ReturnRequestSection({ slug, orderNumber, currency }: { slug: string; o
 
   const authHeaders = (): Record<string, string> => {
     if (typeof window === "undefined") return {};
-    const token = localStorage.getItem(`afrostore_customer_token_${slug}`);
+    const token = localStorage.getItem(`prokip_customer_token_${slug}`);
     return token ? { Authorization: `Bearer ${token}` } : {};
   };
 

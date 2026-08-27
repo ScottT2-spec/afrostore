@@ -36,7 +36,7 @@ function writeWishlist(siteId: string, ids: string[]) {
 function getLoggedInCustomerId(storeSlug?: string): string | null {
   if (typeof window === "undefined" || !storeSlug) return null;
   try {
-    const cached = localStorage.getItem(`afrostore_customer_${storeSlug}`);
+    const cached = localStorage.getItem(`prokip_customer_${storeSlug}`);
     if (!cached) return null;
     const parsed = JSON.parse(cached);
     return parsed?.id || null;

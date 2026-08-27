@@ -1,5 +1,5 @@
 /**
- * AfroStore RAG Engine — Structured Logger
+ * Prokip RAG Engine — Structured Logger
  *
  * Lightweight structured logging. No external dependencies.
  * JSON output for production, human-readable for dev.

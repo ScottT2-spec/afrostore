@@ -64,7 +64,7 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ sit
   const count = await prisma.domain.count({ where: { siteId } });
   if (count >= 5) return domainError("Maximum 5 custom domains per store");
 
-  const verificationToken = `afrostore-verify-${siteId.slice(0, 8)}-${Date.now().toString(36)}`;
+  const verificationToken = `prokip-verify-${siteId.slice(0, 8)}-${Date.now().toString(36)}`;
 
   const newDomain = await prisma.domain.create({
     data: {

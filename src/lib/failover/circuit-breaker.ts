@@ -1,5 +1,5 @@
 /**
- * AfroStore Failover Engine — Circuit Breaker
+ * Prokip Failover Engine — Circuit Breaker
  *
  * Prevents cascading failures by stopping requests to unhealthy providers.
  *

@@ -11,7 +11,7 @@
 
 /** Resolves the app's own base URL the same way signup's verification email does. */
 export function getAppBaseUrl(requestHost?: string | null): string {
-  return process.env.NEXT_PUBLIC_BASE_URL || `https://${requestHost || "afrostore-xi.vercel.app"}`;
+  return process.env.NEXT_PUBLIC_BASE_URL || `https://${requestHost || "prokip-xi.vercel.app"}`;
 }
 
 const HREF_RE = /href\s*=\s*(["'])(.*?)\1/gi;

@@ -110,11 +110,11 @@ export default function ProductDetailPage() {
   const handleAddToCart = () => {
     // Store in localStorage cart - must use the same key AND item shape as
     // every other storefront page (shop, homepage, cart, checkout), which
-    // all read/write `afrostore_cart_${slug}` with a nested `product` object.
+    // all read/write `prokip_cart_${slug}` with a nested `product` object.
     // This page previously wrote to a different key (`cart_${store.id}`)
     // with a flat shape, so anything added here silently never appeared
     // in the cart icon, cart page, or checkout - a real lost-sale bug.
-    const cartKey = `afrostore_cart_${slug}`;
+    const cartKey = `prokip_cart_${slug}`;
     const cart = JSON.parse(localStorage.getItem(cartKey) || "[]");
     const existing = cart.find((item: any) => item.productId === product.id && (item.variantId || null) === (selectedVariant || null));
     if (existing) {
@@ -128,7 +128,7 @@ export default function ProductDetailPage() {
       });
     }
     localStorage.setItem(cartKey, JSON.stringify(cart));
-    localStorage.setItem("afrostore_cart_active_slug", slug);
+    localStorage.setItem("prokip_cart_active_slug", slug);
     trackEvent(slug, "add_to_cart", { productId: product.id, metadata: { quantity, value: (activeFlashSale ? activeFlashSale.salePrice : displayPrice) * quantity, currency } });
     setAddedToCart(true);
     setTimeout(() => setAddedToCart(false), 2000);
@@ -418,7 +418,7 @@ export default function ProductDetailPage() {
       {/* Footer */}
       <footer className="border-t border-surface-100 mt-16">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 text-center">
-          <p className="text-xs text-surface-400">© {new Date().getFullYear()} {store.name}. Powered by AfroStore.</p>
+          <p className="text-xs text-surface-400">© {new Date().getFullYear()} {store.name}. Powered by Prokip.</p>
         </div>
       </footer>
     </div>

@@ -1,5 +1,5 @@
 /**
- * AfroStore Failover Engine — AI Provider Failover
+ * Prokip Failover Engine — AI Provider Failover
  *
  * Automatic failover between AI providers (OpenAI, Anthropic, Google, Groq, DeepSeek).
  *

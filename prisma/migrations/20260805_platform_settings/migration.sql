@@ -1,9 +1,9 @@
 -- Platform-wide settings, singleton row keyed by id = 'platform'
 CREATE TABLE IF NOT EXISTS "platform_settings" (
   "id"                        TEXT NOT NULL,
-  "siteName"                  TEXT NOT NULL DEFAULT 'AfroStore',
-  "siteUrl"                   TEXT NOT NULL DEFAULT 'https://afrostore.app',
-  "supportEmail"              TEXT NOT NULL DEFAULT 'support@afrostore.app',
+  "siteName"                  TEXT NOT NULL DEFAULT 'Prokip',
+  "siteUrl"                   TEXT NOT NULL DEFAULT 'https://prokip.africa',
+  "supportEmail"              TEXT NOT NULL DEFAULT 'support@prokip.africa',
   "defaultCurrency"           TEXT NOT NULL DEFAULT 'NGN',
   "defaultCountry"            TEXT NOT NULL DEFAULT 'NG',
   "maintenanceMode"           BOOLEAN NOT NULL DEFAULT false,
@@ -16,7 +16,7 @@ CREATE TABLE IF NOT EXISTS "platform_settings" (
   "smtpUser"                  TEXT,
   "smtpPass"                  TEXT,
   "sendFromEmail"             TEXT,
-  "sendFromName"              TEXT NOT NULL DEFAULT 'AfroStore',
+  "sendFromName"              TEXT NOT NULL DEFAULT 'Prokip',
   "updatedAt"                 TIMESTAMP(3) NOT NULL,
   "updatedById"               TEXT,
 

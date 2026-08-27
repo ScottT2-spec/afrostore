@@ -198,7 +198,7 @@ export default function StorePage() {
   const [isServerError, setIsServerError] = useState(false);
   const [draftCustomization, setDraftCustomization] = useState<SiteCustomizationDocument | null>(null);
   const templateIframeRef = useRef<HTMLIFrameElement>(null);
-  const cartKey = `afrostore_cart_${slug}`;
+  const cartKey = `prokip_cart_${slug}`;
   const [cart, setCart] = useState<CartItem[]>(() => {
     if (typeof window === "undefined") return [];
     try {
@@ -285,12 +285,12 @@ export default function StorePage() {
   useEffect(() => {
     if (data) {
       localStorage.setItem(cartKey, JSON.stringify(cart));
-      localStorage.setItem("afrostore_cart_active_slug", slug);
-      localStorage.setItem("afrostore_siteId", data.store.id);
-      localStorage.setItem("afrostore_storeSlug", data.store.slug);
-      localStorage.setItem("afrostore_storeName", data.store.name);
-      localStorage.setItem("afrostore_currency", data.store.currency);
-      localStorage.setItem("afrostore_deliveryZones", JSON.stringify(data.deliveryZones));
+      localStorage.setItem("prokip_cart_active_slug", slug);
+      localStorage.setItem("prokip_siteId", data.store.id);
+      localStorage.setItem("prokip_storeSlug", data.store.slug);
+      localStorage.setItem("prokip_storeName", data.store.name);
+      localStorage.setItem("prokip_currency", data.store.currency);
+      localStorage.setItem("prokip_deliveryZones", JSON.stringify(data.deliveryZones));
     }
   }, [cart, data, cartKey, slug]);
 
@@ -340,7 +340,7 @@ export default function StorePage() {
             <p className="text-xs text-surface-400 mt-2">This is a server error, not a missing store — the message above is the actual cause.</p>
           )}
           <Link href="/" className="mt-6 inline-flex items-center gap-2 text-brand-600 font-semibold text-sm hover:text-brand-700">
-            <ArrowRight className="h-4 w-4 rotate-180" /> Go to AfroStore
+            <ArrowRight className="h-4 w-4 rotate-180" /> Go to Prokip
           </Link>
         </div>
       </div>

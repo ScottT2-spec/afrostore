@@ -129,7 +129,7 @@ export function authTests() {
 
     it('should reject login with non-existent email', async () => {
       const res = await POST('/api/auth/login', {
-        email: 'nonexistent@afrostore-test.com',
+        email: 'nonexistent@prokip-test.com',
         password: 'SomePass123!',
       });
 

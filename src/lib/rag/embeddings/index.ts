@@ -1,5 +1,5 @@
 /**
- * AfroStore RAG Engine — Embeddings Module
+ * Prokip RAG Engine — Embeddings Module
  */
 
 export { createEmbeddingProvider } from './provider';

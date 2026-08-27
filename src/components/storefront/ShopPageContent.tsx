@@ -156,7 +156,7 @@ export function ShopPageContent({
   const [addedToCart, setAddedToCart] = useState<string | null>(null);
   const [mobileMenu, setMobileMenu] = useState(false);
   
-  const cartKey = `afrostore_cart_${storeSlug}`;
+  const cartKey = `prokip_cart_${storeSlug}`;
   const [cart, setCart] = useState<Array<{ productId: string; quantity: number; product: Product }>>(() => {
     if (typeof window === "undefined") return [];
     try {
@@ -166,7 +166,7 @@ export function ShopPageContent({
     return [];
   });
   
-  const compareKey = `afrostore_compare_${storeSlug}`;
+  const compareKey = `prokip_compare_${storeSlug}`;
   const [compareList, setCompareList] = useState<string[]>(() => {
     if (typeof window === "undefined") return [];
     try { const s = localStorage.getItem(compareKey); if (s) { const p = JSON.parse(s); if (Array.isArray(p)) return p.map((x: any) => x.id); } } catch {} return [];
@@ -228,11 +228,11 @@ export function ShopPageContent({
   useEffect(() => {
     if (storeData) {
       localStorage.setItem(cartKey, JSON.stringify(cart));
-      localStorage.setItem("afrostore_cart_active_slug", storeSlug);
-      localStorage.setItem("afrostore_siteId", store.id);
-      localStorage.setItem("afrostore_storeSlug", store.slug);
-      localStorage.setItem("afrostore_storeName", store.name);
-      localStorage.setItem("afrostore_currency", store.currency);
+      localStorage.setItem("prokip_cart_active_slug", storeSlug);
+      localStorage.setItem("prokip_siteId", store.id);
+      localStorage.setItem("prokip_storeSlug", store.slug);
+      localStorage.setItem("prokip_storeName", store.name);
+      localStorage.setItem("prokip_currency", store.currency);
     }
   }, [cart, storeData, storeSlug, store.id, store.name, store.currency, cartKey]);
 
