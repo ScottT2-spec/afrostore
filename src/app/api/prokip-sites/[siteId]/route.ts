@@ -1,6 +1,6 @@
 import { NextRequest } from "next/server";
 import { prisma } from "@/lib/db";
-import { success, error, createSiteWithUniqueSlug } from "@/lib/api-helpers";
+import { success, error, createSiteWithUniqueSlug, enforceStoreLimit } from "@/lib/api-helpers";
 import { ProkipSite } from "@/types";
 
 type Params = { params: Promise<{ siteId: string }> };
@@ -227,6 +227,13 @@ export async function POST(req: NextRequest, { params }: Params) {
         },
       });
     } else {
+      // Same plan-based store limit every other site-creation path
+      // enforces — this endpoint was the one gap that let a workspace
+      // exceed its plan's store count entirely, since it had no check at
+      // all before this.
+      const limitError = await enforceStoreLimit(prokipSite.workspaceId);
+      if (limitError) return limitError;
+
       // Create new site. Uses a retry-on-collision loop instead of using
       // the transformed name directly as the slug/subdomain with no
       // uniqueness check at all — any existing site with the same or

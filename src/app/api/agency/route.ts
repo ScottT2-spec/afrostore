@@ -1,6 +1,6 @@
 import { NextRequest } from "next/server";
 import { prisma } from "@/lib/db";
-import { success, error, createSiteWithUniqueSlug } from "@/lib/api-helpers";
+import { success, error, createSiteWithUniqueSlug, enforceStoreLimit } from "@/lib/api-helpers";
 import { getAuthUser, unauthorized } from "@/lib/auth";
 
 type Params = Record<string, never>;
@@ -72,6 +72,13 @@ export async function POST(req: NextRequest) {
 
     let site = null;
     if (createSite && siteName) {
+      // Same plan-based store limit every other site-creation path enforces
+      // — this workspace is brand new (0 sites) so it only ever matters if
+      // this endpoint is ever extended to create more than one site per
+      // call, but it should never be the one path that's allowed to skip it.
+      const limitError = await enforceStoreLimit(workspace.id);
+      if (limitError) return limitError;
+
       // Uses a retry-on-collision loop instead of a single timestamp-based
       // suffix with no retry — collision-resistant, but not collision-proof,
       // and a raw crash here would leave the just-created workspace orphaned
