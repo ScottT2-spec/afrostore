@@ -1,5 +1,5 @@
 "use client";
-import { Loader2 } from "lucide-react";
+import { Loader2, Code } from "lucide-react";
 import { AlertTriangle, Bell, Globe, MessageCircle, Save, Shield, Store, Trash2, Truck } from "@/components/icons/FilledIcons";
 
 import { useState, useEffect } from "react";
@@ -38,6 +38,8 @@ export default function SettingsPage() {
     metaAccessToken: "",
     metaTestEventCode: "",
     tiktokAccessToken: "",
+    customHeadCode: "",
+    customBodyCode: "",
     currency: "",
   });
 
@@ -209,6 +211,24 @@ export default function SettingsPage() {
             <div>
               <label className="block text-sm font-medium text-surface-700 mb-1">TikTok Events API Access Token</label>
               <input type="password" value={settings.tiktokAccessToken} onChange={(e) => update("tiktokAccessToken", e.target.value)} className="input-field" placeholder="xxxxxxxxxxxxxxxx" />
+            </div>
+          </div>
+        </div>
+
+        {/* Custom Code */}
+        <div className="rounded-2xl border border-surface-200 bg-white p-6">
+          <h3 className="text-base font-bold text-surface-900 mb-1 flex items-center gap-2"><Code className="h-5 w-5" />Custom Code</h3>
+          <p className="text-xs text-surface-500 mb-4">
+            Paste any additional tracking or marketing scripts here (e.g. a pixel Meta/TikTok don&apos;t cover, a chat widget, Hotjar, etc.). Injected on every page of your live storefront — leave blank if you don&apos;t need this.
+          </p>
+          <div className="space-y-4">
+            <div>
+              <label className="block text-sm font-medium text-surface-700 mb-1">Head Code <span className="text-surface-400 font-normal">(inside &lt;head&gt;)</span></label>
+              <textarea value={settings.customHeadCode} onChange={(e) => update("customHeadCode", e.target.value)} className="input-field font-mono text-xs" rows={4} placeholder="<script>...</script>" />
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-surface-700 mb-1">Body Code <span className="text-surface-400 font-normal">(before &lt;/body&gt;)</span></label>
+              <textarea value={settings.customBodyCode} onChange={(e) => update("customBodyCode", e.target.value)} className="input-field font-mono text-xs" rows={4} placeholder="<script>...</script>" />
             </div>
           </div>
         </div>
