@@ -1,6 +1,6 @@
 "use client";
 import { Loader2, Plus, X } from "lucide-react";
-import { Calendar, Clock, Package, Percent, ToggleLeft, ToggleRight, Trash2, Zap } from "@/components/icons/FilledIcons";
+import { Calendar, Clock, Package, Pencil, Percent, ToggleLeft, ToggleRight, Trash2, Zap } from "@/components/icons/FilledIcons";
 
 import { useState, useEffect, useCallback } from "react";
 import { useSite } from "@/context/StoreContext";
@@ -27,6 +27,24 @@ interface FlashSale {
 
 interface Product { id: string; name: string; price: number }
 
+// Converts a stored UTC ISO timestamp back to the "YYYY-MM-DDTHH:mm" shape
+// a datetime-local input expects, using LOCAL time components (getFullYear/
+// getMonth/etc. are local by definition in the browser) — the reverse of
+// what happens on submit (new Date(localString).toISOString()). Getting
+// this wrong is the same bug in the opposite direction: stuffing the raw
+// UTC digits into the input (e.g. via .slice(0,16)) shows the merchant a
+// different wall-clock time than what they originally set.
+function toLocalDatetimeInputValue(iso: string): string {
+  const d = new Date(iso);
+  const pad = (n: number) => String(n).padStart(2, "0");
+  return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}T${pad(d.getHours())}:${pad(d.getMinutes())}`;
+}
+
+const emptyForm = {
+  name: "", description: "", discountType: "PERCENTAGE" as const, discountValue: 20,
+  startsAt: "", endsAt: "", maxUses: "", productIds: [] as string[],
+};
+
 export default function FlashSalesPage() {
   const { currentStore } = useSite();
   const router = useRouter();
@@ -34,12 +52,10 @@ export default function FlashSalesPage() {
   const [sales, setSales] = useState<FlashSale[]>([]);
   const [loading, setLoading] = useState(true);
   const [showCreate, setShowCreate] = useState(false);
+  const [editingId, setEditingId] = useState<string | null>(null);
   const [saving, setSaving] = useState(false);
   const [products, setProducts] = useState<Product[]>([]);
-  const [form, setForm] = useState({
-    name: "", description: "", discountType: "PERCENTAGE" as const, discountValue: 20,
-    startsAt: "", endsAt: "", maxUses: "", productIds: [] as string[],
-  });
+  const [form, setForm] = useState(emptyForm);
 
   const currency = currentStore?.currency || "NGN";
   const symbol = currency === "NGN" ? "₦" : currency === "GHS" ? "₵" : currency;
@@ -81,10 +97,26 @@ export default function FlashSalesPage() {
     }
   };
 
-  const create = async () => {
+  const startEdit = (sale: FlashSale) => {
+    setEditingId(sale.id);
+    setForm({
+      name: sale.name,
+      description: sale.description || "",
+      discountType: sale.discountType,
+      discountValue: sale.discountValue,
+      startsAt: toLocalDatetimeInputValue(sale.startsAt),
+      endsAt: toLocalDatetimeInputValue(sale.endsAt),
+      maxUses: sale.maxUses ? String(sale.maxUses) : "",
+      productIds: sale.products.map((p) => p.product.id),
+    });
+    setShowCreate(true);
+    loadProducts();
+  };
+
+  const save = async () => {
     if (!currentStore) return;
     setSaving(true);
-    await api.post(`/api/sites/${currentStore.id}/flash-sales`, {
+    const payload = {
       ...form,
       // datetime-local inputs return a bare "YYYY-MM-DDTHH:mm" string with no
       // timezone info. new Date(...) here runs in the merchant's own browser,
@@ -96,11 +128,17 @@ export default function FlashSalesPage() {
       endsAt: form.endsAt ? new Date(form.endsAt).toISOString() : form.endsAt,
       discountValue: Number(form.discountValue),
       maxUses: form.maxUses ? Number(form.maxUses) : null,
-    });
+    };
+    if (editingId) {
+      await api.patch(`/api/sites/${currentStore.id}/flash-sales/${editingId}`, payload);
+    } else {
+      await api.post(`/api/sites/${currentStore.id}/flash-sales`, payload);
+    }
     await load();
     setSaving(false);
     setShowCreate(false);
-    setForm({ name: "", description: "", discountType: "PERCENTAGE", discountValue: 20, startsAt: "", endsAt: "", maxUses: "", productIds: [] });
+    setEditingId(null);
+    setForm(emptyForm);
     if (isFromAI) { clearPrefill(); router.push("/dashboard/ai"); }
   };
 
@@ -133,9 +171,9 @@ export default function FlashSalesPage() {
 
   return (
     <>
-      <DashboardHeader title="Flash Sales" subtitle="Create urgency with time-limited deals" action={{ label: "New Flash Sale", onClick: () => { setShowCreate(true); loadProducts(); } }} />
+      <DashboardHeader title="Flash Sales" subtitle="Create urgency with time-limited deals" action={{ label: "New Flash Sale", onClick: () => { setEditingId(null); setForm(emptyForm); setShowCreate(true); loadProducts(); } }} />
       <div className="p-6 space-y-6">
-        {isFromAI && <AIPrefillBanner entityType="flash sale" onDiscard={() => { clearPrefill(); setShowCreate(false); setForm({ name: "", description: "", discountType: "PERCENTAGE", discountValue: 20, startsAt: "", endsAt: "", maxUses: "", productIds: [] }); }} />}
+        {isFromAI && <AIPrefillBanner entityType="flash sale" onDiscard={() => { clearPrefill(); setShowCreate(false); setEditingId(null); setForm(emptyForm); }} />}
         {sales.length === 0 ? (
           <div className="rounded-2xl border border-surface-200 bg-white p-12 text-center">
             <div className="mx-auto w-16 h-16 rounded-2xl bg-amber-50 flex items-center justify-center mb-4">
@@ -143,7 +181,7 @@ export default function FlashSalesPage() {
             </div>
             <h2 className="text-xl font-bold text-surface-900 font-display mb-2">No Flash Sales Yet</h2>
             <p className="text-sm text-surface-500 max-w-md mx-auto mb-6">Create time-limited discounts to drive urgency and boost sales. Add a countdown timer to your storefront!</p>
-            <button onClick={() => { setShowCreate(true); loadProducts(); }} className="btn-primary"><Zap className="h-4 w-4" /> Create Flash Sale</button>
+            <button onClick={() => { setEditingId(null); setForm(emptyForm); setShowCreate(true); loadProducts(); }} className="btn-primary"><Zap className="h-4 w-4" /> Create Flash Sale</button>
           </div>
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
@@ -157,6 +195,9 @@ export default function FlashSalesPage() {
                       <span className={`inline-flex items-center rounded-full px-2 py-0.5 text-[10px] font-semibold mt-1 ${status.color}`}>{status.label}</span>
                     </div>
                     <div className="flex items-center gap-1">
+                      <button onClick={() => startEdit(sale)} className="p-1 text-surface-400 hover:text-brand-600" title="Edit">
+                        <Pencil className="h-4 w-4" />
+                      </button>
                       <button onClick={() => toggleActive(sale.id, sale.isActive)} className="p-1 text-surface-400 hover:text-brand-600">
                         {sale.isActive ? <ToggleRight className="h-5 w-5 text-brand-600" /> : <ToggleLeft className="h-5 w-5" />}
                       </button>
@@ -192,13 +233,13 @@ export default function FlashSalesPage() {
         )}
       </div>
 
-      {/* Create Modal */}
+      {/* Create/Edit Modal */}
       {showCreate && (
-        <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4" onClick={() => setShowCreate(false)}>
+        <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4" onClick={() => { setShowCreate(false); setEditingId(null); }}>
           <div className="bg-white rounded-2xl max-w-lg w-full max-h-[90vh] overflow-y-auto p-6" onClick={(e) => e.stopPropagation()}>
             <div className="flex items-center justify-between mb-6">
-              <h2 className="text-lg font-bold text-surface-900 font-display">New Flash Sale</h2>
-              <button onClick={() => setShowCreate(false)} className="text-surface-400 hover:text-surface-600"><X className="h-5 w-5" /></button>
+              <h2 className="text-lg font-bold text-surface-900 font-display">{editingId ? "Edit Flash Sale" : "New Flash Sale"}</h2>
+              <button onClick={() => { setShowCreate(false); setEditingId(null); }} className="text-surface-400 hover:text-surface-600"><X className="h-5 w-5" /></button>
             </div>
             <div className="space-y-4">
               <div>
@@ -254,8 +295,8 @@ export default function FlashSalesPage() {
                   {products.length === 0 && <p className="text-xs text-surface-400 text-center py-2">No products found</p>}
                 </div>
               </div>
-              <button onClick={create} disabled={!form.name || !form.startsAt || !form.endsAt || saving} className="w-full btn-primary py-2.5 disabled:opacity-50">
-                {saving ? <Loader2 className="h-4 w-4 animate-spin" /> : "Create Flash Sale"}
+              <button onClick={save} disabled={!form.name || !form.startsAt || !form.endsAt || saving} className="w-full btn-primary py-2.5 disabled:opacity-50">
+                {saving ? <Loader2 className="h-4 w-4 animate-spin" /> : editingId ? "Save Changes" : "Create Flash Sale"}
               </button>
             </div>
           </div>
