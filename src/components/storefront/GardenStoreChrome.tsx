@@ -81,6 +81,7 @@ export function GardenHeader({
     { label: "All Products", href: `${base}/shop` },
     { label: "Garden Decor", href: `${base}/shop?category=garden-decor` },
     { label: "Home Decor", href: `${base}/shop?category=home-decor` },
+    { label: "Blog", href: `${base}/blog` },
     { label: "About", href: `${base}/about` },
     { label: "Contact", href: `${base}/contact` },
   ];
@@ -213,6 +214,7 @@ export function GardenFooter({
     { label: "All Products", href: `${base}/shop` },
     { label: "Garden Decor", href: `${base}/shop?category=garden-decor` },
     { label: "Home Decor", href: `${base}/shop?category=home-decor` },
+    { label: "Blog", href: `${base}/blog` },
     { label: "About", href: `${base}/about` },
     { label: "Contact", href: `${base}/contact` },
   ];

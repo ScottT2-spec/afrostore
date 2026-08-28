@@ -553,7 +553,7 @@ export default function StorePage() {
     const vegetableNavItems = [
       { label: "Home", href: `/store/${slug}` },
       { label: "Shop", href: `/store/${slug}/shop` },
-      { label: "Recipes", href: `/store/${slug}/recipe` },
+      { label: "Recipes", href: `/store/${slug}/blog` },
       { label: "About", href: `/store/${slug}/about` },
       { label: "Contact", href: `/store/${slug}/contact` },
     ];
@@ -837,6 +837,9 @@ export default function StorePage() {
             {navPages.slice(0, isLanding ? 6 : 3).map((page) => (
               <Link key={page.id} href={`/store/${slug}/${page.slug}`} className="text-sm font-medium text-surface-600 hover:text-surface-900 transition-colors">{page.title}</Link>
             ))}
+            {!isLanding && (data.blogs || []).length > 0 && (
+              <Link href={`/store/${slug}/blog`} className="text-sm font-medium text-surface-600 hover:text-surface-900 transition-colors">Blog</Link>
+            )}
           </nav>
 
           <div className="flex items-center gap-3">
@@ -902,6 +905,9 @@ export default function StorePage() {
           {navPages.map((page) => (
             <Link key={page.id} href={`/store/${slug}/${page.slug}`} onClick={() => setMobileMenu(false)} className="block text-sm font-medium text-surface-600 py-2">{page.title}</Link>
           ))}
+          {!isLanding && (data.blogs || []).length > 0 && (
+            <Link href={`/store/${slug}/blog`} onClick={() => setMobileMenu(false)} className="block text-sm font-medium text-surface-600 py-2">Blog</Link>
+          )}
           {!isLanding && whatsappNumber && (
             <a href={getWhatsAppLink(whatsappNumber, [], currency, store.name)} className="block text-sm font-medium text-green-600 py-2">WhatsApp us</a>
           )}

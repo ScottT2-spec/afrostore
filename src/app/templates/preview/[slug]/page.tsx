@@ -118,7 +118,7 @@ export default function TemplatePreviewPage() {
     const navItems = [
       { label: "Home", href: `/store/${demoStoreSlug}` },
       { label: "Shop", href: `/store/${demoStoreSlug}/shop` },
-      { label: "Recipes", href: `/store/${demoStoreSlug}/recipe` },
+      { label: "Recipes", href: `/store/${demoStoreSlug}/blog` },
       { label: "About", href: `/store/${demoStoreSlug}/about` },
       { label: "Contact", href: `/store/${demoStoreSlug}/contact` },
     ];

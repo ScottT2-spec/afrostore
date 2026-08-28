@@ -218,6 +218,8 @@ export const updateSettingsSchema = z.object({
   metaAccessToken: z.string().optional().nullable(),
   metaTestEventCode: z.string().optional().nullable(),
   tiktokAccessToken: z.string().optional().nullable(),
+  customHeadCode: z.string().optional().nullable(),
+  customBodyCode: z.string().optional().nullable(),
 });
 
 // ─── PAGES ──────────────────────────────────────────────────
