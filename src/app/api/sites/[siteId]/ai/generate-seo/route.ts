@@ -1,6 +1,7 @@
 import { NextRequest } from "next/server";
 import { prisma } from "@/lib/db";
 import { getStoreContext, success, error, logAudit , requireRole } from "@/lib/api-helpers";
+import { rateLimit, rateLimitedResponse } from "@/lib/rate-limit";
 import { unauthorized } from "@/lib/auth";
 import { chatWithAI } from "@/lib/ai-service";
 
@@ -14,6 +15,12 @@ export async function POST(req: NextRequest, { params }: Params) {
   if (ctx.error) return ctx.user ? error(ctx.error, 403) : unauthorized();
   const roleErr = requireRole(ctx, "STAFF");
   if (roleErr) return roleErr;
+
+  // Each call here hits a paid external AI provider, so this guards
+  // against runaway cost from a retry loop or a compromised/careless
+  // staff account, not just abuse.
+  const rl = rateLimit(`ai-generate:${ctx.user!.id}`, 20, 60 * 60 * 1000);
+  if (!rl.allowed) return rateLimitedResponse(rl.retryAfterMs);
 
   try {
     const { target, targetId } = await req.json();

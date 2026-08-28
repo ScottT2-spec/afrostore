@@ -3,6 +3,7 @@ import crypto from "crypto";
 import path from "path";
 import { supabaseAdmin, STORAGE_BUCKET, getPublicUrl } from "@/lib/supabase";
 import { getAuthUser, unauthorized } from "@/lib/auth";
+import { rateLimit, rateLimitedResponse } from "@/lib/rate-limit";
 
 const MAX_FILE_SIZE = 10 * 1024 * 1024; // 10MB
 const ALLOWED_TYPES = [
@@ -25,6 +26,11 @@ function generateFileName(originalName: string): string {
 export async function POST(req: NextRequest) {
   const user = await getAuthUser(req);
   if (!user) return unauthorized();
+
+  // Authenticated, but a compromised/careless account could otherwise
+  // spam this to run up storage costs — cap it per user.
+  const rl = rateLimit(`upload:${user.id}`, 30, 15 * 60 * 1000);
+  if (!rl.allowed) return rateLimitedResponse(rl.retryAfterMs);
 
   try {
     const formData = await req.formData();

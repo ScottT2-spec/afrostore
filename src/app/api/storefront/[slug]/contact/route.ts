@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/db";
 import { upsertLeadContact } from "@/lib/crm";
 import { createSiteNotification } from "@/lib/notifications";
+import { rateLimit, rateLimitedResponse, getClientIp } from "@/lib/rate-limit";
 
 type Params = { params: Promise<{ slug: string }> };
 
@@ -9,6 +10,13 @@ type Params = { params: Promise<{ slug: string }> };
 // Public endpoint — anyone can submit a contact message to a store
 export async function POST(req: NextRequest, { params }: Params) {
   const { slug } = await params;
+
+  // The existing per-email DB check further down stops repeat spam
+  // claiming the same email, but the submitter fully controls that field
+  // — this IP-keyed check is what actually stops a script rotating a
+  // different fake email on every request.
+  const rl = rateLimit(`contact-form:${getClientIp(req)}`, 10, 60 * 60 * 1000);
+  if (!rl.allowed) return rateLimitedResponse(rl.retryAfterMs);
 
   try {
     const body = await req.json();

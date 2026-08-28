@@ -3,6 +3,7 @@ import { prisma } from "@/lib/db";
 import { getStoreContext, success, error, logAudit , requireRole } from "@/lib/api-helpers";
 import { unauthorized } from "@/lib/auth";
 import { getSupabaseAdmin, STORAGE_BUCKET, getPublicUrl } from "@/lib/supabase";
+import { rateLimit, rateLimitedResponse } from "@/lib/rate-limit";
 import crypto from "crypto";
 import path from "path";
 
@@ -33,6 +34,11 @@ export async function POST(req: NextRequest, { params }: Params) {
   if (ctx.error) return ctx.user ? error(ctx.error, 403) : unauthorized();
   const roleErr = requireRole(ctx, "STAFF");
   if (roleErr) return roleErr;
+
+  // Same reasoning as the general /api/upload route — cap per user so a
+  // compromised/careless staff account can't run up storage costs.
+  const rl = rateLimit(`media-upload:${ctx.user!.id}`, 30, 15 * 60 * 1000);
+  if (!rl.allowed) return rateLimitedResponse(rl.retryAfterMs);
 
   try {
     const formData = await req.formData();

@@ -8,12 +8,20 @@ import {
   getMonnifyAccessToken,
 } from "@/lib/payments";
 import { generateId } from "@/lib/utils";
+import { rateLimit, rateLimitedResponse, getClientIp } from "@/lib/rate-limit";
 
 type Params = { params: Promise<{ siteId: string }> };
 
 // POST /api/sites/:siteId/checkout — initialize payment after order creation
 export async function POST(req: NextRequest, { params }: Params) {
   const { siteId } = await params;
+
+  // No customer session check on this route (order ownership isn't
+  // verified against a logged-in customer), so this is the only thing
+  // stopping repeated calls against real payment-gateway APIs — each hit
+  // here calls out to Paystack/Flutterwave/Monnify.
+  const rl = rateLimit(`checkout:${getClientIp(req)}`, 20, 15 * 60 * 1000);
+  if (!rl.allowed) return rateLimitedResponse(rl.retryAfterMs);
 
   try {
     const body = await req.json();

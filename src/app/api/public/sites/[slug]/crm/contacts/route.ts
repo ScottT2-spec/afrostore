@@ -3,6 +3,7 @@ import { prisma } from "@/lib/db";
 import { success, error, validationError } from "@/lib/api-helpers";
 import { upsertLeadContact } from "@/lib/crm";
 import { runAutomationsForTrigger } from "@/lib/automations";
+import { rateLimit, rateLimitedResponse, getClientIp } from "@/lib/rate-limit";
 import { z } from "zod";
 
 // Lightweight public schema for landing page lead submissions
@@ -27,6 +28,12 @@ type Params = { params: Promise<{ slug: string }> };
 // POST /api/public/sites/:slug/crm/contacts — no auth; used by public landing pages
 export async function POST(req: NextRequest, { params }: Params) {
   const { slug } = await params;
+
+  // No auth at all (used by public landing pages) and no limit existed
+  // here — unrestricted, this is a way to flood a store's CRM with fake
+  // leads and trigger the automation emails tied to "new_lead" below.
+  const rl = rateLimit(`public-lead:${getClientIp(req)}`, 15, 60 * 60 * 1000);
+  if (!rl.allowed) return rateLimitedResponse(rl.retryAfterMs);
 
   try {
     // Resolve site by slug (fall back to subdomain/customDomain like other public routes)

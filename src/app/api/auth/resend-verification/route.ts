@@ -2,9 +2,17 @@ import { NextRequest, NextResponse } from "next/server";
 import crypto from "crypto";
 import { prisma } from "@/lib/db";
 import { sendVerificationEmail } from "@/lib/email";
+import { rateLimit, rateLimitedResponse, getClientIp } from "@/lib/rate-limit";
 
 export async function POST(req: NextRequest) {
   try {
+    // The per-account "wait 1 hour" check below only throttles repeat
+    // requests for the SAME account — it doesn't stop one IP from working
+    // through many different unverified accounts, each triggering a real
+    // SES send. This IP-keyed limit covers that gap.
+    const rl = rateLimit(`resend-verification:${getClientIp(req)}`, 5, 15 * 60 * 1000);
+    if (!rl.allowed) return rateLimitedResponse(rl.retryAfterMs);
+
     const { email } = await req.json();
 
     if (!email || typeof email !== "string") {

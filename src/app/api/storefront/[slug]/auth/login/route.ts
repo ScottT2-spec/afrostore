@@ -5,6 +5,7 @@ import {
   createCustomerToken,
   CUSTOMER_COOKIE_NAME,
 } from "@/lib/customer-auth";
+import { rateLimit, rateLimitedResponse, getClientIp } from "@/lib/rate-limit";
 
 type Params = { params: Promise<{ slug: string }> };
 
@@ -38,6 +39,14 @@ export async function POST(req: NextRequest, { params }: Params) {
       { status: 400 }
     );
   }
+
+  // Keyed by store + email so one customer getting brute-forced can't be
+  // used to lock out others on the same store, and an attacker rotating
+  // emails on one IP still gets caught by the IP-keyed check below.
+  const rlEmail = rateLimit(`storefront-login:${site.id}:${email.toLowerCase().trim()}`, 5, 15 * 60 * 1000);
+  if (!rlEmail.allowed) return rateLimitedResponse(rlEmail.retryAfterMs);
+  const rlIp = rateLimit(`storefront-login-ip:${getClientIp(req)}`, 20, 15 * 60 * 1000);
+  if (!rlIp.allowed) return rateLimitedResponse(rlIp.retryAfterMs);
 
   const customer = await prisma.customer.findUnique({
     where: {

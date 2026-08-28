@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/db";
 import { getAuthCustomer } from "@/lib/customer-auth";
 import { joinLoyaltyProgram } from "@/lib/loyalty";
+import { rateLimit, rateLimitedResponse, getClientIp } from "@/lib/rate-limit";
 
 type Params = { params: Promise<{ slug: string }> };
 
@@ -12,6 +13,13 @@ type Params = { params: Promise<{ slug: string }> };
 // or any other action silently enrolls anyone.
 export async function POST(req: NextRequest, { params }: Params) {
   const { slug } = await params;
+
+  // The guest path below upserts a brand-new Customer row per unique email
+  // with no auth at all — unrestricted, that's a way to mass-create
+  // customer/loyalty records on a store.
+  const rl = rateLimit(`loyalty-join:${getClientIp(req)}`, 10, 60 * 60 * 1000);
+  if (!rl.allowed) return rateLimitedResponse(rl.retryAfterMs);
+
   const site = await prisma.site.findFirst({ where: { OR: [{ slug }, { subdomain: slug }, { customDomain: slug }] }, select: { id: true } });
   if (!site) return NextResponse.json({ success: false, error: "Store not found" }, { status: 404 });
 

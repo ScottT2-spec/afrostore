@@ -1,11 +1,18 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/db";
 import { hashPassword } from "@/lib/auth";
+import { rateLimit, rateLimitedResponse, getClientIp } from "@/lib/rate-limit";
 
 const MIN_PASSWORD_LENGTH = 8;
 
 export async function POST(req: NextRequest) {
   try {
+    // Reset tokens are long random strings so brute-forcing one directly is
+    // already infeasible, but this still guards against automated scanning
+    // hammering the endpoint / hitting the DB on every guess.
+    const rl = rateLimit(`reset-password:${getClientIp(req)}`, 10, 15 * 60 * 1000);
+    if (!rl.allowed) return rateLimitedResponse(rl.retryAfterMs);
+
     const { token, password } = await req.json();
 
     if (!token || typeof token !== "string") {

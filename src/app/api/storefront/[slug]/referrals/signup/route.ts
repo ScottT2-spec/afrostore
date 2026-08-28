@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/db";
+import { rateLimit, rateLimitedResponse, getClientIp } from "@/lib/rate-limit";
 
 type Params = { params: Promise<{ slug: string }> };
 
@@ -40,6 +41,12 @@ export async function GET(req: NextRequest, { params }: Params) {
 // an affiliate at all. A merchant approves applicants from the dashboard.
 export async function POST(req: NextRequest, { params }: Params) {
   const { slug } = await params;
+
+  // Creates real Customer + Affiliate records with no auth — unrestricted,
+  // this is a way to mass-create affiliate applications on a store.
+  const rl = rateLimit(`referral-signup:${getClientIp(req)}`, 10, 60 * 60 * 1000);
+  if (!rl.allowed) return rateLimitedResponse(rl.retryAfterMs);
+
   const site = await prisma.site.findUnique({ where: { slug } });
   if (!site) return NextResponse.json({ success: false, error: "Store not found" }, { status: 404 });
 

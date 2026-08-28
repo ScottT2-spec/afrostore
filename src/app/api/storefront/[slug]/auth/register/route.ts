@@ -5,6 +5,7 @@ import {
   createCustomerToken,
   CUSTOMER_COOKIE_NAME,
 } from "@/lib/customer-auth";
+import { rateLimit, rateLimitedResponse, getClientIp } from "@/lib/rate-limit";
 
 type Params = { params: Promise<{ slug: string }> };
 
@@ -19,6 +20,11 @@ export async function POST(req: NextRequest, { params }: Params) {
       { status: 404 }
     );
   }
+
+  // IP-keyed since there's no existing account to key against yet — this
+  // is what stops a script from mass-creating customer accounts on a store.
+  const rl = rateLimit(`storefront-register:${getClientIp(req)}`, 10, 60 * 60 * 1000);
+  if (!rl.allowed) return rateLimitedResponse(rl.retryAfterMs);
 
   let body: any;
   try {

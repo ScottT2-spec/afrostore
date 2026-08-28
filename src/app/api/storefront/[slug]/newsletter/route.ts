@@ -2,12 +2,19 @@ import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/db";
 import { sendNewsletterWelcomeEmail } from "@/lib/email";
 import { upsertLeadContact } from "@/lib/crm";
+import { rateLimit, rateLimitedResponse, getClientIp } from "@/lib/rate-limit";
 
 type Params = { params: Promise<{ slug: string }> };
 
 // POST /api/storefront/:slug/newsletter
 export async function POST(req: NextRequest, { params }: Params) {
   const { slug } = await params;
+
+  // No limit existed here at all — this sends a real welcome email to
+  // whatever address is submitted, so unrestricted this is an email-
+  // bombing vector against arbitrary third-party inboxes.
+  const rl = rateLimit(`newsletter:${getClientIp(req)}`, 10, 60 * 60 * 1000);
+  if (!rl.allowed) return rateLimitedResponse(rl.retryAfterMs);
 
   try {
     const { email } = await req.json();

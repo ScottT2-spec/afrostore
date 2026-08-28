@@ -2,6 +2,7 @@ import { NextRequest } from "next/server";
 import { success, error } from "@/lib/api-helpers";
 import { AIFailover, AICapability } from "@/lib/failover";
 import type { AIProviderConfig } from "@/lib/failover";
+import { rateLimit, rateLimitedResponse, getClientIp } from "@/lib/rate-limit";
 
 const SITE_TYPES = ["ECOMMERCE", "WEBSITE", "LANDING_PAGE"] as const;
 const INDUSTRIES = [
@@ -23,6 +24,12 @@ function getAIProviders(): AIProviderConfig[] {
 // POST /api/ai/classify-onboarding — { description } -> { siteType, industry, suggestedName?, suggestedTagline? }
 export async function POST(req: NextRequest) {
   try {
+    // No auth at all here (runs pre-signup, during onboarding), so this is
+    // the one thing standing between the public internet and unlimited
+    // paid-provider calls.
+    const rl = rateLimit(`classify-onboarding:${getClientIp(req)}`, 20, 60 * 60 * 1000);
+    if (!rl.allowed) return rateLimitedResponse(rl.retryAfterMs);
+
     const { description } = await req.json();
     if (!description || typeof description !== "string" || description.trim().length < 3) {
       return error("description is required", 400);
