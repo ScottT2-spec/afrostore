@@ -86,6 +86,14 @@ export default function FlashSalesPage() {
     setSaving(true);
     await api.post(`/api/sites/${currentStore.id}/flash-sales`, {
       ...form,
+      // datetime-local inputs return a bare "YYYY-MM-DDTHH:mm" string with no
+      // timezone info. new Date(...) here runs in the merchant's own browser,
+      // so it correctly reads that string as their real local wall-clock
+      // time; toISOString() then converts it to the true UTC instant. This
+      // must happen client-side - the server has no way to know which
+      // timezone the merchant meant.
+      startsAt: form.startsAt ? new Date(form.startsAt).toISOString() : form.startsAt,
+      endsAt: form.endsAt ? new Date(form.endsAt).toISOString() : form.endsAt,
       discountValue: Number(form.discountValue),
       maxUses: form.maxUses ? Number(form.maxUses) : null,
     });
