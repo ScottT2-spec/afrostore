@@ -201,7 +201,13 @@ export default function CouponsPage() {
             )}
             <input type="number" value={form.minOrderAmount} onChange={(e) => setForm({ ...form, minOrderAmount: e.target.value })} placeholder="Min order amount (optional)" className="input-field py-2.5" />
             <input type="number" value={form.maxUses} onChange={(e) => setForm({ ...form, maxUses: e.target.value })} placeholder="Max uses (optional)" className="input-field py-2.5" />
-            <input type="date" value={form.expiresAt} onChange={(e) => setForm({ ...form, expiresAt: e.target.value })} className="input-field py-2.5" />
+            <div>
+              <label htmlFor="coupon-expiry" className="block text-xs font-semibold text-surface-500 mb-1">
+                Expiry date
+              </label>
+              <input id="coupon-expiry" type="date" value={form.expiresAt} onChange={(e) => setForm({ ...form, expiresAt: e.target.value })} className="input-field w-full py-2.5" />
+              <p className="text-[11px] text-surface-400 mt-1">Coupon stops working at the end of this day. Leave blank for no expiry.</p>
+            </div>
           </div>
           <div className="flex gap-2 mt-3">
             <button onClick={handleSave} disabled={saving || !form.code.trim()} className="btn-primary text-sm py-2.5 px-5">
