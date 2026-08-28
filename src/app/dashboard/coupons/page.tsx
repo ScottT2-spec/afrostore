@@ -104,7 +104,21 @@ export default function CouponsPage() {
       value: form.value,
       minOrderAmount: form.minOrderAmount ? parseFloat(form.minOrderAmount) : null,
       maxUses: form.maxUses ? parseInt(form.maxUses) : null,
-      expiresAt: form.expiresAt ? new Date(form.expiresAt).toISOString() : null,
+      // "End of day" is only meaningful relative to a timezone — the plain
+      // YYYY-MM-DD value alone doesn't carry one. new Date(dateString) for
+      // a date-only string is always parsed as UTC midnight (a different
+      // JS parsing rule than the datetime-local case fixed for flash
+      // sales), which isn't "end of day" for anyone, and isn't anchored to
+      // the merchant's own timezone at all. Building the Date from
+      // separate numeric args instead (not a string) makes the browser
+      // interpret it in the merchant's real local timezone — the only
+      // place that's actually known — giving a true local 23:59:59.999 on
+      // the selected date before converting to the UTC instant that
+      // represents.
+      expiresAt: form.expiresAt ? (() => {
+        const [y, m, d] = form.expiresAt.split("-").map(Number);
+        return new Date(y, m - 1, d, 23, 59, 59, 999).toISOString();
+      })() : null,
       isActive: form.isActive,
     };
     // Previously this never checked res.error, so a failed save (bad
