@@ -310,7 +310,18 @@ export default function NewSitePage() {
           products: businessInfo.products.split(',').map(item => item.trim()).filter(Boolean),
           services: businessInfo.services.split(',').map(item => item.trim()).filter(Boolean),
           targetAudience: businessInfo.targetAudience,
-          landingPageConfig: siteType === 'LANDING_PAGE' ? landingConfig : undefined,
+          landingPageConfig: siteType === 'LANDING_PAGE' ? {
+            ...landingConfig,
+            // Same fix as flash sales (d304908a): datetime-local gives a
+            // raw wall-clock string with no timezone info. Converting it
+            // here, in the browser, is the only place that reliably knows
+            // the merchant's real local time — new Date(local) reads it
+            // correctly, .toISOString() gives the true UTC instant.
+            // Not yet rendered anywhere on the live storefront, but fixing
+            // now so it's already correct the moment it is.
+            countdownDate: landingConfig.countdownDate ? new Date(landingConfig.countdownDate).toISOString() : landingConfig.countdownDate,
+            eventDate: landingConfig.eventDate ? new Date(landingConfig.eventDate).toISOString() : landingConfig.eventDate,
+          } : undefined,
           branding: {
             logo: businessInfo.logo || undefined,
             colors: {
