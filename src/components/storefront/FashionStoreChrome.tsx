@@ -286,6 +286,7 @@ export function FashionHeader({
                 <Link href={`/store/${storeSlug}`} className="fsh-nav-link fsh-active">Home</Link>
                 {!isLanding && <Link href={`/store/${storeSlug}/shop`} className="fsh-nav-link">Shop</Link>}
                 {!isLanding && <Link href={`/store/${storeSlug}/reviews`} className="fsh-nav-link">Reviews</Link>}
+                {!isLanding && <Link href={`/store/${storeSlug}/blog`} className="fsh-nav-link">Blog</Link>}
                 {navPages.map((p) => (
                   <Link key={p.id} href={`/store/${storeSlug}/${p.slug}`} className="fsh-nav-link">{p.title}</Link>
                 ))}
@@ -312,6 +313,7 @@ export function FashionHeader({
             <Link href={`/store/${storeSlug}`} onClick={() => setMobileMenu(false)}>Home</Link>
             {!isLanding && <Link href={`/store/${storeSlug}/shop`} onClick={() => setMobileMenu(false)}>Shop</Link>}
             {!isLanding && <Link href={`/store/${storeSlug}/reviews`} onClick={() => setMobileMenu(false)}>Reviews</Link>}
+            {!isLanding && <Link href={`/store/${storeSlug}/blog`} onClick={() => setMobileMenu(false)}>Blog</Link>}
             {navPages.map((p) => (
               <Link key={p.id} href={`/store/${storeSlug}/${p.slug}`} onClick={() => setMobileMenu(false)}>{p.title}</Link>
             ))}
@@ -410,6 +412,7 @@ export function FashionFooter({
             <li><Link href={`/store/${storeSlug}/shop`}>Shop</Link></li>
             <li><Link href={`/store/${storeSlug}/order-tracking`}>Track Order</Link></li>
             <li><Link href={`/store/${storeSlug}/reviews`}>Reviews</Link></li>
+            <li><Link href={`/store/${storeSlug}/blog`}>Blog</Link></li>
             {navPages.slice(0, 4).map((p) => (
               <li key={p.id}><Link href={`/store/${storeSlug}/${p.slug}`}>{p.title}</Link></li>
             ))}

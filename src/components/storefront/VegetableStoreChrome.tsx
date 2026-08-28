@@ -109,7 +109,7 @@ export function VegetableHeader({ storeName, storeSlug, logo, navItems, reservat
 }
 
 export function VegetableFooter({ storeName, storeSlug, logo, description, navItems, socialLinks = [] }: FooterProps) {
-  const footerNav = navItems.filter((item) => ["Home", "Shop", "About", "Contact"].includes(item.label));
+  const footerNav = navItems.filter((item) => ["Home", "Shop", "Recipes", "About", "Contact"].includes(item.label));
   const safeSocialLinks = normalizeSocialLinks(socialLinks);
 
   return (

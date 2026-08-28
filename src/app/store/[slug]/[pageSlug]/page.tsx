@@ -731,7 +731,7 @@ export default function StorefrontPage() {
     const vegetableNavItems = [
       { label: "Home", href: `/store/${slug}` },
       { label: "Shop", href: `/store/${slug}/shop` },
-      { label: "Recipes", href: `/store/${slug}/recipe` },
+      { label: "Recipes", href: `/store/${slug}/blog` },
       { label: "About", href: `/store/${slug}/about` },
       { label: "Contact", href: `/store/${slug}/contact` },
     ];

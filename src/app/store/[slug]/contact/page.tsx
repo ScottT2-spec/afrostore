@@ -473,7 +473,7 @@ export default async function ContactPage({ params }: Props) {
     const vegetableNavItems = [
       { label: "Home", href: `/store/${slug}` },
       { label: "Menu", href: `/store/${slug}/menu` },
-      { label: "Recipe", href: `/store/${slug}/recipe` },
+      { label: "Recipe", href: `/store/${slug}/blog` },
       { label: "About", href: `/store/${slug}/about` },
       { label: "Contact", href: `/store/${slug}/contact` },
     ];
