@@ -36,7 +36,6 @@
     "jsbarcode": "^3.12.3",
     "jsdom": "^29.1.1",
     "lucide-react": "^1.17.0",
-    "markdown-pdf": "^11.0.0",
     "next": "16.2.9",
     "next-auth": "^4.24.14",
     "papaparse": "^5.6.0",
