@@ -1,15 +1,16 @@
-import { test } from "node:test";
-import assert from "node:assert/strict";
+import { describe, expect, it } from "vitest";
 import { asRecord } from "../../lib/json.js";
 
-test("asRecord returns an empty object for nullish and non-objects", () => {
-  assert.deepEqual(asRecord(null), {});
-  assert.deepEqual(asRecord(undefined), {});
-  assert.deepEqual(asRecord("test"), {});
-  assert.deepEqual(asRecord([1, 2, 3]), {});
-});
+describe("asRecord", () => {
+  it("returns an empty object for nullish and non-objects", () => {
+    expect(asRecord(null)).toEqual({});
+    expect(asRecord(undefined)).toEqual({});
+    expect(asRecord("test")).toEqual({});
+    expect(asRecord([1, 2, 3])).toEqual({});
+  });
 
-test("asRecord preserves plain objects", () => {
-  const input = { layout: "storefront", enabled: true };
-  assert.deepEqual(asRecord(input), input);
+  it("preserves plain objects", () => {
+    const input = { layout: "storefront", enabled: true };
+    expect(asRecord(input)).toEqual(input);
+  });
 });

@@ -1,0 +1,46 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  ci:
+    name: Lint, typecheck, unit tests
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+          cache: "npm"
+
+      - name: Install dependencies
+        run: npm ci
+
+      # Needed for @prisma/client's generated types to exist — this only
+      # reads prisma/schema.prisma, it does not need a live database.
+      - name: Generate Prisma client
+        run: npx prisma generate
+
+      - name: Lint (non-blocking — 1092 pre-existing issues, not gating merges yet)
+        run: npm run lint
+        continue-on-error: true
+
+      - name: Typecheck
+        run: npm run typecheck
+
+      - name: Unit tests
+        run: npm run test
+
+# To extend this to `next build` + the e2e suite later, add a
+# `postgres:` service block (see actions/setup-node docs / any standard
+# "Next.js + Prisma + GitHub Actions" example), point DATABASE_URL at it,
+# run `npx prisma migrate deploy` against that service, then `npm run
+# build` and `npm run test:e2e`. Left out for now to keep this fast and
+# because it needs a decision on which env vars (AI provider keys, SES,
+# payment gateway sandbox keys, etc.) are safe to stub vs. must be real
+# secrets in the repo's Actions settings.

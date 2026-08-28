@@ -9,6 +9,7 @@
     "migrate:deploy": "prisma migrate deploy",
     "start": "next start",
     "lint": "eslint",
+    "typecheck": "tsc --noEmit",
     "test": "vitest run",
     "test:e2e": "tsx src/__tests__/e2e/run.ts"
   },

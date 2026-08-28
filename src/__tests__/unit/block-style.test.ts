@@ -1,13 +1,12 @@
-import { describe, it } from "node:test";
-import assert from "node:assert/strict";
+import { describe, expect, it } from "vitest";
 
 import { getSectionStyle, resolveOpacity } from "@/components/storefront/block-style";
 
 describe("block style helpers", () => {
   it("normalizes opacity values for overlays", () => {
-    assert.equal(resolveOpacity(35, 0.35), 0.35);
-    assert.equal(resolveOpacity(0.4, 0.35), 0.4);
-    assert.equal(resolveOpacity(undefined, 0.35), 0.35);
+    expect(resolveOpacity(35, 0.35)).toBe(0.35);
+    expect(resolveOpacity(0.4, 0.35)).toBe(0.4);
+    expect(resolveOpacity(undefined, 0.35)).toBe(0.35);
   });
 
   it("maps background image and color bindings onto section styles", () => {
@@ -17,11 +16,11 @@ describe("block style helpers", () => {
       textColor: "#ffffff",
     });
 
-    assert.equal(style.backgroundImage, "url(/uploads/hero.jpg)");
-    assert.equal(style.backgroundSize, "cover");
-    assert.equal(style.backgroundPosition, "center center");
-    assert.equal(style.backgroundRepeat, "no-repeat");
-    assert.equal(style.backgroundColor, "#112233");
-    assert.equal(style.color, "#ffffff");
+    expect(style.backgroundImage).toBe("url(/uploads/hero.jpg)");
+    expect(style.backgroundSize).toBe("cover");
+    expect(style.backgroundPosition).toBe("center center");
+    expect(style.backgroundRepeat).toBe("no-repeat");
+    expect(style.backgroundColor).toBe("#112233");
+    expect(style.color).toBe("#ffffff");
   });
 });
