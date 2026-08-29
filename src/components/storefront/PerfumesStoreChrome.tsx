@@ -23,10 +23,11 @@ interface PerfumesHeaderProps {
   storeName: string; storeSlug: string; logo?: string | null;
   cartCount?: number; wishlistCount?: number;
   socialLinks?: Array<{ platform: string; url: string }>;
+  customNavItems?: NavItem[];
   isLanding?: boolean;
 }
 
-export function PerfumesHeader({ storeName, storeSlug, logo, cartCount = 0, wishlistCount = 0, isLanding = false }: PerfumesHeaderProps) {
+export function PerfumesHeader({ storeName, storeSlug, logo, cartCount = 0, wishlistCount = 0, customNavItems, isLanding = false }: PerfumesHeaderProps) {
   const [mobileMenu, setMobileMenu] = useState(false);
   const [showSearch, setShowSearch] = useState(false);
   const [showMegaMenu, setShowMegaMenu] = useState(false);
@@ -80,12 +81,14 @@ export function PerfumesHeader({ storeName, storeSlug, logo, cartCount = 0, wish
     @media (max-width: 767px) { .pfh-logo-text { font-size: 20px; } .pfh-icons { gap: 2px; } .pfh-icon-btn { width: 36px; height: 36px; font-size: 16px; } }
   `;
 
-  const navLinks = [
-    { label: "New", href: resolveStoreLink("/shop?sort=newest", storeSlug) },
-    { label: "Fragrances", href: resolveStoreLink("/fragrances", storeSlug), hasMega: true },
-    { label: "Journal", href: resolveStoreLink("/journal", storeSlug) },
-    { label: "About Us", href: resolveStoreLink("/about", storeSlug) },
-  ];
+  const navLinks = customNavItems && customNavItems.length > 0
+    ? customNavItems.map((item) => ({ label: item.label, href: resolveStoreLink(item.url, storeSlug), hasMega: false }))
+    : [
+        { label: "New", href: resolveStoreLink("/shop?sort=newest", storeSlug) },
+        { label: "Fragrances", href: resolveStoreLink("/fragrances", storeSlug), hasMega: true },
+        { label: "Journal", href: resolveStoreLink("/journal", storeSlug) },
+        { label: "About Us", href: resolveStoreLink("/about", storeSlug) },
+      ];
 
   return (
     <div className="pfh-header">

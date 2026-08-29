@@ -30,6 +30,7 @@ import { useWishlist } from "@/hooks/useWishlist";
 import { useABTestVariant, applyABTestOverrides, trackABTestConversion } from "@/hooks/useABTestVariant";
 import { applyPageCustomization, buildPageBackgroundStyle, buildThemeDataWithCustomization, filterVisiblePages, getResolvedPageSettings, normalizeSiteCustomization, type SiteCustomizationDocument } from "@/lib/site-customization";
 import { VegetableFooter, VegetableHeader } from "@/components/storefront/VegetableStoreChrome";
+import { resolveStoreLink } from "@/lib/template-link-utils";
 import { LandingGadgetContext, LandingGadgetFontLoader } from "@/components/storefront/LandingGadgetBlocks";
 import { AegisLandingContext, AegisLandingFontLoader } from "@/components/storefront/AegisLandingBlocks";
 import { ProkipAgentLandingContext, ProkipAgentFontLoader } from "@/components/storefront/ProkipAgentLandingBlocks";
@@ -550,13 +551,15 @@ export default function StorePage() {
   }
 
   if (data.templateSlug === "vegetables") {
-    const vegetableNavItems = [
-      { label: "Home", href: `/store/${slug}` },
-      { label: "Shop", href: `/store/${slug}/shop` },
-      { label: "Recipes", href: `/store/${slug}/blog` },
-      { label: "About", href: `/store/${slug}/about` },
-      { label: "Contact", href: `/store/${slug}/contact` },
-    ];
+    const vegetableNavItems = customNavItems && customNavItems.length > 0
+      ? customNavItems.map((item) => ({ label: item.label, href: resolveStoreLink(item.url, slug) }))
+      : [
+          { label: "Home", href: `/store/${slug}` },
+          { label: "Shop", href: `/store/${slug}/shop` },
+          { label: "Recipes", href: `/store/${slug}/blog` },
+          { label: "About", href: `/store/${slug}/about` },
+          { label: "Contact", href: `/store/${slug}/contact` },
+        ];
     // Use the parsed page document so tree-shaped page content renders correctly.
     const homeBlocks = homeContent.blocks;
 
@@ -631,6 +634,7 @@ export default function StorePage() {
             categories={categories}
             cartCount={cartCount}
             wishlistCount={wishlistCount}
+            customNavItems={customNavItems}
           />
           <TemplateStoreContextProvider
             templateSlug={data.templateSlug}
@@ -755,6 +759,7 @@ export default function StorePage() {
           categories={categories}
           cartCount={cartCount}
           wishlistCount={wishlistCount}
+          customNavItems={customNavItems}
         />
       ) : isAiTemplate ? (
         /* AI template — minimal/no chrome header, the blocks handle it */
