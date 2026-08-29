@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/db";
 import { asRecord } from "@/lib/json";
-import { buildThemeDataWithCustomization, loadSiteCustomizationSafely } from "@/lib/site-customization";
+import { buildThemeDataWithCustomization, loadSiteCustomizationSafely, getPageCustomization } from "@/lib/site-customization";
 import { mergeStoredTemplatePages } from "@/lib/templates/site-instance";
 import { ensurePerfumePages } from "@/lib/templates/perfume-pages";
 import { ensureVegetablePages } from "@/lib/templates/vegetable-pages";
@@ -611,6 +611,22 @@ export async function GET(_req: NextRequest, { params }: Params) {
     const mergedPages = mergeStoredTemplatePages(page ? [page] : syntheticPage ? [syntheticPage] : [], activeTemplate?.pages);
     const fallbackPage = mergedPages.find((item) => item.slug === pageSlug) || mergedPages[0];
     if (!fallbackPage) return notFound("Page not found");
+
+    // Apply the per-page overrides from Dashboard -> Editor -> Page tab.
+    // Previously these were saved but never read on the live storefront —
+    // this route (the actual page detail view) never applied them at all,
+    // even though the nav-listing route already respected Hidden/Show-in-
+    // navigation. Published/title/meta/background overrides were all
+    // silent no-ops here specifically.
+    const pageOverride = getPageCustomization(resolvedCustomization, fallbackPage as any);
+    if (pageOverride) {
+      if (pageOverride.isPublished === false || pageOverride.hidden === true) {
+        return notFound("Page not found");
+      }
+      if (pageOverride.title) (fallbackPage as any).title = pageOverride.title;
+      if (pageOverride.metaTitle !== undefined) (fallbackPage as any).metaTitle = pageOverride.metaTitle;
+      if (pageOverride.metaDescription !== undefined) (fallbackPage as any).metaDescription = pageOverride.metaDescription;
+    }
 
     // Preserve nested editor trees and template block documents as-is.
     // Only wrap bare arrays so the page component can still parse them safely.

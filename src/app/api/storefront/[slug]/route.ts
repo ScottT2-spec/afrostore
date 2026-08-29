@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/db";
 import { asRecord } from "@/lib/json";
-import { buildThemeDataWithCustomization, loadSiteCustomizationSafely } from "@/lib/site-customization";
+import { buildThemeDataWithCustomization, loadSiteCustomizationSafely, getPageCustomization } from "@/lib/site-customization";
 import { mergeStoredTemplatePages } from "@/lib/templates/site-instance";
 import { ensurePerfumePages } from "@/lib/templates/perfume-pages";
 import { ensureVegetablePages } from "@/lib/templates/vegetable-pages";
@@ -381,6 +381,30 @@ export async function GET(req: NextRequest, { params }: Params) {
     if (activeTemplate?.template?.slug === "kids") {
       publicPages = appendKidsPages(publicPages as any) as any;
     }
+
+    // Apply the per-page overrides set in Dashboard -> Editor -> Page tab.
+    // Previously this whole customization layer (title/slug/meta overrides,
+    // the Published/Hidden/Show-in-navigation toggles) was saved but never
+    // read anywhere on the live storefront — every one of those fields was
+    // a silent no-op. getPageCustomization() had zero callers before this.
+    publicPages = publicPages
+      .map((page: any) => {
+        const override = getPageCustomization(resolvedCustomization, page);
+        if (!override) return page;
+        // The customization "Published" toggle can additionally hide an
+        // otherwise-published page; it can't make an unpublished page
+        // visible, since the base query above already filtered those out.
+        if (override.isPublished === false || override.hidden === true) return null;
+        return {
+          ...page,
+          title: override.title || page.title,
+          slug: override.slug || page.slug,
+          metaTitle: override.metaTitle ?? page.metaTitle,
+          metaDescription: override.metaDescription ?? page.metaDescription,
+          showInNavigation: override.showInNavigation !== false,
+        };
+      })
+      .filter((page: any): page is NonNullable<typeof page> => page !== null);
 
     return success({
       store: {
