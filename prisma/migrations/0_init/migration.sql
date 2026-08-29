@@ -1,0 +1,13 @@
+-- PLACEHOLDER: replace this file with the real output before deploying.
+--
+-- Generate it with (run on a machine with normal internet access,
+-- NOT in a network-restricted sandbox):
+--
+--   npx prisma migrate diff \
+--     --from-empty \
+--     --to-schema-datamodel prisma/schema.prisma \
+--     --script > prisma/migrations/0_init/migration.sql
+--
+-- This file currently contains NO SQL. Do not deploy until it is
+-- replaced with real output from the command above, or the
+-- production database will end up with zero tables.
