@@ -20,10 +20,17 @@ jobs:
 
       - name: Generate baseline SQL from current schema
         run: |
+          set +e
           npx prisma migrate diff \
             --from-empty \
             --to-schema-datamodel prisma/schema.prisma \
-            --script > prisma/migrations/0_init/migration.sql
+            --script > prisma/migrations/0_init/migration.sql 2> err.log
+          code=$?
+          if [ $code -ne 0 ]; then
+            msg=$(tail -c 900 err.log | tr '\n' ' ')
+            echo "::error::PRISMA_DIFF_FAILED: $msg"
+            exit $code
+          fi
 
       - name: Commit and push generated migration
         run: |
