@@ -691,6 +691,7 @@ export default function StorePage() {
           onSearchChange={setSearchQuery}
           onSearch={handleSearch}
           isLanding={isLanding}
+          customNavItems={customNavItems}
         />
       ) : isRetailTemplate ? (
         <RetailHeader
@@ -703,6 +704,7 @@ export default function StorePage() {
           onSearchChange={setSearchQuery}
           onSearch={handleSearch}
           isLanding={isLanding}
+          customNavItems={customNavItems}
         />
       ) : isHealthTemplate ? (
         <HealthHeader
@@ -717,6 +719,7 @@ export default function StorePage() {
           topBarText={data.deliveryZones.some((z: any) => z.freeAbove)
             ? `FREE DELIVERY ON ORDERS ABOVE ${formatCurrency(Number(data.deliveryZones.find((z: any) => z.freeAbove)?.freeAbove || 0), currency)}`
             : `Free shipping on all orders over $30!`}
+          customNavItems={customNavItems}
         />
       ) : isTShirtsPrintsTemplate ? (
         <TShirtsPrintsHeader
@@ -728,6 +731,7 @@ export default function StorePage() {
           searchQuery={searchQuery}
           onSearchChange={setSearchQuery}
           onSearch={handleSearch}
+          customNavItems={customNavItems}
         />
       ) : isToysTemplate ? (
         <FashionHeader
@@ -735,6 +739,7 @@ export default function StorePage() {
           storeSlug={slug}
           logo={store.logo}
           isLanding={false}
+          customNavItems={customNavItems}
         />
       ) : isKidsTemplate ? (
         <KidsHeader
@@ -750,6 +755,7 @@ export default function StorePage() {
           topBarText={data.deliveryZones.some((z: any) => z.freeAbove)
             ? `FREE DELIVERY ON ORDERS ABOVE ${formatCurrency(Number(data.deliveryZones.find((z: any) => z.freeAbove)?.freeAbove || 0), currency)}`
             : `Sign up for our newsletter to get 10% off for the week!`}
+          customNavItems={customNavItems}
         />
       ) : isPerfumesTemplate ? (
         <PerfumesHeader

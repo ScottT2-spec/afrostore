@@ -988,6 +988,7 @@ export interface KidsHeaderProps {
   searchQuery?: string;
   onSearchChange?: (q: string) => void;
   topBarText?: string;
+  customNavItems?: Array<{ id: string; label: string; url: string; type: string; openInNewTab?: boolean }>;
 }
 
 export function KidsHeader({
@@ -1001,6 +1002,7 @@ export function KidsHeader({
   searchQuery = "",
   onSearchChange,
   topBarText = "Sign up for our newsletter to get 30% off for the week!",
+  customNavItems,
 }: KidsHeaderProps) {
   const [mobileOpen, setMobileOpen] = useState(false);
   const [searchOpen, setSearchOpen] = useState(false);
@@ -1077,9 +1079,17 @@ export function KidsHeader({
 
           {/* Left nav */}
           <nav className="kh-nav">
-            <Link href={`${base}/about`}>About Us</Link>
-            <Link href={`${base}/contact`}>Contact Us</Link>
-            <Link href={`${base}/blog`}>Blog</Link>
+            {customNavItems && customNavItems.length > 0 ? (
+              customNavItems.map((item) => (
+                <Link key={item.id} href={item.url.startsWith("/") ? `${base}${item.url}` : item.url} target={item.openInNewTab ? "_blank" : undefined}>{item.label}</Link>
+              ))
+            ) : (
+              <>
+                <Link href={`${base}/about`}>About Us</Link>
+                <Link href={`${base}/contact`}>Contact Us</Link>
+                <Link href={`${base}/blog`}>Blog</Link>
+              </>
+            )}
           </nav>
 
           {/* Center logo */}
