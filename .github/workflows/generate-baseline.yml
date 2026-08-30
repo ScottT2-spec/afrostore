@@ -3,6 +3,9 @@ name: Generate Prisma baseline migration
 on:
   workflow_dispatch: {}
 
+permissions:
+  contents: write
+
 jobs:
   generate:
     runs-on: ubuntu-latest
@@ -34,8 +37,15 @@ jobs:
 
       - name: Commit and push generated migration
         run: |
+          set +e
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
           git add prisma/migrations/0_init/migration.sql
           git diff --cached --quiet && echo "No changes to commit" || git commit -m "Generate Prisma baseline migration SQL (automated)"
-          git push
+          git push 2> push_err.log
+          code=$?
+          if [ $code -ne 0 ]; then
+            msg=$(tail -c 900 push_err.log | tr '\n' ' ')
+            echo "::error::GIT_PUSH_FAILED: $msg"
+            exit $code
+          fi
