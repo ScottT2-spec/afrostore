@@ -14,12 +14,22 @@ export default function StylePanel({ element, onUpdate }: StylePanelProps) {
     );
   }
   const settings = element.settings || {};
+  const content = element.content && typeof element.content === "object" ? element.content : {};
 
+  // Same bug class as AdvancedPanel's Background Image: editorNodeToBlock
+  // merges settings then content, content wins on collision — so writing
+  // a style change to settings ONLY (as this used to) silently gets
+  // shadowed on the live site by any stale value already in content for
+  // that same key (e.g. from an AI-generated page or template preset).
+  // Mirroring into content too, same fix pattern as AdvancedPanel.
   const updateSetting = (key: string, value: any) => {
-    console.log("StylePanel updateSetting - key:", key, "value:", value);
     onUpdate({
       settings: {
         ...settings,
+        [key]: value,
+      },
+      content: {
+        ...content,
         [key]: value,
       },
     });
@@ -34,7 +44,7 @@ export default function StylePanel({ element, onUpdate }: StylePanelProps) {
     const hasNoStyle = !next.borderStyle || next.borderStyle === "none";
 
     if (key === "borderStyle" && value === "none") {
-      onUpdate({ settings: next });
+      onUpdate({ settings: next, content: { ...content, [key]: value } });
       return;
     }
 
@@ -43,7 +53,10 @@ export default function StylePanel({ element, onUpdate }: StylePanelProps) {
       if (hasNoStyle) next.borderStyle = "solid";
     }
 
-    onUpdate({ settings: next });
+    onUpdate({
+      settings: next,
+      content: { ...content, borderColor: next.borderColor, borderWidth: next.borderWidth, borderStyle: next.borderStyle },
+    });
   };
 
   return (
