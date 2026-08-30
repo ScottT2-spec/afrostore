@@ -726,11 +726,12 @@ export interface InteriorHeaderProps {
   onSearch?: (q: string) => void;
   searchQuery?: string;
   onSearchChange?: (q: string) => void;
+  customNavItems?: Array<{ id: string; label: string; url: string; type: string; openInNewTab?: boolean }>;
 }
 
 export function InteriorHeader({
   storeName, storeSlug, logo, cartCount = 0, wishlistCount = 0,
-  onSearch, searchQuery = "", onSearchChange,
+  onSearch, searchQuery = "", onSearchChange, customNavItems,
 }: InteriorHeaderProps) {
   const [mobileOpen, setMobileOpen] = useState(false);
   const [searchOpen, setSearchOpen] = useState(false);
@@ -801,11 +802,20 @@ export function InteriorHeader({
 
           {/* Center nav */}
           <nav className="ih-center">
-            <Link href={`${base}/shop`}>Shop All</Link>
-            <Link href={`${base}/shop`}>Decor</Link>
-            <Link href={`${base}/shop`}>Office</Link>
-            <Link href={`${base}/shop`}>Living Room</Link>
-            <Link href={`${base}/shop`}>Bedroom</Link>
+            {customNavItems && customNavItems.length > 0 ? (
+              customNavItems.map((item) => (
+                <Link key={item.id} href={resolveStoreLink(item.url, storeSlug)} target={item.openInNewTab ? "_blank" : undefined}>{item.label}</Link>
+              ))
+            ) : (
+              <>
+                <Link href={`${base}/shop`}>Shop All</Link>
+                <Link href={`${base}/shop`}>Decor</Link>
+                <Link href={`${base}/shop`}>Office</Link>
+                <Link href={`${base}/shop`}>Living Room</Link>
+                <Link href={`${base}/shop`}>Bedroom</Link>
+                <Link href={`${base}/blog`}>Blog</Link>
+              </>
+            )}
           </nav>
 
           {/* Right */}
@@ -829,11 +839,20 @@ export function InteriorHeader({
 
         <div className={`ih-mob-menu ${mobileOpen ? "ih-open" : ""}`}>
           <Link href={base} onClick={() => setMobileOpen(false)}>Home</Link>
-          <Link href={`${base}/shop`} onClick={() => setMobileOpen(false)}>Shop All</Link>
-          <Link href={`${base}/shop`} onClick={() => setMobileOpen(false)}>Decor</Link>
-          <Link href={`${base}/shop`} onClick={() => setMobileOpen(false)}>Office</Link>
-          <Link href={`${base}/shop`} onClick={() => setMobileOpen(false)}>Living Room</Link>
-          <Link href={`${base}/shop`} onClick={() => setMobileOpen(false)}>Bedroom</Link>
+          {customNavItems && customNavItems.length > 0 ? (
+            customNavItems.map((item) => (
+              <Link key={item.id} href={resolveStoreLink(item.url, storeSlug)} onClick={() => setMobileOpen(false)}>{item.label}</Link>
+            ))
+          ) : (
+            <>
+              <Link href={`${base}/shop`} onClick={() => setMobileOpen(false)}>Shop All</Link>
+              <Link href={`${base}/shop`} onClick={() => setMobileOpen(false)}>Decor</Link>
+              <Link href={`${base}/shop`} onClick={() => setMobileOpen(false)}>Office</Link>
+              <Link href={`${base}/shop`} onClick={() => setMobileOpen(false)}>Living Room</Link>
+              <Link href={`${base}/shop`} onClick={() => setMobileOpen(false)}>Bedroom</Link>
+              <Link href={`${base}/blog`} onClick={() => setMobileOpen(false)}>Blog</Link>
+            </>
+          )}
           <Link href={`${base}/shop`} onClick={() => setMobileOpen(false)}>Our Story</Link>
           <Link href={`${base}/shop`} onClick={() => setMobileOpen(false)}>Contact</Link>
           <Link href={`${base}/order-tracking`} onClick={() => setMobileOpen(false)}>Track Order</Link>

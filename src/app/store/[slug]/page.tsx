@@ -17,7 +17,6 @@ import { ToysFontLoader } from "@/components/storefront/ToysTemplateBlocks";
 import { TemplateStoreContextProvider } from "@/components/storefront/TemplateStoreContextProvider";
 import { PerfumesFontLoader, PerfumesFooter, PerfumesHeader } from "@/components/storefront/PerfumesTemplateBlocks";
 import { FashionHeader, FashionFooter, type NavItem } from "@/components/storefront/FashionStoreChrome";
-import { GardenHeader, GardenFooter } from "@/components/storefront/GardenStoreChrome";
 import { TShirtsPrintsFooter, TShirtsPrintsHeader } from "@/components/storefront/TShirtsPrintsStoreChrome";
 import { RetailHeader, RetailFooter } from "@/components/storefront/RetailTemplateBlocks";
 import { buildTemplatePageContent } from "@/lib/templates/template-tree";
@@ -678,6 +677,7 @@ export default function StorePage() {
             storeName={store.name}
             storeSlug={slug}
             logo={store.logo}
+            customNavItems={customNavItems}
           />
         </>
       ) : isCosmeticsTemplate ? (
