@@ -1,5 +1,5 @@
 "use client";
-import { ArrowRight, ChevronLeft, Loader2, Plus } from "lucide-react";
+import { ArrowRight, ChevronDown, ChevronLeft, ChevronUp, Loader2, Plus } from "lucide-react";
 import {
   AlertCircle,
   Building2,
@@ -308,6 +308,10 @@ export default function CheckoutPage() {
 
   // Status
   const [placing, setPlacing] = useState(false);
+  // Mobile order-summary toggle — matches CartFlows' Instant Checkout
+  // collapsed-order-summary template: closed by default on small screens,
+  // showing just a "Order Summary ▾ [total]" bar until tapped.
+  const [mobileSummaryOpen, setMobileSummaryOpen] = useState(false);
   const [orderError, setOrderError] = useState("");
   const [orderSuccess, setOrderSuccess] = useState<{ orderNumber: string; orderId: string } | null>(null);
 
@@ -792,6 +796,21 @@ export default function CheckoutPage() {
           {/* Order Receipt — shown first on mobile, right column on desktop */}
           <div className="order-first lg:order-2 lg:col-span-2">
             <div className="lg:sticky lg:top-24">
+              {/* Mobile collapsed order-summary toggle (CartFlows: closed by
+                  default, shows running total, expands the same card below) */}
+              <button
+                type="button"
+                onClick={() => setMobileSummaryOpen((v) => !v)}
+                className="flex w-full items-center justify-between rounded-t-xl border border-[var(--co-line)] bg-white px-4 py-3 lg:hidden"
+                aria-expanded={mobileSummaryOpen}
+              >
+                <span className="flex items-center gap-1.5 text-sm font-semibold text-[var(--co-ink)]">
+                  Order summary
+                  {mobileSummaryOpen ? <ChevronUp className="h-4 w-4" /> : <ChevronDown className="h-4 w-4" />}
+                </span>
+                <span className="co-font-mono text-sm font-bold text-[var(--co-ink)]">{formatCurrency(total, currency)}</span>
+              </button>
+              <div className={`${mobileSummaryOpen ? "block" : "hidden"} lg:block`}>
               <div className="co-scallop h-3 bg-white" />
               <div className="border-x border-[var(--co-line)] bg-white px-6 py-6">
                 <div className="mb-1 flex items-center gap-1.5 text-[11px] font-bold uppercase tracking-widest text-[var(--co-indigo)]">
@@ -997,6 +1016,7 @@ export default function CheckoutPage() {
               </div>
               <div className="co-barcode h-5 bg-white" />
               <div className="co-scallop h-3 rotate-180 bg-white" />
+              </div>
             </div>
           </div>
 
