@@ -50,13 +50,14 @@ export interface RetailHeaderProps {
   onSearchChange?: (q: string) => void;
   topBarText?: string;
   isLanding?: boolean;
+  customNavItems?: Array<{ id: string; label: string; url: string; type: string; openInNewTab?: boolean }>;
 }
 
 export function RetailHeader({
   storeName, storeSlug, logo, cartCount = 0, wishlistCount = 0,
   onSearch, searchQuery = "", onSearchChange,
   topBarText = "Free delivery on orders over $200.00",
-  isLanding = false,
+  isLanding = false, customNavItems,
 }: RetailHeaderProps) {
   const [mobileMenu, setMobileMenu] = useState(false);
   const [showSearch, setShowSearch] = useState(false);
@@ -175,20 +176,36 @@ export function RetailHeader({
       <nav className="rh-nav">
         <div className="rh-nav-inner">
           <div className="rh-nav-links">
-            <Link href={resolveStoreLink("/shop", storeSlug)} className="rh-nav-link">Shop</Link>
-            <Link href={resolveStoreLink("/about", storeSlug)} className="rh-nav-link">About Us</Link>
-            <Link href={resolveStoreLink("/projects", storeSlug)} className="rh-nav-link">Projects</Link>
-            {!isLanding && <Link href={resolveStoreLink("/contact", storeSlug)} className="rh-nav-link">Contact Us</Link>}
+            {customNavItems && customNavItems.length > 0 ? (
+              customNavItems.map((item) => (
+                <Link key={item.id} href={resolveStoreLink(item.url, storeSlug)} className="rh-nav-link" target={item.openInNewTab ? "_blank" : undefined}>{item.label}</Link>
+              ))
+            ) : (
+              <>
+                <Link href={resolveStoreLink("/shop", storeSlug)} className="rh-nav-link">Shop</Link>
+                <Link href={resolveStoreLink("/about", storeSlug)} className="rh-nav-link">About Us</Link>
+                <Link href={resolveStoreLink("/projects", storeSlug)} className="rh-nav-link">Projects</Link>
+                {!isLanding && <Link href={resolveStoreLink("/contact", storeSlug)} className="rh-nav-link">Contact Us</Link>}
+              </>
+            )}
           </div>
         </div>
       </nav>
 
       {/* Mobile Menu */}
       <div className={`rh-mobile-menu ${mobileMenu ? "rh-open" : ""}`}>
-        <Link href={resolveStoreLink("/shop", storeSlug)} onClick={() => setMobileMenu(false)}>Shop</Link>
-        <Link href={resolveStoreLink("/about", storeSlug)} onClick={() => setMobileMenu(false)}>About Us</Link>
-        <Link href={resolveStoreLink("/projects", storeSlug)} onClick={() => setMobileMenu(false)}>Projects</Link>
-        {!isLanding && <Link href={resolveStoreLink("/contact", storeSlug)} onClick={() => setMobileMenu(false)}>Contact Us</Link>}
+        {customNavItems && customNavItems.length > 0 ? (
+          customNavItems.map((item) => (
+            <Link key={item.id} href={resolveStoreLink(item.url, storeSlug)} onClick={() => setMobileMenu(false)}>{item.label}</Link>
+          ))
+        ) : (
+          <>
+            <Link href={resolveStoreLink("/shop", storeSlug)} onClick={() => setMobileMenu(false)}>Shop</Link>
+            <Link href={resolveStoreLink("/about", storeSlug)} onClick={() => setMobileMenu(false)}>About Us</Link>
+            <Link href={resolveStoreLink("/projects", storeSlug)} onClick={() => setMobileMenu(false)}>Projects</Link>
+            {!isLanding && <Link href={resolveStoreLink("/contact", storeSlug)} onClick={() => setMobileMenu(false)}>Contact Us</Link>}
+          </>
+        )}
       </div>
     </div>
   );

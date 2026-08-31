@@ -1414,6 +1414,7 @@ export interface CosmeticsHeaderProps {
   searchQuery?: string;
   onSearchChange?: (q: string) => void;
   isLanding?: boolean;
+  customNavItems?: Array<{ id: string; label: string; url: string; type: string; openInNewTab?: boolean }>;
 }
 
 export function CosmeticsHeader({
@@ -1426,6 +1427,7 @@ export function CosmeticsHeader({
   searchQuery = "",
   onSearchChange,
   isLanding = false,
+  customNavItems,
 }: CosmeticsHeaderProps) {
   const [mobileMenu, setMobileMenu] = useState(false);
   const [showSearch, setShowSearch] = useState(false);
@@ -1441,12 +1443,14 @@ export function CosmeticsHeader({
     }
   };
 
-  const navItems = [
-    { label: "Home", href: "/" },
-    { label: "Shop", href: "/shop" },
-    { label: "Blog", href: "/blog" },
-    { label: "Terms and Conditions", href: "/terms" },
-  ];
+  const navItems = customNavItems && customNavItems.length > 0
+    ? customNavItems.map((item) => ({ label: item.label, href: item.url }))
+    : [
+        { label: "Home", href: "/" },
+        { label: "Shop", href: "/shop" },
+        { label: "Blog", href: "/blog" },
+        { label: "Terms and Conditions", href: "/terms" },
+      ];
 
   const iconLinks: Array<{ icon: string; label: string; action?: () => void; href?: string; count?: number }> = [
     { icon: "🔍", label: "Search", action: () => setShowSearch(!showSearch) },

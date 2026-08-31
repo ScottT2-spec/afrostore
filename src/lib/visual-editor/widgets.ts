@@ -329,7 +329,12 @@ export const widgetDefinitions: WidgetDefinition[] = [
     description: "Add an image gallery",
     icon: "Images",
     defaultSettings: {
-      images: [],
+      // NOT [] — an empty array gives the editor's "Add item" button no
+      // existing item to clone the shape from, so it creates a plain
+      // string instead of {src, alt}. The live renderer (GalleryBlock)
+      // reads img.src on every item, so a plain string item never renders
+      // — this is why a brand-new gallery/slider felt URL-only/broken.
+      images: [{ src: "", alt: "" }],
       columns: 3,
       gap: "16",
       lightbox: true,
@@ -345,7 +350,7 @@ export const widgetDefinitions: WidgetDefinition[] = [
     description: "Add an image slider/carousel",
     icon: "ChevronLeftCircle",
     defaultSettings: {
-      images: [],
+      images: [{ src: "", alt: "" }],
       autoplay: false,
       interval: 5000,
       showArrows: true,

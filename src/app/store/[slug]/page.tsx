@@ -17,7 +17,6 @@ import { ToysFontLoader } from "@/components/storefront/ToysTemplateBlocks";
 import { TemplateStoreContextProvider } from "@/components/storefront/TemplateStoreContextProvider";
 import { PerfumesFontLoader, PerfumesFooter, PerfumesHeader } from "@/components/storefront/PerfumesTemplateBlocks";
 import { FashionHeader, FashionFooter, type NavItem } from "@/components/storefront/FashionStoreChrome";
-import { GardenHeader, GardenFooter } from "@/components/storefront/GardenStoreChrome";
 import { TShirtsPrintsFooter, TShirtsPrintsHeader } from "@/components/storefront/TShirtsPrintsStoreChrome";
 import { RetailHeader, RetailFooter } from "@/components/storefront/RetailTemplateBlocks";
 import { buildTemplatePageContent } from "@/lib/templates/template-tree";
@@ -30,6 +29,7 @@ import { useWishlist } from "@/hooks/useWishlist";
 import { useABTestVariant, applyABTestOverrides, trackABTestConversion } from "@/hooks/useABTestVariant";
 import { applyPageCustomization, buildPageBackgroundStyle, buildThemeDataWithCustomization, filterVisiblePages, getResolvedPageSettings, normalizeSiteCustomization, type SiteCustomizationDocument } from "@/lib/site-customization";
 import { VegetableFooter, VegetableHeader } from "@/components/storefront/VegetableStoreChrome";
+import { resolveStoreLink } from "@/lib/template-link-utils";
 import { LandingGadgetContext, LandingGadgetFontLoader } from "@/components/storefront/LandingGadgetBlocks";
 import { AegisLandingContext, AegisLandingFontLoader } from "@/components/storefront/AegisLandingBlocks";
 import { ProkipAgentLandingContext, ProkipAgentFontLoader } from "@/components/storefront/ProkipAgentLandingBlocks";
@@ -550,13 +550,15 @@ export default function StorePage() {
   }
 
   if (data.templateSlug === "vegetables") {
-    const vegetableNavItems = [
-      { label: "Home", href: `/store/${slug}` },
-      { label: "Shop", href: `/store/${slug}/shop` },
-      { label: "Recipes", href: `/store/${slug}/blog` },
-      { label: "About", href: `/store/${slug}/about` },
-      { label: "Contact", href: `/store/${slug}/contact` },
-    ];
+    const vegetableNavItems = customNavItems && customNavItems.length > 0
+      ? customNavItems.map((item) => ({ label: item.label, href: resolveStoreLink(item.url, slug) }))
+      : [
+          { label: "Home", href: `/store/${slug}` },
+          { label: "Shop", href: `/store/${slug}/shop` },
+          { label: "Recipes", href: `/store/${slug}/blog` },
+          { label: "About", href: `/store/${slug}/about` },
+          { label: "Contact", href: `/store/${slug}/contact` },
+        ];
     // Use the parsed page document so tree-shaped page content renders correctly.
     const homeBlocks = homeContent.blocks;
 
@@ -631,6 +633,7 @@ export default function StorePage() {
             categories={categories}
             cartCount={cartCount}
             wishlistCount={wishlistCount}
+            customNavItems={customNavItems}
           />
           <TemplateStoreContextProvider
             templateSlug={data.templateSlug}
@@ -674,6 +677,7 @@ export default function StorePage() {
             storeName={store.name}
             storeSlug={slug}
             logo={store.logo}
+            customNavItems={customNavItems}
           />
         </>
       ) : isCosmeticsTemplate ? (
@@ -687,6 +691,7 @@ export default function StorePage() {
           onSearchChange={setSearchQuery}
           onSearch={handleSearch}
           isLanding={isLanding}
+          customNavItems={customNavItems}
         />
       ) : isRetailTemplate ? (
         <RetailHeader
@@ -699,6 +704,7 @@ export default function StorePage() {
           onSearchChange={setSearchQuery}
           onSearch={handleSearch}
           isLanding={isLanding}
+          customNavItems={customNavItems}
         />
       ) : isHealthTemplate ? (
         <HealthHeader
@@ -713,6 +719,7 @@ export default function StorePage() {
           topBarText={data.deliveryZones.some((z: any) => z.freeAbove)
             ? `FREE DELIVERY ON ORDERS ABOVE ${formatCurrency(Number(data.deliveryZones.find((z: any) => z.freeAbove)?.freeAbove || 0), currency)}`
             : `Free shipping on all orders over $30!`}
+          customNavItems={customNavItems}
         />
       ) : isTShirtsPrintsTemplate ? (
         <TShirtsPrintsHeader
@@ -724,6 +731,7 @@ export default function StorePage() {
           searchQuery={searchQuery}
           onSearchChange={setSearchQuery}
           onSearch={handleSearch}
+          customNavItems={customNavItems}
         />
       ) : isToysTemplate ? (
         <FashionHeader
@@ -731,6 +739,7 @@ export default function StorePage() {
           storeSlug={slug}
           logo={store.logo}
           isLanding={false}
+          customNavItems={customNavItems}
         />
       ) : isKidsTemplate ? (
         <KidsHeader
@@ -746,6 +755,7 @@ export default function StorePage() {
           topBarText={data.deliveryZones.some((z: any) => z.freeAbove)
             ? `FREE DELIVERY ON ORDERS ABOVE ${formatCurrency(Number(data.deliveryZones.find((z: any) => z.freeAbove)?.freeAbove || 0), currency)}`
             : `Sign up for our newsletter to get 10% off for the week!`}
+          customNavItems={customNavItems}
         />
       ) : isPerfumesTemplate ? (
         <PerfumesHeader
@@ -755,6 +765,7 @@ export default function StorePage() {
           categories={categories}
           cartCount={cartCount}
           wishlistCount={wishlistCount}
+          customNavItems={customNavItems}
         />
       ) : isAiTemplate ? (
         /* AI template — minimal/no chrome header, the blocks handle it */

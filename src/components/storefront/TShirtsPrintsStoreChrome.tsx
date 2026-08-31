@@ -14,6 +14,7 @@ interface TShirtsPrintsHeaderProps {
   onSearch?: (query: string) => void;
   searchQuery?: string;
   onSearchChange?: (query: string) => void;
+  customNavItems?: Array<{ id: string; label: string; url: string; type: string; openInNewTab?: boolean }>;
 }
 
 interface SocialLink {
@@ -48,16 +49,19 @@ export function TShirtsPrintsHeader({
   onSearch,
   searchQuery = "",
   onSearchChange,
+  customNavItems,
 }: TShirtsPrintsHeaderProps) {
   const [mobileMenu, setMobileMenu] = useState(false);
   const { customer, isLoggedIn } = useCustomerAuth(storeSlug);
-  const navItems = [
-    { label: "Home", href: `/store/${storeSlug}` },
-    { label: "Shop", href: `/store/${storeSlug}/shop` },
-    { label: "Blog", href: `/store/${storeSlug}/blog` },
-    { label: "About us", href: `/store/${storeSlug}/about-us` },
-    { label: "Contact us", href: `/store/${storeSlug}/contact-us` },
-  ];
+  const navItems = customNavItems && customNavItems.length > 0
+    ? customNavItems.map((item) => ({ label: item.label, href: item.url.startsWith("/") ? `/store/${storeSlug}${item.url}` : item.url }))
+    : [
+        { label: "Home", href: `/store/${storeSlug}` },
+        { label: "Shop", href: `/store/${storeSlug}/shop` },
+        { label: "Blog", href: `/store/${storeSlug}/blog` },
+        { label: "About us", href: `/store/${storeSlug}/about-us` },
+        { label: "Contact us", href: `/store/${storeSlug}/contact-us` },
+      ];
 
   const css = `
     .tp-header { position: sticky; top: 0; z-index: 50; background: #fff; border-bottom: 1px solid #ececec; }

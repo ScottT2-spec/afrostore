@@ -795,12 +795,14 @@ export interface HealthHeaderProps {
   searchQuery?: string;
   onSearchChange?: (q: string) => void;
   topBarText?: string;
+  customNavItems?: Array<{ id: string; label: string; url: string; type: string; openInNewTab?: boolean }>;
 }
 
 export function HealthHeader({
   storeName, storeSlug, logo, cartCount = 0, wishlistCount = 0,
   onSearch, searchQuery = "", onSearchChange,
   topBarText = "Free shipping on all orders over $30!",
+  customNavItems,
 }: HealthHeaderProps) {
   const [mobileOpen, setMobileOpen] = useState(false);
   const [searchOpen, setSearchOpen] = useState(false);
@@ -864,8 +866,16 @@ export function HealthHeader({
               : <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M3 12h18M3 6h18M3 18h18"/></svg>}
           </button>
           <nav className="hh-nav">
-            <Link href={`${base}/shop`}>Shop</Link>
-            <Link href={`${base}/about`}>About Us</Link>
+            {customNavItems && customNavItems.length > 0 ? (
+              customNavItems.map((item) => (
+                <Link key={item.id} href={item.url.startsWith("/") ? `${base}${item.url}` : item.url} target={item.openInNewTab ? "_blank" : undefined}>{item.label}</Link>
+              ))
+            ) : (
+              <>
+                <Link href={`${base}/shop`}>Shop</Link>
+                <Link href={`${base}/about`}>About Us</Link>
+              </>
+            )}
           </nav>
           <Link href={base} className="hh-logo">
             {logo ? <img src={logo} alt={storeName} /> : <span className="hh-logo-text">{storeName}</span>}
@@ -886,9 +896,17 @@ export function HealthHeader({
         </div>
         <div className={`hh-mob-menu ${mobileOpen ? "hh-open" : ""}`}>
           <Link href={base} onClick={() => setMobileOpen(false)}>Home</Link>
-          <Link href={`${base}/shop`} onClick={() => setMobileOpen(false)}>Shop</Link>
-          <Link href={`${base}/about`} onClick={() => setMobileOpen(false)}>About Us</Link>
-          <Link href={`${base}/blog`} onClick={() => setMobileOpen(false)}>Blog</Link>
+          {customNavItems && customNavItems.length > 0 ? (
+            customNavItems.map((item) => (
+              <Link key={item.id} href={item.url.startsWith("/") ? `${base}${item.url}` : item.url} onClick={() => setMobileOpen(false)}>{item.label}</Link>
+            ))
+          ) : (
+            <>
+              <Link href={`${base}/shop`} onClick={() => setMobileOpen(false)}>Shop</Link>
+              <Link href={`${base}/about`} onClick={() => setMobileOpen(false)}>About Us</Link>
+              <Link href={`${base}/blog`} onClick={() => setMobileOpen(false)}>Blog</Link>
+            </>
+          )}
           <Link href={`${base}/contact`} onClick={() => setMobileOpen(false)}>Contact Us</Link>
           <Link href={`${base}/wishlist`} onClick={() => setMobileOpen(false)}>Wishlist</Link>
           <Link href={`${base}/my-account`} onClick={() => setMobileOpen(false)}>Register</Link>

@@ -310,6 +310,11 @@ export function filterVisiblePages<T extends { id: string; slug: string; title?:
   return pages.filter((page) => {
     const override = getPageCustomization(customization, page);
     if (!override) return true;
+    // isPublished was never checked here — the "Published" toggle in
+    // Dashboard -> Editor -> Page tab looked like it controlled visibility
+    // but silently did nothing, since only hidden/showInNavigation were
+    // ever actually enforced.
+    if (override.isPublished === false) return false;
     if (override.hidden) return false;
     if (override.showInNavigation === false) return false;
     return true;
