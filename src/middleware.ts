@@ -4,12 +4,12 @@ import { NextRequest, NextResponse } from "next/server";
  * Middleware to route custom domains and subdomains to the correct store.
  *
  * Flow:
- *   mystore.prokip.africa/anything  →  internally rewrite to /store/mystore/anything
+ *   mystore.prosell.africa/anything    →  internally rewrite to /store/mystore/anything
  *   mycustomdomain.com/anything     →  internally rewrite to /store/mycustomdomain.com/anything
- *   prokip.africa/anything          →  pass through (main app)
+ *   prosell.africa/anything            →  pass through (main app)
  */
 
-const APP_DOMAIN = process.env.NEXT_PUBLIC_APP_DOMAIN || "prokip.africa";
+const APP_DOMAIN = process.env.NEXT_PUBLIC_APP_DOMAIN || "prosell.africa";
 
 // Paths that should NEVER be rewritten (app infrastructure)
 const BYPASS_PREFIXES = [
@@ -68,7 +68,7 @@ export function middleware(req: NextRequest) {
   }
 
   // 3. Check if this is a subdomain of the app domain
-  //    e.g., mystore.prokip.africa → slug = "mystore"
+  //    e.g., mystore.prosell.africa → slug = "mystore"
   let storeSlug: string | null = null;
 
   if (host.endsWith(`.${APP_DOMAIN}`)) {

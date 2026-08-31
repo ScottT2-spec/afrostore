@@ -10,7 +10,7 @@ import { formatCurrency } from "@/lib/utils";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 
-const APP_DOMAIN = process.env.NEXT_PUBLIC_APP_DOMAIN || "prokip.africa";
+const APP_DOMAIN = process.env.NEXT_PUBLIC_APP_DOMAIN || "prosell.africa";
 
 interface DashboardData {
   stats: {
