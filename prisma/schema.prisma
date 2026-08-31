@@ -969,6 +969,7 @@ model FunnelStep {
   pageId          String?
   formId          String?
   position        Int            @default(0)
+  isEnabled       Boolean        @default(true)
   settings        Json?
   conversionCount Int            @default(0)
   viewCount       Int            @default(0)

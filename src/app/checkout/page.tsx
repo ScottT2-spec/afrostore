@@ -25,6 +25,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { motion, useReducedMotion } from "framer-motion";
 import { trackEvent } from "@/lib/storefront-analytics";
+import { getNextStepOfType } from "@/lib/funnel-flow";
 import { trackABTestConversion } from "@/hooks/useABTestVariant";
 import { syncWishlistOnIdentify } from "@/hooks/useWishlist";
 import { useAbandonedCartTracking } from "@/hooks/useAbandonedCartTracking";
@@ -310,6 +311,49 @@ export default function CheckoutPage() {
   const [orderError, setOrderError] = useState("");
   const [orderSuccess, setOrderSuccess] = useState<{ orderNumber: string; orderId: string } | null>(null);
 
+  // Funnel context — set when this checkout was entered from a funnel's
+  // CHECKOUT step (see FunnelStepView's CHECKOUT case, which links here
+  // with ?funnelId=&funnelStepId=). Mirrors CartFlows'
+  // woocommerce_get_checkout_order_received_url filter: on a confirmed
+  // order, a funnel-linked checkout redirects to that funnel's next
+  // THANK_YOU step instead of showing the generic success screen here.
+  const [funnelCtx, setFunnelCtx] = useState<{ funnelId: string; funnelStepId: string } | null>(null);
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    const params = new URLSearchParams(window.location.search);
+    const funnelId = params.get("funnelId");
+    const funnelStepId = params.get("funnelStepId");
+    if (funnelId && funnelStepId) setFunnelCtx({ funnelId, funnelStepId });
+  }, []);
+
+  // Returns true if it redirected into the funnel's thank-you step
+  // (caller should skip its normal setOrderSuccess in that case).
+  // Accepts an explicit override so callers reading their own
+  // URLSearchParams (e.g. the payment-verify effect below) aren't at the
+  // mercy of funnelCtx state possibly not having re-rendered yet.
+  const redirectToFunnelThankYou = async (
+    orderNumber: string,
+    orderId: string,
+    override?: { funnelId: string; funnelStepId: string } | null
+  ): Promise<boolean> => {
+    const ctx = override ?? funnelCtx;
+    if (!ctx || !storeSlug) return false;
+    try {
+      const res = await fetch(`/api/public/sites/${storeSlug}/funnels/${ctx.funnelId}`);
+      const json = await res.json();
+      if (!json.success || !json.data) return false;
+      const steps = json.data.steps as Array<{ id: string; type: string; position: number; isEnabled: boolean }>;
+      const nextStepId = getNextStepOfType(steps, ctx.funnelStepId, "THANK_YOU");
+      if (!nextStepId) return false;
+      const nextStep = steps.find((s) => s.id === nextStepId);
+      if (!nextStep) return false;
+      router.push(`/store/${storeSlug}/f/${ctx.funnelId}?step=${nextStep.position}&order=${orderNumber}&key=${orderId}`);
+      return true;
+    } catch {
+      return false;
+    }
+  };
+
   useEffect(() => {
     if (typeof window === "undefined") return;
     try {
@@ -459,9 +503,10 @@ export default function CheckoutPage() {
         // Clear cart
         localStorage.removeItem(cartKey);
         setCart([]);
-        setOrderSuccess({ orderNumber: order.orderNumber, orderId: order.id });
         if (storeSlug) trackEvent(storeSlug, "purchase", { orderId: order.id, metadata: { value: total, currency } });
         trackABTestConversion(storeSlug);
+        const redirected = await redirectToFunnelThankYou(order.orderNumber, order.id);
+        if (!redirected) setOrderSuccess({ orderNumber: order.orderNumber, orderId: order.id });
         setPlacing(false);
         return;
       }
@@ -473,7 +518,7 @@ export default function CheckoutPage() {
         body: JSON.stringify({
           orderId: order.id,
           provider: paymentMethod,
-          callbackUrl: `${window.location.origin}/checkout?status=pending&order=${order.orderNumber}`,
+          callbackUrl: `${window.location.origin}/checkout?status=pending&order=${order.orderNumber}${funnelCtx ? `&funnelId=${funnelCtx.funnelId}&funnelStepId=${funnelCtx.funnelStepId}` : ""}`,
         }),
       });
 
@@ -494,14 +539,17 @@ export default function CheckoutPage() {
       // Payment init failed but order was created — show partial success
       localStorage.removeItem(cartKey);
       setCart([]);
-      setOrderSuccess({ orderNumber: order.orderNumber, orderId: order.id });
       trackABTestConversion(storeSlug);
       const reason = typeof payJson.error === "string" ? payJson.error : null;
-      setOrderError(
-        reason
-          ? `Order placed, but payment could not be started: ${reason}. Please contact the store to complete payment.`
-          : "Order placed but payment initialization failed. Please contact the store to complete payment."
-      );
+      const redirectedAfterFail = await redirectToFunnelThankYou(order.orderNumber, order.id);
+      if (!redirectedAfterFail) {
+        setOrderSuccess({ orderNumber: order.orderNumber, orderId: order.id });
+        setOrderError(
+          reason
+            ? `Order placed, but payment could not be started: ${reason}. Please contact the store to complete payment.`
+            : "Order placed but payment initialization failed. Please contact the store to complete payment."
+        );
+      }
       setPlacing(false);
     } catch (err) {
       setOrderError("Something went wrong. Please try again.");
@@ -519,6 +567,9 @@ export default function CheckoutPage() {
     if (!status || !orderNum) return;
 
     const ref = params.get("ref") || sessionStorage.getItem("afro_pay_ref");
+    const verifyFunnelId = params.get("funnelId");
+    const verifyFunnelStepId = params.get("funnelStepId");
+    const verifyFunnelCtx = verifyFunnelId && verifyFunnelStepId ? { funnelId: verifyFunnelId, funnelStepId: verifyFunnelStepId } : null;
     localStorage.removeItem(cartKey);
     setCart([]);
     sessionStorage.removeItem("afro_pay_ref");
@@ -532,11 +583,15 @@ export default function CheckoutPage() {
         body: JSON.stringify({ reference: ref }),
       })
         .then((r) => r.json())
-        .then((json) => {
+        .then(async (json) => {
           if (json.success && json.data?.status === "SUCCESS") {
-            setOrderSuccess({ orderNumber: orderNum, orderId: json.data.orderId || "" });
+            // Only a confirmed order (SUCCESS) advances into the funnel's
+            // thank-you step - matches CartFlows, which hooks the same
+            // redirect off a received order, not a pending/failed one.
             if (storeSlug) trackEvent(storeSlug, "purchase", { orderId: json.data.orderId, metadata: { value: json.data.amount, currency } });
             trackABTestConversion(storeSlug);
+            const redirected = await redirectToFunnelThankYou(orderNum, json.data.orderId || "", verifyFunnelCtx);
+            if (!redirected) setOrderSuccess({ orderNumber: orderNum, orderId: json.data.orderId || "" });
           } else if (json.success && json.data?.status === "PENDING") {
             // Webhook may still be processing
             setOrderSuccess({ orderNumber: orderNum, orderId: "" });

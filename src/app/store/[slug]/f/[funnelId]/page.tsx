@@ -1,6 +1,7 @@
-import { notFound } from "next/navigation";
+import { notFound, redirect } from "next/navigation";
 import { prisma } from "@/lib/db";
 import { parsePageContent } from "@/lib/page-content";
+import { getDisabledStepFallbackRedirect, type FlowStep } from "@/lib/funnel-flow";
 import FunnelStepView, { type PublicFunnelStep } from "./FunnelStepView";
 
 type Props = {
@@ -70,6 +71,25 @@ export default async function FunnelPage({ params, searchParams }: Props) {
     : 0;
   const currentStep = funnel.steps[currentIndex];
 
+  // CartFlows parity: a visitor who lands directly on a disabled step
+  // (e.g. an old bookmarked/ad link to a step that's since been turned
+  // off) gets redirected to the first enabled step in the whole flow,
+  // not just the next one after it - see getDisabledStepFallbackRedirect.
+  const flowSteps: FlowStep[] = funnel.steps.map((s) => ({
+    id: s.id,
+    type: s.type,
+    position: s.position,
+    isEnabled: s.isEnabled,
+  }));
+  if (!currentStep.isEnabled) {
+    const fallbackId = getDisabledStepFallbackRedirect(flowSteps, currentStep.id);
+    const fallbackStep = fallbackId ? funnel.steps.find((s) => s.id === fallbackId) : null;
+    if (fallbackStep) {
+      redirect(`/store/${slug}/f/${funnelId}?step=${fallbackStep.position}`);
+    }
+    return notFound();
+  }
+
   const landingBlocks = currentStep.page
     ? parsePageContent(currentStep.page.content).blocks
     : parsePageContent(currentStep.pageContent).blocks;
@@ -105,6 +125,7 @@ export default async function FunnelPage({ params, searchParams }: Props) {
       funnelId={funnel.id}
       funnelName={funnel.name}
       step={publicStep}
+      steps={flowSteps}
       pixelIds={{
         googleAnalyticsId: site.settings?.googleAnalyticsId ?? null,
         facebookPixelId: site.settings?.facebookPixelId ?? null,

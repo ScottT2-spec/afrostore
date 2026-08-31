@@ -6,6 +6,7 @@ import { RenderBlocks, type BuilderBlock } from "@/components/storefront/BlockRe
 import { injectPixels, trackEvent, type PixelIds } from "@/lib/storefront-analytics";
 import { useFunnelStepABTestVariant, applyABTestOverrides } from "@/hooks/useABTestVariant";
 import { TemplateStoreContextProvider } from "@/components/storefront/TemplateStoreContextProvider";
+import { getDirectNextStepId, type FlowStep } from "@/lib/funnel-flow";
 
 export interface PublicFunnelStep {
   id: string;
@@ -35,10 +36,11 @@ interface Props {
   funnelId: string;
   funnelName: string;
   step: PublicFunnelStep;
+  steps: FlowStep[];
   pixelIds: PixelIds;
 }
 
-export default function FunnelStepView({ siteSlug, siteName, siteLogo, currency, templateSlug, funnelId, funnelName, step, pixelIds }: Props) {
+export default function FunnelStepView({ siteSlug, siteName, siteLogo, currency, templateSlug, funnelId, funnelName, step, steps, pixelIds }: Props) {
   const router = useRouter();
   const trackedRef = useRef(false);
 
@@ -69,7 +71,13 @@ export default function FunnelStepView({ siteSlug, siteName, siteLogo, currency,
       page: `/f/${funnelId}?step=${step.position}`,
       metadata: { funnelId, funnelStepId: step.id },
     });
-    router.push(`/store/${siteSlug}/f/${funnelId}?step=${step.position + 1}`);
+    // CartFlows parity (get_direct_next_step_id): advance to the next
+    // step that isn't disabled, not just position + 1 — a disabled step
+    // in between gets skipped rather than shown.
+    const nextStepId = getDirectNextStepId(steps, step.id);
+    const nextStep = nextStepId ? steps.find((s) => s.id === nextStepId) : null;
+    const nextPosition = nextStep ? nextStep.position : step.position + 1;
+    router.push(`/store/${siteSlug}/f/${funnelId}?step=${nextPosition}`);
   };
 
   return (
@@ -93,7 +101,8 @@ export default function FunnelStepView({ siteSlug, siteName, siteLogo, currency,
           <LeadFormStep siteSlug={siteSlug} funnelId={funnelId} step={step} onSubmitted={goToNextStep} />
         )}
         {step.type === "THANK_YOU" && <ThankYouStep step={step} funnelName={funnelName} siteSlug={siteSlug} funnelId={funnelId} />}
-        {!["LANDING", "LEAD_FORM", "THANK_YOU"].includes(step.type) && (
+        {step.type === "CHECKOUT" && <CheckoutStep siteSlug={siteSlug} funnelId={funnelId} step={step} />}
+        {!["LANDING", "LEAD_FORM", "THANK_YOU", "CHECKOUT"].includes(step.type) && (
           <div className="max-w-lg mx-auto px-4 py-24 text-center">
             <h1 className="text-2xl font-bold text-surface-900 mb-3">{step.name}</h1>
             <p className="text-surface-500 mb-8">This step type isn&apos;t available for public viewing yet.</p>
@@ -324,16 +333,46 @@ function LeadFormStep({
   );
 }
 
+function CheckoutStep({ siteSlug, funnelId, step }: { siteSlug: string; funnelId: string; step: PublicFunnelStep }) {
+  // Redirects straight into the storefront's checkout, passing this
+  // funnel + step as context so a confirmed order redirects to this
+  // funnel's next THANK_YOU step (see checkout/page.tsx's
+  // redirectToFunnelThankYou) instead of showing the generic success
+  // screen — the same role CartFlows' checkout step plays via its
+  // woocommerce_get_checkout_order_received_url filter.
+  useEffect(() => {
+    const params = new URLSearchParams({ funnelId, funnelStepId: step.id });
+    window.location.href = `/checkout?${params.toString()}`;
+  }, [funnelId, step.id]);
+
+  return (
+    <div className="max-w-lg mx-auto px-4 py-24 text-center">
+      <p className="text-surface-500">Taking you to checkout…</p>
+    </div>
+  );
+}
+
 function ThankYouStep({ step, funnelName, siteSlug, funnelId }: { step: PublicFunnelStep; funnelName: string; siteSlug: string; funnelId: string }) {
   const redirectUrl = typeof step.settings.redirectUrl === "string" ? step.settings.redirectUrl : undefined;
   const delaySeconds = typeof step.settings.delaySeconds === "number" ? step.settings.delaySeconds : undefined;
   const buttonText = typeof step.settings.buttonText === "string" ? step.settings.buttonText : "Continue";
   const trackedRef = useRef(false);
 
+  // Order confirmation, when this thank-you was reached via a funnel
+  // CHECKOUT step's redirect (?order=&key=) — CartFlows' equivalent
+  // thank-you template shows the same order-number confirmation.
+  const [orderNumber, setOrderNumber] = useState<string | null>(null);
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    const params = new URLSearchParams(window.location.search);
+    const order = params.get("order");
+    if (order) setOrderNumber(order);
+  }, []);
+
   // THANK_YOU_VIEW — the final confirmation that the funnel's conversion
   // was actually reached (page_view on this step already fired above, but
   // recording it distinctly here is what lets the dashboard tell "step was
-  // viewed" apart from "conversion was confirmed").
+  // viewed" apart from "conversion was confirmed".
   useEffect(() => {
     if (trackedRef.current) return;
     trackedRef.current = true;
@@ -351,9 +390,15 @@ function ThankYouStep({ step, funnelName, siteSlug, funnelId }: { step: PublicFu
     <div className="max-w-lg mx-auto px-4 py-24 text-center">
       <div className="h-16 w-16 rounded-full bg-green-50 flex items-center justify-center mx-auto mb-6 text-3xl">🎉</div>
       <h1 className="text-3xl font-bold text-surface-900 mb-3">{step.name || "Thank You!"}</h1>
-      <p className="text-surface-500 mb-8">
-        We&apos;ve received your submission for {funnelName}. We&apos;ll be in touch soon.
-      </p>
+      {orderNumber ? (
+        <p className="text-surface-500 mb-8">
+          Order <span className="font-mono font-bold text-surface-900">{orderNumber}</span> confirmed. We&apos;ll be in touch soon.
+        </p>
+      ) : (
+        <p className="text-surface-500 mb-8">
+          We&apos;ve received your submission for {funnelName}. We&apos;ll be in touch soon.
+        </p>
+      )}
       {redirectUrl && (
         <a href={redirectUrl} className="btn-primary inline-block px-8 py-3.5 text-base">{buttonText}</a>
       )}

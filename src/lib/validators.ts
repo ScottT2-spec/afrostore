@@ -612,6 +612,7 @@ export const updateFunnelStepSchema = z.object({
   pageId: z.string().optional().nullable(),
   formId: z.string().optional().nullable(),
   position: z.number().int().min(0).optional(),
+  isEnabled: z.boolean().optional(),
   settings: z.object({
     redirectUrl: z.string().url().optional(),
     delaySeconds: z.number().int().min(0).optional(),

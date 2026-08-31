@@ -64,6 +64,7 @@ export async function GET(_req: NextRequest, { params }: Params) {
         name: s.name,
         type: s.type,
         position: s.position,
+        isEnabled: s.isEnabled,
         settings: s.settings,
         pageContent: s.pageContent,
         page: s.page,
