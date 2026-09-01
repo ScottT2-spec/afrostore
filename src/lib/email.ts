@@ -403,6 +403,7 @@ This link expires in 30 minutes. If you didn't request this, you can safely igno
 interface RawEmailData {
   to: string;
   from: string; // "Name <email@domain>"
+  replyTo?: string;
   subject: string;
   html: string;
   text?: string;
@@ -413,6 +414,7 @@ export async function sendRawEmail(data: RawEmailData): Promise<{ success: boole
     const command = new SendEmailCommand({
       Source: data.from,
       Destination: { ToAddresses: [data.to] },
+      ...(data.replyTo ? { ReplyToAddresses: [data.replyTo] } : {}),
       Message: {
         Subject: { Data: data.subject, Charset: "UTF-8" },
         Body: {
