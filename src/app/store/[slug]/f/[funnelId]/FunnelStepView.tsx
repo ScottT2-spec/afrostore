@@ -138,6 +138,30 @@ function LandingStep({
   const abTest = useFunnelStepABTestVariant(storeSlug, funnelStepId);
   const effectiveBlocks = applyABTestOverrides(blocks, abTest.content);
 
+  // Ports CartFlows' actual "Next Step" mechanism 1:1 (assets/js/frontend.js):
+  //   $(document).on('click', 'a[href*="wcf-next-step"]', ...) -> preventDefault, advance
+  // It's a global, widget-agnostic click intercept - ANY link/button a
+  // merchant places anywhere in their page-builder design works as a
+  // "next step" trigger just by pointing its URL at #wcf-next-step, with
+  // no dedicated block type and no editor changes required. Restricted to
+  // LANDING (this component) only, matching CartFlows_Next_Step_Button::
+  // is_enable(), which only enables the equivalent widget on landing steps.
+  const contentRef = useRef<HTMLDivElement>(null);
+  useEffect(() => {
+    const el = contentRef.current;
+    if (!el || isLastStep) return;
+    const handler = (e: MouseEvent) => {
+      const target = e.target as HTMLElement;
+      const link = target.closest('a[href*="wcf-next-step"]');
+      if (link) {
+        e.preventDefault();
+        onContinue();
+      }
+    };
+    el.addEventListener("click", handler);
+    return () => el.removeEventListener("click", handler);
+  }, [isLastStep, onContinue]);
+
   if (blocks.length === 0) {
     return (
       <div className="max-w-lg mx-auto px-4 py-24 text-center">
@@ -152,7 +176,7 @@ function LandingStep({
     );
   }
   return (
-    <div>
+    <div ref={contentRef}>
       {/* Some bespoke templates (Prokip Agent, Prokip Booking, Hardware,
           etc.) read storeSlug/currency from this Context rather than
           props — without it, their forms fail with "This form isn't
