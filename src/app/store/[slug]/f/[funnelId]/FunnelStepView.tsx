@@ -74,13 +74,13 @@ export default function FunnelStepView({ siteSlug, siteName, siteLogo, currency,
 
   return (
     <div className="min-h-screen bg-white">
-      <header className="border-b border-surface-100 py-4">
+      <header className="border-b border-surface-100 bg-white/80 backdrop-blur-sm sticky top-0 z-10 py-4">
         <div className="max-w-5xl mx-auto px-4 flex items-center gap-2">
           {siteLogo ? (
             // eslint-disable-next-line @next/next/no-img-element
             <img src={siteLogo} alt={siteName} className="h-8 w-auto" />
           ) : (
-            <span className="font-bold text-surface-900">{siteName}</span>
+            <span className="font-display font-bold text-lg text-surface-900">{siteName}</span>
           )}
         </div>
       </header>
@@ -94,12 +94,28 @@ export default function FunnelStepView({ siteSlug, siteName, siteLogo, currency,
         )}
         {step.type === "THANK_YOU" && <ThankYouStep step={step} funnelName={funnelName} siteSlug={siteSlug} funnelId={funnelId} siteName={siteName} />}
         {!["LANDING", "LEAD_FORM", "THANK_YOU"].includes(step.type) && (
-          <div className="max-w-lg mx-auto px-4 py-24 text-center">
-            <h1 className="text-2xl font-bold text-surface-900 mb-3">{step.name}</h1>
-            <p className="text-surface-500 mb-8">This step type isn&apos;t available for public viewing yet.</p>
-            {!step.isLastStep && (
-              <button onClick={goToNextStep} className="btn-primary px-6 py-3">Continue</button>
-            )}
+          <div className="relative min-h-[calc(100vh-65px)] overflow-hidden bg-surface-50 flex items-center justify-center px-4 py-16">
+            <div className="pointer-events-none absolute inset-0 overflow-hidden">
+              <div className="absolute -top-32 -left-24 h-80 w-80 rounded-full bg-brand-200/30 blur-3xl" />
+              <div className="absolute -bottom-32 -right-24 h-96 w-96 rounded-full bg-accent-200/30 blur-3xl" />
+            </div>
+            <div className="relative w-full max-w-md rounded-3xl border border-surface-200/70 bg-white shadow-xl shadow-surface-900/5 px-8 py-12 text-center sm:px-10 animate-fade-up">
+              <div className="mx-auto mb-6 flex h-16 w-16 items-center justify-center rounded-full bg-brand-50">
+                <svg viewBox="0 0 24 24" fill="none" className="h-7 w-7 text-brand-500" strokeWidth={1.75} stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M12 9v3.75m0 3.75h.008M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>
+              </div>
+              <h1 className="font-display text-2xl font-bold text-surface-900 mb-3">{step.name}</h1>
+              <p className="text-surface-500 mb-8 leading-relaxed">This step isn&apos;t available for public viewing yet.</p>
+              {!step.isLastStep && (
+                <button
+                  onClick={goToNextStep}
+                  className="inline-flex w-full items-center justify-center gap-2 rounded-xl bg-accent-500 px-6 py-3.5 text-base font-semibold text-white shadow-lg shadow-accent-500/25 transition-all duration-200 hover:bg-accent-600 hover:shadow-xl hover:-translate-y-0.5 active:translate-y-0"
+                >
+                  Continue
+                </button>
+              )}
+            </div>
           </div>
         )}
       </main>
@@ -131,14 +147,28 @@ function LandingStep({
 
   if (blocks.length === 0) {
     return (
-      <div className="max-w-lg mx-auto px-4 py-24 text-center">
-        <h1 className="text-3xl font-bold text-surface-900 mb-4">Welcome</h1>
-        <p className="text-surface-500 mb-8">This landing page hasn&apos;t been designed yet.</p>
-        {!isLastStep && (
-          <button onClick={onContinue} className="btn-primary px-6 py-3">
-            {typeof settings.buttonText === "string" && settings.buttonText ? settings.buttonText : "Continue"}
-          </button>
-        )}
+      <div className="relative min-h-[calc(100vh-65px)] overflow-hidden bg-surface-50 flex items-center justify-center px-4 py-16">
+        <div className="pointer-events-none absolute inset-0 overflow-hidden">
+          <div className="absolute -top-32 -left-24 h-80 w-80 rounded-full bg-brand-200/30 blur-3xl" />
+          <div className="absolute -bottom-32 -right-24 h-96 w-96 rounded-full bg-accent-200/30 blur-3xl" />
+        </div>
+        <div className="relative w-full max-w-md rounded-3xl border border-surface-200/70 bg-white shadow-xl shadow-surface-900/5 px-8 py-12 text-center sm:px-10 animate-fade-up">
+          <div className="mx-auto mb-6 flex h-16 w-16 items-center justify-center rounded-full bg-brand-50">
+            <svg viewBox="0 0 24 24" fill="none" className="h-7 w-7 text-brand-500" strokeWidth={1.75} stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" d="M9 12h6m-6 4h6M9 8h6M5 4.5h14A1.5 1.5 0 0120.5 6v13a1.5 1.5 0 01-1.5 1.5H5A1.5 1.5 0 013.5 19V6A1.5 1.5 0 015 4.5z" />
+            </svg>
+          </div>
+          <h1 className="font-display text-2xl font-bold text-surface-900 mb-3">Welcome</h1>
+          <p className="text-surface-500 mb-8 leading-relaxed">This landing page hasn&apos;t been designed yet.</p>
+          {!isLastStep && (
+            <button
+              onClick={onContinue}
+              className="inline-flex w-full items-center justify-center gap-2 rounded-xl bg-accent-500 px-6 py-3.5 text-base font-semibold text-white shadow-lg shadow-accent-500/25 transition-all duration-200 hover:bg-accent-600 hover:shadow-xl hover:-translate-y-0.5 active:translate-y-0"
+            >
+              {typeof settings.buttonText === "string" && settings.buttonText ? settings.buttonText : "Continue"}
+            </button>
+          )}
+        </div>
       </div>
     );
   }
@@ -163,10 +193,18 @@ function LandingStep({
         <RenderBlocks blocks={effectiveBlocks} storeSlug={storeSlug} />
       </TemplateStoreContextProvider>
       {!isLastStep && (
-        <div className="max-w-5xl mx-auto px-4 py-10 text-center">
-          <button onClick={onContinue} className="btn-primary px-8 py-3.5 text-base">
-            {typeof settings.buttonText === "string" && settings.buttonText ? settings.buttonText : "Continue"}
-          </button>
+        <div className="border-t border-surface-100 bg-surface-50/60">
+          <div className="max-w-5xl mx-auto px-4 py-12 text-center">
+            <button
+              onClick={onContinue}
+              className="inline-flex items-center justify-center gap-2 rounded-xl bg-accent-500 px-8 py-3.5 text-base font-semibold text-white shadow-lg shadow-accent-500/25 transition-all duration-200 hover:bg-accent-600 hover:shadow-xl hover:-translate-y-0.5 active:translate-y-0"
+            >
+              {typeof settings.buttonText === "string" && settings.buttonText ? settings.buttonText : "Continue"}
+              <svg viewBox="0 0 20 20" fill="currentColor" className="h-4 w-4">
+                <path fillRule="evenodd" d="M10.293 3.293a1 1 0 011.414 0l5 5a1 1 0 010 1.414l-5 5a1 1 0 01-1.414-1.414L13.586 11H4a1 1 0 110-2h9.586l-3.293-3.293a1 1 0 010-1.414z" clipRule="evenodd" />
+              </svg>
+            </button>
+          </div>
         </div>
       )}
     </div>
@@ -249,77 +287,106 @@ function LeadFormStep({
 
   if (success) {
     return (
-      <div className="max-w-md mx-auto px-4 py-24 text-center">
-        <div className="h-14 w-14 rounded-full bg-green-50 flex items-center justify-center mx-auto mb-4 text-2xl">✓</div>
-        <h2 className="text-xl font-bold text-surface-900 mb-2">
-          {step.form?.successMessage || "Thanks! Redirecting you now..."}
-        </h2>
+      <div className="relative min-h-[calc(100vh-65px)] overflow-hidden bg-surface-50 flex items-center justify-center px-4 py-16">
+        <div className="pointer-events-none absolute inset-0 overflow-hidden">
+          <div className="absolute -top-32 -left-24 h-80 w-80 rounded-full bg-accent-200/40 blur-3xl" />
+          <div className="absolute -bottom-32 -right-24 h-96 w-96 rounded-full bg-brand-200/40 blur-3xl" />
+        </div>
+        <div className="relative w-full max-w-md rounded-3xl border border-surface-200/70 bg-white shadow-xl shadow-surface-900/5 px-8 py-12 text-center sm:px-10 animate-fade-up">
+          <div className="relative mx-auto mb-6 h-16 w-16">
+            <div className="absolute inset-0 rounded-full bg-emerald-100 animate-glow" />
+            <div className="absolute inset-3 flex items-center justify-center rounded-full bg-emerald-500 shadow-lg shadow-emerald-500/30 animate-scale-in">
+              <svg viewBox="0 0 24 24" fill="none" className="h-5 w-5 text-white" strokeWidth={3} stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" d="M4.5 12.75l6 6 9-13.5" />
+              </svg>
+            </div>
+          </div>
+          <h2 className="font-display text-xl font-bold text-surface-900 mb-2">
+            {step.form?.successMessage || "Thanks! Taking you to the next step..."}
+          </h2>
+          <p className="text-surface-400 text-sm">One moment&hellip;</p>
+        </div>
       </div>
     );
   }
 
   return (
-    <div className="max-w-md mx-auto px-4 py-16">
-      <h1 className="text-2xl font-bold text-surface-900 mb-2 text-center">{step.name}</h1>
-      {step.form?.description && (
-        <p className="text-surface-500 text-center mb-8">{step.form.description}</p>
-      )}
+    <div className="relative min-h-[calc(100vh-65px)] overflow-hidden bg-surface-50 px-4 py-16">
+      <div className="pointer-events-none absolute inset-0 overflow-hidden">
+        <div className="absolute -top-32 -left-24 h-80 w-80 rounded-full bg-brand-200/30 blur-3xl" />
+        <div className="absolute -bottom-32 -right-24 h-96 w-96 rounded-full bg-accent-200/30 blur-3xl" />
+      </div>
+      <div className="relative max-w-md mx-auto rounded-3xl border border-surface-200/70 bg-white shadow-xl shadow-surface-900/5 px-8 py-10 sm:px-10 animate-fade-up">
+        <h1 className="font-display text-2xl font-bold text-surface-900 mb-2 text-center">{step.name}</h1>
+        {step.form?.description && (
+          <p className="text-surface-500 text-center mb-8 leading-relaxed">{step.form.description}</p>
+        )}
+        {!step.form?.description && <div className="mb-8" />}
 
-      {error && (
-        <div className="mb-4 rounded-lg bg-red-50 border border-red-100 text-red-700 text-sm px-4 py-3">{error}</div>
-      )}
+        {error && (
+          <div className="mb-4 rounded-lg bg-red-50 border border-red-100 text-red-700 text-sm px-4 py-3">{error}</div>
+        )}
 
-      {step.form ? (
-        <form
-          onSubmit={(e) => { e.preventDefault(); submitLinkedForm(); }}
-          className="space-y-4"
-        >
-          {step.form.fields.map((f) => (
-            <div key={f.id}>
-              <label className="block text-sm font-medium text-surface-700 mb-1">{f.label}</label>
+        {step.form ? (
+          <form
+            onSubmit={(e) => { e.preventDefault(); submitLinkedForm(); }}
+            className="space-y-4"
+          >
+            {step.form.fields.map((f) => (
+              <div key={f.id}>
+                <label className="block text-sm font-medium text-surface-700 mb-1">{f.label}</label>
+                <input
+                  type={f.type === "email" ? "email" : f.type === "tel" ? "tel" : "text"}
+                  required={f.required}
+                  placeholder={f.placeholder}
+                  value={values[f.id] || ""}
+                  onChange={(e) => handleChange(f.id, e.target.value)}
+                  className="input-field py-3 w-full"
+                />
+              </div>
+            ))}
+            <button
+              type="submit"
+              disabled={submitting}
+              className="inline-flex w-full items-center justify-center gap-2 rounded-xl bg-accent-500 px-6 py-3.5 text-base font-semibold text-white shadow-lg shadow-accent-500/25 transition-all duration-200 hover:bg-accent-600 hover:shadow-xl hover:-translate-y-0.5 active:translate-y-0 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:translate-y-0"
+            >
+              {submitting ? "Submitting..." : step.form.submitButtonText || "Submit"}
+            </button>
+          </form>
+        ) : (
+          <form
+            onSubmit={(e) => { e.preventDefault(); submitQuickCapture(); }}
+            className="space-y-4"
+          >
+            <div>
+              <label className="block text-sm font-medium text-surface-700 mb-1">Name</label>
               <input
-                type={f.type === "email" ? "email" : f.type === "tel" ? "tel" : "text"}
-                required={f.required}
-                placeholder={f.placeholder}
-                value={values[f.id] || ""}
-                onChange={(e) => handleChange(f.id, e.target.value)}
+                type="text"
+                value={quickCapture.firstName}
+                onChange={(e) => setQuickCapture((p) => ({ ...p, firstName: e.target.value }))}
                 className="input-field py-3 w-full"
               />
             </div>
-          ))}
-          <button type="submit" disabled={submitting} className="btn-primary w-full py-3.5 text-base">
-            {submitting ? "Submitting..." : step.form.submitButtonText || "Submit"}
-          </button>
-        </form>
-      ) : (
-        <form
-          onSubmit={(e) => { e.preventDefault(); submitQuickCapture(); }}
-          className="space-y-4"
-        >
-          <div>
-            <label className="block text-sm font-medium text-surface-700 mb-1">Name</label>
-            <input
-              type="text"
-              value={quickCapture.firstName}
-              onChange={(e) => setQuickCapture((p) => ({ ...p, firstName: e.target.value }))}
-              className="input-field py-3 w-full"
-            />
-          </div>
-          <div>
-            <label className="block text-sm font-medium text-surface-700 mb-1">Email</label>
-            <input
-              type="email"
-              required
-              value={quickCapture.email}
-              onChange={(e) => setQuickCapture((p) => ({ ...p, email: e.target.value }))}
-              className="input-field py-3 w-full"
-            />
-          </div>
-          <button type="submit" disabled={submitting} className="btn-primary w-full py-3.5 text-base">
-            {submitting ? "Submitting..." : "Submit"}
-          </button>
-        </form>
-      )}
+            <div>
+              <label className="block text-sm font-medium text-surface-700 mb-1">Email</label>
+              <input
+                type="email"
+                required
+                value={quickCapture.email}
+                onChange={(e) => setQuickCapture((p) => ({ ...p, email: e.target.value }))}
+                className="input-field py-3 w-full"
+              />
+            </div>
+            <button
+              type="submit"
+              disabled={submitting}
+              className="inline-flex w-full items-center justify-center gap-2 rounded-xl bg-accent-500 px-6 py-3.5 text-base font-semibold text-white shadow-lg shadow-accent-500/25 transition-all duration-200 hover:bg-accent-600 hover:shadow-xl hover:-translate-y-0.5 active:translate-y-0 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:translate-y-0"
+            >
+              {submitting ? "Submitting..." : "Submit"}
+            </button>
+          </form>
+        )}
+      </div>
     </div>
   );
 }
