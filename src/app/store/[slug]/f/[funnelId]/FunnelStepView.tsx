@@ -42,7 +42,13 @@ interface Props {
 
 export default function FunnelStepView({ siteSlug, siteName, siteLogo, currency, templateSlug, funnelId, funnelName, step, steps, pixelIds }: Props) {
   const router = useRouter();
-  const trackedRef = useRef(false);
+  // Keyed by step id (not a plain boolean) — FunnelStepView is reused as the
+  // same component instance across step-to-step navigation (router.push only
+  // changes the ?step= search param, there's no remount/key), so a boolean
+  // "already tracked" ref would only ever fire once for the whole funnel and
+  // silently stop counting views from step 2 onward, while conversions (form
+  // submit / lead capture) kept working since those fire on explicit clicks.
+  const trackedStepIdRef = useRef<string | null>(null);
 
   // Every funnel step is a landing destination in its own right (ads point
   // straight at /f/[funnelId]?step=N), so it needs the same pixel injection
@@ -51,8 +57,8 @@ export default function FunnelStepView({ siteSlug, siteName, siteLogo, currency,
   // loaded here and a visitor landing directly on a funnel step was
   // completely invisible to ad platforms.
   useEffect(() => {
-    if (trackedRef.current) return;
-    trackedRef.current = true;
+    if (trackedStepIdRef.current === step.id) return;
+    trackedStepIdRef.current = step.id;
     injectPixels(pixelIds);
     // Own funnel-step counter (drives the funnel dashboard's view counts)
     fetch(`/api/public/sites/${siteSlug}/funnels/${funnelId}/steps/${step.id}/view`, { method: "POST" }).catch(() => {});
