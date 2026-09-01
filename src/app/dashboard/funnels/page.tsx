@@ -3,6 +3,7 @@ import { ChevronDown, ChevronRight, Loader2, Plus } from "lucide-react";
 import { Archive, ArrowDown, BarChart3, Copy, Eye, EyeOff, ExternalLink, Filter, Layers, Megaphone, MousePointerClick, Pause, Pencil, Play, Search, Trash2 } from "@/components/icons/FilledIcons";
 
 import { useState, useEffect, useCallback } from "react";
+import { useRouter } from "next/navigation";
 import { useSite } from "@/context/StoreContext";
 import { api } from "@/lib/api-client";
 
@@ -57,6 +58,7 @@ const stepTypeColors: Record<string, string> = {
 
 export default function FunnelsPage() {
   const { currentStore } = useSite();
+  const router = useRouter();
   const [funnels, setFunnels] = useState<FunnelItem[]>([]);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState("");
@@ -292,6 +294,40 @@ export default function FunnelsPage() {
     setSavingStep(false);
   };
 
+  // Launch this step's page in the site's page-builder editor — the same
+  // /editor/[pageId] route the Pages dashboard already links to. Mirrors
+  // CartFlows' Cartflows_Helper::get_page_builder_edit_link(), which
+  // always resolves to a real, editable page for the step: if this LANDING
+  // step doesn't have a page linked yet, one is created first (seeded with
+  // the site's default blocks, same as creating a page from the Pages
+  // dashboard) and linked to the step, then the editor opens on it.
+  const [launchingStepId, setLaunchingStepId] = useState<string | null>(null);
+  const launchStepDesign = async (funnelId: string, step: FunnelStep) => {
+    if (!currentStore || launchingStepId) return;
+    if (step.pageId) {
+      router.push(`/editor/${step.pageId}`);
+      return;
+    }
+    setLaunchingStepId(step.id);
+    const pageRes = await api.post<{ id: string }>(`/api/sites/${currentStore.id}/pages`, {
+      title: step.name,
+      type: "LANDING",
+    });
+    if (!pageRes.success || !pageRes.data?.id) {
+      setStepError("Couldn't create a page for this step. Please try again.");
+      setLaunchingStepId(null);
+      return;
+    }
+    const newPageId = pageRes.data.id;
+    const linkRes = await api.patch(`/api/sites/${currentStore.id}/funnels/${funnelId}/steps/${step.id}`, { pageId: newPageId });
+    if (!linkRes.success) {
+      setStepError("Page was created but couldn't be linked to this step. Please try again.");
+      setLaunchingStepId(null);
+      return;
+    }
+    router.push(`/editor/${newPageId}`);
+  };
+
   const deleteStep = async (funnelId: string, stepId: string) => {
     if (!currentStore || !confirm("Delete this step?")) return;
     await api.delete(`/api/sites/${currentStore.id}/funnels/${funnelId}/steps/${stepId}`);
@@ -522,6 +558,16 @@ export default function FunnelsPage() {
                                 >
                                   <Pencil className="h-3.5 w-3.5" />
                                 </button>
+                                {step.type === "LANDING" && (
+                                  <button
+                                    onClick={() => launchStepDesign(funnel.id, step)}
+                                    disabled={launchingStepId === step.id}
+                                    className="p-1.5 rounded hover:bg-brand-50 text-surface-400 hover:text-brand-600 disabled:opacity-60"
+                                    title="Edit design"
+                                  >
+                                    {launchingStepId === step.id ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <ExternalLink className="h-3.5 w-3.5" />}
+                                  </button>
+                                )}
                                 <button
                                   onClick={() => deleteStep(funnel.id, step.id)}
                                   className="p-1.5 rounded hover:bg-accent-50 text-surface-400 hover:text-accent-600"
