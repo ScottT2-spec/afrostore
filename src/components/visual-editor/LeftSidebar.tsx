@@ -153,6 +153,14 @@ export default function LeftSidebar() {
 
   useEffect(() => {
     if (!siteId) return;
+    // Refetch whenever the "Site Pages" panel is opened (not just once on
+    // mount) — pages are created from a completely different route
+    // (/dashboard/pages, the AI page generator, etc.), so a mount-only
+    // fetch here goes stale the moment a page is created anywhere else:
+    // it exists in the database, but this list — which is literally what
+    // "the site's pages" means to the person looking at it — never learns
+    // about it until the editor is fully closed and reopened.
+    if (activePanel !== "page-settings") return;
     let cancelled = false;
 
     (async () => {
@@ -167,7 +175,7 @@ export default function LeftSidebar() {
     return () => {
       cancelled = true;
     };
-  }, [siteId]);
+  }, [siteId, activePanel]);
 
   const filteredWidgets = widgetDefinitions.filter(widget =>
     widget.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
