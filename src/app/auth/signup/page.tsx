@@ -3,7 +3,6 @@ import { Loader2 } from "lucide-react";
 
 import { useState } from "react";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
 import { useAuth } from "@/context/AuthContext";
 
 function MailFilled({ className = "" }: { className?: string }) {
@@ -68,7 +67,6 @@ export default function SignupPage() {
   const [submitting, setSubmitting] = useState(false);
   const [signupSuccess, setSignupSuccess] = useState(false);
   const { signup } = useAuth();
-  const router = useRouter();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -106,16 +104,16 @@ export default function SignupPage() {
             <p className="text-gray-500 text-sm leading-relaxed mb-6">
               Account created! We&apos;ve sent a verification link to <strong>{email}</strong>. Please check your inbox and verify your email to get started.
             </p>
-            <button
-              onClick={() => router.push("/dashboard")}
-              className="w-full rounded-xl bg-slate-600 hover:bg-slate-700 text-white font-semibold py-3 text-base transition-all duration-200 shadow-md shadow-slate-300/40"
-            >
-              Continue to Dashboard
-            </button>
-            <p className="text-xs text-gray-400 mt-4">
+            <p className="text-xs text-gray-400">
               Didn&apos;t get the email?{" "}
               <a href="/auth/verify-email" className="text-slate-600 font-semibold hover:text-slate-800">Resend verification</a>
             </p>
+            <Link
+              href="/auth/login"
+              className="mt-4 inline-block text-sm font-semibold text-slate-700 hover:text-slate-900 transition-colors"
+            >
+              Back to Sign In
+            </Link>
           </div>
         </div>
       </div>
