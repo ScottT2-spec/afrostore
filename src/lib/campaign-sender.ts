@@ -21,6 +21,7 @@ import { sendRawEmail } from "@/lib/email";
 import { sendSms, isSmsConfigured } from "@/lib/sms";
 import { sendWhatsAppMessage, isWhatsAppConfigured } from "@/lib/whatsapp";
 import { rewriteEmailHtmlForTracking, getAppBaseUrl } from "@/lib/email-tracking";
+import { isSenderVerified } from "@/lib/ses-identity";
 
 const SEND_DELAY_MS = 120; // stay well under provider rate limits for modest list sizes
 
@@ -100,7 +101,22 @@ export async function sendEmailCampaign(campaignId: string): Promise<{ success: 
     }
 
     const fromName = campaign.fromName || "Store";
-    const fromEmail = campaign.fromEmail || process.env.SES_FROM_EMAIL || "noreply@prokip.com";
+    const defaultFromEmail = process.env.SES_FROM_EMAIL || "noreply@prokip.com";
+
+    // Custom "from" addresses must be verified in SES first, or every send
+    // is rejected by AWS (not by us) with no useful error shown to the merchant.
+    let fromEmail = defaultFromEmail;
+    let replyTo: string | undefined;
+    if (campaign.fromEmail && campaign.fromEmail !== defaultFromEmail) {
+      const verified = await isSenderVerified(campaign.siteId, campaign.fromEmail);
+      if (verified) {
+        fromEmail = campaign.fromEmail;
+      } else {
+        // Fall back to the verified sender so the send still goes out,
+        // but keep merchant replies routed to their own inbox.
+        replyTo = campaign.fromEmail;
+      }
+    }
     const from = `${fromName} <${fromEmail}>`;
     const html = campaign.contentHtml || "";
     const baseUrl = getAppBaseUrl();
@@ -115,7 +131,7 @@ export async function sendEmailCampaign(campaignId: string): Promise<{ success: 
       // totalOpened/totalClicked, which existed on the model already but
       // were never written to anywhere.
       const trackedHtml = rewriteEmailHtmlForTracking(html, recipient.id, baseUrl);
-      const result = await sendRawEmail({ to: recipient.email, from, subject: campaign.subject, html: trackedHtml });
+      const result = await sendRawEmail({ to: recipient.email, from, replyTo, subject: campaign.subject, html: trackedHtml });
       if (result.success) {
         sent++;
         await prisma.emailRecipient.update({ where: { id: recipient.id }, data: { status: "sent", sentAt: new Date() } });
