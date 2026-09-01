@@ -441,10 +441,6 @@ function ThankYouStep({ step, funnelName, siteSlug, funnelId, siteName }: { step
             </div>
           </div>
 
-          <span className="inline-block rounded-full bg-brand-50 px-3 py-1 text-xs font-semibold uppercase tracking-wide text-brand-600 mb-4">
-            {funnelName}
-          </span>
-
           <h1 className="font-display text-3xl font-bold text-surface-900 mb-3 leading-tight">
             {step.name || "You're all set!"}
           </h1>
