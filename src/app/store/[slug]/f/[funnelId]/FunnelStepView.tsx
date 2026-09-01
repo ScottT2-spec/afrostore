@@ -92,7 +92,7 @@ export default function FunnelStepView({ siteSlug, siteName, siteLogo, currency,
         {step.type === "LEAD_FORM" && (
           <LeadFormStep siteSlug={siteSlug} funnelId={funnelId} step={step} onSubmitted={goToNextStep} />
         )}
-        {step.type === "THANK_YOU" && <ThankYouStep step={step} funnelName={funnelName} siteSlug={siteSlug} funnelId={funnelId} />}
+        {step.type === "THANK_YOU" && <ThankYouStep step={step} funnelName={funnelName} siteSlug={siteSlug} funnelId={funnelId} siteName={siteName} />}
         {!["LANDING", "LEAD_FORM", "THANK_YOU"].includes(step.type) && (
           <div className="max-w-lg mx-auto px-4 py-24 text-center">
             <h1 className="text-2xl font-bold text-surface-900 mb-3">{step.name}</h1>
@@ -324,11 +324,12 @@ function LeadFormStep({
   );
 }
 
-function ThankYouStep({ step, funnelName, siteSlug, funnelId }: { step: PublicFunnelStep; funnelName: string; siteSlug: string; funnelId: string }) {
+function ThankYouStep({ step, funnelName, siteSlug, funnelId, siteName }: { step: PublicFunnelStep; funnelName: string; siteSlug: string; funnelId: string; siteName: string }) {
   const redirectUrl = typeof step.settings.redirectUrl === "string" ? step.settings.redirectUrl : undefined;
   const delaySeconds = typeof step.settings.delaySeconds === "number" ? step.settings.delaySeconds : undefined;
   const buttonText = typeof step.settings.buttonText === "string" ? step.settings.buttonText : "Continue";
   const trackedRef = useRef(false);
+  const [secondsLeft, setSecondsLeft] = useState(delaySeconds);
 
   // THANK_YOU_VIEW — the final confirmation that the funnel's conversion
   // was actually reached (page_view on this step already fired above, but
@@ -341,22 +342,79 @@ function ThankYouStep({ step, funnelName, siteSlug, funnelId }: { step: PublicFu
   }, [siteSlug, funnelId, step.id, funnelName]);
 
   useEffect(() => {
-    if (redirectUrl && delaySeconds !== undefined) {
-      const t = setTimeout(() => { window.location.href = redirectUrl; }, delaySeconds * 1000);
-      return () => clearTimeout(t);
+    if (!redirectUrl || delaySeconds === undefined) return;
+    if (secondsLeft === undefined || secondsLeft <= 0) {
+      window.location.href = redirectUrl;
+      return;
     }
-  }, [redirectUrl, delaySeconds]);
+    const t = setTimeout(() => setSecondsLeft((s) => (s ?? 1) - 1), 1000);
+    return () => clearTimeout(t);
+  }, [redirectUrl, delaySeconds, secondsLeft]);
 
   return (
-    <div className="max-w-lg mx-auto px-4 py-24 text-center">
-      <div className="h-16 w-16 rounded-full bg-green-50 flex items-center justify-center mx-auto mb-6 text-3xl">🎉</div>
-      <h1 className="text-3xl font-bold text-surface-900 mb-3">{step.name || "Thank You!"}</h1>
-      <p className="text-surface-500 mb-8">
-        We&apos;ve received your submission for {funnelName}. We&apos;ll be in touch soon.
-      </p>
-      {redirectUrl && (
-        <a href={redirectUrl} className="btn-primary inline-block px-8 py-3.5 text-base">{buttonText}</a>
-      )}
+    <div className="relative min-h-[calc(100vh-65px)] overflow-hidden bg-surface-50 flex items-center justify-center px-4 py-16">
+      {/* Soft branded backdrop — two large, blurred color blooms instead of a
+          flat white void */}
+      <div className="pointer-events-none absolute inset-0 overflow-hidden">
+        <div className="absolute -top-32 -left-24 h-80 w-80 rounded-full bg-accent-200/40 blur-3xl" />
+        <div className="absolute -bottom-32 -right-24 h-96 w-96 rounded-full bg-brand-200/40 blur-3xl" />
+      </div>
+
+      <div className="relative w-full max-w-md animate-fade-up">
+        <div className="rounded-3xl border border-surface-200/70 bg-white shadow-xl shadow-surface-900/5 px-8 py-12 text-center sm:px-10">
+          {/* Success mark — layered rings behind a solid check circle reads
+              far more like a genuine confirmation than a lone emoji */}
+          <div className="relative mx-auto mb-7 h-20 w-20">
+            <div className="absolute inset-0 rounded-full bg-emerald-100 animate-glow" />
+            <div className="absolute inset-2 rounded-full bg-emerald-50" />
+            <div className="absolute inset-4 flex items-center justify-center rounded-full bg-emerald-500 shadow-lg shadow-emerald-500/30 animate-scale-in">
+              <svg viewBox="0 0 24 24" fill="none" className="h-6 w-6 text-white" strokeWidth={3} stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" d="M4.5 12.75l6 6 9-13.5" />
+              </svg>
+            </div>
+          </div>
+
+          <span className="inline-block rounded-full bg-brand-50 px-3 py-1 text-xs font-semibold uppercase tracking-wide text-brand-600 mb-4">
+            {funnelName}
+          </span>
+
+          <h1 className="font-display text-3xl font-bold text-surface-900 mb-3 leading-tight">
+            {step.name || "You're all set!"}
+          </h1>
+          <p className="text-surface-500 text-base leading-relaxed mb-8">
+            We&apos;ve received your submission and {siteName} will be in touch soon.
+          </p>
+
+          {redirectUrl ? (
+            <a
+              href={redirectUrl}
+              className="inline-flex w-full items-center justify-center gap-2 rounded-xl bg-accent-500 px-6 py-3.5 text-base font-semibold text-white shadow-lg shadow-accent-500/25 transition-all duration-200 hover:bg-accent-600 hover:shadow-xl hover:-translate-y-0.5 active:translate-y-0"
+            >
+              {buttonText}
+              <svg viewBox="0 0 20 20" fill="currentColor" className="h-4 w-4">
+                <path fillRule="evenodd" d="M10.293 3.293a1 1 0 011.414 0l5 5a1 1 0 010 1.414l-5 5a1 1 0 01-1.414-1.414L13.586 11H4a1 1 0 110-2h9.586l-3.293-3.293a1 1 0 010-1.414z" clipRule="evenodd" />
+              </svg>
+            </a>
+          ) : (
+            <a
+              href={`/store/${siteSlug}`}
+              className="inline-flex w-full items-center justify-center gap-2 rounded-xl bg-accent-500 px-6 py-3.5 text-base font-semibold text-white shadow-lg shadow-accent-500/25 transition-all duration-200 hover:bg-accent-600 hover:shadow-xl hover:-translate-y-0.5 active:translate-y-0"
+            >
+              Back to {siteName}
+            </a>
+          )}
+
+          {redirectUrl && delaySeconds !== undefined && secondsLeft !== undefined && secondsLeft > 0 && (
+            <p className="mt-4 text-xs text-surface-400">
+              Redirecting automatically in {secondsLeft}s&hellip;
+            </p>
+          )}
+        </div>
+
+        <p className="mt-6 text-center text-xs text-surface-400">
+          Powered by {siteName}
+        </p>
+      </div>
     </div>
   );
 }
