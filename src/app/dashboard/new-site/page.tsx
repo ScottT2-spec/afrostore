@@ -1,6 +1,6 @@
 'use client';
 import { ArrowLeft, ArrowRight, Check, Loader2, X, MessageSquare } from "lucide-react";
-import { FileText, Globe, Layout, Link as LinkIcon, Palette, ShoppingBag, Sparkles, Square, Zap } from "@/components/icons/FilledIcons";
+import { Globe, Layout, Link as LinkIcon, Palette, ShoppingBag, Sparkles, Square, Zap } from "@/components/icons/FilledIcons";
 
 import { useState, useEffect, useMemo } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
@@ -248,7 +248,10 @@ export default function NewSitePage() {
     }
 
     setClassifying(false);
-    setSiteType(result.siteType);
+    // Business Website and Landing Page are hidden right now — only
+    // E-commerce is selectable, so don't let classification (local or AI)
+    // land the person on a site type they have no way to pick or see.
+    setSiteType('ECOMMERCE');
     setIndustry(result.industry);
     if (aiName) setBusinessInfo((prev) => ({ ...prev, name: prev.name || aiName!, description: prev.description || aiTagline || guidedInput }));
     setShowGuided(false);
@@ -443,8 +446,10 @@ export default function NewSitePage() {
             <div className="grid gap-4">
               {([
                 { type: 'ECOMMERCE' as SiteType, icon: ShoppingBag, title: 'E-commerce Website', desc: 'Sell products and services online. Products, orders, inventory, payments.', color: 'emerald' },
-                { type: 'WEBSITE' as SiteType, icon: Globe, title: 'Business Website', desc: 'Build an informational website. Pages, blogs, forms, SEO.', color: 'blue' },
-                { type: 'LANDING_PAGE' as SiteType, icon: FileText, title: 'Landing Page', desc: 'Lead generation and conversion. Funnels, CRM, email & WhatsApp marketing.', color: 'purple' },
+                // Business Website and Landing Page are hidden for now — re-add
+                // here to bring them back.
+                // { type: 'WEBSITE' as SiteType, icon: Globe, title: 'Business Website', desc: 'Build an informational website. Pages, blogs, forms, SEO.', color: 'blue' },
+                // { type: 'LANDING_PAGE' as SiteType, icon: FileText, title: 'Landing Page', desc: 'Lead generation and conversion. Funnels, CRM, email & WhatsApp marketing.', color: 'purple' },
               ]).map(item => {
                 const Icon = item.icon;
                 const selected = siteType === item.type;
