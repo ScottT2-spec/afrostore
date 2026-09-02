@@ -33,6 +33,7 @@ const BYPASS_PREFIXES = [
   "/verify",
   "/reset-password",
   "/invite",
+  "/templates",
   "/store/",  // Already has /store/ prefix — don't double-rewrite
 ];
 
