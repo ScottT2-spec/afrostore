@@ -7,10 +7,11 @@ import { useSite } from "@/context/StoreContext";
 import { useSiteApi } from "@/hooks/useApiData";
 import { useAuth } from "@/context/AuthContext";
 import { formatCurrency } from "@/lib/utils";
+import { APP_DOMAIN } from "@/lib/domain/domain-manager";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 
-const APP_DOMAIN = (process.env.NEXT_PUBLIC_APP_DOMAIN || "prosell.africa").replace(/^https?:\/\//, "");
+
 
 interface DashboardData {
   stats: {
