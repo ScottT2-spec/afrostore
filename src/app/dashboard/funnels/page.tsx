@@ -705,13 +705,7 @@ export default function FunnelsPage() {
                                     {step.viewCount > 0 && <span className="font-semibold text-surface-700">{rate}%</span>}
                                     {(() => {
                                       const stats = funnelStats[funnel.id];
-                                      if (!stats || stats === "loading") return null;
-                                      // Only step types the stats endpoint actually attributes revenue
-                                      // to get a badge - showing ₦0 on Landing/Lead Form steps would
-                                      // wrongly imply they could generate revenue themselves.
-                                      const hasRevenueEntry = Object.prototype.hasOwnProperty.call(stats.stepRevenue || {}, step.id);
-                                      if (!hasRevenueEntry) return null;
-                                      const revenue = stats.stepRevenue[step.id] ?? 0;
+                                      const revenue = stats && stats !== "loading" ? stats.stepRevenue?.[step.id] ?? 0 : 0;
                                       return <span className="font-semibold text-brand-600">{formatCurrency(revenue, currentStore?.currency)}</span>;
                                     })()}
                                   </div>
