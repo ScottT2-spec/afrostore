@@ -1,5 +1,5 @@
 "use client";
-import { ChevronDown, ChevronRight, DollarSign, Gift, Loader2, Percent, Plus, ShoppingCart, Tag, TrendingUp, Users } from "lucide-react";
+import { ChevronDown, ChevronRight, DollarSign, Gift, Loader2, Percent, Plus, ShoppingCart, Tag, TrendingUp, Users, CalendarDays, RefreshCw, X } from "lucide-react";
 import { Archive, ArrowDown, BarChart3, Copy, Eye, EyeOff, ExternalLink, Filter, Layers, Megaphone, MousePointerClick, Pause, Pencil, Play, Search, Trash2 } from "@/components/icons/FilledIcons";
 
 import { useState, useEffect, useCallback, type ComponentType } from "react";
@@ -107,6 +107,45 @@ function FunnelStatCard({
   );
 }
 
+function DateRangeFilter({
+  value, onChange, onRefresh, refreshing,
+}: { value: { from: string; to: string } | null; onChange: (v: { from: string; to: string } | null) => void; onRefresh: () => void; refreshing?: boolean }) {
+  const todayStr = new Date().toISOString().slice(0, 10);
+  const thirtyAgoStr = new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString().slice(0, 10);
+  const from = value?.from || thirtyAgoStr;
+  const to = value?.to || todayStr;
+
+  return (
+    <div className="flex items-center gap-1.5 bg-surface-50 border border-surface-200 rounded-xl pl-3 pr-1.5 py-1.5">
+      <CalendarDays className="h-3.5 w-3.5 text-surface-400 flex-shrink-0" />
+      <input
+        type="date"
+        value={from}
+        max={to}
+        onChange={(e) => onChange({ from: e.target.value, to })}
+        className="text-xs text-surface-700 font-medium bg-transparent border-none outline-none w-[110px]"
+      />
+      <span className="text-surface-300">–</span>
+      <input
+        type="date"
+        value={to}
+        min={from}
+        max={todayStr}
+        onChange={(e) => onChange({ from, to: e.target.value })}
+        className="text-xs text-surface-700 font-medium bg-transparent border-none outline-none w-[110px]"
+      />
+      {value && (
+        <button onClick={() => onChange(null)} className="p-1 rounded-lg hover:bg-surface-200 text-surface-400 hover:text-surface-700 transition-colors" title="Reset to last 30 days">
+          <X className="h-3.5 w-3.5" />
+        </button>
+      )}
+      <button onClick={onRefresh} className="p-1 rounded-lg hover:bg-surface-200 text-surface-400 hover:text-surface-700 transition-colors" title="Refresh">
+        <RefreshCw className={`h-3.5 w-3.5 ${refreshing ? "animate-spin" : ""}`} />
+      </button>
+    </div>
+  );
+}
+
 function FunnelStatsCards({ stats, currency }: { stats: FunnelStats | "loading" | null | undefined; currency?: string }) {
   if (stats === "loading" || stats === undefined) {
     return (
@@ -162,6 +201,8 @@ export default function FunnelsPage() {
   // Expanded funnel (step editor)
   const [expandedId, setExpandedId] = useState<string | null>(null);
   const [funnelStats, setFunnelStats] = useState<Record<string, FunnelStats | "loading" | null>>({});
+  const [dateRanges, setDateRanges] = useState<Record<string, { from: string; to: string } | null>>({});
+  const [statsRefreshing, setStatsRefreshing] = useState<Record<string, boolean>>({});
   const [addingStep, setAddingStep] = useState(false);
   const [newStepName, setNewStepName] = useState("");
   const [newStepType, setNewStepType] = useState("LANDING");
@@ -189,6 +230,17 @@ export default function FunnelsPage() {
       .then((res) => { if (res.success && res.data) setAvailablePages(res.data.pages || []); });
   }, [currentStore]);
 
+  const fetchStatsForFunnel = useCallback((funnelId: string, range?: { from: string; to: string } | null) => {
+    if (!currentStore) return;
+    setStatsRefreshing((prev) => ({ ...prev, [funnelId]: true }));
+    const params = new URLSearchParams();
+    if (range) { params.set("from", range.from); params.set("to", range.to); }
+    api.get<FunnelStats>(`/api/sites/${currentStore.id}/funnels/${funnelId}/stats?${params}`).then((statsRes) => {
+      setFunnelStats((prev) => ({ ...prev, [funnelId]: statsRes.success && statsRes.data ? statsRes.data : null }));
+      setStatsRefreshing((prev) => ({ ...prev, [funnelId]: false }));
+    });
+  }, [currentStore]);
+
   const fetchFunnels = useCallback(async () => {
     if (!currentStore) return;
     setLoading(true);
@@ -203,13 +255,11 @@ export default function FunnelsPage() {
       // so fetch every funnel's stats up front rather than lazily on expand.
       for (const f of list) {
         setFunnelStats((prev) => (prev[f.id] ? prev : { ...prev, [f.id]: "loading" }));
-        api.get<FunnelStats>(`/api/sites/${currentStore.id}/funnels/${f.id}/stats`).then((statsRes) => {
-          setFunnelStats((prev) => ({ ...prev, [f.id]: statsRes.success && statsRes.data ? statsRes.data : null }));
-        });
+        fetchStatsForFunnel(f.id, dateRanges[f.id]);
       }
     }
     setLoading(false);
-  }, [currentStore, search, statusFilter]);
+  }, [currentStore, search, statusFilter, fetchStatsForFunnel]);
 
   useEffect(() => { fetchFunnels(); }, [fetchFunnels]);
 
@@ -549,9 +599,23 @@ export default function FunnelsPage() {
                   </div>
                 </div>
 
+                {/* Date range filter — matches CartFlows' date picker above Flow Analytics */}
+                <div className="px-5 pt-3 flex justify-end border-t border-surface-100">
+                  <DateRangeFilter
+                    value={dateRanges[funnel.id] || null}
+                    onChange={(range) => {
+                      setDateRanges((prev) => ({ ...prev, [funnel.id]: range }));
+                      setFunnelStats((prev) => ({ ...prev, [funnel.id]: "loading" }));
+                      fetchStatsForFunnel(funnel.id, range);
+                    }}
+                    onRefresh={() => fetchStatsForFunnel(funnel.id, dateRanges[funnel.id])}
+                    refreshing={statsRefreshing[funnel.id]}
+                  />
+                </div>
+
                 {/* Always visible - matches CartFlows' Flow Analytics cards at
                     the top of the funnel, not gated behind expanding */}
-                <div className="px-5 pb-4 pt-1 border-t border-surface-100">
+                <div className="px-5 pb-4 pt-2">
                   <FunnelStatsCards stats={funnelStats[funnel.id]} currency={currentStore?.currency} />
                 </div>
 
