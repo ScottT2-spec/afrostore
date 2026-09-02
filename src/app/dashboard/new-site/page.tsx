@@ -624,53 +624,6 @@ export default function NewSitePage() {
                   placeholder="What does your business do?"
                 />
               </div>
-              <div className="grid sm:grid-cols-3 gap-4">
-                {siteType === 'LANDING_PAGE' ? (
-                  <div className="sm:col-span-3">
-                    <label className="block text-sm font-medium text-gray-700 mb-1.5">Target Audience</label>
-                    <input
-                      type="text"
-                      value={businessInfo.targetAudience}
-                      onChange={e => setBusinessInfo(prev => ({ ...prev, targetAudience: e.target.value }))}
-                      className="w-full px-4 py-3 border border-gray-200 rounded-lg focus:ring-2 focus:ring-gray-900 outline-none"
-                      placeholder="Who is this campaign for?"
-                    />
-                  </div>
-                ) : (
-                  <>
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-1.5">Products</label>
-                      <input
-                        type="text"
-                        value={businessInfo.products}
-                        onChange={e => setBusinessInfo(prev => ({ ...prev, products: e.target.value }))}
-                        className="w-full px-4 py-3 border border-gray-200 rounded-lg focus:ring-2 focus:ring-gray-900 outline-none"
-                        placeholder="dresses, shoes"
-                      />
-                    </div>
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-1.5">Services</label>
-                      <input
-                        type="text"
-                        value={businessInfo.services}
-                        onChange={e => setBusinessInfo(prev => ({ ...prev, services: e.target.value }))}
-                        className="w-full px-4 py-3 border border-gray-200 rounded-lg focus:ring-2 focus:ring-gray-900 outline-none"
-                        placeholder="delivery, styling"
-                      />
-                    </div>
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-1.5">Target Audience</label>
-                      <input
-                        type="text"
-                        value={businessInfo.targetAudience}
-                        onChange={e => setBusinessInfo(prev => ({ ...prev, targetAudience: e.target.value }))}
-                        className="w-full px-4 py-3 border border-gray-200 rounded-lg focus:ring-2 focus:ring-gray-900 outline-none"
-                        placeholder="families, founders"
-                      />
-                    </div>
-                  </>
-                )}
-              </div>
               <div className="grid sm:grid-cols-2 gap-4">
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1.5">Phone Number</label>
