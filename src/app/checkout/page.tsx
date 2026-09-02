@@ -312,10 +312,14 @@ export default function CheckoutPage() {
   // Attached to the purchase event below so revenue/orders can be
   // attributed back to the funnel for the Funnels dashboard stats cards.
   const [funnelId, setFunnelId] = useState<string | null>(null);
+  const [funnelStepId, setFunnelStepId] = useState<string | null>(null);
   useEffect(() => {
     if (typeof window === "undefined") return;
-    const id = new URLSearchParams(window.location.search).get("funnelId");
+    const params = new URLSearchParams(window.location.search);
+    const id = params.get("funnelId");
     if (id) setFunnelId(id);
+    const stepId = params.get("funnelStepId");
+    if (stepId) setFunnelStepId(stepId);
   }, []);
   const [orderError, setOrderError] = useState("");
   const [orderSuccess, setOrderSuccess] = useState<{ orderNumber: string; orderId: string } | null>(null);
@@ -470,7 +474,7 @@ export default function CheckoutPage() {
         localStorage.removeItem(cartKey);
         setCart([]);
         setOrderSuccess({ orderNumber: order.orderNumber, orderId: order.id });
-        if (storeSlug) trackEvent(storeSlug, "purchase", { orderId: order.id, funnelId: funnelId || undefined, metadata: { value: total, currency } });
+        if (storeSlug) trackEvent(storeSlug, "purchase", { orderId: order.id, funnelId: funnelId || undefined, metadata: { value: total, currency, funnelStepId: funnelStepId || undefined } });
         trackABTestConversion(storeSlug);
         setPlacing(false);
         return;
@@ -483,7 +487,7 @@ export default function CheckoutPage() {
         body: JSON.stringify({
           orderId: order.id,
           provider: paymentMethod,
-          callbackUrl: `${window.location.origin}/checkout?status=pending&order=${order.orderNumber}${funnelId ? `&funnelId=${funnelId}` : ""}`,
+          callbackUrl: `${window.location.origin}/checkout?status=pending&order=${order.orderNumber}${funnelId ? `&funnelId=${funnelId}` : ""}${funnelStepId ? `&funnelStepId=${funnelStepId}` : ""}`,
         }),
       });
 
@@ -530,6 +534,7 @@ export default function CheckoutPage() {
 
     const ref = params.get("ref") || sessionStorage.getItem("afro_pay_ref");
     const verifyFunnelId = params.get("funnelId");
+    const verifyFunnelStepId = params.get("funnelStepId");
     localStorage.removeItem(cartKey);
     setCart([]);
     sessionStorage.removeItem("afro_pay_ref");
@@ -546,7 +551,7 @@ export default function CheckoutPage() {
         .then((json) => {
           if (json.success && json.data?.status === "SUCCESS") {
             setOrderSuccess({ orderNumber: orderNum, orderId: json.data.orderId || "" });
-            if (storeSlug) trackEvent(storeSlug, "purchase", { orderId: json.data.orderId, funnelId: verifyFunnelId || undefined, metadata: { value: json.data.amount, currency } });
+            if (storeSlug) trackEvent(storeSlug, "purchase", { orderId: json.data.orderId, funnelId: verifyFunnelId || undefined, metadata: { value: json.data.amount, currency, funnelStepId: verifyFunnelStepId || undefined } });
             trackABTestConversion(storeSlug);
           } else if (json.success && json.data?.status === "PENDING") {
             // Webhook may still be processing

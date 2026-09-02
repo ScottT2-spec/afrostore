@@ -60,18 +60,29 @@ export async function GET(req: NextRequest, { params }: Params) {
   const revenuePerVisit = totalPageViews > 0 ? totalRevenue / totalPageViews : 0;
   const rpuv = totalVisitors > 0 ? totalRevenue / totalVisitors : 0;
 
-  // Per-step revenue: purchase events aren't tagged with funnelStepId today
-  // (only funnelId), so exact per-step attribution isn't possible yet. As
-  // an honest approximation, all funnel revenue is attributed to this
-  // funnel's CHECKOUT-type step(s) - that's genuinely where the purchase
-  // happens - split evenly if there's more than one. Every other step type
-  // (including THANK_YOU) correctly gets 0: they don't generate revenue
-  // themselves, only the checkout step does.
-  const checkoutSteps = await prisma.funnelStep.findMany({ where: { funnelId, type: "CHECKOUT" }, select: { id: true } });
+  // Per-step revenue: the checkout page now tags every purchase event with
+  // the funnelStepId of the CHECKOUT step the shopper actually came from
+  // (see CheckoutStep in FunnelStepView + checkout/page.tsx), so this
+  // attributes real revenue to the real step instead of guessing.
+  // Purchases from before that change (or from a non-funnel checkout url)
+  // won't carry a funnelStepId - that revenue still counts toward
+  // totalRevenue above, it just can't be pinned to one step, so it's
+  // split evenly across this funnel's CHECKOUT step(s) as a fallback.
   const stepRevenue: Record<string, number> = {};
-  if (checkoutSteps.length > 0) {
-    const perStep = totalRevenue / checkoutSteps.length;
-    for (const s of checkoutSteps) stepRevenue[s.id] = perStep;
+  let unattributedRevenue = 0;
+  for (const row of purchaseEvents) {
+    const meta = row.metadata as Record<string, unknown> | null;
+    const value = meta && typeof meta.value === "number" ? meta.value : 0;
+    const stepId = meta && typeof meta.funnelStepId === "string" ? meta.funnelStepId : null;
+    if (stepId) stepRevenue[stepId] = (stepRevenue[stepId] || 0) + value;
+    else unattributedRevenue += value;
+  }
+  if (unattributedRevenue > 0) {
+    const checkoutSteps = await prisma.funnelStep.findMany({ where: { funnelId, type: "CHECKOUT" }, select: { id: true } });
+    if (checkoutSteps.length > 0) {
+      const perStep = unattributedRevenue / checkoutSteps.length;
+      for (const s of checkoutSteps) stepRevenue[s.id] = (stepRevenue[s.id] || 0) + perStep;
+    }
   }
 
   return success({
