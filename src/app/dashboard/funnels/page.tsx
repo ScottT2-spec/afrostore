@@ -1,10 +1,11 @@
 "use client";
-import { ChevronDown, ChevronRight, Loader2, Plus } from "lucide-react";
+import { ChevronDown, ChevronRight, DollarSign, Gift, Loader2, Percent, Plus, ShoppingCart, Tag, TrendingUp, Users } from "lucide-react";
 import { Archive, ArrowDown, BarChart3, Copy, Eye, EyeOff, ExternalLink, Filter, Layers, Megaphone, MousePointerClick, Pause, Pencil, Play, Search, Trash2 } from "@/components/icons/FilledIcons";
 
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, type ComponentType } from "react";
 import { useSite } from "@/context/StoreContext";
 import { api } from "@/lib/api-client";
+import { formatCurrency } from "@/lib/utils";
 
 interface FunnelStep {
   id: string;
@@ -28,6 +29,17 @@ interface FunnelItem {
   steps: FunnelStep[];
   createdAt: string;
   stats?: { totalViews: number; totalConversions: number; overallRate: number };
+}
+
+interface FunnelStats {
+  totalVisitors: number;
+  totalOrders: number;
+  totalRevenue: number;
+  avgOrderValue: number;
+  bumpOfferRevenue: number;
+  offersRevenue: number;
+  revenuePerVisit: number;
+  rpuv: number;
 }
 
 const statusStyles: Record<string, string> = {
@@ -55,6 +67,46 @@ const stepTypeColors: Record<string, string> = {
   VIDEO: "bg-pink-100 text-pink-700",
 };
 
+function FunnelStatCard({ icon: Icon, label, value, tooltip }: { icon: ComponentType<{ className?: string }>; label: string; value: string; tooltip?: string }) {
+  return (
+    <div className="rounded-xl border border-surface-200 bg-white px-4 py-3" title={tooltip}>
+      <div className="flex items-center gap-1.5 text-[11px] font-medium text-surface-400 mb-1.5">
+        <Icon className="h-3.5 w-3.5" />
+        {label}
+      </div>
+      <div className="text-lg font-bold text-surface-900">{value}</div>
+    </div>
+  );
+}
+
+function FunnelStatsCards({ stats, currency }: { stats: FunnelStats | "loading" | null | undefined; currency?: string }) {
+  if (stats === "loading" || stats === undefined) {
+    return (
+      <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-5">
+        {Array.from({ length: 8 }).map((_, i) => (
+          <div key={i} className="rounded-xl border border-surface-200 bg-white px-4 py-3 h-[62px] animate-pulse" />
+        ))}
+      </div>
+    );
+  }
+  if (stats === null) return null;
+
+  const money = (n: number) => formatCurrency(n, currency);
+
+  return (
+    <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-5">
+      <FunnelStatCard icon={Users} label="Total Visitors" value={stats.totalVisitors.toLocaleString()} />
+      <FunnelStatCard icon={ShoppingCart} label="Total Orders" value={stats.totalOrders.toLocaleString()} />
+      <FunnelStatCard icon={DollarSign} label="Total Revenue" value={money(stats.totalRevenue)} />
+      <FunnelStatCard icon={BarChart3} label="Avg Order Value" value={money(stats.avgOrderValue)} />
+      <FunnelStatCard icon={Gift} label="Bump Offer Revenue" value={money(stats.bumpOfferRevenue)} tooltip="Revenue from order-bump add-ons at checkout" />
+      <FunnelStatCard icon={Tag} label="Offers Revenue" value={money(stats.offersRevenue)} tooltip="Revenue from one-click upsell/downsell offers" />
+      <FunnelStatCard icon={TrendingUp} label="Revenue Per Visit" value={money(stats.revenuePerVisit)} tooltip="Total revenue divided by total page views" />
+      <FunnelStatCard icon={Percent} label="RPUV" value={money(stats.rpuv)} tooltip="Revenue per unique visitor" />
+    </div>
+  );
+}
+
 export default function FunnelsPage() {
   const { currentStore } = useSite();
   const [funnels, setFunnels] = useState<FunnelItem[]>([]);
@@ -76,6 +128,7 @@ export default function FunnelsPage() {
 
   // Expanded funnel (step editor)
   const [expandedId, setExpandedId] = useState<string | null>(null);
+  const [funnelStats, setFunnelStats] = useState<Record<string, FunnelStats | "loading" | null>>({});
   const [addingStep, setAddingStep] = useState(false);
   const [newStepName, setNewStepName] = useState("");
   const [newStepType, setNewStepType] = useState("LANDING");
@@ -175,6 +228,11 @@ export default function FunnelsPage() {
     const res = await api.get<FunnelItem>(`/api/sites/${currentStore.id}/funnels/${funnelId}`);
     if (res.success && res.data) {
       setFunnels((prev) => prev.map((f) => (f.id === funnelId ? { ...f, ...res.data!, steps: (res.data as FunnelItem).steps } : f)));
+    }
+    if (!funnelStats[funnelId]) {
+      setFunnelStats((prev) => ({ ...prev, [funnelId]: "loading" }));
+      const statsRes = await api.get<FunnelStats>(`/api/sites/${currentStore.id}/funnels/${funnelId}/stats`);
+      setFunnelStats((prev) => ({ ...prev, [funnelId]: statsRes.success && statsRes.data ? statsRes.data : null }));
     }
   };
 
@@ -455,6 +513,7 @@ export default function FunnelsPage() {
                 {/* Expanded: Visual funnel steps */}
                 {isExpanded && (
                   <div className="border-t border-surface-100 bg-surface-50 p-5">
+                    <FunnelStatsCards stats={funnelStats[funnel.id]} currency={currentStore?.currency} />
                     <div className="flex flex-col items-center gap-1">
                       {funnel.steps.map((step, idx) => {
                         const rate = step.viewCount > 0 ? Math.round((step.conversionCount / step.viewCount) * 100) : 0;

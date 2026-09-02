@@ -57,7 +57,8 @@ export default function FunnelStepView({ siteSlug, siteName, siteLogo, currency,
     // Central event log + pixel PageView/ViewContent equivalents
     trackEvent(siteSlug, "page_view", {
       page: `/f/${funnelId}?step=${step.position}`,
-      metadata: { funnelId, funnelStepId: step.id, funnelStepType: step.type, funnelName },
+      funnelId,
+      metadata: { funnelStepId: step.id, funnelStepType: step.type, funnelName },
     });
   }, [siteSlug, funnelId, funnelName, step.id, step.position, step.type, pixelIds]);
 
@@ -93,7 +94,8 @@ export default function FunnelStepView({ siteSlug, siteName, siteLogo, currency,
           <LeadFormStep siteSlug={siteSlug} funnelId={funnelId} step={step} onSubmitted={goToNextStep} />
         )}
         {step.type === "THANK_YOU" && <ThankYouStep step={step} funnelName={funnelName} siteSlug={siteSlug} funnelId={funnelId} siteName={siteName} />}
-        {!["LANDING", "LEAD_FORM", "THANK_YOU"].includes(step.type) && (
+        {step.type === "CHECKOUT" && <CheckoutStep siteSlug={siteSlug} funnelId={funnelId} step={step} />}
+        {!["LANDING", "LEAD_FORM", "THANK_YOU", "CHECKOUT"].includes(step.type) && (
           <div className="relative min-h-[calc(100vh-65px)] overflow-hidden bg-surface-50 flex items-center justify-center px-4 py-16">
             <div className="pointer-events-none absolute inset-0 overflow-hidden">
               <div className="absolute -top-32 -left-24 h-80 w-80 rounded-full bg-brand-200/30 blur-3xl" />
@@ -387,6 +389,23 @@ function LeadFormStep({
           </form>
         )}
       </div>
+    </div>
+  );
+}
+
+function CheckoutStep({ siteSlug, funnelId, step }: { siteSlug: string; funnelId: string; step: PublicFunnelStep }) {
+  // Redirects into the storefront's checkout, passing this funnel + step
+  // as context so a confirmed order can be attributed back to this
+  // funnel for the Funnels dashboard's stats cards (Total Orders, Total
+  // Revenue, etc. - see checkout/page.tsx's purchase trackEvent call).
+  useEffect(() => {
+    const params = new URLSearchParams({ funnelId, funnelStepId: step.id });
+    window.location.href = `/checkout?${params.toString()}`;
+  }, [funnelId, step.id]);
+
+  return (
+    <div className="max-w-lg mx-auto px-4 py-24 text-center">
+      <p className="text-surface-500">Taking you to checkout…</p>
     </div>
   );
 }
