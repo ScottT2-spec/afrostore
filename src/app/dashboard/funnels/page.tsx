@@ -68,14 +68,41 @@ const stepTypeColors: Record<string, string> = {
   VIDEO: "bg-pink-100 text-pink-700",
 };
 
-function FunnelStatCard({ icon: Icon, label, value, tooltip }: { icon: ComponentType<{ className?: string }>; label: string; value: string; tooltip?: string }) {
+const FUNNEL_STAT_ACCENTS = [
+  { border: "border-l-brand-500", icon: "text-brand-600", iconBg: "bg-brand-50" },
+  { border: "border-l-emerald-500", icon: "text-emerald-600", iconBg: "bg-emerald-50" },
+  { border: "border-l-blue-500", icon: "text-blue-600", iconBg: "bg-blue-50" },
+  { border: "border-l-violet-500", icon: "text-violet-600", iconBg: "bg-violet-50" },
+  { border: "border-l-amber-500", icon: "text-amber-600", iconBg: "bg-amber-50" },
+  { border: "border-l-rose-500", icon: "text-rose-600", iconBg: "bg-rose-50" },
+  { border: "border-l-cyan-500", icon: "text-cyan-600", iconBg: "bg-cyan-50" },
+  { border: "border-l-fuchsia-500", icon: "text-fuchsia-600", iconBg: "bg-fuchsia-50" },
+];
+
+function FunnelStatCard({
+  icon: Icon, label, value, tooltip, featured, accent,
+}: { icon: ComponentType<{ className?: string }>; label: string; value: string; tooltip?: string; featured?: boolean; accent: { border: string; icon: string; iconBg: string } }) {
+  if (featured) {
+    return (
+      <div className="rounded-2xl bg-brand-900 px-5 py-4 text-white relative overflow-hidden" title={tooltip}>
+        <div className="absolute -right-4 -top-4 h-20 w-20 rounded-full bg-white/5" />
+        <div className="flex items-center gap-1.5 text-xs font-bold text-brand-200 uppercase tracking-wide mb-1.5 relative">
+          <Icon className="h-4 w-4" />
+          {label}
+        </div>
+        <div className="text-2xl font-black font-display tracking-tight relative">{value}</div>
+      </div>
+    );
+  }
   return (
-    <div className="rounded-xl border border-surface-200 bg-white px-4 py-3" title={tooltip}>
-      <div className="flex items-center gap-1.5 text-[11px] font-medium text-surface-400 mb-1.5">
-        <Icon className="h-3.5 w-3.5" />
+    <div className={`rounded-2xl border border-surface-200 border-l-4 ${accent.border} bg-white px-5 py-4`} title={tooltip}>
+      <div className="flex items-center gap-1.5 text-xs font-bold text-surface-600 uppercase tracking-wide mb-1.5">
+        <span className={`h-5 w-5 rounded-md ${accent.iconBg} flex items-center justify-center`}>
+          <Icon className={`h-3 w-3 ${accent.icon}`} />
+        </span>
         {label}
       </div>
-      <div className="text-lg font-bold text-surface-900">{value}</div>
+      <div className="text-2xl font-black text-surface-900 font-display tracking-tight">{value}</div>
     </div>
   );
 }
@@ -85,7 +112,7 @@ function FunnelStatsCards({ stats, currency }: { stats: FunnelStats | "loading" 
     return (
       <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-5">
         {Array.from({ length: 8 }).map((_, i) => (
-          <div key={i} className="rounded-xl border border-surface-200 bg-white px-4 py-3 h-[62px] animate-pulse" />
+          <div key={i} className="rounded-2xl border border-surface-200 bg-white px-5 py-4 h-[78px] animate-pulse" />
         ))}
       </div>
     );
@@ -93,17 +120,22 @@ function FunnelStatsCards({ stats, currency }: { stats: FunnelStats | "loading" 
   if (stats === null) return null;
 
   const money = (n: number) => formatCurrency(n, currency);
+  const cards = [
+    { icon: Users, label: "Total Visitors", value: stats.totalVisitors.toLocaleString(), featured: true },
+    { icon: ShoppingCart, label: "Total Orders", value: stats.totalOrders.toLocaleString() },
+    { icon: DollarSign, label: "Total Revenue", value: money(stats.totalRevenue) },
+    { icon: BarChart3, label: "Avg Order Value", value: money(stats.avgOrderValue) },
+    { icon: Gift, label: "Bump Offer Revenue", value: money(stats.bumpOfferRevenue), tooltip: "Revenue from order-bump add-ons at checkout" },
+    { icon: Tag, label: "Offers Revenue", value: money(stats.offersRevenue), tooltip: "Revenue from one-click upsell/downsell offers" },
+    { icon: TrendingUp, label: "Revenue Per Visit", value: money(stats.revenuePerVisit), tooltip: "Total revenue divided by total page views" },
+    { icon: Percent, label: "RPUV", value: money(stats.rpuv), tooltip: "Revenue per unique visitor" },
+  ];
 
   return (
     <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-5">
-      <FunnelStatCard icon={Users} label="Total Visitors" value={stats.totalVisitors.toLocaleString()} />
-      <FunnelStatCard icon={ShoppingCart} label="Total Orders" value={stats.totalOrders.toLocaleString()} />
-      <FunnelStatCard icon={DollarSign} label="Total Revenue" value={money(stats.totalRevenue)} />
-      <FunnelStatCard icon={BarChart3} label="Avg Order Value" value={money(stats.avgOrderValue)} />
-      <FunnelStatCard icon={Gift} label="Bump Offer Revenue" value={money(stats.bumpOfferRevenue)} tooltip="Revenue from order-bump add-ons at checkout" />
-      <FunnelStatCard icon={Tag} label="Offers Revenue" value={money(stats.offersRevenue)} tooltip="Revenue from one-click upsell/downsell offers" />
-      <FunnelStatCard icon={TrendingUp} label="Revenue Per Visit" value={money(stats.revenuePerVisit)} tooltip="Total revenue divided by total page views" />
-      <FunnelStatCard icon={Percent} label="RPUV" value={money(stats.rpuv)} tooltip="Revenue per unique visitor" />
+      {cards.map((c, i) => (
+        <FunnelStatCard key={c.label} {...c} accent={FUNNEL_STAT_ACCENTS[i]} />
+      ))}
     </div>
   );
 }
