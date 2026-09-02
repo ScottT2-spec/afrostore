@@ -168,12 +168,14 @@ export default function PagesPage() {
           <div className="flex items-center justify-between mb-3">
             <h3 className="text-sm font-bold text-surface-900">Create New Page</h3>
             <button
-              onClick={() => setUseAI(!useAI)}
-              className={`inline-flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-xs font-semibold transition-colors ${
-                useAI ? "bg-brand-600 text-white" : "bg-surface-100 text-surface-600 hover:bg-surface-200"
-              }`}
+              type="button"
+              disabled
+              aria-disabled
+              title="Build with AI is coming soon"
+              className="inline-flex items-center gap-1.5 rounded-lg bg-surface-100 px-3 py-1.5 text-xs font-semibold text-surface-400 cursor-not-allowed"
             >
-              <Sparkles className="h-3.5 w-3.5" /> {useAI ? "AI mode on" : "Build with AI"}
+              <Sparkles className="h-3.5 w-3.5" /> Build with AI
+              <span className="ml-1 rounded-full bg-surface-200 px-1.5 py-0.5 text-[9px] font-bold uppercase tracking-wide text-surface-500">Soon</span>
             </button>
           </div>
           <div className="flex flex-col sm:flex-row gap-3">

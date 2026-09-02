@@ -44,7 +44,7 @@ const INDUSTRIES = [
 ];
 
 const LAUNCH_METHODS = [
-  { id: 'quick', icon: Zap, title: 'Build with AI', desc: 'Let AI help you build your site quickly', color: 'border-emerald-500 bg-emerald-50' },
+  { id: 'quick', icon: Zap, title: 'Build with AI', desc: 'Let AI help you build your site quickly', color: 'border-emerald-500 bg-emerald-50', disabled: true },
   { id: 'template', icon: Layout, title: 'Use a Template', desc: 'Pick a professionally designed template', color: 'border-blue-500 bg-blue-50' },
   { id: 'blank', icon: Square, title: 'Blank Canvas', desc: 'Start from scratch', color: 'border-gray-500 bg-gray-50' },
 ];
@@ -251,10 +251,9 @@ export default function NewSitePage() {
     setSiteType(result.siteType);
     setIndustry(result.industry);
     if (aiName) setBusinessInfo((prev) => ({ ...prev, name: prev.name || aiName!, description: prev.description || aiTagline || guidedInput }));
-    setLaunchMethod('quick'); // Auto-select "Build with AI"
     setShowGuided(false);
     setGuidedInput('');
-    setStep(4); // Skip straight to business info — type, industry, and method are all set
+    setStep(3); // "Build with AI" is coming soon — let them pick template or blank canvas
   };
 
   const totalSteps = 7;
@@ -572,12 +571,21 @@ export default function NewSitePage() {
                 return (
                   <button
                     key={method.id}
-                    onClick={() => setLaunchMethod(method.id)}
-                    className={`p-6 rounded-xl border-2 text-left transition ${
-                      selected ? method.color : 'border-gray-100 bg-white hover:border-gray-200'
+                    onClick={() => { if (!method.disabled) setLaunchMethod(method.id); }}
+                    disabled={method.disabled}
+                    aria-disabled={method.disabled}
+                    className={`relative p-6 rounded-xl border-2 text-left transition ${
+                      method.disabled
+                        ? 'border-gray-100 bg-gray-50 opacity-60 cursor-not-allowed'
+                        : selected ? method.color : 'border-gray-100 bg-white hover:border-gray-200'
                     }`}
                   >
-                    <Icon className={`w-8 h-8 mb-3 ${selected ? 'text-gray-900' : 'text-gray-400'}`} />
+                    {method.disabled && (
+                      <span className="absolute top-3 right-3 rounded-full bg-gray-200 px-2.5 py-1 text-[10px] font-semibold uppercase tracking-wide text-gray-500">
+                        Coming Soon
+                      </span>
+                    )}
+                    <Icon className={`w-8 h-8 mb-3 ${method.disabled ? 'text-gray-300' : selected ? 'text-gray-900' : 'text-gray-400'}`} />
                     <p className="font-semibold text-gray-900">{method.title}</p>
                     <p className="text-sm text-gray-500 mt-1">{method.desc}</p>
                   </button>
