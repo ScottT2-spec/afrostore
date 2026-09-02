@@ -60,6 +60,20 @@ export async function GET(req: NextRequest, { params }: Params) {
   const revenuePerVisit = totalPageViews > 0 ? totalRevenue / totalPageViews : 0;
   const rpuv = totalVisitors > 0 ? totalRevenue / totalVisitors : 0;
 
+  // Per-step revenue: purchase events aren't tagged with funnelStepId today
+  // (only funnelId), so exact per-step attribution isn't possible yet. As
+  // an honest approximation, all funnel revenue is attributed to this
+  // funnel's CHECKOUT-type step(s) - that's genuinely where the purchase
+  // happens - split evenly if there's more than one. Every other step type
+  // (including THANK_YOU) correctly gets 0: they don't generate revenue
+  // themselves, only the checkout step does.
+  const checkoutSteps = await prisma.funnelStep.findMany({ where: { funnelId, type: "CHECKOUT" }, select: { id: true } });
+  const stepRevenue: Record<string, number> = {};
+  if (checkoutSteps.length > 0) {
+    const perStep = totalRevenue / checkoutSteps.length;
+    for (const s of checkoutSteps) stepRevenue[s.id] = perStep;
+  }
+
   return success({
     dateRange: { from: from.toISOString(), to: toInclusive.toISOString() },
     totalVisitors,
@@ -70,5 +84,6 @@ export async function GET(req: NextRequest, { params }: Params) {
     offersRevenue,
     revenuePerVisit,
     rpuv,
+    stepRevenue,
   });
 }

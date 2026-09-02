@@ -40,6 +40,7 @@ interface FunnelStats {
   offersRevenue: number;
   revenuePerVisit: number;
   rpuv: number;
+  stepRevenue: Record<string, number>;
 }
 
 const statusStyles: Record<string, string> = {
@@ -569,11 +570,32 @@ export default function FunnelsPage() {
                                     </div>
                                   )}
                                 </div>
-                                <div className="flex items-center gap-3 text-xs text-surface-400">
-                                  <span>{step.viewCount} views</span>
-                                  <span>{step.conversionCount} conv.</span>
-                                  {step.viewCount > 0 && <span className="font-semibold text-surface-700">{rate}%</span>}
-                                </div>
+                                {step.type === "THANK_YOU" ? (
+                                  // A thank-you step is only ever reached after a
+                                  // completed purchase - it doesn't have its own
+                                  // conversion event or revenue (that's the checkout
+                                  // step's), so showing a 0%/₦0 conversion+revenue
+                                  // row here would be misleading. Show just views,
+                                  // styled as its own small dashboard instead.
+                                  <div className="flex items-center gap-1.5 text-xs bg-green-50 border border-green-100 rounded-lg px-2.5 py-1 text-green-700">
+                                    <Eye className="h-3 w-3" />
+                                    <span className="font-semibold">{step.viewCount}</span>
+                                    <span className="text-green-600">views</span>
+                                  </div>
+                                ) : (
+                                  <div className="flex items-center gap-3 text-xs text-surface-400">
+                                    <span>{step.viewCount} views</span>
+                                    <span>{step.conversionCount} conv.</span>
+                                    {step.viewCount > 0 && <span className="font-semibold text-surface-700">{rate}%</span>}
+                                    {(() => {
+                                      const stats = funnelStats[funnel.id];
+                                      const revenue = stats && stats !== "loading" ? stats.stepRevenue?.[step.id] : undefined;
+                                      return revenue ? (
+                                        <span className="font-semibold text-brand-600">{formatCurrency(revenue, currentStore?.currency)}</span>
+                                      ) : null;
+                                    })()}
+                                  </div>
+                                )}
                                 <button
                                   onClick={() => openEditStep(funnel.id, step)}
                                   className="p-1.5 rounded hover:bg-surface-100 text-surface-400 hover:text-surface-700"
