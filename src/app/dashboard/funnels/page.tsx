@@ -622,6 +622,15 @@ export default function FunnelsPage() {
                 {/* Expanded: Visual funnel steps */}
                 {isExpanded && (
                   <div className="border-t border-surface-100 bg-surface-50 p-5">
+                    <div className="flex items-center justify-between mb-4">
+                      <h4 className="text-base font-bold text-surface-900 font-display">Funnel Steps</h4>
+                      <button
+                        onClick={() => { setAddingStep(true); setStepError(null); }}
+                        className="btn-primary text-xs py-2 px-3.5"
+                      >
+                        <Plus className="h-3.5 w-3.5" /> Add New Step
+                      </button>
+                    </div>
                     <div className="flex flex-col items-center gap-1">
                       {funnel.steps.map((step, idx) => {
                         const rate = step.viewCount > 0 ? Math.round((step.conversionCount / step.viewCount) * 100) : 0;
@@ -763,11 +772,7 @@ export default function FunnelsPage() {
                             <button onClick={() => { setAddingStep(false); setNewStepName(""); setNewStepFormId(""); setNewStepPageId(""); setStepError(null); }} className="btn-secondary text-xs py-2 px-3">Cancel</button>
                           </div>
                         </div>
-                      ) : (
-                        <button onClick={() => { setAddingStep(true); setStepError(null); }} className="text-xs text-brand-600 hover:text-brand-700 font-medium flex items-center gap-1">
-                          <Plus className="h-3.5 w-3.5" /> Add Step
-                        </button>
-                      )}
+                      ) : null}
                     </div>
                   </div>
                 )}
