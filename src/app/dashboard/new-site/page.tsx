@@ -442,7 +442,7 @@ export default function NewSitePage() {
             <p className="text-gray-500 mb-8">Choose the type of site that fits your needs</p>
             <div className="grid gap-4">
               {([
-                { type: 'ECOMMERCE' as SiteType, icon: ShoppingBag, title: 'Ecommerce Store', desc: 'Sell products and services online. Products, orders, inventory, payments.', color: 'emerald' },
+                { type: 'ECOMMERCE' as SiteType, icon: ShoppingBag, title: 'E-commerce Website', desc: 'Sell products and services online. Products, orders, inventory, payments.', color: 'emerald' },
                 { type: 'WEBSITE' as SiteType, icon: Globe, title: 'Business Website', desc: 'Build an informational website. Pages, blogs, forms, SEO.', color: 'blue' },
                 { type: 'LANDING_PAGE' as SiteType, icon: FileText, title: 'Landing Page', desc: 'Lead generation and conversion. Funnels, CRM, email & WhatsApp marketing.', color: 'purple' },
               ]).map(item => {
