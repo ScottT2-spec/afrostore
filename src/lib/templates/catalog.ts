@@ -27,6 +27,9 @@ export const TEMPLATE_CATEGORIES = [
 
   { id: 'interior-design', label: 'Interior Design' },
   { id: 'food-grocery', label: 'Grocery' },
+  { id: 'artsy', label: 'Art & Crafts' },
+  { id: 'beverage', label: 'Beverage & Drinks' },
+  { id: 'digital-services', label: 'Digital Services' },
   { id: 'landing-simple', label: 'Simple Landing Page' },
   { id: 'landing-health', label: 'Health & Medical' },
 ] as const;
@@ -37,6 +40,7 @@ export const TEMPLATES: TemplateMeta[] = [
   { slug: 'fashion-colored', name: 'Fashion Color', category: 'fashion', categoryLabel: 'Fashion & Clothing', description: 'Vibrant colorful fashion store with eye-catching design', previewImage: '/prokip-logo.png', file: 'fashion/fashion-colored.html', siteType: 'ECOMMERCE', industries: ['fashion'] },
   { slug: 'handmade-bags', name: 'Handmade Bags', category: 'fashion', categoryLabel: 'Fashion & Clothing', description: 'Artisan handmade bags and leather goods store', previewImage: '/prokip-logo.png', file: 'fashion/handmade-bags.html', siteType: 'ECOMMERCE', industries: ['fashion', 'art'] },
   { slug: 't-shirts-prints', name: 'T-Shirts & Prints', category: 'fashion', categoryLabel: 'Fashion & Clothing', description: 'Custom t-shirts and print-on-demand store', previewImage: '/prokip-logo.png', file: 'fashion/t-shirts-prints.html', siteType: 'ECOMMERCE', industries: ['fashion'] },
+  { slug: 'jewellery', name: 'Jewellery', category: 'fashion', categoryLabel: 'Fashion & Clothing', description: 'Elegant jewellery and accessories store', previewImage: '/prokip-logo.png', file: 'accessories/jewellery-2.html', siteType: 'ECOMMERCE', industries: ['fashion'] },
 
   // Electronics
   { slug: 'electronics', name: 'Electronics', category: 'electronics', categoryLabel: 'Electronics & Gadgets', description: 'Tech and electronics store with detailed product specs', previewImage: '/prokip-logo.png', file: 'electronics/electronics.html', siteType: 'ECOMMERCE', industries: ['electronics'] },
@@ -70,6 +74,18 @@ export const TEMPLATES: TemplateMeta[] = [
 
   // Health
   { slug: 'pills', name: 'Health & Supplements', category: 'health', categoryLabel: 'Health & Wellness', description: 'Health supplements and pharmacy store', previewImage: '/prokip-logo.png', file: 'health/pills.html', siteType: 'ECOMMERCE', industries: ['health'] },
+
+  // Art & Crafts
+  { slug: 'handmade-crafts', name: 'Handmade Crafts', category: 'artsy', categoryLabel: 'Art & Crafts', description: 'Handmade crafts and artisan goods store', previewImage: '/prokip-logo.png', file: 'artsy/handmade.html', siteType: 'ECOMMERCE', industries: ['art'] },
+  { slug: 'pottery', name: 'Pottery', category: 'artsy', categoryLabel: 'Art & Crafts', description: 'Handcrafted pottery and ceramics store', previewImage: '/prokip-logo.png', file: 'artsy/pottery.html', siteType: 'ECOMMERCE', industries: ['art'] },
+
+  // Beverage
+  { slug: 'drinks', name: 'Drinks', category: 'beverage', categoryLabel: 'Beverage & Drinks', description: 'Beverage store for soft drinks and refreshments', previewImage: '/prokip-logo.png', file: 'beverage/drinks.html', siteType: 'ECOMMERCE', industries: ['food'] },
+  { slug: 'wine', name: 'Wine', category: 'beverage', categoryLabel: 'Beverage & Drinks', description: 'Wine store with an elegant, refined design', previewImage: '/prokip-logo.png', file: 'beverage/wine.html', siteType: 'ECOMMERCE', industries: ['food'] },
+
+  // Digital Services
+  { slug: 'event-agency', name: 'Event Agency', category: 'digital-services', categoryLabel: 'Digital Services', description: 'Event planning and agency services website', previewImage: '/prokip-logo.png', file: 'digital-services/event-agency.html', siteType: 'WEBSITE', industries: ['agency'] },
+  { slug: 'food-delivery', name: 'Food Delivery', category: 'digital-services', categoryLabel: 'Digital Services', description: 'Food delivery and ordering service store', previewImage: '/prokip-logo.png', file: 'digital-services/food-delivery.html', siteType: 'ECOMMERCE', industries: ['food'] },
 
   // AI-Generated
   { slug: 'ai', name: 'AI Modern', category: 'ai', categoryLabel: 'AI Templates', description: 'Clean, modern Allbirds-inspired e-commerce template with full-bleed imagery, editorial layout, and video hero', previewImage: 'https://images.unsplash.com/photo-1441986300917-64674bd600d8?w=400&h=300&fit=crop', file: 'ai/modern.html', siteType: 'ECOMMERCE', industries: ['fashion', 'lifestyle', 'retail'] },
