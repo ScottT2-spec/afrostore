@@ -706,7 +706,7 @@ export default function FunnelsPage() {
                                     {(() => {
                                       const stats = funnelStats[funnel.id];
                                       const revenue = stats && stats !== "loading" ? stats.stepRevenue?.[step.id] ?? 0 : 0;
-                                      return <span className="font-semibold text-brand-600">{formatCurrency(revenue, currentStore?.currency)}</span>;
+                                      return <span className="font-semibold text-brand-600">{formatCurrency(revenue, currentStore?.currency)} revenue</span>;
                                     })()}
                                   </div>
                                 )}
