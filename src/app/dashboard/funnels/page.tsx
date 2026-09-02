@@ -164,7 +164,18 @@ export default function FunnelsPage() {
     if (search) params.set("search", search);
     if (statusFilter) params.set("status", statusFilter);
     const res = await api.get<{ funnels: FunnelItem[] }>(`/api/sites/${currentStore.id}/funnels?${params}`);
-    if (res.success && res.data) setFunnels(res.data.funnels || []);
+    if (res.success && res.data) {
+      const list = res.data.funnels || [];
+      setFunnels(list);
+      // Cards are always visible now (not gated behind expanding a row),
+      // so fetch every funnel's stats up front rather than lazily on expand.
+      for (const f of list) {
+        setFunnelStats((prev) => (prev[f.id] ? prev : { ...prev, [f.id]: "loading" }));
+        api.get<FunnelStats>(`/api/sites/${currentStore.id}/funnels/${f.id}/stats`).then((statsRes) => {
+          setFunnelStats((prev) => ({ ...prev, [f.id]: statsRes.success && statsRes.data ? statsRes.data : null }));
+        });
+      }
+    }
     setLoading(false);
   }, [currentStore, search, statusFilter]);
 
@@ -229,11 +240,6 @@ export default function FunnelsPage() {
     const res = await api.get<FunnelItem>(`/api/sites/${currentStore.id}/funnels/${funnelId}`);
     if (res.success && res.data) {
       setFunnels((prev) => prev.map((f) => (f.id === funnelId ? { ...f, ...res.data!, steps: (res.data as FunnelItem).steps } : f)));
-    }
-    if (!funnelStats[funnelId]) {
-      setFunnelStats((prev) => ({ ...prev, [funnelId]: "loading" }));
-      const statsRes = await api.get<FunnelStats>(`/api/sites/${currentStore.id}/funnels/${funnelId}/stats`);
-      setFunnelStats((prev) => ({ ...prev, [funnelId]: statsRes.success && statsRes.data ? statsRes.data : null }));
     }
   };
 
@@ -511,10 +517,15 @@ export default function FunnelsPage() {
                   </div>
                 </div>
 
+                {/* Always visible - matches CartFlows' Flow Analytics cards at
+                    the top of the funnel, not gated behind expanding */}
+                <div className="px-5 pb-4 pt-1 border-t border-surface-100">
+                  <FunnelStatsCards stats={funnelStats[funnel.id]} currency={currentStore?.currency} />
+                </div>
+
                 {/* Expanded: Visual funnel steps */}
                 {isExpanded && (
                   <div className="border-t border-surface-100 bg-surface-50 p-5">
-                    <FunnelStatsCards stats={funnelStats[funnel.id]} currency={currentStore?.currency} />
                     <div className="flex flex-col items-center gap-1">
                       {funnel.steps.map((step, idx) => {
                         const rate = step.viewCount > 0 ? Math.round((step.conversionCount / step.viewCount) * 100) : 0;
