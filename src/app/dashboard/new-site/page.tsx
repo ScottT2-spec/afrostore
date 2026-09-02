@@ -694,7 +694,7 @@ export default function NewSitePage() {
                 </div>
               </div>
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1.5">Location</label>
+                <label className="block text-sm font-medium text-gray-700 mb-1.5">Address</label>
                 <input
                   type="text"
                   value={businessInfo.location}
