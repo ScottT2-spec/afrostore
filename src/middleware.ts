@@ -9,7 +9,15 @@ import { NextRequest, NextResponse } from "next/server";
  *   prosell.africa/anything            →  pass through (main app)
  */
 
-const APP_DOMAIN = process.env.NEXT_PUBLIC_APP_DOMAIN || "prosell.africa";
+// NOTE: kept local (not imported from lib/domain/domain-manager.ts) because
+// that module pulls in `dns` + Prisma, which aren't safe/available in this
+// Edge middleware runtime. Same fix, applied locally: production has had
+// NEXT_PUBLIC_APP_DOMAIN set to "https://prosell.africa" (scheme included)
+// rather than the bare domain — since `host` below always comes from the
+// literal HTTP Host header (never includes a scheme), `host === APP_DOMAIN`
+// was silently false for every request, so isMainDomain never matched and
+// every non-bypassed path got rewritten into a dead /store/... URL.
+const APP_DOMAIN = (process.env.NEXT_PUBLIC_APP_DOMAIN || "prosell.africa").replace(/^https?:\/\//, "");
 
 // Paths that should NEVER be rewritten (app infrastructure)
 const BYPASS_PREFIXES = [
