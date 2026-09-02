@@ -490,7 +490,7 @@ export default function FunnelsPage() {
 
                   <div className="flex-1 min-w-0">
                     <div className="flex items-center gap-2">
-                      <h3 className="text-sm font-semibold text-surface-900">{funnel.name}</h3>
+                      <h3 className="text-lg font-bold text-surface-900 font-display tracking-tight">{funnel.name}</h3>
                       <span className={`text-[10px] font-semibold px-2 py-0.5 rounded-full flex items-center gap-1 ${statusStyles[funnel.status]}`}>
                         <StatusIcon className="h-3 w-3" /> {funnel.status}
                       </span>
