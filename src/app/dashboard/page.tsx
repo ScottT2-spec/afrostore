@@ -10,7 +10,7 @@ import { formatCurrency } from "@/lib/utils";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 
-const APP_DOMAIN = process.env.NEXT_PUBLIC_APP_DOMAIN || "prosell.africa";
+const APP_DOMAIN = (process.env.NEXT_PUBLIC_APP_DOMAIN || "prosell.africa").replace(/^https?:\/\//, "");
 
 interface DashboardData {
   stats: {
