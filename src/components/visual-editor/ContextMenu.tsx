@@ -19,6 +19,14 @@ interface ContextMenuProps {
   onClose: () => void;
 }
 
+// Block types that are core storefront infrastructure rather than ordinary
+// page content. These stay fully movable and restylable — merchants should
+// be free to reposition/reskin them — but are protected from accidental
+// deletion by default, without needing any stored flag or data migration:
+// protection is derived from `type`, so it applies uniformly to every site
+// immediately, including ones saved before this existed.
+const STRUCTURAL_TYPES = new Set(["cart"]);
+
 export default function ContextMenu({ elementId, position, onClose }: ContextMenuProps) {
   const menuRef = useRef<HTMLDivElement>(null);
   const {
@@ -45,7 +53,8 @@ export default function ContextMenu({ elementId, position, onClose }: ContextMen
     return null;
   };
   const currentElement = findElement(pageStructure.elements, elementId);
-  const isLocked = Boolean(currentElement?.locked);
+  const isStructural = STRUCTURAL_TYPES.has(currentElement?.type);
+  const isLocked = Boolean(currentElement?.locked) || isStructural;
   const isHidden = currentElement?.visible === false;
 
   useEffect(() => {
@@ -134,12 +143,12 @@ export default function ContextMenu({ elementId, position, onClose }: ContextMen
       action: handlePaste,
       color: "text-gray-700 dark:text-gray-300",
     }] : []),
-    {
+    ...(isStructural ? [] : [{
       icon: isLocked ? Unlock : Lock,
       label: isLocked ? "Unlock" : "Lock",
       action: handleToggleLock,
       color: "text-gray-700 dark:text-gray-300",
-    },
+    }]),
     {
       icon: isHidden ? Eye : EyeOff,
       label: isHidden ? "Show" : "Hide",
@@ -148,7 +157,7 @@ export default function ContextMenu({ elementId, position, onClose }: ContextMen
     },
     {
       icon: Trash2,
-      label: "Delete",
+      label: isStructural ? "Delete (protected)" : "Delete",
       action: handleDelete,
       disabled: isLocked,
       color: isLocked ? "text-gray-300 dark:text-gray-600 cursor-not-allowed" : "text-red-600 dark:text-red-400",
