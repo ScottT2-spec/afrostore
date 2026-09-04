@@ -28,6 +28,7 @@ import RightSidebar from "@/components/visual-editor/RightSidebar";
 import EditorCanvas from "@/components/visual-editor/EditorCanvas";
 import EditorToolbar from "@/components/visual-editor/EditorToolbar";
 import Navigator from "@/components/visual-editor/Navigator";
+import OnboardingCoachmarks from "@/components/visual-editor/OnboardingCoachmarks";
 
 interface VisualEditorProps {
   pageId: string;
@@ -257,6 +258,9 @@ export default function VisualEditor({
           <Navigator />
         )}
       </div>
+
+      {/* First-run guidance — fixed-position overlay, shown once per browser */}
+      <OnboardingCoachmarks />
     </div>
   );
 }
