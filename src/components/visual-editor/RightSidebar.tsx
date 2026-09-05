@@ -8,6 +8,7 @@ import ContentPanel from "@/components/visual-editor/panels/ContentPanel";
 import { PanelErrorBoundary } from "@/components/visual-editor/PanelErrorBoundary";
 import StylePanel from "@/components/visual-editor/panels/StylePanel";
 import AdvancedPanel from "@/components/visual-editor/panels/AdvancedPanel";
+import { EDITOR_SIMPLE_MODE } from "@/lib/visual-editor/editorMode";
 
 export default function RightSidebar() {
   const { selectedElementId, activeTab, setActiveTab, updateElement } = useEditorStore();
@@ -92,18 +93,20 @@ export default function RightSidebar() {
           <Palette className="h-4 w-4" />
           Style
         </button>
-        <button
-          type="button"
-          onClick={() => setActiveTab("advanced")}
-          className={`flex-1 px-4 py-2 text-xs font-medium transition-colors flex items-center justify-center gap-2 ${
-            activeTab === "advanced"
-              ? "text-blue-600 dark:text-blue-400 border-b-2 border-blue-600 dark:border-blue-400 bg-blue-50 dark:bg-blue-900/20"
-              : "text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300"
-          }`}
-        >
-          <Sliders className="h-4 w-4" />
-          Advanced
-        </button>
+        {!EDITOR_SIMPLE_MODE && (
+          <button
+            type="button"
+            onClick={() => setActiveTab("advanced")}
+            className={`flex-1 px-4 py-2 text-xs font-medium transition-colors flex items-center justify-center gap-2 ${
+              activeTab === "advanced"
+                ? "text-blue-600 dark:text-blue-400 border-b-2 border-blue-600 dark:border-blue-400 bg-blue-50 dark:bg-blue-900/20"
+                : "text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300"
+            }`}
+          >
+            <Sliders className="h-4 w-4" />
+            Advanced
+          </button>
+        )}
       </div>
 
       {/* Tab Content */}
@@ -118,7 +121,7 @@ export default function RightSidebar() {
             <StylePanel element={selectedElement} onUpdate={handleUpdate} />
           </PanelErrorBoundary>
         )}
-        {activeTab === "advanced" && (
+        {!EDITOR_SIMPLE_MODE && activeTab === "advanced" && (
           <PanelErrorBoundary panelName="Advanced" elementType={selectedElement?.type}>
             <AdvancedPanel element={selectedElement} onUpdate={handleUpdate} />
           </PanelErrorBoundary>

@@ -1,6 +1,7 @@
 "use client";
 
 import { DeviceType } from "@/lib/visual-editor/types";
+import { EDITOR_SIMPLE_MODE } from "@/lib/visual-editor/editorMode";
 import { 
   ArrowLeft, 
   Undo2, 
@@ -151,19 +152,22 @@ export default function EditorToolbar({
 
         <div className="h-5 w-px bg-gray-200 dark:bg-gray-700 mx-1" />
 
-        {/* Navigator Toggle */}
-        <button
-          type="button"
-          onClick={onNavigatorToggle}
-          className={`p-2 rounded-lg transition-colors ${
-            isNavigatorOpen 
-              ? "bg-blue-50 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400" 
-              : "hover:bg-gray-100 dark:hover:bg-gray-800 text-gray-600 dark:text-gray-400"
-          }`}
-          title="Navigator (⌘I)"
-        >
-          <Navigation className="h-4 w-4" />
-        </button>
+        {/* Navigator Toggle — a layer/tree view is a power-user feature a
+            merchant doing basic customization has no need for */}
+        {!EDITOR_SIMPLE_MODE && (
+          <button
+            type="button"
+            onClick={onNavigatorToggle}
+            className={`p-2 rounded-lg transition-colors ${
+              isNavigatorOpen 
+                ? "bg-blue-50 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400" 
+                : "hover:bg-gray-100 dark:hover:bg-gray-800 text-gray-600 dark:text-gray-400"
+            }`}
+            title="Navigator (⌘I)"
+          >
+            <Navigation className="h-4 w-4" />
+          </button>
+        )}
 
         {/* Dark Mode Toggle */}
         <button

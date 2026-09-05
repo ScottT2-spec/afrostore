@@ -2,6 +2,7 @@
 
 import { useEffect, useRef } from "react";
 import { useEditorStore } from "@/lib/visual-editor/store";
+import { EDITOR_SIMPLE_MODE } from "@/lib/visual-editor/editorMode";
 import { 
   Copy, 
   Trash2, 
@@ -124,31 +125,33 @@ export default function ContextMenu({ elementId, position, onClose }: ContextMen
       action: handleDuplicate,
       color: "text-gray-700 dark:text-gray-300",
     },
-    {
-      icon: Scissors,
-      label: "Cut",
-      action: handleCut,
-      disabled: isLocked,
-      color: isLocked ? "text-gray-300 dark:text-gray-600 cursor-not-allowed" : "text-gray-700 dark:text-gray-300",
-    },
-    {
-      icon: Clipboard,
-      label: "Copy",
-      action: handleCopy,
-      color: "text-gray-700 dark:text-gray-300",
-    },
-    ...(clipboardElement ? [{
-      icon: Clipboard,
-      label: "Paste",
-      action: handlePaste,
-      color: "text-gray-700 dark:text-gray-300",
-    }] : []),
-    ...(isStructural ? [] : [{
-      icon: isLocked ? Unlock : Lock,
-      label: isLocked ? "Unlock" : "Lock",
-      action: handleToggleLock,
-      color: "text-gray-700 dark:text-gray-300",
-    }]),
+    ...(EDITOR_SIMPLE_MODE ? [] : [
+      {
+        icon: Scissors,
+        label: "Cut",
+        action: handleCut,
+        disabled: isLocked,
+        color: isLocked ? "text-gray-300 dark:text-gray-600 cursor-not-allowed" : "text-gray-700 dark:text-gray-300",
+      },
+      {
+        icon: Clipboard,
+        label: "Copy",
+        action: handleCopy,
+        color: "text-gray-700 dark:text-gray-300",
+      },
+      ...(clipboardElement ? [{
+        icon: Clipboard,
+        label: "Paste",
+        action: handlePaste,
+        color: "text-gray-700 dark:text-gray-300",
+      }] : []),
+      ...(isStructural ? [] : [{
+        icon: isLocked ? Unlock : Lock,
+        label: isLocked ? "Unlock" : "Lock",
+        action: handleToggleLock,
+        color: "text-gray-700 dark:text-gray-300",
+      }]),
+    ]),
     {
       icon: isHidden ? Eye : EyeOff,
       label: isHidden ? "Show" : "Hide",

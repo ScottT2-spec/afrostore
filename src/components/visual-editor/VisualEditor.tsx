@@ -29,6 +29,7 @@ import EditorCanvas from "@/components/visual-editor/EditorCanvas";
 import EditorToolbar from "@/components/visual-editor/EditorToolbar";
 import Navigator from "@/components/visual-editor/Navigator";
 import OnboardingCoachmarks from "@/components/visual-editor/OnboardingCoachmarks";
+import { EDITOR_SIMPLE_MODE } from "@/lib/visual-editor/editorMode";
 
 interface VisualEditorProps {
   pageId: string;
@@ -206,8 +207,10 @@ export default function VisualEditor({
         handleSave();
       }
       
-      // Cmd/Ctrl + I - Navigator
-      if ((e.metaKey || e.ctrlKey) && e.key === "i") {
+      // Cmd/Ctrl + I - Navigator (hidden entirely in simple mode, so the
+      // shortcut is disabled too — a hidden feature shouldn't be reachable
+      // via a keystroke nobody was told about)
+      if (!EDITOR_SIMPLE_MODE && (e.metaKey || e.ctrlKey) && e.key === "i") {
         e.preventDefault();
         setNavigatorOpen(!isNavigatorOpen);
       }

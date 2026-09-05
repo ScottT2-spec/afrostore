@@ -2,6 +2,7 @@
 
 import { useMemo, useState } from "react";
 import { useEditorStore } from "@/lib/visual-editor/store";
+import { EDITOR_SIMPLE_MODE } from "@/lib/visual-editor/editorMode";
 
 interface StylePanelProps {
   element: any;
@@ -60,6 +61,10 @@ const presetButtonClass = (active: boolean) =>
 
 export default function StylePanel({ element, onUpdate }: StylePanelProps) {
   const [mode, setMode] = useState<"simple" | "custom">("simple");
+  // In simple mode there is no way to reach "custom" at all — the toggle
+  // itself is hidden below — but this guards the render path too, so
+  // there's no way for stale/local state to sneak Custom controls back in.
+  const effectiveMode = EDITOR_SIMPLE_MODE ? "simple" : mode;
   const pageStructure = useEditorStore((s) => s.pageStructure);
 
   const usedColors = useMemo(() => {
@@ -156,17 +161,20 @@ export default function StylePanel({ element, onUpdate }: StylePanelProps) {
       {/* Simple / Custom mode toggle. "Custom" below is the exact same
           controls that existed here before this change — nothing removed,
           nothing renamed, same settings keys, same content-mirroring fix.
-          "Simple" is new, additive, on top. */}
-      <div className="flex rounded-lg border border-gray-200 dark:border-gray-700 p-0.5 bg-gray-50 dark:bg-gray-800">
-        <button type="button" onClick={() => setMode("simple")} className={modeButtonClass(mode === "simple")}>
-          Simple
-        </button>
-        <button type="button" onClick={() => setMode("custom")} className={modeButtonClass(mode === "custom")}>
-          Custom
-        </button>
-      </div>
+          "Simple" is new, additive, on top. The toggle itself is hidden
+          entirely in simple mode — there's nothing to switch to. */}
+      {!EDITOR_SIMPLE_MODE && (
+        <div className="flex rounded-lg border border-gray-200 dark:border-gray-700 p-0.5 bg-gray-50 dark:bg-gray-800">
+          <button type="button" onClick={() => setMode("simple")} className={modeButtonClass(mode === "simple")}>
+            Simple
+          </button>
+          <button type="button" onClick={() => setMode("custom")} className={modeButtonClass(mode === "custom")}>
+            Custom
+          </button>
+        </div>
+      )}
 
-      {mode === "simple" ? (
+      {effectiveMode === "simple" ? (
         <div className="space-y-6">
           {/* Text Size */}
           <div className="space-y-2">

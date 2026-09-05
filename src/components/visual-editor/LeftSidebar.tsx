@@ -18,6 +18,7 @@ import { elementCategories, categoryLabels, widgetDefinitions, createElementFrom
 import { ElementCategory, ElementType } from "@/lib/visual-editor/types";
 import { api } from "@/lib/api-client";
 import { THEME_BLOCK_GROUPS, BLOCK_TYPE_TO_THEME } from "@/components/storefront/TemplateBlockRenderer";
+import { EDITOR_SIMPLE_MODE } from "@/lib/visual-editor/editorMode";
 import {
   Type, FileText, MousePointer, Image, Star, Minus, MoveVertical,
   Layout, Columns, Box, Grid3X3, AlignHorizontalJustifyCenter,
@@ -185,18 +186,20 @@ export default function LeftSidebar() {
     <aside className="w-72 bg-white dark:bg-gray-900 border-r border-gray-200 dark:border-gray-700 flex flex-col h-full">
       {/* Panel Tabs */}
       <div className="flex border-b border-gray-200 dark:border-gray-700 overflow-x-auto">
-        <button
-          type="button"
-          onClick={() => setActivePanel("widgets")}
-          className={`flex-1 min-w-max px-4 py-3 text-xs font-semibold transition-colors flex items-center justify-center gap-2 ${
-            activePanel === "widgets" 
-              ? "text-blue-600 dark:text-blue-400 border-b-2 border-blue-600 dark:border-blue-400 bg-blue-50 dark:bg-blue-900/20" 
-              : "text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300"
-          }`}
-        >
-          <LayoutGrid className="h-4 w-4" />
-          Add Element
-        </button>
+        {!EDITOR_SIMPLE_MODE && (
+          <button
+            type="button"
+            onClick={() => setActivePanel("widgets")}
+            className={`flex-1 min-w-max px-4 py-3 text-xs font-semibold transition-colors flex items-center justify-center gap-2 ${
+              activePanel === "widgets" 
+                ? "text-blue-600 dark:text-blue-400 border-b-2 border-blue-600 dark:border-blue-400 bg-blue-50 dark:bg-blue-900/20" 
+                : "text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300"
+            }`}
+          >
+            <LayoutGrid className="h-4 w-4" />
+            Add Element
+          </button>
+        )}
         <button
           type="button"
           onClick={() => setActivePanel("sections")}
@@ -237,7 +240,7 @@ export default function LeftSidebar() {
 
       {/* Panel Content */}
       <div className="flex-1 overflow-y-auto">
-        {activePanel === "widgets" && (
+        {!EDITOR_SIMPLE_MODE && activePanel === "widgets" && (
           <div className="p-4">
             {/* Search */}
             <div className="relative mb-4">
