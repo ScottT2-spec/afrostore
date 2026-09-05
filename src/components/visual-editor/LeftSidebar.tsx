@@ -44,7 +44,12 @@ function humanizeBlockType(type: string, themeKey: string): string {
 
 export default function LeftSidebar() {
   const router = useRouter();
-  const [activePanel, setActivePanel] = useState<SidebarPanel>("widgets");
+  // Default to "sections" (pre-built, populated content blocks) rather than
+  // "widgets" (blank building blocks). A merchant's first click into the
+  // editor should land on something that already looks like a real page
+  // section, not an empty box — reduces blank-canvas paralysis. All four
+  // tabs remain fully available and one click away either way.
+  const [activePanel, setActivePanel] = useState<SidebarPanel>("sections");
   const [searchQuery, setSearchQuery] = useState("");
   const [expandedCategories, setExpandedCategories] = useState<Set<ElementCategory>>(
     new Set(elementCategories)
