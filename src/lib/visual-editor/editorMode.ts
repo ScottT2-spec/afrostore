@@ -12,3 +12,14 @@
 // tab, the Custom style controls, cut/copy/paste/lock, the layer
 // navigator) stay fully built and one flag away from coming back.
 export const EDITOR_SIMPLE_MODE = true;
+
+// Some theme block maps (used both for real page rendering AND to populate
+// the merchant-facing "Sections" list) mistakenly include internal/plumbing
+// blocks alongside real content — e.g. a theme's FontLoader, which just
+// silently loads a web font and has no visible content or settings at all.
+// A merchant clicking it sees an empty node and has no idea what happened.
+// This filters those out of the *list offered to merchants* only — it does
+// not touch how any theme actually renders or loads fonts on the live site.
+export function isMerchantFacingBlockType(blockType: string): boolean {
+  return !/fontloader$/i.test(blockType);
+}

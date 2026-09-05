@@ -18,7 +18,7 @@ import { elementCategories, categoryLabels, widgetDefinitions, createElementFrom
 import { ElementCategory, ElementType } from "@/lib/visual-editor/types";
 import { api } from "@/lib/api-client";
 import { THEME_BLOCK_GROUPS, BLOCK_TYPE_TO_THEME } from "@/components/storefront/TemplateBlockRenderer";
-import { EDITOR_SIMPLE_MODE } from "@/lib/visual-editor/editorMode";
+import { EDITOR_SIMPLE_MODE, isMerchantFacingBlockType } from "@/lib/visual-editor/editorMode";
 import {
   Type, FileText, MousePointer, Image, Star, Minus, MoveVertical,
   Layout, Columns, Box, Grid3X3, AlignHorizontalJustifyCenter,
@@ -373,7 +373,8 @@ export default function LeftSidebar() {
             </div>
             <div className="space-y-2">
               {Object.entries(THEME_BLOCK_GROUPS)
-                .filter(([, group]) => group.types.length > 0)
+                .map(([themeKey, group]) => [themeKey, group.types.filter(isMerchantFacingBlockType)] as const)
+                .filter(([, types]) => types.length > 0)
                 // Show the detected theme's own sections first, so a
                 // merchant on e.g. a Fashion store isn't stuck scrolling
                 // past 20 unrelated theme groups to find their own.
@@ -382,7 +383,8 @@ export default function LeftSidebar() {
                   if (keyB === detectedThemeKey) return 1;
                   return 0;
                 })
-                .map(([themeKey, group]) => {
+                .map(([themeKey, visibleTypes]) => {
+                  const group = THEME_BLOCK_GROUPS[themeKey];
                   const isExpanded = expandedThemeGroups.has(themeKey) || (themeKey === detectedThemeKey && expandedThemeGroups.size === 0);
                   return (
                     <div key={themeKey} className="border border-gray-200 dark:border-gray-700 rounded-lg overflow-hidden">
@@ -396,7 +398,7 @@ export default function LeftSidebar() {
                       </button>
                       {isExpanded && (
                         <div className="p-2 space-y-1.5 bg-gray-50 dark:bg-gray-800/50">
-                          {group.types.map((blockType) => (
+                          {visibleTypes.map((blockType) => (
                             <button
                               key={blockType}
                               type="button"
