@@ -13,7 +13,7 @@ import { APP_DOMAIN } from "./domain/domain-manager";
 
 /** Resolves the app's own base URL the same way signup's verification email does. */
 export function getAppBaseUrl(requestHost?: string | null): string {
-  const configured = process.env.NEXT_PUBLIC_BASE_URL;
+  const configured = process.env.NEXT_PUBLIC_BASE_URL?.trim();
   if (configured) {
     // NEXT_PUBLIC_BASE_URL has been set to a bare domain (e.g.
     // "prosell.africa") without a scheme in production. Used raw, that
@@ -22,8 +22,10 @@ export function getAppBaseUrl(requestHost?: string | null): string {
     // literally "prosell.africa/auth/verify-email?..." with no protocol).
     // Add https:// defensively rather than trusting the env var's exact
     // format — this fixes it regardless of whether the env var itself
-    // ever gets corrected.
-    return /^https?:\/\//i.test(configured) ? configured : `https://${configured}`;
+    // ever gets corrected. Also strip a trailing slash so
+    // `${baseUrl}/path` never ends up with a double slash.
+    const withScheme = /^https?:\/\//i.test(configured) ? configured : `https://${configured}`;
+    return withScheme.replace(/\/+$/, "");
   }
   return `https://${requestHost || APP_DOMAIN}`;
 }

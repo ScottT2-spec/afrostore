@@ -17,7 +17,10 @@ import { NextRequest, NextResponse } from "next/server";
 // literal HTTP Host header (never includes a scheme), `host === APP_DOMAIN`
 // was silently false for every request, so isMainDomain never matched and
 // every non-bypassed path got rewritten into a dead /store/... URL.
-const APP_DOMAIN = (process.env.NEXT_PUBLIC_APP_DOMAIN || "prosell.africa").replace(/^https?:\/\//, "");
+const APP_DOMAIN = (process.env.NEXT_PUBLIC_APP_DOMAIN || "prosell.africa")
+  .trim()
+  .replace(/^https?:\/\//, "")
+  .replace(/\/+$/, "");
 
 // Paths that should NEVER be rewritten (app infrastructure)
 const BYPASS_PREFIXES = [

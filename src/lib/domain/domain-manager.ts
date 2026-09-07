@@ -16,7 +16,10 @@ const resolve6 = promisify(dns.resolve6);
 // Override via environment variables for your deployment
 export const SERVER_IP = process.env.SERVER_IP || process.env.NEXT_PUBLIC_SERVER_IP || "";
 export const CNAME_TARGET = process.env.CNAME_TARGET || process.env.NEXT_PUBLIC_CNAME_TARGET || "cname.prosell.africa";
-export const APP_DOMAIN = (process.env.NEXT_PUBLIC_APP_DOMAIN || "prosell.africa").replace(/^https?:\/\//, "");
+export const APP_DOMAIN = (process.env.NEXT_PUBLIC_APP_DOMAIN || "prosell.africa")
+  .trim()
+  .replace(/^https?:\/\//, "")
+  .replace(/\/+$/, "");
 
 export interface DomainConnectionResult {
   success: boolean;
