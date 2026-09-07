@@ -3,6 +3,7 @@ import crypto from "crypto";
 import { prisma } from "@/lib/db";
 import { hashPassword, createToken } from "@/lib/auth";
 import { signupSchema } from "@/lib/validators";
+import { getAppBaseUrl } from "@/lib/email-tracking";
 import { success, error, validationError } from "@/lib/api-helpers";
 import { sendVerificationEmail } from "@/lib/email";
 import { rateLimit } from "@/lib/rate-limit";
@@ -53,9 +54,7 @@ export async function POST(req: NextRequest) {
     });
 
     // Build verify link and send email
-    const baseUrl =
-      process.env.NEXT_PUBLIC_BASE_URL ||
-      `https://${req.headers.get("host")}`;
+    const baseUrl = getAppBaseUrl(req.headers.get("host"));
     const verifyLink = `${baseUrl}/auth/verify-email?token=${emailVerifyToken}`;
 
     const emailResult = await sendVerificationEmail({

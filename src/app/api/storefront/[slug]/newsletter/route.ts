@@ -54,7 +54,14 @@ export async function POST(req: NextRequest, { params }: Params) {
 
     // Send welcome email only to new subscribers (non-blocking)
     if (isNewSubscriber) {
-      const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || `https://${slug}.prokip.com`;
+      // Same NEXT_PUBLIC_BASE_URL-missing-scheme issue as auth emails — see
+      // getAppBaseUrl in lib/email-tracking.ts. This route's fallback is
+      // intentionally the storefront's own subdomain, not the main app
+      // domain, so it can't just reuse that helper directly.
+      const configuredBaseUrl = process.env.NEXT_PUBLIC_BASE_URL;
+      const baseUrl = configuredBaseUrl
+        ? (/^https?:\/\//i.test(configuredBaseUrl) ? configuredBaseUrl : `https://${configuredBaseUrl}`)
+        : `https://${slug}.prokip.com`;
       sendNewsletterWelcomeEmail({
         to: email,
         storeName: site.name || slug,

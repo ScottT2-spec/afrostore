@@ -3,6 +3,7 @@ import { prisma } from "@/lib/db";
 import { sendPasswordResetEmail } from "@/lib/email";
 import { rateLimit } from "@/lib/rate-limit";
 import crypto from "crypto";
+import { getAppBaseUrl } from "@/lib/email-tracking";
 
 const RESET_TOKEN_EXPIRY_MINUTES = 30;
 
@@ -48,9 +49,7 @@ export async function POST(req: NextRequest) {
     });
 
     // Build reset link
-    const baseUrl =
-      process.env.NEXT_PUBLIC_BASE_URL ||
-      `https://${req.headers.get("host")}`;
+    const baseUrl = getAppBaseUrl(req.headers.get("host"));
     const resetLink = `${baseUrl}/auth/reset-password?token=${resetToken}`;
 
     // Send email

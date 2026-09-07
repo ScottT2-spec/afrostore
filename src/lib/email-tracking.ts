@@ -13,7 +13,19 @@ import { APP_DOMAIN } from "./domain/domain-manager";
 
 /** Resolves the app's own base URL the same way signup's verification email does. */
 export function getAppBaseUrl(requestHost?: string | null): string {
-  return process.env.NEXT_PUBLIC_BASE_URL || `https://${requestHost || APP_DOMAIN}`;
+  const configured = process.env.NEXT_PUBLIC_BASE_URL;
+  if (configured) {
+    // NEXT_PUBLIC_BASE_URL has been set to a bare domain (e.g.
+    // "prosell.africa") without a scheme in production. Used raw, that
+    // produces broken/unclickable links in verification, password-reset,
+    // and newsletter emails (`${baseUrl}/auth/verify-email?...` becomes
+    // literally "prosell.africa/auth/verify-email?..." with no protocol).
+    // Add https:// defensively rather than trusting the env var's exact
+    // format — this fixes it regardless of whether the env var itself
+    // ever gets corrected.
+    return /^https?:\/\//i.test(configured) ? configured : `https://${configured}`;
+  }
+  return `https://${requestHost || APP_DOMAIN}`;
 }
 
 const HREF_RE = /href\s*=\s*(["'])(.*?)\1/gi;
