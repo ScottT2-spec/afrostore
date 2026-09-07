@@ -1,7 +1,7 @@
 import { NextRequest } from "next/server";
 import { headers } from "next/headers";
 
-const APP_DOMAIN = process.env.NEXT_PUBLIC_APP_DOMAIN || "prosell.africa";
+const APP_DOMAIN = (process.env.NEXT_PUBLIC_APP_DOMAIN || "prosell.africa").replace(/^https?:\/\//, "");
 
 function computeBaseUrl(host: string, proto: string, site: { slug: string; customDomain?: string | null }) {
   if (site.customDomain) return `https://${site.customDomain}`;
