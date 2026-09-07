@@ -149,6 +149,7 @@ model Site {
   domains           Domain[]
   emailCampaigns    EmailCampaign[]
   senderIdentities  SenderIdentity[]
+  sandboxSessions   SandboxSession[]
   flashSales        FlashSale[]
   forms             Form[]
   funnels           Funnel[]
@@ -1076,6 +1077,23 @@ model EmailRecipient {
   @@index([campaignId])
   @@index([email])
   @@map("email_recipients")
+}
+
+model SandboxSession {
+  id            String    @id @default(cuid())
+  siteId        String
+  provider      String    @default("daytona")
+  externalId    String?   // Daytona sandbox ID once created
+  status        String    @default("creating") // creating | ready | error | stopped
+  previewUrl    String?
+  errorMessage  String?
+  lastActiveAt  DateTime  @default(now())
+  createdAt     DateTime  @default(now())
+  site          Site      @relation(fields: [siteId], references: [id], onDelete: Cascade)
+
+  @@index([siteId])
+  @@index([status])
+  @@map("sandbox_sessions")
 }
 
 model SenderIdentity {
