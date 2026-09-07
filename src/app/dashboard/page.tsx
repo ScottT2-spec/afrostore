@@ -7,7 +7,14 @@ import { useSite } from "@/context/StoreContext";
 import { useSiteApi } from "@/hooks/useApiData";
 import { useAuth } from "@/context/AuthContext";
 import { formatCurrency } from "@/lib/utils";
-import { APP_DOMAIN } from "@/lib/domain/domain-manager";
+
+// Local, client-safe copy - domain-manager.ts pulls in @/lib/db (Prisma's
+// pg adapter), which can't be bundled into a Client Component and breaks
+// the production build with "Module not found" on pg/pgpass internals.
+const APP_DOMAIN = (process.env.NEXT_PUBLIC_APP_DOMAIN || "prosell.africa")
+  .trim()
+  .replace(/^https?:\/\//, "")
+  .replace(/\/+$/, "");
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 
