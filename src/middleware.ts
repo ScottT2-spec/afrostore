@@ -56,10 +56,28 @@ export function middleware(req: NextRequest) {
   const host = hostname.split(":")[0].toLowerCase();
   const pathname = req.nextUrl.pathname;
 
+  // Debug headers — purely informational, attached to every response this
+  // middleware produces. Never affects routing. Inspect with:
+  //   curl -I https://prosell.africa/templates
+  // or the Network tab in browser dev tools. Shows exactly what host this
+  // request arrived with, what APP_DOMAIN it's being compared against, and
+  // which of the three decisions below fired — turns "still 404, no idea
+  // why" into something checkable in seconds instead of guessed at.
+  const withDebugHeaders = (res: NextResponse, extra: Record<string, string>) => {
+    res.headers.set("x-mw-host", host || "(empty)");
+    res.headers.set("x-mw-app-domain", APP_DOMAIN);
+    res.headers.set("x-mw-path", pathname);
+    for (const [k, v] of Object.entries(extra)) res.headers.set(k, v);
+    return res;
+  };
+
   // 1. Skip bypass paths
   for (const prefix of BYPASS_PREFIXES) {
     if (pathname.startsWith(prefix) || pathname === prefix.replace(/\/$/, "")) {
-      return NextResponse.next();
+      return withDebugHeaders(NextResponse.next(), {
+        "x-mw-decision": "bypass",
+        "x-mw-bypass-prefix": prefix,
+      });
     }
   }
 
@@ -74,7 +92,7 @@ export function middleware(req: NextRequest) {
     host.endsWith(".vercel.app");  // Vercel preview/production domains
 
   if (isMainDomain) {
-    return NextResponse.next();
+    return withDebugHeaders(NextResponse.next(), { "x-mw-decision": "main-domain" });
   }
 
   // 3. Check if this is a subdomain of the app domain
@@ -101,7 +119,11 @@ export function middleware(req: NextRequest) {
   const storePath = pathname === "/" ? "" : pathname;
   url.pathname = `/store/${storeSlug}${storePath}`;
 
-  return NextResponse.rewrite(url);
+  return withDebugHeaders(NextResponse.rewrite(url), {
+    "x-mw-decision": "rewrite",
+    "x-mw-store-slug": storeSlug,
+    "x-mw-rewrite-target": url.pathname,
+  });
 }
 
 export const config = {
