@@ -70,6 +70,139 @@ const COST_PER_MILLION: Record<string, { input: number; output: number }> = {
   'deepseek-chat': { input: 0.14, output: 0.28 },
 };
 
+/**
+ * Multi-turn tool-calling conversations (an assistant message that called
+ * a tool, followed by that tool's result, followed by the model's next
+ * response) need each provider's own wire format for those two message
+ * kinds — they are NOT interchangeable, and none of them match this
+ * codebase's generic AIMessage shape directly:
+ *
+ *   - OpenAI: assistant messages carry snake_case `tool_calls`; tool
+ *     results are their own `role: "tool"` message with `tool_call_id`.
+ *   - Anthropic: has no "tool" role at all — a tool result is a `user`
+ *     message containing a `tool_result` content BLOCK, and an assistant
+ *     tool call is a `tool_use` content block, not a separate field.
+ *   - Gemini: assistant tool calls are `{role:"model", parts:[{functionCall}]}`;
+ *     results are `{role:"function", parts:[{functionResponse}]}` — Gemini
+ *     also has no plain "assistant"/"tool" role names.
+ *
+ * Before this, `request.messages` was passed straight through unmodified
+ * to every provider — which meant this codebase's camelCase `toolCalls`/
+ * `toolCallId` fields were simply invisible to every one of them, and any
+ * multi-turn tool conversation (a corrective retry, or an agentic loop)
+ * would silently lose all tool-call context on the second turn onward.
+ * These three functions are what actually make that context survive.
+ */
+
+function toOpenAIMessages(messages: AIMessage[]): unknown[] {
+  return messages.map((m) => {
+    if (m.role === 'assistant' && m.toolCalls && m.toolCalls.length > 0) {
+      return {
+        role: 'assistant',
+        content: m.content || null,
+        tool_calls: m.toolCalls.map((tc) => ({
+          id: tc.id,
+          type: 'function',
+          function: { name: tc.function.name, arguments: tc.function.arguments },
+        })),
+      };
+    }
+    if (m.role === 'tool') {
+      return { role: 'tool', tool_call_id: m.toolCallId, content: m.content };
+    }
+    return { role: m.role, content: m.content };
+  });
+}
+
+function toAnthropicMessages(messages: AIMessage[]): unknown[] {
+  const out: unknown[] = [];
+  for (const m of messages) {
+    if (m.role === 'system') continue;
+
+    if (m.role === 'assistant' && m.toolCalls && m.toolCalls.length > 0) {
+      const blocks: unknown[] = [];
+      if (m.content) blocks.push({ type: 'text', text: m.content });
+      for (const tc of m.toolCalls) {
+        let input: unknown = {};
+        try { input = JSON.parse(tc.function.arguments); } catch { /* leave as {} — malformed args, nothing sound to send back */ }
+        blocks.push({ type: 'tool_use', id: tc.id, name: tc.function.name, input });
+      }
+      out.push({ role: 'assistant', content: blocks });
+      continue;
+    }
+
+    if (m.role === 'tool') {
+      // Anthropic has no "tool" role — a tool result is a user message
+      // containing a tool_result block referencing the call it answers.
+      out.push({
+        role: 'user',
+        content: [{ type: 'tool_result', tool_use_id: m.toolCallId, content: String(m.content ?? '') }],
+      });
+      continue;
+    }
+
+    // Plain text or vision (image) content — unchanged from before tools existed.
+    out.push({
+      role: m.role,
+      content: Array.isArray(m.content)
+        ? m.content.map((part) => {
+            if (part.type === 'image_url') {
+              const url = part.image_url.url;
+              if (url.startsWith('data:')) {
+                const match = url.match(/^data:(image\/[^;]+);base64,(.+)$/);
+                if (match) {
+                  return { type: 'image' as const, source: { type: 'base64' as const, media_type: match[1], data: match[2] } };
+                }
+              }
+              return { type: 'image' as const, source: { type: 'url' as const, url } };
+            }
+            return part;
+          })
+        : m.content,
+    });
+  }
+  return out;
+}
+
+/**
+ * Gemini "contents" array for tool calls/results. Takes the full message
+ * array (not one message at a time, unlike the two functions above)
+ * because Gemini's functionResponse needs the *function name*, not a
+ * call ID — this codebase's tool-result messages only carry toolCallId,
+ * so the name is recovered by looking backward for the assistant message
+ * that made the matching call, rather than requiring every caller to
+ * remember to set AIMessage.name explicitly (which would be an easy
+ * thing for a future caller to silently get wrong).
+ */
+function toGeminiContents(messages: AIMessage[]): { role: string; parts: unknown[] }[] {
+  return messages
+    .filter((m) => m.role !== 'system')
+    .map((m, i) => {
+      if (m.role === 'assistant' && m.toolCalls && m.toolCalls.length > 0) {
+        const parts: unknown[] = [];
+        if (m.content) parts.push({ text: m.content });
+        for (const tc of m.toolCalls) {
+          let args: unknown = {};
+          try { args = JSON.parse(tc.function.arguments); } catch { /* leave as {} */ }
+          parts.push({ functionCall: { name: tc.function.name, args } });
+        }
+        return { role: 'model', parts };
+      }
+      if (m.role === 'tool') {
+        let name = 'tool_result';
+        for (let j = i - 1; j >= 0; j--) {
+          const match = messages[j].toolCalls?.find((tc) => tc.id === m.toolCallId);
+          if (match) { name = match.function.name; break; }
+        }
+        return {
+          role: 'function',
+          parts: [{ functionResponse: { name, response: { result: m.content } } }],
+        };
+      }
+      return { role: m.role === 'assistant' ? 'model' : 'user', parts: [{ text: typeof m.content === 'string' ? m.content : '' }] };
+    });
+}
+
 export class AIFailover {
   private readonly providers: Map<string, AIProviderConfig>;
   private readonly circuits: Map<string, CircuitBreaker>;
@@ -355,7 +488,7 @@ export class AIFailover {
 
     const body: Record<string, unknown> = {
       model: request.model || config.model,
-      messages: request.messages,
+      messages: toOpenAIMessages(request.messages),
       max_tokens: request.maxTokens || config.maxTokens || 4096,
     };
 
@@ -408,30 +541,11 @@ export class AIFailover {
 
     // Extract system message (Anthropic handles it separately)
     const systemMsg = request.messages?.find((m) => m.role === 'system');
-    const nonSystemMessages = request.messages?.filter((m) => m.role !== 'system') || [];
 
     const body: Record<string, unknown> = {
       model: request.model || config.model,
       max_tokens: request.maxTokens || config.maxTokens || 4096,
-      messages: nonSystemMessages.map((m) => ({
-        role: m.role,
-        content: Array.isArray(m.content)
-          ? m.content.map((part) => {
-              if (part.type === 'image_url') {
-                // Anthropic uses a different format for images
-                const url = part.image_url.url;
-                if (url.startsWith('data:')) {
-                  const match = url.match(/^data:(image\/[^;]+);base64,(.+)$/);
-                  if (match) {
-                    return { type: 'image' as const, source: { type: 'base64' as const, media_type: match[1], data: match[2] } };
-                  }
-                }
-                return { type: 'image' as const, source: { type: 'url' as const, url } };
-              }
-              return part;
-            })
-          : m.content,
-      })),
+      messages: toAnthropicMessages(request.messages || []),
     };
 
     if (systemMsg) body.system = systemMsg.content;
@@ -506,12 +620,7 @@ export class AIFailover {
 
     // Convert messages to Gemini format
     const systemMsg = request.messages?.find((m) => m.role === 'system');
-    const contents = (request.messages || [])
-      .filter((m) => m.role !== 'system')
-      .map((m) => ({
-        role: m.role === 'assistant' ? 'model' : 'user',
-        parts: [{ text: m.content }],
-      }));
+    const contents = toGeminiContents(request.messages || []);
 
     const body: Record<string, unknown> = {
       contents,
