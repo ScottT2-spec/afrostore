@@ -174,84 +174,10 @@ Generate content for these 5 pages as a JSON object. Be specific to this busines
 ${input.targetAudience ? `\nWrite specifically FOR ${input.targetAudience} — word choice, tone, and what you emphasize should all speak to that person, not a generic shopper.` : ""}
 ${input.productsOffered?.length || input.servicesOffered?.length ? `\nGround the copy in the ACTUAL products/services listed above — reference them specifically in the hero, FAQ, and features rather than describing the business abstractly.` : ""}
 
-Return ONLY valid JSON with this exact structure:
-{
-  "brand": {
-    "tagline": "short catchy tagline for the hero",
-    "heroHeading": "compelling hero headline (max 10 words)",
-    "heroSubheading": "1-2 sentence value proposition",
-    "ctaText": "call to action button text (2-4 words)"
-  },
-  "about": {
-    "headline": "about page headline",
-    "story": "2-3 paragraph brand story (use \\n\\n between paragraphs)",
-    "values": [
-      {"title": "value 1 name", "desc": "1 sentence description"},
-      {"title": "value 2 name", "desc": "1 sentence description"},
-      {"title": "value 3 name", "desc": "1 sentence description"}
-    ]
-  },
-  "faq": {
-    "items": [
-      {"question": "question 1", "answer": "detailed answer"},
-      {"question": "question 2", "answer": "detailed answer"},
-      {"question": "question 3", "answer": "detailed answer"},
-      {"question": "question 4", "answer": "detailed answer"},
-      {"question": "question 5", "answer": "detailed answer"},
-      {"question": "question 6", "answer": "detailed answer"}
-    ]
-  },
-  "policies": {
-    "shipping": "2-3 paragraph shipping policy",
-    "returns": "2-3 paragraph return/refund policy",
-    "privacy": "2-3 paragraph privacy policy summary"
-  },
-  "contact": {
-    "headline": "contact page headline",
-    "subtitle": "1 sentence encouraging contact"
-  },
-  "seo": {
-    "homeTitle": "SEO title for home page (50-60 chars)",
-    "homeDesc": "SEO meta description for home (150-160 chars)",
-    "aboutTitle": "SEO title for about page",
-    "aboutDesc": "SEO meta description for about",
-    "faqTitle": "SEO title for FAQ page",
-    "faqDesc": "SEO meta description for FAQ",
-    "contactTitle": "SEO title for contact page",
-    "contactDesc": "SEO meta description for contact"
-  },
-  "testimonials": [
-    {"name": "customer name", "text": "realistic testimonial quote", "role": "e.g. Verified Buyer"},
-    {"name": "customer name", "text": "realistic testimonial quote", "role": "e.g. Repeat Customer"},
-    {"name": "customer name", "text": "realistic testimonial quote", "role": "e.g. First-time Buyer"}
-  ],
-  "features": [
-    {"title": "feature/benefit 1", "desc": "short description"},
-    {"title": "feature/benefit 2", "desc": "short description"},
-    {"title": "feature/benefit 3", "desc": "short description"}
-  ],
-  "layout": {
-    "sections": ["pick 6-10 from: hero-image, hero-minimal, hero-split, hero-bold, products, products-featured, products-compact, features, stats, testimonials, story, story-full, newsletter, trust, banner, gallery, contact, faq, values, team, countdown"],
-    "vibe": "one word describing the visual feel (e.g. bold, elegant, minimal, warm, playful, clean, luxurious, earthy)"
-  },
-  "stats": [
-    {"value": "e.g. 500+", "label": "e.g. Happy Clients"},
-    {"value": "e.g. 4.9", "label": "e.g. Customer Rating"},
-    {"value": "e.g. 24/7", "label": "e.g. Support"},
-    {"value": "e.g. 100%", "label": "e.g. Satisfaction"}
-  ],
-  "bannerCta": {
-    "title": "compelling CTA headline for a promotional banner",
-    "subtitle": "1 sentence supporting text",
-    "buttonText": "CTA button text (2-4 words)"
-  },
-  "newsletterCopy": {
-    "title": "newsletter signup heading",
-    "subtitle": "1 sentence encouraging signups"
-  },
-  "productSectionTitle": "title for the main product section (e.g. Our Menu, Featured Properties, New Arrivals)",
-  "productSectionSubtitle": "subtitle for the product section"
-}
+Call the generate_store_content function with this content. A few formatting notes the schema alone won't tell you:
+- about.story: use \n\n between paragraphs
+- layout.sections: valid section names are hero-image, hero-minimal, hero-split, hero-bold, products, products-featured, products-compact, features, stats, testimonials, story, story-full, newsletter, trust, banner, gallery, contact, faq, values, team, countdown
+- seo.homeTitle/aboutTitle/faqTitle/contactTitle: 50-60 characters. The matching *Desc fields: 150-160 characters.
 
 Rules:
 - For layout.sections, pick 6-10 section names from the available list above. Order them how the homepage should flow. MUST start with a hero variant. Pick sections that make sense for this specific business type — a restaurant needs gallery and contact, a fashion store needs products-featured, a service business needs features and values, a church needs values and team, etc. Vary the combination — don't always use the same set.
@@ -265,19 +191,7 @@ Rules:
 - NO placeholder brackets like [Your Name] — write real content
 - Ban these overused AI-copywriting clichés entirely, they make copy feel fake: "elevate your", "unlock", "unleash", "seamless", "seamlessly", "in today's world", "look no further", "step into", "journey", "game-changing", "revolutionize", "at the end of the day", "whether you're... or...". If you catch yourself about to write one, rewrite the sentence a completely different way.
 - Prefer concrete, specific, sensory detail over abstract claims. "Hand-stitched in Accra using leather sourced from Kumasi" beats "high-quality craftsmanship". Specificity is what makes a store memorable instead of generic.
-- Every headline should sound like it belongs to THIS business and no one else's — if you could paste it onto a competitor's site unchanged, rewrite it.
-- Return ONLY the JSON, no markdown fences, no explanation`;
-}
-
-// ─── Parse AI response ──────────────────────────────────────
-
-function parseAIResponse(content: string): Record<string, any> {
-  // Strip markdown code fences if present
-  let cleaned = content.trim();
-  if (cleaned.startsWith("```")) {
-    cleaned = cleaned.replace(/^```(?:json)?\s*\n?/, "").replace(/\n?```\s*$/, "");
-  }
-  return JSON.parse(cleaned);
+- Every headline should sound like it belongs to THIS business and no one else's — if you could paste it onto a competitor's site unchanged, rewrite it.`;
 }
 
 // ─── Build pages from AI content ────────────────────────────
@@ -746,46 +660,42 @@ function buildPoliciesPage(data: Record<string, any>, storeName: string): Genera
 export async function generateStore(input: StoreGeneratorInput): Promise<StoreGeneratorResult> {
   const ai = getAI();
 
-  // 1. Call AI to generate content
+  // 1. Call AI to generate content — schema-validated, not a hopeful
+  //    JSON.parse(). See ai-structured-output.ts for why this replaced the
+  //    old "ask nicely for JSON in the prompt, parse it as Record<string,
+  //    any>" approach: the schema is now the single source of truth for
+  //    both what the model is told to produce and what's accepted, and a
+  //    malformed response triggers a corrective retry with the specific
+  //    validation errors instead of silently reaching prisma.create().
   const prompt = buildGenerationPrompt(input);
 
-  // Try up to 2 times in case of JSON parse failures
-  let data: Record<string, any> | null = null;
-  let lastResult: any = null;
+  const { generateStructured, AIStructuredOutputError } = await import("@/lib/ai-structured-output");
+  const { storeGenerationSchema } = await import("@/lib/ai-schemas/store-generation");
 
-  for (let attempt = 0; attempt < 2; attempt++) {
-    const result = await ai.chat({
-      capability: AICapability.CHAT,
-      messages: [
-        { role: "system" as const, content: "You are a professional ecommerce content generator. Return ONLY valid JSON. No markdown fences, no explanation, no text before or after the JSON." },
-        { role: "user" as const, content: prompt },
-      ],
+  let structuredResult;
+  try {
+    structuredResult = await generateStructured({
+      ai,
+      schema: storeGenerationSchema,
+      toolName: "generate_store_content",
+      toolDescription:
+        "Generates complete, on-brand website copy and homepage layout for a new e-commerce store.",
+      systemPrompt:
+        "You are a senior e-commerce brand strategist and copywriter, the kind agencies pay a lot of money for. You always call the generate_store_content function — never reply with plain text.",
+      userPrompt: prompt,
       maxTokens: 8000,
       temperature: 0.7,
     });
-
-    lastResult = result;
-
-    if (!result.success || !result.data) {
-      const errors = result.failedProviders?.map((f) => `${f.provider}: ${f.error}`).join("; ") || "Unknown error";
-      throw new Error(`AI generation failed: ${errors}`);
+  } catch (err) {
+    if (err instanceof AIStructuredOutputError) {
+      console.error("AI store generation validation error:", err.message, err.issues);
+      throw new Error("AI returned invalid content. Please try again.");
     }
-
-    try {
-      data = parseAIResponse(result.data.content);
-      break; // Success
-    } catch (parseErr) {
-      console.error(`AI response parse error (attempt ${attempt + 1}):`, result.data.content.slice(0, 500));
-      if (attempt === 1) {
-        throw new Error("AI returned invalid content. Please try again.");
-      }
-      // Retry on first failure
-    }
+    throw err;
   }
 
-  if (!data || !lastResult?.data) {
-    throw new Error("AI returned invalid content. Please try again.");
-  }
+  const data = structuredResult.data;
+  const lastResult = { data: { provider: structuredResult.provider, model: structuredResult.model } };
 
   // 3. Detect industry (real AI classification, falls back to keywords) and get images
   const classification = await classifyBusiness(`${input.businessType} ${input.description || ""}`);
