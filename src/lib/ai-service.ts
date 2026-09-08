@@ -96,7 +96,7 @@ function getAIProviders(): AIProviderConfig[] {
   return providers;
 }
 
-function getAIFailover(): AIFailover {
+export function getAIFailover(): AIFailover {
   if (!aiFailover) {
     const providers = getAIProviders();
     if (providers.length === 0) {
