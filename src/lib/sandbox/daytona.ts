@@ -111,3 +111,159 @@ export async function stopSandbox(externalId: string): Promise<void> {
   const sandbox = await daytona.get(externalId);
   await daytona.delete(sandbox);
 }
+
+// ─── Low-level sandbox primitives for the coding agent ──────────────────
+//
+// Everything below is a thin, individually-callable wrapper around one
+// Daytona SDK operation. These map roughly 1:1 onto the coding agent's
+// tool set (list_files, read_file, write_file, edit_file, delete_file,
+// run_command, get_build_errors, take_screenshot) — the tools themselves
+// live in coding-agent.ts and just validate arguments + call these.
+// Kept separate from createSandboxWithFiles/getSandboxStatus/stopSandbox
+// above, which are about the sandbox's lifecycle, not editing what's
+// inside it.
+
+export interface SandboxFileEntry {
+  name: string;
+  isDir: boolean;
+  size: number;
+}
+
+export async function listSandboxFiles(externalId: string, path: string): Promise<SandboxFileEntry[]> {
+  const daytona = getClient();
+  const sandbox = await daytona.get(externalId);
+  const entries = await sandbox.fs.listFiles(path);
+  return entries.map((e) => ({ name: e.name, isDir: e.isDir, size: e.size }));
+}
+
+export async function readSandboxFile(externalId: string, path: string): Promise<string> {
+  const daytona = getClient();
+  const sandbox = await daytona.get(externalId);
+  const buf = await sandbox.fs.downloadFile(path);
+  return buf.toString("utf-8");
+}
+
+export async function writeSandboxFile(externalId: string, path: string, content: string): Promise<void> {
+  const daytona = getClient();
+  const sandbox = await daytona.get(externalId);
+  const dir = path.includes("/") ? path.slice(0, path.lastIndexOf("/")) : "";
+  if (dir) await sandbox.fs.createFolder(dir, "755");
+  await sandbox.fs.uploadFile(Buffer.from(content, "utf-8"), path);
+}
+
+export async function deleteSandboxFile(externalId: string, path: string, recursive = false): Promise<void> {
+  const daytona = getClient();
+  const sandbox = await daytona.get(externalId);
+  await sandbox.fs.deleteFile(path, recursive);
+}
+
+export class SandboxEditError extends Error {}
+
+/**
+ * Edits a file by replacing one exact occurrence of oldStr with newStr —
+ * the same str_replace semantics used throughout this project's own
+ * tooling (and Claude Code's). Deliberately NOT a full-file rewrite: for
+ * small changes it's far cheaper in tokens, and requiring an exact,
+ * unique match is what prevents the agent from silently editing the
+ * wrong occurrence of a common string, or overwriting unrelated changes
+ * it never looked at. Zero matches or multiple matches both fail loudly
+ * rather than guessing.
+ */
+export async function editSandboxFile(
+  externalId: string,
+  path: string,
+  oldStr: string,
+  newStr: string
+): Promise<void> {
+  const current = await readSandboxFile(externalId, path);
+  const occurrences = current.split(oldStr).length - 1;
+
+  if (occurrences === 0) {
+    throw new SandboxEditError(
+      `Could not find the exact text to replace in ${path}. Read the file again and match it exactly, including whitespace.`
+    );
+  }
+  if (occurrences > 1) {
+    throw new SandboxEditError(
+      `The text to replace appears ${occurrences} times in ${path}, but must be unique. Include more surrounding context so it matches only once.`
+    );
+  }
+
+  const updated = current.replace(oldStr, newStr);
+  await writeSandboxFile(externalId, path, updated);
+}
+
+export interface SandboxCommandResult {
+  exitCode: number;
+  output: string;
+}
+
+export async function runSandboxCommand(
+  externalId: string,
+  command: string,
+  cwd?: string,
+  timeoutSeconds = 120
+): Promise<SandboxCommandResult> {
+  const daytona = getClient();
+  const sandbox = await daytona.get(externalId);
+  const response = await sandbox.process.executeCommand(command, cwd, undefined, timeoutSeconds);
+  return { exitCode: response.exitCode, output: response.result || "" };
+}
+
+/**
+ * Runs the project's build and returns whether it succeeded plus the raw
+ * output. Deliberately a thin wrapper around runSandboxCommand rather than
+ * something that tries to parse framework-specific error formats — every
+ * framework's build errors look different, and the model reading the raw
+ * output is more reliable than us guessing at a regex for "the" error
+ * format. What this DOES add over a bare run_command: a fixed timeout
+ * tuned for builds (longer than the default command timeout) and framing
+ * the result as pass/fail up front, since that's the first thing the
+ * agent needs to know before it reads the details.
+ */
+export async function getSandboxBuildErrors(externalId: string): Promise<{ success: boolean; output: string }> {
+  const result = await runSandboxCommand(externalId, "npm run build", undefined, 300);
+  return { success: result.exitCode === 0, output: result.output };
+}
+
+/**
+ * Captures a screenshot of the sandbox's own live preview by running a
+ * headless-browser script INSIDE the sandbox (installing playwright once,
+ * on first use, rather than requiring an external screenshot service —
+ * consistent with the rest of this file's self-hosted-only approach).
+ * Returns a base64 PNG so callers can hand it straight to an <img> src or
+ * a vision-capable model without an intermediate upload step.
+ */
+export async function takeSandboxScreenshot(externalId: string, path = "/"): Promise<string> {
+  const daytona = getClient();
+  const sandbox = await daytona.get(externalId);
+
+  // Installed once per sandbox, not per screenshot — cheap to check,
+  // expensive to reinstall on every call.
+  const check = await sandbox.process.executeCommand(
+    "node -e \"require.resolve('playwright')\" 2>&1 && echo INSTALLED || echo MISSING"
+  );
+  if (check.result?.includes("MISSING")) {
+    await sandbox.process.executeCommand("npm install playwright --no-save && npx playwright install --with-deps chromium", undefined, undefined, 300);
+  }
+
+  const script = `
+const { chromium } = require('playwright');
+(async () => {
+  const browser = await chromium.launch();
+  const page = await browser.newPage({ viewport: { width: 1280, height: 800 } });
+  await page.goto('http://localhost:3000${path}', { waitUntil: 'networkidle', timeout: 20000 });
+  await page.screenshot({ path: '/tmp/screenshot.png' });
+  await browser.close();
+})();
+`.trim();
+
+  await sandbox.fs.uploadFile(Buffer.from(script, "utf-8"), "/tmp/screenshot-script.js");
+  const run = await sandbox.process.executeCommand("node /tmp/screenshot-script.js", undefined, undefined, 30);
+  if (run.exitCode !== 0) {
+    throw new Error(`Screenshot capture failed: ${run.result}`);
+  }
+
+  const png = await sandbox.fs.downloadFile("/tmp/screenshot.png");
+  return png.toString("base64");
+}

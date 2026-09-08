@@ -1,20 +1,12 @@
 import { NextRequest } from "next/server";
-import crypto from "crypto";
-import { prisma } from "@/lib/db";
 import { getStoreContext, success, error, logAudit, requireRole } from "@/lib/api-helpers";
 import { unauthorized } from "@/lib/auth";
-import { getSupabaseAdmin, STORAGE_BUCKET, getPublicUrl } from "@/lib/supabase";
 import { rateLimit, rateLimitedResponse } from "@/lib/rate-limit";
 import { generateAiImage, isAiImageGenConfigured } from "@/lib/gemini-image-client";
 import { searchUnsplashPhotos } from "@/lib/unsplash-client";
+import { persistGeneratedImage } from "@/lib/media-storage";
 
 type Params = { params: Promise<{ siteId: string }> };
-
-const EXT_BY_MIME: Record<string, string> = {
-  "image/png": "png",
-  "image/jpeg": "jpg",
-  "image/webp": "webp",
-};
 
 // POST /api/sites/:siteId/ai/generate-image  { prompt: string, name?: string, folder?: string }
 // Generates a real, unique AI image from a text prompt (Google's Nano
@@ -46,33 +38,14 @@ export async function POST(req: NextRequest, { params }: Params) {
   const generated = isAiImageGenConfigured() ? await generateAiImage(prompt) : null;
 
   if (generated) {
-    let supabase;
-    try {
-      supabase = getSupabaseAdmin();
-    } catch {
-      return error("File storage is not configured on this platform (missing Supabase credentials).", 503);
-    }
-
-    const ext = EXT_BY_MIME[generated.mimeType] || "png";
-    const objectPath = `${siteId}/ai-generated/${Date.now()}-${crypto.randomBytes(8).toString("hex")}.${ext}`;
-
-    const { error: uploadError } = await supabase.storage
-      .from(STORAGE_BUCKET)
-      .upload(objectPath, generated.bytes, { contentType: generated.mimeType, cacheControl: "31536000", upsert: false });
-
-    if (uploadError) {
-      console.error("AI image storage upload error:", uploadError);
-      // Fall through to Unsplash rather than failing outright - generation
-      // succeeded, only the upload step failed, but the caller still
-      // shouldn't be left with nothing.
-    } else {
-      const url = getPublicUrl(objectPath);
-      const mediaItem = await prisma.mediaItem.create({
-        data: { siteId, name, url, type: "IMAGE", mimeType: generated.mimeType, size: generated.bytes.length, folder },
-      });
+    const mediaItem = await persistGeneratedImage({ siteId, bytes: generated.bytes, mimeType: generated.mimeType, name, folder });
+    if (mediaItem) {
       await logAudit({ siteId, userId: ctx.user!.id, action: "CREATE", entity: "media_item", entityId: mediaItem.id, after: mediaItem });
       return success({ ...mediaItem, source: "ai-generated" }, 201);
     }
+    // persistGeneratedImage returning null means storage isn't configured
+    // or the upload failed - fall through to Unsplash rather than failing
+    // outright, since generation itself succeeded.
   }
 
   // Fallback: Unsplash stock photo search using the same prompt as the

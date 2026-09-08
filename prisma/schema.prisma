@@ -151,6 +151,7 @@ model Site {
   senderIdentities  SenderIdentity[]
   sandboxSessions   SandboxSession[]
   sandboxSecrets    SandboxSecret[]
+  pipelineRuns      PipelineRun[]
   flashSales        FlashSale[]
   forms             Form[]
   funnels           Funnel[]
@@ -1078,6 +1079,40 @@ model EmailRecipient {
   @@index([campaignId])
   @@index([email])
   @@map("email_recipients")
+}
+
+model PipelineRun {
+  id          String   @id @default(cuid())
+  siteId      String
+  status      String   @default("running") // running | completed | failed | cancelled
+  input       Json     // the original generation request that kicked this off
+  error       String?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  site        Site     @relation(fields: [siteId], references: [id], onDelete: Cascade)
+  steps       PipelineStepRun[]
+
+  @@index([siteId])
+  @@index([status])
+  @@map("pipeline_runs")
+}
+
+model PipelineStepRun {
+  id          String    @id @default(cuid())
+  runId       String
+  stepId      String    // matches the DAG node id, e.g. "generate-copy"
+  status      String    @default("pending") // pending | running | completed | failed | skipped
+  inputHash   String    // sha256 of resolved dependency outputs, detects when a rerun is actually needed
+  output      Json?
+  error       String?
+  attempts    Int       @default(0)
+  startedAt   DateTime?
+  completedAt DateTime?
+  run         PipelineRun @relation(fields: [runId], references: [id], onDelete: Cascade)
+
+  @@unique([runId, stepId])
+  @@index([inputHash])
+  @@map("pipeline_step_runs")
 }
 
 model SandboxSession {
