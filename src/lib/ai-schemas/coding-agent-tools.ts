@@ -47,6 +47,13 @@ export const takeScreenshotSchema = z.object({
 export const finishTaskSchema = z.object({
   summary: z.string().min(1).describe("A short, merchant-facing summary of what was built or changed — this is shown to the person who asked for it, not logged internally."),
   filesChanged: z.array(z.string()).describe("Relative paths of every file created, edited, or deleted during this task."),
+  qualityChecklist: z.object({
+    matchesRequest: z.boolean().describe("True only if what you built genuinely matches what was asked for — re-read the original task before answering, don't assume."),
+    hasRealCopy: z.boolean().describe("True only if there is NO lorem ipsum, '[Your Business Name]', or other obviously-placeholder text anywhere in what you built or touched."),
+    noBrokenStates: z.boolean().describe("True only if there are no empty-looking sections, missing images with no fallback, or dead '#' links left as TODOs."),
+    isResponsive: z.boolean().describe("True only if you used the component vocabulary (which is responsive by default) or explicitly verified mobile layout for any custom section you wrote."),
+    buildPasses: z.boolean().describe("True only if you called get_build_errors after your last change and it reported success."),
+  }).describe("Honest self-assessment against the quality bar in your instructions — a false 'true' here defeats the entire point of this field."),
 });
 
 export type ListFilesArgs = z.infer<typeof listFilesSchema>;

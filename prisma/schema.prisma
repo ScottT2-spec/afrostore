@@ -151,6 +151,7 @@ model Site {
   senderIdentities  SenderIdentity[]
   sandboxSessions   SandboxSession[]
   pipelineRuns      PipelineRun[]
+  codingAgentRuns   CodingAgentRun[]
   flashSales        FlashSale[]
   forms             Form[]
   funnels           Funnel[]
@@ -1094,6 +1095,31 @@ model PipelineRun {
   @@index([siteId])
   @@index([status])
   @@map("pipeline_runs")
+}
+
+model CodingAgentRun {
+  id                String    @id @default(cuid())
+  siteId            String
+  sandboxExternalId String?
+  task              String
+  status            String    @default("running") // running | completed | failed
+  summary           String?
+  filesChanged      Json?
+  qualityChecklist  Json?
+  iterations        Int       @default(0)
+  toolCallCount     Int       @default(0)
+  provider          String?
+  model             String?
+  error             String?
+  source            String    @default("live") // live | eval - lets the golden-path eval harness tag its runs distinctly from real merchant usage
+  createdAt         DateTime  @default(now())
+  completedAt       DateTime?
+  site              Site      @relation(fields: [siteId], references: [id], onDelete: Cascade)
+
+  @@index([siteId])
+  @@index([status])
+  @@index([source])
+  @@map("coding_agent_runs")
 }
 
 model PipelineStepRun {

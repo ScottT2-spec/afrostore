@@ -21,6 +21,10 @@
  * top of (not replace) this structure.
  */
 
+import { getDesignTokens, tokensToCssVariables, tokensToTailwindExtend, type DesignTokens } from "@/lib/design/tokens";
+import { getComponentLibrary } from "./component-library";
+import { createSandboxWithFiles } from "./daytona";
+
 const packageJson = `{
   "name": "storefront",
   "private": true,
@@ -70,15 +74,17 @@ export default defineConfig({
 });
 `;
 
-const tailwindConfig = `/** @type {import('tailwindcss').Config} */
+function buildTailwindConfig(): string {
+  return `/** @type {import('tailwindcss').Config} */
 export default {
   content: ["./index.html", "./src/**/*.{js,ts,jsx,tsx}"],
   theme: {
-    extend: {},
+    extend: ${tokensToTailwindExtend()},
   },
   plugins: [],
 };
 `;
+}
 
 const postcssConfig = `export default {
   plugins: {
@@ -110,11 +116,15 @@ const tsconfigJson = `{
 }
 `;
 
-const indexHtml = `<!doctype html>
+function buildIndexHtml(tokens: DesignTokens): string {
+  return `<!doctype html>
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="${tokens.fonts.googleFontsUrl}" rel="stylesheet" />
     <title>Storefront</title>
   </head>
   <body>
@@ -123,6 +133,7 @@ const indexHtml = `<!doctype html>
   </body>
 </html>
 `;
+}
 
 const mainTsx = `import React from "react";
 import ReactDOM from "react-dom/client";
@@ -139,10 +150,18 @@ ReactDOM.createRoot(document.getElementById("root")!).render(
 );
 `;
 
-const indexCss = `@tailwind base;
+function buildIndexCss(tokens: DesignTokens): string {
+  return `@tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+${tokensToCssVariables(tokens)}
+
+body {
+  font-family: var(--font-body);
+}
 `;
+}
 
 // App.tsx is the ONLY place routes get registered. New pages get added
 // here as a <Route>, not by inventing a separate routing convention —
@@ -205,12 +224,18 @@ const footerTsx = `export default function Footer() {
 }
 `;
 
-const homePageTsx = `export default function Home() {
+const homePageTsx = `import Hero from "@/components/sections/Hero";
+
+// Starting point only - the coding agent replaces this with real sections
+// built from src/components/sections/ (see README) plus the merchant's
+// actual copy and images, never left as this placeholder.
+export default function Home() {
   return (
-    <div className="mx-auto max-w-6xl px-4 py-16">
-      <h1 className="text-3xl font-bold">Welcome</h1>
-      <p className="mt-2 text-gray-600">This page is ready to be customized.</p>
-    </div>
+    <Hero
+      heading="Welcome"
+      subheading="This page is ready to be customized."
+      ctaText="Get Started"
+    />
   );
 }
 `;
@@ -236,12 +261,28 @@ Generated project. Fixed structure — do not restructure or rename these
 top-level folders; add to them instead:
 
 - \`src/pages/\` — one file per route. Register new routes in \`src/App.tsx\`.
-- \`src/components/\` — shared/reusable UI. \`src/components/layout/\` holds
-  page chrome (Header, Footer, Layout) — edit these to change nav/footer
-  everywhere at once, don't duplicate them into individual pages.
+- \`src/components/sections/\` — the pre-built section vocabulary (Hero,
+  FeatureGrid, Testimonials, CtaSection, FaqAccordion). Reach for these
+  FIRST when building a page — they're already responsive and use the
+  site's design tokens correctly. Only write a custom section component
+  when nothing here fits.
+- \`src/components/layout/\` — page chrome (Header, Footer, Layout) — edit
+  these to change nav/footer everywhere at once, don't duplicate them
+  into individual pages.
 - \`src/lib/\` — non-UI logic, helpers, utilities (e.g. \`cn()\` in \`utils.ts\`).
 - \`src/styles/\` — global/shared CSS beyond \`src/index.css\` (Tailwind
   entrypoint), if a page needs something Tailwind utilities don't cover.
+
+## Design tokens — use these, don't invent your own colors/fonts
+
+This site's color palette and typography are fixed CSS variables (see
+\`src/index.css\`), wired into Tailwind (see \`tailwind.config.js\`) as:
+\`bg-primary\`, \`text-primary-foreground\`, \`bg-secondary\`, \`bg-accent\`,
+\`bg-background\`, \`text-foreground\`, \`bg-muted\`, \`border-border\`,
+\`font-heading\`, \`font-body\`. Always use these classes instead of raw hex
+codes or arbitrary Tailwind color names (\`bg-blue-500\` etc.) — that's
+what keeps every page on a generated site visually consistent with each
+other.
 
 Dev server is fixed on port 3000 (see \`vite.config.ts\`) — Daytona's
 preview link depends on this.
@@ -250,30 +291,52 @@ preview link depends on this.
 /**
  * Returns the fixed starter file set for a new AI-generated storefront
  * project. Every new sandbox seeds from exactly this — nothing here
- * should vary per-generation; only files layered on top of it (new pages,
- * new components, edits to App.tsx's route list) should differ.
+ * should vary per-generation except the design tokens (colors/fonts),
+ * which are deterministically derived from businessType + seed (pass the
+ * siteId) so the same site always gets the same visual identity even
+ * across regenerations, while different sites still get real variety.
  */
-export function getStandardScaffold(): Record<string, string> {
+export function getStandardScaffold(businessType: string, seed: string): Record<string, string> {
+  const tokens = getDesignTokens(businessType, seed);
   return {
     "package.json": packageJson,
     "vite.config.ts": viteConfig,
-    "tailwind.config.js": tailwindConfig,
+    "tailwind.config.js": buildTailwindConfig(),
     "postcss.config.js": postcssConfig,
     "tsconfig.json": tsconfigJson,
-    "index.html": indexHtml,
+    "index.html": buildIndexHtml(tokens),
     ".gitignore": gitignore,
     "README.md": readme,
     "src/main.tsx": mainTsx,
     "src/App.tsx": appTsx,
-    "src/index.css": indexCss,
+    "src/index.css": buildIndexCss(tokens),
     "src/lib/utils.ts": utilsTs,
     "src/components/layout/Layout.tsx": layoutTsx,
     "src/components/layout/Header.tsx": headerTsx,
     "src/components/layout/Footer.tsx": footerTsx,
     "src/pages/Home.tsx": homePageTsx,
+    ...getComponentLibrary(),
   };
 }
 
 /** Top-level paths the scaffold owns — used to warn/flag if generated
- * output tries to restructure rather than extend them. */
-export const SCAFFOLD_OWNED_PATHS = new Set(Object.keys(getStandardScaffold()));
+ * output tries to restructure rather than extend them. Component-library
+ * files are deliberately NOT included here: the agent is expected to
+ * edit/extend those (e.g. tweak Hero's markup for a specific site), just
+ * not the core architecture files (App.tsx routing, Layout.tsx, config). */
+export const SCAFFOLD_OWNED_PATHS = new Set([
+  "package.json", "vite.config.ts", "tailwind.config.js", "postcss.config.js",
+  "tsconfig.json", "index.html", "src/main.tsx", "src/App.tsx", "src/index.css", "src/lib/utils.ts",
+  "src/components/layout/Layout.tsx", "src/components/layout/Header.tsx", "src/components/layout/Footer.tsx",
+]);
+
+/**
+ * Convenience entry point for whatever kicks off a brand-new AI site
+ * generation: builds the file map (scaffold + tokens + component
+ * library) and creates the sandbox in one call. Use createSandboxWithFiles()
+ * directly instead when editing/resuming an EXISTING project - this is
+ * only for the first-ever creation of a project.
+ */
+export async function createProjectSandbox(siteId: string, businessType: string) {
+  return createSandboxWithFiles(getStandardScaffold(businessType, siteId));
+}
