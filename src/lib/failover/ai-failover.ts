@@ -137,6 +137,7 @@ export class AIFailover {
       maxTokens?: number;
       temperature?: number;
       tools?: AIRequest['tools'];
+      toolChoice?: AIRequest['toolChoice'];
     } = {}
   ): Promise<AIResponse> {
     const result = await this.chat({
@@ -359,7 +360,13 @@ export class AIFailover {
     };
 
     if (request.temperature !== undefined) body.temperature = request.temperature;
-    if (request.tools && request.tools.length > 0) body.tools = request.tools;
+    if (request.tools && request.tools.length > 0) {
+      body.tools = request.tools;
+      if (request.toolChoice === 'required') body.tool_choice = 'required';
+      else if (request.toolChoice && typeof request.toolChoice === 'object') {
+        body.tool_choice = { type: 'function', function: { name: request.toolChoice.name } };
+      } else if (request.toolChoice === 'auto') body.tool_choice = 'auto';
+    }
 
     const response = await fetch(`${baseUrl}/chat/completions`, {
       method: 'POST',
@@ -436,6 +443,10 @@ export class AIFailover {
         description: t.function.description,
         input_schema: t.function.parameters,
       }));
+      if (request.toolChoice === 'required') body.tool_choice = { type: 'any' };
+      else if (request.toolChoice && typeof request.toolChoice === 'object') {
+        body.tool_choice = { type: 'tool', name: request.toolChoice.name };
+      } else if (request.toolChoice === 'auto') body.tool_choice = { type: 'auto' };
     }
 
     const response = await fetch('https://api.anthropic.com/v1/messages', {
@@ -514,6 +525,49 @@ export class AIFailover {
       body.systemInstruction = { parts: [{ text: systemMsg.content }] };
     }
 
+    if (request.tools && request.tools.length > 0) {
+      // Gemini's function declarations use plain JSON Schema like the
+      // others, but does NOT accept the `additionalProperties` keyword
+      // Zod sometimes emits — strip it recursively rather than fighting
+      // Zod's schema output, since Gemini rejects the whole request over
+      // one unsupported keyword deep in a nested object.
+      //
+      // Separately (not fixed here, just documented): Gemini's function
+      // calling also rejects `anyOf`/`oneOf`, which is what z.union() and
+      // z.discriminatedUnion() produce. Keep structured-output schemas
+      // that might route through Gemini free of top-level unions —
+      // prefer a single flexible shape or z.enum() over z.union() where
+      // the schema needs to reach every provider.
+      const stripUnsupportedKeywords = (schema: unknown): unknown => {
+        if (Array.isArray(schema)) return schema.map(stripUnsupportedKeywords);
+        if (schema && typeof schema === 'object') {
+          const out: Record<string, unknown> = {};
+          for (const [k, v] of Object.entries(schema as Record<string, unknown>)) {
+            if (k === 'additionalProperties' || k === '$schema') continue;
+            out[k] = stripUnsupportedKeywords(v);
+          }
+          return out;
+        }
+        return schema;
+      };
+
+      body.tools = [{
+        functionDeclarations: request.tools.map((t) => ({
+          name: t.function.name,
+          description: t.function.description,
+          parameters: stripUnsupportedKeywords(t.function.parameters),
+        })),
+      }];
+
+      if (request.toolChoice === 'required') {
+        body.toolConfig = { functionCallingConfig: { mode: 'ANY' } };
+      } else if (request.toolChoice && typeof request.toolChoice === 'object') {
+        body.toolConfig = { functionCallingConfig: { mode: 'ANY', allowedFunctionNames: [request.toolChoice.name] } };
+      } else if (request.toolChoice === 'auto') {
+        body.toolConfig = { functionCallingConfig: { mode: 'AUTO' } };
+      }
+    }
+
     const response = await fetch(
       `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${config.apiKey}`,
       {
@@ -532,12 +586,27 @@ export class AIFailover {
 
     const data = await response.json() as any;
     const candidate = data.candidates?.[0];
-    const content = candidate?.content?.parts?.map((p: any) => p.text).join('') || '';
+    const parts: any[] = candidate?.content?.parts || [];
+    const content = parts.filter((p) => p.text).map((p) => p.text).join('');
+
+    // Gemini returns function calls as {functionCall: {name, args}} parts
+    // rather than a separate top-level field like OpenAI/Anthropic — map
+    // into the same AIToolCall shape so downstream code never needs to
+    // know which provider actually answered.
+    const functionCallParts = parts.filter((p) => p.functionCall);
+    const toolCalls = functionCallParts.length > 0
+      ? functionCallParts.map((p, i) => ({
+          id: `${candidate?.index ?? 0}-${i}`,
+          type: 'function' as const,
+          function: { name: p.functionCall.name, arguments: JSON.stringify(p.functionCall.args || {}) },
+        }))
+      : undefined;
 
     return {
       provider: config.provider,
       model,
       content,
+      toolCalls,
       usage: {
         promptTokens: data.usageMetadata?.promptTokenCount || 0,
         completionTokens: data.usageMetadata?.candidatesTokenCount || 0,

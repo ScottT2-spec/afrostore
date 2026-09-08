@@ -189,6 +189,14 @@ export interface AIRequest {
   temperature?: number;
   /** Function/tool definitions */
   tools?: AITool[];
+  /**
+   * Forces (or allows) tool use. 'required' means the model MUST call one
+   * of the provided tools rather than replying with plain text — this is
+   * what makes structured-output generation reliable instead of hoping a
+   * "please return JSON" instruction in the prompt gets followed.
+   * Passing a specific function name forces that exact tool.
+   */
+  toolChoice?: 'auto' | 'required' | { name: string };
   /** Whether to stream */
   stream?: boolean;
   /** Request timeout override */
