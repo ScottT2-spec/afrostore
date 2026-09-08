@@ -3,6 +3,7 @@ import { prisma } from "@/lib/db";
 import { getStoreContext, success, error } from "@/lib/api-helpers";
 import { unauthorized } from "@/lib/auth";
 import { isSandboxConfigured, createSandboxWithFiles, getSandboxStatus, stopSandbox } from "@/lib/sandbox/daytona";
+import { rateLimit, rateLimitedResponse } from "@/lib/rate-limit";
 
 type Params = { params: Promise<{ siteId: string }> };
 
@@ -47,6 +48,26 @@ export async function POST(req: NextRequest, { params }: Params) {
 
   if (!isSandboxConfigured()) {
     return error("Sandbox isn't configured (DAYTONA_API_URL/DAYTONA_API_KEY missing) - use the block-based preview instead.", 501);
+  }
+
+  // Spinning up a Daytona container (npm install + a running dev server)
+  // is by far the most expensive operation in this app - at any real
+  // scale, an unlimited-creation endpoint here is a direct compute-cost
+  // bleed, not just an abuse edge case. Capped per-user, not per-site, so
+  // one user can't route around it by cycling through many sites either.
+  const rl = rateLimit(`sandbox-create:${ctx.user!.id}`, 5, 15 * 60 * 1000);
+  if (!rl.allowed) return rateLimitedResponse(rl.retryAfterMs);
+
+  // One live sandbox per site at a time. Without this, double-clicking
+  // "generate" (or a slow first request + impatient retry) spins up a
+  // second full container for the same site while the first is still
+  // starting - pure wasted compute, and at 100k users that's the
+  // difference between a fleet you can actually run and one you can't.
+  const existing = await prisma.sandboxSession.findFirst({
+    where: { siteId, status: { in: ["creating", "ready"] } },
+  });
+  if (existing) {
+    return success({ session: existing });
   }
 
   const body = await req.json().catch(() => ({}));
