@@ -105,7 +105,7 @@ export async function POST(req: NextRequest) {
   } catch (err) {
     console.error("Upload error:", err);
     return NextResponse.json(
-      { success: false, error: "Upload failed" },
+      { success: false, error: err instanceof Error ? err.message : "Upload failed" },
       { status: 500 }
     );
   }
