@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { getSupabaseAdmin, STORAGE_BUCKET } from "@/lib/supabase";
+import { getPublicUrl } from "@/lib/s3-storage";
 
 export const runtime = "nodejs";
 
@@ -7,7 +7,7 @@ type Params = { params: Promise<{ buildPath: string; path?: string[] }> };
 
 // GET /_codegen/[buildPath]/[...path] — internal serving route middleware
 // rewrites published-site requests to (see middleware.ts). buildPath is
-// the site's Supabase Storage prefix (sites/{id}/published), already
+// the site's S3 storage prefix (sites/{id}/published), already
 // resolved by middleware via /api/internal/site-mode so this route never
 // needs its own DB lookup.
 //
@@ -18,11 +18,9 @@ export async function GET(req: NextRequest, { params }: Params) {
   const { buildPath, path } = await params;
   const decodedBuildPath = decodeURIComponent(buildPath);
   const relative = (path || []).join("/");
-  const supabase = getSupabaseAdmin();
 
   const tryFetch = async (rel: string) => {
-    const { data } = supabase.storage.from(STORAGE_BUCKET).getPublicUrl(`${decodedBuildPath}/${rel}`);
-    const res = await fetch(data.publicUrl, { cache: "no-store" });
+    const res = await fetch(getPublicUrl(`${decodedBuildPath}/${rel}`), { cache: "no-store" });
     return res.ok ? res : null;
   };
 

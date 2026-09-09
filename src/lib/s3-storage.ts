@@ -1,4 +1,4 @@
-import { S3Client, PutObjectCommand } from "@aws-sdk/client-s3";
+import { S3Client, PutObjectCommand, ListObjectsV2Command, DeleteObjectsCommand } from "@aws-sdk/client-s3";
 
 const region = process.env.AWS_S3_REGION || process.env.AWS_SES_REGION || "us-east-1";
 const bucket = process.env.AWS_S3_BUCKET;
@@ -46,4 +46,24 @@ export function getPublicUrl(filePath: string): string {
   const cdnBase = process.env.AWS_S3_PUBLIC_URL?.replace(/\/$/, "");
   if (cdnBase) return `${cdnBase}/${filePath}`;
   return `https://${STORAGE_BUCKET}.s3.${region}.amazonaws.com/${filePath}`;
+}
+
+/** Deletes every object under a key prefix (e.g. before re-publishing a
+ * site's built output, so stale/renamed files from a previous build
+ * don't linger forever). No-op if the prefix is empty. */
+export async function deletePrefix(prefix: string): Promise<void> {
+  const s3 = getS3Client();
+  let continuationToken: string | undefined;
+  do {
+    const listed = await s3.send(
+      new ListObjectsV2Command({ Bucket: STORAGE_BUCKET, Prefix: prefix, ContinuationToken: continuationToken })
+    );
+    const keys = (listed.Contents || []).map((o) => o.Key).filter((k): k is string => !!k);
+    if (keys.length > 0) {
+      await s3.send(
+        new DeleteObjectsCommand({ Bucket: STORAGE_BUCKET, Delete: { Objects: keys.map((Key) => ({ Key })) } })
+      );
+    }
+    continuationToken = listed.IsTruncated ? listed.NextContinuationToken : undefined;
+  } while (continuationToken);
 }

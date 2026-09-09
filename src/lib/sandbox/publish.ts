@@ -1,5 +1,5 @@
 import { prisma } from "@/lib/db";
-import { getSupabaseAdmin, STORAGE_BUCKET } from "@/lib/supabase";
+import { uploadFile, deletePrefix } from "@/lib/s3-storage";
 import { runSandboxCommand, listSandboxFiles, readSandboxFile } from "@/lib/sandbox/daytona";
 
 const MIME_BY_EXT: Record<string, string> = {
@@ -55,28 +55,17 @@ export async function publishSandboxProject(siteId: string, externalId: string):
     throw new PublishError("Build output has no index.html — cannot serve as a site.");
   }
 
-  const supabase = getSupabaseAdmin();
   const buildPath = `sites/${siteId}/published`;
 
   // Wipe whatever was there before a previous publish, so removed pages/
   // renamed assets don't linger and get served after a newer publish.
-  const { data: existing } = await supabase.storage.from(STORAGE_BUCKET).list(buildPath, { limit: 1000 });
-  if (existing && existing.length > 0) {
-    await supabase.storage.from(STORAGE_BUCKET).remove(existing.map((f) => `${buildPath}/${f.name}`));
-  }
+  await deletePrefix(`${buildPath}/`);
 
   for (const filePath of distFiles) {
     const relative = filePath.slice("dist/".length);
     const content = await readSandboxFile(externalId, filePath);
     const mime = MIME_BY_EXT[extOf(relative)] || "application/octet-stream";
-    const { error } = await supabase.storage
-      .from(STORAGE_BUCKET)
-      .upload(`${buildPath}/${relative}`, Buffer.from(content, "utf-8"), {
-        contentType: mime,
-        cacheControl: relative === "index.html" ? "no-cache" : "31536000",
-        upsert: true,
-      });
-    if (error) throw new PublishError(`Failed to upload ${relative}: ${error.message}`);
+    await uploadFile(`${buildPath}/${relative}`, Buffer.from(content, "utf-8"), mime);
   }
 
   await prisma.site.update({
