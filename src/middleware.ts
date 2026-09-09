@@ -47,9 +47,10 @@ const BYPASS_PREFIXES = [
   "/editor",
   "/templates",
   "/store/",  // Already has /store/ prefix — don't double-rewrite
+  "/_codegen/",  // Internal rewrite target for published AI-generated sites
 ];
 
-export function middleware(req: NextRequest) {
+export async function middleware(req: NextRequest) {
   const hostname =
     req.headers.get("x-forwarded-host") ||
     req.headers.get("host") ||
@@ -120,6 +121,35 @@ export function middleware(req: NextRequest) {
   //    The store page + API routes already look up by slug, subdomain, OR customDomain
   const url = req.nextUrl.clone();
   const storePath = pathname === "/" ? "" : pathname;
+
+  // Published AI-generated (real code) sites take over every path for
+  // their slug/domain entirely — no coexisting with the page-builder
+  // routes at specific paths, since the generated app can freely use any
+  // route name (about/contact/shop/etc.) and a hybrid would be
+  // inconsistent. One extra fetch per request, cached, to a tiny
+  // Node-runtime endpoint since this Edge middleware can't use Prisma
+  // directly.
+  try {
+    const modeRes = await fetch(
+      `${req.nextUrl.origin}/api/internal/site-mode?slug=${encodeURIComponent(storeSlug)}`,
+      { next: { revalidate: 30 } }
+    );
+    if (modeRes.ok) {
+      const mode = (await modeRes.json()) as { codeGen: boolean; buildPath: string | null };
+      if (mode.codeGen && mode.buildPath) {
+        url.pathname = `/_codegen/${encodeURIComponent(mode.buildPath)}${storePath}`;
+        return withDebugHeaders(NextResponse.rewrite(url), {
+          "x-mw-decision": "rewrite-codegen",
+          "x-mw-store-slug": storeSlug,
+          "x-mw-rewrite-target": url.pathname,
+        });
+      }
+    }
+  } catch {
+    // Lookup failing (network blip, endpoint down) must never break a
+    // normal block-based store — fall through to the existing behavior.
+  }
+
   url.pathname = `/store/${storeSlug}${storePath}`;
 
   return withDebugHeaders(NextResponse.rewrite(url), {

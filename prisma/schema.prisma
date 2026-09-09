@@ -150,6 +150,16 @@ model Site {
   emailCampaigns    EmailCampaign[]
   senderIdentities  SenderIdentity[]
   sandboxSessions   SandboxSession[]
+  // AI-generated real-code storefront (Vite/React) — set once Publish is
+  // clicked in the AI builder and the sandbox project has been built and
+  // uploaded. codeGenBuildPath is the Supabase Storage prefix its built
+  // files live under; codeGenPublished gates the storefront routes
+  // (home + [pageSlug] + assets) between serving this vs. the normal
+  // page-builder content, so existing block-based stores are completely
+  // unaffected until a site actually publishes generated code.
+  codeGenPublished    Boolean   @default(false)
+  codeGenPublishedAt  DateTime?
+  codeGenBuildPath    String?
   sandboxSecrets    SandboxSecret[]
   pipelineRuns      PipelineRun[]
   codingAgentRuns   CodingAgentRun[]
