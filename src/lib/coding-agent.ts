@@ -15,6 +15,7 @@
 
 import { z } from "zod";
 import { prisma } from "@/lib/db";
+import { persistGeneratedFile, persistGeneratedFileDelete } from "@/lib/sandbox/generated-files";
 import { AICapability } from "@/lib/failover";
 import type { AIFailover, AIMessage, AITool } from "@/lib/failover";
 import {
@@ -307,7 +308,7 @@ export async function runCodingAgent(opts: RunCodingAgentOptions): Promise<Codin
         };
       }
 
-      const { result: toolResult, isError } = await executeTool(sandboxExternalId, name, args);
+      const { result: toolResult, isError } = await executeTool(sandboxExternalId, siteId, name, args);
       const step: CodingAgentStep = { tool: name, args, result: toolResult, isError };
       steps.push(step);
       onStep?.(step);
@@ -328,6 +329,7 @@ export async function runCodingAgent(opts: RunCodingAgentOptions): Promise<Codin
 
 async function executeTool(
   sandboxExternalId: string,
+  siteId: string,
   name: string,
   args: unknown
 ): Promise<{ result: string; isError: boolean }> {
@@ -346,16 +348,28 @@ async function executeTool(
       case "write_file": {
         const parsed = writeFileSchema.parse(args);
         await writeSandboxFile(sandboxExternalId, parsed.path, parsed.content);
+        // Durable persistence happens right after the sandbox write
+        // succeeds, not batched until finish_task - a crash or timeout
+        // mid-task still leaves every file written up to that point
+        // safely recoverable, not just the ones from a "completed" run.
+        await persistGeneratedFile(siteId, parsed.path, parsed.content);
         return { result: `Wrote ${parsed.path}`, isError: false };
       }
       case "edit_file": {
         const parsed = editFileSchema.parse(args);
         await editSandboxFile(sandboxExternalId, parsed.path, parsed.old_str, parsed.new_str);
+        // Read back the post-edit content rather than reconstructing it
+        // locally - the sandbox is the source of truth for what the edit
+        // actually produced (whitespace/line-ending handling, etc.), and
+        // persistence should reflect exactly that, not a local guess.
+        const updated = await readSandboxFile(sandboxExternalId, parsed.path);
+        await persistGeneratedFile(siteId, parsed.path, updated);
         return { result: `Edited ${parsed.path}`, isError: false };
       }
       case "delete_file": {
         const parsed = deleteFileSchema.parse(args);
         await deleteSandboxFile(sandboxExternalId, parsed.path, parsed.recursive);
+        await persistGeneratedFileDelete(siteId, parsed.path, parsed.recursive ?? false);
         return { result: `Deleted ${parsed.path}`, isError: false };
       }
       case "run_command": {

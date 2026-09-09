@@ -5,6 +5,8 @@ import { unauthorized } from "@/lib/auth";
 import { rateLimit, rateLimitedResponse } from "@/lib/rate-limit";
 import { isSandboxConfigured, createSandboxWithFiles, getSandboxStatus } from "@/lib/sandbox/daytona";
 import { getStandardScaffold } from "@/lib/sandbox/scaffold";
+import { getGeneratedFiles } from "@/lib/sandbox/generated-files";
+import { getDecryptedSecrets } from "@/lib/sandbox/secrets";
 import { getAIFailover } from "@/lib/ai-service";
 import { runCodingAgent, CodingAgentError } from "@/lib/coding-agent";
 
@@ -80,7 +82,18 @@ export async function POST(req: NextRequest, { params }: Params) {
   if (!session) {
     session = await prisma.sandboxSession.create({ data: { siteId, status: "creating" } });
     try {
-      const { externalId, previewUrl } = await createSandboxWithFiles(getStandardScaffold());
+      // If this site has generated code from a PRIOR sandbox that's since
+      // gone idle/stopped/crashed, this is the actual recovery: the new
+      // sandbox is seeded with everything the agent already built, not a
+      // blank scaffold. Persisted files are layered on top of (and take
+      // priority over) the base scaffold, since they represent this
+      // site's real current state; the scaffold underneath just fills in
+      // anything the agent never touched (config, layout chrome, etc.).
+      const scaffold = getStandardScaffold(ctx.site?.businessType || "general", siteId);
+      const persisted = await getGeneratedFiles(siteId);
+      const files = { ...scaffold, ...persisted };
+      const secretEnvVars = await getDecryptedSecrets(siteId);
+      const { externalId, previewUrl } = await createSandboxWithFiles(files, secretEnvVars);
       session = await prisma.sandboxSession.update({
         where: { id: session.id },
         data: { externalId, previewUrl, status: "ready", lastActiveAt: new Date() },
@@ -105,6 +118,8 @@ export async function POST(req: NextRequest, { params }: Params) {
       ai: getAIFailover(),
       sandboxExternalId: session.externalId,
       task: contextLine ? `${contextLine}\n\n${task}` : task,
+      siteId,
+      source: "live",
     });
 
     await prisma.sandboxSession.update({
@@ -116,6 +131,7 @@ export async function POST(req: NextRequest, { params }: Params) {
       session,
       summary: result.summary,
       filesChanged: result.filesChanged,
+      qualityChecklist: result.qualityChecklist,
       steps: result.steps.map((s) => ({ tool: s.tool, isError: s.isError })), // args/full results kept server-side only — can include file contents, not meant for the client payload
       provider: result.provider,
       model: result.model,

@@ -4,7 +4,7 @@ import { getStoreContext, success, error } from "@/lib/api-helpers";
 import { unauthorized } from "@/lib/auth";
 import { isSandboxConfigured, createSandboxWithFiles, getSandboxStatus, stopSandbox } from "@/lib/sandbox/daytona";
 import { rateLimit, rateLimitedResponse } from "@/lib/rate-limit";
-import { decryptField } from "@/lib/field-crypto";
+import { getDecryptedSecrets } from "@/lib/sandbox/secrets";
 
 type Params = { params: Promise<{ siteId: string }> };
 
@@ -60,21 +60,6 @@ async function tryPromoteNextQueued(): Promise<void> {
       data: { status: "error", errorMessage: message },
     });
   }
-}
-
-async function getDecryptedSecrets(siteId: string): Promise<Record<string, string>> {
-  const secrets = await prisma.sandboxSecret.findMany({ where: { siteId } });
-  const out: Record<string, string> = {};
-  for (const s of secrets) {
-    try {
-      out[s.key] = decryptField(s.encryptedValue);
-    } catch {
-      // A secret that fails to decrypt (e.g. PROFILE_ENCRYPTION_KEY was
-      // rotated) is skipped rather than crashing sandbox creation for it -
-      // the generated code just won't have that one env var set.
-    }
-  }
-  return out;
 }
 
 // GET /api/sites/:siteId/sandbox

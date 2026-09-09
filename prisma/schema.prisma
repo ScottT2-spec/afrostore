@@ -153,6 +153,7 @@ model Site {
   sandboxSecrets    SandboxSecret[]
   pipelineRuns      PipelineRun[]
   codingAgentRuns   CodingAgentRun[]
+  generatedFiles    GeneratedFile[]
   flashSales        FlashSale[]
   forms             Form[]
   funnels           Funnel[]
@@ -1139,6 +1140,29 @@ model PipelineStepRun {
   @@unique([runId, stepId])
   @@index([inputHash])
   @@map("pipeline_step_runs")
+}
+
+// The durable source of truth for AI-generated code, independent of any
+// one sandbox container's lifecycle. A sandbox is disposable (auto-stops
+// when idle, can crash, gets torn down on DELETE) - this table is not. On
+// every successful write_file/edit_file/delete_file the coding agent
+// makes, this table is updated immediately (not just at task completion),
+// so even a mid-task crash leaves all progress up to that point durably
+// saved. Reconstructing a fresh sandbox for a site with existing rows
+// here restores it to exactly where the agent last left off, instead of
+// starting blank from the scaffold again.
+model GeneratedFile {
+  id        String   @id @default(cuid())
+  siteId    String
+  path      String
+  content   String   @db.Text
+  size      Int
+  updatedAt DateTime @updatedAt
+  site      Site     @relation(fields: [siteId], references: [id], onDelete: Cascade)
+
+  @@unique([siteId, path])
+  @@index([siteId])
+  @@map("generated_files")
 }
 
 model SandboxSession {
