@@ -18,29 +18,48 @@ interface SandboxSession {
  * - If a Daytona sandbox session exists/gets created for this site, shows
  *   its real live-running dev server in an iframe (the Lovable-style path,
  *   for actual generated code).
- * - If Daytona isn't configured, sandbox creation fails, or `files` isn't
- *   provided (i.e. this generation produced structured block JSON, not
- *   code), falls back to rendering `blocks` with the existing block
- *   renderer - same visual slot, no dead end either way.
+ * - If Daytona isn't configured, sandbox creation fails, or neither
+ *   `session` nor `files` is provided (i.e. this generation produced
+ *   structured block JSON, not code), falls back to rendering `blocks`
+ *   with the existing block renderer — same visual slot, no dead end
+ *   either way.
  *
- * `files` is optional on purpose: pass it only when there's an actual
- * generated-code project to run; omit it to go straight to the block
- * preview without ever calling the sandbox API.
+ * Two ways to get a live sandbox shown, and only one should be used per
+ * call site:
+ *   - `session`: the caller already created/owns a sandbox (e.g.
+ *     /ai/generate-code returns one) — this component just displays and
+ *     polls it, it does NOT call the sandbox API to create another one.
+ *   - `files`: the caller wants THIS component to create the sandbox
+ *     itself from a files map.
+ * Passing neither goes straight to the block preview.
  */
 export function SandboxPreview({
   siteId,
   files,
   blocks,
+  session: initialSession,
 }: {
   siteId: string;
   files?: Record<string, string>;
   blocks: TemplateBlock[];
+  session?: SandboxSession | null;
 }) {
-  const [session, setSession] = useState<SandboxSession | null>(null);
-  const [sandboxUnavailable, setSandboxUnavailable] = useState(!files);
+  const [session, setSession] = useState<SandboxSession | null>(initialSession ?? null);
+  const [sandboxUnavailable, setSandboxUnavailable] = useState(!files && !initialSession);
   const pollRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
+  // A session passed in from the parent (already created) always wins —
+  // sync it in rather than re-deriving from `files`, and skip straight
+  // past the creation effect below.
   useEffect(() => {
+    if (initialSession) {
+      setSession(initialSession);
+      setSandboxUnavailable(false);
+    }
+  }, [initialSession]);
+
+  useEffect(() => {
+    if (initialSession) return; // caller owns this session — nothing to create
     if (!files) {
       setSandboxUnavailable(true);
       return;
@@ -64,7 +83,7 @@ export function SandboxPreview({
 
     return () => { cancelled = true; };
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [siteId, files]);
+  }, [siteId, files, initialSession]);
 
   useEffect(() => {
     if (!session || session.status === "ready" || session.status === "error" || session.status === "stopped") {
@@ -79,19 +98,24 @@ export function SandboxPreview({
     return () => { if (pollRef.current) clearInterval(pollRef.current); };
   }, [session, siteId]);
 
-  // Tear down the sandbox when the preview unmounts - idle sandboxes still
-  // cost compute even self-hosted, and Daytona's own auto-stop timer is a
-  // backstop, not a substitute for cleaning up promptly.
+  // Tear down the sandbox when the preview unmounts — but only if THIS
+  // component created it (via `files`). A session passed in from the
+  // parent is owned by the caller, which may deliberately reuse it
+  // across multiple follow-up edit requests (that's the whole point of
+  // /ai/generate-code reusing a site's existing sandbox) — destroying it
+  // just because this preview briefly unmounted would force a full
+  // rebuild on every single chat message.
   useEffect(() => {
+    if (initialSession) return;
     return () => {
       if (session?.id && session.status === "ready") {
         api.delete(`/api/sites/${siteId}/sandbox?sessionId=${session.id}`).catch(() => {});
       }
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [session?.id]);
+  }, [session?.id, initialSession]);
 
-  if (sandboxUnavailable || !files) {
+  if (sandboxUnavailable || (!files && !initialSession)) {
     return <RenderTemplateBlocks blocks={blocks} />;
   }
 
