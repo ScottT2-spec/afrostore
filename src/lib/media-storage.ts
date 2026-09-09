@@ -1,6 +1,6 @@
 import crypto from "crypto";
 import { prisma } from "@/lib/db";
-import { getSupabaseAdmin, STORAGE_BUCKET, getPublicUrl } from "@/lib/supabase";
+import { uploadFile } from "@/lib/s3-storage";
 
 const EXT_BY_MIME: Record<string, string> = {
   "image/png": "png",
@@ -28,26 +28,17 @@ export async function persistGeneratedImage(opts: {
   name: string;
   folder?: string;
 }) {
-  let supabase;
-  try {
-    supabase = getSupabaseAdmin();
-  } catch {
-    return null;
-  }
-
   const ext = EXT_BY_MIME[opts.mimeType] || "png";
   const objectPath = `${opts.siteId}/ai-generated/${Date.now()}-${crypto.randomBytes(8).toString("hex")}.${ext}`;
 
-  const { error: uploadError } = await supabase.storage
-    .from(STORAGE_BUCKET)
-    .upload(objectPath, opts.bytes, { contentType: opts.mimeType, cacheControl: "31536000", upsert: false });
-
-  if (uploadError) {
+  let url: string;
+  try {
+    url = await uploadFile(objectPath, opts.bytes, opts.mimeType);
+  } catch (uploadError) {
     console.error("AI image storage upload error:", uploadError);
     return null;
   }
 
-  const url = getPublicUrl(objectPath);
   return prisma.mediaItem.create({
     data: {
       siteId: opts.siteId,

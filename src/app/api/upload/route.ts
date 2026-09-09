@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import crypto from "crypto";
 import path from "path";
-import { supabaseAdmin, STORAGE_BUCKET, getPublicUrl } from "@/lib/supabase";
+import { uploadFile } from "@/lib/s3-storage";
 import { getAuthUser, unauthorized } from "@/lib/auth";
 import { rateLimit, rateLimitedResponse } from "@/lib/rate-limit";
 
@@ -66,26 +66,19 @@ export async function POST(req: NextRequest) {
       const fileName = generateFileName(file.name);
       const buffer = Buffer.from(await file.arrayBuffer());
 
-      // Upload to Supabase Storage
-      const { error: uploadError } = await supabaseAdmin.storage
-        .from(STORAGE_BUCKET)
-        .upload(fileName, buffer, {
-          contentType: file.type,
-          cacheControl: "31536000",
-          upsert: false,
+      // Upload to S3
+      try {
+        const url = await uploadFile(fileName, buffer, file.type);
+        uploaded.push({
+          url,
+          name: file.name,
+          size: file.size,
         });
-
-      if (uploadError) {
-        console.error("Supabase upload error:", uploadError);
-        errors.push(`${file.name}: ${uploadError.message}`);
+      } catch (uploadError) {
+        console.error("S3 upload error:", uploadError);
+        errors.push(`${file.name}: ${uploadError instanceof Error ? uploadError.message : "Upload failed"}`);
         continue;
       }
-
-      uploaded.push({
-        url: getPublicUrl(fileName),
-        name: file.name,
-        size: file.size,
-      });
     }
 
     if (uploaded.length === 0 && errors.length > 0) {
