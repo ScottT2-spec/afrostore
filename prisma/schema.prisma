@@ -150,6 +150,7 @@ model Site {
   emailCampaigns    EmailCampaign[]
   senderIdentities  SenderIdentity[]
   sandboxSessions   SandboxSession[]
+  sandboxSecrets    SandboxSecret[]
   pipelineRuns      PipelineRun[]
   codingAgentRuns   CodingAgentRun[]
   flashSales        FlashSale[]
@@ -1145,9 +1146,20 @@ model SandboxSession {
   siteId        String
   provider      String    @default("daytona")
   externalId    String?   // Daytona sandbox ID once created
-  status        String    @default("creating") // creating | ready | error | stopped
+  status        String    @default("creating") // queued | creating | ready | error | stopped
   previewUrl    String?
   errorMessage  String?
+  // Persisted project state — the source of truth for "what files does
+  // this project currently have" independent of whether the live Daytona
+  // container is still running (it auto-stops after 30 min idle). This is
+  // what makes a follow-up prompt ("add authentication") able to build on
+  // the actual current project instead of re-guessing it, and what lets a
+  // queued session be promoted later without the request that created it
+  // still being open.
+  // Deliberately does NOT include secrets — those live in SandboxSecret,
+  // decrypted and injected as sandbox env vars only at container-creation
+  // time, never written into this persisted file map.
+  files         Json?
   lastActiveAt  DateTime  @default(now())
   createdAt     DateTime  @default(now())
   site          Site      @relation(fields: [siteId], references: [id], onDelete: Cascade)
@@ -1155,6 +1167,20 @@ model SandboxSession {
   @@index([siteId])
   @@index([status])
   @@map("sandbox_sessions")
+}
+
+model SandboxSecret {
+  id             String   @id @default(cuid())
+  siteId         String
+  key            String   // env var name the generated code references, e.g. STRIPE_SECRET_KEY
+  encryptedValue String   // AES-256-GCM via field-crypto.ts — never stored or logged in plaintext
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+  site           Site     @relation(fields: [siteId], references: [id], onDelete: Cascade)
+
+  @@unique([siteId, key])
+  @@index([siteId])
+  @@map("sandbox_secrets")
 }
 
 model SenderIdentity {

@@ -4,8 +4,78 @@ import { getStoreContext, success, error } from "@/lib/api-helpers";
 import { unauthorized } from "@/lib/auth";
 import { isSandboxConfigured, createSandboxWithFiles, getSandboxStatus, stopSandbox } from "@/lib/sandbox/daytona";
 import { rateLimit, rateLimitedResponse } from "@/lib/rate-limit";
+import { decryptField } from "@/lib/field-crypto";
 
 type Params = { params: Promise<{ siteId: string }> };
+
+// Global ceiling on simultaneously-running sandboxes, across ALL sites and
+// users. Per-user rate limiting (below) stops one user from creating too
+// many; this is the separate check that stops the sum of many different
+// users from exceeding what the Daytona host can actually run at once.
+// Override via env once real capacity is measured - this default is
+// deliberately conservative for a single self-hosted Daytona instance.
+const MAX_CONCURRENT_SANDBOXES = Number(process.env.SANDBOX_MAX_CONCURRENT || 50);
+
+async function countActiveSandboxes(): Promise<number> {
+  return prisma.sandboxSession.count({ where: { status: { in: ["creating", "ready"] } } });
+}
+
+// Attempts to promote the single oldest queued session into a real
+// Daytona container, if there's spare capacity right now. Called
+// opportunistically from GET (polling) and DELETE (freed capacity)
+// instead of a cron - crons on this platform's plan only run once a day,
+// far too slow for "a slot just opened up, let someone in".
+async function tryPromoteNextQueued(): Promise<void> {
+  const activeCount = await countActiveSandboxes();
+  if (activeCount >= MAX_CONCURRENT_SANDBOXES) return;
+
+  const next = await prisma.sandboxSession.findFirst({
+    where: { status: "queued" },
+    orderBy: { createdAt: "asc" },
+  });
+  if (!next || !next.files) return;
+
+  // Claim it first (creating), so a concurrent promotion attempt from
+  // another request can't also pick up the same queued session.
+  const claimed = await prisma.sandboxSession.updateMany({
+    where: { id: next.id, status: "queued" },
+    data: { status: "creating" },
+  });
+  if (claimed.count === 0) return; // someone else claimed it first
+
+  try {
+    const secretEnvVars = await getDecryptedSecrets(next.siteId);
+    const { externalId, previewUrl } = await createSandboxWithFiles(
+      next.files as Record<string, string>,
+      secretEnvVars
+    );
+    await prisma.sandboxSession.update({
+      where: { id: next.id },
+      data: { externalId, previewUrl, status: "ready", lastActiveAt: new Date() },
+    });
+  } catch (e) {
+    const message = e instanceof Error ? e.message : "Failed to create sandbox";
+    await prisma.sandboxSession.update({
+      where: { id: next.id },
+      data: { status: "error", errorMessage: message },
+    });
+  }
+}
+
+async function getDecryptedSecrets(siteId: string): Promise<Record<string, string>> {
+  const secrets = await prisma.sandboxSecret.findMany({ where: { siteId } });
+  const out: Record<string, string> = {};
+  for (const s of secrets) {
+    try {
+      out[s.key] = decryptField(s.encryptedValue);
+    } catch {
+      // A secret that fails to decrypt (e.g. PROFILE_ENCRYPTION_KEY was
+      // rotated) is skipped rather than crashing sandbox creation for it -
+      // the generated code just won't have that one env var set.
+    }
+  }
+  return out;
+}
 
 // GET /api/sites/:siteId/sandbox
 // Returns the current sandbox session for this site, if any, refreshing
@@ -15,6 +85,12 @@ export async function GET(req: NextRequest, { params }: Params) {
   const { siteId } = await params;
   const ctx = await getStoreContext(req, siteId);
   if (ctx.error) return ctx.user ? error(ctx.error, 403) : unauthorized();
+
+  // Cheap opportunistic check - the frontend already polls this endpoint
+  // while a session is starting, so this is effectively free scheduling:
+  // no session anywhere is "stuck queued" longer than one poll interval
+  // after capacity frees up.
+  await tryPromoteNextQueued();
 
   const session = await prisma.sandboxSession.findFirst({
     where: { siteId, status: { notIn: ["stopped", "error"] } },
@@ -38,9 +114,11 @@ export async function GET(req: NextRequest, { params }: Params) {
 
 // POST /api/sites/:siteId/sandbox  { files: Record<string, string> }
 // Creates a new sandbox session for AI-generated code and starts its dev
-// server. If Daytona isn't configured, returns a clear "not configured"
-// error rather than a confusing failure - the frontend should treat that
-// the same as "no session" and fall back to the block renderer.
+// server - or, if the global concurrency ceiling is currently full,
+// queues it (status "queued") to be picked up as soon as capacity frees.
+// If Daytona isn't configured, returns a clear "not configured" error
+// rather than a confusing failure - the frontend should treat that the
+// same as "no session" and fall back to the block renderer.
 export async function POST(req: NextRequest, { params }: Params) {
   const { siteId } = await params;
   const ctx = await getStoreContext(req, siteId);
@@ -58,13 +136,14 @@ export async function POST(req: NextRequest, { params }: Params) {
   const rl = rateLimit(`sandbox-create:${ctx.user!.id}`, 5, 15 * 60 * 1000);
   if (!rl.allowed) return rateLimitedResponse(rl.retryAfterMs);
 
-  // One live sandbox per site at a time. Without this, double-clicking
-  // "generate" (or a slow first request + impatient retry) spins up a
-  // second full container for the same site while the first is still
-  // starting - pure wasted compute, and at 100k users that's the
-  // difference between a fleet you can actually run and one you can't.
+  // One live (or queued) sandbox per site at a time. Without this,
+  // double-clicking "generate" (or a slow first request + impatient
+  // retry) spins up a second full container for the same site while the
+  // first is still starting - pure wasted compute, and at 100k users
+  // that's the difference between a fleet you can actually run and one
+  // you can't.
   const existing = await prisma.sandboxSession.findFirst({
-    where: { siteId, status: { in: ["creating", "ready"] } },
+    where: { siteId, status: { in: ["queued", "creating", "ready"] } },
   });
   if (existing) {
     return success({ session: existing });
@@ -76,12 +155,25 @@ export async function POST(req: NextRequest, { params }: Params) {
     return error("files is required (a map of relative path -> file content)", 400);
   }
 
+  // Global concurrency ceiling: if we're already at capacity across all
+  // sites/users, queue this one instead of attempting it. files is
+  // persisted so a later promotion (from tryPromoteNextQueued) has
+  // everything it needs without the original request still being open.
+  const activeCount = await countActiveSandboxes();
+  if (activeCount >= MAX_CONCURRENT_SANDBOXES) {
+    const queued = await prisma.sandboxSession.create({
+      data: { siteId, status: "queued", files },
+    });
+    return success({ session: queued, queued: true });
+  }
+
   const session = await prisma.sandboxSession.create({
-    data: { siteId, status: "creating" },
+    data: { siteId, status: "creating", files },
   });
 
   try {
-    const { externalId, previewUrl } = await createSandboxWithFiles(files);
+    const secretEnvVars = await getDecryptedSecrets(siteId);
+    const { externalId, previewUrl } = await createSandboxWithFiles(files, secretEnvVars);
     const updated = await prisma.sandboxSession.update({
       where: { id: session.id },
       data: { externalId, previewUrl, status: "ready", lastActiveAt: new Date() },
@@ -100,6 +192,8 @@ export async function POST(req: NextRequest, { params }: Params) {
 // DELETE /api/sites/:siteId/sandbox?sessionId=xxx
 // Tears down a sandbox session - always called when the user is done
 // previewing, since idle sandboxes still cost compute even self-hosted.
+// Also opportunistically promotes the next queued session, since this is
+// exactly the moment a concurrency slot frees up.
 export async function DELETE(req: NextRequest, { params }: Params) {
   const { siteId } = await params;
   const ctx = await getStoreContext(req, siteId);
@@ -122,5 +216,6 @@ export async function DELETE(req: NextRequest, { params }: Params) {
   }
 
   await prisma.sandboxSession.update({ where: { id: session.id }, data: { status: "stopped" } });
+  await tryPromoteNextQueued();
   return success({ status: "stopped" });
 }
