@@ -23,6 +23,13 @@ interface PageSummary {
   type: string;
 }
 
+interface SandboxSessionResult {
+  id: string;
+  status: "creating" | "ready" | "error" | "stopped";
+  previewUrl: string | null;
+  errorMessage: string | null;
+}
+
 interface ChatMessage {
   id: string;
   role: "user" | "assistant";
@@ -38,10 +45,10 @@ interface BuildStep {
 
 const BUILD_STEPS: string[] = [
   "Understanding your business",
-  "Creating layout",
-  "Writing on-brand copy",
-  "Adding your product catalog",
-  "Building mobile view",
+  "Setting up your project",
+  "Writing your homepage",
+  "Checking everything builds correctly",
+  "Finalizing your preview",
 ];
 
 function uid() {
@@ -58,6 +65,7 @@ export default function AIBuilderPage({ params }: { params: Promise<{ siteId: st
   const [input, setInput] = useState("");
   const [generating, setGenerating] = useState(false);
   const [previewBlocks, setPreviewBlocks] = useState<TemplateBlock[]>([]);
+  const [session, setSession] = useState<SandboxSessionResult | null>(null);
   const [hasGenerated, setHasGenerated] = useState(false);
 
   const messagesEndRef = useRef<HTMLDivElement>(null);
@@ -143,37 +151,81 @@ export default function AIBuilderPage({ params }: { params: Promise<{ siteId: st
       );
     }, 1800);
 
-    const res = await api.post<{ pages: PageSummary[]; productsCreated: number }>(`/api/sites/${siteId}/ai/generate-store`, {
-      description,
-      storeName: site.name,
-      businessType: site.businessType || undefined,
-    });
+    const res = await api.post<{ session: SandboxSessionResult; summary: string; filesChanged: string[] }>(
+      `/api/sites/${siteId}/ai/generate-code`,
+      { task: description }
+    );
 
     if (stepTimerRef.current) clearInterval(stepTimerRef.current);
 
     if (res.success && res.data) {
+      setSession(res.data.session);
       setMessages((prev) =>
         prev.map((m) =>
           m.id === assistantMsgId
             ? {
                 ...m,
                 checklist: m.checklist!.map((s) => ({ ...s, status: "done" as const })),
-                content: `Done! I've built your homepage, About, FAQ, Contact, and Policies pages${res.data!.productsCreated ? `, plus ${res.data!.productsCreated} starter products` : ""}. Check the preview — tell me what you'd like to change.`,
+                content: res.data!.summary,
               }
             : m
         )
       );
-      await loadHomePagePreview(res.data.pages);
       setHasGenerated(true);
-    } else {
+      setGenerating(false);
+      return;
+    }
+
+    // The coding agent is the real, primary path — this fallback exists
+    // only for when it can't run at all (Daytona unconfigured, sandbox
+    // creation failed) on the FIRST message, where there's no existing
+    // generated site to lose. It deliberately does NOT fire for a later
+    // edit request (session already exists): falling back there would
+    // silently abandon the merchant's actual generated site and restart
+    // them on the unrelated block-based pipeline instead of just telling
+    // them the edit failed.
+    if (!session) {
+      const fallbackRes = await api.post<{ pages: PageSummary[]; productsCreated: number }>(
+        `/api/sites/${siteId}/ai/generate-store`,
+        { description, storeName: site.name, businessType: site.businessType || undefined }
+      );
+
+      if (fallbackRes.success && fallbackRes.data) {
+        setMessages((prev) =>
+          prev.map((m) =>
+            m.id === assistantMsgId
+              ? {
+                  ...m,
+                  checklist: m.checklist!.map((s) => ({ ...s, status: "done" as const })),
+                  content: `Done! I've built your homepage, About, FAQ, Contact, and Policies pages${fallbackRes.data!.productsCreated ? `, plus ${fallbackRes.data!.productsCreated} starter products` : ""}. Check the preview — tell me what you'd like to change.`,
+                }
+              : m
+          )
+        );
+        await loadHomePagePreview(fallbackRes.data.pages);
+        setHasGenerated(true);
+        setGenerating(false);
+        return;
+      }
+
       setMessages((prev) =>
         prev.map((m) =>
           m.id === assistantMsgId
-            ? { ...m, checklist: undefined, error: true, content: res.error || "Something went wrong generating your site. Please try again." }
+            ? { ...m, checklist: undefined, error: true, content: fallbackRes.error || res.error || "Something went wrong generating your site. Please try again." }
             : m
         )
       );
+      setGenerating(false);
+      return;
     }
+
+    setMessages((prev) =>
+      prev.map((m) =>
+        m.id === assistantMsgId
+          ? { ...m, checklist: undefined, error: true, content: res.error || "Something went wrong making that change. Please try again." }
+          : m
+      )
+    );
     setGenerating(false);
   };
 
@@ -255,8 +307,8 @@ export default function AIBuilderPage({ params }: { params: Promise<{ siteId: st
 
         {/* Live preview pane */}
         <div className="flex-1 min-w-0 bg-surface-100 overflow-y-auto">
-          {siteId && (previewBlocks.length > 0 || generating) ? (
-            <SandboxPreview siteId={siteId} blocks={previewBlocks} />
+          {siteId && (previewBlocks.length > 0 || session || generating) ? (
+            <SandboxPreview siteId={siteId} blocks={previewBlocks} session={session} />
           ) : (
             <div className="h-full flex flex-col items-center justify-center gap-2 text-surface-400">
               <Sparkles className="h-8 w-8" />
