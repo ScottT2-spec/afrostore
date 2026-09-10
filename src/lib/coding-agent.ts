@@ -17,6 +17,9 @@ import { z } from "zod";
 import { prisma } from "@/lib/db";
 import { persistGeneratedFile, persistGeneratedFileDelete } from "@/lib/sandbox/generated-files";
 import { estimateCostUsd } from "@/lib/ai-pricing";
+import { generateAiImage, isAiImageGenConfigured } from "@/lib/gemini-image-client";
+import { persistGeneratedImage } from "@/lib/media-storage";
+import { searchUnsplashPhotos } from "@/lib/unsplash-client";
 import { AICapability } from "@/lib/failover";
 import type { AIFailover, AIMessage, AITool } from "@/lib/failover";
 import {
@@ -28,6 +31,7 @@ import {
   runCommandSchema,
   getBuildErrorsSchema,
   takeScreenshotSchema,
+  generateImageSchema,
   finishTaskSchema,
   type FinishTaskArgs,
 } from "@/lib/ai-schemas/coding-agent-tools";
@@ -119,6 +123,14 @@ const TOOL_DEFS: AITool[] = [
   {
     type: "function",
     function: {
+      name: "generate_image",
+      description: "Generates a real, unique image from a text description and returns a hosted URL to use in an <img> src. ALWAYS use this instead of guessing or inventing an image URL — a made-up URL points to nothing and produces a broken image for the merchant.",
+      parameters: toToolParameters(generateImageSchema),
+    },
+  },
+  {
+    type: "function",
+    function: {
       name: "finish_task",
       description: "Call this once the task is complete and the build succeeds. Ends the session — nothing else can be done after this.",
       parameters: toToolParameters(finishTaskSchema),
@@ -152,7 +164,7 @@ ${SHADCN_PRIMITIVE_DESCRIPTIONS}
 
 WHAT "DONE" MEANS FOR A MERCHANT, not just a passing build:
 - Real copy everywhere. Never leave lorem ipsum, "[Your Business Name]", "Lorem ipsum dolor...", or any obviously-placeholder text in the final result.
-- No broken or empty-looking states — an empty product grid, a missing image with no fallback, or a section with no content is not acceptable as final output.
+- No broken or empty-looking states — an empty product grid, a missing image with no fallback, or a section with no content is not acceptable as final output. Whenever a page needs a real image (a hero photo, a product shot, anything photographic), call generate_image and use the URL it returns — never invent, guess, or hallucinate an image URL; one that doesn't actually exist is a broken image for the merchant, exactly the failure mode this rule exists to prevent.
 - Every nav link and button actually goes somewhere real (a route that exists, or a working in-page anchor) — never a dead "#" left as a TODO.
 - Looks correct on mobile, not just desktop — the component vocabulary above handles this by default; a custom section must too.
 - The result should actually match what was asked for — re-read the original task before calling finish_task and confirm you built what was requested, not just "something that builds."
@@ -218,6 +230,7 @@ export async function runCodingAgent(opts: RunCodingAgentOptions): Promise<Codin
   let totalCacheReadTokens = 0;
   let sawVisualChange = false;
   let tookScreenshot = false;
+  let imageGenerationCount = 0;
 
   try {
     for (let iteration = 0; iteration < maxIterations; iteration++) {
@@ -272,6 +285,25 @@ export async function runCodingAgent(opts: RunCodingAgentOptions): Promise<Codin
         onStep?.(step);
         messages.push({ role: "tool", toolCallId: call.id, content: step.result });
         continue;
+      }
+
+      if (name === "generate_image") {
+        const MAX_IMAGES_PER_TASK = 6;
+        if (imageGenerationCount >= MAX_IMAGES_PER_TASK) {
+          // Each call costs real money (an AI image generation, or at
+          // minimum an Unsplash lookup) - an unbounded loop generating
+          // images is a real cost risk, not a hypothetical one. Reject
+          // early, before even attempting the call, once a task has
+          // generated a reasonable number - reuse what's already been
+          // made instead of generating more.
+          const message = `Image generation limit reached (${MAX_IMAGES_PER_TASK} per task). Reuse an already-generated image's URL instead of generating another.`;
+          const step: CodingAgentStep = { tool: name, args, result: message, isError: true };
+          steps.push(step);
+          onStep?.(step);
+          messages.push({ role: "tool", toolCallId: call.id, content: message });
+          continue;
+        }
+        imageGenerationCount++;
       }
 
       if (name === "finish_task") {
@@ -463,6 +495,38 @@ async function executeTool(
         return {
           result: build.success ? `Build succeeded.\n${build.output}` : `Build FAILED.\n${build.output}`,
           isError: !build.success,
+        };
+      }
+      case "generate_image": {
+        const parsed = generateImageSchema.parse(args);
+
+        if (isAiImageGenConfigured()) {
+          const generated = await generateAiImage(parsed.prompt);
+          if (generated) {
+            const mediaItem = await persistGeneratedImage({
+              siteId,
+              bytes: generated.bytes,
+              mimeType: generated.mimeType,
+              name: parsed.name,
+              folder: "/ai-generated",
+            });
+            if (mediaItem) {
+              return { result: `Image generated: ${mediaItem.url}\nUse this exact URL in your <img> src — do not modify or guess a different one.`, isError: false };
+            }
+            // Generation succeeded but persisting it failed (storage
+            // misconfigured, upload error) - fall through to Unsplash
+            // rather than losing the image entirely.
+          }
+        }
+
+        const photos = await searchUnsplashPhotos(parsed.prompt, 1);
+        if (photos.length > 0) {
+          return { result: `Image found: ${photos[0].url}\nUse this exact URL in your <img> src — do not modify or guess a different one.`, isError: false };
+        }
+
+        return {
+          result: "Could not generate or find an image for this prompt. Use a solid-color background or an existing image already in the project instead of guessing a URL.",
+          isError: true,
         };
       }
       case "take_screenshot": {

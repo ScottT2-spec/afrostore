@@ -44,6 +44,11 @@ export const takeScreenshotSchema = z.object({
   path: z.string().describe('Which route to screenshot, e.g. "/" or "/about". Defaults to the homepage.'),
 });
 
+export const generateImageSchema = z.object({
+  prompt: z.string().min(1).describe("A clear, specific description of the image to generate — e.g. 'professional hero photo of a modern bakery storefront, warm lighting, no text overlay'. Specific prompts produce far better results than vague ones."),
+  name: z.string().min(1).describe("A short, human-readable name for this image (used as the filename/media library entry) — e.g. 'Hero banner' or 'About us photo'."),
+});
+
 export const finishTaskSchema = z.object({
   summary: z.string().min(1).describe("A short, merchant-facing summary of what was built or changed — this is shown to the person who asked for it, not logged internally."),
   filesChanged: z.array(z.string()).describe("Relative paths of every file created, edited, or deleted during this task."),
@@ -61,6 +66,7 @@ export type ReadFileArgs = z.infer<typeof readFileSchema>;
 export type WriteFileArgs = z.infer<typeof writeFileSchema>;
 export type EditFileArgs = z.infer<typeof editFileSchema>;
 export type DeleteFileArgs = z.infer<typeof deleteFileSchema>;
+export type GenerateImageArgs = z.infer<typeof generateImageSchema>;
 export type RunCommandArgs = z.infer<typeof runCommandSchema>;
 export type GetBuildErrorsArgs = z.infer<typeof getBuildErrorsSchema>;
 export type TakeScreenshotArgs = z.infer<typeof takeScreenshotSchema>;
