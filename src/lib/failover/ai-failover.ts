@@ -199,7 +199,25 @@ function toGeminiContents(messages: AIMessage[]): { role: string; parts: unknown
           parts: [{ functionResponse: { name, response: { result: m.content } } }],
         };
       }
-      return { role: m.role === 'assistant' ? 'model' : 'user', parts: [{ text: typeof m.content === 'string' ? m.content : '' }] };
+      return {
+        role: m.role === 'assistant' ? 'model' : 'user',
+        parts: Array.isArray(m.content)
+          ? m.content.map((part) => {
+              if (part.type === 'image_url') {
+                const url = part.image_url.url;
+                const match = url.match(/^data:([^;]+);base64,(.+)$/);
+                // Gemini's inline-image format needs bare base64 + mime
+                // type, not a data: URL - if this isn't a data URL (e.g.
+                // a remote http(s) image), there's no safe inline
+                // conversion here, so drop to an explicit empty text part
+                // rather than silently sending nothing at all with no
+                // trace of why.
+                return match ? { inlineData: { mimeType: match[1], data: match[2] } } : { text: '' };
+              }
+              return { text: part.text };
+            })
+          : [{ text: typeof m.content === 'string' ? m.content : '' }],
+      };
     });
 }
 

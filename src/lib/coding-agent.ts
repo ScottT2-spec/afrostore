@@ -161,7 +161,7 @@ Rules:
 - Always read a file before editing it with edit_file — the replacement text must match the existing file exactly.
 - Prefer edit_file over write_file for small changes to a file that already exists; use write_file for new files or full rewrites.
 - After making changes, call get_build_errors before finishing. If the build fails, fix the specific errors shown and check again — never finish with a broken build.
-- If you changed anything visual, take a screenshot before finishing to confirm it actually looks right, not just that it compiles.
+- If you changed anything visual (any .tsx/.jsx file), take_screenshot is REQUIRED before finish_task — this isn't optional guidance, it's enforced. The actual screenshot image is shown to you in the message right after you call it — genuinely look at it for real defects (overlapping elements, invisible or low-contrast text, a collapsed or broken layout, content bleeding off-screen) before deciding the task is done. A build that compiles cleanly can still be visually broken; the build passing and the page looking right are two different things, and only looking at the actual screenshot confirms the second one.
 - If you're unsure what already exists, use list_files and read_file to find out rather than guessing at file contents or structure.
 - Call finish_task only once the build succeeds and the task is genuinely done, matching every item in the quality checklist honestly — a false "yes" on a checklist item you know isn't true defeats its entire purpose. Write the summary for the merchant who asked for this — plain language, not implementation detail they won't understand or care about.`;
 
@@ -216,6 +216,8 @@ export async function runCodingAgent(opts: RunCodingAgentOptions): Promise<Codin
   let totalCompletionTokens = 0;
   let totalCacheWriteTokens = 0;
   let totalCacheReadTokens = 0;
+  let sawVisualChange = false;
+  let tookScreenshot = false;
 
   try {
     for (let iteration = 0; iteration < maxIterations; iteration++) {
@@ -283,6 +285,20 @@ export async function runCodingAgent(opts: RunCodingAgentOptions): Promise<Codin
           continue;
         }
 
+        if (sawVisualChange && !tookScreenshot) {
+          // Structural, not optional: if any .tsx/.jsx file was touched
+          // this task, a screenshot MUST have been taken before finishing
+          // - otherwise "isResponsive"/"noBrokenStates" in the checklist
+          // below are claims about a page nobody, including the model
+          // itself, ever actually looked at.
+          const message = "finish_task was rejected: you changed a visual component (.tsx/.jsx) but never called take_screenshot. Take a screenshot of the affected page(s), look at it for real defects, then call finish_task again.";
+          const step: CodingAgentStep = { tool: name, args, result: message, isError: true };
+          steps.push(step);
+          onStep?.(step);
+          messages.push({ role: "tool", toolCallId: call.id, content: message });
+          continue;
+        }
+
         const failedChecks = Object.entries(parsed.data.qualityChecklist)
           .filter(([, passed]) => !passed)
           .map(([check]) => check);
@@ -336,11 +352,30 @@ export async function runCodingAgent(opts: RunCodingAgentOptions): Promise<Codin
         };
       }
 
-      const { result: toolResult, isError } = await executeTool(sandboxExternalId, siteId, name, args);
+      const { result: toolResult, isError, imageDataUrl } = await executeTool(sandboxExternalId, siteId, name, args);
       const step: CodingAgentStep = { tool: name, args, result: toolResult, isError };
       steps.push(step);
       onStep?.(step);
       messages.push({ role: "tool", toolCallId: call.id, content: toolResult });
+      if (imageDataUrl) {
+        tookScreenshot = true;
+        // A normal user-role message, not folded into the tool_result -
+        // OpenAI's protocol doesn't accept image content inside a
+        // tool/function-role message at all, but every provider accepts
+        // it in a user message. This is what actually gets the real
+        // screenshot in front of the model, not a byte-count string.
+        messages.push({
+          role: "user",
+          content: [
+            { type: "image_url", image_url: { url: imageDataUrl } },
+            { type: "text", text: "This is the current state of the page you just captured. Look for real visual defects before proceeding." },
+          ],
+        });
+      }
+      if (name === "write_file" || name === "edit_file") {
+        const path = (args as { path?: string }).path || "";
+        if (/\.(tsx|jsx)$/.test(path)) sawVisualChange = true;
+      }
     }
     }
 
@@ -378,7 +413,7 @@ async function executeTool(
   siteId: string,
   name: string,
   args: unknown
-): Promise<{ result: string; isError: boolean }> {
+): Promise<{ result: string; isError: boolean; imageDataUrl?: string }> {
   try {
     switch (name) {
       case "list_files": {
@@ -433,14 +468,19 @@ async function executeTool(
       case "take_screenshot": {
         const parsed = takeScreenshotSchema.parse(args);
         const base64 = await takeSandboxScreenshot(sandboxExternalId, parsed.path);
-        // Confirmation text only — the raw bytes aren't inlined into the
-        // conversation. Feeding a full base64 PNG back as a plain-text
-        // tool result on every provider would balloon token usage for
-        // every subsequent turn with no benefit unless the model is
-        // actually shown the image via a vision-capable follow-up, which
-        // is a deliberate scope cut for this first version, not an
-        // oversight — see the note in the PR description.
-        return { result: `Screenshot captured (${Math.round(base64.length / 1024)}KB).`, isError: false };
+        // The tool_result itself stays text-only - some providers (OpenAI)
+        // don't accept image content inside a tool/function-role message
+        // at all, so this satisfies every provider's protocol
+        // requirement uniformly. The actual image gets shown to the model
+        // via a normal follow-up user message instead (see the main loop,
+        // right after this tool's result is pushed) - that's supported
+        // everywhere and is what actually closes the "screenshot taken
+        // but never looked at" gap.
+        return {
+          result: `Screenshot captured at ${parsed.path}. The actual image follows in the next message - look at it carefully for real visual defects (overlapping elements, invisible or low-contrast text, a collapsed or broken layout, content bleeding off-screen) before deciding the task is done.`,
+          isError: false,
+          imageDataUrl: `data:image/png;base64,${base64}`,
+        };
       }
       default:
         return { result: `Unknown tool: ${name}`, isError: true };
