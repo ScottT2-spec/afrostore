@@ -552,7 +552,7 @@ async function executeTool(
         }
 
         return {
-          result: "Could not generate or find an image for this prompt. Use a solid-color background or an existing image already in the project instead of guessing a URL.",
+          result: "Could not generate or find an image for this prompt. Don't just fall back to a flat solid-color box — design something real with what you have: a CSS gradient composition, an inline SVG illustration/pattern, layered shapes, or an existing image already in the project reused creatively. The section still needs to look intentional and finished, not like a placeholder.",
           isError: true,
         };
       }
