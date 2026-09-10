@@ -23,6 +23,7 @@
 
 import { getDesignTokens, tokensToCssVariables, tokensToTailwindExtend, type DesignTokens } from "@/lib/design/tokens";
 import { getComponentLibrary } from "./component-library";
+import { getShadcnPrimitives } from "./shadcn-primitives";
 import { createSandboxWithFiles } from "./daytona";
 
 const packageJson = `{
@@ -38,7 +39,15 @@ const packageJson = `{
   "dependencies": {
     "react": "^18.3.1",
     "react-dom": "^18.3.1",
-    "react-router-dom": "^6.26.0"
+    "react-router-dom": "^6.26.0",
+    "lucide-react": "^0.441.0",
+    "class-variance-authority": "^0.7.0",
+    "clsx": "^2.1.1",
+    "tailwind-merge": "^2.5.2",
+    "@radix-ui/react-slot": "^1.1.0",
+    "@radix-ui/react-dialog": "^1.1.1",
+    "@radix-ui/react-dropdown-menu": "^2.1.1",
+    "@radix-ui/react-accordion": "^1.2.0"
   },
   "devDependencies": {
     "@types/react": "^18.3.3",
@@ -47,6 +56,7 @@ const packageJson = `{
     "autoprefixer": "^10.4.19",
     "postcss": "^8.4.39",
     "tailwindcss": "^3.4.6",
+    "tailwindcss-animate": "^1.0.7",
     "typescript": "^5.5.3",
     "vite": "^5.3.4"
   }
@@ -75,13 +85,36 @@ export default defineConfig({
 `;
 
 function buildTailwindConfig(): string {
-  return `/** @type {import('tailwindcss').Config} */
+  return `import tailwindcssAnimate from "tailwindcss-animate";
+
+/** @type {import('tailwindcss').Config} */
 export default {
   content: ["./index.html", "./src/**/*.{js,ts,jsx,tsx}"],
   theme: {
-    extend: ${tokensToTailwindExtend()},
+    extend: {
+      ...${tokensToTailwindExtend()},
+      // shadcn/ui's Accordion component (components/ui/accordion.tsx)
+      // references these two animation names directly — without them
+      // defined here, the open/close transition classes it applies are
+      // silent no-ops. Radix supplies the --radix-accordion-content-height
+      // CSS variable at runtime; this just animates to/from it.
+      keyframes: {
+        "accordion-down": {
+          from: { height: "0" },
+          to: { height: "var(--radix-accordion-content-height)" },
+        },
+        "accordion-up": {
+          from: { height: "var(--radix-accordion-content-height)" },
+          to: { height: "0" },
+        },
+      },
+      animation: {
+        "accordion-down": "accordion-down 0.2s ease-out",
+        "accordion-up": "accordion-up 0.2s ease-out",
+      },
+    },
   },
-  plugins: [],
+  plugins: [tailwindcssAnimate],
 };
 `;
 }
@@ -240,13 +273,19 @@ export default function Home() {
 }
 `;
 
-// cn() (classnames helper) lives here on purpose, not re-implemented ad
-// hoc per component — one canonical util file the model is told to use
-// and extend, same reasoning as the routing contract above.
-const utilsTs = `type ClassValue = string | number | boolean | undefined | null;
+// cn() lives here on purpose, not re-implemented ad hoc per component —
+// one canonical util file the model is told to use and extend, same
+// reasoning as the routing contract above. This is shadcn/ui's own
+// standard implementation (clsx + tailwind-merge), not a hand-rolled
+// version: tailwind-merge specifically resolves conflicting Tailwind
+// classes correctly (e.g. cn("px-2", condition && "px-4") correctly
+// keeps only px-4, where a naive string join would emit both and let
+// CSS's own cascade order — not the code's intent — decide which wins).
+const utilsTs = `import { clsx, type ClassValue } from "clsx";
+import { twMerge } from "tailwind-merge";
 
-export function cn(...values: ClassValue[]): string {
-  return values.filter(Boolean).join(" ");
+export function cn(...inputs: ClassValue[]) {
+  return twMerge(clsx(inputs));
 }
 `;
 
@@ -266,6 +305,10 @@ top-level folders; add to them instead:
   FIRST when building a page — they're already responsive and use the
   site's design tokens correctly. Only write a custom section component
   when nothing here fits.
+- \`src/components/ui/\` — shadcn/ui primitives (Button, Dialog, Sheet,
+  DropdownMenu, Accordion). Use these for any interactive pattern —
+  modals, drawers, dropdowns, collapsibles — instead of hand-rolling one
+  with useState. Icons: \`lucide-react\` is available for any icon needed.
 - \`src/components/layout/\` — page chrome (Header, Footer, Layout) — edit
   these to change nav/footer everywhere at once, don't duplicate them
   into individual pages.
@@ -316,6 +359,7 @@ export function getStandardScaffold(businessType: string, seed: string): Record<
     "src/components/layout/Footer.tsx": footerTsx,
     "src/pages/Home.tsx": homePageTsx,
     ...getComponentLibrary(),
+    ...getShadcnPrimitives(),
   };
 }
 

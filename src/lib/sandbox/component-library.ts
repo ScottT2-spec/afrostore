@@ -138,7 +138,12 @@ export default function CtaSection({ heading, subheading, ctaText, ctaHref = "#"
 }
 `;
 
-const faqAccordionTsx = `import { useState } from "react";
+const faqAccordionTsx = `import {
+  Accordion,
+  AccordionContent,
+  AccordionItem,
+  AccordionTrigger,
+} from "@/components/ui/accordion";
 
 interface FaqItem {
   question: string;
@@ -151,30 +156,18 @@ interface FaqAccordionProps {
 }
 
 export default function FaqAccordion({ heading, items }: FaqAccordionProps) {
-  const [openIndex, setOpenIndex] = useState<number | null>(0);
-
   return (
     <section className="bg-background">
       <div className="mx-auto max-w-3xl px-4 py-16">
         {heading && <h2 className="font-heading text-center text-3xl font-bold text-foreground">{heading}</h2>}
-        <div className="mt-10 divide-y divide-border">
-          {items.map((item, i) => {
-            const isOpen = openIndex === i;
-            return (
-              <div key={i} className="py-4">
-                <button
-                  onClick={() => setOpenIndex(isOpen ? null : i)}
-                  className="flex w-full items-center justify-between text-left font-medium text-foreground"
-                  aria-expanded={isOpen}
-                >
-                  {item.question}
-                  <span className="ml-4 flex-shrink-0 text-foreground/50">{isOpen ? "−" : "+"}</span>
-                </button>
-                {isOpen && <p className="mt-2 text-foreground/70">{item.answer}</p>}
-              </div>
-            );
-          })}
-        </div>
+        <Accordion type="single" collapsible defaultValue="item-0" className="mt-10">
+          {items.map((item, i) => (
+            <AccordionItem key={i} value={\`item-\${i}\`}>
+              <AccordionTrigger>{item.question}</AccordionTrigger>
+              <AccordionContent>{item.answer}</AccordionContent>
+            </AccordionItem>
+          ))}
+        </Accordion>
       </div>
     </section>
   );
