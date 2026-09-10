@@ -67,6 +67,8 @@ export default function AIBuilderPage({ params }: { params: Promise<{ siteId: st
   const [previewBlocks, setPreviewBlocks] = useState<TemplateBlock[]>([]);
   const [session, setSession] = useState<SandboxSessionResult | null>(null);
   const [hasGenerated, setHasGenerated] = useState(false);
+  const [publishing, setPublishing] = useState(false);
+  const [publishError, setPublishError] = useState<string | null>(null);
 
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const stepTimerRef = useRef<ReturnType<typeof setInterval> | null>(null);
@@ -111,6 +113,19 @@ export default function AIBuilderPage({ params }: { params: Promise<{ siteId: st
     const res = await api.get<{ content: unknown }>(`/api/sites/${siteId}/pages/${home.id}`);
     if (res.success && res.data) {
       setPreviewBlocks(parsePageContent(res.data.content).blocks as unknown as TemplateBlock[]);
+    }
+  };
+
+  const handlePublish = async () => {
+    if (!siteId || !hasGenerated || publishing) return;
+    setPublishing(true);
+    setPublishError(null);
+    const res = await api.post<{ published: boolean; liveUrl: string }>(`/api/sites/${siteId}/publish-code`, {});
+    setPublishing(false);
+    if (res.success && res.data?.published) {
+      window.open(res.data.liveUrl, "_blank");
+    } else {
+      setPublishError(res.error || "Publish failed. Please try again.");
     }
   };
 
@@ -249,17 +264,16 @@ export default function AIBuilderPage({ params }: { params: Promise<{ siteId: st
           My Projects
         </button>
         <div className="flex items-center gap-2">
-          <a
-            href={hasGenerated && site ? `/store/${site.slug}` : undefined}
-            target="_blank"
-            rel="noreferrer"
-            aria-disabled={!hasGenerated}
+          {publishError && <span className="text-xs text-red-600 max-w-xs truncate">{publishError}</span>}
+          <button
+            onClick={handlePublish}
+            disabled={!hasGenerated || publishing}
             className={`flex items-center gap-1.5 text-sm font-semibold px-3.5 py-1.5 rounded-lg transition-colors ${
-              hasGenerated ? "bg-brand-600 text-white hover:bg-brand-700" : "bg-surface-100 text-surface-400 pointer-events-none"
+              hasGenerated && !publishing ? "bg-brand-600 text-white hover:bg-brand-700" : "bg-surface-100 text-surface-400"
             }`}
           >
-            Publish <ExternalLink className="h-3.5 w-3.5" />
-          </a>
+            {publishing ? "Publishing..." : "Publish"} <ExternalLink className="h-3.5 w-3.5" />
+          </button>
         </div>
       </header>
 

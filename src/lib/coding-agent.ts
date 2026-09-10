@@ -127,6 +127,7 @@ const TOOL_DEFS: AITool[] = [
 ];
 
 import { COMPONENT_LIBRARY_DESCRIPTIONS } from "./sandbox/component-library";
+import { SHADCN_PRIMITIVE_DESCRIPTIONS } from "./sandbox/shadcn-primitives";
 import { SCAFFOLD_OWNED_PATHS } from "./sandbox/scaffold";
 
 const SYSTEM_PROMPT = `You are a careful, senior front-end engineer working inside a live, sandboxed Vite + React + TypeScript + Tailwind project (NOT Next.js — there is no app router, no server components, no next/link or next/image; routing is client-side via react-router-dom, registered in src/App.tsx). You have tools to explore, read, write, and edit files, run commands, check build errors, and see screenshots of what you've built.
@@ -145,6 +146,9 @@ DESIGN TOKENS — this site already has a fixed, professionally-chosen color pal
 COMPONENT VOCABULARY — reach for these first before writing a custom section from scratch. They're already responsive, accessible, and wired to the design tokens correctly:
 ${COMPONENT_LIBRARY_DESCRIPTIONS}
 Only build a custom component when nothing here genuinely fits what was asked for.
+
+UI PRIMITIVES (shadcn/ui) — for any interactive pattern (modal, drawer, dropdown, collapsible), use these instead of hand-rolling your own with useState and conditional rendering. They handle focus management, keyboard navigation, and animation correctly, which is easy to get subtly wrong by hand:
+${SHADCN_PRIMITIVE_DESCRIPTIONS}
 
 WHAT "DONE" MEANS FOR A MERCHANT, not just a passing build:
 - Real copy everywhere. Never leave lorem ipsum, "[Your Business Name]", "Lorem ipsum dolor...", or any obviously-placeholder text in the final result.

@@ -2,7 +2,7 @@ import { NextRequest } from "next/server";
 import { prisma } from "@/lib/db";
 import { getStoreContext, success, error, logAudit , requireRole } from "@/lib/api-helpers";
 import { unauthorized } from "@/lib/auth";
-import { getSupabaseAdmin, STORAGE_BUCKET, getPublicUrl } from "@/lib/supabase";
+import { uploadFile } from "@/lib/s3-storage";
 import { rateLimit, rateLimitedResponse } from "@/lib/rate-limit";
 import crypto from "crypto";
 import path from "path";
@@ -57,23 +57,18 @@ export async function POST(req: NextRequest, { params }: Params) {
     const objectPath = generateFileName(siteId, file.name);
     const buffer = Buffer.from(await file.arrayBuffer());
 
-    let supabase;
+    let url: string;
     try {
-      supabase = getSupabaseAdmin();
-    } catch {
-      return error("File storage is not configured on this platform (missing Supabase credentials). Contact support.", 503);
+      url = await uploadFile(objectPath, buffer, file.type);
+    } catch (uploadError) {
+      console.error("S3 media upload error:", uploadError);
+      const message = uploadError instanceof Error ? uploadError.message : "Upload failed";
+      if (message.includes("must be set")) {
+        return error("File storage is not configured on this platform (missing AWS S3 credentials). Contact support.", 503);
+      }
+      return error(`Upload failed: ${message}`, 500);
     }
 
-    const { error: uploadError } = await supabase.storage
-      .from(STORAGE_BUCKET)
-      .upload(objectPath, buffer, { contentType: file.type, cacheControl: "31536000", upsert: false });
-
-    if (uploadError) {
-      console.error("Supabase media upload error:", uploadError);
-      return error(`Upload failed: ${uploadError.message}`, 500);
-    }
-
-    const url = getPublicUrl(objectPath);
     const type = detectType(file.type);
 
     const mediaItem = await prisma.mediaItem.create({
