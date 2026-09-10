@@ -6,6 +6,7 @@
  */
 
 import { z } from "zod";
+import { siteManifestSchema } from "./site-manifest";
 
 export const listFilesSchema = z.object({
   path: z.string().describe('Directory path relative to the project root, e.g. "." or "src/components". Use "." to list the project root.'),
@@ -59,6 +60,7 @@ export const finishTaskSchema = z.object({
     isResponsive: z.boolean().describe("True only if you used the component vocabulary (which is responsive by default) or explicitly verified mobile layout for any custom section you wrote."),
     buildPasses: z.boolean().describe("True only if you called get_build_errors after your last change and it reported success."),
   }).describe("Honest self-assessment against the quality bar in your instructions — a false 'true' here defeats the entire point of this field."),
+  siteManifest: siteManifestSchema.describe("The FULL current site manifest — not a diff. Start from the site state you were given at the start of this task (if any), then update it to reflect reality after your changes: add pages/components you created, remove any you deleted, fix any that were already stale. This becomes the next run's starting context, so an inaccurate manifest here directly misleads a future task."),
 });
 
 export type ListFilesArgs = z.infer<typeof listFilesSchema>;

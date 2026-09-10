@@ -164,6 +164,13 @@ model Site {
   pipelineRuns      PipelineRun[]
   codingAgentRuns   CodingAgentRun[]
   generatedFiles    GeneratedFile[]
+  // Structured "what does this site currently have" — pages, routes,
+  // components — updated by the coding agent as part of finish_task and
+  // read back at the start of the next run instead of blind
+  // list_files/read_file re-exploration. See src/lib/ai-schemas/
+  // site-manifest.ts for the shape. Null until the first successful
+  // coding-agent run for this site.
+  siteManifest      Json?
   flashSales        FlashSale[]
   forms             Form[]
   funnels           Funnel[]

@@ -141,8 +141,9 @@ const TOOL_DEFS: AITool[] = [
 import { COMPONENT_LIBRARY_DESCRIPTIONS } from "./sandbox/component-library";
 import { SHADCN_PRIMITIVE_DESCRIPTIONS } from "./sandbox/shadcn-primitives";
 import { SCAFFOLD_OWNED_PATHS } from "./sandbox/scaffold";
+import { siteManifestSchema, renderManifestForPrompt, type SiteManifest } from "./ai-schemas/site-manifest";
 
-const SYSTEM_PROMPT = `You are a careful, senior front-end engineer working inside a live, sandboxed Vite + React + TypeScript + Tailwind project (NOT Next.js — there is no app router, no server components, no next/link or next/image; routing is client-side via react-router-dom, registered in src/App.tsx). You have tools to explore, read, write, and edit files, run commands, check build errors, and see screenshots of what you've built.
+const SYSTEM_PROMPT_BASE = `You are a careful, senior front-end engineer working inside a live, sandboxed Vite + React + TypeScript + Tailwind project (NOT Next.js — there is no app router, no server components, no next/link or next/image; routing is client-side via react-router-dom, registered in src/App.tsx). You have tools to explore, read, write, and edit files, run commands, check build errors, and see screenshots of what you've built.
 
 MATCH YOUR EFFORT TO THE TASK. Not every request needs the same process:
 - A small, well-scoped change (copy edit, button text, a color, swapping one image, a single style tweak) — find the specific file, make the edit, run get_build_errors, finish. Don't list_files across the whole project, don't read files you have no reason to touch, don't re-verify things the task didn't ask you to change.
@@ -175,7 +176,21 @@ Rules:
 - After making changes, call get_build_errors before finishing. If the build fails, fix the specific errors shown and check again — never finish with a broken build.
 - If you changed anything visual (any .tsx/.jsx file), take_screenshot is REQUIRED before finish_task — this isn't optional guidance, it's enforced. The actual screenshot image is shown to you in the message right after you call it — genuinely look at it for real defects (overlapping elements, invisible or low-contrast text, a collapsed or broken layout, content bleeding off-screen) before deciding the task is done. A build that compiles cleanly can still be visually broken; the build passing and the page looking right are two different things, and only looking at the actual screenshot confirms the second one.
 - If you're unsure what already exists, use list_files and read_file to find out rather than guessing at file contents or structure.
-- Call finish_task only once the build succeeds and the task is genuinely done, matching every item in the quality checklist honestly — a false "yes" on a checklist item you know isn't true defeats its entire purpose. Write the summary for the merchant who asked for this — plain language, not implementation detail they won't understand or care about.`;
+- Call finish_task only once the build succeeds and the task is genuinely done, matching every item in the quality checklist honestly — a false "yes" on a checklist item you know isn't true defeats its entire purpose. Write the summary for the merchant who asked for this — plain language, not implementation detail they won't understand or care about.
+- finish_task also requires the full, current siteManifest (pages/components/summary) — not a diff. Start from the state you were given below (if any), then update it to reflect reality after your changes. This is the only memory the next task gets of what you built — an inaccurate manifest here directly misleads a future run into re-exploring things it should already know, or missing things it should check.`;
+
+/**
+ * Builds the actual system prompt for a run: the fixed instructions above,
+ * plus the site's current manifest (if any) appended as a distinct
+ * briefing section. Kept as a function rather than baking the manifest
+ * into a module-level constant since the manifest is per-site and
+ * changes between runs — this makes SYSTEM_PROMPT_BASE cacheable by
+ * providers that support prompt caching while only the manifest section
+ * varies per call.
+ */
+function buildSystemPrompt(manifest: SiteManifest | null): string {
+  return `${SYSTEM_PROMPT_BASE}\n\n${renderManifestForPrompt(manifest)}`;
+}
 
 export interface CodingAgentStep {
   tool: string;
@@ -214,8 +229,11 @@ export async function runCodingAgent(opts: RunCodingAgentOptions): Promise<Codin
     data: { siteId, sandboxExternalId, task, status: "running", source },
   });
 
+  const site = await prisma.site.findUnique({ where: { id: siteId }, select: { siteManifest: true } });
+  const currentManifest = (site?.siteManifest as SiteManifest | null) ?? null;
+
   const messages: AIMessage[] = [
-    { role: "system", content: SYSTEM_PROMPT },
+    { role: "system", content: buildSystemPrompt(currentManifest) },
     { role: "user", content: task },
   ];
 
@@ -371,6 +389,15 @@ export async function runCodingAgent(opts: RunCodingAgentOptions): Promise<Codin
             }),
             completedAt: new Date(),
           },
+        });
+
+        // The manifest is the whole point of this feature: without
+        // writing it back here, the next run's buildSystemPrompt() call
+        // would have nothing to read, and every task would still start
+        // from blind re-exploration regardless of everything above.
+        await prisma.site.update({
+          where: { id: siteId },
+          data: { siteManifest: parsed.data.siteManifest },
         });
 
         return {
