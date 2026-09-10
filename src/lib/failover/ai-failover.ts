@@ -803,7 +803,7 @@ export class AIFailover {
 
   private getOrderedProviders(
     preferred?: string,
-    capability?: AICapability
+    capability?: AICapability | AICapability[]
   ): string[] {
     const ordered: string[] = [];
     const added = new Set<string>();
@@ -846,10 +846,12 @@ export class AIFailover {
     return ordered;
   }
 
-  private hasCapability(providerId: string, capability?: AICapability): boolean {
+  private hasCapability(providerId: string, capability?: AICapability | AICapability[]): boolean {
     if (!capability) return true;
     const config = this.providers.get(providerId);
-    return config?.capabilities.includes(capability) ?? false;
+    if (!config) return false;
+    const required = Array.isArray(capability) ? capability : [capability];
+    return required.every((c) => config.capabilities.includes(c));
   }
 
   private isRateLimitError(error: Error): boolean {

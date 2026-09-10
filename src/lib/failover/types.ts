@@ -173,8 +173,8 @@ export enum AICapability {
 }
 
 export interface AIRequest {
-  /** Required capability */
-  capability: AICapability;
+  /** Required capability, or capabilities that must ALL be present (e.g. forced tool-calling AND vision in the same turn) */
+  capability: AICapability | AICapability[];
   /** Messages for chat */
   messages?: AIMessage[];
   /** Prompt for completion */

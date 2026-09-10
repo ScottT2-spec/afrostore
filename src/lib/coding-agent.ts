@@ -253,8 +253,18 @@ export async function runCodingAgent(opts: RunCodingAgentOptions): Promise<Codin
   try {
     for (let iteration = 0; iteration < maxIterations; iteration++) {
       completedIterations = iteration + 1;
-      const result = await ai.chat({
-        capability: AICapability.FUNCTION_CALLING,
+      let result = await ai.chat({
+        // Once a screenshot's been taken, its image stays in the message
+        // history for every turn from here on — not just the next one.
+        // Without requiring VISION too, the failover engine could route
+        // any later turn to a text-only model (Groq's llama-3.3-70b,
+        // first in priority order, declares FUNCTION_CALLING but not
+        // VISION) and it would either reject the request outright or
+        // silently ignore the image, quietly defeating the whole point
+        // of taking the screenshot in the first place.
+        capability: tookScreenshot
+          ? [AICapability.FUNCTION_CALLING, AICapability.VISION]
+          : AICapability.FUNCTION_CALLING,
         messages,
         tools: TOOL_DEFS,
         toolChoice: "required",
@@ -264,6 +274,27 @@ export async function runCodingAgent(opts: RunCodingAgentOptions): Promise<Codin
         // benefits from variety.
         temperature: 0.3,
       });
+
+      if ((!result.success || !result.data) && tookScreenshot) {
+        // A screenshot is a quality improvement, not a requirement — if
+        // this environment genuinely has no vision-capable provider
+        // configured, that shouldn't be able to abort an otherwise
+        // complete, successful task. Retry this one turn without the
+        // vision requirement rather than crashing the whole run; the
+        // model just won't get to see the screenshot it took, but
+        // everything else proceeds normally via the exact same code
+        // path below — result is simply reassigned, nothing duplicated.
+        const errors = result.failedProviders?.map((f) => `${f.provider}: ${f.error}`).join("; ") || "Unknown error";
+        console.warn(`[coding-agent] No vision-capable provider available after screenshot — continuing without it: ${errors}`);
+        result = await ai.chat({
+          capability: AICapability.FUNCTION_CALLING,
+          messages,
+          tools: TOOL_DEFS,
+          toolChoice: "required",
+          maxTokens: 4096,
+          temperature: 0.3,
+        });
+      }
 
       if (!result.success || !result.data) {
         const errors =
