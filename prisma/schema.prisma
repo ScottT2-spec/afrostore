@@ -1110,6 +1110,11 @@ model CodingAgentRun {
   qualityChecklist  Json?
   iterations        Int       @default(0)
   toolCallCount     Int       @default(0)
+  promptTokens      Int       @default(0)
+  completionTokens  Int       @default(0)
+  cacheWriteTokens  Int       @default(0)
+  cacheReadTokens   Int       @default(0)
+  estimatedCostUsd  Float?
   provider          String?
   model             String?
   error             String?

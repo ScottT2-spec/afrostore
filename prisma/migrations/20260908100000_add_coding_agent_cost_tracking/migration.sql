@@ -1,0 +1,7 @@
+-- AlterTable
+ALTER TABLE "coding_agent_runs"
+  ADD COLUMN "promptTokens" INTEGER NOT NULL DEFAULT 0,
+  ADD COLUMN "completionTokens" INTEGER NOT NULL DEFAULT 0,
+  ADD COLUMN "cacheWriteTokens" INTEGER NOT NULL DEFAULT 0,
+  ADD COLUMN "cacheReadTokens" INTEGER NOT NULL DEFAULT 0,
+  ADD COLUMN "estimatedCostUsd" DOUBLE PRECISION;

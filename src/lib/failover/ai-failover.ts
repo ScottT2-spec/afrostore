@@ -545,23 +545,62 @@ export class AIFailover {
     const body: Record<string, unknown> = {
       model: request.model || config.model,
       max_tokens: request.maxTokens || config.maxTokens || 4096,
-      messages: toAnthropicMessages(request.messages || []),
     };
 
-    if (systemMsg) body.system = systemMsg.content;
+    if (systemMsg) {
+      // Marking this cacheable is the single highest-leverage cost lever
+      // for this loop: the system prompt is long (project contracts,
+      // component vocabulary, quality bar) and nearly IDENTICAL across
+      // every call, every iteration, every merchant, every task. Anthropic
+      // bills a cache write at ~1.25x normal input price but a cache read
+      // at ~0.1x - so after the very first call, every subsequent one
+      // pays a fraction of what it would have for this whole block.
+      // Safe to mark unconditionally: prompts under Anthropic's minimum
+      // cacheable length just silently aren't cached, no error either way.
+      body.system = [{ type: 'text', text: systemMsg.content, cache_control: { type: 'ephemeral' } }];
+    }
     if (request.temperature !== undefined) body.temperature = request.temperature;
 
     if (request.tools && request.tools.length > 0) {
-      body.tools = request.tools.map((t) => ({
+      const tools = request.tools.map((t) => ({
         name: t.function.name,
         description: t.function.description,
         input_schema: t.function.parameters,
-      }));
+      })) as Array<Record<string, unknown>>;
+      // Anthropic's cache breakpoints are prefix-based: marking the LAST
+      // tool definition caches everything up to and including it (system
+      // + all tool schemas) as one block. Tool schemas are fixed
+      // (TOOL_DEFS in coding-agent.ts never changes at runtime), so this
+      // is exactly as cacheable as the system prompt and just as
+      // repetitive across calls if left unmarked.
+      tools[tools.length - 1].cache_control = { type: 'ephemeral' };
+      body.tools = tools;
       if (request.toolChoice === 'required') body.tool_choice = { type: 'any' };
       else if (request.toolChoice && typeof request.toolChoice === 'object') {
         body.tool_choice = { type: 'tool', name: request.toolChoice.name };
       } else if (request.toolChoice === 'auto') body.tool_choice = { type: 'auto' };
     }
+
+    // Third breakpoint: the growing conversation itself. Each iteration of
+    // an agent loop re-sends everything from every prior iteration - by
+    // marking the LAST message of THIS call's history as a cache
+    // breakpoint, the next call (which includes this exact prefix plus
+    // whatever gets appended after it) reads that entire growing prefix
+    // from cache instead of paying full input price for it again. This is
+    // what turns an iterative loop's cost from roughly quadratic back
+    // toward linear in the number of iterations.
+    const anthropicMessages = toAnthropicMessages(request.messages || []) as Array<{ role: string; content: unknown }>;
+    const lastMessage = anthropicMessages[anthropicMessages.length - 1];
+    if (lastMessage) {
+      const blocks = Array.isArray(lastMessage.content)
+        ? lastMessage.content
+        : [{ type: 'text', text: String(lastMessage.content) }];
+      if (blocks.length > 0) {
+        (blocks[blocks.length - 1] as Record<string, unknown>).cache_control = { type: 'ephemeral' };
+      }
+      lastMessage.content = blocks;
+    }
+    body.messages = anthropicMessages;
 
     const response = await fetch('https://api.anthropic.com/v1/messages', {
       method: 'POST',
@@ -607,6 +646,8 @@ export class AIFailover {
         promptTokens: data.usage?.input_tokens || 0,
         completionTokens: data.usage?.output_tokens || 0,
         totalTokens: (data.usage?.input_tokens || 0) + (data.usage?.output_tokens || 0),
+        cacheWriteTokens: data.usage?.cache_creation_input_tokens || undefined,
+        cacheReadTokens: data.usage?.cache_read_input_tokens || undefined,
       },
       finishReason: data.stop_reason || 'unknown',
       latencyMs: Math.round(performance.now() - startTime),

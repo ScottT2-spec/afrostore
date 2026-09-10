@@ -243,6 +243,10 @@ export interface AIResponse {
     promptTokens: number;
     completionTokens: number;
     totalTokens: number;
+    /** Tokens written to Anthropic's prompt cache on this call (billed ~1.25x normal input price) - only populated for providers that support prompt caching. */
+    cacheWriteTokens?: number;
+    /** Tokens read FROM Anthropic's prompt cache on this call (billed ~0.1x normal input price - this is the actual savings). */
+    cacheReadTokens?: number;
   };
   finishReason: string;
   latencyMs: number;

@@ -16,6 +16,7 @@
 import { z } from "zod";
 import { prisma } from "@/lib/db";
 import { persistGeneratedFile, persistGeneratedFileDelete } from "@/lib/sandbox/generated-files";
+import { estimateCostUsd } from "@/lib/ai-pricing";
 import { AICapability } from "@/lib/failover";
 import type { AIFailover, AIMessage, AITool } from "@/lib/failover";
 import {
@@ -207,6 +208,10 @@ export async function runCodingAgent(opts: RunCodingAgentOptions): Promise<Codin
   let lastModel = "";
   let toolCallCount = 0;
   let completedIterations = 0;
+  let totalPromptTokens = 0;
+  let totalCompletionTokens = 0;
+  let totalCacheWriteTokens = 0;
+  let totalCacheReadTokens = 0;
 
   try {
     for (let iteration = 0; iteration < maxIterations; iteration++) {
@@ -231,6 +236,10 @@ export async function runCodingAgent(opts: RunCodingAgentOptions): Promise<Codin
 
     lastProvider = result.data.provider;
     lastModel = result.data.model;
+    totalPromptTokens += result.data.usage.promptTokens;
+    totalCompletionTokens += result.data.usage.completionTokens;
+    totalCacheWriteTokens += result.data.usage.cacheWriteTokens || 0;
+    totalCacheReadTokens += result.data.usage.cacheReadTokens || 0;
 
     const toolCalls = result.data.toolCalls;
     if (!toolCalls || toolCalls.length === 0) {
@@ -298,6 +307,16 @@ export async function runCodingAgent(opts: RunCodingAgentOptions): Promise<Codin
             toolCallCount,
             provider: lastProvider,
             model: lastModel,
+            promptTokens: totalPromptTokens,
+            completionTokens: totalCompletionTokens,
+            cacheWriteTokens: totalCacheWriteTokens,
+            cacheReadTokens: totalCacheReadTokens,
+            estimatedCostUsd: estimateCostUsd(lastProvider, lastModel, {
+              promptTokens: totalPromptTokens,
+              completionTokens: totalCompletionTokens,
+              cacheWriteTokens: totalCacheWriteTokens,
+              cacheReadTokens: totalCacheReadTokens,
+            }),
             completedAt: new Date(),
           },
         });
@@ -326,7 +345,25 @@ export async function runCodingAgent(opts: RunCodingAgentOptions): Promise<Codin
     const message = err instanceof Error ? err.message : String(err);
     await prisma.codingAgentRun.update({
       where: { id: run.id },
-      data: { status: "failed", error: message, iterations: completedIterations, toolCallCount, provider: lastProvider, model: lastModel, completedAt: new Date() },
+      data: {
+        status: "failed",
+        error: message,
+        iterations: completedIterations,
+        toolCallCount,
+        provider: lastProvider,
+        model: lastModel,
+        promptTokens: totalPromptTokens,
+        completionTokens: totalCompletionTokens,
+        cacheWriteTokens: totalCacheWriteTokens,
+        cacheReadTokens: totalCacheReadTokens,
+        estimatedCostUsd: estimateCostUsd(lastProvider, lastModel, {
+          promptTokens: totalPromptTokens,
+          completionTokens: totalCompletionTokens,
+          cacheWriteTokens: totalCacheWriteTokens,
+          cacheReadTokens: totalCacheReadTokens,
+        }),
+        completedAt: new Date(),
+      },
     });
     throw err;
   }
