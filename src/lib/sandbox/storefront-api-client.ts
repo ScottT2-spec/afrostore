@@ -254,6 +254,10 @@ export function removeFromWishlist(customerId: string, productId: string): Promi
 }
 
 export const STOREFRONT_API_DESCRIPTION = `- src/lib/storefront-api.ts: the ONLY way to talk to the real backend — every commerce/account feature (products, cart pricing, checkout, orders, reviews, wishlist, newsletter, coupons, loyalty, contact form, customer login) goes through the typed functions in this file. NEVER invent your own fetch() calls to guessed endpoints, and never fake cart/checkout/reviews/etc. with only local state — that means the merchant would never see a real order, review, or subscriber anywhere in their dashboard no matter how correct the UI looks. If a request seems related to any of these features, import and call the matching function from this file.
-  Checkout is a real 3-step flow, in this exact order: createOrder() → initiateCheckout() (redirect the customer to the returned paymentUrl) → verifyPayment() once they return.
+  Checkout is a real 3-step flow — get this exactly right, it's real money:
+    1. createOrder() with the cart items + customer + delivery details.
+    2. initiateCheckout(order.id, provider, callbackUrl) — callbackUrl must be a full URL to a route IN THIS PROJECT that you build (e.g. "/checkout/complete"), registered in App.tsx like any other page. This is where the customer lands after paying.
+    3. Redirect with window.location.href = result.paymentUrl — a full page navigation, NOT react-router's navigate(). The customer is leaving this app entirely for the payment provider's own hosted page; a client-side route change won't take them there.
+    4. Build that /checkout/complete route: on mount, read the "reference" query param from the URL (the payment provider appends it when redirecting back), call verifyPayment(reference), and show success or failure based on the result. This page is not optional — without it, a customer who actually pays has nowhere to land and no confirmation, even though their order was really created.
   Cart is NOT stored server-side — hold cart items yourself (React state/localStorage) and call validateCart() for live pricing before checkout.
   Wishlist requires a logged-in customer — call getCurrentCustomer() first to get their id.`;
