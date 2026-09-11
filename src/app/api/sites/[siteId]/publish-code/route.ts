@@ -45,7 +45,7 @@ export async function POST(req: NextRequest, { params }: Params) {
     }
     session = await prisma.sandboxSession.create({ data: { siteId, status: "creating" } });
     try {
-      const scaffold = getStandardScaffold(ctx.site?.businessType || "general", siteId);
+      const scaffold = getStandardScaffold(ctx.site?.businessType || "general", siteId, ctx.site?.slug || siteId);
       const files = { ...scaffold, ...persisted };
       const secretEnvVars = await getDecryptedSecrets(siteId);
       const { externalId, previewUrl } = await createSandboxWithFiles(files, secretEnvVars);
