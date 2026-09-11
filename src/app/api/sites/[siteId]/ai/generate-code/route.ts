@@ -89,7 +89,7 @@ export async function POST(req: NextRequest, { params }: Params) {
       // priority over) the base scaffold, since they represent this
       // site's real current state; the scaffold underneath just fills in
       // anything the agent never touched (config, layout chrome, etc.).
-      const scaffold = getStandardScaffold(ctx.site?.businessType || "general", siteId);
+      const scaffold = getStandardScaffold(ctx.site?.businessType || "general", siteId, ctx.site?.slug || siteId);
       const persisted = await getGeneratedFiles(siteId);
       const files = { ...scaffold, ...persisted };
       const secretEnvVars = await getDecryptedSecrets(siteId);

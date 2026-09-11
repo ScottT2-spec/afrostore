@@ -24,6 +24,7 @@
 import { getDesignTokens, tokensToCssVariables, tokensToTailwindExtend, type DesignTokens } from "@/lib/design/tokens";
 import { getComponentLibrary } from "./component-library";
 import { getShadcnPrimitives } from "./shadcn-primitives";
+import { getStorefrontApiClient } from "./storefront-api-client";
 import { createSandboxWithFiles } from "./daytona";
 
 const packageJson = `{
@@ -309,6 +310,13 @@ top-level folders; add to them instead:
   DropdownMenu, Accordion). Use these for any interactive pattern —
   modals, drawers, dropdowns, collapsibles — instead of hand-rolling one
   with useState. Icons: \`lucide-react\` is available for any icon needed.
+- \`src/lib/storefront-api.ts\` — the ONLY way to reach the real backend.
+  Any product listing, cart, checkout, order, review, wishlist,
+  newsletter, coupon, loyalty, or account feature goes through this —
+  never invent your own fetch() calls or fake it with local-only state.
+- \`src/lib/config.ts\` — which store this project belongs to
+  (STORE_SLUG, STORE_ID). storefront-api.ts already uses these; you
+  shouldn't need to reference them directly.
 - \`src/components/layout/\` — page chrome (Header, Footer, Layout) — edit
   these to change nav/footer everywhere at once, don't duplicate them
   into individual pages.
@@ -339,7 +347,7 @@ preview link depends on this.
  * siteId) so the same site always gets the same visual identity even
  * across regenerations, while different sites still get real variety.
  */
-export function getStandardScaffold(businessType: string, seed: string): Record<string, string> {
+export function getStandardScaffold(businessType: string, seed: string, slug: string): Record<string, string> {
   const tokens = getDesignTokens(businessType, seed);
   return {
     "package.json": packageJson,
@@ -354,6 +362,20 @@ export function getStandardScaffold(businessType: string, seed: string): Record<
     "src/App.tsx": appTsx,
     "src/index.css": buildIndexCss(tokens),
     "src/lib/utils.ts": utilsTs,
+    "src/lib/config.ts": `// Which store this generated project belongs to — baked in at creation
+// time, not read from an env var, so it's correct in the sandbox, in
+// the published build, and can't be accidentally left unset.
+//
+// Two identifiers because the backend itself isn't fully consistent:
+// most storefront endpoints (/api/storefront/:slug/...) resolve by the
+// public slug, but orders and checkout specifically
+// (/api/sites/:siteId/...) resolve only by the internal database ID.
+// storefront-api.ts picks the right one per endpoint — you shouldn't
+// need to think about this when calling it.
+export const STORE_SLUG = ${JSON.stringify(slug)};
+export const STORE_ID = ${JSON.stringify(seed)};
+`,
+    "src/lib/storefront-api.ts": getStorefrontApiClient(),
     "src/components/layout/Layout.tsx": layoutTsx,
     "src/components/layout/Header.tsx": headerTsx,
     "src/components/layout/Footer.tsx": footerTsx,
@@ -370,7 +392,7 @@ export function getStandardScaffold(businessType: string, seed: string): Record<
  * not the core architecture files (App.tsx routing, Layout.tsx, config). */
 export const SCAFFOLD_OWNED_PATHS = new Set([
   "package.json", "vite.config.ts", "tailwind.config.js", "postcss.config.js",
-  "tsconfig.json", "index.html", "src/main.tsx", "src/App.tsx", "src/index.css", "src/lib/utils.ts",
+  "tsconfig.json", "index.html", "src/main.tsx", "src/App.tsx", "src/index.css", "src/lib/utils.ts", "src/lib/config.ts", "src/lib/storefront-api.ts",
   "src/components/layout/Layout.tsx", "src/components/layout/Header.tsx", "src/components/layout/Footer.tsx",
 ]);
 
@@ -381,6 +403,6 @@ export const SCAFFOLD_OWNED_PATHS = new Set([
  * directly instead when editing/resuming an EXISTING project - this is
  * only for the first-ever creation of a project.
  */
-export async function createProjectSandbox(siteId: string, businessType: string) {
-  return createSandboxWithFiles(getStandardScaffold(businessType, siteId));
+export async function createProjectSandbox(siteId: string, businessType: string, slug: string) {
+  return createSandboxWithFiles(getStandardScaffold(businessType, siteId, slug));
 }

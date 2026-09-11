@@ -140,6 +140,7 @@ const TOOL_DEFS: AITool[] = [
 
 import { COMPONENT_LIBRARY_DESCRIPTIONS } from "./sandbox/component-library";
 import { SHADCN_PRIMITIVE_DESCRIPTIONS } from "./sandbox/shadcn-primitives";
+import { STOREFRONT_API_DESCRIPTION } from "./sandbox/storefront-api-client";
 import { SCAFFOLD_OWNED_PATHS } from "./sandbox/scaffold";
 import { siteManifestSchema, renderManifestForPrompt, type SiteManifest } from "./ai-schemas/site-manifest";
 
@@ -162,6 +163,9 @@ Only build a custom component when nothing here genuinely fits what was asked fo
 
 UI PRIMITIVES (shadcn/ui) — for any interactive pattern (modal, drawer, dropdown, collapsible), use these instead of hand-rolling your own with useState and conditional rendering. They handle focus management, keyboard navigation, and animation correctly, which is easy to get subtly wrong by hand:
 ${SHADCN_PRIMITIVE_DESCRIPTIONS}
+
+BACKEND — this project is a real storefront, not a static mockup. It has a real backend with real products, orders, and customers:
+${STOREFRONT_API_DESCRIPTION}
 
 WHAT "DONE" MEANS FOR A MERCHANT, not just a passing build:
 - Real copy everywhere. Never leave lorem ipsum, "[Your Business Name]", "Lorem ipsum dolor...", or any obviously-placeholder text in the final result.
