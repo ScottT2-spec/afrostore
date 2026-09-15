@@ -108,6 +108,42 @@ export function getDeliveryZones(): Promise<{ zones: DeliveryZone[] }> {
   return request(\`\${STOREFRONT_BASE}/delivery-zones\`);
 }
 
+// ─── Store info + WhatsApp ordering ─────────────────────────
+// WhatsApp ordering is a real, existing feature — this just gives a
+// generated project a way to read the merchant's actual configured
+// number and build the same wa.me link format already used elsewhere
+// in the platform, rather than inventing a different message format.
+export interface StoreInfo {
+  name: string;
+  currency: string;
+  whatsappNumber: string | null;
+  whatsappOrderingEnabled: boolean;
+  payOnDeliveryEnabled: boolean;
+  bankTransferEnabled: boolean;
+}
+
+export function getStoreInfo(): Promise<StoreInfo> {
+  return request(\`\${STOREFRONT_BASE}/store-info\`);
+}
+
+export function buildWhatsAppOrderLink(
+  whatsappNumber: string,
+  storeName: string,
+  items: Array<{ name: string; quantity: number; price: number }>,
+  currency: string
+): string {
+  const num = whatsappNumber.replace(/[^0-9+]/g, "").replace("+", "");
+  if (!num) return "#";
+  const formatMoney = (n: number) => \`\${currency} \${n.toLocaleString()}\`;
+  let msg = \`Hi \${storeName}! I'd like to order:\\n\\n\`;
+  items.forEach((item) => {
+    msg += \`• \${item.name} x\${item.quantity} — \${formatMoney(item.price * item.quantity)}\\n\`;
+  });
+  const total = items.reduce((sum, item) => sum + item.price * item.quantity, 0);
+  msg += \`\\nTotal: \${formatMoney(total)}\`;
+  return \`https://wa.me/\${num}?text=\${encodeURIComponent(msg)}\`;
+}
+
 // ─── Reviews ─────────────────────────────────────────────────
 export interface Review {
   id: string;
@@ -273,7 +309,7 @@ export function removeFromWishlist(customerId: string, productId: string): Promi
 `;
 }
 
-export const STOREFRONT_API_DESCRIPTION = `- src/lib/storefront-api.ts: the ONLY way to talk to the real backend — every commerce/account feature (products, cart pricing, checkout, orders, delivery zones, reviews, wishlist, newsletter, coupons, loyalty, contact form, customer login) goes through the typed functions in this file. NEVER invent your own fetch() calls to guessed endpoints, and never fake cart/checkout/reviews/etc. with only local state — that means the merchant would never see a real order, review, or subscriber anywhere in their dashboard no matter how correct the UI looks. If a request seems related to any of these features, import and call the matching function from this file.
+export const STOREFRONT_API_DESCRIPTION = `- src/lib/storefront-api.ts: the ONLY way to talk to the real backend — every commerce/account feature (products, cart pricing, checkout, orders, delivery zones, WhatsApp ordering, reviews, wishlist, newsletter, coupons, loyalty, contact form, customer login) goes through the typed functions in this file. NEVER invent your own fetch() calls to guessed endpoints, and never fake cart/checkout/reviews/etc. with only local state — that means the merchant would never see a real order, review, or subscriber anywhere in their dashboard no matter how correct the UI looks. If a request seems related to any of these features, import and call the matching function from this file.
   Checkout is a real 3-step flow — get this exactly right, it's real money:
     1. createOrder() with the cart items + customer + delivery details.
     2. Call getAvailablePaymentMethods() FIRST — initiateCheckout() requires an exact provider match ("PAYSTACK" | "FLUTTERWAVE" | "MONNIFY") and fails with "not configured for this store" for any provider the merchant hasn't set up. Never hardcode/guess a provider. If none are configured, tell the customer payment isn't available yet rather than attempting checkout — that's a real, expected state for a new store, not a bug to work around.
@@ -281,4 +317,5 @@ export const STOREFRONT_API_DESCRIPTION = `- src/lib/storefront-api.ts: the ONLY
     4. Redirect with window.location.href = result.paymentUrl — a full page navigation, NOT react-router's navigate(). The customer is leaving this app entirely for the payment provider's own hosted page; a client-side route change won't take them there.
     5. Build that /checkout/complete route: on mount, read the "reference" query param from the URL (the payment provider appends it when redirecting back), call verifyPayment(reference), and show success or failure based on the result. This page is not optional — without it, a customer who actually pays has nowhere to land and no confirmation, even though their order was really created.
   Cart is NOT stored server-side — hold cart items yourself (React state/localStorage) and call validateCart() for live pricing before checkout.
+  WhatsApp ordering: call getStoreInfo() to check whatsappOrderingEnabled and get the real whatsappNumber the merchant configured — don't ask the customer for it, don't invent one. If enabled, buildWhatsAppOrderLink() produces the same message format already used elsewhere in this platform. If whatsappOrderingEnabled is false or whatsappNumber is null, don't show a WhatsApp ordering option at all.
   Wishlist requires a logged-in customer — call getCurrentCustomer() first to get their id.`;
