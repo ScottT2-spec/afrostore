@@ -87,6 +87,8 @@ export interface SiteGenerationResult {
   model: string;
   /** Set when the agent called ask_user — caller should surface this and resume with the answer, not treat it as failure. */
   pendingQuestion?: { question: string; options?: string[] };
+  /** The full message history at this point — required to resume a paused (pendingQuestion) run via priorMessages. Without it, no caller could ever construct a valid resume input. */
+  messages: AIMessage[];
 }
 
 export class SiteGenerationError extends Error {}
@@ -171,6 +173,7 @@ export async function runSiteGenerationAgent(opts: RunSiteGenerationOptions): Pr
             provider: lastProvider,
             model: lastModel,
             pendingQuestion: { question: parsed.data.question, options: parsed.data.options },
+            messages,
           };
         }
       }
@@ -178,7 +181,7 @@ export async function runSiteGenerationAgent(opts: RunSiteGenerationOptions): Pr
       if (name === "finalize_draft") {
         const parsed = finalizeDraftSchema.safeParse(args);
         if (parsed.success) {
-          return { summary: parsed.data.summary, steps, provider: lastProvider, model: lastModel };
+          return { summary: parsed.data.summary, steps, provider: lastProvider, model: lastModel, messages };
         }
       }
 

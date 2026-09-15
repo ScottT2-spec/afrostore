@@ -66,6 +66,8 @@ export default function AIBuilderPage({ params }: { params: Promise<{ siteId: st
   const [generating, setGenerating] = useState(false);
   const [previewBlocks, setPreviewBlocks] = useState<TemplateBlock[]>([]);
   const [session, setSession] = useState<SandboxSessionResult | null>(null);
+  const [pendingQuestion, setPendingQuestion] = useState<{ question: string; options?: string[] } | null>(null);
+  const priorMessagesRef = useRef<unknown[] | null>(null);
   const [hasGenerated, setHasGenerated] = useState(false);
   const [publishing, setPublishing] = useState(false);
   const [publishError, setPublishError] = useState<string | null>(null);
@@ -120,6 +122,22 @@ export default function AIBuilderPage({ params }: { params: Promise<{ siteId: st
     if (!siteId || !hasGenerated || publishing) return;
     setPublishing(true);
     setPublishError(null);
+
+    if (!session) {
+      // Structured/block-based site — pages are already live the moment
+      // they're created (isPublished: true), no separate publish step.
+      // "Publish" here just means "show me the live URL".
+      const siteRes = await api.get<{ subdomain: string }>(`/api/sites/${siteId}`);
+      setPublishing(false);
+      if (siteRes.success && siteRes.data) {
+        const domain = (process.env.NEXT_PUBLIC_APP_DOMAIN || "prosell.africa").trim().replace(/^https?:\/\//, "").replace(/\/+$/, "");
+        window.open(`https://${siteRes.data.subdomain}.${domain}`, "_blank");
+      } else {
+        setPublishError("Couldn't load your store's URL. Please try again.");
+      }
+      return;
+    }
+
     const res = await api.post<{ published: boolean; liveUrl: string }>(`/api/sites/${siteId}/publish-code`, {});
     setPublishing(false);
     if (res.success && res.data?.published) {
@@ -166,23 +184,53 @@ export default function AIBuilderPage({ params }: { params: Promise<{ siteId: st
       );
     }, 1800);
 
-    const res = await api.post<{ session: SandboxSessionResult; summary: string; filesChanged: string[] }>(
+    const res = await api.post<{
+      mode: "question" | "structured" | "code";
+      question?: string; options?: string[]; priorMessages?: unknown[];
+      pages?: PageSummary[]; summary?: string;
+      session?: SandboxSessionResult; filesChanged?: string[];
+    }>(
       `/api/sites/${siteId}/ai/generate-code`,
-      { task: description }
+      { task: description, priorMessages: priorMessagesRef.current || undefined }
     );
 
     if (stepTimerRef.current) clearInterval(stepTimerRef.current);
 
-    if (res.success && res.data) {
-      setSession(res.data.session);
+    if (res.success && res.data?.mode === "question") {
+      priorMessagesRef.current = res.data.priorMessages || null;
+      setPendingQuestion({ question: res.data.question!, options: res.data.options });
+      setMessages((prev) =>
+        prev.map((m) => (m.id === assistantMsgId ? { ...m, checklist: undefined, content: res.data!.question! } : m))
+      );
+      setGenerating(false);
+      return;
+    }
+
+    if (res.success && res.data?.mode === "structured") {
+      priorMessagesRef.current = null;
+      setPendingQuestion(null);
+      setSession(null); // structured path has no sandbox — block preview only
       setMessages((prev) =>
         prev.map((m) =>
           m.id === assistantMsgId
-            ? {
-                ...m,
-                checklist: m.checklist!.map((s) => ({ ...s, status: "done" as const })),
-                content: res.data!.summary,
-              }
+            ? { ...m, checklist: m.checklist!.map((s) => ({ ...s, status: "done" as const })), content: res.data!.summary! }
+            : m
+        )
+      );
+      await loadHomePagePreview(res.data.pages || []);
+      setHasGenerated(true);
+      setGenerating(false);
+      return;
+    }
+
+    if (res.success && res.data?.mode === "code") {
+      priorMessagesRef.current = null;
+      setPendingQuestion(null);
+      setSession(res.data.session || null);
+      setMessages((prev) =>
+        prev.map((m) =>
+          m.id === assistantMsgId
+            ? { ...m, checklist: m.checklist!.map((s) => ({ ...s, status: "done" as const })), content: res.data!.summary! }
             : m
         )
       );
