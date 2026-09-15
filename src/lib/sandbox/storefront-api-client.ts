@@ -95,6 +95,19 @@ export function getCategories(): Promise<Category[]> {
   return request(\`\${STOREFRONT_BASE}/categories\`);
 }
 
+export interface DeliveryZone {
+  id: string;
+  name: string;
+  areas: string[];
+  fee: number;
+  freeAbove: number | null;
+  estimatedDays: string | null;
+}
+
+export function getDeliveryZones(): Promise<{ zones: DeliveryZone[] }> {
+  return request(\`\${STOREFRONT_BASE}/delivery-zones\`);
+}
+
 // ─── Reviews ─────────────────────────────────────────────────
 export interface Review {
   id: string;
@@ -260,7 +273,7 @@ export function removeFromWishlist(customerId: string, productId: string): Promi
 `;
 }
 
-export const STOREFRONT_API_DESCRIPTION = `- src/lib/storefront-api.ts: the ONLY way to talk to the real backend — every commerce/account feature (products, cart pricing, checkout, orders, reviews, wishlist, newsletter, coupons, loyalty, contact form, customer login) goes through the typed functions in this file. NEVER invent your own fetch() calls to guessed endpoints, and never fake cart/checkout/reviews/etc. with only local state — that means the merchant would never see a real order, review, or subscriber anywhere in their dashboard no matter how correct the UI looks. If a request seems related to any of these features, import and call the matching function from this file.
+export const STOREFRONT_API_DESCRIPTION = `- src/lib/storefront-api.ts: the ONLY way to talk to the real backend — every commerce/account feature (products, cart pricing, checkout, orders, delivery zones, reviews, wishlist, newsletter, coupons, loyalty, contact form, customer login) goes through the typed functions in this file. NEVER invent your own fetch() calls to guessed endpoints, and never fake cart/checkout/reviews/etc. with only local state — that means the merchant would never see a real order, review, or subscriber anywhere in their dashboard no matter how correct the UI looks. If a request seems related to any of these features, import and call the matching function from this file.
   Checkout is a real 3-step flow — get this exactly right, it's real money:
     1. createOrder() with the cart items + customer + delivery details.
     2. Call getAvailablePaymentMethods() FIRST — initiateCheckout() requires an exact provider match ("PAYSTACK" | "FLUTTERWAVE" | "MONNIFY") and fails with "not configured for this store" for any provider the merchant hasn't set up. Never hardcode/guess a provider. If none are configured, tell the customer payment isn't available yet rather than attempting checkout — that's a real, expected state for a new store, not a bug to work around.
