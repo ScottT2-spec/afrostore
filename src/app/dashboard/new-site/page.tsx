@@ -1,6 +1,6 @@
 'use client';
 import { ArrowLeft, ArrowRight, Check, Loader2, X, MessageSquare } from "lucide-react";
-import { Globe, Layout, Link as LinkIcon, Palette, ShoppingBag, Sparkles, Square, Zap } from "@/components/icons/FilledIcons";
+import { FileText, Globe, Layout, Link as LinkIcon, Palette, ShoppingBag, Sparkles, Square, Zap } from "@/components/icons/FilledIcons";
 
 import { useState, useEffect, useMemo } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
@@ -44,7 +44,7 @@ const INDUSTRIES = [
 ];
 
 const LAUNCH_METHODS = [
-  { id: 'quick', icon: Zap, title: 'Build with AI', desc: 'Let AI help you build your site quickly', color: 'border-emerald-500 bg-emerald-50', disabled: true },
+  { id: 'quick', icon: Zap, title: 'Build with AI', desc: 'Chat with AI to build your site in minutes', color: 'border-emerald-500 bg-emerald-50' },
   { id: 'template', icon: Layout, title: 'Use a Template', desc: 'Pick a professionally designed template', color: 'border-blue-500 bg-blue-50' },
   { id: 'blank', icon: Square, title: 'Blank Canvas', desc: 'Start from scratch', color: 'border-gray-500 bg-gray-50' },
 ];
@@ -248,15 +248,12 @@ export default function NewSitePage() {
     }
 
     setClassifying(false);
-    // Business Website and Landing Page are hidden right now — only
-    // E-commerce is selectable, so don't let classification (local or AI)
-    // land the person on a site type they have no way to pick or see.
-    setSiteType('ECOMMERCE');
+    setSiteType(result.siteType);
     setIndustry(result.industry);
     if (aiName) setBusinessInfo((prev) => ({ ...prev, name: prev.name || aiName!, description: prev.description || aiTagline || guidedInput }));
     setShowGuided(false);
     setGuidedInput('');
-    setStep(3); // "Build with AI" is coming soon — let them pick template or blank canvas
+    setStep(3); // "Build with AI" skips template selection — straight to creation, then the AI chat builder
   };
 
   const totalSteps = 7;
@@ -394,7 +391,11 @@ export default function NewSitePage() {
     if (createdSiteId) {
       localStorage.setItem(`activeSiteId:${user?.id || "guest"}`, createdSiteId);
       localStorage.removeItem('activeSiteId');
-      router.push(`/dashboard/sites/${createdSiteId}/customize`);
+      // "Build with AI" lands on the actual AI chat builder, not the
+      // manual editor — that's the entire point of choosing this path.
+      router.push(launchMethod === 'quick'
+        ? `/dashboard/sites/${createdSiteId}/ai-builder`
+        : `/dashboard/sites/${createdSiteId}/customize`);
     }
   };
 
@@ -412,8 +413,9 @@ export default function NewSitePage() {
     if (createdSiteId) {
       localStorage.setItem(`activeSiteId:${user?.id || "guest"}`, createdSiteId);
       localStorage.removeItem('activeSiteId');
-      // Navigate to customize page where publishing can be managed
-      router.push(`/dashboard/sites/${createdSiteId}/customize`);
+      router.push(launchMethod === 'quick'
+        ? `/dashboard/sites/${createdSiteId}/ai-builder`
+        : `/dashboard/sites/${createdSiteId}/customize`);
     }
   };
 
@@ -446,10 +448,8 @@ export default function NewSitePage() {
             <div className="grid gap-4">
               {([
                 { type: 'ECOMMERCE' as SiteType, icon: ShoppingBag, title: 'E-commerce Website', desc: 'Sell products and services online. Products, orders, inventory, payments.', color: 'emerald' },
-                // Business Website and Landing Page are hidden for now — re-add
-                // here to bring them back.
-                // { type: 'WEBSITE' as SiteType, icon: Globe, title: 'Business Website', desc: 'Build an informational website. Pages, blogs, forms, SEO.', color: 'blue' },
-                // { type: 'LANDING_PAGE' as SiteType, icon: FileText, title: 'Landing Page', desc: 'Lead generation and conversion. Funnels, CRM, email & WhatsApp marketing.', color: 'purple' },
+                { type: 'WEBSITE' as SiteType, icon: Globe, title: 'Business Website', desc: 'Build an informational website. Pages, blogs, forms, SEO.', color: 'blue' },
+                { type: 'LANDING_PAGE' as SiteType, icon: FileText, title: 'Landing Page', desc: 'Lead generation and conversion. Funnels, CRM, email & WhatsApp marketing.', color: 'purple' },
               ]).map(item => {
                 const Icon = item.icon;
                 const selected = siteType === item.type;
@@ -576,21 +576,12 @@ export default function NewSitePage() {
                 return (
                   <button
                     key={method.id}
-                    onClick={() => { if (!method.disabled) setLaunchMethod(method.id); }}
-                    disabled={method.disabled}
-                    aria-disabled={method.disabled}
+                    onClick={() => setLaunchMethod(method.id)}
                     className={`relative p-6 rounded-xl border-2 text-left transition ${
-                      method.disabled
-                        ? 'border-gray-100 bg-gray-50 opacity-60 cursor-not-allowed'
-                        : selected ? method.color : 'border-gray-100 bg-white hover:border-gray-200'
+                      selected ? method.color : 'border-gray-100 bg-white hover:border-gray-200'
                     }`}
                   >
-                    {method.disabled && (
-                      <span className="absolute top-3 right-3 rounded-full bg-gray-200 px-2.5 py-1 text-[10px] font-semibold uppercase tracking-wide text-gray-500">
-                        Coming Soon
-                      </span>
-                    )}
-                    <Icon className={`w-8 h-8 mb-3 ${method.disabled ? 'text-gray-300' : selected ? 'text-gray-900' : 'text-gray-400'}`} />
+                    <Icon className={`w-8 h-8 mb-3 ${selected ? 'text-gray-900' : 'text-gray-400'}`} />
                     <p className="font-semibold text-gray-900">{method.title}</p>
                     <p className="text-sm text-gray-500 mt-1">{method.desc}</p>
                   </button>
