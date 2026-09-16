@@ -52,6 +52,7 @@ export async function POST(req: NextRequest, { params }: Params) {
       storeName: ctx.site?.name || "My Business",
       storeSlug: ctx.site?.slug || siteId,
       industry: ctx.site?.businessType || "general",
+      siteType: ctx.site?.siteType || "WEBSITE",
       task,
       priorMessages,
     });

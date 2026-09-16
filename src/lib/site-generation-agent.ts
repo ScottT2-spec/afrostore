@@ -40,6 +40,8 @@ import { generateStructured, AIStructuredOutputError } from "@/lib/ai-structured
 import { buildDynamicHomePage } from "@/lib/ai-layout-engine";
 import { getRandomIndustryImages } from "@/lib/ai-image-pools";
 
+import { getSiteIntentRules, type SiteIntentRules } from "@/lib/site-intent";
+
 function toToolParameters(schema: z.ZodType<unknown>): Record<string, unknown> {
   const jsonSchema = z.toJSONSchema(schema, { target: "draft-7" }) as Record<string, unknown>;
   delete jsonSchema.$schema;
@@ -62,7 +64,10 @@ const TOOL_DEFS: AITool[] = [
   { type: "function", function: { name: "finalize_draft", description: "Call this once the site genuinely reflects what the merchant asked for. Ends the session.", parameters: toToolParameters(finalizeDraftSchema) } },
 ];
 
-const SYSTEM_PROMPT = `You are building a real e-commerce/business/landing site for an African SMB merchant, from their plain-language description. You can ONLY act through the tools you're given — there is no code, no files, nothing outside this specific tool set.
+function buildSystemPrompt(rules: SiteIntentRules): string {
+  return `You are building a real e-commerce/business/landing site for an African SMB merchant, from their plain-language description. You can ONLY act through the tools you're given — there is no code, no files, nothing outside this specific tool set.
+
+${rules.promptRules}
 
 Rules:
 - Default currency is NGN unless the merchant's prompt says otherwise.
@@ -71,7 +76,8 @@ Rules:
 - Never call set_payment_stub with mode "connected" as a guess — that only matters if the merchant already has a real gateway configured, which you cannot cause to happen from here.
 - create_page must produce real, specific, on-brand content immediately — never placeholder/lorem-ipsum text. A merchant should recognize their own business in the copy, not see generic filler.
 - Use ask_user (max 3 times per session) only for genuinely critical missing information — business name, currency/country if ambiguous, primary contact channel. Don't ask about things you can reasonably default.
-- Call finalize_draft only once the site actually reflects the request — don't finalize a half-built site.`;
+- Call finalize_draft only once the site actually reflects the request AND satisfies every rule under SITE TYPE above — don't finalize a half-built or wrong-shaped site. finalize_draft will be rejected with specific corrections if it doesn't, so get it right rather than guessing you're done.`;
+}
 
 export interface SiteGenerationStep {
   tool: string;
@@ -99,6 +105,8 @@ export interface RunSiteGenerationOptions {
   storeName: string;
   storeSlug: string;
   industry: string;
+  /** The site's own SiteType (ECOMMERCE | WEBSITE | LANDING_PAGE) — the merchant's own choice at site creation, the authoritative signal for what structural shape this generation should produce. */
+  siteType: string;
   task: string;
   maxIterations?: number;
   /** Resume a session after ask_user — prior message history from the same run. */
@@ -106,12 +114,13 @@ export interface RunSiteGenerationOptions {
 }
 
 export async function runSiteGenerationAgent(opts: RunSiteGenerationOptions): Promise<SiteGenerationResult> {
-  const { ai, siteId, storeName, storeSlug, industry, task, maxIterations = 15, priorMessages } = opts;
+  const { ai, siteId, storeName, storeSlug, industry, siteType, task, maxIterations = 15, priorMessages } = opts;
+  const rules = getSiteIntentRules(siteType);
 
   const messages: AIMessage[] = priorMessages?.length
     ? [...priorMessages, { role: "user", content: task }]
     : [
-        { role: "system", content: SYSTEM_PROMPT },
+        { role: "system", content: buildSystemPrompt(rules) },
         { role: "user", content: task },
       ];
 
@@ -181,6 +190,19 @@ export async function runSiteGenerationAgent(opts: RunSiteGenerationOptions): Pr
       if (name === "finalize_draft") {
         const parsed = finalizeDraftSchema.safeParse(args);
         if (parsed.success) {
+          const violations = await rules.validate(siteId);
+          if (violations.length > 0) {
+            // Same enforcement shape as the coding agent's quality
+            // checklist and mandatory screenshot: a self-reported "done"
+            // is not accepted when the actual database state
+            // demonstrably doesn't match this site type's rules. Tell it
+            // exactly what's wrong and force another iteration to
+            // actually fix it, rather than finalizing a wrong-shaped site.
+            const message = `finalize_draft was rejected — the actual site doesn't match its site type's rules yet:\n${violations.map((v) => `- ${v.detail}`).join("\n")}\nFix these, then call finalize_draft again.`;
+            messages.push({ role: "tool", toolCallId: call.id, content: message });
+            steps.push({ tool: name, args, result: message, isError: true });
+            continue;
+          }
           return { summary: parsed.data.summary, steps, provider: lastProvider, model: lastModel, messages };
         }
       }
