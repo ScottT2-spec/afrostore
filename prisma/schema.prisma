@@ -164,6 +164,7 @@ model Site {
   pipelineRuns      PipelineRun[]
   codingAgentRuns   CodingAgentRun[]
   generatedFiles    GeneratedFile[]
+  aiBuildRequests   AiBuildRequest[]
   // Structured "what does this site currently have" — pages, routes,
   // components — updated by the coding agent as part of finish_task and
   // read back at the start of the next run instead of blind
@@ -872,10 +873,49 @@ model Page {
   abTests         ABTest[]
   site            Site     @relation(fields: [siteId], references: [id], onDelete: Cascade)
   funnelSteps     FunnelStep[]
+  versions        PageVersion[]
 
   @@unique([siteId, slug])
   @@index([siteId])
   @@map("pages")
+}
+
+// One row per tool-mutation the AI site-generation agent makes to a
+// page's content — real undo, not just a description of it. Snapshotted
+// AFTER each create_page/update_section call succeeds, so "undo" means
+// "restore the row before this one", and a chain of edits is a real,
+// walkable history, not just a single last-known-good backup.
+model PageVersion {
+  id        String   @id @default(cuid())
+  pageId    String
+  title     String
+  content   Json?
+  source    String   @default("ai") // ai | manual — who made this version, for display
+  createdAt DateTime @default(now())
+  page      Page     @relation(fields: [pageId], references: [id], onDelete: Cascade)
+
+  @@index([pageId, createdAt])
+  @@map("page_versions")
+}
+
+// One row per (site, idempotency key) — a duplicate submit with the same
+// key returns the original request's result instead of running the
+// (expensive, real-money) generation a second time. status="running"
+// also rate-limits genuine double-clicks: a second request with the same
+// key while the first is still in flight gets a 409, not a second run.
+model AiBuildRequest {
+  id             String    @id @default(cuid())
+  siteId         String
+  idempotencyKey String
+  status         String    @default("running") // running | completed | failed
+  responseJson   Json?
+  createdAt      DateTime  @default(now())
+  completedAt    DateTime?
+  site           Site      @relation(fields: [siteId], references: [id], onDelete: Cascade)
+
+  @@unique([siteId, idempotencyKey])
+  @@index([siteId])
+  @@map("ai_build_requests")
 }
 
 model Blog {

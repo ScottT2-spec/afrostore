@@ -111,10 +111,12 @@ export interface RunSiteGenerationOptions {
   maxIterations?: number;
   /** Resume a session after ask_user — prior message history from the same run. */
   priorMessages?: AIMessage[];
+  /** Called after every tool executes — for streaming live progress to a UI. */
+  onStep?: (step: SiteGenerationStep) => void;
 }
 
 export async function runSiteGenerationAgent(opts: RunSiteGenerationOptions): Promise<SiteGenerationResult> {
-  const { ai, siteId, storeName, storeSlug, industry, siteType, task, maxIterations = 15, priorMessages } = opts;
+  const { ai, siteId, storeName, storeSlug, industry, siteType, task, maxIterations = 15, priorMessages, onStep } = opts;
   const rules = getSiteIntentRules(siteType);
 
   const messages: AIMessage[] = priorMessages?.length
@@ -164,6 +166,7 @@ export async function runSiteGenerationAgent(opts: RunSiteGenerationOptions): Pr
       } catch {
         const step: SiteGenerationStep = { tool: name, args: rawArgs, result: "Arguments were not valid JSON.", isError: true };
         steps.push(step);
+        onStep?.(step);
         messages.push({ role: "tool", toolCallId: call.id, content: step.result });
         continue;
       }
@@ -200,7 +203,9 @@ export async function runSiteGenerationAgent(opts: RunSiteGenerationOptions): Pr
             // actually fix it, rather than finalizing a wrong-shaped site.
             const message = `finalize_draft was rejected — the actual site doesn't match its site type's rules yet:\n${violations.map((v) => `- ${v.detail}`).join("\n")}\nFix these, then call finalize_draft again.`;
             messages.push({ role: "tool", toolCallId: call.id, content: message });
-            steps.push({ tool: name, args, result: message, isError: true });
+            const rejectionStep: SiteGenerationStep = { tool: name, args, result: message, isError: true };
+            steps.push(rejectionStep);
+            onStep?.(rejectionStep);
             continue;
           }
           return { summary: parsed.data.summary, steps, provider: lastProvider, model: lastModel, messages };
@@ -210,6 +215,7 @@ export async function runSiteGenerationAgent(opts: RunSiteGenerationOptions): Pr
       const { result: toolResult, isError } = await executeTool(siteId, storeName, storeSlug, industry, ai, name, args);
       const step: SiteGenerationStep = { tool: name, args, result: toolResult, isError };
       steps.push(step);
+      onStep?.(step);
       messages.push({ role: "tool", toolCallId: call.id, content: toolResult });
     }
   }
@@ -256,11 +262,16 @@ async function executeTool(
           images
         );
 
-        await prisma.page.upsert({
+        const created = await prisma.page.upsert({
           where: { siteId_slug: { siteId, slug } },
           create: { siteId, slug, title: parsed.title, type: parsed.type, content: blocks as object, isPublished: true },
           update: { title: parsed.title, content: blocks as object },
         });
+        // Snapshot the resulting state, not the pre-change one — undo
+        // restores "the version before this one", so what matters is
+        // having a walkable trail of every real state this page has
+        // been in, starting from its very first creation.
+        await prisma.pageVersion.create({ data: { pageId: created.id, title: created.title, content: created.content as object } });
 
         return { result: `Created page "${parsed.title}" (${slug}) with ${parsed.sections.length} sections.`, isError: false };
       }
@@ -278,6 +289,7 @@ async function executeTool(
         blocks[parsed.sectionIndex] = { ...target, settings: { ...(target.settings || {}), ...parsed.content } };
 
         await prisma.page.update({ where: { id: page.id }, data: { content: blocks as object } });
+        await prisma.pageVersion.create({ data: { pageId: page.id, title: page.title, content: blocks as object } });
         return { result: `Updated section ${parsed.sectionIndex} on "${parsed.pageSlug}".`, isError: false };
       }
 
