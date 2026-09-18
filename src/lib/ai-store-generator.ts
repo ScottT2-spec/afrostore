@@ -105,7 +105,7 @@ function getAIProviders(): AIProviderConfig[] {
     providers.push({
       provider: i === 0 ? "groq" : `groq_${i + 1}`,
       apiKey: key,
-      model: "llama-3.3-70b-versatile",
+      model: "openai/gpt-oss-120b",
       capabilities: [AICapability.CHAT],
     });
   });

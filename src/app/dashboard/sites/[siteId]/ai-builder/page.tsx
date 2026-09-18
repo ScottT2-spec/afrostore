@@ -166,41 +166,93 @@ export default function AIBuilderPage({ params }: { params: Promise<{ siteId: st
     setInput("");
     setGenerating(true);
 
-    // Advances the checklist through its stages while the one real
-    // network call is in flight — this is a perceived-progress animation
-    // (there's no streaming/step-by-step API here to reflect exactly),
-    // but it never lies about completion: the LAST step only flips to
-    // "done" once the actual API call resolves successfully below, not
-    // on a timer. If the call finishes before the animation catches up,
-    // the interval is cleared and every remaining step is marked done
-    // immediately rather than left stuck mid-way.
-    let stepIndex = 0;
-    stepTimerRef.current = setInterval(() => {
-      stepIndex++;
-      if (stepIndex >= BUILD_STEPS.length - 1) {
-        if (stepTimerRef.current) clearInterval(stepTimerRef.current);
-        return;
-      }
-      setMessages((prev) =>
-        prev.map((m) =>
-          m.id === assistantMsgId
-            ? { ...m, checklist: m.checklist!.map((s, i) => ({ ...s, status: i < stepIndex ? "done" : i === stepIndex ? "active" : "pending" })) }
-            : m
-        )
-      );
-    }, 1800);
-
-    const res = await api.post<{
+    // Streams via SSE instead of a single blocking request. This isn't
+    // just for nicer real-time progress — it's the actual fix for a real
+    // production bug: create_page does a large (~6000 token) content
+    // generation per page, and the agent can call it several times in a
+    // row for one message (home, about, contact...). A single blocking
+    // request sends zero bytes back for that entire multi-minute stretch,
+    // which is exactly what trips a reverse-proxy's idle/read timeout —
+    // the proxy then serves its own HTML error page, which showed up in
+    // the UI as a raw "Unexpected token '<', <!DOCTYPE...'" JSON.parse
+    // crash. Streaming keeps real bytes flowing the whole time, so the
+    // proxy never sees an idle connection.
+    type GenResult = {
       mode: "question" | "structured" | "code";
       question?: string; options?: string[]; priorMessages?: unknown[];
       pages?: PageSummary[]; summary?: string;
       session?: SandboxSessionResult; filesChanged?: string[];
-    }>(
-      `/api/sites/${siteId}/ai/generate-code`,
-      { task: description, priorMessages: priorMessagesRef.current || undefined }
-    );
+    };
+    let res: { success: true; data: GenResult } | { success: false; error: string };
+    try {
+      const streamRes = await fetch(`/api/sites/${siteId}/ai/generate-code`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Accept: "text/event-stream",
+          ...(api.getToken() ? { Authorization: `Bearer ${api.getToken()}` } : {}),
+        },
+        body: JSON.stringify({ task: description, priorMessages: priorMessagesRef.current || undefined }),
+      });
 
-    if (stepTimerRef.current) clearInterval(stepTimerRef.current);
+      if (!streamRes.ok || !streamRes.body) {
+        const text = await streamRes.text().catch(() => "");
+        throw new Error(text ? `Request failed (${streamRes.status}): ${text.slice(0, 200)}` : `Request failed (${streamRes.status})`);
+      }
+
+      const reader = streamRes.body.getReader();
+      const decoder = new TextDecoder();
+      let buffer = "";
+      let doneBody: GenResult | null = null;
+      let streamError: string | null = null;
+      let seenSteps = 0;
+
+      while (true) {
+        const { done, value } = await reader.read();
+        if (done) break;
+        buffer += decoder.decode(value, { stream: true });
+
+        // SSE frames are separated by a blank line; each frame is
+        // "event: <type>\ndata: <json>".
+        let sep;
+        while ((sep = buffer.indexOf("\n\n")) !== -1) {
+          const frame = buffer.slice(0, sep);
+          buffer = buffer.slice(sep + 2);
+          const dataLine = frame.split("\n").find((l) => l.startsWith("data:"));
+          if (!dataLine) continue;
+          let evt: { type: string; tool?: string; isError?: boolean; body?: GenResult; message?: string };
+          try {
+            evt = JSON.parse(dataLine.slice(5).trim());
+          } catch {
+            continue;
+          }
+
+          if (evt.type === "step") {
+            seenSteps++;
+            // Real progress from the actual agent, not a timer guess -
+            // reveal checklist lines as real steps come in, capped to
+            // however many lines BUILD_STEPS has.
+            setMessages((prev) =>
+              prev.map((m) =>
+                m.id === assistantMsgId
+                  ? { ...m, checklist: m.checklist!.map((s, i) => ({ ...s, status: i < seenSteps ? "done" : i === seenSteps ? "active" : "pending" })) }
+                  : m
+              )
+            );
+          } else if (evt.type === "done") {
+            doneBody = evt.body || null;
+          } else if (evt.type === "error") {
+            streamError = evt.message || "Generation failed";
+          }
+        }
+      }
+
+      if (streamError) throw new Error(streamError);
+      if (!doneBody) throw new Error("Generation ended without a result.");
+      res = { success: true, data: doneBody };
+    } catch (e) {
+      res = { success: false, error: e instanceof Error ? e.message : "Generation failed" };
+    }
 
     if (res.success && res.data?.mode === "question") {
       priorMessagesRef.current = res.data.priorMessages || null;
@@ -280,7 +332,7 @@ export default function AIBuilderPage({ params }: { params: Promise<{ siteId: st
       setMessages((prev) =>
         prev.map((m) =>
           m.id === assistantMsgId
-            ? { ...m, checklist: undefined, error: true, content: fallbackRes.error || res.error || "Something went wrong generating your site. Please try again." }
+            ? { ...m, checklist: undefined, error: true, content: fallbackRes.error || (!res.success ? res.error : undefined) || "Something went wrong generating your site. Please try again." }
             : m
         )
       );
@@ -291,7 +343,7 @@ export default function AIBuilderPage({ params }: { params: Promise<{ siteId: st
     setMessages((prev) =>
       prev.map((m) =>
         m.id === assistantMsgId
-          ? { ...m, checklist: undefined, error: true, content: res.error || "Something went wrong making that change. Please try again." }
+          ? { ...m, checklist: undefined, error: true, content: (!res.success ? res.error : undefined) || "Something went wrong making that change. Please try again." }
           : m
       )
     );

@@ -17,7 +17,7 @@ function getAIProviders(): AIProviderConfig[] {
   }
   const groqKeys = [process.env.GROQ_API_KEY, process.env.GROQ_KEY_2, process.env.GROQ_KEY_3, process.env.GROQ_KEY_4].filter(Boolean) as string[];
   groqKeys.forEach((key, i) => {
-    providers.push({ provider: i === 0 ? "groq" : `groq_${i + 1}`, apiKey: key, model: "llama-3.3-70b-versatile", capabilities: [AICapability.CHAT] });
+    providers.push({ provider: i === 0 ? "groq" : `groq_${i + 1}`, apiKey: key, model: "openai/gpt-oss-120b", capabilities: [AICapability.CHAT] });
   });
   if (process.env.DEEPSEEK_API_KEY) {
     providers.push({ provider: "deepseek", apiKey: process.env.DEEPSEEK_API_KEY, model: "deepseek-chat", capabilities: [AICapability.CHAT] });

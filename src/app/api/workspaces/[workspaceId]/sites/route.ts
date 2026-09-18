@@ -186,7 +186,7 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ wor
         let aiContent: Record<string, unknown> | undefined;
         try {
           const providers: import("@/lib/failover").AIProviderConfig[] = [];
-          if (process.env.GROQ_API_KEY) providers.push({ provider: "groq", apiKey: process.env.GROQ_API_KEY, model: "llama-3.3-70b-versatile", capabilities: [AICapability.CHAT] });
+          if (process.env.GROQ_API_KEY) providers.push({ provider: "groq", apiKey: process.env.GROQ_API_KEY, model: "openai/gpt-oss-120b", capabilities: [AICapability.CHAT] });
           if (process.env.GOOGLE_AI_KEY) providers.push({ provider: "google", apiKey: process.env.GOOGLE_AI_KEY, model: "gemini-2.0-flash", capabilities: [AICapability.CHAT] });
           if (process.env.OPENAI_API_KEY) providers.push({ provider: "openai", apiKey: process.env.OPENAI_API_KEY, model: "gpt-4o-mini", capabilities: [AICapability.CHAT] });
           if (process.env.ANTHROPIC_API_KEY) providers.push({ provider: "anthropic", apiKey: process.env.ANTHROPIC_API_KEY, model: "claude-3-haiku-20240307", capabilities: [AICapability.CHAT] });
