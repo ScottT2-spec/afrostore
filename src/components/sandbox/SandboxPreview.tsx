@@ -4,6 +4,7 @@ import { useEffect, useRef, useState } from "react";
 import { Loader2 } from "lucide-react";
 import { api } from "@/lib/api-client";
 import { RenderTemplateBlocks, type TemplateBlock } from "@/components/storefront/TemplateBlockRenderer";
+import { TemplateStoreContextProvider } from "@/components/storefront/TemplateStoreContextProvider";
 
 interface SandboxSession {
   id: string;
@@ -47,6 +48,24 @@ export function SandboxPreview({
   const [session, setSession] = useState<SandboxSession | null>(initialSession ?? null);
   const [sandboxUnavailable, setSandboxUnavailable] = useState(!files && !initialSession);
   const pollRef = useRef<ReturnType<typeof setInterval> | null>(null);
+
+  // Minimal site context for the block-fallback render path below. Without
+  // this, RenderTemplateBlocks was called completely bare — no storeSlug/
+  // currency, no TemplateStoreContextProvider — so any bespoke-template
+  // block (forms especially) rendered as broken in THIS preview even
+  // though the real live page (which does wrap this correctly) would work
+  // fine once published. That mismatch was the actual bug: the preview
+  // was lying about what would actually go live.
+  const [storeContext, setStoreContext] = useState<{ storeSlug: string; currency: string } | null>(null);
+  useEffect(() => {
+    let cancelled = false;
+    api.get<{ slug: string; currency: string }>(`/api/sites/${siteId}`).then((res) => {
+      if (!cancelled && res.success && res.data) {
+        setStoreContext({ storeSlug: res.data.slug, currency: res.data.currency || "NGN" });
+      }
+    }).catch(() => {});
+    return () => { cancelled = true; };
+  }, [siteId]);
 
   // A session passed in from the parent (already created) always wins —
   // sync it in rather than re-deriving from `files`, and skip straight
@@ -116,7 +135,18 @@ export function SandboxPreview({
   }, [session?.id, initialSession]);
 
   if (sandboxUnavailable || (!files && !initialSession)) {
-    return <RenderTemplateBlocks blocks={blocks} />;
+    if (!storeContext) return <RenderTemplateBlocks blocks={blocks} />;
+    return (
+      <TemplateStoreContextProvider
+        templateSlug={null}
+        products={[]}
+        blogs={[]}
+        currency={storeContext.currency}
+        storeSlug={storeContext.storeSlug}
+      >
+        <RenderTemplateBlocks blocks={blocks} />
+      </TemplateStoreContextProvider>
+    );
   }
 
   if (!session || session.status === "creating") {
