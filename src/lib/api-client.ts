@@ -54,7 +54,26 @@ class ApiClient {
       });
 
       const text = await res.text();
-      const json = text ? JSON.parse(text) : null;
+      let json: any = null;
+      if (text) {
+        try {
+          json = JSON.parse(text);
+        } catch {
+          // Server returned something that isn't JSON at all - an HTML
+          // error page from a crash, a gateway timeout, an auth redirect,
+          // etc. Log the full raw body so the real cause is inspectable
+          // in devtools/log aggregation, and surface real diagnostic
+          // detail (status + a snippet of the actual body) instead of
+          // leaking the raw parser error ("Unrecognized token '<'") or
+          // hiding it behind a fully generic message.
+          console.error(`[api-client] Non-JSON response from ${path} (status ${res.status}):`, text);
+          const snippet = text.replace(/\s+/g, " ").trim().slice(0, 200);
+          return {
+            success: false,
+            error: `Server returned an invalid response (HTTP ${res.status}): ${snippet || "empty body"}`,
+          };
+        }
+      }
 
       if (!res.ok) {
         return {
