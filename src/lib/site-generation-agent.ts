@@ -113,10 +113,12 @@ export interface RunSiteGenerationOptions {
   priorMessages?: AIMessage[];
   /** Called after every tool executes — for streaming live progress to a UI. */
   onStep?: (step: SiteGenerationStep) => void;
+  /** Checked at the top of every iteration — return true to stop the run immediately (a merchant-triggered cancel). */
+  shouldCancel?: () => Promise<boolean>;
 }
 
 export async function runSiteGenerationAgent(opts: RunSiteGenerationOptions): Promise<SiteGenerationResult> {
-  const { ai, siteId, storeName, storeSlug, industry, siteType, task, maxIterations = 15, priorMessages, onStep } = opts;
+  const { ai, siteId, storeName, storeSlug, industry, siteType, task, maxIterations = 15, priorMessages, onStep, shouldCancel } = opts;
   const rules = getSiteIntentRules(siteType);
 
   const messages: AIMessage[] = priorMessages?.length
@@ -132,6 +134,9 @@ export async function runSiteGenerationAgent(opts: RunSiteGenerationOptions): Pr
   let askCount = priorMessages?.filter((m) => m.role === "assistant" && m.toolCalls?.some((t) => t.function.name === "ask_user")).length || 0;
 
   for (let iteration = 0; iteration < maxIterations; iteration++) {
+    if (shouldCancel && (await shouldCancel())) {
+      throw new SiteGenerationError("Generation was cancelled.");
+    }
     const result = await ai.chat({
       capability: AICapability.FUNCTION_CALLING,
       messages,
@@ -264,7 +269,12 @@ async function executeTool(
 
         const created = await prisma.page.upsert({
           where: { siteId_slug: { siteId, slug } },
-          create: { siteId, slug, title: parsed.title, type: parsed.type, content: blocks as object, isPublished: true },
+          // Draft by default - isPublished: true would make this live on
+          // the real public storefront the instant one page exists,
+          // violating "preview != live until explicit Publish" (a
+          // top-level goal, not just a nice-to-have). An explicit human
+          // publish action flips this, not the agent itself finishing a task.
+          create: { siteId, slug, title: parsed.title, type: parsed.type, content: blocks as object, isPublished: false },
           update: { title: parsed.title, content: blocks as object },
         });
         // Snapshot the resulting state, not the pre-change one — undo

@@ -224,10 +224,12 @@ export interface RunCodingAgentOptions {
   maxIterations?: number;
   /** Called after every tool execution — for streaming progress to a UI later. */
   onStep?: (step: CodingAgentStep) => void;
+  /** Checked at the top of every iteration — return true to stop the run immediately (a merchant-triggered cancel). */
+  shouldCancel?: () => Promise<boolean>;
 }
 
 export async function runCodingAgent(opts: RunCodingAgentOptions): Promise<CodingAgentResult> {
-  const { ai, sandboxExternalId, task, siteId, source = "live", maxIterations = 20, onStep } = opts;
+  const { ai, sandboxExternalId, task, siteId, source = "live", maxIterations = 20, onStep, shouldCancel } = opts;
 
   const run = await prisma.codingAgentRun.create({
     data: { siteId, sandboxExternalId, task, status: "running", source },
@@ -257,6 +259,9 @@ export async function runCodingAgent(opts: RunCodingAgentOptions): Promise<Codin
   try {
     for (let iteration = 0; iteration < maxIterations; iteration++) {
       completedIterations = iteration + 1;
+      if (shouldCancel && (await shouldCancel())) {
+        throw new CodingAgentError("Generation was cancelled.");
+      }
       let result = await ai.chat({
         // Once a screenshot's been taken, its image stays in the message
         // history for every turn from here on — not just the next one.

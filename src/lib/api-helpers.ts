@@ -194,6 +194,17 @@ export function generateSubdomain(name: string): string {
  * checked globally). buildData receives the candidate slug and returns
  * the full create payload for that attempt.
  */
+// Reserved/system subdomains that must never be assignable to a merchant
+// site - both obvious platform routes (www, api, admin) and words that
+// would be actively confusing or abusable as a storefront subdomain.
+const RESERVED_SUBDOMAINS = new Set([
+  "www", "api", "admin", "app", "dashboard", "mail", "email", "ftp",
+  "blog", "help", "support", "status", "docs", "cdn", "assets", "static",
+  "prosell", "prokip", "afrostore", "root", "test", "staging", "dev",
+  "billing", "payments", "checkout", "auth", "login", "signup", "account",
+  "store", "shop", "null", "undefined", "system",
+]);
+
 export async function createSiteWithUniqueSlug<T>(
   baseName: string,
   buildData: (slug: string) => Parameters<typeof prisma.site.create>[0]["data"],
@@ -202,7 +213,14 @@ export async function createSiteWithUniqueSlug<T>(
   const base = slugify(baseName) || `store-${generateId().slice(0, 6)}`;
   let lastErr: unknown;
   for (let attempt = 0; attempt < maxAttempts; attempt++) {
-    const candidateSlug = attempt === 0 ? base : `${base}-${Math.random().toString(36).slice(2, 6)}`;
+    let candidateSlug = attempt === 0 ? base : `${base}-${Math.random().toString(36).slice(2, 6)}`;
+    // A reserved word is treated exactly like a collision - append a
+    // suffix and retry, rather than silently allowing "admin" or "www"
+    // to become a live merchant subdomain just because it happened to be
+    // free.
+    if (RESERVED_SUBDOMAINS.has(candidateSlug.toLowerCase())) {
+      candidateSlug = `${candidateSlug}-${Math.random().toString(36).slice(2, 6)}`;
+    }
     try {
       return (await prisma.site.create({ data: buildData(candidateSlug) })) as T;
     } catch (err: any) {

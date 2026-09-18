@@ -124,9 +124,15 @@ export default function AIBuilderPage({ params }: { params: Promise<{ siteId: st
     setPublishError(null);
 
     if (!session) {
-      // Structured/block-based site — pages are already live the moment
-      // they're created (isPublished: true), no separate publish step.
-      // "Publish" here just means "show me the live URL".
+      // Structured/block-based site — pages start as drafts now, so
+      // actually publish them first (the real "preview != live until
+      // explicit Publish" flip), then show the live URL.
+      const publishRes = await api.post<{ published: boolean; pagesPublished: number }>(`/api/sites/${siteId}/publish-pages`, {});
+      if (!publishRes.success) {
+        setPublishing(false);
+        setPublishError(publishRes.error || "Publish failed. Please try again.");
+        return;
+      }
       const siteRes = await api.get<{ subdomain: string }>(`/api/sites/${siteId}`);
       setPublishing(false);
       if (siteRes.success && siteRes.data) {

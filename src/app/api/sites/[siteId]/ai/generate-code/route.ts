@@ -47,17 +47,20 @@ export async function POST(req: NextRequest, { params }: Params) {
   const task = typeof body?.task === "string" ? body.task.trim() : "";
   if (!task) return error("task is required — describe what you want built or changed.", 400);
   const priorMessages: AIMessage[] | undefined = Array.isArray(body?.priorMessages) ? body.priorMessages : undefined;
-  const idempotencyKey = typeof body?.idempotencyKey === "string" ? body.idempotencyKey : null;
+  const idempotencyKey = typeof body?.idempotencyKey === "string" ? body.idempotencyKey : `auto-${crypto.randomUUID()}`;
 
   const rl = rateLimit(`ai-generate-code:${ctx.user!.id}`, 10, 15 * 60 * 1000);
   if (!rl.allowed) return rateLimitedResponse(rl.retryAfterMs);
 
-  // Idempotency: create the row first, racing on the (siteId, key) unique
-  // constraint rather than check-then-insert, which would have a window
-  // for two near-simultaneous requests with the same key to both pass a
-  // "does it exist" check before either writes.
+  // A request row is ALWAYS created now, not only when the client passed
+  // a real idempotencyKey - cancellation needs a durable id to reference
+  // regardless of whether the caller cares about idempotent retries.
+  // Racing on the (siteId, key) unique constraint rather than
+  // check-then-insert avoids a window for two near-simultaneous requests
+  // with the same key to both pass a "does it exist" check before either
+  // writes.
   let buildRequestId: string | null = null;
-  if (idempotencyKey) {
+  {
     try {
       const created = await prisma.aiBuildRequest.create({ data: { siteId, idempotencyKey, status: "running" } });
       buildRequestId = created.id;
@@ -69,34 +72,42 @@ export async function POST(req: NextRequest, { params }: Params) {
       if (existing?.status === "running") {
         return error("A generation with this idempotency key is already in progress.", 409);
       }
-      // status === "failed" (or a race we lost) - allow a genuine retry.
+      // status === "failed"/"cancelled" (or a race we lost) - allow a genuine retry.
       if (existing) {
-        await prisma.aiBuildRequest.update({ where: { id: existing.id }, data: { status: "running", responseJson: undefined } });
+        await prisma.aiBuildRequest.update({ where: { id: existing.id }, data: { status: "running", cancelRequested: false, responseJson: undefined } });
         buildRequestId = existing.id;
       }
     }
   }
 
+  const shouldCancel = buildRequestId
+    ? async () => {
+        const row = await prisma.aiBuildRequest.findUnique({ where: { id: buildRequestId! }, select: { cancelRequested: true } });
+        return row?.cancelRequested ?? false;
+      }
+    : undefined;
+
   const wantsStream = (req.headers.get("accept") || "").includes("text/event-stream");
 
-  async function finish(resultBody: Record<string, unknown>, failed: boolean) {
+  async function finish(resultBody: Record<string, unknown>, failed: boolean, cancelled = false) {
     if (buildRequestId) {
       await prisma.aiBuildRequest.update({
         where: { id: buildRequestId },
-        data: { status: failed ? "failed" : "completed", responseJson: failed ? undefined : resultBody, completedAt: new Date() },
+        data: { status: cancelled ? "cancelled" : failed ? "failed" : "completed", responseJson: failed || cancelled ? undefined : resultBody, completedAt: new Date() },
       }).catch(() => {}); // best-effort - don't fail the actual response over telemetry bookkeeping
     }
   }
 
   if (!wantsStream) {
     try {
-      const resultBody = await runGeneration(ctx, siteId, task, priorMessages);
+      const resultBody = await runGeneration(ctx, siteId, task, priorMessages, undefined, shouldCancel);
       await finish(resultBody, false);
-      return success(resultBody);
+      return success({ ...resultBody, requestId: buildRequestId });
     } catch (e) {
-      await finish({}, true);
+      const cancelled = e instanceof Error && e.message === "Generation was cancelled.";
+      await finish({}, !cancelled, cancelled);
       const message = e instanceof Error ? e.message : "Generation failed";
-      return error(message, 500);
+      return error(message, cancelled ? 499 : 500);
     }
   }
 
@@ -105,11 +116,12 @@ export async function POST(req: NextRequest, { params }: Params) {
       const encoder = new TextEncoder();
       const send = (evt: ProgressEvent) => controller.enqueue(encoder.encode(`event: ${evt.type}\ndata: ${JSON.stringify(evt)}\n\n`));
       try {
-        const resultBody = await runGeneration(ctx, siteId, task, priorMessages, (s) => send({ type: "step", tool: s.tool, isError: s.isError }));
+        const resultBody = await runGeneration(ctx, siteId, task, priorMessages, (s) => send({ type: "step", tool: s.tool, isError: s.isError }), shouldCancel);
         await finish(resultBody, false);
-        send({ type: "done", body: resultBody });
+        send({ type: "done", body: { ...resultBody, requestId: buildRequestId } });
       } catch (e) {
-        await finish({}, true);
+        const cancelled = e instanceof Error && e.message === "Generation was cancelled.";
+        await finish({}, !cancelled, cancelled);
         send({ type: "error", message: e instanceof Error ? e.message : "Generation failed" });
       } finally {
         controller.close();
@@ -132,7 +144,8 @@ async function runGeneration(
   siteId: string,
   task: string,
   priorMessages: AIMessage[] | undefined,
-  onStep?: (s: SiteGenerationStep | CodingAgentStep) => void
+  onStep?: (s: SiteGenerationStep | CodingAgentStep) => void,
+  shouldCancel?: () => Promise<boolean>
 ): Promise<Record<string, unknown>> {
   try {
     const result = await runSiteGenerationAgent({
@@ -145,6 +158,7 @@ async function runGeneration(
       task,
       priorMessages,
       onStep,
+      shouldCancel,
     });
 
     if (result.pendingQuestion) {
@@ -222,6 +236,7 @@ async function runGeneration(
       siteId,
       source: "live",
       onStep,
+      shouldCancel,
     });
 
     await prisma.sandboxSession.update({ where: { id: session.id }, data: { lastActiveAt: new Date() } });
@@ -243,4 +258,27 @@ async function runGeneration(
     console.error("generate-code failed:", e);
     throw new Error(message);
   }
+}
+
+// DELETE /api/sites/:siteId/ai/generate-code  { requestId }
+// Requests cancellation of an in-flight generation - the agent loop
+// checks this flag at the top of every iteration and stops as soon as it
+// sees it, rather than running to completion regardless.
+export async function DELETE(req: NextRequest, { params }: Params) {
+  const { siteId } = await params;
+  const ctx = await getStoreContext(req, siteId);
+  if (ctx.error) return ctx.user ? error(ctx.error, 403) : unauthorized();
+
+  const body = await req.json().catch(() => ({}));
+  const requestId = typeof body?.requestId === "string" ? body.requestId : null;
+  if (!requestId) return error("requestId is required", 400);
+
+  const request = await prisma.aiBuildRequest.findFirst({ where: { id: requestId, siteId } });
+  if (!request) return error("Request not found", 404);
+  if (request.status !== "running") {
+    return success({ cancelled: false, reason: `Request is already ${request.status}, not running.` });
+  }
+
+  await prisma.aiBuildRequest.update({ where: { id: requestId }, data: { cancelRequested: true } });
+  return success({ cancelled: true });
 }

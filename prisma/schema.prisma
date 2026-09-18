@@ -904,14 +904,15 @@ model PageVersion {
 // also rate-limits genuine double-clicks: a second request with the same
 // key while the first is still in flight gets a 409, not a second run.
 model AiBuildRequest {
-  id             String    @id @default(cuid())
-  siteId         String
-  idempotencyKey String
-  status         String    @default("running") // running | completed | failed
-  responseJson   Json?
-  createdAt      DateTime  @default(now())
-  completedAt    DateTime?
-  site           Site      @relation(fields: [siteId], references: [id], onDelete: Cascade)
+  id              String    @id @default(cuid())
+  siteId          String
+  idempotencyKey  String
+  status          String    @default("running") // running | completed | failed | cancelled
+  cancelRequested Boolean   @default(false)
+  responseJson    Json?
+  createdAt       DateTime  @default(now())
+  completedAt     DateTime?
+  site            Site      @relation(fields: [siteId], references: [id], onDelete: Cascade)
 
   @@unique([siteId, idempotencyKey])
   @@index([siteId])
