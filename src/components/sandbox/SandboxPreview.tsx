@@ -3,8 +3,7 @@
 import { useEffect, useRef, useState } from "react";
 import { Loader2 } from "lucide-react";
 import { api } from "@/lib/api-client";
-import { RenderTemplateBlocks, type TemplateBlock } from "@/components/storefront/TemplateBlockRenderer";
-import { TemplateStoreContextProvider } from "@/components/storefront/TemplateStoreContextProvider";
+import { RenderBlocks, type BuilderBlock } from "@/components/storefront/BlockRenderer";
 
 interface SandboxSession {
   id: string;
@@ -42,7 +41,7 @@ export function SandboxPreview({
 }: {
   siteId: string;
   files?: Record<string, string>;
-  blocks: TemplateBlock[];
+  blocks: BuilderBlock[];
   session?: SandboxSession | null;
 }) {
   const [session, setSession] = useState<SandboxSession | null>(initialSession ?? null);
@@ -50,12 +49,12 @@ export function SandboxPreview({
   const pollRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
   // Minimal site context for the block-fallback render path below. Without
-  // this, RenderTemplateBlocks was called completely bare — no storeSlug/
-  // currency, no TemplateStoreContextProvider — so any bespoke-template
-  // block (forms especially) rendered as broken in THIS preview even
-  // though the real live page (which does wrap this correctly) would work
-  // fine once published. That mismatch was the actual bug: the preview
-  // was lying about what would actually go live.
+  // this, the render call was completely bare — no storeSlug/currency, no
+  // TemplateStoreContextProvider — so any bespoke-template block (forms
+  // especially) rendered as broken in THIS preview even though the real
+  // live page (which does wrap this correctly) would work fine once
+  // published. That mismatch was the actual bug: the preview was lying
+  // about what would actually go live.
   const [storeContext, setStoreContext] = useState<{ storeSlug: string; currency: string } | null>(null);
   useEffect(() => {
     let cancelled = false;
@@ -135,7 +134,7 @@ export function SandboxPreview({
   }, [session?.id, initialSession]);
 
   if (sandboxUnavailable || (!files && !initialSession)) {
-    if (!storeContext) return <RenderTemplateBlocks blocks={blocks} />;
+    if (!storeContext) return <RenderBlocks blocks={blocks} />;
     return (
       <TemplateStoreContextProvider
         templateSlug={null}
@@ -144,7 +143,7 @@ export function SandboxPreview({
         currency={storeContext.currency}
         storeSlug={storeContext.storeSlug}
       >
-        <RenderTemplateBlocks blocks={blocks} />
+        <RenderBlocks blocks={blocks} storeSlug={storeContext.storeSlug} currency={storeContext.currency} />
       </TemplateStoreContextProvider>
     );
   }
