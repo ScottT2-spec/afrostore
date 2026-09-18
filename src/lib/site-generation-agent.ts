@@ -41,6 +41,7 @@ import { buildDynamicHomePage } from "@/lib/ai-layout-engine";
 import { getRandomIndustryImages } from "@/lib/ai-image-pools";
 
 import { getSiteIntentRules, type SiteIntentRules } from "@/lib/site-intent";
+import { detectSensitiveCategory, getGuardrailPromptRules, scanForSafetyViolations, extractTextFromContent, type SensitiveCategory } from "@/lib/site-safety";
 
 function toToolParameters(schema: z.ZodType<unknown>): Record<string, unknown> {
   const jsonSchema = z.toJSONSchema(schema, { target: "draft-7" }) as Record<string, unknown>;
@@ -64,10 +65,11 @@ const TOOL_DEFS: AITool[] = [
   { type: "function", function: { name: "finalize_draft", description: "Call this once the site genuinely reflects what the merchant asked for. Ends the session.", parameters: toToolParameters(finalizeDraftSchema) } },
 ];
 
-function buildSystemPrompt(rules: SiteIntentRules): string {
+function buildSystemPrompt(rules: SiteIntentRules, safetyCategory: SensitiveCategory | null): string {
   return `You are building a real e-commerce/business/landing site for an African SMB merchant, from their plain-language description. You can ONLY act through the tools you're given — there is no code, no files, nothing outside this specific tool set.
 
 ${rules.promptRules}
+${safetyCategory ? `\n${getGuardrailPromptRules(safetyCategory)}\n` : ""}
 
 Rules:
 - Default currency is NGN unless the merchant's prompt says otherwise.
@@ -120,11 +122,13 @@ export interface RunSiteGenerationOptions {
 export async function runSiteGenerationAgent(opts: RunSiteGenerationOptions): Promise<SiteGenerationResult> {
   const { ai, siteId, storeName, storeSlug, industry, siteType, task, maxIterations = 15, priorMessages, onStep, shouldCancel } = opts;
   const rules = getSiteIntentRules(siteType);
+  const safetyMatch = detectSensitiveCategory(`${task} ${industry}`);
+  const safetyCategory = safetyMatch?.tier === "guardrail" ? safetyMatch.category : null;
 
   const messages: AIMessage[] = priorMessages?.length
     ? [...priorMessages, { role: "user", content: task }]
     : [
-        { role: "system", content: buildSystemPrompt(rules) },
+        { role: "system", content: buildSystemPrompt(rules, safetyCategory) },
         { role: "user", content: task },
       ];
 
@@ -213,11 +217,30 @@ export async function runSiteGenerationAgent(opts: RunSiteGenerationOptions): Pr
             onStep?.(rejectionStep);
             continue;
           }
+
+          if (safetyCategory) {
+            // Real check against the actual generated text, not the
+            // prompt's instructions — the copy came from a separate
+            // nested LLM call that could ignore or drift from guardrail
+            // wording, same reasoning as site-intent's DB-state check.
+            const pages = await prisma.page.findMany({ where: { siteId }, select: { content: true } });
+            const allText = pages.map((p: { content: unknown }) => extractTextFromContent(p.content)).join(" \n ");
+            const safetyViolations = scanForSafetyViolations(safetyCategory, allText);
+            if (safetyViolations.length > 0) {
+              const message = `finalize_draft was rejected — this is a regulated business category with mandatory content rules that aren't met yet:\n${safetyViolations.map((v) => `- ${v.detail}`).join("\n")}\nFix these, then call finalize_draft again.`;
+              messages.push({ role: "tool", toolCallId: call.id, content: message });
+              const rejectionStep: SiteGenerationStep = { tool: name, args, result: message, isError: true };
+              steps.push(rejectionStep);
+              onStep?.(rejectionStep);
+              continue;
+            }
+          }
+
           return { summary: parsed.data.summary, steps, provider: lastProvider, model: lastModel, messages };
         }
       }
 
-      const { result: toolResult, isError } = await executeTool(siteId, storeName, storeSlug, industry, ai, name, args);
+      const { result: toolResult, isError } = await executeTool(siteId, storeName, storeSlug, industry, ai, name, args, safetyCategory);
       const step: SiteGenerationStep = { tool: name, args, result: toolResult, isError };
       steps.push(step);
       onStep?.(step);
@@ -235,7 +258,8 @@ async function executeTool(
   industry: string,
   ai: AIFailover,
   name: string,
-  args: unknown
+  args: unknown,
+  safetyCategory: SensitiveCategory | null
 ): Promise<{ result: string; isError: boolean }> {
   try {
     switch (name) {
@@ -252,7 +276,7 @@ async function executeTool(
           schema: storeGenerationSchema,
           toolName: "generate_page_content",
           toolDescription: `Generates real, on-brand content for a ${parsed.type} page with these sections: ${parsed.sections.join(", ")}.`,
-          systemPrompt: "You are a senior brand copywriter. Always call generate_page_content — never reply with plain text. Never write placeholder/lorem-ipsum copy.",
+          systemPrompt: `You are a senior brand copywriter. Always call generate_page_content — never reply with plain text. Never write placeholder/lorem-ipsum copy.${safetyCategory ? `\n\n${getGuardrailPromptRules(safetyCategory)}` : ""}`,
           userPrompt: `Business: ${storeName} (${industry}). Page: "${parsed.title}" (${parsed.type}). Sections in order: ${parsed.sections.join(", ")}. Write real, specific content — no generic filler.`,
           maxTokens: 6000,
           temperature: 0.7,

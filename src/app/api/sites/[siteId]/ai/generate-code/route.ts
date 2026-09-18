@@ -10,6 +10,7 @@ import { getDecryptedSecrets } from "@/lib/sandbox/secrets";
 import { getAIFailover } from "@/lib/ai-service";
 import { runCodingAgent, CodingAgentError, type CodingAgentStep } from "@/lib/coding-agent";
 import { runSiteGenerationAgent, type SiteGenerationStep } from "@/lib/site-generation-agent";
+import { detectSensitiveCategory } from "@/lib/site-safety";
 import type { AIMessage } from "@/lib/failover";
 
 type Params = { params: Promise<{ siteId: string }> };
@@ -78,6 +79,20 @@ export async function POST(req: NextRequest, { params }: Params) {
         buildRequestId = existing.id;
       }
     }
+  }
+
+  // Matches the PRD's own explicit edge case: illegal/refused categories
+  // get no site at all, checked before any AI call is made (saves a real
+  // generation cost too, not just a safety measure).
+  const refusal = detectSensitiveCategory(`${task} ${ctx.site?.businessType || ""}`);
+  if (refusal?.tier === "refuse") {
+    if (buildRequestId) {
+      await prisma.aiBuildRequest.update({ where: { id: buildRequestId }, data: { status: "failed", completedAt: new Date() } }).catch(() => {});
+    }
+    return success({
+      mode: "refused",
+      reason: "This request falls into a category we can't generate a site for on this platform. If you believe this is a mistake, please contact support.",
+    });
   }
 
   const shouldCancel = buildRequestId
