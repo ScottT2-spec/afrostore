@@ -60,8 +60,15 @@ export async function POST(req: NextRequest, { params }: Params) {
   // check-then-insert avoids a window for two near-simultaneous requests
   // with the same key to both pass a "does it exist" check before either
   // writes.
+  //
+  // Wrapped defensively: idempotency/cancel tracking is a best-effort
+  // convenience layered on top of generation, not load-bearing for it -
+  // if this table/query fails for any reason (e.g. a migration that
+  // hasn't finished rolling out yet), buildRequestId just stays null and
+  // generation proceeds without idempotency/cancel support for this one
+  // request, instead of the whole feature going down over it.
   let buildRequestId: string | null = null;
-  {
+  try {
     try {
       const created = await prisma.aiBuildRequest.create({ data: { siteId, idempotencyKey, status: "running" } });
       buildRequestId = created.id;
@@ -79,6 +86,9 @@ export async function POST(req: NextRequest, { params }: Params) {
         buildRequestId = existing.id;
       }
     }
+  } catch (trackingErr) {
+    console.error("ai_build_requests tracking unavailable, continuing without idempotency/cancel support:", trackingErr);
+    buildRequestId = null;
   }
 
   // Matches the PRD's own explicit edge case: illegal/refused categories
