@@ -6,7 +6,7 @@ import { ArrowLeft, Check, ExternalLink, Loader2, Send, Sparkles } from "lucide-
 import { api } from "@/lib/api-client";
 import { parsePageContent } from "@/lib/page-content";
 import { SandboxPreview } from "@/components/sandbox/SandboxPreview";
-import type { TemplateBlock } from "@/components/storefront/TemplateBlockRenderer";
+import type { BuilderBlock } from "@/components/storefront/BlockRenderer";
 
 interface SiteRecord {
   id: string;
@@ -64,7 +64,7 @@ export default function AIBuilderPage({ params }: { params: Promise<{ siteId: st
   const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [input, setInput] = useState("");
   const [generating, setGenerating] = useState(false);
-  const [previewBlocks, setPreviewBlocks] = useState<TemplateBlock[]>([]);
+  const [previewBlocks, setPreviewBlocks] = useState<BuilderBlock[]>([]);
   const [session, setSession] = useState<SandboxSessionResult | null>(null);
   const [pendingQuestion, setPendingQuestion] = useState<{ question: string; options?: string[] } | null>(null);
   const priorMessagesRef = useRef<unknown[] | null>(null);
@@ -114,7 +114,7 @@ export default function AIBuilderPage({ params }: { params: Promise<{ siteId: st
     if (!home) return;
     const res = await api.get<{ content: unknown }>(`/api/sites/${siteId}/pages/${home.id}`);
     if (res.success && res.data) {
-      setPreviewBlocks(parsePageContent(res.data.content).blocks as unknown as TemplateBlock[]);
+      setPreviewBlocks(parsePageContent(res.data.content).blocks as unknown as BuilderBlock[]);
     }
   };
 
