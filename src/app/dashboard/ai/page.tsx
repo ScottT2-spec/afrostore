@@ -8,6 +8,8 @@ import { useAuth } from "@/context/AuthContext";
 import { useSite } from "@/context/StoreContext";
 import { useAIAction } from "@/context/AIActionContext";
 import { api } from "@/lib/api-client";
+import ReactMarkdown from "react-markdown";
+import remarkGfm from "remark-gfm";
 
 // ─── Types ──────────────────────────────────────────────────
 
@@ -458,8 +460,23 @@ export default function AIPage() {
                       </div>
                     )}
 
-                    {/* Message content */}
-                    <p className="whitespace-pre-wrap">{msg.content}</p>
+                    {/* Message content — was raw markdown dumped as plain
+                        text (literal **bold**, ### headers, |table|syntax|,
+                        <br> tags all shown to the user verbatim instead of
+                        rendering). react-markdown handles the standard
+                        syntax; GFM is needed for the pipe-table syntax the
+                        AI actually uses. <br> tags aren't real markdown, so
+                        they're normalized to newlines first rather than
+                        pulling in a raw-HTML plugin for just this one case. */}
+                    <div
+                      className={`prose-chat max-w-none text-sm [&>*:first-child]:mt-0 [&>*:last-child]:mb-0 ${
+                        msg.role === "user" ? "prose-chat-invert" : ""
+                      }`}
+                    >
+                      <ReactMarkdown remarkPlugins={[remarkGfm]}>
+                        {msg.content.replace(/<br\s*\/?>/gi, "\n")}
+                      </ReactMarkdown>
+                    </div>
 
                     {/* Verification card */}
                     {msg.verification && (

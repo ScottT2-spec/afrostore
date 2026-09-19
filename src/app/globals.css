@@ -304,3 +304,32 @@
 .sidebar-nav::-webkit-scrollbar-track { background: transparent; }
 .sidebar-nav::-webkit-scrollbar-thumb { background: #d1d5db; border-radius: 9999px; }
 .sidebar-nav:hover::-webkit-scrollbar-thumb { background: #9ca3af; }
+
+/* AI chat markdown rendering (dashboard/ai — the AI Co-Founder chat).
+   Not using @tailwindcss/typography here: scoped, small enough to hand-write
+   directly against this chat's own two bubble colors instead of pulling in
+   a whole plugin + its own dependency/lockfile update for one component. */
+.prose-chat :where(p) { margin: 0 0 0.75em; line-height: 1.6; }
+.prose-chat :where(h1, h2, h3) { font-weight: 700; margin: 1em 0 0.4em; line-height: 1.3; }
+.prose-chat :where(h1) { font-size: 1.15em; }
+.prose-chat :where(h2) { font-size: 1.08em; }
+.prose-chat :where(h3) { font-size: 1.02em; }
+.prose-chat :where(strong) { font-weight: 700; }
+.prose-chat :where(ul, ol) { margin: 0 0 0.75em; padding-left: 1.25em; }
+.prose-chat :where(ul) { list-style: disc; }
+.prose-chat :where(ol) { list-style: decimal; }
+.prose-chat :where(li) { margin: 0.2em 0; line-height: 1.55; }
+.prose-chat :where(a) { color: var(--color-brand-600); text-decoration: underline; text-underline-offset: 2px; }
+.prose-chat :where(code) { background: rgba(0,0,0,0.06); border-radius: 4px; padding: 0.1em 0.35em; font-size: 0.9em; }
+.prose-chat :where(hr) { border: none; border-top: 1px solid var(--color-surface-200); margin: 0.9em 0; }
+.prose-chat :where(table) { width: 100%; border-collapse: collapse; margin: 0.5em 0 0.9em; font-size: 0.92em; }
+.prose-chat :where(th, td) { border: 1px solid var(--color-surface-200); padding: 0.4em 0.6em; text-align: left; vertical-align: top; }
+.prose-chat :where(th) { background: rgba(0,0,0,0.03); font-weight: 700; }
+
+/* User bubble is bg-brand-600 (dark) with white text — invert borders/
+   backgrounds so the table/code/rule styling above stays legible on it. */
+.prose-chat-invert :where(a) { color: #fff; }
+.prose-chat-invert :where(code) { background: rgba(255,255,255,0.15); }
+.prose-chat-invert :where(hr) { border-top-color: rgba(255,255,255,0.25); }
+.prose-chat-invert :where(th, td) { border-color: rgba(255,255,255,0.25); }
+.prose-chat-invert :where(th) { background: rgba(255,255,255,0.1); }
