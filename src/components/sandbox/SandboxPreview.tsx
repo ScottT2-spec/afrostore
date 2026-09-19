@@ -4,6 +4,7 @@ import { useEffect, useRef, useState } from "react";
 import { Loader2 } from "lucide-react";
 import { api } from "@/lib/api-client";
 import { RenderBlocks, type BuilderBlock } from "@/components/storefront/BlockRenderer";
+import { TemplateStoreContextProvider } from "@/components/storefront/TemplateStoreContextProvider";
 
 interface SandboxSession {
   id: string;
