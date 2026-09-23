@@ -25,7 +25,8 @@ const PRICING: Record<string, ModelPricing> = {
   "anthropic:claude-3-haiku-20240307": { input: 0.25, output: 1.25, cacheWrite: 0.3, cacheRead: 0.03 },
   "openai:gpt-4o": { input: 2.5, output: 10.0 },
   "openai:gpt-4o-mini": { input: 0.15, output: 0.6 },
-  "google:gemini-2.0-flash": { input: 0.1, output: 0.4 },
+  "google:gemini-3.6-flash": { input: 1.5, output: 7.5 },
+  "google:gemini-3.5-flash-lite": { input: 0.3, output: 2.5 },
 };
 
 export interface TokenUsage {

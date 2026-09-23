@@ -13,7 +13,7 @@ function getAIProviders(): AIProviderConfig[] {
     providers.push({ provider: "anthropic", apiKey: process.env.ANTHROPIC_API_KEY, model: "claude-3-5-haiku-20241022", capabilities: [AICapability.CHAT] });
   }
   if (process.env.GOOGLE_AI_KEY) {
-    providers.push({ provider: "google", apiKey: process.env.GOOGLE_AI_KEY, model: "gemini-2.0-flash", capabilities: [AICapability.CHAT] });
+    providers.push({ provider: "google", apiKey: process.env.GOOGLE_AI_KEY, model: "gemini-3.6-flash", capabilities: [AICapability.CHAT] });
   }
   const groqKeys = [process.env.GROQ_API_KEY, process.env.GROQ_KEY_2, process.env.GROQ_KEY_3, process.env.GROQ_KEY_4].filter(Boolean) as string[];
   groqKeys.forEach((key, i) => {

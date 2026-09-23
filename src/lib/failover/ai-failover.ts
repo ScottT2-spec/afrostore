@@ -695,10 +695,19 @@ export class AIFailover {
 
     if (request.tools && request.tools.length > 0) {
       // Gemini's function declarations use plain JSON Schema like the
-      // others, but does NOT accept the `additionalProperties` keyword
-      // Zod sometimes emits — strip it recursively rather than fighting
-      // Zod's schema output, since Gemini rejects the whole request over
-      // one unsupported keyword deep in a nested object.
+      // others, but only accept a narrow OpenAPI-3.0-ish subset of it —
+      // it rejects the whole request over a single unsupported keyword
+      // anywhere in the (possibly deeply nested) schema. Strip the ones
+      // Zod's draft-7 output emits that Gemini doesn't understand,
+      // rather than fighting Zod's schema output.
+      //
+      // Known unsupported keywords, from live 400s:
+      //   - additionalProperties, $schema (original)
+      //   - propertyNames   (from z.record() with a validated key schema)
+      //   - exclusiveMinimum / exclusiveMaximum (from z.number().positive()/
+      //     .negative(), draft-7 emits these as numeric bounds; Gemini's
+      //     subset doesn't have them at all — drop the keyword and keep
+      //     the paired minimum/maximum where Zod also emits one)
       //
       // Separately (not fixed here, just documented): Gemini's function
       // calling also rejects `anyOf`/`oneOf`, which is what z.union() and
@@ -706,12 +715,20 @@ export class AIFailover {
       // that might route through Gemini free of top-level unions —
       // prefer a single flexible shape or z.enum() over z.union() where
       // the schema needs to reach every provider.
+      const UNSUPPORTED_SCHEMA_KEYWORDS = new Set([
+        'additionalProperties',
+        '$schema',
+        'propertyNames',
+        'exclusiveMinimum',
+        'exclusiveMaximum',
+        'patternProperties',
+      ]);
       const stripUnsupportedKeywords = (schema: unknown): unknown => {
         if (Array.isArray(schema)) return schema.map(stripUnsupportedKeywords);
         if (schema && typeof schema === 'object') {
           const out: Record<string, unknown> = {};
           for (const [k, v] of Object.entries(schema as Record<string, unknown>)) {
-            if (k === 'additionalProperties' || k === '$schema') continue;
+            if (UNSUPPORTED_SCHEMA_KEYWORDS.has(k)) continue;
             out[k] = stripUnsupportedKeywords(v);
           }
           return out;

@@ -58,8 +58,8 @@ function getAIProviders(): AIProviderConfig[] {
     providers.push({
       provider: "google",
       apiKey: process.env.GOOGLE_AI_KEY,
-      model: "gemini-2.0-flash",
-      fallbackModels: ["gemini-2.0-flash-lite"],
+      model: "gemini-3.6-flash",
+      fallbackModels: ["gemini-3.5-flash-lite"],
       capabilities: [AICapability.CHAT, AICapability.FUNCTION_CALLING, AICapability.VISION],
     });
   }

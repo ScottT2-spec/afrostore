@@ -14,7 +14,7 @@ const INDUSTRIES = [
 function getAIProviders(): AIProviderConfig[] {
   const providers: AIProviderConfig[] = [];
   if (process.env.GROQ_API_KEY) providers.push({ provider: "groq", apiKey: process.env.GROQ_API_KEY, model: "openai/gpt-oss-120b", capabilities: [AICapability.CHAT] });
-  if (process.env.GOOGLE_AI_KEY) providers.push({ provider: "google", apiKey: process.env.GOOGLE_AI_KEY, model: "gemini-2.0-flash", capabilities: [AICapability.CHAT] });
+  if (process.env.GOOGLE_AI_KEY) providers.push({ provider: "google", apiKey: process.env.GOOGLE_AI_KEY, model: "gemini-3.6-flash", capabilities: [AICapability.CHAT] });
   if (process.env.OPENAI_API_KEY) providers.push({ provider: "openai", apiKey: process.env.OPENAI_API_KEY, model: "gpt-4o-mini", capabilities: [AICapability.CHAT] });
   if (process.env.ANTHROPIC_API_KEY) providers.push({ provider: "anthropic", apiKey: process.env.ANTHROPIC_API_KEY, model: "claude-3-5-haiku-20241022", capabilities: [AICapability.CHAT] });
   if (process.env.DEEPSEEK_API_KEY) providers.push({ provider: "deepseek", apiKey: process.env.DEEPSEEK_API_KEY, model: "deepseek-chat", capabilities: [AICapability.CHAT] });
