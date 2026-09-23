@@ -712,22 +712,34 @@ export async function generateStore(input: StoreGeneratorInput): Promise<StoreGe
     buildPoliciesPage(data, input.storeName),
   ];
 
-  // 4. Delete any existing auto-generated pages for this store (fresh start)
-  await prisma.page.deleteMany({
-    where: {
-      siteId: input.siteId,
-      type: { in: ["HOME", "ABOUT", "FAQ", "CONTACT", "POLICY"] },
-    },
-  });
-
-  // 5. Persist all pages to the database
+  // 4. Persist all pages: upsert by (siteId, slug) rather than delete-then
+  //    -create. The old approach deleted every existing HOME/ABOUT/FAQ/
+  //    CONTACT/POLICY page first, then recreated all 5 with Promise.all —
+  //    if a second generateStore() call ran concurrently (e.g. the
+  //    background call from site creation racing a manual "regenerate"
+  //    click) or any single create failed for any reason, Promise.all
+  //    rejected and the whole batch aborted, leaving those pages deleted
+  //    with nothing to replace them: a real, reproducible 404 for
+  //    policies "and others" depending on which create lost the race.
+  //    Upserting by slug is atomic per-page, idempotent under concurrent
+  //    calls, and never leaves a page missing mid-regeneration.
   const createdPages = await Promise.all(
     pages.map((page, i) =>
-      prisma.page.create({
-        data: {
+      prisma.page.upsert({
+        where: { siteId_slug: { siteId: input.siteId, slug: page.slug } },
+        create: {
           siteId: input.siteId,
           title: page.title,
           slug: page.slug,
+          type: page.type as any,
+          content: page.blocks as any,
+          metaTitle: page.metaTitle,
+          metaDescription: page.metaDescription,
+          isPublished: true,
+          position: i,
+        },
+        update: {
+          title: page.title,
           type: page.type as any,
           content: page.blocks as any,
           metaTitle: page.metaTitle,

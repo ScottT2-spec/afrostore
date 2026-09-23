@@ -431,7 +431,11 @@ export default function StorePage() {
   const navPageOrder: Record<string, number> = { ABOUT: 0, FAQ: 1, CONTACT: 2, POLICY: 3, CUSTOM: 4, LANDING: 5 };
   const navPages = customizedPages
     .filter((p) => p.type !== "HOME")
-    .sort((a, b) => (navPageOrder[a.type] ?? 99) - (navPageOrder[b.type] ?? 99));
+    // De-dupe by normalized title — see matching comment in
+    // [pageSlug]/page.tsx for why this is needed (bespoke templates
+    // seeding a same-purpose page under a different slug).
+    .sort((a, b) => (navPageOrder[a.type] ?? 99) - (navPageOrder[b.type] ?? 99))
+    .filter((p, i, arr) => arr.findIndex((o) => o.title.trim().toLowerCase() === p.title.trim().toLowerCase()) === i);
   
   // Build dynamic navigation items from actual pages
   const dynamicNavItems = navPages.map((page) => ({

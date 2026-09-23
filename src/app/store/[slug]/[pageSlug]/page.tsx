@@ -269,7 +269,15 @@ export default function StorefrontPage() {
   const navPageOrder: Record<string, number> = { ABOUT: 0, FAQ: 1, CONTACT: 2, POLICY: 3, CUSTOM: 4, LANDING: 5 };
   const navPages = customizedPages
     .filter((p) => p.type !== "HOME")
-    .sort((a, b) => (navPageOrder[a.type] ?? 99) - (navPageOrder[b.type] ?? 99));
+    // De-dupe by normalized title: some bespoke templates seed their own
+    // page under a different slug (e.g. "contact-us") for the same
+    // purpose the generic AI pipeline already created under "contact" —
+    // both survive independently since they don't share a slug, and
+    // without this they both show up here as two identical-looking
+    // "Contact Us" (or "About Us") nav links. Keep the first (lowest
+    // navPageOrder, i.e. the "real" typed page) and drop the rest.
+    .sort((a, b) => (navPageOrder[a.type] ?? 99) - (navPageOrder[b.type] ?? 99))
+    .filter((p, i, arr) => arr.findIndex((o) => o.title.trim().toLowerCase() === p.title.trim().toLowerCase()) === i);
 
   const isToysTemplate = data.templateSlug === "toys" || slug === "toys" || data.store.slug === "toys";
   const isKidsTemplate = !isToysTemplate && (data.templateSlug === "kids" || slug === "kids" || data.store.slug === "kids" || data.store.name?.toLowerCase().includes("kids"));
