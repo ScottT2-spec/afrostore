@@ -1064,7 +1064,13 @@ function ElementRenderer({
             className={`editor-node-${element.id} ${selectionChromeClass}`}
             style={{
               ...editorInlineStyles,
-              backgroundColor: styles.backgroundColor || "#ffffff",
+              // Match PublicBlockRenderer's live behavior exactly: a
+              // section/container with no explicit backgroundColor gets
+              // NO backgroundColor style at all (inherits/transparent),
+              // not a forced white. Forcing white here is what made some
+              // blocks show a plain white slab in the editor that never
+              // matched what the live site actually rendered.
+              ...(styles.backgroundColor ? { backgroundColor: styles.backgroundColor } : {}),
               paddingTop: styles.paddingTop || "60px",
               paddingRight: styles.paddingRight || "0",
               paddingBottom: styles.paddingBottom || "60px",

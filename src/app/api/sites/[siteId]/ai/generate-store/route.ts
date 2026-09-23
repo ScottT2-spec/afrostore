@@ -56,7 +56,7 @@ export async function POST(req: NextRequest, { params }: Params) {
         description,
         industry: classification.industry,
         currency: site.currency || "NGN",
-        count: 12,
+        count: 10,
       });
       productsCreated = productResult.productsCreated;
     } catch (err) {

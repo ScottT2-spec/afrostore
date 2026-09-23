@@ -60,7 +60,7 @@ export interface ProductGeneratorInput {
   description?: string;
   industry: string;
   currency: string;
-  count?: number; // default 12
+  count?: number; // default 10, hard-capped at 10 regardless of what's passed
   targetAudience?: string;
   productsOffered?: string[];
   servicesOffered?: string[];
@@ -73,7 +73,8 @@ export interface ProductGeneratorResult {
 
 /** Ask the AI for a realistic starter catalog (no images yet — those come after). */
 async function generateProductDrafts(input: ProductGeneratorInput): Promise<GeneratedProductDraft[]> {
-  const count = input.count ?? 12;
+  const MAX_PRODUCTS = 10;
+  const count = Math.min(input.count ?? MAX_PRODUCTS, MAX_PRODUCTS);
   const ai = getAI();
 
   const contextLines = [

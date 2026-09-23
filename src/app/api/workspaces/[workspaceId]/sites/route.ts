@@ -354,7 +354,7 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ wor
                   description: description || undefined,
                   industry: classification.industry,
                   currency: siteCurrency,
-                  count: Math.max(sampleData.products.length, 10),
+                  count: 10,
                   targetAudience: targetAudience || undefined,
                   productsOffered,
                   servicesOffered,
