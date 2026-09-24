@@ -268,7 +268,10 @@ function HeroBlock({ props }: { props: Record<string, unknown> }) {
               </AnimateIn>
             )}
             <AnimateIn delay={0.1}>
-              <h1 className="mb-4 text-4xl font-display font-extrabold tracking-tight text-[#242424] sm:text-5xl lg:text-[4.5rem] lg:leading-[1.02] whitespace-pre-line">
+              <h1
+                className="mb-4 text-4xl font-display font-extrabold tracking-tight text-[#242424] sm:text-5xl lg:text-[4.5rem] lg:leading-[1.02] whitespace-pre-line"
+                style={{ fontStyle: props.headingItalic ? "italic" : undefined }}
+              >
                 {(props.heading as string) || "Hero Heading"}
               </h1>
             </AnimateIn>
@@ -356,7 +359,7 @@ function HeroBlock({ props }: { props: Record<string, unknown> }) {
           </AnimateIn>
         )}
           <AnimateIn delay={0.1}>
-          <h1 className={`text-3xl sm:text-4xl lg:text-5xl font-display font-extrabold tracking-tight mb-4 sm:mb-6`} style={textStyle}>
+          <h1 className={`text-3xl sm:text-4xl lg:text-5xl font-display font-extrabold tracking-tight mb-4 sm:mb-6`} style={{ ...textStyle, fontStyle: props.headingItalic ? "italic" : undefined }}>
             {(props.heading as string) || "Hero Heading"}
           </h1>
         </AnimateIn>
@@ -501,8 +504,8 @@ function ProductGridBlock({ props }: { props: Record<string, unknown> }) {
       <div>
         {(props.title as string) && (
           <div className="text-center mb-8">
-            <h3 className="text-2xl sm:text-3xl font-display font-extrabold text-surface-900">{props.title as string}</h3>
-            {(props.subtitle as string) && <p className="text-surface-500 mt-2">{props.subtitle as string}</p>}
+            <h3 className="text-2xl sm:text-3xl font-display font-extrabold text-surface-900" style={textStyleFor(props, "title")}>{props.title as string}</h3>
+            {(props.subtitle as string) && <p className="text-surface-500 mt-2" style={textStyleFor(props, "subtitle")}>{props.subtitle as string}</p>}
           </div>
         )}
         <div className={`grid grid-cols-2 sm:grid-cols-${Math.min(cols, 4)} gap-4 sm:gap-6`}>
@@ -716,11 +719,11 @@ function TestimonialsBlock({ props }: { props: Record<string, unknown> }) {
       <AnimateIn>
         {(props.title as string) && (
           <div className="text-center mb-10 px-6 sm:px-10">
-            <h3 className={`text-2xl sm:text-3xl font-display font-extrabold ${isDark ? "text-white" : "text-surface-900"}`}>
+            <h3 className={`text-2xl sm:text-3xl font-display font-extrabold ${isDark ? "text-white" : "text-surface-900"}`} style={textStyleFor(props, "title")}>
               {props.title as string}
             </h3>
             {(props.subtitle as string) && (
-              <p className={`mt-2 ${isDark ? "text-white/60" : "text-surface-500"}`}>{props.subtitle as string}</p>
+              <p className={`mt-2 ${isDark ? "text-white/60" : "text-surface-500"}`} style={textStyleFor(props, "subtitle")}>{props.subtitle as string}</p>
             )}
           </div>
         )}
@@ -769,6 +772,19 @@ function imageBgStyle(props: Record<string, unknown>, tint = 0.6): React.CSSProp
   };
 }
 
+// Shared per-text style resolver: lets any block expose independent color
+// + italic controls per text field (e.g. titleColor/titleItalic,
+// subtitleColor/subtitleItalic) instead of one shared color for the whole
+// block. Pass the prop prefix used by that block/field.
+function textStyleFor(props: Record<string, unknown>, prefix: string, fallbackColor?: string): React.CSSProperties {
+  const color = (props[`${prefix}Color`] as string) || fallbackColor;
+  const italic = Boolean(props[`${prefix}Italic`]);
+  return {
+    ...(color ? { color } : {}),
+    ...(italic ? { fontStyle: "italic" as const } : {}),
+  };
+}
+
 /* ── Features Grid ───────────────────────────────────────────── */
 function FeaturesBlock({ props }: { props: Record<string, unknown> }) {
   const items = (props.items as Array<{ icon: string; title: string; desc: string }>) || [];
@@ -781,11 +797,11 @@ function FeaturesBlock({ props }: { props: Record<string, unknown> }) {
       {(props.title as string) && (
         <AnimateIn>
           <div className="text-center mb-10">
-            <h3 className={`text-2xl sm:text-3xl font-display font-extrabold ${isDark ? "text-white" : "text-surface-900"}`}>
+            <h3 className={`text-2xl sm:text-3xl font-display font-extrabold ${isDark ? "text-white" : "text-surface-900"}`} style={textStyleFor(props, "title")}>
               {props.title as string}
             </h3>
             {(props.subtitle as string) && (
-              <p className={`mt-2 text-base ${isDark ? "text-white/60" : "text-surface-500"}`}>{props.subtitle as string}</p>
+              <p className={`mt-2 text-base ${isDark ? "text-white/60" : "text-surface-500"}`} style={textStyleFor(props, "subtitle")}>{props.subtitle as string}</p>
             )}
           </div>
         </AnimateIn>
@@ -822,8 +838,8 @@ function FAQBlock({ props }: { props: Record<string, unknown> }) {
       <div className="max-w-3xl mx-auto rounded-3xl py-10 px-4 sm:px-8" style={bgImg || undefined}>
         {(props.title as string) && (
           <div className="text-center mb-8">
-            <h3 className={`text-2xl sm:text-3xl font-display font-extrabold ${bgImg ? "text-white" : "text-surface-900"}`}>{props.title as string}</h3>
-            {(props.subtitle as string) && <p className={`mt-2 ${bgImg ? "text-white/70" : "text-surface-500"}`}>{props.subtitle as string}</p>}
+            <h3 className={`text-2xl sm:text-3xl font-display font-extrabold ${bgImg ? "text-white" : "text-surface-900"}`} style={textStyleFor(props, "title")}>{props.title as string}</h3>
+            {(props.subtitle as string) && <p className={`mt-2 ${bgImg ? "text-white/70" : "text-surface-500"}`} style={textStyleFor(props, "subtitle")}>{props.subtitle as string}</p>}
           </div>
         )}
         <div className="space-y-3">
@@ -894,7 +910,7 @@ function ContactFormBlock({ props }: { props: Record<string, unknown> }) {
     <AnimateIn>
       <div className="rounded-3xl py-10 px-4 sm:px-8" style={bgImg || undefined}>
       <div className="max-w-xl mx-auto rounded-2xl border border-surface-200 bg-white p-6 sm:p-8 shadow-sm">
-        {(props.title as string) && <h3 className="text-xl font-display font-bold text-surface-900 mb-1">{props.title as string}</h3>}
+        {(props.title as string) && <h3 className="text-xl font-display font-bold text-surface-900 mb-1" style={textStyleFor(props, "title")}>{props.title as string}</h3>}
         {(props.subtitle as string) && <p className="text-sm text-surface-500 mb-6">{props.subtitle as string}</p>}
         {submitted ? (
           <div className="text-center py-10">
@@ -953,7 +969,7 @@ function ContactInfoBlock({ props }: { props: Record<string, unknown> }) {
       <div className="max-w-2xl mx-auto rounded-3xl py-10 px-4 sm:px-8" style={bgImg || undefined}>
         {(props.title as string) && (
           <div className="text-center mb-8">
-            <h3 className={`text-2xl font-display font-extrabold ${bgImg ? "text-white" : "text-surface-900"}`}>{props.title as string}</h3>
+            <h3 className={`text-2xl font-display font-extrabold ${bgImg ? "text-white" : "text-surface-900"}`} style={textStyleFor(props, "title")}>{props.title as string}</h3>
           </div>
         )}
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
@@ -1017,7 +1033,7 @@ function StatsBlock({ props }: { props: Record<string, unknown> }) {
     >
       {(props.title as string) && (
         <AnimateIn>
-          <h3 className={`text-2xl sm:text-3xl font-display font-extrabold text-center mb-10 ${isDark ? "text-white" : "text-surface-900"}`}>
+          <h3 className={`text-2xl sm:text-3xl font-display font-extrabold text-center mb-10 ${isDark ? "text-white" : "text-surface-900"}`} style={textStyleFor(props, "title")}>
             {props.title as string}
           </h3>
         </AnimateIn>
@@ -1088,10 +1104,10 @@ function NewsletterBlock({ props }: { props: Record<string, unknown> }) {
         }`}
         style={bgImg || undefined}
       >
-        <h3 className={`text-xl sm:text-2xl font-display font-extrabold mb-2 ${isDark ? "text-white" : "text-surface-900"}`}>
+        <h3 className={`text-xl sm:text-2xl font-display font-extrabold mb-2 ${isDark ? "text-white" : "text-surface-900"}`} style={textStyleFor(props, "title")}>
           {(props.title as string) || "Stay Updated"}
         </h3>
-        <p className={`text-sm mb-6 max-w-md mx-auto ${isDark ? "text-white/60" : "text-surface-500"}`}>
+        <p className={`text-sm mb-6 max-w-md mx-auto ${isDark ? "text-white/60" : "text-surface-500"}`} style={textStyleFor(props, "subtitle")}>
           {(props.subtitle as string) || "Get the latest updates and offers."}
         </p>
         {submitted ? (
@@ -1264,11 +1280,11 @@ function BannerBlock({ props }: { props: Record<string, unknown> }) {
         </div>
         <div className="relative flex flex-col sm:flex-row items-center justify-between gap-6">
           <div>
-            <h3 className="text-xl sm:text-2xl font-display font-extrabold" style={textStyle}>
+            <h3 className="text-xl sm:text-2xl font-display font-extrabold" style={{ ...textStyle, ...textStyleFor(props, "title", textStyle.color) }}>
               {(props.title as string) || "Special Offer"}
             </h3>
             {(props.subtitle as string) && (
-              <p className="text-sm mt-1" style={textStyle}>{props.subtitle as string}</p>
+              <p className="text-sm mt-1" style={{ ...textStyle, ...textStyleFor(props, "subtitle", textStyle.color) }}>{props.subtitle as string}</p>
             )}
           </div>
           {(props.buttonText as string) && (
@@ -1313,10 +1329,10 @@ function ImageTextBlock({ props }: { props: Record<string, unknown> }) {
               <Sparkles className="h-3 w-3" /> {props.badge as string}
             </span>
           )}
-          <h3 className="text-2xl sm:text-3xl font-display font-extrabold mb-4" style={{ color: (props.headingColor as string) || undefined }}>
+          <h3 className="text-2xl sm:text-3xl font-display font-extrabold mb-4" style={{ color: (props.headingColor as string) || undefined, fontStyle: props.headingItalic ? "italic" : undefined }}>
             {(props.title as string) || "Title"}
           </h3>
-          <p className="leading-relaxed mb-6" style={{ ...textStyle, color: (props.bodyColor as string) || (props.textColor as string) || undefined }}>
+          <p className="leading-relaxed mb-6" style={{ ...textStyle, color: (props.bodyColor as string) || (props.textColor as string) || undefined, fontStyle: props.bodyItalic ? "italic" : undefined }}>
             {(props.text as string) || "Description text"}
           </p>
           {(props.buttonText as string) && (
@@ -1346,7 +1362,7 @@ function GalleryBlock({ props }: { props: Record<string, unknown> }) {
     <AnimateIn>
       <div>
         {(props.title as string) && (
-          <h3 className="text-2xl font-display font-extrabold text-surface-900 mb-6 text-center">{props.title as string}</h3>
+          <h3 className="text-2xl font-display font-extrabold text-surface-900 mb-6 text-center" style={textStyleFor(props, "title")}>{props.title as string}</h3>
         )}
         <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
           {images.map((img, i) => (
@@ -1373,7 +1389,7 @@ function ProjectsBlock({ props }: { props: Record<string, unknown> }) {
     <AnimateIn>
       <div>
         {(props.title as string) && (
-          <h3 className="text-2xl sm:text-3xl font-display font-extrabold text-surface-900 mb-8 text-center">{props.title as string}</h3>
+          <h3 className="text-2xl sm:text-3xl font-display font-extrabold text-surface-900 mb-8 text-center" style={textStyleFor(props, "title")}>{props.title as string}</h3>
         )}
         <div className={`grid gap-8 ${gridClass}`}>
           {items.map((item, i) => (
@@ -1381,8 +1397,8 @@ function ProjectsBlock({ props }: { props: Record<string, unknown> }) {
               <div className="relative rounded-2xl overflow-hidden mb-4 aspect-[4/3]">
                 <img src={item.image} alt={item.title} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
               </div>
-              <h4 className="text-xl font-bold text-surface-900 mb-2">{item.title}</h4>
-              <p className="text-surface-500 mb-4 line-clamp-3">{item.description}</p>
+              <h4 className="text-xl font-bold text-surface-900 mb-2" style={textStyleFor(props, "itemTitle")}>{item.title}</h4>
+              <p className="text-surface-500 mb-4 line-clamp-3" style={textStyleFor(props, "itemDesc")}>{item.description}</p>
               <a href={resolveStoreLink(item.link, storeSlug)} className="inline-flex items-center text-sm font-semibold text-brand-600 hover:text-brand-700 transition-colors">
                 Continue Reading
                 <ArrowRight className="ml-2 h-4 w-4" />
@@ -1404,8 +1420,8 @@ function TeamBlock({ props }: { props: Record<string, unknown> }) {
       <div className="rounded-3xl py-10 px-4 sm:px-8" style={bgImg || undefined}>
         {(props.title as string) && (
           <div className="text-center mb-10">
-            <h3 className={`text-2xl sm:text-3xl font-display font-extrabold ${bgImg ? "text-white" : "text-surface-900"}`}>{props.title as string}</h3>
-            {(props.subtitle as string) && <p className={`mt-2 ${bgImg ? "text-white/70" : "text-surface-500"}`}>{props.subtitle as string}</p>}
+            <h3 className={`text-2xl sm:text-3xl font-display font-extrabold ${bgImg ? "text-white" : "text-surface-900"}`} style={textStyleFor(props, "title")}>{props.title as string}</h3>
+            {(props.subtitle as string) && <p className={`mt-2 ${bgImg ? "text-white/70" : "text-surface-500"}`} style={textStyleFor(props, "subtitle")}>{props.subtitle as string}</p>}
           </div>
         )}
         <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-6">

@@ -43,9 +43,15 @@ export const updateSectionSchema = z.object({
   sectionIndex: z.number().int().min(0).describe("0-based position of the section on that page — call create_page or read the current page first if unsure."),
   content: z.record(z.string(), z.unknown()).describe(
     'Field/value pairs to change on that section, e.g. {heroHeading: "New headline"}. Only include fields that are actually changing. ' +
-    "For a merchant asking to restyle one specific piece of text (a caption/subtitle/subheading), change ONLY the matching field below — never use set_theme for a request scoped to one element, that changes the whole site's palette instead. " +
-    "Hero section text fields: heading, subheading (the caption/subtitle text itself), subheadingColor (hex color, e.g. \"#111111\" for 'dark'), subheadingItalic (boolean — true for 'italic'), textColor (heading + default text color), buttonText, buttonColor, buttonTextColor, badge. " +
-    'Example — "make the hero caption italic and dark colored": {subheadingItalic: true, subheadingColor: "#1a1a1a"}.'
+    "For a merchant asking to restyle one specific piece of text (a caption/subtitle/subheading/title), change ONLY the matching field below — never use set_theme for a request scoped to one element, that changes the whole site's palette instead. " +
+    "Every text field in every section type supports a matching '<field>Color' (hex, e.g. \"#111111\") and '<field>Italic' (boolean) pair — e.g. subheadingColor/subheadingItalic, titleColor/titleItalic, subtitleColor/subtitleItalic, headingColor/headingItalic, bodyColor/bodyItalic, itemTitleColor/itemTitleItalic, itemDescColor/itemDescItalic. Only set the pair for the exact field the merchant named. " +
+    "Hero section fields: heading (+headingColor/headingItalic), subheading — the caption/subtitle text itself (+subheadingColor/subheadingItalic), textColor (overall fallback color), buttonText, buttonColor, buttonTextColor, badge. " +
+    "Banner section fields: title (+titleColor/titleItalic), subtitle (+subtitleColor/subtitleItalic). " +
+    "Gallery/ProductGrid/Features/Stats/Testimonials/Newsletter/Team/FAQ/ContactInfo/ContactForm sections: title (+titleColor/titleItalic), subtitle (+subtitleColor/subtitleItalic) where present. " +
+    "Story/ImageText section fields: title (+headingColor/headingItalic), text (+bodyColor/bodyItalic). " +
+    "Projects section fields: title (+titleColor/titleItalic), plus itemTitleColor/itemTitleItalic and itemDescColor/itemDescItalic applied to every project card's title/description. " +
+    'Example — "make the hero caption italic and dark colored": {subheadingItalic: true, subheadingColor: "#1a1a1a"}. ' +
+    'Example — "make the banner title italic": {titleItalic: true}.'
   ),
 });
 
