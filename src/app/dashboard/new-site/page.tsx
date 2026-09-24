@@ -74,7 +74,7 @@ export default function NewSitePage() {
   const [createError, setCreateError] = useState('');
 
   // Form state
-  const [siteType, setSiteType] = useState<SiteType | null>((draft?.siteType as SiteType | null) || null);
+  const [siteType, setSiteType] = useState<SiteType | null>((draft?.siteType as SiteType | null) || 'ECOMMERCE');
   const [industry, setIndustry] = useState<string | null>(draft?.industry || null);
   const [launchMethod, setLaunchMethod] = useState<string | null>(templateParam ? 'template' : draft?.launchMethod || null);
   const [selectedTemplate, setSelectedTemplate] = useState<ScoredTemplate | null>(asScoredTemplate(draft?.selectedTemplate));
@@ -248,7 +248,9 @@ export default function NewSitePage() {
     }
 
     setClassifying(false);
-    setSiteType(result.siteType);
+    // Site type is always ECOMMERCE now (Business Website/Landing Page
+    // are hidden) — only trust the guided classifier's industry pick.
+    setSiteType('ECOMMERCE');
     setIndustry(result.industry);
     if (aiName) setBusinessInfo((prev) => ({ ...prev, name: prev.name || aiName!, description: prev.description || aiTagline || guidedInput }));
     setShowGuided(false);
@@ -463,8 +465,11 @@ export default function NewSitePage() {
             <div className="grid gap-4">
               {([
                 { type: 'ECOMMERCE' as SiteType, icon: ShoppingBag, title: 'E-commerce Website', desc: 'Sell products and services online. Products, orders, inventory, payments.', color: 'emerald' },
-                { type: 'WEBSITE' as SiteType, icon: Globe, title: 'Business Website', desc: 'Build an informational website. Pages, blogs, forms, SEO.', color: 'blue' },
-                { type: 'LANDING_PAGE' as SiteType, icon: FileText, title: 'Landing Page', desc: 'Lead generation and conversion. Funnels, CRM, email & WhatsApp marketing.', color: 'purple' },
+                // Business Website and Landing Page are hidden — this
+                // product currently only supports the E-commerce build
+                // path end to end (AI generation, products, storefront).
+                // Keep SiteType/GUIDED_RULES supporting them so nothing
+                // downstream breaks, just don't offer them as a choice.
               ]).map(item => {
                 const Icon = item.icon;
                 const selected = siteType === item.type;
