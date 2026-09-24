@@ -64,6 +64,11 @@ export const setNavigationSchema = z.object({
   links: z.array(z.object({ label: z.string().min(1), pageSlug: z.string().min(1) })).min(1).max(8),
 });
 
+export const setPageNavVisibilitySchema = z.object({
+  pageSlug: z.string().min(1).describe('Which page\'s nav link to show/hide, e.g. "contact" or "faq" — this does NOT delete or unpublish the page, it only removes its link from the nav bar. The page stays reachable by direct URL.'),
+  showInNav: z.boolean().describe('false to remove this page from the nav bar (e.g. "remove the FAQ nav item" / "take contact out of the menu"), true to restore it.'),
+});
+
 export const upsertProductSchema = z.object({
   id: z.string().optional().describe("Omit to create a new product; include to update an existing one."),
   name: z.string().min(1),
@@ -130,6 +135,7 @@ export type CreatePageArgs = z.infer<typeof createPageSchema>;
 export type UpdateSectionArgs = z.infer<typeof updateSectionSchema>;
 export type SetThemeArgs = z.infer<typeof setThemeSchema>;
 export type SetNavigationArgs = z.infer<typeof setNavigationSchema>;
+export type SetPageNavVisibilityArgs = z.infer<typeof setPageNavVisibilitySchema>;
 export type UpsertProductArgs = z.infer<typeof upsertProductSchema>;
 export type RemoveProductArgs = z.infer<typeof removeProductSchema>;
 export type SetWhatsappArgs = z.infer<typeof setWhatsappSchema>;

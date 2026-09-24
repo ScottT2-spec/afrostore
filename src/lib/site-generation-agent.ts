@@ -17,6 +17,7 @@
 
 import { z } from "zod";
 import { prisma } from "@/lib/db";
+import { loadSiteCustomizationSafely, normalizeSiteCustomization, mergeSiteCustomization } from "@/lib/site-customization";
 import { AICapability } from "@/lib/failover";
 import type { AIFailover, AIMessage, AITool } from "@/lib/failover";
 import {
@@ -25,6 +26,7 @@ import {
   updateSectionSchema,
   setThemeSchema,
   setNavigationSchema,
+  setPageNavVisibilitySchema,
   upsertProductSchema,
   removeProductSchema,
   setWhatsappSchema,
@@ -54,6 +56,7 @@ const TOOL_DEFS: AITool[] = [
   { type: "function", function: { name: "update_section", description: "Change specific fields on one existing section of one page.", parameters: toToolParameters(updateSectionSchema) } },
   { type: "function", function: { name: "set_theme", description: "Set the site's visual vibe/color direction.", parameters: toToolParameters(setThemeSchema) } },
   { type: "function", function: { name: "set_navigation", description: "Set the main nav links.", parameters: toToolParameters(setNavigationSchema) } },
+  { type: "function", function: { name: "set_page_nav_visibility", description: "Show or hide a single page's link in the nav bar without deleting or unpublishing the page — use this for any request to remove/hide/take out one nav item (e.g. \"remove the FAQ from the menu\").", parameters: toToolParameters(setPageNavVisibilitySchema) } },
   { type: "function", function: { name: "upsert_product", description: "Add or update one product.", parameters: toToolParameters(upsertProductSchema) } },
   { type: "function", function: { name: "remove_product", description: "Remove one product.", parameters: toToolParameters(removeProductSchema) } },
   { type: "function", function: { name: "set_whatsapp", description: "Turn on WhatsApp ordering with the merchant's real number. Call ask_user first if the prompt didn't include one — never invent a number.", parameters: toToolParameters(setWhatsappSchema) } },
@@ -345,6 +348,22 @@ async function executeTool(
           update: { navigationSettings: parsed as object },
         });
         return { result: `Navigation set: ${parsed.links.map((l) => l.label).join(", ")}.`, isError: false };
+      }
+
+      case "set_page_nav_visibility": {
+        const parsed = setPageNavVisibilitySchema.parse(args);
+        const existing = normalizeSiteCustomization(
+          await loadSiteCustomizationSafely(prisma.siteCustomization.findUnique({ where: { siteId } }))
+        );
+        const merged = mergeSiteCustomization(existing, {
+          pageSettings: { [parsed.pageSlug]: { showInNavigation: parsed.showInNav } },
+        });
+        await prisma.siteCustomization.upsert({
+          where: { siteId },
+          create: { siteId, pageSettings: merged.pageSettings as object },
+          update: { pageSettings: merged.pageSettings as object },
+        });
+        return { result: `"${parsed.pageSlug}" ${parsed.showInNav ? "shown in" : "removed from"} the nav bar. The page itself is untouched.`, isError: false };
       }
 
       case "upsert_product": {
