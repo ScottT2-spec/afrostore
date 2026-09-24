@@ -8,6 +8,7 @@ import { api } from "@/lib/api-client";
 
 interface GenerationResult {
   pages?: Array<{ id: string; title: string; slug: string }>;
+  productsCreated?: number;
   brand?: Record<string, string>;
   tagline?: string;
   seo?: { title: string; description: string };
@@ -133,7 +134,7 @@ export default function AIBusinessPage() {
 
           {/* Pages */}
           {result.pages && result.pages.length > 0 && (
-            <ResultCard icon={FileText} title="Pages Generated" color="bg-blue-50 text-blue-600">
+            <ResultCard icon={FileText} title={`Pages Generated${result.productsCreated ? ` · ${result.productsCreated} products added` : ""}`} color="bg-blue-50 text-blue-600">
               <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
                 {result.pages.map((p) => (
                   <div key={p.id} className="rounded-lg bg-surface-50 px-3 py-2 text-sm"><span className="font-semibold text-surface-900">{p.title}</span><br /><span className="text-xs text-surface-400">/{p.slug}</span></div>

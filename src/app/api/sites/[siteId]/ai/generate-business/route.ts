@@ -38,12 +38,50 @@ export async function POST(req: NextRequest, { params }: Params) {
 
     const results: Record<string, unknown> = {};
 
-    // 1. Generate pages
+    // 1. Generate pages, grounded in every field the merchant gave us —
+    //    productsOffered/targetAudience were already accepted by
+    //    generateStore()'s prompt (it grounds hero/FAQ/features copy in
+    //    the actual products and target audience when present) and by
+    //    generateProducts() (it bases the catalog on named products
+    //    instead of inventing unrelated ones), but this route was never
+    //    passing them through — the merchant's most specific answers on
+    //    this form were being silently dropped before they ever reached
+    //    the block-based site builder.
+    const productsOffered = products
+      ? products.split(/[,\n]/).map((p: string) => p.trim()).filter(Boolean)
+      : undefined;
     const storeResult = await generateStore({
       siteId, storeSlug: site.slug, storeName: businessName,
       businessType, description, country: location, currency: site.currency || "NGN",
+      targetAudience: targetAudience || undefined,
+      productsOffered,
     });
     results.pages = storeResult.pages;
+
+    // 1b. Generate a real starter catalog grounded in the same info —
+    //     an AI Business run that produces pages but zero products is a
+    //     broken first impression, and the merchant may have named
+    //     specific products above that should seed the catalog instead
+    //     of the AI inventing unrelated ones.
+    try {
+      const { classifyBusiness } = await import("@/lib/ai-classify");
+      const { generateProducts } = await import("@/lib/ai-product-generator");
+      const classification = await classifyBusiness(`${businessType} ${description || ""}`);
+      const productResult = await generateProducts({
+        siteId,
+        businessType,
+        businessName,
+        description,
+        industry: classification.industry,
+        currency: site.currency || "NGN",
+        targetAudience: targetAudience || undefined,
+        productsOffered,
+        count: 10,
+      });
+      results.productsCreated = productResult.productsCreated;
+    } catch (err) {
+      console.error("AI Business product generation failed (non-fatal, pages already generated):", err);
+    }
 
     // 2. Generate brand, SEO, email templates via AI
     const aiPrompt = `You are an AI business consultant. Generate the following for a ${businessType} business called "${businessName}".
