@@ -648,7 +648,8 @@ function TestimonialsBlock({ props }: { props: Record<string, unknown> }) {
     [props.items],
   );
   const bg = (props.bgColor as string) || "transparent";
-  const isDark = bg === "dark";
+  const bgImg = imageBgStyle(props);
+  const isDark = bg === "dark" || !!bgImg;
   const storeSlug = useContext(StoreSlugContext);
   const [approvedItems, setApprovedItems] = useState<Array<{ name: string; text: string; role?: string; rating?: number }>>([]);
   const allItems = useMemo(() => [...approvedItems, ...hardcodedItems], [approvedItems, hardcodedItems]);
@@ -696,7 +697,7 @@ function TestimonialsBlock({ props }: { props: Record<string, unknown> }) {
   return (
     <div
       className="rounded-3xl py-12 overflow-hidden"
-      style={{ backgroundColor: bgStyle }}
+      style={bgImg || { backgroundColor: bgStyle }}
       
     >
       <AnimateIn>
@@ -736,14 +737,34 @@ function TestimonialsBlock({ props }: { props: Record<string, unknown> }) {
   );
 }
 
+/* ── Shared image-background helper ──────────────────────────────
+ * Every content block should read as a designed, image-rich section,
+ * never a flat white/transparent slab. When a block has a
+ * backgroundImage prop, this returns a ready-to-spread style object:
+ * the photo as a cover background plus a dark tint so white/light
+ * text stays readable over any photo. Blocks using this should pair
+ * it with light text classes (text-white, text-white/80, etc.) rather
+ * than the surface-900/500 classes used for a plain light background.
+ */
+function imageBgStyle(props: Record<string, unknown>, tint = 0.6): React.CSSProperties | null {
+  const bgImage = props.backgroundImage as string | undefined;
+  if (!bgImage) return null;
+  return {
+    backgroundImage: `linear-gradient(rgba(15,23,42,${tint}), rgba(15,23,42,${tint})), url(${bgImage})`,
+    backgroundSize: "cover",
+    backgroundPosition: "center",
+  };
+}
+
 /* ── Features Grid ───────────────────────────────────────────── */
 function FeaturesBlock({ props }: { props: Record<string, unknown> }) {
   const items = (props.items as Array<{ icon: string; title: string; desc: string }>) || [];
   const cols = items.length <= 3 ? 3 : 4;
+  const bgImg = imageBgStyle(props);
   const bg = (props.bgColor as string) || "transparent";
-  const isDark = bg === "dark";
+  const isDark = bg === "dark" || !!bgImg;
   return (
-    <div className="rounded-3xl py-10 px-6 sm:px-10" style={{ backgroundColor: bg === "surface" ? "#FAFAFA" : isDark ? "#0F172A" : "transparent" }}>
+    <div className="rounded-3xl py-10 px-6 sm:px-10" style={bgImg || { backgroundColor: bg === "surface" ? "#FAFAFA" : isDark ? "#0F172A" : "transparent" }}>
       {(props.title as string) && (
         <AnimateIn>
           <div className="text-center mb-10">
@@ -782,13 +803,14 @@ function FeaturesBlock({ props }: { props: Record<string, unknown> }) {
 function FAQBlock({ props }: { props: Record<string, unknown> }) {
   const items = (props.items as Array<{ question: string; answer: string }>) || [];
   const [open, setOpen] = useState<number | null>(0);
+  const bgImg = imageBgStyle(props, 0.55);
   return (
     <AnimateIn>
-      <div className="max-w-3xl mx-auto">
+      <div className="max-w-3xl mx-auto rounded-3xl py-10 px-4 sm:px-8" style={bgImg || undefined}>
         {(props.title as string) && (
           <div className="text-center mb-8">
-            <h3 className="text-2xl sm:text-3xl font-display font-extrabold text-surface-900">{props.title as string}</h3>
-            {(props.subtitle as string) && <p className="text-surface-500 mt-2">{props.subtitle as string}</p>}
+            <h3 className={`text-2xl sm:text-3xl font-display font-extrabold ${bgImg ? "text-white" : "text-surface-900"}`}>{props.title as string}</h3>
+            {(props.subtitle as string) && <p className={`mt-2 ${bgImg ? "text-white/70" : "text-surface-500"}`}>{props.subtitle as string}</p>}
           </div>
         )}
         <div className="space-y-3">
@@ -853,9 +875,11 @@ function ContactFormBlock({ props }: { props: Record<string, unknown> }) {
   };
 
   const inputCls = "w-full rounded-xl border border-surface-200 bg-surface-50 px-4 py-3 text-sm placeholder:text-surface-400 focus:outline-none focus:ring-2 focus:ring-brand-500 focus:border-transparent transition-shadow";
+  const bgImg = imageBgStyle(props, 0.55);
 
   return (
     <AnimateIn>
+      <div className="rounded-3xl py-10 px-4 sm:px-8" style={bgImg || undefined}>
       <div className="max-w-xl mx-auto rounded-2xl border border-surface-200 bg-white p-6 sm:p-8 shadow-sm">
         {(props.title as string) && <h3 className="text-xl font-display font-bold text-surface-900 mb-1">{props.title as string}</h3>}
         {(props.subtitle as string) && <p className="text-sm text-surface-500 mb-6">{props.subtitle as string}</p>}
@@ -883,6 +907,7 @@ function ContactFormBlock({ props }: { props: Record<string, unknown> }) {
           </form>
         )}
       </div>
+      </div>
     </AnimateIn>
   );
 }
@@ -909,12 +934,13 @@ function ContactInfoBlock({ props }: { props: Record<string, unknown> }) {
   const storeSlug = useContext(StoreSlugContext);
   const items = (props.items as Array<{ icon: string; title: string; value: string; href?: string; whatsappMessage?: string }>) || [];
   const hours = props.hours as string;
+  const bgImg = imageBgStyle(props, 0.55);
   return (
     <AnimateIn>
-      <div className="max-w-2xl mx-auto">
+      <div className="max-w-2xl mx-auto rounded-3xl py-10 px-4 sm:px-8" style={bgImg || undefined}>
         {(props.title as string) && (
           <div className="text-center mb-8">
-            <h3 className="text-2xl font-display font-extrabold text-surface-900">{props.title as string}</h3>
+            <h3 className={`text-2xl font-display font-extrabold ${bgImg ? "text-white" : "text-surface-900"}`}>{props.title as string}</h3>
           </div>
         )}
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
@@ -964,13 +990,18 @@ function ContactInfoBlock({ props }: { props: Record<string, unknown> }) {
 function StatsBlock({ props }: { props: Record<string, unknown> }) {
   const items = (props.items as Array<{ value: string; label: string; icon?: string }>) || [];
   const bg = (props.bgColor as string) || "brand";
-  const isDark = bg === "brand" || bg === "dark";
+  const bgImg = imageBgStyle(props);
+  const isDark = bg === "brand" || bg === "dark" || !!bgImg;
   return (
-    <div className={`rounded-3xl py-12 px-6 sm:px-10 ${
-      bg === "brand" ? "bg-gradient-to-br from-brand-700 to-brand-900" :
-      bg === "dark" ? "bg-gradient-to-br from-surface-900 to-surface-950" :
-      "bg-surface-50"
-    }`}>
+    <div
+      className={`rounded-3xl py-12 px-6 sm:px-10 ${
+        bgImg ? "" :
+        bg === "brand" ? "bg-gradient-to-br from-brand-700 to-brand-900" :
+        bg === "dark" ? "bg-gradient-to-br from-surface-900 to-surface-950" :
+        "bg-surface-50"
+      }`}
+      style={bgImg || undefined}
+    >
       {(props.title as string) && (
         <AnimateIn>
           <h3 className={`text-2xl sm:text-3xl font-display font-extrabold text-center mb-10 ${isDark ? "text-white" : "text-surface-900"}`}>
@@ -1006,7 +1037,8 @@ function NewsletterBlock({ props }: { props: Record<string, unknown> }) {
   const [sending, setSending] = useState(false);
   const [formError, setFormError] = useState("");
   const bg = (props.bgColor as string) || "surface";
-  const isDark = bg === "dark" || bg === "brand";
+  const bgImg = imageBgStyle(props);
+  const isDark = bg === "dark" || bg === "brand" || !!bgImg;
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -1034,11 +1066,15 @@ function NewsletterBlock({ props }: { props: Record<string, unknown> }) {
 
   return (
     <AnimateIn>
-      <div className={`rounded-3xl py-12 px-6 sm:px-10 text-center ${
-        bg === "brand" ? "bg-gradient-to-br from-brand-600 to-brand-800" :
-        bg === "dark" ? "bg-gradient-to-br from-surface-900 to-surface-950" :
-        "bg-surface-50 border border-surface-100"
-      }`}>
+      <div
+        className={`rounded-3xl py-12 px-6 sm:px-10 text-center ${
+          bgImg ? "" :
+          bg === "brand" ? "bg-gradient-to-br from-brand-600 to-brand-800" :
+          bg === "dark" ? "bg-gradient-to-br from-surface-900 to-surface-950" :
+          "bg-surface-50 border border-surface-100"
+        }`}
+        style={bgImg || undefined}
+      >
         <h3 className={`text-xl sm:text-2xl font-display font-extrabold mb-2 ${isDark ? "text-white" : "text-surface-900"}`}>
           {(props.title as string) || "Stay Updated"}
         </h3>
@@ -1126,10 +1162,11 @@ function CountdownBlock({ props }: { props: Record<string, unknown> }) {
     return () => clearInterval(id);
   }, [endDate]);
 
+  const bgImg = imageBgStyle(props, 0.5);
   return (
     <AnimateIn>
       <div className="rounded-3xl px-8 py-12 text-center bg-gradient-to-br from-brand-950 via-brand-900 to-brand-800 relative overflow-hidden"
-        style={{ backgroundColor: (props.bgColor as string) || undefined, color: (props.textColor as string) || "#fff" }}>
+        style={bgImg ? { ...bgImg, color: (props.textColor as string) || "#fff" } : { backgroundColor: (props.bgColor as string) || undefined, color: (props.textColor as string) || "#fff" }}>
         <div className="absolute inset-0 overflow-hidden pointer-events-none">
           <div className="absolute -top-20 -right-20 w-64 h-64 rounded-full bg-accent-500/10 blur-3xl" />
         </div>
@@ -1167,15 +1204,19 @@ function CountdownBlock({ props }: { props: Record<string, unknown> }) {
 /* ── Trust Badges ────────────────────────────────────────────── */
 function TrustBadgesBlock({ props }: { props: Record<string, unknown> }) {
   const items = (props.items as Array<{ icon: string; label: string }>) || [];
+  const bgImg = imageBgStyle(props, 0.65);
   return (
     <AnimateIn>
-      <div className="flex flex-wrap items-center justify-center gap-6 sm:gap-10 py-6 rounded-2xl bg-surface-50 border border-surface-100 px-4">
+      <div
+        className={`flex flex-wrap items-center justify-center gap-6 sm:gap-10 py-6 rounded-2xl px-4 ${bgImg ? "" : "bg-surface-50 border border-surface-100"}`}
+        style={bgImg || undefined}
+      >
         {items.map((item, i) => {
           const Icon = iconMap[item.icon] || Shield;
           return (
-            <div key={i} className="flex items-center gap-2.5 text-surface-600">
-              <div className="h-9 w-9 rounded-xl bg-white border border-surface-200 flex items-center justify-center shadow-sm">
-                <Icon className="h-4 w-4 text-brand-600" />
+            <div key={i} className={`flex items-center gap-2.5 ${bgImg ? "text-white" : "text-surface-600"}`}>
+              <div className={`h-9 w-9 rounded-xl flex items-center justify-center shadow-sm ${bgImg ? "bg-white/15 backdrop-blur-sm border border-white/20" : "bg-white border border-surface-200"}`}>
+                <Icon className={`h-4 w-4 ${bgImg ? "text-white" : "text-brand-600"}`} />
               </div>
               <span className="text-xs font-bold">{item.label}</span>
             </div>
@@ -1344,13 +1385,14 @@ function ProjectsBlock({ props }: { props: Record<string, unknown> }) {
 /* ── Team ────────────────────────────────────────────────────── */
 function TeamBlock({ props }: { props: Record<string, unknown> }) {
   const members = (props.members as Array<{ name: string; role: string; image?: string; bio?: string }>) || [];
+  const bgImg = imageBgStyle(props, 0.6);
   return (
     <AnimateIn>
-      <div>
+      <div className="rounded-3xl py-10 px-4 sm:px-8" style={bgImg || undefined}>
         {(props.title as string) && (
           <div className="text-center mb-10">
-            <h3 className="text-2xl sm:text-3xl font-display font-extrabold text-surface-900">{props.title as string}</h3>
-            {(props.subtitle as string) && <p className="text-surface-500 mt-2">{props.subtitle as string}</p>}
+            <h3 className={`text-2xl sm:text-3xl font-display font-extrabold ${bgImg ? "text-white" : "text-surface-900"}`}>{props.title as string}</h3>
+            {(props.subtitle as string) && <p className={`mt-2 ${bgImg ? "text-white/70" : "text-surface-500"}`}>{props.subtitle as string}</p>}
           </div>
         )}
         <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-6">
@@ -1366,9 +1408,9 @@ function TeamBlock({ props }: { props: Record<string, unknown> }) {
                     </div>
                   )}
                 </div>
-                <h4 className="text-sm font-bold text-surface-900">{m.name}</h4>
-                <p className="text-xs text-surface-500">{m.role}</p>
-                {m.bio && <p className="text-xs text-surface-400 mt-1">{m.bio}</p>}
+                <h4 className={`text-sm font-bold ${bgImg ? "text-white" : "text-surface-900"}`}>{m.name}</h4>
+                <p className={`text-xs ${bgImg ? "text-white/70" : "text-surface-500"}`}>{m.role}</p>
+                {m.bio && <p className={`text-xs mt-1 ${bgImg ? "text-white/60" : "text-surface-400"}`}>{m.bio}</p>}
               </div>
             </AnimateIn>
           ))}

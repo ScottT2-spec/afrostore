@@ -57,6 +57,16 @@ function block(type: BlockType, props: Record<string, unknown>): BuilderBlock {
   return { id: uid(), type, props };
 }
 
+// A section with no photographic background reads as an empty, unfinished
+// slab no matter how good the copy is. Every section that doesn't already
+// carry its own dedicated image (hero/story/banner/gallery, which use a
+// specific slot on purpose) gets one pulled from the store's showcase
+// pool, so the finished site is consistently image-rich end to end.
+function decorativeImage(ctx: LayoutContext): string {
+  const pool = ctx.images.showcase.length > 0 ? ctx.images.showcase : [ctx.images.lifestyle, ctx.images.about, ctx.images.hero];
+  return pool[Math.floor(Math.random() * pool.length)];
+}
+
 // Industry-specific trust badges
 const INDUSTRY_TRUST: Record<string, Array<{ icon: string; label: string }>> = {
   fashion: [
@@ -274,6 +284,7 @@ const SECTION_BUILDERS: Record<string, (ctx: LayoutContext) => BuilderBlock[]> =
         title: "Why Choose Us",
         subtitle: "Here's what makes us different",
         bgColor: "surface",
+        backgroundImage: decorativeImage(ctx),
         items: features.length >= 3
           ? features.slice(0, 4).map((f, i) => ({
               icon: featureIcons[i % featureIcons.length],
@@ -304,7 +315,7 @@ const SECTION_BUILDERS: Record<string, (ctx: LayoutContext) => BuilderBlock[]> =
 
     return [
       block("spacer", { height: 48 }),
-      block("stats", { bgColor: "brand", items }),
+      block("stats", { bgColor: "brand", backgroundImage: decorativeImage(ctx), items }),
     ];
   },
 
@@ -318,6 +329,7 @@ const SECTION_BUILDERS: Record<string, (ctx: LayoutContext) => BuilderBlock[]> =
         title: "What Our Customers Say",
         subtitle: "Real reviews from real people",
         bgColor: "transparent",
+        backgroundImage: decorativeImage(ctx),
         items: testimonials.slice(0, 3).map((t) => ({
           name: t.name,
           role: t.role || "Verified Buyer",
@@ -386,6 +398,7 @@ const SECTION_BUILDERS: Record<string, (ctx: LayoutContext) => BuilderBlock[]> =
         title: copy?.title || "Stay in the Loop",
         subtitle: copy?.subtitle || `Be the first to know about new arrivals and exclusive offers from ${ctx.storeName}.`,
         bgColor: "brand",
+        backgroundImage: decorativeImage(ctx),
       }),
     ];
   },
@@ -395,6 +408,7 @@ const SECTION_BUILDERS: Record<string, (ctx: LayoutContext) => BuilderBlock[]> =
     block("spacer", { height: 40 }),
     block("trustBadges", {
       items: INDUSTRY_TRUST[ctx.industry] || INDUSTRY_TRUST.fashion,
+      backgroundImage: decorativeImage(ctx),
     }),
   ],
 
@@ -439,6 +453,7 @@ const SECTION_BUILDERS: Record<string, (ctx: LayoutContext) => BuilderBlock[]> =
         { icon: "phone", title: "Phone", value: "Call during business hours" },
       ],
       hours: "Monday - Saturday, 9:00 AM - 6:00 PM",
+      backgroundImage: decorativeImage(ctx),
     }),
   ],
 
@@ -450,6 +465,7 @@ const SECTION_BUILDERS: Record<string, (ctx: LayoutContext) => BuilderBlock[]> =
       block("spacer", { height: 56 }),
       block("faq", {
         title: "Frequently Asked Questions",
+        backgroundImage: decorativeImage(ctx),
         items: items.slice(0, 4).map((item) => ({
           question: item.question,
           answer: item.answer,
@@ -469,6 +485,7 @@ const SECTION_BUILDERS: Record<string, (ctx: LayoutContext) => BuilderBlock[]> =
         title: "Our Values",
         subtitle: "The principles that guide everything we do",
         bgColor: "surface",
+        backgroundImage: decorativeImage(ctx),
         items: values.map((v, i) => ({
           icon: icons[i % icons.length],
           title: v.title,
@@ -486,6 +503,7 @@ const SECTION_BUILDERS: Record<string, (ctx: LayoutContext) => BuilderBlock[]> =
       block("team", {
         title: `Meet the ${ctx.storeName} Team`,
         subtitle: "The people behind the brand",
+        backgroundImage: decorativeImage(ctx),
         members: team.slice(0, 4).map((v) => ({
           name: v.title,
           role: v.desc,
@@ -502,6 +520,7 @@ const SECTION_BUILDERS: Record<string, (ctx: LayoutContext) => BuilderBlock[]> =
       title: `${ctx.storeName} — Limited Time Offer`,
       subtitle: "Don't miss out on our special deals",
       bgColor: "brand",
+      backgroundImage: decorativeImage(ctx),
     }),
   ],
 };
