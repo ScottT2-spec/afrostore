@@ -41,7 +41,12 @@ export const createPageSchema = z.object({
 export const updateSectionSchema = z.object({
   pageSlug: z.string().min(1).describe('Which page to edit, e.g. "home" or "about".'),
   sectionIndex: z.number().int().min(0).describe("0-based position of the section on that page — call create_page or read the current page first if unsure."),
-  content: z.record(z.string(), z.unknown()).describe("Field/value pairs to change on that section, e.g. {heroHeading: \"New headline\"}. Only include fields that are actually changing."),
+  content: z.record(z.string(), z.unknown()).describe(
+    'Field/value pairs to change on that section, e.g. {heroHeading: "New headline"}. Only include fields that are actually changing. ' +
+    "For a merchant asking to restyle one specific piece of text (a caption/subtitle/subheading), change ONLY the matching field below — never use set_theme for a request scoped to one element, that changes the whole site's palette instead. " +
+    "Hero section text fields: heading, subheading (the caption/subtitle text itself), subheadingColor (hex color, e.g. \"#111111\" for 'dark'), subheadingItalic (boolean — true for 'italic'), textColor (heading + default text color), buttonText, buttonColor, buttonTextColor, badge. " +
+    'Example — "make the hero caption italic and dark colored": {subheadingItalic: true, subheadingColor: "#1a1a1a"}.'
+  ),
 });
 
 export const setThemeSchema = z.object({

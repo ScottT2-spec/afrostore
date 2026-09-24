@@ -273,7 +273,13 @@ function HeroBlock({ props }: { props: Record<string, unknown> }) {
               </h1>
             </AnimateIn>
             <AnimateIn delay={0.2}>
-              <p className="mb-8 max-w-xl text-base leading-7 text-[#767676] sm:text-lg">
+              <p
+                className="mb-8 max-w-xl text-base leading-7 text-[#767676] sm:text-lg"
+                style={{
+                  color: (props.subheadingColor as string) || undefined,
+                  fontStyle: props.subheadingItalic ? "italic" : undefined,
+                }}
+              >
                 {(props.subheading as string) || "Subheading text"}
               </p>
             </AnimateIn>
@@ -355,7 +361,14 @@ function HeroBlock({ props }: { props: Record<string, unknown> }) {
           </h1>
         </AnimateIn>
         <AnimateIn delay={0.2}>
-          <p className="text-base sm:text-lg lg:text-xl mb-8 max-w-2xl mx-auto leading-relaxed" style={textStyle}>
+          <p
+            className="text-base sm:text-lg lg:text-xl mb-8 max-w-2xl mx-auto leading-relaxed"
+            style={{
+              ...textStyle,
+              color: (props.subheadingColor as string) || textStyle.color,
+              fontStyle: props.subheadingItalic ? "italic" : undefined,
+            }}
+          >
             {(props.subheading as string) || "Subheading text"}
           </p>
         </AnimateIn>
