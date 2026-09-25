@@ -49,19 +49,48 @@ export function SandboxPreview({
   const [sandboxUnavailable, setSandboxUnavailable] = useState(!files && !initialSession);
   const pollRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
-  // Minimal site context for the block-fallback render path below. Without
-  // this, the render call was completely bare — no storeSlug/currency, no
-  // TemplateStoreContextProvider — so any bespoke-template block (forms
-  // especially) rendered as broken in THIS preview even though the real
-  // live page (which does wrap this correctly) would work fine once
-  // published. That mismatch was the actual bug: the preview was lying
-  // about what would actually go live.
-  const [storeContext, setStoreContext] = useState<{ storeSlug: string; currency: string } | null>(null);
+  // Full storefront context (products, categories, blogs, templateSlug,
+  // socialLinks) — not just slug/currency. Without this, any block that
+  // depends on real store data (product grids, best-sellers, category
+  // nav, wishlist/add-to-cart/quick-view buttons) rendered empty or
+  // inert in THIS preview while the real live page (which fetches this
+  // same endpoint) would show real products and working buttons. That
+  // mismatch is exactly "the preview doesn't match what actually goes
+  // live" — mirror the live page's own data source and prop shape here
+  // instead of a stripped-down partial context.
+  const [storeContext, setStoreContext] = useState<{
+    storeSlug: string;
+    currency: string;
+    templateSlug: string | null;
+    products: any[];
+    categories: any[];
+    blogs: any[];
+    socialLinks: any[];
+  } | null>(null);
   useEffect(() => {
     let cancelled = false;
-    api.get<{ slug: string; currency: string }>(`/api/sites/${siteId}`).then((res) => {
-      if (!cancelled && res.success && res.data) {
-        setStoreContext({ storeSlug: res.data.slug, currency: res.data.currency || "NGN" });
+    api.get<{ slug: string; currency: string }>(`/api/sites/${siteId}`).then(async (res) => {
+      if (cancelled || !res.success || !res.data) return;
+      const slug = res.data.slug;
+      const currency = res.data.currency || "NGN";
+      try {
+        const sfRes = await fetch(`/api/storefront/${slug}`);
+        const sf = sfRes.ok ? await sfRes.json() : null;
+        if (cancelled) return;
+        setStoreContext({
+          storeSlug: slug,
+          currency,
+          templateSlug: sf?.templateSlug || "ai",
+          products: sf?.products || [],
+          categories: sf?.categories || [],
+          blogs: sf?.blogs || [],
+          socialLinks: sf?.socialLinks || [],
+        });
+      } catch {
+        // Storefront data is a nice-to-have for parity, not required to
+        // show a preview at all — fall back to the minimal context
+        // rather than leaving the preview stuck loading.
+        if (!cancelled) setStoreContext({ storeSlug: slug, currency, templateSlug: "ai", products: [], categories: [], blogs: [], socialLinks: [] });
       }
     }).catch(() => {});
     return () => { cancelled = true; };
@@ -138,11 +167,13 @@ export function SandboxPreview({
     if (!storeContext) return <RenderBlocks blocks={blocks} />;
     return (
       <TemplateStoreContextProvider
-        templateSlug={null}
-        products={[]}
-        blogs={[]}
+        templateSlug={storeContext.templateSlug}
+        products={storeContext.products}
+        blogs={storeContext.blogs}
+        categories={storeContext.categories}
         currency={storeContext.currency}
         storeSlug={storeContext.storeSlug}
+        socialLinks={storeContext.socialLinks}
       >
         <RenderBlocks blocks={blocks} storeSlug={storeContext.storeSlug} currency={storeContext.currency} />
       </TemplateStoreContextProvider>
