@@ -399,12 +399,11 @@ async function executeTool(
 
         const created = await prisma.page.upsert({
           where: { siteId_slug: { siteId, slug } },
-          // Draft by default - isPublished: true would make this live on
-          // the real public storefront the instant one page exists,
-          // violating "preview != live until explicit Publish" (a
-          // top-level goal, not just a nice-to-have). An explicit human
-          // publish action flips this, not the agent itself finishing a task.
-          create: { siteId, slug, title: parsed.title, type: parsed.type, template: "ai", content: blocks as object, isPublished: false },
+          // Live by default — the page is fully editable afterward (this
+          // same upsert's `update` branch, plus update_section) regardless
+          // of isPublished; that flag only controls whether the public
+          // storefront route serves it, not whether it can be changed.
+          create: { siteId, slug, title: parsed.title, type: parsed.type, template: "ai", content: blocks as object, isPublished: true },
           update: { title: parsed.title, template: "ai", content: blocks as object },
         });
         // Snapshot the resulting state, not the pre-change one — undo
