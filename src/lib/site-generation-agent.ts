@@ -63,7 +63,7 @@ const TOOL_DEFS: AITool[] = [
   { type: "function", function: { name: "set_delivery_zones", description: "Set the store's delivery areas and fees, from what the merchant actually said.", parameters: toToolParameters(setDeliveryZonesSchema) } },
   { type: "function", function: { name: "set_payment_stub", description: "Set checkout UI mode. 'connected' only takes effect if the merchant already has a real payment gateway configured — this tool cannot enable live charging on its own.", parameters: toToolParameters(setPaymentStubSchema) } },
   { type: "function", function: { name: "set_seo", description: "Set a page's SEO title/description.", parameters: toToolParameters(setSeoSchema) } },
-  { type: "function", function: { name: "attach_asset", description: "Bind an uploaded/generated image to a section's image field.", parameters: toToolParameters(attachAssetSchema) } },
+  { type: "function", function: { name: "attach_asset", description: "Bind a merchant-uploaded (or generated) image to a specific section's image field on a specific page. Field name depends on the block type at that section: most blocks (hero, banner, features, testimonials, stats, newsletter, FAQ, team, contact, trustBadges) use \"backgroundImage\"; the imageText/story block uses \"image\"; gallery uses \"images\" (an array — pass a JSON array string of URLs, not attach_asset for a single one). Read the page's current sections first if you're not certain which index/type the merchant means.", parameters: toToolParameters(attachAssetSchema) } },
   { type: "function", function: { name: "ask_user", description: "Ask the merchant a clarifying question when a critical detail (business name, currency/country, contact channel, WhatsApp number) is missing. Ends this turn and waits for their answer — never guess instead.", parameters: toToolParameters(askUserSchema) } },
   { type: "function", function: { name: "finalize_draft", description: "Call this once the site genuinely reflects what the merchant asked for. Ends the session.", parameters: toToolParameters(finalizeDraftSchema) } },
 ];
@@ -77,6 +77,7 @@ ${currentSiteSummary ? `\nCURRENT SITE STATE — this site already exists and is
 Rules:
 - Default currency is NGN unless the merchant's prompt says otherwise.
 - STRICT: every section on the homepage must have real content — never add or leave a section (features, testimonials, FAQ, values, or any other content block) with an empty or near-empty items list. A section with no content under its heading is a broken page. When using update_section on a content block, always include a fully populated items/content array — never set it to an empty list or omit it expecting old content to remain if you're changing that field.
+- STRICT: if the merchant uploaded an image and told you which section to use it in (hero, testimonials, a named section, "this section", etc.), you MUST call attach_asset with that exact uploaded URL on that exact section — never substitute a stock photo, an AI-generated image, or a different section instead. This is a direct, literal instruction from the merchant, not a style preference — treat it as non-negotiable. If it's ambiguous which section they mean, ask_user rather than guessing wrong and using the image somewhere else.
 - STRICT: never create two pages that serve the same nav purpose (e.g. two contact-style pages, two about-style pages) — this produces a duplicate, broken-looking nav bar. Before calling create_page, check the pages you already have in this session/site for one that already serves that purpose (by TYPE, not just title — ABOUT/FAQ/CONTACT/POLICY are one-per-site). If one exists, call update_section on it instead of create_page with a new title/slug for the same thing.
 - STRICT: create_page must finish with a real, working page or not be reported as done. If a page's content generation fails or comes back empty/invalid, retry it immediately (same tool call, same page) rather than leaving a page that exists in the nav but errors when opened — a merchant clicking a nav link into "something went wrong" is a broken product, not an acceptable partial result. Only report a page as failed after retrying has genuinely been exhausted, and say so plainly rather than silently leaving a dead link.
 - If the prompt names delivery areas, call set_delivery_zones with exactly those names — don't invent additional ones, don't skip ones they named.
@@ -575,10 +576,15 @@ async function executeTool(
         if (!page) return { result: `No page with slug "${parsed.pageSlug}" exists.`, isError: true };
         const blocks = Array.isArray(page.content) ? [...(page.content as Record<string, unknown>[])] : [];
         if (parsed.sectionIndex >= blocks.length) return { result: `Section ${parsed.sectionIndex} doesn't exist on "${parsed.pageSlug}".`, isError: true };
-        const target = blocks[parsed.sectionIndex] as { settings?: Record<string, unknown> };
-        blocks[parsed.sectionIndex] = { ...target, settings: { ...(target.settings || {}), [parsed.field]: parsed.assetUrl } };
+        // Every block reads its fields from `props` (heading, backgroundImage,
+        // image, items, etc.) — there is no `settings` field anywhere in the
+        // render path. Writing to `settings` silently did nothing: the
+        // merchant's uploaded image was "attached" but never actually
+        // appeared anywhere on the live site.
+        const target = blocks[parsed.sectionIndex] as { props?: Record<string, unknown> };
+        blocks[parsed.sectionIndex] = { ...target, props: { ...(target.props || {}), [parsed.field]: parsed.assetUrl } };
         await prisma.page.update({ where: { id: page.id }, data: { content: blocks as object } });
-        return { result: `Attached asset to ${parsed.field} on section ${parsed.sectionIndex}.`, isError: false };
+        return { result: `Set ${parsed.field} on section ${parsed.sectionIndex} of "${parsed.pageSlug}" to the uploaded image.`, isError: false };
       }
 
       default:
