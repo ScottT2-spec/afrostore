@@ -6,6 +6,7 @@ import { useState, useEffect, useCallback } from "react";
 import { useParams } from "next/navigation";
 import Link from "next/link";
 import { HandmadeBagsHeader, HandmadeBagsFooter } from "@/components/storefront/HandmadeBagsStoreChrome";
+import { AiStoreHeader } from "@/components/storefront/AiStoreChrome";
 import { RenderBlocks } from "@/components/storefront/BlockRenderer";
 import { RenderTemplateBlocks } from "@/components/storefront/TemplateBlockRenderer";
 import { RETAIL_REVIEWS_BLOCKS } from "@/lib/templates/presets/retail-pages";
@@ -80,6 +81,7 @@ export default function StoreReviewsPage() {
   const isHealthTemplate = slug === "pills" || store?.slug === "pills" || store?.name?.toLowerCase().includes("pill") || store?.name?.toLowerCase().includes("supplement") || store?.name?.toLowerCase().includes("health");
   const isTShirtsPrintsTemplate = slug === "huty" || store?.slug === "huty" || store?.name?.toLowerCase().includes("t-shirts") || store?.name?.toLowerCase().includes("prints");
   const activeTemplateSlug = storeData?.store?.templates?.[0]?.template?.slug || null;
+  const isAiTemplate = activeTemplateSlug === "ai";
   const isPerfumesTemplate = activeTemplateSlug === "perfumes" || slug === "perfumes" || store?.slug === "perfumes" || store?.name?.toLowerCase().includes("perfumes");
 
   const fetchReviews = useCallback(async (p: number, rating: number | null, append: boolean) => {
@@ -282,6 +284,8 @@ export default function StoreReviewsPage() {
           </>
         ) : isTShirtsPrintsTemplate ? (
           <TShirtsPrintsHeader storeName={store?.name || "Store"} storeSlug={slug} logo={store?.logo} />
+        ) : isAiTemplate ? (
+          <AiStoreHeader storeName={store?.name || "Store"} storeSlug={slug} logo={store?.logo} />
         ) : (
           <HandmadeBagsHeader
             storeName={store?.name || "Store"}

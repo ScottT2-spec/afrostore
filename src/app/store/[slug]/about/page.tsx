@@ -5,6 +5,7 @@ import { RenderTemplateBlocks, type TemplateBlock } from "@/components/storefron
 import InteractiveTemplateBlocks from "@/components/storefront/InteractiveTemplateBlocks";
 import { RetailHeader, RetailFooter } from "@/components/storefront/RetailTemplateBlocks";
 import { HandmadeBagsHeader, HandmadeBagsFooter } from "@/components/storefront/HandmadeBagsStoreChrome";
+import { AiStoreHeader } from "@/components/storefront/AiStoreChrome";
 import { ThemeProvider, type ThemeData } from "@/components/storefront/ThemeProvider";
 import { applyPageCustomization, buildPageBackgroundStyle, filterVisiblePages, getResolvedPageSettings, normalizeSiteCustomization, type SiteCustomizationDocument } from "@/lib/site-customization";
 import { RenderBlocks, type BuilderBlock } from "@/components/storefront/BlockRenderer";
@@ -272,6 +273,9 @@ export default async function AboutPage({ params }: Props) {
       })
     : null;
   const aboutNodeCss = resolvedAbout?.css || "";
+  const isAiTemplate =
+    activeTemplateSlug === "ai" ||
+    resolvedAbout?.blocks?.some((b: any) => typeof b?.type === "string" && b.type.startsWith("ai"));
   console.log('[AboutPage] aboutPage.content:', aboutPage?.content);
   console.log('[AboutPage] parsedAbout:', resolvedAbout);
   console.log('[AboutPage] First block styleOverrides:', resolvedAbout?.blocks[0]?.styleOverrides);
@@ -496,12 +500,16 @@ export default async function AboutPage({ params }: Props) {
 
   return (
     <ThemeProvider theme={themeData}>
-      <HandmadeBagsHeader
-        storeName={store.name}
-        storeSlug={store.slug || slug}
-        logo={store.logo}
-        isLanding={false}
-      />
+      {isAiTemplate ? (
+        <AiStoreHeader storeName={store.name} storeSlug={store.slug || slug} logo={store.logo} />
+      ) : (
+        <HandmadeBagsHeader
+          storeName={store.name}
+          storeSlug={store.slug || slug}
+          logo={store.logo}
+          isLanding={false}
+        />
+      )}
       <div style={buildPageBackgroundStyle(pageSettings)}>
         {aboutNodeCss && <style data-live-node-styles dangerouslySetInnerHTML={{ __html: aboutNodeCss }} />}
         {resolvedAbout && resolvedAbout.blocks.length > 0 ? (

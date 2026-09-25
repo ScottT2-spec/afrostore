@@ -429,19 +429,22 @@ function buildFAQPage(data: Record<string, any>, storeName: string, storeSlug: s
   };
 }
 
-function buildContactPage(data: Record<string, any>, storeName: string): GeneratedPage {
+function buildContactPage(data: Record<string, any>, storeName: string, images: StoreImages): GeneratedPage {
   const contact = data.contact || {};
 
   const blocks: BuilderBlock[] = [
     block("hero", {
       heading: contact.headline || "Get in Touch",
       subheading: contact.subtitle || "We'd love to hear from you. Send us a message and we'll respond as soon as possible.",
-      bgStyle: "light",
+      bgStyle: "dark",
+      bgImage: images.banner || images.hero,
+      overlayOpacity: 45,
       buttonText: "",
     }),
     block("spacer", { height: 48 }),
     block("contactInfo", {
       title: "Contact Information",
+      backgroundImage: images.lifestyle || images.about,
       items: [
         { icon: "mail", title: "Email", value: "hello@example.com" },
         { icon: "phone", title: "Phone", value: "+233 XX XXX XXXX" },
@@ -454,6 +457,7 @@ function buildContactPage(data: Record<string, any>, storeName: string): Generat
     block("contactForm", {
       title: "Send Us a Message",
       subtitle: "We'll respond within 24 hours",
+      backgroundImage: images.showcase?.[0] || images.about,
       fields: ["name", "email", "phone", "message"],
       buttonText: "Send Message",
     }),
@@ -461,7 +465,7 @@ function buildContactPage(data: Record<string, any>, storeName: string): Generat
     block("newsletter", {
       title: "Stay in the Loop",
       subtitle: "Get updates on new products and exclusive offers.",
-      bgColor: "surface",
+      backgroundImage: images.showcase?.[1] || images.banner || images.hero,
     }),
   ];
 
@@ -609,9 +613,10 @@ export async function generateStore(input: StoreGeneratorInput): Promise<StoreGe
   const pages: GeneratedPage[] = [
     buildHomePage(data, input.storeName, input.storeSlug, images, industry, existingSettings?.whatsappNumber || undefined),
     buildAboutPage(data, input.storeName, input.storeSlug, images),
-    buildFAQPage(data, input.storeName, input.storeSlug),
-    buildContactPage(data, input.storeName),
-    buildPoliciesPage(data, input.storeName),
+    buildContactPage(data, input.storeName, images),
+    // Strictly Home, About, Contact, Reviews only — no FAQ or Policies
+    // page, and no other nav item. Reviews is a fixed platform route
+    // (src/app/store/[slug]/reviews), not a generated content page.
   ];
 
   // 4. Persist all pages: upsert by (siteId, slug) rather than delete-then

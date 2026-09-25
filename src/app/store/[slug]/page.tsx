@@ -35,6 +35,7 @@ import { AegisLandingContext, AegisLandingFontLoader } from "@/components/storef
 import { ProkipAgentLandingContext, ProkipAgentFontLoader } from "@/components/storefront/ProkipAgentLandingBlocks";
 import { ProkipBookingLandingContext, ProkipBookingFontLoader } from "@/components/storefront/ProkipBookingLandingBlocks";
 import { VegetableHomePage } from "@/components/storefront/VegetableTemplatePages";
+import { AiStoreHeader } from "@/components/storefront/AiStoreChrome";
 
 /* ───────── Types ───────── */
 
@@ -761,8 +762,7 @@ export default function StorePage() {
           wishlistCount={wishlistCount}
         />
       ) : isAiTemplate ? (
-        /* AI template — minimal/no chrome header, the blocks handle it */
-        null
+        <AiStoreHeader storeName={store.name} storeSlug={slug} logo={store.logo} />
       ) : isFashionTemplate ? (
         <FashionHeader
           storeName={store.name}
