@@ -83,9 +83,15 @@ export default function AIBuilderPage({ params }: { params: Promise<{ siteId: st
     if (!siteId) return;
     (async () => {
       setLoadingSite(true);
-      const res = await api.get<SiteRecord>(`/api/sites/${siteId}`);
+      const [res, pagesRes] = await Promise.all([
+        api.get<SiteRecord>(`/api/sites/${siteId}`),
+        api.get<{ pages: PageSummary[] }>(`/api/sites/${siteId}/pages?limit=100`),
+      ]);
       if (res.success && res.data) {
         setSite(res.data);
+        const existingPages = pagesRes.success ? pagesRes.data?.pages || [] : [];
+        const alreadyBuilt = existingPages.length > 0;
+
         // If AI Business just handed off a prefilled task, skip the
         // empty-state greeting and go straight into building with it —
         // the merchant already told us everything on that form, no need
@@ -100,6 +106,20 @@ export default function AIBuilderPage({ params }: { params: Promise<{ siteId: st
               setPendingPrefillTask(prefill.task);
             }
           } catch { /* ignore malformed prefill */ }
+        } else if (alreadyBuilt) {
+          // Coming back to an already-built, possibly already-live site —
+          // greet them as an editor, not a fresh builder, and load the
+          // current homepage right away so they see what's actually live
+          // instead of a blank "your preview will appear here" pane.
+          setMessages([
+            {
+              id: uid(),
+              role: "assistant",
+              content: `Hi! I'm ready to help you update ${res.data.name}. Tell me what you'd like to change — wording, images, a new section, a whole new page — and I'll update it on your live site.`,
+            },
+          ]);
+          setHasGenerated(true);
+          await loadHomePagePreview(existingPages);
         } else {
           setMessages([
             {

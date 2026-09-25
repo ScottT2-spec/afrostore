@@ -68,12 +68,12 @@ const TOOL_DEFS: AITool[] = [
   { type: "function", function: { name: "finalize_draft", description: "Call this once the site genuinely reflects what the merchant asked for. Ends the session.", parameters: toToolParameters(finalizeDraftSchema) } },
 ];
 
-function buildSystemPrompt(rules: SiteIntentRules, safetyCategory: SensitiveCategory | null): string {
+function buildSystemPrompt(rules: SiteIntentRules, safetyCategory: SensitiveCategory | null, currentSiteSummary: string | null): string {
   return `You are building a real e-commerce/business/landing site for an African SMB merchant, from their plain-language description. You can ONLY act through the tools you're given — there is no code, no files, nothing outside this specific tool set.
 
 ${rules.promptRules}
 ${safetyCategory ? `\n${getGuardrailPromptRules(safetyCategory)}\n` : ""}
-
+${currentSiteSummary ? `\nCURRENT SITE STATE — this site already exists and is live. The merchant's message below is a request to CHANGE it, not build it from scratch. Read this before doing anything: it's every page, in order, and every section on each page with its 0-based index (the sectionIndex update_section needs) and a preview of its current content.\n\n${currentSiteSummary}\n\nWhen the merchant refers to something ("the hero", "the FAQ section", "that testimonial"), match it against the actual sections listed above rather than guessing an index. If they ask to change one page's wording/color/image, use update_section on the matching page+index — don't call create_page for something that already exists (see the duplicate-page rule below). If what they're asking about genuinely isn't listed above, say so and ask, rather than assuming a section exists.\n` : ""}
 Rules:
 - Default currency is NGN unless the merchant's prompt says otherwise.
 - STRICT: every section on the homepage must have real content — never add or leave a section (features, testimonials, FAQ, values, or any other content block) with an empty or near-empty items list. A section with no content under its heading is a broken page. When using update_section on a content block, always include a fully populated items/content array — never set it to an empty list or omit it expecting old content to remain if you're changing that field.
@@ -85,6 +85,61 @@ Rules:
 - create_page must produce real, specific, on-brand content immediately — never placeholder/lorem-ipsum text. A merchant should recognize their own business in the copy, not see generic filler.
 - Use ask_user (max 3 times per session) only for genuinely critical missing information — business name, currency/country if ambiguous, primary contact channel. Don't ask about things you can reasonably default.
 - Call finalize_draft only once the site actually reflects the request AND satisfies every rule under SITE TYPE above — don't finalize a half-built or wrong-shaped site. finalize_draft will be rejected with specific corrections if it doesn't, so get it right rather than guessing you're done.`;
+}
+
+/**
+ * A compact, token-cheap snapshot of everything already on this site —
+ * every page, in section order, with each section's index and a short
+ * preview of its current text. This is what lets a merchant come back
+ * weeks later and say "change the hero heading" and have the agent
+ * actually know what page/sectionIndex/current-value that refers to,
+ * instead of starting an editing session with zero knowledge of the
+ * site it's editing (previously the agent had no way to see current
+ * content at all — every edit was a guess).
+ *
+ * Kept intentionally short per section (a handful of key fields, values
+ * truncated) rather than dumping full block JSON — this goes into the
+ * system prompt on every single turn of the session, so its size is a
+ * real cost, not a one-time read.
+ */
+const PREVIEW_FIELDS = ["heading", "title", "subheading", "subtitle", "text", "badge", "buttonText"] as const;
+
+function truncate(value: unknown, max = 60): string {
+  const str = typeof value === "string" ? value : JSON.stringify(value);
+  return str.length > max ? `${str.slice(0, max)}…` : str;
+}
+
+function summarizeSection(props: Record<string, unknown> | undefined, index: number, type: string): string {
+  if (!props) return `  [${index}] ${type}`;
+  const parts: string[] = [];
+  for (const field of PREVIEW_FIELDS) {
+    const value = props[field];
+    if (typeof value === "string" && value.trim()) parts.push(`${field}: "${truncate(value)}"`);
+  }
+  const items = props.items;
+  if (Array.isArray(items) && items.length > 0) {
+    parts.push(`${items.length} item${items.length === 1 ? "" : "s"}`);
+  }
+  return `  [${index}] ${type}${parts.length > 0 ? " — " + parts.join(", ") : ""}`;
+}
+
+async function summarizeCurrentSite(siteId: string): Promise<string | null> {
+  const pages = await prisma.page.findMany({
+    where: { siteId },
+    select: { title: true, slug: true, type: true, content: true },
+    orderBy: { position: "asc" },
+  });
+  if (pages.length === 0) return null; // genuinely new site — nothing to summarize, this is the initial build
+
+  return pages
+    .map((page: { title: string; slug: string; type: string; content: unknown }) => {
+      const blocks = Array.isArray(page.content) ? (page.content as Array<{ type?: string; props?: Record<string, unknown> }>) : [];
+      const sectionLines = blocks.length > 0
+        ? blocks.map((b, i) => summarizeSection(b.props, i, b.type || "unknown")).join("\n")
+        : "  (no sections)";
+      return `Page "${page.slug}" (${page.type}, title: "${page.title}"):\n${sectionLines}`;
+    })
+    .join("\n\n");
 }
 
 export interface SiteGenerationStep {
@@ -131,10 +186,17 @@ export async function runSiteGenerationAgent(opts: RunSiteGenerationOptions): Pr
   const safetyMatch = detectSensitiveCategory(`${task} ${industry}`);
   const safetyCategory = safetyMatch?.tier === "guardrail" ? safetyMatch.category : null;
 
+  // Only fetched for a fresh session (priorMessages is how an in-progress
+  // ask_user round-trip resumes — the summary from the FIRST message of
+  // that session is still accurate enough, and re-fetching it on every
+  // resume would be wasted work). Returns null for a genuinely new site
+  // with no pages yet, in which case the prompt stays exactly as before.
+  const currentSiteSummary = priorMessages?.length ? null : await summarizeCurrentSite(siteId);
+
   const messages: AIMessage[] = priorMessages?.length
     ? [...priorMessages, { role: "user", content: task }]
     : [
-        { role: "system", content: buildSystemPrompt(rules, safetyCategory) },
+        { role: "system", content: buildSystemPrompt(rules, safetyCategory, currentSiteSummary) },
         { role: "user", content: task },
       ];
 
@@ -362,8 +424,16 @@ async function executeTool(
         if (parsed.sectionIndex >= blocks.length) {
           return { result: `Page "${parsed.pageSlug}" only has ${blocks.length} sections (0-${blocks.length - 1}) — sectionIndex ${parsed.sectionIndex} doesn't exist.`, isError: true };
         }
-        const target = blocks[parsed.sectionIndex] as { settings?: Record<string, unknown> };
-        blocks[parsed.sectionIndex] = { ...target, settings: { ...(target.settings || {}), ...parsed.content } };
+        // The storefront renderer (BlockRenderer.tsx) reads each block's
+        // `props` field — every block the generator produces (ai-layout-
+        // engine.ts, ai-store-generator.ts) is shaped {id, type, props}.
+        // This used to merge edits into a `settings` field instead, which
+        // nothing renders: update_section would report success and save a
+        // PageVersion, but the live storefront never actually changed —
+        // exactly the "I asked the AI to change it and nothing happened"
+        // bug. Merge into `props`, the field the renderer really reads.
+        const target = blocks[parsed.sectionIndex] as { props?: Record<string, unknown> };
+        blocks[parsed.sectionIndex] = { ...target, props: { ...(target.props || {}), ...parsed.content } };
 
         await prisma.page.update({ where: { id: page.id }, data: { content: blocks as object } });
         await prisma.pageVersion.create({ data: { pageId: page.id, title: page.title, content: blocks as object } });

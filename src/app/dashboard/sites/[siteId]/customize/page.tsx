@@ -185,6 +185,9 @@ export default function SiteCustomizePage({ params }: { params: Promise<{ siteId
           <Link href={`/dashboard/sites/${siteId}/editor`} className="inline-flex items-center gap-2 rounded-xl border border-brand-200 bg-brand-50 px-4 py-2.5 text-sm font-semibold text-brand-700 hover:bg-brand-100">
             <LayoutTemplate className="h-4 w-4" /> Open visual editor
           </Link>
+          <Link href={`/dashboard/sites/${siteId}/ai-builder`} className="inline-flex items-center gap-2 rounded-xl bg-brand-600 px-4 py-2.5 text-sm font-semibold text-white hover:bg-brand-700">
+            <Sparkles className="h-4 w-4" /> Edit with AI
+          </Link>
           <button onClick={saveChanges} disabled={saving} className="inline-flex items-center gap-2 rounded-xl bg-brand-600 px-4 py-2.5 text-sm font-semibold text-white hover:bg-brand-700 disabled:opacity-50">
             {saving ? <Loader2 className="h-4 w-4 animate-spin" /> : <Save className="h-4 w-4" />} Save changes
           </button>
@@ -263,6 +266,10 @@ export default function SiteCustomizePage({ params }: { params: Promise<{ siteId
             </div>
             <p className="text-sm text-surface-500">Use the page builder to customize wording, add sections, and swap images inside each page.</p>
             <div className="mt-4 space-y-2">
+              <Link href={`/dashboard/sites/${siteId}/ai-builder`} className="flex items-center justify-between rounded-xl border border-brand-200 bg-brand-50 px-4 py-3 text-sm font-medium text-brand-700 hover:bg-brand-100">
+                <span className="inline-flex items-center gap-2"><Sparkles className="h-4 w-4 text-brand-600" /> Edit with AI</span>
+                <span className="text-xs text-brand-500">Just describe the change</span>
+              </Link>
               {homePage && (
                 <Link href={`/editor/${homePage.id}`} className="flex items-center justify-between rounded-xl border border-surface-200 px-4 py-3 text-sm font-medium text-surface-700 hover:bg-surface-50">
                   <span className="inline-flex items-center gap-2"><Pencil className="h-4 w-4 text-brand-600" /> Customize homepage</span>
