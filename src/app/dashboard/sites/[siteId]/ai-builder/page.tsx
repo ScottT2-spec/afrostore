@@ -86,17 +86,45 @@ export default function AIBuilderPage({ params }: { params: Promise<{ siteId: st
       const res = await api.get<SiteRecord>(`/api/sites/${siteId}`);
       if (res.success && res.data) {
         setSite(res.data);
-        setMessages([
-          {
-            id: uid(),
-            role: "assistant",
-            content: `Hi! I'm ready to build ${res.data.name}. Tell me about your business — what you sell, the vibe you're going for, anything that'll help me get it right — and I'll put together your site.`,
-          },
-        ]);
+        // If AI Business just handed off a prefilled task, skip the
+        // empty-state greeting and go straight into building with it —
+        // the merchant already told us everything on that form, no need
+        // to make them retype it here.
+        const raw = sessionStorage.getItem(`ai-builder-prefill:${siteId}`);
+        if (raw) {
+          sessionStorage.removeItem(`ai-builder-prefill:${siteId}`);
+          try {
+            const prefill = JSON.parse(raw) as { task: string };
+            if (prefill.task) {
+              setMessages([]);
+              setPendingPrefillTask(prefill.task);
+            }
+          } catch { /* ignore malformed prefill */ }
+        } else {
+          setMessages([
+            {
+              id: uid(),
+              role: "assistant",
+              content: `Hi! I'm ready to build ${res.data.name}. Tell me about your business — what you sell, the vibe you're going for, anything that'll help me get it right — and I'll put together your site.`,
+            },
+          ]);
+        }
       }
       setLoadingSite(false);
     })();
   }, [siteId]);
+
+  // Fires once the site + prefill are both loaded, so it runs after
+  // `site` state (which handleSend reads) is actually set.
+  const [pendingPrefillTask, setPendingPrefillTask] = useState<string | null>(null);
+  useEffect(() => {
+    if (pendingPrefillTask && site && !generating) {
+      const task = pendingPrefillTask;
+      setPendingPrefillTask(null);
+      handleSend(task);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [pendingPrefillTask, site]);
 
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
@@ -153,8 +181,8 @@ export default function AIBuilderPage({ params }: { params: Promise<{ siteId: st
     }
   };
 
-  const handleSend = async () => {
-    const description = input.trim();
+  const handleSend = async (overrideMessage?: string) => {
+    const description = (overrideMessage ?? input).trim();
     if (!description || !siteId || !site || generating) return;
 
     const userMsg: ChatMessage = { id: uid(), role: "user", content: description };
@@ -163,7 +191,7 @@ export default function AIBuilderPage({ params }: { params: Promise<{ siteId: st
     const assistantMsg: ChatMessage = { id: assistantMsgId, role: "assistant", content: "", checklist };
 
     setMessages((prev) => [...prev, userMsg, assistantMsg]);
-    setInput("");
+    if (!overrideMessage) setInput("");
     setGenerating(true);
 
     // Streams via SSE instead of a single blocking request. This isn't
@@ -415,7 +443,7 @@ export default function AIBuilderPage({ params }: { params: Promise<{ siteId: st
                 className="flex-1 resize-none bg-transparent text-sm outline-none placeholder:text-surface-400 max-h-32 py-1 disabled:opacity-60"
               />
               <button
-                onClick={handleSend}
+                onClick={() => handleSend()}
                 disabled={!input.trim() || generating || loadingSite}
                 className="flex-shrink-0 h-8 w-8 rounded-lg bg-brand-600 text-white flex items-center justify-center hover:bg-brand-700 disabled:opacity-40 disabled:hover:bg-brand-600 transition-colors"
               >
