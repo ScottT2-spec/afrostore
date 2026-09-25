@@ -76,6 +76,8 @@ ${safetyCategory ? `\n${getGuardrailPromptRules(safetyCategory)}\n` : ""}
 
 Rules:
 - Default currency is NGN unless the merchant's prompt says otherwise.
+- STRICT: never create two pages that serve the same nav purpose (e.g. two contact-style pages, two about-style pages) — this produces a duplicate, broken-looking nav bar. Before calling create_page, check the pages you already have in this session/site for one that already serves that purpose (by TYPE, not just title — ABOUT/FAQ/CONTACT/POLICY are one-per-site). If one exists, call update_section on it instead of create_page with a new title/slug for the same thing.
+- STRICT: create_page must finish with a real, working page or not be reported as done. If a page's content generation fails or comes back empty/invalid, retry it immediately (same tool call, same page) rather than leaving a page that exists in the nav but errors when opened — a merchant clicking a nav link into "something went wrong" is a broken product, not an acceptable partial result. Only report a page as failed after retrying has genuinely been exhausted, and say so plainly rather than silently leaving a dead link.
 - If the prompt names delivery areas, call set_delivery_zones with exactly those names — don't invent additional ones, don't skip ones they named.
 - If the prompt mentions WhatsApp ordering/contact, call set_whatsapp — but only with a real number the merchant provided. If they mentioned WhatsApp but gave no number, use ask_user to get it. Never invent a phone number.
 - Never call set_payment_stub with mode "connected" as a guess — that only matters if the merchant already has a real gateway configured, which you cannot cause to happen from here.
@@ -268,31 +270,66 @@ async function executeTool(
     switch (name) {
       case "create_page": {
         const parsed = createPageSchema.parse(args);
-        const slug = parsed.type === "HOME" ? "home" : parsed.title.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/(^-|-$)/g, "");
+
+        // For one-per-site page types, force the slug of whatever page of
+        // that type already exists rather than trusting the AI to reuse a
+        // consistent title across calls — the actual duplicate-nav bug was
+        // the same page type getting created twice under two different
+        // titles/slugs ("Contact Us" vs "Get In Touch"), which no amount
+        // of prompt instruction alone reliably prevents.
+        const ONE_PER_SITE = new Set(["HOME", "ABOUT", "FAQ", "CONTACT", "POLICY"]);
+        let slug = parsed.type === "HOME" ? "home" : parsed.title.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/(^-|-$)/g, "");
+        if (ONE_PER_SITE.has(parsed.type)) {
+          const existingOfType = await prisma.page.findFirst({ where: { siteId, type: parsed.type as any }, select: { slug: true } });
+          if (existingOfType) slug = existingOfType.slug;
+        }
 
         // Real content, not a structural skeleton — generate it scoped to
         // exactly the requested sections, reusing the same schema/prompt
         // already proven for full-site generation (ai-schemas/store-generation.ts),
         // just constrained to fewer fields per call.
-        const content = await generateStructured({
-          ai,
-          schema: storeGenerationSchema,
-          toolName: "generate_page_content",
-          toolDescription: `Generates real, on-brand content for a ${parsed.type} page with these sections: ${parsed.sections.join(", ")}.`,
-          systemPrompt: `You are a senior brand copywriter. Always call generate_page_content — never reply with plain text. Never write placeholder/lorem-ipsum copy.${safetyCategory ? `\n\n${getGuardrailPromptRules(safetyCategory)}` : ""}`,
-          userPrompt: `Business: ${storeName} (${industry}). Page: "${parsed.title}" (${parsed.type}). Sections in order: ${parsed.sections.join(", ")}. Write real, specific content — no generic filler.`,
-          maxTokens: 6000,
-          temperature: 0.7,
-        });
+        //
+        // Forced to actually succeed: a page that exists in the nav but
+        // errors when opened is a broken product, not an acceptable
+        // partial result — retry generation before ever giving up, and
+        // never upsert empty/invalid content that would crash the
+        // storefront render.
+        let blocks: ReturnType<typeof buildDynamicHomePage> | null = null;
+        let lastError: unknown = null;
+        for (let attempt = 0; attempt < 3 && !blocks; attempt++) {
+          try {
+            const content = await generateStructured({
+              ai,
+              schema: storeGenerationSchema,
+              toolName: "generate_page_content",
+              toolDescription: `Generates real, on-brand content for a ${parsed.type} page with these sections: ${parsed.sections.join(", ")}.`,
+              systemPrompt: `You are a senior brand copywriter. Always call generate_page_content — never reply with plain text. Never write placeholder/lorem-ipsum copy.${safetyCategory ? `\n\n${getGuardrailPromptRules(safetyCategory)}` : ""}`,
+              userPrompt: `Business: ${storeName} (${industry}). Page: "${parsed.title}" (${parsed.type}). Sections in order: ${parsed.sections.join(", ")}. Write real, specific content — no generic filler.`,
+              maxTokens: 6000,
+              temperature: attempt === 0 ? 0.7 : 0.4, // steadier on retry
+            });
 
-        const images = getRandomIndustryImages(industry);
-        const blocks = buildDynamicHomePage(
-          { ...content.data, layout: { sections: parsed.sections, vibe: content.data.layout?.vibe || "clean" } },
-          storeName,
-          storeSlug,
-          industry,
-          images
-        );
+            const images = getRandomIndustryImages(industry);
+            const candidate = buildDynamicHomePage(
+              { ...content.data, layout: { sections: parsed.sections, vibe: content.data.layout?.vibe || "clean" } },
+              storeName,
+              storeSlug,
+              industry,
+              images
+            );
+            if (Array.isArray(candidate) && candidate.length > 0) {
+              blocks = candidate;
+            } else {
+              lastError = new Error("Generated page came back with zero blocks");
+            }
+          } catch (err) {
+            lastError = err;
+          }
+        }
+
+        if (!blocks) {
+          return { result: `Couldn't build a working "${parsed.title}" page after retrying — not creating a broken nav link. Error: ${lastError instanceof Error ? lastError.message : String(lastError)}`, isError: true };
+        }
 
         const created = await prisma.page.upsert({
           where: { siteId_slug: { siteId, slug } },
