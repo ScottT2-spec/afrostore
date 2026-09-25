@@ -639,6 +639,7 @@ export async function generateStore(input: StoreGeneratorInput): Promise<StoreGe
           title: page.title,
           slug: page.slug,
           type: page.type as any,
+          template: "ai",
           content: page.blocks as any,
           metaTitle: page.metaTitle,
           metaDescription: page.metaDescription,
@@ -648,6 +649,7 @@ export async function generateStore(input: StoreGeneratorInput): Promise<StoreGe
         update: {
           title: page.title,
           type: page.type as any,
+          template: "ai",
           content: page.blocks as any,
           metaTitle: page.metaTitle,
           metaDescription: page.metaDescription,

@@ -253,11 +253,19 @@ export default async function ContactPage({ params }: Props) {
       })
     : null;
   const contactNodeCss = resolvedContact?.css || "";
-  // Matches the exact same check used on the home page (src/app/store/[slug]/page.tsx)
-  // so the AI block-builder path renders identical header chrome on every page —
-  // the home page renders no hardcoded header chrome for AI-generated sites
-  // ("the blocks handle it"), so the contact page must not either.
+  // contactPage.template is the durable source of truth (set at creation
+  // and preserved through every AI regeneration — see
+  // ai-store-generator.ts). The previous check here — activeTemplateSlug
+  // === "ai" (always null: no SiteTemplate row is ever created for AI
+  // sites) OR'd with "does any block's type start with ai" — was never
+  // actually true for this page: contact/about/faq/policy pages are built
+  // by ai-store-generator.ts with plain block type names (heading, text,
+  // newsletter, ...), never "ai"-prefixed ones. Only the home page's
+  // very first, pre-regeneration content ever had "ai"-prefixed blocks,
+  // and even that gets overwritten by the same background job. Kept as a
+  // fallback only for sites created before this field was backfilled.
   const isAiTemplate =
+    contactPage?.template === "ai" ||
     activeTemplateSlug === "ai" ||
     resolvedContact?.blocks?.some((b: any) => typeof b?.type === "string" && b.type.startsWith("ai"));
   if (resolvedContact && resolvedContact.blocks.length > 0) {

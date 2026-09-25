@@ -424,7 +424,16 @@ export default function StorePage() {
   const isDecorTemplate = data.templateSlug === "decor" || data.templateSlug === "interior" || data.templateSlug === "interior-design" || data.templateSlug === "home-decor" || homeBlocks.some((b) => b.type.startsWith("interior"));
   const isJumiaTemplate = homeBlocks.some((b) => b.type.startsWith("jumia"));
   const isElectronicsTemplate = data.templateSlug === "electronics" || data.templateSlug === "electronics-accessories" || data.templateSlug === "hardware" || data.templateSlug === "tools" || homeBlocks.some((b) => b.type.startsWith("electronics"));
-  const isAiTemplate = data.templateSlug === "ai" || homeBlocks.some((b) => b.type.startsWith("ai"));
+  // homePage.template is the durable source of truth (set at creation and
+  // preserved through every AI regeneration — see ai-store-generator.ts).
+  // The old check here (data.templateSlug === "ai" — always null, since no
+  // SiteTemplate row is ever created for AI sites — OR guessing from block
+  // type names) broke the moment the background generateStore() job
+  // replaced buildSmartAiBlocks' "ai"-prefixed home blocks with
+  // ai-layout-engine.ts's plain-named ones (hero/banner/faq/...). Kept as
+  // a fallback only for sites created before this field was backfilled.
+  const isAiTemplate =
+    homePage?.template === "ai" || data.templateSlug === "ai" || homeBlocks.some((b) => b.type.startsWith("ai"));
   const templatePreset = data.templateSlug ? TEMPLATE_PRESET_MAP[data.templateSlug] : undefined;
 
   // Build navigation items dynamically from actual pages in database

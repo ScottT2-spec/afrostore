@@ -404,8 +404,8 @@ async function executeTool(
           // violating "preview != live until explicit Publish" (a
           // top-level goal, not just a nice-to-have). An explicit human
           // publish action flips this, not the agent itself finishing a task.
-          create: { siteId, slug, title: parsed.title, type: parsed.type, content: blocks as object, isPublished: false },
-          update: { title: parsed.title, content: blocks as object },
+          create: { siteId, slug, title: parsed.title, type: parsed.type, template: "ai", content: blocks as object, isPublished: false },
+          update: { title: parsed.title, template: "ai", content: blocks as object },
         });
         // Snapshot the resulting state, not the pre-change one — undo
         // restores "the version before this one", so what matters is

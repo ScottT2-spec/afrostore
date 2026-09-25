@@ -273,7 +273,14 @@ export default async function AboutPage({ params }: Props) {
       })
     : null;
   const aboutNodeCss = resolvedAbout?.css || "";
+  // aboutPage.template is the durable source of truth (set at creation,
+  // preserved through every AI regeneration — see ai-store-generator.ts).
+  // The block-type-prefix guess never actually held for this page: About
+  // is built by ai-store-generator.ts with plain block type names
+  // (heading, text, ...), never "ai"-prefixed ones. Kept as a fallback
+  // only for sites created before this field was backfilled.
   const isAiTemplate =
+    aboutPage?.template === "ai" ||
     activeTemplateSlug === "ai" ||
     resolvedAbout?.blocks?.some((b: any) => typeof b?.type === "string" && b.type.startsWith("ai"));
   console.log('[AboutPage] aboutPage.content:', aboutPage?.content);

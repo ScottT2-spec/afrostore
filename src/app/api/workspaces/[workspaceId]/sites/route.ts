@@ -305,6 +305,7 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ wor
               title: pg.title,
               slug: pg.slug,
               type: pg.type,
+              template: "ai",
               isPublished: true,
               position: pg.position,
               content: buildTemplatePageContent([], {}) as unknown as Prisma.InputJsonValue,
