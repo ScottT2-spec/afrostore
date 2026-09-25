@@ -1,6 +1,6 @@
 'use client';
 import { ArrowLeft, ArrowRight, Check, Loader2, X, MessageSquare } from "lucide-react";
-import { FileText, Globe, Layout, Link as LinkIcon, Palette, ShoppingBag, Sparkles, Square, Zap } from "@/components/icons/FilledIcons";
+import { FileText, Globe, Layout, Link as LinkIcon, Palette, ShoppingBag, Sparkles, Square } from "@/components/icons/FilledIcons";
 
 import { useState, useEffect, useMemo } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
@@ -44,7 +44,6 @@ const INDUSTRIES = [
 ];
 
 const LAUNCH_METHODS = [
-  { id: 'quick', icon: Zap, title: 'Build with AI', desc: 'Chat with AI to build your site in minutes', color: 'border-emerald-500 bg-emerald-50' },
   { id: 'template', icon: Layout, title: 'Use a Template', desc: 'Pick a professionally designed template', color: 'border-blue-500 bg-blue-50' },
   { id: 'blank', icon: Square, title: 'Blank Canvas', desc: 'Start from scratch', color: 'border-gray-500 bg-gray-50' },
 ];
