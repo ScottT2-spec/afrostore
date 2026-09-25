@@ -131,7 +131,15 @@ User request: ${prompt}`;
     const page = await prisma.page.create({
       data: {
         siteId, title: `AI Generated: ${prompt.slice(0, 50)}`, slug,
-        content: buildTemplatePageContent(blocks) as any, isPublished: false, metaTitle: prompt.slice(0, 60),
+        // Live immediately, same principle as the chat agent's create_page
+        // (site-generation-agent.ts): a page the AI just generated should
+        // be visible and editable right away, not silently hidden behind
+        // isPublished until the merchant finds a separate "Publish"
+        // toggle they don't know exists yet. Manual blank-page creation
+        // in the dashboard (dashboard/pages/page.tsx) is intentionally
+        // still draft-by-default — that's a merchant choosing to build
+        // something before showing it; AI generation is the opposite case.
+        content: buildTemplatePageContent(blocks) as any, isPublished: true, metaTitle: prompt.slice(0, 60),
       },
     });
 
