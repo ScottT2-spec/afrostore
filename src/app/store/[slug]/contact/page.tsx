@@ -252,6 +252,13 @@ export default async function ContactPage({ params }: Props) {
       })
     : null;
   const contactNodeCss = resolvedContact?.css || "";
+  // Matches the exact same check used on the home page (src/app/store/[slug]/page.tsx)
+  // so the AI block-builder path renders identical header chrome on every page —
+  // the home page renders no hardcoded header chrome for AI-generated sites
+  // ("the blocks handle it"), so the contact page must not either.
+  const isAiTemplate =
+    activeTemplateSlug === "ai" ||
+    resolvedContact?.blocks?.some((b: any) => typeof b?.type === "string" && b.type.startsWith("ai"));
   if (resolvedContact && resolvedContact.blocks.length > 0) {
     pageContent = { blocks: resolvedContact.blocks, settings: resolvedContact.settings };
   } else {
@@ -530,12 +537,14 @@ export default async function ContactPage({ params }: Props) {
 
   return (
     <ThemeProvider theme={themeData}>
-      <HandmadeBagsHeader
-        storeName={store.name}
-        storeSlug={store.slug || slug}
-        logo={store.logo}
-        isLanding={false}
-      />
+      {!isAiTemplate && (
+        <HandmadeBagsHeader
+          storeName={store.name}
+          storeSlug={store.slug || slug}
+          logo={store.logo}
+          isLanding={false}
+        />
+      )}
       <div style={buildPageBackgroundStyle(pageSettings)}>
         {contactNodeCss && <style data-live-node-styles dangerouslySetInnerHTML={{ __html: contactNodeCss }} />}
         {resolvedContact && resolvedContact.blocks.length > 0 ? (
