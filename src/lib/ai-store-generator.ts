@@ -181,6 +181,7 @@ Call the generate_store_content function with this content. A few formatting not
 
 Rules:
 - For layout.sections, pick 6-10 section names from the available list above. Order them how the homepage should flow. MUST start with a hero variant. Pick sections that make sense for this specific business type — a restaurant needs gallery and contact, a fashion store needs products-featured, a service business needs features and values, a church needs values and team, etc. Vary the combination — don't always use the same set.
+- STRICT: every field this schema requires (features, testimonials, faq.items, about.values) must come back genuinely populated with real, specific content — never an empty array, never a single word placeholder. A homepage section with no content under its heading is a broken page, not an acceptable partial result. If you pick "testimonials" or "faq" or "features" or "values" for layout.sections, you MUST also write real content for it in the matching field — don't select a section and then leave its content thin or empty.
 - stats: generate realistic, MODEST numbers appropriate for a new/growing business. Don't claim "10,000+ customers" for a startup. Be honest and aspirational.
 - bannerCta, newsletterCopy, productSectionTitle: tailor these to the specific business. A real estate site says "Featured Properties", not "Our Products". A restaurant says "Our Menu", not "Shop Now".
 - Use real-sounding African names for testimonials (${country}-appropriate)
