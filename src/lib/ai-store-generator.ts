@@ -14,7 +14,6 @@ import { AIFailover } from "@/lib/failover";
 import type { AIProviderConfig } from "@/lib/failover";
 import { AICapability } from "@/lib/failover";
 import type { BuilderBlock, BlockType } from "@/lib/builder/types";
-import { AI_TEMPLATE_PRESET } from "@/lib/templates/presets/ai-preset";
 import { detectIndustry, getRandomIndustryImages, getIndustryImagesAsync } from "@/lib/ai-image-pools";
 import { classifyBusiness } from "@/lib/ai-classify";
 import { buildDynamicHomePage } from "@/lib/ai-layout-engine";
@@ -200,164 +199,22 @@ Rules:
 function buildHomePage(data: Record<string, any>, storeName: string, storeSlug: string, images: StoreImages, industry: string, whatsappNumber?: string): GeneratedPage {
   const brand = data.brand || {};
 
-  // Use the dynamic layout engine — AI decides section order
-  const dynamicBlocks = buildDynamicHomePage(data, storeName, storeSlug, industry, images, whatsappNumber);
-
-  if (dynamicBlocks.length > 0) {
-    return {
-      title: "Home",
-      slug: "home",
-      type: "HOME",
-      blocks: dynamicBlocks,
-      metaTitle: data.seo?.homeTitle || `${storeName} — Official Store`,
-      metaDescription: data.seo?.homeDesc || brand.heroSubheading || "",
-    };
-  }
-
-  // Fallback: use the Allbirds-inspired AI template preset
-  const features = data.features || [];
-
-  // Use the Allbirds-inspired AI template preset as the base
-  // Deep clone so we can inject AI-generated content
-  const templateBlocks = JSON.parse(JSON.stringify(AI_TEMPLATE_PRESET));
-
-  // Inject AI-generated content into the template blocks
-  for (const block of templateBlocks) {
-    const props = (block.props ||= {});
-    switch (block.type) {
-      case "aiAnnouncementBar": {
-        // Use AI-generated features as marquee messages
-        const messages = [
-          brand.tagline || `Welcome to ${storeName}`,
-          ...(features.slice(0, 3).map((f: any) => f.title || f.desc)),
-        ].filter(Boolean);
-        if (messages.length > 0) props.messages = messages;
-        break;
-      }
-      case "aiHeroVideo": {
-        // Update hero buttons with store-specific links
-        props.buttons = [
-          { text: brand.ctaText || "Shop Now", link: `/store/${storeSlug}/shop`, style: "primary" },
-          { text: "Learn More", link: `/store/${storeSlug}/about`, style: "primary" },
-        ];
-        break;
-      }
-      case "aiCategoryRow": {
-        // Update category card links to store-specific paths
-        for (const card of props.cards || []) {
-          for (const btn of card.buttons) {
-            if (btn.link.startsWith("/collections")) {
-              btn.link = `/store/${storeSlug}/shop`;
-            }
-          }
-        }
-        break;
-      }
-      case "aiLargeProductCarousel": {
-        // Update product links
-        for (const tab of props.tabs || []) {
-          for (const product of tab.products) {
-            if (product.mensLink) product.mensLink = `/store/${storeSlug}/shop`;
-            if (product.womensLink) product.womensLink = `/store/${storeSlug}/shop`;
-            if (product.link) product.link = `/store/${storeSlug}/shop`;
-          }
-        }
-        break;
-      }
-      case "aiPromoTiles": {
-        // Update tile links
-        for (const tile of props.tiles || []) {
-          for (const btn of tile.buttons) {
-            if (btn.link.startsWith("/collections")) {
-              btn.link = `/store/${storeSlug}/shop`;
-            }
-          }
-        }
-        break;
-      }
-      case "aiProductCarousel": {
-        // Update product card links
-        for (const tab of props.tabs || []) {
-          for (const product of tab.products) {
-            if (product.link) product.link = `/store/${storeSlug}/shop`;
-          }
-        }
-        break;
-      }
-      case "aiValueProps": {
-        // Inject AI-generated features into value props
-        if (features.length >= 3) {
-          props.props = features.slice(0, 3).map((f: any) => ({
-            title: f.title,
-            description: f.desc,
-          }));
-        }
-        break;
-      }
-      case "aiFooter": {
-        // Update footer links and copyright
-        props.copyrightText = `© ${new Date().getFullYear()} ${storeName}. All rights reserved.`;
-        for (const col of props.columns || []) {
-          for (const link of col.links) {
-            if (link.link.startsWith("/collections") || link.link === "/gift-cards") {
-              link.link = `/store/${storeSlug}/shop`;
-            } else if (link.link.startsWith("/")) {
-              link.link = `/store/${storeSlug}${link.link}`;
-            }
-          }
-        }
-        break;
-      }
-    }
-  }
-
-  // Inject industry-specific images into blocks that have image props
-  for (const block of templateBlocks) {
-    // Replace hero/video background images
-    if (block.type === "aiHeroVideo" && block.props) {
-      if (block.props.backgroundImage || block.props.videoUrl) {
-        block.props.backgroundImage = images.hero;
-      }
-    }
-    // Replace product carousel images with industry-matched ones
-    if ((block.type === "aiLargeProductCarousel" || block.type === "aiProductCarousel") && block.props?.tabs) {
-      let imgIdx = 0;
-      for (const tab of block.props.tabs) {
-        for (const product of tab.products) {
-          if (product.image) {
-            product.image = images.showcase[imgIdx % images.showcase.length];
-            imgIdx++;
-          }
-        }
-      }
-    }
-    // Replace category card images
-    if (block.type === "aiCategoryRow" && block.props?.cards) {
-      let imgIdx = 0;
-      for (const card of block.props.cards) {
-        if (card.image) {
-          card.image = images.showcase[imgIdx % images.showcase.length];
-          imgIdx++;
-        }
-      }
-    }
-    // Replace promo tile images
-    if (block.type === "aiPromoTiles" && block.props?.tiles) {
-      let imgIdx = 0;
-      for (const tile of block.props.tiles) {
-        if (tile.image) {
-          tile.image = images.showcase[imgIdx % images.showcase.length];
-          imgIdx++;
-        }
-      }
-    }
-  }
-
+  // The dynamic layout engine (ai-layout-engine.ts) is the only homepage
+  // path — it always returns a populated section list (every section it
+  // can pick falls back to real content, and validateAndFixSections
+  // itself falls back to an industry layout preset if the AI's own
+  // section list is missing or too short), so there's no case left where
+  // it comes back empty. A second "if empty, fall back to the old
+  // Allbirds-preset template instead" branch used to live here — legacy,
+  // effectively dead code, and a second place the "heading renders,
+  // content doesn't" bug could hide. Removed once more after a prior
+  // removal got reverted with no stated reason; the reasoning above
+  // still holds and hasn't been contradicted by anything found since.
   return {
     title: "Home",
     slug: "home",
     type: "HOME",
-    blocks: templateBlocks as unknown as BuilderBlock[],
+    blocks: buildDynamicHomePage(data, storeName, storeSlug, industry, images, whatsappNumber),
     metaTitle: data.seo?.homeTitle || `${storeName} — Official Store`,
     metaDescription: data.seo?.homeDesc || brand.heroSubheading || "",
   };
