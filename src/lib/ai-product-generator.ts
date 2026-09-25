@@ -96,7 +96,9 @@ async function generateProductDrafts(input: ProductGeneratorInput): Promise<Gene
 
 Rules:
 - If the business listed specific products/services they sell, the catalog MUST be built from those — don't invent an unrelated assortment.
-- Prices realistic for the currency given, no currency symbol, numbers only.
+- STRICT — this overrides the price rule below: if the merchant's own text states a specific price for a specific product, in ANY format ("spaghetti - 1500", "rice ₦2000", "jollof 2k", "shoes: 15,000 naira"), you MUST use that exact number as that exact product's price, verbatim — never round it, adjust it, or substitute your own estimate. Scan the business description and product list text for this before generating anything. A merchant who told you their price and got a different one back is the single worst failure mode for this tool — treat any stated price as a hard requirement, not a suggestion.
+- Only when the merchant did NOT state a price for a given product: prices realistic for the currency given, no currency symbol, numbers only.
+- When the merchant names a specific dish/item (e.g. "spaghetti"), keep that word in the product name (e.g. "Spaghetti Bolognese", not a renamed/rebranded dish) — the name is what a product-photo search will be run against, so straying from what they actually said gets the wrong photo.
 - compareAtPrice only when it makes sense as a "was" price (must be higher than price) — omit otherwise, don't add it to every item.
 - 3-5 distinct categories across the set, grouping related products together.
 - Names must sound like real product names a shopper would see in a real store, not category labels — "Sea Salt Caramel Fudge Brownie" not "Chocolate Dessert Item".

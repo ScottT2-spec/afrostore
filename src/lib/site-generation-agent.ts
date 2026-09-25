@@ -289,6 +289,7 @@ async function executeTool(
         // exactly the requested sections, reusing the same schema/prompt
         // already proven for full-site generation (ai-schemas/store-generation.ts),
         // just constrained to fewer fields per call.
+        const whatsappSettings = await prisma.siteSettings.findUnique({ where: { siteId }, select: { whatsappNumber: true } });
         //
         // Forced to actually succeed: a page that exists in the nav but
         // errors when opened is a broken product, not an acceptable
@@ -316,7 +317,8 @@ async function executeTool(
               storeName,
               storeSlug,
               industry,
-              images
+              images,
+              whatsappSettings?.whatsappNumber || undefined
             );
             if (Array.isArray(candidate) && candidate.length > 0) {
               blocks = candidate;
@@ -431,6 +433,33 @@ async function executeTool(
           create: { siteId, whatsappNumber: parsed.number, whatsappOrdering: parsed.enabled },
           update: { whatsappNumber: parsed.number, whatsappOrdering: parsed.enabled },
         });
+
+        // Patch any already-built homepage contactInfo block too — it was
+        // generated before this number existed, so it either has no
+        // WhatsApp item or the old broken placeholder. Without this, the
+        // merchant sets a number and the homepage keeps showing/missing a
+        // dead WhatsApp link until the next full regeneration.
+        const homePage = await prisma.page.findFirst({ where: { siteId, type: "HOME" } });
+        if (homePage && Array.isArray(homePage.content)) {
+          const blocks = homePage.content as Array<{ type: string; props: Record<string, unknown> }>;
+          let changed = false;
+          for (const b of blocks) {
+            if (b.type === "contactInfo" && Array.isArray(b.props?.items)) {
+              const items = b.props.items as Array<{ icon: string; value: string }>;
+              const existing = items.find((i) => i.icon === "message" || i.icon === "whatsapp");
+              if (existing) {
+                if (existing.value !== parsed.number) { existing.value = parsed.number; changed = true; }
+              } else if (parsed.enabled) {
+                items.unshift({ icon: "message", title: "WhatsApp", value: parsed.number } as { icon: string; value: string });
+                changed = true;
+              }
+            }
+          }
+          if (changed) {
+            await prisma.page.update({ where: { id: homePage.id }, data: { content: blocks as object } });
+          }
+        }
+
         return { result: `WhatsApp ordering ${parsed.enabled ? "enabled" : "disabled"} with number ${parsed.number}.`, isError: false };
       }
 

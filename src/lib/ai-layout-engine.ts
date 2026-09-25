@@ -48,6 +48,7 @@ interface LayoutContext {
   industry: string;
   images: ReturnType<typeof getRandomIndustryImages>;
   content: Partial<AIContent>;
+  whatsappNumber?: string;
 }
 
 // ─── Block Builders ─────────────────────────────────────────
@@ -459,7 +460,13 @@ const SECTION_BUILDERS: Record<string, (ctx: LayoutContext) => BuilderBlock[]> =
       title: ctx.content.contact?.headline || "Get in Touch",
       subtitle: ctx.content.contact?.subtitle || "",
       items: [
-        { icon: "message", title: "WhatsApp", value: "Quick chat support" },
+        // WhatsApp uses the merchant's real number when set — the old
+        // hardcoded "Quick chat support" placeholder had no digits in it
+        // at all, so getContactHref() stripped it to nothing and the
+        // link silently went nowhere. Omit the item entirely rather than
+        // show a WhatsApp button that doesn't actually work when no
+        // number has been set yet.
+        ...(ctx.whatsappNumber ? [{ icon: "message", title: "WhatsApp", value: ctx.whatsappNumber }] : []),
         { icon: "mail", title: "Email", value: "Send us a message" },
         { icon: "phone", title: "Phone", value: "Call during business hours" },
       ],
@@ -708,8 +715,9 @@ export function buildDynamicHomePage(
   storeSlug: string,
   industry: string,
   images: ReturnType<typeof getRandomIndustryImages>,
+  whatsappNumber?: string,
 ): BuilderBlock[] {
-  const ctx: LayoutContext = { storeName, storeSlug, industry, images, content };
+  const ctx: LayoutContext = { storeName, storeSlug, industry, images, content, whatsappNumber };
 
   let sections: string[];
 

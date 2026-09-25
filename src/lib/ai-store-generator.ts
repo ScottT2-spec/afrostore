@@ -197,11 +197,11 @@ Rules:
 
 // ─── Build pages from AI content ────────────────────────────
 
-function buildHomePage(data: Record<string, any>, storeName: string, storeSlug: string, images: StoreImages, industry: string): GeneratedPage {
+function buildHomePage(data: Record<string, any>, storeName: string, storeSlug: string, images: StoreImages, industry: string, whatsappNumber?: string): GeneratedPage {
   const brand = data.brand || {};
 
   // Use the dynamic layout engine — AI decides section order
-  const dynamicBlocks = buildDynamicHomePage(data, storeName, storeSlug, industry, images);
+  const dynamicBlocks = buildDynamicHomePage(data, storeName, storeSlug, industry, images, whatsappNumber);
 
   if (dynamicBlocks.length > 0) {
     return {
@@ -704,9 +704,13 @@ export async function generateStore(input: StoreGeneratorInput): Promise<StoreGe
   const industry = pooledIndustries.has(classification.industry) ? classification.industry : detectIndustry(input.businessType, input.description);
   const images = await getIndustryImagesAsync(industry, input.businessType);
 
-  // 4. Build pages from the generated content with industry-matched images
+  // 4. Build pages from the generated content with industry-matched images.
+  //    Fetch whatever WhatsApp number is already set (e.g. a merchant who
+  //    enabled WhatsApp, then regenerated) so the homepage's contact
+  //    section can use the real number instead of a fake placeholder.
+  const existingSettings = await prisma.siteSettings.findUnique({ where: { siteId: input.siteId }, select: { whatsappNumber: true } });
   const pages: GeneratedPage[] = [
-    buildHomePage(data, input.storeName, input.storeSlug, images, industry),
+    buildHomePage(data, input.storeName, input.storeSlug, images, industry, existingSettings?.whatsappNumber || undefined),
     buildAboutPage(data, input.storeName, input.storeSlug, images),
     buildFAQPage(data, input.storeName, input.storeSlug),
     buildContactPage(data, input.storeName),
