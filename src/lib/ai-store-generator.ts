@@ -363,6 +363,35 @@ function buildHomePage(data: Record<string, any>, storeName: string, storeSlug: 
   };
 }
 
+// Same "never let a picked section render with zero content" guarantee
+// used by the homepage layout engine (ai-layout-engine.ts) — the About
+// and FAQ pages built below are a separate, older code path and had the
+// same bug: a section's heading would render while its items list was
+// silently empty, because the code skipped the block or fell through to
+// items: [] instead of falling back to real, usable starter content.
+const ABOUT_PAGE_GENERIC_VALUES = [
+  { title: "Quality First", desc: "We stand behind everything we sell." },
+  { title: "Customer Focused", desc: "Your satisfaction is our top priority." },
+  { title: "Reliable Service", desc: "Consistent, dependable experience every time." },
+];
+
+function aboutPageGenericTestimonials(storeName: string) {
+  return [
+    { name: "Amara O.", role: "Verified Buyer", text: `Great experience with ${storeName} — quality was exactly as described and delivery was quick.` },
+    { name: "Tunde K.", role: "Verified Buyer", text: `Really happy with my order. Will definitely be shopping with ${storeName} again.` },
+    { name: "Chiamaka B.", role: "Verified Buyer", text: `Excellent customer service and the product exceeded my expectations.` },
+  ];
+}
+
+function aboutPageGenericFaq(storeName: string) {
+  return [
+    { question: "How long does delivery take?", answer: `We aim to get your order to you as quickly as possible. Reach out to ${storeName} directly for exact delivery times to your area.` },
+    { question: "What payment methods do you accept?", answer: "We accept a range of secure payment options at checkout." },
+    { question: "Can I return or exchange an item?", answer: "Yes — contact us after your order arrives and we'll help sort out a return or exchange." },
+    { question: "How can I contact you?", answer: `You can reach ${storeName} through the contact details on our Contact page.` },
+  ];
+}
+
 function buildAboutPage(data: Record<string, any>, storeName: string, storeSlug: string, images: StoreImages): GeneratedPage {
   const about = data.about || {};
   const testimonials = data.testimonials || [];
@@ -412,14 +441,18 @@ function buildAboutPage(data: Record<string, any>, storeName: string, storeSlug:
     blocks.push(block("spacer", { height: 48 }));
   }
 
-  // Values
-  if (about.values && about.values.length > 0) {
+  // Values — always render with real content. Previously this whole
+  // block was skipped unless about.values was non-empty; if it skipped,
+  // fine, but if it rendered with a short/empty array the heading would
+  // show with nothing under it. Now it always has a heading AND items.
+  {
+    const values = about.values && about.values.length > 0 ? about.values : ABOUT_PAGE_GENERIC_VALUES;
     blocks.push(
       block("features", {
         title: "Our Values",
         subtitle: "The principles that guide everything we do",
         bgColor: "surface",
-        items: about.values.map((v: any, i: number) => ({
+        items: values.map((v: any, i: number) => ({
           icon: valueIcons[i % valueIcons.length],
           title: v.title,
           desc: v.desc,
@@ -444,13 +477,15 @@ function buildAboutPage(data: Record<string, any>, storeName: string, storeSlug:
   );
   blocks.push(block("spacer", { height: 48 }));
 
-  // Testimonials
-  if (testimonials.length > 0) {
+  // Testimonials — same guarantee: always a populated section, never a
+  // bare heading with an empty items array underneath it.
+  {
+    const items = testimonials.length > 0 ? testimonials.slice(0, 3) : aboutPageGenericTestimonials(storeName);
     blocks.push(
       block("testimonials", {
         title: "Loved by Our Customers",
         bgColor: "transparent",
-        items: testimonials.slice(0, 3).map((t: any) => ({
+        items: items.map((t: any) => ({
           name: t.name,
           role: t.role || "Customer",
           text: t.text,
@@ -484,6 +519,10 @@ function buildAboutPage(data: Record<string, any>, storeName: string, storeSlug:
 
 function buildFAQPage(data: Record<string, any>, storeName: string, storeSlug: string): GeneratedPage {
   const faq = data.faq || {};
+  // Never render this page with a heading and an empty accordion under
+  // it — fall back to honest, generic starter Q&A the same way the
+  // homepage's "faq" section already does.
+  const faqItems = faq.items && faq.items.length > 0 ? faq.items : aboutPageGenericFaq(storeName);
 
   const blocks: BuilderBlock[] = [
     block("hero", {
@@ -495,7 +534,7 @@ function buildFAQPage(data: Record<string, any>, storeName: string, storeSlug: s
     block("spacer", { height: 48 }),
     block("faq", {
       title: "",
-      items: (faq.items || []).slice(0, 8).map((item: any) => ({
+      items: faqItems.slice(0, 8).map((item: any) => ({
         question: item.question,
         answer: item.answer,
       })),
