@@ -33,9 +33,24 @@ export default function AIBusinessPage() {
   // merchant watches it build in real time and can immediately keep
   // chatting to request changes once it's done, instead of landing on a
   // dead-end results page.
-  const launch = () => {
+  const launch = async () => {
     if (!currentStore || !businessName.trim() || !businessType || launching) return;
     setLaunching(true);
+
+    // The Site record's own `name` (shown everywhere — dashboard nav,
+    // workspace list, this page's greeting, browser tab) was never
+    // actually set from this form: it only ever flowed into the task
+    // text sent to the AI, which has no tool to rename the site itself,
+    // so the site kept whatever placeholder name it was created with.
+    // Set it directly, right away, so it's correct regardless of what
+    // the AI does with the rest of the task.
+    try {
+      await fetch(`/api/sites/${currentStore.id}`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ name: businessName.trim(), businessType, ...(location.trim() ? { country: location.trim() } : {}) }),
+      });
+    } catch { /* non-fatal — the AI builder flow below still proceeds either way */ }
 
     const composedTask = [
       `Build my ${businessType} business site for "${businessName.trim()}".`,
