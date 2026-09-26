@@ -503,7 +503,7 @@ export default function AIPage() {
                           {msg.provider && (
                             <span className="flex items-center gap-1">
                               <Zap className="h-2.5 w-2.5" />
-                              {msg.provider}/{msg.model}
+                              Prosell AI Assistant
                             </span>
                           )}
                           {msg.ragSources !== undefined &&
