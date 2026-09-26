@@ -24,6 +24,7 @@ import {
   sectionTypeEnum,
   createPageSchema,
   updateSectionSchema,
+  updateSiteInfoSchema,
   setThemeSchema,
   setNavigationSchema,
   setPageNavVisibilitySchema,
@@ -54,6 +55,7 @@ function toToolParameters(schema: z.ZodType<unknown>): Record<string, unknown> {
 
 const TOOL_DEFS: AITool[] = [
   { type: "function", function: { name: "create_page", description: "Add a new page with default sections, populated with real generated content — never a placeholder skeleton.", parameters: toToolParameters(createPageSchema) } },
+  { type: "function", function: { name: "update_site_info", description: "Set the site's real business name (and optional description). Call this first, before create_page, as soon as you know the business name — this is what makes the site show up correctly in the merchant's dashboard sites list immediately, independent of Publish.", parameters: toToolParameters(updateSiteInfoSchema) } },
   { type: "function", function: { name: "update_section", description: "Change specific fields on one existing section of one page.", parameters: toToolParameters(updateSectionSchema) } },
   { type: "function", function: { name: "set_theme", description: "Set the site's visual vibe/color direction.", parameters: toToolParameters(setThemeSchema) } },
   { type: "function", function: { name: "set_navigation", description: "Set the main nav links.", parameters: toToolParameters(setNavigationSchema) } },
@@ -77,7 +79,7 @@ ${rules.promptRules}
 ${safetyCategory ? `\n${getGuardrailPromptRules(safetyCategory)}\n` : ""}
 ${currentSiteSummary ? `\nCURRENT SITE STATE — this site already exists and is live. The merchant's message below is a request to CHANGE it, not build it from scratch. Read this before doing anything: it's every page, in order, and every section on each page with its 0-based index (the sectionIndex update_section needs) and a preview of its current content.\n\n${currentSiteSummary}\n\nWhen the merchant refers to something ("the hero", "the FAQ section", "that testimonial"), match it against the actual sections listed above rather than guessing an index. If they ask to change one page's wording/color/image, use update_section on the matching page+index — don't call create_page for something that already exists (see the duplicate-page rule below). If what they're asking about genuinely isn't listed above, say so and ask, rather than assuming a section exists.\n` : ""}
 Rules:
-- Default currency is NGN unless the merchant's prompt says otherwise.
+${!currentSiteSummary ? "- STRICT: on a brand-new site (no CURRENT SITE STATE above), call update_site_info with the real business name as your very first tool call, before create_page — this is what makes the site show up under its real name in the merchant's dashboard sites list immediately, not only after Publish. Decide the name from what the merchant said; only ask_user for it if genuinely ambiguous or missing.\n" : ""}- Default currency is NGN unless the merchant's prompt says otherwise.
 - STRICT: every section on the homepage must have real content — never add or leave a section (features, testimonials, FAQ, values, or any other content block) with an empty or near-empty items list. A section with no content under its heading is a broken page. When using update_section on a content block, always include a fully populated items/content array — never set it to an empty list or omit it expecting old content to remain if you're changing that field.
 - STRICT: if the merchant uploaded an image and told you which section to use it in (hero, testimonials, a named section, "this section", etc.), you MUST call attach_asset with that exact uploaded URL on that exact section — never substitute a stock photo, an AI-generated image, or a different section instead. This is a direct, literal instruction from the merchant, not a style preference — treat it as non-negotiable. If it's ambiguous which section they mean, ask_user rather than guessing wrong and using the image somewhere else.
 - STRICT: never create two pages that serve the same nav purpose (e.g. two contact-style pages, two about-style pages) — this produces a duplicate, broken-looking nav bar. Before calling create_page, check the pages you already have in this session/site for one that already serves that purpose (by TYPE, not just title — ABOUT/FAQ/CONTACT/POLICY are one-per-site). If one exists, call update_section on it instead of create_page with a new title/slug for the same thing.
@@ -189,7 +191,11 @@ export interface RunSiteGenerationOptions {
 }
 
 export async function runSiteGenerationAgent(opts: RunSiteGenerationOptions): Promise<SiteGenerationResult> {
-  const { ai, siteId, storeName, storeSlug, industry, siteType, task, maxIterations = 15, priorMessages, onStep, shouldCancel } = opts;
+  const { ai, siteId, storeSlug, industry, siteType, task, maxIterations = 15, priorMessages, onStep, shouldCancel } = opts;
+  // Mutable: update_site_info can rename the site mid-session, and every
+  // subsequent create_page call below should use the real name in its
+  // generated content, not the placeholder this session started with.
+  let storeName = opts.storeName;
   const rules = getSiteIntentRules(siteType);
   const safetyMatch = detectSensitiveCategory(`${task} ${industry}`);
   const safetyCategory = safetyMatch?.tier === "guardrail" ? safetyMatch.category : null;
@@ -317,6 +323,9 @@ export async function runSiteGenerationAgent(opts: RunSiteGenerationOptions): Pr
       }
 
       const { result: toolResult, isError } = await executeTool(siteId, storeName, storeSlug, industry, ai, name, args, safetyCategory);
+      if (name === "update_site_info" && !isError && args && typeof (args as { name?: unknown }).name === "string") {
+        storeName = (args as { name: string }).name;
+      }
       const step: SiteGenerationStep = { tool: name, args, result: toolResult, isError };
       steps.push(step);
       onStep?.(step);
@@ -339,6 +348,14 @@ async function executeTool(
 ): Promise<{ result: string; isError: boolean }> {
   try {
     switch (name) {
+      case "update_site_info": {
+        const parsed = updateSiteInfoSchema.parse(args);
+        await prisma.site.update({
+          where: { id: siteId },
+          data: { name: parsed.name, ...(parsed.description ? { description: parsed.description } : {}) },
+        });
+        return { result: `Site name set to "${parsed.name}". It now shows correctly in the dashboard sites list.`, isError: false };
+      }
       case "create_page": {
         const parsed = createPageSchema.parse(args);
 
