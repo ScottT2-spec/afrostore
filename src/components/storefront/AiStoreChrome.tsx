@@ -6,7 +6,7 @@ import Link from "next/link";
    AI BLOCK-BUILDER STORE HEADER
    Used only for AI-generated sites (templateSlug === "ai").
    Deliberately fixed to exactly four nav items — Home, About Us,
-   Contact Us, Reviews — with no category- or niche-specific links
+   Contact Us, Shop — with no category- or niche-specific links
    (no "Men"/"Women", no Blog, no Policies). Rendered identically
    on every page of an AI-generated site so navigation is consistent
    everywhere.
@@ -35,7 +35,7 @@ export function AiStoreHeader({ storeName, storeSlug, logo }: AiStoreHeaderProps
     { label: "Home", href: base },
     { label: "About Us", href: `${base}/about` },
     { label: "Contact Us", href: `${base}/contact` },
-    { label: "Reviews", href: `${base}/reviews` },
+    { label: "Shop", href: `${base}/shop` },
   ];
 
   const css = `
@@ -102,7 +102,7 @@ export function AiStoreHeader({ storeName, storeSlug, logo }: AiStoreHeaderProps
 /* ═══════════════════════════════════════════════════════════════
    AI BLOCK-BUILDER STORE FOOTER
    Same rule as the header above: exactly the four mandatory pages
-   (Home, About Us, Contact Us, Reviews), rendered identically on
+   (Home, About Us, Contact Us, Shop), rendered identically on
    every page of an AI-generated site. Added alongside the header —
    the header got this same-nav treatment earlier, but nothing filled
    in the equivalent footer, so About/Contact/Reviews were still
@@ -123,7 +123,7 @@ export function AiStoreFooter({ storeName, storeSlug, logo, description }: AiSto
     { label: "Home", href: base },
     { label: "About Us", href: `${base}/about` },
     { label: "Contact Us", href: `${base}/contact` },
-    { label: "Reviews", href: `${base}/reviews` },
+    { label: "Shop", href: `${base}/shop` },
   ];
 
   const css = `
