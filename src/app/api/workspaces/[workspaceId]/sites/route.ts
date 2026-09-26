@@ -4,9 +4,9 @@ import { prisma } from "@/lib/db";
 import { success, error, createSiteWithUniqueSlug, enforceStoreLimit } from "@/lib/api-helpers";
 import { importTemplateToSite } from "@/lib/templates/importer";
 import { provisionDefaultLandingFunnel } from "@/lib/landing-funnel";
-import { buildSmartAiBlocks, buildBlockContentPrompt } from "@/lib/ai-block-content-generator";
 import { getIndustrySampleData, DEFAULT_SAMPLE_DATA } from "@/lib/ai-sample-data";
-import { AIFailover, AICapability } from "@/lib/failover";
+import { buildDynamicHomePage } from "@/lib/ai-layout-engine";
+import { getRandomIndustryImages } from "@/lib/ai-image-pools";
 import { buildTemplatePageContent } from "@/lib/templates/template-tree";
 import type { Prisma } from "@/generated/prisma";
 
@@ -182,48 +182,27 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ wor
         const storeSlug = site.slug;
         const bizType = body.businessType || body.industry || "general";
 
-        // ── Step 1: Try AI content generation (non-blocking fallback) ──
-        let aiContent: Record<string, unknown> | undefined;
-        try {
-          const providers: import("@/lib/failover").AIProviderConfig[] = [];
-          if (process.env.GROQ_API_KEY) providers.push({ provider: "groq", apiKey: process.env.GROQ_API_KEY, model: "openai/gpt-oss-120b", capabilities: [AICapability.CHAT] });
-          if (process.env.GOOGLE_AI_KEY) providers.push({ provider: "google", apiKey: process.env.GOOGLE_AI_KEY, model: "gemini-3.6-flash", capabilities: [AICapability.CHAT] });
-          if (process.env.OPENAI_API_KEY) providers.push({ provider: "openai", apiKey: process.env.OPENAI_API_KEY, model: "gpt-4o-mini", capabilities: [AICapability.CHAT] });
-          if (process.env.ANTHROPIC_API_KEY) providers.push({ provider: "anthropic", apiKey: process.env.ANTHROPIC_API_KEY, model: "claude-3-haiku-20240307", capabilities: [AICapability.CHAT] });
+        // Instant preview uses the SAME generator (buildDynamicHomePage) and
+        // the SAME generic BuilderBlock vocabulary that generateStore()'s
+        // background job below uses to enrich this exact page moments later
+        // with real AI copy. Previously this called a separate generator
+        // (buildSmartAiBlocks) with its own LLM prompt, its own image pool,
+        // and its own incompatible block format (rendered by a completely
+        // different component tree, TemplateBlockRenderer) — so the page a
+        // merchant saw the instant their site was created was silently
+        // replaced seconds later by an unrelated implementation. Using one
+        // generator for both the instant and enriched passes means there's
+        // nothing left for them to disagree about: only the CONTENT changes
+        // between passes (industry defaults now, real AI copy shortly
+        // after), never the format, the renderer, or the header logic tied
+        // to it. ai-layout-engine.ts already has solid per-industry defaults
+        // (value props, stats, trust badges, product titles) for the case
+        // where no AI content has been generated yet, so no LLM call is
+        // needed here at all — that's the ONE LLM call generateStore() makes
+        // below, not a second, redundant one.
+        const homeBlocks = buildDynamicHomePage({}, storeName, storeSlug, bizType, getRandomIndustryImages(bizType));
 
-          if (providers.length > 0) {
-            const ai = new AIFailover({ providers, priorityOrder: providers.map(p => p.provider), requestTimeoutMs: 25_000 });
-            const prompt = buildBlockContentPrompt(storeName, bizType, description || undefined);
-            const result = await ai.chat({
-              capability: AICapability.CHAT,
-              messages: [
-                { role: "system" as const, content: "Return ONLY valid JSON. No markdown, no explanation." },
-                { role: "user" as const, content: prompt },
-              ],
-              maxTokens: 4000,
-              temperature: 0.7,
-            });
-            if (result.success && result.data?.content) {
-              let cleaned = result.data.content.trim();
-              if (cleaned.startsWith("```")) cleaned = cleaned.replace(/^```(?:json)?\s*\n?/, "").replace(/\n?```\s*$/, "");
-              aiContent = JSON.parse(cleaned);
-            }
-          }
-        } catch (aiErr) {
-          console.warn("AI content generation failed, using industry defaults:", aiErr);
-          // Non-fatal — we'll use industry-matched defaults
-        }
-
-        // ── Step 2: Build smart blocks with AI content + industry images ──
-        const aiBlocks = buildSmartAiBlocks({
-          storeName,
-          storeSlug,
-          businessType: bizType,
-          description: description || undefined,
-          aiContent,
-        });
-
-        // Create homepage with AI template blocks
+        // Create homepage with generic AI-editable blocks
         await prisma.page.create({
           data: {
             siteId: site.id,
@@ -232,7 +211,7 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ wor
             type: "HOME",
             isPublished: true,
             template: "ai",
-            content: buildTemplatePageContent(aiBlocks as unknown as Record<string, unknown>[], {}) as unknown as Prisma.InputJsonValue,
+            content: buildTemplatePageContent(homeBlocks as unknown as Record<string, unknown>[], {}) as unknown as Prisma.InputJsonValue,
             metaTitle: `${storeName} — ${bizType.charAt(0).toUpperCase() + bizType.slice(1)}`,
             metaDescription: description || `${storeName} — your trusted ${bizType} destination.`,
           },
@@ -381,7 +360,7 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ wor
           // Non-fatal — pages exist with empty content, user can edit
         }
 
-        templateResult = { method: "ai", template: "ai-modern", blocksCreated: aiBlocks.length, categories: createdCategories.length, products: sampleData.products.length };
+        templateResult = { method: "ai", template: "ai-modern", blocksCreated: homeBlocks.length, categories: createdCategories.length, products: sampleData.products.length };
       } catch (aiErr) {
         console.error("AI build error:", aiErr);
         // Non-fatal — site is still created
