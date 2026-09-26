@@ -930,8 +930,13 @@ export default function StorePage() {
       )}
 
       {/* ─── HOME PAGE CONTENT ─────────────────────────────────── */}
-      {isAiTemplate && homeBlocks.length > 0 ? (
-        /* AI template blocks — use RenderTemplateBlocks */
+      {homeBlocks.length > 0 && homeBlocks.every((b) => b.type.startsWith("ai")) ? (
+        /* Only true ai-prefixed blocks (aiHeroVideo, aiAnnouncementBar, etc)
+           go through RenderTemplateBlocks — that's the only renderer that
+           has them registered. The structured/dynamic AI builder produces
+           generic block types (hero, features, productGrid, etc), which
+           RenderTemplateBlocks silently drops (returns null, no error) —
+           that combination was rendering a fully blank live homepage. */
         <div style={{ background: "#F1F1F1" }}>
           <TemplateStoreContextProvider templateSlug={data.templateSlug || "ai"} products={products} blogs={data.blogs || []} categories={categories} currency={currency} storeSlug={slug} socialLinks={socialLinksArray} addToCart={(pid,qty)=>{const x=products.find(p=>p.id===pid);if(x)addToCart(x,qty);}} toggleWishlist={toggleWishlist} isWishlisted={isWishlisted} onQuickView={(pid)=>{const x=products.find(p=>p.id===pid);if(x){setSelectedProduct(x);setSelectedVariantId(null);setQty(1);}}}>
             <RenderTemplateBlocks blocks={homeBlocks as unknown as TemplateBlock[]} />
