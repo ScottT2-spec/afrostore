@@ -202,7 +202,22 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ wor
         // below, not a second, redundant one.
         const homeBlocks = buildDynamicHomePage({}, storeName, storeSlug, bizType, getRandomIndustryImages(bizType));
 
-        // Create homepage with generic AI-editable blocks
+        // Store as a plain block array — the exact same shape
+        // generateStore()'s background job below writes for this same
+        // page moments later (ai-store-generator.ts: `content: page.blocks
+        // as any`). This used to route through buildTemplatePageContent /
+        // templateBlocksToEditorTree, a conversion built for the OLDER
+        // bespoke-template block format (nested "settings"/"elements",
+        // with a legacy heuristic that aggressively pulls any
+        // array-of-objects out into synthetic child elements). Generic
+        // AI blocks carry array props like `items` (features/testimonials/
+        // faq) that heuristic isn't meant for — round-tripping them
+        // through it risked exactly the "header renders, body blank"
+        // failure this was already known to cause, for no reason: this
+        // content never needed conversion in the first place, since
+        // parsePageContent already handles a plain block array directly
+        // (the Array.isArray(content) branch), which is what actually
+        // renders correctly every time.
         await prisma.page.create({
           data: {
             siteId: site.id,
@@ -211,7 +226,7 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ wor
             type: "HOME",
             isPublished: true,
             template: "ai",
-            content: buildTemplatePageContent(homeBlocks as unknown as Record<string, unknown>[], {}) as unknown as Prisma.InputJsonValue,
+            content: homeBlocks as unknown as Prisma.InputJsonValue,
             metaTitle: `${storeName} — ${bizType.charAt(0).toUpperCase() + bizType.slice(1)}`,
             metaDescription: description || `${storeName} — your trusted ${bizType} destination.`,
           },
