@@ -33,6 +33,7 @@ import {
   setDeliveryZonesSchema,
   setPaymentStubSchema,
   setSeoSchema,
+  setBusinessDescriptionSchema,
   attachAssetSchema,
   askUserSchema,
   finalizeDraftSchema,
@@ -63,6 +64,7 @@ const TOOL_DEFS: AITool[] = [
   { type: "function", function: { name: "set_delivery_zones", description: "Set the store's delivery areas and fees, from what the merchant actually said.", parameters: toToolParameters(setDeliveryZonesSchema) } },
   { type: "function", function: { name: "set_payment_stub", description: "Set checkout UI mode. 'connected' only takes effect if the merchant already has a real payment gateway configured — this tool cannot enable live charging on its own.", parameters: toToolParameters(setPaymentStubSchema) } },
   { type: "function", function: { name: "set_seo", description: "Set a page's SEO title/description.", parameters: toToolParameters(setSeoSchema) } },
+  { type: "function", function: { name: "set_business_description", description: "Set the site's own short business description/tagline — rendered directly in the storefront footer and used as a fallback for page meta descriptions. Use this for requests like \"update the business description\" or \"change what it says about us in the footer\", not set_seo (that's per-page SEO copy).", parameters: toToolParameters(setBusinessDescriptionSchema) } },
   { type: "function", function: { name: "attach_asset", description: "Bind a merchant-uploaded (or generated) image to a specific section's image field on a specific page. Field name depends on the block type at that section: most blocks (hero, banner, features, testimonials, stats, newsletter, FAQ, team, contact, trustBadges) use \"backgroundImage\"; the imageText/story block uses \"image\"; gallery uses \"images\" (an array — pass a JSON array string of URLs, not attach_asset for a single one). Read the page's current sections first if you're not certain which index/type the merchant means.", parameters: toToolParameters(attachAssetSchema) } },
   { type: "function", function: { name: "ask_user", description: "Ask the merchant a clarifying question when a critical detail (business name, currency/country, contact channel, WhatsApp number) is missing. Ends this turn and waits for their answer — never guess instead.", parameters: toToolParameters(askUserSchema) } },
   { type: "function", function: { name: "finalize_draft", description: "Call this once the site genuinely reflects what the merchant asked for. Ends the session.", parameters: toToolParameters(finalizeDraftSchema) } },
@@ -125,14 +127,19 @@ function summarizeSection(props: Record<string, unknown> | undefined, index: num
 }
 
 async function summarizeCurrentSite(siteId: string): Promise<string | null> {
-  const pages = await prisma.page.findMany({
-    where: { siteId },
-    select: { title: true, slug: true, type: true, content: true },
-    orderBy: { position: "asc" },
-  });
+  const [site, pages] = await Promise.all([
+    prisma.site.findUnique({ where: { id: siteId }, select: { description: true } }),
+    prisma.page.findMany({
+      where: { siteId },
+      select: { title: true, slug: true, type: true, content: true },
+      orderBy: { position: "asc" },
+    }),
+  ]);
   if (pages.length === 0) return null; // genuinely new site — nothing to summarize, this is the initial build
 
-  return pages
+  const siteLine = `Business description (site-wide, shown in the footer — change with set_business_description, not update_section): ${site?.description ? `"${truncate(site.description, 200)}"` : "(none set)"}`;
+
+  return siteLine + "\n\n" + pages
     .map((page: { title: string; slug: string; type: string; content: unknown }) => {
       const blocks = Array.isArray(page.content) ? (page.content as Array<{ type?: string; props?: Record<string, unknown> }>) : [];
       const sectionLines = blocks.length > 0
@@ -567,6 +574,12 @@ async function executeTool(
           data: { metaTitle: parsed.title, metaDescription: parsed.description },
         });
         return { result: `SEO set for "${parsed.pageSlug}".`, isError: false };
+      }
+
+      case "set_business_description": {
+        const parsed = setBusinessDescriptionSchema.parse(args);
+        await prisma.site.update({ where: { id: siteId }, data: { description: parsed.description } });
+        return { result: `Business description updated.`, isError: false };
       }
 
       case "attach_asset": {
