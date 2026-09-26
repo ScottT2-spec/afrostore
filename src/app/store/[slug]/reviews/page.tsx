@@ -80,8 +80,15 @@ export default function StoreReviewsPage() {
   const isKidsTemplate = slug === "kids";
   const isHealthTemplate = slug === "pills" || store?.slug === "pills" || store?.name?.toLowerCase().includes("pill") || store?.name?.toLowerCase().includes("supplement") || store?.name?.toLowerCase().includes("health");
   const isTShirtsPrintsTemplate = slug === "huty" || store?.slug === "huty" || store?.name?.toLowerCase().includes("t-shirts") || store?.name?.toLowerCase().includes("prints");
+  const reviewsPage = (storeData?.pages || []).find((p: any) => p.slug === "reviews");
+  // reviewsPage?.template is the durable source of truth — same reasoning
+  // as the identical fix already applied on Home/About/Contact: relying
+  // only on storeData.store.templates[0] (a SiteTemplate join row) is
+  // always null for AI-generated sites, since no SiteTemplate row is ever
+  // created for them. That's why this page kept falling back to
+  // HandmadeBagsHeader/Footer while About/Contact/Home already worked.
   const activeTemplateSlug = storeData?.store?.templates?.[0]?.template?.slug || null;
-  const isAiTemplate = activeTemplateSlug === "ai";
+  const isAiTemplate = reviewsPage?.template === "ai" || activeTemplateSlug === "ai";
   const isPerfumesTemplate = activeTemplateSlug === "perfumes" || slug === "perfumes" || store?.slug === "perfumes" || store?.name?.toLowerCase().includes("perfumes");
 
   const fetchReviews = useCallback(async (p: number, rating: number | null, append: boolean) => {
