@@ -28,7 +28,7 @@ import { resolveLivePageContent } from "@/lib/templates/bespoke-page-content";
 import { ThemeProvider, type ThemeData } from "@/components/storefront/ThemeProvider";
 import { useWishlist } from "@/hooks/useWishlist";
 import { useABTestVariant, applyABTestOverrides, trackABTestConversion } from "@/hooks/useABTestVariant";
-import { applyPageCustomization, buildPageBackgroundStyle, buildThemeDataWithCustomization, filterVisiblePages, getResolvedPageSettings, normalizeSiteCustomization, type SiteCustomizationDocument } from "@/lib/site-customization";
+import { applyPageCustomization, buildPageBackgroundStyle, buildThemeDataWithCustomization, filterVisiblePages, getPageCustomization, getResolvedPageSettings, normalizeSiteCustomization, type SiteCustomizationDocument } from "@/lib/site-customization";
 import { VegetableFooter, VegetableHeader } from "@/components/storefront/VegetableStoreChrome";
 import { LandingGadgetContext, LandingGadgetFontLoader } from "@/components/storefront/LandingGadgetBlocks";
 import { AegisLandingContext, AegisLandingFontLoader } from "@/components/storefront/AegisLandingBlocks";
@@ -441,6 +441,12 @@ export default function StorePage() {
   const navPageOrder: Record<string, number> = { ABOUT: 0, FAQ: 1, CONTACT: 2, POLICY: 3, CUSTOM: 4, LANDING: 5 };
   const navPages = customizedPages
     .filter((p) => p.type !== "HOME")
+    // showInNavigation is a "don't link to this page in the nav bar"
+    // setting, not a "this page doesn't exist" setting — filterVisiblePages
+    // above no longer excludes on it (see the comment there for why), so
+    // it's applied here instead, exactly where a nav list is actually
+    // being built.
+    .filter((p) => getPageCustomization(draftCustomization, p)?.showInNavigation !== false)
     // De-dupe by normalized title — see matching comment in
     // [pageSlug]/page.tsx for why this is needed (bespoke templates
     // seeding a same-purpose page under a different slug).

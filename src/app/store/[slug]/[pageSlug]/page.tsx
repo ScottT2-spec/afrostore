@@ -21,7 +21,7 @@ import { useWishlist } from "@/hooks/useWishlist";
 import { useABTestVariant, applyABTestOverrides } from "@/hooks/useABTestVariant";
 import { injectPixels, trackEvent } from "@/lib/storefront-analytics";
 import { TemplateStoreContextProvider } from "@/components/storefront/TemplateStoreContextProvider";
-import { applyPageCustomization, buildPageBackgroundStyle, buildThemeDataWithCustomization, filterVisiblePages, getResolvedPageSettings, normalizeSiteCustomization, type SiteCustomizationDocument } from "@/lib/site-customization";
+import { applyPageCustomization, buildPageBackgroundStyle, buildThemeDataWithCustomization, filterVisiblePages, getPageCustomization, getResolvedPageSettings, normalizeSiteCustomization, type SiteCustomizationDocument } from "@/lib/site-customization";
 import { VegetableAboutPage, VegetableContactPage, VegetableMenuPage, VegetableRecipePage, VegetableReservationPage } from "@/components/storefront/VegetableTemplatePages";
 import { VegetableFooter, VegetableHeader } from "@/components/storefront/VegetableStoreChrome";
 import { GroceryStoreContext } from "@/components/storefront/GroceryTemplateBlocks";
@@ -269,6 +269,10 @@ export default function StorefrontPage() {
   const navPageOrder: Record<string, number> = { ABOUT: 0, FAQ: 1, CONTACT: 2, POLICY: 3, CUSTOM: 4, LANDING: 5 };
   const navPages = customizedPages
     .filter((p) => p.type !== "HOME")
+    // showInNavigation only controls the nav link, not whether the page's
+    // content exists — see the comment on filterVisiblePages for why this
+    // moved here instead of being baked into the visible-pages filter.
+    .filter((p) => getPageCustomization(draftCustomization, p)?.showInNavigation !== false)
     // De-dupe by normalized title: some bespoke templates seed their own
     // page under a different slug (e.g. "contact-us") for the same
     // purpose the generic AI pipeline already created under "contact" —

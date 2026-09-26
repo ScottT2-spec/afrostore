@@ -303,7 +303,36 @@ export function buildPageBackgroundStyle(settings: PageSettings | Record<string,
   return style;
 }
 
+// This used to also exclude a page when showInNavigation was false — but
+// that's a "don't add a link to this page in the nav bar" setting, not a
+// "delete this page's content everywhere" setting. Every page-content
+// lookup that ever ran through this function (the Home page finding
+// itself by type==="HOME", About, Contact, the generic [pageSlug]
+// route) was drawing from the SAME filtered array used to build the nav
+// list — so a page like Home, which reasonably gets showInNavigation:
+// false (you don't want a redundant "Home" link next to the logo), would
+// vanish from its own content lookup too and render blank on the live
+// site, while the AI builder's chat preview (which renders blocks
+// directly, untouched by this filter) still showed it fine. Nav-only
+// visibility is applied separately, at the specific call sites that
+// build the nav link list (see filterForNavigation below) — this
+// function now only gates whether a page's CONTENT exists at all.
 export function filterVisiblePages<T extends { id: string; slug: string; title?: string }>(
+  pages: T[],
+  customization: SiteCustomizationDocument | null
+): T[] {
+  return pages.filter((page) => {
+    const override = getPageCustomization(customization, page);
+    if (!override) return true;
+    if (override.hidden) return false;
+    return true;
+  });
+}
+
+// Nav-only filter — apply this (not filterVisiblePages) when building the
+// list of links to actually show in a nav bar. Kept separate from content
+// visibility for the reason explained above.
+export function filterForNavigation<T extends { id: string; slug: string; title?: string }>(
   pages: T[],
   customization: SiteCustomizationDocument | null
 ): T[] {
