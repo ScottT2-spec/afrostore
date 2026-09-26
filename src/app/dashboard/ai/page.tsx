@@ -68,15 +68,16 @@ interface MCPResponse {
 
 // ─── Suggestions ────────────────────────────────────────────
 
+// This assistant is read-only (RAG + chat over store data — see
+// chatWithAI in ai-service.ts, which never calls a tool or writes
+// anything). Every suggestion here must be something it can actually
+// answer from that data, not an action it would have to perform.
 const suggestions = [
   { text: "Show me my dashboard overview", icon: "📊" },
-  { text: "Add a new product to my store", icon: "📦" },
-  { text: "Create a 20% off coupon", icon: "🎟️" },
-  { text: "Set up delivery zones for Lagos", icon: "🚚" },
-  { text: "Start a flash sale this weekend", icon: "⚡" },
   { text: "How are my sales doing this month?", icon: "📈" },
   { text: "Show me pending orders", icon: "🛒" },
-  { text: "Set up a loyalty program", icon: "⭐" },
+  { text: "What's my best-selling product?", icon: "🏆" },
+  { text: "Summarize my customers", icon: "👥" },
 ];
 
 // ─── Tool Badge Component ───────────────────────────────────
@@ -403,14 +404,15 @@ export default function AIPage() {
                 Hey {user?.firstName}! I&apos;m your AI co-founder.
               </h2>
               <p className="text-sm text-surface-500 mb-2">
-                I don&apos;t just give advice — I take action. I can add products,
-                create coupons, set up delivery zones, analyze your sales, and
-                manage everything in{" "}
-                <strong>{currentStore?.name || "your store"}</strong>.
+                Ask me anything about{" "}
+                <strong>{currentStore?.name || "your store"}</strong> — your
+                products, orders, customers, and sales — and I&apos;ll pull
+                up the answer.
               </p>
               <p className="text-xs text-surface-400 mb-8">
-                When I create something, I&apos;ll take you to the form to review, add
-                images, and save.
+                I answer questions using your store&apos;s real data. To make
+                changes — add a product, create a coupon, set up delivery
+                zones — use the dashboard directly.
               </p>
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 w-full">
                 {suggestions.map((s) => (
@@ -618,8 +620,8 @@ export default function AIPage() {
               </button>
             </form>
             <p className="text-[10px] text-surface-400 mt-2 text-center">
-              I can manage your entire store — products, orders, coupons,
-              delivery, analytics, and more
+              I can answer questions about your products, orders,
+              customers, and analytics — I don&apos;t make changes to your store
             </p>
           </div>
         </div>
