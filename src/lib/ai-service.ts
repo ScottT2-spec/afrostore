@@ -251,8 +251,16 @@ Customers: ${store._count.customers}`;
   let ragInfo: AIChatResponse["ragContext"] | undefined;
   try {
     const rag = getRAGService();
+    // indexStoreData had no callers anywhere in the codebase — RAG was
+    // always empty. Reindexing here (cheap: upserts, not a full rebuild)
+    // guarantees the assistant is never answering from a stale/blank
+    // corpus. A per-write hook on each CRUD route would avoid this per-
+    // request cost, but this is correct and simple; optimize later if
+    // indexing latency actually shows up.
+    await indexStoreData(req.siteId).catch((err) => console.warn("RAG indexing failed, continuing with stale/partial index:", err));
+
     const context = await rag.retrieveContext(req.message, req.siteId, {
-      documentTypes: ["product", "order", "customer", "analytics_summary", "page", "category"],
+      documentTypes: ["product", "order", "customer", "analytics_summary", "page", "category", "coupon", "delivery_zone", "store_settings", "review"],
       limit: 10,
       maxTokens: 2000,
     });
@@ -390,53 +398,97 @@ export function getAIStatus() {
 }
 
 /**
- * Index store data into RAG for better AI context.
+ * Index ALL of a store's data into RAG, not just products/categories —
+ * every DocumentType the extractor system (rag/indexing/extractors.ts)
+ * already supports, but nothing ever actually indexed: orders, customers,
+ * pages, coupons, delivery zones, store settings, reviews, plugins.
  */
 export async function indexStoreData(siteId: string) {
   const rag = getRAGService();
+  const counts: Record<string, number> = {};
 
-  // Index products
-  const products = await prisma.product.findMany({
-    where: { siteId, status: "ACTIVE" },
-    include: { category: true, images: { take: 1 } },
-  });
+  const [products, categories, orders, customers, pages, coupons, zones, settings, reviews] =
+    await Promise.all([
+      prisma.product.findMany({ where: { siteId, status: "ACTIVE" }, include: { category: true } }),
+      prisma.category.findMany({ where: { siteId }, include: { _count: { select: { products: true } } } }),
+      prisma.order.findMany({ where: { siteId }, take: 200, orderBy: { createdAt: "desc" }, include: { items: true } }),
+      prisma.customer.findMany({ where: { siteId }, take: 200 }),
+      prisma.page.findMany({ where: { siteId } }),
+      prisma.coupon.findMany({ where: { siteId } }).catch(() => []),
+      prisma.deliveryZone.findMany({ where: { siteId } }).catch(() => []),
+      prisma.siteSettings.findUnique({ where: { siteId } }).catch(() => null),
+      // Review has no siteId column — it's scoped through its product.
+      prisma.review.findMany({ where: { product: { siteId } }, take: 200 }).catch(() => []),
+    ]);
 
-  if (products.length > 0) {
-    await rag.indexBatch(
-      "product",
-      products.map((p) => ({
-        id: p.id,
-        name: p.name,
-        description: p.description || "",
-        price: Number(p.price),
-        currency: p.currency,
-        stock: p.stock,
-        category: p.category?.name || "",
-        tags: p.tags,
-        status: p.status,
-      })),
-      siteId
-    );
+  if (products.length) {
+    await rag.indexBatch("product", products.map((p) => ({
+      id: p.id, name: p.name, description: p.description || "", price: Number(p.price),
+      currency: p.currency, stock: p.stock, category: p.category?.name || "", tags: p.tags, status: p.status,
+    })), siteId);
+    counts.products = products.length;
   }
 
-  // Index categories
-  const categories = await prisma.category.findMany({
-    where: { siteId },
-    include: { _count: { select: { products: true } } },
-  });
-
-  if (categories.length > 0) {
-    await rag.indexBatch(
-      "category",
-      categories.map((c) => ({
-        id: c.id,
-        name: c.name,
-        description: c.description || "",
-        productCount: c._count.products,
-      })),
-      siteId
-    );
+  if (categories.length) {
+    await rag.indexBatch("category", categories.map((c) => ({
+      id: c.id, name: c.name, description: c.description || "", productCount: c._count.products,
+    })), siteId);
+    counts.categories = categories.length;
   }
 
-  return { productsIndexed: products.length, categoriesIndexed: categories.length };
+  if (orders.length) {
+    await rag.indexBatch("order", orders.map((o) => ({
+      id: o.id, orderNumber: o.orderNumber, status: o.status, total: Number(o.total),
+      currency: o.currency, itemCount: o.items.length, createdAt: o.createdAt.toISOString(),
+    })), siteId);
+    counts.orders = orders.length;
+  }
+
+  if (customers.length) {
+    await rag.indexBatch("customer", customers.map((c) => ({
+      id: c.id, name: `${c.firstName} ${c.lastName}`.trim(), email: c.email || "", phone: c.phone || "",
+      totalOrders: c.totalOrders, totalSpent: Number(c.totalSpent || 0),
+    })), siteId);
+    counts.customers = customers.length;
+  }
+
+  if (pages.length) {
+    await rag.indexBatch("page", pages.map((p) => ({
+      id: p.id, title: p.title, slug: p.slug, type: p.type, isPublished: p.isPublished,
+    })), siteId);
+    counts.pages = pages.length;
+  }
+
+  if (coupons.length) {
+    await rag.indexBatch("coupon", coupons.map((c) => ({
+      id: c.id, code: c.code, type: c.type, value: Number(c.value),
+      isActive: c.isActive, usedCount: c.usedCount, expiresAt: c.expiresAt?.toISOString() || "",
+    })), siteId);
+    counts.coupons = coupons.length;
+  }
+
+  if (zones.length) {
+    await rag.indexBatch("delivery_zone", zones.map((z) => ({
+      id: z.id, name: z.name, fee: Number(z.fee), isActive: z.isActive,
+    })), siteId);
+    counts.deliveryZones = zones.length;
+  }
+
+  if (settings) {
+    await rag.indexBatch("store_settings", [{
+      id: settings.siteId, whatsappOrdering: settings.whatsappOrdering,
+      whatsappNumber: settings.whatsappNumber || "", payOnDelivery: settings.payOnDelivery,
+      bankTransfer: settings.bankTransfer,
+    }], siteId);
+    counts.storeSettings = 1;
+  }
+
+  if (reviews.length) {
+    await rag.indexBatch("review", reviews.map((r) => ({
+      id: r.id, rating: r.rating, comment: r.body || r.title || "", productId: r.productId,
+    })), siteId);
+    counts.reviews = reviews.length;
+  }
+
+  return counts;
 }
