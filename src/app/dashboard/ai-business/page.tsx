@@ -48,7 +48,16 @@ export default function AIBusinessPage() {
       await fetch(`/api/sites/${currentStore.id}`, {
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ name: businessName.trim(), businessType, ...(location.trim() ? { country: location.trim() } : {}) }),
+        body: JSON.stringify({
+          name: businessName.trim(),
+          businessType,
+          ...(location.trim() ? { country: location.trim() } : {}),
+          // Same reasoning as `name` above: this form's own description
+          // field never made it to Site.description either — only into
+          // the AI's prompt text — so it never actually showed up
+          // anywhere real (footer taglines, meta descriptions).
+          ...(description.trim() ? { description: description.trim() } : {}),
+        }),
       });
     } catch { /* non-fatal — the AI builder flow below still proceeds either way */ }
 
