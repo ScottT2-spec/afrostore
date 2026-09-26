@@ -30,6 +30,7 @@ import {
   FashionContactForm,
 } from "@/components/storefront/FashionTemplateBlocks";
 import { resolveSectionStyleOverrides } from "@/components/storefront/block-style";
+import { AiGeneratedFeaturesBlock, AiGeneratedTestimonialsBlock, AiGeneratedHeroBlock, AiGeneratedSpacerBlock, AiGeneratedProductGridBlock, AiGeneratedFAQBlock, AiGeneratedContactInfoBlock, AiGeneratedStatsBlock, AiGeneratedNewsletterBlock, AiGeneratedCountdownBlock, AiGeneratedTrustBadgesBlock, AiGeneratedBannerBlock, AiGeneratedImageTextBlock, AiGeneratedGalleryBlock, AiGeneratedTeamBlock } from "@/components/storefront/AiGeneratedBlocks";
 import { normalizeStorefrontTemplateProps } from "@/components/storefront/prop-normalizers";
 import { TShirtsPrintsHeader, TShirtsPrintsFooter } from "@/components/storefront/TShirtsPrintsStoreChrome";
 import {
@@ -882,7 +883,30 @@ const AI_BLOCKS: Record<string, BlockComponent> = {
   aiSectionTitle: AiSectionTitle as unknown as BlockComponent,
 };
 
+// Not an industry preset — these are the general AI site generator's own
+// section types (ai-layout-engine.ts), registered so the visual editor
+// can render + let a merchant edit what the AI already built instead of
+// showing a raw-JSON placeholder for them. See AiGeneratedBlocks.tsx.
+const AI_GENERATED_BLOCKS: Record<string, BlockComponent> = {
+  features: AiGeneratedFeaturesBlock as unknown as BlockComponent,
+  testimonials: AiGeneratedTestimonialsBlock as unknown as BlockComponent,
+  hero: AiGeneratedHeroBlock as unknown as BlockComponent,
+  spacer: AiGeneratedSpacerBlock as unknown as BlockComponent,
+  productGrid: AiGeneratedProductGridBlock as unknown as BlockComponent,
+  faq: AiGeneratedFAQBlock as unknown as BlockComponent,
+  contactInfo: AiGeneratedContactInfoBlock as unknown as BlockComponent,
+  stats: AiGeneratedStatsBlock as unknown as BlockComponent,
+  newsletter: AiGeneratedNewsletterBlock as unknown as BlockComponent,
+  countdown: AiGeneratedCountdownBlock as unknown as BlockComponent,
+  trustBadges: AiGeneratedTrustBadgesBlock as unknown as BlockComponent,
+  banner: AiGeneratedBannerBlock as unknown as BlockComponent,
+  imageText: AiGeneratedImageTextBlock as unknown as BlockComponent,
+  gallery: AiGeneratedGalleryBlock as unknown as BlockComponent,
+  team: AiGeneratedTeamBlock as unknown as BlockComponent,
+};
+
 const ALL_TEMPLATE_BLOCKS: Record<string, BlockComponent> = {
+  ...AI_GENERATED_BLOCKS,
   ...FASHION_BLOCKS,
   ...ELECTRONICS_BLOCKS,
   ...HARDWARE_BLOCKS,

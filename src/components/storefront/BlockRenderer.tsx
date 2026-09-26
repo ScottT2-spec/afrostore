@@ -212,7 +212,7 @@ function ButtonBlock({ props }: { props: Record<string, unknown> }) {
 }
 
 /* ── Hero ────────────────────────────────────────────────────── */
-function HeroBlock({ props }: { props: Record<string, unknown> }) {
+export function HeroBlock({ props }: { props: Record<string, unknown> }) {
   const bgStyle = (props.bgStyle as string) || "gradient";
   const bgColor = (props.bgColor as string) || "#1B2B4B";
   const textColor = (props.textColor as string) || "#fff";
@@ -414,7 +414,7 @@ function HeroBlock({ props }: { props: Record<string, unknown> }) {
 }
 
 /* ── Spacer ──────────────────────────────────────────────────── */
-function SpacerBlock({ props }: { props: Record<string, unknown> }) {
+export function SpacerBlock({ props }: { props: Record<string, unknown> }) {
   return <div style={{ height: `${(props.height as number) || 40}px` }} />;
 }
 
@@ -476,7 +476,7 @@ function getProductGradient(id: string): string {
   return PRODUCT_GRADIENTS[Math.abs(hash) % PRODUCT_GRADIENTS.length];
 }
 
-function ProductGridBlock({ props }: { props: Record<string, unknown> }) {
+export function ProductGridBlock({ props }: { props: Record<string, unknown> }) {
   const limit = (props.limit as number) || 6;
   const cols = (props.columns as number) || 3;
   const categoryFilter = toDisplayText(props.category, "");
@@ -658,7 +658,7 @@ function TestimonialCard({ item, isDark }: { item: { name: string; text: string;
   );
 }
 
-function TestimonialsBlock({ props }: { props: Record<string, unknown> }) {
+export function TestimonialsBlock({ props }: { props: Record<string, unknown> }) {
   const hardcodedItems = useMemo(
     () => (props.items as Array<{ name: string; text: string; role?: string; rating?: number }>) || [],
     [props.items],
@@ -786,7 +786,7 @@ function textStyleFor(props: Record<string, unknown>, prefix: string, fallbackCo
 }
 
 /* ── Features Grid ───────────────────────────────────────────── */
-function FeaturesBlock({ props }: { props: Record<string, unknown> }) {
+export function FeaturesBlock({ props }: { props: Record<string, unknown> }) {
   const items = (props.items as Array<{ icon: string; title: string; desc: string }>) || [];
   const cols = items.length <= 3 ? 3 : 4;
   const bgImg = imageBgStyle(props);
@@ -829,7 +829,7 @@ function FeaturesBlock({ props }: { props: Record<string, unknown> }) {
 }
 
 /* ── FAQ Accordion ───────────────────────────────────────────── */
-function FAQBlock({ props }: { props: Record<string, unknown> }) {
+export function FAQBlock({ props }: { props: Record<string, unknown> }) {
   const items = (props.items as Array<{ question: string; answer: string }>) || [];
   const [open, setOpen] = useState<number | null>(0);
   const bgImg = imageBgStyle(props, 0.55);
@@ -959,7 +959,7 @@ function getContactHref(icon: string, value: string, whatsappMessage?: string): 
   return null;
 }
 
-function ContactInfoBlock({ props }: { props: Record<string, unknown> }) {
+export function ContactInfoBlock({ props }: { props: Record<string, unknown> }) {
   const storeSlug = useContext(StoreSlugContext);
   const items = (props.items as Array<{ icon: string; title: string; value: string; href?: string; whatsappMessage?: string }>) || [];
   const hours = props.hours as string;
@@ -1016,7 +1016,7 @@ function ContactInfoBlock({ props }: { props: Record<string, unknown> }) {
 }
 
 /* ── Stats / Counters ────────────────────────────────────────── */
-function StatsBlock({ props }: { props: Record<string, unknown> }) {
+export function StatsBlock({ props }: { props: Record<string, unknown> }) {
   const items = (props.items as Array<{ value: string; label: string; icon?: string }>) || [];
   const bg = (props.bgColor as string) || "brand";
   const bgImg = imageBgStyle(props);
@@ -1059,7 +1059,7 @@ function StatsBlock({ props }: { props: Record<string, unknown> }) {
 }
 
 /* ── Newsletter ──────────────────────────────────────────────── */
-function NewsletterBlock({ props }: { props: Record<string, unknown> }) {
+export function NewsletterBlock({ props }: { props: Record<string, unknown> }) {
   const storeSlug = useContext(StoreSlugContext);
   const [email, setEmail] = useState("");
   const [submitted, setSubmitted] = useState(false);
@@ -1177,7 +1177,7 @@ function VideoBlock({ props }: { props: Record<string, unknown> }) {
 }
 
 /* ── Countdown ───────────────────────────────────────────────── */
-function CountdownBlock({ props }: { props: Record<string, unknown> }) {
+export function CountdownBlock({ props }: { props: Record<string, unknown> }) {
   const endDate = (props.endDate as string) || "";
   const [timeLeft, setTimeLeft] = useState({ days: 0, hours: 0, min: 0, sec: 0 });
   useEffect(() => {
@@ -1231,7 +1231,7 @@ function CountdownBlock({ props }: { props: Record<string, unknown> }) {
 }
 
 /* ── Trust Badges ────────────────────────────────────────────── */
-function TrustBadgesBlock({ props }: { props: Record<string, unknown> }) {
+export function TrustBadgesBlock({ props }: { props: Record<string, unknown> }) {
   const items = (props.items as Array<{ icon: string; label: string }>) || [];
   const bgImg = imageBgStyle(props, 0.65);
   return (
@@ -1257,7 +1257,7 @@ function TrustBadgesBlock({ props }: { props: Record<string, unknown> }) {
 }
 
 /* ── Banner ──────────────────────────────────────────────────── */
-function BannerBlock({ props }: { props: Record<string, unknown> }) {
+export function BannerBlock({ props }: { props: Record<string, unknown> }) {
   const bg = (props.bgColor as string) || "brand";
   const sectionStyle = getSectionStyle(props);
   const hasImageBackground = Boolean(props.bgImage);
@@ -1307,7 +1307,7 @@ function BannerBlock({ props }: { props: Record<string, unknown> }) {
 }
 
 /* ── Image + Text ────────────────────────────────────────────── */
-function ImageTextBlock({ props }: { props: Record<string, unknown> }) {
+export function ImageTextBlock({ props }: { props: Record<string, unknown> }) {
   const reverse = (props.reverse as boolean) || false;
   const sectionStyle = getSectionStyle(props);
   const textStyle = { color: (props.textColor as string) || undefined } as React.CSSProperties;
@@ -1355,7 +1355,7 @@ function ImageTextBlock({ props }: { props: Record<string, unknown> }) {
 }
 
 /* ── Gallery ─────────────────────────────────────────────────── */
-function GalleryBlock({ props }: { props: Record<string, unknown> }) {
+export function GalleryBlock({ props }: { props: Record<string, unknown> }) {
   const images = (props.images as Array<{ src: string; alt?: string }>) || [];
   if (images.length === 0) return null;
   return (
@@ -1412,7 +1412,7 @@ function ProjectsBlock({ props }: { props: Record<string, unknown> }) {
 }
 
 /* ── Team ────────────────────────────────────────────────────── */
-function TeamBlock({ props }: { props: Record<string, unknown> }) {
+export function TeamBlock({ props }: { props: Record<string, unknown> }) {
   const members = (props.members as Array<{ name: string; role: string; image?: string; bio?: string }>) || [];
   const bgImg = imageBgStyle(props, 0.6);
   return (

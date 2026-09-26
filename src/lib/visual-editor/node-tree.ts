@@ -509,6 +509,12 @@ const flattenLegacyNodeSettings = (node: unknown): Record<string, EditorSettingV
   return settings;
 };
 
+const AI_GENERATED_BLOCK_TYPES = new Set([
+  "features", "testimonials", "hero", "spacer", "productGrid", "faq",
+  "contactInfo", "stats", "newsletter", "countdown", "trustBadges",
+  "banner", "imageText", "gallery", "team",
+]);
+
 const migrateLegacyNode = (node: unknown, fallbackType = "node"): EditorNode => {
   if (!isPlainObject(node)) {
     return {
@@ -547,6 +553,32 @@ const migrateLegacyNode = (node: unknown, fallbackType = "node"): EditorNode => 
     const content = isPlainObject(node.content) ? { ...node.content } : undefined;
     return { id, type, settings, content, elements: [] };
   }
+
+  // "features" / "testimonials" are the general AI site generator's own
+  // block types (ai-layout-engine.ts), now registered as editable
+  // template blocks (AiGeneratedBlocks.tsx) for the same reason as the
+  // prokip types just above — their renderer reads `items` directly as
+  // a flat array prop, not a children tree. Their real data lives under
+  // node.props (that's how ai-layout-engine's block() writes them, not
+  // node.settings), so preserve it verbatim rather than letting it fall
+  // into the generic array->children conversion below, which would
+  // silently strip `items` on first editor save.
+  // These are the general AI site generator's own block types
+  // (ai-layout-engine.ts), now registered as editable template blocks
+  // (AiGeneratedBlocks.tsx) for the same reason as the prokip types
+  // just above — their renderers read array fields (items, faqs,
+  // stats, links, etc.) directly as a flat prop, not a children tree.
+  // Their real data lives under node.props (that's how
+  // ai-layout-engine's block() writes them, not node.settings), so
+  // preserve it verbatim rather than letting it fall into the generic
+  // array->children conversion below, which would silently strip that
+  // data on first editor save.
+  if (AI_GENERATED_BLOCK_TYPES.has(type)) {
+    const settings = isPlainObject(node.props) ? { ...node.props } : isPlainObject(node.settings) ? { ...node.settings } : {};
+    const content = isPlainObject(node.content) ? { ...node.content } : undefined;
+    return { id, type, settings, content, elements: [] };
+  }
+
   const settings = flattenLegacyNodeSettings(node);
   const elements = extractLegacyChildren(node, type);
   const content = isPlainObject(node.content) ? node.content : undefined;
