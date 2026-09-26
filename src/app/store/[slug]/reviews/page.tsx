@@ -6,7 +6,7 @@ import { useState, useEffect, useCallback } from "react";
 import { useParams } from "next/navigation";
 import Link from "next/link";
 import { HandmadeBagsHeader, HandmadeBagsFooter } from "@/components/storefront/HandmadeBagsStoreChrome";
-import { AiStoreHeader } from "@/components/storefront/AiStoreChrome";
+import { AiStoreHeader, AiStoreFooter } from "@/components/storefront/AiStoreChrome";
 import { RenderBlocks } from "@/components/storefront/BlockRenderer";
 import { RenderTemplateBlocks } from "@/components/storefront/TemplateBlockRenderer";
 import { RETAIL_REVIEWS_BLOCKS } from "@/lib/templates/presets/retail-pages";
@@ -466,6 +466,8 @@ export default function StoreReviewsPage() {
           storeSlug={slug}
           logo={store?.logo}
         />
+      ) : isAiTemplate ? (
+        <AiStoreFooter storeName={store?.name || "Store"} storeSlug={slug} logo={store?.logo} description={storeData?.store?.description} />
       ) : (
         <HandmadeBagsFooter
           storeName={store?.name || "Store"}

@@ -98,3 +98,73 @@ export function AiStoreHeader({ storeName, storeSlug, logo }: AiStoreHeaderProps
     </div>
   );
 }
+
+/* ═══════════════════════════════════════════════════════════════
+   AI BLOCK-BUILDER STORE FOOTER
+   Same rule as the header above: exactly the four mandatory pages
+   (Home, About Us, Contact Us, Reviews), rendered identically on
+   every page of an AI-generated site. Added alongside the header —
+   the header got this same-nav treatment earlier, but nothing filled
+   in the equivalent footer, so About/Contact/Reviews were still
+   falling back to a hardcoded, niche-template footer (or nothing, on
+   Home) instead of matching each other.
+   ═══════════════════════════════════════════════════════════════ */
+
+export interface AiStoreFooterProps {
+  storeName: string;
+  storeSlug: string;
+  logo?: string | null;
+  description?: string | null;
+}
+
+export function AiStoreFooter({ storeName, storeSlug, logo, description }: AiStoreFooterProps) {
+  const base = `/store/${storeSlug}`;
+  const navItems = [
+    { label: "Home", href: base },
+    { label: "About Us", href: `${base}/about` },
+    { label: "Contact Us", href: `${base}/contact` },
+    { label: "Reviews", href: `${base}/reviews` },
+  ];
+
+  const css = `
+    .ai-footer-wrap { background: #fafafa; border-top: 1px solid ${A.border}; }
+    .ai-footer-inner { max-width: ${A.containerWidth}; margin: 0 auto; padding: 48px 20px 28px; display: flex; flex-direction: column; gap: 24px; }
+    .ai-footer-top { display: flex; flex-wrap: wrap; align-items: flex-start; justify-content: space-between; gap: 24px; }
+    .ai-footer-brand { display: flex; flex-direction: column; gap: 8px; max-width: 360px; }
+    .ai-footer-logo-img { height: 28px; width: auto; object-fit: contain; }
+    .ai-footer-logo-text { font-family: ${A.sansFont}; font-weight: 700; font-size: 16px; color: ${A.textPrimary}; }
+    .ai-footer-desc { font-family: ${A.sansFont}; font-size: 13px; color: #6b6b6b; line-height: 1.5; }
+    .ai-footer-links { display: flex; flex-wrap: wrap; gap: 24px; }
+    .ai-footer-link { font-family: ${A.sansFont}; font-weight: 500; font-size: 13px; color: ${A.textPrimary}; text-decoration: none; }
+    .ai-footer-link:hover { opacity: 0.6; }
+    .ai-footer-bottom { border-top: 1px solid ${A.border}; padding-top: 16px; font-family: ${A.sansFont}; font-size: 12px; color: #9a9a9a; }
+  `;
+
+  return (
+    <div className="ai-footer-wrap">
+      <style dangerouslySetInnerHTML={{ __html: css }} />
+      <div className="ai-footer-inner">
+        <div className="ai-footer-top">
+          <div className="ai-footer-brand">
+            {logo ? (
+              <img src={logo} alt={storeName} className="ai-footer-logo-img" />
+            ) : (
+              <span className="ai-footer-logo-text">{storeName}</span>
+            )}
+            {description && <p className="ai-footer-desc">{description}</p>}
+          </div>
+          <nav className="ai-footer-links">
+            {navItems.map((item) => (
+              <Link key={item.label} href={item.href} className="ai-footer-link">
+                {item.label}
+              </Link>
+            ))}
+          </nav>
+        </div>
+        <div className="ai-footer-bottom">
+          © {new Date().getFullYear()} {storeName}. All rights reserved.
+        </div>
+      </div>
+    </div>
+  );
+}

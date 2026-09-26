@@ -5,7 +5,7 @@ import { RenderTemplateBlocks, type TemplateBlock } from "@/components/storefron
 import InteractiveTemplateBlocks from "@/components/storefront/InteractiveTemplateBlocks";
 import { RetailHeader, RetailFooter } from "@/components/storefront/RetailTemplateBlocks";
 import { HandmadeBagsHeader, HandmadeBagsFooter } from "@/components/storefront/HandmadeBagsStoreChrome";
-import { AiStoreHeader } from "@/components/storefront/AiStoreChrome";
+import { AiStoreHeader, AiStoreFooter } from "@/components/storefront/AiStoreChrome";
 import { ThemeProvider, type ThemeData } from "@/components/storefront/ThemeProvider";
 import { applyPageCustomization, buildPageBackgroundStyle, filterVisiblePages, getResolvedPageSettings, normalizeSiteCustomization, type SiteCustomizationDocument } from "@/lib/site-customization";
 import { RenderBlocks, type BuilderBlock } from "@/components/storefront/BlockRenderer";
@@ -525,12 +525,16 @@ export default async function AboutPage({ params }: Props) {
           <InteractiveTemplateBlocks templateSlug={activeTemplateSlug} blocks={ABOUT_PAGE_BLOCKS} products={serializedProducts} blogs={blogs} currency={store.currency} storeId={store.id} storeSlug={slug} />
         )}
       </div>
-      <HandmadeBagsFooter
-        storeName={store.name}
-        storeSlug={store.slug || slug}
-        logo={store.logo}
-        description={store.description ?? undefined}
-      />
+      {isAiTemplate ? (
+        <AiStoreFooter storeName={store.name} storeSlug={store.slug || slug} logo={store.logo} description={store.description} />
+      ) : (
+        <HandmadeBagsFooter
+          storeName={store.name}
+          storeSlug={store.slug || slug}
+          logo={store.logo}
+          description={store.description ?? undefined}
+        />
+      )}
     </ThemeProvider>
   );
 }

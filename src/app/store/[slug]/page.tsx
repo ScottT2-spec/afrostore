@@ -35,7 +35,7 @@ import { AegisLandingContext, AegisLandingFontLoader } from "@/components/storef
 import { ProkipAgentLandingContext, ProkipAgentFontLoader } from "@/components/storefront/ProkipAgentLandingBlocks";
 import { ProkipBookingLandingContext, ProkipBookingFontLoader } from "@/components/storefront/ProkipBookingLandingBlocks";
 import { VegetableHomePage } from "@/components/storefront/VegetableTemplatePages";
-import { AiStoreHeader } from "@/components/storefront/AiStoreChrome";
+import { AiStoreHeader, AiStoreFooter } from "@/components/storefront/AiStoreChrome";
 
 /* ───────── Types ───────── */
 
@@ -1008,7 +1008,9 @@ export default function StorePage() {
       )}
 
       {/* Footer */}
-      {isDecorTemplate ? (
+      {isAiTemplate ? (
+        <AiStoreFooter storeName={store.name} storeSlug={slug} logo={store.logo} description={store.description} />
+      ) : isDecorTemplate ? (
         <InteriorFooter storeSlug={slug} />
       ) : isCosmeticsTemplate ? (
         <CosmeticsFooter

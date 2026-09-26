@@ -17,7 +17,7 @@ import { HealthHeader, HealthFooterFull, HealthFontLoader } from "@/components/s
 import { CosmeticsFontLoader, CosmeticsHeader, CosmeticsFooter } from "@/components/storefront/CosmeticsTemplateBlocks";
 import { GardenHeader, GardenFooter } from "@/components/storefront/GardenStoreChrome";
 import { HandmadeBagsHeader, HandmadeBagsFooter } from "@/components/storefront/HandmadeBagsStoreChrome";
-import { AiStoreHeader } from "@/components/storefront/AiStoreChrome";
+import { AiStoreHeader, AiStoreFooter } from "@/components/storefront/AiStoreChrome";
 import { resolveLivePageContent } from "@/lib/templates/bespoke-page-content";
 import { buildTemplatePageContent } from "@/lib/templates/template-tree";
 
@@ -564,12 +564,16 @@ export default async function ContactPage({ params }: Props) {
           <InteractiveTemplateBlocks templateSlug={activeTemplateSlug} blocks={CONTACT_PAGE_BLOCKS} products={serializedProducts} blogs={blogs} currency={store.currency} storeId={store.id} storeSlug={slug} />
         )}
       </div>
-      <HandmadeBagsFooter
-        storeName={store.name}
-        storeSlug={store.slug || slug}
-        logo={store.logo}
-        description={store.description ?? undefined}
-      />
+      {isAiTemplate ? (
+        <AiStoreFooter storeName={store.name} storeSlug={store.slug || slug} logo={store.logo} description={store.description} />
+      ) : (
+        <HandmadeBagsFooter
+          storeName={store.name}
+          storeSlug={store.slug || slug}
+          logo={store.logo}
+          description={store.description ?? undefined}
+        />
+      )}
     </ThemeProvider>
   );
 }
