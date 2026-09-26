@@ -356,14 +356,22 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ wor
               }
             })();
           }
-        } catch {
+        } catch (bgErr) {
+          console.error(`Background AI content generation setup failed for site ${site.id}:`, bgErr);
           // Non-fatal — pages exist with empty content, user can edit
         }
 
         templateResult = { method: "ai", template: "ai-modern", blocksCreated: homeBlocks.length, categories: createdCategories.length, products: sampleData.products.length };
       } catch (aiErr) {
-        console.error("AI build error:", aiErr);
-        // Non-fatal — site is still created
+        // Previously this was swallowed entirely with no logged detail —
+        // the site would report success (201) with a blank homepage and
+        // there was no way to know why. Now it's logged loudly with full
+        // context and surfaced in the response so the actual failure is
+        // visible instead of guessed at.
+        const message = aiErr instanceof Error ? aiErr.message : String(aiErr);
+        const stack = aiErr instanceof Error ? aiErr.stack : undefined;
+        console.error(`AI build FAILED for site ${site.id} (${site.slug}), bizType=${body.businessType || body.industry || "general"}:`, message, stack);
+        templateResult = { method: "ai", error: message, blocksCreated: 0 };
       }
     }
 
