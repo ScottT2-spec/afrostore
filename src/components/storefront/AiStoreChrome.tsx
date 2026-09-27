@@ -159,7 +159,7 @@ export function AiStoreFooter({ storeName, storeSlug, logo, description, socialL
     .ai-footer-link { font-family: ${A.sansFont}; font-weight: 500; font-size: 13px; color: ${A.textPrimary}; text-decoration: none; }
     .ai-footer-link:hover { opacity: 0.6; }
     .ai-footer-social { display: flex; gap: 10px; margin-top: 4px; }
-    .ai-footer-social-icon { width: 32px; height: 32px; border-radius: 50%; border: 1px solid ${A.border}; display: flex; align-items: center; justify-content: center; color: ${A.textPrimary}; transition: opacity 0.2s; }
+    .ai-footer-social-icon { width: 32px; height: 32px; border-radius: 50%; border: 1px solid rgba(0,0,0,0.2); display: flex; align-items: center; justify-content: center; color: ${A.textPrimary}; transition: opacity 0.2s; }
     .ai-footer-social-icon:hover { opacity: 0.6; }
     .ai-footer-bottom { border-top: 1px solid rgba(0,0,0,0.15); padding-top: 16px; font-family: ${A.sansFont}; font-size: 12px; color: #47473f; }
   `;
