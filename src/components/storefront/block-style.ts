@@ -10,7 +10,12 @@ export function resolveOpacity(value: unknown, fallback: number) {
  * Maps old props format to new BlockStyleSettings format
  */
 export function getSectionStyle(props: Record<string, unknown>) {
-  const backgroundImage = props.bgImage as string | undefined;
+  // Support both prop names — most of the codebase (ai-layout-engine.ts,
+  // every other block) uses `backgroundImage`; this legacy helper only
+  // ever checked `bgImage`, so any block relying on it (BannerBlock,
+  // ImageTextBlock) never actually rendered its AI-set photo background
+  // at all, silently falling back to a plain color/gradient.
+  const backgroundImage = (props.backgroundImage as string | undefined) || (props.bgImage as string | undefined);
   const bgColor = (props.bgColor as string) || undefined;
   const textColor = (props.textColor as string) || undefined;
 

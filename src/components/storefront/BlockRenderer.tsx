@@ -236,7 +236,7 @@ export function HeroBlock({ props }: { props: Record<string, unknown> }) {
 
   const isLight = bgStyle === "light";
   const sectionStyle = getSectionStyle(props);
-  const hasImageBackground = Boolean(props.bgImage);
+  const hasImageBackground = Boolean(props.backgroundImage) || Boolean(props.bgImage);
   const overlayColor = (props.overlayColor as string) || "#000000";
   const overlayOpacity = resolveOpacity(props.overlayOpacity, 0.35);
   const textStyle = { color: textColor } as React.CSSProperties;
@@ -1260,10 +1260,16 @@ export function TrustBadgesBlock({ props }: { props: Record<string, unknown> }) 
 export function BannerBlock({ props }: { props: Record<string, unknown> }) {
   const bg = (props.bgColor as string) || "brand";
   const sectionStyle = getSectionStyle(props);
-  const hasImageBackground = Boolean(props.bgImage);
+  const hasImageBackground = Boolean(props.bgImage) || Boolean(props.backgroundImage);
   const overlayColor = (props.overlayColor as string) || "#000000";
   const overlayOpacity = resolveOpacity(props.overlayOpacity, 0.35);
-  const textStyle = { color: (props.textColor as string) || undefined } as React.CSSProperties;
+  // brand/accent/dark backgrounds (and any photo background) are all dark
+  // enough to need light text by default — the bug this fixes is a dark
+  // banner background with no explicit textColor falling through to the
+  // page's default (dark) text color, rendering nearly invisible. Only
+  // the "light" bordered variant should default to dark text.
+  const needsLightText = bg !== "light" || hasImageBackground;
+  const textStyle = { color: (props.textColor as string) || (needsLightText ? "#ffffff" : undefined) } as React.CSSProperties;
   return (
     <AnimateIn>
       <div className={`rounded-3xl px-8 sm:px-12 py-10 sm:py-14 relative overflow-hidden ${
