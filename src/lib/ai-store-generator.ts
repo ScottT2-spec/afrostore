@@ -428,8 +428,25 @@ function buildFAQPage(data: Record<string, any>, storeName: string, storeSlug: s
   };
 }
 
-function buildContactPage(data: Record<string, any>, storeName: string, images: StoreImages): GeneratedPage {
+function buildContactPage(data: Record<string, any>, storeName: string, images: StoreImages, whatsappNumber?: string): GeneratedPage {
   const contact = data.contact || {};
+
+  // Previously these 4 fields were 100% hardcoded fake placeholders
+  // ("hello@example.com", "+233 XX XXX XXXX", "Accra, Ghana") regardless
+  // of what the merchant actually told the AI or had set for their real
+  // store — the merchant-provided WhatsApp number was fetched by the
+  // caller but never even passed into this function. Now: the real
+  // whatsappNumber setting wins for phone/WhatsApp, then whatever the AI
+  // actually generated for contact.email/phone/address (grounded in this
+  // specific business's location/description, not a fixed example), and
+  // a field is left out entirely rather than shown as a fake value when
+  // there's genuinely nothing real to put there.
+  const contactItems: Array<{ icon: string; title: string; value: string }> = [
+    ...(contact.email ? [{ icon: "mail", title: "Email", value: contact.email }] : []),
+    ...(whatsappNumber || contact.phone ? [{ icon: "phone", title: "Phone", value: whatsappNumber || contact.phone }] : []),
+    ...(whatsappNumber ? [{ icon: "message", title: "WhatsApp", value: whatsappNumber }] : []),
+    ...(contact.address ? [{ icon: "map-pin", title: "Address", value: contact.address }] : []),
+  ];
 
   const blocks: BuilderBlock[] = [
     block("hero", {
@@ -441,18 +458,17 @@ function buildContactPage(data: Record<string, any>, storeName: string, images: 
       buttonText: "",
     }),
     block("spacer", { height: 48 }),
-    block("contactInfo", {
-      title: "Contact Information",
-      backgroundImage: images.lifestyle || images.about,
-      items: [
-        { icon: "mail", title: "Email", value: "hello@example.com" },
-        { icon: "phone", title: "Phone", value: "+233 XX XXX XXXX" },
-        { icon: "message", title: "WhatsApp", value: "Quick chat support" },
-        { icon: "map-pin", title: "Address", value: "Accra, Ghana" },
-      ],
-      hours: "Monday - Saturday, 9:00 AM - 6:00 PM",
-    }),
-    block("spacer", { height: 48 }),
+    ...(contactItems.length > 0
+      ? [
+          block("contactInfo", {
+            title: "Contact Information",
+            backgroundImage: images.lifestyle || images.about,
+            items: contactItems,
+            hours: contact.hours || "Monday - Saturday, 9:00 AM - 6:00 PM",
+          }),
+          block("spacer", { height: 48 }),
+        ]
+      : []),
     block("contactForm", {
       title: "Send Us a Message",
       subtitle: "We'll respond within 24 hours",
@@ -612,7 +628,7 @@ export async function generateStore(input: StoreGeneratorInput): Promise<StoreGe
   const pages: GeneratedPage[] = [
     buildHomePage(data, input.storeName, input.storeSlug, images, industry, existingSettings?.whatsappNumber || undefined),
     buildAboutPage(data, input.storeName, input.storeSlug, images),
-    buildContactPage(data, input.storeName, images),
+    buildContactPage(data, input.storeName, images, existingSettings?.whatsappNumber || undefined),
     // Strictly Home, About, Contact, Reviews only — no FAQ or Policies
     // page, and no other nav item. Reviews is a fixed platform route
     // (src/app/store/[slug]/reviews), not a generated content page.
