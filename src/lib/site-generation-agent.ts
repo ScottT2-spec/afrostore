@@ -509,6 +509,17 @@ async function executeTool(
       case "upsert_product": {
         const parsed = upsertProductSchema.parse(args);
         const slug = parsed.name.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/(^-|-$)/g, "");
+        if (!parsed.id) {
+          // This tool can be called any number of times across any number
+          // of chat turns, with nothing else limiting how many products a
+          // site ends up with — that's how a site could reach well beyond
+          // 10 despite creation-time seeding being capped. Enforce the
+          // real limit at the actual write point, not just at creation.
+          const existingCount = await prisma.product.count({ where: { siteId } });
+          if (existingCount >= 10) {
+            return { result: `Can't add "${parsed.name}" — this store already has ${existingCount} products, at the 10-product limit. Remove or update an existing product instead of adding a new one.`, isError: true };
+          }
+        }
         const product = parsed.id
           ? await prisma.product.update({
               where: { id: parsed.id },
