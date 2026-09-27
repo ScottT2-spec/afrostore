@@ -148,20 +148,20 @@ export function AiStoreFooter({ storeName, storeSlug, logo, description, socialL
   ];
 
   const css = `
-    .ai-footer-wrap { background: #e9e9e7; border-top: 1px solid ${A.border}; }
+    .ai-footer-wrap { background: #b5b5b2; border-top: 1px solid ${A.border}; }
     .ai-footer-inner { max-width: ${A.containerWidth}; margin: 0 auto; padding: 48px 20px 28px; display: flex; flex-direction: column; gap: 24px; }
     .ai-footer-top { display: flex; flex-wrap: wrap; align-items: flex-start; justify-content: space-between; gap: 24px; }
     .ai-footer-brand { display: flex; flex-direction: column; gap: 8px; max-width: 360px; }
     .ai-footer-logo-img { height: 28px; width: auto; object-fit: contain; }
     .ai-footer-logo-text { font-family: ${A.sansFont}; font-weight: 700; font-size: 16px; color: ${A.textPrimary}; }
-    .ai-footer-desc { font-family: ${A.sansFont}; font-size: 13px; color: #6b6b6b; line-height: 1.5; }
+    .ai-footer-desc { font-family: ${A.sansFont}; font-size: 13px; color: #3a3a38; line-height: 1.5; }
     .ai-footer-links { display: flex; flex-wrap: wrap; gap: 24px; }
     .ai-footer-link { font-family: ${A.sansFont}; font-weight: 500; font-size: 13px; color: ${A.textPrimary}; text-decoration: none; }
     .ai-footer-link:hover { opacity: 0.6; }
     .ai-footer-social { display: flex; gap: 10px; margin-top: 4px; }
     .ai-footer-social-icon { width: 32px; height: 32px; border-radius: 50%; border: 1px solid ${A.border}; display: flex; align-items: center; justify-content: center; color: ${A.textPrimary}; transition: opacity 0.2s; }
     .ai-footer-social-icon:hover { opacity: 0.6; }
-    .ai-footer-bottom { border-top: 1px solid ${A.border}; padding-top: 16px; font-family: ${A.sansFont}; font-size: 12px; color: #9a9a9a; }
+    .ai-footer-bottom { border-top: 1px solid rgba(0,0,0,0.15); padding-top: 16px; font-family: ${A.sansFont}; font-size: 12px; color: #47473f; }
   `;
 
   return (
