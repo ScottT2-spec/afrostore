@@ -81,7 +81,7 @@ interface StoreData {
   theme: ThemeData | null;
   templateSlug?: string | null;
   settings?: { whatsappOrdering?: boolean; whatsappNumber?: string };
-  socialLinks?: { whatsapp?: string };
+  socialLinks?: { whatsapp?: string; facebook?: string; instagram?: string; twitter?: string; tiktok?: string; youtube?: string };
 }
 
 /* ───────── Helpers ───────── */
@@ -350,6 +350,14 @@ export default function ShopPage() {
   // directly).
   const isAiTemplate = storeData?.templateSlug === "ai" || (storeData?.pages || []).some((p) => p.template === "ai");
   const whatsappNumber = storeData?.settings?.whatsappNumber || storeData?.socialLinks?.whatsapp;
+  const aiSocialLinks: Array<{ platform: string; url: string }> = [
+    ...(storeData?.socialLinks?.facebook ? [{ platform: "facebook", url: storeData.socialLinks.facebook }] : []),
+    ...(storeData?.socialLinks?.instagram ? [{ platform: "instagram", url: storeData.socialLinks.instagram }] : []),
+    ...(storeData?.socialLinks?.twitter ? [{ platform: "twitter", url: storeData.socialLinks.twitter }] : []),
+    ...(storeData?.socialLinks?.tiktok ? [{ platform: "tiktok", url: storeData.socialLinks.tiktok }] : []),
+    ...(storeData?.socialLinks?.youtube ? [{ platform: "youtube", url: storeData.socialLinks.youtube }] : []),
+    ...(storeData?.socialLinks?.whatsapp ? [{ platform: "whatsapp", url: storeData.socialLinks.whatsapp }] : []),
+  ];
   const whatsappOrdering = storeData?.settings?.whatsappOrdering;
   const isHandmadeBagsTemplate = store.templateSlug === "handmade-bags";
   const isTShirtsPrintsTemplate = store.templateSlug === "t-shirts-prints" || slug === "t-shirts-prints" || store.slug === "t-shirts-prints";
@@ -1673,7 +1681,7 @@ export default function ShopPage() {
 
       {/* ── Footer ── */}
       {isAiTemplate ? (
-        <AiStoreFooter storeName={store.name} storeSlug={slug} logo={store.logo} description={store.description} />
+        <AiStoreFooter storeName={store.name} storeSlug={slug} logo={store.logo} description={store.description} socialLinks={aiSocialLinks} />
       ) : isTShirtsPrintsTemplate ? (
         <TShirtsPrintsFooter storeName={store.name} storeSlug={slug} logo={store.logo} />
       ) : isCosmeticsTemplate ? (

@@ -272,6 +272,14 @@ export default async function ContactPage({ params }: Props) {
     resolvedContact?.blocks?.some((b: any) => typeof b?.type === "string" && b.type.startsWith("ai"));
   const whatsappNumber = store.settings?.whatsappNumber || (store.socialLinks as any)?.whatsapp;
   const whatsappOrdering = store.settings?.whatsappOrdering;
+  const aiSocialLinks: Array<{ platform: string; url: string }> = [
+    ...(store.socialLinks?.facebook ? [{ platform: "facebook", url: store.socialLinks.facebook }] : []),
+    ...(store.socialLinks?.instagram ? [{ platform: "instagram", url: store.socialLinks.instagram }] : []),
+    ...(store.socialLinks?.twitter ? [{ platform: "twitter", url: store.socialLinks.twitter }] : []),
+    ...(store.socialLinks?.tiktok ? [{ platform: "tiktok", url: store.socialLinks.tiktok }] : []),
+    ...((store.socialLinks as any)?.youtube ? [{ platform: "youtube", url: (store.socialLinks as any).youtube }] : []),
+    ...(store.socialLinks?.whatsapp ? [{ platform: "whatsapp", url: store.socialLinks.whatsapp }] : []),
+  ];
   if (resolvedContact && resolvedContact.blocks.length > 0) {
     pageContent = { blocks: resolvedContact.blocks, settings: resolvedContact.settings };
   } else {
@@ -569,7 +577,7 @@ export default async function ContactPage({ params }: Props) {
         )}
       </div>
       {isAiTemplate ? (
-        <AiStoreFooter storeName={store.name} storeSlug={store.slug || slug} logo={store.logo} description={store.description} />
+        <AiStoreFooter storeName={store.name} storeSlug={store.slug || slug} logo={store.logo} description={store.description} socialLinks={aiSocialLinks} />
       ) : (
         <HandmadeBagsFooter
           storeName={store.name}

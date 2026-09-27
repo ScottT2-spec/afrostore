@@ -476,7 +476,7 @@ export default function StoreReviewsPage() {
           logo={store?.logo}
         />
       ) : isAiTemplate ? (
-        <AiStoreFooter storeName={store?.name || "Store"} storeSlug={slug} logo={store?.logo} description={storeData?.store?.description} />
+        <AiStoreFooter storeName={store?.name || "Store"} storeSlug={slug} logo={store?.logo} description={storeData?.store?.description} socialLinks={socialLinksArray} />
       ) : (
         <HandmadeBagsFooter
           storeName={store?.name || "Store"}
