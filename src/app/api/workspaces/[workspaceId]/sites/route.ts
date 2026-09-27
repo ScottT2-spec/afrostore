@@ -236,35 +236,51 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ wor
         const sampleData = getIndustrySampleData(bizType) || DEFAULT_SAMPLE_DATA;
         const siteCurrency = site.currency || sampleData.currency || "NGN";
 
-        const createdCategories = await Promise.all(
-          sampleData.categories.map((cat, i) =>
-            prisma.category.create({
-              data: { siteId: site.id, name: cat.name, slug: cat.slug, image: cat.image, description: cat.description, position: i },
-            })
-          )
-        );
+        // Decided once, up front: if the merchant gave us enough to work
+        // with, AI-generated products replace the static catalog entirely
+        // rather than being created alongside it and cleaned up after the
+        // fact. The old create-static-then-delete-after-AI-succeeds
+        // approach was a race: if the background AI step failed silently,
+        // errored partway, or the "best-effort" delete just didn't fire,
+        // the static AND the AI products both stayed — a merchant could
+        // end up with more than the intended 10 products from one store.
+        const productsOfferedList: string[] = Array.isArray(products) ? products.filter(Boolean) : [];
+        const servicesOfferedList: string[] = Array.isArray(services) ? services.filter(Boolean) : [];
+        const willUseAiProducts = productsOfferedList.length > 0 || servicesOfferedList.length > 0 || (description && description.trim().length > 10);
 
-        for (const prod of sampleData.products) {
-          const product = await prisma.product.create({
-            data: {
-              siteId: site.id,
-              categoryId: createdCategories[prod.catIdx]?.id || createdCategories[0]?.id || null,
-              name: prod.name,
-              slug: prod.slug,
-              description: prod.description,
-              price: prod.price,
-              compareAtPrice: prod.compareAtPrice || null,
-              currency: siteCurrency,
-              stock: prod.stock,
-              isFeatured: prod.isFeatured,
-              status: "ACTIVE",
-              tags: [],
-            },
-          });
-          for (let j = 0; j < prod.images.length; j++) {
-            await prisma.productImage.create({
-              data: { productId: product.id, url: prod.images[j], alt: prod.name, position: j },
+        const createdCategories = willUseAiProducts
+          ? []
+          : await Promise.all(
+              sampleData.categories.map((cat, i) =>
+                prisma.category.create({
+                  data: { siteId: site.id, name: cat.name, slug: cat.slug, image: cat.image, description: cat.description, position: i },
+                })
+              )
+            );
+
+        if (!willUseAiProducts) {
+          for (const prod of sampleData.products) {
+            const product = await prisma.product.create({
+              data: {
+                siteId: site.id,
+                categoryId: createdCategories[prod.catIdx]?.id || createdCategories[0]?.id || null,
+                name: prod.name,
+                slug: prod.slug,
+                description: prod.description,
+                price: prod.price,
+                compareAtPrice: prod.compareAtPrice || null,
+                currency: siteCurrency,
+                stock: prod.stock,
+                isFeatured: prod.isFeatured,
+                status: "ACTIVE",
+                tags: [],
+              },
             });
+            for (let j = 0; j < prod.images.length; j++) {
+              await prisma.productImage.create({
+                data: { productId: product.id, url: prod.images[j], alt: prod.name, position: j },
+              });
+            }
           }
         }
 
@@ -311,15 +327,13 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ wor
 
         // ── Fire AI page + product generation in background (non-blocking) ──
         // This will populate About/FAQ/Contact/Policies with real AI content,
-        // and replace the generic static starter catalog above with a real
-        // one tailored to what this merchant actually described selling.
+        // and (when willUseAiProducts) generate the real tailored catalog —
+        // the static starter catalog was already skipped above in that case,
+        // so there's nothing to clean up here.
         try {
           const { generateStore } = await import("@/lib/ai-store-generator");
           const { classifyBusiness } = await import("@/lib/ai-classify");
           const { generateProducts } = await import("@/lib/ai-product-generator");
-
-          const productsOffered: string[] = Array.isArray(products) ? products.filter(Boolean) : [];
-          const servicesOffered: string[] = Array.isArray(services) ? services.filter(Boolean) : [];
 
           generateStore({
             siteId: site.id,
@@ -330,19 +344,15 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ wor
             country: site.country || "NG",
             currency: siteCurrency,
             targetAudience: targetAudience || undefined,
-            productsOffered,
-            servicesOffered,
+            productsOffered: productsOfferedList,
+            servicesOffered: servicesOfferedList,
           }).catch((err: unknown) => console.warn("Background AI page generation failed:", err));
 
-          // Only attempt to replace the static catalog if the merchant actually
-          // described specific products/services or a real description — with
-          // nothing to go on, the static industry samples are a perfectly
-          // reasonable starting point and safer than an AI guessing blind.
-          if (productsOffered.length > 0 || servicesOffered.length > 0 || (description && description.trim().length > 10)) {
+          if (willUseAiProducts) {
             (async () => {
               try {
                 const classification = await classifyBusiness(`${bizType} ${description || ""}`);
-                const result = await generateProducts({
+                await generateProducts({
                   siteId: site.id,
                   businessType: bizType,
                   businessName: storeName,
@@ -351,23 +361,16 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ wor
                   currency: siteCurrency,
                   count: 10,
                   targetAudience: targetAudience || undefined,
-                  productsOffered,
-                  servicesOffered,
+                  productsOffered: productsOfferedList,
+                  servicesOffered: servicesOfferedList,
                 });
-                if (result.productsCreated > 0) {
-                  // Success — remove the generic static placeholders now that
-                  // real, tailored products exist. Best-effort: if this fails,
-                  // the merchant just ends up with both, not broken.
-                  const staticProductIds = await prisma.product.findMany({
-                    where: { siteId: site.id, slug: { in: sampleData.products.map((p) => p.slug) } },
-                    select: { id: true },
-                  });
-                  if (staticProductIds.length > 0) {
-                    await prisma.product.deleteMany({ where: { id: { in: staticProductIds.map((p) => p.id) } } });
-                  }
-                }
               } catch (err) {
-                console.warn("Background AI product generation failed, keeping static starter catalog:", err);
+                // Non-fatal, but note: since the static catalog was
+                // intentionally skipped for this branch, a failure here
+                // means the merchant is left with zero products, not the
+                // static fallback. Logged loudly so this is visible, not
+                // silently accepted the way it used to be.
+                console.error(`AI product generation failed for site ${site.id}, and static catalog was skipped for this branch — merchant may have zero products:`, err);
               }
             })();
           }
@@ -376,7 +379,7 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ wor
           // Non-fatal — pages exist with empty content, user can edit
         }
 
-        templateResult = { method: "ai", template: "ai-modern", blocksCreated: homeBlocks.length, categories: createdCategories.length, products: sampleData.products.length };
+        templateResult = { method: "ai", template: "ai-modern", blocksCreated: homeBlocks.length, categories: createdCategories.length, products: willUseAiProducts ? 0 : sampleData.products.length, aiProductsPending: willUseAiProducts };
       } catch (aiErr) {
         // Previously this was swallowed entirely with no logged detail —
         // the site would report success (201) with a blank homepage and
