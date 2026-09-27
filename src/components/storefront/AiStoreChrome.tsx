@@ -115,9 +115,30 @@ export interface AiStoreFooterProps {
   storeSlug: string;
   logo?: string | null;
   description?: string | null;
+  socialLinks?: Array<{ platform: string; url: string }>;
 }
 
-export function AiStoreFooter({ storeName, storeSlug, logo, description }: AiStoreFooterProps) {
+const SOCIAL_ICON_PATHS: Record<string, string> = {
+  instagram: "M12 2c2.7 0 3.06.01 4.12.06 1.06.05 1.79.22 2.43.47.66.26 1.21.6 1.76 1.15.55.55.9 1.1 1.15 1.76.25.64.42 1.37.47 2.43.05 1.06.06 1.42.06 4.12s-.01 3.06-.06 4.12c-.05 1.06-.22 1.79-.47 2.43a4.9 4.9 0 0 1-1.15 1.76 4.9 4.9 0 0 1-1.76 1.15c-.64.25-1.37.42-2.43.47-1.06.05-1.42.06-4.12.06s-3.06-.01-4.12-.06c-1.06-.05-1.79-.22-2.43-.47a4.9 4.9 0 0 1-1.76-1.15 4.9 4.9 0 0 1-1.15-1.76c-.25-.64-.42-1.37-.47-2.43C2.01 15.06 2 14.7 2 12s.01-3.06.06-4.12c.05-1.06.22-1.79.47-2.43.26-.66.6-1.21 1.15-1.76A4.9 4.9 0 0 1 5.44 2.54c.64-.25 1.37-.42 2.43-.47C8.94 2.01 9.3 2 12 2zm0 5a5 5 0 1 0 0 10 5 5 0 0 0 0-10zm0 8.2a3.2 3.2 0 1 1 0-6.4 3.2 3.2 0 0 1 0 6.4zm5.2-8.4a1.17 1.17 0 1 0 0-2.34 1.17 1.17 0 0 0 0 2.34z",
+  facebook: "M13.5 21v-8.1h2.7l.4-3.2h-3.1V7.7c0-.9.25-1.5 1.55-1.5H16.7V3.3c-.28-.04-1.25-.13-2.37-.13-2.34 0-3.94 1.43-3.94 4.05v2.26H7.7v3.2h2.69V21h3.11z",
+  tiktok: "M16.6 5.82c-.97-.9-1.56-2.15-1.6-3.55V2h-3.2v13.5a2.85 2.85 0 1 1-2.02-2.73V9.5a6.05 6.05 0 1 0 5.22 6v-6.8a8.15 8.15 0 0 0 4.6 1.43V7.02a4.85 4.85 0 0 1-2.99-1.2z",
+};
+
+function AiFooterSocialIcons({ socialLinks }: { socialLinks?: Array<{ platform: string; url: string }> }) {
+  const shown = (socialLinks || []).filter((l) => SOCIAL_ICON_PATHS[l.platform] && l.url);
+  if (shown.length === 0) return null;
+  return (
+    <div className="ai-footer-social">
+      {shown.map((l) => (
+        <a key={l.platform} href={l.url} target="_blank" rel="noopener noreferrer" aria-label={l.platform} className="ai-footer-social-icon">
+          <svg viewBox="0 0 24 24" width="16" height="16" fill="currentColor"><path d={SOCIAL_ICON_PATHS[l.platform]} /></svg>
+        </a>
+      ))}
+    </div>
+  );
+}
+
+export function AiStoreFooter({ storeName, storeSlug, logo, description, socialLinks }: AiStoreFooterProps) {
   const base = `/store/${storeSlug}`;
   const navItems = [
     { label: "Home", href: base },
@@ -137,6 +158,9 @@ export function AiStoreFooter({ storeName, storeSlug, logo, description }: AiSto
     .ai-footer-links { display: flex; flex-wrap: wrap; gap: 24px; }
     .ai-footer-link { font-family: ${A.sansFont}; font-weight: 500; font-size: 13px; color: ${A.textPrimary}; text-decoration: none; }
     .ai-footer-link:hover { opacity: 0.6; }
+    .ai-footer-social { display: flex; gap: 10px; margin-top: 4px; }
+    .ai-footer-social-icon { width: 32px; height: 32px; border-radius: 50%; border: 1px solid ${A.border}; display: flex; align-items: center; justify-content: center; color: ${A.textPrimary}; transition: opacity 0.2s; }
+    .ai-footer-social-icon:hover { opacity: 0.6; }
     .ai-footer-bottom { border-top: 1px solid ${A.border}; padding-top: 16px; font-family: ${A.sansFont}; font-size: 12px; color: #9a9a9a; }
   `;
 
@@ -152,6 +176,7 @@ export function AiStoreFooter({ storeName, storeSlug, logo, description }: AiSto
               <span className="ai-footer-logo-text">{storeName}</span>
             )}
             {description && <p className="ai-footer-desc">{description}</p>}
+            <AiFooterSocialIcons socialLinks={socialLinks} />
           </div>
           <nav className="ai-footer-links">
             {navItems.map((item) => (

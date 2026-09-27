@@ -31,6 +31,7 @@ import {
   upsertProductSchema,
   removeProductSchema,
   setWhatsappSchema,
+  setSocialLinksSchema,
   setDeliveryZonesSchema,
   setPaymentStubSchema,
   setSeoSchema,
@@ -63,6 +64,7 @@ const TOOL_DEFS: AITool[] = [
   { type: "function", function: { name: "upsert_product", description: "Add or update one product.", parameters: toToolParameters(upsertProductSchema) } },
   { type: "function", function: { name: "remove_product", description: "Remove one product.", parameters: toToolParameters(removeProductSchema) } },
   { type: "function", function: { name: "set_whatsapp", description: "Turn on WhatsApp ordering with the merchant's real number. Call ask_user first if the prompt didn't include one — never invent a number.", parameters: toToolParameters(setWhatsappSchema) } },
+  { type: "function", function: { name: "set_social_links", description: "Save the merchant's Instagram/Facebook/TikTok URLs so real brand icons appear in the site footer. Only pass fields the merchant actually gave you — never invent a URL.", parameters: toToolParameters(setSocialLinksSchema) } },
   { type: "function", function: { name: "set_delivery_zones", description: "Set the store's delivery areas and fees, from what the merchant actually said.", parameters: toToolParameters(setDeliveryZonesSchema) } },
   { type: "function", function: { name: "set_payment_stub", description: "Set checkout UI mode. 'connected' only takes effect if the merchant already has a real payment gateway configured — this tool cannot enable live charging on its own.", parameters: toToolParameters(setPaymentStubSchema) } },
   { type: "function", function: { name: "set_seo", description: "Set a page's SEO title/description.", parameters: toToolParameters(setSeoSchema) } },
@@ -86,6 +88,7 @@ ${!currentSiteSummary ? "- STRICT: on a brand-new site (no CURRENT SITE STATE ab
 - STRICT: create_page must finish with a real, working page or not be reported as done. If a page's content generation fails or comes back empty/invalid, retry it immediately (same tool call, same page) rather than leaving a page that exists in the nav but errors when opened — a merchant clicking a nav link into "something went wrong" is a broken product, not an acceptable partial result. Only report a page as failed after retrying has genuinely been exhausted, and say so plainly rather than silently leaving a dead link.
 - If the prompt names delivery areas, call set_delivery_zones with exactly those names — don't invent additional ones, don't skip ones they named.
 - If the prompt mentions WhatsApp ordering/contact, call set_whatsapp — but only with a real number the merchant provided. If they mentioned WhatsApp but gave no number, use ask_user to get it. Never invent a phone number.
+- Ask (via ask_user) whether they have an Instagram, Facebook, or TikTok to link — if they weren't already given via the form or an earlier message in this conversation. If they give any, call set_social_links with exactly those URLs so real brand icons appear in the footer. Don't invent a URL, and don't ask again if they already said "no"/skipped it earlier in this conversation.
 - Never call set_payment_stub with mode "connected" as a guess — that only matters if the merchant already has a real gateway configured, which you cannot cause to happen from here.
 - create_page must produce real, specific, on-brand content immediately — never placeholder/lorem-ipsum text. A merchant should recognize their own business in the copy, not see generic filler.
 - Use ask_user (max 3 times per session) only for genuinely critical missing information — business name, currency/country if ambiguous, primary contact channel. Don't ask about things you can reasonably default.
@@ -555,6 +558,23 @@ async function executeTool(
         }
 
         return { result: `WhatsApp ordering ${parsed.enabled ? "enabled" : "disabled"} with number ${parsed.number}.`, isError: false };
+      }
+
+      case "set_social_links": {
+        const parsed = setSocialLinksSchema.parse(args);
+        const fields: Record<string, string> = {};
+        if (parsed.instagram) fields.instagram = parsed.instagram;
+        if (parsed.facebook) fields.facebook = parsed.facebook;
+        if (parsed.tiktok) fields.tiktok = parsed.tiktok;
+        if (Object.keys(fields).length === 0) {
+          return { result: "No social links given — nothing saved.", isError: false };
+        }
+        await prisma.siteSocialLinks.upsert({
+          where: { siteId },
+          create: { siteId, ...fields },
+          update: fields,
+        });
+        return { result: `Saved social links: ${Object.keys(fields).join(", ")}. Icons will now show in the footer.`, isError: false };
       }
 
       case "set_delivery_zones": {

@@ -948,6 +948,7 @@ export default function StorefrontPage() {
           ...(socialLinks?.facebook ? [{ platform: "facebook", url: socialLinks.facebook }] : []),
           ...(socialLinks?.instagram ? [{ platform: "instagram", url: socialLinks.instagram }] : []),
           ...(socialLinks?.twitter ? [{ platform: "twitter", url: socialLinks.twitter }] : []),
+          ...(socialLinks?.tiktok ? [{ platform: "tiktok", url: socialLinks.tiktok }] : []),
         ]}
         contactInfo={{
           phone: whatsappNumber || undefined,

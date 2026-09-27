@@ -96,6 +96,12 @@ export const setWhatsappSchema = z.object({
   enabled: z.boolean().default(true),
 });
 
+export const setSocialLinksSchema = z.object({
+  instagram: z.string().url().optional().describe("Full Instagram profile URL, only if the merchant gave one."),
+  facebook: z.string().url().optional().describe("Full Facebook page URL, only if the merchant gave one."),
+  tiktok: z.string().url().optional().describe("Full TikTok profile URL, only if the merchant gave one."),
+});
+
 export const setDeliveryZonesSchema = z.object({
   zones: z.array(z.object({
     name: z.string().min(1).describe("Area name as the merchant said it, e.g. \"Gwarinpa\"."),
@@ -151,6 +157,7 @@ export type SetPageNavVisibilityArgs = z.infer<typeof setPageNavVisibilitySchema
 export type UpsertProductArgs = z.infer<typeof upsertProductSchema>;
 export type RemoveProductArgs = z.infer<typeof removeProductSchema>;
 export type SetWhatsappArgs = z.infer<typeof setWhatsappSchema>;
+export type SetSocialLinksArgs = z.infer<typeof setSocialLinksSchema>;
 export type SetDeliveryZonesArgs = z.infer<typeof setDeliveryZonesSchema>;
 export type SetPaymentStubArgs = z.infer<typeof setPaymentStubSchema>;
 export type SetSeoArgs = z.infer<typeof setSeoSchema>;

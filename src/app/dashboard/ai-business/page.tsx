@@ -25,6 +25,9 @@ export default function AIBusinessPage() {
   const [targetAudience, setTargetAudience] = useState("");
   const [location, setLocation] = useState("");
   const [description, setDescription] = useState("");
+  const [instagram, setInstagram] = useState("");
+  const [facebook, setFacebook] = useState("");
+  const [tiktok, setTiktok] = useState("");
 
   // "Build with AI" no longer generates here and shows a static results
   // summary — it hands everything collected off to the AI Builder's
@@ -61,6 +64,19 @@ export default function AIBusinessPage() {
       });
     } catch { /* non-fatal — the AI builder flow below still proceeds either way */ }
 
+    // Same reasoning again: social links typed here need to land in the
+    // real SiteSocialLinks row directly — nothing else on this page saves
+    // them, and there's no AI tool that can set them retroactively.
+    if (instagram.trim() || facebook.trim() || tiktok.trim()) {
+      try {
+        await fetch(`/api/sites/${currentStore.id}/social-links`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ instagram: instagram.trim(), facebook: facebook.trim(), tiktok: tiktok.trim() }),
+        });
+      } catch { /* non-fatal */ }
+    }
+
     const composedTask = [
       `Build my ${businessType} business site for "${businessName.trim()}".`,
       location.trim() && `We're based in ${location.trim()}.`,
@@ -71,7 +87,11 @@ export default function AIBusinessPage() {
 
     sessionStorage.setItem(
       `ai-builder-prefill:${currentStore.id}`,
-      JSON.stringify({ task: composedTask, businessName: businessName.trim(), businessType, products: products.trim(), targetAudience: targetAudience.trim() })
+      JSON.stringify({
+        task: composedTask, businessName: businessName.trim(), businessType,
+        products: products.trim(), targetAudience: targetAudience.trim(),
+        socialLinks: { instagram: instagram.trim(), facebook: facebook.trim(), tiktok: tiktok.trim() },
+      })
     );
     router.push(`/dashboard/sites/${currentStore.id}/ai-builder`);
   };
@@ -133,6 +153,15 @@ export default function AIBusinessPage() {
             <textarea value={products} onChange={(e) => setProducts(e.target.value)} className="input-field py-2.5 w-full resize-y" rows={3} placeholder="e.g. African print dresses, accessories, custom tailoring..." /></div>
           <div><label className="block text-sm font-medium text-surface-700 mb-1">Business Description</label>
             <textarea value={description} onChange={(e) => setDescription(e.target.value)} className="input-field py-2.5 w-full resize-y" rows={3} placeholder="Tell us what makes your business unique..." /></div>
+          <div>
+            <label className="block text-sm font-medium text-surface-700 mb-1">Social Media (optional)</label>
+            <p className="text-xs text-surface-400 mb-2">Add any accounts you have — they'll show as icons in your site's footer.</p>
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+              <input value={instagram} onChange={(e) => setInstagram(e.target.value)} className="input-field py-2.5 w-full" placeholder="Instagram URL" />
+              <input value={facebook} onChange={(e) => setFacebook(e.target.value)} className="input-field py-2.5 w-full" placeholder="Facebook URL" />
+              <input value={tiktok} onChange={(e) => setTiktok(e.target.value)} className="input-field py-2.5 w-full" placeholder="TikTok URL" />
+            </div>
+          </div>
 
           <div className="flex items-center gap-3">
             <button onClick={() => setStep(1)} className="btn-secondary py-3 px-6">Back</button>

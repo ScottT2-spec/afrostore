@@ -1020,7 +1020,7 @@ export default function StorePage() {
 
       {/* Footer */}
       {isAiTemplate ? (
-        <AiStoreFooter storeName={store.name} storeSlug={slug} logo={store.logo} description={store.description} />
+        <AiStoreFooter storeName={store.name} storeSlug={slug} logo={store.logo} description={store.description} socialLinks={socialLinksArray} />
       ) : isDecorTemplate ? (
         <InteriorFooter storeSlug={slug} />
       ) : isCosmeticsTemplate ? (
