@@ -60,7 +60,7 @@ export interface ProductGeneratorInput {
   description?: string;
   industry: string;
   currency: string;
-  count?: number; // default 10, hard-capped at 10 regardless of what's passed
+  count?: number; // default 10 for a general/starter site; a merchant with a longer named product list gets that many instead, up to 100
   targetAudience?: string;
   productsOffered?: string[];
   servicesOffered?: string[];
@@ -73,8 +73,14 @@ export interface ProductGeneratorResult {
 
 /** Ask the AI for a realistic starter catalog (no images yet — those come after). */
 async function generateProductDrafts(input: ProductGeneratorInput): Promise<GeneratedProductDraft[]> {
-  const MAX_PRODUCTS = 10;
-  const count = Math.min(input.count ?? MAX_PRODUCTS, MAX_PRODUCTS);
+  // Ceiling raised from a flat 10 (which silently clamped every store,
+  // regardless of size) to 100 — a real business can list far more than
+  // 10 items. If the merchant named more specific products than the
+  // caller's default count, use their real count instead of truncating
+  // their own catalog down to 10.
+  const MAX_PRODUCTS = 100;
+  const requested = Math.max(input.count ?? 10, input.productsOffered?.length ?? 0);
+  const count = Math.min(requested, MAX_PRODUCTS);
   const ai = getAI();
 
   const contextLines = [
@@ -111,7 +117,7 @@ Rules:
         content: `${contextLines.join("\n")}\nGenerate ${count} products.`,
       },
     ],
-    { maxTokens: 3000, temperature: 0.8 }
+    { maxTokens: Math.min(Math.max(3000, count * 90), 8000), temperature: 0.8 }
   );
 
   const cleaned = (result.content || "").replace(/```json\n?|```/g, "").trim();
