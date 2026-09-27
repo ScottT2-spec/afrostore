@@ -173,6 +173,14 @@ async function runGeneration(
   shouldCancel?: () => Promise<boolean>
 ): Promise<Record<string, unknown>> {
   try {
+    const socialLinks = await prisma.siteSocialLinks.findUnique({ where: { siteId } }).catch(() => null);
+    const filledSocials = socialLinks
+      ? Object.entries(socialLinks).filter(([k, v]) => !["id", "siteId"].includes(k) && typeof v === "string" && v.trim())
+      : [];
+    const knownInfo = filledSocials.length
+      ? `Social media links (merchant already filled these in the site-creation form):\n${filledSocials.map(([platform, url]) => `- ${platform}: ${url}`).join("\n")}`
+      : undefined;
+
     const result = await runSiteGenerationAgent({
       ai: getAIFailover(),
       siteId,
@@ -181,6 +189,7 @@ async function runGeneration(
       industry: ctx.site?.businessType || "general",
       siteType: ctx.site?.siteType || "WEBSITE",
       task,
+      knownInfo,
       priorMessages,
       onStep,
       shouldCancel,

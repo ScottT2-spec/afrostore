@@ -74,11 +74,12 @@ const TOOL_DEFS: AITool[] = [
   { type: "function", function: { name: "finalize_draft", description: "Call this once the site genuinely reflects what the merchant asked for. Ends the session.", parameters: toToolParameters(finalizeDraftSchema) } },
 ];
 
-function buildSystemPrompt(rules: SiteIntentRules, safetyCategory: SensitiveCategory | null, currentSiteSummary: string | null): string {
+function buildSystemPrompt(rules: SiteIntentRules, safetyCategory: SensitiveCategory | null, currentSiteSummary: string | null, knownInfo?: string): string {
   return `You are building a real e-commerce/business/landing site for an African SMB merchant, from their plain-language description. You can ONLY act through the tools you're given — there is no code, no files, nothing outside this specific tool set.
 
 ${rules.promptRules}
 ${safetyCategory ? `\n${getGuardrailPromptRules(safetyCategory)}\n` : ""}
+${knownInfo ? `\nALREADY PROVIDED BY THE MERCHANT — do not ask_user for any of this, use it directly:\n${knownInfo}\n` : ""}
 ${currentSiteSummary ? `\nCURRENT SITE STATE — this site already exists and is live. The merchant's message below is a request to CHANGE it, not build it from scratch. Read this before doing anything: it's every page, in order, and every section on each page with its 0-based index (the sectionIndex update_section needs) and a preview of its current content.\n\n${currentSiteSummary}\n\nWhen the merchant refers to something ("the hero", "the FAQ section", "that testimonial"), match it against the actual sections listed above rather than guessing an index. If they ask to change one page's wording/color/image, use update_section on the matching page+index — don't call create_page for something that already exists (see the duplicate-page rule below). If what they're asking about genuinely isn't listed above, say so and ask, rather than assuming a section exists.\n` : ""}
 Rules:
 ${!currentSiteSummary ? "- STRICT: on a brand-new site (no CURRENT SITE STATE above), call update_site_info with the real business name as your very first tool call, before create_page — this is what makes the site show up under its real name in the merchant's dashboard sites list immediately, not only after Publish. Decide the name from what the merchant said; only ask_user for it if genuinely ambiguous or missing.\n" : ""}- Default currency is NGN unless the merchant's prompt says otherwise.
@@ -184,6 +185,8 @@ export interface RunSiteGenerationOptions {
   /** The site's own SiteType (ECOMMERCE | WEBSITE | LANDING_PAGE) — the merchant's own choice at site creation, the authoritative signal for what structural shape this generation should produce. */
   siteType: string;
   task: string;
+  /** Plain-text summary of what the merchant already filled in the site-creation form (e.g. social media links) — pass so the agent doesn't ask_user for something already provided. Omit/undefined if nothing to report. */
+  knownInfo?: string;
   maxIterations?: number;
   /** Resume a session after ask_user — prior message history from the same run. */
   priorMessages?: AIMessage[];
@@ -194,7 +197,7 @@ export interface RunSiteGenerationOptions {
 }
 
 export async function runSiteGenerationAgent(opts: RunSiteGenerationOptions): Promise<SiteGenerationResult> {
-  const { ai, siteId, storeSlug, industry, siteType, task, maxIterations = 15, priorMessages, onStep, shouldCancel } = opts;
+  const { ai, siteId, storeSlug, industry, siteType, task, knownInfo, maxIterations = 15, priorMessages, onStep, shouldCancel } = opts;
   // Mutable: update_site_info can rename the site mid-session, and every
   // subsequent create_page call below should use the real name in its
   // generated content, not the placeholder this session started with.
@@ -213,7 +216,7 @@ export async function runSiteGenerationAgent(opts: RunSiteGenerationOptions): Pr
   const messages: AIMessage[] = priorMessages?.length
     ? [...priorMessages, { role: "user", content: task }]
     : [
-        { role: "system", content: buildSystemPrompt(rules, safetyCategory, currentSiteSummary) },
+        { role: "system", content: buildSystemPrompt(rules, safetyCategory, currentSiteSummary, knownInfo) },
         { role: "user", content: task },
       ];
 
