@@ -148,7 +148,7 @@ export function AiStoreFooter({ storeName, storeSlug, logo, description, socialL
   ];
 
   const css = `
-    .ai-footer-wrap { background: #fafafa; border-top: 1px solid ${A.border}; }
+    .ai-footer-wrap { background: #e9e9e7; border-top: 1px solid ${A.border}; }
     .ai-footer-inner { max-width: ${A.containerWidth}; margin: 0 auto; padding: 48px 20px 28px; display: flex; flex-direction: column; gap: 24px; }
     .ai-footer-top { display: flex; flex-wrap: wrap; align-items: flex-start; justify-content: space-between; gap: 24px; }
     .ai-footer-brand { display: flex; flex-direction: column; gap: 8px; max-width: 360px; }
