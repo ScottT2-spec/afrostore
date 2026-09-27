@@ -1,4 +1,5 @@
 import { prisma } from "@/lib/db";
+import { MessageCircle } from "lucide-react";
 import Link from "next/link";
 import { notFound, redirect } from "next/navigation";
 import { RenderTemplateBlocks, type TemplateBlock } from "@/components/storefront/TemplateBlockRenderer";
@@ -151,6 +152,7 @@ async function getStoreData(slug: string) {
     include: {
       customizations: true,
       socialLinks: true,
+      settings: true,
       templates: {
         include: {
           template: true,
@@ -268,6 +270,8 @@ export default async function ContactPage({ params }: Props) {
     contactPage?.template === "ai" ||
     activeTemplateSlug === "ai" ||
     resolvedContact?.blocks?.some((b: any) => typeof b?.type === "string" && b.type.startsWith("ai"));
+  const whatsappNumber = store.settings?.whatsappNumber || (store.socialLinks as any)?.whatsapp;
+  const whatsappOrdering = store.settings?.whatsappOrdering;
   if (resolvedContact && resolvedContact.blocks.length > 0) {
     pageContent = { blocks: resolvedContact.blocks, settings: resolvedContact.settings };
   } else {
@@ -573,6 +577,16 @@ export default async function ContactPage({ params }: Props) {
           logo={store.logo}
           description={store.description ?? undefined}
         />
+      )}
+
+      {/* Floating WhatsApp */}
+      {isAiTemplate && whatsappOrdering && whatsappNumber && (
+        <a
+          href={`https://wa.me/${whatsappNumber.replace(/[^0-9]/g, "")}`}
+          className="fixed bottom-6 right-6 z-50 flex h-14 w-14 items-center justify-center rounded-full bg-green-500 text-white shadow-xl shadow-green-500/30 hover:bg-green-600 hover:scale-110 transition-all"
+        >
+          <MessageCircle className="h-6 w-6" />
+        </a>
       )}
     </ThemeProvider>
   );

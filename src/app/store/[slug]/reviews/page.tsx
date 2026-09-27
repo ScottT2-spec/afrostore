@@ -1,5 +1,5 @@
 "use client";
-import { Loader2 } from "lucide-react";
+import { Loader2, MessageCircle } from "lucide-react";
 import { BadgeCheck, ImageIcon, Star } from "@/components/icons/FilledIcons";
 
 import { useState, useEffect, useCallback } from "react";
@@ -89,6 +89,8 @@ export default function StoreReviewsPage() {
   // HandmadeBagsHeader/Footer while About/Contact/Home already worked.
   const activeTemplateSlug = storeData?.store?.templates?.[0]?.template?.slug || null;
   const isAiTemplate = reviewsPage?.template === "ai" || activeTemplateSlug === "ai";
+  const whatsappNumber = storeData?.settings?.whatsappNumber || storeData?.socialLinks?.whatsapp;
+  const whatsappOrdering = storeData?.settings?.whatsappOrdering;
   const isPerfumesTemplate = activeTemplateSlug === "perfumes" || slug === "perfumes" || store?.slug === "perfumes" || store?.name?.toLowerCase().includes("perfumes");
 
   const fetchReviews = useCallback(async (p: number, rating: number | null, append: boolean) => {
@@ -481,6 +483,16 @@ export default function StoreReviewsPage() {
           storeSlug={slug}
           logo={store?.logo}
         />
+      )}
+
+      {/* Floating WhatsApp */}
+      {isAiTemplate && whatsappOrdering && whatsappNumber && (
+        <a
+          href={`https://wa.me/${whatsappNumber.replace(/[^0-9]/g, "")}`}
+          className="fixed bottom-6 right-6 z-50 flex h-14 w-14 items-center justify-center rounded-full bg-green-500 text-white shadow-xl shadow-green-500/30 hover:bg-green-600 hover:scale-110 transition-all"
+        >
+          <MessageCircle className="h-6 w-6" />
+        </a>
       )}
     </div>
     </ThemeProvider>
