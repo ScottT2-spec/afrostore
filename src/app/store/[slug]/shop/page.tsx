@@ -9,6 +9,7 @@ import { ThemeProvider, type ThemeData } from "@/components/storefront/ThemeProv
 import FlashSaleCountdown from "@/components/storefront/FlashSaleCountdown";
 import { useWishlist } from "@/hooks/useWishlist";
 import { HandmadeBagsHeader, HandmadeBagsFooter } from "@/components/storefront/HandmadeBagsStoreChrome";
+import { AiStoreHeader, AiStoreFooter } from "@/components/storefront/AiStoreChrome";
 import { CosmeticsHeader, CosmeticsFooter } from "@/components/storefront/CosmeticsTemplateBlocks";
 import { KidsFontLoader, KidsFooterFull, KidsHeader } from "@/components/storefront/KidsTemplateBlocks";
 import { PerfumesFontLoader, PerfumesFooter, PerfumesHeader } from "@/components/storefront/PerfumesTemplateBlocks";
@@ -76,8 +77,9 @@ interface StoreData {
   products: Product[];
   pagination: { page: number; limit: number; total: number; pages: number };
   categories: StoreCategory[];
-  pages: Array<{ id: string; title: string; slug: string; type: string }>;
+  pages: Array<{ id: string; title: string; slug: string; type: string; template?: string | null }>;
   theme: ThemeData | null;
+  templateSlug?: string | null;
 }
 
 /* ───────── Helpers ───────── */
@@ -337,6 +339,14 @@ export default function ShopPage() {
 
   const { store } = storeData;
   const activeCategoryName = categories.find((c) => c.slug === selectedCategory)?.name;
+  // storeData.templateSlug is always null for AI sites (no SiteTemplate
+  // row is ever created for them — same reasoning as the identical fix
+  // on Home/About/Contact/Reviews), so it's backed by the durable
+  // per-page `template` field too, read off any page this response
+  // included (the shop route is a built-in system page, not a CMS Page
+  // row itself, so there's no shop-specific `template` field to check
+  // directly).
+  const isAiTemplate = storeData?.templateSlug === "ai" || (storeData?.pages || []).some((p) => p.template === "ai");
   const isHandmadeBagsTemplate = store.templateSlug === "handmade-bags";
   const isTShirtsPrintsTemplate = store.templateSlug === "t-shirts-prints" || slug === "t-shirts-prints" || store.slug === "t-shirts-prints";
   const isCosmeticsTemplate = 
@@ -1167,7 +1177,9 @@ export default function ShopPage() {
     <ThemeProvider theme={storeData.theme}>
     <div className="min-h-screen bg-surface-50">
       {/* ── Nav ── */}
-      {isTShirtsPrintsTemplate ? (
+      {isAiTemplate ? (
+        <AiStoreHeader storeName={store.name} storeSlug={slug} logo={store.logo} />
+      ) : isTShirtsPrintsTemplate ? (
         <TShirtsPrintsHeader
           storeName={store.name}
           storeSlug={slug}
@@ -1656,7 +1668,9 @@ export default function ShopPage() {
       </div>
 
       {/* ── Footer ── */}
-      {isTShirtsPrintsTemplate ? (
+      {isAiTemplate ? (
+        <AiStoreFooter storeName={store.name} storeSlug={slug} logo={store.logo} description={store.description} />
+      ) : isTShirtsPrintsTemplate ? (
         <TShirtsPrintsFooter storeName={store.name} storeSlug={slug} logo={store.logo} />
       ) : isCosmeticsTemplate ? (
         <CosmeticsFooter
