@@ -294,7 +294,7 @@ export default function StoreReviewsPage() {
         ) : isTShirtsPrintsTemplate ? (
           <TShirtsPrintsHeader storeName={store?.name || "Store"} storeSlug={slug} logo={store?.logo} />
         ) : isAiTemplate ? (
-          <AiStoreHeader storeName={store?.name || "Store"} storeSlug={slug} logo={store?.logo} />
+          <AiStoreHeader storeName={store?.name || "Store"} storeSlug={slug} logo={store?.logo} siteId={store?.id} />
         ) : (
           <HandmadeBagsHeader
             storeName={store?.name || "Store"}

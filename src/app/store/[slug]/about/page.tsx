@@ -521,7 +521,7 @@ export default async function AboutPage({ params }: Props) {
   return (
     <ThemeProvider theme={themeData}>
       {isAiTemplate ? (
-        <AiStoreHeader storeName={store.name} storeSlug={store.slug || slug} logo={store.logo} />
+        <AiStoreHeader storeName={store.name} storeSlug={store.slug || slug} logo={store.logo} siteId={store.id} />
       ) : (
         <HandmadeBagsHeader
           storeName={store.name}

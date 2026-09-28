@@ -777,7 +777,7 @@ export default function StorePage() {
           wishlistCount={wishlistCount}
         />
       ) : isAiTemplate ? (
-        <AiStoreHeader storeName={store.name} storeSlug={slug} logo={store.logo} />
+        <AiStoreHeader storeName={store.name} storeSlug={slug} logo={store.logo} siteId={store.id} />
       ) : isFashionTemplate ? (
         <FashionHeader
           storeName={store.name}

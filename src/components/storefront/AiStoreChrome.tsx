@@ -1,5 +1,5 @@
 "use client";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Link from "next/link";
 
 /* ═══════════════════════════════════════════════════════════════
@@ -25,11 +25,54 @@ export interface AiStoreHeaderProps {
   storeName: string;
   storeSlug: string;
   logo?: string | null;
+  /** Store id — the wishlist is cached in localStorage under this id, so
+   *  without it the wishlist badge can't show a count (icon still links). */
+  siteId?: string;
 }
 
-export function AiStoreHeader({ storeName, storeSlug, logo }: AiStoreHeaderProps) {
+// Cart is stored per store slug by the storefront pages as an array of
+// items with a `quantity`; the wishlist as an array of product ids keyed
+// by site id (see useWishlist). Read both straight from localStorage so
+// the header works identically on every page without each page having to
+// pass live counts down.
+function readCounts(storeSlug: string, siteId?: string) {
+  if (typeof window === "undefined") return { cart: 0, wishlist: 0 };
+  let cart = 0;
+  let wishlist = 0;
+  try {
+    const raw = localStorage.getItem(`prokip_cart_${storeSlug}`);
+    const parsed = raw ? JSON.parse(raw) : [];
+    if (Array.isArray(parsed)) cart = parsed.reduce((n: number, i: { quantity?: number }) => n + (Number(i?.quantity) || 1), 0);
+  } catch { /* ignore */ }
+  try {
+    if (siteId) {
+      const raw = localStorage.getItem(`wishlist_${siteId}`);
+      const parsed = raw ? JSON.parse(raw) : [];
+      if (Array.isArray(parsed)) wishlist = parsed.length;
+    }
+  } catch { /* ignore */ }
+  return { cart, wishlist };
+}
+
+export function AiStoreHeader({ storeName, storeSlug, logo, siteId }: AiStoreHeaderProps) {
   const [mobileMenu, setMobileMenu] = useState(false);
+  const [counts, setCounts] = useState({ cart: 0, wishlist: 0 });
   const base = `/store/${storeSlug}`;
+
+  useEffect(() => {
+    const update = () => setCounts(readCounts(storeSlug, siteId));
+    update();
+    window.addEventListener("storage", update);
+    window.addEventListener("focus", update);
+    // `storage` doesn't fire for changes made in the same tab, so poll
+    // lightly to keep the badge live when an item is added on this page.
+    const t = setInterval(update, 1500);
+    return () => {
+      window.removeEventListener("storage", update);
+      window.removeEventListener("focus", update);
+      clearInterval(t);
+    };
+  }, [storeSlug, siteId]);
 
   // Strictly these four — nothing else. Do not add Shop, Blog,
   // Policies, FAQ, or any category link here.
@@ -49,6 +92,11 @@ export function AiStoreHeader({ storeName, storeSlug, logo }: AiStoreHeaderProps
     .ai-nav-links { display: flex; align-items: center; gap: 32px; }
     .ai-nav-link { font-family: ${A.sansFont}; font-weight: 700; font-size: 14px; color: ${A.textPrimary}; text-decoration: none; transition: opacity 0.2s; }
     .ai-nav-link:hover { opacity: 0.6; }
+    .ai-nav-right { display: flex; align-items: center; gap: 28px; }
+    .ai-nav-icons { display: flex; align-items: center; gap: 6px; }
+    .ai-nav-icon { position: relative; display: flex; align-items: center; justify-content: center; width: 38px; height: 38px; color: ${A.textPrimary}; text-decoration: none; transition: opacity 0.2s; }
+    .ai-nav-icon:hover { opacity: 0.6; }
+    .ai-nav-badge { position: absolute; top: 2px; right: 0; min-width: 17px; height: 17px; padding: 0 4px; border-radius: 9px; background: ${A.textPrimary}; color: ${A.cream}; font-family: ${A.sansFont}; font-size: 10px; font-weight: 700; line-height: 17px; text-align: center; }
     .ai-nav-mobile-toggle { display: none; background: none; border: none; cursor: pointer; color: ${A.textPrimary}; padding: 4px; font-size: 22px; line-height: 1; }
     .ai-nav-mobile-menu { display: none; background: ${A.cream}; border-bottom: 1px solid ${A.creamBorder}; padding: 8px 20px 16px; }
     .ai-nav-mobile-menu a { display: block; padding: 12px 0; font-family: ${A.sansFont}; font-weight: 700; font-size: 15px; color: ${A.textPrimary}; text-decoration: none; }
@@ -75,16 +123,26 @@ export function AiStoreHeader({ storeName, storeSlug, logo }: AiStoreHeaderProps
           )}
         </Link>
 
-        <nav className="ai-nav-links">
-          {navItems.map((item) => (
-            <Link key={item.label} href={item.href} className="ai-nav-link">
-              {item.label}
-            </Link>
-          ))}
-        </nav>
+        <div className="ai-nav-right">
+          <nav className="ai-nav-links">
+            {navItems.map((item) => (
+              <Link key={item.label} href={item.href} className="ai-nav-link">
+                {item.label}
+              </Link>
+            ))}
+          </nav>
 
-        {/* Spacer to balance the mobile toggle button on the left, keeping the logo centered on mobile */}
-        <div style={{ width: "22px" }} className="ai-nav-mobile-toggle" aria-hidden="true" />
+          <div className="ai-nav-icons">
+            <Link href={`${base}/wishlist`} className="ai-nav-icon" aria-label="Wishlist">
+              <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M20.8 4.6a5.5 5.5 0 0 0-7.8 0L12 5.7l-1-1.1a5.5 5.5 0 0 0-7.8 7.8l1 1.1L12 21.2l7.8-7.7 1-1.1a5.5 5.5 0 0 0 0-7.8z" /></svg>
+              {counts.wishlist > 0 && <span className="ai-nav-badge">{counts.wishlist}</span>}
+            </Link>
+            <Link href={`${base}/cart`} className="ai-nav-icon" aria-label="Cart">
+              <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M6 2 3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z" /><path d="M3 6h18" /><path d="M16 10a4 4 0 0 1-8 0" /></svg>
+              {counts.cart > 0 && <span className="ai-nav-badge">{counts.cart}</span>}
+            </Link>
+          </div>
+        </div>
       </div>
 
       {mobileMenu && (

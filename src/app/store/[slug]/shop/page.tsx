@@ -1190,7 +1190,7 @@ export default function ShopPage() {
     <div className="min-h-screen bg-surface-50">
       {/* ── Nav ── */}
       {isAiTemplate ? (
-        <AiStoreHeader storeName={store.name} storeSlug={slug} logo={store.logo} />
+        <AiStoreHeader storeName={store.name} storeSlug={slug} logo={store.logo} siteId={store.id} />
       ) : isTShirtsPrintsTemplate ? (
         <TShirtsPrintsHeader
           storeName={store.name}
