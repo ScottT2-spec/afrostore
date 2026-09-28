@@ -1,6 +1,6 @@
 'use client';
 import { ArrowLeft, ArrowRight, Check, Loader2, X, MessageSquare } from "lucide-react";
-import { FileText, Globe, Layout, Link as LinkIcon, Palette, ShoppingBag, Sparkles, Square } from "@/components/icons/FilledIcons";
+import { FileText, Globe, Layout, Link as LinkIcon, Palette, ShoppingBag, Sparkles } from "@/components/icons/FilledIcons";
 
 import { useState, useEffect, useMemo, useRef } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
@@ -45,7 +45,6 @@ const INDUSTRIES = [
 
 const LAUNCH_METHODS = [
   { id: 'template', icon: Layout, title: 'Use a Template', desc: 'Pick a professionally designed template', color: 'border-blue-500 bg-blue-50' },
-  { id: 'blank', icon: Square, title: 'Blank Canvas', desc: 'Start from scratch', color: 'border-gray-500 bg-gray-50' },
 ];
 
 const PAYMENT_GATEWAYS = [
@@ -75,7 +74,7 @@ export default function NewSitePage() {
   // Form state
   const [siteType, setSiteType] = useState<SiteType | null>((draft?.siteType as SiteType | null) || 'ECOMMERCE');
   const [industry, setIndustry] = useState<string | null>(draft?.industry || null);
-  const [launchMethod, setLaunchMethod] = useState<string | null>(templateParam ? 'template' : draft?.launchMethod || null);
+  const [launchMethod, setLaunchMethod] = useState<string | null>(templateParam ? 'template' : draft?.launchMethod === 'blank' ? null : draft?.launchMethod || null);
   const [selectedTemplate, setSelectedTemplate] = useState<ScoredTemplate | null>(asScoredTemplate(draft?.selectedTemplate));
   const [selectedTemplateId, setSelectedTemplateId] = useState<string | null>(templateParam || draft?.selectedTemplateId || null);
   const [storeCurrency, setStoreCurrency] = useState(draft?.businessDetails.currency || 'NGN');
@@ -273,7 +272,7 @@ export default function NewSitePage() {
       case 2: return siteType === 'LANDING_PAGE' || !!industry;
       case 3: return !!launchMethod;
       case 4: return businessInfo.name.trim().length >= 2;
-      case 5: return launchMethod === 'blank' || launchMethod === 'quick' || !!selectedTemplateId;
+      case 5: return launchMethod === 'quick' || !!selectedTemplateId;
       case 6: return true; // payment optional
       case 7: return true; // domain optional
       default: return false;
@@ -835,7 +834,7 @@ export default function NewSitePage() {
                     <Sparkles className="w-10 h-10 text-emerald-600" />
                   </div>
                   <h1 className="text-2xl font-bold text-gray-900 mb-2">
-                    {launchMethod === 'blank' ? 'Ready to create your site' : 'Choose a template'}
+                    Choose a template
                   </h1>
                   <p className="text-gray-500 mb-6 max-w-md mx-auto">
                     We&apos;ll create a {siteType === 'ECOMMERCE' ? 'store' : siteType === 'WEBSITE' ? 'website' : 'landing page'} for
