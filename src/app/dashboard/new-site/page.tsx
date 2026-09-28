@@ -2,7 +2,7 @@
 import { ArrowLeft, ArrowRight, Check, Loader2, X, MessageSquare } from "lucide-react";
 import { FileText, Globe, Layout, Link as LinkIcon, Palette, ShoppingBag, Sparkles, Square } from "@/components/icons/FilledIcons";
 
-import { useState, useEffect, useMemo } from 'react';
+import { useState, useEffect, useMemo, useRef } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import TemplateSelector from '@/components/templates/TemplateSelector';
 import { clearOnboardingDraft, saveOnboardingDraft } from '@/lib/onboarding-draft';
@@ -153,8 +153,17 @@ export default function NewSitePage() {
     }
   }, [workspaceId]);
 
+  // Set once a site has actually been created. Without this, the autosave
+  // effect below kept running after clearOnboardingDraft() — this form's
+  // state still holds everything the merchant typed (Instagram URL
+  // included), so the next state change re-saved the whole draft, and the
+  // NEXT site's form came pre-filled with the previous site's social links
+  // and submitted them again.
+  const draftClearedRef = useRef(false);
+
   useEffect(() => {
     if (!user) return;
+    if (draftClearedRef.current) return;
     saveOnboardingDraft({
       currentStep: step,
       siteType,
@@ -353,6 +362,7 @@ export default function NewSitePage() {
       }
       if (json.success && json.data) {
         setCreatedSiteId(json.data.id);
+        draftClearedRef.current = true;
         clearOnboardingDraft(user?.id);
         // "Build with AI" skips the "Your site is ready! 🎉" screen
         // entirely — at this point only a bare site record exists (name,
