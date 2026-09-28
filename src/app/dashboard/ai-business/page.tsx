@@ -30,7 +30,6 @@ export default function AIBusinessPage() {
   const [customType, setCustomType] = useState("");
   const effectiveType = businessType === "Other" ? customType.trim() : businessType;
   const [products, setProducts] = useState("");
-  const [targetAudience, setTargetAudience] = useState("");
   const [location, setLocation] = useState("");
   const [description, setDescription] = useState("");
   const [instagram, setInstagram] = useState("");
@@ -88,7 +87,6 @@ export default function AIBusinessPage() {
           ...(email.trim() ? { email: email.trim() } : {}),
           ...(location.trim() ? { location: location.trim() } : {}),
           ...(products.trim() ? { products: products.trim() } : {}),
-          ...(targetAudience.trim() ? { targetAudience: targetAudience.trim() } : {}),
           ...(instagram.trim() || facebook.trim() || tiktok.trim() || (whatsappSameAsPhone && phoneCheck?.ok)
             ? {
                 socialLinks: {
@@ -111,7 +109,6 @@ export default function AIBusinessPage() {
       const composedTask = [
         `Build my ${effectiveType} business site for "${businessName.trim()}".`,
         location.trim() && `We're based in ${location.trim()}.`,
-        targetAudience.trim() && `Our target audience is ${targetAudience.trim()}.`,
         products.trim() && `What we sell: ${products.trim()}.`,
         description.trim() && `About the business: ${description.trim()}.`,
       ].filter(Boolean).join(" ");
@@ -120,7 +117,7 @@ export default function AIBusinessPage() {
         `ai-builder-prefill:${newSiteId}`,
         JSON.stringify({
           task: composedTask, businessName: businessName.trim(), businessType: effectiveType,
-          products: products.trim(), targetAudience: targetAudience.trim(),
+          products: products.trim(),
           socialLinks: { instagram: instagram.trim(), facebook: facebook.trim(), tiktok: tiktok.trim() },
         })
       );
@@ -178,8 +175,6 @@ export default function AIBusinessPage() {
             </div>
             <div><label className="block text-sm font-medium text-surface-700 mb-1">Business Address</label>
               <input value={location} onChange={(e) => setLocation(e.target.value)} className="input-field py-2.5 w-full" placeholder="e.g. Lagos, Nigeria" /></div>
-            <div><label className="block text-sm font-medium text-surface-700 mb-1">Target Audience</label>
-              <input value={targetAudience} onChange={(e) => setTargetAudience(e.target.value)} className="input-field py-2.5 w-full" placeholder="e.g. Young professionals, 25-40" /></div>
           </div>
           <button onClick={() => setStep(2)} disabled={!businessName.trim() || !effectiveType}
             className="btn-primary py-3 px-6 w-full sm:w-auto">Next <ArrowRight className="h-4 w-4" /></button>
