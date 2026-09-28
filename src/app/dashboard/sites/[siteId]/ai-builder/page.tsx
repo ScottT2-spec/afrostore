@@ -113,7 +113,6 @@ export default function AIBuilderPage({ params }: { params: Promise<{ siteId: st
   };
   const [generating, setGenerating] = useState(false);
   const [previewBlocks, setPreviewBlocks] = useState<BuilderBlock[]>([]);
-  const [previewPages, setPreviewPages] = useState<PageSummary[]>([]);
   const [session, setSession] = useState<SandboxSessionResult | null>(null);
   const [pendingQuestion, setPendingQuestion] = useState<{ question: string; options?: string[] } | null>(null);
   const priorMessagesRef = useRef<unknown[] | null>(null);
@@ -212,7 +211,6 @@ export default function AIBuilderPage({ params }: { params: Promise<{ siteId: st
 
   const loadHomePagePreview = async (pages: PageSummary[]) => {
     if (!siteId) return;
-    setPreviewPages(pages);
     const home = pages.find((p) => p.type === "HOME") || pages[0];
     if (!home) return;
     const res = await api.get<{ content: unknown }>(`/api/sites/${siteId}/pages/${home.id}`);
@@ -562,7 +560,7 @@ export default function AIBuilderPage({ params }: { params: Promise<{ siteId: st
         {/* Live preview pane */}
         <div className="flex-1 min-w-0 bg-surface-100 overflow-y-auto">
           {siteId && (previewBlocks.length > 0 || session || generating) ? (
-            <SandboxPreview siteId={siteId} blocks={previewBlocks} pages={previewPages} session={session} />
+            <SandboxPreview siteId={siteId} blocks={previewBlocks} session={session} />
           ) : (
             <div className="h-full flex flex-col items-center justify-center gap-2 text-surface-400">
               <Sparkles className="h-8 w-8" />

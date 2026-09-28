@@ -1,22 +1,9 @@
 "use client";
 
-import { useCallback, useEffect, useRef, useState, type MouseEvent as ReactMouseEvent } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Loader2 } from "lucide-react";
 import { api } from "@/lib/api-client";
-import { parsePageContent } from "@/lib/page-content";
-import { RenderBlocks, type BuilderBlock } from "@/components/storefront/BlockRenderer";
-import { TemplateStoreContextProvider } from "@/components/storefront/TemplateStoreContextProvider";
-import { AiStoreHeader, AiStoreFooter } from "@/components/storefront/AiStoreChrome";
-
-/** Storefront API returns socialLinks as {instagram, facebook, ...}; the
- *  shared footer wants [{platform, url}]. Accept either shape. */
-function toSocialArray(raw: unknown): Array<{ platform: string; url: string }> {
-  if (Array.isArray(raw)) return raw.filter((l) => l && l.platform && l.url);
-  if (!raw || typeof raw !== "object") return [];
-  return Object.entries(raw as Record<string, unknown>)
-    .filter(([, url]) => typeof url === "string" && url)
-    .map(([platform, url]) => ({ platform, url: url as string }));
-}
+import type { BuilderBlock } from "@/components/storefront/BlockRenderer";
 
 interface SandboxSession {
   id: string;
@@ -50,30 +37,49 @@ export function SandboxPreview({
   siteId,
   files,
   blocks,
-  pages,
   session: initialSession,
 }: {
   siteId: string;
   files?: Record<string, string>;
   blocks: BuilderBlock[];
-  /** The site's pages, so a clicked link can be opened inside the preview. */
-  pages?: Array<{ id: string; slug: string; type: string; title?: string }>;
   session?: SandboxSession | null;
 }) {
-  // In-preview navigation. null = the home blocks passed in via `blocks`.
-  // "page" = another block page fetched here; "frame" = a route that isn't
-  // block-based (shop, cart, product…) shown in a contained iframe.
-  const [view, setView] = useState<
-    | null
-    | { kind: "page"; slug: string; blocks: BuilderBlock[] | null }
-    | { kind: "frame"; path: string }
-  >(null);
-  // A fresh generation/edit replaces `blocks` — snap back to it.
-  useEffect(() => { setView(null); }, [blocks]);
-
   const [session, setSession] = useState<SandboxSession | null>(initialSession ?? null);
   const [sandboxUnavailable, setSandboxUnavailable] = useState(!files && !initialSession);
   const pollRef = useRef<ReturnType<typeof setInterval> | null>(null);
+  const frameRef = useRef<HTMLIFrameElement | null>(null);
+
+  // The parent re-fetches the site after every generation / chat edit and
+  // hands over a fresh `blocks` array — reload the live frame in place so
+  // it shows the change while staying on whichever page the merchant is on.
+  const frameLoaded = useRef(false);
+  useEffect(() => {
+    if (!frameLoaded.current) return; // first load already shows the latest
+    try { frameRef.current?.contentWindow?.location.reload(); } catch { /* frame not ready */ }
+  }, [blocks]);
+
+  // Keep every click inside the preview: the frame is same-origin, so on
+  // each page load we can catch links that would leave the site (other
+  // websites) and open those in a new tab instead. Internal links just
+  // navigate the frame, which is already contained.
+  const onFrameLoad = () => {
+    frameLoaded.current = true;
+    try {
+      const doc = frameRef.current?.contentDocument;
+      if (!doc) return;
+      doc.addEventListener("click", (e) => {
+        const a = (e.target as HTMLElement).closest?.("a");
+        const href = a?.getAttribute("href");
+        if (!a || !href || href.startsWith("#") || href.startsWith("mailto:") || href.startsWith("tel:")) return;
+        let url: URL;
+        try { url = new URL(href, window.location.origin); } catch { return; }
+        if (url.origin !== window.location.origin) {
+          e.preventDefault();
+          window.open(url.href, "_blank", "noopener,noreferrer");
+        }
+      }, true);
+    } catch { /* cross-origin — nothing to intercept */ }
+  };
 
   // Full storefront context (products, categories, blogs, templateSlug,
   // socialLinks) — not just slug/currency. Without this, any block that
@@ -92,25 +98,13 @@ export function SandboxPreview({
     categories: any[];
     blogs: any[];
     socialLinks: any[];
-    // Shared AI header/footer inputs — same values the live pages pass.
-    siteRecordId: string;
-    storeName: string;
-    logo: string | null;
-    description: string | null;
-    chromeSocialLinks: Array<{ platform: string; url: string }>;
   } | null>(null);
   useEffect(() => {
     let cancelled = false;
-    api.get<{ id: string; name: string; slug: string; currency: string; logo?: string | null; description?: string | null }>(`/api/sites/${siteId}`).then(async (res) => {
+    api.get<{ slug: string; currency: string }>(`/api/sites/${siteId}`).then(async (res) => {
       if (cancelled || !res.success || !res.data) return;
       const slug = res.data.slug;
       const currency = res.data.currency || "NGN";
-      const chrome = {
-        siteRecordId: res.data.id || siteId,
-        storeName: res.data.name || "Store",
-        logo: res.data.logo ?? null,
-        description: res.data.description ?? null,
-      };
       try {
         const sfRes = await fetch(`/api/storefront/${slug}`);
         const sf = sfRes.ok ? await sfRes.json() : null;
@@ -123,14 +117,12 @@ export function SandboxPreview({
           categories: sf?.categories || [],
           blogs: sf?.blogs || [],
           socialLinks: sf?.socialLinks || [],
-          ...chrome,
-          chromeSocialLinks: toSocialArray(sf?.socialLinks),
         });
       } catch {
         // Storefront data is a nice-to-have for parity, not required to
         // show a preview at all — fall back to the minimal context
         // rather than leaving the preview stuck loading.
-        if (!cancelled) setStoreContext({ storeSlug: slug, currency, templateSlug: "ai", products: [], categories: [], blogs: [], socialLinks: [], ...chrome, chromeSocialLinks: [] });
+        if (!cancelled) setStoreContext({ storeSlug: slug, currency, templateSlug: "ai", products: [], categories: [], blogs: [], socialLinks: [] });
       }
     }).catch(() => {});
     return () => { cancelled = true; };
@@ -203,94 +195,36 @@ export function SandboxPreview({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [session?.id, initialSession]);
 
-  const openInPreview = useCallback((e: ReactMouseEvent) => {
-    const a = (e.target as HTMLElement).closest("a");
-    if (!a) return;
-    const raw = a.getAttribute("href");
-    if (!raw) { e.preventDefault(); return; }
-    if (raw.startsWith("mailto:") || raw.startsWith("tel:")) return;
-
-    // Same-page anchors: scroll inside the preview, never touch the URL.
-    if (raw.startsWith("#")) {
-      e.preventDefault();
-      if (raw.length > 1) document.getElementById(raw.slice(1))?.scrollIntoView({ behavior: "smooth" });
-      return;
-    }
-
-    let url: URL;
-    try { url = new URL(raw, window.location.origin); } catch { e.preventDefault(); return; }
-
-    // Other websites (social icons etc.) open in a new tab — the preview
-    // itself never navigates away.
-    if (url.origin !== window.location.origin) {
-      e.preventDefault();
-      window.open(url.href, "_blank", "noopener,noreferrer");
-      return;
-    }
-
-    e.preventDefault();
-    e.stopPropagation();
-    const slug = storeContext?.storeSlug;
-    const m = slug ? url.pathname.match(new RegExp(`^/store/${slug}(?:/(.*))?$`)) : null;
-    if (!m) return; // not this store — stay put
-    const rest = (m[1] || "").replace(/\/+$/, "");
-    if (!rest) { setView(null); return; }
-
-    const first = rest.split("/")[0];
-    const target = rest.includes("/") ? undefined : pages?.find((p) => p.slug === first);
-    if (target) {
-      if (target.type === "HOME") { setView(null); return; }
-      setView({ kind: "page", slug: target.slug, blocks: null });
-      api.get<{ content: unknown }>(`/api/sites/${siteId}/pages/${target.id}`).then((res) => {
-        if (!res.success || !res.data) return;
-        const pageBlocks = parsePageContent(res.data.content).blocks as unknown as BuilderBlock[];
-        setView((cur) => (cur && cur.kind === "page" && cur.slug === target.slug ? { ...cur, blocks: pageBlocks } : cur));
-      });
-      return;
-    }
-    // Shop, cart, product… are real routes, not block pages — show them
-    // in a contained frame so links inside stay in the preview too.
-    setView({ kind: "frame", path: url.pathname + url.search });
-  }, [pages, siteId, storeContext?.storeSlug]);
-
   if (sandboxUnavailable || (!files && !initialSession)) {
-    if (!storeContext) return <RenderBlocks blocks={blocks} />;
-    return (
-      <TemplateStoreContextProvider
-        templateSlug={storeContext.templateSlug}
-        products={storeContext.products}
-        blogs={storeContext.blogs}
-        categories={storeContext.categories}
-        currency={storeContext.currency}
-        storeSlug={storeContext.storeSlug}
-        socialLinks={storeContext.socialLinks}
-      >
-        {/* Same shared header/footer the live AI pages wrap around their
-            blocks, so the preview matches what actually goes live. Every
-            link click is handled by openInPreview so nothing navigates
-            away from the builder. */}
-        <div onClickCapture={openInPreview}>
-          {view?.kind === "frame" ? (
-            <div className="flex flex-col h-full min-h-[600px]">
-              <div className="flex items-center gap-3 border-b border-surface-200 bg-white px-3 py-2 text-xs text-surface-500">
-                <button type="button" onClick={() => setView(null)} className="font-semibold text-brand-600 hover:underline">← Back to preview</button>
-                <span className="truncate">{view.path}</span>
-              </div>
-              <iframe src={view.path} title="Preview page" className="w-full flex-1 min-h-[600px] border-0" />
-            </div>
-          ) : (
-            <>
-              <AiStoreHeader storeName={storeContext.storeName} storeSlug={storeContext.storeSlug} logo={storeContext.logo} siteId={storeContext.siteRecordId} />
-              {view?.kind === "page" && !view.blocks ? (
-                <div className="flex items-center justify-center min-h-[300px] text-surface-400"><Loader2 className="h-6 w-6 animate-spin" /></div>
-              ) : (
-                <RenderBlocks blocks={view?.kind === "page" && view.blocks ? view.blocks : blocks} storeSlug={storeContext.storeSlug} currency={storeContext.currency} />
-              )}
-              <AiStoreFooter storeName={storeContext.storeName} storeSlug={storeContext.storeSlug} logo={storeContext.logo} description={storeContext.description} socialLinks={storeContext.chromeSocialLinks} />
-            </>
-          )}
+    if (!storeContext) {
+      return (
+        <div className="flex flex-col items-center justify-center h-full min-h-[400px] gap-3 text-surface-500">
+          <Loader2 className="h-6 w-6 animate-spin" />
+          <p className="text-sm">Loading preview…</p>
         </div>
-      </TemplateStoreContextProvider>
+      );
+    }
+    // Nothing to show until the first page has been built.
+    if (blocks.length === 0) {
+      return (
+        <div className="flex flex-col items-center justify-center h-full min-h-[400px] gap-3 text-surface-500">
+          <Loader2 className="h-6 w-6 animate-spin" />
+          <p className="text-sm">Building your site…</p>
+        </div>
+      );
+    }
+    // The real storefront, in a contained frame: the exact header, footer,
+    // shop, cart and product pages the live site serves — nothing missing,
+    // every link works and stays inside the preview. Edits made in the chat
+    // are written to the site, and the frame reloads to show them.
+    return (
+      <iframe
+        ref={frameRef}
+        src={`/store/${storeContext.storeSlug}`}
+        onLoad={onFrameLoad}
+        className="w-full h-full min-h-[600px] border-0 bg-white"
+        title="Site preview"
+      />
     );
   }
 
