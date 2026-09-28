@@ -253,6 +253,13 @@ function buildAboutPage(data: Record<string, any>, storeName: string, storeSlug:
   const about = data.about || {};
   const testimonials = data.testimonials || [];
   const valueIcons = ["heart", "award", "globe", "shield", "target", "rocket"];
+  // Same reasoning as ai-layout-engine.ts's decorativeImage(): a section
+  // with no photo behind it reads as unfinished. buildAboutPage builds
+  // its own fixed block sequence rather than going through
+  // buildDynamicHomePage's SECTION_BUILDERS, so it never got that
+  // treatment — every content block below was missing backgroundImage
+  // entirely. Pull from the same showcase pool, random per block.
+  const pick = () => images.showcase[Math.floor(Math.random() * images.showcase.length)] || images.lifestyle;
 
   // Split story into two halves for image-text sections
   const storyText = about.story || `${storeName} is dedicated to providing the best products and services.`;
@@ -265,6 +272,7 @@ function buildAboutPage(data: Record<string, any>, storeName: string, storeSlug:
       heading: about.headline || `About ${storeName}`,
       subheading: "Our story, our mission, our people",
       bgStyle: "gradient",
+      backgroundImage: images.hero,
       buttonText: "",
     }),
     block("spacer", { height: 56 }),
@@ -309,6 +317,7 @@ function buildAboutPage(data: Record<string, any>, storeName: string, storeSlug:
         title: "Our Values",
         subtitle: "The principles that guide everything we do",
         bgColor: "surface",
+        backgroundImage: pick(),
         items: values.map((v: any, i: number) => ({
           icon: valueIcons[i % valueIcons.length],
           title: v.title,
@@ -324,6 +333,7 @@ function buildAboutPage(data: Record<string, any>, storeName: string, storeSlug:
     block("stats", {
       title: "Our Impact",
       bgColor: "brand",
+      backgroundImage: pick(),
       items: [
         { value: "1,000+", label: "Happy Customers", icon: "users" },
         { value: "500+", label: "Products Sold", icon: "package" },
@@ -342,6 +352,7 @@ function buildAboutPage(data: Record<string, any>, storeName: string, storeSlug:
       block("testimonials", {
         title: "Loved by Our Customers",
         bgColor: "transparent",
+        backgroundImage: pick(),
         items: items.map((t: any) => ({
           name: t.name,
           role: t.role || "Customer",
@@ -361,6 +372,7 @@ function buildAboutPage(data: Record<string, any>, storeName: string, storeSlug:
       buttonText: "Browse Products",
       buttonHref: `/store/${storeSlug}/shop`,
       bgColor: "dark",
+      backgroundImage: images.banner,
     })
   );
 
