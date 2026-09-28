@@ -57,7 +57,7 @@ function toToolParameters(schema: z.ZodType<unknown>): Record<string, unknown> {
 
 const TOOL_DEFS: AITool[] = [
   { type: "function", function: { name: "create_page", description: "Add a new page with default sections, populated with real generated content — never a placeholder skeleton.", parameters: toToolParameters(createPageSchema) } },
-  { type: "function", function: { name: "update_site_info", description: "Set the site's real business name (and optional description). Call this first, before create_page, as soon as you know the business name — this is what makes the site show up correctly in the merchant's dashboard sites list immediately, independent of Publish.", parameters: toToolParameters(updateSiteInfoSchema) } },
+  { type: "function", function: { name: "update_site_info", description: "Set the site's real business name. Call this first, before create_page, as soon as you know the business name — this is what makes the site show up correctly in the merchant's dashboard sites list immediately, independent of Publish.", parameters: toToolParameters(updateSiteInfoSchema) } },
   { type: "function", function: { name: "update_section", description: "Change specific fields on one existing section of one page.", parameters: toToolParameters(updateSectionSchema) } },
   { type: "function", function: { name: "set_theme", description: "Set the site's visual vibe/color direction.", parameters: toToolParameters(setThemeSchema) } },
   { type: "function", function: { name: "set_navigation", description: "Set the main nav links.", parameters: toToolParameters(setNavigationSchema) } },
@@ -355,7 +355,7 @@ async function executeTool(
         const parsed = updateSiteInfoSchema.parse(args);
         await prisma.site.update({
           where: { id: siteId },
-          data: { name: parsed.name, ...(parsed.description ? { description: parsed.description } : {}) },
+          data: { name: parsed.name },
         });
         return { result: `Site name set to "${parsed.name}". It now shows correctly in the dashboard sites list.`, isError: false };
       }

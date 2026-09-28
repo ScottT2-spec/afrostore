@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { ArrowLeft, Check, ExternalLink, Loader2, Paperclip, Send, Sparkles, X } from "lucide-react";
 import { api } from "@/lib/api-client";
 import { parsePageContent } from "@/lib/page-content";
+import { useTypewriterPlaceholder } from "@/lib/use-typewriter-placeholder";
 import { SandboxPreview } from "@/components/sandbox/SandboxPreview";
 import type { BuilderBlock } from "@/components/storefront/BlockRenderer";
 
@@ -52,6 +53,34 @@ const BUILD_STEPS: string[] = [
   "Finalizing your preview",
 ];
 
+// Example prompts the empty chat box types out, one after another. Each maps
+// to something the builder can really do today (its tools: create_page,
+// update_section, set_theme, upsert_product, set_social_links,
+// set_delivery_zones, set_contact_info, set_navigation, set_seo,
+// attach_asset…), so the animation doubles as "here's what I can do".
+// Module-level constants: a new array identity would restart the animation.
+const BUILD_PROMPTS = [
+  "Build me a store for my Ankara fashion brand in Lagos…",
+  "I sell phone accessories to students in Accra…",
+  "Make a bakery site with a menu and WhatsApp orders…",
+  "Create a clean, modern site for my hair salon…",
+] as const;
+
+const EDIT_PROMPTS = [
+  "Change my homepage headline to something bolder…",
+  "Add a product called Ankara maxi dress, priced at 18,000…",
+  "Make my brand colours deep green and gold…",
+  "Add a delivery policy page…",
+  "Put my Instagram and TikTok in the footer…",
+  "Set delivery zones: Lagos, Abuja and Port Harcourt…",
+  "Update my contact email and office address…",
+  "Show only Home, About, Contact and Shop in the menu…",
+  "Rewrite my FAQ to answer questions about shipping…",
+  "Improve my SEO title and description for Google…",
+  "Use my uploaded photo as the hero background…",
+  "Remove the product I've stopped selling…",
+] as const;
+
 function uid() {
   return Math.random().toString(36).slice(2, 10);
 }
@@ -88,6 +117,11 @@ export default function AIBuilderPage({ params }: { params: Promise<{ siteId: st
   const [pendingQuestion, setPendingQuestion] = useState<{ question: string; options?: string[] } | null>(null);
   const priorMessagesRef = useRef<unknown[] | null>(null);
   const [hasGenerated, setHasGenerated] = useState(false);
+  // Empty box + nothing else going on → type out example prompts (see
+  // BUILD_PROMPTS / EDIT_PROMPTS). Once the merchant types, attaches an image
+  // or the builder is busy, it stops and a static line takes over.
+  const typewriterActive = !input && !uploadedImage && !generating && !loadingSite;
+  const typewriterPlaceholder = useTypewriterPlaceholder(hasGenerated ? EDIT_PROMPTS : BUILD_PROMPTS, { active: typewriterActive });
   const [publishing, setPublishing] = useState(false);
   const [publishError, setPublishError] = useState<string | null>(null);
 
@@ -506,7 +540,8 @@ export default function AIBuilderPage({ params }: { params: Promise<{ siteId: st
                     handleSend();
                   }
                 }}
-                placeholder={uploadedImage ? "Tell me where to use this image (e.g. \"use this as the hero background\")…" : "Describe what you want…"}
+                placeholder={uploadedImage ? "Tell me where to use this image (e.g. \"use this as the hero background\")…" : typewriterActive ? typewriterPlaceholder : "Describe what you want…"}
+                aria-label="Describe what you want"
                 rows={1}
                 disabled={generating || loadingSite}
                 className="flex-1 resize-none bg-transparent text-sm outline-none placeholder:text-surface-400 max-h-32 py-1 disabled:opacity-60"
