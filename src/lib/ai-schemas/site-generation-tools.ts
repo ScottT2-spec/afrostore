@@ -74,6 +74,7 @@ export const sectionEditOpSchema = z.object({
   ),
   value: z.unknown().optional().describe('The new value for "set" or the new item for "insert" (text, number, boolean, color hex, image URL, or an object for a whole list item). Not used by "remove".'),
   index: z.number().int().min(0).optional().describe('For "insert" only: position to insert at. Omit to append at the end.'),
+  createIfMissing: z.boolean().optional().describe('Only for "set". A set on a field the section does not have is REJECTED (it is almost always a typo or a guessed name) and the error lists the real fields. Pass true only when you deliberately want to ADD a brand-new field. Color/italic/image/background style fields never need this.'),
 });
 
 export const editSectionSchema = z.object({
@@ -82,6 +83,20 @@ export const editSectionSchema = z.object({
   edits: z.array(sectionEditOpSchema).min(1).max(40).describe(
     "Every change to make on this section, applied together. If any one fails, none are saved and the error says which one, so fix it and resend."
   ),
+});
+
+export const findTextSchema = z.object({
+  query: z.string().min(1).describe("Text to look for, exactly as the merchant wrote it (or a distinctive part of it). Case-insensitive; curly and straight quotes match each other."),
+  pageSlug: z.string().optional().describe("Limit the search to one page. Omit to search every page of the site."),
+});
+
+export const replaceTextSchema = z.object({
+  find: z.string().min(1).describe("The exact wording to replace, as the merchant wrote it."),
+  replace: z.string().describe("The exact new wording, character for character as the merchant gave it. Do not rephrase, fix or improve it."),
+  pageSlug: z.string().optional().describe("Limit to one page. Omit to replace on every page."),
+  sectionIndex: z.number().int().min(0).optional().describe("Limit to one section (needs pageSlug). Use when the merchant pointed at one specific block."),
+  matchCase: z.boolean().optional().describe("Default false (case-insensitive). Set true only if capitalization matters to the request."),
+  wholeValue: z.boolean().optional().describe("Default false: replaces the wording anywhere inside a text. Set true to only change fields whose ENTIRE text is exactly `find` (e.g. a button that says just \"Shop\", leaving \"Shop local\" alone)."),
 });
 
 export const setThemeSchema = z.object({
@@ -180,6 +195,8 @@ export const finalizeDraftSchema = z.object({
 export type SectionType = z.infer<typeof sectionTypeEnum>;
 export type CreatePageArgs = z.infer<typeof createPageSchema>;
 export type UpdateSectionArgs = z.infer<typeof updateSectionSchema>;
+export type FindTextArgs = z.infer<typeof findTextSchema>;
+export type ReplaceTextArgs = z.infer<typeof replaceTextSchema>;
 export type GetSectionArgs = z.infer<typeof getSectionSchema>;
 export type EditSectionArgs = z.infer<typeof editSectionSchema>;
 export type SetThemeArgs = z.infer<typeof setThemeSchema>;
