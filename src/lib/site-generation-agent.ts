@@ -16,6 +16,7 @@
  */
 
 import { z } from "zod";
+import { normalizePhone } from "@/lib/phone";
 import { prisma } from "@/lib/db";
 import { loadSiteCustomizationSafely, normalizeSiteCustomization, mergeSiteCustomization } from "@/lib/site-customization";
 import { AICapability } from "@/lib/failover";
@@ -534,7 +535,11 @@ async function executeTool(
       }
 
       case "set_whatsapp": {
-        const parsed = setWhatsappSchema.parse(args);
+        const parsedRaw = setWhatsappSchema.parse(args);
+        const siteCountry = (await prisma.site.findUnique({ where: { id: siteId }, select: { country: true } }))?.country;
+        const wa = normalizePhone(parsedRaw.number, siteCountry);
+        if (!wa.ok) return { result: `That WhatsApp number can't be used: ${wa.reason} Nothing was saved.`, isError: true };
+        const parsed = { ...parsedRaw, number: wa.e164 };
         await prisma.siteSettings.upsert({
           where: { siteId },
           create: { siteId, whatsappNumber: parsed.number, whatsappOrdering: parsed.enabled },
@@ -572,6 +577,12 @@ async function executeTool(
 
       case "set_contact_info": {
         const parsed = setContactInfoSchema.parse(args);
+        if (parsed.phone) {
+          const siteCountry = (await prisma.site.findUnique({ where: { id: siteId }, select: { country: true } }))?.country;
+          const ph = normalizePhone(parsed.phone, siteCountry);
+          if (!ph.ok) return { result: `That phone number can't be used: ${ph.reason} Nothing was saved.`, isError: true };
+          parsed.phone = ph.e164;
+        }
         if (!parsed.email && !parsed.phone && !parsed.address) {
           return { result: "No email, phone, or address given — nothing saved.", isError: false };
         }

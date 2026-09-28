@@ -2,6 +2,7 @@ import { NextRequest } from "next/server";
 import { prisma } from "@/lib/db";
 import { getStoreContext, success, error, requireRole } from "@/lib/api-helpers";
 import { unauthorized } from "@/lib/auth";
+import { normalizePhone } from "@/lib/phone";
 
 type Params = { params: Promise<{ siteId: string }> };
 
@@ -20,6 +21,13 @@ export async function POST(req: NextRequest, { params }: Params) {
   for (const key of ["instagram", "facebook", "tiktok", "twitter", "whatsapp", "linkedin"] as const) {
     const v = typeof body[key] === "string" ? body[key].trim() : "";
     if (v) fields[key] = v;
+  }
+  // The WhatsApp entry is a phone number — store it in the one canonical form.
+  if (fields.whatsapp) {
+    const siteRow = await prisma.site.findUnique({ where: { id: siteId }, select: { country: true } });
+    const wa = normalizePhone(fields.whatsapp, siteRow?.country);
+    if (!wa.ok) return error(`WhatsApp number: ${wa.reason}`, 422);
+    fields.whatsapp = wa.e164;
   }
   if (Object.keys(fields).length === 0) return success({ updated: false });
 

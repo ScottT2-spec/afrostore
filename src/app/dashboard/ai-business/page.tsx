@@ -1,4 +1,5 @@
 "use client";
+import { normalizePhone } from "@/lib/phone";
 import { ArrowRight, Loader2 } from "lucide-react";
 import { CheckCircle2, Palette, Sparkles } from "@/components/icons/FilledIcons";
 
@@ -33,6 +34,9 @@ export default function AIBusinessPage() {
   const [phone, setPhone] = useState("");
   const [email, setEmail] = useState("");
   const [whatsappSameAsPhone, setWhatsappSameAsPhone] = useState(false);
+  // What the typed phone will actually be saved as (one canonical form,
+  // whatever way it was typed) — null while the field is empty.
+  const phoneCheck = phone.trim() ? normalizePhone(phone, location) : null;
 
   // "Build with AI" no longer generates here and shows a static results
   // summary — it hands everything collected off to the AI Builder's
@@ -43,6 +47,7 @@ export default function AIBusinessPage() {
   // dead-end results page.
   const launch = async () => {
     if (!businessName.trim() || !businessType || launching) return;
+    if (phoneCheck && !phoneCheck.ok) return; // the field shows why; don't send a number we can't resolve
     setLaunching(true);
 
     try {
@@ -69,15 +74,15 @@ export default function AIBusinessPage() {
           siteType: "ECOMMERCE",
           ...(location.trim() ? { country: location.trim() } : {}),
           ...(description.trim() ? { description: description.trim() } : {}),
-          ...(phone.trim() ? { phone: phone.trim() } : {}),
+          ...(phoneCheck?.ok ? { phone: phoneCheck.e164 } : {}),
           ...(email.trim() ? { email: email.trim() } : {}),
           ...(location.trim() ? { location: location.trim() } : {}),
-          ...(instagram.trim() || facebook.trim() || tiktok.trim() || (whatsappSameAsPhone && phone.trim())
+          ...(instagram.trim() || facebook.trim() || tiktok.trim() || (whatsappSameAsPhone && phoneCheck?.ok)
             ? {
                 socialLinks: {
                   instagram: instagram.trim(), facebook: facebook.trim(), tiktok: tiktok.trim(),
                   // Toggle on = the contact phone doubles as the WhatsApp number.
-                  whatsapp: whatsappSameAsPhone ? phone.trim() : "",
+                  whatsapp: whatsappSameAsPhone && phoneCheck?.ok ? phoneCheck.e164 : "",
                 },
               }
             : {}),
@@ -178,24 +183,29 @@ export default function AIBusinessPage() {
               <input type="tel" value={phone} onChange={(e) => setPhone(e.target.value)} className="input-field py-2.5 w-full" placeholder="Phone number, e.g. +234 800 000 0000" />
               <input type="email" value={email} onChange={(e) => setEmail(e.target.value)} className="input-field py-2.5 w-full" placeholder="Email, e.g. hello@business.com" />
             </div>
+            {phoneCheck && (
+              phoneCheck.ok
+                ? <p className="mt-1.5 text-xs text-surface-500">Will be saved as <span className="font-medium text-surface-700">{phoneCheck.display}</span></p>
+                : <p className="mt-1.5 text-xs text-red-600">{phoneCheck.reason}</p>
+            )}
             <div className="mt-3 flex items-start justify-between gap-4 rounded-lg border border-surface-200 px-4 py-3">
               <div>
                 <p className="text-sm font-medium text-surface-700">Use this number for WhatsApp</p>
                 <p className="mt-0.5 text-xs text-surface-400">
-                  {phone.trim()
+                  {phoneCheck?.ok
                     ? "Adds a floating WhatsApp button so customers can order or chat with you on the phone number above."
-                    : "Enter your phone number above first."}
+                    : "Enter a valid phone number above first."}
                 </p>
               </div>
               <button
                 type="button"
                 role="switch"
-                aria-checked={whatsappSameAsPhone && !!phone.trim()}
-                disabled={!phone.trim()}
+                aria-checked={whatsappSameAsPhone && !!phoneCheck?.ok}
+                disabled={!phoneCheck?.ok}
                 onClick={() => setWhatsappSameAsPhone((v) => !v)}
-                className={`relative mt-0.5 inline-flex h-6 w-11 shrink-0 items-center rounded-full transition-colors disabled:opacity-40 disabled:cursor-not-allowed ${whatsappSameAsPhone && phone.trim() ? "bg-green-500" : "bg-surface-300"}`}
+                className={`relative mt-0.5 inline-flex h-6 w-11 shrink-0 items-center rounded-full transition-colors disabled:opacity-40 disabled:cursor-not-allowed ${whatsappSameAsPhone && phoneCheck?.ok ? "bg-green-500" : "bg-surface-300"}`}
               >
-                <span className={`inline-block h-5 w-5 transform rounded-full bg-white shadow transition-transform ${whatsappSameAsPhone && phone.trim() ? "translate-x-5" : "translate-x-0.5"}`} />
+                <span className={`inline-block h-5 w-5 transform rounded-full bg-white shadow transition-transform ${whatsappSameAsPhone && phoneCheck?.ok ? "translate-x-5" : "translate-x-0.5"}`} />
               </button>
             </div>
           </div>

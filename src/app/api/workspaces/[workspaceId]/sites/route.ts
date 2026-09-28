@@ -7,6 +7,7 @@ import { provisionDefaultLandingFunnel } from "@/lib/landing-funnel";
 import { getIndustrySampleData, DEFAULT_SAMPLE_DATA } from "@/lib/ai-sample-data";
 import { buildDynamicHomePage } from "@/lib/ai-layout-engine";
 import { getRandomIndustryImages } from "@/lib/ai-image-pools";
+import { normalizePhone } from "@/lib/phone";
 import { buildTemplatePageContent } from "@/lib/templates/template-tree";
 import type { Prisma } from "@/generated/prisma";
 
@@ -95,14 +96,26 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ wor
       return error("Site name is required (min 2 characters)", 422);
     }
 
-    // WhatsApp is its own optional form field — it used to be silently
-    // taken from the phone field, so a merchant who left WhatsApp blank
-    // still got WhatsApp ordering pointed at their phone, and one who
-    // filled WhatsApp in had it ignored. Only a real, dedicated number
+    // Phone numbers: however the merchant typed them ("0801 234 5678",
+    // "+234 (0)801…", "2348012345678"…) they're normalized to ONE stored
+    // form — E.164, e.g. "+2348012345678" (see lib/phone.ts). Numbers typed
+    // without a country code use the site's country; one that can't be
+    // resolved is rejected with a clear message rather than saved as junk.
+    // The WhatsApp number is its own optional value — only a real number
     // turns WhatsApp features on.
+    const phoneCountryHint = (typeof country === "string" && country.trim()) || (typeof location === "string" ? location : "");
+    let normalizedPhone: ReturnType<typeof normalizePhone> | null = null;
+    if (typeof phone === "string" && phone.trim()) {
+      normalizedPhone = normalizePhone(phone, phoneCountryHint);
+      if (!normalizedPhone.ok) return error(`Contact phone: ${normalizedPhone.reason}`, 422);
+    }
+    let merchantWhatsapp: string | null = null;
     const rawWhatsapp = typeof socialLinks?.whatsapp === "string" ? socialLinks.whatsapp : "";
-    const whatsappDigits = rawWhatsapp.replace(/[^\d+]/g, "");
-    const merchantWhatsapp = whatsappDigits.replace(/\D/g, "").length >= 8 ? whatsappDigits : null;
+    if (rawWhatsapp.trim()) {
+      const wa = normalizePhone(rawWhatsapp, phoneCountryHint);
+      if (!wa.ok) return error(`WhatsApp number: ${wa.reason}`, 422);
+      merchantWhatsapp = wa.e164;
+    }
 
     if (!["ECOMMERCE", "WEBSITE", "LANDING_PAGE"].includes(siteType)) {
       return error("Invalid site type. Must be ECOMMERCE, WEBSITE, or LANDING_PAGE", 422);
@@ -157,7 +170,7 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ wor
           whatsappNumber: merchantWhatsapp,
           whatsappOrdering: !!merchantWhatsapp,
           contactEmail: typeof email === "string" && email.trim() ? email.trim() : null,
-          contactPhone: typeof phone === "string" && phone.trim() ? phone.trim() : null,
+          contactPhone: normalizedPhone?.ok ? normalizedPhone.e164 : null,
           contactAddress: typeof location === "string" && location.trim() ? location.trim() : null,
           metaTitle: name.trim(),
           metaDescription: description || null,
@@ -165,7 +178,7 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ wor
       },
       socialLinks: socialLinks ? {
         create: {
-          whatsapp: socialLinks.whatsapp || null,
+          whatsapp: merchantWhatsapp,
           instagram: socialLinks.instagram || null,
           facebook: socialLinks.facebook || null,
           twitter: socialLinks.twitter || null,
@@ -218,7 +231,7 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ wor
         const homeBlocks = buildDynamicHomePage(
           {}, storeName, storeSlug, bizType, getRandomIndustryImages(bizType),
           merchantWhatsapp || undefined,
-          { email: email || null, phone: phone || null, address: location || null },
+          { email: email || null, phone: normalizedPhone?.ok ? normalizedPhone.display : null, address: location || null },
         );
 
         // Store as a plain block array — the exact same shape

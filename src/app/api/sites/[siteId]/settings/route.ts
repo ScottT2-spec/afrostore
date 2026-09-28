@@ -1,6 +1,7 @@
 import { NextRequest } from "next/server";
 import { prisma } from "@/lib/db";
 import { getStoreContext, success, error, validationError , requireRole } from "@/lib/api-helpers";
+import { normalizePhone } from "@/lib/phone";
 import { updateSettingsSchema } from "@/lib/validators";
 import { unauthorized } from "@/lib/auth";
 import { CURRENCY_OPTIONS } from "@/lib/utils";
@@ -47,6 +48,20 @@ export async function PATCH(req: NextRequest, { params }: Params) {
 
   const parsed = updateSettingsSchema.safeParse(settingsBody);
   if (!parsed.success) return validationError(parsed.error.flatten().fieldErrors);
+
+  // WhatsApp number → one canonical form (E.164), whatever way it was
+  // typed. An empty value clears it; one that can't be resolved is
+  // rejected with a message instead of being saved as junk.
+  if (typeof parsed.data.whatsappNumber === "string") {
+    if (!parsed.data.whatsappNumber.trim()) {
+      parsed.data.whatsappNumber = null;
+    } else {
+      const siteRow = await prisma.site.findUnique({ where: { id: siteId }, select: { country: true } });
+      const wa = normalizePhone(parsed.data.whatsappNumber, siteRow?.country);
+      if (!wa.ok) return validationError({ whatsappNumber: [wa.reason] });
+      parsed.data.whatsappNumber = wa.e164;
+    }
+  }
 
   // Filter out null values for non-nullable fields (language has a default)
   const { language, ...rest } = parsed.data;
