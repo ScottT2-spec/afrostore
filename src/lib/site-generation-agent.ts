@@ -17,7 +17,7 @@
 
 import { z } from "zod";
 import { revalidatePath } from "next/cache";
-import { applySectionEdits, describeChanges, findTextInBlocks, replaceTextInProps, formatFlat } from "@/lib/section-edit";
+import { applySectionEdits, describeChanges, findTextInBlocks, replaceTextInProps, formatFlat, type TextHit } from "@/lib/section-edit";
 import { normalizePhone } from "@/lib/phone";
 import { prisma } from "@/lib/db";
 import { loadSiteCustomizationSafely, normalizeSiteCustomization, mergeSiteCustomization } from "@/lib/site-customization";
@@ -586,7 +586,7 @@ async function executeTool(
           orderBy: { position: "asc" },
         });
         if (parsed.pageSlug && pages.length === 0) return { result: `No page with slug "${parsed.pageSlug}" exists.`, isError: true };
-        const hits = pages.flatMap((pg: { slug: string; content: unknown }) =>
+        const hits: TextHit[] = pages.flatMap((pg: { slug: string; content: unknown }) =>
           findTextInBlocks(pg.slug, Array.isArray(pg.content) ? (pg.content as Array<{ type?: string; props?: Record<string, unknown> }>) : [], parsed.query),
         );
         if (hits.length === 0) {
