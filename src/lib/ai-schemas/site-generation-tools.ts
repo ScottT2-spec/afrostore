@@ -120,12 +120,6 @@ export const setSeoSchema = z.object({
   description: z.string().min(50).max(165),
 });
 
-// The site's own tagline/summary — rendered directly in the storefront
-// footer (AiStoreFooter) and used as a fallback for page meta
-// descriptions. Distinct from set_seo, which is per-page SEO copy.
-export const setBusinessDescriptionSchema = z.object({
-  description: z.string().min(10).max(300),
-});
 
 export const attachAssetSchema = z.object({
   pageSlug: z.string().min(1),
@@ -161,7 +155,6 @@ export type SetSocialLinksArgs = z.infer<typeof setSocialLinksSchema>;
 export type SetDeliveryZonesArgs = z.infer<typeof setDeliveryZonesSchema>;
 export type SetPaymentStubArgs = z.infer<typeof setPaymentStubSchema>;
 export type SetSeoArgs = z.infer<typeof setSeoSchema>;
-export type SetBusinessDescriptionArgs = z.infer<typeof setBusinessDescriptionSchema>;
 export type AttachAssetArgs = z.infer<typeof attachAssetSchema>;
 export type AskUserArgs = z.infer<typeof askUserSchema>;
 export type FinalizeDraftArgs = z.infer<typeof finalizeDraftSchema>;

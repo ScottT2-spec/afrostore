@@ -687,22 +687,12 @@ export async function generateStore(input: StoreGeneratorInput): Promise<StoreGe
     )
   );
 
-  // Site.description was never actually written by this function — the
-  // merchant's typed business description only ever fed the AI prompt as
-  // context, then got discarded. Every footer/meta-description spot that
-  // reads store.description was therefore always empty for AI-generated
-  // sites (falling back to nothing, or in the older niche templates, a
-  // hardcoded generic line unrelated to this business). Persist a real,
-  // per-business value: the merchant's own words if they gave one,
-  // otherwise the AI's own tagline for this specific business — never a
-  // fixed generic string.
-  const descriptionToSave = input.description?.trim() || data.brand?.tagline?.trim();
-  if (descriptionToSave) {
-    await prisma.site.update({ where: { id: input.siteId }, data: { description: descriptionToSave } }).catch(() => {
-      // Non-fatal — the site and its pages are already fully created;
-      // losing this one field shouldn't fail the whole generation.
-    });
-  }
+  // NOTE: this function deliberately never writes Site.description. That
+  // field is the footer's business description and the merchant's own
+  // description field (AI Business form) is its only source — nothing the
+  // AI produces, and nothing derived from a chat message, may replace it.
+  // (It previously did: the AI builder's fallback path passes the chat
+  // message as `description`, which then got saved over the real one.)
 
   return {
     pages: createdPages.map((p) => ({

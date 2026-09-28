@@ -35,7 +35,7 @@ export async function POST(req: NextRequest, { params }: Params) {
       storeSlug: site.slug,
       storeName: (body.storeName as string) || site.name,
       businessType: (body.businessType as string) || site.businessType || "general",
-      description: (body.description as string) || site.description || undefined,
+      description: site.description || (body.description as string) || undefined,
       country: site.country || "NG",
       currency: site.currency || "NGN",
     });
@@ -47,7 +47,7 @@ export async function POST(req: NextRequest, { params }: Params) {
       const { classifyBusiness } = await import("@/lib/ai-classify");
       const { generateProducts } = await import("@/lib/ai-product-generator");
       const businessType = (body.businessType as string) || site.businessType || "general";
-      const description = (body.description as string) || site.description || undefined;
+      const description = site.description || (body.description as string) || undefined;
       const classification = await classifyBusiness(`${businessType} ${description || ""}`);
       const productResult = await generateProducts({
         siteId,
