@@ -1,8 +1,9 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState, type MouseEvent as ReactMouseEvent } from "react";
 import { Loader2 } from "lucide-react";
 import { api } from "@/lib/api-client";
+import { parsePageContent } from "@/lib/page-content";
 import { RenderBlocks, type BuilderBlock } from "@/components/storefront/BlockRenderer";
 import { TemplateStoreContextProvider } from "@/components/storefront/TemplateStoreContextProvider";
 import { AiStoreHeader, AiStoreFooter } from "@/components/storefront/AiStoreChrome";
@@ -49,13 +50,27 @@ export function SandboxPreview({
   siteId,
   files,
   blocks,
+  pages,
   session: initialSession,
 }: {
   siteId: string;
   files?: Record<string, string>;
   blocks: BuilderBlock[];
+  /** The site's pages, so a clicked link can be opened inside the preview. */
+  pages?: Array<{ id: string; slug: string; type: string; title?: string }>;
   session?: SandboxSession | null;
 }) {
+  // In-preview navigation. null = the home blocks passed in via `blocks`.
+  // "page" = another block page fetched here; "frame" = a route that isn't
+  // block-based (shop, cart, product…) shown in a contained iframe.
+  const [view, setView] = useState<
+    | null
+    | { kind: "page"; slug: string; blocks: BuilderBlock[] | null }
+    | { kind: "frame"; path: string }
+  >(null);
+  // A fresh generation/edit replaces `blocks` — snap back to it.
+  useEffect(() => { setView(null); }, [blocks]);
+
   const [session, setSession] = useState<SandboxSession | null>(initialSession ?? null);
   const [sandboxUnavailable, setSandboxUnavailable] = useState(!files && !initialSession);
   const pollRef = useRef<ReturnType<typeof setInterval> | null>(null);
@@ -188,6 +203,56 @@ export function SandboxPreview({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [session?.id, initialSession]);
 
+  const openInPreview = useCallback((e: ReactMouseEvent) => {
+    const a = (e.target as HTMLElement).closest("a");
+    if (!a) return;
+    const raw = a.getAttribute("href");
+    if (!raw) { e.preventDefault(); return; }
+    if (raw.startsWith("mailto:") || raw.startsWith("tel:")) return;
+
+    // Same-page anchors: scroll inside the preview, never touch the URL.
+    if (raw.startsWith("#")) {
+      e.preventDefault();
+      if (raw.length > 1) document.getElementById(raw.slice(1))?.scrollIntoView({ behavior: "smooth" });
+      return;
+    }
+
+    let url: URL;
+    try { url = new URL(raw, window.location.origin); } catch { e.preventDefault(); return; }
+
+    // Other websites (social icons etc.) open in a new tab — the preview
+    // itself never navigates away.
+    if (url.origin !== window.location.origin) {
+      e.preventDefault();
+      window.open(url.href, "_blank", "noopener,noreferrer");
+      return;
+    }
+
+    e.preventDefault();
+    e.stopPropagation();
+    const slug = storeContext?.storeSlug;
+    const m = slug ? url.pathname.match(new RegExp(`^/store/${slug}(?:/(.*))?$`)) : null;
+    if (!m) return; // not this store — stay put
+    const rest = (m[1] || "").replace(/\/+$/, "");
+    if (!rest) { setView(null); return; }
+
+    const first = rest.split("/")[0];
+    const target = rest.includes("/") ? undefined : pages?.find((p) => p.slug === first);
+    if (target) {
+      if (target.type === "HOME") { setView(null); return; }
+      setView({ kind: "page", slug: target.slug, blocks: null });
+      api.get<{ content: unknown }>(`/api/sites/${siteId}/pages/${target.id}`).then((res) => {
+        if (!res.success || !res.data) return;
+        const pageBlocks = parsePageContent(res.data.content).blocks as unknown as BuilderBlock[];
+        setView((cur) => (cur && cur.kind === "page" && cur.slug === target.slug ? { ...cur, blocks: pageBlocks } : cur));
+      });
+      return;
+    }
+    // Shop, cart, product… are real routes, not block pages — show them
+    // in a contained frame so links inside stay in the preview too.
+    setView({ kind: "frame", path: url.pathname + url.search });
+  }, [pages, siteId, storeContext?.storeSlug]);
+
   if (sandboxUnavailable || (!files && !initialSession)) {
     if (!storeContext) return <RenderBlocks blocks={blocks} />;
     return (
@@ -201,13 +266,29 @@ export function SandboxPreview({
         socialLinks={storeContext.socialLinks}
       >
         {/* Same shared header/footer the live AI pages wrap around their
-            blocks, so the preview matches what actually goes live. Links
-            are inert here — clicking one must not navigate away from the
-            builder. */}
-        <div onClickCapture={(e) => { if ((e.target as HTMLElement).closest("a")) e.preventDefault(); }}>
-          <AiStoreHeader storeName={storeContext.storeName} storeSlug={storeContext.storeSlug} logo={storeContext.logo} siteId={storeContext.siteRecordId} />
-          <RenderBlocks blocks={blocks} storeSlug={storeContext.storeSlug} currency={storeContext.currency} />
-          <AiStoreFooter storeName={storeContext.storeName} storeSlug={storeContext.storeSlug} logo={storeContext.logo} description={storeContext.description} socialLinks={storeContext.chromeSocialLinks} />
+            blocks, so the preview matches what actually goes live. Every
+            link click is handled by openInPreview so nothing navigates
+            away from the builder. */}
+        <div onClickCapture={openInPreview}>
+          {view?.kind === "frame" ? (
+            <div className="flex flex-col h-full min-h-[600px]">
+              <div className="flex items-center gap-3 border-b border-surface-200 bg-white px-3 py-2 text-xs text-surface-500">
+                <button type="button" onClick={() => setView(null)} className="font-semibold text-brand-600 hover:underline">← Back to preview</button>
+                <span className="truncate">{view.path}</span>
+              </div>
+              <iframe src={view.path} title="Preview page" className="w-full flex-1 min-h-[600px] border-0" />
+            </div>
+          ) : (
+            <>
+              <AiStoreHeader storeName={storeContext.storeName} storeSlug={storeContext.storeSlug} logo={storeContext.logo} siteId={storeContext.siteRecordId} />
+              {view?.kind === "page" && !view.blocks ? (
+                <div className="flex items-center justify-center min-h-[300px] text-surface-400"><Loader2 className="h-6 w-6 animate-spin" /></div>
+              ) : (
+                <RenderBlocks blocks={view?.kind === "page" && view.blocks ? view.blocks : blocks} storeSlug={storeContext.storeSlug} currency={storeContext.currency} />
+              )}
+              <AiStoreFooter storeName={storeContext.storeName} storeSlug={storeContext.storeSlug} logo={storeContext.logo} description={storeContext.description} socialLinks={storeContext.chromeSocialLinks} />
+            </>
+          )}
         </div>
       </TemplateStoreContextProvider>
     );
