@@ -95,11 +95,6 @@ export default function NewSitePage() {
     services: draft?.businessDetails.services || '',
     targetAudience: draft?.businessDetails.targetAudience || '',
   });
-  // WhatsApp isn't a separate field: the merchant either reuses their
-  // contact phone number for WhatsApp (toggle on) or doesn't offer it at
-  // all. The old dedicated WhatsApp input made people type the same number
-  // twice. Restored from a saved draft when a number was saved with it.
-  const [whatsappSameAsPhone, setWhatsappSameAsPhone] = useState(!!draft?.businessDetails.whatsapp);
   const [landingConfig, setLandingConfig] = useState({
     leadCaptureEnabled: true,
     whatsappCta: '',
@@ -174,7 +169,7 @@ export default function NewSitePage() {
       siteType,
       industry,
       launchMethod,
-      businessDetails: { ...businessInfo, whatsapp: whatsappSameAsPhone ? businessInfo.phone : '', currency: storeCurrency },
+      businessDetails: { ...businessInfo, currency: storeCurrency },
       selectedTemplate,
       selectedTemplateId,
     }, user.id);
@@ -185,7 +180,6 @@ export default function NewSitePage() {
     industry,
     launchMethod,
     businessInfo,
-    whatsappSameAsPhone,
     storeCurrency,
     selectedTemplate,
     selectedTemplateId,
@@ -354,7 +348,6 @@ export default function NewSitePage() {
             },
           },
           socialLinks: {
-            whatsapp: whatsappSameAsPhone ? businessInfo.phone : '',
             instagram: businessInfo.instagram,
             facebook: businessInfo.facebook,
             twitter: businessInfo.twitter,
@@ -696,26 +689,6 @@ export default function NewSitePage() {
                   className="w-full px-4 py-3 border border-gray-200 rounded-lg focus:ring-2 focus:ring-gray-900 outline-none"
                   placeholder="Lagos, Nigeria"
                 />
-              </div>
-              <div className="flex items-start justify-between gap-4 rounded-lg border border-gray-200 px-4 py-3">
-                <div>
-                  <p className="text-sm font-medium text-gray-700">Use this number for WhatsApp</p>
-                  <p className="mt-0.5 text-xs text-gray-400">
-                    {businessInfo.phone.trim()
-                      ? 'Adds a floating WhatsApp button so customers can order or chat with you on the phone number above.'
-                      : 'Enter your phone number above first.'}
-                  </p>
-                </div>
-                <button
-                  type="button"
-                  role="switch"
-                  aria-checked={whatsappSameAsPhone}
-                  disabled={!businessInfo.phone.trim()}
-                  onClick={() => setWhatsappSameAsPhone(v => !v)}
-                  className={`relative mt-0.5 inline-flex h-6 w-11 shrink-0 items-center rounded-full transition-colors disabled:opacity-40 disabled:cursor-not-allowed ${whatsappSameAsPhone && businessInfo.phone.trim() ? 'bg-green-500' : 'bg-gray-300'}`}
-                >
-                  <span className={`inline-block h-5 w-5 transform rounded-full bg-white shadow transition-transform ${whatsappSameAsPhone && businessInfo.phone.trim() ? 'translate-x-5' : 'translate-x-0.5'}`} />
-                </button>
               </div>
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1.5">Currency</label>
