@@ -15,6 +15,8 @@ import Link from "next/link";
 const A = {
   textPrimary: "#1a1a1a",
   border: "#e5e5e5",
+  cream: "#F1E4C8",
+  creamBorder: "#E0CFA8",
   sansFont: "'Inter', 'Helvetica Neue', Arial, sans-serif",
   containerWidth: "1200px",
 };
@@ -39,18 +41,17 @@ export function AiStoreHeader({ storeName, storeSlug, logo }: AiStoreHeaderProps
   ];
 
   const css = `
-    .ai-nav-wrap { position: sticky; top: 0; z-index: 50; background: #ffffff; border-bottom: 1px solid ${A.border}; }
+    .ai-nav-wrap { position: sticky; top: 0; z-index: 50; background: ${A.cream}; border-bottom: 1px solid ${A.creamBorder}; }
     .ai-nav-inner { max-width: ${A.containerWidth}; margin: 0 auto; padding: 18px 20px; display: flex; align-items: center; justify-content: space-between; }
     .ai-nav-logo { display: flex; align-items: center; gap: 10px; text-decoration: none; flex-shrink: 0; }
     .ai-nav-logo-img { height: 32px; width: auto; object-fit: contain; }
     .ai-nav-logo-text { font-family: ${A.sansFont}; font-weight: 700; font-size: 18px; color: ${A.textPrimary}; text-decoration: none; letter-spacing: 0.02em; }
     .ai-nav-links { display: flex; align-items: center; gap: 32px; }
-    .ai-nav-link { font-family: ${A.sansFont}; font-weight: 500; font-size: 14px; color: ${A.textPrimary}; text-decoration: none; transition: opacity 0.2s; }
+    .ai-nav-link { font-family: ${A.sansFont}; font-weight: 700; font-size: 14px; color: ${A.textPrimary}; text-decoration: none; transition: opacity 0.2s; }
     .ai-nav-link:hover { opacity: 0.6; }
     .ai-nav-mobile-toggle { display: none; background: none; border: none; cursor: pointer; color: ${A.textPrimary}; padding: 4px; font-size: 22px; line-height: 1; }
-    .ai-nav-mobile-menu { display: none; background: #ffffff; border-bottom: 1px solid ${A.border}; padding: 8px 20px 16px; }
-    .ai-nav-mobile-menu a { display: block; padding: 12px 0; font-family: ${A.sansFont}; font-weight: 500; font-size: 15px; color: ${A.textPrimary}; text-decoration: none; border-bottom: 1px solid #f0f0f0; }
-    .ai-nav-mobile-menu a:last-child { border-bottom: none; }
+    .ai-nav-mobile-menu { display: none; background: ${A.cream}; border-bottom: 1px solid ${A.creamBorder}; padding: 8px 20px 16px; }
+    .ai-nav-mobile-menu a { display: block; padding: 12px 0; font-family: ${A.sansFont}; font-weight: 700; font-size: 15px; color: ${A.textPrimary}; text-decoration: none; }
     @media (max-width: 768px) {
       .ai-nav-links { display: none; }
       .ai-nav-mobile-toggle { display: flex; }
