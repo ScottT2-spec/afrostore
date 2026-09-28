@@ -172,6 +172,11 @@ async function runGeneration(
   onStep?: (s: SiteGenerationStep | CodingAgentStep) => void,
   shouldCancel?: () => Promise<boolean>
 ): Promise<Record<string, unknown>> {
+  // A site that already has pages is being EDITED. If the structured agent
+  // fails on an edit, falling through to the sandbox coding agent would
+  // scaffold a brand-new generated site and swap the merchant's real one
+  // out from under them. Fail the edit instead and keep their site intact.
+  const siteAlreadyBuilt = (await prisma.page.count({ where: { siteId } }).catch(() => 0)) > 0;
   try {
     const socialLinks = await prisma.siteSocialLinks.findUnique({ where: { siteId } }).catch(() => null);
     const filledSocials = socialLinks
@@ -235,6 +240,11 @@ async function runGeneration(
 
     return { mode: "structured", summary: result.summary, pages };
   } catch (structuredErr) {
+    if (siteAlreadyBuilt) {
+      console.error("Structured site edit failed (not falling back — site already built):", structuredErr);
+      const detail = structuredErr instanceof Error ? structuredErr.message : "unknown error";
+      throw new Error(`I couldn't apply that change, and I left your site exactly as it was. Please try again or rephrase it. (${detail})`);
+    }
     console.error("Structured site generation failed, falling back to coding agent:", structuredErr);
   }
 

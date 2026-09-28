@@ -414,7 +414,10 @@ export default function AIBuilderPage({ params }: { params: Promise<{ siteId: st
     // silently abandon the merchant's actual generated site and restart
     // them on the unrelated block-based pipeline instead of just telling
     // them the edit failed.
-    if (!session) {
+    // Only for a brand-new site with nothing built yet. `session` is null
+    // for every block-based site, so checking it alone made a failed EDIT
+    // fall into generate-store, which regenerates and overwrites every page.
+    if (!session && !hasGenerated) {
       const fallbackRes = await api.post<{ pages: PageSummary[]; productsCreated: number }>(
         `/api/sites/${siteId}/ai/generate-store`,
         { description, storeName: site.name, businessType: site.businessType || undefined }

@@ -16,6 +16,7 @@
  */
 
 import { z } from "zod";
+import { revalidatePath } from "next/cache";
 import { normalizePhone } from "@/lib/phone";
 import { prisma } from "@/lib/db";
 import { loadSiteCustomizationSafely, normalizeSiteCustomization, mergeSiteCustomization } from "@/lib/site-customization";
@@ -79,13 +80,38 @@ const TOOL_DEFS: AITool[] = [
   { type: "function", function: { name: "finalize_draft", description: "Call this once the site genuinely reflects what the merchant asked for. Ends the session.", parameters: toToolParameters(finalizeDraftSchema) } },
 ];
 
+/** Clears Next's cache for the storefront so an AI edit shows up on the live site immediately, not after the cache expires. Never throws — a cache miss must not fail a saved edit. */
+function revalidateStorefront(storeSlug: string, pageSlug: string): void {
+  try {
+    revalidatePath(`/store/${storeSlug}/${pageSlug}`);
+    revalidatePath(`/store/${storeSlug}`);
+    revalidatePath(`/store/${storeSlug}/pages/${pageSlug}`);
+    revalidatePath(`/api/storefront/${storeSlug}/pages/${pageSlug}`);
+    revalidatePath(`/api/storefront/${storeSlug}`);
+  } catch {
+    /* outside a Next request context (scripts/tests) — nothing to revalidate */
+  }
+}
+
+/** True when the merchant explicitly wants a page thrown away and regenerated. Only then may create_page overwrite a page that already exists. */
+const REBUILD_INTENT = /\b(rebuild|regenerate|re-generate|recreate|re-create|start over|start again|from scratch|redo the (whole|entire)|redesign the (whole|entire))\b/i;
+
+const EDIT_MODE_RULES = `MODE: EDITING AN EXISTING, LIVE SITE. You are the merchant's site editor, not a site builder. The site is already built — your job is to change exactly what they asked for and nothing else.
+- Do what the merchant said, literally and completely. If they name a piece of text (\"change 'Shop Now' to 'Order Today'\"), find that exact text and replace it with exactly what they gave you — same spelling, casing and wording, never a paraphrase or an \"improved\" version. If they describe a change (\"make the hero more elegant\", \"change the button to green\"), make that specific change to the fields that control it.
+- Everything the merchant did NOT mention stays byte-for-byte the same. Never regenerate, rewrite, reorder or \"refresh\" sections, pages, products or the theme as a side effect of a small request.
+- Workflow for EVERY change: (1) locate the section — match the merchant's words against the CURRENT SITE STATE; if the text isn't visible there, call get_section (with sectionIndex for the full field list, or without it to outline the whole page) and search other pages too, since \"the footer\" or \"the phone number\" may live on a page you didn't expect. (2) call edit_section with every change for that section in ONE call, using the exact paths get_section listed. (3) only then tell the merchant it's done.
+- If the same text appears in several places and the merchant said \"everywhere\", \"all\" or didn't say where, change every occurrence. If they pointed at one specific place, change only that one.
+- NEVER call create_page for a page that already exists, and never rebuild the site. Adding a genuinely NEW page or section the merchant asked for is fine. The build-from-scratch rules (minimum pages/products, starter catalog) do NOT apply to edits — do not add pages or products the merchant didn't ask for.
+- Never say a change was made unless edit_section (or another tool) returned success in this session. If a call fails, read the error, fix the path or value, and retry. If something truly can't be located after checking get_section, say exactly what you looked for and ask one short question.
+- When finished, call finalize_draft with a short, natural summary that names what you changed and where (e.g. \"Changed the hero heading to 'Fresh Bakes Daily' and turned the button green.\"). Sound like a sharp human assistant, not a template.`;
+
 function buildSystemPrompt(rules: SiteIntentRules, safetyCategory: SensitiveCategory | null, currentSiteSummary: string | null, knownInfo?: string): string {
   return `You are building a real e-commerce/business/landing site for an African SMB merchant, from their plain-language description. You can ONLY act through the tools you're given — there is no code, no files, nothing outside this specific tool set.
 
-${rules.promptRules}
+${currentSiteSummary ? EDIT_MODE_RULES : rules.promptRules}
 ${safetyCategory ? `\n${getGuardrailPromptRules(safetyCategory)}\n` : ""}
 ${knownInfo ? `\nALREADY PROVIDED BY THE MERCHANT — do not ask_user for any of this, use it directly:\n${knownInfo}\n` : ""}
-${currentSiteSummary ? `\nCURRENT SITE STATE — this site already exists and is live. The merchant's message below is a request to CHANGE it, not build it from scratch. Read this before doing anything: it's every page, in order, and every section on each page with its 0-based index (the sectionIndex update_section needs) and a preview of its current content.\n\n${currentSiteSummary}\n\nWhen the merchant refers to something ("the hero", "the FAQ section", "that testimonial"), match it against the actual sections listed above rather than guessing an index. If they ask to change one page's wording/color/image, use update_section on the matching page+index — don't call create_page for something that already exists (see the duplicate-page rule below). If what they're asking about genuinely isn't listed above, say so and ask, rather than assuming a section exists.\n` : ""}
+${currentSiteSummary ? `\nCURRENT SITE STATE — this site already exists and is live. The merchant's message below is a request to CHANGE it, not build it from scratch. Read this before doing anything: it's every page, in order, and every section on each page with its 0-based index (the sectionIndex get_section and edit_section need) and a preview of its current content.\n\n${currentSiteSummary}\n\nWhen the merchant refers to something ("the hero", "the FAQ section", "that testimonial"), match it against the actual sections listed above rather than guessing an index. If they ask to change one page's wording/color/image, use get_section then edit_section on the matching page+index — don't call create_page for something that already exists (see the duplicate-page rule below). If what they're asking about genuinely isn't listed above, say so and ask, rather than assuming a section exists.\n` : ""}
 Rules:
 ${!currentSiteSummary ? "- STRICT, HIGHEST PRIORITY: this is the initial build of a brand-new site. Do NOT call ask_user at all during this build, for anything — not business name, not currency, not social links, not product images, not anything else. Use exactly what the merchant's message/form gave you, and make a reasonable, clearly-labeled-as-default choice for everything else (stock/generated images for products, a sensible default currency/country, no social links if none were given). If something later turns out wrong, the merchant can correct it in chat after seeing the built site — that correction, not this first pass, is what ask_user and the other tools are for. Call update_site_info with the real business name as your very first tool call, before create_page, deciding the name from what the merchant said rather than asking.\n" : ""}- Default currency is NGN unless the merchant's prompt says otherwise.
 - STRICT: when the merchant asks to change ANY detail of ANY section (a heading, any text, a color, the background image or an image, a button label or link, or one individual item like the 3rd feature or a single FAQ answer), you can change it \u2014 nothing on a section is off-limits. If you don't know the exact field path or its current value, call get_section first, then apply every change together with edit_section (use its set / remove / insert operations). Never tell the merchant something can't be changed without checking get_section first, and never claim a change is done unless edit_section returned success.\n- STRICT: every section on the homepage must have real content — never add or leave a section (features, testimonials, FAQ, values, or any other content block) with an empty or near-empty items list. A section with no content under its heading is a broken page. When using update_section on a content block, always include a fully populated items/content array — never set it to an empty list or omit it expecting old content to remain if you're changing that field.
@@ -313,6 +339,16 @@ export async function runSiteGenerationAgent(opts: RunSiteGenerationOptions): Pr
   // with no pages yet, in which case the prompt stays exactly as before.
   const currentSiteSummary = priorMessages?.length ? null : await summarizeCurrentSite(siteId);
 
+  // Edit mode = the site already had pages when this session STARTED. On a
+  // resumed session the summary isn't re-fetched, so read the mode from the
+  // original system prompt instead of guessing from current DB state
+  // (mid-build, pages exist too, and that must not flip a build into edit mode).
+  const firstPrior = priorMessages?.[0];
+  const isEditMode = priorMessages?.length
+    ? firstPrior?.role === "system" && typeof firstPrior.content === "string" && firstPrior.content.includes("MODE: EDITING AN EXISTING, LIVE SITE")
+    : currentSiteSummary !== null;
+  const allowRebuild = REBUILD_INTENT.test(task);
+
   const messages: AIMessage[] = priorMessages?.length
     ? [...priorMessages, { role: "user", content: task }]
     : [
@@ -390,7 +426,7 @@ export async function runSiteGenerationAgent(opts: RunSiteGenerationOptions): Pr
       if (name === "finalize_draft") {
         const parsed = finalizeDraftSchema.safeParse(args);
         if (parsed.success) {
-          const violations = await rules.validate(siteId);
+          const violations = isEditMode ? [] : await rules.validate(siteId);
           if (violations.length > 0) {
             // Same enforcement shape as the coding agent's quality
             // checklist and mandatory screenshot: a self-reported "done"
@@ -428,7 +464,7 @@ export async function runSiteGenerationAgent(opts: RunSiteGenerationOptions): Pr
         }
       }
 
-      const { result: toolResult, isError } = await executeTool(siteId, storeName, storeSlug, industry, ai, name, args, safetyCategory);
+      const { result: toolResult, isError } = await executeTool(siteId, storeName, storeSlug, industry, ai, name, args, safetyCategory, { isEditMode, allowRebuild });
       if (name === "update_site_info" && !isError && args && typeof (args as { name?: unknown }).name === "string") {
         storeName = (args as { name: string }).name;
       }
@@ -450,7 +486,8 @@ async function executeTool(
   ai: AIFailover,
   name: string,
   args: unknown,
-  safetyCategory: SensitiveCategory | null
+  safetyCategory: SensitiveCategory | null,
+  mode: { isEditMode: boolean; allowRebuild: boolean } = { isEditMode: false, allowRebuild: false }
 ): Promise<{ result: string; isError: boolean }> {
   try {
     switch (name) {
@@ -476,6 +513,20 @@ async function executeTool(
         if (ONE_PER_SITE.has(parsed.type)) {
           const existingOfType = await prisma.page.findFirst({ where: { siteId, type: parsed.type as any }, select: { slug: true } });
           if (existingOfType) slug = existingOfType.slug;
+        }
+
+        // Editing a live site: create_page on a page that already exists
+        // REPLACES its whole content with freshly generated copy — that is
+        // the "I asked for one small change and it rebuilt everything" bug.
+        // Refuse it unless the merchant explicitly asked to rebuild.
+        if (mode.isEditMode && !mode.allowRebuild) {
+          const already = await prisma.page.findUnique({ where: { siteId_slug: { siteId, slug } }, select: { id: true } });
+          if (already) {
+            return {
+              result: `Refused: the page "${slug}" already exists and create_page would overwrite ALL of its current content. The merchant asked for a change, not a rebuild. Call get_section (omit sectionIndex to outline the page), then change only what they asked with edit_section.`,
+              isError: true,
+            };
+          }
         }
 
         // Real content, not a structural skeleton — generate it scoped to
@@ -542,6 +593,7 @@ async function executeTool(
         // been in, starting from its very first creation.
         await prisma.pageVersion.create({ data: { pageId: created.id, title: created.title, content: created.content as object } });
 
+        revalidateStorefront(storeSlug, slug);
         return { result: `Created page "${parsed.title}" (${slug}) with ${parsed.sections.length} sections.`, isError: false };
       }
 
@@ -567,6 +619,7 @@ async function executeTool(
 
         await prisma.page.update({ where: { id: page.id }, data: { content: blocks as object } });
         await prisma.pageVersion.create({ data: { pageId: page.id, title: page.title, content: blocks as object } });
+        revalidateStorefront(storeSlug, parsed.pageSlug);
         return { result: `Updated section ${parsed.sectionIndex} on "${parsed.pageSlug}".`, isError: false };
       }
 
@@ -606,6 +659,7 @@ async function executeTool(
         blocks[parsed.sectionIndex] = { ...target, props: applied.props };
         await prisma.page.update({ where: { id: page.id }, data: { content: blocks as object } });
         await prisma.pageVersion.create({ data: { pageId: page.id, title: page.title, content: blocks as object } });
+        revalidateStorefront(storeSlug, parsed.pageSlug);
         return { result: `Applied ${parsed.edits.length} edit${parsed.edits.length === 1 ? "" : "s"} to section ${parsed.sectionIndex} on "${parsed.pageSlug}": ${parsed.edits.map((e) => `${e.op} ${e.path}`).join(", ")}.`, isError: false };
       }
 
