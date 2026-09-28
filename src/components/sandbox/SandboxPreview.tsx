@@ -5,6 +5,17 @@ import { Loader2 } from "lucide-react";
 import { api } from "@/lib/api-client";
 import { RenderBlocks, type BuilderBlock } from "@/components/storefront/BlockRenderer";
 import { TemplateStoreContextProvider } from "@/components/storefront/TemplateStoreContextProvider";
+import { AiStoreHeader, AiStoreFooter } from "@/components/storefront/AiStoreChrome";
+
+/** Storefront API returns socialLinks as {instagram, facebook, ...}; the
+ *  shared footer wants [{platform, url}]. Accept either shape. */
+function toSocialArray(raw: unknown): Array<{ platform: string; url: string }> {
+  if (Array.isArray(raw)) return raw.filter((l) => l && l.platform && l.url);
+  if (!raw || typeof raw !== "object") return [];
+  return Object.entries(raw as Record<string, unknown>)
+    .filter(([, url]) => typeof url === "string" && url)
+    .map(([platform, url]) => ({ platform, url: url as string }));
+}
 
 interface SandboxSession {
   id: string;
@@ -66,13 +77,25 @@ export function SandboxPreview({
     categories: any[];
     blogs: any[];
     socialLinks: any[];
+    // Shared AI header/footer inputs — same values the live pages pass.
+    siteRecordId: string;
+    storeName: string;
+    logo: string | null;
+    description: string | null;
+    chromeSocialLinks: Array<{ platform: string; url: string }>;
   } | null>(null);
   useEffect(() => {
     let cancelled = false;
-    api.get<{ slug: string; currency: string }>(`/api/sites/${siteId}`).then(async (res) => {
+    api.get<{ id: string; name: string; slug: string; currency: string; logo?: string | null; description?: string | null }>(`/api/sites/${siteId}`).then(async (res) => {
       if (cancelled || !res.success || !res.data) return;
       const slug = res.data.slug;
       const currency = res.data.currency || "NGN";
+      const chrome = {
+        siteRecordId: res.data.id || siteId,
+        storeName: res.data.name || "Store",
+        logo: res.data.logo ?? null,
+        description: res.data.description ?? null,
+      };
       try {
         const sfRes = await fetch(`/api/storefront/${slug}`);
         const sf = sfRes.ok ? await sfRes.json() : null;
@@ -85,12 +108,14 @@ export function SandboxPreview({
           categories: sf?.categories || [],
           blogs: sf?.blogs || [],
           socialLinks: sf?.socialLinks || [],
+          ...chrome,
+          chromeSocialLinks: toSocialArray(sf?.socialLinks),
         });
       } catch {
         // Storefront data is a nice-to-have for parity, not required to
         // show a preview at all — fall back to the minimal context
         // rather than leaving the preview stuck loading.
-        if (!cancelled) setStoreContext({ storeSlug: slug, currency, templateSlug: "ai", products: [], categories: [], blogs: [], socialLinks: [] });
+        if (!cancelled) setStoreContext({ storeSlug: slug, currency, templateSlug: "ai", products: [], categories: [], blogs: [], socialLinks: [], ...chrome, chromeSocialLinks: [] });
       }
     }).catch(() => {});
     return () => { cancelled = true; };
@@ -175,7 +200,15 @@ export function SandboxPreview({
         storeSlug={storeContext.storeSlug}
         socialLinks={storeContext.socialLinks}
       >
-        <RenderBlocks blocks={blocks} storeSlug={storeContext.storeSlug} currency={storeContext.currency} />
+        {/* Same shared header/footer the live AI pages wrap around their
+            blocks, so the preview matches what actually goes live. Links
+            are inert here — clicking one must not navigate away from the
+            builder. */}
+        <div onClickCapture={(e) => { if ((e.target as HTMLElement).closest("a")) e.preventDefault(); }}>
+          <AiStoreHeader storeName={storeContext.storeName} storeSlug={storeContext.storeSlug} logo={storeContext.logo} siteId={storeContext.siteRecordId} />
+          <RenderBlocks blocks={blocks} storeSlug={storeContext.storeSlug} currency={storeContext.currency} />
+          <AiStoreFooter storeName={storeContext.storeName} storeSlug={storeContext.storeSlug} logo={storeContext.logo} description={storeContext.description} socialLinks={storeContext.chromeSocialLinks} />
+        </div>
       </TemplateStoreContextProvider>
     );
   }
