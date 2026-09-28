@@ -176,7 +176,7 @@ export default function AIBusinessPage() {
                 </div>
               )}
             </div>
-            <div><label className="block text-sm font-medium text-surface-700 mb-1">Location</label>
+            <div><label className="block text-sm font-medium text-surface-700 mb-1">Business Address</label>
               <input value={location} onChange={(e) => setLocation(e.target.value)} className="input-field py-2.5 w-full" placeholder="e.g. Lagos, Nigeria" /></div>
             <div><label className="block text-sm font-medium text-surface-700 mb-1">Target Audience</label>
               <input value={targetAudience} onChange={(e) => setTargetAudience(e.target.value)} className="input-field py-2.5 w-full" placeholder="e.g. Young professionals, 25-40" /></div>
