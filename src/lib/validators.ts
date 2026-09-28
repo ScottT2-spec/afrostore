@@ -37,6 +37,8 @@ export const updateStoreSchema = z.object({
   currency: z.string().optional(),
   country: z.string().optional(),
   businessType: z.string().optional(),
+  productsSummary: z.string().max(2000).optional(),
+  targetAudience: z.string().max(1000).optional(),
 });
 
 // ─── PRODUCTS ───────────────────────────────────────────────

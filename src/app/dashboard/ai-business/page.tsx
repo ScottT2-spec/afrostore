@@ -77,6 +77,8 @@ export default function AIBusinessPage() {
           ...(phoneCheck?.ok ? { phone: phoneCheck.e164 } : {}),
           ...(email.trim() ? { email: email.trim() } : {}),
           ...(location.trim() ? { location: location.trim() } : {}),
+          ...(products.trim() ? { products: products.trim() } : {}),
+          ...(targetAudience.trim() ? { targetAudience: targetAudience.trim() } : {}),
           ...(instagram.trim() || facebook.trim() || tiktok.trim() || (whatsappSameAsPhone && phoneCheck?.ok)
             ? {
                 socialLinks: {

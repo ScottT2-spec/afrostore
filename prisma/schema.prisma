@@ -127,6 +127,8 @@ model Site {
   currency          String             @default("NGN")
   country           String             @default("NG")
   businessType      String             @default("general")
+  productsSummary   String?            @db.Text
+  targetAudience    String?            @db.Text
   industry          String?
   status            SiteStatus         @default(ACTIVE)
   createdAt         DateTime           @default(now())

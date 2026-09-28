@@ -165,6 +165,8 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ wor
       customDomain: customDomain || null,
       country: resolvedCountry,
       currency: resolvedCurrency,
+      productsSummary: products || null,
+      targetAudience: targetAudience || null,
       settings: {
         create: {
           whatsappNumber: merchantWhatsapp,
