@@ -28,6 +28,11 @@ export default function AIBusinessPage() {
   const [instagram, setInstagram] = useState("");
   const [facebook, setFacebook] = useState("");
   const [tiktok, setTiktok] = useState("");
+  // Contact details. WhatsApp isn't its own field — the toggle reuses the
+  // phone number, so nobody types the same number twice.
+  const [phone, setPhone] = useState("");
+  const [email, setEmail] = useState("");
+  const [whatsappSameAsPhone, setWhatsappSameAsPhone] = useState(false);
 
   // "Build with AI" no longer generates here and shows a static results
   // summary — it hands everything collected off to the AI Builder's
@@ -64,8 +69,17 @@ export default function AIBusinessPage() {
           siteType: "ECOMMERCE",
           ...(location.trim() ? { country: location.trim() } : {}),
           ...(description.trim() ? { description: description.trim() } : {}),
-          ...(instagram.trim() || facebook.trim() || tiktok.trim()
-            ? { socialLinks: { instagram: instagram.trim(), facebook: facebook.trim(), tiktok: tiktok.trim() } }
+          ...(phone.trim() ? { phone: phone.trim() } : {}),
+          ...(email.trim() ? { email: email.trim() } : {}),
+          ...(location.trim() ? { location: location.trim() } : {}),
+          ...(instagram.trim() || facebook.trim() || tiktok.trim() || (whatsappSameAsPhone && phone.trim())
+            ? {
+                socialLinks: {
+                  instagram: instagram.trim(), facebook: facebook.trim(), tiktok: tiktok.trim(),
+                  // Toggle on = the contact phone doubles as the WhatsApp number.
+                  whatsapp: whatsappSameAsPhone ? phone.trim() : "",
+                },
+              }
             : {}),
         }),
       });
@@ -157,6 +171,34 @@ export default function AIBusinessPage() {
             <textarea value={products} onChange={(e) => setProducts(e.target.value)} className="input-field py-2.5 w-full resize-y" rows={3} placeholder="e.g. African print dresses, accessories, custom tailoring..." /></div>
           <div><label className="block text-sm font-medium text-surface-700 mb-1">Business Description</label>
             <textarea value={description} onChange={(e) => setDescription(e.target.value)} className="input-field py-2.5 w-full resize-y" rows={3} placeholder="Tell us what makes your business unique..." /></div>
+          <div>
+            <label className="block text-sm font-medium text-surface-700 mb-1">Contact details (optional)</label>
+            <p className="text-xs text-surface-400 mb-2">Shown on your Contact page exactly as you type them.</p>
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+              <input type="tel" value={phone} onChange={(e) => setPhone(e.target.value)} className="input-field py-2.5 w-full" placeholder="Phone number, e.g. +234 800 000 0000" />
+              <input type="email" value={email} onChange={(e) => setEmail(e.target.value)} className="input-field py-2.5 w-full" placeholder="Email, e.g. hello@business.com" />
+            </div>
+            <div className="mt-3 flex items-start justify-between gap-4 rounded-lg border border-surface-200 px-4 py-3">
+              <div>
+                <p className="text-sm font-medium text-surface-700">Use this number for WhatsApp</p>
+                <p className="mt-0.5 text-xs text-surface-400">
+                  {phone.trim()
+                    ? "Adds a floating WhatsApp button so customers can order or chat with you on the phone number above."
+                    : "Enter your phone number above first."}
+                </p>
+              </div>
+              <button
+                type="button"
+                role="switch"
+                aria-checked={whatsappSameAsPhone && !!phone.trim()}
+                disabled={!phone.trim()}
+                onClick={() => setWhatsappSameAsPhone((v) => !v)}
+                className={`relative mt-0.5 inline-flex h-6 w-11 shrink-0 items-center rounded-full transition-colors disabled:opacity-40 disabled:cursor-not-allowed ${whatsappSameAsPhone && phone.trim() ? "bg-green-500" : "bg-surface-300"}`}
+              >
+                <span className={`inline-block h-5 w-5 transform rounded-full bg-white shadow transition-transform ${whatsappSameAsPhone && phone.trim() ? "translate-x-5" : "translate-x-0.5"}`} />
+              </button>
+            </div>
+          </div>
           <div>
             <label className="block text-sm font-medium text-surface-700 mb-1">Social Media (optional)</label>
             <p className="text-xs text-surface-400 mb-2">Add any accounts you have — they'll show as icons in your site's footer.</p>
