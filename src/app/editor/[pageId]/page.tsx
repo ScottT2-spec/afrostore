@@ -131,8 +131,14 @@ export default function EditorPage() {
   };
 
   const handleBack = () => {
-    // Navigate back to the site's pages list
-    if (siteData) {
+    // Return to wherever the merchant actually came from (the Pages
+    // list, the AI Co-Founder editor's own page picker, etc.) instead
+    // of always forcing them into a different, specific editor — that
+    // was the bug: this always hardcoded to the AI Co-Founder editor
+    // even when the merchant opened this page from the Pages list.
+    if (typeof window !== "undefined" && window.history.length > 1) {
+      router.back();
+    } else if (siteData) {
       router.push(`/dashboard/sites/${siteData.id}/editor`);
     } else {
       router.push("/dashboard");
