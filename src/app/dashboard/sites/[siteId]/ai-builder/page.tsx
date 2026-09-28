@@ -544,7 +544,7 @@ export default function AIBuilderPage({ params }: { params: Promise<{ siteId: st
                 aria-label="Describe what you want"
                 rows={1}
                 disabled={generating || loadingSite}
-                className="flex-1 resize-none bg-transparent text-sm outline-none placeholder:text-surface-400 max-h-32 py-1 disabled:opacity-60"
+                className="flex-1 resize-none bg-transparent text-sm outline-none placeholder:text-surface-600 max-h-32 py-1 disabled:opacity-60"
               />
               <button
                 onClick={() => handleSend()}
