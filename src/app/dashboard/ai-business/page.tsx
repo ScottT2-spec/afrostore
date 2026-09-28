@@ -175,8 +175,42 @@ export default function AIBusinessPage() {
             </div>
             <div><label className="block text-sm font-medium text-surface-700 mb-1">Business Address</label>
               <input value={location} onChange={(e) => setLocation(e.target.value)} className="input-field py-2.5 w-full" placeholder="e.g. Lagos, Nigeria" /></div>
+            <div className="sm:col-span-2">
+              <p className="text-xs text-surface-400 mb-2">Business contact details are shown on your Contact page exactly as you type them.</p>
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div><label className="block text-sm font-medium text-surface-700 mb-1">Business Contact</label>
+                  <input type="tel" value={phone} onChange={(e) => setPhone(e.target.value)} className="input-field py-2.5 w-full" placeholder="Phone number, e.g. +234 800 000 0000" /></div>
+                <div><label className="block text-sm font-medium text-surface-700 mb-1">Business Email</label>
+                  <input type="email" value={email} onChange={(e) => setEmail(e.target.value)} className="input-field py-2.5 w-full" placeholder="Email, e.g. hello@business.com" /></div>
+              </div>
+              {phoneCheck && (
+                phoneCheck.ok
+                  ? <p className="mt-1.5 text-xs text-surface-500">Will be saved as <span className="font-medium text-surface-700">{phoneCheck.display}</span></p>
+                  : <p className="mt-1.5 text-xs text-red-600">{phoneCheck.reason}</p>
+              )}
+              <div className="mt-3 flex items-start justify-between gap-4 rounded-lg border border-surface-200 px-4 py-3">
+                <div>
+                  <p className="text-sm font-medium text-surface-700">Use this number for WhatsApp</p>
+                  <p className="mt-0.5 text-xs text-surface-400">
+                    {phoneCheck?.ok
+                      ? "Adds a floating WhatsApp button so customers can order or chat with you on the phone number above."
+                      : "Enter a valid phone number above first."}
+                  </p>
+                </div>
+                <button
+                  type="button"
+                  role="switch"
+                  aria-checked={whatsappSameAsPhone && !!phoneCheck?.ok}
+                  disabled={!phoneCheck?.ok}
+                  onClick={() => setWhatsappSameAsPhone((v) => !v)}
+                  className={`relative mt-0.5 inline-flex h-6 w-11 shrink-0 items-center rounded-full transition-colors disabled:opacity-40 disabled:cursor-not-allowed ${whatsappSameAsPhone && phoneCheck?.ok ? "bg-green-500" : "bg-surface-300"}`}
+                >
+                  <span className={`inline-block h-5 w-5 transform rounded-full bg-white shadow transition-transform ${whatsappSameAsPhone && phoneCheck?.ok ? "translate-x-5" : "translate-x-0.5"}`} />
+                </button>
+              </div>
+            </div>
           </div>
-          <button onClick={() => setStep(2)} disabled={!businessName.trim() || !effectiveType}
+          <button onClick={() => setStep(2)} disabled={!businessName.trim() || !effectiveType || !!(phoneCheck && !phoneCheck.ok)}
             className="btn-primary py-3 px-6 w-full sm:w-auto">Next <ArrowRight className="h-4 w-4" /></button>
         </div>
       )}
@@ -189,39 +223,6 @@ export default function AIBusinessPage() {
             <textarea value={products} onChange={(e) => setProducts(e.target.value)} className="input-field py-2.5 w-full resize-y" rows={3} placeholder="e.g. African print dresses, accessories, custom tailoring..." /></div>
           <div><label className="block text-sm font-medium text-surface-700 mb-1">Business Description</label>
             <textarea value={description} onChange={(e) => setDescription(e.target.value)} className="input-field py-2.5 w-full resize-y" rows={3} placeholder="Tell us what makes your business unique..." /></div>
-          <div>
-            <label className="block text-sm font-medium text-surface-700 mb-1">Contact details (optional)</label>
-            <p className="text-xs text-surface-400 mb-2">Shown on your Contact page exactly as you type them.</p>
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-              <input type="tel" value={phone} onChange={(e) => setPhone(e.target.value)} className="input-field py-2.5 w-full" placeholder="Phone number, e.g. +234 800 000 0000" />
-              <input type="email" value={email} onChange={(e) => setEmail(e.target.value)} className="input-field py-2.5 w-full" placeholder="Email, e.g. hello@business.com" />
-            </div>
-            {phoneCheck && (
-              phoneCheck.ok
-                ? <p className="mt-1.5 text-xs text-surface-500">Will be saved as <span className="font-medium text-surface-700">{phoneCheck.display}</span></p>
-                : <p className="mt-1.5 text-xs text-red-600">{phoneCheck.reason}</p>
-            )}
-            <div className="mt-3 flex items-start justify-between gap-4 rounded-lg border border-surface-200 px-4 py-3">
-              <div>
-                <p className="text-sm font-medium text-surface-700">Use this number for WhatsApp</p>
-                <p className="mt-0.5 text-xs text-surface-400">
-                  {phoneCheck?.ok
-                    ? "Adds a floating WhatsApp button so customers can order or chat with you on the phone number above."
-                    : "Enter a valid phone number above first."}
-                </p>
-              </div>
-              <button
-                type="button"
-                role="switch"
-                aria-checked={whatsappSameAsPhone && !!phoneCheck?.ok}
-                disabled={!phoneCheck?.ok}
-                onClick={() => setWhatsappSameAsPhone((v) => !v)}
-                className={`relative mt-0.5 inline-flex h-6 w-11 shrink-0 items-center rounded-full transition-colors disabled:opacity-40 disabled:cursor-not-allowed ${whatsappSameAsPhone && phoneCheck?.ok ? "bg-green-500" : "bg-surface-300"}`}
-              >
-                <span className={`inline-block h-5 w-5 transform rounded-full bg-white shadow transition-transform ${whatsappSameAsPhone && phoneCheck?.ok ? "translate-x-5" : "translate-x-0.5"}`} />
-              </button>
-            </div>
-          </div>
           <div>
             <label className="block text-sm font-medium text-surface-700 mb-1">Social Media (optional)</label>
             <p className="text-xs text-surface-400 mb-2">Add any accounts you have — they'll show as icons in your site's footer.</p>
