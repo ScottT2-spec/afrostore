@@ -92,8 +92,14 @@ export const removeProductSchema = z.object({
 // this agent exists to close versus the earlier generation pipeline,
 // which never set either of these during generation at all.
 export const setWhatsappSchema = z.object({
-  number: z.string().min(8).describe("The merchant's WhatsApp number, digits and + only — ask_user first if the prompt didn't include one, never invent one."),
+  number: z.string().min(8).describe("The merchant's WhatsApp number, digits and + only. Never ask for one and never invent one — the site-creation form already saved it if they gave one."),
   enabled: z.boolean().default(true),
+});
+
+export const setContactInfoSchema = z.object({
+  email: z.string().email().optional().describe("The merchant's real contact email as they typed it in chat — never ask for one and never invent one."),
+  phone: z.string().min(6).optional().describe("The merchant's real phone number, if different from their WhatsApp number."),
+  address: z.string().optional().describe("The merchant's real business address/city, e.g. 'Lagos, Nigeria' — never invent a city the merchant hasn't stated."),
 });
 
 export const setSocialLinksSchema = z.object({

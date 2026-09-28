@@ -31,6 +31,7 @@ import {
   upsertProductSchema,
   removeProductSchema,
   setWhatsappSchema,
+  setContactInfoSchema,
   setSocialLinksSchema,
   setDeliveryZonesSchema,
   setPaymentStubSchema,
@@ -62,13 +63,14 @@ const TOOL_DEFS: AITool[] = [
   { type: "function", function: { name: "set_page_nav_visibility", description: "Show or hide a single page's link in the nav bar without deleting or unpublishing the page — use this for any request to remove/hide/take out one nav item (e.g. \"remove the FAQ from the menu\").", parameters: toToolParameters(setPageNavVisibilitySchema) } },
   { type: "function", function: { name: "upsert_product", description: "Add or update one product.", parameters: toToolParameters(upsertProductSchema) } },
   { type: "function", function: { name: "remove_product", description: "Remove one product.", parameters: toToolParameters(removeProductSchema) } },
-  { type: "function", function: { name: "set_whatsapp", description: "Turn on WhatsApp ordering with the merchant's real number. Call ask_user first if the prompt didn't include one — never invent a number.", parameters: toToolParameters(setWhatsappSchema) } },
+  { type: "function", function: { name: "set_whatsapp", description: "Turn on WhatsApp ordering (and the floating WhatsApp button) with a real number. The site-creation form already saves the merchant's WhatsApp number when they gave one, so only call this if the merchant types a NEW or different number in chat. Never ask for a WhatsApp number and never invent one.", parameters: toToolParameters(setWhatsappSchema) } },
+  { type: "function", function: { name: "set_contact_info", description: "Save the merchant's real contact email, phone, and/or address, and update the already-built contact page to show them. Only call this when the merchant types new or changed details in chat — the site-creation form already saves what they entered, so never ask for them and never invent an email, phone, or city.", parameters: toToolParameters(setContactInfoSchema) } },
   { type: "function", function: { name: "set_social_links", description: "Save the merchant's Instagram/Facebook/TikTok URLs so real brand icons appear in the site footer. Only pass fields the merchant actually gave you — never invent a URL.", parameters: toToolParameters(setSocialLinksSchema) } },
   { type: "function", function: { name: "set_delivery_zones", description: "Set the store's delivery areas and fees, from what the merchant actually said.", parameters: toToolParameters(setDeliveryZonesSchema) } },
   { type: "function", function: { name: "set_payment_stub", description: "Set checkout UI mode. 'connected' only takes effect if the merchant already has a real payment gateway configured — this tool cannot enable live charging on its own.", parameters: toToolParameters(setPaymentStubSchema) } },
   { type: "function", function: { name: "set_seo", description: "Set a page's SEO title/description.", parameters: toToolParameters(setSeoSchema) } },
   { type: "function", function: { name: "attach_asset", description: "Bind a merchant-uploaded (or generated) image to a specific section's image field on a specific page. Field name depends on the block type at that section: most blocks (hero, banner, features, testimonials, stats, newsletter, FAQ, team, contact, trustBadges) use \"backgroundImage\"; the imageText/story block uses \"image\"; gallery uses \"images\" (an array — pass a JSON array string of URLs, not attach_asset for a single one). Read the page's current sections first if you're not certain which index/type the merchant means.", parameters: toToolParameters(attachAssetSchema) } },
-  { type: "function", function: { name: "ask_user", description: "Ask the merchant a clarifying question when a critical detail (business name, currency/country, contact channel, WhatsApp number) is missing. Ends this turn and waits for their answer — never guess instead.", parameters: toToolParameters(askUserSchema) } },
+  { type: "function", function: { name: "ask_user", description: "Ask the merchant a clarifying question when a critical detail (business name or currency/country) is genuinely missing. Never use it for contact email, phone, address, or WhatsApp — those come from the site-creation form. Ends this turn and waits for their answer — never guess instead.", parameters: toToolParameters(askUserSchema) } },
   { type: "function", function: { name: "finalize_draft", description: "Call this once the site genuinely reflects what the merchant asked for. Ends the session.", parameters: toToolParameters(finalizeDraftSchema) } },
 ];
 
@@ -86,11 +88,12 @@ ${!currentSiteSummary ? "- STRICT: on a brand-new site (no CURRENT SITE STATE ab
 - STRICT: never create two pages that serve the same nav purpose (e.g. two contact-style pages, two about-style pages) — this produces a duplicate, broken-looking nav bar. Before calling create_page, check the pages you already have in this session/site for one that already serves that purpose (by TYPE, not just title — ABOUT/FAQ/CONTACT/POLICY are one-per-site). If one exists, call update_section on it instead of create_page with a new title/slug for the same thing.
 - STRICT: create_page must finish with a real, working page or not be reported as done. If a page's content generation fails or comes back empty/invalid, retry it immediately (same tool call, same page) rather than leaving a page that exists in the nav but errors when opened — a merchant clicking a nav link into "something went wrong" is a broken product, not an acceptable partial result. Only report a page as failed after retrying has genuinely been exhausted, and say so plainly rather than silently leaving a dead link.
 - If the prompt names delivery areas, call set_delivery_zones with exactly those names — don't invent additional ones, don't skip ones they named.
-- If the prompt mentions WhatsApp ordering/contact, call set_whatsapp — but only with a real number the merchant provided. If they mentioned WhatsApp but gave no number, use ask_user to get it. Never invent a phone number.
+- WhatsApp is an OPTIONAL field on the site-creation form. NEVER ask the merchant for a WhatsApp number. If the details block above lists a WhatsApp number, WhatsApp ordering and the floating WhatsApp button are already on — use that number in every contact section and "WhatsApp us" call to action. If it says none was given, don't add WhatsApp buttons or links at all. Only call set_whatsapp if the merchant types a new or different number in this conversation. Never invent a phone number.
+- Contact details (email, phone, address) come from the site-creation form and are listed above when provided. Use them exactly as written in every contact section, the contact page, and the footer — never write a fake email like hello@example.com or a made-up address or city. If a detail wasn't given, leave that line out instead of inventing one. Only call set_contact_info if the merchant types new or changed contact details in this conversation.
 - Ask (via ask_user) whether they have an Instagram, Facebook, or TikTok to link — if they weren't already given via the form or an earlier message in this conversation. If they give any, call set_social_links with exactly those URLs so real brand icons appear in the footer. Don't invent a URL, and don't ask again if they already said "no"/skipped it earlier in this conversation.
 - Never call set_payment_stub with mode "connected" as a guess — that only matters if the merchant already has a real gateway configured, which you cannot cause to happen from here.
 - create_page must produce real, specific, on-brand content immediately — never placeholder/lorem-ipsum text. A merchant should recognize their own business in the copy, not see generic filler.
-- Use ask_user (max 3 times per session) only for genuinely critical missing information — business name, currency/country if ambiguous, primary contact channel. Don't ask about things you can reasonably default.
+- Use ask_user (max 3 times per session) only for genuinely critical missing information — business name, currency/country if ambiguous. Never ask for contact email, phone, address, or WhatsApp (they come from the form). Don't ask about things you can reasonably default.
 - Call finalize_draft only once the site actually reflects the request AND satisfies every rule under SITE TYPE above — don't finalize a half-built or wrong-shaped site. finalize_draft will be rejected with specific corrections if it doesn't, so get it right rather than guessing you're done.`;
 }
 
@@ -565,6 +568,56 @@ async function executeTool(
         }
 
         return { result: `WhatsApp ordering ${parsed.enabled ? "enabled" : "disabled"} with number ${parsed.number}.`, isError: false };
+      }
+
+      case "set_contact_info": {
+        const parsed = setContactInfoSchema.parse(args);
+        if (!parsed.email && !parsed.phone && !parsed.address) {
+          return { result: "No email, phone, or address given — nothing saved.", isError: false };
+        }
+        await prisma.siteSettings.upsert({
+          where: { siteId },
+          create: {
+            siteId,
+            ...(parsed.email ? { contactEmail: parsed.email } : {}),
+            ...(parsed.phone ? { contactPhone: parsed.phone } : {}),
+            ...(parsed.address ? { contactAddress: parsed.address } : {}),
+          },
+          update: {
+            ...(parsed.email ? { contactEmail: parsed.email } : {}),
+            ...(parsed.phone ? { contactPhone: parsed.phone } : {}),
+            ...(parsed.address ? { contactAddress: parsed.address } : {}),
+          },
+        });
+
+        // Same reasoning as set_whatsapp above: patch the already-built
+        // contactInfo block on Home and Contact directly, so the merchant
+        // doesn't have to regenerate the whole page to see their real
+        // details replace whatever the AI guessed (or a stale placeholder).
+        const pagesToPatch = await prisma.page.findMany({ where: { siteId, type: { in: ["HOME", "CONTACT"] } } });
+        for (const p of pagesToPatch) {
+          if (!Array.isArray(p.content)) continue;
+          const blocks = p.content as Array<{ type: string; props: Record<string, unknown> }>;
+          let changed = false;
+          for (const b of blocks) {
+            if (b.type !== "contactInfo" || !Array.isArray(b.props?.items)) continue;
+            const items = b.props.items as Array<{ icon: string; title: string; value: string }>;
+            const upsertItem = (icon: string, title: string, value: string) => {
+              const existing = items.find((i) => i.icon === icon);
+              if (existing) { if (existing.value !== value) { existing.value = value; changed = true; } }
+              else { items.push({ icon, title, value }); changed = true; }
+            };
+            if (parsed.email) upsertItem("mail", "Email", parsed.email);
+            if (parsed.phone) upsertItem("phone", "Phone", parsed.phone);
+            if (parsed.address) upsertItem("map-pin", "Address", parsed.address);
+          }
+          if (changed) {
+            await prisma.page.update({ where: { id: p.id }, data: { content: blocks as object } });
+          }
+        }
+
+        const saved = [parsed.email && "email", parsed.phone && "phone", parsed.address && "address"].filter(Boolean).join(", ");
+        return { result: `Saved contact info (${saved}) and updated the contact page.`, isError: false };
       }
 
       case "set_social_links": {

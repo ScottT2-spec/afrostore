@@ -49,6 +49,7 @@ interface LayoutContext {
   images: ReturnType<typeof getRandomIndustryImages>;
   content: Partial<AIContent>;
   whatsappNumber?: string;
+  contact?: { email?: string | null; phone?: string | null; address?: string | null };
 }
 
 // ─── Block Builders ─────────────────────────────────────────
@@ -460,15 +461,15 @@ const SECTION_BUILDERS: Record<string, (ctx: LayoutContext) => BuilderBlock[]> =
       title: ctx.content.contact?.headline || "Get in Touch",
       subtitle: ctx.content.contact?.subtitle || "",
       items: [
-        // WhatsApp uses the merchant's real number when set — the old
-        // hardcoded "Quick chat support" placeholder had no digits in it
-        // at all, so getContactHref() stripped it to nothing and the
-        // link silently went nowhere. Omit the item entirely rather than
-        // show a WhatsApp button that doesn't actually work when no
-        // number has been set yet.
+        // Every item here uses a REAL value the merchant provided, or is
+        // omitted entirely. The old hardcoded filler ("Send us a message"
+        // for email, "Call during business hours" for phone) looked like
+        // contact info but wasn't any — no address at all, and nothing a
+        // customer could actually click or call.
         ...(ctx.whatsappNumber ? [{ icon: "message", title: "WhatsApp", value: ctx.whatsappNumber }] : []),
-        { icon: "mail", title: "Email", value: "Send us a message" },
-        { icon: "phone", title: "Phone", value: "Call during business hours" },
+        ...(ctx.contact?.email ? [{ icon: "mail", title: "Email", value: ctx.contact.email }] : []),
+        ...(ctx.contact?.phone ? [{ icon: "phone", title: "Phone", value: ctx.contact.phone }] : []),
+        ...(ctx.contact?.address ? [{ icon: "map-pin", title: "Address", value: ctx.contact.address }] : []),
       ],
       hours: "Monday - Saturday, 9:00 AM - 6:00 PM",
       backgroundImage: decorativeImage(ctx),
@@ -716,8 +717,9 @@ export function buildDynamicHomePage(
   industry: string,
   images: ReturnType<typeof getRandomIndustryImages>,
   whatsappNumber?: string,
+  contact?: { email?: string | null; phone?: string | null; address?: string | null },
 ): BuilderBlock[] {
-  const ctx: LayoutContext = { storeName, storeSlug, industry, images, content, whatsappNumber };
+  const ctx: LayoutContext = { storeName, storeSlug, industry, images, content, whatsappNumber, contact };
 
   let sections: string[];
 

@@ -46,7 +46,7 @@ const ECOMMERCE_RULES: SiteIntentRules = {
 - Build a real online store: Home, a Shop/products listing, and a Cart or Contact page at minimum — three pages is the floor, not a suggestion.
 - Create at least 3 real sample products with upsert_product UNLESS the merchant already gave you their own specific product list — in that case, use exactly what they gave you, don't pad it with invented items.
 - Real per-product pricing in the merchant's currency (NGN unless they said otherwise) — never a placeholder price like 0 or 1000 for every item.
-- WhatsApp ordering (set_whatsapp) is the expected default contact/order channel for an African SMB store unless the merchant asked for something else.
+- WhatsApp ordering is the expected contact/order channel for an African SMB store ONLY when the merchant gave a WhatsApp number in the site-creation form. When they did, it's already enabled — use that number. When they didn't, don't add WhatsApp buttons or links and don't ask for a number.
 - Never call set_payment_stub with mode "connected" as a guess — only if a gateway is already genuinely configured.`,
   async validate(siteId) {
     const violations: SiteIntentViolation[] = [];

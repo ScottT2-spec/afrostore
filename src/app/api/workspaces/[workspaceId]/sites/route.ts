@@ -80,6 +80,8 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ wor
     logo,
     socialLinks,
     phone,
+    email,
+    location,
     businessType = "general",
     country,
     currency,
@@ -92,6 +94,15 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ wor
     if (!name || typeof name !== "string" || name.trim().length < 2) {
       return error("Site name is required (min 2 characters)", 422);
     }
+
+    // WhatsApp is its own optional form field — it used to be silently
+    // taken from the phone field, so a merchant who left WhatsApp blank
+    // still got WhatsApp ordering pointed at their phone, and one who
+    // filled WhatsApp in had it ignored. Only a real, dedicated number
+    // turns WhatsApp features on.
+    const rawWhatsapp = typeof socialLinks?.whatsapp === "string" ? socialLinks.whatsapp : "";
+    const whatsappDigits = rawWhatsapp.replace(/[^\d+]/g, "");
+    const merchantWhatsapp = whatsappDigits.replace(/\D/g, "").length >= 8 ? whatsappDigits : null;
 
     if (!["ECOMMERCE", "WEBSITE", "LANDING_PAGE"].includes(siteType)) {
       return error("Invalid site type. Must be ECOMMERCE, WEBSITE, or LANDING_PAGE", 422);
@@ -143,7 +154,11 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ wor
       currency: resolvedCurrency,
       settings: {
         create: {
-          whatsappNumber: phone || null,
+          whatsappNumber: merchantWhatsapp,
+          whatsappOrdering: !!merchantWhatsapp,
+          contactEmail: typeof email === "string" && email.trim() ? email.trim() : null,
+          contactPhone: typeof phone === "string" && phone.trim() ? phone.trim() : null,
+          contactAddress: typeof location === "string" && location.trim() ? location.trim() : null,
           metaTitle: name.trim(),
           metaDescription: description || null,
         },
@@ -200,7 +215,11 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ wor
         // where no AI content has been generated yet, so no LLM call is
         // needed here at all — that's the ONE LLM call generateStore() makes
         // below, not a second, redundant one.
-        const homeBlocks = buildDynamicHomePage({}, storeName, storeSlug, bizType, getRandomIndustryImages(bizType));
+        const homeBlocks = buildDynamicHomePage(
+          {}, storeName, storeSlug, bizType, getRandomIndustryImages(bizType),
+          merchantWhatsapp || undefined,
+          { email: email || null, phone: phone || null, address: location || null },
+        );
 
         // Store as a plain block array — the exact same shape
         // generateStore()'s background job below writes for this same

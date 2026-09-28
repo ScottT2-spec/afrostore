@@ -314,6 +314,8 @@ export default function NewSitePage() {
           description: businessInfo.description,
           logo: businessInfo.logo || null,
           phone: businessInfo.phone,
+          email: businessInfo.email,
+          location: businessInfo.location,
           currency: storeCurrency,
           businessType: industry || 'general',
           products: businessInfo.products.split(',').map(item => item.trim()).filter(Boolean),
@@ -690,6 +692,19 @@ export default function NewSitePage() {
                 />
               </div>
               <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1.5">
+                  WhatsApp Number <span className="text-gray-400 font-normal">(optional)</span>
+                </label>
+                <input
+                  type="tel"
+                  value={businessInfo.whatsapp}
+                  onChange={e => setBusinessInfo(prev => ({ ...prev, whatsapp: e.target.value }))}
+                  className="w-full px-4 py-3 border border-gray-200 rounded-lg focus:ring-2 focus:ring-gray-900 outline-none"
+                  placeholder="+234 800 000 0000"
+                />
+                <p className="mt-1 text-xs text-gray-400">If you add one, your site gets a floating WhatsApp button and customers can order or chat with you on WhatsApp.</p>
+              </div>
+              <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1.5">Currency</label>
                 <select
                   value={storeCurrency}
@@ -784,7 +799,7 @@ export default function NewSitePage() {
                   Social Links (optional)
                 </summary>
                 <div className="px-4 pb-4 space-y-3">
-                  {(['whatsapp', 'instagram', 'facebook', 'twitter', 'tiktok'] as const).map(platform => (
+                  {(['instagram', 'facebook', 'twitter', 'tiktok'] as const).map(platform => (
                     <input
                       key={platform}
                       type="text"

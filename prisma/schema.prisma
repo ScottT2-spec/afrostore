@@ -254,6 +254,9 @@ model SiteSettings {
   offlineMode        Boolean @default(false)
   language           String  @default("en")
   whatsappNumber     String?
+  contactEmail       String?
+  contactPhone       String?
+  contactAddress     String?
   metaTitle          String?
   metaDescription    String?
   googleAnalyticsId  String?

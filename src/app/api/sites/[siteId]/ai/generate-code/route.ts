@@ -177,8 +177,31 @@ async function runGeneration(
     const filledSocials = socialLinks
       ? Object.entries(socialLinks).filter(([k, v]) => !["id", "siteId"].includes(k) && typeof v === "string" && v.trim())
       : [];
-    const knownInfo = filledSocials.length
-      ? `Social media links (merchant already filled these in the site-creation form):\n${filledSocials.map(([platform, url]) => `- ${platform}: ${url}`).join("\n")}`
+    // Everything the merchant already typed into the site-creation form.
+    // The agent is told to use these directly and never ask for them —
+    // contact email/phone/address end up in the contact section, and the
+    // (optional) WhatsApp number drives WhatsApp ordering + the floating
+    // WhatsApp button. Previously only social links reached the AI, so
+    // the contact page filled in fake values and the agent asked for a
+    // WhatsApp number the merchant had already given.
+    const settings = await prisma.siteSettings
+      .findUnique({ where: { siteId }, select: { whatsappNumber: true, contactEmail: true, contactPhone: true, contactAddress: true } })
+      .catch(() => null);
+    const socialsOnly = filledSocials.filter(([k]) => k !== "whatsapp");
+    const knownLines: string[] = [];
+    if (settings?.contactEmail) knownLines.push(`- Contact email: ${settings.contactEmail}`);
+    if (settings?.contactPhone) knownLines.push(`- Contact phone: ${settings.contactPhone}`);
+    if (settings?.contactAddress) knownLines.push(`- Business address / location: ${settings.contactAddress}`);
+    if (settings?.whatsappNumber) {
+      knownLines.push(`- WhatsApp number: ${settings.whatsappNumber} — WhatsApp ordering and the floating WhatsApp button are ALREADY turned on with this number. Use it in every contact section / "WhatsApp us" call to action. Do NOT call ask_user for it and do NOT ask the merchant to confirm it.`);
+    } else {
+      knownLines.push(`- WhatsApp number: none — the merchant left this optional field blank. Do NOT ask for one, do NOT call set_whatsapp, and do NOT add WhatsApp buttons or links unless the merchant gives a number themselves later.`);
+    }
+    if (socialsOnly.length) {
+      knownLines.push(`- Social media links (already filled in the form):\n${socialsOnly.map(([platform, url]) => `  - ${platform}: ${url}`).join("\n")}`);
+    }
+    const knownInfo = knownLines.length
+      ? `Details the merchant entered in the site-creation form. Use these exactly as written wherever they belong (contact page, contact sections, footer). Never invent a different email, phone, or address, and never leave a fake placeholder like hello@example.com:\n${knownLines.join("\n")}`
       : undefined;
 
     const result = await runSiteGenerationAgent({

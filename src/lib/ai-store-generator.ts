@@ -196,7 +196,7 @@ Rules:
 
 // ─── Build pages from AI content ────────────────────────────
 
-function buildHomePage(data: Record<string, any>, storeName: string, storeSlug: string, images: StoreImages, industry: string, whatsappNumber?: string): GeneratedPage {
+function buildHomePage(data: Record<string, any>, storeName: string, storeSlug: string, images: StoreImages, industry: string, whatsappNumber?: string, contact?: { email?: string | null; phone?: string | null; address?: string | null }): GeneratedPage {
   const brand = data.brand || {};
 
   // The dynamic layout engine (ai-layout-engine.ts) is the only homepage
@@ -214,7 +214,7 @@ function buildHomePage(data: Record<string, any>, storeName: string, storeSlug: 
     title: "Home",
     slug: "home",
     type: "HOME",
-    blocks: buildDynamicHomePage(data, storeName, storeSlug, industry, images, whatsappNumber),
+    blocks: buildDynamicHomePage(data, storeName, storeSlug, industry, images, whatsappNumber, contact),
     metaTitle: data.seo?.homeTitle || `${storeName} — Official Store`,
     metaDescription: data.seo?.homeDesc || brand.heroSubheading || "",
   };
@@ -440,24 +440,27 @@ function buildFAQPage(data: Record<string, any>, storeName: string, storeSlug: s
   };
 }
 
-function buildContactPage(data: Record<string, any>, storeName: string, images: StoreImages, whatsappNumber?: string): GeneratedPage {
+function buildContactPage(
+  data: Record<string, any>,
+  storeName: string,
+  images: StoreImages,
+  realContact?: { whatsappNumber?: string | null; contactEmail?: string | null; contactPhone?: string | null; contactAddress?: string | null }
+): GeneratedPage {
   const contact = data.contact || {};
 
-  // Previously these 4 fields were 100% hardcoded fake placeholders
-  // ("hello@example.com", "+233 XX XXX XXXX", "Accra, Ghana") regardless
-  // of what the merchant actually told the AI or had set for their real
-  // store — the merchant-provided WhatsApp number was fetched by the
-  // caller but never even passed into this function. Now: the real
-  // whatsappNumber setting wins for phone/WhatsApp, then whatever the AI
-  // actually generated for contact.email/phone/address (grounded in this
-  // specific business's location/description, not a fixed example), and
-  // a field is left out entirely rather than shown as a fake value when
-  // there's genuinely nothing real to put there.
+  // Real, merchant-entered settings always win over anything the AI
+  // guessed or wrote for this business — those exist specifically so
+  // the contact page never has to guess again.
+  const realEmail = realContact?.contactEmail || contact.email;
+  const realPhone = realContact?.contactPhone || realContact?.whatsappNumber || contact.phone;
+  const realWhatsapp = realContact?.whatsappNumber;
+  const realAddress = realContact?.contactAddress || contact.address;
+
   const contactItems: Array<{ icon: string; title: string; value: string }> = [
-    ...(contact.email ? [{ icon: "mail", title: "Email", value: contact.email }] : []),
-    ...(whatsappNumber || contact.phone ? [{ icon: "phone", title: "Phone", value: whatsappNumber || contact.phone }] : []),
-    ...(whatsappNumber ? [{ icon: "message", title: "WhatsApp", value: whatsappNumber }] : []),
-    ...(contact.address ? [{ icon: "map-pin", title: "Address", value: contact.address }] : []),
+    ...(realEmail ? [{ icon: "mail", title: "Email", value: realEmail }] : []),
+    ...(realPhone ? [{ icon: "phone", title: "Phone", value: realPhone }] : []),
+    ...(realWhatsapp ? [{ icon: "message", title: "WhatsApp", value: realWhatsapp }] : []),
+    ...(realAddress ? [{ icon: "map-pin", title: "Address", value: realAddress }] : []),
   ];
 
   const blocks: BuilderBlock[] = [
@@ -636,11 +639,11 @@ export async function generateStore(input: StoreGeneratorInput): Promise<StoreGe
   //    Fetch whatever WhatsApp number is already set (e.g. a merchant who
   //    enabled WhatsApp, then regenerated) so the homepage's contact
   //    section can use the real number instead of a fake placeholder.
-  const existingSettings = await prisma.siteSettings.findUnique({ where: { siteId: input.siteId }, select: { whatsappNumber: true } });
+  const existingSettings = await prisma.siteSettings.findUnique({ where: { siteId: input.siteId }, select: { whatsappNumber: true, contactEmail: true, contactPhone: true, contactAddress: true } });
   const pages: GeneratedPage[] = [
-    buildHomePage(data, input.storeName, input.storeSlug, images, industry, existingSettings?.whatsappNumber || undefined),
+    buildHomePage(data, input.storeName, input.storeSlug, images, industry, existingSettings?.whatsappNumber || undefined, { email: existingSettings?.contactEmail, phone: existingSettings?.contactPhone, address: existingSettings?.contactAddress }),
     buildAboutPage(data, input.storeName, input.storeSlug, images),
-    buildContactPage(data, input.storeName, images, existingSettings?.whatsappNumber || undefined),
+    buildContactPage(data, input.storeName, images, existingSettings || undefined),
     // Strictly Home, About, Contact, Reviews only — no FAQ or Policies
     // page, and no other nav item. Reviews is a fixed platform route
     // (src/app/store/[slug]/reviews), not a generated content page.
