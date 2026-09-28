@@ -13,7 +13,7 @@ const INDUSTRIES = [
 ];
 
 export default function AIBusinessPage() {
-  const { currentStore } = useSite();
+  const { setSiteId, loading: siteLoading } = useSite();
   const router = useRouter();
   const [step, setStep] = useState(1);
   const [launching, setLaunching] = useState(false);
@@ -37,78 +37,70 @@ export default function AIBusinessPage() {
   // chatting to request changes once it's done, instead of landing on a
   // dead-end results page.
   const launch = async () => {
-    if (!currentStore || !businessName.trim() || !businessType || launching) return;
+    if (!businessName.trim() || !businessType || launching) return;
     setLaunching(true);
 
-    // The Site record's own `name` (shown everywhere — dashboard nav,
-    // workspace list, this page's greeting, browser tab) was never
-    // actually set from this form: it only ever flowed into the task
-    // text sent to the AI, which has no tool to rename the site itself,
-    // so the site kept whatever placeholder name it was created with.
-    // Set it directly, right away, so it's correct regardless of what
-    // the AI does with the rest of the task.
     try {
-      await fetch(`/api/sites/${currentStore.id}`, {
-        method: "PATCH",
-        headers: { "Content-Type": "application/json" },
+      // A brand-new Site every time — "AI Business" was silently reusing
+      // whatever site the merchant happened to have active (currentStore),
+      // so a second AI-generated site overwrote the first instead of
+      // creating its own. Same endpoint/shape the template flow already
+      // uses, so this new site shows up in the dashboard sites list the
+      // same way a template-created one does.
+      const token = typeof window !== "undefined" ? localStorage.getItem("token") : null;
+      const authHeaders: Record<string, string> = token ? { Authorization: `Bearer ${token}` } : {};
+
+      const wsRes = await fetch("/api/workspaces", { headers: authHeaders });
+      const wsJson = await wsRes.json();
+      const workspaceId = wsJson?.data?.[0]?.id;
+      if (!workspaceId) throw new Error("No workspace found for this account");
+
+      const createRes = await fetch(`/api/workspaces/${workspaceId}/sites`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json", ...authHeaders },
         body: JSON.stringify({
           name: businessName.trim(),
           businessType,
+          siteType: "ECOMMERCE",
           ...(location.trim() ? { country: location.trim() } : {}),
-          // Same reasoning as `name` above: this form's own description
-          // field never made it to Site.description either — only into
-          // the AI's prompt text — so it never actually showed up
-          // anywhere real (footer taglines, meta descriptions).
           ...(description.trim() ? { description: description.trim() } : {}),
+          ...(instagram.trim() || facebook.trim() || tiktok.trim()
+            ? { socialLinks: { instagram: instagram.trim(), facebook: facebook.trim(), tiktok: tiktok.trim() } }
+            : {}),
         }),
       });
-    } catch { /* non-fatal — the AI builder flow below still proceeds either way */ }
+      const createJson = await createRes.json();
+      const newSiteId = createJson?.data?.id;
+      if (!createRes.ok || !newSiteId) throw new Error(createJson?.error || "Failed to create site");
 
-    // Same reasoning again: social links typed here need to land in the
-    // real SiteSocialLinks row directly — nothing else on this page saves
-    // them, and there's no AI tool that can set them retroactively.
-    if (instagram.trim() || facebook.trim() || tiktok.trim()) {
-      try {
-        await fetch(`/api/sites/${currentStore.id}/social-links`, {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ instagram: instagram.trim(), facebook: facebook.trim(), tiktok: tiktok.trim() }),
-        });
-      } catch { /* non-fatal */ }
+      // Point the app's "current site" at the one we just made, so the
+      // dashboard (sidebar switcher included) reflects it immediately.
+      setSiteId(newSiteId);
+
+      const composedTask = [
+        `Build my ${businessType} business site for "${businessName.trim()}".`,
+        location.trim() && `We're based in ${location.trim()}.`,
+        targetAudience.trim() && `Our target audience is ${targetAudience.trim()}.`,
+        products.trim() && `What we sell: ${products.trim()}.`,
+        description.trim() && `About the business: ${description.trim()}.`,
+      ].filter(Boolean).join(" ");
+
+      sessionStorage.setItem(
+        `ai-builder-prefill:${newSiteId}`,
+        JSON.stringify({
+          task: composedTask, businessName: businessName.trim(), businessType,
+          products: products.trim(), targetAudience: targetAudience.trim(),
+          socialLinks: { instagram: instagram.trim(), facebook: facebook.trim(), tiktok: tiktok.trim() },
+        })
+      );
+      router.push(`/dashboard/sites/${newSiteId}/ai-builder`);
+    } catch (err) {
+      setLaunching(false);
+      alert(err instanceof Error ? err.message : "Failed to launch AI Business — please try again.");
     }
-
-    const socialLinksGiven = [
-      instagram.trim() && `Instagram: ${instagram.trim()}`,
-      facebook.trim() && `Facebook: ${facebook.trim()}`,
-      tiktok.trim() && `TikTok: ${tiktok.trim()}`,
-    ].filter(Boolean);
-
-    const composedTask = [
-      `Build my ${businessType} business site for "${businessName.trim()}".`,
-      location.trim() && `We're based in ${location.trim()}.`,
-      targetAudience.trim() && `Our target audience is ${targetAudience.trim()}.`,
-      products.trim() && `What we sell: ${products.trim()}.`,
-      description.trim() && `About the business: ${description.trim()}.`,
-      // Tell the AI these are already saved so it doesn't ask again —
-      // without this line it has no way to know the form (not this
-      // message) already collected and stored them.
-      socialLinksGiven.length > 0
-        ? `Social links already saved to the database, do NOT ask about this or call set_social_links — it's done: ${socialLinksGiven.join(", ")}.`
-        : `No social media links given yet — ask if they have Instagram, Facebook, or TikTok before finishing.`,
-    ].filter(Boolean).join(" ");
-
-    sessionStorage.setItem(
-      `ai-builder-prefill:${currentStore.id}`,
-      JSON.stringify({
-        task: composedTask, businessName: businessName.trim(), businessType,
-        products: products.trim(), targetAudience: targetAudience.trim(),
-        socialLinks: { instagram: instagram.trim(), facebook: facebook.trim(), tiktok: tiktok.trim() },
-      })
-    );
-    router.push(`/dashboard/sites/${currentStore.id}/ai-builder`);
   };
 
-  if (!currentStore) return <div className="p-6 flex items-center justify-center min-h-[50vh]"><Loader2 className="h-8 w-8 animate-spin text-brand-600" /></div>;
+  if (siteLoading) return <div className="p-6 flex items-center justify-center min-h-[50vh]"><Loader2 className="h-8 w-8 animate-spin text-brand-600" /></div>;
 
   return (
     <div className="p-6 max-w-4xl mx-auto space-y-6">
