@@ -460,7 +460,7 @@ export default function AIBuilderPage({ params }: { params: Promise<{ siteId: st
   };
 
   return (
-    <div className="h-screen w-screen flex flex-col bg-surface-50 overflow-hidden">
+    <div className="fixed inset-0 z-[60] flex flex-col bg-surface-50 overflow-hidden">
       {/* Top bar */}
       <header className="h-14 flex-shrink-0 border-b border-surface-200 bg-white flex items-center justify-between px-4">
         <div className="flex items-center gap-3">
