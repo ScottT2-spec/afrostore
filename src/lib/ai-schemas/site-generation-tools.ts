@@ -62,6 +62,7 @@ export const setThemeSchema = z.object({
 
 export const updateSiteInfoSchema = z.object({
   name: z.string().min(1).describe("The real business/store name, exactly as the merchant said it or as decided from their description. Call this as early as possible — before or alongside the first create_page — so the site's name shows up correctly in the merchant's dashboard sites list immediately, not only after Publish."),
+  description: z.string().optional().describe("Optional one-line business description."),
 });
 
 export const setNavigationSchema = z.object({
