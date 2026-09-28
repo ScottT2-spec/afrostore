@@ -71,7 +71,7 @@ function EmptyDashboard() {
         <p className="text-surface-500 mb-6 max-w-sm mx-auto">
           Get started by creating a store. You&apos;ll be selling in minutes.
         </p>
-        <button onClick={() => router.push("/dashboard/new-site")} className="btn-primary">
+        <button onClick={() => router.push("/dashboard/create-site")} className="btn-primary">
           <Sparkles className="h-4 w-4" />
           Create Store
         </button>

@@ -106,7 +106,7 @@ export default function DashboardLayout({
 }
 
 /** Pages that work without a site selected */
-const NO_SITE_PAGES = ["/dashboard/workspaces", "/dashboard/new-site", "/dashboard/agency", "/dashboard/billing", "/dashboard/settings", "/dashboard/support", "/dashboard/sites", "/dashboard/profile"];
+const NO_SITE_PAGES = ["/dashboard/workspaces", "/dashboard/new-site", "/dashboard/create-site", "/dashboard/ai-business", "/dashboard/agency", "/dashboard/billing", "/dashboard/settings", "/dashboard/support", "/dashboard/sites", "/dashboard/profile"];
 
 function SiteGate({ children }: { children: React.ReactNode }) {
   const { currentStore, loading } = useSite();
@@ -140,7 +140,7 @@ function SiteGate({ children }: { children: React.ReactNode }) {
             <Link href="/dashboard/workspaces" className="btn-secondary py-2.5 px-4 text-sm">
               My Workspaces
             </Link>
-            <Link href="/dashboard/new-site" className="btn-primary py-2.5 px-4 text-sm flex items-center gap-1.5">
+            <Link href="/dashboard/create-site" className="btn-primary py-2.5 px-4 text-sm flex items-center gap-1.5">
               <Plus className="h-4 w-4" /> Create Site
             </Link>
           </div>

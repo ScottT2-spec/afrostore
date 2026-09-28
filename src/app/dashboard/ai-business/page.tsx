@@ -4,7 +4,7 @@ import { ArrowRight, Loader2 } from "lucide-react";
 import { CheckCircle2, Palette, Sparkles } from "@/components/icons/FilledIcons";
 
 import { useState } from "react";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { useSite } from "@/context/StoreContext";
 
 const INDUSTRIES = [
@@ -16,6 +16,8 @@ const INDUSTRIES = [
 export default function AIBusinessPage() {
   const { setSiteId, loading: siteLoading } = useSite();
   const router = useRouter();
+  const searchParams = useSearchParams();
+  const workspaceParam = searchParams.get("workspace");
   const [step, setStep] = useState(1);
   const [launching, setLaunching] = useState(false);
 
@@ -65,9 +67,12 @@ export default function AIBusinessPage() {
       const token = typeof window !== "undefined" ? localStorage.getItem("token") : null;
       const authHeaders: Record<string, string> = token ? { Authorization: `Bearer ${token}` } : {};
 
-      const wsRes = await fetch("/api/workspaces", { headers: authHeaders });
-      const wsJson = await wsRes.json();
-      const workspaceId = wsJson?.data?.[0]?.id;
+      let workspaceId = workspaceParam;
+      if (!workspaceId) {
+        const wsRes = await fetch("/api/workspaces", { headers: authHeaders });
+        const wsJson = await wsRes.json();
+        workspaceId = wsJson?.data?.[0]?.id;
+      }
       if (!workspaceId) throw new Error("No workspace found for this account");
 
       const createRes = await fetch(`/api/workspaces/${workspaceId}/sites`, {

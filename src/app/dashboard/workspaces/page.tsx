@@ -337,7 +337,7 @@ export default function WorkspacesPage() {
                 </div>
                 <div className="flex items-center gap-2">
                   <button
-                    onClick={() => router.push(`/dashboard/new-site?workspace=${workspace.id}`)}
+                    onClick={() => router.push(`/dashboard/create-site?workspace=${workspace.id}`)}
                     className="flex items-center gap-1.5 px-3 py-1.5 text-sm bg-gray-100 hover:bg-gray-200 rounded-lg transition font-medium"
                   >
                     <Plus className="w-3.5 h-3.5" />
