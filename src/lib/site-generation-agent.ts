@@ -38,6 +38,8 @@ import {
   setPaymentStubSchema,
   setSeoSchema,
   attachAssetSchema,
+  getSectionSchema,
+  editSectionSchema,
   askUserSchema,
   finalizeDraftSchema,
 } from "@/lib/ai-schemas/site-generation-tools";
@@ -59,6 +61,8 @@ const TOOL_DEFS: AITool[] = [
   { type: "function", function: { name: "create_page", description: "Add a new page with default sections, populated with real generated content — never a placeholder skeleton.", parameters: toToolParameters(createPageSchema) } },
   { type: "function", function: { name: "update_site_info", description: "Set the site's real business name (and optional description). Call this first, before create_page, as soon as you know the business name — this is what makes the site show up correctly in the merchant's dashboard sites list immediately, independent of Publish.", parameters: toToolParameters(updateSiteInfoSchema) } },
   { type: "function", function: { name: "update_section", description: "Change specific fields on one existing section of one page.", parameters: toToolParameters(updateSectionSchema) } },
+  { type: "function", function: { name: "get_section", description: "READ a section's real, current content before editing it. With sectionIndex: returns every editable field of that one section as dotted paths with their current values (headings, texts, colors, images, buttons, links, and each list item like items.2.title). Without sectionIndex: returns an outline of all sections on the page. Call this whenever you are not 100% sure of a field's exact path or current value.", parameters: toToolParameters(getSectionSchema) } },
+  { type: "function", function: { name: "edit_section", description: "Change ANYTHING on any section: a heading or any text, text/background/button colors, the background image or any image, button labels and links, and every individual item inside lists (features, testimonials, FAQs, stats, team, gallery images, etc.) — set a value, remove a field or list item, or insert a new list item. Paths come from get_section. Prefer this over update_section for anything beyond top-level fields.", parameters: toToolParameters(editSectionSchema) } },
   { type: "function", function: { name: "set_theme", description: "Set the site's visual vibe/color direction.", parameters: toToolParameters(setThemeSchema) } },
   { type: "function", function: { name: "set_navigation", description: "Set the main nav links.", parameters: toToolParameters(setNavigationSchema) } },
   { type: "function", function: { name: "set_page_nav_visibility", description: "Show or hide a single page's link in the nav bar without deleting or unpublishing the page — use this for any request to remove/hide/take out one nav item (e.g. \"remove the FAQ from the menu\").", parameters: toToolParameters(setPageNavVisibilitySchema) } },
@@ -84,7 +88,7 @@ ${knownInfo ? `\nALREADY PROVIDED BY THE MERCHANT — do not ask_user for any of
 ${currentSiteSummary ? `\nCURRENT SITE STATE — this site already exists and is live. The merchant's message below is a request to CHANGE it, not build it from scratch. Read this before doing anything: it's every page, in order, and every section on each page with its 0-based index (the sectionIndex update_section needs) and a preview of its current content.\n\n${currentSiteSummary}\n\nWhen the merchant refers to something ("the hero", "the FAQ section", "that testimonial"), match it against the actual sections listed above rather than guessing an index. If they ask to change one page's wording/color/image, use update_section on the matching page+index — don't call create_page for something that already exists (see the duplicate-page rule below). If what they're asking about genuinely isn't listed above, say so and ask, rather than assuming a section exists.\n` : ""}
 Rules:
 ${!currentSiteSummary ? "- STRICT, HIGHEST PRIORITY: this is the initial build of a brand-new site. Do NOT call ask_user at all during this build, for anything — not business name, not currency, not social links, not product images, not anything else. Use exactly what the merchant's message/form gave you, and make a reasonable, clearly-labeled-as-default choice for everything else (stock/generated images for products, a sensible default currency/country, no social links if none were given). If something later turns out wrong, the merchant can correct it in chat after seeing the built site — that correction, not this first pass, is what ask_user and the other tools are for. Call update_site_info with the real business name as your very first tool call, before create_page, deciding the name from what the merchant said rather than asking.\n" : ""}- Default currency is NGN unless the merchant's prompt says otherwise.
-- STRICT: every section on the homepage must have real content — never add or leave a section (features, testimonials, FAQ, values, or any other content block) with an empty or near-empty items list. A section with no content under its heading is a broken page. When using update_section on a content block, always include a fully populated items/content array — never set it to an empty list or omit it expecting old content to remain if you're changing that field.
+- STRICT: when the merchant asks to change ANY detail of ANY section (a heading, any text, a color, the background image or an image, a button label or link, or one individual item like the 3rd feature or a single FAQ answer), you can change it \u2014 nothing on a section is off-limits. If you don't know the exact field path or its current value, call get_section first, then apply every change together with edit_section (use its set / remove / insert operations). Never tell the merchant something can't be changed without checking get_section first, and never claim a change is done unless edit_section returned success.\n- STRICT: every section on the homepage must have real content — never add or leave a section (features, testimonials, FAQ, values, or any other content block) with an empty or near-empty items list. A section with no content under its heading is a broken page. When using update_section on a content block, always include a fully populated items/content array — never set it to an empty list or omit it expecting old content to remain if you're changing that field.
 - STRICT: if the merchant uploaded an image and told you which section to use it in (hero, testimonials, a named section, "this section", etc.), you MUST call attach_asset with that exact uploaded URL on that exact section — never substitute a stock photo, an AI-generated image, or a different section instead. This is a direct, literal instruction from the merchant, not a style preference — treat it as non-negotiable. If it's ambiguous which section they mean, ask_user rather than guessing wrong and using the image somewhere else.
 - STRICT: never create two pages that serve the same nav purpose (e.g. two contact-style pages, two about-style pages) — this produces a duplicate, broken-looking nav bar. Before calling create_page, check the pages you already have in this session/site for one that already serves that purpose (by TYPE, not just title — ABOUT/FAQ/CONTACT/POLICY are one-per-site). If one exists, call update_section on it instead of create_page with a new title/slug for the same thing.
 - STRICT: create_page must finish with a real, working page or not be reported as done. If a page's content generation fails or comes back empty/invalid, retry it immediately (same tool call, same page) rather than leaving a page that exists in the nav but errors when opened — a merchant clicking a nav link into "something went wrong" is a broken product, not an acceptable partial result. Only report a page as failed after retrying has genuinely been exhausted, and say so plainly rather than silently leaving a dead link.
@@ -133,6 +137,104 @@ function summarizeSection(props: Record<string, unknown> | undefined, index: num
     parts.push(`${items.length} item${items.length === 1 ? "" : "s"}`);
   }
   return `  [${index}] ${type}${parts.length > 0 ? " — " + parts.join(", ") : ""}`;
+}
+
+// ---- Path-based section editing (get_section / edit_section) ----------
+// Blocks are {id, type, props}; every visible thing lives somewhere inside
+// `props`, sometimes nested (items[2].title). These helpers let the agent
+// read and change any of it by dotted path, atomically.
+const UNSAFE_PATH_KEYS = new Set(["__proto__", "constructor", "prototype"]);
+const MAX_PROPS_BYTES = 400_000;
+
+function parsePath(path: string): string[] | null {
+  const parts = path.split(".").map((p) => p.trim()).filter(Boolean);
+  if (parts.length === 0 || parts.some((p) => UNSAFE_PATH_KEYS.has(p))) return null;
+  return parts;
+}
+
+function flattenProps(value: unknown, prefix = "", out: Array<[string, unknown]> = []): Array<[string, unknown]> {
+  if (Array.isArray(value)) {
+    if (value.length === 0 && prefix) out.push([prefix, []]);
+    value.forEach((v, i) => flattenProps(v, prefix ? `${prefix}.${i}` : String(i), out));
+  } else if (value && typeof value === "object") {
+    const entries = Object.entries(value as Record<string, unknown>);
+    if (entries.length === 0 && prefix) out.push([prefix, {}]);
+    for (const [k, v] of entries) flattenProps(v, prefix ? `${prefix}.${k}` : k, out);
+  } else if (prefix) {
+    out.push([prefix, value]);
+  }
+  return out;
+}
+
+function formatFlat(props: Record<string, unknown>, maxValueLen: number): string {
+  const rows = flattenProps(props).map(([path, v]) => {
+    const raw = typeof v === "string" ? v : JSON.stringify(v);
+    const shown = raw.length > maxValueLen ? raw.slice(0, maxValueLen) + "\u2026" : raw;
+    return `  ${path} = ${typeof v === "string" ? JSON.stringify(shown) : shown}`;
+  });
+  return rows.length ? rows.join("\n") : "  (no fields)";
+}
+
+/** Walk to the container that holds the last path segment. Creates missing plain objects when asked (for adding a brand-new field). */
+function walkToParent(root: Record<string, unknown>, parts: string[], createMissing: boolean): { parent: any; key: string } | string {
+  let cur: any = root;
+  for (let i = 0; i < parts.length - 1; i++) {
+    const k = parts[i];
+    let next = Array.isArray(cur) ? cur[Number(k)] : cur?.[k];
+    if (next === undefined || next === null) {
+      if (!createMissing || Array.isArray(cur)) return `"${parts.slice(0, i + 1).join(".")}" doesn't exist`;
+      next = {};
+      cur[k] = next;
+    }
+    if (typeof next !== "object") return `"${parts.slice(0, i + 1).join(".")}" is a plain value, not something with fields inside it`;
+    cur = next;
+  }
+  return { parent: cur, key: parts[parts.length - 1] };
+}
+
+function applySectionEdits(
+  props: Record<string, unknown>,
+  edits: Array<{ op: "set" | "remove" | "insert"; path: string; value?: unknown; index?: number }>,
+): { props: Record<string, unknown>; error?: string } {
+  const next = JSON.parse(JSON.stringify(props)) as Record<string, unknown>;
+  for (let n = 0; n < edits.length; n++) {
+    const e = edits[n];
+    const label = `edit ${n + 1} (${e.op} "${e.path}")`;
+    const parts = parsePath(e.path);
+    if (!parts) return { props, error: `${label}: invalid path.` };
+
+    if (e.op === "insert") {
+      const target = parts.reduce<any>((c, k) => (c == null ? c : Array.isArray(c) ? c[Number(k)] : c[k]), next);
+      if (!Array.isArray(target)) return { props, error: `${label}: "${e.path}" is not a list \u2014 use get_section to see which fields are lists.` };
+      const at = e.index === undefined ? target.length : e.index;
+      if (at > target.length) return { props, error: `${label}: index ${at} is past the end (list has ${target.length} items).` };
+      target.splice(at, 0, e.value);
+      continue;
+    }
+
+    const loc = walkToParent(next, parts, e.op === "set");
+    if (typeof loc === "string") return { props, error: `${label}: ${loc}.` };
+    const { parent, key } = loc;
+
+    if (Array.isArray(parent)) {
+      const i = Number(key);
+      if (!Number.isInteger(i) || i < 0) return { props, error: `${label}: "${key}" isn't a valid list position.` };
+      if (e.op === "remove") {
+        if (i >= parent.length) return { props, error: `${label}: list only has ${parent.length} items.` };
+        parent.splice(i, 1);
+      } else {
+        if (i > parent.length) return { props, error: `${label}: list only has ${parent.length} items \u2014 use insert to add one.` };
+        parent[i] = e.value;
+      }
+    } else if (e.op === "remove") {
+      if (!(key in parent)) return { props, error: `${label}: "${e.path}" doesn't exist.` };
+      delete parent[key];
+    } else {
+      parent[key] = e.value;
+    }
+  }
+  if (JSON.stringify(next).length > MAX_PROPS_BYTES) return { props, error: "Edits would make this section too large." };
+  return { props: next };
 }
 
 async function summarizeCurrentSite(siteId: string): Promise<string | null> {
@@ -466,6 +568,45 @@ async function executeTool(
         await prisma.page.update({ where: { id: page.id }, data: { content: blocks as object } });
         await prisma.pageVersion.create({ data: { pageId: page.id, title: page.title, content: blocks as object } });
         return { result: `Updated section ${parsed.sectionIndex} on "${parsed.pageSlug}".`, isError: false };
+      }
+
+      case "get_section": {
+        const parsed = getSectionSchema.parse(args);
+        const page = await prisma.page.findUnique({ where: { siteId_slug: { siteId, slug: parsed.pageSlug } } });
+        if (!page) return { result: `No page with slug "${parsed.pageSlug}" exists.`, isError: true };
+        const blocks = Array.isArray(page.content) ? (page.content as Array<{ type?: string; props?: Record<string, unknown> }>) : [];
+        if (parsed.sectionIndex === undefined) {
+          const outline = blocks.map((b, i) => `[${i}] ${b.type || "unknown"}\n${formatFlat(b.props || {}, 50)}`).join("\n");
+          return { result: `Page "${parsed.pageSlug}" has ${blocks.length} sections:\n${outline || "(none)"}`, isError: false };
+        }
+        if (parsed.sectionIndex >= blocks.length) return { result: `Page "${parsed.pageSlug}" only has ${blocks.length} sections (0-${blocks.length - 1}).`, isError: true };
+        const b = blocks[parsed.sectionIndex];
+        return { result: `Section ${parsed.sectionIndex} on "${parsed.pageSlug}" (type: ${b.type || "unknown"}). Editable fields (path = current value):\n${formatFlat(b.props || {}, 400)}`, isError: false };
+      }
+
+      case "edit_section": {
+        const parsed = editSectionSchema.parse(args);
+        const page = await prisma.page.findUnique({ where: { siteId_slug: { siteId, slug: parsed.pageSlug } } });
+        if (!page) return { result: `No page with slug "${parsed.pageSlug}" exists \u2014 call create_page first.`, isError: true };
+        const blocks = Array.isArray(page.content) ? [...(page.content as Record<string, unknown>[])] : [];
+        if (parsed.sectionIndex >= blocks.length) {
+          return { result: `Page "${parsed.pageSlug}" only has ${blocks.length} sections (0-${blocks.length - 1}) \u2014 sectionIndex ${parsed.sectionIndex} doesn't exist.`, isError: true };
+        }
+        const target = blocks[parsed.sectionIndex] as { props?: Record<string, unknown> };
+        const applied = applySectionEdits(target.props || {}, parsed.edits);
+        if (applied.error) return { result: `Nothing was changed. ${applied.error}`, isError: true };
+
+        // Same sensitive-category guardrail the build applies, on the new text only.
+        if (safetyCategory) {
+          const newText = parsed.edits.map((e) => (typeof e.value === "string" ? e.value : e.value ? JSON.stringify(e.value) : "")).join(" \n ");
+          const violations = scanForSafetyViolations(safetyCategory, newText).filter((v) => v.rule === "forbidden-phrase");
+          if (violations.length > 0) return { result: `Nothing was changed. ${violations.map((v) => v.detail).join(" ")}`, isError: true };
+        }
+
+        blocks[parsed.sectionIndex] = { ...target, props: applied.props };
+        await prisma.page.update({ where: { id: page.id }, data: { content: blocks as object } });
+        await prisma.pageVersion.create({ data: { pageId: page.id, title: page.title, content: blocks as object } });
+        return { result: `Applied ${parsed.edits.length} edit${parsed.edits.length === 1 ? "" : "s"} to section ${parsed.sectionIndex} on "${parsed.pageSlug}": ${parsed.edits.map((e) => `${e.op} ${e.path}`).join(", ")}.`, isError: false };
       }
 
       case "set_theme": {

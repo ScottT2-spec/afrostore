@@ -55,6 +55,35 @@ export const updateSectionSchema = z.object({
   ),
 });
 
+export const getSectionSchema = z.object({
+  pageSlug: z.string().min(1).describe('Which page to read, e.g. "home" or "about".'),
+  sectionIndex: z.number().int().min(0).optional().describe(
+    "0-based position of the section. Omit to get a short outline of every section on the page (type + field paths) instead of one section in full."
+  ),
+});
+
+export const sectionEditOpSchema = z.object({
+  op: z.enum(["set", "remove", "insert"]).describe(
+    '"set" = write a value at a path (creates the field if it does not exist yet, e.g. a new color or background image). ' +
+    '"remove" = delete a field, or delete one list item. ' +
+    '"insert" = add a new item into a list at an index (or at the end).'
+  ),
+  path: z.string().min(1).describe(
+    'Dotted path INSIDE the section, exactly as get_section lists it. Lists use the item number: "heading", "buttonColor", "backgroundImage", "items.2.title", "items.0.image", "images.3". ' +
+    'For "insert" the path is the LIST itself, e.g. "items".'
+  ),
+  value: z.unknown().optional().describe('The new value for "set" or the new item for "insert" (text, number, boolean, color hex, image URL, or an object for a whole list item). Not used by "remove".'),
+  index: z.number().int().min(0).optional().describe('For "insert" only: position to insert at. Omit to append at the end.'),
+});
+
+export const editSectionSchema = z.object({
+  pageSlug: z.string().min(1).describe('Which page to edit, e.g. "home" or "about".'),
+  sectionIndex: z.number().int().min(0).describe("0-based position of the section on that page."),
+  edits: z.array(sectionEditOpSchema).min(1).max(40).describe(
+    "Every change to make on this section, applied together. If any one fails, none are saved and the error says which one, so fix it and resend."
+  ),
+});
+
 export const setThemeSchema = z.object({
   vibe: z.string().min(1).describe("One word describing the visual feel, e.g. warm, bold, minimal, elegant, playful."),
   primaryColorHint: z.string().optional().describe("Optional color name/hex hint — the theme system picks the final palette, this is a preference, not a guarantee."),
@@ -151,6 +180,8 @@ export const finalizeDraftSchema = z.object({
 export type SectionType = z.infer<typeof sectionTypeEnum>;
 export type CreatePageArgs = z.infer<typeof createPageSchema>;
 export type UpdateSectionArgs = z.infer<typeof updateSectionSchema>;
+export type GetSectionArgs = z.infer<typeof getSectionSchema>;
+export type EditSectionArgs = z.infer<typeof editSectionSchema>;
 export type SetThemeArgs = z.infer<typeof setThemeSchema>;
 export type SetNavigationArgs = z.infer<typeof setNavigationSchema>;
 export type SetPageNavVisibilityArgs = z.infer<typeof setPageNavVisibilitySchema>;
