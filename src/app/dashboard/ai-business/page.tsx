@@ -22,6 +22,11 @@ export default function AIBusinessPage() {
   // Form
   const [businessName, setBusinessName] = useState("");
   const [businessType, setBusinessType] = useState("");
+  // When "Other" is picked, the merchant types the actual business type
+  // (e.g. "Car wash", "Pet shop"). That typed text — not the word
+  // "Other" — is what everything downstream receives as the business type.
+  const [customType, setCustomType] = useState("");
+  const effectiveType = businessType === "Other" ? customType.trim() : businessType;
   const [products, setProducts] = useState("");
   const [targetAudience, setTargetAudience] = useState("");
   const [location, setLocation] = useState("");
@@ -46,7 +51,7 @@ export default function AIBusinessPage() {
   // chatting to request changes once it's done, instead of landing on a
   // dead-end results page.
   const launch = async () => {
-    if (!businessName.trim() || !businessType || launching) return;
+    if (!businessName.trim() || !effectiveType || launching) return;
     if (phoneCheck && !phoneCheck.ok) return; // the field shows why; don't send a number we can't resolve
     setLaunching(true);
 
@@ -70,7 +75,7 @@ export default function AIBusinessPage() {
         headers: { "Content-Type": "application/json", ...authHeaders },
         body: JSON.stringify({
           name: businessName.trim(),
-          businessType,
+          businessType: effectiveType,
           siteType: "ECOMMERCE",
           ...(location.trim() ? { country: location.trim() } : {}),
           ...(description.trim() ? { description: description.trim() } : {}),
@@ -99,7 +104,7 @@ export default function AIBusinessPage() {
       setSiteId(newSiteId);
 
       const composedTask = [
-        `Build my ${businessType} business site for "${businessName.trim()}".`,
+        `Build my ${effectiveType} business site for "${businessName.trim()}".`,
         location.trim() && `We're based in ${location.trim()}.`,
         targetAudience.trim() && `Our target audience is ${targetAudience.trim()}.`,
         products.trim() && `What we sell: ${products.trim()}.`,
@@ -109,7 +114,7 @@ export default function AIBusinessPage() {
       sessionStorage.setItem(
         `ai-builder-prefill:${newSiteId}`,
         JSON.stringify({
-          task: composedTask, businessName: businessName.trim(), businessType,
+          task: composedTask, businessName: businessName.trim(), businessType: effectiveType,
           products: products.trim(), targetAudience: targetAudience.trim(),
           socialLinks: { instagram: instagram.trim(), facebook: facebook.trim(), tiktok: tiktok.trim() },
         })
@@ -159,13 +164,19 @@ export default function AIBusinessPage() {
                   </button>
                 ))}
               </div>
+              {businessType === "Other" && (
+                <div className="mt-3">
+                  <label className="block text-sm font-medium text-surface-700 mb-1">What type of business is it? *</label>
+                  <input value={customType} onChange={(e) => setCustomType(e.target.value)} className="input-field py-2.5 w-full" placeholder="e.g. Car wash, Pet shop, Bookstore" maxLength={60} autoFocus />
+                </div>
+              )}
             </div>
             <div><label className="block text-sm font-medium text-surface-700 mb-1">Location</label>
               <input value={location} onChange={(e) => setLocation(e.target.value)} className="input-field py-2.5 w-full" placeholder="e.g. Lagos, Nigeria" /></div>
             <div><label className="block text-sm font-medium text-surface-700 mb-1">Target Audience</label>
               <input value={targetAudience} onChange={(e) => setTargetAudience(e.target.value)} className="input-field py-2.5 w-full" placeholder="e.g. Young professionals, 25-40" /></div>
           </div>
-          <button onClick={() => setStep(2)} disabled={!businessName.trim() || !businessType}
+          <button onClick={() => setStep(2)} disabled={!businessName.trim() || !effectiveType}
             className="btn-primary py-3 px-6 w-full sm:w-auto">Next <ArrowRight className="h-4 w-4" /></button>
         </div>
       )}

@@ -6,7 +6,7 @@ import { importTemplateToSite } from "@/lib/templates/importer";
 import { provisionDefaultLandingFunnel } from "@/lib/landing-funnel";
 import { getIndustrySampleData, DEFAULT_SAMPLE_DATA } from "@/lib/ai-sample-data";
 import { buildDynamicHomePage } from "@/lib/ai-layout-engine";
-import { getRandomIndustryImages } from "@/lib/ai-image-pools";
+import { getRandomIndustryImages, detectIndustry } from "@/lib/ai-image-pools";
 import { normalizePhone } from "@/lib/phone";
 import { buildTemplatePageContent } from "@/lib/templates/template-tree";
 import type { Prisma } from "@/generated/prisma";
@@ -230,8 +230,14 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ wor
         // where no AI content has been generated yet, so no LLM call is
         // needed here at all — that's the ONE LLM call generateStore() makes
         // below, not a second, redundant one.
+        // bizType is free text (a picked industry label or, for "Other",
+        // whatever the merchant typed) — map it to the industry key the
+        // image pools and layout defaults are actually keyed by, instead
+        // of passing raw text that never matches and silently falls back
+        // to fashion.
+        const instantIndustry = detectIndustry(bizType, description || undefined);
         const homeBlocks = buildDynamicHomePage(
-          {}, storeName, storeSlug, bizType, getRandomIndustryImages(bizType),
+          {}, storeName, storeSlug, instantIndustry, getRandomIndustryImages(instantIndustry),
           merchantWhatsapp || undefined,
           { email: email || null, phone: normalizedPhone?.ok ? normalizedPhone.display : null, address: location || null },
         );
