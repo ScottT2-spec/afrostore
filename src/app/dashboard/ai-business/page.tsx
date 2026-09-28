@@ -219,10 +219,10 @@ export default function AIBusinessPage() {
       {step === 2 && (
         <div className="rounded-2xl border border-surface-200 bg-white p-8 space-y-5">
           <h2 className="text-xl font-bold text-surface-900">More details (optional but helpful)</h2>
-          <div><label className="block text-sm font-medium text-surface-700 mb-1">Products / Services</label>
-            <textarea value={products} onChange={(e) => setProducts(e.target.value)} className="input-field py-2.5 w-full resize-y" rows={3} placeholder="e.g. African print dresses, accessories, custom tailoring..." /></div>
           <div><label className="block text-sm font-medium text-surface-700 mb-1">Business Description</label>
             <textarea value={description} onChange={(e) => setDescription(e.target.value)} className="input-field py-2.5 w-full resize-y" rows={3} placeholder="Tell us what makes your business unique..." /></div>
+          <div><label className="block text-sm font-medium text-surface-700 mb-1">Tell us more about the products you sell or services you offer</label>
+            <textarea value={products} onChange={(e) => setProducts(e.target.value)} className="input-field py-2.5 w-full resize-y" rows={3} placeholder="e.g. African print dresses, accessories, custom tailoring..." /></div>
           <div>
             <label className="block text-sm font-medium text-surface-700 mb-1">Social Media (optional)</label>
             <p className="text-xs text-surface-400 mb-2">Add any accounts you have — they'll show as icons in your site's footer.</p>
