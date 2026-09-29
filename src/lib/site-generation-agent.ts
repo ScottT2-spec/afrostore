@@ -17,6 +17,7 @@
 
 import { z } from "zod";
 import { revalidatePath } from "next/cache";
+import { parseDirectEdit, planDirectEdit, describeDirectEdit, type DirectPage } from "@/lib/direct-edit";
 import { applySectionEdits, describeChanges, findTextInBlocks, replaceTextInProps, formatFlat, type TextHit } from "@/lib/section-edit";
 import { normalizePhone } from "@/lib/phone";
 import { prisma } from "@/lib/db";
@@ -328,6 +329,42 @@ export async function runSiteGenerationAgent(opts: RunSiteGenerationOptions): Pr
       ];
 
   const steps: SiteGenerationStep[] = [];
+
+  // FAST PATH — "change X to Y (in the hero)" needs no AI. If the text is
+  // really on the site (and the match is small and unambiguous) do it directly:
+  // instant, no tokens, can't be rate-limited or misread. Anything unclear
+  // falls through to the agent below exactly as before.
+  if (isEditMode && !priorMessages?.length && !allowRebuild) {
+    try {
+      const rows = await prisma.page.findMany({ where: { siteId }, select: { id: true, slug: true, title: true, content: true }, orderBy: { position: "asc" } });
+      const pages: DirectPage[] = (rows as Array<{ id: string; slug: string; title: string; content: unknown }>).map((r) => ({
+        id: r.id, slug: r.slug, title: r.title, content: Array.isArray(r.content) ? (r.content as DirectPage["content"]) : [],
+      }));
+      const req = parseDirectEdit(task, pages.flatMap((p) => [p.slug, p.title]));
+      const unsafe = req && safetyCategory ? scanForSafetyViolations(safetyCategory, req.replace).some((v) => v.rule === "forbidden-phrase") : false;
+      const plan = req && !unsafe ? planDirectEdit(req, pages) : null;
+      if (req && plan) {
+        for (const pg of plan.pages) {
+          await prisma.page.update({ where: { id: pg.id }, data: { content: pg.content as object } });
+          await prisma.pageVersion.create({ data: { pageId: pg.id, title: pg.title, content: pg.content as object } });
+          revalidateStorefront(storeSlug, pg.slug);
+        }
+        const summary = describeDirectEdit(req, plan);
+        const step: SiteGenerationStep = {
+          tool: "replace_text",
+          args: { find: req.find, replace: plan.changes[0].after, scope: req.scope },
+          result: plan.changes.map((c) => `${c.pageSlug} #${c.sectionIndex} (${c.blockType}) ${c.path}: ${JSON.stringify(c.before)} \u2192 ${JSON.stringify(c.after)}`).join("\n"),
+          isError: false,
+        };
+        steps.push(step);
+        onStep?.(step);
+        return { summary, steps, provider: "direct-edit", model: "rule-based", messages: [] };
+      }
+    } catch (err) {
+      // Never let the shortcut break an edit: fall back to the AI agent.
+      console.error("Direct edit path failed, falling back to agent:", err);
+    }
+  }
   let lastProvider = "";
   let lastModel = "";
   let askCount = priorMessages?.filter((m) => m.role === "assistant" && m.toolCalls?.some((t) => t.function.name === "ask_user")).length || 0;
@@ -663,7 +700,7 @@ async function executeTool(
           };
         }
         const shown = hits.slice(0, 40).map((h) => `- page "${h.pageSlug}", section ${h.sectionIndex} (${h.blockType}), path ${h.path} = ${JSON.stringify(h.value.length > 120 ? h.value.slice(0, 120) + "\u2026" : h.value)}`);
-        return { result: `Found ${hits.length} match${hits.length === 1 ? "" : "es"} for "${parsed.query}":\n${shown.join("\n")}${hits.length > 40 ? `\n(+${hits.length - 40} more)` : ""}`, isError: false };
+        return { result: `Found ${hits.length} match${hits.length === 1 ? "" : "es"} for "${parsed.query}":\n${shown.join("\n")}${hits.length > 40 ? `\n(+${hits.length - 40} more)` : ""}\nNext: replace_text for a plain wording swap (add pageSlug/sectionIndex to limit it); edit_section for colors, images or list items.`, isError: false };
       }
 
       case "replace_text": {
