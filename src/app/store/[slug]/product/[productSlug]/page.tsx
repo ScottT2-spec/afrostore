@@ -59,6 +59,8 @@ export default function ProductDetailPage() {
   const [quantity, setQuantity] = useState(1);
   const [addedToCart, setAddedToCart] = useState(false);
   const [wishlistToast, setWishlistToast] = useState<string | null>(null);
+  // Updated by ReviewsSection right after a customer posts a review, so the rating near the title is live
+  const [liveReviewStats, setLiveReviewStats] = useState<{ averageRating: number; totalCount: number } | null>(null);
   const { isWishlisted, toggleWishlist } = useWishlist(data?.store?.id || "", slug);
 
   useEffect(() => {
@@ -233,10 +235,10 @@ export default function ProductDetailPage() {
                 </Link>
               )}
 
-              {reviews.stats.totalCount > 0 && (
+              {(liveReviewStats || reviews.stats).totalCount > 0 && (
                 <div className="flex items-center gap-2 mt-2">
-                  <Stars rating={reviews.stats.averageRating} />
-                  <span className="text-sm text-surface-500">({reviews.stats.totalCount} review{reviews.stats.totalCount !== 1 ? "s" : ""})</span>
+                  <Stars rating={(liveReviewStats || reviews.stats).averageRating} />
+                  <span className="text-sm text-surface-500">({(liveReviewStats || reviews.stats).totalCount} review{(liveReviewStats || reviews.stats).totalCount !== 1 ? "s" : ""})</span>
                 </div>
               )}
 
@@ -378,7 +380,7 @@ export default function ProductDetailPage() {
         </div>
 
         {/* Reviews Section */}
-        <ReviewsSection slug={slug} productSlug={productSlug} initialReviews={reviews} />
+        <ReviewsSection slug={slug} productSlug={productSlug} initialReviews={reviews} onStatsChange={setLiveReviewStats} />
 
         {/* Related Products */}
         {relatedProducts.length > 0 && (
@@ -455,7 +457,7 @@ interface ReviewsData {
   stats: { averageRating: number; totalCount: number; ratingDistribution: { rating: number; count: number }[] };
 }
 
-function ReviewsSection({ slug, productSlug, initialReviews }: { slug: string; productSlug: string; initialReviews: ReviewsData }) {
+function ReviewsSection({ slug, productSlug, initialReviews, onStatsChange }: { slug: string; productSlug: string; initialReviews: ReviewsData; onStatsChange?: (s: { averageRating: number; totalCount: number }) => void }) {
   const [reviews, setReviews] = useState<Review[]>(initialReviews.items);
   const [stats, setStats] = useState(initialReviews.stats);
   const [page, setPage] = useState(1);
@@ -477,7 +479,7 @@ function ReviewsSection({ slug, productSlug, initialReviews }: { slug: string; p
   const fetchReviews = useCallback(async (p: number, s: string, append: boolean) => {
     setLoadingMore(true);
     try {
-      const res = await fetch(`/api/storefront/${slug}/products/${productSlug}/reviews?page=${p}&limit=5&sort=${s}`);
+      const res = await fetch(`/api/storefront/${slug}/products/${productSlug}/reviews?page=${p}&limit=5&sort=${s}`, { cache: "no-store" });
       const data = await res.json();
       if (data.success) {
         if (append) {
@@ -486,6 +488,7 @@ function ReviewsSection({ slug, productSlug, initialReviews }: { slug: string; p
           setReviews(data.data.items);
         }
         setStats(data.data.stats);
+        onStatsChange?.({ averageRating: data.data.stats.averageRating, totalCount: data.data.stats.totalCount });
         setHasMore(data.data.pagination.hasMore);
       }
     } catch {
@@ -493,7 +496,7 @@ function ReviewsSection({ slug, productSlug, initialReviews }: { slug: string; p
     } finally {
       setLoadingMore(false);
     }
-  }, [slug, productSlug]);
+  }, [slug, productSlug, onStatsChange]);
 
   const handleSortChange = (newSort: string) => {
     setSort(newSort);
@@ -531,6 +534,10 @@ function ReviewsSection({ slug, productSlug, initialReviews }: { slug: string; p
       const data = await res.json();
       if (data.success) {
         setSubmitResult({ type: "success", message: "Thank you for your patronage!" });
+        // Reviews are published instantly, so reload the list now (newest first) and the customer sees theirs straight away
+        setSort("newest");
+        setPage(1);
+        await fetchReviews(1, "newest", false);
         setFormRating(0);
         setFormName("");
         setFormEmail("");

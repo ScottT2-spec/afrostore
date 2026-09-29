@@ -108,7 +108,7 @@ export async function POST(req: NextRequest, { params }: Params) {
         title: parsed.data.title,
         body: parsed.data.body,
         images: parsed.data.images,
-        isApproved: false,
+        isApproved: true,
         isVerified: false,
       },
       include: {
