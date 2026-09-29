@@ -3,6 +3,7 @@ import crypto from "crypto";
 import { runAutomationsForTrigger } from "./automations";
 import { awardOrderPoints, finalizeOrderRedemption } from "./loyalty";
 import { convertReferral } from "./referrals";
+import { createSiteNotification } from "./notifications";
 
 // ─── PAYSTACK ───────────────────────────────────────────────
 
@@ -352,6 +353,14 @@ export async function processPaymentConfirmation(params: {
   // (fire-and-forget — never block the webhook response on this).
   if (result.paidOrder) {
     const order = result.paidOrder;
+    // Show "payment received" in the merchant's notification bell (fire-and-forget)
+    createSiteNotification({
+      siteId: order.siteId,
+      type: "PAYMENT",
+      title: "Payment received",
+      message: `${order.currency} ${Number(order.total).toFixed(2)} was paid${params.method ? ` via ${params.method}` : ""}.`,
+      data: { orderId: order.id, total: Number(order.total), currency: order.currency, method: params.method },
+    });
     runAutomationsForTrigger(order.siteId, "payment_success", {
       recipientEmail: order.email,
       recipientPhone: order.phone ?? undefined,

@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/db";
 import { upsertLeadContact } from "@/lib/crm";
 import { runAutomationsForTrigger } from "@/lib/automations";
+import { createSiteNotification } from "@/lib/notifications";
 
 type Params = { params: Promise<{ slug: string; formSlug: string }> };
 
@@ -177,6 +178,14 @@ export async function POST(req: NextRequest, { params }: Params) {
         message: `A form submission (${form.name}) was received from ${contact.email}.`,
         data: { contactId: contact.id, email: contact.email, phone: contact.phone, formId: form.id, formName: form.name, funnelStepId: funnelStep?.id },
       };
+      // Show it in the merchant's notification bell (fire-and-forget)
+      createSiteNotification({
+        siteId: site.id,
+        type: "LEAD",
+        title: isNewContact ? "New lead" : "New form submission",
+        message: `${form.name}: ${contact.email}${contact.phone ? ` · ${contact.phone}` : ""}`,
+        data: { contactId: contact.id, formId: form.id, formName: form.name },
+      });
       if (isNewContact) {
         runAutomationsForTrigger(site.id, "new_lead", automationCtx).catch((err) => console.error("Automation trigger (new_lead) error:", err));
       }
