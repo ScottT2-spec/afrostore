@@ -26,36 +26,12 @@ const BLOCKS: Array<{ key: keyof typeof BLOCK_ALIASES; label: string; what: stri
   { key: "contactinfo", label: "Contact info", what: "Email, phone, address" },
 ];
 
-const EXAMPLES = [
-  { group: "Change text", items: [
-    "Change \"Welcome to our store\" to \"Fresh food, delivered fast\" in the hero",
-    "Change the button text \"Shop now\" to \"Order today\"",
-  ]},
-  { group: "Colors, images & buttons", items: [
-    "Make the hero button green",
-    "Use the image I uploaded as the hero background",
-    "Make the Shop now button link to the products page",
-  ]},
-  { group: "Lists (features, FAQ, team…)", items: [
-    "Add a new question to the FAQ about delivery time",
-    "Remove the third item in Why choose us",
-  ]},
-  { group: "Whole site", items: [
-    "Hide FAQ from the menu",
-    "Change my phone number to 0803 000 0000",
-    "Add my Instagram: https://instagram.com/mybrand",
-    "Make the site look more premium and dark",
-  ]},
-];
-
 interface Props {
   open: boolean;
   onClose: () => void;
-  /** Puts an example into the chat box so the merchant can tweak and send it. */
-  onPick: (text: string) => void;
 }
 
-export function AIEditGuide({ open, onClose, onPick }: Props) {
+export function AIEditGuide({ open, onClose }: Props) {
   if (!open) return null;
   return (
     <div className="mb-2 max-h-[55vh] overflow-y-auto rounded-xl border border-surface-200 bg-white p-3 text-xs shadow-sm">
@@ -84,25 +60,6 @@ export function AIEditGuide({ open, onClose, onPick }: Props) {
         ))}
       </div>
 
-      <div className="font-semibold text-surface-800 mb-1">Try one (tap to use)</div>
-      <div className="space-y-2">
-        {EXAMPLES.map((g) => (
-          <div key={g.group}>
-            <div className="text-surface-500 mb-1">{g.group}</div>
-            <div className="flex flex-col gap-1">
-              {g.items.map((ex) => (
-                <button
-                  key={ex}
-                  onClick={() => { onPick(ex); onClose(); }}
-                  className="text-left rounded-lg border border-surface-200 px-2 py-1.5 text-surface-700 hover:border-brand-300 hover:bg-brand-50"
-                >
-                  {ex}
-                </button>
-              ))}
-            </div>
-          </div>
-        ))}
-      </div>
       <p className="mt-3 text-surface-400">Tip: use the paperclip to upload an image, then say where it should go.</p>
     </div>
   );

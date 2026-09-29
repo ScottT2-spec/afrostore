@@ -513,7 +513,7 @@ export default function AIBuilderPage({ params }: { params: Promise<{ siteId: st
           </div>
 
           <div className="flex-shrink-0 border-t border-surface-200 p-3">
-            <AIEditGuide open={showGuide} onClose={() => setShowGuide(false)} onPick={(t) => setInput(t)} />
+            <AIEditGuide open={showGuide} onClose={() => setShowGuide(false)} />
             {!showGuide && (
               <button
                 onClick={() => setShowGuide(true)}
