@@ -394,6 +394,18 @@ export class AIFailover {
       };
     }
 
+    // Pass 0 respects circuit breakers. If every provider was skipped purely
+    // because its circuit is open (nothing was actually attempted), pass 1
+    // force-probes them in priority order instead of failing the merchant
+    // instantly with "Circuit open" everywhere.
+    for (let pass = 0; pass < 2; pass++) {
+      const force = pass === 1;
+      if (force) {
+        if (failedProviders.length === 0 || !failedProviders.every((f) => f.error.startsWith('Circuit open'))) break;
+        failedProviders.length = 0;
+        attemptedProviders.length = 0;
+      }
+
     for (let i = 0; i < orderedProviders.length; i++) {
       const providerId = orderedProviders[i];
       const providerConfig = this.providers.get(providerId);
@@ -414,7 +426,7 @@ export class AIFailover {
         try {
           const response = await circuit.execute(async () => {
             return this.executeRequest(providerConfig, { ...request, model });
-          });
+          }, { force });
 
           // Track usage
           this.trackUsage(providerId, model, response);
@@ -463,6 +475,8 @@ export class AIFailover {
           });
         }
       }
+    }
+
     }
 
     return {

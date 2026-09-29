@@ -60,9 +60,10 @@ export class CircuitBreaker {
    * Execute a function through the circuit breaker.
    * Throws if circuit is OPEN and recovery timeout hasn't elapsed.
    */
-  async execute<T>(fn: () => Promise<T>): Promise<T> {
-    // Check if request is allowed
-    if (!this.canExecute()) {
+  async execute<T>(fn: () => Promise<T>, opts: { force?: boolean } = {}): Promise<T> {
+    // Check if request is allowed. `force` is a last-resort probe used when
+    // EVERY provider's circuit is open — better to try than to fail instantly.
+    if (!opts.force && !this.canExecute()) {
       throw new CircuitOpenError(this.providerId, this.getTimeUntilHalfOpen());
     }
 
@@ -75,9 +76,27 @@ export class CircuitBreaker {
       return result;
     } catch (error) {
       const latencyMs = performance.now() - startTime;
-      this.onFailure(error as Error, latencyMs);
+      if (this.countsAsProviderFailure(error as Error)) {
+        this.onFailure(error as Error, latencyMs);
+      }
       throw error;
     }
+  }
+
+  /**
+   * Request-specific client errors (400/401/403/404/413/422 — bad payload,
+   * unsupported tool schema, too-long prompt, etc.) say nothing about the
+   * provider's health. Counting them let a single bad request trip every
+   * provider's breaker at once and lock all AI out for 30s.
+   * Timeouts, network errors, 5xx and 429 still count.
+   */
+  private countsAsProviderFailure(error: Error): boolean {
+    const status = (error as any)?.status;
+    if (typeof status === 'number') {
+      if (status === 408 || status === 429 || status >= 500) return true;
+      if (status >= 400 && status < 500) return false;
+    }
+    return true;
   }
 
   /** Check if the circuit allows requests */
@@ -112,6 +131,11 @@ export class CircuitBreaker {
     this.state.successes++;
 
     switch (this.state.state) {
+      case CircuitState.OPEN:
+        // A forced probe succeeded — the provider is demonstrably healthy.
+        this.transitionTo(CircuitState.CLOSED);
+        break;
+
       case CircuitState.HALF_OPEN:
         if (this.state.successes >= this.config.halfOpenSuccessThreshold) {
           this.transitionTo(CircuitState.CLOSED);
