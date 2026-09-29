@@ -68,3 +68,34 @@ describe("planDirectEdit", () => {
     expect(plan.pages[0].content[0].props!.buttonText).toBe("order");
   });
 });
+
+describe("sloppy quotes (real merchant messages)", () => {
+  const pg = (): DirectPage[] => [
+    {
+      id: "h", slug: "home", title: "Home",
+      content: [
+        { type: "hero", props: { heading: "Welcome" } },
+        { type: "features", props: { title: "Why Choose Us", subtitle: "Here\u2019s what makes us different" } },
+        { type: "newsletter", props: { subtitle: "Stay in the loop" } },
+      ],
+    },
+  ];
+  it("ignores unbalanced curly quotes and a stray space", () => {
+    const r = parseDirectEdit("Change \u201Cwhat makes us different \u201D to \u201Cwhat makes us best on the why choose us block", names)!;
+    expect(r).toMatchObject({ find: "what makes us different", replace: "what makes us best", scope: "why choose us", quoted: true });
+    const plan = planDirectEdit(r, pg())!;
+    expect(plan.pages[0].content[1].props!.subtitle).toBe("Here\u2019s what makes us best");
+    expect(plan.pages[0].content[2].props!.subtitle).toBe("Stay in the loop");
+  });
+  it("replaces the whole phrase when the merchant quotes the full text", () => {
+    const r = parseDirectEdit("Change \u201CHere's what makes us different \u201D to \u201Cwhat makes us best on the why choose us block", names)!;
+    expect(r).toMatchObject({ find: "Here's what makes us different", replace: "what makes us best" });
+    const plan = planDirectEdit(r, pg())!;
+    expect(plan.pages[0].content[1].props!.subtitle).toBe("what makes us best");
+  });
+  it("matches template-specific block types by their generic name", () => {
+    const r = parseDirectEdit('change "Fast" to "Quick" in the why choose us block', names)!;
+    const plan = planDirectEdit(r, [{ id: "x", slug: "home", title: "Home", content: [{ type: "perfumesWhyChooseUs", props: { items: [{ desc: "Fast" }] } }] }])!;
+    expect(plan.changes[0].after).toBe("Quick");
+  });
+});

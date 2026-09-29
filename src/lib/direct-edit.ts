@@ -47,6 +47,28 @@ const SCOPE_TAIL_RE = /^(.*\S)\s+(?:in|on|inside|within|at|from)\s+(?:the\s+)?(.
 
 const first = (m: RegExpMatchArray, from: number) => m.slice(from, from + 4).find((x) => x !== undefined) as string;
 
+/**
+ * Merchants type sloppy quotes: “what makes us different ” to “what makes us best
+ * (opening quote never closed, stray space before the closing one). Strip any
+ * quote characters wrapping the text so they can't leak into the search/replace
+ * strings — which is exactly what made the fast path miss and dump the request
+ * on the AI. Reports whether quotes were present (= merchant wants it verbatim).
+ */
+export function stripQuoteNoise(s: string): { text: string; hadQuotes: boolean } {
+  let t = s.trim();
+  let hadQuotes = false;
+  const DQ = /^[\"\u201C\u201D\u201E\u201F\u00AB\u00BB`]+|[\"\u201C\u201D\u201E\u201F\u00AB\u00BB`]+$/g;
+  const stripped = t.replace(DQ, "");
+  if (stripped !== t) { hadQuotes = true; t = stripped.trim(); }
+  // Single quotes: only when they wrap the text (leading one present), so
+  // possessives/apostrophes inside or at the end of a word survive.
+  if (/^[\u2018\u201B']/.test(t) && !/^['\u2018\u201B]\w+['\u2019]\w/.test(t)) {
+    t = t.replace(/^[\u2018\u201B']+/, "").replace(/['\u2019\u2018]+$/, "").trim();
+    hadQuotes = true;
+  }
+  return { text: t, hadQuotes };
+}
+
 function stripFiller(s: string): string {
   return s.replace(/^\s*just\s+/i, "").replace(/\s+(please|pls|thanks|thank you)\s*[.!]?\s*$/i, "").replace(/[.!]+$/, "").trim();
 }
@@ -79,7 +101,8 @@ export function parseDirectEdit(task: string, pageNames: string[] = []): DirectE
 
   const p = text.match(PLAIN_RE);
   if (!p) return null;
-  const find = stripFiller(p[1]);
+  const findQ = stripQuoteNoise(stripFiller(p[1]));
+  const find = findQ.text;
   let rest = p[2];
   let scope: string | undefined;
   const st = rest.match(SCOPE_TAIL_RE);
@@ -90,9 +113,10 @@ export function parseDirectEdit(task: string, pageNames: string[] = []): DirectE
   // "…to X in the something block" where "something" isn't a scope we recognise:
   // the merchant is narrowing the location and we can't tell where. Let the AI ask.
   if (!scope && /\s+(?:in|on|inside|within)\s+the\s+.+\s+(?:block|section|page)\s*[.!]?$/i.test(rest)) return null;
-  const replace = stripFiller(rest);
+  const replaceQ = stripQuoteNoise(stripFiller(rest));
+  const replace = replaceQ.text;
   if (!find || !replace) return null;
-  return { find, replace, scope, quoted: false };
+  return { find, replace, scope, quoted: findQ.hadQuotes || replaceQ.hadQuotes };
 }
 
 export interface DirectBlock { type?: string; props?: Record<string, unknown> }
@@ -103,7 +127,11 @@ function scopeMatches(scope: string, page: DirectPage, block: DirectBlock): "pag
   if (squash(page.slug) === w || squash(page.title) === w || w === squash(page.slug) + "page") return "page";
   const type = squash(block.type || "");
   for (const [t, al] of Object.entries(BLOCK_ALIASES)) {
-    if (squash(t) === w || al.some((a) => squash(a) === w)) if (type === squash(t)) return "block";
+    if (squash(t) === w || al.some((a) => squash(a) === w)) {
+      // Template-specific block types embed the generic name (fashionFeatures,
+      // perfumesWhyChooseUs, perfumesHero…), so match on containment too.
+      if (type === squash(t) || (type && (type.includes(squash(t)) || al.some((a) => squash(a).length >= 8 && type.includes(squash(a)))))) return "block";
+    }
   }
   return type && (type === w || type.includes(w)) ? "block" : null;
 }
@@ -135,7 +163,7 @@ export function planDirectEdit(req: DirectEditRequest, pages: DirectPage[]): Dir
       // Casual typing ("order") over a capitalised original ("Order via WhatsApp") should keep the capital.
       let replacement = req.replace;
       const stored = hits[0].value.trim();
-      if (!req.quoted && /^[A-Z]/.test(stored) && /^[a-z]/.test(replacement) && /^[a-z]/.test(req.find.trim())) {
+      if (!req.quoted && /^[A-Z]/.test(stored) && /^[a-z]/.test(replacement) && /^[a-z]/.test(req.find.trim()) && normalizeText(stored).startsWith(normalizeText(req.find))) {
         replacement = replacement[0].toUpperCase() + replacement.slice(1);
       }
       const r = replaceTextInProps(block.props || {}, req.find, replacement);

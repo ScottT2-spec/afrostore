@@ -343,6 +343,16 @@ export async function runSiteGenerationAgent(opts: RunSiteGenerationOptions): Pr
       const req = parseDirectEdit(task, pages.flatMap((p) => [p.slug, p.title]));
       const unsafe = req && safetyCategory ? scanForSafetyViolations(safetyCategory, req.replace).some((v) => v.rule === "forbidden-phrase") : false;
       const plan = req && !unsafe ? planDirectEdit(req, pages) : null;
+      if (req && !plan && !unsafe) {
+        // We understood the shape of the request but couldn't apply it
+        // mechanically (exact text not found, or several candidates). Tell the
+        // model how the request was read so it searches for the closest text
+        // with find_text instead of guessing or replying in prose.
+        const last = messages[messages.length - 1];
+        if (last?.role === "user" && typeof last.content === "string") {
+          last.content = `${last.content}\n\n[Parsed intent — text to change: "${req.find}"; new text: "${req.replace}"${req.scope ? `; where: the "${req.scope}" section/page` : ""}. The merchant may have typed the old text loosely (it may be only part of a longer heading, or worded slightly differently). Use find_text to locate the closest matching text${req.scope ? ` in that section` : ""}, then apply the change with the edit tools. Do not answer in plain text — call a tool.]`;
+        }
+      }
       if (req && plan) {
         for (const pg of plan.pages) {
           await prisma.page.update({ where: { id: pg.id }, data: { content: pg.content as object } });

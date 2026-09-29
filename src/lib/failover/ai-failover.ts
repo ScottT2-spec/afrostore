@@ -174,7 +174,9 @@ function toAnthropicMessages(messages: AIMessage[]): unknown[] {
  * remember to set AIMessage.name explicitly (which would be an easy
  * thing for a future caller to silently get wrong).
  */
-function toGeminiContents(messages: AIMessage[]): { role: string; parts: unknown[] }[] {
+const GEMINI_SKIP_THOUGHT_SIGNATURE = 'skip_thought_signature_validator';
+
+export function toGeminiContents(messages: AIMessage[]): { role: string; parts: unknown[] }[] {
   const convo = messages.filter((m) => m.role !== 'system');
   const mapped = convo
     .map((m, i) => {
@@ -184,7 +186,13 @@ function toGeminiContents(messages: AIMessage[]): { role: string; parts: unknown
         for (const tc of m.toolCalls) {
           let args: unknown = {};
           try { args = JSON.parse(tc.function.arguments); } catch { /* leave as {} */ }
-          parts.push({ functionCall: { name: tc.function.name, args } });
+          // Gemini 3+ 400s if a replayed functionCall lacks its thoughtSignature.
+          // Echo the real one; if the call came from another provider (failover
+          // mid-conversation) use Google's documented bypass value.
+          parts.push({
+            functionCall: { name: tc.function.name, args },
+            thoughtSignature: tc.thoughtSignature || GEMINI_SKIP_THOUGHT_SIGNATURE,
+          });
         }
         return { role: 'model', parts };
       }
@@ -545,14 +553,35 @@ export class AIFailover {
       } else if (request.toolChoice === 'auto') body.tool_choice = 'auto';
     }
 
-    const response = await fetch(`${baseUrl}/chat/completions`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        Authorization: `Bearer ${config.apiKey}`,
-      },
-      body: JSON.stringify(body),
-    });
+    const post = (b: Record<string, unknown>) =>
+      fetch(`${baseUrl}/chat/completions`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${config.apiKey}`,
+        },
+        body: JSON.stringify(b),
+      });
+
+    let response = await post(body);
+
+    // Groq (gpt-oss) answers 400 "tool_use_failed" when tool_choice is
+    // "required" but the model wrote prose instead of a call. That's a model
+    // hiccup, not a bad request: retry once as-is (sampling differs), then
+    // relax to "auto" so the caller gets a normal response it can nudge
+    // ("you must call a tool") instead of a hard failure on every key.
+    if (response.status === 400 && body.tool_choice && body.tool_choice !== 'auto') {
+      const errText = await response.clone().text().catch(() => '');
+      if (/tool_use_failed|did not call a tool|Tool choice is required/i.test(errText)) {
+        response = await post(body);
+        if (response.status === 400) {
+          const again = await response.clone().text().catch(() => '');
+          if (/tool_use_failed|did not call a tool|Tool choice is required/i.test(again)) {
+            response = await post({ ...body, tool_choice: 'auto' });
+          }
+        }
+      }
+    }
 
     if (!response.ok) {
       const errorText = await response.text().catch(() => 'unknown');
@@ -810,6 +839,9 @@ export class AIFailover {
           id: `${candidate?.index ?? 0}-${i}`,
           type: 'function' as const,
           function: { name: p.functionCall.name, arguments: JSON.stringify(p.functionCall.args || {}) },
+          ...(p.thoughtSignature || p.thought_signature
+            ? { thoughtSignature: (p.thoughtSignature || p.thought_signature) as string }
+            : {}),
         }))
       : undefined;
 

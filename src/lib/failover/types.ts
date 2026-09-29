@@ -232,6 +232,12 @@ export interface AIToolCall {
     name: string;
     arguments: string;
   };
+  /**
+   * Gemini 3+ attaches an opaque `thoughtSignature` to functionCall parts and
+   * REJECTS (400 INVALID_ARGUMENT) any later request that replays the call
+   * without it. Captured from the response and echoed back verbatim.
+   */
+  thoughtSignature?: string;
 }
 
 export interface AIResponse {
