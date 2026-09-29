@@ -39,5 +39,15 @@ export async function GET(req: NextRequest, { params }: Params) {
     select: { provider: true },
   });
 
-  return success({ providers: gateways.map((g) => g.provider) });
+  // Dashboard → Settings → Checkout toggles (schema defaults are both on)
+  const settings = await prisma.siteSettings.findUnique({
+    where: { siteId: site.id },
+    select: { payOnDelivery: true, bankTransfer: true },
+  });
+
+  return success({
+    providers: gateways.map((g) => g.provider),
+    payOnDelivery: settings?.payOnDelivery ?? true,
+    bankTransfer: settings?.bankTransfer ?? true,
+  });
 }

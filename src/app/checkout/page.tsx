@@ -261,12 +261,35 @@ export default function CheckoutPage() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [debouncedContact.email, storeSlug]);
 
+  // Only offer payment methods the merchant has enabled: gateway toggles
+  // (Payments page) plus Pay on delivery / Bank transfer (Settings → Checkout).
+  useEffect(() => {
+    if (!storeSlug) return;
+    fetch(`/api/storefront/${storeSlug}/payment-methods`)
+      .then((r) => r.json())
+      .then((json) => {
+        if (!json.success || !json.data) { setEnabledMethodIds(paymentMethods.map((m) => m.id)); return; }
+        const providers: string[] = json.data.providers || [];
+        const ids: string[] = [];
+        if (providers.includes("PAYSTACK")) ids.push("PAYSTACK");
+        if (providers.includes("MONNIFY") && json.data.bankTransfer) ids.push("MONNIFY");
+        if (providers.includes("FLUTTERWAVE")) ids.push("FLUTTERWAVE");
+        if (json.data.payOnDelivery) ids.push("COD");
+        setEnabledMethodIds(ids);
+        setPaymentMethod((current) => (ids.includes(current) ? current : ids[0] || current));
+      })
+      .catch(() => setEnabledMethodIds(paymentMethods.map((m) => m.id)));
+  }, [storeSlug]);
+  const visiblePaymentMethods = enabledMethodIds ? paymentMethods.filter((m) => enabledMethodIds.includes(m.id)) : [];
+
   const [address, setAddress] = useState("");
   const [city, setCity] = useState("");
   const [state, setState] = useState("");
   const [deliveryInstructions, setDeliveryInstructions] = useState("");
   const [selectedZone, setSelectedZone] = useState("");
   const [paymentMethod, setPaymentMethod] = useState("PAYSTACK");
+  // Which payment methods the merchant has switched on (null = still loading)
+  const [enabledMethodIds, setEnabledMethodIds] = useState<string[] | null>(null);
   const [couponCode, setCouponCode] = useState("");
   const [couponApplied, setCouponApplied] = useState(false);
   const [couponValidating, setCouponValidating] = useState(false);
@@ -403,6 +426,10 @@ export default function CheckoutPage() {
 
   const handlePlaceOrder = async () => {
     if (!siteId) { setOrderError("Store information missing. Go back to the store and try again."); return; }
+    if (enabledMethodIds && !enabledMethodIds.includes(paymentMethod)) {
+      setOrderError("Please choose an available payment method.");
+      return;
+    }
     if (!firstName || !lastName || !email || !phone) {
       setTouched((t) => ({ ...t, firstName: true, lastName: true, email: true, phone: true }));
       setOrderError("Please fill in all contact information.");
@@ -1089,7 +1116,12 @@ export default function CheckoutPage() {
                 <CreditCard className="h-5 w-5 text-[var(--co-indigo)]" /> Payment method
               </h3>
               <div className="space-y-2">
-                {paymentMethods.map((method) => {
+                {enabledMethodIds && visiblePaymentMethods.length === 0 && (
+                  <p className="rounded-xl border border-[var(--co-line)] p-4 text-sm text-surface-500">
+                    This store has no payment method available right now. Please contact the store.
+                  </p>
+                )}
+                {visiblePaymentMethods.map((method) => {
                   const Icon = method.icon;
                   const active = paymentMethod === method.id;
                   return (
