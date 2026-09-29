@@ -11,15 +11,14 @@ const footerLinks = {
     { name: "Website Builder", href: "#website-builder" },
     { name: "AI Assistant", href: "#ai-assistant" },
     { name: "Templates", href: "#templates" },
-    { name: "Pricing", href: "#pricing" },
   ],
   Payments: [
     { name: "Monnify", href: "https://monnify.com", external: true },
     { name: "Paystack", href: "https://paystack.com", external: true },
     { name: "Flutterwave", href: "https://flutterwave.com", external: true },
-    { name: "Bank Transfer", href: "#pricing" },
-    { name: "Mobile Money", href: "#pricing" },
-    { name: "USSD", href: "#pricing" },
+    { name: "Bank Transfer", href: "#products" },
+    { name: "Mobile Money", href: "#products" },
+    { name: "USSD", href: "#products" },
   ],
   Company: [
     { name: "About Us", href: "#how-it-works" },

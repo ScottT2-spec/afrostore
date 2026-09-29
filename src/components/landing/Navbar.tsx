@@ -17,7 +17,6 @@ const navigation = [
     ],
   },
   { name: "Templates", href: "/templates" },
-  { name: "Pricing", href: "#pricing" },
   { name: "Plugins", href: "/dashboard/plugins" },
 ];
 
