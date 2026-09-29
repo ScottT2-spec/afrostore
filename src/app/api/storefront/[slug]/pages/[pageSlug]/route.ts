@@ -633,7 +633,7 @@ export async function GET(_req: NextRequest, { params }: Params) {
       compareAtPrice: p.compareAtPrice,
       currency: p.currency,
       stock: settings?.showStockCount ? p.stock : undefined,
-      inStock: p.stock > 0,
+      inStock: !p.trackInventory || p.stock > 0,
       isFeatured: p.isFeatured,
       tags: p.tags,
       images: p.images,

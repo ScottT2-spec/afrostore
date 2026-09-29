@@ -143,7 +143,7 @@ export async function GET(req: NextRequest, { params }: Params) {
         price: p.price,
         compareAtPrice: p.compareAtPrice,
         currency: p.currency,
-        inStock: p.stock > 0,
+        inStock: !p.trackInventory || p.stock > 0,
         images: p.images,
       }));
     }
@@ -161,7 +161,7 @@ export async function GET(req: NextRequest, { params }: Params) {
       currency: product.currency,
       sku: product.sku,
       stock: showStock ? product.stock : undefined,
-      inStock: product.stock > 0,
+      inStock: !product.trackInventory || product.stock > 0,
       isFeatured: product.isFeatured,
       tags: product.tags,
       metaTitle: product.metaTitle,
@@ -170,7 +170,7 @@ export async function GET(req: NextRequest, { params }: Params) {
       variants: product.variants.map((v) => ({
         ...v,
         stock: showStock ? v.stock : undefined,
-        inStock: v.stock > 0,
+        inStock: !product.trackInventory || v.stock > 0,
       })),
       category: product.category,
       brand: product.brand,
