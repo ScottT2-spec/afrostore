@@ -53,7 +53,7 @@ export default function PrivacyPage() {
 
           <section>
             <h2 className="text-lg font-semibold text-gray-900 mt-8 mb-3">9. Contact Us</h2>
-            <p>If you have questions about this privacy policy or your data, contact us at <a href="mailto:support@prokip.com" className="text-blue-600 hover:underline">support@prokip.com</a>.</p>
+            <p>If you have questions about this privacy policy or your data, contact us at <a href="mailto:support@prokip.africa" className="text-blue-600 hover:underline">support@prokip.africa</a>.</p>
           </section>
         </div>
       </div>

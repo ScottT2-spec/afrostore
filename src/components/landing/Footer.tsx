@@ -25,10 +25,10 @@ const footerLinks = {
     { name: "About Us", href: "#how-it-works" },
     { name: "How It Works", href: "#how-it-works" },
     { name: "Testimonials", href: "#testimonials" },
-    { name: "Contact Us", href: "mailto:support@prokip.com" },
+    { name: "Contact Us", href: "mailto:support@prokip.africa" },
   ],
   Support: [
-    { name: "Help Center", href: "mailto:support@prokip.com" },
+    { name: "Help Center", href: "mailto:support@prokip.africa" },
     { name: "Get Started", href: "/auth/signup" },
     { name: "Login", href: "/auth/login" },
     { name: "Showcase", href: "#showcase" },

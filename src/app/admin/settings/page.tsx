@@ -26,7 +26,7 @@ interface PlatformSettings {
 const defaults: PlatformSettings = {
   siteName: "Prokip",
   siteUrl: "https://prokip.app",
-  supportEmail: "support@prokip.app",
+  supportEmail: "support@prokip.africa",
   defaultCurrency: "NGN",
   defaultCountry: "NG",
   maintenanceMode: false,
