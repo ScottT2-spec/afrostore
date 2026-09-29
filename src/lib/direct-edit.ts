@@ -41,8 +41,8 @@ const squash = (s: string) => s.toLowerCase().replace(/[^a-z0-9]/g, "");
 /** Quoted token: "x", “x”, `x`, or 'x' (single quotes only when not an apostrophe inside a word). */
 const QT = `(?:"([^"]+)"|\\u201C([^\\u201D]+)\\u201D|\`([^\`]+)\`|(?<![\\w])'([^']+)'(?![\\w]))`;
 const VERB = `(?:change|replace|rename|edit|update|switch|make)`;
-const QUOTED_RE = new RegExp(`^\\s*(?:please\\s+)?${VERB}\\s+(?:the\\s+)?(?:(?:text|word|words|label|button|heading|title|wording|line)\\s+)?${QT}\\s+(?:to|with|into|say|read)\\s+(?:just\\s+)?${QT}(.*)$`, "i");
-const PLAIN_RE = new RegExp(`^\\s*(?:please\\s+)?${VERB}\\s+(?:the\\s+)?(?:(?:text|word|words|label|wording)\\s+)?(.+?)\\s+(?:to|with|into)\\s+(.+?)\\s*$`, "i");
+const QUOTED_RE = new RegExp(`^\\s*(?:please\\s+)?${VERB}\\s+(?:the\\s+)?(?:(?:text|word|words|label|button|heading|title|wording|line)\\s+)?(?:from\\s+)?${QT}\\s+(?:to|with|into|say|read)\\s+(?:just\\s+)?${QT}(.*)$`, "i");
+const PLAIN_RE = new RegExp(`^\\s*(?:please\\s+)?${VERB}\\s+(?:the\\s+)?(?:(?:text|word|words|label|wording|heading|title)\\s+)?(?:from\\s+)?(.+?)\\s+(?:to|with|into)\\s+(.+?)\\s*$`, "i");
 const SCOPE_TAIL_RE = /^(.*\S)\s+(?:in|on|inside|within|at|from)\s+(?:the\s+)?(.+?)(?:\s+(?:block|section|page|area))?\s*[.!]?$/i;
 
 const first = (m: RegExpMatchArray, from: number) => m.slice(from, from + 4).find((x) => x !== undefined) as string;

@@ -175,8 +175,8 @@ function toAnthropicMessages(messages: AIMessage[]): unknown[] {
  * thing for a future caller to silently get wrong).
  */
 function toGeminiContents(messages: AIMessage[]): { role: string; parts: unknown[] }[] {
-  return messages
-    .filter((m) => m.role !== 'system')
+  const convo = messages.filter((m) => m.role !== 'system');
+  const mapped = convo
     .map((m, i) => {
       if (m.role === 'assistant' && m.toolCalls && m.toolCalls.length > 0) {
         const parts: unknown[] = [];
@@ -191,11 +191,13 @@ function toGeminiContents(messages: AIMessage[]): { role: string; parts: unknown
       if (m.role === 'tool') {
         let name = 'tool_result';
         for (let j = i - 1; j >= 0; j--) {
-          const match = messages[j].toolCalls?.find((tc) => tc.id === m.toolCallId);
+          const match = convo[j].toolCalls?.find((tc) => tc.id === m.toolCallId);
           if (match) { name = match.function.name; break; }
         }
+        // Gemini now rejects role "function" (400 "Role 'function' is not
+        // supported") — tool results go in a "user" turn as functionResponse parts.
         return {
-          role: 'function',
+          role: 'user',
           parts: [{ functionResponse: { name, response: { result: m.content } } }],
         };
       }
@@ -219,8 +221,18 @@ function toGeminiContents(messages: AIMessage[]): { role: string; parts: unknown
           : [{ text: typeof m.content === 'string' ? m.content : '' }],
       };
     });
-}
 
+  // Parallel tool calls produce several consecutive functionResponse turns;
+  // Gemini needs them combined into ONE user turn.
+  const isFnResp = (c: { parts: unknown[] }) => c.parts.length > 0 && c.parts.every((p) => (p as any)?.functionResponse);
+  const merged: { role: string; parts: unknown[] }[] = [];
+  for (const c of mapped) {
+    const prev = merged[merged.length - 1];
+    if (prev && isFnResp(prev) && isFnResp(c)) prev.parts.push(...c.parts);
+    else merged.push(c);
+  }
+  return merged;
+}
 export class AIFailover {
   private readonly providers: Map<string, AIProviderConfig>;
   private readonly circuits: Map<string, CircuitBreaker>;
