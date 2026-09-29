@@ -1,6 +1,6 @@
 "use client";
 import { ChevronDown, Plus, X } from "lucide-react";
-import { AlertTriangle, Bell, Bot, CheckCircle2, CreditCard, HelpCircle, Info, LogOut, Package, Search, Settings, ShoppingCart, Store, User } from "@/components/icons/FilledIcons";
+import { AlertTriangle, Bell, Bot, CheckCircle2, HelpCircle, Info, LogOut, Package, Search, Settings, ShoppingCart, Store, User } from "@/components/icons/FilledIcons";
 
 import { useState, useRef, useEffect } from "react";
 import { useAuth } from "@/context/AuthContext";
@@ -308,7 +308,6 @@ export default function DashboardHeader({
                     { icon: User, label: "My Profile", href: "/dashboard/profile" },
                     { icon: Store, label: "My Stores", href: "/dashboard" },
                     { icon: Settings, label: "Settings", href: "/dashboard/settings" },
-                    { icon: CreditCard, label: "Billing", href: "/dashboard/billing" },
                     { icon: HelpCircle, label: "Help & Support", href: "/dashboard/support" },
                   ].map((item) => (
                     <Link

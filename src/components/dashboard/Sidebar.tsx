@@ -1,6 +1,6 @@
 "use client";
 import { ChevronDown, ChevronLeft, ChevronRight, Plus } from "lucide-react";
-import { Activity, BarChart, BarChart3, Bell, BookOpen, Bot, Building2, Clock, CreditCard, Crown, ExternalLink, File, FileText, Filter, FolderTree, Globe, Heart, HelpCircle, Home, Image as ImageIcon, Info, Layers, LayoutDashboard, Link2, LogOut, Mail, Megaphone, MessageSquare, MousePointer, Package, Palette, PenTool, Phone, Puzzle, Receipt, RotateCcw, ScrollText, Search, Send, Settings, Shield, ShoppingBag, ShoppingCart, Smartphone, Star, Store, Tag, Target, Truck, Undo2, UserPlus, Users, Zap } from "@/components/icons/FilledIcons";
+import { Activity, BarChart, BarChart3, Bell, BookOpen, Bot, Building2, Clock, CreditCard, Crown, ExternalLink, File, FileText, Filter, FolderTree, Globe, Heart, HelpCircle, Home, Image as ImageIcon, Info, Layers, LayoutDashboard, Link2, LogOut, Mail, Megaphone, MessageSquare, MousePointer, Package, Palette, PenTool, Phone, Puzzle, RotateCcw, ScrollText, Search, Send, Settings, Shield, ShoppingBag, ShoppingCart, Smartphone, Star, Store, Tag, Target, Truck, Undo2, UserPlus, Users, Zap } from "@/components/icons/FilledIcons";
 
 import { useState, useEffect, useCallback } from "react";
 import Link from "next/link";
@@ -175,7 +175,6 @@ function getNavForSiteType(siteType: string | null): NavGroup[] {
 }
 
 const bottomNav = [
-  { name: "Billing", href: "/dashboard/billing", icon: Receipt },
   { name: "Settings", href: "/dashboard/settings", icon: Settings },
   { name: "Help", href: "/dashboard/support", icon: HelpCircle },
 ];
