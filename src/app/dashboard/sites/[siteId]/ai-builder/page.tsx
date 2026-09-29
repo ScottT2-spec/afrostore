@@ -2,7 +2,8 @@
 
 import { useState, useRef, useEffect } from "react";
 import { useRouter } from "next/navigation";
-import { ArrowLeft, Check, ExternalLink, Loader2, Paperclip, Send, Sparkles, X } from "lucide-react";
+import { ArrowLeft, BookOpen, Check, ExternalLink, Loader2, Paperclip, Send, Sparkles, X } from "lucide-react";
+import { AIEditGuide } from "@/components/ai-builder/AIEditGuide";
 import { api } from "@/lib/api-client";
 import { parsePageContent } from "@/lib/page-content";
 import { useTypewriterPlaceholder } from "@/lib/use-typewriter-placeholder";
@@ -117,6 +118,7 @@ export default function AIBuilderPage({ params }: { params: Promise<{ siteId: st
   const [pendingQuestion, setPendingQuestion] = useState<{ question: string; options?: string[] } | null>(null);
   const priorMessagesRef = useRef<unknown[] | null>(null);
   const [hasGenerated, setHasGenerated] = useState(false);
+  const [showGuide, setShowGuide] = useState(false);
   // Empty box + nothing else going on → type out example prompts (see
   // BUILD_PROMPTS / EDIT_PROMPTS). Once the merchant types, attaches an image
   // or the builder is busy, it stops and a static line takes over.
@@ -511,6 +513,15 @@ export default function AIBuilderPage({ params }: { params: Promise<{ siteId: st
           </div>
 
           <div className="flex-shrink-0 border-t border-surface-200 p-3">
+            <AIEditGuide open={showGuide} onClose={() => setShowGuide(false)} onPick={(t) => setInput(t)} />
+            {!showGuide && (
+              <button
+                onClick={() => setShowGuide(true)}
+                className="mb-2 flex items-center gap-1.5 text-xs font-medium text-brand-600 hover:text-brand-700"
+              >
+                <BookOpen className="h-3.5 w-3.5" /> AI edit guidelines
+              </button>
+            )}
             {uploadedImage && (
               <div className="flex items-center gap-2 mb-2 rounded-lg border border-brand-200 bg-brand-50 px-2.5 py-1.5 text-xs text-brand-700 w-fit">
                 <img src={uploadedImage.url} alt="" className="h-6 w-6 rounded object-cover" />

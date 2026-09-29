@@ -19,7 +19,7 @@ export interface DirectEditRequest {
   quoted: boolean;
 }
 
-const BLOCK_ALIASES: Record<string, string[]> = {
+export const BLOCK_ALIASES: Record<string, string[]> = {
   hero: ["hero", "hero section", "top section", "main banner"],
   banner: ["banner", "promo banner", "announcement bar"],
   features: ["features", "feature", "why choose us", "why choose", "benefits"],
