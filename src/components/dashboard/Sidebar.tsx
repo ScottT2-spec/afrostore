@@ -326,7 +326,7 @@ export default function Sidebar({ onNavigate }: { onNavigate?: () => void } = {}
             </div>
             <div className="border-t border-gray-100">
               <Link
-                href="/dashboard/new-site"
+                href="/dashboard/create-site"
                 onClick={() => setSiteSwitcherOpen(false)}
                 className="flex items-center gap-2 px-3 py-2.5 text-xs font-semibold text-gray-600 hover:bg-gray-50 transition-colors"
               >

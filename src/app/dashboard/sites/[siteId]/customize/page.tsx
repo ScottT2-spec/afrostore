@@ -172,7 +172,7 @@ export default function SiteCustomizePage({ params }: { params: Promise<{ siteId
     <div className="p-6 space-y-6">
       <div className="flex flex-wrap items-center justify-between gap-3">
         <div>
-          <Link href="/dashboard/new-site" className="mb-2 inline-flex items-center gap-2 text-sm font-medium text-surface-500 hover:text-surface-800">
+          <Link href="/dashboard/create-site" className="mb-2 inline-flex items-center gap-2 text-sm font-medium text-surface-500 hover:text-surface-800">
             <ArrowLeft className="h-4 w-4" /> Back to onboarding
           </Link>
           <h1 className="text-2xl font-bold text-surface-900 font-display">Customize {site.name}</h1>
