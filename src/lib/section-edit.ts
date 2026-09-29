@@ -112,6 +112,19 @@ function walkToParent(root: Record<string, unknown>, parts: string[], createMiss
   return { parent: cur, key: parts[parts.length - 1] };
 }
 
+/** Tool schemas advertise `value` as text (some providers can't take "any"), so models send true/false/JSON as text. Turn it back into the right type. */
+export function coerceEditValue(value: unknown, before: unknown, key: string, forInsert = false): unknown {
+  if (typeof value !== "string") return value;
+  const t = value.trim();
+  const looksJson = (t.startsWith("{") && t.endsWith("}")) || (t.startsWith("[") && t.endsWith("]"));
+  if (looksJson && (forInsert || typeof before === "object")) {
+    try { return JSON.parse(t); } catch { /* keep as text */ }
+  }
+  if (/^(true|false)$/i.test(t) && (typeof before === "boolean" || (before === undefined && /(italic|bold|underline|enabled|show|hide|visible)/i.test(key)))) return t.toLowerCase() === "true";
+  if (typeof before === "number" && t !== "" && !Number.isNaN(Number(t))) return Number(t);
+  return value;
+}
+
 export function applySectionEdits(
   props: Record<string, unknown>,
   edits: EditOp[],
@@ -121,7 +134,7 @@ export function applySectionEdits(
   const fail = (error: string) => ({ props, changes: [], error });
 
   for (let n = 0; n < edits.length; n++) {
-    const e = edits[n];
+    let e = edits[n];
     const label = `edit ${n + 1} (${e.op} "${e.path}")`;
     const parts = parsePath(e.path);
     if (!parts) return fail(`${label}: invalid path.`);
@@ -134,13 +147,15 @@ export function applySectionEdits(
       }
       const at = e.index === undefined ? target.length : e.index;
       if (at > target.length) return fail(`${label}: index ${at} is past the end (list has ${target.length} items).`);
-      target.splice(at, 0, e.value);
-      changes.push({ op: "insert", path: `${e.path}.${at}`, after: e.value });
+      const item = coerceEditValue(e.value, undefined, parts[parts.length - 1], true);
+      target.splice(at, 0, item);
+      changes.push({ op: "insert", path: `${e.path}.${at}`, after: item });
       continue;
     }
 
     const lastKey = parts[parts.length - 1];
     const before = getAt(next, parts);
+    if (e.op === "set") e = { ...e, value: coerceEditValue(e.value, before, lastKey) };
 
     // A `set` on a field the section doesn't have is almost always a typo or a
     // guessed name ("headline" for "heading"). It would "succeed" and change

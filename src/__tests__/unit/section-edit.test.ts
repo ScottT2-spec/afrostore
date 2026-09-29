@@ -135,3 +135,18 @@ describe("normalizeText", () => {
     expect(normalizeText("  Don\u2019t   miss ")).toBe("don't miss");
   });
 });
+
+describe("coerceEditValue (models send values as text)", () => {
+  it("turns 'true'/'false' into booleans for existing boolean fields", () => {
+    const r = applySectionEdits({ headingItalic: false }, [{ op: "set", path: "headingItalic", value: "true" }]);
+    expect(r.props.headingItalic).toBe(true);
+  });
+  it("parses a JSON list item on insert", () => {
+    const r = applySectionEdits({ items: [] }, [{ op: "insert", path: "items", value: '{"title":"A","desc":"B"}' }]);
+    expect((r.props.items as any[])[0]).toEqual({ title: "A", desc: "B" });
+  });
+  it("leaves ordinary text alone", () => {
+    const r = applySectionEdits({ heading: "x" }, [{ op: "set", path: "heading", value: "true story" }]);
+    expect(r.props.heading).toBe("true story");
+  });
+});

@@ -58,17 +58,54 @@ import { detectSensitiveCategory, getGuardrailPromptRules, scanForSafetyViolatio
 function toToolParameters(schema: z.ZodType<unknown>): Record<string, unknown> {
   const jsonSchema = z.toJSONSchema(schema, { target: "draft-7" }) as Record<string, unknown>;
   delete jsonSchema.$schema;
-  return jsonSchema;
+  return geminiSafe(jsonSchema) as Record<string, unknown>;
 }
 
-const TOOL_DEFS: AITool[] = [
+/** Some providers (Gemini) reject `default`, and properties with no `type`. Make every schema acceptable to all of them. */
+function geminiSafe(node: unknown): unknown {
+  if (Array.isArray(node)) return node.map(geminiSafe);
+  if (!node || typeof node !== "object") return node;
+  const out: Record<string, unknown> = {};
+  for (const [k, v] of Object.entries(node as Record<string, unknown>)) {
+    if (k === "default") continue;
+    out[k] = k === "properties" && v && typeof v === "object"
+      ? Object.fromEntries(Object.entries(v as Record<string, Record<string, unknown>>).map(([pk, pv]) => {
+          const safe = geminiSafe(pv) as Record<string, unknown>;
+          return [pk, "type" in safe || "anyOf" in safe || "enum" in safe ? safe : { ...safe, type: "string" }];
+        }))
+      : geminiSafe(v);
+  }
+  return out;
+}
+
+/** Edit turns send only the tools the request can plausibly need: every tool definition costs tokens on every call, and free-tier providers cap requests at ~8k tokens. */
+const EDIT_CORE_TOOLS = ["get_section", "edit_section", "find_text", "replace_text", "ask_user", "finalize_draft"];
+const EDIT_TOOL_GROUPS: Array<[RegExp, string[]]> = [
+  [/\b(new page|add (a |another )?page|create (a |another )?page|page for)\b/i, ["create_page"]],
+  [/\b(product|price|stock|item|sell|catalog|inventory|categor|collection)/i, ["upsert_product", "remove_product"]],
+  [/\b(phone|email|address|whatsapp|contact|number|call us|location)\b/i, ["set_contact_info", "set_whatsapp"]],
+  [/\b(instagram|facebook|tiktok|twitter|social|youtube)\b/i, ["set_social_links"]],
+  [/\b(theme|vibe|palette|font|colou?r scheme|mood|whole site|entire site|overall look)\b/i, ["set_theme"]],
+  [/\b(nav|menu|header|link|hide|remove .* page|page.*(menu|nav))\b/i, ["set_navigation", "set_page_nav_visibility"]],
+  [/\b(seo|meta|google|search engine)\b/i, ["set_seo"]],
+  [/\b(business name|store name|site name|rename|brand name)\b/i, ["update_site_info"]],
+  [/\b(deliver|shipping|zone)\b/i, ["set_delivery_zones"]],
+  [/(uploaded an image|image url|logo|photo|picture|upload)/i, ["attach_asset"]],
+];
+export function selectEditTools(requestText: string): AITool[] {
+  const names = new Set(EDIT_CORE_TOOLS);
+  for (const [re, tools] of EDIT_TOOL_GROUPS) if (re.test(requestText)) tools.forEach((t) => names.add(t));
+  return TOOL_DEFS.filter((t) => names.has(t.function.name));
+}
+
+export const TOOL_DEFS: AITool[] = [
   { type: "function", function: { name: "create_page", description: "Add a new page with default sections, populated with real generated content — never a placeholder skeleton.", parameters: toToolParameters(createPageSchema) } },
   { type: "function", function: { name: "update_site_info", description: "Set the site's real business name (and optional description). Call this first, before create_page, as soon as you know the business name — this is what makes the site show up correctly in the merchant's dashboard sites list immediately, independent of Publish.", parameters: toToolParameters(updateSiteInfoSchema) } },
   { type: "function", function: { name: "update_section", description: "Change specific fields on one existing section of one page.", parameters: toToolParameters(updateSectionSchema) } },
-  { type: "function", function: { name: "get_section", description: "READ a section's real, current content before editing it. With sectionIndex: returns every editable field of that one section as dotted paths with their current values (headings, texts, colors, images, buttons, links, and each list item like items.2.title). Without sectionIndex: returns an outline of all sections on the page. Call this whenever you are not 100% sure of a field's exact path or current value.", parameters: toToolParameters(getSectionSchema) } },
-  { type: "function", function: { name: "edit_section", description: "Change ANYTHING on any section: a heading or any text, text/background/button colors, the background image or any image, button labels and links, and every individual item inside lists (features, testimonials, FAQs, stats, team, gallery images, etc.) — set a value, remove a field or list item, or insert a new list item. Paths come from get_section. Prefer this over update_section for anything beyond top-level fields.", parameters: toToolParameters(editSectionSchema) } },
-  { type: "function", function: { name: "find_text", description: "SEARCH the whole site (or one page) for a piece of visible text and get back exactly where it lives: page, section number, block type, and field path. Use this FIRST whenever the merchant quotes or describes specific wording (\"change 'Shop Now' to...\", \"the line about free delivery\", \"my phone number\") and you are not certain which section holds it.", parameters: toToolParameters(findTextSchema) } },
-  { type: "function", function: { name: "replace_text", description: "EXACT find-and-replace of wording across the site, one page, or one section. Use for \"change X to Y\" / \"replace X with Y everywhere\". Never touches links, image URLs or colors, only visible words. Returns every change as before \u2192 after. For anything structural (colors, images, adding/removing list items, several different fields) use edit_section instead.", parameters: toToolParameters(replaceTextSchema) } },
+  { type: "function", function: { name: "get_section", description: "Read a section's real content: every field as a dotted path with its current value. Omit sectionIndex for an outline of the page.", parameters: toToolParameters(getSectionSchema) } },
+  { type: "function", function: { name: "edit_section", description: "Change anything on a section: any text, colors, images, button labels/links, or individual list items (set, remove, insert). Use paths from get_section.", parameters: toToolParameters(editSectionSchema) } },
+  { type: "function", function: { name: "find_text", description: "Search the site (or one page) for visible text; returns page, section, block type and field path. Use first when the merchant quotes wording.", parameters: toToolParameters(findTextSchema) } },
+  { type: "function", function: { name: "replace_text", description: "Exact find-and-replace of wording across the site, a page, or a section. Only visible words (never links/images/colors). Returns before to after.", parameters: toToolParameters(replaceTextSchema) } },
   { type: "function", function: { name: "set_theme", description: "Set the site's visual vibe/color direction.", parameters: toToolParameters(setThemeSchema) } },
   { type: "function", function: { name: "set_navigation", description: "Set the main nav links.", parameters: toToolParameters(setNavigationSchema) } },
   { type: "function", function: { name: "set_page_nav_visibility", description: "Show or hide a single page's link in the nav bar without deleting or unpublishing the page — use this for any request to remove/hide/take out one nav item (e.g. \"remove the FAQ from the menu\").", parameters: toToolParameters(setPageNavVisibilitySchema) } },
@@ -118,7 +155,25 @@ const EDIT_MODE_RULES = `MODE: EDITING AN EXISTING, LIVE SITE. You are the merch
 - Never say a change was made unless edit_section (or another tool) returned success in this session. If a call fails, read the error, fix the path or value, and retry. If something truly can't be located after checking get_section, say exactly what you looked for and ask one short question.
 - When finished, call finalize_draft with a short, natural summary that names what you changed and where (e.g. \"Changed the hero heading to 'Fresh Bakes Daily' and turned the button green.\"). Sound like a sharp human assistant, not a template.`;
 
-function buildSystemPrompt(rules: SiteIntentRules, safetyCategory: SensitiveCategory | null, currentSiteSummary: string | null, knownInfo?: string): string {
+function buildEditSystemPrompt(safetyCategory: SensitiveCategory | null, summary: string, knownInfo?: string): string {
+  const cap = (t: string, n: number) => (t.length > n ? t.slice(0, n) + "\n\u2026(more sections \u2014 use get_section to see them)" : t);
+  return `MODE: EDITING AN EXISTING, LIVE SITE. You are the merchant's site editor. Change exactly what they ask, using the tools, and nothing else.
+RULES
+- Do precisely what was asked. Everything not mentioned stays unchanged. Use the merchant's exact wording (no rephrasing, fixing or polishing). Write new copy only if asked, in the site's voice.
+- Quoted or named text: find_text, then replace_text (pageSlug/sectionIndex if they pointed at one spot; wholeValue for whole-field matches). Colors, images, buttons, list items or several fields: get_section, then ONE edit_section with all changes. "The hero"/"2nd testimonial": match the SITE list; if unsure, get_section without sectionIndex.
+- "everywhere"/"all"/no place given: change every occurrence. Pointed at one spot: only that.
+- Colors: convert names to hex (text color keys are <field>Color); keep text readable on the background. Images: only exact URLs the merchant uploaded.
+- Unknown field errors list the real fields: pick one and retry (createIfMissing only for truly new fields).
+- Check the before \u2192 after in each result; fix mismatches. Never say done without a success result. Not found: try shorter wording or other pages. Footer/menu/social/WhatsApp/products use their own tools; if no tool fits, say so plainly.
+- Never create_page for an existing page or rebuild anything; don't add pages/products unasked. Don't ask for details listed below; ask at most one short question only if truly ambiguous.
+- Default currency NGN. Finish with finalize_draft: a short natural summary of what changed and where.
+${safetyCategory ? getGuardrailPromptRules(safetyCategory) : ""}${knownInfo ? "\nMERCHANT DETAILS (use directly):\n" + cap(knownInfo, 900) : ""}
+SITE (page slug, section index, block type, preview):
+${cap(summary, 3800)}`;
+}
+
+export function buildSystemPrompt(rules: SiteIntentRules, safetyCategory: SensitiveCategory | null, currentSiteSummary: string | null, knownInfo?: string): string {
+  if (currentSiteSummary) return buildEditSystemPrompt(safetyCategory, currentSiteSummary, knownInfo);
   return `You are building a real e-commerce/business/landing site for an African SMB merchant, from their plain-language description. You can ONLY act through the tools you're given — there is no code, no files, nothing outside this specific tool set.
 
 ${currentSiteSummary ? EDIT_MODE_RULES : rules.promptRules}
@@ -194,7 +249,8 @@ async function summarizeCurrentSite(siteId: string): Promise<string | null> {
         : "  (no sections)";
       return `Page "${page.slug}" (${page.type}, title: "${page.title}"):\n${sectionLines}`;
     })
-    .join("\n\n");
+    .join("\n\n")
+    .split("\n").map((l: string) => (l.length > 130 ? l.slice(0, 130) + "\u2026" : l)).join("\n");
 }
 
 export interface SiteGenerationStep {
@@ -280,14 +336,25 @@ export async function runSiteGenerationAgent(opts: RunSiteGenerationOptions): Pr
     if (shouldCancel && (await shouldCancel())) {
       throw new SiteGenerationError("Generation was cancelled.");
     }
-    const result = await ai.chat({
-      capability: AICapability.FUNCTION_CALLING,
-      messages,
-      tools: TOOL_DEFS,
-      toolChoice: "required",
-      maxTokens: 4096,
-      temperature: 0.5,
-    });
+    const routingText = messages.filter((m) => m.role === "user").map((m) => (typeof m.content === "string" ? m.content : "")).join("\n");
+    const callAI = () =>
+      ai.chat({
+        capability: AICapability.FUNCTION_CALLING,
+        messages,
+        tools: isEditMode ? selectEditTools(routingText) : TOOL_DEFS,
+        toolChoice: "required",
+        maxTokens: isEditMode ? 1500 : 4096,
+        temperature: 0.5,
+      });
+    let result = await callAI();
+    // Free-tier providers rate-limit per minute; a short wait usually clears it.
+    for (const wait of [8000, 16000]) {
+      if (result.success && result.data) break;
+      const msg = result.failedProviders?.map((f) => f.error).join(" ") || "";
+      if (!/rate_limit|429|413|tokens per minute|TPM/i.test(msg)) break;
+      await new Promise((r) => setTimeout(r, wait));
+      result = await callAI();
+    }
 
     if (!result.success || !result.data) {
       const errors = result.failedProviders?.map((f) => `${f.provider}: ${f.error}`).join("; ") || "Unknown error";
@@ -549,7 +616,7 @@ async function executeTool(
         }
         if (parsed.sectionIndex >= blocks.length) return { result: `Page "${parsed.pageSlug}" only has ${blocks.length} sections (0-${blocks.length - 1}).`, isError: true };
         const b = blocks[parsed.sectionIndex];
-        return { result: `Section ${parsed.sectionIndex} on "${parsed.pageSlug}" (type: ${b.type || "unknown"}). Editable fields (path = current value):\n${formatFlat(b.props || {}, 400)}`, isError: false };
+        return { result: `Section ${parsed.sectionIndex} on "${parsed.pageSlug}" (type: ${b.type || "unknown"}). Editable fields (path = current value):\n${formatFlat(b.props || {}, 300).slice(0, 5000)}`, isError: false };
       }
 
       case "edit_section": {

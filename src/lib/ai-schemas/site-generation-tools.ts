@@ -56,47 +56,36 @@ export const updateSectionSchema = z.object({
 });
 
 export const getSectionSchema = z.object({
-  pageSlug: z.string().min(1).describe('Which page to read, e.g. "home" or "about".'),
-  sectionIndex: z.number().int().min(0).optional().describe(
-    "0-based position of the section. Omit to get a short outline of every section on the page (type + field paths) instead of one section in full."
-  ),
+  pageSlug: z.string().min(1).describe('Page slug, e.g. "home".'),
+  sectionIndex: z.number().int().min(0).optional().describe("0-based section position. Omit for a short outline of the whole page."),
 });
 
 export const sectionEditOpSchema = z.object({
-  op: z.enum(["set", "remove", "insert"]).describe(
-    '"set" = write a value at a path (creates the field if it does not exist yet, e.g. a new color or background image). ' +
-    '"remove" = delete a field, or delete one list item. ' +
-    '"insert" = add a new item into a list at an index (or at the end).'
-  ),
-  path: z.string().min(1).describe(
-    'Dotted path INSIDE the section, exactly as get_section lists it. Lists use the item number: "heading", "buttonColor", "backgroundImage", "items.2.title", "items.0.image", "images.3". ' +
-    'For "insert" the path is the LIST itself, e.g. "items".'
-  ),
-  value: z.unknown().optional().describe('The new value for "set" or the new item for "insert" (text, number, boolean, color hex, image URL, or an object for a whole list item). Not used by "remove".'),
-  index: z.number().int().min(0).optional().describe('For "insert" only: position to insert at. Omit to append at the end.'),
-  createIfMissing: z.boolean().optional().describe('Only for "set". A set on a field the section does not have is REJECTED (it is almost always a typo or a guessed name) and the error lists the real fields. Pass true only when you deliberately want to ADD a brand-new field. Color/italic/image/background style fields never need this.'),
+  op: z.enum(["set", "remove", "insert"]).describe("set = write a value; remove = delete a field or list item; insert = add a list item."),
+  path: z.string().min(1).describe('Dotted path from get_section, e.g. "heading", "items.2.title". For insert, the list itself, e.g. "items".'),
+  value: z.unknown().optional().describe('New value. Text as plain text; on/off fields as true or false; a whole list item as JSON text like {"title":"..","desc":".."}.'),
+  index: z.number().int().min(0).optional().describe("insert only: position (omit to append)."),
+  createIfMissing: z.boolean().optional().describe("set only: true ONLY to add a brand-new field; unknown fields are otherwise rejected."),
 });
 
 export const editSectionSchema = z.object({
-  pageSlug: z.string().min(1).describe('Which page to edit, e.g. "home" or "about".'),
-  sectionIndex: z.number().int().min(0).describe("0-based position of the section on that page."),
-  edits: z.array(sectionEditOpSchema).min(1).max(40).describe(
-    "Every change to make on this section, applied together. If any one fails, none are saved and the error says which one, so fix it and resend."
-  ),
+  pageSlug: z.string().min(1).describe('Page slug, e.g. "home".'),
+  sectionIndex: z.number().int().min(0).describe("0-based section position."),
+  edits: z.array(sectionEditOpSchema).min(1).max(40).describe("All changes for this section, applied together (all or nothing)."),
 });
 
 export const findTextSchema = z.object({
-  query: z.string().min(1).describe("Text to look for, exactly as the merchant wrote it (or a distinctive part of it). Case-insensitive; curly and straight quotes match each other."),
-  pageSlug: z.string().optional().describe("Limit the search to one page. Omit to search every page of the site."),
+  query: z.string().min(1).describe("Text to find, as the merchant wrote it. Case-insensitive."),
+  pageSlug: z.string().optional().describe("Limit to one page; omit to search all pages."),
 });
 
 export const replaceTextSchema = z.object({
-  find: z.string().min(1).describe("The exact wording to replace, as the merchant wrote it."),
-  replace: z.string().describe("The exact new wording, character for character as the merchant gave it. Do not rephrase, fix or improve it."),
-  pageSlug: z.string().optional().describe("Limit to one page. Omit to replace on every page."),
-  sectionIndex: z.number().int().min(0).optional().describe("Limit to one section (needs pageSlug). Use when the merchant pointed at one specific block."),
-  matchCase: z.boolean().optional().describe("Default false (case-insensitive). Set true only if capitalization matters to the request."),
-  wholeValue: z.boolean().optional().describe("Default false: replaces the wording anywhere inside a text. Set true to only change fields whose ENTIRE text is exactly `find` (e.g. a button that says just \"Shop\", leaving \"Shop local\" alone)."),
+  find: z.string().min(1).describe("Exact wording to replace."),
+  replace: z.string().describe("Exact new wording, character for character as the merchant gave it."),
+  pageSlug: z.string().optional().describe("Limit to one page; omit for all pages."),
+  sectionIndex: z.number().int().min(0).optional().describe("Limit to one section (needs pageSlug)."),
+  matchCase: z.boolean().optional().describe("Default false."),
+  wholeValue: z.boolean().optional().describe('true = only fields whose entire text equals find (e.g. a button that says just "Shop").'),
 });
 
 export const setThemeSchema = z.object({
