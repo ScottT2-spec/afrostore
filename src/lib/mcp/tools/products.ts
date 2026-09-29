@@ -166,7 +166,6 @@ const getProduct: MCPToolDef = {
         variants: { orderBy: { position: "asc" } },
         category: { select: { id: true, name: true, slug: true } },
         reviews: {
-          where: { isApproved: true },
           orderBy: { createdAt: "desc" },
           take: 5,
           select: { id: true, name: true, rating: true, title: true, body: true, createdAt: true },

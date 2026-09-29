@@ -73,12 +73,11 @@ export async function GET(req: NextRequest, { params }: Params) {
 
     if (!product) return notFound("Product not found");
 
-    // Fetch approved reviews (last 10) + aggregate stats
+    // Fetch reviews (last 10) + aggregate stats
     const [reviews, reviewStats, ratingDistribution] = await Promise.all([
       prisma.review.findMany({
         where: {
           productId: product.id,
-          isApproved: true,
         },
         select: {
           id: true,
@@ -97,7 +96,6 @@ export async function GET(req: NextRequest, { params }: Params) {
       prisma.review.aggregate({
         where: {
           productId: product.id,
-          isApproved: true,
         },
         _avg: { rating: true },
         _count: { rating: true },
@@ -107,7 +105,6 @@ export async function GET(req: NextRequest, { params }: Params) {
         by: ["rating"],
         where: {
           productId: product.id,
-          isApproved: true,
         },
         _count: { rating: true },
         orderBy: { rating: "asc" },

@@ -530,7 +530,7 @@ function ReviewsSection({ slug, productSlug, initialReviews }: { slug: string; p
       });
       const data = await res.json();
       if (data.success) {
-        setSubmitResult({ type: "success", message: "Thank you! Your review will appear after approval." });
+        setSubmitResult({ type: "success", message: "Thank you for your patronage!" });
         setFormRating(0);
         setFormName("");
         setFormEmail("");

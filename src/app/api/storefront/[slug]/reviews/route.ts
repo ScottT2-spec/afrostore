@@ -7,7 +7,7 @@ function json(data: unknown, status = 200) {
   return NextResponse.json(data, { status });
 }
 
-// GET /api/storefront/:slug/reviews — all approved reviews for the store
+// GET /api/storefront/:slug/reviews — all reviews for the store
 export async function GET(req: NextRequest, { params }: Params) {
   const { slug } = await params;
 
@@ -30,9 +30,8 @@ export async function GET(req: NextRequest, { params }: Params) {
     const ratingFilter = url.searchParams.get("rating");
     const ratingVal = ratingFilter ? parseInt(ratingFilter) : null;
 
-    // Base where clause: approved reviews for products in this store
+    // Base where clause: reviews for products in this store
     const where: Record<string, unknown> = {
-      isApproved: true,
       product: { siteId: site.id, status: "ACTIVE" },
     };
     if (ratingVal && ratingVal >= 1 && ratingVal <= 5) {
@@ -66,7 +65,6 @@ export async function GET(req: NextRequest, { params }: Params) {
       prisma.review.count({ where }),
       prisma.review.aggregate({
         where: {
-          isApproved: true,
           product: { siteId: site.id, status: "ACTIVE" },
         },
         _avg: { rating: true },
@@ -75,7 +73,6 @@ export async function GET(req: NextRequest, { params }: Params) {
       prisma.review.groupBy({
         by: ["rating"],
         where: {
-          isApproved: true,
           product: { siteId: site.id, status: "ACTIVE" },
         },
         _count: { rating: true },

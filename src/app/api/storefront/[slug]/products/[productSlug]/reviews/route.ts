@@ -66,7 +66,7 @@ export async function GET(req: NextRequest, { params }: Params) {
         orderBy = { createdAt: "desc" };
     }
 
-    const where = { productId: resolved.productId, isApproved: true };
+    const where = { productId: resolved.productId };
 
     const [reviews, total, reviewStats, ratingDistribution] = await Promise.all([
       prisma.review.findMany({
@@ -194,7 +194,7 @@ export async function POST(req: NextRequest, { params }: Params) {
         body: body || null,
         images: images || [],
         isVerified,
-        isApproved: false,
+        isApproved: true, // reviews publish immediately; merchants can delete from the dashboard
       },
       select: {
         id: true,

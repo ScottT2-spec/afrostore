@@ -5,7 +5,7 @@ function json(data: unknown, status = 200) {
   return NextResponse.json(data, { status });
 }
 
-// GET /api/reviews/approved — approved reviews across all stores (for landing page)
+// GET /api/reviews/approved — reviews across all stores (for landing page)
 export async function GET(req: NextRequest) {
   try {
     const url = new URL(req.url);
@@ -13,7 +13,6 @@ export async function GET(req: NextRequest) {
 
     const reviews = await prisma.review.findMany({
       where: {
-        isApproved: true,
         product: { status: "ACTIVE", site: { status: "ACTIVE" } },
       },
       select: {
