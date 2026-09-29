@@ -75,7 +75,6 @@ const ecommerceNav: NavGroup[] = [
   { label: "", items: [
     { name: "Notifications", href: "/dashboard/notifications", icon: Bell },
     { name: "Messages", href: "/dashboard/messages", icon: Mail },
-    { name: "AI Business", href: "/dashboard/ai-business", icon: Bot },
     { name: "AI Assistant", href: "/dashboard/ai", icon: Bot },
   ] },
 ];
@@ -114,7 +113,6 @@ const websiteNav: NavGroup[] = [
   { label: "", items: [
     { name: "Notifications", href: "/dashboard/notifications", icon: Bell },
     { name: "Messages", href: "/dashboard/messages", icon: Mail },
-    { name: "AI Business", href: "/dashboard/ai-business", icon: Bot },
     { name: "AI Assistant", href: "/dashboard/ai", icon: Bot },
   ] },
 ];
@@ -161,7 +159,6 @@ const landingPageNav: NavGroup[] = [
   { label: "", items: [
     { name: "Notifications", href: "/dashboard/notifications", icon: Bell },
     { name: "Messages", href: "/dashboard/messages", icon: Mail },
-    { name: "AI Business", href: "/dashboard/ai-business", icon: Bot },
     { name: "AI Assistant", href: "/dashboard/ai", icon: Bot },
   ] },
 ];

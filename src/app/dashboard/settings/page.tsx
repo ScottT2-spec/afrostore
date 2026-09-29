@@ -287,7 +287,7 @@ export default function SettingsPage() {
                     setCurrentStore(remaining[0]);
                     router.push("/dashboard");
                   } else {
-                    router.push("/dashboard/new-site");
+                    router.push("/dashboard/create-site");
                   }
                 } else {
                   setDeleteError(res.error || "Failed to delete store");
