@@ -64,7 +64,6 @@ const ecommerceNav: NavGroup[] = [
       { name: "Delivery", href: "/dashboard/delivery", icon: Truck },
       { name: "Payments", href: "/dashboard/payments", icon: CreditCard },
       { name: "Themes", href: "/dashboard/themes", icon: Palette },
-      { name: "Plugins", href: "/dashboard/plugins", icon: Puzzle },
       { name: "Domains", href: "/dashboard/domains", icon: Globe },
       { name: "Analytics", href: "/dashboard/analytics", icon: BarChart3 },
       { name: "Marketplace", href: "/dashboard/marketplace", icon: Store },
@@ -102,7 +101,6 @@ const websiteNav: NavGroup[] = [
     label: "Configuration",
     items: [
       { name: "Themes", href: "/dashboard/themes", icon: Palette },
-      { name: "Plugins", href: "/dashboard/plugins", icon: Puzzle },
       { name: "Domains", href: "/dashboard/domains", icon: Globe },
       { name: "Analytics", href: "/dashboard/analytics", icon: BarChart3 },
       { name: "Team", href: "/dashboard/team", icon: UserPlus },
@@ -146,7 +144,6 @@ const landingPageNav: NavGroup[] = [
     label: "Configuration",
     items: [
       { name: "Themes", href: "/dashboard/themes", icon: Palette },
-      { name: "Plugins", href: "/dashboard/plugins", icon: Puzzle },
       { name: "Domains", href: "/dashboard/domains", icon: Globe },
       { name: "Analytics", href: "/dashboard/analytics", icon: BarChart3 },
       { name: "Media Library", href: "/dashboard/media", icon: ImageIcon },
