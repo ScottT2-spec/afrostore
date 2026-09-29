@@ -5,8 +5,11 @@ import { CheckCircle2, Palette, Sparkles } from "@/components/icons/FilledIcons"
 
 import { useState } from "react";
 import ImageUpload from "@/components/dashboard/ImageUpload";
+import { readableTextOn } from "@/lib/brand-color";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useSite } from "@/context/StoreContext";
+
+const BRAND_COLOR_PRESETS = ["#0f62fe", "#0e7c66", "#c2410c", "#b91c1c", "#7c3aed", "#be185d", "#1f2937", "#ca8a04"];
 
 const INDUSTRIES = [
   "Fashion", "Electronics", "Food & Restaurant", "Beauty & Cosmetics", "Real Estate",
@@ -26,6 +29,9 @@ export default function AIBusinessPage() {
   const [businessName, setBusinessName] = useState("");
   // Optional logo — saved on the Site and shown in the generated store's header beside the business name
   const [logoUrl, setLogoUrl] = useState("");
+  // Optional brand color — empty = not chosen (store keeps its default look). When set, it becomes the
+  // header + footer background (and their links/buttons) on the generated store.
+  const [brandColor, setBrandColor] = useState("");
   const [businessType, setBusinessType] = useState("");
   // When "Other" is picked, the merchant types the actual business type
   // (e.g. "Car wash", "Pet shop"). That typed text — not the word
@@ -85,6 +91,7 @@ export default function AIBusinessPage() {
           businessType: effectiveType,
           siteType: "ECOMMERCE",
           ...(logoUrl ? { logo: logoUrl } : {}),
+          ...(brandColor ? { brandColor } : {}),
           ...(location.trim() ? { country: location.trim() } : {}),
           ...(description.trim() ? { description: description.trim() } : {}),
           ...(phoneCheck?.ok ? { phone: phoneCheck.e164 } : {}),
@@ -169,6 +176,37 @@ export default function AIBusinessPage() {
                 compact
               />
               <p className="text-xs text-surface-400 mt-1">If you upload one, it appears in your store&apos;s header next to your business name. PNG, JPG, WebP or SVG.</p>
+            </div>
+            <div className="sm:col-span-2">
+              <label className="block text-sm font-medium text-surface-700 mb-1">Brand Color (optional)</label>
+              <div className="flex flex-wrap items-center gap-2">
+                {BRAND_COLOR_PRESETS.map((c) => (
+                  <button key={c} type="button" onClick={() => setBrandColor(c)} aria-label={`Use ${c}`}
+                    className={`h-8 w-8 rounded-full border-2 transition-transform ${brandColor === c ? "border-surface-900 scale-110" : "border-white ring-1 ring-surface-200 hover:scale-105"}`}
+                    style={{ backgroundColor: c }} />
+                ))}
+                <label className="flex items-center gap-2 text-xs text-surface-500 cursor-pointer ml-1">
+                  <input type="color" value={brandColor || "#0f62fe"} onChange={(e) => setBrandColor(e.target.value)}
+                    className="h-8 w-10 rounded border border-surface-200 bg-white p-0.5 cursor-pointer" />
+                  Custom
+                </label>
+                {brandColor && (
+                  <button type="button" onClick={() => setBrandColor("")} className="text-xs font-medium text-surface-500 hover:text-surface-800 underline ml-1">
+                    Clear
+                  </button>
+                )}
+              </div>
+              {brandColor ? (
+                <div className="mt-2 flex items-center justify-between rounded-lg px-4 py-2.5 text-sm font-semibold" style={{ backgroundColor: brandColor, color: readableTextOn(brandColor) }}>
+                  <span className="flex items-center gap-2">
+                    {logoUrl && <img src={logoUrl} alt="" className="h-5 w-auto object-contain" />}
+                    {businessName.trim() || "Your Business"}
+                  </span>
+                  <span className="text-xs font-medium opacity-90">Home &nbsp; About &nbsp; Shop</span>
+                </div>
+              ) : (
+                <p className="text-xs text-surface-400 mt-1">Skip this to keep the default look. If you pick one, it becomes your store&apos;s header and footer background, with links and buttons matched to it.</p>
+              )}
             </div>
             <div className="sm:col-span-2"><label className="block text-sm font-medium text-surface-700 mb-1">Industry *</label>
               <div className="grid grid-cols-3 sm:grid-cols-5 gap-2">

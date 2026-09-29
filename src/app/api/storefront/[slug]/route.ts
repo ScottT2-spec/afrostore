@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/db";
 import { asRecord } from "@/lib/json";
+import { normalizeBrandColor } from "@/lib/brand-color";
 import { buildThemeDataWithCustomization, loadSiteCustomizationSafely } from "@/lib/site-customization";
 import { mergeStoredTemplatePages } from "@/lib/templates/site-instance";
 import { ensurePerfumePages } from "@/lib/templates/perfume-pages";
@@ -389,6 +390,7 @@ export async function GET(req: NextRequest, { params }: Params) {
         slug: site.slug,
         description: site.description,
         logo: site.logo,
+        brandColor: normalizeBrandColor((resolvedCustomization?.themeSettings as Record<string, unknown> | undefined)?.brandColor),
         coverImage: site.coverImage,
         subdomain: site.subdomain,
         customDomain: site.customDomain,

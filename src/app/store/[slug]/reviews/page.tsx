@@ -48,6 +48,7 @@ interface StoreInfo {
   name: string;
   slug: string;
   logo?: string;
+  brandColor?: string | null;
 }
 
 function Stars({ rating, size = 16 }: { rating: number; size?: number }) {
@@ -131,7 +132,7 @@ export default function StoreReviewsPage() {
       .then(([storeRes, pageRes]) => {
         if (storeRes.success) {
           const s = storeRes.data.store;
-          setStore({ id: s.id, name: s.name, slug: s.slug, logo: s.logo });
+          setStore({ id: s.id, name: s.name, slug: s.slug, logo: s.logo, brandColor: s.brandColor });
           setStoreData(storeRes.data);
           // Set theme data from customization
           const customization = storeRes.data.customization;
@@ -205,9 +206,11 @@ export default function StoreReviewsPage() {
     { label: "1 Star", value: 1 },
   ];
 
+  // Declared at component level: the AI-site footer below needs it too, not just the Perfumes branch
+  const socialLinksArray = Object.entries(storeData?.socialLinks || {}).filter(([, url]: any) => url).map(([p, u]: any) => ({ platform: p, url: u as string }));
+
   // ─── PERFUMES REVIEWS ───
   if (isPerfumesTemplate) {
-    const socialLinksArray = Object.entries(storeData?.socialLinks || {}).filter(([, url]: any) => url).map(([p, u]: any) => ({ platform: p, url: u as string }));
     const addToCart = (productId: string, quantity: number = 1) => {
       const product = (storeData?.products || []).find((p: any) => p.id === productId);
       if (!product || !store) return;
@@ -294,7 +297,7 @@ export default function StoreReviewsPage() {
         ) : isTShirtsPrintsTemplate ? (
           <TShirtsPrintsHeader storeName={store?.name || "Store"} storeSlug={slug} logo={store?.logo} />
         ) : isAiTemplate ? (
-          <AiStoreHeader storeName={store?.name || "Store"} storeSlug={slug} logo={store?.logo} siteId={store?.id} />
+          <AiStoreHeader storeName={store?.name || "Store"} storeSlug={slug} logo={store?.logo} brandColor={store?.brandColor} siteId={store?.id} />
         ) : (
           <HandmadeBagsHeader
             storeName={store?.name || "Store"}
@@ -476,7 +479,7 @@ export default function StoreReviewsPage() {
           logo={store?.logo}
         />
       ) : isAiTemplate ? (
-        <AiStoreFooter storeName={store?.name || "Store"} storeSlug={slug} logo={store?.logo} description={storeData?.store?.description} socialLinks={socialLinksArray} />
+        <AiStoreFooter storeName={store?.name || "Store"} storeSlug={slug} logo={store?.logo} brandColor={store?.brandColor} description={storeData?.store?.description} socialLinks={socialLinksArray} />
       ) : (
         <HandmadeBagsFooter
           storeName={store?.name || "Store"}

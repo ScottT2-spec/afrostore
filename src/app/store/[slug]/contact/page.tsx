@@ -559,7 +559,7 @@ export default async function ContactPage({ params }: Props) {
   return (
     <ThemeProvider theme={themeData}>
       {isAiTemplate ? (
-        <AiStoreHeader storeName={store.name} storeSlug={store.slug || slug} logo={store.logo} siteId={store.id} />
+        <AiStoreHeader storeName={store.name} storeSlug={store.slug || slug} logo={store.logo} brandColor={(store.customizations?.themeSettings as Record<string, unknown> | null | undefined)?.brandColor as string | undefined} siteId={store.id} />
       ) : (
         <HandmadeBagsHeader
           storeName={store.name}
@@ -577,7 +577,7 @@ export default async function ContactPage({ params }: Props) {
         )}
       </div>
       {isAiTemplate ? (
-        <AiStoreFooter storeName={store.name} storeSlug={store.slug || slug} logo={store.logo} description={store.description} socialLinks={aiSocialLinks} />
+        <AiStoreFooter storeName={store.name} storeSlug={store.slug || slug} logo={store.logo} brandColor={(store.customizations?.themeSettings as Record<string, unknown> | null | undefined)?.brandColor as string | undefined} description={store.description} socialLinks={aiSocialLinks} />
       ) : (
         <HandmadeBagsFooter
           storeName={store.name}

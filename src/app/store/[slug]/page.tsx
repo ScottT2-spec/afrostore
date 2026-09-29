@@ -102,6 +102,7 @@ interface StoreData {
     slug: string;
     description?: string;
     logo?: string;
+    brandColor?: string | null;
     coverImage?: string;
     subdomain: string;
     customDomain?: string;
@@ -777,7 +778,7 @@ export default function StorePage() {
           wishlistCount={wishlistCount}
         />
       ) : isAiTemplate ? (
-        <AiStoreHeader storeName={store.name} storeSlug={slug} logo={store.logo} siteId={store.id} />
+        <AiStoreHeader storeName={store.name} storeSlug={slug} logo={store.logo} brandColor={store.brandColor} siteId={store.id} />
       ) : isFashionTemplate ? (
         <FashionHeader
           storeName={store.name}
@@ -1020,7 +1021,7 @@ export default function StorePage() {
 
       {/* Footer */}
       {isAiTemplate ? (
-        <AiStoreFooter storeName={store.name} storeSlug={slug} logo={store.logo} description={store.description} socialLinks={socialLinksArray} />
+        <AiStoreFooter storeName={store.name} storeSlug={slug} logo={store.logo} brandColor={store.brandColor} description={store.description} socialLinks={socialLinksArray} />
       ) : isDecorTemplate ? (
         <InteriorFooter storeSlug={slug} />
       ) : isCosmeticsTemplate ? (

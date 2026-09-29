@@ -71,6 +71,7 @@ interface StoreData {
     slug: string;
     description?: string;
     logo?: string;
+    brandColor?: string | null;
     currency: string;
     templateSlug?: string;
   };
@@ -1190,7 +1191,7 @@ export default function ShopPage() {
     <div className="min-h-screen bg-surface-50">
       {/* ── Nav ── */}
       {isAiTemplate ? (
-        <AiStoreHeader storeName={store.name} storeSlug={slug} logo={store.logo} siteId={store.id} />
+        <AiStoreHeader storeName={store.name} storeSlug={slug} logo={store.logo} brandColor={store.brandColor} siteId={store.id} />
       ) : isTShirtsPrintsTemplate ? (
         <TShirtsPrintsHeader
           storeName={store.name}
@@ -1681,7 +1682,7 @@ export default function ShopPage() {
 
       {/* ── Footer ── */}
       {isAiTemplate ? (
-        <AiStoreFooter storeName={store.name} storeSlug={slug} logo={store.logo} description={store.description} socialLinks={aiSocialLinks} />
+        <AiStoreFooter storeName={store.name} storeSlug={slug} logo={store.logo} brandColor={store.brandColor} description={store.description} socialLinks={aiSocialLinks} />
       ) : isTShirtsPrintsTemplate ? (
         <TShirtsPrintsFooter storeName={store.name} storeSlug={slug} logo={store.logo} />
       ) : isCosmeticsTemplate ? (

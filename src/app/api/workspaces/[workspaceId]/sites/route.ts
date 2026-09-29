@@ -8,6 +8,7 @@ import { getIndustrySampleData, DEFAULT_SAMPLE_DATA } from "@/lib/ai-sample-data
 import { buildDynamicHomePage } from "@/lib/ai-layout-engine";
 import { getRandomIndustryImages, detectIndustry } from "@/lib/ai-image-pools";
 import { normalizePhone } from "@/lib/phone";
+import { normalizeBrandColor } from "@/lib/brand-color";
 import { buildTemplatePageContent } from "@/lib/templates/template-tree";
 import type { Prisma } from "@/generated/prisma";
 
@@ -79,6 +80,7 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ wor
     name,
     description,
     logo,
+    brandColor,
     socialLinks,
     phone,
     email,
@@ -199,6 +201,16 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ wor
       include: { settings: true, socialLinks: true },
     });
     Object.assign(site, siteWithRelations);
+
+    // Optional brand color (AI Business form). Stored only when the merchant picked a valid one.
+    const chosenBrandColor = normalizeBrandColor(brandColor);
+    if (chosenBrandColor) {
+      await prisma.siteCustomization.upsert({
+        where: { siteId: site.id },
+        create: { siteId: site.id, themeSettings: { brandColor: chosenBrandColor } },
+        update: { themeSettings: { brandColor: chosenBrandColor } },
+      });
+    }
 
     // Theme packages always provide their own pages and site data.
     // No default page synthesis is allowed in the import flow.
