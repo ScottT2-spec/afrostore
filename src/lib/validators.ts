@@ -174,20 +174,41 @@ export const createCouponSchema = z.object({
 
 // ─── DELIVERY ZONES ─────────────────────────────────────────
 
+// Delivery zone fields other than the name are optional: a blank fee means free delivery,
+// no areas means the zone isn't tied to named areas, and a "free above" of 0 / blank means
+// "no free-delivery threshold". Numbers may arrive as strings or NaN from form inputs.
+const optionalMoney = z.preprocess(
+  (v) => (v === "" || v === undefined || v === null || (typeof v === "number" && Number.isNaN(v)) ? undefined : typeof v === "string" ? Number(v) : v),
+  z.number().finite().min(0).optional()
+);
+const freeAboveField = z.preprocess(
+  (v) => {
+    if (v === "" || v === undefined || v === null) return null;
+    const n = typeof v === "string" ? Number(v) : v;
+    return typeof n === "number" && Number.isFinite(n) && n > 0 ? n : null; // 0 / negative / NaN = not set
+  },
+  z.number().positive().nullable()
+);
+const areasField = z.preprocess(
+  (v) => (Array.isArray(v) ? v.map((a) => String(a).trim()).filter(Boolean) : v === undefined || v === null ? [] : v),
+  z.array(z.string())
+);
+
 export const createDeliveryZoneSchema = z.object({
-  name: z.string().min(1).max(100),
-  areas: z.array(z.string()).min(1),
-  fee: z.number().min(0),
-  freeAbove: z.number().positive().nullable().optional(),
-  estimatedDays: z.string().nullable().optional(),
+  name: z.string().trim().min(1, "Zone name is required").max(100),
+  areas: areasField.optional().default([]),
+  fee: optionalMoney.default(0),
+  freeAbove: freeAboveField.optional(),
+  estimatedDays: z.string().nullable().optional().transform((v) => (v && v.trim() ? v.trim() : null)),
+  isActive: z.boolean().optional(),
 });
 
 export const updateDeliveryZoneSchema = z.object({
-  name: z.string().min(1).max(100).optional(),
-  areas: z.array(z.string()).min(1).optional(),
-  fee: z.number().min(0).optional(),
-  freeAbove: z.number().positive().nullable().optional(),
-  estimatedDays: z.string().nullable().optional(),
+  name: z.string().trim().min(1, "Zone name is required").max(100).optional(),
+  areas: areasField.optional(),
+  fee: optionalMoney,
+  freeAbove: freeAboveField.optional(),
+  estimatedDays: z.string().nullable().optional().transform((v) => (v === undefined ? undefined : v && v.trim() ? v.trim() : null)),
   isActive: z.boolean().optional(),
 });
 

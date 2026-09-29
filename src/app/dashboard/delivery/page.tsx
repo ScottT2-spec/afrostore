@@ -85,19 +85,30 @@ export default function DeliveryPage() {
   const handleSave = async () => {
     if (!currentStore || !form.name.trim()) return;
     setSaving(true);
+    // Everything except the name is optional: blank/0/invalid numbers are sent as "not set"
+    const feeNum = parseFloat(form.fee);
+    const freeAboveNum = parseFloat(form.freeAbove);
     const body = {
-      name: form.name,
+      name: form.name.trim(),
       areas: form.areas.split(",").map((a) => a.trim()).filter(Boolean),
-      fee: parseFloat(form.fee) || 0,
-      freeAbove: form.freeAbove ? parseFloat(form.freeAbove) : null,
-      estimatedDays: form.estimatedDays || null,
+      fee: Number.isFinite(feeNum) && feeNum > 0 ? feeNum : 0,
+      freeAbove: Number.isFinite(freeAboveNum) && freeAboveNum > 0 ? freeAboveNum : null,
+      estimatedDays: form.estimatedDays.trim() || null,
       isActive: form.isActive,
     };
     const res = editingId
       ? await api.patch(`/api/sites/${currentStore.id}/delivery-zones`, { id: editingId, ...body })
       : await api.post(`/api/sites/${currentStore.id}/delivery-zones`, body);
     setSaving(false);
-    if (!res.success) { alert(res.error || "Failed to save delivery zone"); return; }
+    if (!res.success) {
+      // Show WHICH field failed instead of a bare "Validation failed"
+      const details = (res as { details?: Record<string, string[]> }).details;
+      const reasons = details && typeof details === "object"
+        ? Object.entries(details).map(([field, msgs]) => `${field}: ${(msgs || []).join(", ")}`).join("\n")
+        : "";
+      alert([res.error || "Failed to save delivery zone", reasons].filter(Boolean).join("\n"));
+      return;
+    }
     resetForm();
     fetchZones();
     if (isFromAI) { clearPrefill(); router.push("/dashboard/ai"); }
@@ -134,7 +145,7 @@ export default function DeliveryPage() {
           <h3 className="text-sm font-bold text-surface-900 mb-3">{editingId ? "Edit Zone" : "New Delivery Zone"}</h3>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
             <input value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })} placeholder="Zone name (e.g. Lagos Mainland)" className="input-field py-2.5" autoFocus />
-            <input value={form.areas} onChange={(e) => setForm({ ...form, areas: e.target.value })} placeholder="Areas (comma-separated: Ikeja, Surulere, Yaba)" className="input-field py-2.5" />
+            <input value={form.areas} onChange={(e) => setForm({ ...form, areas: e.target.value })} placeholder="Areas (optional, comma-separated: Ikeja, Surulere, Yaba)" className="input-field py-2.5" />
             <div>
               <label className="block text-xs font-medium text-surface-500 mb-1">Delivery Fee</label>
               <input type="number" value={form.fee} onChange={(e) => setForm({ ...form, fee: e.target.value })} placeholder="0" className="input-field py-2.5" />
