@@ -4,6 +4,7 @@ import { ArrowRight, Loader2 } from "lucide-react";
 import { CheckCircle2, Palette, Sparkles } from "@/components/icons/FilledIcons";
 
 import { useState } from "react";
+import ImageUpload from "@/components/dashboard/ImageUpload";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useSite } from "@/context/StoreContext";
 
@@ -23,6 +24,8 @@ export default function AIBusinessPage() {
 
   // Form
   const [businessName, setBusinessName] = useState("");
+  // Optional logo — saved on the Site and shown in the generated store's header beside the business name
+  const [logoUrl, setLogoUrl] = useState("");
   const [businessType, setBusinessType] = useState("");
   // When "Other" is picked, the merchant types the actual business type
   // (e.g. "Car wash", "Pet shop"). That typed text — not the word
@@ -81,6 +84,7 @@ export default function AIBusinessPage() {
           name: businessName.trim(),
           businessType: effectiveType,
           siteType: "ECOMMERCE",
+          ...(logoUrl ? { logo: logoUrl } : {}),
           ...(location.trim() ? { country: location.trim() } : {}),
           ...(description.trim() ? { description: description.trim() } : {}),
           ...(phoneCheck?.ok ? { phone: phoneCheck.e164 } : {}),
@@ -157,6 +161,15 @@ export default function AIBusinessPage() {
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div className="sm:col-span-2"><label className="block text-sm font-medium text-surface-700 mb-1">Business Name *</label>
               <input value={businessName} onChange={(e) => setBusinessName(e.target.value)} className="input-field py-3 w-full text-lg" placeholder="e.g. Kwame Fashion Hub" autoFocus /></div>
+            <div className="sm:col-span-2">
+              <ImageUpload
+                images={logoUrl ? [{ url: logoUrl }] : []}
+                onChange={(imgs) => setLogoUrl(imgs[0]?.url || "")}
+                label="Business Logo (optional)"
+                compact
+              />
+              <p className="text-xs text-surface-400 mt-1">If you upload one, it appears in your store&apos;s header next to your business name. PNG, JPG, WebP or SVG.</p>
+            </div>
             <div className="sm:col-span-2"><label className="block text-sm font-medium text-surface-700 mb-1">Industry *</label>
               <div className="grid grid-cols-3 sm:grid-cols-5 gap-2">
                 {INDUSTRIES.map((ind) => (

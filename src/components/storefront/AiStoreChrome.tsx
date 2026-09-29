@@ -89,6 +89,8 @@ export function AiStoreHeader({ storeName, storeSlug, logo, siteId }: AiStoreHea
     .ai-nav-logo { display: flex; align-items: center; gap: 10px; text-decoration: none; flex-shrink: 0; }
     .ai-nav-logo-img { height: 32px; width: auto; object-fit: contain; }
     .ai-nav-logo-text { font-family: ${A.sansFont}; font-weight: 700; font-size: 18px; color: ${A.textPrimary}; text-decoration: none; letter-spacing: 0.02em; }
+    .ai-nav-logo-text--with-logo { max-width: 220px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    @media (max-width: 640px) { .ai-nav-logo-text--with-logo { max-width: 38vw; font-size: 16px; } }
     .ai-nav-links { display: flex; align-items: center; gap: 32px; }
     .ai-nav-link { font-family: ${A.sansFont}; font-weight: 700; font-size: 14px; color: ${A.textPrimary}; text-decoration: none; transition: opacity 0.2s; }
     .ai-nav-link:hover { opacity: 0.6; }
@@ -116,11 +118,9 @@ export function AiStoreHeader({ storeName, storeSlug, logo, siteId }: AiStoreHea
         </button>
 
         <Link href={base} className="ai-nav-logo">
-          {logo ? (
-            <img src={logo} alt={storeName} className="ai-nav-logo-img" />
-          ) : (
-            <span className="ai-nav-logo-text">{storeName}</span>
-          )}
+          {/* Logo (when uploaded) sits beside the business name, not instead of it */}
+          {logo && <img src={logo} alt="" className="ai-nav-logo-img" />}
+          <span className={logo ? "ai-nav-logo-text ai-nav-logo-text--with-logo" : "ai-nav-logo-text"}>{storeName}</span>
         </Link>
 
         <div className="ai-nav-right">
