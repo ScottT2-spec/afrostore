@@ -1,7 +1,26 @@
 import { S3Client, PutObjectCommand, ListObjectsV2Command, DeleteObjectsCommand } from "@aws-sdk/client-s3";
 
-const region = process.env.AWS_S3_REGION || process.env.AWS_SES_REGION || "us-east-1";
-const bucket = process.env.AWS_S3_BUCKET;
+type Env = Record<string, string | undefined>;
+
+/**
+ * S3 settings. The standard AWS names are preferred; the shorter names are
+ * accepted too so the app works with whichever the host has set:
+ *   access key: AWS_ACCESS_KEY_ID  | AWS_ACCESS_KEY | ACCESS_KEY
+ *   secret key: AWS_SECRET_ACCESS_KEY | AWS_SECRET_KEY | SECRET_KEY
+ *   bucket:     AWS_S3_BUCKET | S3_BUCKET
+ *   region:     AWS_S3_REGION | AWS_REGION | REGION | AWS_SES_REGION (default us-east-1)
+ */
+export function resolveS3Config(env: Env = process.env) {
+  const pick = (...names: string[]) => names.map((n) => env[n]?.trim()).find((v) => v);
+  return {
+    accessKeyId: pick("AWS_ACCESS_KEY_ID", "AWS_ACCESS_KEY", "ACCESS_KEY"),
+    secretAccessKey: pick("AWS_SECRET_ACCESS_KEY", "AWS_SECRET_KEY", "SECRET_KEY"),
+    bucket: pick("AWS_S3_BUCKET", "S3_BUCKET"),
+    region: pick("AWS_S3_REGION", "AWS_REGION", "REGION", "AWS_SES_REGION") || "us-east-1",
+  };
+}
+
+const { region, bucket } = resolveS3Config();
 
 // Lazy-init, same pattern as getSupabaseAdmin() — avoids crashing at build
 // time when env vars aren't set yet, only throws when actually used.
@@ -12,15 +31,13 @@ function getS3Client(): S3Client {
     if (!bucket) {
       throw new Error("AWS_S3_BUCKET must be set");
     }
-    if (!process.env.AWS_ACCESS_KEY_ID || !process.env.AWS_SECRET_ACCESS_KEY) {
+    const { accessKeyId, secretAccessKey } = resolveS3Config();
+    if (!accessKeyId || !secretAccessKey) {
       throw new Error("AWS_ACCESS_KEY_ID and AWS_SECRET_ACCESS_KEY must be set");
     }
     _s3 = new S3Client({
       region,
-      credentials: {
-        accessKeyId: process.env.AWS_ACCESS_KEY_ID,
-        secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY,
-      },
+      credentials: { accessKeyId, secretAccessKey },
     });
   }
   return _s3;
