@@ -43,7 +43,9 @@ export default function DashboardLayout({
   return (
     <SiteProvider>
       <AIActionProvider>
-      <div className="min-h-screen bg-surface-50">
+      {/* Page backdrop; the app itself sits in a centered, bordered frame on wide screens */}
+      <div className="min-h-screen bg-surface-200">
+      <div className="relative mx-auto min-h-screen max-w-[1440px] bg-surface-50 lg:flex lg:border-x lg:border-surface-300 lg:shadow-sm">
         {/* 
           Mobile: small arrow tab on the left edge to open sidebar.
           No top bar taking up space — just a floating toggle.
@@ -78,7 +80,7 @@ export default function DashboardLayout({
           className={`
             fixed inset-y-0 left-0 z-50 transition-transform duration-300 ease-in-out
             ${sidebarOpen ? "translate-x-0" : "-translate-x-full"}
-            lg:translate-x-0
+            lg:sticky lg:inset-y-auto lg:top-0 lg:z-40 lg:h-screen lg:shrink-0 lg:self-start lg:translate-x-0
           `}
         >
           {/* Mobile close button */}
@@ -94,11 +96,12 @@ export default function DashboardLayout({
           <Sidebar onNavigate={() => setSidebarOpen(false)} />
         </div>
 
-        <main className="lg:pl-64 min-h-screen">
+        <main className="min-h-screen min-w-0 lg:flex-1">
           <div className="mx-auto max-w-[1400px]">
             <SiteGate>{children}</SiteGate>
           </div>
         </main>
+      </div>
       </div>
       </AIActionProvider>
     </SiteProvider>
