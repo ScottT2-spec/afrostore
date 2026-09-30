@@ -291,3 +291,15 @@ export function toStoredPageContent(document: PageContentDocument): unknown {
   if (!hasElements && !hasSettings) return document.blocks;
   return serializePageContent(document);
 }
+
+/**
+ * Parse page content for the AI builder's block view/drafts. parsePageContent
+ * derives a visual-editor `elements` tree from a flat block array; if that tree
+ * were kept, saving would flip the page to the object format — which the AI edit
+ * tools (array-only) read as an empty page. So for flat-array pages, drop it and
+ * keep the page a plain array of blocks end to end.
+ */
+export function parseBlockDocument(content: unknown): PageContentDocument {
+  const doc = parsePageContent(content);
+  return Array.isArray(content) ? { ...doc, elements: undefined } : doc;
+}

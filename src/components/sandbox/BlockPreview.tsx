@@ -6,7 +6,7 @@ import { DndContext, PointerSensor, TouchSensor, closestCenter, useSensor, useSe
 import { SortableContext, arrayMove, useSortable, verticalListSortingStrategy } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
 import { api } from "@/lib/api-client";
-import { parsePageContent, type PageContentDocument } from "@/lib/page-content";
+import { parseBlockDocument, type PageContentDocument } from "@/lib/page-content";
 import { RenderBlocks, type BuilderBlock } from "@/components/storefront/BlockRenderer";
 
 export interface SelectedBlock {
@@ -98,7 +98,7 @@ export function BlockPreview({ siteId, pages, pageSlug, store, selectedId, onSel
     setError(null);
     api.get<{ content: unknown }>(`/api/sites/${siteId}/pages/${page.id}`).then((res) => {
       if (cancelled) return;
-      if (res.success && res.data) setSavedDoc(parsePageContent(res.data.content));
+      if (res.success && res.data) setSavedDoc(parseBlockDocument(res.data.content));
       else setError("Couldn't load this page.");
     });
     return () => { cancelled = true; };

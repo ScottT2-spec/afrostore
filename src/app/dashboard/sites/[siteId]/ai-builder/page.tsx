@@ -5,7 +5,7 @@ import { useRouter } from "next/navigation";
 import { ArrowLeft, BookOpen, Check, ExternalLink, Loader2, Paperclip, Send, Sparkles, X } from "lucide-react";
 import { AIEditGuide } from "@/components/ai-builder/AIEditGuide";
 import { BlockPreview, type SelectedBlock, type PageRef } from "@/components/sandbox/BlockPreview";
-import { toStoredPageContent, type PageContentDocument } from "@/lib/page-content";
+import { toStoredPageContent, parseBlockDocument, type PageContentDocument } from "@/lib/page-content";
 import { api } from "@/lib/api-client";
 import { parsePageContent } from "@/lib/page-content";
 import { useTypewriterPlaceholder } from "@/lib/use-typewriter-placeholder";
@@ -460,7 +460,7 @@ export default function AIBuilderPage({ params }: { params: Promise<{ siteId: st
         // Edits are staged, not saved: show them in the block preview so the merchant can review, then Save.
         const staged = res.data.draftPages as Record<string, unknown>;
         // Only mark pages whose content actually differs from what's saved as drafts.
-        setDrafts((d) => ({ ...d, ...Object.fromEntries(stagedIds.map((id) => [id, parsePageContent(staged[id])])) }));
+        setDrafts((d) => ({ ...d, ...Object.fromEntries(stagedIds.map((id) => [id, parseBlockDocument(staged[id])])) }));
         setBlocksSaveError(null);
         const firstPage = (res.data.pages || pageList).find((p) => p.id === stagedIds[0]);
         setBlocksPageSlug(firstPage ? firstPage.slug : null);
