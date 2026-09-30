@@ -58,6 +58,7 @@ export const updateSectionSchema = z.object({
 export const getSectionSchema = z.object({
   pageSlug: z.string().min(1).describe('Page slug, e.g. "home".'),
   sectionIndex: z.number().int().min(0).optional().describe("0-based section position. Omit for a short outline of the whole page."),
+  path: z.string().optional().describe('Read just one part of a big section: a field ("heading"), a list ("items"), one item ("items.5"), its field ("items.5.answer") or a range ("items.10-19").'),
 });
 
 export const sectionEditOpSchema = z.object({

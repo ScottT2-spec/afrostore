@@ -19,7 +19,7 @@ import { z } from "zod";
 import { revalidatePath } from "next/cache";
 import { parseDirectEdit, planDirectEdit, describeDirectEdit, type DirectPage } from "@/lib/direct-edit";
 import { readPageBlocks, writePageBlocks, type AIBlock } from "@/lib/page-content-adapter";
-import { applySectionEdits, describeChanges, findTextInBlocks, replaceTextInProps, formatFlat, type TextHit } from "@/lib/section-edit";
+import { applySectionEdits, describeChanges, findTextInBlocks, replaceTextInProps, formatFlat, describeSection, readSectionPart, type TextHit } from "@/lib/section-edit";
 import { normalizePhone } from "@/lib/phone";
 import { prisma } from "@/lib/db";
 import { loadSiteCustomizationSafely, normalizeSiteCustomization, mergeSiteCustomization } from "@/lib/site-customization";
@@ -104,7 +104,7 @@ export const TOOL_DEFS: AITool[] = [
   { type: "function", function: { name: "create_page", description: "Add a new page with default sections, populated with real generated content — never a placeholder skeleton.", parameters: toToolParameters(createPageSchema) } },
   { type: "function", function: { name: "update_site_info", description: "Set the site's real business name (and optional description). Call this first, before create_page, as soon as you know the business name — this is what makes the site show up correctly in the merchant's dashboard sites list immediately, independent of Publish.", parameters: toToolParameters(updateSiteInfoSchema) } },
   { type: "function", function: { name: "update_section", description: "Change specific fields on one existing section of one page.", parameters: toToolParameters(updateSectionSchema) } },
-  { type: "function", function: { name: "get_section", description: "Read a section's real content: every field as a dotted path with its current value. Omit sectionIndex for an outline of the page.", parameters: toToolParameters(getSectionSchema) } },
+  { type: "function", function: { name: "get_section", description: "Read a section's real content: every field as a dotted path with its current value. Big sections return a map of all fields; pass path (e.g. items.10-19, items.3.answer) to read a part. Omit sectionIndex for an outline of the page.", parameters: toToolParameters(getSectionSchema) } },
   { type: "function", function: { name: "edit_section", description: "Change anything on a section: any text, colors, images, button labels/links, or individual list items (set, remove, insert). Use paths from get_section.", parameters: toToolParameters(editSectionSchema) } },
   { type: "function", function: { name: "find_text", description: "Search the site (or one page) for visible text; returns page, section, block type and field path. Use first when the merchant quotes wording.", parameters: toToolParameters(findTextSchema) } },
   { type: "function", function: { name: "replace_text", description: "Exact find-and-replace of wording across the site, a page, or a section. Only visible words (never links/images/colors). Returns before to after.", parameters: toToolParameters(replaceTextSchema) } },
@@ -392,10 +392,10 @@ function buildLockedBlockPrompt(pageSlug: string, pageTitle: string, index: numb
     `The merchant selected ONE block: type "${block.type || "unknown"}", on page "${pageTitle}" (pageSlug "${pageSlug}"), sectionIndex ${index}.`,
     `You may change ONLY this block, and EVERYTHING in it is editable: all text and headings, button labels and links, colors, images and backgrounds, and list items (set, remove, insert, reorder by rewriting). Always pass pageSlug "${pageSlug}" and sectionIndex ${index} \u2014 the server enforces this.`,
     "Current content of the block (path = current value):",
-    formatFlat(block.props || {}, 300).slice(0, 6000),
+    describeSection(block.props || {}, 5500),
     "",
     "Rules:",
-    "- Make the merchant's requested change with edit_section (use the exact paths above; call get_section if you need to re-read). Several edit_section calls are fine. Use replace_text only for a plain wording swap inside this block.",
+    "- Make the merchant's requested change with edit_section (use the exact paths above; if the block was too big to list in full, call get_section with a path to read the part you need, e.g. items.10-19). Several edit_section calls are fine. Use replace_text only for a plain wording swap inside this block.",
     "- Interpret loose requests (\"make it more premium\", \"rewrite for a bakery\") as edits to this block's own copy/colors/images. Keep the block's structure and field types valid.",
     "- If the request is about ANYTHING outside this block (other blocks or pages, adding/removing/reordering sections, navigation, footer, products, site settings, theme), do NOT call an edit tool. Call finalize_draft with a short summary saying you're locked to the selected block and the merchant should deselect it (the \u00d7 on the \"Editing\" chip) to make site-wide changes.",
     "- Your edits are STAGED, not live: the merchant reviews them in the block preview and clicks Save. Never say the change is live or saved.",
@@ -819,7 +819,12 @@ async function executeTool(
         }
         if (parsed.sectionIndex >= blocks.length) return { result: `Page "${parsed.pageSlug}" only has ${blocks.length} sections (0-${blocks.length - 1}).`, isError: true };
         const b = blocks[parsed.sectionIndex];
-        return { result: `Section ${parsed.sectionIndex} on "${parsed.pageSlug}" (type: ${b.type || "unknown"}). Editable fields (path = current value):\n${formatFlat(b.props || {}, 300).slice(0, 5000)}`, isError: false };
+        if (parsed.path) {
+          const part = readSectionPart(b.props || {}, parsed.path);
+          if (!part.ok) return { result: part.error, isError: true };
+          return { result: `Section ${parsed.sectionIndex} on "${parsed.pageSlug}" (type: ${b.type || "unknown"}), ${parsed.path} (path = current value):\n${part.text}`, isError: false };
+        }
+        return { result: `Section ${parsed.sectionIndex} on "${parsed.pageSlug}" (type: ${b.type || "unknown"}). Editable fields (path = current value):\n${describeSection(b.props || {})}`, isError: false };
       }
 
       case "edit_section": {

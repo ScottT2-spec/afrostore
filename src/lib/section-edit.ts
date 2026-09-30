@@ -57,6 +57,129 @@ export function formatFlat(props: Record<string, unknown>, maxValueLen: number):
   return rows.length ? rows.join("\n") : "  (no fields)";
 }
 
+/** Short one-line description of a value, for outlines. */
+function shortPreview(v: unknown, max = 60): string {
+  if (typeof v === "string") return JSON.stringify(v.length > max ? v.slice(0, max) + "\u2026" : v);
+  if (v === null || typeof v !== "object") return String(v);
+  return JSON.stringify(v).slice(0, max);
+}
+
+/** Field names (max 2 levels deep) an object or list item has, e.g. "question, answer". */
+function shapeOf(v: unknown, depth = 0): string {
+  if (Array.isArray(v)) return `list of ${v.length}`;
+  if (v && typeof v === "object") {
+    const keys = Object.keys(v as Record<string, unknown>);
+    if (depth >= 1) return `{${keys.slice(0, 8).join(", ")}${keys.length > 8 ? ", \u2026" : ""}}`;
+    return `{${keys.slice(0, 12).map((k) => k + ((v as Record<string, unknown>)[k] && typeof (v as Record<string, unknown>)[k] === "object" ? ":" + shapeOf((v as Record<string, unknown>)[k], depth + 1) : "")).join(", ")}${keys.length > 12 ? ", \u2026" : ""}}`;
+  }
+  return "";
+}
+
+/** Compact map of EVERY top-level field — always small, never cut off. */
+export function outlineProps(props: Record<string, unknown>): string {
+  const rows = Object.entries(props).map(([k, v]) => {
+    if (Array.isArray(v)) {
+      const first = v.find((x) => x && typeof x === "object");
+      return `  ${k} = list of ${v.length}${first ? ` \u00d7 ${shapeOf(first, 1)}` : ""}`;
+    }
+    if (v && typeof v === "object") return `  ${k} = ${shapeOf(v)}`;
+    return `  ${k} = ${shortPreview(v)}`;
+  });
+  return rows.length ? rows.join("\n") : "  (no fields)";
+}
+
+/** Row list with each over-long value cut at `cap` and marked with how much was left out. */
+function listRows(props: Record<string, unknown>, cap: number): { text: string; cut: number } {
+  let cut = 0;
+  const rows = flattenProps(props).map(([path, v]) => {
+    const raw = typeof v === "string" ? v : JSON.stringify(v);
+    if (raw.length > cap) {
+      cut++;
+      const head = raw.slice(0, cap) + "\u2026";
+      return `  ${path} = ${typeof v === "string" ? JSON.stringify(head) : head}[+${raw.length - cap} chars]`;
+    }
+    return `  ${path} = ${typeof v === "string" ? JSON.stringify(raw) : raw}`;
+  });
+  return { text: rows.length ? rows.join("\n") : "  (no fields)", cut };
+}
+
+const CUT_NOTE = "Values ending in [+N chars] are cut off. Before rewriting or shortening one, read it in full: get_section with path (e.g. items.3.answer).";
+
+/**
+ * What the AI is shown for a section. Small sections: every field with its value
+ * (long texts up to 600 chars, or 300 if that is what it takes to fit). Anything
+ * cut is marked with how much is missing and how to read it in full. Sections too
+ * big to list: the outline of every field plus how to read any part with
+ * get_section's `path`, so nothing is ever hidden. The size never grows: the same
+ * budget applies, it is only spent more wisely.
+ */
+export function describeSection(props: Record<string, unknown>, budget = 4500, maxValueLen = 600): string {
+  for (const cap of Array.from(new Set([maxValueLen, Math.min(300, maxValueLen)]))) {
+    const r = listRows(props, cap);
+    const text = r.cut ? `${r.text}\n${CUT_NOTE}` : r.text;
+    if (text.length <= budget) return text;
+  }
+  return (
+    `This section is too big to list in full, so here is a map of ALL its fields:\n${outlineProps(props).slice(0, budget)}\n` +
+    `To read part of it, call get_section with path: a field ("backgroundImage"), a list ("items"), one item ("items.5"), ` +
+    `an item's field ("items.5.answer" \u2014 shows the full text), or a range of list items ("items.10-19"). ` +
+    `You can edit any of these paths with edit_section even before reading them.`
+  );
+}
+
+/** Read one part of a section: a path, optionally with an item range like "items.10-19". */
+export function readSectionPart(
+  props: Record<string, unknown>,
+  path: string,
+  budget = 5000,
+): { ok: true; text: string } | { ok: false; error: string } {
+  const parts = parsePath(path);
+  if (!parts) return { ok: false, error: `"${path}" isn't a valid path.` };
+
+  const rangeAt = parts.findIndex((seg) => /^\d+-\d+$/.test(seg));
+  const base = rangeAt >= 0 ? parts.slice(0, rangeAt) : parts;
+  const value = base.length ? getAt(props, base) : props;
+  if (value === undefined) {
+    const close = suggestPaths(props, path);
+    return { ok: false, error: `No field at "${path}".${close.length ? ` Did you mean: ${close.join(", ")}?` : ""} Top-level fields: ${topLevelKeys(props).join(", ") || "(none)"}.` };
+  }
+
+  let rows: Array<[string, unknown]>;
+  if (rangeAt >= 0) {
+    if (!Array.isArray(value)) return { ok: false, error: `"${base.join(".") || "(section)"}" is not a list, so a range like "${parts[rangeAt]}" doesn't apply.` };
+    const [a, b] = parts[rangeAt].split("-").map(Number);
+    const rest = parts.slice(rangeAt + 1);
+    rows = [];
+    for (let i = a; i <= Math.min(b, value.length - 1); i++) {
+      const item = rest.length ? getAt(value[i], rest) : value[i];
+      flattenProps(item, [...base, String(i), ...rest].join("."), rows);
+    }
+    if (rows.length === 0) return { ok: false, error: `The list "${base.join(".")}" has ${value.length} items (0-${value.length - 1}); nothing at ${parts[rangeAt]}.` };
+  } else if (typeof value === "string") {
+    // A single text: show it in full so it can be edited properly.
+    return { ok: true, text: `  ${path} = ${JSON.stringify(value.length > 4000 ? value.slice(0, 4000) + "\u2026" : value)}` };
+  } else if (value !== null && typeof value === "object") {
+    rows = flattenProps(value, base.join("."));
+    if (rows.length === 0) rows = [[base.join("."), value]];
+  } else {
+    rows = [[base.join("."), value]];
+  }
+
+  const lines = rows.map(([pth, v]) => {
+    const raw = typeof v === "string" ? v : JSON.stringify(v);
+    if (raw.length <= 300) return `  ${pth} = ${typeof v === "string" ? JSON.stringify(raw) : raw}`;
+    const head = raw.slice(0, 300) + "\u2026";
+    return `  ${pth} = ${typeof v === "string" ? JSON.stringify(head) : head}[+${raw.length - 300} chars]`;
+  });
+  let text = lines.join("\n");
+  if (text.length > budget) {
+    let cut = 0, used = 0;
+    while (cut < lines.length && used + lines[cut].length + 1 <= budget) used += lines[cut++].length + 1;
+    text = lines.slice(0, cut).join("\n") + `\n  \u2026 ${lines.length - cut} more fields \u2014 read a narrower path or range to see them.`;
+  }
+  return { ok: true, text };
+}
+
 function getAt(root: unknown, parts: string[]): unknown {
   let cur: any = root;
   for (const k of parts) {
