@@ -123,6 +123,61 @@ export const TOOL_DEFS: AITool[] = [
   { type: "function", function: { name: "finalize_draft", description: "Call this once the site genuinely reflects what the merchant asked for. Ends the session.", parameters: toToolParameters(finalizeDraftSchema) } },
 ];
 
+
+/** Unsaved (draft) page edits, keyed by page id. Seeded from the client on each request and handed back after the run. */
+export type DraftPages = Record<string, { content?: unknown; metaTitle?: string; metaDescription?: string }>;
+
+/**
+ * Single place the agent reads/writes page content. In draft mode nothing
+ * touches the database or the live site: edits accumulate in `draft` (which the
+ * caller returns to the merchant to review and Save). Reads apply the draft on
+ * top of the saved page, so several edits in a row build on each other.
+ */
+function createPageStore(siteId: string, storeSlug: string, draft?: DraftPages) {
+  type Row = { id: string; slug: string; title: string; type: string; content: unknown; metaTitle?: string | null; metaDescription?: string | null };
+  const overlay = (r: Row): Row => {
+    const d = draft?.[r.id];
+    return d && d.content !== undefined ? { ...r, content: d.content } : r;
+  };
+  return {
+    isDraft: !!draft,
+    /** Prefix the model sees on successful edits, so it doesn't tell the merchant a staged change is already live. */
+    savedLabel: draft ? "Staged (NOT live yet \u2014 the merchant reviews it in the block preview and clicks Save)." : "Saved and live.",
+    async bySlug(slug: string): Promise<Row | null> {
+      const r = (await prisma.page.findUnique({ where: { siteId_slug: { siteId, slug } } })) as Row | null;
+      return r ? overlay(r) : null;
+    },
+    async list(where: { slug?: string; types?: string[] } = {}): Promise<Row[]> {
+      const rows = (await prisma.page.findMany({
+        where: { siteId, ...(where.slug ? { slug: where.slug } : {}), ...(where.types ? { type: { in: where.types as never } } : {}) },
+        orderBy: { position: "asc" },
+      })) as Row[];
+      return rows.map(overlay);
+    },
+    async home(): Promise<Row | null> {
+      const r = (await prisma.page.findFirst({ where: { siteId, type: "HOME" } })) as Row | null;
+      return r ? overlay(r) : null;
+    },
+    async saveContent(page: { id: string; slug: string; title: string }, content: unknown, opts: { version?: boolean } = { version: true }): Promise<void> {
+      if (draft) {
+        draft[page.id] = { ...draft[page.id], content };
+        return;
+      }
+      await prisma.page.update({ where: { id: page.id }, data: { content: content as object } });
+      if (opts.version !== false) await prisma.pageVersion.create({ data: { pageId: page.id, title: page.title, content: content as object } });
+      revalidateStorefront(storeSlug, page.slug);
+    },
+    async saveMeta(slug: string, meta: { title: string; description: string }): Promise<boolean> {
+      const r = await this.bySlug(slug);
+      if (!r) return false;
+      if (draft) { draft[r.id] = { ...draft[r.id], metaTitle: meta.title, metaDescription: meta.description }; return true; }
+      await prisma.page.update({ where: { siteId_slug: { siteId, slug } }, data: { metaTitle: meta.title, metaDescription: meta.description } });
+      return true;
+    },
+  };
+}
+type PageStore = ReturnType<typeof createPageStore>;
+
 /** Clears Next's cache for the storefront so an AI edit shows up on the live site immediately, not after the cache expires. Never throws — a cache miss must not fail a saved edit. */
 function revalidateStorefront(storeSlug: string, pageSlug: string): void {
   try {
@@ -234,12 +289,15 @@ function summarizeSection(props: Record<string, unknown> | undefined, index: num
   return `  [${index}] ${type}${parts.length > 0 ? " — " + parts.join(", ") : ""}`;
 }
 
-async function summarizeCurrentSite(siteId: string): Promise<string | null> {
-  const pages = await prisma.page.findMany({
+async function summarizeCurrentSite(siteId: string, draft?: DraftPages): Promise<string | null> {
+  const rows = await prisma.page.findMany({
     where: { siteId },
-    select: { title: true, slug: true, type: true, content: true },
+    select: { id: true, title: true, slug: true, type: true, content: true },
     orderBy: { position: "asc" },
   });
+  // Show the model the site as the merchant currently sees it, including unsaved draft edits.
+  const pages = rows.map((r: { id: string; title: string; slug: string; type: string; content: unknown }) =>
+    draft?.[r.id]?.content !== undefined ? { ...r, content: draft[r.id].content } : r);
   if (pages.length === 0) return null; // genuinely new site — nothing to summarize, this is the initial build
 
   return pages
@@ -292,10 +350,13 @@ export interface RunSiteGenerationOptions {
   onStep?: (step: SiteGenerationStep) => void;
   /** Checked at the top of every iteration — return true to stop the run immediately (a merchant-triggered cancel). */
   shouldCancel?: () => Promise<boolean>;
+  /** Draft mode: page edits are staged here instead of saved. Seeded by the caller, mutated during the run, returned to the merchant to review + Save. */
+  draft?: DraftPages;
 }
 
 export async function runSiteGenerationAgent(opts: RunSiteGenerationOptions): Promise<SiteGenerationResult> {
-  const { ai, siteId, storeSlug, industry, siteType, task, knownInfo, maxIterations = 15, priorMessages, onStep, shouldCancel } = opts;
+  const { ai, siteId, storeSlug, industry, siteType, task, knownInfo, maxIterations = 15, priorMessages, onStep, shouldCancel, draft } = opts;
+  const store = createPageStore(siteId, storeSlug, draft);
   // Mutable: update_site_info can rename the site mid-session, and every
   // subsequent create_page call below should use the real name in its
   // generated content, not the placeholder this session started with.
@@ -309,7 +370,7 @@ export async function runSiteGenerationAgent(opts: RunSiteGenerationOptions): Pr
   // that session is still accurate enough, and re-fetching it on every
   // resume would be wasted work). Returns null for a genuinely new site
   // with no pages yet, in which case the prompt stays exactly as before.
-  const currentSiteSummary = priorMessages?.length ? null : await summarizeCurrentSite(siteId);
+  const currentSiteSummary = priorMessages?.length ? null : await summarizeCurrentSite(siteId, draft);
 
   // Edit mode = the site already had pages when this session STARTED. On a
   // resumed session the summary isn't re-fetched, so read the mode from the
@@ -336,7 +397,7 @@ export async function runSiteGenerationAgent(opts: RunSiteGenerationOptions): Pr
   // falls through to the agent below exactly as before.
   if (isEditMode && !priorMessages?.length && !allowRebuild) {
     try {
-      const rows = await prisma.page.findMany({ where: { siteId }, select: { id: true, slug: true, title: true, content: true }, orderBy: { position: "asc" } });
+      const rows = await store.list();
       const pages: DirectPage[] = (rows as Array<{ id: string; slug: string; title: string; content: unknown }>).map((r) => ({
         id: r.id, slug: r.slug, title: r.title, content: Array.isArray(r.content) ? (r.content as DirectPage["content"]) : [],
       }));
@@ -355,9 +416,7 @@ export async function runSiteGenerationAgent(opts: RunSiteGenerationOptions): Pr
       }
       if (req && plan) {
         for (const pg of plan.pages) {
-          await prisma.page.update({ where: { id: pg.id }, data: { content: pg.content as object } });
-          await prisma.pageVersion.create({ data: { pageId: pg.id, title: pg.title, content: pg.content as object } });
-          revalidateStorefront(storeSlug, pg.slug);
+          await store.saveContent(pg, pg.content);
         }
         const summary = describeDirectEdit(req, plan);
         const step: SiteGenerationStep = {
@@ -476,7 +535,7 @@ export async function runSiteGenerationAgent(opts: RunSiteGenerationOptions): Pr
             // prompt's instructions — the copy came from a separate
             // nested LLM call that could ignore or drift from guardrail
             // wording, same reasoning as site-intent's DB-state check.
-            const pages = await prisma.page.findMany({ where: { siteId }, select: { content: true } });
+            const pages = await store.list();
             const allText = pages.map((p: { content: unknown }) => extractTextFromContent(p.content)).join(" \n ");
             const safetyViolations = scanForSafetyViolations(safetyCategory, allText);
             if (safetyViolations.length > 0) {
@@ -493,7 +552,7 @@ export async function runSiteGenerationAgent(opts: RunSiteGenerationOptions): Pr
         }
       }
 
-      const { result: toolResult, isError } = await executeTool(siteId, storeName, storeSlug, industry, ai, name, args, safetyCategory, { isEditMode, allowRebuild });
+      const { result: toolResult, isError } = await executeTool(siteId, storeName, storeSlug, industry, ai, name, args, safetyCategory, { isEditMode, allowRebuild }, store);
       if (name === "update_site_info" && !isError && args && typeof (args as { name?: unknown }).name === "string") {
         storeName = (args as { name: string }).name;
       }
@@ -516,7 +575,8 @@ async function executeTool(
   name: string,
   args: unknown,
   safetyCategory: SensitiveCategory | null,
-  mode: { isEditMode: boolean; allowRebuild: boolean } = { isEditMode: false, allowRebuild: false }
+  mode: { isEditMode: boolean; allowRebuild: boolean } = { isEditMode: false, allowRebuild: false },
+  store: PageStore = createPageStore(siteId, storeSlug)
 ): Promise<{ result: string; isError: boolean }> {
   try {
     switch (name) {
@@ -628,7 +688,7 @@ async function executeTool(
 
       case "update_section": {
         const parsed = updateSectionSchema.parse(args);
-        const page = await prisma.page.findUnique({ where: { siteId_slug: { siteId, slug: parsed.pageSlug } } });
+        const page = await store.bySlug(parsed.pageSlug);
         if (!page) return { result: `No page with slug "${parsed.pageSlug}" exists — call create_page first.`, isError: true };
 
         const blocks = Array.isArray(page.content) ? [...(page.content as Record<string, unknown>[])] : [];
@@ -646,15 +706,13 @@ async function executeTool(
         const target = blocks[parsed.sectionIndex] as { props?: Record<string, unknown> };
         blocks[parsed.sectionIndex] = { ...target, props: { ...(target.props || {}), ...parsed.content } };
 
-        await prisma.page.update({ where: { id: page.id }, data: { content: blocks as object } });
-        await prisma.pageVersion.create({ data: { pageId: page.id, title: page.title, content: blocks as object } });
-        revalidateStorefront(storeSlug, parsed.pageSlug);
+        await store.saveContent(page, blocks);
         return { result: `Updated section ${parsed.sectionIndex} on "${parsed.pageSlug}".`, isError: false };
       }
 
       case "get_section": {
         const parsed = getSectionSchema.parse(args);
-        const page = await prisma.page.findUnique({ where: { siteId_slug: { siteId, slug: parsed.pageSlug } } });
+        const page = await store.bySlug(parsed.pageSlug);
         if (!page) return { result: `No page with slug "${parsed.pageSlug}" exists.`, isError: true };
         const blocks = Array.isArray(page.content) ? (page.content as Array<{ type?: string; props?: Record<string, unknown> }>) : [];
         if (parsed.sectionIndex === undefined) {
@@ -668,7 +726,7 @@ async function executeTool(
 
       case "edit_section": {
         const parsed = editSectionSchema.parse(args);
-        const page = await prisma.page.findUnique({ where: { siteId_slug: { siteId, slug: parsed.pageSlug } } });
+        const page = await store.bySlug(parsed.pageSlug);
         if (!page) return { result: `No page with slug "${parsed.pageSlug}" exists \u2014 call create_page first.`, isError: true };
         const blocks = Array.isArray(page.content) ? [...(page.content as Record<string, unknown>[])] : [];
         if (parsed.sectionIndex >= blocks.length) {
@@ -686,19 +744,13 @@ async function executeTool(
         }
 
         blocks[parsed.sectionIndex] = { ...target, props: applied.props };
-        await prisma.page.update({ where: { id: page.id }, data: { content: blocks as object } });
-        await prisma.pageVersion.create({ data: { pageId: page.id, title: page.title, content: blocks as object } });
-        revalidateStorefront(storeSlug, parsed.pageSlug);
-        return { result: `Saved and live. Applied ${applied.changes.length} change${applied.changes.length === 1 ? "" : "s"} to section ${parsed.sectionIndex} (${(target as { type?: string }).type || "unknown"}) on "${parsed.pageSlug}":\n${describeChanges(applied.changes)}\nIf any line isn't what the merchant asked for, fix it now with another edit_section call.`, isError: false };
+        await store.saveContent(page, blocks);
+        return { result: `${store.savedLabel} Applied ${applied.changes.length} change${applied.changes.length === 1 ? "" : "s"} to section ${parsed.sectionIndex} (${(target as { type?: string }).type || "unknown"}) on "${parsed.pageSlug}":\n${describeChanges(applied.changes)}\nIf any line isn't what the merchant asked for, fix it now with another edit_section call.`, isError: false };
       }
 
       case "find_text": {
         const parsed = findTextSchema.parse(args);
-        const pages = await prisma.page.findMany({
-          where: { siteId, ...(parsed.pageSlug ? { slug: parsed.pageSlug } : {}) },
-          select: { slug: true, content: true },
-          orderBy: { position: "asc" },
-        });
+        const pages = await store.list({ slug: parsed.pageSlug });
         if (parsed.pageSlug && pages.length === 0) return { result: `No page with slug "${parsed.pageSlug}" exists.`, isError: true };
         const hits: TextHit[] = pages.flatMap((pg: { slug: string; content: unknown }) =>
           findTextInBlocks(pg.slug, Array.isArray(pg.content) ? (pg.content as Array<{ type?: string; props?: Record<string, unknown> }>) : [], parsed.query),
@@ -720,11 +772,7 @@ async function executeTool(
           const violations = scanForSafetyViolations(safetyCategory, parsed.replace).filter((v) => v.rule === "forbidden-phrase");
           if (violations.length > 0) return { result: `Nothing was changed. ${violations.map((v) => v.detail).join(" ")}`, isError: true };
         }
-        const pages = await prisma.page.findMany({
-          where: { siteId, ...(parsed.pageSlug ? { slug: parsed.pageSlug } : {}) },
-          select: { id: true, slug: true, title: true, content: true },
-          orderBy: { position: "asc" },
-        });
+        const pages = await store.list({ slug: parsed.pageSlug });
         if (parsed.pageSlug && pages.length === 0) return { result: `No page with slug "${parsed.pageSlug}" exists.`, isError: true };
 
         const report: string[] = [];
@@ -754,11 +802,9 @@ async function executeTool(
           return { result: `Nothing was changed: "${parsed.find}" wasn't found${parsed.wholeValue ? " as a complete field value" : ""}${parsed.pageSlug ? ` on "${parsed.pageSlug}"` : ""}. Call find_text with a shorter part of the wording to see where it actually is.`, isError: true };
         }
         for (const pg of toSave) {
-          await prisma.page.update({ where: { id: pg.id }, data: { content: pg.blocks as object } });
-          await prisma.pageVersion.create({ data: { pageId: pg.id, title: pg.title, content: pg.blocks as object } });
-          revalidateStorefront(storeSlug, pg.slug);
+          await store.saveContent(pg, pg.blocks);
         }
-        return { result: `Saved and live. Replaced ${total} occurrence${total === 1 ? "" : "s"} across ${toSave.length} page${toSave.length === 1 ? "" : "s"}:\n${report.join("\n")}${total > report.length ? `\n(+${total - report.length} more)` : ""}`, isError: false };
+        return { result: `${store.savedLabel} Replaced ${total} occurrence${total === 1 ? "" : "s"} across ${toSave.length} page${toSave.length === 1 ? "" : "s"}:\n${report.join("\n")}${total > report.length ? `\n(+${total - report.length} more)` : ""}`, isError: false };
       }
 
       case "set_theme": {
@@ -845,7 +891,7 @@ async function executeTool(
         // WhatsApp item or the old broken placeholder. Without this, the
         // merchant sets a number and the homepage keeps showing/missing a
         // dead WhatsApp link until the next full regeneration.
-        const homePage = await prisma.page.findFirst({ where: { siteId, type: "HOME" } });
+        const homePage = await store.home();
         if (homePage && Array.isArray(homePage.content)) {
           const blocks = homePage.content as Array<{ type: string; props: Record<string, unknown> }>;
           let changed = false;
@@ -862,7 +908,7 @@ async function executeTool(
             }
           }
           if (changed) {
-            await prisma.page.update({ where: { id: homePage.id }, data: { content: blocks as object } });
+            await store.saveContent(homePage, blocks, { version: false });
           }
         }
 
@@ -899,7 +945,7 @@ async function executeTool(
         // contactInfo block on Home and Contact directly, so the merchant
         // doesn't have to regenerate the whole page to see their real
         // details replace whatever the AI guessed (or a stale placeholder).
-        const pagesToPatch = await prisma.page.findMany({ where: { siteId, type: { in: ["HOME", "CONTACT"] } } });
+        const pagesToPatch = await store.list({ types: ["HOME", "CONTACT"] });
         for (const p of pagesToPatch) {
           if (!Array.isArray(p.content)) continue;
           const blocks = p.content as Array<{ type: string; props: Record<string, unknown> }>;
@@ -917,7 +963,7 @@ async function executeTool(
             if (parsed.address) upsertItem("map-pin", "Address", parsed.address);
           }
           if (changed) {
-            await prisma.page.update({ where: { id: p.id }, data: { content: blocks as object } });
+            await store.saveContent(p, blocks, { version: false });
           }
         }
 
@@ -971,16 +1017,15 @@ async function executeTool(
 
       case "set_seo": {
         const parsed = setSeoSchema.parse(args);
-        await prisma.page.update({
-          where: { siteId_slug: { siteId, slug: parsed.pageSlug } },
-          data: { metaTitle: parsed.title, metaDescription: parsed.description },
-        });
+        if (!(await store.saveMeta(parsed.pageSlug, { title: parsed.title, description: parsed.description }))) {
+          return { result: `No page with slug "${parsed.pageSlug}" exists.`, isError: true };
+        }
         return { result: `SEO set for "${parsed.pageSlug}".`, isError: false };
       }
 
       case "attach_asset": {
         const parsed = attachAssetSchema.parse(args);
-        const page = await prisma.page.findUnique({ where: { siteId_slug: { siteId, slug: parsed.pageSlug } } });
+        const page = await store.bySlug(parsed.pageSlug);
         if (!page) return { result: `No page with slug "${parsed.pageSlug}" exists.`, isError: true };
         const blocks = Array.isArray(page.content) ? [...(page.content as Record<string, unknown>[])] : [];
         if (parsed.sectionIndex >= blocks.length) return { result: `Section ${parsed.sectionIndex} doesn't exist on "${parsed.pageSlug}".`, isError: true };
@@ -991,7 +1036,7 @@ async function executeTool(
         // appeared anywhere on the live site.
         const target = blocks[parsed.sectionIndex] as { props?: Record<string, unknown> };
         blocks[parsed.sectionIndex] = { ...target, props: { ...(target.props || {}), [parsed.field]: parsed.assetUrl } };
-        await prisma.page.update({ where: { id: page.id }, data: { content: blocks as object } });
+        await store.saveContent(page, blocks, { version: false });
         return { result: `Set ${parsed.field} on section ${parsed.sectionIndex} of "${parsed.pageSlug}" to the uploaded image.`, isError: false };
       }
 

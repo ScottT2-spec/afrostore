@@ -9,7 +9,7 @@ import { getGeneratedFiles } from "@/lib/sandbox/generated-files";
 import { getDecryptedSecrets } from "@/lib/sandbox/secrets";
 import { getAIFailover } from "@/lib/ai-service";
 import { runCodingAgent, CodingAgentError, type CodingAgentStep } from "@/lib/coding-agent";
-import { runSiteGenerationAgent, type SiteGenerationStep } from "@/lib/site-generation-agent";
+import { runSiteGenerationAgent, type SiteGenerationStep, type DraftPages } from "@/lib/site-generation-agent";
 import { detectSensitiveCategory } from "@/lib/site-safety";
 import type { AIMessage } from "@/lib/failover";
 
@@ -48,6 +48,13 @@ export async function POST(req: NextRequest, { params }: Params) {
   const task = typeof body?.task === "string" ? body.task.trim() : "";
   if (!task) return error("task is required — describe what you want built or changed.", 400);
   const priorMessages: AIMessage[] | undefined = Array.isArray(body?.priorMessages) ? body.priorMessages : undefined;
+  // Draft mode: page edits are staged and returned for the merchant to review + Save, not written.
+  const draftSeed: DraftPages | undefined =
+    body?.draft === true
+      ? (body?.draftPages && typeof body.draftPages === "object" && !Array.isArray(body.draftPages)
+          ? Object.fromEntries(Object.entries(body.draftPages as Record<string, unknown>).map(([id, content]) => [id, { content }]))
+          : {})
+      : undefined;
   const idempotencyKey = typeof body?.idempotencyKey === "string" ? body.idempotencyKey : `auto-${crypto.randomUUID()}`;
 
   const rl = rateLimit(`ai-generate-code:${ctx.user!.id}`, 10, 15 * 60 * 1000);
@@ -125,7 +132,7 @@ export async function POST(req: NextRequest, { params }: Params) {
 
   if (!wantsStream) {
     try {
-      const resultBody = await runGeneration(ctx, siteId, task, priorMessages, undefined, shouldCancel);
+      const resultBody = await runGeneration(ctx, siteId, task, priorMessages, undefined, shouldCancel, draftSeed);
       await finish(resultBody, false);
       return success({ ...resultBody, requestId: buildRequestId });
     } catch (e) {
@@ -141,7 +148,7 @@ export async function POST(req: NextRequest, { params }: Params) {
       const encoder = new TextEncoder();
       const send = (evt: ProgressEvent) => controller.enqueue(encoder.encode(`event: ${evt.type}\ndata: ${JSON.stringify(evt)}\n\n`));
       try {
-        const resultBody = await runGeneration(ctx, siteId, task, priorMessages, (s) => send({ type: "step", tool: s.tool, isError: s.isError }), shouldCancel);
+        const resultBody = await runGeneration(ctx, siteId, task, priorMessages, (s) => send({ type: "step", tool: s.tool, isError: s.isError }), shouldCancel, draftSeed);
         await finish(resultBody, false);
         send({ type: "done", body: { ...resultBody, requestId: buildRequestId } });
       } catch (e) {
@@ -170,7 +177,8 @@ async function runGeneration(
   task: string,
   priorMessages: AIMessage[] | undefined,
   onStep?: (s: SiteGenerationStep | CodingAgentStep) => void,
-  shouldCancel?: () => Promise<boolean>
+  shouldCancel?: () => Promise<boolean>,
+  draftSeed?: DraftPages
 ): Promise<Record<string, unknown>> {
   // A site that already has pages is being EDITED. If the structured agent
   // fails on an edit, falling through to the sandbox coding agent would
@@ -221,6 +229,8 @@ async function runGeneration(
       priorMessages,
       onStep,
       shouldCancel,
+      // Only an already-built site is edited in draft mode; the first build has to write its pages.
+      draft: siteAlreadyBuilt ? draftSeed : undefined,
     });
 
     if (result.pendingQuestion) {
@@ -238,7 +248,7 @@ async function runGeneration(
       orderBy: { position: "asc" },
     });
 
-    return { mode: "structured", summary: result.summary, pages };
+    return { mode: "structured", summary: result.summary, pages, ...(siteAlreadyBuilt && draftSeed ? { draftPages: Object.fromEntries(Object.entries(draftSeed).map(([id, d]) => [id, d.content]).filter(([, c]) => c !== undefined)) } : {}) };
   } catch (structuredErr) {
     if (siteAlreadyBuilt) {
       console.error("Structured site edit failed (not falling back — site already built):", structuredErr);

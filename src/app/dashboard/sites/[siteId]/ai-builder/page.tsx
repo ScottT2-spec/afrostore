@@ -5,7 +5,7 @@ import { useRouter } from "next/navigation";
 import { ArrowLeft, BookOpen, Check, ExternalLink, Loader2, Paperclip, Send, Sparkles, X } from "lucide-react";
 import { AIEditGuide } from "@/components/ai-builder/AIEditGuide";
 import { BlockPreview, type SelectedBlock, type PageRef } from "@/components/sandbox/BlockPreview";
-import { serializePageContent, type PageContentDocument } from "@/lib/page-content";
+import { toStoredPageContent, type PageContentDocument } from "@/lib/page-content";
 import { api } from "@/lib/api-client";
 import { parsePageContent } from "@/lib/page-content";
 import { useTypewriterPlaceholder } from "@/lib/use-typewriter-placeholder";
@@ -132,6 +132,8 @@ export default function AIBuilderPage({ params }: { params: Promise<{ siteId: st
   const [drafts, setDrafts] = useState<Record<string, PageContentDocument>>({});
   const [savedVersion, setSavedVersion] = useState(0);
   const [savingBlocks, setSavingBlocks] = useState(false);
+  // After an AI edit, jump the block view to the page that changed (cleared when the live frame navigates).
+  const [blocksPageSlug, setBlocksPageSlug] = useState<string | null>(null);
   const [blocksSaveError, setBlocksSaveError] = useState<string | null>(null);
   const dirtyCount = Object.keys(drafts).length;
   const onDraftChange = useCallback((pageId: string, doc: PageContentDocument) => {
@@ -153,7 +155,7 @@ export default function AIBuilderPage({ params }: { params: Promise<{ siteId: st
     setBlocksSaveError(null);
     const failed: Record<string, PageContentDocument> = {};
     for (const [pageId, doc] of Object.entries(drafts) as [string, PageContentDocument][]) {
-      const res = await api.patch(`/api/sites/${siteId}/pages/${pageId}`, { content: serializePageContent(doc) });
+      const res = await api.patch(`/api/sites/${siteId}/pages/${pageId}`, { content: toStoredPageContent(doc) });
       if (!res.success) failed[pageId] = doc;
     }
     setSavingBlocks(false);
@@ -162,6 +164,7 @@ export default function AIBuilderPage({ params }: { params: Promise<{ siteId: st
       setBlocksSaveError("Some changes couldn't be saved. Please try again.");
       return;
     }
+    setBlocksPageSlug(null);
     setSavedVersion((v) => v + 1);
     setReloadKey((k) => k + 1); // reload the live frame…
     setPreviewMode("live");     // …and show it, now with the saved changes
@@ -352,6 +355,7 @@ export default function AIBuilderPage({ params }: { params: Promise<{ siteId: st
       mode: "question" | "structured" | "code";
       question?: string; options?: string[]; priorMessages?: unknown[];
       pages?: PageSummary[]; summary?: string;
+      draftPages?: Record<string, unknown>;
       session?: SandboxSessionResult; filesChanged?: string[];
     };
     let res: { success: true; data: GenResult } | { success: false; error: string };
@@ -363,7 +367,12 @@ export default function AIBuilderPage({ params }: { params: Promise<{ siteId: st
           Accept: "text/event-stream",
           ...(api.getToken() ? { Authorization: `Bearer ${api.getToken()}` } : {}),
         },
-        body: JSON.stringify({ task: outgoingDescription, priorMessages: priorMessagesRef.current || undefined }),
+        body: JSON.stringify({
+          task: outgoingDescription,
+          priorMessages: priorMessagesRef.current || undefined,
+          // Once the site exists, AI edits are staged as a draft (not saved) until the merchant clicks Save.
+          ...(hasGenerated ? { draft: true, draftPages: Object.fromEntries((Object.entries(drafts) as [string, PageContentDocument][]).map(([id, d]) => [id, toStoredPageContent(d)])) } : {}),
+        }),
       });
 
       if (!streamRes.ok || !streamRes.body) {
@@ -446,7 +455,20 @@ export default function AIBuilderPage({ params }: { params: Promise<{ siteId: st
             : m
         )
       );
-      await loadHomePagePreview(res.data.pages || []);
+      const stagedIds = Object.keys(res.data.draftPages || {});
+      if (stagedIds.length > 0) {
+        // Edits are staged, not saved: show them in the block preview so the merchant can review, then Save.
+        const staged = res.data.draftPages as Record<string, unknown>;
+        // Only mark pages whose content actually differs from what's saved as drafts.
+        setDrafts((d) => ({ ...d, ...Object.fromEntries(stagedIds.map((id) => [id, parsePageContent(staged[id])])) }));
+        setBlocksSaveError(null);
+        const firstPage = (res.data.pages || pageList).find((p) => p.id === stagedIds[0]);
+        setBlocksPageSlug(firstPage ? firstPage.slug : null);
+        setPreviewMode("blocks");
+      } else {
+        await loadHomePagePreview(res.data.pages || []);
+      }
+      if (res.data.pages) setPageList(res.data.pages as PageRef[]);
       setHasGenerated(true);
       setGenerating(false);
       return;
@@ -681,7 +703,7 @@ export default function AIBuilderPage({ params }: { params: Promise<{ siteId: st
                     blocks={previewBlocks}
                     session={session}
                     reloadKey={reloadKey}
-                    onNavigate={setLivePath}
+                    onNavigate={(p) => { setBlocksPageSlug(null); setLivePath(p); }}
                     onStoreContext={setStoreCtx}
                   />
                 </div>
@@ -690,7 +712,7 @@ export default function AIBuilderPage({ params }: { params: Promise<{ siteId: st
                     <BlockPreview
                       siteId={siteId}
                       pages={pageList}
-                      pageSlug={livePageSlug}
+                      pageSlug={blocksPageSlug ?? livePageSlug}
                       store={storeCtx}
                       selectedId={selectedBlock?.id ?? null}
                       onSelect={setSelectedBlock}

@@ -278,3 +278,16 @@ export function getLinkedPageBadge(page: { slug: string; template?: string | nul
 
   return null;
 }
+
+/**
+ * The shape to persist a page in. Pages the AI builder creates are stored as a
+ * plain array of blocks (that's what the AI edit tools and direct-edit read),
+ * so keep that shape when there's nothing else to carry; only use the object
+ * form when the page has visual-editor elements or page settings.
+ */
+export function toStoredPageContent(document: PageContentDocument): unknown {
+  const hasElements = Array.isArray(document.elements) && document.elements.length > 0;
+  const hasSettings = !!document.settings && Object.keys(document.settings).length > 0;
+  if (!hasElements && !hasSettings) return document.blocks;
+  return serializePageContent(document);
+}
