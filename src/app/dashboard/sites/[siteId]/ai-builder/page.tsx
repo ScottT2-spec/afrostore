@@ -1,10 +1,11 @@
 "use client";
 
-import { useState, useRef, useEffect } from "react";
+import { useState, useRef, useEffect, useCallback } from "react";
 import { useRouter } from "next/navigation";
 import { ArrowLeft, BookOpen, Check, ExternalLink, Loader2, Paperclip, Send, Sparkles, X } from "lucide-react";
 import { AIEditGuide } from "@/components/ai-builder/AIEditGuide";
 import { BlockPreview, type SelectedBlock, type PageRef } from "@/components/sandbox/BlockPreview";
+import { serializePageContent, type PageContentDocument } from "@/lib/page-content";
 import { api } from "@/lib/api-client";
 import { parsePageContent } from "@/lib/page-content";
 import { useTypewriterPlaceholder } from "@/lib/use-typewriter-placeholder";
@@ -127,6 +128,50 @@ export default function AIBuilderPage({ params }: { params: Promise<{ siteId: st
   const [storeCtx, setStoreCtx] = useState<{ storeSlug: string; currency: string; products: any[] } | null>(null);
   const [selectedBlock, setSelectedBlock] = useState<SelectedBlock | null>(null);
   const [reloadKey, setReloadKey] = useState(0);
+  // Unsaved block edits per page id. Nothing reaches the site until Save is clicked.
+  const [drafts, setDrafts] = useState<Record<string, PageContentDocument>>({});
+  const [savedVersion, setSavedVersion] = useState(0);
+  const [savingBlocks, setSavingBlocks] = useState(false);
+  const [blocksSaveError, setBlocksSaveError] = useState<string | null>(null);
+  const dirtyCount = Object.keys(drafts).length;
+  const onDraftChange = useCallback((pageId: string, doc: PageContentDocument) => {
+    setDrafts((d) => ({ ...d, [pageId]: doc }));
+    setBlocksSaveError(null);
+  }, []);
+
+  // Warn before leaving with unsaved block changes.
+  useEffect(() => {
+    if (dirtyCount === 0) return;
+    const h = (e: BeforeUnloadEvent) => { e.preventDefault(); e.returnValue = ""; };
+    window.addEventListener("beforeunload", h);
+    return () => window.removeEventListener("beforeunload", h);
+  }, [dirtyCount]);
+
+  const handleSaveBlocks = async () => {
+    if (!siteId || dirtyCount === 0 || savingBlocks) return;
+    setSavingBlocks(true);
+    setBlocksSaveError(null);
+    const failed: Record<string, PageContentDocument> = {};
+    for (const [pageId, doc] of Object.entries(drafts) as [string, PageContentDocument][]) {
+      const res = await api.patch(`/api/sites/${siteId}/pages/${pageId}`, { content: serializePageContent(doc) });
+      if (!res.success) failed[pageId] = doc;
+    }
+    setSavingBlocks(false);
+    setDrafts(failed); // only what failed stays as a draft
+    if (Object.keys(failed).length > 0) {
+      setBlocksSaveError("Some changes couldn't be saved. Please try again.");
+      return;
+    }
+    setSavedVersion((v) => v + 1);
+    setReloadKey((k) => k + 1); // reload the live frame…
+    setPreviewMode("live");     // …and show it, now with the saved changes
+  };
+
+  const handleDiscardBlocks = () => {
+    setDrafts({});
+    setBlocksSaveError(null);
+    setSavedVersion((v) => v + 1);
+  };
   // Empty box + nothing else going on → type out example prompts (see
   // BUILD_PROMPTS / EDIT_PROMPTS). Once the merchant types, attaches an image
   // or the builder is busy, it stops and a static line takes over.
@@ -604,8 +649,29 @@ export default function AIBuilderPage({ params }: { params: Promise<{ siteId: st
                     className={`rounded-md px-3 py-1 text-xs font-medium ${previewMode === m ? "bg-brand-600 text-white" : "text-surface-600 hover:bg-surface-100"}`}
                   >
                     {m === "live" ? "Live preview" : "Edit blocks"}
+                    {m === "blocks" && dirtyCount > 0 && <span className="ml-1.5 inline-block h-1.5 w-1.5 rounded-full bg-amber-400 align-middle" />}
                   </button>
                 ))}
+                {previewMode === "blocks" && (
+                  <div className="ml-auto flex items-center gap-1.5">
+                    {blocksSaveError && <span className="text-[11px] text-red-600">{blocksSaveError}</span>}
+                    <button
+                      onClick={handleDiscardBlocks}
+                      disabled={dirtyCount === 0 || savingBlocks}
+                      className="rounded-md px-2.5 py-1 text-xs font-medium text-surface-600 hover:bg-surface-100 disabled:opacity-40"
+                    >
+                      Discard
+                    </button>
+                    <button
+                      onClick={handleSaveBlocks}
+                      disabled={dirtyCount === 0 || savingBlocks}
+                      className="flex items-center gap-1 rounded-md bg-brand-600 px-3 py-1 text-xs font-medium text-white disabled:opacity-40"
+                    >
+                      {savingBlocks && <Loader2 className="h-3 w-3 animate-spin" />}
+                      Save
+                    </button>
+                  </div>
+                )}
               </div>
               <div className="flex-1 min-h-0 overflow-y-auto">
                 {/* Live frame stays mounted (hidden) so it keeps its page while editing blocks */}
@@ -628,7 +694,9 @@ export default function AIBuilderPage({ params }: { params: Promise<{ siteId: st
                       store={storeCtx}
                       selectedId={selectedBlock?.id ?? null}
                       onSelect={setSelectedBlock}
-                      onSaved={() => setReloadKey((k) => k + 1)}
+                      drafts={drafts}
+                      onDraftChange={onDraftChange}
+                      version={savedVersion}
                     />
                   ) : (
                     <div className="h-full min-h-[400px] flex items-center justify-center text-sm text-surface-500">Loading blocks…</div>

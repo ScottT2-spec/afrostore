@@ -6,7 +6,7 @@ import { DndContext, PointerSensor, TouchSensor, closestCenter, useSensor, useSe
 import { SortableContext, arrayMove, useSortable, verticalListSortingStrategy } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
 import { api } from "@/lib/api-client";
-import { parsePageContent, serializePageContent, type PageContentDocument } from "@/lib/page-content";
+import { parsePageContent, type PageContentDocument } from "@/lib/page-content";
 import { RenderBlocks, type BuilderBlock } from "@/components/storefront/BlockRenderer";
 
 export interface SelectedBlock {
@@ -70,40 +70,46 @@ function SortableBlock({ block, selected, onSelect, store }: {
  * the Live iframe is on (`pageSlug`, null = home). Selecting a block only
  * reports it upward; nothing opens. Reordering saves straight to the page.
  */
-export function BlockPreview({ siteId, pages, pageSlug, store, selectedId, onSelect, onSaved }: {
+export function BlockPreview({ siteId, pages, pageSlug, store, selectedId, onSelect, drafts, onDraftChange, version }: {
   siteId: string;
   pages: PageRef[];
   pageSlug: string | null;
   store: StoreCtx;
   selectedId: string | null;
   onSelect: (block: SelectedBlock | null) => void;
-  onSaved: () => void;
+  /** Unsaved edits per page id. Nothing here is written to the site until the parent saves. */
+  drafts: Record<string, PageContentDocument>;
+  onDraftChange: (pageId: string, doc: PageContentDocument) => void;
+  /** Bump after a save/discard to re-fetch the saved version of the page. */
+  version: number;
 }) {
   const page = (pageSlug && pages.find((p) => p.slug === pageSlug)) || pages.find((p) => p.type === "HOME") || pages[0] || null;
-  const [doc, setDoc] = useState<PageContentDocument | null>(null);
+  const [savedDoc, setSavedDoc] = useState<PageContentDocument | null>(null);
   const [error, setError] = useState<string | null>(null);
+  // What's shown: the merchant's unsaved draft if there is one, else what's saved.
+  const doc = (page && drafts[page.id]) || savedDoc;
   const docRef = useRef<PageContentDocument | null>(null);
   docRef.current = doc;
 
   useEffect(() => {
     if (!page) return;
     let cancelled = false;
-    setDoc(null);
+    setSavedDoc(null);
     setError(null);
     api.get<{ content: unknown }>(`/api/sites/${siteId}/pages/${page.id}`).then((res) => {
       if (cancelled) return;
-      if (res.success && res.data) setDoc(parsePageContent(res.data.content));
+      if (res.success && res.data) setSavedDoc(parsePageContent(res.data.content));
       else setError("Couldn't load this page.");
     });
     return () => { cancelled = true; };
-  }, [siteId, page?.id]); // eslint-disable-line react-hooks/exhaustive-deps
+  }, [siteId, page?.id, version]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const sensors = useSensors(
     useSensor(PointerSensor, { activationConstraint: { distance: 6 } }),
     useSensor(TouchSensor, { activationConstraint: { delay: 120, tolerance: 6 } }),
   );
 
-  const onDragEnd = useCallback(async (e: DragEndEvent) => {
+  const onDragEnd = useCallback((e: DragEndEvent) => {
     const current = docRef.current;
     if (!current || !page || !e.over || e.active.id === e.over.id) return;
     const from = current.blocks.findIndex((b) => b.id === e.active.id);
@@ -117,13 +123,9 @@ export function BlockPreview({ siteId, pages, pageSlug, store, selectedId, onSel
       ? [...current.elements].sort((a, b) => Number(order.get(a.id) ?? 1e6) - Number(order.get(b.id) ?? 1e6))
       : current.elements;
     const next: PageContentDocument = { ...current, blocks, elements };
-    setDoc(next); // optimistic — feels instant
-    setError(null);
-
-    const res = await api.patch(`/api/sites/${siteId}/pages/${page.id}`, { content: serializePageContent(next) });
-    if (res.success) onSaved();
-    else { setDoc(current); setError("Couldn't save the new order. Please try again."); }
-  }, [page, siteId, onSaved]);
+    // Draft only — the site is NOT touched until the merchant clicks Save.
+    onDraftChange(page.id, next);
+  }, [page, onDraftChange]);
 
   if (!page || !doc) {
     return (
@@ -136,7 +138,7 @@ export function BlockPreview({ siteId, pages, pageSlug, store, selectedId, onSel
   return (
     <div className="min-h-full bg-white" onClick={() => onSelect(null)}>
       <div className="sticky top-0 z-30 border-b border-brand-200 bg-brand-50/95 px-3 py-1.5 text-[11px] text-brand-800 backdrop-blur">
-        <b>{page.title}</b> · tap a block to select it · drag <GripVertical className="inline h-3 w-3" /> to reorder
+        <b>{page.title}</b> · tap a block to select it · drag <GripVertical className="inline h-3 w-3" /> to reorder · changes apply only when you press Save
         {error && <span className="ml-2 font-medium text-red-600">{error}</span>}
       </div>
       <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={onDragEnd}>
