@@ -4,6 +4,7 @@ import { useState, useRef, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { ArrowLeft, BookOpen, Check, ExternalLink, Loader2, Paperclip, Send, Sparkles, X } from "lucide-react";
 import { AIEditGuide } from "@/components/ai-builder/AIEditGuide";
+import { BlockPreview, type SelectedBlock, type PageRef } from "@/components/sandbox/BlockPreview";
 import { api } from "@/lib/api-client";
 import { parsePageContent } from "@/lib/page-content";
 import { useTypewriterPlaceholder } from "@/lib/use-typewriter-placeholder";
@@ -119,6 +120,13 @@ export default function AIBuilderPage({ params }: { params: Promise<{ siteId: st
   const priorMessagesRef = useRef<unknown[] | null>(null);
   const [hasGenerated, setHasGenerated] = useState(false);
   const [showGuide, setShowGuide] = useState(false);
+  // Preview switch: "live" = real storefront iframe, "blocks" = selectable/reorderable blocks
+  const [previewMode, setPreviewMode] = useState<"live" | "blocks">("live");
+  const [livePath, setLivePath] = useState<string | null>(null);
+  const [pageList, setPageList] = useState<PageRef[]>([]);
+  const [storeCtx, setStoreCtx] = useState<{ storeSlug: string; currency: string; products: any[] } | null>(null);
+  const [selectedBlock, setSelectedBlock] = useState<SelectedBlock | null>(null);
+  const [reloadKey, setReloadKey] = useState(0);
   // Empty box + nothing else going on → type out example prompts (see
   // BUILD_PROMPTS / EDIT_PROMPTS). Once the merchant types, attaches an image
   // or the builder is busy, it stops and a static line takes over.
@@ -213,6 +221,7 @@ export default function AIBuilderPage({ params }: { params: Promise<{ siteId: st
 
   const loadHomePagePreview = async (pages: PageSummary[]) => {
     if (!siteId) return;
+    setPageList(pages as PageRef[]);
     const home = pages.find((p) => p.type === "HOME") || pages[0];
     if (!home) return;
     const res = await api.get<{ content: unknown }>(`/api/sites/${siteId}/pages/${home.id}`);
@@ -220,6 +229,12 @@ export default function AIBuilderPage({ params }: { params: Promise<{ siteId: st
       setPreviewBlocks(parsePageContent(res.data.content).blocks as unknown as BuilderBlock[]);
     }
   };
+
+  const livePageSlug = (() => {
+    if (!livePath || !storeCtx) return null;
+    const rest = livePath.replace(new RegExp(`^/store/${storeCtx.storeSlug}/?`), "").replace(/^pages\//, "").split("/")[0];
+    return rest || null;
+  })();
 
   const handlePublish = async () => {
     if (!siteId || !hasGenerated || publishing) return;
@@ -513,6 +528,12 @@ export default function AIBuilderPage({ params }: { params: Promise<{ siteId: st
           </div>
 
           <div className="flex-shrink-0 border-t border-surface-200 p-3">
+            {selectedBlock && (
+              <div className="mb-2 flex items-center justify-between rounded-lg bg-brand-50 px-2.5 py-1.5 text-xs text-brand-800">
+                <span>Selected: <b className="capitalize">{selectedBlock.type.replace(/([a-z])([A-Z])/g, "$1 $2").replace(/[_-]+/g, " ")}</b> · {selectedBlock.pageTitle}</span>
+                <button onClick={() => setSelectedBlock(null)} aria-label="Clear selection"><X className="h-3.5 w-3.5" /></button>
+              </div>
+            )}
             <AIEditGuide open={showGuide} onClose={() => setShowGuide(false)} />
             {!showGuide && (
               <button
@@ -571,10 +592,50 @@ export default function AIBuilderPage({ params }: { params: Promise<{ siteId: st
           </div>
         </div>
 
-        {/* Live preview pane */}
-        <div className="flex-1 min-w-0 bg-surface-100 overflow-y-auto">
+        {/* Preview pane: Live / Blocks switch on top */}
+        <div className="flex-1 min-w-0 bg-surface-100 flex flex-col">
           {siteId && (previewBlocks.length > 0 || session || generating) ? (
-            <SandboxPreview siteId={siteId} blocks={previewBlocks} session={session} />
+            <>
+              <div className="flex-shrink-0 flex items-center justify-center gap-1 border-b border-surface-200 bg-white p-1.5">
+                {(["live", "blocks"] as const).map((m) => (
+                  <button
+                    key={m}
+                    onClick={() => setPreviewMode(m)}
+                    className={`rounded-md px-3 py-1 text-xs font-medium ${previewMode === m ? "bg-brand-600 text-white" : "text-surface-600 hover:bg-surface-100"}`}
+                  >
+                    {m === "live" ? "Live preview" : "Edit blocks"}
+                  </button>
+                ))}
+              </div>
+              <div className="flex-1 min-h-0 overflow-y-auto">
+                {/* Live frame stays mounted (hidden) so it keeps its page while editing blocks */}
+                <div className={previewMode === "live" ? "h-full" : "hidden"}>
+                  <SandboxPreview
+                    siteId={siteId}
+                    blocks={previewBlocks}
+                    session={session}
+                    reloadKey={reloadKey}
+                    onNavigate={setLivePath}
+                    onStoreContext={setStoreCtx}
+                  />
+                </div>
+                {previewMode === "blocks" && (
+                  storeCtx && pageList.length > 0 ? (
+                    <BlockPreview
+                      siteId={siteId}
+                      pages={pageList}
+                      pageSlug={livePageSlug}
+                      store={storeCtx}
+                      selectedId={selectedBlock?.id ?? null}
+                      onSelect={setSelectedBlock}
+                      onSaved={() => setReloadKey((k) => k + 1)}
+                    />
+                  ) : (
+                    <div className="h-full min-h-[400px] flex items-center justify-center text-sm text-surface-500">Loading blocks…</div>
+                  )
+                )}
+              </div>
+            </>
           ) : (
             <div className="h-full flex flex-col items-center justify-center gap-2 text-surface-400">
               <Sparkles className="h-8 w-8" />

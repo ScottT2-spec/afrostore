@@ -38,11 +38,20 @@ export function SandboxPreview({
   files,
   blocks,
   session: initialSession,
+  reloadKey,
+  onNavigate,
+  onStoreContext,
 }: {
   siteId: string;
   files?: Record<string, string>;
   blocks: BuilderBlock[];
   session?: SandboxSession | null;
+  /** Bump to reload the live frame (e.g. after a block reorder was saved). */
+  reloadKey?: number;
+  /** Fires with the frame's current pathname (e.g. /store/my-shop/about) whenever it changes. */
+  onNavigate?: (pathname: string) => void;
+  /** Hands the loaded storefront data up so a sibling block view can render the same blocks. */
+  onStoreContext?: (ctx: { storeSlug: string; currency: string; products: any[] }) => void;
 }) {
   const [session, setSession] = useState<SandboxSession | null>(initialSession ?? null);
   const [sandboxUnavailable, setSandboxUnavailable] = useState(!files && !initialSession);
@@ -56,7 +65,20 @@ export function SandboxPreview({
   useEffect(() => {
     if (!frameLoaded.current) return; // first load already shows the latest
     try { frameRef.current?.contentWindow?.location.reload(); } catch { /* frame not ready */ }
-  }, [blocks]);
+  }, [blocks, reloadKey]);
+
+  // The frame navigates client-side (no load event), so poll its pathname.
+  const lastPath = useRef<string | null>(null);
+  useEffect(() => {
+    if (!onNavigate) return;
+    const t = setInterval(() => {
+      try {
+        const p = frameRef.current?.contentWindow?.location.pathname;
+        if (p && p !== lastPath.current) { lastPath.current = p; onNavigate(p); }
+      } catch { /* frame not ready */ }
+    }, 400);
+    return () => clearInterval(t);
+  }, [onNavigate]);
 
   // Keep every click inside the preview: the frame is same-origin, so on
   // each page load we can catch links that would leave the site (other
@@ -90,7 +112,7 @@ export function SandboxPreview({
   // mismatch is exactly "the preview doesn't match what actually goes
   // live" — mirror the live page's own data source and prop shape here
   // instead of a stripped-down partial context.
-  const [storeContext, setStoreContext] = useState<{
+  const [storeContext, setStoreContextRaw] = useState<{
     storeSlug: string;
     currency: string;
     templateSlug: string | null;
@@ -99,6 +121,10 @@ export function SandboxPreview({
     blogs: any[];
     socialLinks: any[];
   } | null>(null);
+  const setStoreContext = (c: NonNullable<typeof storeContext>) => {
+    setStoreContextRaw(c);
+    onStoreContext?.({ storeSlug: c.storeSlug, currency: c.currency, products: c.products });
+  };
   useEffect(() => {
     let cancelled = false;
     api.get<{ slug: string; currency: string }>(`/api/sites/${siteId}`).then(async (res) => {
