@@ -1346,8 +1346,8 @@ export function ImageTextBlock({ props }: { props: Record<string, unknown> }) {
               href={(props.buttonHref as string) || "#"}
               className="inline-flex items-center gap-2 rounded-2xl font-bold py-3 px-7 text-sm transition-all shadow-lg hover:-translate-y-0.5"
               style={{
-                backgroundColor: (props.buttonColor as string) || "#0f62fe",
-                color: (props.buttonTextColor as string) || "#ffffff",
+                backgroundColor: (props.buttonColor as string) || "var(--brand-button, #0f62fe)",
+                color: (props.buttonTextColor as string) || "var(--brand-button-text, #ffffff)",
               }}
             >
               {props.buttonText as string}

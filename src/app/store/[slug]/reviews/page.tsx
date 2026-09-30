@@ -297,7 +297,7 @@ export default function StoreReviewsPage() {
         ) : isTShirtsPrintsTemplate ? (
           <TShirtsPrintsHeader storeName={store?.name || "Store"} storeSlug={slug} logo={store?.logo} />
         ) : isAiTemplate ? (
-          <AiStoreHeader storeName={store?.name || "Store"} storeSlug={slug} logo={store?.logo} brandColor={store?.brandColor} siteId={store?.id} />
+          <AiStoreHeader storeName={store?.name || "Store"} storeSlug={slug} logo={store?.logo} siteId={store?.id} />
         ) : (
           <HandmadeBagsHeader
             storeName={store?.name || "Store"}
@@ -479,7 +479,7 @@ export default function StoreReviewsPage() {
           logo={store?.logo}
         />
       ) : isAiTemplate ? (
-        <AiStoreFooter storeName={store?.name || "Store"} storeSlug={slug} logo={store?.logo} brandColor={store?.brandColor} description={storeData?.store?.description} socialLinks={socialLinksArray} />
+        <AiStoreFooter storeName={store?.name || "Store"} storeSlug={slug} logo={store?.logo} description={storeData?.store?.description} socialLinks={socialLinksArray} />
       ) : (
         <HandmadeBagsFooter
           storeName={store?.name || "Store"}

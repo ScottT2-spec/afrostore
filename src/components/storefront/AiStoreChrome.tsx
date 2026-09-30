@@ -1,7 +1,6 @@
 "use client";
 import { useState, useEffect } from "react";
 import Link from "next/link";
-import { normalizeBrandColor, readableTextOn, shadeColor } from "@/lib/brand-color";
 
 /* ═══════════════════════════════════════════════════════════════
    AI BLOCK-BUILDER STORE HEADER
@@ -29,8 +28,6 @@ export interface AiStoreHeaderProps {
   /** Store id — the wishlist is cached in localStorage under this id, so
    *  without it the wishlist badge can't show a count (icon still links). */
   siteId?: string;
-  /** Optional merchant brand color (#rrggbb). Only when set: header background + its links/buttons use it. */
-  brandColor?: string | null;
 }
 
 // Cart is stored per store slug by the storefront pages as an array of
@@ -57,37 +54,7 @@ function readCounts(storeSlug: string, siteId?: string) {
   return { cart, wishlist };
 }
 
-// ── Optional brand color ─────────────────────────────────────
-// Returns extra CSS only when the merchant chose a valid brand color; otherwise "" so the
-// default look is untouched. Text/icon color is picked automatically for readability.
-function headerBrandCss(brandColor?: string | null): string {
-  const b = normalizeBrandColor(brandColor);
-  if (!b) return "";
-  const t = readableTextOn(b);
-  const edge = t === "#ffffff" ? shadeColor(b, 0.22) : shadeColor(b, -0.15);
-  return `
-    .ai-nav-wrap { background: ${b}; border-bottom-color: ${edge}; }
-    .ai-nav-logo-text, .ai-nav-link, .ai-nav-icon, .ai-nav-mobile-toggle, .ai-nav-mobile-menu a { color: ${t}; }
-    .ai-nav-badge { background: ${t}; color: ${b}; }
-    .ai-nav-mobile-menu { background: ${b}; border-bottom-color: ${edge}; }
-  `;
-}
-
-function footerBrandCss(brandColor?: string | null): string {
-  const b = normalizeBrandColor(brandColor);
-  if (!b) return "";
-  const t = readableTextOn(b);
-  const edge = t === "#ffffff" ? shadeColor(b, 0.22) : shadeColor(b, -0.15);
-  return `
-    .ai-footer-wrap { background: ${b}; border-top-color: ${edge}; }
-    .ai-footer-logo-text, .ai-footer-link, .ai-footer-social-icon, .ai-footer-desc, .ai-footer-bottom { color: ${t}; }
-    .ai-footer-desc, .ai-footer-bottom { opacity: 0.85; }
-    .ai-footer-social-icon { border-color: ${t}66; }
-    .ai-footer-bottom { border-top-color: ${t}33; }
-  `;
-}
-
-export function AiStoreHeader({ storeName, storeSlug, logo, siteId, brandColor }: AiStoreHeaderProps) {
+export function AiStoreHeader({ storeName, storeSlug, logo, siteId }: AiStoreHeaderProps) {
   const [mobileMenu, setMobileMenu] = useState(false);
   const [counts, setCounts] = useState({ cart: 0, wishlist: 0 });
   const base = `/store/${storeSlug}`;
@@ -140,7 +107,6 @@ export function AiStoreHeader({ storeName, storeSlug, logo, siteId, brandColor }
       .ai-nav-mobile-toggle { display: flex; }
       .ai-nav-mobile-menu.ai-nav-open { display: block; }
     }
-    ${headerBrandCss(brandColor)}
   `;
 
   return (
@@ -209,8 +175,6 @@ export interface AiStoreFooterProps {
   logo?: string | null;
   description?: string | null;
   socialLinks?: Array<{ platform: string; url: string }>;
-  /** Optional merchant brand color (#rrggbb). Only when set: footer background + its links use it. */
-  brandColor?: string | null;
 }
 
 const SOCIAL_ICON_PATHS: Record<string, string> = {
@@ -233,7 +197,7 @@ function AiFooterSocialIcons({ socialLinks }: { socialLinks?: Array<{ platform: 
   );
 }
 
-export function AiStoreFooter({ storeName, storeSlug, logo, description, socialLinks, brandColor }: AiStoreFooterProps) {
+export function AiStoreFooter({ storeName, storeSlug, logo, description, socialLinks }: AiStoreFooterProps) {
   const base = `/store/${storeSlug}`;
   const navItems = [
     { label: "Home", href: base },
@@ -257,7 +221,6 @@ export function AiStoreFooter({ storeName, storeSlug, logo, description, socialL
     .ai-footer-social-icon { width: 32px; height: 32px; border-radius: 50%; border: 1px solid rgba(0,0,0,0.2); display: flex; align-items: center; justify-content: center; color: ${A.textPrimary}; transition: opacity 0.2s; }
     .ai-footer-social-icon:hover { opacity: 0.6; }
     .ai-footer-bottom { border-top: 1px solid rgba(0,0,0,0.15); padding-top: 16px; font-family: ${A.sansFont}; font-size: 12px; color: #47473f; }
-    ${footerBrandCss(brandColor)}
   `;
 
   return (

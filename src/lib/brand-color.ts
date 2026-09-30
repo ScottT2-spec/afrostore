@@ -37,3 +37,20 @@ export function shadeColor(hex: string, amount: number): string {
   const [r, g, b] = channels(hex).map((v) => Math.round(v + (target - v) * a));
   return `#${[r, g, b].map((v) => v.toString(16).padStart(2, "0")).join("")}`;
 }
+
+/**
+ * CSS that recolors BUTTONS ONLY (not header/footer/links) with the merchant's brand color.
+ * Returns "" unless a valid color was chosen. Matches whole class tokens, so translucent
+ * overlays (bg-black/50), hover-only variants and deliberate white buttons are left alone.
+ */
+export function brandButtonCss(value: unknown): string {
+  const b = normalizeBrandColor(value);
+  if (!b) return "";
+  const t = readableTextOn(b);
+  const hover = shadeColor(b, -0.15);
+  const tokens = ["bg-brand-500", "bg-brand-600", "bg-brand-700", "bg-black", "bg-surface-900"];
+  const base = ["html .btn-primary", ...tokens.flatMap((k) => [`html a[class~="${k}"]`, `html button[class~="${k}"]`])];
+  return `:root{--brand-button:${b};--brand-button-text:${t};}
+${base.join(",")}{background-color:${b};color:${t};}
+${base.map((x) => x + ":hover").join(",")}{background-color:${hover};}`;
+}

@@ -22,3 +22,19 @@ describe("brand color helpers", () => {
     expect(shadeColor("#808080", -0.5)).toBe("#404040");
   });
 });
+
+import { brandButtonCss } from "@/lib/brand-color";
+describe("brandButtonCss (buttons only)", () => {
+  it("is empty unless a valid color is chosen", () => {
+    for (const v of [undefined, null, "", "red", "#zzz", "#fff;}x{"]) expect(brandButtonCss(v)).toBe("");
+  });
+  it("targets buttons, never header/footer/links", () => {
+    const css = brandButtonCss("#0F62FE");
+    expect(css).toContain("#0f62fe");
+    expect(css).toContain(".btn-primary");
+    expect(css).toContain('a[class~="bg-brand-600"]');
+    expect(css).not.toMatch(/ai-nav|ai-footer|header|footer/);
+    expect(css).not.toContain('bg-white');
+    expect(brandButtonCss("#ffd400")).toContain("color:#1a1a1a");
+  });
+});

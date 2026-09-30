@@ -5,6 +5,7 @@ import StorefrontPopups from "@/components/storefront/StorefrontPopups";
 import ReferralTracker from "@/components/storefront/ReferralTracker";
 import AbandonedCartTracker from "@/components/storefront/AbandonedCartTracker";
 import { resolveStoreBaseUrlFromHeaders } from "@/lib/site-url";
+import { brandButtonCss } from "@/lib/brand-color";
 import { buildCustomizationCss, loadSiteCustomizationSafely } from "@/lib/site-customization";
 
 type Props = {
@@ -133,6 +134,8 @@ export default async function StoreLayout({ params, children }: Props) {
     : null;
   const customCss = customization ? buildCustomizationCss(customization) : "";
   const customJs = customization?.customJs?.trim() || "";
+  // Optional merchant brand color → buttons only (set in the AI Business form)
+  const brandCss = brandButtonCss((customization?.themeSettings as Record<string, unknown> | undefined)?.brandColor);
 
   // Google Analytics (GA4) / Facebook Pixel — settings were fully wired
   // (dashboard field, validated, saved to SiteSettings) but nothing on the
@@ -144,6 +147,7 @@ export default async function StoreLayout({ params, children }: Props) {
 
   return (
     <>
+      {brandCss && <style dangerouslySetInnerHTML={{ __html: brandCss }} />}
       {jsonLd && (
         <script
           type="application/ld+json"
