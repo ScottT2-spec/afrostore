@@ -49,6 +49,10 @@ export async function POST(req: NextRequest, { params }: Params) {
   if (!task) return error("task is required — describe what you want built or changed.", 400);
   const priorMessages: AIMessage[] | undefined = Array.isArray(body?.priorMessages) ? body.priorMessages : undefined;
   // Draft mode: page edits are staged and returned for the merchant to review + Save, not written.
+  const lockedBlock: { pageId: string; blockId: string } | undefined =
+    body?.lockedBlock && typeof body.lockedBlock.pageId === "string" && typeof body.lockedBlock.blockId === "string"
+      ? { pageId: body.lockedBlock.pageId, blockId: body.lockedBlock.blockId }
+      : undefined;
   const draftSeed: DraftPages | undefined =
     body?.draft === true
       ? (body?.draftPages && typeof body.draftPages === "object" && !Array.isArray(body.draftPages)
@@ -132,7 +136,7 @@ export async function POST(req: NextRequest, { params }: Params) {
 
   if (!wantsStream) {
     try {
-      const resultBody = await runGeneration(ctx, siteId, task, priorMessages, undefined, shouldCancel, draftSeed);
+      const resultBody = await runGeneration(ctx, siteId, task, priorMessages, undefined, shouldCancel, draftSeed, lockedBlock);
       await finish(resultBody, false);
       return success({ ...resultBody, requestId: buildRequestId });
     } catch (e) {
@@ -148,7 +152,7 @@ export async function POST(req: NextRequest, { params }: Params) {
       const encoder = new TextEncoder();
       const send = (evt: ProgressEvent) => controller.enqueue(encoder.encode(`event: ${evt.type}\ndata: ${JSON.stringify(evt)}\n\n`));
       try {
-        const resultBody = await runGeneration(ctx, siteId, task, priorMessages, (s) => send({ type: "step", tool: s.tool, isError: s.isError }), shouldCancel, draftSeed);
+        const resultBody = await runGeneration(ctx, siteId, task, priorMessages, (s) => send({ type: "step", tool: s.tool, isError: s.isError }), shouldCancel, draftSeed, lockedBlock);
         await finish(resultBody, false);
         send({ type: "done", body: { ...resultBody, requestId: buildRequestId } });
       } catch (e) {
@@ -178,7 +182,8 @@ async function runGeneration(
   priorMessages: AIMessage[] | undefined,
   onStep?: (s: SiteGenerationStep | CodingAgentStep) => void,
   shouldCancel?: () => Promise<boolean>,
-  draftSeed?: DraftPages
+  draftSeed?: DraftPages,
+  lockedBlock?: { pageId: string; blockId: string }
 ): Promise<Record<string, unknown>> {
   // A site that already has pages is being EDITED. If the structured agent
   // fails on an edit, falling through to the sandbox coding agent would
@@ -231,6 +236,7 @@ async function runGeneration(
       shouldCancel,
       // Only an already-built site is edited in draft mode; the first build has to write its pages.
       draft: siteAlreadyBuilt ? draftSeed : undefined,
+      lockedBlock: siteAlreadyBuilt && draftSeed ? lockedBlock : undefined,
     });
 
     if (result.pendingQuestion) {

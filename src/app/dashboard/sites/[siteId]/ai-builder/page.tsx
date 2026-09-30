@@ -371,7 +371,7 @@ export default function AIBuilderPage({ params }: { params: Promise<{ siteId: st
           task: outgoingDescription,
           priorMessages: priorMessagesRef.current || undefined,
           // Once the site exists, AI edits are staged as a draft (not saved) until the merchant clicks Save.
-          ...(hasGenerated ? { draft: true, draftPages: Object.fromEntries((Object.entries(drafts) as [string, PageContentDocument][]).map(([id, d]) => [id, toStoredPageContent(d)])) } : {}),
+          ...(hasGenerated ? { ...(selectedBlock ? { lockedBlock: { pageId: selectedBlock.pageId, blockId: selectedBlock.id } } : {}), draft: true, draftPages: Object.fromEntries((Object.entries(drafts) as [string, PageContentDocument][]).map(([id, d]) => [id, toStoredPageContent(d)])) } : {}),
         }),
       });
 
@@ -597,7 +597,7 @@ export default function AIBuilderPage({ params }: { params: Promise<{ siteId: st
           <div className="flex-shrink-0 border-t border-surface-200 p-3">
             {selectedBlock && (
               <div className="mb-2 flex items-center justify-between rounded-lg bg-brand-50 px-2.5 py-1.5 text-xs text-brand-800">
-                <span>Selected: <b className="capitalize">{selectedBlock.type.replace(/([a-z])([A-Z])/g, "$1 $2").replace(/[_-]+/g, " ")}</b> · {selectedBlock.pageTitle}</span>
+                <span>Editing: <b className="capitalize">{selectedBlock.type.replace(/([a-z])([A-Z])/g, "$1 $2").replace(/[_-]+/g, " ")}</b> · {selectedBlock.pageTitle} · AI is limited to this block</span>
                 <button onClick={() => setSelectedBlock(null)} aria-label="Clear selection"><X className="h-3.5 w-3.5" /></button>
               </div>
             )}
@@ -642,7 +642,7 @@ export default function AIBuilderPage({ params }: { params: Promise<{ siteId: st
                     handleSend();
                   }
                 }}
-                placeholder={uploadedImage ? "Tell me where to use this image (e.g. \"use this as the hero background\")…" : typewriterActive ? typewriterPlaceholder : "Describe what you want…"}
+                placeholder={selectedBlock ? "What should change in this block?" : uploadedImage ? "Tell me where to use this image (e.g. \"use this as the hero background\")…" : typewriterActive ? typewriterPlaceholder : "Describe what you want…"}
                 aria-label="Describe what you want"
                 rows={1}
                 disabled={generating || loadingSite}

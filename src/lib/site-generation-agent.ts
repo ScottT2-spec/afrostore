@@ -143,6 +143,10 @@ function createPageStore(siteId: string, storeSlug: string, draft?: DraftPages) 
     isDraft: !!draft,
     /** Prefix the model sees on successful edits, so it doesn't tell the merchant a staged change is already live. */
     savedLabel: draft ? "Staged (NOT live yet \u2014 the merchant reviews it in the block preview and clicks Save)." : "Saved and live.",
+    async byId(id: string): Promise<Row | null> {
+      const r = (await prisma.page.findFirst({ where: { id, siteId } })) as Row | null;
+      return r ? overlay(r) : null;
+    },
     async bySlug(slug: string): Promise<Row | null> {
       const r = (await prisma.page.findUnique({ where: { siteId_slug: { siteId, slug } } })) as Row | null;
       return r ? overlay(r) : null;
@@ -352,11 +356,55 @@ export interface RunSiteGenerationOptions {
   shouldCancel?: () => Promise<boolean>;
   /** Draft mode: page edits are staged here instead of saved. Seeded by the caller, mutated during the run, returned to the merchant to review + Save. */
   draft?: DraftPages;
+  /** Block-locked mode: the merchant selected one block. The agent may edit ONLY that block (every field in it), nothing else. Requires `draft`. */
+  lockedBlock?: { pageId: string; blockId: string };
+}
+
+/** Tools available while locked to one block — all scoped to that block by the server, whatever the model passes. */
+const LOCKED_TOOL_NAMES = new Set(["get_section", "edit_section", "update_section", "replace_text", "attach_asset", "finalize_draft"]);
+const LOCKED_SCOPED_TOOLS = new Set(["get_section", "edit_section", "update_section", "replace_text", "attach_asset"]);
+
+function buildLockedBlockPrompt(pageSlug: string, pageTitle: string, index: number, block: { type?: string; props?: Record<string, unknown> }): string {
+  return [
+    "MODE: EDITING AN EXISTING, LIVE SITE \u2014 LOCKED TO ONE BLOCK.",
+    `The merchant selected ONE block: type "${block.type || "unknown"}", on page "${pageTitle}" (pageSlug "${pageSlug}"), sectionIndex ${index}.`,
+    `You may change ONLY this block, and EVERYTHING in it is editable: all text and headings, button labels and links, colors, images and backgrounds, and list items (set, remove, insert, reorder by rewriting). Always pass pageSlug "${pageSlug}" and sectionIndex ${index} \u2014 the server enforces this.`,
+    "Current content of the block (path = current value):",
+    formatFlat(block.props || {}, 300).slice(0, 6000),
+    "",
+    "Rules:",
+    "- Make the merchant's requested change with edit_section (use the exact paths above; call get_section if you need to re-read). Several edit_section calls are fine. Use replace_text only for a plain wording swap inside this block.",
+    "- Interpret loose requests (\"make it more premium\", \"rewrite for a bakery\") as edits to this block's own copy/colors/images. Keep the block's structure and field types valid.",
+    "- If the request is about ANYTHING outside this block (other blocks or pages, adding/removing/reordering sections, navigation, footer, products, site settings, theme), do NOT call an edit tool. Call finalize_draft with a short summary saying you're locked to the selected block and the merchant should deselect it (the \u00d7 on the \"Editing\" chip) to make site-wide changes.",
+    "- Your edits are STAGED, not live: the merchant reviews them in the block preview and clicks Save. Never say the change is live or saved.",
+    "- Never invent contact details, URLs, prices or claims. When done, call finalize_draft with a one- or two-sentence summary of exactly what changed.",
+  ].join("\n");
 }
 
 export async function runSiteGenerationAgent(opts: RunSiteGenerationOptions): Promise<SiteGenerationResult> {
-  const { ai, siteId, storeSlug, industry, siteType, task, knownInfo, maxIterations = 15, priorMessages, onStep, shouldCancel, draft } = opts;
+  const { ai, siteId, storeSlug, industry, siteType, task, knownInfo, maxIterations = 15, priorMessages, onStep, shouldCancel, draft, lockedBlock } = opts;
   const store = createPageStore(siteId, storeSlug, draft);
+
+  // Resolve the locked block against the CURRENT content (saved page + unsaved draft).
+  let lock: { page: { id: string; slug: string; title: string; content: unknown }; blockId: string } | null = null;
+  let lockedPrompt: string | null = null;
+  if (lockedBlock) {
+    if (!draft) throw new SiteGenerationError("Block-locked editing requires draft mode.");
+    const lp = await store.byId(lockedBlock.pageId);
+    const lblocks = lp && Array.isArray(lp.content) ? (lp.content as Array<{ id?: string; type?: string; props?: Record<string, unknown> }>) : [];
+    const lidx = lblocks.findIndex((b) => b.id === lockedBlock.blockId);
+    if (!lp || lidx < 0) throw new SiteGenerationError("The selected block no longer exists on that page. Deselect it and try again.");
+    lock = { page: lp, blockId: lockedBlock.blockId };
+    lockedPrompt = buildLockedBlockPrompt(lp.slug, lp.title, lidx, lblocks[lidx]);
+  }
+  /** Current index of the locked block (re-read each call, from the live overlay). */
+  const lockedIndex = async (): Promise<{ slug: string; index: number } | null> => {
+    if (!lock) return null;
+    const pg = await store.byId(lock.page.id);
+    const bl = pg && Array.isArray(pg.content) ? (pg.content as Array<{ id?: string }>) : [];
+    const i = bl.findIndex((b) => b.id === lock!.blockId);
+    return pg && i >= 0 ? { slug: pg.slug, index: i } : null;
+  };
   // Mutable: update_site_info can rename the site mid-session, and every
   // subsequent create_page call below should use the real name in its
   // generated content, not the placeholder this session started with.
@@ -370,14 +418,14 @@ export async function runSiteGenerationAgent(opts: RunSiteGenerationOptions): Pr
   // that session is still accurate enough, and re-fetching it on every
   // resume would be wasted work). Returns null for a genuinely new site
   // with no pages yet, in which case the prompt stays exactly as before.
-  const currentSiteSummary = priorMessages?.length ? null : await summarizeCurrentSite(siteId, draft);
+  const currentSiteSummary = priorMessages?.length || lock ? null : await summarizeCurrentSite(siteId, draft);
 
   // Edit mode = the site already had pages when this session STARTED. On a
   // resumed session the summary isn't re-fetched, so read the mode from the
   // original system prompt instead of guessing from current DB state
   // (mid-build, pages exist too, and that must not flip a build into edit mode).
   const firstPrior = priorMessages?.[0];
-  const isEditMode = priorMessages?.length
+  const isEditMode = lock ? true : priorMessages?.length
     ? firstPrior?.role === "system" && typeof firstPrior.content === "string" && firstPrior.content.includes("MODE: EDITING AN EXISTING, LIVE SITE")
     : currentSiteSummary !== null;
   const allowRebuild = REBUILD_INTENT.test(task);
@@ -385,7 +433,7 @@ export async function runSiteGenerationAgent(opts: RunSiteGenerationOptions): Pr
   const messages: AIMessage[] = priorMessages?.length
     ? [...priorMessages, { role: "user", content: task }]
     : [
-        { role: "system", content: buildSystemPrompt(rules, safetyCategory, currentSiteSummary, knownInfo) },
+        { role: "system", content: lockedPrompt ?? buildSystemPrompt(rules, safetyCategory, currentSiteSummary, knownInfo) },
         { role: "user", content: task },
       ];
 
@@ -397,10 +445,14 @@ export async function runSiteGenerationAgent(opts: RunSiteGenerationOptions): Pr
   // falls through to the agent below exactly as before.
   if (isEditMode && !priorMessages?.length && !allowRebuild) {
     try {
-      const rows = await store.list();
-      const pages: DirectPage[] = (rows as Array<{ id: string; slug: string; title: string; content: unknown }>).map((r) => ({
+      const rows = lock ? [await store.byId(lock.page.id)].filter((r): r is NonNullable<typeof r> => !!r) : await store.list();
+      let pages: DirectPage[] = (rows as Array<{ id: string; slug: string; title: string; content: unknown }>).map((r) => ({
         id: r.id, slug: r.slug, title: r.title, content: Array.isArray(r.content) ? (r.content as DirectPage["content"]) : [],
       }));
+      // Locked: the shortcut may only see the selected block, so it can't touch anything else.
+      const fullLockedContent = lock ? pages[0]?.content : undefined;
+      const lockedAt = lock && fullLockedContent ? fullLockedContent.findIndex((b) => (b as { id?: string }).id === lock!.blockId) : -1;
+      if (lock && lockedAt >= 0) pages = [{ ...pages[0], content: [fullLockedContent![lockedAt]] }];
       const req = parseDirectEdit(task, pages.flatMap((p) => [p.slug, p.title]));
       const unsafe = req && safetyCategory ? scanForSafetyViolations(safetyCategory, req.replace).some((v) => v.rule === "forbidden-phrase") : false;
       const plan = req && !unsafe ? planDirectEdit(req, pages) : null;
@@ -416,7 +468,10 @@ export async function runSiteGenerationAgent(opts: RunSiteGenerationOptions): Pr
       }
       if (req && plan) {
         for (const pg of plan.pages) {
-          await store.saveContent(pg, pg.content);
+          const merged = lock && fullLockedContent && lockedAt >= 0
+            ? fullLockedContent.map((b, i) => (i === lockedAt ? pg.content[0] : b))
+            : pg.content;
+          await store.saveContent(pg, merged);
         }
         const summary = describeDirectEdit(req, plan);
         const step: SiteGenerationStep = {
@@ -447,9 +502,9 @@ export async function runSiteGenerationAgent(opts: RunSiteGenerationOptions): Pr
       ai.chat({
         capability: AICapability.FUNCTION_CALLING,
         messages,
-        tools: isEditMode ? selectEditTools(routingText) : TOOL_DEFS,
+        tools: lock ? TOOL_DEFS.filter((t) => LOCKED_TOOL_NAMES.has(t.function.name)) : isEditMode ? selectEditTools(routingText) : TOOL_DEFS,
         toolChoice: "required",
-        maxTokens: isEditMode ? 1500 : 4096,
+        maxTokens: lock ? 3000 : isEditMode ? 1500 : 4096,
         temperature: 0.5,
       });
     let result = await callAI();
@@ -490,6 +545,27 @@ export async function runSiteGenerationAgent(opts: RunSiteGenerationOptions): Pr
         onStep?.(step);
         messages.push({ role: "tool", toolCallId: call.id, content: step.result });
         continue;
+      }
+
+      if (lock) {
+        if (!LOCKED_TOOL_NAMES.has(name)) {
+          const msg = "That tool isn't available: you're locked to the selected block. Edit only that block, or call finalize_draft explaining the request is outside it.";
+          const step: SiteGenerationStep = { tool: name, args, result: msg, isError: true };
+          steps.push(step);
+          onStep?.(step);
+          messages.push({ role: "tool", toolCallId: call.id, content: msg });
+          continue;
+        }
+        if (LOCKED_SCOPED_TOOLS.has(name)) {
+          const at = await lockedIndex();
+          if (!at) {
+            const msg = "The selected block no longer exists. Call finalize_draft and tell the merchant.";
+            messages.push({ role: "tool", toolCallId: call.id, content: msg });
+            continue;
+          }
+          // Whatever page/section the model passed, the server pins it to the selected block.
+          args = { ...(args as Record<string, unknown>), pageSlug: at.slug, sectionIndex: at.index };
+        }
       }
 
       if (name === "ask_user") {
