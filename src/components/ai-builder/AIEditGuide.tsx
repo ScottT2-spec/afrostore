@@ -50,6 +50,15 @@ export function AIEditGuide({ open, onClose }: Props) {
         <li>One change per message works best. Your site is never changed if an edit fails.</li>
       </ol>
 
+      <div className="font-semibold text-surface-800 mb-1">Instant text changes</div>
+      <div className="rounded-lg bg-surface-50 px-2 py-1.5 mb-3 space-y-1 text-surface-600">
+        <p>Simple wording swaps are done <b>instantly</b>, without waiting for the AI. Just say:</p>
+        <p className="text-surface-800">change &quot;Shop Now&quot; to &quot;Order Today&quot;</p>
+        <p className="text-surface-800">change Shop Now to Order Today in the hero</p>
+        <p className="text-surface-500">Add a block or page name (like <b>hero</b> or <b>about page</b>) to change it in just that place.</p>
+        <p className="text-surface-500">This works when the words are already on your site and appear in 10 places or fewer. Colors, images, layout, new sections and rewrites go to the AI.</p>
+      </div>
+
       <div className="font-semibold text-surface-800 mb-1">Blocks the AI understands</div>
       <div className="space-y-1.5 mb-3">
         {BLOCKS.map((b) => (

@@ -62,7 +62,7 @@ function normalizeElementsFromBlocks(value: unknown): EditorNode[] | undefined {
 // silently vanish the moment a page gets converted for live rendering,
 // even though the data was saved correctly; Sections-with-Columns is the
 // single most common structural pattern in any real page.
-function getEditorNodeChildren(node: EditorNode): EditorNode[] {
+export function getEditorNodeChildren(node: EditorNode): EditorNode[] {
   const anyNode = node as any;
   if (Array.isArray(anyNode.elements)) return anyNode.elements;
   if (Array.isArray(anyNode.children)) return anyNode.children;
@@ -70,7 +70,7 @@ function getEditorNodeChildren(node: EditorNode): EditorNode[] {
   return [];
 }
 
-function editorNodeToBlock(node: EditorNode): BuilderBlock {
+export function editorNodeToBlock(node: EditorNode): BuilderBlock {
   // The editor writes to two different places depending on which UI path
   // made the edit: the 5 hand-built content editors (heading/paragraph/
   // text/button/image) write to both node.settings and node.content

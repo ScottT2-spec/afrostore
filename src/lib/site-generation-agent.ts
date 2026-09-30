@@ -18,6 +18,7 @@
 import { z } from "zod";
 import { revalidatePath } from "next/cache";
 import { parseDirectEdit, planDirectEdit, describeDirectEdit, type DirectPage } from "@/lib/direct-edit";
+import { readPageBlocks, writePageBlocks, type AIBlock } from "@/lib/page-content-adapter";
 import { applySectionEdits, describeChanges, findTextInBlocks, replaceTextInProps, formatFlat, type TextHit } from "@/lib/section-edit";
 import { normalizePhone } from "@/lib/phone";
 import { prisma } from "@/lib/db";
@@ -139,30 +140,41 @@ function createPageStore(siteId: string, storeSlug: string, draft?: DraftPages) 
     const d = draft?.[r.id];
     return d && d.content !== undefined ? { ...r, content: d.content } : r;
   };
+  // Pages can be stored as a block array (AI builder) or as visual-editor elements.
+  // Tools always see uniform blocks; we remember each page's original content so a
+  // save is written back in that same shape (see page-content-adapter.ts).
+  const rawById = new Map<string, unknown>();
+  const asBlocks = (r: Row): Row => {
+    const o = overlay(r);
+    rawById.set(o.id, o.content);
+    return { ...o, content: readPageBlocks(o.content).blocks };
+  };
   return {
     isDraft: !!draft,
     /** Prefix the model sees on successful edits, so it doesn't tell the merchant a staged change is already live. */
     savedLabel: draft ? "Staged (NOT live yet \u2014 the merchant reviews it in the block preview and clicks Save)." : "Saved and live.",
     async byId(id: string): Promise<Row | null> {
       const r = (await prisma.page.findFirst({ where: { id, siteId } })) as Row | null;
-      return r ? overlay(r) : null;
+      return r ? asBlocks(r) : null;
     },
     async bySlug(slug: string): Promise<Row | null> {
       const r = (await prisma.page.findUnique({ where: { siteId_slug: { siteId, slug } } })) as Row | null;
-      return r ? overlay(r) : null;
+      return r ? asBlocks(r) : null;
     },
     async list(where: { slug?: string; types?: string[] } = {}): Promise<Row[]> {
       const rows = (await prisma.page.findMany({
         where: { siteId, ...(where.slug ? { slug: where.slug } : {}), ...(where.types ? { type: { in: where.types as never } } : {}) },
         orderBy: { position: "asc" },
       })) as Row[];
-      return rows.map(overlay);
+      return rows.map(asBlocks);
     },
     async home(): Promise<Row | null> {
       const r = (await prisma.page.findFirst({ where: { siteId, type: "HOME" } })) as Row | null;
-      return r ? overlay(r) : null;
+      return r ? asBlocks(r) : null;
     },
-    async saveContent(page: { id: string; slug: string; title: string }, content: unknown, opts: { version?: boolean } = { version: true }): Promise<void> {
+    async saveContent(page: { id: string; slug: string; title: string }, blocks: unknown, opts: { version?: boolean } = { version: true }): Promise<void> {
+      const content = Array.isArray(blocks) && rawById.has(page.id) ? writePageBlocks(rawById.get(page.id), blocks as AIBlock[]) : blocks;
+      rawById.set(page.id, content);
       if (draft) {
         draft[page.id] = { ...draft[page.id], content };
         return;
@@ -282,13 +294,23 @@ function truncate(value: unknown, max = 60): string {
 function summarizeSection(props: Record<string, unknown> | undefined, index: number, type: string): string {
   if (!props) return `  [${index}] ${type}`;
   const parts: string[] = [];
+  // A generic visual-editor element (section, heading…) keeps its text in
+  // settings/content and its children in elements; preview those instead.
+  const isEditorElement = typeof props.settings === "object" && props.settings !== null && Array.isArray(props.elements);
+  const flat: Record<string, unknown> = isEditorElement
+    ? { ...(props.settings as Record<string, unknown>), ...((props.content as Record<string, unknown>) || {}) }
+    : props;
   for (const field of PREVIEW_FIELDS) {
-    const value = props[field];
+    const value = flat[field];
     if (typeof value === "string" && value.trim()) parts.push(`${field}: "${truncate(value)}"`);
   }
-  const items = props.items;
+  const items = flat.items;
   if (Array.isArray(items) && items.length > 0) {
     parts.push(`${items.length} item${items.length === 1 ? "" : "s"}`);
+  }
+  if (isEditorElement && (props.elements as unknown[]).length > 0) {
+    const n = (props.elements as unknown[]).length;
+    parts.push(`${n} child element${n === 1 ? "" : "s"}`);
   }
   return `  [${index}] ${type}${parts.length > 0 ? " — " + parts.join(", ") : ""}`;
 }
@@ -306,7 +328,7 @@ async function summarizeCurrentSite(siteId: string, draft?: DraftPages): Promise
 
   return pages
     .map((page: { title: string; slug: string; type: string; content: unknown }) => {
-      const blocks = Array.isArray(page.content) ? (page.content as Array<{ type?: string; props?: Record<string, unknown> }>) : [];
+      const blocks = readPageBlocks(page.content).blocks as Array<{ type?: string; props?: Record<string, unknown> }>;
       const sectionLines = blocks.length > 0
         ? blocks.map((b, i) => summarizeSection(b.props, i, b.type || "unknown")).join("\n")
         : "  (no sections)";
@@ -767,7 +789,7 @@ async function executeTool(
         const page = await store.bySlug(parsed.pageSlug);
         if (!page) return { result: `No page with slug "${parsed.pageSlug}" exists — call create_page first.`, isError: true };
 
-        const blocks = Array.isArray(page.content) ? [...(page.content as Record<string, unknown>[])] : [];
+        const blocks = [...readPageBlocks(page.content).blocks] as Record<string, unknown>[];
         if (parsed.sectionIndex >= blocks.length) {
           return { result: `Page "${parsed.pageSlug}" only has ${blocks.length} sections (0-${blocks.length - 1}) — sectionIndex ${parsed.sectionIndex} doesn't exist.`, isError: true };
         }
@@ -790,7 +812,7 @@ async function executeTool(
         const parsed = getSectionSchema.parse(args);
         const page = await store.bySlug(parsed.pageSlug);
         if (!page) return { result: `No page with slug "${parsed.pageSlug}" exists.`, isError: true };
-        const blocks = Array.isArray(page.content) ? (page.content as Array<{ type?: string; props?: Record<string, unknown> }>) : [];
+        const blocks = readPageBlocks(page.content).blocks as Array<{ type?: string; props?: Record<string, unknown> }>;
         if (parsed.sectionIndex === undefined) {
           const outline = blocks.map((b, i) => `[${i}] ${b.type || "unknown"}\n${formatFlat(b.props || {}, 50)}`).join("\n");
           return { result: `Page "${parsed.pageSlug}" has ${blocks.length} sections:\n${outline || "(none)"}`, isError: false };
@@ -804,7 +826,7 @@ async function executeTool(
         const parsed = editSectionSchema.parse(args);
         const page = await store.bySlug(parsed.pageSlug);
         if (!page) return { result: `No page with slug "${parsed.pageSlug}" exists \u2014 call create_page first.`, isError: true };
-        const blocks = Array.isArray(page.content) ? [...(page.content as Record<string, unknown>[])] : [];
+        const blocks = [...readPageBlocks(page.content).blocks] as Record<string, unknown>[];
         if (parsed.sectionIndex >= blocks.length) {
           return { result: `Page "${parsed.pageSlug}" only has ${blocks.length} sections (0-${blocks.length - 1}) \u2014 sectionIndex ${parsed.sectionIndex} doesn't exist.`, isError: true };
         }
@@ -829,7 +851,7 @@ async function executeTool(
         const pages = await store.list({ slug: parsed.pageSlug });
         if (parsed.pageSlug && pages.length === 0) return { result: `No page with slug "${parsed.pageSlug}" exists.`, isError: true };
         const hits: TextHit[] = pages.flatMap((pg: { slug: string; content: unknown }) =>
-          findTextInBlocks(pg.slug, Array.isArray(pg.content) ? (pg.content as Array<{ type?: string; props?: Record<string, unknown> }>) : [], parsed.query),
+          findTextInBlocks(pg.slug, readPageBlocks(pg.content).blocks as Array<{ type?: string; props?: Record<string, unknown> }>, parsed.query),
         );
         if (hits.length === 0) {
           return {
@@ -853,9 +875,9 @@ async function executeTool(
 
         const report: string[] = [];
         let total = 0;
-        const toSave: Array<{ id: string; slug: string; title: string; blocks: Record<string, unknown>[] }> = [];
+        const toSave: Array<{ id: string; slug: string; title: string; raw: unknown; blocks: Record<string, unknown>[] }> = [];
         for (const pg of pages as Array<{ id: string; slug: string; title: string; content: unknown }>) {
-          const blocks = Array.isArray(pg.content) ? [...(pg.content as Record<string, unknown>[])] : [];
+          const blocks = [...readPageBlocks(pg.content).blocks] as Record<string, unknown>[];
           if (parsed.sectionIndex !== undefined && parsed.sectionIndex >= blocks.length) {
             return { result: `Page "${pg.slug}" only has ${blocks.length} sections (0-${blocks.length - 1}).`, isError: true };
           }
@@ -872,7 +894,7 @@ async function executeTool(
               if (report.length < 25) report.push(`- page "${pg.slug}", section ${i} (${blk.type || "unknown"}), ${c.path}: ${JSON.stringify(c.before.length > 70 ? c.before.slice(0, 70) + "\u2026" : c.before)} \u2192 ${JSON.stringify(c.after.length > 70 ? c.after.slice(0, 70) + "\u2026" : c.after)}`);
             }
           });
-          if (pageChanged) toSave.push({ id: pg.id, slug: pg.slug, title: pg.title, blocks });
+          if (pageChanged) toSave.push({ id: pg.id, slug: pg.slug, title: pg.title, raw: pg.content, blocks });
         }
         if (total === 0) {
           return { result: `Nothing was changed: "${parsed.find}" wasn't found${parsed.wholeValue ? " as a complete field value" : ""}${parsed.pageSlug ? ` on "${parsed.pageSlug}"` : ""}. Call find_text with a shorter part of the wording to see where it actually is.`, isError: true };
@@ -1023,8 +1045,9 @@ async function executeTool(
         // details replace whatever the AI guessed (or a stale placeholder).
         const pagesToPatch = await store.list({ types: ["HOME", "CONTACT"] });
         for (const p of pagesToPatch) {
-          if (!Array.isArray(p.content)) continue;
-          const blocks = p.content as Array<{ type: string; props: Record<string, unknown> }>;
+          const pView = readPageBlocks(p.content);
+          if (pView.format === "unsupported") continue;
+          const blocks = pView.blocks as Array<{ type: string; props: Record<string, unknown> }>;
           let changed = false;
           for (const b of blocks) {
             if (b.type !== "contactInfo" || !Array.isArray(b.props?.items)) continue;
@@ -1103,7 +1126,7 @@ async function executeTool(
         const parsed = attachAssetSchema.parse(args);
         const page = await store.bySlug(parsed.pageSlug);
         if (!page) return { result: `No page with slug "${parsed.pageSlug}" exists.`, isError: true };
-        const blocks = Array.isArray(page.content) ? [...(page.content as Record<string, unknown>[])] : [];
+        const blocks = [...readPageBlocks(page.content).blocks] as Record<string, unknown>[];
         if (parsed.sectionIndex >= blocks.length) return { result: `Section ${parsed.sectionIndex} doesn't exist on "${parsed.pageSlug}".`, isError: true };
         // Every block reads its fields from `props` (heading, backgroundImage,
         // image, items, etc.) — there is no `settings` field anywhere in the
