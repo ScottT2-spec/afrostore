@@ -261,35 +261,15 @@ export default function CheckoutPage() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [debouncedContact.email, storeSlug]);
 
-  // Only offer payment methods the merchant has enabled: gateway toggles
-  // (Payments page) plus Pay on delivery / Bank transfer (Settings → Checkout).
-  useEffect(() => {
-    if (!storeSlug) return;
-    fetch(`/api/storefront/${storeSlug}/payment-methods`)
-      .then((r) => r.json())
-      .then((json) => {
-        if (!json.success || !json.data) { setEnabledMethodIds(paymentMethods.map((m) => m.id)); return; }
-        const providers: string[] = json.data.providers || [];
-        const ids: string[] = [];
-        if (providers.includes("PAYSTACK")) ids.push("PAYSTACK");
-        if (providers.includes("MONNIFY") && json.data.bankTransfer) ids.push("MONNIFY");
-        if (providers.includes("FLUTTERWAVE")) ids.push("FLUTTERWAVE");
-        if (json.data.payOnDelivery) ids.push("COD");
-        setEnabledMethodIds(ids);
-        setPaymentMethod((current) => (ids.includes(current) ? current : ids[0] || current));
-      })
-      .catch(() => setEnabledMethodIds(paymentMethods.map((m) => m.id)));
-  }, [storeSlug]);
-  const visiblePaymentMethods = enabledMethodIds ? paymentMethods.filter((m) => enabledMethodIds.includes(m.id)) : [];
-
   const [address, setAddress] = useState("");
   const [city, setCity] = useState("");
   const [state, setState] = useState("");
   const [deliveryInstructions, setDeliveryInstructions] = useState("");
   const [selectedZone, setSelectedZone] = useState("");
-  const [paymentMethod, setPaymentMethod] = useState("PAYSTACK");
-  // Which payment methods the merchant has switched on (null = still loading)
-  const [enabledMethodIds, setEnabledMethodIds] = useState<string[] | null>(null);
+  const [selectedMethod, setSelectedMethod] = useState("");
+  // Which options the merchant actually has switched on (null = still loading)
+  const [enabledMethods, setEnabledMethods] = useState<string[] | null>(null);
+  const [methodsError, setMethodsError] = useState(false);
   const [couponCode, setCouponCode] = useState("");
   const [couponApplied, setCouponApplied] = useState(false);
   const [couponValidating, setCouponValidating] = useState(false);
@@ -365,6 +345,31 @@ export default function CheckoutPage() {
     }
   }, []);
 
+  // Load the payment options the merchant has enabled (gateways + Pay on
+  // delivery). Always fresh — never from localStorage or the HTTP cache.
+  useEffect(() => {
+    if (!storeSlug) return;
+    let cancelled = false;
+    fetch(`/api/storefront/${encodeURIComponent(storeSlug)}/payment-methods`, { cache: "no-store" })
+      .then((r) => r.json())
+      .then((json) => {
+        if (cancelled) return;
+        if (!json.success || !json.data) { setMethodsError(true); setEnabledMethods([]); return; }
+        const ids: string[] = [...(json.data.providers || [])];
+        if (json.data.payOnDelivery) ids.push("COD");
+        setMethodsError(false);
+        setEnabledMethods(ids);
+      })
+      .catch(() => { if (!cancelled) { setMethodsError(true); setEnabledMethods([]); } });
+    return () => { cancelled = true; };
+  }, [storeSlug]);
+
+  const availableMethods = paymentMethods.filter((m) => enabledMethods?.includes(m.id));
+
+  // The chosen method, kept valid: the customer's pick if it's still offered,
+  // otherwise the first enabled option (empty when nothing is enabled).
+  const paymentMethod = availableMethods.some((m) => m.id === selectedMethod) ? selectedMethod : availableMethods[0]?.id || "";
+
   // Cart helpers
   const updateQty = (productId: string, delta: number) => {
     setCart((prev) => {
@@ -426,10 +431,6 @@ export default function CheckoutPage() {
 
   const handlePlaceOrder = async () => {
     if (!siteId) { setOrderError("Store information missing. Go back to the store and try again."); return; }
-    if (enabledMethodIds && !enabledMethodIds.includes(paymentMethod)) {
-      setOrderError("Please choose an available payment method.");
-      return;
-    }
     if (!firstName || !lastName || !email || !phone) {
       setTouched((t) => ({ ...t, firstName: true, lastName: true, email: true, phone: true }));
       setOrderError("Please fill in all contact information.");
@@ -441,6 +442,7 @@ export default function CheckoutPage() {
       return;
     }
     if (cart.length === 0) { setOrderError("Your cart is empty."); return; }
+    if (!paymentMethod) { setOrderError("No payment method is available for this store right now. Please contact the store."); return; }
 
     setPlacing(true);
     setOrderError("");
@@ -951,7 +953,7 @@ export default function CheckoutPage() {
 
                 <button
                   onClick={handlePlaceOrder}
-                  disabled={placing}
+                  disabled={placing || !paymentMethod}
                   className="hidden w-full items-center justify-center gap-2 rounded-xl bg-[var(--co-indigo)] py-4 text-base font-semibold text-white shadow-lg transition-all duration-200 hover:-translate-y-0.5 hover:bg-[var(--co-indigo-deep)] hover:shadow-xl active:translate-y-0 disabled:cursor-not-allowed disabled:opacity-60 lg:flex"
                 >
                   {placing ? (
@@ -1116,17 +1118,19 @@ export default function CheckoutPage() {
                 <CreditCard className="h-5 w-5 text-[var(--co-indigo)]" /> Payment method
               </h3>
               <div className="space-y-2">
-                {enabledMethodIds && visiblePaymentMethods.length === 0 && (
-                  <p className="rounded-xl border border-[var(--co-line)] p-4 text-sm text-surface-500">
-                    This store has no payment method available right now. Please contact the store.
+                {enabledMethods === null ? (
+                  <p className="text-sm text-surface-500">Loading payment options…</p>
+                ) : availableMethods.length === 0 ? (
+                  <p className="text-sm text-surface-500">
+                    {methodsError ? "We couldn't load the payment options. Please refresh the page." : "This store isn't accepting payments right now. Please contact the store."}
                   </p>
-                )}
-                {visiblePaymentMethods.map((method) => {
+                ) : null}
+                {availableMethods.map((method) => {
                   const Icon = method.icon;
                   const active = paymentMethod === method.id;
                   return (
                     <label key={method.id} className={`flex cursor-pointer items-start gap-3 rounded-xl border p-4 transition-all ${active ? "border-[var(--co-indigo)] bg-[var(--co-indigo-soft)]" : "border-[var(--co-line)] hover:border-surface-300"}`}>
-                      <input type="radio" name="payment" checked={active} onChange={() => setPaymentMethod(method.id)} className="mt-1 h-4 w-4 accent-[var(--co-indigo)]" />
+                      <input type="radio" name="payment" checked={active} onChange={() => setSelectedMethod(method.id)} className="mt-1 h-4 w-4 accent-[var(--co-indigo)]" />
                       <Icon className="mt-0.5 h-5 w-5 flex-shrink-0 text-surface-500" />
                       <div className="flex-1">
                         <span className="text-sm font-semibold text-[var(--co-ink)]">{method.name}</span>
@@ -1157,7 +1161,7 @@ export default function CheckoutPage() {
           </div>
           <button
             onClick={handlePlaceOrder}
-            disabled={placing}
+            disabled={placing || !paymentMethod}
             className="flex flex-1 items-center justify-center gap-2 rounded-xl bg-[var(--co-indigo)] py-3.5 text-sm font-semibold text-white shadow-lg transition-all disabled:cursor-not-allowed disabled:opacity-60"
           >
             {placing ? (

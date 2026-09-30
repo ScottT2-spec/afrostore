@@ -78,6 +78,23 @@ export async function POST(req: NextRequest, { params }: Params) {
 
     const { items, deliveryAddress, deliveryZoneId, paymentMethod, couponCode, email, phone, firstName, lastName, note, redeemPoints, joinLoyalty } = parsed.data;
 
+    // A payment option the merchant switched off must be unusable, not just
+    // hidden — reject it here so no client (old cached page, API, AI storefront)
+    // can place an order with it.
+    if (paymentMethod === "PAY_ON_DELIVERY" && site.settings && site.settings.payOnDelivery === false) {
+      return error("Pay on delivery is not available for this store", 400);
+    }
+    if (paymentMethod === "BANK_TRANSFER" && site.settings && site.settings.bankTransfer === false) {
+      return error("Bank transfer is not available for this store", 400);
+    }
+    if (["PAYSTACK", "MONNIFY", "FLUTTERWAVE"].includes(paymentMethod)) {
+      const gateway = await prisma.paymentGateway.findFirst({
+        where: { siteId, provider: paymentMethod as "PAYSTACK" | "MONNIFY" | "FLUTTERWAVE", isEnabled: true },
+        select: { id: true },
+      });
+      if (!gateway) return error("This payment method is not available for this store", 400);
+    }
+
     // Resolve products and calculate prices
     const productIds = items.map((i) => i.productId);
     const products = await prisma.product.findMany({
