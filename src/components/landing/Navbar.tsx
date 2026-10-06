@@ -11,13 +11,11 @@ const navigation = [
     href: "#products",
     children: [
       { name: "Ecommerce Store", href: "#products" },
-      { name: "Landing Pages", href: "#products" },
-      { name: "Website Builder", href: "#products" },
+      { name: "Landing Pages (Coming Soon)", href: "#products" },
+      { name: "Website Builder (Coming Soon)", href: "#products" },
       { name: "AI Assistant", href: "#products" },
     ],
   },
-  { name: "Templates", href: "/templates" },
-  { name: "Plugins", href: "/dashboard/plugins" },
 ];
 
 export default function Navbar() {

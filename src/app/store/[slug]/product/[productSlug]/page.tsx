@@ -58,6 +58,19 @@ export default function ProductDetailPage() {
   const [selectedVariant, setSelectedVariant] = useState<string | null>(null);
   const [quantity, setQuantity] = useState(1);
   const [addedToCart, setAddedToCart] = useState(false);
+  // Drives the header cart icon's badge  read once on mount so a cart
+  // from an earlier visit still shows, then kept in sync in handleAddToCart.
+  const [cartCount, setCartCount] = useState(0);
+
+  useEffect(() => {
+    if (!slug) return;
+    try {
+      const saved = JSON.parse(localStorage.getItem(`prokip_cart_${slug}`) || "[]");
+      setCartCount(Array.isArray(saved) ? saved.reduce((sum: number, item: any) => sum + (item.quantity || 0), 0) : 0);
+    } catch {
+      setCartCount(0);
+    }
+  }, [slug]);
   const [wishlistToast, setWishlistToast] = useState<string | null>(null);
   // Updated by ReviewsSection right after a customer posts a review, so the rating near the title is live
   const [liveReviewStats, setLiveReviewStats] = useState<{ averageRating: number; totalCount: number } | null>(null);
@@ -131,6 +144,7 @@ export default function ProductDetailPage() {
     }
     localStorage.setItem(cartKey, JSON.stringify(cart));
     localStorage.setItem("prokip_cart_active_slug", slug);
+    setCartCount(cart.reduce((sum: number, item: any) => sum + (item.quantity || 0), 0));
     trackEvent(slug, "add_to_cart", { productId: product.id, metadata: { quantity, value: (activeFlashSale ? activeFlashSale.salePrice : displayPrice) * quantity, currency } });
     setAddedToCart(true);
     setTimeout(() => setAddedToCart(false), 2000);
@@ -169,8 +183,13 @@ export default function ProductDetailPage() {
             <button onClick={share} className="p-2 rounded-xl text-surface-500 hover:bg-surface-50">
               <Share2 className="h-5 w-5" />
             </button>
-            <Link href={`/store/${slug}`} className="p-2 rounded-xl text-surface-500 hover:bg-surface-50 relative">
+            <Link href={`/store/${slug}/cart`} className="p-2 rounded-xl text-surface-500 hover:bg-surface-50 relative">
               <ShoppingCart className="h-5 w-5" />
+              {cartCount > 0 && (
+                <span className="absolute -top-0.5 -right-0.5 h-5 w-5 rounded-full bg-red-500 text-white text-[10px] font-bold flex items-center justify-center">
+                  {cartCount > 9 ? "9+" : cartCount}
+                </span>
+              )}
             </Link>
           </div>
         </div>
