@@ -1,5 +1,5 @@
 "use client";
-import { BarChart3, Bot, Clock, CreditCard, Globe, Languages, MessageCircle, MousePointerClick, Palette, Shield, ShoppingBag, Smartphone, Sparkles, Truck, Zap } from "@/components/icons/FilledIcons";
+import { BarChart3, Bot, Clock, CreditCard, Globe, Languages, MessageCircle, MousePointerClick, Palette, Puzzle, Shield, ShoppingBag, Smartphone, Sparkles, Truck, Zap } from "@/components/icons/FilledIcons";
 
 const features = [
   {
@@ -43,6 +43,13 @@ const features = [
     description:
       "Stunning, industry-specific themes designed for African markets. Fashion, food, electronics, beauty — all mobile-first and conversion-optimized.",
     color: "accent",
+  },
+  {
+    icon: Puzzle,
+    title: "Plugin Marketplace",
+    description:
+      "Extend your store with plugins — delivery, reviews, coupons, SEO, affiliates. Or describe a feature in plain English and AI builds it.",
+    color: "brand",
   },
   {
     icon: Globe,
