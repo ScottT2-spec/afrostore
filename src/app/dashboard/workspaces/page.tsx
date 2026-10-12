@@ -407,6 +407,12 @@ export default function WorkspacesPage() {
                           >
                             Customize
                           </Link>
+                          <Link
+                            href={`/dashboard/sites/${site.id}/history`}
+                            className="rounded-lg border border-gray-200 bg-white px-3 py-1.5 text-xs font-medium text-gray-700 hover:bg-gray-50 transition"
+                          >
+                            Site History
+                          </Link>
                         </div>
                       </div>
                     );

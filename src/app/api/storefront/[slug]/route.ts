@@ -8,6 +8,7 @@ import { ensurePerfumePages } from "@/lib/templates/perfume-pages";
 import { ensureVegetablePages } from "@/lib/templates/vegetable-pages";
 import { buildTemplatePageContent } from "@/lib/templates/template-tree";
 import { getBestActiveFlashSales } from "@/lib/flash-sales";
+import { loadHistoryPreview } from "@/lib/site-history";
 import type { Prisma } from "@/generated/prisma";
 import type { PageType } from "@/generated/prisma";
 
@@ -268,7 +269,23 @@ export async function GET(req: NextRequest, { params }: Params) {
         take: 10,
       }),
     ]);
-    const resolvedCustomization = customization;
+    // Site History preview: staff viewing an older version of the site.
+    const historyPreview = await loadHistoryPreview(req, site.id);
+    const resolvedCustomization = historyPreview?.customization
+      ? ({ ...(customization ?? {}), ...historyPreview.customization } as typeof customization)
+      : customization;
+    const sourcePages = historyPreview
+      ? historyPreview.pages
+          .filter((p) => p.isPublished)
+          .map((p) => ({
+            id: p.id,
+            title: p.title,
+            slug: p.slug,
+            type: p.type as PageType,
+            content: (p.content ?? null) as Prisma.JsonValue | null,
+            template: p.template,
+          }))
+      : pages;
 
     // Clean product output — strip cost price and other merchant-only fields
     const activeFlashSales = await getBestActiveFlashSales(
@@ -367,11 +384,11 @@ export async function GET(req: NextRequest, { params }: Params) {
     }
 
     let publicPages = mergeStoredTemplatePages(
-      pages.map((page) => ({
+      sourcePages.map((page) => ({
         ...page,
         content: page.content,
       })),
-      activeTemplate?.pages
+      historyPreview ? undefined : activeTemplate?.pages
     ).map((page) => ({
       ...page,
       content: Array.isArray(page.content)

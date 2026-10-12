@@ -8,6 +8,7 @@ import { ensurePerfumePages } from "@/lib/templates/perfume-pages";
 import { ensureVegetablePages } from "@/lib/templates/vegetable-pages";
 import { ensureTemplatePages } from "@/lib/templates/template-pages";
 import { buildTemplatePageContent } from "@/lib/templates/template-tree";
+import { loadHistoryPreview } from "@/lib/site-history";
 import { RETAIL_PROJECT_DETAIL_BLOCKS } from "@/lib/templates/presets/retail-pages";
 import type { PageType, Prisma } from "@/generated/prisma";
 
@@ -451,7 +452,7 @@ function buildRetailSyntheticPage(pageSlug: string): {
 }
 
 // GET /api/storefront/:slug/pages/:pageSlug — public page content + full store context
-export async function GET(_req: NextRequest, { params }: Params) {
+export async function GET(req: NextRequest, { params }: Params) {
   const { slug, pageSlug } = await params;
 
   try {
@@ -595,7 +596,30 @@ export async function GET(_req: NextRequest, { params }: Params) {
       loadSiteCustomizationSafely(prisma.siteCustomization.findUnique({ where: { siteId: site.id } })),
     ]);
 
-    const resolvedCustomization = customization;
+    // Site History preview: staff viewing an older version of the site.
+    const historyPreview = await loadHistoryPreview(req, site.id);
+    const resolvedCustomization = historyPreview?.customization
+      ? ({ ...(customization ?? {}), ...historyPreview.customization } as typeof customization)
+      : customization;
+    const snapshotPublished = historyPreview ? historyPreview.pages.filter((p) => p.isPublished) : [];
+    const snapshotPage = snapshotPublished.find((p) => p.slug === pageSlug);
+    const effectivePage = historyPreview
+      ? snapshotPage
+        ? {
+            id: snapshotPage.id,
+            title: snapshotPage.title,
+            slug: snapshotPage.slug,
+            type: snapshotPage.type as PageType,
+            template: snapshotPage.template,
+            content: (snapshotPage.content ?? null) as Prisma.JsonValue | null,
+            metaTitle: snapshotPage.metaTitle,
+            metaDescription: snapshotPage.metaDescription,
+          }
+        : null
+      : page;
+    const effectiveAllPages = historyPreview
+      ? snapshotPublished.map((p) => ({ id: p.id, title: p.title, slug: p.slug, type: p.type as PageType, template: p.template }))
+      : allPages;
     const templateSlug = activeTemplate?.template?.slug || "";
     const syntheticPage =
       templateSlug === "kids"
@@ -609,7 +633,7 @@ export async function GET(_req: NextRequest, { params }: Params) {
         : templateSlug === "retail" || templateSlug === "decor" || slug === "retail" || slug === "decor" || site.slug === "retail" || site.slug === "decor" || site.name?.toLowerCase().includes("retail") || site.name?.toLowerCase().includes("decor")
           ? buildRetailSyntheticPage(pageSlug)
           : null;
-    const mergedPages = mergeStoredTemplatePages(page ? [page] : syntheticPage ? [syntheticPage] : [], activeTemplate?.pages);
+    const mergedPages = mergeStoredTemplatePages(effectivePage ? [effectivePage] : syntheticPage ? [syntheticPage] : [], historyPreview ? undefined : activeTemplate?.pages);
     const fallbackPage = mergedPages.find((item) => item.slug === pageSlug) || mergedPages[0];
     if (!fallbackPage) return notFound("Page not found");
 
@@ -699,7 +723,7 @@ export async function GET(_req: NextRequest, { params }: Params) {
       console.error("Storefront page theme build error:", themeError);
     }
 
-    const publicPages = mergeStoredTemplatePages(allPages, activeTemplate?.pages);
+    const publicPages = mergeStoredTemplatePages(effectiveAllPages, historyPreview ? undefined : activeTemplate?.pages);
 
     const response = success({
       store: {

@@ -3,6 +3,7 @@ import { prisma } from "@/lib/db";
 import { error, getSiteContext, success , requireRole } from "@/lib/api-helpers";
 import { unauthorized } from "@/lib/auth";
 import type { Prisma } from "@/generated/prisma";
+import { captureOriginalIfMissing, recordSiteVersion } from "@/lib/site-history";
 import {
   mergeSiteCustomization,
   normalizeSiteCustomization,
@@ -67,6 +68,7 @@ export async function PATCH(req: NextRequest, { params }: Params) {
   ];
 
   try {
+    await captureOriginalIfMissing(siteId);
     const saved = await prisma.siteCustomization.upsert({
       where: { siteId },
       update: {
@@ -105,6 +107,8 @@ export async function PATCH(req: NextRequest, { params }: Params) {
         lastPublishedAt: new Date(),
       },
     });
+
+    await recordSiteVersion(siteId, { source: "manual", label: body.note || "Changed site design", userId: ctx.user!.id });
 
     return success({
       siteId,

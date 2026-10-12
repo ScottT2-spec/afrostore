@@ -5,6 +5,7 @@ import { updatePageSchema } from "@/lib/validators";
 import { unauthorized } from "@/lib/auth";
 import { findStoredTemplatePage } from "@/lib/templates/site-instance";
 import { revalidatePath } from "next/cache";
+import { captureOriginalIfMissing, recordSiteVersion } from "@/lib/site-history";
 import type { Prisma } from "@/generated/prisma";
 
 type Params = { params: Promise<{ siteId: string; pageId: string }> };
@@ -56,10 +57,12 @@ export async function PATCH(req: NextRequest, { params }: Params) {
       updateData.slug = await ensureUniqueSlug(parsed.data.title, siteId, "page");
     }
 
+    await captureOriginalIfMissing(siteId);
     const page = await prisma.page.update({
       where: { id: pageId },
       data: updateData as Prisma.PageUpdateInput,
     });
+    await recordSiteVersion(siteId, { source: "manual", label: `Edited ${page.title}`, userId: ctx.user!.id });
 
     // Revalidate all relevant paths to clear Next.js cache
     revalidatePath(`/store/${existing.site.slug}/${page.slug}`);

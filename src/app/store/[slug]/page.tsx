@@ -242,7 +242,8 @@ export default function StorePage() {
     async function fetchStore() {
       setLoading(true);
       try {
-        const res = await fetch(`/api/storefront/${slug}`);
+        const historyPreview = new URLSearchParams(window.location.search).get('historyPreview');
+        const res = await fetch(`/api/storefront/${slug}${historyPreview ? `?historyPreview=${encodeURIComponent(historyPreview)}` : ''}`);
         const json = await res.json();
         if (cancelled) return;
         if (json.success && json.data) {

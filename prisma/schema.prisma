@@ -167,6 +167,7 @@ model Site {
   codingAgentRuns   CodingAgentRun[]
   generatedFiles    GeneratedFile[]
   aiBuildRequests   AiBuildRequest[]
+  versions          SiteVersion[]
   // Structured "what does this site currently have" — pages, routes,
   // components — updated by the coding agent as part of finish_task and
   // read back at the start of the next run instead of blind
@@ -2139,4 +2140,22 @@ enum PayoutStatus {
   PROCESSING
   COMPLETED
   FAILED
+}
+
+// Whole-site snapshot for the "Site History" screen: every page plus the
+// site-wide customization (theme, header, footer, nav...) at one moment.
+// The first row for a site is its "Original" (AI generated) state; restoring
+// any row puts the entire site back to it.
+model SiteVersion {
+  id        String   @id @default(cuid())
+  siteId    String
+  source    String   @default("manual") // ai | manual | restore
+  label     String?
+  snapshot  Json
+  createdBy String?
+  createdAt DateTime @default(now())
+  site      Site     @relation(fields: [siteId], references: [id], onDelete: Cascade)
+
+  @@index([siteId, createdAt])
+  @@map("site_versions")
 }

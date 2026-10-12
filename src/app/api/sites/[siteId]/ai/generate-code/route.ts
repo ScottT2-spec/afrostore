@@ -9,6 +9,7 @@ import { getGeneratedFiles } from "@/lib/sandbox/generated-files";
 import { getDecryptedSecrets } from "@/lib/sandbox/secrets";
 import { getAIFailover } from "@/lib/ai-service";
 import { runCodingAgent, CodingAgentError, type CodingAgentStep } from "@/lib/coding-agent";
+import { recordSiteVersion } from "@/lib/site-history";
 import { runSiteGenerationAgent, type SiteGenerationStep, type DraftPages } from "@/lib/site-generation-agent";
 import { detectSensitiveCategory } from "@/lib/site-safety";
 import type { AIMessage } from "@/lib/failover";
@@ -246,6 +247,11 @@ async function runGeneration(
         options: result.pendingQuestion.options,
         priorMessages: result.messages,
       };
+    }
+
+    // A first build is the site's "Original (AI generated)" state in Site History.
+    if (!siteAlreadyBuilt) {
+      await recordSiteVersion(siteId, { source: "ai", label: "Original (AI generated)", userId: ctx.user?.id ?? null });
     }
 
     const pages = await prisma.page.findMany({

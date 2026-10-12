@@ -132,7 +132,8 @@ export default function StorefrontPage() {
   useEffect(() => {
     (async () => {
       try {
-      const res = await fetch(`/api/storefront/${slug}/pages/${pageSlug}`, { cache: 'no-store' });
+      const historyPreview = new URLSearchParams(window.location.search).get('historyPreview');
+      const res = await fetch(`/api/storefront/${slug}/pages/${pageSlug}${historyPreview ? `?historyPreview=${encodeURIComponent(historyPreview)}` : ''}`, { cache: 'no-store' });
       const json = await res.json();
       if (json.success && json.data) {
         setData(json.data);

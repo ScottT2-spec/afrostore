@@ -1,4 +1,5 @@
 import { NextRequest } from "next/server";
+import { captureOriginalIfMissing, recordSiteVersion } from "@/lib/site-history";
 import { prisma } from "@/lib/db";
 import { success, error, getStoreContext, validationError, ensureUniqueSlug, logAudit, requireRole } from "@/lib/api-helpers";
 import { updatePageSchema } from "@/lib/validators";
@@ -85,10 +86,12 @@ export async function PATCH(req: NextRequest, { params }: Params) {
       updateData.slug = await ensureUniqueSlug(parsed.data.title, existing.siteId, "page", pageId);
     }
 
+    await captureOriginalIfMissing(existing.siteId);
     const updatedPage = await prisma.page.update({
       where: { id: pageId },
       data: updateData,
     });
+    await recordSiteVersion(existing.siteId, { source: "manual", label: `Edited ${updatedPage.title}`, userId: ctx.user!.id });
 
     if (existing.site.slug && updatedPage.slug) {
       revalidatePath(`/store/${existing.site.slug}/${updatedPage.slug}`);
